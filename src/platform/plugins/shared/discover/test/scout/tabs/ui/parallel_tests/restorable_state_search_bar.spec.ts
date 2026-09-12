@@ -11,7 +11,7 @@ import type { PageObjects } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
 
-const DEFAULT_ESQL_QUERY = 'FROM logstash-*';
+const DEFAULT_ESQL_QUERY = 'FROM logstash-* | SORT @timestamp DESC';
 
 const expectCleanClassicQueryState = async ({ discover, queryBar }: PageObjects, query: string) => {
   expect(await queryBar.getQuery()).toBe(query);

@@ -138,10 +138,13 @@ describe('UserActionMarkdown ', () => {
       renderWithTestingProviders(<TestComponent />);
       expect(screen.getByTestId('editable-markdown-form')).toBeTruthy();
 
-      // append content
-      await userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea')!, appendContent);
+      // append content via a single paste; typing char-by-char intermittently races the
+      // fully-controlled editor's value reset and drops the append, leaving stale form state
+      const editor = screen.getByTestId('euiMarkdownEditorTextArea');
+      await userEvent.click(editor);
+      await userEvent.paste(appendContent);
 
-      // wait for the typed content to reach the form state before saving, otherwise
+      // wait for the pasted content to reach the form state before saving, otherwise
       // the save can run against the original content and be skipped as a no-op
       await waitFor(() => {
         expect(

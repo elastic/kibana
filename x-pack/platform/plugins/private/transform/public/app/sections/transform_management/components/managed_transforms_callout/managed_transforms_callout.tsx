@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import React from 'react';
 
 export const ManagedTransformsWarningCallout = ({
@@ -17,8 +17,7 @@ export const ManagedTransformsWarningCallout = ({
   action: string;
 }) => {
   return (
-    <EuiCallOut
-      color="warning"
+    <KbnWarningCallout
       title={
         <FormattedMessage
           id="xpack.transform.managedTransformsWarningCallout"

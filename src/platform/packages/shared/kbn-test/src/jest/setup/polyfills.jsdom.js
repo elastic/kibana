@@ -10,15 +10,26 @@
 // Required until JSDOM supports fetch: https://github.com/jsdom/jsdom/issues/1724
 require('whatwg-fetch');
 
+// Monaco's clipboard contribution calls this deprecated browser API during module evaluation.
+// JSDOM does not implement it; node environments may not define `document`.
+if (typeof document !== 'undefined' && typeof document.queryCommandSupported !== 'function') {
+  Object.defineProperty(document, 'queryCommandSupported', { value: () => true });
+}
+
 if (!Object.hasOwn(global.URL, 'createObjectURL')) {
   Object.defineProperty(global.URL, 'createObjectURL', { value: () => '' });
 }
 
 // https://github.com/jsdom/jsdom/issues/2524
 if (!Object.hasOwn(global, 'TextEncoder')) {
-  const customTextEncoding = require('@kayahr/text-encoding');
-  global.TextEncoder = customTextEncoding.TextEncoder;
-  global.TextDecoder = customTextEncoding.TextDecoder;
+  const { TextEncoder: NodeTextEncoder, TextDecoder } = require('node:util');
+
+  global.TextEncoder = class TextEncoder extends NodeTextEncoder {
+    encode(input = '') {
+      return global.Uint8Array.from(super.encode(input));
+    }
+  };
+  global.TextDecoder = TextDecoder;
 }
 
 // JSDOM 20's Blob lacks .arrayBuffer() and .text() (jsdom#2555).

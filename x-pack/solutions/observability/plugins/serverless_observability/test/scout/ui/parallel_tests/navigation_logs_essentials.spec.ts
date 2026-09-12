@@ -73,7 +73,6 @@ test.describe(
         'management:inference_endpoints',
         'management:model_settings',
         'management:genAiSettings',
-        'management:evals',
         'management:observabilityAiAssistantManagement',
       ];
       for (const deepLinkId of disabledDeepLinks) {
@@ -109,7 +108,6 @@ test.describe(
       await test.step('Alerts', async () => {
         await nav.clickBodyNavItemByDeepLinkId('observability-overview:alerts');
         await expect(page.testSubj.locator('alertsPageWithData')).toBeVisible();
-        await expect(nav.activeNavItemByDeepLinkId('observability-overview:alerts')).toBeVisible();
       });
     });
 

@@ -65,7 +65,7 @@ export const RelatedAttacks: React.FC<RelatedAttacksProps> = ({
                   disableScreenReaderOutput
                 >
                   <EuiButtonIcon
-                    iconType="expand"
+                    iconType="maximize"
                     data-test-subj={`${CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TEST_ID}AlertPreviewButton`}
                     onClick={() =>
                       onShowAttack(

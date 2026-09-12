@@ -8,7 +8,12 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
-import { hasWorkflowReadPrivilege, hasWorkflowExecutePrivilege } from './check_privileges';
+import {
+  hasWorkflowReadPrivilege,
+  hasWorkflowExecutePrivilege,
+  hasWorkflowCreatePrivilege,
+  hasWorkflowUpdatePrivilege,
+} from './check_privileges';
 
 const request = {} as KibanaRequest;
 const spaceId = 'default';
@@ -41,6 +46,18 @@ describe('workflow privilege checks', () => {
         hasWorkflowExecutePrivilege({ security: undefined, request, spaceId })
       ).resolves.toBe(true);
     });
+
+    it('allows create', async () => {
+      await expect(
+        hasWorkflowCreatePrivilege({ security: undefined, request, spaceId })
+      ).resolves.toBe(true);
+    });
+
+    it('allows update', async () => {
+      await expect(
+        hasWorkflowUpdatePrivilege({ security: undefined, request, spaceId })
+      ).resolves.toBe(true);
+    });
   });
 
   describe('hasWorkflowReadPrivilege', () => {
@@ -62,16 +79,13 @@ describe('workflow privilege checks', () => {
   });
 
   describe('hasWorkflowExecutePrivilege', () => {
-    it('requires both execute and read', async () => {
+    it('requires execute only, so a workflow can be run without reading its definition', async () => {
       const { security, atSpace } = createSecurityMock(true);
 
       await expect(hasWorkflowExecutePrivilege({ security, request, spaceId })).resolves.toBe(true);
 
       expect(atSpace).toHaveBeenCalledWith(spaceId, {
-        kibana: [
-          `api:${WorkflowsManagementApiActions.execute}`,
-          `api:${WorkflowsManagementApiActions.read}`,
-        ],
+        kibana: [`api:${WorkflowsManagementApiActions.execute}`],
       });
     });
 
@@ -80,6 +94,32 @@ describe('workflow privilege checks', () => {
       await expect(hasWorkflowExecutePrivilege({ security, request, spaceId })).resolves.toBe(
         false
       );
+    });
+  });
+
+  describe('hasWorkflowCreatePrivilege', () => {
+    it('checks the create privilege and returns the verdict', async () => {
+      const { security, atSpace, get } = createSecurityMock(true);
+
+      await expect(hasWorkflowCreatePrivilege({ security, request, spaceId })).resolves.toBe(true);
+
+      expect(get).toHaveBeenCalledWith(WorkflowsManagementApiActions.create);
+      expect(atSpace).toHaveBeenCalledWith(spaceId, {
+        kibana: [`api:${WorkflowsManagementApiActions.create}`],
+      });
+    });
+  });
+
+  describe('hasWorkflowUpdatePrivilege', () => {
+    it('checks the update privilege and returns the verdict', async () => {
+      const { security, atSpace, get } = createSecurityMock(true);
+
+      await expect(hasWorkflowUpdatePrivilege({ security, request, spaceId })).resolves.toBe(true);
+
+      expect(get).toHaveBeenCalledWith(WorkflowsManagementApiActions.update);
+      expect(atSpace).toHaveBeenCalledWith(spaceId, {
+        kibana: [`api:${WorkflowsManagementApiActions.update}`],
+      });
     });
   });
 });

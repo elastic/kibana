@@ -18,7 +18,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import type { Streams } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
@@ -183,8 +183,8 @@ export function KnowledgeIndicatorsTable() {
   });
 
   const generationRow = (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem>
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} css={{ width: '100%' }}>
+      <EuiFlexItem css={{ minWidth: 0 }}>
         <StreamPicker
           streams={filteredStreams}
           isStreamsLoading={isStreamsLoading}
@@ -238,8 +238,18 @@ export function KnowledgeIndicatorsTable() {
     return (
       <EuiEmptyPrompt
         aria-live="polite"
-        titleSize="xs"
-        icon={<AssetImage type="knowledgeIndicatorsEmptyState" />}
+        color="plain"
+        css={css`
+          && {
+            max-width: 560px;
+          }
+
+          .euiEmptyPrompt__actions {
+            width: 100%;
+            max-width: 100%;
+          }
+        `}
+        icon={<AssetImage type="knowledgeIndicatorsEmptyState" size={140} />}
         title={<h2>{EMPTY_STATE_TITLE}</h2>}
         body={<p>{EMPTY_STATE_DESCRIPTION}</p>}
         actions={generationRow}
@@ -349,6 +359,7 @@ export function KnowledgeIndicatorsTable() {
       </EuiPanel>
       {selectedKnowledgeIndicator ? (
         <KnowledgeIndicatorDetailsFlyout
+          key={getKnowledgeIndicatorItemId(selectedKnowledgeIndicator)}
           knowledgeIndicator={selectedKnowledgeIndicator}
           occurrencesByQueryId={occurrencesByQueryId}
           onClose={closeFlyout}

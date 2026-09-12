@@ -154,10 +154,17 @@ export const getDataFromFieldsHits = (
     const isEcsField = fieldMaps[field as keyof typeof fieldMaps] !== undefined;
     const isRuleParameters = isRuleParametersFieldOrSubfield(field, prependField);
     const isThreatEnrichment = isThreatEnrichmentFieldOrSubfield(field, prependField);
+    const isFlattenedField = fieldMaps[field as keyof typeof fieldMaps]?.type === 'flattened';
+    const shouldKeepFlattenedAsSingleRow =
+      isFlattenedField && !isRuleParameters && !isThreatEnrichment;
 
     // Handle simple fields - but don't treat threat enrichments as simple fields
     // even if they're not in ecsFieldMap (they were excluded as nested type)
-    if (!isObjectArray || (!isEcsField && !isRuleParameters && !isThreatEnrichment)) {
+    if (
+      !isObjectArray ||
+      (!isEcsField && !isRuleParameters && !isThreatEnrichment) ||
+      shouldKeepFlattenedAsSingleRow
+    ) {
       const simpleItem = processSimpleField(dotField, strArr, isObjectArray, fieldCategory);
       resultMap.set(dotField, simpleItem);
       // eslint-disable-next-line no-continue

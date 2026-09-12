@@ -1,5 +1,8 @@
 {
   "sha1": "116b63b2ba9c94a191c676f5282614fe83b6fe70",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "d3b5a0b3b6b9628-a2c82aac53380fa",
@@ -7,18 +10,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/painless_lab/test/scout/api/tests/execute_api_custom_cluster_privileges.spec.ts",
-        "line": 16,
-        "column": 12
+        "line": 12,
+        "column": 17
       }
     },
     {
@@ -27,18 +24,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/painless_lab/test/scout/api/tests/execute_api_custom_cluster_privileges.spec.ts",
-        "line": 39,
-        "column": 12
+        "line": 33,
+        "column": 16
       }
     },
     {
@@ -47,18 +38,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/painless_lab/test/scout/api/tests/execute_api_custom_cluster_privileges.spec.ts",
-        "line": 61,
-        "column": 12
+        "line": 54,
+        "column": 16
       }
     },
     {
@@ -67,17 +52,11 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/painless_lab/test/scout/api/tests/execute_api_custom_cluster_privileges.spec.ts",
-        "line": 80,
+        "line": 72,
         "column": 12
       }
     },
@@ -91,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/painless_lab/test/scout/api/tests/execute_api_disabled.spec.ts",
-        "line": 21,
-        "column": 12
+        "line": 18,
+        "column": 13
       }
     },
     {
@@ -109,8 +88,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/painless_lab/test/scout/api/tests/execute_api.spec.ts",
-        "line": 28,
-        "column": 12
+        "line": 26,
+        "column": 7
       }
     },
     {
@@ -127,8 +106,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/painless_lab/test/scout/api/tests/execute_api.spec.ts",
-        "line": 46,
-        "column": 12
+        "line": 41,
+        "column": 19
       }
     }
   ]

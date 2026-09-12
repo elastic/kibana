@@ -70,7 +70,11 @@ describe('getConnectorList', () => {
         inferenceId: 'my-endpoint',
         taskType: 'chat_completion',
         service: 'openai',
-        serviceSettings: { model_id: 'gpt-4' },
+        serviceSettings: {
+          model_id: 'gpt-4',
+          api_key: 'secret-key',
+          url: 'https://example.invalid/v1/chat/completions',
+        },
         metadata: { display: { name: 'My Preconfigured Endpoint' } },
       },
     ]);
@@ -85,7 +89,16 @@ describe('getConnectorList', () => {
       isInferenceEndpoint: true,
       isPreconfigured: true,
       isEis: false,
+      config: {
+        inferenceId: 'my-endpoint',
+        providerConfig: { model_id: 'gpt-4' },
+        taskType: 'chat_completion',
+        service: 'openai',
+      },
     });
+    expect(result[0]).not.toHaveProperty('serviceSettings');
+    expect(result[0].config).not.toHaveProperty('serviceSettings');
+    expect(result[0].config.providerConfig).toEqual({ model_id: 'gpt-4' });
   });
 
   it('uses the matching stack connector name when the endpoint has no display.name', async () => {

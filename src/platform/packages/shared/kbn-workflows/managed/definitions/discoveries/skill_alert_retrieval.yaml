@@ -14,65 +14,64 @@ description: |
   surfaced as workflow output for the report phase to resume.
 enabled: true
 tags:
-  - Attack discovery
-  - Security
-  - AI Agent
+  - attack-discovery
+  - security
+  - ai-agent
   - attackDiscovery:gate
 
 triggers:
   - type: manual
-
-inputs:
-  additionalProperties: false
-  properties:
-    alerts_index_pattern:
-      description: >
-        Elasticsearch index pattern for security alerts. When not provided,
-        defaults to .alerts-security.alerts-<spaceId> using the current
-        Kibana space (via workflow.spaceId). Used only when the skill performs
-        its own additional retrieval (skill_enabled).
-      type: string
-    candidate_alerts:
-      default: []
-      description: >
-        The candidate alert strings produced by the deterministic retrieval
-        phase, for the gate to ground-truth. Each candidate embeds its backing
-        document _id. The gate returns the _ids to REMOVE (it never echoes these
-        bytes back); the orchestration keeps every candidate NOT listed and
-        forwards the original kept bytes.
-      items:
-        type: string
-      type: array
-    connector_id:
-      description: >
-        GenAI connector id used by the gate `ai.agent` step's model routing.
-        Per Constraint A this is the same (or a larger-context) connector used
-        for the generation request, so the gate never fails on inputs the
-        generate step would accept. When omitted (or empty), the step falls
-        back to the Agent Builder default model.
-      type: string
-    end:
-      default: now
-      description: Time range end (date math, e.g., now)
-      type: string
-    size:
-      default: 100
-      description: >
-        Maximum number of alerts the skill should retrieve when it performs its
-        own additional retrieval (skill_enabled).
-      type: integer
-    skill_enabled:
-      default: false
-      description: >
-        Skill toggle (Toggle 1). When true, the gate may retrieve net-new
-        alerts of its own (in addition to ground-truthing the candidates) and
-        return their _id values in added_alert_ids. When false, the gate only ground-truths
-        the candidate set and adds none.
-      type: boolean
-    start:
-      default: now-24h
-      description: Time range start (date math, e.g., now-24h, now-7d)
-      type: string
+    inputs:
+      additionalProperties: false
+      properties:
+        alerts_index_pattern:
+          description: >
+            Elasticsearch index pattern for security alerts. When not provided,
+            defaults to .alerts-security.alerts-<spaceId> using the current
+            Kibana space (via workflow.spaceId). Used only when the skill performs
+            its own additional retrieval (skill_enabled).
+          type: string
+        candidate_alerts:
+          default: []
+          description: >
+            The candidate alert strings produced by the deterministic retrieval
+            phase, for the gate to ground-truth. Each candidate embeds its backing
+            document _id. The gate returns the _ids to REMOVE (it never echoes these
+            bytes back); the orchestration keeps every candidate NOT listed and
+            forwards the original kept bytes.
+          items:
+            type: string
+          type: array
+        connector_id:
+          description: >
+            GenAI connector id used by the gate `ai.agent` step's model routing.
+            Per Constraint A this is the same (or a larger-context) connector used
+            for the generation request, so the gate never fails on inputs the
+            generate step would accept. When omitted (or empty), the step falls
+            back to the Agent Builder default model.
+          type: string
+        end:
+          default: now
+          description: Time range end (date math, e.g., now)
+          type: string
+        size:
+          default: 100
+          description: >
+            Maximum number of alerts the skill should retrieve when it performs its
+            own additional retrieval (skill_enabled).
+          type: integer
+        skill_enabled:
+          default: false
+          description: >
+            Skill toggle (Toggle 1). When true, the gate may retrieve net-new
+            alerts of its own (in addition to ground-truthing the candidates) and
+            return their _id values in added_alert_ids. When false, the gate only ground-truths
+            the candidate set and adds none.
+          type: boolean
+        start:
+          default: now-24h
+          description: Time range start (date math, e.g., now-24h, now-7d)
+          type: string
 
 steps:
   # Invoke the attack-discovery-generator skill in its ground-truth mode (Mode C).

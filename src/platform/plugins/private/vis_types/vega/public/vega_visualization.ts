@@ -8,17 +8,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { IInterpreterRenderHandlers, RenderMode } from '@kbn/expressions-plugin/common';
 import type { VegaParser } from './data_model/vega_parser';
 import type { VegaVisualizationDependencies } from './plugin';
+import type { VegaEventHandler } from './types';
 import { getNotifications, getData } from './services';
 import type { VegaView } from './vega_view/vega_view';
 import { createVegaStateRestorer } from './lib/vega_state_restorer';
 
-export type VegaVisType = new (
-  el: HTMLDivElement,
-  fireEvent: IInterpreterRenderHandlers['event']
-) => {
+export type VegaVisType = new (el: HTMLDivElement, fireEvent: VegaEventHandler) => {
   render(visData: VegaParser): Promise<void>;
   resize(dimensions?: { height: number; width: number }): Promise<void>;
   destroy(): void;
@@ -26,7 +23,7 @@ export type VegaVisType = new (
 
 export const createVegaVisualization = (
   { core, getServiceSettings }: VegaVisualizationDependencies,
-  renderMode: RenderMode
+  showWarnings: boolean
 ): VegaVisType =>
   class VegaVisualization {
     private readonly dataPlugin = getData();
@@ -35,10 +32,7 @@ export const createVegaVisualization = (
       isActive: () => Boolean(this.vegaView?._parser?.restoreSignalValuesOnRefresh),
     });
 
-    constructor(
-      private el: HTMLDivElement,
-      private fireEvent: IInterpreterRenderHandlers['event']
-    ) {}
+    constructor(private el: HTMLDivElement, private fireEvent: VegaEventHandler) {}
 
     async render(visData: VegaParser) {
       const { toasts } = getNotifications();
@@ -88,7 +82,7 @@ export const createVegaVisualization = (
           serviceSettings,
           filterManager,
           timefilter,
-          renderMode,
+          showWarnings,
         };
 
         if (vegaParser.useMap) {

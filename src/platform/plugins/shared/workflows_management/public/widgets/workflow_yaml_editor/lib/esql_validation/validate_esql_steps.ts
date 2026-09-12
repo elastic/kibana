@@ -180,6 +180,7 @@ function toValidationResult(
     severity,
     message,
     owner: 'esql-validation',
+    ruleId: 'esqlDiagnostic',
     source: 'esql',
     startLineNumber: startPos.lineNumber,
     startColumn: startPos.column,

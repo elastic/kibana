@@ -147,7 +147,7 @@ export const RunOverviewPage: React.FC = () => {
     return (
       <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
         <EuiEmptyPrompt
-          iconType="iInCircle"
+          iconType="info"
           title={<h2>{i18n.EMPTY_TITLE}</h2>}
           body={<p>{i18n.EMPTY_BODY}</p>}
           actions={
@@ -174,7 +174,7 @@ export const RunOverviewPage: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             onClick={() => history.push('/')}
             data-test-subj="evalsRunOverviewBack"
           >
@@ -263,7 +263,7 @@ export const RunOverviewPage: React.FC = () => {
         <EuiToolTip content={canCompare ? undefined : i18n.COMPARE_PENDING_HINT}>
           <EuiButton
             fill
-            iconType="diff"
+            iconType="compare"
             isDisabled={!canCompare}
             onClick={onCompare}
             data-test-subj="evalsRunOverviewCompare"

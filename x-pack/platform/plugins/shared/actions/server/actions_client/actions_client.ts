@@ -26,6 +26,7 @@ import type { SpacesServiceSetup } from '@kbn/spaces-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 import type { AuthMode } from '@kbn/connector-specs';
 import type { Connector, ConnectorWithExtraFindData } from '../application/connector/types';
+import type { RotateInboundIngressResult } from '../application/connector/methods/rotate_inbound_ingress/types';
 import type { ConnectorType } from '../application/connector/types';
 import { get } from '../application/connector/methods/get';
 import { getAll, getAllSystemConnectors } from '../application/connector/methods/get_all';
@@ -33,6 +34,7 @@ import { getAuthStatus } from '../application/connector/methods/get_auth_status'
 import { getConnectorSpecAsJsonSchema } from '../application/connector/methods/get_connector_spec';
 import type { GetAuthStatusResult } from '../application/connector/methods/get_auth_status/types';
 import { update } from '../application/connector/methods/update';
+import { rotateInboundIngress } from '../application/connector/methods/rotate_inbound_ingress';
 import { listTypes } from '../application/connector/methods/list_types';
 import { create } from '../application/connector/methods/create';
 import { execute } from '../application/connector/methods/execute';
@@ -125,6 +127,7 @@ export interface ConstructorOptions {
   isESOCanEncrypt: boolean;
   connectorLifecycleListeners?: ConnectorLifecycleListener[];
   getCurrentUserProfileId?: (request: KibanaRequest) => Promise<string | undefined>;
+  evictClientPool?: (connectorId: string) => Promise<void>;
 }
 
 export interface ActionsClientContext {
@@ -152,6 +155,7 @@ export interface ActionsClientContext {
   isESOCanEncrypt: boolean;
   connectorLifecycleListeners?: ConnectorLifecycleListener[];
   getCurrentUserProfileId?: (request: KibanaRequest) => Promise<string | undefined>;
+  evictClientPool?: (connectorId: string) => Promise<void>;
 }
 
 const noop = async (_request: KibanaRequest): Promise<string | undefined> => undefined;
@@ -182,6 +186,7 @@ export class ActionsClient {
     isESOCanEncrypt,
     connectorLifecycleListeners,
     getCurrentUserProfileId,
+    evictClientPool,
   }: ConstructorOptions) {
     this.context = {
       logger,
@@ -206,6 +211,7 @@ export class ActionsClient {
       isESOCanEncrypt,
       connectorLifecycleListeners,
       getCurrentUserProfileId: getCurrentUserProfileId ?? noop,
+      evictClientPool,
     };
   }
 
@@ -215,7 +221,7 @@ export class ActionsClient {
   public async create({
     action,
     options,
-  }: Omit<ConnectorCreateParams, 'context'>): Promise<ActionResult> {
+  }: Omit<ConnectorCreateParams, 'context'>): Promise<Connector> {
     return create({ context: this.context, action, options });
   }
 
@@ -227,6 +233,14 @@ export class ActionsClient {
     action,
   }: Pick<ConnectorUpdateParams, 'id' | 'action'>): Promise<Connector> {
     return update({ context: this.context, id, action });
+  }
+
+  /**
+   * Rotate inbound ingest credentials for a connector. Invalidates the previous
+   * token immediately and returns the new token once.
+   */
+  public async rotateInboundIngress({ id }: { id: string }): Promise<RotateInboundIngressResult> {
+    return rotateInboundIngress({ context: this.context, id });
   }
 
   /**
@@ -584,7 +598,12 @@ export class ActionsClient {
       );
     }
 
-    // Must run before the delete below — needs the connector's secrets to revoke its OAuth grant.
+    // Must run before deleting credentials or the saved object because client termination may
+    // need the connector's current credentials.
+    await this.context.evictClientPool?.(id);
+
+    // Must run before the saved-object delete below — needs the connector's secrets to revoke its
+    // OAuth grant.
     await this.deleteConnectorAuthTokens(id, authMode);
 
     const result = await this.context.unsecuredSavedObjectsClient.delete('action', id);
@@ -806,5 +825,9 @@ export class ActionsClient {
       );
       throw err;
     }
+  }
+
+  public async evictClientPool(connectorId: string): Promise<void> {
+    await this.context.evictClientPool?.(connectorId);
   }
 }

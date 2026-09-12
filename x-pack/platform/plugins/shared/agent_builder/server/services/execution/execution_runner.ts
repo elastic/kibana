@@ -9,29 +9,45 @@ import {
   merge,
   of,
   filter,
+  map,
   tap,
   catchError,
   throwError,
   EMPTY,
   shareReplay,
   ignoreElements,
+  concatMap,
+  take,
 } from 'rxjs';
 import type { Observable } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { RunAgentFn } from '@kbn/agent-builder-server';
-import type { ChatEvent, ConversationAction } from '@kbn/agent-builder-common';
+import type {
+  ChatEvent,
+  ConversationAction,
+  ConverseInput,
+  ConversationRoundAuthor,
+} from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
   isRoundCompleteEvent,
+  isRoundStartedEvent,
+  isConversationCreatedEvent,
   isAgentBuilderError,
   AgentBuilderErrorCode,
   AgentExecutionMode,
+  ConversationRoundStatus,
   createInternalError,
+  normalizeInteractive,
+  DEFAULT_CONVERSATION_TITLE,
+  isEventsNativeVersion,
 } from '@kbn/agent-builder-common';
+import type { InteractivityConfig } from '@kbn/agent-builder-common';
 import { getConnectorProvider } from '@kbn/inference-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SerializedExecutionError } from '@kbn/agent-builder-common';
@@ -41,7 +57,8 @@ import type {
   StandaloneAgentExecution,
 } from '@kbn/agent-builder-server/execution';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
-import { ElasticGenAIAttributes } from '@kbn/inference-tracing';
+import { ElasticGenAIAttributes, UserAttributes } from '@kbn/inference-tracing';
+import type { Span } from '@opentelemetry/api';
 import type { ConversationService, ConversationClient } from '../conversation';
 import type { AgentsServiceStart } from '../agents';
 import {
@@ -51,6 +68,9 @@ import {
   getConversation,
   updateConversation$,
   createConversation$,
+  persistRoundInput,
+  appendRoundTerminated$,
+  appendResumeExecution$,
   resolveServices,
   convertErrors,
   type ConversationWithOperation,
@@ -83,6 +103,20 @@ export interface AgentExecutionDeps {
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
 }
 
+export const setUserAttributes = (
+  span: Span | undefined,
+  user: { id?: string; username?: string }
+): void => {
+  if (!span) {
+    return;
+  }
+  if (user.id) {
+    span.setAttribute(UserAttributes.UserId, user.id);
+  }
+  if (user.username) {
+    span.setAttribute(UserAttributes.UserName, user.username);
+  }
+};
 /**
  * Unified entry point for agent execution. Dispatches to the appropriate handler
  * based on the execution mode.
@@ -92,16 +126,34 @@ export const handleAgentExecution = async ({
   deps,
   request,
   abortSignal,
+  interactivity,
 }: {
   execution: AgentExecution;
   deps: AgentExecutionDeps;
   request: KibanaRequest;
   abortSignal: AbortSignal;
+  interactivity?: InteractivityConfig;
 }): Promise<Observable<ChatEvent>> => {
+  const resolvedInteractivity: InteractivityConfig =
+    interactivity ??
+    execution.interactivity ??
+    normalizeInteractive(undefined, execution.executionMode);
   if (execution.executionMode === AgentExecutionMode.standalone) {
-    return handleStandaloneExecution({ execution, deps, request, abortSignal });
+    return handleStandaloneExecution({
+      execution,
+      deps,
+      request,
+      abortSignal,
+      interactivity: resolvedInteractivity,
+    });
   }
-  return handleConversationExecution({ execution, deps, request, abortSignal });
+  return handleConversationExecution({
+    execution,
+    deps,
+    request,
+    abortSignal,
+    interactivity: resolvedInteractivity,
+  });
 };
 
 /**
@@ -113,17 +165,18 @@ const handleConversationExecution = async ({
   deps,
   request,
   abortSignal,
+  interactivity,
 }: {
   execution: ConversationAgentExecution;
   deps: AgentExecutionDeps;
   request: KibanaRequest;
   abortSignal: AbortSignal;
+  interactivity: InteractivityConfig;
 }): Promise<Observable<ChatEvent>> => {
   const {
     agentId = agentBuilderDefaultAgentId,
     connectorId,
     conversationId,
-    capabilities,
     structuredOutput,
     outputSchema,
     storeConversation = true,
@@ -135,7 +188,11 @@ const handleConversationExecution = async ({
     action,
     telemetryMetadata,
     maxContentLength,
+    reasoningLevel,
     accessControl,
+    subagentCreation,
+    readOnly,
+    projectRouting,
   } = execution.agentParams;
 
   const { logger, runAgent, trackingService, analyticsService, meteringService, agentService } =
@@ -157,14 +214,31 @@ const handleConversationExecution = async ({
     autoCreateConversationWithId,
     conversationClient,
     accessControl,
+    readOnly,
     origin: origin ? { external_conversation_id: origin.external_conversation_id } : undefined,
+    subagentCreation,
   });
 
   const author = await deps.conversationService.getConversationRoundAuthor({
     request,
-    conversation,
     origin,
   });
+
+  const roundId = uuidv4();
+  const receivedAt = new Date();
+
+  const useTwoPhase = action !== 'regenerate' && !isPendingResumeConversation(conversation);
+  if (storeConversation && useTwoPhase) {
+    await persistRoundInput({
+      conversation,
+      conversationClient,
+      roundId,
+      receivedAt,
+      input: nextInput,
+      author,
+      origin: origin ? { type: origin.type } : undefined,
+    });
+  }
 
   // Emit conversation ID for new conversations (only when persisting)
   const conversationIdEvent$ =
@@ -180,7 +254,6 @@ const handleConversationExecution = async ({
     nextInput,
     origin,
     author,
-    capabilities,
     structuredOutput,
     outputSchema,
     abortSignal,
@@ -188,16 +261,24 @@ const handleConversationExecution = async ({
     defaultConnectorId: selectedConnectorId,
     telemetryMetadata,
     maxContentLength,
+    reasoningLevel,
     runAgent,
     browserApiTools,
     configurationOverrides,
     action,
+    interactivity,
+    parentExecutionId: execution.parentExecutionId,
+    projectRouting,
+    roundId,
   });
 
-  // Generate title (for CREATE) or use existing title (for UPDATE).
-  // shareReplay so persistence and the span attribute share one emission.
+  // Generate title when creating a new conversation
+  // OR when the conversation still carries the default placeholder title
+  const needsTitle =
+    (conversation.operation === 'CREATE' || conversationNeedsTitle(conversation)) &&
+    !subagentCreation;
   const title$ = (
-    conversation.operation === 'CREATE'
+    needsTitle
       ? generateTitle({
           chatModel: (await modelProvider.selectModel({ effortLevel: 'low' })).chatModel,
           conversation,
@@ -214,6 +295,8 @@ const handleConversationExecution = async ({
         title$,
         agentEvents$,
         action,
+        nextInput,
+        author,
       })
     : EMPTY;
 
@@ -243,6 +326,13 @@ const handleConversationExecution = async ({
       opikHeaders,
     },
     (span) => {
+      if (author || conversation.operation !== 'CREATE') {
+        setUserAttributes(span, {
+          id: author?.id ?? conversation.user.id,
+          username: author?.username ?? conversation.user.username,
+        });
+      }
+
       const titleAttr$ = storeConversation
         ? title$.pipe(
             tap((title) => {
@@ -253,8 +343,19 @@ const handleConversationExecution = async ({
         : EMPTY;
 
       return merge(conversationIdEvent$, agentEvents$, persistenceEvents$, titleAttr$).pipe(
+        filter((event) => !isRoundStartedEvent(event)),
+        // `resume_execution` is persistence-layer plumbing consumed by buildPersistenceEvents; strip
+        // it from the client-facing stream so it doesn't duplicate the follow-up round's steps.
+        map(stripResumeExecution),
         handleCancellation(abortSignal),
         tap((event) => {
+          if (isConversationCreatedEvent(event) && !author) {
+            setUserAttributes(span, {
+              id: event.data.user.id,
+              username: event.data.user.username,
+            });
+          }
+
           try {
             if (isRoundCompleteEvent(event)) {
               const isReplacingRound = action === 'regenerate' || event.data?.resumed === true;
@@ -287,6 +388,7 @@ const handleConversationExecution = async ({
                 agentId,
                 round: event.data.round,
                 modelProvider: connectorProvider,
+                conversationAttachments: event.data.attachments ?? conversation.attachments ?? [],
               });
             }
           } catch (error) {
@@ -416,36 +518,94 @@ const getHttpStatusFromError = (error: unknown): number | undefined => {
     : undefined;
 };
 
+const conversationNeedsTitle = (conversation: { title?: string }): boolean =>
+  !conversation.title || conversation.title === DEFAULT_CONVERSATION_TITLE;
+
+const stripResumeExecution = (event: ChatEvent): ChatEvent => {
+  if (!isRoundCompleteEvent(event) || !event.data.resume_execution) {
+    return event;
+  }
+  const { resume_execution: _resumeExecution, ...data } = event.data;
+  return { ...event, data };
+};
+
+const isPendingResumeConversation = (conversation: ConversationWithOperation): boolean => {
+  const lastRound = conversation.rounds[conversation.rounds.length - 1];
+  return lastRound?.status === ConversationRoundStatus.awaitingPrompt;
+};
+
 const buildPersistenceEvents = ({
   conversation,
   conversationClient,
   title$,
   agentEvents$,
   action,
+  nextInput,
+  author,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
   title$: Observable<string>;
   agentEvents$: Observable<ChatEvent>;
   action?: ConversationAction;
+  nextInput: ConverseInput;
+  author?: ConversationRoundAuthor;
 }): Observable<ChatEvent> => {
   const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
 
-  if (conversation.operation === 'CREATE') {
-    return createConversation$({
+  const isRegenerate = action === 'regenerate';
+  const isResume = isPendingResumeConversation(conversation);
+  const useTwoPhase = !isRegenerate && !isResume;
+
+  if (useTwoPhase) {
+    const roundStartedEvents$ = agentEvents$.pipe(filter(isRoundStartedEvent));
+    const endTitle$ =
+      conversation.operation === 'CREATE' || conversationNeedsTitle(conversation)
+        ? title$
+        : undefined;
+
+    return roundStartedEvents$.pipe(
+      concatMap((startEvent) =>
+        appendRoundTerminated$({
+          conversation,
+          conversationClient,
+          roundCompletedEvents$: roundCompletedEvents$.pipe(
+            filter((event) => event.data.round.id === startEvent.data.round_id),
+            take(1)
+          ),
+          title$: endTitle$,
+        })
+      )
+    );
+  }
+
+  // A resume of an events-native conversation appends a new execution (append-only); the pause is
+  // never rewritten. Legacy (non-events-native) resumes and regenerate keep the rounds-path write.
+  if (isResume && !isRegenerate && isEventsNativeVersion(conversation.schema_version)) {
+    return appendResumeExecution$({
       conversation,
       conversationClient,
-      title$,
       roundCompletedEvents$,
+      input: nextInput,
+      author,
+      title$: conversationNeedsTitle(conversation) ? title$ : undefined,
     });
   }
 
-  return updateConversation$({
-    conversationClient,
-    conversation,
-    roundCompletedEvents$,
-    action,
-  });
+  return conversation.operation === 'CREATE'
+    ? createConversation$({
+        conversation,
+        conversationClient,
+        title$,
+        roundCompletedEvents$,
+      })
+    : updateConversation$({
+        conversationClient,
+        conversation,
+        roundCompletedEvents$,
+        action,
+        title$: conversationNeedsTitle(conversation) ? title$ : undefined,
+      });
 };
 
 /**
@@ -457,15 +617,18 @@ const handleStandaloneExecution = async ({
   deps,
   request,
   abortSignal,
+  interactivity,
 }: {
   execution: StandaloneAgentExecution;
   deps: AgentExecutionDeps;
   request: KibanaRequest;
   abortSignal: AbortSignal;
+  interactivity: InteractivityConfig;
 }): Promise<Observable<ChatEvent>> => {
   const agentId = execution.agentId;
   const { logger, runAgent } = deps;
-  const { telemetryMetadata, maxContentLength } = execution.agentParams;
+  const { telemetryMetadata, maxContentLength, reasoningLevel, projectRouting } =
+    execution.agentParams;
 
   const { selectedConnectorId } = await resolveServices({
     agentId,
@@ -480,17 +643,21 @@ const handleStandaloneExecution = async ({
     executionId: execution.executionId,
     request,
     nextInput: execution.agentParams.nextInput,
-    capabilities: execution.agentParams.capabilities,
     abortSignal,
     conversation: undefined,
     defaultConnectorId: selectedConnectorId,
     telemetryMetadata,
     maxContentLength,
+    reasoningLevel,
     runAgent,
+    projectRouting,
     executionMode: AgentExecutionMode.standalone,
+    interactivity,
+    parentExecutionId: execution.parentExecutionId,
   });
 
   return agentEvents$.pipe(
+    filter((event) => !isRoundStartedEvent(event)),
     handleCancellation(abortSignal),
     catchError((err) => {
       logger.error(`Error executing standalone agent: ${err.stack ?? err.message}`);

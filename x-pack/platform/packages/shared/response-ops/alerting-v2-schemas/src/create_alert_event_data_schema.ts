@@ -15,7 +15,7 @@ import {
   MAX_FINGERPRINT_LENGTH,
 } from './constants';
 
-const alertEventSeveritySchema = z.enum(['info', 'low', 'medium', 'high', 'critical']);
+export const alertEventSeveritySchema = z.enum(['info', 'low', 'medium', 'high', 'critical']);
 
 /**
  * Same four lifecycle states as {@link ALERT_EPISODE_STATUS} / alert_events.ts.
@@ -117,7 +117,9 @@ export const createAlertEventDataSchema = createAlertEventBodyBaseObjectSchema
 
 /** Path params for POST /api/alerting/v2/alerts/:source */
 export const createAlertEventSourceParamsSchema = z.object({
-  source: sourceSchema,
+  source: sourceSchema.describe(
+    'The external source system that produced the alert event (for example, "datadog"). Cannot start with "elastic".'
+  ),
 });
 
 export const createAlertEventResponseSchema = z.object({

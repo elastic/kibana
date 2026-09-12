@@ -7,7 +7,6 @@
 
 import React, { useMemo, useState } from 'react';
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -29,7 +28,7 @@ import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { isRuleLoaded } from '../../types/rule_state';
 import { useInvalidateEpisodeQueries } from '../../hooks/use_invalidate_episode_queries';
-import { FLYOUT_FOOTER_OFFSET, getAlertEpisodeDetailsPath } from '../../constants';
+import { FLYOUT_FOOTER_OFFSET } from '../../constants';
 import { AlertEpisodeDetailsHeaderSection } from './details_header_section';
 import { AlertEpisodeOverviewSection } from './overview_section';
 import { AlertEpisodesRelatedSection } from './related_section';
@@ -39,7 +38,7 @@ import { AlertEpisodeTimelineSection } from './timeline_section';
 import type { EpisodeAction } from '../../actions/types';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
-import { EpisodeActionsBar } from '../episode_actions_bar';
+import { EpisodeFooterActionMenu } from './footer_action_menu';
 
 type TabId = 'overview' | 'related' | 'timeline' | 'metadata' | 'runbook';
 
@@ -49,6 +48,8 @@ export interface AlertEpisodeDetailsFlyoutProps {
   onClose: () => void;
   services: AlertEpisodeDetailsServices;
   actions?: EpisodeAction[];
+  getRuleDetailsHref: (ruleId: string) => string;
+  getEpisodeDetailsHref: (episodeId: string) => string;
 }
 
 export const AlertEpisodeDetailsFlyout = ({
@@ -57,12 +58,14 @@ export const AlertEpisodeDetailsFlyout = ({
   onClose,
   services,
   actions,
+  getRuleDetailsHref,
+  getEpisodeDetailsHref,
 }: AlertEpisodeDetailsFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
   const [tab, setTab] = useState<TabId>('overview');
   const invalidateEpisodeQueries = useInvalidateEpisodeQueries();
 
-  const { data: episode } = useFetchEpisodeQuery({ episodeId, services });
+  const { data: episode } = useFetchEpisodeQuery({ episodeId, groupHash, services });
   const ruleId = episode?.['rule.id'];
   const { ruleState } = useFetchRule({ id: ruleId, http: services.http });
   const showRuleDependentTabs = isRuleLoaded(ruleState);
@@ -101,16 +104,6 @@ export const AlertEpisodeDetailsFlyout = ({
           responsive={false}
           alignItems="center"
         >
-          {compatibleActions.length > 0 && (
-            <EuiFlexItem grow={false}>
-              <EpisodeActionsBar
-                actions={compatibleActions}
-                episodes={episodes}
-                onSuccess={invalidateEpisodeQueries}
-                iconOnly
-              />
-            </EuiFlexItem>
-          )}
           <EuiFlexItem grow={false}>
             <EuiToolTip content={i18n.FLYOUT_CLOSE} disableScreenReaderOutput>
               <EuiButtonIcon
@@ -118,6 +111,7 @@ export const AlertEpisodeDetailsFlyout = ({
                 color="text"
                 onClick={onClose}
                 aria-label={i18n.FLYOUT_CLOSE}
+                data-test-subj="alertingV2EpisodeFlyoutCloseIcon"
               />
             </EuiToolTip>
           </EuiFlexItem>
@@ -237,12 +231,14 @@ export const AlertEpisodeDetailsFlyout = ({
             episodeId={episodeId}
             groupHash={groupHash}
             services={services}
+            getRuleDetailsHref={getRuleDetailsHref}
           />
         )}
         {effectiveTab === 'related' && (
           <AlertEpisodesRelatedSection
             episodeId={episodeId}
             services={services}
+            getEpisodeDetailsHref={getEpisodeDetailsHref}
             showHeading={false}
             compressed
           />
@@ -289,14 +285,12 @@ export const AlertEpisodeDetailsFlyout = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                href={services.http.basePath.prepend(getAlertEpisodeDetailsPath(episodeId))}
-                data-test-subj="alertingV2EpisodeFlyoutViewDetailsButton"
-                iconType="eye"
-              >
-                {i18n.FLYOUT_VIEW_DETAILS}
-              </EuiButton>
+              <EpisodeFooterActionMenu
+                actions={compatibleActions}
+                episodes={episodes}
+                viewDetailsHref={getEpisodeDetailsHref(episodeId)}
+                onSuccess={invalidateEpisodeQueries}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>

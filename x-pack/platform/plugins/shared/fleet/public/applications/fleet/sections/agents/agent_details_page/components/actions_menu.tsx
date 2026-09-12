@@ -21,6 +21,7 @@ import { useSingleAgentMenuItems } from '../../hooks/use_single_agent_menu_items
 import type { SingleAgentMenuCallbacks } from '../../hooks/use_single_agent_menu_items';
 import { useAgentRefresh } from '../hooks';
 import { policyHasFleetServer } from '../../../../services';
+import { removeVersionSuffixFromPolicyId } from '../../../../../../../common/services/version_specific_policies_utils';
 import { AgentRequestDiagnosticsModal } from '../../components/agent_request_diagnostics_modal';
 import {
   AgentMigrateFlyout,
@@ -158,6 +159,8 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
         )}
         {isAgentPolicyYamlFlyoutOpen && agent.policy_id && (
           <EuiPortal>
+            {/* Do NOT strip the suffix here: AgentPolicyYamlFlyout needs the raw variant id
+                to render the `- v9.x` label and to fetch the correct `.fleet-policies` doc. */}
             <AgentPolicyYamlFlyout
               policyId={agent.policy_id}
               revision={agent.policy_revision}
@@ -199,7 +202,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
           <EuiPortal>
             <UninstallCommandFlyout
               target="agent"
-              policyId={agent.policy_id}
+              policyId={removeVersionSuffixFromPolicyId(agent.policy_id)}
               onClose={() => {
                 setIsUninstallCommandFlyoutOpen(false);
               }}

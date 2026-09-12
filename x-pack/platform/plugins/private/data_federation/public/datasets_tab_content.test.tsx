@@ -150,6 +150,22 @@ const createServicesMock = ({
     dataSourcesClient: { get: jest.fn() },
     datasetsClient,
     toasts: { addDanger: jest.fn(), addSuccess: jest.fn() },
+    docLinks: {
+      links: {
+        dataFederation: {
+          overview: '',
+          quickstart: '',
+          dataSources: '',
+          datasets: '',
+          datasetSettings: '',
+          authentication: '',
+          staticCredentials: '',
+          federatedIdentity: '',
+          querying: '',
+          security: '',
+        },
+      },
+    },
   } as unknown as DataFederationKibanaServices);
 
 const renderComponent = async ({

@@ -38,6 +38,7 @@ export async function autocomplete(
     {
       getFunctionsToIgnore: () => FUNCTIONS_TO_IGNORE,
       preferredExpressionType: 'any',
+      allowSubquery: true,
     }
   );
 }

@@ -60,7 +60,7 @@ export const AgentDescription = ({ description }: { description: string }) => {
           <EuiButtonEmpty
             size="s"
             flush="left"
-            iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
+            iconType={isExpanded ? 'chevronSingleUp' : 'chevronSingleDown'}
             iconSide="right"
             onClick={() => {
               setIsExpanded((prev) => !prev);

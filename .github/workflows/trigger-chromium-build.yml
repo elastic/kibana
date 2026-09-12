@@ -2,7 +2,7 @@ name: Trigger Chromium Build
 
 on:
   issues:
-    types: [labeled, opened, edited]
+    types: [labeled, opened]
 
 jobs:
   matches_label:

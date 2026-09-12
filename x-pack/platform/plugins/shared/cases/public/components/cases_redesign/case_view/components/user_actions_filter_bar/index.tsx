@@ -33,6 +33,8 @@ interface UserActionsFilterBarProps {
   userActionsStats?: CaseUserActionsStats;
   isLoading?: boolean;
   onParamsChange: (params: UserActivityParams) => void;
+  /** Rendered at the end of the "Clear filters" row, so both share one line. */
+  rightAction?: React.ReactNode;
 }
 
 /**
@@ -44,7 +46,7 @@ interface UserActionsFilterBarProps {
  * the user_actions `_find` endpoint.
  */
 export const UserActionsFilterBar = React.memo<UserActionsFilterBarProps>(
-  ({ caseId, params, userActionsStats, isLoading = false, onParamsChange }) => {
+  ({ caseId, params, userActionsStats, isLoading = false, onParamsChange, rightAction }) => {
     const [searchInputValue, setSearchInputValue] = useState(params.search ?? '');
 
     // Derived from the applied `params`, not `searchInputValue`, so "Clear
@@ -131,25 +133,32 @@ export const UserActionsFilterBar = React.memo<UserActionsFilterBarProps>(
             </EuiFilterGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {hasActiveFilter && (
-          <>
-            <EuiSpacer size="xs" />
-            <EuiFlexGroup gutterSize="none" justifyContent="flexStart" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  onClick={handleClearFilters}
-                  size="xs"
-                  iconSide="left"
-                  iconType="cross"
-                  flush="left"
-                  data-test-subj="user-actions-filter-bar-clear-filters"
-                >
-                  {i18n.CLEAR_FILTERS}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        )}
+        {/* One row for both, always rendered: "Clear filters" only appears once a filter is active,
+            and when it lived on its own line it pushed the collapse controls down the moment you
+            filtered. Sharing the row keeps everything still. */}
+        <EuiSpacer size="xs" />
+        <EuiFlexGroup
+          gutterSize="none"
+          justifyContent="spaceBetween"
+          alignItems="center"
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            {hasActiveFilter ? (
+              <EuiButtonEmpty
+                onClick={handleClearFilters}
+                size="xs"
+                iconSide="left"
+                iconType="cross"
+                flush="left"
+                data-test-subj="user-actions-filter-bar-clear-filters"
+              >
+                {i18n.CLEAR_FILTERS}
+              </EuiButtonEmpty>
+            ) : null}
+          </EuiFlexItem>
+          {rightAction ? <EuiFlexItem grow={false}>{rightAction}</EuiFlexItem> : null}
+        </EuiFlexGroup>
       </>
     );
   }

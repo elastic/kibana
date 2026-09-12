@@ -20,11 +20,12 @@ export interface ScheduledActionResultsStrategyResponse
         aggs: {
           responses_by_schedule: estypes.AggregationsSingleBucketAggregateBase & {
             rows_count: estypes.AggregationsSumAggregate;
-            responses: {
-              buckets: Array<{
-                key: string;
-                doc_count: number;
-              }>;
+            responded_agents: estypes.AggregationsCardinalityAggregate;
+            success_agents: estypes.AggregationsSingleBucketAggregateBase & {
+              agents: estypes.AggregationsCardinalityAggregate;
+            };
+            error_agents: estypes.AggregationsSingleBucketAggregateBase & {
+              agents: estypes.AggregationsCardinalityAggregate;
             };
           };
         };

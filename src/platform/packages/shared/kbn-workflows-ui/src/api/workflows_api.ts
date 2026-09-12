@@ -298,9 +298,15 @@ export class WorkflowApi {
     );
   }
 
-  async resumeExecution(executionId: string, { input }: ResumeExecutionParams): Promise<void> {
+  async resumeExecution(
+    executionId: string,
+    { input, stepExecutionId }: ResumeExecutionParams
+  ): Promise<void> {
     return this.http.post(`${BASE}/executions/${encodeURIComponent(executionId)}/resume`, {
-      body: JSON.stringify({ input }),
+      body: JSON.stringify({
+        input,
+        ...(stepExecutionId ? { stepExecutionId } : {}),
+      }),
       version: API_VERSION,
     });
   }
@@ -374,6 +380,20 @@ export class WorkflowApi {
         version: INTERNAL_API_VERSION,
       }
     );
+  }
+
+  /**
+   * Installs a template from raw YAML (e.g. an uploaded file) rather than a
+   * catalog slug. The server parses, renders, and creates the workflow.
+   */
+  async installTemplateFromYaml(
+    yaml: string,
+    values: Record<string, unknown>
+  ): Promise<InstallTemplateResponse> {
+    return this.http.post(`${INTERNAL_BASE}/library/templates/install`, {
+      body: JSON.stringify({ yaml, values }),
+      version: INTERNAL_API_VERSION,
+    });
   }
 
   async restoreWorkflowVersion(

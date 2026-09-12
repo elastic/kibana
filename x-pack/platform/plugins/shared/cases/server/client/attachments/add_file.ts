@@ -29,12 +29,10 @@ export const addFile = async (
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
 ): Promise<Case> => {
-  const { caseId, file, filename, mimeType, $abort, mode = 'legacy' } = addFileArgs;
+  const { caseId, file, filename, mimeType, $abort } = addFileArgs;
   const {
     logger,
     authorization,
-    persistableStateAttachmentTypeRegistry,
-    externalReferenceAttachmentTypeRegistry,
     unifiedAttachmentTypeRegistry,
     services: { userActionService },
     fileService,
@@ -81,8 +79,6 @@ export const addFile = async (
 
     validateRegisteredAttachments({
       query: commentReq,
-      persistableStateAttachmentTypeRegistry,
-      externalReferenceAttachmentTypeRegistry,
       unifiedAttachmentTypeRegistry,
     });
 
@@ -96,7 +92,7 @@ export const addFile = async (
       id: savedObjectID,
     });
 
-    return await updatedModel.encodeWithComments({ mode });
+    return await updatedModel.encodeWithComments();
   } catch (error) {
     if (createdFile?.id) {
       await fileService.delete({ id: createdFile.id });

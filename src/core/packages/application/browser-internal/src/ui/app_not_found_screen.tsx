@@ -20,7 +20,7 @@ export const AppNotFound = () => (
         <h2>
           <FormattedMessage
             id="core.application.appNotFound.title"
-            defaultMessage="Application not found"
+            defaultMessage="Application unavailable"
           />
         </h2>
       }
@@ -28,7 +28,7 @@ export const AppNotFound = () => (
         <p>
           <FormattedMessage
             id="core.application.appNotFound.pageDescription"
-            defaultMessage="No application was found at this URL. Try going back or choosing an app from the menu."
+            defaultMessage="This app doesn't exist, or you don't have permission to access it. Go back or choose another app from the menu."
           />
         </p>
       }

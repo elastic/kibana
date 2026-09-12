@@ -14,7 +14,6 @@ import { useKibana } from '../../hooks/use_kibana';
 import { getFormattedError } from '../../util/errors';
 import { useSignificantEventsAppParams } from '../../hooks/use_significant_events_app_params';
 import { useSignificantEventsAppRouter } from '../../hooks/use_significant_events_app_router';
-import { useSignificantEventsPrivileges } from '../../hooks/use_significant_events_privileges';
 import { useSignificantEventsAvailability } from '../../hooks/use_significant_events_availability';
 import { useBlocksNewActivity } from '../../hooks/use_significant_events_maintenance';
 import { RedirectTo } from '../../components/redirect_to';
@@ -35,6 +34,7 @@ import { SettingsTab } from './components/settings/tab';
 import { MemoryTab } from './components/memory/tab';
 import { DetectionsTab } from './components/detections_tab';
 import { SignificantEventsTab } from './components/significant_events_tab';
+import { RunLimitsBanner } from './components/run_limits_banner';
 
 const significantEventsTabs = [
   'streams',
@@ -59,7 +59,10 @@ export function SignificantEventsPage() {
   const router = useSignificantEventsAppRouter();
   const {
     core: {
-      application: { getUrlForApp },
+      application: {
+        getUrlForApp,
+        capabilities: { streams },
+      },
       chrome,
       notifications: { toasts },
     },
@@ -68,12 +71,7 @@ export function SignificantEventsPage() {
     },
   } = useKibana();
 
-  const {
-    ui: streamsUiPrivileges,
-    significantEvents,
-    isLoading: isPrivilegesLoading,
-  } = useSignificantEventsPrivileges();
-  const canManageStreams = streamsUiPrivileges.manage;
+  const canManageStreams = streams?.manage === true;
 
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
   const {
@@ -94,7 +92,7 @@ export function SignificantEventsPage() {
   );
 
   const pageTitle = i18n.translate('xpack.significantEventsApp.pageHeaderTitle', {
-    defaultMessage: 'Significant Events',
+    defaultMessage: 'Nightshift Management',
   });
 
   const nightshiftLabel = i18n.translate('xpack.significantEventsApp.nightshiftButtonLabel', {
@@ -152,7 +150,7 @@ export function SignificantEventsPage() {
     chrome.setBreadcrumbs([
       {
         text: i18n.translate('xpack.significantEventsApp.breadcrumb', {
-          defaultMessage: 'Significant Events',
+          defaultMessage: 'Nightshift Management',
         }),
       },
     ]);
@@ -221,13 +219,13 @@ export function SignificantEventsPage() {
     [tab, router]
   );
 
-  if (isPrivilegesLoading || isAvailabilityLoading) {
+  if (isAvailabilityLoading) {
     return <EuiLoadingElastic size="xxl" />;
   }
 
-  if (!significantEvents.available || (availability && !availability.available)) {
+  if (!availability || !availability.available) {
     const reason =
-      availability && !availability.available ? availability.reason : ('feature_flag' as const);
+      availability && !availability.available ? availability.reason : ('unknown' as const);
     return (
       <SignificantEventsAppPageTemplate.Body grow>
         <SignificantEventsNotEnabledPrompt reason={reason} />
@@ -351,6 +349,7 @@ export function SignificantEventsPage() {
                 <EuiSpacer />
               </>
             )}
+            {showMaintenanceBanners && <RunLimitsBanner />}
             {tab === 'streams' && <StreamsView />}
             {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
             {tab === 'queries' && <QueriesTable />}

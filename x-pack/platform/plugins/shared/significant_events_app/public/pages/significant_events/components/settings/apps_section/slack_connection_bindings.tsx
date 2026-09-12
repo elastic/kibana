@@ -209,7 +209,7 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 size="s"
-                iconType="arrowLeft"
+                iconType="chevronSingleLeft"
                 isDisabled={pageIndex === 0 || isFetching}
                 onClick={onPreviousPage}
                 data-test-subj="streamsSlackAppChannelsPreviousPage"
@@ -231,7 +231,7 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 size="s"
-                iconType="arrowRight"
+                iconType="chevronSingleRight"
                 iconSide="right"
                 isDisabled={nextCursor == null || isFetching}
                 onClick={onNextPage}

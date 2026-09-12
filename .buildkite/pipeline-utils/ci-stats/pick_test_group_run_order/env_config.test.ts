@@ -12,8 +12,8 @@ jest.mock('#pipeline-utils', () => ({
   collectEnvFromLabels: () => ({}),
 }));
 
-import { MAX_MINUTES, PREVENT_SELECTIVE_TESTS_LABEL, RETRIES } from './const';
-import { loadRunOrderConfig } from './env_config';
+import { MAX_MINUTES, PREVENT_SELECTIVE_TESTS_LABEL, RETRIES } from './const.ts';
+import { loadRunOrderConfig } from './env_config.ts';
 
 const TYPE_ENV = {
   BUILDKITE_BRANCH: 'main',
@@ -31,9 +31,9 @@ describe('loadRunOrderConfig', () => {
     process.env = originalEnv;
   });
 
-  it('defaults ftrTestChannels to {ci-on-commit, ci-batch-3h} when FTR_TEST_CHANNELS is unset', () => {
+  it('defaults ftrTestChannels to {ci-on-commit} when FTR_TEST_CHANNELS is unset', () => {
     const cfg = loadRunOrderConfig();
-    expect(cfg.ftrTestChannels).toEqual(new Set(['ci-on-commit', 'ci-batch-3h']));
+    expect(cfg.ftrTestChannels).toEqual(new Set(['ci-on-commit']));
   });
 
   it('applies sensible defaults when nothing is set', () => {

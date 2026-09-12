@@ -49,7 +49,7 @@ export const CopyableDetail: React.FC<CopyableDetailProps> = ({
         <EuiFlexItem grow={false}>
           <EuiToolTip content={copyAriaLabel} disableScreenReaderOutput>
             <EuiButtonIcon
-              iconType="copyClipboard"
+              iconType="copy"
               color="text"
               aria-label={copyAriaLabel}
               onClick={(event: React.MouseEvent) => {

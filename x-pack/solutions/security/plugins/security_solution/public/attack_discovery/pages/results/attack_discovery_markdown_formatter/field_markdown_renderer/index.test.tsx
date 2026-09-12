@@ -10,7 +10,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { TestProviders } from '../../../../../common/mock';
-import { FieldMarkdownRenderer } from '.';
+import { ALERTS_INDEX_PATTERN, FieldMarkdownRenderer } from '.';
 import { MarkdownFormatterContext } from '../context';
 import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
@@ -183,5 +183,137 @@ describe('FieldMarkdownRenderer', () => {
     expect(cellActionsContent.querySelector('.euiToolTipAnchor')).toBeInTheDocument();
     expect(screen.queryByTestId('disabledActionsBadge')).not.toBeInTheDocument();
     expect(screen.getByTestId('fieldMarkdownRendererInlineWrapper')).toBeInTheDocument();
+  });
+
+  describe('alert-id chip', () => {
+    // Note: JSDOM always reports scrollWidth === clientWidth === 0, so isValueTruncated is
+    // always false in tests. Tooltip content differences (field name vs "field: value") are
+    // not covered here; they require a real browser layout engine to observe.
+    const alertId = 'test-alert-id-abc123';
+
+    it('renders an alertIdButton when the field is _id and the value is in alertIds', () => {
+      render(
+        <TestProviders>
+          <MarkdownFormatterContext.Provider value={{ disableActions: false, alertIds: [alertId] }}>
+            <FieldMarkdownRenderer icon="warning" name="_id" operator={':'} value={alertId} />
+          </MarkdownFormatterContext.Provider>
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('alertIdButton')).toBeInTheDocument();
+      expect(screen.queryByTestId('entityButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('disabledActionsBadge')).not.toBeInTheDocument();
+    });
+
+    it('renders an alertIdButton for kibana.alert.uuid when the value is in alertIds', () => {
+      render(
+        <TestProviders>
+          <MarkdownFormatterContext.Provider value={{ disableActions: false, alertIds: [alertId] }}>
+            <FieldMarkdownRenderer
+              icon="warning"
+              name="kibana.alert.uuid"
+              operator={':'}
+              value={alertId}
+            />
+          </MarkdownFormatterContext.Provider>
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('alertIdButton')).toBeInTheDocument();
+    });
+
+    it('does NOT render an alertIdButton when the value is not in alertIds', () => {
+      render(
+        <TestProviders>
+          <MarkdownFormatterContext.Provider
+            value={{ disableActions: false, alertIds: ['some-other-alert-id'] }}
+          >
+            <FieldMarkdownRenderer icon="warning" name="_id" operator={':'} value={alertId} />
+          </MarkdownFormatterContext.Provider>
+        </TestProviders>
+      );
+
+      expect(screen.queryByTestId('alertIdButton')).not.toBeInTheDocument();
+    });
+
+    it('does NOT render an alertIdButton when alertIds is empty', () => {
+      render(
+        <TestProviders>
+          <MarkdownFormatterContext.Provider value={{ disableActions: false, alertIds: [] }}>
+            <FieldMarkdownRenderer icon="warning" name="_id" operator={':'} value={alertId} />
+          </MarkdownFormatterContext.Provider>
+        </TestProviders>
+      );
+
+      expect(screen.queryByTestId('alertIdButton')).not.toBeInTheDocument();
+    });
+
+    it('does NOT render an alertIdButton when disableActions is true', () => {
+      render(
+        <TestProviders>
+          <MarkdownFormatterContext.Provider value={{ disableActions: true, alertIds: [alertId] }}>
+            <FieldMarkdownRenderer icon="warning" name="_id" operator={':'} value={alertId} />
+          </MarkdownFormatterContext.Provider>
+        </TestProviders>
+      );
+
+      expect(screen.queryByTestId('alertIdButton')).not.toBeInTheDocument();
+      expect(screen.getByTestId('disabledActionsBadge')).toBeInTheDocument();
+    });
+
+    it('calls openFlyout (legacy) when alertIdButton is clicked with new flyout disabled', () => {
+      const mockOpenFlyout = jest.fn();
+      mockUseExpandableFlyoutApi.mockReturnValue({
+        ...createExpandableFlyoutApiMock(),
+        openFlyout: mockOpenFlyout,
+        openRightPanel: mockOpenRightPanel,
+      });
+
+      render(
+        <TestProviders>
+          <MarkdownFormatterContext.Provider
+            value={{ disableActions: false, alertIds: [alertId], scopeId: 'test-scope' }}
+          >
+            <FieldMarkdownRenderer icon="warning" name="_id" operator={':'} value={alertId} />
+          </MarkdownFormatterContext.Provider>
+        </TestProviders>
+      );
+
+      fireEvent.click(screen.getByTestId('alertIdButton'));
+
+      expect(mockOpenFlyout).toHaveBeenCalledTimes(1);
+      expect(mockOpenFlyout).toHaveBeenCalledWith({
+        right: {
+          id: expect.any(String),
+          params: { id: alertId, indexName: ALERTS_INDEX_PATTERN, scopeId: 'test-scope' },
+        },
+      });
+      expect(flyoutApi.openDocumentFlyoutFromPattern).not.toHaveBeenCalled();
+    });
+
+    it('calls openDocumentFlyoutFromPattern (new flyout) when alertIdButton is clicked', async () => {
+      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+
+      render(
+        <TestProviders>
+          <MarkdownFormatterContext.Provider value={{ disableActions: false, alertIds: [alertId] }}>
+            <FieldMarkdownRenderer icon="warning" name="_id" operator={':'} value={alertId} />
+          </MarkdownFormatterContext.Provider>
+        </TestProviders>
+      );
+
+      fireEvent.click(screen.getByTestId('alertIdButton'));
+
+      await waitFor(() => {
+        expect(flyoutApi.openDocumentFlyoutFromPattern).toHaveBeenCalledTimes(1);
+        expect(flyoutApi.openDocumentFlyoutFromPattern).toHaveBeenCalledWith(
+          expect.objectContaining({
+            documentId: alertId,
+            indexName: ALERTS_INDEX_PATTERN,
+          })
+        );
+        expect(mockOpenRightPanel).not.toHaveBeenCalled();
+      });
+    });
   });
 });

@@ -17,13 +17,14 @@ describe('open_investigation_item_in_chat', () => {
       buildBlindSpotChatOptions(
         {
           title: 'Missing trace coverage',
+          confidence: 0.8,
           description: 'No spans for payment gateway calls.',
         },
         'blind-spot-1'
       )
     ).toEqual({
       newConversation: true,
-      autoSendInitialMessage: true,
+      autoSendInitialMessage: false,
       initialMessage: 'Tell me about this blind spot: Missing trace coverage',
       attachments: [
         {
@@ -43,13 +44,14 @@ describe('open_investigation_item_in_chat', () => {
       buildRecommendationChatOptions(
         {
           title: 'Roll back checkout deployment',
+          confidence: 0.9,
           description: 'Revert commit abc123 and monitor error rate.',
         },
         'recommendation-1'
       )
     ).toEqual({
       newConversation: true,
-      autoSendInitialMessage: true,
+      autoSendInitialMessage: false,
       initialMessage: 'Tell me about this recommendation: Roll back checkout deployment',
       attachments: [
         {
@@ -75,7 +77,7 @@ describe('open_investigation_item_in_chat', () => {
       )
     ).toEqual({
       newConversation: true,
-      autoSendInitialMessage: true,
+      autoSendInitialMessage: false,
       initialMessage: 'Tell me about this hypothesis: Checkout deploy regression',
       attachments: [
         {

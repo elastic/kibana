@@ -23,9 +23,9 @@ import {
   EuiFormRow,
   EuiSwitch,
   EuiConfirmModal,
-  EuiCallOut,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { ModelSnapshot } from '@kbn/ml-common-types/anomaly_detection_jobs/model_snapshot';
@@ -125,19 +125,20 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
             {isCurrentSnapshot && (
               <>
                 <EuiSpacer size="m" />
-                <EuiCallOut
+                <KbnInfoCallout
                   announceOnMount
                   size="s"
                   title={i18n.translate('xpack.ml.editModelSnapshotFlyout.calloutTitle', {
                     defaultMessage: 'Current snapshot',
                   })}
-                >
-                  <FormattedMessage
-                    id="xpack.ml.editModelSnapshotFlyout.calloutText"
-                    defaultMessage="This is the current snapshot being used by job {jobId} and so cannot be deleted."
-                    values={{ jobId: job.job_id }}
-                  />
-                </EuiCallOut>
+                  text={
+                    <FormattedMessage
+                      id="xpack.ml.editModelSnapshotFlyout.calloutText"
+                      defaultMessage="This is the current snapshot being used by job {jobId} and so cannot be deleted."
+                      values={{ jobId: job.job_id }}
+                    />
+                  }
+                />
               </>
             )}
 

@@ -50,6 +50,13 @@ export const resolveRecoveryStrategy = (
   return formValues.query.recovery != null ? ('query' as const) : undefined;
 };
 
+export const isRecoveryEnabled = (
+  formValues: Pick<FormValues, 'kind' | 'recoveryStrategy' | 'query'>
+): boolean => {
+  const strategy = resolveRecoveryStrategy(formValues);
+  return strategy != null && strategy !== 'none';
+};
+
 // ---------------------------------------------------------------------------
 // FormValues → API request
 // ---------------------------------------------------------------------------
@@ -95,16 +102,20 @@ const mapStateTransition = (formValues: FormValues) => {
     }
   }
 
-  if (recoveryMode === DELAY_MODE.immediate) {
-    out.recovering_count = 0;
-  } else if (recoveryMode !== DELAY_MODE.duration && stateTransition?.recoveringCount != null) {
-    out.recovering_count = stateTransition.recoveringCount;
-  } else if (recoveryMode === DELAY_MODE.duration) {
-    if (stateTransition?.recoveringTimeframe != null) {
-      out.recovering_timeframe = stateTransition.recoveringTimeframe;
-    }
-    if (stateTransition?.recoveringCount != null) {
+  // Recovering thresholds are only meaningful when recovery is enabled; emitting them
+  // while recovery is disabled is inert and rejected by the write API.
+  if (isRecoveryEnabled(formValues)) {
+    if (recoveryMode === DELAY_MODE.immediate) {
+      out.recovering_count = 0;
+    } else if (recoveryMode !== DELAY_MODE.duration && stateTransition?.recoveringCount != null) {
       out.recovering_count = stateTransition.recoveringCount;
+    } else if (recoveryMode === DELAY_MODE.duration) {
+      if (stateTransition?.recoveringTimeframe != null) {
+        out.recovering_timeframe = stateTransition.recoveringTimeframe;
+      }
+      if (stateTransition?.recoveringCount != null) {
+        out.recovering_count = stateTransition.recoveringCount;
+      }
     }
   }
 
@@ -137,10 +148,7 @@ export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestC
   const { metadata, timeField, schedule, query, grouping } = formValues;
   const mappedArtifacts = mapArtifacts(mergeArtifactsByType(formValues));
   const recoveryStrategy = resolveRecoveryStrategy(formValues);
-  const noDataStrategy =
-    formValues.kind === 'alert' && formValues.noDataStrategy
-      ? formValues.noDataStrategy
-      : undefined;
+  const noDataStrategy = formValues.noDataStrategy;
 
   return {
     metadata: mapMetadata(metadata),

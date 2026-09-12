@@ -7,9 +7,11 @@
 
 import { flatMap } from 'lodash';
 
+import { labels } from '../constants/i18n';
 import type {
   ApplicationConnection,
   ApplicationConnections,
+  ApplicationConnectionsActionMode,
   ApplicationConnectionStatusFilter,
 } from '../constants/types';
 
@@ -24,6 +26,33 @@ export const getConnectionStatus = ({
 
 export const isRevocable = (applicationConnection: ApplicationConnection): boolean =>
   getConnectionStatus(applicationConnection) !== 'revoked';
+
+export const isDeletable = (applicationConnection: ApplicationConnection): boolean =>
+  !isRevocable(applicationConnection);
+
+export const getActionMode = (
+  applicationConnection: ApplicationConnection
+): ApplicationConnectionsActionMode => (isRevocable(applicationConnection) ? 'revoke' : 'delete');
+
+export const matchesActionMode = (
+  applicationConnection: ApplicationConnection,
+  mode: ApplicationConnectionsActionMode | null
+): boolean => mode === null || getActionMode(applicationConnection) === mode;
+
+export const toSingleModeSelection = (
+  applicationConnections: ApplicationConnection[],
+  preferredMode: ApplicationConnectionsActionMode
+): ApplicationConnection[] => {
+  const preferred = applicationConnections.filter((applicationConnection) =>
+    matchesActionMode(applicationConnection, preferredMode)
+  );
+  return preferred.length > 0 ? preferred : applicationConnections;
+};
+
+export const getUnselectableRowMessage = (applicationConnection: ApplicationConnection): string =>
+  isDeletable(applicationConnection)
+    ? labels.connectionColumns.deletableRowNotSelectableLabel
+    : labels.connectionColumns.revocableRowNotSelectableLabel;
 
 export const toApplicationConnectionList = (
   connections: ApplicationConnections[]

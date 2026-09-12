@@ -8,6 +8,7 @@
  */
 
 export * from './actions_menu';
+export * from './genai';
 export * from './service_flyout/transactions';
 export * from './duration';
 export * from './duration_distribution_chart';

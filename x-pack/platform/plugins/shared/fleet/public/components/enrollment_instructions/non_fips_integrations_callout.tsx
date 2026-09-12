@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -19,11 +20,9 @@ export const NonFipsIntegrationsCallout: React.FC<{
 
   return nonFipsIntegrations.length > 0 ? (
     <>
-      <EuiCallOut
+      <KbnWarningCallout
         announceOnMount
         size="m"
-        color="warning"
-        iconType="warning"
         title={i18n.translate(
           'xpack.fleet.agentEnrollmentCallout.nonFipsIntegrationsCalloutTitle',
           {
@@ -31,27 +30,29 @@ export const NonFipsIntegrationsCallout: React.FC<{
           }
         )}
         data-test-subj="nonFipsIntegrationsCallout"
+        text={
+          <FormattedMessage
+            id="xpack.fleet.agentEnrollmentCallout.nonFipsIntegrationsCalloutDescription"
+            defaultMessage="This agent policy contains the following integrations that are not FIPS compatible. Enrolling an agent in FIPS mode might cause the agent to not ingest data properly. For more information, see the {guideLink}."
+            values={{
+              guideLink: (
+                <EuiLink href={docLinks.links.fleet.fipsIngest} target="_blank" external>
+                  <FormattedMessage
+                    id="xpack.fleet.agentEnrollmentCallout.nonFipsIntegrationsMessage.guideLink"
+                    defaultMessage="Guide"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        }
       >
-        <FormattedMessage
-          id="xpack.fleet.agentEnrollmentCallout.nonFipsIntegrationsCalloutDescription"
-          defaultMessage="This agent policy contains the following integrations that are not FIPS compatible. Enrolling an agent in FIPS mode might cause the agent to not ingest data properly. For more information, see the {guideLink}."
-          values={{
-            guideLink: (
-              <EuiLink href={docLinks.links.fleet.fipsIngest} target="_blank" external>
-                <FormattedMessage
-                  id="xpack.fleet.agentEnrollmentCallout.nonFipsIntegrationsMessage.guideLink"
-                  defaultMessage="Guide"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
         <ul>
           {nonFipsIntegrations.map((item) => (
             <li key={item.name}>{item.title}</li>
           ))}
         </ul>
-      </EuiCallOut>
+      </KbnWarningCallout>
 
       <EuiSpacer size="m" />
     </>

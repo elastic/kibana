@@ -1,0 +1,148 @@
+{
+  "sha1": "93c6cbc5380977d9f2d3e079ba1bff6297d8fc31",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "9c72907cf23b98d-21f687a5b4985b5",
+      "title": "Management pages - required privileges user with full access can view every management page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/management/ui/tests/management_required_privileges.spec.ts",
+        "line": 61,
+        "column": 69
+      }
+    },
+    {
+      "id": "9c72907cf23b98d-b7f047f4a779368",
+      "title": "Management pages - required privileges user with read-only access can view every management page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/management/ui/tests/management_required_privileges.spec.ts",
+        "line": 61,
+        "column": 97
+      }
+    },
+    {
+      "id": "9c72907cf23b98d-568f55e8c7b81e1",
+      "title": "Management pages - required privileges user without alerting_v2 access is redirected to the management landing on every page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/management/ui/tests/management_required_privileges.spec.ts",
+        "line": 62,
+        "column": 8
+      }
+    },
+    {
+      "id": "9c72907cf23b98d-d99fe7755387fda",
+      "title": "Management pages - required privileges user with rules read-only role can view the Rules and Rule library pages",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/management/ui/tests/management_required_privileges.spec.ts",
+        "line": 65,
+        "column": 5
+      }
+    },
+    {
+      "id": "9c72907cf23b98d-d3a2856980af75e",
+      "title": "Management pages - required privileges user with alerts read-only role can only view the Alerts page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/management/ui/tests/management_required_privileges.spec.ts",
+        "line": 85,
+        "column": 5
+      }
+    },
+    {
+      "id": "9c72907cf23b98d-46516218f3583d8",
+      "title": "Management pages - required privileges user with action policies read-only role can only view the Action Policies page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/management/ui/tests/management_required_privileges.spec.ts",
+        "line": 50,
+        "column": 24
+      }
+    },
+    {
+      "id": "9c72907cf23b98d-870a9a777319880",
+      "title": "Management pages - required privileges user with execution history read-only role can only view the Execution History page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/management/ui/tests/management_required_privileges.spec.ts",
+        "line": 53,
+        "column": 24
+      }
+    }
+  ]
+}

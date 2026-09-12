@@ -6,7 +6,12 @@
  */
 
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
-import { actionTaskParamsSchemaV1, actionTaskParamsSchemaV2 } from '../schemas/action_task_params';
+import {
+  actionTaskParamsSchemaV1,
+  actionTaskParamsSchemaV2,
+  actionTaskParamsSchemaV3,
+  actionTaskParamsSchemaV4,
+} from '../schemas/action_task_params';
 
 export const actionTaskParamsModelVersions: SavedObjectsModelVersionMap = {
   '1': {
@@ -28,6 +33,31 @@ export const actionTaskParamsModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: actionTaskParamsSchemaV2.extends({}, { unknowns: 'ignore' }),
       create: actionTaskParamsSchemaV2,
+    },
+  },
+  '3': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: actionTaskParamsSchemaV3.extends({}, { unknowns: 'ignore' }),
+      create: actionTaskParamsSchemaV3,
+    },
+  },
+  '4': {
+    changes: [
+      {
+        // Searchable so the alerting API key invalidation task can see that a pending connector
+        // execution still needs the key, exactly like `apiKeyId` in model version 2. Objects
+        // that predate the field keep today's behavior: the guard unions its per-attribute
+        // lookups, so a miss here is never worse than not querying the attribute at all.
+        type: 'mappings_addition',
+        addedMappings: {
+          uiamApiKeyId: { type: 'keyword', ignore_above: 1024 },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: actionTaskParamsSchemaV4.extends({}, { unknowns: 'ignore' }),
+      create: actionTaskParamsSchemaV4,
     },
   },
 };

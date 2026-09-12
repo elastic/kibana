@@ -25,7 +25,7 @@ export const createUnackAction = (deps: UnackActionDeps): EpisodeAction => ({
   id: 'ALERTING_V2_UNACK_EPISODE',
   order: 11,
   displayName: i18n.UNACK,
-  iconType: 'crossInCircle',
+  iconType: 'crossCircle',
   isCompatible: ({ episodes }: EpisodeActionContext) =>
     episodes.length > 0 && episodes.some((ep) => ep.last_ack_action === 'ack'),
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {

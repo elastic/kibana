@@ -24,13 +24,17 @@ const buildRegistryWithComment = () => {
 };
 
 describe('registerCasesSteps', () => {
-  const registerWithFlag = (isCasesAttachmentsEnabled: boolean) => {
+  const registerWithFlag = (
+    isCasesAttachmentsEnabled: boolean,
+    { isTemplatesEnabled = true }: { isTemplatesEnabled?: boolean } = {}
+  ) => {
     const workflowsExtensions = { registerStepDefinition: jest.fn() };
 
     registerCasesSteps(
       workflowsExtensions as never,
       new UnifiedAttachmentTypeRegistry(),
-      isCasesAttachmentsEnabled
+      isCasesAttachmentsEnabled,
+      isTemplatesEnabled
     );
 
     return workflowsExtensions.registerStepDefinition;
@@ -43,6 +47,15 @@ describe('registerCasesSteps', () => {
   it('registers the generic attachments step loader only when unified attachments are enabled', () => {
     const disabled = registerWithFlag(false);
     const enabled = registerWithFlag(true);
+
+    expect(enabled).toHaveBeenCalledTimes(disabled.mock.calls.length + 1);
+  });
+
+  // The docs-only `cases.setExtendedFields` public definition is gated on the same templates
+  // feature flag as its server handler.
+  it('registers the setExtendedFields step only when the templates feature is enabled', () => {
+    const disabled = registerWithFlag(false, { isTemplatesEnabled: false });
+    const enabled = registerWithFlag(false, { isTemplatesEnabled: true });
 
     expect(enabled).toHaveBeenCalledTimes(disabled.mock.calls.length + 1);
   });

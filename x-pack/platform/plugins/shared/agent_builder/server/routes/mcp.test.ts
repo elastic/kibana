@@ -139,6 +139,196 @@ describe('filterToolsByNamespace', () => {
   });
 });
 
+const mockRegisterTool = jest.fn();
+jest.mock('@modelcontextprotocol/sdk/server/mcp.js', () => ({
+  McpServer: jest.fn().mockImplementation(() => ({
+    registerTool: mockRegisterTool,
+    connect: jest.fn(),
+    close: jest.fn(),
+  })),
+}));
+
+jest.mock('../utils/mcp/kibana_mcp_http_transport', () => ({
+  KibanaMcpHttpTransport: jest.fn().mockImplementation(() => ({
+    handleRequest: jest.fn().mockResolvedValue({ status: 200 }),
+    close: jest.fn(),
+  })),
+}));
+
+describe('MCP route — registerTool arguments', () => {
+  const mockAnnotations = {
+    title: 'List Indices',
+    readOnlyHint: true as const,
+    destructiveHint: false as const,
+    idempotentHint: true as const,
+    openWorldHint: false as const,
+  };
+
+  let postHandler: Function;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    const mockLogger = loggingSystemMock.createLogger();
+
+    const annotatedTool = createMockTool('platform.core.list_indices', {
+      annotations: mockAnnotations,
+    });
+    const unannotatedTool = createMockTool('platform.core.search');
+    const excludedTool = createMockTool('platform.core.execute_connector_sub_action', {
+      annotations: mockAnnotations,
+      excludeFromMcp: true,
+    });
+
+    const mockRegistry = {
+      list: jest.fn().mockResolvedValue([annotatedTool, unannotatedTool, excludedTool]),
+      execute: jest.fn().mockResolvedValue({ results: [{ type: 'other', data: {} }] }),
+    };
+    const getInternalServices = jest.fn().mockReturnValue({
+      tools: { getRegistry: jest.fn().mockResolvedValue(mockRegistry) },
+    });
+
+    const captureVersioned = (method: string) =>
+      jest.fn().mockImplementation((routeConfig: { path: string }) => {
+        const versionedRoute = {
+          addVersion: jest.fn().mockImplementation((_config: any, handler: Function) => {
+            if (method === 'POST') {
+              postHandler = handler;
+            }
+            return versionedRoute;
+          }),
+        };
+        return versionedRoute;
+      });
+
+    const mockRouter = {
+      get: jest.fn(),
+      versioned: { post: captureVersioned('POST') },
+    } as unknown as jest.Mocked<IRouter>;
+
+    registerMCPRoutes({
+      router: mockRouter,
+      getInternalServices,
+      logger: mockLogger,
+    } as unknown as RouteDependencies);
+  });
+
+  const createMockRequest = () => ({
+    query: {},
+    events: { aborted$: { subscribe: jest.fn() } },
+  });
+
+  const createMockContext = () => ({
+    core: Promise.resolve({ uiSettings: { client: { get: jest.fn() } } }),
+    licensing: Promise.resolve({
+      license: { status: 'active', hasAtLeast: () => true },
+    }),
+  });
+
+  it('passes annotations in config when the tool has them', async () => {
+    await postHandler(createMockContext(), createMockRequest(), { customError: jest.fn() });
+
+    const annotatedCall = mockRegisterTool.mock.calls.find(
+      (call: any[]) => call[0] === 'platform_core_list_indices'
+    );
+    expect(annotatedCall).toBeDefined();
+    const [, config, callback] = annotatedCall!;
+    expect(config.annotations).toEqual(mockAnnotations);
+    expect(config.description).toBe('Tool platform.core.list_indices');
+    expect(typeof callback).toBe('function');
+  });
+
+  it('passes undefined annotations when tool has none', async () => {
+    await postHandler(createMockContext(), createMockRequest(), { customError: jest.fn() });
+
+    const unannotatedCall = mockRegisterTool.mock.calls.find(
+      (call: any[]) => call[0] === 'platform_core_search'
+    );
+    expect(unannotatedCall).toBeDefined();
+    const [, config, callback] = unannotatedCall!;
+    expect(config.annotations).toBeUndefined();
+    expect(typeof callback).toBe('function');
+  });
+
+  it('excludes tools with excludeFromMcp: true', async () => {
+    await postHandler(createMockContext(), createMockRequest(), { customError: jest.fn() });
+
+    const excludedCall = mockRegisterTool.mock.calls.find(
+      (call: any[]) => call[0] === 'platform_core_execute_connector_sub_action'
+    );
+    expect(excludedCall).toBeUndefined();
+    expect(mockRegisterTool).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('MCP route — real SDK tool registration', () => {
+  it('registers an unannotated tool without throwing', () => {
+    jest.restoreAllMocks();
+    const { McpServer: RealMcpServer } = jest.requireActual<
+      typeof import('@modelcontextprotocol/sdk/server/mcp.js')
+    >('@modelcontextprotocol/sdk/server/mcp.js');
+
+    const server = new RealMcpServer({ name: 'test', version: '0.0.1' });
+    const handler = jest.fn().mockResolvedValue({
+      content: [{ type: 'text' as const, text: 'ok' }],
+    });
+
+    expect(() => {
+      server.registerTool(
+        'unannotated_tool',
+        { description: 'no annotations', inputSchema: {} },
+        handler
+      );
+    }).not.toThrow();
+  });
+
+  it('registers an annotated tool without throwing', () => {
+    jest.restoreAllMocks();
+    const { McpServer: RealMcpServer } = jest.requireActual<
+      typeof import('@modelcontextprotocol/sdk/server/mcp.js')
+    >('@modelcontextprotocol/sdk/server/mcp.js');
+
+    const server = new RealMcpServer({ name: 'test', version: '0.0.1' });
+    const handler = jest.fn().mockResolvedValue({
+      content: [{ type: 'text' as const, text: 'ok' }],
+    });
+
+    expect(() => {
+      server.registerTool(
+        'annotated_tool',
+        {
+          description: 'with annotations',
+          inputSchema: {},
+          annotations: {
+            title: 'My Tool',
+            readOnlyHint: true,
+            destructiveHint: false,
+            idempotentHint: true,
+            openWorldHint: false,
+          },
+        },
+        handler
+      );
+    }).not.toThrow();
+  });
+
+  it('rejects duplicate registration (proves first registration took effect)', () => {
+    jest.restoreAllMocks();
+    const { McpServer: RealMcpServer } = jest.requireActual<
+      typeof import('@modelcontextprotocol/sdk/server/mcp.js')
+    >('@modelcontextprotocol/sdk/server/mcp.js');
+
+    const server = new RealMcpServer({ name: 'test', version: '0.0.1' });
+    const handler = jest.fn();
+
+    server.registerTool('my_tool', { description: 'first', inputSchema: {} }, handler);
+
+    expect(() => {
+      server.registerTool('my_tool', { description: 'duplicate', inputSchema: {} }, handler);
+    }).toThrow(/already registered/);
+  });
+});
+
 describe('registerMCPRoutes', () => {
   const routeKey = `POST:${MCP_SERVER_PATH}`;
   const getRouteKey = `GET:${MCP_SERVER_PATH}`;

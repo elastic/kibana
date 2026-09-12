@@ -41,7 +41,15 @@ export type NightshiftStorybookScenario =
   | 'error';
 
 export type NightshiftLifecycleScenario = 'populated' | 'loading' | 'empty' | 'error';
-export type NightshiftStreamFeaturesScenario = 'populated' | 'loading' | 'empty' | 'error';
+export type NightshiftStreamFeaturesScenario =
+  | 'populated'
+  | 'loading'
+  | 'empty'
+  | 'error'
+  | 'partialError';
+
+/** The one stream `partialError` refuses to serve, so the others still resolve their services. */
+const UNREACHABLE_STREAM_NAME = 'logs.inventory-service';
 
 const performanceApi = {
   onPageReady: () => undefined,
@@ -110,12 +118,14 @@ const createServices = ({
   streamFeaturesScenario: NightshiftStreamFeaturesScenario;
 }) => {
   const closedEventUuids = new Set<string>();
-  const http = {
-    basePath: {
-      prepend: (path: string) => path,
-    },
-    get: async (path: string) => {
-      if (path === '/internal/significant_events/events') {
+  const significantEventsRepositoryClient = {
+    fetch: async (
+      route: string,
+      options?: {
+        params?: { path?: { id?: string; name?: string }; query?: { event_id?: string } };
+      }
+    ) => {
+      if (route === 'GET /internal/significant_events/events') {
         if (scenario === 'loading') {
           return neverResolve();
         }
@@ -126,15 +136,16 @@ const createServices = ({
           throw new Error('The significant events request failed');
         }
         const response = getEventsResponse(scenario);
-        return {
-          ...response,
-          hits: response.hits.map((event) =>
+        const requestedEventId = options?.params?.query?.event_id;
+        const hits = response.hits
+          .filter((event) => !requestedEventId || event.event_id === requestedEventId)
+          .map((event) =>
             closedEventUuids.has(event.event_uuid) ? { ...event, status: 'closed' as const } : event
-          ),
-        };
+          );
+        return { ...response, hits, total: hits.length };
       }
 
-      if (path.includes('/lifecycle')) {
+      if (route === 'GET /internal/significant_events/events/{id}/lifecycle') {
         if (lifecycleScenario === 'loading') {
           return neverResolve();
         }
@@ -147,7 +158,40 @@ const createServices = ({
         return checkoutLifecycle;
       }
 
-      return {};
+      const eventUuid = options?.params?.path?.id;
+      if (route === 'POST /internal/significant_events/events/{id}/update' && eventUuid) {
+        closedEventUuids.add(eventUuid);
+        return {
+          event_uuid: eventUuid,
+          updated: 1,
+          ignored: 0,
+          status: 'closed',
+        };
+      }
+
+      if (route === 'GET /internal/streams/_query_occurrences') {
+        return checkoutOccurrences;
+      }
+
+      if (route === 'GET /internal/streams/{name}/features') {
+        if (streamFeaturesScenario === 'loading') {
+          return neverResolve();
+        }
+        if (streamFeaturesScenario === 'error') {
+          throw new Error('The stream features request failed');
+        }
+        if (streamFeaturesScenario === 'empty') {
+          return { features: [] };
+        }
+        if (
+          streamFeaturesScenario === 'partialError' &&
+          options?.params?.path?.name === UNREACHABLE_STREAM_NAME
+        ) {
+          throw new Error(`The ${UNREACHABLE_STREAM_NAME} features request failed`);
+        }
+      }
+
+      return { features: [checkoutFeature] };
     },
   };
 
@@ -181,7 +225,11 @@ const createServices = ({
         toSpec: () => ({ id, timeFieldName, title }),
       }),
     },
-    http,
+    http: {
+      basePath: {
+        prepend: (path: string) => path,
+      },
+    },
     lens: {
       EmbeddableComponent: StorybookLensEmbeddable,
     },
@@ -200,6 +248,9 @@ const createServices = ({
         },
       },
     },
+    significantEvents: {
+      significantEventsRepositoryClient,
+    },
     settings: {
       client: {
         get: (setting: string) =>
@@ -212,37 +263,6 @@ const createServices = ({
         name: 'Default',
         disabledFeatures: [],
       }),
-    },
-    streams: {
-      streamsRepositoryClient: {
-        fetch: async (route: string, options?: { params?: { path?: { id?: string } } }) => {
-          const eventUuid = options?.params?.path?.id;
-          if (route === 'POST /internal/significant_events/events/{id}/update' && eventUuid) {
-            closedEventUuids.add(eventUuid);
-            return {
-              event_uuid: eventUuid,
-              updated: 1,
-              ignored: 0,
-              status: 'closed',
-            };
-          }
-          if (route === 'GET /internal/streams/_query_occurrences') {
-            return checkoutOccurrences;
-          }
-          if (route === 'GET /internal/streams/{name}/features') {
-            if (streamFeaturesScenario === 'loading') {
-              return neverResolve();
-            }
-            if (streamFeaturesScenario === 'error') {
-              throw new Error('The stream features request failed');
-            }
-            if (streamFeaturesScenario === 'empty') {
-              return { features: [] };
-            }
-          }
-          return { features: [checkoutFeature] };
-        },
-      },
     },
   };
 };

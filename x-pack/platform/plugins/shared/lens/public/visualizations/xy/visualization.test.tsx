@@ -4457,7 +4457,7 @@ describe('xy_visualization', () => {
           ],
           annotationGroups
         )
-      ).not.toThrowError();
+      ).not.toThrow();
     });
   });
 
@@ -4587,6 +4587,25 @@ describe('xy_visualization', () => {
       expect((newState.layers[0] as XYDataLayerConfig).seriesType).toEqual(newType);
       expect((newState.layers[1] as XYDataLayerConfig).seriesType).toEqual('area');
       expect((newState.layers[2] as XYDataLayerConfig).seriesType).toEqual('area');
+    });
+
+    describe('areaFill defaulting', () => {
+      it('applies the solid default when an area layer is introduced', () => {
+        const state = exampleState();
+        (state.layers[0] as XYDataLayerConfig).seriesType = 'bar';
+        expect(state.areaFill).toBeUndefined();
+        const newState = xyVisualization.switchVisualizationType!('area', state);
+        expect((newState.layers[0] as XYDataLayerConfig).seriesType).toEqual('area');
+        expect(newState.areaFill).toEqual('solid');
+      });
+
+      it('preserves an existing areaFill when switching area subtypes', () => {
+        const state = exampleState();
+        state.areaFill = 'gradient';
+        (state.layers[0] as XYDataLayerConfig).seriesType = 'area';
+        const newState = xyVisualization.switchVisualizationType!('area_stacked', state);
+        expect(newState.areaFill).toEqual('gradient');
+      });
     });
   });
 });

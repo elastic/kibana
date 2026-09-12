@@ -363,3 +363,7 @@ export const CLOSE_CASE_MODAL_REASON_OTHER = i18n.translate(
 export const TABLE_CAPTION = i18n.translate('xpack.cases.caseTable.tableCaption', {
   defaultMessage: 'Cases',
 });
+
+export const EDIT_FILTERS_TOOLTIP = i18n.translate('xpack.cases.allCases.editFiltersTooltip', {
+  defaultMessage: 'Add or remove filters',
+});

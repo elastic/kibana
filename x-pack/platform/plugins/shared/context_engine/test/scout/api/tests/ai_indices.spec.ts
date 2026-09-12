@@ -37,24 +37,13 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
   let adminApiCredentials: RoleApiCredentials;
   let viewerApiCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ apiClient, requestAuth, kbnClient, esClient }) => {
+  apiTest.beforeAll(async ({ requestAuth, kbnClient, esClient }) => {
     adminApiCredentials = await requestAuth.getApiKey('admin');
     viewerApiCredentials = await requestAuth.getApiKey('viewer');
     await kbnClient.uiSettings.update({ [CONTEXT_ENGINE_ENABLED_SETTING]: true });
-    // Defensive polling due to the context engine feature flag; may be simplified when
-    // feature flag is removed.
-    await expect
-      .poll(
-        async () => {
-          const response = await apiClient.get('api/context_engine/ai_index', {
-            headers: { ...viewerApiCredentials.apiKeyHeader, ...API_HEADERS },
-            responseType: 'json',
-          });
-          return response.statusCode;
-        },
-        { timeout: 30_000, message: 'contextEngine feature flag did not propagate' }
-      )
-      .toBe(200);
+    // Deployment-agnostic stateful runs are multi-node: wait out the shared uiSettings cache TTL
+    // so every node serves the enabled flag before the suite reads it (see #265720).
+    await kbnClient.uiSettings.waitForEventualCacheRefresh();
     await esClient.indices.createDataStream({ name: DEST_DATA_STREAM });
     await esClient.indices.create({ index: DEST_INDEX });
   });

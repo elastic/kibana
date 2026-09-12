@@ -10,8 +10,6 @@ import { EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import type { CaseSeverity } from '../../../../../../common';
 import { SeveritySelector } from '../../../../severity/selector';
 import { SEVERITY_TITLE } from '../../../../severity/translations';
-import { InlineFieldActions } from '../../../../templates_v2/field_types/controls/inline_field_actions';
-import { usePendingFieldValue } from './hooks/use_pending_field_value';
 
 interface Props {
   selectedSeverity: CaseSeverity;
@@ -26,25 +24,16 @@ export const SeverityField: React.FC<Props> = ({
   isLoading,
   isDisabled,
 }) => {
-  const { currentValue, hasPendingChange, setPendingValue, onConfirm, onCancel } =
-    usePendingFieldValue<CaseSeverity>({
-      committedValue: selectedSeverity,
-      onSubmit: onSeverityChange,
-    });
-
   return (
     <EuiFlexItem grow={false} data-test-subj="sidebar-severity">
       <EuiFormRow label={SEVERITY_TITLE} fullWidth>
         <SeveritySelector
-          selectedSeverity={currentValue}
-          onSeverityChange={setPendingValue}
+          selectedSeverity={selectedSeverity}
+          onSeverityChange={onSeverityChange}
           isLoading={isLoading}
           isDisabled={isDisabled}
         />
       </EuiFormRow>
-      {hasPendingChange && !isLoading && (
-        <InlineFieldActions name="severity" onConfirm={onConfirm} onCancel={onCancel} />
-      )}
     </EuiFlexItem>
   );
 };

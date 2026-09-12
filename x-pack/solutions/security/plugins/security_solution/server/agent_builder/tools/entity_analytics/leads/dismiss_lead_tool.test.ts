@@ -46,8 +46,8 @@ describe('dismissLeadTool', () => {
     mockDismissLead = jest.fn().mockResolvedValue(true);
     mockCreateLeadDataClient.mockReturnValue({ dismissLead: mockDismissLead });
     mockGetUserLeadPrivileges.mockResolvedValue({
-      adhoc: { has_read_permissions: true, has_write_permissions: true },
-      scheduled: { has_read_permissions: true, has_write_permissions: true },
+      has_read_permissions: true,
+      has_write_permissions: true,
       has_all_required: true,
       privileges: {},
     });
@@ -74,8 +74,8 @@ describe('dismissLeadTool', () => {
   describe('handler — privilege check', () => {
     it('returns permission error when user lacks write permissions', async () => {
       mockGetUserLeadPrivileges.mockResolvedValue({
-        adhoc: { has_read_permissions: true, has_write_permissions: false },
-        scheduled: { has_read_permissions: true, has_write_permissions: false },
+        has_read_permissions: true,
+        has_write_permissions: false,
         has_all_required: false,
         privileges: {},
       });
@@ -253,8 +253,8 @@ describe('dismissLeadTool', () => {
 
     it('reports success=false when the caller lacks write privilege', async () => {
       mockGetUserLeadPrivileges.mockResolvedValue({
-        adhoc: { has_read_permissions: true, has_write_permissions: false },
-        scheduled: { has_read_permissions: true, has_write_permissions: false },
+        has_read_permissions: true,
+        has_write_permissions: false,
         has_all_required: false,
         privileges: {},
       });

@@ -148,6 +148,7 @@ export const EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/event_filters` as const;
 export const HOST_ISOLATION_EXCEPTIONS_PATH =
   `${MANAGEMENT_PATH}/host_isolation_exceptions` as const;
 export const BLOCKLIST_PATH = `${MANAGEMENT_PATH}/blocklist` as const;
+export const CUSTOM_YARA_SIGNATURES_PATH = `${MANAGEMENT_PATH}/custom_yara_signatures` as const;
 export const RESPONSE_ACTIONS_HISTORY_PATH = `${MANAGEMENT_PATH}/response_actions_history` as const;
 export const SCRIPT_LIBRARY_PATH = `${MANAGEMENT_PATH}/script_library` as const;
 export const ENTITY_ANALYTICS_PATH = '/entity_analytics' as const;
@@ -173,6 +174,7 @@ export const APP_EVENT_FILTERS_PATH = `${APP_PATH}${EVENT_FILTERS_PATH}` as cons
 export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
   `${APP_PATH}${HOST_ISOLATION_EXCEPTIONS_PATH}` as const;
 export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
+export const APP_CUSTOM_YARA_SIGNATURES_PATH = `${APP_PATH}${CUSTOM_YARA_SIGNATURES_PATH}` as const;
 export const APP_RESPONSE_ACTIONS_HISTORY_PATH =
   `${APP_PATH}${RESPONSE_ACTIONS_HISTORY_PATH}` as const;
 export const APP_SCRIPT_LIBRARY_PATH = `${APP_PATH}${SCRIPT_LIBRARY_PATH}` as const;
@@ -516,6 +518,8 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   DEFAULT_LLM: `elasticAssistant.elasticLLM.costAwarenessTour.assistantHeader.v8.19.default`,
   ATTACKS_PAGE: 'securitySolution.attacksPage.newFeaturesTour.v9.5',
   ATTACKS_PAGE_CALLOUT: 'securitySolution.attacksPage.tourCalloutDismissed.v9.5',
+  ATTACKS_PAGE_WORKFLOWS_PROMOTION_CALLOUT:
+    'securitySolution.attacksPage.workflowsPromotionCalloutDismissed.v9.5',
   // Notifies users that the bundled MITRE ATT&CK® dataset was bumped. Keyed to
   // MITRE_ATTACK_VERSION so each upgrade automatically re-surfaces the callout.
   MITRE_VERSION_UPGRADED_CALLOUT: `securitySolution.rulesManagementPage.mitreVersionUpgradedCallout.${MITRE_ATTACK_VERSION}`,
@@ -745,6 +749,8 @@ export enum SecurityAgentBuilderAttachments {
   alerts = 'security.alerts',
   entity = 'security.entity',
   entityAnalyticsDashboard = 'security.entity_analytics_dashboard',
+  entityGraph = 'security.entity_graph',
+  entityRiskScoreHistory = 'security.entity_risk_score_history',
   rule = 'security.rule',
   rulePreview = 'security.rule.preview',
 }

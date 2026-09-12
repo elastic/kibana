@@ -148,7 +148,6 @@ export const InferenceEndpointIdField: React.FC<InferenceEndpointIdFieldProps> =
               tooltipProps={{ disableScreenReaderOutput: true }}
             >
               {(copy) => (
-                /* eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap */
                 <EuiButtonIcon
                   iconType="copy"
                   aria-label={LABELS.COPY_TOOLTIP}

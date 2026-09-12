@@ -141,3 +141,8 @@ export const PointVisibilityOptions = {
   NEVER: 'never',
   AUTO: 'auto',
 } as const;
+
+export const AreaFillOptions = {
+  SOLID: 'solid',
+  GRADIENT: 'gradient',
+} as const;

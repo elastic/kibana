@@ -65,13 +65,7 @@ const MAINTENANCE_STATUS_REFETCH_INTERVAL_MS = 30_000;
  * consumer (settings control, discovery callout, toggles) sees a single source
  * of truth. */
 export const useMaintenanceStatus = () => {
-  const {
-    dependencies: {
-      start: {
-        significantEvents: { significantEventsRepositoryClient },
-      },
-    },
-  } = useKibana();
+  const { significantEventsRepositoryClient } = useKibana().dependencies.start.significantEvents;
 
   return useQuery<SignificantEventsMaintenanceStatus, Error>({
     queryKey: MAINTENANCE_STATUS_QUERY_KEY,

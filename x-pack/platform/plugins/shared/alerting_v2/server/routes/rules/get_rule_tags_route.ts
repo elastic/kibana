@@ -26,7 +26,7 @@ import { ruleTagsOasExamples } from './get_rule_tags_oas_example';
 @injectable()
 export class GetRuleTagsRoute extends BaseAlertingRoute {
   static method = 'get' as const;
-  static path = `${ALERTING_V2_RULE_API_PATH}/_tags`;
+  static path = `${ALERTING_V2_RULE_API_PATH}/tags`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.read],
@@ -64,7 +64,8 @@ export class GetRuleTagsRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const tags = await this.rulesClient.getTags({ filter: this.request.query.filter });
+    const { search, kind } = this.request.query;
+    const tags = await this.rulesClient.getTags({ search, kind });
     return this.ctx.response.ok({ body: { tags } });
   }
 }

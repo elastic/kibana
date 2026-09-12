@@ -8,7 +8,12 @@
 import type { IRouter, Logger } from '@kbn/core/server';
 import { AuthzDisabled } from '@kbn/core-security-server';
 import { DEPLOYMENT_STATS_PATH } from '../../common/constants';
-import { fetchDashboardsCount, fetchIndexStats } from '../lib/deployment_stats';
+import { fetchDashboardsCount } from '../lib/dashboards';
+import {
+  fetchApiKeysStats,
+  fetchIndexStats,
+  fetchMonitorPrivileges,
+} from '../lib/deployment_stats';
 
 export const registerDeploymentStatsRoute = (router: IRouter, logger: Logger) => {
   router.get(
@@ -16,7 +21,9 @@ export const registerDeploymentStatsRoute = (router: IRouter, logger: Logger) =>
       path: DEPLOYMENT_STATS_PATH,
       validate: false,
       security: {
-        authz: AuthzDisabled.delegateToESClient,
+        authz: AuthzDisabled.fromReason(
+          'All counts, except the vector count, are scoped to the caller. The vector count is gated by a handler that checks the caller holds the `monitor` privilege on all indices before returning that cluster-wide total. The newest-index lookup is gated on the caller holding the cluster `monitor` privilege. The dashboard count is authorized by the saved objects client'
+        ),
       },
     },
     async (context, request, response) => {
@@ -25,18 +32,31 @@ export const registerDeploymentStatsRoute = (router: IRouter, logger: Logger) =>
         const client = core.elasticsearch.client;
         const savedObjectsClient = core.savedObjects.getClient();
 
-        const [{ indicesCount, storeSizeBytes, vectorDocsCount }, dashboardsCount] =
-          await Promise.all([
-            fetchIndexStats(client, logger),
-            fetchDashboardsCount(savedObjectsClient, logger),
-          ]);
+        const { canMonitorAllIndices, canMonitorCluster } = await fetchMonitorPrivileges(
+          client,
+          logger
+        );
+
+        const [
+          { indicesCount, storeSizeBytes, vectorCount, documentsCount, newIndex },
+          dashboardsCount,
+          { total: apiKeysCount, expiring: expiringApiKeysCount },
+        ] = await Promise.all([
+          fetchIndexStats(client, logger, { canMonitorAllIndices, canMonitorCluster }),
+          fetchDashboardsCount(savedObjectsClient, logger),
+          fetchApiKeysStats(client, logger),
+        ]);
 
         return response.ok({
           body: {
             indicesCount,
             storeSizeBytes,
-            vectorDocsCount,
+            vectorCount,
+            documentsCount,
             dashboardsCount,
+            apiKeysCount,
+            expiringApiKeysCount,
+            newIndex,
           },
         });
       } catch (error) {

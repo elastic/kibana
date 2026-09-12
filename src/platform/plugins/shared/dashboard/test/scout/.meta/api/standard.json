@@ -1,8 +1,7 @@
 {
-  "sha1": "fc287df04181c7beb6453f6451bed9699ab074d6",
+  "sha1": "0121b2af0c16d873cab9b92beca05d41379ea843",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -221,8 +220,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 38,
-        "column": 25
+        "line": 37,
+        "column": 21
       }
     },
     {
@@ -241,7 +240,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 50,
+        "line": 49,
         "column": 12
       }
     },
@@ -261,8 +260,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 64,
-        "column": 69
+        "line": 63,
+        "column": 16
       }
     },
     {
@@ -281,8 +280,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 80,
-        "column": 22
+        "line": 78,
+        "column": 63
       }
     },
     {
@@ -301,7 +300,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 91,
+        "line": 90,
         "column": 12
       }
     },
@@ -321,8 +320,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 108,
-        "column": 5
+        "line": 107,
+        "column": 14
       }
     },
     {
@@ -341,8 +340,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 126,
-        "column": 69
+        "line": 125,
+        "column": 22
       }
     },
     {
@@ -361,8 +360,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 145,
-        "column": 22
+        "line": 143,
+        "column": 69
       }
     },
     {
@@ -381,8 +380,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 161,
-        "column": 11
+        "line": 159,
+        "column": 62
       }
     },
     {
@@ -401,8 +400,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 180,
-        "column": 83
+        "line": 178,
+        "column": 99
       }
     },
     {
@@ -421,7 +420,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 195,
+        "line": 194,
         "column": 12
       }
     },
@@ -441,8 +440,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 208,
-        "column": 12
+        "line": 207,
+        "column": 5
       }
     },
     {
@@ -461,7 +460,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 217,
+        "line": 216,
         "column": 12
       }
     },
@@ -481,8 +480,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 225,
-        "column": 72
+        "line": 224,
+        "column": 21
       }
     },
     {
@@ -501,7 +500,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 242,
+        "line": 241,
         "column": 14
       }
     },
@@ -521,8 +520,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 253,
-        "column": 16
+        "line": 251,
+        "column": 21
       }
     },
     {
@@ -541,8 +540,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 264,
-        "column": 22
+        "line": 263,
+        "column": 34
       }
     },
     {

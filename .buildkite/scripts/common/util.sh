@@ -210,6 +210,79 @@ set_git_merge_base() {
   export GITHUB_PR_MERGE_BASE
 }
 
+# Sets the GitHub stack root merge base, falling back to the current PR merge base.
+set_git_stack_merge_base() {
+  GITHUB_PR_STACK_TARGET_BRANCH="$GITHUB_PR_TARGET_BRANCH"
+  GITHUB_PR_STACK_MERGE_BASE="$GITHUB_PR_MERGE_BASE"
+  export GITHUB_PR_STACK_TARGET_BRANCH
+  export GITHUB_PR_STACK_MERGE_BASE
+
+  local github_token="${GITHUB_TOKEN:-${VAULT_GITHUB_TOKEN:-}}"
+  local stack_target_branch
+  local stack_merge_base
+
+  if [[ -z "$github_token" || -z "${GITHUB_PR_BASE_OWNER:-}" || -z "${GITHUB_PR_BASE_REPO:-}" ]] || ! command -v gh >/dev/null 2>&1; then
+    return
+  fi
+
+  if ! stack_target_branch="$(
+    GH_TOKEN="$github_token" gh api graphql \
+      -f owner="$GITHUB_PR_BASE_OWNER" \
+      -f repo="$GITHUB_PR_BASE_REPO" \
+      -F number="$GITHUB_PR_NUMBER" \
+      -f query='query($owner: String!, $repo: String!, $number: Int!) { repository(owner: $owner, name: $repo) { pullRequest(number: $number) { stack { baseRefName } } } }' \
+      --jq '.data.repository.pullRequest.stack.baseRefName // empty' 2>/dev/null
+  )" || [[ -z "$stack_target_branch" ]]; then
+    return
+  fi
+
+  if git fetch origin "$stack_target_branch" 2>/dev/null; then
+    stack_merge_base="$(git merge-base HEAD FETCH_HEAD 2>/dev/null || true)"
+  fi
+
+  if [[ -z "$stack_merge_base" ]]; then
+    echo "Failed to resolve stack merge base; falling back to PR merge base" >&2
+    return
+  fi
+
+  GITHUB_PR_STACK_TARGET_BRANCH="$stack_target_branch"
+  GITHUB_PR_STACK_MERGE_BASE="$stack_merge_base"
+  export GITHUB_PR_STACK_TARGET_BRANCH
+  export GITHUB_PR_STACK_MERGE_BASE
+}
+
+# For merge-queue builds (gh-readonly-queue/* branches), resolves the merge base
+# against the target branch and the list of first-parent commits this merge group
+# will add to the target branch when it lands. These are reported to ci-stats so
+# a single queue build can act as the metrics baseline for every commit it covers.
+set_merge_queue_git_info() {
+  MERGE_QUEUE_MERGE_BASE="$(buildkite-agent meta-data get merge-queue-merge-base --default '')"
+  MERGE_QUEUE_COVERED_COMMITS="$(buildkite-agent meta-data get merge-queue-covered-commits --default '')"
+
+  if [[ ! "$MERGE_QUEUE_MERGE_BASE" || ! "$MERGE_QUEUE_COVERED_COMMITS" ]]; then
+    if ! git fetch origin "$MERGE_QUEUE_TARGET_BRANCH" 2>/dev/null; then
+      echo "Failed to fetch $MERGE_QUEUE_TARGET_BRANCH to resolve merge queue git info" >&2
+      return 1
+    fi
+
+    MERGE_QUEUE_MERGE_BASE="$(git merge-base HEAD FETCH_HEAD 2>/dev/null || true)"
+    if [[ ! "$MERGE_QUEUE_MERGE_BASE" ]]; then
+      echo "Failed to resolve merge queue merge base" >&2
+      return 1
+    fi
+
+    # first-parent commits between the merge base and the queue-branch head are
+    # the exact commits GitHub fast-forwards onto the target branch on success
+    MERGE_QUEUE_COVERED_COMMITS="$(git rev-list --first-parent "$MERGE_QUEUE_MERGE_BASE..HEAD" | paste -sd, -)"
+
+    buildkite-agent meta-data set merge-queue-merge-base "$MERGE_QUEUE_MERGE_BASE"
+    buildkite-agent meta-data set merge-queue-covered-commits "$MERGE_QUEUE_COVERED_COMMITS"
+  fi
+
+  export MERGE_QUEUE_MERGE_BASE
+  export MERGE_QUEUE_COVERED_COMMITS
+}
+
 # Download an artifact using the buildkite-agent, takes the same arguments as https://buildkite.com/docs/agent/v3/cli-artifact#downloading-artifacts-usage
 # times-out after 60 seconds and retries up to 3 times
 download_artifact() {
@@ -273,13 +346,18 @@ upload_tmp_artifact() {
   return 0
 }
 
-upload_tmp_artifact_to_region() {
+upload_tmp_artifact_to_region() (
   local local_path="$1" artifact_name="$2" build_id="$3" region="$4"
+  local config_dir
 
-  retry 3 5 env CLOUDSDK_STORAGE_PARALLEL_COMPOSITE_UPLOAD_ENABLED=False gcloud storage cp \
+  config_dir="$(mktemp -d -t gcloud-upload-XXXXXX)"
+  trap 'rm -rf "$config_dir"' EXIT
+  cp -a "${CLOUDSDK_CONFIG:-$HOME/.config/gcloud}/." "$config_dir/"
+
+  retry 3 5 env "CLOUDSDK_CONFIG=$config_dir" gcloud storage cp \
     "$local_path" \
     "gs://kibana-ci-artifacts-${region}/tmp/builds/${build_id}/${artifact_name}"
-}
+)
 
 print_if_dry_run() {
   if [[ "${DRY_RUN:-}" =~ ^(1|true)$ ]]; then
@@ -359,4 +437,19 @@ force_clean_ports() {
 clean_cached_images() {
   docker images -q | sort -u | xargs -r docker rmi -f || true
   docker image prune -af || true
+}
+
+# Move the first existing source dir onto dest (no-op if none exist).
+copy_first_available() {
+  local dest="$1"
+  shift
+  local src
+  for src in "$@"; do
+    if [[ -d "$src" ]]; then
+      echo "Using $src as a starting point"
+      mkdir -p "$(dirname "$dest")"
+      mv "$src" "$dest"
+      return 0
+    fi
+  done
 }

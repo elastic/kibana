@@ -10,6 +10,7 @@
 export {
   DocViewer,
   DOC_VIEWER_FLYOUT_HISTORY_KEY,
+  DOC_VIEWER_TABS_EBT_ELEMENT,
   type DocViewerProps,
   type DocViewerApi,
   type DocViewerRestorableState,

@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/charts-plugin'
   - '@kbn/core'
   - '@kbn/core-chrome-app-menu-components'
+  - '@kbn/core-http-browser'
   - '@kbn/data-plugin'
   - '@kbn/data-views-plugin'
   - '@kbn/deeplinks-analytics'
@@ -36,10 +37,10 @@ dependsOn:
   - '@kbn/kibana-react-plugin'
   - '@kbn/lens-embeddable-utils'
   - '@kbn/lens-plugin'
+  - '@kbn/nightshift-investigations-plugin'
   - '@kbn/observability-shared-plugin'
   - '@kbn/react-query'
   - '@kbn/scout-oblt'
-  - '@kbn/server-route-repository'
   - '@kbn/serverless'
   - '@kbn/share-plugin'
   - '@kbn/shared-ux-ai-components'
@@ -48,7 +49,6 @@ dependsOn:
   - '@kbn/significant-events-plugin'
   - '@kbn/significant-events-schema'
   - '@kbn/spaces-plugin'
-  - '@kbn/streams-plugin'
   - '@kbn/unified-search-plugin'
 tags:
   - plugin

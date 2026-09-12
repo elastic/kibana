@@ -8,13 +8,13 @@
  */
 
 /**
- * Turn a kebab-case category id into a display label (e.g. `threat-intel` →
- * `Threat Intel`). Rendering the canonical `library/categories.yaml` names is a
- * known follow-up.
+ * Turn a kebab-case category id into a sentence-case display label (e.g.
+ * `threat-intel` → `Threat intel`). Rendering the canonical
+ * `library/categories.yaml` names is a known follow-up.
  */
 export function humanizeCategoryId(id: string): string {
-  return id
-    .split('-')
-    .map((word) => (word.length > 0 ? word[0].toUpperCase() + word.slice(1) : word))
+  const words = id.split('-').filter((word) => word.length > 0);
+  return words
+    .map((word, index) => (index === 0 ? word[0].toUpperCase() + word.slice(1) : word))
     .join(' ');
 }

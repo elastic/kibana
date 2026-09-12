@@ -8,8 +8,6 @@
 /**
  * Upper bound on how many recent leads are fetched and surfaced anywhere in
  * the UI (main panel count, "See recent leads" label, and the flyout list).
- * See `MAX_RECENT_LEADS` in the common lead generation constants for how this
- * is derived from the per-run engine cap.
  */
 export { MAX_RECENT_LEADS } from '../../../../../common/entity_analytics/lead_generation/constants';
 
@@ -27,7 +25,7 @@ export const getEntityIcon = (entityType: string): string => {
     case 'host':
       return 'storage';
     case 'service':
-      return 'node';
+      return 'vectorTriangle';
     case 'generic':
     default:
       return 'globe';

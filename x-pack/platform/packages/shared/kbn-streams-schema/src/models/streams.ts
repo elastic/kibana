@@ -16,6 +16,14 @@ import { QueryStream as nQueryStream } from './query';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
+// Namespace aliases for the sub-streams. Babel elides this whole declaration
+// (every member is an import alias or type-only), emitting NO runtime code, so
+// these are type-only in the built CJS and the runtime values are assigned at
+// the bottom of the file. It must stay separate from the `all` runtime member:
+// `@babel/plugin-transform-typescript` >= 7.25 mis-compiles `export import X = Y`
+// in a namespace that also has a runtime member, emitting an invalid nested
+// `export var X` that is a SyntaxError in the built CJS.
+// See: https://github.com/babel/babel/pull/16566
 export namespace Streams {
   export import ingest = IngestStream;
 
@@ -30,7 +38,9 @@ export namespace Streams {
     export type GetResponse = ingest.all.GetResponse | QueryStream.GetResponse;
     export type UpsertRequest = ingest.all.UpsertRequest | QueryStream.UpsertRequest;
   }
+}
 
+export namespace Streams {
   const allDefinitionSchema = z.union([
     nWiredStream.Definition.right,
     nClassicStream.Definition.right,
@@ -81,10 +91,14 @@ export namespace Streams {
   };
 }
 
-Streams.ingest = IngestStream;
-Streams.WiredStream = nWiredStream;
-Streams.ClassicStream = nClassicStream;
-Streams.QueryStream = nQueryStream;
+// Runtime values for the aliases above, which Babel drops (see the note there).
+// `satisfies` keeps them type-checked against the namespace's alias types.
+Object.assign(Streams, {
+  ingest: IngestStream,
+  WiredStream: nWiredStream,
+  ClassicStream: nClassicStream,
+  QueryStream: nQueryStream,
+} satisfies Pick<typeof Streams, 'ingest' | 'WiredStream' | 'ClassicStream' | 'QueryStream'>);
 
 /**
  * Union of all three stream definition schemas, discriminated by the `type`

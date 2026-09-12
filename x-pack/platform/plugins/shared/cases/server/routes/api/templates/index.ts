@@ -10,6 +10,9 @@ import { getTemplatesRoute } from './get_templates_route';
 import { getTemplateRoute } from './get_template_route';
 import { getPublicTemplatesRoute } from './get_public_templates_route';
 import { getPublicTemplateRoute } from './get_public_template_route';
+import { postPublicTemplateRoute } from './post_public_template_route';
+import { putPublicTemplateRoute } from './put_public_template_route';
+import { deletePublicTemplateRoute } from './delete_public_template_route';
 import { postTemplateRoute } from './post_template_route';
 import { putTemplateRoute } from './put_template_route';
 import { patchTemplateRoute } from './patch_template_route';
@@ -31,6 +34,9 @@ export const getPublicTemplateRoutes = (config: ConfigType) => {
   return [
     getPublicTemplatesRoute,
     getPublicTemplateRoute,
+    postPublicTemplateRoute,
+    putPublicTemplateRoute,
+    deletePublicTemplateRoute,
     getApplicableFieldsRoute,
     getCaseApplicableFieldsRoute,
   ];
