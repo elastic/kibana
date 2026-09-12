@@ -23,7 +23,7 @@ settings:
       # a genuine failure.
       - name: record_expiry
         type: investigations.updateProposal
-        if: "${ ((steps.create_proposal.output.proposalId != null and steps.create_proposal.output.proposalId != '') or (steps.recover_original.output.proposalId != null and steps.recover_original.output.proposalId != '')) and error.type == 'TimeoutError' }"
+        if: "${{ ((steps.create_proposal.output.proposalId != null and steps.create_proposal.output.proposalId != '') or (steps.recover_original.output.proposalId != null and steps.recover_original.output.proposalId != '')) and error.type == 'TimeoutError' }}"
         with:
           proposalId: '{{ steps.create_proposal.output.proposalId | default: steps.recover_original.output.proposalId }}'
           status: dismissed
@@ -32,7 +32,7 @@ settings:
         # Skipped when no proposal exists on this run (creation or recovery
         # itself failed): there is nothing to mark, and the template would
         # resolve to an empty id.
-        if: "${ ((steps.create_proposal.output.proposalId != null and steps.create_proposal.output.proposalId != '') or (steps.recover_original.output.proposalId != null and steps.recover_original.output.proposalId != '')) and error.type != 'TimeoutError' }"
+        if: "${{ ((steps.create_proposal.output.proposalId != null and steps.create_proposal.output.proposalId != '') or (steps.recover_original.output.proposalId != null and steps.recover_original.output.proposalId != '')) and error.type != 'TimeoutError' }}"
         with:
           proposalId: '{{ steps.create_proposal.output.proposalId | default: steps.recover_original.output.proposalId }}'
           status: failed
@@ -52,7 +52,7 @@ settings:
       # another.
       - name: spawn_recovery
         type: workflow.executeAsync
-        if: "${ ((steps.create_proposal.output.proposalId != null and steps.create_proposal.output.proposalId != '') or (steps.recover_original.output.proposalId != null and steps.recover_original.output.proposalId != '')) and error.type != 'TimeoutError' }"
+        if: "${{ ((steps.create_proposal.output.proposalId != null and steps.create_proposal.output.proposalId != '') or (steps.recover_original.output.proposalId != null and steps.recover_original.output.proposalId != '')) and error.type != 'TimeoutError' }}"
         with:
           workflow-id: 'system-create-investigation-proposal'
           inputs:

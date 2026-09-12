@@ -251,6 +251,25 @@ describe('create-investigation-proposal workflow', () => {
     expect(text).not.toContain('supersededBy:');
   });
 
+  it('parses every condition with the ${{ }} expression syntax, never a single-brace variant', () => {
+    // e2e-caught defect class: `${ ((...)) }` is stored verbatim by YAML
+    // parsing and only blows up at execution time, so the on-failure chain
+    // silently never runs. Walk every step and fallback entry with an `if`.
+    const conditions: string[] = [];
+    const walk = (entries: Array<{ if?: string }>) => {
+      for (const entry of entries) {
+        if (entry.if !== undefined) conditions.push(entry.if);
+      }
+    };
+    walk(workflow.steps as Array<{ if?: string }>);
+    walk((workflow.settings?.['on-failure']?.fallback ?? []) as Array<{ if?: string }>);
+    expect(conditions.length).toBeGreaterThan(0);
+    for (const condition of conditions) {
+      expect(condition).toMatch(/^\$\{\{/);
+      expect(condition).toMatch(/\}\}$/);
+    }
+  });
+
   it('renders every recovery-spawn input through a real liquid template', () => {
     const fallback = workflow.settings?.['on-failure']?.fallback ?? [];
     const spawn = fallback.find(({ name }) => name === 'spawn_recovery') as {
