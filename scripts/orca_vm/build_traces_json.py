@@ -45,7 +45,7 @@ class Es:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--env-file", default="/tmp/golden-cluster-env.sh")
+    ap.add_argument("--env-file", default=os.path.expanduser("~/.elastic/golden-cluster-env.sh"))
     ap.add_argument("--suite", default="security-persona-matrix",
                     help="suite_id filter for score docs (agent-builder feeds agent_eval_full boards)")
     ap.add_argument("--since", required=True, help="ISO lower bound for trace docs")
@@ -150,59 +150,54 @@ def main():
     # trace_id. Persona-matrix suite spans land in traces-generic.otel-default
     # (dotted attr keys); agent-builder suite spans in traces-agent_builder
     # .otel-default (nested attrs). Query both, read both shapes.
-    def _read_usage(attrs):
-        in_tok = attrs.get("gen_ai.usage.input_tokens")
-        if in_tok is None:
-            in_tok = ((attrs.get("gen_ai") or {}).get("usage") or {}).get("input_tokens")
-        out_tok = attrs.get("gen_ai.usage.output_tokens")
-        if out_tok is None:
-            out_tok = ((attrs.get("gen_ai") or {}).get("usage") or {}).get("output_tokens")
-        return in_tok, out_tok
-
-    usage_body = {
-        "size": 1000,
-        "query": {"bool": {"filter": [
-            {"range": {"@timestamp": {"gte": args.since, **({"lt": args.until} if args.until else {})}}},
-            {"bool": {"should": [
-                {"exists": {"field": "attributes.gen_ai.usage.input_tokens"}},
-                {"exists": {"field": "gen_ai.usage.input_tokens"}},
-            ]}},
+    usage_query = {"bool": {"filter": [
+        {"range": {"@timestamp": {"gte": args.since, **({"lt": args.until} if args.until else {})}}},
+        {"bool": {"should": [
+            {"exists": {"field": "attributes.gen_ai.usage.input_tokens"}},
+            {"exists": {"field": "gen_ai.usage.input_tokens"}},
         ]}},
-        "_source": [
-            "trace_id", "duration",
-            "attributes.gen_ai.usage.input_tokens",
-            "attributes.gen_ai.usage.output_tokens",
-            "attributes",
-        ],
-        "sort": [{"@timestamp": "asc"}],
-    }
+    ]}}
     span_usage = {}  # trace_id -> [dur_ns, in_tok, out_tok] (summed per trace)
     n_usage = 0
-    search_after = None
+    after = None
     while True:
-        body = dict(usage_body)
-        if search_after:
-            body["search_after"] = search_after
-        res = es.post("/.ds-traces-generic.otel-default*,.ds-traces-agent_builder.otel-default*/_search", body)
-        hits = res["hits"]["hits"]
-        if not hits:
+        # composite agg: server-side sum per trace_id — no deep paging,
+        # no _source transfer. (The pre-agg search_after scan moved 359k
+        # docs serially at 1k/page; this moves only per-trace sums.)
+        agg_body = {
+            "size": 0,
+            "query": usage_query,
+            "aggs": {
+                "by_trace": {
+                    "composite": {
+                        "size": 1000,
+                        "sources": [{"tid": {"terms": {"field": "trace_id"}}}],
+                        **({"after": after} if after else {}),
+                    },
+                    "aggs": {
+                        "dur": {"sum": {"field": "duration"}},
+                        "in_tok": {"sum": {"field": "attributes.gen_ai.usage.input_tokens"}},
+                        "in_tok_flat": {"sum": {"field": "gen_ai.usage.input_tokens"}},
+                        "out_tok": {"sum": {"field": "attributes.gen_ai.usage.output_tokens"}},
+                        "out_tok_flat": {"sum": {"field": "gen_ai.usage.output_tokens"}},
+                    },
+                },
+            },
+        }
+        res = es.post("/.ds-traces-generic.otel-default*,.ds-traces-agent_builder.otel-default*/_search", agg_body)
+        buckets = res["aggregations"]["by_trace"]["buckets"]
+        if not buckets:
             break
-        for h in hits:
-            src = h["_source"]
-            tid = src.get("trace_id")
-            attrs = src.get("attributes") or {}
-            in_tok, out_tok = _read_usage(attrs)
-            dur = src.get("duration") or 0
-            if not tid or not isinstance(in_tok, (int, float)):
-                continue
+        for b in buckets:
+            tid = b["key"]["tid"]
             cur = span_usage.get(tid) or [0.0, 0, 0]
-            cur[0] += float(dur) if isinstance(dur, (int, float)) else 0.0
-            cur[1] += int(in_tok)
-            cur[2] += int(out_tok) if isinstance(out_tok, (int, float)) else 0
+            cur[0] += float(b["dur"]["value"] or 0)
+            cur[1] += int(b["in_tok"]["value"] or b["in_tok_flat"]["value"] or 0)
+            cur[2] += int(b["out_tok"]["value"] or b["out_tok_flat"]["value"] or 0)
             span_usage[tid] = cur
-            n_usage += 1
-        search_after = hits[-1]["sort"]
-        if len(hits) < 1000:
+            n_usage += b["doc_count"]
+        after = res["aggregations"]["by_trace"].get("after_key")
+        if not after or len(buckets) < 1000:
             break
 
     # ---- 3. join ------------------------------------------------------
@@ -308,6 +303,26 @@ def main():
                 "usage": {"durNs": round(dur_ns), "inTok": in_tok, "outTok": out_tok},
             }
 
+    # ---- guard: silent-zero join detection ----------------------------
+    # A join that fetches spans but matches zero cells looks green while the
+    # board renders without the data (observed 2026-09-12: wrong index ->
+    # 764 spans fetched, 0 cells joined). Fail loudly instead.
+    n_cells_usage = sum(1 for c in out.values()
+                        if (c.get("usage") or {}).get("inTok")
+                        or (c.get("usage") or {}).get("durNs"))
+    warnings = []
+    if n_usage > 0 and n_cells_usage == 0:
+        warnings.append(
+            f"usageSpans={n_usage} fetched but 0/{len(out)} cells joined — "
+            "trace-id linkage broken (wrong index or era without LLM spans)")
+    if n_spans > 0 and not any((s.get("toolParams") for c in out.values()
+                                for s in (c.get("steps") or []))):
+        warnings.append(
+            f"argSpans={n_spans} fetched but 0 tool steps carry params — "
+            "name-join broken (tool name mismatch)")
+    for w in warnings:
+        print(f"WARNING: {w}", file=sys.stderr)
+
     payload = {
         "cells": out,
         "meta": {
@@ -316,12 +331,15 @@ def main():
             "scoreDocs": n_docs,
             "argSpans": n_spans,
             "usageSpans": n_usage,
+            "cells": len(out),
+            "cellsUsage": n_cells_usage,
             "note": "toolParams joined from gen_ai.tool.call.arguments spans",
         },
     }
     with open(args.out, "w") as fh:
         json.dump(payload, fh)
-    print(f"score docs: {n_docs} | arg spans: {n_spans} | cells: {len(out)} -> {args.out}")
+    print(f"score docs: {n_docs} | arg spans: {n_spans} | "
+          f"cells: {len(out)} (usage: {n_cells_usage}) -> {args.out}")
 
 if __name__ == "__main__":
     main()

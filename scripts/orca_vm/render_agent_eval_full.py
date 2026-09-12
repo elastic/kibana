@@ -119,7 +119,7 @@ def cell_status(cell):
     return "partial"
 
 
-def render(traces, out, since, extra_missing=None):
+def render(traces, out, since, extra_missing=None, traces_sha=None):
     cells_raw = traces["cells"]
     # normalise model ids to reference spelling (see ALIASES)
     cells = {}
@@ -256,7 +256,7 @@ details.prompt summary {{ cursor:pointer; }}
 code {{ font-family:ui-monospace,monospace; }}
 </style></head><body><div class="wrap">
 <h1>Agent Builder Skill Eval — EIS Models (golden recreation)</h1>
-<div class="sub">Recreated from golden ES (<code>security-persona-matrix</code> suite score docs + OTel traces) · window since {esc(since)} · rendered {ts}</div>
+<div class="sub">Recreated from golden ES (<code>security-persona-matrix</code> suite score docs + OTel traces) · window since {esc(since)} · rendered {ts}{(' · extract sha256 ' + traces_sha) if traces_sha else ''}</div>
 
 <div class="disclosure">
 <h3>Provenance &amp; honesty disclosures</h3>
@@ -290,8 +290,11 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--since", required=True)
     args = ap.parse_args()
+    import hashlib
+    with open(args.traces, "rb") as fh:
+        traces_sha = hashlib.sha256(fh.read()).hexdigest()[:16]
     traces = json.load(open(args.traces))
-    render(traces, args.out, args.since)
+    render(traces, args.out, args.since, traces_sha=traces_sha)
 
 
 if __name__ == "__main__":
