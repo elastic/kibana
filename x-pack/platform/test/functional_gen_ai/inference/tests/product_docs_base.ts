@@ -143,7 +143,8 @@ export const productDocsBaseInstallationSuite = ({}: {}, { getService }: FtrProv
       );
     });
 
-    it('installs the E5 product docs', async () => {
+    // TODO: Remove this skip once the E5 product docs are available
+    it.skip('installs the E5 product docs', async () => {
       const e5ProductDocs = await installProductDoc(
         supertest,
         defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL
@@ -214,7 +215,8 @@ export const productDocsBaseInstallationSuite = ({}: {}, { getService }: FtrProv
       expect(updatedBody[defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL]).to.be(undefined);
     });
 
-    it('uninstalls the E5 product docs', async () => {
+    // TODO: Remove this skip once the E5 product docs are available
+    it.skip('uninstalls the E5 product docs', async () => {
       const uninstalledResponse = await uninstallProductDoc(
         supertest,
         defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL
