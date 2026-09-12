@@ -1704,6 +1704,50 @@ describe('utils', () => {
     });
   });
 
+  // ---------------------------------------------------------------------------
+  // Step 5.1: caller identity — app fills from onBehalfOf on unmanaged creates
+  // ---------------------------------------------------------------------------
+
+  describe('deriveOwnership — app from caller identity (step 5.1)', () => {
+    it('includes app in { managed: false } when an app is provided', () => {
+      const registry = new BuilderTypeRegistry();
+      expect(deriveOwnership(registry, undefined, 'significantEvents')).toEqual({
+        managed: false,
+        app: 'significantEvents',
+      });
+    });
+
+    it('omits app from { managed: false } when app is undefined', () => {
+      const registry = new BuilderTypeRegistry();
+      const result = deriveOwnership(registry, undefined, undefined);
+      expect(result).toEqual({ managed: false });
+      expect((result as { app?: string }).app).toBeUndefined();
+    });
+
+    it('ignores app for a managed builder type — managed ownership wins', () => {
+      const registry = new BuilderTypeRegistry();
+      jest.spyOn(registry, 'get').mockReturnValue({
+        type: 'security.detection.query',
+        name: 'Detection query',
+        ownership: { solution: 'security', domain: 'detection' },
+        builderFieldsSchema: {} as never,
+        generateQuery: jest.fn(),
+      });
+      // Even if app is supplied, the managed path wins and app does not appear.
+      const result = deriveOwnership(registry, 'security.detection.query', 'someApp');
+      expect(result).toEqual({ managed: true, solution: 'security', domain: 'detection' });
+      expect((result as { app?: string }).app).toBeUndefined();
+    });
+
+    it('includes app when the builder type is unregistered', () => {
+      const registry = new BuilderTypeRegistry();
+      expect(deriveOwnership(registry, 'unknown.type', 'myApp')).toEqual({
+        managed: false,
+        app: 'myApp',
+      });
+    });
+  });
+
   describe('transformCreateRuleBodyToRuleSoAttributes — ownership (step 4.4)', () => {
     it('stores the server-supplied ownership in metadata.ownership', () => {
       const result = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, {

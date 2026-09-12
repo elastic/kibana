@@ -50,6 +50,7 @@ import {
   RuleChangesHistoryServiceToken,
 } from '../lib/rule_changes_history';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
+import { CallerIdentityToken } from '../lib/rules_client/caller_identity';
 import { ApiKeyService } from '../lib/services/api_key_service/api_key_service';
 import {
   EsServiceInternalToken,
@@ -131,6 +132,14 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
       return spaces.spacesService.getSpaceId(request);
     })
+    .inRequestScope();
+  // Default caller identity is absent. Framework HTTP routes never override
+  // this, so the generic API surface is identity-less by construction.
+  // In-process callers that pass `options.onBehalfOf` to
+  // `getRulesClientWithRequest` override this in buildScope.
+  // Ref: rule-ownership.md "Caller identity"
+  bind(CallerIdentityToken)
+    .toDynamicValue(() => undefined)
     .inRequestScope();
   bind(ActionPolicyNamespaceToken)
     .toDynamicValue(({ get }) => {

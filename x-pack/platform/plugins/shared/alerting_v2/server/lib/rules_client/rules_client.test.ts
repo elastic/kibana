@@ -115,7 +115,10 @@ describe('RulesClient', () => {
     jest.useRealTimers();
   });
 
-  function createClient(rulesConfigOverrides?: Partial<PluginConfig['rules']>) {
+  function createClient(
+    rulesConfigOverrides?: Partial<PluginConfig['rules']>,
+    callerIdentity?: { solution?: string; app?: string } | undefined
+  ) {
     const config: PluginConfig = {
       enabled: true,
       invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' },
@@ -146,7 +149,8 @@ describe('RulesClient', () => {
       ruleEventPublisher,
       loggerService,
       artifactTypeRegistry,
-      builderTypeRegistry
+      builderTypeRegistry,
+      callerIdentity
     );
   }
 
@@ -4447,6 +4451,124 @@ describe('RulesClient', () => {
         // Ownership is preserved in the stored attributes.
         const { attrs } = rulesSavedObjectService.update.mock.calls[0][0];
         expect(attrs.metadata.ownership).toEqual(storedOwnership);
+      });
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Step 5.1: caller identity — onBehalfOf binds to the client and fills app
+  //
+  // Pins four invariants from the design:
+  //   1. A client created with an app identity stamps ownership.app on create.
+  //   2. A client created without an identity leaves ownership.app absent.
+  //   3. The app is frozen at creation — not re-stamped on update.
+  //   4. The identity does not affect managed ownership (app is irrelevant there).
+  // ---------------------------------------------------------------------------
+
+  describe('caller identity (step 5.1)', () => {
+    describe('createRule — ownership.app', () => {
+      it('stamps ownership.app when the client carries an app identity', async () => {
+        const client = createClient(undefined, { app: 'significantEvents' });
+        rulesSavedObjectService.find.mockResolvedValueOnce({
+          saved_objects: [],
+          total: 0,
+          page: 1,
+          per_page: 1,
+        });
+        rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-app-stamped' });
+
+        const res = await client.createRule({
+          data: baseCreateData,
+          options: { id: 'rule-app-stamped' },
+        });
+
+        // Response carries app on unmanaged ownership.
+        expect(res.metadata.ownership).toEqual({ managed: false, app: 'significantEvents' });
+
+        // Stored attributes carry app.
+        const { attrs } = rulesSavedObjectService.create.mock.calls[0][0];
+        expect(attrs.metadata.ownership).toEqual({ managed: false, app: 'significantEvents' });
+      });
+
+      it('leaves ownership.app absent when the client has no identity', async () => {
+        const client = createClient(undefined, undefined);
+        rulesSavedObjectService.find.mockResolvedValueOnce({
+          saved_objects: [],
+          total: 0,
+          page: 1,
+          per_page: 1,
+        });
+        rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-no-app' });
+
+        const res = await client.createRule({
+          data: baseCreateData,
+          options: { id: 'rule-no-app' },
+        });
+
+        // ownership.app is absent.
+        expect(res.metadata.ownership).toEqual({ managed: false });
+        expect((res.metadata.ownership as { app?: string }).app).toBeUndefined();
+
+        const { attrs } = rulesSavedObjectService.create.mock.calls[0][0];
+        expect(attrs.metadata.ownership).toEqual({ managed: false });
+      });
+
+      it('leaves ownership.app absent when the identity carries only solution', async () => {
+        // A security-side client carries onBehalfOf.solution but no app; the
+        // managed path copies ownership from the registration anyway, so app
+        // is never relevant there. For an unmanaged create it should still be absent.
+        const client = createClient(undefined, { solution: 'security' });
+        rulesSavedObjectService.find.mockResolvedValueOnce({
+          saved_objects: [],
+          total: 0,
+          page: 1,
+          per_page: 1,
+        });
+        rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-solution-only' });
+
+        const res = await client.createRule({
+          data: baseCreateData,
+          options: { id: 'rule-solution-only' },
+        });
+
+        expect(res.metadata.ownership).toEqual({ managed: false });
+        expect((res.metadata.ownership as { app?: string }).app).toBeUndefined();
+      });
+
+      it('does not stamp app on managed-type creates — managed ownership wins', async () => {
+        const client = createClient(undefined, { app: 'someApp', solution: 'security' });
+
+        jest.spyOn(builderTypeRegistry, 'get').mockReturnValue({
+          type: 'security.detection.query',
+          name: 'Detection query',
+          ownership: { solution: 'security', domain: 'detection' },
+          builderFieldsSchema: {} as never,
+          generateQuery: jest.fn(),
+        });
+
+        rulesSavedObjectService.find.mockResolvedValueOnce({
+          saved_objects: [],
+          total: 0,
+          page: 1,
+          per_page: 1,
+        });
+        rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-managed-no-app' });
+
+        const res = await client.createRule({
+          data: {
+            ...baseCreateData,
+            metadata: { name: 'detection-rule', builder_type: 'security.detection.query' },
+          },
+          options: { id: 'rule-managed-no-app' },
+        });
+
+        // Managed ownership is derived from the registration; app is irrelevant.
+        expect(res.metadata.ownership).toEqual({
+          managed: true,
+          solution: 'security',
+          domain: 'detection',
+        });
+        expect((res.metadata.ownership as { app?: string }).app).toBeUndefined();
       });
     });
   });

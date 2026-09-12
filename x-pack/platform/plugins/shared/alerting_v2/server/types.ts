@@ -52,11 +52,31 @@ export interface AlertingServerSetup {
   registerBuilderType(definition: RegisteredBuilderType): void;
 }
 
+/**
+ * Optional identity declared by an in-process caller when it creates a rules
+ * client. The framework's own HTTP routes pass nothing, making the entire
+ * generic API surface identity-less by construction.
+ *
+ * `solution` is the managed-rules identity: a client bearing it may write
+ * rules whose ownership solution matches.
+ * `app` is the unmanaged-rules attribution that fills `ownership.app` on
+ * creates.
+ *
+ * Ref: rule-ownership.md "Caller identity"
+ */
+export interface RulesClientCallerOptions {
+  onBehalfOf?: { solution?: string; app?: string };
+}
+
 export interface AlertingServerStart {
-  getRulesClientWithRequest(request: KibanaRequest): Promise<RulesClientApi>;
+  getRulesClientWithRequest(
+    request: KibanaRequest,
+    options?: RulesClientCallerOptions
+  ): Promise<RulesClientApi>;
   getRulesClientWithRequestInSpace(
     request: KibanaRequest,
-    spaceId: SpaceId
+    spaceId: SpaceId,
+    options?: RulesClientCallerOptions
   ): Promise<RulesClientApi>;
 
   getActionPolicyClientWithRequest(request: KibanaRequest): Promise<ActionPolicyClientApi>;

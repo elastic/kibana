@@ -54,7 +54,8 @@ export function createRulesClient(): {
     ruleEventPublisher,
     loggerService,
     artifactTypeRegistry,
-    builderTypeRegistry
+    builderTypeRegistry,
+    undefined // callerIdentity — absent for mock (identity-less by default)
   );
 
   return { rulesClient, mockSavedObjectsClient, ruleEventPublisher };
