@@ -487,6 +487,21 @@ throw new Error('after');`,
       });
     });
 
+    it('normalizes multiline attributes that contain an apostrophe', () => {
+      const code = getCode(
+        `export const message = (
+  <FormattedMessage
+    id="example.message"
+    defaultMessage="If you'd like to continue,
+      keep going."
+  />
+);`,
+        '/repo/message.tsx'
+      );
+
+      expect(code).toContain(`defaultMessage: "If you'd like to continue, keep going."`);
+    });
+
     it('delimits Emotion labels when CSS templates omit a trailing semicolon', () => {
       const code = getCode(
         `

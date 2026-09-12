@@ -851,7 +851,9 @@ function hasSoleDefaultExport(ast) {
   return exportNames.size === 1 && exportNames.has('default');
 }
 
-const JSX_MULTILINE_STRING_ATTRIBUTE = /=\s*["'][^"']*\r?\n/;
+// Prefilter only; the AST decides. Each quote style is matched separately so an apostrophe inside a
+// double-quoted attribute (or vice versa) does not hide a multiline value.
+const JSX_MULTILINE_STRING_ATTRIBUTE = /=\s*(?:"[^"]*\r?\n|'[^']*\r?\n)/;
 const ENUM_KEYWORD = /\benum\b/;
 const JEST_MOCK_CALL = /\bjest\s*\.\s*mock\s*\(/;
 const LAZY_OBJECT_CALL = /\blazyObject\s*\(/;
