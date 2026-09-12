@@ -802,9 +802,7 @@ describe('ProposalsService', () => {
       await service.listByWindow(activityQuery(), SPACE_ID);
 
       const [[searchArgs]] = storage.search.mock.calls;
-      expect(searchArgs.query.bool.must_not).toEqual([
-        { exists: { field: 'supersededBy' } },
-      ]);
+      expect(searchArgs.query.bool.must_not).toEqual([{ exists: { field: 'supersededBy' } }]);
     });
 
     it('returns truncated=true when total exceeds the cap', async () => {
@@ -864,7 +862,6 @@ describe('ProposalsService', () => {
   });
 });
 
-
 describe('ProposalsService.update supersededBy', () => {
   it('persists supersededBy alongside the failed transition', async () => {
     const storage = createStorage(baseDocument({ status: 'executing' }));
@@ -894,10 +891,150 @@ describe('ProposalsService.update supersededBy', () => {
     const { service } = createService(storage);
 
     await expect(
-      service.update(
-        { id: 'p1', status: 'failed', supersededBy: 'clone-1' },
-        SPACE_ID
-      )
+      service.update({ id: 'p1', status: 'failed', supersededBy: 'clone-1' }, SPACE_ID)
     ).rejects.toThrow(/already settled/);
+  });
+
+  describe('clone', () => {
+    it('should clone a failed proposal into a fresh pending record parked on the recovery gate', async () => {
+      const storage = createStorage(
+        baseDocument({ status: 'failed', executionError: 'action crashed' })
+      );
+      const { service } = createService(storage);
+      const clone = await service.clone({ proposalId: 'proposal-1' }, SPACE_ID, {
+        workflowExecutionId: 'recovery-exec-1',
+      });
+      expect(clone.status).toBe('pending');
+      expect(clone.workflowExecutionId).toBe('recovery-exec-1');
+      expect(clone.executionError).toBeUndefined();
+      // two index calls: clone write + supersede write on the original
+      expect(storage.index).toHaveBeenCalledTimes(2);
+      const [cloneWrite] = storage.index.mock.calls;
+      expect(cloneWrite[0].id).not.toBe('proposal-1');
+      expect(cloneWrite[0].document.status).toBe('pending');
+      expect(cloneWrite[0].document.workflowExecutionId).toBe('recovery-exec-1');
+      // deadline carried, not reset
+      expect(cloneWrite[0].document.createdAt).toBe('2026-09-01T00:00:00.000Z');
+      const supersedeCalls = storage.index.mock.calls.slice(1);
+      const supersedeWrite = supersedeCalls[0]![0] as { id: string; document: ProposalDocument };
+      expect(supersedeWrite.id).toBe('proposal-1');
+      expect(supersedeWrite.document.supersededBy).toBe(clone.id);
+    });
+
+    it('should apply caller overrides on the clone without touching the original', async () => {
+      const storage = createStorage(baseDocument({ status: 'failed' }));
+      const { service } = createService(storage);
+      const clone = await service.clone(
+        {
+          proposalId: 'proposal-1',
+          overrides: { comment: 'Retuned after crash', confidence: 'high' },
+        },
+        SPACE_ID,
+        { workflowExecutionId: 'recovery-exec-1' }
+      );
+      expect(clone.comment).toBe('Retuned after crash');
+      expect(clone.confidence).toBe('high');
+    });
+
+    it('should refuse to clone a proposal that is not failed', async () => {
+      const storage = createStorage(baseDocument({ status: 'approved' }));
+      const { service } = createService(storage);
+      await expect(
+        service.clone({ proposalId: 'proposal-1' }, SPACE_ID, {
+          workflowExecutionId: 'recovery-exec-1',
+        })
+      ).rejects.toThrow(ProposalConflictError);
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('should refuse to clone a proposal that was already superseded', async () => {
+      const storage = createStorage(
+        baseDocument({ status: 'failed', supersededBy: 'clone-earlier' })
+      );
+      const { service } = createService(storage);
+      await expect(
+        service.clone({ proposalId: 'proposal-1' }, SPACE_ID, {
+          workflowExecutionId: 'recovery-exec-1',
+        })
+      ).rejects.toThrow(ProposalConflictError);
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('should refuse to clone a proposal past its deadline', async () => {
+      const storage = createStorage(
+        baseDocument({ status: 'failed', expiresAt: '2026-09-01T00:00:00.000Z' })
+      );
+      const { service } = createService(storage);
+      await expect(
+        service.clone({ proposalId: 'proposal-1' }, SPACE_ID, {
+          workflowExecutionId: 'recovery-exec-1',
+        })
+      ).rejects.toThrow(ProposalExpiredError);
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('should carry the expiry so the chain cannot outlive the original deadline', async () => {
+      const storage = createStorage(
+        baseDocument({
+          status: 'failed',
+          expiresAt: '2099-01-01T00:00:00.000Z',
+        })
+      );
+      const { service } = createService(storage);
+      const clone = await service.clone({ proposalId: 'proposal-1' }, SPACE_ID, {
+        workflowExecutionId: 'recovery-exec-1',
+      });
+      expect(clone.expiresAt).toBe('2099-01-01T00:00:00.000Z');
+    });
+
+    it('should surface a losing supersede race as a conflict, not a silent second clone', async () => {
+      const storage = createStorage(baseDocument({ status: 'failed' }));
+      // First index call is the clone write (succeeds); the second is the
+      // supersede write on the original, which loses the race with a 409.
+      storage.index
+        .mockResolvedValueOnce({ _id: 'proposal-clone' })
+        .mockRejectedValueOnce({ statusCode: 409 });
+      const { service } = createService(storage);
+      await expect(
+        service.clone({ proposalId: 'proposal-1' }, SPACE_ID, {
+          workflowExecutionId: 'recovery-exec-1',
+        })
+      ).rejects.toThrow(ProposalConflictError);
+    });
+  });
+
+  describe('markSuperseded', () => {
+    it('should write supersededBy on a failed proposal with optimistic concurrency', async () => {
+      const storage = createStorage(baseDocument({ status: 'failed' }));
+      const { service } = createService(storage);
+      await service.markSuperseded('proposal-1', 'clone-new', SPACE_ID);
+      expect(storage.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'proposal-1',
+          if_seq_no: 7,
+          if_primary_term: 1,
+        })
+      );
+      const call = storage.index.mock.calls[0];
+      expect(call[0].document.supersededBy).toBe('clone-new');
+    });
+
+    it('should reject a non-failed proposal, since only a failed original can be superseded', async () => {
+      const storage = createStorage(baseDocument({ status: 'pending' }));
+      const { service } = createService(storage);
+      await expect(service.markSuperseded('proposal-1', 'clone-new', SPACE_ID)).rejects.toThrow(
+        ProposalConflictError
+      );
+    });
+
+    it('should reject double supersede', async () => {
+      const storage = createStorage(
+        baseDocument({ status: 'failed', supersededBy: 'clone-earlier' })
+      );
+      const { service } = createService(storage);
+      await expect(service.markSuperseded('proposal-1', 'clone-second', SPACE_ID)).rejects.toThrow(
+        ProposalConflictError
+      );
+    });
   });
 });
