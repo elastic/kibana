@@ -129,6 +129,8 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response.body.metadata).toStrictEqual({
         ...created.metadata,
         version: created.metadata.version + 1,
+        // A query edit is a meaningful change: revision bumps by one.
+        revision: created.metadata.revision + 1,
       });
       expect(response.body.schedule).toStrictEqual(created.schedule);
     }

@@ -1196,6 +1196,76 @@ describe('utils', () => {
       expect(noOpResult.metadata.version).toBe(2);
       expect(noOpResult.metadata.revision).toBe(3);
     });
+
+    it('does NOT bump revision when tags:null clears absent tags (end-to-end through update path)', () => {
+      // Drive the clear through buildUpdateRuleAttributes so the null → undefined
+      // normalization (nullToUndefined) runs as part of what is tested, not just
+      // the final computeNextRevision call.
+      const storedNoTags = createRuleSoAttributes({
+        metadata: { name: 'rule-1', revision: 7, signature_id: 'sig-1' },
+        // no tags stored
+      });
+      const result = buildUpdateRuleAttributes(
+        storedNoTags,
+        { metadata: { tags: null } },
+        { updatedBy: 'user-2', updatedAt: '2099-01-01T00:00:00.000Z', version: 2 }
+      );
+      expect(result.metadata.revision).toBe(7); // no bump
+    });
+
+    it('does NOT bump revision when artifacts:null clears absent artifacts (null → [] normalizes to absent)', () => {
+      // Rule created without artifacts; the edit flyout sends artifacts: null on
+      // every save unconditionally. The revision counter must not move.
+      const storedNoArtifacts = createRuleSoAttributes({
+        metadata: { name: 'rule-1', revision: 4, signature_id: 'sig-1' },
+        // no artifacts stored
+      });
+      const result = buildUpdateRuleAttributes(
+        storedNoArtifacts,
+        { artifacts: null },
+        { updatedBy: 'user-2', updatedAt: '2099-01-01T00:00:00.000Z', version: 2 }
+      );
+      expect(result.metadata.revision).toBe(4); // no bump
+    });
+
+    it('does NOT bump revision when state_transition:null clears absent state_transition', () => {
+      // Rule created without state_transition; the edit flyout sends
+      // state_transition: null unconditionally. The counter must not move.
+      const storedNoStateTransition = createRuleSoAttributes({
+        metadata: { name: 'rule-1', revision: 2, signature_id: 'sig-1' },
+        // no state_transition stored
+      });
+      const result = buildUpdateRuleAttributes(
+        storedNoStateTransition,
+        { state_transition: null },
+        { updatedBy: 'user-2', updatedAt: '2099-01-01T00:00:00.000Z', version: 2 }
+      );
+      expect(result.metadata.revision).toBe(2); // no bump
+    });
+
+    it('DOES bump revision when artifacts change from absent to non-empty', () => {
+      const storedNoArtifacts = createRuleSoAttributes({
+        metadata: { name: 'rule-1', revision: 1, signature_id: 'sig-1' },
+      });
+      const result = buildUpdateRuleAttributes(
+        storedNoArtifacts,
+        { artifacts: [{ type: 'dashboard', id: 'dash-1', data: { dashboard_id: 'dash-1' } }] },
+        { updatedBy: 'user-2', updatedAt: '2099-01-01T00:00:00.000Z', version: 2 }
+      );
+      expect(result.metadata.revision).toBe(2); // bumps
+    });
+
+    it('DOES bump revision when state_transition changes from absent to a value', () => {
+      const storedNoStateTransition = createRuleSoAttributes({
+        metadata: { name: 'rule-1', revision: 1, signature_id: 'sig-1' },
+      });
+      const result = buildUpdateRuleAttributes(
+        storedNoStateTransition,
+        { state_transition: { pending_count: 3 } },
+        { updatedBy: 'user-2', updatedAt: '2099-01-01T00:00:00.000Z', version: 2 }
+      );
+      expect(result.metadata.revision).toBe(2); // bumps
+    });
   });
 
   describe('transformRuleSoAttributesToRuleApiResponse — revision (step 4.2)', () => {
@@ -1683,6 +1753,32 @@ describe('utils', () => {
       const { updateRuleDataSchema } = require('@kbn/alerting-v2-schemas');
       const result = updateRuleDataSchema.safeParse({
         metadata: { ownership: { managed: false } },
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  // Step 4.2: metadata.revision is server-managed and response-only — the same
+  // guarantee ownership gets above, pinned by a test beside the ownership ones.
+  describe('ruleResponseSchema rejects revision in request body (step 4.2)', () => {
+    it('createRuleDataSchema rejects revision in metadata (response-only field)', () => {
+      const { createRuleDataSchema } = require('@kbn/alerting-v2-schemas');
+      const result = createRuleDataSchema.safeParse({
+        kind: 'alert',
+        metadata: {
+          name: 'test',
+          revision: 0,
+        },
+        schedule: { every: '5m' },
+        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('updateRuleDataSchema rejects revision in metadata (response-only field)', () => {
+      const { updateRuleDataSchema } = require('@kbn/alerting-v2-schemas');
+      const result = updateRuleDataSchema.safeParse({
+        metadata: { revision: 0 },
       });
       expect(result.success).toBe(false);
     });

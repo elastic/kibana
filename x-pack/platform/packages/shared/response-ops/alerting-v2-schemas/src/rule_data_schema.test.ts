@@ -1741,6 +1741,26 @@ describe('ruleOwnershipSchema (step 4.4)', () => {
     });
     expect(result.success).toBe(false);
   });
+
+  // Step 4.2: metadata.revision is server-managed and response-only. No create or
+  // update body may carry it. These tests pin that the strict metadataSchema rejects
+  // it, the same guarantee ownership gets above.
+  it('createRuleDataSchema rejects revision in metadata (response-only, strict schema)', () => {
+    const result = createRuleDataSchema.safeParse({
+      kind: 'alert',
+      metadata: { name: 'r', revision: 0 },
+      schedule: { every: '5m' },
+      query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('updateRuleDataSchema rejects revision in metadata (response-only, strict schema)', () => {
+    const result = updateRuleDataSchema.safeParse({
+      metadata: { name: 'r', revision: 0 },
+    });
+    expect(result.success).toBe(false);
+  });
 });
 
 describe('bulkGetRulesResponseSchema', () => {
