@@ -63,6 +63,7 @@ dependsOn:
   - '@kbn/global-search-plugin'
   - '@kbn/fields-metadata-plugin'
   - '@kbn/otel-semantic-conventions'
+  - '@kbn/nightshift-ai'
   - '@kbn/streams-ai'
   - '@kbn/spaces-plugin'
   - '@kbn/usage-collection-plugin'

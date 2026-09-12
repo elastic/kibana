@@ -89,14 +89,19 @@ export interface Rule {
   tags: string[];
 }
 
+export interface PolicyMatcherAttributes {
+  tags?: string[] | null;
+  expression?: string | null;
+}
+
 export interface ActionPolicy {
   id: ActionPolicyId;
   spaceId: string;
   name: string;
   enabled: boolean;
-  /** KQL expression evaluated against the alert episode context.
-   *  An empty matcher matches all episodes (catch-all). */
-  matcher?: string; // e.g. 'data.severity == "critical" AND data.env != "dev"'
+  /** Structured matcher evaluated against the alert episode context.
+   *  Null or absent means catch-all (matches every episode). */
+  matcher?: PolicyMatcherAttributes | null;
   /** data.* fields used to group episodes into a single action group */
   groupBy: string[];
   /** User-defined tags for organizing and filtering policies */
