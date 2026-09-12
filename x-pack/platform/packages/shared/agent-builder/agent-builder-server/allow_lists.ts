@@ -195,6 +195,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Platform – Discover
   'discover-data-analysis',
+  'discover-session',
 
   // Platform – Streams
   'streams-management',
@@ -324,6 +325,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Platform – Discover
   'esql.query_results',
+  'discover.session',
 
   // Platform – Workflows
   'workflow.yaml',
