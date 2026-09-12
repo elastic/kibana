@@ -80,6 +80,43 @@ export function assertBoundedSchema(
   }
 }
 
+/**
+ * Computes the worst-case serialized byte size of a schema without enforcing
+ * the framework cap. Runs the same validation walk as assertBoundedSchema
+ * (ensuring the schema is bounded, no defaults/transforms if builderChecks is
+ * set, etc.), but returns the computed byte count instead of throwing when the
+ * cap is exceeded.
+ *
+ * Use this to measure and record the actual worst-case size. Step 3.5 uses it
+ * to verify the detection-type schemas fit within the cap and to record the
+ * concrete numbers.
+ *
+ * @throws if the schema is invalid (unbounded strings, arrays without maxItems,
+ *   open objects, recursive schemas, etc.) or if builderChecks is enabled and
+ *   the schema violates the no-defaults/no-transforms rule.
+ */
+export function computeWorstCaseBytes(
+  schema: z.ZodType,
+  typeName: string,
+  subject: BoundedSchemaSubject
+): number {
+  const ctx: Ctx = { ...subject, typeName };
+
+  if (ctx.builderChecks) {
+    assertNoDefaultsOrTransforms(schema, ctx.rootPath, ctx);
+  }
+
+  let json: JsonSchemaNode;
+  try {
+    json = z.toJSONSchema(schema, { io: 'input' }) as JsonSchemaNode;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`${prefix(ctx)} cannot be converted to JSON Schema: ${message}`);
+  }
+
+  return assertBoundedNode(json, ctx.rootPath, ctx, new Set());
+}
+
 // ---------------------------------------------------------------------------
 // Companion Zod tree walk: check 3 no-defaults/no-transforms rule
 // ---------------------------------------------------------------------------
