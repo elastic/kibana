@@ -21,6 +21,7 @@ import {
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import type { EpisodesFilterState, EpisodesSortState } from '../../queries/episodes_query';
 import {
   EPISODE_SEVERITY_CHART_VALUE,
@@ -164,8 +165,8 @@ export const buildClassicAlertsQuery = (
 
 const SORT_FIELD_MAP: Record<string, string> = {
   '@timestamp': TIMESTAMP,
-  'episode.id': ALERT_UUID,
-  'episode.status': ALERT_STATUS,
+  [ALERT_ID_FIELD]: ALERT_UUID,
+  [ALERT_STATUS_FIELD]: ALERT_STATUS,
   'rule.id': ALERT_RULE_UUID,
   duration: ALERT_DURATION,
 };

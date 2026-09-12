@@ -6,6 +6,7 @@
  */
 
 import type { AlertEpisode, EpisodeAttachmentData } from '@kbn/alerting-v2-schemas';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import { resolveEpisodeLabel } from './resolve_episode_label';
 
 export interface AlertEpisodeToAttachmentOptions {
@@ -35,13 +36,13 @@ export const alertEpisodeToEpisodeAttachment = (
 ): EpisodeAttachmentData =>
   mapNullFieldsToUndefined({
     '@timestamp': episode['@timestamp'],
-    'episode.id': episode['episode.id'],
+    [ALERT_ID_FIELD]: episode[ALERT_ID_FIELD],
     'episode.label': resolveEpisodeLabel({
       episode,
       ruleName: options.ruleName,
       groupingFields: options.groupingFields,
     }),
-    'episode.status': episode['episode.status'],
+    [ALERT_STATUS_FIELD]: episode[ALERT_STATUS_FIELD],
     'rule.id': episode['rule.id'],
     group_hash: episode.group_hash,
     first_timestamp: episode.first_timestamp,

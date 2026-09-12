@@ -7,8 +7,9 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
+import { ALERT_ID_FIELD } from '@kbn/alerting-v2-constants';
 export const alertEpisodeToDataTableRecord = (row: AlertEpisode): DataTableRecord => ({
-  id: row['episode.id'],
+  id: row[ALERT_ID_FIELD],
   raw: {},
   flattened: Object.fromEntries(Object.entries(row)),
 });

@@ -12,6 +12,7 @@ import { useFetchEpisodeActions } from '../../hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '../../hooks/use_fetch_group_actions';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { useEpisodeFlapping } from '../../hooks/use_episode_flapping';
+import { ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import { AlertEpisodeDetailsHeader } from './details_header';
 import type { AlertEpisodeDetailsServices } from './types';
 
@@ -33,7 +34,7 @@ export const AlertEpisodeDetailsHeaderSection = ({
 
   const ruleId = episode?.['rule.id'];
   const groupHash = episode?.group_hash;
-  const lastStatus = episode?.['episode.status'];
+  const lastStatus = episode?.[ALERT_STATUS_FIELD];
   const severity = episode?.severity;
 
   const { data: episodeActionsMap } = useFetchEpisodeActions({

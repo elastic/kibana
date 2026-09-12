@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import type { EpisodeActionState, AlertEpisodeGroupAction } from '../../types/action';
 import { AlertingEpisodeGroupingTags } from '../grouping/alerting_episode_grouping_tags';
 import { AlertEpisodeStatusBadges } from '../status/status_badges';
@@ -44,8 +45,8 @@ export function RelatedAlertEpisode({
   href,
   compressed = false,
 }: RelatedAlertEpisodeProps) {
-  const status = episode['episode.status'];
-  const episodeId = episode['episode.id'];
+  const status = episode[ALERT_STATUS_FIELD];
+  const episodeId = episode[ALERT_ID_FIELD];
   const episodeData = parseEpisodeDataJson(episode.episode_data);
   const showGroupingBadges =
     groupingFields.length > 0 &&

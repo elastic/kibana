@@ -7,7 +7,12 @@
 
 import { esql } from '@elastic/esql';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
-import { ALERT_EVENTS_DATA_STREAM, DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
+import {
+  ALERT_EVENTS_DATA_STREAM,
+  DEFAULT_TIME_FIELD,
+  ALERT_ID_FIELD,
+  ALERT_STATUS_FIELD,
+} from '@kbn/alerting-v2-constants';
 import { asTypedEsqlQuery, type TypedEsqlQuery } from './typed_esql_query';
 
 export interface EpisodeEventRow {
@@ -22,8 +27,8 @@ export interface EpisodeEventRow {
 
 export const ALERT_EPISODE_EVENT_FIELDS = [
   '@timestamp',
-  'episode.id',
-  'episode.status',
+  ALERT_ID_FIELD,
+  ALERT_STATUS_FIELD,
   'rule.id',
   'group_hash',
   'severity',

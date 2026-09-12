@@ -23,6 +23,7 @@ import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
+import { ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import type { EpisodeEventRow } from '@kbn/alerting-v2-common-queries';
 import * as i18n from './translations';
 
@@ -137,9 +138,9 @@ export const AlertEpisodeLifecycleHeatmap = ({ eventRows }: AlertEpisodeLifecycl
 
   const data: HeatmapDatum[] = useMemo(() => {
     const rows = eventRows
-      .filter((row) => row['episode.status'] in STATUS_VALUE)
+      .filter((row) => row[ALERT_STATUS_FIELD] in STATUS_VALUE)
       .map((row, rowIndex) => {
-        const { '@timestamp': ts, 'episode.status': status } = row;
+        const { '@timestamp': ts, [ALERT_STATUS_FIELD]: status } = row;
         const tsMs = ts ? Date.parse(ts) : Number.NaN;
         return {
           ts,

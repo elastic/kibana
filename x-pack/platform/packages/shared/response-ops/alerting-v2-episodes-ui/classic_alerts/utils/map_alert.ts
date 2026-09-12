@@ -22,6 +22,7 @@ import {
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import type { AlertEpisode } from '../../queries/episodes_query';
 import type { HistogramEpisodeRow } from '../../utils/histogram_utils';
 
@@ -127,8 +128,8 @@ export const mapClassicAlertToEpisode = (source: ClassicAlertSource): AlertEpiso
 
   return {
     '@timestamp': timestamp,
-    'episode.id': uuid,
-    'episode.status': mapClassicStatusToEpisodeStatus(source[ALERT_STATUS]),
+    [ALERT_ID_FIELD]: uuid,
+    [ALERT_STATUS_FIELD]: mapClassicStatusToEpisodeStatus(source[ALERT_STATUS]),
     'rule.id': source[ALERT_RULE_UUID] ?? '',
     'rule.name': source[ALERT_RULE_NAME],
     group_hash: uuid,
@@ -156,8 +157,8 @@ const resolveHistogramBreakdownValue = (
   breakdownField: string
 ): unknown => {
   switch (breakdownField) {
-    case 'episode.status':
-      return episode['episode.status'];
+    case ALERT_STATUS_FIELD:
+      return episode[ALERT_STATUS_FIELD];
     case 'rule.id':
       return source[ALERT_RULE_UUID] ?? null;
     case 'last_ack_action':
@@ -182,7 +183,7 @@ export const mapClassicAlertToHistogramRow = (
   const row: HistogramEpisodeRow = {
     first_timestamp: start ?? timestamp,
     last_timestamp: end ?? timestamp,
-    'episode.status': mapClassicStatusToEpisodeStatus(source[ALERT_STATUS]),
+    [ALERT_STATUS_FIELD]: mapClassicStatusToEpisodeStatus(source[ALERT_STATUS]),
   };
 
   if (breakdownField) {

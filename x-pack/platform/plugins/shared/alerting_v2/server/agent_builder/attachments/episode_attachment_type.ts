@@ -11,7 +11,7 @@ import type {
   AttachmentResolveContext,
 } from '@kbn/agent-builder-server/attachments';
 import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import { RULE_MANAGEMENT_SKILL_ID } from '@kbn/alerting-v2-constants';
+import { RULE_MANAGEMENT_SKILL_ID, ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import {
   EPISODE_ATTACHMENT_TYPE,
   episodeAttachmentDataSchema,
@@ -50,8 +50,8 @@ const formatEpisodeDescription = ({
   const lines = [
     'This is a platform alert, not a Security/SIEM detection alert.',
     'Do not use the security alert-analysis skill, detection-rule tools, or .alerts-security.alerts-* indices.',
-    `Platform alert episode "${data['episode.id']}" (episodeAttachment.id: "${attachmentId}")`,
-    `Status: ${data['episode.status']}`,
+    `Platform alert episode "${data[ALERT_ID_FIELD]}" (episodeAttachment.id: "${attachmentId}")`,
+    `Status: ${data[ALERT_STATUS_FIELD]}`,
   ];
 
   if (data['episode.label']) {
@@ -173,7 +173,7 @@ export const createEpisodeAttachmentType = ({
         if (!episode) {
           return false;
         }
-        return episode['episode.status'] !== latestVersion.data['episode.status'];
+        return episode[ALERT_STATUS_FIELD] !== latestVersion.data[ALERT_STATUS_FIELD];
       } catch (error) {
         attachmentLogger.warn({
           message: 'Failed to check episode attachment staleness',
@@ -186,7 +186,7 @@ export const createEpisodeAttachmentType = ({
     },
 
     format: (attachment) => {
-      const episodeId = attachment.origin ?? attachment.data['episode.id'];
+      const episodeId = attachment.origin ?? attachment.data[ALERT_ID_FIELD];
       const ruleId = attachment.data['rule.id'];
       const refreshToolId = refreshEpisodeToolId(attachment.id);
       const ruleToolId = getRuleToolId(attachment.id);

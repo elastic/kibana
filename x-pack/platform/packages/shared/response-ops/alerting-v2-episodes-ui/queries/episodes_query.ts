@@ -14,6 +14,7 @@ import {
 } from '@kbn/alerting-v2-common-queries';
 import type { AlertEpisode as BaseAlertEpisode } from '@kbn/alerting-v2-schemas';
 import { HISTOGRAM_EPISODE_LIMIT } from '../constants';
+import { ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 
 export type { EpisodesFilterState, EpisodesSortState } from '@kbn/alerting-v2-common-queries';
 
@@ -111,7 +112,7 @@ export const buildEpisodesHistogramQuery = (
 
   const keepFields = [
     ...new Set(
-      ['first_timestamp', 'last_timestamp', 'episode.status', breakdownField].filter(
+      ['first_timestamp', 'last_timestamp', ALERT_STATUS_FIELD, breakdownField].filter(
         (f): f is string => Boolean(f)
       )
     ),

@@ -11,6 +11,7 @@ import {
   ALERT_EVENTS_DATA_STREAM,
   DEFAULT_TIME_FIELD as TIME_FIELD,
 } from '@kbn/alerting-v2-constants';
+import { ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 export interface EpisodeTrendRow {
   '@timestamp': string;
   'episode.status': AlertEpisodeStatus;
@@ -71,7 +72,7 @@ export const buildEpisodeTrendQuery = (
     );
   });
 
-  return query.sort([TIME_FIELD, 'ASC']).keep('@timestamp', 'episode.status', ...metricLabels);
+  return query.sort([TIME_FIELD, 'ASC']).keep('@timestamp', ALERT_STATUS_FIELD, ...metricLabels);
 };
 
 /**

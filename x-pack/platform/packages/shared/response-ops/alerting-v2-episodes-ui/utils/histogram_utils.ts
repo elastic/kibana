@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import { ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 
 import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 
@@ -81,7 +82,7 @@ export const computeOverlapCounts = (
   const parsed = episodes.map((ep) => ({
     ep,
     firstMs: new Date(ep.first_timestamp).getTime(),
-    lastMs: ep['episode.status'] === 'active' ? nowMs : new Date(ep.last_timestamp).getTime(),
+    lastMs: ep[ALERT_STATUS_FIELD] === 'active' ? nowMs : new Date(ep.last_timestamp).getTime(),
   }));
 
   return buckets.flatMap(({ start, end }) => {

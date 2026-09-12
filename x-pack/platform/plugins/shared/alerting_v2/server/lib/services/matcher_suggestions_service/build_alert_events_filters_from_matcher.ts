@@ -8,6 +8,7 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { DataViewBase, KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 
 const SUPPORTED_MATCHER_FIELDS: ReadonlySet<string> = new Set([
   'episode_status',
@@ -17,15 +18,15 @@ const SUPPORTED_MATCHER_FIELDS: ReadonlySet<string> = new Set([
 ]);
 
 const MATCHER_TO_ES_FIELD: Readonly<Record<string, string>> = {
-  episode_status: 'episode.status',
-  episode_id: 'episode.id',
+  episode_status: ALERT_STATUS_FIELD,
+  episode_id: ALERT_ID_FIELD,
 };
 
 const ALERT_EVENTS_DATA_VIEW: DataViewBase = {
   title: 'alert_events',
   fields: [
-    { name: 'episode.status', type: 'string', esTypes: ['keyword'] },
-    { name: 'episode.id', type: 'string', esTypes: ['keyword'] },
+    { name: ALERT_STATUS_FIELD, type: 'string', esTypes: ['keyword'] },
+    { name: ALERT_ID_FIELD, type: 'string', esTypes: ['keyword'] },
     { name: 'group_hash', type: 'string', esTypes: ['keyword'] },
     { name: 'rule.id', type: 'string', esTypes: ['keyword'] },
   ],

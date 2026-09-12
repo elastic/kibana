@@ -12,6 +12,7 @@ import {
   ALERT_EPISODE_STATUS,
   type BulkCreateAlertActionBody,
 } from '@kbn/alerting-v2-schemas';
+import { ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import type { EpisodeAction, EpisodeActionContext } from './types';
 import { bulkCreateAlertActions } from './bulk_create_alert_actions';
 import { uniqueByGroup, successOrPartialToast } from './helpers';
@@ -29,7 +30,7 @@ export const createResolveAction = (deps: ResolveActionDeps): EpisodeAction => (
   iconType: 'check',
   isCompatible: ({ episodes }: EpisodeActionContext) =>
     episodes.length > 0 &&
-    episodes.some((ep) => ep['episode.status'] !== ALERT_EPISODE_STATUS.INACTIVE),
+    episodes.some((ep) => ep[ALERT_STATUS_FIELD] !== ALERT_EPISODE_STATUS.INACTIVE),
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
     const items: BulkCreateAlertActionBody = uniqueByGroup(episodes).map((ep) => ({
       group_hash: ep.group_hash,

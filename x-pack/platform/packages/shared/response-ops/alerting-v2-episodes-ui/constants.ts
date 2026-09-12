@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import {
   ALERTING_V2_RULES_BASE_PATH,
   ALERTING_V2_EPISODES_BASE_PATH,
+  ALERT_STATUS_FIELD,
 } from '@kbn/alerting-v2-constants';
 
 export const EMPTY_VALUE = '—';
@@ -25,7 +26,7 @@ export const QUERY_STALE_TIME = 30_000;
  */
 export const HISTOGRAM_BREAKDOWN_COLUMNS: DatatableColumn[] = [
   {
-    id: 'episode.status',
+    id: ALERT_STATUS_FIELD,
     name: i18n.translate('xpack.alertingV2.episodesUi.breakdownByStatus', {
       defaultMessage: 'Status',
     }),

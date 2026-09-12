@@ -9,7 +9,7 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { ALERT_EVENTS_DATA_STREAM, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import type {
   AlertEpisodeStatus,
   AlertEvent,
@@ -57,7 +57,7 @@ export const getRuleEventsApiService = ({
       if (filter.type) must.push({ term: { type: filter.type } });
       if (filter.status) must.push({ term: { status: filter.status } });
       if (filter.episodeStatus) {
-        must.push({ term: { 'episode.status': filter.episodeStatus } });
+        must.push({ term: { [ALERT_STATUS_FIELD]: filter.episodeStatus } });
       }
 
       const result = await esClient.search<AlertEvent>({
@@ -79,7 +79,7 @@ export const getRuleEventsApiService = ({
             filter: [
               { term: { 'rule.id': ruleId } },
               { term: { type: 'alert' } },
-              { exists: { field: 'episode.status' } },
+              { exists: { field: ALERT_STATUS_FIELD } },
             ],
           },
         },

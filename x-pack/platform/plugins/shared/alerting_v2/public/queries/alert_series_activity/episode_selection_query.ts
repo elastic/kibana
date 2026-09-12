@@ -6,7 +6,7 @@
  */
 
 import { esql } from '@elastic/esql';
-import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { ALERT_EVENTS_DATA_STREAM, ALERT_ID_FIELD } from '@kbn/alerting-v2-constants';
 
 /**
  * Selects the episodes the alert timeline draws, scoped to the chosen top-N
@@ -54,6 +54,6 @@ export const buildEpisodeSelectionQuery = ({
       .pipe`STATS last_ts = MAX(@timestamp) BY episode.id, group_hash`.sort(['last_ts', 'DESC'])
       .pipe`LIMIT ${perLaneLimit} BY group_hash`
       .limit(Math.max(groupHashes.length * perLaneLimit, 1))
-      .keep('episode.id', 'group_hash', 'last_ts')
+      .keep(ALERT_ID_FIELD, 'group_hash', 'last_ts')
   );
 };

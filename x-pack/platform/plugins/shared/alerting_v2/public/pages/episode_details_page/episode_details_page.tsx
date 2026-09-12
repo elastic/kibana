@@ -68,6 +68,7 @@ import {
 } from './utils/get_episode_header_tabs';
 import { EpisodeActionPolicyHistoryTab } from './components/episode_action_policy_history_tab';
 import * as i18n from './translations';
+import { ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 
 interface EpisodeRouteParams {
   episodeId: string;
@@ -248,7 +249,7 @@ export function EpisodeDetailsPage() {
   const headerBadges = useMemo(
     () =>
       getEpisodeHeaderBadges({
-        status: episode?.['episode.status'],
+        status: episode?.[ALERT_STATUS_FIELD],
         severity: episode?.severity,
         episodeAction,
         groupAction,

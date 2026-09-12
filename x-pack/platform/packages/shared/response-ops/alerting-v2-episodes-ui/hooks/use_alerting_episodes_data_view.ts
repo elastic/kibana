@@ -13,6 +13,7 @@ import { useMemo } from 'react';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { buildEpisodesBaseQuery } from '@kbn/alerting-v2-common-queries';
+import { ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import * as i18n from './translations';
 import { useSpaceId } from './use_space_id';
 
@@ -33,7 +34,7 @@ const knownFieldsOverrides: Record<string, KnownFieldOverrides> = {
   'rule.id': {
     customLabel: i18n.RULE_FIELD_LABEL,
   },
-  'episode.status': {
+  [ALERT_STATUS_FIELD]: {
     customLabel: i18n.STATUS_FIELD_LABEL,
   },
   severity: {

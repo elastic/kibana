@@ -6,6 +6,7 @@
  */
 
 import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import type {
   AlertTimelineData,
   AlertTimelineGroupingValues,
@@ -71,8 +72,8 @@ export const deriveAlertTimelineData = (
     const endMs = Date.parse(row.seg_end);
     if (!Number.isFinite(startMs) || !Number.isFinite(endMs)) continue;
     const phase: ParsedPhase = {
-      episodeId: row['episode.id'],
-      status: row['episode.status'],
+      episodeId: row[ALERT_ID_FIELD],
+      status: row[ALERT_STATUS_FIELD],
       startMs,
       endMs,
       groupHash: row.group_hash,

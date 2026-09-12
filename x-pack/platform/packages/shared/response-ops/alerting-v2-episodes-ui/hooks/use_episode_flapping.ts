@@ -14,6 +14,7 @@ import {
   type FlappingSettings,
 } from '../utils/is_episode_flapping';
 import { useFetchEpisodeFlappingQuery } from './use_fetch_episode_flapping_query';
+import { ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 
 export interface UseEpisodeFlappingOptions {
   episodeId: string | undefined;
@@ -42,7 +43,7 @@ export const useEpisodeFlapping = ({
   const isFlapping = useMemo(
     () =>
       isEpisodeFlapping(
-        (events ?? []).map((row) => row['episode.status']),
+        (events ?? []).map((row) => row[ALERT_STATUS_FIELD]),
         settings
       ),
     [events, settings]

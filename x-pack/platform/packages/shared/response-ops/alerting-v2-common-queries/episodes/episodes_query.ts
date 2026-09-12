@@ -8,7 +8,12 @@
 import type { ComposerQuery } from '@elastic/esql';
 import { esql } from '@elastic/esql';
 import { escapeStringValue } from '@kbn/esql-utils';
-import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import {
+  ALERT_ACTIONS_DATA_STREAM,
+  ALERT_EVENTS_DATA_STREAM,
+  ALERT_ID_FIELD,
+  ALERT_STATUS_FIELD,
+} from '@kbn/alerting-v2-constants';
 import {
   ALERT_EPISODE_STATUS,
   type AlertEpisode,
@@ -33,8 +38,8 @@ export interface AlertEpisodeEsqlRow extends Omit<AlertEpisode, 'last_tags'> {
 
 export const ALERT_EPISODE_FIELDS = [
   '@timestamp',
-  'episode.id',
-  'episode.status',
+  ALERT_ID_FIELD,
+  ALERT_STATUS_FIELD,
   'rule.id',
   'group_hash',
   'first_timestamp',
@@ -81,8 +86,8 @@ export interface EpisodesSortState {
 
 const ALLOWLISTED_SORT_FIELDS = new Set([
   '@timestamp',
-  'episode.id',
-  'episode.status',
+  ALERT_ID_FIELD,
+  ALERT_STATUS_FIELD,
   'rule.id',
   'duration',
 ]);

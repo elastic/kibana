@@ -6,7 +6,7 @@
  */
 
 import { esql } from '@elastic/esql';
-import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { ALERT_ACTIONS_DATA_STREAM, ALERT_ACTION_ALERT_ID_FIELD } from '@kbn/alerting-v2-constants';
 import { asTypedEsqlQuery, type TypedEsqlQuery } from './typed_esql_query';
 
 /** Raw ES|QL row shape — `tags` may arrive as a string when ES|QL collapses a single-value multivalue field. */
@@ -77,7 +77,7 @@ export const buildEpisodeActionsHistoryQuery = (
         '@timestamp',
         'action_type',
         'actor',
-        'episode_id',
+        ALERT_ACTION_ALERT_ID_FIELD,
         'group_hash',
         'tags',
         'assignee_uid',

@@ -6,12 +6,13 @@
  */
 
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
+import { ALERT_ID_FIELD } from '@kbn/alerting-v2-constants';
 export const getEpisodesFromDocIds = (
   selectedDocIds: string[],
   episodesData: AlertEpisode[]
 ): AlertEpisode[] => {
   const selected = new Set(selectedDocIds);
-  return episodesData.filter((ep) => selected.has(ep['episode.id']));
+  return episodesData.filter((ep) => selected.has(ep[ALERT_ID_FIELD]));
 };
 
 export const uniqueGroupEpisodes = (episodes: AlertEpisode[]): AlertEpisode[] => {

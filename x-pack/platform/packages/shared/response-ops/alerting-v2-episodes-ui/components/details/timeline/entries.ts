@@ -7,6 +7,7 @@
 
 import type { IconType } from '@elastic/eui';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
+import { ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import type { EpisodeActionHistoryEntry } from '@kbn/alerting-v2-common-queries';
 import {
   isSupportedEpisodeSeverity,
@@ -72,7 +73,7 @@ export const deriveStateChangeEntries = (eventRows: StateChangeSourceRow[]): Sta
   let runCount = 0;
 
   for (const row of eventRows) {
-    const status = row['episode.status'];
+    const status = row[ALERT_STATUS_FIELD];
     const eventCount = row.event_count ?? 1;
     if (status !== prevStatus) {
       entries.push({

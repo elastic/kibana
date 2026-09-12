@@ -8,6 +8,7 @@
 import type { ColorMapping } from '@kbn/coloring';
 import type { TypedLensByValueInput, XYVisualizationState } from '@kbn/lens-plugin/public';
 import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
+import { ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 export interface EpisodeStatusColors {
   danger: string;
   success: string;
@@ -27,7 +28,7 @@ export const getStatusColorMap = (colors: EpisodeStatusColors): Record<string, s
  * Patches a Lens `TypedLensByValueInput` attributes object to apply episode-aware
  * color coding and strip axis titles.
  *
- * - When `breakdownField` is `'episode.status'`: applies a categorical color
+ * - When `breakdownField` is `ALERT_STATUS_FIELD`: applies a categorical color
  *   mapping so each status value gets its own color.
  * - When there is no breakdown: colors the whole series to match the active
  *   status filter, falling back to `danger` (red) when no filter is set.
@@ -64,7 +65,7 @@ export const buildModifiedVisAttributes = (
     },
   });
 
-  if (breakdownField === 'episode.status') {
+  if (breakdownField === ALERT_STATUS_FIELD) {
     return applyColorMapping({
       paletteId: 'default',
       colorMode: { type: 'categorical' },

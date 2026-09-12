@@ -6,7 +6,7 @@
  */
 
 import { esql } from '@elastic/esql';
-import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { ALERT_EVENTS_DATA_STREAM, ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 
 /**
  * Collapses each episode's per-execution events into status *phases*: one
@@ -52,6 +52,6 @@ export const buildEpisodePhasesQuery = ({
       .pipe`STATS seg_start = MIN(@timestamp), seg_end = MAX(@timestamp) BY episode.id, episode.status, group_hash`
       // Explicit ceiling (≤4 phases × episodes) so the implicit result cap can't clip a phase.
       .limit(Math.max(episodeIds.length * MAX_PHASES_PER_EPISODE, 1))
-      .keep('episode.id', 'episode.status', 'group_hash', 'seg_start', 'seg_end')
+      .keep(ALERT_ID_FIELD, ALERT_STATUS_FIELD, 'group_hash', 'seg_start', 'seg_end')
   );
 };

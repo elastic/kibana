@@ -68,6 +68,7 @@ import { useAlertingLocators } from '../../application/locator_context';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import * as i18n from './translations';
+import { ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import { EpisodesFilterBar } from './components/episodes_filter_bar';
 import { EpisodesKpis } from './components/episodes_kpis';
 import { EpisodesHistogram } from './components/episodes_histogram';
@@ -486,7 +487,7 @@ const AlertEpisodesListPageContent = () => {
 
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
     () => ({
-      'episode.status': (props) => <EpisodeStatusCell {...props} />,
+      [ALERT_STATUS_FIELD]: (props) => <EpisodeStatusCell {...props} />,
       severity: (props) => <EpisodeSeverityCell {...props} />,
       tags: (props) => <EpisodeTagsCell {...props} />,
       rule_tags: (props) => (

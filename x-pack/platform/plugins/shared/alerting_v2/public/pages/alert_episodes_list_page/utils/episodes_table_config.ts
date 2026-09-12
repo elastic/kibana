@@ -10,7 +10,11 @@ import { z } from '@kbn/zod';
 import { ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import type { IKbnUrlStateStorage, Storage } from '@kbn/kibana-utils-plugin/public';
 import { isPlainObject } from 'lodash';
-import { ALERTING_V2_EPISODES_APP_ID, ALERTING_V2_SECTION_ID } from '@kbn/alerting-v2-constants';
+import {
+  ALERTING_V2_EPISODES_APP_ID,
+  ALERTING_V2_SECTION_ID,
+  ALERT_STATUS_FIELD,
+} from '@kbn/alerting-v2-constants';
 /** Namespace for episodes table config inside the `_a` app-state blob */
 export const EPISODES_TABLE_APP_STATE_KEY = 'episodesTable' as const;
 
@@ -46,7 +50,7 @@ export type EpisodesTableConfig = z.infer<typeof episodesTableConfigSchema>;
 export type EpisodesTableColumnSettings = EpisodesTableConfig['columnSettings'];
 
 export const DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS: string[] = [
-  'episode.status',
+  ALERT_STATUS_FIELD,
   'severity',
   '@timestamp',
   'rule.id',
@@ -64,7 +68,7 @@ export const DEFAULT_EPISODES_TABLE_SORT: EpisodesTableConfig['sort'] = {
 export const DEFAULT_EPISODES_TABLE_COLUMN_SETTINGS: EpisodesTableColumnSettings = {
   duration: { width: 110 },
   assignees: { width: 120 },
-  'episode.status': { width: 110 },
+  [ALERT_STATUS_FIELD]: { width: 110 },
   severity: { width: 100 },
 };
 

@@ -37,6 +37,7 @@ import {
   type AlertTimelineSummaryEsqlRow,
 } from '../queries/alert_series_activity/alert_timeline_summary_query';
 import { useFetchSeriesGroupingValues } from './use_fetch_series_grouping_values';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import type { SeriesGroupingValuesByHash } from '../queries/alert_series_activity/series_grouping_values_query';
 
 const EMPTY_PHASES: AlertTimelinePhaseRow[] = [];
@@ -128,7 +129,7 @@ export const useFetchRuleEvents = ({
   });
 
   const selectedEpisodeIds = useMemo(
-    () => (selectionQuery.data ?? []).map((r) => r['episode.id']),
+    () => (selectionQuery.data ?? []).map((r) => r[ALERT_ID_FIELD]),
     [selectionQuery.data]
   );
 
@@ -193,7 +194,7 @@ export const useFetchRuleEvents = ({
     for (const row of startsQuery.data ?? []) {
       const startMs = Date.parse(row.episode_start);
       if (Number.isFinite(startMs)) {
-        map.set(makeEpisodeStartKey(row['episode.id'], row['episode.status']), startMs);
+        map.set(makeEpisodeStartKey(row[ALERT_ID_FIELD], row[ALERT_STATUS_FIELD]), startMs);
       }
     }
     return map;

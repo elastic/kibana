@@ -7,7 +7,7 @@
 
 import { esql } from '@elastic/esql';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
-import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { ALERT_EVENTS_DATA_STREAM, ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 
 /** Upper bound on phase rows per episode — the four `episode.status` values. */
 const MAX_PHASES_PER_EPISODE = 4;
@@ -39,6 +39,6 @@ export const buildEpisodeStartsQuery = ({ ruleId, episodeIds }: BuildEpisodeStar
       .pipe`STATS episode_start = MIN(@timestamp) BY episode.id, episode.status`
       // Explicit ceiling (≤4 phases × episodes) so the implicit result cap can't clip a phase.
       .limit(Math.max(episodeIds.length * MAX_PHASES_PER_EPISODE, 1))
-      .keep('episode.id', 'episode.status', 'episode_start')
+      .keep(ALERT_ID_FIELD, ALERT_STATUS_FIELD, 'episode_start')
   );
 };

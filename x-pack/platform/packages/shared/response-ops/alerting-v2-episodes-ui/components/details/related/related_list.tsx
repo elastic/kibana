@@ -11,6 +11,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
+import { ALERT_ID_FIELD } from '@kbn/alerting-v2-constants';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import {
   RelatedAlertEpisode,
@@ -78,7 +79,7 @@ export function RelatedAlertEpisodesList({
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="alertingV2RelatedEpisodesList">
       {rows.map((row) => {
-        const relatedId = row['episode.id'];
+        const relatedId = row[ALERT_ID_FIELD];
         const relatedGroupHash = row.group_hash;
         const { ruleName, groupingFields } = getRuleDisplayFromState(ruleState, relatedId);
         return (

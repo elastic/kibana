@@ -6,7 +6,7 @@
  */
 
 import { esql } from '@elastic/esql';
-import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { ALERT_ACTIONS_DATA_STREAM, ALERT_ACTION_ALERT_ID_FIELD } from '@kbn/alerting-v2-constants';
 import { asTypedEsqlQuery, type TypedEsqlQuery } from './typed_esql_query';
 
 export interface EpisodeActionRow {
@@ -39,6 +39,6 @@ export const buildEpisodeActionsQuery = (
         last_assignee_uid = LAST(assignee_value, @timestamp),
         last_ack_actor = LAST(ack_actor, @timestamp)
         BY episode_id, rule_id, group_hash`
-      .keep('episode_id', 'rule_id', 'group_hash', 'last_ack_action', 'last_assignee_uid', 'last_ack_actor')
+      .keep(ALERT_ACTION_ALERT_ID_FIELD, 'rule_id', 'group_hash', 'last_ack_action', 'last_assignee_uid', 'last_ack_actor')
   );
 };

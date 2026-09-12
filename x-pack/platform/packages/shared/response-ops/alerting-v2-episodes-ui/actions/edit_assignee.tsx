@@ -14,6 +14,7 @@ import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { QueryClient } from '@kbn/react-query';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
+import { ALERT_ID_FIELD } from '@kbn/alerting-v2-constants';
 import {
   ALERT_EPISODE_ACTION_TYPE,
   type BulkCreateAlertActionBody,
@@ -53,7 +54,7 @@ const applyAssignee = async (
   const items: BulkCreateAlertActionBody = episodes.map((episode) => ({
     group_hash: episode.group_hash,
     action_type: ALERT_EPISODE_ACTION_TYPE.ASSIGN,
-    episode_id: episode['episode.id'],
+    episode_id: episode[ALERT_ID_FIELD],
     assignee_uid: assigneeUid,
   }));
   if (!items.length) return;

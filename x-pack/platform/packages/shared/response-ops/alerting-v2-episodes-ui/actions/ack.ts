@@ -11,6 +11,7 @@ import {
   ALERT_EPISODE_ACTION_TYPE,
   type BulkCreateAlertActionBody,
 } from '@kbn/alerting-v2-schemas';
+import { ALERT_ID_FIELD } from '@kbn/alerting-v2-constants';
 import type { EpisodeAction, EpisodeActionContext } from './types';
 import { bulkCreateAlertActions } from './bulk_create_alert_actions';
 import { successOrPartialToast } from './helpers';
@@ -32,7 +33,7 @@ export const createAckAction = (deps: AckActionDeps): EpisodeAction => ({
     const items: BulkCreateAlertActionBody = episodes.map((ep) => ({
       group_hash: ep.group_hash,
       action_type: ALERT_EPISODE_ACTION_TYPE.ACK,
-      episode_id: ep['episode.id'],
+      episode_id: ep[ALERT_ID_FIELD],
     }));
     if (!items.length) return;
 

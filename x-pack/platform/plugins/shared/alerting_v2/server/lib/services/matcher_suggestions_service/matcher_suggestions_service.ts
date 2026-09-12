@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { flattenObject } from '@kbn/object-utils';
 import { inject, injectable } from 'inversify';
-import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { ALERT_EVENTS_DATA_STREAM, ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import { alertEpisodeStatus } from '../../../resources/datastreams/alert_events';
 import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../../saved_objects';
 import { EsServiceScopedToken } from '../es_service/tokens';
@@ -44,7 +44,7 @@ const RULE_SO_FIELD_CONFIG: Partial<Record<MatcherField, RuleSoFieldConfig>> = {
 };
 
 const MATCHER_FIELD_TO_ES_FIELD: Partial<Record<MatcherField, string>> = {
-  [MatcherField.EpisodeId]: 'episode.id',
+  [MatcherField.EpisodeId]: ALERT_ID_FIELD,
   [MatcherField.GroupHash]: 'group_hash',
 };
 
@@ -115,7 +115,7 @@ export class MatcherSuggestionsService {
               { term: { type: 'alert' } },
               { range: { '@timestamp': { gte: ALERT_EVENTS_LOOKBACK } } },
               { exists: { field: 'data' } },
-              { terms: { 'episode.status': ['pending', 'active', 'recovering'] } },
+              { terms: { [ALERT_STATUS_FIELD]: ['pending', 'active', 'recovering'] } },
               ...buildAlertEventsFiltersFromMatcher(matcher ?? ''),
             ],
           },

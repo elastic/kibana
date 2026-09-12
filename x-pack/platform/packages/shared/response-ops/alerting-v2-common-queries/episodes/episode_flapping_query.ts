@@ -7,7 +7,11 @@
 
 import { esql } from '@elastic/esql';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
-import { ALERT_EVENTS_DATA_STREAM, DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
+import {
+  ALERT_EVENTS_DATA_STREAM,
+  DEFAULT_TIME_FIELD,
+  ALERT_STATUS_FIELD,
+} from '@kbn/alerting-v2-constants';
 import { DEFAULT_FLAPPING_LOOKBACK } from './constants';
 import { asTypedEsqlQuery, type TypedEsqlQuery } from './typed_esql_query';
 
@@ -15,7 +19,7 @@ export interface EpisodeFlappingRow {
   'episode.status': AlertEpisodeStatus;
 }
 
-const ALERT_EPISODE_FLAPPING_FIELDS = ['episode.status'] as const;
+const ALERT_EPISODE_FLAPPING_FIELDS = [ALERT_STATUS_FIELD] as const;
 
 /**
  * ES|QL query returning the most recent `limit` rule-event statuses for a single
