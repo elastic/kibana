@@ -706,7 +706,6 @@ steps:
 
                 Missing context lowers confidence but must not change classification.
 
-                Don't use any tools. Just reason about the alerts and the context.
                 </epistemic_framework>
 
                 <reasoning_process>
