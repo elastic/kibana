@@ -32,6 +32,7 @@ import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import { RULE_REVISION_FALLBACK, RULE_VERSION_FALLBACK } from '../rule_changes_history';
 import type { BuilderTypeRegistry } from '../builder_types';
+import type { CallerIdentity } from './caller_identity';
 import type { BulkOperationError, ResolvedCreateRuleData, RotationCandidate } from './types';
 
 /**
@@ -277,6 +278,86 @@ export function deriveOwnership(
     }
   }
   return app !== undefined ? { managed: false, app } : { managed: false };
+}
+
+/**
+ * Asserts that the calling client may write to a managed rule, or may create
+ * a rule of a managed type.
+ *
+ * A rule is managed when **either** its stored `metadata.ownership.managed` is
+ * `true` **or** its `builder_type`'s current registration declares `ownership`.
+ * Both halves are checked so the gate stays closed when the owning plugin is
+ * disabled (stored field holds it) and before a become-managed transition's
+ * backfill has run (registration holds it).
+ *
+ * For mutating paths that already have the stored rule, pass the stored
+ * ownership and the stored/effective builder type. For create paths (no stored
+ * rule), pass `storedOwnership: undefined` and the requested builder type —
+ * the registration half of the gate applies.
+ *
+ * Match is on `solution` alone, never `solution` plus `domain`. The solution
+ * is the trust boundary; requiring the domain to match as well would force a
+ * caller to create one client per domain for no isolation gain.
+ *
+ * Throws `RULE_IS_MANAGED` (400) when the rule is managed and the caller has
+ * no identity or a mismatched-solution identity. The error details carry
+ * `{ solution, domain }` so the caller can report which owner refused the write.
+ *
+ * Ref: rule-ownership.md "The write gate"
+ * Ref: rule-ownership.md "Path by path"
+ */
+export function assertManagedRuleWrite({
+  registry,
+  callerIdentity,
+  storedOwnership,
+  builderType,
+}: {
+  registry: BuilderTypeRegistry;
+  callerIdentity: CallerIdentity | undefined;
+  /**
+   * The stored ownership object from `metadata.ownership`. Pass `undefined`
+   * on create paths where no stored rule exists yet.
+   */
+  storedOwnership: RuleOwnership | undefined;
+  /**
+   * The effective builder type (stored or requested). Used to consult the
+   * current registration for the managed declaration even when the stored
+   * ownership mark is absent or unmanaged.
+   */
+  builderType: string | undefined | null;
+}): void {
+  // Determine the owning solution and domain using the two-half check.
+  let owningSolution: string | undefined;
+  let owningDomain: string | undefined;
+
+  if (storedOwnership != null && storedOwnership.managed === true) {
+    // First half: the stored mark says managed.
+    owningSolution = storedOwnership.solution;
+    owningDomain = storedOwnership.domain;
+  } else if (builderType != null) {
+    // Second half: the current registration declares ownership.
+    const registration = registry.get(builderType);
+    if (registration?.ownership != null) {
+      owningSolution = registration.ownership.solution;
+      owningDomain = registration.ownership.domain;
+    }
+  }
+
+  // Not a managed rule — write proceeds.
+  if (owningSolution === undefined) {
+    return;
+  }
+
+  // Managed rule — the caller must carry a matching solution identity.
+  if (callerIdentity?.solution !== owningSolution) {
+    throw Boom.badRequest(
+      `Rule is managed by solution "${owningSolution}" / domain "${owningDomain}" and may not be written by this caller`,
+      {
+        code: ALERTING_ERROR_CODES.RULE_IS_MANAGED,
+        details: { solution: owningSolution, domain: owningDomain },
+      }
+    );
+  }
 }
 
 /**

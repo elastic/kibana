@@ -4335,7 +4335,10 @@ describe('RulesClient', () => {
       });
 
       it('stamps managed ownership for a rule whose builder type declares ownership', async () => {
-        const client = createClient();
+        // Step 5.2: the gate now requires a matching solution identity to create
+        // a managed-type rule. Use a client with { solution: 'security' } so this
+        // test stays focused on ownership derivation, not the gate.
+        const client = createClient(undefined, { solution: 'security' });
 
         // Spy on registry.get so that deriveOwnership reads the managed declaration
         // without needing a full valid registration. builder_type is set but
@@ -4402,7 +4405,10 @@ describe('RulesClient', () => {
 
     describe('upsertRule — replace branch', () => {
       it('carries stored ownership forward without accepting ownership from the body', async () => {
-        const client = createClient();
+        // Step 5.2: the gate requires a matching solution identity to replace a
+        // managed rule. Use a client with { solution: 'security' } so this test
+        // stays focused on ownership carry-forward, not the gate.
+        const client = createClient(undefined, { solution: 'security' });
 
         const storedOwnership = { managed: true, solution: 'security', domain: 'detection' };
         const existing = createRuleSoAttributes({
@@ -4569,6 +4575,375 @@ describe('RulesClient', () => {
           domain: 'detection',
         });
         expect((res.metadata.ownership as { app?: string }).app).toBeUndefined();
+      });
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Step 5.2: the managed-rule write gate
+  //
+  // Tests per path, both directions. For each mutating path:
+  //   1. An identity-less client is refused (RULE_IS_MANAGED).
+  //   2. A matching-solution client passes.
+  //   3. A mismatched-solution client is refused (RULE_IS_MANAGED).
+  //
+  // The gate has two halves: stored ownership and registration. Both are
+  // exercised — stored-managed tests use managed ownership in stored attrs;
+  // registration-only tests use unmanaged stored attrs but a registered type
+  // whose definition declares ownership.
+  // ---------------------------------------------------------------------------
+
+  describe('write gate (step 5.2)', () => {
+    // Shared managed ownership mark stored on a rule.
+    const managedOwnership = { managed: true, solution: 'security', domain: 'detection' };
+
+    // A registered managed type definition (without a full valid registration —
+    // just enough for assertManagedRuleWrite to find the declaration).
+    const managedTypeDefinition = {
+      type: 'security.detection.query',
+      name: 'Detection query',
+      ownership: { solution: 'security', domain: 'detection' },
+      builderFieldsSchema: {} as never,
+      generateQuery: jest.fn(),
+    };
+
+    // Stored attrs for a rule that already has managed ownership stamped.
+    const managedSoAttrs = createRuleSoAttributes({
+      metadata: {
+        name: 'managed-rule',
+        signature_id: 'mgd-sig',
+        ownership: managedOwnership,
+      },
+      time_field: '@timestamp',
+      schedule: { every: '1m', lookback: '1m' },
+      query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+    });
+    const managedDoc = (id: string) => ({
+      id,
+      attributes: managedSoAttrs,
+      version: 'WzEsMV0=',
+      references: [],
+    });
+
+    // Helper: set up the registry so registry.get returns the managed type definition.
+    const useManagedType = () =>
+      jest.spyOn(builderTypeRegistry, 'get').mockReturnValue(managedTypeDefinition);
+
+    // Helper: set up the registry so registry.get returns undefined (unregistered).
+    const useUnregisteredType = () =>
+      jest.spyOn(builderTypeRegistry, 'get').mockReturnValue(undefined);
+
+    describe('createRule', () => {
+      // For create, the gate checks the registration (no stored ownership).
+      beforeEach(() => {
+        // The signature_id uniqueness find must succeed.
+        rulesSavedObjectService.find.mockResolvedValue({
+          saved_objects: [],
+          total: 0,
+          page: 1,
+          per_page: 1,
+        });
+        rulesSavedObjectService.create.mockResolvedValue({ id: 'rule-created' });
+      });
+
+      it('refuses an identity-less client when the type is managed', async () => {
+        useManagedType();
+        const client = createClient(undefined, undefined);
+        await expect(
+          client.createRule({
+            data: {
+              ...baseCreateData,
+              metadata: { name: 'rule-1', builder_type: 'security.detection.query' },
+            },
+          })
+        ).rejects.toMatchObject({
+          output: { statusCode: 400 },
+          data: {
+            code: 'RULE_IS_MANAGED',
+            details: { solution: 'security', domain: 'detection' },
+          },
+        });
+        expect(rulesSavedObjectService.create).not.toHaveBeenCalled();
+      });
+
+      it('allows a matching-solution client to create a managed-type rule', async () => {
+        useManagedType();
+        const client = createClient(undefined, { solution: 'security' });
+        await expect(
+          client.createRule({
+            data: {
+              ...baseCreateData,
+              metadata: { name: 'rule-1', builder_type: 'security.detection.query' },
+            },
+          })
+        ).resolves.toBeDefined();
+        expect(rulesSavedObjectService.create).toHaveBeenCalled();
+      });
+
+      it('refuses a mismatched-solution client when the type is managed', async () => {
+        useManagedType();
+        const client = createClient(undefined, { solution: 'other' });
+        await expect(
+          client.createRule({
+            data: {
+              ...baseCreateData,
+              metadata: { name: 'rule-1', builder_type: 'security.detection.query' },
+            },
+          })
+        ).rejects.toMatchObject({
+          output: { statusCode: 400 },
+          data: {
+            code: 'RULE_IS_MANAGED',
+            details: { solution: 'security', domain: 'detection' },
+          },
+        });
+        expect(rulesSavedObjectService.create).not.toHaveBeenCalled();
+      });
+
+      it('allows any caller to create an unmanaged-type rule', async () => {
+        useUnregisteredType();
+        const client = createClient(undefined, undefined);
+        await expect(client.createRule({ data: baseCreateData })).resolves.toBeDefined();
+        expect(rulesSavedObjectService.create).toHaveBeenCalled();
+      });
+    });
+
+    describe('updateRule', () => {
+      it('refuses an identity-less client when the stored ownership is managed', async () => {
+        const client = createClient(undefined, undefined);
+        rulesSavedObjectService.get.mockResolvedValueOnce(managedDoc('rule-upd-1'));
+        await expect(
+          client.updateRule({ id: 'rule-upd-1', data: { metadata: { name: 'changed' } } })
+        ).rejects.toMatchObject({
+          output: { statusCode: 400 },
+          data: { code: 'RULE_IS_MANAGED', details: { solution: 'security' } },
+        });
+        expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+      });
+
+      it('allows a matching-solution client to update a managed rule', async () => {
+        const client = createClient(undefined, { solution: 'security' });
+        rulesSavedObjectService.get.mockResolvedValueOnce(managedDoc('rule-upd-2'));
+        rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-upd-2' });
+        await expect(
+          client.updateRule({ id: 'rule-upd-2', data: { metadata: { name: 'changed' } } })
+        ).resolves.toBeDefined();
+        expect(rulesSavedObjectService.update).toHaveBeenCalled();
+      });
+
+      it('refuses a mismatched-solution client when the stored ownership is managed', async () => {
+        const client = createClient(undefined, { solution: 'other' });
+        rulesSavedObjectService.get.mockResolvedValueOnce(managedDoc('rule-upd-3'));
+        await expect(
+          client.updateRule({ id: 'rule-upd-3', data: { metadata: { name: 'changed' } } })
+        ).rejects.toMatchObject({
+          output: { statusCode: 400 },
+          data: { code: 'RULE_IS_MANAGED' },
+        });
+        expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+      });
+
+      it('also gates on the registration when stored ownership is not managed', async () => {
+        // Stored ownership says unmanaged, but the builder_type is currently
+        // registered as managed. The registration half of the gate applies.
+        useManagedType();
+        const attrsWithUnmanagedOwnership = createRuleSoAttributes({
+          metadata: {
+            name: 'half-migrated',
+            signature_id: 'hmig-sig',
+            builder_type: 'security.detection.query',
+            ownership: { managed: false },
+          },
+          time_field: '@timestamp',
+          schedule: { every: '1m', lookback: '1m' },
+          query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+        });
+        const client = createClient(undefined, undefined);
+        rulesSavedObjectService.get.mockResolvedValueOnce({
+          id: 'rule-upd-hmig',
+          attributes: attrsWithUnmanagedOwnership,
+          version: 'WzEsMV0=',
+          references: [],
+        });
+        await expect(
+          client.updateRule({ id: 'rule-upd-hmig', data: { metadata: { name: 'changed' } } })
+        ).rejects.toMatchObject({
+          output: { statusCode: 400 },
+          data: { code: 'RULE_IS_MANAGED' },
+        });
+        expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('upsertRule replace branch', () => {
+      it('refuses an identity-less client when the stored ownership is managed', async () => {
+        const client = createClient(undefined, undefined);
+        rulesSavedObjectService.get.mockResolvedValue(managedDoc('rule-upsert-1'));
+        await expect(
+          client.upsertRule({
+            id: 'rule-upsert-1',
+            data: { ...baseCreateData, metadata: { name: 'replaced' } },
+          })
+        ).rejects.toMatchObject({
+          output: { statusCode: 400 },
+          data: { code: 'RULE_IS_MANAGED' },
+        });
+        expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+      });
+
+      it('allows a matching-solution client to replace a managed rule', async () => {
+        const client = createClient(undefined, { solution: 'security' });
+        // ruleExists calls get, then the replace branch calls get again.
+        rulesSavedObjectService.get.mockResolvedValue(managedDoc('rule-upsert-2'));
+        rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-upsert-2' });
+        await expect(
+          client.upsertRule({
+            id: 'rule-upsert-2',
+            data: { ...baseCreateData, metadata: { name: 'replaced' } },
+          })
+        ).resolves.toBeDefined();
+        expect(rulesSavedObjectService.update).toHaveBeenCalled();
+      });
+
+      it('refuses a mismatched-solution client when the stored ownership is managed', async () => {
+        const client = createClient(undefined, { solution: 'other' });
+        rulesSavedObjectService.get.mockResolvedValue(managedDoc('rule-upsert-3'));
+        await expect(
+          client.upsertRule({
+            id: 'rule-upsert-3',
+            data: { ...baseCreateData, metadata: { name: 'replaced' } },
+          })
+        ).rejects.toMatchObject({
+          output: { statusCode: 400 },
+          data: { code: 'RULE_IS_MANAGED' },
+        });
+        expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('deleteRule', () => {
+      it('refuses an identity-less client when the stored ownership is managed', async () => {
+        const client = createClient(undefined, undefined);
+        rulesSavedObjectService.get.mockResolvedValueOnce(managedDoc('rule-del-1'));
+        await expect(client.deleteRule({ id: 'rule-del-1' })).rejects.toMatchObject({
+          output: { statusCode: 400 },
+          data: { code: 'RULE_IS_MANAGED' },
+        });
+        expect(rulesSavedObjectService.delete).not.toHaveBeenCalled();
+      });
+
+      it('allows a matching-solution client to delete a managed rule', async () => {
+        const client = createClient(undefined, { solution: 'security' });
+        rulesSavedObjectService.get.mockResolvedValueOnce(managedDoc('rule-del-2'));
+        await expect(client.deleteRule({ id: 'rule-del-2' })).resolves.toBeUndefined();
+        expect(rulesSavedObjectService.delete).toHaveBeenCalled();
+      });
+
+      it('refuses a mismatched-solution client when the stored ownership is managed', async () => {
+        const client = createClient(undefined, { solution: 'other' });
+        rulesSavedObjectService.get.mockResolvedValueOnce(managedDoc('rule-del-3'));
+        await expect(client.deleteRule({ id: 'rule-del-3' })).rejects.toMatchObject({
+          output: { statusCode: 400 },
+          data: { code: 'RULE_IS_MANAGED' },
+        });
+        expect(rulesSavedObjectService.delete).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('enableRule', () => {
+      it('refuses an identity-less client when the stored ownership is managed', async () => {
+        const client = createClient(undefined, undefined);
+        rulesSavedObjectService.get.mockResolvedValueOnce(managedDoc('rule-en-1'));
+        await expect(client.enableRule({ id: 'rule-en-1' })).rejects.toMatchObject({
+          output: { statusCode: 400 },
+          data: { code: 'RULE_IS_MANAGED' },
+        });
+        expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+      });
+
+      it('allows a matching-solution client to enable a managed rule', async () => {
+        const client = createClient(undefined, { solution: 'security' });
+        rulesSavedObjectService.get.mockResolvedValueOnce(managedDoc('rule-en-2'));
+        rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-en-2' });
+        await expect(client.enableRule({ id: 'rule-en-2' })).resolves.toBeDefined();
+        expect(rulesSavedObjectService.update).toHaveBeenCalled();
+      });
+
+      it('refuses a mismatched-solution client when the stored ownership is managed', async () => {
+        const client = createClient(undefined, { solution: 'other' });
+        rulesSavedObjectService.get.mockResolvedValueOnce(managedDoc('rule-en-3'));
+        await expect(client.enableRule({ id: 'rule-en-3' })).rejects.toMatchObject({
+          output: { statusCode: 400 },
+          data: { code: 'RULE_IS_MANAGED' },
+        });
+        expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('disableRule', () => {
+      it('refuses an identity-less client when the stored ownership is managed', async () => {
+        const client = createClient(undefined, undefined);
+        rulesSavedObjectService.get.mockResolvedValueOnce(managedDoc('rule-dis-1'));
+        await expect(client.disableRule({ id: 'rule-dis-1' })).rejects.toMatchObject({
+          output: { statusCode: 400 },
+          data: { code: 'RULE_IS_MANAGED' },
+        });
+        expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+      });
+
+      it('allows a matching-solution client to disable a managed rule', async () => {
+        const client = createClient(undefined, { solution: 'security' });
+        rulesSavedObjectService.get.mockResolvedValueOnce(managedDoc('rule-dis-2'));
+        rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-dis-2' });
+        await expect(client.disableRule({ id: 'rule-dis-2' })).resolves.toBeDefined();
+        expect(rulesSavedObjectService.update).toHaveBeenCalled();
+      });
+
+      it('refuses a mismatched-solution client when the stored ownership is managed', async () => {
+        const client = createClient(undefined, { solution: 'other' });
+        rulesSavedObjectService.get.mockResolvedValueOnce(managedDoc('rule-dis-3'));
+        await expect(client.disableRule({ id: 'rule-dis-3' })).rejects.toMatchObject({
+          output: { statusCode: 400 },
+          data: { code: 'RULE_IS_MANAGED' },
+        });
+        expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('runRuleNow', () => {
+      const enabledManagedDoc = (id: string) => ({
+        id,
+        attributes: { ...managedSoAttrs, enabled: true },
+        version: 'WzEsMV0=',
+        references: [],
+      });
+
+      it('refuses an identity-less client when the stored ownership is managed', async () => {
+        const client = createClient(undefined, undefined);
+        rulesSavedObjectService.get.mockResolvedValueOnce(enabledManagedDoc('rule-run-1'));
+        await expect(client.runRuleNow({ id: 'rule-run-1' })).rejects.toMatchObject({
+          output: { statusCode: 400 },
+          data: { code: 'RULE_IS_MANAGED' },
+        });
+        expect(taskManager.runSoon).not.toHaveBeenCalled();
+      });
+
+      it('allows a matching-solution client to trigger a managed rule', async () => {
+        const client = createClient(undefined, { solution: 'security' });
+        rulesSavedObjectService.get.mockResolvedValueOnce(enabledManagedDoc('rule-run-2'));
+        taskManager.runSoon.mockResolvedValueOnce({ id: 'task-id', conflict: false, forced: false });
+        await expect(client.runRuleNow({ id: 'rule-run-2' })).resolves.toBeUndefined();
+        expect(taskManager.runSoon).toHaveBeenCalled();
+      });
+
+      it('refuses a mismatched-solution client when the stored ownership is managed', async () => {
+        const client = createClient(undefined, { solution: 'other' });
+        rulesSavedObjectService.get.mockResolvedValueOnce(enabledManagedDoc('rule-run-3'));
+        await expect(client.runRuleNow({ id: 'rule-run-3' })).rejects.toMatchObject({
+          output: { statusCode: 400 },
+          data: { code: 'RULE_IS_MANAGED' },
+        });
+        expect(taskManager.runSoon).not.toHaveBeenCalled();
       });
     });
   });
