@@ -462,6 +462,7 @@ export class Plugin
         title: alertsFeatureTitle,
         capabilitiesId: ALERTS_PAGE_ID,
         order: 0,
+        hideFromGlobalSearch: true,
         async mount(params: ManagementAppMountParams) {
           const { renderApp } = await import('./application/alerts_app');
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
