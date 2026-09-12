@@ -15,6 +15,7 @@ import {
   isStateTransitionAllowed,
   updateRuleDataSchema,
   type RuleKind,
+  type RuleSource,
 } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { Request, PluginInitializer } from '@kbn/core-di-server';
@@ -84,9 +85,11 @@ import type {
 import { resolveCreateRuleBuilder, resolveUpdateRuleBuilder } from './builder_resolution';
 import {
   assertImmutableUnchanged,
+  assertRuleSourceUnchanged,
   assertSignatureIdUnchanged,
   validateMergedRuleAttributes,
   buildUpdateRuleAttributes,
+  computeNextRevision,
   groupCandidatesByInterval,
   isTaskMidRun,
   ruleDisabledError,
@@ -428,6 +431,8 @@ export class RulesClient {
     const nowIso = new Date().toISOString();
     const ruleVersion = this.getNextVersion();
 
+    // Resolve source: use caller-supplied value or default to internal.
+    // Ref: rule-source.md "Who writes the source"
     const ruleAttributes = transformCreateRuleBodyToRuleSoAttributes(resolved, {
       enabled: true,
       createdBy: userProfileUid,
@@ -436,6 +441,7 @@ export class RulesClient {
       updatedAt: nowIso,
       version: ruleVersion,
       signatureId,
+      source: parsed.metadata?.source ?? { type: 'internal', version: 1 },
     });
 
     // A freshly created rule is always enabled, so it always counts towards the limit.
@@ -524,6 +530,8 @@ export class RulesClient {
 
     // Immutability check: omitted keeps stored value, equal passes, different rejects.
     assertSignatureIdUnchanged(parsed.metadata?.signature_id, existingAttrs);
+    // source.type and source.id are immutable; only source.version can move.
+    assertRuleSourceUnchanged(parsed.metadata?.source, existingAttrs);
 
     const resolved = resolveUpdateRuleBuilder(this.builderTypeRegistry, id, parsed, existingAttrs);
 
@@ -1601,12 +1609,27 @@ export class RulesClient {
     // Separate omitted-means-keep check for the nested signature_id — see the
     // design doc ("Immutability") for why assertImmutableUnchanged cannot cover it.
     assertSignatureIdUnchanged(parsed.metadata?.signature_id, existingAttrs);
+    // source.type and source.id are immutable; only source.version can move.
+    assertRuleSourceUnchanged(parsed.metadata?.source, existingAttrs);
 
     const ruleVersion = this.getNextVersion(existingAttrs.metadata.version);
     // PUT replaces the whole resource, so the body alone decides whether the
     // rule is builder-managed — no need to reconcile against what is stored.
     const resolved = resolveCreateRuleBuilder(this.builderTypeRegistry, parsed);
-    const nextAttrs = transformCreateRuleBodyToRuleSoAttributes(resolved, {
+    // Resolve source for replace: omit keeps stored value (a PUT that omits
+    // source cannot silently reset an external rule to internal). When present,
+    // assertRuleSourceUnchanged above already confirmed type/id are unchanged.
+    // existingAttrs.metadata.source is typed by @kbn/config-schema's TypeOf, which
+    // produces a flat union rather than a discriminated one. The cast is safe because
+    // the v7 schema validates the same shape the Zod schema requires.
+    const resolvedSource = (
+      parsed.metadata?.source ??
+      existingAttrs.metadata.source ??
+      { type: 'internal', version: 1 }
+    ) as RuleSource;
+    // Build the next attributes without revision first; the diff against stored
+    // attributes determines whether the replace actually changed anything meaningful.
+    const rawNextAttrs = transformCreateRuleBodyToRuleSoAttributes(resolved, {
       enabled: existingAttrs.enabled,
       createdBy: existingAttrs.createdBy,
       createdAt: existingAttrs.createdAt,
@@ -1615,7 +1638,17 @@ export class RulesClient {
       version: ruleVersion,
       // Immutable: always carry the stored value forward on replace.
       signatureId: existingAttrs.metadata.signature_id!,
+      source: resolvedSource,
     });
+    // Revision: diff the replacement against stored attributes and bump if needed.
+    // Ref: rule-versions.md "How the diff runs"
+    const nextAttrs = {
+      ...rawNextAttrs,
+      metadata: {
+        ...rawNextAttrs.metadata,
+        revision: computeNextRevision(rawNextAttrs, existingAttrs),
+      },
+    };
 
     await this.validateSchedule({
       updatedEvery: nextAttrs.schedule.every,

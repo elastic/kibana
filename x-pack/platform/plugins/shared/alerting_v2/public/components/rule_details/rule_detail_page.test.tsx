@@ -142,6 +142,8 @@ const baseRule: RuleApiResponse = {
     name: 'Test Events Rule',
     signature_id: 'test-sig-id',
     version: 1,
+    revision: 0,
+    source: { type: 'internal' as const, version: 1 },
     description: 'Test rule description',
     tags: ['prod', 'infra'],
   },

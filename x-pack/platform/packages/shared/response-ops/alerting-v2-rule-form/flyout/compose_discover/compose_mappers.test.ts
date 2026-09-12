@@ -25,7 +25,7 @@ const baseRuleResponse: RuleResponse = {
   id: 'rule-1',
   kind: 'alert',
   enabled: true,
-  metadata: { name: 'Test Rule', signature_id: 'test-sig-id', version: 1, owner: 'test-owner', tags: ['tag1'] },
+  metadata: { name: 'Test Rule', signature_id: 'test-sig-id', version: 1, revision: 0, source: { type: 'internal' as const, version: 1 }, owner: 'test-owner', tags: ['tag1'] },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '2m' },
   query: {

@@ -1346,11 +1346,18 @@ describe('RulesClient', () => {
 
         await client.upsertRule({ id: 'rule-id-1', data: baseCreateData });
 
+        // tags changed from ['tag-a', 'tag-b'] → absent: a meaningful edit, so
+        // revision bumps from the default 0 to 1.
         expect(rulesSavedObjectService.update).toHaveBeenCalledWith(
           expect.objectContaining({
             id: 'rule-id-1',
             attrs: expect.objectContaining({
-              metadata: { name: 'rule-1', version: 1 },
+              metadata: expect.objectContaining({
+                name: 'rule-1',
+                version: 1,
+                revision: 1,
+                tags: undefined,
+              }),
               grouping: undefined,
             }),
           })
@@ -4003,6 +4010,175 @@ describe('RulesClient', () => {
 
       const { attrs: savedAttrs } = rulesSavedObjectService.update.mock.calls[0][0];
       expect(savedAttrs.metadata.version).toBe(3);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Step 4.2: metadata.revision — the meaningful-edit counter
+  //
+  // Pins the four assertions the design explicitly requires in rules_client.ts:
+  //   1. No-op update does not bump revision.
+  //   2. enable/disable never run the diff at all.
+  //   3. The bulk API-key path never runs the diff.
+  //   4. metadata.version keeps its every-mutation contract (asserted, not assumed).
+  // ---------------------------------------------------------------------------
+
+  describe('metadata.revision (step 4.2)', () => {
+    describe('createRule', () => {
+      it('seeds revision at 0', async () => {
+        const client = createClient();
+        rulesSavedObjectService.find.mockResolvedValueOnce({
+          saved_objects: [],
+          total: 0,
+          page: 1,
+          per_page: 1,
+        });
+        rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-rev-1' });
+
+        await client.createRule({ data: baseCreateData });
+
+        const { attrs } = rulesSavedObjectService.create.mock.calls[0][0];
+        expect(attrs.metadata.revision).toBe(0);
+      });
+
+      it('metadata.version is 1 on create (every-mutation contract)', async () => {
+        const client = createClient();
+        rulesSavedObjectService.find.mockResolvedValueOnce({
+          saved_objects: [],
+          total: 0,
+          page: 1,
+          per_page: 1,
+        });
+        rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-rev-2' });
+
+        await client.createRule({ data: baseCreateData });
+
+        const { attrs } = rulesSavedObjectService.create.mock.calls[0][0];
+        expect(attrs.metadata.version).toBe(1);
+      });
+    });
+
+    describe('updateRule', () => {
+      it('does not bump revision when the update changes no meaningful field', async () => {
+        const client = createClient();
+        // Stored rule: revision=5, name='rule-1'. Update sends same name → no change.
+        const stored = createRuleSoAttributes({
+          metadata: { name: 'rule-1', version: 4, revision: 5, signature_id: 'sig-1' },
+        });
+        rulesSavedObjectService.get.mockResolvedValueOnce({
+          id: 'rule-rev-noop',
+          attributes: stored,
+          version: 'v1',
+        });
+        rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-rev-noop' });
+
+        await client.updateRule({
+          id: 'rule-rev-noop',
+          data: { metadata: { name: 'rule-1' } }, // same name — no meaningful change
+        });
+
+        const { attrs } = rulesSavedObjectService.update.mock.calls[0][0];
+        expect(attrs.metadata.revision).toBe(5); // unchanged
+        expect(attrs.metadata.version).toBe(5); // version still bumped
+      });
+
+      it('bumps revision by one when a meaningful field changes', async () => {
+        const client = createClient();
+        const stored = createRuleSoAttributes({
+          metadata: { name: 'rule-1', version: 2, revision: 3, signature_id: 'sig-1' },
+        });
+        rulesSavedObjectService.get.mockResolvedValueOnce({
+          id: 'rule-rev-bump',
+          attributes: stored,
+          version: 'v1',
+        });
+        rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-rev-bump' });
+
+        await client.updateRule({
+          id: 'rule-rev-bump',
+          data: { metadata: { name: 'new-name' } },
+        });
+
+        const { attrs } = rulesSavedObjectService.update.mock.calls[0][0];
+        expect(attrs.metadata.revision).toBe(4); // bumped
+        expect(attrs.metadata.version).toBe(3); // also bumped (every-mutation)
+      });
+    });
+
+    describe('enableRule — never diffs', () => {
+      it('does not change revision on enable', async () => {
+        const client = createClient();
+        const stored = createRuleSoAttributes({
+          metadata: { name: 'rule-1', version: 2, revision: 7, signature_id: 'sig-1' },
+          enabled: false,
+        });
+        rulesSavedObjectService.get.mockResolvedValueOnce({
+          id: 'rule-rev-enable',
+          attributes: stored,
+          version: 'v1',
+        });
+        rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-rev-enable' });
+
+        await client.enableRule({ id: 'rule-rev-enable' });
+
+        const { attrs } = rulesSavedObjectService.update.mock.calls[0][0];
+        expect(attrs.metadata.revision).toBe(7); // unchanged — enable is not a meaningful edit
+        expect(attrs.metadata.version).toBe(3); // still bumped (every-mutation contract)
+      });
+    });
+
+    describe('disableRule — never diffs', () => {
+      it('does not change revision on disable', async () => {
+        const client = createClient();
+        const stored = createRuleSoAttributes({
+          metadata: { name: 'rule-1', version: 5, revision: 2, signature_id: 'sig-1' },
+          enabled: true,
+        });
+        rulesSavedObjectService.get.mockResolvedValueOnce({
+          id: 'rule-rev-disable',
+          attributes: stored,
+          version: 'v1',
+        });
+        rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-rev-disable' });
+
+        await client.disableRule({ id: 'rule-rev-disable' });
+
+        const { attrs } = rulesSavedObjectService.update.mock.calls[0][0];
+        expect(attrs.metadata.revision).toBe(2); // unchanged — disable is not a meaningful edit
+        expect(attrs.metadata.version).toBe(6); // still bumped (every-mutation contract)
+      });
+    });
+
+    describe('executeBulkUpdateApiKey — never diffs', () => {
+      it('does not change revision on API-key rotation', async () => {
+        const client = createClient();
+        const stored = createRuleSoAttributes({
+          metadata: { name: 'rule-1', version: 3, revision: 9, signature_id: 'sig-1' },
+          enabled: true,
+        });
+        rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
+          { id: 'rule-rev-apikey', attributes: stored, version: 'v1' },
+        ]);
+        taskManager.bulkUpdateSchedules.mockResolvedValueOnce(
+          { tasks: [{ id: 'task-rev-apikey' }], errors: [] } as unknown as Awaited<
+            ReturnType<typeof taskManager.bulkUpdateSchedules>
+          >
+        );
+        getRuleExecutorTaskIdMock.mockReturnValue('task-rev-apikey');
+        rulesSavedObjectService.bulkUpdate.mockResolvedValueOnce([
+          { id: 'rule-rev-apikey', success: true },
+        ]);
+
+        await client.bulkUpdateApiKey({ ids: ['rule-rev-apikey'] });
+
+        const updateCall = rulesSavedObjectService.bulkUpdate.mock.calls[0][0][0];
+        // The bulk-API-key path only stamps updatedAt/updatedBy — revision must
+        // not be touched (the key rotation did not change any rule data).
+        expect(updateCall.attrs.metadata.revision).toBe(9); // unchanged
+        // metadata.version is also NOT bumped by the bulk-API-key path — that is
+        // the existing, documented behavior (api key no bump).
+        expect(updateCall.attrs.metadata.version).toBe(3); // unchanged
+      });
     });
   });
 

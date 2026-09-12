@@ -14,9 +14,10 @@ export const RULE_ATTACHMENT_TYPE = 'platform.alerting.rule' as const;
 /**
  * Data stored inside a rule attachment.
  *
- * Server-generated fields (id, enabled, created_by, created_at, updated_by, updated_at, metadata.version)
- * are optional so that the same schema covers both:
- *   - proposed rules (by-value, not yet saved — no id or audit fields)
+ * Server-generated fields (id, enabled, created_by, created_at, updated_by, updated_at,
+ * metadata.version, metadata.revision, metadata.signature_id) are optional so that the
+ * same schema covers both:
+ *   - proposed rules (by-value, not yet saved — no id, audit fields, or server counters)
  *   - saved rules    (by-reference, linked via attachment.origin = rule saved object id)
  */
 const { shape } = ruleResponseSchema;
@@ -30,8 +31,12 @@ export const ruleAttachmentDataSchema = ruleResponseSchema.extend({
   updated_at: opt(shape.updated_at),
   metadata: shape.metadata.extend({
     version: opt(shape.metadata.shape.version),
-    // signature_id is server-generated, so it is absent on proposed (not-yet-saved) rules.
+    // revision, signature_id, and source are server-generated/stamped, so they
+    // are absent on proposed (not-yet-saved) rules — the server stamps them at
+    // create time.
+    revision: opt(shape.metadata.shape.revision),
     signature_id: opt(shape.metadata.shape.signature_id),
+    source: opt(shape.metadata.shape.source),
   }),
 });
 

@@ -1686,7 +1686,7 @@ describe('bulkGetRulesResponseSchema', () => {
   const sampleRule = {
     id: 'rule-1',
     kind: 'alert' as const,
-    metadata: { name: 'r', version: 1, signature_id: 'sample-sig-id' },
+    metadata: { name: 'r', version: 1, signature_id: 'sample-sig-id', revision: 0, source: { type: 'internal' as const, version: 1 } },
     time_field: '@timestamp',
     schedule: { every: '5m' },
     query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
