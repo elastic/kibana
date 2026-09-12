@@ -1076,10 +1076,15 @@ export class RulesClient {
     // managed-rule write gate: refuse managed rules as per-item errors and
     // remove them from the set of ids to actually delete.
     //
-    // Rules that could not be pre-fetched (fetch error) are kept in the delete
-    // set so bulkDelete surfaces the real per-rule error (e.g. RULE_NOT_FOUND).
+    // Fetch errors are handled conservatively:
+    //   - 404 (not found): keep in the delete set so bulkDelete surfaces the
+    //     real RULE_NOT_FOUND error — the rule is genuinely absent.
+    //   - Any other status: fail closed — the gate could not evaluate the rule,
+    //     so push an error and exclude the id from the delete set rather than
+    //     deleting something we could not verify.
     //
-    // Ref: rule-ownership.md "Path by path"
+    // Ref: rule-ownership.md "Path by path" — "the gate rejects any other write
+    // with a RULE_IS_MANAGED error"
     const docsById = new Map<
       string,
       { attrs: RuleSavedObjectAttributes; references: SavedObjectReference[] }
@@ -1087,7 +1092,14 @@ export class RulesClient {
     const refusedIds = new Set<string>();
     for (const doc of await this.rulesSavedObjectService.bulkGetByIds(ids)) {
       if ('error' in doc) {
-        // Keep in the delete set — bulkDelete will surface the real error.
+        if (doc.error.statusCode === 404) {
+          // Keep in the delete set — bulkDelete will surface the real
+          // RULE_NOT_FOUND error.
+          continue;
+        }
+        // Non-404 fetch error: the gate cannot evaluate this id. Fail closed.
+        errors.push(toBulkError(doc.id, doc.error));
+        refusedIds.add(doc.id);
         continue;
       }
       const owner = getManagedWriteOwner({
@@ -1826,12 +1838,7 @@ export class RulesClient {
     // BUILDER_TYPE_NOT_CLEARED guard as the PATCH path, for every builder rule,
     // managed or not.
     // Ref: rule-types.md "What this design needs from the framework"
-    const resolved = resolveReplaceRuleBuilder(
-      this.builderTypeRegistry,
-      id,
-      parsed,
-      existingAttrs
-    );
+    const resolved = resolveReplaceRuleBuilder(this.builderTypeRegistry, id, parsed, existingAttrs);
     // Resolve source for replace: omit keeps stored value (a PUT that omits
     // source cannot silently reset an external rule to internal). When present,
     // assertRuleSourceUnchanged above already confirmed type/id are unchanged.

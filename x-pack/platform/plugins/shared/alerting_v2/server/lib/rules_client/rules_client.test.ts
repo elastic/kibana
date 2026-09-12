@@ -2331,6 +2331,43 @@ describe('RulesClient', () => {
       expect(taskManager.bulkRemove).not.toHaveBeenCalled();
       expect(res).toEqual({ affected_count: 0, errors: [] });
     });
+
+    it('fails closed on a non-404 bulkGetByIds error: surfaces an error and does not pass the id to bulkDelete', async () => {
+      // The managed-rule gate must evaluate every id before deleting it. When
+      // bulkGetByIds returns an error that is not 404, the gate cannot evaluate
+      // the rule, so the id must be excluded from the delete set and surfaced
+      // as a per-item error instead (fail closed). A genuine 404 is the only
+      // case where passing through is safe, because bulkDelete produces the
+      // proper RULE_NOT_FOUND result in that case.
+      //
+      // Ref: rule-ownership.md "The write gate"
+      const client = createClient();
+
+      rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
+        {
+          id: 'rule-err',
+          error: {
+            error: 'Internal Server Error',
+            message: 'service unavailable',
+            statusCode: 503,
+          },
+        },
+        { id: 'rule-ok', attributes: baseSoAttrs, version: 'WzEsMV0=', references: [] },
+      ]);
+      getRuleExecutorTaskIdMock.mockReturnValueOnce('task:rule-ok');
+      rulesSavedObjectService.bulkDelete.mockResolvedValueOnce([{ id: 'rule-ok', success: true }]);
+
+      const res = await client.bulkDeleteRules({ ids: ['rule-err', 'rule-ok'] });
+
+      // The 503 id must not be passed to bulkDelete.
+      expect(rulesSavedObjectService.bulkDelete).toHaveBeenCalledWith(['rule-ok']);
+      expect(res.affected_count).toBe(1);
+      expect(res.errors).toHaveLength(1);
+      expect(res.errors[0]).toMatchObject({
+        id: 'rule-err',
+        error: expect.objectContaining({ message: 'service unavailable' }),
+      });
+    });
   });
 
   describe('bulkEnableRules', () => {
@@ -4971,7 +5008,11 @@ describe('RulesClient', () => {
       it('allows a matching-solution client to trigger a managed rule', async () => {
         const client = createClient(undefined, { solution: 'security' });
         rulesSavedObjectService.get.mockResolvedValueOnce(enabledManagedDoc('rule-run-2'));
-        taskManager.runSoon.mockResolvedValueOnce({ id: 'task-id', conflict: false, forced: false });
+        taskManager.runSoon.mockResolvedValueOnce({
+          id: 'task-id',
+          conflict: false,
+          forced: false,
+        });
         await expect(client.runRuleNow({ id: 'rule-run-2' })).resolves.toBeUndefined();
         expect(taskManager.runSoon).toHaveBeenCalled();
       });
@@ -5065,9 +5106,7 @@ describe('RulesClient', () => {
         const client = createClient(undefined, { solution: 'security' });
         rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([managedDoc('rule-m')]);
         getRuleExecutorTaskIdMock.mockReturnValueOnce('task:rule-m');
-        rulesSavedObjectService.bulkDelete.mockResolvedValueOnce([
-          { id: 'rule-m', success: true },
-        ]);
+        rulesSavedObjectService.bulkDelete.mockResolvedValueOnce([{ id: 'rule-m', success: true }]);
 
         const res = await client.bulkDeleteRules({ ids: ['rule-m'] });
 
@@ -5093,7 +5132,10 @@ describe('RulesClient', () => {
         expect(rulesSavedObjectService.bulkDelete).toHaveBeenCalledWith(['rule-plain']);
         expect(res.affected_count).toBe(1);
         expect(res.errors).toHaveLength(1);
-        expect(res.errors[0]).toMatchObject({ id: 'rule-managed', error: { code: 'RULE_IS_MANAGED' } });
+        expect(res.errors[0]).toMatchObject({
+          id: 'rule-managed',
+          error: { code: 'RULE_IS_MANAGED' },
+        });
       });
     });
 
@@ -5121,9 +5163,7 @@ describe('RulesClient', () => {
           { id: 'rule-m', attributes: disabledManagedAttrs, version: 'WzEsMV0=', references: [] },
         ]);
         taskManager.bulkSchedule.mockResolvedValueOnce([]);
-        rulesSavedObjectService.bulkUpdate.mockResolvedValueOnce([
-          { id: 'rule-m', success: true },
-        ]);
+        rulesSavedObjectService.bulkUpdate.mockResolvedValueOnce([{ id: 'rule-m', success: true }]);
 
         const res = await client.bulkEnableRules({ ids: ['rule-m'] });
 
@@ -5147,7 +5187,10 @@ describe('RulesClient', () => {
 
         expect(res.affected_count).toBe(1);
         expect(res.errors).toHaveLength(1);
-        expect(res.errors[0]).toMatchObject({ id: 'rule-managed', error: { code: 'RULE_IS_MANAGED' } });
+        expect(res.errors[0]).toMatchObject({
+          id: 'rule-managed',
+          error: { code: 'RULE_IS_MANAGED' },
+        });
       });
     });
 
@@ -5178,9 +5221,7 @@ describe('RulesClient', () => {
           { id: 'rule-m', attributes: enabledManagedAttrs, version: 'WzEsMV0=', references: [] },
         ]);
         getRuleExecutorTaskIdMock.mockReturnValueOnce('task:rule-m');
-        rulesSavedObjectService.bulkUpdate.mockResolvedValueOnce([
-          { id: 'rule-m', success: true },
-        ]);
+        rulesSavedObjectService.bulkUpdate.mockResolvedValueOnce([{ id: 'rule-m', success: true }]);
 
         const res = await client.bulkDisableRules({ ids: ['rule-m'] });
 
@@ -5194,8 +5235,18 @@ describe('RulesClient', () => {
         const enabledManagedAttrs = { ...managedSoAttrs, enabled: true };
         const enabledUnmanagedAttrs = { ...unmanagedSoAttrs, enabled: true };
         rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
-          { id: 'rule-managed', attributes: enabledManagedAttrs, version: 'WzEsMV0=', references: [] },
-          { id: 'rule-plain', attributes: enabledUnmanagedAttrs, version: 'WzEsMV0=', references: [] },
+          {
+            id: 'rule-managed',
+            attributes: enabledManagedAttrs,
+            version: 'WzEsMV0=',
+            references: [],
+          },
+          {
+            id: 'rule-plain',
+            attributes: enabledUnmanagedAttrs,
+            version: 'WzEsMV0=',
+            references: [],
+          },
         ]);
         getRuleExecutorTaskIdMock.mockReturnValueOnce('task:rule-plain');
         rulesSavedObjectService.bulkUpdate.mockResolvedValueOnce([
@@ -5206,7 +5257,10 @@ describe('RulesClient', () => {
 
         expect(res.affected_count).toBe(1);
         expect(res.errors).toHaveLength(1);
-        expect(res.errors[0]).toMatchObject({ id: 'rule-managed', error: { code: 'RULE_IS_MANAGED' } });
+        expect(res.errors[0]).toMatchObject({
+          id: 'rule-managed',
+          error: { code: 'RULE_IS_MANAGED' },
+        });
       });
     });
 
@@ -5246,9 +5300,7 @@ describe('RulesClient', () => {
           { id: 'rule-m', attributes: enabledManagedAttrs, version: 'WzEsMV0=', references: [] },
         ]);
         taskManager.bulkUpdateSchedules.mockResolvedValueOnce(rotationResult([taskId]));
-        rulesSavedObjectService.bulkUpdate.mockResolvedValueOnce([
-          { id: 'rule-m', success: true },
-        ]);
+        rulesSavedObjectService.bulkUpdate.mockResolvedValueOnce([{ id: 'rule-m', success: true }]);
 
         const res = await client.bulkUpdateApiKey({ ids: ['rule-m'] });
 
@@ -5264,8 +5316,18 @@ describe('RulesClient', () => {
         const taskId = 'task:rule-plain';
         getRuleExecutorTaskIdMock.mockReturnValue(taskId);
         rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
-          { id: 'rule-managed', attributes: enabledManagedAttrs, version: 'WzEsMV0=', references: [] },
-          { id: 'rule-plain', attributes: enabledUnmanagedAttrs, version: 'WzEsMV0=', references: [] },
+          {
+            id: 'rule-managed',
+            attributes: enabledManagedAttrs,
+            version: 'WzEsMV0=',
+            references: [],
+          },
+          {
+            id: 'rule-plain',
+            attributes: enabledUnmanagedAttrs,
+            version: 'WzEsMV0=',
+            references: [],
+          },
         ]);
         taskManager.bulkUpdateSchedules.mockResolvedValueOnce(rotationResult([taskId]));
         rulesSavedObjectService.bulkUpdate.mockResolvedValueOnce([
@@ -5276,7 +5338,10 @@ describe('RulesClient', () => {
 
         expect(res.affected_count).toBe(1);
         expect(res.errors).toHaveLength(1);
-        expect(res.errors[0]).toMatchObject({ id: 'rule-managed', error: { code: 'RULE_IS_MANAGED' } });
+        expect(res.errors[0]).toMatchObject({
+          id: 'rule-managed',
+          error: { code: 'RULE_IS_MANAGED' },
+        });
       });
     });
 

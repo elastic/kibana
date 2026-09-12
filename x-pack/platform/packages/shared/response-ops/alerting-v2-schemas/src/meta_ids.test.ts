@@ -9,6 +9,8 @@ import { z } from '@kbn/zod/v4';
 import {
   createRuleDataSchema,
   updateRuleBodySchema,
+  replaceRuleBodySchema,
+  replaceRuleMetadataSchema,
   ruleResponseSchema,
   findRulesResponseSchema,
   ruleTagsResponseSchema,
@@ -85,6 +87,8 @@ const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
   // rules
   [createRuleDataSchema, 'alerting_new_rule'],
   [updateRuleBodySchema, 'alerting_update_rule'],
+  [replaceRuleBodySchema, 'alerting_replace_rule'],
+  [replaceRuleMetadataSchema, 'alerting_replace_rule_metadata'],
   [ruleResponseSchema, 'alerting_rule_response'],
   [findRulesResponseSchema, 'alerting_rule_list_response'],
   [ruleTagsResponseSchema, 'alerting_rule_tags_response'],
