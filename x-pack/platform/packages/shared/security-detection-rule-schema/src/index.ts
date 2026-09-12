@@ -16,3 +16,22 @@ export {
 export type { DetectionRuleCommonFields } from './detection_rule_common_fields';
 
 export { DETECTION_RULE_TYPE_OWNERSHIP } from './type_ownership_map';
+
+export {
+  customQueryBuilderFieldsSchema,
+  securityDetectionQueryManifest,
+  securityDetectionQuery,
+} from './custom_query';
+export type { CustomQueryBuilderFields } from './custom_query';
+
+export {
+  thresholdBuilderFieldsSchema,
+  type ThresholdBuilderFields,
+} from './threshold_builder_fields';
+export { generateThresholdQuery } from './threshold_generate_query';
+export {
+  securityDetectionThresholdManifest,
+  validateThresholdFields,
+  deriveThresholdRuleFields,
+  securityDetectionThreshold,
+} from './threshold_definition';
