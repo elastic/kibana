@@ -90707,12 +90707,12 @@ components:
           type: string
         matcher:
           additionalProperties: false
-          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules that have those tags, or `expression` to a KQL query evaluated against each alert. If you set both, an alert must match the tags and the expression. If you set neither, the policy applies to all alerts.
+          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are empty, the policy applies to all alerts.
           nullable: true
           type: object
           properties:
             expression:
-              description: A KQL query evaluated against each alert. You can query `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, `rule.id`, `rule.name`, `rule.tags`, and your rule's query output columns under `data.*` (for example, `data.host.name`). A query that references any other field never matches, and no error is returned. Omit `matcher.expression` or set it to `null` to match on `matcher.tags` alone.
+              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, `rule.id`, `rule.name`, `rule.tags`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
               maxLength: 4096
               nullable: true
               type: string
@@ -91140,7 +91140,7 @@ components:
           type: object
           properties:
             tags:
-              description: Tags of the rule you want to check. The response includes policies whose `matcher.tags` contain at least one of the tags in this list, along with catch-all policies that apply to every rule.
+              description: Tags of the rule you want to check. The response includes policies whose `matcher.tags` contain at least one of the tags in this list, along with policies that apply to every rule.
               items:
                 maxLength: 256
                 minLength: 1
@@ -91221,11 +91221,11 @@ components:
           description: The grouping mode for alert notifications.
         matcher:
           additionalProperties: false
-          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules that have those tags, or `expression` to a KQL query evaluated against each alert. If you set both, an alert must match the tags and the expression. If you set neither, the policy applies to all alerts.
+          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are empty, the policy applies to all alerts.
           type: object
           properties:
             expression:
-              description: A KQL query evaluated against each alert. You can query `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, `rule.id`, `rule.name`, `rule.tags`, and your rule's query output columns under `data.*` (for example, `data.host.name`). A query that references any other field never matches, and no error is returned. Omit `matcher.expression` or set it to `null` to match on `matcher.tags` alone.
+              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, `rule.id`, `rule.name`, `rule.tags`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
               maxLength: 4096
               nullable: true
               type: string
@@ -92135,12 +92135,12 @@ components:
           nullable: true
         matcher:
           additionalProperties: false
-          description: 'Selects the alerts this policy applies to. Set `tags` to match alerts from rules that have those tags, or `expression` to a KQL query evaluated against each alert. If you set both, an alert must match the tags and the expression. Updating `matcher` replaces it entirely: to change `tags` without dropping `expression`, resend the current `expression` value. Set `matcher` to `null` to apply to all alerts.'
+          description: 'Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are empty, the policy applies to all alerts. <br/><br/> Updating `matcher` replaces it entirely: to change `tags` without dropping `expression`, resend the current `expression` value.'
           nullable: true
           type: object
           properties:
             expression:
-              description: A KQL query evaluated against each alert. You can query `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, `rule.id`, `rule.name`, `rule.tags`, and your rule's query output columns under `data.*` (for example, `data.host.name`). A query that references any other field never matches, and no error is returned. Omit `matcher.expression` or set it to `null` to match on `matcher.tags` alone.
+              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, `rule.id`, `rule.name`, `rule.tags`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
               maxLength: 4096
               nullable: true
               type: string

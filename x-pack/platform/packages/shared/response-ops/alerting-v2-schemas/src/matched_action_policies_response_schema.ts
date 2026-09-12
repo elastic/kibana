@@ -19,7 +19,7 @@ export const matchActionPoliciesForRuleBodySchema = z
           .max(100)
           .optional()
           .describe(
-            'Tags of the rule you want to check. The response includes policies whose `matcher.tags` contain at least one of the tags in this list, along with catch-all policies that apply to every rule.'
+            'Tags of the rule you want to check. The response includes policies whose `matcher.tags` contain at least one of the tags in this list, along with policies that apply to every rule.'
           ),
       })
       .strict()
