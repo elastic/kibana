@@ -140,6 +140,12 @@ function mockCapabilities(
 }
 
 describe('WorkflowsPage authorization', () => {
+  // The header renders its menu via a lazy `import('@kbn/ui-app-menu')`; warm that chunk once (via its
+  // re-export) so its first uncached load can't run inside a timed test and race the 5s Jest budget under CI load.
+  beforeAll(async () => {
+    await import('@kbn/app-menu');
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseWorkflows.mockReturnValue(emptyWorkflowsResult as any);
