@@ -795,6 +795,18 @@ describe('ProposalsService', () => {
       );
     });
 
+    it('excludes superseded proposals from the queue', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.listByWindow(activityQuery(), SPACE_ID);
+
+      const [[searchArgs]] = storage.search.mock.calls;
+      expect(searchArgs.query.bool.must_not).toEqual([
+        { exists: { field: 'supersededBy' } },
+      ]);
+    });
+
     it('returns truncated=true when total exceeds the cap', async () => {
       const doc = baseDocument();
       const storage = {
@@ -849,5 +861,43 @@ describe('ProposalsService', () => {
       expect(proposals[0]).not.toHaveProperty('impactRank');
       expect(proposals[0]).not.toHaveProperty('confidenceRank');
     });
+  });
+});
+
+
+describe('ProposalsService.update supersededBy', () => {
+  it('persists supersededBy alongside the failed transition', async () => {
+    const storage = createStorage(baseDocument({ status: 'executing' }));
+    const { service } = createService(storage);
+
+    await service.update(
+      { id: 'p1', status: 'failed', executionError: 'RBAC rejected', supersededBy: 'clone-1' },
+      SPACE_ID
+    );
+
+    const [[indexArgs]] = storage.index.mock.calls;
+    expect(indexArgs.document.supersededBy).toBe('clone-1');
+  });
+
+  it('keeps supersededBy undefined on an ordinary status transition', async () => {
+    const storage = createStorage(baseDocument({ status: 'executing' }));
+    const { service } = createService(storage);
+
+    await service.update({ id: 'p1', status: 'succeeded' }, SPACE_ID);
+
+    const [[indexArgs]] = storage.index.mock.calls;
+    expect(indexArgs.document.supersededBy).toBeUndefined();
+  });
+
+  it('rejects writing supersededBy to an already-settled proposal', async () => {
+    const storage = createStorage(baseDocument({ status: 'failed' }));
+    const { service } = createService(storage);
+
+    await expect(
+      service.update(
+        { id: 'p1', status: 'failed', supersededBy: 'clone-1' },
+        SPACE_ID
+      )
+    ).rejects.toThrow(/already settled/);
   });
 });

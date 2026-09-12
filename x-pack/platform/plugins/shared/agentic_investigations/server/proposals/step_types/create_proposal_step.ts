@@ -6,8 +6,10 @@
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { createProposalStepCommonDefinition } from '../../../common/proposals/step_types/create_proposal_step';
 import { resolveExpiresAt } from './resolve_expires_at';
+import { assertManageProposals } from './assert_manage_proposals';
 import type { ProposalsService } from '../services/proposals_service';
 import type { ResolveProposalUser } from '../services/resolve_proposal_user';
 
@@ -19,9 +21,11 @@ import type { ResolveProposalUser } from '../services/resolve_proposal_user';
 export const getCreateProposalStepDefinition = ({
   getProposalsService,
   resolveUser,
+  getSecurity,
 }: {
   getProposalsService: () => ProposalsService;
   resolveUser: ResolveProposalUser;
+  getSecurity: () => SecurityPluginStart;
 }) =>
   createServerStepDefinition({
     ...createProposalStepCommonDefinition,
@@ -30,6 +34,13 @@ export const getCreateProposalStepDefinition = ({
         const workflowContext = context.contextManager.getContext();
         const spaceId = workflowContext.workflow.spaceId;
         const workflowExecutionId = workflowContext.execution.id;
+
+        await assertManageProposals({
+          request: context.contextManager.getFakeRequest(),
+          security: getSecurity(),
+          spaceId,
+        });
+
         // The step runs under the execution's own credentials, so the fake
         // request is what identifies the Worker that is proposing.
         const user = await resolveUser(context.contextManager.getFakeRequest());
