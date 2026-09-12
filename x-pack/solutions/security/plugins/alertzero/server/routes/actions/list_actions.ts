@@ -24,7 +24,10 @@ import { API_VERSIONS, INTERNAL_API_ACCESS, ALERTZERO_ACTIONS_URL } from '@kbn/a
 import type { ListActionsResponse } from '@kbn/alertzero-common';
 import { ALERTZERO_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
-import { readActionCategoriesQueryParam } from './read_categories_query_param';
+import {
+  InvalidCategoriesError,
+  readActionCategoriesQueryParam,
+} from './read_categories_query_param';
 
 export const registerListActionsRoute = ({
   router,
@@ -59,6 +62,9 @@ export const registerListActionsRoute = ({
           );
           return response.ok({ body });
         } catch (error) {
+          if (error instanceof InvalidCategoriesError) {
+            return response.badRequest({ body: { message: error.message } });
+          }
           logger.error(`Failed to list actions: ${error}`);
           return response.customError({
             statusCode: 500,

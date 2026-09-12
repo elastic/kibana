@@ -40,7 +40,7 @@ const listByCategorySchema = z.object({
 });
 
 /**
- * `security.alertzero.actions.listByCategory` — lets an agent discover the
+ * `security.alertzero.actions.list_by_category` — lets an agent discover the
  * installed action workflows at runtime instead of hard-coding workflow ids.
  *
  * Registered by the AlertZero plugin (setup), reads the catalog through

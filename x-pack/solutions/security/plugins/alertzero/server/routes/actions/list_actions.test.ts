@@ -78,6 +78,21 @@ describe('registerListActionsRoute', () => {
     expect(list).toHaveBeenCalledWith('default', undefined);
   });
 
+  it('maps an invalid categories param to 400 with the param message', async () => {
+    const { handler } = makeDeps({ list: jest.fn() });
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      path: '/internal/alertzero/actions',
+      query: { categories: Array(21).fill('c') },
+    });
+    await handler({}, request, response);
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: {
+        message: expect.stringContaining('at most 20'),
+      },
+    });
+  });
+
   it('maps service errors to 500', async () => {
     const list = jest.fn().mockRejectedValue(new Error('boom'));
     const { handler } = makeDeps({ list });

@@ -50,14 +50,16 @@ describe('readActionCategoriesQueryParam', () => {
   });
 
   it('splits a comma-joined single value', () => {
-    expect(readActionCategoriesQueryParam(requestWithQuery({ categories: 'contain,tune' }))).toEqual(
-      ['contain', 'tune']
-    );
+    expect(
+      readActionCategoriesQueryParam(requestWithQuery({ categories: 'contain,tune' }))
+    ).toEqual(['contain', 'tune']);
   });
 
   it('rejects more than the max values even when comma-joined', () => {
     expect(() =>
-      readActionCategoriesQueryParam(requestWithQuery({ categories: Array(21).fill('c').join(',') }))
+      readActionCategoriesQueryParam(
+        requestWithQuery({ categories: Array(21).fill('c').join(',') })
+      )
     ).toThrow(/at most 20/);
   });
 
