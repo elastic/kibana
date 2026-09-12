@@ -140,8 +140,7 @@ describe('thresholdBuilderFieldsSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('rejects lucene as language', () => {
-    // lucene is in the enum, so this should succeed
+  it('accepts lucene as language', () => {
     const result = thresholdBuilderFieldsSchema.safeParse({ ...base, language: 'lucene' });
     expect(result.success).toBe(true);
   });
