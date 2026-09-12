@@ -71,7 +71,11 @@ describe('enrichDetectionRuleEvent', () => {
   });
 
   it('does not read from the row — a non-empty row does not change the output', () => {
-    const withEmptyRow = enrichDetectionRuleEvent({ fields: BASE_FIELDS, rule: BASE_RULE, row: {} });
+    const withEmptyRow = enrichDetectionRuleEvent({
+      fields: BASE_FIELDS,
+      rule: BASE_RULE,
+      row: {},
+    });
     const withNonEmptyRow = enrichDetectionRuleEvent({
       fields: BASE_FIELDS,
       rule: BASE_RULE,

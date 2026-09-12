@@ -12,7 +12,10 @@ import type {
 } from '@kbn/alerting-v2-rule-builders';
 import { DETECTION_RULE_FRAGMENT_SUB_FIELD_MAPPINGS } from './detection_rule_common_fields';
 import { enrichDetectionRuleEvent } from './enrich_detection_rule_event';
-import { thresholdBuilderFieldsSchema, type ThresholdBuilderFields } from './threshold_builder_fields';
+import {
+  thresholdBuilderFieldsSchema,
+  type ThresholdBuilderFields,
+} from './threshold_builder_fields';
 import { generateThresholdQuery } from './threshold_generate_query';
 
 // ---------------------------------------------------------------------------

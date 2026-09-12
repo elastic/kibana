@@ -46,14 +46,22 @@ describe('detectionRuleCommonFields – valid example', () => {
       threat: [
         {
           framework: 'MITRE ATT&CK',
-          tactic: { id: 'TA0002', name: 'Execution', reference: 'https://attack.mitre.org/tactics/TA0002/' },
+          tactic: {
+            id: 'TA0002',
+            name: 'Execution',
+            reference: 'https://attack.mitre.org/tactics/TA0002/',
+          },
           technique: [
             {
               id: 'T1059',
               name: 'Command and Scripting Interpreter',
               reference: 'https://attack.mitre.org/techniques/T1059/',
               subtechnique: [
-                { id: 'T1059.001', name: 'PowerShell', reference: 'https://attack.mitre.org/techniques/T1059/001/' },
+                {
+                  id: 'T1059.001',
+                  name: 'PowerShell',
+                  reference: 'https://attack.mitre.org/techniques/T1059/001/',
+                },
               ],
             },
           ],

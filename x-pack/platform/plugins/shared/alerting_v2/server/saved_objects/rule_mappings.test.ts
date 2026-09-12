@@ -7,6 +7,9 @@
 
 import { BUILDER_FIELDS_IGNORE_ABOVE } from '@kbn/alerting-v2-constants';
 import { ruleMappings } from './rule_mappings';
+// Importing ruleModelVersions triggers fromBuilderManifest() side effects
+// (globalFoldedVersions population) needed by the cross-check below.
+import { ruleModelVersions } from './model_versions/rule_model_versions';
 
 describe('ruleMappings', () => {
   // ---------------------------------------------------------------------------
@@ -34,6 +37,52 @@ describe('ruleMappings', () => {
 
     it('sets ignore_above to the framework constant', () => {
       expect(getBuilderFieldsMapping()?.ignore_above).toBe(BUILDER_FIELDS_IGNORE_ABOVE);
+    });
+
+    it('every mappings_addition builder_fields property in ruleModelVersions is a subset of the static mapping', () => {
+      // Guard: the static mapping drives the schema for builder_fields.properties.
+      // Each manifest fold emits a mappings_addition; core's startup consistency
+      // check requires every added property to already exist in the static mapping.
+      // This test proves that statically, so the failure surface is a test run
+      // rather than a Kibana boot failure.
+      //
+      // Ref: rule-type-registration.md "The fold into the saved-object registration"
+      const staticBuilderFieldsProperties = (getBuilderFieldsMapping()?.properties ?? {}) as Record<
+        string,
+        unknown
+      >;
+
+      for (const [versionKey, versionDef] of Object.entries(ruleModelVersions)) {
+        const version = versionDef as {
+          changes?: Array<{ type: string; addedMappings?: unknown }>;
+        };
+        for (const change of version.changes ?? []) {
+          if (change.type !== 'mappings_addition') continue;
+          // Drill into addedMappings.metadata.properties.builder_fields.properties
+          const addedMappings = change.addedMappings as Record<string, unknown> | undefined;
+          const metadataProps = (addedMappings?.metadata as { properties?: unknown } | undefined)
+            ?.properties as Record<string, unknown> | undefined;
+          const addedBuilderFields = (
+            metadataProps?.builder_fields as { properties?: unknown } | undefined
+          )?.properties as Record<string, unknown> | undefined;
+          if (!addedBuilderFields) continue;
+
+          for (const key of Object.keys(addedBuilderFields)) {
+            expect(staticBuilderFieldsProperties).toHaveProperty(
+              key,
+              undefined === staticBuilderFieldsProperties[key]
+                ? undefined
+                : staticBuilderFieldsProperties[key]
+            );
+            // Use a real assertion: the static mapping must contain this key.
+            expect(Object.keys(staticBuilderFieldsProperties)).toContain(key);
+            // And the mapping for that key must match exactly.
+            expect(staticBuilderFieldsProperties[key]).toEqual(addedBuilderFields[key]);
+          }
+        }
+        // reference versionKey in assertion message
+        void versionKey;
+      }
     });
 
     it('carries the merged sub-field mappings from the two detection-type manifests', () => {

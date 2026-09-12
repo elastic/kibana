@@ -13,12 +13,18 @@
  * lives in this plugin (packages cannot import from plugins).  This test file
  * lives here so it can import both and run the framework's extended check.
  *
+ * Both schemas are imported from the production package so this check runs
+ * over the schemas that actually ship.  A copy that drifted silently would
+ * undermine the bounded-schema claim made in rule-data-model.md.
+ *
  * Ref: implementation-plan.md step 3.1
  *      rule-data-model.md "The bounded-schema budget"
  */
 
 import { z } from '@kbn/zod/v4';
 import {
+  customQueryBuilderFieldsSchema,
+  thresholdBuilderFieldsSchema,
   detectionRuleCommonFields,
   DETECTION_RULE_FRAGMENT_SUB_FIELD_MAPPINGS,
 } from '@kbn/security-detection-rule-schema';
@@ -29,46 +35,6 @@ import {
 } from '@kbn/alerting-v2-constants';
 import { assertBoundedSchema } from './assert_bounded_schema';
 import type { BoundedSchemaSubject } from './assert_bounded_schema';
-
-// ---------------------------------------------------------------------------
-// Replicate the two POC type schemas exactly as the data model defines them,
-// so the bounded-schema check runs over the full shape.
-// ---------------------------------------------------------------------------
-
-const customQueryBuilderFieldsSchema = z
-  .object({
-    ...detectionRuleCommonFields,
-    index: z.array(z.string().min(1).max(256)).min(1).max(32),
-    query: z.string().min(1).max(8192),
-    language: z.enum(['kuery', 'lucene']),
-  })
-  .strict();
-
-const thresholdBuilderFieldsSchema = z
-  .object({
-    ...detectionRuleCommonFields,
-    index: z.array(z.string().min(1).max(256)).min(1).max(32),
-    query: z.string().max(8192),
-    language: z.enum(['kuery', 'lucene']),
-    threshold: z
-      .object({
-        field: z.array(z.string().min(1).max(256)).max(5),
-        value: z.number().int().min(1),
-        cardinality: z
-          .array(
-            z
-              .object({
-                field: z.string().min(1).max(256),
-                value: z.number().int().min(0),
-              })
-              .strict()
-          )
-          .max(1)
-          .optional(),
-      })
-      .strict(),
-  })
-  .strict();
 
 // ---------------------------------------------------------------------------
 // The builder-schema subject used by the registry for all builder types.
@@ -93,17 +59,11 @@ const builderSubject: BoundedSchemaSubject = {
 describe('assertBoundedSchema – security.detection.query', () => {
   it('passes the full bounded-schema check', () => {
     expect(() =>
-      assertBoundedSchema(customQueryBuilderFieldsSchema, 'security.detection.query', builderSubject)
-    ).not.toThrow();
-  });
-
-  it('records the measured worst-case byte size (informational)', () => {
-    // This test exists purely to capture the actual number in the test output.
-    // It does not assert a specific number, only that the schema fits.
-    // Actual measurement happens inside assertBoundedSchema; the design predicts
-    // roughly 190 KB — the exact number is recorded in the test run output.
-    expect(() =>
-      assertBoundedSchema(customQueryBuilderFieldsSchema, 'security.detection.query', builderSubject)
+      assertBoundedSchema(
+        customQueryBuilderFieldsSchema,
+        'security.detection.query',
+        builderSubject
+      )
     ).not.toThrow();
   });
 });
