@@ -128137,7 +128137,11 @@ components:
         runtime_mappings:
           additionalProperties:
             $ref: '#/components/schemas/Security_Detections_API_RuntimeFieldMapping'
-          description: 'Optional map of runtime field name to runtime field mapping. For each entry the server forwards `type`, `script.source`, and `format` to the underlying `_update_by_query` as `runtime_mappings`, so the close query can match fields not natively mapped on the alerts index (e.g. data view runtime fields with Painless scripts). Unlike `runtime_fields`, the caller-supplied Painless script is preserved and executed by Elasticsearch at query time. The server always sets `on_script_error: continue` regardless of any value supplied by the caller, so a single alert that causes a script error is skipped rather than aborting the entire close. Limited to 100 unique field names combined with `runtime_fields`; larger maps are rejected.'
+          description: |-
+            Use this when the query references fields that are not in the alerts index mapping, for example data view runtime fields with a Painless script.
+            Kibana sends `type`, `script.source`, and `format` to Elasticsearch as `runtime_mappings` on the status-update query. Unlike `runtime_fields`, Kibana keeps your script and runs it at query time. It does not replace the script with a `_source` reader.
+            When a script is present, Kibana sets `on_script_error` to `continue`. If the script fails on one alert, that field has no value for the alert and the update continues.
+            Unique field names across `runtime_fields` and `runtime_mappings` combined cannot exceed 100. Larger maps are rejected.
           maxProperties: 100
           type: object
         status:
@@ -131701,16 +131705,16 @@ components:
       required:
         - command
     Security_Detections_API_RuntimeFieldMapping:
-      description: A single runtime field mapping to be attached verbatim to the `_update_by_query` as `runtime_mappings`. Allows the close query to reference fields that are not natively mapped on the alerts index but are evaluatable at query time by Elasticsearch — for example, scripted fields defined on a data view.
+      description: A runtime field included in the status-update query so the query can match fields that are not in the alerts index mapping, for example scripted fields on a data view. Elasticsearch evaluates the field at query time.
       type: object
       properties:
         format:
-          description: Optional format string for date runtime fields (e.g. `strict_date_optional_time`).
+          description: Format string for date runtime fields, for example `strict_date_optional_time`.
           maxLength: 100
           type: string
         script:
           additionalProperties: false
-          description: Painless script that Elasticsearch evaluates for each candidate document. Only inline scripts (`source`) are accepted — stored scripts, parameterised scripts (`params`), and non-default `lang` values are not supported. The server rejects any extra properties with a 400 to avoid silently changing runtime field semantics.
+          description: Inline Painless script that Elasticsearch evaluates for each alert. Only `source` is accepted. Stored scripts, parameterized scripts (`params`), and non-default `lang` values are not supported. Extra properties are rejected with a 400 so the script is not run with different semantics.
           type: object
           properties:
             source:
@@ -132301,7 +132305,11 @@ components:
         runtime_mappings:
           additionalProperties:
             $ref: '#/components/schemas/Security_Detections_API_RuntimeFieldMapping'
-          description: 'Optional map of runtime field name to runtime field mapping. For each entry the server forwards `type`, `script.source`, and `format` to the underlying `_update_by_query` as `runtime_mappings`, so the close query can match fields not natively mapped on the alerts index (e.g. data view runtime fields with Painless scripts). Unlike `runtime_fields`, the caller-supplied Painless script is preserved and executed by Elasticsearch at query time. The server always sets `on_script_error: continue` regardless of any value supplied by the caller, so a single alert that causes a script error is skipped rather than aborting the entire close. Limited to 100 unique field names combined with `runtime_fields`; larger maps are rejected.'
+          description: |-
+            Use this when the query references fields that are not in the alerts index mapping, for example data view runtime fields with a Painless script.
+            Kibana sends `type`, `script.source`, and `format` to Elasticsearch as `runtime_mappings` on the status-update query. Unlike `runtime_fields`, Kibana keeps your script and runs it at query time. It does not replace the script with a `_source` reader.
+            When a script is present, Kibana sets `on_script_error` to `continue`. If the script fails on one alert, that field has no value for the alert and the update continues.
+            Unique field names across `runtime_fields` and `runtime_mappings` combined cannot exceed 100. Larger maps are rejected.
           maxProperties: 100
           type: object
         status:
