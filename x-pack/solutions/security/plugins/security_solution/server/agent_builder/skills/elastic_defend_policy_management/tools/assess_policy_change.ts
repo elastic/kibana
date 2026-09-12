@@ -91,7 +91,8 @@ type AssessmentPresentation = Readonly<{
   policy: PresentedPolicy;
   spaceId: string;
   requestedOperations: readonly (
-    PresentedRequestedOperation | PresentedRequestedOperationIdentity
+    | PresentedRequestedOperation
+    | PresentedRequestedOperationIdentity
   )[];
   requestedImpact: readonly PresentedPolicyChangeFact[];
   expandedChanges: readonly PresentedPolicyChangeFact[];

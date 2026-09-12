@@ -72,7 +72,10 @@ export const TIGHTER_TRIM_LIMITS: readonly TrimLimits[] = [
 ];
 
 export type TruncationReason =
-  'string_truncated' | 'array_truncated' | 'object_truncated' | 'depth_truncated';
+  | 'string_truncated'
+  | 'array_truncated'
+  | 'object_truncated'
+  | 'depth_truncated';
 
 export type TruncationEntry = Readonly<{
   path: string;
@@ -299,7 +302,13 @@ export const presentFromTo = (
 export const GUARDED_ENVELOPE_HEADROOM_TOKENS = 64;
 
 type PolicyIdentityStringKey =
-  'id' | 'name' | 'description' | 'version' | 'updatedAt' | 'updatedBy' | 'packageVersion';
+  | 'id'
+  | 'name'
+  | 'description'
+  | 'version'
+  | 'updatedAt'
+  | 'updatedBy'
+  | 'packageVersion';
 
 export type PresentedPolicyIdentity<T extends Partial<PolicyIdentity> = PolicyIdentity> = Pick<
   T,
@@ -308,9 +317,9 @@ export type PresentedPolicyIdentity<T extends Partial<PolicyIdentity> = PolicyId
   Partial<Record<`${Extract<keyof T, PolicyIdentityStringKey>}_string_truncated`, true>>;
 
 type WritablePresentedIdentity = {
-  -readonly [
-    Key in keyof PresentedPolicyIdentity<Partial<PolicyIdentity>>
-  ]?: PresentedPolicyIdentity<Partial<PolicyIdentity>>[Key];
+  -readonly [Key in keyof PresentedPolicyIdentity<
+    Partial<PolicyIdentity>
+  >]?: PresentedPolicyIdentity<Partial<PolicyIdentity>>[Key];
 };
 
 const IDENTITY_STRING_KEYS = [
