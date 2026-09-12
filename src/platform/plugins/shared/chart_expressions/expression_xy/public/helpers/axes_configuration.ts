@@ -18,8 +18,15 @@ import type {
   ReferenceLineDecorationConfig,
   YAxisConfigResult,
   XAxisConfigResult,
+  AxisFormatPolicy,
 } from '../../common';
 import type { LayersFieldFormats } from './layers';
+import {
+  groupAxisSeries,
+  LEFT_AXIS_GROUP_ID,
+  RIGHT_AXIS_GROUP_ID,
+  type AxisSeriesDescriptor,
+} from '../../common/axis_grouping';
 
 export interface Series {
   layer: string;
@@ -29,10 +36,6 @@ export interface Series {
 interface FormattedMetric extends Series {
   fieldFormat: SerializedFieldFormat;
   axisId?: string;
-}
-
-interface AxesSeries {
-  [key: string]: FormattedMetric[];
 }
 
 export interface AxisConfiguration extends Omit<YAxisConfig, 'id'> {
@@ -56,32 +59,12 @@ export function isFormatterCompatible(
   return formatter1?.id === formatter2?.id;
 }
 
-const LEFT_GLOBAL_AXIS_ID = 'left';
-const RIGHT_GLOBAL_AXIS_ID = 'right';
-
-function isAxisSeriesAppliedForFormatter(
-  series: FormattedMetric[],
-  currentSeries: FormattedMetric
-) {
-  return series.every((leftSeries) =>
-    isFormatterCompatible(leftSeries.fieldFormat, currentSeries.fieldFormat)
-  );
-}
-
 export function groupAxesByType(
   layers: CommonXYDataLayerConfig[],
   fieldFormats: LayersFieldFormats,
   yAxisConfigs?: YAxisConfig[]
-) {
-  const series: AxesSeries = {
-    auto: [],
-    left: [],
-    right: [],
-  };
-
-  const leftSeriesKeys: string[] = [];
-  const rightSeriesKeys: string[] = [];
-
+): Record<string, FormattedMetric[]> {
+  const descriptors: AxisSeriesDescriptor[] = [];
   layers.forEach((layer) => {
     const { layerId, table } = layer;
     layer.accessors.forEach((accessor) => {
@@ -98,65 +81,27 @@ export function groupAxesByType(
       );
       const key = axisConfigById?.id ? `axis-${axisConfigById?.id}` : 'auto';
       const fieldFormat = fieldFormats[layerId].yAccessors[yAccessor]!;
-      if (!series[key]) {
-        series[key] = [];
-      }
-      series[key].push({ layer: layer.layerId, accessor: yAccessor, fieldFormat });
-
-      if (axisConfigById?.position === Position.Left) {
-        leftSeriesKeys.push(key);
-      } else if (axisConfigById?.position === Position.Right) {
-        rightSeriesKeys.push(key);
-      }
+      descriptors.push({
+        layerId,
+        accessor: yAccessor,
+        fieldFormat,
+        requestedGroupId: key,
+        requestedGroupPosition: axisConfigById?.position,
+      });
     });
   });
 
   const tablesExist = layers.filter(({ table }) => Boolean(table)).length > 0;
-
-  if (!leftSeriesKeys.length) {
-    leftSeriesKeys.push(LEFT_GLOBAL_AXIS_ID);
+  const groupedSeries = groupAxisSeries(descriptors, tablesExist);
+  const seriesByGroup: Record<string, FormattedMetric[]> = {};
+  for (const [groupId, group] of Object.entries(groupedSeries)) {
+    seriesByGroup[groupId] = group.map(({ layerId, accessor, fieldFormat }) => ({
+      layer: layerId,
+      accessor,
+      fieldFormat,
+    }));
   }
-
-  if (!rightSeriesKeys.length) {
-    rightSeriesKeys.push(RIGHT_GLOBAL_AXIS_ID);
-  }
-
-  series.auto.forEach((currentSeries) => {
-    const leftAxisGroupId = tablesExist
-      ? leftSeriesKeys.find((leftSeriesKey) =>
-          isAxisSeriesAppliedForFormatter(series[leftSeriesKey], currentSeries)
-        )
-      : undefined;
-
-    const rightAxisGroupId = tablesExist
-      ? rightSeriesKeys.find((rightSeriesKey) =>
-          isAxisSeriesAppliedForFormatter(series[rightSeriesKey], currentSeries)
-        )
-      : undefined;
-
-    const rightSeriesCount = rightSeriesKeys.reduce((acc, key) => {
-      return acc + series[key].length;
-    }, 0);
-    const leftSeriesCount = leftSeriesKeys.reduce((acc, key) => {
-      return acc + series[key].length;
-    }, 0);
-
-    let axisGroupId;
-
-    if (leftSeriesCount === 0 || leftAxisGroupId) {
-      axisGroupId = leftAxisGroupId || leftSeriesKeys[0];
-    } else if (rightSeriesCount === 0 || rightAxisGroupId) {
-      axisGroupId = rightAxisGroupId || rightSeriesKeys[0];
-    } else if (rightSeriesCount >= leftSeriesCount) {
-      axisGroupId = leftSeriesKeys[0];
-    } else {
-      axisGroupId = rightSeriesKeys[0];
-    }
-
-    series[axisGroupId].push(currentSeries);
-  });
-
-  return series;
+  return seriesByGroup;
 }
 
 export function getAxisPosition(position: Position, shouldRotate: boolean) {
@@ -213,7 +158,8 @@ export function getAxesConfiguration(
   shouldRotate: boolean,
   formatFactory: FormatFactory | undefined,
   fieldFormats: LayersFieldFormats,
-  axisConfigs?: Array<XAxisConfigResult | YAxisConfigResult>
+  axisConfigs?: Array<XAxisConfigResult | YAxisConfigResult>,
+  axisFormatPolicies?: AxisFormatPolicy[]
 ): GroupsConfiguration {
   const series = groupAxesByType(layers, fieldFormats, axisConfigs);
 
@@ -226,7 +172,10 @@ export function getAxesConfiguration(
       position = getAxisPosition(axis.position || Position.Left, shouldRotate);
       axisGroups.push({
         groupId,
-        formatter: formatFactory?.(series[groupId][0].fieldFormat),
+        formatter: formatFactory?.(
+          axisFormatPolicies?.find((policy) => policy.groupId === groupId)?.formatter ??
+            series[groupId][0].fieldFormat
+        ),
         series: series[groupId].map(({ fieldFormat, ...currentSeries }) => currentSeries),
         ...axisGlobalConfig(axis.position || Position.Left, axisConfigs),
         ...axis,
@@ -235,22 +184,28 @@ export function getAxesConfiguration(
     }
   });
 
-  if (series[LEFT_GLOBAL_AXIS_ID].length > 0) {
+  if (series[LEFT_AXIS_GROUP_ID].length > 0) {
     position = shouldRotate ? Position.Bottom : Position.Left;
     axisGroups.push({
-      groupId: LEFT_GLOBAL_AXIS_ID,
-      formatter: formatFactory?.(series.left[0].fieldFormat),
+      groupId: LEFT_AXIS_GROUP_ID,
+      formatter: formatFactory?.(
+        axisFormatPolicies?.find((policy) => policy.groupId === LEFT_AXIS_GROUP_ID)?.formatter ??
+          series.left[0].fieldFormat
+      ),
       series: series.left.map(({ fieldFormat, ...currentSeries }) => currentSeries),
       ...axisGlobalConfig(Position.Left, axisConfigs),
       position,
     });
   }
 
-  if (series[RIGHT_GLOBAL_AXIS_ID].length > 0) {
+  if (series[RIGHT_AXIS_GROUP_ID].length > 0) {
     position = shouldRotate ? Position.Top : Position.Right;
     axisGroups.push({
-      groupId: RIGHT_GLOBAL_AXIS_ID,
-      formatter: formatFactory?.(series.right[0].fieldFormat),
+      groupId: RIGHT_AXIS_GROUP_ID,
+      formatter: formatFactory?.(
+        axisFormatPolicies?.find((policy) => policy.groupId === RIGHT_AXIS_GROUP_ID)?.formatter ??
+          series.right[0].fieldFormat
+      ),
       series: series.right.map(({ fieldFormat, ...currentSeries }) => currentSeries),
       ...axisGlobalConfig(Position.Right, axisConfigs),
       position,
