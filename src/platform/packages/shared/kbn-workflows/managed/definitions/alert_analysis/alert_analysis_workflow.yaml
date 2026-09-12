@@ -1007,6 +1007,11 @@ steps:
               # partial batch: the verdicts it did return are applied, the rest get error notes.
               continue: true
             with:
+              # Context is pre-built, so strip the tool belt: no tool calls, and smaller framework prompt.
+              configuration_overrides:
+                enable_elastic_capabilities: false
+                tools: []
+                skill_ids: []
               message: "{{ steps.build_agent_message.output.message }}"
 
               # Structured output schema the AI agent must conform to: one verdict object per
