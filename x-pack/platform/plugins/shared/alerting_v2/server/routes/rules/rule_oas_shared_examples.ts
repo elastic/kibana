@@ -54,6 +54,7 @@ export const RULE_RESPONSE: RuleResponse = {
   enabled: true,
   metadata: {
     ...SAMPLE_RULE_DATA.metadata,
+    signature_id: 'host-cpu-high-v1',
     version: 1,
   },
   created_by: 'elastic',

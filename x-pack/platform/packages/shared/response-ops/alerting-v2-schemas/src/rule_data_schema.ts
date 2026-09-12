@@ -25,6 +25,7 @@ import {
   MAX_ARTIFACT_DATA_FIELDS,
   MAX_BUILDER_FIELDS_KEYS,
   MAX_BUILDER_TYPE_LENGTH,
+  MAX_SIGNATURE_ID_LENGTH,
 } from './constants';
 
 /** Primitives */
@@ -101,6 +102,22 @@ export const metadataSchema = z
       .min(1)
       .optional()
       .describe('Tags for categorization, e.g. ["production", "infra"].'),
+    /**
+     * Stable logical-rule identifier. Callers may supply an opaque string (1–256
+     * chars) at creation; when absent the framework generates a UUID v4. The value
+     * is immutable after creation: an update or PUT-replace omitting the field
+     * keeps the stored value, and sending a differing value is rejected with 409.
+     * Unique within a space (same value in two spaces represents the same logical
+     * rule installed twice, which is the expected cross-space use case).
+     */
+    signature_id: z
+      .string()
+      .min(1)
+      .max(MAX_SIGNATURE_ID_LENGTH)
+      .optional()
+      .describe(
+        'Stable logical-rule identifier. Optional at creation — generated when absent. Immutable after creation.'
+      ),
     builder_type: builderTypeSchema.optional(),
     builder_fields: builderFieldsSchema.optional(),
   })
@@ -776,9 +793,20 @@ export const updateRuleBodySchema = updateRuleDataSchema
 
 export type UpdateRuleBody = z.infer<typeof updateRuleBodySchema>;
 
-/** Rule response metadata — write-path fields plus server-managed `version`. */
+/** Rule response metadata — write-path fields plus server-managed fields. */
 export const ruleResponseMetadataSchema = metadataSchema
   .extend({
+    /**
+     * `signature_id` is optional on write (generated when absent) but the
+     * framework always sets it at create time, so responses always carry it.
+     */
+    signature_id: z
+      .string()
+      .min(1)
+      .max(MAX_SIGNATURE_ID_LENGTH)
+      .describe(
+        'Stable logical-rule identifier. Set at creation (caller-supplied or UUID v4). Immutable.'
+      ),
     version: z
       .number()
       .int()

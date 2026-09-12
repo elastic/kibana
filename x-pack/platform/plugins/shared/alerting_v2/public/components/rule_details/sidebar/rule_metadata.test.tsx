@@ -27,7 +27,7 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
-  metadata: { name: 'Test Signal Rule', version: 1 },
+  metadata: { name: 'Test Signal Rule', signature_id: 'test-sig-id', version: 1 },
   created_by: ALICE_UID,
   created_at: '2026-03-01T12:00:00.000Z',
   updated_by: BOB_UID,
