@@ -54,6 +54,8 @@ export function createI18nKeys(connectorId: string) {
 export interface ConnectorMetadata {
   id: string;
   displayName: string;
+  /** Stable name used for licensing feature usage when it differs from the user-facing display name. */
+  featureUsageName?: string;
   icon?: string;
   description: string;
   /**
@@ -313,8 +315,10 @@ export interface ActionContext {
 
 export interface TemplateRendering {
   enabled: boolean;
-  format?: 'mustache' | 'handlebars' | 'custom';
-  escaping?: 'html' | 'json' | 'markdown' | 'none';
+  format?: 'mustache';
+  escaping?: 'html' | 'json' | 'markdown' | 'slack' | 'none';
+  /** When set, escaping applies only to values with one of these field names. */
+  escapingFields?: readonly string[];
 }
 
 export interface Transformations {

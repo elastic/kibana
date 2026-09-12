@@ -90,6 +90,15 @@ describe('relaySendMessage', () => {
     });
   });
 
+  it('requires channel and text', async () => {
+    const trigger = jest.fn();
+
+    await expect(send({ blocks: [{ type: 'divider' }] }, trigger)).rejects.toThrow(
+      'channel and text are required when sending through the Elastic Slack app'
+    );
+    expect(trigger).not.toHaveBeenCalled();
+  });
+
   it('forwards threadTs when replying in a thread', async () => {
     const trigger = jest.fn().mockResolvedValue({ ref: '1700.0002', tenantKey: 'team-A' });
 

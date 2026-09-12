@@ -9,9 +9,17 @@
 
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
-import type { AxiosError, AxiosResponse } from 'axios';
-import type { ConnectorSpec, ActionContext } from '../../connector_spec';
+import type { AxiosError } from 'axios';
+import { getConnectorAuthType, type ConnectorSpec } from '../../connector_spec';
 import { slackRelay } from './relay';
+import {
+  formatSlackApiErrorMessage,
+  isRecord,
+  SLACK_API_BASE,
+  SLACK_MAX_RETRIES,
+  slackRequestWithRateLimitRetry,
+} from './request';
+import { getSendMessagePayload, sendMessageViaWebApi, sendMessageViaWebhook } from './send_message';
 import {
   SlackCreateConversationInputSchema,
   SlackGetConversationHistoryInputSchema,
@@ -34,7 +42,6 @@ import {
   type SlackConversationsListParams,
   type SlackConversationsListResponse,
   type SlackCreateConversationInput,
-  type SlackErrorFields,
   type SlackFile,
   type SlackFilesInfoResponse,
   type SlackFilesListResponse,
@@ -53,129 +60,18 @@ import {
   type SlackWhoAmIInput,
 } from './types';
 
-const SLACK_API_BASE = 'https://slack.com/api';
+const SLACK_USER_TOKEN_AUTH_TYPES = ['ears', 'oauth_authorization_code'] as const;
+const SLACK_WEB_API_AUTH_TYPES = [...SLACK_USER_TOKEN_AUTH_TYPES, 'bearer'] as const;
+const SLACK_CHANNEL_AUTH_TYPES = [...SLACK_WEB_API_AUTH_TYPES, 'relay'] as const;
+const SLACK_MESSAGE_AUTH_TYPES = [...SLACK_CHANNEL_AUTH_TYPES, 'webhook'] as const;
 
-const SLACK_RETRY_DEFAULT_BASE_DELAY_MS = 1000;
-const SLACK_RETRY_JITTER_MAX_MS = 250;
-const SLACK_RETRY_MAX_DELAY_MS = 60_000;
-const SLACK_RETRY_EXPONENT_CAP = 6;
-const SLACK_MAX_RETRIES = 5;
-
-// Tiny async sleep helper
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const isRecord = (v: unknown): v is Record<string, unknown> =>
-  typeof v === 'object' && v !== null && !Array.isArray(v);
-
-const asString = (v: unknown): string | undefined => (typeof v === 'string' ? v : undefined);
-
-function getHeader(headers: unknown, headerName: string): string | undefined {
-  if (!isRecord(headers)) return undefined;
-  const needle = headerName.toLowerCase();
-  for (const [k, v] of Object.entries(headers)) {
-    if (k.toLowerCase() !== needle) continue;
-    if (typeof v === 'string') return v;
-    if (Array.isArray(v) && typeof v[0] === 'string') return v[0];
+const SEARCH_MESSAGES_BOT_TOKEN_ERROR = i18n.translate(
+  'core.kibanaConnectorSpecs.slack.searchMessages.botTokenError',
+  {
+    defaultMessage:
+      'searchMessages is not supported with bot token auth — Slack search APIs require a user token. Use getConversationHistory to read messages from a specific channel instead.',
   }
-  return undefined;
-}
-
-function getSlackErrorFields(responseData: unknown): SlackErrorFields {
-  if (!isRecord(responseData)) return {};
-  return {
-    error: asString(responseData.error),
-    needed: asString(responseData.needed),
-    provided: asString(responseData.provided),
-  };
-}
-
-function formatSlackApiErrorMessage(params: {
-  action: string;
-  responseData?: unknown;
-  responseHeaders?: unknown;
-}) {
-  const { action, responseData } = params;
-  const { error: slackError, needed, provided } = getSlackErrorFields(responseData);
-  const error = slackError ?? 'unknown_error';
-
-  const extras: string[] = [];
-  // Be careful about echoing back scope details in user-facing errors. We include only the minimum
-  // Slack-provided hints that help diagnose the failure without exposing token scope inventories.
-  if (needed) extras.push(`needed=${needed}`);
-  if (provided) extras.push(`provided=${provided}`);
-
-  return extras.length > 0
-    ? `Slack ${action} error: ${error} (${extras.join(', ')})`
-    : `Slack ${action} error: ${error}`;
-}
-
-function getSlackRetryDelayMs(params: {
-  responseHeaders?: unknown;
-  attempt: number;
-  defaultBaseDelayMs?: number;
-}) {
-  const {
-    responseHeaders,
-    attempt,
-    defaultBaseDelayMs = SLACK_RETRY_DEFAULT_BASE_DELAY_MS,
-  } = params;
-  const retryAfter = getHeader(responseHeaders, 'retry-after');
-  const retryAfterSeconds = typeof retryAfter === 'string' ? Number(retryAfter) : NaN;
-
-  if (Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0) {
-    // Add a small jitter so multiple callers don't retry in lockstep.
-    const jitterMs = Math.floor(Math.random() * SLACK_RETRY_JITTER_MAX_MS);
-    return Math.min(SLACK_RETRY_MAX_DELAY_MS, Math.floor(retryAfterSeconds * 1000) + jitterMs);
-  }
-
-  // Fallback exponential backoff with jitter.
-  const exp = Math.min(SLACK_RETRY_EXPONENT_CAP, Math.max(0, attempt)); // cap at 2^cap
-  const base = defaultBaseDelayMs * Math.pow(2, exp);
-  const jitterMs = Math.floor(Math.random() * SLACK_RETRY_JITTER_MAX_MS);
-  return Math.min(SLACK_RETRY_MAX_DELAY_MS, base + jitterMs);
-}
-
-async function slackRequestWithRateLimitRetry<TData>(params: {
-  ctx: ActionContext;
-  action: string;
-  request: () => Promise<AxiosResponse<TData>>;
-  maxRetries?: number;
-}): Promise<AxiosResponse<TData>> {
-  const { ctx, action, request, maxRetries = 3 } = params;
-
-  // Total attempts = maxRetries + 1 (initial attempt + retries)
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    try {
-      return await request();
-    } catch (error) {
-      const err = error as AxiosError<unknown>;
-
-      const status = err.response?.status;
-      const slackError = getSlackErrorFields(err.response?.data).error;
-      const isRateLimited =
-        status === 429 ||
-        slackError === 'ratelimited' ||
-        (typeof err.message === 'string' && err.message.includes('ratelimited'));
-
-      if (!isRateLimited || attempt === maxRetries) {
-        throw error;
-      }
-
-      const delayMs = getSlackRetryDelayMs({
-        responseHeaders: err.response?.headers,
-        attempt,
-      });
-      ctx.log.debug(
-        `Slack ${action} rate limited (attempt ${
-          attempt + 1
-        }/${maxRetries}). Sleeping ${delayMs}ms before retry.`
-      );
-      await sleep(delayMs);
-    }
-  }
-
-  throw new Error(`Slack ${action} failed after ${maxRetries + 1} attempts`);
-}
+);
 
 /**
  * Slack connector using OAuth2 Authorization Code flow (Slack OAuth v2),
@@ -196,15 +92,24 @@ async function slackRequestWithRateLimitRetry<TData>(params: {
 export const Slack: ConnectorSpec = {
   metadata: {
     id: '.slack2',
-    displayName: 'Slack (v2)',
+    displayName: 'Slack',
+    featureUsageName: 'Slack (v2)',
     description: i18n.translate('core.kibanaConnectorSpecs.slack.metadata.description', {
       defaultMessage:
         'Search messages, list channels and users, read conversation history, list and look up files, look up users by email, and send messages in Slack',
     }),
     minimumLicense: 'enterprise',
-    isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
     docsUrl: `https://www.elastic.co/docs/reference/kibana/connectors-kibana/slack-v2-action-type`,
+  },
+
+  transformations: {
+    templates: {
+      enabled: true,
+      format: 'mustache',
+      escaping: 'slack',
+      escapingFields: ['text'],
+    },
   },
 
   auth: {
@@ -260,6 +165,26 @@ export const Slack: ConnectorSpec = {
         },
       },
       {
+        type: 'webhook',
+        defaults: {},
+        overrides: {
+          label: i18n.translate('core.kibanaConnectorSpecs.slack.auth.webhook.label', {
+            defaultMessage: 'Incoming Webhook URL',
+          }),
+          meta: {
+            webhookUrl: {
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.slack.auth.webhook.webhookUrl.helpText',
+                {
+                  defaultMessage:
+                    'Messages are sent to the channel configured for this Slack incoming webhook.',
+                }
+              ),
+            },
+          },
+        },
+      },
+      {
         type: 'relay',
         defaults: {},
         overrides: {
@@ -278,6 +203,10 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/assistant.search.context
     searchMessages: {
       isTool: true,
+      supportedAuthTypes: SLACK_USER_TOKEN_AUTH_TYPES,
+      unsupportedAuthTypeMessages: {
+        bearer: SEARCH_MESSAGES_BOT_TOKEN_ERROR,
+      },
       scope: 'read',
       description:
         'Search Slack messages by keyword. Returns matching messages with channel, sender, timestamp, and permalink. Use the dedicated fromUser, inChannel, after, and before parameters for filtering — do not embed Slack search operators in the query string.',
@@ -286,12 +215,7 @@ export const Slack: ConnectorSpec = {
         slackRelay.assertNotSupported(ctx, 'searchMessages');
 
         if (ctx.secrets?.authType === 'bearer') {
-          throw new Error(
-            i18n.translate('core.kibanaConnectorSpecs.slack.searchMessages.botTokenError', {
-              defaultMessage:
-                'searchMessages is not supported with bot token auth — Slack search APIs require a user token. Use getConversationHistory to read messages from a specific channel instead.',
-            })
-          );
+          throw new Error(SEARCH_MESSAGES_BOT_TOKEN_ERROR);
         }
 
         const typedInput: SlackSearchMessagesInput = SlackSearchMessagesInputSchema.parse(input);
@@ -378,6 +302,7 @@ export const Slack: ConnectorSpec = {
 
     listChannels: {
       isTool: true,
+      supportedAuthTypes: SLACK_CHANNEL_AUTH_TYPES,
       scope: 'read',
       description:
         'List Slack channels/conversations the token can see (one page per call). Use this to answer which channels exist or to browse IDs before sendMessage. Pass nextCursor from the previous response to fetch the next page. Prefer this over many resolveChannelId calls for discovery.',
@@ -441,6 +366,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/conversations.list
     resolveChannelId: {
       isTool: true,
+      supportedAuthTypes: SLACK_CHANNEL_AUTH_TYPES,
       scope: 'read',
       description:
         'Look up a Slack channel/conversation ID from a human-readable channel name (e.g. "general" or "#general"). Use before sendMessage when you already know the target name but need its ID. To list or explore channels, use listChannels instead of many resolveChannelId calls.',
@@ -525,6 +451,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/conversations.history
     getConversationHistory: {
       isTool: true,
+      supportedAuthTypes: SLACK_WEB_API_AUTH_TYPES,
       scope: 'read',
       description:
         'Fetch a page of recent messages from a Slack channel or DM. Returns messages newest-first. Pass nextCursor from the response to fetch older pages.',
@@ -604,6 +531,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/conversations.info
     getConversationInfo: {
       isTool: true,
+      supportedAuthTypes: SLACK_WEB_API_AUTH_TYPES,
       scope: 'read',
       description:
         'Look up metadata for a single Slack channel or DM by ID. Returns the channel object (name, privacy, membership, topic, purpose).',
@@ -648,6 +576,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/users.lookupByEmail
     lookupUserByEmail: {
       isTool: true,
+      supportedAuthTypes: SLACK_WEB_API_AUTH_TYPES,
       scope: 'read',
       description:
         'Find a Slack user by email address. Returns the matching user object including id, name, and profile. Throws if no user has that email.',
@@ -685,6 +614,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/users.list
     listUsers: {
       isTool: true,
+      supportedAuthTypes: SLACK_WEB_API_AUTH_TYPES,
       scope: 'read',
       description:
         'List Slack workspace users (one page per call). Pass nextCursor from the previous response to fetch the next page.',
@@ -765,6 +695,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/users.conversations
     listUserConversations: {
       isTool: true,
+      supportedAuthTypes: SLACK_WEB_API_AUTH_TYPES,
       scope: 'read',
       description:
         'List the channels/conversations a Slack user is a member of (one page per call). Omit user to list for the authenticated user. Pass nextCursor to fetch the next page.',
@@ -827,6 +758,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/auth.test
     whoAmI: {
       isTool: true,
+      supportedAuthTypes: SLACK_WEB_API_AUTH_TYPES,
       scope: 'read',
       description:
         'Return the identity the Slack connector is authenticated as. Useful before sendMessage to confirm the workspace, or to resolve "me" to a user ID for other actions.',
@@ -874,6 +806,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/files.info
     getFileInfo: {
       isTool: true,
+      supportedAuthTypes: SLACK_WEB_API_AUTH_TYPES,
       scope: 'read',
       description:
         'Look up a single Slack file by ID. Returns the file metadata (name, mimetype, size, urls, sharing channels).',
@@ -911,6 +844,7 @@ export const Slack: ConnectorSpec = {
     // Classic-paginated: uses `page`/`pages`, not cursor-based pagination.
     listFiles: {
       isTool: true,
+      supportedAuthTypes: SLACK_WEB_API_AUTH_TYPES,
       scope: 'read',
       description:
         'List Slack files (one page per call). Filter by channel, user, time range, or types. Pass nextPage from the previous response to fetch the next page.',
@@ -988,6 +922,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/conversations.create
     createConversation: {
       isTool: false,
+      supportedAuthTypes: SLACK_WEB_API_AUTH_TYPES,
       scope: 'write',
       description:
         'Create a new Slack channel (public or private). Returns the created channel object including its ID.',
@@ -1043,6 +978,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/conversations.invite
     inviteToConversation: {
       isTool: false,
+      supportedAuthTypes: SLACK_WEB_API_AUTH_TYPES,
       scope: 'write',
       description: 'Invite one or more users to a Slack channel by channel ID and user IDs.',
       input: SlackInviteToConversationInputSchema,
@@ -1097,9 +1033,10 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/chat.postMessage
     sendMessage: {
       isTool: true,
+      supportedAuthTypes: SLACK_MESSAGE_AUTH_TYPES,
       scope: 'write',
       description:
-        'Send a message to a Slack channel or DM. Requires a channel ID. Use listChannels to discover channels, or resolveChannelId when you know the channel name and need its ID. Returns the message timestamp, which can be used as threadTs to post a reply in a thread. Confirm the message content and destination with the user before sending unless they have already made their intent explicit.',
+        'Send a text or Block Kit message. OAuth and bot token authentication require a channel ID; use listChannels to discover channels or resolveChannelId when you know the channel name. These authentication methods return a message timestamp that can be used as threadTs to post a reply. Incoming webhooks send to their configured channel. Confirm the message content and destination with the user before sending unless they have already made their intent explicit.',
       input: SlackSendMessageInputSchema,
       handler: async (ctx, input) => {
         const typedInput: SlackSendMessageInput = SlackSendMessageInputSchema.parse(input);
@@ -1109,46 +1046,10 @@ export const Slack: ConnectorSpec = {
           return slackRelay.actions.sendMessage(relayConnection, ctx, typedInput);
         }
 
-        const payload: Record<string, unknown> = {
-          channel: typedInput.channel,
-          text: typedInput.text,
-        };
-
-        if (typedInput.threadTs) {
-          payload.thread_ts = typedInput.threadTs;
-        }
-        if (typedInput.unfurlLinks !== undefined) {
-          payload.unfurl_links = typedInput.unfurlLinks;
-        }
-        if (typedInput.unfurlMedia !== undefined) {
-          payload.unfurl_media = typedInput.unfurlMedia;
-        }
-
         try {
-          ctx.log.debug(`Slack sendMessage request: channel=${typedInput.channel}`);
-          const response = await slackRequestWithRateLimitRetry({
-            ctx,
-            action: 'sendMessage',
-            maxRetries: SLACK_MAX_RETRIES,
-            request: () =>
-              ctx.client.post(`${SLACK_API_BASE}/chat.postMessage`, payload, {
-                headers: {
-                  'Content-Type': 'application/json; charset=utf-8',
-                },
-              }),
-          });
-
-          if (!response.data.ok) {
-            throw new Error(
-              formatSlackApiErrorMessage({
-                action: 'sendMessage',
-                responseData: response.data,
-                responseHeaders: response.headers,
-              })
-            );
-          }
-
-          return response.data;
+          return getConnectorAuthType(ctx) === 'webhook'
+            ? await sendMessageViaWebhook(ctx, getSendMessagePayload(typedInput))
+            : await sendMessageViaWebApi(ctx, typedInput);
         } catch (error) {
           const err = error as AxiosError<unknown>;
           ctx.log.error(
@@ -1168,6 +1069,15 @@ export const Slack: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       ctx.log.debug('Slack test handler');
+
+      if (getConnectorAuthType(ctx) === 'webhook') {
+        await sendMessageViaWebhook(ctx, {
+          text: i18n.translate('core.kibanaConnectorSpecs.slack.test.webhookTestMessage', {
+            defaultMessage: 'Elastic Slack connector test message',
+          }),
+        });
+        return {};
+      }
 
       const relayConnection = slackRelay.getConnection(ctx);
       if (relayConnection) {
@@ -1192,7 +1102,7 @@ export const Slack: ConnectorSpec = {
 
   skill: [
     'Use whoAmI before any write or "as me" action to confirm the authenticated workspace/user. It is also the cheapest way to translate the implicit "me" to a concrete user_id for listUserConversations or message attribution.',
-    'searchMessages requires a user token (EARS or OAuth). If this connector uses a bot token, searchMessages will fail — use getConversationHistory with a specific channel ID to read recent messages instead.',
+    'searchMessages requires a user token (EARS or OAuth). Bot tokens can use the other Slack Web API actions. Incoming webhooks can only use sendMessage.',
     'To list Slack channels or answer which channels exist, use listChannels. When the response has hasMore true, call listChannels again with the nextCursor from the previous response until you have enough context.',
     'When sending to a channel whose name you know but whose ID you do not, call resolveChannelId to get the channel ID, then pass it to sendMessage.',
     'Do not use resolveChannelId to discover channels—for example, do not use contains with a very short partial name to probe the workspace. Use listChannels for discovery instead.',
@@ -1202,5 +1112,6 @@ export const Slack: ConnectorSpec = {
     'listUserConversations returns the channels a given user (or the authenticated user, if user is omitted) is a member of. Prefer it over listChannels when you only care about a specific user’s memberships.',
     'When a user identity comes back from one action as an ID (e.g. a message author_user_id) and you need their email or profile, resolve it via listUsers or by feeding a known email to lookupUserByEmail.',
     'For Slack files: use getFileInfo with a file ID (F...) when a message references a file you need metadata for, and listFiles when browsing or scoping by channel/user/time range. Both are paginated; listFiles supports a `types` filter (e.g. "images,pdfs").',
+    'sendMessage accepts plain text, Block Kit blocks, or both. Include text as an accessibility and notification fallback when sending blocks.',
   ].join('\n'),
 };

@@ -32,6 +32,13 @@ describe('Slack', () => {
     client: mockClient,
     log: { debug: jest.fn(), error: jest.fn() },
   } as unknown as ActionContext;
+  const webhookContext: ActionContext = {
+    ...mockContext,
+    secrets: {
+      authType: 'webhook',
+      webhookUrl: 'https://hooks.slack.com/services/test',
+    },
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -50,10 +57,24 @@ describe('Slack', () => {
 
   it('should have correct metadata', () => {
     expect(Slack.metadata.id).toBe('.slack2');
-    expect(Slack.metadata.displayName).toBe('Slack (v2)');
+    expect(Slack.metadata.displayName).toBe('Slack');
+    expect(Slack.metadata.featureUsageName).toBe('Slack (v2)');
     expect(Slack.metadata.minimumLicense).toBe('enterprise');
-    expect(Slack.metadata.supportedFeatureIds).toContain('workflows');
-    expect(Slack.metadata.supportedFeatureIds).toContain('contextEngine');
+    expect(Slack.metadata.isTechnicalPreview).toBeUndefined();
+    expect(Slack.metadata.supportedFeatureIds).toEqual([
+      'workflows',
+      'agentBuilder',
+      'contextEngine',
+    ]);
+  });
+
+  it('uses Slack escaping for action parameter templates', () => {
+    expect(Slack.transformations?.templates).toEqual({
+      enabled: true,
+      format: 'mustache',
+      escaping: 'slack',
+      escapingFields: ['text'],
+    });
   });
 
   it('should support expected auth types', () => {
@@ -65,6 +86,7 @@ describe('Slack', () => {
     expect(types).toContain('oauth_authorization_code');
     expect(types).toContain('ears');
     expect(types).toContain('bearer');
+    expect(types).toContain('webhook');
     expect(types).toContain('relay');
   });
 
@@ -209,15 +231,14 @@ describe('Slack', () => {
       ).rejects.toThrow('Slack searchMessages error: invalid_auth');
     });
 
-    it('should throw a descriptive error when called with bot token auth', async () => {
-      const botTokenContext = {
-        ...mockContext,
-        secrets: { authType: 'bearer', token: 'xoxb-fake' },
-      } as unknown as ActionContext;
-
-      await expect(
-        Slack.actions.searchMessages.handler(botTokenContext, { query: 'test' })
-      ).rejects.toThrow('getConversationHistory');
+    it('declares user-token auth types and a descriptive bot-token error', () => {
+      expect(Slack.actions.searchMessages.supportedAuthTypes).toEqual([
+        'ears',
+        'oauth_authorization_code',
+      ]);
+      expect(Slack.actions.searchMessages.unsupportedAuthTypeMessages?.bearer).toBe(
+        'searchMessages is not supported with bot token auth — Slack search APIs require a user token. Use getConversationHistory to read messages from a specific channel instead.'
+      );
     });
   });
 
@@ -1462,6 +1483,63 @@ describe('Slack', () => {
       );
     });
 
+    it('should send Block Kit blocks using the Web API', async () => {
+      mockClient.post.mockResolvedValue({ data: { ok: true } });
+      const blocks = [{ type: 'section', text: { type: 'mrkdwn', text: '*Hello*' } }];
+
+      await Slack.actions.sendMessage.handler(mockContext, {
+        channel: 'C123',
+        text: 'Hello',
+        blocks,
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://slack.com/api/chat.postMessage',
+        { channel: 'C123', text: 'Hello', blocks },
+        expect.any(Object)
+      );
+    });
+
+    it('should send text and blocks using an incoming webhook', async () => {
+      mockClient.post.mockResolvedValue({ data: 'ok' });
+      const blocks = [{ type: 'section', text: { type: 'plain_text', text: 'Hello' } }];
+
+      const result = await Slack.actions.sendMessage.handler(webhookContext, {
+        text: 'Hello',
+        blocks,
+        threadTs: '1234567890.123456',
+        unfurlLinks: false,
+        unfurlMedia: true,
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://hooks.slack.com/services/test',
+        {
+          text: 'Hello',
+          blocks,
+          thread_ts: '1234567890.123456',
+          unfurl_links: false,
+          unfurl_media: true,
+        },
+        expect.any(Object)
+      );
+      expect(result).toEqual({ ok: true });
+    });
+
+    it('should reject an unsuccessful incoming webhook response', async () => {
+      mockClient.post.mockResolvedValue({ data: 'invalid_payload' });
+
+      await expect(
+        Slack.actions.sendMessage.handler(webhookContext, { text: 'Hello' })
+      ).rejects.toThrow('Slack incoming webhook returned an unsuccessful response');
+    });
+
+    it('should require a channel for token authentication', async () => {
+      await expect(
+        Slack.actions.sendMessage.handler(mockContext, { text: 'Hello' })
+      ).rejects.toThrow('channel is required');
+    });
+
     it('should include unfurl options', async () => {
       const mockResponse = {
         data: {
@@ -1616,6 +1694,19 @@ describe('Slack', () => {
 
   describe('test handler', () => {
     const testSpec = Slack.test;
+
+    it('should send a test message for incoming webhook auth', async () => {
+      mockClient.post.mockResolvedValue({ data: 'ok' });
+
+      const result = await testSpec.handler(webhookContext);
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://hooks.slack.com/services/test',
+        { text: 'Elastic Slack connector test message' },
+        expect.any(Object)
+      );
+      expect(result).toEqual({});
+    });
 
     it('should return success when API is accessible', async () => {
       const mockResponse = {
