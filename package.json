@@ -72,7 +72,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "24.19.0",
+    "node": "24.21.0",
     "yarn": "^1.22.19"
   },
   "resolutions": {
@@ -1350,7 +1350,7 @@
     "type-fest": "4.26.1",
     "typescript-fsa": "3.0.0",
     "typescript-fsa-reducers": "1.2.2",
-    "undici": "7.29.0",
+    "undici": "7.29.1",
     "unidiff": "1.0.4",
     "unified": "9.2.2",
     "use-resize-observer": "9.1.0",
@@ -1761,7 +1761,7 @@
     "@types/sinon": "22.0.0",
     "@types/source-map-support": "0.5.10",
     "@types/stats-lite": "2.2.0",
-    "@types/styled-components": "5.1.0",
+    "@types/styled-components": "5.1.36",
     "@types/supertest": "7.2.0",
     "@types/textarea-caret": "3.0.1",
     "@types/tinycolor2": "1.4.2",
@@ -1926,7 +1926,7 @@
     "rxjs-marbles": "7.0.1",
     "sass-embedded": "1.89.2",
     "sass-loader": "10.5.2",
-    "selenium-webdriver": "4.47.0",
+    "selenium-webdriver": "4.48.0",
     "sharp": "0.35.2",
     "simple-git": "3.36.0",
     "sinon": "22.1.0",
