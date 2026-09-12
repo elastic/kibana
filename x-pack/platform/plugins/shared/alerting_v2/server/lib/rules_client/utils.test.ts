@@ -7,7 +7,11 @@
 
 import type { UpdateRuleData } from '@kbn/alerting-v2-schemas';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { ruleResponseSchema } from '@kbn/alerting-v2-schemas';
+import {
+  ruleResponseSchema,
+  createRuleDataSchema,
+  updateRuleDataSchema,
+} from '@kbn/alerting-v2-schemas';
 import { createRuleSoAttributes } from '../test_utils';
 import { BuilderTypeRegistry } from '../builder_types';
 import type { ResolvedCreateRuleData, RotationCandidate } from './types';
@@ -672,9 +676,7 @@ describe('utils', () => {
     });
 
     it('throws Boom.conflict (409) when incomingSignatureId differs from stored', () => {
-      expect(() =>
-        assertSignatureIdUnchanged('different-sig', storedAttrs)
-      ).toThrow(
+      expect(() => assertSignatureIdUnchanged('different-sig', storedAttrs)).toThrow(
         expect.objectContaining({
           isBoom: true,
           output: expect.objectContaining({ statusCode: 409 }),
@@ -684,9 +686,7 @@ describe('utils', () => {
     });
 
     it('attaches IMMUTABLE_FIELDS_CHANGED code when differing', () => {
-      expect(() =>
-        assertSignatureIdUnchanged('different-sig', storedAttrs)
-      ).toThrow(
+      expect(() => assertSignatureIdUnchanged('different-sig', storedAttrs)).toThrow(
         expect.objectContaining({
           data: {
             code: 'IMMUTABLE_FIELDS_CHANGED',
@@ -748,7 +748,11 @@ describe('utils', () => {
         metadata: { name: 'original', signature_id: 'stored-sig' },
       });
 
-      const next = buildUpdateRuleAttributes(existing, {}, { updatedBy: 'u', updatedAt: 't', version: 2 });
+      const next = buildUpdateRuleAttributes(
+        existing,
+        {},
+        { updatedBy: 'u', updatedAt: 't', version: 2 }
+      );
 
       expect(next.metadata.signature_id).toBe('stored-sig');
     });
@@ -1160,7 +1164,11 @@ describe('utils', () => {
     const baseExisting = createRuleSoAttributes({
       metadata: { name: 'rule-1', version: 1, revision: 3, signature_id: 'sig-1' },
     });
-    const baseUpdateServerFields = { updatedBy: 'user-2', updatedAt: '2099-01-01T00:00:00.000Z', version: 2 };
+    const baseUpdateServerFields = {
+      updatedBy: 'user-2',
+      updatedAt: '2099-01-01T00:00:00.000Z',
+      version: 2,
+    };
 
     it('does NOT bump revision when the update changes nothing meaningful', () => {
       // Sending an empty update — all optional fields omitted, nothing changes.
@@ -1375,7 +1383,10 @@ describe('utils', () => {
         expect(() =>
           assertRuleSourceUnchanged({ type: 'external', version: 1, id: 'tmpl-id' }, stored)
         ).toThrow(
-          expect.objectContaining({ isBoom: true, output: expect.objectContaining({ statusCode: 409 }) })
+          expect.objectContaining({
+            isBoom: true,
+            output: expect.objectContaining({ statusCode: 409 }),
+          })
         );
       });
 
@@ -1405,7 +1416,10 @@ describe('utils', () => {
         expect(() =>
           assertRuleSourceUnchanged({ type: 'template', version: 1, id: 'tmpl-different' }, stored)
         ).toThrow(
-          expect.objectContaining({ isBoom: true, output: expect.objectContaining({ statusCode: 409 }) })
+          expect.objectContaining({
+            isBoom: true,
+            output: expect.objectContaining({ statusCode: 409 }),
+          })
         );
       });
 
@@ -1463,7 +1477,11 @@ describe('utils', () => {
         metadata: { name: 'rule', signature_id: 'sig', source: stored },
       });
 
-      const next = buildUpdateRuleAttributes(existing, {}, { updatedBy: 'u', updatedAt: 't', version: 2 });
+      const next = buildUpdateRuleAttributes(
+        existing,
+        {},
+        { updatedBy: 'u', updatedAt: 't', version: 2 }
+      );
 
       expect(next.metadata.source).toEqual(stored);
     });
@@ -1659,7 +1677,11 @@ describe('utils', () => {
         },
       });
 
-      const next = buildUpdateRuleAttributes(existing, {}, { updatedBy: 'u', updatedAt: 't', version: 2 });
+      const next = buildUpdateRuleAttributes(
+        existing,
+        {},
+        { updatedBy: 'u', updatedAt: 't', version: 2 }
+      );
 
       expect(next.metadata.ownership).toEqual({
         managed: true,
@@ -1675,7 +1697,11 @@ describe('utils', () => {
       // ownership is not set — simulates a rule created before step 4.4
       delete (existing.metadata as Record<string, unknown>).ownership;
 
-      const next = buildUpdateRuleAttributes(existing, {}, { updatedBy: 'u', updatedAt: 't', version: 2 });
+      const next = buildUpdateRuleAttributes(
+        existing,
+        {},
+        { updatedBy: 'u', updatedAt: 't', version: 2 }
+      );
 
       // The stored value (undefined) is preserved as-is; the fallback happens
       // only in transformRuleSoAttributesToRuleApiResponse at response time.
@@ -1735,7 +1761,6 @@ describe('utils', () => {
 
   describe('ruleResponseSchema rejects ownership in request body (step 4.4)', () => {
     it('createRuleDataSchema rejects ownership in metadata (response-only field)', () => {
-      const { createRuleDataSchema } = require('@kbn/alerting-v2-schemas');
       const result = createRuleDataSchema.safeParse({
         kind: 'alert',
         metadata: {
@@ -1750,7 +1775,6 @@ describe('utils', () => {
     });
 
     it('updateRuleDataSchema rejects ownership in metadata (response-only field)', () => {
-      const { updateRuleDataSchema } = require('@kbn/alerting-v2-schemas');
       const result = updateRuleDataSchema.safeParse({
         metadata: { ownership: { managed: false } },
       });
@@ -1762,7 +1786,6 @@ describe('utils', () => {
   // guarantee ownership gets above, pinned by a test beside the ownership ones.
   describe('ruleResponseSchema rejects revision in request body (step 4.2)', () => {
     it('createRuleDataSchema rejects revision in metadata (response-only field)', () => {
-      const { createRuleDataSchema } = require('@kbn/alerting-v2-schemas');
       const result = createRuleDataSchema.safeParse({
         kind: 'alert',
         metadata: {
@@ -1776,7 +1799,6 @@ describe('utils', () => {
     });
 
     it('updateRuleDataSchema rejects revision in metadata (response-only field)', () => {
-      const { updateRuleDataSchema } = require('@kbn/alerting-v2-schemas');
       const result = updateRuleDataSchema.safeParse({
         metadata: { revision: 0 },
       });

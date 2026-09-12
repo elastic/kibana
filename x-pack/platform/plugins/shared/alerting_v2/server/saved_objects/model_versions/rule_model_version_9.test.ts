@@ -39,10 +39,9 @@ import { ruleMappings } from '../rule_mappings';
 // Helpers
 // ---------------------------------------------------------------------------
 
-type BackfillFn = (doc: {
-  id: string;
+type BackfillFn = (doc: { id: string; attributes: { metadata?: Record<string, unknown> } }) => {
   attributes: { metadata?: Record<string, unknown> };
-}) => { attributes: { metadata?: Record<string, unknown> } };
+};
 
 /**
  * Extracts the `backfillFn` from model version '9'.
@@ -66,10 +65,7 @@ function getV9BackfillFn(): BackfillFn {
 /**
  * Runs the backfill on a synthetic doc and returns the resulting metadata.
  */
-function runBackfill(
-  id: string,
-  metadata: Record<string, unknown>
-): Record<string, unknown> {
+function runBackfill(id: string, metadata: Record<string, unknown>): Record<string, unknown> {
   const fn = getV9BackfillFn();
   const result = fn({ id, attributes: { metadata } });
   return result.attributes.metadata as Record<string, unknown>;

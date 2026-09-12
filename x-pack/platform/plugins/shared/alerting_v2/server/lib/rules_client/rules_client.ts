@@ -1636,11 +1636,8 @@ export class RulesClient {
     // existingAttrs.metadata.source is typed by @kbn/config-schema's TypeOf, which
     // produces a flat union rather than a discriminated one. The cast is safe because
     // the v7 schema validates the same shape the Zod schema requires.
-    const resolvedSource = (
-      parsed.metadata?.source ??
-      existingAttrs.metadata.source ??
-      { type: 'internal', version: 1 }
-    ) as RuleSource;
+    const resolvedSource = (parsed.metadata?.source ??
+      existingAttrs.metadata.source ?? { type: 'internal', version: 1 }) as RuleSource;
     // Build the next attributes without revision first; the diff against stored
     // attributes determines whether the replace actually changed anything meaningful.
     const rawNextAttrs = transformCreateRuleBodyToRuleSoAttributes(resolved, {

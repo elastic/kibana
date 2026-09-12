@@ -44,7 +44,14 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
-  metadata: { name: 'Test Rule', signature_id: 'test-sig-id', version: 1, revision: 0, source: { type: 'internal' as const, version: 1 }, ownership: { managed: false } },
+  metadata: {
+    name: 'Test Rule',
+    signature_id: 'test-sig-id',
+    version: 1,
+    revision: 0,
+    source: { type: 'internal' as const, version: 1 },
+    ownership: { managed: false },
+  },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
   query: {
