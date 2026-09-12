@@ -237,6 +237,15 @@ export const schema: FormSchema<AboutStepRule> = {
     ),
     labelAppend: OptionalFieldLabel,
   },
+  atlasThreat: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldMitreAtlasThreatLabel',
+      {
+        defaultMessage: 'MITRE ATLAS',
+      }
+    ),
+    labelAppend: OptionalFieldLabel,
+  },
   threatIndicatorPath: {},
   timestampOverride: {
     type: FIELD_TYPES.TEXT,

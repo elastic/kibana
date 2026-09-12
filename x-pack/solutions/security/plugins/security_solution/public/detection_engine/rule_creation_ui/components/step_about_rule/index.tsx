@@ -21,12 +21,14 @@ import { isEsqlRule, isThreatMatchRule } from '../../../../../common/detection_e
 import type { AboutStepRule, RuleStepProps } from '../../../common/types';
 import { AddItem } from '../add_item_form';
 import { StepRuleDescription } from '../description_step';
-import { AddMitreAttackThreat } from '../mitre';
+import { AddMitreAtlasThreat } from '../atlas';
 import type { FieldHook, FormHook } from '../../../../shared_imports';
 import { Field, Form, getUseField, UseField } from '../../../../shared_imports';
 
 import { isUrlInvalid } from '../../../../common/utils/validators';
 import { schema as defaultSchema } from './schema';
+import { atlasThreatDefault } from './default_value';
+import { AddMitreAttackThreatWithDefault } from './add_mitre_attack_threat_with_default';
 import * as I18n from './translations';
 import { StepContentWrapper } from '../../../rule_creation/components/step_content_wrapper';
 import { MarkdownEditorForm } from '../../../../common/components/markdown_editor/eui_form';
@@ -256,11 +258,21 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
             />
             <UseField
               path="threat"
-              component={AddMitreAttackThreat}
+              component={AddMitreAttackThreatWithDefault}
               componentProps={{
                 idAria: 'detectionEngineStepAboutRuleMitreThreat',
                 isDisabled: isFieldDisabled,
                 dataTestSubj: 'detectionEngineStepAboutRuleMitreThreat',
+              }}
+            />
+            <UseField
+              path="atlasThreat"
+              defaultValue={atlasThreatDefault}
+              component={AddMitreAtlasThreat}
+              componentProps={{
+                idAria: 'detectionEngineStepAboutRuleMitreAtlasThreat',
+                isDisabled: isFieldDisabled,
+                dataTestSubj: 'detectionEngineStepAboutRuleMitreAtlasThreat',
               }}
             />
             <EuiSpacer size="l" />

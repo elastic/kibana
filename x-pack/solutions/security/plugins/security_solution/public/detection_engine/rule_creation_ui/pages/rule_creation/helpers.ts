@@ -581,6 +581,7 @@ export const formatAboutStepData = (
     riskScore,
     severity,
     threat,
+    atlasThreat: _atlasThreat, // prototype UI-only; not persisted yet
     isAssociatedToEndpointList,
     isBuildingBlock,
     maxSignals,
