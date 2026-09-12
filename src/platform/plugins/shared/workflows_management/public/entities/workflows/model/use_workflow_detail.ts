@@ -18,6 +18,7 @@ export function useWorkflowDetail(id: string | null) {
     networkMode: 'always',
     enabled: !!id,
     queryKey: ['workflows', id],
+    refetchOnWindowFocus: false,
     queryFn: () => {
       return http!.get<WorkflowDetailDto>(`/api/workflows/${id}`).then((res) => {
         return {
