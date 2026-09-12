@@ -36,8 +36,9 @@
  */
 
 import type { CreateRuleData, ReplaceRuleData, UpdateRuleData } from '@kbn/alerting-v2-schemas';
+import { z } from '@kbn/zod/v4';
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
-import type { BuilderTypeRegistry, GeneratedQuery } from '../builder_types';
+import type { BuilderTypeRegistry, DerivedRuleFields, GeneratedQuery, RegisteredBuilderType } from '../builder_types';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import { createRuleSoAttributes } from '../test_utils';
 import {
@@ -51,11 +52,30 @@ import {
 // ---------------------------------------------------------------------------
 
 /**
- * Creates a minimal BuilderTypeRegistry mock.  Only `generate` is consulted
- * by the two resolution functions under test.
+ * Creates a minimal BuilderTypeRegistry mock for write-time (default)
+ * builder types. Only `generate` and `get` are consulted by the resolution
+ * functions under test. `get()` returns `undefined` by default, so the
+ * resolution falls through to the write-time path.
  */
 function createMockRegistry(generateFn: jest.Mock = jest.fn()): BuilderTypeRegistry {
-  return { generate: generateFn } as unknown as BuilderTypeRegistry;
+  return {
+    generate: generateFn,
+    get: (_type: string) => undefined,
+  } as unknown as BuilderTypeRegistry;
+}
+
+/**
+ * Creates a registry mock where specific types are registered by the caller.
+ * Used for execution-time type tests where `get()` must return a definition.
+ */
+function createMockRegistryWithTypes(
+  typeMap: Map<string, Partial<RegisteredBuilderType>>,
+  generateFn: jest.Mock = jest.fn()
+): BuilderTypeRegistry {
+  return {
+    generate: generateFn,
+    get: (type: string) => typeMap.get(type) as RegisteredBuilderType | undefined,
+  } as unknown as BuilderTypeRegistry;
 }
 
 // ---------------------------------------------------------------------------
@@ -284,7 +304,8 @@ describe('resolveCreateRuleBuilder', () => {
 
         const result = resolveCreateRuleBuilder(registry, signalBuilderCreateData);
 
-        expect(result.query.format).toBe('standalone');
+        // Write-time path always produces a query; non-null assertion is safe.
+        expect(result.query!.format).toBe('standalone');
       });
 
       it('produces the full composed query (base + breach) as the standalone breach query for a signal rule', () => {
@@ -754,20 +775,19 @@ describe('resolveUpdateRuleBuilder', () => {
     });
 
     // -----------------------------------------------------------------------
-    // GENERATED_QUERY_INVARIANTS are NOT checked on the update path
+    // GENERATED_QUERY_INVARIANTS are checked on the update path (step 6.4 fix)
     // -----------------------------------------------------------------------
 
-    describe('GENERATED_QUERY_INVARIANTS are not asserted on the update path', () => {
+    describe('GENERATED_QUERY_INVARIANTS are now asserted on the update path', () => {
       /**
-       * BUG (pinned): assertGeneratedQueryIsValid is called in
-       * resolveCreateRuleBuilder but NOT in resolveUpdateRuleBuilder.  A
-       * builder that returns a query violating the invariants (e.g.,
-       * recovery_strategy: 'query' but no recovery generated) passes silently
-       * on the update path.  Step 6.4 fixes this; these tests document the
-       * current state so the fix can update them deliberately.
+       * Step 6.4 adds assertGeneratedQueryIsValid to the update path.
+       * Previously (characterised as a bug in the step 1.3a tests) a builder
+       * could return a query that violated the invariants on update without
+       * being rejected. These tests confirm the fix: the same scenarios that
+       * throw on create now also throw on update.
        */
-      it('does not throw when recovery_strategy is "query" but the builder generates no recovery (bug: invariants not checked on update)', () => {
-        // This same scenario throws BUILDER_QUERY_GENERATION_FAILED on the create path.
+      it('throws BUILDER_QUERY_GENERATION_FAILED when recovery_strategy is "query" but the builder generates no recovery', () => {
+        // The same scenario no longer passes silently on the update path.
         const generate = jest.fn().mockReturnValue(standaloneGenerated);
         const registry = createMockRegistry(generate);
         const data: UpdateRuleData = {
@@ -777,7 +797,14 @@ describe('resolveUpdateRuleBuilder', () => {
 
         expect(() =>
           resolveUpdateRuleBuilder(registry, RULE_ID, data, builderExisting)
-        ).not.toThrow();
+        ).toThrow(
+          expect.objectContaining({
+            output: expect.objectContaining({ statusCode: 400 }),
+            data: expect.objectContaining({
+              code: ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED,
+            }),
+          })
+        );
       });
     });
   });
@@ -1155,6 +1182,258 @@ describe('resolveReplaceRuleBuilder', () => {
           resolveReplaceRuleBuilder(registry, RULE_ID, baseCreateData, plainExisting)
         ).not.toThrow();
       });
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Execution-time builder types (step 6.4)
+//
+// Execution-time types declare `compilation: 'execution_time'`. On the write
+// path the framework must NOT call generateQuery; instead it:
+//   1. Parses the builder fields (or skips the parse under the validation opt-out).
+//   2. Calls deriveRuleFields if the type declares one, and applies the result
+//      with withDerived override semantics (undefined keeps the caller value).
+//   3. Returns data WITHOUT a `query` field.
+//
+// Ref: rule-execution-logic.md "Two compilation modes"
+//      rule-execution-logic.md "Derived rule fields at write time"
+// ---------------------------------------------------------------------------
+
+describe('execution-time builder types', () => {
+  // Minimal execution-time type that derives grouping from threshold.field.
+  const EXECUTION_TYPE = 'test.execution';
+
+  // Zod schema for the execution-time type's fields.
+  const executionFieldsSchema = z.object({
+    index: z.string(),
+    threshold_field: z.array(z.string()),
+  });
+
+  /** Build a RegisteredBuilderType-shaped object for the execution-time type. */
+  function makeExecutionDefinition(
+    opts: { deriveRuleFields?: (fields: z.infer<typeof executionFieldsSchema>) => DerivedRuleFields } = {}
+  ): Partial<RegisteredBuilderType> {
+    return {
+      type: EXECUTION_TYPE,
+      compilation: 'execution_time',
+      builderFieldsSchema: executionFieldsSchema as unknown as RegisteredBuilderType['builderFieldsSchema'],
+      deriveRuleFields: opts.deriveRuleFields as RegisteredBuilderType['deriveRuleFields'],
+    };
+  }
+
+  const RAW_EXECUTION_FIELDS = { index: 'logs-*', threshold_field: ['user.name'] };
+
+  // CreateRuleData carrying execution-time builder fields.
+  const executionCreateData = {
+    kind: 'signal',
+    metadata: {
+      name: 'detection-rule',
+      builder_type: EXECUTION_TYPE,
+      builder_fields: RAW_EXECUTION_FIELDS,
+    },
+    time_field: '@timestamp',
+    schedule: { every: '5m' },
+  } as unknown as CreateRuleData;
+
+  // Existing SO attributes for a stored execution-time rule (no query stored).
+  const executionExisting: RuleSavedObjectAttributes = createRuleSoAttributes({
+    kind: 'signal',
+    metadata: {
+      name: 'detection-rule',
+      builder_type: EXECUTION_TYPE,
+      builder_fields: RAW_EXECUTION_FIELDS,
+      ownership: { managed: true, solution: 'security', domain: 'detection' },
+    },
+    // No `query` — execution-time rules persist none.
+  } as Partial<RuleSavedObjectAttributes>);
+  // Clear the query the helper defaults to.
+  (executionExisting as unknown as { query: undefined }).query = undefined;
+
+  // -------------------------------------------------------------------------
+  // resolveCreateRuleBuilder — execution-time create
+  // -------------------------------------------------------------------------
+
+  describe('resolveCreateRuleBuilder — execution-time type', () => {
+    it('does NOT call registry.generate for an execution-time type', () => {
+      const generate = jest.fn();
+      const typeMap = new Map([[EXECUTION_TYPE, makeExecutionDefinition()]]);
+      const registry = createMockRegistryWithTypes(typeMap, generate);
+
+      resolveCreateRuleBuilder(registry, executionCreateData);
+
+      expect(generate).not.toHaveBeenCalled();
+    });
+
+    it('returns result with NO query field for an execution-time type', () => {
+      const typeMap = new Map([[EXECUTION_TYPE, makeExecutionDefinition()]]);
+      const registry = createMockRegistryWithTypes(typeMap);
+
+      const result = resolveCreateRuleBuilder(registry, executionCreateData);
+
+      // Explicitly assert absence — execution-time rules must persist no query.
+      expect(result.query).toBeUndefined();
+    });
+
+    it('preserves builder_fields in the result (raw, not a parsed copy)', () => {
+      const typeMap = new Map([[EXECUTION_TYPE, makeExecutionDefinition()]]);
+      const registry = createMockRegistryWithTypes(typeMap);
+
+      const result = resolveCreateRuleBuilder(registry, executionCreateData);
+
+      // Same object reference as the request — raw, unparsed.
+      expect(result.metadata.builder_fields).toBe(RAW_EXECUTION_FIELDS);
+    });
+
+    it('calls deriveRuleFields with the parsed fields and applies the result', () => {
+      const derive = jest.fn<DerivedRuleFields, [unknown]>().mockReturnValue({
+        grouping: { fields: ['user.name'] },
+      });
+      const typeMap = new Map([[
+        EXECUTION_TYPE,
+        makeExecutionDefinition({ deriveRuleFields: derive as unknown as (fields: z.infer<typeof executionFieldsSchema>) => DerivedRuleFields }),
+      ]]);
+      const registry = createMockRegistryWithTypes(typeMap);
+
+      const result = resolveCreateRuleBuilder(registry, executionCreateData);
+
+      // Derived grouping is persisted.
+      expect(result.grouping).toEqual({ fields: ['user.name'] });
+      // No query persisted.
+      expect(result.query).toBeUndefined();
+    });
+
+    it('keeps the caller-sent grouping when deriveRuleFields returns undefined for grouping', () => {
+      const derive = jest.fn<DerivedRuleFields, [unknown]>().mockReturnValue({});
+      const typeMap = new Map([[
+        EXECUTION_TYPE,
+        makeExecutionDefinition({ deriveRuleFields: derive as unknown as (fields: z.infer<typeof executionFieldsSchema>) => DerivedRuleFields }),
+      ]]);
+      const registry = createMockRegistryWithTypes(typeMap);
+      const data = {
+        ...executionCreateData,
+        grouping: { fields: ['source.ip'] },
+      } as unknown as CreateRuleData;
+
+      const result = resolveCreateRuleBuilder(registry, data);
+
+      expect(result.grouping).toEqual({ fields: ['source.ip'] });
+    });
+
+    it('skips derivation and returns data as-is when validateBuilderFields is false and fields do not parse', () => {
+      const derive = jest.fn<DerivedRuleFields, [unknown]>().mockReturnValue({
+        grouping: { fields: ['user.name'] },
+      });
+      const typeMap = new Map([[
+        EXECUTION_TYPE,
+        makeExecutionDefinition({ deriveRuleFields: derive as unknown as (fields: z.infer<typeof executionFieldsSchema>) => DerivedRuleFields }),
+      ]]);
+      const registry = createMockRegistryWithTypes(typeMap);
+      const badFieldsData = {
+        ...executionCreateData,
+        // Missing required 'index' field — will fail the Zod schema.
+        metadata: {
+          ...executionCreateData.metadata,
+          builder_fields: { threshold_field: ['user.name'] },
+        },
+      } as unknown as CreateRuleData;
+
+      // Under the validation opt-out, unparseable fields silently skip derivation.
+      const result = resolveCreateRuleBuilder(registry, badFieldsData, {
+        validateBuilderFields: false,
+      });
+
+      // Derivation skipped — no derived grouping, no query.
+      expect(derive).not.toHaveBeenCalled();
+      expect(result.query).toBeUndefined();
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // resolveUpdateRuleBuilder — execution-time update
+  // -------------------------------------------------------------------------
+
+  describe('resolveUpdateRuleBuilder — execution-time type', () => {
+    it('does NOT call registry.generate for an execution-time type update', () => {
+      const generate = jest.fn();
+      const typeMap = new Map([[EXECUTION_TYPE, makeExecutionDefinition()]]);
+      const registry = createMockRegistryWithTypes(typeMap, generate);
+      const data: UpdateRuleData = {
+        metadata: { builder_type: EXECUTION_TYPE, builder_fields: RAW_EXECUTION_FIELDS },
+      };
+
+      resolveUpdateRuleBuilder(registry, RULE_ID, data, executionExisting);
+
+      expect(generate).not.toHaveBeenCalled();
+    });
+
+    it('returns result with NO query for an execution-time type update', () => {
+      const typeMap = new Map([[EXECUTION_TYPE, makeExecutionDefinition()]]);
+      const registry = createMockRegistryWithTypes(typeMap);
+      const data: UpdateRuleData = {
+        metadata: { builder_fields: RAW_EXECUTION_FIELDS },
+      };
+
+      const result = resolveUpdateRuleBuilder(registry, RULE_ID, data, executionExisting);
+
+      expect(result.query).toBeUndefined();
+    });
+
+    it('re-derives grouping on update when threshold_field changes', () => {
+      // An update that changes `threshold_field` re-derives `grouping` in the
+      // same write, keeping the stored grouping consistent with the fields.
+      //
+      // Ref: rule-execution-logic.md "Derived rule fields at write time"
+      const derive = jest.fn<DerivedRuleFields, [{ index: string; threshold_field: string[] }]>(
+        (fields) => ({ grouping: { fields: fields.threshold_field } })
+      );
+      const typeMap = new Map([[
+        EXECUTION_TYPE,
+        makeExecutionDefinition({ deriveRuleFields: derive as unknown as (fields: z.infer<typeof executionFieldsSchema>) => DerivedRuleFields }),
+      ]]);
+      const registry = createMockRegistryWithTypes(typeMap);
+      const updatedFields = { index: 'logs-*', threshold_field: ['source.ip'] };
+      const data: UpdateRuleData = {
+        metadata: { builder_fields: updatedFields },
+      };
+
+      const result = resolveUpdateRuleBuilder(registry, RULE_ID, data, executionExisting);
+
+      expect(result.grouping).toEqual({ fields: ['source.ip'] });
+      expect(result.query).toBeUndefined();
+    });
+
+    it('stamps the effective builder_type onto the result metadata', () => {
+      const typeMap = new Map([[EXECUTION_TYPE, makeExecutionDefinition()]]);
+      const registry = createMockRegistryWithTypes(typeMap);
+      // Omit builder_type — should fall back to the stored type.
+      const data: UpdateRuleData = { metadata: { builder_fields: RAW_EXECUTION_FIELDS } };
+
+      const result = resolveUpdateRuleBuilder(registry, RULE_ID, data, executionExisting);
+
+      expect(result.metadata?.builder_type).toBe(EXECUTION_TYPE);
+    });
+
+    it('skips derivation under the validation opt-out when fields do not parse', () => {
+      const derive = jest.fn<DerivedRuleFields, [unknown]>().mockReturnValue({
+        grouping: { fields: ['user.name'] },
+      });
+      const typeMap = new Map([[
+        EXECUTION_TYPE,
+        makeExecutionDefinition({ deriveRuleFields: derive as unknown as (fields: z.infer<typeof executionFieldsSchema>) => DerivedRuleFields }),
+      ]]);
+      const registry = createMockRegistryWithTypes(typeMap);
+      const data: UpdateRuleData = {
+        // Missing required 'index' field — fails the schema.
+        metadata: { builder_fields: { threshold_field: ['user.name'] } },
+      };
+
+      const result = resolveUpdateRuleBuilder(registry, RULE_ID, data, executionExisting, {
+        validateBuilderFields: false,
+      });
+
+      expect(derive).not.toHaveBeenCalled();
+      expect(result.query).toBeUndefined();
     });
   });
 });

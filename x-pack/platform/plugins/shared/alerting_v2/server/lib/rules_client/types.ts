@@ -14,7 +14,6 @@ import type {
   DryRunResponse,
   FindRulesResponse,
   FindRulesSortField,
-  Query,
   RuleResponse,
   UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
@@ -38,11 +37,14 @@ export type {
 export type BulkOperationError = BulkResponse['errors'][number];
 
 /**
- * Create data whose `query` is settled — either generated from
- * `metadata.builder_fields` or supplied by the caller. The create schema
- * accepts exactly one of the two, so resolution always produces a query.
+ * Create data whose builder metadata has been normalised and whose `query` has
+ * been settled. For write-time builder rules and plain ES|QL rules, `query` is
+ * always present (generated or supplied). For execution-time builder rules,
+ * `query` is absent — they compile a query on every run.
+ *
+ * Ref: rule-execution-logic.md "A rule without a persisted query"
  */
-export type ResolvedCreateRuleData = CreateRuleData & { query: Query };
+export type ResolvedCreateRuleData = CreateRuleData;
 
 /**
  * Update data whose builder metadata has been normalized and whose `query` has
