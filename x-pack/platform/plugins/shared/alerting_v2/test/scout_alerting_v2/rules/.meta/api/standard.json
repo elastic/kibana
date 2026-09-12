@@ -1,5 +1,5 @@
 {
-  "sha1": "30f03f73e7502f5e448a08c643c91f3b143b8b7e",
+  "sha1": "66b678b1bd8e4ff8ad10f48c68c5eeac0dda8e6a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -798,8 +798,8 @@
       }
     },
     {
-      "id": "ebd999d5574271b-1bd1b1e8cb33681",
-      "title": "Create rule API create: returns 201 with the signal kind round-tripped to the response",
+      "id": "ebd999d5574271b-63b9924377d58ad",
+      "title": "Create rule API validation: rejects a recovering delay when recovery is disabled",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -811,6 +811,19 @@
       }
     },
     {
+      "id": "ebd999d5574271b-1bd1b1e8cb33681",
+      "title": "Create rule API create: returns 201 with the signal kind round-tripped to the response",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
+        "line": 289,
+        "column": 4
+      }
+    },
+    {
       "id": "ebd999d5574271b-b8337b8f761db8f",
       "title": "Create rule API create: returns 201 and round-trips every optional field",
       "expectedStatus": "passed",
@@ -819,8 +832,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 297,
-        "column": 16
+        "line": 314,
+        "column": 14
       }
     },
     {
@@ -832,8 +845,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 338,
-        "column": 4
+        "line": 352,
+        "column": 25
       }
     },
     {
@@ -845,8 +858,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 355,
-        "column": 47
+        "line": 372,
+        "column": 27
       }
     },
     {
@@ -858,8 +871,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 372,
-        "column": 4
+        "line": 386,
+        "column": 25
       }
     },
     {
@@ -871,8 +884,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 397,
-        "column": 14
+        "line": 412,
+        "column": 9
       }
     },
     {
@@ -884,8 +897,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 415,
-        "column": 9
+        "line": 430,
+        "column": 24
       }
     },
     {
@@ -897,8 +910,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 431,
-        "column": 29
+        "line": 447,
+        "column": 53
       }
     },
     {
@@ -910,8 +923,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 451,
-        "column": 7
+        "line": 467,
+        "column": 28
       }
     },
     {
@@ -923,8 +936,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 470,
-        "column": 9
+        "line": 485,
+        "column": 17
       }
     },
     {
@@ -936,8 +949,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 488,
-        "column": 20
+        "line": 504,
+        "column": 14
       }
     },
     {
@@ -949,8 +962,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 495,
-        "column": 52
+        "line": 512,
+        "column": 21
       }
     },
     {
@@ -962,8 +975,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 510,
-        "column": 30
+        "line": 526,
+        "column": 5
       }
     },
     {
@@ -975,8 +988,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 518,
-        "column": 9
+        "line": 534,
+        "column": 30
       }
     },
     {
@@ -988,8 +1001,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts",
-        "line": 530,
-        "column": 70
+        "line": 547,
+        "column": 29
       }
     },
     {
@@ -3839,6 +3852,19 @@
       }
     },
     {
+      "id": "df929c73b65283e-a778bc0fef2f65a",
+      "title": "Update rule API validation: should reject disabling recovery that would leave a stored recovering delay inert",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
+        "line": 508,
+        "column": 5
+      }
+    },
+    {
       "id": "df929c73b65283e-aada47ed9bc3de0",
       "title": "Update rule API validation: should reject updating a signal rule query to composed format",
       "expectedStatus": "passed",
@@ -3847,8 +3873,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 515,
-        "column": 41
+        "line": 535,
+        "column": 12
       }
     },
     {
@@ -3860,8 +3886,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 534,
-        "column": 30
+        "line": 550,
+        "column": 43
       }
     },
     {
@@ -3873,8 +3899,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 541,
-        "column": 53
+        "line": 559,
+        "column": 24
       }
     },
     {
@@ -3886,8 +3912,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 555,
-        "column": 26
+        "line": 577,
+        "column": 14
       }
     },
     {
@@ -3899,8 +3925,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 574,
-        "column": 9
+        "line": 596,
+        "column": 32
       }
     },
     {
@@ -3912,8 +3938,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 603,
-        "column": 78
+        "line": 626,
+        "column": 29
       }
     },
     {
@@ -3925,8 +3951,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 617,
-        "column": 29
+        "line": 640,
+        "column": 23
       }
     },
     {
@@ -3938,8 +3964,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 630,
-        "column": 9
+        "line": 653,
+        "column": 15
       }
     },
     {
@@ -3951,8 +3977,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 650,
-        "column": 8
+        "line": 671,
+        "column": 34
       }
     },
     {
@@ -3964,8 +3990,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 669,
-        "column": 24
+        "line": 691,
+        "column": 49
       }
     },
     {
@@ -3977,8 +4003,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts",
-        "line": 686,
-        "column": 54
+        "line": 710,
+        "column": 27
       }
     },
     {
@@ -4177,8 +4203,8 @@
       }
     },
     {
-      "id": "63d456e0152970c-0fed3ff048e629f",
-      "title": "Upsert rule API authorization: should return 201 for a user with full alerting_v2 privileges",
+      "id": "63d456e0152970c-b98f7ede6c6874f",
+      "title": "Upsert rule API validation: should reject a recovering delay when recovery is disabled",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -4190,6 +4216,19 @@
       }
     },
     {
+      "id": "63d456e0152970c-0fed3ff048e629f",
+      "title": "Upsert rule API authorization: should return 201 for a user with full alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
+        "line": 273,
+        "column": 9
+      }
+    },
+    {
       "id": "63d456e0152970c-620ce24e71651bf",
       "title": "Upsert rule API authorization: should return 403 for a user with read-only alerting_v2 privileges",
       "expectedStatus": "passed",
@@ -4198,8 +4237,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 272,
-        "column": 15
+        "line": 283,
+        "column": 48
       }
     },
     {
@@ -4211,8 +4250,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 284,
-        "column": 8
+        "line": 298,
+        "column": 65
       }
     }
   ]
