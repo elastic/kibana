@@ -68,7 +68,6 @@ export function withSpaceSolutionDisabledFeatures(
   } else if (spaceSolution === 'security') {
     disabledFeatureKeysFromSolution = getFeatureIdsForCategories(features, [
       'observability',
-      'enterpriseSearch',
     ]).filter((featureId) => !enabledFeaturesPerSolution.security.includes(featureId));
   }
 
