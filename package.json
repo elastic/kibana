@@ -1128,6 +1128,7 @@
     "@kbn/security-api-key-management": "workspace:*",
     "@kbn/security-authorization-core": "workspace:*",
     "@kbn/security-authorization-core-common": "workspace:*",
+    "@kbn/security-detection-rule-schema": "workspace:*",
     "@kbn/security-form-components": "workspace:*",
     "@kbn/security-hardening": "workspace:*",
     "@kbn/security-mitre-attack-common": "workspace:*",

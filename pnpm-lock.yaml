@@ -3104,6 +3104,9 @@ importers:
       '@kbn/security-authorization-core-common':
         specifier: workspace:*
         version: link:x-pack/platform/packages/private/security/authorization_core_common
+      '@kbn/security-detection-rule-schema':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/security-detection-rule-schema
       '@kbn/security-form-components':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/security/form_components
@@ -8923,6 +8926,8 @@ importers:
   x-pack/platform/packages/shared/response-ops/scheduling-types: {}
 
   x-pack/platform/packages/shared/response-ops/yaml-rule-editor: {}
+
+  x-pack/platform/packages/shared/security-detection-rule-schema: {}
 
   x-pack/platform/packages/shared/security/api_key_management: {}
 

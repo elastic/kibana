@@ -1355,6 +1355,7 @@ packages:
   - 'x-pack/platform/packages/shared/response-ops/schedule-schema'
   - 'x-pack/platform/packages/shared/response-ops/scheduling-types'
   - 'x-pack/platform/packages/shared/response-ops/yaml-rule-editor'
+  - 'x-pack/platform/packages/shared/security-detection-rule-schema'
   - 'x-pack/platform/packages/shared/security/api_key_management'
   - 'x-pack/platform/packages/shared/security/form_components'
   - 'x-pack/platform/packages/shared/security/plugin_types_common'
