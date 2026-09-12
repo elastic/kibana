@@ -74,9 +74,9 @@ export function useAddFromLibraryTypes() {
 
 /**
  * Getter for accessing saved object type from AddFromLibrary registry
- * @param type string
+ * @param libraryType string
  * @returns registry item for saved object type
  */
-export const getAddFromLibraryType = (type: string) => {
-  return registry.get(type);
+export const getAddFromLibraryType = (libraryType: string) => {
+  return registry.get(libraryType);
 };
