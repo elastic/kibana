@@ -734,9 +734,11 @@ describe('Trusted apps form', () => {
       expect(renderResult.getByText(INPUT_ERRORS.mustHaveValue(0)));
     });
 
-    it('should validate all condition values (when multiples exist) have non empty space value', async () => {
+    it('should validate all condition values (when multiples exist) have non empty space value', () => {
       const andButton = getConditionBuilderAndButton();
-      await userEvent.click(andButton);
+      act(() => {
+        fireEvent.click(andButton);
+      });
       formProps.item = (formProps.onChange as jest.Mock).mock.calls.at(-2)[0].item;
       rerender();
 
@@ -746,9 +748,11 @@ describe('Trusted apps form', () => {
       expect(renderResult.getByText(INPUT_ERRORS.mustHaveValue(1)));
     });
 
-    it('should validate duplicated conditions', async () => {
+    it('should validate duplicated conditions', () => {
       const andButton = getConditionBuilderAndButton();
-      await userEvent.click(andButton);
+      act(() => {
+        fireEvent.click(andButton);
+      });
       formProps.item = (formProps.onChange as jest.Mock).mock.calls.at(-2)[0].item;
       rerender();
 
@@ -758,10 +762,12 @@ describe('Trusted apps form', () => {
       expect(renderResult.getByText(INPUT_ERRORS.noDuplicateField(ConditionEntryField.HASH)));
     });
 
-    it('should validate multiple errors in form', async () => {
+    it('should validate multiple errors in form', () => {
       const andButton = getConditionBuilderAndButton();
 
-      await userEvent.click(andButton);
+      act(() => {
+        fireEvent.click(andButton);
+      });
       formProps.item = (formProps.onChange as jest.Mock).mock.calls.at(-2)[0].item;
       rerender();
 
