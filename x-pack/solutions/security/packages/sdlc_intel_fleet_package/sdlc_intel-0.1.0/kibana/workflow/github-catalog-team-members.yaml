@@ -30,7 +30,7 @@ consts:
   entityType: team_member
   pageSize: 100
   teamsPageSize: 1000
-  teamsPerRun: 20
+  teamsPerRun: 150
 
 settings:
   timeout: 60m

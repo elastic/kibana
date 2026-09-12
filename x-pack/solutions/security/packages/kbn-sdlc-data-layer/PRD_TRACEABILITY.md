@@ -5,7 +5,7 @@ Living traceability matrix for the **Development Lifecycle Visibility Platform**
 | Source document | Version | Location |
 | --- | --- | --- |
 | Product Requirement Document (PRD) | 1.0 Draft | `Development Lifecycle Visibility Platform.docx` |
-| Architecture proposal | 1.0 Draft → **1.1 delta** | `sdlc-platform-architecture.docx` · [ARCHITECTURE_v1.1_DELTA.md](./ARCHITECTURE_v1.1_DELTA.md) |
+| Architecture proposal | 1.0 Draft → **1.1 delta** | `sdlc-platform-architecture.docx` · [architecture_v1.1_delta.md](./architecture_v1.1_delta.md) |
 | Implementation | In progress | `x-pack/solutions/security/packages/kbn-sdlc-data-layer/`, `x-pack/solutions/security/plugins/sdlc_intel/` |
 
 **Last reviewed:** implementation state as of managed workflow v6 (`system-sdlc-github-sync-orchestrator`).
@@ -44,7 +44,7 @@ The PRD describes one platform; **implementation and revised architecture (v1.1 
 | **Agent Builder** | Optional `sdlc-roadmap-summary` on `sdlc-epic-phases` | Full six-tool surface on lifecycle indices |
 | **Status** | **~40%** — ingest + P4/P5 rollups; dashboards pending | **0%** |
 
-**Architecture doc strategy:** Update `sdlc-platform-architecture.docx` to v1.1 using [ARCHITECTURE_v1.1_DELTA.md](./ARCHITECTURE_v1.1_DELTA.md) — document what exists, add only Track B tiers when needed. **No mandatory rename** of `github-intel-*` indices.
+**Architecture doc strategy:** Update `sdlc-platform-architecture.docx` to v1.1 using [architecture_v1.1_delta.md](./architecture_v1.1_delta.md) — document what exists, add only Track B tiers when needed. **No mandatory rename** of `github-intel-*` indices.
 
 ### Track A — remaining work
 
@@ -60,7 +60,7 @@ The PRD describes one platform; **implementation and revised architecture (v1.1 
 3. ES Transform → `sdlc-phase-durations`
 4. Quality/review/defect indices + Agent Builder
 
-Full v1.1 section rewrites: [ARCHITECTURE_v1.1_DELTA.md](./ARCHITECTURE_v1.1_DELTA.md).
+Full v1.1 section rewrites: [architecture_v1.1_delta.md](./architecture_v1.1_delta.md).
 
 ---
 
@@ -204,7 +204,7 @@ HTML prototypes (`sdlc_executive_roadmap_dashboard.html`, `sdlc_phase_pipeline_v
 
 ## Rollout alignment (revised — Track A / Track B)
 
-Supersedes v1.0 architecture §8 single-path phases A–D. See [ARCHITECTURE_v1.1_DELTA.md §8](./ARCHITECTURE_v1.1_DELTA.md#8-rollout-replace-v10-8).
+Supersedes v1.0 architecture §8 single-path phases A–D. See [architecture_v1.1_delta.md §8](./architecture_v1.1_delta.md#8-rollout-replace-v10-8).
 
 | Phase | Weeks | Scope | Current progress |
 | --- | --- | --- | --- |
@@ -291,7 +291,7 @@ Index **renaming** is optional and mainly helps when dashboards and Agent Builde
 
 ## Recommended convergence path
 
-Two paths — pick based on active track. Architecture v1.1 documents **Track A first**; see [ARCHITECTURE_v1.1_DELTA.md](./ARCHITECTURE_v1.1_DELTA.md).
+Two paths — pick based on active track. Architecture v1.1 documents **Track A first**; see [architecture_v1.1_delta.md](./architecture_v1.1_delta.md).
 
 ### Track A (recommended near-term)
 
