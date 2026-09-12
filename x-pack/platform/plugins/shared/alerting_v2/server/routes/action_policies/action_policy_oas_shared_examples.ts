@@ -30,10 +30,10 @@ import type { OasExampleEntry } from '../oas_types';
 export const SAMPLE_ACTION_POLICY_ID = 'action-policy-1';
 
 export const CREATE_ACTION_POLICY_REQUEST: CreateActionPolicyDataInput = {
-  name: 'Notify on host alerts',
-  description: 'Sends a workflow notification when matching host alerts fire.',
+  name: 'Notify on production alerts',
+  description: 'Sends a workflow notification when alerts from production-tagged rules fire.',
   destinations: [{ type: 'workflow', id: 'workflow-1' }],
-  matcher: 'host.name: "web-*"',
+  matcher: { expression: 'rule.tags: "production"' },
   tags: ['production'],
   grouping_mode: 'per_episode',
   throttle: { strategy: 'on_status_change' },
@@ -46,7 +46,7 @@ export const ACTION_POLICY_RESPONSE: ActionPolicyResponse = {
   description: CREATE_ACTION_POLICY_REQUEST.description,
   enabled: true,
   destinations: [{ type: 'workflow', id: 'workflow-1' }],
-  matcher: 'host.name: "web-*"',
+  matcher: { expression: 'rule.tags: "production"' },
   group_by: null,
   tags: ['production'],
   grouping_mode: 'per_episode',
