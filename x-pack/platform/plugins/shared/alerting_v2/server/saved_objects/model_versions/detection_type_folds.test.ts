@@ -119,7 +119,9 @@ describe('ruleModelVersions fold lines', () => {
   });
 
   it('dense version sequence runs from 1 to 8 with no gaps', () => {
-    const keys = Object.keys(ruleModelVersions).map(Number).sort((a, b) => a - b);
+    const keys = Object.keys(ruleModelVersions)
+      .map(Number)
+      .sort((a, b) => a - b);
     expect(keys).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
   });
 });
@@ -221,18 +223,13 @@ describe('byte budget measurements (step 3.5)', () => {
     expect(thresholdBytes).toBeLessThan(MAX_BUILDER_FIELDS_BYTES);
   });
 
-  it('logs the measured bytes (visible in test output for record keeping)', () => {
-    // Intentionally console.log here so the numbers appear in the test runner
-    // output and can be copied into the implementation plan.
-    // eslint-disable-next-line no-console
-    console.log(
-      `[step 3.5 byte measurements]\n` +
-        `  security.detection.query:     ${queryBytes} bytes (cap: ${MAX_BUILDER_FIELDS_BYTES})\n` +
-        `  security.detection.threshold: ${thresholdBytes} bytes (cap: ${MAX_BUILDER_FIELDS_BYTES})`
-    );
-    // Dummy assertion so this test never fails.
-    expect(typeof queryBytes).toBe('number');
-    expect(typeof thresholdBytes).toBe('number');
+  it('both schemas fit well within the cap (at most 75 % of MAX_BUILDER_FIELDS_BYTES)', () => {
+    // Asserting a concrete upper bound catches accidental schema bloat before it
+    // hits the hard cap.  75 % (≈ 196 KB) gives the plan's recorded numbers
+    // (≈ 186–188 KB) a reasonable headroom.
+    const headroomCap = Math.floor(MAX_BUILDER_FIELDS_BYTES * 0.75);
+    expect(queryBytes).toBeLessThan(headroomCap);
+    expect(thresholdBytes).toBeLessThan(headroomCap);
   });
 });
 

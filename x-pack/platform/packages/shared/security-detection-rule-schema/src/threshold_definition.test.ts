@@ -291,7 +291,7 @@ describe('generateThresholdQuery — compiled query snapshots', () => {
     // emits double-quoted ("...").  The implementation pins the Builder's output;
     // the discrepancy is reported to the team.
     expect(result.query.breach.query).toMatchInlineSnapshot(`
-      "FROM auditbeat-*
+      "FROM \\"auditbeat-*\\"
       | WHERE KQL(\\"event.category:authentication and event.outcome:failure\\")
       | WHERE \`user.name\` IS NOT NULL AND \`source.ip\` IS NOT NULL
       | STATS threshold_count = COUNT(*), cardinality_count = COUNT_DISTINCT(\`destination.ip\`) BY \`user.name\`, \`source.ip\`
@@ -318,7 +318,7 @@ describe('generateThresholdQuery — compiled query snapshots', () => {
     const result = generateThresholdQuery(makeInput(fields));
     if (result.query.format !== 'standalone') throw new Error('expected standalone');
     expect(result.query.breach.query).toMatchInlineSnapshot(`
-      "FROM auditbeat-*
+      "FROM \\"auditbeat-*\\"
       | WHERE \`host.name\` IS NOT NULL
       | STATS threshold_count = COUNT(*) BY \`host.name\`
       | WHERE threshold_count >= 5
@@ -341,7 +341,7 @@ describe('generateThresholdQuery — compiled query snapshots', () => {
     const result = generateThresholdQuery(makeInput(fields));
     if (result.query.format !== 'standalone') throw new Error('expected standalone');
     expect(result.query.breach.query).toMatchInlineSnapshot(`
-      "FROM logs-*
+      "FROM \\"logs-*\\"
       | WHERE KQL(\\"error\\")
       | WHERE \`user.name\` IS NOT NULL
       | STATS threshold_count = COUNT(*) BY \`user.name\`
@@ -365,7 +365,7 @@ describe('generateThresholdQuery — compiled query snapshots', () => {
     const result = generateThresholdQuery(makeInput(fields));
     if (result.query.format !== 'standalone') throw new Error('expected standalone');
     expect(result.query.breach.query).toMatchInlineSnapshot(`
-      "FROM logs-*
+      "FROM \\"logs-*\\"
       | WHERE KQL(\\"error\\")
       | STATS threshold_count = COUNT(*)
       | WHERE threshold_count >= 5
@@ -388,7 +388,7 @@ describe('generateThresholdQuery — compiled query snapshots', () => {
     const result = generateThresholdQuery(makeInput(fields));
     if (result.query.format !== 'standalone') throw new Error('expected standalone');
     expect(result.query.breach.query).toMatchInlineSnapshot(`
-      "FROM logs-*
+      "FROM \\"logs-*\\"
       | WHERE KQL(\\"error\\")
       | STATS threshold_count = COUNT(*), cardinality_count = COUNT_DISTINCT(\`source.ip\`)
       | WHERE threshold_count >= 5 AND cardinality_count >= 3
@@ -411,7 +411,7 @@ describe('generateThresholdQuery — compiled query snapshots', () => {
     const result = generateThresholdQuery(makeInput(fields));
     if (result.query.format !== 'standalone') throw new Error('expected standalone');
     expect(result.query.breach.query).toMatchInlineSnapshot(`
-      "FROM logs-*
+      "FROM \\"logs-*\\"
       | WHERE KQL(\\"error\\")
       | WHERE \`user.name\` IS NOT NULL
       | STATS threshold_count = COUNT(*) BY \`user.name\`
@@ -434,8 +434,8 @@ describe('generateThresholdQuery — compiled query snapshots', () => {
     const result = generateThresholdQuery(makeInput(fields));
     if (result.query.format !== 'standalone') throw new Error('expected standalone');
     expect(result.query.breach.query).toMatchInlineSnapshot(`
-      "FROM logs-*
-      | WHERE QSTR(\\"error message:*timeout*\\", allow_wildcard : TRUE)
+      "FROM \\"logs-*\\"
+      | WHERE QSTR(\\"error message:*timeout*\\", {\\"allow_wildcard\\": TRUE})
       | WHERE \`host.name\` IS NOT NULL
       | STATS threshold_count = COUNT(*) BY \`host.name\`
       | WHERE threshold_count >= 5
@@ -457,7 +457,8 @@ describe('generateThresholdQuery — compiled query snapshots', () => {
     };
     const result = generateThresholdQuery(makeInput(fields));
     if (result.query.format !== 'standalone') throw new Error('expected standalone');
-    expect(result.query.breach.query.startsWith('FROM logs-*, auditbeat-*')).toBe(true);
+    // Index names are quoted (buildQuotedIndexSource) so the AST builder controls escaping.
+    expect(result.query.breach.query.startsWith('FROM "logs-*", "auditbeat-*"')).toBe(true);
   });
 });
 

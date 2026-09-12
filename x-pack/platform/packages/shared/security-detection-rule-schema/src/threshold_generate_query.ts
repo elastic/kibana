@@ -9,6 +9,7 @@ import { BasicPrettyPrinter, Builder } from '@elastic/esql';
 import type { ESQLAstCommand, ESQLSingleAstItem } from '@elastic/esql/types';
 import type { GeneratedQuery, QueryGenerationInput } from '@kbn/alerting-v2-rule-builders';
 import type { ThresholdBuilderFields } from './threshold_builder_fields';
+import { buildQuotedIndexSource, buildFullTextFilter } from './esql_helpers';
 
 // ---------------------------------------------------------------------------
 // Helper: column from a dotted field name
@@ -29,9 +30,7 @@ const andAll = (predicates: ESQLSingleAstItem[]): ESQLSingleAstItem => {
   if (predicates.length === 1) {
     return predicates[0];
   }
-  return predicates.reduce((left, right) =>
-    Builder.expression.func.binary('and', [left, right])
-  );
+  return predicates.reduce((left, right) => Builder.expression.func.binary('and', [left, right]));
 };
 
 // ---------------------------------------------------------------------------
@@ -70,31 +69,26 @@ export const generateThresholdQuery = ({
 
   const commands: ESQLAstCommand[] = [];
 
-  // 1. FROM
+  // 1. FROM "index1", "index2", ...
+  // Index names are quoted so that user-supplied entries cannot inject extra
+  // pipeline commands.  buildQuotedIndexSource emits a quoted AST source node.
   commands.push(
     Builder.command({
       name: 'from',
-      args: index.map((idx) => Builder.expression.source.index(idx)),
+      args: index.map(buildQuotedIndexSource),
     })
   );
 
   // 2. WHERE KQL() / QSTR() — only when query is non-empty
+  // buildFullTextFilter produces the same wrap as security.detection.query:
+  //   kuery  → KQL("...")
+  //   lucene → QSTR("...", {"allow_wildcard": TRUE})
+  // Per the design, both detection types must use the same wrap.
   if (query.length > 0) {
-    const queryLiteral = Builder.expression.literal.string(query);
-    const filterFn =
-      language === 'kuery'
-        ? Builder.expression.func.call('KQL', [queryLiteral])
-        : Builder.expression.func.call('QSTR', [
-            queryLiteral,
-            Builder.expression.func.binary(':', [
-              Builder.expression.column('allow_wildcard'),
-              Builder.expression.literal.boolean(true),
-            ]),
-          ]);
     commands.push(
       Builder.command({
         name: 'where',
-        args: [filterFn],
+        args: [buildFullTextFilter(query, language)],
       })
     );
   }

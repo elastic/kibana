@@ -208,7 +208,7 @@ describe('securityDetectionQuery.generateQuery', () => {
 
     // Snapshot of what the Builder actually emits.
     expect(result.query.breach.query).toMatchInlineSnapshot(`
-      "FROM logs-*, winlogbeat-*
+      "FROM \\"logs-*\\", \\"winlogbeat-*\\"
       | WHERE KQL(\\"process.args:/tmp/* and event.type:start\\")
       | LIMIT 100"
     `);
@@ -217,11 +217,11 @@ describe('securityDetectionQuery.generateQuery', () => {
   /**
    * Compiled-query snapshot: lucene language with allow_wildcard.
    *
-   * Design specifies:
-   *   QSTR("""...""", allow_wildcard = true)
+   * Design (rule-execution-logic.md "security.detection.query") specifies:
+   *   QSTR("""...""", {"allow_wildcard": TRUE})
    *
-   * The Builder produces `allow_wildcard = TRUE` (uppercase). Both are valid ES|QL.
-   * Reported to the orchestrator per step 3.2 instructions.
+   * The named-parameter map form is the only valid ES|QL syntax for QSTR options.
+   * A binary `=` or `:` expression is rejected by Elasticsearch.
    */
   it('compiles a lucene-language rule to a QSTR query with allow_wildcard', async () => {
     const luceneFields: CustomQueryBuilderFields = {
@@ -238,8 +238,8 @@ describe('securityDetectionQuery.generateQuery', () => {
     if (result.query.format !== 'standalone') return;
 
     expect(result.query.breach.query).toMatchInlineSnapshot(`
-      "FROM logs-*, winlogbeat-*
-      | WHERE QSTR(\\"process.args:/tmp/* AND event.type:start\\", allow_wildcard = TRUE)
+      "FROM \\"logs-*\\", \\"winlogbeat-*\\"
+      | WHERE QSTR(\\"process.args:/tmp/* AND event.type:start\\", {\\"allow_wildcard\\": TRUE})
       | LIMIT 100"
     `);
   });
@@ -264,7 +264,7 @@ describe('securityDetectionQuery.generateQuery', () => {
     if (result.query.format !== 'standalone') return;
 
     expect(result.query.breach.query).toMatchInlineSnapshot(`
-      "FROM filebeat-*
+      "FROM \\"filebeat-*\\"
       | WHERE KQL(\\"event.action:login\\")"
     `);
     expect(result.query.breach.query).not.toContain('LIMIT');
@@ -282,14 +282,40 @@ describe('securityDetectionQuery.generateQuery', () => {
     expect(result.grouping).toBeUndefined();
   });
 
-  it('uses each index in the FROM clause', async () => {
+  it('uses each index in the FROM clause (quoted)', async () => {
+    // Index names are emitted as quoted identifiers so the AST builder controls
+    // escaping.  Verified here so a change to buildQuotedIndexSource is caught.
     const multiIndexFields: CustomQueryBuilderFields = {
       ...minimalFields,
       index: ['index-a', 'index-b', 'index-c'],
     };
     const result = await securityDetectionQuery.generateQuery(makeInput(multiIndexFields));
     if (result.query.format !== 'standalone') return;
-    expect(result.query.breach.query).toContain('FROM index-a, index-b, index-c');
+    expect(result.query.breach.query).toContain('FROM "index-a", "index-b", "index-c"');
+  });
+
+  it('quotes index names so a pipe character cannot inject a second pipeline command', async () => {
+    // Blocker 3 fix: index names must be escaped by the AST builder, not
+    // emitted raw.  A user-supplied `"logs-* | LIMIT 1 | WHERE true"` would
+    // otherwise produce three extra commands when emitted unquoted.
+    //
+    // Ref: rule-execution-logic.md "AST composition is the required pattern"
+    const maliciousFields: CustomQueryBuilderFields = {
+      ...minimalFields,
+      index: ['logs-* | LIMIT 1 | WHERE true'],
+    };
+    const result = await securityDetectionQuery.generateQuery(makeInput(maliciousFields));
+    if (result.query.format !== 'standalone') return;
+    const compiledQuery = result.query.breach.query;
+    // The injected text must appear only inside a quoted index name, not as
+    // a bare pipeline command.
+    expect(compiledQuery).toContain('"logs-* | LIMIT 1 | WHERE true"');
+    // The query must have exactly one top-level command after FROM: the WHERE.
+    const lines = compiledQuery.split('\n');
+    const commandLines = lines.filter((l) => l.trim().startsWith('|'));
+    // Only "| WHERE KQL(...)" — no injected LIMIT or extra WHERE.
+    expect(commandLines).toHaveLength(1);
+    expect(commandLines[0]).toContain('WHERE KQL');
   });
 
   it('places the user query inside KQL() for kuery language', async () => {

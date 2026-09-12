@@ -20,6 +20,7 @@ import {
   DETECTION_RULE_FRAGMENT_SUB_FIELD_MAPPINGS,
 } from './detection_rule_common_fields';
 import { enrichDetectionRuleEvent } from './enrich_detection_rule_event';
+import { buildQuotedIndexSource, buildFullTextFilter } from './esql_helpers';
 
 // ---------------------------------------------------------------------------
 // Schema
@@ -90,12 +91,15 @@ const validateCustomQueryFields = (fields: CustomQueryBuilderFields): string[] =
 // Compile function
 //
 // Builds a standalone breach query via the @elastic/esql AST builder.
-// User-supplied query text is always an AST string literal — never spliced
-// into query source text. This is the required pattern for detection types.
+// User-supplied values are always AST literals — never spliced into query
+// source text.  Index names are emitted as quoted identifiers so that a
+// user-supplied entry cannot inject extra pipeline commands.
 //
 // language: 'kuery'  => | WHERE KQL("...")
-// language: 'lucene' => | WHERE QSTR("...", allow_wildcard = TRUE)
+// language: 'lucene' => | WHERE QSTR("...", {"allow_wildcard": TRUE})
 //   allow_wildcard is the one option v1 pins that QSTR defaults off.
+//   The named-parameter map form is the only valid ES|QL syntax for QSTR
+//   options; a binary = or : expression is rejected by Elasticsearch.
 //
 // max_signals maps to a trailing | LIMIT <n>. When absent, no LIMIT is
 // emitted and the deployment-wide cap alone applies.
@@ -109,29 +113,23 @@ const generateCustomQuery = ({
 }: QueryGenerationInput<CustomQueryBuilderFields>): GeneratedQuery => {
   const commands: ESQLAstCommand[] = [];
 
-  // FROM <index1>, <index2>, ...
+  // FROM "index1", "index2", ...
+  // Index names are quoted so that user-supplied entries cannot inject extra
+  // pipeline commands (e.g. "logs-* | LIMIT 1" would otherwise become two
+  // commands).  buildQuotedIndexSource emits a quoted AST source node.
   commands.push(
     Builder.command({
       name: 'from',
-      args: fields.index.map((idx) => Builder.expression.source.index(idx)),
+      args: fields.index.map(buildQuotedIndexSource),
     })
   );
 
-  // WHERE KQL("...") or WHERE QSTR("...", allow_wildcard = TRUE)
-  // User text is passed as an AST literal, not interpolated into the source.
-  const fullTextCall =
-    fields.language === 'kuery'
-      ? Builder.expression.func.call('KQL', [Builder.expression.literal.string(fields.query)])
-      : Builder.expression.func.call('QSTR', [
-          Builder.expression.literal.string(fields.query),
-          // allow_wildcard = TRUE — the only QSTR option v1 pins (defaults off)
-          Builder.expression.func.binary('=', [
-            Builder.identifier('allow_wildcard'),
-            Builder.expression.literal.boolean(true),
-          ]),
-        ]);
-
-  commands.push(Builder.command({ name: 'where', args: [fullTextCall] }));
+  // WHERE KQL("...") or WHERE QSTR("...", {"allow_wildcard": TRUE})
+  // buildFullTextFilter handles both languages and uses the shared QSTR
+  // named-parameter map so both detection types emit identical wraps.
+  commands.push(
+    Builder.command({ name: 'where', args: [buildFullTextFilter(fields.query, fields.language)] })
+  );
 
   // LIMIT <max_signals> — omitted when the field is absent so the deployment
   // cap alone controls the row budget.

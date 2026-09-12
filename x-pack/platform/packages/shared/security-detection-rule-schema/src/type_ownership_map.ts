@@ -18,10 +18,7 @@
  * Ref: rule-type-registration.md "What a registration declares" (ownership)
  *      rule-ownership.md "The ownership object"
  */
-export const DETECTION_RULE_TYPE_OWNERSHIP: Record<
-  string,
-  { solution: string; domain: string }
-> = {
+export const DETECTION_RULE_TYPE_OWNERSHIP: Record<string, { solution: string; domain: string }> = {
   'security.detection.query': { solution: 'security', domain: 'detection' },
   'security.detection.threshold': { solution: 'security', domain: 'detection' },
 };
