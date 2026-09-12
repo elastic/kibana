@@ -52,7 +52,7 @@ describe('ruleMappings', () => {
         unknown
       >;
 
-      for (const [versionKey, versionDef] of Object.entries(ruleModelVersions)) {
+      for (const [, versionDef] of Object.entries(ruleModelVersions)) {
         const version = versionDef as {
           changes?: Array<{ type: string; addedMappings?: unknown }>;
         };
@@ -68,20 +68,12 @@ describe('ruleMappings', () => {
           if (!addedBuilderFields) continue;
 
           for (const key of Object.keys(addedBuilderFields)) {
-            expect(staticBuilderFieldsProperties).toHaveProperty(
-              key,
-              undefined === staticBuilderFieldsProperties[key]
-                ? undefined
-                : staticBuilderFieldsProperties[key]
-            );
-            // Use a real assertion: the static mapping must contain this key.
+            // The static mapping must contain this key.
             expect(Object.keys(staticBuilderFieldsProperties)).toContain(key);
             // And the mapping for that key must match exactly.
             expect(staticBuilderFieldsProperties[key]).toEqual(addedBuilderFields[key]);
           }
         }
-        // reference versionKey in assertion message
-        void versionKey;
       }
     });
 
