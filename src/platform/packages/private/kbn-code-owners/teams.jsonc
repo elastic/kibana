@@ -520,7 +520,8 @@
     "name": "Nightshift Investigations",
     "areas": ["observability"],
     "github": {
-      "team": "elastic/nightshift-investigations-team"
+      "team": "elastic/nightshift-investigations-team",
+      "label": "Team:nightshift-investigations"
     }
   },
   {
