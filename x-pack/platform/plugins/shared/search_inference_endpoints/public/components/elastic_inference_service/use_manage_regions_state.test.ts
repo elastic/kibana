@@ -11,14 +11,12 @@ import { useRegionPolicy } from '../../hooks/use_region_policy';
 import { useSaveRegionPolicy } from '../../hooks/use_save_region_policy';
 import { useDeleteRegionPolicy } from '../../hooks/use_delete_region_policy';
 import { useEisModels } from '../../hooks/use_eis_models';
-import { useRegionPreferencesRedesignEnabled } from '../../hooks/use_region_preferences_redesign_enabled';
 import * as eisUtils from '../../utils/eis_utils';
 
 jest.mock('../../hooks/use_region_policy');
 jest.mock('../../hooks/use_save_region_policy');
 jest.mock('../../hooks/use_delete_region_policy');
 jest.mock('../../hooks/use_eis_models');
-jest.mock('../../hooks/use_region_preferences_redesign_enabled');
 jest.mock('../../utils/eis_utils', () => ({
   ...jest.requireActual('../../utils/eis_utils'),
   getAvailableRegions: jest.fn(),
@@ -29,7 +27,6 @@ const mockUseRegionPolicy = jest.mocked(useRegionPolicy);
 const mockUseSaveRegionPolicy = jest.mocked(useSaveRegionPolicy);
 const mockUseDeleteRegionPolicy = jest.mocked(useDeleteRegionPolicy);
 const mockUseEisModels = jest.mocked(useEisModels);
-const mockUseRegionPreferencesRedesignEnabled = jest.mocked(useRegionPreferencesRedesignEnabled);
 const mockGetAvailableRegions = jest.mocked(eisUtils.getAvailableRegions);
 const mockGetAvailableGeos = jest.mocked(eisUtils.getAvailableGeos);
 
@@ -45,7 +42,6 @@ describe('useManageRegionsState', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseRegionPreferencesRedesignEnabled.mockReturnValue(false);
     mockGetAvailableRegions.mockReturnValue(twoRegions);
     mockGetAvailableGeos.mockReturnValue(['eu', 'us']);
     mockUseSaveRegionPolicy.mockReturnValue({
@@ -719,7 +715,7 @@ describe('useManageRegionsState', () => {
     });
   });
 
-  describe('redesign confirmation conflict handling', () => {
+  describe('confirmation conflict handling', () => {
     const conflictError = {
       response: { status: 409 },
       body: {
@@ -740,20 +736,7 @@ describe('useManageRegionsState', () => {
       } as unknown as ReturnType<typeof useRegionPolicy>);
     });
 
-    it('ignores in-use 409 attributes when the redesign flag is off', () => {
-      mockSaveMutate.mockImplementation(
-        (_vars: unknown, { onError }: { onError: (err: unknown) => void }) => {
-          onError(conflictError);
-        }
-      );
-      const { result } = renderHook(() => useManageRegionsState(onClose));
-      act(() => result.current.common.handleConfirmSave());
-      expect(result.current.common.conflictArtifacts).toBeUndefined();
-      expect(result.current.common.showConfirmation).toBe(false);
-    });
-
-    it('stores grouped conflict artifacts on in-use 409 when the redesign flag is on', () => {
-      mockUseRegionPreferencesRedesignEnabled.mockReturnValue(true);
+    it('stores grouped conflict artifacts on in-use 409', () => {
       mockSaveMutate.mockImplementation(
         (_vars: unknown, { onError }: { onError: (err: unknown) => void }) => {
           onError(conflictError);
@@ -770,7 +753,6 @@ describe('useManageRegionsState', () => {
     });
 
     it('clears conflict artifacts when confirmation is cancelled', () => {
-      mockUseRegionPreferencesRedesignEnabled.mockReturnValue(true);
       mockSaveMutate.mockImplementation(
         (_vars: unknown, { onError }: { onError: (err: unknown) => void }) => {
           onError(conflictError);

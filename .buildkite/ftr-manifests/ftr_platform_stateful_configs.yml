@@ -79,7 +79,6 @@ enabled:
   - src/platform/test/functional/apps/dashboard/group6/config.ts
   - src/platform/test/functional/apps/dashboard/esql_controls/config.ts
   - src/platform/test/functional/apps/discover/ccs_compatibility/config.ts
-  - src/platform/test/functional/apps/discover/embeddable/config.ts
   - src/platform/test/functional/apps/discover/esql_2/config.ts
   - src/platform/test/functional/apps/discover/group10/config.ts
   - src/platform/test/functional/apps/discover/context_awareness/config.ts
@@ -87,7 +86,6 @@ enabled:
   - src/platform/test/functional/apps/management/group1/config.ts
   - src/platform/test/functional/apps/management/group2/config.ts
   - src/platform/test/functional/apps/management/group3/config.ts
-  - src/platform/test/functional/apps/management/group4/config.ts
   - src/platform/test/functional/apps/visualize/group1/config.ts
   - src/platform/test/functional/apps/visualize/group2/config.ts
   - src/platform/test/functional/apps/visualize/group3/config.ts
@@ -244,7 +242,6 @@ enabled:
   - x-pack/platform/test/functional/apps/transform/actions/config.ts
   - x-pack/platform/test/functional/apps/transform/edit_clone/config.ts
   - x-pack/platform/test/functional/apps/transform/permissions/config.ts
-  - x-pack/platform/test/functional/apps/user_profiles/config.ts
   - x-pack/platform/test/functional/apps/visualize/config.ts
   - x-pack/platform/test/functional/config_security_basic.ts
   - x-pack/platform/test/functional/config.ccs.ts

@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { EuiSkeletonText, EuiSkeletonTitle, EuiSpacer, EuiText } from '@elastic/eui';
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { isRuleLoading } from '../../types/rule_state';
-import { getAlertEpisodeDetailsPath } from '../../constants';
 import { AlertEpisodesRelated } from './related/related';
 import { AlertEpisodeCardListSkeleton } from './section_skeletons';
 import type { AlertEpisodeDetailsServices } from './types';
@@ -19,6 +18,7 @@ import * as i18n from './translations';
 export interface AlertEpisodesRelatedSectionProps {
   episodeId: string;
   services: Pick<AlertEpisodeDetailsServices, 'data' | 'http' | 'spaces'>;
+  getEpisodeDetailsHref: (episodeId: string) => string;
   showHeading?: boolean;
   compressed?: boolean;
 }
@@ -26,13 +26,10 @@ export interface AlertEpisodesRelatedSectionProps {
 export const AlertEpisodesRelatedSection = ({
   episodeId,
   services,
+  getEpisodeDetailsHref,
   showHeading,
   compressed,
 }: AlertEpisodesRelatedSectionProps) => {
-  const getEpisodeDetailsHref = useCallback(
-    (id: string) => services.http.basePath.prepend(getAlertEpisodeDetailsPath(id)),
-    [services.http.basePath]
-  );
   const {
     data: episode,
     isLoading: isLoadingEpisode,

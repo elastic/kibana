@@ -8,10 +8,12 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
+import { useRouteMatch } from 'react-router-dom';
 import { RuleLibraryPage } from '../pages/rule_library_page/rule_library_page';
 import { RequireAlertingPrivilege } from '../components/require_alerting_privilege';
 
 export const RuleLibraryApp = () => {
+  const { path } = useRouteMatch();
   return (
     <RequireAlertingPrivilege
       features={['rules']}
@@ -20,7 +22,7 @@ export const RuleLibraryApp = () => {
       })}
     >
       <Routes>
-        <Route exact path="/">
+        <Route exact path={path}>
           <RuleLibraryPage />
         </Route>
       </Routes>

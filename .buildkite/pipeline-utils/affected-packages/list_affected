@@ -9,18 +9,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const path = require('path');
-const parseArgs = require('minimist');
-
-require('ts-node').register({
-  transpileOnly: true,
-  compilerOptions: {
-    module: 'commonjs',
-  },
-  project: path.join(__dirname, '../../tsconfig.json'),
-});
-
-const { getAffectedPackages } = require(path.join(__dirname, './index'));
+import parseArgs from 'minimist';
+import { getAffectedPackages } from './index.ts';
 
 const HELP_TEXT = `
 Usage: list_affected [options]

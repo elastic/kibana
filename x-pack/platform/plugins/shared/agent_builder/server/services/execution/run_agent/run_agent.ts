@@ -18,6 +18,7 @@ import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server';
 import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
 import { runDefaultAgentMode } from './run_chat_agent';
+import { shouldUseDeductive, runDeductiveAgent } from './deductive';
 
 export interface RunAgentParams {
   /**
@@ -91,5 +92,9 @@ export const runAgent = async (
   params: RunAgentParams,
   context: AgentHandlerContext
 ): Promise<RunAgentResponse> => {
+  if (shouldUseDeductive(params.agentId)) {
+    return runDeductiveAgent(params, context);
+  }
+
   return runDefaultAgentMode(params, context);
 };
