@@ -6,19 +6,28 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { isAssignment, isColumn, isFunctionExpression } from '@elastic/esql';
+import { isAssignment, isColumn, isFunctionExpression, singleItems } from '@elastic/esql';
 import type { ESQLColumn, ESQLCommand } from '@elastic/esql/types';
 import type { ESQLCommandSummary } from '../types';
+import { getColumnName } from '../../definitions/utils/columns';
 
 // The enrich command can add new columns with the assignment or without
 export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary => {
   const newColumns: string[] = [];
+  const renamedColumnsPairs: Array<[string, string]> = [];
 
   const processArgument = async (arg: unknown) => {
     // EVAL col = expr
     if (isAssignment(arg) && isColumn(arg.args[0])) {
-      const leftColumn = arg.args[0] as ESQLColumn;
-      newColumns.push(leftColumn.name);
+      const [leftColumn, rightItem] = [...singleItems(arg.args)];
+      newColumns.push((leftColumn as ESQLColumn).name);
+      // EVAL new = old behaves as a rename when the right side is a single column
+      if (isColumn(rightItem)) {
+        renamedColumnsPairs.push([
+          (leftColumn as ESQLColumn).name,
+          getColumnName(rightItem as ESQLColumn),
+        ]);
+      }
       // EVAL func(...)
     } else if (isFunctionExpression(arg) && arg.text) {
       newColumns.push(arg.text);
@@ -27,5 +36,8 @@ export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary
 
   command.args.forEach(processArgument);
 
-  return { newColumns: new Set(newColumns) };
+  return {
+    newColumns: new Set(newColumns),
+    renamedColumnsPairs: new Set(renamedColumnsPairs),
+  };
 };

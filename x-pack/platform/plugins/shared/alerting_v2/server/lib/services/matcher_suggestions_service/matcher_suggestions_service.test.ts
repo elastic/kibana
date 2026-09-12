@@ -6,7 +6,13 @@
  */
 
 import type { QueryDslQueryContainer, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { createMockEsClient, createMockSavedObjectsClient } from '../../test_utils';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
+import {
+  createMockEsClient,
+  createMockSavedObjectsClient,
+  createRuleSoAttributes,
+} from '../../test_utils';
+import type { RuleSavedObjectAttributes } from '../../../saved_objects';
 import { MatcherSuggestionsService } from './matcher_suggestions_service';
 
 const buildSearchResponse = (
@@ -114,5 +120,121 @@ describe('MatcherSuggestionsService.getDataFieldNames', () => {
     esClient.search.mockRejectedValue(error);
 
     await expect(service.getDataFieldNames()).rejects.toBe(error);
+  });
+});
+
+describe('MatcherSuggestionsService.getSuggestions (saved-object-backed fields)', () => {
+  let esClient: ReturnType<typeof createMockEsClient>;
+  let soClient: ReturnType<typeof createMockSavedObjectsClient>;
+  let service: MatcherSuggestionsService;
+
+  const buildFindResponse = (
+    attributesList: Array<Partial<RuleSavedObjectAttributes>>,
+    ids?: string[]
+  ): SavedObjectsFindResponse<RuleSavedObjectAttributes> => ({
+    total: attributesList.length,
+    per_page: attributesList.length,
+    page: 1,
+    saved_objects: attributesList.map((attributes, i) => ({
+      id: ids?.[i] ?? `rule-${i}`,
+      type: 'alerting_v2_rule',
+      attributes: createRuleSoAttributes(attributes),
+      references: [],
+      score: 0,
+    })),
+  });
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+    esClient = createMockEsClient();
+    soClient = createMockSavedObjectsClient();
+    service = new MatcherSuggestionsService(soClient, esClient);
+  });
+
+  describe('rule.name', () => {
+    it('sorts by the managed updated_at root field, not the camelCase updatedAt', async () => {
+      soClient.find.mockResolvedValue(buildFindResponse([{ metadata: { name: 'My rule' } }]));
+
+      await service.getSuggestions('rule.name', 'My');
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ sortField: 'updated_at', sortOrder: 'desc' })
+      );
+    });
+
+    it('scopes the search to metadata.name when a query is provided', async () => {
+      soClient.find.mockResolvedValue(buildFindResponse([{ metadata: { name: 'My rule' } }]));
+
+      await service.getSuggestions('rule.name', 'My');
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ search: 'My*', searchFields: ['metadata.name'] })
+      );
+    });
+
+    it('omits the search clause when no query is provided', async () => {
+      soClient.find.mockResolvedValue(buildFindResponse([{ metadata: { name: 'My rule' } }]));
+
+      await service.getSuggestions('rule.name', '');
+
+      const params = soClient.find.mock.calls[0][0];
+      expect(params).not.toHaveProperty('search');
+      expect(params).not.toHaveProperty('searchFields');
+    });
+
+    it('maps results to the rule name attribute', async () => {
+      soClient.find.mockResolvedValue(
+        buildFindResponse([{ metadata: { name: 'Rule A' } }, { metadata: { name: 'Rule B' } }])
+      );
+
+      const result = await service.getSuggestions('rule.name', '');
+
+      expect(result).toEqual(['Rule A', 'Rule B']);
+    });
+  });
+
+  describe('rule.tags', () => {
+    it('sorts by the managed updated_at root field', async () => {
+      soClient.find.mockResolvedValue(buildFindResponse([{ metadata: { name: 'r', tags: [] } }]));
+
+      await service.getSuggestions('rule.tags', '');
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ sortField: 'updated_at', sortOrder: 'desc' })
+      );
+    });
+
+    it('collects, dedupes, sorts, and prefix-filters tags across rules', async () => {
+      soClient.find.mockResolvedValue(
+        buildFindResponse([
+          { metadata: { name: 'r1', tags: ['prod', 'team-a'] } },
+          { metadata: { name: 'r2', tags: ['prod', 'preview'] } },
+        ])
+      );
+
+      const result = await service.getSuggestions('rule.tags', 'pr');
+
+      expect(result).toEqual(['preview', 'prod']);
+    });
+  });
+
+  describe('rule.id', () => {
+    it('sorts by the managed updated_at root field', async () => {
+      soClient.find.mockResolvedValue(buildFindResponse([{}], ['abc']));
+
+      await service.getSuggestions('rule.id', '');
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ sortField: 'updated_at', sortOrder: 'desc' })
+      );
+    });
+
+    it('maps to saved object ids and prefix-filters by query', async () => {
+      soClient.find.mockResolvedValue(buildFindResponse([{}, {}], ['abc-1', 'xyz-2']));
+
+      const result = await service.getSuggestions('rule.id', 'abc');
+
+      expect(result).toEqual(['abc-1']);
+    });
   });
 });

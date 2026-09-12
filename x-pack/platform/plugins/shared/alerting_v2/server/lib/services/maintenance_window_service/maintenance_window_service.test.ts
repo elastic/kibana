@@ -8,10 +8,9 @@
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import type { MaintenanceWindowAttributes } from '@kbn/maintenance-windows-plugin/common';
-import {
-  DEFAULT_MAINTENANCE_WINDOW_CACHE_INTERVAL_MS,
-  MaintenanceWindowService,
-} from './maintenance_window_service';
+import { createLoggerService } from '../logger_service/logger_service.mock';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
+import { MaintenanceWindowService } from './maintenance_window_service';
 
 const buildSo = (
   id: string,
@@ -50,13 +49,6 @@ const mockFinderForSavedObjects = (docs: Array<SavedObject<MaintenanceWindowAttr
   close: jest.fn().mockResolvedValue(undefined),
 });
 
-const buildLogger = () => ({
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-});
-
 describe('MaintenanceWindowService', () => {
   let client: jest.Mocked<SavedObjectsClientContract>;
 
@@ -78,7 +70,7 @@ describe('MaintenanceWindowService', () => {
       >
     );
 
-    const service = new MaintenanceWindowService(client, buildLogger());
+    const service = new MaintenanceWindowService(client, createLoggerService().loggerService);
 
     const result = await service.getEnabledMaintenanceWindows();
 
@@ -99,7 +91,7 @@ describe('MaintenanceWindowService', () => {
       >
     );
 
-    const service = new MaintenanceWindowService(client, buildLogger());
+    const service = new MaintenanceWindowService(client, createLoggerService().loggerService);
     await service.getEnabledMaintenanceWindows();
 
     expect(client.createPointInTimeFinder).toHaveBeenCalledWith(
@@ -111,42 +103,24 @@ describe('MaintenanceWindowService', () => {
     );
   });
 
-  it('caches results within the cache interval', async () => {
+  it('queries the saved-object store on every invocation (no caching)', async () => {
     const mw = buildSo('mw-1', 'default', {
       events: [{ gte: '2026-04-29T00:00:00.000Z', lte: '2026-04-29T23:00:00.000Z' }],
     });
 
-    client.createPointInTimeFinder.mockReturnValue(
-      mockFinderForSavedObjects([mw]) as ReturnType<
-        SavedObjectsClientContract['createPointInTimeFinder']
-      >
+    client.createPointInTimeFinder.mockImplementation(
+      () =>
+        mockFinderForSavedObjects([mw]) as ReturnType<
+          SavedObjectsClientContract['createPointInTimeFinder']
+        >
     );
 
-    const service = new MaintenanceWindowService(client, buildLogger());
+    const service = new MaintenanceWindowService(client, createLoggerService().loggerService);
     await service.getEnabledMaintenanceWindows();
     await service.getEnabledMaintenanceWindows();
     await service.getEnabledMaintenanceWindows();
 
-    expect(client.createPointInTimeFinder).toHaveBeenCalledTimes(1);
-  });
-
-  it('refetches after cache TTL expires', async () => {
-    const mw = buildSo('mw-1', 'default', {
-      events: [{ gte: '2026-04-29T00:00:00.000Z', lte: '2026-04-29T23:00:00.000Z' }],
-    });
-
-    client.createPointInTimeFinder.mockReturnValue(
-      mockFinderForSavedObjects([mw]) as ReturnType<
-        SavedObjectsClientContract['createPointInTimeFinder']
-      >
-    );
-
-    const service = new MaintenanceWindowService(client, buildLogger(), { cacheIntervalMs: 10 });
-    await service.getEnabledMaintenanceWindows();
-    await new Promise((resolve) => setTimeout(resolve, 25));
-    await service.getEnabledMaintenanceWindows();
-
-    expect(client.createPointInTimeFinder).toHaveBeenCalledTimes(2);
+    expect(client.createPointInTimeFinder).toHaveBeenCalledTimes(3);
   });
 
   it('returns empty array on fetch error, logs, and still closes the PIT finder', async () => {
@@ -161,13 +135,18 @@ describe('MaintenanceWindowService', () => {
       finderThatThrows as ReturnType<SavedObjectsClientContract['createPointInTimeFinder']>
     );
 
-    const logger = buildLogger();
-    const service = new MaintenanceWindowService(client, logger);
+    const { loggerService, mockLogger } = createLoggerService();
+    const service = new MaintenanceWindowService(client, loggerService);
 
     const result = await service.getEnabledMaintenanceWindows();
 
     expect(result).toEqual([]);
-    expect(logger.error).toHaveBeenCalled();
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'boom',
+      expect.objectContaining({
+        labels: { code: ALERTING_LOG_CODES.MAINTENANCE_WINDOW_FETCH_FAILED },
+      })
+    );
     expect(close).toHaveBeenCalledTimes(1);
   });
 
@@ -185,13 +164,15 @@ describe('MaintenanceWindowService', () => {
       finderWithFailingClose as ReturnType<SavedObjectsClientContract['createPointInTimeFinder']>
     );
 
-    const logger = buildLogger();
-    const service = new MaintenanceWindowService(client, logger);
+    const { loggerService, mockLogger } = createLoggerService();
+    const service = new MaintenanceWindowService(client, loggerService);
 
     const result = await service.getEnabledMaintenanceWindows();
 
     expect(result.map((mw) => mw.id)).toEqual(['mw-ok']);
-    expect(logger.warn).toHaveBeenCalled();
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.any(Function), {
+      labels: { code: ALERTING_LOG_CODES.MAINTENANCE_WINDOW_PIT_CLOSE_FAILED },
+    });
   });
 
   it('skips a malformed MW with missing events and still returns the valid ones', async () => {
@@ -207,13 +188,15 @@ describe('MaintenanceWindowService', () => {
       >
     );
 
-    const logger = buildLogger();
-    const service = new MaintenanceWindowService(client, logger);
+    const { loggerService, mockLogger } = createLoggerService();
+    const service = new MaintenanceWindowService(client, loggerService);
 
     const result = await service.getEnabledMaintenanceWindows();
 
     expect(result.map((mw) => mw.id)).toEqual(['mw-ok']);
-    expect(logger.warn).toHaveBeenCalled();
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.any(Function), {
+      labels: { code: ALERTING_LOG_CODES.MAINTENANCE_WINDOW_DOCUMENT_INVALID },
+    });
   });
 
   it('falls back to the default space when a doc has no namespaces array', async () => {
@@ -228,14 +211,10 @@ describe('MaintenanceWindowService', () => {
       >
     );
 
-    const service = new MaintenanceWindowService(client, buildLogger());
+    const service = new MaintenanceWindowService(client, createLoggerService().loggerService);
     const result = await service.getEnabledMaintenanceWindows();
 
     expect(result).toHaveLength(1);
     expect(result[0].spaceId).toBe('default');
-  });
-
-  it('uses default cache interval', () => {
-    expect(DEFAULT_MAINTENANCE_WINDOW_CACHE_INTERVAL_MS).toBe(60_000);
   });
 });

@@ -12,22 +12,21 @@ import { test } from '../fixtures';
 test.describe('Ingest pipelines feature controls', { tag: tags.stateful.classic }, () => {
   test('ingest user with dev tools has the embedded console', async ({
     browserAuth,
-    page,
     pageObjects,
   }) => {
     await browserAuth.loginAsDevToolsReadWithIngest();
     await pageObjects.ingestPipelines.goto();
 
-    const controlBar = page.testSubj.locator('consoleEmbeddedControlBar');
-    const body = page.testSubj.locator('consoleEmbeddedBody');
+    const { embeddedConsole } = pageObjects;
 
-    await expect(controlBar).toBeVisible();
-    await expect(body).toBeHidden();
+    await expect(embeddedConsole.controlBar).toBeVisible();
+    await expect(embeddedConsole.body).toBeHidden();
 
-    await controlBar.click();
-    await expect(body).toBeVisible();
+    await embeddedConsole.toggle();
+    await expect(embeddedConsole.body).toBeVisible();
+    await expect(embeddedConsole.fullscreenToggle).toBeVisible();
 
-    await controlBar.click();
-    await expect(body).toBeHidden();
+    await embeddedConsole.toggle();
+    await expect(embeddedConsole.body).toBeHidden();
   });
 });

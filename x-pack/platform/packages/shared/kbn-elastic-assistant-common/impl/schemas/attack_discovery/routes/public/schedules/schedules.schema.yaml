@@ -94,6 +94,40 @@ components:
           type: number
         start:
           type: string
+        workflowConfig:
+          description: >
+            Composite workflow configuration that signals this schedule should use the
+            orchestrator workflow executor, enabling tracking events (alert
+            retrieval, generation, validation) to be written to the event log.
+            Three independent retrieval toggles (skillEnabled, defaultRetrievalEnabled,
+            alertRetrievalWorkflowsEnabled) compose the alert set; at least one must be enabled.
+          type: object
+          properties:
+            alertRetrievalMode:
+              type: string
+              enum:
+                - custom_query
+                - esql
+              default: custom_query
+            alertRetrievalWorkflowIds:
+              type: array
+              items:
+                type: string
+              default: []
+            alertRetrievalWorkflowsEnabled:
+              type: boolean
+              default: false
+            defaultRetrievalEnabled:
+              type: boolean
+              default: false
+            esqlQuery:
+              type: string
+            skillEnabled:
+              type: boolean
+              default: true
+            validationWorkflowId:
+              type: string
+              default: default
 
     Query:
       type: object

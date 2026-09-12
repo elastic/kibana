@@ -13,3 +13,10 @@ export type {
   AuthenticatedUser,
   AuthenticationProvider,
 } from './src/authentication';
+export { isUserAnonymous, canUserHaveProfile } from './src/authentication';
+export type {
+  ServiceAccount,
+  ServiceAccountAssumableBy,
+  ServiceAccountRoleAssignments,
+  CreateServiceAccountParams,
+} from './src/service_accounts';

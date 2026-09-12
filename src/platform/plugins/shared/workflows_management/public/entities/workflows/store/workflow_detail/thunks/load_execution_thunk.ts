@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createAsyncThunk } from '@reduxjs/toolkit';
+import { createAsyncThunk } from 'redux-toolkit-v1';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { WorkflowApi } from '@kbn/workflows-ui';
@@ -34,7 +34,9 @@ export const loadExecutionThunk = createAsyncThunk<
     try {
       const previousExecution = getState().detail.execution;
 
-      const response = await api.getExecution(id, { includeInput: false, includeOutput: false });
+      // includeOutput so AI token metadata (LangChain tokenUsage) is available for
+      // tree badges / AI section before step.usage is populated by the engine.
+      const response = await api.getExecution(id, { includeInput: false, includeOutput: true });
       dispatch(setExecution(response));
 
       if (id !== previousExecution?.id) {

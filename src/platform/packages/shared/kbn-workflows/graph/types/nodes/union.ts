@@ -13,6 +13,7 @@ import {
   DataSetGraphNodeSchema,
   ElasticsearchGraphNodeSchema,
   KibanaGraphNodeSchema,
+  WaitForApprovalGraphNodeSchema,
   WaitForInputGraphNodeSchema,
   WaitGraphNodeSchema,
   WorkflowExecuteAsyncGraphNodeSchema,
@@ -49,6 +50,7 @@ import {
   StepLevelOnFailureNodeSchema,
   WorkflowLevelOnFailureNodeSchema,
 } from './on_failure_nodes';
+import { EnterParallelNodeSchema, ExitParallelNodeSchema } from './parallel_nodes';
 import {
   EnterCaseBranchNodeSchema,
   EnterDefaultBranchNodeSchema,
@@ -65,6 +67,7 @@ const GraphNodeUnionSchema = z.discriminatedUnion('type', [
   KibanaGraphNodeSchema,
   WaitGraphNodeSchema,
   WaitForInputGraphNodeSchema,
+  WaitForApprovalGraphNodeSchema,
   WorkflowExecuteGraphNodeSchema,
   WorkflowExecuteAsyncGraphNodeSchema,
   WorkflowOutputGraphNodeSchema,
@@ -76,6 +79,8 @@ const GraphNodeUnionSchema = z.discriminatedUnion('type', [
   ExitForeachNodeSchema,
   EnterWhileNodeSchema,
   ExitWhileNodeSchema,
+  EnterParallelNodeSchema,
+  ExitParallelNodeSchema,
   EnterRetryNodeSchema,
   ExitRetryNodeSchema,
   EnterContinueNodeSchema,

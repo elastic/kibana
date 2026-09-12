@@ -14,24 +14,25 @@ import {
   TRACE_ID_FIELD,
   TRANSACTION_ID_FIELD,
 } from '@kbn/discover-utils';
-import { where } from '@kbn/esql-composer';
+import type { ESQLAstExpression } from '@elastic/esql/types';
+import { esqlEquals } from '../../../../../../utils/esql_expressions';
 
-export function createSpanNameWhereClause(item: SpanLinkDetails) {
+export function createSpanNameWhereClause(item: SpanLinkDetails): ESQLAstExpression {
   const transactionId = item.details?.transactionId;
   if (transactionId) {
-    return where(`${TRANSACTION_ID_FIELD} == ?transactionId`, [{ transactionId }]);
+    return esqlEquals(TRANSACTION_ID_FIELD, transactionId);
   }
 
-  return where(`${SPAN_ID_FIELD} == ?spanId`, [{ spanId: item.spanId }]);
+  return esqlEquals(SPAN_ID_FIELD, item.spanId);
 }
 
-export function createServiceNameWhereClause(item: SpanLinkDetails) {
+export function createServiceNameWhereClause(item: SpanLinkDetails): ESQLAstExpression | undefined {
   const serviceName = item.details?.serviceName;
   if (!serviceName) return undefined;
 
-  return where(`${SERVICE_NAME_FIELD} == ?serviceName`, [{ serviceName }]);
+  return esqlEquals(SERVICE_NAME_FIELD, serviceName);
 }
 
-export function createTraceIdWhereClause(item: SpanLinkDetails) {
-  return where(`${TRACE_ID_FIELD} == ?traceId`, [{ traceId: item.traceId }]);
+export function createTraceIdWhereClause(item: SpanLinkDetails): ESQLAstExpression {
+  return esqlEquals(TRACE_ID_FIELD, item.traceId);
 }

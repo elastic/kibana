@@ -46,6 +46,10 @@ describe('createRuleRoute', () => {
       removalDelay: '1h',
     },
     enableFrameworkAlerts: true,
+    alertsService: {
+      totalFieldsLimit: 2800,
+      coordinateInstallation: true,
+    },
     cancelAlertsOnRuleTimeout: true,
     ruleChangeTracking: {
       enabled: false,
@@ -173,7 +177,10 @@ describe('createRuleRoute', () => {
       {
         ...ruleToCreate.actions[0],
         alerts_filter: {
-          query: action.alertsFilter?.query!,
+          query: {
+            kql: action.alertsFilter?.query!.kql,
+            filters: action.alertsFilter?.query!.filters ?? [],
+          },
           timeframe: action.alertsFilter!.timeframe!,
         },
         connector_type_id: 'test',
@@ -291,6 +298,42 @@ describe('createRuleRoute', () => {
         },
       },
     });
+  });
+
+  it('maps the clone API key header to a rules client option, never rule data', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+
+    createRuleRoute({
+      router,
+      licenseState,
+      encryptedSavedObjects,
+      docLinks,
+      alertingConfig: alertingConfigMock,
+      core: {} as unknown as CoreSetup<AlertingPluginsStart, unknown>,
+    });
+
+    const [, handler] = router.post.mock.calls[0];
+
+    rulesClient.create.mockResolvedValueOnce(mockedAlert);
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      {
+        body: ruleToCreate,
+        headers: { 'x-kbn-alerting-clone-api-key': 'true' },
+      },
+      ['ok']
+    );
+
+    await handler(context, req, res);
+
+    expect(rulesClient.create).toHaveBeenCalledTimes(1);
+    const [createArgs] = rulesClient.create.mock.calls[0];
+    expect(createArgs.options).toEqual({ id: undefined, cloneApiKey: true });
+    expect(createArgs.data).not.toHaveProperty('clone_api_key');
+    expect(createArgs.data).not.toHaveProperty('cloneApiKey');
   });
 
   it('allows providing a custom id when space is undefined', async () => {
@@ -860,7 +903,7 @@ describe('createRuleRoute', () => {
       expect(routeRes.body.actions).toEqual([
         {
           alerts_filter: {
-            query: { dsl: '{"must": {"term": { "name": "test" }}}', filters: [], kql: 'name:test' },
+            query: { filters: [], kql: 'name:test' },
             timeframe: { days: [1], hours: { end: '17:00', start: '08:00' }, timezone: 'UTC' },
           },
           connector_type_id: 'test',

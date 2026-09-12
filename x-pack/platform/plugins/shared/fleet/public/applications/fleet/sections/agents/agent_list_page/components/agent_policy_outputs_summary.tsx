@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
 import React, { useMemo, useState } from 'react';
 
 import type { EuiListGroupItemProps } from '@elastic/eui';
@@ -16,19 +15,13 @@ import {
   EuiLink,
   EuiListGroup,
   EuiPopover,
-  EuiPopoverTitle,
 } from '@elastic/eui';
+
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { useLink } from '../../../../hooks';
 import type { OutputsForAgentPolicy } from '../../../../../../../common/types';
-
-const TruncatedEuiLink = styled(EuiLink)`
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  width: 120px;
-`;
 
 export const AgentPolicyOutputsSummary: React.FC<{
   outputs?: OutputsForAgentPolicy;
@@ -49,7 +42,7 @@ export const AgentPolicyOutputsSummary: React.FC<{
         'data-test-subj': `output-integration-${index}`,
         label: `${integration.integrationPolicyName}: ${integration.name}`,
         href: getHref('settings_edit_outputs', { outputId: integration?.id ?? '' }),
-        iconType: 'dot',
+        wrapText: true,
       };
     });
   }, [getHref, data?.integrations]);
@@ -63,23 +56,23 @@ export const AgentPolicyOutputsSummary: React.FC<{
     >
       {isMonitoring ? (
         <EuiFlexItem grow={false}>
-          <TruncatedEuiLink
+          <EuiLink
             href={getHref('settings_edit_outputs', { outputId: monitoring?.output?.id ?? '' })}
             title={monitoring?.output.name}
             data-test-subj="outputNameLink"
           >
             {monitoring?.output.name}
-          </TruncatedEuiLink>
+          </EuiLink>
         </EuiFlexItem>
       ) : (
         <EuiFlexItem grow={false}>
-          <TruncatedEuiLink
+          <EuiLink
             href={getHref('settings_edit_outputs', { outputId: data?.output?.id ?? '' })}
             title={data?.output.name}
             data-test-subj="outputNameLink"
           >
             {data?.output.name}
-          </TruncatedEuiLink>
+          </EuiLink>
         </EuiFlexItem>
       )}
 
@@ -91,22 +84,25 @@ export const AgentPolicyOutputsSummary: React.FC<{
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
             onClickAriaLabel="Open output integrations popover"
           >
-            +{data?.integrations.length}
+            <FormattedMessage
+              id="xpack.fleet.AgentPolicyOutputsSummary.popover.countBadge"
+              defaultMessage="{count} more"
+              values={{
+                count: `+${data?.integrations.length}`,
+              }}
+            />
           </EuiBadge>
           <EuiPopover
+            aria-label={i18n.translate('xpack.fleet.agentPolicyOutputsSummary.popoverAriaLabel', {
+              defaultMessage: 'Output integrations',
+            })}
             data-test-subj="outputPopover"
             isOpen={isPopoverOpen}
             closePopover={closePopover}
             anchorPosition="downCenter"
+            panelPaddingSize="s"
           >
-            <EuiPopoverTitle>
-              {i18n.translate('xpack.fleet.AgentPolicyOutputsSummary.popover.title', {
-                defaultMessage: 'Output for integrations',
-              })}
-            </EuiPopoverTitle>
-            <div style={{ width: '280px' }}>
-              <EuiListGroup listItems={listItems} color="primary" />
-            </div>
+            <EuiListGroup listItems={listItems} color="primary" />
           </EuiPopover>
         </EuiFlexItem>
       )}

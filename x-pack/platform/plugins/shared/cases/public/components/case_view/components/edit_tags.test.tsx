@@ -70,7 +70,7 @@ describe('EditTags ', () => {
 
     await user.click(await screen.findByTestId('edit-tags-submit'));
 
-    await waitFor(() => expect(onSubmit).toBeCalledWith([sampleTags[0]]));
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledWith([sampleTags[0]]));
   });
 
   it('add new tags on submit', async () => {
@@ -86,7 +86,7 @@ describe('EditTags ', () => {
 
     await user.click(await screen.findByTestId('edit-tags-submit'));
 
-    await waitFor(() => expect(onSubmit).toBeCalledWith(['dude']));
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledWith(['dude']));
   });
 
   it('trims the tags on submit', async () => {
@@ -102,7 +102,7 @@ describe('EditTags ', () => {
 
     await user.click(await screen.findByTestId('edit-tags-submit'));
 
-    await waitFor(() => expect(onSubmit).toBeCalledWith(['dude']));
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledWith(['dude']));
   });
 
   it('cancels on cancel', async () => {
@@ -119,7 +119,7 @@ describe('EditTags ', () => {
     await user.click(await screen.findByTestId('edit-tags-cancel'));
 
     await waitFor(() => {
-      expect(onSubmit).not.toBeCalled();
+      expect(onSubmit).not.toHaveBeenCalled();
     });
 
     expect(await screen.findByTestId('no-tags')).toBeInTheDocument();

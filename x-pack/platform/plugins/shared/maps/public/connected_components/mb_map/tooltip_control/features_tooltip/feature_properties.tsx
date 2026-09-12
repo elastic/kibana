@@ -12,7 +12,6 @@ import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
-  EuiCallOut,
   EuiLoadingSpinner,
   EuiTextAlign,
   EuiButtonEmpty,
@@ -24,6 +23,7 @@ import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/publ
 import type { GeoJsonProperties } from 'geojson';
 import type { Filter } from '@kbn/es-query';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { isUrlDrilldown } from '../../../../trigger_actions/trigger_utils';
 import type { RawValue } from '../../../../../common/constants';
 import type { ITooltipProperty } from '../../../../classes/tooltips/tooltip_property';
@@ -305,17 +305,14 @@ export class FeatureProperties extends Component<Props, State> {
   render() {
     if (this.state.loadPropertiesErrorMsg) {
       return (
-        <EuiCallOut
+        <KbnDangerCallout
           announceOnMount
           title={i18n.translate('xpack.maps.tooltip.unableToLoadContentTitle', {
             defaultMessage: 'Unable to load tooltip content',
           })}
-          color="danger"
-          iconType="warning"
+          text={this.state.loadPropertiesErrorMsg}
           size="s"
-        >
-          <p>{this.state.loadPropertiesErrorMsg}</p>
-        </EuiCallOut>
+        />
       );
     }
 

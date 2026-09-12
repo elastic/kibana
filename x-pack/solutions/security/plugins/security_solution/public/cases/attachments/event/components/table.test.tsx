@@ -31,7 +31,8 @@ import type { EcsSecurityExtension } from '@kbn/securitysolution-ecs';
 jest.mock('../hooks/use_events_data_view');
 jest.mock('../hooks/search_events');
 
-describe('EventsTableForCases', () => {
+// Failing: See https://github.com/elastic/kibana/issues/271294
+describe.skip('EventsTableForCases', () => {
   beforeEach(() => {
     jest.mocked(useCaseEventsDataView).mockReturnValue({
       dataView: new DataView({

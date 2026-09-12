@@ -9,13 +9,18 @@
 
 import type { ConsoleAppenderConfig } from './console';
 import type { FileAppenderConfig } from './file';
-import type { OtelAppenderConfig } from './otel';
+import type { OtelAppenderConfig, OtelAppenderPluginConfig } from './otel';
 import type { RewriteAppenderConfig } from './rewrite';
 import type { RollingFileAppenderConfig } from './rolling_file';
 
 export type { ConsoleAppenderConfig } from './console';
 export type { FileAppenderConfig } from './file';
-export type { OtelAppenderConfig, OtelAppenderTlsConfig } from './otel';
+export type {
+  OtelAppenderConfig,
+  OtelAppenderPluginConfig,
+  OtelAppenderTlsConfig,
+  OtelAttributesTransform,
+} from './otel';
 export type {
   RewriteAppenderConfig,
   MetaRewritePolicyConfig,
@@ -39,3 +44,10 @@ export type AppenderConfigType =
   | OtelAppenderConfig
   | RewriteAppenderConfig
   | RollingFileAppenderConfig;
+
+/**
+ * Appender configs accepted by {@link LoggingServiceSetup.configure}: every YAML-safe
+ * {@link AppenderConfigType} plus {@link OtelAppenderPluginConfig}.
+ * @public
+ */
+export type PluginAppenderConfigType = AppenderConfigType | OtelAppenderPluginConfig;

@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "map_version": "2.2",
+  "obfuscated_class": "co.elastic.otel.android.integration.CrashActivity",
+  "original_class": "co.elastic.otel.android.integration.CrashActivity",
+  "source_file": "CrashActivity.kt",
+  "methods": {
+    "onCreate": {
+      "mappings": [
+        {
+          "obf_range": [
+            1,
+            3
+          ],
+          "orig_range": [
+            29,
+            29
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            4,
+            24
+          ],
+          "orig_range": [
+            30,
+            30
+          ],
+          "method": "onCreate"
+        }
+      ]
+    }
+  }
+}

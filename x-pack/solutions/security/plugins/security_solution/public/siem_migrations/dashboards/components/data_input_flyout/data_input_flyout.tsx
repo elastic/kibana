@@ -33,7 +33,7 @@ import { MigrationSource, SplunkDataInputStep } from '../../../common/types';
 import { useMissingResources } from '../../../common/hooks/use_missing_resources';
 import { STEP_COMPONENTS } from './configs';
 import { PanelText } from '../../../../common/components/panel_text';
-import { getCopyrightNoticeByVendor } from '../../../common/utils/get_copyright_notice_by_vendor';
+import { useRuleMigrationVendorCopy } from '../../../rules/hooks/use_rule_migration_vendor_copy';
 
 interface DashboardMigrationDataInputFlyoutProps {
   onClose: () => void;
@@ -54,6 +54,7 @@ export const DashboardMigrationDataInputFlyout = React.memo(
     });
 
     const { closeFlyout } = useMigrationDataInputContext();
+    const { copyrightNotice } = useRuleMigrationVendorCopy(MigrationSource.SPLUNK);
 
     const isRetry = migrationStats?.status === SiemMigrationTaskStatus.FINISHED;
 
@@ -130,9 +131,7 @@ export const DashboardMigrationDataInputFlyout = React.memo(
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
-              <h2 id={modalTitleId} aria-label={DASHBOARDS_MIGRATION_DATA_INPUT_FLYOUT_TITLE}>
-                {i18n.DATA_INPUT_FLYOUT_TITLE}
-              </h2>
+              <h2 id={modalTitleId}>{i18n.DATA_INPUT_FLYOUT_TITLE}</h2>
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
@@ -154,7 +153,7 @@ export const DashboardMigrationDataInputFlyout = React.memo(
               </>
               <EuiFlexItem>
                 <PanelText size="xs" subdued cursive>
-                  <p>{getCopyrightNoticeByVendor(MigrationSource.SPLUNK)}</p>
+                  <p>{copyrightNotice}</p>
                 </PanelText>
               </EuiFlexItem>
             </EuiFlexGroup>

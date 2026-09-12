@@ -6,6 +6,143 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "filtering": [
+        {
+          "active": {
+            "advanced_snippet": {
+              "created_at": "",
+              "updated_at": "",
+              "value": ""
+            },
+            "rules": [
+              {
+                "created_at": "",
+                "field": "",
+                "id": "",
+                "order": "",
+                "policy": {
+                  "__one_of": [
+                    "exclude",
+                    "include"
+                  ]
+                },
+                "rule": {
+                  "__one_of": [
+                    "contains",
+                    "ends_with",
+                    "equals",
+                    "regex",
+                    "starts_with",
+                    ">",
+                    "<"
+                  ]
+                },
+                "updated_at": "",
+                "value": ""
+              }
+            ],
+            "validation": {
+              "errors": [
+                {
+                  "ids": [],
+                  "messages": []
+                }
+              ],
+              "state": {
+                "__one_of": [
+                  "edited",
+                  "invalid",
+                  "valid"
+                ]
+              }
+            }
+          },
+          "domain": "",
+          "draft": {
+            "advanced_snippet": {
+              "created_at": "",
+              "updated_at": "",
+              "value": ""
+            },
+            "rules": [
+              {
+                "created_at": "",
+                "field": "",
+                "id": "",
+                "order": "",
+                "policy": {
+                  "__one_of": [
+                    "exclude",
+                    "include"
+                  ]
+                },
+                "rule": {
+                  "__one_of": [
+                    "contains",
+                    "ends_with",
+                    "equals",
+                    "regex",
+                    "starts_with",
+                    ">",
+                    "<"
+                  ]
+                },
+                "updated_at": "",
+                "value": ""
+              }
+            ],
+            "validation": {
+              "errors": [
+                {
+                  "ids": [],
+                  "messages": []
+                }
+              ],
+              "state": {
+                "__one_of": [
+                  "edited",
+                  "invalid",
+                  "valid"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "rules": [
+        {
+          "created_at": "",
+          "field": "",
+          "id": "",
+          "order": "",
+          "policy": {
+            "__one_of": [
+              "exclude",
+              "include"
+            ]
+          },
+          "rule": {
+            "__one_of": [
+              "contains",
+              "ends_with",
+              "equals",
+              "regex",
+              "starts_with",
+              ">",
+              "<"
+            ]
+          },
+          "updated_at": "",
+          "value": ""
+        }
+      ],
+      "advanced_snippet": {
+        "created_at": "",
+        "updated_at": "",
+        "value": ""
+      }
+    },
     "methods": [
       "PUT"
     ],

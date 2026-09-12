@@ -16,6 +16,8 @@ import type { LogEntryAnomaly } from '../../../../../../common/log_analysis';
 import { isCategoryAnomaly, logEntryRateJobType } from '../../../../../../common/log_analysis';
 import type { TimeRange } from '../../../../../../common/time/time_range';
 import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
+import { useLogEntryCategoriesModuleContext } from '../../../../../containers/logs/log_analysis/modules/log_entry_categories';
+import { useLogEntryRateModuleContext } from '../../../../../containers/logs/log_analysis/modules/log_entry_rate';
 import { useLogEntryExamples } from '../../use_log_entry_examples';
 import { LogEntryExampleMessageTable } from './log_entry_example';
 import { useLogMlJobIdFormatsShimContext } from '../../../shared/use_log_ml_job_id_formats_shim';
@@ -32,6 +34,9 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
 }> = ({ anomaly, timeRange }) => {
   const { logViewReference } = useLogViewContext();
   const { idFormats } = useLogMlJobIdFormatsShimContext();
+  const { projectRouting: rateProjectRouting } = useLogEntryRateModuleContext();
+  const { projectRouting: categoriesProjectRouting } = useLogEntryCategoriesModuleContext();
+  const projectRouting = isCategoryAnomaly(anomaly) ? categoriesProjectRouting : rateProjectRouting;
 
   if (logViewReference.type === 'log-view-inline') {
     throw new Error('Logs ML features only support persisted Log Views');
@@ -77,6 +82,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
                 examples={logEntryExamples}
                 timeRange={timeRange}
                 anomaly={anomaly}
+                projectRouting={projectRouting}
               />
             ) : null}
           </LogEntryExampleMessages>

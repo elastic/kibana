@@ -240,6 +240,50 @@ describe('defaultGroupStatsRenderer', () => {
     ).toBeTruthy();
   });
 
+  it('should return array of badges for destination.ip field', () => {
+    const badges = defaultGroupStatsRenderer('destination.ip', {
+      key: '',
+      severitiesSubAggregation: { buckets: [{ key: 'medium', doc_count: 10 }] },
+      rulesCountAggregation: { value: 7 },
+      hostsCountAggregation: { value: 4 },
+      doc_count: 9,
+    });
+
+    expect(badges.length).toBe(4);
+    expect(
+      badges.find(
+        (badge) => badge.title === 'Severity:' && badge.component != null && badge.badge == null
+      )
+    ).toBeTruthy();
+    expect(
+      badges.find(
+        (badge) =>
+          badge.title === 'Hosts:' &&
+          badge.component == null &&
+          badge.badge != null &&
+          badge.badge.value === 4
+      )
+    ).toBeTruthy();
+    expect(
+      badges.find(
+        (badge) =>
+          badge.title === 'Rules:' &&
+          badge.component == null &&
+          badge.badge != null &&
+          badge.badge.value === 7
+      )
+    ).toBeTruthy();
+    expect(
+      badges.find(
+        (badge) =>
+          badge.title === 'Alerts:' &&
+          badge.component == null &&
+          badge.badge != null &&
+          badge.badge.value === 9
+      )
+    ).toBeTruthy();
+  });
+
   it('should return default badges if the field specific does not exist', () => {
     const badges = defaultGroupStatsRenderer('process.name', {
       key: '',

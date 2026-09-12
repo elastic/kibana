@@ -13,11 +13,11 @@ describe('RotateKeyPairSchema', () => {
       RotateKeyPairSchema.query.validate({
         acknowledge: false,
       })
-    ).toThrowError(errorMessage);
+    ).toThrow(errorMessage);
   });
 
   it('should allow without any query', () => {
-    expect(() => RotateKeyPairSchema.query.validate({})).toThrowError(errorMessage);
+    expect(() => RotateKeyPairSchema.query.validate({})).toThrow(errorMessage);
   });
 
   it.each([1, 'string'])('should not allow non-boolean `%s` values for acknowledge', (value) => {
@@ -25,7 +25,7 @@ describe('RotateKeyPairSchema', () => {
       RotateKeyPairSchema.query.validate({
         acknowledge: value,
       })
-    ).toThrowError(`[acknowledge]: expected value of type [boolean] but got [${typeof value}]`);
+    ).toThrow(`[acknowledge]: expected value of type [boolean] but got [${typeof value}]`);
   });
 
   it('should not throw on `true` values for acknowledge', () => {

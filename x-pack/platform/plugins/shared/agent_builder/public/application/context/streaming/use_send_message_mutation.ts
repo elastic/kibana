@@ -10,21 +10,19 @@ import { useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, tap } from 'rxjs';
 import { isEqual } from 'lodash';
-import type {
-  ConversationAction,
-  ConversationRoundStep,
-  Conversation,
-} from '@kbn/agent-builder-common';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import { v4 as uuidv4 } from 'uuid';
+import type { ConversationRoundStep, Conversation } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus, isConversationCreatedEvent } from '@kbn/agent-builder-common';
 import type {
   Attachment,
-  AttachmentInput,
+  ConversationAttachment,
   ScreenContextAttachmentData,
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType, getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import { flattenAttachments } from '../conversation/flatten_attachments';
 import { queryKeys } from '../../query_keys';
 import { useKibana } from '../../hooks/use_kibana';
 import type { StartServices } from '../../hooks/use_kibana';
@@ -46,20 +44,18 @@ const optimisticConversationListTitle = i18n.translate(
 );
 
 export interface SendMessageVars {
-  message?: string;
-  action?: ConversationAction;
+  message: string;
   conversationId: string;
   agentId: string;
   connectorId?: string;
-  attachments?: AttachmentInput[];
+  attachments?: ConversationAttachment[];
   conversationAttachments?: VersionedAttachment[];
-  lastRoundSteps?: ConversationRoundStep[];
   resetAttachments?: () => void;
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
+  onResetToNewConversation?: (message: string, attachments?: ConversationAttachment[]) => void;
 }
 
 export interface SendMessageMutationBindings {
-  updateActiveReasoning: (conversationId: string, reasoning: string) => void;
   setPendingMessage: (conversationId: string, message: string) => void;
   clearPendingMessage: (conversationId: string) => void;
   setError: (conversationId: string, error: unknown, errorSteps: ConversationRoundStep[]) => void;
@@ -126,7 +122,7 @@ const withScreenContextAttachment = async ({
 };
 
 /**
- * Send and regenerate-round mutation. Lives in the lifted StreamingProvider so streaming
+ * Send-message mutation. Lives in the lifted StreamingProvider so streaming
  * state is visible to the whole app (sidebar included).
  *
  * Single-scope `mutationFn` (setup → try → catch → finally) — no `onMutate` / `onSettled`
@@ -135,7 +131,6 @@ const withScreenContextAttachment = async ({
  * to the right cache regardless of where the user has navigated.
  */
 export const useSendMessageMutation = ({
-  updateActiveReasoning,
   setPendingMessage,
   clearPendingMessage,
   setError,
@@ -145,9 +140,12 @@ export const useSendMessageMutation = ({
   const { chatService, conversationsService } = useAgentBuilderServices();
   const { services } = useKibana();
   const queryClient = useQueryClient();
-  // One controller per in-flight conversation. Concurrent streams need independent cancel.
+  // One controller + executionId per in-flight conversation. Concurrent streams need
+  // independent cancel; the executionId is what the abort endpoint uses to stop server-side.
   // `useSendMessageMutation` is called exactly once — by  the `StreamingProvider`.
-  const controllersRef = useRef<Map<string, AbortController>>(new Map());
+  const controllersRef = useRef<Map<string, { controller: AbortController; executionId: string }>>(
+    new Map()
+  );
 
   const browserToolExecutor = useMemo(() => {
     return new BrowserToolExecutor(services.notifications?.toasts);
@@ -156,13 +154,15 @@ export const useSendMessageMutation = ({
   const { mutate, isLoading } = useMutation({
     mutationKey: mutationKeys.sendMessage,
     mutationFn: async (vars: SendMessageVars) => {
-      const isRegenerate = vars.action === 'regenerate';
-
       // Clear any previous error for this conversation before starting the new mutation.
-      // Covers retry, fresh-send-after-error, and regenerate-after-error uniformly —
+      // Covers retry and fresh-send-after-error uniformly —
       // otherwise `useConversationRounds` would render the stale error round alongside
       // the new optimistic round.
       clearError(vars.conversationId);
+      const isNewConversation = !queryClient.getQueryData<Conversation>(
+        queryKeys.conversations.byId(vars.conversationId)
+      );
+      let conversationPersisted = false;
 
       // Each conversation owns its streaming lifecycle. The streamActions instance built
       // here is closure-bound to vars.conversationId for the duration of this mutation —
@@ -173,59 +173,62 @@ export const useSendMessageMutation = ({
         conversationsService,
       });
 
-      controllersRef.current.get(vars.conversationId)?.abort();
-      const controller = new AbortController();
-      controllersRef.current.set(vars.conversationId, controller);
-
-      let hasInsertedOptimisticListRow = false;
-      if (isRegenerate) {
-        // Clear the existing response immediately so UI shows empty state.
-        streamActions.clearLastRoundResponse();
-      } else {
-        if (!vars.message) {
-          throw new Error('Message is required');
-        }
-        setPendingMessage(vars.conversationId, vars.message);
-        hasInsertedOptimisticListRow = await insertSidebarConversationListRow({
-          queryClient,
-          agentId: vars.agentId,
-          conversationId: vars.conversationId,
-          title: optimisticConversationListTitle,
-        });
-        await streamActions.addOptimisticRound({
-          userMessage: vars.message,
-          attachments: vars.attachments ?? [],
-          agentId: vars.agentId,
-        });
+      const previous = controllersRef.current.get(vars.conversationId);
+      if (previous) {
+        chatService.abort(previous.executionId).catch(() => {});
+        previous.controller.abort();
       }
+      const controller = new AbortController();
+      const executionId = uuidv4();
+      controllersRef.current.set(vars.conversationId, { controller, executionId });
+
+      if (!vars.message) {
+        throw new Error('Message is required');
+      }
+      setPendingMessage(vars.conversationId, vars.message);
+      const hasInsertedOptimisticListRow = await insertSidebarConversationListRow({
+        queryClient,
+        conversationsService,
+        agentId: vars.agentId,
+        conversationId: vars.conversationId,
+        title: optimisticConversationListTitle,
+      });
+      await streamActions.addOptimisticRound({
+        userMessage: vars.message,
+        attachments: flattenAttachments(vars.attachments ?? []),
+        agentId: vars.agentId,
+      });
 
       let succeeded = false;
       try {
         const browserApiToolsMetadata = vars.browserApiTools?.map(toToolMetadata);
+        const projectRouting = services.plugins.cps?.cpsManager?.getProjectRouting();
 
-        const events$ = isRegenerate
-          ? chatService.regenerate({
-              signal: controller.signal,
-              conversationId: vars.conversationId,
-              agentId: vars.agentId,
-              connectorId: vars.connectorId,
-              browserApiTools: browserApiToolsMetadata,
-            })
-          : chatService.chat({
-              signal: controller.signal,
-              input: vars.message!,
-              conversationId: vars.conversationId,
-              agentId: vars.agentId,
-              connectorId: vars.connectorId,
-              attachments: [
-                ...(vars.attachments ?? []),
-                ...(await withScreenContextAttachment({
-                  services,
-                  conversationAttachments: vars.conversationAttachments,
-                })),
-              ],
-              browserApiTools: browserApiToolsMetadata,
-            });
+        const rawEvents$ = chatService.chat({
+          signal: controller.signal,
+          executionId,
+          input: vars.message,
+          conversationId: vars.conversationId,
+          agentId: vars.agentId,
+          connectorId: vars.connectorId,
+          attachments: [
+            ...flattenAttachments(vars.attachments ?? []),
+            ...(await withScreenContextAttachment({
+              services,
+              conversationAttachments: vars.conversationAttachments,
+            })),
+          ],
+          browserApiTools: browserApiToolsMetadata,
+          projectRouting,
+        });
+
+        const events$ = rawEvents$.pipe(
+          tap((event) => {
+            if (isConversationCreatedEvent(event)) {
+              conversationPersisted = true;
+            }
+          })
+        );
 
         await subscribeToChatEvents({
           events$,
@@ -233,21 +236,27 @@ export const useSendMessageMutation = ({
           browserApiTools: vars.browserApiTools,
           browserToolExecutor,
           isAborted: () => controller.signal.aborted,
-          setAgentReasoning: (reasoning) => updateActiveReasoning(vars.conversationId, reasoning),
         });
 
-        if (!isRegenerate) {
+        // Skip on cancel: the editor restores the pending message's image chips, so clearing attachments here would break them.
+        if (!controller.signal.aborted) {
           clearPendingMessage(vars.conversationId);
           vars.resetAttachments?.();
         }
         succeeded = true;
       } catch (err) {
-        setError(vars.conversationId, err, vars.lastRoundSteps ?? []);
-        if (!isRegenerate) {
-          // Remove the optimistic round immediately so the error round and the optimistic
-          // round are not both visible.
-          streamActions.removeOptimisticRound();
-        }
+        // Snapshot the failing round's accumulated steps from the cache BEFORE
+        // we tear down the optimistic round below. Without this, the in-progress
+        // steps (reasoning + any successful tool calls before the failure) are
+        // lost and the error panel renders with no context.
+        const cached = queryClient.getQueryData<Conversation>(
+          queryKeys.conversations.byId(vars.conversationId)
+        );
+        const inProgressSteps = cached?.rounds?.at(-1)?.steps ?? [];
+        setError(vars.conversationId, err, inProgressSteps);
+        // Remove the optimistic round immediately so the error round and the optimistic
+        // round are not both visible.
+        streamActions.removeOptimisticRound();
         throw err;
       } finally {
         // Only invalidate on success. On error: refetching a fresh conversation that
@@ -260,33 +269,63 @@ export const useSendMessageMutation = ({
         );
         const endedInAwaitingPrompt =
           cached?.rounds?.at(-1)?.status === ConversationRoundStatus.awaitingPrompt;
-        if (succeeded && !endedInAwaitingPrompt) {
-          streamActions.invalidateConversation();
-        }
-        if (!succeeded && hasInsertedOptimisticListRow) {
-          removeSidebarConversationListRow({
-            queryClient,
-            agentId: vars.agentId,
-            conversationId: vars.conversationId,
+
+        const abortedNewUnpersisted =
+          controller.signal.aborted &&
+          isNewConversation &&
+          !conversationPersisted &&
+          Boolean(vars.onResetToNewConversation);
+
+        if (abortedNewUnpersisted) {
+          queryClient.removeQueries({
+            queryKey: queryKeys.conversations.byId(vars.conversationId),
           });
+          if (hasInsertedOptimisticListRow) {
+            removeSidebarConversationListRow({
+              queryClient,
+              agentId: vars.agentId,
+              conversationId: vars.conversationId,
+            });
+          }
+          clearPendingMessage(vars.conversationId);
+          vars.onResetToNewConversation!(vars.message, vars.attachments);
+        } else {
+          if (succeeded && !endedInAwaitingPrompt) {
+            streamActions.invalidateConversation();
+          }
+          if (!succeeded && hasInsertedOptimisticListRow && !conversationPersisted) {
+            removeSidebarConversationListRow({
+              queryClient,
+              agentId: vars.agentId,
+              conversationId: vars.conversationId,
+            });
+          }
         }
         clearActiveStream(vars.conversationId);
-        if (controllersRef.current.get(vars.conversationId) === controller) {
+        if (controllersRef.current.get(vars.conversationId)?.controller === controller) {
           controllersRef.current.delete(vars.conversationId);
         }
       }
     },
   });
 
-  const cancel = useCallback((conversationId: string) => {
-    controllersRef.current.get(conversationId)?.abort();
-  }, []);
+  const cancel = useCallback(
+    (conversationId: string) => {
+      const entry = controllersRef.current.get(conversationId);
+      if (entry) {
+        chatService.abort(entry.executionId).catch(() => {});
+        entry.controller.abort();
+      }
+    },
+    [chatService]
+  );
 
   const cancelAll = useCallback(() => {
-    for (const controller of controllersRef.current.values()) {
+    for (const { controller, executionId } of controllersRef.current.values()) {
+      chatService.abort(executionId).catch(() => {});
       controller.abort();
     }
-  }, []);
+  }, [chatService]);
 
   return {
     mutate,

@@ -9,34 +9,10 @@
 // Reads KIBANA_TESTING_AI_CONNECTORS (base64 or raw JSON) and EVAL_MODEL_GROUPS
 // from the environment, then writes matching connector IDs (newline-separated) to stdout.
 
-const raw = process.env.KIBANA_TESTING_AI_CONNECTORS || '';
+const { parseMaybeBase64Json } = require('./ai_connectors');
+const { slugifyId } = require('./slugify_id');
 
-function tryParseJson(text) {
-  try {
-    const obj = JSON.parse(text);
-    if (obj && typeof obj === 'object') return obj;
-  } catch {
-    // ignore
-  }
-  return null;
-}
-
-// In CI, @kbn/evals expects KIBANA_TESTING_AI_CONNECTORS to be base64-encoded JSON.
-// But allow raw JSON as a fallback for local usage.
-let parsed = null;
-if (raw) {
-  parsed = tryParseJson(raw);
-  if (!parsed) {
-    try {
-      const decoded = Buffer.from(raw, 'base64').toString('utf8');
-      parsed = tryParseJson(decoded);
-    } catch {
-      // ignore
-    }
-  }
-}
-
-const cfg = parsed ?? {};
+const cfg = parseMaybeBase64Json(process.env.KIBANA_TESTING_AI_CONNECTORS || '');
 
 const requestedRaw = process.env.EVAL_MODEL_GROUPS || '';
 const requested = requestedRaw
@@ -58,6 +34,9 @@ const connectorIds =
           const matchesRequested = (requestedValue) => {
             if (requestedValue === id) return true;
             if (typeof defaultModel === 'string' && requestedValue === defaultModel) return true;
+            if (requestedValue.startsWith('openrouter/') && slugifyId(requestedValue) === id) {
+              return true;
+            }
             if (typeof eisModelId === 'string') {
               if (requestedValue === eisModelId) return true;
               if (

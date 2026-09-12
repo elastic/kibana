@@ -20,7 +20,7 @@ import {
   initializeTimeRangeManager,
   initializeTitleManager,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import { initializeStateApi } from '@kbn/presentation-publishing';
 import { distinctUntilChanged } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
@@ -29,9 +29,9 @@ import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { AnomalyChartsEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/anomaly_charts';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import type { AnomalyChartsEmbeddableApi } from '..';
-import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '..';
 import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import {
   anomalyChartsComparators,
@@ -77,18 +77,14 @@ export const getAnomalyChartsReactEmbeddableFactory = (
         parentApi
       );
 
-      function serializeState() {
-        return {
+      const stateApi = initializeStateApi<AnomalyChartsEmbeddableState>({
+        uuid,
+        parentApi,
+        serializeState: () => ({
           ...titleManager.getLatestState(),
           ...timeRangeManager.getLatestState(),
           ...chartsManager.getLatestState(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<AnomalyChartsEmbeddableState>({
-        uuid,
-        parentApi,
-        serializeState,
+        }),
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           timeRangeManager.anyStateChange$,
@@ -101,10 +97,10 @@ export const getAnomalyChartsReactEmbeddableFactory = (
             ...anomalyChartsComparators,
           };
         },
-        onReset: (lastSaved) => {
-          timeRangeManager.reinitializeState(lastSaved);
-          titleManager.reinitializeState(lastSaved);
-          if (lastSaved) chartsManager.reinitializeState(lastSaved);
+        applySerializedState: (nextState) => {
+          timeRangeManager.reinitializeState(nextState);
+          titleManager.reinitializeState(nextState);
+          chartsManager.reinitializeState(nextState);
         },
       });
 
@@ -142,7 +138,7 @@ export const getAnomalyChartsReactEmbeddableFactory = (
         ...timeRangeManager.api,
         ...chartsManager.api,
         ...chartsManager.dataLoadingApi,
-        ...unsavedChangesApi,
+        ...stateApi,
         dataViews$: buildDataViewPublishingApi(
           {
             anomalyDetectorService: mlServices.anomalyDetectorService,
@@ -151,7 +147,6 @@ export const getAnomalyChartsReactEmbeddableFactory = (
           { jobIds: chartsManager.api.jobIds$ },
           subscriptions
         ),
-        serializeState,
       });
 
       const appliedTimeRange$: Observable<TimeRange | undefined> = fetch$(api).pipe(
@@ -201,7 +196,7 @@ export const getAnomalyChartsReactEmbeddableFactory = (
                 >
                   <LazyAnomalyChartsContainer
                     id={uuid}
-                    severityThreshold={initialState.severityThreshold}
+                    severityThreshold={initialState.severity_threshold}
                     api={api}
                     services={anomalyChartsDependencies}
                     onLoading={onLoading}

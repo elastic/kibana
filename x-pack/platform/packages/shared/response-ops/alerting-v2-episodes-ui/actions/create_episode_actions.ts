@@ -13,9 +13,9 @@ import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { QueryClient } from '@kbn/react-query';
 import type { EpisodeAction } from './types';
-import { createViewDetailsAction } from './view_details';
 import { createAckAction } from './ack';
 import { createUnackAction } from './unack';
 import { createSnoozeAction } from './snooze';
@@ -24,7 +24,17 @@ import { createResolveAction } from './resolve';
 import { createUnresolveAction } from './unresolve';
 import { createEditTagsAction } from './edit_tags';
 import { createEditAssigneeAction } from './edit_assignee';
-import { createOpenInDiscoverAction } from './open_in_discover';
+import { createOpenInDiscoverAction, OPEN_IN_DISCOVER_EPISODE_ACTION_ID } from './open_in_discover';
+
+/**
+ * Ids of episode actions that are safe to expose to users without write
+ * privilege because they do not mutate any episode (e.g. navigation only).
+ * Anything not listed here is treated as a write action and hidden from
+ * read-only users, so new mutating actions are gated by default.
+ */
+export const READ_SAFE_EPISODE_ACTION_IDS: ReadonlySet<string> = new Set([
+  OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
+]);
 
 export interface EpisodeActionsDeps {
   http: HttpStart;
@@ -35,9 +45,8 @@ export interface EpisodeActionsDeps {
   userProfile: UserProfileService;
   docLinks: DocLinksStart;
   expressions: ExpressionsStart;
+  spaces: SpacesPluginStart;
   queryClient: QueryClient;
-  /** Resolver for single-episode-page URL (caller prepends basePath). */
-  getEpisodeDetailsHref: (episodeId: string) => string;
   /** Resolver for "Open in Discover" URL; may be sync or async. Return undefined when not applicable. */
   getDiscoverHref: (args: {
     episodeIsoTimestamp: string;
@@ -47,7 +56,6 @@ export interface EpisodeActionsDeps {
 
 export const createEpisodeActions = (deps: EpisodeActionsDeps): EpisodeAction[] =>
   [
-    createViewDetailsAction(deps),
     createAckAction(deps),
     createUnackAction(deps),
     createSnoozeAction(deps),

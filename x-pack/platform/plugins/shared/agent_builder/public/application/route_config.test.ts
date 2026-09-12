@@ -188,25 +188,17 @@ describe('route_config', () => {
     const findMcpRoute = (routes: ReturnType<typeof getEnabledRoutes>) =>
       routes.find((r) => r.path === mcpClientsPath);
 
-    const config = (experimental: boolean, isUIAMEnabled: boolean): RouteAccessConfig => ({
-      featureFlags: { experimental },
+    const config = (isUIAMEnabled: boolean): RouteAccessConfig => ({
+      featureFlags: { experimental: true },
       capabilities: { isUIAMEnabled },
     });
 
-    it('includes MCP clients route when both experimental and UIAM are enabled', () => {
-      expect(findMcpRoute(getEnabledRoutes(config(true, true)))).toBeDefined();
+    it('includes MCP clients route when UIAM is enabled', () => {
+      expect(findMcpRoute(getEnabledRoutes(config(true)))).toBeDefined();
     });
 
     it('excludes MCP clients route when UIAM is disabled', () => {
-      expect(findMcpRoute(getEnabledRoutes(config(true, false)))).toBeUndefined();
-    });
-
-    it('excludes MCP clients route when experimental is disabled', () => {
-      expect(findMcpRoute(getEnabledRoutes(config(false, true)))).toBeUndefined();
-    });
-
-    it('excludes MCP clients route when both are disabled', () => {
-      expect(findMcpRoute(getEnabledRoutes(config(false, false)))).toBeUndefined();
+      expect(findMcpRoute(getEnabledRoutes(config(false)))).toBeUndefined();
     });
   });
 

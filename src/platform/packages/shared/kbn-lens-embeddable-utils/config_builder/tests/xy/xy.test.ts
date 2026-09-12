@@ -8,7 +8,7 @@
  */
 
 import type { XYVisualizationState } from '@kbn/lens-common';
-import type { XYConfig } from '../../schema/charts/xy';
+import type { XYConfig, XYConfigNoESQL } from '../../schema/charts/xy';
 import { AUTO_COLOR, DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
 import type { LensAttributes } from '../../types';
@@ -26,7 +26,7 @@ import {
   xyWithFormulaRefColumnsAndRankByTermsBucketOperationAttributes,
 } from './basicXY.mock';
 import { dualReferenceLineXY, referenceLineXY } from './referenceLines.mock';
-import { annotationXY, byRefAnnotationXY } from './annotations.mock';
+import { annotationXY, byRefAnnotationXY, runtimeByRefAnnotationXY } from './annotations.mock';
 import {
   esqlChart,
   esqlChartWithBreakdownColorMapping,
@@ -59,6 +59,24 @@ function setSeriesType(attributes: LensAttributes, seriesType: 'bar' | 'line' | 
   };
 }
 
+type AnnotationApiLayer = Extract<XYConfigNoESQL['layers'][number], { type: 'annotations' }>;
+
+// Builds an XY API config whose annotation layer points at the given
+// data_source. Reuses annotationXY so every defaulted field is present and only
+// the annotation layer's data_source is swapped.
+function withAnnotationDataSource(
+  builder: LensConfigBuilder,
+  dataSource: AnnotationApiLayer['data_source']
+): XYConfigNoESQL {
+  const api = builder.toAPIFormat(annotationXY) as XYConfigNoESQL;
+  return {
+    ...api,
+    layers: api.layers.map((layer) =>
+      layer.type === 'annotations' ? { ...layer, data_source: dataSource } : layer
+    ),
+  };
+}
+
 describe('XY', () => {
   describe('state transform validation', () => {
     describe('Data only', () => {
@@ -82,6 +100,51 @@ describe('XY', () => {
 
       it('should convert a bar chart with 2 layers', () => {
         validator.xy.fromState(barWithTwoLayersAttributes);
+      });
+
+      // Regression test for https://github.com/elastic/kibana/issues/268820
+      // Column/accessor ids must be unique across the whole document, not just
+      // within a layer. Two layers of the same series type used to produce
+      // colliding column ids (e.g. both `line_x`/`line_y_0`) on the
+      // `fromAPIFormat` round trip, which corrupts multi-layer state and prevents
+      // the suggestion engine from recognizing the layer/column shape (e.g. the
+      // treemap suggestion no longer appears when transitioning a multi-layer
+      // stacked bar chart).
+      it('produces unique, layer-aligned column ids for a multi-layer chart after an API round trip', () => {
+        const builder = new LensConfigBuilder(undefined, true);
+        const api = builder.toAPIFormat(barWithTwoLayersAttributes);
+        const lensState = builder.fromAPIFormat(api);
+
+        const layers = lensState.state.datasourceStates.formBased?.layers ?? {};
+
+        // Column ids must be globally unique across all layers.
+        const allColumnIds = Object.values(layers).flatMap((layer) => Object.keys(layer.columns));
+        expect(new Set(allColumnIds).size).toBe(allColumnIds.length);
+
+        // Every visualization data-layer accessor must resolve to a column in its
+        // own datasource layer.
+        const visualizationLayers = (lensState.state.visualization as XYVisualizationState).layers;
+        for (const vizLayer of visualizationLayers as Array<{
+          layerId: string;
+          layerType?: string;
+          accessors?: string[];
+          xAccessor?: string;
+          splitAccessors?: string[];
+        }>) {
+          if (vizLayer.layerType && vizLayer.layerType !== 'data') {
+            continue;
+          }
+          const layerColumns = layers[vizLayer.layerId]?.columns ?? {};
+          for (const accessor of vizLayer.accessors ?? []) {
+            expect(layerColumns).toHaveProperty(accessor);
+          }
+          if (vizLayer.xAccessor) {
+            expect(layerColumns).toHaveProperty(vizLayer.xAccessor);
+          }
+          for (const splitAccessor of vizLayer.splitAccessors ?? []) {
+            expect(layerColumns).toHaveProperty(splitAccessor);
+          }
+        }
       });
 
       it('should convert a mixed chart with 3 layers', () => {
@@ -121,6 +184,285 @@ describe('XY', () => {
           validator.xy.fromState(setSeriesType(byRefAnnotationXY, type));
         });
       }
+
+      // Regression test for https://github.com/elastic/kibana/issues/268821
+      // A by-value annotation layer must round-trip its data view reference under
+      // the `xy-visualization-layer-` name, matching the layer id in the rebuilt
+      // visualization state. If the reference is emitted with the generic
+      // `indexpattern-datasource-layer-` prefix, the runtime cannot resolve the
+      // annotation layer's data view and the panel fails to render.
+      it('preserves resolvable data view references for a by-value annotation layer after an API round trip', () => {
+        const builder = new LensConfigBuilder(undefined, true);
+        const api = builder.toAPIFormat(annotationXY);
+        const lensState = builder.fromAPIFormat(api);
+
+        const referenceNames = new Set(lensState.references.map((ref) => ref.name));
+
+        const visualizationLayers = (
+          lensState.state.visualization as { layers: Array<Record<string, unknown>> }
+        ).layers;
+        for (const layer of visualizationLayers) {
+          if (layer.layerType === 'annotations' && layer.persistanceType !== 'byReference') {
+            expect(referenceNames.has(`xy-visualization-layer-${layer.layerId}`)).toBe(true);
+          }
+        }
+
+        const formBasedLayerIds = Object.keys(
+          lensState.state.datasourceStates.formBased?.layers ?? {}
+        );
+        for (const layerId of formBasedLayerIds) {
+          expect(referenceNames.has(`indexpattern-datasource-layer-${layerId}`)).toBe(true);
+        }
+      });
+
+      // Regression test for https://github.com/elastic/kibana/issues/268821
+      // A by-value annotation layer made of manual (point/range) annotations does
+      // not query an index, so the data view is not useful for it. Even when the
+      // state still carries a `xy-visualization-layer-<layerId>` reference (e.g.
+      // sample data / older saved objects), `toAPIFormat` should NOT emit a
+      // `data_source` for a manual-only layer, and the round trip back to state
+      // produces a persisted by-value layer (no `indexPatternId`) that relies on
+      // the Lens XY runtime fallback.
+      it('omits data_source for a manual-only annotation layer and persists it for the runtime fallback', () => {
+        const manualAnnotationXY: LensAttributes = {
+          ...annotationXY,
+          state: {
+            ...annotationXY.state,
+            visualization: {
+              ...(annotationXY.state.visualization as XYVisualizationState),
+              layers: (annotationXY.state.visualization as XYVisualizationState).layers.map(
+                (layer) =>
+                  layer.layerType === 'annotations'
+                    ? {
+                        ...layer,
+                        annotations: [
+                          {
+                            type: 'manual',
+                            id: 'manual_event_0',
+                            label: 'Event',
+                            key: {
+                              type: 'point_in_time',
+                              timestamp: '2016-02-09T10:30:00.000Z',
+                            },
+                          },
+                        ],
+                      }
+                    : layer
+              ),
+            },
+          },
+        } as LensAttributes;
+
+        const builder = new LensConfigBuilder(undefined, true);
+
+        expect(() => builder.toAPIFormat(manualAnnotationXY)).not.toThrow();
+
+        const api = builder.toAPIFormat(manualAnnotationXY) as XYConfig;
+        const annotationLayer = api.layers.find((layer) => layer.type === 'annotations');
+
+        // Manual-only annotation layer: no data view is emitted on the API layer,
+        // even though the source state still has the `xy-visualization-layer-` ref.
+        expect(annotationLayer).toBeDefined();
+        expect(annotationLayer?.data_source).toBeUndefined();
+
+        // Round trip back to state must produce a persisted by-value annotation
+        // layer (no `indexPatternId`, no own reference). The Lens XY runtime then
+        // injects the data view via the first-index-pattern fallback.
+        const lensState = builder.fromAPIFormat(api);
+        const referenceNames = new Set(lensState.references.map((ref) => ref.name));
+
+        const visualizationLayers = (
+          lensState.state.visualization as { layers: Array<Record<string, unknown>> }
+        ).layers;
+        const rebuiltAnnotationLayer = visualizationLayers.find(
+          (layer) => layer.layerType === 'annotations'
+        );
+
+        expect(rebuiltAnnotationLayer).toBeDefined();
+        expect(rebuiltAnnotationLayer).not.toHaveProperty('indexPatternId');
+        expect(rebuiltAnnotationLayer?.persistanceType).toBe('byValue');
+        expect(
+          referenceNames.has(`xy-visualization-layer-${rebuiltAnnotationLayer?.layerId}`)
+        ).toBe(false);
+      });
+
+      // A query annotation genuinely queries an index, so `toAPIFormat` must emit
+      // its `data_source` (and `fromAPIFormat` must round-trip the reference).
+      it('emits data_source for a query annotation layer', () => {
+        const builder = new LensConfigBuilder(undefined, true);
+        const api = builder.toAPIFormat(annotationXY) as XYConfig;
+        const annotationLayer = api.layers.find((layer) => layer.type === 'annotations');
+
+        expect(annotationLayer?.data_source).toEqual(
+          expect.objectContaining({
+            type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+            ref_id: 'metrics-*',
+          })
+        );
+      });
+
+      // The inbound direction must reject a query annotation layer that arrives
+      // without a data_source, since a query event cannot be represented without
+      // an index to query.
+      it('throws when a query annotation layer is missing its data_source', () => {
+        const builder = new LensConfigBuilder(undefined, true);
+        // annotationXY is a DSL chart, so narrow to the concrete (non-ES|QL)
+        // config to keep the spread within a single union member.
+        const api = builder.toAPIFormat(annotationXY) as XYConfigNoESQL;
+
+        // Strip data_source from the annotation layer to simulate a query
+        // annotation arriving without an index to query. data_source is optional
+        // in the schema, so the resulting config is still a valid XYConfig.
+        const apiWithoutAnnotationDataSource: XYConfigNoESQL = {
+          ...api,
+          layers: api.layers.map((layer) => {
+            if (layer.type !== 'annotations') {
+              return layer;
+            }
+            const { data_source: _, ...rest } = layer;
+            return rest;
+          }),
+        };
+
+        expect(() => builder.fromAPIFormat(apiWithoutAnnotationDataSource)).toThrow(
+          'A data source is required for annotation layers with query events'
+        );
+      });
+
+      // Regression test for https://github.com/elastic/kibana/issues/280977
+      //
+      // A query annotation layer that uses an inline (ad hoc) data view must
+      // round-trip through state and back:
+      //   - API -> state: the `xy-visualization-layer-<layerId>` reference lives in
+      //     `state.internalReferences` (not the top-level `references`) and points
+      //     at an ad hoc data view in `adHocDataViews`, matching Lens's own
+      //     persistence so the runtime resolves the correct data view.
+      //   - state -> API: the reference must be resolved from `internalReferences`
+      //     and the inline `data_view_spec` re-emitted, instead of throwing
+      //     "cannot find data view ID for annotation layer".
+      it('round-trips an inline (ad hoc) data view for a query annotation layer', () => {
+        const builder = new LensConfigBuilder(undefined, true);
+        const apiConfig = withAnnotationDataSource(builder, {
+          type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+          index_pattern: 'annotations-*',
+          time_field: '@timestamp',
+        });
+
+        const lensState = builder.fromAPIFormat(apiConfig);
+
+        const visualizationLayers = (
+          lensState.state.visualization as { layers: Array<Record<string, unknown>> }
+        ).layers;
+        const annotationLayer = visualizationLayers.find(
+          (layer) => layer.layerType === 'annotations'
+        );
+        expect(annotationLayer).toBeDefined();
+
+        // Ad hoc data view references are stored in internalReferences, pointing at
+        // an entry in adHocDataViews.
+        const internalReferences = lensState.state.internalReferences ?? [];
+        const annotationReference = internalReferences.find(
+          (ref) => ref.name === `xy-visualization-layer-${annotationLayer?.layerId}`
+        );
+        expect(annotationReference).toBeDefined();
+        expect(annotationReference?.type).toBe('index-pattern');
+
+        const adHocDataViews = lensState.state.adHocDataViews ?? {};
+        expect(annotationReference?.id).toBeDefined();
+        expect(Object.keys(adHocDataViews)).toContain(annotationReference?.id);
+
+        // Reading the state back to API must resolve the internalReferences entry
+        // and re-emit the inline data view spec.
+        const roundTripped = builder.toAPIFormat(lensState) as XYConfigNoESQL;
+        const roundTrippedAnnotationLayer = roundTripped.layers.find(
+          (layer) => layer.type === 'annotations'
+        );
+        expect(roundTrippedAnnotationLayer?.data_source).toEqual(
+          expect.objectContaining({
+            type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+            index_pattern: 'annotations-*',
+            time_field: '@timestamp',
+          })
+        );
+      });
+
+      // Guards the by-reference (persisted data view) branch through the full
+      // builder: a query annotation layer pointing at a persisted data view must
+      // round-trip API -> state -> API as a `data_view_reference`, preserving the
+      // referenced id rather than collapsing into an inline spec.
+      it('round-trips a persisted data view reference for a query annotation layer', () => {
+        const builder = new LensConfigBuilder(undefined, true);
+        const apiConfig = withAnnotationDataSource(builder, {
+          type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+          ref_id: 'metrics-*',
+        });
+
+        const lensState = builder.fromAPIFormat(apiConfig);
+        const roundTripped = builder.toAPIFormat(lensState) as XYConfigNoESQL;
+        const annotationLayer = roundTripped.layers.find((layer) => layer.type === 'annotations');
+
+        expect(annotationLayer?.data_source).toEqual(
+          expect.objectContaining({
+            type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+            ref_id: 'metrics-*',
+          })
+        );
+      });
+
+      for (const type of ['bar', 'line', 'area'] as const) {
+        it(`should validate a runtime by-reference annotation with a ${type} chart`, () => {
+          validator.xy.fromState(setSeriesType(runtimeByRefAnnotationXY, type));
+        });
+      }
+
+      it('emits annotation_group with group_id for a runtime by-reference annotation layer', () => {
+        const builder = new LensConfigBuilder(undefined, true);
+        const api = builder.toAPIFormat(runtimeByRefAnnotationXY) as XYConfig;
+        const annotationLayer = api.layers.find((l) => l.type === 'annotation_group');
+
+        expect(annotationLayer).toBeDefined();
+        expect(annotationLayer).toEqual({
+          type: 'annotation_group',
+          group_id: 'my-runtime-annotation-group-id',
+        });
+      });
+
+      it('does not emit inline annotations or data_source for a runtime by-reference annotation layer', () => {
+        const builder = new LensConfigBuilder(undefined, true);
+        const api = builder.toAPIFormat(runtimeByRefAnnotationXY) as XYConfig;
+        const annotationLayer = api.layers.find((l) => l.type === 'annotation_group');
+
+        expect(annotationLayer).toBeDefined();
+        expect(annotationLayer).not.toHaveProperty('annotations');
+        expect(annotationLayer).not.toHaveProperty('data_source');
+        expect(annotationLayer).not.toHaveProperty('events');
+      });
+
+      it('round-trips a runtime by-reference annotation as a persisted by-reference layer', () => {
+        const builder = new LensConfigBuilder(undefined, true);
+        const api = builder.toAPIFormat(runtimeByRefAnnotationXY);
+        const lensState = builder.fromAPIFormat(api);
+
+        const visualizationLayers = (
+          lensState.state.visualization as { layers: Array<Record<string, unknown>> }
+        ).layers;
+        const annotationLayer = visualizationLayers.find(
+          (layer) => layer.layerType === 'annotations'
+        );
+
+        expect(annotationLayer).toBeDefined();
+        expect(annotationLayer?.persistanceType).toBe('byReference');
+        expect(annotationLayer).toHaveProperty('annotationGroupRef');
+        expect(annotationLayer).not.toHaveProperty('indexPatternId');
+        expect(annotationLayer).not.toHaveProperty('annotations');
+
+        const matchingRef = lensState.references.find(
+          (ref) => ref.name === annotationLayer?.annotationGroupRef
+        );
+        expect(matchingRef).toBeDefined();
+        expect(matchingRef?.id).toBe('my-runtime-annotation-group-id');
+        expect(matchingRef?.type).toBe('event-annotation-group');
+      });
     });
 
     describe('ES|QL panels', () => {
@@ -187,7 +529,6 @@ describe('XY', () => {
                   },
                 ],
               },
-              query: { esql: 'FROM logs | STATS count = COUNT(*) BY timestamp' },
               filters: [],
             },
           };
@@ -245,7 +586,6 @@ describe('XY', () => {
                   },
                 ],
               },
-              query: { esql: 'FROM logs | STATS count = COUNT(*) BY bytes' },
               filters: [],
             },
           };
@@ -538,6 +878,25 @@ describe('XY', () => {
       validator.xy.fromApi(apiXYWithNoTitleAndCustomOutsideLegend);
     });
 
+    it('should round-trip area fill styling', () => {
+      validator.xy.fromApi({
+        type: 'xy',
+        title: 'Area fill test',
+        styling: {
+          areas: { fill: 'gradient', fill_opacity: 0.5 },
+        },
+        layers: [
+          {
+            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
+            type: 'area',
+            ignore_global_filters: false,
+            sampling: 1,
+            y: [{ operation: 'count', empty_as_null: false }],
+          },
+        ],
+      });
+    });
+
     it('should convert API with by-reference annotation layer', () => {
       validator.xy.fromApi({
         type: 'xy',
@@ -735,6 +1094,35 @@ describe('XY', () => {
       const dataLayer = apiOutput.layers[0];
       expect('breakdown_by' in dataLayer && dataLayer.breakdown_by?.color).toEqual(
         DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING
+      );
+    });
+
+    it('should emit default categorical palette on breakdown_by for stacked area charts', () => {
+      const config = {
+        type: 'xy',
+        title: 'Stacked area breakdown color default test',
+        layers: [
+          {
+            data_source: {
+              type: 'esql',
+              query: 'FROM logs | STATS count = count() BY product',
+            },
+            type: 'area_stacked',
+            ignore_global_filters: false,
+            sampling: 1,
+            y: [{ column: 'count' }],
+            breakdown_by: { column: 'product' },
+          },
+        ],
+      } satisfies XYConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as XYConfig;
+
+      const dataLayer = apiOutput.layers[0];
+      expect('breakdown_by' in dataLayer && dataLayer.breakdown_by?.color).toEqual(
+        DEFAULT_CATEGORICAL_COLOR_MAPPING
       );
     });
 

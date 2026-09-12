@@ -205,6 +205,22 @@ describe('ESQLExtensionsRegistry', () => {
       ]);
     });
 
+    it('should return the same queries for a cross-cluster pattern as for the local pattern', () => {
+      const result = registry.getRecommendedQueries(
+        'FROM remote_cluster:logs-*',
+        {
+          indices: [{ name: 'remote_cluster:logs-2024' }],
+          data_streams: [],
+          aliases: [],
+        },
+        'oblt'
+      );
+      expect(result).toEqual([
+        { name: 'Logs Query', query: 'FROM logs-2023 | STATS count()' },
+        { name: 'Wildcard Logs Query', query: 'FROM logs-* | LIMIT 5' },
+      ]);
+    });
+
     it('should return queries where the registered pattern covers the concrete index in the query string', () => {
       const result = registry.getRecommendedQueries('FROM logs-2024', availableDatasources, 'oblt');
       // Expect the 'logs-*' query to be returned because it covers 'logs-2024'

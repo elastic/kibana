@@ -134,6 +134,10 @@ export function AttachmentFilters({
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
           <EuiPopover
+            aria-label={i18n.translate(
+              'xpack.streams.attachmentFilters.typeFilterPopoverAriaLabel',
+              { defaultMessage: 'Attachment type filter options' }
+            )}
             id={typePopoverId}
             button={typeFilterButton}
             isOpen={isTypePopoverOpen}
@@ -177,6 +181,10 @@ export function AttachmentFilters({
             </EuiSelectable>
           </EuiPopover>
           <EuiPopover
+            aria-label={i18n.translate(
+              'xpack.streams.attachmentFilters.tagsFilterPopoverAriaLabel',
+              { defaultMessage: 'Attachment tag filter options' }
+            )}
             id={tagsPopoverId}
             button={tagsFilterButton}
             isOpen={isTagsPopoverOpen}

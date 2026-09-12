@@ -30,13 +30,8 @@ const makeSteps = (titles: string[], currentIndex: number): MinimalStep[] =>
     status: i < currentIndex ? 'complete' : i === currentIndex ? 'current' : 'incomplete',
   }));
 
-const RULE_STEPS = [
-  'Alert Condition',
-  'Recovery Condition',
-  'Details & Artifacts',
-  'Notifications',
-];
-const RULE_STEPS_SHORT = ['Alert Condition', 'Details & Artifacts', 'Notifications'];
+const RULE_STEPS = ['Condition', 'Recovery Condition', 'Details & Artifacts', 'Notifications'];
+const RULE_STEPS_SHORT = ['Condition', 'Details & Artifacts', 'Notifications'];
 
 // ---------------------------------------------------------------------------
 // Interactive story — click through steps to see the animation
@@ -131,8 +126,8 @@ const ThreeStepsStory = () => {
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiText size="xs" color="subdued">
-        Three-step variant shown when &quot;Track active and recovered state&quot; is disabled (no
-        Recovery Condition step).
+        Three-step variant shown when the mode is set to &quot;Signal&quot; (no Recovery Condition
+        step).
       </EuiText>
     </div>
   );

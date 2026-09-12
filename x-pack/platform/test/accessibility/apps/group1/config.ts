@@ -22,6 +22,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     pageObjects,
     services,
 
+    security: {
+      ...functionalConfig.get('security'),
+      cookieLogin: false, // login_page.ts audits the login form UI itself
+    },
+
     junit: {
       reportName: 'X-Pack Patform Accessibility Tests - Group 1',
     },

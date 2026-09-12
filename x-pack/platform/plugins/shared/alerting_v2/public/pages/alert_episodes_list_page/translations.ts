@@ -13,6 +13,13 @@ export const EPISODES_LIST_PAGE_TITLE = i18n.translate('xpack.alertingV2.episode
   defaultMessage: 'Alert episodes',
 });
 
+export const EPISODES_LIST_MANAGE_RULES = i18n.translate(
+  'xpack.alertingV2.episodes.manageRulesButton',
+  {
+    defaultMessage: 'Manage rules',
+  }
+);
+
 export const EPISODES_LIST_TABLE_ARIA_LABEL = i18n.translate(
   'xpack.alertingV2.episodes.tableAriaLabel',
   {
@@ -27,9 +34,19 @@ export const EPISODES_LIST_COLUMN_ACTIONS = i18n.translate(
   }
 );
 
-export const EPISODES_LIST_COLUMN_TAGS = i18n.translate('xpack.alertingV2.episodes.columns.tags', {
-  defaultMessage: 'Tags',
-});
+export const EPISODES_LIST_COLUMN_ALERT_TAGS = i18n.translate(
+  'xpack.alertingV2.episodes.columns.tags',
+  {
+    defaultMessage: 'Alert tags',
+  }
+);
+
+export const EPISODES_LIST_COLUMN_RULE_TAGS = i18n.translate(
+  'xpack.alertingV2.episodes.columns.ruleTags',
+  {
+    defaultMessage: 'Rule tags',
+  }
+);
 
 export const EPISODES_LIST_COLUMN_ASSIGNEES = i18n.translate(
   'xpack.alertingV2.episodes.columns.assignees',
@@ -37,6 +54,25 @@ export const EPISODES_LIST_COLUMN_ASSIGNEES = i18n.translate(
     defaultMessage: 'Assignee',
   }
 );
+
+export const EPISODES_LIST_ITEM_COUNT = (count: number) =>
+  i18n.translate('xpack.alertingV2.episodes.itemCount', {
+    defaultMessage: 'Showing {count, plural, one {# episode} other {# episodes}}',
+    values: { count },
+  });
+
+export const EPISODES_LIST_ITEM_COUNT_CAPPED = (count: number) =>
+  i18n.translate('xpack.alertingV2.episodes.itemCountCapped', {
+    defaultMessage: 'Showing first {count} episodes',
+    values: { count },
+  });
+
+export const EPISODES_LIST_ITEM_COUNT_CAPPED_TOOLTIP = (count: number) =>
+  i18n.translate('xpack.alertingV2.episodes.itemCountCappedTooltip', {
+    defaultMessage:
+      'The table loads at most {count} episodes. Narrow the time range or filters to find others.',
+    values: { count },
+  });
 
 export const EPISODES_ASSIGNEE_EMPTY = i18n.translate('xpack.alertingV2.episodes.assignees.empty', {
   defaultMessage: '—',
@@ -70,6 +106,13 @@ export const EPISODES_FILTER_BAR_SEARCH_PLACEHOLDER = i18n.translate(
   }
 );
 
+export const EPISODES_FILTER_BAR_SEARCH_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2.episodes.filterBar.searchAriaLabel',
+  {
+    defaultMessage: 'Filter alert episodes',
+  }
+);
+
 export const BULK_ACKNOWLEDGE = i18n.translate(
   'xpack.alertingV2.episodes.bulkActions.acknowledge',
   { defaultMessage: 'Acknowledge' }
@@ -97,7 +140,7 @@ export const BULK_UNRESOLVE = i18n.translate('xpack.alertingV2.episodes.bulkActi
 });
 
 export const BULK_EDIT_TAGS = i18n.translate('xpack.alertingV2.episodes.bulkActions.editTags', {
-  defaultMessage: 'Edit tags',
+  defaultMessage: 'Edit alert tags',
 });
 
 export const BULK_ERROR_TOAST = i18n.translate('xpack.alertingV2.episodes.bulkActions.errorToast', {
@@ -116,3 +159,183 @@ export const getBulkPartialSuccessToast = (processed: number, total: number) =>
       '{processed} of {total} {total, plural, one {episode} other {episodes}} updated',
     values: { processed, total },
   });
+
+export const EPISODES_HISTOGRAM_CAP_WARNING = i18n.translate(
+  'xpack.alertingV2.alertEpisodesListPage.episodesHistogram.capWarning',
+  {
+    defaultMessage: 'Results may be incomplete — too many episodes in this time range.',
+  }
+);
+
+export const EPISODES_HISTOGRAM_QUERY_ERROR = i18n.translate(
+  'xpack.alertingV2.alertEpisodesListPage.episodesHistogram.queryError',
+  { defaultMessage: 'Failed to load histogram data.' }
+);
+
+export const EPISODES_HISTOGRAM_RETRY = i18n.translate(
+  'xpack.alertingV2.alertEpisodesListPage.episodesHistogram.retry',
+  { defaultMessage: 'Retry' }
+);
+
+export const EPISODES_KPIS_ALERTS_PANEL_TITLE = i18n.translate(
+  'xpack.alertingV2.episodes.kpis.alertsPanelTitle',
+  { defaultMessage: 'Alerts' }
+);
+
+export const EPISODES_KPIS_ALERT_ACTIONS_PANEL_TITLE = i18n.translate(
+  'xpack.alertingV2.episodes.kpis.alertActionsPanelTitle',
+  { defaultMessage: 'Alert actions' }
+);
+
+export const EPISODES_KPIS_ALERTS_COUNT = i18n.translate(
+  'xpack.alertingV2.episodes.kpis.alertsCount',
+  { defaultMessage: 'Alerts count' }
+);
+
+export const EPISODES_KPIS_FIRING_RULES = i18n.translate(
+  'xpack.alertingV2.episodes.kpis.firingRules',
+  { defaultMessage: 'Firing rules' }
+);
+
+export const EPISODES_KPIS_ASSIGNED_TO_ME = i18n.translate(
+  'xpack.alertingV2.episodes.kpis.assignedToMe',
+  { defaultMessage: 'Assigned to me' }
+);
+
+export const EPISODES_KPIS_UNASSIGNED_ALERTS = i18n.translate(
+  'xpack.alertingV2.episodes.kpis.unassignedAlerts',
+  { defaultMessage: 'Unassigned alerts' }
+);
+
+export const EPISODES_KPIS_ACKNOWLEDGED = i18n.translate(
+  'xpack.alertingV2.episodes.kpis.acknowledged',
+  { defaultMessage: 'Acknowledged' }
+);
+
+export const EPISODES_KPIS_SNOOZED = i18n.translate('xpack.alertingV2.episodes.kpis.snoozed', {
+  defaultMessage: 'Snoozed',
+});
+
+export const EPISODES_KPIS_ERROR_TITLE = i18n.translate(
+  'xpack.alertingV2.episodes.kpis.errorTitle',
+  {
+    defaultMessage: 'Unable to load alert statistics',
+  }
+);
+
+export const EPISODES_KPIS_ERROR = i18n.translate('xpack.alertingV2.episodes.kpis.error', {
+  defaultMessage: 'An error occurred while fetching the alert statistics. Try refreshing the page.',
+});
+
+export const CLASSIC_ALERT_DETAILS_TITLE = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.title',
+  {
+    defaultMessage: 'Classic alert',
+  }
+);
+
+export const CLASSIC_ALERT_DETAILS_VIEW_DETAILS = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.viewDetailsButton',
+  {
+    defaultMessage: 'View details',
+  }
+);
+
+export const CLASSIC_ALERT_DETAILS_CLOSE = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.closeButton',
+  {
+    defaultMessage: 'Close',
+  }
+);
+
+export const CLASSIC_ALERT_DETAILS_OVERVIEW_TAB = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.overviewTab',
+  {
+    defaultMessage: 'Overview',
+  }
+);
+
+export const CLASSIC_ALERT_DETAILS_FIELDS_TAB = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.fieldsTab',
+  {
+    defaultMessage: 'Fields',
+  }
+);
+
+export const CLASSIC_ALERT_DETAILS_LOADING = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.loading',
+  {
+    defaultMessage: 'Loading classic alert',
+  }
+);
+
+export const CLASSIC_ALERT_DETAILS_ERROR_TITLE = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.errorTitle',
+  {
+    defaultMessage: 'Unable to load classic alert',
+  }
+);
+
+export const CLASSIC_ALERT_DETAILS_ERROR_BODY = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.errorBody',
+  {
+    defaultMessage:
+      'The classic alert could not be loaded. It may have been deleted, or you may not have access to it.',
+  }
+);
+
+export const CLASSIC_ALERT_DETAILS_FIELD_STATUS = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.field.status',
+  {
+    defaultMessage: 'Status',
+  }
+);
+
+export const CLASSIC_ALERT_DETAILS_FIELD_RULE = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.field.rule',
+  {
+    defaultMessage: 'Rule',
+  }
+);
+
+export const CLASSIC_ALERT_DETAILS_FIELD_REASON = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.field.reason',
+  {
+    defaultMessage: 'Reason',
+  }
+);
+
+export const CLASSIC_ALERT_DETAILS_FIELD_SEVERITY = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.field.severity',
+  {
+    defaultMessage: 'Severity',
+  }
+);
+
+export const CLASSIC_ALERT_DETAILS_FIELD_STARTED = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.field.started',
+  {
+    defaultMessage: 'Triggered',
+  }
+);
+
+export const CLASSIC_ALERT_DETAILS_FIELD_LAST_UPDATED = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.field.lastUpdated',
+  {
+    defaultMessage: 'Last updated',
+  }
+);
+
+export const CLASSIC_ALERT_DETAILS_FIELD_DURATION = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.field.duration',
+  {
+    defaultMessage: 'Duration',
+  }
+);
+
+export const CLASSIC_ALERT_DETAILS_FIELD_TAGS = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.field.tags',
+  {
+    defaultMessage: 'Tags',
+  }
+);

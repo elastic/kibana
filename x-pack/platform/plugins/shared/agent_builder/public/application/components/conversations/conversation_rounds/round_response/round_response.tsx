@@ -8,7 +8,11 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { AssistantResponse, ConversationRoundStep } from '@kbn/agent-builder-common';
+import type {
+  AssistantResponse,
+  ConversationRound,
+  ConversationRoundStep,
+} from '@kbn/agent-builder-common';
 import type {
   VersionedAttachment,
   AttachmentVersionRef,
@@ -23,56 +27,63 @@ export interface RoundResponseProps {
   steps: ConversationRoundStep[];
   isLoading: boolean;
   hasError: boolean;
-  isLastRound: boolean;
   conversationAttachments?: VersionedAttachment[];
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
+  rawRound: ConversationRound;
 }
 
 export const RoundResponse: React.FC<RoundResponseProps> = ({
   hasError,
-  response: { message },
+  response,
   steps,
   isLoading,
-  isLastRound,
   conversationAttachments,
   attachmentRefs,
   conversationId,
-}) => (
-  <EuiFlexGroup
-    direction="column"
-    gutterSize="m"
-    aria-label={i18n.translate('xpack.agentBuilder.round.assistantResponse', {
-      defaultMessage: 'Assistant response',
-    })}
-    data-test-subj="agentBuilderRoundResponse"
-    css={css`
-      position: relative;
-    `}
-  >
-    <EuiFlexItem>
-      {isLoading ? (
-        <StreamingText
-          content={message}
-          steps={steps}
-          conversationAttachments={conversationAttachments}
-          attachmentRefs={attachmentRefs}
-          conversationId={conversationId}
-        />
-      ) : (
-        <ChatMessageText
-          content={message}
-          steps={steps}
-          conversationAttachments={conversationAttachments}
-          attachmentRefs={attachmentRefs}
-          conversationId={conversationId}
-        />
-      )}
-    </EuiFlexItem>
-    {!isLoading && !hasError && (
-      <EuiFlexItem grow={false}>
-        <RoundResponseActions content={message} isVisible isLastRound={isLastRound} />
+  rawRound,
+}) => {
+  const hasMessage = Boolean(response.message);
+
+  const showStreamingText = isLoading && hasMessage;
+  const showCompletedAnswer = !isLoading;
+
+  return (
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      aria-label={i18n.translate('xpack.agentBuilder.round.assistantResponse', {
+        defaultMessage: 'Assistant response',
+      })}
+      data-test-subj="agentBuilderRoundResponse"
+      css={css`
+        position: relative;
+      `}
+    >
+      <EuiFlexItem>
+        {showStreamingText ? (
+          <StreamingText
+            content={response.message}
+            steps={steps}
+            conversationAttachments={conversationAttachments}
+            attachmentRefs={attachmentRefs}
+            conversationId={conversationId}
+          />
+        ) : showCompletedAnswer ? (
+          <ChatMessageText
+            content={response.message}
+            steps={steps}
+            conversationAttachments={conversationAttachments}
+            attachmentRefs={attachmentRefs}
+            conversationId={conversationId}
+          />
+        ) : null}
       </EuiFlexItem>
-    )}
-  </EuiFlexGroup>
-);
+      {!isLoading && !hasError && (
+        <EuiFlexItem grow={false}>
+          <RoundResponseActions content={response.message} isVisible rawRound={rawRound} />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+};

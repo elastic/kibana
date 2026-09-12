@@ -189,7 +189,7 @@ describe('BedrockConnector', () => {
       });
       it('the Bedrock API call is successful with Claude 3 parameters; returns the response formatted for Claude 2 along with usage object', async () => {
         const response = await connector.runApi({ body: DEFAULT_BODY }, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -219,7 +219,7 @@ describe('BedrockConnector', () => {
         // @ts-ignore
         connector.request = mockRequest;
         const response = await connector.runApi({ body: v2Body }, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -292,7 +292,7 @@ describe('BedrockConnector', () => {
 
       it('the API call is successful with correct request parameters', async () => {
         await connector.invokeStream(aiAssistantBody, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -508,7 +508,7 @@ describe('BedrockConnector', () => {
 
       it('the API call is successful with correct parameters', async () => {
         const response = await connector.invokeAI(aiAssistantBody, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -552,7 +552,7 @@ describe('BedrockConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -598,7 +598,7 @@ describe('BedrockConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -648,7 +648,7 @@ describe('BedrockConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -789,7 +789,7 @@ describe('BedrockConnector', () => {
 
       it('the API call is successful with correct parameters', async () => {
         const response = await connector.converse(aiAssistantBody, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -805,6 +805,23 @@ describe('BedrockConnector', () => {
         expect(response.output.message!.content[0].text).toEqual(mockResponseString);
       });
 
+      it('forwards maxContentLength to the request when provided', async () => {
+        await connector.converse(
+          { ...aiAssistantBody, maxContentLength: 10 * 1024 * 1024 },
+          connectorUsageCollector
+        );
+
+        expect(mockRequest).toHaveBeenCalledWith(
+          expect.objectContaining({ maxContentLength: 10 * 1024 * 1024 }),
+          connectorUsageCollector
+        );
+      });
+
+      it('does not set maxContentLength when not provided', async () => {
+        await connector.converse(aiAssistantBody, connectorUsageCollector);
+        expect(mockRequest.mock.calls[0][0]).not.toHaveProperty('maxContentLength');
+      });
+
       it('formats messages from user, assistant, and system', async () => {
         const response = await connector.converse(
           {
@@ -817,7 +834,7 @@ describe('BedrockConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -864,7 +881,7 @@ describe('BedrockConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -924,7 +941,7 @@ describe('BedrockConnector', () => {
           },
           connectorUsageCollector
         );
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -1028,7 +1045,7 @@ describe('BedrockConnector', () => {
 
       it('the API call is successful with correct request parameters', async () => {
         await connector.converseStream(aiAssistantBody, connectorUsageCollector);
-        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
@@ -1040,6 +1057,21 @@ describe('BedrockConnector', () => {
             signal: undefined,
             data: JSON.stringify(DEFAULT_CONVERSE_STREAM_REQUEST_PAYLOAD),
           },
+          connectorUsageCollector
+        );
+      });
+
+      it('forwards maxContentLength to the streaming request when provided', async () => {
+        await connector.converseStream(
+          { ...aiAssistantBody, maxContentLength: 10 * 1024 * 1024 },
+          connectorUsageCollector
+        );
+
+        expect(mockRequest).toHaveBeenCalledWith(
+          expect.objectContaining({
+            responseType: 'stream',
+            maxContentLength: 10 * 1024 * 1024,
+          }),
           connectorUsageCollector
         );
       });
@@ -1312,7 +1344,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     });
     it('the create dashboard API call returns available: true when user has correct permissions', async () => {
       const response = await connector.getDashboard({ dashboardId: '123' });
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith({
         path: '/_security/user/_has_privileges',
         method: 'POST',
@@ -1331,7 +1363,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     it('the create dashboard API call returns available: false when user has correct permissions', async () => {
       mockRequest.mockResolvedValue({ has_all_requested: false });
       const response = await connector.getDashboard({ dashboardId: '123' });
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith({
         path: '/_security/user/_has_privileges',
         method: 'POST',
@@ -1351,7 +1383,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     it('the create dashboard API call returns available: false when init dashboard fails', async () => {
       mockGenAi.mockResolvedValue({ success: false });
       const response = await connector.getDashboard({ dashboardId: '123' });
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith({
         path: '/_security/user/_has_privileges',
         method: 'POST',

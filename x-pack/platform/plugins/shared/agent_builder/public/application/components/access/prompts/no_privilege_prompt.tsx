@@ -8,6 +8,8 @@
 import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import type { PromptLayoutVariant } from '../../common/prompt/layout';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useAssetBasePath } from '../../../hooks/use_asset_base_path';
@@ -28,6 +30,11 @@ export const NoPrivilegePrompt: React.FC<NoPrivilegePromptProps> = ({ variant })
       target="_blank"
       iconType="external"
       iconSide="right"
+      {...getEbtProps({
+        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+        action: AGENT_BUILDER_UI_EBT.action.access.LEARN_MORE_DOCS,
+        detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+      })}
     >
       <FormattedMessage
         id="xpack.agentBuilder.access.prompt.noPrivilege.actions.docsLink"

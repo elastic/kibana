@@ -9,20 +9,32 @@ import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { renderHook } from '@testing-library/react';
 
 import { TestProviders } from '../../common/mock';
-import { KibanaServices } from '../../common/lib/kibana';
 import { useCasesFeatures } from '../../common/use_cases_features';
 
 import { useCasesColumnsConfiguration } from './use_cases_columns_configuration';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import { CustomFieldTypes } from '../../../common/types/domain';
+import { FieldType } from '../../../common/types/domain/template/fields';
+import { useCasesConfig } from '../../common/lib/kibana';
+import { useGlobalInlineFields } from './hooks/use_global_inline_fields';
 import React from 'react';
 
 jest.mock('../../common/use_cases_features');
 jest.mock('../../containers/configure/use_get_case_configuration');
+jest.mock('../../common/lib/kibana', () => ({
+  ...jest.requireActual('../../common/lib/kibana'),
+  useCasesConfig: jest.fn(),
+}));
+jest.mock('./hooks/use_global_inline_fields', () => ({
+  ...jest.requireActual('./hooks/use_global_inline_fields'),
+  useGlobalInlineFields: jest.fn(),
+}));
 
 const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
 const useCasesFeaturesMock = useCasesFeatures as jest.Mock;
+const useCasesConfigMock = useCasesConfig as jest.Mock;
+const useGlobalInlineFieldsMock = useGlobalInlineFields as jest.Mock;
 
 describe('useCasesColumnsConfiguration ', () => {
   const license = licensingMock.createLicense({
@@ -33,10 +45,10 @@ describe('useCasesColumnsConfiguration ', () => {
     jest.clearAllMocks();
     useCasesFeaturesMock.mockReturnValue({
       caseAssignmentAuthorized: true,
-      isAlertsEnabled: true,
     });
     useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
-    jest.spyOn(KibanaServices, 'getConfig').mockReturnValue(undefined);
+    useCasesConfigMock.mockReturnValue({ templatesEnabled: false });
+    useGlobalInlineFieldsMock.mockReturnValue({ globalInlineFields: [], isLoading: false });
   });
 
   afterEach(() => {
@@ -73,12 +85,6 @@ describe('useCasesColumnsConfiguration ', () => {
           "field": "createdAt",
           "isCheckedDefault": true,
           "name": "Created on",
-        },
-        "extendedFields": Object {
-          "canDisplay": false,
-          "field": "extendedFields",
-          "isCheckedDefault": false,
-          "name": "Extended fields",
         },
         "externalIncident": Object {
           "canDisplay": true,
@@ -141,7 +147,6 @@ describe('useCasesColumnsConfiguration ', () => {
   it('cannot display assignees when case assignment is not authorized', async () => {
     useCasesFeaturesMock.mockReturnValue({
       caseAssignmentAuthorized: false,
-      isAlertsEnabled: true,
     });
 
     const { result } = renderHook(() => useCasesColumnsConfiguration(), {
@@ -154,26 +159,6 @@ describe('useCasesColumnsConfiguration ', () => {
         "field": "assignees",
         "isCheckedDefault": true,
         "name": "Assignees",
-      }
-    `);
-  });
-
-  it('cannot display alerts if alerts are not enabled', async () => {
-    useCasesFeaturesMock.mockReturnValue({
-      caseAssignmentAuthorized: true,
-      isAlertsEnabled: false,
-    });
-
-    const { result } = renderHook(() => useCasesColumnsConfiguration(), {
-      wrapper: (props) => <TestProviders {...props} license={license} />,
-    });
-
-    expect(result.current.totalAlerts).toMatchInlineSnapshot(`
-      Object {
-        "canDisplay": false,
-        "field": "totalAlerts",
-        "isCheckedDefault": true,
-        "name": "Alerts",
       }
     `);
   });
@@ -213,49 +198,32 @@ describe('useCasesColumnsConfiguration ', () => {
     });
   });
 
-  it('does not display extended fields when templates are disabled', () => {
-    jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
-      templates: { enabled: false },
-    } as ReturnType<typeof KibanaServices.getConfig>);
+  it('sources columns from global extended fields when templates v2 is enabled', async () => {
+    useCasesConfigMock.mockReturnValue({ templatesEnabled: true });
+    // Legacy customFields must be ignored in favor of global field definitions.
+    useGetCaseConfigurationMock.mockImplementation(() => ({
+      data: {
+        ...useCaseConfigureResponse.data,
+        customFields: [{ key: 'legacy_key', label: 'Legacy', type: CustomFieldTypes.TEXT }],
+      },
+    }));
+    useGlobalInlineFieldsMock.mockReturnValue({
+      globalInlineFields: [
+        { name: 'priority', type: 'keyword', control: FieldType.INPUT_TEXT, label: 'Priority' },
+      ],
+      isLoading: false,
+    });
 
     const { result } = renderHook(() => useCasesColumnsConfiguration(), {
       wrapper: (props) => <TestProviders {...props} license={license} />,
     });
 
-    expect(result.current.extendedFields).toEqual({
-      field: 'extendedFields',
-      name: 'Extended fields',
-      canDisplay: false,
-      isCheckedDefault: false,
-    });
-  });
-
-  it('displays extended fields when templates are enabled', () => {
-    jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
-      templates: { enabled: true },
-    } as ReturnType<typeof KibanaServices.getConfig>);
-
-    const { result } = renderHook(() => useCasesColumnsConfiguration(), {
-      wrapper: (props) => <TestProviders {...props} license={license} />,
-    });
-
-    expect(result.current.extendedFields).toEqual({
-      field: 'extendedFields',
-      name: 'Extended fields',
+    expect(result.current.legacy_key).toBeUndefined();
+    expect(result.current.priority_as_keyword).toEqual({
+      field: 'priority_as_keyword',
+      name: 'Priority',
       canDisplay: true,
       isCheckedDefault: false,
     });
-  });
-
-  it('never displays extended fields in selector view', () => {
-    jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
-      templates: { enabled: true },
-    } as ReturnType<typeof KibanaServices.getConfig>);
-
-    const { result } = renderHook(() => useCasesColumnsConfiguration(true), {
-      wrapper: (props) => <TestProviders {...props} license={license} />,
-    });
-
-    expect(result.current.extendedFields.canDisplay).toBe(false);
   });
 });

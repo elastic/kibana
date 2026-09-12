@@ -35,8 +35,6 @@ import {
   isGcpCloudConnectorVars,
 } from '../utils';
 import { CloudConnectorPoliciesFlyout } from '../cloud_connector_policies_flyout';
-import { AccountBadge } from '../components/account_badge';
-import { IntegrationCountBadge } from '../components/integration_count_badge';
 
 interface CloudConnectorSelectorProps {
   provider: CloudProviders;
@@ -45,7 +43,6 @@ interface CloudConnectorSelectorProps {
   setCredentials: (credentials: CloudConnectorCredentials) => void;
   accountType?: AccountType;
   packageName?: string;
-  policyTemplate?: string;
 }
 
 export const CloudConnectorSelector = ({
@@ -55,13 +52,11 @@ export const CloudConnectorSelector = ({
   setCredentials,
   accountType,
   packageName,
-  policyTemplate,
 }: CloudConnectorSelectorProps) => {
   const { data: cloudConnectors = [] } = useGetCloudConnectors({
     cloudProvider: provider,
     accountType,
     packageName,
-    policyTemplate,
   });
   const [flyoutConnectorId, setFlyoutConnectorId] = useState<string | null>(null);
   const [selectKey, setSelectKey] = useState(0);
@@ -111,9 +106,6 @@ export const CloudConnectorSelector = ({
               <EuiTextTruncate text={connector.name} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <AccountBadge accountType={connector.accountType} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={i18n.translate('xpack.fleet.cloudConnector.selector.editTooltip', {
                   defaultMessage: 'View and edit identity details',
@@ -154,15 +146,6 @@ export const CloudConnectorSelector = ({
                 )}
               </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <AccountBadge accountType={connector.accountType} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <IntegrationCountBadge
-                cloudConnectorId={connector.id}
-                count={connector.packagePolicyCount ?? 0}
-              />
-            </EuiFlexItem>
           </EuiFlexGroup>
         ),
       };
@@ -189,12 +172,14 @@ export const CloudConnectorSelector = ({
             ? connector.vars.external_id.value
             : connector.vars.external_id?.value;
         setCredentials({
+          name: connector.name,
           roleArn: connector.vars.role_arn?.value,
           externalId: externalIdValue,
           cloudConnectorId: connector.id,
         });
       } else if (isAzureCloudConnectorVars(connector.vars, provider)) {
         setCredentials({
+          name: connector.name,
           tenantId: connector.vars.tenant_id?.value,
           clientId: connector.vars.client_id?.value,
           azure_credentials_cloud_connector_id:
@@ -203,6 +188,7 @@ export const CloudConnectorSelector = ({
         });
       } else if (isGcpCloudConnectorVars(connector.vars, provider)) {
         setCredentials({
+          name: connector.name,
           serviceAccount: connector.vars.service_account?.value,
           audience: connector.vars.audience?.value,
           gcp_credentials_cloud_connector_id:

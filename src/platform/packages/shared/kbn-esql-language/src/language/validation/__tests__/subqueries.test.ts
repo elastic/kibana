@@ -8,58 +8,6 @@
  */
 
 import { setup } from './helpers';
+import { runSubqueriesValidationSuite } from './subqueries_suite';
 
-describe('Subqueries Validation', () => {
-  describe('FROM subqueries', () => {
-    it('should validate commands inside subqueries', async () => {
-      const { expectErrors } = await setup();
-
-      await expectErrors('FROM index, (FROM other_index | KEEP missingField)', [
-        'Unknown column "missingField"',
-      ]);
-    });
-
-    it('should validate nested subqueries', async () => {
-      const { expectErrors } = await setup();
-
-      await expectErrors('FROM index, (FROM other_index, (FROM missingIndex))', [
-        'Unknown index "missingIndex"',
-      ]);
-    });
-
-    it('should validate multiple errors in subqueries', async () => {
-      const { expectErrors } = await setup();
-
-      await expectErrors(
-        'FROM index, (FROM other_index | KEEP keywordField, missingField1, missingField2)',
-        ['Unknown column "missingField1"', 'Unknown column "missingField2"']
-      );
-    });
-
-    it('should validate METADATA inside subqueries', async () => {
-      const { expectErrors } = await setup();
-
-      await expectErrors('FROM index, (FROM other_index METADATA _invalidField)', [
-        'Metadata field "_invalidField" is not available. Available metadata fields are: [_version, _id, _index, _source, _ignored, _index_mode, _score]',
-      ]);
-    });
-
-    it('should validate CCS indices inside subqueries', async () => {
-      const { expectErrors } = await setup();
-
-      await expectErrors('FROM index, (FROM remote-ccs:indexes)', [
-        'Unknown index "remote-ccs:indexes"',
-      ]);
-      await expectErrors('FROM index, (FROM remote-*:indexes*)', []);
-    });
-
-    it('should validate custom command validation inside deeply nested subqueries', async () => {
-      const { expectErrors } = await setup();
-
-      await expectErrors(
-        'FROM index, (FROM other_index, (FROM a_index | RERANK "query" ON keywordField WITH {}))',
-        ['"inference_id" parameter is required for RERANK.']
-      );
-    });
-  });
-});
+runSubqueriesValidationSuite(setup);

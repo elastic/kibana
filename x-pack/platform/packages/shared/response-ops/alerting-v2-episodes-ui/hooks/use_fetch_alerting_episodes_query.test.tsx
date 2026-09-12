@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
@@ -15,11 +16,17 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { useAlertingEpisodesDataView } from './use_alerting_episodes_data_view';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AlertEpisode } from '../queries/episodes_query';
-import { createQueryClientWrapper, createTestQueryClient } from './test_utils';
+import { createTestEpisodeSource } from '../types/episode_data_source.mock';
+import type { EpisodeDataSource } from '../types/episode_data_source';
+import { EpisodeDataSourceProvider } from '../context/episode_data_source_context';
+import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
 
 jest.mock('../apis/fetch_alerting_episodes');
 
 const fetchAlertingEpisodesMock = jest.mocked(fetchAlertingEpisodes);
+
+const sourceWithEpisodes = (fetchEpisodes: EpisodeDataSource['fetchEpisodes']) =>
+  createTestEpisodeSource({ fetchEpisodes });
 
 jest.mock('./use_alerting_episodes_data_view');
 const mockDataView = {
@@ -35,6 +42,7 @@ const mockUseAlertingEpisodesDataView = jest
 const http = httpServiceMock.createStartContract();
 const { dataViews } = dataPluginMock.createStartContract();
 const mockExpressions = {} as ExpressionsStart;
+const mockSpaces = createMockSpaces();
 
 const mockEpisodesData: AlertEpisode[] = [
   {
@@ -80,7 +88,7 @@ describe('useFetchAlertingEpisodesQuery', () => {
       () =>
         useFetchAlertingEpisodesQuery({
           pageSize,
-          services: { dataViews, http, expressions: mockExpressions },
+          services: { dataViews, http, expressions: mockExpressions, spaces: mockSpaces },
         }),
       { wrapper }
     );
@@ -103,7 +111,7 @@ describe('useFetchAlertingEpisodesQuery', () => {
       () =>
         useFetchAlertingEpisodesQuery({
           pageSize,
-          services: { dataViews, http, expressions: mockExpressions },
+          services: { dataViews, http, expressions: mockExpressions, spaces: mockSpaces },
         }),
       { wrapper }
     );
@@ -120,7 +128,7 @@ describe('useFetchAlertingEpisodesQuery', () => {
       () =>
         useFetchAlertingEpisodesQuery({
           pageSize,
-          services: { dataViews, http, expressions: mockExpressions },
+          services: { dataViews, http, expressions: mockExpressions, spaces: mockSpaces },
         }),
       { wrapper }
     );
@@ -139,7 +147,7 @@ describe('useFetchAlertingEpisodesQuery', () => {
       () =>
         useFetchAlertingEpisodesQuery({
           pageSize,
-          services: { dataViews, http, expressions: mockExpressions },
+          services: { dataViews, http, expressions: mockExpressions, spaces: mockSpaces },
         }),
       { wrapper }
     );
@@ -163,7 +171,7 @@ describe('useFetchAlertingEpisodesQuery', () => {
       () =>
         useFetchAlertingEpisodesQuery({
           pageSize,
-          services: { dataViews, http, expressions: mockExpressions },
+          services: { dataViews, http, expressions: mockExpressions, spaces: mockSpaces },
         }),
       { wrapper }
     );
@@ -182,7 +190,7 @@ describe('useFetchAlertingEpisodesQuery', () => {
       ({ size }) =>
         useFetchAlertingEpisodesQuery({
           pageSize: size,
-          services: { dataViews, http, expressions: mockExpressions },
+          services: { dataViews, http, expressions: mockExpressions, spaces: mockSpaces },
         }),
       { wrapper, initialProps: { size: pageSize } }
     );
@@ -196,5 +204,81 @@ describe('useFetchAlertingEpisodesQuery', () => {
 
     // Previous data should still be available during fetch
     expect(result.current.data).toBe(firstData);
+  });
+
+  it('merges source episodes with v2 episodes sorted by timestamp', async () => {
+    const pageSize = 10;
+
+    const sourceEpisodes: AlertEpisode[] = [
+      {
+        '@timestamp': '2024-03-01T11:00:00Z',
+        'episode.id': 'source-episode-1',
+        'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+        'rule.id': 'source-rule-1',
+        group_hash: 'source-gh-1',
+        first_timestamp: '2024-03-01T11:00:00Z',
+        last_timestamp: '2024-03-01T11:00:00Z',
+        duration: 0,
+        supports_actions: false,
+        supports_timeline: false,
+      },
+    ];
+
+    fetchAlertingEpisodesMock.mockResolvedValue(mockEpisodesData);
+
+    const dataSource = sourceWithEpisodes(jest.fn().mockResolvedValue(sourceEpisodes));
+    const Wrapper = ({ children }: { children: React.ReactNode }) => (
+      <EpisodeDataSourceProvider dataSource={dataSource}>
+        {wrapper({ children })}
+      </EpisodeDataSourceProvider>
+    );
+
+    const { result } = renderHook(
+      () =>
+        useFetchAlertingEpisodesQuery({
+          pageSize,
+          services: { dataViews, http, expressions: mockExpressions, spaces: mockSpaces },
+        }),
+      { wrapper: Wrapper }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data).toHaveLength(3);
+    expect(result.current.data![0]['episode.id']).toBe('source-episode-1');
+    expect(result.current.data![0].supports_actions).toBe(false);
+    expect(result.current.sourceErrors).toEqual([]);
+  });
+
+  it('returns v2-only episodes and reports the error when a source fetch fails', async () => {
+    const pageSize = 10;
+
+    fetchAlertingEpisodesMock.mockResolvedValue(mockEpisodesData);
+
+    const dataSource = sourceWithEpisodes(jest.fn().mockRejectedValue(new Error('source failure')));
+    const Wrapper = ({ children }: { children: React.ReactNode }) => (
+      <EpisodeDataSourceProvider dataSource={dataSource}>
+        {wrapper({ children })}
+      </EpisodeDataSourceProvider>
+    );
+
+    const { result } = renderHook(
+      () =>
+        useFetchAlertingEpisodesQuery({
+          pageSize,
+          services: { dataViews, http, expressions: mockExpressions, spaces: mockSpaces },
+        }),
+      { wrapper: Wrapper }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data).toHaveLength(mockEpisodesData.length);
+    expect(result.current.data?.map((ep) => ep['episode.id'])).toEqual(
+      mockEpisodesData.map((ep) => ep['episode.id'])
+    );
+    expect(result.current.sourceErrors).toEqual([
+      { sourceId: 'test-source', error: new Error('source failure') },
+    ]);
   });
 });

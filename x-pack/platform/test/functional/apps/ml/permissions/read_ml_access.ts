@@ -9,7 +9,6 @@ import { USER } from '../../../services/ml/security_common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const PageObjects = getPageObjects(['common', 'error']);
 
@@ -136,15 +135,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const ecIndexPattern = 'ft_module_sample_ecommerce';
       const ecExpectedTotalCount = '287';
       const uploadFilePath = require.resolve(
-        '../data_visualizer/files_to_import/artificial_server_log'
+        '../../../../fixtures/ml/files_to_import/artificial_server_log'
       );
       const expectedUploadFileTitle = 'artificial_server_log';
       before(async () => {
-        await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
-        await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ihp_outlier');
-        await esArchiver.loadIfNeeded(
-          'x-pack/platform/test/fixtures/es_archives/ml/module_sample_ecommerce'
-        );
         await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
         await ml.testResources.createDataViewIfNeeded('ft_ihp_outlier', '@timestamp');
         await ml.testResources.createDataViewIfNeeded(ecIndexPattern, 'order_date');

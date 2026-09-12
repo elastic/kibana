@@ -9,6 +9,7 @@ import { css } from '@emotion/react';
 import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { getRepresentativeQuery } from '@kbn/lens-common';
 import { useFetchContext } from '@kbn/presentation-publishing';
 import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { isEqual } from 'lodash';
@@ -25,13 +26,7 @@ import { EMPTY } from 'rxjs';
 import { useCurrentAttributes } from '../../../app_plugin/shared/edit_on_the_fly/use_current_attributes';
 import { useESQLEditorContext } from './esql_editor_context';
 import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
-import {
-  onActiveDataChange,
-  useLensDispatch,
-  useLensSelector,
-  selectCanEditTextBasedQuery,
-  selectSearchSessionId,
-} from '../../../state_management';
+import { useLensSelector, selectSearchSessionId } from '../../../state_management';
 import type { ESQLDataGridAttrs } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
 import { getSuggestions } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
 import { useESQLVariables } from '../../../app_plugin/shared/edit_on_the_fly/use_esql_variables';
@@ -90,23 +85,21 @@ export function ESQLEditor({
   updateSuggestion,
   onTextBasedQueryStateChange,
 }: ESQLEditorProps) {
-  const prevQuery = useRef<AggregateQuery | Query>(attributes?.state.query || { esql: '' });
-  const [query, setQuery] = useState<AggregateQuery | Query>(
-    attributes?.state.query || { esql: '' }
-  );
+  // recomputed every render but only read by the useRef/useState initializers
+  // below — do not hoist into a memo, later renders intentionally ignore it
+  const initialQuery = getRepresentativeQuery(attributes) || { esql: '' };
+  const prevQuery = useRef<AggregateQuery | Query>(initialQuery);
+  const [query, setQuery] = useState<AggregateQuery | Query>(initialQuery);
 
   const { visualizationMap, datasourceMap } = useEditorFrameService();
   const { visualization } = useLensSelector((state) => state.lens);
-  const canEditTextBasedQuery = useLensSelector(selectCanEditTextBasedQuery);
   // Updated when the workspace kicks off a new search (manual refresh, auto-refresh,
   // or when chart requests run under a new session). Used as an effect dependency to
   // re-fetch the ES|QL results grid for the last submitted query.
   const searchSessionId = useLensSelector(selectSearchSessionId);
 
   const [errors, setErrors] = useState<Error[]>([]);
-  const [submittedQuery, setSubmittedQuery] = useState<AggregateQuery | Query>(
-    attributes?.state.query || { esql: '' }
-  );
+  const [submittedQuery, setSubmittedQuery] = useState<AggregateQuery | Query>(initialQuery);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
   const [suggestsLimitedColumns, setSuggestsLimitedColumns] = useState(false);
   const [isVisualizationLoading, setIsVisualizationLoading] = useState(false);
@@ -141,35 +134,24 @@ export function ESQLEditor({
   const submittedQueryRef = useRef(submittedQuery);
   submittedQueryRef.current = submittedQuery;
 
-  const { esqlVariables } = useFetchContext({ uuid: panelId, parentApi });
+  const { esqlVariables, isApproximate } = useFetchContext({ uuid: panelId, parentApi });
   const esqlQueryStats = useESQLQueryStats(isTextBasedLanguage, lensAdapters?.requests);
 
-  const dispatch = useLensDispatch();
-
-  // Update activeData and column limit indicator when chart data finishes loading
+  // Update column limit indicator when chart data finishes loading
   const isDataLoading = useObservable(dataLoading$ ?? EMPTY);
 
   useEffect(() => {
-    if (isDataLoading !== false) {
-      return;
-    }
-
+    if (isDataLoading !== false) return;
     const activeData = getActiveDataFromDatatable(layerId, lensAdaptersRef.current?.tables?.tables);
-
     const table = activeData?.[layerId];
     if (table) {
-      // there are cases where a query can return a big amount of columns
-      // at this case we don't suggest all columns in a table but the first `MAX_NUM_OF_COLUMNS`
       setSuggestsLimitedColumns(table.columns.length >= MAX_NUM_OF_COLUMNS);
     }
-
-    if (Object.keys(activeData).length > 0) {
-      dispatch(onActiveDataChange({ activeData }));
-    }
-  }, [isDataLoading, dispatch, layerId]);
+  }, [isDataLoading, layerId]);
 
   const runQuery = useCallback(
     async (q: AggregateQuery, abortController?: AbortController, shouldUpdateAttrs?: boolean) => {
+      setErrors([]);
       const attrs = await getSuggestions(
         q,
         data,
@@ -183,11 +165,20 @@ export function ESQLEditor({
         setDataGridAttrs,
         esqlVariables,
         shouldUpdateAttrs,
-        currentAttributesRef.current
+        currentAttributesRef.current,
+        isApproximate
       );
+      // An aborted run (e.g. the user clicked "Cancel", or a re-render tore
+      // down the request) produced no result. Bail out *without* recording the
+      // query as submitted: `onTextLangQuerySubmit` skips queries equal to
+      // `prevQuery.current`, so marking an aborted run here would silently
+      // drop every future resubmission of the same query text.
+      if (abortController?.signal.aborted) {
+        setIsVisualizationLoading(false);
+        return;
+      }
       if (attrs) {
         setCurrentAttributes?.(attrs);
-        setErrors([]);
         updateSuggestion?.(attrs);
       }
       prevQuery.current = q;
@@ -202,6 +193,7 @@ export function ESQLEditor({
       visualizationMap,
       adHocDataViews,
       esqlVariables,
+      isApproximate,
       setCurrentAttributes,
       updateSuggestion,
     ]
@@ -256,7 +248,8 @@ export function ESQLEditor({
       setDataGridAttrs,
       esqlVariables,
       false,
-      currentAttributesRef.current
+      currentAttributesRef.current,
+      isApproximate
     ).catch(() => {
       // The chart itself will surface query errors via its own error handling path
     });
@@ -267,6 +260,7 @@ export function ESQLEditor({
   }, [
     searchSessionId,
     esqlVariables,
+    isApproximate,
     data,
     http,
     uiSettings,
@@ -275,8 +269,7 @@ export function ESQLEditor({
     adHocDataViews,
   ]);
 
-  // Early exit if it's not in TextBased mode or the editor should be hidden
-  if (!isTextBasedLanguage || !canEditTextBasedQuery || !isOfAggregateQueryType(query)) {
+  if (!isOfAggregateQueryType(query)) {
     return null;
   }
 
@@ -296,6 +289,7 @@ export function ESQLEditor({
         queryStats={esqlQueryStats}
         closeFlyout={closeFlyout}
         panelId={panelId}
+        layerId={layerId}
         attributes={attributes}
         parentApi={parentApi}
       />
@@ -304,6 +298,7 @@ export function ESQLEditor({
           dataGridAttrs={dataGridAttrs}
           isAccordionOpen={isESQLResultsAccordionOpen}
           isTableView={visualization.activeId !== 'lnsDatatable'}
+          isApproximate={isApproximate}
           setIsAccordionOpen={setIsESQLResultsAccordionOpen}
           query={query}
           onAccordionToggleCb={(status) => {
@@ -342,7 +337,7 @@ type InnerEditorProps = Simplify<
     adHocDataViews: DataViewSpec[];
     esqlVariables: ESQLControlVariable[] | undefined;
     queryStats?: ESQLQueryStats;
-  } & Pick<LayerPanelProps, 'attributes' | 'parentApi' | 'panelId' | 'closeFlyout'>
+  } & Pick<LayerPanelProps, 'attributes' | 'parentApi' | 'panelId' | 'layerId' | 'closeFlyout'>
 >;
 
 function InnerESQLEditor({
@@ -353,6 +348,7 @@ function InnerESQLEditor({
   attributes,
   parentApi,
   panelId,
+  layerId,
   closeFlyout,
   setQuery,
   isVisualizationLoading,
@@ -367,6 +363,7 @@ function InnerESQLEditor({
   const { onSaveControl, onCancelControl } = useESQLVariables({
     parentApi,
     panelId,
+    layerId,
     attributes,
     closeFlyout,
   });

@@ -7,6 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/context_awareness/extensions/_get_pagination_config.ts
+
+/**
+ * Scout audit: MIGRATE TO SCOUT UI, scoped to the rendering consequence only. The mode resolution
+ * itself is covered by
+ * profile_providers/observability/logs_data_source_profile/accessors/get_pagination_config.test.ts,
+ * so assert that `singlePage` suppresses the controls (and that a non-log source renders them),
+ * not that the mode resolves.
+ */
 import kbnRison from '@kbn/rison';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -15,7 +24,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
   const dataGrid = getService('dataGrid');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
   const resetTimeFrame = {
@@ -30,19 +38,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('extension getPaginationConfig', () => {
     before(async () => {
-      // To load more than 500 records
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await kibanaServer.uiSettings.update({
         'timepicker:timeDefaults': `{ "from": "${currentTimeFrame.from}", "to": "${currentTimeFrame.to}"}`,
       });
     });
 
     after(async () => {
-      await esArchiver.unload(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await kibanaServer.uiSettings.update({
         'timepicker:timeDefaults': `{ "from": "${resetTimeFrame.from}", "to": "${resetTimeFrame.to}"}`,
       });

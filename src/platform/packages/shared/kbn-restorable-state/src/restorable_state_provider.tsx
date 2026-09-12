@@ -28,7 +28,9 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 const storage = new Storage(localStorage);
 
 export interface RestorableStateProviderProps<TState extends object> {
+  /** Previously persisted state to restore on mount */
   initialState?: Partial<TState>;
+  /** Called whenever the restorable state changes, allowing the host to persist it */
   onInitialStateChange?: (initialState: Partial<TState>) => void;
 }
 

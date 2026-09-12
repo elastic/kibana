@@ -82,6 +82,8 @@ describe('TaskScheduling', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    // resetAllMocks wipes the factory default; restore the security-enabled behavior.
+    mockTaskStore.willGrantApiKeys.mockImplementation((options) => Boolean(options?.request));
   });
 
   test('allows scheduling tasks', async () => {
@@ -213,6 +215,77 @@ describe('TaskScheduling', () => {
     );
 
     expect(result.id).toEqual('my-foo-id');
+  });
+
+  test('does not schedule a user scoped task that already exists, so no API key is granted', async () => {
+    const task = getTask();
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    const bulkUpdateScheduleSpy = jest
+      .spyOn(taskScheduling, 'bulkUpdateSchedules')
+      .mockResolvedValue({ tasks: [task], errors: [] });
+    mockTaskStore.taskExists.mockResolvedValue(true);
+
+    const mockRequest = httpServerMock.createKibanaRequest();
+    const result = await taskScheduling.ensureScheduled(task, { request: mockRequest });
+
+    expect(mockTaskStore.taskExists).toHaveBeenCalledWith('my-foo-id');
+    expect(mockTaskStore.schedule).not.toHaveBeenCalled();
+    expect(bulkUpdateScheduleSpy).toHaveBeenCalledWith(
+      ['my-foo-id'],
+      { interval: '1m' },
+      {
+        request: mockRequest,
+      }
+    );
+    expect(result.id).toEqual('my-foo-id');
+  });
+
+  test('grants an API key only once when ensureScheduled is called repeatedly for the same task', async () => {
+    const task = getTask();
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    jest
+      .spyOn(taskScheduling, 'bulkUpdateSchedules')
+      .mockResolvedValue({ tasks: [task], errors: [] });
+    mockTaskStore.taskExists.mockResolvedValueOnce(false).mockResolvedValue(true);
+
+    const mockRequest = httpServerMock.createKibanaRequest();
+    await taskScheduling.ensureScheduled(task, { request: mockRequest });
+    await taskScheduling.ensureScheduled(task, { request: mockRequest });
+    await taskScheduling.ensureScheduled(task, { request: mockRequest });
+
+    // Only the first call reaches the store, which is where the API key is granted.
+    expect(mockTaskStore.schedule).toHaveBeenCalledTimes(1);
+  });
+
+  test('does not look up the task when scheduling without a request', async () => {
+    const task = getTask();
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    jest
+      .spyOn(taskScheduling, 'bulkUpdateSchedules')
+      .mockResolvedValue({ tasks: [task], errors: [] });
+    mockTaskStore.schedule.mockRejectedValueOnce({ statusCode: 409 });
+
+    await taskScheduling.ensureScheduled(task);
+
+    expect(mockTaskStore.taskExists).not.toHaveBeenCalled();
+    expect(mockTaskStore.schedule).toHaveBeenCalled();
+  });
+
+  test('does not look up the task when the store will not grant API keys despite a request (e.g. security disabled)', async () => {
+    const task = getTask();
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    jest
+      .spyOn(taskScheduling, 'bulkUpdateSchedules')
+      .mockResolvedValue({ tasks: [task], errors: [] });
+    mockTaskStore.willGrantApiKeys.mockReturnValue(false);
+    mockTaskStore.schedule.mockRejectedValueOnce({ statusCode: 409 });
+
+    const mockRequest = httpServerMock.createKibanaRequest();
+    await taskScheduling.ensureScheduled(task, { request: mockRequest });
+
+    // No key would be granted, so there is no leak to guard against and the lookup is skipped.
+    expect(mockTaskStore.taskExists).not.toHaveBeenCalled();
+    expect(mockTaskStore.schedule).toHaveBeenCalled();
   });
 
   test('does not try to update schedule for tasks that have already been scheduled if no schedule is provided', async () => {
@@ -529,24 +602,21 @@ describe('TaskScheduling', () => {
       const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
 
       expect(bulkUpdatePayload.length).toBe(2);
-      expect(bulkUpdatePayload[0]).toEqual({
-        ...task,
-        enabled: true,
-        runAt: new Date('1970-01-01T00:00:00.000Z'),
-        scheduledAt: new Date('1970-01-01T00:00:00.000Z'),
-      });
 
-      expect(omit(bulkUpdatePayload[1], 'runAt', 'scheduledAt')).toEqual({
-        ...omit(task2, 'runAt', 'scheduledAt'),
-        enabled: true,
-      });
-
-      const { runAt, scheduledAt } = bulkUpdatePayload[1];
-      expect(runAt.getTime()).toEqual(scheduledAt.getTime());
-      expect(runAt.getTime() - bulkUpdatePayload[0].runAt.getTime()).toBeLessThanOrEqual(
-        5 * 60 * 1000
-      );
+      // When more than one task is enabled, every task is jittered (no task runs immediately).
+      for (const payload of bulkUpdatePayload) {
+        const sourceTask = payload.id === task.id ? task : task2;
+        expect(omit(payload, 'runAt', 'scheduledAt')).toEqual({
+          ...omit(sourceTask, 'runAt', 'scheduledAt'),
+          enabled: true,
+        });
+        const { runAt, scheduledAt } = payload;
+        expect(runAt.getTime()).toEqual(scheduledAt.getTime());
+        expect(runAt.getTime()).toBeGreaterThanOrEqual(1);
+        expect(runAt.getTime()).toBeLessThanOrEqual(5 * 60 * 1000);
+      }
     });
+
     test('should call store bulk update with request when provided', async () => {
       const task = taskManagerMock.createTask({
         id,
@@ -909,6 +979,76 @@ describe('TaskScheduling', () => {
       expect(bulkUpdatePayload).toHaveLength(0);
     });
 
+    test('should update task if new schedule is equal to previous and regenerateApiKey is requested', async () => {
+      const task = taskManagerMock.createTask({ id, schedule: { interval: '3h' } });
+      const mockRequest = httpServerMock.createKibanaRequest();
+
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkUpdateSchedules(
+        [id],
+        { interval: '3h' },
+        {
+          request: mockRequest,
+          regenerateApiKey: true,
+        }
+      );
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0];
+
+      expect(bulkUpdatePayload).toEqual([
+        [task],
+        {
+          validate: false,
+          mergeAttributes: false,
+          options: { request: mockRequest, regenerateApiKey: true },
+        },
+      ]);
+    });
+
+    test('should not update running task if regenerateApiKey is requested', async () => {
+      const task = taskManagerMock.createTask({
+        id,
+        schedule: { interval: '3h' },
+        status: TaskStatus.Running,
+      });
+      const mockRequest = httpServerMock.createKibanaRequest();
+
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkUpdateSchedules(
+        [id],
+        { interval: '3h' },
+        {
+          request: mockRequest,
+          regenerateApiKey: true,
+        }
+      );
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
+
+      expect(bulkUpdatePayload).toHaveLength(0);
+    });
+
+    test('should not update running task if regenerateApiKey is not requested', async () => {
+      const task = taskManagerMock.createTask({
+        id,
+        schedule: { interval: '3h' },
+        status: TaskStatus.Running,
+      });
+
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkUpdateSchedules([id], { interval: '5h' });
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
+
+      expect(bulkUpdatePayload).toHaveLength(0);
+    });
+
     test('should not update task if new schedule is equal to previous using rrule', async () => {
       const task = taskManagerMock.createTask({
         id,
@@ -1194,7 +1334,7 @@ describe('TaskScheduling', () => {
       );
     });
 
-    test('ignores 409 conflict errors', async () => {
+    test('reports 409 conflict errors via the conflict flag without throwing', async () => {
       const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
 
@@ -1204,7 +1344,7 @@ describe('TaskScheduling', () => {
       mockTaskStore.update.mockRejectedValueOnce({ statusCode: 409 });
 
       const result = await taskScheduling.runSoon(id);
-      expect(result).toEqual({ id, forced: false });
+      expect(result).toEqual({ id, forced: false, conflict: true });
       expect(taskSchedulingOpts.logger.debug).toHaveBeenCalledWith(
         'Failed to update the task (01ddff11-e88a-4d13-bc4e-256164e755e2) for runSoon due to conflict (409)'
       );
@@ -1337,6 +1477,8 @@ describe('TaskScheduling', () => {
             schedule: undefined,
             traceparent: 'parent',
             enabled: true,
+            runAt: new Date(),
+            scheduledAt: new Date(),
           },
         ],
         undefined
@@ -1366,6 +1508,8 @@ describe('TaskScheduling', () => {
             schedule: undefined,
             traceparent: 'parent',
             enabled: true,
+            runAt: new Date(),
+            scheduledAt: new Date(),
           },
           {
             ...task2,
@@ -1377,6 +1521,139 @@ describe('TaskScheduling', () => {
         ],
         undefined
       );
+    });
+
+    test('runs a single recurring task immediately', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const task = {
+        taskType: 'foo',
+        params: {},
+        state: {},
+        schedule: { interval: '1m' },
+      };
+      await taskScheduling.bulkSchedule([task]);
+
+      const bulkSchedulePayload = mockTaskStore.bulkSchedule.mock.calls[0][0];
+
+      expect(bulkSchedulePayload).toEqual([
+        {
+          ...task,
+          id: undefined,
+          traceparent: 'parent',
+          enabled: true,
+          runAt: new Date(),
+          scheduledAt: new Date(),
+        },
+      ]);
+    });
+
+    test('jitters every recurring task within min(interval, 5m) when more than one task is scheduled', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const task0 = {
+        taskType: 'foo',
+        params: {},
+        state: {},
+        schedule: { interval: '1m' },
+      };
+      const task1 = {
+        taskType: 'foo',
+        params: {},
+        state: {},
+        schedule: { interval: '1m' },
+      };
+      const task2 = {
+        taskType: 'foo',
+        params: {},
+        state: {},
+        schedule: { interval: '1h' },
+      };
+      await taskScheduling.bulkSchedule([task0, task1, task2]);
+
+      const bulkSchedulePayload = mockTaskStore.bulkSchedule.mock.calls[0][0];
+
+      expect(bulkSchedulePayload.length).toBe(3);
+
+      const inputs = [task0, task1, task2];
+      const expectedUpperBounds = [60 * 1000, 60 * 1000, 5 * 60 * 1000];
+
+      bulkSchedulePayload.forEach((payload, idx) => {
+        expect(omit(payload, 'runAt', 'scheduledAt')).toEqual({
+          ...inputs[idx],
+          id: undefined,
+          traceparent: 'parent',
+          enabled: true,
+        });
+        const runAt = payload.runAt!.getTime();
+        expect(payload.scheduledAt!.getTime()).toBe(runAt);
+        expect(runAt).toBeGreaterThanOrEqual(1);
+        expect(runAt).toBeLessThanOrEqual(expectedUpperBounds[idx]);
+      });
+    });
+
+    test('runs ad-hoc tasks immediately without jitter even when scheduled alongside other tasks', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const recurringTask = {
+        taskType: 'foo',
+        params: {},
+        state: {},
+        schedule: { interval: '1m' },
+      };
+      const adHocTask = {
+        taskType: 'foo',
+        params: {},
+        state: {},
+      };
+      await taskScheduling.bulkSchedule([recurringTask, adHocTask]);
+
+      const bulkSchedulePayload = mockTaskStore.bulkSchedule.mock.calls[0][0];
+
+      expect(bulkSchedulePayload.length).toBe(2);
+
+      // Recurring task is now jittered since there is more than one task.
+      expect(omit(bulkSchedulePayload[0], 'runAt', 'scheduledAt')).toEqual({
+        ...recurringTask,
+        id: undefined,
+        traceparent: 'parent',
+        enabled: true,
+      });
+      const recurringRunAt = bulkSchedulePayload[0].runAt!.getTime();
+      expect(bulkSchedulePayload[0].scheduledAt!.getTime()).toBe(recurringRunAt);
+      expect(recurringRunAt).toBeGreaterThanOrEqual(1);
+      expect(recurringRunAt).toBeLessThanOrEqual(60 * 1000);
+
+      // Ad-hoc task still runs immediately because addJitter returns "now" when there is no interval.
+      expect(bulkSchedulePayload[1]).toEqual({
+        ...adHocTask,
+        id: undefined,
+        schedule: undefined,
+        traceparent: 'parent',
+        enabled: true,
+        runAt: new Date(),
+        scheduledAt: new Date(),
+      });
+    });
+
+    test('does not jitter disabled tasks even if they have an interval schedule', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const task = {
+        taskType: 'foo',
+        params: {},
+        state: {},
+        schedule: { interval: '1h' },
+        enabled: false,
+      };
+      await taskScheduling.bulkSchedule([task]);
+
+      const bulkSchedulePayload = mockTaskStore.bulkSchedule.mock.calls[0][0];
+
+      expect(bulkSchedulePayload).toEqual([
+        {
+          ...task,
+          id: undefined,
+          traceparent: 'parent',
+          enabled: false,
+        },
+      ]);
     });
 
     test('doesnt allow naively rescheduling existing tasks that have already been scheduled', async () => {

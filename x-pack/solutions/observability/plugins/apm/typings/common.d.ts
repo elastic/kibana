@@ -18,8 +18,6 @@ type AllowUnknownObjectProperties<T> = T extends object
     }
   : T;
 
-export type Maybe<T> = T | null | undefined;
-
 export type RecursivePartial<T> = {
   [P in keyof T]?: T[P] extends Array<infer U>
     ? Array<RecursivePartial<U>>

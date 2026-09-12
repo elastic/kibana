@@ -13,6 +13,7 @@ const SOURCE_TYPE_PATTERNS = [
   { patterns: ['timeseries', 'time series'], label: 'Timeseries', key: 'timeseries' },
   { patterns: ['stream', 'data stream'], label: 'Stream', key: 'stream' },
   { patterns: ['alias'], label: 'Alias', key: 'alias' },
+  { patterns: ['external'], label: 'External data', key: 'external' },
   { patterns: ['index'], label: 'Index', key: 'index' },
 ] as const;
 

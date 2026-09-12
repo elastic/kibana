@@ -8,17 +8,19 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
-import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-
+import { createFieldFormatMock } from '../test_utils';
+import { formatId } from './constants';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 import { StringFormatEditor } from './string';
 
 const fieldType = 'string';
-const format = {
-  reactConvert: jest.fn().mockImplementation((input: string) => input.toUpperCase()),
+
+const format = createFieldFormatMock({
   getParamDefaults: jest.fn().mockImplementation(() => {
     return { transform: 'upper' };
   }),
+  convertToReact: jest.fn().mockImplementation((input: string) => input.toUpperCase()),
   type: {
     transformOptions: [
       {
@@ -27,28 +29,37 @@ const format = {
       },
     ],
   },
-};
+});
+
 const formatParams = {
   transform: '',
 };
+
 const onChange = jest.fn();
 const onError = jest.fn();
 
+const renderStringFormatEditor = () =>
+  renderWithI18n(
+    <StringFormatEditor
+      fieldType={fieldType}
+      format={format}
+      formatParams={formatParams}
+      onChange={onChange}
+      onError={onError}
+    />
+  );
+
 describe('StringFormatEditor', () => {
   it('should have a formatId', () => {
-    expect(StringFormatEditor.formatId).toEqual('string');
+    expect(StringFormatEditor.formatId).toEqual(formatId);
   });
 
-  it('should render normally', async () => {
-    const component = shallow(
-      <StringFormatEditor
-        fieldType={fieldType}
-        format={format as unknown as FieldFormat}
-        formatParams={formatParams}
-        onChange={onChange}
-        onError={onError}
-      />
-    );
-    expect(component).toMatchSnapshot();
+  it('should render normally', () => {
+    renderStringFormatEditor();
+
+    expect(screen.getByText('Transform')).toBeVisible();
+    expect(screen.getByText('Upper Case')).toBeVisible();
+    expect(screen.getByText('A Quick Brown Fox.')).toBeVisible();
+    expect(screen.getByText('A QUICK BROWN FOX.')).toBeVisible();
   });
 });

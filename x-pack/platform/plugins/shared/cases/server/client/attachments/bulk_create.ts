@@ -23,40 +23,37 @@ import type { BulkCreateArgs } from './types';
 import { validateRegisteredAttachments } from './validators';
 import { validateMaxUserActions } from '../../common/validators';
 import { emitAttachmentsAddedEvent } from './trigger_utils';
+import { extractAndAddObservables } from './extract_observables';
+import { toUnifiedAttachmentPayload } from '../../common/attachments';
 
 export const bulkCreate = async (
   args: BulkCreateArgs,
   clientArgs: CasesClientArgs
 ): Promise<Case> => {
-  const { attachments, caseId, mode = 'legacy' } = args;
+  const { attachments, caseId } = args;
 
   const {
     logger,
     authorization,
-    externalReferenceAttachmentTypeRegistry,
-    persistableStateAttachmentTypeRegistry,
     unifiedAttachmentTypeRegistry,
     services: { userActionService },
   } = clientArgs;
 
   try {
     decodeWithExcessOrThrow(BulkCreateAttachmentsRequestRtV2)(attachments);
+    attachments.forEach((attachment) => {
+      decodeCommentRequestV2(attachment, unifiedAttachmentTypeRegistry);
+    });
+    const unifiedAttachments = attachments.map(toUnifiedAttachmentPayload);
     await validateMaxUserActions({
       caseId,
       userActionService,
-      userActionsToAdd: attachments.length,
+      userActionsToAdd: unifiedAttachments.length,
     });
 
-    attachments.forEach((attachment) => {
-      decodeCommentRequestV2(
-        attachment,
-        externalReferenceAttachmentTypeRegistry,
-        unifiedAttachmentTypeRegistry
-      );
+    unifiedAttachments.forEach((attachment) => {
       validateRegisteredAttachments({
         query: attachment,
-        persistableStateAttachmentTypeRegistry,
-        externalReferenceAttachmentTypeRegistry,
         unifiedAttachmentTypeRegistry,
       });
     });
@@ -64,7 +61,7 @@ export const bulkCreate = async (
     const [attachmentsWithIds, entities]: [
       Array<{ id: string } & AttachmentRequestV2>,
       OwnerEntity[]
-    ] = attachments.reduce<[Array<{ id: string } & AttachmentRequestV2>, OwnerEntity[]]>(
+    ] = unifiedAttachments.reduce<[Array<{ id: string } & AttachmentRequestV2>, OwnerEntity[]]>(
       ([a, e], attachment) => {
         const savedObjectID = SavedObjectsUtils.generateId();
         return [
@@ -85,7 +82,7 @@ export const bulkCreate = async (
       attachments: attachmentsWithIds,
     });
 
-    const updatedCase = await updatedModel.encodeWithComments({ mode });
+    const updatedCase = await updatedModel.encodeWithComments();
 
     const idsByType = new Map<string, string[]>();
     for (const attachment of attachmentsWithIds) {
@@ -96,6 +93,9 @@ export const bulkCreate = async (
     for (const [type, ids] of idsByType) {
       emitAttachmentsAddedEvent(clientArgs, updatedCase, ids, type);
     }
+
+    // This call never throws — failures are logged and do not abort the attachment creation.
+    await extractAndAddObservables(caseId, unifiedAttachments, updatedCase, clientArgs);
 
     return updatedCase;
   } catch (error) {

@@ -292,6 +292,33 @@ describe('Timeline', () => {
         bar: barWithPopulatedColumns,
       });
     });
+
+    test('should reset isSuperTimeline and superTimelineSourceIds when creating a new timeline from a Super Timeline', () => {
+      // WHY: Super Timeline is a transient, read-only view. Clicking "New" must return the user to
+      // a normal editable timeline. Without explicit resets in timelineDefaults, the stale
+      // isSuperTimeline: true flag would survive the spread in addNewTimeline and the new timeline
+      // would still render in read-only mode (tabs hidden, save disabled).
+      const superTimelineById: TimelineById = {
+        foo: {
+          ...basicTimeline,
+          isSuperTimeline: true,
+          superTimelineSourceIds: ['source-id-1', 'source-id-2'],
+        },
+      };
+
+      const update = addNewTimeline({
+        id: 'foo',
+        columns: timelineDefaults.columns,
+        dataViewId: null,
+        indexNames: [],
+        timelineById: superTimelineById,
+        timelineType: TimelineTypeEnum.default,
+        savedSearchId: null,
+      });
+
+      expect(update.foo.isSuperTimeline).toBe(false);
+      expect(update.foo.superTimelineSourceIds).toEqual([]);
+    });
   });
 
   describe('#updateTimelineShowTimeline', () => {
@@ -318,6 +345,45 @@ describe('Timeline', () => {
           show: false,
         },
       });
+    });
+
+    test('should reset super timeline fields when a super timeline is closed', () => {
+      // WHY: Super Timeline is transient and read-only. When the modal is closed the footer
+      // must revert to a blank timeline state, not continue showing "Super Timeline" metadata.
+      const superTimelineById: TimelineById = {
+        foo: {
+          ...basicTimeline,
+          show: true,
+          isSuperTimeline: true,
+          title: 'Super Timeline',
+          description: 'aggregated view',
+          superTimelineSourceIds: ['id-1', 'id-2'],
+          superTimelineSourceTitles: ['Alpha', 'Beta'],
+          superTimelineDescriptions: [
+            {
+              savedObjectId: 'id-1',
+              title: 'Alpha',
+              description: 'desc',
+              updatedBy: null,
+              updated: null,
+            },
+          ],
+        },
+      };
+
+      const update = updateTimelineShowTimeline({
+        id: 'foo',
+        show: false,
+        timelineById: superTimelineById,
+      });
+
+      expect(update.foo.show).toBe(false);
+      expect(update.foo.isSuperTimeline).toBe(false);
+      expect(update.foo.title).toBe('');
+      expect(update.foo.description).toBe('');
+      expect(update.foo.superTimelineSourceIds).toEqual([]);
+      expect(update.foo.superTimelineSourceTitles).toEqual([]);
+      expect(update.foo.superTimelineDescriptions).toEqual([]);
     });
   });
 

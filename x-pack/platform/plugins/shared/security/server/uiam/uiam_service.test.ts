@@ -9,7 +9,12 @@ import fs from 'fs';
 import undici from 'undici';
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
+import {
+  deriveInternalCallerAttestation,
+  HTTPAuthorizationHeader,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+} from '@kbn/core-security-server';
+import type { ServiceAccount } from '@kbn/core-security-server';
 
 import {
   type GrantUiamApiKeyRequestBody,
@@ -20,6 +25,13 @@ import {
 } from './uiam_service';
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 import { ConfigSchema } from '../config';
+import { securityTelemetry } from '../otel/instrumentation';
+
+jest.mock('../otel/instrumentation', () => ({
+  securityTelemetry: {
+    recordOAuthTokenExchangeAttempt: jest.fn(),
+  },
+}));
 
 const AGENT_MOCK = { name: "I'm the danger. I'm the one who knocks." };
 
@@ -49,8 +61,9 @@ describe('UiamService', () => {
         { serverless: true }
       ).uiam,
       {
-        kibanaServerURL: 'https://my-project.kb.us-east-1.cloud.es.io:9243',
+        kibanaServerResourceURL: 'https://my-project.kb.us-east-1.cloud.es.io:9243',
         elasticsearchUrl: 'https://es.example.com',
+        kibanaVersion: '9.0.0',
       }
     );
   });
@@ -73,9 +86,9 @@ describe('UiamService', () => {
               sharedSecret: 'secret',
               ssl: { verificationMode: 'none' },
             },
-            { kibanaServerURL: 'https://kibana.test' }
+            { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
           )
-      ).toThrowError('UIAM is not enabled.');
+      ).toThrow('UIAM is not enabled.');
     });
 
     it('fails if UIAM service URL is not configured', () => {
@@ -88,9 +101,9 @@ describe('UiamService', () => {
               sharedSecret: 'secret',
               ssl: { verificationMode: 'none' },
             },
-            { kibanaServerURL: 'https://kibana.test' }
+            { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
           )
-      ).toThrowError('UIAM URL is not configured.');
+      ).toThrow('UIAM URL is not configured.');
     });
 
     it('fails if UIAM service shared secret is not configured', () => {
@@ -103,9 +116,9 @@ describe('UiamService', () => {
               url: 'https://uiam.service',
               ssl: { verificationMode: 'none' },
             },
-            { kibanaServerURL: 'https://kibana.test' }
+            { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
           )
-      ).toThrowError('UIAM shared secret is not configured.');
+      ).toThrow('UIAM shared secret is not configured.');
     });
 
     it('does not create custom dispatcher for `full` verification without custom TLS settings', () => {
@@ -118,7 +131,7 @@ describe('UiamService', () => {
           sharedSecret: 'secret',
           ssl: { verificationMode: 'full' },
         },
-        { kibanaServerURL: 'https://kibana.test' }
+        { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
       );
       expect(agentSpy).not.toHaveBeenCalled();
     });
@@ -133,7 +146,7 @@ describe('UiamService', () => {
           sharedSecret: 'secret',
           ssl: { verificationMode: 'full', certificateAuthorities: '/some/ca/path' },
         },
-        { kibanaServerURL: 'https://kibana.test' }
+        { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
       );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
@@ -156,7 +169,7 @@ describe('UiamService', () => {
             certificateAuthorities: ['/some/ca/path-1', '/some/ca/path-2'],
           },
         },
-        { kibanaServerURL: 'https://kibana.test' }
+        { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
       );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
@@ -181,7 +194,7 @@ describe('UiamService', () => {
           sharedSecret: 'secret',
           ssl: { verificationMode: 'certificate', certificateAuthorities: '/some/ca/path' },
         },
-        { kibanaServerURL: 'https://kibana.test' }
+        { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
       );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
@@ -202,7 +215,7 @@ describe('UiamService', () => {
           sharedSecret: 'secret',
           ssl: { verificationMode: 'certificate' },
         },
-        { kibanaServerURL: 'https://kibana.test' }
+        { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
       );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
@@ -224,7 +237,7 @@ describe('UiamService', () => {
           sharedSecret: 'secret',
           ssl: { verificationMode: 'none' },
         },
-        { kibanaServerURL: 'https://kibana.test' }
+        { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
       );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
@@ -246,7 +259,7 @@ describe('UiamService', () => {
             key: '/path/to/key.pem',
           },
         },
-        { kibanaServerURL: 'https://kibana.test' }
+        { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
       );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
@@ -274,7 +287,7 @@ describe('UiamService', () => {
             certificateAuthorities: '/some/ca/path',
           },
         },
-        { kibanaServerURL: 'https://kibana.test' }
+        { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
       );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
@@ -307,6 +320,30 @@ describe('UiamService', () => {
     });
   });
 
+  describe('#getInternalCallerAttestationHeaders', () => {
+    it('carries the attestation derived from the shared secret, and never the secret itself', () => {
+      const credential = new HTTPAuthorizationHeader('Bearer', 'essu_one');
+      expect(uiamService.getInternalCallerAttestationHeaders(credential)).toEqual({
+        [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+          'secret',
+          credential
+        ),
+      });
+    });
+
+    it('binds the attestation to the credential', () => {
+      expect(
+        uiamService.getInternalCallerAttestationHeaders(
+          new HTTPAuthorizationHeader('Bearer', 'essu_one')
+        )
+      ).not.toEqual(
+        uiamService.getInternalCallerAttestationHeaders(
+          new HTTPAuthorizationHeader('Bearer', 'essu_two')
+        )
+      );
+    });
+  });
+
   describe('#refreshSessionTokens', () => {
     it('properly calls UIAM service to refresh the tokens', async () => {
       fetchSpy.mockResolvedValue({
@@ -324,6 +361,7 @@ describe('UiamService', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
         },
         body: JSON.stringify({ refresh_token: 'old-refresh' }),
@@ -339,15 +377,14 @@ describe('UiamService', () => {
         json: async () => ({ error: { message: 'Bad request' } }),
       });
 
-      await expect(uiamService.refreshSessionTokens('old-refresh')).rejects.toThrowError(
-        'Bad request'
-      );
+      await expect(uiamService.refreshSessionTokens('old-refresh')).rejects.toThrow('Bad request');
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/tokens/_refresh', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
         },
         body: JSON.stringify({ refresh_token: 'old-refresh' }),
@@ -370,6 +407,7 @@ describe('UiamService', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
           Authorization: 'Bearer old-token',
         },
@@ -386,15 +424,16 @@ describe('UiamService', () => {
         json: async () => ({ error: { message: 'Bad request' } }),
       });
 
-      await expect(
-        uiamService.invalidateSessionTokens('old-token', 'old-refresh')
-      ).rejects.toThrowError('Bad request');
+      await expect(uiamService.invalidateSessionTokens('old-token', 'old-refresh')).rejects.toThrow(
+        'Bad request'
+      );
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/tokens/_invalidate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
           Authorization: 'Bearer old-token',
         },
@@ -405,12 +444,16 @@ describe('UiamService', () => {
   });
 
   describe('#exchangeOAuthToken', () => {
+    beforeEach(() => {
+      (securityTelemetry.recordOAuthTokenExchangeAttempt as jest.Mock).mockClear();
+    });
+
     it('properly calls UIAM service to exchange an OAuth token for an ephemeral token', async () => {
       const mockResponse = {
         token: 'essu_ephemeral_token_value',
         credentials: {
           oauth: {
-            audience: 'https://my-project.kb.us-east-1.cloud.es.io:9243/',
+            audience: 'https://my-project.kb.us-east-1.cloud.es.io:9243',
           },
         },
       };
@@ -426,16 +469,20 @@ describe('UiamService', () => {
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith(
-        'https://uiam.service/uiam/api/v1/authentication/_authenticate?include_token=true&audience=https%3A%2F%2Fmy-project.kb.us-east-1.cloud.es.io%3A9243%2F',
+        'https://uiam.service/uiam/api/v1/authentication/_authenticate?include_token=true&audience=https%3A%2F%2Fmy-project.kb.us-east-1.cloud.es.io%3A9243',
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            'User-Agent': 'Kibana/9.0.0',
             Authorization: 'Bearer essu_oauth_access_token',
           },
           dispatcher: AGENT_MOCK,
         }
+      );
+      expect(securityTelemetry.recordOAuthTokenExchangeAttempt).toHaveBeenCalledWith(
+        expect.any(Number),
+        { outcome: 'success' }
       );
     });
 
@@ -453,6 +500,14 @@ describe('UiamService', () => {
       await expect(uiamService.exchangeOAuthToken('essu_oauth_access_token')).rejects.toThrow(
         'OAuth token audience mismatch'
       );
+      expect(securityTelemetry.recordOAuthTokenExchangeAttempt).toHaveBeenCalledWith(
+        expect.any(Number),
+        {
+          outcome: 'failure',
+          oauthErrorType: 'KIBANA.AUDIENCE_MISMATCH',
+          oauthErrorCode: undefined,
+        }
+      );
     });
 
     it('throws and logs error when UIAM service returns an error', async () => {
@@ -464,6 +519,33 @@ describe('UiamService', () => {
       });
 
       await expect(uiamService.exchangeOAuthToken('essu_invalid_token')).rejects.toThrow();
+      expect(securityTelemetry.recordOAuthTokenExchangeAttempt).toHaveBeenCalledWith(
+        expect.any(Number),
+        { outcome: 'failure', oauthErrorType: 'UNKNOWN', oauthErrorCode: undefined }
+      );
+    });
+
+    it('records the UIAM error type when the exchange fails with a classified error', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 401,
+        json: async () => ({
+          request_id: '2f26103be7be5483ef70f099ca9d5567',
+          error: {
+            message: 'Authentication failed',
+            type: 'AUTHENTICATION.TOKEN',
+            resource: 'ba6ab8be-9c98-43ec-a5f9-7b163af9e432',
+            code: '0x7E0116',
+          },
+        }),
+        headers: new Headers(),
+      });
+
+      await expect(uiamService.exchangeOAuthToken('essu_expired_token')).rejects.toThrow();
+      expect(securityTelemetry.recordOAuthTokenExchangeAttempt).toHaveBeenCalledWith(
+        expect.any(Number),
+        { outcome: 'failure', oauthErrorType: 'AUTHENTICATION.TOKEN', oauthErrorCode: '0x7E0116' }
+      );
     });
   });
 
@@ -502,6 +584,7 @@ describe('UiamService', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
           Authorization: 'Bearer access-token',
         },
@@ -544,7 +627,85 @@ describe('UiamService', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+          Authorization: 'ApiKey essu_api_key',
+        },
+        body: JSON.stringify(expectedRequestBody),
+        dispatcher: AGENT_MOCK,
+      });
+    });
+
+    it('withholds only the shared secret (not the mTLS certificate) when client authentication is not requested', async () => {
+      const mockResponse: GrantUiamApiKeyResponse = {
+        id: 'api-key-id',
+        key: 'essu_api_key_from_grant',
+        description: 'api-key-from-grant',
+      };
+      agentSpy.mockClear();
+      const mtlsUiamService = new UiamService(
+        loggingSystemMock.createLogger(),
+        ConfigSchema.validate(
+          {
+            uiam: {
+              enabled: true,
+              url: 'https://uiam.service',
+              sharedSecret: 'secret',
+              ssl: {
+                certificateAuthorities: '/some/ca/path',
+                certificate: '/path/to/cert.pem',
+                key: '/path/to/key.pem',
+              },
+            },
+          },
+          { serverless: true }
+        ).uiam,
+        { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
+      );
+
+      // The dispatcher created during construction always includes the mTLS client certificate.
+      expect(agentSpy).toHaveBeenCalledWith({
+        connect: {
+          ca: ['mocked file content for /some/ca/path'],
+          cert: 'mocked file content for /path/to/cert.pem',
+          key: 'mocked file content for /path/to/key.pem',
+          allowPartialTrustChain: true,
+          rejectUnauthorized: true,
+        },
+      });
+
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      await expect(
+        mtlsUiamService.grantApiKey(
+          new HTTPAuthorizationHeader('ApiKey', 'essu_api_key'),
+          {
+            name: 'api-key-from-grant',
+          },
+          { includeClientAuthentication: false }
+        )
+      ).resolves.toEqual(mockResponse);
+
+      const expectedRequestBody: GrantUiamApiKeyRequestBody = {
+        description: 'api-key-from-grant',
+        internal: true,
+        role_assignments: {
+          limit: {
+            access: ['application'],
+            resource: ['project'],
+          },
+        },
+      };
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/api-keys/_grant', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
           Authorization: 'ApiKey essu_api_key',
         },
         body: JSON.stringify(expectedRequestBody),
@@ -588,6 +749,7 @@ describe('UiamService', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
           Authorization: 'Bearer access-token',
         },
@@ -608,7 +770,7 @@ describe('UiamService', () => {
         uiamService.grantApiKey(new HTTPAuthorizationHeader('Bearer', 'access-token'), {
           name: 'test-key',
         })
-      ).rejects.toThrowError('Invalid request');
+      ).rejects.toThrow('Invalid request');
 
       const expectedRequestBody: GrantUiamApiKeyRequestBody = {
         description: 'test-key',
@@ -626,6 +788,7 @@ describe('UiamService', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
           Authorization: 'Bearer access-token',
         },
@@ -646,7 +809,7 @@ describe('UiamService', () => {
         uiamService.grantApiKey(new HTTPAuthorizationHeader('Bearer', 'access-token'), {
           name: 'test-key',
         })
-      ).rejects.toThrowError('Unknown error');
+      ).rejects.toThrow('Unknown error');
     });
 
     it('throws error if granting API key fails with 401 unauthorized status code', async () => {
@@ -661,7 +824,7 @@ describe('UiamService', () => {
         uiamService.grantApiKey(new HTTPAuthorizationHeader('Bearer', 'invalid-token'), {
           name: 'test-key',
         })
-      ).rejects.toThrowError('Unauthorized');
+      ).rejects.toThrow('Unauthorized');
     });
 
     it('throws error if granting API key fails with 403 forbidden status code', async () => {
@@ -676,7 +839,7 @@ describe('UiamService', () => {
         uiamService.grantApiKey(new HTTPAuthorizationHeader('Bearer', 'access-token'), {
           name: 'test-key',
         })
-      ).rejects.toThrowError('Forbidden');
+      ).rejects.toThrow('Forbidden');
     });
 
     it('throws error if granting API key fails with 500 server error status code', async () => {
@@ -691,7 +854,7 @@ describe('UiamService', () => {
         uiamService.grantApiKey(new HTTPAuthorizationHeader('Bearer', 'access-token'), {
           name: 'test-key',
         })
-      ).rejects.toThrowError('Internal Server Error');
+      ).rejects.toThrow('Internal Server Error');
     });
   });
 
@@ -711,6 +874,7 @@ describe('UiamService', () => {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
+            'User-Agent': 'Kibana/9.0.0',
             [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
             Authorization: 'ApiKey access-token',
           },
@@ -727,7 +891,7 @@ describe('UiamService', () => {
         json: async () => ({ error: { message: 'Bad request' } }),
       });
 
-      await expect(uiamService.revokeApiKey('test-key-id', 'access-token')).rejects.toThrowError(
+      await expect(uiamService.revokeApiKey('test-key-id', 'access-token')).rejects.toThrow(
         'Bad request'
       );
 
@@ -738,6 +902,7 @@ describe('UiamService', () => {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
+            'User-Agent': 'Kibana/9.0.0',
             [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
             Authorization: 'ApiKey access-token',
           },
@@ -779,6 +944,7 @@ describe('UiamService', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
         },
         body: JSON.stringify({
@@ -828,6 +994,7 @@ describe('UiamService', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
         },
         body: JSON.stringify({
@@ -854,10 +1021,10 @@ describe('UiamService', () => {
           },
           { serverless: true }
         ).uiam,
-        { kibanaServerURL: 'https://kibana.test' }
+        { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
       );
 
-      await expect(serviceWithoutUrl.convertApiKeys(['es-api-key'])).rejects.toThrowError(
+      await expect(serviceWithoutUrl.convertApiKeys(['es-api-key'])).rejects.toThrow(
         'Cannot convert API keys: Elasticsearch URL could not be resolved from cloud.id'
       );
 
@@ -872,7 +1039,7 @@ describe('UiamService', () => {
         json: async () => ({ error: { message: 'Must authenticate using mTLS' } }),
       });
 
-      await expect(uiamService.convertApiKeys(['es-api-key'])).rejects.toThrowError(
+      await expect(uiamService.convertApiKeys(['es-api-key'])).rejects.toThrow(
         'Must authenticate using mTLS'
       );
 
@@ -881,6 +1048,7 @@ describe('UiamService', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
         },
         body: JSON.stringify({
@@ -888,6 +1056,173 @@ describe('UiamService', () => {
         }),
         dispatcher: AGENT_MOCK,
       });
+    });
+  });
+
+  describe('#createServiceAccount', () => {
+    const body = {
+      organization_id: 'organization-id',
+      name: 'nightshift-relay',
+      role_assignments: { limit: { access: ['application'], resource: ['project'] } },
+      assumable_by: [
+        {
+          type: 'project-service-account' as const,
+          organization_id: 'organization-id',
+          project_type: 'security',
+          project_id: 'project-id',
+        },
+      ],
+    };
+
+    it('properly calls UIAM service to create a service account', async () => {
+      const mockResponse: ServiceAccount = {
+        id: 'service-account-id',
+        type: 'project',
+        name: 'nightshift-relay',
+        organization_id: 'organization-id',
+        role_assignments: body.role_assignments,
+        assumable_by: body.assumable_by,
+      };
+
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => mockResponse });
+
+      await expect(
+        uiamService.createServiceAccount(
+          new HTTPAuthorizationHeader('Bearer', 'access-token'),
+          body
+        )
+      ).resolves.toEqual(mockResponse);
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/service-accounts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+          Authorization: 'Bearer access-token',
+        },
+        body: JSON.stringify({
+          ...body,
+          type: 'project',
+        }),
+        dispatcher: AGENT_MOCK,
+      });
+    });
+
+    it.each([true, false])(
+      'authenticates API keys with includeClientAuthentication=%s',
+      async (includeClientAuthentication) => {
+        fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ id: 'service-account-id' }) });
+        await uiamService.createServiceAccount(
+          new HTTPAuthorizationHeader('ApiKey', 'essu_key'),
+          body,
+          { includeClientAuthentication }
+        );
+        expect(fetchSpy).toHaveBeenCalledWith(
+          expect.any(String),
+          expect.objectContaining({
+            headers: {
+              'Content-Type': 'application/json',
+              'User-Agent': 'Kibana/9.0.0',
+              Authorization: 'ApiKey essu_key',
+              ...(includeClientAuthentication
+                ? { [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret' }
+                : {}),
+            },
+          })
+        );
+      }
+    );
+
+    it('withholds only the shared secret (not the mTLS certificate) when client authentication is not requested', async () => {
+      agentSpy.mockClear();
+      const mtlsUiamService = new UiamService(
+        loggingSystemMock.createLogger(),
+        ConfigSchema.validate(
+          {
+            uiam: {
+              enabled: true,
+              url: 'https://uiam.service',
+              sharedSecret: 'secret',
+              ssl: {
+                certificateAuthorities: '/some/ca/path',
+                certificate: '/path/to/cert.pem',
+                key: '/path/to/key.pem',
+              },
+            },
+          },
+          { serverless: true }
+        ).uiam,
+        { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
+      );
+
+      // The dispatcher created during construction always includes the mTLS client certificate.
+      expect(agentSpy).toHaveBeenCalledWith({
+        connect: {
+          ca: ['mocked file content for /some/ca/path'],
+          cert: 'mocked file content for /path/to/cert.pem',
+          key: 'mocked file content for /path/to/key.pem',
+          allowPartialTrustChain: true,
+          rejectUnauthorized: true,
+        },
+      });
+
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ id: 'service-account-id' }) });
+      await mtlsUiamService.createServiceAccount(
+        new HTTPAuthorizationHeader('ApiKey', 'essu_key'),
+        body,
+        { includeClientAuthentication: false }
+      );
+
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/service-accounts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
+          Authorization: 'ApiKey essu_key',
+        },
+        body: JSON.stringify({
+          ...body,
+          type: 'project',
+        }),
+        dispatcher: AGENT_MOCK,
+      });
+    });
+
+    it('reproduces the UIAM status code and payload when creation fails', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 409,
+        headers: new Headers(),
+        json: async () => ({
+          error: {
+            code: 'SERVICE_ACCOUNT_LIMIT_REACHED',
+            type: 'conflict',
+            message: 'Project has reached its service account limit',
+          },
+        }),
+      });
+
+      await expect(
+        uiamService.createServiceAccount(
+          new HTTPAuthorizationHeader('Bearer', 'access-token'),
+          body
+        )
+      ).rejects.toMatchObject({
+        output: { statusCode: 409 },
+      });
+    });
+
+    it('logs and rethrows transport errors', async () => {
+      fetchSpy.mockRejectedValue(new Error('socket hang up'));
+
+      await expect(
+        uiamService.createServiceAccount(
+          new HTTPAuthorizationHeader('Bearer', 'access-token'),
+          body
+        )
+      ).rejects.toThrowError('socket hang up');
     });
   });
 
@@ -907,6 +1242,7 @@ describe('UiamService', () => {
       await expect(
         uiamService.createOAuthClient('access-token', {
           resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          project_id: 'test-project-id',
           client_name: 'Test Client',
         })
       ).resolves.toEqual(mockResponse);
@@ -916,11 +1252,13 @@ describe('UiamService', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
           Authorization: 'Bearer access-token',
         },
         body: JSON.stringify({
           resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          project_id: 'test-project-id',
           client_name: 'Test Client',
         }),
         dispatcher: AGENT_MOCK,
@@ -938,8 +1276,9 @@ describe('UiamService', () => {
       await expect(
         uiamService.createOAuthClient('access-token', {
           resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          project_id: 'test-project-id',
         })
-      ).rejects.toThrowError('Bad request');
+      ).rejects.toThrow('Bad request');
     });
 
     it('forwards redirect_uris, client_logo, and client_metadata verbatim to UIAM', async () => {
@@ -954,6 +1293,7 @@ describe('UiamService', () => {
 
       const body = {
         resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+        project_id: 'test-project-id',
         client_type: 'confidential' as const,
         client_metadata: { owner: 'admin' },
         client_logo: { media_type: 'image/png', data: 'abc' },
@@ -988,8 +1328,9 @@ describe('UiamService', () => {
       await expect(
         uiamService.createOAuthClient('access-token', {
           resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          project_id: 'test-project-id',
         })
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         '[INVALID_REDIRECT_URI/validation_error] Redirect URI must not contain a fragment (resource: redirect_uris[0])'
       );
     });
@@ -1010,6 +1351,7 @@ describe('UiamService', () => {
       expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/oauth/clients', {
         method: 'GET',
         headers: {
+          'User-Agent': 'Kibana/9.0.0',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
           Authorization: 'Bearer access-token',
         },
@@ -1031,6 +1373,30 @@ describe('UiamService', () => {
         {
           method: 'GET',
           headers: {
+            'User-Agent': 'Kibana/9.0.0',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'Bearer access-token',
+          },
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
+    it('includes project_id query parameter when provided', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({ clients: [] }),
+      });
+
+      await uiamService.listOAuthClients('access-token', undefined, 'my-project-id');
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients?project_id=my-project-id',
+        {
+          method: 'GET',
+          headers: {
+            'User-Agent': 'Kibana/9.0.0',
             [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
             Authorization: 'Bearer access-token',
           },
@@ -1047,7 +1413,7 @@ describe('UiamService', () => {
         json: async () => ({ error: { message: 'Forbidden' } }),
       });
 
-      await expect(uiamService.listOAuthClients('access-token')).rejects.toThrowError('Forbidden');
+      await expect(uiamService.listOAuthClients('access-token')).rejects.toThrow('Forbidden');
     });
   });
 
@@ -1078,6 +1444,7 @@ describe('UiamService', () => {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
+            'User-Agent': 'Kibana/9.0.0',
             [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
             Authorization: 'Bearer access-token',
           },
@@ -1099,7 +1466,7 @@ describe('UiamService', () => {
         uiamService.updateOAuthClient('access-token', 'missing-id', {
           client_metadata: {},
         })
-      ).rejects.toThrowError('Client not found');
+      ).rejects.toThrow('Client not found');
     });
 
     it('encodes reserved characters in the client id path segment', async () => {
@@ -1146,6 +1513,7 @@ describe('UiamService', () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'User-Agent': 'Kibana/9.0.0',
             [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
             Authorization: 'Bearer access-token',
           },
@@ -1163,7 +1531,7 @@ describe('UiamService', () => {
         json: async () => ({ error: { message: 'Already revoked' } }),
       });
 
-      await expect(uiamService.revokeOAuthClient('access-token', 'client-id')).rejects.toThrowError(
+      await expect(uiamService.revokeOAuthClient('access-token', 'client-id')).rejects.toThrow(
         'Already revoked'
       );
     });
@@ -1187,6 +1555,54 @@ describe('UiamService', () => {
     });
   });
 
+  describe('#deleteOAuthClient', () => {
+    it('properly calls UIAM service to delete an OAuth client', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, status: 204 });
+
+      await expect(
+        uiamService.deleteOAuthClient('access-token', 'client-id')
+      ).resolves.toBeUndefined();
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients/client-id',
+        {
+          method: 'DELETE',
+          headers: {
+            'User-Agent': 'Kibana/9.0.0',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'Bearer access-token',
+          },
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
+    it('throws error if deletion fails', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 404,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'OAuth client not found' } }),
+      });
+
+      await expect(uiamService.deleteOAuthClient('access-token', 'client-id')).rejects.toThrow(
+        'OAuth client not found'
+      );
+    });
+
+    it('encodes reserved characters in the client id path segment', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, status: 204 });
+
+      await uiamService.deleteOAuthClient('access-token', 'weird/id?x#y');
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients/weird%2Fid%3Fx%23y',
+        expect.objectContaining({ method: 'DELETE' })
+      );
+    });
+  });
+
   describe('#listOAuthConnections', () => {
     it('properly calls UIAM service to list OAuth connections', async () => {
       const mockResponse = { connections: [] };
@@ -1202,6 +1618,7 @@ describe('UiamService', () => {
       expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/oauth/connections', {
         method: 'GET',
         headers: {
+          'User-Agent': 'Kibana/9.0.0',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
           Authorization: 'Bearer access-token',
         },
@@ -1215,14 +1632,38 @@ describe('UiamService', () => {
         json: async () => ({ connections: [] }),
       });
 
-      await uiamService.listOAuthConnections('access-token', 'cid', 'conn-id');
+      await uiamService.listOAuthConnections('access-token', 'cid', 'conn-id', 'my-project-id');
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith(
-        'https://uiam.service/uiam/api/v1/oauth/connections?client_id=cid&connection_id=conn-id',
+        'https://uiam.service/uiam/api/v1/oauth/connections?client_id=cid&connection_id=conn-id&project_id=my-project-id',
         {
           method: 'GET',
           headers: {
+            'User-Agent': 'Kibana/9.0.0',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'Bearer access-token',
+          },
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
+    it('includes project_id query parameter when provided', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({ connections: [] }),
+      });
+
+      await uiamService.listOAuthConnections('access-token', undefined, undefined, 'my-project-id');
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/connections?project_id=my-project-id',
+        {
+          method: 'GET',
+          headers: {
+            'User-Agent': 'Kibana/9.0.0',
             [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
             Authorization: 'Bearer access-token',
           },
@@ -1239,7 +1680,7 @@ describe('UiamService', () => {
         json: async () => ({ error: { message: 'Internal Server Error' } }),
       });
 
-      await expect(uiamService.listOAuthConnections('access-token')).rejects.toThrowError(
+      await expect(uiamService.listOAuthConnections('access-token')).rejects.toThrow(
         'Internal Server Error'
       );
     });
@@ -1269,6 +1710,7 @@ describe('UiamService', () => {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
+            'User-Agent': 'Kibana/9.0.0',
             [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
             Authorization: 'Bearer access-token',
           },
@@ -1290,7 +1732,7 @@ describe('UiamService', () => {
         uiamService.updateOAuthConnection('access-token', 'client-id', 'missing', {
           name: 'x',
         })
-      ).rejects.toThrowError('Connection not found');
+      ).rejects.toThrow('Connection not found');
     });
 
     it('encodes reserved characters in both path segments', async () => {
@@ -1340,6 +1782,7 @@ describe('UiamService', () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'User-Agent': 'Kibana/9.0.0',
             [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
             Authorization: 'Bearer access-token',
           },
@@ -1359,7 +1802,7 @@ describe('UiamService', () => {
 
       await expect(
         uiamService.revokeOAuthConnection('access-token', 'client-id', 'conn-id')
-      ).rejects.toThrowError('Connection not found');
+      ).rejects.toThrow('Connection not found');
     });
 
     it('encodes reserved characters in both path segments', async () => {
@@ -1378,6 +1821,172 @@ describe('UiamService', () => {
       expect(fetchSpy).toHaveBeenCalledWith(
         'https://uiam.service/uiam/api/v1/oauth/clients/client%2Fid%23y/connections/conn%2Fid%3Fx/_revoke',
         expect.objectContaining({ method: 'POST' })
+      );
+    });
+  });
+
+  describe('#deleteOAuthConnection', () => {
+    it('properly calls UIAM service to delete an OAuth connection', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, status: 204 });
+
+      await expect(
+        uiamService.deleteOAuthConnection('access-token', 'client-id', 'conn-id')
+      ).resolves.toBeUndefined();
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients/client-id/connections/conn-id',
+        {
+          method: 'DELETE',
+          headers: {
+            'User-Agent': 'Kibana/9.0.0',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'Bearer access-token',
+          },
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
+    it('throws error if deletion fails', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 404,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'Connection not found' } }),
+      });
+
+      await expect(
+        uiamService.deleteOAuthConnection('access-token', 'client-id', 'conn-id')
+      ).rejects.toThrow('Connection not found');
+    });
+
+    it('encodes reserved characters in both path segments', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, status: 204 });
+
+      await uiamService.deleteOAuthConnection('access-token', 'client/id#y', 'conn/id?x');
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients/client%2Fid%23y/connections/conn%2Fid%3Fx',
+        expect.objectContaining({ method: 'DELETE' })
+      );
+    });
+  });
+
+  describe('#resolveUsers', () => {
+    it('returns an empty map without calling UIAM when there are no user ids', async () => {
+      await expect(uiamService.resolveUsers('access-token', [])).resolves.toEqual({ users: {} });
+
+      expect(fetchSpy).not.toHaveBeenCalled();
+    });
+
+    it('resolves a single user id', async () => {
+      const mockResponse = {
+        users: {
+          'user-1': { email: 'a@example.com', first_name: 'Ada', last_name: 'Lovelace' },
+        },
+      };
+
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => mockResponse });
+
+      await expect(uiamService.resolveUsers('access-token', ['user-1'])).resolves.toEqual(
+        mockResponse
+      );
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/users?user_id=user-1',
+        {
+          method: 'GET',
+          headers: {
+            'User-Agent': 'Kibana/9.0.0',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'Bearer access-token',
+          },
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
+    it('comma-joins and deduplicates user ids', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ users: {} }) });
+
+      await uiamService.resolveUsers('access-token', ['user-1', 'user-2', 'user-1']);
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/users?user_id=user-1%2Cuser-2',
+        expect.objectContaining({ method: 'GET' })
+      );
+    });
+
+    it('splits large lists into batches and merges the results', async () => {
+      const userIds = Array.from({ length: 250 }, (_, i) => `user-${i}`);
+
+      fetchSpy
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ users: { 'user-0': { first_name: 'First' } } }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ users: { 'user-100': { first_name: 'Second' } } }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ users: { 'user-200': { first_name: 'Third' } } }),
+        });
+
+      await expect(uiamService.resolveUsers('access-token', userIds)).resolves.toEqual({
+        users: {
+          'user-0': { first_name: 'First' },
+          'user-100': { first_name: 'Second' },
+          'user-200': { first_name: 'Third' },
+        },
+      });
+
+      expect(fetchSpy).toHaveBeenCalledTimes(3);
+    });
+
+    it('returns partial results when some batches fail', async () => {
+      const userIds = Array.from({ length: 250 }, (_, i) => `user-${i}`);
+
+      fetchSpy
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ users: { 'user-0': { first_name: 'First' } } }),
+        })
+        .mockResolvedValueOnce({
+          ok: false,
+          status: 500,
+          headers: new Headers(),
+          json: async () => ({ error: { message: 'Internal Server Error' } }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ users: { 'user-200': { first_name: 'Third' } } }),
+        });
+
+      await expect(uiamService.resolveUsers('access-token', userIds)).resolves.toEqual({
+        users: {
+          'user-0': { first_name: 'First' },
+          'user-200': { first_name: 'Third' },
+        },
+      });
+
+      expect(fetchSpy).toHaveBeenCalledTimes(3);
+    });
+
+    it('throws error if resolution fails', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 500,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'Internal Server Error' } }),
+      });
+
+      await expect(uiamService.resolveUsers('access-token', ['user-1'])).rejects.toThrow(
+        'Internal Server Error'
       );
     });
   });

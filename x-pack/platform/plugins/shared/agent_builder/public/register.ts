@@ -76,7 +76,7 @@ export const registerApp = ({
     category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
     title: AGENT_BUILDER_SHORT_TITLE,
     euiIconType: 'logoElasticsearch',
-    visibleIn: ['sideNav', 'globalSearch'],
+    visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
     keywords: ['agent builder', 'ai agent', 'chat agent'],
     updater$: appUpdater$,
     deepLinks: buildAgentBuilderDeepLinks(false),

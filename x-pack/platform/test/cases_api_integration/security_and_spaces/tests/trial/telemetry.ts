@@ -6,17 +6,28 @@
  */
 
 import expect from 'expect';
-import { OBSERVABLE_TYPE_IPV4 } from '@kbn/cases-plugin/common/constants';
+import { stringify as yamlStringify } from 'yaml';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
+import { AttachmentType } from '@kbn/cases-plugin/common';
+import {
+  CASES_URL,
+  CASE_TELEMETRY_SAVED_OBJECT,
+  CASE_TEMPLATE_SAVED_OBJECT,
+  INTERNAL_FIELD_DEFINITIONS_URL,
+  OBSERVABLE_TYPE_IPV4,
+} from '@kbn/cases-plugin/common/constants';
 import type { CasesTelemetry } from '@kbn/cases-plugin/server/telemetry/types';
 import { getPostCaseRequest, postCommentAlertReq } from '../../../common/lib/mock';
 import {
   deleteAllCaseItems,
+  deleteFieldDefinitions,
   createCase,
+  getSpaceUrlPrefix,
   getTelemetry,
   runTelemetryTask,
   createComment,
   bulkCreateAttachments,
-  bulkAddObservables,
+  addObservable,
 } from '../../../common/lib/api';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { superUser } from '../../../common/lib/authentication/users';
@@ -122,64 +133,89 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return the correct telemetry for cases with observables', async () => {
+      // Index synthetic alert docs with ECS source.ip fields.  The server-side
+      // extraction path fetches these via mget so we can control exactly which
+      // observables are produced without needing real detection-engine alerts.
+      const alertIndex = 'synthetic-cases-telemetry-alerts';
+
+      // First case: one alert whose source.ip produces 1 auto-extracted observable
+      await es.index({
+        index: alertIndex,
+        id: 'alert-telemetry-1',
+        refresh: 'true',
+        document: { 'source.ip': '127.0.0.2' },
+      });
+
+      // Second case: 50 alerts each with a distinct source.ip so they produce
+      // 50 distinct observables — hitting MAX_OBSERVABLES_PER_CASE exactly.
+      const bulkOps: Array<Record<string, unknown>> = [];
+      for (let i = 0; i < 50; i++) {
+        bulkOps.push({ index: { _index: alertIndex, _id: `alert-telemetry-2-${i}` } });
+        bulkOps.push({ 'source.ip': `10.0.0.${i}` });
+      }
+      await es.bulk({ operations: bulkOps, refresh: 'true' });
+
+      const caseSettings = { syncAlerts: false, extractObservables: true };
+
       const firstCase = await createCase(
         supertest,
-        getPostCaseRequest({ owner: 'securitySolution' }),
+        getPostCaseRequest({ owner: 'securitySolution', settings: caseSettings }),
         200,
-        {
-          user: superUser,
-          space: 'space1',
-        }
+        { user: superUser, space: 'space1' }
       );
 
       const secondCase = await createCase(
         supertest,
-        getPostCaseRequest({ owner: 'securitySolution' }),
+        getPostCaseRequest({ owner: 'securitySolution', settings: caseSettings }),
         200,
-        {
-          user: superUser,
-          space: 'space2',
-        }
+        { user: superUser, space: 'space2' }
       );
 
-      const firstObservables = [
-        {
-          typeKey: OBSERVABLE_TYPE_IPV4.key,
-          value: '127.0.0.1',
-          description: 'Manually added observable',
-        },
-        {
-          typeKey: OBSERVABLE_TYPE_IPV4.key,
-          value: '127.0.0.2',
-          description: 'Auto extract observables',
-        },
-      ];
-
-      const secondObservables = [];
-      for (let i = 0; i < 100; i++) {
-        secondObservables.push({
-          typeKey: OBSERVABLE_TYPE_IPV4.key,
-          value: `127.0.0.${i}`,
-          description: 'Auto extract observables',
-        });
-      }
-
-      await bulkAddObservables({
+      // 1 manual observable on the first case
+      await addObservable({
         supertest,
+        caseId: firstCase.id,
         params: {
-          caseId: firstCase.id,
-          observables: firstObservables,
+          observable: {
+            typeKey: OBSERVABLE_TYPE_IPV4.key,
+            value: '127.0.0.1',
+            description: 'Manually added observable',
+          },
         },
+        auth: { user: superUser, space: 'space1' },
+      });
+
+      // 1 auto-extracted observable: attach the first alert to the first case.
+      // extractAndAddObservables fires on bulkCreate and pulls source.ip from the doc.
+      await bulkCreateAttachments({
+        supertest,
+        caseId: firstCase.id,
+        params: [
+          {
+            type: AttachmentType.alert,
+            alertId: 'alert-telemetry-1',
+            index: alertIndex,
+            rule: { id: 'rule-1', name: 'Rule 1' },
+            owner: 'securitySolution',
+          },
+        ],
         auth: { user: superUser, space: 'space1' },
         expectedHttpCode: 200,
       });
 
-      await bulkAddObservables({
+      // 50 auto-extracted observables: one attachment per alert on the second case.
+      // This reaches MAX_OBSERVABLES_PER_CASE (50) making totalWithMaxObservables = 1.
+      const secondCaseAttachments = Array.from({ length: 50 }, (_, i) => ({
+        type: AttachmentType.alert as const,
+        alertId: `alert-telemetry-2-${i}`,
+        index: alertIndex,
+        rule: { id: 'rule-2', name: 'Rule 2' },
+        owner: 'securitySolution',
+      }));
+      await bulkCreateAttachments({
         supertest,
-        params: {
-          caseId: secondCase.id,
-          observables: secondObservables,
-        },
+        caseId: secondCase.id,
+        params: secondCaseAttachments,
         auth: { user: superUser, space: 'space2' },
         expectedHttpCode: 200,
       });
@@ -193,11 +229,340 @@ export default ({ getService }: FtrProviderContext): void => {
         const securityCasesTelemetry = casesTelemetry.cases.sec;
 
         for (const telemetry of [allCasesTelemetry, securityCasesTelemetry]) {
+          // 1 manual (addObservable call)
           expect(telemetry.observables.manual.default).toBe(1);
+          // 1 from first case + 50 from second case = 51 auto-extracted
           expect(telemetry.observables.auto.default).toBe(51);
           expect(telemetry.observables.total).toBe(52);
+          // second case has exactly MAX_OBSERVABLES_PER_CASE observables
           expect(telemetry.totalWithMaxObservables).toBe(1);
         }
+      });
+
+      // Clean up synthetic index
+      await es.indices.delete({ index: alertIndex, ignore_unavailable: true });
+    });
+
+    describe('templates', () => {
+      const TEMPLATES_URL = `${CASES_URL}/templates`;
+      const OWNER = 'securitySolutionFixture';
+
+      // Every field is inline, never a `$ref`. Only then do the declared field count and the
+      // resolved field definitions share a denominator, so the test may assert both.
+      const TEXT = { control: 'INPUT_TEXT', type: 'keyword' };
+      const TOGGLE = { control: 'TOGGLE', type: 'boolean' };
+      const DATE = { control: 'DATE_PICKER', type: 'date' };
+      const NUMBER = { control: 'INPUT_NUMBER', type: 'long' };
+
+      type FieldKind = typeof TEXT;
+
+      const field = (name: string, kind: FieldKind) => ({ name, label: name, ...kind });
+
+      const buildBody = (
+        name: string,
+        fields: Array<ReturnType<typeof field>>,
+        overrides: Record<string, unknown> = {}
+      ) => ({
+        name,
+        owner: OWNER,
+        definition: yamlStringify({ name: `${name} case title`, fields }),
+        ...overrides,
+      });
+
+      const request = (method: 'post' | 'put' | 'delete', path: string) =>
+        supertest[method](path).set('kbn-xsrf', 'true').set('x-elastic-internal-origin', 'foo');
+
+      /**
+       * Drops the stored snapshot, which `deleteAllCaseItems` leaves behind and the collector
+       * serves verbatim. Without this the retry below can pass on the PREVIOUS run's snapshot
+       * before the task overwrites it, so the assertions would hold even against a broken
+       * query. Removing it first means the only payload that can satisfy them is a fresh one.
+       */
+      const deleteTelemetrySnapshot = async () => {
+        await es.deleteByQuery({
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          q: `type:${CASE_TELEMETRY_SAVED_OBJECT}`,
+          wait_for_completion: true,
+          refresh: true,
+          conflicts: 'proceed',
+        });
+      };
+
+      /**
+       * Removes `isEnabled` from a template document. No API path can produce this shape,
+       * because create and update both write `isEnabled: input.isEnabled ?? true` — hence the
+       * direct write. The shape is real all the same: the attribute is optional in every model
+       * version, nothing backfills it, and the read path treats only an explicit `false` as
+       * disabled, so a deployment can hold such documents.
+       *
+       * This is the only place that can prove the `missing: true` clause on the inventory's
+       * boolean terms aggregation buckets an absent flag as enabled. A mocked client cannot,
+       * and the clause has no precedent in this repository.
+       *
+       * `templateId` is the template's stable identity across versions. The raw document nests
+       * attributes directly under the saved-object type, with no `attributes` level, which is
+       * what the saved-object layer rewrites its own `.attributes.` KQL paths into.
+       */
+      const stripIsEnabled = async (templateId: string) => {
+        const { updated } = await es.updateByQuery({
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          query: {
+            bool: {
+              filter: [
+                { term: { type: CASE_TEMPLATE_SAVED_OBJECT } },
+                { term: { [`${CASE_TEMPLATE_SAVED_OBJECT}.templateId`]: templateId } },
+              ],
+            },
+          },
+          script: {
+            source: `ctx._source['${CASE_TEMPLATE_SAVED_OBJECT}'].remove('isEnabled')`,
+          },
+          refresh: true,
+          conflicts: 'proceed',
+        });
+
+        // A wrong field path would match nothing and update nothing, leaving the assertion
+        // this exists to support passing for the wrong reason. Fail loudly instead.
+        expect(updated).toBe(1);
+      };
+
+      const createTemplate = async (
+        name: string,
+        fields: Array<ReturnType<typeof field>>,
+        overrides: Record<string, unknown> = {}
+      ) => {
+        const { body } = await request('post', TEMPLATES_URL)
+          .send(buildBody(name, fields, overrides))
+          .expect(200);
+
+        return body;
+      };
+
+      const updateTemplate = async (
+        templateId: string,
+        name: string,
+        fields: Array<ReturnType<typeof field>>
+      ) => {
+        const { body } = await request('put', `${TEMPLATES_URL}/${templateId}`)
+          .send(buildBody(name, fields))
+          .expect(200);
+
+        return body;
+      };
+
+      // Every solution scope stays empty because the fixture owner is not one of the three
+      // real owners. Asserted rather than skipped, so a regression that folded an unknown
+      // owner into a solution scope would fail here.
+      const zeroedScope = {
+        total: 0,
+        totalEnabled: 0,
+        totalDisabled: 0,
+        totalSoftDeleted: 0,
+        totalMigratedFromV1: 0,
+        versionPercentiles: { p50: 0, p90: 0, p99: 0 },
+        fieldCount: { total: 0, max: 0, average: 0 },
+        fieldDefinitions: { totalsByControl: {}, totalsByType: {} },
+        cases: {
+          withTemplate: { total: 0, daily: 0, weekly: 0, monthly: 0 },
+          withoutTemplate: { total: 0, daily: 0, weekly: 0, monthly: 0 },
+        },
+      };
+
+      it('should report the templates snapshot', async () => {
+        /**
+         * Edited twice, so three version documents exist. Each version declares a different
+         * field set on purpose: if the `isLatest` scoping regressed, the superseded versions
+         * would move the field numbers as well as the total, rather than the total alone.
+         */
+        const edited = await createTemplate('Edited Template', [field('a1', TEXT)]);
+        await updateTemplate(edited.templateId, 'Edited Template', [
+          field('a1', TEXT),
+          field('a2', TOGGLE),
+          field('a3', DATE),
+          field('a4', NUMBER),
+        ]);
+        const latest = await updateTemplate(edited.templateId, 'Edited Template', [
+          field('a1', TEXT),
+          field('a2', TOGGLE),
+        ]);
+
+        // Guards the version-percentile expectation below against a change in how an edit
+        // numbers versions.
+        expect(latest.templateVersion).toBe(3);
+
+        const simple = await createTemplate('Simple Template', [field('b1', TEXT)]);
+
+        /**
+         * Left with no `isEnabled` at all. It must still count as enabled, so the numbers below
+         * are unchanged by this — which is the point: if the aggregation stopped bucketing an
+         * absent flag as enabled, `totalEnabled` would drop to 1 and the two counts would no
+         * longer sum to the total.
+         */
+        await stripIsEnabled(simple.templateId);
+
+        await createTemplate(
+          'Disabled Template',
+          [field('d1', TEXT), field('d2', DATE), field('d3', NUMBER)],
+          { isEnabled: false }
+        );
+
+        /**
+         * Edited once before the delete, so it has two version documents and a soft delete
+         * stamps both. It must be counted as ONE deleted template, and must leave the
+         * inventory entirely — its text field must not reach the field totals.
+         */
+        const doomed = await createTemplate('Doomed Template', [field('c1', TEXT)]);
+        await updateTemplate(doomed.templateId, 'Doomed Template', [
+          field('c1', TEXT),
+          field('c2', TOGGLE),
+        ]);
+        await request('delete', `${TEMPLATES_URL}/${doomed.templateId}`).expect(204);
+
+        await createCase(
+          supertest,
+          getPostCaseRequest({ tags: [], template: { id: edited.templateId } })
+        );
+        await createCase(
+          supertest,
+          getPostCaseRequest({ tags: [], template: { id: edited.templateId } })
+        );
+        await createCase(supertest, getPostCaseRequest({ tags: [] }));
+
+        await deleteTelemetrySnapshot();
+        await runTelemetryTask(supertest);
+
+        await retry.try(async () => {
+          const res = await getTelemetry(supertest);
+          const casesTelemetry = getCasesTelemetry(res);
+
+          /**
+           * Checked before the deep assertion below. Collection omits this key when the
+           * templates area fails, and `CasesTelemetry` declares it required, so reading
+           * through it would fail with an opaque `TypeError` instead of a readable diff.
+           */
+          expect(casesTelemetry.templates).toBeDefined();
+
+          /**
+           * Asserted on its own, ahead of the payload comparison, because it is the one figure
+           * a mocked client cannot establish. One of the three live templates carries no
+           * `isEnabled`, so the counts only sum to the total while the aggregation buckets an
+           * absent flag as enabled. On a regression this reports `2 !== 3` rather than burying
+           * the cause in a whole-payload diff.
+           */
+          const { total, totalEnabled, totalDisabled } = casesTelemetry.templates.all;
+          expect(totalEnabled + totalDisabled).toBe(total);
+
+          expect(casesTelemetry.templates).toEqual({
+            all: {
+              // The edited template counts once despite its three versions, and the
+              // soft-deleted one does not count at all.
+              total: 3,
+              totalEnabled: 2,
+              totalDisabled: 1,
+              // One template, not one per version document.
+              totalSoftDeleted: 1,
+              totalMigratedFromV1: 0,
+              // Two templates are on version 1, and the edited template is on version 3.
+              versionPercentiles: { p50: 1, p90: 3, p99: 3 },
+              // 2 + 1 + 3 declared fields across the live templates only.
+              fieldCount: { total: 6, max: 3, average: 2 },
+              // Read from the indexed field definitions, not from a re-parse of the YAML.
+              fieldDefinitions: {
+                totalsByControl: { INPUT_TEXT: 3, TOGGLE: 1, DATE_PICKER: 1, INPUT_NUMBER: 1 },
+                totalsByType: { keyword: 3, boolean: 1, date: 1, long: 1 },
+              },
+              cases: {
+                withTemplate: { total: 2, daily: 2, weekly: 2, monthly: 2 },
+                withoutTemplate: { total: 1, daily: 1, weekly: 1, monthly: 1 },
+              },
+            },
+            sec: zeroedScope,
+            obs: zeroedScope,
+            main: zeroedScope,
+          });
+        });
+      });
+    });
+
+    describe('field library', () => {
+      const createFieldDefinition = async (
+        name: string,
+        owner: string,
+        overrides: Record<string, unknown> = {},
+        space?: string
+      ) => {
+        await supertest
+          .post(`${getSpaceUrlPrefix(space)}${INTERNAL_FIELD_DEFINITIONS_URL}`)
+          .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'foo')
+          .send({
+            name,
+            owner,
+            definition: `name: ${name}\ncontrol: INPUT_TEXT\ntype: keyword\n`,
+            ...overrides,
+          })
+          .expect(200);
+      };
+
+      /**
+       * Drops the stored snapshot, which `deleteAllCaseItems` leaves behind and the collector
+       * serves verbatim. Without this the retry below can pass on the PREVIOUS run's snapshot
+       * before the task overwrites it, so the assertions would hold even against a broken query.
+       */
+      const deleteTelemetrySnapshot = async () => {
+        await es.deleteByQuery({
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          q: `type:${CASE_TELEMETRY_SAVED_OBJECT}`,
+          wait_for_completion: true,
+          refresh: true,
+          conflicts: 'proceed',
+        });
+      };
+
+      const zeroedScope = { total: 0, totalGlobal: 0, totalReusable: 0 };
+
+      it('should report the field library snapshot', async () => {
+        // The counts below are absolute, so they only stay diagnostic from an empty start. A
+        // single leftover reusable definition would reproduce them even with a broken query.
+        await deleteFieldDefinitions(es);
+
+        await createFieldDefinition('sec_global', 'securitySolution', { isGlobal: true });
+        await createFieldDefinition('sec_reusable', 'securitySolution', { isGlobal: false });
+        // No `isGlobal` key at all, which the create route allows and nothing backfills.
+        await createFieldDefinition('sec_unset', 'securitySolution');
+
+        // Not one of the three real owners, so it must reach `all` and no solution scope.
+        await createFieldDefinition('fixture_global', 'securitySolutionFixture', {
+          isGlobal: true,
+        });
+
+        // The type is `multiple-isolated`, so a definition outside the default space is only
+        // counted while the query keeps searching every namespace.
+        await createFieldDefinition(
+          'space1_global',
+          'securitySolution',
+          { isGlobal: true },
+          'space1'
+        );
+
+        await deleteTelemetrySnapshot();
+        await runTelemetryTask(supertest);
+
+        await retry.try(async () => {
+          const res = await getTelemetry(supertest);
+          const casesTelemetry = getCasesTelemetry(res);
+
+          expect(casesTelemetry.fieldLibrary).toBeDefined();
+
+          expect(casesTelemetry.fieldLibrary.sec.totalReusable).toBe(2);
+
+          expect(casesTelemetry.fieldLibrary).toEqual({
+            all: { total: 5, totalGlobal: 3, totalReusable: 2 },
+            sec: { total: 4, totalGlobal: 2, totalReusable: 2 },
+            obs: zeroedScope,
+            main: zeroedScope,
+          });
+        });
       });
     });
   });

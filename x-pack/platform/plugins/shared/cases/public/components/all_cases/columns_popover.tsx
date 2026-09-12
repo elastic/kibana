@@ -94,6 +94,7 @@ export const ColumnsPopover: React.FC<Props> = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.COLUMN_SELECTION_POPOVER_ARIA_LABEL}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="s"

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { PolicyMatcher } from '@kbn/alerting-v2-schemas';
+
 export interface QuickFiltersProps {
-  matcher: string;
-  onChange: (matcher: string) => void;
+  matcher: PolicyMatcher | null;
+  onChange: (matcher: PolicyMatcher | null) => void;
 }
 
 export const POPOVER_PANEL_STYLE = { maxWidth: 360 };

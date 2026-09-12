@@ -257,7 +257,7 @@ const ConnectorAddModal = ({
           <EuiFlexGroup gutterSize="m" alignItems="center">
             {actionTypeModel && actionTypeModel.iconClass ? (
               <EuiFlexItem grow={false}>
-                <EuiIcon type={actionTypeModel.iconClass} size="xl" />
+                <EuiIcon type={actionTypeModel.iconClass} size="xl" aria-hidden={true} />
               </EuiFlexItem>
             ) : null}
             <EuiFlexItem grow={false}>
@@ -302,7 +302,6 @@ const ConnectorAddModal = ({
                   <EuiButtonGroup
                     isFullWidth
                     buttonSize="m"
-                    color="primary"
                     legend=""
                     options={groupActionButtons}
                     idSelected={actionType.id}

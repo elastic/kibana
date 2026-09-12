@@ -113,30 +113,32 @@ describe('useAddToExistingCase', () => {
 
     expect(attachments).toHaveLength(4);
     expect(attachments[0]).toEqual({
-      comment: 'Comment 1',
-      type: 'user',
+      type: 'comment',
+      data: {
+        content: 'Comment 1',
+      },
     });
     expect(attachments[1]).toEqual({
-      comment: 'Comment 2',
-      type: 'user',
+      type: 'comment',
+      data: {
+        content: 'Comment 2',
+      },
     });
     expect(attachments[2]).toEqual({
-      alertId: 'replacement1', // <-- case attachment uses the replacement values
-      index: '',
-      rule: {
-        id: null,
-        name: null,
+      type: 'security.alert',
+      attachmentId: 'replacement1',
+      metadata: {
+        index: '',
+        rule: { id: null, name: null },
       },
-      type: 'alert',
     });
     expect(attachments[3]).toEqual({
-      alertId: 'replacement2',
-      index: '',
-      rule: {
-        id: null,
-        name: null,
+      type: 'security.alert',
+      attachmentId: 'replacement2',
+      metadata: {
+        index: '',
+        rule: { id: null, name: null },
       },
-      type: 'alert',
     });
   });
 });

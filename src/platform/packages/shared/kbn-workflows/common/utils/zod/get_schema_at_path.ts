@@ -8,6 +8,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { unwrapSchema } from './unwrap_schema';
 
 export function parsePath(path: string) {
   const segments = path
@@ -29,7 +30,6 @@ interface GetSchemaAtPathResult {
  * @param options.partial - If true, return the schema for the last valid path segment.
  * @returns The schema at the given path or null if the path is invalid.
  */
-// eslint-disable-next-line complexity
 export function getSchemaAtPath(
   schema: z.ZodType,
   path: string,
@@ -44,18 +44,12 @@ export function getSchemaAtPath(
     let current: z.ZodType = schema;
 
     for (const [index, segment] of segments.entries()) {
-      if (current instanceof z.ZodOptional) {
-        current = current.unwrap() as z.ZodType;
-      }
-      if (current instanceof z.ZodDefault) {
-        current = current.unwrap() as z.ZodType;
-      }
-      if (current instanceof z.ZodLazy) {
-        current = current.unwrap() as z.ZodType;
-      }
+      current = unwrapSchema(current);
       if (current instanceof z.ZodObject) {
         const shape = current.shape;
-        if (!(segment in shape)) {
+        // `in` walks the prototype chain, so `__proto__` / `constructor` / `toString`
+        // would resolve to an Object.prototype member instead of a zod schema.
+        if (!Object.hasOwn(shape, segment)) {
           return partial
             ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
             : { schema: null, scopedToPath: null };

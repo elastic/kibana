@@ -120,6 +120,7 @@ function FieldListItemComponent(
   const indent = treeDepth * CHILD_FIELD_INDENT_SIZE - substractIndentAmount;
 
   const isSemanticText = source.type === 'semantic_text';
+  const isSemantic = source.type === 'semantic';
 
   const hasDottedLine = isMultiField
     ? isLastItem
@@ -242,12 +243,8 @@ function FieldListItemComponent(
           >
             {(hasChildFields || hasMultiFields) && (
               <EuiFlexItem grow={false} css={styles.toggle}>
-                <EuiButtonIcon
-                  color="text"
-                  onClick={toggleExpand}
-                  iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
-                  data-test-subj="toggleExpandButton"
-                  aria-label={
+                <EuiToolTip
+                  content={
                     isExpanded
                       ? i18n.translate('xpack.idxMgmt.mappingsEditor.collapseFieldButtonLabel', {
                           defaultMessage: 'Collapse field {name}',
@@ -262,7 +259,30 @@ function FieldListItemComponent(
                           },
                         })
                   }
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    color="text"
+                    onClick={toggleExpand}
+                    iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+                    data-test-subj="toggleExpandButton"
+                    aria-label={
+                      isExpanded
+                        ? i18n.translate('xpack.idxMgmt.mappingsEditor.collapseFieldButtonLabel', {
+                            defaultMessage: 'Collapse field {name}',
+                            values: {
+                              name: source.name,
+                            },
+                          })
+                        : i18n.translate('xpack.idxMgmt.mappingsEditor.expandFieldButtonLabel', {
+                            defaultMessage: 'Expand field {name}',
+                            values: {
+                              name: source.name,
+                            },
+                          })
+                    }
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             )}
 
@@ -302,7 +322,7 @@ function FieldListItemComponent(
                 </EuiBadge>
               </EuiFlexItem>
 
-              {isSemanticText && source.inference_id ? (
+              {(isSemanticText || isSemantic) && source.inference_id ? (
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="hollow">{source.inference_id as string}</EuiBadge>
                 </EuiFlexItem>

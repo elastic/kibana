@@ -9,6 +9,7 @@
 
 import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
   EuiContextMenuPanel,
@@ -102,6 +103,9 @@ export class TableSelector extends Component<TableSelectorProps, TableSelectorSt
               panelPaddingSize="none"
               anchorPosition="downLeft"
               repositionOnScroll
+              aria-label={i18n.translate('data.inspector.table.tableChooserPopover.ariaLabel', {
+                defaultMessage: 'Select table',
+              })}
             >
               <EuiContextMenuPanel
                 items={this.props.tables.map(this.renderTableDropdownItem)}

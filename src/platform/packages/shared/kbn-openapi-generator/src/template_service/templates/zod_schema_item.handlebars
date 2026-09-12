@@ -90,7 +90,7 @@ z.unknown()
       * {{{description}}}
       */
       {{/if}}
-      '{{@key}}':{{~> zod_schema_item requiredBool=(includes ../required @key)~}},
+      '{{@key}}':{{~> zod_schema_item requiredBool=(includes ../required @key)~}}{{#if description}}.describe({{{toJSON description}}}){{/if}},
     {{/each}}
   })
   {{~#if (eq additionalProperties false)}}.strict(){{/if~}}

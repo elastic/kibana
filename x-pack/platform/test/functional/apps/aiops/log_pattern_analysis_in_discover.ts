@@ -14,7 +14,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const ml = getService('ml');
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
-  const totalDocCount = 14005;
+  const totalDocCount = 14004;
 
   async function retrySwitchTab(tabIndex: number, seconds: number) {
     await retry.tryForTime(seconds * 1000, async () => {

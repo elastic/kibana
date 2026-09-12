@@ -1,0 +1,21 @@
+version: "1"
+name: Attack Discovery
+description: Watch Floor Attack Discovery worker stub.
+enabled: false
+tags:
+  - watch
+  - watch-floor
+triggers:
+  - type: scheduled
+    with:
+      every: "__WORKER_SCHEDULE_INTERVAL__"
+consts:
+  worker_settings:
+    settingsVersion: __WORKER_SETTINGS_VERSION__
+    autonomy: "__WORKER_AUTONOMY_LEVEL__"
+    scheduleInterval: "__WORKER_SCHEDULE_INTERVAL__"
+steps:
+  - name: stub
+    type: console
+    with:
+      message: "Attack Discovery worker stub"

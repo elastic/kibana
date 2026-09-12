@@ -6,6 +6,21 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "grant_type": {
+        "__one_of": [
+          "password",
+          "client_credentials",
+          "_kerberos",
+          "refresh_token"
+        ]
+      },
+      "scope": "",
+      "password": "",
+      "kerberos_ticket": "",
+      "refresh_token": "",
+      "username": ""
+    },
     "methods": [
       "POST"
     ],

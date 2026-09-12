@@ -59,9 +59,11 @@ export interface DatatableColumnConfig {
   sortingDirection: LensGridDirection;
 }
 
-export type DatatableColumnArgs = Omit<ColumnState, 'palette' | 'colorMapping'> & {
+export type DatatableColumnArgs = Omit<ColumnState, 'palette' | 'colorMapping' | 'fillStyle'> & {
   palette?: PaletteOutput<CustomPaletteState>;
   colorMapping?: string;
+  /** JSON-serialized {@link CellDecorationFillConfig}, mirroring how `colorMapping` is passed. */
+  fillStyle?: string;
   summaryRowValue?: unknown;
   sortingHint?: SortingHint;
 };
@@ -69,6 +71,80 @@ export type DatatableColumnArgs = Omit<ColumnState, 'palette' | 'colorMapping'> 
 export type DatatableColumnResult = DatatableColumnArgs & {
   type: typeof LENS_DATATABLE_COLUMN;
 };
+
+/**
+ * Cell decoration mode for a datatable column.
+ * Formerly surfaced in the editor as "Color by value"; now "Cell decoration".
+ *
+ * The stored value `'cell'` is surfaced in the editor as "Background".
+ */
+export const COLUMN_CELL_DECORATION_MODE = {
+  NONE: 'none',
+  CELL: 'cell',
+  BADGE: 'badge',
+  TEXT: 'text',
+  PROGRESS: 'progress',
+} as const;
+export type ColumnCellDecorationMode = $Values<typeof COLUMN_CELL_DECORATION_MODE>;
+
+/**
+ * Fill style for a value-driven cell decoration.
+ *
+ * Shared by the datatable cell decorations (the `progress` decoration today),
+ * shaped so another cell decoration can adopt the same single/solid/gradient
+ * model without a new type.
+ * - `single`: one fixed color for the whole fill.
+ * - `solid`: one palette-resolved color, derived from the cell value.
+ * - `gradient`: the palette gradient revealed inside the filled extent.
+ */
+export type CellDecorationFillMode = 'single' | 'solid' | 'gradient';
+
+/**
+ * Value range that drives a cell decoration's domain.
+ * - `auto`: derive the domain from the loaded column values.
+ * - `custom`: use an explicit `[min, max]` domain (supports a negative `min`).
+ *
+ * For `single` fills this range is the source of truth. For `solid`/`gradient`
+ * fills the active custom range is kept in sync with the palette color bounds
+ * (`palette.params.rangeMin`/`rangeMax`).
+ *
+ * `min`/`max` may also be present while `mode` is `auto`: they hold the last
+ * committed custom bounds so toggling `auto`<->`custom` restores them rather
+ * than resetting to the data bounds. They are inert while `mode` is `auto`
+ * (the domain falls back to the data bounds).
+ */
+export interface CellDecorationValueRange {
+  mode: 'auto' | 'custom';
+  min?: number;
+  max?: number;
+}
+
+/**
+ * Fill configuration for a value-driven cell decoration.
+ *
+ * Consumed today by the `progress` decoration; shaped so a future cell
+ * decoration (e.g. a gradient cell background) can reuse it without a new type.
+ */
+export interface CellDecorationFillConfig {
+  fillMode: CellDecorationFillMode;
+  /** Fill color for the `single` style. Ignored for `solid`/`gradient`. */
+  color?: string;
+  /**
+   * Value range driving the domain. For `solid`/`gradient` the custom bounds
+   * mirror `palette.params.rangeMin`/`rangeMax`; for `single` they live here.
+   */
+  valueRange?: CellDecorationValueRange;
+  /**
+   * Anchor value at which the fill starts, expressed in the column's value units
+   * (defaults to `0`). The fill grows from this baseline toward the value, so a
+   * baseline inside the domain (e.g. the 25th percentile) leaves part of the
+   * track empty before the fill begins.
+   *
+   * Not configurable from the editor yet; exposed for the as-code API and
+   * agentic configuration, and consumed by the renderer when present.
+   */
+  baseline?: number;
+}
 
 export interface ColumnState {
   columnId: string;
@@ -87,7 +163,11 @@ export interface ColumnState {
   palette?: PaletteOutput<CustomPaletteParams>;
   // Categorical color mapping configuration
   colorMapping?: ColorMapping.Config;
-  colorMode?: 'none' | 'cell' | 'text' | 'badge';
+  colorMode?: ColumnCellDecorationMode;
+  // Fill configuration for value-driven cell decorations (currently the
+  // "progress" cell decoration for numeric data). Shared so other cell
+  // decorations can reuse it.
+  fillStyle?: CellDecorationFillConfig;
   summaryRow?: 'none' | 'sum' | 'avg' | 'count' | 'min' | 'max';
   summaryLabel?: string;
   collapseFn?: CollapseFunction;

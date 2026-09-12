@@ -139,7 +139,7 @@ export const EditExample = ({ dataView }: Props) => {
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               color="primary"
-              iconType="plusInCircle"
+              iconType="plusCircle"
               aria-label={'Add control'}
               isDisabled={controlGroupAPI === undefined}
               onClick={() => {

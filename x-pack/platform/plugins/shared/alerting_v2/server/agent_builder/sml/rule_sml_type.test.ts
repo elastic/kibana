@@ -6,14 +6,14 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { RULE_ATTACHMENT_TYPE, RULE_SML_TYPE } from '@kbn/alerting-v2-schemas';
+import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import { RULE_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { RulesClient } from '../../lib/rules_client';
 import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../saved_objects';
-import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { createRuleSmlType } from './rule_sml_type';
 
 const baseRuleAttrs: RuleSavedObjectAttributes = {
@@ -26,7 +26,10 @@ const baseRuleAttrs: RuleSavedObjectAttributes = {
   },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '15m' },
-  evaluation: { query: { base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' } },
+  query: {
+    format: 'standalone',
+    breach: { query: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
+  },
   state_transition: null,
   enabled: true,
   createdBy: 'elastic',
@@ -35,11 +38,16 @@ const baseRuleAttrs: RuleSavedObjectAttributes = {
   updatedAt: '2026-04-10T00:00:00.000Z',
 } as RuleSavedObjectAttributes;
 
-const buildSmlContext = (logger = loggingSystemMock.createLogger()) => ({
-  esClient: {} as ElasticsearchClient,
-  savedObjectsClient: {} as SavedObjectsClientContract,
-  logger,
-});
+// `getRule` returns the snake_case API response, not the saved object attributes.
+const { createdBy, createdAt, updatedBy, updatedAt, ...restRuleAttrs } = baseRuleAttrs;
+const baseRuleResponse = {
+  ...restRuleAttrs,
+  created_by: createdBy,
+  created_at: createdAt,
+  updated_by: updatedBy,
+  updated_at: updatedAt,
+  metadata: { ...baseRuleAttrs.metadata, version: baseRuleAttrs.metadata?.version ?? 1 },
+};
 
 const buildToAttachmentContext = () => ({
   request: {} as KibanaRequest,
@@ -49,33 +57,40 @@ const buildToAttachmentContext = () => ({
 
 describe('createRuleSmlType', () => {
   let getRule: jest.Mock;
-  let getRepoSo: jest.Mock;
-  let createFinder: jest.Mock;
-  let repository: ISavedObjectsRepository;
+  let getIsAlertingV2Enabled: jest.Mock;
+  let soClient: ReturnType<typeof savedObjectsClientMock.create>;
   let rulesClient: RulesClient;
+
+  const buildSmlContext = (logger = loggingSystemMock.createLogger()) => ({
+    esClient: {} as ElasticsearchClient,
+    savedObjectsClient: soClient,
+    logger,
+  });
+
+  const stubFinder = (find: () => AsyncGenerator<unknown>) => {
+    const close = jest.fn().mockResolvedValue(undefined);
+    soClient.createPointInTimeFinder.mockReturnValue({ find, close } as unknown as ReturnType<
+      typeof soClient.createPointInTimeFinder
+    >);
+    return close;
+  };
 
   beforeEach(() => {
     getRule = jest.fn();
-    getRepoSo = jest.fn();
-    createFinder = jest.fn();
-
-    repository = {
-      get: getRepoSo,
-      createPointInTimeFinder: createFinder,
-    } as unknown as ISavedObjectsRepository;
-
+    getIsAlertingV2Enabled = jest.fn().mockResolvedValue(true);
+    soClient = savedObjectsClientMock.create();
     rulesClient = { getRule } as unknown as RulesClient;
   });
 
   const buildDefinition = () =>
     createRuleSmlType({
       getScopedRulesClient: () => rulesClient,
-      getInternalRepository: () => repository,
+      getIsAlertingV2Enabled: () => getIsAlertingV2Enabled(),
     });
 
   describe('id and fetchFrequency', () => {
-    it('uses the shared RULE_SML_TYPE constant', () => {
-      expect(buildDefinition().id).toBe(RULE_SML_TYPE);
+    it('uses the shared RULE_KI_TYPE constant', () => {
+      expect(buildDefinition().id).toBe(RULE_KI_TYPE);
     });
 
     it('returns "1m" as fetch frequency', () => {
@@ -94,8 +109,7 @@ describe('createRuleSmlType', () => {
     };
 
     it('yields items from the saved objects finder and closes it when done', async () => {
-      const close = jest.fn().mockResolvedValue(undefined);
-      const find = jest.fn(async function* () {
+      const close = stubFinder(async function* () {
         yield {
           saved_objects: [
             {
@@ -111,7 +125,6 @@ describe('createRuleSmlType', () => {
           ],
         };
       });
-      createFinder.mockReturnValue({ find, close });
 
       const items = await drainList();
 
@@ -123,7 +136,7 @@ describe('createRuleSmlType', () => {
         },
         { id: 'rule-2', updatedAt: '2026-04-11T00:00:00.000Z', spaces: ['default'] },
       ]);
-      expect(createFinder).toHaveBeenCalledWith(
+      expect(soClient.createPointInTimeFinder).toHaveBeenCalledWith(
         expect.objectContaining({
           type: RULE_SAVED_OBJECT_TYPE,
           namespaces: ['*'],
@@ -134,13 +147,11 @@ describe('createRuleSmlType', () => {
     });
 
     it('falls back to "default" namespace and a fresh timestamp when missing', async () => {
-      const close = jest.fn().mockResolvedValue(undefined);
-      const find = jest.fn(async function* () {
+      stubFinder(async function* () {
         yield {
           saved_objects: [{ id: 'rule-no-meta' }],
         };
       });
-      createFinder.mockReturnValue({ find, close });
 
       const items = await drainList();
 
@@ -154,87 +165,119 @@ describe('createRuleSmlType', () => {
     });
 
     it('closes the finder even if iteration throws', async () => {
-      const close = jest.fn().mockResolvedValue(undefined);
-      const find = jest.fn(async function* () {
+      const close = stubFinder(async function* () {
         yield { saved_objects: [{ id: 'rule-1' }] };
         throw new Error('boom');
       });
-      createFinder.mockReturnValue({ find, close });
 
       await expect(drainList()).rejects.toThrow('boom');
       expect(close).toHaveBeenCalledTimes(1);
     });
+
+    it('yields nothing and never opens a PIT finder when alerting v2 is disabled', async () => {
+      getIsAlertingV2Enabled.mockResolvedValue(false);
+
+      const items = await drainList();
+
+      expect(items).toEqual([]);
+      expect(soClient.createPointInTimeFinder).not.toHaveBeenCalled();
+    });
   });
 
-  describe('getSmlData', () => {
-    it('returns a single chunk built from rule metadata + query', async () => {
-      getRepoSo.mockResolvedValueOnce({ id: 'rule-1', attributes: baseRuleAttrs });
-
-      const result = await buildDefinition().getSmlData('rule-1', buildSmlContext());
-
-      expect(getRepoSo).toHaveBeenCalledWith(RULE_SAVED_OBJECT_TYPE, 'rule-1');
-      expect(result).toEqual({
-        chunks: [
-          {
-            type: RULE_SML_TYPE,
-            title: 'High CPU',
-            content: [
-              'High CPU',
-              'CPU breach detection',
-              'alert',
-              'ops, cpu',
-              baseRuleAttrs.evaluation!.query!.base,
-            ].join('\n'),
-            permissions: [`api:${ALERTING_V2_API_PRIVILEGES.rules.read}`],
-          },
-        ],
+  describe('getSmlEntry', () => {
+    it('reads the origin through the shared client and builds an entry from metadata + query', async () => {
+      soClient.get.mockResolvedValueOnce({
+        id: 'rule-1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes: baseRuleAttrs,
       });
+
+      const result = await buildDefinition().getSmlEntry('rule-1', buildSmlContext());
+
+      expect(soClient.get).toHaveBeenCalledWith(RULE_SAVED_OBJECT_TYPE, 'rule-1');
+      expect(result).toEqual({
+        type: RULE_KI_TYPE,
+        title: 'High CPU',
+        content: [
+          'High CPU',
+          'CPU breach detection',
+          'alert',
+          'ops, cpu',
+          (baseRuleAttrs.query as { breach: { query: string } }).breach.query,
+        ].join('\n'),
+      });
+      expect(result).not.toHaveProperty('permissions');
     });
 
     it('falls back to originId for title when metadata.name is missing', async () => {
-      getRepoSo.mockResolvedValueOnce({
+      soClient.get.mockResolvedValueOnce({
         id: 'rule-bare',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
         attributes: {
           ...baseRuleAttrs,
           metadata: undefined,
         } as unknown as RuleSavedObjectAttributes,
       });
 
-      const result = await buildDefinition().getSmlData('rule-bare', buildSmlContext());
+      const result = await buildDefinition().getSmlEntry('rule-bare', buildSmlContext());
 
-      expect(result?.chunks[0].title).toBe('rule-bare');
+      expect(result?.title).toBe('rule-bare');
     });
 
     it('returns undefined and logs a warning when the saved object lookup throws', async () => {
-      getRepoSo.mockRejectedValueOnce(new Error('not found'));
+      soClient.get.mockRejectedValueOnce(new Error('not found'));
       const logger = loggingSystemMock.createLogger();
 
-      const result = await buildDefinition().getSmlData('rule-missing', buildSmlContext(logger));
+      const result = await buildDefinition().getSmlEntry('rule-missing', buildSmlContext(logger));
 
       expect(result).toBeUndefined();
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining("SML rule: failed to get data for 'rule-missing'")
       );
     });
+
+    it('returns undefined without reading the saved object when alerting v2 is disabled', async () => {
+      getIsAlertingV2Enabled.mockResolvedValue(false);
+
+      const result = await buildDefinition().getSmlEntry('rule-1', buildSmlContext());
+
+      expect(result).toBeUndefined();
+      expect(soClient.get).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getPermissions', () => {
+    it('returns the registered ai_index read action for rules', () => {
+      const permissions = buildDefinition().getPermissions!('rule-1', buildSmlContext());
+      expect(permissions).toEqual({
+        kibana: { privileges: { name: [`ai_index:${RULE_KI_TYPE}/read`] } },
+      });
+    });
   });
 
   describe('toAttachment', () => {
-    const buildSmlDocument = (overrides: Partial<{ origin_id: string }> = {}) => ({
-      id: 'sml-1',
-      type: RULE_SML_TYPE,
-      title: 'High CPU',
-      origin_id: 'rule-1',
-      content: '',
-      created_at: '2026-04-10T00:00:00.000Z',
-      updated_at: '2026-04-10T00:00:00.000Z',
-      spaces: ['default'],
-      permissions: [],
-      ...overrides,
-    });
+    const buildSmlDocument = (overrides: Partial<{ origin_id: string }> = {}) => {
+      const originId = overrides.origin_id ?? 'rule-1';
+      return {
+        id: 'sml-1',
+        type: RULE_KI_TYPE,
+        title: 'High CPU',
+        origin_id: originId,
+        origin: { uri: `${RULE_KI_TYPE}://${originId}` },
+        content: '',
+        created_at: '2026-04-10T00:00:00.000Z',
+        updated_at: '2026-04-10T00:00:00.000Z',
+        spaces: ['default'],
+        permissions: { kibana: { privileges: [] } },
+        ingestion_method: 'crawled' as const,
+      };
+    };
 
     it('returns an attachment input wrapping the parsed rule', async () => {
       getRule.mockResolvedValueOnce({
-        ...baseRuleAttrs,
+        ...baseRuleResponse,
         id: 'rule-1',
       });
 
@@ -268,6 +311,18 @@ describe('createRuleSmlType', () => {
       );
 
       expect(result).toBeUndefined();
+    });
+
+    it('returns undefined without calling the rules client when alerting v2 is disabled', async () => {
+      getIsAlertingV2Enabled.mockResolvedValue(false);
+
+      const result = await buildDefinition().toAttachment(
+        buildSmlDocument(),
+        buildToAttachmentContext()
+      );
+
+      expect(result).toBeUndefined();
+      expect(getRule).not.toHaveBeenCalled();
     });
   });
 });

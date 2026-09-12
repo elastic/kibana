@@ -20,29 +20,36 @@ components:
         properties:
           field:
             type: string
+            maxLength: 2000
           value:
             oneOf:
               - type: string
+                maxLength: 30000
               - type: array
                 items:
                   type: string
+                  maxLength: 30000
 
     OsqueryQuery:
       type: object
       properties:
         id:
           type: string
+          maxLength: 256
           description: Query ID
         query:
           type: string
+          maxLength: 30000
           description: Query to run
         ecs_mapping:
           $ref: '#/components/schemas/EcsMapping'
         version:
           type: string
+          maxLength: 256
           description: Query version
         platform:
           type: string
+          maxLength: 256
         removed:
           type: boolean
         snapshot:
@@ -56,6 +63,7 @@ components:
       properties:
         query:
           type: string
+          maxLength: 30000
           description: 'To run a single query, use the query field and enter a SQL query. Example: "query": "SELECT * FROM processes;"'
         ecs_mapping:
           $ref: '#/components/schemas/EcsMapping'
@@ -65,9 +73,11 @@ components:
             $ref: '#/components/schemas/OsqueryQuery'
         pack_id:
           type: string
+          maxLength: 256
           description: 'To specify a query pack, use the packId field. Example: "packId": "processes_elastic"'
         saved_query_id:
           type: string
+          maxLength: 256
           description: 'To run a saved query, use the saved_query_id field and specify the saved query ID. Example: "saved_query_id": "processes_elastic"'
         timeout:
           type: number
@@ -78,6 +88,7 @@ components:
       properties:
         query:
           type: string
+          maxLength: 30000
         ecsMapping:
           $ref: '#/components/schemas/EcsMapping'
         queries:
@@ -86,8 +97,10 @@ components:
             $ref: '#/components/schemas/OsqueryQuery'
         packId:
           type: string
+          maxLength: 256
         savedQueryId:
           type: string
+          maxLength: 256
         timeout:
           type: number
 
@@ -127,6 +140,7 @@ components:
             - isolate
         comment:
           type: string
+          maxLength: 30000
       required:
         - command
 
@@ -136,9 +150,11 @@ components:
       properties:
         scriptId:
           type: string
+          maxLength: 256
           description: The ID of the script to run (from the Kibana Script library)
         scriptInput:
           type: string
+          maxLength: 8192
           description: The arguments to pass to the script (if any)
         timeout:
           type: integer
@@ -158,6 +174,7 @@ components:
             - runscript
         comment:
           type: string
+          maxLength: 30000
           description: Add a note that explains or describes the action. You can find your comment in the response actions history log
         config:
           type: object
@@ -169,17 +186,50 @@ components:
             windows:
               $ref: '#/components/schemas/RunScriptOsConfigValues'
 
-    ProcessesParams:
+    KillProcessParams:
       type: object
       properties:
         command:
           type: string
           enum:
             - kill-process
-            - suspend-process
-          description: 'To run an endpoint response action, specify a value for the command field. Example: "command": "isolate"'
+          description: 'To run an endpoint response action, specify a value for the command field. Example: "command": "kill-process"'
         comment:
           type: string
+          maxLength: 30000
+          description: 'Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Check processes"'
+        config:
+          required:
+            - field
+          type: object
+          properties:
+            field:
+              type: string
+              description: Field to use instead of `process.pid`
+              maxLength: 2000
+            overwrite:
+              type: boolean
+              description: Whether to overwrite field with `process.pid`
+              default: true
+            kill_descendants:
+              type: boolean
+              description: 'Whether to also terminate the descendant processes of the targeted process.'
+              x-state: Added in 9.6.0
+      required:
+        - command
+        - config
+
+    SuspendProcessParams:
+      type: object
+      properties:
+        command:
+          type: string
+          enum:
+            - suspend-process
+          description: 'To run an endpoint response action, specify a value for the command field. Example: "command": "suspend-process"'
+        comment:
+          type: string
+          maxLength: 30000
           description: 'Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Check processes"'
         config:
           required:
@@ -189,6 +239,7 @@ components:
             field:
               type: string
               description: Field to use instead of process.pid
+              maxLength: 2000
             overwrite:
               type: boolean
               description: Whether to overwrite field with process.pid
@@ -196,6 +247,16 @@ components:
       required:
         - command
         - config
+
+    ProcessesParams:
+      discriminator:
+        propertyName: command
+        mapping:
+          kill-process: '#/components/schemas/KillProcessParams'
+          suspend-process: '#/components/schemas/SuspendProcessParams'
+      oneOf:
+        - $ref: '#/components/schemas/KillProcessParams'
+        - $ref: '#/components/schemas/SuspendProcessParams'
 
     EndpointResponseAction:
       type: object

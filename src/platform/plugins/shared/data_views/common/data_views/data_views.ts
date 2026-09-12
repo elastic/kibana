@@ -332,6 +332,7 @@ export interface DataViewsServicePublicMethods {
   getDataViewLazy: (id: string) => Promise<DataViewLazy>;
   getDataViewLazyFromCache: (id: string) => Promise<DataViewLazy | undefined>;
 
+  createFromSpecLazy: (spec: DataViewSpec) => Promise<DataViewLazy>;
   createDataViewLazy: (spec: DataViewSpec) => Promise<DataViewLazy>;
 
   createAndSaveDataViewLazy: (spec: DataViewSpec, override?: boolean) => Promise<DataViewLazy>;
@@ -1185,11 +1186,11 @@ export class DataViewsService {
   }
 
   /**
-   * Create a new data view instance.
+   * Always create a new `DataViewLazy` from spec.
    * @param spec data view spec
    * @returns DataViewLazy
    */
-  private async createFromSpecLazy({
+  public async createFromSpecLazy({
     id,
     name,
     title,
@@ -1216,7 +1217,7 @@ export class DataViewsService {
   }
 
   /**
-   * Create data view lazy instance.
+   * Create or reuse cached `DataViewLazy` by id.
    * @param spec data view spec
    * @returns DataViewLazy
    */

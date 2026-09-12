@@ -6,8 +6,11 @@
  */
 
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { useQuery } from '@kbn/react-query';
 import { fetchRelatedEpisodes } from '../apis/fetch_related_episodes';
+import { QUERY_STALE_TIME } from '../constants';
+import { useSpaceId } from './use_space_id';
 import {
   buildRelatedBaseQuery,
   finishRelatedEpisodesQuery,
@@ -21,7 +24,7 @@ export interface UseFetchSameGroupEpisodesQueryOptions {
   pageSize: number;
   /** Required; hook stays idle when missing. */
   groupHash: string | undefined;
-  expressions: ExpressionsStart;
+  services: { expressions: ExpressionsStart; spaces: SpacesPluginStart };
   toastDanger?: (message: string) => void;
 }
 
@@ -29,11 +32,12 @@ export interface UseFetchSameGroupEpisodesQueryOptions {
  * Other episodes for the same rule and same `group_hash` (excluding the current episode id).
  */
 const buildSameGroupRelatedAlertEpisodesEsqlQuery = (
+  spaceId: string,
   ruleId: string,
   groupHash: string,
   excludeEpisodeId: string
 ) => {
-  const query = buildRelatedBaseQuery(ruleId, excludeEpisodeId);
+  const query = buildRelatedBaseQuery(spaceId, ruleId, excludeEpisodeId);
   query.where`group_hash == ${groupHash}`;
   return finishRelatedEpisodesQuery(query);
 };
@@ -48,16 +52,20 @@ export const useFetchSameGroupEpisodesQuery = ({
   excludeEpisodeId,
   pageSize,
   groupHash,
-  expressions,
+  services,
   toastDanger,
 }: UseFetchSameGroupEpisodesQueryOptions) => {
+  const { expressions } = services;
+  const spaceId = useSpaceId(services.spaces);
+
   return useQuery({
-    queryKey: queryKeys.relatedSameGroupEpisodes(ruleId ?? '', groupHash ?? '', pageSize),
+    queryKey: queryKeys.relatedSameGroupEpisodes(spaceId, ruleId ?? '', groupHash ?? '', pageSize),
     queryFn: ({ signal }) =>
       fetchRelatedEpisodes({
         abortSignal: signal,
         pageSize,
         query: buildSameGroupRelatedAlertEpisodesEsqlQuery(
+          spaceId,
           ruleId as string,
           groupHash as string,
           excludeEpisodeId as string
@@ -65,6 +73,7 @@ export const useFetchSameGroupEpisodesQuery = ({
         expressions,
       }),
     enabled: Boolean(ruleId && excludeEpisodeId && groupHash),
+    staleTime: QUERY_STALE_TIME,
     onError: () => {
       toastDanger?.(RELATED_EPISODES_LOAD_ERROR);
     },

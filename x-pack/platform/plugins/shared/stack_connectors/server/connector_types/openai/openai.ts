@@ -231,7 +231,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
    * @param body The stringified request body to be sent in the POST request.
    */
   public async runApi(
-    { body, signal, timeout }: RunActionParams,
+    { body, signal, timeout, maxContentLength }: RunActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse> {
     const parentSpan = trace.getActiveSpan();
@@ -257,6 +257,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           signal,
           // give up to 2 minutes for response
           timeout: timeout ?? DEFAULT_TIMEOUT_MS,
+          ...(maxContentLength !== undefined ? { maxContentLength } : {}),
           ...axiosOptions,
           headers: {
             ...this.headers,
@@ -287,7 +288,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
    * @param stream flag indicating whether it is a streaming request or not
    */
   public async streamApi(
-    { body, stream, signal, timeout }: StreamActionParams,
+    { body, stream, signal, timeout, maxContentLength }: StreamActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse> {
     const parentSpan = trace.getActiveSpan();
@@ -311,6 +312,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           responseSchema: stream ? StreamingResponseSchema : RunActionResponseSchema,
           data: executeBody,
           signal,
+          ...(maxContentLength !== undefined ? { maxContentLength } : {}),
           ...axiosOptions,
           headers: {
             ...this.headers,
@@ -461,9 +463,15 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     body: InvokeAIActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<InvokeAIActionResponse> {
-    const { signal, timeout, telemetryMetadata: _telemetryMetadata, ...rest } = body;
+    const {
+      signal,
+      timeout,
+      maxContentLength,
+      telemetryMetadata: _telemetryMetadata,
+      ...rest
+    } = body;
     const res = await this.runApi(
-      { body: JSON.stringify(rest), signal, timeout },
+      { body: JSON.stringify(rest), signal, timeout, maxContentLength },
       connectorUsageCollector
     );
 

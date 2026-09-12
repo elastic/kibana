@@ -11,20 +11,10 @@ import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-p
 import { inject, injectable } from 'inversify';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { savedObjectNamespacesToSpaceId } from '../../space_id_to_namespace';
 import { MaintenanceWindowSavedObjectsClientToken } from './tokens';
 import type { ActiveMaintenanceWindow } from './types';
-
-export const DEFAULT_MAINTENANCE_WINDOW_CACHE_INTERVAL_MS = 60 * 1000;
-
-interface MaintenanceWindowServiceOptions {
-  cacheIntervalMs?: number;
-}
-
-interface CacheEntry {
-  expiresAt: number;
-  windows: ActiveMaintenanceWindow[];
-}
 
 export interface MaintenanceWindowServiceContract {
   /**
@@ -40,46 +30,14 @@ export interface MaintenanceWindowServiceContract {
 
 @injectable()
 export class MaintenanceWindowService implements MaintenanceWindowServiceContract {
-  private cache: CacheEntry | null = null;
-  private inFlight: Promise<ActiveMaintenanceWindow[]> | null = null;
-  private readonly cacheIntervalMs: number;
-
   constructor(
     @inject(MaintenanceWindowSavedObjectsClientToken)
     private readonly client: SavedObjectsClientContract,
     @inject(LoggerServiceToken)
-    private readonly logger: LoggerServiceContract,
-    options: MaintenanceWindowServiceOptions = {}
-  ) {
-    this.cacheIntervalMs = options.cacheIntervalMs ?? DEFAULT_MAINTENANCE_WINDOW_CACHE_INTERVAL_MS;
-  }
+    private readonly logger: LoggerServiceContract
+  ) {}
 
   public async getEnabledMaintenanceWindows(): Promise<ActiveMaintenanceWindow[]> {
-    const now = Date.now();
-    if (this.cache && this.cache.expiresAt > now) {
-      return this.cache.windows;
-    }
-
-    if (this.inFlight) {
-      return this.inFlight;
-    }
-
-    this.inFlight = this.fetchEnabledWindows()
-      .then((windows) => {
-        this.cache = {
-          windows,
-          expiresAt: Date.now() + this.cacheIntervalMs,
-        };
-        return windows;
-      })
-      .finally(() => {
-        this.inFlight = null;
-      });
-
-    return this.inFlight;
-  }
-
-  private async fetchEnabledWindows(): Promise<ActiveMaintenanceWindow[]> {
     const windows: ActiveMaintenanceWindow[] = [];
     const finder = this.client.createPointInTimeFinder<MaintenanceWindowAttributes>({
       type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
@@ -97,6 +55,7 @@ export class MaintenanceWindowService implements MaintenanceWindowServiceContrac
             this.logger.warn({
               message: () =>
                 `Skipping maintenance window "${doc.id}": missing or invalid events array`,
+              code: ALERTING_LOG_CODES.MAINTENANCE_WINDOW_DOCUMENT_INVALID,
             });
             continue;
           }
@@ -115,7 +74,7 @@ export class MaintenanceWindowService implements MaintenanceWindowServiceContrac
     } catch (error) {
       this.logger.error({
         error,
-        type: 'MaintenanceWindowFetchError',
+        code: ALERTING_LOG_CODES.MAINTENANCE_WINDOW_FETCH_FAILED,
       });
       return [];
     } finally {
@@ -124,6 +83,7 @@ export class MaintenanceWindowService implements MaintenanceWindowServiceContrac
       } catch (closeError) {
         this.logger.warn({
           message: () => `Failed to close maintenance window PIT finder: ${closeError.message}`,
+          code: ALERTING_LOG_CODES.MAINTENANCE_WINDOW_PIT_CLOSE_FAILED,
         });
       }
     }

@@ -8,6 +8,7 @@
  */
 
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { getDefaultSecurityImplementation } from './default_implementation';
 
 describe('getDefaultSecurityImplementation', () => {
@@ -52,6 +53,28 @@ describe('getDefaultSecurityImplementation', () => {
       const logger = implementation.audit.withoutRequest;
       expect(logger.enabled).toBe(false);
       expect(logger.log({ message: 'no request' })).toBeUndefined();
+    });
+  });
+
+  describe('serviceAccounts', () => {
+    it('isEnabled returns false', () => {
+      expect(implementation.serviceAccounts.isEnabled()).toBe(false);
+    });
+
+    it('create rejects', async () => {
+      await expect(
+        implementation.serviceAccounts.create(httpServerMock.createKibanaRequest(), {
+          name: 'my-service-account',
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are disabled"`);
+    });
+  });
+
+  describe('fakeRequestEnricher', () => {
+    it('is a no-op (no security delegate registered)', () => {
+      expect(() =>
+        implementation.fakeRequestEnricher({} as any, { profileId: 'u_test_profile_123' })
+      ).not.toThrow();
     });
   });
 });

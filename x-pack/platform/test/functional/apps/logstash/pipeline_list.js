@@ -80,8 +80,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/244614
-    describe.skip('add button', () => {
+    describe('add button', () => {
       it('links to the empty pipeline editor', async () => {
         await pipelineList.clickAdd();
         await pipelineEditor.assertExists();

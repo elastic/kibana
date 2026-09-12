@@ -6,8 +6,19 @@
  */
 
 import type { ComponentType } from 'react';
-import type { CreateRuleFormFlyoutProps } from './create_rule_form_flyout';
+import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
+import type { AlertingV2PageProps } from './application/composable_pages';
+import type { CreateAlertingV2HostApp } from './locator_host';
+
+export type { CreateRuleOptionsFlyoutLegacyItem } from './create_rule_options_flyout';
+export type { AlertingV2PageProps } from './application/composable_pages';
 
 export interface AlertingV2PublicStart {
-  DynamicRuleFormFlyout: ComponentType<CreateRuleFormFlyoutProps>;
+  CreateRuleOptionsFlyout: ComponentType<CreateRuleOptionsFlyoutProps>;
+  RulesPage: ComponentType<AlertingV2PageProps>;
+  RuleLibraryPage: ComponentType<AlertingV2PageProps>;
+  EpisodesPage: ComponentType<AlertingV2PageProps>;
+  ActionPoliciesPage: ComponentType<AlertingV2PageProps>;
+  ExecutionHistoryPage: ComponentType<AlertingV2PageProps>;
+  createAlertingV2HostApp: CreateAlertingV2HostApp;
 }

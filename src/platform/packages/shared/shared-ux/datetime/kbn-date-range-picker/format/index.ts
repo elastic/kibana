@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { durationToDisplayShortText } from './format_duration';
+export { durationToDisplayShortText, durationToDisplayFullText } from './format_duration';
 export {
   applyTimePrecision,
   dateMathToRelativeParts,
   timeRangeToDisplayText,
   timeRangeToFullFormattedText,
 } from './format_time_range';
-export type { TimeRangeTransformOptions } from '../types';
+export type { TimeRangeFormatOptions, TimeRangeTransformOptions } from '../types';

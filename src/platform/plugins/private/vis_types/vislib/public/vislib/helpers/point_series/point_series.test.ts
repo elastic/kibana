@@ -20,7 +20,7 @@ describe('pointSeriesChartDataFromTable', function () {
   beforeAll(() => {
     setFormatService({
       deserialize: () => ({
-        convert: jest.fn((v) => v),
+        convertToText: jest.fn((v) => v),
       }),
     } as any);
   });

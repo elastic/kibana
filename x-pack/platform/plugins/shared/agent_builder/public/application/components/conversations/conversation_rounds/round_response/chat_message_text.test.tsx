@@ -9,32 +9,49 @@ import React from 'react';
 import type { Parent } from 'unist';
 import type { MutableNode } from './markdown_plugins';
 import { render, screen } from '@testing-library/react';
-import { ToolResultType, type EsqlResults } from '@kbn/agent-builder-common/tools/tool_result';
+import {
+  ToolResultType,
+  type EsqlResults,
+  type VisualizationResult,
+} from '@kbn/agent-builder-common/tools/tool_result';
 import { cloneDeep } from 'lodash';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import unified from 'unified';
 import remarkParse from 'remark-parse-no-trim';
 import { createVisualizationRenderer, visualizationTagParser } from './markdown_plugins';
+import { VisualizeESQL, InlineVisualization } from '@kbn/agent-builder-visualizations';
 import { ChatMessageText } from './chat_message_text';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
 import { useStepsFromPrevRounds } from '../../../../hooks/use_conversation';
 import { useConversationContext } from '../../../../context/conversation/conversation_context';
-import { VisualizeESQL } from '../../../tools/esql/visualize_esql';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { AgentBuilderStartDependencies } from '../../../../../types';
 import { setWith } from '@kbn/safer-lodash-set';
 import { ChartType } from '@kbn/visualization-utils';
 import dedent from 'dedent';
 
-jest.mock('../../../tools/esql/visualize_esql', () => {
+jest.mock('@kbn/agent-builder-visualizations', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const _React = require('react'); // Use require to avoid hoisting issues with jest.mock
   return {
     VisualizeESQL: jest.fn(() =>
       _React.createElement('span', { 'data-test-subj': 'visualize-esql' })
     ),
+    VisualizeLens: jest.fn(() =>
+      _React.createElement('span', { 'data-test-subj': 'visualize-lens' })
+    ),
+    InlineVisualization: jest.fn(() =>
+      _React.createElement('span', { 'data-test-subj': 'inline-visualization' })
+    ),
   };
 });
+
+const application = {} as ApplicationStart;
+const http = {} as HttpStart;
+const uiSettings = {} as IUiSettingsClient;
 
 jest.mock('../../../../hooks/use_agent_builder_service', () => ({
   useAgentBuilderServices: jest.fn(),
@@ -49,6 +66,7 @@ jest.mock('../../../../context/conversation/conversation_context', () => ({
 }));
 
 const mockVisualizeESQL = VisualizeESQL as jest.MockedFunction<any>;
+const mockInlineVisualization = InlineVisualization as jest.MockedFunction<any>;
 const useAgentBuilderServicesMock = useAgentBuilderServices as jest.MockedFunction<
   typeof useAgentBuilderServices
 >;
@@ -81,6 +99,25 @@ const toolCallStep: ConversationRoundStep = {
   results: [toolResult],
 };
 
+const vegaVisualizationResult: VisualizationResult = {
+  tool_result_id: 'VEGA1',
+  type: ToolResultType.visualization,
+  data: {
+    esql: 'FROM kibana_sample_data_logs',
+    renderer: 'vega',
+    visualization: { spec: '{"mark":"bar"}' },
+    time_range: { from: 'now-7d', to: 'now' },
+  },
+};
+
+const vegaVisualizationStep: ConversationRoundStep = {
+  type: ConversationRoundStepType.toolCall,
+  tool_call_id: 'tool-call-viz',
+  tool_id: 'platform.core.create_visualization',
+  params: {},
+  results: [vegaVisualizationResult],
+};
+
 function createStartDependencies() {
   return {
     lens: {},
@@ -88,6 +125,9 @@ function createStartDependencies() {
     cloud: {},
     share: {},
     uiActions: {},
+    embeddable: {},
+    // Read when assembling the custom content renderer's services.
+    data: { search: { search: jest.fn() } },
     unifiedSearch: {
       ui: {
         SearchBar: () => null,
@@ -126,17 +166,20 @@ describe('chat_message_text', () => {
         setToolCallResult: jest.fn(),
         setAssistantMessage: jest.fn(),
         addAssistantMessageChunk: jest.fn(),
+        clearAssistantMessage: jest.fn(),
         onConversationCreated: jest.fn(),
         deleteConversation: jest.fn(),
         renameConversation: jest.fn(),
         setTimeToFirstToken: jest.fn(),
         addPendingPrompt: jest.fn(),
         clearPendingPrompts: jest.fn(),
-        clearLastRoundResponse: jest.fn(),
+        setAskUserQuestionAnswers: jest.fn(),
         addBackgroundExecutionCompleteStep: jest.fn(),
         addCompactionStep: jest.fn(),
         setCompactionStepComplete: jest.fn(),
         addOrUpdateTodosStep: jest.fn(),
+        setAttachments: jest.fn(),
+        onRoundComplete: jest.fn(),
       },
     });
   });
@@ -229,9 +272,38 @@ describe('chat_message_text', () => {
   });
 
   describe('createVisualizationRenderer', () => {
+    beforeEach(() => mockInlineVisualization.mockClear());
+
+    it('renders a Vega visualization-type tool result via InlineVisualization', () => {
+      const startDependencies = createStartDependencies();
+      const renderer = createVisualizationRenderer({
+        application,
+        http,
+        uiSettings,
+        startDependencies,
+        stepsFromCurrentRound: [vegaVisualizationStep],
+        stepsFromPrevRounds: [],
+      });
+
+      render(renderer({ toolResultId: 'VEGA1' }));
+
+      expect(mockVisualizeESQL).not.toHaveBeenCalled();
+      expect(mockInlineVisualization).toHaveBeenCalledTimes(1);
+      const props = mockInlineVisualization.mock.calls[0][0];
+      expect(props).toMatchObject({
+        renderer: 'vega',
+        visualization: vegaVisualizationResult.data.visualization,
+        timeRange: vegaVisualizationResult.data.time_range,
+        services: expect.objectContaining({ embeddable: startDependencies.embeddable }),
+      });
+    });
+
     it('returns a renderer that instantiates VisualizeESQL when the tool result exists', () => {
       const startDependencies = createStartDependencies();
       const renderer = createVisualizationRenderer({
+        application,
+        http,
+        uiSettings,
         startDependencies,
         stepsFromCurrentRound: [toolCallStep],
         stepsFromPrevRounds: [],
@@ -245,14 +317,19 @@ describe('chat_message_text', () => {
       expect(props).toMatchObject({
         esqlColumns: toolResult.data.columns,
         esqlQuery: toolResult.data.query,
-        lens: startDependencies.lens,
-        dataViews: startDependencies.dataViews,
-        uiActions: startDependencies.uiActions,
+        services: expect.objectContaining({
+          lens: startDependencies.lens,
+          dataViews: startDependencies.dataViews,
+          uiActions: startDependencies.uiActions,
+        }),
       });
     });
 
     it('returns a fallback when toolResultId is missing', () => {
       const renderer = createVisualizationRenderer({
+        application,
+        http,
+        uiSettings,
         startDependencies: createStartDependencies(),
         stepsFromCurrentRound: [toolCallStep],
         stepsFromPrevRounds: [],
@@ -267,6 +344,9 @@ describe('chat_message_text', () => {
 
     it('returns a fallback when tool result cannot be found', () => {
       const renderer = createVisualizationRenderer({
+        application,
+        http,
+        uiSettings,
         startDependencies: createStartDependencies(),
         stepsFromCurrentRound: [toolCallStep],
         stepsFromPrevRounds: [],
@@ -289,6 +369,9 @@ describe('chat_message_text', () => {
       setWith(stepWithoutQuery, 'results[0].data.query', undefined); // Remove the query
 
       const renderer = createVisualizationRenderer({
+        application,
+        http,
+        uiSettings,
         startDependencies: createStartDependencies(),
         stepsFromCurrentRound: [stepWithoutQuery],
         stepsFromPrevRounds: [],
@@ -306,6 +389,9 @@ describe('chat_message_text', () => {
 
     it('looks through previous rounds when current steps have no matching tool result', () => {
       const renderer = createVisualizationRenderer({
+        application,
+        http,
+        uiSettings,
         startDependencies: createStartDependencies(),
         stepsFromCurrentRound: [],
         stepsFromPrevRounds: [toolCallStep],
@@ -319,6 +405,9 @@ describe('chat_message_text', () => {
 
     it('passes the chartType as preferredChartType to VisualizeESQL', () => {
       const renderer = createVisualizationRenderer({
+        application,
+        http,
+        uiSettings,
         startDependencies: createStartDependencies(),
         stepsFromCurrentRound: [toolCallStep],
         stepsFromPrevRounds: [],
@@ -338,6 +427,9 @@ describe('chat_message_text', () => {
 
     it('works without a chartType attribute', () => {
       const renderer = createVisualizationRenderer({
+        application,
+        http,
+        uiSettings,
         startDependencies: createStartDependencies(),
         stepsFromCurrentRound: [toolCallStep],
         stepsFromPrevRounds: [],

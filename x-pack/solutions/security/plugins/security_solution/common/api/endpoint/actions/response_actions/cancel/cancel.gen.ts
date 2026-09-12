@@ -21,15 +21,43 @@ import {
   BaseActionSchema,
 } from '../../../model/schema/common.gen';
 
+/**
+ * Elastic Defend agent type
+ */
+export const ElasticDefendCancelParameters = lazySchema(() =>
+  z.object({
+    /**
+     * ID of the response action to cancel
+     */
+    id: z.string().min(1).max(50).describe('ID of the response action to cancel'),
+    /**
+     * Forcefully cancel the response action even when it is already running
+     */
+    force: z
+      .boolean()
+      .optional()
+      .describe('Forcefully cancel the response action even when it is already running'),
+  })
+);
+export type ElasticDefendCancelParameters = z.infer<typeof ElasticDefendCancelParameters>;
+
+/**
+ * Microsoft Defender for Endpoint agent type
+ */
+export const MDECancelParameters = lazySchema(() =>
+  z.object({
+    /**
+     * ID of the response action to cancel
+     */
+    id: z.string().min(1).max(50).describe('ID of the response action to cancel'),
+  })
+);
+export type MDECancelParameters = z.infer<typeof MDECancelParameters>;
+
 export const CancelRouteRequestBody = lazySchema(() =>
   BaseActionSchema.merge(
     z.object({
-      parameters: z.object({
-        /**
-         * ID of the response action to cancel
-         */
-        id: z.string().min(1),
-      }),
+      parameters: z.union([ElasticDefendCancelParameters, MDECancelParameters]),
     })
   )
 );

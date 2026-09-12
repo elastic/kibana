@@ -8,7 +8,7 @@
 const { UndiciInstrumentation } = require('@opentelemetry/instrumentation-undici');
 const { registerInstrumentations } = require('@opentelemetry/instrumentation');
 
-const init = require('../../../../../../src/cli/kibana/apm');
+const init = require('@kbn/cli/kibana/apm');
 
 registerInstrumentations({
   instrumentations: [

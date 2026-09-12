@@ -6,20 +6,29 @@
  */
 
 import React, { useMemo } from 'react';
-import { useSelector } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useFetchRelatedAlertsByAncestry } from '../hooks/use_fetch_related_alerts_by_ancestry';
 import { InsightsSummaryRow } from './insights_summary_row';
 import { CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID } from './test_ids';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
-import { sourcererSelectors } from '../../../../sourcerer/store';
+import { useKibana } from '../../../../common/lib/kibana';
+import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
+import { withDocumentIndex } from '../../../shared/utils/non_local_index';
+
+const DEFAULT_FROM = 'now-1d';
+const DEFAULT_TO = 'now';
 
 export interface RelatedAlertsByAncestryProps {
   /**
    * Id of the document
    */
   documentId: string;
+  /**
+   * Project-qualified index of the ancestry document, prepended to the search indices so entity
+   * lookup can disambiguate the same `_id` across linked projects (CPS). `undefined` when the
+   * document has no index; required so every render site consciously threads it.
+   */
+  documentIndex: string | undefined;
   /**
    * Callback to navigate to correlations details
    */
@@ -31,19 +40,29 @@ export interface RelatedAlertsByAncestryProps {
  */
 export const RelatedAlertsByAncestry: React.VFC<RelatedAlertsByAncestryProps> = ({
   documentId,
+  documentIndex,
   onShowCorrelationsDetails,
 }) => {
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const oldSecurityDefaultPatterns =
-    useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];
-  const { indexPatterns: experimentalSecurityDefaultIndexPatterns } = useSecurityDefaultPatterns();
-  const indices = newDataViewPickerEnabled
-    ? experimentalSecurityDefaultIndexPatterns
-    : oldSecurityDefaultPatterns;
+  const { storage } = useKibana().services;
+  const { indexPatterns } = useSecurityDefaultPatterns();
+
+  // This reads the same time range persisted by the Correlations tab's date picker
+  // (see flyout_v2/document/tools/correlations/components/related_alerts_by_ancestry.tsx),
+  // so this summary row stays bounded without rendering its own picker.
+  const timeSavedInLocalStorage = storage.get(FLYOUT_STORAGE_KEYS.ANCESTRY_ALERTS_TIME_RANGE);
+
+  const indices = useMemo(
+    () => withDocumentIndex(indexPatterns, documentIndex),
+    [indexPatterns, documentIndex]
+  );
 
   const { loading, error, dataCount } = useFetchRelatedAlertsByAncestry({
     documentId,
     indices,
+    interval: {
+      from: timeSavedInLocalStorage?.start || DEFAULT_FROM,
+      to: timeSavedInLocalStorage?.end || DEFAULT_TO,
+    },
   });
 
   const text = useMemo(

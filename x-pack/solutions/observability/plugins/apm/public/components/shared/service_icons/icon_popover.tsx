@@ -7,9 +7,10 @@
 
 import {
   EuiButtonIcon,
-  EuiSkeletonText,
   EuiPopover,
   EuiPopoverTitle,
+  EuiSkeletonText,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import React from 'react';
@@ -24,6 +25,7 @@ interface IconPopoverProps {
   detailsFetchStatus: FETCH_STATUS;
   isOpen: boolean;
   icon: PopoverItem['icon'];
+  buttonSize?: 's' | 'm';
 }
 
 export function IconPopover({
@@ -34,6 +36,7 @@ export function IconPopover({
   onClose,
   detailsFetchStatus,
   isOpen,
+  buttonSize = 'm',
 }: IconPopoverProps) {
   const popoverTitleId = useGeneratedHtmlId();
 
@@ -47,17 +50,19 @@ export function IconPopover({
       anchorPosition="downCenter"
       ownFocus={false}
       button={
-        <EuiButtonIcon
-          display="base"
-          color="text"
-          onClick={onClick}
-          iconType={icon.type}
-          aria-label={title}
-          iconSize={icon.size ?? 'l'}
-          className="serviceIcon_button"
-          data-test-subj={`popover_${title}`}
-          size="m"
-        />
+        <EuiToolTip content={title} disableScreenReaderOutput>
+          <EuiButtonIcon
+            display="base"
+            color="text"
+            onClick={onClick}
+            iconType={icon.type}
+            aria-label={title}
+            iconSize={icon.size ?? 'l'}
+            className="serviceIcon_button"
+            data-test-subj={`popover_${title}`}
+            size={buttonSize}
+          />
+        </EuiToolTip>
       }
       isOpen={isOpen}
       closePopover={onClose}

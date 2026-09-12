@@ -67,7 +67,7 @@ interface ProcessGapsForRulesResult {
 type LoggerMessageBuilder = (message: string) => string;
 
 export async function processRuleBatches({
-  abortController,
+  signal,
   gapsPerPage,
   gapFetchMaxIterations,
   logger,
@@ -85,7 +85,7 @@ export async function processRuleBatches({
   numRetries,
   excludedReasons,
 }: {
-  abortController: AbortController;
+  signal: AbortSignal;
   gapsPerPage: number;
   gapFetchMaxIterations: number;
   logger: Logger;
@@ -110,7 +110,7 @@ export async function processRuleBatches({
       return { aggregatedByRule, state: SchedulerLoopState.CAPACITY_EXHAUSTED };
     }
 
-    if (isCancelled(abortController)) {
+    if (isCancelled(signal)) {
       return { aggregatedByRule, state: SchedulerLoopState.CANCELLED };
     }
 
@@ -131,7 +131,7 @@ export async function processRuleBatches({
     }
 
     const gapsResult = await processGapsForRules({
-      abortController,
+      signal,
       aggregatedByRule,
       endISO,
       gapsPerPage,
@@ -164,7 +164,7 @@ export async function processRuleBatches({
 }
 
 export async function processGapsForRules({
-  abortController,
+  signal,
   aggregatedByRule,
   endISO,
   gapsPerPage,
@@ -181,7 +181,7 @@ export async function processGapsForRules({
   numRetries,
   excludedReasons,
 }: {
-  abortController: AbortController;
+  signal: AbortSignal;
   aggregatedByRule: Map<string, AggregatedByRuleEntry>;
   endISO: string;
   gapsPerPage: number;
@@ -213,7 +213,7 @@ export async function processGapsForRules({
     }
     gapFetchIterationCount++;
 
-    if (isCancelled(abortController)) {
+    if (isCancelled(signal)) {
       return {
         aggregatedByRule: aggregated,
         remainingBackfills,
@@ -386,7 +386,7 @@ export function registerGapAutoFillSchedulerTask({
     [GAP_AUTO_FILL_SCHEDULER_TASK_TYPE]: {
       title: 'Gap Auto Fill Scheduler',
       timeout: schedulerConfig?.timeout ?? DEFAULT_GAP_AUTO_FILL_SCHEDULER_TIMEOUT,
-      createTaskRunner: ({ taskInstance, fakeRequest, abortController }) => {
+      createTaskRunner: ({ taskInstance, fakeRequest, signal }) => {
         return {
           async run() {
             const loggerMessage = (message: string) =>
@@ -501,7 +501,7 @@ export function registerGapAutoFillSchedulerTask({
 
               // Step 4: Process rules in batches
               const gapFillsResult = await processRuleBatches({
-                abortController,
+                signal,
                 gapsPerPage: DEFAULT_GAPS_PER_PAGE,
                 gapFetchMaxIterations: GAP_FETCH_MAX_ITERATIONS,
                 logger,

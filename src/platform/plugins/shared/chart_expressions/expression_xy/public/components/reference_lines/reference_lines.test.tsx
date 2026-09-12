@@ -100,7 +100,7 @@ describe('ReferenceLines', () => {
     beforeEach(() => {
       defaultProps = {
         formatters: {},
-        xAxisFormatter: { convert: jest.fn((x) => x) } as unknown as FieldFormat,
+        xAxisFormatter: { convertToText: jest.fn((x) => x) } as unknown as FieldFormat,
         isHorizontal: false,
         axesConfiguration: [
           {
@@ -174,8 +174,8 @@ describe('ReferenceLines', () => {
         <ReferenceLines
           {...defaultProps}
           formatters={{
-            yAccessorLeftFirstId: { convert: convertLeft } as unknown as FieldFormat,
-            yAccessorRightFirstId: { convert: convertRight } as unknown as FieldFormat,
+            yAccessorLeftFirstId: { convertToText: convertLeft } as unknown as FieldFormat,
+            yAccessorRightFirstId: { convertToText: convertRight } as unknown as FieldFormat,
           }}
           layers={createLayers(
             [
@@ -226,7 +226,7 @@ describe('ReferenceLines', () => {
 
       expect(convertLeft).toHaveBeenCalled();
       expect(convertRight).toHaveBeenCalled();
-      expect(defaultProps.xAxisFormatter.convert).not.toHaveBeenCalled();
+      expect(defaultProps.xAxisFormatter.convertToText).not.toHaveBeenCalled();
     });
 
     it.each([
@@ -549,7 +549,7 @@ describe('ReferenceLines', () => {
     beforeEach(() => {
       defaultProps = {
         formatters: {},
-        xAxisFormatter: { convert: jest.fn((x) => x) } as unknown as FieldFormat,
+        xAxisFormatter: { convertToText: jest.fn((x) => x) } as unknown as FieldFormat,
         isHorizontal: false,
         axesConfiguration: [
           {

@@ -5,9 +5,23 @@
  * 2.0.
  */
 
-import { eventsRequestSchema } from './v1';
+import { eventsRequestSchema, eventOrAlertItemSchema } from './v1';
 
 describe('graph events schema', () => {
+  it('accepts Elasticsearch document IDs up to 512 characters and rejects longer IDs', () => {
+    const buildRequest = (eventId: string) => ({
+      page: { index: 0, size: 10 },
+      query: {
+        eventIds: [eventId],
+        start: 'now-1d',
+        end: 'now',
+      },
+    });
+
+    expect(() => eventsRequestSchema.validate(buildRequest('a'.repeat(512)))).not.toThrow();
+    expect(() => eventsRequestSchema.validate(buildRequest('a'.repeat(513)))).toThrow();
+  });
+
   it('accepts a page size up to 100', () => {
     expect(() =>
       eventsRequestSchema.validate({
@@ -62,5 +76,75 @@ describe('graph events schema', () => {
         },
       })
     ).toThrow();
+  });
+
+  it('accepts up to 100 index patterns', () => {
+    const indexPatterns = Array.from({ length: 100 }, (_, index) => `logs-${index}-*`);
+
+    expect(() =>
+      eventsRequestSchema.validate({
+        page: { index: 0, size: 10 },
+        query: {
+          eventIds: ['event-1'],
+          start: 'now-1d',
+          end: 'now',
+          indexPatterns,
+        },
+      })
+    ).not.toThrow();
+  });
+
+  it('rejects more than 100 index patterns', () => {
+    const indexPatterns = Array.from({ length: 101 }, (_, index) => `logs-${index}-*`);
+
+    expect(() =>
+      eventsRequestSchema.validate({
+        page: { index: 0, size: 10 },
+        query: {
+          eventIds: ['event-1'],
+          start: 'now-1d',
+          end: 'now',
+          indexPatterns,
+        },
+      })
+    ).toThrow();
+  });
+
+  describe('eventOrAlertItemSchema', () => {
+    it('accepts up to 1000 ips and rejects more', () => {
+      expect(() =>
+        eventOrAlertItemSchema.validate({
+          id: 'event-1',
+          isAlert: false,
+          ips: Array.from({ length: 1000 }, (_, index) => `10.0.0.${index}`),
+        })
+      ).not.toThrow();
+
+      expect(() =>
+        eventOrAlertItemSchema.validate({
+          id: 'event-1',
+          isAlert: false,
+          ips: Array.from({ length: 1001 }, (_, index) => `10.0.0.${index}`),
+        })
+      ).toThrow();
+    });
+
+    it('accepts up to 250 country codes and rejects more', () => {
+      expect(() =>
+        eventOrAlertItemSchema.validate({
+          id: 'event-1',
+          isAlert: false,
+          countryCodes: Array.from({ length: 250 }, (_, index) => `c-${index}`),
+        })
+      ).not.toThrow();
+
+      expect(() =>
+        eventOrAlertItemSchema.validate({
+          id: 'event-1',
+          isAlert: false,
+          countryCodes: Array.from({ length: 251 }, (_, index) => `c-${index}`),
+        })
+      ).toThrow();
+    });
   });
 });

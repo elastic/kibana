@@ -6,9 +6,9 @@
  */
 
 import { v5 } from 'uuid';
-import { AxiosError } from 'axios';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { KbnClientRequesterError } from '@kbn/kbn-client';
 import {
   createConnectorFixture,
   getConnectorIdAsUuid,
@@ -167,13 +167,7 @@ describe('createConnectorFixture', () => {
   });
 
   it('handles 409 conflict on create when another worker already created the connector', async () => {
-    const conflictError = new AxiosError('Conflict', '409', undefined, undefined, {
-      status: 409,
-      data: {},
-      headers: {},
-      statusText: 'Conflict',
-      config: {} as any,
-    });
+    const conflictError = Object.assign(new Error('Conflict'), { status: 409 });
 
     // First call (preconfigured check) returns not preconfigured, second call (POST) returns 409
     mockFetch
@@ -197,16 +191,15 @@ describe('createConnectorFixture', () => {
   });
 
   it('handles 400 when inference endpoint already exists (parallel workers)', async () => {
-    const existsError = new AxiosError('Bad Request', '400', undefined, undefined, {
+    const existsError = Object.assign(new Error('Bad Request'), {
       status: 400,
-      data: {
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'Inference endpoint [dev-my-test-connector] already exists',
+      response: {
+        data: {
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'Inference endpoint [dev-my-test-connector] already exists',
+        },
       },
-      headers: {},
-      statusText: 'Bad Request',
-      config: {} as any,
     });
 
     mockFetch.mockResolvedValueOnce({ is_preconfigured: false }).mockRejectedValueOnce(existsError);
@@ -227,13 +220,7 @@ describe('createConnectorFixture', () => {
   });
 
   it('throws non-conflict errors on create', async () => {
-    const serverError = new AxiosError('Internal Server Error', '500', undefined, undefined, {
-      status: 500,
-      data: {},
-      headers: {},
-      statusText: 'Internal Server Error',
-      config: {} as any,
-    });
+    const serverError = Object.assign(new Error('Internal Server Error'), { status: 500 });
 
     // First call (preconfigured check) succeeds, second call (POST) fails hard
     mockFetch.mockResolvedValueOnce({ is_preconfigured: false }).mockRejectedValueOnce(serverError);
@@ -252,12 +239,9 @@ describe('createConnectorFixture', () => {
   });
 
   it('throws 400 when message is not an already-exists case', async () => {
-    const badRequest = new AxiosError('Bad Request', '400', undefined, undefined, {
+    const badRequest = Object.assign(new Error('Bad Request'), {
       status: 400,
-      data: { message: 'Invalid API key' },
-      headers: {},
-      statusText: 'Bad Request',
-      config: {} as any,
+      response: { data: { message: 'Invalid API key' } },
     });
 
     mockFetch.mockResolvedValueOnce({ is_preconfigured: false }).mockRejectedValueOnce(badRequest);
@@ -290,6 +274,148 @@ describe('createConnectorFixture', () => {
       method: 'GET',
     });
     expect(mockUse).toHaveBeenCalledWith(predefinedConnector);
+  });
+
+  describe('with KbnClientRequesterError (production error shape)', () => {
+    // KbnClient stringifies the response body into the error message after ` -- `, mirroring what
+    // `KbnClientRequester` does in production. Tests must use this exact shape to cover the real
+    // failure path that surfaces from `httpHandlerFromKbnClient`.
+    const buildKbnClientError = (status: number, body: unknown) =>
+      new KbnClientRequesterError(
+        `[POST http://localhost:5620/api/actions/connector/${expectedUuid}] ${status} -- ${JSON.stringify(
+          body
+        )}`,
+        { status }
+      );
+
+    it('handles 409 conflict on create (race between parallel workers)', async () => {
+      const conflictError = buildKbnClientError(409, {
+        statusCode: 409,
+        error: 'Conflict',
+        message: `A connector is already using this ID: ${expectedUuid}. Choose a different ID.`,
+      });
+
+      mockFetch
+        .mockResolvedValueOnce({ is_preconfigured: false })
+        .mockRejectedValueOnce(conflictError);
+
+      await expect(
+        createConnectorFixture({
+          predefinedConnector,
+          fetch: mockFetch,
+          log: mockLog,
+          use: mockUse,
+        })
+      ).resolves.toBeUndefined();
+
+      expect(mockUse).toHaveBeenCalledWith({
+        ...predefinedConnector,
+        id: expectedUuid,
+      });
+    });
+
+    it('handles 400 when inference endpoint already exists', async () => {
+      const existsError = buildKbnClientError(400, {
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'Inference endpoint [dev-my-test-connector] already exists',
+      });
+
+      mockFetch
+        .mockResolvedValueOnce({ is_preconfigured: false })
+        .mockRejectedValueOnce(existsError);
+
+      await expect(
+        createConnectorFixture({
+          predefinedConnector,
+          fetch: mockFetch,
+          log: mockLog,
+          use: mockUse,
+        })
+      ).resolves.toBeUndefined();
+
+      expect(mockUse).toHaveBeenCalledWith({
+        ...predefinedConnector,
+        id: expectedUuid,
+      });
+    });
+
+    it('throws non-conflict errors on create', async () => {
+      const serverError = buildKbnClientError(500, {
+        statusCode: 500,
+        error: 'Internal Server Error',
+        message: 'Something broke',
+      });
+
+      mockFetch
+        .mockResolvedValueOnce({ is_preconfigured: false })
+        .mockRejectedValueOnce(serverError);
+
+      await expect(
+        createConnectorFixture({
+          predefinedConnector,
+          fetch: mockFetch,
+          log: mockLog,
+          use: mockUse,
+        })
+      ).rejects.toBeInstanceOf(KbnClientRequesterError);
+
+      expect(mockUse).not.toHaveBeenCalled();
+    });
+
+    it('throws 400 when message is not an already-exists case', async () => {
+      const badRequest = buildKbnClientError(400, {
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'Invalid API key',
+      });
+
+      mockFetch
+        .mockResolvedValueOnce({ is_preconfigured: false })
+        .mockRejectedValueOnce(badRequest);
+
+      await expect(
+        createConnectorFixture({
+          predefinedConnector,
+          fetch: mockFetch,
+          log: mockLog,
+          use: mockUse,
+        })
+      ).rejects.toBeInstanceOf(KbnClientRequesterError);
+
+      expect(mockUse).not.toHaveBeenCalled();
+    });
+
+    it('treats 404 on the preconfigured check as "not preconfigured" and creates the connector', async () => {
+      const notFound = new KbnClientRequesterError(
+        `[GET http://localhost:5620/api/actions/connector/${predefinedConnector.id}] 404 Not Found -- {}`,
+        { status: 404 }
+      );
+
+      mockFetch.mockRejectedValueOnce(notFound).mockResolvedValueOnce(undefined);
+
+      await createConnectorFixture({
+        predefinedConnector,
+        fetch: mockFetch,
+        log: mockLog,
+        use: mockUse,
+      });
+
+      expect(mockFetch).toHaveBeenNthCalledWith(2, {
+        path: `/api/actions/connector/${expectedUuid}`,
+        method: 'POST',
+        body: JSON.stringify({
+          config: predefinedConnector.config,
+          connector_type_id: predefinedConnector.actionTypeId,
+          name: predefinedConnector.name,
+          secrets: predefinedConnector.secrets,
+        }),
+      });
+      expect(mockUse).toHaveBeenCalledWith({
+        ...predefinedConnector,
+        id: expectedUuid,
+      });
+    });
   });
 
   describe('when KBN_EVALS_SKIP_CONNECTOR_SETUP is set', () => {

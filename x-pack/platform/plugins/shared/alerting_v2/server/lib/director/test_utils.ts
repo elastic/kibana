@@ -13,7 +13,7 @@ import type {
 import { createAlertEvent } from '../rule_executor/test_utils';
 import { createRuleResponse } from '../test_utils';
 import type { StateTransitionContext } from './strategies/types';
-import type { LatestAlertEventState } from './queries';
+import type { LastLifecycleActionType, LatestAlertEventState } from './queries';
 
 const DEFAULT_TIMESTAMP = '2025-01-01T00:00:00.000Z';
 const DEFAULT_EPISODE_ID = 'episode-1';
@@ -26,6 +26,7 @@ export const buildLatestAlertEvent = ({
   previousTimestamp,
   episodeId = DEFAULT_EPISODE_ID,
   groupHash = DEFAULT_GROUP_HASH,
+  lifecycleActionType = null,
 }: {
   episodeStatus: AlertEpisodeStatus | null;
   eventStatus: AlertEventStatus;
@@ -33,27 +34,34 @@ export const buildLatestAlertEvent = ({
   previousTimestamp?: string | null;
   episodeId?: string;
   groupHash?: string;
+  lifecycleActionType?: LastLifecycleActionType;
 }): LatestAlertEventState => ({
   last_status: eventStatus,
   last_episode_id: episodeId,
   last_episode_status: episodeStatus,
   last_episode_status_count: statusCount ?? null,
   last_episode_timestamp: previousTimestamp ?? DEFAULT_TIMESTAMP,
+  last_lifecycle_action_type: lifecycleActionType,
   group_hash: groupHash,
 });
 
 export const buildStrategyStateTransitionContext = ({
   eventStatus,
   stateTransition,
+  noDataStrategy,
   eventTimestamp,
   previousEpisode,
 }: {
   eventStatus: AlertEventStatus;
   stateTransition?: RuleResponse['state_transition'];
+  noDataStrategy?: RuleResponse['no_data_strategy'];
   eventTimestamp?: string;
   previousEpisode?: LatestAlertEventState;
 }): StateTransitionContext => ({
-  rule: createRuleResponse({ state_transition: stateTransition }),
+  rule: createRuleResponse({
+    state_transition: stateTransition,
+    no_data_strategy: noDataStrategy,
+  }),
   alertEvent: createAlertEvent({
     status: eventStatus,
     '@timestamp': eventTimestamp ?? DEFAULT_TIMESTAMP,

@@ -15,7 +15,7 @@ describe('EVAL > summary', () => {
     const command = root.commands[1];
     const result = summary(command, '');
 
-    expect(result).toEqual({ newColumns: new Set(['baz']) });
+    expect(result).toEqual({ newColumns: new Set(['baz']), renamedColumnsPairs: new Set() });
   });
 
   it('identifies user-defined columns from EVAL command with function expression', async () => {
@@ -23,7 +23,7 @@ describe('EVAL > summary', () => {
     const command = root.commands[1];
     const result = summary(command, '');
 
-    expect(result).toEqual({ newColumns: new Set(['baz']) });
+    expect(result).toEqual({ newColumns: new Set(['baz']), renamedColumnsPairs: new Set() });
   });
 
   it('identifies automatically created columns from EVAL command', async () => {
@@ -31,7 +31,7 @@ describe('EVAL > summary', () => {
     const command = root.commands[1];
     const result = summary(command, '');
 
-    expect(result).toEqual({ newColumns: new Set(['ABS(x)']) });
+    expect(result).toEqual({ newColumns: new Set(['ABS(x)']), renamedColumnsPairs: new Set() });
   });
 
   it('identifies automatically created columns from EVAL command with more complex expression', async () => {
@@ -39,6 +39,45 @@ describe('EVAL > summary', () => {
     const command = root.commands[1];
     const result = summary(command, '');
 
-    expect(result).toEqual({ newColumns: new Set(['ABS(x)+ABS(y+1)']) });
+    expect(result).toEqual({
+      newColumns: new Set(['ABS(x)+ABS(y+1)']),
+      renamedColumnsPairs: new Set(),
+    });
+  });
+
+  it('EVAL new = old is treated as a rename', async () => {
+    const { root } = Parser.parse(`FROM logs | EVAL new_name = old_name`);
+    const command = root.commands[1];
+    const result = summary(command, '');
+
+    expect(result).toEqual({
+      newColumns: new Set(['new_name']),
+      renamedColumnsPairs: new Set([['new_name', 'old_name']]),
+    });
+  });
+
+  it('EVAL new = old captures multiple renames', async () => {
+    const { root } = Parser.parse(`FROM logs | EVAL a = x, b = y`);
+    const command = root.commands[1];
+    const result = summary(command, '');
+
+    expect(result).toEqual({
+      newColumns: new Set(['a', 'b']),
+      renamedColumnsPairs: new Set([
+        ['a', 'x'],
+        ['b', 'y'],
+      ]),
+    });
+  });
+
+  it('EVAL new = func(...) is not a rename', async () => {
+    const { root } = Parser.parse(`FROM logs | EVAL new_name = ABS(old_name)`);
+    const command = root.commands[1];
+    const result = summary(command, '');
+
+    expect(result).toEqual({
+      newColumns: new Set(['new_name']),
+      renamedColumnsPairs: new Set(),
+    });
   });
 });

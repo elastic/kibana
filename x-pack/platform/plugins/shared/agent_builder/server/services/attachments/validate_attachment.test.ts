@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { AttachmentResolveContext } from '@kbn/agent-builder-server/attachments';
+import { createResolveContextMock } from '../../test_utils';
 import { validateAttachment } from './validate_attachment';
 import type { AttachmentTypeRegistry } from './attachment_type_registry';
 
@@ -22,12 +22,8 @@ const createRegistry = (definition: {
   } as unknown as AttachmentTypeRegistry);
 
 describe('validateAttachment', () => {
-  const request = httpServerMock.createKibanaRequest();
-  const resolveContext: AttachmentResolveContext = {
-    request,
-    spaceId: 'default',
-    savedObjectsClient: {} as AttachmentResolveContext['savedObjectsClient'],
-  };
+  const resolveContext = createResolveContextMock();
+  const validateContext = { request: resolveContext.request };
 
   describe('Converse attachment input scenarios (structural + resolution)', () => {
     it('only data: validates using inline data', async () => {
@@ -39,6 +35,7 @@ describe('validateAttachment', () => {
         attachment: { type: 'text', data: { body: 'only-data' } },
         registry,
         resolveContext,
+        validateContext,
       });
 
       expect(result).toEqual({
@@ -61,6 +58,7 @@ describe('validateAttachment', () => {
         attachment: { type: 'text', origin: 'dashboard-id' },
         registry,
         resolveContext,
+        validateContext,
       });
 
       expect(result).toEqual({
@@ -84,6 +82,7 @@ describe('validateAttachment', () => {
         attachment: { type: 'text', data: { body: 'inline' }, origin: 'so-1' },
         registry,
         resolveContext,
+        validateContext,
       });
 
       expect(resolve).not.toHaveBeenCalled();
@@ -106,6 +105,7 @@ describe('validateAttachment', () => {
         attachment: { type: 'text' },
         registry,
         resolveContext,
+        validateContext,
       });
 
       expect(result).toEqual({

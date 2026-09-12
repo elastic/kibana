@@ -35,14 +35,14 @@ export function TotalDocCountLabel({ eventType, totalDocCount }: Props) {
       `}
     >
       {eventType === ProcessorEvent.transaction
-        ? i18n.translate('kbnApmUiShared.durationDistributionChart.totalTransactionsCount', {
+        ? i18n.translate('apmUiShared.durationDistributionChart.totalTransactionsCount', {
             defaultMessage:
               '{totalDocCount} total {totalDocCount, plural, one {transaction} other {transactions}}',
             values: {
               totalDocCount,
             },
           })
-        : i18n.translate('kbnApmUiShared.durationDistributionChart.totalSpansCount', {
+        : i18n.translate('apmUiShared.durationDistributionChart.totalSpansCount', {
             defaultMessage:
               '{totalDocCount} total {totalDocCount, plural, one {span} other {spans}}',
             values: {

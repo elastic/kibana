@@ -14,14 +14,34 @@ import { wrapFunction, wrapAsyncFunction } from './wrap_function';
  *  so that any "runnable" arguments passed to it are wrapped and will
  *  trigger a lifecycle event if they throw an error.
  */
-export function wrapRunnableArgs(fn, lifecycle, handler) {
+export function wrapRunnableArgs(fn, lifecycle, handler, options = {}) {
+  const { hookTimeout, testTimeout } = options;
   return wrapFunction(fn, {
     before(target, thisArg, argumentsList) {
       for (let i = 0; i < argumentsList.length; i++) {
         if (typeof argumentsList[i] === 'function') {
           argumentsList[i] = wrapAsyncFunction(argumentsList[i], {
             async before(target, thisArg) {
+              if (lifecycle.isAborting) {
+                // fail fast instead of waiting out the full hook/test timeout
+                const runnable = thisArg.test;
+                if (runnable && typeof runnable.timeout === 'function') {
+                  runnable.timeout(1);
+                }
+                throw new Error('FTR run aborted (mocha timeout) - skipping remaining runnable');
+              }
+
               await lifecycle.beforeEachRunnable.trigger(thisArg);
+              if (typeof hookTimeout === 'number') {
+                const runnable = thisArg.test;
+                if (
+                  runnable &&
+                  typeof runnable.timeout === 'function' &&
+                  runnable.timeout() === testTimeout
+                ) {
+                  runnable.timeout(hookTimeout);
+                }
+              }
             },
 
             async handleError(target, thisArg, argumentsList, err) {

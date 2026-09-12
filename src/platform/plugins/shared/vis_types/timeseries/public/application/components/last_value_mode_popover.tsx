@@ -13,6 +13,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiSwitch,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -39,13 +40,20 @@ export const LastValueModePopover = ({
         height: auto;
       `}
       button={
-        <EuiButtonIcon
-          iconType={'gear'}
-          onClick={onButtonClick}
-          aria-label={i18n.translate('visTypeTimeseries.lastValueModePopover.gearButton', {
+        <EuiToolTip
+          content={i18n.translate('visTypeTimeseries.lastValueModePopover.gearButton', {
             defaultMessage: 'Change last value indicator display option',
           })}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType={'gear'}
+            onClick={onButtonClick}
+            aria-label={i18n.translate('visTypeTimeseries.lastValueModePopover.gearButton', {
+              defaultMessage: 'Change last value indicator display option',
+            })}
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}

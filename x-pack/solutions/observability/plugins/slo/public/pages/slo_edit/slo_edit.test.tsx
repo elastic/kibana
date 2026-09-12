@@ -29,11 +29,9 @@ import { useFetchSloTemplate } from '../../hooks/use_fetch_slo_template';
 import { useKibana } from '../../hooks/use_kibana';
 import { usePermissions } from '../../hooks/use_permissions';
 import { useUpdateSlo } from '../../hooks/use_update_slo';
-import { PluginContext } from '../../context/plugin_context';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
-import { render, pluginContextDefaultValue } from '../../utils/test_helper';
+import { render } from '../../utils/test_helper';
 import { SloEditPage } from './slo_edit';
-
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: jest.fn(),
@@ -241,7 +239,7 @@ describe('SLO Edit Page', () => {
 
       render(<SloEditPage />);
 
-      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slosWelcome));
+      expect(mockNavigate).toHaveBeenCalledWith(mockBasePathPrepend(paths.slosWelcome));
     });
 
     it('with no read permission triggers a redirect to the SLO welcome page', async () => {
@@ -255,7 +253,7 @@ describe('SLO Edit Page', () => {
 
       render(<SloEditPage />);
 
-      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slosWelcome));
+      expect(mockNavigate).toHaveBeenCalledWith(mockBasePathPrepend(paths.slosWelcome));
     });
 
     it('with no write permission triggers a redirect to the SLO List page', async () => {
@@ -269,7 +267,7 @@ describe('SLO Edit Page', () => {
 
       render(<SloEditPage />);
 
-      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slos));
+      expect(mockNavigate).toHaveBeenCalledWith(mockBasePathPrepend(paths.slos));
     });
 
     it('renders an empty SLO Edit Form', async () => {
@@ -385,7 +383,7 @@ describe('SLO Edit Page', () => {
 
       render(<SloEditPage />);
 
-      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slosWelcome));
+      expect(mockNavigate).toHaveBeenCalledWith(mockBasePathPrepend(paths.slosWelcome));
     });
 
     it('with no read permission triggers a redirect to the SLO welcome page', async () => {
@@ -399,7 +397,7 @@ describe('SLO Edit Page', () => {
 
       render(<SloEditPage />);
 
-      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slosWelcome));
+      expect(mockNavigate).toHaveBeenCalledWith(mockBasePathPrepend(paths.slosWelcome));
     });
 
     it('with no write permission triggers a redirect to the SLO List page', async () => {
@@ -412,7 +410,7 @@ describe('SLO Edit Page', () => {
       });
       render(<SloEditPage />);
 
-      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slos));
+      expect(mockNavigate).toHaveBeenCalledWith(mockBasePathPrepend(paths.slos));
     });
 
     it('prefills the form with the SLO values', async () => {
@@ -444,34 +442,7 @@ describe('SLO Edit Page', () => {
       });
 
       expect(mockUpdate).toHaveBeenCalled();
-      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slos));
-    });
-  });
-
-  describe('CPS readiness banner', () => {
-    beforeEach(() => {
-      jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: undefined });
-      jest
-        .spyOn(Router, 'useLocation')
-        .mockReturnValue({ pathname: '/slos/create', search: '', state: '', hash: '' });
-      useFetchSloDetailsMock.mockReturnValue({ isInitialLoading: false, data: undefined });
-      useFetchSloTemplateMock.mockReturnValue({ isInitialLoading: false, data: undefined });
-    });
-
-    it('does not render the CPS readiness banner when not serverless', () => {
-      const { queryByTestId } = render(<SloEditPage />);
-
-      expect(queryByTestId('sloEditFormCpsReadinessBanner')).toBeNull();
-    });
-
-    it('renders the CPS readiness banner when serverless', () => {
-      const { queryByTestId } = render(
-        <PluginContext.Provider value={{ ...pluginContextDefaultValue, isServerless: true }}>
-          <SloEditPage />
-        </PluginContext.Provider>
-      );
-
-      expect(queryByTestId('sloEditFormCpsReadinessBanner')).toBeTruthy();
+      expect(mockNavigate).toHaveBeenCalledWith(mockBasePathPrepend(paths.slos));
     });
   });
 });

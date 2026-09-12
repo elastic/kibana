@@ -7,17 +7,15 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import type { EisInferenceEndpoint } from '../../../common/types';
 
 import { ModelEndpointRow } from './model_endpoint_row';
 
-const createEndpoint = (
-  overrides: Partial<InferenceAPIConfigResponse> = {}
-): InferenceAPIConfigResponse => ({
+const createEndpoint = (overrides: Partial<EisInferenceEndpoint> = {}): EisInferenceEndpoint => ({
   inference_id: 'my-endpoint',
   task_type: 'text_embedding',
   service: 'elastic',
-  service_settings: {},
+  service_settings: { model_id: 'test-model' },
   ...overrides,
 });
 

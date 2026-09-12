@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { AgentExplorerAgentsResponse } from '@kbn/apm-api-shared';
 import { isOpenTelemetryAgentName } from '../../../common/agent_name';
-import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import type { RandomSampler } from '../../lib/helpers/get_random_sampler';
 import { getAgentDocsPageUrl } from './get_agent_url_repository';
@@ -21,19 +21,6 @@ const getOtelAgentVersion = (item: {
     ? item.agentTelemetryAutoVersion
     : item.agentVersion;
 };
-
-export interface AgentExplorerAgentsResponse {
-  items: Array<{
-    agentDocsPageUrl: string | undefined;
-    serviceName: string;
-    environments: string[];
-    agentName: AgentName;
-    agentVersion: string[];
-    agentTelemetryAutoVersion: string[];
-    instances: number;
-    latestVersion?: string;
-  }>;
-}
 
 export async function getAgents({
   environment,

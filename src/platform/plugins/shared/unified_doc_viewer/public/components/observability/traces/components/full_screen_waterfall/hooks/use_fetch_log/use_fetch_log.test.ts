@@ -235,6 +235,16 @@ describe('useFetchLog', () => {
     });
   });
 
+  it('should expose the thrown error so consumers can render an error state', async () => {
+    const thrownError = new Error('Fetch error');
+    mockFetchLogDocumentById.mockRejectedValue(thrownError);
+
+    const { result } = renderHook(() => useFetchLog({ id }));
+
+    await waitFor(() => expect(result.current.error).toBeDefined());
+    expect(result.current.error).toBe(thrownError);
+  });
+
   it('should refetch when id changes', async () => {
     const mockLogData1 = {
       _index: 'logs-*',

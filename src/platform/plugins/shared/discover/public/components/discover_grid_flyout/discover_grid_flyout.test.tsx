@@ -23,6 +23,7 @@ import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/pub
 import { discoverServiceMock } from '../../__mocks__/services';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import type { UnifiedDocViewerFlyoutProps } from '@kbn/unified-doc-viewer-plugin/public';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../context_awareness';
 
 let mockRenderCustomHeader: UnifiedDocViewerFlyoutProps['renderCustomHeader'] | undefined;
 
@@ -31,17 +32,19 @@ jest.mock('@kbn/unified-doc-viewer-plugin/public', () => {
   const OriginalFlyout = actual.UnifiedDocViewerFlyout;
   return {
     ...actual,
-    UnifiedDocViewerFlyout: (props: UnifiedDocViewerFlyoutProps) => (
-      <>
-        <div data-test-subj="mockFlyoutTitle">
-          {props.flyoutTitle ?? (props.isEsqlQuery ? 'Result' : 'Document')}
-        </div>
-        <OriginalFlyout
-          {...props}
-          {...(mockRenderCustomHeader ? { renderCustomHeader: mockRenderCustomHeader } : {})}
-        />
-      </>
-    ),
+    UnifiedDocViewerFlyout: (props: UnifiedDocViewerFlyoutProps) => {
+      return (
+        <>
+          <div data-test-subj="mockFlyoutTitle">
+            {props.flyoutTitle ?? (props.isEsqlQuery ? 'Result' : 'Document')}
+          </div>
+          <OriginalFlyout
+            {...props}
+            {...(mockRenderCustomHeader ? { renderCustomHeader: mockRenderCustomHeader } : {})}
+          />
+        </>
+      );
+    },
   };
 });
 
@@ -292,6 +295,7 @@ describe('Discover flyout', function () {
       ];
       const scopedProfilesManager = services.profilesManager.createScopedProfilesManager({
         scopedEbtManager: services.ebtManager.createScopedEBTManager(),
+        toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
       });
       const records = buildDataTableRecordList({
         records: hits as EsHitRecord[],
@@ -308,6 +312,7 @@ describe('Discover flyout', function () {
       const services = getServices();
       const scopedProfilesManager = services.profilesManager.createScopedProfilesManager({
         scopedEbtManager: services.ebtManager.createScopedEBTManager(),
+        toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
       });
       const records = buildDataTableRecordList({
         records: esHitsMock as EsHitRecord[],
@@ -323,6 +328,7 @@ describe('Discover flyout', function () {
       const services = getServices();
       const scopedProfilesManager = services.profilesManager.createScopedProfilesManager({
         scopedEbtManager: services.ebtManager.createScopedEBTManager(),
+        toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
       });
       const records = buildDataTableRecordList({
         records: esHitsMock as EsHitRecord[],

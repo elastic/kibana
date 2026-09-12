@@ -210,6 +210,19 @@ export const SearchExamplesApp = ({
     setWarningContents([]);
     setIsLoading(true);
 
+    const result = await data.search.dslPaginated({
+      index: dataView,
+      query,
+      size: 100,
+      sort: [{ '@timestamp': 'desc' }],
+    });
+
+    // Fetch next page
+    if (result.pagination.hasNextPage) {
+      const nextPage = await result.pagination.nextPage();
+      void nextPage;
+    }
+
     data.search
       .search(req, {
         strategy,

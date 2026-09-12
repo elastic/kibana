@@ -42,8 +42,9 @@ export const EmbeddableWelcomeMessage = () => {
     }
   }, [isAnyStreaming]);
 
-  const { conversations = [], isLoading } = useConversationList();
-  const hasNoConversations = isLoading === false && conversations.length === 0;
+  // Fetch only 1 conversation — just enough to know whether any exist at all.
+  const { total, isLoading } = useConversationList({ perPage: 1 });
+  const hasNoConversations = isLoading === false && total === 0;
 
   // Only render the Welcome Message if the user has NO conversations AND the welcome message has not been dismissed
   if (!showCallOut || !hasNoConversations) return null;

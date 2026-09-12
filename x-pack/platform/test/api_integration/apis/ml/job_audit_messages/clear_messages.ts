@@ -123,5 +123,20 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(getBody.messages[0].cleared).to.not.eql(true);
     });
+
+    it('should reject invalid notification indices', async () => {
+      const { body, status } = await supertest
+        .put(`/internal/ml/job_audit_messages/clear_messages`)
+        .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+        .set(getCommonRequestHeader('1'))
+        .send({
+          jobId: 'test_get_job_audit_messages_1',
+          notificationIndices: ['not-a-notification-index'],
+        });
+      ml.api.assertResponseStatusCode(400, status, body);
+
+      expect(body.error).to.eql('Bad Request');
+      expect(body.message).to.eql('Invalid notification index: not-a-notification-index');
+    });
   });
 };

@@ -6,9 +6,10 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
+import { InlineFieldActions } from './inline_field_actions';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import { getFieldSnakeKey } from '../../../../../common/utils';
 import type {
@@ -16,9 +17,12 @@ import type {
   ConditionRenderProps,
 } from '../../../../../common/types/domain/template/fields';
 import { FIELD_REQUIRED, FIELD_MIN_VALUE, FIELD_MAX_VALUE } from '../../translations';
-import { OptionalFieldLabel } from '../../../optional_field_label';
+import { getFieldRequirementLabel } from '../../../optional_field_label';
 
-type InputNumberProps = z.infer<typeof InputNumberFieldSchema> & ConditionRenderProps;
+type InputNumberProps = z.infer<typeof InputNumberFieldSchema> &
+  ConditionRenderProps & {
+    onEditCancel?: () => void;
+  };
 
 const isEmptyNumeric = (value: unknown): boolean => {
   if (value === undefined || value === null) return true;
@@ -27,9 +31,26 @@ const isEmptyNumeric = (value: unknown): boolean => {
   return false;
 };
 
-export const InputNumber = ({ label, name, type, isRequired, min, max }: InputNumberProps) => {
-  const { control } = useFormContext();
+export const InputNumber = ({
+  label,
+  name,
+  type,
+  isRequired,
+  isRequiredOnClose,
+  min,
+  max,
+  onConfirm,
+  isSaving,
+  isSaveDisabled,
+  onEditCancel,
+}: InputNumberProps) => {
+  const { control, resetField } = useFormContext();
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
+
+  const handleCancel = useCallback(() => {
+    resetField(path);
+    onEditCancel?.();
+  }, [onEditCancel, path, resetField]);
 
   const rules = useMemo(() => {
     const validate: Record<string, (value: unknown) => true | string> = {};
@@ -64,25 +85,40 @@ export const InputNumber = ({ label, name, type, isRequired, min, max }: InputNu
       control={control}
       rules={rules}
       defaultValue=""
-      render={({ field, fieldState }) => (
-        <EuiFormRow
-          label={label}
-          labelAppend={!isRequired ? OptionalFieldLabel : undefined}
-          isInvalid={!!fieldState.error}
-          error={fieldState.error?.message}
-          fullWidth
-        >
-          <EuiFieldNumber
-            inputRef={field.ref}
-            name={field.name}
-            value={(field.value as string | number | undefined) ?? ''}
-            onChange={(e) => field.onChange(e.target.value)}
-            onBlur={field.onBlur}
-            isInvalid={!!fieldState.error}
-            fullWidth
-          />
-        </EuiFormRow>
-      )}
+      render={({ field, fieldState }) => {
+        const showInlineActions = fieldState.isDirty && onConfirm != null;
+        return (
+          <>
+            <EuiFormRow
+              label={label}
+              labelAppend={getFieldRequirementLabel(isRequired, isRequiredOnClose)}
+              isInvalid={Boolean(fieldState.error)}
+              error={fieldState.error?.message}
+              fullWidth
+            >
+              <EuiFieldNumber
+                inputRef={field.ref}
+                name={field.name}
+                value={(field.value as string | number | undefined) ?? ''}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                isInvalid={Boolean(fieldState.error)}
+                disabled={isSaving}
+                fullWidth
+              />
+            </EuiFormRow>
+            {showInlineActions && onConfirm && (
+              <InlineFieldActions
+                name={name}
+                onConfirm={onConfirm}
+                onCancel={handleCancel}
+                isLoading={isSaving}
+                isDisabled={isSaveDisabled}
+              />
+            )}
+          </>
+        );
+      }}
     />
   );
 };

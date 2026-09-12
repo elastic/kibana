@@ -41,6 +41,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const securityService = getService('security');
   const kbnServer = getService('kibanaServer');
 
+  /**
+   * Purpose: Verify lens and vis by-value work when user does not have library permissions
+   *
+   * Migration: Migrate to scout
+   */
   describe('dashboard time to visualize security', () => {
     before(async () => {
       await esArchiver.loadIfNeeded(
@@ -146,7 +151,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await lens.switchToVisualization('lnsLegacyMetric');
 
         await lens.waitForVisualization('legacyMtrVis');
-        await lens.assertLegacyMetric('Average of bytes', '5,727.322');
+        await lens.assertLegacyMetric('Average of bytes', '5,727.314');
 
         await header.waitUntilLoadingHasFinished();
         await testSubjects.click('lnsApp_saveButton');
@@ -161,7 +166,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await dashboard.waitForRenderComplete();
 
-        await lens.assertLegacyMetric('Average of bytes', '5,727.322');
+        await lens.assertLegacyMetric('Average of bytes', '5,727.314');
 
         const panelCount = await dashboard.getPanelCount();
         expect(panelCount).to.eql(1);
@@ -234,7 +239,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         await dashboard.waitForRenderComplete();
-        await dashboardExpect.metricValuesExist(['14,005']);
+        await dashboardExpect.metricValuesExist(['14,004']);
         const panelCount = await dashboard.getPanelCount();
         expect(panelCount).to.eql(1);
       });

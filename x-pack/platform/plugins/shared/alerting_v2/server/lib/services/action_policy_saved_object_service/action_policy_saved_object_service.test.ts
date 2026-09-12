@@ -15,14 +15,11 @@ import { createActionPolicySavedObjectService } from './action_policy_saved_obje
 const mockAttrs: ActionPolicySavedObjectAttributes = {
   name: 'test-policy',
   description: 'A test action policy',
-  type: 'global',
   enabled: true,
   destinations: [{ type: 'workflow', id: 'workflow-1' }],
-  auth: {
-    apiKey: 'test-api-key',
-    owner: 'test-user',
-    createdByUser: false,
-  },
+  apiKey: 'test-api-key',
+  apiKeyOwner: 'test-user',
+  apiKeyCreatedByUser: false,
   createdBy: 'elastic',
   updatedBy: 'elastic',
   createdAt: '2025-01-01T00:00:00Z',
@@ -401,7 +398,74 @@ describe('ActionPolicySavedObjectService', () => {
     });
   });
 
-  describe('getDistinctTags', () => {
+  describe('find', () => {
+    const makeFindResponse = () => ({
+      saved_objects: [],
+      total: 0,
+      per_page: 10,
+      page: 1,
+    });
+
+    it('passes search, searchFields, and defaultSearchOperator AND when search is provided', async () => {
+      mockSoClient.find.mockResolvedValue(makeFindResponse());
+
+      await service.find({ page: 1, perPage: 10, search: 'my-policy' });
+
+      expect(mockSoClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: 'my-policy',
+          searchFields: ['name', 'description'],
+          defaultSearchOperator: 'AND',
+        })
+      );
+    });
+
+    it('does not pass search, searchFields, or defaultSearchOperator when search is undefined', async () => {
+      mockSoClient.find.mockResolvedValue(makeFindResponse());
+
+      await service.find({ page: 1, perPage: 10 });
+
+      const callArgs = mockSoClient.find.mock.calls[0][0];
+      expect(callArgs).not.toHaveProperty('search');
+      expect(callArgs).not.toHaveProperty('searchFields');
+      expect(callArgs).not.toHaveProperty('defaultSearchOperator');
+    });
+
+    it('passes filter, sortField, and sortOrder', async () => {
+      mockSoClient.find.mockResolvedValue(makeFindResponse());
+
+      await service.find({
+        page: 2,
+        perPage: 5,
+        sortField: 'createdAt',
+        sortOrder: 'desc',
+      });
+
+      expect(mockSoClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          page: 2,
+          perPage: 5,
+          sortField: 'createdAt',
+          sortOrder: 'desc',
+        })
+      );
+    });
+
+    it('defaults sortField to name.keyword and sortOrder to asc', async () => {
+      mockSoClient.find.mockResolvedValue(makeFindResponse());
+
+      await service.find({ page: 1, perPage: 10 });
+
+      expect(mockSoClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sortField: 'name.keyword',
+          sortOrder: 'asc',
+        })
+      );
+    });
+  });
+
+  describe('findTags', () => {
     const makeTagsAggResponse = (
       buckets: Array<{ key: string }>,
       opts?: { omitAggregations?: boolean }
@@ -416,7 +480,7 @@ describe('ActionPolicySavedObjectService', () => {
         makeTagsAggResponse([{ key: 'production' }, { key: 'critical' }, { key: 'staging' }])
       );
 
-      const result = await service.getDistinctTags();
+      const result = await service.findTags();
 
       expect(result).toEqual(['production', 'critical', 'staging']);
       expect(mockSoClient.find).toHaveBeenCalledWith({
@@ -426,8 +490,8 @@ describe('ActionPolicySavedObjectService', () => {
           tags: {
             terms: {
               field: `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.tags`,
-              size: 100,
-              order: { _key: 'asc' },
+              size: 20,
+              order: { _count: 'desc' },
             },
           },
         },
@@ -437,7 +501,7 @@ describe('ActionPolicySavedObjectService', () => {
     it('passes include prefix pattern when search is provided', async () => {
       mockSoClient.find.mockResolvedValue(makeTagsAggResponse([{ key: 'production' }]));
 
-      const result = await service.getDistinctTags({ search: 'prod' });
+      const result = await service.findTags({ search: 'prod' });
 
       expect(result).toEqual(['production']);
       expect(mockSoClient.find).toHaveBeenCalledWith({
@@ -447,8 +511,8 @@ describe('ActionPolicySavedObjectService', () => {
           tags: {
             terms: {
               field: `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.tags`,
-              size: 100,
-              order: { _key: 'asc' },
+              size: 20,
+              order: { _count: 'desc' },
               include: 'prod.*',
             },
           },
@@ -459,7 +523,7 @@ describe('ActionPolicySavedObjectService', () => {
     it('escapes special regex characters in search', async () => {
       mockSoClient.find.mockResolvedValue(makeTagsAggResponse([]));
 
-      await service.getDistinctTags({ search: 'test[foo' });
+      await service.findTags({ search: 'test[foo' });
 
       expect(mockSoClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -477,7 +541,7 @@ describe('ActionPolicySavedObjectService', () => {
     it('returns empty array when aggregations are missing', async () => {
       mockSoClient.find.mockResolvedValue(makeTagsAggResponse([], { omitAggregations: true }));
 
-      const result = await service.getDistinctTags();
+      const result = await service.findTags();
 
       expect(result).toEqual([]);
     });
@@ -487,7 +551,7 @@ describe('ActionPolicySavedObjectService', () => {
         makeTagsAggResponse([{ key: 'production' }, { key: '' }, { key: 'staging' }])
       );
 
-      const result = await service.getDistinctTags();
+      const result = await service.findTags();
 
       expect(result).toEqual(['production', 'staging']);
     });

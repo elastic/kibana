@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import type { CoreStart, ScopedHistory, ExecutionContextStart } from '@kbn/core/public';
 
 import { KibanaRenderContextProvider, useExecutionContext } from '../shared_imports';

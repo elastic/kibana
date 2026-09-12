@@ -163,9 +163,12 @@ export class UiamApiKeyProvisioningTask {
       nextRunNumber: nextRuns,
     });
 
+    // Re-run soon when there is more to provision.
+    const shouldRunAgainSoon = hasMoreToProvision;
+
     return {
       state: { runs: nextRuns },
-      ...(hasMoreToProvision ? { runAt: new Date(Date.now() + RUN_AT_INTERVAL_MS) } : {}),
+      ...(shouldRunAgainSoon ? { runAt: new Date(Date.now() + RUN_AT_INTERVAL_MS) } : {}),
       telemetry,
     };
   };
@@ -255,7 +258,7 @@ export class UiamApiKeyProvisioningTask {
       };
     }
 
-    const { savedObjectsClient } = context;
+    const { unsafeSavedObjectsClient } = context;
     const updates = buildSavedObjectBulkUpdatesForUiamKeys(converted);
 
     const uiamKeyByTaskId = new Map(
@@ -263,7 +266,10 @@ export class UiamApiKeyProvisioningTask {
     );
 
     try {
-      const bulkResponse = await savedObjectsClient.bulkUpdate(updates);
+      // `uiamApiKey` is an ESO `attributesToEncrypt` on the `task` type, so this
+      // write must go through the encryption-aware client (see the context wiring
+      // in `create_provisioning_run_context.ts`).
+      const bulkResponse = await unsafeSavedObjectsClient.bulkUpdate(updates);
 
       const {
         provisioningStatusForCompletedTasks,
@@ -274,10 +280,12 @@ export class UiamApiKeyProvisioningTask {
         uiamKeyByTaskId
       );
       if (orphanedInvalidationTargets.length > 0) {
+        // `api_key_to_invalidate` also encrypts `uiamApiKey`, so the invalidation
+        // bulk create must use the encryption-aware client as well.
         await markApiKeysForInvalidation(
           orphanedInvalidationTargets,
           this.logger,
-          savedObjectsClient
+          unsafeSavedObjectsClient
         );
       }
 

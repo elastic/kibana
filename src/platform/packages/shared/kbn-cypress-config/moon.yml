@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/scout-reporting'
   - '@kbn/code-owners'
+  - '@kbn/peggy'
 tags:
   - shared-common
   - package

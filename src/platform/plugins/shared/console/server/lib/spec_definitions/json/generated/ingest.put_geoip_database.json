@@ -16,6 +16,12 @@
         "0"
       ]
     },
+    "data_autocomplete_rules": {
+      "name": "",
+      "maxmind": {
+        "account_id": ""
+      }
+    },
     "methods": [
       "PUT"
     ],

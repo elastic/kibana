@@ -7,17 +7,37 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout';
 
+export type PainlessContext = 'basic' | 'filter' | 'score';
+
+const CONTEXT_OPTION_TEST_SUBJECTS: Record<PainlessContext, string> = {
+  basic: 'basicButtonDropdown',
+  filter: 'filterButtonDropdown',
+  score: 'scoreButtonDropdown',
+};
+
 export class PainlessLab {
   public editorOutputPane: Locator;
   public requestFlyoutHeader: Locator;
   public viewRequestButton: Locator;
   public flyoutResponseTab: Locator;
+  public outputTab: Locator;
+  public parametersTab: Locator;
+  public contextTab: Locator;
+  public contextDropdown: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.editorOutputPane = this.page.testSubj.locator('painlessTabs-loaded');
     this.requestFlyoutHeader = this.page.testSubj.locator('painlessLabRequestFlyoutHeader');
     this.viewRequestButton = this.page.testSubj.locator('btnViewRequest');
     this.flyoutResponseTab = this.page.locator('#response');
+    this.outputTab = this.editorOutputPane.locator('#output');
+    this.parametersTab = this.editorOutputPane.locator('#parameters');
+    this.contextTab = this.editorOutputPane.locator('#context');
+    this.contextDropdown = this.page.testSubj.locator('painlessContextDropDown');
+  }
+
+  contextOption(context: PainlessContext): Locator {
+    return this.page.testSubj.locator(CONTEXT_OPTION_TEST_SUBJECTS[context]);
   }
 
   async goto() {
@@ -25,8 +45,12 @@ export class PainlessLab {
   }
 
   async waitForEditorToLoad() {
-    // wait for page to be rendered
-    await this.page.testSubj.locator('kibanaCodeEditor').waitFor({ state: 'visible' });
+    // Dev Tools + the Monaco code editor are a heavy, lazily-loaded bundle: on cold or
+    // resource-contended runs (notably serverless) the app can sit on the "Loading Elastic"
+    // splash for more than the default 10s, so give the editor a longer readiness budget.
+    await this.page.testSubj
+      .locator('kibanaCodeEditor')
+      .waitFor({ state: 'visible', timeout: 30_000 });
     await this.editorOutputPane.waitFor({ state: 'visible' });
   }
 

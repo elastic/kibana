@@ -8,14 +8,10 @@
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { ToolsFlyoutHeader } from '../../../shared/components/tools_flyout_header';
+import { DocumentToolsFlyoutHeader } from '../../../shared/components/document_tools_flyout_header';
 import { CorrelationsDetailsView } from './components/correlations_details_view';
-
-const TITLE = i18n.translate('xpack.securitySolution.flyout.correlations.title', {
-  defaultMessage: 'Correlations',
-});
+import { CORRELATIONS_TITLE } from '../../../shared/constants/flyout_titles';
 
 export interface CorrelationsDetailsProps {
   /**
@@ -27,19 +23,14 @@ export interface CorrelationsDetailsProps {
    */
   scopeId: string;
   /**
-   * Whether the document is being displayed in a rule preview
-   */
-  isRulePreview: boolean;
-  /**
    * Callback to open an alert preview when clicking the preview button in the correlations table
    */
-  onShowAlert: (id: string, indexName: string) => void;
+  onShowAlert: (id: string, indexName: string, title?: string) => void;
   /**
    * Callback to open an attack preview when clicking the expand button in the related attacks table.
    * When not provided, the expand button column is hidden.
-   * // TODO make required once we have an attack flyout in the new flyout system
    */
-  onShowAttack?: (id: string, indexName: string) => void;
+  onShowAttack?: (id: string, indexName: string, title?: string) => void;
 }
 
 /**
@@ -47,7 +38,7 @@ export interface CorrelationsDetailsProps {
  * This component is meant to be used in a tools flyout, with the new EUI flyout system.
  */
 export const CorrelationsDetails = memo(
-  ({ hit, scopeId, isRulePreview, onShowAlert, onShowAttack }: CorrelationsDetailsProps) => {
+  ({ hit, scopeId, onShowAlert, onShowAttack }: CorrelationsDetailsProps) => {
     const { euiTheme } = useEuiTheme();
 
     return (
@@ -58,13 +49,12 @@ export const CorrelationsDetails = memo(
             padding-block: ${euiTheme.size.s} !important;
           `}
         >
-          <ToolsFlyoutHeader hit={hit} title={TITLE} />
+          <DocumentToolsFlyoutHeader title={CORRELATIONS_TITLE} hit={hit} />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <CorrelationsDetailsView
             hit={hit}
             scopeId={scopeId}
-            isRulePreview={isRulePreview}
             onShowAlert={onShowAlert}
             onShowAttack={onShowAttack}
             useLegacyExpandableFlyout={false}

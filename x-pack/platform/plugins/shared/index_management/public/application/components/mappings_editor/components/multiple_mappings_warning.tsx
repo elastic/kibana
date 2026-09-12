@@ -8,20 +8,18 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { documentationService } from '../../../services/documentation';
 
 export const MultipleMappingsWarning = () => (
-  <EuiCallOut
+  <KbnWarningCallout
     title={i18n.translate('xpack.idxMgmt.mappingsEditor.mappingTypesDetectedCallOutTitle', {
       defaultMessage: 'Mapping types detected',
     })}
-    iconType="warning"
-    color="warning"
     data-test-subj="mappingTypesDetectedCallout"
-  >
-    <p>
+    text={
       <FormattedMessage
         id="xpack.idxMgmt.mappingsEditor.mappingTypesDetectedCallOutDescription"
         defaultMessage="The mappings for this template uses types, which have been removed. {docsLink}"
@@ -38,6 +36,6 @@ export const MultipleMappingsWarning = () => (
           ),
         }}
       />
-    </p>
-  </EuiCallOut>
+    }
+  />
 );
