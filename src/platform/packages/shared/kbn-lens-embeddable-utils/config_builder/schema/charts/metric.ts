@@ -73,7 +73,7 @@ const compareToSchemaShared = z
   })
   .strict()
   .meta({
-    id: 'metricChartCompareToShared',
+    id: 'visMetricChartCompareToShared',
     title: 'Compare To Shared',
     description: 'Shared configuration for compare-to options (palette, icon, value visibility).',
   });
@@ -90,7 +90,7 @@ const barBackgroundChartSchema = z
   })
   .strict()
   .meta({
-    id: 'metricBarBackgroundChart',
+    id: 'visMetricBarBackgroundChart',
     title: 'Bar Background Chart',
     description: 'Bar chart shown as background context behind the primary metric value.',
   });
@@ -110,7 +110,7 @@ export const complementaryVizSchemaNoESQL = z
       .strict(),
   ])
   .meta({
-    id: 'metricComplementaryViz',
+    id: 'visMetricComplementaryViz',
     title: 'Complementary Visualization',
     description:
       'Secondary visualization displayed behind the primary metric value, either a bar chart (with optional max value) or a trend line.',
@@ -125,15 +125,15 @@ export const complementaryVizSchemaESQL = z
          */
         max_value: esqlColumnSchema,
       })
-      .meta({ id: 'metricComplementaryBar', title: 'Complementary Bar' }),
+      .meta({ id: 'visMetricComplementaryBar', title: 'Complementary Bar' }),
     z
       .object({
         type: z.literal('trend'),
       })
-      .meta({ id: 'metricComplementaryTrend', title: 'Complementary Trend' }),
+      .meta({ id: 'visMetricComplementaryTrend', title: 'Complementary Trend' }),
   ])
   .meta({
-    id: 'metricComplementaryVizESQL',
+    id: 'visMetricComplementaryVizESQL',
     title: 'Complementary Visualization',
     description: 'Bar chart or trendline shown behind the primary metric value.',
   });
@@ -212,7 +212,7 @@ const metricStylingSchema = z
       .strict()
       .optional()
       .meta({
-        id: 'metricIconConfig',
+        id: 'visMetricIconConfig',
         title: 'Icon Configuration',
         description: 'Icon configuration for the metric chart',
       }),
@@ -338,7 +338,7 @@ const metricStylingSchema = z
   })
   .strict()
   .meta({
-    id: 'metricStyling',
+    id: 'visMetricStyling',
     description: 'Visual chart styling options',
   });
 
@@ -380,12 +380,12 @@ const metricConfigSecondaryMetricOptionsShape = {
           to: z.literal('baseline'),
           baseline: z.number().default(0).meta({ description: 'Baseline value.' }),
         })
-        .meta({ id: 'metricCompareToBaseline', title: 'Compare To Baseline' }),
+        .meta({ id: 'visMetricCompareToBaseline', title: 'Compare To Baseline' }),
       compareToSchemaShared
         .extend({
           to: z.literal('primary'),
         })
-        .meta({ id: 'metricCompareToPrimary', title: 'Compare To Primary' }),
+        .meta({ id: 'visMetricCompareToPrimary', title: 'Compare To Primary' }),
     ])
     .optional()
     .meta({
@@ -505,7 +505,7 @@ export const metricConfigSchemaNoESQL = z
     }
   })
   .meta({
-    id: 'metricNoESQL',
+    id: 'visMetricNoESQL',
     title: 'Metric Chart (DSL)',
     description: 'Metric chart configuration for standard queries',
   });
@@ -564,13 +564,13 @@ export const metricConfigSchemaESQL = z
     }
   })
   .meta({
-    id: 'metricESQL',
+    id: 'visMetricESQL',
     title: 'Metric Chart (ES|QL)',
     description: 'Metric chart configuration for ES|QL queries',
   });
 
 export const metricConfigSchema = z.union([metricConfigSchemaNoESQL, metricConfigSchemaESQL]).meta({
-  id: 'metricChart',
+  id: 'visMetricChart',
   title: 'Metric Chart',
   description:
     'One or two metric values with optional color coding, trend line, and breakdown by dimension.',

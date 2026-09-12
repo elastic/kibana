@@ -198,7 +198,7 @@ export interface DocLinks {
     readonly vectorSearchDenseVector: string;
     readonly jinaEmbeddingModels: string;
     readonly vectorSearchBringOwnVectors: string;
-    readonly vectorDatabaseGetStarted: string;
+    readonly vectorDatabaseFullTextSearch: string;
     readonly start: string;
     readonly supportedNlpModels: string;
     readonly syncRules: string;
@@ -539,6 +539,7 @@ export interface DocLinks {
     elasticsearchSettings: string;
     elasticsearchEnableSecurity: string;
     elasticsearchEnableApiKeys: string;
+    esqlDataFederationSecurityPrivileges: string;
     indicesPrivileges: string;
     kibanaTLS: string;
     kibanaPrivileges: string;

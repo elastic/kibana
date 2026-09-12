@@ -226,3 +226,116 @@ export const EPISODES_KPIS_ERROR_TITLE = i18n.translate(
 export const EPISODES_KPIS_ERROR = i18n.translate('xpack.alertingV2.episodes.kpis.error', {
   defaultMessage: 'An error occurred while fetching the alert statistics. Try refreshing the page.',
 });
+
+export const CLASSIC_ALERT_DETAILS_TITLE = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.title',
+  {
+    defaultMessage: 'Classic alert',
+  }
+);
+
+export const CLASSIC_ALERT_DETAILS_VIEW_DETAILS = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.viewDetailsButton',
+  {
+    defaultMessage: 'View details',
+  }
+);
+
+export const CLASSIC_ALERT_DETAILS_CLOSE = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.closeButton',
+  {
+    defaultMessage: 'Close',
+  }
+);
+
+export const CLASSIC_ALERT_DETAILS_OVERVIEW_TAB = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.overviewTab',
+  {
+    defaultMessage: 'Overview',
+  }
+);
+
+export const CLASSIC_ALERT_DETAILS_FIELDS_TAB = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.fieldsTab',
+  {
+    defaultMessage: 'Fields',
+  }
+);
+
+export const CLASSIC_ALERT_DETAILS_LOADING = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.loading',
+  {
+    defaultMessage: 'Loading classic alert',
+  }
+);
+
+export const CLASSIC_ALERT_DETAILS_ERROR_TITLE = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.errorTitle',
+  {
+    defaultMessage: 'Unable to load classic alert',
+  }
+);
+
+export const CLASSIC_ALERT_DETAILS_ERROR_BODY = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.errorBody',
+  {
+    defaultMessage:
+      'The classic alert could not be loaded. It may have been deleted, or you may not have access to it.',
+  }
+);
+
+export const CLASSIC_ALERT_DETAILS_FIELD_STATUS = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.field.status',
+  {
+    defaultMessage: 'Status',
+  }
+);
+
+export const CLASSIC_ALERT_DETAILS_FIELD_RULE = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.field.rule',
+  {
+    defaultMessage: 'Rule',
+  }
+);
+
+export const CLASSIC_ALERT_DETAILS_FIELD_REASON = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.field.reason',
+  {
+    defaultMessage: 'Reason',
+  }
+);
+
+export const CLASSIC_ALERT_DETAILS_FIELD_SEVERITY = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.field.severity',
+  {
+    defaultMessage: 'Severity',
+  }
+);
+
+export const CLASSIC_ALERT_DETAILS_FIELD_STARTED = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.field.started',
+  {
+    defaultMessage: 'Triggered',
+  }
+);
+
+export const CLASSIC_ALERT_DETAILS_FIELD_LAST_UPDATED = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.field.lastUpdated',
+  {
+    defaultMessage: 'Last updated',
+  }
+);
+
+export const CLASSIC_ALERT_DETAILS_FIELD_DURATION = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.field.duration',
+  {
+    defaultMessage: 'Duration',
+  }
+);
+
+export const CLASSIC_ALERT_DETAILS_FIELD_TAGS = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.field.tags',
+  {
+    defaultMessage: 'Tags',
+  }
+);

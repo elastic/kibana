@@ -1,5 +1,5 @@
 {
-  "sha1": "d62be05fce331f13497465d306bf6d23978fb9a8",
+  "sha1": "ebb85a9c78b43996217d278c4181288b41c9d74c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -129,6 +129,123 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_switching.spec.ts",
         "line": 92,
+        "column": 20
+      }
+    },
+    {
+      "id": "7ed6373e7ffd5c3-a50ad196fb2d6e1",
+      "title": "Lens dimension editor edits label, format, color, style, and a long label on a saved XY chart",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/dimension_editor.spec.ts",
+        "line": 33,
+        "column": 15
+      }
+    },
+    {
+      "id": "7ed6373e7ffd5c3-3a4ec68165c8c53",
+      "title": "Lens dimension editor creates a valid XY chart with references",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/dimension_editor.spec.ts",
+        "line": 89,
+        "column": 20
+      }
+    },
+    {
+      "id": "7ed6373e7ffd5c3-3d788cf16e5d6a2",
+      "title": "Lens dimension editor allows formatting on references",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/dimension_editor.spec.ts",
+        "line": 123,
+        "column": 16
+      }
+    },
+    {
+      "id": "7ed6373e7ffd5c3-5bd89ffea1242cf",
+      "title": "Lens dimension editor handles edge cases in reference-based operations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/dimension_editor.spec.ts",
+        "line": 152,
+        "column": 18
+      }
+    },
+    {
+      "id": "7ed6373e7ffd5c3-f6f86da570b1f5f",
+      "title": "Lens dimension editor keeps the field selection while transitioning to every reference-based operation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/dimension_editor.spec.ts",
+        "line": 177,
+        "column": 18
+      }
+    },
+    {
+      "id": "7ed6373e7ffd5c3-cce52c525c9bad1",
+      "title": "Lens dimension editor does not leave an incomplete column for a field-based operation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/dimension_editor.spec.ts",
+        "line": 214,
+        "column": 16
+      }
+    },
+    {
+      "id": "7ed6373e7ffd5c3-e46be65d0ddb912",
+      "title": "Lens dimension editor reverts to the previous configuration when picking an incompatible operation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/dimension_editor.spec.ts",
+        "line": 224,
+        "column": 9
+      }
+    },
+    {
+      "id": "7ed6373e7ffd5c3-66a5559852f70c5",
+      "title": "Lens dimension editor transitions from unique count to last value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/dimension_editor.spec.ts",
+        "line": 251,
+        "column": 20
+      }
+    },
+    {
+      "id": "7ed6373e7ffd5c3-f08160eabc85daf",
+      "title": "Lens dimension editor optimizes multiple percentile metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/dimension_editor.spec.ts",
+        "line": 276,
         "column": 20
       }
     },

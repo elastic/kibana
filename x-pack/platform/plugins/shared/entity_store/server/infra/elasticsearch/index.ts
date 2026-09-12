@@ -20,6 +20,8 @@ export { updateByQueryWithScript } from './ingest';
 export type { UpdateByQueryWithScriptOptions } from './ingest';
 export { waitForTaskToComplete } from './wait_for_task';
 export type { WaitForTaskOptions } from './wait_for_task';
+export { retryOnConflict } from './retry_on_conflict';
+export type { RetryOnConflictOptions } from './retry_on_conflict';
 
 export interface CreateOptions {
   throwIfExists?: boolean;

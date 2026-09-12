@@ -27,6 +27,7 @@ import type {
   LensSerializedState,
   LensByRefSerializedState,
   LensByValueSerializedState,
+  LensDatasourceId,
 } from '@kbn/lens-common';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { getActiveDatasourceIdFromDoc } from '../../../utils';
@@ -41,7 +42,7 @@ import {
 } from '../../../state_management';
 import { generateId } from '../../../id_generator';
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
-import type { EditConfigPanelProps } from './types';
+import type { EditConfigPanelProps, LensPanelStateUpdater } from './types';
 import { LensDocumentService } from '../../../persistence';
 import { EditorFrameServiceProvider } from '../../../editor_frame_service/editor_frame_service_context';
 import { ESQLEditorContext } from '../../../editor_frame_service/editor_frame/config_panel/esql_editor_context';
@@ -64,15 +65,12 @@ function LoadingSpinnerWithOverlay() {
   );
 }
 
-type UpdaterType = (
-  datasourceState: unknown,
-  visualizationState: unknown,
-  visualizationType?: string
-) => void;
-
 // exported for testing
 export const updatingMiddleware =
-  (updater: UpdaterType) => (store: MiddlewareAPI) => (next: Dispatch) => (action: Action) => {
+  (updater: LensPanelStateUpdater) =>
+  (store: MiddlewareAPI) =>
+  (next: Dispatch) =>
+  (action: Action) => {
     const {
       datasourceStates: prevDatasourceStates,
       visualization: prevVisualization,
@@ -104,7 +102,12 @@ export const updatingMiddleware =
       updater(
         datasourceStates[activeDatasourceId].state,
         visualization.state,
-        visualization.activeId
+        visualization.activeId,
+        // pass the store's active datasource id explicitly: during a datasource
+        // conversion (e.g. formBased -> textBased) the serialized attributes can
+        // lag behind the store, so re-deriving the id from them may pick a stale key
+        (activeDatasourceId as LensDatasourceId | null) ?? undefined,
+        datasourceStates
       );
     }
   };
