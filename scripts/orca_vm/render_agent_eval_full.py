@@ -136,6 +136,10 @@ def render(traces, out, since, extra_missing=None):
     n_tool = sum(1 for c in cells.values() for s in (c.get("steps") or [])
                  if s.get("type") == "tool")
     n_ans = sum(1 for c in cells.values() if c.get("answer"))
+    n_usage_cells = sum(1 for c in cells.values()
+                        if (c.get("usage") or {}).get("durNs")
+                        or (c.get("usage") or {}).get("inTok")
+                        or (c.get("usage") or {}).get("outTok"))
 
     # one row per reference model, in reference order — data row or missing-row
     all_rows = []
@@ -146,14 +150,22 @@ def render(traces, out, since, extra_missing=None):
         tds = []
         for p in PROMPT_IDS:
             c = cells.get(f"{m}:{p}")
-            if c is None:
+            if not c:
                 tds.append('<td class="cell blank" title="no score doc in window">&mdash;</td>')
                 continue
             steps = c.get("stepCount") or 0
             ans = "✓" if c.get("answer") else "△"
             n_ev = len(c.get("scores") or {})
+            u = c.get("usage") or {}
+            if u.get("durNs") or u.get("inTok") or u.get("outTok"):
+                secs = (u.get("durNs") or 0) / 1e9
+                usage_txt = f"{secs:.0f}s · {u.get('inTok', 0)}/{u.get('outTok', 0)} tok"
+                cls = "usage"
+            else:
+                usage_txt = ""
+                cls = ""
             tds.append(
-                f'<td class="cell {cell_status(c)}" title="{esc(p)}: {steps} steps, {n_ev} evaluator scores">{ans} {steps} steps</td>'
+                f'<td class="cell {cell_status(c)}" title="{esc(p)}: {steps} steps, {n_ev} evaluator scores">{ans} {steps} steps<span class="{cls}">{usage_txt}</span></td>'
             )
         all_rows.append(f'<tr><td class="model">{esc(m)}</td>{"".join(tds)}</tr>')
 
@@ -219,6 +231,7 @@ th,td {{ padding:8px 10px; text-align:left; border-bottom:1px solid var(--border
 th {{ background:var(--panel2); color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.04em; }}
 td.model {{ font-weight:600; font-family:ui-monospace,monospace; font-size:12px; }}
 td.cell {{ font-size:12px; color:var(--text); }}
+td.cell .usage {{ display:block; font-size:10px; color:var(--muted); white-space:nowrap; }}
 td.cell.ok {{ color:var(--ok); }}
 td.cell.partial {{ color:var(--warn); }}
 td.cell.blank {{ color:var(--muted); }}
@@ -250,6 +263,7 @@ code {{ font-family:ui-monospace,monospace; }}
 <ul>
 <li>Every cell traces to golden <code>.ds-.evaluation-scores*</code> docs (suite <code>security-persona-matrix</code>) joined with <code>traces-agent_builder.otel-default</code> spans. Zero hand-edited numbers.</li>
 <li>Tool args: {n_args}/{n_tool} tool steps carry <code>gen_ai.tool.call.arguments</code> — captured via <code>--uiSettings.overrides.agentBuilder:tracing:includeToolDetails=true</code> in Kibana boot args (grep-verified in the runs' scout logs). Steps without args render an explicit "(args not captured)" marker — never invented. Historical runs predate this flag (383,098 tool steps, 100% null args).</li>
+<li>Per-cell latency/tokens ("Xs · Y/Z tok"): summed from <code>gen_ai.usage.*_tokens</code> + <code>duration</code> on LLM spans, joined by <code>trace_id</code> to the cell's executions ({n_usage_cells} cells carry usage; cells with no usage spans in window show steps only — never imputed).</li>
 <li>Cells: {n_cells} of {len(REFERENCE_MODELS) * len(PROMPT_IDS)} reference-model cells have data. Final answers present in {n_ans} cells with data.</li>
 <li>Multi-execution models (retry runs): each (model, prompt) cell renders the most-doc'd single execution — one real execution per cell, never a blend. Cells missing in a model's executions render blank with a "no score doc" tooltip.</li>
 <li>openai-gpt-oss-20b: no single execution completed all 21 prompts (best single: 16/21; scatter across attempts). All 21 prompts have data only when taking the best execution per prompt — each cell is one real execution, and the selection is disclosed here rather than hidden.</li>

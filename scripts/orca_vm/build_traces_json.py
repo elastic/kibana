@@ -144,6 +144,67 @@ def main():
         if len(hits) < 1000:
             break
 
+    # ---- 2b. spans: LLM usage (tokens + duration) per trace ------------
+    # Reference board cells show "Xs · Y/Z tok" — per-cell latency and token
+    # totals. Score docs carry neither; they live on LLM spans keyed by
+    # trace_id. Persona-matrix suite spans land in traces-generic.otel-default
+    # (dotted attr keys); agent-builder suite spans in traces-agent_builder
+    # .otel-default (nested attrs). Query both, read both shapes.
+    def _read_usage(attrs):
+        in_tok = attrs.get("gen_ai.usage.input_tokens")
+        if in_tok is None:
+            in_tok = ((attrs.get("gen_ai") or {}).get("usage") or {}).get("input_tokens")
+        out_tok = attrs.get("gen_ai.usage.output_tokens")
+        if out_tok is None:
+            out_tok = ((attrs.get("gen_ai") or {}).get("usage") or {}).get("output_tokens")
+        return in_tok, out_tok
+
+    usage_body = {
+        "size": 1000,
+        "query": {"bool": {"filter": [
+            {"range": {"@timestamp": {"gte": args.since, **({"lt": args.until} if args.until else {})}}},
+            {"bool": {"should": [
+                {"exists": {"field": "attributes.gen_ai.usage.input_tokens"}},
+                {"exists": {"field": "gen_ai.usage.input_tokens"}},
+            ]}},
+        ]}},
+        "_source": [
+            "trace_id", "duration",
+            "attributes.gen_ai.usage.input_tokens",
+            "attributes.gen_ai.usage.output_tokens",
+            "attributes",
+        ],
+        "sort": [{"@timestamp": "asc"}],
+    }
+    span_usage = {}  # trace_id -> [dur_ns, in_tok, out_tok] (summed per trace)
+    n_usage = 0
+    search_after = None
+    while True:
+        body = dict(usage_body)
+        if search_after:
+            body["search_after"] = search_after
+        res = es.post("/.ds-traces-generic.otel-default*,.ds-traces-agent_builder.otel-default*/_search", body)
+        hits = res["hits"]["hits"]
+        if not hits:
+            break
+        for h in hits:
+            src = h["_source"]
+            tid = src.get("trace_id")
+            attrs = src.get("attributes") or {}
+            in_tok, out_tok = _read_usage(attrs)
+            dur = src.get("duration") or 0
+            if not tid or not isinstance(in_tok, (int, float)):
+                continue
+            cur = span_usage.get(tid) or [0.0, 0, 0]
+            cur[0] += float(dur) if isinstance(dur, (int, float)) else 0.0
+            cur[1] += int(in_tok)
+            cur[2] += int(out_tok) if isinstance(out_tok, (int, float)) else 0
+            span_usage[tid] = cur
+            n_usage += 1
+        search_after = hits[-1]["sort"]
+        if len(hits) < 1000:
+            break
+
     # ---- 3. join ------------------------------------------------------
     # Score-doc steps[].args is None even on includeToolDetails runs (the
     # evals writer does not serialise args into task.output). Real args live
@@ -183,6 +244,16 @@ def main():
                 for sp in sorted(span_args.get(tid, []), key=lambda s: s["ts"] or ""):
                     nm = sp["name"].replace("execute_tool ", "") if sp["name"] else sp["name"]
                     name_queue[nm].append(sp)
+            # LLM usage summed across the cell's traces ("Xs · Y/Z tok")
+            dur_ns = 0.0
+            in_tok = 0
+            out_tok = 0
+            for tid in trace_ids:
+                u = span_usage.get(tid)
+                if u:
+                    dur_ns += u[0]
+                    in_tok += u[1]
+                    out_tok += u[2]
             steps_out = []
             answer = None
             question = None
@@ -234,6 +305,7 @@ def main():
                 "stepCount": len(steps_out),
                 "scores": {k: round(sum(v)/len(v), 4) for k, v in scores.items()},
                 "repetitions": len(docs),
+                "usage": {"durNs": round(dur_ns), "inTok": in_tok, "outTok": out_tok},
             }
 
     payload = {
@@ -243,6 +315,7 @@ def main():
             "until": args.until,
             "scoreDocs": n_docs,
             "argSpans": n_spans,
+            "usageSpans": n_usage,
             "note": "toolParams joined from gen_ai.tool.call.arguments spans",
         },
     }
