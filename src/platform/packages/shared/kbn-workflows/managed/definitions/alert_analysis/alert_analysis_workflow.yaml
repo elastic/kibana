@@ -63,7 +63,7 @@ settings:
 # Adjust these values to tune workflow behaviour without editing step logic.
 
 consts:
-  workflow_version: "v0.0.2"
+  workflow_version: "v0.0.3"
 
   # When false, the workflow skips alerts that already carry the workflow tag prefix.
   # Set to true to re-evaluate previously analyzed alerts.
