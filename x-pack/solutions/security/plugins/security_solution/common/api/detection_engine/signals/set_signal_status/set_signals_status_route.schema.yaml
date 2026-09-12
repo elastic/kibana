@@ -183,8 +183,8 @@ components:
         format:
           type: string
           description: >-
-            Optional format string for date runtime fields (e.g.
-            `strict_date_optional_time`).
+            Format string for date runtime fields, for example
+            `strict_date_optional_time`.
           maxLength: 100
     SetAlertsStatusByIdsBase:
       type: object
