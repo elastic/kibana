@@ -1,0 +1,618 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/**
+ * Step 8.4 — DetectionRulesClient unit tests.
+ *
+ * Covers every branch the design names:
+ *   - createRule: happy path (query, threshold), enabled default is false.
+ *   - replaceRule (PUT): happy path, 404 for missing rule, 409 for type change,
+ *     reset of omitted defaultables (the "PUT reset" invariant).
+ *   - patchRule (PATCH): happy path, empty-patch no-op, 400 for foreign fields,
+ *     null-clears optional fields, 404 for missing rule.
+ *   - deleteRule: happy path returning last state, 404 for missing rule.
+ *   - getInScopeRule: 404 for out-of-scope rule, 404 for unknown builder_type,
+ *     passthrough of framework 404.
+ *
+ * All framework client calls are mocked.  No kibana boot required.
+ *
+ * Ref: rule-crud-api.md "Create a rule", "Replace a rule with PUT",
+ *      "Patch a rule with PATCH", "Delete a rule", "Validation layering"
+ *      rule-fetch-api.md "One rule by object id"
+ */
+
+import Boom from '@hapi/boom';
+import { loggerMock } from '@kbn/logging-mocks';
+import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { ALERTING_ERROR_CODES } from '@kbn/alerting-v2-plugin/server';
+import { DetectionRulesClient } from '../detection_rules_client';
+import type { DetectionRulesClientDeps } from '../detection_rules_client';
+import type {
+  DetectionRuleCreateProps,
+  DetectionRuleUpdateProps,
+  DetectionRulePatchProps,
+} from '../../common/api';
+
+// ---------------------------------------------------------------------------
+// Mock helpers
+// ---------------------------------------------------------------------------
+
+function makeFrameworkClientMock() {
+  return {
+    createRule: jest.fn(),
+    updateRule: jest.fn(),
+    getRule: jest.fn(),
+    deleteRule: jest.fn(),
+    findRules: jest.fn(),
+    getTags: jest.fn(),
+    enableRule: jest.fn(),
+    disableRule: jest.fn(),
+  } as unknown as jest.Mocked<DetectionRulesClientDeps['frameworkClient']>;
+}
+
+function makeDeps(
+  frameworkOverride?: Partial<ReturnType<typeof makeFrameworkClientMock>>
+): DetectionRulesClientDeps {
+  const frameworkClient = { ...makeFrameworkClientMock(), ...frameworkOverride };
+  return {
+    frameworkClient: frameworkClient as never,
+    logger: loggerMock.create(),
+  };
+}
+
+/**
+ * Build a minimal framework RuleResponse that is in scope.
+ * The concurrency token is exposed as `version` on the stored object.
+ */
+function makeInScopeRuleResponse(overrides: Partial<RuleResponse> = {}): RuleResponse & {
+  version?: string;
+} {
+  const base: RuleResponse & { version?: string } = {
+    id: 'rule-id-1',
+    version: 'abc123', // saved-object concurrency token
+    enabled: false,
+    created_at: '2024-01-01T00:00:00.000Z',
+    created_by: 'elastic',
+    updated_at: '2024-01-02T00:00:00.000Z',
+    updated_by: 'elastic',
+    kind: 'signal',
+    schedule: { every: '5m' },
+    metadata: {
+      name: 'Test rule',
+      description: 'Test description',
+      tags: ['tag1'],
+      signature_id: 'rule-sig-1',
+      revision: 0,
+      builder_type: 'security.detection.query',
+      builder_fields: {
+        severity: 'low',
+        risk_score: 21,
+        index: ['logs-*'],
+        query: 'process.name: "cmd.exe"',
+        language: 'kuery',
+        max_signals: 100,
+        threat: [],
+        setup: '',
+        references: [],
+        false_positives: [],
+        author: [],
+        related_integrations: [],
+        required_fields: [],
+      },
+      source: { type: 'internal', version: 1 },
+      ownership: {
+        managed: true,
+        solution: 'security',
+        domain: 'detection',
+      },
+    },
+  } as unknown as RuleResponse & { version?: string };
+
+  return { ...base, ...overrides } as RuleResponse & { version?: string };
+}
+
+function makeThresholdRuleResponse(overrides: Partial<RuleResponse> = {}): RuleResponse & {
+  version?: string;
+} {
+  const base = makeInScopeRuleResponse();
+  return {
+    ...base,
+    metadata: {
+      ...base.metadata,
+      builder_type: 'security.detection.threshold',
+      builder_fields: {
+        ...(base.metadata?.builder_fields as Record<string, unknown>),
+        query: '',
+        threshold: { field: ['host.name'], value: 5 },
+      },
+    },
+    ...overrides,
+  } as RuleResponse & { version?: string };
+}
+
+// ---------------------------------------------------------------------------
+// Tests: createRule
+// ---------------------------------------------------------------------------
+
+describe('DetectionRulesClient', () => {
+  describe('createRule', () => {
+    it('creates a query rule with enabled defaulting to false', async () => {
+      const storedRule = makeInScopeRuleResponse();
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.createRule as jest.Mock).mockResolvedValueOnce(storedRule);
+
+      const client = new DetectionRulesClient(makeDeps({ createRule: frameworkClient.createRule }));
+
+      const props: DetectionRuleCreateProps = {
+        type: 'query',
+        name: 'Test rule',
+        description: 'A test rule',
+        severity: 'low',
+        risk_score: 21,
+        index: ['logs-*'],
+        query: 'process.name: "cmd.exe"',
+      };
+
+      const result = await client.createRule(props);
+
+      // The framework createRule was called.
+      expect(frameworkClient.createRule).toHaveBeenCalledTimes(1);
+
+      const [callArgs] = (frameworkClient.createRule as jest.Mock).mock.calls[0];
+      // Default enabled = false.
+      expect(callArgs.options?.enabled).toBe(false);
+      // Kind must be 'signal'.
+      expect(callArgs.data.kind).toBe('signal');
+      // The builder_type must be the namespaced id.
+      expect(callArgs.data.metadata.builder_type).toBe('security.detection.query');
+      // builder_fields must contain the detection fields.
+      expect(callArgs.data.metadata.builder_fields.severity).toBe('low');
+      // No grouping on the create payload.
+      expect(callArgs.data.grouping).toBeUndefined();
+
+      // Response has the public type alias.
+      expect(result.type).toBe('query');
+      expect(result.id).toBe('rule-id-1');
+    });
+
+    it('creates a rule enabled when caller passes enabled: true', async () => {
+      const storedRule = makeInScopeRuleResponse({ enabled: true });
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.createRule as jest.Mock).mockResolvedValueOnce(storedRule);
+
+      const client = new DetectionRulesClient(makeDeps({ createRule: frameworkClient.createRule }));
+
+      await client.createRule({
+        type: 'query',
+        name: 'Test',
+        description: 'Test',
+        severity: 'low',
+        risk_score: 21,
+        index: ['logs-*'],
+        query: 'process.name: "cmd.exe"',
+        enabled: true,
+      });
+
+      const [callArgs] = (frameworkClient.createRule as jest.Mock).mock.calls[0];
+      expect(callArgs.options?.enabled).toBe(true);
+    });
+
+    it('creates a threshold rule', async () => {
+      const storedRule = makeThresholdRuleResponse();
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.createRule as jest.Mock).mockResolvedValueOnce(storedRule);
+
+      const client = new DetectionRulesClient(makeDeps({ createRule: frameworkClient.createRule }));
+
+      await client.createRule({
+        type: 'threshold',
+        name: 'Threshold rule',
+        description: 'Counts by host',
+        severity: 'medium',
+        risk_score: 47,
+        index: ['logs-*'],
+        query: '',
+        threshold: { field: ['host.name'], value: 5 },
+      });
+
+      const [callArgs] = (frameworkClient.createRule as jest.Mock).mock.calls[0];
+      expect(callArgs.data.metadata.builder_type).toBe('security.detection.threshold');
+      expect(callArgs.data.metadata.builder_fields.threshold).toEqual({
+        field: ['host.name'],
+        value: 5,
+      });
+    });
+
+    it('passes through a 409 framework error when the rule_id already exists', async () => {
+      const frameworkClient = makeFrameworkClientMock();
+      const conflictError = Boom.conflict('signature id already exists', {
+        code: ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS,
+      });
+      (frameworkClient.createRule as jest.Mock).mockRejectedValueOnce(conflictError);
+
+      const client = new DetectionRulesClient(makeDeps({ createRule: frameworkClient.createRule }));
+
+      await expect(
+        client.createRule({
+          type: 'query',
+          name: 'Dup rule',
+          description: 'Dup',
+          severity: 'low',
+          risk_score: 21,
+          index: ['logs-*'],
+          query: 'process.name: "cmd.exe"',
+          rule_id: 'my-sig-id',
+        })
+      ).rejects.toMatchObject({ output: { statusCode: 409 } });
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // replaceRule (PUT)
+  // -------------------------------------------------------------------------
+
+  describe('replaceRule', () => {
+    it('reads the rule, applies defaults, and writes the full replacement', async () => {
+      const existingRule = makeInScopeRuleResponse();
+      const updatedRule = makeInScopeRuleResponse();
+
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.getRule as jest.Mock).mockResolvedValueOnce(existingRule);
+      (frameworkClient.updateRule as jest.Mock).mockResolvedValueOnce(updatedRule);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+
+      const props: DetectionRuleUpdateProps = {
+        type: 'query',
+        name: 'Updated name',
+        description: 'Updated description',
+        severity: 'high',
+        risk_score: 73,
+        index: ['logs-*'],
+        query: 'process.name: "powershell.exe"',
+      };
+
+      const result = await client.replaceRule('rule-id-1', props);
+
+      // getRule was called first.
+      expect(frameworkClient.getRule).toHaveBeenCalledWith({ id: 'rule-id-1' });
+      // updateRule was called.
+      expect(frameworkClient.updateRule).toHaveBeenCalledTimes(1);
+      const [updateArgs] = (frameworkClient.updateRule as jest.Mock).mock.calls[0];
+      expect(updateArgs.id).toBe('rule-id-1');
+      // Concurrency token from the existing rule.
+      expect(updateArgs.options?.version).toBe('abc123');
+      // The result is the converted public response.
+      expect(result.type).toBe('query');
+    });
+
+    it('throws 409 when the payload type differs from the stored type', async () => {
+      const existingRule = makeInScopeRuleResponse(); // query type
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.getRule as jest.Mock).mockResolvedValueOnce(existingRule);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+
+      await expect(
+        client.replaceRule('rule-id-1', {
+          type: 'threshold', // differs from stored 'query'
+          name: 'Changed type',
+          description: 'Attempt to change type',
+          severity: 'medium',
+          risk_score: 47,
+          index: ['logs-*'],
+          query: '',
+          threshold: { field: ['host.name'], value: 5 },
+        })
+      ).rejects.toMatchObject({ output: { statusCode: 409 } });
+
+      // updateRule was never called.
+      expect(frameworkClient.updateRule).not.toHaveBeenCalled();
+    });
+
+    it('throws 404 when the rule does not exist', async () => {
+      const frameworkClient = makeFrameworkClientMock();
+      const notFoundError = Boom.notFound('Rule not found', {
+        code: ALERTING_ERROR_CODES.RULE_NOT_FOUND,
+      });
+      (frameworkClient.getRule as jest.Mock).mockRejectedValueOnce(notFoundError);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+
+      await expect(
+        client.replaceRule('missing-id', {
+          type: 'query',
+          name: 'Test',
+          description: 'Test',
+          severity: 'low',
+          risk_score: 21,
+          index: ['logs-*'],
+          query: 'process.name: "cmd.exe"',
+        })
+      ).rejects.toMatchObject({ output: { statusCode: 404 } });
+    });
+
+    it('resets omitted defaultable fields to their defaults (PUT reset invariant)', async () => {
+      // The stored rule has tags, max_signals, references etc. set.
+      const existingRule = makeInScopeRuleResponse();
+      (existingRule.metadata!.builder_fields as Record<string, unknown>).max_signals = 999;
+      (existingRule.metadata!.tags as unknown) = ['old-tag'];
+
+      const updatedRule = makeInScopeRuleResponse();
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.getRule as jest.Mock).mockResolvedValueOnce(existingRule);
+      (frameworkClient.updateRule as jest.Mock).mockResolvedValueOnce(updatedRule);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+
+      // PUT payload with no max_signals (omitted → should reset to default 100),
+      // no tags (omitted → should reset to default []).
+      await client.replaceRule('rule-id-1', {
+        type: 'query',
+        name: 'Minimal PUT',
+        description: 'Testing defaults reset',
+        severity: 'low',
+        risk_score: 21,
+        index: ['logs-*'],
+        query: 'process.name: "cmd.exe"',
+      });
+
+      const [updateArgs] = (frameworkClient.updateRule as jest.Mock).mock.calls[0];
+      // max_signals not in payload → default applies (100); builder_fields should carry it.
+      expect(updateArgs.data.metadata.builder_fields.max_signals).toBe(100);
+      // Tags omitted from PUT → default is empty; the converter omits metadata.tags
+      // when tags is [] to avoid the framework rejecting an empty array.
+      expect(updateArgs.data.metadata.tags).toBeUndefined();
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // patchRule (PATCH)
+  // -------------------------------------------------------------------------
+
+  describe('patchRule', () => {
+    it('merges the patch over the stored state and writes the result', async () => {
+      const existingRule = makeInScopeRuleResponse();
+      const updatedRule = makeInScopeRuleResponse();
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.getRule as jest.Mock).mockResolvedValueOnce(existingRule);
+      (frameworkClient.updateRule as jest.Mock).mockResolvedValueOnce(updatedRule);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+
+      const patch: DetectionRulePatchProps = { name: 'Patched name' };
+      const result = await client.patchRule('rule-id-1', patch);
+
+      expect(frameworkClient.getRule).toHaveBeenCalledWith({ id: 'rule-id-1' });
+      expect(frameworkClient.updateRule).toHaveBeenCalledTimes(1);
+      const [updateArgs] = (frameworkClient.updateRule as jest.Mock).mock.calls[0];
+      expect(updateArgs.id).toBe('rule-id-1');
+      expect(updateArgs.data.metadata.name).toBe('Patched name');
+      // Concurrency token passed through.
+      expect(updateArgs.options?.version).toBe('abc123');
+      expect(result.type).toBe('query');
+    });
+
+    it('accepts an empty patch body (no-op beyond framework mutation sequence)', async () => {
+      const existingRule = makeInScopeRuleResponse();
+      const updatedRule = makeInScopeRuleResponse();
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.getRule as jest.Mock).mockResolvedValueOnce(existingRule);
+      (frameworkClient.updateRule as jest.Mock).mockResolvedValueOnce(updatedRule);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+
+      // Empty patch body.
+      await client.patchRule('rule-id-1', {});
+
+      // updateRule is still called (framework's mutation sequence always runs).
+      expect(frameworkClient.updateRule).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns 400 when a patch field does not belong to the stored type', async () => {
+      // The stored rule is a 'query' type.
+      const existingRule = makeInScopeRuleResponse();
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.getRule as jest.Mock).mockResolvedValueOnce(existingRule);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+
+      // `threshold` does not belong to a query rule.
+      const patch: DetectionRulePatchProps = {
+        threshold: { field: ['host.name'], value: 5 },
+      };
+
+      await expect(client.patchRule('rule-id-1', patch)).rejects.toMatchObject({
+        output: { statusCode: 400 },
+      });
+
+      // updateRule was never called.
+      expect(frameworkClient.updateRule).not.toHaveBeenCalled();
+    });
+
+    it('clears an optional field when null is sent', async () => {
+      const existingRule = makeInScopeRuleResponse();
+      (existingRule.metadata!.builder_fields as Record<string, unknown>).note = 'old note';
+
+      const updatedRule = makeInScopeRuleResponse();
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.getRule as jest.Mock).mockResolvedValueOnce(existingRule);
+      (frameworkClient.updateRule as jest.Mock).mockResolvedValueOnce(updatedRule);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+
+      // Patch with null clears the `note` field.
+      await client.patchRule('rule-id-1', { note: null });
+
+      const [updateArgs] = (frameworkClient.updateRule as jest.Mock).mock.calls[0];
+      // The note key must not be in builder_fields (it was cleared).
+      expect(
+        (updateArgs.data.metadata.builder_fields as Record<string, unknown>).note
+      ).toBeUndefined();
+    });
+
+    it('throws 404 when the rule does not exist', async () => {
+      const frameworkClient = makeFrameworkClientMock();
+      const notFoundError = Boom.notFound('Rule not found', {
+        code: ALERTING_ERROR_CODES.RULE_NOT_FOUND,
+      });
+      (frameworkClient.getRule as jest.Mock).mockRejectedValueOnce(notFoundError);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+
+      await expect(client.patchRule('missing-id', { name: 'x' })).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+    });
+
+    it('clears lookback when schedule.lookback is null', async () => {
+      const existingRule = makeInScopeRuleResponse();
+      // Set a stored lookback.
+      (existingRule as unknown as { schedule: Record<string, unknown> }).schedule = {
+        every: '5m',
+        lookback: '6m',
+      };
+
+      const updatedRule = makeInScopeRuleResponse();
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.getRule as jest.Mock).mockResolvedValueOnce(existingRule);
+      (frameworkClient.updateRule as jest.Mock).mockResolvedValueOnce(updatedRule);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+
+      await client.patchRule('rule-id-1', { schedule: { lookback: null } });
+
+      const [updateArgs] = (frameworkClient.updateRule as jest.Mock).mock.calls[0];
+      // lookback should be explicitly null in the schedule (to clear the stored value).
+      expect(updateArgs.data.schedule?.lookback).toBeNull();
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // deleteRule
+  // -------------------------------------------------------------------------
+
+  describe('deleteRule', () => {
+    it('reads, deletes, and returns the last state', async () => {
+      const existingRule = makeInScopeRuleResponse();
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.getRule as jest.Mock).mockResolvedValueOnce(existingRule);
+      (frameworkClient.deleteRule as jest.Mock).mockResolvedValueOnce(undefined);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+
+      const result = await client.deleteRule('rule-id-1');
+
+      expect(frameworkClient.getRule).toHaveBeenCalledWith({ id: 'rule-id-1' });
+      expect(frameworkClient.deleteRule).toHaveBeenCalledWith({ id: 'rule-id-1' });
+      // Returns the last state as the public response.
+      expect(result.id).toBe('rule-id-1');
+      expect(result.type).toBe('query');
+    });
+
+    it('throws 404 when the rule does not exist', async () => {
+      const frameworkClient = makeFrameworkClientMock();
+      const notFoundError = Boom.notFound('Rule not found', {
+        code: ALERTING_ERROR_CODES.RULE_NOT_FOUND,
+      });
+      (frameworkClient.getRule as jest.Mock).mockRejectedValueOnce(notFoundError);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+
+      await expect(client.deleteRule('missing-id')).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+
+      // deleteRule on the framework is never called.
+      expect(frameworkClient.deleteRule).not.toHaveBeenCalled();
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // getInScopeRule (scope check helper)
+  // -------------------------------------------------------------------------
+
+  describe('getInScopeRule', () => {
+    it('returns the rule when it is in scope', async () => {
+      const inScopeRule = makeInScopeRuleResponse();
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.getRule as jest.Mock).mockResolvedValueOnce(inScopeRule);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+
+      const result = await client.getInScopeRule('rule-id-1');
+      expect(result.id).toBe('rule-id-1');
+    });
+
+    it('throws 404 when the rule is not a detection rule (foreign ownership)', async () => {
+      const foreignRule = makeInScopeRuleResponse();
+      // Override ownership to a different solution.
+      (foreignRule.metadata!.ownership as Record<string, unknown>) = {
+        managed: true,
+        solution: 'apm',
+        domain: 'slo',
+      };
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.getRule as jest.Mock).mockResolvedValueOnce(foreignRule);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+
+      await expect(client.getInScopeRule('rule-id-1')).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+    });
+
+    it('throws 404 when the rule has an unmanaged ownership', async () => {
+      const unmanagedRule = makeInScopeRuleResponse();
+      (unmanagedRule.metadata!.ownership as Record<string, unknown>) = { managed: false };
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.getRule as jest.Mock).mockResolvedValueOnce(unmanagedRule);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+
+      await expect(client.getInScopeRule('rule-id-1')).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+    });
+
+    it('throws 404 when the builder_type is unknown (rollback scenario)', async () => {
+      const rollbackRule = makeInScopeRuleResponse();
+      // A newer type this build does not know.
+      (rollbackRule.metadata as Record<string, unknown>).builder_type = 'security.detection.eql'; // not registered
+
+      const logger = loggerMock.create();
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.getRule as jest.Mock).mockResolvedValueOnce(rollbackRule);
+
+      const client = new DetectionRulesClient({
+        frameworkClient: frameworkClient as never,
+        logger,
+      });
+
+      await expect(client.getInScopeRule('rule-id-1')).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+
+      // A warning should be logged for the rollback case.
+      expect(logger.warn).toHaveBeenCalled();
+    });
+
+    it('re-throws the framework 404 when the id does not exist', async () => {
+      const frameworkClient = makeFrameworkClientMock();
+      const notFoundError = Boom.notFound('Rule not found', {
+        code: ALERTING_ERROR_CODES.RULE_NOT_FOUND,
+      });
+      (frameworkClient.getRule as jest.Mock).mockRejectedValueOnce(notFoundError);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+
+      await expect(client.getInScopeRule('missing-id')).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+    });
+  });
+});
