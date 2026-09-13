@@ -15,7 +15,11 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
-import type { DetectionRuleResponse } from '../../common/api';
+import type {
+  DetectionRuleResponse,
+  DetectionRuleCreateProps,
+  DetectionRuleUpdateProps,
+} from '../../common/api';
 
 // ---------------------------------------------------------------------------
 // API path constants
@@ -116,5 +120,43 @@ export class DetectionRulesApi {
    */
   public async deleteRule(id: string): Promise<DetectionRuleResponse> {
     return this.http.delete<DetectionRuleResponse>(rulePath(id));
+  }
+
+  /**
+   * Get a single detection rule by id.
+   *
+   * `GET /api/detection_engine/v2/rules/{id}`
+   */
+  public async getRule(id: string): Promise<DetectionRuleResponse> {
+    return this.http.get<DetectionRuleResponse>(rulePath(id));
+  }
+
+  /**
+   * Create a detection rule.
+   *
+   * `POST /api/detection_engine/v2/rules`
+   *
+   * @param props - The create request body, validated against the public schema.
+   */
+  public async createRule(props: DetectionRuleCreateProps): Promise<DetectionRuleResponse> {
+    return this.http.post<DetectionRuleResponse>(RULES_PATH, { body: JSON.stringify(props) });
+  }
+
+  /**
+   * Replace a detection rule via PUT (full replacement).
+   *
+   * `PUT /api/detection_engine/v2/rules/{id}`
+   *
+   * The caller must send the complete current state. Omitted defaultable fields
+   * reset to their defaults; omitted optional fields are cleared.
+   *
+   * @param id - The rule's object id.
+   * @param props - The full update request body (no `enabled`).
+   */
+  public async updateRule(
+    id: string,
+    props: DetectionRuleUpdateProps
+  ): Promise<DetectionRuleResponse> {
+    return this.http.put<DetectionRuleResponse>(rulePath(id), { body: JSON.stringify(props) });
   }
 }
