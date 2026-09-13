@@ -535,10 +535,17 @@ export class RulesClient {
       this.callerIdentity?.app
     );
 
+    // `enabled` defaults to true so existing callers keep today's behavior.
+    // Pass false to create a disabled rule: no executor task is registered and
+    // the schedule-limit check is skipped (mirrors how updateRule and enableRule
+    // condition the check).
+    // Ref: rule-crud-api.md "Create a rule" (initial-enabled option)
+    const enabled = params.options?.enabled ?? true;
+
     // Resolve source: use caller-supplied value or default to internal.
     // Ref: rule-source.md "Who writes the source"
     const ruleAttributes = transformCreateRuleBodyToRuleSoAttributes(resolved, {
-      enabled: true,
+      enabled,
       createdBy: userProfileUid,
       createdAt: nowIso,
       updatedBy: userProfileUid,
@@ -549,8 +556,12 @@ export class RulesClient {
       ownership,
     });
 
-    // A freshly created rule is always enabled, so it always counts towards the limit.
-    await this.validateSchedule({ updatedEvery: ruleAttributes.schedule.every, checkLimit: true });
+    // Only count enabled rules towards the schedule limit, mirroring the
+    // conditioning that updateRule and enableRule already apply.
+    await this.validateSchedule({
+      updatedEvery: ruleAttributes.schedule.every,
+      checkLimit: enabled,
+    });
 
     const references = extractArtifactReferences(
       ruleAttributes.artifacts,
@@ -577,24 +588,28 @@ export class RulesClient {
 
     const { id, version } = created;
 
-    try {
-      await this.scheduleRuleExecutorTask({
-        ruleId: id,
-        spaceId,
-        scheduleEvery: ruleAttributes.schedule.every,
-      });
-    } catch (e) {
+    // Only schedule an executor task when the rule is enabled. Disabled rules
+    // have no task, so there is nothing to roll back if this block is skipped.
+    if (enabled) {
       try {
-        await this.rulesSavedObjectService.delete({ id });
-      } catch (rollbackError) {
-        this.logger.error({
-          message: 'Failed to roll back rule creation after task scheduling failed',
-          error: rollbackError,
-          code: ALERTING_LOG_CODES.RULE_CREATE_ROLLBACK_FAILED,
-          labels: { rule_id: id, space_id: spaceId },
+        await this.scheduleRuleExecutorTask({
+          ruleId: id,
+          spaceId,
+          scheduleEvery: ruleAttributes.schedule.every,
         });
+      } catch (e) {
+        try {
+          await this.rulesSavedObjectService.delete({ id });
+        } catch (rollbackError) {
+          this.logger.error({
+            message: 'Failed to roll back rule creation after task scheduling failed',
+            error: rollbackError,
+            code: ALERTING_LOG_CODES.RULE_CREATE_ROLLBACK_FAILED,
+            labels: { rule_id: id, space_id: spaceId },
+          });
+        }
+        throw e;
       }
-      throw e;
     }
 
     const rule = this.toRuleApiResponse({ id, attrs: ruleAttributes, version, references });
@@ -979,9 +994,13 @@ export class RulesClient {
 
   @withApm
   public async getTags(
-    params: { search?: string; kind?: RuleKind; size?: number } = {}
+    params: { search?: string; kind?: RuleKind; filter?: string; size?: number } = {}
   ): Promise<string[]> {
-    const soFilter = params.kind ? buildRuleSoFilter(`kind:${params.kind}`) : undefined;
+    const parts: string[] = [];
+    if (params.kind) parts.push(`kind:${params.kind}`);
+    if (params.filter) parts.push(params.filter);
+    const combined = parts.length === 2 ? `(${parts[0]}) AND (${parts[1]})` : parts[0] ?? undefined;
+    const soFilter = combined ? buildRuleSoFilter(combined) : undefined;
     return this.rulesSavedObjectService.findTags({
       search: params.search,
       filter: soFilter,
