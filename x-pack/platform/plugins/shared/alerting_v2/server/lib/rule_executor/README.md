@@ -145,18 +145,20 @@ Top-level strategy fields (sit alongside `query` on the rule, not inside it):
 | Schedule | Per rule | [`schedule.ts`](schedule.ts) |
 | Max alerts per run | `xpack.alerting_v2.rules.run.alerts.max`, default and ceiling `10000` | [`config.ts`](../../config.ts) |
 | Max groups per execution | `xpack.alerting_v2.rules.run.maxGroupsPerExecution`, default `10000`, ceiling tied to `alerts.max` | [`config.ts`](../../config.ts) |
-| Max JSON query rows | Internal `NON_STREAMING_MAX_ROWS` (`1000`); applied on the JSON path as `LIMIT min(alerts.max, NON_STREAMING_MAX_ROWS)` | [`config.ts`](../../config.ts) |
-| ES\|QL response format | `xpack.alerting_v2.esql.responseFormat`, `json` or `arrow`, defaults to `json` | [`config.ts`](../../config.ts) |
+| Max JSON query rows | Internal `NON_STREAMING_MAX_ROWS` (`1000`), declared as the JSON format's `maxRows`; applied as `LIMIT min(alerts.max, maxRows)` | [`json_format.ts`](../services/query_service/formats/json_format.ts) |
+| ES\|QL response format | `xpack.alerting_v2.esql.responseFormat`; allowed values are the names in the format registry (`json`, `arrow`), defaults to `json` | [`registry.ts`](../services/query_service/formats/registry.ts) |
 
 `xpack.alerting_v2.rules.run.timeout`, when set, applies uniformly to the rule executor task. The rule executor task definition owns this via its `resolveTimeout` hook, which resolves the value as `config → DEFAULT_RULE_EXECUTION_TIMEOUT`; other task types (dispatcher, telemetry, API-key invalidation) omit the hook and keep their static `timeout`. The resolved value is applied where tasks are registered with Task Manager in [`setup/bind_tasks.ts`](../../setup/bind_tasks.ts).
 
-`ExecuteRuleQueryStep` unconditionally appends `\| LIMIT <max>` to the breach query before execution. The LIMIT is `alerts.max` on the Arrow path and `min(alerts.max, NON_STREAMING_MAX_ROWS)` on the JSON path, so a transport choice cannot silently change the product-level alerts cap. ES|QL takes the min across multiple `LIMIT` commands, so an author-supplied smaller limit still wins.
+`ExecuteRuleQueryStep` unconditionally appends `\| LIMIT <max>` to the breach query before execution. The LIMIT is `alerts.max`, further capped by the configured format's `maxRows` when it declares one — `alerts.max` on the Arrow path and `min(alerts.max, NON_STREAMING_MAX_ROWS)` on the JSON path, so a transport choice cannot silently change the product-level alerts cap. ES|QL takes the min across multiple `LIMIT` commands, so an author-supplied smaller limit still wins.
 
 `CreateAlertEventsStep` caps the number of distinct `group_hash` values a single execution can produce at `maxGroupsPerExecution`. The batch builder tracks the group set across every streamed batch of one run; once the cap is reached, rows that would introduce a **new** group are dropped (rows for already-seen groups still pass) and a single warning is logged for the run.
 
 The cap only ever drops groups that have **no existing episode** — groups that were already active at the start of the run always pass, even past the cap. To do this, `FetchActiveGroupsStep` fetches the rule's active groups up front for every episode-tracked (`kind: 'alert'`) rule and threads them onto `state.activeGroups` so both `CreateAlertEventsStep` (for the cap) and `ClassifyAbsentGroupsStep` reuse the result instead of re-querying.
 
-`xpack.alerting_v2.esql.responseFormat` selects how `QueryService.executeQueryStream` fetches results. `json` (default) runs the single-shot JSON query and yields the full result set as one in-memory batch; `arrow` streams self-contained Arrow record batches.
+`xpack.alerting_v2.esql.responseFormat` selects how `QueryService.executeQueryStream` fetches results. `json` (default) runs the single-shot JSON query, materializes the whole response in memory, then yields it in `JSON_STREAM_BATCH_SIZE` (`100`) row slices so downstream steps never copy the full result set at once; `arrow` streams self-contained Arrow record batches.
+
+Formats are strategies under [`services/query_service/formats`](../services/query_service/formats). A format implements one method — `open(esClient, request, options)` returning decoded row batches plus optional cleanup — and optionally declares a `maxRows` cap. `QueryService` owns everything else: the execution context, the abort check between batches, dropping empty batches, wrapping decode failures as parse errors, logging, and cleanup. To add a format, create `formats/<name>_format.ts` and register it in [`formats/registry.ts`](../services/query_service/formats/registry.ts); the config schema's allowed values and the query row limit follow from the registry automatically.
 
 ## Pipeline state
 

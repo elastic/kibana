@@ -10,7 +10,7 @@ import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { errors } from '@elastic/elasticsearch';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { QueryService } from './query_service';
-import { JSON_STREAM_BATCH_SIZE } from './query_service';
+import { JSON_STREAM_BATCH_SIZE } from './formats';
 import { createQueryService } from './query_service.mock';
 import {
   createMockArrowReader,
@@ -651,6 +651,21 @@ describe('QueryService', () => {
       expect(mockLogger.error).toHaveBeenCalled();
     });
 
+    it('wraps decode failures with a descriptive error (parity with the arrow path)', async () => {
+      // A response missing `columns` cannot be decoded into rows.
+      mockEsClient.esql.query.mockResolvedValue({
+        values: [['host-a']],
+      } as unknown as EsqlQueryResponse);
+
+      await expect(async () => {
+        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
+          // consume
+        }
+      }).rejects.toThrow(/Failed to parse ES\|QL response/);
+
+      expect(mockLogger.error).toHaveBeenCalled();
+    });
+
     it('logs debug instead of error when cancelled', async () => {
       const { RuleExecutionCancellationError } = jest.requireActual('../../execution_context');
       mockEsClient.esql.query.mockRejectedValue(
@@ -757,6 +772,104 @@ describe('QueryService', () => {
       expect(batches).toEqual([
         [{ bucket: Date.parse(iso), label: '2026-08-24T14:01:32.000Z', count: 7 }],
       ]);
+    });
+  });
+
+  describe('executeQueryStream (format-agnostic envelope)', () => {
+    const mockQuery = 'FROM .alerting-* | LIMIT 10';
+
+    beforeEach(() => {
+      const mocks = createQueryService('arrow');
+      mockEsClient = mocks.mockEsClient;
+      mockLogger = mocks.mockLogger;
+      queryService = mocks.queryService;
+    });
+
+    it('stops iterating and reports cancellation when the signal fires between batches', async () => {
+      const { RuleExecutionCancellationError } = jest.requireActual('../../execution_context');
+      const abortController = new AbortController();
+
+      mockHelpersEsqlArrowBatches(mockEsClient, [
+        { numRows: 1, rows: [{ host: 'host-a' }] },
+        { numRows: 1, rows: [{ host: 'host-b' }] },
+      ]);
+
+      const batches: Array<Record<string, unknown>[]> = [];
+
+      await expect(async () => {
+        for await (const batch of queryService.executeQueryStream({
+          query: mockQuery,
+          abortSignal: abortController.signal,
+        })) {
+          batches.push(batch);
+          // Abort with an explicit `RuleExecutionCancellationError` reason so
+          // `throwIfAborted` rethrows it as-is between batches, exercising the
+          // `isRuleExecutionCancellationError` rethrow branch in
+          // `iterateBatches`. This is NOT how the dispatcher aborts in
+          // production (it calls bare `abort()`, no reason) — see the
+          // companion test below for that path.
+          abortController.abort(new RuleExecutionCancellationError());
+        }
+      }).rejects.toThrow(RuleExecutionCancellationError);
+
+      expect(batches).toEqual([[{ host: 'host-a' }]]);
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'QueryService: Streaming query aborted (arrow)'
+      );
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('[known gap] a bare mid-stream abort (as the dispatcher issues) is not recognized as a cancellation and surfaces as a parse error', async () => {
+      const abortController = new AbortController();
+
+      mockHelpersEsqlArrowBatches(mockEsClient, [
+        { numRows: 1, rows: [{ host: 'host-a' }] },
+        { numRows: 1, rows: [{ host: 'host-b' }] },
+      ]);
+
+      const batches: Array<Record<string, unknown>[]> = [];
+
+      // Documents current behavior, not desired behavior: a standard
+      // `AbortError` (what `abort()` without a reason produces) is not an
+      // `instanceof RuleExecutionCancellationError` and doesn't carry
+      // `code: 'rule_execution_aborted'`, so `isRuleExecutionCancellationError`
+      // returns false and `iterateBatches` wraps it in a parse error instead
+      // of rethrowing it. This predates this refactor (see `buildParseError`
+      // in `query_service.ts`); the fix belongs in `execution_context`, not here.
+      await expect(async () => {
+        for await (const batch of queryService.executeQueryStream({
+          query: mockQuery,
+          abortSignal: abortController.signal,
+        })) {
+          batches.push(batch);
+          abortController.abort();
+        }
+      }).rejects.toThrow(/Failed to parse ES\|QL response/);
+
+      expect(batches).toEqual([[{ host: 'host-a' }]]);
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'QueryService: Streaming query aborted (arrow)'
+      );
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('does not let a failing format cleanup mask the primary error', async () => {
+      const reader: MockArrowReader = {
+        closed: false,
+        cancel: jest.fn().mockRejectedValue(new Error('cancel blew up')),
+        async *[Symbol.asyncIterator]() {
+          throw new Error('mid-stream failure');
+        },
+      };
+      mockHelpersEsqlToArrowReader(mockEsClient, jest.fn().mockResolvedValue(reader));
+
+      await expect(async () => {
+        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
+          // consume
+        }
+      }).rejects.toThrow(/Failed to parse ES\|QL response/);
+
+      expect(reader.cancel).toHaveBeenCalledTimes(1);
     });
   });
 });

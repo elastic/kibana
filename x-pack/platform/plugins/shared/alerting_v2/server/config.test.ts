@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { configSchema, getQueryRowLimit, NON_STREAMING_MAX_ROWS } from './config';
+import { configSchema, getQueryRowLimit } from './config';
+import {
+  ESQL_RESPONSE_FORMAT_NAMES,
+  NON_STREAMING_MAX_ROWS,
+} from './lib/services/query_service/formats';
 
 describe('alerting_v2 config schema', () => {
   describe('enabled', () => {
@@ -216,6 +220,14 @@ describe('alerting_v2 config schema', () => {
 
     it('rejects an unknown format', () => {
       expect(() => configSchema.validate({ esql: { responseFormat: 'csv' } })).toThrow();
+    });
+
+    it('accepts every name the format registry advertises', () => {
+      for (const name of ESQL_RESPONSE_FORMAT_NAMES) {
+        expect(configSchema.validate({ esql: { responseFormat: name } }).esql.responseFormat).toBe(
+          name
+        );
+      }
     });
   });
 });
