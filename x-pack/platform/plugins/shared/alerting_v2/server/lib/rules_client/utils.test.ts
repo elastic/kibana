@@ -269,6 +269,69 @@ describe('utils', () => {
       expect(result.state_transition).toEqual({ pending_count: 5 });
     });
 
+    describe('schedule.lookback — set, change, clear, omit (step 7.3)', () => {
+      const lookbackTestServerFields = {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      };
+
+      it('sets schedule.lookback when the stored rule has none', () => {
+        const existing = createRuleSoAttributes({
+          schedule: { every: '5m' },
+        });
+        const updateData: UpdateRuleData = {
+          schedule: { lookback: '10m' },
+        };
+
+        const result = buildUpdateRuleAttributes(existing, updateData, lookbackTestServerFields);
+
+        expect(result.schedule.lookback).toBe('10m');
+        expect(result.schedule.every).toBe('5m');
+      });
+
+      it('changes schedule.lookback to a new value', () => {
+        const existing = createRuleSoAttributes({
+          schedule: { every: '5m', lookback: '10m' },
+        });
+        const updateData: UpdateRuleData = {
+          schedule: { lookback: '30m' },
+        };
+
+        const result = buildUpdateRuleAttributes(existing, updateData, lookbackTestServerFields);
+
+        expect(result.schedule.lookback).toBe('30m');
+      });
+
+      it('clears schedule.lookback when update sends null', () => {
+        const existing = createRuleSoAttributes({
+          schedule: { every: '5m', lookback: '10m' },
+        });
+        const updateData: UpdateRuleData = {
+          schedule: { lookback: null },
+        };
+
+        const result = buildUpdateRuleAttributes(existing, updateData, lookbackTestServerFields);
+
+        expect(result.schedule.lookback).toBeUndefined();
+        expect(result.schedule.every).toBe('5m');
+      });
+
+      it('preserves stored schedule.lookback when update omits it', () => {
+        const existing = createRuleSoAttributes({
+          schedule: { every: '5m', lookback: '10m' },
+        });
+        const updateData: UpdateRuleData = {
+          schedule: { every: '1m' },
+        };
+
+        const result = buildUpdateRuleAttributes(existing, updateData, lookbackTestServerFields);
+
+        expect(result.schedule.lookback).toBe('10m');
+        expect(result.schedule.every).toBe('1m');
+      });
+    });
+
     it('preserves metadata.builder_type when query is not changed', () => {
       const existing = createRuleSoAttributes({
         metadata: { name: 'test-rule', builder_type: 'threshold' },

@@ -1227,6 +1227,24 @@ describe('updateRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
+    it('accepts schedule.lookback set to null (clear a stored lookback)', () => {
+      const result = updateRuleDataSchema.safeParse({ schedule: { lookback: null } });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.schedule?.lookback).toBeNull();
+      }
+    });
+
+    it('does not allow schedule.lookback: null on the create schema', () => {
+      const result = createRuleDataSchema.safeParse({
+        kind: 'alert',
+        metadata: { name: 'test rule' },
+        schedule: { every: '5m', lookback: null },
+        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+      });
+      expect(result.success).toBe(false);
+    });
+
     it('rejects an invalid ES|QL query', () => {
       const result = updateRuleDataSchema.safeParse({
         query: { format: 'standalone', breach: { query: 'FROM |' } },
