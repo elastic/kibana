@@ -19,12 +19,17 @@ import {
 } from '@kbn/security-detection-rule-schema';
 import type { AlertingServerSetup } from '@kbn/alerting-v2-plugin/server';
 import type { ConfigType } from './config';
+import { registerDetectionFetchRoutes } from './routes/fetch';
+import { registerCrudRoutes } from './routes/crud_routes';
+import type { DetectionsPluginStartDeps } from './routes/types';
 
 interface SetupDeps {
   alertingVTwo: AlertingServerSetup;
 }
 
-export class SecurityDetectionsPlugin implements Plugin<void, void, SetupDeps> {
+export class SecurityDetectionsPlugin
+  implements Plugin<void, void, SetupDeps, DetectionsPluginStartDeps>
+{
   private readonly logger: Logger;
   private readonly config: ConfigType;
 
@@ -43,9 +48,11 @@ export class SecurityDetectionsPlugin implements Plugin<void, void, SetupDeps> {
     return this.config.enableDetectionsOnV2;
   }
 
-  public setup(_core: CoreSetup, { alertingVTwo }: SetupDeps): void {
+  public setup(core: CoreSetup<DetectionsPluginStartDeps>, { alertingVTwo }: SetupDeps): void {
     if (this.detectionsEnabled) {
-      this.logger.info('Detection Engine v2 enabled — registering detection builder types');
+      this.logger.info(
+        'Detection Engine v2 enabled — registering detection builder types and routes'
+      );
 
       // defineBuilderType() is the sanctioned type-erasure helper from
       // @kbn/alerting-v2-rule-builders. registerBuilderType takes
@@ -56,6 +63,11 @@ export class SecurityDetectionsPlugin implements Plugin<void, void, SetupDeps> {
       // is the correct seam.
       alertingVTwo.registerBuilderType(defineBuilderType(securityDetectionQuery));
       alertingVTwo.registerBuilderType(defineBuilderType(securityDetectionThreshold));
+
+      // Register all detection routes.
+      const router = core.http.createRouter();
+      registerDetectionFetchRoutes(router, core.getStartServices, this.logger);
+      registerCrudRoutes(router, core.getStartServices, this.logger);
     } else {
       this.logger.debug(
         'Detection Engine v2 disabled (xpack.securityDetections.enableDetectionsOnV2 = false) — ' +
