@@ -19,6 +19,7 @@ export type DecodeOutcome<T> = { success: true; value: T } | { success: false; e
  */
 export function decode<A, O>(codec: t.Type<A, O, unknown>, input: unknown): DecodeOutcome<A>;
 export function decode<S extends z.ZodType>(codec: S, input: unknown): DecodeOutcome<z.output<S>>;
+export function decode(codec: t.Any | z.ZodType, input: unknown): DecodeOutcome<unknown>;
 export function decode(codec: t.Any | z.ZodType, input: unknown): DecodeOutcome<unknown> {
   if (isZod(codec)) {
     const result = codec.safeParse(input);
