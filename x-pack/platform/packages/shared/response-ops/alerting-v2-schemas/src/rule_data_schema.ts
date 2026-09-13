@@ -263,6 +263,15 @@ export const scheduleSchema = z
   .describe('Execution schedule configuration.')
   .meta({ id: 'alerting_rule_schedule' });
 
+/**
+ * Partial schedule shape used in update requests. Extends the standard partial
+ * with a nullable `lookback` so a stored lookback can be removed by sending
+ * `null`. The create schema does not allow `null` here; only updates do.
+ */
+export const scheduleUpdatePartialSchema = scheduleSchema.partial().extend({
+  lookback: durationSchema.optional().nullable(),
+});
+
 /** Query (required) */
 
 export const queryFormatSchema = z.enum(['composed', 'standalone']);
@@ -943,7 +952,7 @@ export const updateRuleDataSchema = z
       })
       .optional(),
     time_field: z.string().min(1).max(128).optional(),
-    schedule: scheduleSchema.partial().optional().nullable(),
+    schedule: scheduleUpdatePartialSchema.optional().nullable(),
     query: querySchema.optional(),
     recovery_strategy: recoveryStrategySchema.optional().nullable(),
     no_data_strategy: noDataStrategySchema.optional().nullable(),
