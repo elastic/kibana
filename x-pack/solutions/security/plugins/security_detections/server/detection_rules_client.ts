@@ -16,6 +16,7 @@
  *   - The public ↔ framework conversion (via toFrameworkCreate / toPublicResponse etc.).
  *   - Type immutability enforcement on PUT.
  *   - Read-modify-write for PATCH, with full create-schema validation of the merged result.
+ *   - Scoped list, tags, enable, disable.
  *
  * Routes stay thin over this client.  The framework rules client is acquired
  * via `getRulesClientWithRequest(request, { onBehalfOf: { solution: 'security' } })`
@@ -23,7 +24,8 @@
  *
  * Ref: rule-crud-api.md "Create a rule", "Replace a rule with PUT",
  *      "Patch a rule with PATCH", "Delete a rule", "Validation layering"
- *      rule-fetch-api.md "One rule by object id"
+ *      rule-fetch-api.md "One rule by object id", "The list endpoint", "The tags endpoint"
+ *      rule-actions-api.md "The endpoints", "Semantics"
  */
 
 import Boom from '@hapi/boom';
@@ -31,7 +33,7 @@ import type { Logger } from '@kbn/core/server';
 import type { z } from '@kbn/zod/v4';
 import type { RuleResponse, RuleSource } from '@kbn/alerting-v2-schemas';
 import { ALERTING_ERROR_CODES } from '@kbn/alerting-v2-plugin/server';
-import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { RulesClientApi, FindRulesArgs } from '@kbn/alerting-v2-plugin/server';
 
 import {
   applyRuleDefaults,
@@ -61,6 +63,166 @@ const DETECTION_OWNERSHIP = {
   solution: 'security',
   domain: 'detection',
 };
+
+// ---------------------------------------------------------------------------
+// List params and result types
+// ---------------------------------------------------------------------------
+
+/**
+ * Public sort fields accepted by the Detections API list endpoint.
+ * `severity` is deliberately absent — lexicographic order is wrong and the API
+ * does not substitute a risk_score sort.
+ *
+ * Ref: rule-fetch-api.md "Searching and sorting"
+ */
+export type DetectionRuleListSortField = 'name' | 'enabled' | 'risk_score';
+
+/**
+ * Structured filter parameters for the list endpoint.
+ * Each parameter filters on one field; values within a parameter are ORed,
+ * and separate parameters are ANDed.
+ *
+ * Ref: rule-fetch-api.md "The list endpoint", "Filtering"
+ */
+export interface ListRulesParams {
+  /** Filter on enabled/disabled state. */
+  enabled?: boolean;
+  /** Filter on public type alias — translated through the alias map. */
+  type?: Array<'query' | 'threshold'>;
+  /** Filter on metadata.builder_fields.severity. */
+  severity?: Array<'low' | 'medium' | 'high' | 'critical'>;
+  /** Filter on metadata.tags. */
+  tags?: string[];
+  /** Filter on metadata.signature_id (the stable public rule id). */
+  rule_ids?: string[];
+  /** Prefix match over rule names and descriptions. Passed straight through. */
+  search?: string;
+  /** Sort field. `severity` is not accepted. */
+  sort_field?: DetectionRuleListSortField;
+  sort_order?: 'asc' | 'desc';
+  page?: number;
+  per_page?: number;
+  /**
+   * Public field names to project. Projection runs in the API layer on the
+   * converted objects; `id` is always included regardless.
+   *
+   * Ref: rule-fetch-api.md "Field limitation"
+   */
+  fields?: string[];
+}
+
+/** Response envelope for the list endpoint. */
+export interface ListRulesResult {
+  page: number;
+  per_page: number;
+  total: number;
+  data: DetectionRuleResponse[];
+}
+
+// ---------------------------------------------------------------------------
+// KQL scoping helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * The constant ownership KQL fragment that scopes detection rule queries.
+ * All three fields must match for a rule to belong to the Detections API.
+ */
+const DETECTION_OWNERSHIP_FRAGMENT =
+  `metadata.ownership.managed: true and ` +
+  `metadata.ownership.solution: "${DETECTION_OWNERSHIP.solution}" and ` +
+  `metadata.ownership.domain: "${DETECTION_OWNERSHIP.domain}"`;
+
+/**
+ * Builds the full KQL scoping fragment (ownership AND type clause).
+ *
+ * The type clause is derived from the alias map so a future detection type
+ * joins the API by registering — no hardcoded builder type id list to maintain.
+ *
+ * Ref: rule-fetch-api.md "Scoping: only detection rules, always"
+ */
+function buildScopingFragment(): string {
+  const typeClauses = ALIAS_MAP.map((e) => `metadata.builder_type: "${e.builderTypeId}"`);
+  const typeClause = typeClauses.length === 1 ? typeClauses[0] : `(${typeClauses.join(' or ')})`;
+  return `(${DETECTION_OWNERSHIP_FRAGMENT}) and ${typeClause}`;
+}
+
+/**
+ * Builds one OR-joined KQL clause from an array of terms.
+ * Returns a bare clause for a single term, or a parenthesised OR for multiple.
+ */
+function orClause(terms: string[]): string {
+  if (terms.length === 1) return terms[0];
+  return `(${terms.join(' or ')})`;
+}
+
+/**
+ * Composes the structured list filters into one KQL string and ANDs in the
+ * scoping fragment.  Returns only the scoping fragment when no caller filters
+ * are supplied.
+ *
+ * Ref: rule-fetch-api.md "Filtering"
+ */
+function buildListFilter(params: ListRulesParams): string {
+  const parts: string[] = [];
+
+  if (params.enabled !== undefined) {
+    parts.push(`enabled: ${params.enabled}`);
+  }
+
+  if (params.type && params.type.length > 0) {
+    parts.push(
+      orClause(
+        params.type.map((alias) => `metadata.builder_type: "${ALIAS_TO_BUILDER_TYPE_ID[alias]}"`)
+      )
+    );
+  }
+
+  if (params.severity && params.severity.length > 0) {
+    parts.push(orClause(params.severity.map((s) => `metadata.builder_fields.severity: "${s}"`)));
+  }
+
+  if (params.tags && params.tags.length > 0) {
+    parts.push(orClause(params.tags.map((t) => `metadata.tags: "${t}"`)));
+  }
+
+  if (params.rule_ids && params.rule_ids.length > 0) {
+    parts.push(orClause(params.rule_ids.map((rid) => `metadata.signature_id: "${rid}"`)));
+  }
+
+  const scoping = buildScopingFragment();
+  if (parts.length === 0) {
+    return scoping;
+  }
+  return `(${parts.join(') and (')}) and (${scoping})`;
+}
+
+/**
+ * Maps the Detections API public sort field to the framework's FindRulesSortField.
+ * Throws 400 for `severity` (explicitly not sortable).
+ *
+ * Ref: rule-fetch-api.md "Searching and sorting"
+ */
+const DETECTION_SORT_FIELD_TO_FRAMEWORK: Record<
+  DetectionRuleListSortField,
+  FindRulesArgs['sortField']
+> = {
+  name: 'name',
+  enabled: 'enabled',
+  risk_score: 'builder_fields.risk_score',
+};
+
+/**
+ * Projects a converted public rule to only the requested fields, always
+ * keeping `id`.  Runs at the API layer, after the framework returned full rules.
+ *
+ * Ref: rule-fetch-api.md "Field limitation"
+ */
+function projectFields(rule: DetectionRuleResponse, fields: string[]): DetectionRuleResponse {
+  const keep = new Set(['id', ...fields]);
+  return Object.fromEntries(
+    Object.entries(rule as Record<string, unknown>).filter(([k]) => keep.has(k))
+  ) as DetectionRuleResponse;
+}
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -371,6 +533,143 @@ export class DetectionRulesClient {
     await this.framework.deleteRule({ id });
 
     return lastState;
+  }
+
+  // -------------------------------------------------------------------------
+  // Get (GET /rules/{id})
+  // -------------------------------------------------------------------------
+
+  /**
+   * Fetch one detection rule by its Kibana object id.
+   *
+   * Returns 404 RULE_NOT_FOUND for a missing id, a rule outside the detection
+   * scope, and a detection rule whose builder_type this build does not know
+   * (rollback scenario — logged with a warning).
+   *
+   * Reads never validate builder fields; validation is opt-in per call.
+   *
+   * Ref: rule-fetch-api.md "One rule by object id"
+   */
+  public async getRule(id: string): Promise<DetectionRuleResponse> {
+    const rule = await this.getInScopeRule(id);
+    return toPublicResponse(rule);
+  }
+
+  // -------------------------------------------------------------------------
+  // List (GET /rules)
+  // -------------------------------------------------------------------------
+
+  /**
+   * List detection rules.
+   *
+   * Composes the structured filters (OR within a parameter, AND across
+   * parameters) into one KQL string and ANDs in the scoping fragment before
+   * passing to the framework's findRules.  `search` passes straight through.
+   *
+   * The framework's scoping fragment ANDed into every find is what the list
+   * endpoint means by "only detection rules, always": it includes the ownership
+   * fragment plus a builder_type clause derived from the alias map, so unknown-
+   * type detection rules (rollback state) are naturally excluded.
+   *
+   * Field projection runs in the API layer after conversion.  The sort field is
+   * validated here: `severity` is explicitly rejected.
+   *
+   * Ref: rule-fetch-api.md "The list endpoint", "Filtering", "Searching and
+   *      sorting", "Field limitation"
+   */
+  public async listRules(params: ListRulesParams = {}): Promise<ListRulesResult> {
+    // Validate sort field: severity is not sortable.
+    if ((params.sort_field as string) === 'severity') {
+      throw Boom.badRequest(
+        `'severity' is not a valid sort field. Use 'risk_score' as a practical stand-in, ` +
+          `or sort by 'name' or 'enabled'.`,
+        { code: ALERTING_ERROR_CODES.INVALID_RULE_DATA }
+      );
+    }
+
+    const frameworkSortField = params.sort_field
+      ? DETECTION_SORT_FIELD_TO_FRAMEWORK[params.sort_field]
+      : undefined;
+
+    const filter = buildListFilter(params);
+
+    const result = await this.framework.findRules({
+      filter,
+      search: params.search,
+      sortField: frameworkSortField,
+      sortOrder: params.sort_order,
+      page: params.page,
+      perPage: params.per_page,
+    });
+
+    // Convert each framework rule to the public shape.
+    let data: DetectionRuleResponse[] = result.items.map((r) => toPublicResponse(r));
+
+    // Apply fields projection in the API layer.
+    if (params.fields && params.fields.length > 0) {
+      data = data.map((r) => projectFields(r, params.fields!));
+    }
+
+    return {
+      page: result.page,
+      per_page: result.per_page,
+      total: result.total,
+      data,
+    };
+  }
+
+  // -------------------------------------------------------------------------
+  // Tags (GET /tags)
+  // -------------------------------------------------------------------------
+
+  /**
+   * Fetch distinct tags across the caller's detection rules.
+   *
+   * Uses the phase 7 filter option on getTags, filled with the ownership
+   * fragment so the aggregation is scoped to detection rules only.
+   *
+   * Ref: rule-fetch-api.md "The tags endpoint"
+   */
+  public async getDetectionTags(): Promise<string[]> {
+    return this.framework.getTags({ filter: buildScopingFragment() });
+  }
+
+  // -------------------------------------------------------------------------
+  // Enable / disable
+  // -------------------------------------------------------------------------
+
+  /**
+   * Enable a detection rule.
+   *
+   * Scope-checks first (404 for out-of-scope), then calls the framework's
+   * enableRule untouched.  The framework semantics are preserved exactly:
+   *   - Re-enabling an already-enabled rule is not short-circuited.
+   *   - The mutation sequence moves and updated_at changes.
+   *   - revision does not move (enable is not a meaningful edit).
+   *   - The enabling user's API key is stamped on the executor task.
+   *   - Enable does not validate detection logic.
+   *
+   * Ref: rule-actions-api.md "Semantics", "What enable does not check"
+   */
+  public async enableRule(id: string): Promise<DetectionRuleResponse> {
+    await this.getInScopeRule(id);
+    const result = await this.framework.enableRule({ id });
+    return toPublicResponse(result);
+  }
+
+  /**
+   * Disable a detection rule.
+   *
+   * Scope-checks first (404 for out-of-scope), then calls the framework's
+   * disableRule untouched.  Same idempotent-outcome / not-short-circuited
+   * semantics as enable; revision never moves.
+   *
+   * Ref: rule-actions-api.md "Semantics"
+   */
+  public async disableRule(id: string): Promise<DetectionRuleResponse> {
+    await this.getInScopeRule(id);
+    const result = await this.framework.disableRule({ id });
+    return toPublicResponse(result);
   }
 
   // -------------------------------------------------------------------------
