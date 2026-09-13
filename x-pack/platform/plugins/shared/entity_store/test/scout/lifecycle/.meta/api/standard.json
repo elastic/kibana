@@ -1,5 +1,5 @@
 {
-  "sha1": "6eabdcba66e44f02511810ca90d5e80b84c19f0f",
+  "sha1": "f4c0069da0fa1b8273cf4b10042d486dec586329",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -384,8 +384,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 80,
-        "column": 9
+        "line": 81,
+        "column": 14
       }
     },
     {
@@ -400,7 +400,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 91,
+        "line": 92,
         "column": 14
       }
     },
@@ -416,7 +416,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 108,
+        "line": 109,
         "column": 7
       }
     },
@@ -432,7 +432,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 122,
+        "line": 123,
         "column": 7
       }
     },
@@ -448,7 +448,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 152,
+        "line": 153,
         "column": 7
       }
     },
@@ -464,7 +464,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 159,
+        "line": 160,
         "column": 12
       }
     },
@@ -480,7 +480,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 171,
+        "line": 172,
         "column": 16
       }
     },
@@ -496,7 +496,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 180,
+        "line": 181,
         "column": 21
       }
     },

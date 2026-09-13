@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonGroup,
@@ -51,7 +51,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { AlertEpisodeTimelineSection } from '@kbn/alerting-v2-episodes-ui/components/details/timeline_section';
 import { useEpisodeAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
-import { paths } from '../../constants';
+import { useAlertingLocators } from '../../application/locator_context';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { UserCapabilities } from '../../services/user_capabilities';
@@ -82,6 +82,7 @@ export function EpisodeDetailsPage() {
   const [mainPanel, setMainPanel] = useState<EpisodeDetailsMainPanel>('overview');
 
   const { services } = useKibana<AlertEpisodesKibanaServices>();
+  const { episodesLocators, rulesLocators } = useAlertingLocators();
   const queryClient = useQueryClient();
   const alertsCapability = useService(UserCapabilities).canWrite('alerts')
     ? EPISODE_ACTIONS_PRIVILEGE.all
@@ -266,7 +267,15 @@ export function EpisodeDetailsPage() {
     [applicableActions, episode, invalidateEpisodeQueries]
   );
 
-  const episodesListHref = services.http.basePath.prepend(paths.alertEpisodesList);
+  const episodesListHref = episodesLocators.useUrl({});
+  const getRuleDetailsHref = useCallback(
+    (id: string) => rulesLocators.getRedirectUrl({ ruleId: id }),
+    [rulesLocators]
+  );
+  const getEpisodeDetailsHref = useCallback(
+    (id: string) => episodesLocators.getRedirectUrl({ episodeId: id }),
+    [episodesLocators]
+  );
 
   const isLoading = isLoadingEpisode;
   const episodeNotFound = !isLoading && episode == null;
@@ -353,6 +362,7 @@ export function EpisodeDetailsPage() {
             <AlertEpisodeRuleOverviewPanelSection
               episodeId={episodeId}
               services={detailsServices}
+              getRuleDetailsHref={getRuleDetailsHref}
             />
           </>
         )}
@@ -498,7 +508,11 @@ export function EpisodeDetailsPage() {
                       episodeId={episodeId}
                       services={detailsServices}
                     />
-                    <AlertEpisodesRelatedSection episodeId={episodeId} services={detailsServices} />
+                    <AlertEpisodesRelatedSection
+                      episodeId={episodeId}
+                      services={detailsServices}
+                      getEpisodeDetailsHref={getEpisodeDetailsHref}
+                    />
                   </EuiFlexGroup>
                 </EuiPanel>
               )}

@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 
-import { AttachmentPatchRequestRtV2 } from '../../../common/types/api';
+import { UnifiedAttachmentPatchRequestRt } from '../../../common/types/api';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
 import { isCommentRequestTypeExternalReference } from '../../../common/utils/attachments';
@@ -27,7 +27,7 @@ import { validateRegisteredAttachments } from './validators';
  * @ignore
  */
 export async function update(
-  { caseID, updateRequest: queryParams, mode = 'legacy' }: UpdateArgs,
+  { caseID, updateRequest: queryParams }: UpdateArgs,
   clientArgs: CasesClientArgs
 ): Promise<Case> {
   const {
@@ -42,14 +42,14 @@ export async function update(
       id: queryCommentId,
       version: queryCommentVersion,
       ...queryRestAttributes
-    } = decodeWithExcessOrThrow(AttachmentPatchRequestRtV2)(queryParams);
+    } = decodeWithExcessOrThrow(UnifiedAttachmentPatchRequestRt)(queryParams);
+    decodeCommentRequestV2(queryRestAttributes, unifiedAttachmentTypeRegistry);
+
     await validateMaxUserActions({
       caseId: caseID,
       userActionService,
       userActionsToAdd: 1,
     });
-
-    decodeCommentRequestV2(queryRestAttributes, unifiedAttachmentTypeRegistry);
 
     // Also enforce registry registration and the unified zod schema for
     // migrated legacy subtypes (e.g. `.files`); mirrors the add/bulk_create
@@ -61,7 +61,6 @@ export async function update(
 
     const myComment = await attachmentService.getter.get({
       savedObjectId: queryCommentId,
-      mode,
     });
 
     if (myComment == null) {
@@ -108,13 +107,16 @@ export async function update(
     const updatedDate = new Date().toISOString();
 
     const updatedModel = await model.updateComment({
-      updateRequest: queryParams,
+      updateRequest: {
+        id: queryCommentId,
+        version: queryCommentVersion,
+        ...queryRestAttributes,
+      },
       updatedAt: updatedDate,
       owner: myComment.attributes.owner,
-      mode,
     });
 
-    return await updatedModel.encodeWithComments({ mode });
+    return await updatedModel.encodeWithComments();
   } catch (error) {
     throw createCaseError({
       message: `Failed to patch comment case id: ${caseID}: ${error}`,

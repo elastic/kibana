@@ -138,6 +138,23 @@
       ]
     },
     {
+      "id": "nightshift-investigations",
+      "name": "Nightshift Investigations",
+      "slackChannel": "#nightshift-alerts",
+      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-nightshift-investigations/playwright.config.ts",
+      "tags": [
+        "platform",
+        "nightshift-investigations"
+      ],
+      "ciLabels": [
+        "evals:nightshift-investigations"
+      ],
+      "stepTimeoutInMinutes": 60,
+      "defaultModelGroups": [
+        "eis/anthropic-claude-4.5-haiku"
+      ]
+    },
+    {
       "id": "llm-tasks",
       "name": "LLM Tasks",
       "slackChannel": "#search-ml-ux-team",
@@ -286,6 +303,19 @@
         "evals:lead-generation"
       ],
       "serverConfigSet": "evals_lead_generation"
+    },
+    {
+      "id": "threat-intel-enrichment",
+      "name": "Threat Intel Enrichment",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-threat-intel-enrichment/playwright.config.ts",
+      "tags": [
+        "security",
+        "threat-intel-enrichment"
+      ],
+      "ciLabels": [
+        "evals:threat-intel-enrichment"
+      ],
+      "serverConfigSet": "evals_threat_intel"
     },
     {
       "id": "workflows",
