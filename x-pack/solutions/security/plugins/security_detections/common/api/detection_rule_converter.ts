@@ -60,7 +60,11 @@ import type {
   RuleSource,
 } from '@kbn/alerting-v2-schemas';
 
-import { ALIAS_TO_BUILDER_TYPE_ID, ALIAS_TO_KIND, BUILDER_TYPE_ID_TO_ALIAS } from './rule_alias_map';
+import {
+  ALIAS_TO_BUILDER_TYPE_ID,
+  ALIAS_TO_KIND,
+  BUILDER_TYPE_ID_TO_ALIAS,
+} from './rule_alias_map';
 import { RULE_DEFAULTS } from './apply_rule_defaults';
 import type {
   DetectionRuleResponse,

@@ -364,9 +364,9 @@ apiTest.describe('Detection Engine v2 — fetch routes', { tag: '@local-stateful
 
     const response = await apiClient.get(DETECTION_V2_TAGS, { headers: readerHeaders });
     expect(response).toHaveStatusCode(200);
-    expect(Array.isArray(response.body.data)).toBe(true);
-    expect(response.body.data).toContain('endpoint');
-    expect(response.body.data).toContain('windows');
-    expect(response.body.data).toContain('linux');
+    expect(Array.isArray(response.body.tags)).toBe(true);
+    expect(response.body.tags).toContain('endpoint');
+    expect(response.body.tags).toContain('windows');
+    expect(response.body.tags).toContain('linux');
   });
 });

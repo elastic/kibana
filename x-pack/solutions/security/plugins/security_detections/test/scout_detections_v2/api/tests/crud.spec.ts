@@ -251,7 +251,7 @@ apiTest.describe('Detection Engine v2 — CRUD routes', { tag: '@local-stateful-
         body: { threshold: { field: ['host.name'], value: 5 } },
       });
       expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
+      expect(response.body.code).toBe('INVALID_RULE_DATA');
     }
   );
 
