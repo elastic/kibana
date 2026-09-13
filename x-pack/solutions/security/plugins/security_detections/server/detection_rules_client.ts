@@ -477,17 +477,21 @@ export class DetectionRulesClient {
     const storedSource = existing.metadata?.source as RuleSource;
 
     // rule_id immutability: if the patch includes rule_id, it must match the stored value.
-    // PUT enforces this via the framework's assertSignatureIdUnchanged; PATCH must do it
-    // here because buildPatchedInput drops rule_id and toFrameworkPatch never sends it.
+    // PUT enforces this via the framework's assertSignatureIdUnchanged, which surfaces as
+    // IMMUTABLE_FIELDS_CHANGED with details.fields = ['metadata.signature_id'].  PATCH
+    // runs the same check here (because buildPatchedInput drops rule_id and the framework
+    // never sees a mismatched signature_id through this path) and raises the same code so
+    // clients see one machine-readable code for a rule_id mismatch regardless of the verb.
+    // RULE_TYPE_IMMUTABLE is reserved for a PUT payload's type change.
     if (patch.rule_id !== undefined) {
       const storedRuleId = existing.metadata?.signature_id;
       if (patch.rule_id !== storedRuleId) {
         throw Boom.conflict(
           `Cannot change rule_id from '${storedRuleId ?? '(not set)'}' to '${patch.rule_id}'. ` +
-            `rule_id is immutable.`,
+            `rule_id (metadata.signature_id) is immutable.`,
           {
-            code: DETECTION_ERROR_CODES.RULE_TYPE_IMMUTABLE,
-            details: { rule_id: id },
+            code: ALERTING_ERROR_CODES.IMMUTABLE_FIELDS_CHANGED,
+            details: { fields: ['metadata.signature_id'] },
           }
         );
       }
@@ -549,7 +553,9 @@ export class DetectionRulesClient {
     const patchedInput = buildPatchedInput(merged, patch, storedSource);
     const occVersion = (existing as RuleResponse & { version?: string }).version;
 
-    const frameworkData = toFrameworkPatch(patchedInput, occVersion);
+    // The concurrency token goes to options.version (not inside the data body).
+    // The framework's updateRuleDataSchema is strict and rejects a top-level version key.
+    const frameworkData = toFrameworkPatch(patchedInput);
 
     const result = await this.framework.updateRule({
       id,

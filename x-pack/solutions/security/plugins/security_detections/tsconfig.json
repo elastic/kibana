@@ -18,6 +18,7 @@
     "@kbn/alerting-v2-plugin",
     "@kbn/alerting-v2-rule-builders",
     "@kbn/alerting-v2-schemas",
+    "@kbn/alerting-v2-constants",
     "@kbn/security-detection-rule-schema",
     "@kbn/zod",
     "@kbn/zod-helpers",

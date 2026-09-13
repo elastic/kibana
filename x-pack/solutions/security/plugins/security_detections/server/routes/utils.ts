@@ -26,6 +26,7 @@ export {
   DETECTION_ENGINE_V2_TAGS_PATH,
   assertAlertingEnabled,
   toErrorResponse,
+  detectionOnRequestValidationError,
 } from './detection_route_helpers';
 
 export type { DetectionsPluginStartDeps } from './types';

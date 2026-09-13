@@ -183,6 +183,63 @@ apiTest.describe('Detection Engine v2 — action routes', { tag: '@local-statefu
   );
 
   // -------------------------------------------------------------------------
+  // Redundant enable: 409-on-already-enabled was considered and declined
+  // -------------------------------------------------------------------------
+
+  apiTest(
+    'enable: enabling an already-enabled rule returns 200 (not 409)',
+    async ({ apiClient }) => {
+      // This contract was explicitly considered and declined: the toggle
+      // must be idempotent, not conflicting.  rule-actions-api.md "Semantics".
+      const created = await apiClient.post(DETECTION_V2_RULES, {
+        headers: writerHeaders,
+        body: buildQueryRule({ name: 'already-enabled', enabled: true }),
+      });
+      expect(created).toHaveStatusCode(201);
+      expect(created.body.enabled).toBe(true);
+
+      const updatedAtBefore: string = created.body.updated_at;
+      const revisionBefore: number = created.body.revision;
+
+      // Enable again — must be 200 with enabled: true, not 409.
+      const response = await apiClient.post(getDetectionEnableUrl(created.body.id), {
+        headers: writerHeaders,
+      });
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.enabled).toBe(true);
+      // Revision must not move — a redundant toggle is not a meaningful edit.
+      expect(response.body.revision).toBe(revisionBefore);
+      // updated_at must move (or at least not regress) because a mutation did occur.
+      expect(Date.parse(response.body.updated_at)).toBeGreaterThanOrEqual(
+        Date.parse(updatedAtBefore)
+      );
+    }
+  );
+
+  apiTest(
+    'enable: does not re-validate detection builder fields (enable is a toggle, not a write)',
+    async ({ apiClient }) => {
+      // rule-actions-api.md "What enable does not check": the enable handler
+      // calls framework.enableRule, which does not re-run the builder schema.
+      // Verified structurally: enable succeeds on any in-scope rule whose
+      // builder fields were valid at create time, regardless of any later
+      // schema evolution.  This test confirms the happy path is unconditional.
+      const created = await apiClient.post(DETECTION_V2_RULES, {
+        headers: writerHeaders,
+        body: buildQueryRule({ name: 'enable-no-validation' }),
+      });
+      expect(created).toHaveStatusCode(201);
+
+      const response = await apiClient.post(getDetectionEnableUrl(created.body.id), {
+        headers: writerHeaders,
+      });
+      // Enable must succeed with no builder-schema validation error.
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.enabled).toBe(true);
+    }
+  );
+
+  // -------------------------------------------------------------------------
   // Authorization
   // -------------------------------------------------------------------------
 

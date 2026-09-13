@@ -61,6 +61,7 @@ import type {
 } from '@kbn/alerting-v2-schemas';
 
 import { ALIAS_TO_BUILDER_TYPE_ID, BUILDER_TYPE_ID_TO_ALIAS } from './rule_alias_map';
+import { RULE_DEFAULTS } from './apply_rule_defaults';
 import type {
   DetectionRuleResponse,
   CustomQueryRuleTypeFields,
@@ -171,16 +172,20 @@ export interface DetectionRuleCreateInput {
  *
  * Detection rules always have:
  *   - `kind: 'signal'` — they collect evidence, not alert episodes.
+ *   - `recovery_strategy: 'none'` and `no_data_strategy: 'none'` — sent
+ *     explicitly so stored detection rules are uniform even if the framework
+ *     default ever changes.  The framework's create schema accepts only absence
+ *     or `'none'` for signal rules.
  *   - No persisted `query` — the framework compiles the query at execution time
  *     from `metadata.builder_fields`.
- *   - No `state_transition`, `grouping`, `recovery_strategy`, or `no_data_strategy`
- *     — signal-kind rules do not use those framework features; omitting them
- *     lets the framework apply its own defaults rather than storing redundant values.
+ *   - No `state_transition` or `grouping` — signal-kind rules do not use those
+ *     framework features.
  *
  * Empty tags: the framework rejects `metadata.tags = []`, so the field is
  * omitted when the caller provides an empty array.
  *
  * Ref: rule-domain-model.md "How public fields map onto the stored rule"
+ *      rule-crud-api.md "Create a rule"
  */
 export function toFrameworkCreate(props: DetectionRuleCreateInput): CreateRuleData {
   const builderTypeId = ALIAS_TO_BUILDER_TYPE_ID[props.type];
@@ -191,6 +196,11 @@ export function toFrameworkCreate(props: DetectionRuleCreateInput): CreateRuleDa
 
   return {
     kind: 'signal',
+    // Sent explicitly so stored detection rules are uniform regardless of the
+    // framework default.  The framework's create schema accepts only 'none' for
+    // signal rules.
+    recovery_strategy: 'none',
+    no_data_strategy: 'none',
     schedule: {
       every: props.schedule.interval,
       ...(props.schedule.lookback !== undefined ? { lookback: props.schedule.lookback } : {}),
@@ -321,15 +331,15 @@ export interface DetectionRulePatchedInput {
  * Omitting `metadata.tags` on a partial update would keep the stored tags,
  * which is the wrong behaviour when the merged state has no tags.
  *
- * `occVersion`: the saved-object concurrency token for optimistic concurrency
- * control.  Pass the token from the preceding read; `undefined` disables OCC.
+ * The saved-object concurrency token belongs in `UpdateRuleParams.options.version`,
+ * NOT in the update data body.  The framework's `updateRuleDataSchema` is strict
+ * and rejects any top-level `version` key.  The caller (DetectionRulesClient) is
+ * responsible for passing the token via `options.version`.
  *
  * Ref: rule-domain-model.md "How public fields map onto the stored rule" (off-table rules)
+ *      rule-crud-api.md "Patch a rule with PATCH" (concurrency token via options)
  */
-export function toFrameworkPatch(
-  merged: DetectionRulePatchedInput,
-  occVersion?: string
-): UpdateRuleData & { version?: string } {
+export function toFrameworkPatch(merged: DetectionRulePatchedInput): UpdateRuleData {
   // Empty tags: for a partial update, null explicitly clears the stored value;
   // omission would keep the stored value unchanged.
   const metadataTags: string[] | null = merged.tags.length > 0 ? merged.tags : null;
@@ -344,7 +354,7 @@ export function toFrameworkPatch(
     schedulePayload.lookback = merged.schedule.lookback;
   }
 
-  const updateData: UpdateRuleData & { version?: string } = {
+  const updateData: UpdateRuleData = {
     metadata: {
       name: merged.name,
       description: merged.description,
@@ -354,10 +364,6 @@ export function toFrameworkPatch(
     },
     schedule: schedulePayload,
   };
-
-  if (occVersion !== undefined) {
-    updateData.version = occVersion;
-  }
 
   return updateData;
 }
@@ -434,9 +440,9 @@ export function toPublicResponse(rule: RuleResponse): DetectionRuleResponse {
     tags: (metadata.tags ?? []) as string[],
     severity: bf.severity as DetectionRuleResponseBase['severity'],
     risk_score: bf.risk_score as number,
-    max_signals: (bf.max_signals ?? 100) as number,
+    max_signals: (bf.max_signals ?? RULE_DEFAULTS.max_signals) as number,
     threat: (bf.threat ?? []) as DetectionRuleResponseBase['threat'],
-    setup: (bf.setup ?? '') as string,
+    setup: (bf.setup ?? RULE_DEFAULTS.setup) as string,
     note: bf.note as string | undefined,
     references: (bf.references ?? []) as string[],
     false_positives: (bf.false_positives ?? []) as string[],
