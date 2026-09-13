@@ -484,6 +484,30 @@ describe('DetectionRulesClient', () => {
       expect(frameworkClient.updateRule).toHaveBeenCalledTimes(1);
     });
 
+    it('preserves the stored max_signals when it is absent from the patch', async () => {
+      // The stored rule has max_signals = 500 (non-default).
+      const existingRule = makeInScopeRuleResponse();
+      (existingRule.metadata!.builder_fields as Record<string, unknown>).max_signals = 500;
+
+      const updatedRule = makeInScopeRuleResponse();
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.getRule as jest.Mock).mockResolvedValueOnce(existingRule);
+      (frameworkClient.updateRule as jest.Mock).mockResolvedValueOnce(updatedRule);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+
+      // Patch an unrelated field; max_signals is absent from the patch body.
+      await client.patchRule('rule-id-1', { name: 'Patched name' });
+
+      const [updateArgs] = (frameworkClient.updateRule as jest.Mock).mock.calls[0];
+      // The stored value must be written through unchanged, not reset to the
+      // default.  An absent max_signals in builder_fields causes the compile
+      // function to emit no LIMIT clause, which is the regression this guards.
+      expect((updateArgs.data.metadata.builder_fields as Record<string, unknown>).max_signals).toBe(
+        500
+      );
+    });
+
     it('returns 400 when a patch field does not belong to the stored type', async () => {
       // The stored rule is a 'query' type.
       const existingRule = makeInScopeRuleResponse();

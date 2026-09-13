@@ -244,6 +244,14 @@ describe('detectionRulePatchPropsSchema', () => {
     expect(result.success).toBe(false);
   });
 
+  it('accepts max_signals: 200 and preserves the value', () => {
+    const result = detectionRulePatchPropsSchema.safeParse({ max_signals: 200 });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.max_signals).toBe(200);
+    }
+  });
+
   it('accepts schedule.lookback: null to clear the lookback', () => {
     const input = { schedule: { lookback: null } };
     const result = detectionRulePatchPropsSchema.safeParse(input);
