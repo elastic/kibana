@@ -74,7 +74,7 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
             const fields = (state.parsedBuilderFields ?? {}) as OpaqueBuilderFields;
             const ruleIdentity = {
               id: state.rule.id,
-              signature_id: state.rule.metadata.signature_id ?? '',
+              signature_id: state.rule.metadata.signature_id,
               kind: state.rule.kind,
             };
             const hookFn = definition.enrichRuleEvent;
