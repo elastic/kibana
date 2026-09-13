@@ -1157,6 +1157,13 @@ export const ruleTagsParamsSchema = z
       .optional()
       .describe('Prefix to filter tags by. Returns all most-used tags when omitted.'),
     kind: ruleKindSchema.optional().describe('Restrict tags to rules of the given kind.'),
+    filter: z
+      .string()
+      .max(MAX_KQL_LENGTH)
+      .optional()
+      .describe(
+        'KQL filter to scope the tags aggregation. Validated against the find-filter allowlist.'
+      ),
   })
   .strict();
 

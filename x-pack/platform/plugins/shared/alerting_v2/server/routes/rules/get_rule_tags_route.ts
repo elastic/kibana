@@ -64,8 +64,8 @@ export class GetRuleTagsRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const { search, kind } = this.request.query;
-    const tags = await this.rulesClient.getTags({ search, kind });
+    const { search, kind, filter } = this.request.query;
+    const tags = await this.rulesClient.getTags({ search, kind, filter });
     return this.ctx.response.ok({ body: { tags } });
   }
 }
