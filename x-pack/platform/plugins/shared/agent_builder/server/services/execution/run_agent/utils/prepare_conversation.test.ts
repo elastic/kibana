@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import type { ConversationRound, ConverseInput, RoundInput } from '@kbn/agent-builder-common';
+import type {
+  ConversationRound,
+  ConverseInput,
+  RoundInput,
+  TimelineEvent,
+} from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
   ConversationRoundStepType,
+  TimelineEventType,
   ToolResultType,
   isBadRequestError,
 } from '@kbn/agent-builder-common';
@@ -24,7 +30,30 @@ import {
   createAgentHandlerContextMock,
   type AgentHandlerContextMock,
 } from '../../../../test_utils/runner';
-import { prepareConversation } from './prepare_conversation';
+import { prepareConversation as prepareConversationFromTimeline } from './prepare_conversation';
+import { eventsForContext, groupTimelineRounds } from './context_timeline';
+import {
+  TIMELINE_FIXTURE_AUTHOR,
+  eventsNativeConversation,
+  pausedAndResumedRoundTimeline,
+  roundsOfTimeline,
+  timelineFromRounds,
+} from '../../../../test_utils/timeline';
+
+type PrepareParams = Parameters<typeof prepareConversationFromTimeline>[0];
+
+// Rounds fixtures are normalized to the timeline the pipeline consumes and the processed timeline
+// is folded back to rounds, so every expectation below also checks the rounds -> events path.
+const prepareConversation = async ({
+  previousRounds,
+  ...params
+}: Omit<PrepareParams, 'timeline'> & { previousRounds: ConversationRound[] }) => {
+  const result = await prepareConversationFromTimeline({
+    ...params,
+    timeline: timelineFromRounds(previousRounds),
+  });
+  return { ...result, previousRounds: roundsOfTimeline(result.timeline) };
+};
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 
@@ -479,11 +508,14 @@ describe('prepareConversation', () => {
       });
 
       expect(result.previousRounds).toHaveLength(1);
+      // A round without an explicit author is attributed to the conversation owner by the timeline.
       expect(result.previousRounds[0]).toEqual({
         ...previousRound,
+        author: TIMELINE_FIXTURE_AUTHOR,
         input: {
           ...previousRound.input,
           attachments: [],
+          author: TIMELINE_FIXTURE_AUTHOR,
         },
       });
     });
@@ -667,11 +699,106 @@ describe('prepareConversation', () => {
 
       expect(result.previousRounds[0]).toEqual({
         ...previousRounds[0],
+        author: TIMELINE_FIXTURE_AUTHOR,
         input: {
           ...previousRounds[0].input,
           attachments: [],
+          author: TIMELINE_FIXTURE_AUTHOR,
         },
       });
+    });
+  });
+
+  describe('multi-execution (HITL) timelines', () => {
+    const textAttachment = (id: string): VersionedAttachment => ({
+      id,
+      type: 'text',
+      active: true,
+      current_version: 1,
+      versions: [
+        {
+          version: 1,
+          data: { content: 'v1' },
+          created_at: '2024-01-01T00:00:00.000Z',
+          content_hash: `hash-${id}`,
+          estimated_tokens: 1,
+        },
+      ],
+    });
+
+    it('processes the normalized round once, keeping the answered ask and the final response', async () => {
+      const timeline = eventsForContext(eventsNativeConversation(pausedAndResumedRoundTimeline()));
+
+      const result = await prepareConversationFromTimeline({
+        timeline,
+        nextInput: { message: 'next' },
+        context: mockContext,
+      });
+
+      const rounds = groupTimelineRounds(result.timeline);
+      expect(rounds).toHaveLength(1);
+      expect(rounds[0].userMessage.data).toEqual({
+        message: 'do it',
+        attachments: [],
+        author: { id: 'u1', username: 'user1' },
+      });
+      expect(rounds[0].steps[0]).toEqual(
+        expect.objectContaining({ prompt_id: 'p1', answers: [{ choice: [0] }] })
+      );
+      expect(rounds[0].terminated.data.outcome).toEqual({
+        type: 'responded',
+        response: { message: 'done' },
+      });
+    });
+
+    it('keeps processed attachment refs when the resume carried refs of its own', async () => {
+      mockContext.attachmentStateManager = createAttachmentStateManager([textAttachment('att-1')], {
+        getTypeDefinition: (type: string) => ({
+          id: type,
+          validate: (input: unknown) => ({ valid: true, data: input }),
+          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+        }),
+      });
+      const ref = { attachment_id: 'att-1', version: 1 };
+      const stored = pausedAndResumedRoundTimeline().map((event) => {
+        if (event.type === TimelineEventType.userMessage) {
+          return { ...event, data: { ...event.data, attachment_refs: [ref] } };
+        }
+        if (event.type === TimelineEventType.promptResponse) {
+          return {
+            ...event,
+            data: { ...event.data, input: { message: '', attachment_refs: [ref] } },
+          };
+        }
+        return event;
+      }) as TimelineEvent[];
+
+      const result = await prepareConversationFromTimeline({
+        timeline: eventsForContext(eventsNativeConversation(stored)),
+        nextInput: { message: 'next' },
+        context: mockContext,
+      });
+
+      const [round] = groupTimelineRounds(result.timeline);
+      expect(round.userMessage.data.attachment_refs).toEqual([{ ...ref, type: 'text' }]);
+      expect(result.attachmentTypes.map((type) => type.type)).toEqual(['text']);
+    });
+
+    it('drops events that belong to no round', async () => {
+      const orphan = {
+        ...pausedAndResumedRoundTimeline()[0],
+        id: 'orphan::user_message',
+        data: { message: 'never answered' },
+      } as unknown as TimelineEvent;
+
+      const result = await prepareConversationFromTimeline({
+        timeline: [...timelineFromRounds([{ id: 'r0', input: { message: 'first' } }]), orphan],
+        nextInput: { message: 'next' },
+        context: mockContext,
+      });
+
+      expect(result.timeline.some((event) => event.id === 'orphan::user_message')).toBe(false);
+      expect(groupTimelineRounds(result.timeline).map((round) => round.id)).toEqual(['r0']);
     });
   });
 

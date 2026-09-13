@@ -367,6 +367,11 @@ class ConversationClientImpl implements ConversationClient {
     let resolvedMetadata = conversationWithoutTemplateId.metadata;
     let resolvedTemplateId: string | undefined;
     let resolvedTemplateVersion: number | undefined;
+    if (!templateId && resolvedMetadata && Object.keys(resolvedMetadata).length > 0) {
+      throw createBadRequestError(
+        '`metadata` requires `template_id`: metadata values are validated against the referenced template'
+      );
+    }
     if (templateId) {
       const template = getTemplate(templateId);
       if (!template) {

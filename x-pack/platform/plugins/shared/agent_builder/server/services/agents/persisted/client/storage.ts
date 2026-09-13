@@ -49,6 +49,7 @@ const storageSettings = {
       config: types.object({
         properties: {
           workflow_ids: types.keyword({}),
+          post_execution_workflow_ids: types.keyword({}),
           plugin_ids: types.keyword({}),
           skill_ids: types.keyword({}),
           connector_ids: types.keyword({}),
@@ -91,6 +92,7 @@ export interface AgentConfigurationProperties {
   skill_ids?: string[];
   enable_elastic_capabilities?: boolean;
   workflow_ids?: string[];
+  post_execution_workflow_ids?: string[];
   plugin_ids?: string[];
   connector_ids?: string[];
   ai_indices?: string[];

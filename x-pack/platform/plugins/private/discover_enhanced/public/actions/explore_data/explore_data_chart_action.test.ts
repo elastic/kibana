@@ -91,7 +91,7 @@ const setup = (
 describe('"Explore underlying data" panel action', () => {
   test('action has Discover icon', () => {
     const { action } = setup();
-    expect(action.getIconType()).toBe('discoverApp');
+    expect(action.getIconType()).toBe('productDiscover');
   });
 
   test('title is "Explore underlying data"', () => {

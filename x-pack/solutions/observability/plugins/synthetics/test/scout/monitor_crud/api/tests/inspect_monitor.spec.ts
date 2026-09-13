@@ -264,16 +264,18 @@ apiTest.describe(
       assertNoRawSecret(apiResponse);
 
       // The `synthetics` Fleet package omits `enabled` (when true, the Heartbeat
-      // default) and `check.request.method` (when unset) from the compiled stream
-      // instead of always emitting them - tolerate either representation rather
-      // than pinning the test to one package version.
+      // default), `check.request.method` (when unset) and `__ui` (falsy UI-only
+      // metadata) from the compiled stream instead of always emitting them -
+      // tolerate either representation rather than pinning the test to one
+      // package version.
       expect(compiledStream.enabled ?? true).toBe(true);
       expect(compiledStream['check.request.method'] ?? null).toBeNull();
+      expect(compiledStream.__ui ?? null).toBeNull();
       delete compiledStream.enabled;
       delete compiledStream['check.request.method'];
+      delete compiledStream.__ui;
 
       expect(enabledStream?.compiled_stream).toStrictEqual({
-        __ui: null,
         type: 'http',
         name: 'test-monitor-name',
         origin: 'ui',
