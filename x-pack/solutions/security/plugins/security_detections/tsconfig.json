@@ -17,7 +17,8 @@
     "@kbn/alerting-v2-rule-builders",
     "@kbn/alerting-v2-schemas",
     "@kbn/security-detection-rule-schema",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/zod-helpers"
   ],
   "exclude": ["target/**/*"]
 }
