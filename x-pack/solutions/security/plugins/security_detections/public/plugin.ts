@@ -6,6 +6,8 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type { ConfigType } from '../server/config';
 
 /**
@@ -14,7 +16,17 @@ import type { ConfigType } from '../server/config';
  */
 export type SecurityDetectionsUIConfig = Pick<ConfigType, 'enableDetectionsOnV2'>;
 
-export class SecurityDetectionsPublicPlugin implements Plugin<void, void> {
+/** Setup dependencies injected by Kibana core. */
+export interface SecurityDetectionsPluginSetupDeps {
+  management: ManagementSetup;
+}
+
+const SECTION_ID = 'securityDetectionsV2';
+const APP_ID = 'securityDetectionsRules';
+
+export class SecurityDetectionsPublicPlugin
+  implements Plugin<void, void, SecurityDetectionsPluginSetupDeps>
+{
   private readonly config: SecurityDetectionsUIConfig;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -30,7 +42,36 @@ export class SecurityDetectionsPublicPlugin implements Plugin<void, void> {
     return this.config.enableDetectionsOnV2;
   }
 
-  public setup(_core: CoreSetup): void {}
+  public setup(core: CoreSetup, { management }: SecurityDetectionsPluginSetupDeps): void {
+    // Gate the entire UI surface behind the feature flag. With the flag off no
+    // section, no app, and no nav entry are registered — the page simply does
+    // not exist.
+    if (!this.detectionsEnabled) {
+      return;
+    }
+
+    const detectionSection = management.sections.register({
+      id: SECTION_ID,
+      title: i18n.translate('xpack.securityDetections.management.sectionTitle', {
+        defaultMessage: 'Security Detections',
+      }),
+      order: 10,
+    });
+
+    detectionSection.registerApp({
+      id: APP_ID,
+      title: i18n.translate('xpack.securityDetections.management.rulesNavTitle', {
+        defaultMessage: 'Detection Rules',
+      }),
+      order: 1,
+      async mount(params) {
+        const [coreStart] = await core.getStartServices();
+        // Dynamic import keeps the page component out of the main bundle.
+        const { mountDetectionRulesApp } = await import('./pages/detection_rules/mount');
+        return mountDetectionRulesApp(params, coreStart);
+      },
+    });
+  }
 
   public start(_core: CoreStart): void {}
 
