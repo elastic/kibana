@@ -9,7 +9,8 @@
     "server/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
-    "test/scout_detections_v2/**/*"
+    "test/scout_detections_v2/**/*",
+    "test/scout_detections_v2_flag_off/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -22,6 +23,7 @@
     "@kbn/security-detection-rule-schema",
     "@kbn/zod",
     "@kbn/zod-helpers",
+    "@kbn/logging-mocks",
     "@kbn/scout-security"
   ],
   "exclude": ["target/**/*"]

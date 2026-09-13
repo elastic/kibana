@@ -19,7 +19,8 @@
  *   - Flag on, alerting off → 503 ALERTING_DISABLED (path exists, handler rejects)
  *
  * Run this suite against a server started with the `detections_v2_flag_off`
- * config set (no `enableDetectionsOnV2` arg).  See playwright.flag_off.config.ts.
+ * config set (no `enableDetectionsOnV2` arg).  See playwright.config.ts in this
+ * directory (test/scout_detections_v2_flag_off/api/).
  *
  * Ref: rule-crud-api.md "Conventions every endpoint shares" (flag gate)
  *      plugin.ts setup() (route registration gated by flag)
@@ -31,7 +32,7 @@ import {
   DETECTION_HEADERS,
   DETECTION_V2_RULES,
   DETECTION_V2_TAGS,
-} from '../../fixtures';
+} from '../../../scout_detections_v2/api/fixtures';
 
 /** A plausible but non-existent rule id used in path-parameter tests. */
 const FAKE_ID = '00000000-0000-0000-0000-000000000001';

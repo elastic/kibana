@@ -637,22 +637,6 @@ export class RulesClient {
       references: existingReferences,
     } = await this.getExistingRule(id);
 
-    // Pre-check: builder-type transitions that touch a managed type are
-    // rejected before the identity gate. This ensures callers without an
-    // identity see BUILDER_TYPE_IS_MANAGED (not RULE_IS_MANAGED) when they
-    // attempt to transition a managed rule's builder type — matching what
-    // rule-ownership.md "The write gate" and rule-types.md both prescribe.
-    // resolveUpdateRuleBuilder runs the same check internally; this call
-    // makes the ordering explicit and guards against future refactors that
-    // might move or remove the resolve call.
-    assertBuilderTypeTransitionNotManaged(
-      this.builderTypeRegistry,
-      id,
-      parsed.metadata?.builder_type,
-      existingAttrs.metadata.builder_type,
-      existingAttrs.metadata.ownership
-    );
-
     // Gate: managed rules may only be written by the owning solution's client.
     // Both the stored ownership mark and the current registration are consulted.
     // Ref: rule-ownership.md "The write gate"
@@ -662,6 +646,22 @@ export class RulesClient {
       storedOwnership: existingAttrs.metadata.ownership as RuleOwnership | undefined,
       builderType: existingAttrs.metadata.builder_type,
     });
+
+    // Second clause: builder-type transitions that touch a managed type are
+    // rejected regardless of caller identity. This runs after the identity
+    // gate because the gate's flowchart puts the identity clause first: a
+    // caller with no identity writing a managed rule receives RULE_IS_MANAGED,
+    // not BUILDER_TYPE_IS_MANAGED. The identity clause reads the stored rule,
+    // so a rule that is not yet managed adopting a managed type sails past it
+    // and is rejected here instead. Caller identity does not bypass this clause.
+    // Ref: rule-ownership.md "The write gate" (second clause)
+    assertBuilderTypeTransitionNotManaged(
+      this.builderTypeRegistry,
+      id,
+      parsed.metadata?.builder_type,
+      existingAttrs.metadata.builder_type,
+      existingAttrs.metadata.ownership
+    );
 
     if (
       !isStateTransitionAllowed({
@@ -1946,17 +1946,6 @@ export class RulesClient {
       references: existingReferences,
     } = await this.getExistingRule(id);
 
-    // Pre-check: builder-type transitions that touch a managed type are
-    // rejected before the identity gate. Same rationale as the updateRule
-    // path above — rule-ownership.md "The write gate" second clause.
-    assertBuilderTypeTransitionNotManaged(
-      this.builderTypeRegistry,
-      id,
-      parsed.metadata?.builder_type,
-      existingAttrs.metadata.builder_type,
-      existingAttrs.metadata.ownership
-    );
-
     // Gate: managed rules may only be replaced by the owning solution's client.
     // Ref: rule-ownership.md "The write gate"
     assertManagedRuleWrite({
@@ -1965,6 +1954,17 @@ export class RulesClient {
       storedOwnership: existingAttrs.metadata.ownership as RuleOwnership | undefined,
       builderType: existingAttrs.metadata.builder_type,
     });
+
+    // Second clause: builder-type transitions that touch a managed type are
+    // rejected regardless of caller identity. Same ordering rationale as the
+    // updateRule path above — rule-ownership.md "The write gate" second clause.
+    assertBuilderTypeTransitionNotManaged(
+      this.builderTypeRegistry,
+      id,
+      parsed.metadata?.builder_type,
+      existingAttrs.metadata.builder_type,
+      existingAttrs.metadata.ownership
+    );
 
     assertImmutableUnchanged(parsed, existingAttrs);
     // Separate omitted-means-keep check for the nested signature_id — see the

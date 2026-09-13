@@ -247,10 +247,13 @@ apiTest.describe('Detection Engine v2 — fetch routes', { tag: '@local-stateful
   apiTest(
     'list: sort by risk_score returns rules in numeric order (proves builder_fields.risk_score sub-field sort)',
     async ({ apiClient }) => {
+      // Use 9, 10, 100 so that lexicographic order ('10' < '100' < '9') differs
+      // from numeric order (9 < 10 < 100) — the test proves the typed sub-field
+      // sort is active, not a keyword fallback.
       for (const [name, riskScore] of [
-        ['risk-low', 10],
-        ['risk-med', 47],
-        ['risk-high', 75],
+        ['risk-low', 9],
+        ['risk-med', 10],
+        ['risk-high', 100],
       ] as Array<[string, number]>) {
         await apiClient.post(DETECTION_V2_RULES, {
           headers: writerHeaders,
@@ -265,9 +268,9 @@ apiTest.describe('Detection Engine v2 — fetch routes', { tag: '@local-stateful
       expect(asc).toHaveStatusCode(200);
       const ascScores = asc.body.data.map((r: { risk_score: number }) => r.risk_score);
       // Verify ascending order across the slice we control.
-      const lowIdx = ascScores.indexOf(10);
-      const medIdx = ascScores.indexOf(47);
-      const highIdx = ascScores.indexOf(75);
+      const lowIdx = ascScores.indexOf(9);
+      const medIdx = ascScores.indexOf(10);
+      const highIdx = ascScores.indexOf(100);
       expect(lowIdx).toBeGreaterThanOrEqual(0);
       expect(lowIdx).toBeLessThan(medIdx);
       expect(medIdx).toBeLessThan(highIdx);
