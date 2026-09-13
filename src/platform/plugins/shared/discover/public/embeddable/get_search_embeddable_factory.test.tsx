@@ -12,7 +12,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
+import { DiscoverTabType, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import type { PresentationContainer } from '@kbn/presentation-publishing';
 import type { PhaseEvent, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
@@ -22,6 +22,7 @@ import { userEvent } from '@testing-library/user-event';
 
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { EmbeddableApiRegistration } from '@kbn/embeddable-plugin/public/react_embeddable_system/types';
+import { createProfileStateRegistry, METRICS_STATE_DEF } from '../../common/context_awareness';
 import { createDataViewDataSource } from '../../common/data_sources';
 import type { SearchEmbeddableState } from '../../common/embeddable/types';
 import { discoverServiceMock } from '../__mocks__/services';
@@ -73,11 +74,16 @@ describe('saved search embeddable', () => {
   };
 
   let runtimeState = getInitialRuntimeState();
+  const defaultProfileStateRegistry = discoverServiceMock.profileStateRegistry;
 
   beforeEach(() => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     require('./utils/serialization_utils').deserializeState = () => runtimeState;
     mockedEditableDashboardApi.setFocusedPanelId.mockClear();
+  });
+
+  afterEach(() => {
+    discoverServiceMock.profileStateRegistry = defaultProfileStateRegistry;
   });
 
   const mockServices = {
@@ -686,6 +692,59 @@ describe('saved search embeddable', () => {
         ...TEST_PROFILE_STATE_DEF.defaultState,
         uiValue: 'success',
       });
+    });
+
+    it('should initialize profile state from the runtime tab state', async () => {
+      let capturedToolkit: ContextAwarenessToolkit | undefined;
+      const originalCreateScopedProfilesManager =
+        discoverServiceMock.profilesManager.createScopedProfilesManager.bind(
+          discoverServiceMock.profilesManager
+        );
+
+      discoverServiceMock.profileStateRegistry = createProfileStateRegistry();
+
+      jest
+        .spyOn(discoverServiceMock.profilesManager, 'createScopedProfilesManager')
+        .mockImplementationOnce((args) => {
+          capturedToolkit = args.toolkit;
+          return originalCreateScopedProfilesManager(args);
+        });
+
+      runtimeState = getInitialRuntimeState({
+        partialState: {
+          tabTypeState: {
+            type: DiscoverTabType.Metrics,
+            dimensions: ['host.name'],
+            searchTerm: 'cpu',
+            counterAggregation: 'max',
+            gaugeAggregation: 'avg',
+            histogramPercentile: 'p99',
+          },
+        },
+      });
+
+      const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: mockedDashboardApi,
+      });
+      await waitOneTick();
+
+      if (!capturedToolkit) {
+        throw new Error('Expected search embeddable to create a scoped profiles manager.');
+      }
+
+      expect(capturedToolkit.getStateAdapter(METRICS_STATE_DEF).getState()).toEqual({
+        ...METRICS_STATE_DEF.defaultState,
+        dimensions: ['host.name'],
+        searchTerm: 'cpu',
+        counterAggregation: 'max',
+        gaugeAggregation: 'avg',
+        histogramPercentile: 'p99',
+      });
+      expect(api.savedSearch$.getValue().tabTypeState).toEqual(runtimeState.tabTypeState);
     });
 
     it('should not expose addFilter through the toolkit when filters are disabled', async () => {

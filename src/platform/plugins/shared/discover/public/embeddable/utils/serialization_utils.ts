@@ -105,6 +105,7 @@ export const deserializeState = async ({
       ...savedSearchWithoutTabs,
       ...panelState,
       ...savedObjectOverride,
+      tabTypeState: storedState.attributes.tabs[0]?.attributes.tabTypeState,
       nonPersistedDisplayOptions: serializedState.nonPersistedDisplayOptions,
     };
   }
@@ -132,13 +133,12 @@ export const serializeState = ({
   const searchSource = savedSearch.searchSource;
   const searchSourceJSON = JSON.stringify(searchSource.getSerializedFields());
   const savedSearchAttributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
+  const selectedTab = selectedTabId
+    ? initialState.tabs?.find((tab) => tab.id === selectedTabId)
+    : undefined;
 
   if (savedObjectId) {
     const isSelectedTabDeleted = isTabDeleted(selectedTabId, initialState.tabs ?? []);
-
-    const selectedTab = selectedTabId
-      ? initialState.tabs?.find((tab) => tab.id === selectedTabId)
-      : undefined;
 
     let overwriteState: EditableSavedSearchAttributes;
 
@@ -174,6 +174,9 @@ export const serializeState = ({
     title: title || initialState.savedObjectTitle,
     description: description || initialState.savedObjectDescription,
   };
+  const [savedSearchTab] = savedSearchAttributes.tabs;
+  // Unlinking uses the selected session tab, including an absent state for a default tab.
+  const tabTypeState = initialState.tabs ? selectedTab?.tabTypeState : initialState.tabTypeState;
 
   const stored: StoredSearchEmbeddableByValueState = {
     ...serializeTimeRange(),
@@ -182,6 +185,15 @@ export const serializeState = ({
     ...titleOptions,
     attributes: {
       ...savedSearchAttributes,
+      tabs: [
+        {
+          ...savedSearchTab,
+          attributes: {
+            ...savedSearchTab.attributes,
+            tabTypeState,
+          },
+        },
+      ],
       ...(serializedTitles.title && { title: serializedTitles.title }),
       ...(serializedTitles.description && { description: serializedTitles.description }),
     },

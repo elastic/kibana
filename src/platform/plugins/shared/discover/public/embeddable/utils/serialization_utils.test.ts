@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
+import {
+  AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+  AS_CODE_ESQL_DATA_SOURCE_TYPE,
+} from '@kbn/as-code-data-views-schema';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock } from '../../__mocks__/services';
@@ -18,9 +21,12 @@ import type {
   DiscoverSessionEmbeddableByValueState,
 } from '../../../server';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
+import type {
+  DiscoverSessionTab,
+  DiscoverSessionTabTypeState,
+} from '@kbn/saved-search-plugin/common';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import { DataGridDensity } from '@kbn/discover-utils';
+import { DataGridDensity, DiscoverTabType } from '@kbn/discover-utils';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import type {
   SearchEmbeddableByReferenceState,
@@ -71,6 +77,7 @@ describe('Serialization utils', () => {
     description: 'description',
     tabs: [
       {
+        type: DiscoverTabType.Default,
         column_order: ['_source'],
         sort: [{ name: 'order_date', direction: 'desc' }],
         view_mode: VIEW_MODE.DOCUMENT_LEVEL,
@@ -84,6 +91,29 @@ describe('Serialization utils', () => {
         data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: dataViewId },
       },
     ],
+  };
+
+  const metricsTabTypeState: DiscoverSessionTabTypeState = {
+    type: DiscoverTabType.Metrics,
+    dimensions: ['host.name'],
+    searchTerm: 'cpu',
+    counterAggregation: 'max',
+    gaugeAggregation: 'avg',
+    histogramPercentile: 'p99',
+  };
+
+  const metricsByValueTab: DiscoverSessionEmbeddableByValueState['tabs'][0] = {
+    type: DiscoverTabType.Metrics,
+    dimensions: metricsTabTypeState.dimensions,
+    search_term: metricsTabTypeState.searchTerm,
+    counter_aggregation: metricsTabTypeState.counterAggregation,
+    gauge_aggregation: metricsTabTypeState.gaugeAggregation,
+    histogram_percentile: metricsTabTypeState.histogramPercentile,
+    sort: [],
+    data_source: {
+      type: AS_CODE_ESQL_DATA_SOURCE_TYPE,
+      query: 'TS metrics-*',
+    },
   };
 
   const mockTab = (
@@ -113,6 +143,18 @@ describe('Serialization utils', () => {
       tabs: sessionTabs,
     });
 
+  const getSessionTabsWithMetrics = (): DiscoverSessionTab[] => [
+    {
+      ...mockTab('metrics-tab', 'Metrics tab'),
+      serializedSearchSource: { query: { esql: 'TS metrics-*' } },
+      tabTypeState: metricsTabTypeState,
+    },
+    {
+      ...mockTab('default-tab', 'Default tab'),
+      serializedSearchSource: { query: { esql: 'FROM logs-*' } },
+    },
+  ];
+
   describe('deserialize state', () => {
     test('by value', async () => {
       const deserializedState = await deserializeState({
@@ -141,6 +183,18 @@ describe('Serialization utils', () => {
 
       expect(Object.keys(deserializedState)).toContain('serializedSearchSource');
       expect(deserializedState.title).toEqual('test panel title');
+    });
+
+    test('by value restores Metrics profile state from the synthetic tab', async () => {
+      const deserializedState = await deserializeState({
+        serializedState: {
+          title: 'Metrics panel',
+          tabs: [metricsByValueTab],
+        },
+        discoverServices: discoverServiceMock,
+      });
+
+      expect(deserializedState.tabTypeState).toEqual(metricsTabTypeState);
     });
 
     test('by reference - default tab (no selectedTabId)', async () => {
@@ -204,11 +258,15 @@ describe('Serialization utils', () => {
     test('by reference - valid selectedTabId', async () => {
       const sessionTabs = [
         mockTab('tab-1', 'Tab 1'),
-        mockTab('tab-2', 'Tab 2', {
-          columns: ['col-a', 'col-b'],
-          sort: [['timestamp', 'asc']],
-          sampleSize: 200,
-        }),
+        {
+          ...mockTab('tab-2', 'Tab 2', {
+            columns: ['col-a', 'col-b'],
+            sort: [['timestamp', 'asc']],
+            sampleSize: 200,
+          }),
+          serializedSearchSource: { query: { esql: 'TS metrics-*' } },
+          tabTypeState: metricsTabTypeState,
+        },
       ];
       discoverServiceMock.savedSearch.getDiscoverSession = jest
         .fn()
@@ -231,6 +289,7 @@ describe('Serialization utils', () => {
       expect(deserializedState.columns).toEqual(['col-a', 'col-b']);
       expect(deserializedState.sort).toEqual([['timestamp', 'asc']]);
       expect(deserializedState.sampleSize).toEqual(200);
+      expect(deserializedState.tabTypeState).toEqual(metricsTabTypeState);
     });
 
     test('by reference - deleted selectedTabId discards stale dashboard overrides', async () => {
@@ -390,6 +449,142 @@ describe('Serialization utils', () => {
         ],
       });
       expect(serializedState).not.toHaveProperty('attributes');
+    });
+
+    test('by value preserves Metrics profile state in the public tab shape', () => {
+      const searchSource = createSearchSourceMock({
+        query: { esql: 'TS metrics-*' },
+      });
+
+      const serializedState = serializeState({
+        uuid,
+        initialState: {
+          tabTypeState: metricsTabTypeState,
+          serializedSearchSource: { query: { esql: 'TS metrics-*' } },
+        },
+        savedSearch: {
+          title: 'Metrics panel',
+          description: '',
+          columns: [],
+          sort: [],
+          grid: {},
+          hideChart: false,
+          isTextBasedQuery: true,
+          managed: false,
+          searchSource,
+        },
+        serializeTitles: jest.fn().mockReturnValue({ title: 'Metrics panel' }),
+        serializeTimeRange: jest.fn(),
+        serializeDynamicActions: jest.fn(),
+      });
+
+      expect(serializedState).toMatchObject({
+        tabs: [
+          {
+            type: DiscoverTabType.Metrics,
+            dimensions: ['host.name'],
+            search_term: 'cpu',
+            counter_aggregation: 'max',
+            gauge_aggregation: 'avg',
+            histogram_percentile: 'p99',
+            data_source: {
+              type: AS_CODE_ESQL_DATA_SOURCE_TYPE,
+              query: 'TS metrics-*',
+            },
+          },
+        ],
+      });
+    });
+
+    test('unlink uses the selected tab profile state after switching tabs', () => {
+      const searchSource = createSearchSourceMock({
+        query: { esql: 'FROM logs-*' },
+      });
+
+      const serializedState = serializeState({
+        uuid,
+        initialState: {
+          tabs: getSessionTabsWithMetrics(),
+          tabTypeState: metricsTabTypeState,
+          serializedSearchSource: { query: { esql: 'TS metrics-*' } },
+        },
+        savedSearch: {
+          title: 'Default panel',
+          description: '',
+          columns: [],
+          sort: [],
+          grid: {},
+          hideChart: false,
+          isTextBasedQuery: true,
+          managed: false,
+          searchSource,
+        },
+        serializeTitles: jest.fn().mockReturnValue({ title: 'Default panel' }),
+        serializeTimeRange: jest.fn(),
+        serializeDynamicActions: jest.fn(),
+        selectedTabId: 'default-tab',
+      });
+
+      expect(serializedState).toMatchObject({
+        tabs: [
+          {
+            type: DiscoverTabType.Default,
+            data_source: {
+              type: AS_CODE_ESQL_DATA_SOURCE_TYPE,
+              query: 'FROM logs-*',
+            },
+          },
+        ],
+      });
+      expect(serializedState).not.toMatchObject({
+        tabs: [expect.objectContaining({ dimensions: expect.anything() })],
+      });
+    });
+
+    test('unlink preserves the selected Metrics tab profile state', () => {
+      const searchSource = createSearchSourceMock({
+        query: { esql: 'TS metrics-*' },
+      });
+
+      const serializedState = serializeState({
+        uuid,
+        initialState: {
+          tabs: getSessionTabsWithMetrics(),
+          serializedSearchSource: { query: { esql: 'FROM logs-*' } },
+        },
+        savedSearch: {
+          title: 'Metrics panel',
+          description: '',
+          columns: [],
+          sort: [],
+          grid: {},
+          hideChart: false,
+          isTextBasedQuery: true,
+          managed: false,
+          searchSource,
+        },
+        serializeTitles: jest.fn().mockReturnValue({ title: 'Metrics panel' }),
+        serializeTimeRange: jest.fn(),
+        serializeDynamicActions: jest.fn(),
+        selectedTabId: 'metrics-tab',
+      });
+
+      expect(serializedState).toMatchObject({
+        tabs: [
+          {
+            type: DiscoverTabType.Metrics,
+            dimensions: ['host.name'],
+            search_term: 'cpu',
+            counter_aggregation: 'max',
+            gauge_aggregation: 'avg',
+            histogram_percentile: 'p99',
+            data_source: {
+              type: AS_CODE_ESQL_DATA_SOURCE_TYPE,
+              query: 'TS metrics-*',
+            },
+          },
+        ],
+      });
     });
 
     describe('by reference', () => {

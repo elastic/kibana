@@ -21,7 +21,7 @@ import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { fromStoredDataView, toStoredDataView } from '@kbn/as-code-data-views-transforms';
 import { toAsCodeQuery, toStoredQuery } from '@kbn/as-code-shared-transforms';
 import type { SavedObjectReference } from '@kbn/core/server';
-import { isLegacySort, type SortOrder } from '@kbn/discover-utils';
+import { DiscoverTabType, isLegacySort, type SortOrder } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { JsonModeSettings } from '@kbn/unified-data-table';
 import {
@@ -43,6 +43,7 @@ import type {
   StoredSearchEmbeddableByValueState,
   StoredSearchEmbeddableState,
 } from './types';
+import type { MetricsTabTypeState } from '../session/metrics';
 import {
   DISCOVER_SESSION_EMBEDDABLE_SYNTHETIC_TAB_ID,
   DISCOVER_SESSION_EMBEDDABLE_SYNTHETIC_TAB_LABEL,
@@ -148,6 +149,12 @@ export function fromStoredSearchEmbeddableByValue(
   } = storedState;
   const [tab] = attributes.tabs ?? extractTabs(attributes).tabs;
   const apiTab = fromStoredTab(tab.attributes, references);
+  // Saved Metrics settings only apply to an ES|QL tab; a mismatch is dropped rather than failing
+  // the panel, unlike the session API which rejects the session outright.
+  const typedTab: DiscoverSessionEmbeddableByValueState['tabs'][number] =
+    tab.attributes.tabTypeState && isDiscoverSessionEsqlTab(apiTab)
+      ? { ...apiTab, ...fromStoredMetricsTabTypeState(tab.attributes.tabTypeState) }
+      : { ...apiTab, type: DiscoverTabType.Default };
   const panelOverrides = toDiscoverSessionPanelOverrides(storedState);
   const { hide_title, hide_border } = storedState;
 
@@ -157,7 +164,7 @@ export function fromStoredSearchEmbeddableByValue(
     description: description || attributes.description,
     ...(hide_title && { hide_title }),
     ...(hide_border && { hide_border }),
-    tabs: [{ ...apiTab, ...panelOverrides }],
+    tabs: [{ ...typedTab, ...panelOverrides }],
   };
 }
 
@@ -169,13 +176,19 @@ export function toStoredSearchEmbeddableByValue(
     tabs: [apiTab],
     ...otherAttrs
   } = apiState;
-  const { state: tabAttributes, references: tabReferences } = toStoredTab(apiTab);
+  const { state: baseTabAttributes, references: tabReferences } = toStoredTab(apiTab);
+  const tabAttributes: DiscoverSessionTabAttributes = {
+    ...baseTabAttributes,
+    ...(apiTab.type === DiscoverTabType.Metrics && {
+      tabTypeState: toStoredMetricsTabTypeState(apiTab),
+    }),
+  };
   const state: StoredSearchEmbeddableByValueState = {
     ...otherAttrs,
     ...fromDiscoverSessionPanelOverrides(apiTab),
     attributes: {
-      ...tabAttributes,
-      sort: tabAttributes.sort as SavedSearchAttributes['sort'],
+      ...baseTabAttributes,
+      sort: baseTabAttributes.sort as SavedSearchAttributes['sort'],
       title: apiState.title ?? '',
       description: apiState.description ?? '',
       tabs: [
@@ -192,6 +205,28 @@ export function toStoredSearchEmbeddableByValue(
     references: [...references, ...tabReferences],
   };
 }
+
+export const fromStoredMetricsTabTypeState = (
+  tabTypeState: NonNullable<DiscoverSessionTabAttributes['tabTypeState']>
+): MetricsTabTypeState => ({
+  type: DiscoverTabType.Metrics,
+  dimensions: tabTypeState.dimensions,
+  search_term: tabTypeState.searchTerm,
+  counter_aggregation: tabTypeState.counterAggregation,
+  gauge_aggregation: tabTypeState.gaugeAggregation,
+  histogram_percentile: tabTypeState.histogramPercentile,
+});
+
+export const toStoredMetricsTabTypeState = (
+  tabTypeState: MetricsTabTypeState
+): NonNullable<DiscoverSessionTabAttributes['tabTypeState']> => ({
+  type: DiscoverTabType.Metrics,
+  dimensions: tabTypeState.dimensions,
+  searchTerm: tabTypeState.search_term,
+  counterAggregation: tabTypeState.counter_aggregation,
+  gaugeAggregation: tabTypeState.gauge_aggregation,
+  histogramPercentile: tabTypeState.histogram_percentile,
+});
 
 export function fromStoredTab(
   tab: DiscoverSessionTabAttributes,

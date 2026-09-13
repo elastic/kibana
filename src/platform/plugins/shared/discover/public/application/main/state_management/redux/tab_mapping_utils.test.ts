@@ -32,6 +32,14 @@ import {
 } from '../../../../../common/context_awareness';
 
 const services = createDiscoverServicesMock();
+const metricsTabTypeState: NonNullable<DiscoverSessionTab['tabTypeState']> = {
+  type: DiscoverTabType.Metrics,
+  dimensions: ['host.name'],
+  searchTerm: 'cpu',
+  counterAggregation: 'max',
+  gaugeAggregation: 'avg',
+  histogramPercentile: 'p99',
+};
 const tab1 = getTabStateMock({
   id: '1',
   label: 'Tab 1',
@@ -453,6 +461,25 @@ describe('tab mapping utils', () => {
         }
       `);
     });
+
+    it('should preserve tab type state', async () => {
+      const persistedTab = {
+        ...getPersistedTabMock({
+          tabId: 'metrics-tab',
+          dataView: dataViewMockWithTimeField,
+          services,
+        }),
+        tabTypeState: metricsTabTypeState,
+      };
+
+      const savedSearch = await fromSavedObjectTabToSavedSearch({
+        tab: persistedTab,
+        discoverSession: undefined,
+        services,
+      });
+
+      expect(savedSearch.tabTypeState).toEqual(metricsTabTypeState);
+    });
   });
 
   describe('fromTabStateToSavedObjectTab', () => {
@@ -827,6 +854,16 @@ describe('tab mapping utils', () => {
           "visContext": undefined,
         }
       `);
+    });
+
+    it('should preserve tab type state', () => {
+      const savedObjectTab = fromSavedSearchToSavedObjectTab({
+        tab: tab1,
+        savedSearch: { ...savedSearchMock, tabTypeState: metricsTabTypeState },
+        services,
+      });
+
+      expect(savedObjectTab.tabTypeState).toEqual(metricsTabTypeState);
     });
   });
 

@@ -10,6 +10,10 @@
 import { DiscoverTabType } from '@kbn/discover-utils';
 import type { DiscoverSessionTabAttributes } from '@kbn/saved-search-plugin/server';
 import { isDiscoverSessionEsqlTab } from '../../../common/embeddable';
+import {
+  fromStoredMetricsTabTypeState,
+  toStoredMetricsTabTypeState,
+} from '../../../common/embeddable/transform_utils';
 import type {
   DiscoverSessionApiClassicTab,
   DiscoverSessionApiEsqlTab,
@@ -30,14 +34,7 @@ export const transformTabTypeStateIn = (
       // Default tabs have no tabTypeState in the saved object.
       return undefined;
     case DiscoverTabType.Metrics:
-      return {
-        type: DiscoverTabType.Metrics,
-        dimensions: apiTabTypeState.dimensions,
-        searchTerm: apiTabTypeState.search_term,
-        counterAggregation: apiTabTypeState.counter_aggregation,
-        gaugeAggregation: apiTabTypeState.gauge_aggregation,
-        histogramPercentile: apiTabTypeState.histogram_percentile,
-      };
+      return toStoredMetricsTabTypeState(apiTabTypeState);
   }
 };
 
@@ -56,14 +53,6 @@ export const transformTabTypeStateOut = (
         );
       }
 
-      return {
-        ...apiTab,
-        type: DiscoverTabType.Metrics,
-        dimensions: tabTypeState.dimensions,
-        search_term: tabTypeState.searchTerm,
-        counter_aggregation: tabTypeState.counterAggregation,
-        gauge_aggregation: tabTypeState.gaugeAggregation,
-        histogram_percentile: tabTypeState.histogramPercentile,
-      };
+      return { ...apiTab, ...fromStoredMetricsTabTypeState(tabTypeState) };
   }
 };
