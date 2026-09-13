@@ -18,10 +18,21 @@ project:
   sourceRoot: x-pack/solutions/security/plugins/security_detections
 dependsOn:
   - '@kbn/core'
+  - '@kbn/core-http-server'
   - '@kbn/config-schema'
   - '@kbn/alerting-v2-plugin'
   - '@kbn/alerting-v2-rule-builders'
+  - '@kbn/alerting-v2-schemas'
+  - '@kbn/alerting-v2-constants'
   - '@kbn/security-detection-rule-schema'
+  - '@kbn/zod'
+  - '@kbn/zod-helpers'
+  - '@kbn/logging-mocks'
+  - '@kbn/scout-security'
+  - '@kbn/management-plugin'
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/react-query'
 tags:
   - plugin
   - prod
@@ -34,6 +45,8 @@ fileGroups:
     - public/**/*
     - server/**/*
     - server/**/*.json
+    - test/scout_detections_v2/**/*
+    - test/scout_detections_v2_flag_off/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
