@@ -54,6 +54,7 @@ RuleExecutionPipeline
    +--> WaitForResourcesStep
    +--> FetchRuleStep
    +--> ValidateRuleStep
+   +--> CompileRuleQueryStep
    +--> FetchActiveGroupsStep
    +--> ExecuteRuleQueryStep
    +--> CreateAlertEventsStep
@@ -166,6 +167,9 @@ The cap only ever drops groups that have **no existing episode** — groups that
 | --- | --- | --- |
 | `input` | Pipeline / task runner | Rule id, space id, schedule, and execution context. |
 | `rule` | `FetchRuleStep` | Current rule document. |
+| `effectiveQuery` | `CompileRuleQueryStep` | The query to execute this run — either the stored query (write-time types) or the query generated from builder fields (execution-time types). |
+| `executionWindow` | `CompileRuleQueryStep` | Resolved time window for the current execution (from builder output or stored rule). |
+| `parsedBuilderFields` | `CompileRuleQueryStep` | Builder fields parsed against the builder type's schema, threaded to downstream steps so they do not re-parse. Present only for execution-time builder types. |
 | `queryPayload` | `ExecuteRuleQueryStep` | ES\|QL query/filter/params for the current run. |
 | `esqlRowBatch` | `ExecuteRuleQueryStep` | One streamed batch of ES\|QL rows. |
 | `alertEventsBatch` | Event-creation steps and director | Materialized rule events for the current batch. |
@@ -180,12 +184,13 @@ Step order is defined in `setup/bind_rule_executor.ts`.
 | 1 | `WaitForResourcesStep` | Ensure required Elasticsearch resources exist before doing work. |
 | 2 | `FetchRuleStep` | Load the current rule saved object. |
 | 3 | `ValidateRuleStep` | Halt early if the rule cannot run, for example because it is disabled. |
-| 4 | `FetchActiveGroupsStep` | Fetch the rule's active groups once for every `kind: 'alert'` rule (bounded by `maxGroupsPerExecution`) and thread them onto `state.activeGroups`. |
-| 5 | `ExecuteRuleQueryStep` | Build and run ES\|QL, emitting streamed row batches. |
-| 6 | `CreateAlertEventsStep` | Turn a row batch into breached rule events (per batch). |
-| 7 | `ClassifyAbsentGroupsStep` | Forward every breach batch unchanged while accumulating the full-run breach set. Once the stream drains, run the data-presence and recovery queries once and emit recovery / `no_data` / continued-`breached` events for the active groups absent from that set, as a single final batch. No-op for `signal` rules and when both `recovery_strategy` and `no_data_strategy` are `'none'`. |
-| 8 | `DirectorStep` | Enrich alert-type events with episode state. |
-| 9 | `StoreAlertEventsStep` | Persist the batch into `.rule-events`. |
+| 4 | `CompileRuleQueryStep` | Resolve the effective query for the run: for write-time builder types, take the stored query; for execution-time types, invoke the builder to generate a query from the stored builder fields, validate the output, and thread the result plus parsed fields onto pipeline state. |
+| 5 | `FetchActiveGroupsStep` | Fetch the rule's active groups once for every `kind: 'alert'` rule (bounded by `maxGroupsPerExecution`) and thread them onto `state.activeGroups`. |
+| 6 | `ExecuteRuleQueryStep` | Build and run ES\|QL, emitting streamed row batches. |
+| 7 | `CreateAlertEventsStep` | Turn a row batch into breached rule events (per batch). |
+| 8 | `ClassifyAbsentGroupsStep` | Forward every breach batch unchanged while accumulating the full-run breach set. Once the stream drains, run the data-presence and recovery queries once and emit recovery / `no_data` / continued-`breached` events for the active groups absent from that set, as a single final batch. No-op for `signal` rules and when both `recovery_strategy` and `no_data_strategy` are `'none'`. |
+| 9 | `DirectorStep` | Enrich alert-type events with episode state. |
+| 10 | `StoreAlertEventsStep` | Persist the batch into `.rule-events`. |
 
 The rule executor runs whenever the plugin is enabled (`xpack.alerting_v2.enabled`). The `alerting:v2:enabled` advanced setting gates only the user-facing surface (UI + APIs), not core engine execution, so rules keep producing events even while the UI and APIs stay hidden.
 

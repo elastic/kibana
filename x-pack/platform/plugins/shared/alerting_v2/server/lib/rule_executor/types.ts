@@ -37,6 +37,15 @@ export interface RulePipelineState {
   readonly effectiveQuery?: Query;
   /** The run's time window, resolved once. end is the run's `now`. */
   readonly executionWindow?: { readonly start: string; readonly end: string };
+  /**
+   * The parsed builder fields for an execution-time rule, produced by
+   * `CompileRuleQueryStep` after running `definition.builderFieldsSchema.safeParse`.
+   * Threaded forward so `CreateAlertEventsStep` can pass them to the
+   * `enrichRuleEvent` hook without re-parsing.
+   *
+   * Absent for stored-query rules (plain ES|QL or write-time builder rules).
+   */
+  readonly parsedBuilderFields?: unknown;
   readonly queryPayload?: QueryPayload;
   readonly esqlRowBatch?: ReadonlyArray<Record<string, unknown>>;
   readonly alertEventsBatch?: ReadonlyArray<AlertEvent>;

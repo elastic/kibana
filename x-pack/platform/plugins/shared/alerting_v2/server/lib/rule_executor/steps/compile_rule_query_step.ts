@@ -11,6 +11,7 @@ import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/se
 import { BuilderQueryGenerationError } from '@kbn/alerting-v2-rule-builders';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError } from '@kbn/zod/v4';
+import { querySchema } from '@kbn/alerting-v2-schemas';
 import type { OpaqueBuilderFields } from '../../builder_types';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import { guardedMapStep } from '../stream_utils';
@@ -176,11 +177,12 @@ export class CompileRuleQueryStep implements RuleExecutionStep {
           run: { now: nowIso, window: executionWindow },
         });
       } catch (genError) {
-        // Propagate Boom errors unchanged (they already carry the right code).
-        if (Boom.isBoom(genError)) {
-          throw createTaskRunError(genError as Error, TaskErrorSource.USER);
-        }
-
+        // Every throw from generateQuery maps to BUILDER_QUERY_GENERATION_FAILED
+        // regardless of what code a Boom error might carry. The failure taxonomy
+        // (rule-execution-logic.md "Compilation failures") maps all generateQuery
+        // throws to this code; trusting the thrower's Boom code would let a
+        // compile function emit e.g. INVALID_BUILDER_FIELDS from this catch, which
+        // differs from the write path and breaks the taxonomy.
         const message =
           genError instanceof Error ? genError.message : String(genError);
 
@@ -202,14 +204,39 @@ export class CompileRuleQueryStep implements RuleExecutionStep {
         );
       }
 
-      // Validate the compile result. Three checks, all in the design:
-      //   1. No-overrides rule (execution-time types only): the result must not
+      // Validate the compile result. Four checks, all in the design:
+      //   1. Structural parse: run the result's `query` field through `querySchema`
+      //      so that a compile function returning a structurally invalid Query (e.g.
+      //      `{ format: 'standalone', breach: { query: 42 } }` from an unchecked
+      //      cast or a JS-side type error) fails here as BUILDER_QUERY_GENERATION_FAILED
+      //      rather than reaching ExecuteRuleQueryStep and throwing a raw TypeError
+      //      that is classified as a framework-source (retryable) failure.
+      //   2. No-overrides rule (execution-time types only): the result must not
       //      carry time_field or grouping — those must be derived at write time
       //      via deriveRuleFields, not set per-run.
-      //   2. adaptToKind: flatten composed queries for signal rules; reject a
+      //   3. adaptToKind: flatten composed queries for signal rules; reject a
       //      recovery block on a signal rule.
-      //   3. GENERATED_QUERY_INVARIANTS: the same invariants the write path enforces.
+      //   4. GENERATED_QUERY_INVARIANTS: the same invariants the write path enforces.
+      //
+      // Ref: rule-execution-logic.md "The compilation contract"
       try {
+        // Check 1: structural parse.
+        const queryParseResult = querySchema.safeParse(generated.query);
+        if (!queryParseResult.success) {
+          throw Boom.badRequest(
+            `The "${builderType}" rule builder returned a structurally invalid query: ` +
+              stringifyZodError(queryParseResult.error),
+            {
+              code: ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED,
+              details: {
+                builder_type: builderType,
+                errors: treeifyError(queryParseResult.error),
+              },
+            }
+          );
+        }
+
+        // Check 2: no-overrides rule.
         if (generated.time_field !== undefined || generated.grouping !== undefined) {
           throw Boom.badRequest(
             `The "${builderType}" rule builder returned time_field or grouping overrides at ` +
@@ -221,6 +248,7 @@ export class CompileRuleQueryStep implements RuleExecutionStep {
           );
         }
 
+        // Checks 3 + 4.
         const adapted = adaptToKind(generated, rule.kind, builderType);
 
         assertGeneratedQueryIsValid(
@@ -235,7 +263,7 @@ export class CompileRuleQueryStep implements RuleExecutionStep {
 
         return {
           type: 'continue',
-          state: { ...state, effectiveQuery: adapted.query, executionWindow },
+          state: { ...state, effectiveQuery: adapted.query, executionWindow, parsedBuilderFields: parsedFields },
         };
       } catch (validationError) {
         throw createTaskRunError(

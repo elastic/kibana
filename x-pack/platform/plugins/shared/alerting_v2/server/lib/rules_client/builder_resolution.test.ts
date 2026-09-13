@@ -1367,7 +1367,10 @@ describe('execution-time builder types', () => {
       expect(generate).not.toHaveBeenCalled();
     });
 
-    it('returns result with NO query for an execution-time type update', () => {
+    it('returns result with NO stored query for an execution-time type update (null signals clearance)', () => {
+      // Execution-time types always set query: null so buildUpdateRuleAttributes
+      // clears any stale stored query. The null sentinel is intentional —
+      // undefined would be silently treated as "preserve" by buildUpdateRuleAttributes.
       const typeMap = new Map([[EXECUTION_TYPE, makeExecutionDefinition()]]);
       const registry = createMockRegistryWithTypes(typeMap);
       const data: UpdateRuleData = {
@@ -1376,7 +1379,44 @@ describe('execution-time builder types', () => {
 
       const result = resolveUpdateRuleBuilder(registry, RULE_ID, data, executionExisting);
 
-      expect(result.query).toBeUndefined();
+      expect(result.query).toBeNull();
+    });
+
+    it('returns query: null to clear a stale stored query when switching from write-time to execution-time type', () => {
+      // When a PATCH changes a rule's builder type from write-time to execution-time,
+      // the stored query compiled by the old type must not survive. The resolver
+      // signals buildUpdateRuleAttributes to clear it by returning query: null.
+      //
+      // Without this, "omitted = preserve" semantics in buildUpdateRuleAttributes
+      // would keep the old compiled query in the saved object even though every
+      // run now ignores it and compiles fresh from builder_fields.
+      //
+      // Ref: rule-execution-logic.md "A rule without a persisted query"
+      //   ("no saved-object attribute, no cached last-compiled copy")
+      const typeMap = new Map([[EXECUTION_TYPE, makeExecutionDefinition()]]);
+      const registry = createMockRegistryWithTypes(typeMap);
+
+      // Existing rule has a stored query from a write-time builder type.
+      const writeTimeExisting: RuleSavedObjectAttributes = createRuleSoAttributes({
+        kind: 'alert',
+        metadata: {
+          name: 'rule',
+          builder_type: 'old.write_time_type',
+          builder_fields: { q: 'old-fields' },
+          ownership: { managed: false },
+        },
+        query: { format: 'standalone', breach: { query: 'FROM old-index | LIMIT 10' } },
+      });
+
+      const data: UpdateRuleData = {
+        metadata: { builder_type: EXECUTION_TYPE, builder_fields: RAW_EXECUTION_FIELDS },
+      };
+
+      const result = resolveUpdateRuleBuilder(registry, RULE_ID, data, writeTimeExisting);
+
+      // The resolver must return null, not undefined, so buildUpdateRuleAttributes
+      // clears the stored query instead of preserving the old one.
+      expect(result.query).toBeNull();
     });
 
     it('re-derives grouping on update when threshold_field changes', () => {
@@ -1400,7 +1440,7 @@ describe('execution-time builder types', () => {
       const result = resolveUpdateRuleBuilder(registry, RULE_ID, data, executionExisting);
 
       expect(result.grouping).toEqual({ fields: ['source.ip'] });
-      expect(result.query).toBeUndefined();
+      expect(result.query).toBeNull(); // null clears any stale stored query
     });
 
     it('stamps the effective builder_type onto the result metadata', () => {
@@ -1433,7 +1473,7 @@ describe('execution-time builder types', () => {
       });
 
       expect(derive).not.toHaveBeenCalled();
-      expect(result.query).toBeUndefined();
+      expect(result.query).toBeNull(); // null clears any stale stored query
     });
   });
 });
