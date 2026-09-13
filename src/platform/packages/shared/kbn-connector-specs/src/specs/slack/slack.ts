@@ -11,9 +11,12 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosError, AxiosResponse } from 'axios';
 import type { ConnectorSpec, ActionContext } from '../../connector_spec';
+import { UISchemas } from '../../connector_spec';
 import { slackRelay } from './relay';
 import {
   SlackCreateConversationInputSchema,
+  SlackGetChannelHistoryInputSchema,
+  SlackGetConversationRepliesInputSchema,
   SlackGetConversationHistoryInputSchema,
   SlackGetConversationInfoInputSchema,
   SlackGetFileInfoInputSchema,
@@ -31,10 +34,13 @@ import {
   type SlackAssistantSearchContextResponse,
   type SlackAuthTestResponse,
   type SlackConversationsHistoryResponse,
+  type SlackConversationsRepliesResponse,
+  type SlackGetConversationRepliesInput,
   type SlackConversationsListParams,
   type SlackConversationsListResponse,
   type SlackCreateConversationInput,
   type SlackErrorFields,
+  type SlackGetChannelHistoryInput,
   type SlackFile,
   type SlackFilesInfoResponse,
   type SlackFilesListResponse,
@@ -50,10 +56,21 @@ import {
   type SlackResolveChannelIdInput,
   type SlackSearchMessagesInput,
   type SlackSendMessageInput,
+  type SlackUsersListResponse,
   type SlackWhoAmIInput,
 } from './types';
 
 const SLACK_API_BASE = 'https://slack.com/api';
+
+/**
+ * Resolve the Slack API base URL. Defaults to the public Slack API; an optional
+ * `baseUrl` config override lets deployments point the connector at a gateway,
+ * egress proxy, or contract-mock endpoint without code changes.
+ */
+function slackApiBase(ctx: { config?: Record<string, unknown> }): string {
+  const override = ((ctx?.config?.baseUrl as string | undefined) ?? '').trim();
+  return override ? override.replace(/\/+$/, '') : SLACK_API_BASE;
+}
 
 const SLACK_RETRY_DEFAULT_BASE_DELAY_MS = 1000;
 const SLACK_RETRY_JITTER_MAX_MS = 250;
@@ -272,7 +289,24 @@ export const Slack: ConnectorSpec = {
   },
 
   // No additional configuration needed beyond OAuth credentials
-  schema: lazySchema(() => z.object({})),
+  schema: lazySchema(() =>
+    z.object({
+      baseUrl: UISchemas.url()
+        .default(SLACK_API_BASE)
+        .describe('Slack API base URL')
+        .meta({
+          widget: 'text',
+          placeholder: SLACK_API_BASE,
+          label: i18n.translate('connectorSpecs.slack.config.baseUrl.label', {
+            defaultMessage: 'Slack API URL',
+          }),
+          helpText: i18n.translate('connectorSpecs.slack.config.baseUrl.helpText', {
+            defaultMessage:
+              'Base URL for the Slack Web API. Override to route through a gateway or egress proxy.',
+          }),
+        }),
+    })
+  ),
 
   actions: {
     // https://api.slack.com/methods/assistant.search.context
@@ -324,7 +358,7 @@ export const Slack: ConnectorSpec = {
               action: 'searchMessages',
               maxRetries: SLACK_MAX_RETRIES,
               request: () =>
-                ctx.client.post(`${SLACK_API_BASE}/assistant.search.context`, requestBody, {
+                ctx.client.post(`${slackApiBase(ctx)}/assistant.search.context`, requestBody, {
                   headers: {
                     'Content-Type': 'application/json; charset=utf-8',
                   },
@@ -399,7 +433,7 @@ export const Slack: ConnectorSpec = {
           ctx,
           action: 'listChannels',
           maxRetries: SLACK_MAX_RETRIES,
-          request: () => ctx.client.get(`${SLACK_API_BASE}/conversations.list`, { params }),
+          request: () => ctx.client.get(`${slackApiBase(ctx)}/conversations.list`, { params }),
         });
 
         if (!response.data.ok) {
@@ -469,7 +503,7 @@ export const Slack: ConnectorSpec = {
             ctx,
             action: 'resolveChannelId',
             maxRetries: SLACK_MAX_RETRIES,
-            request: () => ctx.client.get(`${SLACK_API_BASE}/conversations.list`, { params }),
+            request: () => ctx.client.get(`${slackApiBase(ctx)}/conversations.list`, { params }),
           });
 
           if (!response.data.ok) {
@@ -522,6 +556,182 @@ export const Slack: ConnectorSpec = {
       },
     },
 
+    // https://api.slack.com/methods/users.list
+    // Ingest-oriented variant of listUsers (isTool: false). Kept separate from the
+    // agent-facing listUsers action, matching the listFiles / listFilesIngest pattern.
+    listUsersIngest: {
+      isTool: false,
+      scope: 'read',
+      description:
+        'List workspace users with cursor pagination for ingest workflows. Returns compact user records and nextCursor.',
+      input: SlackListUsersInputSchema,
+      handler: async (ctx, input: SlackListUsersInput) => {
+        const typedInput = SlackListUsersInputSchema.parse(input);
+        const params: Record<string, string | number> = {
+          limit: typedInput.limit,
+        };
+        if (typedInput.cursor) {
+          params.cursor = typedInput.cursor;
+        }
+
+        const response = await slackRequestWithRateLimitRetry<SlackUsersListResponse>({
+          ctx,
+          action: 'listUsersIngest',
+          maxRetries: SLACK_MAX_RETRIES,
+          request: () =>
+            ctx.client.get(`${slackApiBase(ctx)}/users.list`, {
+              params,
+            }),
+        });
+
+        if (!response.data.ok) {
+          throw new Error(
+            formatSlackApiErrorMessage({
+              action: 'listUsersIngest',
+              responseData: response.data,
+              responseHeaders: response.headers,
+            })
+          );
+        }
+
+        if (typedInput.raw) {
+          return response.data;
+        }
+
+        const members = (response.data.members ?? []).filter((member) => {
+          if (typedInput.includeDeleted) {
+            return true;
+          }
+          return !member.deleted && !member.is_bot;
+        });
+
+        return {
+          ok: true,
+          users: members.map((member) => ({
+            id: member.id,
+            name: member.name,
+            realName: member.real_name,
+            email: member.profile?.email,
+            displayName: member.profile?.display_name,
+          })),
+          nextCursor: response.data.response_metadata?.next_cursor,
+          hasMore: Boolean(response.data.response_metadata?.next_cursor),
+        };
+      },
+    },
+
+    // https://api.slack.com/methods/conversations.history
+    getChannelHistory: {
+      isTool: false,
+      scope: 'read',
+      description:
+        'Fetch channel message history with cursor pagination for ingest workflows. Use oldest for incremental sync checkpoints.',
+      input: SlackGetChannelHistoryInputSchema,
+      handler: async (ctx, input: SlackGetChannelHistoryInput) => {
+        const typedInput = SlackGetChannelHistoryInputSchema.parse(input);
+        const params: Record<string, string | number | boolean> = {
+          channel: typedInput.channel,
+          limit: typedInput.limit,
+          inclusive: typedInput.inclusive,
+        };
+        if (typedInput.oldest) {
+          params.oldest = typedInput.oldest;
+        }
+        if (typedInput.latest) {
+          params.latest = typedInput.latest;
+        }
+        if (typedInput.cursor) {
+          params.cursor = typedInput.cursor;
+        }
+
+        const response = await slackRequestWithRateLimitRetry<SlackConversationsHistoryResponse>({
+          ctx,
+          action: 'getChannelHistory',
+          maxRetries: SLACK_MAX_RETRIES,
+          request: () =>
+            ctx.client.get(`${slackApiBase(ctx)}/conversations.history`, {
+              params,
+            }),
+        });
+
+        if (!response.data.ok) {
+          throw new Error(
+            formatSlackApiErrorMessage({
+              action: 'getChannelHistory',
+              responseData: response.data,
+              responseHeaders: response.headers,
+            })
+          );
+        }
+
+        if (typedInput.raw) {
+          return response.data;
+        }
+
+        return {
+          ok: true,
+          channel: typedInput.channel,
+          messages: response.data.messages ?? [],
+          nextCursor: response.data.response_metadata?.next_cursor,
+          hasMore: Boolean(response.data.response_metadata?.next_cursor || response.data.has_more),
+        };
+      },
+    },
+
+    // https://api.slack.com/methods/conversations.replies
+    getConversationReplies: {
+      isTool: false,
+      scope: 'read',
+      description:
+        'Fetch thread replies for a Slack message. Use after getChannelHistory to ingest thread context.',
+      input: SlackGetConversationRepliesInputSchema,
+      handler: async (ctx, input: SlackGetConversationRepliesInput) => {
+        const typedInput = SlackGetConversationRepliesInputSchema.parse(input);
+        const params: Record<string, string | number | boolean> = {
+          channel: typedInput.channel,
+          ts: typedInput.ts,
+          limit: typedInput.limit,
+          inclusive: typedInput.inclusive,
+        };
+        if (typedInput.cursor) {
+          params.cursor = typedInput.cursor;
+        }
+
+        const response = await slackRequestWithRateLimitRetry<SlackConversationsRepliesResponse>({
+          ctx,
+          action: 'getConversationReplies',
+          maxRetries: SLACK_MAX_RETRIES,
+          request: () =>
+            ctx.client.get(`${slackApiBase(ctx)}/conversations.replies`, {
+              params,
+            }),
+        });
+
+        if (!response.data.ok) {
+          throw new Error(
+            formatSlackApiErrorMessage({
+              action: 'getConversationReplies',
+              responseData: response.data,
+              responseHeaders: response.headers,
+            })
+          );
+        }
+
+        if (typedInput.raw) {
+          return response.data;
+        }
+
+        return {
+          ok: true,
+          channel: typedInput.channel,
+          threadTs: typedInput.ts,
+          messages: response.data.messages ?? [],
+          nextCursor: response.data.response_metadata?.next_cursor,
+          hasMore: Boolean(response.data.response_metadata?.next_cursor || response.data.has_more),
+        };
+      },
+    },
+
     // https://api.slack.com/methods/conversations.history
     getConversationHistory: {
       isTool: true,
@@ -548,7 +758,7 @@ export const Slack: ConnectorSpec = {
           ctx,
           action: 'getConversationHistory',
           maxRetries: SLACK_MAX_RETRIES,
-          request: () => ctx.client.get(`${SLACK_API_BASE}/conversations.history`, { params }),
+          request: () => ctx.client.get(`${slackApiBase(ctx)}/conversations.history`, { params }),
         });
 
         if (!response.data.ok) {
@@ -628,7 +838,7 @@ export const Slack: ConnectorSpec = {
           ctx,
           action: 'getConversationInfo',
           maxRetries: SLACK_MAX_RETRIES,
-          request: () => ctx.client.get(`${SLACK_API_BASE}/conversations.info`, { params }),
+          request: () => ctx.client.get(`${slackApiBase(ctx)}/conversations.info`, { params }),
         });
 
         if (!response.data.ok) {
@@ -663,7 +873,7 @@ export const Slack: ConnectorSpec = {
           action: 'lookupUserByEmail',
           maxRetries: SLACK_MAX_RETRIES,
           request: () =>
-            ctx.client.get(`${SLACK_API_BASE}/users.lookupByEmail`, {
+            ctx.client.get(`${slackApiBase(ctx)}/users.lookupByEmail`, {
               params: { email: typedInput.email },
             }),
         });
@@ -706,7 +916,7 @@ export const Slack: ConnectorSpec = {
           ctx,
           action: 'listUsers',
           maxRetries: SLACK_MAX_RETRIES,
-          request: () => ctx.client.get(`${SLACK_API_BASE}/users.list`, { params }),
+          request: () => ctx.client.get(`${slackApiBase(ctx)}/users.list`, { params }),
         });
 
         if (!response.data.ok) {
@@ -787,7 +997,7 @@ export const Slack: ConnectorSpec = {
           ctx,
           action: 'listUserConversations',
           maxRetries: SLACK_MAX_RETRIES,
-          request: () => ctx.client.get(`${SLACK_API_BASE}/users.conversations`, { params }),
+          request: () => ctx.client.get(`${slackApiBase(ctx)}/users.conversations`, { params }),
         });
 
         if (!response.data.ok) {
@@ -840,7 +1050,7 @@ export const Slack: ConnectorSpec = {
           ctx,
           action: 'whoAmI',
           maxRetries: SLACK_MAX_RETRIES,
-          request: () => ctx.client.get(`${SLACK_API_BASE}/auth.test`),
+          request: () => ctx.client.get(`${slackApiBase(ctx)}/auth.test`),
         });
 
         if (!response.data.ok) {
@@ -888,7 +1098,7 @@ export const Slack: ConnectorSpec = {
           action: 'getFileInfo',
           maxRetries: SLACK_MAX_RETRIES,
           request: () =>
-            ctx.client.get(`${SLACK_API_BASE}/files.info`, {
+            ctx.client.get(`${slackApiBase(ctx)}/files.info`, {
               params: { file: typedInput.file },
             }),
         });
@@ -934,7 +1144,7 @@ export const Slack: ConnectorSpec = {
           ctx,
           action: 'listFiles',
           maxRetries: SLACK_MAX_RETRIES,
-          request: () => ctx.client.get(`${SLACK_API_BASE}/files.list`, { params }),
+          request: () => ctx.client.get(`${slackApiBase(ctx)}/files.list`, { params }),
         });
 
         if (!response.data.ok) {
@@ -1010,7 +1220,7 @@ export const Slack: ConnectorSpec = {
             action: 'createConversation',
             maxRetries: SLACK_MAX_RETRIES,
             request: () =>
-              ctx.client.post(`${SLACK_API_BASE}/conversations.create`, payload, {
+              ctx.client.post(`${slackApiBase(ctx)}/conversations.create`, payload, {
                 headers: {
                   'Content-Type': 'application/json; charset=utf-8',
                 },
@@ -1064,7 +1274,7 @@ export const Slack: ConnectorSpec = {
             action: 'inviteToConversation',
             maxRetries: SLACK_MAX_RETRIES,
             request: () =>
-              ctx.client.post(`${SLACK_API_BASE}/conversations.invite`, payload, {
+              ctx.client.post(`${slackApiBase(ctx)}/conversations.invite`, payload, {
                 headers: {
                   'Content-Type': 'application/json; charset=utf-8',
                 },
@@ -1131,7 +1341,7 @@ export const Slack: ConnectorSpec = {
             action: 'sendMessage',
             maxRetries: SLACK_MAX_RETRIES,
             request: () =>
-              ctx.client.post(`${SLACK_API_BASE}/chat.postMessage`, payload, {
+              ctx.client.post(`${slackApiBase(ctx)}/chat.postMessage`, payload, {
                 headers: {
                   'Content-Type': 'application/json; charset=utf-8',
                 },
@@ -1175,7 +1385,7 @@ export const Slack: ConnectorSpec = {
       }
 
       // Test connection by calling auth.test which validates the token
-      const response = await ctx.client.get(`${SLACK_API_BASE}/auth.test`);
+      const response = await ctx.client.get(`${slackApiBase(ctx)}/auth.test`);
       if (!response.data.ok) {
         throw new Error(
           formatSlackApiErrorMessage({

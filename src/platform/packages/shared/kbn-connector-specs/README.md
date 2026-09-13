@@ -276,7 +276,7 @@ Actions define what the connector can do:
 ```typescript
 actions: {
   actionName: {
-    isTool?: boolean,              // Whether this action is a tool (for AI workflows)
+    isTool: boolean,               // REQUIRED: true = agent tool (Agent Builder/MCP); false = workflow/ingest-only
     input: z.ZodSchema,            // Input validation schema
     output?: z.ZodSchema,          // Output validation schema (optional)
     handler: async (ctx, input) => {
@@ -289,6 +289,8 @@ actions: {
   },
 }
 ```
+
+**`isTool` classification is mandatory and enforced.** Declare `isTool` on every action. Use `isTool: true` only for actions an AI agent may call directly. Actions that page through large or unbounded datasets (catalog listings, bulk history pulls, org-wide enumeration) are **workflow/ingest-only** and must set `isTool: false` — they are never exposed to Agent Builder / MCP, since a paginating ingest action would flood an agent's context. A contract test (`connector_spec_contract.test.ts`) fails CI on any action missing an explicit `isTool`.
 
 ### Test
 
@@ -604,3 +606,94 @@ When creating a new connector with a lazy icon:
 ## License
 
 Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0
+
+## Package-shippable query templates (CONN-006)
+
+The GitHub GraphQL template library (`github.runQueryTemplate`) is extensible at
+runtime: a Fleet package can contribute its own read-only templates at install
+time, so new product queries ship in the package instead of requiring a
+kibana-core PR.
+
+```ts
+import {
+  registerConnectorQueryTemplates,
+  unregisterConnectorQueryTemplates,
+} from '@kbn/connector-specs';
+
+// on package install
+registerConnectorQueryTemplates({
+  packageName: 'sdlc_intel',
+  templates: [
+    {
+      id: 'myTeamRoadmap',                      // becomes `sdlc_intel.myTeamRoadmap`
+      description: 'Team roadmap items for an org project.',
+      resultPath: 'organization.projectV2.items',
+      isPaginated: true,
+      variables: [{ name: 'org', type: 'string', required: true }],
+      document: `query MyTeamRoadmap($org: String!, $first: Int!, $after: String) { ... }`,
+    },
+  ],
+});
+
+// on package uninstall
+unregisterConnectorQueryTemplates('sdlc_intel');
+```
+
+The template is then callable with no core change:
+
+```yaml
+- { type: github.runQueryTemplate, with: { templateId: sdlc_intel.myTeamRoadmap, org: elastic } }
+```
+
+### Manifest schema
+
+| Field | Required | Notes |
+|---|---|---|
+| `id` | yes | `^[A-Za-z][A-Za-z0-9_.]{0,127}$`; auto-namespaced to `<packageName>.<id>` |
+| `document` | yes | GraphQL string, max 20000 chars |
+| `resultPath` | yes | dot-separated path into `data` (e.g. `organization.repositories`) |
+| `isPaginated` | no | defaults `false`; when `true` the document must declare `$first` and `$after` |
+| `variables` | no | `{ name, type: string\|number\|integer\|boolean, required?, description? }` — compiled to a Zod schema |
+| `description` | no | shown by `listTemplates` |
+
+Definitions are declarative and JSON-serializable — a package ships data, never
+executable code.
+
+### Registration guarantees
+
+Registration validates every template and **never throws for a bad template** —
+per-template failures come back in `result.errors` so one malformed template
+cannot abort a package install. A template is rejected when it:
+
+- is not valid GraphQL, or does not contain **exactly one `query` operation**
+  (mutations and subscriptions are rejected, including a mutation smuggled in
+  alongside a query),
+- exceeds the 20000-character document cap,
+- declares `isPaginated: true` without `$first`/`$after`,
+- targets a **core template id** (reserved — packages can never clobber core), or
+- targets an id **already owned by another package**.
+
+Both the raw and namespaced id are checked, so a package cannot claim a core id
+by relying on the namespace prefix. Re-registering the same package is
+idempotent (re-install replaces), and `unregisterConnectorQueryTemplates` only
+ever removes templates owned by that package — core templates are immutable.
+
+### Normalization belongs in the workflow, not the connector (CONN-008)
+
+A connector action must **not** return documents shaped for a particular product's
+index. Ingest workflows map their own documents with `data.set` and write them with
+`elasticsearch.bulk` (`id_field`), which keeps target-schema ownership in the package.
+
+Measured on the SDLC ingest fleet, moving mapping into the connector would have removed
+only the generic `@timestamp`/`sync`/`entity`/`org`/`payload` envelope — **41 of 1668
+workflow YAML lines (2.5%)** — while making every product schema change a Kibana PR. The
+envelope was not even uniform: it fit fewer than half the call sites.
+
+| Ask the platform for | Keep in the workflow |
+|---|---|
+| Pagination, cursors, retry/rate-limit handling | Which API field maps to which index field |
+| Query templates (see CONN-006 — ship them in your package) | The document envelope and `_id` choice |
+| Transport-shaped flattening (`nodes`/`pageInfo`) with no schema knowledge | Anything naming your index's fields |
+
+Rule of thumb: if the change would make the connector unusable for another package that
+stores the same API's data differently, it belongs in the workflow.

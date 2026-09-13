@@ -8,7 +8,6 @@
  */
 
 import * as authTypeDefinitions from './src/all_auth_types';
-import { ApiKeyHeaderWithTlsAuth } from './src/auth_types/api_key_header_with_tls_server';
 import { BearerWithTlsAuth } from './src/auth_types/bearer_with_tls_server';
 import { KubernetesAksAuth } from './src/auth_types/kubernetes_aks_server';
 import { KubernetesEksAuth } from './src/auth_types/kubernetes_eks_server';
@@ -16,7 +15,6 @@ import { KubernetesGkeAuth } from './src/auth_types/kubernetes_gke_server';
 
 export const authTypeSpecs = {
   ...authTypeDefinitions,
-  ApiKeyHeaderWithTlsAuth,
   BearerWithTlsAuth,
   KubernetesAksAuth,
   KubernetesEksAuth,
