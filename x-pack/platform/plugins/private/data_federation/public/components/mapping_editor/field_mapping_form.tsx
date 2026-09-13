@@ -8,6 +8,8 @@
 import React from 'react';
 import type { ReactNode } from 'react';
 import {
+  EuiButton,
+  EuiButtonEmpty,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -34,13 +36,65 @@ export interface FieldMappingFormErrors {
 export interface FieldMappingFormProps {
   value: FieldMappingFormValue;
   onChange: (patch: Partial<FieldMappingFormValue>) => void;
-  typeOptions: Array<{ value: '' | DatasetMappingFieldType; text: string }>;
   typeHelpText?: ReactNode;
   pathHelpText?: ReactNode;
   errors?: FieldMappingFormErrors;
-  dateTypeValue: DatasetMappingFieldType;
-  actions: ReactNode;
+  mode: 'create' | 'edit';
+  onSubmit: () => void;
 }
+
+const DEFAULT_DATE_TYPE_VALUE: DatasetMappingFieldType = 'date';
+
+const DEFAULT_TYPE_OPTIONS: Array<{ value: '' | DatasetMappingFieldType; text: string }> = [
+  {
+    value: '',
+    text: i18n.translate('xpack.dataFederation.mappingEditor.typePlaceholder', {
+      defaultMessage: 'Select type',
+    }),
+  },
+  { value: 'boolean', text: 'Boolean' },
+  { value: 'date', text: 'Date' },
+  { value: 'double', text: 'Double' },
+  { value: 'integer', text: 'Integer' },
+  { value: 'ip', text: 'IP' },
+  { value: 'keyword', text: 'Keyword' },
+  { value: 'long', text: 'Long' },
+  { value: 'unsigned_long', text: 'Unsigned long' },
+];
+
+const CreateButton = ({ onClick }: { onClick: () => void }) => {
+  return (
+    <EuiButton
+      iconType="plusCircle"
+      size="s"
+      onClick={onClick}
+      data-test-subj="dataFederationMappingEditorDraftAddField"
+    >
+      {i18n.translate('xpack.dataFederation.mappingEditor.addFirstField', {
+        defaultMessage: 'Add field',
+      })}
+    </EuiButton>
+  );
+};
+
+const EditButton = ({ onClick }: { onClick: () => void }) => {
+  return (
+    <EuiFlexGroup gutterSize="s" direction="row" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          iconType="check"
+          size="s"
+          onClick={onClick}
+          data-test-subj="dataFederationMappingEditorDoneField"
+        >
+          {i18n.translate('xpack.dataFederation.mappingEditor.doneField', {
+            defaultMessage: 'Done',
+          })}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 export const getFieldTypeDocsHelpText = (
   type: DatasetMappingFieldType,
@@ -62,14 +116,13 @@ export const getFieldTypeDocsHelpText = (
 export function FieldMappingForm({
   value,
   onChange,
-  typeOptions,
   typeHelpText,
   pathHelpText,
   errors,
-  dateTypeValue,
-  actions,
+  mode,
+  onSubmit,
 }: FieldMappingFormProps) {
-  const isDateType = value.type === dateTypeValue;
+  const isDateType = value.type === DEFAULT_DATE_TYPE_VALUE;
 
   return (
     <EuiFlexGroup gutterSize="m" alignItems="flexStart">
@@ -86,13 +139,13 @@ export function FieldMappingForm({
           <EuiSelect
             isInvalid={Boolean(errors?.type)}
             fullWidth
-            options={typeOptions as unknown as Array<{ value: string; text: string }>}
+            options={DEFAULT_TYPE_OPTIONS}
             value={value.type}
             onChange={(e) => {
               const nextType = e.target.value as '' | DatasetMappingFieldType;
               onChange({
                 type: nextType,
-                ...(nextType === dateTypeValue ? {} : { format: '' }),
+                ...(nextType === DEFAULT_DATE_TYPE_VALUE ? {} : { format: '' }),
               });
             }}
             data-test-subj="dataFederationMappingEditorFieldType"
@@ -168,7 +221,13 @@ export function FieldMappingForm({
         )}
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>{actions}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        {mode === 'create' ? (
+          <CreateButton onClick={onSubmit} />
+        ) : (
+          <EditButton onClick={onSubmit} />
+        )}
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }

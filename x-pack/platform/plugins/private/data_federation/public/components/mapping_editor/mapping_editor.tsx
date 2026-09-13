@@ -9,7 +9,6 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { FC, SetStateAction } from 'react';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -102,23 +101,6 @@ const TYPE_INFO_BY_VALUE: Record<DatasetMappingFieldType, { label: string; docs:
     docs: `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/unsigned-long`,
   },
 };
-
-const TYPE_OPTIONS: Array<{ value: '' | DatasetMappingFieldType; text: string }> = [
-  {
-    value: '',
-    text: i18n.translate('xpack.dataFederation.mappingEditor.typePlaceholder', {
-      defaultMessage: 'Select type',
-    }),
-  },
-  { value: 'boolean', text: TYPE_INFO_BY_VALUE.boolean.label },
-  { value: 'date', text: TYPE_INFO_BY_VALUE.date.label },
-  { value: 'double', text: TYPE_INFO_BY_VALUE.double.label },
-  { value: 'integer', text: TYPE_INFO_BY_VALUE.integer.label },
-  { value: 'ip', text: TYPE_INFO_BY_VALUE.ip.label },
-  { value: 'keyword', text: TYPE_INFO_BY_VALUE.keyword.label },
-  { value: 'long', text: TYPE_INFO_BY_VALUE.long.label },
-  { value: 'unsigned_long', text: TYPE_INFO_BY_VALUE.unsigned_long.label },
-];
 
 export const emptyMappingEditorValue = (): MappingEditorValue => ({
   dynamic: true,
@@ -540,7 +522,6 @@ export const MappingEditor: FC<MappingEditorProps> = ({
             onChange={(patch) =>
               setDraftField((prev) => ({ ...prev, ...(patch as Partial<MappingEditorField>) }))
             }
-            typeOptions={TYPE_OPTIONS}
             typeHelpText={
               draftField.type
                 ? getFieldTypeDocsHelpText(
@@ -550,19 +531,8 @@ export const MappingEditor: FC<MappingEditorProps> = ({
                 : undefined
             }
             errors={draftFieldErrors}
-            dateTypeValue={'date'}
-            actions={
-              <EuiButton
-                iconType="plusCircle"
-                size="s"
-                onClick={addDraftField}
-                data-test-subj="dataFederationMappingEditorDraftAddField"
-              >
-                {i18n.translate('xpack.dataFederation.mappingEditor.addFirstField', {
-                  defaultMessage: 'Add field',
-                })}
-              </EuiButton>
-            }
+            mode="create"
+            onSubmit={addDraftField}
           />
         </EuiPanel>
       ) : filteredFields.length === 0 ? (
@@ -595,7 +565,6 @@ export const MappingEditor: FC<MappingEditorProps> = ({
                           onChange={(patch) => {
                             updateField(f.id, patch as Partial<MappingEditorField>);
                           }}
-                          typeOptions={TYPE_OPTIONS}
                           typeHelpText={
                             f.type
                               ? getFieldTypeDocsHelpText(f.type, TYPE_INFO_BY_VALUE)
@@ -608,34 +577,14 @@ export const MappingEditor: FC<MappingEditorProps> = ({
                             }
                           )}
                           errors={rowErrors}
-                          dateTypeValue={'date'}
-                          actions={
-                            <EuiFlexGroup
-                              gutterSize="s"
-                              direction="row"
-                              alignItems="center"
-                              responsive={false}
-                            >
-                              <EuiFlexItem grow={false}>
-                                <EuiButtonEmpty
-                                  iconType="check"
-                                  size="s"
-                                  onClick={() => {
-                                    const nextValidation = validateMappingEditorValue(value);
-                                    const fieldErrors = nextValidation.fieldErrorsById[f.id];
-                                    markFieldValidated(f.id);
-                                    if (fieldErrors) return;
-                                    setEditingFieldId(null);
-                                  }}
-                                  data-test-subj="dataFederationMappingEditorDoneField"
-                                >
-                                  {i18n.translate('xpack.dataFederation.mappingEditor.doneField', {
-                                    defaultMessage: 'Done',
-                                  })}
-                                </EuiButtonEmpty>
-                              </EuiFlexItem>
-                            </EuiFlexGroup>
-                          }
+                          mode="edit"
+                          onSubmit={() => {
+                            const nextValidation = validateMappingEditorValue(value);
+                            const fieldErrors = nextValidation.fieldErrorsById[f.id];
+                            markFieldValidated(f.id);
+                            if (fieldErrors) return;
+                            setEditingFieldId(null);
+                          }}
                         />
                       </>
                     ) : (
