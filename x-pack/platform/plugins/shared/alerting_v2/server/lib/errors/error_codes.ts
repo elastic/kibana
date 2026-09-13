@@ -84,6 +84,21 @@ export const ALERTING_ERROR_CODES = {
    * Ref: rule-ownership.md "The write gate"
    */
   RULE_IS_MANAGED: 'RULE_IS_MANAGED',
+  /**
+   * An update or upsert-replace operation tried to transition a managed builder
+   * type — into, out of, or between managed types — after the rule was created.
+   * Managed builder types (those whose registration declares `ownership`) are set
+   * at create time only; the create path's existing write gate stamps
+   * `metadata.ownership` from the registration. The error details carry the
+   * `builder_type`, `solution`, and `domain` of the managed side.
+   *
+   * Caller identity (`onBehalfOf`) does not bypass this check: managed types are
+   * set at create only, where `createRule`'s existing gate requires the owning
+   * solution's identity and stamps ownership from the registration.
+   *
+   * Ref: rule-ownership.md "The write gate"
+   */
+  BUILDER_TYPE_IS_MANAGED: 'BUILDER_TYPE_IS_MANAGED',
   /** Filter expression referenced an unknown field. */
   INVALID_FILTER_FIELD: 'INVALID_FILTER_FIELD',
   /** Filter expression used an unsupported KQL function. */
