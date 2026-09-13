@@ -10,7 +10,6 @@ import type { FC, SetStateAction } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCodeBlock,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,7 +26,8 @@ import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import type { DatasetMappingFieldType, DatasetMappings } from '../../../common';
 import { FieldMappingForm, getFieldTypeDocsHelpText } from './field_mapping_form';
-import { MappingActions } from './mapping_actions';
+import { FieldMappingDisplayMode } from './field_mapping_display_mode';
+import { MappingJsonPreview } from './mapping_json_preview';
 
 export interface MappingEditorField {
   id: string;
@@ -101,36 +101,6 @@ const TYPE_INFO_BY_VALUE: Record<DatasetMappingFieldType, { label: string; docs:
     label: 'Unsigned long',
     docs: `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/unsigned-long`,
   },
-};
-
-const renderBoldMatches = (text: string, query: string): React.ReactNode => {
-  const t = text ?? '';
-  const q = query.trim();
-
-  if (!t) return <span aria-hidden="true">&nbsp;</span>;
-  if (!q) return t;
-
-  const lowerText = t.toLowerCase();
-  const lowerQuery = q.toLowerCase();
-
-  const parts: React.ReactNode[] = [];
-  let idx = 0;
-  while (idx < t.length) {
-    const matchAt = lowerText.indexOf(lowerQuery, idx);
-    if (matchAt === -1) {
-      parts.push(t.slice(idx));
-      break;
-    }
-
-    if (matchAt > idx) {
-      parts.push(t.slice(idx, matchAt));
-    }
-
-    parts.push(<strong key={`m-${matchAt}`}>{t.slice(matchAt, matchAt + q.length)}</strong>);
-    idx = matchAt + q.length;
-  }
-
-  return <>{parts}</>;
 };
 
 const TYPE_OPTIONS: Array<{ value: '' | DatasetMappingFieldType; text: string }> = [
@@ -431,9 +401,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
           })}
         </h3>
       </EuiTitle>
-
       <EuiSpacer size="s" />
-
       <EuiText size="s" color="subdued">
         <p>
           {i18n.translate('xpack.dataFederation.mappingEditor.description', {
@@ -442,9 +410,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
           })}
         </p>
       </EuiText>
-
       <EuiSpacer size="m" />
-
       {!validation.isValid && shouldShowValidationCallout ? (
         <>
           <KbnDangerCallout
@@ -470,7 +436,6 @@ export const MappingEditor: FC<MappingEditorProps> = ({
           <EuiSpacer size="m" />
         </>
       ) : null}
-
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem>
           <EuiFormRow
@@ -502,9 +467,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-
       <EuiSpacer size="m" />
-
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
@@ -569,9 +532,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-
       <EuiSpacer size="s" />
-
       {value.fields.length === 0 ? (
         <EuiPanel paddingSize="s" color="subdued" hasBorder={false}>
           <FieldMappingForm
@@ -619,7 +580,6 @@ export const MappingEditor: FC<MappingEditorProps> = ({
       ) : (
         <EuiFlexGroup direction="column" gutterSize="s">
           {filteredFields.map((f) => {
-            const isDate = f.type === 'date';
             const typeInfo = (
               TYPE_INFO_BY_VALUE as Record<string, { label: string; docs: string } | undefined>
             )[f.type];
@@ -687,24 +647,13 @@ export const MappingEditor: FC<MappingEditorProps> = ({
                         />
                       </>
                     ) : (
-                      <>
-                        <EuiFlexItem>
-                          <EuiText size="s">{renderBoldMatches(f.name, fieldSearch)}</EuiText>
-                          <EuiText size="xs" color="subdued">
-                            {i18n.translate('xpack.dataFederation.mappingEditor.sourceLabel', {
-                              defaultMessage: 'Source: {source}',
-                              values: { source: f.path || f.name || '' },
-                            })}
-                          </EuiText>
-                        </EuiFlexItem>
-                        <MappingActions
-                          field={f}
-                          isDate={isDate}
-                          typeLabel={typeInfo?.label}
-                          onEdit={() => setEditingFieldId(f.id)}
-                          onRemove={() => removeField(f.id)}
-                        />
-                      </>
+                      <FieldMappingDisplayMode
+                        field={f}
+                        fieldSearch={fieldSearch}
+                        typeLabel={typeInfo?.label}
+                        onEdit={() => setEditingFieldId(f.id)}
+                        onRemove={() => removeField(f.id)}
+                      />
                     )}
                   </EuiFlexGroup>
                 </EuiPanel>
@@ -713,24 +662,8 @@ export const MappingEditor: FC<MappingEditorProps> = ({
           })}
         </EuiFlexGroup>
       )}
-
-      {showJsonPreview ? (
-        <>
-          <EuiSpacer size="m" />
-          <EuiTitle size="xs">
-            <h4>
-              {i18n.translate('xpack.dataFederation.mappingEditor.previewTitle', {
-                defaultMessage: 'Request snippet',
-              })}
-            </h4>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiCodeBlock language="json" isCopyable paddingSize="s">
-            {previewJson ||
-              '{\n  "mappings": {\n    "dynamic": "false",\n    "properties": {\n      "@timestamp": {\n        "type": "date",\n        "path": "event_time",\n        "format": "yyyy-MM-dd HH:mm:ss"\n      }\n    }\n  }\n}'}
-          </EuiCodeBlock>
-        </>
-      ) : null}
+      // todo remove
+      {showJsonPreview ? <MappingJsonPreview json={previewJson} /> : null}
     </EuiPanel>
   );
 };
