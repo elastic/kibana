@@ -90,6 +90,93 @@ describe('sharedBulk', () => {
     expect(result.items[1].error?.type).toBe('version_conflict_engine_exception');
   });
 
+  it('retries create-already-exists conflicts as updates against the backing index', async () => {
+    const { esClient, logger } = createSetup();
+    const backingIndex = '.ds-.workflows-step-executions-data-stream-000001';
+
+    esClient.bulk
+      .mockResolvedValueOnce({
+        errors: true,
+        items: [
+          {
+            create: {
+              _id: 'a',
+              _index: backingIndex,
+              error: {
+                type: 'version_conflict_engine_exception',
+                reason: 'document already exists (current version [1])',
+              },
+            },
+          },
+        ],
+      } as never)
+      .mockResolvedValueOnce({
+        errors: false,
+        items: [
+          {
+            update: {
+              _id: 'a',
+              _index: backingIndex,
+              result: 'updated',
+              _seq_no: 1,
+              _primary_term: 1,
+            },
+          },
+        ],
+      } as never);
+
+    esClient.mget.mockResolvedValue({
+      docs: [
+        {
+          _id: 'a',
+          _index: backingIndex,
+          found: true,
+          _seq_no: 0,
+          _primary_term: 1,
+        },
+      ],
+    } as never);
+
+    const result = await sharedBulk<{ id: string; status: string }>(
+      esClient,
+      {
+        items: [
+          {
+            operation: 'create',
+            document: { id: 'a', status: 'completed' },
+            index: '.workflows-step-executions-data-stream',
+            retryOnConflict: 3,
+          },
+        ],
+      },
+      logger
+    );
+
+    expect(result.errors).toBe(false);
+    expect(result.items).toEqual([
+      expect.objectContaining({ id: 'a', result: 'updated', error: undefined }),
+    ]);
+    expect(esClient.mget).toHaveBeenCalledWith({
+      docs: [{ _id: 'a', _index: backingIndex, _source: false }],
+    });
+    expect(esClient.bulk).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        operations: [
+          {
+            update: {
+              _id: 'a',
+              _index: backingIndex,
+              if_seq_no: 0,
+              if_primary_term: 1,
+            },
+          },
+          { doc: { id: 'a', status: 'completed' } },
+        ],
+      })
+    );
+  });
+
   it('throws when a response item has no _id', async () => {
     const { esClient, logger } = createSetup();
     esClient.bulk.mockResolvedValue({

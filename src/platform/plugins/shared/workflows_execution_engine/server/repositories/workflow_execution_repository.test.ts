@@ -17,6 +17,7 @@ import {
   createMockGetExecutionsByIdsResponse,
   createMockWorkflowDataClient,
 } from './data_access_layer/mocks';
+import { isBulkUpdaterItem } from './data_access_layer/types';
 import { WorkflowExecutionRepository } from './workflow_execution_repository';
 
 const asBulkResponse = (value: unknown) =>
@@ -1200,8 +1201,13 @@ describe('WorkflowExecutionRepository', () => {
   });
 
   describe('tryCasPromoteQueuedWorkflowExecutionToPending', () => {
-    it('returns true when the atomic CAS flips queued → pending', async () => {
-      workflowExecutionsDataClient.scriptUpdate.mockResolvedValue({ result: 'updated' });
+    it('returns true when the bulk updater flips queued → pending', async () => {
+      workflowExecutionsDataClient.bulk.mockResolvedValue(
+        asBulkResponse({
+          errors: false,
+          items: [{ id: 'exec-1', index: '.workflows-executions', result: 'updated' }],
+        })
+      );
 
       const result = await repository.tryCasPromoteQueuedWorkflowExecutionToPending({
         workflowExecutionId: 'exec-1',
@@ -1209,21 +1215,41 @@ describe('WorkflowExecutionRepository', () => {
       });
 
       expect(result).toBe(true);
-      expect(workflowExecutionsDataClient.scriptUpdate).toHaveBeenCalledWith(
+      expect(workflowExecutionsDataClient.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
-          id: 'exec-1',
           refresh: 'wait_for',
-          params: expect.objectContaining({
-            queuedStatus: ExecutionStatus.QUEUED,
-            pendingStatus: ExecutionStatus.PENDING,
-            spaceId: 'default',
-          }),
+          items: [
+            expect.objectContaining({
+              operation: 'update',
+              documentId: 'exec-1',
+              sourceFields: ['status', 'spaceId'],
+              retryOnConflict: 3,
+              updater: expect.any(Function),
+            }),
+          ],
         })
       );
+
+      const bulkItem = workflowExecutionsDataClient.bulk.mock.calls[0][0].items[0];
+      expect(isBulkUpdaterItem(bulkItem)).toBe(true);
+      if (!isBulkUpdaterItem(bulkItem)) {
+        throw new Error('expected bulk updater item');
+      }
+      expect(
+        bulkItem.updater({ status: ExecutionStatus.QUEUED, spaceId: 'default' } as never)
+      ).toEqual({ status: ExecutionStatus.PENDING });
+      expect(
+        bulkItem.updater({ status: ExecutionStatus.RUNNING, spaceId: 'default' } as never)
+      ).toBe('noop');
     });
 
     it('returns false when the execution is no longer queued (noop)', async () => {
-      workflowExecutionsDataClient.scriptUpdate.mockResolvedValue({ result: 'noop' });
+      workflowExecutionsDataClient.bulk.mockResolvedValue(
+        asBulkResponse({
+          errors: false,
+          items: [{ id: 'exec-1', index: '.workflows-executions', result: 'noop' }],
+        })
+      );
 
       const result = await repository.tryCasPromoteQueuedWorkflowExecutionToPending({
         workflowExecutionId: 'exec-1',
@@ -1234,7 +1260,21 @@ describe('WorkflowExecutionRepository', () => {
     });
 
     it('returns false when the execution document is not found', async () => {
-      workflowExecutionsDataClient.scriptUpdate.mockResolvedValue({ result: 'not_found' });
+      workflowExecutionsDataClient.bulk.mockResolvedValue(
+        asBulkResponse({
+          errors: true,
+          items: [
+            {
+              id: 'exec-missing',
+              index: '',
+              error: {
+                type: 'document_missing_exception',
+                reason: '[_doc][exec-missing]: document missing',
+              },
+            },
+          ],
+        })
+      );
 
       const result = await repository.tryCasPromoteQueuedWorkflowExecutionToPending({
         workflowExecutionId: 'exec-missing',
