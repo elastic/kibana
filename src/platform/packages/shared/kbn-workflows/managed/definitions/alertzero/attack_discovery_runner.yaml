@@ -1,0 +1,238 @@
+version: "1"
+name: Attack Discovery Runner
+description: >
+  Runs Attack Discovery generation, then fans out one review workflow per generated
+  attack so every attack is reviewed concurrently on its own execution. Launched by
+  the per-space Attack Discovery workflow, which owns the schedule.
+enabled: true
+tags:
+  - security
+  - attack-discovery
+settings:
+  # The space is in the key only so the group reads clearly in execution history:
+  # concurrency is always checked within a single space.
+  # `cancel-in-progress` with max 1: the floor Watch Worker uses the same strategy,
+  # and a new floor dispatch would otherwise be SKIPPED while this slot is still
+  # held by the runner being cancelled. Latest run wins. The in-flight generation
+  # is cancelled as cleanly as the engine allows (the run step does not abort the
+  # LLM pipeline mid-call). Must be an object — unlike a `parallel` step's
+  # `concurrency`, workflow-level `settings.concurrency` does not accept a bare number.
+  concurrency:
+    key: "attack-discovery-worker-{{ workflow.spaceId }}"
+    strategy: cancel-in-progress
+    max: 1
+triggers:
+  # The per-space Attack Discovery workflow owns the schedule. This global workflow
+  # stays manual-only so there is one scheduler authority and no cross-space task
+  # collision, and so the whole chain stays exercisable by hand.
+  - type: manual
+    inputs:
+      properties:
+        connector_id:
+          type: string
+          maxLength: 512
+          description: >-
+            LLM connector for generation. Omit to let the run step resolve the
+            space's default AI connector.
+        autonomy:
+          type: string
+          enum:
+            - manual
+            - assisted
+            - supervised
+          description: >-
+            Worker autonomy level, passed through to each review so a true-positive
+            or inconclusive verdict knows whether it needs an analyst gate.
+            Defaults to `manual`.
+        settings_version:
+          type: integer
+          minimum: 1
+          description: >-
+            Version of the worker settings that launched this run. Recorded for
+            traceability only; no step reads it.
+        schedule_interval:
+          type: string
+          maxLength: 32
+          description: >-
+            Schedule interval of the worker that launched this run (for example
+            `24h`). Recorded for traceability only; no step reads it. Echoed in the
+            output so a run's cadence is visible in its execution history.
+        parent_run_id:
+          type: string
+          maxLength: 128
+          description: >-
+            Workflow execution id of the per-space Attack Discovery run that launched
+            this run. No step reads it. It stays readable in this execution's inputs,
+            which is the only link back to the parent the engine keeps. Empty on a
+            standalone run.
+      additionalProperties: false
+outputs:
+  # Declared as string because the editor type-checks the YAML source of
+  # `workflow.output` `with:` values. A `type: number` field whose value is
+  # `"${{ ... }}"` is reported as invalid even though Liquid keeps the number
+  # at runtime. `{{ }}` stringifies so the emitted value matches this schema;
+  # `${{ }}` would keep the count as a number and fail output validation.
+  - name: attacks_generated
+    type: string
+  - name: reviews_requested
+    type: string
+  - name: reviews_failed
+    type: string
+  - name: alerts_analyzed
+    type: string
+  - name: schedule_interval
+    type: string
+  # The Attack Discovery generation id, not this workflow's execution id. It keys
+  # the AD generations API and lands on every persisted discovery as
+  # `kibana.alert.rule.execution.uuid`, so a run can be traced to what it produced.
+  - name: execution_uuid
+    type: string
+consts:
+  # Liquid has no array literal, so `| default: []` yields undefined rather than an
+  # empty array. This is an EMPTY-ARRAY FALLBACK ONLY — never synthetic discovery
+  # data. It covers all three empty shapes the run step can produce:
+  # `attack_discoveries` omitted, `null` (validation failed), or `[]` (genuine zero).
+  no_discoveries: []
+steps:
+  # Reuses the existing generation engine unchanged (#19276 AC2): the run step is
+  # the composite retrieve -> generate -> validate -> persist pipeline. Alert
+  # batching (https://github.com/elastic/security-team/issues/18967) will replace
+  # this call site later, so nothing here is designed around it.
+  #
+  # `mode: sync` because the fan-out below needs the discoveries inline. Sync mode
+  # awaits the pipeline to completion and applies no soft deadline.
+  #
+  # No `on-failure`: the default propagation is what #19276 requires — when
+  # generation fails after its own built-in retries, this run fails and hands off
+  # nothing. Adding `continue: true` would fan out over a partial result.
+  - name: run_generation
+    type: security.attack-discovery.run
+    # 35m = the 30m pipeline budget + 5m. The pipeline enforces its own 30m budget
+    # internally (DEFAULT_PIPELINE_TIMEOUT_MS / getRemainingBudgetMs in
+    # kbn-discoveries run_manual_orchestration: ADR-008's gate 10m + generation 10m
+    # + validation 5m, shared across phases on one wall clock). This timeout must
+    # stay ABOVE it so the pipeline's own budget wins the race and fails with an
+    # attributed PipelineStepError, rather than the engine killing the step with an
+    # opaque TimeoutError while generation keeps running in the background.
+    # Must stay a literal: the engine hands `timeout` to the duration parser
+    # unrendered (elastic/kibana#290258).
+    timeout: '35m'
+    with:
+      connector_id: "{{ inputs.connector_id }}"
+      mode: sync
+
+  # The fan-out list, resolved once so the batches, the parallel step, and the
+  # summary agree on it. `| default: consts.no_discoveries` normalizes the three
+  # empty shapes to an empty array.
+  - name: resolve_fanout
+    type: data.set
+    with:
+      attacks: "${{ steps.run_generation.output.attack_discoveries | default: consts.no_discoveries }}"
+      # Computed on its own because comparison operators cannot follow a filter chain.
+      attack_count: "${{ steps.run_generation.output.attack_discoveries | default: consts.no_discoveries | size }}"
+      # 100 is DEFAULT_PARALLEL_MAX_FAN_OUT: a single `parallel` foreach throws
+      # above that. `chunk` drains leftovers in later batches. `concurrency.max`
+      # (not this) bounds claimed Task Manager workers.
+      batches: "${{ steps.run_generation.output.attack_discoveries | default: consts.no_discoveries | chunk: 100 }}"
+
+  # A run that generated nothing is a normal outcome, not a failure: there may
+  # simply be no attack in the alerts. Logged explicitly so an empty execution is
+  # distinguishable from one that failed before generation.
+  - name: log_empty_run
+    type: console
+    if: "${{ steps.resolve_fanout.output.attack_count == 0 }}"
+    with:
+      message: >-
+        Attack Discovery generation produced no attacks
+        (alerts analyzed: {{ steps.run_generation.output.alerts_context_count }},
+        status: {{ steps.run_generation.output.status }}). Skipping the per-attack
+        fan-out.
+
+  # Failed-review count starts at 0 so an empty generation and the first batch
+  # both have a number to add to. Each batch writes the running total back here.
+  - name: init_review_counts
+    type: data.set
+    with:
+      reviews_failed: 0
+
+  # One review execution per attack. Each `chunk: 100` batch stays under the
+  # parallel fan-out ceiling so a 101+ generation cannot throw. Branches still
+  # run at `concurrency.max` (5). The per-attack body cannot live in a parallel
+  # branch: that body must be a straight-line sequence, so the verdict `switch`
+  # sits in a child workflow. `current_batch` copies `foreach.item` so the inner
+  # parallel's `foreach.item` is the attack, not the batch array.
+  - name: run_review_batches
+    type: foreach
+    foreach: "${{ steps.resolve_fanout.output.batches }}"
+    steps:
+      - name: current_batch
+        type: data.set
+        with:
+          attacks: "${{ foreach.item }}"
+
+      - name: run_reviews
+        type: parallel
+        foreach: "${{ steps.current_batch.output.attacks }}"
+        # Settled: one failed review must not abandon the remaining attacks. Failures
+        # stay visible in the aggregate results and counts.
+        mode: settled
+        concurrency:
+          # Well under DEFAULT_PARALLEL_MAX_CONCURRENCY (20), which the schema enforces
+          # as a validation error rather than clamping. This is the TM bound; it is not
+          # a cap on how many attacks are reviewed.
+          max: 5
+          # `count-waiting` is left at its default (true). Every branch here parks as
+          # soon as it starts its child, because `workflow.execute` is synchronous, so
+          # this bounds in-flight reviews to `max` and a generation larger than `max`
+          # starts its reviews in successive waves. Revisit alongside #19214, which
+          # adds HITL gates and keeps each branch parked far longer.
+        steps:
+          - name: run_review
+            type: workflow.execute
+            with:
+              workflow-id: system-security-attack-discovery-review
+              inputs:
+                # `${{ }}` preserves the value's type (arrays stay arrays); `{{ }}`
+                # stringifies. The run step returns the persist handover, so
+                # `alert_ids` holds DETECTION alert ids. There is no persisted Attack
+                # Discovery `_id` to pass yet. #19022 / #19214 will use it once the
+                # run step returns persist-projected discoveries with document ids
+                # in-context. Do not forward `foreach.item.id`: that optional field
+                # is the LLM UUID, not the document id.
+                title: "{{ foreach.item.title }}"
+                alert_ids: "${{ foreach.item.alert_ids }}"
+                summary_markdown: "{{ foreach.item.summary_markdown }}"
+                # `${{ }}` so the editor does not type-check the template source
+                # against the child's autonomy enum.
+                autonomy: "${{ inputs.autonomy }}"
+                parent_run_id: "{{ execution.id }}"
+
+      - name: batch_failed
+        type: data.set
+        with:
+          count: "${{ steps.run_reviews.output.failed | default: 0 }}"
+
+      - name: accumulate_failed
+        type: data.set
+        with:
+          reviews_failed: "${{ variables.reviews_failed | plus: steps.batch_failed.output.count }}"
+
+  # Fan-in: every batch has settled. A branch output is the child's
+  # `workflow.output` payload (title, verdict, investigation_opened).
+  - name: summarize_run
+    type: data.set
+    with:
+      attacks_generated: "${{ steps.resolve_fanout.output.attack_count }}"
+      reviews_requested: "${{ steps.resolve_fanout.output.attack_count }}"
+      reviews_failed: "${{ variables.reviews_failed | default: 0 }}"
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      attacks_generated: "{{ steps.summarize_run.output.attacks_generated }}"
+      reviews_requested: "{{ steps.summarize_run.output.reviews_requested }}"
+      reviews_failed: "{{ steps.summarize_run.output.reviews_failed }}"
+      alerts_analyzed: "{{ steps.run_generation.output.alerts_context_count | default: 0 }}"
+      schedule_interval: "{{ inputs.schedule_interval }}"
+      execution_uuid: "{{ steps.run_generation.output.execution_uuid }}"

@@ -1,10 +1,25 @@
 version: "1"
 name: Attack Discovery
-description: Watch Floor Attack Discovery worker stub.
+description: >
+  Watch Floor Attack Discovery worker. Owns the schedule and dispatches to the
+  global Attack Discovery worker, which runs generation and fans out one review
+  per generated attack.
 enabled: false
 tags:
   - watch
   - watch-floor
+settings:
+  # This worker is installed per space, so the key needs no space component.
+  # `cancel-in-progress` with max 1: a run holds its Task Manager task for as long
+  # as generation takes (up to the child's 35m step timeout). A newer overlapping
+  # scheduled run replaces that work instead of skipping itself. The runner uses
+  # the same strategy so the replacement dispatch is not SKIPPED on the still-held
+  # child slot. Must be an object — unlike a `parallel` step's `concurrency`,
+  # workflow-level `settings.concurrency` does not accept a bare number.
+  concurrency:
+    key: floor-attack-discovery
+    strategy: cancel-in-progress
+    max: 1
 triggers:
   - type: scheduled
     with:
@@ -15,7 +30,25 @@ consts:
     autonomy: "__WORKER_AUTONOMY_LEVEL__"
     scheduleInterval: "__WORKER_SCHEDULE_INTERVAL__"
 steps:
-  - name: stub
-    type: console
+  # Synchronous on purpose: #19276 requires that when generation fails after its
+  # built-in retries, this worker run remains failed and hands off nothing.
+  # `workflow.execute` propagates the child's failure, which `workflow.executeAsync`
+  # would not — the run would report success while generation had failed. The cost
+  # is that this run's Task Manager task stays claimed for the whole generation.
+  #
+  # The child carries no schedule of its own; this worker is the single scheduler
+  # authority for the space.
+  - name: run_attack_discovery
+    type: workflow.execute
     with:
-      message: "Attack Discovery worker stub"
+      workflow-id: system-security-attack-discovery-worker
+      inputs:
+        # All three worker settings are forwarded. `autonomy` decides how the child's
+        # review handles a true-positive verdict; the other two are traceability only
+        # and are echoed in the child's output.
+        # `${{ }}` preserves the value's type so the editor does not type-check the
+        # template source against the child's enum / maxLength constraints.
+        autonomy: "${{ consts.worker_settings.autonomy }}"
+        settings_version: "${{ consts.worker_settings.settingsVersion }}"
+        schedule_interval: "${{ consts.worker_settings.scheduleInterval }}"
+        parent_run_id: "{{ execution.id }}"
