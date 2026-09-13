@@ -484,6 +484,29 @@ describe('Execution Routes', () => {
         'default'
       );
     });
+
+    it('should forward workflowId collapse to the api layer', async () => {
+      mockApi.getWorkflowExecutions.mockResolvedValue({ executions: [] });
+      const h = handler('GET', path)!;
+      const request = {
+        params: { workflowId: 'wf-1' },
+        query: {
+          statuses: 'running',
+          collapse: 'workflowId',
+        },
+      };
+
+      await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockApi.getWorkflowExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowId: 'wf-1',
+          statuses: ['running'],
+          collapse: 'workflowId',
+        }),
+        'default'
+      );
+    });
   });
 
   describe('GET /api/workflows/workflow/{workflowId}/executions/steps (get_workflow_step_executions)', () => {

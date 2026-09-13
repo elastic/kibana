@@ -171,6 +171,19 @@ describe('WorkflowExecutionQueryService', () => {
       expect(call.query.bool.must).toContainEqual({ terms: { status: ['running'] } });
     });
 
+    it('adds workflowId collapse while preserving other filters', async () => {
+      mockEsClient.search.mockResolvedValue(emptyResponse as any);
+
+      await service.getWorkflowExecutions(
+        { workflowId: 'wf-1', statuses: ['running'] as any, collapse: 'workflowId' },
+        'default'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      expect(call.collapse).toEqual({ field: 'workflowId' });
+      expect(call.query.bool.must).toContainEqual({ terms: { status: ['running'] } });
+    });
+
     it('adds omitStepRuns filter', async () => {
       mockEsClient.search.mockResolvedValue(emptyResponse as any);
 
