@@ -450,7 +450,11 @@ describe('CreateAlertEventsStep', () => {
         metadata: { builder_type: 'test.enrichment', builder_fields: { severity: 'high' } },
       });
       const esqlRowBatch = [{ 'host.name': 'host-a', severity: 'low' }];
-      const state = createRulePipelineState({ input: createRuleExecutionInput(), rule, esqlRowBatch });
+      const state = createRulePipelineState({
+        input: createRuleExecutionInput(),
+        rule,
+        esqlRowBatch,
+      });
 
       const [result] = await collectStreamResults(
         step.executeStream(createPipelineStream([state]))
@@ -472,7 +476,11 @@ describe('CreateAlertEventsStep', () => {
       });
 
       const esqlRowBatch = [{ 'host.name': 'host-a', severity: 'low' }];
-      const state = createRulePipelineState({ input: createRuleExecutionInput(), rule, esqlRowBatch });
+      const state = createRulePipelineState({
+        input: createRuleExecutionInput(),
+        rule,
+        esqlRowBatch,
+      });
 
       const [result] = await collectStreamResults(
         localStep.executeStream(createPipelineStream([state]))
@@ -489,7 +497,11 @@ describe('CreateAlertEventsStep', () => {
       });
 
       const esqlRowBatch = [{ 'host.name': 'host-a', severity: 'high' }];
-      const state = createRulePipelineState({ input: createRuleExecutionInput(), rule, esqlRowBatch });
+      const state = createRulePipelineState({
+        input: createRuleExecutionInput(),
+        rule,
+        esqlRowBatch,
+      });
 
       const [result] = await collectStreamResults(
         localStep.executeStream(createPipelineStream([state]))
@@ -508,7 +520,11 @@ describe('CreateAlertEventsStep', () => {
       });
 
       const esqlRowBatch = [{ 'host.name': 'host-a' }];
-      const state = createRulePipelineState({ input: createRuleExecutionInput(), rule, esqlRowBatch });
+      const state = createRulePipelineState({
+        input: createRuleExecutionInput(),
+        rule,
+        esqlRowBatch,
+      });
 
       const [result] = await collectStreamResults(
         localStep.executeStream(createPipelineStream([state]))
@@ -529,7 +545,11 @@ describe('CreateAlertEventsStep', () => {
       });
 
       const esqlRowBatch = [{ 'host.name': 'host-a', region: 'row-region' }];
-      const state = createRulePipelineState({ input: createRuleExecutionInput(), rule, esqlRowBatch });
+      const state = createRulePipelineState({
+        input: createRuleExecutionInput(),
+        rule,
+        esqlRowBatch,
+      });
 
       const [result] = await collectStreamResults(
         localStep.executeStream(createPipelineStream([state]))
@@ -549,7 +569,11 @@ describe('CreateAlertEventsStep', () => {
       });
 
       const esqlRowBatch = [{ 'host.name': 'host-a' }];
-      const state = createRulePipelineState({ input: createRuleExecutionInput(), rule, esqlRowBatch });
+      const state = createRulePipelineState({
+        input: createRuleExecutionInput(),
+        rule,
+        esqlRowBatch,
+      });
 
       const error = await getStepError(localStep, state);
 
@@ -570,7 +594,11 @@ describe('CreateAlertEventsStep', () => {
       });
 
       const esqlRowBatch = [{ 'host.name': 'host-a' }];
-      const state = createRulePipelineState({ input: createRuleExecutionInput(), rule, esqlRowBatch });
+      const state = createRulePipelineState({
+        input: createRuleExecutionInput(),
+        rule,
+        esqlRowBatch,
+      });
       await collectStreamResults(localStep.executeStream(createPipelineStream([state])));
 
       expect(capturedInputs).toHaveLength(1);
@@ -589,7 +617,11 @@ describe('CreateAlertEventsStep', () => {
       });
 
       const esqlRowBatch = [{ 'host.name': 'host-a', score: 99 }];
-      const state = createRulePipelineState({ input: createRuleExecutionInput(), rule, esqlRowBatch });
+      const state = createRulePipelineState({
+        input: createRuleExecutionInput(),
+        rule,
+        esqlRowBatch,
+      });
       await collectStreamResults(localStep.executeStream(createPipelineStream([state])));
 
       expect(capturedRows).toHaveLength(1);
@@ -606,7 +638,11 @@ describe('CreateAlertEventsStep', () => {
       // No builder_type on this rule
       const rule = createRuleResponse({ kind: 'signal' });
       const esqlRowBatch = [{ 'host.name': 'host-a' }];
-      const state = createRulePipelineState({ input: createRuleExecutionInput(), rule, esqlRowBatch });
+      const state = createRulePipelineState({
+        input: createRuleExecutionInput(),
+        rule,
+        esqlRowBatch,
+      });
 
       await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
