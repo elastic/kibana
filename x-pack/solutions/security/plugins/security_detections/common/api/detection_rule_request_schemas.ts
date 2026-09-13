@@ -286,8 +286,16 @@ export const detectionRulePatchPropsSchema = z
     note: detectionRuleCommonFields.note.unwrap().nullable().optional(),
     license: detectionRuleCommonFields.license.unwrap().nullable().optional(),
 
-    // --- Defaultable scalar: nullable so null reverts to default ---
-    max_signals: detectionRuleCommonFields.max_signals.unwrap().nullable().optional(),
+    // --- Defaultable scalars: optional but NOT nullable ---
+    // max_signals is a defaultable field (default 100).  Clearing it to null
+    // removes it from the stored container, which causes the compile step to
+    // emit no LIMIT and the rule to run under the deployment row cap while the
+    // read-back path papers over the absence with the default (100).  Callers
+    // who want to revert to 100 must send 100 explicitly.
+    // Ref: rule-domain-model.md "The request shapes" (three-group split) —
+    // only optional-with-no-default fields (note, license, rule_id,
+    // schedule.lookback, threshold.cardinality) are nullable in PATCH.
+    max_signals: detectionRuleCommonFields.max_signals.unwrap().optional(),
     setup: detectionRuleCommonFields.setup.unwrap().nullable().optional(),
 
     // --- Defaultable arrays: nullable so null clears to [] ---
