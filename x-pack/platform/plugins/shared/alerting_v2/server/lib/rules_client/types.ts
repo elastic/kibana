@@ -35,6 +35,39 @@ export type {
   UpdateRuleData,
 };
 
+/**
+ * Per-rule builder fields validation result. Attached to read responses when
+ * the caller opts in via `validateBuilderFields` on `getRule` or `findRules`.
+ * An unregistered builder type is reported as an ordinary error, not thrown.
+ *
+ * Ref: rule-validation.md "Read-path validation: off by default, opt-in per call"
+ */
+export interface BuilderFieldsValidation {
+  valid: boolean;
+  errors: Array<{ path: string; message: string }>;
+}
+
+/**
+ * Single-rule result type. Extends `RuleResponse` with an optional validation
+ * attachment present only when the caller passes `validateBuilderFields: true`
+ * on `getRule`.
+ */
+export type GetRuleResult = RuleResponse & {
+  builder_fields_validation?: BuilderFieldsValidation;
+};
+
+/**
+ * Multi-rule result type. Mirrors `FindRulesResponse` but with items typed as
+ * `GetRuleResult[]` so per-rule validation can be attached when the caller
+ * passes `validateBuilderFields: true` on `findRules`.
+ */
+export interface FindRulesResult {
+  items: GetRuleResult[];
+  total: FindRulesResponse['total'];
+  page: FindRulesResponse['page'];
+  per_page: FindRulesResponse['per_page'];
+}
+
 export type BulkOperationError = BulkResponse['errors'][number];
 
 /**
@@ -73,7 +106,17 @@ export interface RotationCandidate {
 
 export interface CreateRuleParams {
   data: CreateRuleData;
-  options?: { id?: string };
+  options?: {
+    id?: string;
+    /**
+     * When false, the builder schema parse and `validateFields` hook are
+     * skipped. The wire schema always runs. For in-process callers only;
+     * the framework's HTTP routes never pass this.
+     *
+     * Ref: rule-validation.md "Write-path validation: on by default, opt-out per call"
+     */
+    validateBuilderFields?: boolean;
+  };
 }
 
 export interface FindRulesArgs {
@@ -88,5 +131,15 @@ export interface FindRulesArgs {
 export interface UpdateRuleParams {
   id: string;
   data: UpdateRuleData;
-  options?: { version?: string };
+  options?: {
+    version?: string;
+    /**
+     * When false, the builder schema parse and `validateFields` hook are
+     * skipped. The wire schema always runs. For in-process callers only;
+     * the framework's HTTP routes never pass this.
+     *
+     * Ref: rule-validation.md "Write-path validation: on by default, opt-out per call"
+     */
+    validateBuilderFields?: boolean;
+  };
 }
