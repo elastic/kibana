@@ -17,8 +17,8 @@ export const MAX_HITL_EXTERNAL_RESUME_TOKEN_LENGTH = 128 as const;
 /** Max length for connector saved-object id / name in HITL channel config. */
 export const MAX_HITL_CHANNEL_CONNECTOR_ID_LENGTH = CONNECTOR_ID_MAX_LENGTH;
 
-/** Max length for Slack channel id in `slack_api` config. */
-export const MAX_HITL_SLACK_CHANNEL_ID_LENGTH = 256 as const;
+/** Max length for a Slack channel id or name in `slack_api` config. */
+export const MAX_HITL_SLACK_CHANNEL_LENGTH = 256 as const;
 
 /** Max length for HITL step messages and channel notification templates. */
 export const MAX_HITL_MESSAGE_LENGTH = 10_240 as const;
@@ -28,6 +28,12 @@ export const MAX_HITL_ACTION_LABEL_LENGTH = 256 as const;
 
 /** Max length for `respondedBy` on HITL step output. */
 export const MAX_HITL_RESPONDED_BY_LENGTH = 1024 as const;
+
+/** Max length for `channel` on HITL step output (e.g. inbox, kibana_execution_view, timeout). */
+export const MAX_HITL_CHANNEL_LENGTH = 256 as const;
+
+/** Max length for `respondedAt` ISO-8601 timestamp on HITL step output. */
+export const MAX_HITL_RESPONDED_AT_LENGTH = 64 as const;
 
 /** Max length for external resume / form URLs in template context. */
 export const MAX_HITL_EXTERNAL_LINK_LENGTH = 8192 as const;

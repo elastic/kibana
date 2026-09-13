@@ -6,28 +6,33 @@
  */
 
 import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { getFieldValue } from '@kbn/discover-utils';
 import { getNonLocalQualifiedIndex } from '../../../shared/utils/non_local_index';
-import {
-  EVENT_SOURCE_FIELD_NAME,
-  LEGACY_EVENT_SOURCE_FIELD_NAME,
-} from '../../../../timelines/components/timeline/body/renderers/constants';
-import { ANCESTOR_INDEX, LEGACY_ANCESTOR_INDEX } from '../constants/field_names';
+import { ANCESTORS, LEGACY_ANCESTORS } from '../constants/field_names';
 
-// The ancestor id/index arrays are parallel, and both the current (`kibana.alert.ancestors.*`) and
-// legacy (`signal.ancestors.*`) field names may be present depending on the alert's schema version.
-const ANCESTOR_ID_INDEX_FIELD_PAIRS: ReadonlyArray<readonly [idField: string, indexField: string]> =
-  [
-    [EVENT_SOURCE_FIELD_NAME, ANCESTOR_INDEX],
-    [LEGACY_EVENT_SOURCE_FIELD_NAME, LEGACY_ANCESTOR_INDEX],
-  ];
+interface Ancestor {
+  id?: string;
+  index?: string;
+}
+
+const toAncestors = (value: unknown): Ancestor[] =>
+  Array.isArray(value)
+    ? value.filter((entry): entry is Ancestor => entry != null && typeof entry === 'object')
+    : [];
 
 /**
  * Builds a map from each ancestor document id (`kibana.alert.ancestors.id`, or the legacy
- * `signal.ancestors.id`) to the index that document lives in (`kibana.alert.ancestors.index` /
- * `signal.ancestors.index`), by aligning the two parallel arrays by position. This lets the Table
- * tab turn each "Source event" value into a link that opens the correct ancestor document, even for
- * alert-on-alert cases where several ancestors (at different depths) are listed in the same field.
+ * `signal.ancestors.id`) to the index that document lives in. This lets the Table tab and the
+ * Highlighted Fields "Source event" link turn each value into a link that opens the correct ancestor
+ * document, even for alert-on-alert cases where several ancestors (at different depths) are listed.
+ *
+ * The map is built from the nested `kibana.alert.ancestors` / `signal.ancestors` objects in
+ * `_source`, where each entry keeps its own `{ id, index }` together. We intentionally do NOT align
+ * the flattened `.id`/`.index` arrays by position: an EQL sequence produces an alert whose ancestors
+ * interleave depth-0 events (real index) with depth-1 `signal` legs (empty index), and the empty
+ * index values get dropped during field formatting — so the two arrays fall out of alignment and a
+ * source event gets paired with the wrong index. See SDH #1666 / #1798, kibana #288207.
  *
  * Threshold rules are intentionally excluded: they synthesize a fake ancestor id to represent the
  * aggregation bucket, and that id does not correspond to a real document — clicking it would return
@@ -35,30 +40,21 @@ const ANCESTOR_ID_INDEX_FIELD_PAIRS: ReadonlyArray<readonly [idField: string, in
  * map for those keeps the values rendered as plain text.
  */
 export const getAncestorsIndexById = (
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[],
+  hit: DataTableRecord,
   documentIndex: string
 ): Record<string, string> => {
-  const ruleType = dataFormattedForFieldBrowser.find((item) => item.field === ALERT_RULE_TYPE)
-    ?.values?.[0];
-
+  const ruleType = getFieldValue(hit, ALERT_RULE_TYPE);
   if (ruleType === 'threshold') {
     return {};
   }
 
-  return ANCESTOR_ID_INDEX_FIELD_PAIRS.reduce<Record<string, string>>(
-    (acc, [idField, indexField]) => {
-      const ids = dataFormattedForFieldBrowser.find((item) => item.field === idField)?.values ?? [];
-      const indices =
-        dataFormattedForFieldBrowser.find((item) => item.field === indexField)?.values ?? [];
+  const source = (hit.raw._source ?? {}) as Record<string, unknown>;
+  const ancestors = [...toAncestors(source[ANCESTORS]), ...toAncestors(source[LEGACY_ANCESTORS])];
 
-      ids.forEach((id, i) => {
-        const indexName = indices[i];
-        if (id && indexName) {
-          acc[id] = getNonLocalQualifiedIndex(indexName, documentIndex);
-        }
-      });
-      return acc;
-    },
-    {}
-  );
+  return ancestors.reduce<Record<string, string>>((acc, { id, index }) => {
+    if (id && index) {
+      acc[id] = getNonLocalQualifiedIndex(index, documentIndex);
+    }
+    return acc;
+  }, {});
 };

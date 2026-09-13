@@ -11,7 +11,6 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageHeader,
   EuiPageSection,
   EuiSpacer,
   hexToHsv,
@@ -20,6 +19,7 @@ import {
 import { difference } from 'lodash';
 import React, { Component } from 'react';
 
+import { AppHeader } from '@kbn/app-header';
 import type {
   ApplicationStart,
   Capabilities,
@@ -51,6 +51,15 @@ import { SolutionView } from '../components/solution_view';
 import { haveFormValuesChanged, toSpaceIdentifier } from '../lib';
 import { SpaceValidator } from '../lib/validate_space';
 import type { CustomizeSpaceFormValues } from '../types';
+
+const spacesListTitle = i18n.translate('xpack.spaces.management.spacesGridPage.spacesTitle', {
+  defaultMessage: 'Spaces',
+});
+
+const createSpaceTitle = i18n.translate(
+  'xpack.spaces.management.manageSpacePage.createSpaceTitle',
+  { defaultMessage: 'Create space' }
+);
 
 interface Props {
   getFeatures: FeaturesPluginStart['getFeatures'];
@@ -204,18 +213,21 @@ export class CreateSpacePage extends Component<Props, State> {
             space can itself fail and send the user back to the list */}
         <NavigateOnLeave isLeaving={this.state.isLeaving} history={this.props.history} />
 
+        <AppHeader
+          title={createSpaceTitle}
+          description={getSpacesFeatureDescription()}
+          back={{
+            href: this.props.history.createHref({ pathname: '/' }),
+            label: spacesListTitle,
+          }}
+          spacing="bleed"
+        />
+        <EuiSpacer size="l" />
+
         {this.state.isLoading ? (
           this.getLoadingIndicator()
         ) : (
-          <EuiPageSection restrictWidth>
-            <EuiPageHeader
-              pageTitle={this.getTitle()}
-              description={getSpacesFeatureDescription()}
-            />
-            <EuiSpacer size="l" />
-
-            {this.getForm()}
-          </EuiPageSection>
+          <EuiPageSection restrictWidth>{this.getForm()}</EuiPageSection>
         )}
       </>
     );
@@ -307,15 +319,6 @@ export class CreateSpacePage extends Component<Props, State> {
           />
         )}
       </div>
-    );
-  };
-
-  public getTitle = () => {
-    return (
-      <FormattedMessage
-        id="xpack.spaces.management.manageSpacePage.createSpaceTitle"
-        defaultMessage="Create space"
-      />
     );
   };
 
