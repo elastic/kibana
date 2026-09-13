@@ -114,6 +114,12 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // Platform – Context Engine
   `${internalNamespaces.platformContextEngine}.save_automation`,
 
+  // Nightshift – Sandbox
+  'nightshift_sandbox_bash',
+  'nightshift_sandbox_view_file',
+  'nightshift_sandbox_str_replace',
+  'nightshift_sandbox_write_file',
+
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
   `${internalNamespaces.workflows}.get_step_definitions`,
@@ -134,6 +140,7 @@ export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[numbe
 export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
+  'deductive.ai',
 ] as const;
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];

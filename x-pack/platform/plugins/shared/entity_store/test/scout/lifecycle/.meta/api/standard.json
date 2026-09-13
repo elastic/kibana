@@ -1,5 +1,5 @@
 {
-  "sha1": "6eabdcba66e44f02511810ca90d5e80b84c19f0f",
+  "sha1": "954e4116086682b6bc8e845279c35a67b006e4c4",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -384,8 +384,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 80,
-        "column": 9
+        "line": 81,
+        "column": 14
       }
     },
     {
@@ -400,7 +400,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 91,
+        "line": 92,
         "column": 14
       }
     },
@@ -416,7 +416,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 108,
+        "line": 109,
         "column": 7
       }
     },
@@ -432,7 +432,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 122,
+        "line": 123,
         "column": 7
       }
     },
@@ -448,7 +448,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 152,
+        "line": 153,
         "column": 7
       }
     },
@@ -464,7 +464,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 159,
+        "line": 160,
         "column": 12
       }
     },
@@ -480,7 +480,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 171,
+        "line": 172,
         "column": 16
       }
     },
@@ -496,8 +496,40 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 180,
+        "line": 181,
         "column": 21
+      }
+    },
+    {
+      "id": "46bb8a3a58b1410-b5ad2fd90b66e1d",
+      "title": "Entity Store per entity-type log extraction config reports identical config for every engine when nothing is overridden",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/log_extraction_by_type.spec.ts",
+        "line": 54,
+        "column": 60
+      }
+    },
+    {
+      "id": "46bb8a3a58b1410-cc2c00064485f34",
+      "title": "Entity Store per entity-type log extraction config setting a store-wide field to null falls back to the built-in default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/log_extraction_by_type.spec.ts",
+        "line": 69,
+        "column": 32
       }
     },
     {
