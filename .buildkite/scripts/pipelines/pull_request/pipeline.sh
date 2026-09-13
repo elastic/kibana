@@ -8,4 +8,4 @@ set -euo pipefail
  && echo "Uploaded cache-warmup step" >&2) || echo "Failed to upload cache-warmup step" >&2
 
 
-ts-node .buildkite/scripts/pipelines/pull_request/pipeline.ts
+node .buildkite/scripts/pipelines/pull_request/pipeline.ts

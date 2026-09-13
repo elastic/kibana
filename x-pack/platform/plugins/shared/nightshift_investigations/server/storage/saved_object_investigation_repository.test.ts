@@ -223,5 +223,173 @@ describe('SavedObjectInvestigationRepository', () => {
         perPage: undefined,
       });
     });
+
+    it('builds a subject-type OR filter', async () => {
+      const { repository, savedObjectsClient } = createRepository();
+      savedObjectsClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 20,
+      });
+
+      await repository.find({ subjectTypes: ['alert', 'significant_event'] });
+
+      expect(savedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter:
+            `(${TYPE}.attributes.subject_type: "alert"` +
+            ` OR ${TYPE}.attributes.subject_type: "significant_event")`,
+        })
+      );
+    });
+
+    it('builds a severity OR filter', async () => {
+      const { repository, savedObjectsClient } = createRepository();
+      savedObjectsClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 20,
+      });
+
+      await repository.find({ severities: ['80-critical', '60-high'] });
+
+      expect(savedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter:
+            `(${TYPE}.attributes.severity: "80-critical"` +
+            ` OR ${TYPE}.attributes.severity: "60-high")`,
+        })
+      );
+    });
+
+    it('passes free-text search across the three text-mapped attributes', async () => {
+      const { repository, savedObjectsClient } = createRepository();
+      savedObjectsClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 20,
+      });
+
+      await repository.find({ query: 'checkout latency' });
+
+      expect(savedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: 'checkout latency',
+          searchFields: ['subject_summary', 'summary', 'conclusion'],
+        })
+      );
+    });
+
+    it('omits searchFields when there is no query', async () => {
+      const { repository, savedObjectsClient } = createRepository();
+      savedObjectsClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 20,
+      });
+
+      await repository.find({ statuses: ['running'] });
+
+      expect(savedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ search: undefined, searchFields: undefined })
+      );
+    });
+  });
+
+  describe('countBySeverity()', () => {
+    const aggResult = (buckets: Array<{ key: string; doc_count: number }>) => ({
+      saved_objects: [],
+      total: 0,
+      page: 1,
+      per_page: 0,
+      aggregations: { severity: { buckets } },
+    });
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('zero-fills every tier when the aggregation returns nothing', async () => {
+      const { repository, savedObjectsClient } = createRepository();
+      savedObjectsClient.find.mockResolvedValue(aggResult([]));
+
+      await expect(repository.countBySeverity({})).resolves.toEqual({
+        '80-critical': 0,
+        '60-high': 0,
+        '40-medium': 0,
+        '20-low': 0,
+      });
+    });
+
+    it('zero-fills the tiers the aggregation omits', async () => {
+      const { repository, savedObjectsClient } = createRepository();
+      savedObjectsClient.find.mockResolvedValue(
+        aggResult([
+          { key: '80-critical', doc_count: 3 },
+          { key: '20-low', doc_count: 7 },
+        ])
+      );
+
+      await expect(repository.countBySeverity({})).resolves.toEqual({
+        '80-critical': 3,
+        '60-high': 0,
+        '40-medium': 0,
+        '20-low': 7,
+      });
+    });
+
+    it('requests a terms aggregation with no hits', async () => {
+      const { repository, savedObjectsClient } = createRepository();
+      savedObjectsClient.find.mockResolvedValue(aggResult([]));
+
+      await repository.countBySeverity({});
+
+      expect(savedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          perPage: 0,
+          aggs: {
+            severity: { terms: { field: `${TYPE}.attributes.severity`, size: 4 } },
+          },
+        })
+      );
+    });
+
+    it('applies the same base filters as find()', async () => {
+      const { repository, savedObjectsClient } = createRepository();
+      savedObjectsClient.find.mockResolvedValue(aggResult([]));
+
+      await repository.countBySeverity({
+        statuses: ['running'],
+        concurrencyKey: 'key-1',
+        createdAfter: '2024-01-01T00:00:00Z',
+      });
+
+      expect(savedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter:
+            `(${TYPE}.attributes.status: "running")` +
+            ` AND ${TYPE}.attributes.concurrency_key: "key-1"` +
+            ` AND ${TYPE}.attributes.created_at >= "2024-01-01T00:00:00Z"`,
+        })
+      );
+    });
+
+    it('carries the free-text search so counts match the searched list', async () => {
+      const { repository, savedObjectsClient } = createRepository();
+      savedObjectsClient.find.mockResolvedValue(aggResult([]));
+
+      await repository.countBySeverity({ query: 'checkout' });
+
+      expect(savedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: 'checkout',
+          searchFields: ['subject_summary', 'summary', 'conclusion'],
+        })
+      );
+    });
   });
 });

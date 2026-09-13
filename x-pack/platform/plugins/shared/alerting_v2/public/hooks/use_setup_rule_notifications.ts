@@ -12,6 +12,7 @@ import { WorkflowApi } from '@kbn/workflows-ui';
 import {
   buildInlineWorkflowYaml,
   buildRuleScopedMatcher,
+  resolveRuleNotificationTag,
   type ActionDraft,
 } from '@kbn/alerting-v2-rule-form';
 import { ActionPoliciesApi } from '../services/action_policies_api';
@@ -34,8 +35,9 @@ export const useSetupRuleNotifications = () => {
       if (actions.length === 0) {
         return;
       }
+      const matcher = buildRuleScopedMatcher(resolveRuleNotificationTag(rule.metadata));
+
       const setupOne = async (action: ActionDraft): Promise<void> => {
-        const matcher = buildRuleScopedMatcher(rule.id);
         let createdWorkflowId: string | null = null;
         let workflowId: string;
 
