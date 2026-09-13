@@ -10,10 +10,12 @@
 /**
  * Scout server config set for Detection Engine v2 API integration tests.
  *
- * Extends the `alerting_v2` defaults with the detection feature flag so routes
- * are registered at startup.  The suite tests the 503 off-state by flipping the
- * `alerting:v2:enabled` uiSettings entry at runtime; the 404 off-state (feature
- * flag disabled) cannot be tested without a separate Kibana boot.
+ * Spreads the base default config and adds the alerting v2 server flag and the
+ * detection feature flag so routes are registered at startup.  Deliberately
+ * omits `--uiSettings.globalOverrides.alerting:v2:enabled=true` so that
+ * off_states.spec.ts can flip the uiSettings entry at runtime; the specs write
+ * it themselves in beforeAll.  The 404 off-state (feature flag disabled) cannot
+ * be tested without a separate Kibana boot.
  */
 
 import type { ScoutServerConfig } from '../../../../../types';

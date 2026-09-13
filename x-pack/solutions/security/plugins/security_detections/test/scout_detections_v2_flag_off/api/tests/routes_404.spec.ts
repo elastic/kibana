@@ -12,11 +12,23 @@
  * the plugin's `setup` never calls `registerCrudRoutes`, `registerFetchRoutes`,
  * or `registerActionRoutes`.  Kibana's router has no record of the
  * `/api/detection_engine/v2/...` paths, so every request lands on the "route
- * not found" handler and returns 404.
+ * not found" handler and returns 404 with Kibana's generic error body
+ * `{ statusCode: 404, error: "Not Found", message: "Not Found" }`.
  *
- * This distinguishes the flag-off state from the 503 alerting-disabled state:
- *   - Flag off  → 404 (path does not exist in the router)
- *   - Flag on, alerting off → 503 ALERTING_DISABLED (path exists, handler rejects)
+ * This distinguishes the flag-off state from the two 404-producing states when
+ * the flag is on:
+ *   - Flag off  → router 404 (`{ statusCode, error, message }`, no `code`)
+ *   - Flag on, alerting on, unknown id → RULE_NOT_FOUND app error (has `code`)
+ *   - Flag on, alerting off → 503 ALERTING_DISABLED
+ *
+ * The collection routes (POST /rules, GET /rules, GET /tags) are the strongest
+ * discriminators: with the flag on they return 2xx, never 404.  The by-id
+ * routes (GET/PUT/PATCH/DELETE /rules/{id}, POST /rules/{id}/_enable|_disable)
+ * also return 404 with the flag on when the id is unknown, but with a different
+ * body shape (RULE_NOT_FOUND carries `code`; the router 404 does not).  This
+ * suite asserts the router-404 body; the RULE_NOT_FOUND envelope is asserted
+ * by the flag-on suite (fetch/actions/crud specs), so together the two suites
+ * make the distinction explicit.
  *
  * Run this suite against a server started with the `detections_v2_flag_off`
  * config set (no `enableDetectionsOnV2` arg).  See playwright.config.ts in this
@@ -74,6 +86,14 @@ apiTest.describe(
         headers: adminHeaders,
       });
       expect(response).toHaveStatusCode(404);
+      // Router-level 404 (no route registered) produces this generic shape with
+      // no `code` field, unlike the RULE_NOT_FOUND app error (which has `code`).
+      expect(response.body).toMatchObject({
+        statusCode: 404,
+        error: 'Not Found',
+        message: 'Not Found',
+      });
+      expect(response.body.code).toBeUndefined();
     });
 
     apiTest('PUT /rules/{id} returns 404 when flag is off', async ({ apiClient }) => {
@@ -90,6 +110,12 @@ apiTest.describe(
         },
       });
       expect(response).toHaveStatusCode(404);
+      expect(response.body).toMatchObject({
+        statusCode: 404,
+        error: 'Not Found',
+        message: 'Not Found',
+      });
+      expect(response.body.code).toBeUndefined();
     });
 
     apiTest('PATCH /rules/{id} returns 404 when flag is off', async ({ apiClient }) => {
@@ -98,6 +124,12 @@ apiTest.describe(
         body: { name: 'patched' },
       });
       expect(response).toHaveStatusCode(404);
+      expect(response.body).toMatchObject({
+        statusCode: 404,
+        error: 'Not Found',
+        message: 'Not Found',
+      });
+      expect(response.body.code).toBeUndefined();
     });
 
     apiTest('DELETE /rules/{id} returns 404 when flag is off', async ({ apiClient }) => {
@@ -105,6 +137,12 @@ apiTest.describe(
         headers: adminHeaders,
       });
       expect(response).toHaveStatusCode(404);
+      expect(response.body).toMatchObject({
+        statusCode: 404,
+        error: 'Not Found',
+        message: 'Not Found',
+      });
+      expect(response.body.code).toBeUndefined();
     });
 
     apiTest('GET /tags returns 404 when flag is off', async ({ apiClient }) => {
@@ -118,6 +156,12 @@ apiTest.describe(
         body: {},
       });
       expect(response).toHaveStatusCode(404);
+      expect(response.body).toMatchObject({
+        statusCode: 404,
+        error: 'Not Found',
+        message: 'Not Found',
+      });
+      expect(response.body.code).toBeUndefined();
     });
 
     apiTest('POST /rules/{id}/_disable returns 404 when flag is off', async ({ apiClient }) => {
@@ -126,6 +170,12 @@ apiTest.describe(
         body: {},
       });
       expect(response).toHaveStatusCode(404);
+      expect(response.body).toMatchObject({
+        statusCode: 404,
+        error: 'Not Found',
+        message: 'Not Found',
+      });
+      expect(response.body.code).toBeUndefined();
     });
   }
 );

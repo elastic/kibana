@@ -8,9 +8,11 @@
 /**
  * Detection Engine v2 API Scout suite (flag-on path).
  *
- * Runs against the `detections_v2` server config set, which extends the
- * `alerting_v2` defaults with `--xpack.securityDetections.enableDetectionsOnV2=true`.
- * Both `xpack.alerting_v2.enabled` and `alerting:v2:enabled` (uiSettings) are on.
+ * Runs against the `detections_v2` server config set, which starts Kibana with
+ * `--xpack.alerting_v2.enabled=true` and `--xpack.securityDetections.enableDetectionsOnV2=true`.
+ * The `alerting:v2:enabled` uiSettings entry is NOT set via a global override
+ * so that off_states.spec.ts can flip it at runtime; the specs enable it
+ * themselves in beforeAll.
  *
  * Off-state coverage:
  *   - 503 (v2 alerting disabled): the off_states.spec tests flip the

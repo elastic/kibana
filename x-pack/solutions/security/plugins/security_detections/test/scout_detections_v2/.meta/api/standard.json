@@ -1,7 +1,827 @@
 {
-  "sha1": "0000000000000000000000000000000000000000",
+  "sha1": "107c11c51c27212c162d9e1593f9087501708553",
   "testChannels": [
     "ci-on-commit"
   ],
-  "tests": []
+  "tests": [
+    {
+      "id": "0ad359da16389d4-999803f39da7b2a",
+      "title": "Detection Engine v2 — action routes enable: transitions a disabled rule to enabled=true and returns 200",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/actions.spec.ts",
+        "line": 74,
+        "column": 22
+      }
+    },
+    {
+      "id": "0ad359da16389d4-9d8f144596988cc",
+      "title": "Detection Engine v2 — action routes enable: returns 404 for an unknown id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/actions.spec.ts",
+        "line": 88,
+        "column": 29
+      }
+    },
+    {
+      "id": "0ad359da16389d4-79917b56a51ce3c",
+      "title": "Detection Engine v2 — action routes disable: transitions an enabled rule to enabled=false and returns 200",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/actions.spec.ts",
+        "line": 97,
+        "column": 18
+      }
+    },
+    {
+      "id": "0ad359da16389d4-2b2428b3a275211",
+      "title": "Detection Engine v2 — action routes disable: returns 404 for an unknown id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/actions.spec.ts",
+        "line": 114,
+        "column": 3
+      }
+    },
+    {
+      "id": "0ad359da16389d4-ce2787c8ac1fa35",
+      "title": "Detection Engine v2 — action routes revision stays at 0 across enable → disable; updated_at moves",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/actions.spec.ts",
+        "line": 122,
+        "column": 61
+      }
+    },
+    {
+      "id": "0ad359da16389d4-55cc692674396f2",
+      "title": "Detection Engine v2 — action routes enable: enabling an already-enabled rule returns 200 (not 409)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/actions.spec.ts",
+        "line": 153,
+        "column": 38
+      }
+    },
+    {
+      "id": "0ad359da16389d4-f99895318227c0e",
+      "title": "Detection Engine v2 — action routes enable: does not re-validate detection builder fields (enable is a toggle, not a write)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/actions.spec.ts",
+        "line": 179,
+        "column": 14
+      }
+    },
+    {
+      "id": "0ad359da16389d4-e1efac155d59e98",
+      "title": "Detection Engine v2 — action routes authorization: enable returns 403 for a rules-read-only caller",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/actions.spec.ts",
+        "line": 214,
+        "column": 27
+      }
+    },
+    {
+      "id": "0ad359da16389d4-f3fdd9cddf435b8",
+      "title": "Detection Engine v2 — action routes authorization: disable returns 403 for a no-access caller",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/actions.spec.ts",
+        "line": 221,
+        "column": 14
+      }
+    },
+    {
+      "id": "33564566fccf650-cbd760661847941",
+      "title": "Detection Engine v2 — CRUD routes create: POST returns 201 and the created query rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
+        "line": 81,
+        "column": 7
+      }
+    },
+    {
+      "id": "33564566fccf650-b9ff5a036d4d89c",
+      "title": "Detection Engine v2 — CRUD routes create: POST returns 201 and the created threshold rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
+        "line": 95,
+        "column": 74
+      }
+    },
+    {
+      "id": "33564566fccf650-513e43c4a875fef",
+      "title": "Detection Engine v2 — CRUD routes create: POST returns 409 on duplicate rule_id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
+        "line": 113,
+        "column": 49
+      }
+    },
+    {
+      "id": "33564566fccf650-c13de787caa2430",
+      "title": "Detection Engine v2 — CRUD routes create: POST returns 400 for missing required fields (no name)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
+        "line": 123,
+        "column": 85
+      }
+    },
+    {
+      "id": "33564566fccf650-a0c9d1569d37243",
+      "title": "Detection Engine v2 — CRUD routes replace: PUT returns 200 with the updated rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
+        "line": 136,
+        "column": 24
+      }
+    },
+    {
+      "id": "33564566fccf650-944ab6c2b2259c5",
+      "title": "Detection Engine v2 — CRUD routes replace: PUT returns 404 for an unknown id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
+        "line": 163,
+        "column": 27
+      }
+    },
+    {
+      "id": "33564566fccf650-58453cf766fbccd",
+      "title": "Detection Engine v2 — CRUD routes replace: PUT returns 409 when the payload type differs from the stored type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
+        "line": 171,
+        "column": 26
+      }
+    },
+    {
+      "id": "33564566fccf650-4c2e46418cb5b79",
+      "title": "Detection Engine v2 — CRUD routes patch: PATCH returns 200 with only the patched fields changed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
+        "line": 193,
+        "column": 5
+      }
+    },
+    {
+      "id": "33564566fccf650-5a0a910948450e1",
+      "title": "Detection Engine v2 — CRUD routes patch: PATCH returns 400 when a foreign field is sent (merged-validation)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
+        "line": 211,
+        "column": 4
+      }
+    },
+    {
+      "id": "33564566fccf650-292e1c4992474d6",
+      "title": "Detection Engine v2 — CRUD routes patch: PATCH returns 404 for an unknown id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
+        "line": 232,
+        "column": 7
+      }
+    },
+    {
+      "id": "33564566fccf650-b24e983543ff7fe",
+      "title": "Detection Engine v2 — CRUD routes delete: DELETE returns 200 with the deleted rule body",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
+        "line": 245,
+        "column": 14
+      }
+    },
+    {
+      "id": "33564566fccf650-855534b977ef62b",
+      "title": "Detection Engine v2 — CRUD routes delete: DELETE returns 404 for an unknown id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
+        "line": 260,
+        "column": 16
+      }
+    },
+    {
+      "id": "33564566fccf650-b969cb04ff11d5c",
+      "title": "Detection Engine v2 — CRUD routes scoping: a generic Alerting v2 rule is 404 on the Detections API",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
+        "line": 268,
+        "column": 3
+      }
+    },
+    {
+      "id": "33564566fccf650-0e722d01042b1b7",
+      "title": "Detection Engine v2 — CRUD routes authorization: POST returns 403 for a rules-read-only caller",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
+        "line": 321,
+        "column": 46
+      }
+    },
+    {
+      "id": "33564566fccf650-bc6de1c09116f43",
+      "title": "Detection Engine v2 — CRUD routes authorization: POST returns 403 for a no-access caller",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
+        "line": 328,
+        "column": 11
+      }
+    },
+    {
+      "id": "33564566fccf650-9a143727e92fac0",
+      "title": "Detection Engine v2 — CRUD routes authorization: DELETE returns 403 for a rules-read-only caller",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
+        "line": 337,
+        "column": 20
+      }
+    },
+    {
+      "id": "20407c74eb4c14a-da95fdd6ad26f0a",
+      "title": "Detection Engine v2 — fetch routes get: returns 200 with the correct shape",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/fetch.spec.ts",
+        "line": 87,
+        "column": 7
+      }
+    },
+    {
+      "id": "20407c74eb4c14a-a9030901deaa3ef",
+      "title": "Detection Engine v2 — fetch routes get: returns 404 for an unknown id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/fetch.spec.ts",
+        "line": 102,
+        "column": 82
+      }
+    },
+    {
+      "id": "20407c74eb4c14a-6d657ce0d8083e5",
+      "title": "Detection Engine v2 — fetch routes get: returns 403 for a no-access caller",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/fetch.spec.ts",
+        "line": 110,
+        "column": 12
+      }
+    },
+    {
+      "id": "20407c74eb4c14a-d21deca4d73d19f",
+      "title": "Detection Engine v2 — fetch routes list: returns page/per_page/total/data shape",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/fetch.spec.ts",
+        "line": 125,
+        "column": 12
+      }
+    },
+    {
+      "id": "20407c74eb4c14a-b1d28577646fb91",
+      "title": "Detection Engine v2 — fetch routes list: filter by type=query excludes threshold rules",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/fetch.spec.ts",
+        "line": 147,
+        "column": 26
+      }
+    },
+    {
+      "id": "20407c74eb4c14a-b9f618fcfef2c84",
+      "title": "Detection Engine v2 — fetch routes list: filter by severity=high excludes other severities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/fetch.spec.ts",
+        "line": 164,
+        "column": 12
+      }
+    },
+    {
+      "id": "20407c74eb4c14a-53785392bf0028c",
+      "title": "Detection Engine v2 — fetch routes list: filter by tags returns only matching rules",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/fetch.spec.ts",
+        "line": 182,
+        "column": 12
+      }
+    },
+    {
+      "id": "20407c74eb4c14a-19dcbda4ba84641",
+      "title": "Detection Engine v2 — fetch routes list: filter by rule_ids returns only the matching rule (proves metadata.signature_id mapping)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/fetch.spec.ts",
+        "line": 203,
+        "column": 11
+      }
+    },
+    {
+      "id": "20407c74eb4c14a-697d2306b9e2948",
+      "title": "Detection Engine v2 — fetch routes list: sort by risk_score returns rules in numeric order (proves builder_fields.risk_score sub-field sort)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/fetch.spec.ts",
+        "line": 225,
+        "column": 7
+      }
+    },
+    {
+      "id": "20407c74eb4c14a-182b8f536411d25",
+      "title": "Detection Engine v2 — fetch routes list: sort_field=severity returns 400 (not in the allowlist)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/fetch.spec.ts",
+        "line": 264,
+        "column": 25
+      }
+    },
+    {
+      "id": "20407c74eb4c14a-da8c457436c1028",
+      "title": "Detection Engine v2 — fetch routes list: sort by name returns alphabetically ordered results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/fetch.spec.ts",
+        "line": 270,
+        "column": 7
+      }
+    },
+    {
+      "id": "20407c74eb4c14a-a30996bcf894490",
+      "title": "Detection Engine v2 — fetch routes list: pagination — page 2 returns the next slice",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/fetch.spec.ts",
+        "line": 291,
+        "column": 15
+      }
+    },
+    {
+      "id": "20407c74eb4c14a-54be4e07886317c",
+      "title": "Detection Engine v2 — fetch routes list: fields projection always includes id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/fetch.spec.ts",
+        "line": 317,
+        "column": 6
+      }
+    },
+    {
+      "id": "20407c74eb4c14a-dd40beee327f330",
+      "title": "Detection Engine v2 — fetch routes tags: returns all unique tags across rules",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/fetch.spec.ts",
+        "line": 337,
+        "column": 36
+      }
+    },
+    {
+      "id": "766826aeae7d69b-0ba782583270a9d",
+      "title": "Detection Engine v2 — managed-rule invariant single-rule upsert (PUT) via generic API returns RULE_IS_MANAGED",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
+        "line": 105,
+        "column": 14
+      }
+    },
+    {
+      "id": "766826aeae7d69b-b8e40a27da85deb",
+      "title": "Detection Engine v2 — managed-rule invariant enable via generic API returns RULE_IS_MANAGED",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
+        "line": 133,
+        "column": 23
+      }
+    },
+    {
+      "id": "766826aeae7d69b-6df1e328cc99279",
+      "title": "Detection Engine v2 — managed-rule invariant disable via generic API returns RULE_IS_MANAGED",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
+        "line": 137,
+        "column": 34
+      }
+    },
+    {
+      "id": "766826aeae7d69b-f30b18603abe75f",
+      "title": "Detection Engine v2 — managed-rule invariant delete via generic API returns RULE_IS_MANAGED",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
+        "line": 140,
+        "column": 11
+      }
+    },
+    {
+      "id": "766826aeae7d69b-0f80342c4d47084",
+      "title": "Detection Engine v2 — managed-rule invariant run-now via generic API returns RULE_IS_MANAGED",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
+        "line": 147,
+        "column": 24
+      }
+    },
+    {
+      "id": "766826aeae7d69b-9257661ac2a5039",
+      "title": "Detection Engine v2 — managed-rule invariant single-rule PATCH (update_rule_route) via generic API returns RULE_IS_MANAGED",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
+        "line": 154,
+        "column": 73
+      }
+    },
+    {
+      "id": "766826aeae7d69b-3afb669711ff6cd",
+      "title": "Detection Engine v2 — managed-rule invariant delete_by_query via generic API does not delete the detection rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
+        "line": 167,
+        "column": 14
+      }
+    },
+    {
+      "id": "766826aeae7d69b-b6da0ab6c5f0520",
+      "title": "Detection Engine v2 — managed-rule invariant enable_by_query via generic API does not change the detection rule enabled state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
+        "line": 179,
+        "column": 7
+      }
+    },
+    {
+      "id": "766826aeae7d69b-e7eeaf612d7735d",
+      "title": "Detection Engine v2 — managed-rule invariant disable_by_query via generic API does not change the detection rule enabled state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
+        "line": 192,
+        "column": 5
+      }
+    },
+    {
+      "id": "766826aeae7d69b-12301362f227dfc",
+      "title": "Detection Engine v2 — managed-rule invariant bulk_delete via generic API returns RULE_IS_MANAGED for the detection rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
+        "line": 213,
+        "column": 20
+      }
+    },
+    {
+      "id": "766826aeae7d69b-4f3c003d1978004",
+      "title": "Detection Engine v2 — managed-rule invariant bulk_enable via generic API does not enable the detection rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
+        "line": 236,
+        "column": 81
+      }
+    },
+    {
+      "id": "766826aeae7d69b-6fccb9fd96819ae",
+      "title": "Detection Engine v2 — managed-rule invariant bulk_disable via generic API does not disable the detection rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
+        "line": 259,
+        "column": 26
+      }
+    },
+    {
+      "id": "766826aeae7d69b-cc8ffa1943e1e58",
+      "title": "Detection Engine v2 — managed-rule invariant bulk_update_api_key via generic API refuses the detection rule per-item",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
+        "line": 279,
+        "column": 16
+      }
+    },
+    {
+      "id": "766826aeae7d69b-d650bca92d554ac",
+      "title": "Detection Engine v2 — managed-rule invariant update_api_key_by_query via generic API does not rotate the detection rule api key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
+        "line": 300,
+        "column": 81
+      }
+    },
+    {
+      "id": "766826aeae7d69b-eab296ef248e795",
+      "title": "Detection Engine v2 — managed-rule invariant Detection API enable/disable succeeds on the detection rule that generic API rejects",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
+        "line": 318,
+        "column": 32
+      }
+    },
+    {
+      "id": "74ea7917a3a842b-7a327ec8e90be26",
+      "title": "Detection Engine v2 — off-state: 503 when alerting:v2:enabled is off 503: POST /rules returns ALERTING_DISABLED when alerting:v2:enabled is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/off_states.spec.ts",
+        "line": 97,
+        "column": 1
+      }
+    },
+    {
+      "id": "74ea7917a3a842b-4f7d6511a0b9662",
+      "title": "Detection Engine v2 — off-state: 503 when alerting:v2:enabled is off 503: GET /rules/{id} returns ALERTING_DISABLED when alerting:v2:enabled is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/off_states.spec.ts",
+        "line": 106,
+        "column": 6
+      }
+    },
+    {
+      "id": "74ea7917a3a842b-00664c06c457555",
+      "title": "Detection Engine v2 — off-state: 503 when alerting:v2:enabled is off 503: GET /rules returns ALERTING_DISABLED when alerting:v2:enabled is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/off_states.spec.ts",
+        "line": 114,
+        "column": 32
+      }
+    },
+    {
+      "id": "74ea7917a3a842b-8c90d87aa35e06e",
+      "title": "Detection Engine v2 — off-state: 503 when alerting:v2:enabled is off 503: GET /tags returns ALERTING_DISABLED when alerting:v2:enabled is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/off_states.spec.ts",
+        "line": 121,
+        "column": 16
+      }
+    },
+    {
+      "id": "74ea7917a3a842b-f274b48057add3b",
+      "title": "Detection Engine v2 — off-state: 503 when alerting:v2:enabled is off 503: PUT /rules/{id} returns ALERTING_DISABLED when alerting:v2:enabled is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/off_states.spec.ts",
+        "line": 132,
+        "column": 20
+      }
+    },
+    {
+      "id": "74ea7917a3a842b-705cd8d964ea99d",
+      "title": "Detection Engine v2 — off-state: 503 when alerting:v2:enabled is off 503: PATCH /rules/{id} returns ALERTING_DISABLED when alerting:v2:enabled is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/off_states.spec.ts",
+        "line": 144,
+        "column": 26
+      }
+    },
+    {
+      "id": "74ea7917a3a842b-bba2ac095fa6a9f",
+      "title": "Detection Engine v2 — off-state: 503 when alerting:v2:enabled is off 503: DELETE /rules/{id} returns ALERTING_DISABLED when alerting:v2:enabled is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/off_states.spec.ts",
+        "line": 158,
+        "column": 20
+      }
+    },
+    {
+      "id": "74ea7917a3a842b-4e256ff66fe0dcf",
+      "title": "Detection Engine v2 — off-state: 503 when alerting:v2:enabled is off 503: POST /rules/{id}/_enable returns ALERTING_DISABLED when alerting:v2:enabled is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/off_states.spec.ts",
+        "line": 168,
+        "column": 15
+      }
+    },
+    {
+      "id": "74ea7917a3a842b-68785ac96a8e4af",
+      "title": "Detection Engine v2 — off-state: 503 when alerting:v2:enabled is off 503: POST /rules/{id}/_disable returns ALERTING_DISABLED when alerting:v2:enabled is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/off_states.spec.ts",
+        "line": 180,
+        "column": 7
+      }
+    }
+  ]
 }
