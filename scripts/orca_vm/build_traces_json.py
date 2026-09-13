@@ -71,6 +71,7 @@ def main():
             "metadata.execution_id", "task.model.id", "example.id",
             "task.output.steps", "task.output.messages", "task.output.traceId",
             "evaluator.name", "evaluator.score", "task.repetition_index",
+            "@timestamp",
         ],
         "sort": [{"@timestamp": "asc"}],
     }
@@ -208,16 +209,21 @@ def main():
     # timestamp order. Unmatched -> explicit None (renderer marks it).
     #
     # A model may have MULTIPLE executions in the window (retries). The
-    # reference board renders one run per model; pick the execution with
-    # the most docs per (model, prompt) — deterministic, never a blend.
-    best = {}  # (model, prompt) -> (n_docs, exec_id, docs)
+    # reference board renders one run per model; per (model, prompt) pick
+    # the NEWEST execution (latest @timestamp across its docs) — "latest
+    # numbers" semantics. Doc-count was the old rule; it preferred bulky
+    # early executions over newer usage-bearing runs (observed 2026-09-13:
+    # 882-doc Sep-1 execs beating 98-doc Sep-7 eis runs). Deterministic,
+    # never a blend.
+    best = {}  # (model, prompt) -> (last_ts, exec_id, docs)
     for exec_id, prompts in cells.items():
         model = model_of.get(exec_id, "")
         short = model.removeprefix("eis-")
         for prompt, docs in prompts.items():
             k = (short, prompt)
-            if k not in best or len(docs) > best[k][0]:
-                best[k] = (len(docs), exec_id, docs)
+            last_ts = max((d.get("@timestamp") or "") for d in docs)
+            if k not in best or last_ts > best[k][0]:
+                best[k] = (last_ts, exec_id, docs)
 
     by_exec_prompt = collections.defaultdict(dict)  # exec_id -> prompt -> docs
     for (short, prompt), (n, exec_id, docs) in best.items():
