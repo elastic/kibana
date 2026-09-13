@@ -7,7 +7,11 @@
 
 import type { ZodObject } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { AgentCreateRequest, ConversationTemplate } from '@kbn/agent-builder-common';
+import type {
+  AgentCreateRequest,
+  ConversationTemplate,
+  PersistedSkillCreateRequest,
+} from '@kbn/agent-builder-common';
 import type { ConversationPublicClient } from './conversations';
 import type { StaticToolRegistration, ToolRegistry } from './tools';
 import type { AttachmentTypeDefinition, AttachmentPublicClient } from './attachments';
@@ -248,11 +252,36 @@ export interface TopSnippetsConfig {
 /**
  * Setup contract of the agentBuilder plugin.
  */
+
+/**
+ * Internal management API for package-owned persisted agents and skills
+ * (e.g. Fleet package install/uninstall).
+ */
+export interface AgentBuilderManagementSetup {
+  /** Read a single agent, or null when it does not exist. Used to enrich Fleet asset listings. */
+  getAgent(agentId: string, request: KibanaRequest): Promise<unknown>;
+  createOrUpdateAgent(params: AgentCreateRequest, request: KibanaRequest): Promise<unknown>;
+  deletePackageManagedAgent(agentId: string, spaceId: string): Promise<boolean>;
+  createOrUpdateSkill(params: PersistedSkillCreateRequest, request: KibanaRequest): Promise<unknown>;
+  deletePackageManagedSkill(skillId: string, spaceId: string): Promise<boolean>;
+  /**
+   * List the skills a package owns, so install can reap the ones the current
+   * archive no longer produces. Package-managed skills are readonly, so an
+   * orphan left behind by an id-scheme change is otherwise undeletable.
+   */
+  listPackageManagedSkills(
+    pluginId: string,
+    spaceId: string
+  ): Promise<Array<{ id: string; plugin_id?: string }>>;
+}
+
 export interface AgentBuilderPluginSetup {
   /**
    * Agents setup contract, which can be used to register built-in agents.
    */
   agents: AgentsSetup;
+  /** Internal management API for programmatic agent/skill CRUD (Fleet package install). */
+  management: AgentBuilderManagementSetup;
   /**
    * Tools setup contract, which can be used to register built-in tools.
    */

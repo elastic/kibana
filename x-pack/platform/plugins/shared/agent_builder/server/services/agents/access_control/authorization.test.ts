@@ -58,13 +58,31 @@ describe('agent access-control authorization', () => {
       expect(
         isAgentOwner({
           owner: { id: 'owner-id', username: 'alice' },
-          currentUser: { username: 'alice' },
+          currentUser: { id: 'different-id', username: 'alice' },
         })
       ).toBe(false);
+      // Profile-uid owners never accept a username-only current user.
       expect(
         isAgentOwner({
           owner: { id: 'owner-id', username: 'alice' },
-          currentUser: { id: 'different-id', username: 'alice' },
+          currentUser: { username: 'alice' },
+        })
+      ).toBe(false);
+    });
+
+    it('accepts the realm-encoded username when the current user id is unresolvable', () => {
+      // Kibana authc can omit authentication_realm, leaving currentUser.id undefined. The owner
+      // must still be recognised, but only via the username encoded in its own realm id.
+      expect(
+        isAgentOwner({
+          owner: { id: 'realm:["reserved","reserved","elastic"]', username: 'elastic' },
+          currentUser: { username: 'elastic' },
+        })
+      ).toBe(true);
+      expect(
+        isAgentOwner({
+          owner: { id: 'realm:["reserved","reserved","elastic"]', username: 'elastic' },
+          currentUser: { username: 'mallory' },
         })
       ).toBe(false);
     });
