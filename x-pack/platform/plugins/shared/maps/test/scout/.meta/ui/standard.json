@@ -1,5 +1,5 @@
 {
-  "sha1": "41ec40a4f41a33fe96c28536d03a656c12c9a8ca",
+  "sha1": "a61b094fa6eeb4c1a0a03f9e53bf49152b0001ac",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -33,7 +33,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/full_screen_mode.spec.ts",
-        "line": 23,
+        "line": 18,
         "column": 43
       }
     }

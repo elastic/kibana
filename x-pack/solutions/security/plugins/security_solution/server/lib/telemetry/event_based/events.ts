@@ -2528,6 +2528,64 @@ export const ANALYZER_CROSS_PROJECT_RENDER_EVENT: EventTypeOpts<{
   },
 };
 
+/**
+ * Temporary sizing telemetry for the New Terms to ES|QL INLINE STATS migration decision. This is a
+ * one-off study to measure the cardinality and value length of the fields customers group by. It should be removed once the migration sizing is settled.
+ *
+ * Removal tracking issue: https://github.com/elastic/kibana/issues/290516
+ */
+export const NEW_TERMS_FIELD_CARDINALITY_EVENT: EventTypeOpts<{
+  isElasticRule: boolean;
+  newTermsFieldsCount: number;
+  distinctFieldCombinations: number;
+  maxCombinationValueLength: number;
+  combinationValueLengthSum: number;
+  interruptedByMaxSignals: boolean;
+}> = {
+  eventType: 'new_terms_field_cardinality_on_rule_execution',
+  schema: {
+    isElasticRule: {
+      type: 'boolean',
+      _meta: {
+        description:
+          'True for an Elastic prebuilt rule, false for a user-created rule. No rule id, name, field names or values are reported.',
+      },
+    },
+    newTermsFieldsCount: {
+      type: 'long',
+      _meta: { description: 'Number of fields the New Terms rule groups by (1-3)' },
+    },
+    distinctFieldCombinations: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of distinct combinations of the grouping-field values seen in the rule run window this execution. Counts every combination scanned, not only the new ones that produced alerts',
+      },
+    },
+    maxCombinationValueLength: {
+      type: 'long',
+      _meta: {
+        description:
+          'Longest combined character length of the grouping-field values across a single distinct combination this run (value lengths only, not the values)',
+      },
+    },
+    combinationValueLengthSum: {
+      type: 'long',
+      _meta: {
+        description:
+          'Sum over the distinct combinations this run of the combined character length of their grouping-field values (lengths only, not the values). Divide by distinctFieldCombinations to get the average',
+      },
+    },
+    interruptedByMaxSignals: {
+      type: 'boolean',
+      _meta: {
+        description:
+          'True if the run stopped early after reaching maxSignals before paging through all terms, in which case the counts are a lower bound. False if it paged through all terms',
+      },
+    },
+  },
+};
+
 export const events = [
   DETECTION_RULE_UPGRADE_EVENT,
   DETECTION_RULE_BULK_UPGRADE_EVENT,
@@ -2544,6 +2602,7 @@ export const events = [
   RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT,
   ASSET_CRITICALITY_SYSTEM_PROCESSED_ASSIGNMENT_FILE_EVENT,
   ALERT_SUPPRESSION_EVENT,
+  NEW_TERMS_FIELD_CARDINALITY_EVENT,
   ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
   ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
   ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT,
