@@ -11,7 +11,11 @@ import type { COMPUTED_FEATURE_TYPES } from '@kbn/significant-events-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { StreamsClient } from '@kbn/streams-plugin/server';
 import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators';
-import { searchKnowledgeIndicatorsToolHandler, type StrippedFeatureKeys } from './handler';
+import {
+  searchKnowledgeIndicatorsToolHandler,
+  type CompactFeature,
+  type StrippedFeatureKeys,
+} from './handler';
 
 const STRIPPED_FEATURE_KEYS = [
   'uuid',
@@ -203,6 +207,57 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     expect(kiClient.getFeatures).not.toHaveBeenCalled();
   });
 
+  it('loads topology candidates in one feature search', async () => {
+    streamsClient.listStreams = jest
+      .fn()
+      .mockResolvedValue([{ name: 'logs.test' } as Streams.all.Definition]);
+    kiClient.getFeatures = jest
+      .fn()
+      .mockImplementation(
+        async (_stream: string, options: { type?: string[]; featureIds?: string[] }) => {
+          if (options.type?.includes('dependency') && !options.featureIds) {
+            return {
+              hits: [
+                makeFeature({
+                  id: 'orders-api-storage',
+                  type: 'dependency',
+                  properties: {
+                    source: 'orders-api',
+                    target: 'storage',
+                    protocol: 'tcp',
+                  },
+                }),
+              ],
+              total: 1,
+            };
+          }
+          return { hits: [], total: 0 };
+        }
+      );
+
+    const result = await searchKnowledgeIndicatorsToolHandler({
+      streamsClient,
+      kiClient,
+      logger,
+      params: {
+        kind: ['feature'],
+        feature_types: ['dependency'],
+        feature_ids: ['orders-api'],
+      },
+      view: 'compact',
+    });
+
+    expect(result.knowledge_indicators).toEqual([
+      expect.objectContaining({
+        kind: 'feature',
+        feature: expect.objectContaining({ id: 'orders-api-storage' }),
+      }),
+    ]);
+    expect(kiClient.getFeatures).toHaveBeenCalledWith('logs.test', {
+      type: ['dependency'],
+    });
+  });
+
   it('filters requested streamNames against accessible streams', async () => {
     streamsClient.listStreams = jest
       .fn()
@@ -253,7 +308,6 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
 
     expect(kiClient.getFeatures).toHaveBeenCalledWith('logs.test', {
       type: ['dependency', 'entity'],
-      featureIds: ['service-a'],
     });
     expect(kiClient.getQueryLinks).toHaveBeenCalledWith(['logs.test'], {
       ruleUnbacked: 'exclude',
@@ -301,7 +355,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
       kiClient.getQueryLinks = jest.fn().mockResolvedValue([]);
     }
 
-    async function getCompactFeature(feature: Feature) {
+    async function getCompactFeature(feature: Feature): Promise<CompactFeature> {
       setupFeatureStream(feature);
       const result = await searchKnowledgeIndicatorsToolHandler({
         streamsClient,
@@ -310,7 +364,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
         params: { kind: ['feature'] },
         view: 'compact',
       });
-      expect(result.view).toBe('compact');
+      if (result.view !== 'compact') throw new Error('Expected compact view');
       const ki = result.knowledge_indicators[0];
       if (ki.kind !== 'feature') throw new Error('Expected feature KI');
       return ki.feature;
@@ -363,6 +417,118 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
         patterns_count: 3,
         truncated: true,
       });
+    });
+
+    it('truncates evidence to MAX_FEATURE_ARRAY_ITEMS and sets evidence_count', async () => {
+      const evidence = Array.from({ length: 15 }, (_, i) => `evidence item ${i}`);
+      const feature = await getCompactFeature(makeFeature({ type: 'entity', evidence }));
+      expect(feature.evidence).toHaveLength(10);
+      expect(feature.evidence_count).toBe(15);
+    });
+
+    it('truncates tags to MAX_FEATURE_ARRAY_ITEMS and sets tags_count', async () => {
+      const tags = Array.from({ length: 15 }, (_, i) => `tag-${i}`);
+      const feature = await getCompactFeature(makeFeature({ type: 'entity', tags }));
+      expect(feature.tags).toHaveLength(10);
+      expect(feature.tags_count).toBe(15);
+    });
+
+    it('does not set evidence_count when evidence is exactly MAX_FEATURE_ARRAY_ITEMS', async () => {
+      const evidence = Array.from({ length: 10 }, (_, i) => `evidence item ${i}`);
+      const feature = await getCompactFeature(makeFeature({ type: 'entity', evidence }));
+      expect(feature.evidence).toHaveLength(10);
+      expect(feature).not.toHaveProperty('evidence_count');
+    });
+
+    it('does not set evidence_count when evidence has fewer than MAX_FEATURE_ARRAY_ITEMS', async () => {
+      const evidence = Array.from({ length: 5 }, (_, i) => `evidence item ${i}`);
+      const feature = await getCompactFeature(makeFeature({ type: 'entity', evidence }));
+      expect(feature.evidence).toHaveLength(5);
+      expect(feature).not.toHaveProperty('evidence_count');
+    });
+
+    it('does not set tags_count when tags is exactly MAX_FEATURE_ARRAY_ITEMS', async () => {
+      const tags = Array.from({ length: 10 }, (_, i) => `tag-${i}`);
+      const feature = await getCompactFeature(makeFeature({ type: 'entity', tags }));
+      expect(feature.tags).toHaveLength(10);
+      expect(feature).not.toHaveProperty('tags_count');
+    });
+
+    it('does not set tags_count when tags has fewer than MAX_FEATURE_ARRAY_ITEMS', async () => {
+      const tags = Array.from({ length: 5 }, (_, i) => `tag-${i}`);
+      const feature = await getCompactFeature(makeFeature({ type: 'entity', tags }));
+      expect(feature.tags).toHaveLength(5);
+      expect(feature).not.toHaveProperty('tags_count');
+    });
+
+    it('samples array-valued meta keys to MAX_COMPACT_META_ARRAY_SAMPLE and preserves scalars', async () => {
+      const meta = {
+        observed_clusters: Array.from({ length: 15 }, (_, i) => `cluster-${i}`),
+        observed_regions: Array.from({ length: 12 }, (_, i) => `region-${i}`),
+        runtime: 'containerd',
+        version: '0.41.0',
+      };
+      const feature = await getCompactFeature(makeFeature({ type: 'entity', meta }));
+      expect(feature.meta?.observed_clusters).toEqual(['cluster-0', 'cluster-1', 'cluster-2']);
+      expect(feature.meta?.observed_regions).toEqual(['region-0', 'region-1', 'region-2']);
+      expect(feature.meta?.runtime).toBe('containerd');
+      expect(feature.meta?.version).toBe('0.41.0');
+      expect(feature).not.toHaveProperty('meta_keys_omitted');
+      expect(feature.meta_array_items_omitted).toEqual({
+        observed_clusters: 12,
+        observed_regions: 9,
+      });
+    });
+
+    it('drops meta keys beyond MAX_COMPACT_META_KEYS and sets meta_keys_omitted', async () => {
+      const meta = Object.fromEntries(
+        Array.from({ length: 40 }, (_, i) => [`key_${String(i).padStart(2, '0')}`, `value-${i}`])
+      );
+      const feature = await getCompactFeature(makeFeature({ type: 'entity', meta }));
+      const keptKeys = Object.keys(feature.meta ?? {});
+      expect(keptKeys).toHaveLength(10);
+      expect(feature.meta_keys_omitted).toBe(30);
+      // insertion order preserved: the first keys survive
+      expect(keptKeys[0]).toBe('key_00');
+      expect(keptKeys[9]).toBe('key_09');
+    });
+
+    it('keeps small meta intact without meta_keys_omitted', async () => {
+      const meta = { port: '5560', endpoint_paths: ['/accounts/projects'], note: 'internal HTTP' };
+      const feature = await getCompactFeature(makeFeature({ type: 'entity', meta }));
+      expect(feature.meta).toEqual(meta);
+      expect(feature).not.toHaveProperty('meta_keys_omitted');
+    });
+
+    it('samples top-level array values and records omitted items', async () => {
+      const meta = {
+        ports: [443, 8443, 9200, 9300],
+      };
+      const feature = await getCompactFeature(makeFeature({ type: 'entity', meta }));
+      expect(feature.meta?.ports).toEqual([443, 8443, 9200]);
+      expect(feature.meta_array_items_omitted).toEqual({ ports: 1 });
+    });
+
+    it('passes through undefined meta without error', async () => {
+      const feature = await getCompactFeature(makeFeature({ type: 'entity', meta: undefined }));
+      expect(feature.meta).toBeUndefined();
+      expect(feature).not.toHaveProperty('meta_keys_omitted');
+      expect(feature).not.toHaveProperty('meta_array_items_omitted');
+    });
+
+    it('passes through undefined evidence and tags without count fields or error', async () => {
+      const feature = await getCompactFeature(
+        makeFeature({ type: 'entity', evidence: undefined, tags: undefined })
+      );
+      expect(feature).not.toHaveProperty('evidence_count');
+      expect(feature).not.toHaveProperty('tags_count');
+    });
+
+    it('truncates evidence on non-entity inferred type (infrastructure)', async () => {
+      const evidence = Array.from({ length: 15 }, (_, i) => `evidence item ${i}`);
+      const feature = await getCompactFeature(makeFeature({ type: 'infrastructure', evidence }));
+      expect(feature.evidence).toHaveLength(10);
+      expect(feature.evidence_count).toBe(15);
     });
 
     it('omits filter for entity but preserves it for non-entity types', async () => {

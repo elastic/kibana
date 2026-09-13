@@ -23,10 +23,10 @@ const baseRule: RuleApiResponse = {
     format: 'standalone',
     breach: { query: 'FROM logs-* | STATS count() BY host.name' },
   },
-  createdBy: 'alice@example.com',
-  createdAt: '2026-03-01T12:00:00.000Z',
-  updatedBy: 'bob@example.com',
-  updatedAt: '2026-03-04T12:00:00.000Z',
+  created_by: 'alice@example.com',
+  created_at: '2026-03-01T12:00:00.000Z',
+  updated_by: 'bob@example.com',
+  updated_at: '2026-03-04T12:00:00.000Z',
 };
 
 const renderRunbookTab = (rule: RuleApiResponse) =>
@@ -73,7 +73,7 @@ describe('RuleSidebarRunbookTab', () => {
     renderRunbookTab({
       ...baseRule,
       artifacts: [
-        { id: 'other-1', type: 'dashboard', data: { dashboardId: 'some-dashboard-id' } },
+        { id: 'other-1', type: 'dashboard', data: { dashboard_id: 'some-dashboard-id' } },
         { id: 'runbook-1', type: 'runbook', data: { content: '# First Runbook' } },
         { id: 'runbook-2', type: 'runbook', data: { content: '# Second Runbook' } },
       ],

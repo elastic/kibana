@@ -79,7 +79,7 @@ export const DiscoverTopNav = ({
   const onSaveCbRef = useRef<(() => void) | undefined>(undefined);
 
   const query = useAppStateSelector((state) => state.query);
-  const isApproximate = useAppStateSelector((state) => state.isApproximate ?? false);
+  const esqlApproximation = useAppStateSelector((state) => state.esqlApproximation ?? false);
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
   const { timeRangeAbsolute } = useCurrentTabSelector((tab) => tab.dataRequestParams);
   const refreshInterval = useCurrentTabSelector((state) => state.globalState.refreshInterval);
@@ -93,11 +93,11 @@ export const DiscoverTopNav = ({
   );
   const isEsqlMode = useIsEsqlMode();
   const showDatePicker = useMemo(() => {
-    // always show the timepicker for ES|QL mode
-    return (
-      isEsqlMode || (!isEsqlMode && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP)
-    );
-  }, [dataView, isEsqlMode]);
+    if (dataView.type === DataViewType.ROLLUP) {
+      return false;
+    }
+    return { disabled: !dataView.isTimeBased() };
+  }, [dataView]);
 
   const closeFieldEditor = useRef<() => void | undefined>();
 
@@ -199,7 +199,7 @@ export const DiscoverTopNav = ({
 
   const onUseApproximationChange = useCallback(
     (nextValue: boolean) => {
-      dispatch(updateAppState({ appState: { isApproximate: nextValue } }));
+      dispatch(updateAppState({ appState: { esqlApproximation: nextValue } }));
     },
     [dispatch, updateAppState]
   );
@@ -422,7 +422,7 @@ export const DiscoverTopNav = ({
         esqlApproximation={
           isEsqlMode
             ? {
-                isApproximate,
+                isApproximate: esqlApproximation,
                 onChange: onUseApproximationChange,
                 additionalText: i18n.translate('discover.esqlApproximationToggle.additionalText', {
                   defaultMessage: 'Only applies to queries that use one STATS command.',

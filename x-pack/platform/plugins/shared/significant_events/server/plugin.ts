@@ -13,14 +13,31 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
-import { combineLatest, distinctUntilChanged, filter, skip, switchMap } from 'rxjs';
+import {
+  catchError,
+  combineLatest,
+  distinctUntilChanged,
+  exhaustMap,
+  filter,
+  from,
+  of,
+  skip,
+  switchMap,
+  timer,
+} from 'rxjs';
 import type { Subscription } from 'rxjs';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
-import { getRelayAppConnectionSavedObjectType } from './lib/slack_app/saved_object';
+import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
+import {
+  getRelayAppConnectionSavedObjectType,
+  RELAY_APP_CONNECTION_SO_TYPE,
+} from './lib/slack_app/saved_object';
+import { SlackAppService } from './lib/slack_app/service';
 import { getSignificantEventsMaintenanceStateSavedObjectType } from './lib/maintenance/saved_object';
+import { runQuotaLedgerSavedObjectType, runQuotaSettingsSavedObjectType } from './lib/run_quotas';
 import {
   createSignificantEventsMaintenanceService,
   type SignificantEventsMaintenanceService,
@@ -39,9 +56,11 @@ import type { SignificantEventsAlertingContext } from './lib/significant_events/
 import { EbtTelemetryService } from './lib/telemetry/ebt';
 import { significantEventsRouteRepository } from './routes';
 import type { GetScopedClients, RouteHandlerScopedClients } from './routes/types';
+import { createPriceService } from './lib/cost/price_service';
 import type {
   SignificantEventsPluginSetupDependencies,
   SignificantEventsPluginStartDependencies,
+  SignificantEventsServer,
 } from './types';
 import {
   type KnowledgeIndicatorClient,
@@ -62,6 +81,10 @@ import {
   createContinuousKiOnboardingWorkflowService,
   type ContinuousKiOnboardingWorkflowService,
 } from './lib/workflows/continuous_onboarding_workflow';
+import {
+  createCleanupWorkflowService,
+  type CleanupWorkflowService,
+} from './lib/workflows/cleanup_workflow';
 import { createSyncWorkflowService, type SyncWorkflowService } from './lib/workflows/sync_workflow';
 import {
   createSignificantEventsScheduledWorkflowsService,
@@ -70,12 +93,14 @@ import {
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
 import { registerSignificantEventsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { createTriggerEmitter } from './workflows/triggers/emit';
-import { installInvestigationAgent } from './memory_and_investigation/lib/investigation/install_investigation_agent';
-import { registerInvestigationAgentType } from './memory_and_investigation/agents/investigation';
 import {
   installDiscoveryAgents,
   registerSignificantEventsDiscoveryAgentTypes,
 } from './agent_builder/agents/discovery';
+import {
+  installFeatureIdentificationAgent,
+  registerSignificantEventsFeatureIdentificationAgentTypes,
+} from './agent_builder/agents/feature_identification';
 import { createSignificantEventsAvailability } from './agent_builder/tools/significant_events_availability';
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '../common/feature_flags';
@@ -83,6 +108,7 @@ import { isSignificantEventsAvailable } from './routes/utils/assert_significant_
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 
 const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significantEvents';
+const SLACK_CONNECTOR_RECONCILE_INTERVAL_MS = 60_000;
 
 export class SignificantEventsPlugin
   implements
@@ -94,7 +120,7 @@ export class SignificantEventsPlugin
     >
 {
   public logger: Logger;
-  public server?: StreamsServer;
+  public server?: SignificantEventsServer;
   private isDev: boolean;
   private ebtTelemetryService = new EbtTelemetryService();
   private getScopedClients?: GetScopedClients;
@@ -119,11 +145,13 @@ export class SignificantEventsPlugin
       workflowsManagement: plugins.workflowsManagement,
       cloud: plugins.cloud,
       kibanaVersion: this.kibanaVersion,
-    } as StreamsServer;
+    } as SignificantEventsServer;
     this.server.workflowsManagement = plugins.workflowsManagement;
 
     core.savedObjects.registerType(getRelayAppConnectionSavedObjectType());
     core.savedObjects.registerType(getSignificantEventsMaintenanceStateSavedObjectType());
+    core.savedObjects.registerType(runQuotaSettingsSavedObjectType);
+    core.savedObjects.registerType(runQuotaLedgerSavedObjectType);
 
     this.ebtTelemetryService.setup(core.analytics);
 
@@ -144,18 +172,24 @@ export class SignificantEventsPlugin
       rulesClientOptions?: RulesClientCreateOptions;
     }): Promise<RouteHandlerScopedClients> => {
       const [coreStart, pluginsStart] = await core.getStartServices();
+      const isServerless = plugins.cloud?.isServerlessEnabled ?? false;
 
       const scopedSoClient = coreStart.savedObjects.getScopedClient(request);
       const uiSettingsClient = coreStart.uiSettings.asScopedToClient(scopedSoClient);
       const globalUiSettingsClient = coreStart.uiSettings.globalAsScopedToClient(scopedSoClient);
 
+      // `scopedClusterClient`: origin-only. Used for everything the plugin owns (its hidden
+      // data streams), which only ever exists in the origin project.
+      // `streamDataEsClient`: always routed across every CPS-linked project, regardless of the
+      // active space's project routing expression. Knowledge indicators are not space-scoped -
+      // they model all data available to a stream - so extraction must always read across every
+      // linked project.
+      //
+      // Detection matches that all-projects scope on serverless via `withAllProjectsRouting`.
       const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
-      // A Query Stream's ES|QL view can resolve to indices that live on remote CPS-connected
-      // projects, so reads of stream data must follow the space's project routing expression
-      // rather than the origin project only. `scopedClusterClient` deliberately stays
-      // origin-only: the plugin's own hidden data streams only ever exist in the origin project.
       const streamDataEsClient = coreStart.elasticsearch.client.asScoped(request, {
-        projectRouting: 'space',
+        projectRouting: 'expression',
+        value: PROJECT_ROUTING_ALL,
       }).asCurrentUser;
       const soClient = scopedSoClient;
       const inferenceClient = pluginsStart.inference.getClient({ request });
@@ -200,6 +234,7 @@ export class SignificantEventsPlugin
       const resolveSignificantEventsAlertingContext =
         createSignificantEventsAlertingContextResolver({
           getAlertingV2RulesClient,
+          isServerless,
         });
 
       const createKnowledgeIndicatorClient = (context: SignificantEventsAlertingContext) =>
@@ -262,8 +297,10 @@ export class SignificantEventsPlugin
     }
 
     if (plugins.agentBuilder) {
-      registerInvestigationAgentType(plugins.agentBuilder);
       registerSignificantEventsDiscoveryAgentTypes({ agentBuilder: plugins.agentBuilder });
+      registerSignificantEventsFeatureIdentificationAgentTypes({
+        agentBuilder: plugins.agentBuilder,
+      });
       void core
         .getStartServices()
         .then(async () => {
@@ -284,6 +321,7 @@ export class SignificantEventsPlugin
 
     let continuousKiOnboardingWorkflowService: ContinuousKiOnboardingWorkflowService | undefined;
     let syncWorkflowService: SyncWorkflowService | undefined;
+    let cleanupWorkflowService: CleanupWorkflowService | undefined;
     let significantEventsScheduledWorkflowsService:
       | SignificantEventsScheduledWorkflowsService
       | undefined;
@@ -311,19 +349,27 @@ export class SignificantEventsPlugin
     registerSignificantEventsWorkflowTriggers(plugins.workflowsExtensions);
 
     if (plugins.workflowsManagement && plugins.workflowsExtensions) {
+      const getManagedWorkflowsClient = async () => {
+        const [, pluginsStart] = await core.getStartServices();
+        if (!pluginsStart.workflowsExtensions) {
+          throw new Error('Workflows extensions are not available');
+        }
+        return pluginsStart.workflowsExtensions.initManagedWorkflowsClient(
+          SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER
+        );
+      };
+
+      cleanupWorkflowService = createCleanupWorkflowService({
+        logger: this.logger,
+        managementApi: plugins.workflowsManagement.management,
+        getManagedWorkflowsClient,
+      });
+
       significantEventsScheduledWorkflowsService = createSignificantEventsScheduledWorkflowsService(
         {
           logger: this.logger,
           managementApi: plugins.workflowsManagement.management,
-          getManagedWorkflowsClient: async () => {
-            const [, pluginsStart] = await core.getStartServices();
-            if (!pluginsStart.workflowsExtensions) {
-              throw new Error('Workflows extensions are not available');
-            }
-            return pluginsStart.workflowsExtensions.initManagedWorkflowsClient(
-              SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER
-            );
-          },
+          getManagedWorkflowsClient,
         }
       );
     }
@@ -337,6 +383,17 @@ export class SignificantEventsPlugin
       getScopedClients: this.getScopedClients,
     });
 
+    const priceService = createPriceService({
+      fetchFn: fetch,
+      getNow: () => new Date(),
+      logger: this.logger.get('cost'),
+      timeoutMs: 10_000,
+      cacheTtlMs: 6 * 60 * 60 * 1000,
+      maxBodyBytes: 4 * 1024 * 1024,
+      maxScopedRows: 10_000,
+      baseUrl: plugins.cloud?.baseUrl ?? 'https://cloud.elastic.co',
+    });
+
     registerRoutes({
       repository: significantEventsRouteRepository,
       dependencies: {
@@ -345,9 +402,11 @@ export class SignificantEventsPlugin
         getScopedClients: this.getScopedClients,
         continuousKiOnboardingWorkflowService,
         syncWorkflowService,
+        cleanupWorkflowService,
         significantEventsScheduledWorkflowsService,
         workflowClients,
         maintenanceService: this.maintenanceService,
+        priceService,
         getSpaceId: async (request: KibanaRequest) => {
           const [, pluginsStart] = await core.getStartServices();
           return pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
@@ -362,7 +421,7 @@ export class SignificantEventsPlugin
   public start(core: CoreStart, plugins: SignificantEventsPluginStartDependencies): void {
     if (this.server) {
       this.server.core = core;
-      this.server.isServerless = core.elasticsearch.getCapabilities().serverless;
+      this.server.isServerless = this.server.cloud?.isServerlessEnabled ?? false;
       this.server.security = plugins.security;
       this.server.actions = plugins.actions;
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
@@ -372,8 +431,41 @@ export class SignificantEventsPlugin
       this.server.spaces = plugins.spaces;
       this.server.workflowsExtensions = plugins.workflowsExtensions;
       this.server.agentBuilder = plugins.agentBuilder;
+      this.server.nightshiftInvestigations = plugins.nightshiftInvestigations;
 
       this.server.relayClient = plugins.actions.getRelayClient();
+
+      // The Elastic Slack connector is in-memory, so it survives neither a restart nor a connect
+      // handled by another node. The connection document is namespace-agnostic, so one internal
+      // client covers the deployment. Relay config is static at start, so skip the poller when the
+      // client is absent rather than ticking a reconcile loop that can never do anything.
+      if (this.server.relayClient) {
+        const slackAppService = new SlackAppService(this.server);
+        const soClient = new SavedObjectsClient(
+          core.savedObjects.createInternalRepository([RELAY_APP_CONNECTION_SO_TYPE])
+        );
+
+        // `timer(0, …)` makes the first tick the startup restore. `catchError` must stay inside the
+        // inner observable — outside, one failed tick would end the loop for the process's lifetime.
+        this.subscriptions.push(
+          timer(0, SLACK_CONNECTOR_RECONCILE_INTERVAL_MS)
+            .pipe(
+              exhaustMap(() =>
+                from(slackAppService.reconcileConnector(soClient)).pipe(
+                  catchError((error: unknown) => {
+                    this.logger.warn(
+                      `Failed to reconcile the Elastic Slack connector: ${
+                        error instanceof Error ? error.message : String(error)
+                      }`
+                    );
+                    return of(undefined);
+                  })
+                )
+              )
+            )
+            .subscribe()
+        );
+      }
     }
 
     // Availability is the same requirement registry that gates requests, so a deployment never gets
@@ -427,11 +519,10 @@ export class SignificantEventsPlugin
       })
     );
 
-    // Editable investigation + discovery agents: installed via agents.ensure when
-    // significant events is available. skip(1) on availabilityEnabled$ drops the initial
-    // emission, so catch up at startup as well. Per-space installs also happen just-in-time
-    // from triggerInvestigationWorkflow (investigation), scheduled discovery enablement,
-    // and manual discovery execute (discovery).
+    // Editable discovery agents: installed via agents.ensure when significant events is
+    // available. skip(1) on availabilityEnabled$ drops the initial emission, so catch up at
+    // startup as well. Per-space installs also happen just-in-time from scheduled discovery
+    // enablement and manual discovery execute.
     // Pause re-assert runs inside ensureSignificantEventsInstalled after every install.
     if (plugins.agentBuilder && this.server) {
       const agentBuilder = plugins.agentBuilder;
@@ -439,11 +530,17 @@ export class SignificantEventsPlugin
         server: this.server,
         logger: this.logger,
       });
-      void Promise.all([
-        installInvestigationAgent({ agentBuilder, spaceId: DEFAULT_SPACE_ID, availability }),
-        installDiscoveryAgents({ agentBuilder, spaceId: DEFAULT_SPACE_ID, availability }),
-      ]).catch((error: unknown) => {
-        this.logManagedResourceError('significant events agents', error);
+      void installDiscoveryAgents({ agentBuilder, spaceId: DEFAULT_SPACE_ID, availability }).catch(
+        (error: unknown) => {
+          this.logManagedResourceError('significant events agents', error);
+        }
+      );
+      void installFeatureIdentificationAgent({
+        agentBuilder,
+        spaceId: DEFAULT_SPACE_ID,
+        availability,
+      }).catch((error: unknown) => {
+        this.logManagedResourceError('feature identification agent', error);
       });
     }
 

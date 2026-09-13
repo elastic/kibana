@@ -63,7 +63,7 @@ const getTimeVisMeta = (
 
 const CALENDAR_UNITS: readonly Unit[] = ['d', 'w', 'M', 'y'];
 
-const getXValues = (layers: CommonXYDataLayerConfig[]) => {
+export const getXValues = (layers: CommonXYDataLayerConfig[]) => {
   return uniq(
     layers
       .flatMap<number>(({ table, xAccessor }) => {

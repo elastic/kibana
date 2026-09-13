@@ -41,6 +41,7 @@ Use **Jest** for unit and integration tests:
 - [Write UI tests](./write-ui-tests.md)
 - [Write API tests](./write-api-tests.md)
 - [Debug test runs](./debugging.md)
+- [Logging](./logging.md)
 - [Browser authentication](./browser-auth.md)
 - [API authentication](./api-auth.md)
 - [Accessibility checks](./a11y-checks.md)

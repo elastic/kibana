@@ -61,6 +61,13 @@ export function createGetLogChangePointsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getLogChangePointsSchema> = {
     id: OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Get Log Change Points',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description: `Analyzes logs to detect statistically significant changes in log message patterns over time.
 
 When to use:

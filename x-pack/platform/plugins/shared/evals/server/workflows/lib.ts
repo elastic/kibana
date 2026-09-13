@@ -16,6 +16,7 @@ import {
 } from '@kbn/evals-common';
 import type {
   CompareExperimentsResponse,
+  Direction,
   EvaluateResponse,
   IngestScoresRequestBody,
   IngestScoresResponse,
@@ -135,6 +136,9 @@ export const evaluateTrace = async (
   const results = allResults
     .filter((result) => result.status === 'ok' && Array.isArray(result.scores))
     .map((result) => ({
+      // `evaluator` carries the judge model the route resolved from this evaluator's
+      // own `connector_id`, so scores are attributed per evaluator rather than to a
+      // single experiment-wide model.
       evaluator: result.evaluator,
       scores: (result.scores ?? []).map((score) => ({
         name: score.name,
@@ -176,7 +180,13 @@ export const ingestScores = async (
 
 /** The snake_case evaluator-result shape used by the workflow step schemas. */
 export interface SnakeEvaluatorResult {
-  evaluator: { name: string; version?: string; kind?: 'llm' | 'code' };
+  evaluator: {
+    name: string;
+    version?: string;
+    kind?: 'llm' | 'code';
+    model?: Model;
+    direction?: Direction;
+  };
   scores: Array<{
     name: string;
     score?: number | null;
@@ -561,7 +571,12 @@ export const resolveTaskModel = async (
   return runtime.resolveModel(connectorId);
 };
 
-/** Derives the default judge model from the evaluator connectors, falling back to the task connector. */
+/**
+ * Derives the experiment-wide default judge model from the evaluator connectors,
+ * falling back to the task connector. Each score now carries the model resolved
+ * from its own evaluator's connector, so this only backs scores whose evaluator
+ * reports no model of its own.
+ */
 export const resolveEvaluatorModel = async (
   runtime: StepRuntime,
   evaluators: EvaluatorConfig[],

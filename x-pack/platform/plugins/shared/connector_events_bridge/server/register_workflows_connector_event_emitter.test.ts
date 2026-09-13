@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import type { ConnectorEventEmitter } from '@kbn/actions-plugin/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
-import type {
-  ActionsHubConnectorEventRegistry,
-  ConnectorEventEmitter,
-} from './actions_hub_contract';
 import {
   getConnectorEventEmitFailureCount,
   registerWorkflowsConnectorEventEmitter,
@@ -19,17 +16,9 @@ import {
 } from './register_workflows_connector_event_emitter';
 
 describe('registerWorkflowsConnectorEventEmitter', () => {
-  const logger = loggingSystemMock.createLogger();
-
   beforeEach(() => {
     jest.clearAllMocks();
     resetConnectorEventEmitFailureCountForTests();
-  });
-
-  const createActionsRegistryMock = (): ActionsHubConnectorEventRegistry & {
-    registerConnectorEventEmitter: jest.Mock;
-  } => ({
-    registerConnectorEventEmitter: jest.fn(),
   });
 
   const registerAndGetEmitter = ({
@@ -42,9 +31,9 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
     emitter: ConnectorEventEmitter;
     emitEvent: jest.Mock;
     getClient: jest.Mock;
-    actions: ReturnType<typeof createActionsRegistryMock>;
+    actions: ReturnType<typeof actionsMock.createSetup>;
   } => {
-    const actions = createActionsRegistryMock();
+    const actions = actionsMock.createSetup();
     const emitEvent = jest.fn().mockResolvedValue(undefined);
     const resolvedGetClient = getClient ?? jest.fn().mockResolvedValue({ emitEvent });
 
@@ -54,7 +43,6 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
         getWorkflowsExtensionsStart ??
         (async () =>
           ({ getClient: resolvedGetClient } as unknown as WorkflowsExtensionsServerPluginStart)),
-      logger,
     });
 
     expect(actions.registerConnectorEventEmitter).toHaveBeenCalledTimes(1);
@@ -119,7 +107,7 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
     expect(emitEvent.mock.calls[0][1]).not.toHaveProperty('correlationKey');
   });
 
-  it('skips emit without throwing when workflowsExtensions is missing', async () => {
+  it('throws when workflowsExtensions is missing so the hub logs emit_partial', async () => {
     const { emitter, emitEvent, getClient } = registerAndGetEmitter({
       getWorkflowsExtensionsStart: async () => undefined,
     });
@@ -132,14 +120,11 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
         connectorId: 'c1',
         connectorTypeId: '.inboundWebhook',
       })
-    ).resolves.toBeUndefined();
+    ).rejects.toThrow('Workflows extensions unavailable');
 
     expect(getClient).not.toHaveBeenCalled();
     expect(emitEvent).not.toHaveBeenCalled();
-    expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('Workflows extensions unavailable')
-    );
-    expect(getConnectorEventEmitFailureCount()).toBe(0);
+    expect(getConnectorEventEmitFailureCount()).toBe(1);
   });
 
   it('increments failure counter and rethrows when emitEvent fails', async () => {
@@ -158,7 +143,6 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
     ).rejects.toThrow('emit boom');
 
     expect(getConnectorEventEmitFailureCount()).toBe(1);
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('emit boom'));
   });
 
   it('increments failure counter when getClient throws', async () => {

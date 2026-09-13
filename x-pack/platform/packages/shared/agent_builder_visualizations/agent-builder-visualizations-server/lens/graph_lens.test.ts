@@ -26,10 +26,7 @@ jest.mock('./chart_type_registry', () => ({
           parse: (config: unknown) => config,
         },
         prompt: {
-          selection: {
-            description: 'Mock chart description',
-            guideline: 'Mock chart guideline',
-          },
+          selection: 'Mock chart description',
         },
       }),
     }
@@ -57,7 +54,7 @@ describe('createVisualizationGraph', () => {
   const esClient = { asCurrentUser: {} } as IScopedClusterClient;
 
   // Returns a ModelProvider-shaped mock. `createVisualizationGraph` resolves the default model
-  // via `getDefaultModel()` for the config / time-range nodes; the ES|QL node resolves the
+  // via `getDefaultModel()` for the config node; the ES|QL node resolves the
   // low-effort model via `selectModel()`. Both resolve to the same connector so the
   // default-model fallback in `generateVisualizationEsql` stays out of these tests.
   const createMockModel = (invokeResult: string = asAuthoringResponse({ type: 'metric' })) => {
@@ -67,7 +64,6 @@ describe('createVisualizationGraph', () => {
         // invoke resolves to a message-like object; graph_lens reads `.content` via
         // extractTextFromMessage.
         invoke: jest.fn().mockResolvedValue({ content: invokeResult }),
-        withStructuredOutput: jest.fn(),
       },
     };
     return {
@@ -85,8 +81,7 @@ describe('createVisualizationGraph', () => {
       createMockModel() as never,
       logger,
       events,
-      esClient,
-      false
+      esClient
     );
     const esqlQuery = 'FROM logs-* | WHERE response.code != 503 | STATS count = COUNT(*)';
 
@@ -119,8 +114,7 @@ describe('createVisualizationGraph', () => {
       ) as never,
       logger,
       events,
-      esClient,
-      false
+      esClient
     );
     const esqlQuery = 'FROM logs-* | STATS count = COUNT(*)';
 
@@ -152,8 +146,7 @@ describe('createVisualizationGraph', () => {
       ) as never,
       logger,
       events,
-      esClient,
-      false
+      esClient
     );
     const esqlQuery = 'FROM logs-* | STATS count = COUNT(*)';
 
@@ -187,8 +180,7 @@ describe('createVisualizationGraph', () => {
       createMockModel() as never,
       logger,
       events,
-      esClient,
-      false
+      esClient
     );
     const parsedExistingConfig = {
       type: 'metric',
@@ -230,7 +222,7 @@ describe('createVisualizationGraph', () => {
     } as Awaited<ReturnType<typeof generateEsql>>);
 
     const model = createMockModel();
-    const graph = await createVisualizationGraph(model as never, logger, events, esClient, false);
+    const graph = await createVisualizationGraph(model as never, logger, events, esClient);
 
     const finalState = await graph.invoke({
       nlQuery: '5-minute load average',
@@ -267,8 +259,7 @@ describe('createVisualizationGraph', () => {
       createMockModel(corruptedConfig) as never,
       logger,
       events,
-      esClient,
-      false
+      esClient
     );
 
     const finalState = await graph.invoke({
@@ -299,8 +290,7 @@ describe('createVisualizationGraph', () => {
       createMockModel(configWithoutDataSource) as never,
       logger,
       events,
-      esClient,
-      false
+      esClient
     );
 
     const finalState = await graph.invoke({
@@ -335,8 +325,7 @@ describe('createVisualizationGraph', () => {
       createMockModel(xyConfigWithoutDataSource) as never,
       logger,
       events,
-      esClient,
-      false
+      esClient
     );
 
     const finalState = await graph.invoke({

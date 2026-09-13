@@ -76,19 +76,19 @@ export const unstructuredLogMessageGenerators = {
   userAuthentication: (f: Faker) =>
     f.helpers.arrayElements(
       [
-        `User ${f.internet.userName()} (id ${f.string.uuid()}) ${f.helpers.arrayElement([
+        `User ${f.internet.username()} (id ${f.string.uuid()}) ${f.helpers.arrayElement([
           'logged in',
           'logged out',
         ])} at ${f.date.recent().toISOString()} from ${f.internet.ip()}:${f.internet.port()}`,
-        `Created new user ${f.internet.userName()} (id ${f.string.uuid()})`,
-        `Disabled user ${f.internet.userName()} (id ${f.string.uuid()}) due to level ${f.number.int(
+        `Created new user ${f.internet.username()} (id ${f.string.uuid()})`,
+        `Disabled user ${f.internet.username()} (id ${f.string.uuid()}) due to level ${f.number.int(
           { max: 10 }
         )} ${f.helpers.arrayElement([
           'suspicious activity',
           'security concerns',
           'policy violation',
         ])}`,
-        `Login ${f.internet.userName()} (id ${f.string.uuid()}) incorrect ${f.number.int({
+        `Login ${f.internet.username()} (id ${f.string.uuid()}) incorrect ${f.number.int({
           max: 100,
         })} times from ${f.internet.ipv6()}.`,
       ],

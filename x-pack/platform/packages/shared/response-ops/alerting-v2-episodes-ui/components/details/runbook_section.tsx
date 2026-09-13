@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiSkeletonText, EuiText } from '@elastic/eui';
 import { getRunbookContent } from '@kbn/alerting-v2-rule-form';
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
@@ -38,7 +38,7 @@ export const AlertEpisodeRunbookSection = ({
   });
 
   if (isLoadingEpisode || (ruleId && isRuleLoading(ruleState))) {
-    return <EuiLoadingSpinner size="m" data-test-subj="alertingV2EpisodeRunbookSectionLoading" />;
+    return <EuiSkeletonText lines={4} data-test-subj="alertingV2EpisodeRunbookSectionLoading" />;
   }
 
   if (isEpisodeError || isRuleError(ruleState)) {

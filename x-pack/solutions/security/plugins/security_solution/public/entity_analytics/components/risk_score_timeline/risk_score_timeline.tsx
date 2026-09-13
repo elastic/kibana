@@ -72,7 +72,7 @@ interface QuickRange {
 
 // Used only to floor the chart's x-domain `minInterval` so buckets keep a
 // sensible minimum spacing; moment's calendar-unit approximations are fine here.
-const intervalToMs = (interval: string | undefined): number | undefined =>
+export const intervalToMs = (interval: string | undefined): number | undefined =>
   interval === undefined ? undefined : parseInterval(interval)?.asMilliseconds();
 
 export const RiskScoreTimeline: React.FC<RiskScoreTimelineProps> = ({
@@ -163,7 +163,7 @@ export const RiskScoreTimeline: React.FC<RiskScoreTimelineProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <TimelineBody
+      <RiskScoreTimelineChart
         entries={entries}
         isLoading={isLoading}
         isError={error !== undefined}
@@ -190,7 +190,11 @@ interface TimelineBodyProps {
   onPointSelect: (timestamp: string | undefined) => void;
 }
 
-const TimelineBody: React.FC<TimelineBodyProps> = ({
+/**
+ * Presentational risk-history chart body used by the flyout timeline and the
+ * Agent Builder `security.entity_risk_score_history` attachment preview.
+ */
+export const RiskScoreTimelineChart: React.FC<TimelineBodyProps> = ({
   entries,
   isLoading,
   isError,
@@ -256,7 +260,7 @@ const TimelineBody: React.FC<TimelineBodyProps> = ({
   );
 };
 
-TimelineBody.displayName = 'TimelineBody';
+RiskScoreTimelineChart.displayName = 'RiskScoreTimelineChart';
 
 interface TimelineChartProps {
   entries: RiskScoreHistoryEntry[];

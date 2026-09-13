@@ -7,8 +7,15 @@
 
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
+import type { CoreStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import type { Template } from '../../../../common/types/domain/template/v1';
-import { TestProviders } from '../../../common/mock';
+import {
+  CASES_TEMPLATE_CREATED_EVENT_TYPE,
+  CASES_TEMPLATE_DELETED_EVENT_TYPE,
+  CASES_TEMPLATE_UPDATED_EVENT_TYPE,
+} from '../../../../common/constants';
+import { mockedTestProvidersOwner, TestProviders } from '../../../common/mock';
 import { useTemplatesActions } from './use_templates_actions';
 import { useCasesEditTemplateNavigation } from '../../../common/navigation';
 import { useBulkDeleteTemplates } from './use_bulk_delete_templates';
@@ -36,8 +43,10 @@ const useBulkExportTemplatesMock = useBulkExportTemplates as jest.Mock;
 const useCasesToastMock = useCasesToast as jest.Mock;
 
 describe('useTemplatesActions', () => {
+  let coreStart: CoreStart;
+
   const wrapper = ({ children }: React.PropsWithChildren<{}>) => (
-    <TestProviders>{children}</TestProviders>
+    <TestProviders coreStart={coreStart}>{children}</TestProviders>
   );
 
   const mockTemplate: Template = {
@@ -66,6 +75,7 @@ describe('useTemplatesActions', () => {
   const showSuccessToastMock = jest.fn();
 
   beforeEach(() => {
+    coreStart = coreMock.createStart() as unknown as CoreStart;
     consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     useCasesEditTemplateNavigationMock.mockReturnValue({
       navigateToCasesEditTemplate: navigateToCasesEditTemplateMock,
@@ -298,16 +308,21 @@ describe('useTemplatesActions', () => {
     expect(result.current.templateToDelete).toBeNull();
   });
 
-  it('passes onDeleteSuccess to useBulkDeleteTemplates hook', () => {
+  it('forwards onDeleteSuccess through the callback it gives useBulkDeleteTemplates', () => {
     const onDeleteSuccessMock = jest.fn();
     renderHook(() => useTemplatesActions({ onDeleteSuccess: onDeleteSuccessMock }), {
       wrapper,
     });
 
-    // Verify useBulkDeleteTemplates was called with the onSuccess callback
     expect(useBulkDeleteTemplatesMock).toHaveBeenCalledWith({
-      onSuccess: onDeleteSuccessMock,
+      onSuccess: expect.any(Function),
     });
+
+    act(() => {
+      useBulkDeleteTemplatesMock.mock.calls[0][0].onSuccess();
+    });
+
+    expect(onDeleteSuccessMock).toHaveBeenCalledTimes(1);
   });
 
   it('cancelDelete clears templateToDelete without calling mutation', () => {
@@ -398,5 +413,130 @@ describe('useTemplatesActions', () => {
     expect(result.current.handleDelete).toBe(firstRenderHandlers.handleDelete);
     expect(result.current.cancelDelete).toBe(firstRenderHandlers.cancelDelete);
     expect(result.current.handleIsEnabledChange).toBe(firstRenderHandlers.handleIsEnabledChange);
+  });
+
+  describe('telemetry', () => {
+    it('reports nothing when the actions are only mounted', () => {
+      renderHook(() => useTemplatesActions(), { wrapper });
+
+      expect(coreStart.analytics.reportEvent).not.toHaveBeenCalled();
+    });
+
+    it('reports a created event with the clone mode once the clone is confirmed', () => {
+      const { result } = renderHook(() => useTemplatesActions(), { wrapper });
+
+      act(() => {
+        result.current.handleClone(mockTemplate);
+      });
+
+      // The mutation has been called but the server has not confirmed it yet.
+      expect(coreStart.analytics.reportEvent).not.toHaveBeenCalled();
+
+      act(() => {
+        cloneTemplateMock.mock.calls[0][1].onSuccess();
+      });
+
+      expect(coreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(coreStart.analytics.reportEvent).toHaveBeenCalledWith(
+        CASES_TEMPLATE_CREATED_EVENT_TYPE,
+        {
+          owner: mockedTestProvidersOwner[0],
+          entry_point: 'templates_list',
+          creation_mode: 'clone',
+        }
+      );
+    });
+
+    it('reports an updated event with the list entry point once the enabled toggle is confirmed', () => {
+      const { result } = renderHook(() => useTemplatesActions(), { wrapper });
+
+      act(() => {
+        result.current.handleIsEnabledChange({ ...mockTemplate, isEnabled: true });
+      });
+
+      expect(coreStart.analytics.reportEvent).not.toHaveBeenCalled();
+
+      act(() => {
+        updateTemplateMock.mock.calls[0][1].onSuccess();
+      });
+
+      expect(coreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(coreStart.analytics.reportEvent).toHaveBeenCalledWith(
+        CASES_TEMPLATE_UPDATED_EVENT_TYPE,
+        { owner: mockedTestProvidersOwner[0], entry_point: 'templates_list' }
+      );
+    });
+
+    it('reports a deleted event with the single scope once a row delete is confirmed', () => {
+      const { result } = renderHook(() => useTemplatesActions(), { wrapper });
+
+      act(() => {
+        result.current.handleDelete(mockTemplate);
+      });
+
+      act(() => {
+        result.current.confirmDelete();
+      });
+
+      // Confirming the modal only starts the delete; the event waits for the server.
+      expect(coreStart.analytics.reportEvent).not.toHaveBeenCalled();
+      // The report must not live in a per-call callback, which React Query skips once the caller has
+      // unsubscribed.
+      expect(bulkDeleteTemplatesMock).toHaveBeenCalledWith({
+        templateIds: [mockTemplate.templateId],
+      });
+
+      act(() => {
+        useBulkDeleteTemplatesMock.mock.calls[0][0].onSuccess();
+      });
+
+      expect(coreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(coreStart.analytics.reportEvent).toHaveBeenCalledWith(
+        CASES_TEMPLATE_DELETED_EVENT_TYPE,
+        {
+          owner: mockedTestProvidersOwner[0],
+          entry_point: 'templates_list',
+          delete_scope: 'single',
+        }
+      );
+    });
+
+    it('reports one deleted event and still refreshes the list', () => {
+      const onDeleteSuccessMock = jest.fn();
+      const { result } = renderHook(
+        () => useTemplatesActions({ onDeleteSuccess: onDeleteSuccessMock }),
+        { wrapper }
+      );
+
+      act(() => {
+        result.current.handleDelete(mockTemplate);
+      });
+
+      act(() => {
+        result.current.confirmDelete();
+      });
+
+      // The report and the list refresh now share one callback, so neither may cost the other.
+      act(() => {
+        useBulkDeleteTemplatesMock.mock.calls[0][0].onSuccess();
+      });
+
+      expect(onDeleteSuccessMock).toHaveBeenCalledTimes(1);
+      expect(coreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports nothing for a delete the user cancels', () => {
+      const { result } = renderHook(() => useTemplatesActions(), { wrapper });
+
+      act(() => {
+        result.current.handleDelete(mockTemplate);
+      });
+
+      act(() => {
+        result.current.cancelDelete();
+      });
+
+      expect(coreStart.analytics.reportEvent).not.toHaveBeenCalled();
+    });
   });
 });

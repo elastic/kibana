@@ -7,9 +7,9 @@
 
 import React, { useState } from 'react';
 import type { ActionPolicyResponse, CreateActionPolicyData } from '@kbn/alerting-v2-schemas';
-import { CoreStart, useService } from '@kbn/core-di-browser';
+import { useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
-import { paths } from '../../../constants';
+import { useAlertingLocators } from '../../../application/locator_context';
 import { EntityNotFoundFlyout } from '../../entity_not_found_flyout';
 import { LoadingFlyout } from '../../loading_flyout';
 import { useCreateActionPolicy } from '../../../hooks/use_create_action_policy';
@@ -31,8 +31,7 @@ interface Props {
 }
 
 export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props) => {
-  const { navigateToUrl } = useService(CoreStart('application'));
-  const { basePath } = useService(CoreStart('http'));
+  const { actionPolicyLocators } = useAlertingLocators();
   const canWrite = useService(UserCapabilities).canWrite('actionPolicies');
 
   const [policyToDelete, setPolicyToDelete] = useState<ActionPolicyResponse | null>(null);
@@ -57,20 +56,28 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
 
   const navigateToEdit = (id: string) => {
     onClose();
-    navigateToUrl(basePath.prepend(paths.actionPolicyEdit(id)));
+    actionPolicyLocators.navigateSync({ page: 'edit', actionPolicyId: id });
   };
 
   const clonePolicy = (source: ActionPolicyResponse) => {
-    const { name, description, destinations, matcher, groupBy, throttle, tags, groupingMode } =
-      source;
+    const {
+      name,
+      description,
+      destinations,
+      matcher,
+      group_by: groupBy,
+      throttle,
+      tags,
+      grouping_mode: groupingMode,
+    } = source;
     const data: CreateActionPolicyData = {
       name: `${name} [clone]`,
       description,
       destinations,
-      groupingMode: groupingMode ?? 'per_episode',
+      grouping_mode: groupingMode ?? 'per_episode',
       ...(tags != null && { tags }),
       ...(matcher != null && { matcher }),
-      ...(groupBy != null && { groupBy }),
+      ...(groupBy != null && { group_by: groupBy }),
       ...(throttle != null && { throttle }),
     };
     createActionPolicy(data);

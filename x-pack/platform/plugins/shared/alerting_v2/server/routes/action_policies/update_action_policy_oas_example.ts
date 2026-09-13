@@ -17,7 +17,7 @@ import { buildOasOperation } from '../oas_utils';
 
 export const UPDATE_ACTION_POLICY_REQUEST: UpdateActionPolicyBody = {
   version: 'WzAsMV0=',
-  name: 'Notify on host alerts (updated)',
+  name: 'Notify on production alerts (updated)',
   description: 'Updated description.',
 };
 

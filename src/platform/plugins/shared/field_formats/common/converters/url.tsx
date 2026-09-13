@@ -16,6 +16,7 @@ import { FieldFormat } from '../field_format';
 import type {
   ReactConvertFunction,
   TextContextTypeConvert,
+  FieldFormatsGetConfigFn,
   FieldFormatMetaParams,
   FieldFormatParams,
 } from '../types';
@@ -74,8 +75,11 @@ export class UrlFormat extends FieldFormat {
   ];
   static urlTypes = URL_TYPES;
 
-  constructor(params: FieldFormatParams & FieldFormatMetaParams) {
-    super(params);
+  constructor(
+    params?: FieldFormatParams & FieldFormatMetaParams,
+    getConfig?: FieldFormatsGetConfigFn
+  ) {
+    super(params, getConfig);
     this.compileTemplate = memoize(this.compileTemplate);
   }
 

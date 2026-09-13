@@ -114,7 +114,7 @@ on_exit() {
 
 trap on_exit EXIT
 
-# Generate LiteLLM connectors (or skip when only EIS models are requested).
+# Generate OpenRouter connectors (or skip when only EIS models are requested).
 # This must run after bootstrap so Node is available for the generator script.
 source .buildkite/scripts/steps/evals/setup_connectors.sh
 
@@ -135,7 +135,7 @@ if [[ "${FTR_EIS_CCM:-}" =~ ^(1|true)$ ]]; then
   if [[ -n "${EVAL_PROJECT:-}" ]] && [[ "${EVAL_PROJECT}" == eis-* ]]; then
     NEED_EIS_CONNECTORS="true"
   fi
-  # If the judge connector is EIS-backed, we still need EIS connectors even when running a LiteLLM project.
+  # If the judge connector is EIS-backed, we still need EIS connectors even when running an OpenRouter project.
   if [[ -n "${EVAL_CONNECTOR_ID:-}" ]] && [[ "${EVAL_CONNECTOR_ID}" == eis-* ]]; then
     NEED_EIS_CONNECTORS="true"
   fi
@@ -156,7 +156,7 @@ if [[ "${FTR_EIS_CCM:-}" =~ ^(1|true)$ ]]; then
 
     export EIS_CONNECTORS_B64
 
-    echo "--- Merging LiteLLM + EIS connectors"
+    echo "--- Merging OpenRouter + EIS connectors"
     export KIBANA_TESTING_AI_CONNECTORS="$(
       node x-pack/platform/packages/shared/kbn-evals/scripts/ci/merge_ai_connectors.js
     )"
@@ -352,7 +352,6 @@ EOF
           EVAL_SLACK_NOTIFICATION_CHANNEL: "${EVAL_SLACK_NOTIFICATION_CHANNEL:-}"
           EVAL_PR_NUMBER: "${resolved_pr_number}"
           EVAL_SUITE_NAME: "${EVAL_SUITE_NAME:-}"
-          EVAL_TRIAGE_MODEL_ID: "${EVAL_TRIAGE_MODEL_ID:-}"
         depends_on:
 EOF
         for key in "${fanout_step_keys[@]}"; do

@@ -14,15 +14,25 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER } from '../../../../../common/constants';
 
 import type { validateTree } from '../../../../../common/endpoint/schema/resolver';
+import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import { featureUsageService } from '../../../services/feature_usage';
 import { Fetcher } from './utils/fetch';
+import type { GetResolverClusterClient } from '../utils/scoped_client';
+import { stripRemoteIndexPatterns } from '../utils/index_routing';
+import { reportAnalyzerCrossProjectRender } from '../utils/cross_project_telemetry';
 
 export function handleTree(
   getRuleRegistry: () => Promise<RuleRegistryPluginStartContract>,
-  getLicensing: () => Promise<LicensingPluginStart>
-): RequestHandler<unknown, unknown, TypeOf<typeof validateTree.body>> {
+  getLicensing: () => Promise<LicensingPluginStart>,
+  getResolverClient: GetResolverClusterClient
+): RequestHandler<
+  unknown,
+  unknown,
+  TypeOf<typeof validateTree.body>,
+  SecuritySolutionRequestHandlerContext
+> {
   return async (context, req, res) => {
-    const client = (await context.core).elasticsearch.client;
+    const { client, cpsRead } = await getResolverClient(context, req);
     const licensing = await getLicensing();
     const license = await firstValueFrom(licensing.license$);
     const hasAccessToInsightsRelatedByProcessAncestry = license.hasAtLeast('platinum');
@@ -38,7 +48,14 @@ export function handleTree(
       ? await (await getRuleRegistry()).getRacClientWithRequest(req)
       : undefined;
     const fetcher = new Fetcher(client, alertsClient);
-    const body = await fetcher.tree({ ...req.body, shouldExcludeColdAndFrozenTiers });
+    const indexPatterns = stripRemoteIndexPatterns(req.body.indexPatterns, cpsRead);
+    const body = await fetcher.tree({
+      ...req.body,
+      indexPatterns,
+      shouldExcludeColdAndFrozenTiers,
+    });
+    const nodes = Array.isArray(body) ? body : body.statsNodes;
+    reportAnalyzerCrossProjectRender((await context.securitySolution).getAnalytics(), nodes);
     return res.ok({
       body,
     });

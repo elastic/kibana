@@ -22,6 +22,7 @@ import type {
   WorkflowYaml,
 } from '../spec/schema';
 import { WorkflowSchema } from '../spec/schema';
+import type { WorkflowValidationRuleId } from '../validation/rules';
 
 export type { WorkflowYaml } from '../spec/schema';
 
@@ -332,6 +333,11 @@ export interface WorkflowExecutionListDto {
   page: number;
   size: number;
   total: number;
+  /**
+   * Opaque `search_after` sort values for the next window.
+   * Absent when there are no further results.
+   */
+  searchAfter?: unknown[];
 }
 
 export interface WorkflowStepExecutionListDto {
@@ -478,6 +484,7 @@ export interface WorkflowDetailDto {
   definition: WorkflowYaml | null;
   yaml: string;
   valid: boolean;
+  tags?: string[];
   version?: number;
 }
 
@@ -886,6 +893,12 @@ export interface WorkflowDiagnostic {
   message: string;
   source: string;
   path?: (string | number)[];
+  /**
+   * Stable identity of the check that produced this diagnostic. Prefer this over
+   * matching on `message`, which is translated and reworded freely.
+   * See WORKFLOW_VALIDATION_RULES.
+   */
+  ruleId: WorkflowValidationRuleId;
 }
 export interface ValidateWorkflowResponseDto {
   valid: boolean;

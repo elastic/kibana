@@ -1,21 +1,9 @@
 {
-  "sha1": "e5cf9dfdb3f95de95befc6764dfacab1e872f274",
+  "sha1": "861b847024c9e87c7dbe2650465ce37310f835de",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "fbe5c6bcfe99e83-7132d4e40af07dc",
-      "title": "Teardown environment for streams tests",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/global.teardown.ts",
-        "line": 5,
-        "column": 1
-      }
-    },
     {
       "id": "230fcfe7ad78991-744ce32675c025c",
       "title": "Setup environment for streams tests",
@@ -103,8 +91,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 70,
-        "column": 10
+        "line": 74,
+        "column": 7
       }
     },
     {
@@ -119,8 +107,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 77,
-        "column": 13
+        "line": 83,
+        "column": 11
       }
     },
     {
@@ -135,8 +123,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 85,
-        "column": 7
+        "line": 91,
+        "column": 13
       }
     },
     {
@@ -151,8 +139,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 96,
-        "column": 7
+        "line": 102,
+        "column": 21
       }
     },
     {
@@ -167,8 +155,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 103,
-        "column": 13
+        "line": 109,
+        "column": 7
       }
     },
     {
@@ -183,13 +171,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 121,
-        "column": 13
+        "line": 132,
+        "column": 24
       }
     },
     {
-      "id": "63983bc249d77f4-0b811fdb96ea78f",
-      "title": "Stream canvas - classic source to destination nodes shows the processing glyph only on destinations with processing",
+      "id": "63983bc249d77f4-af2f473ed3e97ca",
+      "title": "Stream canvas - classic source to destination nodes shows the processing button only on destinations with processing",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -199,8 +187,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 137,
-        "column": 7
+        "line": 141,
+        "column": 13
+      }
+    },
+    {
+      "id": "63983bc249d77f4-a197aeba921176d",
+      "title": "Stream canvas - classic source to destination nodes opens the processing tab when the processing button is clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
+        "line": 147,
+        "column": 26
       }
     },
     {
@@ -215,8 +219,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 142,
-        "column": 24
+        "line": 154,
+        "column": 21
       }
     },
     {
@@ -231,8 +235,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 153,
-        "column": 91
+        "line": 169,
+        "column": 7
       }
     },
     {
@@ -407,8 +411,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_layout.spec.ts",
-        "line": 33,
-        "column": 7
+        "line": 32,
+        "column": 9
       }
     },
     {
@@ -423,13 +427,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_layout.spec.ts",
-        "line": 38,
-        "column": 25
+        "line": 36,
+        "column": 21
       }
     },
     {
-      "id": "6697d27925b9def-79e01a18e79b2dd",
-      "title": "Streams layout shows a placeholder for the tabs that have no content yet",
+      "id": "6697d27925b9def-2d929861841bf1e",
+      "title": "Streams layout renders the sources table",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -439,8 +443,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_layout.spec.ts",
-        "line": 43,
-        "column": 7
+        "line": 42,
+        "column": 13
+      }
+    },
+    {
+      "id": "6697d27925b9def-ea242490a272e1b",
+      "title": "Streams layout renders the destinations table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_layout.spec.ts",
+        "line": 47,
+        "column": 11
       }
     },
     {
@@ -539,6 +559,17 @@
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_list_view/streams_table_values.spec.ts",
         "line": 177,
         "column": 80
+      }
+    },
+    {
+      "id": "fbe5c6bcfe99e83-7132d4e40af07dc",
+      "title": "Teardown environment for streams tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
       }
     }
   ]

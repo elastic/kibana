@@ -18,6 +18,7 @@ import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 
 import type { InternalAuthenticationServiceStart } from './authentication';
 import { createFakeRequestEnrichment } from './authentication/fake_request_enrichment';
+import type { ServiceAccountsServiceStart } from './service_accounts';
 import type { Session } from './session_management';
 import { getPrintableSessionId } from './session_management';
 import type { UserProfileServiceStartInternal } from './user_profile';
@@ -25,14 +26,16 @@ import type { UserProfileServiceStartInternal } from './user_profile';
 export const buildSecurityApi = ({
   getAuthc,
   getSession,
+  getServiceAccounts,
   audit,
   config,
   logger,
 }: {
   getAuthc: () => InternalAuthenticationServiceStart;
   getSession: () => Pick<Session, 'getSID'>;
+  getServiceAccounts: () => ServiceAccountsServiceStart | null;
   audit: AuditServiceSetup;
-  config: { uiam?: { enabled: boolean } };
+  config: { uiam?: { enabled: boolean }; serviceAccounts?: { enabled: boolean } };
   logger: Logger;
 }): CoreSecurityDelegateContract => {
   const enrichment = createFakeRequestEnrichment(logger.get('fake-request-enrichment'));
@@ -85,6 +88,18 @@ export const buildSecurityApi = ({
         log: audit.withoutRequest.log,
         enabled: audit.withoutRequest.enabled,
         includeSavedObjectNames: audit.withoutRequest.includeSavedObjectNames,
+      },
+    },
+    serviceAccounts: {
+      isEnabled: () => config.serviceAccounts?.enabled === true,
+      // `async` so that a disabled feature surfaces as a rejected promise rather than a
+      // synchronous throw, which callers of a promise-returning API would not expect.
+      create: async (request, params) => {
+        const serviceAccounts = getServiceAccounts();
+        if (!serviceAccounts) {
+          throw new Error('Service accounts are not enabled');
+        }
+        return serviceAccounts.create(request, params);
       },
     },
     fakeRequestEnricher: enrichment.enrichRequestWithUserProfile,

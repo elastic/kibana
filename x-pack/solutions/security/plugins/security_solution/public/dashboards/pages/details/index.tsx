@@ -61,7 +61,7 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   const [dashboardTitle, setDashboardTitle] = useState<string>();
 
   const { dashboardContainer, dashboardInternalApi, handleDashboardLoaded } =
-    useDashboardRenderer();
+    useDashboardRenderer(savedObjectId);
   const onDashboardToolBarLoad = useCallback((mode: ViewMode) => {
     setViewMode(mode);
   }, []);

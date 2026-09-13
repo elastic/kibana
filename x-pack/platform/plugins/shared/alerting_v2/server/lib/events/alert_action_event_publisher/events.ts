@@ -18,7 +18,11 @@ export interface AlertActionEventEnvelope {
   /** ISO timestamp of when the event occurred. */
   readonly occurredAt: string;
   readonly groupHash: string;
-  readonly episodeId: string;
+  /**
+   * `null` for series-level actions (tag/snooze/unsnooze): they target the
+   * series as a whole, not one episode.
+   */
+  readonly episodeId: string | null;
   /** `null` for external-source episodes that are not tied to a Kibana rule. */
   readonly ruleId: string | null;
   readonly spaceId: string;

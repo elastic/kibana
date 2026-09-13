@@ -22,6 +22,7 @@ import { HUNT_WITH_AI_PROMPT } from '../prompts';
 import { EntityEventTypes } from '../../common/lib/telemetry';
 import type { StartServices } from '../../types';
 import { useStoredAssistantConnectorId } from '../../onboarding/components/hooks/use_stored_state';
+import { LEADS_INDEX_PATTERN } from '../../../common/entity_analytics/lead_generation/constants';
 
 jest.mock('../../common/components/links/link_props', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -493,7 +494,7 @@ describe('EntityAnalyticsHomePage', () => {
   });
 
   it('shows privileges callout and hides leads section when lead generation read access is missing', () => {
-    const leadsIndex = '.entity_analytics.entity-leads-*';
+    const leadsIndex = LEADS_INDEX_PATTERN;
     mockUseIsExperimentalFeatureEnabled.mockImplementation((flag: string) => {
       if (flag === 'leadGenerationEnabled') return true;
       if (flag === 'newDataViewPickerEnabled') return false;

@@ -22,5 +22,9 @@ export const MiniTileCard = ({ tile }: Props) => (
     title={tile.title}
     href={tile.href}
     onClick={tile.onClick}
-  />
+  >
+    {/* The vertical card lays its children out under the title, so the badge
+     * needs no positioning of its own. */}
+    {tile.badge}
+  </EuiCard>
 );

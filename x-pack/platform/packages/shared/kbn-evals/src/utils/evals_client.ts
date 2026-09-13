@@ -54,7 +54,8 @@ export interface EvaluatorStats {
 export interface ExperimentStats {
   stats: EvaluatorStats[];
   taskModel: EvalsModel;
-  evaluatorModel: EvalsModel;
+  /** The judge most evaluators used, absent when only code evaluators scored the experiment. */
+  evaluatorModel?: EvalsModel;
   totalRepetitions: number;
 }
 
@@ -151,7 +152,7 @@ const mapStatsResponse = (
   response: ReturnType<typeof GetEvaluationExperimentResponse.parse>
 ): ExperimentStats => {
   const { task_model: taskModel, evaluator_model: evaluatorModel } = response;
-  if (!taskModel || !evaluatorModel) {
+  if (!taskModel) {
     throw new Error('Evaluation experiment is missing model metadata');
   }
 
@@ -175,10 +176,14 @@ const mapStatsResponse = (
   };
 };
 
+/**
+ * Omits absent filters rather than sending them as undefined, which reaches the route as an empty
+ * string and filters every score out. An unfiltered read has to mean "no filter", not "match ''".
+ */
 const buildExperimentQuery = (options?: GetExperimentFilters) => ({
-  suite_id: options?.suiteId,
-  model_id: options?.taskModelId,
-  execution_id: options?.executionId,
+  ...(options?.suiteId ? { suite_id: options.suiteId } : {}),
+  ...(options?.taskModelId ? { model_id: options.taskModelId } : {}),
+  ...(options?.executionId ? { execution_id: options.executionId } : {}),
 });
 
 const VERSIONED_HEADERS = { 'elastic-api-version': API_VERSIONS.internal.v1 };

@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { SignificantEvent, SignificantEventStatus } from '@kbn/significant-events-schema';
-import { MAX_SIGNAL_DESCRIPTION_LENGTH } from '@kbn/significant-events-schema';
+import {
+  MAX_SIGNAL_DESCRIPTION_LENGTH,
+  type SignificantEvent,
+  type SignificantEventStatus,
+} from '@kbn/significant-events-schema';
 import {
   DEFAULT_EVENTS_SEARCH_FROM,
   DEFAULT_EVENTS_SEARCH_TO,
@@ -15,13 +18,11 @@ import {
 
 export const EVENT_SEARCH_DEFAULT_PER_PAGE = 20;
 export const EVENT_SEARCH_MAX_PER_PAGE = 50;
-export const EVENT_SEARCH_FULL_MAX_PER_PAGE = 10;
-// Bounds one event's signal detail in compact view — a long-running episode can otherwise
-// accumulate dozens of signals, each carrying a full narrative description, and blow up a
-// caller's prompt budget regardless of how many events are on the page. Truncation is reported
-// via `total_signals`/`signals_truncated` so callers know to re-query with view: 'full' and
-// event_ids: [event_id] for the complete list.
-export const MAX_COMPACT_EVENT_SIGNALS = 10;
+export const EVENT_SEARCH_SIGNAL_PAGE_SIZE = 10;
+
+export const DESCRIPTION_TRUNCATION_SUFFIX = '… [truncated]';
+export const DESCRIPTION_CONTENT_LENGTH =
+  MAX_SIGNAL_DESCRIPTION_LENGTH - DESCRIPTION_TRUNCATION_SUFFIX.length;
 
 export type EventSearchView = 'compact' | 'full';
 
@@ -39,44 +40,71 @@ export interface EventSearchInput {
   rule_uuids?: string[];
   event_ids?: string[];
   topology_feature_ids?: string[];
-  exclude_unconfirmed_signals?: boolean;
   from?: string;
   to?: string;
   view?: EventSearchView;
+  signals_page?: number;
+  signals_per_page?: number;
 }
 
-export interface CompactEventSignal {
+type SignalSummary = {
+  total: number;
+} & Record<Signal['verdict'], number>;
+
+interface DetailedEventSignal {
   stream_name: string;
   rule_uuid?: string;
-  rule_name?: string;
-  detection_id?: string;
-  change_point_type?: string;
-  p_value?: number;
-  confirmed?: boolean;
+  verdict: Signal['verdict'];
   description?: string;
   collected_at?: string;
-  // The query last run to verify this signal, so callers can re-run a fresh current-state
-  // check without a separate KI lookup. Absent when no query has ever been run for it.
-  esql_query?: string;
 }
 
 export interface CompactEventSearchItem
-  extends Omit<SignificantEvent, 'assessment_note' | 'investigations' | 'signals'> {
-  signals: CompactEventSignal[];
-  // Count of all signals on the event, before compact-view truncation.
-  total_signals: number;
-  // True when `signals` omits entries present on the full event; fetch the rest with
-  // view: 'full' and event_ids: [event_id].
-  signals_truncated: boolean;
+  extends Pick<
+    SignificantEvent,
+    | '@timestamp'
+    | 'blast_radius'
+    | 'causal_features'
+    | 'confidence'
+    | 'event_id'
+    | 'event_uuid'
+    | 'severity'
+    | 'status'
+    | 'stream_names'
+    | 'summary'
+    | 'symptom_hypothesis'
+    | 'title'
+  > {
+  signal_rule_uuids: string[];
+  signal_counts: SignalSummary;
+  unresolved_rule_uuids: string[];
+}
+
+interface DetailedEventSearchItem
+  extends Pick<
+    SignificantEvent,
+    | '@timestamp'
+    | 'confidence'
+    | 'event_id'
+    | 'event_uuid'
+    | 'severity'
+    | 'status'
+    | 'stream_names'
+    | 'symptom_hypothesis'
+    | 'title'
+  > {
+  signals: DetailedEventSignal[];
+  signals_page: number;
+  signals_per_page: number;
+  signals_total: number;
+  signals_has_more: boolean;
 }
 
 interface EventSearchEnvelope {
   page: number;
   per_page: number;
-  returned: number;
   total: number;
   has_more: boolean;
-  next_page: number | null;
 }
 
 export type EventSearchResponse =
@@ -86,97 +114,155 @@ export type EventSearchResponse =
     })
   | (EventSearchEnvelope & {
       view: 'full';
-      events: SignificantEvent[];
+      events: DetailedEventSearchItem[];
     });
 
 type Signal = NonNullable<SignificantEvent['signals']>[number];
 
-// Most-recent first; confirmed only breaks ties between signals with the same `collected_at`.
-const byRecencyThenConfirmed = (a: Signal, b: Signal): number => {
-  const byRecency = (b.collected_at ?? '').localeCompare(a.collected_at ?? '');
-  if (byRecency !== 0) return byRecency;
-  return a.confirmed === b.confirmed ? 0 : a.confirmed ? -1 : 1;
-};
+const preventsClosure = (signal: Signal): boolean =>
+  signal.verdict === 'confirms' || signal.verdict === 'inconclusive';
 
-const COMPACT_DESCRIPTION_SUFFIX = '… [truncated]';
-const COMPACT_DESCRIPTION_CONTENT_LENGTH =
-  MAX_SIGNAL_DESCRIPTION_LENGTH - COMPACT_DESCRIPTION_SUFFIX.length;
+const byClosureStatusThenRecency = (left: Signal, right: Signal): number => {
+  const leftPreventsClosure = preventsClosure(left);
+  const rightPreventsClosure = preventsClosure(right);
 
-const truncateCompactDescription = (description: string | undefined): string | undefined =>
-  description !== undefined && description.length > MAX_SIGNAL_DESCRIPTION_LENGTH
-    ? `${description.slice(0, COMPACT_DESCRIPTION_CONTENT_LENGTH)}${COMPACT_DESCRIPTION_SUFFIX}`
-    : description;
-
-// A signal matching the caller's own `rule_uuids`/`stream_names` filter is what the caller
-// explicitly asked for, so its whole group is kept ahead of the rest and can never be truncated
-// away in its favor; each group is independently sorted by recency.
-const selectCompactSignals = (
-  signals: SignificantEvent['signals'],
-  params: Pick<EventSearchInput, 'rule_uuids' | 'stream_names'>
-): Signal[] => {
-  const all = signals ?? [];
-  if (all.length <= MAX_COMPACT_EVENT_SIGNALS) return all;
-
-  const requestedRuleUuids = new Set(params.rule_uuids ?? []);
-  const requestedStreamNames = new Set(params.stream_names ?? []);
-  const isRequested = (signal: Signal): boolean =>
-    (signal.metadata.rule_uuid !== undefined &&
-      requestedRuleUuids.has(signal.metadata.rule_uuid)) ||
-    requestedStreamNames.has(signal.stream_name);
-
-  const requested: Signal[] = [];
-  const rest: Signal[] = [];
-  for (const signal of all) {
-    (isRequested(signal) ? requested : rest).push(signal);
+  if (leftPreventsClosure !== rightPreventsClosure) {
+    return leftPreventsClosure ? -1 : 1;
   }
-
-  return [...requested.sort(byRecencyThenConfirmed), ...rest.sort(byRecencyThenConfirmed)].slice(
-    0,
-    MAX_COMPACT_EVENT_SIGNALS
-  );
+  return (right.collected_at ?? '').localeCompare(left.collected_at ?? '');
 };
 
-const toCompactEvent = (
-  event: SignificantEvent,
-  params: Pick<EventSearchInput, 'rule_uuids' | 'stream_names'>
-): CompactEventSearchItem => {
-  const allSignals = event.signals ?? [];
-  const compactSignals = selectCompactSignals(allSignals, params);
+const getRuleUuid = (signal: Signal): string | undefined =>
+  signal.type === 'detection' ? signal.metadata.rule_uuid : undefined;
+
+const createSignalSummary = (): SignalSummary => ({
+  total: 0,
+  confirms: 0,
+  refutes: 0,
+  off_topic: 0,
+  inconclusive: 0,
+  not_checked: 0,
+});
+
+const collectSignalMetadata = (signals: Signal[]) =>
+  signals.reduce(
+    (metadata, signal) => {
+      const ruleUuid = getRuleUuid(signal);
+      if (ruleUuid !== undefined) {
+        metadata.ruleUuids.add(ruleUuid);
+        if (preventsClosure(signal)) {
+          metadata.closureBlockingRuleUuids.add(ruleUuid);
+        }
+      }
+      metadata.signalCounts.total++;
+      metadata.signalCounts[signal.verdict]++;
+      return metadata;
+    },
+    {
+      ruleUuids: new Set<string>(),
+      closureBlockingRuleUuids: new Set<string>(),
+      signalCounts: createSignalSummary(),
+    }
+  );
+
+const toEventSearchItemBase = (
+  event: SignificantEvent
+): Pick<
+  SignificantEvent,
+  | '@timestamp'
+  | 'confidence'
+  | 'event_id'
+  | 'event_uuid'
+  | 'severity'
+  | 'status'
+  | 'stream_names'
+  | 'symptom_hypothesis'
+  | 'title'
+> => ({
+  event_id: event.event_id,
+  event_uuid: event.event_uuid,
+  '@timestamp': event['@timestamp'],
+  title: event.title,
+  symptom_hypothesis: event.symptom_hypothesis,
+  status: event.status,
+  severity: event.severity,
+  confidence: event.confidence,
+  stream_names: event.stream_names,
+});
+
+const toCompactEvent = (event: SignificantEvent): CompactEventSearchItem => {
+  const signals = event.signals ?? [];
+  const { ruleUuids, closureBlockingRuleUuids, signalCounts } = collectSignalMetadata(signals);
   return {
-    event_id: event.event_id,
-    event_uuid: event.event_uuid,
-    '@timestamp': event['@timestamp'],
-    title: event.title,
-    symptom_hypothesis: event.symptom_hypothesis,
+    ...toEventSearchItemBase(event),
     summary: event.summary,
-    status: event.status,
-    severity: event.severity,
-    confidence: event.confidence,
-    stream_names: event.stream_names,
-    signals: compactSignals.map((signal) => ({
-      stream_name: signal.stream_name,
-      rule_uuid: signal.metadata.rule_uuid,
-      rule_name: signal.metadata.rule_name,
-      detection_id: signal.metadata.detection_id,
-      change_point_type: signal.metadata.change_point_type,
-      p_value: signal.metadata.p_value,
-      confirmed: signal.confirmed,
-      description: truncateCompactDescription(signal.description),
-      collected_at: signal.collected_at,
-      esql_query: signal.evidence?.esql_query,
-    })),
-    total_signals: allSignals.length,
-    signals_truncated: compactSignals.length < allSignals.length,
+    signal_rule_uuids: [...ruleUuids].sort(),
+    signal_counts: signalCounts,
+    unresolved_rule_uuids: [...closureBlockingRuleUuids].sort(),
     causal_features: event.causal_features,
     blast_radius: event.blast_radius,
   };
 };
 
-const hasRequestedRule = (event: SignificantEvent, ruleUuids: string[]) =>
-  (event.signals ?? []).some(
-    (signal) =>
-      signal.metadata?.rule_uuid !== undefined && ruleUuids.includes(signal.metadata.rule_uuid)
-  );
+const truncateSignalDescription = (description: string | undefined): string | undefined =>
+  description !== undefined && description.length > MAX_SIGNAL_DESCRIPTION_LENGTH
+    ? `${description.slice(0, DESCRIPTION_CONTENT_LENGTH)}${DESCRIPTION_TRUNCATION_SUFFIX}`
+    : description;
+
+const toDetailedEvent = (
+  event: SignificantEvent,
+  signalsPage: number,
+  signalsPerPage: number
+): DetailedEventSearchItem => {
+  const signals = [...(event.signals ?? [])].sort(byClosureStatusThenRecency);
+  const start = (signalsPage - 1) * signalsPerPage;
+  const pageSignals = signals.slice(start, start + signalsPerPage);
+  return {
+    ...toEventSearchItemBase(event),
+    signals: pageSignals.map((signal) => ({
+      stream_name: signal.stream_name,
+      rule_uuid: getRuleUuid(signal),
+      verdict: signal.verdict,
+      description: truncateSignalDescription(signal.description),
+      collected_at: signal.collected_at,
+    })),
+    signals_page: signalsPage,
+    signals_per_page: signalsPerPage,
+    signals_total: signals.length,
+    signals_has_more: start + pageSignals.length < signals.length,
+  };
+};
+
+const buildSearchParams = (view: EventSearchView, params: EventSearchInput) => {
+  const requestedPerPage = params.per_page ?? EVENT_SEARCH_DEFAULT_PER_PAGE;
+  const maxPerPage = view === 'full' ? 1 : EVENT_SEARCH_MAX_PER_PAGE;
+
+  return {
+    page: view === 'full' ? 1 : params.page ?? 1,
+    perPage: Math.min(requestedPerPage, maxPerPage),
+    search: normalizeEventSearchQuery(params.query),
+    stream: params.stream_names,
+    from: params.from ?? DEFAULT_EVENTS_SEARCH_FROM,
+    to: params.to ?? DEFAULT_EVENTS_SEARCH_TO,
+  };
+};
+
+const hasEventSearchFilters = (params: EventSearchInput): boolean =>
+  params.status !== undefined ||
+  (params.rule_uuids?.length ?? 0) > 0 ||
+  (params.event_ids?.length ?? 0) > 0 ||
+  (params.topology_feature_ids?.length ?? 0) > 0;
+
+const toEnvelope = (response: {
+  page: number;
+  perPage: number;
+  total: number;
+}): EventSearchEnvelope => ({
+  page: response.page,
+  per_page: response.perPage,
+  total: response.total,
+  has_more: response.page * response.perPage < response.total,
+});
 
 // The generic lets a call site passing `view: 'full'` (or omitting it, defaulting to 'compact')
 // get back the matching response member, so callers don't need to narrow on `.view` themselves.
@@ -188,79 +274,38 @@ export async function searchEventsToolHandler<V extends EventSearchView = 'compa
   params: EventSearchInput & { view?: V };
 }): Promise<Extract<EventSearchResponse, { view: V }>> {
   const view = params.view ?? 'compact';
-  const requestedPerPage = params.per_page ?? EVENT_SEARCH_DEFAULT_PER_PAGE;
-  const maxPerPage = view === 'full' ? EVENT_SEARCH_FULL_MAX_PER_PAGE : EVENT_SEARCH_MAX_PER_PAGE;
-  const sharedParams = {
-    page: params.page ?? 1,
-    perPage: Math.min(requestedPerPage, maxPerPage),
-    search: normalizeEventSearchQuery(params.query),
-    stream: params.stream_names,
-    from: params.from ?? DEFAULT_EVENTS_SEARCH_FROM,
-    to: params.to ?? DEFAULT_EVENTS_SEARCH_TO,
-  };
+  if (view === 'full' && params.event_ids?.length !== 1) {
+    throw new Error('Full event search requires exactly one event ID');
+  }
 
-  const hasRuleFilter = (params.rule_uuids?.length ?? 0) > 0;
-  const hasEventIdFilter = (params.event_ids?.length ?? 0) > 0;
-  const hasTopologyFilter = (params.topology_feature_ids?.length ?? 0) > 0;
-  const response =
-    params.status !== undefined || hasRuleFilter || hasEventIdFilter || hasTopologyFilter
-      ? await eventClient.findLatestByCurrentStatePaginated({
-          ...sharedParams,
-          status: params.status ? [params.status] : undefined,
-          ruleUuids: params.rule_uuids,
-          eventIds: params.event_ids,
-          topologyFeatureIds: params.topology_feature_ids,
-        })
-      : await eventClient.findLatestPaginated(sharedParams);
-
-  const eventsWithUnconfirmedSignalsExcluded = params.exclude_unconfirmed_signals
-    ? response.hits.map((event) => {
-        const confirmedSignals = (event.signals ?? []).filter(
-          (signal) => signal.confirmed !== false
-        );
-        const preserveUnconfirmedRuleMatch =
-          hasRuleFilter &&
-          !hasTopologyFilter &&
-          !hasEventIdFilter &&
-          hasRequestedRule(event, params.rule_uuids ?? []);
-
-        return {
-          ...event,
-          signals: preserveUnconfirmedRuleMatch
-            ? (event.signals ?? []).filter(
-                (signal) =>
-                  signal.confirmed !== false ||
-                  params.rule_uuids?.includes(signal.metadata?.rule_uuid ?? '')
-              )
-            : confirmedSignals,
-        };
+  const sharedParams = buildSearchParams(view, params);
+  const response = hasEventSearchFilters(params)
+    ? await eventClient.findLatestByCurrentStatePaginated({
+        ...sharedParams,
+        status: params.status ? [params.status] : undefined,
+        ruleUuids: params.rule_uuids,
+        eventIds: params.event_ids,
+        topologyFeatureIds: params.topology_feature_ids,
       })
-    : response.hits;
-  // Rule matching happens in the data query before excluded signals are removed. Preserve an
-  // otherwise invisible requested rule match so an agent can reconcile that open episode to
-  // closed after a current recovery check. All other unconfirmed signals remain excluded.
-  const events =
-    params.exclude_unconfirmed_signals && hasRuleFilter && !hasTopologyFilter && !hasEventIdFilter
-      ? eventsWithUnconfirmedSignalsExcluded.filter((event) =>
-          hasRequestedRule(event, params.rule_uuids ?? [])
-        )
-      : eventsWithUnconfirmedSignalsExcluded;
-  const envelope = {
-    page: response.page,
-    per_page: response.perPage,
-    returned: events.length,
-    total: response.total,
-    has_more: response.page * response.perPage < response.total,
-    next_page: response.page * response.perPage < response.total ? response.page + 1 : null,
-  };
+    : await eventClient.findLatestPaginated(sharedParams);
 
-  const result: EventSearchResponse =
-    view === 'full'
-      ? { ...envelope, view, events }
-      : {
-          ...envelope,
-          view,
-          events: events.map((event) => toCompactEvent(event, params)),
-        };
-  return result as Extract<EventSearchResponse, { view: V }>;
+  const envelope = toEnvelope(response);
+
+  return view === 'full'
+    ? ({
+        ...envelope,
+        view,
+        events: response.hits.map((event) =>
+          toDetailedEvent(
+            event,
+            params.signals_page ?? 1,
+            params.signals_per_page ?? EVENT_SEARCH_SIGNAL_PAGE_SIZE
+          )
+        ),
+      } as Extract<EventSearchResponse, { view: V }>)
+    : ({
+        ...envelope,
+        view,
+        events: response.hits.map(toCompactEvent),
+      } as Extract<EventSearchResponse, { view: V }>);
 }

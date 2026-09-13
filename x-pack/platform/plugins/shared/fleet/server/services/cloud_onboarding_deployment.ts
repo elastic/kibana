@@ -27,7 +27,9 @@ class CloudOnboardingDeploymentService {
     input: CreateCloudOnboardingDeploymentInput
   ): Promise<CloudOnboardingDeployment> {
     // Validates connectorId exists in the same space; throws SavedObjectsErrorHelpers not-found if not.
-    await soClient.get(CLOUD_CONNECTOR_SAVED_OBJECT_TYPE, input.connectorId);
+    if (input.connectorId) {
+      await soClient.get(CLOUD_CONNECTOR_SAVED_OBJECT_TYPE, input.connectorId);
+    }
 
     const attributes: CloudOnboardingDeploymentSOAttributes = {
       ...input,

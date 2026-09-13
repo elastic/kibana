@@ -140,6 +140,7 @@ describe('getServiceMapEmbeddableFactory', () => {
         onEdit: expect.any(Function),
         getTypeDisplayName: expect.any(Function),
         blockingError$: expect.any(Object),
+        rendered$: expect.any(Object),
       })
     );
     const stateApi = mockInitializeStateApi.mock.calls[0][0];
@@ -169,6 +170,77 @@ describe('getServiceMapEmbeddableFactory', () => {
 
     expect(embeddable.api.blockingError$).toBeDefined();
     expect(embeddable.api.blockingError$.getValue()).toBeUndefined();
+  });
+
+  it('exposes rendered$ initialized to false', async () => {
+    const finalizeApi = jest.fn((api) => api);
+    const parentApi = { query$: new BehaviorSubject({ query: '' }) };
+    const deps = { coreStart: { application: {} } } as unknown as EmbeddableDeps;
+    const factory = getServiceMapEmbeddableFactory(deps);
+
+    const embeddable = await factory.buildEmbeddable({
+      initialState: {},
+      finalizeApi,
+      uuid: 'panel-1',
+      parentApi,
+      initializeDrilldownsManager: jest.fn(),
+    } as never);
+
+    expect(embeddable.api.rendered$).toBeDefined();
+    expect(embeddable.api.rendered$.getValue()).toBe(false);
+  });
+
+  it('updates rendered$ when the service map reports render completion', async () => {
+    const finalizeApi = jest.fn((api) => api);
+    const parentApi = { query$: new BehaviorSubject({ query: '' }) };
+    const deps = { coreStart: { application: {} } } as unknown as EmbeddableDeps;
+    const factory = getServiceMapEmbeddableFactory(deps);
+
+    const embeddable = await factory.buildEmbeddable({
+      initialState: {},
+      finalizeApi,
+      uuid: 'panel-1',
+      parentApi,
+      initializeDrilldownsManager: jest.fn(),
+    } as never);
+
+    render(<embeddable.Component />);
+
+    const onRendered = mockServiceMapEmbeddable.mock.calls[0][0].onRendered as (
+      isRendered: boolean
+    ) => void;
+    expect(embeddable.api.rendered$.getValue()).toBe(false);
+
+    act(() => {
+      onRendered(true);
+    });
+    expect(embeddable.api.rendered$.getValue()).toBe(true);
+
+    act(() => {
+      onRendered(false);
+    });
+    expect(embeddable.api.rendered$.getValue()).toBe(false);
+  });
+
+  it('keeps rendered$ false while waiting for a time range', async () => {
+    mockUseFetchContext.mockReturnValue({ timeRange: undefined });
+
+    const finalizeApi = jest.fn((api) => api);
+    const parentApi = { query$: new BehaviorSubject({ query: '' }) };
+    const deps = { coreStart: {} } as unknown as EmbeddableDeps;
+    const factory = getServiceMapEmbeddableFactory(deps);
+    const embeddable = await factory.buildEmbeddable({
+      initialState: {},
+      finalizeApi,
+      uuid: 'panel-waiting',
+      parentApi,
+      initializeDrilldownsManager: jest.fn(),
+    } as never);
+
+    render(<embeddable.Component />);
+
+    expect(mockServiceMapEmbeddable).not.toHaveBeenCalled();
+    expect(embeddable.api.rendered$.getValue()).toBe(false);
   });
 
   it('exposes edit capabilities', async () => {

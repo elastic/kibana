@@ -82,6 +82,19 @@ export const createCaseStepCommonDefinition: CommonStepDefinition<
     settings:
       syncAlerts: true
 \`\`\``,
+      `## Setting case fields (extended_fields)
+Keys follow the \`<field_name>_as_<storage_type>\` convention; discover them with \`GET /api/cases/fields\`.
+\`\`\`yaml
+- name: create_case_with_fields
+  type: ${CreateCaseStepTypeId}
+  with:
+    title: "Security incident detected"
+    description: "Suspicious activity detected in system logs"
+    owner: "securitySolution"
+    extended_fields:
+      priority_as_keyword: "high"
+      team_as_keyword: "soc"
+\`\`\``,
     ],
   },
   inputSchema: InputSchema,

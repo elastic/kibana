@@ -27,7 +27,6 @@ import { FILE_ATTACHMENT_TYPE } from '../../../../common/constants';
 import { resolveUnifiedAttachmentType } from '../../../../common/utils/attachments/migration_utils';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesFeatures } from '../../../common/use_cases_features';
-import { useCasesConfig } from '../../../common/lib/kibana';
 import { SEARCH_PLACEHOLDER } from '../../actions/translations';
 import { CaseViewAttachButton } from './case_view_attach_button';
 import { CaseViewObservables, OBSERVABLES_FILTER_ID } from './case_view_observables';
@@ -76,7 +75,6 @@ export const CaseViewAttachments = ({
   onUpdateField,
 }: CaseViewAttachmentsProps) => {
   const { euiTheme } = useEuiTheme();
-  const { detailsRedesignEnabled } = useCasesConfig();
   const { unifiedAttachmentTypeRegistry } = useCasesContext();
   const { observablesAuthorized, isObservablesFeatureEnabled } = useCasesFeatures();
   const { data: fileStats } = useGetCaseFileStats({ caseId: caseData.id, searchTerm });
@@ -113,7 +111,7 @@ export const CaseViewAttachments = ({
     () =>
       unifiedAttachmentTypeRegistry
         .list()
-        .filter((type) => !type.getAttachmentTabViewObject?.()?.children)
+        .filter((type) => !type.getAttachmentList?.()?.children)
         .map((type) => type.id),
     [unifiedAttachmentTypeRegistry]
   );
@@ -125,7 +123,7 @@ export const CaseViewAttachments = ({
         .list()
         .flatMap((type) => {
           if (!isTypeVisible(type.id)) return [];
-          const Children = type.getAttachmentTabViewObject?.()?.children;
+          const Children = type.getAttachmentList?.()?.children;
           if (!Children) {
             return [];
           }
@@ -134,9 +132,9 @@ export const CaseViewAttachments = ({
           if (count < 1) {
             return [];
           }
-          return [{ id: type.id, displayName: type.displayName, count, Children }];
+          return [{ id: type.id, label: type.getLabel(), count, Children }];
         })
-        .sort((a, b) => a.displayName.localeCompare(b.displayName)),
+        .sort((a, b) => a.label.localeCompare(b.label)),
     [unifiedAttachmentTypeRegistry, countsByType, effectiveFileCount, isTypeVisible]
   );
 
@@ -228,7 +226,7 @@ export const CaseViewAttachments = ({
 
   return (
     <>
-      <EuiFlexItem grow={detailsRedesignEnabled ? false : 6} data-test-subj="case-view-attachments">
+      <EuiFlexItem grow={false} data-test-subj="case-view-attachments">
         <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow>
@@ -253,11 +251,9 @@ export const CaseViewAttachments = ({
           <EuiFlexItem grow={false}>
             <CaseViewAttachButton caseData={caseData} attachLocation="attachments" fill />
           </EuiFlexItem>
-          {detailsRedesignEnabled && (
-            <EuiFlexItem grow={false}>
-              <SidebarToggleButton />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <SidebarToggleButton />
+          </EuiFlexItem>
         </EuiFlexGroup>
         {hasActiveFilter ? (
           <>
@@ -332,11 +328,11 @@ export const CaseViewAttachments = ({
           />
         ) : (
           <EuiFlexGroup direction="column" gutterSize="m">
-            {attachmentSections.map(({ id, displayName, count, Children }) => (
+            {attachmentSections.map(({ id, label, count, Children }) => (
               <AttachmentAccordion
                 key={id}
                 id={id}
-                title={displayName}
+                title={label}
                 count={count}
                 isOpen={!collapsedAttachmentIds.has(id)}
                 onToggle={(isOpen) => onAttachmentToggle(id, isOpen)}

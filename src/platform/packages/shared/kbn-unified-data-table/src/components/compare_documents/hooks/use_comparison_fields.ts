@@ -12,6 +12,7 @@ import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/
 import { isEqual } from 'lodash';
 import { useMemo } from 'react';
 import type { DocMap } from '../../../types';
+import { SOURCE_COLUMN } from '../../../utils/columns';
 
 export const MAX_COMPARISON_FIELDS = 250;
 
@@ -46,7 +47,8 @@ export const useComparisonFields = ({
   }, [docMap, selectedDocIds]);
 
   return useMemo(() => {
-    let comparisonFields = selectedFieldNames;
+    // Summary is not a comparable field; compare selected fields only
+    let comparisonFields = selectedFieldNames.filter((fieldName) => fieldName !== SOURCE_COLUMN);
 
     if (showAllFields) {
       const dataViewFieldNames = dataView.fields.map((field) => field.name);

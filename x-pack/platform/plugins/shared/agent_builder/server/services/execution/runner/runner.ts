@@ -13,13 +13,21 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
+import type {
+  ChatCompletionReasoningEffort,
+  ConnectorTelemetryMetadata,
+} from '@kbn/inference-common';
 import type { AgentConfiguration, Conversation, ConverseInput } from '@kbn/agent-builder-common';
 import {
   AgentExecutionMode,
+  createBadRequestError,
   createInternalError,
+  createNonInteractiveConfig,
   isAgentBuilderError,
+  normalizeInteractive,
 } from '@kbn/agent-builder-common';
+import type { InteractivityConfig } from '@kbn/agent-builder-common';
+import { findUnknownApis, formatUnknownApis } from '@kbn/agent-builder-common/apis/known_apis';
 import type { PromptStorageState } from '@kbn/agent-builder-common/agents/prompts';
 import type {
   ExperimentalFeatures,
@@ -27,6 +35,7 @@ import type {
   ModelProvider,
   RunAgentReturn,
   RunContext,
+  RunApprovals,
   Runner,
   RunToolReturn,
   ScopedRunner,
@@ -37,7 +46,9 @@ import type {
 import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
+  CONTEXT_ENGINE_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
+import type { DeductiveRuntimeConfig } from '@kbn/agent-builder-server/agents';
 import type {
   ConversationStateManager,
   PromptManager,
@@ -51,8 +62,10 @@ import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachme
 import type { TodoStateManager } from '@kbn/agent-builder-server/runner';
 import { createTodoStateManager } from '@kbn/agent-builder-server/runner';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
+import { DEDUCTIVE_AGENT_ID, getDeductiveConfig } from '../run_agent/deductive/config';
 import type { ToolsServiceStart } from '../../tools';
 import type { AgentsServiceStart } from '../../agents';
+import type { ConversationService } from '../../conversation';
 import type { AttachmentServiceStart } from '../../attachments';
 import type { RendererServiceStart } from '../../renderers';
 import type { ModelProviderFactoryFn } from './model_provider';
@@ -70,6 +83,7 @@ import { createResultStore } from './store/volumes/tool_results/tool_result_stor
 import { createSkillsStore } from './store/volumes/skills/skills_store';
 import type { SkillServiceStart } from '../../skills';
 import type { PluginsServiceStart } from '../../plugins/plugin_service';
+import type { ConversationTemplatesServiceStart } from '../../conversation/templates';
 
 export interface CreateScopedRunnerDeps {
   // core services
@@ -85,8 +99,10 @@ export interface CreateScopedRunnerDeps {
   modelProvider: ModelProvider;
   toolsService: ToolsServiceStart;
   agentsService: AgentsServiceStart;
+  conversationService: ConversationService;
   attachmentsService: AttachmentServiceStart;
   renderersService: RendererServiceStart;
+  conversationTemplates: ConversationTemplatesServiceStart;
   promptManager: PromptManager;
   stateManager: ConversationStateManager;
   trackingService?: TrackingService;
@@ -96,6 +112,11 @@ export interface CreateScopedRunnerDeps {
   logger: Logger;
   request: KibanaRequest;
   defaultConnectorId?: string;
+  /**
+   * Optional CPS project routing expression scoping this run's search tools to a set of projects
+   * Defaults to space-level routing (all linked projects in the current space) when omitted.
+   */
+  projectRouting?: string;
   /**
    * Optional abort signal for the run (e.g. from the request).
    * Propagated to hooks so they can respect cancellation.
@@ -111,18 +132,33 @@ export interface CreateScopedRunnerDeps {
   toolManager: ToolManager;
   /** Execution mode for this runner context. */
   executionMode: AgentExecutionMode;
+  /** Canonical interactivity config for this runner context. */
+  interactivity: InteractivityConfig;
+  /** Id of the parent execution that spawned this one, if any. */
+  parentExecutionId?: string;
   /** Sub-agent executor for spawning child executions. */
   subAgentExecutor: SubAgentExecutor;
   /** Experimental features enabled for this runner context. */
   experimentalFeatures: ExperimentalFeatures;
   /** The effective agent configuration for the current run (with overrides applied). */
   agentConfiguration?: AgentConfiguration;
+  /**
+   * Resolved runtime configuration for the external Deductive execution path.
+   * Populated only for the `deductive.ai` agent when the deployment opted in.
+   */
+  deductive?: DeductiveRuntimeConfig;
+  /**
+   * `xpack.agentBuilder.deductive.register` for this deployment. One half of the
+   * Deductive double switch; the other is the `agentBuilder:deductiveEnabled` setting.
+   */
+  deductiveRegister: boolean;
 }
 
 export type CreateRunnerDeps = Omit<
   CreateScopedRunnerDeps,
   | 'request'
   | 'defaultConnectorId'
+  | 'projectRouting'
   | 'resultStore'
   | 'skillsStore'
   | 'attachmentStateManager'
@@ -133,11 +169,25 @@ export type CreateRunnerDeps = Omit<
   | 'toolManager'
   | 'subAgentExecutor'
   | 'executionMode'
+  | 'interactivity'
+  | 'parentExecutionId'
   | 'experimentalFeatures'
 > & {
   modelProviderFactory: ModelProviderFactoryFn;
   /** Lazy getter for the execution service (breaks circular dep with runner). */
   getExecutionService: () => AgentExecutionService;
+};
+
+const toToolRunInteractivity = (approvals?: RunApprovals): InteractivityConfig => {
+  const unknownApis = findUnknownApis(approvals?.autoApprovedApis ?? []);
+  if (unknownApis.length > 0) {
+    throw createBadRequestError(
+      `Unknown auto_approved_apis: ${formatUnknownApis(
+        unknownApis
+      )}. Each entry must name an API that exists on its target.`
+    );
+  }
+  return createNonInteractiveConfig(approvals?.autoApprovedApis);
 };
 
 export class RunnerManager {
@@ -207,24 +257,35 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
 
   const createScopedRunnerWithDeps = async ({
     request,
+    agentId,
     defaultConnectorId,
+    projectRouting,
     telemetryMetadata,
     maxContentLength,
+    reasoningLevel,
     conversation,
     nextInput,
     promptState,
     abortSignal,
     executionMode,
+    interactivity,
+    parentExecutionId,
   }: {
     request: KibanaRequest;
+    /** Agent id for this run; used to lazily resolve Deductive-only config. */
+    agentId?: string;
     defaultConnectorId?: string;
+    projectRouting?: string;
     telemetryMetadata?: ConnectorTelemetryMetadata;
     maxContentLength?: number;
+    reasoningLevel?: ChatCompletionReasoningEffort;
     conversation?: Conversation;
     nextInput?: ConverseInput;
     promptState?: PromptStorageState;
     abortSignal?: AbortSignal;
     executionMode: AgentExecutionMode;
+    interactivity: InteractivityConfig;
+    parentExecutionId?: string;
   }): Promise<ScopedRunner> => {
     const resultStore = createResultStore({ conversation });
     const skillsStore = createSkillsStore({ skills: [] });
@@ -244,21 +305,29 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       defaultConnectorId,
       telemetryMetadata,
       maxContentLength,
+      reasoningLevel,
     });
 
-    const subAgentExecutor = createSubAgentExecutor({ request, getExecutionService });
+    const subAgentExecutor = createSubAgentExecutor({
+      request,
+      getExecutionService,
+      projectRouting,
+      interactivity,
+    });
 
     const uiSettingsClient = runnerDeps.uiSettings.asScopedToClient(
       runnerDeps.savedObjects.getScopedClient(request)
     );
-    const [experimentalEnabled, bashEnabled] = await Promise.all([
+    const [experimentalEnabled, bashEnabled, contextEngineEnabled] = await Promise.all([
       uiSettingsClient
         .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
         .catch(() => false),
       uiSettingsClient.get<boolean>(AGENT_BUILDER_BASH_SUPPORT_SETTING_ID).catch(() => false),
+      uiSettingsClient.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID).catch(() => false),
     ]);
     const experimentalFeatures: ExperimentalFeatures = {
       skills: true,
+      aiIndices: experimentalEnabled && contextEngineEnabled,
       relevantSkills: experimentalEnabled,
       subagents: experimentalEnabled,
       todos: experimentalEnabled,
@@ -269,11 +338,26 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       apiTools: experimentalEnabled,
     };
 
+    // External Deductive execution path: gated per-deployment by the LaunchDarkly feature
+    // flag (self-managed / LD-unreachable stays off), configured per-deployment via Advanced
+    // Settings (agentBuilder:deductive*). Resolved lazily ONLY for the Deductive agent so
+    // ordinary agents and tool runs never read the flag/credentials or pay the cost.
+    const deductive =
+      agentId === DEDUCTIVE_AGENT_ID
+        ? await getDeductiveConfig({
+            request,
+            uiSettings: runnerDeps.uiSettings,
+            savedObjects: runnerDeps.savedObjects,
+            registerEnabled: runnerDeps.deductiveRegister,
+          })
+        : undefined;
+
     const allDeps = {
       ...runnerDeps,
       modelProvider,
       request,
       defaultConnectorId,
+      projectRouting,
       abortSignal,
       resultStore,
       skillsStore,
@@ -283,15 +367,18 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       promptManager,
       toolManager,
       executionMode,
+      interactivity,
+      parentExecutionId,
       subAgentExecutor,
       experimentalFeatures,
+      ...(deductive ? { deductive } : {}),
     };
     return createScopedRunner(allDeps);
   };
 
   return {
     runTool: async (runToolParams) => {
-      const { request, defaultConnectorId, promptState, abortSignal, ...otherParams } =
+      const { request, defaultConnectorId, promptState, abortSignal, approvals, ...otherParams } =
         runToolParams;
       const runner = await createScopedRunnerWithDeps({
         request,
@@ -300,11 +387,12 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         abortSignal,
         // tools always executed in standalone context
         executionMode: AgentExecutionMode.standalone,
+        interactivity: toToolRunInteractivity(approvals),
       });
       return runner.runTool(otherParams);
     },
     runInternalTool: async (runToolParams) => {
-      const { request, defaultConnectorId, promptState, abortSignal, ...otherParams } =
+      const { request, defaultConnectorId, promptState, abortSignal, approvals, ...otherParams } =
         runToolParams;
       const runner = await createScopedRunnerWithDeps({
         request,
@@ -313,6 +401,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         abortSignal,
         // tools always executed in standalone context
         executionMode: AgentExecutionMode.standalone,
+        interactivity: toToolRunInteractivity(approvals),
       });
       return runner.runInternalTool(otherParams);
     },
@@ -320,22 +409,33 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       const {
         request,
         defaultConnectorId,
+        projectRouting,
         telemetryMetadata,
         maxContentLength,
+        reasoningLevel,
         abortSignal,
         executionMode = AgentExecutionMode.conversation,
+        interactive,
+        parentExecutionId,
         ...otherParams
       } = params;
+      const { agentId } = params;
       const { nextInput, conversation } = params.agentParams;
+      const interactivity = normalizeInteractive(interactive, executionMode);
       const runner = await createScopedRunnerWithDeps({
         request,
+        agentId,
         defaultConnectorId,
+        projectRouting,
         telemetryMetadata,
         maxContentLength,
+        reasoningLevel,
         conversation,
         nextInput,
         abortSignal,
         executionMode,
+        interactivity,
+        parentExecutionId,
         promptState: getAgentPromptStorageState({
           input: nextInput,
           conversation,

@@ -52,6 +52,20 @@ describe('buildEpisodesBaseQuery', () => {
     );
   });
 
+  it('applies the ruleId filter on both rule.id and rule_id before the aggregations', () => {
+    const esql = buildEpisodesBaseQuery(SPACE_ID, { ruleId: 'rule-123' }).print('basic');
+
+    expect(esql).toContain('WHERE rule.id == "rule-123" OR rule_id == "rule-123"');
+    expect(esql.indexOf('WHERE rule.id ==')).toBeLessThan(esql.indexOf('INLINE STATS'));
+  });
+
+  it('applies the groupHash filter before the aggregations', () => {
+    const esql = buildEpisodesBaseQuery(SPACE_ID, { groupHash: 'abc123' }).print('basic');
+
+    expect(esql).toContain('WHERE group_hash == "abc123"');
+    expect(esql.indexOf('WHERE group_hash ==')).toBeLessThan(esql.indexOf('INLINE STATS'));
+  });
+
   it('unifies episode.id and episode_id before computing per-episode action stats', () => {
     const esql = buildEpisodesBaseQuery(SPACE_ID).print('basic');
     expect(esql).toMatch(/EVAL\s+episode_id\s*=\s*COALESCE\(`episode\.id`,\s*episode_id\)/);
@@ -178,7 +192,7 @@ describe('buildEpisodesQuery', () => {
     expect(queryString).not.toContain('`episode.status` IN');
   });
 
-  it('should apply ruleId filter', () => {
+  it('should apply ruleId filter on both rule.id and rule_id before the aggregations', () => {
     const query = buildEpisodesQuery(
       SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
@@ -186,10 +200,13 @@ describe('buildEpisodesQuery', () => {
     );
     const queryString = query.print('basic');
 
-    expect(queryString).toContain('WHERE rule.id == "rule-123"');
+    expect(queryString).toContain('WHERE rule.id == "rule-123" OR rule_id == "rule-123"');
+    expect(queryString.indexOf('WHERE rule.id ==')).toBeLessThan(
+      queryString.indexOf('INLINE STATS')
+    );
   });
 
-  it('should apply groupHash filter', () => {
+  it('should apply groupHash filter before the aggregations', () => {
     const query = buildEpisodesQuery(
       SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
@@ -198,6 +215,9 @@ describe('buildEpisodesQuery', () => {
     const queryString = query.print('basic');
 
     expect(queryString).toContain('WHERE group_hash == "abc123"');
+    expect(queryString.indexOf('WHERE group_hash ==')).toBeLessThan(
+      queryString.indexOf('INLINE STATS')
+    );
   });
 
   it('should not apply groupHash filter when null', () => {
@@ -253,7 +273,7 @@ describe('buildEpisodesQuery', () => {
 
     expect(queryString).toContain('QSTR("alert.name: \\"test\\"")');
     expect(queryString).toMatch(/\| WHERE `episode\.status` == "active"/);
-    expect(queryString).toContain('WHERE rule.id == "rule-123"');
+    expect(queryString).toContain('WHERE rule.id == "rule-123" OR rule_id == "rule-123"');
   });
 
   it('should apply single tag filter with MV_CONTAINS', () => {
@@ -425,7 +445,7 @@ describe('buildEpisodesQuery', () => {
 
     expect(queryString).toContain('WHERE last_assignee_uid == "user-123"');
     expect(queryString).toMatch(/\| WHERE `episode\.status` == "active"/);
-    expect(queryString).toContain('WHERE rule.id == "rule-456"');
+    expect(queryString).toContain('WHERE rule.id == "rule-456" OR rule_id == "rule-456"');
   });
 
   it('should apply queryString with assigneeUid filter', () => {

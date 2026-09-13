@@ -79,6 +79,7 @@ The plugin reads from the following indices:
 | `.evaluation-scores`           | Score ingestion API   | Evaluation score documents |
 | `.evaluation-datasets`         | Datasets API          | Dataset metadata           |
 | `.evaluation-dataset-examples` | Datasets API          | Dataset examples           |
+| `.evaluation-evaluators`       | Evaluators API        | User-defined evaluators    |
 | `traces-*`                     | OTLP / EDOT collector | OpenTelemetry trace spans  |
 
 Run evaluation suites via the `@kbn/evals` CLI to populate the scores and traces indices. See the [`@kbn/evals` README](../../packages/shared/kbn-evals/README.md) for details.
@@ -179,6 +180,7 @@ All routes are internal (`elastic-api-version: 1`). Read routes require the `rea
 - **Experiments** — list, detail, scores, dataset-level examples, and statistical comparison of two experiments
 - **Experiment execution (Workflows)** — launch a run, save it as a reusable workflow, preview the generated YAML, list run templates, and poll or cancel a run. Requires an Enterprise license; otherwise returns `501`.
 - **Datasets** — full CRUD for datasets and their examples, plus a bulk upsert endpoint. The listing accepts `tags` and `maturity` filters and returns facet counts for both (see [Dataset tags and maturity](#dataset-tags-and-maturity)). Supports remote forwarding to a configured golden-cluster Kibana.
+- **Evaluators** — list every evaluator available in the space, and create, read, update, or delete user-defined ones
 - **Scores** — bulk ingestion of evaluation score documents
 - **Examples** — per-example score history across experiments
 - **Traces** — span retrieval for a given trace ID

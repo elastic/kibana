@@ -8,13 +8,13 @@
  */
 
 import { parse as yamlParse } from 'yaml';
-import { DEFAULT_AGENT_IMAGE_CONFIG } from '../../pipeline-utils/agent_images';
+import { DEFAULT_AGENT_IMAGE_CONFIG } from '../../pipeline-utils/agent_images.ts';
 import {
   getEvalPipeline,
   getEvalTriggerStep,
   getForwardablePrLabels,
   shouldRunEvals,
-} from './eval_pipeline';
+} from './eval_pipeline.ts';
 
 // `jest.mock` calls are hoisted above the imports above, so `eval_pipeline` sees
 // the mocked `fs` / `child_process` when it is first evaluated.
@@ -87,6 +87,14 @@ describe('eval_pipeline', () => {
 
     it('runs evals when both `evals:*` and `models:*` labels are present', () => {
       expect(shouldRunEvals('evals:agent-builder,models:eis/openai-gpt-5.4')).toBe(true);
+    });
+
+    it('maps `models:judge:openrouter/<provider>-<model>` to an openrouter-* connector id', () => {
+      const yaml = getEvalPipeline(
+        'evals:agent-builder,models:openrouter/openai-gpt-5.4,models:judge:openrouter/anthropic-claude-sonnet-4.6'
+      ) as string;
+
+      expect(yaml).toContain('EVAL_CONNECTOR_ID: "openrouter-anthropic-claude-sonnet-4-6"');
     });
 
     it('does not trigger when the only model label is dropped by forwarding (gate parity)', () => {
