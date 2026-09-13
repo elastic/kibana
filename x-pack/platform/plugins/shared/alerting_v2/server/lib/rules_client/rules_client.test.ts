@@ -452,6 +452,69 @@ describe('RulesClient', () => {
         expect(res.metadata.signature_id).toBe('resp-check-id');
       });
     });
+
+    describe('options.enabled (step 7.2)', () => {
+      it('creates an enabled rule and schedules a task when options.enabled is omitted (default true)', async () => {
+        const client = createClient();
+        rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-default-enabled' });
+
+        const res = await client.createRule({
+          data: baseCreateData,
+          options: { id: 'rule-default-enabled' },
+          // no `enabled` key — must behave exactly as today
+        });
+
+        expect(rulesSavedObjectService.create).toHaveBeenCalledWith(
+          expect.objectContaining({ attrs: expect.objectContaining({ enabled: true }) })
+        );
+        expect(ensureRuleExecutorTaskScheduledMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            input: expect.objectContaining({ ruleId: 'rule-default-enabled' }),
+          })
+        );
+        expect(res.enabled).toBe(true);
+      });
+
+      it('creates a disabled rule and does NOT schedule a task when options.enabled is false', async () => {
+        const client = createClient();
+        rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-disabled' });
+
+        const res = await client.createRule({
+          data: baseCreateData,
+          options: { id: 'rule-disabled', enabled: false },
+        });
+
+        // The SO is written with enabled: false.
+        expect(rulesSavedObjectService.create).toHaveBeenCalledWith(
+          expect.objectContaining({ attrs: expect.objectContaining({ enabled: false }) })
+        );
+        // No executor task must be registered.
+        expect(ensureRuleExecutorTaskScheduledMock).not.toHaveBeenCalled();
+        expect(res.enabled).toBe(false);
+      });
+
+      it('does not count a disabled create towards the schedule limit', async () => {
+        // Use a config where only 1 run per minute is allowed and that slot is
+        // already taken.  An enabled create would exceed the limit; a disabled
+        // one must skip the check entirely.
+        const client = createClient({ maxScheduledPerMinute: 1 });
+        rulesSavedObjectService.getTotalScheduledPerMinute.mockResolvedValueOnce(1);
+        rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-disabled-limit' });
+
+        // Must not throw even though the limit is reached.
+        await expect(
+          client.createRule({
+            data: baseCreateData,
+            options: { id: 'rule-disabled-limit', enabled: false },
+          })
+        ).resolves.toMatchObject({ enabled: false });
+
+        // The limit check must not have run (getTotalScheduledPerMinute was
+        // queued but should not have been consumed).
+        expect(rulesSavedObjectService.getTotalScheduledPerMinute).not.toHaveBeenCalled();
+        expect(ensureRuleExecutorTaskScheduledMock).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('updateRule', () => {
@@ -2200,6 +2263,43 @@ describe('RulesClient', () => {
         filter: undefined,
         size: 10000,
       });
+    });
+
+    it('translates a KQL filter to an SO filter', async () => {
+      const client = createClient();
+
+      rulesSavedObjectService.findTags.mockResolvedValueOnce(['detection-tag']);
+
+      await client.getTags({ filter: 'metadata.ownership.managed: true' });
+
+      expect(rulesSavedObjectService.findTags).toHaveBeenCalledWith({
+        search: undefined,
+        filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.ownership.managed: true`,
+        size: undefined,
+      });
+    });
+
+    it('combines kind and filter with AND when both are provided', async () => {
+      const client = createClient();
+
+      rulesSavedObjectService.findTags.mockResolvedValueOnce(['sig-tag']);
+
+      await client.getTags({ kind: 'signal', filter: 'metadata.ownership.managed: true' });
+
+      // toKqlExpression normalises the AND into a single parenthesised group.
+      expect(rulesSavedObjectService.findTags).toHaveBeenCalledWith({
+        search: undefined,
+        filter: `(${RULE_SAVED_OBJECT_TYPE}.attributes.kind: signal AND ${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.ownership.managed: true)`,
+        size: undefined,
+      });
+    });
+
+    it('rejects a filter naming a field not in the allowlist', async () => {
+      const client = createClient();
+
+      await expect(
+        client.getTags({ filter: 'metadata.updated_at: "2024-01-01"' })
+      ).rejects.toThrow();
     });
   });
 

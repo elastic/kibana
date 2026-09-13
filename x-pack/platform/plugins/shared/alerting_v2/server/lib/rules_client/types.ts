@@ -116,6 +116,15 @@ export interface CreateRuleParams {
      * Ref: rule-validation.md "Write-path validation: on by default, opt-out per call"
      */
     validateBuilderFields?: boolean;
+    /**
+     * Whether the rule should start enabled. Defaults to `true` so existing
+     * callers keep today's behavior (a freshly created rule is immediately
+     * scheduled). Pass `false` to create a disabled rule: the schedule-limit
+     * check is skipped and no executor task is registered.
+     *
+     * Ref: rule-crud-api.md "Create a rule" (initial-enabled option)
+     */
+    enabled?: boolean;
   };
 }
 
