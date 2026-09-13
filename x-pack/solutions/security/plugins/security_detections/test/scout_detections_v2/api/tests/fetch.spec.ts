@@ -219,6 +219,68 @@ apiTest.describe('Detection Engine v2 — fetch routes', { tag: '@local-stateful
     expect(names).not.toContain('untagged-rule');
   });
 
+  apiTest(
+    'list: filter by rule_ids returns only the matching rule (proves metadata.signature_id mapping)',
+    async ({ apiClient }) => {
+      // Create two rules, one with a known rule_id.
+      const TARGET_RULE_ID = `scout-rule-id-${Date.now()}`;
+      const created = await apiClient.post(DETECTION_V2_RULES, {
+        headers: writerHeaders,
+        body: buildQueryRule({ name: 'rule-id-target', rule_id: TARGET_RULE_ID }),
+      });
+      expect(created).toHaveStatusCode(201);
+      await apiClient.post(DETECTION_V2_RULES, {
+        headers: writerHeaders,
+        body: buildQueryRule({ name: 'rule-id-other' }),
+      });
+
+      // Filter by the known rule_id — should return exactly one rule.
+      const response = await apiClient.get(toQuery({ rule_ids: [TARGET_RULE_ID], per_page: 100 }), {
+        headers: readerHeaders,
+      });
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.data).toHaveLength(1);
+      expect(response.body.data[0].rule_id).toBe(TARGET_RULE_ID);
+    }
+  );
+
+  apiTest(
+    'list: sort by risk_score returns rules in numeric order (proves builder_fields.risk_score sub-field sort)',
+    async ({ apiClient }) => {
+      for (const [name, riskScore] of [
+        ['risk-low', 10],
+        ['risk-med', 47],
+        ['risk-high', 75],
+      ] as Array<[string, number]>) {
+        await apiClient.post(DETECTION_V2_RULES, {
+          headers: writerHeaders,
+          body: buildQueryRule({ name, risk_score: riskScore }),
+        });
+      }
+
+      const asc = await apiClient.get(
+        toQuery({ sort_field: 'risk_score', sort_order: 'asc', per_page: 100 }),
+        { headers: readerHeaders }
+      );
+      expect(asc).toHaveStatusCode(200);
+      const ascScores = asc.body.data.map((r: { risk_score: number }) => r.risk_score);
+      // Verify ascending order across the slice we control.
+      const lowIdx = ascScores.indexOf(10);
+      const medIdx = ascScores.indexOf(47);
+      const highIdx = ascScores.indexOf(75);
+      expect(lowIdx).toBeGreaterThanOrEqual(0);
+      expect(lowIdx).toBeLessThan(medIdx);
+      expect(medIdx).toBeLessThan(highIdx);
+    }
+  );
+
+  apiTest('list: sort_field=severity returns 400 (not in the allowlist)', async ({ apiClient }) => {
+    const response = await apiClient.get(toQuery({ sort_field: 'severity', per_page: 10 }), {
+      headers: readerHeaders,
+    });
+    expect(response).toHaveStatusCode(400);
+  });
+
   apiTest('list: sort by name returns alphabetically ordered results', async ({ apiClient }) => {
     for (const name of ['Zebra', 'Apple', 'Mango']) {
       await apiClient.post(DETECTION_V2_RULES, {

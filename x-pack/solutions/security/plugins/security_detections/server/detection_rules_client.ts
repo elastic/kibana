@@ -213,9 +213,7 @@ function buildListFilter(params: ListRulesParams): string {
   }
 
   if (params.tags && params.tags.length > 0) {
-    parts.push(
-      orClause(params.tags.map((t) => `metadata.tags: "${escapeKqlValue(t)}"`))
-    );
+    parts.push(orClause(params.tags.map((t) => `metadata.tags: "${escapeKqlValue(t)}"`)));
   }
 
   if (params.rule_ids && params.rule_ids.length > 0) {

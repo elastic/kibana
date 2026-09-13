@@ -27,6 +27,12 @@ import {
   customQueryBuilderFieldsSchema,
   thresholdBuilderFieldsSchema,
 } from '@kbn/security-detection-rule-schema';
+import {
+  MAX_NAME_LENGTH,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_SIGNATURE_ID_LENGTH,
+} from '@kbn/alerting-v2-schemas';
+import { MAX_TAG_LENGTH, MAX_TAGS } from '@kbn/alerting-v2-constants';
 import { detectionRuleScheduleSchema } from './detection_rule_response_schema';
 
 // ---------------------------------------------------------------------------
@@ -46,8 +52,8 @@ import { detectionRuleScheduleSchema } from './detection_rule_response_schema';
  * `type`, `index`, and `query` are in the per-type schemas instead.
  */
 const baseRequiredFieldsSchema = z.object({
-  name: z.string().min(1).max(256),
-  description: z.string().min(1).max(1024),
+  name: z.string().min(1).max(MAX_NAME_LENGTH),
+  description: z.string().min(1).max(MAX_DESCRIPTION_LENGTH),
   severity: detectionRuleCommonFields.severity,
   risk_score: detectionRuleCommonFields.risk_score,
 });
@@ -67,7 +73,7 @@ const baseOptionalFieldsSchema = z.object({
    * optional but must match the stored value if provided (validation at the
    * application layer, not the schema layer).
    */
-  rule_id: z.string().min(1).max(256).optional(),
+  rule_id: z.string().min(1).max(MAX_SIGNATURE_ID_LENGTH).optional(),
 });
 
 /**
@@ -82,7 +88,7 @@ const baseOptionalFieldsSchema = z.object({
  */
 const baseDefaultableFieldsSchema = z.object({
   version: z.number().int().min(1).optional(),
-  tags: z.array(z.string().min(1).max(128)).max(20).optional(),
+  tags: z.array(z.string().min(1).max(MAX_TAG_LENGTH)).max(MAX_TAGS).optional(),
   max_signals: detectionRuleCommonFields.max_signals,
   setup: detectionRuleCommonFields.setup,
   references: detectionRuleCommonFields.references,
@@ -253,12 +259,12 @@ export type DetectionRuleUpdateProps = z.infer<typeof detectionRuleUpdatePropsSc
 export const detectionRulePatchPropsSchema = z
   .object({
     // --- Required-in-create fields: optional in PATCH, not nullable ---
-    name: z.string().min(1).max(256).optional(),
-    description: z.string().min(1).max(1024).optional(),
+    name: z.string().min(1).max(MAX_NAME_LENGTH).optional(),
+    description: z.string().min(1).max(MAX_DESCRIPTION_LENGTH).optional(),
     severity: detectionRuleCommonFields.severity.optional(),
     risk_score: detectionRuleCommonFields.risk_score.optional(),
     /** rule_id is immutable; include for equality-check only. */
-    rule_id: z.string().min(1).max(256).optional(),
+    rule_id: z.string().min(1).max(MAX_SIGNATURE_ID_LENGTH).optional(),
 
     // --- Type-specific fields: optional, not nullable ---
     // `index` and `threshold` shapes imported from builder schemas so bounds
@@ -283,7 +289,7 @@ export const detectionRulePatchPropsSchema = z
     setup: detectionRuleCommonFields.setup.unwrap().nullable().optional(),
 
     // --- Defaultable arrays: nullable so null clears to [] ---
-    tags: z.array(z.string().min(1).max(128)).max(20).nullable().optional(),
+    tags: z.array(z.string().min(1).max(MAX_TAG_LENGTH)).max(MAX_TAGS).nullable().optional(),
     references: detectionRuleCommonFields.references.unwrap().nullable().optional(),
     false_positives: detectionRuleCommonFields.false_positives.unwrap().nullable().optional(),
     author: detectionRuleCommonFields.author.unwrap().nullable().optional(),
