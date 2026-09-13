@@ -314,6 +314,12 @@ export const HeaderZone = ({
                 isCollapsed ? collapseStyles.wrapperCollapsed : collapseStyles.wrapperExpanded,
               ]}
               aria-hidden={isCollapsed || undefined}
+              // `visibility` is delayed by the collapse animation, so it cannot be what removes
+              // this content from the tab order: for the length of the transition the region
+              // would be `aria-hidden` yet still focusable. `inert` applies immediately, which
+              // keeps the accessibility tree and the tab order in agreement. React 18 has no
+              // typing for the native attribute, hence the spread.
+              {...(isCollapsed && { inert: '' })}
               data-test-subj="flyoutHeaderCollapsibleRegion"
             >
               <div css={collapseStyles.inner} ref={!collapsed ? collapsibleRef : undefined}>
