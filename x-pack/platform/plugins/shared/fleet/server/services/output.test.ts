@@ -1769,6 +1769,79 @@ describe('Output Service', () => {
           `Updated output ${SERVERLESS_PRIVATE_OUTPUT_ID}`
         );
       });
+
+      describe('allow_edit enforcement on the preconfigured private output', () => {
+        // Helper: a variant of makeSoClientWithServerlessOutputs where the private output
+        // is is_preconfigured: true with the parity allow_edit list.
+        function makeSoClientWithPreconfiguredPrivateOutput() {
+          const soClient = getMockedSoClient();
+          const handleId = async (id: string) => {
+            if (id === outputIdToUuid(SERVERLESS_DEFAULT_OUTPUT_ID)) {
+              return mockOutputSO(SERVERLESS_DEFAULT_OUTPUT_ID, {
+                type: 'elasticsearch',
+                hosts: [DEFAULT_HOST],
+                is_preconfigured: true,
+              });
+            }
+            if (id === outputIdToUuid(SERVERLESS_PRIVATE_OUTPUT_ID)) {
+              return mockOutputSO(SERVERLESS_PRIVATE_OUTPUT_ID, {
+                type: 'elasticsearch',
+                hosts: [PRIVATE_HOST],
+                is_preconfigured: true,
+                allow_edit: [
+                  'is_default',
+                  'is_default_monitoring',
+                  'shipper',
+                  'config_yaml',
+                  'preset',
+                  'write_to_logs_streams',
+                ],
+              });
+            }
+            return mockOutputSO('existing-default-output', {
+              type: 'elasticsearch',
+              hosts: [DEFAULT_HOST],
+            });
+          };
+          soClient.get.mockImplementation(async (_type: string, id: string) => handleId(id));
+          esoClientMock.getDecryptedAsInternalUser.mockImplementation(async (_type, id) =>
+            handleId(id)
+          );
+          return soClient;
+        }
+
+        it('allows updating preset on the preconfigured private output', async () => {
+          const soClient = makeSoClientWithPreconfiguredPrivateOutput();
+          // update() returns void — we just verify it does not throw
+          await expect(
+            outputService.update(soClient, esClientMock, SERVERLESS_PRIVATE_OUTPUT_ID, {
+              preset: 'throughput',
+            })
+          ).resolves.not.toThrow();
+        });
+
+        it('rejects updating hosts on the preconfigured private output', async () => {
+          const soClient = makeSoClientWithPreconfiguredPrivateOutput();
+          await expect(
+            outputService.update(soClient, esClientMock, SERVERLESS_PRIVATE_OUTPUT_ID, {
+              // Different host — must be rejected even though it matches the private URL pattern
+              hosts: ['https://attacker.example.com'],
+            })
+          ).rejects.toThrow(/cannot be updated outside of kibana config file/);
+        });
+
+        it('rejects updating allow_edit itself on the preconfigured private output', async () => {
+          const soClient = makeSoClientWithPreconfiguredPrivateOutput();
+          await expect(
+            outputService.update(soClient, esClientMock, SERVERLESS_PRIVATE_OUTPUT_ID, {
+              // Attempting self-escalation: include allow_edit in the payload so
+              // _validateFieldsAreEditable would check it against allowEditFields.
+              // 'allow_edit' is not in the list, and the old/new values differ.
+              allow_edit: ['hosts', 'ssl', 'preset'] as any,
+            })
+          ).rejects.toThrow(/cannot be updated outside of kibana config file/);
+        });
+      });
     });
   });
   describe('input validation', () => {

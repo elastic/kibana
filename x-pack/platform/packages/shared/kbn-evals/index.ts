@@ -111,6 +111,7 @@ export {
 export type { EvaluationDataset, EvaluationWorkerFixtures, EvaluationReport } from './src/types';
 export { withEvaluatorSpan, withTaskSpan, getCurrentTraceId } from './src/utils/tracing';
 export { withRetry, type RetryOptions } from './src/utils/retry_utils';
+export { calculateSetMetrics, type SetMetrics } from './src/utils/set_metrics';
 export {
   containsAllTerms,
   extractAllStrings,

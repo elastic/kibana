@@ -13,20 +13,13 @@ import { SearchButton } from './search_button';
 import { AiButtonSlot } from './ai_button_slot';
 import { HelpButton } from './help_button';
 import { ChromeNextGlobalHeaderShell } from './global_header_shell';
-import {
-  useContextSwitcher,
-  useProjectBreadcrumbs,
-  useProjectPicker,
-  useUserMenu,
-} from '../../shared/chrome_hooks';
-import { HeaderPageAnnouncer } from '../../shared/header_page_announcer';
+import { useContextSwitcher, useProjectPicker, useUserMenu } from '../../shared/chrome_hooks';
+import { ChromeNextPageAnnouncer } from '../../shared/header_page_announcer';
 
 export const ChromeNextGlobalHeader = React.memo(() => {
-  const breadcrumbs = useProjectBreadcrumbs();
-
   return (
     <>
-      <HeaderPageAnnouncer breadcrumbs={breadcrumbs} />
+      <ChromeNextPageAnnouncer />
       <ChromeNextGlobalHeaderShell
         logo={<ChromeNextGlobalHeaderLogo />}
         search={<SearchButton />}

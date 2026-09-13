@@ -215,7 +215,7 @@ describe('step validation', () => {
           {
             id: 'dashboard-id',
             type: DASHBOARD_ARTIFACT_TYPE,
-            data: { dashboardId: DASHBOARD_ID },
+            data: { dashboard_id: DASHBOARD_ID },
           },
         ],
       });
@@ -310,7 +310,6 @@ describe('step validation', () => {
           onRecoveryTypeChange={jest.fn()}
           onKindChange={jest.fn()}
           isEditing={ruleId !== undefined}
-          ruleId={ruleId}
         />,
         { wrapper: createComposeFormWrapper() }
       );

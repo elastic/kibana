@@ -9,6 +9,7 @@ import type {
   AssistantMessage,
   ChatCompleteCacheControl,
   ChatCompleteCompositeResponse,
+  ChatCompletionReasoning,
   Message,
   Model,
   ToolCall,
@@ -175,6 +176,7 @@ interface InferenceGenerationOptions {
   toolChoice?: ToolChoice;
   cacheControl?: ChatCompleteCacheControl;
   sessionId?: string;
+  reasoning?: ChatCompletionReasoning;
 }
 
 /**
@@ -191,8 +193,17 @@ export function withChatCompleteSpan(
   options: InferenceGenerationOptions,
   cb: (span?: Span) => ChatCompleteCompositeResponse
 ): ChatCompleteCompositeResponse {
-  const { system, messages, model, toolChoice, tools, cacheControl, sessionId, ...attributes } =
-    options;
+  const {
+    system,
+    messages,
+    model,
+    toolChoice,
+    tools,
+    cacheControl,
+    sessionId,
+    reasoning,
+    ...attributes
+  } = options;
 
   const modelProvider = model?.provider ?? 'unknown';
   const modelId = model?.id ?? model?.family ?? 'unknown';
@@ -220,6 +231,9 @@ export function withChatCompleteSpan(
             }
           : {}),
         ...(sessionId ? { [ElasticGenAIAttributes.CacheControlSessionId]: sessionId } : {}),
+        ...(reasoning?.effort
+          ? { [GenAISemanticConventions.GenAIRequestReasoningLevel]: reasoning.effort }
+          : {}),
       },
     },
     (span) => {

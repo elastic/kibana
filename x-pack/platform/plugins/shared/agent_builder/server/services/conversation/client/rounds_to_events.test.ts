@@ -20,6 +20,8 @@ import {
 } from '@kbn/agent-builder-common';
 import {
   executionStartedEvent,
+  parseExecutionId,
+  resumeExecutionId,
   isRoundDerivedEventId,
   roundsToEvents,
   userMessageEvent,
@@ -290,4 +292,22 @@ describe('isRoundDerivedEventId', () => {
     expect(isRoundDerivedEventId('round-1::step::0::retry')).toBe(false);
     expect(isRoundDerivedEventId('round-1::step::')).toBe(false);
   });
+});
+
+describe('parseExecutionId', () => {
+  it.each([1, 2, 10])('parses resume %i', (index) => {
+    expect(parseExecutionId(resumeExecutionId('round::nested', index))).toEqual({
+      roundId: 'round::nested',
+      index,
+    });
+  });
+
+  it('parses an initial execution', () => {
+    expect(parseExecutionId('round::execution')).toEqual({ roundId: 'round', index: 0 });
+  });
+
+  it.each(['round', 'round::execution::bad', 'round::execution::1::step::0'])(
+    'rejects unrelated id %s',
+    (id) => expect(parseExecutionId(id)).toBeUndefined()
+  );
 });
