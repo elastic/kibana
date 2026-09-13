@@ -481,9 +481,7 @@ describe('ClassifyAbsentGroupsStep', () => {
 
       const fixedEnd = '2025-03-01T06:00:00.000Z';
       const lookback = '5m';
-      const fixedStart = new Date(
-        new Date(fixedEnd).getTime() - 5 * 60 * 1000
-      ).toISOString();
+      const fixedStart = new Date(new Date(fixedEnd).getTime() - 5 * 60 * 1000).toISOString();
 
       const rule = createRuleResponse({
         kind: 'alert',
@@ -528,9 +526,7 @@ describe('ClassifyAbsentGroupsStep', () => {
 
       const fixedEnd = '2025-03-01T06:00:00.000Z';
       const lookback = '5m';
-      const fixedStart = new Date(
-        new Date(fixedEnd).getTime() - 5 * 60 * 1000
-      ).toISOString();
+      const fixedStart = new Date(new Date(fixedEnd).getTime() - 5 * 60 * 1000).toISOString();
 
       const rule = createRuleResponse({
         kind: 'alert',
@@ -563,6 +559,30 @@ describe('ClassifyAbsentGroupsStep', () => {
       const tsRange = rangeFilter?.['@timestamp'];
       expect(tsRange?.lte).toBe(fixedEnd);
       expect(tsRange?.gt).toBe(fixedStart);
+    });
+
+    it('throws when executionWindow is absent so the fallback to Date.now() cannot happen', async () => {
+      // CompileRuleQueryStep always sets executionWindow before this step runs.
+      // If it is somehow absent the step must fail loudly rather than silently
+      // misaligning the no-data/recovery window with the breach window.
+      const { step, internalEsClient } = createStep();
+      const hashRec = hashFor('host-rec');
+      mockActiveGroups(internalEsClient, [hashRec]);
+
+      const rule = createRuleResponse({
+        kind: 'alert',
+        recovery_strategy: 'no_breach',
+      });
+
+      const state = createRulePipelineState({
+        rule,
+        alertEventsBatch: [],
+        executionWindow: undefined,
+      });
+
+      await expect(
+        collectStreamResults(step.executeStream(createPipelineStream([state])))
+      ).rejects.toThrow(/executionWindow/);
     });
   });
 });

@@ -170,6 +170,21 @@ export function assertValidDefinition(
         `(mode consistency check)`
     );
   }
+
+  // `enrichRuleEvent` is only allowed on execution-time types. The hook
+  // contract requires `fields` to be the *parsed* builder fields; for
+  // write-time types the stored fields are raw JSON that has never passed
+  // through `builderFieldsSchema`, so the contract cannot be satisfied.
+  // Reject at registration so the violation is caught at startup rather than
+  // silently at run time.
+  // Ref: rule-event-generation-logic.md "The hook contract"
+  if (definition.enrichRuleEvent !== undefined && definition.compilation !== 'execution_time') {
+    throw new Error(
+      `Builder type "${definition.type}" declares enrichRuleEvent but compilation is not ` +
+        `'execution_time' — enrichRuleEvent is only allowed on execution-time types ` +
+        `(mode consistency check)`
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------

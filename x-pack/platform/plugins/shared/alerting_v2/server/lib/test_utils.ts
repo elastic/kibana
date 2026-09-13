@@ -150,6 +150,17 @@ export function createRuleExecutionPipelineInput(
 }
 
 export function createRulePipelineState(state?: Partial<RulePipelineState>): RulePipelineState {
+  // Simulate the two fields CompileRuleQueryStep always sets.
+  // `effectiveQuery` defaults to the stored rule query so step tests that
+  // provide a rule get a coherent query without running the compile step.
+  // `executionWindow` defaults to a fixed window aligned with the default
+  // `scheduledAt` ('2025-01-01T00:00:00.000Z') so steps that guard on it
+  // (ExecuteRuleQueryStep) and helpers that require it
+  // (ClassifyAbsentGroupsStep's classify path) work without every test
+  // explicitly supplying a window.
+  const defaultEnd = createRuleExecutionInput().scheduledAt;
+  const defaultStart = new Date(new Date(defaultEnd).getTime() - 60_000).toISOString();
+
   return {
     input: createRuleExecutionInput(),
     logger: createLoggerService().loggerService.forSubsystem('ruleExecutor').withLabels({
@@ -157,10 +168,8 @@ export function createRulePipelineState(state?: Partial<RulePipelineState>): Rul
       space_id: 'default',
       task_id: 'task-1',
     }),
-    // Simulate what CompileRuleQueryStep sets: effective query defaults to the stored
-    // rule query so step tests that provide a rule get a consistent pipeline state
-    // without requiring the compile step to run.
     effectiveQuery: state?.rule?.query,
+    executionWindow: { start: defaultStart, end: defaultEnd },
     ...state,
   };
 }

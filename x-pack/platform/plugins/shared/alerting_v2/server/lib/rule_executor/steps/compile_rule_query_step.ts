@@ -183,23 +183,18 @@ export class CompileRuleQueryStep implements RuleExecutionStep {
         // throws to this code; trusting the thrower's Boom code would let a
         // compile function emit e.g. INVALID_BUILDER_FIELDS from this catch, which
         // differs from the write path and breaks the taxonomy.
-        const message =
-          genError instanceof Error ? genError.message : String(genError);
+        const message = genError instanceof Error ? genError.message : String(genError);
 
         throw createTaskRunError(
-          Boom.badRequest(
-            `Rule builder "${builderType}" could not generate a query: ${message}`,
-            {
-              code: ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED,
-              details: {
-                builder_type: builderType,
-                ...(genError instanceof BuilderQueryGenerationError &&
-                genError.path !== undefined
-                  ? { path: genError.path }
-                  : {}),
-              },
-            }
-          ) as Error,
+          Boom.badRequest(`Rule builder "${builderType}" could not generate a query: ${message}`, {
+            code: ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED,
+            details: {
+              builder_type: builderType,
+              ...(genError instanceof BuilderQueryGenerationError && genError.path !== undefined
+                ? { path: genError.path }
+                : {}),
+            },
+          }) as Error,
           TaskErrorSource.USER
         );
       }
@@ -263,19 +258,21 @@ export class CompileRuleQueryStep implements RuleExecutionStep {
 
         return {
           type: 'continue',
-          state: { ...state, effectiveQuery: adapted.query, executionWindow, parsedBuilderFields: parsedFields },
+          state: {
+            ...state,
+            effectiveQuery: adapted.query,
+            executionWindow,
+            parsedBuilderFields: parsedFields,
+          },
         };
       } catch (validationError) {
         throw createTaskRunError(
           (Boom.isBoom(validationError)
             ? validationError
-            : Boom.badRequest(
-                `The "${builderType}" rule builder generated an invalid query.`,
-                {
-                  code: ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED,
-                  details: { builder_type: builderType },
-                }
-              )) as Error,
+            : Boom.badRequest(`The "${builderType}" rule builder generated an invalid query.`, {
+                code: ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED,
+                details: { builder_type: builderType },
+              })) as Error,
           TaskErrorSource.USER
         );
       }

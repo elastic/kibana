@@ -56,24 +56,22 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
         // Resolve the enrichment hook once per run: look up the registered type
         // and create a pre-bound callback. A type with no hook pays nothing here.
         //
-        // For execution-time builder rules, `state.parsedBuilderFields` carries
-        // the fields already parsed by CompileRuleQueryStep. For write-time builder
-        // rules, the raw stored builder_fields are passed directly — re-parsing
-        // them here is not in the design and would introduce a new run-failure mode
-        // for write-time types whose stored fields have drifted from the current
-        // schema (those rules already run fine on their persisted query today).
+        // Registration rejects `enrichRuleEvent` on write-time types (mode
+        // consistency check in assert_valid_definition.ts), so only
+        // execution-time types reach this branch. For those types,
+        // `state.parsedBuilderFields` is always set by CompileRuleQueryStep
+        // and carries the fields already validated against the type's
+        // `builderFieldsSchema`, satisfying the hook contract's "parsed builder
+        // fields" requirement.
         //
-        // Ref: rule-event-generation-logic.md "Where the hook runs"
+        // Ref: rule-event-generation-logic.md "The hook contract"
+        //      rule-event-generation-logic.md "Where the hook runs"
         let enrichRuleEvent: BuildAlertEventsBaseOpts['enrichRuleEvent'];
         const builderType = state.rule.metadata.builder_type;
         if (builderType) {
           const definition = step.registry.get(builderType);
           if (definition?.enrichRuleEvent) {
-            // Use pre-parsed fields from the compile step for execution-time rules;
-            // fall back to the raw stored builder_fields for write-time rules.
-            const fields = (
-              state.parsedBuilderFields ?? state.rule.metadata.builder_fields ?? {}
-            ) as OpaqueBuilderFields;
+            const fields = (state.parsedBuilderFields ?? {}) as OpaqueBuilderFields;
             const ruleIdentity = {
               id: state.rule.id,
               signature_id: state.rule.metadata.signature_id ?? '',
@@ -92,8 +90,7 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
               try {
                 return hookFn({ fields, rule: ruleIdentity, row });
               } catch (hookError) {
-                const msg =
-                  hookError instanceof Error ? hookError.message : String(hookError);
+                const msg = hookError instanceof Error ? hookError.message : String(hookError);
                 throw createTaskRunError(
                   Boom.badRequest(
                     `Rule event enrichment hook for builder type "${bt}" threw: ${msg}`,
