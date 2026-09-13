@@ -75,7 +75,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "24.19.0",
+    "node": "24.21.0",
     "pnpm": "~11.21.0",
     "yarn": "1.22.22"
   },
@@ -1645,7 +1645,7 @@
     "type-fest": "4.41.0",
     "typescript-fsa": "3.0.0",
     "typescript-fsa-reducers": "1.2.2",
-    "undici": "7.29.0",
+    "undici": "7.29.1",
     "unidiff": "1.0.4",
     "unified": "9.2.2",
     "use-resize-observer": "9.1.0",
@@ -1843,6 +1843,7 @@
     "@kbn/evals-suite-lead-generation": "workspace:*",
     "@kbn/evals-suite-llm-tasks": "workspace:*",
     "@kbn/evals-suite-ml": "workspace:*",
+    "@kbn/evals-suite-nightshift-investigations": "workspace:*",
     "@kbn/evals-suite-observability-ai": "workspace:*",
     "@kbn/evals-suite-pci-compliance": "workspace:*",
     "@kbn/evals-suite-security-ai-rules": "workspace:*",
@@ -1854,6 +1855,7 @@
     "@kbn/evals-suite-significant-events": "workspace:*",
     "@kbn/evals-suite-smoke-tests": "workspace:*",
     "@kbn/evals-suite-streams": "workspace:*",
+    "@kbn/evals-suite-threat-intel-enrichment": "workspace:*",
     "@kbn/evals-suite-workflows": "workspace:*",
     "@kbn/expect": "workspace:*",
     "@kbn/extract-plugin-translations": "workspace:*",

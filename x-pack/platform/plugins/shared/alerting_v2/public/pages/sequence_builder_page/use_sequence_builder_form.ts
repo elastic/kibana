@@ -19,7 +19,7 @@ import {
 import type { SequenceFormValues } from '@kbn/alerting-v2-rule-form';
 import { RulesApi } from '../../services/rules_api';
 import { ruleKeys } from '../../hooks/query_key_factory';
-import { paths } from '../../constants';
+import { useAlertingLocators } from '../../application/locator_context';
 
 export const DEFAULT_SEQUENCE_RULE_NAME = i18n.translate(
   'xpack.alertingV2.sequenceBuilder.defaultRuleName',
@@ -54,9 +54,8 @@ export const useSequenceBuilderForm = () => {
 
 export const useSequenceBuilderState = () => {
   const rulesApi = useService(RulesApi);
-  const { navigateToUrl } = useService(CoreStart('application'));
-  const basePath = useService(CoreStart('http')).basePath;
   const notifications = useService(CoreStart('notifications'));
+  const { rulesLocators } = useAlertingLocators();
   const queryClient = useQueryClient();
 
   const [seqValues, setSeqValues] = useState<SequenceFormValues>(DEFAULT_SEQUENCE_FORM_VALUES);
@@ -109,7 +108,7 @@ export const useSequenceBuilderState = () => {
           })
         );
 
-        navigateToUrl(basePath.prepend(paths.ruleList));
+        rulesLocators.navigateSync({});
       } catch (err) {
         notifications.toasts.addError(err instanceof Error ? err : new Error(String(err)), {
           title: i18n.translate('xpack.alertingV2.sequenceBuilder.saveError', {
@@ -120,7 +119,7 @@ export const useSequenceBuilderState = () => {
         setIsSaving(false);
       }
     },
-    [rulesApi, navigateToUrl, basePath, notifications, queryClient]
+    [rulesApi, rulesLocators, notifications, queryClient]
   );
 
   return {

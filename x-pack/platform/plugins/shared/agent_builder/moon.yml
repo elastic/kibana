@@ -57,6 +57,7 @@ dependsOn:
   - '@kbn/core-application-common'
   - '@kbn/core-application-browser'
   - '@kbn/core-ui-settings-server'
+  - '@kbn/core-ui-settings-common'
   - '@kbn/utility-types'
   - '@kbn/inference-tracing'
   - '@kbn/tracing'
