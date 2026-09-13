@@ -215,6 +215,90 @@ function resolveExecutionTimeUpdate(
 }
 
 // ---------------------------------------------------------------------------
+// Managed-type transition guard
+// ---------------------------------------------------------------------------
+
+/**
+ * Throws `BUILDER_TYPE_IS_MANAGED` (400) when the request would transition a
+ * managed builder type — into, out of, or between managed types — after the
+ * rule was created.
+ *
+ * A type is "managed" when:
+ *   - its current registration in the registry declares `ownership` (the
+ *     primary signal, covers both the requested and the stored type), OR
+ *   - the stored rule's `metadata.ownership.managed` is `true` (the fallback
+ *     signal that covers plugin-disabled / unregistered states, mirroring the
+ *     dual-predicate pattern in the write gate's `getManagedWriteOwner`).
+ *
+ * Conditions for rejection (both must hold):
+ *   1. There is a real type change: `requestedType` is not `undefined`
+ *      (keep-semantics) AND differs from `existingType` (null counts as a
+ *      change when the stored type is set).
+ *   2. Either side is managed (as defined above).
+ *
+ * Restating the stored type (requested === stored) unconditionally passes.
+ * Caller identity (`onBehalfOf`) does NOT bypass this check.
+ *
+ * Ref: rule-ownership.md "The write gate"
+ */
+function assertBuilderTypeTransitionNotManaged(
+  registry: BuilderTypeRegistry,
+  ruleId: string,
+  requestedType: string | null | undefined,
+  existingType: string | undefined,
+  storedOwnership: RuleSavedObjectAttributes['metadata']['ownership']
+): void {
+  // undefined = "keep" semantics → no transition, nothing to check.
+  if (requestedType === undefined) return;
+  // Restating the same type → always passes.
+  if (requestedType === existingType) return;
+
+  // There is a real type change. Determine whether either side is managed.
+  const requestedRegistration =
+    typeof requestedType === 'string' ? registry.get(requestedType) : undefined;
+  const existingRegistration =
+    typeof existingType === 'string' ? registry.get(existingType) : undefined;
+
+  const requestedIsManaged = requestedRegistration?.ownership != null;
+  const storedIsManaged =
+    existingRegistration?.ownership != null || storedOwnership?.managed === true;
+
+  if (!requestedIsManaged && !storedIsManaged) return;
+
+  // Determine the builder type, solution, and domain to report.
+  // Prefer the managed side's current registration; fall back to the stored
+  // ownership mark when the type's plugin is disabled/unregistered.
+  let builderType: string;
+  let solution: string;
+  let domain: string;
+
+  if (requestedIsManaged) {
+    builderType = requestedType as string;
+    solution = requestedRegistration!.ownership!.solution;
+    domain = requestedRegistration!.ownership!.domain;
+  } else if (existingRegistration?.ownership != null) {
+    builderType = existingType!;
+    solution = existingRegistration.ownership.solution;
+    domain = existingRegistration.ownership.domain;
+  } else {
+    // Stored-mark path: the plugin is disabled or the type is unregistered.
+    // storedOwnership.managed === true here (otherwise storedIsManaged would
+    // be false), so solution and domain are invariantly present.
+    builderType = existingType ?? '(unregistered)';
+    solution = storedOwnership!.solution!;
+    domain = storedOwnership!.domain!;
+  }
+
+  throw Boom.badRequest(
+    `Rule "${ruleId}" cannot change its managed builder type: "${builderType}" is owned by solution "${solution}" / domain "${domain}". Managed builder types may only be set at creation.`,
+    {
+      code: ALERTING_ERROR_CODES.BUILDER_TYPE_IS_MANAGED,
+      details: { rule_id: ruleId, builder_type: builderType, solution, domain },
+    }
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Public resolution functions
 // ---------------------------------------------------------------------------
 
@@ -309,6 +393,18 @@ export function resolveUpdateRuleBuilder(
   const requestedFields = data.metadata?.builder_fields;
   const existingType = existing.metadata.builder_type;
   const validateBuilderFields = options?.validateBuilderFields ?? true;
+
+  // Reject any transition that touches a managed builder type. This guard runs
+  // before all other checks so that managed-type constraints are enforced even
+  // when the request would otherwise be rejected for an unrelated reason (e.g.
+  // missing builder_fields). Caller identity does not bypass this check.
+  assertBuilderTypeTransitionNotManaged(
+    registry,
+    ruleId,
+    requestedType,
+    existingType,
+    existing.metadata.ownership
+  );
 
   if (requestedType === null) {
     if (requestedFields != null) {
@@ -509,6 +605,18 @@ export function resolveReplaceRuleBuilder(
   options?: BuilderResolutionOptions
 ): ResolvedCreateRuleData {
   const existingType = existing.metadata.builder_type;
+  const requestedTypeForReplace = data.metadata?.builder_type;
+
+  // Reject any transition that touches a managed builder type on the replace
+  // branch. Runs before the existing guard paths for the same reason as on the
+  // update path. Caller identity does not bypass this check.
+  assertBuilderTypeTransitionNotManaged(
+    registry,
+    ruleId,
+    requestedTypeForReplace,
+    existingType,
+    existing.metadata.ownership
+  );
 
   // No stored builder type: the replace is a straightforward create-shaped
   // resolution. Delegate to the create path unchanged.
