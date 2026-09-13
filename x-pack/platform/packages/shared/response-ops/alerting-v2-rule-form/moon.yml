@@ -33,6 +33,7 @@ dependsOn:
   - '@kbn/alerting-v2-schemas'
   - '@kbn/alerting-v2-constants'
   - '@kbn/alerting-v2-utils'
+  - '@kbn/std'
   - '@kbn/yaml-rule-editor'
   - '@kbn/core-application-browser-mocks'
   - '@kbn/react-hooks'
@@ -55,6 +56,7 @@ dependsOn:
   - '@kbn/cps-utils'
   - '@kbn/cps'
   - '@kbn/core-ui-settings-browser-mocks'
+  - '@kbn/ui-callout'
 tags:
   - shared-browser
   - package

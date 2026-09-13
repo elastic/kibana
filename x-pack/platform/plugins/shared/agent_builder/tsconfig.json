@@ -16,7 +16,9 @@
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [
+    "@kbn/core-ui-settings-browser",
     "@kbn/core",
+    "@kbn/datemath",
     "@kbn/alerting-plugin",
     "@kbn/logging",
     "@kbn/config-schema",
@@ -54,6 +56,7 @@
     "@kbn/core-application-common",
     "@kbn/core-application-browser",
     "@kbn/core-ui-settings-server",
+    "@kbn/core-ui-settings-common",
     "@kbn/utility-types",
     "@kbn/inference-tracing",
     "@kbn/tracing",
