@@ -30,24 +30,41 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPageHeader,
+  EuiPanel,
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  EuiTitle,
   EuiToolTip,
   type Criteria,
   type EuiBasicTableColumn,
   type EuiTableSortingType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DetectionRuleResponse } from '../../../common/api';
+import type {
+  DetectionRuleResponse,
+  DetectionRuleCreateProps,
+  DetectionRuleUpdateProps,
+} from '../../../common/api';
 import {
   useDetectionRules,
   useEnableRule,
   useDisableRule,
   useDeleteRule,
+  useCreateRule,
+  useUpdateRule,
 } from './use_detection_rules';
 import type { ListRulesParams } from '../../services/detection_rules_api';
+import {
+  DetectionRuleForm,
+  defaultFormState,
+  formStateFromRule,
+  assembleCreatePayload,
+  assembleUpdatePayload,
+  validatePayload,
+} from './detection_rule_form';
+import type { DetectionRuleFormState, FieldErrors } from './detection_rule_form';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -63,6 +80,18 @@ interface RuleFilters {
   typeFilter: 'all' | 'query' | 'threshold';
   severityFilter: 'all' | 'low' | 'medium' | 'high' | 'critical';
 }
+
+/**
+ * UI mode for the page.
+ *
+ * - `list`: the normal rules table
+ * - `create`: the form for creating a new rule
+ * - `edit`: the form pre-populated for editing an existing rule
+ */
+type PageMode =
+  | { kind: 'list' }
+  | { kind: 'create' }
+  | { kind: 'edit'; rule: DetectionRuleResponse };
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -112,6 +141,14 @@ const filtersToParams = (
 // ---------------------------------------------------------------------------
 
 export const DetectionRulesPage: React.FC = () => {
+  // --- Page mode: list | create | edit ---
+  const [mode, setMode] = useState<PageMode>({ kind: 'list' });
+
+  // --- Form state (shared across create and edit modes) ---
+  const [formState, setFormState] = useState<DetectionRuleFormState>(defaultFormState());
+  const [formErrors, setFormErrors] = useState<FieldErrors>({});
+  const [formSubmitError, setFormSubmitError] = useState<string | null>(null);
+
   // --- Filter state ---
   const [filters, setFilters] = useState<RuleFilters>({
     search: '',
@@ -137,6 +174,8 @@ export const DetectionRulesPage: React.FC = () => {
   const enableMutation = useEnableRule();
   const disableMutation = useDisableRule();
   const deleteMutation = useDeleteRule();
+  const createMutation = useCreateRule();
+  const updateMutation = useUpdateRule();
 
   // Track which rule's toggle is in-flight to show a spinner.
   const togglingId =
@@ -163,6 +202,69 @@ export const DetectionRulesPage: React.FC = () => {
     },
     [deleteMutation]
   );
+
+  // --- Form callbacks ---
+
+  const handleCreateClick = useCallback(() => {
+    setFormState(defaultFormState());
+    setFormErrors({});
+    setFormSubmitError(null);
+    setMode({ kind: 'create' });
+  }, []);
+
+  const handleEditClick = useCallback((rule: DetectionRuleResponse) => {
+    setFormState(formStateFromRule(rule));
+    setFormErrors({});
+    setFormSubmitError(null);
+    setMode({ kind: 'edit', rule });
+  }, []);
+
+  const handleFormCancel = useCallback(() => {
+    setMode({ kind: 'list' });
+  }, []);
+
+  const handleFormSubmit = useCallback(() => {
+    if (mode.kind === 'create') {
+      const payload = assembleCreatePayload(formState);
+      const errors = validatePayload(payload, 'create');
+      if (Object.keys(errors).length > 0) {
+        setFormErrors(errors);
+        return;
+      }
+      setFormErrors({});
+      createMutation.mutate(payload as DetectionRuleCreateProps, {
+        onSuccess: () => {
+          setMode({ kind: 'list' });
+          setFormSubmitError(null);
+        },
+        onError: (err: unknown) => {
+          const msg = err instanceof Error ? err.message : 'Unknown error';
+          setFormSubmitError(msg);
+        },
+      });
+    } else if (mode.kind === 'edit') {
+      const payload = assembleUpdatePayload(formState, mode.rule);
+      const errors = validatePayload(payload, 'edit');
+      if (Object.keys(errors).length > 0) {
+        setFormErrors(errors);
+        return;
+      }
+      setFormErrors({});
+      updateMutation.mutate(
+        { id: mode.rule.id, props: payload as DetectionRuleUpdateProps },
+        {
+          onSuccess: () => {
+            setMode({ kind: 'list' });
+            setFormSubmitError(null);
+          },
+          onError: (err: unknown) => {
+            const msg = err instanceof Error ? err.message : 'Unknown error';
+            setFormSubmitError(msg);
+          },
+        }
+      );
+    }
+  }, [mode, formState, createMutation, updateMutation]);
 
   const handleTableChange = useCallback(
     ({ page: tablePage, sort: tableSort }: Criteria<DetectionRuleResponse>) => {
@@ -289,26 +391,47 @@ export const DetectionRulesPage: React.FC = () => {
       name: i18n.translate('xpack.securityDetections.rulesList.column.actions', {
         defaultMessage: 'Actions',
       }),
-      width: '7%',
+      width: '12%',
       align: 'right',
       render: (rule: DetectionRuleResponse) => (
-        <EuiToolTip
-          content={i18n.translate('xpack.securityDetections.rulesList.action.delete', {
-            defaultMessage: 'Delete rule',
-          })}
-          disableScreenReaderOutput
-        >
-          <EuiButtonIcon
-            iconType="trash"
-            color="danger"
-            aria-label={i18n.translate('xpack.securityDetections.rulesList.action.delete', {
-              defaultMessage: 'Delete rule',
-            })}
-            onClick={() => handleDelete(rule)}
-            isLoading={deleteMutation.isLoading && deleteMutation.variables === rule.id}
-            data-test-subj={`deleteRule-${rule.id}`}
-          />
-        </EuiToolTip>
+        <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={i18n.translate('xpack.securityDetections.rulesList.action.edit', {
+                defaultMessage: 'Edit rule',
+              })}
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="pencil"
+                aria-label={i18n.translate('xpack.securityDetections.rulesList.action.edit', {
+                  defaultMessage: 'Edit rule',
+                })}
+                onClick={() => handleEditClick(rule)}
+                data-test-subj={`editRule-${rule.id}`}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={i18n.translate('xpack.securityDetections.rulesList.action.delete', {
+                defaultMessage: 'Delete rule',
+              })}
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="trash"
+                color="danger"
+                aria-label={i18n.translate('xpack.securityDetections.rulesList.action.delete', {
+                  defaultMessage: 'Delete rule',
+                })}
+                onClick={() => handleDelete(rule)}
+                isLoading={deleteMutation.isLoading && deleteMutation.variables === rule.id}
+                data-test-subj={`deleteRule-${rule.id}`}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ),
     },
   ];
@@ -331,6 +454,10 @@ export const DetectionRulesPage: React.FC = () => {
 
   const items = data?.data ?? [];
 
+  const isFormSubmitting =
+    (mode.kind === 'create' && createMutation.isLoading) ||
+    (mode.kind === 'edit' && updateMutation.isLoading);
+
   // --- Render ---
   return (
     <div data-test-subj="detectionRulesPage">
@@ -341,8 +468,56 @@ export const DetectionRulesPage: React.FC = () => {
         description={i18n.translate('xpack.securityDetections.rulesList.pageDescription', {
           defaultMessage: 'Manage detection rules powered by Alerting v2.',
         })}
+        rightSideItems={
+          mode.kind === 'list'
+            ? [
+                <EuiButton
+                  fill
+                  iconType="plusInCircle"
+                  onClick={handleCreateClick}
+                  data-test-subj="createRuleButton"
+                >
+                  {i18n.translate('xpack.securityDetections.rulesList.createButton', {
+                    defaultMessage: 'Create rule',
+                  })}
+                </EuiButton>,
+              ]
+            : []
+        }
         data-test-subj="detectionRulesPageHeader"
       />
+
+      {/* Create / edit form */}
+      {mode.kind !== 'list' && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiPanel hasBorder data-test-subj="detectionRuleFormPanel">
+            <EuiTitle size="s">
+              <h2>
+                {mode.kind === 'create'
+                  ? i18n.translate('xpack.securityDetections.ruleForm.createTitle', {
+                      defaultMessage: 'Create detection rule',
+                    })
+                  : i18n.translate('xpack.securityDetections.ruleForm.editTitle', {
+                      defaultMessage: 'Edit detection rule',
+                    })}
+              </h2>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            <DetectionRuleForm
+              ruleToEdit={mode.kind === 'edit' ? mode.rule : undefined}
+              formState={formState}
+              errors={formErrors}
+              isSubmitting={isFormSubmitting}
+              submitError={formSubmitError}
+              onChange={setFormState}
+              onSubmit={handleFormSubmit}
+              onCancel={handleFormCancel}
+            />
+          </EuiPanel>
+          <EuiSpacer size="l" />
+        </>
+      )}
 
       {isError && (
         <EuiCallOut
