@@ -21,6 +21,7 @@ import type { AlertingServerSetup } from '@kbn/alerting-v2-plugin/server';
 import type { ConfigType } from './config';
 import { registerDetectionFetchRoutes } from './routes/fetch';
 import { registerCrudRoutes } from './routes/crud_routes';
+import { registerDetectionActionRoutes } from './routes/action';
 import type { DetectionsPluginStartDeps } from './routes/types';
 
 interface SetupDeps {
@@ -68,6 +69,7 @@ export class SecurityDetectionsPlugin
       const router = core.http.createRouter();
       registerDetectionFetchRoutes(router, core.getStartServices, this.logger);
       registerCrudRoutes(router, core.getStartServices, this.logger);
+      registerDetectionActionRoutes(router, core.getStartServices, this.logger);
     } else {
       this.logger.debug(
         'Detection Engine v2 disabled (xpack.securityDetections.enableDetectionsOnV2 = false) — ' +
