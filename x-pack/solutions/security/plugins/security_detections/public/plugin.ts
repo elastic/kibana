@@ -55,7 +55,10 @@ export class SecurityDetectionsPublicPlugin
       title: i18n.translate('xpack.securityDetections.management.sectionTitle', {
         defaultMessage: 'Security Detections',
       }),
-      order: 10,
+      // order: 1 is taken by Alerting V2 Preview. order: 2 places this section
+      // immediately after it in the Management sidebar, keeping related sections
+      // together and above the fold at 1920 x 1080.
+      order: 2,
     });
 
     detectionSection.registerApp({

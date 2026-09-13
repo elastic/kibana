@@ -21,7 +21,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { DetectionRuleResponse } from '../../../common/api';
 import type { DetectionRulesApi, ListRulesParams } from '../../services/detection_rules_api';
 import { DetectionRulesContext } from './detection_rules_context';
-import { DetectionRulesPage } from './detection_rules_page';
+import { DetectionRulesPage, COLUMN_WIDTHS } from './detection_rules_page';
 import type { SecurityDetectionsPluginSetupDeps } from '../../plugin';
 
 // ---------------------------------------------------------------------------
@@ -169,6 +169,29 @@ describe('DetectionRulesPage — table rendering', () => {
       // checked corresponds to enabled=true
       expect(toggle).toBeChecked();
     });
+  });
+
+  it('column widths use absolute units (em or px), not percentages', () => {
+    // EUI v9 rejects percentage-based widths and falls back to responsive card
+    // layout. All named widths must be em (text cells) or px (icon cells).
+    Object.entries(COLUMN_WIDTHS).forEach(([col, width]) => {
+      expect(width).not.toMatch(/%/);
+      expect(width).toMatch(/em$|px$/);
+      // Sanity-check: no zero widths.
+      expect(parseFloat(width)).toBeGreaterThan(0);
+    });
+  });
+
+  it('renders a standard column-header table, not a responsive card layout', async () => {
+    // EuiBasicTable switches to mobile card layout when responsiveBreakpoint is
+    // active. With responsiveBreakpoint={false} the mobile header element must
+    // never appear, even at desktop widths that would otherwise trip the
+    // default 'm' breakpoint.
+    const api = makeApi();
+    renderPage(api);
+
+    // euiTableHeaderMobile is only injected by EUI when isResponsive === true.
+    expect(document.querySelector('.euiTableHeaderMobile')).toBeNull();
   });
 
   it('does not offer a severity sort column', async () => {
@@ -459,6 +482,11 @@ describe('Feature flag off — management app not registered', () => {
     plugin.setup(coreSetup, { management: managementMock });
 
     expect(managementMock.sections.register).toHaveBeenCalledTimes(1);
+    // order: 2 places Security Detections immediately after Alerting V2 Preview
+    // (order: 1) so the section is visible above the fold at 1920 x 1080.
+    expect(managementMock.sections.register).toHaveBeenCalledWith(
+      expect.objectContaining({ order: 2 })
+    );
     expect(registerApp).toHaveBeenCalledTimes(1);
   });
 });
