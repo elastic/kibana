@@ -67,6 +67,30 @@ export interface MappingEditorProps {
   showJsonPreview?: boolean;
 }
 
+const AddField = ({ isVisible, onAddField }: { isVisible: boolean; onAddField: () => void }) => {
+  return (
+    <div
+      style={{
+        width: 'fit-content',
+        visibility: isVisible ? 'visible' : 'hidden',
+      }}
+      aria-hidden={!isVisible}
+    >
+      <EuiButton
+        iconType="plusCircle"
+        size="s"
+        color="primary"
+        onClick={onAddField}
+        data-test-subj="dataFederationMappingEditorAddField"
+      >
+        {i18n.translate('xpack.dataFederation.mappingEditor.addFieldButton', {
+          defaultMessage: 'Add field',
+        })}
+      </EuiButton>
+    </div>
+  );
+};
+
 export const emptyMappingEditorValue = (): MappingEditorValue => ({
   dynamic: true,
   fields: [],
@@ -437,30 +461,10 @@ export const MappingEditor: FC<MappingEditorProps> = ({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
             <EuiFlexItem grow={false} style={{ alignSelf: 'flex-end' }}>
-              {(() => {
-                const isVisible = editingFieldId === null && value.fields.length > 0;
-                return (
-                  <div
-                    style={{
-                      width: 'fit-content',
-                      visibility: isVisible ? 'visible' : 'hidden',
-                    }}
-                    aria-hidden={!isVisible}
-                  >
-                    <EuiButton
-                      iconType="plusCircle"
-                      size="s"
-                      color="primary"
-                      onClick={addField}
-                      data-test-subj="dataFederationMappingEditorAddField"
-                    >
-                      {i18n.translate('xpack.dataFederation.mappingEditor.addFieldButton', {
-                        defaultMessage: 'Add field',
-                      })}
-                    </EuiButton>
-                  </div>
-                );
-              })()}
+              <AddField
+                isVisible={editingFieldId === null && value.fields.length > 0}
+                onAddField={addField}
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <div style={{ width: 320 }}>
