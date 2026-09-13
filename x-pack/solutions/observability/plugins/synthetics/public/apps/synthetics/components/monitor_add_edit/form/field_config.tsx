@@ -115,13 +115,6 @@ const API_PRIVATE_LOCATION_REQUIRED = i18n.translate(
   }
 );
 
-const API_NOT_SUPPORTED_ON_SERVERLESS = i18n.translate(
-  'xpack.synthetics.monitorConfig.monitorType.api.notSupportedOnServerlessTooltip',
-  {
-    defaultMessage: 'API Journey monitors are not yet supported on Serverless.',
-  }
-);
-
 const getScheduleContent = (value: number, seconds?: boolean) => {
   if (seconds) {
     return i18n.translate('xpack.synthetics.monitorConfig.schedule.seconds.label', {
@@ -297,42 +290,25 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       const hasUsableApiJourneyLocation = locations.some(
         (location) => !location.isInvalid && !location.isServiceManaged
       );
-      const isExistingApiJourney = field?.value === FormMonitorType.API;
       return {
         onChange: (_: string, monitorType: FormMonitorType) => {
           const defaultFields = getDefaultFormFields(space)[monitorType];
           reset(defaultFields);
         },
         selectedOption: field?.value,
-        // API Journey isn't supported on Serverless yet; disable choosing it
-        // there until it ships in a stack release, but keep it visible (and
-        // selected) when editing a monitor that already has this type, so the
-        // selector still reflects its current type. Remove this special-casing
-        // once it's enabled on Serverless.
+        // API Journey isn't supported on Serverless yet; hide it there until
+        // it ships in a stack release. Remove this filter once it's enabled.
         options: Object.values(MONITOR_TYPE_CONFIG)
-          .filter(
-            (option) =>
-              option.value !== FormMonitorType.API ||
-              !kibanaService.isServerless ||
-              isExistingApiJourney
-          )
-          .map((option) => {
-            if (option.value !== FormMonitorType.API) {
-              return option;
-            }
-            if (kibanaService.isServerless) {
-              return {
-                ...option,
-                isDisabled: !isExistingApiJourney,
-                disabledReason: API_NOT_SUPPORTED_ON_SERVERLESS,
-              };
-            }
-            return {
-              ...option,
-              isDisabled: !hasUsableApiJourneyLocation,
-              disabledReason: API_PRIVATE_LOCATION_REQUIRED,
-            };
-          }),
+          .filter((option) => option.value !== FormMonitorType.API || !kibanaService.isServerless)
+          .map((option) =>
+            option.value === FormMonitorType.API
+              ? {
+                  ...option,
+                  isDisabled: !hasUsableApiJourneyLocation,
+                  disabledReason: API_PRIVATE_LOCATION_REQUIRED,
+                }
+              : option
+          ),
       };
     },
     validation: () => ({
