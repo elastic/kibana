@@ -50,7 +50,17 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       });
       expect(response).toHaveStatusCode(201);
       expect(response.body.id).toBe(id);
-      expect(response.body.metadata).toStrictEqual({ ...body.metadata, version: 1 });
+      expect(response.body.metadata).toStrictEqual({
+        ...body.metadata,
+        version: 1,
+        // Step 4 response-only fields: server-derived, never accepted from a request body.
+        signature_id: response.body.metadata.signature_id,
+        revision: 0,
+        source: { type: 'internal', version: 1 },
+        ownership: { managed: false },
+      });
+      expect(typeof response.body.metadata.signature_id).toBe('string');
+      expect(response.body.metadata.signature_id.length).toBeGreaterThan(0);
       expect(response.body.kind).toBe(body.kind);
       expect(response.body.schedule).toStrictEqual(body.schedule);
       expect(response.body.query).toStrictEqual(body.query);
@@ -83,6 +93,12 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response.body.metadata).toStrictEqual({
         ...replacementBody.metadata,
         version: created.metadata.version + 1,
+        // Step 4 response-only fields. signature_id is preserved from the original
+        // rule across a replace. revision bumps when the replacement changes content.
+        signature_id: created.metadata.signature_id,
+        revision: created.metadata.revision + 1,
+        source: created.metadata.source,
+        ownership: created.metadata.ownership,
       });
       expect(response.body.schedule).toStrictEqual(replacementBody.schedule);
       expect(response.body.query).toStrictEqual(replacementBody.query);

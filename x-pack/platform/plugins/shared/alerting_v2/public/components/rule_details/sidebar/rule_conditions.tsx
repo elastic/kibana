@@ -37,7 +37,9 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
   const rule = useRule();
   const isAlertKind = rule.kind === 'alert';
   const isSummary = variant === 'summary';
-  const dataSource = getIndexPatternFromESQLQuery(getRootEsqlQuery(rule.query)) || EMPTY_VALUE;
+  const dataSource = rule.query
+    ? getIndexPatternFromESQLQuery(getRootEsqlQuery(rule.query)) || EMPTY_VALUE
+    : EMPTY_VALUE;
   const recoveryCondition = getRecoverEsqlSegment(rule.query, rule.recovery_strategy);
 
   const conditionItems = [
@@ -162,23 +164,27 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
           <EuiSpacer size="m" />
         </>
       )}
-      <EuiTitle size="xxs">
-        <h3>
-          {i18n.translate('xpack.alertingV2.ruleDetails.esqlQuery', {
-            defaultMessage: 'ES|QL query',
-          })}
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiCodeBlock
-        language="esql"
-        isCopyable
-        overflowHeight={360}
-        paddingSize="m"
-        data-test-subj="alertingV2RuleDetailsBaseQuery"
-      >
-        {getBreachEsqlQuery(rule.query) || EMPTY_VALUE}
-      </EuiCodeBlock>
+      {rule.query ? (
+        <>
+          <EuiTitle size="xxs">
+            <h3>
+              {i18n.translate('xpack.alertingV2.ruleDetails.esqlQuery', {
+                defaultMessage: 'ES|QL query',
+              })}
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiCodeBlock
+            language="esql"
+            isCopyable
+            overflowHeight={360}
+            paddingSize="m"
+            data-test-subj="alertingV2RuleDetailsBaseQuery"
+          >
+            {getBreachEsqlQuery(rule.query) || EMPTY_VALUE}
+          </EuiCodeBlock>
+        </>
+      ) : null}
 
       <EuiSpacer size="s" />
 

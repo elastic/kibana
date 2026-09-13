@@ -33,6 +33,23 @@ export const ALERTING_ERROR_CODES = {
   INVALID_RULE_DATA: 'INVALID_RULE_DATA',
   /** A registered artifact's `data` failed its type-specific schema validation. */
   INVALID_ARTIFACT_DATA: 'INVALID_ARTIFACT_DATA',
+  /** `metadata.builder_type` does not match any registered rule builder. */
+  UNKNOWN_BUILDER_TYPE: 'UNKNOWN_BUILDER_TYPE',
+  /** `metadata.builder_fields` failed the schema registered for its `builder_type`. */
+  INVALID_BUILDER_FIELDS: 'INVALID_BUILDER_FIELDS',
+  /**
+   * A builder accepted its fields but could not turn them into a valid query —
+   * e.g. an ES|QL fragment the bounded schema accepts as a string but the
+   * parser rejects.
+   */
+  BUILDER_QUERY_GENERATION_FAILED: 'BUILDER_QUERY_GENERATION_FAILED',
+  /**
+   * The registered `enrichRuleEvent` hook threw during event building. The
+   * hook is a pure function of validated fields and a query row, so a throw
+   * is a deterministic type bug that must fail the run loudly rather than
+   * silently ship unenriched events.
+   */
+  RULE_EVENT_ENRICHMENT_FAILED: 'RULE_EVENT_ENRICHMENT_FAILED',
   /** `state_transition` cannot be applied to the rule's `kind`. */
   INVALID_STATE_TRANSITION: 'INVALID_STATE_TRANSITION',
   INVALID_STATE_TRANSITION_CONFIG: 'INVALID_STATE_TRANSITION_CONFIG',
@@ -58,6 +75,40 @@ export const ALERTING_ERROR_CODES = {
   BUILDER_TYPE_NOT_CLEARED: 'BUILDER_TYPE_NOT_CLEARED',
   /** PUT body changed a field flagged as immutable. */
   IMMUTABLE_FIELDS_CHANGED: 'IMMUTABLE_FIELDS_CHANGED',
+  /**
+   * The caller has no identity or a mismatched solution identity for the rule's
+   * owning solution. Managed rules may only be written through the owning
+   * solution's rules client (created with a matching `onBehalfOf.solution`).
+   * The error details carry the rule's `solution` and `domain`.
+   *
+   * Ref: rule-ownership.md "The write gate"
+   */
+  RULE_IS_MANAGED: 'RULE_IS_MANAGED',
+  /**
+   * An update or upsert-replace operation tried to transition a managed builder
+   * type — into, out of, or between managed types — after the rule was created.
+   * Managed builder types (those whose registration declares `ownership`) are set
+   * at create time only; the create path's existing write gate stamps
+   * `metadata.ownership` from the registration. The error details carry the
+   * `builder_type`, `solution`, and `domain` of the managed side.
+   *
+   * Caller identity (`onBehalfOf`) does not bypass this check: managed types are
+   * set at create only, where `createRule`'s existing gate requires the owning
+   * solution's identity and stamps ownership from the registration.
+   *
+   * Ref: rule-ownership.md "The write gate"
+   */
+  BUILDER_TYPE_IS_MANAGED: 'BUILDER_TYPE_IS_MANAGED',
+  /**
+   * The rule's `kind` does not match the kind pin declared by its builder type.
+   * A builder type may declare `kind: 'alert' | 'signal'`; a write supplying a
+   * different kind is rejected. The error details carry the `write_kind`,
+   * `required_kind`, and `builder_type`.
+   *
+   * Ref: rule-type-registration.md "Registration-time checks" (check 5)
+   * Ref: rule-types.md "Which kind detection rules use"
+   */
+  RULE_KIND_MISMATCH: 'RULE_KIND_MISMATCH',
   /** Filter expression referenced an unknown field. */
   INVALID_FILTER_FIELD: 'INVALID_FILTER_FIELD',
   /** Filter expression used an unsupported KQL function. */

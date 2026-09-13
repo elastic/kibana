@@ -62,6 +62,93 @@ describe('buildRuleSoFilter', () => {
         'alerting_rule.attributes.metadata.tags: "production"'
       );
     });
+
+    // Phase 4 framework fields (step 4.5)
+    it('maps metadata.signature_id to SO attributes path', () => {
+      expect(buildRuleSoFilter('metadata.signature_id: "RULE-001"')).toBe(
+        'alerting_rule.attributes.metadata.signature_id: "RULE-001"'
+      );
+    });
+
+    it('maps metadata.source.type to SO attributes path', () => {
+      expect(buildRuleSoFilter('metadata.source.type: internal')).toBe(
+        'alerting_rule.attributes.metadata.source.type: internal'
+      );
+    });
+
+    it('maps metadata.source.id to SO attributes path', () => {
+      expect(buildRuleSoFilter('metadata.source.id: "tpl-001"')).toBe(
+        'alerting_rule.attributes.metadata.source.id: "tpl-001"'
+      );
+    });
+
+    it('maps metadata.source.version to SO attributes path', () => {
+      expect(buildRuleSoFilter('metadata.source.version: 2')).toBe(
+        'alerting_rule.attributes.metadata.source.version: 2'
+      );
+    });
+
+    it('maps metadata.ownership.managed to SO attributes path', () => {
+      expect(buildRuleSoFilter('metadata.ownership.managed: true')).toBe(
+        'alerting_rule.attributes.metadata.ownership.managed: true'
+      );
+    });
+
+    it('maps metadata.ownership.solution to SO attributes path', () => {
+      expect(buildRuleSoFilter('metadata.ownership.solution: security')).toBe(
+        'alerting_rule.attributes.metadata.ownership.solution: security'
+      );
+    });
+
+    it('maps metadata.ownership.domain to SO attributes path', () => {
+      expect(buildRuleSoFilter('metadata.ownership.domain: detection')).toBe(
+        'alerting_rule.attributes.metadata.ownership.domain: detection'
+      );
+    });
+
+    it('maps metadata.builder_type to SO attributes path', () => {
+      expect(buildRuleSoFilter('metadata.builder_type: "security.detection.query"')).toBe(
+        'alerting_rule.attributes.metadata.builder_type: "security.detection.query"'
+      );
+    });
+  });
+
+  describe('metadata.builder_fields.* prefix rule (step 4.5)', () => {
+    it('accepts a declared typed sub-field (risk_score)', () => {
+      expect(buildRuleSoFilter('metadata.builder_fields.risk_score: 75')).toBe(
+        'alerting_rule.attributes.metadata.builder_fields.risk_score: 75'
+      );
+    });
+
+    it('accepts a text sub-field (query)', () => {
+      expect(buildRuleSoFilter('metadata.builder_fields.query: "process.name:cmd.exe"')).toBe(
+        'alerting_rule.attributes.metadata.builder_fields.query: "process.name:cmd.exe"'
+      );
+    });
+
+    it('accepts any builder_fields sub-field path (prefix rule)', () => {
+      // The prefix rule accepts any non-empty sub-path even if undeclared.
+      expect(buildRuleSoFilter('metadata.builder_fields.severity: high')).toBe(
+        'alerting_rule.attributes.metadata.builder_fields.severity: high'
+      );
+    });
+
+    it('rejects metadata.builder_fields without a sub-field (bare prefix)', () => {
+      // The bare prefix maps to the flattened container itself, not a leaf.
+      expect(() => buildRuleSoFilter('metadata.builder_fields: *')).toThrow(
+        'Invalid filter field "metadata.builder_fields"'
+      );
+    });
+
+    it('accepts builder_fields.* inside compound expressions', () => {
+      expect(
+        buildRuleSoFilter(
+          'metadata.builder_type: "security.detection.query" AND metadata.builder_fields.severity: critical'
+        )
+      ).toBe(
+        '(alerting_rule.attributes.metadata.builder_type: "security.detection.query" AND alerting_rule.attributes.metadata.builder_fields.severity: critical)'
+      );
+    });
   });
 
   describe('compound expressions', () => {

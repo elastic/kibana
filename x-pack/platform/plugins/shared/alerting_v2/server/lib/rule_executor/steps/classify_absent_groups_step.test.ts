@@ -467,4 +467,122 @@ describe('ClassifyAbsentGroupsStep', () => {
       );
     });
   });
+
+  describe('shared execution window', () => {
+    it('uses executionWindow.end as the now for the recovery query so its window matches the breach query', async () => {
+      const { step, internalEsClient, scopedEsClient } = createStep();
+      const hashRec = hashFor('host-rec');
+      mockActiveGroups(internalEsClient, [hashRec]);
+
+      // Recovery query resolves the active group as recovered.
+      scopedEsClient.esql.query.mockResolvedValue(
+        createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [['host-rec']])
+      );
+
+      const fixedEnd = '2025-03-01T06:00:00.000Z';
+      const lookback = '5m';
+      const fixedStart = new Date(new Date(fixedEnd).getTime() - 5 * 60 * 1000).toISOString();
+
+      const rule = createRuleResponse({
+        kind: 'alert',
+        recovery_strategy: 'query',
+        no_data_strategy: 'none',
+        grouping: { fields: ['host.name'] },
+        schedule: { every: '1m', lookback },
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM m | WHERE breach' },
+          recovery: { query: 'FROM m | STATS c BY host.name' },
+        },
+      });
+
+      const state = createRulePipelineState({
+        rule,
+        alertEventsBatch: [],
+        executionWindow: { start: fixedStart, end: fixedEnd },
+      });
+
+      await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+      // The recovery query should carry a range filter whose lte matches the
+      // shared executionWindow.end, not a later Date.now() call.
+      const recoveryCall = scopedEsClient.esql.query.mock.calls[0];
+      const filter = recoveryCall?.[0]?.filter as {
+        bool: { filter: Array<{ range: Record<string, { lte: string; gt: string }> }> };
+      };
+      const rangeFilter = filter?.bool?.filter?.[0]?.range;
+      const tsRange = rangeFilter?.['@timestamp'];
+      expect(tsRange?.lte).toBe(fixedEnd);
+      expect(tsRange?.gt).toBe(fixedStart);
+    });
+
+    it('uses executionWindow.end as the now for the no-data query so its window matches the breach query', async () => {
+      const { step, internalEsClient, scopedEsClient } = createStep();
+      const hashNoData = hashFor('host-nodata');
+      mockActiveGroups(internalEsClient, [hashNoData]);
+
+      // Data-presence query returns no rows → group is no-data.
+      scopedEsClient.esql.query.mockResolvedValue(createEsqlResponse([], []));
+
+      const fixedEnd = '2025-03-01T06:00:00.000Z';
+      const lookback = '5m';
+      const fixedStart = new Date(new Date(fixedEnd).getTime() - 5 * 60 * 1000).toISOString();
+
+      const rule = createRuleResponse({
+        kind: 'alert',
+        recovery_strategy: 'none',
+        no_data_strategy: 'emit',
+        grouping: { fields: ['host.name'] },
+        schedule: { every: '1m', lookback },
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM m | WHERE breach' },
+          no_data: { query: 'FROM m | STATS c BY host.name' },
+        },
+      });
+
+      const state = createRulePipelineState({
+        rule,
+        alertEventsBatch: [],
+        executionWindow: { start: fixedStart, end: fixedEnd },
+      });
+
+      await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+      // The no-data query should carry a range filter whose lte matches the
+      // shared executionWindow.end, not a later Date.now() call.
+      const noDataCall = scopedEsClient.esql.query.mock.calls[0];
+      const filter = noDataCall?.[0]?.filter as {
+        bool: { filter: Array<{ range: Record<string, { lte: string; gt: string }> }> };
+      };
+      const rangeFilter = filter?.bool?.filter?.[0]?.range;
+      const tsRange = rangeFilter?.['@timestamp'];
+      expect(tsRange?.lte).toBe(fixedEnd);
+      expect(tsRange?.gt).toBe(fixedStart);
+    });
+
+    it('throws when executionWindow is absent so the fallback to Date.now() cannot happen', async () => {
+      // CompileRuleQueryStep always sets executionWindow before this step runs.
+      // If it is somehow absent the step must fail loudly rather than silently
+      // misaligning the no-data/recovery window with the breach window.
+      const { step, internalEsClient } = createStep();
+      const hashRec = hashFor('host-rec');
+      mockActiveGroups(internalEsClient, [hashRec]);
+
+      const rule = createRuleResponse({
+        kind: 'alert',
+        recovery_strategy: 'no_breach',
+      });
+
+      const state = createRulePipelineState({
+        rule,
+        alertEventsBatch: [],
+        executionWindow: undefined,
+      });
+
+      await expect(
+        collectStreamResults(step.executeStream(createPipelineStream([state])))
+      ).rejects.toThrow(/executionWindow/);
+    });
+  });
 });

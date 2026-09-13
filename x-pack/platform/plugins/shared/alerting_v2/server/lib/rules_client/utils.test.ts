@@ -5,16 +5,28 @@
  * 2.0.
  */
 
-import type { CreateRuleData, UpdateRuleData } from '@kbn/alerting-v2-schemas';
+import type { UpdateRuleData } from '@kbn/alerting-v2-schemas';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { ruleResponseSchema } from '@kbn/alerting-v2-schemas';
+import {
+  ruleResponseSchema,
+  createRuleDataSchema,
+  updateRuleDataSchema,
+} from '@kbn/alerting-v2-schemas';
 import { createRuleSoAttributes } from '../test_utils';
-import type { RotationCandidate } from './types';
+import { BuilderTypeRegistry } from '../builder_types';
+import type { ResolvedCreateRuleData, ResolvedUpdateRuleData, RotationCandidate } from './types';
 import {
   transformCreateRuleBodyToRuleSoAttributes,
   transformRuleSoAttributesToRuleApiResponse,
   buildUpdateRuleAttributes,
+  computeNextRevision,
   assertImmutableUnchanged,
+  assertKindPinMatch,
+  assertSignatureIdUnchanged,
+  assertRuleSourceUnchanged,
+  deriveOwnership,
+  getManagedWriteOwner,
+  managedRuleWriteError,
   validateMergedRuleAttributes,
   pickImmutable,
   bulkErrorCodeForStatus,
@@ -33,9 +45,12 @@ const serverFields = {
   updatedBy: 'user-1',
   updatedAt: '2025-01-01T00:00:00.000Z',
   version: 1,
+  signatureId: 'test-sig-id',
+  source: { type: 'internal' as const, version: 1 },
+  ownership: { managed: false } as const,
 };
 
-const baseCreateData: CreateRuleData = {
+const baseCreateData: ResolvedCreateRuleData = {
   kind: 'alert',
   metadata: { name: 'test-rule' },
   time_field: '@timestamp',
@@ -54,7 +69,7 @@ const createRuleSoAttributesWithArtifacts = () =>
 describe('utils', () => {
   describe('transformCreateRuleBodyToRuleSoAttributes', () => {
     it('maps description into saved object attributes', () => {
-      const data: CreateRuleData = {
+      const data: ResolvedCreateRuleData = {
         ...baseCreateData,
         metadata: { name: 'rule-with-desc', description: 'My rule description' },
       };
@@ -71,7 +86,7 @@ describe('utils', () => {
     });
 
     it('passes metadata.builder_type through to SO attributes', () => {
-      const data: CreateRuleData = {
+      const data: ResolvedCreateRuleData = {
         ...baseCreateData,
         metadata: { name: 'test-rule', builder_type: 'threshold' },
       };
@@ -88,7 +103,7 @@ describe('utils', () => {
     });
 
     it('persists an omitted composed breach block as an empty segment', () => {
-      const data: CreateRuleData = {
+      const data: ResolvedCreateRuleData = {
         ...baseCreateData,
         query: { format: 'composed', base: 'FROM metrics-*' },
       };
@@ -103,7 +118,7 @@ describe('utils', () => {
     });
 
     it('leaves a populated composed breach segment untouched', () => {
-      const data: CreateRuleData = {
+      const data: ResolvedCreateRuleData = {
         ...baseCreateData,
         query: {
           format: 'composed',
@@ -255,6 +270,69 @@ describe('utils', () => {
       expect(result.state_transition).toEqual({ pending_count: 5 });
     });
 
+    describe('schedule.lookback — set, change, clear, omit (step 7.3)', () => {
+      const lookbackTestServerFields = {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      };
+
+      it('sets schedule.lookback when the stored rule has none', () => {
+        const existing = createRuleSoAttributes({
+          schedule: { every: '5m' },
+        });
+        const updateData: UpdateRuleData = {
+          schedule: { lookback: '10m' },
+        };
+
+        const result = buildUpdateRuleAttributes(existing, updateData, lookbackTestServerFields);
+
+        expect(result.schedule.lookback).toBe('10m');
+        expect(result.schedule.every).toBe('5m');
+      });
+
+      it('changes schedule.lookback to a new value', () => {
+        const existing = createRuleSoAttributes({
+          schedule: { every: '5m', lookback: '10m' },
+        });
+        const updateData: UpdateRuleData = {
+          schedule: { lookback: '30m' },
+        };
+
+        const result = buildUpdateRuleAttributes(existing, updateData, lookbackTestServerFields);
+
+        expect(result.schedule.lookback).toBe('30m');
+      });
+
+      it('clears schedule.lookback when update sends null', () => {
+        const existing = createRuleSoAttributes({
+          schedule: { every: '5m', lookback: '10m' },
+        });
+        const updateData: UpdateRuleData = {
+          schedule: { lookback: null },
+        };
+
+        const result = buildUpdateRuleAttributes(existing, updateData, lookbackTestServerFields);
+
+        expect(result.schedule.lookback).toBeUndefined();
+        expect(result.schedule.every).toBe('5m');
+      });
+
+      it('preserves stored schedule.lookback when update omits it', () => {
+        const existing = createRuleSoAttributes({
+          schedule: { every: '5m', lookback: '10m' },
+        });
+        const updateData: UpdateRuleData = {
+          schedule: { every: '1m' },
+        };
+
+        const result = buildUpdateRuleAttributes(existing, updateData, lookbackTestServerFields);
+
+        expect(result.schedule.lookback).toBe('10m');
+        expect(result.schedule.every).toBe('1m');
+      });
+    });
+
     it('preserves metadata.builder_type when query is not changed', () => {
       const existing = createRuleSoAttributes({
         metadata: { name: 'test-rule', builder_type: 'threshold' },
@@ -270,23 +348,6 @@ describe('utils', () => {
       });
 
       expect(result.metadata.builder_type).toBe('threshold');
-    });
-
-    it('rejects query change on a builder rule without explicit builder_type clear', () => {
-      const existing = createRuleSoAttributes({
-        metadata: { name: 'test-rule', builder_type: 'threshold' },
-      });
-      const updateData: UpdateRuleData = {
-        query: { format: 'standalone', breach: { query: 'FROM new-index | LIMIT 1' } },
-      };
-
-      expect(() =>
-        buildUpdateRuleAttributes(existing, updateData, {
-          updatedBy: 'user-2',
-          updatedAt: '2025-01-02T00:00:00.000Z',
-          version: 2,
-        })
-      ).toThrow(/Cannot update the query on a builder rule/);
     });
 
     it('clears builder_type when query changes and explicit builder_type: null is sent', () => {
@@ -457,6 +518,57 @@ describe('utils', () => {
         { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
       ]);
     });
+
+    it('clears the stored query when the resolved update data carries query: null (execution-time type)', () => {
+      // An execution-time builder type may switch from a write-time type that
+      // compiled and stored a query. The null sentinel tells buildUpdateRuleAttributes
+      // to clear the stored query so the saved object carries no persisted query.
+      //
+      // Ref: rule-execution-logic.md "A rule without a persisted query"
+      const existing = createRuleSoAttributes({
+        kind: 'alert',
+        metadata: { name: 'rule-with-stored-query', builder_type: 'write_time_type' },
+        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+      });
+
+      // Simulate resolveExecutionTimeUpdate returning query: null.
+      const updateData: ResolvedUpdateRuleData = {
+        metadata: { builder_type: 'exec_time_type', builder_fields: { index: 'logs-*' } },
+        query: null,
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      // null in the resolved data must clear the stored query.
+      expect(result.query).toBeUndefined();
+    });
+
+    it('preserves the stored query when the resolved update data omits query (undefined)', () => {
+      // Contrast the null case: undefined means "no query in the patch" — the
+      // stored query should survive.
+      const existing = createRuleSoAttributes({
+        kind: 'alert',
+        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+      });
+
+      const updateData: UpdateRuleData = {
+        metadata: { name: 'renamed' },
+        // query omitted — should preserve the stored value
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.query).toBeDefined();
+      expect(result.query?.format).toBe('standalone');
+    });
   });
 
   describe('transformRuleSoAttributesToRuleApiResponse', () => {
@@ -520,7 +632,7 @@ describe('utils', () => {
     });
 
     it('round-trips description through create → transform', () => {
-      const createData: CreateRuleData = {
+      const createData: ResolvedCreateRuleData = {
         ...baseCreateData,
         metadata: { name: 'round-trip-rule', description: 'Round-trip desc' },
       };
@@ -561,7 +673,7 @@ describe('utils', () => {
     });
 
     it('round-trips a conditionless composed query through create → transform', () => {
-      const createData: CreateRuleData = {
+      const createData: ResolvedCreateRuleData = {
         ...baseCreateData,
         query: { format: 'composed', base: 'FROM metrics-*' },
       };
@@ -663,6 +775,149 @@ describe('utils', () => {
     });
   });
 
+  describe('assertSignatureIdUnchanged (step 4.1)', () => {
+    const storedAttrs = createRuleSoAttributes({
+      metadata: { name: 'test', signature_id: 'stored-sig' },
+    });
+
+    it('does not throw when incomingSignatureId is undefined (omitted-means-keep)', () => {
+      expect(() => assertSignatureIdUnchanged(undefined, storedAttrs)).not.toThrow();
+    });
+
+    it('does not throw when incomingSignatureId is null (treated as omitted)', () => {
+      expect(() => assertSignatureIdUnchanged(null, storedAttrs)).not.toThrow();
+    });
+
+    it('does not throw when incomingSignatureId matches stored value (equal-passes)', () => {
+      expect(() => assertSignatureIdUnchanged('stored-sig', storedAttrs)).not.toThrow();
+    });
+
+    it('throws Boom.conflict (409) when incomingSignatureId differs from stored', () => {
+      expect(() => assertSignatureIdUnchanged('different-sig', storedAttrs)).toThrow(
+        expect.objectContaining({
+          isBoom: true,
+          output: expect.objectContaining({ statusCode: 409 }),
+          message: expect.stringContaining('metadata.signature_id'),
+        })
+      );
+    });
+
+    it('attaches IMMUTABLE_FIELDS_CHANGED code when differing', () => {
+      expect(() => assertSignatureIdUnchanged('different-sig', storedAttrs)).toThrow(
+        expect.objectContaining({
+          data: {
+            code: 'IMMUTABLE_FIELDS_CHANGED',
+            details: { fields: ['metadata.signature_id'] },
+          },
+        })
+      );
+    });
+  });
+
+  describe('transformCreateRuleBodyToRuleSoAttributes — signature_id (step 4.1)', () => {
+    it('stores the caller-supplied signatureId in metadata.signature_id', () => {
+      const result = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, {
+        ...serverFields,
+        signatureId: 'my-sig-id',
+      });
+
+      expect(result.metadata.signature_id).toBe('my-sig-id');
+    });
+  });
+
+  describe('transformRuleSoAttributesToRuleApiResponse — signature_id (step 4.1)', () => {
+    it('includes signature_id from stored attributes in the response', () => {
+      const attrs = createRuleSoAttributes({
+        metadata: { name: 'rule-1', signature_id: 'response-sig' },
+      });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.metadata.signature_id).toBe('response-sig');
+    });
+
+    it('round-trips signature_id through create → transform', () => {
+      const soAttrs = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, {
+        ...serverFields,
+        signatureId: 'round-trip-sig',
+      });
+
+      const response = transformRuleSoAttributesToRuleApiResponse('rule-rt', soAttrs);
+
+      expect(response.metadata.signature_id).toBe('round-trip-sig');
+    });
+
+    it('passes ruleResponseSchema parse with signature_id set', () => {
+      const soAttrs = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, {
+        ...serverFields,
+        signatureId: 'schema-check-sig',
+      });
+
+      const response = transformRuleSoAttributesToRuleApiResponse('rule-schema', soAttrs);
+
+      expect(() => ruleResponseSchema.parse(response)).not.toThrow();
+    });
+
+    it('falls back to the object id when signature_id is absent from stored attributes', () => {
+      // Simulates a document created before step 4.1 that has not yet been
+      // migrated. The read-time fallback should match model version 9's backfill
+      // logic (`signature_id ?? doc.id`) so no migration gap is visible to a
+      // client reading such a document.
+      const attrs = createRuleSoAttributes({ metadata: { name: 'pre-4.1-rule' } });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('the-rule-id', attrs);
+
+      expect(result.metadata.signature_id).toBe('the-rule-id');
+    });
+  });
+
+  describe('buildUpdateRuleAttributes — signature_id immutability (step 4.1)', () => {
+    it('preserves stored signature_id when the update data omits the field', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'original', signature_id: 'stored-sig' },
+      });
+
+      const next = buildUpdateRuleAttributes(
+        existing,
+        {},
+        { updatedBy: 'u', updatedAt: 't', version: 2 }
+      );
+
+      expect(next.metadata.signature_id).toBe('stored-sig');
+    });
+
+    it('still preserves stored signature_id when the update data supplies the same value', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'original', signature_id: 'stored-sig' },
+      });
+
+      const next = buildUpdateRuleAttributes(
+        existing,
+        { metadata: { signature_id: 'stored-sig' } },
+        { updatedBy: 'u', updatedAt: 't', version: 2 }
+      );
+
+      expect(next.metadata.signature_id).toBe('stored-sig');
+    });
+
+    it('still preserves stored signature_id even when the update data supplies a different value (caller checked upstream)', () => {
+      // buildUpdateRuleAttributes always restores the stored value — the mismatch
+      // check is done by assertSignatureIdUnchanged in the rules client before
+      // this function is called. This test documents that contract.
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'original', signature_id: 'stored-sig' },
+      });
+
+      const next = buildUpdateRuleAttributes(
+        existing,
+        { metadata: { signature_id: 'changed-sig' } },
+        { updatedBy: 'u', updatedAt: 't', version: 2 }
+      );
+
+      expect(next.metadata.signature_id).toBe('stored-sig');
+    });
+  });
+
   describe('validateMergedRuleAttributes', () => {
     it('does not throw for a valid alert rule', () => {
       const attrs = createRuleSoAttributes({ kind: 'alert' });
@@ -678,6 +933,111 @@ describe('utils', () => {
       });
 
       expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
+    });
+
+    it('does not throw for an execution-time signal rule with builder_fields and no query', () => {
+      // Execution-time builder rules have no persisted query. The standalone-
+      // format invariant must not fire for them — it is satisfied vacuously
+      // because the query is compiled per-run and validated there.
+      //
+      // This is the blocker scenario: PATCH on an execution-compiled signal rule
+      // runs validateMergedRuleAttributes after buildUpdateRuleAttributes merges
+      // the stored attrs (which have builder_fields but no query). Without the
+      // query == null escape the invariant returns false and throws
+      // INVALID_SIGNAL_RULE on every update of a detection-rule PATCH.
+      //
+      // Ref: rule-execution-logic.md "A rule without a persisted query"
+      const attrs = createRuleSoAttributes({
+        kind: 'signal',
+        recovery_strategy: undefined,
+        metadata: {
+          name: 'detection-rule',
+          builder_type: 'security.custom_query',
+          builder_fields: { index: 'logs-*', kql: 'host.name: *' },
+          ownership: { managed: false },
+        },
+      } as Partial<ReturnType<typeof createRuleSoAttributes>>);
+      // Clear the default query that createRuleSoAttributes adds —
+      // execution-time rules persist no query.
+      (attrs as Record<string, unknown>).query = undefined;
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
+    });
+
+    it('does not throw for an execution-time alert rule with recovery_strategy "query" and no stored query', () => {
+      // Same blocker as above, but for the isRecoveryQueryProvidedForStrategy
+      // invariant: an alert-kind execution-compiled rule with recovery_strategy
+      // 'query' has no stored recovery block (the query is compiled per run).
+      // The escape must also apply to this invariant, or every PATCH on such a
+      // rule throws INVALID_RULE_QUERY_CONFIG.
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        recovery_strategy: 'query',
+        metadata: {
+          name: 'detection-rule',
+          builder_type: 'security.custom_query',
+          builder_fields: { index: 'logs-*', kql: 'host.name: *' },
+          ownership: { managed: false },
+        },
+      } as Partial<ReturnType<typeof createRuleSoAttributes>>);
+      (attrs as Record<string, unknown>).query = undefined;
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
+    });
+
+    it('still enforces isSignalUsingStandaloneFormat for write-time builder rules that have a stored query', () => {
+      // Write-time builder rules have builder_fields AND a stored query.
+      // The `query == null` escape must NOT fire for them — the backstop
+      // must remain active to catch a composed-format query.
+      const attrs = createRuleSoAttributes({
+        kind: 'signal',
+        recovery_strategy: undefined,
+        query: {
+          format: 'composed',
+          base: 'FROM logs-*',
+          breach: { segment: 'WHERE error' },
+        },
+        metadata: {
+          name: 'write-time-builder-rule',
+          builder_type: 'some.write_time.type',
+          builder_fields: { index: 'logs-*' },
+          ownership: { managed: false },
+        },
+      } as Partial<ReturnType<typeof createRuleSoAttributes>>);
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
+        expect.objectContaining({
+          message: 'kind "signal" requires query.format "standalone".',
+          data: {
+            code: 'INVALID_SIGNAL_RULE',
+            details: { rule_id: 'rule-1', rule_kind: 'signal' },
+          },
+        })
+      );
+    });
+
+    it('still enforces isRecoveryQueryProvidedForStrategy for write-time builder rules that have a stored query', () => {
+      // Write-time builder rules with recovery_strategy 'query' must have a
+      // stored recovery block. The `query == null` escape must NOT fire when
+      // the rule has a persisted query — the backstop stays active.
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        recovery_strategy: 'query',
+        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+        metadata: {
+          name: 'write-time-builder-rule',
+          builder_type: 'some.write_time.type',
+          builder_fields: { index: 'logs-*' },
+          ownership: { managed: false },
+        },
+      } as Partial<ReturnType<typeof createRuleSoAttributes>>);
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
+        expect.objectContaining({
+          message: 'query.recovery is required when recovery_strategy is "query".',
+          data: { code: 'INVALID_RULE_QUERY_CONFIG', details: { rule_id: 'rule-1' } },
+        })
+      );
     });
 
     it('throws INVALID_SIGNAL_RULE (400) when a signal rule uses a composed query', () => {
@@ -928,6 +1288,861 @@ describe('utils', () => {
     });
   });
 
+  // ---------------------------------------------------------------------------
+  // Step 4.2: metadata.revision — the meaningful-edit counter
+  // ---------------------------------------------------------------------------
+
+  describe('computeNextRevision (step 4.2)', () => {
+    const stored = createRuleSoAttributes({ metadata: { name: 'rule-1', revision: 2 } });
+
+    it('returns the current revision when next attrs are identical to stored (no-op update)', () => {
+      // Exact same content: no meaningful change, counter must stay.
+      expect(computeNextRevision(stored, stored)).toBe(2);
+    });
+
+    it('bumps revision by one when any meaningful field differs', () => {
+      const next = {
+        ...stored,
+        metadata: { ...stored.metadata, name: 'renamed' },
+      };
+      expect(computeNextRevision(next, stored)).toBe(3);
+    });
+
+    it('does NOT bump when only excluded fields differ (updated_at, updated_by, version, revision)', () => {
+      // Simulate the stamps that every write applies — these must never trigger a bump.
+      const next = {
+        ...stored,
+        updatedAt: '2099-01-01T00:00:00.000Z',
+        updatedBy: 'some-other-user',
+        metadata: {
+          ...stored.metadata,
+          version: 99,
+          revision: 99,
+        },
+      };
+      expect(computeNextRevision(next, stored)).toBe(2);
+    });
+
+    it('does NOT bump when tags:null clears absent tags (null → undefined normalizes to no change)', () => {
+      // v2's PATCH normalizes `tags: null` → stored as `undefined` (absent).
+      // Both next and stored have tags absent, so the diff sees no difference.
+      const storedNoTags = createRuleSoAttributes({
+        metadata: { name: 'rule-1', revision: 5 },
+        // no tags field
+      });
+      const nextNoTags = {
+        ...storedNoTags,
+        metadata: { ...storedNoTags.metadata, tags: undefined },
+      };
+      expect(computeNextRevision(nextNoTags, storedNoTags)).toBe(5);
+    });
+
+    it('bumps when tags actually change (non-empty → empty)', () => {
+      const storedWithTags = createRuleSoAttributes({
+        metadata: { name: 'rule-1', tags: ['a', 'b'], revision: 3 },
+      });
+      const nextNoTags = {
+        ...storedWithTags,
+        metadata: { ...storedWithTags.metadata, tags: undefined },
+      };
+      expect(computeNextRevision(nextNoTags, storedWithTags)).toBe(4);
+    });
+
+    it('bumps when builder_fields container changes (diffed as one value)', () => {
+      const storedWithBuilder = createRuleSoAttributes({
+        metadata: {
+          name: 'rule-1',
+          builder_type: 'threshold',
+          builder_fields: { threshold: 10 },
+          revision: 1,
+        },
+      });
+      const nextDifferentBuilder = {
+        ...storedWithBuilder,
+        metadata: {
+          ...storedWithBuilder.metadata,
+          builder_fields: { threshold: 20 },
+        },
+      };
+      expect(computeNextRevision(nextDifferentBuilder, storedWithBuilder)).toBe(2);
+    });
+
+    it('bumps when builder_fields gains an empty-array field (e.g. references: [])', () => {
+      // The design says builder_fields diffs as one whole value — any difference
+      // in the container is meaningful content, not a PATCH normalisation.
+      // An empty array inside builder_fields (e.g. references: []) must register
+      // as a change, not be silently erased by deepOmitUndefined.
+      const storedNoRefs = createRuleSoAttributes({
+        metadata: {
+          name: 'rule-1',
+          builder_type: 'security.detection.query',
+          builder_fields: { severity: 'high', risk_score: 50 },
+          revision: 3,
+        },
+      });
+      const nextWithEmptyRefs = {
+        ...storedNoRefs,
+        metadata: {
+          ...storedNoRefs.metadata,
+          builder_fields: { severity: 'high', risk_score: 50, references: [] },
+        },
+      };
+      // Adding references: [] is a real content change — revision must bump.
+      expect(computeNextRevision(nextWithEmptyRefs, storedNoRefs)).toBe(4);
+    });
+
+    it('bumps when builder_fields drops an empty-array field (e.g. references: [] removed)', () => {
+      // The reverse direction: stored has references: [], next drops it.
+      // Both sides must be compared verbatim — no silent erasure of the empty array.
+      const storedWithEmptyRefs = createRuleSoAttributes({
+        metadata: {
+          name: 'rule-1',
+          builder_type: 'security.detection.query',
+          builder_fields: { severity: 'high', risk_score: 50, references: [] },
+          revision: 4,
+        },
+      });
+      const nextNoRefs = {
+        ...storedWithEmptyRefs,
+        metadata: {
+          ...storedWithEmptyRefs.metadata,
+          builder_fields: { severity: 'high', risk_score: 50 },
+        },
+      };
+      // Dropping references: [] is a real content change — revision must bump.
+      expect(computeNextRevision(nextNoRefs, storedWithEmptyRefs)).toBe(5);
+    });
+
+    it('does NOT bump when builder_fields is identical including empty arrays', () => {
+      // If both sides carry the same empty-array field, there is no change.
+      const storedWithEmptyRefs = createRuleSoAttributes({
+        metadata: {
+          name: 'rule-1',
+          builder_type: 'security.detection.query',
+          builder_fields: { severity: 'high', risk_score: 50, references: [] },
+          revision: 4,
+        },
+      });
+      expect(computeNextRevision(storedWithEmptyRefs, storedWithEmptyRefs)).toBe(4);
+    });
+
+    it('falls back to 0 and bumps to 1 when stored has no revision (unmigrated rule)', () => {
+      // Rule created before step 4.2's migration — no revision on disk.
+      const storedNoRevision = createRuleSoAttributes({
+        metadata: { name: 'rule-1' },
+      });
+      const nextChanged = {
+        ...storedNoRevision,
+        metadata: { ...storedNoRevision.metadata, name: 'renamed' },
+      };
+      expect(computeNextRevision(nextChanged, storedNoRevision)).toBe(1);
+    });
+
+    it('falls back to 0 and stays at 0 for an unmigrated rule on a no-op write', () => {
+      const storedNoRevision = createRuleSoAttributes({
+        metadata: { name: 'rule-1' },
+      });
+      expect(computeNextRevision(storedNoRevision, storedNoRevision)).toBe(0);
+    });
+  });
+
+  describe('transformCreateRuleBodyToRuleSoAttributes — revision (step 4.2)', () => {
+    it('seeds revision at 0 on create', () => {
+      const result = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, serverFields);
+      expect(result.metadata.revision).toBe(0);
+    });
+  });
+
+  describe('buildUpdateRuleAttributes — revision (step 4.2)', () => {
+    const baseExisting = createRuleSoAttributes({
+      metadata: { name: 'rule-1', version: 1, revision: 3, signature_id: 'sig-1' },
+    });
+    const baseUpdateServerFields = {
+      updatedBy: 'user-2',
+      updatedAt: '2099-01-01T00:00:00.000Z',
+      version: 2,
+    };
+
+    it('does NOT bump revision when the update changes nothing meaningful', () => {
+      // Sending an empty update — all optional fields omitted, nothing changes.
+      const result = buildUpdateRuleAttributes(baseExisting, {}, baseUpdateServerFields);
+      // Revision stays at 3; only version, updatedAt, updatedBy moved.
+      expect(result.metadata.revision).toBe(3);
+    });
+
+    it('bumps revision by exactly one when a meaningful field changes', () => {
+      const result = buildUpdateRuleAttributes(
+        baseExisting,
+        { metadata: { name: 'renamed-rule' } },
+        baseUpdateServerFields
+      );
+      expect(result.metadata.revision).toBe(4);
+    });
+
+    it('bumps at most once even when multiple fields change in a single update', () => {
+      const result = buildUpdateRuleAttributes(
+        baseExisting,
+        {
+          metadata: { name: 'renamed-rule', tags: ['new-tag'] },
+          time_field: 'event.created',
+        },
+        baseUpdateServerFields
+      );
+      expect(result.metadata.revision).toBe(4);
+    });
+
+    it('version (metadata.version) still increments independently of revision', () => {
+      // No-op update: revision stays, version still moves.
+      const noOpResult = buildUpdateRuleAttributes(baseExisting, {}, baseUpdateServerFields);
+      expect(noOpResult.metadata.version).toBe(2);
+      expect(noOpResult.metadata.revision).toBe(3);
+    });
+
+    it('does NOT bump revision when tags:null clears absent tags (end-to-end through update path)', () => {
+      // Drive the clear through buildUpdateRuleAttributes so the null → undefined
+      // normalization (nullToUndefined) runs as part of what is tested, not just
+      // the final computeNextRevision call.
+      const storedNoTags = createRuleSoAttributes({
+        metadata: { name: 'rule-1', revision: 7, signature_id: 'sig-1' },
+        // no tags stored
+      });
+      const result = buildUpdateRuleAttributes(
+        storedNoTags,
+        { metadata: { tags: null } },
+        { updatedBy: 'user-2', updatedAt: '2099-01-01T00:00:00.000Z', version: 2 }
+      );
+      expect(result.metadata.revision).toBe(7); // no bump
+    });
+
+    it('does NOT bump revision when artifacts:null clears absent artifacts (null → [] normalizes to absent)', () => {
+      // Rule created without artifacts; the edit flyout sends artifacts: null on
+      // every save unconditionally. The revision counter must not move.
+      const storedNoArtifacts = createRuleSoAttributes({
+        metadata: { name: 'rule-1', revision: 4, signature_id: 'sig-1' },
+        // no artifacts stored
+      });
+      const result = buildUpdateRuleAttributes(
+        storedNoArtifacts,
+        { artifacts: null },
+        { updatedBy: 'user-2', updatedAt: '2099-01-01T00:00:00.000Z', version: 2 }
+      );
+      expect(result.metadata.revision).toBe(4); // no bump
+    });
+
+    it('does NOT bump revision when state_transition:null clears absent state_transition', () => {
+      // Rule created without state_transition; the edit flyout sends
+      // state_transition: null unconditionally. The counter must not move.
+      const storedNoStateTransition = createRuleSoAttributes({
+        metadata: { name: 'rule-1', revision: 2, signature_id: 'sig-1' },
+        // no state_transition stored
+      });
+      const result = buildUpdateRuleAttributes(
+        storedNoStateTransition,
+        { state_transition: null },
+        { updatedBy: 'user-2', updatedAt: '2099-01-01T00:00:00.000Z', version: 2 }
+      );
+      expect(result.metadata.revision).toBe(2); // no bump
+    });
+
+    it('DOES bump revision when artifacts change from absent to non-empty', () => {
+      const storedNoArtifacts = createRuleSoAttributes({
+        metadata: { name: 'rule-1', revision: 1, signature_id: 'sig-1' },
+      });
+      const result = buildUpdateRuleAttributes(
+        storedNoArtifacts,
+        { artifacts: [{ type: 'dashboard', id: 'dash-1', data: { dashboard_id: 'dash-1' } }] },
+        { updatedBy: 'user-2', updatedAt: '2099-01-01T00:00:00.000Z', version: 2 }
+      );
+      expect(result.metadata.revision).toBe(2); // bumps
+    });
+
+    it('DOES bump revision when state_transition changes from absent to a value', () => {
+      const storedNoStateTransition = createRuleSoAttributes({
+        metadata: { name: 'rule-1', revision: 1, signature_id: 'sig-1' },
+      });
+      const result = buildUpdateRuleAttributes(
+        storedNoStateTransition,
+        { state_transition: { pending_count: 3 } },
+        { updatedBy: 'user-2', updatedAt: '2099-01-01T00:00:00.000Z', version: 2 }
+      );
+      expect(result.metadata.revision).toBe(2); // bumps
+    });
+  });
+
+  describe('transformRuleSoAttributesToRuleApiResponse — revision (step 4.2)', () => {
+    it('includes revision from stored attributes in the response', () => {
+      const attrs = createRuleSoAttributes({
+        metadata: { name: 'rule-1', revision: 7, signature_id: 'sig-1' },
+      });
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id', attrs);
+      expect(result.metadata.revision).toBe(7);
+    });
+
+    it('falls back to 0 for revision when the stored attribute is absent (unmigrated rule)', () => {
+      const attrs = createRuleSoAttributes({
+        metadata: { name: 'rule-1', signature_id: 'sig-1' },
+        // no revision
+      });
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id', attrs);
+      expect(result.metadata.revision).toBe(0);
+    });
+
+    it('passes ruleResponseSchema parse with revision present', () => {
+      const attrs = createRuleSoAttributes({
+        metadata: { name: 'rule-1', revision: 2, signature_id: 'sig-1' },
+      });
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id', attrs);
+      expect(() => ruleResponseSchema.parse(result)).not.toThrow();
+    });
+  });
+
+  // ─── Step 4.3: source object ───────────────────────────────────────────────
+
+  describe('assertRuleSourceUnchanged (step 4.3)', () => {
+    describe('no-op cases — should never throw', () => {
+      it('does not throw when source is omitted (undefined)', () => {
+        const stored = createRuleSoAttributes({
+          metadata: { name: 'rule', signature_id: 'sig', source: { type: 'internal', version: 1 } },
+        });
+        expect(() => assertRuleSourceUnchanged(undefined, stored)).not.toThrow();
+      });
+
+      it('does not throw when stored source is absent (pre-migration rule)', () => {
+        const stored = createRuleSoAttributes({ metadata: { name: 'rule', signature_id: 'sig' } });
+        expect(() =>
+          assertRuleSourceUnchanged({ type: 'internal', version: 1 }, stored)
+        ).not.toThrow();
+      });
+
+      it('does not throw when type matches for internal', () => {
+        const stored = createRuleSoAttributes({
+          metadata: { name: 'rule', signature_id: 'sig', source: { type: 'internal', version: 1 } },
+        });
+        expect(() =>
+          assertRuleSourceUnchanged({ type: 'internal', version: 2 }, stored)
+        ).not.toThrow();
+      });
+
+      it('does not throw when type and id match for template', () => {
+        const stored = createRuleSoAttributes({
+          metadata: {
+            name: 'rule',
+            signature_id: 'sig',
+            source: { type: 'template', version: 1, id: 'tmpl-abc' },
+          },
+        });
+        expect(() =>
+          assertRuleSourceUnchanged({ type: 'template', version: 5, id: 'tmpl-abc' }, stored)
+        ).not.toThrow();
+      });
+
+      it('does not throw when type and id match for external', () => {
+        const stored = createRuleSoAttributes({
+          metadata: {
+            name: 'rule',
+            signature_id: 'sig',
+            source: { type: 'external', version: 209, id: 'asset-xyz' },
+          },
+        });
+        expect(() =>
+          assertRuleSourceUnchanged({ type: 'external', version: 210, id: 'asset-xyz' }, stored)
+        ).not.toThrow();
+      });
+    });
+
+    describe('conflict cases — should throw 409 IMMUTABLE_FIELDS_CHANGED', () => {
+      it('throws when type changes from internal to template', () => {
+        const stored = createRuleSoAttributes({
+          metadata: { name: 'rule', signature_id: 'sig', source: { type: 'internal', version: 1 } },
+        });
+        expect(() =>
+          assertRuleSourceUnchanged({ type: 'template', version: 1, id: 'tmpl-id' }, stored)
+        ).toThrow(
+          expect.objectContaining({
+            isBoom: true,
+            output: expect.objectContaining({ statusCode: 409 }),
+          })
+        );
+      });
+
+      it('throws when type changes from template to external', () => {
+        const stored = createRuleSoAttributes({
+          metadata: {
+            name: 'rule',
+            signature_id: 'sig',
+            source: { type: 'template', version: 1, id: 'tmpl-id' },
+          },
+        });
+        expect(() =>
+          assertRuleSourceUnchanged({ type: 'external', version: 1, id: 'tmpl-id' }, stored)
+        ).toThrow(
+          expect.objectContaining({
+            isBoom: true,
+            output: expect.objectContaining({ statusCode: 409 }),
+          })
+        );
+      });
+
+      it('throws with IMMUTABLE_FIELDS_CHANGED and the changed field name', () => {
+        const stored = createRuleSoAttributes({
+          metadata: { name: 'rule', signature_id: 'sig', source: { type: 'internal', version: 1 } },
+        });
+        let err: unknown;
+        try {
+          assertRuleSourceUnchanged({ type: 'external', version: 1, id: 'asset-id' }, stored);
+        } catch (e) {
+          err = e;
+        }
+        expect(err).toMatchObject({
+          data: { code: 'IMMUTABLE_FIELDS_CHANGED', details: { fields: ['metadata.source.type'] } },
+        });
+      });
+
+      it('throws when id changes for template source', () => {
+        const stored = createRuleSoAttributes({
+          metadata: {
+            name: 'rule',
+            signature_id: 'sig',
+            source: { type: 'template', version: 1, id: 'tmpl-abc' },
+          },
+        });
+        expect(() =>
+          assertRuleSourceUnchanged({ type: 'template', version: 1, id: 'tmpl-different' }, stored)
+        ).toThrow(
+          expect.objectContaining({
+            isBoom: true,
+            output: expect.objectContaining({ statusCode: 409 }),
+          })
+        );
+      });
+
+      it('includes metadata.source.id in the changed-fields list when id differs', () => {
+        const stored = createRuleSoAttributes({
+          metadata: {
+            name: 'rule',
+            signature_id: 'sig',
+            source: { type: 'external', version: 100, id: 'asset-abc' },
+          },
+        });
+        let err: unknown;
+        try {
+          assertRuleSourceUnchanged({ type: 'external', version: 100, id: 'asset-xyz' }, stored);
+        } catch (e) {
+          err = e;
+        }
+        expect(err).toMatchObject({
+          data: { details: { fields: ['metadata.source.id'] } },
+        });
+      });
+    });
+  });
+
+  describe('transformCreateRuleBodyToRuleSoAttributes — source (step 4.3)', () => {
+    it('stores the declared internal source', () => {
+      const result = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, {
+        ...serverFields,
+        source: { type: 'internal', version: 1 },
+      });
+      expect(result.metadata.source).toEqual({ type: 'internal', version: 1 });
+    });
+
+    it('stores a template source with its id', () => {
+      const result = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, {
+        ...serverFields,
+        source: { type: 'template', version: 1, id: 'tmpl-abc' },
+      });
+      expect(result.metadata.source).toEqual({ type: 'template', version: 1, id: 'tmpl-abc' });
+    });
+
+    it('stores an external source with its id and version', () => {
+      const result = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, {
+        ...serverFields,
+        source: { type: 'external', version: 209, id: 'asset-xyz' },
+      });
+      expect(result.metadata.source).toEqual({ type: 'external', version: 209, id: 'asset-xyz' });
+    });
+  });
+
+  describe('buildUpdateRuleAttributes — source (step 4.3)', () => {
+    it('preserves stored source when update data omits the field', () => {
+      const stored = { type: 'external', version: 100, id: 'asset-id' } as const;
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'rule', signature_id: 'sig', source: stored },
+      });
+
+      const next = buildUpdateRuleAttributes(
+        existing,
+        {},
+        { updatedBy: 'u', updatedAt: 't', version: 2 }
+      );
+
+      expect(next.metadata.source).toEqual(stored);
+    });
+
+    it('allows version to move while preserving type and id', () => {
+      const existing = createRuleSoAttributes({
+        metadata: {
+          name: 'rule',
+          signature_id: 'sig',
+          source: { type: 'template', version: 1, id: 'tmpl-abc' },
+        },
+      });
+
+      const next = buildUpdateRuleAttributes(
+        existing,
+        { metadata: { source: { type: 'template', version: 5, id: 'tmpl-abc' } } },
+        { updatedBy: 'u', updatedAt: 't', version: 2 }
+      );
+
+      expect(next.metadata.source).toEqual({ type: 'template', version: 5, id: 'tmpl-abc' });
+    });
+
+    it('forces stored type and id even when the caller sends different values (assertRuleSourceUnchanged handles the rejection upstream)', () => {
+      // buildUpdateRuleAttributes always restores type and id from storage.
+      // The mismatch rejection happens in assertRuleSourceUnchanged before this
+      // function is called; this test documents that the function is safe.
+      const existing = createRuleSoAttributes({
+        metadata: {
+          name: 'rule',
+          signature_id: 'sig',
+          source: { type: 'external', version: 100, id: 'original-id' },
+        },
+      });
+
+      const next = buildUpdateRuleAttributes(
+        existing,
+        { metadata: { source: { type: 'external', version: 101, id: 'changed-id' } } },
+        { updatedBy: 'u', updatedAt: 't', version: 2 }
+      );
+
+      // type and id forced from storage; only version moved
+      expect(next.metadata.source).toEqual({ type: 'external', version: 101, id: 'original-id' });
+    });
+
+    it('uses incoming source as-is when stored source is absent (pre-migration)', () => {
+      const existing = createRuleSoAttributes({ metadata: { name: 'rule', signature_id: 'sig' } });
+
+      const next = buildUpdateRuleAttributes(
+        existing,
+        { metadata: { source: { type: 'internal', version: 2 } } },
+        { updatedBy: 'u', updatedAt: 't', version: 2 }
+      );
+
+      expect(next.metadata.source).toEqual({ type: 'internal', version: 2 });
+    });
+  });
+
+  describe('transformRuleSoAttributesToRuleApiResponse — source (step 4.3)', () => {
+    it('includes internal source from stored attributes', () => {
+      const attrs = createRuleSoAttributes({
+        metadata: { name: 'rule', signature_id: 'sig', source: { type: 'internal', version: 3 } },
+      });
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id', attrs);
+      expect(result.metadata.source).toEqual({ type: 'internal', version: 3 });
+    });
+
+    it('includes template source with id', () => {
+      const attrs = createRuleSoAttributes({
+        metadata: {
+          name: 'rule',
+          signature_id: 'sig',
+          source: { type: 'template', version: 1, id: 'tmpl-id' },
+        },
+      });
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id', attrs);
+      expect(result.metadata.source).toEqual({ type: 'template', version: 1, id: 'tmpl-id' });
+    });
+
+    it('includes external source with id and version', () => {
+      const attrs = createRuleSoAttributes({
+        metadata: {
+          name: 'rule',
+          signature_id: 'sig',
+          source: { type: 'external', version: 209, id: 'asset-id' },
+        },
+      });
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id', attrs);
+      expect(result.metadata.source).toEqual({ type: 'external', version: 209, id: 'asset-id' });
+    });
+
+    it('falls back to internal/version-1 when stored source is absent (pre-migration)', () => {
+      const attrs = createRuleSoAttributes({ metadata: { name: 'rule', signature_id: 'sig' } });
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id', attrs);
+      expect(result.metadata.source).toEqual({ type: 'internal', version: 1 });
+    });
+
+    it('passes ruleResponseSchema parse for each source variant', () => {
+      const variants = [
+        { type: 'internal', version: 1 } as const,
+        { type: 'template', version: 1, id: 'tmpl-id' } as const,
+        { type: 'external', version: 100, id: 'asset-id' } as const,
+      ];
+      for (const source of variants) {
+        const attrs = createRuleSoAttributes({
+          metadata: { name: 'rule', signature_id: 'sig', source },
+        });
+        const result = transformRuleSoAttributesToRuleApiResponse('rule-id', attrs);
+        expect(() => ruleResponseSchema.parse(result)).not.toThrow();
+      }
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Step 4.4: metadata.ownership — server-derived, immutable, response-only
+  // ---------------------------------------------------------------------------
+
+  describe('deriveOwnership (step 4.4)', () => {
+    it('returns { managed: false } when builder type is undefined', () => {
+      const registry = new BuilderTypeRegistry();
+      expect(deriveOwnership(registry, undefined)).toEqual({ managed: false });
+    });
+
+    it('returns { managed: false } when builder type is null', () => {
+      const registry = new BuilderTypeRegistry();
+      expect(deriveOwnership(registry, null)).toEqual({ managed: false });
+    });
+
+    it('returns { managed: false } when the builder type is not in the registry', () => {
+      const registry = new BuilderTypeRegistry();
+      // registry.get('unknown.type') returns undefined — not registered
+      expect(deriveOwnership(registry, 'unknown.type')).toEqual({ managed: false });
+    });
+
+    it('returns { managed: false } when the registered type has no ownership declaration', () => {
+      // Spy on `get` to return an unmanaged type (no `ownership` field).
+      const registry = new BuilderTypeRegistry();
+      jest.spyOn(registry, 'get').mockReturnValue({
+        type: 'platform.test.query',
+        name: 'Test type',
+        builderFieldsSchema: {} as never,
+        generateQuery: jest.fn(),
+        // no `ownership` field → unmanaged
+      });
+      expect(deriveOwnership(registry, 'platform.test.query')).toEqual({ managed: false });
+    });
+
+    it('returns { managed: true, solution, domain } for a managed builder type', () => {
+      const registry = new BuilderTypeRegistry();
+      jest.spyOn(registry, 'get').mockReturnValue({
+        type: 'security.detection.query',
+        name: 'Detection query',
+        ownership: { solution: 'security', domain: 'detection' },
+        builderFieldsSchema: {} as never,
+        generateQuery: jest.fn(),
+      });
+      expect(deriveOwnership(registry, 'security.detection.query')).toEqual({
+        managed: true,
+        solution: 'security',
+        domain: 'detection',
+      });
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Step 5.1: caller identity — app fills from onBehalfOf on unmanaged creates
+  // ---------------------------------------------------------------------------
+
+  describe('deriveOwnership — app from caller identity (step 5.1)', () => {
+    it('includes app in { managed: false } when an app is provided', () => {
+      const registry = new BuilderTypeRegistry();
+      expect(deriveOwnership(registry, undefined, 'significantEvents')).toEqual({
+        managed: false,
+        app: 'significantEvents',
+      });
+    });
+
+    it('omits app from { managed: false } when app is undefined', () => {
+      const registry = new BuilderTypeRegistry();
+      const result = deriveOwnership(registry, undefined, undefined);
+      expect(result).toEqual({ managed: false });
+      expect((result as { app?: string }).app).toBeUndefined();
+    });
+
+    it('ignores app for a managed builder type — managed ownership wins', () => {
+      const registry = new BuilderTypeRegistry();
+      jest.spyOn(registry, 'get').mockReturnValue({
+        type: 'security.detection.query',
+        name: 'Detection query',
+        ownership: { solution: 'security', domain: 'detection' },
+        builderFieldsSchema: {} as never,
+        generateQuery: jest.fn(),
+      });
+      // Even if app is supplied, the managed path wins and app does not appear.
+      const result = deriveOwnership(registry, 'security.detection.query', 'someApp');
+      expect(result).toEqual({ managed: true, solution: 'security', domain: 'detection' });
+      expect((result as { app?: string }).app).toBeUndefined();
+    });
+
+    it('includes app when the builder type is unregistered', () => {
+      const registry = new BuilderTypeRegistry();
+      expect(deriveOwnership(registry, 'unknown.type', 'myApp')).toEqual({
+        managed: false,
+        app: 'myApp',
+      });
+    });
+  });
+
+  describe('transformCreateRuleBodyToRuleSoAttributes — ownership (step 4.4)', () => {
+    it('stores the server-supplied ownership in metadata.ownership', () => {
+      const result = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, {
+        ...serverFields,
+        ownership: { managed: false },
+      });
+      expect(result.metadata.ownership).toEqual({ managed: false });
+    });
+
+    it('stores managed ownership when supplied', () => {
+      const result = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, {
+        ...serverFields,
+        ownership: { managed: true, solution: 'security', domain: 'detection' },
+      });
+      expect(result.metadata.ownership).toEqual({
+        managed: true,
+        solution: 'security',
+        domain: 'detection',
+      });
+    });
+  });
+
+  describe('buildUpdateRuleAttributes — ownership immutability (step 4.4)', () => {
+    it('preserves stored ownership when update data omits the field', () => {
+      const existing = createRuleSoAttributes({
+        metadata: {
+          name: 'rule',
+          signature_id: 'sig',
+          ownership: { managed: true, solution: 'security', domain: 'detection' },
+        },
+      });
+
+      const next = buildUpdateRuleAttributes(
+        existing,
+        {},
+        { updatedBy: 'u', updatedAt: 't', version: 2 }
+      );
+
+      expect(next.metadata.ownership).toEqual({
+        managed: true,
+        solution: 'security',
+        domain: 'detection',
+      });
+    });
+
+    it('preserves stored unmanaged ownership even when absent (pre-migration fallback)', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'rule', signature_id: 'sig' },
+      });
+      // ownership is not set — simulates a rule created before step 4.4
+      delete (existing.metadata as Record<string, unknown>).ownership;
+
+      const next = buildUpdateRuleAttributes(
+        existing,
+        {},
+        { updatedBy: 'u', updatedAt: 't', version: 2 }
+      );
+
+      // The stored value (undefined) is preserved as-is; the fallback happens
+      // only in transformRuleSoAttributesToRuleApiResponse at response time.
+      expect(next.metadata.ownership).toBeUndefined();
+    });
+  });
+
+  describe('transformRuleSoAttributesToRuleApiResponse — ownership (step 4.4)', () => {
+    it('includes managed ownership from stored attributes', () => {
+      const attrs = createRuleSoAttributes({
+        metadata: {
+          name: 'rule',
+          signature_id: 'sig',
+          ownership: { managed: true, solution: 'security', domain: 'detection' },
+        },
+      });
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id', attrs);
+      expect(result.metadata.ownership).toEqual({
+        managed: true,
+        solution: 'security',
+        domain: 'detection',
+      });
+    });
+
+    it('includes unmanaged ownership from stored attributes', () => {
+      const attrs = createRuleSoAttributes({
+        metadata: { name: 'rule', signature_id: 'sig', ownership: { managed: false } },
+      });
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id', attrs);
+      expect(result.metadata.ownership).toEqual({ managed: false });
+    });
+
+    it('falls back to { managed: false } when stored ownership is absent (pre-migration)', () => {
+      const attrs = createRuleSoAttributes({ metadata: { name: 'rule', signature_id: 'sig' } });
+      delete (attrs.metadata as Record<string, unknown>).ownership;
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id', attrs);
+
+      expect(result.metadata.ownership).toEqual({ managed: false });
+    });
+
+    it('passes ruleResponseSchema parse for managed and unmanaged ownership', () => {
+      const variants = [
+        { managed: true as const, solution: 'security', domain: 'detection' },
+        { managed: false as const },
+        { managed: false as const, app: 'significantEvents' },
+      ];
+      for (const ownership of variants) {
+        const attrs = createRuleSoAttributes({
+          metadata: { name: 'rule', signature_id: 'sig', ownership },
+        });
+        const result = transformRuleSoAttributesToRuleApiResponse('rule-id', attrs);
+        expect(() => ruleResponseSchema.parse(result)).not.toThrow();
+      }
+    });
+  });
+
+  describe('ruleResponseSchema rejects ownership in request body (step 4.4)', () => {
+    it('createRuleDataSchema rejects ownership in metadata (response-only field)', () => {
+      const result = createRuleDataSchema.safeParse({
+        kind: 'alert',
+        metadata: {
+          name: 'test',
+          // ownership is response-only; the strict metadataSchema must reject it
+          ownership: { managed: false },
+        },
+        schedule: { every: '5m' },
+        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('updateRuleDataSchema rejects ownership in metadata (response-only field)', () => {
+      const result = updateRuleDataSchema.safeParse({
+        metadata: { ownership: { managed: false } },
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  // Step 4.2: metadata.revision is server-managed and response-only — the same
+  // guarantee ownership gets above, pinned by a test beside the ownership ones.
+  describe('ruleResponseSchema rejects revision in request body (step 4.2)', () => {
+    it('createRuleDataSchema rejects revision in metadata (response-only field)', () => {
+      const result = createRuleDataSchema.safeParse({
+        kind: 'alert',
+        metadata: {
+          name: 'test',
+          revision: 0,
+        },
+        schedule: { every: '5m' },
+        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('updateRuleDataSchema rejects revision in metadata (response-only field)', () => {
+      const result = updateRuleDataSchema.safeParse({
+        metadata: { revision: 0 },
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
   describe('pickImmutable', () => {
     it('returns only the fields declared in IMMUTABLE_RULE_FIELDS', () => {
       const existing = createRuleSoAttributes({ kind: 'signal' });
@@ -1052,5 +2267,222 @@ describe('isTaskMidRun', () => {
     expect(isTaskMidRun(TaskStatus.DeadLetter)).toBe(false);
     expect(isTaskMidRun(TaskStatus.Idle)).toBe(false);
     expect(isTaskMidRun(undefined)).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Step 5.3: getManagedWriteOwner and managedRuleWriteError
+// ---------------------------------------------------------------------------
+
+describe('getManagedWriteOwner (step 5.3)', () => {
+  const registry = new BuilderTypeRegistry();
+  const managedType = {
+    type: 'security.detection.query',
+    name: 'Detection query',
+    ownership: { solution: 'security', domain: 'detection' },
+    builderFieldsSchema: {} as never,
+    generateQuery: jest.fn(),
+  };
+
+  beforeEach(() => {
+    jest.spyOn(registry, 'get').mockReturnValue(undefined);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('returns undefined for an unmanaged stored rule', () => {
+    expect(
+      getManagedWriteOwner({
+        registry,
+        callerIdentity: undefined,
+        storedOwnership: { managed: false },
+        builderType: undefined,
+      })
+    ).toBeUndefined();
+  });
+
+  it('returns the owner when stored ownership says managed and caller has no identity', () => {
+    expect(
+      getManagedWriteOwner({
+        registry,
+        callerIdentity: undefined,
+        storedOwnership: { managed: true, solution: 'security', domain: 'detection' },
+        builderType: undefined,
+      })
+    ).toEqual({ solution: 'security', domain: 'detection' });
+  });
+
+  it('returns undefined when stored ownership says managed and caller solution matches', () => {
+    expect(
+      getManagedWriteOwner({
+        registry,
+        callerIdentity: { solution: 'security' },
+        storedOwnership: { managed: true, solution: 'security', domain: 'detection' },
+        builderType: undefined,
+      })
+    ).toBeUndefined();
+  });
+
+  it('returns the owner when stored ownership says managed and caller solution mismatches', () => {
+    expect(
+      getManagedWriteOwner({
+        registry,
+        callerIdentity: { solution: 'other' },
+        storedOwnership: { managed: true, solution: 'security', domain: 'detection' },
+        builderType: undefined,
+      })
+    ).toEqual({ solution: 'security', domain: 'detection' });
+  });
+
+  it('uses the registration when stored ownership is not managed', () => {
+    jest.spyOn(registry, 'get').mockReturnValue(managedType as never);
+    expect(
+      getManagedWriteOwner({
+        registry,
+        callerIdentity: undefined,
+        storedOwnership: { managed: false },
+        builderType: 'security.detection.query',
+      })
+    ).toEqual({ solution: 'security', domain: 'detection' });
+  });
+
+  it('returns undefined when neither stored ownership nor registration says managed', () => {
+    jest.spyOn(registry, 'get').mockReturnValue(undefined);
+    expect(
+      getManagedWriteOwner({
+        registry,
+        callerIdentity: undefined,
+        storedOwnership: { managed: false },
+        builderType: 'security.detection.query',
+      })
+    ).toBeUndefined();
+  });
+});
+
+describe('managedRuleWriteError (step 5.3)', () => {
+  it('builds a RULE_IS_MANAGED bulk error with solution/domain in the message', () => {
+    const err = managedRuleWriteError('rule-1', 'security', 'detection');
+    expect(err).toMatchObject({
+      id: 'rule-1',
+      error: {
+        code: 'RULE_IS_MANAGED',
+        message: expect.stringContaining('security'),
+      },
+    });
+    expect(err.error.message).toContain('detection');
+  });
+
+  it('includes the rule name in error.details when provided', () => {
+    const err = managedRuleWriteError('rule-1', 'security', 'detection', 'My detection rule');
+    expect(err.error.details).toEqual({ name: 'My detection rule' });
+  });
+
+  it('omits error.details when no name is provided', () => {
+    const err = managedRuleWriteError('rule-1', 'security', 'detection');
+    expect(err.error.details).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// assertKindPinMatch (check 5 per-write half, rule-type-registration.md)
+// ---------------------------------------------------------------------------
+
+describe('assertKindPinMatch', () => {
+  function makeRegistryWithPin(pin: 'alert' | 'signal') {
+    const registry = new BuilderTypeRegistry();
+    jest.spyOn(registry, 'get').mockReturnValue({
+      type: 'test.pinned.type',
+      name: 'Pinned type',
+      kind: pin,
+      builderFieldsSchema: {} as never,
+      generateQuery: jest.fn(),
+    });
+    return registry;
+  }
+
+  function makeRegistryWithoutPin() {
+    const registry = new BuilderTypeRegistry();
+    jest.spyOn(registry, 'get').mockReturnValue({
+      type: 'test.unpinned.type',
+      name: 'Unpinned type',
+      builderFieldsSchema: {} as never,
+      generateQuery: jest.fn(),
+    });
+    return registry;
+  }
+
+  it('does not throw when builderType is undefined (no-builder rule)', () => {
+    const registry = new BuilderTypeRegistry();
+    expect(() => assertKindPinMatch(registry, 'alert', undefined)).not.toThrow();
+  });
+
+  it('does not throw when builderType is null', () => {
+    const registry = new BuilderTypeRegistry();
+    expect(() => assertKindPinMatch(registry, 'signal', null)).not.toThrow();
+  });
+
+  it('does not throw when the builder type is not registered', () => {
+    const registry = new BuilderTypeRegistry();
+    // registry.get returns undefined for unknown types — no pin to check.
+    expect(() => assertKindPinMatch(registry, 'alert', 'unknown.type')).not.toThrow();
+  });
+
+  it('does not throw when the builder type has no kind pin', () => {
+    const registry = makeRegistryWithoutPin();
+    // No pin declared: any kind is acceptable.
+    expect(() => assertKindPinMatch(registry, 'alert', 'test.unpinned.type')).not.toThrow();
+    expect(() => assertKindPinMatch(registry, 'signal', 'test.unpinned.type')).not.toThrow();
+  });
+
+  it('does not throw when write kind matches the pin (signal)', () => {
+    const registry = makeRegistryWithPin('signal');
+    expect(() => assertKindPinMatch(registry, 'signal', 'test.pinned.type')).not.toThrow();
+  });
+
+  it('does not throw when write kind matches the pin (alert)', () => {
+    const registry = makeRegistryWithPin('alert');
+    expect(() => assertKindPinMatch(registry, 'alert', 'test.pinned.type')).not.toThrow();
+  });
+
+  it('throws Boom.badRequest (400) when write kind mismatches the pin', () => {
+    const registry = makeRegistryWithPin('signal');
+    expect(() => assertKindPinMatch(registry, 'alert', 'test.pinned.type')).toThrow(
+      expect.objectContaining({
+        isBoom: true,
+        output: expect.objectContaining({ statusCode: 400 }),
+      })
+    );
+  });
+
+  it('attaches RULE_KIND_MISMATCH code and details when the pin is violated', () => {
+    const registry = makeRegistryWithPin('signal');
+    expect(() => assertKindPinMatch(registry, 'alert', 'test.pinned.type')).toThrow(
+      expect.objectContaining({
+        data: {
+          code: 'RULE_KIND_MISMATCH',
+          details: {
+            write_kind: 'alert',
+            required_kind: 'signal',
+            builder_type: 'test.pinned.type',
+          },
+        },
+      })
+    );
+  });
+
+  it('error message names the mismatched kinds and builder type', () => {
+    const registry = makeRegistryWithPin('alert');
+    let caught: Error | undefined;
+    try {
+      assertKindPinMatch(registry, 'signal', 'test.pinned.type');
+    } catch (e) {
+      caught = e as Error;
+    }
+    expect(caught).toBeDefined();
+    expect(caught!.message).toContain('signal');
+    expect(caught!.message).toContain('alert');
+    expect(caught!.message).toContain('test.pinned.type');
   });
 });

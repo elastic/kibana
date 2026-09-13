@@ -36,6 +36,7 @@ export const executeRecoveryQuery = async ({
   activeGroupHashes,
   breachedGroupHashes,
   maxResponseSize,
+  now,
 }: {
   queryService: QueryServiceContract;
   logger: LoggerServiceContract;
@@ -45,6 +46,10 @@ export const executeRecoveryQuery = async ({
   activeGroupHashes: ActiveAlertGroupHash[];
   breachedGroupHashes: ReadonlySet<string>;
   maxResponseSize?: number;
+  /** Shared run-level now, ms since epoch. Passed from state.executionWindow to
+   *  keep the recovery window aligned with the breach window. Defaults to
+   *  Date.now() when absent (pre-compile-step paths). */
+  now?: number;
 }): Promise<AlertEvent[]> => {
   const lookbackWindow = rule.schedule.lookback ?? rule.schedule.every;
 
@@ -52,6 +57,7 @@ export const executeRecoveryQuery = async ({
     query: effectiveQuery,
     timeField: rule.time_field,
     lookbackWindow,
+    now,
   });
 
   logger.debug({

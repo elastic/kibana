@@ -1,0 +1,8 @@
+{
+  "name": "@kbn/security-detection-rule-schema",
+  "description": "Zod schemas and mapping constants for Security detection rule types.",
+  "private": true,
+  "version": "1.0.0",
+  "license": "Elastic License 2.0",
+  "sideEffects": false
+}

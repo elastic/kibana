@@ -208,7 +208,7 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
       every: rule.schedule.every,
       lookback: rule.schedule.lookback ?? '1m',
     },
-    query: apiQueryToFormQuery(rule.query, rule.recovery_strategy),
+    query: apiQueryToFormQuery(rule.query, rule.recovery_strategy, rule.kind),
     recoveryStrategy: rule.recovery_strategy ?? undefined,
     noDataStrategy: rule.no_data_strategy ?? (rule.kind === 'alert' ? 'none' : undefined),
     ...(rule.grouping ? { grouping: { fields: rule.grouping.fields } } : {}),

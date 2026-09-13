@@ -32,6 +32,13 @@ const getDocumentId = (ruleId: string, spaceId: string): string =>
     ? `${RULE_SAVED_OBJECT_TYPE}:${ruleId}`
     : `${spaceId}:${RULE_SAVED_OBJECT_TYPE}:${ruleId}`;
 
+/** The shape stored in `alerting_rule.attributes.metadata.ownership`. */
+export interface StoredOwnership {
+  managed: boolean;
+  solution?: string;
+  domain?: string;
+}
+
 /**
  * Test-time direct-index accessor for the rule saved object. The type is
  * `hidden: true`, so the saved objects HTTP API cannot reach it and specs that
@@ -51,6 +58,15 @@ export interface RuleSavedObjectService {
     references: SavedObjectReference[],
     spaceId?: string
   ) => Promise<void>;
+  /**
+   * Directly patches `metadata.ownership` in the rule saved object. Used by
+   * tests that need to simulate a managed rule without going through a managed
+   * builder type registration. The write is a test-time bypass that matches how
+   * a model-version backfill would stamp ownership on existing rules.
+   *
+   * Ref: rule-ownership.md "Storage, mapping, and migration"
+   */
+  setOwnership: (ruleId: string, ownership: StoredOwnership, spaceId?: string) => Promise<void>;
 }
 
 export const getRuleSavedObjectService = ({
@@ -99,6 +115,24 @@ export const getRuleSavedObjectService = ({
           index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           id: getDocumentId(ruleId, spaceId),
           doc: { references },
+          refresh: 'wait_for',
+        });
+      }),
+
+    setOwnership: (ruleId, ownership, spaceId = DEFAULT_SPACE_ID) =>
+      measurePerformanceAsync(log, 'ruleSavedObject.setOwnership', async () => {
+        const client = await getSavedObjectClient();
+        // The Kibana SO serializer stores attributes directly under the type
+        // key — not nested inside an extra "attributes" wrapper. So the ES
+        // document shape is { alerting_rule: <attributes object>, references: [] }.
+        await client.update({
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          id: getDocumentId(ruleId, spaceId),
+          doc: {
+            [RULE_SAVED_OBJECT_TYPE]: {
+              metadata: { ownership },
+            },
+          },
           refresh: 'wait_for',
         });
       }),

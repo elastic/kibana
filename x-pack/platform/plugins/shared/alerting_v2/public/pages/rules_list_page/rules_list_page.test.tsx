@@ -97,6 +97,7 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
       Compose Discover flyout
     </button>
   ),
+  getRuleBuilderCreateOptions: () => [],
 }));
 
 jest.mock('./rules_data_source', () => ({
@@ -162,8 +163,13 @@ const createRule = (overrides: Partial<RuleApiResponse> = {}): RuleApiResponse =
     enabled: true,
     metadata: {
       name: 'Rule One',
+      signature_id: 'test-sig-id',
+      version: 1,
+      revision: 0,
+      source: { type: 'internal' as const, version: 1 },
       description: 'Monitors log errors',
       tags: ['prod'],
+      ownership: { managed: false },
     },
     schedule: { every: '1m' },
     query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
@@ -180,7 +186,15 @@ const mockRules: RuleApiResponse[] = [
   createRule({
     id: 'rule-2',
     enabled: false,
-    metadata: { name: 'Rule Two', tags: [] as string[], version: 1 },
+    metadata: {
+      name: 'Rule Two',
+      signature_id: 'test-sig-id',
+      tags: [] as string[],
+      version: 1,
+      revision: 0,
+      source: { type: 'internal' as const, version: 1 },
+      ownership: { managed: false },
+    },
     schedule: { every: '5m' },
     query: { format: 'standalone', breach: { query: 'FROM metrics-*' } },
   }),
@@ -902,11 +916,27 @@ describe('RulesListPage', () => {
       const page2 = [
         createRule({
           id: 'rule-3',
-          metadata: { name: 'Rule Three', tags: [] as string[], version: 1 },
+          metadata: {
+            name: 'Rule Three',
+            signature_id: 'test-sig-id',
+            tags: [] as string[],
+            version: 1,
+            revision: 0,
+            source: { type: 'internal' as const, version: 1 },
+            ownership: { managed: false },
+          },
         }),
         createRule({
           id: 'rule-4',
-          metadata: { name: 'Rule Four', tags: [] as string[], version: 1 },
+          metadata: {
+            name: 'Rule Four',
+            signature_id: 'test-sig-id',
+            tags: [] as string[],
+            version: 1,
+            revision: 0,
+            source: { type: 'internal' as const, version: 1 },
+            ownership: { managed: false },
+          },
         }),
       ];
 

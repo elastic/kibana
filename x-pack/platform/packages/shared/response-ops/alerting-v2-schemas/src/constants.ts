@@ -85,6 +85,15 @@ export const MAX_ALERT_EVENT_DATA_KEYS = 100;
  */
 export const MAX_ARTIFACT_DATA_FIELDS = 32;
 
+export const MAX_BUILDER_TYPE_LENGTH = 64;
+export const MAX_BUILDER_FIELDS_KEYS = 64;
+
+/**
+ * Maximum length of the `metadata.signature_id` field. Matches v1's `rule_id`
+ * string length limit and is generous enough for any opaque caller-assigned id.
+ */
+export const MAX_SIGNATURE_ID_LENGTH = 256;
+
 /** Maximum number of destinations per action policy. */
 export const ACTION_POLICY_MAX_DESTINATIONS = 10;
 

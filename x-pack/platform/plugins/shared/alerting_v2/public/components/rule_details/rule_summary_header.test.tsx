@@ -17,7 +17,15 @@ const baseRule = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
-  metadata: { name: 'My Rule', version: 1, tags: ['prod', 'infra'] },
+  metadata: {
+    name: 'My Rule',
+    signature_id: 'test-sig-id',
+    version: 1,
+    revision: 0,
+    source: { type: 'internal' as const, version: 1 },
+    tags: ['prod', 'infra'],
+    ownership: { managed: false },
+  },
 } as RuleApiResponse;
 
 const wrap = (ui: React.ReactElement, rule: RuleApiResponse = baseRule) =>
@@ -31,7 +39,11 @@ describe('RuleHeaderDescription', () => {
   it('renders description text', () => {
     const rule = {
       ...baseRule,
-      metadata: { name: 'My Rule', description: 'Alert when errors exceed threshold.' },
+      metadata: {
+        name: 'My Rule',
+        signature_id: 'test-sig-id',
+        description: 'Alert when errors exceed threshold.',
+      },
     } as RuleApiResponse;
     wrap(<RuleHeaderDescription />, rule);
     expect(screen.getByTestId('ruleDescription')).toHaveTextContent(
@@ -40,7 +52,10 @@ describe('RuleHeaderDescription', () => {
   });
 
   it('returns null when there is no description', () => {
-    const rule = { ...baseRule, metadata: { name: 'No Description' } } as RuleApiResponse;
+    const rule = {
+      ...baseRule,
+      metadata: { name: 'No Description', signature_id: 'test-sig-id' },
+    } as RuleApiResponse;
     const { container } = wrap(<RuleHeaderDescription />, rule);
     expect(container.innerHTML).toBe('');
   });
@@ -57,13 +72,24 @@ describe('RuleTagsList', () => {
   it('returns null when tags are empty', () => {
     const { container } = wrap(<RuleTagsList />, {
       ...baseRule,
-      metadata: { name: 'No Tags', version: 1, tags: [] },
+      metadata: {
+        name: 'No Tags',
+        signature_id: 'test-sig-id',
+        version: 1,
+        revision: 0,
+        source: { type: 'internal' as const, version: 1 },
+        tags: [],
+        ownership: { managed: false },
+      },
     } as RuleApiResponse);
     expect(container.innerHTML).toBe('');
   });
 
   it('returns null when tags are undefined', () => {
-    const rule = { ...baseRule, metadata: { name: 'No Tags' } } as RuleApiResponse;
+    const rule = {
+      ...baseRule,
+      metadata: { name: 'No Tags', signature_id: 'test-sig-id' },
+    } as RuleApiResponse;
     const { container } = wrap(<RuleTagsList />, rule);
     expect(container.innerHTML).toBe('');
   });

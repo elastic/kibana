@@ -23,6 +23,7 @@ import {
   QueryServiceScopedSpaceRoutingToken,
 } from '../lib/services/query_service/tokens';
 import { bindServices } from './bind_services';
+import { CallerIdentityToken } from '../lib/rules_client/caller_identity';
 
 describe('bindServices - Elasticsearch client routing', () => {
   let container: Container;
@@ -81,5 +82,48 @@ describe('bindServices - Elasticsearch client routing', () => {
     expect(elasticsearch.client.asScoped).toHaveBeenCalledWith(request, {
       projectRouting: 'space',
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// bindServices - CallerIdentityToken default
+//
+// The default binding for CallerIdentityToken resolves to `undefined` so that
+// framework HTTP routes (which take their rules client from the request scope
+// without overriding the token) are identity-less by construction. The test
+// pins this guarantee so that a future edit to bind_services that accidentally
+// stamps an identity would be caught before landing.
+//
+// Ref: rule-ownership.md "Caller identity"
+// ---------------------------------------------------------------------------
+
+describe('bindServices - CallerIdentityToken default', () => {
+  let container: Container;
+  let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
+
+  beforeEach(() => {
+    container = new Container();
+    const elasticsearch = elasticsearchServiceMock.createStart();
+    request = httpServerMock.createKibanaRequest();
+
+    container.bind(CoreStart('elasticsearch')).toConstantValue(elasticsearch);
+    container.bind(Request).toConstantValue(request);
+    container.bind(Logger).toConstantValue(loggingSystemMock.createLogger());
+    container
+      .bind(PluginInitializer('config'))
+      .toConstantValue(coreMock.createPluginInitializerContext(configSchema.validate({})).config);
+
+    container.load(new ContainerModule((options) => bindServices(options)));
+  });
+
+  it('resolves CallerIdentityToken to undefined in the request scope (no route stamps an identity)', () => {
+    // bind_services defaults CallerIdentityToken to `undefined` so that every
+    // framework HTTP route that resolves its RulesClient from the request scope
+    // gets an identity-less client. The only way to get a non-undefined value is
+    // to override it in `buildScope` via `getRulesClientWithRequest`'s
+    // `onBehalfOf` option, which no framework route does.
+    const identity = container.get(CallerIdentityToken);
+
+    expect(identity).toBeUndefined();
   });
 });

@@ -58,13 +58,17 @@ const isNonRepresentable = ({
   return false;
 };
 
-export const isNonRepresentableRule = (rule: RuleResponse): boolean =>
-  isNonRepresentable({
+export const isNonRepresentableRule = (rule: RuleResponse): boolean => {
+  // A rule with no persisted query is builder-authored; it is represented by its
+  // builder form, not by a query editor, so it is not non-representable.
+  if (rule.query == null) return false;
+  return isNonRepresentable({
     kind: rule.kind,
     queryFormat: rule.query.format,
     recoveryStrategy: rule.recovery_strategy,
     noDataStrategy: rule.no_data_strategy,
   });
+};
 
 export const isNonRepresentableFormState = (values: {
   kind: RuleKind;

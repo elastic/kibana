@@ -145,10 +145,10 @@ export function formatNoDataStrategy(strategy?: NoDataStrategy | null): string {
 }
 
 export function getRecoverEsqlSegment(
-  query: Query,
+  query: Query | undefined,
   strategy?: RecoveryStrategy
 ): string | undefined {
-  if (strategy !== recoveryStrategy.query || !query.recovery) return undefined;
+  if (!query || strategy !== recoveryStrategy.query || !query.recovery) return undefined;
   if (query.format === 'composed') {
     return query.recovery.segment;
   }
