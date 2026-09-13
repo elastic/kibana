@@ -12,12 +12,21 @@
  * helpers: roles, URL builders, and rule body factories.
  *
  * Role grant rationale:
- *   The Detection API routes declare `requiredPrivileges: ['rules-all']` and
- *   `['rules-read']`.  These strings are Kibana API privileges granted by the
- *   `securitySolutionRulesV4` feature:
- *     - `all` privilege → grants `rules-all` + `rules-read`
- *     - `read` privilege → grants `rules-read` only
- *   A role that does not include the feature grants neither.
+ *   Authorization runs at two layers (rule-crud-api.md "Authorization runs at
+ *   two layers"):
+ *
+ *   1. Route layer: the Detection API routes declare `requiredPrivileges:
+ *      ['rules-all']` and `['rules-read']`.  These strings are Kibana API
+ *      privileges granted by the `securitySolutionRulesV4` feature.
+ *
+ *   2. Saved-objects layer: the framework rules client reads and writes
+ *      `alerting_rule` SO documents on the security-wrapped, request-scoped SO
+ *      client.  Write access to `alerting_rule` is granted only by the
+ *      `alerting_v2_rules` feature privilege (same as the framework's own Scout
+ *      roles at alerting_v2/test/scout_alerting_v2/common/roles.ts).
+ *
+ *   A role that holds only `securitySolutionRulesV4` passes the route check and
+ *   is then denied at the SO layer.  Both grants are required.
  */
 
 import { apiTest as baseApiTest } from '@kbn/scout-security';
@@ -82,8 +91,10 @@ export const DETECTION_RULES_ALL_ROLE: KibanaRole = {
     {
       base: [],
       feature: {
-        // securitySolutionRulesV4 all → RULES_API_ALL + RULES_API_READ
+        // Layer 1 — route authz: securitySolutionRulesV4 all grants rules-all + rules-read
         securitySolutionRulesV4: ['all'],
+        // Layer 2 — SO authz: alerting_v2_rules all grants write access to alerting_rule SO type
+        alerting_v2_rules: ['all'],
       },
       spaces: ['*'],
     },
@@ -100,7 +111,10 @@ export const DETECTION_RULES_READ_ROLE: KibanaRole = {
     {
       base: [],
       feature: {
+        // Layer 1 — route authz: securitySolutionRulesV4 read grants rules-read
         securitySolutionRulesV4: ['read'],
+        // Layer 2 — SO authz: alerting_v2_rules read grants read access to alerting_rule SO type
+        alerting_v2_rules: ['read'],
       },
       spaces: ['*'],
     },

@@ -151,19 +151,11 @@ describe('detectionRuleUpdatePropsSchema', () => {
   });
 
   it('does not accept enabled on update', () => {
-    // The update schema does not define `enabled` — parse without it succeeds,
-    // and if present the field should not appear in the output (Zod strips
-    // unknown keys in non-strict schemas).
-    const result = detectionRuleUpdatePropsSchema.safeParse({
-      ...QUERY_CREATE_MIN,
-      enabled: true,
-    });
-    // Because the base schemas are not strict, an extra `enabled` field is
-    // stripped rather than rejected.  The important invariant is that the
-    // *type* has no `enabled` — enforced by TypeScript.  Verify at runtime:
-    if (result.success) {
-      expect('enabled' in result.data).toBe(false);
-    }
+    // The update schema is strict: `enabled` is not a defined key, so a PUT
+    // body carrying it is rejected with a 400 rather than silently stripped.
+    expect(
+      detectionRuleUpdatePropsSchema.safeParse({ ...QUERY_CREATE_MIN, enabled: true }).success
+    ).toBe(false);
   });
 
   it('accepts an optional rule_id on update', () => {

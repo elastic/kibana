@@ -98,7 +98,11 @@ export function applyRuleDefaults(props: DetectionRuleCreateProps) {
  *     keeps the stored one, as v1 does."
  */
 export function applyRuleUpdateDefaults(props: DetectionRuleUpdateProps) {
-  const { enabled: _ignored, version: _versionIgnored, ...nonEnabledVersionDefaults } = RULE_DEFAULTS;
+  const {
+    enabled: _ignored,
+    version: _versionIgnored,
+    ...nonEnabledVersionDefaults
+  } = RULE_DEFAULTS;
   return {
     ...nonEnabledVersionDefaults,
     ...props,

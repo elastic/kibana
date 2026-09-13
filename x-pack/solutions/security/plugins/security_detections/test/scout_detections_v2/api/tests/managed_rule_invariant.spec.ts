@@ -325,8 +325,7 @@ apiTest.describe(
         });
         // The route returns 200 with a per-item errors list (bulk semantics).
         expect(response).toHaveStatusCode(200);
-        const errors: Array<{ id: string; error: { code?: string } }> =
-          response.body.errors ?? [];
+        const errors: Array<{ id: string; error: { code?: string } }> = response.body.errors ?? [];
         const ruleError = errors.find(
           (e: { id: string; error: { code?: string } }) => e.id === detectionRuleId
         );

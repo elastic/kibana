@@ -26,17 +26,12 @@
  *      and returns 404.  This state CANNOT be verified in this suite, because
  *      the suite runs against a Kibana started with the flag enabled.
  *
- *      Coverage rationale:
- *        - The unit tests in step 8.1 (`plugin.test.ts`) assert that the route
- *          registration is gated by the flag — they boot a mock plugin with the
- *          flag off and confirm that `registerCrudRoutes`, `registerFetchRoutes`,
- *          and `registerActionRoutes` are never called.
- *        - Kibana's own route infrastructure returns 404 for unregistered paths;
- *          the flag's effect is structural, not behavioral.
- *        - A dedicated CI config that boots Kibana WITHOUT the flag and hits the
- *          Detection paths would confirm the 404 posture at the integration level
- *          if the team decides that coverage is worth the extra CI server cost.
- *          See the `alerting_v2_detections` server config set for the template.
+ *      The 404 posture is covered by the sibling suite in tests/flag_off/,
+ *      run via playwright.flag_off.config.ts against a server started with the
+ *      `detections_v2_flag_off` config set (no `enableDetectionsOnV2` arg).
+ *      That set is the template; the flag-off spec hits each Detection path and
+ *      asserts 404 to prove both that the router has no record of the paths and
+ *      that the response code is 404 rather than 401/403/503.
  *
  * Ref: rule-crud-api.md "Conventions every endpoint shares" (503 gate)
  *      plugin.ts setup() (flag gate on route registration)
