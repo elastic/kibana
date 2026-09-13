@@ -2325,6 +2325,8 @@
       "@kbn/security-authorization-core-common/*": ["./x-pack/platform/packages/private/security/authorization_core_common/*"],
       "@kbn/security-detection-rule-schema": ["./x-pack/platform/packages/shared/security-detection-rule-schema"],
       "@kbn/security-detection-rule-schema/*": ["./x-pack/platform/packages/shared/security-detection-rule-schema/*"],
+      "@kbn/security-detections-plugin": ["./x-pack/solutions/security/plugins/security_detections"],
+      "@kbn/security-detections-plugin/*": ["./x-pack/solutions/security/plugins/security_detections/*"],
       "@kbn/security-evals-alerts-snapshot": ["./x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot"],
       "@kbn/security-evals-alerts-snapshot/*": ["./x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot/*"],
       "@kbn/security-evals-workflow-traces": ["./x-pack/solutions/security/packages/kbn-security-evals-workflow-traces"],

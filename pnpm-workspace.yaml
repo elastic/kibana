@@ -1649,6 +1649,7 @@ packages:
   - 'x-pack/solutions/security/plugins/kubernetes_security'
   - 'x-pack/solutions/security/plugins/lists'
   - 'x-pack/solutions/security/plugins/mitre_attack'
+  - 'x-pack/solutions/security/plugins/security_detections'
   - 'x-pack/solutions/security/plugins/security_solution'
   - 'x-pack/solutions/security/plugins/security_solution_ess'
   - 'x-pack/solutions/security/plugins/security_solution_serverless'
