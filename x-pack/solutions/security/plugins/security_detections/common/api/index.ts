@@ -53,3 +53,14 @@ export {
 } from './rule_alias_map';
 
 export { RULE_DEFAULTS, applyRuleDefaults, applyRuleUpdateDefaults } from './apply_rule_defaults';
+
+export type {
+  DetectionRuleCreateInput,
+  DetectionRulePatchedInput,
+} from './detection_rule_converter';
+export {
+  toFrameworkCreate,
+  toFrameworkReplace,
+  toFrameworkPatch,
+  toPublicResponse,
+} from './detection_rule_converter';
