@@ -26,8 +26,9 @@
  *      and returns 404.  This state CANNOT be verified in this suite, because
  *      the suite runs against a Kibana started with the flag enabled.
  *
- *      The 404 posture is covered by the sibling suite in tests/flag_off/,
- *      run via playwright.flag_off.config.ts against a server started with the
+ *      The 404 posture is covered by the sibling suite in
+ *      test/scout_detections_v2_flag_off/api/tests/routes_404.spec.ts, run via
+ *      its own playwright.config.ts against a server started with the
  *      `detections_v2_flag_off` config set (no `enableDetectionsOnV2` arg).
  *      That set is the template; the flag-off spec hits each Detection path and
  *      asserts 404 to prove both that the router has no record of the paths and

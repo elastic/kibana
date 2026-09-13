@@ -4994,6 +4994,45 @@ describe('RulesClient', () => {
         });
         expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
       });
+
+      it('refuses BUILDER_TYPE_IS_MANAGED when a matching-solution client transitions the builder_type of a managed rule', async () => {
+        // Caller identity does not bypass the builder-type transition clause.
+        // A matching-solution client that attempts to change a managed rule's
+        // builder_type still receives BUILDER_TYPE_IS_MANAGED.
+        // Ref: rule-ownership.md "The write gate" (second clause)
+        const client = createClient(undefined, { solution: 'security' });
+        rulesSavedObjectService.get.mockResolvedValueOnce(managedDoc('rule-upd-bt-1'));
+        await expect(
+          client.updateRule({
+            id: 'rule-upd-bt-1',
+            data: { metadata: { name: 'changed', builder_type: null } },
+          })
+        ).rejects.toMatchObject({
+          output: { statusCode: 400 },
+          data: { code: 'BUILDER_TYPE_IS_MANAGED' },
+        });
+        expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+      });
+
+      it('refuses RULE_IS_MANAGED (not BUILDER_TYPE_IS_MANAGED) when an identity-less client carries a builder_type transition', async () => {
+        // The identity clause (assertManagedRuleWrite) runs before the
+        // builder-type transition clause (assertBuilderTypeTransitionNotManaged).
+        // An identity-less caller whose body also changes builder_type receives
+        // RULE_IS_MANAGED from the earlier gate, not BUILDER_TYPE_IS_MANAGED.
+        // Ref: rule-ownership.md "The write gate" flowchart (identity clause first)
+        const client = createClient(undefined, undefined);
+        rulesSavedObjectService.get.mockResolvedValueOnce(managedDoc('rule-upd-bt-2'));
+        await expect(
+          client.updateRule({
+            id: 'rule-upd-bt-2',
+            data: { metadata: { name: 'changed', builder_type: null } },
+          })
+        ).rejects.toMatchObject({
+          output: { statusCode: 400 },
+          data: { code: 'RULE_IS_MANAGED' },
+        });
+        expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+      });
     });
 
     describe('upsertRule replace branch', () => {
@@ -5033,6 +5072,42 @@ describe('RulesClient', () => {
           client.upsertRule({
             id: 'rule-upsert-3',
             data: { ...baseCreateData, metadata: { name: 'replaced' } },
+          })
+        ).rejects.toMatchObject({
+          output: { statusCode: 400 },
+          data: { code: 'RULE_IS_MANAGED' },
+        });
+        expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+      });
+
+      it('refuses BUILDER_TYPE_IS_MANAGED when a matching-solution client transitions the builder_type on replace', async () => {
+        // Caller identity does not bypass the builder-type transition clause
+        // on the replace branch either.
+        // Ref: rule-ownership.md "The write gate" (second clause)
+        const client = createClient(undefined, { solution: 'security' });
+        rulesSavedObjectService.get.mockResolvedValue(managedDoc('rule-upsert-bt-1'));
+        await expect(
+          client.upsertRule({
+            id: 'rule-upsert-bt-1',
+            data: { ...baseCreateData, metadata: { name: 'replaced', builder_type: null } },
+          })
+        ).rejects.toMatchObject({
+          output: { statusCode: 400 },
+          data: { code: 'BUILDER_TYPE_IS_MANAGED' },
+        });
+        expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+      });
+
+      it('refuses RULE_IS_MANAGED (not BUILDER_TYPE_IS_MANAGED) when an identity-less client carries a builder_type transition on replace', async () => {
+        // Identity clause runs before the builder-type transition clause on the
+        // replace branch: identity-less caller gets RULE_IS_MANAGED.
+        // Ref: rule-ownership.md "The write gate" flowchart (identity clause first)
+        const client = createClient(undefined, undefined);
+        rulesSavedObjectService.get.mockResolvedValue(managedDoc('rule-upsert-bt-2'));
+        await expect(
+          client.upsertRule({
+            id: 'rule-upsert-bt-2',
+            data: { ...baseCreateData, metadata: { name: 'replaced', builder_type: null } },
           })
         ).rejects.toMatchObject({
           output: { statusCode: 400 },
