@@ -563,10 +563,6 @@ export const MappingEditor: FC<MappingEditorProps> = ({
                 })}
               </EuiButton>
             }
-            fieldTypeTestSubj="dataFederationMappingEditorDraftFieldType"
-            fieldNameTestSubj="dataFederationMappingEditorDraftFieldName"
-            fieldPathTestSubj="dataFederationMappingEditorDraftFieldPath"
-            fieldFormatTestSubj="dataFederationMappingEditorDraftFieldFormat"
           />
         </EuiPanel>
       ) : filteredFields.length === 0 ? (
@@ -640,10 +636,6 @@ export const MappingEditor: FC<MappingEditorProps> = ({
                               </EuiFlexItem>
                             </EuiFlexGroup>
                           }
-                          fieldTypeTestSubj="dataFederationMappingEditorFieldType"
-                          fieldNameTestSubj="dataFederationMappingEditorFieldName"
-                          fieldPathTestSubj="dataFederationMappingEditorFieldPath"
-                          fieldFormatTestSubj="dataFederationMappingEditorFieldFormat"
                         />
                       </>
                     ) : (

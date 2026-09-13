@@ -40,10 +40,6 @@ export interface FieldMappingFormProps {
   errors?: FieldMappingFormErrors;
   dateTypeValue: DatasetMappingFieldType;
   actions: ReactNode;
-  fieldTypeTestSubj: string;
-  fieldNameTestSubj: string;
-  fieldPathTestSubj: string;
-  fieldFormatTestSubj: string;
 }
 
 export const getFieldTypeDocsHelpText = (
@@ -72,10 +68,6 @@ export function FieldMappingForm({
   errors,
   dateTypeValue,
   actions,
-  fieldTypeTestSubj,
-  fieldNameTestSubj,
-  fieldPathTestSubj,
-  fieldFormatTestSubj,
 }: FieldMappingFormProps) {
   const isDateType = value.type === dateTypeValue;
 
@@ -103,7 +95,7 @@ export function FieldMappingForm({
                 ...(nextType === dateTypeValue ? {} : { format: '' }),
               });
             }}
-            data-test-subj={fieldTypeTestSubj}
+            data-test-subj="dataFederationMappingEditorFieldType"
           />
         </EuiFormRow>
       </EuiFlexItem>
@@ -122,7 +114,7 @@ export function FieldMappingForm({
             fullWidth
             value={value.name}
             onChange={(e) => onChange({ name: e.target.value })}
-            data-test-subj={fieldNameTestSubj}
+            data-test-subj="dataFederationMappingEditorFieldName"
           />
         </EuiFormRow>
       </EuiFlexItem>
@@ -139,7 +131,7 @@ export function FieldMappingForm({
             fullWidth
             value={value.path}
             onChange={(e) => onChange({ path: e.target.value })}
-            data-test-subj={fieldPathTestSubj}
+            data-test-subj="dataFederationMappingEditorFieldPath"
           />
         </EuiFormRow>
       </EuiFlexItem>
@@ -159,7 +151,7 @@ export function FieldMappingForm({
               fullWidth
               value={value.format}
               onChange={(e) => onChange({ format: e.target.value })}
-              data-test-subj={fieldFormatTestSubj}
+              data-test-subj="dataFederationMappingEditorFieldFormat"
             />
           </EuiFormRow>
         ) : (
