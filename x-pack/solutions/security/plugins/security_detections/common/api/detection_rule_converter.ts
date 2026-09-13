@@ -60,7 +60,7 @@ import type {
   RuleSource,
 } from '@kbn/alerting-v2-schemas';
 
-import { ALIAS_TO_BUILDER_TYPE_ID, BUILDER_TYPE_ID_TO_ALIAS } from './rule_alias_map';
+import { ALIAS_TO_BUILDER_TYPE_ID, ALIAS_TO_KIND, BUILDER_TYPE_ID_TO_ALIAS } from './rule_alias_map';
 import { RULE_DEFAULTS } from './apply_rule_defaults';
 import type {
   DetectionRuleResponse,
@@ -189,13 +189,16 @@ export interface DetectionRuleCreateInput {
  */
 export function toFrameworkCreate(props: DetectionRuleCreateInput): CreateRuleData {
   const builderTypeId = ALIAS_TO_BUILDER_TYPE_ID[props.type];
+  // Read the pinned kind from the alias map so that a future entry with a
+  // different kind pin requires no change here.
+  const kind = ALIAS_TO_KIND[props.type];
 
   // Empty tags: omit so the framework stores no tags; the response converter
   // reads absence back as [].
   const metadataTags = props.tags.length > 0 ? props.tags : undefined;
 
   return {
-    kind: 'signal',
+    kind,
     // Sent explicitly so stored detection rules are uniform regardless of the
     // framework default.  The framework's create schema accepts only 'none' for
     // signal rules.

@@ -21,6 +21,7 @@ import {
   buildUpdateRuleAttributes,
   computeNextRevision,
   assertImmutableUnchanged,
+  assertKindPinMatch,
   assertSignatureIdUnchanged,
   assertRuleSourceUnchanged,
   deriveOwnership,
@@ -2369,5 +2370,107 @@ describe('managedRuleWriteError (step 5.3)', () => {
   it('omits error.details when no name is provided', () => {
     const err = managedRuleWriteError('rule-1', 'security', 'detection');
     expect(err.error.details).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// assertKindPinMatch (check 5 per-write half, rule-type-registration.md)
+// ---------------------------------------------------------------------------
+
+describe('assertKindPinMatch', () => {
+  function makeRegistryWithPin(pin: 'alert' | 'signal') {
+    const registry = new BuilderTypeRegistry();
+    jest.spyOn(registry, 'get').mockReturnValue({
+      type: 'test.pinned.type',
+      name: 'Pinned type',
+      kind: pin,
+      builderFieldsSchema: {} as never,
+      generateQuery: jest.fn(),
+    });
+    return registry;
+  }
+
+  function makeRegistryWithoutPin() {
+    const registry = new BuilderTypeRegistry();
+    jest.spyOn(registry, 'get').mockReturnValue({
+      type: 'test.unpinned.type',
+      name: 'Unpinned type',
+      builderFieldsSchema: {} as never,
+      generateQuery: jest.fn(),
+    });
+    return registry;
+  }
+
+  it('does not throw when builderType is undefined (no-builder rule)', () => {
+    const registry = new BuilderTypeRegistry();
+    expect(() => assertKindPinMatch(registry, 'alert', undefined)).not.toThrow();
+  });
+
+  it('does not throw when builderType is null', () => {
+    const registry = new BuilderTypeRegistry();
+    expect(() => assertKindPinMatch(registry, 'signal', null)).not.toThrow();
+  });
+
+  it('does not throw when the builder type is not registered', () => {
+    const registry = new BuilderTypeRegistry();
+    // registry.get returns undefined for unknown types — no pin to check.
+    expect(() => assertKindPinMatch(registry, 'alert', 'unknown.type')).not.toThrow();
+  });
+
+  it('does not throw when the builder type has no kind pin', () => {
+    const registry = makeRegistryWithoutPin();
+    // No pin declared: any kind is acceptable.
+    expect(() => assertKindPinMatch(registry, 'alert', 'test.unpinned.type')).not.toThrow();
+    expect(() => assertKindPinMatch(registry, 'signal', 'test.unpinned.type')).not.toThrow();
+  });
+
+  it('does not throw when write kind matches the pin (signal)', () => {
+    const registry = makeRegistryWithPin('signal');
+    expect(() => assertKindPinMatch(registry, 'signal', 'test.pinned.type')).not.toThrow();
+  });
+
+  it('does not throw when write kind matches the pin (alert)', () => {
+    const registry = makeRegistryWithPin('alert');
+    expect(() => assertKindPinMatch(registry, 'alert', 'test.pinned.type')).not.toThrow();
+  });
+
+  it('throws Boom.badRequest (400) when write kind mismatches the pin', () => {
+    const registry = makeRegistryWithPin('signal');
+    expect(() => assertKindPinMatch(registry, 'alert', 'test.pinned.type')).toThrow(
+      expect.objectContaining({
+        isBoom: true,
+        output: expect.objectContaining({ statusCode: 400 }),
+      })
+    );
+  });
+
+  it('attaches RULE_KIND_MISMATCH code and details when the pin is violated', () => {
+    const registry = makeRegistryWithPin('signal');
+    expect(() => assertKindPinMatch(registry, 'alert', 'test.pinned.type')).toThrow(
+      expect.objectContaining({
+        data: {
+          code: 'RULE_KIND_MISMATCH',
+          details: {
+            write_kind: 'alert',
+            required_kind: 'signal',
+            builder_type: 'test.pinned.type',
+          },
+        },
+      })
+    );
+  });
+
+  it('error message names the mismatched kinds and builder type', () => {
+    const registry = makeRegistryWithPin('alert');
+    let caught: Error | undefined;
+    try {
+      assertKindPinMatch(registry, 'signal', 'test.pinned.type');
+    } catch (e) {
+      caught = e as Error;
+    }
+    expect(caught).toBeDefined();
+    expect(caught!.message).toContain('signal');
+    expect(caught!.message).toContain('alert');
+    expect(caught!.message).toContain('test.pinned.type');
   });
 });

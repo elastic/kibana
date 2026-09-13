@@ -99,6 +99,16 @@ export const ALERTING_ERROR_CODES = {
    * Ref: rule-ownership.md "The write gate"
    */
   BUILDER_TYPE_IS_MANAGED: 'BUILDER_TYPE_IS_MANAGED',
+  /**
+   * The rule's `kind` does not match the kind pin declared by its builder type.
+   * A builder type may declare `kind: 'alert' | 'signal'`; a write supplying a
+   * different kind is rejected. The error details carry the `write_kind`,
+   * `required_kind`, and `builder_type`.
+   *
+   * Ref: rule-type-registration.md "Registration-time checks" (check 5)
+   * Ref: rule-types.md "Which kind detection rules use"
+   */
+  RULE_KIND_MISMATCH: 'RULE_KIND_MISMATCH',
   /** Filter expression referenced an unknown field. */
   INVALID_FILTER_FIELD: 'INVALID_FILTER_FIELD',
   /** Filter expression used an unsupported KQL function. */
