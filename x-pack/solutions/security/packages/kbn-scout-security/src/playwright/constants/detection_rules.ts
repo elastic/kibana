@@ -5,6 +5,18 @@
  * 2.0.
  */
 
+export interface CustomQueryRuleResponseAction {
+  action_type_id: string;
+  params: {
+    command: string;
+    comment?: string;
+    config?: {
+      field: string;
+      overwrite: boolean;
+    };
+  };
+}
+
 export interface CustomQueryRule {
   index: string[];
   enabled: boolean;
@@ -16,7 +28,9 @@ export interface CustomQueryRule {
   type: 'query';
   query: string;
   from: string;
+  language?: string;
   investigation_fields?: { field_names: string[] };
+  response_actions?: CustomQueryRuleResponseAction[];
 }
 
 export const DEFAULT_SECURITY_SOLUTION_INDEXES = [

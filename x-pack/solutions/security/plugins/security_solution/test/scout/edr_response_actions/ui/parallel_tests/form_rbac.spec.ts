@@ -5,9 +5,34 @@
  * 2.0.
  */
 
+import { CUSTOM_QUERY_RULE } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 import { spaceTest, tags } from '../fixtures';
-import { createRuleWithAutomatedResponseActions } from '../fixtures/seed_rule';
+
+const CREATE_RULE_NAME = 'scout-response-actions-create-rbac';
+
+const SEEDED_RESPONSE_ACTIONS = [
+  {
+    params: { command: 'isolate', comment: 'Isolate host' },
+    action_type_id: '.endpoint',
+  },
+  {
+    params: {
+      command: 'suspend-process',
+      comment: 'Suspend host',
+      config: { field: 'entity_id', overwrite: false },
+    },
+    action_type_id: '.endpoint',
+  },
+  {
+    params: {
+      command: 'kill-process',
+      comment: 'Kill host',
+      config: { field: '', overwrite: true },
+    },
+    action_type_id: '.endpoint',
+  },
+];
 
 spaceTest.describe(
   'Automated response actions form RBAC',
@@ -24,11 +49,15 @@ spaceTest.describe(
     spaceTest(
       'rule_author cannot add an Elastic Defend response action while creating a rule',
       async ({ pageObjects }) => {
-        const { ruleResponseActionsForm } = pageObjects;
+        const { ruleCreateWizard, ruleResponseActionsForm } = pageObjects;
         spaceTest.setTimeout(120_000);
 
         await spaceTest.step('open the rule create wizard on the Actions step', async () => {
-          await ruleResponseActionsForm.completeWizardUntilActionsStep();
+          await ruleCreateWizard.completeUntilActionsStep({
+            name: CREATE_RULE_NAME,
+            query: '_id:*',
+          });
+          await ruleResponseActionsForm.responseActionsWrapper.waitFor({ state: 'visible' });
         });
 
         await spaceTest.step('Elastic Defend keypad is disabled', async () => {
@@ -40,15 +69,19 @@ spaceTest.describe(
 
     spaceTest(
       'rule_author cannot edit or remove existing Elastic Defend response actions',
-      async ({ pageObjects, kbnClient, scoutSpace }) => {
+      async ({ pageObjects, apiServices, scoutSpace }) => {
         const { ruleResponseActionsForm } = pageObjects;
         const ruleName = `scout-response-actions-edit-rbac-${scoutSpace.id}`;
 
-        const rule = await createRuleWithAutomatedResponseActions(
-          kbnClient,
-          scoutSpace.id,
-          ruleName
-        );
+        const rule = await apiServices.detectionRule.createCustomQueryRule({
+          ...CUSTOM_QUERY_RULE,
+          name: ruleName,
+          description: ruleName,
+          rule_id: ruleName,
+          enabled: false,
+          language: 'kuery',
+          response_actions: SEEDED_RESPONSE_ACTIONS,
+        });
 
         await spaceTest.step('open the rule edit Actions tab', async () => {
           await ruleResponseActionsForm.gotoEditActions(rule.id);

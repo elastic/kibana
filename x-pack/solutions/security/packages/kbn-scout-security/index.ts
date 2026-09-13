@@ -69,6 +69,7 @@ export type {
   SecurityParallelTestFixtures,
   SecurityParallelApiServicesFixture,
   SecurityParallelWorkerFixtures,
+  RuleCreateWizardPage,
   ThreatMatchRuleCreatePage,
 } from './src/playwright';
 
