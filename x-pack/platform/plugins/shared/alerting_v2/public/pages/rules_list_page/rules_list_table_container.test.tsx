@@ -958,29 +958,31 @@ describe('RulesListTableContainer', () => {
       const mixedPage = [managedRule, plainRule];
 
       render(
-        <I18nProvider>
-          <ContentListProvider
-            id="rules-list-managed-select-test"
-            labels={{ entity: 'rule', entityPlural: 'rules' }}
-            dataSource={{
-              findItems: async () => ({
-                items: mixedPage.map(toListItem),
-                total: 2,
-              }),
-            }}
-            features={{
-              sorting: { initialSort: { field: 'name', direction: 'asc' } },
-              pagination: { initialPageSize: 20 },
-              search: true,
-              selection: false,
-            }}
-          >
-            <RulesListTableContainer
-              onEditInFlyout={mockOnEditInFlyout}
-              onCloneInFlyout={mockOnCloneInFlyout}
-            />
-          </ContentListProvider>
-        </I18nProvider>
+        <MockLocatorProvider>
+          <I18nProvider>
+            <ContentListProvider
+              id="rules-list-managed-select-test"
+              labels={{ entity: 'rule', entityPlural: 'rules' }}
+              dataSource={{
+                findItems: async () => ({
+                  items: mixedPage.map(toListItem),
+                  total: 2,
+                }),
+              }}
+              features={{
+                sorting: { initialSort: { field: 'name', direction: 'asc' } },
+                pagination: { initialPageSize: 20 },
+                search: true,
+                selection: false,
+              }}
+            >
+              <RulesListTableContainer
+                onEditInFlyout={mockOnEditInFlyout}
+                onCloneInFlyout={mockOnCloneInFlyout}
+              />
+            </ContentListProvider>
+          </I18nProvider>
+        </MockLocatorProvider>
       );
 
       await waitFor(() => {
