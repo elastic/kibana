@@ -142,7 +142,7 @@ export const describeArtifactTabPolicyDetails = (
       spaceTest(
         `ALL user can add an artifact from an empty tab`,
         async ({ browserAuth, pageObjects, endpointPolicy }) => {
-          await browserAuth.loginAsSecurityRole('endpoint_policy_manager');
+          await browserAuth.loginAsEndpointPolicyManager();
           await pageObjects.policyDetailsPage.goto(endpointPolicy.id);
           await pageObjects.policyDetailsPage.openArtifactTab(artifact.tabTestSubj);
           await pageObjects.policyArtifactsPage.waitForEmptyUnexisting();
@@ -187,7 +187,7 @@ export const describeArtifactTabPolicyDetails = (
             entries: artifact.entries,
             osTypes: artifact.osTypes,
           });
-          await browserAuth.loginAsSecurityRole('endpoint_policy_manager');
+          await browserAuth.loginAsEndpointPolicyManager();
           await pageObjects.policyDetailsPage.goto(endpointPolicy.id);
           await pageObjects.policyDetailsPage.openArtifactTab(artifact.tabTestSubj);
           await pageObjects.policyArtifactsPage.waitForEmptyUnassigned();
@@ -227,7 +227,7 @@ export const describeArtifactTabPolicyDetails = (
             osTypes: artifact.osTypes,
             policyId: endpointPolicy.id,
           });
-          await browserAuth.loginAsSecurityRole('endpoint_policy_manager');
+          await browserAuth.loginAsEndpointPolicyManager();
           await pageObjects.policyDetailsPage.goto(endpointPolicy.id);
           await pageObjects.policyDetailsPage.openArtifactTab(artifact.tabTestSubj);
           await pageObjects.policyArtifactsPage.waitForAssignedList();
