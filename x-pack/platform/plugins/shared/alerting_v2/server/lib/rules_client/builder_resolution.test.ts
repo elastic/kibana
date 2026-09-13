@@ -1464,6 +1464,71 @@ describe('resolveReplaceRuleBuilder', () => {
           resolveReplaceRuleBuilder(registry, RULE_ID, data, managedBuilderExistingForReplace)
         ).not.toThrow();
       });
+
+      it('rejects clearing a managed builder type via builder_type: null on the replace branch', () => {
+        // PUT body explicitly clears the builder_type (escape hatch), but the
+        // stored rule is managed — rule-types.md closes this path for managed
+        // types with BUILDER_TYPE_IS_MANAGED.
+        const registry = createRegistryWithManagedTypes();
+        const data = {
+          ...baseCreateData,
+          metadata: {
+            ...baseCreateData.metadata,
+            builder_type: null,
+          },
+          query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+        } as ReplaceRuleData;
+
+        expect(() =>
+          resolveReplaceRuleBuilder(registry, RULE_ID, data, managedBuilderExistingForReplace)
+        ).toThrow(
+          expect.objectContaining({
+            output: expect.objectContaining({ statusCode: 400 }),
+            data: expect.objectContaining({
+              code: ALERTING_ERROR_CODES.BUILDER_TYPE_IS_MANAGED,
+            }),
+          })
+        );
+      });
+
+      it('rejects switching between managed types on the replace branch', () => {
+        // Two different managed types — any transition between them (even
+        // managed-to-managed) must be rejected with BUILDER_TYPE_IS_MANAGED.
+        const SECOND_MANAGED_TYPE = 'test.managed_other';
+        const secondManagedDefinition: Partial<RegisteredBuilderType> = {
+          type: SECOND_MANAGED_TYPE,
+          ownership: { solution: 'security', domain: 'endpoint' },
+          builderFieldsSchema: z.object(
+            {}
+          ) as unknown as RegisteredBuilderType['builderFieldsSchema'],
+        };
+        const registry = createMockRegistryWithTypes(
+          new Map<string, Partial<RegisteredBuilderType>>([
+            [MANAGED_BUILDER_TYPE, managedTypeDefinition],
+            [SECOND_MANAGED_TYPE, secondManagedDefinition],
+          ]),
+          jest.fn().mockReturnValue(standaloneGenerated)
+        );
+        const data = {
+          ...baseCreateData,
+          metadata: {
+            ...baseCreateData.metadata,
+            builder_type: SECOND_MANAGED_TYPE,
+            builder_fields: RAW_FIELDS,
+          },
+        } as unknown as ReplaceRuleData;
+
+        expect(() =>
+          resolveReplaceRuleBuilder(registry, RULE_ID, data, managedBuilderExistingForReplace)
+        ).toThrow(
+          expect.objectContaining({
+            output: expect.objectContaining({ statusCode: 400 }),
+            data: expect.objectContaining({
+              code: ALERTING_ERROR_CODES.BUILDER_TYPE_IS_MANAGED,
+            }),
+          })
+        );
+      });
     });
   });
 });

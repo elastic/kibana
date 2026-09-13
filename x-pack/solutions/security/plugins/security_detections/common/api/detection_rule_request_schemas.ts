@@ -105,7 +105,7 @@ const baseDefaultableFieldsSchema = z.object({
    * Ref: rule-domain-model.md "The request shapes" (defaults table)
    */
   schedule: detectionRuleScheduleSchema.optional(),
-  language: z.enum(['kuery', 'lucene']).optional(),
+  language: customQueryBuilderFieldsSchema.shape.language.optional(),
 });
 
 // ---------------------------------------------------------------------------
@@ -115,8 +115,10 @@ const baseDefaultableFieldsSchema = z.object({
 /**
  * Writable fields specific to the Custom Query rule type.
  *
- * `index`, `query`, and `language` shapes are imported from the builder schema
- * package so the public bounds cannot diverge from the stored model.
+ * `index` and `query` shapes are imported from the builder schema package so
+ * the public bounds cannot diverge from the stored model.  `language` is in
+ * `baseDefaultableFieldsSchema` (shared across types) and is likewise imported
+ * from the builder schema package there.
  */
 const customQueryWritableFieldsSchema = z.object({
   type: z.literal('query'),
@@ -272,7 +274,7 @@ export const detectionRulePatchPropsSchema = z
     // (more permissive) shape to accommodate both types in the flat PATCH schema.
     index: customQueryBuilderFieldsSchema.shape.index.optional(),
     query: thresholdBuilderFieldsSchema.shape.query.optional(),
-    language: z.enum(['kuery', 'lucene']).optional(),
+    language: customQueryBuilderFieldsSchema.shape.language.optional(),
     threshold: thresholdBuilderFieldsSchema.shape.threshold.optional(),
 
     // --- Content version: optional, not nullable (meaningless to null) ---
@@ -301,10 +303,12 @@ export const detectionRulePatchPropsSchema = z
     required_fields: detectionRuleCommonFields.required_fields.unwrap().nullable().optional(),
 
     // --- Schedule: the object itself is optional; lookback is nullable inside ---
+    // Shapes are composed from detectionRuleScheduleSchema so the min(1) bounds
+    // cannot drift from the create/update path.
     schedule: z
       .object({
-        interval: z.string().min(1).optional(),
-        lookback: z.string().min(1).nullable().optional(),
+        interval: detectionRuleScheduleSchema.shape.interval.optional(),
+        lookback: detectionRuleScheduleSchema.shape.lookback.unwrap().nullable().optional(),
       })
       .strict()
       .optional(),
