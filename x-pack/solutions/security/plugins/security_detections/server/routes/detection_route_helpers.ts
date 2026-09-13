@@ -23,7 +23,7 @@
 import Boom from '@hapi/boom';
 import type { IKibanaResponse, IUiSettingsClient, KibanaResponseFactory } from '@kbn/core/server';
 import type { OnRequestValidationError } from '@kbn/core-http-server';
-import { ALERTING_ERROR_CODES } from '@kbn/alerting-v2-plugin/server';
+import { ALERTING_ERROR_CODES, deriveErrorCodeFromStatus } from '@kbn/alerting-v2-plugin/server';
 import type { ErrorResponse } from '@kbn/alerting-v2-schemas';
 
 // ---------------------------------------------------------------------------
@@ -84,36 +84,6 @@ interface DetectionBoomData {
   code?: string;
   details?: Record<string, unknown>;
 }
-
-/**
- * Default fallback: HTTP status code → machine-readable error code.
- * Domain-specific codes set on the Boom error via `{ code }` data are preferred
- * — this is the floor for errors that arrive without one.
- *
- * Mirrors `deriveErrorCodeFromStatus` from the framework routes.
- */
-const deriveErrorCodeFromStatus = (statusCode: number): string => {
-  // Mirrors the framework's deriveErrorCodeFromStatus exactly so a client of
-  // both surfaces sees one code per HTTP status.  The framework map is not
-  // exported, so this copy must stay in sync.
-  const map: Record<number, string> = {
-    400: 'BAD_REQUEST',
-    401: 'UNAUTHORIZED',
-    403: 'FORBIDDEN',
-    404: 'NOT_FOUND',
-    409: 'CONFLICT',
-    422: 'UNPROCESSABLE_ENTITY',
-    429: 'TOO_MANY_REQUESTS',
-    500: 'INTERNAL_SERVER_ERROR',
-    502: 'BAD_GATEWAY',
-    503: 'SERVICE_UNAVAILABLE',
-    504: 'GATEWAY_TIMEOUT',
-  };
-  return (
-    map[statusCode] ??
-    (statusCode >= 400 && statusCode < 500 ? 'BAD_REQUEST' : 'INTERNAL_SERVER_ERROR')
-  );
-};
 
 /**
  * Converts any error to the Alerting v2 `{ code, error, message, details? }` envelope

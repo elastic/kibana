@@ -938,11 +938,10 @@ export function transformRuleSoAttributesToRuleApiResponse(
       description: attrs.metadata.description,
       owner: attrs.metadata.owner,
       tags: attrs.metadata.tags,
-      // signature_id is always set at create time (generated or caller-supplied).
-      // The non-null assertion is safe for all rules created since step 4.1;
-      // step 4.5's model-version migration backfills any pre-existing rules.
-
-      signature_id: attrs.metadata.signature_id!,
+      // Falls back to the object id for rules created before this field was
+      // introduced (pending the model-version migration in step 4.5 which
+      // backfills `signature_id ?? doc.id`), matching the migration's own logic.
+      signature_id: attrs.metadata.signature_id ?? id,
       builder_type: attrs.metadata.builder_type,
       builder_fields: attrs.metadata.builder_fields,
       // Falls back to the default for rules created before this field was
