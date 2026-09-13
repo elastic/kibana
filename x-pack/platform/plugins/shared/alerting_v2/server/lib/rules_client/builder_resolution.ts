@@ -109,6 +109,24 @@ function parseBuilderFields(
     );
   }
 
+  // Run the extra validation hook after the schema parse succeeds.
+  // Its errors reject the write exactly like schema errors.
+  // Ref: rule-validation.md "The extra validation hook"
+  if (definition.validateFields) {
+    const hookErrors = definition.validateFields(result.data);
+    if (hookErrors.length > 0) {
+      throw Boom.badRequest(
+        `builder_fields for builder type "${definition.type}" are invalid: ${hookErrors.join(
+          '; '
+        )}`,
+        {
+          code: ALERTING_ERROR_CODES.INVALID_BUILDER_FIELDS,
+          details: { builder_type: definition.type },
+        }
+      );
+    }
+  }
+
   return result.data;
 }
 
