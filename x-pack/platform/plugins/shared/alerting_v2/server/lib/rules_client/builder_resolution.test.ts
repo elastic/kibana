@@ -47,6 +47,7 @@ import type {
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import { createRuleSoAttributes } from '../test_utils';
 import {
+  assertBuilderTypeTransitionNotManaged,
   resolveCreateRuleBuilder,
   resolveReplaceRuleBuilder,
   resolveUpdateRuleBuilder,
@@ -151,12 +152,12 @@ const unmanagedExplicitTypeDefinition: Partial<RegisteredBuilderType> = {
  * fixture types. The unregistered test types (BUILDER_TYPE, OTHER_BUILDER_TYPE)
  * still return `undefined` from `get()`.
  */
-function createRegistryWithManagedTypes(generateFn: jest.Mock = jest.fn()): BuilderTypeRegistry {
+function createRegistryWithManagedTypes(): BuilderTypeRegistry {
   const typeMap = new Map<string, Partial<RegisteredBuilderType>>([
     [MANAGED_BUILDER_TYPE, managedTypeDefinition],
     [UNMANAGED_EXPLICIT_BUILDER_TYPE, unmanagedExplicitTypeDefinition],
   ]);
-  return createMockRegistryWithTypes(typeMap, generateFn);
+  return createMockRegistryWithTypes(typeMap);
 }
 
 // Existing SO attributes for a plain (non-builder) rule.
@@ -628,11 +629,16 @@ describe('resolveUpdateRuleBuilder', () => {
       // A plain rule requesting a managed builder_type + fields must be rejected
       // before any query compilation runs.
       const registry = createRegistryWithManagedTypes();
-      const data: UpdateRuleData = {
-        metadata: { builder_type: MANAGED_BUILDER_TYPE, builder_fields: RAW_FIELDS },
-      };
 
-      expect(() => resolveUpdateRuleBuilder(registry, RULE_ID, data, plainExisting)).toThrow(
+      expect(() =>
+        assertBuilderTypeTransitionNotManaged(
+          registry,
+          RULE_ID,
+          MANAGED_BUILDER_TYPE,
+          plainExisting.metadata.builder_type,
+          plainExisting.metadata.ownership
+        )
+      ).toThrow(
         expect.objectContaining({
           output: expect.objectContaining({ statusCode: 400 }),
           data: expect.objectContaining({
@@ -651,14 +657,19 @@ describe('resolveUpdateRuleBuilder', () => {
     it('rejects a plain rule adopting a managed type even when a matching onBehalfOf identity would pass the write gate', () => {
       // Caller identity does NOT bypass the managed-type transition check.
       // The gate here is on type change, not on write permission.
+      // assertBuilderTypeTransitionNotManaged has no identity parameter — there
+      // is no bypass path.
       const registry = createRegistryWithManagedTypes();
-      const data: UpdateRuleData = {
-        metadata: { builder_type: MANAGED_BUILDER_TYPE, builder_fields: RAW_FIELDS },
-      };
 
-      // Same call — identity is not part of resolveUpdateRuleBuilder's
-      // signature, so there is no bypass path.
-      expect(() => resolveUpdateRuleBuilder(registry, RULE_ID, data, plainExisting)).toThrow(
+      expect(() =>
+        assertBuilderTypeTransitionNotManaged(
+          registry,
+          RULE_ID,
+          MANAGED_BUILDER_TYPE,
+          plainExisting.metadata.builder_type,
+          plainExisting.metadata.ownership
+        )
+      ).toThrow(
         expect.objectContaining({
           data: expect.objectContaining({ code: ALERTING_ERROR_CODES.BUILDER_TYPE_IS_MANAGED }),
         })
@@ -667,12 +678,15 @@ describe('resolveUpdateRuleBuilder', () => {
 
     it('rejects an unmanaged builder rule switching to a managed type', () => {
       const registry = createRegistryWithManagedTypes();
-      const data: UpdateRuleData = {
-        metadata: { builder_type: MANAGED_BUILDER_TYPE, builder_fields: RAW_FIELDS },
-      };
 
       expect(() =>
-        resolveUpdateRuleBuilder(registry, RULE_ID, data, unmanagedExplicitBuilderExisting)
+        assertBuilderTypeTransitionNotManaged(
+          registry,
+          RULE_ID,
+          MANAGED_BUILDER_TYPE,
+          unmanagedExplicitBuilderExisting.metadata.builder_type,
+          unmanagedExplicitBuilderExisting.metadata.ownership
+        )
       ).toThrow(
         expect.objectContaining({
           data: expect.objectContaining({ code: ALERTING_ERROR_CODES.BUILDER_TYPE_IS_MANAGED }),
@@ -683,15 +697,16 @@ describe('resolveUpdateRuleBuilder', () => {
     it('rejects a managed rule switching to an unmanaged type', () => {
       // The stored rule is managed (ownership.managed === true and type is registered
       // as managed), so any transition away from it is rejected.
-      const registry = createRegistryWithManagedTypes(
-        jest.fn().mockReturnValue(standaloneGenerated)
-      );
-      const data: UpdateRuleData = {
-        metadata: { builder_type: UNMANAGED_EXPLICIT_BUILDER_TYPE, builder_fields: RAW_FIELDS },
-      };
+      const registry = createRegistryWithManagedTypes();
 
       expect(() =>
-        resolveUpdateRuleBuilder(registry, RULE_ID, data, managedBuilderExisting)
+        assertBuilderTypeTransitionNotManaged(
+          registry,
+          RULE_ID,
+          UNMANAGED_EXPLICIT_BUILDER_TYPE,
+          managedBuilderExisting.metadata.builder_type,
+          managedBuilderExisting.metadata.ownership
+        )
       ).toThrow(
         expect.objectContaining({
           data: expect.objectContaining({ code: ALERTING_ERROR_CODES.BUILDER_TYPE_IS_MANAGED }),
@@ -701,10 +716,15 @@ describe('resolveUpdateRuleBuilder', () => {
 
     it('rejects clearing a managed builder type via builder_type: null', () => {
       const registry = createRegistryWithManagedTypes();
-      const data: UpdateRuleData = { metadata: { builder_type: null } };
 
       expect(() =>
-        resolveUpdateRuleBuilder(registry, RULE_ID, data, managedBuilderExisting)
+        assertBuilderTypeTransitionNotManaged(
+          registry,
+          RULE_ID,
+          null,
+          managedBuilderExisting.metadata.builder_type,
+          managedBuilderExisting.metadata.ownership
+        )
       ).toThrow(
         expect.objectContaining({
           data: expect.objectContaining({ code: ALERTING_ERROR_CODES.BUILDER_TYPE_IS_MANAGED }),
@@ -713,18 +733,17 @@ describe('resolveUpdateRuleBuilder', () => {
     });
 
     it('passes when restating the same managed type with new builder_fields', () => {
-      // Restatement (requested === stored) is always allowed; the existing
-      // builder regeneration path takes over.
-      const generate = jest.fn().mockReturnValue(standaloneGenerated);
-      const registry = createRegistryWithManagedTypes(generate);
-      const data: UpdateRuleData = {
-        metadata: { builder_type: MANAGED_BUILDER_TYPE, builder_fields: RAW_FIELDS },
-      };
+      // Restatement (requested === stored) is always allowed.
+      const registry = createRegistryWithManagedTypes();
 
-      // Must not throw BUILDER_TYPE_IS_MANAGED. The write-time compilation path
-      // runs next and succeeds with the mocked generate().
       expect(() =>
-        resolveUpdateRuleBuilder(registry, RULE_ID, data, managedBuilderExisting)
+        assertBuilderTypeTransitionNotManaged(
+          registry,
+          RULE_ID,
+          MANAGED_BUILDER_TYPE,
+          managedBuilderExisting.metadata.builder_type,
+          managedBuilderExisting.metadata.ownership
+        )
       ).not.toThrow();
     });
 
@@ -733,10 +752,15 @@ describe('resolveUpdateRuleBuilder', () => {
       // BUILDER_TYPE_IS_MANAGED must fire even when the type is no longer in
       // the registry.
       const registry = createRegistryWithManagedTypes();
-      const data: UpdateRuleData = { metadata: { builder_type: null } };
 
       expect(() =>
-        resolveUpdateRuleBuilder(registry, RULE_ID, data, orphanManagedExisting)
+        assertBuilderTypeTransitionNotManaged(
+          registry,
+          RULE_ID,
+          null,
+          orphanManagedExisting.metadata.builder_type,
+          orphanManagedExisting.metadata.ownership
+        )
       ).toThrow(
         expect.objectContaining({
           data: expect.objectContaining({ code: ALERTING_ERROR_CODES.BUILDER_TYPE_IS_MANAGED }),
@@ -744,17 +768,21 @@ describe('resolveUpdateRuleBuilder', () => {
       );
     });
 
-    it('does not interfere with an unmanaged type adoption (plain rule adopting an unmanaged type without fields stays INVALID_BUILDER_FIELDS)', () => {
+    it('does not interfere with an unmanaged type adoption (the guard passes without throwing)', () => {
       // BUILDER_TYPE_IS_MANAGED does not fire for unmanaged transitions. The
-      // existing INVALID_BUILDER_FIELDS guard (missing fields) takes over.
+      // guard passes without throwing; subsequent checks (INVALID_BUILDER_FIELDS
+      // for missing builder_fields) handle the rest.
       const registry = createRegistryWithManagedTypes();
-      const data: UpdateRuleData = { metadata: { builder_type: UNMANAGED_EXPLICIT_BUILDER_TYPE } };
 
-      expect(() => resolveUpdateRuleBuilder(registry, RULE_ID, data, plainExisting)).toThrow(
-        expect.objectContaining({
-          data: expect.objectContaining({ code: ALERTING_ERROR_CODES.INVALID_BUILDER_FIELDS }),
-        })
-      );
+      expect(() =>
+        assertBuilderTypeTransitionNotManaged(
+          registry,
+          RULE_ID,
+          UNMANAGED_EXPLICIT_BUILDER_TYPE,
+          plainExisting.metadata.builder_type,
+          plainExisting.metadata.ownership
+        )
+      ).not.toThrow();
     });
   });
 
@@ -1419,20 +1447,16 @@ describe('resolveReplaceRuleBuilder', () => {
       it('rejects a plain rule adopting a managed type via PUT with builder_fields', () => {
         // PUT body supplies builder_type (managed) + builder_fields: the
         // managed-type transition guard fires before builder regeneration.
-        const registry = createRegistryWithManagedTypes(
-          jest.fn().mockReturnValue(standaloneGenerated)
-        );
-        const data = {
-          ...baseCreateData,
-          metadata: {
-            ...baseCreateData.metadata,
-            builder_type: MANAGED_BUILDER_TYPE,
-            builder_fields: RAW_FIELDS,
-          },
-        } as unknown as ReplaceRuleData;
+        const registry = createRegistryWithManagedTypes();
 
         expect(() =>
-          resolveReplaceRuleBuilder(registry, RULE_ID, data, plainExistingForReplace)
+          assertBuilderTypeTransitionNotManaged(
+            registry,
+            RULE_ID,
+            MANAGED_BUILDER_TYPE,
+            plainExistingForReplace.metadata.builder_type,
+            plainExistingForReplace.metadata.ownership
+          )
         ).toThrow(
           expect.objectContaining({
             output: expect.objectContaining({ statusCode: 400 }),
@@ -1445,23 +1469,17 @@ describe('resolveReplaceRuleBuilder', () => {
 
       it('passes when restating the same managed type on the replace branch', () => {
         // Carrying the same builder_type as stored (restatement) is always
-        // allowed. The existing faithful-round-trip path (Path 3) takes over.
+        // allowed.
         const registry = createRegistryWithManagedTypes();
-        const data = {
-          ...baseCreateData,
-          metadata: {
-            ...baseCreateData.metadata,
-            builder_type: MANAGED_BUILDER_TYPE,
-          },
-          query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
-        } as ReplaceRuleData;
 
-        // The round-trip check (Path 3) accepts this because:
-        //   - builder_type matches stored
-        //   - stored rule has no builder_fields
-        //   - query is unchanged
         expect(() =>
-          resolveReplaceRuleBuilder(registry, RULE_ID, data, managedBuilderExistingForReplace)
+          assertBuilderTypeTransitionNotManaged(
+            registry,
+            RULE_ID,
+            MANAGED_BUILDER_TYPE,
+            managedBuilderExistingForReplace.metadata.builder_type,
+            managedBuilderExistingForReplace.metadata.ownership
+          )
         ).not.toThrow();
       });
 
@@ -1470,17 +1488,15 @@ describe('resolveReplaceRuleBuilder', () => {
         // stored rule is managed — rule-types.md closes this path for managed
         // types with BUILDER_TYPE_IS_MANAGED.
         const registry = createRegistryWithManagedTypes();
-        const data = {
-          ...baseCreateData,
-          metadata: {
-            ...baseCreateData.metadata,
-            builder_type: null,
-          },
-          query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
-        } as ReplaceRuleData;
 
         expect(() =>
-          resolveReplaceRuleBuilder(registry, RULE_ID, data, managedBuilderExistingForReplace)
+          assertBuilderTypeTransitionNotManaged(
+            registry,
+            RULE_ID,
+            null,
+            managedBuilderExistingForReplace.metadata.builder_type,
+            managedBuilderExistingForReplace.metadata.ownership
+          )
         ).toThrow(
           expect.objectContaining({
             output: expect.objectContaining({ statusCode: 400 }),
@@ -1506,20 +1522,17 @@ describe('resolveReplaceRuleBuilder', () => {
           new Map<string, Partial<RegisteredBuilderType>>([
             [MANAGED_BUILDER_TYPE, managedTypeDefinition],
             [SECOND_MANAGED_TYPE, secondManagedDefinition],
-          ]),
-          jest.fn().mockReturnValue(standaloneGenerated)
+          ])
         );
-        const data = {
-          ...baseCreateData,
-          metadata: {
-            ...baseCreateData.metadata,
-            builder_type: SECOND_MANAGED_TYPE,
-            builder_fields: RAW_FIELDS,
-          },
-        } as unknown as ReplaceRuleData;
 
         expect(() =>
-          resolveReplaceRuleBuilder(registry, RULE_ID, data, managedBuilderExistingForReplace)
+          assertBuilderTypeTransitionNotManaged(
+            registry,
+            RULE_ID,
+            SECOND_MANAGED_TYPE,
+            managedBuilderExistingForReplace.metadata.builder_type,
+            managedBuilderExistingForReplace.metadata.ownership
+          )
         ).toThrow(
           expect.objectContaining({
             output: expect.objectContaining({ statusCode: 400 }),

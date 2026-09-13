@@ -394,18 +394,6 @@ export function resolveUpdateRuleBuilder(
   const existingType = existing.metadata.builder_type;
   const validateBuilderFields = options?.validateBuilderFields ?? true;
 
-  // Reject any transition that touches a managed builder type. This guard runs
-  // before all other checks so that managed-type constraints are enforced even
-  // when the request would otherwise be rejected for an unrelated reason (e.g.
-  // missing builder_fields). Caller identity does not bypass this check.
-  assertBuilderTypeTransitionNotManaged(
-    registry,
-    ruleId,
-    requestedType,
-    existingType,
-    existing.metadata.ownership
-  );
-
   if (requestedType === null) {
     if (requestedFields != null) {
       throw Boom.badRequest(
@@ -605,18 +593,6 @@ export function resolveReplaceRuleBuilder(
   options?: BuilderResolutionOptions
 ): ResolvedCreateRuleData {
   const existingType = existing.metadata.builder_type;
-  const requestedTypeForReplace = data.metadata?.builder_type;
-
-  // Reject any transition that touches a managed builder type on the replace
-  // branch. Runs before the existing guard paths for the same reason as on the
-  // update path. Caller identity does not bypass this check.
-  assertBuilderTypeTransitionNotManaged(
-    registry,
-    ruleId,
-    requestedTypeForReplace,
-    existingType,
-    existing.metadata.ownership
-  );
 
   // No stored builder type: the replace is a straightforward create-shaped
   // resolution. Delegate to the create path unchanged.
