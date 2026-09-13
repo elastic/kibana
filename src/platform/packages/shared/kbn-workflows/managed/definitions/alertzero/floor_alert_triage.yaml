@@ -21,6 +21,9 @@ steps:
       configuration_overrides:
         skill_ids:
           - alert-analysis
+        tools:
+          - tool_ids:
+              - security.alertzero.actions.list_by_category
       message: >
         Triage the security alert context below. Prefer
         recall over precision when unsure. Return a structured

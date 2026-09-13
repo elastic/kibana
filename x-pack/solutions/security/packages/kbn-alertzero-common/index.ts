@@ -24,6 +24,8 @@ export {
   ALERTZERO_INVESTIGATIONS_URL,
   ALERTZERO_INVESTIGATION_URL_TEMPLATE,
   ALERTZERO_PLUGIN_NAME,
+  ALERTZERO_ACTIONS_URL,
+  ALERTZERO_ACTIONS_LIST_BY_CATEGORY_TOOL_ID,
   ALERTZERO_PROPOSALS_URL,
   ALERTZERO_THIN_AGENT_ID,
   ALERTZERO_SKILLS_URL,
@@ -64,6 +66,13 @@ export {
   buildWorkerUrl,
 } from './constants';
 
+export type {
+  ActionApprovalPolicy,
+  ActionCategory,
+  ActionCatalogEntry,
+  ActionImpact,
+  ListActionsResponse,
+} from './action_catalog_types';
 export { CONVERSATION_QUEUE_CATEGORIES, CONVERSATION_QUEUE_LABELS } from './translations';
 
 export {
