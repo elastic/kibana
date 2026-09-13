@@ -413,7 +413,11 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
                       <EuiSpacer size="s" />
                     </>
                   ) : null}
-                  <MappingEditor value={mappingsValue} onChange={setMappingsValue} />
+                  <MappingEditor
+                    value={mappingsValue}
+                    onChange={setMappingsValue}
+                    docLinks={docLinks}
+                  />
                 </>
               ) : null}
             </>

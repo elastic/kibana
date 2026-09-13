@@ -8,6 +8,8 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+
 import type { MappingEditorValue } from './mapping_editor';
 import { MappingEditor, emptyMappingEditorValue } from './mapping_editor';
 
@@ -18,6 +20,24 @@ const meta: Meta<typeof MappingEditor> = {
 
 export default meta;
 type Story = StoryObj<typeof MappingEditor>;
+
+const docLinksMock = {
+  links: {
+    elasticsearch: {
+      mappingReference: 'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference',
+      mappingKeyword:
+        'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/keyword',
+      mappingBoolean:
+        'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/boolean',
+      mappingIp: 'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/ip',
+      mappingDate: 'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/date',
+      mappingUnsignedLong:
+        'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/unsigned-long',
+      mappingNumber: 'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/number',
+    },
+    dataFederation: {},
+  },
+} as unknown as DocLinksStart;
 
 const PopulatedStory = () => {
   const [value, setValue] = React.useState<MappingEditorValue>(() => ({
@@ -48,12 +68,12 @@ const PopulatedStory = () => {
     ],
   }));
 
-  return <MappingEditor value={value} onChange={setValue} />;
+  return <MappingEditor value={value} onChange={setValue} docLinks={docLinksMock} />;
 };
 
 const EmptyStory = () => {
   const [value, setValue] = React.useState<MappingEditorValue>(() => emptyMappingEditorValue());
-  return <MappingEditor value={value} onChange={setValue} />;
+  return <MappingEditor value={value} onChange={setValue} docLinks={docLinksMock} />;
 };
 
 export const Empty: Story = {

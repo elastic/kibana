@@ -22,11 +22,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 import type { DatasetMappingFieldType, DatasetMappings } from '../../../common';
 import { FieldMappingForm, getFieldTypeDocsHelpText } from './field_mapping_form';
 import { FieldMappingDisplayMode } from './field_mapping_display_mode';
 import { MappingJsonPreview } from './mapping_json_preview';
+import { getTypeInfoByValue } from './const';
 
 export interface MappingEditorField {
   id: string;
@@ -57,50 +59,13 @@ export interface MappingEditorValidationResult {
 export interface MappingEditorProps {
   value: MappingEditorValue;
   onChange: (next: SetStateAction<MappingEditorValue>) => void;
+  docLinks: DocLinksStart;
   /**
    * When true, shows a JSON preview matching the docs.
    * Defaults to true because the output is typically copy/pasted.
    */
   showJsonPreview?: boolean;
 }
-
-const ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL =
-  'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference';
-
-const TYPE_INFO_BY_VALUE: Record<DatasetMappingFieldType, { label: string; docs: string }> = {
-  boolean: {
-    label: 'Boolean',
-    docs: `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/boolean`,
-  },
-  date: {
-    label: 'Date',
-    docs: `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/date`,
-  },
-  double: {
-    label: 'Double',
-    docs: `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/number`,
-  },
-  integer: {
-    label: 'Integer',
-    docs: `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/number`,
-  },
-  ip: {
-    label: 'IP',
-    docs: `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/ip`,
-  },
-  keyword: {
-    label: 'Keyword',
-    docs: `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/keyword`,
-  },
-  long: {
-    label: 'Long',
-    docs: `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/number`,
-  },
-  unsigned_long: {
-    label: 'Unsigned long',
-    docs: `${ELASTICSEARCH_MAPPING_REFERENCE_BASE_URL}/unsigned-long`,
-  },
-};
 
 export const emptyMappingEditorValue = (): MappingEditorValue => ({
   dynamic: true,
@@ -213,8 +178,10 @@ export const buildDatasetMappings = (value: MappingEditorValue): DatasetMappings
 export const MappingEditor: FC<MappingEditorProps> = ({
   value,
   onChange,
+  docLinks,
   showJsonPreview = true,
 }) => {
+  const typeInfoByValue = useMemo(() => getTypeInfoByValue(docLinks), [docLinks]);
   const nextId = useRef(0);
   const validation = useMemo(() => validateMappingEditorValue(value), [value]);
   const [editingFieldId, setEditingFieldId] = useState<string | null>(null);
@@ -526,7 +493,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
               draftField.type
                 ? getFieldTypeDocsHelpText(
                     draftField.type as DatasetMappingFieldType,
-                    TYPE_INFO_BY_VALUE
+                    typeInfoByValue
                   )
                 : undefined
             }
@@ -547,7 +514,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
         <EuiFlexGroup direction="column" gutterSize="s">
           {filteredFields.map((f) => {
             const typeInfo = (
-              TYPE_INFO_BY_VALUE as Record<string, { label: string; docs: string } | undefined>
+              typeInfoByValue as Record<string, { label: string; docs: string } | undefined>
             )[f.type];
             const isEditing = editingFieldId === f.id;
             const shouldShowRowValidation = validatedFieldIds.includes(f.id);
@@ -566,9 +533,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
                             updateField(f.id, patch as Partial<MappingEditorField>);
                           }}
                           typeHelpText={
-                            f.type
-                              ? getFieldTypeDocsHelpText(f.type, TYPE_INFO_BY_VALUE)
-                              : undefined
+                            f.type ? getFieldTypeDocsHelpText(f.type, typeInfoByValue) : undefined
                           }
                           pathHelpText={i18n.translate(
                             'xpack.dataFederation.mappingEditor.physicalPathHelp',
