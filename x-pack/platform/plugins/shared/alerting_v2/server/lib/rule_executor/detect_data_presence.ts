@@ -56,7 +56,7 @@ export const detectDataPresence = async ({
   // effectiveQuery is set by CompileRuleQueryStep, which always runs before the
   // classify step that calls this helper. The non-null assertion is safe in all
   // correctly assembled pipelines.
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
   const noDataQuery = getNoDataEsqlQuery(effectiveQuery!, rule.no_data_strategy);
 
   if (!noDataQuery) {
