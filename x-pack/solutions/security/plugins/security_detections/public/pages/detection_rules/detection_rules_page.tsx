@@ -677,7 +677,6 @@ export const DetectionRulesPage: React.FC = () => {
         sorting={sorting}
         loading={isFetching}
         onChange={handleTableChange}
-        responsiveBreakpoint={false}
         noItemsMessage={
           isFetching
             ? i18n.translate('xpack.securityDetections.rulesList.loading', {
