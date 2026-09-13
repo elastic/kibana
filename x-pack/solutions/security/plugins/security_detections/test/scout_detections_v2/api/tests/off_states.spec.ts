@@ -70,22 +70,30 @@ apiTest.describe(
     let adminCredentials: RoleApiCredentials;
     let adminHeaders: Record<string, string>;
 
-    apiTest.beforeAll(async ({ requestAuth }) => {
+    apiTest.beforeAll(async ({ requestAuth, apiClient }) => {
       writerCredentials = await requestAuth.getApiKeyForCustomRole(DETECTION_RULES_ALL_ROLE);
       writerHeaders = { ...DETECTION_HEADERS, ...writerCredentials.apiKeyHeader };
 
       adminCredentials = await requestAuth.getApiKeyForAdmin();
       adminHeaders = { ...DETECTION_HEADERS, ...adminCredentials.apiKeyHeader };
+
+      // Enable alerting:v2:enabled via the API so tests start with the flag on.
+      // The server config no longer uses a globalOverride (which would lock the
+      // setting and prevent tests from flipping it), so we must write it here.
+      await apiClient.post(GLOBAL_SETTINGS_API, {
+        headers: adminHeaders,
+        body: { changes: { [ALERTING_V2_ENABLED_SETTING]: true } },
+      });
     });
 
     apiTest.afterEach(async ({ apiClient }) => {
-      // Always restore the uiSettings flag — DELETE the override so the setting
-      // reverts to the server config's globalOverride (true for this suite's
-      // server config set).
-      await apiClient.delete(
-        `${GLOBAL_SETTINGS_API}/${encodeURIComponent(ALERTING_V2_ENABLED_SETTING)}`,
-        { headers: adminHeaders, responseType: 'json' }
-      );
+      // Always restore the uiSettings flag by writing true again.  We POST
+      // rather than DELETE because DELETE removes a user-set value but cannot
+      // revert to a global-override (the server config no longer sets one).
+      await apiClient.post(GLOBAL_SETTINGS_API, {
+        headers: adminHeaders,
+        body: { changes: { [ALERTING_V2_ENABLED_SETTING]: true } },
+      });
     });
 
     /**

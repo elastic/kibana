@@ -77,7 +77,7 @@ function makeContext(alertingEnabled: boolean) {
   return {
     core: Promise.resolve({
       uiSettings: {
-        client: makeUiSettings(alertingEnabled),
+        globalClient: makeUiSettings(alertingEnabled),
       },
     }),
   };

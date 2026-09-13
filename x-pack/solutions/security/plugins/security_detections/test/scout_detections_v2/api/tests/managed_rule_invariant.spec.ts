@@ -59,6 +59,13 @@ const alertingRuleUrl = (id: string) => `${ALERTING_V2_RULES}/${encodeURICompone
 const alertingEnableUrl = (id: string) => `${alertingRuleUrl(id)}/_enable`;
 const alertingDisableUrl = (id: string) => `${alertingRuleUrl(id)}/_disable`;
 const alertingRunUrl = (id: string) => `${alertingRuleUrl(id)}/_run`;
+const alertingDeleteByQueryUrl = `${ALERTING_V2_RULES}/_delete_by_query`;
+const alertingEnableByQueryUrl = `${ALERTING_V2_RULES}/_enable_by_query`;
+const alertingDisableByQueryUrl = `${ALERTING_V2_RULES}/_disable_by_query`;
+
+/** Kibana global settings API — used to enable alerting:v2:enabled at suite start. */
+const GLOBAL_SETTINGS_API = '/api/kibana/global_settings';
+const ALERTING_V2_ENABLED_SETTING = 'alerting:v2:enabled';
 
 apiTest.describe(
   'Detection Engine v2 — managed-rule invariant',
@@ -71,12 +78,19 @@ apiTest.describe(
 
     let detectionRuleId: string;
 
-    apiTest.beforeAll(async ({ requestAuth }) => {
+    apiTest.beforeAll(async ({ requestAuth, apiClient }) => {
       writerCredentials = await requestAuth.getApiKeyForCustomRole(DETECTION_RULES_ALL_ROLE);
       writerHeaders = { ...DETECTION_HEADERS, ...writerCredentials.apiKeyHeader };
 
       const adminCredentials = await requestAuth.getApiKeyForAdmin();
       adminHeaders = { ...DETECTION_HEADERS, ...adminCredentials.apiKeyHeader };
+
+      // Enable alerting:v2:enabled via the API so every test in this suite sees the
+      // flag on.  The server config no longer uses a globalOverride.
+      await apiClient.post(GLOBAL_SETTINGS_API, {
+        headers: adminHeaders,
+        body: { changes: { [ALERTING_V2_ENABLED_SETTING]: true } },
+      });
     });
 
     apiTest.beforeEach(async ({ apiClient }) => {
@@ -121,7 +135,7 @@ apiTest.describe(
             state_transition: { pending_count: 0, recovering_count: 0 },
           },
         });
-        expect(response).toHaveStatusCode(409);
+        expect(response).toHaveStatusCode(400);
         expect(response.body.code).toBe('RULE_IS_MANAGED');
       }
     );
@@ -130,7 +144,7 @@ apiTest.describe(
       const response = await apiClient.post(alertingEnableUrl(detectionRuleId), {
         headers: adminHeaders,
       });
-      expect(response).toHaveStatusCode(409);
+      expect(response).toHaveStatusCode(400);
       expect(response.body.code).toBe('RULE_IS_MANAGED');
     });
 
@@ -138,7 +152,7 @@ apiTest.describe(
       const response = await apiClient.post(alertingDisableUrl(detectionRuleId), {
         headers: adminHeaders,
       });
-      expect(response).toHaveStatusCode(409);
+      expect(response).toHaveStatusCode(400);
       expect(response.body.code).toBe('RULE_IS_MANAGED');
     });
 
@@ -146,7 +160,7 @@ apiTest.describe(
       const response = await apiClient.delete(alertingRuleUrl(detectionRuleId), {
         headers: adminHeaders,
       });
-      expect(response).toHaveStatusCode(409);
+      expect(response).toHaveStatusCode(400);
       expect(response.body.code).toBe('RULE_IS_MANAGED');
     });
 
@@ -154,9 +168,83 @@ apiTest.describe(
       const response = await apiClient.post(alertingRunUrl(detectionRuleId), {
         headers: adminHeaders,
       });
-      expect(response).toHaveStatusCode(409);
+      expect(response).toHaveStatusCode(400);
       expect(response.body.code).toBe('RULE_IS_MANAGED');
     });
+
+    apiTest(
+      'single-rule PATCH (update_rule_route) via generic API returns RULE_IS_MANAGED',
+      async ({ apiClient }) => {
+        const response = await apiClient.patch(alertingRuleUrl(detectionRuleId), {
+          headers: adminHeaders,
+          body: { metadata: { name: 'attempted-hijack' } },
+        });
+        expect(response).toHaveStatusCode(400);
+        expect(response.body.code).toBe('RULE_IS_MANAGED');
+      }
+    );
+
+    // -------------------------------------------------------------------------
+    // By-query paths: managed rule excluded from the write set
+    // -------------------------------------------------------------------------
+
+    apiTest(
+      'delete_by_query via generic API does not delete the detection rule',
+      async ({ apiClient }) => {
+        await apiClient.post(alertingDeleteByQueryUrl, {
+          headers: adminHeaders,
+          body: {},
+        });
+        // The detection rule must still exist after the by-query delete.
+        const fetchAfter = await apiClient.get(getDetectionRuleUrl(detectionRuleId), {
+          headers: writerHeaders,
+        });
+        expect(fetchAfter).toHaveStatusCode(200);
+      }
+    );
+
+    apiTest(
+      'enable_by_query via generic API does not change the detection rule enabled state',
+      async ({ apiClient }) => {
+        const before = await apiClient.get(getDetectionRuleUrl(detectionRuleId), {
+          headers: writerHeaders,
+        });
+        expect(before).toHaveStatusCode(200);
+        const beforeEnabled: boolean = before.body.enabled;
+
+        await apiClient.post(alertingEnableByQueryUrl, {
+          headers: adminHeaders,
+          body: {},
+        });
+
+        const after = await apiClient.get(getDetectionRuleUrl(detectionRuleId), {
+          headers: writerHeaders,
+        });
+        expect(after).toHaveStatusCode(200);
+        // The detection rule's enabled state must not have changed via the generic by-query.
+        expect(after.body.enabled).toBe(beforeEnabled);
+      }
+    );
+
+    apiTest(
+      'disable_by_query via generic API does not change the detection rule enabled state',
+      async ({ apiClient }) => {
+        // Enable the rule first via the Detection API.
+        await apiClient.post(getDetectionEnableUrl(detectionRuleId), { headers: writerHeaders });
+
+        await apiClient.post(alertingDisableByQueryUrl, {
+          headers: adminHeaders,
+          body: {},
+        });
+
+        const after = await apiClient.get(getDetectionRuleUrl(detectionRuleId), {
+          headers: writerHeaders,
+        });
+        expect(after).toHaveStatusCode(200);
+        // Must still be enabled because the generic by-query is blocked for managed rules.
+        expect(after.body.enabled).toBe(true);
+      }
+    );
 
     // -------------------------------------------------------------------------
     // Bulk paths: managed rule excluded from write set (not just gate-rejected)
@@ -247,7 +335,7 @@ apiTest.describe(
         const rejectResponse = await apiClient.post(alertingEnableUrl(detectionRuleId), {
           headers: adminHeaders,
         });
-        expect(rejectResponse).toHaveStatusCode(409);
+        expect(rejectResponse).toHaveStatusCode(400);
         expect(rejectResponse.body.code).toBe('RULE_IS_MANAGED');
       }
     );

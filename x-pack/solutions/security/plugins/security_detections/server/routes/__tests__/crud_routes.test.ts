@@ -39,6 +39,7 @@ import {
   DETECTION_ENGINE_V2_RULES_PATH,
   DETECTION_ENGINE_V2_RULE_PATH,
   ALERTING_V2_ENABLED_SETTING,
+  detectionOnRequestValidationError,
 } from '../detection_route_helpers';
 
 // ---------------------------------------------------------------------------
@@ -127,7 +128,7 @@ function makeUiSettings(enabled: boolean) {
 function makeContext(alertingEnabled: boolean) {
   return {
     core: Promise.resolve({
-      uiSettings: { client: makeUiSettings(alertingEnabled) },
+      uiSettings: { globalClient: makeUiSettings(alertingEnabled) },
     }),
   };
 }
@@ -201,6 +202,16 @@ describe('POST /api/detection_engine/v2/rules — create rule', () => {
       // RouteAuthz is a union (AuthzEnabled | AuthzDisabled); cast to access requiredPrivileges.
       const authz = registeredRoute.config.security?.authz as { requiredPrivileges?: string[] };
       expect(authz?.requiredPrivileges).toContain('rules-all');
+    });
+
+    it('wires detectionOnRequestValidationError into the validate config', () => {
+      const { registeredRoute } = setup();
+      const versionConfig = registeredRoute.versions[API_VERSION].config as {
+        validate?: { onRequestValidationError?: unknown };
+      };
+      expect(versionConfig.validate?.onRequestValidationError).toBe(
+        detectionOnRequestValidationError
+      );
     });
   });
 
@@ -343,6 +354,16 @@ describe('PUT /api/detection_engine/v2/rules/{id} — replace rule', () => {
       // RouteAuthz is a union (AuthzEnabled | AuthzDisabled); cast to access requiredPrivileges.
       const authz = registeredRoute.config.security?.authz as { requiredPrivileges?: string[] };
       expect(authz?.requiredPrivileges).toContain('rules-all');
+    });
+
+    it('wires detectionOnRequestValidationError into the validate config', () => {
+      const { registeredRoute } = setup();
+      const versionConfig = registeredRoute.versions[API_VERSION].config as {
+        validate?: { onRequestValidationError?: unknown };
+      };
+      expect(versionConfig.validate?.onRequestValidationError).toBe(
+        detectionOnRequestValidationError
+      );
     });
   });
 
@@ -514,6 +535,16 @@ describe('PATCH /api/detection_engine/v2/rules/{id} — patch rule', () => {
       const authz = registeredRoute.config.security?.authz as { requiredPrivileges?: string[] };
       expect(authz?.requiredPrivileges).toContain('rules-all');
     });
+
+    it('wires detectionOnRequestValidationError into the validate config', () => {
+      const { registeredRoute } = setup();
+      const versionConfig = registeredRoute.versions[API_VERSION].config as {
+        validate?: { onRequestValidationError?: unknown };
+      };
+      expect(versionConfig.validate?.onRequestValidationError).toBe(
+        detectionOnRequestValidationError
+      );
+    });
   });
 
   describe('handler — happy path', () => {
@@ -677,6 +708,16 @@ describe('DELETE /api/detection_engine/v2/rules/{id} — delete rule', () => {
       // RouteAuthz is a union (AuthzEnabled | AuthzDisabled); cast to access requiredPrivileges.
       const authz = registeredRoute.config.security?.authz as { requiredPrivileges?: string[] };
       expect(authz?.requiredPrivileges).toContain('rules-all');
+    });
+
+    it('wires detectionOnRequestValidationError into the validate config', () => {
+      const { registeredRoute } = setup();
+      const versionConfig = registeredRoute.versions[API_VERSION].config as {
+        validate?: { onRequestValidationError?: unknown };
+      };
+      expect(versionConfig.validate?.onRequestValidationError).toBe(
+        detectionOnRequestValidationError
+      );
     });
   });
 

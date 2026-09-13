@@ -42,13 +42,17 @@ import {
 // The alerting_v2 generic rules API path — used to create a foreign (out-of-scope) rule.
 const ALERTING_V2_RULES = '/api/alerting/v2/rules';
 
+/** Kibana global settings API — used to enable alerting:v2:enabled at suite start. */
+const GLOBAL_SETTINGS_API = '/api/kibana/global_settings';
+const ALERTING_V2_ENABLED_SETTING = 'alerting:v2:enabled';
+
 apiTest.describe('Detection Engine v2 — CRUD routes', { tag: '@local-stateful-classic' }, () => {
   let writerCredentials: RoleApiCredentials;
   let writerHeaders: Record<string, string>;
   let readerHeaders: Record<string, string>;
   let noAccessHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
+  apiTest.beforeAll(async ({ requestAuth, apiClient }) => {
     writerCredentials = await requestAuth.getApiKeyForCustomRole(DETECTION_RULES_ALL_ROLE);
     writerHeaders = { ...DETECTION_HEADERS, ...writerCredentials.apiKeyHeader };
 
@@ -57,6 +61,16 @@ apiTest.describe('Detection Engine v2 — CRUD routes', { tag: '@local-stateful-
 
     const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
     noAccessHeaders = { ...DETECTION_HEADERS, ...noAccessCredentials.apiKeyHeader };
+
+    // Enable alerting:v2:enabled via the API so every test in this suite sees the
+    // flag on.  The server config no longer uses a globalOverride (which would lock
+    // the setting and prevent the off_states suite from flipping it).
+    const adminCredentials = await requestAuth.getApiKeyForAdmin();
+    const adminHeaders = { ...DETECTION_HEADERS, ...adminCredentials.apiKeyHeader };
+    await apiClient.post(GLOBAL_SETTINGS_API, {
+      headers: adminHeaders,
+      body: { changes: { [ALERTING_V2_ENABLED_SETTING]: true } },
+    });
   });
 
   apiTest.afterEach(async ({ apiClient }) => {

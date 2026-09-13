@@ -14,8 +14,8 @@
  * before passing a create or update payload into the "in" direction.
  *
  * Two directions:
- *   - In  (public → framework): produces CreateRuleData, ReplaceRuleData, or
- *     UpdateRuleData depending on the write verb (POST, PUT, PATCH).
+ *   - In  (public → framework): produces CreateRuleData (POST) or UpdateRuleData
+ *     (PUT / PATCH).
  *   - Out (framework → public): maps a framework RuleResponse back to the
  *     public DetectionRuleResponse contract.
  *
@@ -55,7 +55,6 @@
 
 import type {
   CreateRuleData,
-  ReplaceRuleData,
   UpdateRuleData,
   RuleResponse,
   RuleSource,
@@ -174,8 +173,9 @@ export interface DetectionRuleCreateInput {
  *   - `kind: 'signal'` — they collect evidence, not alert episodes.
  *   - No persisted `query` — the framework compiles the query at execution time
  *     from `metadata.builder_fields`.
- *   - No `recovery_strategy`, `no_data_strategy`, `state_transition`, or
- *     `grouping` — signal-kind rules do not use those framework features.
+ *   - No `state_transition`, `grouping`, `recovery_strategy`, or `no_data_strategy`
+ *     — signal-kind rules do not use those framework features; omitting them
+ *     lets the framework apply its own defaults rather than storing redundant values.
  *
  * Empty tags: the framework rejects `metadata.tags = []`, so the field is
  * omitted when the caller provides an empty array.
@@ -204,54 +204,69 @@ export function toFrameworkCreate(props: DetectionRuleCreateInput): CreateRuleDa
       builder_fields: extractBuilderFields(props),
       source: { type: 'internal', version: props.version },
     },
-    // Signal-kind rules use execution-time compilation: no persisted query,
-    // no recovery or no-data strategies, no episode state transitions.
   } as CreateRuleData;
 }
 
 /**
  * Convert a detection rule update (PUT) request into the framework's
- * `ReplaceRuleData`.
+ * `UpdateRuleData`.
+ *
+ * PUT is a full replacement: omitted defaultable fields reset and omitted
+ * optional fields clear.  The converter mirrors this by sending explicit `null`
+ * for cleared framework-level optionals instead of omitting them, because
+ * `updateRule`'s merge logic treats `undefined` as "keep the stored value"
+ * while `null` clears it.
+ *
+ * Differences from `toFrameworkCreate`:
+ *   - Does NOT send `kind` — `kind` is in `IMMUTABLE_RULE_FIELDS` and the
+ *     `updateRuleDataSchema` is strict, so sending it causes a 400.
+ *   - Sends `tags: null` (not omit) when tags is empty — omission would keep
+ *     the stored tags instead of clearing them.
+ *   - Sends `schedule.lookback: null` (not omit) when absent — omission would
+ *     keep the stored lookback.
  *
  * The stored source is restated with the caller's new `version` number.
  * `type` and `id` are immutable and come from the stored source; only
  * `version` is caller-writable.
  *
- * Empty tags: same rule as create — omit rather than send [].  A full replace
- * has the same semantics as create for absent fields.
- *
  * Ref: rule-domain-model.md "How public fields map onto the stored rule"
  *      rule-source.md "The v2 source object"
+ *      rule-crud-api.md "Replace a rule with PUT"
  */
 export function toFrameworkReplace(
   props: DetectionRuleCreateInput,
   storedSource: RuleSource
-): ReplaceRuleData {
+): UpdateRuleData {
   const builderTypeId = ALIAS_TO_BUILDER_TYPE_ID[props.type];
 
   // Restate the stored source with the caller's new version.  `type` and `id`
   // are immutable; only `version` is owner-writable.
   const updatedSource: RuleSource = { ...storedSource, version: props.version };
 
-  // Empty tags: same omit rule as create.
-  const metadataTags = props.tags.length > 0 ? props.tags : undefined;
+  // Empty tags: send null so the framework clears the stored value.
+  // Omitting the field would preserve the old tags (framework treats undefined
+  // as "no change"), violating PUT's full-replacement semantics.
+  const metadataTags: string[] | null = props.tags.length > 0 ? props.tags : null;
+
+  // lookback: send null when absent so the framework clears any stored lookback.
+  // Same reasoning as tags — omission means "keep stored value".
+  const schedulePayload: { every: string; lookback?: string | null } = {
+    every: props.schedule.interval,
+    lookback: props.schedule.lookback !== undefined ? props.schedule.lookback : null,
+  };
 
   return {
-    kind: 'signal',
-    schedule: {
-      every: props.schedule.interval,
-      ...(props.schedule.lookback !== undefined ? { lookback: props.schedule.lookback } : {}),
-    },
+    schedule: schedulePayload,
     metadata: {
       name: props.name,
       description: props.description,
       ...(props.rule_id !== undefined ? { signature_id: props.rule_id } : {}),
-      ...(metadataTags !== undefined ? { tags: metadataTags } : {}),
+      tags: metadataTags,
       builder_type: builderTypeId,
       builder_fields: extractBuilderFields(props),
       source: updatedSource,
     },
-  } as ReplaceRuleData;
+  };
 }
 
 /**

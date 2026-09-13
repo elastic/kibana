@@ -22,7 +22,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { detectionRuleCommonFields, threatEntrySchema } from '@kbn/security-detection-rule-schema';
+import {
+  detectionRuleCommonFields,
+  customQueryBuilderFieldsSchema,
+  thresholdBuilderFieldsSchema,
+} from '@kbn/security-detection-rule-schema';
 import { detectionRuleScheduleSchema } from './detection_rule_response_schema';
 
 // ---------------------------------------------------------------------------
@@ -51,10 +55,13 @@ const baseRequiredFieldsSchema = z.object({
 /**
  * Base optional fields — genuinely optional, no default value.
  * PATCH makes these nullable so `null` clears the stored value.
+ *
+ * `note` and `license` are imported from the schema package so bounds cannot
+ * diverge from the stored model.
  */
 const baseOptionalFieldsSchema = z.object({
-  note: z.string().max(8192).optional(),
-  license: z.string().max(256).optional(),
+  note: detectionRuleCommonFields.note,
+  license: detectionRuleCommonFields.license,
   /**
    * Client-assignable stable identifier at create time.  On UPDATE/PATCH it is
    * optional but must match the stored value if provided (validation at the
@@ -68,41 +75,22 @@ const baseOptionalFieldsSchema = z.object({
  * fills them before the framework sees the payload.  No `.default()` here per
  * the no-defaults rule.
  *
+ * All array/string fields that the schema package already bounds are imported
+ * directly so the public bound and the stored bound cannot drift.
+ *
  * Ref: rule-validation.md "No defaults, no transforms"
  */
 const baseDefaultableFieldsSchema = z.object({
   version: z.number().int().min(1).optional(),
   tags: z.array(z.string().min(1).max(128)).max(20).optional(),
   max_signals: detectionRuleCommonFields.max_signals,
-  setup: z.string().max(8192).optional(),
-  references: z.array(z.string().max(1024)).max(32).optional(),
-  false_positives: z.array(z.string().max(1024)).max(16).optional(),
-  author: z.array(z.string().max(256)).max(16).optional(),
-  threat: z.array(threatEntrySchema).max(5).optional(),
-  related_integrations: z
-    .array(
-      z
-        .object({
-          package: z.string().max(64),
-          version: z.string().max(32),
-          integration: z.string().max(64).optional(),
-        })
-        .strict()
-    )
-    .max(16)
-    .optional(),
-  required_fields: z
-    .array(
-      z
-        .object({
-          name: z.string().max(128),
-          type: z.string().max(64),
-          ecs: z.boolean(),
-        })
-        .strict()
-    )
-    .max(32)
-    .optional(),
+  setup: detectionRuleCommonFields.setup,
+  references: detectionRuleCommonFields.references,
+  false_positives: detectionRuleCommonFields.false_positives,
+  author: detectionRuleCommonFields.author,
+  threat: detectionRuleCommonFields.threat,
+  related_integrations: detectionRuleCommonFields.related_integrations,
+  required_fields: detectionRuleCommonFields.required_fields,
   /**
    * Schedule with optional lookback.  Default: { interval: '5m' }.
    * No `from: now-6m` overlap — a deliberate departure from v1.
@@ -121,43 +109,27 @@ const baseDefaultableFieldsSchema = z.object({
 /**
  * Writable fields specific to the Custom Query rule type.
  *
- * `query` is required non-empty — an empty query is not a footgun here.
- * The `threshold` type accepts an empty string as a match-all pre-filter.
+ * `index`, `query`, and `language` shapes are imported from the builder schema
+ * package so the public bounds cannot diverge from the stored model.
  */
 const customQueryWritableFieldsSchema = z.object({
   type: z.literal('query'),
-  index: z.array(z.string().min(1).max(256)).min(1).max(32),
-  query: z.string().min(1).max(8192),
+  index: customQueryBuilderFieldsSchema.shape.index,
+  query: customQueryBuilderFieldsSchema.shape.query,
 });
 
 /**
  * Writable fields specific to the Threshold rule type.
  *
+ * All type-specific field shapes are imported from the builder schema package.
  * `query` may be empty (match-all pre-filter).
- * `threshold.cardinality` is optional — optional with no default.
  */
 const thresholdWritableFieldsSchema = z.object({
   type: z.literal('threshold'),
-  index: z.array(z.string().min(1).max(256)).min(1).max(32),
+  index: thresholdBuilderFieldsSchema.shape.index,
   /** Empty string is valid as a match-all pre-filter. */
-  query: z.string().max(8192),
-  threshold: z
-    .object({
-      field: z.array(z.string().min(1).max(256)).max(5),
-      value: z.number().int().min(1),
-      cardinality: z
-        .array(
-          z
-            .object({
-              field: z.string().min(1).max(256),
-              value: z.number().int().min(0),
-            })
-            .strict()
-        )
-        .max(1)
-        .optional(),
-    })
-    .strict(),
+  query: thresholdBuilderFieldsSchema.shape.query,
+  threshold: thresholdBuilderFieldsSchema.shape.threshold,
 });
 
 // ---------------------------------------------------------------------------
@@ -182,17 +154,25 @@ const thresholdCreateBaseSchema = baseRequiredFieldsSchema
 /**
  * Create schema for the Custom Query rule type.
  * Used as the alias map's `createSchema` entry for the `'query'` alias.
+ *
+ * `.strict()` makes the merged schema reject unknown keys at layer 1 so a
+ * camelCase typo (e.g. `riskScore`) or a server-side field (`id`, `revision`,
+ * `source`) surfaces as a 400 instead of being silently stripped.
  */
-export const customQueryCreateSchema = customQueryCreateBaseSchema.merge(
-  customQueryWritableFieldsSchema
-);
+export const customQueryCreateSchema = customQueryCreateBaseSchema
+  .merge(customQueryWritableFieldsSchema)
+  .strict();
 export type CustomQueryCreateProps = z.infer<typeof customQueryCreateSchema>;
 
 /**
  * Create schema for the Threshold rule type.
  * Used as the alias map's `createSchema` entry for the `'threshold'` alias.
+ *
+ * `.strict()` — same rationale as `customQueryCreateSchema`.
  */
-export const thresholdCreateSchema = thresholdCreateBaseSchema.merge(thresholdWritableFieldsSchema);
+export const thresholdCreateSchema = thresholdCreateBaseSchema
+  .merge(thresholdWritableFieldsSchema)
+  .strict();
 export type ThresholdCreateProps = z.infer<typeof thresholdCreateSchema>;
 
 /**
@@ -230,11 +210,14 @@ const thresholdUpdateBaseSchema = baseRequiredFieldsSchema
 /**
  * `DetectionRuleUpdateProps` (PUT) — the create shape without `enabled`.
  *
+ * `.strict()` — same unknown-key rejection rationale as the create schemas.
+ * Prevents `enabled: true` in a PUT body from being silently stripped.
+ *
  * Ref: rule-domain-model.md "The request shapes"
  */
 export const detectionRuleUpdatePropsSchema = z.discriminatedUnion('type', [
-  customQueryUpdateBaseSchema.merge(customQueryWritableFieldsSchema),
-  thresholdUpdateBaseSchema.merge(thresholdWritableFieldsSchema),
+  customQueryUpdateBaseSchema.merge(customQueryWritableFieldsSchema).strict(),
+  thresholdUpdateBaseSchema.merge(thresholdWritableFieldsSchema).strict(),
 ]);
 export type DetectionRuleUpdateProps = z.infer<typeof detectionRuleUpdatePropsSchema>;
 
@@ -278,71 +261,38 @@ export const detectionRulePatchPropsSchema = z
     rule_id: z.string().min(1).max(256).optional(),
 
     // --- Type-specific fields: optional, not nullable ---
-    index: z.array(z.string().min(1).max(256)).min(1).max(32).optional(),
-    query: z.string().max(8192).optional(),
+    // `index` and `threshold` shapes imported from builder schemas so bounds
+    // cannot drift from the stored model.  `query` uses the threshold builder's
+    // (more permissive) shape to accommodate both types in the flat PATCH schema.
+    index: customQueryBuilderFieldsSchema.shape.index.optional(),
+    query: thresholdBuilderFieldsSchema.shape.query.optional(),
     language: z.enum(['kuery', 'lucene']).optional(),
-    threshold: z
-      .object({
-        field: z.array(z.string().min(1).max(256)).max(5),
-        value: z.number().int().min(1),
-        cardinality: z
-          .array(
-            z
-              .object({
-                field: z.string().min(1).max(256),
-                value: z.number().int().min(0),
-              })
-              .strict()
-          )
-          .max(1)
-          .optional(),
-      })
-      .strict()
-      .optional(),
+    threshold: thresholdBuilderFieldsSchema.shape.threshold.optional(),
 
     // --- Content version: optional, not nullable (meaningless to null) ---
     version: z.number().int().min(1).optional(),
 
     // --- Optional-with-no-default: nullable so null clears the field ---
-    note: z.string().max(8192).nullable().optional(),
-    license: z.string().max(256).nullable().optional(),
+    // Unwrap the package's .optional() wrapper before adding .nullable() so
+    // the result is T | null | undefined rather than T | undefined | undefined.
+    note: detectionRuleCommonFields.note.unwrap().nullable().optional(),
+    license: detectionRuleCommonFields.license.unwrap().nullable().optional(),
 
     // --- Defaultable scalar: nullable so null reverts to default ---
     max_signals: detectionRuleCommonFields.max_signals.unwrap().nullable().optional(),
-    setup: z.string().max(8192).nullable().optional(),
+    setup: detectionRuleCommonFields.setup.unwrap().nullable().optional(),
 
     // --- Defaultable arrays: nullable so null clears to [] ---
     tags: z.array(z.string().min(1).max(128)).max(20).nullable().optional(),
-    references: z.array(z.string().max(1024)).max(32).nullable().optional(),
-    false_positives: z.array(z.string().max(1024)).max(16).nullable().optional(),
-    author: z.array(z.string().max(256)).max(16).nullable().optional(),
-    threat: z.array(threatEntrySchema).max(5).nullable().optional(),
-    related_integrations: z
-      .array(
-        z
-          .object({
-            package: z.string().max(64),
-            version: z.string().max(32),
-            integration: z.string().max(64).optional(),
-          })
-          .strict()
-      )
-      .max(16)
+    references: detectionRuleCommonFields.references.unwrap().nullable().optional(),
+    false_positives: detectionRuleCommonFields.false_positives.unwrap().nullable().optional(),
+    author: detectionRuleCommonFields.author.unwrap().nullable().optional(),
+    threat: detectionRuleCommonFields.threat.unwrap().nullable().optional(),
+    related_integrations: detectionRuleCommonFields.related_integrations
+      .unwrap()
       .nullable()
       .optional(),
-    required_fields: z
-      .array(
-        z
-          .object({
-            name: z.string().max(128),
-            type: z.string().max(64),
-            ecs: z.boolean(),
-          })
-          .strict()
-      )
-      .max(32)
-      .nullable()
-      .optional(),
+    required_fields: detectionRuleCommonFields.required_fields.unwrap().nullable().optional(),
 
     // --- Schedule: the object itself is optional; lookback is nullable inside ---
     schedule: z

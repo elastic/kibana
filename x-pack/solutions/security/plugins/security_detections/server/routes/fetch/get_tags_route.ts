@@ -61,7 +61,7 @@ export function registerGetTagsRoute(
       async (context, request, response) => {
         try {
           const coreCtx = await context.core;
-          await assertAlertingEnabled(coreCtx.uiSettings.client);
+          await assertAlertingEnabled(coreCtx.uiSettings.globalClient);
 
           const [, { alertingVTwo }] = await getStartServices();
           const frameworkClient = await (
