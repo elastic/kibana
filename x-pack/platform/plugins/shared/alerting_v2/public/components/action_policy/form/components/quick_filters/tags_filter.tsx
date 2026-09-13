@@ -7,7 +7,6 @@
 
 import React, { useMemo, useState } from 'react';
 import {
-  EuiCode,
   EuiFilterButton,
   EuiPopover,
   EuiPopoverFooter,
@@ -19,13 +18,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import { useFetchRuleTags } from '../../../../../hooks/use_fetch_rule_tags';
-import {
-  mergeRuleTagsIntoMatcher,
-  parseRuleTagsFromMatcher,
-} from '../../matcher_quick_filter_utils';
 import { POPOVER_PANEL_STYLE, SELECTABLE_LIST_PROPS, type QuickFiltersProps } from './constants';
 
 const TAG_SEARCH_DEBOUNCE_MS = 300;
@@ -47,7 +41,7 @@ export const TagsFilter = ({ matcher, onChange }: QuickFiltersProps) => {
     kind: 'alert',
     search: debouncedTagSearch || undefined,
   });
-  const selectedTags = useMemo(() => parseRuleTagsFromMatcher(matcher), [matcher]);
+  const selectedTags = useMemo(() => matcher?.tags ?? [], [matcher]);
 
   const tagOptions = useMemo((): Array<EuiSelectableOption<TagSelectableMeta>> => {
     const selectedSet = new Set(selectedTags);
@@ -73,7 +67,7 @@ export const TagsFilter = ({ matcher, onChange }: QuickFiltersProps) => {
 
   const handleTagsChange = (newOptions: Array<EuiSelectableOption<TagSelectableMeta>>) => {
     const tags = newOptions.filter((o) => o.checked === 'on').map((o) => o.value);
-    onChange(mergeRuleTagsIntoMatcher(matcher, tags));
+    onChange({ ...matcher, tags: tags.length > 0 ? tags : null });
   };
 
   const showCapGuidance = apiTags.length >= TAGS_RESPONSE_LIMIT;
@@ -121,7 +115,7 @@ export const TagsFilter = ({ matcher, onChange }: QuickFiltersProps) => {
           onChange: (searchValue: string) => setTagSearch(searchValue),
           placeholder: i18n.translate(
             'xpack.alertingV2.actionPolicy.form.quickFilters.tags.search',
-            { defaultMessage: 'Search tags' }
+            { defaultMessage: 'Search rule tags' }
           ),
           'data-test-subj': 'quickFilterTagsSearch',
         }}
@@ -150,15 +144,6 @@ export const TagsFilter = ({ matcher, onChange }: QuickFiltersProps) => {
           </EuiText>
         </EuiPopoverFooter>
       )}
-      <EuiPopoverFooter paddingSize="s">
-        <EuiText size="xs" color="subdued">
-          <FormattedMessage
-            id="xpack.alertingV2.actionPolicy.form.quickFilters.tags.footer"
-            defaultMessage="Adds {code} to the filter"
-            values={{ code: <EuiCode>{'rule.tags: ("...")'}</EuiCode> }}
-          />
-        </EuiText>
-      </EuiPopoverFooter>
     </EuiPopover>
   );
 };
