@@ -67,6 +67,25 @@ import {
 import type { DetectionRuleFormState, FieldErrors } from './detection_rule_form';
 
 // ---------------------------------------------------------------------------
+// Column widths
+//
+// EUI v9 rejects percentage units (%, vw, cqw, cqi) in cell width settings
+// and falls back to responsive card layout. Use absolute units instead:
+// em for text cells and px for fixed icon-sized cells (toggles, buttons).
+// The Name column intentionally has no width so it fills the remaining space.
+// ---------------------------------------------------------------------------
+
+/** Absolute column widths for the detection rules table. */
+export const COLUMN_WIDTHS = {
+  type: '8em',
+  severity: '8em',
+  riskScore: '7em',
+  tags: '16em',
+  enabled: '80px',
+  actions: '96px',
+} as const;
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
@@ -299,7 +318,7 @@ export const DetectionRulesPage: React.FC = () => {
       name: i18n.translate('xpack.securityDetections.rulesList.column.type', {
         defaultMessage: 'Type',
       }),
-      width: '10%',
+      width: COLUMN_WIDTHS.type,
       render: (type: string) => (
         <EuiBadge color="hollow" data-test-subj="ruleTypeCell">
           {type}
@@ -311,7 +330,7 @@ export const DetectionRulesPage: React.FC = () => {
       name: i18n.translate('xpack.securityDetections.rulesList.column.severity', {
         defaultMessage: 'Severity',
       }),
-      width: '10%',
+      width: COLUMN_WIDTHS.severity,
       // Severity is intentionally not sortable: lexicographic ordering is
       // meaningless for low < medium < high < critical.
       sortable: false,
@@ -326,7 +345,7 @@ export const DetectionRulesPage: React.FC = () => {
       name: i18n.translate('xpack.securityDetections.rulesList.column.riskScore', {
         defaultMessage: 'Risk score',
       }),
-      width: '10%',
+      width: COLUMN_WIDTHS.riskScore,
       sortable: true,
     },
     {
@@ -334,7 +353,7 @@ export const DetectionRulesPage: React.FC = () => {
       name: i18n.translate('xpack.securityDetections.rulesList.column.tags', {
         defaultMessage: 'Tags',
       }),
-      width: '20%',
+      width: COLUMN_WIDTHS.tags,
       render: (tags: string[]) => {
         if (!tags || tags.length === 0) {
           return <span>—</span>;
@@ -362,7 +381,7 @@ export const DetectionRulesPage: React.FC = () => {
       name: i18n.translate('xpack.securityDetections.rulesList.column.enabled', {
         defaultMessage: 'Enabled',
       }),
-      width: '9%',
+      width: COLUMN_WIDTHS.enabled,
       sortable: true,
       render: (enabled: boolean, rule: DetectionRuleResponse) => {
         if (togglingId === rule.id) {
@@ -391,7 +410,7 @@ export const DetectionRulesPage: React.FC = () => {
       name: i18n.translate('xpack.securityDetections.rulesList.column.actions', {
         defaultMessage: 'Actions',
       }),
-      width: '12%',
+      width: COLUMN_WIDTHS.actions,
       align: 'right',
       render: (rule: DetectionRuleResponse) => (
         <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd" responsive={false}>
@@ -658,6 +677,7 @@ export const DetectionRulesPage: React.FC = () => {
         sorting={sorting}
         loading={isFetching}
         onChange={handleTableChange}
+        responsiveBreakpoint={false}
         noItemsMessage={
           isFetching
             ? i18n.translate('xpack.securityDetections.rulesList.loading', {
