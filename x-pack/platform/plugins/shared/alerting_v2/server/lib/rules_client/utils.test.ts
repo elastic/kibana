@@ -867,7 +867,7 @@ describe('utils', () => {
       // This is the blocker scenario: PATCH on an execution-compiled signal rule
       // runs validateMergedRuleAttributes after buildUpdateRuleAttributes merges
       // the stored attrs (which have builder_fields but no query). Without the
-      // builder_fields != null escape the invariant returns false and throws
+      // query == null escape the invariant returns false and throws
       // INVALID_SIGNAL_RULE on every update of a detection-rule PATCH.
       //
       // Ref: rule-execution-logic.md "A rule without a persisted query"
@@ -886,6 +886,82 @@ describe('utils', () => {
       (attrs as Record<string, unknown>).query = undefined;
 
       expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
+    });
+
+    it('does not throw for an execution-time alert rule with recovery_strategy "query" and no stored query', () => {
+      // Same blocker as above, but for the isRecoveryQueryProvidedForStrategy
+      // invariant: an alert-kind execution-compiled rule with recovery_strategy
+      // 'query' has no stored recovery block (the query is compiled per run).
+      // The escape must also apply to this invariant, or every PATCH on such a
+      // rule throws INVALID_RULE_QUERY_CONFIG.
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        recovery_strategy: 'query',
+        metadata: {
+          name: 'detection-rule',
+          builder_type: 'security.custom_query',
+          builder_fields: { index: 'logs-*', kql: 'host.name: *' },
+          ownership: { managed: false },
+        },
+      } as Partial<ReturnType<typeof createRuleSoAttributes>>);
+      (attrs as Record<string, unknown>).query = undefined;
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
+    });
+
+    it('still enforces isSignalUsingStandaloneFormat for write-time builder rules that have a stored query', () => {
+      // Write-time builder rules have builder_fields AND a stored query.
+      // The `query == null` escape must NOT fire for them — the backstop
+      // must remain active to catch a composed-format query.
+      const attrs = createRuleSoAttributes({
+        kind: 'signal',
+        recovery_strategy: undefined,
+        query: {
+          format: 'composed',
+          base: 'FROM logs-*',
+          breach: { segment: 'WHERE error' },
+        },
+        metadata: {
+          name: 'write-time-builder-rule',
+          builder_type: 'some.write_time.type',
+          builder_fields: { index: 'logs-*' },
+          ownership: { managed: false },
+        },
+      } as Partial<ReturnType<typeof createRuleSoAttributes>>);
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
+        expect.objectContaining({
+          message: 'kind "signal" requires query.format "standalone".',
+          data: {
+            code: 'INVALID_SIGNAL_RULE',
+            details: { rule_id: 'rule-1', rule_kind: 'signal' },
+          },
+        })
+      );
+    });
+
+    it('still enforces isRecoveryQueryProvidedForStrategy for write-time builder rules that have a stored query', () => {
+      // Write-time builder rules with recovery_strategy 'query' must have a
+      // stored recovery block. The `query == null` escape must NOT fire when
+      // the rule has a persisted query — the backstop stays active.
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        recovery_strategy: 'query',
+        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+        metadata: {
+          name: 'write-time-builder-rule',
+          builder_type: 'some.write_time.type',
+          builder_fields: { index: 'logs-*' },
+          ownership: { managed: false },
+        },
+      } as Partial<ReturnType<typeof createRuleSoAttributes>>);
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
+        expect.objectContaining({
+          message: 'query.recovery is required when recovery_strategy is "query".',
+          data: { code: 'INVALID_RULE_QUERY_CONFIG', details: { rule_id: 'rule-1' } },
+        })
+      );
     });
 
     it('throws INVALID_SIGNAL_RULE (400) when a signal rule uses a composed query', () => {

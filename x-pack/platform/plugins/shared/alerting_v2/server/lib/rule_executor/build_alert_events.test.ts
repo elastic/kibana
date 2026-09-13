@@ -408,9 +408,7 @@ describe('createAlertEventsBatchBuilder', () => {
         ...makeBaseOpts(),
         enrichRuleEvent: () => ({ data: { 'kibana.alert.risk_score': 75 } }),
       };
-      const [doc] = createAlertEventsBatchBuilder(opts).buildBatch([
-        { 'host.name': 'host-a' },
-      ]);
+      const [doc] = createAlertEventsBatchBuilder(opts).buildBatch([{ 'host.name': 'host-a' }]);
 
       expect(doc.data).toEqual({ 'host.name': 'host-a', 'kibana.alert.risk_score': 75 });
     });
@@ -439,9 +437,7 @@ describe('createAlertEventsBatchBuilder', () => {
           return {};
         },
       };
-      createAlertEventsBatchBuilder(opts).buildBatch([
-        { 'host.name': 'host-a', severity: 'high' },
-      ]);
+      createAlertEventsBatchBuilder(opts).buildBatch([{ 'host.name': 'host-a', severity: 'high' }]);
 
       expect(receivedRows).toHaveLength(1);
       expect(receivedRows[0]).toEqual({ 'host.name': 'host-a', severity: 'high' });
@@ -452,9 +448,7 @@ describe('createAlertEventsBatchBuilder', () => {
         ...makeBaseOpts(),
         enrichRuleEvent: () => ({}),
       };
-      const [doc] = createAlertEventsBatchBuilder(opts).buildBatch([
-        { 'host.name': 'host-a' },
-      ]);
+      const [doc] = createAlertEventsBatchBuilder(opts).buildBatch([{ 'host.name': 'host-a' }]);
 
       expect(doc.data).toEqual({ 'host.name': 'host-a' });
     });

@@ -208,8 +208,7 @@ export function createAlertEventsBatchBuilder({
       // The hook may throw; callers wrap any such error as a user-source run failure.
       const enrichment = enrichRuleEvent ? enrichRuleEvent(rowDoc) : undefined;
       const severity = enrichment?.severity ?? extractSeverity(rowDoc);
-      const data =
-        enrichment?.data != null ? { ...rowDoc, ...enrichment.data } : rowDoc;
+      const data = enrichment?.data != null ? { ...rowDoc, ...enrichment.data } : rowDoc;
 
       const doc = buildRuleEventDocument({
         '@timestamp': wroteAt,

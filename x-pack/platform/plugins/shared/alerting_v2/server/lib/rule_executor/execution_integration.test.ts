@@ -280,9 +280,7 @@ describe('Execution integration — fixture execution-time builder type (Step 6.
 
     it('compile step: resolves effectiveQuery from builder_fields via generateQuery and sets executionWindow', async () => {
       const initialStream = createPipelineStream([createRulePipelineState({ rule })]);
-      const results = await collectStreamResults(
-        pipeline.compileStep.executeStream(initialStream)
-      );
+      const results = await collectStreamResults(pipeline.compileStep.executeStream(initialStream));
 
       expect(results).toHaveLength(1);
       expect(results[0].type).toBe('continue');
@@ -436,9 +434,7 @@ describe('Execution integration — fixture execution-time builder type (Step 6.
 
       expect(error).toBeDefined();
       expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
-      expect((error as any).data?.code).toBe(
-        ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED
-      );
+      expect((error as any).data?.code).toBe(ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED);
     });
 
     /**
@@ -472,9 +468,7 @@ describe('Execution integration — fixture execution-time builder type (Step 6.
 
       expect(error).toBeDefined();
       expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
-      expect((error as any).data?.code).toBe(
-        ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED
-      );
+      expect((error as any).data?.code).toBe(ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED);
     });
 
     /**
@@ -510,9 +504,7 @@ describe('Execution integration — fixture execution-time builder type (Step 6.
 
       expect(error).toBeDefined();
       expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
-      expect((error as any).data?.code).toBe(
-        ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED
-      );
+      expect((error as any).data?.code).toBe(ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED);
     });
   });
 });

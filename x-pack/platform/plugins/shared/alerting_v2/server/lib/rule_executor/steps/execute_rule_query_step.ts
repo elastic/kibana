@@ -46,87 +46,90 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     const step = this;
 
-    return guardedExpandStep(streamState, ['rule', 'effectiveQuery'], async function* (state) {
-      const { input, rule } = state;
-      const logger = state.logger.withLabels({ step: step.name });
+    return guardedExpandStep(
+      streamState,
+      ['rule', 'effectiveQuery', 'executionWindow'],
+      async function* (state) {
+        const { input, rule } = state;
+        const logger = state.logger.withLabels({ step: step.name });
 
-      const effectiveQuery = getBreachEsqlQuery(state.effectiveQuery);
-      const lookbackWindow = rule.schedule.lookback ?? rule.schedule.every;
-      const timeField = rule.time_field;
+        const effectiveQuery = getBreachEsqlQuery(state.effectiveQuery);
+        const lookbackWindow = rule.schedule.lookback ?? rule.schedule.every;
+        const timeField = rule.time_field;
 
-      // Use the shared now resolved by CompileRuleQueryStep so the breach window
-      // matches what every other query in this run uses.
-      const now = state.executionWindow
-        ? new Date(state.executionWindow.end).getTime()
-        : undefined;
+        // `executionWindow` is now a required guard key, so `state.executionWindow`
+        // is guaranteed non-null here. The breach window matches what every other
+        // query in this run uses — no silent fallback to Date.now().
+        const now = new Date(state.executionWindow.end).getTime();
 
-      const queryPayload = getQueryPayload({
-        query: effectiveQuery,
-        timeField,
-        lookbackWindow,
-        now,
-      });
-
-      const boundedQuery = appendLimitToQuery(effectiveQuery, step.queryRowLimit);
-
-      logger.debug({
-        message: 'Executing ES|QL query',
-        labels: { rule_id: input.ruleId, step: step.name },
-      });
-
-      try {
-        const esqlRowBatchStream = step.queryService.executeQueryStream({
-          query: boundedQuery,
-          filter: queryPayload.filter,
-          params: queryPayload.params,
-          abortSignal: input.executionContext.signal,
-          maxResponseSize: step.maxQueryResponseSize,
+        const queryPayload = getQueryPayload({
+          query: effectiveQuery,
+          timeField,
+          lookbackWindow,
+          now,
         });
 
-        let totalRows = 0;
-        let loggedRowsDropped = false;
+        const boundedQuery = appendLimitToQuery(effectiveQuery, step.queryRowLimit);
 
-        for await (const batch of withAtLeastOne<EsqlRowBatch>(esqlRowBatchStream, [])) {
-          totalRows += batch.length;
+        logger.debug({
+          message: 'Executing ES|QL query',
+          labels: { rule_id: input.ruleId, step: step.name },
+        });
 
-          const counters: Partial<Record<RuleExecutionCounter, number>> = {
-            [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: batch.length,
-          };
-
-          if (!loggedRowsDropped && totalRows >= step.queryRowLimit) {
-            loggedRowsDropped = true;
-            counters[RULE_EXECUTION_COUNTERS.rowsDroppedByLimit] = 1;
-            logger.debug({
-              message: `ES|QL query results truncated at the ${step.queryRowLimit}-row limit; some rows may have been dropped`,
-              labels: { rule_id: input.ruleId, step: step.name },
-            });
-          }
-
-          yield {
-            type: 'continue',
-            state: { ...state, queryPayload, esqlRowBatch: batch },
-            meta: { counters },
-          };
-        }
-      } catch (error) {
-        if (isMaximumResponseSizeExceededError(error)) {
-          const sizeError = toQueryResponseSizeExceededError(
-            error,
-            'breach',
-            step.maxQueryResponseSize
-          );
-          logger.warn({
-            message: sizeError.message,
-            code: ALERTING_LOG_CODES.RULE_EXECUTION_QUERY_RESPONSE_SIZE_EXCEEDED,
-            labels: { rule_id: input.ruleId, space_id: input.spaceId, step: step.name },
+        try {
+          const esqlRowBatchStream = step.queryService.executeQueryStream({
+            query: boundedQuery,
+            filter: queryPayload.filter,
+            params: queryPayload.params,
+            abortSignal: input.executionContext.signal,
+            maxResponseSize: step.maxQueryResponseSize,
           });
-          throw createTaskRunError(sizeError, TaskErrorSource.USER);
+
+          let totalRows = 0;
+          let loggedRowsDropped = false;
+
+          for await (const batch of withAtLeastOne<EsqlRowBatch>(esqlRowBatchStream, [])) {
+            totalRows += batch.length;
+
+            const counters: Partial<Record<RuleExecutionCounter, number>> = {
+              [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: batch.length,
+            };
+
+            if (!loggedRowsDropped && totalRows >= step.queryRowLimit) {
+              loggedRowsDropped = true;
+              counters[RULE_EXECUTION_COUNTERS.rowsDroppedByLimit] = 1;
+              logger.debug({
+                message: `ES|QL query results truncated at the ${step.queryRowLimit}-row limit; some rows may have been dropped`,
+                labels: { rule_id: input.ruleId, step: step.name },
+              });
+            }
+
+            yield {
+              type: 'continue',
+              state: { ...state, queryPayload, esqlRowBatch: batch },
+              meta: { counters },
+            };
+          }
+        } catch (error) {
+          if (isMaximumResponseSizeExceededError(error)) {
+            const sizeError = toQueryResponseSizeExceededError(
+              error,
+              'breach',
+              step.maxQueryResponseSize
+            );
+            logger.warn({
+              message: sizeError.message,
+              code: ALERTING_LOG_CODES.RULE_EXECUTION_QUERY_RESPONSE_SIZE_EXCEEDED,
+              labels: { rule_id: input.ruleId, space_id: input.spaceId, step: step.name },
+            });
+            throw createTaskRunError(sizeError, TaskErrorSource.USER);
+          }
+          if (isEsqlUserError(error)) {
+            throw createTaskRunError(error as Error, TaskErrorSource.USER);
+          }
+          throw error;
         }
-        if (isEsqlUserError(error)) {
-          throw createTaskRunError(error as Error, TaskErrorSource.USER);
-        }
-        throw error;
       }
-    });
+    );
   }
 }

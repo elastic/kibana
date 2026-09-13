@@ -397,9 +397,7 @@ describe('CompileRuleQueryStep', () => {
 
       expect(error).toBeDefined();
       expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
-      expect((error as any).data?.code).toBe(
-        ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED
-      );
+      expect((error as any).data?.code).toBe(ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED);
     });
 
     it('fails the run when generateQuery throws a BuilderQueryGenerationError', async () => {
@@ -420,9 +418,7 @@ describe('CompileRuleQueryStep', () => {
 
       expect(error).toBeDefined();
       expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
-      expect((error as any).data?.code).toBe(
-        ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED
-      );
+      expect((error as any).data?.code).toBe(ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED);
     });
 
     it('fails the run when generateQuery (async) rejects', async () => {
@@ -443,9 +439,7 @@ describe('CompileRuleQueryStep', () => {
 
       expect(error).toBeDefined();
       expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
-      expect((error as any).data?.code).toBe(
-        ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED
-      );
+      expect((error as any).data?.code).toBe(ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED);
     });
 
     it('re-stamps a Boom throw from generateQuery as BUILDER_QUERY_GENERATION_FAILED (code is not trusted)', async () => {
@@ -459,7 +453,11 @@ describe('CompileRuleQueryStep', () => {
       const definition = makeExecutionTypeDefinition({
         generateQuery: jest.fn(() => {
           // Throw a Boom with a different code — this must be normalised.
-          const err = Object.assign(new Error('bad field'), { isBoom: true, output: { statusCode: 400 }, data: { code: ALERTING_ERROR_CODES.INVALID_BUILDER_FIELDS } });
+          const err = Object.assign(new Error('bad field'), {
+            isBoom: true,
+            output: { statusCode: 400 },
+            data: { code: ALERTING_ERROR_CODES.INVALID_BUILDER_FIELDS },
+          });
           throw err;
         }),
       });
@@ -476,9 +474,7 @@ describe('CompileRuleQueryStep', () => {
       expect(error).toBeDefined();
       expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
       // Code must be re-stamped, not passed through from the thrown Boom.
-      expect((error as any).data?.code).toBe(
-        ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED
-      );
+      expect((error as any).data?.code).toBe(ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED);
     });
   });
 
@@ -504,9 +500,7 @@ describe('CompileRuleQueryStep', () => {
 
       expect(error).toBeDefined();
       expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
-      expect((error as any).data?.code).toBe(
-        ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED
-      );
+      expect((error as any).data?.code).toBe(ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED);
     });
 
     it('fails the run when the result carries a grouping override', async () => {
@@ -528,9 +522,7 @@ describe('CompileRuleQueryStep', () => {
 
       expect(error).toBeDefined();
       expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
-      expect((error as any).data?.code).toBe(
-        ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED
-      );
+      expect((error as any).data?.code).toBe(ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED);
     });
 
     it('fails the run when a signal rule returns a composed query with recovery', async () => {
@@ -557,9 +549,7 @@ describe('CompileRuleQueryStep', () => {
 
       expect(error).toBeDefined();
       expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
-      expect((error as any).data?.code).toBe(
-        ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED
-      );
+      expect((error as any).data?.code).toBe(ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED);
     });
 
     it('fails the run when the compile result has a structurally invalid query (e.g. breach.query is not a string)', async () => {
@@ -592,9 +582,7 @@ describe('CompileRuleQueryStep', () => {
 
       expect(error).toBeDefined();
       expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
-      expect((error as any).data?.code).toBe(
-        ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED
-      );
+      expect((error as any).data?.code).toBe(ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED);
     });
   });
 
@@ -602,9 +590,7 @@ describe('CompileRuleQueryStep', () => {
 
   it('halts with state_not_ready when rule is missing from state', async () => {
     const state = createRulePipelineState(); // no rule
-    const [result] = await collectStreamResults(
-      step.executeStream(createPipelineStream([state]))
-    );
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     expect(result).toEqual({ type: 'halt', reason: 'state_not_ready', state });
   });

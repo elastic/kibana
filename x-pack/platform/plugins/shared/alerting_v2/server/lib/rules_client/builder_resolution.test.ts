@@ -38,7 +38,12 @@
 import type { CreateRuleData, ReplaceRuleData, UpdateRuleData } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
-import type { BuilderTypeRegistry, DerivedRuleFields, GeneratedQuery, RegisteredBuilderType } from '../builder_types';
+import type {
+  BuilderTypeRegistry,
+  DerivedRuleFields,
+  GeneratedQuery,
+  RegisteredBuilderType,
+} from '../builder_types';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import { createRuleSoAttributes } from '../test_utils';
 import {
@@ -795,9 +800,7 @@ describe('resolveUpdateRuleBuilder', () => {
           recovery_strategy: 'query',
         };
 
-        expect(() =>
-          resolveUpdateRuleBuilder(registry, RULE_ID, data, builderExisting)
-        ).toThrow(
+        expect(() => resolveUpdateRuleBuilder(registry, RULE_ID, data, builderExisting)).toThrow(
           expect.objectContaining({
             output: expect.objectContaining({ statusCode: 400 }),
             data: expect.objectContaining({
@@ -1212,12 +1215,15 @@ describe('execution-time builder types', () => {
 
   /** Build a RegisteredBuilderType-shaped object for the execution-time type. */
   function makeExecutionDefinition(
-    opts: { deriveRuleFields?: (fields: z.infer<typeof executionFieldsSchema>) => DerivedRuleFields } = {}
+    opts: {
+      deriveRuleFields?: (fields: z.infer<typeof executionFieldsSchema>) => DerivedRuleFields;
+    } = {}
   ): Partial<RegisteredBuilderType> {
     return {
       type: EXECUTION_TYPE,
       compilation: 'execution_time',
-      builderFieldsSchema: executionFieldsSchema as unknown as RegisteredBuilderType['builderFieldsSchema'],
+      builderFieldsSchema:
+        executionFieldsSchema as unknown as RegisteredBuilderType['builderFieldsSchema'],
       deriveRuleFields: opts.deriveRuleFields as RegisteredBuilderType['deriveRuleFields'],
     };
   }
@@ -1289,10 +1295,16 @@ describe('execution-time builder types', () => {
       const derive = jest.fn<DerivedRuleFields, [unknown]>().mockReturnValue({
         grouping: { fields: ['user.name'] },
       });
-      const typeMap = new Map([[
-        EXECUTION_TYPE,
-        makeExecutionDefinition({ deriveRuleFields: derive as unknown as (fields: z.infer<typeof executionFieldsSchema>) => DerivedRuleFields }),
-      ]]);
+      const typeMap = new Map([
+        [
+          EXECUTION_TYPE,
+          makeExecutionDefinition({
+            deriveRuleFields: derive as unknown as (
+              fields: z.infer<typeof executionFieldsSchema>
+            ) => DerivedRuleFields,
+          }),
+        ],
+      ]);
       const registry = createMockRegistryWithTypes(typeMap);
 
       const result = resolveCreateRuleBuilder(registry, executionCreateData);
@@ -1305,10 +1317,16 @@ describe('execution-time builder types', () => {
 
     it('keeps the caller-sent grouping when deriveRuleFields returns undefined for grouping', () => {
       const derive = jest.fn<DerivedRuleFields, [unknown]>().mockReturnValue({});
-      const typeMap = new Map([[
-        EXECUTION_TYPE,
-        makeExecutionDefinition({ deriveRuleFields: derive as unknown as (fields: z.infer<typeof executionFieldsSchema>) => DerivedRuleFields }),
-      ]]);
+      const typeMap = new Map([
+        [
+          EXECUTION_TYPE,
+          makeExecutionDefinition({
+            deriveRuleFields: derive as unknown as (
+              fields: z.infer<typeof executionFieldsSchema>
+            ) => DerivedRuleFields,
+          }),
+        ],
+      ]);
       const registry = createMockRegistryWithTypes(typeMap);
       const data = {
         ...executionCreateData,
@@ -1324,10 +1342,16 @@ describe('execution-time builder types', () => {
       const derive = jest.fn<DerivedRuleFields, [unknown]>().mockReturnValue({
         grouping: { fields: ['user.name'] },
       });
-      const typeMap = new Map([[
-        EXECUTION_TYPE,
-        makeExecutionDefinition({ deriveRuleFields: derive as unknown as (fields: z.infer<typeof executionFieldsSchema>) => DerivedRuleFields }),
-      ]]);
+      const typeMap = new Map([
+        [
+          EXECUTION_TYPE,
+          makeExecutionDefinition({
+            deriveRuleFields: derive as unknown as (
+              fields: z.infer<typeof executionFieldsSchema>
+            ) => DerivedRuleFields,
+          }),
+        ],
+      ]);
       const registry = createMockRegistryWithTypes(typeMap);
       const badFieldsData = {
         ...executionCreateData,
@@ -1427,10 +1451,16 @@ describe('execution-time builder types', () => {
       const derive = jest.fn<DerivedRuleFields, [{ index: string; threshold_field: string[] }]>(
         (fields) => ({ grouping: { fields: fields.threshold_field } })
       );
-      const typeMap = new Map([[
-        EXECUTION_TYPE,
-        makeExecutionDefinition({ deriveRuleFields: derive as unknown as (fields: z.infer<typeof executionFieldsSchema>) => DerivedRuleFields }),
-      ]]);
+      const typeMap = new Map([
+        [
+          EXECUTION_TYPE,
+          makeExecutionDefinition({
+            deriveRuleFields: derive as unknown as (
+              fields: z.infer<typeof executionFieldsSchema>
+            ) => DerivedRuleFields,
+          }),
+        ],
+      ]);
       const registry = createMockRegistryWithTypes(typeMap);
       const updatedFields = { index: 'logs-*', threshold_field: ['source.ip'] };
       const data: UpdateRuleData = {
@@ -1458,10 +1488,16 @@ describe('execution-time builder types', () => {
       const derive = jest.fn<DerivedRuleFields, [unknown]>().mockReturnValue({
         grouping: { fields: ['user.name'] },
       });
-      const typeMap = new Map([[
-        EXECUTION_TYPE,
-        makeExecutionDefinition({ deriveRuleFields: derive as unknown as (fields: z.infer<typeof executionFieldsSchema>) => DerivedRuleFields }),
-      ]]);
+      const typeMap = new Map([
+        [
+          EXECUTION_TYPE,
+          makeExecutionDefinition({
+            deriveRuleFields: derive as unknown as (
+              fields: z.infer<typeof executionFieldsSchema>
+            ) => DerivedRuleFields,
+          }),
+        ],
+      ]);
       const registry = createMockRegistryWithTypes(typeMap);
       const data: UpdateRuleData = {
         // Missing required 'index' field — fails the schema.

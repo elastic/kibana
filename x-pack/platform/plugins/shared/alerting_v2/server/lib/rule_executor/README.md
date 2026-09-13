@@ -168,7 +168,7 @@ The cap only ever drops groups that have **no existing episode** — groups that
 | `input` | Pipeline / task runner | Rule id, space id, schedule, and execution context. |
 | `rule` | `FetchRuleStep` | Current rule document. |
 | `effectiveQuery` | `CompileRuleQueryStep` | The query to execute this run — either the stored query (write-time types) or the query generated from builder fields (execution-time types). |
-| `executionWindow` | `CompileRuleQueryStep` | Resolved time window for the current execution (from builder output or stored rule). |
+| `executionWindow` | `CompileRuleQueryStep` | Start-exclusive, end-inclusive time window resolved once per run from `now` and `schedule.lookback ?? schedule.every`. Passed into `generateQuery` as `run.window`; downstream steps read it from state instead of recomputing to ensure the breach, recovery, and no-data queries all use the same window. |
 | `parsedBuilderFields` | `CompileRuleQueryStep` | Builder fields parsed against the builder type's schema, threaded to downstream steps so they do not re-parse. Present only for execution-time builder types. |
 | `queryPayload` | `ExecuteRuleQueryStep` | ES\|QL query/filter/params for the current run. |
 | `esqlRowBatch` | `ExecuteRuleQueryStep` | One streamed batch of ES\|QL rows. |

@@ -217,7 +217,10 @@ export function EpisodeDetailsPage() {
               share: services.share,
               capabilities: services.application.capabilities,
               uiSettings: services.uiSettings,
-              ruleEsql: showRuleDependentUi && ruleState.rule.query ? getBreachEsqlQuery(ruleState.rule.query) : undefined,
+              ruleEsql:
+                showRuleDependentUi && ruleState.rule.query
+                  ? getBreachEsqlQuery(ruleState.rule.query)
+                  : undefined,
               episodeIsoTimestamp: ts,
             }),
         }),

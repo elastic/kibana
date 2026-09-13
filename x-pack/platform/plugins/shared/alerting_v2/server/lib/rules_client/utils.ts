@@ -801,15 +801,15 @@ export function validateMergedRuleAttributes(
     details: Record<string, unknown>;
   }> = [
     {
-      // Execution-time builder rules have no stored query, so the standalone-
-      // format invariant is vacuously satisfied — the query is compiled per run
-      // and validated there. Mirror the wire schema's `builder_fields != null`
-      // escape (createRuleDataSchema refinement line 746, replaceRuleBodySchema
-      // line 827) so that a PATCH on a signal execution-compiled rule does not
-      // incorrectly fail with INVALID_SIGNAL_RULE.
+      // Execution-time builder rules have no stored query (`attrs.query == null`),
+      // so the standalone-format invariant is vacuously satisfied — the query is
+      // compiled per run and validated there. Key the escape on `attrs.query == null`
+      // rather than `builder_fields != null`: write-time builder rules carry both
+      // `builder_fields` and a persisted `query`, so the backstop must still apply
+      // to them. Only execution-time rules genuinely have no query.
       //
       // Ref: rule-execution-logic.md "A rule without a persisted query"
-      valid: attrs.metadata.builder_fields != null || isSignalUsingStandaloneFormat(attrs),
+      valid: attrs.query == null || isSignalUsingStandaloneFormat(attrs),
       message: 'kind "signal" requires query.format "standalone".',
       code: ALERTING_ERROR_CODES.INVALID_SIGNAL_RULE,
       details: { rule_id: ruleId, rule_kind: attrs.kind },
@@ -827,7 +827,13 @@ export function validateMergedRuleAttributes(
       details: { rule_id: ruleId },
     },
     {
-      valid: isRecoveryQueryProvidedForStrategy(attrs),
+      // Mirror the wire-schema `builder_fields != null` escape for
+      // `isRecoveryQueryProvidedForStrategy` (createRuleDataSchema line 759,
+      // replaceRuleBodySchema line 840): execution-time rules have no stored query,
+      // so recovery_strategy 'query' with no query block is vacuously valid (the
+      // recovery query is compiled per run). Same `query == null` key as above to
+      // keep write-time builder rules under the backstop.
+      valid: attrs.query == null || isRecoveryQueryProvidedForStrategy(attrs),
       message: 'query.recovery is required when recovery_strategy is "query".',
       code: ALERTING_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
       details: { rule_id: ruleId },

@@ -278,9 +278,7 @@ describe('detectDataPresence', () => {
 
     const fixedEnd = '2025-04-15T08:00:00.000Z';
     const lookback = '5m';
-    const expectedStart = new Date(
-      new Date(fixedEnd).getTime() - 5 * 60 * 1000
-    ).toISOString();
+    const expectedStart = new Date(new Date(fixedEnd).getTime() - 5 * 60 * 1000).toISOString();
 
     const rule = buildRule({ schedule: { every: '1m', lookback } });
 

@@ -122,14 +122,19 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
 
     // Use the effective query from pipeline state (set by CompileRuleQueryStep,
     // which always runs before this step).
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     const effectiveQuery = state.effectiveQuery!;
 
-    // Derive the shared now from the resolved execution window so no-data and
-    // recovery queries use the same window boundary as the breach query.
-    const now = state.executionWindow
-      ? new Date(state.executionWindow.end).getTime()
-      : undefined;
+    // executionWindow is always set by CompileRuleQueryStep, which runs before
+    // this step. Absence is a pipeline assembly error — fail loudly rather than
+    // silently reverting to Date.now() and misaligning the time window.
+    if (!state.executionWindow) {
+      throw new Error(
+        'ClassifyAbsentGroupsStep requires executionWindow (set by CompileRuleQueryStep) — ' +
+          'check that CompileRuleQueryStep is bound before this step'
+      );
+    }
+    const now = new Date(state.executionWindow.end).getTime();
 
     const recoveryEnabled = rule.recovery_strategy != null && rule.recovery_strategy !== 'none';
     const noDataEnabled = getNoDataEsqlQuery(effectiveQuery, rule.no_data_strategy) != null;
