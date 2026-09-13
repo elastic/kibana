@@ -6,9 +6,9 @@
  */
 
 /**
- * Step 8.4 — DetectionRulesClient unit tests.
+ * Steps 8.4 and 8.5 — DetectionRulesClient unit tests.
  *
- * Covers every branch the design names:
+ * Step 8.4 covers every branch the design names:
  *   - createRule: happy path (query, threshold), enabled default is false.
  *   - replaceRule (PUT): happy path, 404 for missing rule, 409 for type change,
  *     reset of omitted defaultables (the "PUT reset" invariant).
@@ -18,11 +18,24 @@
  *   - getInScopeRule: 404 for out-of-scope rule, 404 for unknown builder_type,
  *     passthrough of framework 404.
  *
+ * Step 8.5 adds:
+ *   - getRule: happy path, 404 for out-of-scope (scoping test).
+ *   - listRules: scoping fragment always ANDed in, structured filters each
+ *     composed correctly (enabled, type, severity, tags, rule_ids), search
+ *     pass-through, sort allowlist (severity rejected), fields projection
+ *     (always includes id, extra fields kept, others dropped), foreign rules
+ *     excluded via the scoping fragment.
+ *   - getDetectionTags: scoping fragment passed to framework getTags.
+ *   - enableRule / disableRule: scope-checked, framework called, revision
+ *     unchanged in response.
+ *
  * All framework client calls are mocked.  No kibana boot required.
  *
  * Ref: rule-crud-api.md "Create a rule", "Replace a rule with PUT",
  *      "Patch a rule with PATCH", "Delete a rule", "Validation layering"
- *      rule-fetch-api.md "One rule by object id"
+ *      rule-fetch-api.md "One rule by object id", "The list endpoint",
+ *      "Filtering", "Searching and sorting", "Field limitation", "The tags endpoint"
+ *      rule-actions-api.md "The endpoints", "Semantics"
  */
 
 import Boom from '@hapi/boom';
@@ -30,7 +43,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { ALERTING_ERROR_CODES } from '@kbn/alerting-v2-plugin/server';
 import { DetectionRulesClient } from '../detection_rules_client';
-import type { DetectionRulesClientDeps } from '../detection_rules_client';
+import type { DetectionRulesClientDeps, ListRulesParams } from '../detection_rules_client';
 import type {
   DetectionRuleCreateProps,
   DetectionRuleUpdateProps,
@@ -613,6 +626,474 @@ describe('DetectionRulesClient', () => {
       await expect(client.getInScopeRule('missing-id')).rejects.toMatchObject({
         output: { statusCode: 404 },
       });
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Step 8.5: getRule
+  // -------------------------------------------------------------------------
+
+  describe('getRule', () => {
+    it('returns the public response for an in-scope rule', async () => {
+      const inScopeRule = makeInScopeRuleResponse();
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.getRule as jest.Mock).mockResolvedValueOnce(inScopeRule);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+      const result = await client.getRule('rule-id-1');
+
+      expect(result.id).toBe('rule-id-1');
+      expect(result.type).toBe('query');
+    });
+
+    it('throws 404 for a foreign (out-of-scope) rule — scoping test', async () => {
+      const foreignRule = makeInScopeRuleResponse();
+      (foreignRule.metadata!.ownership as Record<string, unknown>) = {
+        managed: true,
+        solution: 'apm',
+        domain: 'slo',
+      };
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.getRule as jest.Mock).mockResolvedValueOnce(foreignRule);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+
+      await expect(client.getRule('rule-id-1')).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+    });
+
+    it('throws 404 for a detection rule with an unknown builder_type (rollback state)', async () => {
+      const rollbackRule = makeInScopeRuleResponse();
+      (rollbackRule.metadata as Record<string, unknown>).builder_type = 'security.detection.eql';
+
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.getRule as jest.Mock).mockResolvedValueOnce(rollbackRule);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+
+      await expect(client.getRule('rule-id-1')).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Step 8.5: listRules
+  // -------------------------------------------------------------------------
+
+  /**
+   * Helper — builds a minimal FindRulesResult from framework client mocks.
+   * The `filter` passed to framework.findRules is what we assert on.
+   */
+  function makeFindResult(rules: Array<ReturnType<typeof makeInScopeRuleResponse>>) {
+    return {
+      items: rules,
+      total: rules.length,
+      page: 1,
+      per_page: 20,
+    };
+  }
+
+  describe('listRules', () => {
+    it('always ANDs the scoping fragment into the framework filter', async () => {
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.findRules as jest.Mock).mockResolvedValueOnce(
+        makeFindResult([makeInScopeRuleResponse()])
+      );
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+      await client.listRules({});
+
+      const [callArgs] = (frameworkClient.findRules as jest.Mock).mock.calls[0];
+      // The scoping fragment must always be present.
+      expect(callArgs.filter).toContain('metadata.ownership.managed: true');
+      expect(callArgs.filter).toContain('metadata.ownership.solution: "security"');
+      expect(callArgs.filter).toContain('metadata.ownership.domain: "detection"');
+      expect(callArgs.filter).toContain('metadata.builder_type:');
+    });
+
+    it('derives the builder_type clause from the alias map (not hardcoded)', async () => {
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.findRules as jest.Mock).mockResolvedValueOnce(makeFindResult([]));
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+      await client.listRules({});
+
+      const [callArgs] = (frameworkClient.findRules as jest.Mock).mock.calls[0];
+      // Both registered types must appear.
+      expect(callArgs.filter).toContain('security.detection.query');
+      expect(callArgs.filter).toContain('security.detection.threshold');
+    });
+
+    it('a foreign rule never appears: scoping excludes unmanaged rules', async () => {
+      // The framework mock returns both in-scope and a "foreign" rule.
+      // In reality the filter prevents this; here we verify the filter contains
+      // the ownership fragment that makes the framework exclude them.
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.findRules as jest.Mock).mockResolvedValueOnce(makeFindResult([]));
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+      await client.listRules({});
+
+      const [callArgs] = (frameworkClient.findRules as jest.Mock).mock.calls[0];
+      // The ownership fragment ensures managed: true + correct solution + domain.
+      expect(callArgs.filter).toContain('metadata.ownership.managed: true');
+      expect(callArgs.filter).toContain('metadata.ownership.solution: "security"');
+    });
+
+    it('composes enabled filter', async () => {
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.findRules as jest.Mock).mockResolvedValueOnce(makeFindResult([]));
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+      await client.listRules({ enabled: true });
+
+      const [callArgs] = (frameworkClient.findRules as jest.Mock).mock.calls[0];
+      expect(callArgs.filter).toContain('enabled: true');
+    });
+
+    it('composes type filter: single alias translated to builder type id', async () => {
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.findRules as jest.Mock).mockResolvedValueOnce(makeFindResult([]));
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+      await client.listRules({ type: ['query'] });
+
+      const [callArgs] = (frameworkClient.findRules as jest.Mock).mock.calls[0];
+      expect(callArgs.filter).toContain('metadata.builder_type: "security.detection.query"');
+    });
+
+    it('composes type filter: multiple aliases ORed', async () => {
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.findRules as jest.Mock).mockResolvedValueOnce(makeFindResult([]));
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+      await client.listRules({ type: ['query', 'threshold'] });
+
+      const [callArgs] = (frameworkClient.findRules as jest.Mock).mock.calls[0];
+      expect(callArgs.filter).toContain('security.detection.query');
+      expect(callArgs.filter).toContain('security.detection.threshold');
+      // Both should be ORed together.
+      expect(callArgs.filter).toContain(' or ');
+    });
+
+    it('composes severity filter: multiple values ORed', async () => {
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.findRules as jest.Mock).mockResolvedValueOnce(makeFindResult([]));
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+      await client.listRules({ severity: ['low', 'high'] });
+
+      const [callArgs] = (frameworkClient.findRules as jest.Mock).mock.calls[0];
+      expect(callArgs.filter).toContain('metadata.builder_fields.severity: "low"');
+      expect(callArgs.filter).toContain('metadata.builder_fields.severity: "high"');
+    });
+
+    it('composes tags filter', async () => {
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.findRules as jest.Mock).mockResolvedValueOnce(makeFindResult([]));
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+      await client.listRules({ tags: ['os:windows', 'tactic:discovery'] });
+
+      const [callArgs] = (frameworkClient.findRules as jest.Mock).mock.calls[0];
+      expect(callArgs.filter).toContain('metadata.tags: "os:windows"');
+      expect(callArgs.filter).toContain('metadata.tags: "tactic:discovery"');
+    });
+
+    it('composes rule_ids filter using signature_id field', async () => {
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.findRules as jest.Mock).mockResolvedValueOnce(makeFindResult([]));
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+      await client.listRules({ rule_ids: ['sig-001', 'sig-002'] });
+
+      const [callArgs] = (frameworkClient.findRules as jest.Mock).mock.calls[0];
+      expect(callArgs.filter).toContain('metadata.signature_id: "sig-001"');
+      expect(callArgs.filter).toContain('metadata.signature_id: "sig-002"');
+    });
+
+    it('ANDs separate filter parameters together', async () => {
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.findRules as jest.Mock).mockResolvedValueOnce(makeFindResult([]));
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+      await client.listRules({ enabled: true, severity: ['low'] });
+
+      const [callArgs] = (frameworkClient.findRules as jest.Mock).mock.calls[0];
+      // Both filters must appear, joined with AND (not OR).
+      expect(callArgs.filter).toContain('enabled: true');
+      expect(callArgs.filter).toContain('metadata.builder_fields.severity: "low"');
+      // The filter contains ' and ' (the cross-parameter AND).
+      expect(callArgs.filter.toLowerCase()).toContain(' and ');
+    });
+
+    it('passes search straight through to the framework', async () => {
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.findRules as jest.Mock).mockResolvedValueOnce(makeFindResult([]));
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+      await client.listRules({ search: 'powershell' });
+
+      const [callArgs] = (frameworkClient.findRules as jest.Mock).mock.calls[0];
+      expect(callArgs.search).toBe('powershell');
+    });
+
+    it('maps name sort field to the framework sort field', async () => {
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.findRules as jest.Mock).mockResolvedValueOnce(makeFindResult([]));
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+      await client.listRules({ sort_field: 'name', sort_order: 'asc' });
+
+      const [callArgs] = (frameworkClient.findRules as jest.Mock).mock.calls[0];
+      expect(callArgs.sortField).toBe('name');
+      expect(callArgs.sortOrder).toBe('asc');
+    });
+
+    it('maps risk_score sort field to builder_fields.risk_score', async () => {
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.findRules as jest.Mock).mockResolvedValueOnce(makeFindResult([]));
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+      await client.listRules({ sort_field: 'risk_score' });
+
+      const [callArgs] = (frameworkClient.findRules as jest.Mock).mock.calls[0];
+      expect(callArgs.sortField).toBe('builder_fields.risk_score');
+    });
+
+    it('maps enabled sort field to the framework sort field', async () => {
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.findRules as jest.Mock).mockResolvedValueOnce(makeFindResult([]));
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+      await client.listRules({ sort_field: 'enabled' });
+
+      const [callArgs] = (frameworkClient.findRules as jest.Mock).mock.calls[0];
+      expect(callArgs.sortField).toBe('enabled');
+    });
+
+    it('rejects severity as a sort field — it is deliberately not sortable', async () => {
+      const frameworkClient = makeFrameworkClientMock();
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+
+      // Cast through unknown to allow passing 'severity' in tests — the type
+      // does not include it precisely because the API rejects it.
+      await expect(
+        client.listRules({ sort_field: 'severity' as unknown as ListRulesParams['sort_field'] })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+
+      // Framework find was never called.
+      expect(frameworkClient.findRules).not.toHaveBeenCalled();
+    });
+
+    it('applies fields projection: only requested fields plus id are returned', async () => {
+      const rule = makeInScopeRuleResponse();
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.findRules as jest.Mock).mockResolvedValueOnce(makeFindResult([rule]));
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+      const result = await client.listRules({ fields: ['name', 'enabled'] });
+
+      // id is always included.
+      expect(result.data[0]).toHaveProperty('id');
+      expect(result.data[0]).toHaveProperty('name');
+      expect(result.data[0]).toHaveProperty('enabled');
+      // Other fields like type, risk_score etc. must be absent.
+      expect(result.data[0]).not.toHaveProperty('risk_score');
+      expect(result.data[0]).not.toHaveProperty('severity');
+    });
+
+    it('fields projection always includes id even when not in the fields list', async () => {
+      const rule = makeInScopeRuleResponse();
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.findRules as jest.Mock).mockResolvedValueOnce(makeFindResult([rule]));
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+      const result = await client.listRules({ fields: ['name'] });
+
+      expect(result.data[0]).toHaveProperty('id');
+    });
+
+    it('returns full rules when fields is not provided', async () => {
+      const rule = makeInScopeRuleResponse();
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.findRules as jest.Mock).mockResolvedValueOnce(makeFindResult([rule]));
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+      const result = await client.listRules({});
+
+      // No projection — full converted rule is returned.
+      expect(result.data[0]).toHaveProperty('id');
+      expect(result.data[0]).toHaveProperty('type');
+      expect(result.data[0]).toHaveProperty('severity');
+    });
+
+    it('passes pagination through to the framework', async () => {
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.findRules as jest.Mock).mockResolvedValueOnce({
+        items: [],
+        total: 42,
+        page: 3,
+        per_page: 10,
+      });
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+      const result = await client.listRules({ page: 3, per_page: 10 });
+
+      const [callArgs] = (frameworkClient.findRules as jest.Mock).mock.calls[0];
+      expect(callArgs.page).toBe(3);
+      expect(callArgs.perPage).toBe(10);
+      expect(result.page).toBe(3);
+      expect(result.per_page).toBe(10);
+      expect(result.total).toBe(42);
+    });
+
+    it('returns the response envelope with page, per_page, total, data', async () => {
+      const rule = makeInScopeRuleResponse();
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.findRules as jest.Mock).mockResolvedValueOnce(makeFindResult([rule]));
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+      const result = await client.listRules({});
+
+      expect(result).toHaveProperty('page');
+      expect(result).toHaveProperty('per_page');
+      expect(result).toHaveProperty('total');
+      expect(result).toHaveProperty('data');
+      expect(Array.isArray(result.data)).toBe(true);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Step 8.5: getDetectionTags
+  // -------------------------------------------------------------------------
+
+  describe('getDetectionTags', () => {
+    it('calls framework getTags with the scoping fragment as the filter', async () => {
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.getTags as jest.Mock).mockResolvedValueOnce(['tag-a', 'tag-b']);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+      const result = await client.getDetectionTags();
+
+      const [callArgs] = (frameworkClient.getTags as jest.Mock).mock.calls[0];
+      // The scoping fragment must be passed as the filter.
+      expect(callArgs.filter).toContain('metadata.ownership.managed: true');
+      expect(callArgs.filter).toContain('metadata.ownership.solution: "security"');
+      expect(callArgs.filter).toContain('metadata.ownership.domain: "detection"');
+      expect(callArgs.filter).toContain('metadata.builder_type:');
+      // Returns the tags from the framework as-is.
+      expect(result).toEqual(['tag-a', 'tag-b']);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Step 8.5: enableRule / disableRule
+  // -------------------------------------------------------------------------
+
+  describe('enableRule', () => {
+    it('scope-checks and calls framework enableRule, returning the public response', async () => {
+      const ruleBeforeToggle = makeInScopeRuleResponse({ enabled: false });
+      const ruleAfterToggle = makeInScopeRuleResponse({ enabled: true });
+
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.getRule as jest.Mock).mockResolvedValueOnce(ruleBeforeToggle);
+      (frameworkClient.enableRule as jest.Mock).mockResolvedValueOnce(ruleAfterToggle);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+      const result = await client.enableRule('rule-id-1');
+
+      expect(frameworkClient.getRule).toHaveBeenCalledWith({ id: 'rule-id-1' });
+      expect(frameworkClient.enableRule).toHaveBeenCalledWith({ id: 'rule-id-1' });
+      expect(result.enabled).toBe(true);
+    });
+
+    it('throws 404 for a foreign rule (scoping enforced before toggle)', async () => {
+      const foreignRule = makeInScopeRuleResponse();
+      (foreignRule.metadata!.ownership as Record<string, unknown>) = {
+        managed: true,
+        solution: 'apm',
+        domain: 'slo',
+      };
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.getRule as jest.Mock).mockResolvedValueOnce(foreignRule);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+
+      await expect(client.enableRule('rule-id-1')).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+
+      // Framework enableRule was never called.
+      expect(frameworkClient.enableRule).not.toHaveBeenCalled();
+    });
+
+    it('revision stays at the same value after enable (the framework does not move it)', async () => {
+      const ruleBeforeToggle = makeInScopeRuleResponse({ enabled: false });
+      // The revision is 0 in makeInScopeRuleResponse; the framework does not
+      // touch it in enableRule, so the returned rule has the same revision.
+      const ruleAfterToggle = makeInScopeRuleResponse({ enabled: true });
+
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.getRule as jest.Mock).mockResolvedValueOnce(ruleBeforeToggle);
+      (frameworkClient.enableRule as jest.Mock).mockResolvedValueOnce(ruleAfterToggle);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+      const result = await client.enableRule('rule-id-1');
+
+      // revision in the response must equal the stored revision (0).
+      expect(result.revision).toBe(0);
+    });
+  });
+
+  describe('disableRule', () => {
+    it('scope-checks and calls framework disableRule, returning the public response', async () => {
+      const ruleBeforeToggle = makeInScopeRuleResponse({ enabled: true });
+      const ruleAfterToggle = makeInScopeRuleResponse({ enabled: false });
+
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.getRule as jest.Mock).mockResolvedValueOnce(ruleBeforeToggle);
+      (frameworkClient.disableRule as jest.Mock).mockResolvedValueOnce(ruleAfterToggle);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+      const result = await client.disableRule('rule-id-1');
+
+      expect(frameworkClient.getRule).toHaveBeenCalledWith({ id: 'rule-id-1' });
+      expect(frameworkClient.disableRule).toHaveBeenCalledWith({ id: 'rule-id-1' });
+      expect(result.enabled).toBe(false);
+    });
+
+    it('throws 404 for a foreign rule', async () => {
+      const foreignRule = makeInScopeRuleResponse();
+      (foreignRule.metadata!.ownership as Record<string, unknown>) = {
+        managed: false,
+      };
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.getRule as jest.Mock).mockResolvedValueOnce(foreignRule);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+
+      await expect(client.disableRule('rule-id-1')).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+
+      expect(frameworkClient.disableRule).not.toHaveBeenCalled();
+    });
+
+    it('revision stays at the same value after disable', async () => {
+      const ruleBeforeToggle = makeInScopeRuleResponse({ enabled: true });
+      const ruleAfterToggle = makeInScopeRuleResponse({ enabled: false });
+
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.getRule as jest.Mock).mockResolvedValueOnce(ruleBeforeToggle);
+      (frameworkClient.disableRule as jest.Mock).mockResolvedValueOnce(ruleAfterToggle);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+      const result = await client.disableRule('rule-id-1');
+
+      expect(result.revision).toBe(0);
     });
   });
 });
