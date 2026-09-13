@@ -211,7 +211,10 @@ describe('detectionRulePatchPropsSchema', () => {
     expect(detectionRulePatchPropsSchema.safeParse(input).success).toBe(false);
   });
 
-  // Nullable optionals — null clears the stored value
+  // Nullable optionals — null clears the stored value.
+  // Only optional-with-no-default fields are nullable; defaultable fields
+  // (max_signals, version, etc.) are optional but NOT nullable.
+  // Ref: rule-domain-model.md "The request shapes" (three-group split)
   it.each([
     ['note', null],
     ['license', null],
@@ -223,7 +226,6 @@ describe('detectionRulePatchPropsSchema', () => {
     ['threat', null],
     ['related_integrations', null],
     ['required_fields', null],
-    ['max_signals', null],
   ])('accepts %s: null (clear)', (field, value) => {
     const input = { [field]: value };
     const result = detectionRulePatchPropsSchema.safeParse(input);
@@ -231,6 +233,15 @@ describe('detectionRulePatchPropsSchema', () => {
     if (result.success) {
       expect((result.data as Record<string, unknown>)[field]).toBeNull();
     }
+  });
+
+  // max_signals is a defaultable field — null is rejected so the stored value
+  // cannot become absent while the response papers over it with the default.
+  // Callers who want max_signals = 100 must send 100 explicitly.
+  it('rejects max_signals: null (defaultable, not clearable)', () => {
+    const input = { max_signals: null };
+    const result = detectionRulePatchPropsSchema.safeParse(input);
+    expect(result.success).toBe(false);
   });
 
   it('accepts schedule.lookback: null to clear the lookback', () => {
