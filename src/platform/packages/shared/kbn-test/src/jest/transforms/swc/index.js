@@ -409,13 +409,15 @@ function inlineComputedEnumValues(parsed, source) {
       const object = new Map();
       for (const property of unwrapped.properties) {
         if (property.type !== 'KeyValueProperty') {
-          continue;
+          return;
         }
 
         const propertyName = getPropertyName(property.key);
-        if (propertyName !== undefined) {
-          object.set(propertyName, resolveConstant(property.value, seen));
+        if (propertyName === undefined) {
+          return;
         }
+
+        object.set(propertyName, resolveConstant(property.value, seen));
       }
       return object;
     }
@@ -507,6 +509,29 @@ function createPurityChecker(parsed) {
     return kind === 'const' || kind === 'import' || !reassigned.has(key);
   };
 
+  const isPureClassMember = (member, isPureExpression) => {
+    const keyIsPure = member.key?.type !== 'Computed' || isPureExpression(member.key.expression);
+    const decorators = member.decorators ?? member.function?.decorators ?? [];
+
+    if (!keyIsPure || decorators.length > 0) {
+      return false;
+    }
+
+    switch (member.type) {
+      case 'Constructor':
+      case 'ClassMethod':
+      case 'PrivateMethod':
+      case 'TsIndexSignature':
+      case 'EmptyStatement':
+        return true;
+      case 'ClassProperty':
+      case 'PrivateProperty':
+        return !member.isStatic || !member.value || isPureExpression(member.value);
+      default:
+        return false;
+    }
+  };
+
   const isPure = (node) => {
     const expression = unwrapExpression(node);
 
@@ -557,7 +582,8 @@ function createPurityChecker(parsed) {
       case 'ClassExpression':
         return (
           (expression.decorators?.length ?? 0) === 0 &&
-          (!expression.superClass || isPure(expression.superClass))
+          (!expression.superClass || isPure(expression.superClass)) &&
+          expression.body.every((member) => isPureClassMember(member, isPure))
         );
       default:
         return false;
@@ -625,6 +651,38 @@ function forEachStatementList(ast, callback) {
   });
 }
 
+function moveVariableDeclarators(parsed, source, declaration, declarators, insertion) {
+  const orderedDeclarators = [...declarators].sort(
+    (left, right) => left.span.start - right.span.start
+  );
+  const selected = new Set(orderedDeclarators);
+
+  if (selected.size === declaration.declarations.length) {
+    const end = parsed.end(declaration);
+    source.move(parsed.start(declaration), end, insertion);
+    source.appendLeft(end, '\n');
+    return;
+  }
+
+  const remaining = declaration.declarations.filter((declarator) => !selected.has(declarator));
+  const lastRemaining = remaining.at(-1);
+
+  for (const declarator of orderedDeclarators) {
+    const start = parsed.start(declarator);
+    const end = parsed.end(declarator);
+    source.prependRight(start, `${declaration.kind} `);
+    source.appendLeft(end, ';\n');
+    source.move(start, end, insertion);
+  }
+
+  for (let index = 0; index < declaration.declarations.length - 1; index++) {
+    const declarator = declaration.declarations[index];
+    if (selected.has(declarator) || declarator === lastRemaining) {
+      source.remove(parsed.end(declarator), parsed.start(declaration.declarations[index + 1]));
+    }
+  }
+}
+
 /**
  * Babel's Jest hoist inlined nothing, but only hoisted mocks with literal module names. SWC hoists
  * every jest.mock() call, so resolve identifier module names to the literal visible at the call
@@ -636,7 +694,7 @@ function forEachStatementList(ast, callback) {
 function rewriteJestMocks(parsed, source) {
   const { isPure, isConstantBinding } = createPurityChecker(parsed);
   const hoistedModuleNames = new Set();
-  const movedStatements = new Set();
+  const movedDeclarators = new Set();
   const moduleNameDeclarations = new Map();
 
   visitAst(parsed.ast, (node) => {
@@ -708,31 +766,45 @@ function rewriteJestMocks(parsed, source) {
             !binding ||
             /^mock/i.test(reference.value) ||
             !binding.declarator.init ||
-            binding.declaration.declarations.length !== 1 ||
-            (block !== parsed.ast && binding.statement === firstStatement) ||
-            movedStatements.has(binding.statement) ||
+            (block !== parsed.ast &&
+              binding.statement === firstStatement &&
+              binding.declaration.declarations.length === 1) ||
+            movedDeclarators.has(binding.declarator) ||
             !isConstantBinding(binding.declarator.id) ||
             !isPure(binding.declarator.init)
           ) {
             continue;
           }
 
-          movedStatements.add(binding.statement);
+          movedDeclarators.add(binding.declarator);
 
           if (block === parsed.ast) {
             hoistedModuleNames.add(reference.value);
           } else {
-            blockMoves.push(binding.statement);
+            blockMoves.push(binding);
           }
         }
       }
     }
 
     // Keep source order so a hoisted constant can still reference an earlier hoisted one.
-    for (const statement of blockMoves.sort((left, right) => left.span.start - right.span.start)) {
-      const end = parsed.end(statement);
-      source.move(parsed.start(statement), end, parsed.start(firstStatement));
-      source.appendLeft(end, ';\n');
+    const movesByDeclaration = new Map();
+    for (const binding of blockMoves) {
+      const declarators = movesByDeclaration.get(binding.declaration) ?? [];
+      declarators.push(binding.declarator);
+      movesByDeclaration.set(binding.declaration, declarators);
+    }
+
+    for (const [declaration, declarators] of [...movesByDeclaration].sort(
+      ([left], [right]) => left.span.start - right.span.start
+    )) {
+      moveVariableDeclarators(
+        parsed,
+        source,
+        declaration,
+        declarators,
+        parsed.start(firstStatement)
+      );
     }
   });
 
@@ -931,18 +1003,16 @@ function hoistModuleDeclarations(code, hoistedModuleNames) {
   const insertion = parsed.start(insertionTarget);
 
   for (const statement of body.slice(insertionIndex + 1)) {
-    if (
-      statement.type !== 'VariableDeclaration' ||
-      !statement.declarations.some(
-        ({ id }) => id.type === 'Identifier' && hoistedModuleNames.has(id.value)
-      )
-    ) {
+    if (statement.type !== 'VariableDeclaration') {
       continue;
     }
 
-    const end = parsed.end(statement);
-    source.move(parsed.start(statement), end, insertion);
-    source.appendLeft(end, '\n');
+    const declarators = statement.declarations.filter(
+      ({ id }) => id.type === 'Identifier' && hoistedModuleNames.has(id.value)
+    );
+    if (declarators.length > 0) {
+      moveVariableDeclarators(parsed, source, statement, declarators, insertion);
+    }
   }
 
   if (!source.hasChanged()) {
@@ -1129,6 +1199,120 @@ function getExportName(rawName) {
   return rawName.startsWith('"') ? JSON.parse(rawName) : rawName;
 }
 
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function republishMutableLocalExports(code, mutableLocalExports) {
+  if (mutableLocalExports.length === 0) {
+    return { code };
+  }
+
+  const parsed = new ParsedSource(code, GENERATED_PATH);
+  const source = new MagicString(code);
+  const exportsByBinding = new Map();
+  const identifiers = new Set();
+
+  visitAst(parsed.ast, (node) => {
+    if (node.type === 'Identifier') {
+      identifiers.add(node.value);
+    }
+  });
+
+  for (const statement of parsed.ast.body) {
+    if (statement.type !== 'VariableDeclaration') {
+      continue;
+    }
+
+    for (const { id } of statement.declarations) {
+      if (id.type !== 'Identifier') {
+        continue;
+      }
+
+      const matchingExports = mutableLocalExports.filter(({ binding }) => binding === id.value);
+      if (matchingExports.length > 0) {
+        exportsByBinding.set(getIdentifierKey(id), matchingExports);
+      }
+    }
+  }
+
+  let resultName = '__kbnExportUpdateResult';
+  while (identifiers.has(resultName)) {
+    resultName += '_';
+  }
+
+  const getAffectedExports = (assignedIdentifiers) => {
+    const affectedExports = new Map();
+
+    for (const identifier of assignedIdentifiers) {
+      for (const exported of exportsByBinding.get(getIdentifierKey(identifier)) ?? []) {
+        affectedExports.set(JSON.stringify([exported.name, exported.binding]), exported);
+      }
+    }
+
+    return [...affectedExports.values()];
+  };
+  const getUpdates = (affectedExports) =>
+    affectedExports
+      .map(({ name, binding }) => {
+        const rawName = JSON.stringify(name);
+        return (
+          `Object.getOwnPropertyDescriptor(exports, ${rawName})?.get === undefined && ` +
+          `(exports[${rawName}] = ${binding})`
+        );
+      })
+      .join(', ');
+
+  visitAst(parsed.ast, (node) => {
+    let assignedIdentifiers = [];
+    if (node.type === 'AssignmentExpression') {
+      assignedIdentifiers = getBindingIdentifiers(node.left);
+    } else if (node.type === 'UpdateExpression') {
+      assignedIdentifiers = getBindingIdentifiers(node.argument);
+    }
+
+    const affectedExports = getAffectedExports(assignedIdentifiers);
+    if (affectedExports.length === 0) {
+      return;
+    }
+
+    const updates = getUpdates(affectedExports);
+    source.prependRight(parsed.start(node), `((${resultName}) => (${updates}, ${resultName}))(`);
+    source.appendLeft(parsed.end(node), ')');
+  });
+
+  visitAst(parsed.ast, (node) => {
+    if (
+      (node.type !== 'ForInStatement' && node.type !== 'ForOfStatement') ||
+      node.left.type === 'VariableDeclaration'
+    ) {
+      return;
+    }
+
+    const affectedExports = getAffectedExports(getBindingIdentifiers(node.left));
+    if (affectedExports.length === 0) {
+      return;
+    }
+
+    const updates = `${getUpdates(affectedExports)};`;
+    if (node.body.type === 'BlockStatement') {
+      source.appendLeft(parsed.start(node.body) + 1, updates);
+    } else {
+      source.prependRight(parsed.start(node.body), `{ ${updates} `);
+      source.appendLeft(parsed.end(node.body), ' }');
+    }
+  });
+
+  if (!source.hasChanged()) {
+    return { code };
+  }
+
+  return {
+    code: source.toString(),
+    map: JSON.parse(source.generateMap({ hires: true, source: GENERATED_PATH }).toString()),
+  };
+}
+
 function makeExportsReplaceable(code) {
   if (!code.includes('exports')) {
     return { code, localExportNames: [] };
@@ -1185,12 +1369,20 @@ function makeExportsReplaceable(code) {
   // module has initialized so Sinon can wrap them, keeping `let`/`var` exports as live getters.
   // SWC prints class declarations as `let Name = class Name`, which are still immutable.
   const isMutableBinding = (binding) =>
-    new RegExp(String.raw`^(?:let|var) ${binding}\b(?! = class\b)`, 'm').test(rewritten);
+    new RegExp(String.raw`^(?:let|var) ${escapeRegExp(binding)}(?![\w$])(?! = class\b)`, 'm').test(
+      rewritten
+    );
+  const mutableLocalExports = localExports.filter(({ binding }) => isMutableBinding(binding));
   const localExportNames = localExports
     .filter(({ name, binding }) => name !== 'default' && !isMutableBinding(binding))
     .map(({ name }) => name);
+  const republished = republishMutableLocalExports(rewritten, mutableLocalExports);
 
-  return { code: rewritten, localExportNames };
+  return {
+    code: republished.code,
+    map: republished.map,
+    localExportNames,
+  };
 }
 
 function materializeLocalExports(code, localExportNames) {
@@ -1276,6 +1468,9 @@ function finalizeResult(result, prepared, transformOptions) {
   if (!transformOptions?.supportsStaticESM) {
     const replaceable = makeExportsReplaceable(code);
     code = materializeLocalExports(replaceable.code, replaceable.localExportNames);
+    if (replaceable.map) {
+      maps.unshift(replaceable.map);
+    }
 
     if (prepared.soleDefaultExport) {
       code = appendStatement(code, 'module.exports = exports.default;');

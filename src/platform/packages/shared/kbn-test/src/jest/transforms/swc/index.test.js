@@ -139,6 +139,46 @@ describe('SWC Jest transformer', () => {
       expect(typeof exports.value).toBe('function');
     });
 
+    it('hoists a referenced declarator without hoisting its siblings', () => {
+      const source = `
+        import { rendered } from './component';
+        const Component = () => null, state = { Component }, other = 1;
+        jest.mock('./component', () => ({ state, Component }));
+        export const value = rendered;
+      `;
+      const code = getCode(source);
+      const factories = new Map();
+      const jestObject = {
+        mock: (name, factory) => factories.set(name, factory),
+      };
+      const exports = evaluate(source, {
+        jestObject,
+        modules: {
+          './component': () => ({ rendered: factories.get('./component')().state.Component }),
+        },
+      });
+
+      expect(typeof exports.value).toBe('function');
+      expect(code.indexOf('const Component')).toBeLessThan(code.indexOf('require("./component")'));
+      expect(code.indexOf('const state')).toBeLessThan(code.indexOf('require("./component")'));
+      expect(code.indexOf('const other')).toBeGreaterThan(code.indexOf('require("./component")'));
+    });
+
+    it('does not hoist classes with eager side effects above imports', () => {
+      const code = getCode(`
+        import { readImportedSetup } from './setup';
+        const StaticField = class { static value = readImportedSetup(); };
+        const ComputedKey = class { [readImportedSetup()]() {} };
+        const StaticBlock = class { static { readImportedSetup(); } };
+        jest.mock('./component', () => ({ StaticField, ComputedKey, StaticBlock }));
+      `);
+
+      const requireIndex = code.indexOf('require("./setup")');
+      expect(code.indexOf('const StaticField')).toBeGreaterThan(requireIndex);
+      expect(code.indexOf('const ComputedKey')).toBeGreaterThan(requireIndex);
+      expect(code.indexOf('const StaticBlock')).toBeGreaterThan(requireIndex);
+    });
+
     it('does not hoist impure or mock-prefixed bindings', () => {
       const code = getCode(`
         import { rendered } from './component';
@@ -247,6 +287,43 @@ export function boom() {
 
       exports.counter = 10;
       expect(exports.counter).toBe(10);
+    });
+
+    it('publishes local updates after a mutable export is replaced', () => {
+      const exports = evaluate(`
+        export let value = 0;
+        export const update = () => { value = 1; };
+        export const increment = () => value++;
+        export const updateInLoop = () => { for (value of [3]) {} };
+        export const updateShadow = () => { let value = 20; value = 21; };
+      `);
+
+      exports.value = 10;
+      exports.update();
+      expect(exports.value).toBe(1);
+
+      exports.value = 10;
+      expect(exports.increment()).toBe(1);
+      expect(exports.value).toBe(2);
+
+      exports.value = 10;
+      exports.updateInLoop();
+      expect(exports.value).toBe(3);
+
+      exports.value = 10;
+      exports.updateShadow();
+      expect(exports.value).toBe(10);
+    });
+
+    it('keeps mutable exports ending in a dollar sign live', () => {
+      const exports = evaluate(`
+        export let value$ = 0;
+        export const update = () => { value$ = 1; };
+      `);
+
+      exports.update();
+      expect(exports.value$).toBe(1);
+      expect(Object.getOwnPropertyDescriptor(exports, 'value$').get).toBeDefined();
     });
 
     it('keeps re-exported and namespace bindings live and configurable', () => {
@@ -383,6 +460,15 @@ export function boom() {
       `);
 
       expect(exports.RuleType).toEqual({ Metric: 'x' });
+    });
+
+    it('does not fold enum member access through object spreads', () => {
+      const exports = evaluate(`
+        const CFG = { ID: 'first', ...{ ID: 'second' } } as const;
+        export enum RuleType { Metric = CFG.ID }
+      `);
+
+      expect(exports.RuleType.Metric).toBe('second');
     });
 
     it('inlines enum members initialized from template literals', () => {
@@ -566,6 +652,23 @@ throw new Error('after');`,
         originalSource: '/repo/unicode.ts',
         originalLine: 2,
         originalColumn: 0,
+      });
+    });
+
+    it('maps mutable export updates after adding compatibility assignments', () => {
+      const result = transformer.process(
+        `export let value = 0;
+export function update() {
+  value = 1;
+}`,
+        '/repo/update.ts',
+        makeTransformOptions()
+      );
+
+      expect(findOriginalPosition(result, 'value = 1')).toMatchObject({
+        originalSource: '/repo/update.ts',
+        originalLine: 2,
+        originalColumn: 2,
       });
     });
   });
