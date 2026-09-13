@@ -22,6 +22,15 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { SecurityDetectionsPlugin } from '../plugin';
 import type { ConfigType } from '../config';
 import { configSchema } from '../config';
+import { registerCrudRoutes } from '../routes/crud_routes';
+import { registerDetectionFetchRoutes } from '../routes/fetch';
+import { registerDetectionActionRoutes } from '../routes/action';
+
+// Mock all route-registration modules so setup() does not attempt real
+// Kibana router calls and so tests can assert call counts.
+jest.mock('../routes/crud_routes', () => ({ registerCrudRoutes: jest.fn() }));
+jest.mock('../routes/fetch', () => ({ registerDetectionFetchRoutes: jest.fn() }));
+jest.mock('../routes/action', () => ({ registerDetectionActionRoutes: jest.fn() }));
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -97,5 +106,35 @@ describe('SecurityDetectionsPlugin — builder type registration', () => {
     it('exposes detectionsEnabled = false', () => {
       expect(plugin.detectionsEnabled).toBe(false);
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Route registration gating
+// ---------------------------------------------------------------------------
+
+describe('SecurityDetectionsPlugin — route registration gating', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('does not register CRUD, fetch, or action routes when flag is off', () => {
+    const initializerContext = makeInitializerContext({ enableDetectionsOnV2: false });
+    const plugin = new SecurityDetectionsPlugin(initializerContext);
+    plugin.setup(coreMock.createSetup(), { alertingVTwo: makeAlertingVTwoSetupMock() } as never);
+
+    expect(registerCrudRoutes).not.toHaveBeenCalled();
+    expect(registerDetectionFetchRoutes).not.toHaveBeenCalled();
+    expect(registerDetectionActionRoutes).not.toHaveBeenCalled();
+  });
+
+  it('registers CRUD, fetch, and action routes when flag is on', () => {
+    const initializerContext = makeInitializerContext({ enableDetectionsOnV2: true });
+    const plugin = new SecurityDetectionsPlugin(initializerContext);
+    plugin.setup(coreMock.createSetup(), { alertingVTwo: makeAlertingVTwoSetupMock() } as never);
+
+    expect(registerCrudRoutes).toHaveBeenCalledTimes(1);
+    expect(registerDetectionFetchRoutes).toHaveBeenCalledTimes(1);
+    expect(registerDetectionActionRoutes).toHaveBeenCalledTimes(1);
   });
 });

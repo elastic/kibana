@@ -19,6 +19,7 @@ import {
 } from '@kbn/security-detection-rule-schema';
 import type { AlertingServerSetup } from '@kbn/alerting-v2-plugin/server';
 import type { ConfigType } from './config';
+import { assertAliasBijectivity } from '../common/api';
 import { registerDetectionFetchRoutes } from './routes/fetch';
 import { registerCrudRoutes } from './routes/crud_routes';
 import { registerDetectionActionRoutes } from './routes/action';
@@ -64,6 +65,13 @@ export class SecurityDetectionsPlugin
       // is the correct seam.
       alertingVTwo.registerBuilderType(defineBuilderType(securityDetectionQuery));
       alertingVTwo.registerBuilderType(defineBuilderType(securityDetectionThreshold));
+
+      // Verify that the alias map is bijective against the registered type ids.
+      // Throws at startup if an alias resolves to an unregistered type or two
+      // aliases share a type — catches copy-paste errors before any request lands.
+      assertAliasBijectivity(
+        new Set([securityDetectionQuery.type, securityDetectionThreshold.type])
+      );
 
       // Register all detection routes.
       const router = core.http.createRouter();

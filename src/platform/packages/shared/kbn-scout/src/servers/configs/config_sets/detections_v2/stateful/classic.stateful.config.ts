@@ -29,7 +29,6 @@ export const servers: ScoutServerConfig = {
       // Relax the schedule guardrails so functional tests can run rules every few seconds.
       '--xpack.alerting_v2.rules.minimumScheduleInterval=5s',
       '--xpack.alerting_v2.rules.maxScheduledPerMinute=32000',
-      '--uiSettings.globalOverrides.alerting:v2:enabled=true',
       // Enable the detection feature flag so routes are registered.
       '--xpack.securityDetections.enableDetectionsOnV2=true',
     ],

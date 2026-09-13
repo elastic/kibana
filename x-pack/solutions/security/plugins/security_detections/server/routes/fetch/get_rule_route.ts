@@ -25,6 +25,7 @@ import { DetectionRulesClient } from '../../detection_rules_client';
 import {
   DETECTION_ENGINE_V2_RULE_PATH,
   assertAlertingEnabled,
+  detectionOnRequestValidationError,
   toErrorResponse,
 } from '../detection_route_helpers';
 import type { DetectionsPluginStartDeps } from '../types';
@@ -66,12 +67,13 @@ export function registerGetRuleRoute(
           request: {
             params: buildRouteValidationWithZod(ruleIdParamsSchema),
           },
+          onRequestValidationError: detectionOnRequestValidationError,
         },
       },
       async (context, request, response) => {
         try {
           const coreCtx = await context.core;
-          await assertAlertingEnabled(coreCtx.uiSettings.client);
+          await assertAlertingEnabled(coreCtx.uiSettings.globalClient);
 
           const [, { alertingVTwo }] = await getStartServices();
           const frameworkClient = await (

@@ -377,9 +377,37 @@ describe('DetectionRulesClient', () => {
       const [updateArgs] = (frameworkClient.updateRule as jest.Mock).mock.calls[0];
       // max_signals not in payload → default applies (100); builder_fields should carry it.
       expect(updateArgs.data.metadata.builder_fields.max_signals).toBe(100);
-      // Tags omitted from PUT → default is empty; the converter omits metadata.tags
-      // when tags is [] to avoid the framework rejecting an empty array.
-      expect(updateArgs.data.metadata.tags).toBeUndefined();
+      // Tags omitted from PUT → default is []; converter sends null (not undefined) so
+      // the framework clears any stored tags rather than keeping them unchanged.
+      expect(updateArgs.data.metadata.tags).toBeNull();
+    });
+
+    it('sends null for lookback when schedule.lookback is omitted (PUT clear invariant)', async () => {
+      const existingRule = makeInScopeRuleResponse();
+      (existingRule as Record<string, unknown>).schedule = { every: '5m', lookback: '1m' };
+
+      const updatedRule = makeInScopeRuleResponse();
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.getRule as jest.Mock).mockResolvedValueOnce(existingRule);
+      (frameworkClient.updateRule as jest.Mock).mockResolvedValueOnce(updatedRule);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+
+      // PUT payload without a lookback — replaceRule must send null so the
+      // framework clears the stored lookback rather than leaving it unchanged.
+      await client.replaceRule('rule-id-1', {
+        type: 'query',
+        name: 'No lookback PUT',
+        description: 'Testing lookback clear',
+        severity: 'low',
+        risk_score: 21,
+        index: ['logs-*'],
+        query: 'process.name: "cmd.exe"',
+      });
+
+      const [updateArgs] = (frameworkClient.updateRule as jest.Mock).mock.calls[0];
+      // schedule.lookback absent from PUT → must be null, not undefined.
+      expect(updateArgs.data.schedule.lookback).toBeNull();
     });
   });
 
@@ -502,6 +530,47 @@ describe('DetectionRulesClient', () => {
       const [updateArgs] = (frameworkClient.updateRule as jest.Mock).mock.calls[0];
       // lookback should be explicitly null in the schedule (to clear the stored value).
       expect(updateArgs.data.schedule?.lookback).toBeNull();
+    });
+
+    it('throws 409 when rule_id in the patch differs from the stored signature_id', async () => {
+      const existingRule = makeInScopeRuleResponse();
+      // The stored rule has signature_id 'existing-rule-id'.
+      existingRule.metadata!.signature_id = 'existing-rule-id';
+
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.getRule as jest.Mock).mockResolvedValueOnce(existingRule);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+
+      // Attempting to change rule_id must be rejected — rule_id is immutable.
+      await expect(
+        client.patchRule('rule-id-1', { rule_id: 'different-rule-id' })
+      ).rejects.toMatchObject({
+        output: { statusCode: 409 },
+        data: { code: 'RULE_TYPE_IMMUTABLE' },
+      });
+
+      // The framework update must not be called — the error is thrown before it.
+      expect(frameworkClient.updateRule).not.toHaveBeenCalled();
+    });
+
+    it('accepts a patch where rule_id matches the stored signature_id (no-op identity check)', async () => {
+      const existingRule = makeInScopeRuleResponse();
+      existingRule.metadata!.signature_id = 'same-rule-id';
+
+      const updatedRule = makeInScopeRuleResponse();
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.getRule as jest.Mock).mockResolvedValueOnce(existingRule);
+      (frameworkClient.updateRule as jest.Mock).mockResolvedValueOnce(updatedRule);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+
+      // rule_id that matches the stored value must pass through without error.
+      await expect(
+        client.patchRule('rule-id-1', { rule_id: 'same-rule-id' })
+      ).resolves.toBeDefined();
+
+      expect(frameworkClient.updateRule).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -16,7 +16,7 @@
  *   DELETE /api/detection_engine/v2/rules/{id}       delete  (returns last state)
  *
  * Every handler:
- *   1. Awaits `context.core` for the per-request uiSettings client.
+ *   1. Awaits `context.core` for the global uiSettings client.
  *   2. Checks the `alerting:v2:enabled` gate (503 ALERTING_DISABLED when off).
  *   3. Acquires the framework rules client with the Security caller identity
  *      so managed-rule writes are allowed.
@@ -46,6 +46,7 @@ import {
   DETECTION_ENGINE_V2_RULES_PATH,
   DETECTION_ENGINE_V2_RULE_PATH,
   assertAlertingEnabled,
+  detectionOnRequestValidationError,
   toErrorResponse,
 } from './detection_route_helpers';
 import type { DetectionsPluginStartDeps } from './types';
@@ -107,12 +108,13 @@ export function registerCreateRuleRoute(
           request: {
             body: buildRouteValidationWithZod(detectionRuleCreatePropsSchema),
           },
+          onRequestValidationError: detectionOnRequestValidationError,
         },
       },
       async (context, request, response) => {
         try {
           const coreCtx = await context.core;
-          await assertAlertingEnabled(coreCtx.uiSettings.client);
+          await assertAlertingEnabled(coreCtx.uiSettings.globalClient);
 
           const [, { alertingVTwo }] = await getStartServices();
           const frameworkClient = await (
@@ -176,12 +178,13 @@ export function registerReplaceRuleRoute(
             params: buildRouteValidationWithZod(ruleIdParamsSchema),
             body: buildRouteValidationWithZod(detectionRuleUpdatePropsSchema),
           },
+          onRequestValidationError: detectionOnRequestValidationError,
         },
       },
       async (context, request, response) => {
         try {
           const coreCtx = await context.core;
-          await assertAlertingEnabled(coreCtx.uiSettings.client);
+          await assertAlertingEnabled(coreCtx.uiSettings.globalClient);
 
           const [, { alertingVTwo }] = await getStartServices();
           const frameworkClient = await (
@@ -246,12 +249,13 @@ export function registerPatchRuleRoute(
             params: buildRouteValidationWithZod(ruleIdParamsSchema),
             body: buildRouteValidationWithZod(detectionRulePatchPropsSchema),
           },
+          onRequestValidationError: detectionOnRequestValidationError,
         },
       },
       async (context, request, response) => {
         try {
           const coreCtx = await context.core;
-          await assertAlertingEnabled(coreCtx.uiSettings.client);
+          await assertAlertingEnabled(coreCtx.uiSettings.globalClient);
 
           const [, { alertingVTwo }] = await getStartServices();
           const frameworkClient = await (
@@ -311,12 +315,13 @@ export function registerDeleteRuleRoute(
           request: {
             params: buildRouteValidationWithZod(ruleIdParamsSchema),
           },
+          onRequestValidationError: detectionOnRequestValidationError,
         },
       },
       async (context, request, response) => {
         try {
           const coreCtx = await context.core;
-          await assertAlertingEnabled(coreCtx.uiSettings.client);
+          await assertAlertingEnabled(coreCtx.uiSettings.globalClient);
 
           const [, { alertingVTwo }] = await getStartServices();
           const frameworkClient = await (

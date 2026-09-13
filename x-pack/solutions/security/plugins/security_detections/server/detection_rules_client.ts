@@ -54,6 +54,25 @@ import type {
 } from '../common/api';
 
 // ---------------------------------------------------------------------------
+// Detection-side error codes
+//
+// Codes for checks the framework does not make.  Kept separate from the
+// framework's ALERTING_ERROR_CODES to avoid confusion.
+// ---------------------------------------------------------------------------
+
+/**
+ * Machine-readable error codes specific to the Detections API.
+ *
+ * `RULE_TYPE_IMMUTABLE` — returned (409) when a PUT payload's `type` differs
+ * from the stored type.  Not to be confused with `RULE_VERSION_CONFLICT`
+ * (optimistic-concurrency conflict) — a client retrying on OCC must not loop
+ * forever on a type-change attempt.
+ */
+export const DETECTION_ERROR_CODES = {
+  RULE_TYPE_IMMUTABLE: 'RULE_TYPE_IMMUTABLE',
+} as const;
+
+// ---------------------------------------------------------------------------
 // Scope check constants
 // ---------------------------------------------------------------------------
 
@@ -147,6 +166,18 @@ function buildScopingFragment(): string {
 }
 
 /**
+ * Escapes a freeform string value for safe embedding inside a KQL
+ * double-quoted literal.  KQL uses `\` as the escape character inside a
+ * double-quoted string, so both `"` and `\` must be escaped.
+ *
+ * Without escaping, a tag value such as `say "hi"` produces the unparseable
+ * fragment `metadata.tags: "say "hi""` and fromKueryExpression throws.
+ */
+function escapeKqlValue(raw: string): string {
+  return raw.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
+/**
  * Builds one OR-joined KQL clause from an array of terms.
  * Returns a bare clause for a single term, or a parenthesised OR for multiple.
  */
@@ -182,11 +213,15 @@ function buildListFilter(params: ListRulesParams): string {
   }
 
   if (params.tags && params.tags.length > 0) {
-    parts.push(orClause(params.tags.map((t) => `metadata.tags: "${t}"`)));
+    parts.push(
+      orClause(params.tags.map((t) => `metadata.tags: "${escapeKqlValue(t)}"`))
+    );
   }
 
   if (params.rule_ids && params.rule_ids.length > 0) {
-    parts.push(orClause(params.rule_ids.map((rid) => `metadata.signature_id: "${rid}"`)));
+    parts.push(
+      orClause(params.rule_ids.map((rid) => `metadata.signature_id: "${escapeKqlValue(rid)}"`))
+    );
   }
 
   const scoping = buildScopingFragment();
@@ -306,12 +341,10 @@ export class DetectionRulesClient {
    * `options.enabled` option so the rule starts disabled by default (v1's
    * contract) while the framework's default is enabled.
    *
-   * Three framework fields are the API's decision, not the caller's:
-   *   - `recovery_strategy: 'none'` and `no_data_strategy: 'none'` are sent
-   *     explicitly (the converter omits them; the framework's create schema
-   *     accepts absence or the literal 'none' for signal rules — sending the
-   *     explicit pair ensures uniformity even if the framework default ever
-   *     changes).
+   * Two framework fields are the API's decision, not the caller's:
+   *   - `recovery_strategy: 'none'` and `no_data_strategy: 'none'` — the
+   *     converter sends these explicitly so stored detection rules are uniform
+   *     even if the framework default ever changes.
    *   - No `grouping` — for threshold rules the framework derives it at write
    *     time from `threshold.field`.
    *
@@ -374,13 +407,16 @@ export class DetectionRulesClient {
     const storedSource = existing.metadata?.source as RuleSource;
 
     // Type immutability: the payload's `type` must match the stored type.
+    // RULE_TYPE_IMMUTABLE is the detection-side code; RULE_VERSION_CONFLICT is
+    // reserved for optimistic-concurrency conflicts and must not be reused here
+    // (a client that retries on OCC would loop forever on a type-change attempt).
     const storedPublicType = BUILDER_TYPE_ID_TO_ALIAS[existing.metadata?.builder_type ?? ''];
     if (storedPublicType !== props.type) {
       throw Boom.conflict(
         `Cannot change rule type from '${storedPublicType}' to '${props.type}'. ` +
           `Rule type is immutable.`,
         {
-          code: ALERTING_ERROR_CODES.RULE_VERSION_CONFLICT,
+          code: DETECTION_ERROR_CODES.RULE_TYPE_IMMUTABLE,
           details: { rule_id: id },
         }
       );
@@ -439,6 +475,23 @@ export class DetectionRulesClient {
     const existing = await this.getInScopeRule(id);
     const storedPublicType = BUILDER_TYPE_ID_TO_ALIAS[existing.metadata?.builder_type ?? ''];
     const storedSource = existing.metadata?.source as RuleSource;
+
+    // rule_id immutability: if the patch includes rule_id, it must match the stored value.
+    // PUT enforces this via the framework's assertSignatureIdUnchanged; PATCH must do it
+    // here because buildPatchedInput drops rule_id and toFrameworkPatch never sends it.
+    if (patch.rule_id !== undefined) {
+      const storedRuleId = existing.metadata?.signature_id;
+      if (patch.rule_id !== storedRuleId) {
+        throw Boom.conflict(
+          `Cannot change rule_id from '${storedRuleId ?? '(not set)'}' to '${patch.rule_id}'. ` +
+            `rule_id is immutable.`,
+          {
+            code: DETECTION_ERROR_CODES.RULE_TYPE_IMMUTABLE,
+            details: { rule_id: id },
+          }
+        );
+      }
+    }
 
     // Step 2: Convert the stored rule to its public form.
     const currentPublic = toPublicResponse(existing);

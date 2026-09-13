@@ -326,10 +326,12 @@ describe('Empty tags — off-table rule', () => {
     expect(frameworkData.metadata.tags).toBeUndefined();
   });
 
-  it('on replace (PUT): also omits metadata.tags when tags is []', () => {
+  it('on replace (PUT): sends metadata.tags: null when tags is [] (clears stored tags)', () => {
     const storedSource: RuleSource = { type: 'internal', version: 1 };
     const frameworkData = toFrameworkReplace(emptyTagsInput, storedSource);
-    expect(frameworkData.metadata.tags).toBeUndefined();
+    // PUT must send null (not undefined) so the framework clears any stored tags
+    // rather than keeping them unchanged.
+    expect(frameworkData.metadata!.tags).toBeNull();
   });
 
   it('on patch (PATCH): sends metadata.tags: null when merged tags is []', () => {
@@ -497,15 +499,15 @@ describe('toFrameworkReplace — source version update', () => {
     const storedSource: RuleSource = { type: 'internal', version: 1 };
     const input: DetectionRuleCreateInput = { ...QUERY_CREATE_INPUT, version: 3 };
     const frameworkData = toFrameworkReplace(input, storedSource);
-    expect((frameworkData.metadata.source as RuleSource).version).toBe(3);
-    expect((frameworkData.metadata.source as RuleSource).type).toBe('internal');
+    expect((frameworkData.metadata!.source as RuleSource).version).toBe(3);
+    expect((frameworkData.metadata!.source as RuleSource).type).toBe('internal');
   });
 
   it('preserves source.type and source.id from the stored source', () => {
     const storedSource: RuleSource = { type: 'template', version: 2, id: 'tpl-xyz' };
     const input: DetectionRuleCreateInput = { ...QUERY_CREATE_INPUT, version: 3 };
     const frameworkData = toFrameworkReplace(input, storedSource);
-    const source = frameworkData.metadata.source as RuleSource;
+    const source = frameworkData.metadata!.source as RuleSource;
     expect(source.type).toBe('template');
     expect((source as { id?: string }).id).toBe('tpl-xyz');
     expect(source.version).toBe(3);

@@ -22,6 +22,7 @@
 
 import Boom from '@hapi/boom';
 import type { IKibanaResponse, IUiSettingsClient, KibanaResponseFactory } from '@kbn/core/server';
+import type { OnRequestValidationError } from '@kbn/core-http-server';
 import { ALERTING_ERROR_CODES } from '@kbn/alerting-v2-plugin/server';
 import type { ErrorResponse } from '@kbn/alerting-v2-schemas';
 
@@ -143,3 +144,35 @@ export function toErrorResponse(e: unknown, response: KibanaResponseFactory): IK
     bypassErrorFormat: true,
   });
 }
+
+// ---------------------------------------------------------------------------
+// Request validation error handler
+// ---------------------------------------------------------------------------
+
+/**
+ * Maps Kibana request schema-validation failures to the Alerting v2
+ * `{ code, error, message, details? }` envelope.
+ *
+ * Wire `this` in every `addVersion` call's `validate.onRequestValidationError`
+ * so that layer-1 (public Zod schema) rejections carry the same `code` field
+ * as domain-level errors.  Without this, Kibana core's default response has no
+ * `code` field and callers parsing the envelope get `undefined`.
+ *
+ * Mirrors `BaseAlertingRoute.onRequestValidationError`.
+ *
+ * Ref: rule-crud-api.md "Conventions every endpoint shares" (error envelope)
+ *      base_alerting_route.ts "onRequestValidationError"
+ */
+export const detectionOnRequestValidationError: OnRequestValidationError = (
+  error,
+  _request,
+  response
+) => {
+  const body: ErrorResponse = {
+    code: deriveErrorCodeFromStatus(400),
+    error: 'Bad Request',
+    message: error.message,
+    details: { source: error.source },
+  };
+  return response.customError({ statusCode: 400, body, bypassErrorFormat: true });
+};
