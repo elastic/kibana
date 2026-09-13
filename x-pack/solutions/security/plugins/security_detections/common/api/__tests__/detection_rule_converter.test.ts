@@ -24,6 +24,7 @@
  */
 
 import type { RuleResponse, RuleSource } from '@kbn/alerting-v2-schemas';
+import { updateRuleDataSchema } from '@kbn/alerting-v2-schemas';
 import {
   toFrameworkCreate,
   toFrameworkReplace,
@@ -518,6 +519,47 @@ describe('toFrameworkReplace — source version update', () => {
 // toFrameworkPatch: schedule.lookback handling
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// toFrameworkPatch: concurrency token must NOT be in the update data body
+// ---------------------------------------------------------------------------
+
+describe('toFrameworkPatch — no top-level version key in update data', () => {
+  const BASE_PATCH_FOR_OCC: import('../detection_rule_converter').DetectionRulePatchedInput = {
+    name: 'Test rule',
+    description: 'Test description',
+    version: 1,
+    tags: [],
+    severity: 'low',
+    risk_score: 10,
+    max_signals: 100,
+    threat: [],
+    setup: '',
+    references: [],
+    false_positives: [],
+    author: [],
+    related_integrations: [],
+    required_fields: [],
+    language: 'kuery',
+    index: ['logs-*'],
+    query: 'event.type:start',
+    source: { type: 'internal', version: 1 },
+    schedule: { interval: '5m' },
+  };
+
+  it('the returned data has no top-level version key', () => {
+    // The concurrency token belongs in options.version, not in the update body.
+    // updateRuleDataSchema is strict — a top-level `version` key would cause a 400.
+    const data = toFrameworkPatch(BASE_PATCH_FOR_OCC);
+    expect('version' in data).toBe(false);
+  });
+
+  it('the returned data parses cleanly against the real updateRuleDataSchema', () => {
+    const data = toFrameworkPatch(BASE_PATCH_FOR_OCC);
+    const result = updateRuleDataSchema.safeParse(data);
+    expect(result.success).toBe(true);
+  });
+});
+
 describe('toFrameworkPatch — schedule.lookback handling', () => {
   const BASE_PATCH: DetectionRulePatchedInput = {
     name: 'Test rule',
@@ -618,15 +660,17 @@ describe('toPublicResponse — unknown builder type', () => {
 // toFrameworkCreate: does not set internal fields
 // ---------------------------------------------------------------------------
 
-describe('toFrameworkCreate — internal fields not set', () => {
+describe('toFrameworkCreate — uniform detection-rule fields', () => {
   const frameworkData = toFrameworkCreate(QUERY_CREATE_INPUT) as Record<string, unknown>;
 
-  it('does not set recovery_strategy', () => {
-    expect('recovery_strategy' in frameworkData).toBe(false);
+  it('sets recovery_strategy to "none" for uniform stored rules', () => {
+    // Sent explicitly so stored detection rules are uniform even if the
+    // framework default changes.  rule-crud-api.md "Create a rule".
+    expect(frameworkData.recovery_strategy).toBe('none');
   });
 
-  it('does not set no_data_strategy', () => {
-    expect('no_data_strategy' in frameworkData).toBe(false);
+  it('sets no_data_strategy to "none" for uniform stored rules', () => {
+    expect(frameworkData.no_data_strategy).toBe('none');
   });
 
   it('does not set state_transition', () => {

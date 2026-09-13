@@ -357,6 +357,19 @@ describe('applyRuleDefaults', () => {
     expect('enabled' in result).toBe(false);
   });
 
+  it('does not inject a default version on PUT (omitted version defers to stored)', () => {
+    // rule-crud-api.md "Replace a rule with PUT": "An omitted version keeps the
+    // stored one, as v1 does."  The defaults layer must NOT supply version: 1
+    // so that DetectionRulesClient.replaceRule's stored-version fallback works.
+    const result = applyRuleUpdateDefaults(minimal);
+    expect('version' in result).toBe(false);
+  });
+
+  it('caller-supplied version passes through applyRuleUpdateDefaults unchanged', () => {
+    const result = applyRuleUpdateDefaults({ ...minimal, version: 5 });
+    expect(result.version).toBe(5);
+  });
+
   it('RULE_DEFAULTS.enabled matches the design default (false)', () => {
     expect(RULE_DEFAULTS.enabled).toBe(false);
   });

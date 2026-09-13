@@ -29,6 +29,7 @@ import Boom from '@hapi/boom';
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ALERTING_ERROR_CODES } from '@kbn/alerting-v2-plugin/server';
+import { DETECTION_ERROR_CODES } from '../../detection_rules_client';
 import {
   registerCreateRuleRoute,
   registerReplaceRuleRoute,
@@ -433,11 +434,14 @@ describe('PUT /api/detection_engine/v2/rules/{id} — replace rule', () => {
   });
 
   describe('handler — 409 on type change', () => {
-    it('returns 409 RULE_VERSION_CONFLICT when the type differs from stored', async () => {
+    it('returns 409 RULE_TYPE_IMMUTABLE when the client rejects a type-change PUT', async () => {
+      // The client throws RULE_TYPE_IMMUTABLE for a type change (not
+      // RULE_VERSION_CONFLICT, which is reserved for OCC conflicts).
+      // The route is thin: it passes any 409 through unchanged.
       const { routeHandler, response, mockReplaceRule } = setup();
       mockReplaceRule.mockRejectedValue(
         Boom.conflict('Cannot change rule type', {
-          code: ALERTING_ERROR_CODES.RULE_VERSION_CONFLICT,
+          code: DETECTION_ERROR_CODES.RULE_TYPE_IMMUTABLE,
         })
       );
 
@@ -453,7 +457,7 @@ describe('PUT /api/detection_engine/v2/rules/{id} — replace rule', () => {
       expect(response.customError).toHaveBeenCalledWith(
         expect.objectContaining({
           statusCode: 409,
-          body: expect.objectContaining({ code: ALERTING_ERROR_CODES.RULE_VERSION_CONFLICT }),
+          body: expect.objectContaining({ code: DETECTION_ERROR_CODES.RULE_TYPE_IMMUTABLE }),
         })
       );
     });

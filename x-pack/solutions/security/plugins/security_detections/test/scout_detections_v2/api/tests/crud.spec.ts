@@ -204,7 +204,9 @@ apiTest.describe('Detection Engine v2 — CRUD routes', { tag: '@local-stateful-
         body: buildThresholdRule(),
       });
       expect(response).toHaveStatusCode(409);
-      expect(response.body.code).toBe('RULE_VERSION_CONFLICT');
+      // The client returns RULE_TYPE_IMMUTABLE for a type-change rejection —
+      // NOT RULE_VERSION_CONFLICT (reserved for OCC conflicts).
+      expect(response.body.code).toBe('RULE_TYPE_IMMUTABLE');
     }
   );
 

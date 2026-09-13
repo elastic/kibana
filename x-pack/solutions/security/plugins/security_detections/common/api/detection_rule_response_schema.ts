@@ -24,7 +24,13 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { threatEntrySchema, detectionRuleCommonFields } from '@kbn/security-detection-rule-schema';
+import {
+  detectionRuleCommonFields,
+  customQueryBuilderFieldsSchema,
+  thresholdBuilderFieldsSchema,
+} from '@kbn/security-detection-rule-schema';
+import { MAX_NAME_LENGTH, MAX_DESCRIPTION_LENGTH } from '@kbn/alerting-v2-schemas';
+import { MAX_TAG_LENGTH, MAX_TAGS } from '@kbn/alerting-v2-constants';
 
 // ---------------------------------------------------------------------------
 // Nested object sub-schemas
@@ -85,10 +91,18 @@ export const detectionRuleResponseBaseSchema = z.object({
   version: z.number().int().min(1),
 
   // --- Common detection fields — v1 names, v1 semantics ---
-  name: z.string().max(256),
-  description: z.string().max(1024),
+  //
+  // Framework metadata caps use the exported constants so the public bound and
+  // the framework bound cannot silently diverge.  Builder-field bounds are
+  // composed from detectionRuleCommonFields so the response and the stored
+  // schema share the same constraint objects.
+  //
+  // Ref: rule-domain-model.md "Where the schemas live"
+  //      rule-crud-api.md "Validation layering"
+  name: z.string().max(MAX_NAME_LENGTH),
+  description: z.string().max(MAX_DESCRIPTION_LENGTH),
   /** Always present; stored absence is read back as []. */
-  tags: z.array(z.string().min(1).max(128)).max(20),
+  tags: z.array(z.string().min(1).max(MAX_TAG_LENGTH)).max(MAX_TAGS),
 
   // severity and risk_score: imported directly from the package — same bounds
   // as the stored builder schema, so they cannot drift.
@@ -99,37 +113,17 @@ export const detectionRuleResponseBaseSchema = z.object({
   // required in the response.  ZodOptional.unwrap() returns the inner schema
   // with all constraints intact.
   max_signals: detectionRuleCommonFields.max_signals.unwrap(),
-  threat: z.array(threatEntrySchema).max(5),
-  setup: z.string().max(8192),
+  threat: detectionRuleCommonFields.threat.unwrap(),
+  setup: detectionRuleCommonFields.setup.unwrap(),
   /** Absent when not set. */
-  note: z.string().max(8192).optional(),
-  references: z.array(z.string().max(1024)).max(32),
-  false_positives: z.array(z.string().max(1024)).max(16),
-  author: z.array(z.string().max(256)).max(16),
+  note: detectionRuleCommonFields.note,
+  references: detectionRuleCommonFields.references.unwrap(),
+  false_positives: detectionRuleCommonFields.false_positives.unwrap(),
+  author: detectionRuleCommonFields.author.unwrap(),
   /** Absent when not set. */
-  license: z.string().max(256).optional(),
-  related_integrations: z
-    .array(
-      z
-        .object({
-          package: z.string().max(64),
-          version: z.string().max(32),
-          integration: z.string().max(64).optional(),
-        })
-        .strict()
-    )
-    .max(16),
-  required_fields: z
-    .array(
-      z
-        .object({
-          name: z.string().max(128),
-          type: z.string().max(64),
-          ecs: z.boolean(),
-        })
-        .strict()
-    )
-    .max(32),
+  license: detectionRuleCommonFields.license,
+  related_integrations: detectionRuleCommonFields.related_integrations.unwrap(),
+  required_fields: detectionRuleCommonFields.required_fields.unwrap(),
   schedule: detectionRuleScheduleSchema,
 });
 
@@ -139,40 +133,34 @@ export type DetectionRuleResponseBase = z.infer<typeof detectionRuleResponseBase
 // Type-discriminated fields
 // ---------------------------------------------------------------------------
 
-/** Custom Query rule — the two types share `index`, `query`, `language`. */
+/**
+ * Custom Query rule — the two types share `index`, `query`, `language`.
+ *
+ * Field bounds are composed from `customQueryBuilderFieldsSchema.shape.*` so
+ * the public schema and the stored builder schema share the same constraints.
+ */
 export const customQueryRuleTypeFieldsSchema = z.object({
   type: z.literal('query'),
-  index: z.array(z.string().min(1).max(256)).min(1).max(32),
+  index: customQueryBuilderFieldsSchema.shape.index,
   /** Non-empty: the design forbids an empty `query` for this type. */
-  query: z.string().min(1).max(8192),
-  language: z.enum(['kuery', 'lucene']),
+  query: customQueryBuilderFieldsSchema.shape.query,
+  language: customQueryBuilderFieldsSchema.shape.language,
 });
 export type CustomQueryRuleTypeFields = z.infer<typeof customQueryRuleTypeFieldsSchema>;
 
-/** Threshold rule — adds the normalized threshold object. */
+/**
+ * Threshold rule — adds the normalized threshold object.
+ *
+ * Field bounds are composed from `thresholdBuilderFieldsSchema.shape.*` so
+ * the public schema and the stored builder schema share the same constraints.
+ */
 export const thresholdRuleTypeFieldsSchema = z.object({
   type: z.literal('threshold'),
-  index: z.array(z.string().min(1).max(256)).min(1).max(32),
+  index: thresholdBuilderFieldsSchema.shape.index,
   /** May be empty (match-all pre-filter). */
-  query: z.string().max(8192),
-  language: z.enum(['kuery', 'lucene']),
-  threshold: z
-    .object({
-      field: z.array(z.string().min(1).max(256)).max(5),
-      value: z.number().int().min(1),
-      cardinality: z
-        .array(
-          z
-            .object({
-              field: z.string().min(1).max(256),
-              value: z.number().int().min(0),
-            })
-            .strict()
-        )
-        .max(1)
-        .optional(),
-    })
-    .strict(),
+  query: thresholdBuilderFieldsSchema.shape.query,
+  language: thresholdBuilderFieldsSchema.shape.language,
+  threshold: thresholdBuilderFieldsSchema.shape.threshold,
 });
 export type ThresholdRuleTypeFields = z.infer<typeof thresholdRuleTypeFieldsSchema>;
 

@@ -93,6 +93,9 @@ interface DetectionBoomData {
  * Mirrors `deriveErrorCodeFromStatus` from the framework routes.
  */
 const deriveErrorCodeFromStatus = (statusCode: number): string => {
+  // Mirrors the framework's deriveErrorCodeFromStatus exactly so a client of
+  // both surfaces sees one code per HTTP status.  The framework map is not
+  // exported, so this copy must stay in sync.
   const map: Record<number, string> = {
     400: 'BAD_REQUEST',
     401: 'UNAUTHORIZED',
@@ -102,7 +105,9 @@ const deriveErrorCodeFromStatus = (statusCode: number): string => {
     422: 'UNPROCESSABLE_ENTITY',
     429: 'TOO_MANY_REQUESTS',
     500: 'INTERNAL_SERVER_ERROR',
+    502: 'BAD_GATEWAY',
     503: 'SERVICE_UNAVAILABLE',
+    504: 'GATEWAY_TIMEOUT',
   };
   return (
     map[statusCode] ??

@@ -90,13 +90,17 @@ export function applyRuleDefaults(props: DetectionRuleCreateProps) {
  * Apply default values to an update (PUT) request.
  *
  * PUT replaces the entire rule, so omitting a defaultable field resets it to
- * the same default as create.  `enabled` is not in the update schema, so it
- * is not re-applied here.
+ * the same default as create.  `enabled` and `version` are excluded:
+ *   - `enabled` is not in the update schema.
+ *   - `version` is omitted so that an absent version falls through to the
+ *     stored rule's content version rather than being reset to 1.
+ *     The PUT section of rule-crud-api.md is explicit: "An omitted version
+ *     keeps the stored one, as v1 does."
  */
 export function applyRuleUpdateDefaults(props: DetectionRuleUpdateProps) {
-  const { enabled: _ignored, ...nonEnabledDefaults } = RULE_DEFAULTS;
+  const { enabled: _ignored, version: _versionIgnored, ...nonEnabledVersionDefaults } = RULE_DEFAULTS;
   return {
-    ...nonEnabledDefaults,
+    ...nonEnabledVersionDefaults,
     ...props,
     schedule:
       props.schedule !== undefined

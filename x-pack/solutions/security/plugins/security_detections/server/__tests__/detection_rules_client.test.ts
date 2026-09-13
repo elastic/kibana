@@ -409,6 +409,36 @@ describe('DetectionRulesClient', () => {
       // schedule.lookback absent from PUT → must be null, not undefined.
       expect(updateArgs.data.schedule.lookback).toBeNull();
     });
+
+    it('keeps the stored content version when PUT payload omits version', async () => {
+      // The design says: "An omitted version keeps the stored one, as v1 does."
+      // The stored rule must be at a version > 1 so the test is meaningful.
+      const existingRule = makeInScopeRuleResponse();
+      (existingRule.metadata!.source as Record<string, unknown>).version = 7;
+
+      const updatedRule = makeInScopeRuleResponse();
+      const frameworkClient = makeFrameworkClientMock();
+      (frameworkClient.getRule as jest.Mock).mockResolvedValueOnce(existingRule);
+      (frameworkClient.updateRule as jest.Mock).mockResolvedValueOnce(updatedRule);
+
+      const client = new DetectionRulesClient(makeDeps(frameworkClient));
+
+      // PUT payload with no version field — should keep the stored version (7).
+      await client.replaceRule('rule-id-1', {
+        type: 'query',
+        name: 'Version omitted PUT',
+        description: 'Testing omitted version keeps stored',
+        severity: 'low',
+        risk_score: 21,
+        index: ['logs-*'],
+        query: 'process.name: "cmd.exe"',
+      });
+
+      const [updateArgs2] = (frameworkClient.updateRule as jest.Mock).mock.calls[0];
+      // metadata.source.version must be the stored value (7), not the default (1).
+      const source = updateArgs2.data.metadata.source as { version: number };
+      expect(source.version).toBe(7);
+    });
   });
 
   // -------------------------------------------------------------------------
@@ -543,11 +573,18 @@ describe('DetectionRulesClient', () => {
       const client = new DetectionRulesClient(makeDeps(frameworkClient));
 
       // Attempting to change rule_id must be rejected — rule_id is immutable.
+      // The code must be IMMUTABLE_FIELDS_CHANGED (the framework code for
+      // signature_id mutation), NOT RULE_TYPE_IMMUTABLE (reserved for PUT
+      // type-change rejections).  Clients see one code per invariant
+      // regardless of the HTTP verb.
       await expect(
         client.patchRule('rule-id-1', { rule_id: 'different-rule-id' })
       ).rejects.toMatchObject({
         output: { statusCode: 409 },
-        data: { code: 'RULE_TYPE_IMMUTABLE' },
+        data: {
+          code: 'IMMUTABLE_FIELDS_CHANGED',
+          details: { fields: ['metadata.signature_id'] },
+        },
       });
 
       // The framework update must not be called — the error is thrown before it.

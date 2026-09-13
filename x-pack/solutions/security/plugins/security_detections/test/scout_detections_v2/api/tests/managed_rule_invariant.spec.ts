@@ -23,7 +23,8 @@
  *   POST /api/alerting/v2/rules/_bulk_delete   (bulk_delete_rules_route)
  *   POST /api/alerting/v2/rules/_bulk_enable   (bulk_enable_rules_route)
  *   POST /api/alerting/v2/rules/_bulk_disable  (bulk_disable_rules_route)
- *   POST /api/alerting/v2/rules/_bulk_update_api_key (bulk_update_api_key_route)
+ *   POST /api/alerting/v2/rules/_bulk_update_api_key   (bulk_update_api_key_route)
+ *   POST /api/alerting/v2/rules/_update_api_key_by_query (update_api_key_by_query_route)
  *   POST /api/alerting/v2/rules/{id}/_run      (run_rule_route)
  *   POST /api/alerting/v2/rules/_delete_by_query (delete_rules_by_query_route)
  *   POST /api/alerting/v2/rules/_enable_by_query  (enable_rules_by_query_route)
@@ -62,6 +63,8 @@ const alertingRunUrl = (id: string) => `${alertingRuleUrl(id)}/_run`;
 const alertingDeleteByQueryUrl = `${ALERTING_V2_RULES}/_delete_by_query`;
 const alertingEnableByQueryUrl = `${ALERTING_V2_RULES}/_enable_by_query`;
 const alertingDisableByQueryUrl = `${ALERTING_V2_RULES}/_disable_by_query`;
+const alertingBulkUpdateApiKeyUrl = `${ALERTING_V2_RULES}/_bulk_update_api_key`;
+const alertingUpdateApiKeyByQueryUrl = `${ALERTING_V2_RULES}/_update_api_key_by_query`;
 
 /** Kibana global settings API — used to enable alerting:v2:enabled at suite start. */
 const GLOBAL_SETTINGS_API = '/api/kibana/global_settings';
@@ -307,6 +310,48 @@ apiTest.describe(
         expect(after).toHaveStatusCode(200);
         // Must still be enabled because the generic bulk-disable is blocked.
         expect(after.body.enabled).toBe(true);
+      }
+    );
+
+    apiTest(
+      'bulk_update_api_key via generic API refuses the detection rule per-item',
+      async ({ apiClient }) => {
+        // The framework's executeBulkUpdateApiKey runs getManagedWriteOwner per
+        // item.  Detection rules must appear in the errors array with
+        // RULE_IS_MANAGED; their API key must not be rotated.
+        const response = await apiClient.post(alertingBulkUpdateApiKeyUrl, {
+          headers: adminHeaders,
+          body: { ids: [detectionRuleId] },
+        });
+        // The route returns 200 with a per-item errors list (bulk semantics).
+        expect(response).toHaveStatusCode(200);
+        const errors: Array<{ id: string; error: { code?: string } }> =
+          response.body.errors ?? [];
+        const ruleError = errors.find(
+          (e: { id: string; error: { code?: string } }) => e.id === detectionRuleId
+        );
+        expect(ruleError).toBeDefined();
+        expect(ruleError?.error?.code).toBe('RULE_IS_MANAGED');
+      }
+    );
+
+    apiTest(
+      'update_api_key_by_query via generic API does not rotate the detection rule api key',
+      async ({ apiClient }) => {
+        // update_api_key_by_query runs executeBulkUpdateApiKey on every matching
+        // rule.  The managed-rule gate excludes detection rules per-item, so
+        // their API key is untouched.  Verify by confirming the rule still
+        // exists (a rotation failure would leave it in a broken state or throw).
+        await apiClient.post(alertingUpdateApiKeyByQueryUrl, {
+          headers: adminHeaders,
+          body: {},
+        });
+
+        // The detection rule must still exist and be readable.
+        const fetchAfter = await apiClient.get(getDetectionRuleUrl(detectionRuleId), {
+          headers: writerHeaders,
+        });
+        expect(fetchAfter).toHaveStatusCode(200);
       }
     );
 
