@@ -14,6 +14,7 @@ import type {
   DryRunResponse,
   FindRulesResponse,
   FindRulesSortField,
+  Query,
   RuleResponse,
   UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
@@ -49,8 +50,17 @@ export type ResolvedCreateRuleData = CreateRuleData;
 /**
  * Update data whose builder metadata has been normalized and whose `query` has
  * been regenerated if the builder fields changed.
+ *
+ * Extends `UpdateRuleData` to allow `query: null` as a sentinel that tells
+ * `buildUpdateRuleAttributes` to clear any previously stored query. This is
+ * needed for execution-time builder rules: when a PATCH switches a rule to an
+ * execution-time type, the old compiled query (if any) must not be preserved in
+ * the saved object. `null` is normalised to `undefined` (absent SO attribute) by
+ * `buildUpdateRuleAttributes` and never reaches storage or the response schema.
+ *
+ * Ref: rule-execution-logic.md "A rule without a persisted query"
  */
-export type ResolvedUpdateRuleData = UpdateRuleData;
+export type ResolvedUpdateRuleData = Omit<UpdateRuleData, 'query'> & { query?: Query | null };
 
 /** An enabled rule whose executor task API key is a candidate for rotation. */
 export interface RotationCandidate {

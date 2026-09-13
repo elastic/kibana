@@ -12,8 +12,7 @@ rules (those whose `compilation` is `'execution_time'`) can be returned from the
 API without a stored query.  Every consumer of `RuleResponse.query` was audited
 before the schema change landed.
 
-Design reference: [rule-execution-logic.md — "A rule without a persisted
-query"](../../../../../../../../docs-security/detection-engine-v2/architecture-design/rule-execution/rule-execution-logic.md#a-rule-without-a-persisted-query).
+Design reference: rule-execution-logic.md "A rule without a persisted query".
 
 ---
 

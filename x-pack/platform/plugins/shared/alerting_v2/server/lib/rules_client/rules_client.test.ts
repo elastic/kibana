@@ -826,6 +826,50 @@ describe('RulesClient', () => {
       expect(rulesSavedObjectService.update).toHaveBeenCalled();
     });
 
+    it('allows updating an execution-time signal rule that has no persisted query', async () => {
+      // Blocker scenario: execution-compiled signal rules have no stored query.
+      // validateMergedRuleAttributes must use the builder_fields != null escape
+      // (mirroring the wire schema's refinement) so it does not fail with
+      // INVALID_SIGNAL_RULE on every PATCH.
+      //
+      // The builder type need not be registered — this patch only changes the
+      // rule name (no builder_fields change), so resolveUpdateRuleBuilder falls
+      // through to the preserved-query path, and the merger carries the stored
+      // builder_fields forward without touching the builder type.
+      //
+      // Ref: rule-execution-logic.md "A rule without a persisted query"
+      const client = createClient();
+
+      const existingAttributes: RuleSavedObjectAttributes = {
+        ...baseSoAttrs,
+        kind: 'signal',
+        recovery_strategy: undefined,
+        no_data_strategy: undefined,
+        metadata: {
+          ...baseSoAttrs.metadata,
+          builder_type: 'security.custom_query',
+          builder_fields: { index: 'logs-*', kql: 'host.name: *' },
+        },
+        query: undefined as unknown as RuleSavedObjectAttributes['query'],
+      };
+
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-exec-signal',
+        attributes: existingAttributes,
+        version: 'WzEsMV0=',
+      });
+      rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-id-exec-signal' });
+
+      await expect(
+        client.updateRule({
+          id: 'rule-id-exec-signal',
+          data: { metadata: { name: 'renamed exec-time signal' } },
+        })
+      ).resolves.not.toThrow();
+
+      expect(rulesSavedObjectService.update).toHaveBeenCalled();
+    });
+
     it('throws 400 when clearing recovery_strategy leaves a stale query.recovery block', async () => {
       const client = createClient();
 

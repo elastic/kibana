@@ -178,6 +178,29 @@ describe('CompileRuleQueryStep', () => {
       });
     });
 
+    it('threads parsedBuilderFields onto pipeline state for downstream steps', async () => {
+      // CreateAlertEventsStep reads parsedBuilderFields to avoid re-parsing the
+      // builder_fields schema for execution-time rules that register an enrichRuleEvent
+      // hook. The compile step must set it on state so a single parse covers both.
+      //
+      // Ref: RulePipelineState.parsedBuilderFields (types.ts)
+      const rule = createRuleResponse({
+        kind: 'signal',
+        metadata: { builder_type: 'test.exec', builder_fields: { q: 'hello' } },
+      });
+      const state = createRulePipelineState({ rule });
+      const [result] = await collectStreamResults(
+        step.executeStream(createPipelineStream([state]))
+      );
+
+      expect(result.type).toBe('continue');
+      if (result.type === 'continue') {
+        // parsedBuilderFields must be the Zod-parsed output of the registered schema,
+        // i.e. the same value generateQuery received as `fields`.
+        expect(result.state.parsedBuilderFields).toEqual({ q: 'hello' });
+      }
+    });
+
     it('awaits a promise-returning generateQuery', async () => {
       const asyncDefinition = makeExecutionTypeDefinition({
         generateQuery: jest.fn(async () => standaloneBreach(COMPILED_QUERY_TEXT)),
@@ -424,6 +447,39 @@ describe('CompileRuleQueryStep', () => {
         ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED
       );
     });
+
+    it('re-stamps a Boom throw from generateQuery as BUILDER_QUERY_GENERATION_FAILED (code is not trusted)', async () => {
+      // A compile function that validates its own inputs may throw a well-formed
+      // Boom error, but with an arbitrary code (e.g. INVALID_BUILDER_FIELDS).
+      // The failure taxonomy maps every generateQuery throw to
+      // BUILDER_QUERY_GENERATION_FAILED, so we must NOT pass the Boom through
+      // unchanged. The step wraps it in a new Boom with the correct code.
+      //
+      // Ref: rule-execution-logic.md "Compilation failures" (four-row code table)
+      const definition = makeExecutionTypeDefinition({
+        generateQuery: jest.fn(() => {
+          // Throw a Boom with a different code — this must be normalised.
+          const err = Object.assign(new Error('bad field'), { isBoom: true, output: { statusCode: 400 }, data: { code: ALERTING_ERROR_CODES.INVALID_BUILDER_FIELDS } });
+          throw err;
+        }),
+      });
+      registry = makeRegistry(definition);
+      step = new CompileRuleQueryStep(registry);
+
+      const rule = createRuleResponse({
+        metadata: { builder_type: 'test.exec', builder_fields: { q: 'x' } },
+      });
+      const state = createRulePipelineState({ rule });
+
+      const error = await getStepError(step, state);
+
+      expect(error).toBeDefined();
+      expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
+      // Code must be re-stamped, not passed through from the thrown Boom.
+      expect((error as any).data?.code).toBe(
+        ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED
+      );
+    });
   });
 
   // ─── failure: BUILDER_QUERY_GENERATION_FAILED (invalid/override result) ──
@@ -493,6 +549,41 @@ describe('CompileRuleQueryStep', () => {
 
       const rule = createRuleResponse({
         kind: 'signal',
+        metadata: { builder_type: 'test.exec', builder_fields: { q: 'x' } },
+      });
+      const state = createRulePipelineState({ rule });
+
+      const error = await getStepError(step, state);
+
+      expect(error).toBeDefined();
+      expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
+      expect((error as any).data?.code).toBe(
+        ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED
+      );
+    });
+
+    it('fails the run when the compile result has a structurally invalid query (e.g. breach.query is not a string)', async () => {
+      // A JS-side type error or unchecked cast can produce a GeneratedQuery whose
+      // `query` field fails the schema (e.g. breach.query: 42 instead of a string).
+      // Without a structural parse this reaches ExecuteRuleQueryStep and throws a
+      // raw TypeError classified as a framework-source (retryable) failure.
+      // The compile step must catch it first as a user-source BUILDER_QUERY_GENERATION_FAILED.
+      //
+      // Ref: rule-execution-logic.md "The compilation contract"
+      //      implementation-plan.md step 6.1 ("validate the result (parse, ...)")
+      const definition = makeExecutionTypeDefinition({
+        generateQuery: jest.fn(() => ({
+          // TypeScript would reject this but JavaScript-side a rogue generator could return it.
+          query: {
+            format: 'standalone',
+            breach: { query: 42 }, // not a string
+          } as unknown as import('@kbn/alerting-v2-schemas').Query,
+        })),
+      });
+      registry = makeRegistry(definition);
+      step = new CompileRuleQueryStep(registry);
+
+      const rule = createRuleResponse({
         metadata: { builder_type: 'test.exec', builder_fields: { q: 'x' } },
       });
       const state = createRulePipelineState({ rule });

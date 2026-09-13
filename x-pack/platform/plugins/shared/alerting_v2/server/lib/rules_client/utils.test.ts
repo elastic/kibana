@@ -14,7 +14,7 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import { createRuleSoAttributes } from '../test_utils';
 import { BuilderTypeRegistry } from '../builder_types';
-import type { ResolvedCreateRuleData, RotationCandidate } from './types';
+import type { ResolvedCreateRuleData, ResolvedUpdateRuleData, RotationCandidate } from './types';
 import {
   transformCreateRuleBodyToRuleSoAttributes,
   transformRuleSoAttributesToRuleApiResponse,
@@ -454,6 +454,57 @@ describe('utils', () => {
         { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
       ]);
     });
+
+    it('clears the stored query when the resolved update data carries query: null (execution-time type)', () => {
+      // An execution-time builder type may switch from a write-time type that
+      // compiled and stored a query. The null sentinel tells buildUpdateRuleAttributes
+      // to clear the stored query so the saved object carries no persisted query.
+      //
+      // Ref: rule-execution-logic.md "A rule without a persisted query"
+      const existing = createRuleSoAttributes({
+        kind: 'alert',
+        metadata: { name: 'rule-with-stored-query', builder_type: 'write_time_type' },
+        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+      });
+
+      // Simulate resolveExecutionTimeUpdate returning query: null.
+      const updateData: ResolvedUpdateRuleData = {
+        metadata: { builder_type: 'exec_time_type', builder_fields: { index: 'logs-*' } },
+        query: null,
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      // null in the resolved data must clear the stored query.
+      expect(result.query).toBeUndefined();
+    });
+
+    it('preserves the stored query when the resolved update data omits query (undefined)', () => {
+      // Contrast the null case: undefined means "no query in the patch" — the
+      // stored query should survive.
+      const existing = createRuleSoAttributes({
+        kind: 'alert',
+        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+      });
+
+      const updateData: UpdateRuleData = {
+        metadata: { name: 'renamed' },
+        // query omitted — should preserve the stored value
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.query).toBeDefined();
+      expect(result.query?.format).toBe('standalone');
+    });
   });
 
   describe('transformRuleSoAttributesToRuleApiResponse', () => {
@@ -804,6 +855,35 @@ describe('utils', () => {
         recovery_strategy: undefined,
         query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
       });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
+    });
+
+    it('does not throw for an execution-time signal rule with builder_fields and no query', () => {
+      // Execution-time builder rules have no persisted query. The standalone-
+      // format invariant must not fire for them — it is satisfied vacuously
+      // because the query is compiled per-run and validated there.
+      //
+      // This is the blocker scenario: PATCH on an execution-compiled signal rule
+      // runs validateMergedRuleAttributes after buildUpdateRuleAttributes merges
+      // the stored attrs (which have builder_fields but no query). Without the
+      // builder_fields != null escape the invariant returns false and throws
+      // INVALID_SIGNAL_RULE on every update of a detection-rule PATCH.
+      //
+      // Ref: rule-execution-logic.md "A rule without a persisted query"
+      const attrs = createRuleSoAttributes({
+        kind: 'signal',
+        recovery_strategy: undefined,
+        metadata: {
+          name: 'detection-rule',
+          builder_type: 'security.custom_query',
+          builder_fields: { index: 'logs-*', kql: 'host.name: *' },
+          ownership: { managed: false },
+        },
+      } as Partial<ReturnType<typeof createRuleSoAttributes>>);
+      // Clear the default query that createRuleSoAttributes adds —
+      // execution-time rules persist no query.
+      (attrs as Record<string, unknown>).query = undefined;
 
       expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
     });

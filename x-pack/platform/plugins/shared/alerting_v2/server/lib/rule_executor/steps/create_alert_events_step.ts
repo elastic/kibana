@@ -10,8 +10,7 @@ import Boom from '@hapi/boom';
 import { PluginInitializer } from '@kbn/core-di-server';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { stringifyZodError } from '@kbn/zod-helpers/v4';
-import type { RuleEventEnrichment } from '@kbn/alerting-v2-rule-builders';
+import type { OpaqueBuilderFields, RuleEventEnrichment } from '@kbn/alerting-v2-rule-builders';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import {
   createAlertEventsBatchBuilder,
@@ -54,40 +53,59 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
       const logger = state.logger.withLabels({ step: step.name });
 
       if (!builder) {
-        // Resolve the enrichment hook once per run: look up the registered type,
-        // parse the stored builder_fields against its schema, and create a
-        // pre-bound callback. A type with no hook pays nothing here.
+        // Resolve the enrichment hook once per run: look up the registered type
+        // and create a pre-bound callback. A type with no hook pays nothing here.
+        //
+        // For execution-time builder rules, `state.parsedBuilderFields` carries
+        // the fields already parsed by CompileRuleQueryStep. For write-time builder
+        // rules, the raw stored builder_fields are passed directly — re-parsing
+        // them here is not in the design and would introduce a new run-failure mode
+        // for write-time types whose stored fields have drifted from the current
+        // schema (those rules already run fine on their persisted query today).
+        //
+        // Ref: rule-event-generation-logic.md "Where the hook runs"
         let enrichRuleEvent: BuildAlertEventsBaseOpts['enrichRuleEvent'];
         const builderType = state.rule.metadata.builder_type;
         if (builderType) {
           const definition = step.registry.get(builderType);
           if (definition?.enrichRuleEvent) {
-            // Parse builder_fields once per run. A parse failure here is a
-            // user-source error (same classification as CompileRuleQueryStep).
-            const parseResult = definition.builderFieldsSchema.safeParse(
-              state.rule.metadata.builder_fields
-            );
-            if (!parseResult.success) {
-              throw createTaskRunError(
-                Boom.badRequest(
-                  `builder_fields for builder type "${builderType}" are invalid: ${stringifyZodError(parseResult.error)}`,
-                  {
-                    code: ALERTING_ERROR_CODES.INVALID_BUILDER_FIELDS,
-                    details: { builder_type: builderType },
-                  }
-                ) as Error,
-                TaskErrorSource.USER
-              );
-            }
-            const parsedFields = parseResult.data;
+            // Use pre-parsed fields from the compile step for execution-time rules;
+            // fall back to the raw stored builder_fields for write-time rules.
+            const fields = (
+              state.parsedBuilderFields ?? state.rule.metadata.builder_fields ?? {}
+            ) as OpaqueBuilderFields;
             const ruleIdentity = {
               id: state.rule.id,
               signature_id: state.rule.metadata.signature_id ?? '',
               kind: state.rule.kind,
             };
             const hookFn = definition.enrichRuleEvent;
-            enrichRuleEvent = (row: Readonly<Record<string, unknown>>): RuleEventEnrichment =>
-              hookFn({ fields: parsedFields, rule: ruleIdentity, row });
+            const bt = builderType;
+            // The try/catch is intentionally scoped to the hook call only. Any
+            // throw from the hook is a deterministic user-source error
+            // (RULE_EVENT_ENRICHMENT_FAILED). Faults elsewhere in buildBatch
+            // (group hashing, document building) propagate with their own
+            // classification.
+            //
+            // Ref: rule-event-generation-logic.md "Failure handling"
+            enrichRuleEvent = (row: Readonly<Record<string, unknown>>): RuleEventEnrichment => {
+              try {
+                return hookFn({ fields, rule: ruleIdentity, row });
+              } catch (hookError) {
+                const msg =
+                  hookError instanceof Error ? hookError.message : String(hookError);
+                throw createTaskRunError(
+                  Boom.badRequest(
+                    `Rule event enrichment hook for builder type "${bt}" threw: ${msg}`,
+                    {
+                      code: ALERTING_ERROR_CODES.RULE_EVENT_ENRICHMENT_FAILED,
+                      details: { builder_type: bt },
+                    }
+                  ) as Error,
+                  TaskErrorSource.USER
+                );
+              }
+            };
           }
         }
 
@@ -110,27 +128,7 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
 
       const droppedGroupsBefore = builder.droppedGroupCount;
 
-      // Build the batch. If the enrichment hook throws, classify it as a
-      // user-source run failure — a pure function throwing is a deterministic
-      // type bug that must not silently ship unenriched events.
-      let alertEventsBatch;
-      try {
-        alertEventsBatch = builder.buildBatch([...state.esqlRowBatch]);
-      } catch (enrichmentError) {
-        const bt = state.rule.metadata.builder_type ?? 'unknown';
-        const msg =
-          enrichmentError instanceof Error ? enrichmentError.message : String(enrichmentError);
-        throw createTaskRunError(
-          Boom.badRequest(
-            `Rule event enrichment hook for builder type "${bt}" threw: ${msg}`,
-            {
-              code: ALERTING_ERROR_CODES.RULE_EVENT_ENRICHMENT_FAILED,
-              details: { builder_type: bt },
-            }
-          ) as Error,
-          TaskErrorSource.USER
-        );
-      }
+      const alertEventsBatch = builder.buildBatch([...state.esqlRowBatch]);
 
       // Count distinct groups newly dropped by the max this batch
       const groupsDroppedInBatch = builder.droppedGroupCount - droppedGroupsBefore;

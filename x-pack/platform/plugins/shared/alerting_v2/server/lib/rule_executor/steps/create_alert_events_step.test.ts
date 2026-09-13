@@ -22,7 +22,7 @@ import {
   getStepError,
 } from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
-import { buildGroupHash } from '../build_alert_events';
+import * as buildAlertEventsModule from '../build_alert_events';
 import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
 import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { BuilderTypeRegistry } from '../../builder_types';
@@ -377,7 +377,7 @@ describe('CreateAlertEventsStep', () => {
 
   describe('active group protection', () => {
     const hashFor = (host: string) =>
-      buildGroupHash({
+      buildAlertEventsModule.buildGroupHash({
         rowDoc: { 'host.name': host },
         groupKeyFields: ['host.name'],
         fallbackSeed: 'unused',
@@ -611,6 +611,86 @@ describe('CreateAlertEventsStep', () => {
       await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
       expect(hookSpy).not.toHaveBeenCalled();
+    });
+
+    it('a framework fault in buildBatch (not the hook) propagates without RULE_EVENT_ENRICHMENT_FAILED', async () => {
+      // The try/catch must be scoped to the hook call only. A throw from group
+      // hashing, document building, or any other part of buildBatch must keep
+      // its own error and default (framework) source classification, not be
+      // mislabelled as a hook failure.
+      //
+      // We test this by intercepting createAlertEventsBatchBuilder to return a
+      // builder whose buildBatch throws directly (simulating a framework fault
+      // that has nothing to do with the enrichRuleEvent hook).
+      //
+      // Ref: rule-event-generation-logic.md "Failure handling"
+      const { localStep, rule } = makeEnrichedRule({
+        // Hook does not throw.
+        enrichRuleEvent: () => ({ severity: 'critical' }),
+      });
+
+      const frameworkError = new TypeError('Framework error inside buildBatch');
+      const spy = jest
+        .spyOn(buildAlertEventsModule, 'createAlertEventsBatchBuilder')
+        .mockReturnValueOnce({
+          buildBatch: () => {
+            throw frameworkError;
+          },
+          get droppedGroupCount() {
+            return 0;
+          },
+        });
+
+      try {
+        const esqlRowBatch = [{ 'host.name': 'host-a' }];
+        const state = createRulePipelineState({
+          input: createRuleExecutionInput(),
+          rule,
+          esqlRowBatch,
+        });
+
+        const error = await getStepError(localStep, state);
+
+        // An error must have occurred.
+        expect(error).toBeDefined();
+        // It must NOT carry RULE_EVENT_ENRICHMENT_FAILED — that code is for hook throws only.
+        expect((error as any).data?.code).not.toBe(
+          ALERTING_ERROR_CODES.RULE_EVENT_ENRICHMENT_FAILED
+        );
+      } finally {
+        spy.mockRestore();
+      }
+    });
+
+    it('uses parsedBuilderFields from compile-step state instead of re-parsing builder_fields', async () => {
+      // For execution-time rules, CompileRuleQueryStep already parses builder_fields
+      // and threads the result as state.parsedBuilderFields. The step must pass those
+      // to the hook without re-parsing. This avoids a double schema parse and, more
+      // importantly, avoids adding a new failure mode for write-time rules whose
+      // stored fields may have drifted from the current schema.
+      //
+      // Ref: RulePipelineState.parsedBuilderFields (types.ts)
+      const capturedFields: unknown[] = [];
+      const { localStep, rule } = makeEnrichedRule({
+        enrichRuleEvent: ({ fields }) => {
+          capturedFields.push(fields);
+          return {};
+        },
+      });
+
+      const esqlRowBatch = [{ 'host.name': 'host-a' }];
+      // Inject parsedBuilderFields onto the state — simulating what CompileRuleQueryStep sets.
+      const parsedBuilderFields = { severity: 'critical', _parsed: true };
+      const state = {
+        ...createRulePipelineState({ input: createRuleExecutionInput(), rule, esqlRowBatch }),
+        parsedBuilderFields,
+      };
+
+      await collectStreamResults(localStep.executeStream(createPipelineStream([state])));
+
+      // The hook must receive parsedBuilderFields, not rule.metadata.builder_fields.
+      expect(capturedFields).toHaveLength(1);
+      expect(capturedFields[0]).toBe(parsedBuilderFields);
     });
   });
 });

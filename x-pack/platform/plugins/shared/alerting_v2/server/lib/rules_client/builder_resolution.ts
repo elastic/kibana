@@ -153,6 +153,15 @@ function resolveExecutionTimeCreate(
 /**
  * Handles the execution-time update path: derive framework fields from the
  * parsed builder fields; persist no `query`.
+ *
+ * Sets `query: null` to signal `buildUpdateRuleAttributes` to clear any stale
+ * stored query. This handles the case where a PATCH switches a rule from a
+ * write-time builder type (which compiled and stored a query) to an
+ * execution-time type. Without an explicit clear, the old query would be
+ * preserved by `buildUpdateRuleAttributes`'s "omitted = preserve" semantics.
+ *
+ * Ref: rule-execution-logic.md "A rule without a persisted query"
+ *   ("no saved-object attribute, no cached last-compiled copy")
  */
 function resolveExecutionTimeUpdate(
   definition: RegisteredBuilderType,
@@ -161,8 +170,11 @@ function resolveExecutionTimeUpdate(
   builderFields: OpaqueBuilderFields,
   validateBuilderFields: boolean
 ): ResolvedUpdateRuleData {
-  const base: UpdateRuleData = {
+  const base: ResolvedUpdateRuleData = {
     ...data,
+    // null signals buildUpdateRuleAttributes to clear any stale stored query,
+    // including one left over from a previous write-time builder type.
+    query: null,
     metadata: { ...data.metadata, builder_type: effectiveType },
   };
 

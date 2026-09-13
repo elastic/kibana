@@ -9,7 +9,6 @@ import Boom from '@hapi/boom';
 import { isEqual } from 'lodash';
 import type {
   CreateRuleData,
-  UpdateRuleData,
   Query,
   RuleOwnership,
   RuleResponse,
@@ -33,7 +32,12 @@ import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import { RULE_REVISION_FALLBACK, RULE_VERSION_FALLBACK } from '../rule_changes_history';
 import type { BuilderTypeRegistry } from '../builder_types';
 import type { CallerIdentity } from './caller_identity';
-import type { BulkOperationError, ResolvedCreateRuleData, RotationCandidate } from './types';
+import type {
+  BulkOperationError,
+  ResolvedCreateRuleData,
+  ResolvedUpdateRuleData,
+  RotationCandidate,
+} from './types';
 
 /**
  * Maps a saved-object status code to the stable, machine-readable bulk-error
@@ -676,7 +680,7 @@ export function transformCreateRuleBodyToRuleSoAttributes(
  */
 export function buildUpdateRuleAttributes(
   existingAttrs: RuleSavedObjectAttributes,
-  updateData: UpdateRuleData,
+  updateData: ResolvedUpdateRuleData,
   serverFields: { updatedBy: string | null; updatedAt: string; version: number }
 ): RuleSavedObjectAttributes {
   const { version, ...restServerFields } = serverFields;
@@ -727,9 +731,19 @@ export function buildUpdateRuleAttributes(
     },
     time_field: updateData.time_field ?? existingAttrs.time_field,
     schedule: { ...existingAttrs.schedule, ...updateData.schedule },
-    // `query` - callers must send a complete new shape (we can't merge across formats),
-    // so omitted = preserved, present = full replacement.
-    query: updateData.query !== undefined ? toStoredQuery(updateData.query) : existingAttrs.query,
+    // `query` semantics for the resolved update data:
+    //   undefined  → preserve existing (ordinary PATCH with no query change)
+    //   null       → clear (execution-time type; must carry no stored query, even
+    //                if an old write-time type compiled one)
+    //   Query      → replace with the new value
+    //
+    // Ref: rule-execution-logic.md "A rule without a persisted query"
+    query:
+      updateData.query === null
+        ? undefined
+        : updateData.query !== undefined
+        ? toStoredQuery(updateData.query)
+        : existingAttrs.query,
     // `null` → clear (undefined). SO schema uses `maybe()` without `nullable()`.
     recovery_strategy: nullToUndefined(
       updateData.recovery_strategy,
@@ -787,7 +801,15 @@ export function validateMergedRuleAttributes(
     details: Record<string, unknown>;
   }> = [
     {
-      valid: isSignalUsingStandaloneFormat(attrs),
+      // Execution-time builder rules have no stored query, so the standalone-
+      // format invariant is vacuously satisfied — the query is compiled per run
+      // and validated there. Mirror the wire schema's `builder_fields != null`
+      // escape (createRuleDataSchema refinement line 746, replaceRuleBodySchema
+      // line 827) so that a PATCH on a signal execution-compiled rule does not
+      // incorrectly fail with INVALID_SIGNAL_RULE.
+      //
+      // Ref: rule-execution-logic.md "A rule without a persisted query"
+      valid: attrs.metadata.builder_fields != null || isSignalUsingStandaloneFormat(attrs),
       message: 'kind "signal" requires query.format "standalone".',
       code: ALERTING_ERROR_CODES.INVALID_SIGNAL_RULE,
       details: { rule_id: ruleId, rule_kind: attrs.kind },
