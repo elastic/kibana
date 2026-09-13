@@ -89,6 +89,7 @@ import type {
   UpdateRuleParams,
 } from './types';
 import {
+  assertBuilderTypeTransitionNotManaged,
   resolveCreateRuleBuilder,
   resolveReplaceRuleBuilder,
   resolveUpdateRuleBuilder,
@@ -635,6 +636,22 @@ export class RulesClient {
       version: existingVersion,
       references: existingReferences,
     } = await this.getExistingRule(id);
+
+    // Pre-check: builder-type transitions that touch a managed type are
+    // rejected before the identity gate. This ensures callers without an
+    // identity see BUILDER_TYPE_IS_MANAGED (not RULE_IS_MANAGED) when they
+    // attempt to transition a managed rule's builder type — matching what
+    // rule-ownership.md "The write gate" and rule-types.md both prescribe.
+    // resolveUpdateRuleBuilder runs the same check internally; this call
+    // makes the ordering explicit and guards against future refactors that
+    // might move or remove the resolve call.
+    assertBuilderTypeTransitionNotManaged(
+      this.builderTypeRegistry,
+      id,
+      parsed.metadata?.builder_type,
+      existingAttrs.metadata.builder_type,
+      existingAttrs.metadata.ownership
+    );
 
     // Gate: managed rules may only be written by the owning solution's client.
     // Both the stored ownership mark and the current registration are consulted.
@@ -1928,6 +1945,17 @@ export class RulesClient {
       version: existingVersion,
       references: existingReferences,
     } = await this.getExistingRule(id);
+
+    // Pre-check: builder-type transitions that touch a managed type are
+    // rejected before the identity gate. Same rationale as the updateRule
+    // path above — rule-ownership.md "The write gate" second clause.
+    assertBuilderTypeTransitionNotManaged(
+      this.builderTypeRegistry,
+      id,
+      parsed.metadata?.builder_type,
+      existingAttrs.metadata.builder_type,
+      existingAttrs.metadata.ownership
+    );
 
     // Gate: managed rules may only be replaced by the owning solution's client.
     // Ref: rule-ownership.md "The write gate"

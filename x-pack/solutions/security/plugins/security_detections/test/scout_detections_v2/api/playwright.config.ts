@@ -16,8 +16,9 @@
  *   - 503 (v2 alerting disabled): the off_states.spec tests flip the
  *     `alerting:v2:enabled` uiSettings at runtime and restore it after.
  *   - 404 (feature flag disabled): covered by the sibling
- *     playwright.flag_off.config.ts suite, which starts Kibana via the
- *     `detections_v2_flag_off` config set (no `enableDetectionsOnV2` arg).
+ *     `test/scout_detections_v2_flag_off/api/playwright.config.ts` suite,
+ *     which starts Kibana via the `detections_v2_flag_off` config set
+ *     (no `enableDetectionsOnV2` arg).
  *
  * Start server:
  *   node scripts/scout.js start-server --arch stateful --domain classic \

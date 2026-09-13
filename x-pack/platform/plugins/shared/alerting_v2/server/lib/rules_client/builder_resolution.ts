@@ -241,7 +241,7 @@ function resolveExecutionTimeUpdate(
  *
  * Ref: rule-ownership.md "The write gate"
  */
-function assertBuilderTypeTransitionNotManaged(
+export function assertBuilderTypeTransitionNotManaged(
   registry: BuilderTypeRegistry,
   ruleId: string,
   requestedType: string | null | undefined,
