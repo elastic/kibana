@@ -256,7 +256,10 @@ describe('toFrameworkCreate + toPublicResponse — Custom Query round-trip', () 
     expect((frameworkData as { query?: unknown }).query).toBeUndefined();
   });
 
-  it('pins kind: "signal"', () => {
+  it('pins kind: "signal" (read from ALIAS_TO_KIND, not hardcoded)', () => {
+    // ALIAS_TO_KIND['query'] === 'signal'; the converter reads the map entry
+    // rather than hardcoding the string so future alias entries with a
+    // different pin require no change to the converter.
     expect(frameworkData.kind).toBe('signal');
   });
 

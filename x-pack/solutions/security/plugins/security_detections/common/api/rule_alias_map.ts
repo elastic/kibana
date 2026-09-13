@@ -99,6 +99,18 @@ export const BUILDER_TYPE_ID_TO_ALIAS: Readonly<Record<string, 'query' | 'thresh
   >;
 
 /**
+ * Alias → kind.
+ * Use this to look up the pinned kind from the wire alias.
+ * Converters should read kind from here rather than hardcoding it, so that
+ * adding a future alias with a different pin requires no change to the converter.
+ */
+export const ALIAS_TO_KIND: Readonly<Record<'query' | 'threshold', 'alert' | 'signal'>> =
+  Object.fromEntries(ALIAS_MAP_ENTRIES.map((e) => [e.alias, e.kind])) as Record<
+    'query' | 'threshold',
+    'alert' | 'signal'
+  >;
+
+/**
  * All alias map entries as an array.
  * Use this when you need to iterate over all known detection types.
  */

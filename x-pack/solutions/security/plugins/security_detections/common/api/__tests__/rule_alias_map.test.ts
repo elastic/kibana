@@ -22,6 +22,7 @@
 
 import {
   ALIAS_TO_BUILDER_TYPE_ID,
+  ALIAS_TO_KIND,
   BUILDER_TYPE_ID_TO_ALIAS,
   ALIAS_MAP,
   assertAliasBijectivity,
@@ -59,6 +60,22 @@ describe('BUILDER_TYPE_ID_TO_ALIAS', () => {
   it('is the inverse of ALIAS_TO_BUILDER_TYPE_ID', () => {
     for (const [alias, builderId] of Object.entries(ALIAS_TO_BUILDER_TYPE_ID)) {
       expect(BUILDER_TYPE_ID_TO_ALIAS[builderId]).toBe(alias);
+    }
+  });
+});
+
+describe('ALIAS_TO_KIND', () => {
+  it('maps query → signal', () => {
+    expect(ALIAS_TO_KIND.query).toBe('signal');
+  });
+
+  it('maps threshold → signal', () => {
+    expect(ALIAS_TO_KIND.threshold).toBe('signal');
+  });
+
+  it('is consistent with ALIAS_MAP entry kind pins', () => {
+    for (const entry of ALIAS_MAP) {
+      expect(ALIAS_TO_KIND[entry.alias]).toBe(entry.kind);
     }
   });
 });
