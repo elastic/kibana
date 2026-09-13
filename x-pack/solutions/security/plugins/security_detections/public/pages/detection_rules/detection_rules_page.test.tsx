@@ -183,10 +183,12 @@ describe('DetectionRulesPage — table rendering', () => {
   });
 
   it('renders a standard column-header table, not a responsive card layout', async () => {
-    // EuiBasicTable switches to mobile card layout when responsiveBreakpoint is
-    // active. With responsiveBreakpoint={false} the mobile header element must
-    // never appear, even at desktop widths that would otherwise trip the
-    // default 'm' breakpoint.
+    // EuiBasicTable switches to mobile card layout at narrow viewports when
+    // the Kibana render context supplies a breakpoint value at or below the
+    // default 'm' threshold. jsdom does not implement matchMedia, so EUI's
+    // breakpoint hook never fires — no mobile headers appear in unit tests
+    // regardless of viewport size. Real-browser behaviour is covered by the
+    // Playwright smoke test at 1920 x 1080 and 500px wide.
     const api = makeApi();
     renderPage(api);
 

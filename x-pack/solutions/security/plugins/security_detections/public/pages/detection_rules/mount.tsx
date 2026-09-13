@@ -19,6 +19,7 @@ import ReactDOM from 'react-dom';
 import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { I18nProvider } from '@kbn/i18n-react';
 import { DetectionRulesApi } from '../../services/detection_rules_api';
 import { DetectionRulesContext } from './detection_rules_context';
 import { DetectionRulesPage } from './detection_rules_page';
@@ -31,11 +32,15 @@ export const mountDetectionRulesApp = (
   const queryClient = new QueryClient();
 
   ReactDOM.render(
-    <QueryClientProvider client={queryClient}>
-      <DetectionRulesContext.Provider value={{ api, notifications: coreStart.notifications }}>
-        <DetectionRulesPage />
-      </DetectionRulesContext.Provider>
-    </QueryClientProvider>,
+    coreStart.rendering.addContext(
+      <QueryClientProvider client={queryClient}>
+        <I18nProvider>
+          <DetectionRulesContext.Provider value={{ api, notifications: coreStart.notifications }}>
+            <DetectionRulesPage />
+          </DetectionRulesContext.Provider>
+        </I18nProvider>
+      </QueryClientProvider>
+    ),
     params.element
   );
 
