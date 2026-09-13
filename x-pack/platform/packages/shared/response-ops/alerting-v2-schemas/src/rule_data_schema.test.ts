@@ -1841,8 +1841,18 @@ describe('ruleTagsParamsSchema', () => {
     expect(() => ruleTagsParamsSchema.parse({ kind: 'unknown' })).toThrow();
   });
 
-  it('rejects the removed filter key', () => {
-    expect(() => ruleTagsParamsSchema.parse({ filter: 'kind:alert' })).toThrow();
+  it('accepts a KQL filter string', () => {
+    expect(ruleTagsParamsSchema.parse({ filter: 'kind:alert' })).toEqual({ filter: 'kind:alert' });
+  });
+
+  it('accepts all three parameters together', () => {
+    expect(
+      ruleTagsParamsSchema.parse({ search: 'cpu', kind: 'alert', filter: 'enabled:true' })
+    ).toEqual({ search: 'cpu', kind: 'alert', filter: 'enabled:true' });
+  });
+
+  it('rejects a filter longer than the KQL length limit', () => {
+    expect(() => ruleTagsParamsSchema.parse({ filter: 'kind:alert'.padEnd(10001, ' ') })).toThrow();
   });
 
   it('rejects unknown keys', () => {
