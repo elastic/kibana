@@ -6,14 +6,11 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import type { FC, MouseEvent, SetStateAction } from 'react';
+import type { FC, SetStateAction } from 'react';
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiCodeBlock,
-  EuiCopy,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,7 +20,6 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
-  EuiToolTip,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -31,6 +27,7 @@ import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import type { DatasetMappingFieldType, DatasetMappings } from '../../../common';
 import { FieldMappingForm, getFieldTypeDocsHelpText } from './field_mapping_form';
+import { MappingActions } from './mapping_actions';
 
 export interface MappingEditorField {
   id: string;
@@ -700,110 +697,13 @@ export const MappingEditor: FC<MappingEditorProps> = ({
                             })}
                           </EuiText>
                         </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiFlexGroup
-                            gutterSize="s"
-                            direction="row"
-                            alignItems="center"
-                            responsive={false}
-                          >
-                            <EuiFlexItem grow={false}>
-                              {f.type ? (
-                                <EuiBadge color="hollow">{typeInfo?.label ?? f.type}</EuiBadge>
-                              ) : (
-                                <span aria-hidden="true">&nbsp;</span>
-                              )}
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>
-                              <EuiCopy
-                                textToCopy={JSON.stringify(
-                                  {
-                                    [f.name || 'field']: {
-                                      type: f.type,
-                                      ...(f.path ? { path: f.path } : {}),
-                                      ...(isDate && f.format ? { format: f.format } : {}),
-                                    },
-                                  },
-                                  null,
-                                  2
-                                )}
-                              >
-                                {(copy) => (
-                                  <EuiToolTip
-                                    content={i18n.translate(
-                                      'xpack.dataFederation.mappingEditor.copyField',
-                                      { defaultMessage: 'Copy field mapping' }
-                                    )}
-                                  >
-                                    <EuiButtonIcon
-                                      iconType="copy"
-                                      aria-label={i18n.translate(
-                                        'xpack.dataFederation.mappingEditor.copyFieldAriaLabel',
-                                        { defaultMessage: 'Copy field mapping' }
-                                      )}
-                                      type="button"
-                                      onClick={(e: MouseEvent<HTMLButtonElement>) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        copy();
-                                      }}
-                                      data-test-subj="dataFederationMappingEditorCopyField"
-                                    />
-                                  </EuiToolTip>
-                                )}
-                              </EuiCopy>
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>
-                              <EuiToolTip
-                                content={i18n.translate(
-                                  'xpack.dataFederation.mappingEditor.editField',
-                                  {
-                                    defaultMessage: 'Edit',
-                                  }
-                                )}
-                              >
-                                <EuiButtonIcon
-                                  iconType="pencil"
-                                  aria-label={i18n.translate(
-                                    'xpack.dataFederation.mappingEditor.editFieldAriaLabel',
-                                    { defaultMessage: 'Edit field' }
-                                  )}
-                                  type="button"
-                                  onClick={(e: MouseEvent<HTMLButtonElement>) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    setEditingFieldId(f.id);
-                                  }}
-                                  data-test-subj="dataFederationMappingEditorEditField"
-                                />
-                              </EuiToolTip>
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>
-                              <EuiToolTip
-                                content={i18n.translate(
-                                  'xpack.dataFederation.mappingEditor.removeField',
-                                  { defaultMessage: 'Remove' }
-                                )}
-                              >
-                                <EuiButtonIcon
-                                  iconType="trash"
-                                  color="danger"
-                                  aria-label={i18n.translate(
-                                    'xpack.dataFederation.mappingEditor.removeFieldAriaLabel',
-                                    { defaultMessage: 'Remove field' }
-                                  )}
-                                  type="button"
-                                  onClick={(e: MouseEvent<HTMLButtonElement>) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    removeField(f.id);
-                                  }}
-                                  data-test-subj="dataFederationMappingEditorRemoveField"
-                                />
-                              </EuiToolTip>
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        </EuiFlexItem>
+                        <MappingActions
+                          field={f}
+                          isDate={isDate}
+                          typeLabel={typeInfo?.label}
+                          onEdit={() => setEditingFieldId(f.id)}
+                          onRemove={() => removeField(f.id)}
+                        />
                       </>
                     )}
                   </EuiFlexGroup>
