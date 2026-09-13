@@ -14,18 +14,13 @@ export const matchActionPoliciesForRuleBodySchema = z
   .object({
     rule: z
       .object({
-        id: z.string().min(1).max(256).optional().describe('The ID of the rule.'),
-        name: z
-          .string()
-          .min(1)
-          .max(256)
-          .optional()
-          .describe('The name of the rule, used to evaluate global matcher expressions.'),
         tags: z
           .array(tagItemSchema)
           .max(100)
           .optional()
-          .describe('The tags of the rule, used to evaluate global matcher expressions.'),
+          .describe(
+            'Tags of the rule you want to check. Used to find policies whose `matcher.tags` include at least one of these values.'
+          ),
       })
       .strict()
       .optional(),
@@ -36,9 +31,9 @@ export const matchActionPoliciesForRuleBodySchema = z
 export type MatchActionPoliciesForRuleBody = z.infer<typeof matchActionPoliciesForRuleBodySchema>;
 
 export const matchedActionPolicyCategorySchema = z
-  .enum(['global', 'global-filtered'])
+  .enum(['catch-all', 'tags'])
   .describe(
-    'Why this action policy matches the rule: "global" (applies to all rules, no filter), or "global-filtered" (applies to all rules, KQL filter evaluated to true).'
+    "The reason this policy applies to the rule. `catch-all` means the policy sets neither `matcher.tags` nor `matcher.expression`, so it applies to every rule. `tags` means the rule carries at least one tag listed in the policy's `matcher.tags`."
   );
 
 export type MatchedActionPolicyCategory = z.infer<typeof matchedActionPolicyCategorySchema>;

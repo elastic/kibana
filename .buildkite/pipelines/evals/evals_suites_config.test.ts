@@ -9,7 +9,7 @@
 
 import Fs from 'fs';
 import Path from 'path';
-import type { EvalsSuiteMetadataEntry } from './eval_pipeline';
+import type { EvalsSuiteMetadataEntry } from './eval_pipeline.ts';
 
 // Reads the real config, unlike `eval_pipeline.test.ts` which mocks `fs` with a fixture. These
 // mistakes are only reachable by hand-editing the file, so a PR-time check is the cheapest guard.

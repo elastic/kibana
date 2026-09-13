@@ -41,6 +41,7 @@ const WORKER_SETTINGS_VERSIONS: Record<RegisteredWorkerId, number> = {
 const WORKER_SCHEDULE_DEFAULTS: Partial<Record<RegisteredWorkerId, string>> = {
   // Matches the Attack Discovery schedule form default.
   [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: '24h',
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: '2h',
 };
 
 /**

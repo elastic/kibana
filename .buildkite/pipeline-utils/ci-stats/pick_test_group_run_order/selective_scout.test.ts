@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isScoutTestPath, isScoutTestsOnlyDiff, isScoutPathOnlyDiff } from './selective_scout';
+import { isScoutTestPath, isScoutTestsOnlyDiff, isScoutPathOnlyDiff } from './selective_scout.ts';
 
 describe('isScoutTestPath', () => {
   it('returns true for specs, co-located helpers, fixtures and generated manifests', () => {

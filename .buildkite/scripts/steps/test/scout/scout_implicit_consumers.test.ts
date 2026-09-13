@@ -8,7 +8,7 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import { expandWithImplicitConsumers } from './scout_implicit_consumers';
+import { expandWithImplicitConsumers } from './scout_implicit_consumers.ts';
 
 const WORKFLOWS_EXTENSIONS_MODULE = '@kbn/workflows-extensions';
 

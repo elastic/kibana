@@ -1,5 +1,5 @@
 {
-  "sha1": "889deb109ceb72304b45930db3a3a2d19f11316a",
+  "sha1": "e90ae28b7749e63b10ea3a5e6141ce7fc386a5bf",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -229,8 +229,8 @@
       }
     },
     {
-      "id": "66985a39c31728f-608c0105d6e978b",
-      "title": "GET /internal/nightshift/investigations each result has list fields without structured output",
+      "id": "66985a39c31728f-68fab1a4d8f59fc",
+      "title": "GET /internal/nightshift/investigations each result includes list fields, not detailed output",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -677,6 +677,22 @@
       }
     },
     {
+      "id": "b635a01a89e1578-73640336c326be7",
+      "title": "PATCH /internal/nightshift/investigations/{id} returns 400 for an unscored current recommendation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/update_investigation.spec.ts",
+        "line": 113,
+        "column": 92
+      }
+    },
+    {
       "id": "b635a01a89e1578-04419dbcb3dad21",
       "title": "PATCH /internal/nightshift/investigations/{id} updates error field for failed investigations",
       "expectedStatus": "passed",
@@ -688,8 +704,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/update_investigation.spec.ts",
-        "line": 100,
-        "column": 14
+        "line": 122,
+        "column": 87
       }
     },
     {
@@ -704,8 +720,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/update_investigation.spec.ts",
-        "line": 112,
-        "column": 14
+        "line": 137,
+        "column": 7
       }
     },
     {
@@ -720,8 +736,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/update_investigation.spec.ts",
-        "line": 123,
-        "column": 19
+        "line": 147,
+        "column": 16
       }
     },
     {
@@ -736,8 +752,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/update_investigation.spec.ts",
-        "line": 142,
-        "column": 26
+        "line": 165,
+        "column": 16
       }
     }
   ]

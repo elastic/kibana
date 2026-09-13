@@ -7,10 +7,11 @@ pageLoadAssetSize:
   agentBuilderSml: 597
   agentBuilderVisualizations: 1551
   agentBuilderWorkflows: 1029
+  agenticInvestigations: 9299
   aiAssistantManagementSelection: 355
   aiops: 586
   alerting: 8789
-  alertingVTwo: 21472
+  alertingVTwo: 24358
   alertzero: 4489
   apm: 31419
   apmShared: 1896
@@ -135,7 +136,7 @@ pageLoadAssetSize:
   navigation: 332
   newsfeed: 10708
   nightshift: 2362
-  nightshiftInvestigations: 1221
+  nightshiftInvestigations: 9405
   noDataPage: 630
   notificationCenter: 600
   observability: 4071
@@ -143,6 +144,7 @@ pageLoadAssetSize:
   observabilityAIAssistant: 2236
   observabilityAIAssistantApp: 5918
   observabilityAiAssistantManagement: 2280
+  observabilityAlerting: 3500
   observabilityLogsExplorer: 1351
   observabilityOnboarding: 8873
   observabilityShared: 7496
@@ -189,7 +191,7 @@ pageLoadAssetSize:
   sessionView: 647
   share: 379
   shared-core: 311749
-  shared-misc: 140291
+  shared-misc: 155260
   shared-packages: 5010040
   shared-plugins: 13536562
   shared-solution-packages: 347767

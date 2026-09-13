@@ -2003,10 +2003,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eui-illustrations/-/eui-illustrations-1.0.2.tgz#ea3386f8ff415603f0f49f18bd80acd1fa820df5"
   integrity sha512-gYK9mHdGm/P7wbf6yhYo17qoP61IlUcwVwIDyOSHqx89TymSn9AyVZzbgjwmGdaLFNfgM+RKvg+hfTB7Unm+Gw==
 
-"@elastic/eui-test-helpers@1.5.0-snapshot.1788752437240":
-  version "1.5.0-snapshot.1788752437240"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-test-helpers/-/eui-test-helpers-1.5.0-snapshot.1788752437240.tgz#91ccb7419aaeebd7a203bc0bbfe4f94aa8207ef3"
-  integrity sha512-vuSoYimsHXUau35iWM2sY+75XIQinv9KgyWKdDW57ml7Iok3tdDe0ZpWHYcGmIZlKHbXSs6h7SmYY6ydY9uQ/A==
+"@elastic/eui-test-helpers@1.6.0":
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-test-helpers/-/eui-test-helpers-1.6.0.tgz#98e22cc315dd7caba132687588092d5bb9e19fb5"
+  integrity sha512-H2c4qYXVYaooLpDCLTQq2+VAw6aSBowEW3PTEqZfEzE9CJq/tXYpV/NfApRVJo/OjxLFdGws+fQd26UR2agozg==
 
 "@elastic/eui-theme-borealis@8.0.0":
   version "8.0.0"
@@ -2025,10 +2025,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@120.0.0":
-  version "120.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-120.0.0.tgz#30ee329210b3cd608fb55e31690edfe01711cd0f"
-  integrity sha512-iUutRU4JIG4eolU3LCE4CWe/H7juRCKYQaT+UeXQyegHRGttYFlunPEisS7+BLV1qrJRWiIq2lwykf0HwT7osw==
+"@elastic/eui@121.0.0":
+  version "121.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-121.0.0.tgz#bafa2c972a6457ac8899401217f7b0a1376891cc"
+  integrity sha512-Ws6scxpbhK7kiUqC8RR1Nua3ppguOOcXis81OATvzb9xSKQZbUWys+6TlZP67lrFheO1eqVc3ih276Pfm6kVBw==
   dependencies:
     "@elastic/eui-theme-common" "10.0.0"
     "@elastic/prismjs-esql" "^4.13.0"
@@ -6908,6 +6908,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/evals-suite-threat-intel-enrichment@link:x-pack/solutions/security/packages/kbn-evals-suite-threat-intel-enrichment":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals-suite-workflows@link:src/platform/packages/shared/kbn-evals-suite-workflows":
   version "0.0.0"
   uid ""
@@ -7740,10 +7744,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-test-plugin@link:src/platform/test/plugin_functional/plugins/management_test_plugin":
-  version "0.0.0"
-  uid ""
-
 "@kbn/manifest@link:packages/kbn-manifest":
   version "0.0.0"
   uid ""
@@ -8033,6 +8033,10 @@
   uid ""
 
 "@kbn/observability-alert-details@link:x-pack/solutions/observability/packages/alert-details":
+  version "0.0.0"
+  uid ""
+
+"@kbn/observability-alerting-plugin@link:x-pack/solutions/observability/plugins/observability_alerting":
   version "0.0.0"
   uid ""
 
@@ -21373,9 +21377,9 @@ fast-string-width@^3.0.2:
     fast-string-truncated-width "^3.0.2"
 
 fast-uri@^3.0.1:
-  version "3.1.6"
-  resolved "https://registry.yarnpkg.com/fast-uri/-/fast-uri-3.1.6.tgz#bfdd308ef763f835fed059f3c6c925f708e33e3a"
-  integrity sha512-7Ical1vFEMr0onbVzEDIreM22I4khW+fzyQPwvAFWBp1iwdshSZRsL4jjRvPG9JP1uiqMHRto+YU6R2/CzDz5Q==
+  version "3.1.7"
+  resolved "https://registry.yarnpkg.com/fast-uri/-/fast-uri-3.1.7.tgz#743157d957f3cbb4c65310e033dc2ad4ad7dc60a"
+  integrity sha512-dOvZVzjdZdz7phd9v6jCbwxrBW3fK6n8Rc0CtdmM4bumzMnxywBYhuph6J819RRw/ku+rLbelwfMunktuzVVHg==
 
 fast-wrap-ansi@^0.2.0:
   version "0.2.0"
@@ -33402,15 +33406,15 @@ undici-types@~7.16.0:
   resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-7.16.0.tgz#ffccdff36aea4884cbfce9a750a0580224f58a46"
   integrity sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==
 
-undici@7.29.0, undici@^7.19.1:
-  version "7.29.0"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-7.29.0.tgz#ae0f6f62e06e057a9cbb7b2b5fde2bb74f791b8f"
-  integrity sha512-IDxfleLmmbSskfWSUATiN1nfn2rDuvnMOqb5CWR92iIfojA0Ud+ulOAAEQ57LPr9rWmsreUyf5lwyao+7GNNVw==
+undici@7.29.1, undici@^7.19.1:
+  version "7.29.1"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-7.29.1.tgz#7741c6fc8b3e1a48e30323833642bfbe841443ad"
+  integrity sha512-RYONW2MeafgYlkVOKYKkA/Ag7BmXqgIWCa8t1m0JcxrQg9pI9lEqRhAOruOBCbAohOa/gkCF+iPi9hrgvTzu6Q==
 
 undici@^6.21.1, undici@^6.21.2:
-  version "6.28.0"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-6.28.0.tgz#9f0e385744fef5021d6596c5bccd783f61193c1c"
-  integrity sha512-LIY910g9TI13YS95lrMFrs8Rm/u/irgHeTWoKCoteeJ04CUJ92eEfj0rVn+7VKMPBpUPiUoBKfhNyLI23EE/KA==
+  version "6.28.1"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-6.28.1.tgz#aa9d2c44aef3840bef80216f2a50f337543a3fbd"
+  integrity sha512-zWpdTVD54H48CIybL0rWQ3ukpb9d23wM7eH5RtfdmeP70cWHNjtfo7P4vZX+5CoDcO53J4Pu5uXp7lNfjc6DRA==
 
 unherit@^1.0.4:
   version "1.1.0"
