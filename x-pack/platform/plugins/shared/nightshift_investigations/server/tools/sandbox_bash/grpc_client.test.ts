@@ -14,15 +14,19 @@ interface MockServiceClient {
 }
 
 jest.mock('@grpc/grpc-js', () => {
-  const actual = jest.requireActual<typeof import('@grpc/grpc-js')>('@grpc/grpc-js');
-
   function MockSandboxServiceClient(this: MockServiceClient): void {
     this.close = mockClose;
   }
 
   return {
-    ...actual,
     makeClientConstructor: () => MockSandboxServiceClient,
+    credentials: {
+      createInsecure: () => ({}),
+      createSsl: () => ({}),
+    },
+    Metadata: class MockMetadata {
+      set(_key: string, _value: string) {}
+    },
   };
 });
 
