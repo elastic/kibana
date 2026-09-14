@@ -100,10 +100,9 @@ export class ESQLService extends FtrService {
     return rows[rowIndex];
   }
 
-  public async clickStarredItem(rowIndex = 0) {
-    const row = await this.getStarredItem(rowIndex);
-    const toggle = await row.findByTestSubject('ESQLEditor-history-starred-queries-run-button');
-    await toggle.click();
+  public async clickStarredItem() {
+    // Re-find via the stable test subject so the click survives the starred table's async re-render.
+    await this.testSubjects.click('ESQLEditor-history-starred-queries-run-button');
   }
 
   public async getHistoryItem(rowIndex = 0) {
