@@ -196,6 +196,42 @@ describe('getEmbeddableDisplayColumns', () => {
     ).toEqual({ columns: [], grid: undefined });
   });
 
+  it('uses STATS result columns for mixed FORK aggregations', () => {
+    expect(
+      getEmbeddableDisplayColumns({
+        autoApplyDiscoverColumnDefaults: true,
+        persistedColumns: [],
+        dataView: dataViewMock,
+        isEsql: true,
+        esql: 'FROM logs | FORK (WHERE x > 0) (STATS count = COUNT(*) BY status)',
+        columnsMeta: {
+          count: { type: 'number' },
+          status: { type: 'string' },
+        },
+      })
+    ).toEqual({ columns: ['count', 'status'], grid: undefined });
+  });
+
+  it('does not treat STATS mentioned in a string as an aggregating query', () => {
+    expect(
+      getEmbeddableDisplayColumns({
+        autoApplyDiscoverColumnDefaults: true,
+        persistedColumns: [],
+        dataView: dataViewMock,
+        isEsql: true,
+        esql: 'FROM logs | WHERE message == "STATS count"',
+        columnsMeta: {
+          a: { type: 'string' },
+          b: { type: 'string' },
+          c: { type: 'string' },
+          d: { type: 'string' },
+          e: { type: 'string' },
+          f: { type: 'string' },
+        },
+      })
+    ).toEqual({ columns: [], grid: undefined });
+  });
+
   it('keeps empty columns until ES|QL columnsMeta is available', () => {
     expect(
       getEmbeddableDisplayColumns({

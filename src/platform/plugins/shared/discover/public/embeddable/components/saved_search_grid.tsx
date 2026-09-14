@@ -177,6 +177,27 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     gridProps.rowHeightState,
   ]);
 
+  const discoverGrid = (
+    <DiscoverGrid
+      {...gridProps}
+      isPaginationEnabled={!gridProps.isPlainRecord}
+      totalHits={props.totalHitCount}
+      setExpandedDoc={props.setExpandedDoc}
+      expandedDoc={props.expandedDoc}
+      showMultiFields={props.services.uiSettings.get(SHOW_MULTIFIELDS)}
+      hideFilteringOnComputedColumns={true}
+      maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
+      renderDocumentView={enableDocumentViewer ? renderDocumentView : undefined}
+      renderCustomToolbar={renderCustomToolbarWithElements}
+      externalCustomRenderers={cellRenderers}
+      enableComparisonMode
+      showColumnTokens
+      showFullScreenButton={false}
+      className="unifiedDataTable"
+      css={{ '.unifiedDataTableToolbar': { paddingBlockStart: euiTheme.size.xs } }}
+    />
+  );
+
   return (
     <SavedSearchEmbeddableBase
       totalHitCount={undefined} // it will be rendered inside the custom grid toolbar instead
@@ -188,38 +209,34 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       {showToolbarSlotOutsideGrid ? (
         <EuiFlexGroup
           responsive={false}
-          gutterSize="s"
-          alignItems="center"
-          justifyContent="spaceBetween"
-          wrap={false}
-          css={{
-            padding: `${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.xs}`,
-          }}
+          direction="column"
+          gutterSize="none"
+          css={{ minHeight: 0, height: '100%' }}
         >
-          {toolbarSlotLeftSide ? <EuiFlexItem grow={false}>{toolbarSlotLeftSide}</EuiFlexItem> : null}
-          {saveToDashboardButton ? (
-            <EuiFlexItem grow={false}>{saveToDashboardButton}</EuiFlexItem>
-          ) : null}
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup
+              responsive={false}
+              gutterSize="s"
+              alignItems="center"
+              justifyContent="spaceBetween"
+              wrap={false}
+              css={{
+                padding: `${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.xs}`,
+              }}
+            >
+              {toolbarSlotLeftSide ? (
+                <EuiFlexItem grow={false}>{toolbarSlotLeftSide}</EuiFlexItem>
+              ) : null}
+              {saveToDashboardButton ? (
+                <EuiFlexItem grow={false}>{saveToDashboardButton}</EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem css={{ minHeight: 0 }}>{discoverGrid}</EuiFlexItem>
         </EuiFlexGroup>
-      ) : null}
-      <DiscoverGrid
-        {...gridProps}
-        isPaginationEnabled={!gridProps.isPlainRecord}
-        totalHits={props.totalHitCount}
-        setExpandedDoc={props.setExpandedDoc}
-        expandedDoc={props.expandedDoc}
-        showMultiFields={props.services.uiSettings.get(SHOW_MULTIFIELDS)}
-        hideFilteringOnComputedColumns={true}
-        maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
-        renderDocumentView={enableDocumentViewer ? renderDocumentView : undefined}
-        renderCustomToolbar={renderCustomToolbarWithElements}
-        externalCustomRenderers={cellRenderers}
-        enableComparisonMode
-        showColumnTokens
-        showFullScreenButton={false}
-        className="unifiedDataTable"
-        css={{ '.unifiedDataTableToolbar': { paddingBlockStart: euiTheme.size.xs } }}
-      />
+      ) : (
+        discoverGrid
+      )}
     </SavedSearchEmbeddableBase>
   );
 }

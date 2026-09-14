@@ -50,6 +50,7 @@ const navigateToWithEmbeddablePackages = jest.fn();
 
 let exposeApi = true;
 let capturedOnSave: ((args: Record<string, unknown>) => Promise<void>) | undefined;
+let capturedSaveModalDocumentInfo: { title?: string; description?: string } | undefined;
 const capturedSearchBarProps: Array<{
   appName?: string;
   disableSubscribingToGlobalDataServices?: boolean;
@@ -63,8 +64,10 @@ jest.mock('@kbn/embeddable-plugin/public', () => ({
 jest.mock('@kbn/presentation-util-plugin/public', () => ({
   SavedObjectSaveModalDashboard: (props: {
     onSave: (args: Record<string, unknown>) => Promise<void>;
+    documentInfo?: { title?: string; description?: string };
   }) => {
     capturedOnSave = props.onSave;
+    capturedSaveModalDocumentInfo = props.documentInfo;
     return <span data-test-subj="discoverAgentBuilderSaveModal" />;
   },
 }));
@@ -110,15 +113,17 @@ const SearchBar = (props: {
 const renderInline = ({
   registerActionButtons,
   canWriteDashboards = true,
+  data = sessionData,
 }: {
   registerActionButtons?: jest.Mock;
   canWriteDashboards?: boolean;
+  data?: DiscoverSessionApiData;
 } = {}) => {
   const navigate = jest.fn();
   render(
     <EuiProvider>
       <DiscoverSessionInline
-        data={sessionData}
+        data={data}
         unifiedSearch={{ ui: { SearchBar } } as unknown as UnifiedSearchPublicPluginStart}
         locator={{ navigate } as unknown as DiscoverAppLocator}
         embeddable={
@@ -164,6 +169,7 @@ describe('DiscoverSessionInline', () => {
     jest.clearAllMocks();
     exposeApi = true;
     capturedOnSave = undefined;
+    capturedSaveModalDocumentInfo = undefined;
     capturedSearchBarProps.length = 0;
     jest
       .mocked(EmbeddableRenderer)
@@ -274,7 +280,26 @@ describe('DiscoverSessionInline', () => {
 
     const saveButton = await screen.findByTestId('saveDiscoverTableToDashboardButton');
     expect(saveButton).toBeDisabled();
+    expect(saveButton).toHaveAttribute(
+      'aria-label',
+      'Save table to dashboard. You need dashboard write permissions to save tables to a dashboard.'
+    );
     expect(screen.queryByTestId('discoverAgentBuilderSaveModal')).not.toBeInTheDocument();
+  });
+
+  it('prefills the save modal with the session description', async () => {
+    const user = userEvent.setup();
+    renderInline({
+      data: { ...sessionData, description: 'Chat table description' },
+    });
+
+    await user.click(await screen.findByTestId('saveDiscoverTableToDashboardButton'));
+
+    expect(await screen.findByTestId('discoverAgentBuilderSaveModal')).toBeInTheDocument();
+    expect(capturedSaveModalDocumentInfo).toEqual({
+      title: 'Nginx errors',
+      description: 'Chat table description',
+    });
   });
 
   it('clears action buttons on unmount', () => {

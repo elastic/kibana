@@ -192,5 +192,53 @@ describe('discover session inline state', () => {
         ],
       });
     });
+
+    it('preserves the live description when the modal omits one', () => {
+      const liveState: DiscoverSessionEmbeddableByValueState = {
+        title: 'Original',
+        description: 'old',
+        tabs: [
+          {
+            data_source: { type: AS_CODE_ESQL_DATA_SOURCE_TYPE, query: 'FROM logs-*' },
+            column_order: ['@timestamp'],
+            sort: [],
+          },
+        ],
+      };
+
+      expect(
+        buildDiscoverSessionDashboardSaveState({
+          liveState,
+          title: 'Saved table',
+        })
+      ).toEqual(
+        expect.objectContaining({
+          title: 'Saved table',
+          description: 'old',
+        })
+      );
+    });
+
+    it('allows clearing the description with an empty string', () => {
+      const liveState: DiscoverSessionEmbeddableByValueState = {
+        title: 'Original',
+        description: 'old',
+        tabs: [
+          {
+            data_source: { type: AS_CODE_ESQL_DATA_SOURCE_TYPE, query: 'FROM logs-*' },
+            column_order: ['@timestamp'],
+            sort: [],
+          },
+        ],
+      };
+
+      expect(
+        buildDiscoverSessionDashboardSaveState({
+          liveState,
+          title: 'Saved table',
+          description: '',
+        }).description
+      ).toBe('');
+    });
   });
 });

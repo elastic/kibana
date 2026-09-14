@@ -61,6 +61,14 @@ const dashboardWriteControlsDisabledReason = i18n.translate(
   }
 );
 
+const saveTableToDashboardDisabledAriaLabel = i18n.translate(
+  'discover.agentBuilder.saveTableToDashboardDisabledAriaLabel',
+  {
+    defaultMessage:
+      'Save table to dashboard. You need dashboard write permissions to save tables to a dashboard.',
+  }
+);
+
 const saveModalObjectType = i18n.translate('discover.agentBuilder.saveToDashboardObjectType', {
   defaultMessage: 'Discover session',
 });
@@ -151,7 +159,11 @@ export const DiscoverSessionInline = ({
       >
         <EuiButtonIcon
           data-test-subj="saveDiscoverTableToDashboardButton"
-          aria-label={saveTableToDashboardButtonLabel}
+          aria-label={
+            canWriteDashboards
+              ? saveTableToDashboardButtonLabel
+              : saveTableToDashboardDisabledAriaLabel
+          }
           color="text"
           size="s"
           iconSize="m"
@@ -247,7 +259,7 @@ export const DiscoverSessionInline = ({
       {isSaveModalOpen && (
         <SavedObjectSaveModalDashboard
           objectType={saveModalObjectType}
-          documentInfo={{ title: data.title ?? '' }}
+          documentInfo={{ title: data.title ?? '', description: data.description }}
           canSaveByReference={false}
           onClose={closeSaveModal}
           onSave={onSaveToDashboard}

@@ -132,7 +132,7 @@ export const buildDiscoverSessionDashboardSaveState = ({
   return {
     ...rest,
     title,
-    description,
+    description: description ?? liveState.description,
     tabs: [
       {
         ...tab,
