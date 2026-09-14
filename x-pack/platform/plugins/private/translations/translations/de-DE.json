@@ -42229,7 +42229,6 @@
     "xpack.securitySolution.containers.detectionEngine.bootstrapPrebuiltRulesPackageFailure": "Das vorgefertigte Regelpaket konnte nicht installiert werden",
     "xpack.securitySolution.containers.detectionEngine.ruleManagementFiltersFetchFailure": "Regelfilter konnte nicht abgerufen werden",
     "xpack.securitySolution.containers.detectionEngine.rulesAndTimelines": "Regeln und Zeitpläne konnten nicht abgerufen werden",
-    "xpack.securitySolution.contextMenuItemByRouter.viewDetails": "Details anzeigen",
     "xpack.securitySolution.coverageOverviewDashboard.collapseCellsButton": "Zellen einklappen",
     "xpack.securitySolution.coverageOverviewDashboard.coveredMitreSubtechniques": "Untertechniken {enabledSubtechniques}/{totalSubtechniques}",
     "xpack.securitySolution.coverageOverviewDashboard.coveredMitreTechniques": "{enabledTechniques}/{totalTechniques} Techniken",
