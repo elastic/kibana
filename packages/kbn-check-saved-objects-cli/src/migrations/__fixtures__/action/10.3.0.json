@@ -1,30 +1,112 @@
 {
   "10.2.0": [
     {
-      "TODO": "Please create one or more sample objects with properties that reflect real '[object Object]' objects",
-      "NOTE": "That each modelVersion has a corresponding fixture file, which defines the previous and current versions.",
-      "NOTE2": "These fixtures define the before and after state, and are used for both upgrade and rollback testing.",
-      "HINT": "You can use the template below and create sample objects for 10.2.0 and 10.3.0 versions.",
-      "HINT2": "Alternatively, you can copy the contents from older fixture files (if they exist) and adapt them accordingly.",
-      "IMPORTANT": "The current version fixtures (below) are defining how objects from the previous version fixtures (this array) would look like AFTER upgrading.",
-      "IMPORTANT2": "They are NOT defining random sample objects with properties that are valid for the current model version."
+      "name": "Webhook Connector with authType",
+      "actionTypeId": ".webhook",
+      "isMissingSecrets": false,
+      "config": {
+        "url": "https://example.com/webhook",
+        "method": "post",
+        "authType": "basic"
+      },
+      "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
+      "isPreconfigured": false,
+      "isSystemAction": false,
+      "authMode": "shared"
+    },
+    {
+      "name": "ServiceNow Connector",
+      "actionTypeId": ".servicenow",
+      "isMissingSecrets": false,
+      "config": {
+        "apiUrl": "https://instance.service-now.com",
+        "authType": "apiKey",
+        "usesTableApi": false
+      },
+      "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
+      "isPreconfigured": false,
+      "isSystemAction": false,
+      "authMode": "shared"
+    },
+    {
+      "name": "Slack Connector without authType",
+      "actionTypeId": ".slack",
+      "isMissingSecrets": false,
+      "config": {
+        "webhookUrl": "https://hooks.slack.com/services/xxx"
+      },
+      "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
+      "isPreconfigured": false,
+      "isSystemAction": false,
+      "authMode": "shared"
+    },
+    {
+      "name": "Email Connector",
+      "actionTypeId": ".email",
+      "isMissingSecrets": false,
+      "config": {
+        "service": "gmail",
+        "from": "test@example.com"
+      },
+      "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
+      "isPreconfigured": false,
+      "isSystemAction": false,
+      "authMode": "shared"
     }
   ],
   "10.3.0": [
     {
-      "actionTypeId": "string",
-      "name": "string",
-      "isMissingSecrets": "boolean",
-      "config": "record?",
-      "secrets": "string?",
-      "isPreconfigured": "boolean?",
-      "isSystemAction": "boolean?",
-      "id": "string?",
-      "isDeprecated": "boolean?",
-      "authMode": "shared?|per-user?",
-      "apiKey": "string?|null",
-      "uiamApiKey": "string?|null",
-      "uiamApiKeyExternal": "boolean?"
+      "name": "Webhook Connector with authType",
+      "actionTypeId": ".webhook",
+      "isMissingSecrets": false,
+      "config": {
+        "url": "https://example.com/webhook",
+        "method": "post",
+        "authType": "basic"
+      },
+      "secrets": { "$match": "string" },
+      "isPreconfigured": false,
+      "isSystemAction": false,
+      "authMode": "shared"
+    },
+    {
+      "name": "ServiceNow Connector",
+      "actionTypeId": ".servicenow",
+      "isMissingSecrets": false,
+      "config": {
+        "apiUrl": "https://instance.service-now.com",
+        "authType": "apiKey",
+        "usesTableApi": false
+      },
+      "secrets": { "$match": "string" },
+      "isPreconfigured": false,
+      "isSystemAction": false,
+      "authMode": "shared"
+    },
+    {
+      "name": "Slack Connector without authType",
+      "actionTypeId": ".slack",
+      "isMissingSecrets": false,
+      "config": {
+        "webhookUrl": "https://hooks.slack.com/services/xxx"
+      },
+      "secrets": { "$match": "string" },
+      "isPreconfigured": false,
+      "isSystemAction": false,
+      "authMode": "shared"
+    },
+    {
+      "name": "Email Connector",
+      "actionTypeId": ".email",
+      "isMissingSecrets": false,
+      "config": {
+        "service": "gmail",
+        "from": "test@example.com"
+      },
+      "secrets": { "$match": "string" },
+      "isPreconfigured": false,
+      "isSystemAction": false,
+      "authMode": "shared"
     }
   ]
 }
