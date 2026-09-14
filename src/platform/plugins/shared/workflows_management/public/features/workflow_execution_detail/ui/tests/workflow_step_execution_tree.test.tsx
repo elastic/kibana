@@ -1716,10 +1716,126 @@ describe('WorkflowStepExecutionTree', () => {
       await user.click(iterationRow!);
       expect(mockOnStepExecutionClick).toHaveBeenCalledWith('foreach-iteration:loop:0');
     });
+
+    it('expands a selected non-failed iteration so nested steps are visible', () => {
+      isTerminalStatus.mockReturnValue(true);
+      buildStepExecutionsTree.mockReturnValue([
+        {
+          stepExecutionId: 'foreach-exec',
+          stepId: 'loop',
+          stepType: 'foreach',
+          executionIndex: 0,
+          children: [
+            makeIteration(0, 'step-0'),
+            makeIteration(1, 'step-1'),
+            makeIteration(2, 'step-2'),
+          ],
+        },
+      ]);
+
+      render(
+        <TestWrapper>
+          <WorkflowStepExecutionTree
+            execution={createMockExecution({
+              status: ExecutionStatus.COMPLETED,
+              stepExecutions: [
+                createMockStepExecution({
+                  id: 'foreach-exec',
+                  stepId: 'loop',
+                  stepType: 'foreach',
+                }),
+                createMockStepExecution({ id: 'step-0', stepId: 'log', stepType: 'console' }),
+                createMockStepExecution({ id: 'step-1', stepId: 'log', stepType: 'console' }),
+                createMockStepExecution({ id: 'step-2', stepId: 'log', stepType: 'console' }),
+              ],
+            })}
+            definition={createMockDefinition()}
+            error={null}
+            onStepExecutionClick={mockOnStepExecutionClick}
+            selectedId="foreach-iteration:loop:1"
+          />
+        </TestWrapper>
+      );
+
+      const selectedRow = screen
+        .getByText('Iteration #1')
+        .closest('[data-test-subj="step-execution-tree-item-label"]');
+      expect(selectedRow).toHaveAttribute('data-is-expanded', 'true');
+      expect(selectedRow).toHaveAttribute('data-selected', 'true');
+
+      const collapsedPeer = screen
+        .getByText('Iteration #0')
+        .closest('[data-test-subj="step-execution-tree-item-label"]');
+      expect(collapsedPeer).toHaveAttribute('data-is-expanded', 'false');
+
+      const selectedNode = screen
+        .getByText('Iteration #1')
+        .closest('[data-test-subj="workflowStepTreeNode"]');
+      expect(selectedNode?.querySelector('[data-step-id="log"]')).not.toBeNull();
+    });
+
+    it('opens a collapsed gap when the selected iteration index is inside it', () => {
+      isTerminalStatus.mockReturnValue(true);
+      isDangerousStatus.mockImplementation(
+        (status: ExecutionStatus) => status === ExecutionStatus.FAILED
+      );
+      const children = Array.from({ length: 6 }, (_, i) => makeIteration(i, `step-${i}`));
+      buildStepExecutionsTree.mockReturnValue([
+        {
+          stepExecutionId: 'foreach-exec',
+          stepId: 'loop',
+          stepType: 'foreach',
+          executionIndex: 0,
+          children,
+        },
+      ]);
+
+      render(
+        <TestWrapper>
+          <WorkflowStepExecutionTree
+            execution={createMockExecution({
+              status: ExecutionStatus.COMPLETED,
+              stepExecutions: [
+                createMockStepExecution({
+                  id: 'foreach-exec',
+                  stepId: 'loop',
+                  stepType: 'foreach',
+                }),
+                ...Array.from({ length: 6 }, (_, i) =>
+                  createMockStepExecution({
+                    id: `step-${i}`,
+                    stepId: 'log',
+                    stepType: 'console',
+                    status: i === 2 ? ExecutionStatus.FAILED : ExecutionStatus.COMPLETED,
+                    executionTimeMs: 10,
+                  })
+                ),
+              ],
+            })}
+            definition={createMockDefinition()}
+            error={null}
+            onStepExecutionClick={mockOnStepExecutionClick}
+            selectedId="foreach-iteration:loop:0"
+          />
+        </TestWrapper>
+      );
+
+      const gaps = screen.getAllByTestId('workflowStepExecutionTreeIterationGap');
+      expect(gaps[0]).toHaveAttribute('data-gap-from', '0');
+      expect(gaps[0]).toHaveAttribute('data-gap-to', '1');
+      expect(gaps[0]).toHaveAttribute('data-gap-expanded', 'true');
+      expect(gaps[1]).toHaveAttribute('data-gap-expanded', 'false');
+
+      const selectedRow = screen
+        .getByText('Iteration #0')
+        .closest('[data-test-subj="step-execution-tree-item-label"]');
+      expect(selectedRow).toHaveAttribute('data-is-expanded', 'true');
+      expect(screen.queryByText('Iteration #3')).not.toBeInTheDocument();
+    });
   });
 
-  describe('definition-merged Not run rows', () => {
-    it('ghosts subsequent definition steps after a halt, in definition order', () => {
+  describe('finished runs do not invent definition ghosts', () => {
+    it('does not add Not run rows for definition steps that never executed', () => {
       isTerminalStatus.mockReturnValue(true);
       isDangerousStatus.mockImplementation((s) => s === ExecutionStatus.FAILED);
       buildStepExecutionsTree.mockReturnValue([
@@ -1807,22 +1923,12 @@ describe('WorkflowStepExecutionTree', () => {
       );
 
       const names = screen.getAllByTestId('workflowStepName').map((el) => el.textContent);
-      expect(names).toEqual([
-        'start',
-        'triage_overview',
-        'Attempt #1',
-        'Attempt #2',
-        'process_alerts',
-        'final_summary',
-        'done',
-      ]);
-      expect(screen.getAllByText('Not run')).toHaveLength(3);
-      const foreachRow = screen.getByText('process_alerts').closest('[data-is-expandable]');
-      expect(foreachRow).toHaveAttribute('data-is-expandable', 'false');
-      expect(foreachRow).toHaveAttribute('data-status', ExecutionStatus.SKIPPED);
+      expect(names).toEqual(['start', 'triage_overview', 'Attempt #1', 'Attempt #2']);
+      expect(screen.queryByText('Not run')).not.toBeInTheDocument();
+      expect(screen.queryByText('process_alerts')).not.toBeInTheDocument();
     });
 
-    it('does not ghost later steps that actually ran (on-failure: continue)', () => {
+    it('keeps later steps that actually ran (on-failure: continue)', () => {
       isTerminalStatus.mockReturnValue(true);
       isDangerousStatus.mockImplementation((s) => s === ExecutionStatus.FAILED);
       buildStepExecutionsTree.mockReturnValue([
@@ -1881,11 +1987,8 @@ describe('WorkflowStepExecutionTree', () => {
         'data-status',
         ExecutionStatus.COMPLETED
       );
-      expect(screen.getByText('c').closest('[data-status]')).toHaveAttribute(
-        'data-status',
-        ExecutionStatus.SKIPPED
-      );
-      expect(screen.getAllByText('Not run')).toHaveLength(1);
+      expect(screen.queryByText('c')).not.toBeInTheDocument();
+      expect(screen.queryByText('Not run')).not.toBeInTheDocument();
     });
 
     it('renders zero Not run rows for a fully successful execution', () => {

@@ -1533,4 +1533,50 @@ describe('injectChildWorkflowSteps', () => {
     expect(result[0].children[0].stepId).toBe('real_step');
     expect(childStepExecutions).toHaveLength(1);
   });
+
+  it('lifts parent siblings that were nested under workflow.execute', () => {
+    const tree = [
+      makeTreeNode({
+        stepId: 'run_child',
+        stepType: 'workflow.execute',
+        stepExecutionId: 'wf-exec-step-1',
+        children: [
+          makeTreeNode({
+            stepId: 'after_child',
+            stepType: 'console',
+            stepExecutionId: 'after-id',
+          }),
+        ],
+      }),
+    ];
+
+    const childMap: ChildWorkflowExecutionsMap = new Map([
+      [
+        'wf-exec-step-1',
+        {
+          parentStepExecutionId: 'wf-exec-step-1',
+          workflowId: 'child-wf',
+          workflowName: 'Child',
+          executionId: 'child-exec-1',
+          status: ExecutionStatus.COMPLETED,
+          stepExecutions: [
+            createStepExecution({
+              id: 'child-step-1',
+              stepId: 'lookup_host',
+              stepType: 'data.set',
+              status: ExecutionStatus.COMPLETED,
+            }),
+          ],
+        },
+      ],
+    ]);
+
+    const { tree: result } = injectChildWorkflowSteps(tree, childMap, false);
+
+    expect(result.map((node) => node.stepId)).toEqual(['run_child', 'after_child']);
+    expect(result[0].children.map((child) => child.stepId)).toEqual(['lookup_host']);
+    expect(result[0].children[0].isChildWorkflowStep).toBe(true);
+    expect(result[1].stepId).toBe('after_child');
+    expect(result[1].isChildWorkflowStep).toBeUndefined();
+  });
 });
