@@ -22187,7 +22187,6 @@
     "xpack.fleet.debug.agentPolicyDebugger.selectLabel": "Sélectionner une politique d'agent",
     "xpack.fleet.debug.agentPolicyDebugger.title": "Débogueur de politique d'agent",
     "xpack.fleet.debug.agentPolicyDebugger.viewAgentPolicyLink": "Afficher la politique d'agent dans l’interface de Fleet",
-    "xpack.fleet.debug.cloudOnboardingDeploymentDebugger.title": "Débogueur du déploiement pour l'intégration au cloud",
     "xpack.fleet.debug.dangerZone.description": "Cette page fournit une interface pour traiter directement les problèmes de données sous-jacentes de Fleet et diagnostiquer les problèmes. Notez que ces outils de débogage peuvent être {strongDestructive} par nature et entraîner une {strongLossOfData}. Agissez avec prudence.",
     "xpack.fleet.debug.dangerZone.destructive": "destructif",
     "xpack.fleet.debug.dangerZone.lossOfData": "perte de données",

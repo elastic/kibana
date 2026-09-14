@@ -13,7 +13,7 @@ import {
   getArtifactBuildTriggers,
   getArtifactSnapshotPipelineTriggers,
   getArtifactStagingPipelineTriggers,
-} from './pipeline';
+} from './pipeline.ts';
 
 const versionsFile = getVersionsFile();
 
