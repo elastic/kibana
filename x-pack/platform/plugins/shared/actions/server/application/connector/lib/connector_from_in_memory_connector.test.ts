@@ -6,6 +6,7 @@
  */
 
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
+import type { ActionTypeRegistry } from '../../../action_type_registry';
 import { createMockInMemoryConnector } from '../mocks';
 import { connectorFromInMemoryConnector } from './connector_from_in_memory_connector';
 
@@ -18,7 +19,7 @@ describe('connectorFromInMemoryConnector', () => {
         config: {},
         secrets: { authType: 'relay' },
       }),
-      actionTypeRegistry: actionTypeRegistryMock.create(),
+      actionTypeRegistry: actionTypeRegistryMock.create() as unknown as ActionTypeRegistry,
     });
 
     expect(connector.authType).toBe('relay');
