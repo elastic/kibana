@@ -20,18 +20,18 @@ export const RULE_DETAILS_ALERTS_TAB: RuleDetailsTabId = 'alerts';
 export const RULE_DETAILS_HISTORY_TAB: RuleDetailsTabId = 'history';
 
 /**
- * Identifies the Kibana app and in-app path prefix for v1 rule locators so the
- * same locator resolves to different URL trees depending on which app mounts
- * the classic rules page (Stack Management, Observability, etc.).
+ * Identifies the Kibana app and in-app path prefix so the same locator
+ * resolves to different URL trees depending on which app mounts the page
+ * (Stack Management, Observability, etc.).
  *
  * `pathPrefix` is an in-app path, not `core.http.basePath`.
  */
-export interface RuleLocatorHost extends SerializableRecord {
+export interface LocatorHost extends SerializableRecord {
   app: string;
   pathPrefix: string;
 }
 
-export const STACK_MANAGEMENT_RULES_HOST: RuleLocatorHost = {
+export const STACK_MANAGEMENT_RULES_HOST: LocatorHost = {
   app: 'management',
   pathPrefix: `/${TRIGGERS_ACTIONS_MANAGEMENT_PATH}`,
 };
@@ -43,7 +43,7 @@ export interface RuleDetailsLocatorParams extends SerializableRecord {
   rangeTo?: string;
   kuery?: string;
   controlConfigs?: SerializableRecord[];
-  host?: RuleLocatorHost;
+  host?: LocatorHost;
 }
 
 export interface RulesLocatorParams extends SerializableRecord {
@@ -52,5 +52,5 @@ export interface RulesLocatorParams extends SerializableRecord {
   search?: string;
   status?: RuleStatus[];
   type?: string[];
-  host?: RuleLocatorHost;
+  host?: LocatorHost;
 }
