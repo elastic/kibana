@@ -69,7 +69,7 @@ describe('useWaitingStepResume', () => {
         },
       },
       isLoading: false,
-    } as ReturnType<typeof useStepExecution>);
+    } as unknown as ReturnType<typeof useStepExecution>);
 
     const execution = createMockWorkflowExecutionDto({
       status: ExecutionStatus.WAITING_FOR_INPUT,

@@ -117,7 +117,16 @@ jest.mock('../../../entities/workflows/model/use_workflow_execution_polling', ()
   useWorkflowExecutionPolling: () => mockPollingResult,
 }));
 
-const mockUseStepExecution = jest.fn(() => ({
+type UseStepExecutionParams = Parameters<
+  typeof import('../model/use_step_execution').useStepExecution
+>;
+/** Subset of useQuery result; tests override via mockReturnValue */
+interface UseStepExecutionQueryStub {
+  data: unknown;
+  isLoading: boolean;
+}
+
+const mockUseStepExecution = jest.fn<UseStepExecutionQueryStub, UseStepExecutionParams>(() => ({
   data: {
     id: 'step-wait',
     stepId: 'request_approval',
@@ -129,7 +138,7 @@ const mockUseStepExecution = jest.fn(() => ({
 }));
 
 jest.mock('../model/use_step_execution', () => ({
-  useStepExecution: (...args: unknown[]) => mockUseStepExecution(...args),
+  useStepExecution: (...args: UseStepExecutionParams) => mockUseStepExecution(...args),
 }));
 
 describe('WorkflowExecutionFlyout resume', () => {
