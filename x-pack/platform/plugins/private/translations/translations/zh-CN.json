@@ -42362,7 +42362,6 @@
     "xpack.securitySolution.containers.detectionEngine.bootstrapPrebuiltRulesPackageFailure": "未能安装预构建规则包",
     "xpack.securitySolution.containers.detectionEngine.ruleManagementFiltersFetchFailure": "无法提取规则筛选",
     "xpack.securitySolution.containers.detectionEngine.rulesAndTimelines": "无法提取规则和时间线",
-    "xpack.securitySolution.contextMenuItemByRouter.viewDetails": "查看详情",
     "xpack.securitySolution.controlColumns.checkboxForRowAriaLabel": "告警或事件第 {ariaRowindex} 行的 {checked, select, true {checked} other {已取消选中}}复选框，其列为 {columnValues}",
     "xpack.securitySolution.coverageOverviewDashboard.collapseCellsButton": "折叠单元格",
     "xpack.securitySolution.coverageOverviewDashboard.coveredMitreSubtechniques": "子技术 {enabledSubtechniques}/{totalSubtechniques}",
