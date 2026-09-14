@@ -68,6 +68,9 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
     packageName: packageInfo.name,
   });
   const cloudConnectorsCount = cloudConnectors?.length;
+  const templateSha =
+    cloudConnectors?.find(({ id }) => id === newPolicy.cloud_connector_id)?.templateSha ??
+    undefined;
   const [selectedTabId, setSelectedTabId] = useState<string>(TABS.NEW_CONNECTION);
 
   useEffect(() => {
@@ -146,6 +149,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
             setCredentials={updatePolicyWithNewCredentials}
             accountType={accountType}
             iacTemplateUrl={iacTemplateUrl}
+            templateSha={templateSha}
           />
         </>
       ),
@@ -205,6 +209,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
           setCredentials={updatePolicyWithNewCredentials}
           accountType={accountType}
           iacTemplateUrl={iacTemplateUrl}
+          templateSha={templateSha}
         />
       )}
       {reusableFeatureEnabled && (
