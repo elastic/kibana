@@ -1,5 +1,5 @@
 {
-  "sha1": "76dcbdff226bb15a7560e02c9fea75b89f4c5c5d",
+  "sha1": "4fee04a41c2367d9c02fc70592ea04a5cc3dc085",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -999,6 +999,58 @@
       }
     },
     {
+      "id": "2ca770c721a7347-905a30533941939",
+      "title": "RunTestManuallyPermissions read-only role cannot run tests (403)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/run_test_manually.spec.ts",
+        "line": 155,
+        "column": 27
+      }
+    },
+    {
+      "id": "2ca770c721a7347-49991afc3c99bf6",
+      "title": "RunTestManuallyPermissions user with no Synthetics access cannot run tests (403)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/run_test_manually.spec.ts",
+        "line": 162,
+        "column": 27
+      }
+    },
+    {
+      "id": "2ca770c721a7347-bcdafea1617e095",
+      "title": "RunTestManuallyPermissions read + can_run_test_manually role is authorized to run tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/run_test_manually.spec.ts",
+        "line": 167,
+        "column": 27
+      }
+    },
+    {
+      "id": "2ca770c721a7347-43eb8e8308d5839",
+      "title": "RunTestManuallyPermissions base `all` role is still authorized to run tests (non-breaking)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/run_test_manually.spec.ts",
+        "line": 173,
+        "column": 27
+      }
+    },
+    {
       "id": "0748b0e208605b1-ceb30d1a52ecd1f",
       "title": "SyntheticsSuggestions returns the suggestions",
       "expectedStatus": "passed",
@@ -1035,8 +1087,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/synthetics_api_security.spec.ts",
-        "line": 142,
-        "column": 4
+        "line": 143,
+        "column": 12
       }
     },
     {
@@ -1048,8 +1100,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/synthetics_api_security.spec.ts",
-        "line": 153,
-        "column": 7
+        "line": 161,
+        "column": 17
       }
     },
     {

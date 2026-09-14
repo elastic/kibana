@@ -1,5 +1,5 @@
 {
-  "sha1": "e9612c1b8893d6d83dd0ec81b174db4b75d376ac",
+  "sha1": "98a9c04998eeec00ce5382fa3f8cd7e03b17cf28",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -491,6 +491,48 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
         "line": 85,
+        "column": 5
+      }
+    },
+    {
+      "id": "7f9cbf00b4a7ca7-c1d4903f431c19f",
+      "title": "Onboarding SO persistence Deploy fires SO POST with connector and provider, then navigates to detect-and-review",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_so_persist.spec.ts",
+        "line": 77,
+        "column": 22
+      }
+    },
+    {
+      "id": "7f9cbf00b4a7ca7-2e1b1d68c38e79e",
+      "title": "Onboarding SO persistence ?deploymentId= resume lands on detect-and-review and keeps the param in the URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_so_persist.spec.ts",
+        "line": 145,
+        "column": 9
+      }
+    },
+    {
+      "id": "7f9cbf00b4a7ca7-3af4512cd2bfc72",
+      "title": "Onboarding SO persistence static-keys ?deploymentId= resume renders StaticKeysReplaceView",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_so_persist.spec.ts",
+        "line": 180,
         "column": 5
       }
     },
