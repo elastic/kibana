@@ -70,6 +70,7 @@ export interface RouteDefinitionParams {
   getAnonymousAccessService: () => AnonymousAccessServiceStart;
   /** `null` when service accounts are not enabled for this deployment. */
   getServiceAccountsService: () => ServiceAccountsServiceStart | null;
+  serverlessOrganizationId: string | undefined;
   serverlessProjectId: string | undefined;
   serverlessProjectType: KibanaSolution | undefined;
   analyticsService: AnalyticsServiceSetup;

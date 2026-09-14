@@ -280,6 +280,7 @@ describe('workflow:scheduled task runner', () => {
     mockGetWorkflow.mockResolvedValue({
       id: workflowId,
       yaml: 'name: Bound scheduled workflow',
+      enabled: true,
       definition: {
         name: 'Bound scheduled workflow',
         enabled: true,

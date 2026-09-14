@@ -287,8 +287,17 @@ describe('Security Plugin', () => {
         try {
           plugin.setup(mockCoreSetup, mockSetupDependencies);
           plugin.start(mockCoreStart, mockStartDependencies);
-          expect(start).toHaveBeenCalledWith(
-            expect.objectContaining({ cloudProjectContext: expected })
+          const context = start.mock.calls[0][0];
+          expect({
+            organizationId: context.organizationId,
+            projectId: context.projectId,
+            projectType: context.projectType,
+          }).toEqual(
+            expected ?? {
+              organizationId: undefined,
+              projectId: undefined,
+              projectType: undefined,
+            }
           );
         } finally {
           start.mockRestore();

@@ -6,8 +6,13 @@
  */
 
 import type { BuildFlavor } from '@kbn/config';
-import type { AuthenticatedUser, KibanaRequest, Logger, SavedObjectsServiceStart } from '@kbn/core/server';
-import type { UiamOAuthProjectType } from '@kbn/core-security-server';
+import type {
+  AuthenticatedUser,
+  KibanaRequest,
+  Logger,
+  SavedObjectsServiceStart,
+} from '@kbn/core/server';
+import type { UiamProjectType } from '@kbn/core-security-server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 
@@ -32,7 +37,7 @@ export interface ServiceAccountsServiceStartParams {
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
   organizationId?: string;
   projectId?: string;
-  projectType?: UiamOAuthProjectType;
+  projectType?: UiamProjectType;
   buildFlavor: BuildFlavor;
   savedObjects: SavedObjectsServiceStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;

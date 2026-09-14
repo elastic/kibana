@@ -1,10 +1,23 @@
 {
-  "sha1": "f80a54bacc9a29119b3a85bffb510fd60ffb2aef",
+  "sha1": "510d9c96117561e7b047d7c2d3ecfea991f6f68e",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "17cb36a7000113d-c8e68da9353bd17",
+      "title": "[NON-MKI] Workflow execution with an organization-level UIAM API key grants a Task Manager key and completes the workflow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_uiam_local/api/tests/org_api_key_workflow_execution.spec.ts",
+        "line": 40,
+        "column": 27
+      }
+    },
     {
       "id": "4752a5ed7356cc8-34a2eddf213e182",
       "title": "[NON-MKI] Agent Builder workflow service-account execution runs the agent as the bound account and probes conversation access",

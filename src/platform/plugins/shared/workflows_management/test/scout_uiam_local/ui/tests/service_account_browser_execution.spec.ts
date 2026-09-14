@@ -126,11 +126,12 @@ test.describe(
           } effectiveIdentity=${execution.effectiveIdentity}`
         );
       } finally {
-        if (workflowId) {
-          await cleanupWorkflow(workflows, workflowId);
+        const keepAccounts = process.env.SA_KEEP_VALIDATION_DATA === 'true';
+        if (!keepAccounts) {
+          if (workflowId) await cleanupWorkflow(workflows, workflowId);
+          await esClient.indices.delete({ index: indexName, ignore_unavailable: true });
         }
-        await esClient.indices.delete({ index: indexName, ignore_unavailable: true });
-        await uiam.cleanup();
+        await uiam.cleanup({ keepAccounts });
       }
     });
 
@@ -191,11 +192,12 @@ test.describe(
           `RESULT execution_identity_ui=passed execution=${executionId} serviceAccount=${serviceAccount.name} (${serviceAccount.id})`
         );
       } finally {
-        if (workflowId) {
-          await cleanupWorkflow(workflows, workflowId);
+        const keepAccounts = process.env.SA_KEEP_VALIDATION_DATA === 'true';
+        if (!keepAccounts) {
+          if (workflowId) await cleanupWorkflow(workflows, workflowId);
+          await esClient.indices.delete({ index: indexName, ignore_unavailable: true });
         }
-        await esClient.indices.delete({ index: indexName, ignore_unavailable: true });
-        await uiam.cleanup();
+        await uiam.cleanup({ keepAccounts });
       }
     });
   }

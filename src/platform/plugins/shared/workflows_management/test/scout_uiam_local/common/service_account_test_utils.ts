@@ -28,7 +28,7 @@ export interface TestServiceAccount {
 
 export interface UiamServiceAccountContext {
   createServiceAccount(name: string): Promise<TestServiceAccount>;
-  cleanup(): Promise<void>;
+  cleanup(options?: { keepAccounts?: boolean }): Promise<void>;
 }
 
 interface CreateUiamServiceAccountContextOptions {
@@ -118,6 +118,7 @@ export const createUiamServiceAccountContext = async ({
         },
         body: JSON.stringify({
           name,
+          organization_id: organizationId,
           type: 'project',
           role_assignments: {
             limit: {
@@ -145,9 +146,9 @@ export const createUiamServiceAccountContext = async ({
       createdServiceAccountIds.push(body.id);
       return { id: body.id, name };
     },
-    cleanup: async (): Promise<void> => {
+    cleanup: async ({ keepAccounts = false } = {}): Promise<void> => {
       try {
-        for (const serviceAccountId of createdServiceAccountIds.reverse()) {
+        for (const serviceAccountId of keepAccounts ? [] : createdServiceAccountIds.reverse()) {
           const response = await fetch(
             `${MOCK_IDP_UIAM_SERVICE_URL}/uiam/api/v1/service-accounts/${serviceAccountId}`,
             {

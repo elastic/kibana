@@ -31,7 +31,11 @@ describe('ServiceAccountsService', () => {
     encryptedSavedObjects.getClient.mockReturnValue(encryptedClient);
 
     return {
-      config: createConfig(ConfigSchema.validate(config, { serverless: config.serviceAccounts !== undefined }), loggingSystemMock.createLogger(), { isTLSEnabled: false }),
+      config: createConfig(
+        ConfigSchema.validate(config, { serverless: config.serviceAccounts !== undefined }),
+        loggingSystemMock.createLogger(),
+        { isTLSEnabled: false }
+      ),
       license,
       uiam,
       checkPrivilegesWithRequest: jest.fn(),

@@ -425,6 +425,7 @@ export class SecurityPlugin
       getAnonymousAccessService: this.getAnonymousAccess,
       getUserProfileService: this.getUserProfileService,
       getServiceAccountsService: this.getServiceAccountsService,
+      serverlessOrganizationId: this.cloudProjectContext?.organizationId,
       serverlessProjectId: cloud?.serverless?.projectId,
       serverlessProjectType: cloud?.serverless?.projectType,
       analyticsService: this.analyticsService.setup({ analytics: core.analytics }),

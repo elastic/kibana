@@ -1002,8 +1002,8 @@ export class WorkflowsExecutionEnginePlugin
                 try {
                   const run = (executionRequest: KibanaRequest) =>
                     runWorkflow({
-                    workflowExecutionRepository,
-                    stepExecutionRepository,
+                      workflowExecutionRepository,
+                      stepExecutionRepository,
                       workflowRunId: workflowExecution.id,
                       spaceId: workflowExecution.spaceId,
                       signal: taskAbortController.signal,

@@ -1,8 +1,7 @@
 {
   "sha1": "74b442da1e0d0b7c37ebb0aa9aa2dfe14c1e86f3",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -29,8 +28,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_uiam_local/ui/tests/service_account_browser_execution.spec.ts",
-        "line": 121,
-        "column": 16
+        "line": 128,
+        "column": 17
       }
     }
   ]

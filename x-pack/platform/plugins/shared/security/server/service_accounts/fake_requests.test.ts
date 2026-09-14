@@ -328,7 +328,7 @@ describe('ServiceAccountFakeRequests', () => {
       expect(mintToken).not.toHaveBeenCalled();
     });
 
-    it('wraps every refresh mint; interceptor refusals are backed off like mint failures', async () => {
+    it('keeps a binding refusal terminal for the request', async () => {
       let refuse = false;
       const mintInterceptor = jest.fn(async (mint: () => Promise<string>) => {
         if (refuse) {
@@ -347,19 +347,19 @@ describe('ServiceAccountFakeRequests', () => {
       );
       expect(mintToken).not.toHaveBeenCalled();
 
-      // Within the backoff window the interceptor is not even consulted again.
+      // A terminal binding refusal is not retried.
       await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).rejects.toThrowError(
-        'A recent attempt to mint a service account token failed; refusing to retry yet.'
+        'binding no longer exists'
       );
       expect(mintInterceptor).toHaveBeenCalledTimes(2);
 
-      // Once the backoff elapses and the interceptor permits again, minting resumes.
+      // Restoring the binding cannot revive a request whose mint was refused.
       refuse = false;
       jest.advanceTimersByTime(SERVICE_ACCOUNT_MINT_FAILURE_BACKOFF_MS);
-      await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).resolves.toBe(
-        'essu_token_2'
+      await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).rejects.toThrowError(
+        'binding no longer exists'
       );
-      expect(request.headers.authorization).toBe('Bearer essu_token_2');
+      expect(mintToken).not.toHaveBeenCalled();
     });
 
     it('deduplicates concurrent refreshes into a single interceptor invocation', async () => {

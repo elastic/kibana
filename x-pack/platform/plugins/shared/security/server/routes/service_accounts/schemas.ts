@@ -7,10 +7,10 @@
 
 import { z } from '@kbn/zod';
 
-import { serviceAccountNameSchema } from '../../../common/service_accounts';
 import {
   SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
   SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
+  serviceAccountNameSchema,
 } from '../../../common/service_accounts';
 
 export const createServiceAccountBodySchema = z

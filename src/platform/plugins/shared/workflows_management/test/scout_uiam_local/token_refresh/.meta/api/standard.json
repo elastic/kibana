@@ -1,0 +1,36 @@
+{
+  "sha1": "",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "1fd313bab75077f-1e6d7f9bf4fc487",
+      "title": "Workflow service-account token refresh keeps the bound identity when elasticsearch is called first after expiry",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_uiam_local/token_refresh/api/tests/service_account_token_refresh.spec.ts",
+        "line": 31,
+        "column": 9
+      }
+    },
+    {
+      "id": "1fd313bab75077f-ac118852b93fc67",
+      "title": "Workflow service-account token refresh keeps the bound identity when kibana is called first after expiry",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_uiam_local/token_refresh/api/tests/service_account_token_refresh.spec.ts",
+        "line": 31,
+        "column": 9
+      }
+    }
+  ]
+}

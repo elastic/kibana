@@ -196,7 +196,10 @@ export class ServiceAccountFakeRequests {
     return this.registry.delete(request);
   }
 
-  private mintWithInterceptor(serviceAccountId: string, interceptor?: ServiceAccountMintInterceptor): Promise<string> {
+  private mintWithInterceptor(
+    serviceAccountId: string,
+    interceptor?: ServiceAccountMintInterceptor
+  ): Promise<string> {
     const mint = () => this.mintToken(serviceAccountId);
     return interceptor ? interceptor(mint) : mint();
   }

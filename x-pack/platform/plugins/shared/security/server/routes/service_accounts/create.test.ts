@@ -140,7 +140,12 @@ describe('Create service account route', () => {
   });
 
   it('reaches the Elasticsearch backend without serverless context', async () => {
-    const { routeHandler } = setup({ serviceAccounts: new EsServiceAccounts(), serverless: false });
+    const { routeHandler } = setup({
+      serviceAccounts: Object.assign(new EsServiceAccounts(), {
+        workloads: serviceAccountsServiceMock.createStart().workloads,
+      }),
+      serverless: false,
+    });
     expect((await callRoute(routeHandler)).status).toBe(501);
   });
 

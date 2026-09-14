@@ -28,8 +28,7 @@ export function defineListServiceAccountsRoute({
       security: {
         authz: {
           enabled: false,
-          reason:
-            "This route authorizes with Elasticsearch manage_security",
+          reason: 'This route authorizes with Elasticsearch manage_security',
         },
       },
       validate: { query: listServiceAccountsQuerySchema },

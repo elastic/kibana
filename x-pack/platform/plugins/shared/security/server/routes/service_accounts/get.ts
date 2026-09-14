@@ -28,8 +28,7 @@ export function defineGetServiceAccountRoute({
       security: {
         authz: {
           enabled: false,
-          reason:
-            "This route authorizes with Elasticsearch manage_security",
+          reason: 'This route authorizes with Elasticsearch manage_security',
         },
       },
       validate: { params: getServiceAccountParamsSchema },

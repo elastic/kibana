@@ -106,8 +106,7 @@ describe('Get service account route', () => {
       expect(routeConfig.options?.access).toBe('internal');
       expect(routeConfig.security?.authz).toEqual({
         enabled: false,
-        reason:
-          "This route authorizes with Elasticsearch manage_security; UIAM authorizes Kibana's own client credential against assumable_by",
+        reason: 'This route authorizes with Elasticsearch manage_security',
       });
     });
   });

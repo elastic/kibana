@@ -161,6 +161,9 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
 
       '--env',
       'JAVA_OPTS_APPEND=-Xms256m -Xmx1g',
+      ...(process.env.UIAM_EPHEMERAL_TOKEN_TTL
+        ? ['--env', `uiam.tokens.ephemeral.expiration=${process.env.UIAM_EPHEMERAL_TOKEN_TTL}`]
+        : []),
 
       '--env',
       'uiam.apikey.convert.validation.endpoint.enabled=false',
