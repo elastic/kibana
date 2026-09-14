@@ -46,6 +46,9 @@ dependsOn:
   - '@kbn/core-spaces-common'
   - '@kbn/logging-mocks'
   - '@kbn/core-http-server-mocks'
+  - '@kbn/std'
+  - '@kbn/core-security-server'
+  - '@kbn/charts-theme'
 tags:
   - plugin
   - prod
