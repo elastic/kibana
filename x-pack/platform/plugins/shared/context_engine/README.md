@@ -306,6 +306,16 @@ The briefing is handed over as the agent's `message`. It instructs the agent to
 load the `analyze-and-improve` skill before reading anything, so the run carries
 the analysis playbook whichever agent the index is configured with.
 
+**Signals are evidence, not a precondition.** A run analyzes whether or not the
+window held any: an indicator its source contradicts, an automation producing
+nothing, a source nothing covers are all visible without a failed retrieval, and
+an index nobody has queried yet is when a bad setup is cheapest to fix. The
+briefing says which kind of run it is, and asks for grounding either way — signal
+ids when there are groups, and what was actually read when there are not, which
+is why `signal_ids` is optional on a proposal and its provenance can be empty.
+The agent is skipped only for `can_analyze: false`: an index with no signals, no
+indicators, no sources and no automations, where there is nothing to read at all.
+
 The briefing does not carry prior proposals, only how many there are and where
 they stand. A run cannot be handed the history that matters to it, because until
 it has read the signals it does not know what it is about to suggest, and an

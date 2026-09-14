@@ -102,6 +102,39 @@ describe('renderBriefing', () => {
     expect(render({ groups: [] })).toContain('None of the selected signals were classified');
   });
 
+  describe('a run with no signals at all', () => {
+    const withoutSignals = () =>
+      render({
+        groups: [],
+        run: { ...RUN, signal_count: 0, signal_spaces: [] },
+      });
+
+    it('says what the silence does and does not settle', () => {
+      const briefing = withoutSignals();
+
+      expect(briefing).toContain('No signals at all');
+      expect(briefing).toContain('not the index itself');
+    });
+
+    it('points the run at the index instead of at ids it cannot cite', () => {
+      const briefing = withoutSignals();
+
+      expect(briefing).toContain('omit `signal_ids`');
+      expect(briefing).toContain('name the evidence in `rationale`');
+      expect(briefing).not.toContain('Cite the `signal_ids` you took it from');
+    });
+
+    it('keeps asking for grounding, so an empty window is not licence to invent work', () => {
+      expect(withoutSignals()).toContain(
+        'A proposal you cannot trace to something you actually looked at is one you should not make.'
+      );
+    });
+
+    it('still requires the signal ids of a run that has them', () => {
+      expect(render()).toContain('Cite the `signal_ids` you took it from');
+    });
+  });
+
   it('names the permitted actions and only those', () => {
     const briefing = render();
 
