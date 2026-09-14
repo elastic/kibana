@@ -132,7 +132,7 @@ describe('ServiceAccountWorkloadBindings', () => {
       expect(result.serviceAccountId).toBe('service-account-id');
     });
 
-    it('generates a fresh canary per bind, so an older binding cannot be restored in place', async () => {
+    it('generates an independent canary per bind, so no two generations share one', async () => {
       const request = httpServerMock.createKibanaRequest();
       const params = { serviceAccountId: 'service-account-id', ...WORKLOAD };
 

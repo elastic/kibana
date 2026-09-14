@@ -59,6 +59,10 @@ export interface WorkloadBindingAttributes {
    * direct-to-index edit of, say, `serviceAccountId` makes this attribute undecryptable and the
    * binding unusable. Decryption skips an absent attribute rather than failing, so the reader
    * must also refuse a document whose canary is missing.
+   *
+   * Tamper-evidence is not freshness. A whole prior document restored under the same ID is
+   * internally consistent and still decrypts, so an actor holding a copy can revive a binding
+   * that was since changed or removed.
    */
   canary: string;
 }
@@ -159,9 +163,11 @@ export const registerWorkloadBindingSavedObjectType = (
   });
 
   // Encryption here buys integrity, not secrecy: none of a binding's attributes are sensitive,
-  // but which service account a workload runs as must not be rewritable by anything holding
-  // index-level access. Everything meaningful is therefore authenticated (AAD) and stays
-  // queryable, while the encrypted canary makes tampering fail closed at credential mint.
+  // but which service account a workload runs as must not be rewritable to an account of the
+  // editor's choosing by anything holding index-level access. Everything meaningful is therefore
+  // authenticated (AAD) and stays queryable, while the encrypted canary makes tampering fail
+  // closed at credential mint. Restoring a whole prior document is the residual case, and only
+  // reaches accounts the workload was bound to before.
   encryptedSavedObjects.registerType({
     type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
     enforceRandomId: false,

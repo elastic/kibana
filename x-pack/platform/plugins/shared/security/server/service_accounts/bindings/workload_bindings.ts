@@ -138,8 +138,8 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
       spaceId: this.getSpaceId(request),
       boundBy: await resolveWorkloadBinder(user, () => this.resolveUserProfileId(request)),
       boundAt: new Date().toISOString(),
-      // Regenerated on every bind so a rebind cannot be rolled back to a previous binding by
-      // restoring an older copy of the document.
+      // Fresh per bind, so no two generations of a binding share one. This does not make a
+      // rebind irreversible; see the attribute's own note.
       canary: randomBytes(CANARY_BYTE_LENGTH).toString('base64'),
     });
 
