@@ -412,6 +412,40 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     );
   });
 
+  it('resolves the verdict lookup against a mocked agent output, including the missing-output case', () => {
+    // The apply loop reads steps.runAgent_step.output from inside a nested foreach inside a
+    // parallel branch. Evaluate the exact liquid expressions from the yaml against mocked
+    // scopes to prove resolution semantics (this is the pattern the threat-mapping tests
+    // above already use with evalValueSync).
+    const selectStep = findStepByName(workflow.steps, 'select_alert_verdict') as {
+      with: { alert_verdict: string; alert_verdict_count: string };
+    };
+    const strip = (expr: string) => expr.slice(3, -2).trim(); // strips ${{ ... }}
+    const verdictExpr = strip(selectStep.with.alert_verdict);
+    const countExpr = strip(selectStep.with.alert_verdict_count);
+    const engine = createWorkflowLiquidEngine();
+
+    const verdict = { id: 'a1', classification: 'false_positive', confidence_score: 0.97 };
+    const withVerdicts = {
+      steps: { runAgent_step: { output: { structured_output: { verdicts: [verdict] } } } },
+    };
+
+    // Matching alert id -> the verdict itself.
+    expect(engine.evalValueSync(verdictExpr, { ...withVerdicts, foreach: { item: { _id: 'a1' } } })).toEqual(verdict);
+    // Non-matching id -> undefined verdict, count 0.
+    expect(
+      engine.evalValueSync(countExpr, { ...withVerdicts, foreach: { item: { _id: 'other' } } })
+    ).toBe(0);
+    // Missing agent output entirely (agent exhausted retries, continued): where maps
+    // undefined to [] so the count is 0 and every alert takes the no-verdict path.
+    expect(
+      engine.evalValueSync(countExpr, {
+        steps: { runAgent_step: { output: {} } },
+        foreach: { item: { _id: 'a1' } },
+      })
+    ).toBe(0);
+  });
+
   it('records an error note for an alert the batch returned no verdict for', () => {
     const check = findStepByName(workflow.steps, 'check_alert_verdict_exists') as {
       type: string;
