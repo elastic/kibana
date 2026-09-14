@@ -55,8 +55,14 @@ export const ConversationsPage: React.FC = () => {
     string | undefined
   >(undefined);
 
-  const { selectedConversationId, show, selectConversation, showTab, clearSelectedConversation } =
-    useConversationsUrlParams();
+  const {
+    selectedConversationId,
+    show,
+    selectConversation,
+    showTab,
+    clearSelectedConversation,
+    dismissMissingConversation,
+  } = useConversationsUrlParams();
   const [modalState, setModalState] = useState<{
     type: CardActionType | null;
     recordId: Investigation['recordId'] | null;
@@ -119,14 +125,15 @@ export const ConversationsPage: React.FC = () => {
 
   // A link to a conversation that no longer exists closes the flyout rather than leaving an empty
   // one open. Gated on `isLoading` so a background refetch cannot close a flyout that is in use.
+  // Dismissed rather than closed, so Back cannot return to the bad id and warn all over again.
   useEffect(() => {
     if (!selectedConversationId || !show || isLoading || error || selectedDetailsConversation) {
       return;
     }
     notifications?.toasts.addDanger(QUEUE_PAGE_INFO.conversationNotFound(selectedConversationId));
-    clearSelectedConversation();
+    dismissMissingConversation();
   }, [
-    clearSelectedConversation,
+    dismissMissingConversation,
     error,
     isLoading,
     notifications,

@@ -99,6 +99,17 @@ describe('useConversationsUrlParams', () => {
     expect(history.length).toBe(initialLength);
   });
 
+  it('dismisses a missing conversation without leaving a history entry', () => {
+    const { result, history } = renderUrlParams('/?selectedConversationId=missing&show=overview');
+    const initialLength = history.length;
+
+    act(() => result.current.dismissMissingConversation());
+
+    expect(history.location.search).toBe('');
+    // Back must not return to the bad id and re-run the not-found handling.
+    expect(history.length).toBe(initialLength);
+  });
+
   it('drops both params when the flyout closes', () => {
     const { result, history } = renderUrlParams('/?selectedConversationId=inv-1&show=timeline');
 
