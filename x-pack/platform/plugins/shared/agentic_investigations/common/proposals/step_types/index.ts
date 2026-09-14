@@ -18,3 +18,9 @@ export {
   updateProposalStepInputSchema,
   updateProposalStepOutputSchema,
 } from './update_proposal_step';
+export {
+  CloneProposalStepId,
+  cloneProposalStepCommonDefinition,
+  cloneProposalStepInputSchema,
+  cloneProposalStepOutputSchema,
+} from './clone_proposal_step';

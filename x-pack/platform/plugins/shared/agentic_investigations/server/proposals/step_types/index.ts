@@ -11,6 +11,7 @@ import type { ProposalsService } from '../services/proposals_service';
 import type { ResolveProposalUser } from '../services/resolve_proposal_user';
 import { getCreateProposalStepDefinition } from './create_proposal_step';
 import { getUpdateProposalStepDefinition } from './update_proposal_step';
+import { getCloneProposalStepDefinition } from './clone_proposal_step';
 
 export const registerStepDefinitions = ({
   workflowsExtensions,
@@ -29,7 +30,11 @@ export const registerStepDefinitions = ({
   workflowsExtensions.registerStepDefinition(
     getUpdateProposalStepDefinition({ getProposalsService, getSecurity })
   );
+  workflowsExtensions.registerStepDefinition(
+    getCloneProposalStepDefinition({ getProposalsService, getSecurity })
+  );
 };
 
 export { getCreateProposalStepDefinition } from './create_proposal_step';
+export { getCloneProposalStepDefinition } from './clone_proposal_step';
 export { getUpdateProposalStepDefinition } from './update_proposal_step';

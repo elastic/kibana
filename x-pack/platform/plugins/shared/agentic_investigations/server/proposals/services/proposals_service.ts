@@ -362,6 +362,117 @@ export class ProposalsService {
   }
 
   /**
+   * Recovery flow only: writes the clone's id back on the failed original so
+   * the queue can filter it out (#19287). Allowed only on a `failed`
+   * proposal — a live proposal can never be superseded, and a decided one
+   * already carries its outcome. Uses optimistic concurrency: a racing write
+   * loses loudly rather than silently double-superseding.
+   */
+  async markSuperseded(id: string, supersededBy: string, spaceId: string): Promise<void> {
+    const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
+
+    if (proposal.status !== 'failed') {
+      throw new ProposalConflictError(
+        `Proposal [${id}] is ${proposal.status}, not failed; only a failed proposal can be superseded`
+      );
+    }
+    if (proposal.supersededBy) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] is already superseded by [${proposal.supersededBy}]`
+      );
+    }
+
+    const document = { ...proposal, supersededBy };
+    const { id: _id, ...doc } = document;
+
+    try {
+      await this.deps.storage.index({
+        id,
+        document: doc,
+        ...(seqNo !== undefined && primaryTerm !== undefined
+          ? { if_seq_no: seqNo, if_primary_term: primaryTerm }
+          : {}),
+      });
+    } catch (error) {
+      if (isVersionConflict(error)) {
+        throw new ProposalConflictError(`Proposal [${id}] was superseded by another actor first`);
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Recovery flow only: clones a failed proposal into a fresh pending record
+   * parked on its own recovery gate (#19287).
+   *
+   * Chain bounds, enforced here rather than in YAML so they hold for every
+   * caller:
+   * - only `failed` originals clone — dismissal is a terminal human decision
+   *   and stays clone-free by construction;
+   * - a proposal can be superseded at most once, so a racing pair of recovery
+   *   handlers cannot fan out into a chain;
+   * - the deadline is carried, never reset: an expired original refuses to
+   *   clone, so no clone can outlive the original deadline.
+   */
+  async clone(
+    params: {
+      proposalId: string;
+      overrides?: Partial<
+        Pick<CreateProposalRequest, 'comment' | 'actionInput' | 'impact' | 'confidence'>
+      >;
+    },
+    spaceId: string,
+    context: { workflowExecutionId: string }
+  ): Promise<Proposal> {
+    const { proposal, seqNo: _s, primaryTerm: _p } = await this.load(params.proposalId, spaceId);
+
+    if (proposal.status !== 'failed') {
+      throw new ProposalConflictError(
+        `Proposal [${params.proposalId}] is ${proposal.status}, not failed; only a failed proposal can be recovered by clone`
+      );
+    }
+    if (proposal.supersededBy) {
+      throw new ProposalConflictError(
+        `Proposal [${params.proposalId}] is already superseded by [${proposal.supersededBy}]; refusing to clone again`
+      );
+    }
+    if (proposal.expiresAt !== undefined && Date.parse(proposal.expiresAt) < Date.now()) {
+      throw new ProposalExpiredError(
+        `Proposal [${params.proposalId}] expired at ${proposal.expiresAt}; the deadline does not reset on recovery`
+      );
+    }
+
+    const id = uuidv4();
+    const clone: StoredProposalRecord = {
+      ...proposal,
+      id,
+      comment: params.overrides?.comment ?? proposal.comment,
+      actionInput: params.overrides?.actionInput ?? proposal.actionInput,
+      impact: params.overrides?.impact ?? proposal.impact,
+      confidence: params.overrides?.confidence ?? proposal.confidence,
+      status: 'pending',
+      // The deadline does not reset: both timestamps are carried from the
+      // original so the chain expires with it.
+      createdAt: proposal.createdAt,
+      expiresAt: proposal.expiresAt,
+      // Fresh gate: the recovery execution owns the clone from here.
+      workflowExecutionId: context.workflowExecutionId,
+      decidedBy: undefined,
+      decidedAt: undefined,
+      dismissReason: undefined,
+      rationale: undefined,
+      executionError: undefined,
+      supersededBy: undefined,
+    };
+    const { id: _cid, ...document } = clone;
+
+    await this.deps.storage.index({ id, document });
+    await this.markSuperseded(params.proposalId, id, spaceId);
+
+    return stripRanks(clone);
+  }
+
+  /**
    * Reads the action workflow's self-declared metadata from `consts.actionMetadata`.
    * Resolved on read so a catalog change is picked up rather than baked into
    * every historical proposal.

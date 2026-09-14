@@ -11,16 +11,16 @@ import {
   AGENTIC_INVESTIGATIONS_MANAGED_WORKFLOW_PLUGIN_ID,
   AGENTIC_INVESTIGATIONS_WORKFLOW_MANAGEMENT,
 } from './constants';
-import CREATE_INVESTIGATION_PROPOSAL_YAML from './create_investigation_proposal.yaml';
+import RECOVER_INVESTIGATION_PROPOSAL_YAML from './recover_investigation_proposal.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
 
-export const CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID = 'system-create-investigation-proposal';
+export const RECOVER_INVESTIGATION_PROPOSAL_WORKFLOW_ID = 'system-recover-investigation-proposal';
 
-export const CREATE_INVESTIGATION_PROPOSAL_WORKFLOW = {
+export const RECOVER_INVESTIGATION_PROPOSAL_WORKFLOW = {
   billable: false,
-  id: CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID,
+  id: RECOVER_INVESTIGATION_PROPOSAL_WORKFLOW_ID,
   management: AGENTIC_INVESTIGATIONS_WORKFLOW_MANAGEMENT,
   pluginId: AGENTIC_INVESTIGATIONS_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 4,
-  yaml: CREATE_INVESTIGATION_PROPOSAL_YAML,
+  version: 1,
+  yaml: RECOVER_INVESTIGATION_PROPOSAL_YAML,
 } as const satisfies ManagedWorkflowDefinition;

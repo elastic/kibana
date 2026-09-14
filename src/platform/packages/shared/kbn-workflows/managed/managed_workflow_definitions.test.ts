@@ -22,6 +22,8 @@ import {
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
+import { CREATE_INVESTIGATION_PROPOSAL_WORKFLOW } from './definitions/agentic_investigations/proposals/create_investigation_proposal';
+import { RECOVER_INVESTIGATION_PROPOSAL_WORKFLOW } from './definitions/agentic_investigations/proposals/recover_investigation_proposal';
 import DARK_CONTINUOUS_THREAT_HUNT_YAML from './definitions/alertzero/dark_continuous_threat_hunt.yaml';
 import DETECTION_RULE_CREATION_YAML from './definitions/alertzero/detection_rule_creation.yaml';
 import DETECTION_RULE_TUNING_YAML from './definitions/alertzero/detection_rule_tuning.yaml';
@@ -202,6 +204,19 @@ describe('managedWorkflowDefinitions', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
+  it('registers every exported managed workflow definition', () => {
+    // A definition exported from its barrel but never added to managedWorkflowDefinitions
+    // fails at runtime as `install(undefined)` (see #290714 e2e): the installer logs an
+    // error and boot continues, silently. Assert membership here so the omission is a red
+    // test, not a silent prod gap.
+    const registered = new Set(managedWorkflowDefinitions.map(({ id }) => id));
+    for (const definition of [
+      CREATE_INVESTIGATION_PROPOSAL_WORKFLOW,
+      RECOVER_INVESTIGATION_PROPOSAL_WORKFLOW,
+    ]) {
+      expect(registered.has(definition.id)).toBe(true);
+    }
+  });
   it('contains the Security alert analysis workflow', () => {
     const ids = managedWorkflowDefinitions.map(({ id }) => id);
     expect(ids).toContain(SECURITY_ALERT_ANALYSIS_WORKFLOW_ID);
