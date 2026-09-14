@@ -8,16 +8,13 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
+import { defaultConfig } from '../../default/stateful/base.config';
 import { discoverContextAwarenessServerArgs } from '../shared';
-import { discoverContextAwarenessConfig } from './base.config';
 
 export const servers: ScoutServerConfig = {
-  ...discoverContextAwarenessConfig,
+  ...defaultConfig,
   kbnTestServer: {
-    ...discoverContextAwarenessConfig.kbnTestServer,
-    serverArgs: [
-      ...discoverContextAwarenessConfig.kbnTestServer.serverArgs,
-      ...discoverContextAwarenessServerArgs,
-    ],
+    ...defaultConfig.kbnTestServer,
+    serverArgs: [...defaultConfig.kbnTestServer.serverArgs, ...discoverContextAwarenessServerArgs],
   },
 };
