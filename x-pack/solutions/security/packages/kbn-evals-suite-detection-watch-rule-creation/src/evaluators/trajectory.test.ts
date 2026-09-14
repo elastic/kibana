@@ -20,7 +20,6 @@ import {
   createTrajectoryEvaluators,
   createTrajectoryFetcher,
   scoreCallCount,
-  scoreCallOrder,
   scoreKnownTools,
 } from './trajectory';
 
@@ -38,14 +37,12 @@ const rows = (names: Array<string | null>) => ({
 });
 const probe = (n: number) => ({ columns: [{ name: 'tool_spans', type: 'long' }], values: [[n]] });
 
-/** Handler receives the query text and the 1-based count of queries so far, to script polls. */
 const esWith = (handler: (query: string, call: number) => unknown) => {
   let calls = 0;
   const query = jest.fn(async ({ query: q }: { query: string }) => handler(q, ++calls));
   return { client: { esql: { query } } as unknown as EsClient, query };
 };
 
-/** Every join returns the same rows; the probe query returns `cluster` spans. */
 const esReturning = (names: Array<string | null>, cluster = 0) =>
   esWith((q) => (q.includes('STATS tool_spans') ? probe(cluster) : rows(names)));
 
@@ -64,9 +61,9 @@ const noWait = { settleMs: 0, sleep: async () => {} };
 const fetcher = (client: EsClient, opts: { maxPolls?: number } = {}) =>
   createTrajectoryFetcher({ traceEsClient: client, log, ...noWait, ...opts });
 
-const evaluateAll = async (client: EsClient, output: RuleCreationResult) =>
+const evaluateAll = async (client: EsClient, output: RuleCreationResult, maxPolls?: number) =>
   Promise.all(
-    createTrajectoryEvaluators({ traceEsClient: client, log, ...noWait }).map((e) =>
+    createTrajectoryEvaluators({ traceEsClient: client, log, ...noWait, maxPolls }).map((e) =>
       e.evaluate({ input: {}, output, expected: {}, metadata: undefined } as never)
     )
   );
@@ -125,7 +122,6 @@ describe('createTrajectoryFetcher', () => {
   });
 
   it('keeps polling until two consecutive reads agree, so a mid-flush export is not scored short', async () => {
-    // Batch exporter is still flushing: 1 span, then 3, then 3.
     const byPoll: Record<number, string[]> = { 1: [CREATE], 2: [LABS, CREATE, PREVIEW] };
     const { client, query } = esWith((_q, call) => rows(byPoll[call] ?? [LABS, CREATE, PREVIEW]));
     const t = await fetcher(client)(result());
@@ -139,33 +135,25 @@ describe('createTrajectoryFetcher', () => {
     expect(t).toMatchObject({ available: true, settled: false });
   });
 
-  it('resolves each run once and shares it across the three evaluators', async () => {
+  it('resolves each run once and shares it across evaluators', async () => {
     const { client, query } = esReturning([CREATE]);
-    const evaluators = createTrajectoryEvaluators({ traceEsClient: client, log, ...noWait });
-    const output = result();
-    for (const e of evaluators) {
-      await e.evaluate({ input: {}, output, expected: {}, metadata: undefined } as never);
-    }
-    // One settled read = two polls. Three evaluators must not triple that.
+    await evaluateAll(client, result());
+    // One settled read is two polls; two evaluators must not double that.
     expect(query).toHaveBeenCalledTimes(2);
   });
 });
 
 describe('createTrajectoryEvaluators', () => {
-  it('emits three independently named series', () => {
+  it('emits two independently named series', () => {
     const { client } = esReturning([CREATE]);
     const names = createTrajectoryEvaluators({ traceEsClient: client, log }).map((e) => e.name);
-    expect(names).toEqual([
-      'Trajectory: Call Count',
-      'Trajectory: Call Order',
-      'Trajectory: Known Tools',
-    ]);
+    expect(names).toEqual(['Trajectory: Call Count', 'Trajectory: Known Tools']);
   });
 
   it('scores a skill-conformant run 1 on every series', async () => {
     const { client } = esReturning([LABS, INTERNAL, CREATE, PREVIEW]);
     const scores = (await evaluateAll(client, result())).map((r) => r.score);
-    expect(scores).toEqual([1, 1, 1]);
+    expect(scores).toEqual([1, 1]);
   });
 
   it('scores null with label unavailable on every series when spans are unreachable', async () => {
@@ -178,12 +166,7 @@ describe('createTrajectoryEvaluators', () => {
 
   it('labels every series potentially_incomplete when the span set never settled', async () => {
     const { client } = esWith((_q, call) => rows(Array(call).fill(CREATE)));
-    const results = await Promise.all(
-      createTrajectoryEvaluators({ traceEsClient: client, log, ...noWait, maxPolls: 2 }).map((e) =>
-        e.evaluate({ input: {}, output: result(), expected: {}, metadata: undefined } as never)
-      )
-    );
-    for (const r of results) {
+    for (const r of await evaluateAll(client, result(), 2)) {
       expect(r.label).toBe('potentially_incomplete');
       expect((r.metadata as Record<string, unknown>).incomplete).toBe(true);
     }
@@ -196,43 +179,10 @@ describe('scoreCallCount', () => {
     expect(scoreCallCount(settled(Array(TRAJECTORY_MAX_TOOL_CALLS).fill(CREATE))).score).toBe(1);
   });
 
-  it('decays linearly past the bound and reaches 0 at twice the bound', () => {
-    const half = scoreCallCount(settled(Array(TRAJECTORY_MAX_TOOL_CALLS * 1.5).fill(CREATE)));
-    expect(half.score).toBeCloseTo(0.5);
-    expect(scoreCallCount(settled(Array(TRAJECTORY_MAX_TOOL_CALLS * 2).fill(CREATE))).score).toBe(
+  it('is 0 past the bound', () => {
+    expect(scoreCallCount(settled(Array(TRAJECTORY_MAX_TOOL_CALLS + 1).fill(CREATE))).score).toBe(
       0
     );
-  });
-});
-
-describe('scoreCallOrder', () => {
-  it('is 1 when preview follows create', () => {
-    expect(scoreCallOrder(settled([CREATE, PREVIEW]))).toMatchObject({
-      score: 1,
-      metadata: { checked: 1, violations: [] },
-    });
-  });
-
-  it('is 0 when preview precedes create', () => {
-    expect(scoreCallOrder(settled([PREVIEW, CREATE]))).toMatchObject({
-      score: 0,
-      metadata: { violations: [[CREATE, PREVIEW]] },
-    });
-  });
-
-  it('judges on first occurrences, so a premature preview is not excused by a later one', () => {
-    expect(scoreCallOrder(settled([PREVIEW, CREATE, PREVIEW])).score).toBe(0);
-  });
-
-  it('is vacuously 1, and says so, when no constraint applies', () => {
-    const r = scoreCallOrder(settled([CREATE]));
-    expect(r.score).toBe(1);
-    expect(r.metadata.checked).toBe(0);
-    expect(r.explanation).toContain('no precedence constraint');
-  });
-
-  it('does not require generate_esql before create — create builds its own ES|QL', () => {
-    expect(scoreCallOrder(settled([CREATE, PREVIEW, GEN_ESQL])).score).toBe(1);
   });
 });
 

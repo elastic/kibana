@@ -9,11 +9,7 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator } from '@kbn/evals';
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
-import {
-  SKILL_REGISTRY_TOOL_IDS,
-  TRAJECTORY_MAX_TOOL_CALLS,
-  TRAJECTORY_PRECEDENCE,
-} from '../constants';
+import { SKILL_REGISTRY_TOOL_IDS, TRAJECTORY_MAX_TOOL_CALLS } from '../constants';
 import type { RuleCreationResult } from '../rule_creation_client';
 import {
   TOOL_KIND,
@@ -23,27 +19,19 @@ import {
   type EsqlResponse,
 } from './trace_spans';
 
-/** Tool name the span processor substitutes for non-builtin tools when real names are disabled. */
+// What AgentBuilderSpanProcessor writes for non-builtin tools when includeRealNames is off.
 const ANONYMIZED_TOOL_NAME = 'custom';
 
 const TOOL_NAME_COLUMN = 'attributes.gen_ai.tool.name';
 
 export interface TrajectoryFetchOptions {
-  /** Pause between polls while waiting for the batch span exporter to flush. */
   settleMs?: number;
-  /** Total polls before giving up on a stable span set. */
   maxPolls?: number;
   sleep?: (ms: number) => Promise<void>;
 }
 
 type Trajectory =
-  | {
-      available: true;
-      toolNames: string[];
-      joinedOn: string;
-      /** Two consecutive polls returned the same span count. */
-      settled: boolean;
-    }
+  | { available: true; toolNames: string[]; joinedOn: string; settled: boolean }
   | { available: false; explanation: string };
 
 const fetchToolNames = async (
@@ -58,17 +46,13 @@ const fetchToolNames = async (
   const names = response.values
     .map((row) => row[nameIdx])
     .filter((n): n is string => typeof n === 'string' && n.length > 0);
-  // Zero rows means this join key reached no TOOL spans — unmeasured, not empty.
+  // No rows means this join key reached no spans: unmeasured, not an empty trajectory.
   return names.length > 0 ? names : undefined;
 };
 
 /**
- * Resolves a run's ordered tool calls from the tracing cluster.
- *
- * Agent Builder exports spans through a BatchSpanProcessor (`scheduledDelay`, 5s by default), so
- * the trajectory can still be arriving when the workflow returns. Polling until two consecutive
- * reads agree keeps a half-exported run from being scored as a confident short trajectory; a run
- * that never settles is reported as `settled: false` so evaluators can label it, not hide it.
+ * Agent Builder exports spans in batches (5s delay by default), so a run's spans can still be
+ * arriving when the workflow returns. Polls until two consecutive reads agree.
  */
 export const createTrajectoryFetcher = ({
   traceEsClient,
@@ -178,50 +162,16 @@ const trajectoryEvaluator = (
   },
 });
 
-/** 1 up to TRAJECTORY_MAX_TOOL_CALLS, then linear decay to 0 at twice the bound. */
 export const scoreCallCount: ScoreFn = ({ toolNames }) => {
   const total = toolNames.length;
-  const over = Math.max(0, total - TRAJECTORY_MAX_TOOL_CALLS);
-  const score = Math.max(0, 1 - over / TRAJECTORY_MAX_TOOL_CALLS);
   return {
-    score,
+    score: total <= TRAJECTORY_MAX_TOOL_CALLS ? 1 : 0,
     explanation: `${total} tool call(s), bound ${TRAJECTORY_MAX_TOOL_CALLS}`,
     metadata: { total, max: TRAJECTORY_MAX_TOOL_CALLS },
   };
 };
 
-/**
- * Fraction of applicable precedence constraints satisfied, judged on first occurrences. A
- * constraint is applicable only when both tools were called; a run that calls neither side of
- * any constraint scores 1 with `checked: 0` so the vacuous case stays visible in metadata.
- */
-export const scoreCallOrder: ScoreFn = ({ toolNames }) => {
-  const violations: Array<readonly [string, string]> = [];
-  let checked = 0;
-  for (const [earlier, later] of TRAJECTORY_PRECEDENCE) {
-    const earlierAt = toolNames.indexOf(earlier);
-    const laterAt = toolNames.indexOf(later);
-    if (earlierAt !== -1 && laterAt !== -1) {
-      checked++;
-      if (laterAt < earlierAt) violations.push([earlier, later]);
-    }
-  }
-  const score = checked === 0 ? 1 : (checked - violations.length) / checked;
-  return {
-    score,
-    explanation:
-      checked === 0
-        ? 'no precedence constraint applicable to this run'
-        : `${checked - violations.length}/${checked} precedence constraint(s) satisfied`,
-    metadata: { checked, violations },
-  };
-};
-
-/**
- * Fraction of calls naming a tool the agent can actually reach: the skill's registry tools or
- * Agent Builder's internal tools. Spans anonymized to "custom" by the tracing privacy settings
- * are reported separately and not counted as hallucinated — they are unnameable, not invented.
- */
+// Anonymized spans are unnameable, not invented, so they are reported but not penalized.
 export const scoreKnownTools: ScoreFn = ({ toolNames }) => {
   const registry: string[] = [];
   const internal: string[] = [];
@@ -250,19 +200,13 @@ export const scoreKnownTools: ScoreFn = ({ toolNames }) => {
   };
 };
 
-/**
- * Trajectory evaluators (trace-based, direction: maximize). Tool Routing asks whether the
- * required tool was called; these ask whether the path to it was sensible. Reported as three
- * series rather than one average so a single failing dimension cannot hide behind two passing
- * ones on the dashboard.
- */
+/** Separate series rather than one average, so a failing dimension cannot hide behind a passing one. */
 export const createTrajectoryEvaluators = (
   deps: { traceEsClient: EsClient; log: ToolingLog } & TrajectoryFetchOptions
 ): Evaluator[] => {
   const fetchTrajectory = createTrajectoryFetcher(deps);
   return [
     trajectoryEvaluator('Trajectory: Call Count', fetchTrajectory, scoreCallCount),
-    trajectoryEvaluator('Trajectory: Call Order', fetchTrajectory, scoreCallOrder),
     trajectoryEvaluator('Trajectory: Known Tools', fetchTrajectory, scoreKnownTools),
   ];
 };

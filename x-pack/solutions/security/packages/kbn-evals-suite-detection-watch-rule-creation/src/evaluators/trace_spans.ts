@@ -9,7 +9,6 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import { DRAFT_STEP_ID } from '../constants';
 import type { RuleCreationResult } from '../rule_creation_client';
 
-/** ES|QL predicate selecting Agent Builder tool-execution spans. */
 export const TOOL_KIND = 'attributes.elastic.inference.span.kind == "TOOL"';
 
 export interface EsqlResponse {
@@ -57,11 +56,7 @@ export const toolSpanJoinClauses = ({
     : []),
 ];
 
-/**
- * Explains why no join key reached any TOOL span. Distinguishes "this cluster holds no agent
- * tool spans at all" (export/config problem) from "spans exist but carry different join keys"
- * (attribute drift) — otherwise every future N/A costs another round of manual trace archaeology.
- */
+// Separates "no TOOL spans exported at all" from "spans exist under other join keys".
 export const diagnoseUnreachableToolSpans = async (traceEsClient: EsClient): Promise<string> => {
   try {
     const probe = (await traceEsClient.esql.query({
