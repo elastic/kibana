@@ -142,9 +142,6 @@ describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(ABOUT_DETAILS).within(() => {
         getDetails(SEVERITY_DETAILS).should('have.text', 'Medium');
         getDetails(RISK_SCORE_DETAILS).should('have.text', `${getEditedRule().risk_score}`);
-        // On MKI, the alerting framework appends "Missing Elastic Cloud API Key" to rules
-        // created with an ES API key and no UIAM key (see https://github.com/elastic/kibana/pull/289195).
-        // Strip it so the assertion holds on both ECH and serverless.
         getDetails(TAGS_DETAILS)
           .invoke('text')
           .then((text) => {
