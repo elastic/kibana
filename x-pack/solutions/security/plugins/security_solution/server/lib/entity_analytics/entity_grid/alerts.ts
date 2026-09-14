@@ -154,9 +154,11 @@ export const buildAlertBuckets = (
     const sev = (r.severity as string | null) ?? '';
     const cnt = (r[ALERT_COUNT_FIELD] as number) ?? 0;
     const ts = r[LAST_SEEN_ALERT_FIELD] as string | null;
-    if (!byId.has(id))
-      byId.set(id, { last_seen: null, total: 0, critical: 0, high: 0, medium: 0, low: 0 });
-    const bucket = byId.get(id)!;
+    let bucket = byId.get(id);
+    if (bucket == null) {
+      bucket = { last_seen: null, total: 0, critical: 0, high: 0, medium: 0, low: 0 };
+      byId.set(id, bucket);
+    }
     bucket.total += cnt;
     if (ts != null && (bucket.last_seen == null || ts > bucket.last_seen)) bucket.last_seen = ts;
     if (sev === 'critical') bucket.critical += cnt;
