@@ -7,9 +7,6 @@
 
 export { MappingEditor } from './mapping_editor';
 export type { MappingEditorProps } from './mapping_editor';
-export {
-  emptyMappingEditorValue,
-  buildDatasetMappings,
-  validateMappingEditorValue,
-} from './mapping_editor';
+export { buildDatasetMappings, validateMappingEditorValue } from './mapping_editor';
 export type { MappingEditorValue, MappingEditorField } from './mapping_editor';
+export { emptyMappingEditorValue } from './constants';

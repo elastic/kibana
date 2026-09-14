@@ -8,6 +8,12 @@
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 import type { DatasetMappingFieldType } from '../../../common';
+import type { MappingEditorValue } from './mapping_editor';
+
+export const emptyMappingEditorValue: MappingEditorValue = {
+  dynamic: true,
+  fields: [],
+};
 
 const TYPE_LABEL_BY_VALUE: Record<DatasetMappingFieldType, string> = {
   boolean: 'Boolean',

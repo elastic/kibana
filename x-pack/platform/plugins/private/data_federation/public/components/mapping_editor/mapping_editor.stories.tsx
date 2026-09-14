@@ -11,7 +11,8 @@ import type { Meta, StoryObj } from '@storybook/react';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 import type { MappingEditorValue } from './mapping_editor';
-import { MappingEditor, emptyMappingEditorValue } from './mapping_editor';
+import { MappingEditor } from './mapping_editor';
+import { emptyMappingEditorValue } from './constants';
 
 const meta: Meta<typeof MappingEditor> = {
   component: MappingEditor,
@@ -41,7 +42,7 @@ const docLinksMock = {
 
 const PopulatedStory = () => {
   const [value, setValue] = React.useState<MappingEditorValue>(() => ({
-    ...emptyMappingEditorValue(),
+    ...emptyMappingEditorValue,
     dynamic: false,
     fields: [
       {
@@ -72,7 +73,9 @@ const PopulatedStory = () => {
 };
 
 const EmptyStory = () => {
-  const [value, setValue] = React.useState<MappingEditorValue>(() => emptyMappingEditorValue());
+  const [value, setValue] = React.useState<MappingEditorValue>(() => ({
+    ...emptyMappingEditorValue,
+  }));
   return <MappingEditor value={value} onChange={setValue} docLinks={docLinksMock} />;
 };
 

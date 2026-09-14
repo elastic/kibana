@@ -108,7 +108,7 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
   const [mappingsValue, setMappingsValue] = useState<MappingEditorValue>(() => {
     // NOTE: We intentionally keep this out of react-hook-form for now. The API payload is
     // derived from this editor state on submit.
-    if (!initialDataSet?.mappings) return emptyMappingEditorValue();
+    if (!initialDataSet?.mappings) return { ...emptyMappingEditorValue };
 
     const mappings = initialDataSet.mappings;
     const fields = Object.entries(mappings.properties ?? {}).map(([name, prop], idx) => ({
@@ -154,7 +154,7 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
       });
       setIsMappingsOpen(true);
     } else {
-      setMappingsValue(emptyMappingEditorValue());
+      setMappingsValue({ ...emptyMappingEditorValue });
       setIsMappingsOpen(false);
     }
   }, [initialDataSet, reset]);
