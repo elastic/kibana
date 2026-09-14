@@ -15,14 +15,6 @@ import { registerTracingExporter } from './register_tracing';
 import { AgentBuilderSpanProcessor } from './agent_builder_span_processor';
 import { DATA_STREAM_NAMESPACE_ATTR } from './agent_builder_context';
 
-jest.mock('@kbn/core/server', () => {
-  const actual = jest.requireActual('@kbn/core/server');
-  return {
-    ...actual,
-    SavedObjectsClient: jest.fn(() => ({})),
-  };
-});
-
 jest.mock('@kbn/inference-tracing', () => ({
   initInferenceTracerProvider: jest.fn(),
   shutdownInferenceTracerProvider: jest.fn().mockResolvedValue(undefined),
@@ -89,18 +81,16 @@ describe('registerTracingExporter', () => {
 
   function createCore() {
     const core = coreMock.createStart();
+    core.savedObjects.getUnsafeInternalClient.mockReturnValue({
+      asScopedToNamespace: jest.fn((namespace: string) => ({ namespace })),
+    } as never);
     const scopedUiSettings = jest.mocked(core.uiSettings.asScopedToClient(jest.fn() as never));
     scopedUiSettings.get.mockResolvedValue(true);
     return core;
   }
 
   beforeEach(() => {
-    jest.useFakeTimers();
     jest.clearAllMocks();
-  });
-
-  afterEach(() => {
-    jest.useRealTimers();
   });
 
   it('always initializes the tracing pipeline (ES exporter is always set up for uiSetting-based toggling)', async () => {
@@ -201,8 +191,11 @@ describe('registerTracingExporter', () => {
     expect(mockResource.waitForAsyncAttributes).toHaveBeenCalledTimes(1);
   });
 
-  it('createCachedTracingSettings returns enabled=true after registerTracingExporter resolves', async () => {
+  it('getSettings reads current uiSettings for the requested space', async () => {
     const coreStart = createCore();
+    const scopedUiSettings = jest.mocked(coreStart.uiSettings.asScopedToClient(jest.fn() as never));
+    scopedUiSettings.get.mockResolvedValue(true);
+
     const tracingConfig: TracingConfig = {
       exporters: [],
       scheduledDelay: 100,
@@ -215,12 +208,15 @@ describe('registerTracingExporter', () => {
       logger,
     });
 
-    const ctorOpts = MockedAgentBuilderProcessor.mock.calls[0][0];
-    const { getSettings } = ctorOpts;
-    expect(getSettings().enabled).toBe(true);
+    const { getSettings } = MockedAgentBuilderProcessor.mock.calls[0][0];
+    expect((await getSettings('marketing')).enabled).toBe(true);
+    expect(coreStart.uiSettings.asScopedToClient).toHaveBeenCalledWith({ namespace: 'marketing' });
+
+    scopedUiSettings.get.mockResolvedValue(false);
+    expect((await getSettings('marketing')).enabled).toBe(false);
   });
 
-  it('refreshes the cached value when the polling interval fires', async () => {
+  it('getSettings scopes each space independently', async () => {
     const coreStart = createCore();
     const scopedUiSettings = jest.mocked(coreStart.uiSettings.asScopedToClient(jest.fn() as never));
     scopedUiSettings.get.mockResolvedValue(true);
@@ -234,19 +230,17 @@ describe('registerTracingExporter', () => {
     await registerTracingExporter({ core: coreStart, tracingConfig, logger });
 
     const { getSettings } = MockedAgentBuilderProcessor.mock.calls[0][0];
-    expect(getSettings().enabled).toBe(true);
+    await getSettings('space-a');
+    await getSettings('space-b');
 
-    scopedUiSettings.get.mockResolvedValue(false);
-    jest.advanceTimersByTime(30_000);
-    await jest.advanceTimersByTimeAsync(0);
-
-    expect(getSettings().enabled).toBe(false);
+    expect(coreStart.uiSettings.asScopedToClient).toHaveBeenCalledWith({ namespace: 'space-a' });
+    expect(coreStart.uiSettings.asScopedToClient).toHaveBeenCalledWith({ namespace: 'space-b' });
   });
 
-  it('logs error when polling refresh rejects', async () => {
+  it('logs error and fail-closes when settings lookup rejects', async () => {
     const coreStart = createCore();
     const scopedUiSettings = jest.mocked(coreStart.uiSettings.asScopedToClient(jest.fn() as never));
-    scopedUiSettings.get.mockResolvedValue(true);
+    scopedUiSettings.get.mockRejectedValue(new Error('SO unavailable'));
 
     const tracingConfig: TracingConfig = {
       exporters: [],
@@ -256,20 +250,18 @@ describe('registerTracingExporter', () => {
 
     await registerTracingExporter({ core: coreStart, tracingConfig, logger });
 
-    scopedUiSettings.get.mockRejectedValue(new Error('SO unavailable'));
-    jest.advanceTimersByTime(30_000);
-    await jest.advanceTimersByTimeAsync(0);
+    const { getSettings } = MockedAgentBuilderProcessor.mock.calls[0][0];
+    const settings = await getSettings();
 
+    expect(settings.enabled).toBe(false);
     expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to fetch tracing settings')
+      expect.stringContaining('Failed to fetch tracing settings for space [default]')
     );
   });
 
-  it('teardown stops polling and shuts down processors', async () => {
+  it('teardown shuts down processors', async () => {
+    const { shutdownInferenceTracerProvider } = jest.requireMock('@kbn/inference-tracing');
     const coreStart = createCore();
-    const scopedUiSettings = jest.mocked(coreStart.uiSettings.asScopedToClient(jest.fn() as never));
-    scopedUiSettings.get.mockResolvedValue(true);
-
     const tracingConfig: TracingConfig = {
       exporters: [],
       scheduledDelay: 100,
@@ -281,11 +273,6 @@ describe('registerTracingExporter', () => {
 
     await teardown!();
 
-    scopedUiSettings.get.mockResolvedValue(false);
-    jest.advanceTimersByTime(30_000);
-    await jest.advanceTimersByTimeAsync(0);
-
-    const { getSettings } = MockedAgentBuilderProcessor.mock.calls[0][0];
-    expect(getSettings().enabled).toBe(true);
+    expect(shutdownInferenceTracerProvider).toHaveBeenCalled();
   });
 });

@@ -15,6 +15,16 @@ export const AGENT_BUILDER_OWNER_BAGGAGE_VALUE = '1';
 export const SPACE_ID_BAGGAGE_KEY = 'agent_builder.space_id';
 export const DATA_STREAM_NAMESPACE_ATTR = 'data_stream.namespace';
 
+export function getSpaceIdFromContext(parentContext: api.Context): string {
+  const value = propagation.getBaggage(parentContext)?.getEntry(SPACE_ID_BAGGAGE_KEY)?.value;
+  return value && value.length > 0 ? value : 'default';
+}
+
+export function getSpaceIdFromSpan(span: tracing.ReadableSpan): string {
+  const namespace = span.attributes[DATA_STREAM_NAMESPACE_ATTR];
+  return typeof namespace === 'string' && namespace.length > 0 ? namespace : 'default';
+}
+
 /**
  * Executes a function within a context that has the Agent Builder ownership baggage set,
  * along with an optional space ID for data stream routing.

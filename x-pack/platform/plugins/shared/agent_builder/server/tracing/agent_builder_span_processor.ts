@@ -23,7 +23,12 @@ import {
   AGENT_BUILDER_BUILTIN_TOOLS,
 } from '@kbn/agent-builder-server/allow_lists';
 import { toHashedId } from '@kbn/agent-builder-server/telemetry';
-import { DATA_STREAM_NAMESPACE_ATTR, isAgentBuilderSpan } from './agent_builder_context';
+import {
+  DATA_STREAM_NAMESPACE_ATTR,
+  getSpaceIdFromContext,
+  getSpaceIdFromSpan,
+  isAgentBuilderSpan,
+} from './agent_builder_context';
 import { normalizeAgentIdForTelemetry } from '../telemetry/utils';
 
 const BUILTIN_TOOL_IDS: Set<string> = new Set(AGENT_BUILDER_BUILTIN_TOOLS);
@@ -45,10 +50,14 @@ export interface TracingPrivacySettings {
   includeUserData: boolean;
 }
 
+export type GetTracingPrivacySettings = (
+  spaceId?: string
+) => TracingPrivacySettings | Promise<TracingPrivacySettings>;
+
 interface AgentBuilderSpanProcessorOpts {
   exporter: tracing.SpanExporter;
   scheduledDelayMillis: number;
-  getSettings: () => TracingPrivacySettings;
+  getSettings: GetTracingPrivacySettings;
 }
 
 /**
@@ -275,9 +284,14 @@ function applyMessageAttributePrivacy(
 /**
  * Span processor that exports Agent Builder inference spans.
  */
+function isPromise<T>(value: T | Promise<T>): value is Promise<T> {
+  return typeof (value as Promise<T>)?.then === 'function';
+}
+
 export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
   private readonly batchProcessor: tracing.SpanProcessor;
-  private readonly getSettings: () => TracingPrivacySettings;
+  private readonly getSettings: GetTracingPrivacySettings;
+  private readonly pendingExports = new Set<Promise<void>>();
 
   constructor(opts: AgentBuilderSpanProcessorOpts) {
     this.batchProcessor = new tracing.BatchSpanProcessor(opts.exporter, {
@@ -286,13 +300,10 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
     this.getSettings = opts.getSettings;
   }
 
-  async onStart(span: tracing.Span, parentContext: api.Context): Promise<void> {
-    const settings = this.getSettings();
-    if (!settings.enabled) {
-      return;
-    }
+  onStart(span: tracing.Span, parentContext: api.Context): void {
     if (isAgentBuilderSpan(span, parentContext)) {
       span.setAttribute(SHOULD_TRACK_ATTR, true);
+      span.setAttribute(DATA_STREAM_NAMESPACE_ATTR, getSpaceIdFromContext(parentContext));
       this.batchProcessor.onStart(span, parentContext);
     }
   }
@@ -302,7 +313,23 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
       return;
     }
 
-    const settings = this.getSettings();
+    const settingsOrPromise = this.getSettings(getSpaceIdFromSpan(span));
+    if (!isPromise(settingsOrPromise)) {
+      this.exportWithSettings(span, settingsOrPromise);
+      return;
+    }
+
+    const task = settingsOrPromise.then(
+      (settings) => {
+        this.exportWithSettings(span, settings);
+      },
+      () => undefined
+    );
+    this.pendingExports.add(task);
+    void task.finally(() => this.pendingExports.delete(task));
+  }
+
+  private exportWithSettings(span: tracing.ReadableSpan, settings: TracingPrivacySettings): void {
     if (!settings.enabled) {
       return;
     }
@@ -355,11 +382,13 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
     this.batchProcessor.onEnd(exportSpan);
   }
 
-  forceFlush(): Promise<void> {
+  async forceFlush(): Promise<void> {
+    await Promise.all(this.pendingExports);
     return this.batchProcessor.forceFlush();
   }
 
-  shutdown(): Promise<void> {
+  async shutdown(): Promise<void> {
+    await Promise.all(this.pendingExports);
     return this.batchProcessor.shutdown();
   }
 }

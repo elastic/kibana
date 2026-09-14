@@ -8,7 +8,6 @@
 import type { CoreStart } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { tracing } from '@elastic/opentelemetry-node/sdk';
-import { SavedObjectsClient } from '@kbn/core/server';
 import { buildOtelResources } from '@kbn/telemetry';
 import {
   ElasticsearchOtlpExporter,
@@ -40,73 +39,66 @@ import { GlobalBridgeProcessor } from './global_bridge_processor';
 import { OpikDistributedTracingSpanProcessor } from './opik_distributed_tracing';
 import { DATA_STREAM_NAMESPACE_ATTR, SPACE_ID_BAGGAGE_KEY } from './agent_builder_context';
 
-const SETTING_CACHE_TTL_MS = 30_000;
+const DISABLED_TRACING_SETTINGS: TracingPrivacySettings = {
+  enabled: false,
+  includeUserPrompts: false,
+  includeLlmResponses: false,
+  includeToolDetails: false,
+  includeSystemPrompt: false,
+  includeRealNames: false,
+  includeRealIds: false,
+  includeUserData: false,
+};
 
 /**
- * Returns a synchronous `getSettings()` function that polls all tracing privacy
- * uiSettings on a fixed interval. The span processor hot-path requires synchronous
- * access, so we refresh in the background every {@link SETTING_CACHE_TTL_MS} ms.
+ * Loads tracing privacy uiSettings for the span's space on demand.
  */
-const createCachedTracingSettings = async (
+const createTracingSettingsLoader = (
   core: CoreStart,
   logger: Logger
-): Promise<{ getSettings: () => TracingPrivacySettings; stopPolling: () => void }> => {
-  let settings: TracingPrivacySettings = {
-    enabled: false,
-    includeUserPrompts: false,
-    includeLlmResponses: false,
-    includeToolDetails: false,
-    includeSystemPrompt: false,
-    includeRealNames: false,
-    includeRealIds: false,
-    includeUserData: false,
-  };
-
-  const refresh = async () => {
-    try {
-      const internalRepo = core.savedObjects.createInternalRepository();
-      const internalClient = new SavedObjectsClient(internalRepo);
-      const client = core.uiSettings.asScopedToClient(internalClient);
-      const [
-        enabled,
-        includeUserPrompts,
-        includeLlmResponses,
-        includeToolDetails,
-        includeSystemPrompt,
-        includeRealNames,
-        includeRealIds,
-        includeUserData,
-      ] = await Promise.all([
-        client.get<boolean>(AGENT_BUILDER_TRACING_ENABLED_SETTING_ID),
-        client.get<boolean>(AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID),
-        client.get<boolean>(AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID),
-        client.get<boolean>(AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID),
-        client.get<boolean>(AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID),
-        client.get<boolean>(AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID),
-        client.get<boolean>(AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID),
-        client.get<boolean>(AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID),
-      ]);
-      settings = {
-        enabled,
-        includeUserPrompts,
-        includeLlmResponses,
-        includeToolDetails,
-        includeSystemPrompt,
-        includeRealNames,
-        includeRealIds,
-        includeUserData,
-      };
-    } catch (error) {
-      logger.error(`Failed to fetch tracing settings: ${error.message}`);
-    }
-  };
-
-  await refresh();
-  const intervalId = setInterval(refresh, SETTING_CACHE_TTL_MS);
+): { getSettings: (spaceId?: string) => Promise<TracingPrivacySettings> } => {
+  const internalClient = core.savedObjects.getUnsafeInternalClient();
 
   return {
-    getSettings: () => settings,
-    stopPolling: () => clearInterval(intervalId),
+    getSettings: async (spaceId = 'default') => {
+      const namespace = spaceId || 'default';
+      try {
+        const soClient = internalClient.asScopedToNamespace(namespace);
+        const client = core.uiSettings.asScopedToClient(soClient);
+        const [
+          enabled,
+          includeUserPrompts,
+          includeLlmResponses,
+          includeToolDetails,
+          includeSystemPrompt,
+          includeRealNames,
+          includeRealIds,
+          includeUserData,
+        ] = await Promise.all([
+          client.get<boolean>(AGENT_BUILDER_TRACING_ENABLED_SETTING_ID),
+          client.get<boolean>(AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID),
+          client.get<boolean>(AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID),
+          client.get<boolean>(AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID),
+          client.get<boolean>(AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID),
+          client.get<boolean>(AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID),
+          client.get<boolean>(AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID),
+          client.get<boolean>(AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID),
+        ]);
+        return {
+          enabled,
+          includeUserPrompts,
+          includeLlmResponses,
+          includeToolDetails,
+          includeSystemPrompt,
+          includeRealNames,
+          includeRealIds,
+          includeUserData,
+        };
+      } catch (error) {
+        logger.error(`Failed to fetch tracing settings for space [${namespace}]: ${error.message}`);
+        return DISABLED_TRACING_SETTINGS;
+      }
+    },
   };
 };
 
@@ -119,10 +111,10 @@ export const registerTracingExporter = async ({
   tracingConfig: AgentBuilderConfig['tracing'];
   logger: Logger;
 }): Promise<(() => Promise<void>) | undefined> => {
-  const { getSettings, stopPolling } = await createCachedTracingSettings(core, logger);
+  const { getSettings } = createTracingSettingsLoader(core, logger);
 
-  // Always include the ES exporter so that enabling the uiSetting takes effect
-  // within the next polling cycle, without requiring a server restart.
+  // Always include the ES exporter so enabling the uiSetting takes effect on
+  // the next span without a server restart.
   const allExporters: tracing.SpanExporter[] = [
     new ElasticsearchOtlpExporter(core.elasticsearch.client.asInternalUser),
     ...tracingConfig.exporters.map(
@@ -169,7 +161,6 @@ export const registerTracingExporter = async ({
   });
 
   return async () => {
-    stopPolling();
     await shutdownInferenceTracerProvider();
   };
 };
