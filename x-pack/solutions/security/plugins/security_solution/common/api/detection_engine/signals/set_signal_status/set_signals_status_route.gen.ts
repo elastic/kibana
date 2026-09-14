@@ -74,11 +74,11 @@ export const SetAlertsStatusByQuery = z.object({
   status: AlertStatus,
   conflicts: z.enum(['abort', 'proceed']).optional().default('abort'),
   /**
-   * Optional map of field name to runtime field type. For each entry, a runtime field of the specified type is created reading its value from `_source[fieldName]` and included in the query as `runtime_mappings`. Use this to reference fields stored on the alert `_source` that are not part of the alerts index mapping, for example, custom fields added via data view runtime fields.
+   * Optional map of field name to runtime field type. For each entry, a runtime field of the specified type is created reading its value from `_source[fieldName]` and included in the query as `runtime_mappings`. Use this to reference fields stored on the alert `_source` that are not part of the alerts index mapping, for example, custom fields added via data view runtime fields. The combined number of unique field names across `runtime_fields` and `runtime_mappings` must not exceed 100.
    */
   runtime_fields: z.object({}).catchall(RuntimeFieldType).optional(),
   /**
-   * Use this when the query references fields that are not in the alerts index mapping, for example data view runtime fields with a Painless script.
+   * Use this when the query references fields that are not in the alerts index mapping, for example data view runtime fields with a Painless script. The combined number of unique field names across `runtime_fields` and `runtime_mappings` must not exceed 100.
    */
   runtime_mappings: z.object({}).catchall(RuntimeFieldMapping).optional(),
 });
