@@ -52,5 +52,4 @@ export const INFRA_EBT_DETAILS = {
 export const INFRA_EBT_ELEMENTS = {
   LOG_ANALYSIS_ANOMALIES_RESULTS: 'infraLogAnalysisAnomaliesResults',
   LOG_ANALYSIS_DATASETS_SELECTOR: 'infraLogAnalysisDatasetsSelector',
-  LOG_ANALYSIS_PAGE_HEADER: 'infraLogAnalysisPageHeader',
 } as const;

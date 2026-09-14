@@ -21,8 +21,8 @@ const loadingMessage = i18n.translate('xpack.infra.ml.splash.loadingMessage', {
 });
 
 export const SubscriptionSplashPage: React.FC<
-  LazyObservabilityPageTemplateProps & { header?: React.ReactNode }
-> = ({ header, pageHeader, ...templateProps }) => {
+  Omit<LazyObservabilityPageTemplateProps, 'pageHeader'> & { header: React.ReactNode }
+> = ({ header, ...templateProps }) => {
   const { loadState, isTrialAvailable, checkTrialAvailability } = useTrialStatus();
   const manageLicenseURL = useLicenseUrl();
 
@@ -30,36 +30,25 @@ export const SubscriptionSplashPage: React.FC<
     checkTrialAvailability();
   }, [checkTrialAvailability]);
 
-  const renderWithOptionalHeader = (body: React.ReactNode) => {
-    if (!header) {
-      return (
-        <PageTemplate {...templateProps} pageHeader={pageHeader} isEmptyState>
-          {body}
-        </PageTemplate>
-      );
-    }
-
-    return (
-      <PageTemplate
-        {...templateProps}
-        pageSectionProps={{
-          paddingSize: 'none',
-          contentProps: {
-            css: filledPageSectionContentCss,
-          },
-        }}
-      >
-        {header}
-        <EuiPageSection alignment="center" grow>
-          {body}
-        </EuiPageSection>
-      </PageTemplate>
-    );
-  };
+  const renderWithHeader = (body: React.ReactNode) => (
+    <PageTemplate
+      {...templateProps}
+      pageSectionProps={{
+        paddingSize: 'none',
+        contentProps: {
+          css: filledPageSectionContentCss,
+        },
+      }}
+    >
+      {header}
+      <EuiPageSection alignment="center" grow>
+        {body}
+      </EuiPageSection>
+    </PageTemplate>
+  );
 
   if (loadState === 'pending') {
-    const pendingPrompt = <LoadingPrompt message={loadingMessage} />;
-    return header ? renderWithOptionalHeader(pendingPrompt) : pendingPrompt;
+    return renderWithHeader(<LoadingPrompt message={loadingMessage} />);
   }
 
   const canStartTrial = isTrialAvailable && loadState === 'resolved';
@@ -123,7 +112,7 @@ export const SubscriptionSplashPage: React.FC<
     );
   }
 
-  return renderWithOptionalHeader(
+  return renderWithHeader(
     <EuiEmptyPrompt
       iconType={'chartLine'}
       title={<h2>{title}</h2>}
