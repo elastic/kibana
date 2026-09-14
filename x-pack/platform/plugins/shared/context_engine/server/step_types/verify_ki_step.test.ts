@@ -112,7 +112,9 @@ describe('verify_ki workflow step', () => {
       coreSetup,
       telemetry.logger,
       telemetry.analyticsService,
-      withWorkflows ? { workflowsManagement, checkExecutePrivilege } : undefined
+      withWorkflows
+        ? { getWorkflowsManagement: async () => workflowsManagement, checkExecutePrivilege }
+        : undefined
     );
 
   const runHandler = async (

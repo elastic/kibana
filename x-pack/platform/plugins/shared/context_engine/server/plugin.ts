@@ -27,6 +27,7 @@ import type {
   ContextEngineStartDependencies,
   DeleteWorkflowsApi,
 } from './types';
+import type { KiVerifierWorkflowRunner } from './ki_verification';
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
 import { registerSignalRoutes } from './routes/signals';
@@ -71,8 +72,9 @@ export class ContextEnginePlugin
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();
   private analyticsService?: ContextEngineAnalyticsService;
-  private workflowsManagementApiPromise: Promise<DeleteWorkflowsApi | undefined> =
-    Promise.resolve(undefined);
+  private workflowsManagementApiPromise: Promise<
+    (DeleteWorkflowsApi & KiVerifierWorkflowRunner) | undefined
+  > = Promise.resolve(undefined);
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
@@ -112,18 +114,12 @@ export class ContextEnginePlugin
       return hasAllRequested;
     };
 
-    const workflowsManagement = setupDeps.workflowsManagement?.management;
     setupDeps.workflowsExtensions.registerStepDefinition(
-      createVerifyKiStepDefinition(
-        coreSetup,
-        this.logger.get('context_steps'),
-        analyticsService,
-        workflowsManagement && {
-          workflowsManagement,
-          checkExecutePrivilege: (request, spaceId) =>
-            checkApiPrivileges(request, spaceId, WorkflowsManagementOperationPrivileges.execute),
-        }
-      )
+      createVerifyKiStepDefinition(coreSetup, this.logger.get('context_steps'), analyticsService, {
+        getWorkflowsManagement: () => this.workflowsManagementApiPromise,
+        checkExecutePrivilege: (request, spaceId) =>
+          checkApiPrivileges(request, spaceId, WorkflowsManagementOperationPrivileges.execute),
+      })
     );
 
     coreSetup.uiSettings.registerGlobal({
@@ -266,7 +262,9 @@ export class ContextEnginePlugin
   ): void {
     try {
       this.workflowsManagementApiPromise = coreSetup.plugins
-        .onSetup<{ workflowsManagement: { management: DeleteWorkflowsApi } }>('workflowsManagement')
+        .onSetup<{
+          workflowsManagement: { management: DeleteWorkflowsApi & KiVerifierWorkflowRunner };
+        }>('workflowsManagement')
         .then(({ workflowsManagement }) =>
           workflowsManagement.found ? workflowsManagement.contract.management : undefined
         )

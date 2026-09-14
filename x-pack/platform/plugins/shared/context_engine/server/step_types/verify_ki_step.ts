@@ -26,7 +26,7 @@ import type { ContextEngineAnalyticsService } from '../telemetry';
 import { withKiVerificationTelemetry } from './helpers';
 
 export interface WorkflowVerifierStepDependencies {
-  workflowsManagement: KiVerifierWorkflowRunner;
+  getWorkflowsManagement: () => Promise<KiVerifierWorkflowRunner | undefined>;
   /** Checks if the request has permission to run workflows in the space. */
   checkExecutePrivilege: (request: KibanaRequest, spaceId: string) => Promise<boolean>;
 }
@@ -69,7 +69,8 @@ export const createVerifyKiStepDefinition = (
         if (builtInIds.length === entries.length) {
           return builtInIds;
         }
-        if (!workflowVerifierDeps) {
+        const workflowsManagement = await workflowVerifierDeps?.getWorkflowsManagement();
+        if (!workflowVerifierDeps || !workflowsManagement) {
           throw new ExecutionError({
             type: 'FeatureDisabledError',
             message:
@@ -88,7 +89,7 @@ export const createVerifyKiStepDefinition = (
           metadata,
           parent,
           spaceId,
-          workflowsManagement: workflowVerifierDeps.workflowsManagement,
+          workflowsManagement,
         });
         if (verifierChain.length > MAX_KI_VERIFIER_WORKFLOW_DEPTH) {
           throw new ExecutionError({
@@ -114,7 +115,7 @@ export const createVerifyKiStepDefinition = (
             });
           }
           return createWorkflowVerifier(entry, {
-            workflowsManagement: workflowVerifierDeps.workflowsManagement,
+            workflowsManagement,
             request: fakeRequest,
             spaceId,
             auditLogger,

@@ -22,7 +22,6 @@ import type { WorkflowEnablementApi } from './feedback_analysis/schedule';
 import type { AiIndexProperties } from '../common/http_api/ai_indices';
 import type { AiIndexService } from './ai_indices/service';
 import type { ImprovementsServiceApi } from './improvements/service';
-import type { KiVerifierWorkflowRunner } from './ki_verification';
 import type { SignalsServiceApi } from './signals/service';
 
 export interface ContextEnginePluginSetup {
@@ -56,8 +55,8 @@ export interface ContextEngineSetupDependencies {
   features: FeaturesPluginSetup;
   taskManager: TaskManagerSetupContract;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
-  /** Optional in the manifest; without it feedback analysis schedules and custom KI verifiers are unavailable. */
-  workflowsManagement?: { management: KiVerifierWorkflowRunner & WorkflowEnablementApi };
+  /** Optional in the manifest; without it a feedback analysis schedule cannot be enabled. */
+  workflowsManagement?: { management: WorkflowEnablementApi };
 }
 
 export interface ContextEngineStartDependencies {
