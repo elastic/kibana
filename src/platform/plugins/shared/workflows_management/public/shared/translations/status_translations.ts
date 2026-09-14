@@ -39,7 +39,7 @@ export const STATUS_LABELS = {
     defaultMessage: 'Success',
   }),
   [ExecutionStatus.FAILED]: i18n.translate('workflowsManagement.executionStatus.failed', {
-    defaultMessage: 'Error',
+    defaultMessage: 'Failed',
   }),
   [ExecutionStatus.CANCELLED]: i18n.translate('workflowsManagement.executionStatus.cancelled', {
     defaultMessage: 'Canceled',
