@@ -59,6 +59,18 @@ describe('fetchConnectors lib', () => {
       });
     });
 
+    it('should return undefined if connector is soft-deleted', async () => {
+      mockClient.transport.request.mockResolvedValue({
+        id: 'connectorId',
+        service_type: 'someServiceType',
+        deleted: true,
+      });
+
+      await expect(
+        fetchConnectorById(mockClient as unknown as ElasticsearchClient, 'connectorId')
+      ).resolves.toBeUndefined();
+    });
+
     it('should return undefined if connector not found', async () => {
       mockClient.transport.request.mockImplementationOnce(() => Promise.reject(notFoundError));
 
@@ -151,6 +163,20 @@ describe('fetchConnectors lib', () => {
           size: 1000,
         },
       });
+    });
+    it('should exclude soft-deleted connectors by default', async () => {
+      const mockResult = {
+        results: [
+          { id: 'connector1', service_type: 'type1' },
+          { id: 'connector2', service_type: 'type2', deleted: true },
+        ],
+        count: 2,
+      };
+      mockClient.transport.request.mockResolvedValue(mockResult);
+
+      await expect(fetchConnectors(mockClient as unknown as ElasticsearchClient)).resolves.toEqual([
+        { id: 'connector1', service_type: 'type1' },
+      ]);
     });
     it('should fetch all connectors if there are more than 1000', async () => {
       const firstBatch = Array.from({ length: 1000 }, (_, i) => ({

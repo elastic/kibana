@@ -25,6 +25,9 @@ export const fetchConnectorById = async (
       method: 'GET',
       path: `/_connector/${connectorId}`,
     });
+    if (result.deleted) {
+      return undefined;
+    }
     return result;
   } catch (err) {
     if (isNotFoundException(err)) {
@@ -83,7 +86,7 @@ export const fetchConnectors = async (
         ...querystring,
         from: accumulator.length,
         size: 1000,
-        include_deleted: includeDeleted,
+        ...(includeDeleted ? { include_deleted: true } : {}),
       },
     });
 
@@ -91,7 +94,11 @@ export const fetchConnectors = async (
     accumulator = accumulator.concat(hits);
   } while (hits.length >= 1000);
 
-  const result = accumulator;
+  let result = accumulator;
+
+  if (!includeDeleted) {
+    result = result.filter((connector) => !connector.deleted);
+  }
 
   if (fetchOnlyCrawlers !== undefined) {
     return result.filter((hit) => {
