@@ -23,7 +23,7 @@ import { RuntimeFieldTypeEnum } from '../../../../../common/api/detection_engine
 import { MAX_RUNTIME_FIELDS_PER_REQUEST } from './bulk_close_runtime_mappings';
 import { setSignalsStatusRoute } from './open_close_signals_route';
 import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
-import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
+
 
 describe('set signal status', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -385,12 +385,9 @@ describe('set signal status', () => {
     beforeEach(() => {
       server = serverMock.create();
       mockEventBus = { emitAlertStatusChanged: jest.fn() };
-      setSignalsStatusRoute(
-        server.router,
-        logger,
-        createMockTelemetryEventsSender(),
-        mockEventBus as unknown as SecuritySolutionEventBus
-      );
+      // NOTE: setSignalsStatusRoute in 9.4 takes 3 args (router, logger, sender).
+      // The event-bus 4th argument was introduced in 9.x main and does not exist here.
+      setSignalsStatusRoute(server.router, logger, createMockTelemetryEventsSender());
     });
 
     describe('by-ids path', () => {
