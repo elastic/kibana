@@ -28,6 +28,16 @@ export const getIndentedDatasetSettingsFieldsWidthCss = (indent: readonly string
   width: calc(${DATASET_SETTINGS_FIELDS_WIDTH} - ${indent.join(' - ')});
 `;
 
+/** Indents content under the section title but spans to the panel's right edge. */
+export const getIndentedDatasetSettingsFullWidthCss = (indent: readonly string[]) => {
+  const indentSum = indent.join(' + ');
+
+  return css`
+    margin-inline-start: calc(${indentSum});
+    width: calc(100% - (${indentSum}));
+  `;
+};
+
 const chunkFields = <T,>(items: readonly T[], size: number): T[][] => {
   const chunks: T[][] = [];
 

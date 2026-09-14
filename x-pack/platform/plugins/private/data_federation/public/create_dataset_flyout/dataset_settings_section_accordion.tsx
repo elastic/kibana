@@ -11,7 +11,10 @@ import { css } from '@emotion/react';
 import type { EuiAccordionProps } from '@elastic/eui';
 import { EuiAccordion, EuiPanel, EuiTitle, useEuiTheme } from '@elastic/eui';
 
-import { getIndentedDatasetSettingsFieldsWidthCss } from './dataset_settings_fields_layout';
+import {
+  getIndentedDatasetSettingsFieldsWidthCss,
+  getIndentedDatasetSettingsFullWidthCss,
+} from './dataset_settings_fields_layout';
 
 export const datasetSettingsAccordionButtonCss = css`
   &:hover {
@@ -22,9 +25,14 @@ export const datasetSettingsAccordionButtonCss = css`
 /**
  * panel: the content sits in a filled panel.
  * indented: the content sits on the page, lined up under the accordion arrow.
+ * indentedFullWidth: same left indent as indented, but content spans to the right edge.
  * plain: the content sits on the page at the full width of the step.
  */
-export type DatasetSettingsSectionContentLayout = 'panel' | 'indented' | 'plain';
+export type DatasetSettingsSectionContentLayout =
+  | 'panel'
+  | 'indented'
+  | 'indentedFullWidth'
+  | 'plain';
 
 export interface DatasetSettingsSectionAccordionProps {
   id: string;
@@ -83,10 +91,14 @@ export const DatasetSettingsSectionAccordion: FunctionComponent<
           `,
         } as const);
 
+  const accordionContentIndent = [euiTheme.size.l, euiTheme.size.xs] as const;
+
   const contentCss =
     contentLayout === 'indented'
-      ? getIndentedDatasetSettingsFieldsWidthCss([euiTheme.size.l, euiTheme.size.xs])
-      : undefined;
+      ? getIndentedDatasetSettingsFieldsWidthCss(accordionContentIndent)
+      : contentLayout === 'indentedFullWidth'
+        ? getIndentedDatasetSettingsFullWidthCss(accordionContentIndent)
+        : undefined;
 
   return (
     <EuiAccordion

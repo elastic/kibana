@@ -426,7 +426,7 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
       <DatasetSettingsSectionAccordion
         id={mappedFieldsAccordionId}
         title={datasetWizardStrings.mappedFieldsTitle()}
-        contentLayout="plain"
+        contentLayout={isFlow396 ? 'indentedFullWidth' : 'plain'}
         initialIsOpen={isFlow396 ? true : isMappedFieldsOpen}
         forceState={isFlow396 ? undefined : isMappedFieldsOpen ? 'open' : 'closed'}
         onToggle={isFlow396 ? undefined : setIsMappedFieldsOpen}
