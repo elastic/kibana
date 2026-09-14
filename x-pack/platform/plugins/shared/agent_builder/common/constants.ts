@@ -32,3 +32,9 @@ export const CONVERSATION_SEARCH_QUERY_MAX_LENGTH = 512;
  * not reachable through offset pagination; requests past it return 400.
  */
 export const MAX_RESULT_WINDOW = 10_000;
+
+/** Maximum events per _add_events request. */
+export const MAX_EVENTS_PER_REQUEST = 50;
+
+/** Maximum byte length of a conversation event type string. */
+export const CONVERSATION_EVENT_TYPE_MAX_LENGTH = 256;
