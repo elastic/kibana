@@ -304,16 +304,24 @@ const removeOutOfScopeReferences = (
         break;
       }
       case 'eval': {
-        const currentScope = scope;
+        // ES|QL resolves EVAL assignments left to right and allows referencing
+        // an earlier assignment within the same EVAL, so the scope accumulates
+        // across kept assignments instead of being captured once per command
+        const workingScope: ColumnScope = scope === null ? null : new Set(scope);
         // for assignments (`x = expr`) only the right-hand side must be in
         // scope; the assignment target is the column being introduced
         command.args = command.args.filter((arg) => {
           if (Array.isArray(arg)) return true;
           const nodesToCheck =
             isAssignment(arg) && isColumn(arg.args[0]) ? arg.args.slice(1) : [arg];
-          return nodesToCheck
+          const inScope = nodesToCheck
             .flat()
-            .every((node) => Array.isArray(node) || refsAreInScope(node, currentScope));
+            .every((node) => Array.isArray(node) || refsAreInScope(node, workingScope));
+          if (inScope && workingScope !== null) {
+            const resultColumn = getExpressionResultColumn(arg);
+            if (resultColumn !== undefined) workingScope.add(resultColumn);
+          }
+          return inScope;
         });
         if (command.args.length === 0) removeCommand = true;
         break;

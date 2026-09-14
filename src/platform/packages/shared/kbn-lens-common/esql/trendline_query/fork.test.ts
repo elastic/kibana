@@ -163,6 +163,24 @@ describe('flattenForkCommands', () => {
       ).toBe('FROM index | STATS a = COUNT(*) | KEEP a');
     });
 
+    it('keeps chained EVAL assignments referencing an earlier assignment in the same EVAL', () => {
+      expect(
+        flatten(
+          'FROM index | FORK (STATS a = COUNT(*)) (STATS b = COUNT(*)) | EVAL x = a + 1, y = x + 1 | KEEP a, x, y',
+          ['a']
+        )
+      ).toBe('FROM index | STATS a = COUNT(*) | EVAL x = a + 1, y = x + 1 | KEEP a, x, y');
+    });
+
+    it('cascades within a chained EVAL when the first assignment is out of scope', () => {
+      expect(
+        flatten(
+          'FROM index | FORK (STATS a = COUNT(*)) (STATS b = COUNT(*)) | EVAL x = b + 1, y = x + 1 | KEEP a, x, y',
+          ['a']
+        )
+      ).toBe('FROM index | STATS a = COUNT(*) | KEEP a');
+    });
+
     it('keeps EVAL assignments whose references are all in scope', () => {
       expect(
         flatten(

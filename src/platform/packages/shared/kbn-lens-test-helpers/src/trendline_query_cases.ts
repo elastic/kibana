@@ -261,6 +261,18 @@ export const buildTrendlineQueryCases = ({ index }: { index: string }): Trendlin
       expectedUnavailableMetricFields: ['diff'],
     },
     {
+      // ES|QL allows referencing an earlier assignment within the same EVAL;
+      // post-FORK pruning must resolve intra-EVAL dependencies instead of
+      // dropping the chained assignment as out-of-scope
+      description: 'FORK query with post-FORK chained EVAL assignments',
+      sourceQuery: `FROM ${index} | FORK (STATS a = COUNT(*)) (STATS b = COUNT(*)) | EVAL x = a + 1, y = x + 1 | KEEP a, x, y`,
+      expectedQuery: `FROM ${index} | STATS a = COUNT(*) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend) | EVAL x = a + 1, y = x + 1 | KEEP a, x, y, \`BUCKET(@timestamp, 75, ?_tstart, ?_tend)\``,
+      expectedTimeField: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+      expectedMetricFields: ['a', 'x', 'y'],
+      metricFields: ['a', 'y'],
+      expectedUnavailableMetricFields: [],
+    },
+    {
       description: 'FORK query without metric fields falls back to the first STATS branch',
       // the WHERE branch projects to KEEP bytes: counter-typed fields in the TSDB
       // index otherwise conflict across FORK branch schemas (ES rejects the query)
