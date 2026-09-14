@@ -182,24 +182,20 @@ apiTest.describe(
     });
 
     apiTest(
-      'project monitors - rejects api monitors on Serverless',
+      'project monitors - rejected api monitors on Serverless are not listed',
       async ({ apiClient, config }) => {
         apiTest.skip(!config.serverless, 'only relevant on Serverless');
 
         const project = `test-api-suite-${uuidv4()}`;
-        const monitors = buildMonitors(
-          projectApiMonitorFixture.monitors[0],
-          'test api id',
-          TOTAL_MONITORS
-        );
+        const monitors = buildMonitors(projectApiMonitorFixture.monitors[0], 'test api id', 1);
         try {
-          const res = await pushProjectMonitors(apiClient, editorHeaders, project, monitors);
+          await pushProjectMonitors(apiClient, editorHeaders, project, monitors);
 
-          // API Journey monitors aren't supported on Serverless yet, so none
-          // of the pushed monitors were created; there's nothing to page through.
-          const body = res.body as { createdMonitors: string[]; failedMonitors: unknown[] };
-          expect(body.createdMonitors).toHaveLength(0);
-          expect(body.failedMonitors).toHaveLength(TOTAL_MONITORS);
+          // API Journey monitors aren't supported on Serverless yet, so the
+          // rejected push must leave nothing for the get/paging endpoint to return.
+          const page = await getPage(apiClient, project, 'per_page=20');
+          expect(page.total).toBe(0);
+          expect(page.monitors).toHaveLength(0);
         } finally {
           await deleteProjectMonitors(
             apiClient,
