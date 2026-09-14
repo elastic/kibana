@@ -146,7 +146,17 @@ describe('ServiceFlyoutTransactionsSection', () => {
   it('resolves the max groups tooltip docs link through the doc links service', () => {
     mockedUseServiceFlyoutTransactionData.mockReturnValue({
       ...DEFAULT_HOOK_RESULT,
-      items: [...FIXTURE_ITEMS, { name: '_other', transactionType: 'request' }],
+      items: [
+        ...FIXTURE_ITEMS,
+        {
+          name: '_other',
+          transactionType: 'request',
+          latency: { value: null },
+          throughput: { value: 0 },
+          errorRate: { value: null },
+          alertsCount: 0,
+        },
+      ],
       maxCountExceeded: true,
     });
 
