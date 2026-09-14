@@ -12,13 +12,7 @@ import {
   FormMonitorType,
   LocationStatus,
   MonitorTypeEnum,
-  ScreenshotOption,
 } from '../../../../common/runtime_types';
-import {
-  DEFAULT_FIELDS,
-  PROFILE_VALUES_ENUM,
-  PROFILES_MAP,
-} from '../../../../common/constants/monitor_defaults';
 import { normalizeProjectMonitors } from '.';
 import type { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 
@@ -99,13 +93,12 @@ describe('api normalizers', () => {
     );
   });
 
-  it('defaults screenshots to OFF and throttling to NO_THROTTLING (API has no browser/CDP)', () => {
-    // SCREENSHOTS / THROTTLING are part of the shared SO shape with BROWSER,
-    // but they are semantically inapplicable to API journeys: there is no
+  it('omits screenshots and throttling entirely (API has no browser/CDP)', () => {
+    // SCREENSHOTS / THROTTLING_CONFIG are browser/CDP-specific: there is no
     // browser to screenshot, and raw HTTP doesn't go through Chromium's CDP
-    // network throttling. Heartbeat's api plugin strips both CLI flags
-    // (elastic/beats#50802); we mirror that by defaulting to no-op values so
-    // the SO / UI / telemetry don't carry browser-only state.
+    // network throttling. API's own codec (APIAdvancedFieldsCodec) omits both
+    // rather than carrying them as inert values, so they must not appear on
+    // a normalized API monitor at all.
     const monitors: ProjectMonitor[] = [
       {
         type: MonitorTypeEnum.API,
@@ -126,14 +119,9 @@ describe('api normalizers', () => {
       version: '9.5.0',
     });
 
-    const apiDefaults = DEFAULT_FIELDS[MonitorTypeEnum.API];
     const fields = asApi(actual.normalizedFields);
-    expect(fields[ConfigKey.SCREENSHOTS]).toBe(ScreenshotOption.OFF);
-    expect(fields[ConfigKey.THROTTLING_CONFIG]).toEqual(
-      PROFILES_MAP[PROFILE_VALUES_ENUM.NO_THROTTLING]
-    );
-    expect(fields[ConfigKey.SCREENSHOTS]).toBe(apiDefaults[ConfigKey.SCREENSHOTS]);
-    expect(fields[ConfigKey.THROTTLING_CONFIG]).toEqual(apiDefaults[ConfigKey.THROTTLING_CONFIG]);
+    expect(ConfigKey.SCREENSHOTS in fields).toBe(false);
+    expect(ConfigKey.THROTTLING_CONFIG in fields).toBe(false);
   });
 
   it('reports unsupportedKeys as empty (API monitors do not strip unknown fields)', () => {

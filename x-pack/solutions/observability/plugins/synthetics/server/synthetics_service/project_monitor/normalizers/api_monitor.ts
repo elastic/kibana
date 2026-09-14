@@ -15,12 +15,12 @@ import { getNormalizeCommonFields, getValueInSeconds } from './common_fields';
  * Normalize a project monitor pushed by `@elastic/synthetics` as `monitor.type: api`
  * (see elastic/synthetics#997 / elastic/beats#50802) into the Kibana SO shape.
  *
- * Structurally identical to the browser normalizer, but:
+ * Structurally close to the browser normalizer, but:
  *  - emits MONITOR_TYPE === 'api' (Heartbeat routes to the api plugin, no Chromium)
- *  - inherits API-correct defaults for `screenshots` (OFF) and `throttling`
- *    (NO_THROTTLING) via DEFAULT_FIELDS[MonitorTypeEnum.API]; both are stripped
- *    from the CLI invocation by Heartbeat's api plugin (elastic/beats#50802),
- *    and neither is surfaced in the API form.
+ *  - never sets `screenshots` or `throttling`: APIFields (see
+ *    common/runtime_types/monitor_management/monitor_types.ts) omits both,
+ *    since they're browser/CDP-specific and Heartbeat's api plugin
+ *    (elastic/beats#50802) never launches a browser.
  *  - keeps `ignoreHTTPSErrors` and `playwrightOptions` (both apply to
  *    Playwright's APIRequestContext)
  */

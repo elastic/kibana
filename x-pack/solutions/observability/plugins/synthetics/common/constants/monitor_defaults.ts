@@ -198,16 +198,10 @@ export const DEFAULT_BROWSER_SIMPLE_FIELDS: BrowserSimpleFields = {
 };
 
 // API monitor defaults — same SO shape as Browser (APIFields in
-// runtime_types/monitor_management/monitor_types.ts is structurally identical
-// to BrowserFields), distinguished by MONITOR_TYPE / FORM_MONITOR_TYPE.
-//
-// Browser-only advanced defaults are explicitly overridden to no-op values so
-// the SO doesn't carry semantically wrong defaults — the values still flow to
-// the UI form, list filters, and telemetry even though Heartbeat's `api`
-// plugin (elastic/beats#50802) strips `--screenshots` and `--throttling` from
-// the CLI invocation:
-//   - SCREENSHOTS:       OFF             — no browser launched, nothing to capture
-//   - THROTTLING_CONFIG: NO_THROTTLING   — raw HTTP doesn't go through CDP throttling
+// runtime_types/monitor_management/monitor_types.ts) except SCREENSHOTS and
+// THROTTLING_CONFIG, which API's codec omits entirely (they're browser/CDP-
+// specific and Heartbeat's `api` plugin, elastic/beats#50802, never launches
+// a browser). Distinguished by MONITOR_TYPE / FORM_MONITOR_TYPE.
 //
 // Other browser advanced fields (SYNTHETICS_ARGS, JOURNEY_FILTERS_*,
 // IGNORE_HTTPS_ERRORS) apply to API journeys too and inherit cleanly.
@@ -220,9 +214,13 @@ export const DEFAULT_API_SIMPLE_FIELDS: APISimpleFields = {
 };
 
 export const DEFAULT_API_ADVANCED_FIELDS: APIAdvancedFields = {
-  ...DEFAULT_BROWSER_ADVANCED_FIELDS,
-  [ConfigKey.SCREENSHOTS]: ScreenshotOption.OFF,
-  [ConfigKey.THROTTLING_CONFIG]: PROFILES_MAP[PROFILE_VALUES_ENUM.NO_THROTTLING],
+  [ConfigKey.SYNTHETICS_ARGS]: DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.SYNTHETICS_ARGS],
+  [ConfigKey.JOURNEY_FILTERS_MATCH]:
+    DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.JOURNEY_FILTERS_MATCH],
+  [ConfigKey.JOURNEY_FILTERS_TAGS]: DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.JOURNEY_FILTERS_TAGS],
+  [ConfigKey.IGNORE_HTTPS_ERRORS]: DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.IGNORE_HTTPS_ERRORS],
+  [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]:
+    DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST],
 };
 
 export const DEFAULT_HTTP_SIMPLE_FIELDS: HTTPSimpleFields = {
