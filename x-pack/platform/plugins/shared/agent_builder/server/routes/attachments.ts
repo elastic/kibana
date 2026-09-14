@@ -7,12 +7,11 @@
 
 import path from 'path';
 import { schema } from '@kbn/config-schema';
-import type { ConversationRound, ToolCallStep } from '@kbn/agent-builder-common';
 import type { UpdateOriginResponse } from '@kbn/agent-builder-common/attachments';
-import { isToolCallStep, attachmentTools } from '@kbn/agent-builder-common';
 import type { AttachmentResolveContext } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import { CONVERSATION_ID_MAX_LENGTH, isAgentBuilderError } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import type {
@@ -23,52 +22,18 @@ import type {
   RestoreAttachmentResponse,
   RenameAttachmentResponse,
   CheckStaleAttachmentsResponse,
+  GetAttachmentResponse,
 } from '../../common/http_api/attachments';
+import { createAttachmentPublicClient } from '../services/attachments';
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY } from './route_security';
 
-/**
- * Check if an attachment is referenced in any conversation round.
- * This checks tool calls to see if any attachment tools were used with this attachment ID.
- */
-function isAttachmentReferencedInRounds(
-  attachmentId: string,
-  rounds: ConversationRound[]
-): boolean {
-  const attachmentToolIds = [attachmentTools.read, attachmentTools.update, attachmentTools.diff];
-
-  for (const round of rounds) {
-    for (const step of round.steps) {
-      if (isToolCallStep(step)) {
-        const toolCallStep = step as ToolCallStep;
-        // Check if this is an attachment tool call
-        if (attachmentToolIds.includes(toolCallStep.tool_id)) {
-          // Check if the params reference this attachment ID
-          const params = toolCallStep.params as Record<string, unknown>;
-          if (params.attachment_id === attachmentId) {
-            return true;
-          }
-        }
-      }
-    }
-  }
-  return false;
-}
-
-const hasClientId = (attachment: { client_id?: string; versions: Array<{ data: unknown }> }) => {
-  if (attachment.client_id) {
-    return true;
-  }
-
-  return attachment.versions.some((version) => {
-    if (!version?.data || typeof version.data !== 'object') {
-      return false;
-    }
-
-    return Boolean((version.data as { client_id?: string }).client_id);
-  });
-};
+// Defensive caps on client-supplied attachment fields to avoid unbounded request payloads.
+const ATTACHMENT_ID_MAX_LENGTH = 256;
+const ATTACHMENT_TYPE_MAX_LENGTH = 256;
+const ATTACHMENT_ORIGIN_MAX_LENGTH = 2048;
+const ATTACHMENT_DESCRIPTION_MAX_LENGTH = 2048;
 
 export function registerAttachmentRoutes({
   router,
@@ -104,6 +69,7 @@ export function registerAttachmentRoutes({
           request: {
             params: schema.object({
               conversation_id: schema.string({
+                maxLength: CONVERSATION_ID_MAX_LENGTH,
                 meta: { description: 'The unique identifier of the conversation.' },
               }),
             }),
@@ -126,20 +92,83 @@ export function registerAttachmentRoutes({
         const { conversation_id: conversationId } = request.params;
         const { include_deleted: includeDeleted } = request.query;
 
-        const client = await conversationsService.getScopedClient({ request });
-        const conversation = await client.get(conversationId);
-
-        const stateManager = createAttachmentStateManager(conversation.attachments ?? [], {
-          getTypeDefinition: attachmentsService.getTypeDefinition,
+        const [coreStart, startDeps] = await coreSetup.getStartServices();
+        const client = createAttachmentPublicClient({
+          request,
+          conversationsService,
+          attachmentsService,
+          coreStart,
+          spaces: startDeps.spaces,
         });
-        const attachments = includeDeleted ? stateManager.getAll() : stateManager.getActive();
 
-        return response.ok<ListAttachmentsResponse>({
-          body: {
-            results: attachments,
-            total_token_estimate: stateManager.getTotalTokenEstimate(),
+        const result = await client.list({ conversationId, includeDeleted });
+        return response.ok<ListAttachmentsResponse>({ body: result });
+      })
+    );
+
+  // Get a single attachment
+  router.versioned
+    .get({
+      path: `${publicApiPath}/conversations/{conversation_id}/attachments/{attachment_id}`,
+      security: AGENT_BUILDER_READ_SECURITY,
+      access: 'public',
+      summary: 'Get conversation attachment',
+      description: 'Get a single attachment by ID for a conversation.',
+      options: {
+        tags: ['attachment', 'oas-tag:agent builder'],
+        availability: {
+          stability: 'experimental',
+          since: '9.6.0',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            params: schema.object({
+              conversation_id: schema.string({
+                maxLength: CONVERSATION_ID_MAX_LENGTH,
+                meta: { description: 'The unique identifier of the conversation.' },
+              }),
+              attachment_id: schema.string({
+                maxLength: ATTACHMENT_ID_MAX_LENGTH,
+                meta: { description: 'The unique identifier of the attachment.' },
+              }),
+            }),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/attachments_get.yaml'),
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { conversations: conversationsService, attachments: attachmentsService } =
+          getInternalServices();
+        const { conversation_id: conversationId, attachment_id: attachmentId } = request.params;
+
+        const [coreStart, startDeps] = await coreSetup.getStartServices();
+        const client = createAttachmentPublicClient({
+          request,
+          conversationsService,
+          attachmentsService,
+          coreStart,
+          spaces: startDeps.spaces,
         });
+
+        try {
+          const attachment = await client.get({ conversationId, attachmentId });
+          return response.ok<GetAttachmentResponse>({ body: { attachment } });
+        } catch (e) {
+          if (isAgentBuilderError(e)) {
+            return response.customError({
+              statusCode: (e.meta.statusCode as number) ?? 500,
+              body: { message: e.message },
+            });
+          }
+          throw e;
+        }
       })
     );
 
@@ -167,6 +196,7 @@ export function registerAttachmentRoutes({
           request: {
             params: schema.object({
               conversation_id: schema.string({
+                maxLength: CONVERSATION_ID_MAX_LENGTH,
                 meta: { description: 'The unique identifier of the conversation.' },
               }),
             }),
@@ -243,16 +273,19 @@ export function registerAttachmentRoutes({
           request: {
             params: schema.object({
               conversation_id: schema.string({
+                maxLength: CONVERSATION_ID_MAX_LENGTH,
                 meta: { description: 'The unique identifier of the conversation.' },
               }),
             }),
             body: schema.object({
               id: schema.maybe(
                 schema.string({
+                  maxLength: ATTACHMENT_ID_MAX_LENGTH,
                   meta: { description: 'Optional custom ID for the attachment.' },
                 })
               ),
               type: schema.string({
+                maxLength: ATTACHMENT_TYPE_MAX_LENGTH,
                 meta: {
                   description: 'The type of the attachment (e.g., text, esql, visualization).',
                 },
@@ -266,6 +299,7 @@ export function registerAttachmentRoutes({
               ),
               origin: schema.maybe(
                 schema.string({
+                  maxLength: ATTACHMENT_ORIGIN_MAX_LENGTH,
                   meta: {
                     description:
                       'Origin string (for example, saved object ID) for by-reference attachments. When provided without data, the content is resolved once at creation time.',
@@ -274,6 +308,7 @@ export function registerAttachmentRoutes({
               ),
               description: schema.maybe(
                 schema.string({
+                  maxLength: ATTACHMENT_DESCRIPTION_MAX_LENGTH,
                   meta: { description: 'Human-readable description of the attachment.' },
                 })
               ),
@@ -293,52 +328,28 @@ export function registerAttachmentRoutes({
         const { conversations: conversationsService, attachments: attachmentsService } =
           getInternalServices();
         const { conversation_id: conversationId } = request.params;
-        const { id, type, data, origin, description, hidden } = request.body;
 
-        const client = await conversationsService.getScopedClient({ request });
-        const conversation = await client.get(conversationId);
-
-        const stateManager = createAttachmentStateManager(conversation.attachments ?? [], {
-          getTypeDefinition: attachmentsService.getTypeDefinition,
+        const [coreStart, startDeps] = await coreSetup.getStartServices();
+        const client = createAttachmentPublicClient({
+          request,
+          conversationsService,
+          attachmentsService,
+          coreStart,
+          spaces: startDeps.spaces,
         });
 
-        // Check for duplicate ID if provided
-        if (id && stateManager.getAttachmentRecord(id)) {
-          return response.conflict({
-            body: { message: `Attachment with ID '${id}' already exists` },
-          });
-        }
-
-        let attachment;
         try {
-          const [coreStart] = await coreSetup.getStartServices();
-          const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
-          const resolveContext = {
-            request,
-            spaceId,
-            savedObjectsClient: coreStart.savedObjects.getScopedClient(request),
-          };
-
-          attachment = await stateManager.add(
-            { id, type, data, origin, description, hidden },
-            ATTACHMENT_REF_ACTOR.user,
-            resolveContext
-          );
+          const attachment = await client.create({ conversationId, ...request.body });
+          return response.ok<CreateAttachmentResponse>({ body: { attachment } });
         } catch (e) {
-          return response.badRequest({
-            body: { message: e.message },
-          });
+          if (isAgentBuilderError(e)) {
+            return response.customError({
+              statusCode: (e.meta.statusCode as number) ?? 500,
+              body: { message: e.message },
+            });
+          }
+          throw e;
         }
-
-        // Save the updated conversation
-        await client.update({
-          id: conversationId,
-          attachments: stateManager.getAll(),
-        });
-
-        return response.ok<CreateAttachmentResponse>({
-          body: { attachment },
-        });
       })
     );
 
@@ -367,9 +378,11 @@ export function registerAttachmentRoutes({
           request: {
             params: schema.object({
               conversation_id: schema.string({
+                maxLength: CONVERSATION_ID_MAX_LENGTH,
                 meta: { description: 'The unique identifier of the conversation.' },
               }),
               attachment_id: schema.string({
+                maxLength: ATTACHMENT_ID_MAX_LENGTH,
                 meta: { description: 'The unique identifier of the attachment to update.' },
               }),
             }),
@@ -379,6 +392,7 @@ export function registerAttachmentRoutes({
               }),
               description: schema.maybe(
                 schema.string({
+                  maxLength: ATTACHMENT_DESCRIPTION_MAX_LENGTH,
                   meta: { description: 'Optional new description for the attachment.' },
                 })
               ),
@@ -393,58 +407,34 @@ export function registerAttachmentRoutes({
         const { conversations: conversationsService, attachments: attachmentsService } =
           getInternalServices();
         const { conversation_id: conversationId, attachment_id: attachmentId } = request.params;
-        const { data, description } = request.body;
 
-        const client = await conversationsService.getScopedClient({ request });
-        const conversation = await client.get(conversationId);
-
-        const stateManager = createAttachmentStateManager(conversation.attachments ?? [], {
-          getTypeDefinition: attachmentsService.getTypeDefinition,
+        const [coreStart, startDeps] = await coreSetup.getStartServices();
+        const client = createAttachmentPublicClient({
+          request,
+          conversationsService,
+          attachmentsService,
+          coreStart,
+          spaces: startDeps.spaces,
         });
-        const existing = stateManager.getAttachmentRecord(attachmentId);
 
-        if (!existing) {
-          return response.notFound({
-            body: { message: `Attachment '${attachmentId}' not found` },
-          });
-        }
-
-        if (existing.active === false) {
-          return response.badRequest({
-            body: {
-              message: `Cannot update deleted attachment '${attachmentId}'. Restore it first.`,
-            },
-          });
-        }
-
-        let updated;
         try {
-          updated = await stateManager.update(attachmentId, { data, description });
+          const updated = await client.update({
+            conversationId,
+            attachmentId,
+            ...request.body,
+          });
+          return response.ok<UpdateAttachmentResponse>({
+            body: { attachment: updated, new_version: updated.current_version },
+          });
         } catch (e) {
-          return response.badRequest({
-            body: { message: e.message },
-          });
+          if (isAgentBuilderError(e)) {
+            return response.customError({
+              statusCode: (e.meta.statusCode as number) ?? 500,
+              body: { message: e.message },
+            });
+          }
+          throw e;
         }
-
-        if (!updated) {
-          return response.customError({
-            body: { message: `Failed to update attachment '${attachmentId}'` },
-            statusCode: 500,
-          });
-        }
-
-        // Save the updated conversation
-        await client.update({
-          id: conversationId,
-          attachments: stateManager.getAll(),
-        });
-
-        return response.ok<UpdateAttachmentResponse>({
-          body: {
-            attachment: updated,
-            new_version: updated.current_version,
-          },
-        });
       })
     );
 
@@ -474,9 +464,11 @@ export function registerAttachmentRoutes({
           request: {
             params: schema.object({
               conversation_id: schema.string({
+                maxLength: CONVERSATION_ID_MAX_LENGTH,
                 meta: { description: 'The unique identifier of the conversation.' },
               }),
               attachment_id: schema.string({
+                maxLength: ATTACHMENT_ID_MAX_LENGTH,
                 meta: { description: 'The unique identifier of the attachment to delete.' },
               }),
             }),
@@ -502,81 +494,29 @@ export function registerAttachmentRoutes({
         const { conversation_id: conversationId, attachment_id: attachmentId } = request.params;
         const { permanent } = request.query;
 
-        const client = await conversationsService.getScopedClient({ request });
-        const conversation = await client.get(conversationId);
-
-        const stateManager = createAttachmentStateManager(conversation.attachments ?? [], {
-          getTypeDefinition: attachmentsService.getTypeDefinition,
+        const [coreStart, startDeps] = await coreSetup.getStartServices();
+        const client = createAttachmentPublicClient({
+          request,
+          conversationsService,
+          attachmentsService,
+          coreStart,
+          spaces: startDeps.spaces,
         });
-        const existing = stateManager.getAttachmentRecord(attachmentId);
 
-        if (!existing) {
-          return response.notFound({
-            body: { message: `Attachment '${attachmentId}' not found` },
+        try {
+          await client.delete({ conversationId, attachmentId, permanent });
+          return response.ok<DeleteAttachmentResponse>({
+            body: { success: true, permanent: permanent ?? false },
           });
-        }
-
-        // Block delete for screen context attachments
-        if (existing.type === 'screen_context') {
-          return response.badRequest({
-            body: { message: 'Screen context attachments cannot be deleted' },
-          });
-        }
-
-        if (permanent) {
-          if (hasClientId(existing)) {
-            return response.conflict({
-              body: {
-                message: `Cannot permanently delete attachment '${attachmentId}' because it was created from flyout configuration`,
-              },
-            });
-          }
-
-          // Check if attachment is referenced in rounds
-          if (isAttachmentReferencedInRounds(attachmentId, conversation.rounds)) {
-            return response.conflict({
-              body: {
-                message: `Cannot permanently delete attachment '${attachmentId}' because it is referenced in conversation rounds`,
-              },
-            });
-          }
-
-          const success = stateManager.permanentDelete(attachmentId);
-          if (!success) {
+        } catch (e) {
+          if (isAgentBuilderError(e)) {
             return response.customError({
-              body: { message: `Failed to permanently delete attachment '${attachmentId}'` },
-              statusCode: 500,
+              statusCode: (e.meta.statusCode as number) ?? 500,
+              body: { message: e.message },
             });
           }
-        } else {
-          // Soft delete
-          if (existing.active === false) {
-            return response.badRequest({
-              body: { message: `Attachment '${attachmentId}' is already deleted` },
-            });
-          }
-
-          const success = stateManager.delete(attachmentId);
-          if (!success) {
-            return response.customError({
-              body: { message: `Failed to delete attachment '${attachmentId}'` },
-              statusCode: 500,
-            });
-          }
+          throw e;
         }
-
-        // Save the updated conversation
-        await client.update({
-          id: conversationId,
-          attachments: stateManager.getAll(),
-        });
-
-        return response.ok<DeleteAttachmentResponse>({
-          body: {
-            success: true,
-            permanent: permanent ?? false,
-          },
-        });
       })
     );
 
@@ -605,9 +545,11 @@ export function registerAttachmentRoutes({
           request: {
             params: schema.object({
               conversation_id: schema.string({
+                maxLength: CONVERSATION_ID_MAX_LENGTH,
                 meta: { description: 'The unique identifier of the conversation.' },
               }),
               attachment_id: schema.string({
+                maxLength: ATTACHMENT_ID_MAX_LENGTH,
                 meta: { description: 'The unique identifier of the attachment to restore.' },
               }),
             }),
@@ -692,14 +634,17 @@ export function registerAttachmentRoutes({
           request: {
             params: schema.object({
               conversation_id: schema.string({
+                maxLength: CONVERSATION_ID_MAX_LENGTH,
                 meta: { description: 'The unique identifier of the conversation.' },
               }),
               attachment_id: schema.string({
+                maxLength: ATTACHMENT_ID_MAX_LENGTH,
                 meta: { description: 'The unique identifier of the attachment to rename.' },
               }),
             }),
             body: schema.object({
               description: schema.string({
+                maxLength: ATTACHMENT_DESCRIPTION_MAX_LENGTH,
                 meta: { description: 'The new description/name for the attachment.' },
               }),
             }),
@@ -780,14 +725,17 @@ export function registerAttachmentRoutes({
           request: {
             params: schema.object({
               conversation_id: schema.string({
+                maxLength: CONVERSATION_ID_MAX_LENGTH,
                 meta: { description: 'The unique identifier of the conversation.' },
               }),
               attachment_id: schema.string({
+                maxLength: ATTACHMENT_ID_MAX_LENGTH,
                 meta: { description: 'The unique identifier of the attachment to update.' },
               }),
             }),
             body: schema.object({
               origin: schema.string({
+                maxLength: ATTACHMENT_ORIGIN_MAX_LENGTH,
                 meta: {
                   description:
                     'The origin string (e.g., saved object ID for visualizations and dashboards).',
