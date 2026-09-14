@@ -55,7 +55,7 @@ export const AutomationRow = ({
     <EuiPanel hasBorder paddingSize="m" data-test-subj="contextAiIndexAutomationRow">
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="indexRuntime" size="l" aria-hidden={true} />
+          <EuiIcon type="tableSparkles" size="l" aria-hidden={true} />
         </EuiFlexItem>
         {/* minWidth: 0 lets the flex item shrink so long names truncate instead of overflowing the panel */}
         <EuiFlexItem css={{ minWidth: 0 }}>
