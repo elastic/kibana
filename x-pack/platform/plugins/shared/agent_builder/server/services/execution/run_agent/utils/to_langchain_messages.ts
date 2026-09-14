@@ -117,9 +117,9 @@ export const prepareMessages = async ({
 
     // Inject back subagent roaster notice after compaction
     if (subagentRosterFallback && Object.keys(subagentRosterFallback).length > 0) {
-      const fallbackRoster = Object.entries(subagentRosterFallback).map(([name, id]) => ({
+      const fallbackRoster = Object.entries(subagentRosterFallback).map(([name, entry]) => ({
         name,
-        conversation_id: id,
+        conversation_id: entry.conversation_id,
       }));
       messages.push(createUserMessage(formatSubagentRosterNotice(fallbackRoster)));
     }
