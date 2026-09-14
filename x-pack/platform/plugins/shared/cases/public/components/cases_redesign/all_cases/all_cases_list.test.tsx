@@ -31,7 +31,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { AllCasesList } from './all_cases_list';
 import { VIEW_TOGGLE_LIST_ID, VIEW_TOGGLE_TABLE_ID, type ViewToggleId } from './constants';
 import * as useViewModeModule from './hooks/use_view_mode';
-import { useCasesColumns } from '../../all_cases/use_cases_columns';
+import { useCasesColumns } from './hooks/use_cases_columns';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { registerConnectorsToMockActionRegistry } from '../../../common/mock/register_connectors';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
