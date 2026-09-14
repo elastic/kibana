@@ -70,7 +70,6 @@ export class ContextEnginePlugin
   private workflowsManagement?: WorkflowEnablementApi;
   /** Registered by `contextEngineAgentBuilder`, which can depend on both this plugin and workflows. */
   private workflowProvider?: WorkflowProvider;
-  private spaces?: SpacesPluginStart;
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();
   private analyticsService?: ContextEngineAnalyticsService;
