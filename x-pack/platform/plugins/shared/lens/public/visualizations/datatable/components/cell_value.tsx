@@ -16,6 +16,7 @@ import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import type { RawValue } from '@kbn/data-plugin/common';
 import { getOriginalId } from '@kbn/transpose-utils';
 import type { DataGridDensity } from '@kbn/lens-common';
+import { isMissingValue } from '@kbn/field-formats-common';
 import type { FormatFactory } from '../../../../common/types';
 import type { DatatableColumnConfig } from '../../../../common/expressions';
 import type { DataContextType } from './types';
@@ -260,6 +261,10 @@ export const createGridCell = (
           colorMode === 'cell' && !isEmptyValue(rawValue)
             ? getCellColor(columnId, palette, colorMapping)(rawValue)
             : null;
+        const linkContent =
+          formatter && isMissingValue(rawValue)
+            ? formatter.convertToReact(rawValue)
+            : formatter?.convertToText(rawValue) ?? fallbackText;
         const baseColor = euiTheme.colors.link;
         // Only adjust link contrast when the cell background is colored (colorMode: cell).
         const linkColor =
@@ -272,7 +277,7 @@ export const createGridCell = (
 
         return (
           <LinkCell
-            content={formatter?.convertToText(rawValue) ?? fallbackText}
+            content={linkContent}
             linkColor={linkColor}
             onClick={onFilter}
             alignment={alignment}

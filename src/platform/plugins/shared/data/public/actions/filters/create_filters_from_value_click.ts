@@ -25,7 +25,7 @@ import {
   buildPhraseFilter,
   buildPhrasesFilter,
 } from '@kbn/es-query/src/filters/build_filters';
-import { MISSING_TOKEN } from '@kbn/field-formats-common';
+import { isMissingValue, MISSING_TOKEN } from '@kbn/field-formats-common';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getHttp, getIndexPatterns, getSearchService } from '../../services';
 import type { AggConfigSerialized } from '../../../common/search/aggs';
@@ -141,7 +141,7 @@ export const createFilter = async (
 
 const createFilterFromRawColumnsESQL = async (
   column: DatatableColumn,
-  value: string | number | boolean | (string | number | boolean)[]
+  value: string | number | boolean | (string | number | boolean)[] | null | undefined
 ) => {
   const indexPattern = column?.meta?.sourceParams?.indexPattern as string | undefined;
 
@@ -176,6 +176,12 @@ const createFilterFromRawColumnsESQL = async (
     return [];
   }
 
+  if (isMissingValue(value)) {
+    const existsFilter = buildSimpleExistFilter(fieldName, indexPattern);
+    existsFilter.meta.negate = true;
+    return [existsFilter];
+  }
+
   // Match phrase or phrases filter based on whether value is an array
   // The advantage of match_phrase is that you get a term query when it's not a text and
   // match phrase if it is a text. So you don't have to worry about the field type.
@@ -204,9 +210,12 @@ export const createFilterESQL = async (
   }
   const { indexPattern, sourceField, operationType, interval } = sourceParams;
 
-  const value = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
-  if (value == null) {
+  if (rowIndex === -1) {
     return [];
+  }
+  const value = table.rows[rowIndex][column.id];
+  if (isMissingValue(value)) {
+    return !operationType ? await createFilterFromRawColumnsESQL(column, value) : [];
   }
 
   const filters: Filter[] = [];

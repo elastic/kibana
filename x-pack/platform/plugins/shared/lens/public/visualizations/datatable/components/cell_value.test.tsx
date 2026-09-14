@@ -199,6 +199,29 @@ describe('datatable cell renderer', () => {
       expect(screen.getByRole('button')).toHaveTextContent('formatted 123');
     });
 
+    it('renders a clickable dash for missing values', async () => {
+      const handleFilterClick = jest.fn();
+      const cellRenderer = makeCellRenderer({
+        columnConfig: {
+          columns: [{ columnId: 'a', type: 'lens_datatable_column', oneClickFilter: true }],
+          sortingColumnId: '',
+          sortingDirection: 'none',
+        },
+        formatters: { a: defaultFieldFormat },
+      });
+
+      renderCell({
+        cellRenderer,
+        context: { handleFilterClick, table: makeTable([{ a: null }]) },
+      });
+
+      expect(screen.getByRole('button')).toHaveTextContent(NULL_TOKEN);
+      expect(screen.queryByText('(null)')).not.toBeInTheDocument();
+
+      await userEvent.click(screen.getByRole('button'));
+      expect(handleFilterClick).toHaveBeenCalledWith('a', null, 0, 0);
+    });
+
     it('passes the correct colIndex to handleFilterClick for a non-first column', async () => {
       const handleFilterClick = jest.fn();
       const cellRenderer = makeCellRenderer({
