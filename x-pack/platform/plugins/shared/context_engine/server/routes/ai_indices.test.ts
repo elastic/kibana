@@ -36,6 +36,7 @@ import {
   KiNotFoundError,
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
+import type { FeedbackAnalysisScheduleService } from '../feedback_analysis/schedule';
 import type { ImprovementsServiceApi } from '../improvements/service';
 import type { DeleteWorkflowsApi } from '../types';
 
@@ -101,6 +102,7 @@ describe('ai indices routes', () => {
   >;
   let improvementsService: jest.Mocked<Pick<ImprovementsServiceApi, 'deleteByAiIndex'>>;
   let workflowsManagementApi: jest.Mocked<DeleteWorkflowsApi>;
+  let scheduleService: jest.Mocked<FeedbackAnalysisScheduleService>;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let featureFlagEnabled: boolean;
   let actionsClient: ReturnType<typeof actionsClientMock.create>;
@@ -175,6 +177,10 @@ describe('ai indices routes', () => {
       deleteWorkflows: jest.fn().mockResolvedValue({ failures: [] }),
     };
     improvementsClients = [];
+    scheduleService = {
+      reconcile: jest.fn().mockResolvedValue(undefined),
+      remove: jest.fn().mockResolvedValue(undefined),
+    };
 
     const createVersionedRoute = (method: string) => (config: RegisteredRoute['config']) => ({
       addVersion: (
@@ -206,6 +212,7 @@ describe('ai indices routes', () => {
         improvementsClients.push(esClient);
         return improvementsService as unknown as ImprovementsServiceApi;
       },
+      getScheduleService: () => scheduleService as unknown as FeedbackAnalysisScheduleService,
       getActions: async () => actions,
       getWorkflowsManagementApi: async () => workflowsManagementApi,
       getSpaces: async () => spacesStart,
@@ -1023,6 +1030,7 @@ describe('ai indices routes', () => {
           logger,
           getAiIndexService: () => aiIndexService as unknown as AiIndexService,
           getImprovementsService: () => improvementsService as unknown as ImprovementsServiceApi,
+          getScheduleService: () => scheduleService as unknown as FeedbackAnalysisScheduleService,
           getActions: async () => actions,
           getWorkflowsManagementApi: async () => undefined,
           getSpaces: async () => undefined,
@@ -1177,6 +1185,117 @@ describe('ai indices routes', () => {
       });
 
       expect(response.conflict).toHaveBeenCalled();
+    });
+  });
+
+  describe('feedback analysis scheduling', () => {
+    const feedbackAnalysis = { enabled: true, schedule: { interval: '24h' } };
+
+    it('schedules analysis when it is turned on', async () => {
+      aiIndexService.setFeedbackAnalysis.mockResolvedValue(feedbackAnalysis);
+      aiIndexService.get.mockResolvedValue({ ...aiIndexItem, feedback_analysis: feedbackAnalysis });
+
+      await callRoute('PUT', aiIndexFeedbackAnalysisPath, {
+        params: { aiIndexId: 'customer_support' },
+        body: feedbackAnalysis,
+      });
+
+      expect(scheduleService.reconcile).toHaveBeenCalledWith({
+        aiIndexId: 'customer_support',
+        feedbackAnalysis,
+        request: expect.anything(),
+      });
+    });
+
+    it('reconciles with the caller, whose credentials the scheduled runs use', async () => {
+      aiIndexService.setFeedbackAnalysis.mockResolvedValue(feedbackAnalysis);
+      aiIndexService.get.mockResolvedValue({ ...aiIndexItem, feedback_analysis: feedbackAnalysis });
+
+      await callRoute('PUT', aiIndexFeedbackAnalysisPath, {
+        params: { aiIndexId: 'customer_support' },
+        body: feedbackAnalysis,
+        headers: { authorization: 'Basic whoever-turned-it-on' },
+      });
+
+      const [{ request }] = scheduleService.reconcile.mock.calls[0];
+      expect(request.headers.authorization).toBe('Basic whoever-turned-it-on');
+    });
+
+    it('reconciles against the stored document, not the request body', async () => {
+      const stored = { enabled: false };
+      aiIndexService.setFeedbackAnalysis.mockResolvedValue(feedbackAnalysis);
+      aiIndexService.get.mockResolvedValue({ ...aiIndexItem, feedback_analysis: stored });
+
+      await callRoute('PUT', aiIndexFeedbackAnalysisPath, {
+        params: { aiIndexId: 'customer_support' },
+        body: feedbackAnalysis,
+      });
+
+      expect(scheduleService.reconcile).toHaveBeenCalledWith(
+        expect.objectContaining({ feedbackAnalysis: stored })
+      );
+    });
+
+    it('schedules analysis for an index created with it enabled', async () => {
+      aiIndexService.create.mockResolvedValue(undefined);
+      aiIndexService.get.mockResolvedValue({ ...aiIndexItem, feedback_analysis: feedbackAnalysis });
+
+      await callRoute('POST', aiIndexPath, {
+        body: { id: 'customer_support', sources: [], feedback_analysis: feedbackAnalysis },
+      });
+
+      expect(scheduleService.reconcile).toHaveBeenCalledWith({
+        aiIndexId: 'customer_support',
+        feedbackAnalysis,
+        request: expect.anything(),
+      });
+    });
+
+    it('reconciles after a full update, which can drop the block entirely', async () => {
+      aiIndexService.put.mockResolvedValue('updated');
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+
+      await callRoute('PUT', aiIndexByIdPath, {
+        params: { aiIndexId: 'customer_support' },
+        body: { sources: [] },
+      });
+
+      expect(scheduleService.reconcile).toHaveBeenCalledWith({
+        aiIndexId: 'customer_support',
+        request: expect.anything(),
+      });
+    });
+
+    it('keeps the configuration when the schedule cannot be reconciled', async () => {
+      aiIndexService.setFeedbackAnalysis.mockResolvedValue(feedbackAnalysis);
+      aiIndexService.get.mockResolvedValue({ ...aiIndexItem, feedback_analysis: feedbackAnalysis });
+      scheduleService.reconcile.mockRejectedValue(new Error('workflows unavailable'));
+
+      await callRoute('PUT', aiIndexFeedbackAnalysisPath, {
+        params: { aiIndexId: 'customer_support' },
+        body: feedbackAnalysis,
+      });
+
+      expect(response.ok).toHaveBeenCalledWith({ body: { feedback_analysis: feedbackAnalysis } });
+      expect(logger.warn).toHaveBeenCalled();
+    });
+
+    it('tears the schedule down when the AI index is deleted', async () => {
+      await callRoute('DELETE', aiIndexByIdPath, { params: { aiIndexId: 'customer_support' } });
+
+      expect(scheduleService.remove).toHaveBeenCalledWith({
+        aiIndexId: 'customer_support',
+      });
+    });
+
+    it('still deletes the AI index when tearing down its schedule fails', async () => {
+      scheduleService.remove.mockRejectedValue(new Error('workflows unavailable'));
+
+      await callRoute('DELETE', aiIndexByIdPath, { params: { aiIndexId: 'customer_support' } });
+
+      expect(aiIndexService.delete).toHaveBeenCalledWith('customer_support');
+      expect(response.ok).toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalled();
     });
   });
 

@@ -48,8 +48,9 @@ export type AiIndexSignalTimeRange =
  */
 export interface AiIndexFeedbackAnalysis {
   /**
-   * Desired state. The scheduler remains authoritative for whether analysis is
-   * actually running, because a schedule also needs credentials bound to it.
+   * Desired state, reconciled onto the scheduler after the write. The scheduler
+   * remains authoritative for whether analysis is actually running, because
+   * enabling also binds the credentials a run executes under.
    */
   enabled: boolean;
   /** Agent Builder agent to analyze with. */

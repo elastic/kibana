@@ -81,6 +81,7 @@ import {
   deleteAutomationResources,
   deleteBackingStoreResource,
 } from '../ai_indices/delete_resources';
+import type { FeedbackAnalysisScheduleService } from '../feedback_analysis/schedule';
 import type { ImprovementsServiceApi } from '../improvements/service';
 import { getKi } from '../ai_indices/ki_get';
 import { getKis } from '../ai_indices/ki_list';
@@ -342,6 +343,7 @@ export const registerAiIndexRoutes = ({
   logger,
   getAiIndexService,
   getImprovementsService,
+  getScheduleService,
   getActions,
   getWorkflowsManagementApi,
   getSpaces,
@@ -350,10 +352,27 @@ export const registerAiIndexRoutes = ({
   logger: Logger;
   getAiIndexService: () => AiIndexService;
   getImprovementsService: (esClient: ElasticsearchClient) => ImprovementsServiceApi;
+  getScheduleService: () => FeedbackAnalysisScheduleService;
   getActions: () => Promise<ActionsPluginStart>;
   getWorkflowsManagementApi: () => Promise<DeleteWorkflowsApi | undefined>;
   getSpaces: () => Promise<SpacesPluginStart | undefined>;
 }) => {
+  const reconcileSchedule = async (aiIndexId: string, request: KibanaRequest) => {
+    try {
+      const aiIndex = await getAiIndexService().get(aiIndexId);
+      await getScheduleService().reconcile({
+        aiIndexId,
+        ...(aiIndex.feedback_analysis ? { feedbackAnalysis: aiIndex.feedback_analysis } : {}),
+        request,
+      });
+    } catch (error) {
+      logger.warn(
+        `Stored the feedback analysis configuration for AI index '${aiIndexId}', but failed to reconcile its schedule: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  };
   // Create an AI index
   router.versioned
     .post({
@@ -388,6 +407,7 @@ export const registerAiIndexRoutes = ({
           });
           await getAiIndexService().create(id, properties);
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.CREATE, id }));
+          await reconcileSchedule(id, request);
           const body: CreateAiIndexResponse = { status: 'created' };
           return response.created({ body });
         } catch (error) {
@@ -434,6 +454,7 @@ export const registerAiIndexRoutes = ({
           const putAction =
             status === 'created' ? AiIndexAuditAction.CREATE : AiIndexAuditAction.UPDATE;
           auditLogger.log(aiIndexAuditEvent({ action: putAction, id: aiIndexId }));
+          await reconcileSchedule(aiIndexId, request);
           const body: PutAiIndexResponse = { status };
           return status === 'created' ? response.created({ body }) : response.ok({ body });
         } catch (error) {
@@ -631,6 +652,7 @@ export const registerAiIndexRoutes = ({
             request.body
           );
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.UPDATE, id: aiIndexId }));
+          await reconcileSchedule(aiIndexId, request);
           const body: PutAiIndexFeedbackAnalysisResponse = { feedback_analysis: feedbackAnalysis };
           return response.ok({ body });
         } catch (error) {
@@ -686,6 +708,16 @@ export const registerAiIndexRoutes = ({
           // Audited here rather than after the cleanup below: the deletion is done and cannot be
           // undone, so an audit record is owed for it whatever happens next.
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.DELETE, id: aiIndexId }));
+
+          await getScheduleService()
+            .remove({ aiIndexId })
+            .catch((error) => {
+              logger.warn(
+                `Deleted AI index '${aiIndexId}', but failed to remove its analysis schedule: ${
+                  error instanceof Error ? error.message : String(error)
+                }`
+              );
+            });
 
           // From here on, failures are best-effort: the AI index entry is already gone (the primary
           // goal), so any failure is reported back to the caller as a partial-failure
