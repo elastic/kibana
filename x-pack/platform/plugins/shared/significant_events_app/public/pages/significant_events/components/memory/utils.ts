@@ -6,7 +6,7 @@
  */
 
 export const changeTypeIcons: Record<string, string> = {
-  create: 'plusInCircle',
+  create: 'plusCircle',
   update: 'pencil',
   delete: 'trash',
   rename: 'sortRight',

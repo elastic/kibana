@@ -6,10 +6,12 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { ToolResultType } from '@kbn/agent-builder-common';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import {
   isHighConfidenceSingleMatch,
   normalizeEntityId,
+  requireResolvedEntity,
   resolveSingleEntity,
   type EntityMatchSource,
 } from './entity_resolution';
@@ -162,6 +164,108 @@ describe('entity_resolution', () => {
       });
 
       expect(result.status).toBe('no_identity');
+    });
+  });
+
+  describe('requireResolvedEntity', () => {
+    it('returns an error result for not_found', async () => {
+      mockExecuteEsql
+        .mockResolvedValueOnce(empty)
+        .mockResolvedValueOnce(empty)
+        .mockResolvedValueOnce(empty)
+        .mockResolvedValueOnce(empty);
+
+      const result = await requireResolvedEntity({
+        esClient,
+        spaceId: 'default',
+        entityId: 'ghost',
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.results).toHaveLength(1);
+        expect(result.results[0]).toEqual(
+          expect.objectContaining({
+            type: ToolResultType.error,
+            data: { message: 'No entity found for id: ghost' },
+          })
+        );
+      }
+    });
+
+    it('returns an other result with candidates for ambiguous', async () => {
+      mockExecuteEsql
+        .mockResolvedValueOnce(empty)
+        .mockResolvedValueOnce(empty)
+        .mockResolvedValueOnce({
+          columns: [{ name: 'entity.id', type: 'keyword' }],
+          values: [['host:server1'], ['host:server10']],
+        });
+
+      const result = await requireResolvedEntity({
+        esClient,
+        spaceId: 'default',
+        entityId: 'server',
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.results[0]).toEqual(
+          expect.objectContaining({
+            type: ToolResultType.other,
+            data: {
+              message: expect.stringContaining('exact entity id (EUID)'),
+              candidateEntityIds: ['host:server1', 'host:server10'],
+            },
+          })
+        );
+      }
+    });
+
+    it('returns an error result for no_identity', async () => {
+      mockExecuteEsql.mockResolvedValueOnce({
+        columns: [{ name: 'entity.id', type: 'keyword' }],
+        values: [['host:server1']],
+      });
+
+      const result = await requireResolvedEntity({
+        esClient,
+        spaceId: 'default',
+        entityId: 'host:server1',
+        entityType: 'host',
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.results[0]).toEqual(
+          expect.objectContaining({
+            type: ToolResultType.error,
+            data: {
+              message: expect.stringContaining('no canonical entity.id'),
+            },
+          })
+        );
+      }
+    });
+
+    it('returns the identity when resolved with an entityStoreId', async () => {
+      mockExecuteEsql.mockResolvedValueOnce(singleHostRow);
+
+      const result = await requireResolvedEntity({
+        esClient,
+        spaceId: 'default',
+        entityId: 'host:server1',
+        entityType: 'host',
+      });
+
+      expect(result).toEqual({
+        ok: true,
+        identity: {
+          identifierType: 'host',
+          identifier: 'server1',
+          entityStoreId: 'host:server1',
+        },
+      });
     });
   });
 });

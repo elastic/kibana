@@ -126,7 +126,7 @@ describe('createUrlSyncObservables', () => {
     expect(currentAppState.query).toBeDefined();
 
     const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
-    const snapshotsByProfileId = selectTab(internalState.getState(), tabId).defaultProfileState
+    const snapshotsByProfileId = selectTab(internalState.getState(), tabId).profileAppStateDefaults
       .snapshotsByProfileId;
 
     let state = internalState.getState();
@@ -143,8 +143,8 @@ describe('createUrlSyncObservables', () => {
     state = internalState.getState();
     tab = selectTab(state, tabId);
     expect(tab.appState.hideChart).toBe(true);
-    expect(tab.defaultProfileState.snapshotsByProfileId).toBe(snapshotsByProfileId);
-    expect(tab.defaultProfileState.snapshotsByProfileId[profileId]).toBe(
+    expect(tab.profileAppStateDefaults.snapshotsByProfileId).toBe(snapshotsByProfileId);
+    expect(tab.profileAppStateDefaults.snapshotsByProfileId[profileId]).toBe(
       snapshotsByProfileId[profileId]
     );
   });

@@ -8,11 +8,11 @@
  */
 
 import Fsp from 'fs/promises';
-import globby from 'globby';
+import { globby } from 'globby';
 import { getAllDocFileIds } from './get_all_doc_file_ids';
 
 jest.mock('fs/promises');
-jest.mock('globby');
+jest.mock('globby', () => ({ globby: jest.fn() }));
 
 const mockFsp = Fsp as jest.Mocked<typeof Fsp>;
 const mockGlobby = globby as jest.MockedFunction<typeof globby>;

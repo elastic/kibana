@@ -58,8 +58,8 @@ describe('TelemetryPlugin', () => {
             home,
           });
 
-          expect(home.welcomeScreen.registerTelemetryNoticeRenderer).not.toBeCalled();
-          expect(home.welcomeScreen.registerOnRendered).not.toBeCalled();
+          expect(home.welcomeScreen.registerTelemetryNoticeRenderer).not.toHaveBeenCalled();
+          expect(home.welcomeScreen.registerOnRendered).not.toHaveBeenCalled();
         });
       });
     });
@@ -117,15 +117,15 @@ describe('TelemetryPlugin', () => {
         .spyOn(screenshotMode, 'isScreenshotMode')
         .mockReturnValue(true);
       plugin.setup(coreMock.createSetup(), { screenshotMode, home });
-      expect(isScreenshotModeSpy).toBeCalledTimes(1);
+      expect(isScreenshotModeSpy).toHaveBeenCalledTimes(1);
 
       const coreStartMock = coreMock.createStart();
       coreStartMock.application = { ...coreStartMock.application, currentAppId$: of('some-app') };
       const optInSpy = jest.spyOn(coreStartMock.analytics, 'optIn');
       plugin.start(coreStartMock, { screenshotMode });
       // Once in setup, once in the early skip-mode guard, once in the currentAppId$ subscription.
-      expect(isScreenshotModeSpy).toBeCalledTimes(3);
-      expect(optInSpy).toBeCalledTimes(1);
+      expect(isScreenshotModeSpy).toHaveBeenCalledTimes(3);
+      expect(optInSpy).toHaveBeenCalledTimes(1);
       expect(optInSpy).toHaveBeenCalledWith({ global: { enabled: false } });
     });
 
@@ -153,7 +153,7 @@ describe('TelemetryPlugin', () => {
         .spyOn(screenshotMode, 'isScreenshotMode')
         .mockReturnValue(false);
       plugin.setup(coreMock.createSetup(), { screenshotMode, home });
-      expect(isScreenshotModeSpy).toBeCalledTimes(1);
+      expect(isScreenshotModeSpy).toHaveBeenCalledTimes(1);
 
       const coreStartMock = coreMock.createStart();
       coreStartMock.application = { ...coreStartMock.application, currentAppId$: of('some-app') };
@@ -162,8 +162,8 @@ describe('TelemetryPlugin', () => {
       const optInSpy = jest.spyOn(coreStartMock.analytics, 'optIn');
       plugin.start(coreStartMock, { screenshotMode });
       // Once in setup, once in the early skip-mode guard, once in the currentAppId$ subscription.
-      expect(isScreenshotModeSpy).toBeCalledTimes(3);
-      expect(optInSpy).toBeCalledTimes(1);
+      expect(isScreenshotModeSpy).toHaveBeenCalledTimes(3);
+      expect(optInSpy).toHaveBeenCalledTimes(1);
       expect(optInSpy).toHaveBeenCalledWith({ global: { enabled: false } });
     });
   });

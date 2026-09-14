@@ -32,8 +32,10 @@ import {
 import type { InvalidateAPIKeyResult } from '@kbn/core-security-server';
 import type { FakeRawRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { RulesClient } from './rules_client';
+import { ApiKeyType } from './task_runner/types';
 import type { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import type { AlertingRulesConfig } from './config';
 import type { GetAlertIndicesAlias } from './lib';
@@ -48,6 +50,7 @@ import {
 } from './saved_objects';
 import type { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 import { type IChangeTrackingService } from './rules_client/lib/change_tracking';
+import { bulkMarkApiKeysForInvalidation } from './invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import {
   UIAM_LOGS_CREDENTIALS_TAGS,
   UIAM_LOGS_GRANT_TAGS,
@@ -69,7 +72,7 @@ export interface RulesClientFactoryOpts {
   ruleTypeRegistry: RuleTypeRegistry;
   securityPluginSetup?: SecurityPluginSetup;
   securityPluginStart?: SecurityPluginStart;
-  getSpaceId: (request: KibanaRequest) => string;
+  getSpaceId: (request: KibanaRequest) => SpaceId;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   internalSavedObjectsRepository: ISavedObjectsRepository;
@@ -88,8 +91,10 @@ export interface RulesClientFactoryOpts {
   uiSettings: CoreStart['uiSettings'];
   securityService: CoreStart['security'];
   shouldGrantUiam: boolean;
+  apiKeyType: ApiKeyType;
   isServerless: boolean;
   featureFlags: CoreStart['featureFlags'];
+  analytics: CoreStart['analytics'];
 }
 
 export class RulesClientFactory {
@@ -99,7 +104,7 @@ export class RulesClientFactory {
   private ruleTypeRegistry!: RuleTypeRegistry;
   private securityPluginSetup?: SecurityPluginSetup;
   private securityPluginStart?: SecurityPluginStart;
-  private getSpaceId!: (request: KibanaRequest) => string;
+  private getSpaceId!: (request: KibanaRequest) => SpaceId;
   private spaceIdToNamespace!: SpaceIdToNamespaceFunction;
   private encryptedSavedObjectsClient!: EncryptedSavedObjectsClient;
   private internalSavedObjectsRepository!: ISavedObjectsRepository;
@@ -118,8 +123,10 @@ export class RulesClientFactory {
   private uiSettings!: CoreStart['uiSettings'];
   private securityService!: CoreStart['security'];
   private shouldGrantUiam: boolean = false;
+  private apiKeyType: ApiKeyType = ApiKeyType.ES;
   private isServerless: boolean = false;
   private featureFlags!: CoreStart['featureFlags'];
+  private analytics!: CoreStart['analytics'];
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
@@ -150,8 +157,10 @@ export class RulesClientFactory {
     this.uiSettings = options.uiSettings;
     this.securityService = options.securityService;
     this.shouldGrantUiam = options.shouldGrantUiam;
+    this.apiKeyType = options.apiKeyType;
     this.isServerless = options.isServerless;
     this.featureFlags = options.featureFlags;
+    this.analytics = options.analytics;
   }
 
   /**
@@ -178,7 +187,7 @@ export class RulesClientFactory {
   public async createWithSpaceId(
     request: KibanaRequest,
     savedObjects: SavedObjectsServiceStart,
-    spaceId: string,
+    spaceId: SpaceId,
     options?: RulesClientCreateOptions
   ): Promise<RulesClient> {
     return await this.createInternal({
@@ -342,6 +351,21 @@ export class RulesClientFactory {
                   .join(', ')}`
               );
             }
+            // A refresh=false grant on bulk action can be missed out of ES search results.
+            const missed =
+              result &&
+              result.invalidated_api_keys.length === 0 &&
+              result.previously_invalidated_api_keys.length === 0;
+            if (missed && apiKey) {
+              this.logger.warn(
+                `Synchronous ES API key invalidation found no key for alerting rule : ${ruleName}; queueing for delayed invalidation.`
+              );
+              await bulkMarkApiKeysForInvalidation(
+                { apiKeys: [apiKey] },
+                this.logger,
+                this.internalSavedObjectsRepository
+              );
+            }
           } catch (err) {
             this.logger.error(
               `Failed to synchronously invalidate ES API key for alerting rule : ${ruleName}: ${
@@ -366,7 +390,7 @@ export class RulesClientFactory {
   }: {
     request: KibanaRequest;
     savedObjects: SavedObjectsServiceStart;
-    spaceId: string;
+    spaceId: SpaceId;
     isExplicitSpaceOverride: boolean;
     options?: RulesClientCreateOptions;
   }): Promise<RulesClient> {
@@ -415,14 +439,16 @@ export class RulesClientFactory {
       connectorAdapterRegistry: this.connectorAdapterRegistry,
       uiSettings: this.uiSettings,
       shouldGrantUiam: this.shouldGrantUiam,
+      apiKeyType: this.apiKeyType,
       isServerless: this.isServerless,
       featureFlags: this.featureFlags,
+      analytics: this.analytics,
 
       async getUserName() {
         const user = securityService.authc.getCurrentUser(request);
         return user?.username ?? null;
       },
-      async createAPIKey(name: string) {
+      async createAPIKey(name: string, refresh?: boolean | 'wait_for') {
         if (!securityPluginStart) {
           return { apiKeysEnabled: false };
         }
@@ -433,11 +459,15 @@ export class RulesClientFactory {
 
         let createEsAPIKeyResult;
         try {
-          createEsAPIKeyResult = await securityService.authc.apiKeys.grantAsInternalUser(request, {
-            name,
-            role_descriptors: {},
-            metadata: { managed: true, kibana: { type: 'alerting_rule' } },
-          });
+          createEsAPIKeyResult = await securityService.authc.apiKeys.grantAsInternalUser(
+            request,
+            {
+              name,
+              role_descriptors: {},
+              metadata: { managed: true, kibana: { type: 'alerting_rule' } },
+            },
+            { refresh }
+          );
         } catch (err) {
           // if the ES API key creation failed, we need to invalidate the UIAM API key
           if (createUiamApiKeyResult?.id) {
@@ -488,16 +518,38 @@ export class RulesClientFactory {
       getAuthenticationAPIKey(name: string) {
         const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
         if (authorizationHeader && authorizationHeader.credentials) {
+          // UIAM's authoritative verdict on whether the authenticated API key is an external
+          // (user-created Cloud) key, reported by the UIAM authentication provider on the
+          // current user. `internal === false` is the only trustworthy "external" signal: the
+          // flag is absent for session tokens and for keys Kibana granted itself, both of
+          // which keep the internal-key treatment (fail closed).
+          const isExternalApiKey =
+            securityService.authc.getCurrentUser(request)?.api_key?.internal === false;
+
           // A raw UIAM credential (`essu_...`) means the request was authenticated with a
-          // user-created organization-level API key. Unlike framework-granted UIAM keys
-          // (encoded as `base64(id:key)`), it carries no key id, so it cannot be persisted on
-          // the rule for execution and invalidation bookkeeping.
+          // user-created Cloud API key (obtained from the Elastic Cloud UI). Unlike
+          // framework-granted UIAM keys (encoded as `base64(id:key)`), it carries no key id,
+          // so it is stored on the rule as-is and never invalidated by alerting — lifecycle
+          // management (rotation, deletion) remains the user's responsibility, and
+          // `apiKeyCreatedByUser` gates every invalidation path.
           if (isUiamCredential(authorizationHeader)) {
-            throw Boom.badRequest(
-              `Cannot use an organization-level API key to create or enable rule "${name}". ` +
-                `Organization-level API keys are not supported for rule operations; ` +
-                `use a project-scoped Elasticsearch API key instead.`
-            );
+            if (!this.shouldGrantUiam) {
+              // A client error, not a server one: keep it a 4xx with an actionable message
+              // instead of surfacing an opaque 500.
+              throw Boom.badRequest(
+                `Cannot use a Cloud API key to create or enable rule "${name}". ` +
+                  `Cloud API keys are only supported in serverless environments; ` +
+                  `use a project-scoped Elasticsearch API key instead.`
+              );
+            }
+            return {
+              apiKeysEnabled: true,
+              uiamResult: {
+                name: `uiam-${name}`,
+                api_key: authorizationHeader.credentials,
+                ...(isExternalApiKey ? { external: true } : {}),
+              },
+            };
           }
 
           const [apiKeyId, apiKey] = Buffer.from(authorizationHeader.credentials, 'base64')
@@ -521,6 +573,7 @@ export class RulesClientFactory {
                 name: `uiam-${name}`,
                 id: apiKeyId,
                 api_key: apiKey,
+                ...(isExternalApiKey ? { external: true } : {}),
               },
             };
           }

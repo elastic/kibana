@@ -762,6 +762,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiFlyoutMenu.history': i18n.translate('core.euiFlyoutMenu.history', {
       defaultMessage: 'History',
     }),
+    'euiFlyoutMenu.history.tooltip': i18n.translate('core.euiFlyoutMenu.history.tooltip', {
+      defaultMessage: 'Recently visited',
+    }),
     'euiFlyoutManaged.defaultTitle': i18n.translate('core.euiFlyoutManaged.defaultTitle', {
       defaultMessage: 'Unknown Flyout',
     }),
@@ -1306,6 +1309,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     }),
     'euiQuickSelect.applyButton': i18n.translate('core.euiQuickSelect.applyButton', {
       defaultMessage: 'Apply',
+    }),
+    'euiTimeWindowButtons.label': i18n.translate('core.euiTimeWindowButtons.label', {
+      defaultMessage: 'Time window controls',
+      description: 'ARIA legend for the SuperDatePicker time window shift and zoom buttons',
     }),
     'euiTimeWindowButtons.invalidShiftLabel': i18n.translate(
       'core.euiTimeWindowButtons.invalidShiftLabel',
@@ -1871,16 +1878,27 @@ export const getEuiContextMapping = (): EuiTokensObject => {
           title,
         },
       }),
+    'euiFlyoutMenu.pagination.first': i18n.translate('core.euiFlyoutMenu.pagination.first', {
+      defaultMessage: 'First',
+    }),
     'euiFlyoutMenu.pagination.previous': i18n.translate('core.euiFlyoutMenu.pagination.previous', {
       defaultMessage: 'Previous',
     }),
     'euiFlyoutMenu.pagination.next': i18n.translate('core.euiFlyoutMenu.pagination.next', {
       defaultMessage: 'Next',
     }),
+    'euiFlyoutMenu.pagination.last': i18n.translate('core.euiFlyoutMenu.pagination.last', {
+      defaultMessage: 'Last',
+    }),
     'euiFlyoutMenu.pagination.counter': ({ position, total }: EuiValues) =>
       i18n.translate('core.euiFlyoutMenu.pagination.counter', {
         defaultMessage: '{position} of {total}',
         values: { position, total },
+      }),
+    'euiFlyoutMenu.back.tooltip': ({ previousPage }: EuiValues) =>
+      i18n.translate('core.euiFlyoutMenu.back.tooltip', {
+        defaultMessage: 'Back to {previousPage}',
+        values: { previousPage },
       }),
   };
 };

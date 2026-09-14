@@ -12,7 +12,6 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import styled from 'styled-components';
 import {
   EuiBadge,
-  EuiCallOut,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -23,12 +22,14 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import semverLt from 'semver/functions/lt';
 
 import { getDeferredInstallationsCnt } from '../../../../../../services/has_deferred_installations';
 import { KibanaSavedObjectType } from '../../../../../../../common/types/models';
+import { appendReturnParams } from '../../components/return_params';
 
 import {
   isPackagePrerelease,
@@ -137,7 +138,8 @@ function Breadcrumbs({ packageTitle }: { packageTitle: string }) {
 export function Detail() {
   const theme = useEuiTheme();
   const { getId: getAgentPolicyId } = useAgentPolicyContext();
-  const { getFromIntegrations } = useIntegrationsStateContext();
+  const { getFromIntegrations, getFromCollection, getCatalogReturn } =
+    useIntegrationsStateContext();
   const { pkgkey, panel } = useParams<DetailParams>();
   const { getHref, getPath } = useLink();
   const history = useHistory();
@@ -386,13 +388,20 @@ export function Detail() {
   );
 
   const fromIntegrations = getFromIntegrations();
+  const fromCollection = getFromCollection();
+  const catalogReturn = getCatalogReturn();
 
-  const fromIntegrationsPath =
-    fromIntegrations === 'updates_available'
-      ? getPath('integrations_installed_updates_available')
-      : fromIntegrations === 'installed'
-      ? getPath('integrations_installed')
-      : getPath('integrations_all');
+  const baseIntegrationsPath = fromCollection
+    ? getPath('integration_collection', { groupId: fromCollection.groupId })
+    : fromIntegrations === 'updates_available'
+    ? getPath('integrations_installed_updates_available')
+    : fromIntegrations === 'installed'
+    ? getPath('integrations_installed')
+    : getPath('integrations_all');
+
+  const fromIntegrationsPath = fromCollection
+    ? baseIntegrationsPath
+    : appendReturnParams(baseIntegrationsPath, catalogReturn);
 
   const numOfDeferredInstallations = useMemo(
     () => getDeferredInstallationsCnt(packageInfo),
@@ -430,7 +439,11 @@ export function Detail() {
         <EuiFlexItem>
           {/* Allows button to break out of full width */}
           <div>
-            <BackLink queryParams={queryParams} integrationsPath={fromIntegrationsPath} />
+            <BackLink
+              queryParams={queryParams}
+              integrationsPath={fromIntegrationsPath}
+              collectionTitle={fromCollection?.title}
+            />
           </div>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -492,12 +505,13 @@ export function Detail() {
       </EuiFlexGroup>
     ),
     [
-      integrationInfo,
+      queryParams,
+      fromIntegrationsPath,
+      fromCollection?.title,
+      packageInfoError,
       isLoading,
       packageInfo,
-      fromIntegrationsPath,
-      queryParams,
-      packageInfoError,
+      integrationInfo,
       releaseLabel,
     ]
   );
@@ -898,33 +912,32 @@ export function Detail() {
 
   const securityCallout = missingSecurityConfiguration ? (
     <>
-      <EuiCallOut
+      <KbnWarningCallout
         announceOnMount
-        color="warning"
-        iconType="lock"
         title={
           <FormattedMessage
             id="xpack.fleet.epm.packageDetailsSecurityRequiredCalloutTitle"
             defaultMessage="Security needs to be enabled in order to add Elastic Agent integrations"
           />
         }
-      >
-        <FormattedMessage
-          id="xpack.fleet.epm.packageDetailsSecurityRequiredCalloutDescription"
-          defaultMessage="In order to fully use Fleet, you must enable Elasticsearch and Kibana security features.
+        text={
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetailsSecurityRequiredCalloutDescription"
+            defaultMessage="In order to fully use Fleet, you must enable Elasticsearch and Kibana security features.
         Follow the {guideLink} to enable security."
-          values={{
-            guideLink: (
-              <a href={services.http.basePath.prepend('/app/fleet')}>
-                <FormattedMessage
-                  id="xpack.fleet.epm.packageDetailsSecurityRequiredCalloutDescriptionGuideLink"
-                  defaultMessage="steps in this guide"
-                />
-              </a>
-            ),
-          }}
-        />
-      </EuiCallOut>
+            values={{
+              guideLink: (
+                <a href={services.http.basePath.prepend('/app/fleet')}>
+                  <FormattedMessage
+                    id="xpack.fleet.epm.packageDetailsSecurityRequiredCalloutDescriptionGuideLink"
+                    defaultMessage="steps in this guide"
+                  />
+                </a>
+              ),
+            }}
+          />
+        }
+      />
       <EuiSpacer />
     </>
   ) : undefined;

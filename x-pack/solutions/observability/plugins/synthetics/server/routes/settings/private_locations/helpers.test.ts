@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { allLocationsToClientContract, updatePrivateLocationMonitors } from './helpers';
+import {
+  allLocationsToClientContract,
+  toClientContract,
+  toSavedObjectContract,
+  updatePrivateLocationMonitors,
+} from './helpers';
 import type { RouteContext } from '../../types';
 
 // Mock the syncEditedMonitorBulk module
@@ -95,6 +100,30 @@ describe('toClientContract', () => {
         tags: ['a tag'],
       },
     ]);
+  });
+
+  it('surfaces isAgentSharding from saved object attributes', () => {
+    const [scalable, classic] = allLocationsToClientContract({
+      locations: [
+        {
+          label: 'scalable',
+          agentPolicyId: 'ap-1',
+          id: 'loc-1',
+          isServiceManaged: false,
+          isAgentSharding: true,
+        },
+        {
+          label: 'classic',
+          agentPolicyId: 'ap-2',
+          id: 'loc-2',
+          isServiceManaged: false,
+        },
+      ],
+    });
+
+    expect(scalable).toEqual(expect.objectContaining({ id: 'loc-1', isAgentSharding: true }));
+    expect(classic).toEqual(expect.objectContaining({ id: 'loc-2' }));
+    expect(classic).not.toHaveProperty('isAgentSharding');
   });
 
   it('formats SO attributes to client contract with truthy geo location', () => {
@@ -231,5 +260,68 @@ describe('updatePrivateLocationMonitors', () => {
       routeContext: ROUTE_CONTEXT,
       spaceId: SECOND_SPACE_ID,
     });
+  });
+
+  it('throws when a monitor rewrite reports failed configs so the location flag is not persisted', async () => {
+    (syncEditedMonitorBulk as jest.Mock).mockResolvedValueOnce({
+      failedConfigs: {
+        [FIRST_MONITOR_ID]: { config: mockMonitors[0].attributes, error: new Error('fleet') },
+      },
+      errors: [],
+      editedMonitors: [],
+    });
+
+    await expect(
+      updatePrivateLocationMonitors({
+        locationId: LOCATION_ID,
+        newLocationLabel: NEW_LABEL,
+        allPrivateLocations: [],
+        routeContext: {} as RouteContext,
+        monitorsInLocation: [mockMonitors[0]] as any,
+      })
+    ).rejects.toThrow(/failed to update monitors/i);
+  });
+});
+
+describe('isAgentSharding contract mappers', () => {
+  const baseLocation = {
+    label: 'Loc',
+    id: 'loc-1',
+    agentPolicyId: 'ap-1',
+    isServiceManaged: false,
+  };
+
+  it('persists isAgentSharding onto the saved object contract', () => {
+    expect(
+      toSavedObjectContract({
+        ...baseLocation,
+        isAgentSharding: true,
+      })
+    ).toEqual(expect.objectContaining({ isAgentSharding: true }));
+  });
+
+  it('omits isAgentSharding when the location is classic', () => {
+    expect(toSavedObjectContract(baseLocation).isAgentSharding).toBeUndefined();
+  });
+
+  it('omits isAgentSharding: false so classic and explicitly-off look the same', () => {
+    expect(toSavedObjectContract({ ...baseLocation, isAgentSharding: false })).not.toHaveProperty(
+      'isAgentSharding'
+    );
+    expect(
+      toClientContract({
+        attributes: { ...baseLocation, isAgentSharding: false },
+        namespaces: ['default'],
+      } as any)
+    ).not.toHaveProperty('isAgentSharding');
+  });
+
+  it('returns isAgentSharding on the single-location client contract', () => {
+    expect(
+      toClientContract({
+        attributes: { ...baseLocation, isAgentSharding: true },
+        namespaces: ['default'],
+      } as any)
+    ).toEqual(expect.objectContaining({ isAgentSharding: true }));
   });
 });

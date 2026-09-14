@@ -69,7 +69,7 @@ export const enableLeadGenerationRoute = (
           await upsertLeadGenerationConfig(soClient, spaceId, { connectorId });
 
           const indexService = createLeadIndexService({ esClient, logger, spaceId });
-          await indexService.createIndices();
+          await indexService.createIndex();
 
           await startLeadGenerationTask({ taskManager, logger, namespace: spaceId, request });
 

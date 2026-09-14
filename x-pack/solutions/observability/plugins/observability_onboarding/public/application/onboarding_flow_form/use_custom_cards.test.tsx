@@ -8,7 +8,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import type { ObservabilityOnboardingAppServices } from '../..';
@@ -88,9 +87,7 @@ describe('useCustomCards', () => {
   it('uses the merged Kubernetes OTel quickstart for the Kubernetes add data entry', () => {
     render(
       <MemoryRouter>
-        <CompatRouter>
-          <CardsProbe />
-        </CompatRouter>
+        <CardsProbe />
       </MemoryRouter>
     );
 
@@ -100,9 +97,7 @@ describe('useCustomCards', () => {
   it('exposes the AWS CloudWatch OTel quickstart card with expected metadata', () => {
     render(
       <MemoryRouter>
-        <CompatRouter>
-          <CardsProbe />
-        </CompatRouter>
+        <CardsProbe />
       </MemoryRouter>
     );
 

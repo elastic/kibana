@@ -18,8 +18,6 @@ interface ActionPolicyActionsCellProps {
   onEdit: (id: string) => void;
   onClone: (policy: ActionPolicyResponse) => void;
   onDelete: (policy: ActionPolicyResponse) => void;
-  onSnooze: (id: string, snoozedUntil: string) => void;
-  onCancelSnooze: (id: string) => void;
   onUpdateApiKey: (id: string) => void;
   isDisabled?: boolean;
 }
@@ -31,34 +29,11 @@ export const ActionPolicyActionsCell = ({
   onEdit,
   onClone,
   onDelete,
-  onSnooze,
-  onCancelSnooze,
   onUpdateApiKey,
   isDisabled = false,
 }: ActionPolicyActionsCellProps) => {
   return (
     <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={i18n.translate(
-            'xpack.alertingV2.actionPoliciesList.action.viewDetails.description',
-            { defaultMessage: 'View action policy details' }
-          )}
-          disableScreenReaderOutput
-        >
-          <EuiButtonIcon
-            iconType="eye"
-            color="text"
-            aria-label={i18n.translate(
-              'xpack.alertingV2.actionPoliciesList.action.viewDetails.description',
-              { defaultMessage: 'View action policy details' }
-            )}
-            onClick={() => onViewDetails(policy)}
-            isDisabled={isDisabled}
-            data-test-subj="actionPolicyViewDetailsButton"
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
       {canWrite && (
         <>
           <EuiFlexItem grow={false}>
@@ -90,8 +65,6 @@ export const ActionPolicyActionsCell = ({
               onEdit={onEdit}
               onClone={onClone}
               onDelete={onDelete}
-              onSnooze={onSnooze}
-              onCancelSnooze={onCancelSnooze}
               onUpdateApiKey={onUpdateApiKey}
               isDisabled={isDisabled}
             />

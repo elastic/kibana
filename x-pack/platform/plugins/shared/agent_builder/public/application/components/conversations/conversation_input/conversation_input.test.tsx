@@ -13,6 +13,7 @@ import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import {
   useAgentId,
+  useConversationReadOnly,
   useConversationTitle,
   useHasActiveConversation,
   useIsAwaitingPrompt,
@@ -22,6 +23,8 @@ import { useConversationContext } from '../../../context/conversation/conversati
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useToasts } from '../../../hooks/use_toasts';
 import { useMessageEditor } from './message_editor';
+import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
+import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 
 jest.mock('../../../hooks/use_conversation_stream', () => ({
   useConversationStream: jest.fn(),
@@ -34,6 +37,7 @@ jest.mock('../../../hooks/agents/use_validate_agent_id', () => ({
 }));
 jest.mock('../../../hooks/use_conversation', () => ({
   useAgentId: jest.fn(),
+  useConversationReadOnly: jest.fn(),
   useConversationTitle: jest.fn(),
   useHasActiveConversation: jest.fn(),
   useIsAwaitingPrompt: jest.fn(),
@@ -62,8 +66,29 @@ jest.mock('./message_editor', () => ({
 jest.mock('./input_actions', () => ({
   InputActions: () => null,
 }));
-jest.mock('./attachment_pills_row', () => ({
-  AttachmentPillsRow: () => null,
+jest.mock('./attachment_pill', () => ({
+  AttachmentPill: ({
+    attachment,
+    onRemoveAttachment,
+  }: {
+    attachment: { id: string };
+    onRemoveAttachment?: () => void;
+  }) => (
+    <button
+      data-test-subj={`mock-remove-attachment-${attachment.id}`}
+      type="button"
+      onClick={onRemoveAttachment}
+    />
+  ),
+}));
+jest.mock('./attachment_group_pill', () => ({
+  AttachmentGroupPill: () => null,
+}));
+jest.mock('../../../hooks/use_agent_builder_service', () => ({
+  useAgentBuilderServices: jest.fn(),
+}));
+jest.mock('../../../hooks/use_experimental_features', () => ({
+  useExperimentalFeatures: jest.fn(),
 }));
 jest.mock('@kbn/agent-builder-browser', () => ({
   ConversationInputShell: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
@@ -73,6 +98,7 @@ const mockedUseConversationStream = jest.mocked(useConversationStream);
 const mockedUseAgentBuilderAgents = jest.mocked(useAgentBuilderAgents);
 const mockedUseValidateAgentId = jest.mocked(useValidateAgentId);
 const mockedUseAgentId = jest.mocked(useAgentId);
+const mockedUseConversationReadOnly = jest.mocked(useConversationReadOnly);
 const mockedUseConversationTitle = jest.mocked(useConversationTitle);
 const mockedUseHasActiveConversation = jest.mocked(useHasActiveConversation);
 const mockedUseIsAwaitingPrompt = jest.mocked(useIsAwaitingPrompt);
@@ -81,6 +107,8 @@ const mockedUseConversationContext = jest.mocked(useConversationContext);
 const mockedUseSubmitMessage = jest.mocked(useSubmitMessage);
 const mockedUseToasts = jest.mocked(useToasts);
 const mockedUseMessageEditor = jest.mocked(useMessageEditor);
+const mockedUseAgentBuilderServices = jest.mocked(useAgentBuilderServices);
+const mockedUseExperimentalFeatures = jest.mocked(useExperimentalFeatures);
 
 const submitMessage = jest.fn();
 const editorController = {
@@ -89,6 +117,8 @@ const editorController = {
   setContent: jest.fn(),
   clear: jest.fn(),
   isEmpty: false,
+  getPlaceholderNames: jest.fn(() => []),
+  removePlaceholderByName: jest.fn(),
 };
 
 describe('ConversationInput', () => {
@@ -107,15 +137,26 @@ describe('ConversationInput', () => {
     mockedUseValidateAgentId.mockReturnValue(((agentId?: string): agentId is string =>
       Boolean(agentId)) as never);
     mockedUseAgentId.mockReturnValue('elastic-ai-agent');
+    mockedUseConversationReadOnly.mockReturnValue({ isReadOnly: false, isLoading: false });
     mockedUseConversationTitle.mockReturnValue({ title: '', isLoading: false } as never);
     mockedUseHasActiveConversation.mockReturnValue(false);
     mockedUseIsAwaitingPrompt.mockReturnValue(false);
     mockedUseConversationId.mockReturnValue(undefined);
     mockedUseConversationContext.mockReturnValue({
       attachments: [],
+      upsertAttachments: jest.fn(),
+      removeAttachment: jest.fn(),
+      resetAttachments: jest.fn(),
       isEmbeddedContext: false,
       conversationActions: {} as never,
     });
+    mockedUseAgentBuilderServices.mockReturnValue({
+      filesClient: {
+        create: jest.fn().mockResolvedValue({ file: { id: 'test-file-id' } }),
+        upload: jest.fn().mockResolvedValue(undefined),
+      },
+    } as never);
+    mockedUseExperimentalFeatures.mockReturnValue(true);
     mockedUseSubmitMessage.mockReturnValue(submitMessage);
     mockedUseToasts.mockReturnValue({
       addErrorToast: jest.fn(),
@@ -150,6 +191,22 @@ describe('ConversationInput', () => {
     expect(editorController.clear).toHaveBeenCalledTimes(1);
   });
 
+  it('hides the message input for read-only conversations', () => {
+    mockedUseConversationReadOnly.mockReturnValue({ isReadOnly: true, isLoading: false });
+
+    render(<ConversationInput />);
+
+    expect(screen.queryByTestId('mock-message-editor-submit')).not.toBeInTheDocument();
+  });
+
+  it('hides the message input while the conversation is loading', () => {
+    mockedUseConversationReadOnly.mockReturnValue({ isReadOnly: false, isLoading: true });
+
+    render(<ConversationInput />);
+
+    expect(screen.queryByTestId('mock-message-editor-submit')).not.toBeInTheDocument();
+  });
+
   describe('auto-focus', () => {
     it('focuses the editor shortly after mount', () => {
       jest.useFakeTimers();
@@ -168,6 +225,46 @@ describe('ConversationInput', () => {
       jest.advanceTimersByTime(200);
       expect(editorController.focus).not.toHaveBeenCalled();
       jest.useRealTimers();
+    });
+  });
+
+  describe('attachment removal', () => {
+    const attachment = { id: 'a1', type: 'text', data: {} };
+
+    it('removes a normal attachment via context when image upload is enabled', () => {
+      const removeAttachment = jest.fn();
+      mockedUseExperimentalFeatures.mockReturnValue(true);
+      mockedUseConversationContext.mockReturnValue({
+        attachments: [attachment],
+        upsertAttachments: jest.fn(),
+        removeAttachment,
+        resetAttachments: jest.fn(),
+        isEmbeddedContext: false,
+        conversationActions: {} as never,
+      } as never);
+
+      render(<ConversationInput />);
+      fireEvent.click(screen.getByTestId('mock-remove-attachment-a1'));
+
+      expect(removeAttachment).toHaveBeenCalledWith(0);
+    });
+
+    it('still removes a normal attachment via context when image upload is disabled', () => {
+      const removeAttachment = jest.fn();
+      mockedUseExperimentalFeatures.mockReturnValue(false);
+      mockedUseConversationContext.mockReturnValue({
+        attachments: [attachment],
+        upsertAttachments: jest.fn(),
+        removeAttachment,
+        resetAttachments: jest.fn(),
+        isEmbeddedContext: false,
+        conversationActions: {} as never,
+      } as never);
+
+      render(<ConversationInput />);
+      fireEvent.click(screen.getByTestId('mock-remove-attachment-a1'));
+
+      expect(removeAttachment).toHaveBeenCalledWith(0);
     });
   });
 });

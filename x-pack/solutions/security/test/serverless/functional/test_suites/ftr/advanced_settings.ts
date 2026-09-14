@@ -16,10 +16,14 @@ import {
   AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID,
+  AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID,
   SECURITY_SOLUTION_EXCLUDED_GAP_REASONS_KEY,
   SECURITY_SOLUTION_SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING,
 } from '@kbn/management-settings-ids';
-import { isEditorFieldSetting } from '@kbn/test-suites-xpack-platform/serverless/functional/test_suites/management/advanced_settings';
+import {
+  isEditorFieldSetting,
+  isGlobalSetting,
+} from '@kbn/test-suites-xpack-platform/serverless/functional/test_suites/management/advanced_settings';
 import {
   AI_CHAT_EXPERIENCE_TYPE,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
@@ -52,6 +56,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID,
     AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID,
     AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID,
+    AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID,
     SECURITY_SOLUTION_EXCLUDED_GAP_REASONS_KEY,
   ];
 
@@ -72,6 +77,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('renders security settings', () => {
       for (const settingId of SECURITY_PROJECT_SETTINGS) {
+        // Global settings render on the Global Settings tab
+        if (isGlobalSetting(settingId)) {
+          continue;
+        }
         // Code editors don't have their test subjects rendered
         if (isEditorFieldSetting(settingId)) {
           continue;

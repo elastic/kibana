@@ -1,8 +1,7 @@
 {
-  "sha1": "3d5669640d13a373992360f234fa52891b61d133",
+  "sha1": "781a93d5a4bb8c1b4e4ee03e73ca19bf61023d7f",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -134,7 +133,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
-        "line": 119,
+        "line": 122,
         "column": 22
       }
     },
@@ -150,7 +149,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
-        "line": 134,
+        "line": 137,
         "column": 6
       }
     },
@@ -166,7 +165,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
-        "line": 147,
+        "line": 150,
         "column": 27
       }
     },
@@ -182,7 +181,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
-        "line": 178,
+        "line": 181,
         "column": 27
       }
     },
@@ -198,8 +197,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
-        "line": 193,
-        "column": 85
+        "line": 208,
+        "column": 34
       }
     },
     {
@@ -214,7 +213,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
-        "line": 224,
+        "line": 242,
         "column": 28
       }
     },
@@ -230,24 +229,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
-        "line": 251,
+        "line": 269,
         "column": 26
-      }
-    },
-    {
-      "id": "27a03cda1136b49-ed6f6c2aead2f28",
-      "title": "Entity flyout anomalies anomalies table row actions menu exposes investigation actions",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
-        "line": 273,
-        "column": 40
       }
     },
     {
@@ -262,7 +245,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
-        "line": 298,
+        "line": 291,
         "column": 40
       }
     },
@@ -278,8 +261,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
-        "line": 386,
-        "column": 60
+        "line": 377,
+        "column": 27
       }
     },
     {

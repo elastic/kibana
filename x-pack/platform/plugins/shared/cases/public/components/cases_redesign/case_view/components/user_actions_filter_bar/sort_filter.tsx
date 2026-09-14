@@ -73,7 +73,7 @@ export const SortFilter = React.memo<SortFilterProps>(
         button={
           <EuiFilterButton
             data-test-subj="user-actions-filter-bar-sort-button"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             onClick={togglePopover}
             isSelected={isPopoverOpen}
             isLoading={isLoading}

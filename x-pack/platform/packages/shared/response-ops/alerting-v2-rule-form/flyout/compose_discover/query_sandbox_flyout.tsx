@@ -83,13 +83,15 @@ export interface QuerySandboxFlyoutProps {
    */
   helpText?: React.ReactNode;
   /**
-   * Optional actions rendered right-aligned in the ES|QL query header row — passed through
+   * Optional actions rendered at the end of the in-editor toolbar — passed through
    * to `QuerySandbox`. Use for header-level controls such as Split / Merge buttons.
    */
   headerActions?: React.ReactNode;
   title?: string;
   onAlertEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
   onRecoveryEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
+  onBaseEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
+  onSingleEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
 }
 
 const QUERY_SANDBOX_TITLE_ID = 'composeDiscoverChildTitle';
@@ -112,6 +114,8 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
   headerActions,
   onAlertEditorMount,
   onRecoveryEditorMount,
+  onBaseEditorMount,
+  onSingleEditorMount,
   title = i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.defaultTitle', {
     defaultMessage: 'Query sandbox',
   }),
@@ -261,6 +265,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
       onRecoveryBlockChange: (v: string) => updateQuery({ recover: v }),
       onAlertEditorMount,
       onRecoveryEditorMount,
+      onBaseEditorMount,
       readOnly: editingLocked,
     };
   }, [
@@ -271,6 +276,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
     updateQuery,
     onAlertEditorMount,
     onRecoveryEditorMount,
+    onBaseEditorMount,
     editingLocked,
   ]);
 
@@ -278,6 +284,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
     <EuiFlyout
       type="overlay"
       size="fill"
+      minWidth={700}
       onClose={onClose}
       aria-labelledby={QUERY_SANDBOX_TITLE_ID}
       closeButtonProps={{ 'data-test-subj': 'querySandboxClose' }}
@@ -302,6 +309,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
           helpText={helpText}
           headerActions={headerActions}
           tabProps={tabProps}
+          onSingleEditorMount={onSingleEditorMount}
           validationError={activeValidationError}
         />
       </EuiFlyoutBody>

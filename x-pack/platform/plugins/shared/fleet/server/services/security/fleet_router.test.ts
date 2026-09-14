@@ -279,7 +279,7 @@ describe('FleetAuthzRouter', () => {
             security: { authz: { enabled: false, reason: '' } },
           });
           // @ts-ignore
-          expect(fakeRouter.versioned[method]).toBeCalledWith(
+          expect(fakeRouter.versioned[method]).toHaveBeenCalledWith(
             expect.objectContaining({
               access: 'public',
             })
@@ -294,7 +294,7 @@ describe('FleetAuthzRouter', () => {
             security: { authz: { enabled: false, reason: '' } },
           });
           // @ts-ignore
-          expect(fakeRouter.versioned[method]).toBeCalledWith(
+          expect(fakeRouter.versioned[method]).toHaveBeenCalledWith(
             expect.objectContaining({
               access: 'internal',
             })

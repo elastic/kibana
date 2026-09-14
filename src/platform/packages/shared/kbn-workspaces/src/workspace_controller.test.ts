@@ -16,6 +16,7 @@ import { WorkspaceController } from './workspace_controller';
 import { ensureClonedRepo } from './ensure_cloned_repo';
 import { SourceRepoWorkspace } from './source_repo_workspace';
 import { WorktreeWorkspace } from './worktree_workspace';
+import { getSha } from './utils/get_sha';
 
 // Helper to init a temporary git repo with an initial commit
 async function initGitRepo(dir: string) {
@@ -55,10 +56,23 @@ async function createContext(): Promise<ReturnType<typeof createWorkspaceGlobalC
   });
 }
 
+async function ensureBaseClone(context: Awaited<ReturnType<typeof createContext>>) {
+  await ensureClonedRepo(context, { ref: await getSha(context.repoRoot, 'HEAD') });
+}
+
 describe('@kbn/workspaces controller', () => {
+  test('fromSourceRepo works when the workspaces root does not exist yet', async () => {
+    const context = await createContext();
+    // no ensureBaseClone: nothing has created workspacesRoot
+    const controller = new WorkspaceController(context);
+    const source = await controller.fromSourceRepo();
+    expect(source).toBeInstanceOf(SourceRepoWorkspace);
+    await expect(Fs.readFile(context.stateFilepath, 'utf8')).resolves.toContain('_source');
+  });
+
   test('cache key changes when diff changes', async () => {
     const context = await createContext();
-    await ensureClonedRepo(context);
+    await ensureBaseClone(context);
     const controller = new WorkspaceController(context);
     const source = await controller.fromSourceRepo();
     expect(source).toBeInstanceOf(SourceRepoWorkspace);
@@ -76,7 +90,7 @@ describe('@kbn/workspaces controller', () => {
 
   test('activating worktree creates directory and state', async () => {
     const context = await createContext();
-    await ensureClonedRepo(context);
+    await ensureBaseClone(context);
     const controller = new WorkspaceController(context);
     const wt = await controller.activateWorktree('HEAD');
     expect(wt).toBeInstanceOf(WorktreeWorkspace);
@@ -89,7 +103,7 @@ describe('@kbn/workspaces controller', () => {
 
   test('checkout task cache invalidates when worktree sha changes', async () => {
     const context = await createContext();
-    await ensureClonedRepo(context);
+    await ensureBaseClone(context);
     const controller = new WorkspaceController(context);
     const wt = await controller.activateWorktree('HEAD');
     await wt.ensureCheckout();
@@ -105,8 +119,6 @@ describe('@kbn/workspaces controller', () => {
       ['-c', 'user.email=you@example.com', '-c', 'user.name=Your Name', 'commit', '-m', 'new'],
       { cwd: context.baseCloneDir }
     );
-    // fetch the new commit into the worktree so rev-parse in base clone reflects new sha
-    await execa('git', ['fetch', '--all', '--prune', '--quiet'], { cwd: context.baseCloneDir });
 
     await wt.ensureCheckout();
 
@@ -116,7 +128,7 @@ describe('@kbn/workspaces controller', () => {
 
   test('prunes oldest workspaces beyond maxWorkspaces', async () => {
     const context = await createContext();
-    await ensureClonedRepo(context);
+    await ensureBaseClone(context);
     const controller = new WorkspaceController(context);
 
     const a = await controller.activateWorktree('HEAD');

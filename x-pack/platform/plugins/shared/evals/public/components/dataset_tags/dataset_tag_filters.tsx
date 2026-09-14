@@ -70,7 +70,7 @@ const FacetFilter: React.FC<FacetFilterProps> = ({
       panelPaddingSize="none"
       button={
         <EuiFilterButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           badgeColor="success"
           onClick={() => setIsOpen(!isOpen)}
           isSelected={isOpen}

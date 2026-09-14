@@ -7,9 +7,11 @@
 
 import { v4 as uuidV4 } from 'uuid';
 import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { getPackagePolicySavedObjectType } from '@kbn/fleet-plugin/server/services/package_policy';
 import { i18n } from '@kbn/i18n';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import {
   legacySyntheticsMonitorTypeSingle,
   syntheticsMonitorAttributes,
@@ -43,6 +45,26 @@ import type { RouteContext } from '../../types';
 import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monitor_upgrade_sender';
 import { formatKibanaNamespace } from '../../../../common/formatters';
 import { getPrivateLocationsForNamespaces } from '../../../synthetics_service/get_private_locations';
+import { resolveMaintenanceWindowsOrThrow } from '../../../synthetics_service/maintenance_windows/resolve_maintenance_windows';
+import { PackagePolicyService } from '../../../synthetics_service/private_location/package_policy_service';
+
+/**
+ * Fleet bulkCreate reports saved-object 409s as plain `{ statusCode, error }`
+ * objects, not `Error` instances. Package-policy ids are deterministic
+ * (`${monitorId}-${locationId}`), so a conflict means that policy already
+ * exists — typically a concurrent cleanup sync or a Fleet retry after the SO
+ * write landed. Failing the create (and reverting) turns that into a 500.
+ */
+export const isPackagePolicyConflictFailure = (error: unknown): boolean => {
+  if (error instanceof Error) {
+    return SavedObjectsErrorHelpers.isConflictError(error);
+  }
+  if (error && typeof error === 'object') {
+    const soError = error as { statusCode?: number; error?: string };
+    return soError.statusCode === 409 || soError.error === 'Conflict';
+  }
+  return false;
+};
 
 export type CreateMonitorPayLoad = MonitorFields & {
   url?: string;
@@ -76,11 +98,13 @@ export class AddEditMonitorAPI {
       normalizedMonitor,
       newMonitorId,
     });
+    const monitorPrivateLocations = monitorWithNamespace[ConfigKey.LOCATIONS].filter(
+      (loc) => !loc.isServiceManaged
+    );
+    const packagePolicyIds = monitorPrivateLocations.map((loc) => `${newMonitorId}-${loc.id}`);
+    let soCreated = false;
 
     try {
-      const monitorPrivateLocations = monitorWithNamespace[ConfigKey.LOCATIONS].filter(
-        (loc) => !loc.isServiceManaged
-      );
       const packagePolicySoType = await getPackagePolicySavedObjectType();
       const references = monitorPrivateLocations.map((loc) => ({
         id: `${newMonitorId}-${loc.id}`,
@@ -102,17 +126,36 @@ export class AddEditMonitorAPI {
         spaceId
       );
 
-      const [monitorSavedObjectN, [packagePolicyResult, syncErrors]] = await Promise.all([
+      const [soResult, syncResult] = await Promise.allSettled([
         newMonitorPromise,
         syncErrorsPromise,
       ]);
+      soCreated = soResult.status === 'fulfilled';
 
-      if (packagePolicyResult && (packagePolicyResult?.failed?.length ?? []) > 0) {
-        const failed = packagePolicyResult.failed.map((f) => f.error);
-        throw new Error(failed.join(', '));
+      if (soResult.status === 'rejected') {
+        throw soResult.reason;
+      }
+      if (syncResult.status === 'rejected') {
+        throw syncResult.reason;
       }
 
-      monitorSavedObject = monitorSavedObjectN;
+      const [packagePolicyResult, syncErrors] = syncResult.value;
+
+      if ((packagePolicyResult?.failed?.length ?? 0) > 0) {
+        // Fleet reports saved object level failures (e.g. a policy id conflict) as plain
+        // objects, so they have to be formatted explicitly to stay readable.
+        const failed = packagePolicyResult.failed.filter(
+          ({ error }) => !isPackagePolicyConflictFailure(error)
+        );
+        if (failed.length > 0) {
+          const messages = failed.map(({ error }) =>
+            error instanceof Error ? error.message : JSON.stringify(error)
+          );
+          throw new Error(messages.join(', '));
+        }
+      }
+
+      monitorSavedObject = soResult.value;
 
       sendTelemetryEvents(
         server.logger,
@@ -136,6 +179,8 @@ export class AddEditMonitorAPI {
       e.message = `${e.message}, monitor name: ${monitorWithNamespace[ConfigKey.NAME]}`;
       await this.revertMonitorIfCreated({
         newMonitorId,
+        packagePolicyIds,
+        soCreated,
       });
 
       throw e;
@@ -169,7 +214,8 @@ export class AddEditMonitorAPI {
   async normalizeMonitor(
     requestPayload: CreateMonitorPayLoad,
     monitorPayload: CreateMonitorPayLoad,
-    prevLocations?: MonitorFields['locations']
+    prevLocations?: MonitorFields['locations'],
+    maintenanceWindows: MaintenanceWindow[] = []
   ) {
     const { syntheticsMonitorClient, request } = this.routeContext;
     const internal = Boolean((request.query as { internal?: boolean })?.internal);
@@ -190,6 +236,15 @@ export class AddEditMonitorAPI {
     }
 
     const defaultFields = DEFAULT_FIELDS[monitorType];
+
+    const maintenanceWindowRefs = monitor[ConfigKey.MAINTENANCE_WINDOWS];
+    let resolvedMaintenanceWindows = maintenanceWindowRefs;
+    if (maintenanceWindowRefs && maintenanceWindowRefs.length > 0) {
+      resolvedMaintenanceWindows = resolveMaintenanceWindowsOrThrow(
+        maintenanceWindowRefs,
+        maintenanceWindows
+      );
+    }
 
     let locationsVal: MonitorFields['locations'] = [];
 
@@ -240,6 +295,8 @@ export class AddEditMonitorAPI {
       [ConfigKey.SCHEDULE]: getMonitorSchedule(schedule ?? defaultFields[ConfigKey.SCHEDULE]),
       [ConfigKey.MAX_ATTEMPTS]: getMaxAttempts(retestOnFailure, monitor[ConfigKey.MAX_ATTEMPTS]),
       [ConfigKey.LOCATIONS]: locationsVal,
+      [ConfigKey.MAINTENANCE_WINDOWS]:
+        resolvedMaintenanceWindows ?? defaultFields?.[ConfigKey.MAINTENANCE_WINDOWS] ?? [],
     } as MonitorFields;
   }
 
@@ -346,28 +403,58 @@ export class AddEditMonitorAPI {
     return namespace;
   }
 
-  async revertMonitorIfCreated({ newMonitorId }: { newMonitorId: string }) {
-    const { server, monitorConfigRepository } = this.routeContext;
+  async revertMonitorIfCreated({
+    newMonitorId,
+    packagePolicyIds = [],
+    soCreated = true,
+  }: {
+    newMonitorId: string;
+    packagePolicyIds?: string[];
+    soCreated?: boolean;
+  }) {
+    const { server, spaceId, monitorConfigRepository } = this.routeContext;
     try {
-      const encryptedMonitor = await monitorConfigRepository.get(newMonitorId);
+      const encryptedMonitor = soCreated ? await monitorConfigRepository.get(newMonitorId) : null;
       if (encryptedMonitor) {
+        const deleteMonitorAPI = new DeleteMonitorAPI(this.routeContext);
+        await deleteMonitorAPI.execute({ monitorIds: [newMonitorId] });
         await monitorConfigRepository.bulkDelete([
           { id: newMonitorId, type: syntheticsMonitorSavedObjectType },
           { id: newMonitorId, type: legacySyntheticsMonitorTypeSingle },
         ]);
-
-        const deleteMonitorAPI = new DeleteMonitorAPI(this.routeContext);
-        await deleteMonitorAPI.execute({
-          monitorIds: [newMonitorId],
-        });
       }
     } catch (error) {
-      // ignore errors here
       server.logger.error(
-        `Unable to revert monitor with id ${newMonitorId}, Error: ${error.message}`,
+        `Unable to revert monitor saved object with id ${newMonitorId}, Error: ${error.message}`,
         {
           error,
         }
+      );
+    }
+
+    // Saved-monitor policies are owned by DeleteMonitorAPI; orphan cleanup is only for unsaved creates.
+    if (soCreated || packagePolicyIds.length === 0) {
+      return;
+    }
+
+    const ownedByExistingMonitor = Boolean(
+      await monitorConfigRepository.get(newMonitorId).catch(() => null)
+    );
+    if (ownedByExistingMonitor) {
+      return;
+    }
+
+    try {
+      await new PackagePolicyService(server).bulkDelete({
+        policyIdsToDelete: packagePolicyIds,
+        spaceId,
+      });
+    } catch (error) {
+      server.logger.error(
+        `Unable to revert package policies [${packagePolicyIds.join(
+          ', '
+        )}] for monitor with id ${newMonitorId}, Error: ${error.message}`,
+        { error }
       );
     }
   }

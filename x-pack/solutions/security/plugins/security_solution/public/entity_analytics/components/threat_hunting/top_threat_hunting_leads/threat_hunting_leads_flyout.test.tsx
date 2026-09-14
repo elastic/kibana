@@ -56,7 +56,7 @@ const createMockLead = (overrides: Partial<HuntingLead> = {}): HuntingLead => ({
   title: 'Test Lead',
   byline: 'Test byline',
   description: 'Test description',
-  entities: [{ type: 'user', name: 'jsmith' }],
+  entity: { type: 'user', name: 'jsmith', id: 'user:jsmith' },
   tags: ['tag1'],
   priority: 8,
   chatRecommendations: ['Check logs'],
@@ -65,6 +65,9 @@ const createMockLead = (overrides: Partial<HuntingLead> = {}): HuntingLead => ({
   status: 'active' as const,
   observations: [],
   sourceType: 'adhoc' as const,
+  topRelatedEntities: [],
+  relatedEntityCounts: {},
+  origin: 'observations' as const,
   ...overrides,
 });
 
@@ -140,6 +143,28 @@ describe('ThreatHuntingLeadsFlyout', () => {
     expect(screen.queryByTestId('leadsCountBadge')).not.toBeInTheDocument();
   });
 
+  it('does not render the exploratory badge for an observations-origin lead', () => {
+    mockUseQuery.mockReturnValue({
+      data: { leads: [createApiLead({ origin: 'observations' })], total: 1 },
+      isLoading: false,
+    });
+
+    render(<ThreatHuntingLeadsFlyout {...defaultProps} />);
+
+    expect(screen.queryByTestId('leadExploratoryBadge')).not.toBeInTheDocument();
+  });
+
+  it('renders the exploratory badge for an exploratory-origin lead', () => {
+    mockUseQuery.mockReturnValue({
+      data: { leads: [createApiLead({ origin: 'exploratory' })], total: 1 },
+      isLoading: false,
+    });
+
+    render(<ThreatHuntingLeadsFlyout {...defaultProps} />);
+
+    expect(screen.getByTestId('leadExploratoryBadge')).toBeInTheDocument();
+  });
+
   it('shows a no-matching-leads message when the search query matches nothing', () => {
     render(<ThreatHuntingLeadsFlyout {...defaultProps} />);
 
@@ -187,7 +212,7 @@ describe('ThreatHuntingLeadsFlyout', () => {
           createApiLead({
             id: 'lead-badge',
             byline: 'User jsmith on host server-01',
-            entities: [{ type: 'user', name: 'jsmith' }],
+            entity: { type: 'user', name: 'jsmith', id: 'user:jsmith' },
           }),
         ],
         total: 1,
@@ -205,49 +230,7 @@ describe('ThreatHuntingLeadsFlyout', () => {
         id: 'user-panel',
         params: {
           userName: 'jsmith',
-          // No real entity id on this lead, so it falls back to `type:name`.
           entityId: 'user:jsmith',
-          contextID: 'entity-analytics-threat-hunting-leads',
-          scopeId: 'entity-analytics-threat-hunting-leads',
-        },
-      },
-    });
-    expect(onSelectLead).not.toHaveBeenCalled();
-  });
-
-  it('opens the entity flyout using the real entity id (EUID) when the lead entity carries one', () => {
-    const onSelectLead = jest.fn();
-    mockUseQuery.mockReturnValue({
-      data: {
-        leads: [
-          createApiLead({
-            id: 'lead-euid',
-            byline: 'Host 8c67cb16-b7f2-4052-82f9-6edb87bb63ef triggered an alert',
-            entities: [
-              {
-                type: 'host',
-                name: '8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
-                id: 'host:8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
-              },
-            ],
-          }),
-        ],
-        total: 1,
-      },
-      isLoading: false,
-    });
-
-    render(<ThreatHuntingLeadsFlyout {...defaultProps} onSelectLead={onSelectLead} />);
-
-    fireEvent.click(screen.getByTestId('leadEntityBadge-8c67cb16-b7f2-4052-82f9-6edb87bb63ef'));
-
-    expect(mockOpenFlyout).toHaveBeenCalledTimes(1);
-    expect(mockOpenFlyout).toHaveBeenCalledWith({
-      right: {
-        id: 'host-panel',
-        params: {
-          hostName: '8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
-          entityId: 'host:8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
           contextID: 'entity-analytics-threat-hunting-leads',
           scopeId: 'entity-analytics-threat-hunting-leads',
         },

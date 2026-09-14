@@ -13,7 +13,7 @@ import { BULK_RESPONSE, SAMPLE_ACTION_POLICY_ID } from './action_policy_oas_shar
 
 export const BULK_SNOOZE_ACTION_POLICIES_REQUEST: BulkSnoozeActionPoliciesBody = {
   ids: [SAMPLE_ACTION_POLICY_ID, 'action-policy-2'],
-  snoozedUntil: '2026-01-16T12:00:00.000Z',
+  snoozed_until: '2026-01-16T12:00:00.000Z',
 };
 
 export const bulkSnoozeActionPoliciesOasExamples = (): AlertingOasOperationObject =>
@@ -31,12 +31,12 @@ export const bulkSnoozeActionPoliciesOasExamples = (): AlertingOasOperationObjec
       },
       400: invalidResponseExample({
         summary: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
-        message: 'snoozedUntil: Invalid input: expected string, received undefined',
+        message: 'snoozed_until: Invalid input: expected string, received undefined',
         details: {
           errors: {
             errors: [],
             properties: {
-              snoozedUntil: { errors: ['Invalid input: expected string, received undefined'] },
+              snoozed_until: { errors: ['Invalid input: expected string, received undefined'] },
             },
           },
         },

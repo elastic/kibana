@@ -9,10 +9,12 @@
 
 import { z } from '@kbn/zod';
 import {
+  asCodeEsqlApproximationSchema,
   asCodeIdSchema,
   asCodeMetaSchema,
-  asCodePaginationParamsSchema,
   asCodePaginationResponseMetaSchema,
+  asCodeSearchRequestSchema,
+  getAsCodeTagsSchema,
   PAGINATION_MAX_SIZE,
 } from '@kbn/as-code-shared-schemas';
 import { optionsListESQLControlSchema } from '@kbn/controls-schemas';
@@ -25,8 +27,17 @@ import {
 } from '@kbn/controls-constants';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { timeRangeSchema } from '@kbn/es-query-server';
-import { MAX_DISCOVER_SESSION_TABS } from '@kbn/saved-search-plugin/common';
-import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
+import {
+  MAX_DISCOVER_SESSION_TABS,
+  MAX_METRICS_TAB_DIMENSIONS,
+  MAX_METRICS_TAB_STATE_STRING_LENGTH,
+} from '@kbn/saved-search-plugin/common';
+import {
+  DiscoverTabType,
+  METRICS_GRID_HISTOGRAM_PERCENTILES,
+  METRICS_GRID_SIMPLE_AGGREGATIONS,
+  UnifiedHistogramSuggestionType,
+} from '@kbn/discover-utils';
 import { classicTabSchema, esqlTabSchema } from '../embeddable/schema';
 
 export const MAX_SESSION_TITLE_LENGTH = 256;
@@ -35,6 +46,7 @@ export const MAX_TAB_LABEL_LENGTH = 120;
 export const MAX_BREAKDOWN_FIELD_LENGTH = 1000;
 export const MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH = 256;
 export const MAX_DISCOVER_SESSION_CONTROL_PANELS = 100;
+export const MAX_DISCOVER_SESSION_TAGS = 1000;
 export const MAX_SEARCH_QUERY_LENGTH = 1000;
 
 const visContextSchema = z
@@ -66,7 +78,7 @@ const discoverSessionControlWidthSchema = z
     description: 'Minimum width of the control panel.',
   });
 
-const discoverSessionControlPanelSchema = z
+export const discoverSessionControlPanelSchema = z
   .object({
     id: z.string().min(1).meta({ description: 'The unique ID of the control.' }),
     type: z.literal(ESQL_CONTROL),
@@ -136,12 +148,14 @@ const discoverSessionTabPresentationSchema = z
       .meta({
         description: 'Time interval for the chart histogram on this tab.',
       }),
-    time_restore: z.boolean().default(false).meta({
+    time_range: timeRangeSchema.optional().meta({
       description:
-        "When `true`, Discover applies this tab's `time_range` and `refresh_interval`. When `false`, those fields are ignored and global time settings are used.",
+        'Time range to restore when the tab is opened. When omitted, Discover uses the global time settings.',
     }),
-    time_range: timeRangeSchema.optional(),
-    refresh_interval: refreshIntervalSchema.optional(),
+    refresh_interval: refreshIntervalSchema.optional().meta({
+      description:
+        'Refresh interval associated with this tab. It can be stored independently; the presence of `time_range` controls whether the time settings are restored.',
+    }),
     vis_context: visContextSchema.optional(),
     control_panels: discoverSessionControlPanelsSchema.optional(),
   })
@@ -154,11 +168,55 @@ const discoverSessionTabIdentitySchema = z
   })
   .strict();
 
+const discoverSessionDefaultTabTypeStateSchema = z
+  .object({
+    type: z
+      .literal(`${DiscoverTabType.Default}`)
+      .default(DiscoverTabType.Default)
+      .meta({
+        description:
+          'A tab with no type-specific saved state. ' +
+          'If `type` is omitted, it defaults to `default`. Responses always include `type`.',
+      }),
+  })
+  .strict();
+
+const simpleAggregationSchema = z.enum(METRICS_GRID_SIMPLE_AGGREGATIONS);
+
+const discoverSessionMetricsTabTypeStateSchema = z
+  .object({
+    type: z.literal(`${DiscoverTabType.Metrics}`).meta({
+      description:
+        'A tab with saved metrics grid settings. Requires an ES|QL data source. ' +
+        'These settings are used only when the query supports the metrics experience.',
+    }),
+    dimensions: z
+      .array(z.string().max(MAX_METRICS_TAB_STATE_STRING_LENGTH))
+      .max(MAX_METRICS_TAB_DIMENSIONS)
+      .meta({
+        description: 'Fields used to group metrics in the metrics grid.',
+      }),
+    search_term: z.string().max(MAX_METRICS_TAB_STATE_STRING_LENGTH).meta({
+      description: 'Search term used to filter metrics in the metrics grid.',
+    }),
+    counter_aggregation: simpleAggregationSchema.meta({
+      description: 'Aggregation applied to counter metric fields.',
+    }),
+    gauge_aggregation: simpleAggregationSchema.meta({
+      description: 'Aggregation applied to gauge metric fields.',
+    }),
+    histogram_percentile: z.enum(METRICS_GRID_HISTOGRAM_PERCENTILES).meta({
+      description: 'Percentile displayed for histogram metric fields.',
+    }),
+  })
+  .strict();
+
 const discoverSessionClassicTabSchema = z
   .object({
     ...discoverSessionTabIdentitySchema.shape,
     ...classicTabSchema.shape,
     ...discoverSessionTabPresentationSchema.shape,
+    ...discoverSessionDefaultTabTypeStateSchema.shape,
   })
   .strict();
 
@@ -167,13 +225,30 @@ const discoverSessionEsqlTabSchema = z
     ...discoverSessionTabIdentitySchema.shape,
     ...esqlTabSchema.shape,
     ...discoverSessionTabPresentationSchema.shape,
+    ...asCodeEsqlApproximationSchema.shape,
+    ...discoverSessionDefaultTabTypeStateSchema.shape,
   })
   .strict();
 
-const discoverSessionApiTabSchema = z.union([
-  discoverSessionClassicTabSchema,
-  discoverSessionEsqlTabSchema,
-]);
+const discoverSessionMetricsTabSchema = discoverSessionEsqlTabSchema
+  .extend(discoverSessionMetricsTabTypeStateSchema.shape)
+  .meta({
+    title: 'Metrics tab',
+    description: 'An ES|QL tab with saved metrics grid settings.',
+  });
+
+const discoverSessionApiTabSchema = z
+  .union([
+    discoverSessionClassicTabSchema,
+    discoverSessionEsqlTabSchema,
+    discoverSessionMetricsTabSchema,
+  ])
+  .meta({
+    description:
+      'A Discover tab definition. `data_source.type` identifies the data source; `type` identifies the tab type. ' +
+      'The tab type describes saved state and does not select the active Discover experience. ' +
+      'Default tabs support data views and ES|QL; metrics tabs support only ES|QL.',
+  });
 
 export const discoverSessionApiDataSchema = z
   .object({
@@ -187,6 +262,10 @@ export const discoverSessionApiDataSchema = z
       .max(MAX_SESSION_DESCRIPTION_LENGTH)
       .default('')
       .meta({ description: 'Discover session description.' }),
+    tags: getAsCodeTagsSchema(
+      'Tag IDs to associate with this Discover session.',
+      MAX_DISCOVER_SESSION_TAGS
+    ).optional(),
     tabs: z
       .array(discoverSessionApiTabSchema)
       .min(1)
@@ -215,7 +294,50 @@ export const discoverSessionApiResponseSchema = z
   })
   .strict();
 
-export const discoverSessionSearchParamsSchema = asCodePaginationParamsSchema.extend({
+/* Shared context for warnings produced while transforming a Discover session tab. */
+const discoverSessionWarningBaseSchema = z.object({
+  message: z.string().meta({ description: 'Why stored content was omitted from the response.' }),
+  tab_id: z.string().meta({ description: 'The ID of the affected tab.' }),
+});
+
+/* Reports one invalid panel while allowing the other panels in the tab to be returned. */
+const discoverSessionDroppedPanelWarningSchema = discoverSessionWarningBaseSchema
+  .extend({
+    type: z.literal('dropped_panel'),
+    panel_id: z.string().meta({ description: 'The ID of the omitted control panel.' }),
+  })
+  .strict();
+
+/* Reports a tab property that could not be returned as a whole. */
+const discoverSessionDroppedPropertyWarningSchema = discoverSessionWarningBaseSchema
+  .extend({
+    type: z.literal('dropped_property'),
+    key: z.string().meta({ description: 'The name of the property omitted from the response.' }),
+  })
+  .strict();
+
+/* Allows GET responses to preserve valid session data while reporting what was dropped. */
+export const discoverSessionWarningsSchema = z
+  .array(
+    z.union([discoverSessionDroppedPanelWarningSchema, discoverSessionDroppedPropertyWarningSchema])
+  )
+  .meta({
+    description:
+      'Warnings generated when stored Discover session content cannot be fully represented in the API response.',
+  });
+
+export const discoverSessionGetResponseSchema = discoverSessionApiResponseSchema.extend({
+  warnings: discoverSessionWarningsSchema.optional(),
+});
+
+export const discoverSessionSanitizeResponseSchema = z
+  .object({
+    data: discoverSessionApiDataSchema,
+    warnings: discoverSessionWarningsSchema.optional(),
+  })
+  .strict();
+
+export const discoverSessionSearchParamsSchema = asCodeSearchRequestSchema.extend({
   query: z
     .string()
     .max(MAX_SEARCH_QUERY_LENGTH)
@@ -233,6 +355,10 @@ const discoverSessionSearchItemSchema = z
       .object({
         title: z.string().meta({ description: 'Discover session title.' }),
         description: z.string().optional().meta({ description: 'Discover session description.' }),
+        tags: getAsCodeTagsSchema(
+          'Tag IDs associated with this Discover session.',
+          MAX_DISCOVER_SESSION_TAGS
+        ).optional(),
       })
       .strict(),
     meta: asCodeMetaSchema,
@@ -254,9 +380,23 @@ export const discoverSessionSearchResponseSchema = z
 
 export type DiscoverSessionApiData = z.output<typeof discoverSessionApiDataSchema>;
 export type DiscoverSessionApiResponse = z.output<typeof discoverSessionApiResponseSchema>;
+export type DiscoverSessionGetResponse = z.output<typeof discoverSessionGetResponseSchema>;
+export type DiscoverSessionSanitizeResponse = z.output<
+  typeof discoverSessionSanitizeResponseSchema
+>;
+export type DiscoverSessionWarning = z.output<typeof discoverSessionWarningsSchema>[number];
 export type DiscoverSessionSearchParams = z.output<typeof discoverSessionSearchParamsSchema>;
 export type DiscoverSessionSearchResponse = z.output<typeof discoverSessionSearchResponseSchema>;
 export type DiscoverSessionApiClassicTab = z.output<typeof discoverSessionClassicTabSchema>;
-export type DiscoverSessionApiEsqlTab = z.output<typeof discoverSessionEsqlTabSchema>;
+export type DiscoverSessionApiMetricsTab = z.output<typeof discoverSessionMetricsTabSchema>;
+export type DiscoverSessionApiEsqlTab =
+  | z.output<typeof discoverSessionEsqlTabSchema>
+  | DiscoverSessionApiMetricsTab;
 export type DiscoverSessionApiTab = z.output<typeof discoverSessionApiTabSchema>;
+export type DiscoverSessionApiTabTypeState =
+  | z.output<typeof discoverSessionDefaultTabTypeStateSchema>
+  | z.output<typeof discoverSessionMetricsTabTypeStateSchema>;
 export type DiscoverSessionControlPanels = z.output<typeof discoverSessionControlPanelsSchema>;
+
+// Input types (shape accepted by the API, before defaults applied)
+export type DiscoverSessionApiDataInput = z.input<typeof discoverSessionApiDataSchema>;

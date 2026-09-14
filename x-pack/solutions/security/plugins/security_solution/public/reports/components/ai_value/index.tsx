@@ -139,7 +139,7 @@ const AIValueReportContent: React.FC<AIValueReportContentProps> = ({
                 ? i18n.ATTACKS_LINK
                 : i18n.ATTACK_DISCOVERY_LINK,
               href: attackDiscoveryHref,
-              iconType: 'popout',
+              iconType: 'external',
               iconSide: 'left',
               target: '_blank',
               rel: 'noopener noreferrer',
