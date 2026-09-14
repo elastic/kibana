@@ -118,6 +118,14 @@ describe('buildLogsExtractionEsqlQuery', () => {
       );
     });
 
+    /**
+     * A document with no `event.kind` belongs to the non-priority process, so the gate has to let
+     * it through. In ES|QL, `NOT (MV_CONTAINS(event.kind, "asset"))` is neither true nor false when
+     * the field is missing, and the document is dropped. The `IS NULL` part is what keeps it.
+     *
+     * This checks the generated ES|QL text on purpose. Running the condition through our in-memory
+     * evaluator would report the document as matching either way, and so would not catch the bug.
+     */
     it('nonPriority gates on the complement, including documents without event.kind', () => {
       expect(sourceClauseOf(buildForMode('nonPriority'))).toContain(
         'AND (TO_STRING(event.kind) IS NULL OR NOT (MV_CONTAINS(TO_STRING(event.kind), "asset")))'

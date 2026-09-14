@@ -110,6 +110,48 @@ describe('buildLogPaginationCursorProbeEsql', () => {
   });
 });
 
+/**
+ * The probe draws the slice boundary and feeds the volume cap, so it has to see exactly the
+ * documents the extraction query will go on to read. A gate reaching one but not the other would
+ * strand logs inside a slice that no pass ever scans.
+ */
+describe('buildLogPaginationCursorProbeEsql extraction gate', () => {
+  const probeFor = (extractionMode: 'single' | 'priority' | 'nonPriority') =>
+    buildLogPaginationCursorProbeEsql({
+      indexPatterns: ['logs-*'],
+      entityDefinition: getEntityDefinition('user', 'default', extractionMode),
+      fromDateISO: '2024-01-01T00:00:00.000Z',
+      toDateISO: '2024-01-02T00:00:00.000Z',
+      maxLogsPerPage: 100,
+    });
+
+  it('single: probes without a gate', () => {
+    expect(probeFor('single')).not.toContain('event.kind');
+  });
+
+  it('priority: probes only asset documents', () => {
+    expect(probeFor('priority')).toContain('AND (MV_CONTAINS(TO_STRING(event.kind), "asset"))');
+  });
+
+  it('nonPriority: probes the complement, including documents without event.kind', () => {
+    expect(probeFor('nonPriority')).toContain(
+      'AND (TO_STRING(event.kind) IS NULL OR NOT (MV_CONTAINS(TO_STRING(event.kind), "asset")))'
+    );
+  });
+
+  it.each(['priority', 'nonPriority'] as const)(
+    '%s: the gate is the only difference from the single probe',
+    (extractionMode) => {
+      const gateLine = probeFor(extractionMode)
+        .split('\n')
+        .find((line) => line.includes('event.kind'));
+
+      expect(gateLine).toBeDefined();
+      expect(probeFor(extractionMode).replace(`\n${gateLine}`, '')).toBe(probeFor('single'));
+    }
+  );
+});
+
 describe('interpretLogPaginationCursorRows', () => {
   it('treats undefined row as hasLogsToProcess false', () => {
     expect(interpretLogPaginationCursorRows(undefined, 100)).toEqual({

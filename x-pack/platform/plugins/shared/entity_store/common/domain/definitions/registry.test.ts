@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EntityDefinitionWithoutId } from './entity_schema';
 import { ALL_ENTITY_TYPES, entitySchema } from './entity_schema';
 import {
   getEntityDefinitionWithoutId,
@@ -62,5 +63,45 @@ describe('getEntityDefinitionWithoutId', () => {
     expect(() => getEntityDefinitionWithoutId('host', 'priority')).toThrow(
       /No 'priority' extraction variant registered/
     );
+  });
+});
+
+/**
+ * Every variant of a type must share one identity object. `entity.namespace` is part of the entity
+ * id, so identity logic that drifted between variants would resolve the same person to a different
+ * id per process, splitting one user into two entities.
+ */
+describe('user extraction variants share identity logic', () => {
+  const single = getEntityDefinitionWithoutId('user');
+  const priority = getEntityDefinitionWithoutId('user', 'priority');
+  const nonPriority = getEntityDefinitionWithoutId('user', 'nonPriority');
+
+  const asRecord = (definition: EntityDefinitionWithoutId) =>
+    definition as unknown as Record<string, unknown>;
+
+  /** Compares by reference, so a rebuilt-but-equal value counts as a difference. */
+  const keysDifferingFromSingle = (variant: EntityDefinitionWithoutId): string[] => {
+    const keys = new Set([...Object.keys(single), ...Object.keys(variant)]);
+    return [...keys].filter((key) => asRecord(variant)[key] !== asRecord(single)[key]).sort();
+  };
+
+  it.each([
+    ['priority', priority],
+    ['nonPriority', nonPriority],
+  ])('%s is the single definition with only extractionGate replaced', (_name, variant) => {
+    expect(keysDifferingFromSingle(variant)).toEqual(['extractionGate']);
+  });
+
+  it.each([
+    ['priority', priority],
+    ['nonPriority', nonPriority],
+  ])('%s reuses the very same identityField object', (_name, variant) => {
+    expect(variant.identityField).toBe(single.identityField);
+  });
+
+  it('gives each variant a distinct gate', () => {
+    expect(priority.extractionGate).toBeDefined();
+    expect(nonPriority.extractionGate).toBeDefined();
+    expect(priority.extractionGate).not.toEqual(nonPriority.extractionGate);
   });
 });
