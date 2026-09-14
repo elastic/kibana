@@ -22,19 +22,19 @@ import type { MappingsResponse } from '../../../../../../../common';
 interface IndexDocumentsProps {
   documents: SearchHit[];
   isLoading: boolean;
-  error: unknown;
   mappings?: MappingsResponse;
+  onRefresh: () => void;
 }
 
 export const IndexDocuments: React.FC<IndexDocumentsProps> = ({
   documents,
   isLoading,
-  error,
   mappings,
+  onRefresh,
 }) => {
   const mappingProperties = mappings?.mappings?.properties;
 
-  if (isLoading || error || documents.length === 0) {
+  if (documents.length === 0) {
     return null;
   }
   return (
@@ -65,7 +65,19 @@ export const IndexDocuments: React.FC<IndexDocumentsProps> = ({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty iconType="refresh" size="s" onClick={() => { }}>Refresh</EuiButtonEmpty>
+          <EuiButtonEmpty
+            iconType="refresh"
+            size="s"
+            onClick={onRefresh}
+            isLoading={isLoading}
+            isDisabled={isLoading}
+            data-test-subj="indexDetailsDataPreviewRefreshButton"
+          >
+            <FormattedMessage
+              id="xpack.idxMgmt.indexDetails.data.preview.refreshButtonLabel"
+              defaultMessage="Refresh"
+            />
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
 

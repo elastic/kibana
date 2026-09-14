@@ -20,6 +20,7 @@ import {
   testIndexName,
   testIndexMappings,
   testUserStartPrivilegesResponse,
+  testIndexDocumentsSampleResponse,
 } from '../../../../../../../__jest__/client_integration/index_details_page/mocks';
 
 jest.mock('@kbn/code-editor');
@@ -84,7 +85,7 @@ describe('DetailsPageOverview', () => {
       indexDetails?: Index;
       sampleDocuments?: SearchHit[];
       isDocumentsLoading?: boolean;
-      documentsError?: unknown;
+      onRefreshDocuments?: () => void;
       appDeps?: Record<string, unknown>;
     } = {}
   ) => {
@@ -92,7 +93,7 @@ describe('DetailsPageOverview', () => {
       indexDetails: overrides.indexDetails ?? testIndexMock,
       sampleDocuments: overrides.sampleDocuments ?? [],
       isDocumentsLoading: overrides.isDocumentsLoading ?? false,
-      documentsError: overrides.documentsError ?? undefined,
+      onRefreshDocuments: overrides.onRefreshDocuments ?? jest.fn(),
     };
 
     const Comp = WithAppDependencies(() => <DetailsPageOverview {...defaultProps} />, httpSetup, {
@@ -227,6 +228,39 @@ describe('DetailsPageOverview', () => {
       await waitFor(() => {
         expect(screen.getByTestId('updateElserMappingsModal')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('Data preview', () => {
+    const sampleDocuments = testIndexDocumentsSampleResponse.results as SearchHit[];
+
+    it('does not render when there are no documents', async () => {
+      renderComponent();
+      await waitFor(() => {
+        expect(screen.getByText('Add data to this index')).toBeInTheDocument();
+      });
+      expect(screen.queryByText('Data preview')).not.toBeInTheDocument();
+    });
+
+    it('renders sample documents and reloads them when Refresh is clicked', async () => {
+      const onRefreshDocuments = jest.fn();
+      renderComponent({ sampleDocuments, onRefreshDocuments });
+
+      await waitFor(() => {
+        expect(screen.getByText('Data preview')).toBeInTheDocument();
+      });
+
+      screen.getByTestId('indexDetailsDataPreviewRefreshButton').click();
+      expect(onRefreshDocuments).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps the preview visible while documents are reloading', async () => {
+      renderComponent({ sampleDocuments, isDocumentsLoading: true });
+
+      await waitFor(() => {
+        expect(screen.getByText('Data preview')).toBeInTheDocument();
+      });
+      expect(screen.getByTestId('indexDetailsDataPreviewRefreshButton')).toBeDisabled();
     });
   });
 });

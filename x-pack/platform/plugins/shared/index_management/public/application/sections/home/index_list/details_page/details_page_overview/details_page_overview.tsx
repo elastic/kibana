@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiTitle,
   EuiText,
-  EuiTextColor,
   EuiLink,
   EuiPanel,
 } from '@elastic/eui';
@@ -51,14 +50,14 @@ interface Props {
   indexDetails: Index;
   sampleDocuments: SearchHit[];
   isDocumentsLoading: boolean;
-  documentsError: unknown;
+  onRefreshDocuments: () => void;
 }
 
 export const DetailsPageOverview: React.FunctionComponent<Props> = ({
   indexDetails,
   sampleDocuments,
   isDocumentsLoading,
-  documentsError,
+  onRefreshDocuments,
 }) => {
   const { name } = indexDetails;
   const {
@@ -206,8 +205,8 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({
             <IndexDocuments
               documents={sampleDocuments}
               isLoading={isDocumentsLoading}
-              error={documentsError}
               mappings={mappingsData ?? undefined}
+              onRefresh={onRefreshDocuments}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
