@@ -65,7 +65,7 @@ import { useEpisodesTableConfig } from './hooks/use_episodes_table_config';
 import { experimentalBadge } from '../../components/experimental_badge';
 import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary_flyout_container';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
-import { paths } from '../../constants';
+import { useAlertingLocators } from '../../application/locator_context';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import * as i18n from './translations';
@@ -172,6 +172,7 @@ export const AlertEpisodesListPage = () => (
 
 const AlertEpisodesListPageContent = () => {
   const services = useKibana<AlertEpisodesKibanaServices>().services;
+  const { rulesLocators, episodesLocators } = useAlertingLocators();
   const queryClient = useQueryClient();
   const alertsCapability = useService(UserCapabilities).canWrite('alerts')
     ? EPISODE_ACTIONS_PRIVILEGE.all
@@ -398,6 +399,15 @@ const AlertEpisodesListPageContent = () => {
     [services, queryClient, rulesCache, alertsCapability]
   );
 
+  const getRuleDetailsHref = useCallback(
+    (ruleId: string) => rulesLocators.getRedirectUrl({ ruleId }),
+    [rulesLocators]
+  );
+  const getEpisodeDetailsHref = useCallback(
+    (episodeId: string) => episodesLocators.getRedirectUrl({ episodeId }),
+    [episodesLocators]
+  );
+
   const renderDocumentView = useCallback<RenderDocumentViewCallback>(
     (hit) => {
       if (!episodeSupportsTimeline(dataTableRecordToEpisode(hit))) {
@@ -415,6 +425,8 @@ const AlertEpisodesListPageContent = () => {
           groupHash={hit.flattened.group_hash as string | undefined}
           onClose={closeFlyout}
           actions={episodeActions}
+          getRuleDetailsHref={getRuleDetailsHref}
+          getEpisodeDetailsHref={getEpisodeDetailsHref}
           services={{
             data: services.data,
             http: services.http,
@@ -428,7 +440,7 @@ const AlertEpisodesListPageContent = () => {
         />
       );
     },
-    [closeFlyout, episodeActions, services]
+    [closeFlyout, episodeActions, getEpisodeDetailsHref, getRuleDetailsHref, services]
   );
 
   const rowAdditionalLeadingControls: RowControlColumn[] = useMemo(
@@ -477,10 +489,7 @@ const AlertEpisodesListPageContent = () => {
     [setVisibleColumns]
   );
 
-  const getRuleDetailsHref = useCallback(
-    (ruleId: string) => services.http.basePath.prepend(paths.ruleDetails(ruleId)),
-    [services.http.basePath]
-  );
+  const manageRulesHref = rulesLocators.useUrl({});
 
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
     () => ({
@@ -520,13 +529,7 @@ const AlertEpisodesListPageContent = () => {
     ]
   );
 
-  const episodesMenu = useMemo(
-    () =>
-      getEpisodesListMenu({
-        manageRulesHref: services.http.basePath.prepend(paths.ruleList),
-      }),
-    [services.http.basePath]
-  );
+  const episodesMenu = useMemo(() => getEpisodesListMenu({ manageRulesHref }), [manageRulesHref]);
 
   return (
     <div
