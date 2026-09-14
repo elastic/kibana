@@ -66,6 +66,8 @@ export const EndpointExceptionsPerPolicyOptInCallout: React.FC<EndpointException
                 secondary: {
                   href: docLinks.links.securitySolution.endpointExceptions,
                   target: '_blank',
+                  iconType: 'external',
+                  iconSide: 'right',
                   'data-test-subj': 'learnMoreEndpointExceptionsPerPolicyOptInButton',
                   children: i18n.translate(
                     'xpack.securitySolution.endpointExceptions.perPolicyOptInCalloutLearnMore',
