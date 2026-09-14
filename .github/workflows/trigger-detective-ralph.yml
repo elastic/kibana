@@ -1,0 +1,45 @@
+name: 'Trigger Detective Ralph'
+
+on:
+  issues:
+    types: [labeled]
+
+# Shared condition: issue (not PR), ralph-investigate label added, from org member/collaborator.
+# Duplicated across jobs because job-level `if` cannot reference other jobs.
+
+permissions:
+  contents: none
+
+jobs:
+  acknowledge:
+    name: 'Acknowledge ralph-investigate'
+    if: >-
+      github.event.issue.pull_request == null &&
+      github.event.label.name == 'ralph-investigate' &&
+      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.issue.author_association)
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Post acknowledgment comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh issue comment "$ISSUE_NUMBER" --repo "$REPO" \
+            --body "Detective Ralph has been triggered and is starting up. A follow-up comment with a progress link will appear shortly."
+
+  trigger:
+    permissions:
+      contents: read
+      id-token: write
+    name: 'Run Detective Ralph'
+    if: >-
+      github.event.issue.pull_request == null &&
+      github.event.label.name == 'ralph-investigate' &&
+      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.issue.author_association)
+    uses: elastic/kibana-error-sentry/.github/workflows/detective-ralph.yml@main
+    with:
+      issue_number: '${{ github.event.issue.number }}'
+    secrets: inherit
