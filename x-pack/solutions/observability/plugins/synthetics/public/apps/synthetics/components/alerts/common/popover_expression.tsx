@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { EuiExpressionProps } from '@elastic/eui';
 import { EuiExpression, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -22,6 +22,15 @@ interface Props {
 export function PopoverExpression(props: Props) {
   const { title, value, children, color, disabled } = props;
   const [popoverOpen, setPopoverOpen] = useState(false);
+
+  // `isOpen` below already hides the popover while disabled, but that alone
+  // leaves `popoverOpen` itself true underneath. Without this, re-enabling
+  // reopens the popover with no click.
+  useEffect(() => {
+    if (disabled) {
+      setPopoverOpen(false);
+    }
+  }, [disabled]);
 
   return (
     <EuiPopover

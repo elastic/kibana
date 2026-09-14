@@ -999,6 +999,7 @@ describe('StatusRuleExecutor', () => {
       expect(schedulePendingAlertPerConfigIdSpy).toHaveBeenCalledTimes(1);
       expect(schedulePendingAlertPerConfigIdSpy).toHaveBeenCalledWith({
         pendingConfigs: mockPendingConfigs,
+        pendingThreshold: 1,
       });
 
       expect(schedulePendingAlertPerConfigIdPerLocationSpy).not.toHaveBeenCalled();
@@ -1279,7 +1280,10 @@ describe('StatusRuleExecutor', () => {
 
       it('should group configs by configId and call scheduleAlert with combined location information', async () => {
         // Call the method
-        await statusRule.schedulePendingAlertPerConfigId({ pendingConfigs: mockPendingConfigs });
+        await statusRule.schedulePendingAlertPerConfigId({
+          pendingConfigs: mockPendingConfigs,
+          pendingThreshold: 1,
+        });
 
         // Verify scheduleAlert was called twice (once for each unique configId)
         expect(scheduleAlertSpy).toHaveBeenCalledTimes(2);
@@ -1354,7 +1358,7 @@ describe('StatusRuleExecutor', () => {
 
       it('should do nothing if pendingConfigs is empty', async () => {
         // Call the method with empty pendingConfigs
-        await statusRule.schedulePendingAlertPerConfigId({ pendingConfigs: {} });
+        await statusRule.schedulePendingAlertPerConfigId({ pendingConfigs: {}, pendingThreshold: 1 });
 
         // Verify scheduleAlert was not called
         expect(scheduleAlertSpy).not.toHaveBeenCalled();

@@ -196,7 +196,13 @@ export class StatusRuleExecutor {
         upConfigs: {},
         staleDownConfigs,
         enabledMonitorQueryIds,
-        pendingConfigs: { ...prevPendingConfigs },
+        // No monitors were evaluated this round, so no location can count as a
+        // consecutive pending evaluation. Returning the still-existing (not
+        // deleted/relocated) entries here would skip `applyPendingCounts`,
+        // freezing `pendingCount` while still reporting the pending alert as
+        // active. Dropping them lets that alert recover like it would for a
+        // single disabled monitor among many, and resets the count on resume.
+        pendingConfigs: {},
         stalePendingConfigs,
         maxPeriod,
       };
@@ -341,12 +347,27 @@ export class StatusRuleExecutor {
 
   async schedulePendingAlertPerConfigId({
     pendingConfigs,
+    pendingThreshold,
   }: {
     pendingConfigs: AlertPendingStatusConfigs;
-  }) {
+    pendingThreshold: number;
+  }): Promise<AlertPendingStatusConfigs> {
     const pendingConfigsById = getConfigsByIds(pendingConfigs);
+    const configsMeetingThreshold: AlertPendingStatusConfigs = {};
 
     for (const [configId, configs] of pendingConfigsById) {
+      // Gate on the monitor as a whole so a location that hasn't individually
+      // reached the threshold isn't silently dropped from the alert once a
+      // sibling location has — mirrors how down-alerts gate on an aggregate
+      // across all of a monitor's locations and then include all of them.
+      const meetsThreshold = configs.some((config) => (config.pendingCount ?? 1) >= pendingThreshold);
+      if (!meetsThreshold) {
+        continue;
+      }
+      for (const config of configs) {
+        configsMeetingThreshold[`${config.configId}-${config.locationId}`] = config;
+      }
+
       const alertId = configId;
       const monitorSummary = this.getUngroupedPendingSummary({
         statusConfigs: configs,
@@ -362,36 +383,42 @@ export class StatusRuleExecutor {
         locationIds: configs.map(({ locationId }) => locationId),
       });
     }
+
+    return configsMeetingThreshold;
   }
 
   handlePendingMonitorAlert = async ({
     pendingConfigs,
   }: {
     pendingConfigs: AlertPendingStatusConfigs;
-  }) => {
+  }): Promise<AlertPendingStatusConfigs> => {
     if (!this.params.condition?.alertOnNoData) {
-      return;
+      return {};
     }
 
     const { pendingThreshold } = getConditionType(this.params.condition);
+
+    if (this.params.condition?.groupBy && this.params.condition.groupBy !== 'locationId') {
+      return await this.schedulePendingAlertPerConfigId({
+        pendingConfigs,
+        pendingThreshold,
+      });
+    }
+
     const configsMeetingThreshold = filterPendingConfigsByThreshold(
       pendingConfigs,
       pendingThreshold
     );
 
     if (isEmpty(configsMeetingThreshold)) {
-      return;
+      return {};
     }
 
-    if (this.params.condition?.groupBy && this.params.condition.groupBy !== 'locationId') {
-      await this.schedulePendingAlertPerConfigId({
-        pendingConfigs: configsMeetingThreshold,
-      });
-    } else {
-      await this.schedulePendingAlertPerConfigIdPerLocation({
-        pendingConfigs: configsMeetingThreshold,
-      });
-    }
+    await this.schedulePendingAlertPerConfigIdPerLocation({
+      pendingConfigs: configsMeetingThreshold,
+    });
+
+    return configsMeetingThreshold;
   };
 
   handleDownMonitorThresholdAlert = async ({
