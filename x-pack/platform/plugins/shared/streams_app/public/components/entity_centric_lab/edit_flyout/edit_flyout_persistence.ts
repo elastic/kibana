@@ -32,6 +32,7 @@ import type {
   FlyoutTabConfig,
   GeneralFields,
   HealthSignals,
+  LinkedDashboard,
   OwnershipConfig,
   SubsetDraft,
 } from './fake_entity_type_draft';
@@ -51,6 +52,7 @@ export interface PersistedEntityTypeDraft {
   readonly ownership?: OwnershipConfig;
   readonly flyoutTabs?: readonly FlyoutTabConfig[];
   readonly customLinks?: readonly CustomLinkDraft[];
+  readonly linkedDashboards?: readonly LinkedDashboard[];
   readonly subsets?: readonly SubsetDraft[];
 }
 
@@ -117,6 +119,7 @@ export const persistEntityTypeDraft = (entityTypeId: string, draft: EntityTypeDr
     ownership: draft.ownership,
     flyoutTabs: draft.flyoutTabs,
     customLinks: draft.customLinks,
+    linkedDashboards: draft.linkedDashboards,
     subsets: draft.subsets,
   };
   cache.set(entityTypeId, slice);
@@ -151,6 +154,7 @@ export const mergePersistedDraft = (
     ownership: persisted.ownership ?? base.ownership,
     flyoutTabs: persisted.flyoutTabs ?? base.flyoutTabs,
     customLinks: persisted.customLinks ?? base.customLinks,
+    linkedDashboards: persisted.linkedDashboards ?? base.linkedDashboards,
     subsets: persisted.subsets ?? base.subsets,
   };
 };

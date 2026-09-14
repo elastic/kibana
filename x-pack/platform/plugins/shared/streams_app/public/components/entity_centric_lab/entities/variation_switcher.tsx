@@ -12,11 +12,13 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import {
+  EuiButton,
   EuiButtonGroup,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiPopover,
   EuiPopoverTitle,
   EuiText,
@@ -24,6 +26,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+import { useKibana } from '../../../hooks/use_kibana';
 import { useVariationContext } from './variation_context';
 import type { VariationDimension } from './variation_registry';
 
@@ -76,6 +79,77 @@ const DimensionRow = ({
         ) : null}
       </>
     </EuiFormRow>
+  );
+};
+
+// ---------------------------------------------------------------------------
+// Seed K8s demo data button
+// ---------------------------------------------------------------------------
+
+const SeedDemoDataButton = () => {
+  const { core } = useKibana();
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [result, setResult] = useState<string>('');
+
+  const handleSeed = useCallback(async () => {
+    setStatus('loading');
+    setResult('');
+    try {
+      const resp = await core.http.post<{
+        success: boolean;
+        indexed: number;
+        failed: number;
+        hours: number;
+        topology: { nodes: number; namespaces: number; deployments: number; pods: number };
+      }>('/internal/streams/entity_centric_lab/seed_k8s_data', {
+        body: JSON.stringify({ hours: 8, intervalMinutes: 5, deleteExisting: true }),
+      });
+      if (resp.success) {
+        setStatus('success');
+        setResult(
+          `${resp.indexed.toLocaleString()} docs over ${resp.hours}h — ` +
+          `${resp.topology.nodes} nodes, ${resp.topology.pods} pods`
+        );
+      } else {
+        setStatus('error');
+        setResult(`${resp.indexed} ok, ${resp.failed} failed`);
+      }
+    } catch (e) {
+      setStatus('error');
+      setResult(e instanceof Error ? e.message : 'Unknown error');
+    }
+  }, [core.http]);
+
+  return (
+    <>
+      <EuiHorizontalRule margin="s" />
+      <EuiFormRow
+        label="K8s dashboard data"
+        fullWidth
+        helpText={
+          result ? (
+            <EuiText size="xs" color={status === 'error' ? 'danger' : 'success'}>
+              <p>{result}</p>
+            </EuiText>
+          ) : undefined
+        }
+      >
+        <EuiButton
+          size="s"
+          fullWidth
+          iconType="importAction"
+          isLoading={status === 'loading'}
+          color={status === 'success' ? 'success' : 'primary'}
+          onClick={handleSeed}
+        >
+          {status === 'loading'
+            ? 'Seeding…'
+            : status === 'success'
+            ? 'Seeded ✓'
+            : 'Seed demo data'}
+        </EuiButton>
+      </EuiFormRow>
+    </>
   );
 };
 
@@ -150,6 +224,9 @@ export const VariationSwitcher = () => {
               />
             </EuiFlexItem>
           ))}
+          <EuiFlexItem grow={false}>
+            <SeedDemoDataButton />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPopover>
     </div>

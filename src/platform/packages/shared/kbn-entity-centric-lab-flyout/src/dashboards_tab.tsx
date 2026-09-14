@@ -28,6 +28,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { entityTypeToKind, inferEntityKind } from './kind_templates';
+import type { LinkedDashboardOverride } from './flyout_template_overrides';
 
 // ---------------------------------------------------------------------------
 // Dashboard descriptor
@@ -44,6 +45,12 @@ export interface DashboardDescriptor {
   readonly scopeField: string;
   /** Stock panel ids to prune from the embedded dashboard (back-links, headers). */
   readonly hiddenPanelIds?: ReadonlySet<string>;
+  /**
+   * When set, the host renderer can skip title-based lookup and use this
+   * id directly. Used for user-linked dashboards where the SO id is
+   * known from the picker.
+   */
+  readonly savedObjectId?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -157,17 +164,35 @@ export interface DashboardsTabProps {
     dashboard: DashboardDescriptor,
     entityName: string
   ) => React.ReactNode;
+  /**
+   * User-linked dashboards from the override store. Merged after OOTB
+   * dashboards so user picks appear below the built-in ones.
+   */
+  readonly linkedDashboards?: readonly LinkedDashboardOverride[];
 }
 
 export const DashboardsTab = ({
   entityName,
   entityType,
   renderDashboard,
+  linkedDashboards,
 }: DashboardsTabProps) => {
-  const dashboards = useMemo(
+  const ootbDashboards = useMemo(
     () => getOotbDashboards(entityName, entityType),
     [entityName, entityType]
   );
+
+  const dashboards = useMemo<readonly DashboardDescriptor[]>(() => {
+    if (!linkedDashboards || linkedDashboards.length === 0) return ootbDashboards;
+    const userDashboards: DashboardDescriptor[] = linkedDashboards.map((d) => ({
+      id: `user-${d.savedObjectId}`,
+      title: d.title,
+      savedObjectTitle: d.title,
+      savedObjectId: d.savedObjectId,
+      scopeField: '',
+    }));
+    return [...ootbDashboards, ...userDashboards];
+  }, [ootbDashboards, linkedDashboards]);
 
   const [selectedId, setSelectedId] = useState<string>(() => dashboards[0]?.id ?? '');
 

@@ -37,6 +37,7 @@ import type {
   FlyoutTabConfig,
   GeneralFields,
   HealthSignals,
+  LinkedDashboard,
   OwnershipConfig,
   SubsetDraft,
 } from './fake_entity_type_draft';
@@ -197,6 +198,10 @@ const EntityTypeWizardFlyout = ({ mode, entityType, onClose }: WizardProps) => {
     (next: CustomLinkDraft[]) => setDraft((prev) => ({ ...prev, customLinks: next })),
     []
   );
+  const updateLinkedDashboards = useCallback(
+    (next: LinkedDashboard[]) => setDraft((prev) => ({ ...prev, linkedDashboards: next })),
+    []
+  );
   const updateSubsets = useCallback(
     (next: SubsetDraft[]) => setDraft((prev) => ({ ...prev, subsets: next })),
     []
@@ -286,6 +291,10 @@ const EntityTypeWizardFlyout = ({ mode, entityType, onClose }: WizardProps) => {
         enabled: tab.enabled,
       })),
       customLinks: meaningfulLinks,
+      linkedDashboards: draft.linkedDashboards.map((d) => ({
+        savedObjectId: d.savedObjectId,
+        title: d.title,
+      })),
     });
     // Push the per-type display config to the shared store so every
     // renderer (entity flyout title, Streams entities list/grid,
@@ -380,6 +389,7 @@ const EntityTypeWizardFlyout = ({ mode, entityType, onClose }: WizardProps) => {
             onUpdateOwnership={updateOwnership}
             onUpdateFlyoutTabs={updateFlyoutTabs}
             onUpdateCustomLinks={updateCustomLinks}
+            onUpdateLinkedDashboards={updateLinkedDashboards}
             onUpdateSubsets={updateSubsets}
             onAddSubset={handleAddSubset}
             onEditSubset={handleEditSubset}
@@ -608,6 +618,7 @@ interface WizardBodyProps {
   readonly onUpdateOwnership: (next: OwnershipConfig) => void;
   readonly onUpdateFlyoutTabs: (next: FlyoutTabConfig[]) => void;
   readonly onUpdateCustomLinks: (next: CustomLinkDraft[]) => void;
+  readonly onUpdateLinkedDashboards: (next: LinkedDashboard[]) => void;
   readonly onUpdateSubsets: (next: SubsetDraft[]) => void;
   readonly onAddSubset: () => void;
   readonly onEditSubset: (subsetId: string) => void;
@@ -621,6 +632,7 @@ const WizardBody = ({
   onUpdateOwnership,
   onUpdateFlyoutTabs,
   onUpdateCustomLinks,
+  onUpdateLinkedDashboards,
   onUpdateSubsets,
   onAddSubset,
   onEditSubset,
@@ -638,6 +650,7 @@ const WizardBody = ({
           draft={draft}
           onChange={onUpdateFlyoutTabs}
           onCustomLinksChange={onUpdateCustomLinks}
+          onLinkedDashboardsChange={onUpdateLinkedDashboards}
         />
       );
     case 'subsets':

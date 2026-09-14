@@ -107,6 +107,16 @@ export interface CustomLinkDraft {
   readonly label: string;
 }
 
+/**
+ * A Kibana dashboard the user linked from the "Manage resource types" wizard.
+ * Persisted to the flyout override store and used by the Dashboards tab to
+ * embed real dashboards alongside OOTB ones.
+ */
+export interface LinkedDashboard {
+  readonly savedObjectId: string;
+  readonly title: string;
+}
+
 export type FilterOperator = 'equals' | 'notEquals' | 'contains' | 'exists';
 
 export interface FilterCondition {
@@ -143,6 +153,7 @@ export interface SubsetDraft {
      * AND the Custom tab is enabled within `flyoutTabs`.
      */
     readonly customLinks: readonly CustomLinkDraft[];
+    readonly linkedDashboards: readonly LinkedDashboard[];
   };
 }
 
@@ -159,6 +170,11 @@ export interface EntityTypeDraft {
    * before any data exists. Empty rows are filtered out at save time.
    */
   readonly customLinks: readonly CustomLinkDraft[];
+  /**
+   * User-selected Kibana dashboards surfaced under the Dashboards tab.
+   * These are merged with OOTB dashboards in the flyout at render time.
+   */
+  readonly linkedDashboards: readonly LinkedDashboard[];
   readonly subsets: readonly SubsetDraft[];
 }
 
@@ -203,6 +219,12 @@ const defaultFlyoutTabs = (entityTypeId?: string): FlyoutTabConfig[] => [
     enabled: true,
   },
   {
+    id: 'dashboards',
+    label: 'Dashboards',
+    description: 'Linked Kibana dashboards for this entity type',
+    enabled: true,
+  },
+  {
     id: 'metrics',
     label: 'Metrics',
     description: 'Charts for key signals',
@@ -230,12 +252,6 @@ const defaultFlyoutTabs = (entityTypeId?: string): FlyoutTabConfig[] => [
     id: 'relationships',
     label: 'Relationships',
     description: 'Related entities: upstream, downstream',
-    enabled: true,
-  },
-  {
-    id: 'dashboards',
-    label: 'Dashboards',
-    description: 'Linked Kibana dashboards for this entity type',
     enabled: true,
   },
   {
@@ -345,6 +361,7 @@ const PRESETS: Readonly<Record<string, PresetSeed>> = {
           enabled: false,
           flyoutTabs: defaultFlyoutTabs('k8s-cluster'),
           customLinks: defaultCustomLinks(),
+          linkedDashboards: [],
         },
       },
       {
@@ -365,6 +382,7 @@ const PRESETS: Readonly<Record<string, PresetSeed>> = {
             tab.id === 'profiling' ? { ...tab, enabled: true } : tab
           ),
           customLinks: defaultCustomLinks(),
+          linkedDashboards: [],
         },
       },
     ],
@@ -514,6 +532,7 @@ export const buildFakeEntityTypeDraft = (entityType: FakeEntityType): EntityType
     coveragePreview: preset.coverage,
     flyoutTabs: defaultFlyoutTabs(entityType.id),
     customLinks: defaultCustomLinks(),
+    linkedDashboards: [],
     subsets: preset.subsets,
   };
 };
@@ -557,6 +576,7 @@ export const buildBlankSubsetDraft = (parent: EntityTypeDraft): SubsetDraft => (
     // entries to make them subset-specific. Cloned so mutations on the
     // subset don't leak back into the parent draft.
     customLinks: parent.customLinks.map((link) => ({ ...link })),
+    linkedDashboards: parent.linkedDashboards.map((d) => ({ ...d })),
   },
 });
 

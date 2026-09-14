@@ -35,6 +35,7 @@ import type {
   FilterOperator,
   FlyoutTabConfig,
   HealthSignals,
+  LinkedDashboard,
   OwnershipConfig,
   SubsetDraft,
 } from './fake_entity_type_draft';
@@ -158,6 +159,16 @@ export const SubsetEditorBody = ({ entityType, subset, onChange }: SubsetEditorB
       onChange({
         ...subset,
         contentOverride: { ...subset.contentOverride, customLinks: next },
+      });
+    },
+    [onChange, subset]
+  );
+
+  const updateLinkedDashboards = useCallback(
+    (next: LinkedDashboard[]) => {
+      onChange({
+        ...subset,
+        contentOverride: { ...subset.contentOverride, linkedDashboards: next },
       });
     },
     [onChange, subset]
@@ -388,6 +399,8 @@ export const SubsetEditorBody = ({ entityType, subset, onChange }: SubsetEditorB
           // editor on legacy payloads.
           customLinks={subset.contentOverride.customLinks ?? []}
           onCustomLinksChange={updateCustomLinks}
+          linkedDashboards={subset.contentOverride.linkedDashboards ?? []}
+          onLinkedDashboardsChange={updateLinkedDashboards}
         />
       </OverrideAccordion>
 

@@ -95,6 +95,7 @@ export type {
   FlyoutCustomLink,
   FlyoutTabOverride,
   FlyoutTemplateOverride,
+  LinkedDashboardOverride,
 } from './src/flyout_template_overrides';
 
 export {

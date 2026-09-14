@@ -37,6 +37,7 @@ import { internalEligibleStreamsRoutes } from './internal/sig_events/extraction/
 import { internalSignificantEventsSettingsRoutes } from './internal/sig_events/significant_events_settings/route';
 import { timeSeriesRoutes } from './internal/streams/time_series/route';
 import { internalMemoryRoutes } from './internal/memory/route';
+import { entityCentricLabRoutes } from './internal/entity_centric_lab/seed_k8s_data';
 
 export const streamsRouteRepository = {
   // internal APIs
@@ -62,6 +63,7 @@ export const streamsRouteRepository = {
   ...internalEligibleStreamsRoutes,
   ...internalSignificantEventsSettingsRoutes,
   ...internalMemoryRoutes,
+  ...entityCentricLabRoutes,
   // public APIs
   ...docCountsRoutes,
   ...crudRoutes,

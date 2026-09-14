@@ -76,6 +76,16 @@ export interface FlyoutCustomLink {
   readonly label: string;
 }
 
+/**
+ * A user-linked Kibana dashboard persisted in the override store. The
+ * flyout's Dashboards tab merges these with the OOTB registry to build
+ * the full dashboard list for each entity type.
+ */
+export interface LinkedDashboardOverride {
+  readonly savedObjectId: string;
+  readonly title: string;
+}
+
 export interface FlyoutTemplateOverride {
   readonly flyoutTabs: readonly FlyoutTabOverride[];
   /**
@@ -84,6 +94,12 @@ export interface FlyoutTemplateOverride {
    * empty-state placeholder for that tab.
    */
   readonly customLinks?: readonly FlyoutCustomLink[];
+  /**
+   * Optional list of user-linked Kibana dashboards to embed in the
+   * Dashboards tab. Omitted (or empty) means the tab only shows
+   * OOTB dashboards from the static registry.
+   */
+  readonly linkedDashboards?: readonly LinkedDashboardOverride[];
 }
 
 type Listener = () => void;
@@ -123,12 +139,13 @@ const hydrateOnce = (): void => {
   const stored = readStorage();
   for (const [entityTypeId, value] of Object.entries(stored)) {
     if (!value || !Array.isArray(value.flyoutTabs)) continue;
-    // `customLinks` is optional, but if present must be an array — drop it
-    // silently otherwise rather than feeding garbage to the renderer.
-    const sanitized: FlyoutTemplateOverride =
-      value.customLinks !== undefined && !Array.isArray(value.customLinks)
-        ? { flyoutTabs: value.flyoutTabs }
-        : value;
+    // Optional arrays must be arrays when present — drop invalid shapes
+    // silently rather than feeding garbage to the renderer.
+    const sanitized: FlyoutTemplateOverride = {
+      flyoutTabs: value.flyoutTabs,
+      ...(Array.isArray(value.customLinks) ? { customLinks: value.customLinks } : {}),
+      ...(Array.isArray(value.linkedDashboards) ? { linkedDashboards: value.linkedDashboards } : {}),
+    };
     overrides.set(entityTypeId, sanitized);
   }
 };

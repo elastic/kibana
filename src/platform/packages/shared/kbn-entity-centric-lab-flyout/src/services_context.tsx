@@ -50,7 +50,12 @@ export interface EntityFlyoutServices {
    * scoped to the entity name. Returning `null` renders a fallback prompt.
    */
   readonly renderTabDashboard?: (
-    dashboard: { savedObjectTitle: string; scopeField: string; hiddenPanelIds?: ReadonlySet<string> },
+    dashboard: {
+      savedObjectTitle: string;
+      scopeField: string;
+      hiddenPanelIds?: ReadonlySet<string>;
+      savedObjectId?: string;
+    },
     entityName: string
   ) => ReactNode;
   /**

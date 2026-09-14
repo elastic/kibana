@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiComboBox,
   EuiDragDropContext,
   EuiDraggable,
   EuiDroppable,
@@ -27,6 +28,7 @@ import {
   euiDragDropReorder,
   useEuiTheme,
 } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { DragDropContextProps } from '@elastic/eui';
@@ -36,16 +38,24 @@ import type {
   CustomLinkType,
   EntityTypeDraft,
   FlyoutTabConfig,
+  LinkedDashboard,
 } from '../fake_entity_type_draft';
 import { buildBlankCustomLink } from '../fake_entity_type_draft';
+import { useKibana } from '../../../../hooks/use_kibana';
 
 interface StepProps {
   readonly draft: EntityTypeDraft;
   readonly onChange: (next: FlyoutTabConfig[]) => void;
   readonly onCustomLinksChange: (next: CustomLinkDraft[]) => void;
+  readonly onLinkedDashboardsChange: (next: LinkedDashboard[]) => void;
 }
 
-export const FlyoutContentStep = ({ draft, onChange, onCustomLinksChange }: StepProps) => {
+export const FlyoutContentStep = ({
+  draft,
+  onChange,
+  onCustomLinksChange,
+  onLinkedDashboardsChange,
+}: StepProps) => {
   return (
     <div data-test-subj="entityCentricLabEditFlyoutContentStep">
       <EuiText size="s">
@@ -72,6 +82,8 @@ export const FlyoutContentStep = ({ draft, onChange, onCustomLinksChange }: Step
         testSubjPrefix="entityCentricLabEditFlyoutContent"
         customLinks={draft.customLinks}
         onCustomLinksChange={onCustomLinksChange}
+        linkedDashboards={draft.linkedDashboards}
+        onLinkedDashboardsChange={onLinkedDashboardsChange}
       />
     </div>
   );
@@ -92,6 +104,12 @@ export interface FlyoutTabsListProps {
    */
   readonly customLinks?: readonly CustomLinkDraft[];
   readonly onCustomLinksChange?: (next: CustomLinkDraft[]) => void;
+  /**
+   * Optional linked-dashboards payload. When supplied, the Dashboards row
+   * reveals an inline combo box for picking Kibana saved dashboards.
+   */
+  readonly linkedDashboards?: readonly LinkedDashboard[];
+  readonly onLinkedDashboardsChange?: (next: LinkedDashboard[]) => void;
 }
 
 /**
@@ -105,6 +123,8 @@ export const FlyoutTabsList = ({
   testSubjPrefix,
   customLinks,
   onCustomLinksChange,
+  linkedDashboards,
+  onLinkedDashboardsChange,
 }: FlyoutTabsListProps) => {
   const handleDragEnd: DragDropContextProps['onDragEnd'] = useCallback(
     ({ source, destination }) => {
@@ -136,6 +156,11 @@ export const FlyoutTabsList = ({
             tab.enabled &&
             customLinks !== undefined &&
             onCustomLinksChange !== undefined;
+          const showDashboardPicker =
+            tab.id === 'dashboards' &&
+            tab.enabled &&
+            linkedDashboards !== undefined &&
+            onLinkedDashboardsChange !== undefined;
           return (
             <EuiDraggable
               key={tab.id}
@@ -158,6 +183,15 @@ export const FlyoutTabsList = ({
                         links={customLinks}
                         onChange={onCustomLinksChange}
                         testSubjPrefix={`${testSubjPrefix}CustomLinks`}
+                      />
+                    ) : null
+                  }
+                  dashboardPickerSlot={
+                    showDashboardPicker ? (
+                      <DashboardPickerEditor
+                        linkedDashboards={linkedDashboards}
+                        onChange={onLinkedDashboardsChange}
+                        testSubjPrefix={`${testSubjPrefix}Dashboards`}
                       />
                     ) : null
                   }
@@ -184,6 +218,7 @@ interface FlyoutTabRowProps {
    * is enabled.
    */
   readonly customLinksSlot?: React.ReactNode;
+  readonly dashboardPickerSlot?: React.ReactNode;
 }
 
 const FlyoutTabRow = ({
@@ -192,6 +227,7 @@ const FlyoutTabRow = ({
   onToggle,
   dragHandleProps,
   customLinksSlot,
+  dashboardPickerSlot,
 }: FlyoutTabRowProps) => {
   const { euiTheme } = useEuiTheme();
   return (
@@ -249,6 +285,12 @@ const FlyoutTabRow = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+      {dashboardPickerSlot ? (
+        <>
+          <EuiHorizontalRule margin="m" />
+          {dashboardPickerSlot}
+        </>
+      ) : null}
       {customLinksSlot ? (
         <>
           <EuiHorizontalRule margin="m" />
@@ -256,6 +298,134 @@ const FlyoutTabRow = ({
         </>
       ) : null}
     </EuiPanel>
+  );
+};
+
+// ---------------------------------------------------------------------------
+// Dashboard picker — inline combo box for linking Kibana saved dashboards
+// ---------------------------------------------------------------------------
+
+type DashboardComboOption = EuiComboBoxOptionOption<{ savedObjectId: string }>;
+
+const toDashboardOption = (d: LinkedDashboard): DashboardComboOption => ({
+  label: d.title,
+  key: d.savedObjectId,
+  value: { savedObjectId: d.savedObjectId },
+});
+
+interface DashboardPickerEditorProps {
+  readonly linkedDashboards: readonly LinkedDashboard[];
+  readonly onChange: (next: LinkedDashboard[]) => void;
+  readonly testSubjPrefix: string;
+}
+
+const DashboardPickerEditor = ({
+  linkedDashboards,
+  onChange,
+  testSubjPrefix,
+}: DashboardPickerEditorProps) => {
+  const {
+    dependencies: {
+      start: { dashboard: dashboardStart },
+    },
+  } = useKibana();
+
+  const [options, setOptions] = useState<DashboardComboOption[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const selectedOptions = useMemo<DashboardComboOption[]>(
+    () => linkedDashboards.map(toDashboardOption),
+    [linkedDashboards]
+  );
+
+  const fetchDashboards = useCallback(
+    async (query: string) => {
+      setIsLoading(true);
+      try {
+        const findService = await dashboardStart.findDashboardsService();
+        const results = await findService.search({ query, per_page: 50 });
+        const fetched: DashboardComboOption[] = results.dashboards.map(
+          (hit: { id: string; data: { title: string } }) => ({
+            label: hit.data.title,
+            key: hit.id,
+            value: { savedObjectId: hit.id },
+          })
+        );
+        setOptions(fetched);
+      } catch {
+        setOptions([]);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [dashboardStart]
+  );
+
+  useEffect(() => {
+    fetchDashboards('');
+  }, [fetchDashboards]);
+
+  const handleChange = useCallback(
+    (selected: DashboardComboOption[]) => {
+      onChange(
+        selected.map((opt) => ({
+          savedObjectId: opt.value?.savedObjectId ?? opt.key ?? '',
+          title: opt.label,
+        }))
+      );
+    },
+    [onChange]
+  );
+
+  const handleSearchChange = useCallback(
+    (searchValue: string) => {
+      fetchDashboards(searchValue);
+    },
+    [fetchDashboards]
+  );
+
+  return (
+    <div data-test-subj={`${testSubjPrefix}Editor`}>
+      <EuiTitle size="xxs">
+        <h5>
+          {i18n.translate(
+            'xpack.streams.entityCentricLab.editFlyout.content.linkedDashboards.title',
+            { defaultMessage: 'Linked dashboards' }
+          )}
+        </h5>
+      </EuiTitle>
+      <EuiSpacer size="xs" />
+      <EuiText size="xs" color="subdued">
+        <p>
+          {i18n.translate(
+            'xpack.streams.entityCentricLab.editFlyout.content.linkedDashboards.hint',
+            {
+              defaultMessage:
+                'Select Kibana dashboards to embed under the Dashboards tab when users open an entity of this type.',
+            }
+          )}
+        </p>
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiComboBox
+        placeholder={i18n.translate(
+          'xpack.streams.entityCentricLab.editFlyout.content.linkedDashboards.placeholder',
+          { defaultMessage: 'Search dashboards…' }
+        )}
+        options={options}
+        selectedOptions={selectedOptions}
+        onChange={handleChange}
+        onSearchChange={handleSearchChange}
+        isLoading={isLoading}
+        fullWidth
+        compressed
+        data-test-subj={`${testSubjPrefix}ComboBox`}
+        aria-label={i18n.translate(
+          'xpack.streams.entityCentricLab.editFlyout.content.linkedDashboards.ariaLabel',
+          { defaultMessage: 'Select dashboards to link' }
+        )}
+      />
+    </div>
   );
 };
 

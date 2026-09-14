@@ -100,6 +100,12 @@ interface K8sDetailDashboardProps {
   readonly resourceName: string;
   readonly rangeFrom: string;
   readonly rangeTo: string;
+  /**
+   * When set, skip the title-based saved-object lookup and use this id
+   * directly for embedding. Used for user-linked dashboards where the
+   * SO id is known from the combo-box picker.
+   */
+  readonly directSavedObjectId?: string;
 }
 
 /**
@@ -113,6 +119,7 @@ export const K8sDetailDashboard = ({
   resourceName,
   rangeFrom,
   rangeTo,
+  directSavedObjectId,
 }: K8sDetailDashboardProps) => {
   const {
     dependencies: {
@@ -120,7 +127,9 @@ export const K8sDetailDashboard = ({
     },
   } = useKibana();
 
-  const [dashboardId, setDashboardId] = useState<string | null | undefined>(undefined);
+  const [dashboardId, setDashboardId] = useState<string | null | undefined>(
+    directSavedObjectId ?? undefined
+  );
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
 
   const { dashboardTitle, scopeField, hiddenPanelIds } = config;
@@ -128,7 +137,13 @@ export const K8sDetailDashboard = ({
   // Resolve the saved-object id by title. `undefined` = resolving, `null` =
   // not found (package not installed in this space). Re-runs if the kind (and
   // thus the title) changes while the flyout is open.
+  // When `directSavedObjectId` is provided (user-linked dashboards),
+  // skip the title-based lookup entirely.
   useEffect(() => {
+    if (directSavedObjectId) {
+      setDashboardId(directSavedObjectId);
+      return;
+    }
     let cancelled = false;
     setDashboardId(undefined);
     dashboardStart
@@ -143,36 +158,40 @@ export const K8sDetailDashboard = ({
     return () => {
       cancelled = true;
     };
-  }, [dashboardStart, dashboardTitle]);
+  }, [dashboardStart, dashboardTitle, directSavedObjectId]);
 
-  const scopeFilter = useMemo<Filter>(
-    () => ({
-      meta: {
-        alias: null,
-        disabled: false,
-        negate: false,
-        key: scopeField,
-        field: scopeField,
-        type: 'phrase',
-        params: { query: resourceName },
-      },
-      query: { match_phrase: { [scopeField]: resourceName } },
-    }),
+  const scopeFilter = useMemo<Filter | null>(
+    () =>
+      scopeField
+        ? {
+            meta: {
+              alias: null,
+              disabled: false,
+              negate: false,
+              key: scopeField,
+              field: scopeField,
+              type: 'phrase',
+              params: { query: resourceName },
+            },
+            query: { match_phrase: { [scopeField]: resourceName } },
+          }
+        : null,
     [scopeField, resourceName]
   );
 
-  // The scope filter is applied through `setFilters` once the API is available
-  // (see the effect below) — `getInitialInput.filters` expects the serialized
-  // filter shape, whereas `setFilters` takes runtime `@kbn/es-query` filters.
+  // Include the scope filter in the initial input so the very first render
+  // is already scoped to the right entity. The effect below keeps it in sync
+  // when props change without a remount.
   const getCreationOptions = useCallback(
     (): Promise<DashboardCreationOptions> =>
       Promise.resolve<DashboardCreationOptions>({
         getInitialInput: () => ({
           viewMode: 'view',
           timeRange: { from: rangeFrom, to: rangeTo },
+          filters: scopeFilter ? [scopeFilter] : [],
         }),
       }),
-    [rangeFrom, rangeTo]
+    [rangeFrom, rangeTo, scopeFilter]
   );
 
   // Strip the stock dashboard's navigation cards / header row once it loads —
@@ -192,10 +211,12 @@ export const K8sDetailDashboard = ({
   }, [dashboardApi, hiddenPanelIds]);
 
   // Keep the embedded dashboard in sync when the resource or time range
-  // changes without remounting the renderer.
+  // changes without remounting the renderer. When `scopeField` is empty
+  // (user-linked dashboards without a known scope), skip entity-level
+  // filtering and show the full dashboard.
   useEffect(() => {
     if (!dashboardApi) return;
-    dashboardApi.setFilters([scopeFilter]);
+    dashboardApi.setFilters(scopeFilter ? [scopeFilter] : []);
     dashboardApi.setTimeRange({ from: rangeFrom, to: rangeTo });
     dashboardApi.forceRefresh();
   }, [dashboardApi, scopeFilter, rangeFrom, rangeTo]);
