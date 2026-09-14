@@ -35,6 +35,7 @@ export const ALERTING_ERROR_CODES = {
   INVALID_ARTIFACT_DATA: 'INVALID_ARTIFACT_DATA',
   /** `state_transition` cannot be applied to the rule's `kind`. */
   INVALID_STATE_TRANSITION: 'INVALID_STATE_TRANSITION',
+  INVALID_STATE_TRANSITION_CONFIG: 'INVALID_STATE_TRANSITION_CONFIG',
   /** A signal rule's merged shape violates signal constraints. */
   INVALID_SIGNAL_RULE: 'INVALID_SIGNAL_RULE',
   /**
