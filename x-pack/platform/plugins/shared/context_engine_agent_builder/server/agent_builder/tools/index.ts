@@ -11,6 +11,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import { createSaveAutomationTool } from './save_automation/tool';
+import { createRememberTool } from './remember/tool';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 
@@ -33,6 +34,13 @@ export const registerAgentBuilderTools = ({
       getCoreStart,
       getSecurityStart,
       getWorkflowsManagement,
+    })
+  );
+  agentBuilder.tools.register(
+    createRememberTool({
+      getAiIndexService,
+      getCoreStart,
+      getSecurityStart,
     })
   );
 };
