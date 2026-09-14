@@ -14,6 +14,7 @@ import { HttpService } from '../../application/services/http_service';
 import { mlUsageCollectionProvider } from '../../application/services/usage_collection';
 import { AnomalyExplorerChartsService } from '../../application/services/anomaly_explorer_charts_service';
 import type { SingleMetricViewerEmbeddableServices, SingleMetricViewerServices } from '../types';
+import { isMlServerInfoLoaded, loadMlServerInfo } from '../../application/services/ml_server_info';
 
 /**
  * Provides the ML services required by the Single Metric Viewer Embeddable.
@@ -77,6 +78,11 @@ export const getMlServices = async (
   //   way this manages its own state right now doesn't consider React component lifecycles.
   const mlIndexUtils = indexServiceFactory(pluginsStart.data.dataViews);
   const mlFieldFormatService = fieldFormatServiceFactory(mlApi, mlIndexUtils, mlJobService);
+
+  if (!isMlServerInfoLoaded()) {
+    await loadMlServerInfo(mlApi);
+  }
+
   return {
     anomalyDetectorService,
     anomalyExplorerService,
