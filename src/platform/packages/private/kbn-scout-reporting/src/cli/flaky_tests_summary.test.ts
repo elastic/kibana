@@ -310,10 +310,17 @@ describe('displaySummary', () => {
       frameworks: ['jest', 'playwright'],
       classifications: ['flaky', 'consistently-failing'],
     },
-    thresholds: { minBuilds: 10, minFailedBuilds: 2, maxTests: 200 },
+    thresholds: {
+      minBuilds: 10,
+      minFailedBuilds: 2,
+      minFailRate: 0,
+      maxTests: 200,
+      maxInactiveHours: 24,
+    },
     summary: { totalFlaky: 2, totalConsistentlyFailing: 1, flakyByFramework: { jest: 2 } },
     flaky: [entry({ testId: 't1', title: 'first' }), entry({ testId: 't2', title: 'second' })],
     consistentlyFailing: [],
+    files: [],
   };
   const alwaysBroken = entry({
     testId: 'c1',
@@ -371,6 +378,8 @@ describe('displaySummary', () => {
     expect(output).toContain('Classifications : flaky, consistently-failing');
     expect(output).toContain('Min builds        : 10');
     expect(output).toContain('Min failed builds : 2');
+    expect(output).toContain('Min fail rate     : 0.0%');
+    expect(output).toContain('Max inactive      : 24h');
     expect(output).toContain('Max tests         : 200 per list');
     expect(output).toContain('Consistently failing = qualifying test that never passed');
     expect(output).toContain('Flaky                : 2 (jest: 2)');
