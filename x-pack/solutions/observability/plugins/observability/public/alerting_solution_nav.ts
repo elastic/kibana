@@ -45,6 +45,7 @@ export const getAlertingSolutionNavItem = ({
                 title: i18n.translate('xpack.observability.obltNav.alerting.alertsV1', {
                   defaultMessage: 'Alerts',
                 }),
+                badgeType: 'v1Only',
               },
             ]
           : []),

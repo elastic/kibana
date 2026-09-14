@@ -304,6 +304,15 @@ function InternalAlertsPage() {
       >
         <AppHeader
           title={i18n.translate('xpack.observability.alertsTitle', { defaultMessage: 'Alerts' })}
+          badges={[
+            {
+              label: i18n.translate('xpack.observability.alertsV1OnlyBadge', {
+                defaultMessage: 'v1 only',
+              }),
+              color: 'hollow',
+              'data-test-subj': 'observabilityAlertsV1OnlyBadge',
+            },
+          ]}
           menu={appMenu}
           docLink={docLinks.links.observability.createAlerts}
           spacing="standard"
