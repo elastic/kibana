@@ -6,6 +6,8 @@
  */
 
 import type { AgentBuilderEvent } from '../base/events';
+import type { ExecutionStartedEvent, ExecutionTerminatedEvent } from './timeline_events';
+import { TimelineEventType } from './timeline_events';
 import type { ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
 import type {
@@ -519,6 +521,18 @@ export type ChatAgentEvent =
   | UserQuestionAskedEvent
   | UserQuestionAnsweredEvent;
 
+export const isExecutionStartedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is ExecutionStartedEvent => {
+  return event.type === TimelineEventType.executionStarted;
+};
+
+export const isExecutionTerminatedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is ExecutionTerminatedEvent => {
+  return event.type === TimelineEventType.executionTerminated;
+};
+
 /**
  * All types of events that can be emitted from the chat API.
  */
@@ -526,4 +540,6 @@ export type ChatEvent =
   | ChatAgentEvent
   | ConversationCreatedEvent
   | ConversationUpdatedEvent
-  | ConversationIdSetEvent;
+  | ConversationIdSetEvent
+  | ExecutionStartedEvent
+  | ExecutionTerminatedEvent;
