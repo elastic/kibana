@@ -27,7 +27,6 @@ import { ESQLLangEditor } from '@kbn/esql/public';
 import type { ESQLColumn } from '@kbn/es-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { apiCanAddNewPanel, apiCanPinPanels } from '@kbn/presentation-publishing';
-import type { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import {
   DEFAULT_ESQL_OPTIONS_LIST_STATE,
   ESQL_CONTROL,
@@ -48,7 +47,7 @@ interface ConfigureValuesQueryProps {
   isEdit: boolean;
   esqlVariables?: ESQLControlVariable[];
   parentApi?: unknown;
-  selectedControlType?: typeof OPTIONS_LIST_CONTROL | typeof RANGE_SLIDER_CONTROL;
+  selectedControlType?: string;
   // Re-opens the parent data control editor flyout. Used after the inner ESQL variable
   // control creation flyout closes
   reopenEditor?: (overrides?: Partial<DataControlEditorState>) => void;
