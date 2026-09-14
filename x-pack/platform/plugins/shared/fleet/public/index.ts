@@ -227,9 +227,18 @@ export interface AgentEnrollmentFlyoutProps {
   selectedAgentPolicies?: Array<import('./types').AgentPolicy>;
   defaultMode?: 'managed' | 'standalone' | 'kubernetes';
   isIntegrationFlow?: boolean;
+  hideIncomingDataStep?: boolean;
+  onAgentPolicyCreated?: (policy: import('./types').AgentPolicy) => void;
+  defaultAgentPolicyName?: string;
+  forceCreatePolicy?: boolean;
 }
 // AgentPolicy is required by AgentEnrollmentFlyoutProps — type-only, zero bundle cost.
-export type { AgentPolicy } from './types';
+export type { AgentPolicy, NewAgentPolicy } from './types';
+
+// Agent policy integration form and validation — used by ingest_hub to render the policy config step.
+export { AgentPolicyIntegrationForm } from './applications/fleet/sections/agent_policy/components/agent_policy_integration';
+export { agentPolicyFormValidation } from './applications/fleet/sections/agent_policy/components/agent_policy_validation';
+export type { ValidationResults } from './applications/fleet/sections/agent_policy/components/agent_policy_validation';
 
 // AWS Temporary Keys Form — standalone for cross-plugin use (parallel to LazyAwsStaticKeysForm)
 export const LazyAwsTemporaryKeysForm = lazy(() =>

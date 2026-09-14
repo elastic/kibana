@@ -12,25 +12,29 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
   sendCreateAgentPolicyWithPackagePolicies: jest.fn(),
   sendCreatePackagePolicy: jest.fn(),
   sendGetPackageInfoByKeyForRq: jest.fn(),
+  sendGetAgentPolicies: jest.fn(),
 }));
 
 import {
   sendCreateAgentPolicyWithPackagePolicies,
   sendCreatePackagePolicy,
   sendGetPackageInfoByKeyForRq,
+  sendGetAgentPolicies,
 } from '@kbn/fleet-plugin/public';
 import {
   buildAgentBasedTargets,
   deployNewAgentPolicy,
   deployToExistingAgentPolicies,
-  extractErrorMessage,
+  buildAgentPolicyName,
 } from './agent_based_deploy';
+import { extractErrorMessage } from './deploy_errors';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import type { ServiceInstance } from '../service_settings_step/use_service_settings';
 
 const mockSendCreateAgentPolicy = sendCreateAgentPolicyWithPackagePolicies as jest.Mock;
 const mockSendCreatePackagePolicy = sendCreatePackagePolicy as jest.Mock;
 const mockSendGetPackageInfo = sendGetPackageInfoByKeyForRq as jest.Mock;
+const mockSendGetAgentPolicies = sendGetAgentPolicies as jest.Mock;
 
 function makeVarDef(name: string, opts: Partial<RegistryVarsEntry> = {}): RegistryVarsEntry {
   return { name, type: 'text', title: name, ...opts } as RegistryVarsEntry;
@@ -126,40 +130,42 @@ beforeEach(() => {
     item: { id: 'agent-policy-1', package_policies: [] },
   });
   mockSendCreatePackagePolicy.mockResolvedValue({ item: { id: 'pp-1' } });
+  mockSendGetAgentPolicies.mockResolvedValue({ data: { items: [] } });
 });
 
 describe('buildAgentBasedTargets', () => {
   it('keeps persisted instances whose service is still selected', () => {
     const svc = makeSimpleService();
-    const targets = buildAgentBasedTargets(
+    const groups = buildAgentBasedTargets(
       [makeInstance()],
       ['vpcflow'],
       new Map([['vpcflow', svc]])
     );
-    expect(targets).toHaveLength(1);
-    expect(targets[0].instance.instanceId).toBe('vpcflow');
+    // One group (one original service)
+    expect(groups).toHaveLength(1);
+    expect(groups[0].instanceIds).toEqual(['vpcflow']);
   });
 
   it('drops persisted instances whose service was deselected in step 1', () => {
     const svc = makeSimpleService();
-    const targets = buildAgentBasedTargets(
+    const groups = buildAgentBasedTargets(
       [makeInstance(), makeInstance({ instanceId: 'guardduty', serviceId: 'guardduty' })],
       ['vpcflow'],
       new Map([['vpcflow', svc]])
     );
-    expect(targets.map((t) => t.instance.serviceId)).toEqual(['vpcflow']);
+    expect(groups.flatMap((g) => g.instanceIds)).toEqual(['vpcflow']);
   });
 
   it('adds a base instance for a selected service with no persisted instance', () => {
     const svc = makeSimpleService();
-    const targets = buildAgentBasedTargets([], ['vpcflow'], new Map([['vpcflow', svc]]));
-    expect(targets).toHaveLength(1);
-    expect(targets[0].instance.instanceId).toBe('vpcflow');
+    const groups = buildAgentBasedTargets([], ['vpcflow'], new Map([['vpcflow', svc]]));
+    expect(groups).toHaveLength(1);
+    expect(groups[0].instanceIds).toEqual(['vpcflow']);
   });
 
-  it('keeps duplicates as peers of their original', () => {
+  it('keeps duplicates as separate groups from their original', () => {
     const svc = makeSimpleService();
-    const targets = buildAgentBasedTargets(
+    const groups = buildAgentBasedTargets(
       [
         makeInstance(),
         makeInstance({ instanceId: 'vpcflow__dup-1', name: 'Second bucket', isDuplicate: true }),
@@ -167,30 +173,139 @@ describe('buildAgentBasedTargets', () => {
       ['vpcflow'],
       new Map([['vpcflow', svc]])
     );
-    expect(targets.map((t) => t.instance.instanceId)).toEqual(['vpcflow', 'vpcflow__dup-1']);
+    // Original in a bundled group, duplicate in its own group
+    expect(groups).toHaveLength(2);
+    const allIds = groups.flatMap((g) => g.instanceIds);
+    expect(allIds).toContain('vpcflow');
+    expect(allIds).toContain('vpcflow__dup-1');
+    // The duplicate group is a separate group
+    const dupGroup = groups.find((g) => g.isDuplicateGroup);
+    expect(dupGroup?.instanceIds).toEqual(['vpcflow__dup-1']);
+  });
+
+  it('bundles two originals of the same package into one group', () => {
+    const s3Svc = makeSimpleService('s3');
+    const vpcSvc = makeSimpleService('vpcflow');
+    // Both have packageName: 'aws'
+    const groups = buildAgentBasedTargets(
+      [
+        makeInstance({ instanceId: 's3', serviceId: 's3' }),
+        makeInstance({ instanceId: 'vpcflow', serviceId: 'vpcflow' }),
+      ],
+      ['s3', 'vpcflow'],
+      new Map([
+        ['s3', s3Svc],
+        ['vpcflow', vpcSvc],
+      ])
+    );
+    // Both services share the 'aws' package → one bundled group
+    expect(groups).toHaveLength(1);
+    expect(groups[0].isDuplicateGroup).toBe(false);
+    expect(groups[0].instanceIds).toContain('s3');
+    expect(groups[0].instanceIds).toContain('vpcflow');
+  });
+});
+
+describe('buildAgentPolicyName', () => {
+  it('returns "AWS Agent Policy 1" when no existing policies match', async () => {
+    mockSendGetAgentPolicies.mockResolvedValue({ data: { items: [] } });
+    const name = await buildAgentPolicyName();
+    expect(name).toBe('AWS Agent Policy 1');
+  });
+
+  it('increments past the highest existing "AWS Agent Policy N" policy', async () => {
+    mockSendGetAgentPolicies.mockResolvedValue({
+      data: {
+        items: [
+          { name: 'AWS Agent Policy 1' },
+          { name: 'AWS Agent Policy 3' },
+          { name: 'AWS Agent Policy 2' },
+        ],
+      },
+    });
+    const name = await buildAgentPolicyName();
+    expect(name).toBe('AWS Agent Policy 4');
+  });
+
+  it('falls back to "AWS Agent Policy 1" when the fetch fails', async () => {
+    mockSendGetAgentPolicies.mockRejectedValue(new Error('Network error'));
+    const name = await buildAgentPolicyName();
+    expect(name).toBe('AWS Agent Policy 1');
+  });
+
+  it('does not match policies with a different prefix', async () => {
+    mockSendGetAgentPolicies.mockResolvedValue({
+      data: {
+        items: [
+          { name: 'AWS Onboarding 5' }, // old name — must not be matched
+          { name: 'AWS Agent Policy 1' },
+        ],
+      },
+    });
+    const name = await buildAgentPolicyName();
+    // Only "AWS Agent Policy 1" matches → next is 2
+    expect(name).toBe('AWS Agent Policy 2');
   });
 });
 
 describe('deployNewAgentPolicy', () => {
-  it('sends one request with one package policy per target', async () => {
+  it('sends one request with one package policy per group', async () => {
     const svc = makeSimpleService();
-    const targets = buildAgentBasedTargets([], ['vpcflow'], new Map([['vpcflow', svc]]));
+    const groups = buildAgentBasedTargets([], ['vpcflow'], new Map([['vpcflow', svc]]));
 
-    await deployNewAgentPolicy(targets, { ...BASE_OPTS, agentPolicyName: 'AWS Onboarding' });
+    await deployNewAgentPolicy(groups, { ...BASE_OPTS, agentPolicyName: 'AWS Agent Policy 1' });
 
     expect(mockSendCreateAgentPolicy).toHaveBeenCalledTimes(1);
     const body = mockSendCreateAgentPolicy.mock.calls[0][0];
     expect(body.package_policies).toHaveLength(1);
   });
 
+  it('two services with same package → one package policy (bundled originals)', async () => {
+    const s3Svc = makeSimpleService('s3');
+    const vpcSvc = makeSimpleService('vpcflow');
+    const groups = buildAgentBasedTargets(
+      [
+        makeInstance({ instanceId: 's3', serviceId: 's3' }),
+        makeInstance({ instanceId: 'vpcflow', serviceId: 'vpcflow' }),
+      ],
+      ['s3', 'vpcflow'],
+      new Map([
+        ['s3', s3Svc],
+        ['vpcflow', vpcSvc],
+      ])
+    );
+
+    mockSendCreateAgentPolicy.mockImplementation(async (body: any) => {
+      const names = body.package_policies.map((pp: any) => pp.name);
+      return {
+        item: {
+          id: 'agent-policy-1',
+          package_policies: names.map((name: string, i: number) => ({ id: `pp-${i}`, name })),
+        },
+      };
+    });
+
+    const result = await deployNewAgentPolicy(groups, {
+      ...BASE_OPTS,
+      agentPolicyName: 'AWS Agent Policy 1',
+    });
+
+    const body = mockSendCreateAgentPolicy.mock.calls[0][0];
+    // One bundled group → one package policy
+    expect(body.package_policies).toHaveLength(1);
+    // Both instances map to the same package policy id
+    expect(result.packagePolicyIdsByInstance.s3).toBe(result.packagePolicyIdsByInstance.vpcflow);
+    expect(result.packagePolicyIdsByInstance.s3).toBeDefined();
+  });
+
   it('puts namespace on the agent policy and omits it per package policy', async () => {
     const svc = makeSimpleService();
-    const targets = buildAgentBasedTargets([], ['vpcflow'], new Map([['vpcflow', svc]]));
+    const groups = buildAgentBasedTargets([], ['vpcflow'], new Map([['vpcflow', svc]]));
 
-    await deployNewAgentPolicy(targets, {
+    await deployNewAgentPolicy(groups, {
       ...BASE_OPTS,
       namespace: 'custom-ns',
-      agentPolicyName: 'AWS Onboarding',
+      agentPolicyName: 'AWS Agent Policy 1',
     });
 
     const body = mockSendCreateAgentPolicy.mock.calls[0][0];
@@ -200,12 +315,12 @@ describe('deployNewAgentPolicy', () => {
 
   it('never sends cloud_connector — that is an agentless-only auth mechanism', async () => {
     const svc = makeSimpleService();
-    const targets = buildAgentBasedTargets([], ['vpcflow'], new Map([['vpcflow', svc]]));
+    const groups = buildAgentBasedTargets([], ['vpcflow'], new Map([['vpcflow', svc]]));
 
-    await deployNewAgentPolicy(targets, {
+    await deployNewAgentPolicy(groups, {
       ...BASE_OPTS,
       authenticateAndDeployStep: { connectorId: 'connector-1' } as never,
-      agentPolicyName: 'AWS Onboarding',
+      agentPolicyName: 'AWS Agent Policy 1',
     });
 
     const serialized = JSON.stringify(mockSendCreateAgentPolicy.mock.calls[0][0]);
@@ -215,7 +330,7 @@ describe('deployNewAgentPolicy', () => {
 
   it('maps returned package policy ids back by name, not array index', async () => {
     const svc = makeSimpleService();
-    const targets = buildAgentBasedTargets(
+    const groups = buildAgentBasedTargets(
       [
         makeInstance(),
         makeInstance({ instanceId: 'vpcflow__dup-1', name: 'Second bucket', isDuplicate: true }),
@@ -240,9 +355,9 @@ describe('deployNewAgentPolicy', () => {
       };
     });
 
-    const result = await deployNewAgentPolicy(targets, {
+    const result = await deployNewAgentPolicy(groups, {
       ...BASE_OPTS,
-      agentPolicyName: 'AWS Onboarding',
+      agentPolicyName: 'AWS Agent Policy 1',
     });
 
     expect(result.packagePolicyIdsByInstance.vpcflow).toBe('pp-first');
@@ -251,7 +366,7 @@ describe('deployNewAgentPolicy', () => {
 
   it('gives duplicate instances distinct bucket_arns in separate documents', async () => {
     const svc = makeSimpleService();
-    const targets = buildAgentBasedTargets(
+    const groups = buildAgentBasedTargets(
       [
         makeInstance(),
         makeInstance({ instanceId: 'vpcflow__dup-1', name: 'Second bucket', isDuplicate: true }),
@@ -260,7 +375,7 @@ describe('deployNewAgentPolicy', () => {
       new Map([['vpcflow', svc]])
     );
 
-    await deployNewAgentPolicy(targets, {
+    await deployNewAgentPolicy(groups, {
       ...BASE_OPTS,
       storedServiceVars: {
         vpcflow: {
@@ -282,7 +397,7 @@ describe('deployNewAgentPolicy', () => {
           },
         },
       } as never,
-      agentPolicyName: 'AWS Onboarding',
+      agentPolicyName: 'AWS Agent Policy 1',
     });
 
     const body = mockSendCreateAgentPolicy.mock.calls[0][0];
@@ -303,9 +418,9 @@ describe('deployNewAgentPolicy', () => {
     //   inputs.guardduty-httpjson.streams.aws.guardduty.vars.detector_id: ["Detector ID is required"]
     it('drops an input whose required vars are unset', async () => {
       const svc = makeGuardDutyService();
-      const targets = buildAgentBasedTargets([], ['guardduty'], new Map([['guardduty', svc]]));
+      const groups = buildAgentBasedTargets([], ['guardduty'], new Map([['guardduty', svc]]));
 
-      await deployNewAgentPolicy(targets, {
+      await deployNewAgentPolicy(groups, {
         ...BASE_OPTS,
         storedServiceVars: {
           guardduty: {
@@ -318,7 +433,7 @@ describe('deployNewAgentPolicy', () => {
             },
           },
         } as never,
-        agentPolicyName: 'AWS Onboarding',
+        agentPolicyName: 'AWS Agent Policy 1',
       });
 
       const inputs = mockSendCreateAgentPolicy.mock.calls[0][0].package_policies[0].inputs;
@@ -328,9 +443,9 @@ describe('deployNewAgentPolicy', () => {
 
     it('keeps an input whose required vars are all satisfied', async () => {
       const svc = makeGuardDutyService();
-      const targets = buildAgentBasedTargets([], ['guardduty'], new Map([['guardduty', svc]]));
+      const groups = buildAgentBasedTargets([], ['guardduty'], new Map([['guardduty', svc]]));
 
-      await deployNewAgentPolicy(targets, {
+      await deployNewAgentPolicy(groups, {
         ...BASE_OPTS,
         storedServiceVars: {
           guardduty: {
@@ -345,7 +460,7 @@ describe('deployNewAgentPolicy', () => {
             },
           },
         } as never,
-        agentPolicyName: 'AWS Onboarding',
+        agentPolicyName: 'AWS Agent Policy 1',
       });
 
       const inputs = mockSendCreateAgentPolicy.mock.calls[0][0].package_policies[0].inputs;
@@ -355,9 +470,9 @@ describe('deployNewAgentPolicy', () => {
 
     it('treats a whitespace-only required var as unsatisfied', async () => {
       const svc = makeGuardDutyService();
-      const targets = buildAgentBasedTargets([], ['guardduty'], new Map([['guardduty', svc]]));
+      const groups = buildAgentBasedTargets([], ['guardduty'], new Map([['guardduty', svc]]));
 
-      await deployNewAgentPolicy(targets, {
+      await deployNewAgentPolicy(groups, {
         ...BASE_OPTS,
         storedServiceVars: {
           guardduty: {
@@ -373,7 +488,7 @@ describe('deployNewAgentPolicy', () => {
             },
           },
         } as never,
-        agentPolicyName: 'AWS Onboarding',
+        agentPolicyName: 'AWS Agent Policy 1',
       });
 
       const inputs = mockSendCreateAgentPolicy.mock.calls[0][0].package_policies[0].inputs;
@@ -394,9 +509,9 @@ describe('deployNewAgentPolicy', () => {
         'advanced_thing',
         { required: true, show_user: false }
       );
-      const targets = buildAgentBasedTargets([], ['config'], new Map([['config', svc]]));
+      const groups = buildAgentBasedTargets([], ['config'], new Map([['config', svc]]));
 
-      await deployNewAgentPolicy(targets, { ...BASE_OPTS, agentPolicyName: 'AWS Onboarding' });
+      await deployNewAgentPolicy(groups, { ...BASE_OPTS, agentPolicyName: 'AWS Agent Policy 1' });
 
       const inputs = mockSendCreateAgentPolicy.mock.calls[0][0].package_policies[0].inputs;
       expect(inputs['config-aws-s3']).toBeDefined();
@@ -409,9 +524,9 @@ describe('deployNewAgentPolicy', () => {
       (svc as any).varDefsByInput['aws-s3'].aws_region = makeRequiredUserVar('aws_region');
       (svc as any).varDefsByDataStream.config.varDefsByInput['aws-s3'].aws_region =
         makeRequiredUserVar('aws_region');
-      const targets = buildAgentBasedTargets([], ['config'], new Map([['config', svc]]));
+      const groups = buildAgentBasedTargets([], ['config'], new Map([['config', svc]]));
 
-      await deployNewAgentPolicy(targets, { ...BASE_OPTS, agentPolicyName: 'AWS Onboarding' });
+      await deployNewAgentPolicy(groups, { ...BASE_OPTS, agentPolicyName: 'AWS Agent Policy 1' });
 
       const inputs = mockSendCreateAgentPolicy.mock.calls[0][0].package_policies[0].inputs;
       expect(inputs['config-aws-s3']).toBeDefined();
@@ -426,9 +541,9 @@ describe('deployNewAgentPolicy', () => {
       });
       (svc as any).varDefsByInput['aws-s3'].enable_thing = boolVar;
       (svc as any).varDefsByDataStream.config.varDefsByInput['aws-s3'].enable_thing = boolVar;
-      const targets = buildAgentBasedTargets([], ['config'], new Map([['config', svc]]));
+      const groups = buildAgentBasedTargets([], ['config'], new Map([['config', svc]]));
 
-      await deployNewAgentPolicy(targets, { ...BASE_OPTS, agentPolicyName: 'AWS Onboarding' });
+      await deployNewAgentPolicy(groups, { ...BASE_OPTS, agentPolicyName: 'AWS Agent Policy 1' });
 
       const inputs = mockSendCreateAgentPolicy.mock.calls[0][0].package_policies[0].inputs;
       expect(inputs['config-aws-s3']).toBeDefined();
@@ -438,10 +553,10 @@ describe('deployNewAgentPolicy', () => {
       const svc = makeGuardDutyService();
       (svc as any).inputs = ['httpjson'];
       (svc as any).varDefsByDataStream.guardduty.inputs = ['httpjson'];
-      const targets = buildAgentBasedTargets([], ['guardduty'], new Map([['guardduty', svc]]));
+      const groups = buildAgentBasedTargets([], ['guardduty'], new Map([['guardduty', svc]]));
 
       await expect(
-        deployNewAgentPolicy(targets, { ...BASE_OPTS, globalRegion: '', agentPolicyName: 'X' })
+        deployNewAgentPolicy(groups, { ...BASE_OPTS, globalRegion: '', agentPolicyName: 'X' })
       ).rejects.toThrow(/httpjson: .*detector_id/);
     });
 
@@ -450,13 +565,13 @@ describe('deployNewAgentPolicy', () => {
       // Strip the input that has no required vars, leaving only the unsatisfiable one.
       (svc as any).inputs = ['httpjson'];
       (svc as any).varDefsByDataStream.guardduty.inputs = ['httpjson'];
-      const targets = buildAgentBasedTargets([], ['guardduty'], new Map([['guardduty', svc]]));
+      const groups = buildAgentBasedTargets([], ['guardduty'], new Map([['guardduty', svc]]));
 
       await expect(
-        deployNewAgentPolicy(targets, {
+        deployNewAgentPolicy(groups, {
           ...BASE_OPTS,
           globalRegion: '',
-          agentPolicyName: 'AWS Onboarding',
+          agentPolicyName: 'AWS Agent Policy 1',
         })
       ).rejects.toThrow(/No fully configured input for AWS GuardDuty/);
 
@@ -474,7 +589,7 @@ describe('disabled inputs for other policy templates', () => {
   it('marks inputs from other policy templates disabled when pkgInfo has policy_templates', async () => {
     // makeSimpleService('config') has inputs: ['aws-s3'], so buildPackageInputs emits 'config-aws-s3'.
     const svc = makeSimpleService('config');
-    const targets = buildAgentBasedTargets([], ['config'], new Map([['config', svc]]));
+    const groups = buildAgentBasedTargets([], ['config'], new Map([['config', svc]]));
 
     // Simulate a package with two templates: 'config' (ours) and 'securityhub' (other).
     mockSendGetPackageInfo.mockResolvedValue({
@@ -494,7 +609,7 @@ describe('disabled inputs for other policy templates', () => {
       },
     });
 
-    await deployNewAgentPolicy(targets, { ...BASE_OPTS, agentPolicyName: 'AWS Onboarding' });
+    await deployNewAgentPolicy(groups, { ...BASE_OPTS, agentPolicyName: 'AWS Agent Policy 1' });
 
     const inputs = mockSendCreateAgentPolicy.mock.calls[0][0].package_policies[0].inputs;
     // Our template's input is present and enabled (from buildPackageInputs).
@@ -508,10 +623,10 @@ describe('disabled inputs for other policy templates', () => {
     // Packages with a single template or no template list — disabled-inputs map is empty and
     // the request body is unchanged.
     const svc = makeSimpleService('config');
-    const targets = buildAgentBasedTargets([], ['config'], new Map([['config', svc]]));
+    const groups = buildAgentBasedTargets([], ['config'], new Map([['config', svc]]));
 
     // Default mock: { version: '3.0.0', vars: [] } — no policy_templates.
-    await deployNewAgentPolicy(targets, { ...BASE_OPTS, agentPolicyName: 'AWS Onboarding' });
+    await deployNewAgentPolicy(groups, { ...BASE_OPTS, agentPolicyName: 'AWS Agent Policy 1' });
 
     const inputs = mockSendCreateAgentPolicy.mock.calls[0][0].package_policies[0].inputs;
     // Only our service's input is present.
@@ -523,7 +638,7 @@ describe('disabled inputs for other policy templates', () => {
 describe('deployToExistingAgentPolicies', () => {
   it('sends policy_ids with every selected id on each body — no cross product', async () => {
     const svc = makeSimpleService();
-    const targets = buildAgentBasedTargets(
+    const groups = buildAgentBasedTargets(
       [
         makeInstance(),
         makeInstance({ instanceId: 'vpcflow__dup-1', name: 'Second bucket', isDuplicate: true }),
@@ -532,12 +647,12 @@ describe('deployToExistingAgentPolicies', () => {
       new Map([['vpcflow', svc]])
     );
 
-    await deployToExistingAgentPolicies(targets, {
+    await deployToExistingAgentPolicies(groups, {
       ...BASE_OPTS,
       selectedAgentPolicyIds: ['policy-a', 'policy-b'],
     });
 
-    // 2 instances × 2 policies would be 4 calls; policy_ids keeps it at 2.
+    // 2 groups (1 original + 1 duplicate) → 2 calls; policy_ids keeps it at 2 (not 2 × 2 = 4).
     expect(mockSendCreatePackagePolicy).toHaveBeenCalledTimes(2);
     for (const call of mockSendCreatePackagePolicy.mock.calls) {
       expect(call[0].policy_ids).toEqual(['policy-a', 'policy-b']);
@@ -545,9 +660,38 @@ describe('deployToExistingAgentPolicies', () => {
     }
   });
 
-  it('reports per-instance failures without failing the whole batch', async () => {
+  it('two originals with same package → one package policy call, both instanceIds mapped', async () => {
+    const s3Svc = makeSimpleService('s3');
+    const vpcSvc = makeSimpleService('vpcflow');
+    const groups = buildAgentBasedTargets(
+      [
+        makeInstance({ instanceId: 's3', serviceId: 's3' }),
+        makeInstance({ instanceId: 'vpcflow', serviceId: 'vpcflow' }),
+      ],
+      ['s3', 'vpcflow'],
+      new Map([
+        ['s3', s3Svc],
+        ['vpcflow', vpcSvc],
+      ])
+    );
+
+    mockSendCreatePackagePolicy.mockResolvedValue({ item: { id: 'pp-bundled' } });
+
+    const result = await deployToExistingAgentPolicies(groups, {
+      ...BASE_OPTS,
+      selectedAgentPolicyIds: ['policy-a'],
+    });
+
+    // One group → one create call
+    expect(mockSendCreatePackagePolicy).toHaveBeenCalledTimes(1);
+    // Both instanceIds mapped to the same policy id
+    expect(result.packagePolicyIdsByInstance.s3).toBe('pp-bundled');
+    expect(result.packagePolicyIdsByInstance.vpcflow).toBe('pp-bundled');
+  });
+
+  it('reports per-group failures without failing the whole batch', async () => {
     const svc = makeSimpleService();
-    const targets = buildAgentBasedTargets(
+    const groups = buildAgentBasedTargets(
       [
         makeInstance(),
         makeInstance({ instanceId: 'vpcflow__dup-1', name: 'Second bucket', isDuplicate: true }),
@@ -560,7 +704,7 @@ describe('deployToExistingAgentPolicies', () => {
       .mockResolvedValueOnce({ item: { id: 'pp-ok' } })
       .mockRejectedValueOnce(new Error('Package policy is invalid'));
 
-    const result = await deployToExistingAgentPolicies(targets, {
+    const result = await deployToExistingAgentPolicies(groups, {
       ...BASE_OPTS,
       selectedAgentPolicyIds: ['policy-a'],
     });
@@ -623,7 +767,7 @@ describe('extractErrorMessage', () => {
 
   it('surfaces the server detail through the existing-policy path', async () => {
     const svc = makeSimpleService();
-    const targets = buildAgentBasedTargets([], ['vpcflow'], new Map([['vpcflow', svc]]));
+    const groups = buildAgentBasedTargets([], ['vpcflow'], new Map([['vpcflow', svc]]));
 
     mockSendCreatePackagePolicy.mockRejectedValueOnce(
       Object.assign(new Error('Bad Request'), {
@@ -631,7 +775,7 @@ describe('extractErrorMessage', () => {
       })
     );
 
-    const result = await deployToExistingAgentPolicies(targets, {
+    const result = await deployToExistingAgentPolicies(groups, {
       ...BASE_OPTS,
       selectedAgentPolicyIds: ['policy-a'],
     });
@@ -643,14 +787,14 @@ describe('extractErrorMessage', () => {
 describe('secrets', () => {
   it('does not send session_token in the package policy body', async () => {
     const svc = makeSimpleService();
-    const targets = buildAgentBasedTargets([], ['vpcflow'], new Map([['vpcflow', svc]]));
+    const groups = buildAgentBasedTargets([], ['vpcflow'], new Map([['vpcflow', svc]]));
 
-    await deployNewAgentPolicy(targets, {
+    await deployNewAgentPolicy(groups, {
       ...BASE_OPTS,
       authenticateAndDeployStep: {
         staticKeys: { access_key_id: 'AKIA', secret_access_key: 'shhh' },
       } as never,
-      agentPolicyName: 'AWS Onboarding',
+      agentPolicyName: 'AWS Agent Policy 1',
     });
 
     const serialized = JSON.stringify(mockSendCreateAgentPolicy.mock.calls[0][0]);

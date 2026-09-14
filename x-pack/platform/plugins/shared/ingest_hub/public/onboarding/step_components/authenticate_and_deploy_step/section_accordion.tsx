@@ -40,6 +40,8 @@ export interface DeploymentSectionAccordionProps {
   isDone: boolean;
   /** When false, the Done badge shows but the accordion does not auto-collapse. Default true. */
   autoCollapse?: boolean;
+  /** When true, forces the accordion to collapse (controlled override). */
+  forceCollapsed?: boolean;
   /** data-test-subj on the outer EuiPanel */
   dataTestSubj: string;
   /** data-test-subj on the header button */
@@ -53,6 +55,7 @@ export function DeploymentSectionAccordion({
   serviceCount,
   isDone,
   autoCollapse = true,
+  forceCollapsed = false,
   dataTestSubj,
   headerButtonTestSubj,
   children,
@@ -71,6 +74,13 @@ export function DeploymentSectionAccordion({
     }
     prevIsDoneRef.current = isDone;
   }, [autoCollapse, isDone]);
+
+  // forceCollapsed overrides local open state when true.
+  useEffect(() => {
+    if (forceCollapsed) {
+      setIsOpen(false);
+    }
+  }, [forceCollapsed]);
 
   const headerButtonCss = css`
     display: block;

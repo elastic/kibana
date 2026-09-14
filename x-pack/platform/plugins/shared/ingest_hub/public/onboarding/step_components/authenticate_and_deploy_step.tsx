@@ -154,6 +154,12 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     [handleAgentDeploy]
   );
 
+  // Used by handleNext to await the deploy result and decide whether to navigate.
+  const handleAgentDeployForNext = useCallback(async (): Promise<{ failed: boolean }> => {
+    setAgentDeployAttempted(true);
+    return handleAgentDeploy();
+  }, [handleAgentDeploy]);
+
   const showIdentityFederation = useMemo(() => {
     if (miServiceIds.length === 0) return true;
     return miServiceIds.every(
@@ -179,6 +185,10 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
   // ── ECF-only SO persistence ───────────────────────────────────────────────────
   const [isSavingSO, setIsSavingSO] = useState(false);
+
+  // Defined before handleNext so they can be referenced in the callback and dependency array.
+  const showMiSection = !isAgentBased && miServiceIds.length > 0;
+  const showAgentSection = isAgentBased && agentTargets.length > 0;
 
   const handleNext = useCallback(async () => {
     const defaultNames: Record<string, string> = {
@@ -247,10 +257,23 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       return;
     }
 
+    // Agent-based: deploy on Next, then navigate only if succeeded.
+    if (showAgentSection) {
+      const result = await handleAgentDeployForNext();
+      if (result.failed) {
+        // Deploy failed — stay on step 3, error callout is already shown by the section.
+        return;
+      }
+      onContinue();
+      return;
+    }
+
     onContinue();
   }, [
     miServiceIds.length,
     hasAnyEcf,
+    showAgentSection,
+    handleAgentDeployForNext,
     ecfSectionProps,
     selectedServiceIds,
     serviceVars,
@@ -268,11 +291,13 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
   // ── Next button gating ────────────────────────────────────────────────────────
   // Disabled until every active deployment section reports done.
-  const showMiSection = !isAgentBased && miServiceIds.length > 0;
-  const showAgentSection = isAgentBased && agentTargets.length > 0;
-  // Agent-based deploy is non-blocking — user can proceed to Step 4 without waiting for deploy
-  // or agent enrollment. Data detection and the service chips are shown in Step 4 instead.
-  const isNextDisabled = (showMiSection && !isMiDone) || (hasAnyEcf && !isEcfDone) || isSavingSO;
+  // Agent enrolment is non-blocking, but the deploy itself now happens here on Next.
+  // The section stays visible with the error callout if deploy fails.
+  const isNextDisabled =
+    (showMiSection && !isMiDone) ||
+    (hasAnyEcf && !isEcfDone) ||
+    isSavingSO ||
+    (showAgentSection && isAgentDeploying);
 
   return (
     <div data-test-subj="onboardingStep-authenticate-and-deploy">
@@ -295,7 +320,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
       {showAgentSection && (
         <AgentBasedSection
-          serviceCount={agentTargets.length}
+          serviceCount={agentTargets.reduce((sum, g) => sum + g.instanceIds.length, 0)}
           onDeploy={handleAgentDeployClick}
           onCredentialsChange={setAgentCredentials}
           isDeploying={isAgentDeploying}
@@ -328,7 +353,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
             fill
             onClick={handleNext}
             isDisabled={isNextDisabled}
-            isLoading={isSavingSO}
+            isLoading={isSavingSO || isAgentDeploying}
             data-test-subj="authenticateAndDeployStep-nextButton"
           >
             <FormattedMessage

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 // ─── Mocks ──────────────────────────────────────────────────────────────────
@@ -16,10 +16,16 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
   LazyAwsStaticKeysForm: jest.fn(),
   LazyAwsTemporaryKeysForm: jest.fn(),
   useGetAgentPoliciesQuery: jest.fn(),
+  AgentPolicyIntegrationForm: jest.fn(),
+  agentPolicyFormValidation: jest.fn(),
 }));
 
 jest.mock('../../onboarding_flow_context', () => ({
   useOnboardingFlow: jest.fn(),
+}));
+
+jest.mock('./agent_based_deploy/agent_policy_name', () => ({
+  buildAgentPolicyName: jest.fn().mockResolvedValue('AWS Agent Policy 1'),
 }));
 
 import {
@@ -27,12 +33,16 @@ import {
   LazyAwsStaticKeysForm,
   LazyAwsTemporaryKeysForm,
   useGetAgentPoliciesQuery,
+  AgentPolicyIntegrationForm,
+  agentPolicyFormValidation,
 } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 
 const MockAgentEnrollmentFlyout = LazyAgentEnrollmentFlyout as unknown as jest.Mock;
 const MockStaticKeysForm = LazyAwsStaticKeysForm as unknown as jest.Mock;
 const MockTemporaryKeysForm = LazyAwsTemporaryKeysForm as unknown as jest.Mock;
+const MockAgentPolicyIntegrationForm = AgentPolicyIntegrationForm as unknown as jest.Mock;
+const mockAgentPolicyFormValidation = agentPolicyFormValidation as jest.Mock;
 const mockUseGetAgentPoliciesQuery = useGetAgentPoliciesQuery as jest.Mock;
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 
@@ -43,24 +53,36 @@ import { AgentBasedSection } from './agent_based_section';
 interface OnboardingFlowOptions {
   agentHostsMode?: 'new' | 'existing';
   agentPolicyId?: string;
+  agentPolicyName?: string;
   selectedAgentPolicyIds?: string[];
   agentCredentialMethod?:
     | 'direct_access_keys'
     | 'temporary_keys'
     | 'shared_credentials'
     | 'assume_role';
+  withSysMonitoring?: boolean;
   setAgentBasedDeployment?: jest.Mock;
 }
 
 function setupMocks({
   agentHostsMode = 'new',
   agentPolicyId = undefined,
+  agentPolicyName = undefined,
   selectedAgentPolicyIds = [],
   agentCredentialMethod = 'direct_access_keys',
+  withSysMonitoring = undefined,
   setAgentBasedDeployment = jest.fn(),
 }: OnboardingFlowOptions = {}) {
-  MockAgentEnrollmentFlyout.mockImplementation(() => (
-    <div data-test-subj="agent-enrollment-flyout" />
+  MockAgentEnrollmentFlyout.mockImplementation(({ onAgentPolicyCreated }: any) => (
+    <div data-test-subj="agent-enrollment-flyout">
+      {onAgentPolicyCreated && (
+        <button
+          onClick={() => onAgentPolicyCreated({ id: 'new-policy-id', name: 'AWS Agent Policy 1' })}
+        >
+          simulate-policy-created
+        </button>
+      )}
+    </div>
   ));
 
   MockStaticKeysForm.mockImplementation(
@@ -79,14 +101,23 @@ function setupMocks({
     )
   );
 
+  MockAgentPolicyIntegrationForm.mockImplementation(() => (
+    <div data-test-subj="agent-policy-integration-form" />
+  ));
+
+  // By default, validation returns no errors (form valid).
+  mockAgentPolicyFormValidation.mockReturnValue({});
+
   mockUseGetAgentPoliciesQuery.mockReturnValue({ data: { items: [] }, isLoading: false });
 
   mockUseOnboardingFlow.mockReturnValue({
     agentBasedDeployment: {
       agentHostsMode,
       agentPolicyId,
+      agentPolicyName,
       selectedAgentPolicyIds,
       agentCredentialMethod,
+      withSysMonitoring,
     },
     setAgentBasedDeployment,
   });
@@ -129,46 +160,87 @@ describe('AgentBasedSection', () => {
     setupMocks();
   });
 
-  describe('pre-deploy state — new policy mode', () => {
-    it('shows "Create a new agent policy" radio selected by default', () => {
+  describe('pre-create state — new policy mode', () => {
+    it('shows "Create a new agent policy" radio selected by default', async () => {
       renderSection();
-      const radio = screen.getByRole('radio', { name: /create a new agent policy/i });
-      expect(radio).toBeChecked();
+      await waitFor(() => {
+        const radio = screen.getByRole('radio', { name: /create a new agent policy/i });
+        expect(radio).toBeChecked();
+      });
     });
 
-    it('shows pre-deploy description ("A new agent policy will be created for you")', () => {
+    it('shows AgentPolicyIntegrationForm', async () => {
       renderSection();
-      expect(screen.getByText(/a new agent policy will be created for you/i)).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByTestId('agent-policy-integration-form')).toBeInTheDocument();
+      });
     });
 
-    it('does NOT show post-deploy description', () => {
+    it('does NOT show post-create summary', async () => {
       renderSection();
-      expect(
-        screen.queryByText(/a new agent policy is created for this integration/i)
-      ).not.toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.queryByText(/agent policy.*has been created/i)).not.toBeInTheDocument();
+      });
     });
 
-    it('"Add agent" button is disabled when credential form not ready', () => {
+    it('"Add agent" button is disabled when credential form not ready (even when form valid)', async () => {
+      // Validation passes but credentials not ready → button disabled.
+      mockAgentPolicyFormValidation.mockReturnValue({});
       renderSection();
-      expect(screen.getByTestId('agentBasedSection-addAgentButton')).toBeDisabled();
+      await waitFor(() => {
+        expect(screen.getByTestId('agentBasedSection-addAgentButton')).toBeDisabled();
+      });
     });
 
-    it('"Add agent" button enables when LazyAwsStaticKeysForm calls onReadyChange(true)', () => {
+    it('"Add agent" button enables when credentials ready and form valid', async () => {
+      // Set persisted name so isPolicyNameLoading = false.
+      setupMocks({ agentPolicyName: 'AWS Agent Policy 1' });
+      mockAgentPolicyFormValidation.mockReturnValue({});
       renderSection();
       act(() => {
         fireEvent.click(screen.getByText('mark-credential-ready'));
       });
-      expect(screen.getByTestId('agentBasedSection-addAgentButton')).not.toBeDisabled();
+      await waitFor(() => {
+        expect(screen.getByTestId('agentBasedSection-addAgentButton')).not.toBeDisabled();
+      });
     });
 
-    it('clicking "Deploy integrations" calls onDeploy', () => {
+    it('"Add agent" button disabled when policy form has validation errors', async () => {
+      setupMocks({ agentPolicyName: 'AWS Agent Policy 1' });
+      // Return a validation error.
+      mockAgentPolicyFormValidation.mockReturnValue({ name: 'Name is required' });
+      renderSection();
+      act(() => {
+        fireEvent.click(screen.getByText('mark-credential-ready'));
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId('agentBasedSection-addAgentButton')).toBeDisabled();
+      });
+    });
+
+    it('clicking "Add agent" opens the flyout (does NOT call onDeploy)', async () => {
+      setupMocks({ agentPolicyName: 'AWS Agent Policy 1' });
+      mockAgentPolicyFormValidation.mockReturnValue({});
       const onDeploy = jest.fn();
       renderSection({ onDeploy });
       act(() => {
         fireEvent.click(screen.getByText('mark-credential-ready'));
       });
+      await waitFor(() => {
+        expect(screen.getByTestId('agentBasedSection-addAgentButton')).not.toBeDisabled();
+      });
       fireEvent.click(screen.getByTestId('agentBasedSection-addAgentButton'));
-      expect(onDeploy).toHaveBeenCalledTimes(1);
+      expect(onDeploy).not.toHaveBeenCalled();
+      expect(screen.getByTestId('agent-enrollment-flyout')).toBeInTheDocument();
+    });
+
+    it('does NOT show "Add another agent" button in pre-create state', async () => {
+      renderSection();
+      await waitFor(() => {
+        expect(
+          screen.queryByTestId('agentBasedSection-addAnotherAgentButton')
+        ).not.toBeInTheDocument();
+      });
     });
   });
 
@@ -182,68 +254,65 @@ describe('AgentBasedSection', () => {
       expect(screen.getByTestId('agentBasedSection-agentPoliciesComboBox')).toBeInTheDocument();
     });
 
-    it('"Add agent" button is disabled when no policies selected (selectedAgentPolicyIds=[])', () => {
+    it('does NOT show AgentPolicyIntegrationForm in existing mode', () => {
       renderSection();
-      // mark credentials ready first
-      act(() => {
-        fireEvent.click(screen.getByText('mark-credential-ready'));
-      });
-      expect(screen.getByTestId('agentBasedSection-addAgentButton')).toBeDisabled();
+      expect(screen.queryByTestId('agent-policy-integration-form')).not.toBeInTheDocument();
+    });
+
+    it('does NOT show "Add agent" button in existing mode', () => {
+      renderSection();
+      expect(screen.queryByTestId('agentBasedSection-addAgentButton')).not.toBeInTheDocument();
     });
   });
 
-  describe('post-deploy — new policy mode', () => {
+  describe('post-create — new policy mode (agentPolicyId set)', () => {
     beforeEach(() => {
-      setupMocks({ agentHostsMode: 'new', agentPolicyId: 'policy-123' });
+      setupMocks({
+        agentHostsMode: 'new',
+        agentPolicyId: 'policy-123',
+        agentPolicyName: 'AWS Agent Policy 1',
+      });
     });
 
-    it('shows post-deploy description ("A new Agent Policy is created for this integration")', () => {
+    it('shows post-create summary text mentioning policy name', () => {
       renderSection();
-      expect(
-        screen.getByText(/a new agent policy is created for this integration/i)
-      ).toBeInTheDocument();
+      expect(screen.getByText(/agent policy.*has been created/i)).toBeInTheDocument();
     });
 
-    it('does NOT show pre-deploy description', () => {
+    it('does NOT show AgentPolicyIntegrationForm after policy is created', () => {
       renderSection();
-      expect(
-        screen.queryByText(/a new agent policy will be created for you/i)
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('agent-policy-integration-form')).not.toBeInTheDocument();
     });
 
-    it('shows "Add agent" button enabled (isDeployedForCurrentMode=true)', () => {
+    it('shows "Add another agent" button', () => {
       renderSection();
-      const btn = screen.getByTestId('agentBasedSection-addAgentButton');
+      const btn = screen.getByTestId('agentBasedSection-addAnotherAgentButton');
       expect(btn).toBeInTheDocument();
-      expect(btn).not.toBeDisabled();
     });
 
-    it('clicking "Add agent" opens the flyout directly (no onDeploy call)', () => {
+    it('clicking "Add another agent" opens flyout', () => {
       const onDeploy = jest.fn();
       renderSection({ onDeploy });
-      fireEvent.click(screen.getByTestId('agentBasedSection-addAgentButton'));
+      fireEvent.click(screen.getByTestId('agentBasedSection-addAnotherAgentButton'));
       expect(onDeploy).not.toHaveBeenCalled();
       expect(screen.getByTestId('agent-enrollment-flyout')).toBeInTheDocument();
     });
 
-    it('does NOT show "+ Add another agent" button', () => {
+    it('does NOT show "Add agent" pre-create button', () => {
       renderSection();
-      expect(
-        screen.queryByTestId('agentBasedSection-addAnotherAgentButton')
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('agentBasedSection-addAgentButton')).not.toBeInTheDocument();
     });
-  });
 
-  describe('radio always interactive', () => {
-    it('radio buttons are not disabled when agentPolicyId is set', () => {
-      setupMocks({ agentHostsMode: 'new', agentPolicyId: 'policy-123' });
+    it('radio buttons are disabled when agentPolicyId is set (mode locked)', () => {
       renderSection();
       const radios = screen.getAllByRole('radio');
       radios.forEach((radio) => {
-        expect(radio).not.toBeDisabled();
+        expect(radio).toBeDisabled();
       });
     });
+  });
 
+  describe('radio onChange calls setAgentBasedDeployment', () => {
     it('radio onChange calls setAgentBasedDeployment', () => {
       const setAgentBasedDeployment = jest.fn();
       setupMocks({ agentHostsMode: 'new', setAgentBasedDeployment });
@@ -253,8 +322,8 @@ describe('AgentBasedSection', () => {
     });
   });
 
-  describe('isDeployedForCurrentMode mode switching', () => {
-    it('after switching from "new" (with agentPolicyId set) to "existing", pre-deploy combobox appears', () => {
+  describe('existing mode combobox visible', () => {
+    it('when agentHostsMode="existing", combobox appears', () => {
       setupMocks({
         agentHostsMode: 'existing',
         agentPolicyId: undefined,

@@ -19,17 +19,18 @@ import {
   extractErrorMessage,
   buildAgentPolicyName,
 } from './agent_based_deploy';
-import type { AgentBasedTarget } from './agent_based_deploy';
 import type { AgentCredentialVars } from './package_inputs';
+import type { DeployGroup } from './deploy_groups';
 
 export interface UseAgentBasedDeployResult {
-  targets: AgentBasedTarget[];
+  targets: DeployGroup[];
   isDeploying: boolean;
   failedInstances: string[];
   /** True when a successful deploy result already exists in persisted state. */
   isAlreadyDeployed: boolean;
-  /** Trigger a deploy (or retry). Defaults to all targets; pass specific instanceIds for retry. */
-  handleDeploy: (instanceIds?: string[]) => void;
+  /** Trigger a deploy (or retry). Defaults to all targets; pass specific instanceIds for retry.
+   *  Returns a Promise that resolves to `{ failed: boolean }` when the deploy settles. */
+  handleDeploy: (instanceIds?: string[]) => Promise<{ failed: boolean }>;
   namespace: string;
   setNamespace: (ns: string) => void;
   /** Update the in-memory credential values used on the next deploy. Secrets (secret_access_key,
@@ -70,7 +71,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
   // behaviour MI relies on, because agentPolicyId is its durable success flag.
   const [failedInstances, setFailedInstances] = useState<string[]>([]);
 
-  const targets: AgentBasedTarget[] = useMemo(
+  const targets: DeployGroup[] = useMemo(
     () =>
       buildAgentBasedTargets(
         serviceSettings?.instances ?? [],
@@ -81,25 +82,28 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
   );
 
   // Deploy is "already done" when the agent policy id is persisted (created in a previous session
-  // or a previous deploy attempt in this session) AND every target has a status that passed the
+  // or a previous deploy attempt in this session) AND every instance has a status that passed the
   // deploy gate (detecting/receiving/timeout = success, error = failed).
   const isAlreadyDeployed = useMemo(() => {
     if (!agentBasedDeployment.agentPolicyId) return false;
     if (targets.length === 0) return false;
-    return targets.every(({ instance }) => {
-      const status = detectAndReviewStep.serviceStatuses[instance.instanceId];
-      return status === 'receiving' || status === 'detecting' || status === 'timeout';
-    });
+    return targets.every((group) =>
+      group.instanceIds.every((instanceId) => {
+        const status = detectAndReviewStep.serviceStatuses[instanceId];
+        return status === 'receiving' || status === 'detecting' || status === 'timeout';
+      })
+    );
   }, [agentBasedDeployment.agentPolicyId, targets, detectAndReviewStep.serviceStatuses]);
 
   const handleDeploy = useCallback(
-    async (instanceIds?: string[]) => {
+    async (instanceIds?: string[]): Promise<{ failed: boolean }> => {
       const isRetry = instanceIds !== undefined && instanceIds.length > 0;
+      // For retries, keep only groups that have at least one instanceId to retry.
       const targetsToDeploy = isRetry
-        ? targets.filter((t) => instanceIds.includes(t.instance.instanceId))
+        ? targets.filter((g) => g.instanceIds.some((id) => instanceIds.includes(id)))
         : targets;
 
-      if (targetsToDeploy.length === 0) return;
+      if (targetsToDeploy.length === 0) return { failed: false };
 
       setIsDeploying(true);
       updateDetectAndReviewStep({ isDeploying: true });
@@ -122,13 +126,13 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         let failed: string[] = [];
         let errorsByInstance: Record<string, string> = {};
 
-        if (agentHostsMode === 'existing' || (isRetry && agentPolicyId)) {
-          // Existing-policy path:
-          // - For retries when agentPolicyId is already set (new-policy mode), we target the
-          //   existing policy to avoid creating a second one (double-creation guard).
-          // - For existing-policy mode, selectedAgentPolicyIds carries the user's selection.
-          const targetPolicyIds =
-            isRetry && agentPolicyId ? [agentPolicyId] : selectedAgentPolicyIds ?? [];
+        // Route to the existing-policy path when:
+        // - agentHostsMode === 'existing': user selected an existing policy.
+        // - agentPolicyId is already set: the flyout created the policy on a previous attempt
+        //   (including the very first Next click when the flyout ran), so we target the existing
+        //   policy to avoid creating a second one (double-creation guard applies on retry too).
+        if (agentHostsMode === 'existing' || agentPolicyId) {
+          const targetPolicyIds = agentPolicyId ? [agentPolicyId] : selectedAgentPolicyIds ?? [];
 
           const result = await deployToExistingAgentPolicies(targetsToDeploy, {
             ...baseOpts,
@@ -144,6 +148,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             const result = await deployNewAgentPolicy(targetsToDeploy, {
               ...baseOpts,
               agentPolicyName,
+              withSysMonitoring: agentBasedDeployment.withSysMonitoring ?? true,
             });
             policyIdsByInstance = result.packagePolicyIdsByInstance;
             // Persist the agent policy id so retries and step 4 can find it.
@@ -156,12 +161,12 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             // extractErrorMessage, not String(err): Fleet rejects with an IHttpFetchError whose
             // server detail is in body.message, so String() would render "[object Object]".
             const msg = extractErrorMessage(err);
-            failed = targetsToDeploy.map((t) => t.instance.instanceId);
+            failed = targetsToDeploy.flatMap((g) => g.instanceIds);
             errorsByInstance = Object.fromEntries(failed.map((id) => [id, msg]));
           }
         }
 
-        const allTargetIds = targetsToDeploy.map((t) => t.instance.instanceId);
+        const allTargetIds = targetsToDeploy.flatMap((g) => g.instanceIds);
         const statuses = buildAgentBasedInstanceStatuses(targetsToDeploy, failed);
 
         setFailedInstances(failed);
@@ -175,10 +180,11 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             : failed,
           deployErrors: errorsByInstance,
         });
+        return { failed: failed.length > 0 };
       } catch (err) {
         // Unexpected error — mark all as failed.
         const msg = extractErrorMessage(err);
-        const allIds = targetsToDeploy.map((t) => t.instance.instanceId);
+        const allIds = targetsToDeploy.flatMap((g) => g.instanceIds);
         const statuses = buildAgentBasedInstanceStatuses(targetsToDeploy, allIds);
         setFailedInstances(allIds);
         updateDetectAndReviewStep({
@@ -187,6 +193,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           failedInstances: allIds,
           deployErrors: Object.fromEntries(allIds.map((id) => [id, msg])),
         });
+        return { failed: true };
       } finally {
         setIsDeploying(false);
       }

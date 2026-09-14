@@ -66,6 +66,7 @@ interface PersistedAuthenticateAndDeployStep {
   sharedCredentialFile?: string;
   credentialProfileName?: string;
   roleArn?: string;
+  withSysMonitoring?: boolean;
 }
 
 export interface ServicesStepState {
@@ -103,6 +104,7 @@ export interface AgentBasedDeploymentState {
   sharedCredentialFile?: string;
   credentialProfileName?: string;
   roleArn?: string;
+  withSysMonitoring?: boolean;
 }
 
 interface OnboardingFlowState {
@@ -208,6 +210,9 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
           ? { credentialProfileName: update.credentialProfileName }
           : {}),
         ...(update.roleArn !== undefined ? { roleArn: update.roleArn } : {}),
+        ...(update.withSysMonitoring !== undefined
+          ? { withSysMonitoring: update.withSysMonitoring }
+          : {}),
       });
     },
     [setPersistedAuthenticateAndDeployStep]
@@ -352,6 +357,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         deploymentMethod: method,
         agentPolicyId: undefined,
         agentPolicyName: undefined,
+        withSysMonitoring: undefined,
       });
       setPersistedDetectAndReviewStep({
         serviceStatuses: {},
@@ -381,6 +387,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     sharedCredentialFile: persistedAuthenticateAndDeployStep?.sharedCredentialFile,
     credentialProfileName: persistedAuthenticateAndDeployStep?.credentialProfileName,
     roleArn: persistedAuthenticateAndDeployStep?.roleArn,
+    withSysMonitoring: persistedAuthenticateAndDeployStep?.withSysMonitoring,
   };
 
   const detectAndReviewStep: DetectAndReviewStepState = {
