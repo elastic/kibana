@@ -1288,8 +1288,8 @@
       "enabled": true
     },
     {
-      "groupName": "package.json/yarn.lock utils",
-      "matchDepNames": ["@yarnpkg/lockfile", "sort-package-json", "yarn-deduplicate"],
+      "groupName": "package.json/pnpm-lock.yaml utils",
+      "matchDepNames": ["sort-package-json"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "backport:all-open", "release_note:skip"],
