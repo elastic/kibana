@@ -9,6 +9,7 @@ import {
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiSpacer,
   EuiText,
   EuiTextArea,
@@ -131,6 +132,8 @@ export const ActionPolicyForm = () => {
         />
       </EuiDescribedFormGroup>
 
+      <EuiHorizontalRule margin="l" />
+
       <EuiDescribedFormGroup
         fullWidth
         title={
@@ -185,6 +188,8 @@ export const ActionPolicyForm = () => {
         />
       </EuiDescribedFormGroup>
 
+      <EuiHorizontalRule margin="l" />
+
       <EuiDescribedFormGroup
         fullWidth
         title={
@@ -199,6 +204,8 @@ export const ActionPolicyForm = () => {
       >
         <DispatchSection />
       </EuiDescribedFormGroup>
+
+      <EuiHorizontalRule margin="l" />
 
       <EuiDescribedFormGroup
         fullWidth
