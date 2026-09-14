@@ -50,12 +50,14 @@ const finalState: InvestigationState = {
   recommendations: [
     {
       title: 'Roll back the deployment that introduced the regression',
+      confidence: 0.95,
       code: 'kubectl rollout undo deployment/checkout-service',
     },
   ],
   blind_spots: [
     {
       title: 'No profiling data available',
+      confidence: 0.7,
       description: 'Could not confirm whether a leak compounded the exhaustion.',
     },
   ],
@@ -163,8 +165,15 @@ describe('InvestigationOutput', () => {
   it('honours the emphasis and inline code the agent wrote, without showing the markers', () => {
     const stateWithMarkdown: InvestigationState = {
       ...finalState,
-      recommendations: [{ title: '**Block the attacker IPs** at the firewall via `hosts.deny`' }],
-      blind_spots: [{ title: 'No `apm-*` indices', description: 'Needed for _tracing_.' }],
+      recommendations: [
+        {
+          title: '**Block the attacker IPs** at the firewall via `hosts.deny`',
+          confidence: 0.9,
+        },
+      ],
+      blind_spots: [
+        { title: 'No `apm-*` indices', confidence: 0.8, description: 'Needed for _tracing_.' },
+      ],
     };
 
     renderWithI18n(<InvestigationOutput status="complete" state={stateWithMarkdown} />);
@@ -180,7 +189,7 @@ describe('InvestigationOutput', () => {
     const gap = 'No GeoIP enrichment available for the attacker IPs.';
     const stateWithRecoveredGap: InvestigationState = {
       ...finalState,
-      blind_spots: [{ title: gap, description: gap }],
+      blind_spots: [{ title: gap, confidence: 0.8, description: gap }],
     };
 
     renderWithI18n(<InvestigationOutput status="complete" state={stateWithRecoveredGap} />);
