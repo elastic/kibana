@@ -48,6 +48,7 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import type { AppHeaderTab } from '@kbn/app-header';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import type { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
 import type { Section } from './constants';
@@ -79,6 +80,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   storage?: Storage;
   isCloud: boolean;
   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
+  tabs?: AppHeaderTab[];
   actionTypeRegistry: ActionTypeRegistryContract;
   ruleTypeRegistry: RuleTypeRegistryContract;
   history: ScopedHistory;
