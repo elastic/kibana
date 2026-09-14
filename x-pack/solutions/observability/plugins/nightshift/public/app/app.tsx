@@ -8,26 +8,56 @@
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
 import { SIGNIFICANT_EVENTS_APP_ID } from '@kbn/deeplinks-observability';
 import { usePageReady } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
-import type { ListInvestigationItem } from '@kbn/nightshift-investigations-plugin/common';
+import type {
+  ListInvestigationItem,
+  Severity,
+  SeverityCounts,
+} from '@kbn/nightshift-investigations-plugin/common';
+import { SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
 import { useKibana } from '../hooks/use_kibana';
 import { isHttpNotFoundError } from '../common/http_error';
 import { useFetchInvestigations } from '../hooks/use_fetch_investigations';
+import { useFetchSeverityCounts } from '../hooks/use_fetch_severity_counts';
 import {
-  INVESTIGATION_LIST_PAGE_SIZES,
+  INVESTIGATION_LIST_PAGE_SIZE,
   InvestigationList,
-  type InvestigationListPageSize,
 } from '../investigation/investigation_list';
 import { InvestigationDetailFlyout } from '../investigation/investigation_detail_flyout';
+import { InvestigationSeverityTiles } from '../investigation/investigation_severity_tiles';
 import {
   clearNightshiftInvestigationIdParam,
+  clearNightshiftSeverityParam,
   getNightshiftInvestigationIdFromSearch,
+  getNightshiftSearchQueryFromSearch,
+  getNightshiftSeverityFromSearch,
   setNightshiftInvestigationIdParam,
+  setNightshiftSearchQueryParam,
+  setNightshiftSeverityParam,
 } from '../common/url_params';
 import { NightshiftHeader } from './header';
+
+const EMPTY_SEVERITY_COUNTS: SeverityCounts = {
+  '80-critical': 0,
+  '60-high': 0,
+  '40-medium': 0,
+  '20-low': 0,
+};
+
+function isSeverity(value: string | undefined): value is Severity {
+  return SEVERITY_OPTIONS.some((s) => s === value);
+}
 
 export function NightshiftApp(): React.ReactElement {
   const { euiTheme } = useEuiTheme();
@@ -35,11 +65,37 @@ export function NightshiftApp(): React.ReactElement {
   const history = useHistory();
   const { search } = useLocation();
 
-  const [size, setSize] = useState<InvestigationListPageSize>(INVESTIGATION_LIST_PAGE_SIZES[0]);
-  const { data, error, isFetching, isInitialLoading, refetch } = useFetchInvestigations({ size });
+  // Read filter state from URL so it survives navigation and is shareable.
+  const searchQuery = useMemo(() => getNightshiftSearchQueryFromSearch(search), [search]);
+  const rawSeverity = useMemo(() => getNightshiftSeverityFromSearch(search), [search]);
+  const activeSeverity: Severity | undefined = useMemo(
+    () => (isSeverity(rawSeverity) ? rawSeverity : undefined),
+    [rawSeverity]
+  );
+  const [page, setPage] = useState(1);
+
+  const severities = useMemo(
+    () => (activeSeverity ? [activeSeverity] : undefined),
+    [activeSeverity]
+  );
+
+  const { data, error, isFetching, isInitialLoading, refetch } = useFetchInvestigations({
+    page,
+    size: INVESTIGATION_LIST_PAGE_SIZE,
+    query: searchQuery,
+    severities,
+  });
   const isInvestigationsAvailable = nightshiftInvestigations?.investigationsClient != null;
 
+  // Separate request: the counts are independent of page, sort and the selected severity, so
+  // they resolve on their own and the list does not wait on the aggregation.
+  const { data: countsData } = useFetchSeverityCounts({ query: searchQuery });
+
   const investigations = useMemo(() => data?.results ?? [], [data]);
+  const severityCounts = useMemo(
+    () => countsData?.severity_counts ?? EMPTY_SEVERITY_COUNTS,
+    [countsData]
+  );
   const selectedInvestigationId = useMemo(
     () => getNightshiftInvestigationIdFromSearch(search),
     [search]
@@ -64,6 +120,34 @@ export function NightshiftApp(): React.ReactElement {
     history.replace({ search: params.toString() });
   }, [history]);
 
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const params = new URLSearchParams(history.location.search);
+      setNightshiftSearchQueryParam(params, e.target.value);
+      history.replace({ search: params.toString() });
+      setPage(1);
+    },
+    [history]
+  );
+
+  const handleSeverityClick = useCallback(
+    (severity: Severity) => {
+      const params = new URLSearchParams(history.location.search);
+      if (severity === activeSeverity) {
+        // clicking the active tile deselects it
+        clearNightshiftSeverityParam(params);
+      } else {
+        setNightshiftSeverityParam(params, severity);
+      }
+      history.replace({ search: params.toString() });
+      setPage(1);
+    },
+    [history, activeSeverity]
+  );
+
+  const handlePageChange = useCallback((nextPage: number) => {
+    setPage(nextPage);
+  }, []);
   const hasActiveInvestigations = investigations.some(
     ({ status }) => status === 'pending' || status === 'running'
   );
@@ -126,6 +210,28 @@ export function NightshiftApp(): React.ReactElement {
         showAllEventsHref={showAllEventsHref}
       />
 
+      <EuiSpacer size="l" />
+
+      <EuiFieldSearch
+        data-test-subj="nightshiftInvestigationsSearchInput"
+        placeholder={i18n.translate('xpack.nightshift.investigations.searchPlaceholder', {
+          defaultMessage: 'Search',
+        })}
+        value={searchQuery ?? ''}
+        onChange={handleSearchChange}
+        isClearable
+        fullWidth
+      />
+
+      <EuiSpacer size="m" />
+
+      <InvestigationSeverityTiles
+        severityCounts={severityCounts}
+        activeSeverity={activeSeverity}
+        onSeverityClick={handleSeverityClick}
+      />
+
+      <EuiSpacer size="l" />
       {error && data && (
         <div
           css={css`
@@ -160,9 +266,9 @@ export function NightshiftApp(): React.ReactElement {
       <InvestigationList
         investigations={investigations}
         total={data?.total ?? 0}
+        page={page}
+        onPageChange={handlePageChange}
         isInitialLoading={isInitialLoading}
-        size={size}
-        onSizeChange={setSize}
         selectedInvestigationId={selectedInvestigationId}
         onInvestigationClick={handleInvestigationClick}
       />

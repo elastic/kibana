@@ -8,9 +8,16 @@
 import {
   buildNightshiftEventFlyoutShareUrl,
   clearNightshiftEventIdParam,
+  clearNightshiftSeverityParam,
   getNightshiftEventIdFromSearch,
+  getNightshiftSearchQueryFromSearch,
+  getNightshiftSeverityFromSearch,
   NIGHTSHIFT_EVENT_ID_QUERY_PARAM,
+  NIGHTSHIFT_SEARCH_QUERY_PARAM,
+  NIGHTSHIFT_SEVERITY_QUERY_PARAM,
   setNightshiftEventIdParam,
+  setNightshiftSearchQueryParam,
+  setNightshiftSeverityParam,
 } from './url_params';
 
 describe('url_params', () => {
@@ -44,5 +51,33 @@ describe('url_params', () => {
 
     clearNightshiftEventIdParam(params);
     expect(params.has(NIGHTSHIFT_EVENT_ID_QUERY_PARAM)).toBe(false);
+  });
+
+  it('reads and writes the search query param', () => {
+    expect(getNightshiftSearchQueryFromSearch(`?${NIGHTSHIFT_SEARCH_QUERY_PARAM}=logs.web`)).toBe(
+      'logs.web'
+    );
+    expect(getNightshiftSearchQueryFromSearch('')).toBeUndefined();
+
+    const params = new URLSearchParams();
+    setNightshiftSearchQueryParam(params, 'logs.web');
+    expect(params.get(NIGHTSHIFT_SEARCH_QUERY_PARAM)).toBe('logs.web');
+
+    setNightshiftSearchQueryParam(params, '');
+    expect(params.has(NIGHTSHIFT_SEARCH_QUERY_PARAM)).toBe(false);
+  });
+
+  it('reads and writes the severity param', () => {
+    expect(getNightshiftSeverityFromSearch(`?${NIGHTSHIFT_SEVERITY_QUERY_PARAM}=80-critical`)).toBe(
+      '80-critical'
+    );
+    expect(getNightshiftSeverityFromSearch('')).toBeUndefined();
+
+    const params = new URLSearchParams();
+    setNightshiftSeverityParam(params, '80-critical');
+    expect(params.get(NIGHTSHIFT_SEVERITY_QUERY_PARAM)).toBe('80-critical');
+
+    clearNightshiftSeverityParam(params);
+    expect(params.has(NIGHTSHIFT_SEVERITY_QUERY_PARAM)).toBe(false);
   });
 });
