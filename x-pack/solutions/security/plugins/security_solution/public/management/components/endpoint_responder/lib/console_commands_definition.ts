@@ -238,10 +238,10 @@ export const getEndpointConsoleCommands = ({
 
   // `kill-process --kill-descendants` applies only to the Elastic Defend Endpoint, is gated behind
   // a feature flag and requires that the host's Endpoint version supports it (reported via the
-  // `kill_process_descendents` capability).
+  // `kill_process_descendants` capability).
   const isKillDescendantsSupportedByEndpoint = (
     endpointCapabilities as EndpointCapabilities[]
-  ).includes('kill_process_descendents');
+  ).includes('kill_process_descendants');
   const killDescendantsArg: Record<string, CommandArgDefinition> =
     agentType === 'endpoint' && responseActionsEndpointKillProcessDescendants
       ? {

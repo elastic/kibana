@@ -47,7 +47,7 @@ describe('registerNewsfeedHandler', () => {
     };
 
     const core = {
-      chrome: { next: { registerNewsfeedHandler: registerNewsfeedHandlerMock } },
+      chrome: { help: { registerNewsfeedHandler: registerNewsfeedHandlerMock } },
     } as unknown as CoreStart;
 
     const cleanup = registerNewsfeedHandler({ core, api, sidebarController });
