@@ -50,6 +50,7 @@ export {
   UPDATE_CASES_CAPABILITY,
   INTERNAL_BULK_GET_CASES_URL,
   COMMENT_ATTACHMENT_TYPE,
+  FILE_ATTACHMENT_TYPE,
   LENS_ATTACHMENT_TYPE,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   CASE_COMMENT_SAVED_OBJECT,
@@ -105,6 +106,7 @@ export {
   getRuleInfo,
   getManualAlertIds,
   buildAlertCaseAttachment,
+  buildEventCaseAttachment,
 } from './utils/attachments';
 
 export { AttachmentActionType } from './utils/attachment_actions';

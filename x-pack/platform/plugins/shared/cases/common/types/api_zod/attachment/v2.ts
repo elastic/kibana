@@ -6,8 +6,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { MAX_BULK_CREATE_ATTACHMENTS } from '../../../constants';
-import { limitedArraySchema } from '../../../schema_zod';
 import {
   AttachmentRequestSchema,
   AttachmentRequestWithoutRefsSchema,
@@ -39,13 +37,5 @@ export const AttachmentPatchRequestSchemaV2 = z.union([
   UnifiedAttachmentPatchRequestSchema,
 ]);
 
-export const BulkCreateAttachmentsRequestSchemaV2 = limitedArraySchema({
-  codec: AttachmentRequestSchemaV2,
-  min: 0,
-  max: MAX_BULK_CREATE_ATTACHMENTS,
-  fieldName: 'attachments',
-});
-
 export type AttachmentRequestV2 = z.infer<typeof AttachmentRequestSchemaV2>;
 export type AttachmentPatchRequestV2 = z.infer<typeof AttachmentPatchRequestSchemaV2>;
-export type BulkCreateAttachmentsRequestV2 = z.infer<typeof BulkCreateAttachmentsRequestSchemaV2>;

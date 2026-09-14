@@ -12,16 +12,15 @@ import {
   getCasesDeleteFileAttachmentsUrl,
 } from '@kbn/cases-plugin/common/api';
 import type { Case } from '@kbn/cases-plugin/common';
-import { AttachmentType } from '@kbn/cases-plugin/common';
 import type {
   BulkGetAttachmentsResponse,
   AttachmentRequestV2,
-  BulkCreateAttachmentsRequest,
-  BulkCreateAttachmentsRequestV2,
+  BulkCreateUnifiedAttachmentsRequest,
   AttachmentPatchRequest,
   AttachmentsFindResponse,
   PostFileAttachmentRequest,
 } from '@kbn/cases-plugin/common/types/api';
+import { COMMENT_ATTACHMENT_TYPE, buildAlertCaseAttachment } from '@kbn/cases-plugin/common';
 import type { Attachments, Attachment } from '@kbn/cases-plugin/common/types/domain';
 import type { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
@@ -118,7 +117,7 @@ export const bulkCreateAttachments = async ({
 }: {
   supertest: SuperTest.Agent;
   caseId: string;
-  params: BulkCreateAttachmentsRequestV2;
+  params: BulkCreateUnifiedAttachmentsRequest;
   auth?: { user: User; space: string | null };
   expectedHttpCode?: number;
 }): Promise<Case> => {
@@ -144,7 +143,7 @@ export const createCaseAndBulkCreateAttachments = async ({
   numberOfAttachments?: number;
   auth?: { user: User; space: string | null };
   expectedHttpCode?: number;
-}): Promise<{ theCase: Case; attachments: BulkCreateAttachmentsRequestV2 }> => {
+}): Promise<{ theCase: Case; attachments: BulkCreateUnifiedAttachmentsRequest }> => {
   const postedCase = await createCase(supertest, postCaseReq);
   const attachments = getAttachments(numberOfAttachments);
   const patchedCase = await bulkCreateAttachments({
@@ -156,24 +155,27 @@ export const createCaseAndBulkCreateAttachments = async ({
   return { theCase: patchedCase, attachments };
 };
 
-export const getAttachments = (numberOfAttachments: number): BulkCreateAttachmentsRequest => {
+export const getAttachments = (
+  numberOfAttachments: number
+): BulkCreateUnifiedAttachmentsRequest => {
   return [...Array(numberOfAttachments)].map((_, index) => {
     if (index % 10 === 0) {
       return {
-        type: AttachmentType.user,
-        comment: `Test ${index + 1}`,
+        type: COMMENT_ATTACHMENT_TYPE,
+        data: { content: `Test ${index + 1}` },
         owner: 'securitySolutionFixture',
       };
     }
 
     return {
-      type: AttachmentType.alert,
-      alertId: [`test-id-${index + 1}`],
-      index: [`test-index-${index + 1}`],
-      rule: {
-        id: `rule-test-id-${index + 1}`,
-        name: `Test ${index + 1}`,
-      },
+      ...buildAlertCaseAttachment('securitySolutionFixture', {
+        alertId: [`test-id-${index + 1}`],
+        index: [`test-index-${index + 1}`],
+        rule: {
+          id: `rule-test-id-${index + 1}`,
+          name: `Test ${index + 1}`,
+        },
+      }),
       owner: 'securitySolutionFixture',
     };
   });

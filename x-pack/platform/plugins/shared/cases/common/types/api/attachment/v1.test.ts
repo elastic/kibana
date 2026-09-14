@@ -6,17 +6,12 @@
  */
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import {
-  MAX_BULK_CREATE_ATTACHMENTS,
-  MAX_COMMENT_LENGTH,
-  MAX_FILENAME_LENGTH,
-} from '../../../constants';
+import { MAX_COMMENT_LENGTH, MAX_FILENAME_LENGTH } from '../../../constants';
 import { AttachmentType } from '../../domain/attachment/v1';
 import {
   AttachmentPatchRequestRt,
   AttachmentRequestRt,
   AttachmentsFindResponseRt,
-  BulkCreateAttachmentsRequestRt,
   BulkDeleteFileAttachmentsRequestRt,
   BulkGetAttachmentsRequestRt,
   BulkGetAttachmentsResponseRt,
@@ -27,7 +22,6 @@ import {
   AttachmentPatchRequestSchema,
   AttachmentRequestSchema,
   AttachmentsFindResponseSchema,
-  BulkCreateAttachmentsRequestSchema,
   BulkDeleteFileAttachmentsRequestSchema,
   BulkGetAttachmentsRequestSchema,
   BulkGetAttachmentsResponseSchema,
@@ -321,71 +315,6 @@ describe('Attachments', () => {
       const result = FindAttachmentsQueryParamsSchema.safeParse({ ...defaultRequest, foo: 'bar' });
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(defaultRequest);
-    });
-  });
-
-  describe('BulkCreateAttachmentsRequestRt', () => {
-    const defaultRequest = [
-      {
-        comment: 'Solve this fast!',
-        type: AttachmentType.user,
-        owner: 'cases',
-      },
-    ];
-
-    it('has expected attributes in request', () => {
-      const query = BulkCreateAttachmentsRequestRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = BulkCreateAttachmentsRequestRt.decode([
-        { comment: 'Solve this fast!', type: AttachmentType.user, owner: 'cases', foo: 'bar' },
-      ]);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('zod: has expected attributes in request', () => {
-      const result = BulkCreateAttachmentsRequestSchema.safeParse(defaultRequest);
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(defaultRequest);
-    });
-
-    it('zod: strips unknown fields', () => {
-      const result = BulkCreateAttachmentsRequestSchema.safeParse([
-        { comment: 'Solve this fast!', type: AttachmentType.user, owner: 'cases', foo: 'bar' },
-      ]);
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(defaultRequest);
-    });
-
-    describe('errors', () => {
-      it(`throws error when attachments are more than ${MAX_BULK_CREATE_ATTACHMENTS}`, () => {
-        const comment = {
-          comment: 'Solve this fast!',
-          type: AttachmentType.user,
-          owner: 'cases',
-        };
-        const attachments = Array(MAX_BULK_CREATE_ATTACHMENTS + 1).fill(comment);
-
-        expect(PathReporter.report(BulkCreateAttachmentsRequestRt.decode(attachments))).toContain(
-          `The length of the field attachments is too long. Array must be of length <= ${MAX_BULK_CREATE_ATTACHMENTS}.`
-        );
-      });
-
-      it(`no errors when empty array of attachments`, () => {
-        expect(PathReporter.report(BulkCreateAttachmentsRequestRt.decode([]))).toStrictEqual([
-          'No errors!',
-        ]);
-      });
     });
   });
 

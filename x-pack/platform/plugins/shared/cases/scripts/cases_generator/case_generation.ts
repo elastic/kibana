@@ -6,6 +6,11 @@
  */
 
 import pMap from 'p-map';
+import {
+  COMMENT_ATTACHMENT_TYPE,
+  buildAlertCaseAttachment,
+  buildEventCaseAttachment,
+} from '../../common';
 import { logger } from './logger';
 import type { GenerateCasesParams, KbnContext } from './types';
 import { casesBasePath, chunk, formatRequestError, rng, runWithRetry } from './utils';
@@ -255,9 +260,9 @@ export async function generateCases(
         const pending: PendingAttachment[] = [];
 
         for (let i = 0; i < commentsPerCase; i++) {
-          const comment = `Auto generated comment ${i + 1}`;
+          const content = `Auto generated comment ${i + 1}`;
           pending.push({
-            body: { type: 'user', comment, owner: newCase.owner },
+            body: { type: COMMENT_ATTACHMENT_TYPE, data: { content }, owner: newCase.owner },
           });
         }
 
@@ -273,10 +278,11 @@ export async function generateCases(
           const rule = { id: alert.ruleId, name: alert.ruleName };
           pending.push({
             body: {
-              type: 'alert',
-              alertId: alert.alertId,
-              index: alert.index,
-              rule,
+              ...buildAlertCaseAttachment(newCase.owner, {
+                alertId: alert.alertId,
+                index: alert.index,
+                rule,
+              }),
               owner: newCase.owner,
             },
           });
@@ -288,9 +294,10 @@ export async function generateCases(
             const event = events[(eventBase + i) % events.length];
             pending.push({
               body: {
-                type: 'event',
-                eventId: event.eventId,
-                index: event.index,
+                ...buildEventCaseAttachment(newCase.owner, {
+                  eventId: event.eventId,
+                  index: event.index,
+                }),
                 owner: newCase.owner,
               },
             });
