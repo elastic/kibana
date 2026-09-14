@@ -240,3 +240,29 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
     newestValue({ source: 'host.name' }),
   ],
 } as const satisfies EntityDefinitionWithoutId;
+
+/**
+ * Strict complement of the priority gate, so every log is handled by exactly one process.
+ * The explicit `exists` arm is required: on a document without `event.kind`,
+ * `NOT (MV_CONTAINS(event.kind, "asset"))` evaluates to null rather than true, which would leave
+ * that document unscanned by both processes.
+ */
+const nonPriorityExtractionGate: Condition = {
+  or: [{ field: 'event.kind', exists: false }, { not: idpGate }],
+};
+
+/**
+ * Priority extraction: authoritative identity snapshots only. Variants are spread from the base
+ * definition so they share one identity logic object, keeping a given user on a single entity id
+ * whichever process discovers them first.
+ */
+export const userPriorityEntityDefinition: EntityDefinitionWithoutId = {
+  ...userEntityDefinition,
+  extractionGate: idpGate,
+};
+
+/** Non-priority extraction: every log the priority gate rejects. */
+export const userNonPriorityEntityDefinition: EntityDefinitionWithoutId = {
+  ...userEntityDefinition,
+  extractionGate: nonPriorityExtractionGate,
+};
