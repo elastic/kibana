@@ -8,23 +8,15 @@
 import * as rt from 'io-ts';
 import { MAX_BULK_CREATE_ATTACHMENTS } from '../../../constants';
 import type { BulkGetAttachmentsRequest } from './v1';
-import {
-  AttachmentPatchRequestRt,
-  AttachmentRequestRt,
-  AttachmentRequestWithoutRefsRt,
-} from './v1';
-import {
-  AttachmentRtV2,
-  UnifiedAttachmentPayloadRt,
-  UnifiedAttachmentRt,
-} from '../../domain/attachment/v2';
+import { UnifiedAttachmentPayloadRt, UnifiedAttachmentRt } from '../../domain/attachment/v2';
 import { limitedArraySchema } from '../../../schema';
 
 // Same shape in v1 and v2 (just saved object ids); re-exported under the V2
 // alias for attachmentApiV2 namespace completeness.
 export type { BulkGetAttachmentsRequest as BulkGetAttachmentsRequestV2 };
 
-// --- Unified-only: no legacy (v1) form, no wire back-compat to preserve ---
+// --- Unified-only: no legacy (v1) form, no wire back-compat to preserve.
+// Version-spanning (v1 ∪ unified) types live in ./v2_union (attachmentApiV2Union) ---
 
 export const UnifiedAttachmentPatchRequestRt = rt.intersection([
   UnifiedAttachmentPayloadRt,
@@ -60,35 +52,3 @@ export type BulkCreateUnifiedAttachmentsRequest = rt.TypeOf<
 export type BulkGetUnifiedAttachmentsResponse = rt.TypeOf<
   typeof BulkGetUnifiedAttachmentsResponseRt
 >;
-
-// --- V2 union: version-spanning (v1 legacy ∪ unified). Used at read/response
-// boundaries and any write boundary that still accepts both wire shapes ---
-
-export const AttachmentRequestRtV2 = rt.union([AttachmentRequestRt, UnifiedAttachmentPayloadRt]);
-export const AttachmentRequestWithoutRefsRtV2 = rt.union([
-  AttachmentRequestWithoutRefsRt,
-  UnifiedAttachmentPayloadRt,
-]);
-export const AttachmentPatchRequestRtV2 = rt.union([
-  AttachmentPatchRequestRt,
-  UnifiedAttachmentPatchRequestRt,
-]);
-
-export const AttachmentsFindResponseRtV2 = rt.strict({
-  comments: rt.array(AttachmentRtV2),
-  page: rt.number,
-  per_page: rt.number,
-  total: rt.number,
-});
-
-export const BulkCreateAttachmentsRequestRtV2 = limitedArraySchema({
-  codec: AttachmentRequestRtV2,
-  min: 0,
-  max: MAX_BULK_CREATE_ATTACHMENTS,
-  fieldName: 'attachments',
-});
-
-export type AttachmentRequestV2 = rt.TypeOf<typeof AttachmentRequestRtV2>;
-export type AttachmentPatchRequestV2 = rt.TypeOf<typeof AttachmentPatchRequestRtV2>;
-export type AttachmentsFindResponseV2 = rt.TypeOf<typeof AttachmentsFindResponseRtV2>;
-export type BulkCreateAttachmentsRequestV2 = rt.TypeOf<typeof BulkCreateAttachmentsRequestRtV2>;
