@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-import { panelGridSchema, timeRangeSchema } from '@kbn/agent-builder-dashboards-common';
+import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
+import {
+  anomalyChartsEmbeddableStateSchema,
+  severityThresholdSchema,
+} from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
+import {
+  anomalySwimLaneOverallSchema,
+  anomalySwimLaneViewBySchema,
+} from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
+import { singleMetricViewerEmbeddableStateSchema } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
 import { z } from '@kbn/zod/v4';
 import { definePanelType, type ConfigEditValidation } from '../panel_type';
-
-const MAX_STRING_LENGTH = 2048;
 
 /**
  * ML anomaly detection panel logic.
@@ -21,11 +28,11 @@ const MAX_STRING_LENGTH = 2048;
  * ML panels; the agent derives job IDs and parameters from prior tool calls or
  * conversation context.
  *
- * All schemas are defined inline with Zod v4 to avoid mixing Zod v3 schemas
- * from `@kbn/ml-server-schemas` with the v4 `z` instance used by this package.
+ * Config shapes come from `@kbn/ml-server-schemas` so dashboard generation
+ * accepts the same payload as ML chart attachments. Anomaly charts additionally
+ * accept a numeric `severity_threshold` and map it to the embeddable's
+ * open-ended `{ min }` range.
  */
-
-const panelTitleSchema = z.string().max(500).optional().describe('Descriptive panel title.');
 
 const panelIdSchema = z.string().max(256);
 
@@ -42,21 +49,21 @@ const validateSameEmbeddableType =
 // ─── Anomaly Charts ───────────────────────────────────────────────────────────
 
 export const anomalyChartsPanelConfigSchema = z.object({
-  job_ids: z
-    .array(z.string().max(256))
-    .min(1)
-    .max(20)
-    .describe('Anomaly detection job or group IDs to display. Must already exist.'),
-  title: panelTitleSchema,
-  time_range: timeRangeSchema
-    .optional()
-    .describe('Time range to scope the chart. When omitted the dashboard time range is used.'),
+  ...anomalyChartsEmbeddableStateSchema.shape,
+  // Agent-facing number plus the embeddable array form (e.g. forwarded attachments).
   severity_threshold: z
-    .number()
-    .min(0)
-    .max(100)
+    .union([
+      z
+        .number()
+        .min(0)
+        .max(100)
+        .describe('Minimum anomaly score (0–100) to display. Defaults to 25 when omitted.'),
+      z.array(severityThresholdSchema).max(5),
+    ])
     .optional()
-    .describe('Minimum anomaly score (0–100) to display. Defaults to 25 when omitted.'),
+    .describe(
+      'Minimum anomaly score to display. A number N means scores >= N. An array of { min, max? } ranges is also accepted (for example from an ML chart attachment).'
+    ),
 });
 
 export const anomalyChartsPanelConfigInputSchema = z.object({
@@ -81,13 +88,13 @@ export const anomalyChartsPanelDefinition = definePanelType({
   embeddableType: 'ml_anomaly_charts',
   buildPanelContent: (config) => {
     const { severity_threshold: severityThreshold, ...rest } = config;
+    const normalizedThreshold =
+      typeof severityThreshold === 'number' ? [{ min: severityThreshold }] : severityThreshold;
     return {
       type: 'ml_anomaly_charts',
       config: {
         ...rest,
-        ...(typeof severityThreshold === 'number'
-          ? { severity_threshold: [{ min: severityThreshold }] }
-          : {}),
+        ...(normalizedThreshold != null ? { severity_threshold: normalizedThreshold } : {}),
       },
     };
   },
@@ -96,49 +103,8 @@ export const anomalyChartsPanelDefinition = definePanelType({
 
 // ─── Anomaly Swim Lane ────────────────────────────────────────────────────────
 
-const swimlaneTimeRangeSchema = timeRangeSchema
-  .optional()
-  .describe('Time range to scope the swim lane. When omitted the dashboard time range is used.');
-
-const swimlaneJobIdsSchema = z
-  .array(z.string().max(256))
-  .min(1)
-  .max(20)
-  .describe('Anomaly detection job or group IDs. Must already exist.');
-
-const swimlaneSeveritySchema = z
-  .number()
-  .min(0)
-  .max(100)
-  .optional()
-  .describe('Minimum anomaly score (0–100) to show. Defaults to 0 when omitted.');
-
-export const anomalySwimlaneOverallConfigSchema = z.object({
-  job_ids: swimlaneJobIdsSchema,
-  title: panelTitleSchema,
-  severity_threshold: swimlaneSeveritySchema,
-  swimlane_type: z
-    .literal('overall')
-    .describe(
-      'Shows the highest anomaly score per time bucket aggregated across all selected jobs.'
-    ),
-  time_range: swimlaneTimeRangeSchema,
-});
-
-export const anomalySwimlaneViewByConfigSchema = z.object({
-  job_ids: swimlaneJobIdsSchema,
-  title: panelTitleSchema,
-  severity_threshold: swimlaneSeveritySchema,
-  swimlane_type: z
-    .literal('viewBy')
-    .describe('Splits anomaly scores by the values of a chosen field.'),
-  view_by: z
-    .string()
-    .min(1)
-    .max(256)
-    .describe('Field to split by (e.g. "host.name"). Required when swimlane_type is "viewBy".'),
-  time_range: swimlaneTimeRangeSchema,
-});
+export const anomalySwimlaneOverallConfigSchema = anomalySwimLaneOverallSchema;
+export const anomalySwimlaneViewByConfigSchema = anomalySwimLaneViewBySchema;
 
 export const anomalySwimlaneConfigSchema = z.discriminatedUnion('swimlane_type', [
   anomalySwimlaneOverallConfigSchema,
@@ -170,15 +136,7 @@ export const anomalySwimlaneDefinition = definePanelType({
 
 // ─── Single Metric Viewer ─────────────────────────────────────────────────────
 
-export const singleMetricViewerConfigSchema = z.object({
-  job_ids: z
-    .array(z.string().max(256))
-    .min(1)
-    .max(1)
-    .describe(
-      'Exactly one anomaly detection job ID whose results are shown in the single metric viewer.'
-    ),
-  title: panelTitleSchema,
+export const singleMetricViewerConfigSchema = singleMetricViewerEmbeddableStateSchema.extend({
   selected_detector_index: z
     .number()
     .min(0)
@@ -186,28 +144,6 @@ export const singleMetricViewerConfigSchema = z.object({
     .describe(
       'Zero-based index of the detector within the job whose results are shown. Defaults to 0 when omitted.'
     ),
-  selected_entities: z
-    .record(
-      z.string().max(256),
-      z.union([z.string().max(MAX_STRING_LENGTH), z.number()]).optional()
-    )
-    .optional()
-    .describe(
-      'Values of the partition, by, or over fields that identify the single time series to display.'
-    ),
-  function_description: z
-    .string()
-    .max(MAX_STRING_LENGTH)
-    .optional()
-    .describe('For metric detectors: which value to plot — "min", "max", or "mean".'),
-  forecast_id: z
-    .string()
-    .max(MAX_STRING_LENGTH)
-    .optional()
-    .describe('Identifier of a forecast to overlay on the chart.'),
-  time_range: timeRangeSchema
-    .optional()
-    .describe('Time range to scope the viewer. When omitted the dashboard time range is used.'),
 });
 
 export const singleMetricViewerConfigInputSchema = z.object({

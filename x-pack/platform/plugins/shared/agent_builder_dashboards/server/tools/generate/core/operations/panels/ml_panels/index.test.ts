@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_STRING_LENGTH } from '@kbn/ml-server-schemas/constants';
 import {
   anomalyChartsPanelConfigSchema,
   anomalyChartsPanelDefinition,
@@ -30,6 +31,21 @@ describe('anomalyChartsPanelDefinition', () => {
         config: {
           job_ids: ['job-1'],
           severity_threshold: [{ min: 30 }],
+        },
+      });
+    });
+
+    it('passes through an embeddable severity_threshold range array', () => {
+      expect(
+        anomalyChartsPanelDefinition.buildPanelContent({
+          job_ids: ['job-1'],
+          severity_threshold: [{ min: 50 }],
+        })
+      ).toEqual({
+        type: 'ml_anomaly_charts',
+        config: {
+          job_ids: ['job-1'],
+          severity_threshold: [{ min: 50 }],
         },
       });
     });
@@ -102,13 +118,27 @@ describe('anomalyChartsPanelConfigSchema', () => {
     });
   });
 
-  it('rejects a title longer than 500 characters', () => {
+  it('rejects an empty job_ids array', () => {
+    expect(
+      anomalyChartsPanelConfigSchema.safeParse({
+        job_ids: [],
+      }).success
+    ).toBe(false);
+  });
+
+  it('accepts a numeric severity_threshold and an embeddable range array', () => {
     expect(
       anomalyChartsPanelConfigSchema.safeParse({
         job_ids: ['job-1'],
-        title: 'a'.repeat(501),
+        severity_threshold: 50,
       }).success
-    ).toBe(false);
+    ).toBe(true);
+    expect(
+      anomalyChartsPanelConfigSchema.safeParse({
+        job_ids: ['job-1'],
+        severity_threshold: [{ min: 50 }],
+      }).success
+    ).toBe(true);
   });
 });
 
@@ -186,13 +216,13 @@ describe('singleMetricViewerConfigSchema', () => {
     expect(
       singleMetricViewerConfigSchema.safeParse({
         job_ids: ['job-1'],
-        function_description: 'a'.repeat(1001),
+        function_description: 'a'.repeat(MAX_STRING_LENGTH + 1),
       }).success
     ).toBe(false);
     expect(
       singleMetricViewerConfigSchema.safeParse({
         job_ids: ['job-1'],
-        forecast_id: 'a'.repeat(1001),
+        forecast_id: 'a'.repeat(MAX_STRING_LENGTH + 1),
       }).success
     ).toBe(false);
   });
