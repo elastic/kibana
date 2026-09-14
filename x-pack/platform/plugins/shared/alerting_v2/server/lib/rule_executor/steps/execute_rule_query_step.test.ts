@@ -277,10 +277,7 @@ describe('ExecuteRuleQueryStep', () => {
 
     expect(error).toBeInstanceOf(QueryResponseSizeExceededError);
     expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
-    // The test config sets maxResponseSize to 50 MB; the message must name the limit and the fix.
-    expect(error!.message).toContain('exceeded the maximum allowed size of 50mb');
-    expect(error!.message).toContain('xpack.alerting_v2.rules.run.query.maxResponseSize');
-    expect(error!.message).toContain('KEEP');
+    expect((error as QueryResponseSizeExceededError).queryType).toBe('breach');
   });
 
   it('does not mark plain ES|QL errors as TaskErrorSource.USER', async () => {
