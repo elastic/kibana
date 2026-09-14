@@ -70,8 +70,10 @@ export function LensRenderer({
   hidePanelTitles,
   lastReloadRequestTime,
   titleHighlight,
+  parentApi,
   ...props
 }: LensRendererProps) {
+  console.log({ props });
   // Use the settings interface to store panel settings
   const settings = useMemo(() => {
     return {
@@ -162,13 +164,14 @@ export function LensRenderer({
       },
     };
   }, [withDefaultActions, extraActions, lensApi, titleHighlight]);
-
+  console.log('HEREEEE 2');
   return (
     <EmbeddableRenderer<LensWireAPIConfig, LensApi>
       type={LENS_EMBEDDABLE_TYPE}
       maybeId={id}
       getParentApi={() =>
         ({
+          ...parentApi,
           // forward the Lens components to the embeddable
           ...props,
           // forward the unified search context

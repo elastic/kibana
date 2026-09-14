@@ -36,7 +36,7 @@ export const TableVisBasic = memo(
     uiStateProps: { columnsWidth, sort, setColumnsWidth, setSort },
   }: TableVisBasicProps) => {
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
-
+    console.log('here????');
     const { columns, rows, formattedColumns } = table;
 
     // custom sorting is in place until the EuiDataGrid sorting gets rid of flaws -> https://github.com/elastic/eui/issues/4108
@@ -115,7 +115,7 @@ export const TableVisBasic = memo(
       },
       [columns, setColumnsWidth]
     );
-    // console.log({ visConfig });
+    console.log({ visConfig });
     return (
       <>
         {title && (

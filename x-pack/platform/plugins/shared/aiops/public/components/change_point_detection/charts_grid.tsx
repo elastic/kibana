@@ -31,6 +31,7 @@ const CHARTS_PER_PAGE = 6;
 
 interface ChartsGridProps {
   changePoints: Record<number, SelectedChangePoint[]>;
+  parentApi: unknown;
 }
 
 /**
@@ -44,12 +45,13 @@ export const ChartsGrid: FC<{
   changePoints: SelectedChangePoint[];
   interval: string;
   onRenderComplete?: () => void;
-}> = ({ changePoints, interval, onRenderComplete }) => {
+  parentApi: unknown;
+}> = ({ changePoints, interval, onRenderComplete, parentApi }) => {
   // Render is complete when all chart components in the grid are ready
   const loadCounter = useRef<Record<number, boolean>>(
     Object.fromEntries(changePoints.map((v, i) => [i, true]))
   );
-
+  console.log('??????');
   /**
    * Callback to track render of each chart component
    * to report when all charts are ready.
@@ -135,6 +137,7 @@ export const ChartsGrid: FC<{
                 onRenderComplete={() => {
                   onChartRenderCompleteCallback(index, false);
                 }}
+                parentApi={parentApi}
               />
             </EuiPanel>
           </EuiFlexItem>
@@ -150,9 +153,12 @@ export const ChartsGrid: FC<{
  * @param changePointsDict
  * @constructor
  */
-export const ChartsGridContainer: FC<ChartsGridProps> = ({ changePoints: changePointsDict }) => {
+export const ChartsGridContainer: FC<ChartsGridProps> = ({
+  changePoints: changePointsDict,
+  parentApi,
+}) => {
   const timefilter = useTimefilter();
-
+  console.log('HERE');
   const initialRefreshSetting = useRef<RefreshInterval>();
 
   const { bucketInterval } = useChangePointDetectionContext();
@@ -196,7 +202,11 @@ export const ChartsGridContainer: FC<ChartsGridProps> = ({ changePoints: changeP
 
   return (
     <>
-      <ChartsGrid changePoints={resultPerPage} interval={bucketInterval.expression} />
+      <ChartsGrid
+        changePoints={resultPerPage}
+        interval={bucketInterval.expression}
+        parentApi={parentApi}
+      />
 
       {pagination.pageCount > 1 ? (
         <EuiFlexGroup justifyContent="spaceAround">

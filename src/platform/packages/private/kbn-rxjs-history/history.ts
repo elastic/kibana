@@ -43,6 +43,7 @@ export function startTrackingHistory<T extends object = {}>({
         return;
       }
       const diff = jsondiffpatch.diff(previous, current);
+      console.log({ previous, current, diff });
       if (!diff) return;
 
       const pointer = pointer$.getValue();
