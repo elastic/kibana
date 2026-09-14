@@ -30,7 +30,7 @@ export const useHighCriticalCount = ({
   const index = getEntitiesAlias(ENTITY_LATEST, spaceId);
   const query = `FROM ${index} ${buildHcCountQueryBody(watchlistId)}`;
 
-  const { data: riskEngineStatus, isFetching: isStatusLoading } = useRiskEngineStatus();
+  const { data: riskEngineStatus, isLoading: isStatusLoading } = useRiskEngineStatus();
 
   const isEnabled =
     !skip && !isStatusLoading && riskEngineStatus?.risk_engine_status !== 'NOT_INSTALLED';
@@ -68,6 +68,8 @@ export const useHighCriticalCount = ({
     },
     {
       keepPreviousData: true,
+      staleTime: 5 * 60_000,
+      refetchOnWindowFocus: false,
       enabled: isEnabled,
       retry: 1,
     }
@@ -75,7 +77,7 @@ export const useHighCriticalCount = ({
 
   return {
     count: result ?? 0,
-    isLoading: isLoading || isRefetching || isStatusLoading,
+    isLoading: isLoading || isStatusLoading,
     error,
   };
 };

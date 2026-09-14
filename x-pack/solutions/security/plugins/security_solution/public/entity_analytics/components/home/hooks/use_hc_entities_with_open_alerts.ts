@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { lastValueFrom } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
@@ -16,7 +15,7 @@ import { useErrorToast } from '../../../../common/hooks/use_error_toast';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
 import { useResolvedLatestEntitiesIndexName } from '../../../../common/hooks/use_resolved_latest_entities_index_name';
-import { buildEntitiesWithAlertsCountQuery } from '../queries/hc_open_alerts_lookup_query';
+import { buildEntitiesWithAlertsCountQuery } from '../queries/entities_with_alerts_lookup_query';
 
 const esqlSearch = async (
   searchService: ReturnType<typeof useKibana>['services']['data']['search'],
@@ -29,6 +28,22 @@ const esqlSearch = async (
   return result.rawResponse as unknown as ESQLSearchResponse;
 };
 
+const parseAlertsCountResponse = (
+  raw: ESQLSearchResponse
+): { count: number; entityIds: string[] } => {
+  const row = raw.values?.[0];
+  const valueIndex = raw.columns?.findIndex((c) => c.name === 'value') ?? 0;
+  const entityIdsIndex = raw.columns?.findIndex((c) => c.name === 'entity_ids') ?? -1;
+  const count = typeof row?.[valueIndex] === 'number' ? (row[valueIndex] as number) : 0;
+  const rawIds = entityIdsIndex >= 0 ? row?.[entityIdsIndex] : undefined;
+  const entityIds: string[] = Array.isArray(rawIds)
+    ? (rawIds as string[]).filter(Boolean)
+    : typeof rawIds === 'string' && rawIds
+    ? [rawIds]
+    : [];
+  return { count, entityIds };
+};
+
 export const useEntitiesWithAlertsCount = ({
   spaceId,
   skip,
@@ -37,7 +52,7 @@ export const useEntitiesWithAlertsCount = ({
   skip?: boolean;
 }) => {
   const { data } = useKibana().services;
-  const { data: riskEngineStatus, isFetching: isStatusLoading } = useRiskEngineStatus();
+  const { data: riskEngineStatus, isLoading: isStatusLoading } = useRiskEngineStatus();
   const euidApi = useEntityStoreEuidApi();
   const { data: resolvedIndex, isLoading: isIndexLoading } =
     useResolvedLatestEntitiesIndexName(spaceId);
@@ -50,36 +65,28 @@ export const useEntitiesWithAlertsCount = ({
     Boolean(euidApi) &&
     Boolean(resolvedIndex?.indexName);
 
-  const query = useMemo(() => {
-    if (!euidApi || !resolvedIndex?.indexName) return null;
-    return buildEntitiesWithAlertsCountQuery(euidApi.euid, resolvedIndex.indexName, spaceId);
-  }, [euidApi, resolvedIndex?.indexName, spaceId]);
-
   const {
     data: queryResult,
     isLoading,
     isRefetching,
     error,
   } = useQuery<{ count: number; entityIds: string[] }, SecurityAppError>(
-    ['entitiesWithAlertsCount', query],
+    ['entitiesWithAlertsCount', resolvedIndex?.indexName, spaceId],
     async ({ signal }) => {
-      if (!query) return { count: 0, entityIds: [] };
-      const raw = await esqlSearch(data.search, query, signal);
-      const row = raw.values?.[0];
-      const valueIndex = raw.columns?.findIndex((c) => c.name === 'value') ?? 0;
-      const entityIdsIndex = raw.columns?.findIndex((c) => c.name === 'entity_ids') ?? -1;
-      const count = typeof row?.[valueIndex] === 'number' ? (row[valueIndex] as number) : 0;
-      const rawIds = entityIdsIndex >= 0 ? row?.[entityIdsIndex] : undefined;
-      const entityIds: string[] = Array.isArray(rawIds)
-        ? (rawIds as string[]).filter(Boolean)
-        : typeof rawIds === 'string' && rawIds
-        ? [rawIds]
-        : [];
-      return { count, entityIds };
+      if (!resolvedIndex?.indexName || !euidApi) return { count: 0, entityIds: [] };
+
+      const raw = await esqlSearch(
+        data.search,
+        buildEntitiesWithAlertsCountQuery(euidApi.euid, resolvedIndex.indexName, spaceId),
+        signal
+      );
+      return parseAlertsCountResponse(raw);
     },
     {
-      enabled: isEnabled && Boolean(query),
+      enabled: isEnabled,
       keepPreviousData: true,
+      staleTime: 5 * 60_000,
+      refetchOnWindowFocus: false,
       retry: 1,
     }
   );
@@ -98,7 +105,7 @@ export const useEntitiesWithAlertsCount = ({
   return {
     count: queryResult?.count ?? 0,
     entityIds: queryResult?.entityIds ?? [],
-    isLoading: isStatusLoading || isIndexLoading || isLoading || isRefetching,
+    isLoading: isStatusLoading || isIndexLoading || isLoading,
     error: filteredError,
   };
 };

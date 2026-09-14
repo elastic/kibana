@@ -23,7 +23,7 @@ export const useNewlyHighCriticalCount = ({
   skip?: boolean;
 }) => {
   const { data } = useKibana().services;
-  const { data: riskEngineStatus, isFetching: isStatusLoading } = useRiskEngineStatus();
+  const { data: riskEngineStatus, isLoading: isStatusLoading } = useRiskEngineStatus();
   const { data: resolvedIndex, isLoading: isIndexLoading } =
     useResolvedLatestEntitiesIndexName(spaceId);
 
@@ -70,6 +70,8 @@ export const useNewlyHighCriticalCount = ({
     {
       enabled: isEnabled && Boolean(query),
       keepPreviousData: true,
+      staleTime: 5 * 60_000,
+      refetchOnWindowFocus: false,
       retry: 1,
     }
   );
@@ -81,7 +83,7 @@ export const useNewlyHighCriticalCount = ({
   return {
     count: queryResult?.count ?? 0,
     entityIds: queryResult?.entityIds ?? [],
-    isLoading: isStatusLoading || isIndexLoading || isLoading || isRefetching,
+    isLoading: isStatusLoading || isIndexLoading || isLoading,
     error: filteredError,
   };
 };

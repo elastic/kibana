@@ -15,7 +15,7 @@ import { getEntitiesAlias, ENTITY_LATEST } from '../constants';
 
 export const useWatchlistedCount = ({ spaceId, skip }: { spaceId: string; skip?: boolean }) => {
   const { data } = useKibana().services;
-  const { data: riskEngineStatus, isFetching: isStatusLoading } = useRiskEngineStatus();
+  const { data: riskEngineStatus, isLoading: isStatusLoading } = useRiskEngineStatus();
 
   const index = getEntitiesAlias(ENTITY_LATEST, spaceId);
   const query = `FROM ${index}
@@ -58,6 +58,8 @@ export const useWatchlistedCount = ({ spaceId, skip }: { spaceId: string; skip?:
     },
     {
       keepPreviousData: true,
+      staleTime: 5 * 60_000,
+      refetchOnWindowFocus: false,
       enabled: isEnabled,
       retry: 1,
     }
@@ -66,7 +68,7 @@ export const useWatchlistedCount = ({ spaceId, skip }: { spaceId: string; skip?:
   return {
     count: result?.count ?? 0,
     entityIds: result?.entityIds ?? [],
-    isLoading: isLoading || isRefetching || isStatusLoading,
+    isLoading: isLoading || isStatusLoading,
     error,
   };
 };

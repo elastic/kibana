@@ -37,7 +37,6 @@ export const buildEntitiesWithAlertsCountQuery = (
   parts.push(`| LOOKUP JOIN ${entitiesIndexName} ON entity.id`);
   parts.push(`| RENAME event_timestamp AS @timestamp`);
 
-  parts.push(`| WHERE entity.risk.calculated_level IN ("High", "Critical")`);
   parts.push(
     `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`
   );
