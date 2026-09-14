@@ -6,6 +6,7 @@
  */
 
 import { get } from 'lodash';
+import type { estypes } from '@elastic/elasticsearch';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   ALERT_WORKFLOW_STATUS,
@@ -183,7 +184,7 @@ const updateSignalsStatusByIds = async (
 const updateSignalsStatusByQuery = async (
   status: SetAlertsStatusRequestBody['status'],
   query: object | undefined,
-  options: { conflicts: 'abort' | 'proceed'; runtimeMappings?: Record<string, object> },
+  options: { conflicts: 'abort' | 'proceed'; runtimeMappings?: estypes.MappingRuntimeFields },
   spaceId: string,
   esClient: ElasticsearchClient,
   user: AuthenticatedUser | null

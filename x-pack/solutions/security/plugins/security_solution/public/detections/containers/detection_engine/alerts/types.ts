@@ -6,6 +6,7 @@
  */
 
 import type { Status } from '../../../../../common/api/detection_engine';
+import type { RuntimeFieldType } from '../../../../../common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
 import type { BulkCloseRuntimeMappings } from '../../../../common/components/toolbar/bulk_actions/runtime_mappings_for_bulk_close';
 
 export interface BasicSignals {
@@ -43,7 +44,7 @@ export interface UpdateAlertStatusByQueryProps {
   query: object;
   status: Status;
   signal?: AbortSignal;
-  runtimeFields?: Record<string, string>;
+  runtimeFields?: Record<string, RuntimeFieldType>;
   /**
    * Optional verbatim runtime field mappings forwarded directly to the
    * `_update_by_query` as `runtime_mappings`. Preserves the caller's Painless

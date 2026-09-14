@@ -7,6 +7,7 @@
 
 import type { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Status } from '../../../../../common/api/detection_engine';
+import type { RuntimeFieldType } from '../../../../../common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
 import {
   updateAlertStatusByIds,
   updateAlertStatusByQuery,
@@ -23,7 +24,7 @@ interface UpdatedAlertsProps {
   query?: object;
   signalIds?: string[];
   signal?: AbortSignal;
-  runtimeFields?: Record<string, string>;
+  runtimeFields?: Record<string, RuntimeFieldType>;
   runtimeMappings?: BulkCloseRuntimeMappings;
 }
 
