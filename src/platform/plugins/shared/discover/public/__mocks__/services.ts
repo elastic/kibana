@@ -319,7 +319,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     discoverFeatureFlags: {
       getCascadeLayoutEnabled: jest.fn(() => false),
       getIsEsqlDefault: jest.fn(() => false),
-      getEmbeddableTransformsEnabled: jest.fn(() => true),
+      getDataTableJsonViewEnabled: jest.fn(() => false),
     },
     embeddableEditor: {
       isByValueEditor: jest.fn(() => false),
@@ -333,6 +333,12 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     alertingVTwo: {
       CreateRuleOptionsFlyout: jest.fn(() => null),
+      RulesPage: jest.fn(() => null),
+      RuleLibraryPage: jest.fn(() => null),
+      EpisodesPage: jest.fn(() => null),
+      ActionPoliciesPage: jest.fn(() => null),
+      ExecutionHistoryPage: jest.fn(() => null),
+      createAlertingV2HostApp: jest.fn(),
     },
     trackUiMetric: jest.fn(),
     logger: { get: jest.fn(() => loggerMock.create()) },

@@ -33,32 +33,22 @@ export const EmptyState = () => {
         </h2>
       }
       body={
-        <>
-          <p>
-            <FormattedMessage
-              id="xpack.idxMgmt.enrichPolicies.list.emptyPromptDescription"
-              defaultMessage="Use an enrich policy as a lookup reference, to add fields to incoming documents during ingest with {ingestPipelinesLink} or to use the ENRICH command in ES|QL"
-              values={{
-                ingestPipelinesLink: (
-                  <EuiLink
-                    href={share.url.locators.get('INGEST_PIPELINES_APP_LOCATOR')?.useUrl({})}
-                  >
-                    <FormattedMessage
-                      id="xpack.idxMgmt.enrichPolicies.list.emptyPromptIngestPipelinesLink"
-                      defaultMessage="ingest pipelines"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
-          <EuiLink href={documentationService.getEnrichIngestDataLink()} target="_blank">
-            <FormattedMessage
-              id="xpack.idxMgmt.enrichPolicies.list.emptyPromptLearnMoreLink"
-              defaultMessage="Learn more about enriching your data"
-            />
-          </EuiLink>
-        </>
+        <p>
+          <FormattedMessage
+            id="xpack.idxMgmt.enrichPolicies.list.emptyPromptDescription"
+            defaultMessage="Use an enrich policy as a lookup reference, to add fields to incoming documents during ingest with {ingestPipelinesLink} or to use the ENRICH command in ES|QL"
+            values={{
+              ingestPipelinesLink: (
+                <EuiLink href={share.url.locators.get('INGEST_PIPELINES_APP_LOCATOR')?.useUrl({})}>
+                  <FormattedMessage
+                    id="xpack.idxMgmt.enrichPolicies.list.emptyPromptIngestPipelinesLink"
+                    defaultMessage="ingest pipelines"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
       }
       actions={
         <EuiButton
@@ -72,6 +62,14 @@ export const EmptyState = () => {
             defaultMessage="Add an enrich policy"
           />
         </EuiButton>
+      }
+      footer={
+        <EuiLink href={documentationService.getEnrichIngestDataLink()} target="_blank">
+          <FormattedMessage
+            id="xpack.idxMgmt.enrichPolicies.list.emptyPromptLearnMoreLink"
+            defaultMessage="Learn more about enriching your data"
+          />
+        </EuiLink>
       }
     />
   );

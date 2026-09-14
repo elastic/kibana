@@ -169,7 +169,6 @@ Feature flag keys are re-exported as constants from [public/constants.ts](./publ
 | Flag key                        | Constant                                  | Description                                                      |
 | ------------------------------- | ----------------------------------------- | ---------------------------------------------------------------- |
 | `discover.cascadeLayoutEnabled` | `CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY` | Enables the cascaded documents layout.                           |
-| `discover.embeddableTransforms` | `EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY`  | Enables saved object transforms for the saved search embeddable. |
 | `discover.isEsqlDefault`        | `IS_ESQL_DEFAULT_FEATURE_FLAG_KEY`        | Makes ES\|QL the default query mode.                             |
 
 Discover also exposes plugin config options, defined in [server/config.ts](./server/config.ts):

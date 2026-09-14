@@ -13,5 +13,6 @@ globalSetupHook('Setup environment for Lens tests', async ({ esArchiver }) => {
     esArchiver.loadIfNeeded(testData.ES_ARCHIVE_PATHS.LOGSTASH),
     esArchiver.loadIfNeeded(testData.ES_ARCHIVE_PATHS.LONG_WINDOW_LOGSTASH),
     esArchiver.loadIfNeeded(testData.ES_ARCHIVE_PATHS.KIBANA_SAMPLE_DATA_FLIGHTS),
+    esArchiver.loadIfNeeded(testData.ES_ARCHIVE_PATHS.KIBANA_SAMPLE_DATA_LOGS_TSDB),
   ]);
 });

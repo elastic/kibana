@@ -28,6 +28,7 @@ export class EisModelsPage {
   readonly flyoutRegionBadges: Locator;
   readonly flyoutAddEndpointButton: Locator;
   readonly flyoutCloseButton: Locator;
+  readonly flyoutRegionUnavailableCallout: Locator;
   readonly allEndpointRows: Locator;
 
   // Add/View Endpoint Modal
@@ -49,17 +50,17 @@ export class EisModelsPage {
   readonly manageRegionsLoading: Locator;
   readonly manageRegionsNoGeos: Locator;
   readonly manageRegionsNoRegions: Locator;
-  readonly manageRegionsGeoTab: Locator;
-  readonly manageRegionsRegionsTab: Locator;
+  readonly manageRegionsLocationTypeGeo: Locator;
+  readonly manageRegionsLocationTypeRegions: Locator;
   readonly manageRegionsSelectAllButton: Locator;
-  readonly manageRegionsExpandAllButton: Locator;
   readonly manageRegionsCustomPolicyToggle: Locator;
-  // Confirm Region Change Modal
-  readonly confirmRegionChangeModal: Locator;
-  readonly confirmRegionChangeModalGeoList: Locator;
-  readonly confirmRegionChangeModalRegionList: Locator;
-  readonly confirmRegionChangeSaveButton: Locator;
-  readonly confirmRegionChangeCancelButton: Locator;
+  readonly confirmRegionSelectionModal: Locator;
+  readonly confirmRegionSelectionGeoList: Locator;
+  readonly confirmRegionSelectionRegionList: Locator;
+  readonly confirmRegionSelectionCallout: Locator;
+  readonly confirmRegionSelectionIgnoreCheckbox: Locator;
+  readonly confirmRegionSelectionSaveButton: Locator;
+  readonly confirmRegionSelectionCancelButton: Locator;
   // Confirm Delete Region Policy Modal
   readonly confirmDeleteRegionPolicyModal: Locator;
   readonly confirmDeleteRegionPolicySaveButton: Locator;
@@ -71,7 +72,10 @@ export class EisModelsPage {
     this.pageHeader = this.page.testSubj.locator('appHeaderTitle');
 
     // Search and Filters
-    this.searchBar = this.page.testSubj.locator('eisModelsSearchBar');
+    // The search box belongs to the Content List toolbar, which derives its
+    // subjects from the toolbar root.
+    this.searchBar = this.page.testSubj.locator('contentListToolbar-searchBox');
+    // Resolves to the popover's filter button, so it is clicked directly.
     this.modelFamilyFilter = this.page.testSubj.locator('modelFamilyFilterMultiselect');
 
     // Model Cards
@@ -89,6 +93,9 @@ export class EisModelsPage {
     this.flyoutRegionBadges = this.page.testSubj.locator('flyoutRegionBadges');
     this.flyoutAddEndpointButton = this.page.testSubj.locator('modelDetailFlyoutAddEndpointButton');
     this.flyoutCloseButton = this.page.testSubj.locator('modelDetailFlyoutCloseButton');
+    this.flyoutRegionUnavailableCallout = this.page.testSubj.locator(
+      'modelDetailFlyoutRegionUnavailableCallout'
+    );
     this.allEndpointRows = this.page.testSubj
       .locator('modelDetailFlyout')
       .locator('[data-test-subj^="endpoint-row-"]');
@@ -112,22 +119,32 @@ export class EisModelsPage {
     this.manageRegionsLoading = this.page.testSubj.locator('manageRegionsLoading');
     this.manageRegionsNoGeos = this.page.testSubj.locator('manageRegionsNoGeos');
     this.manageRegionsNoRegions = this.page.testSubj.locator('manageRegionsNoRegions');
-    this.manageRegionsGeoTab = this.page.testSubj.locator('manageRegionsGeoTab');
-    this.manageRegionsRegionsTab = this.page.testSubj.locator('manageRegionsRegionsTab');
+    this.manageRegionsLocationTypeGeo = this.page.testSubj.locator('manageRegionsLocationTypeGeo');
+    this.manageRegionsLocationTypeRegions = this.page.testSubj.locator(
+      'manageRegionsLocationTypeRegions'
+    );
     this.manageRegionsSelectAllButton = this.page.testSubj.locator('manageRegionsSelectAllButton');
-    this.manageRegionsExpandAllButton = this.page.testSubj.locator('manageRegionsExpandAllButton');
     this.manageRegionsCustomPolicyToggle = this.page.testSubj.locator(
       'manageRegionsCustomPolicyToggle'
     );
-    // Confirm Region Change Modal
-    this.confirmRegionChangeModal = this.page.testSubj.locator('confirmRegionChangeModal');
-    this.confirmRegionChangeModalGeoList = this.page.testSubj.locator('confirmModalGeoList');
-    this.confirmRegionChangeModalRegionList = this.page.testSubj.locator('confirmModalRegionList');
-    this.confirmRegionChangeSaveButton = this.confirmRegionChangeModal.locator(
-      '[data-test-subj="confirmModalConfirmButton"]'
+    this.confirmRegionSelectionModal = this.page.testSubj.locator('confirmRegionSelectionModal');
+    this.confirmRegionSelectionGeoList = this.page.testSubj.locator(
+      'confirmRegionSelectionGeoList'
     );
-    this.confirmRegionChangeCancelButton = this.confirmRegionChangeModal.locator(
-      '[data-test-subj="confirmModalCancelButton"]'
+    this.confirmRegionSelectionRegionList = this.page.testSubj.locator(
+      'confirmRegionSelectionRegionList'
+    );
+    this.confirmRegionSelectionCallout = this.page.testSubj.locator(
+      'confirmRegionSelectionCallout'
+    );
+    this.confirmRegionSelectionIgnoreCheckbox = this.page.testSubj.locator(
+      'confirmRegionSelectionIgnoreCheckbox'
+    );
+    this.confirmRegionSelectionSaveButton = this.page.testSubj.locator(
+      'confirmRegionSelectionSaveButton'
+    );
+    this.confirmRegionSelectionCancelButton = this.page.testSubj.locator(
+      'confirmRegionSelectionCancelButton'
     );
     // Confirm Delete Region Policy Modal
     this.confirmDeleteRegionPolicyModal = this.page.testSubj.locator(
@@ -151,6 +168,22 @@ export class EisModelsPage {
     await this.page.testSubj.waitForSelector('appHeaderTitle', { state: 'visible' });
   }
 
+  // --- Actions ---
+
+  /**
+   * `EuiSearchBar` commits its value on keyup, the native `search` event, or a
+   * native `change` event — never on a bare `input`, which is all
+   * `Locator.fill` dispatches. Pressing Enter fires the `search` event.
+   */
+  public async search(term: string) {
+    await this.searchBar.fill(term);
+    await this.searchBar.press('Enter');
+  }
+
+  public async clearSearch() {
+    await this.search('');
+  }
+
   // --- Parameterized Locators ---
 
   public modelCard(modelName: string): Locator {
@@ -169,20 +202,24 @@ export class EisModelsPage {
     return this.page.testSubj.locator(`deleteEndpointButton-${inferenceId}`);
   }
 
-  public geoZoneRow(geo: string): Locator {
-    return this.page.testSubj.locator(`geoZoneRow-${geo}`);
-  }
-
   public geoZoneCheckbox(geo: string): Locator {
     return this.page.testSubj.locator(`geoZoneCheckbox-${geo}`);
   }
 
-  public regionZonePanel(geo: string): Locator {
-    return this.page.testSubj.locator(`manageRegionsZone-${geo}`);
+  public confirmRegionSelectionIssue(index: number): Locator {
+    return this.page.testSubj.locator(`confirmRegionSelectionIssue-${index}`);
   }
 
-  public regionZoneToggle(geo: string): Locator {
-    return this.page.testSubj.locator(`manageRegionsZoneToggle-${geo}`);
+  public async startGeoPolicySave(geo: string) {
+    await this.manageRegionsButton.click();
+    await this.manageRegionsLoading.waitFor({ state: 'hidden' });
+    await this.manageRegionsCustomPolicyToggle.click();
+    await this.geoZoneCheckbox(geo).click();
+    await this.manageRegionsSaveButton.click();
+  }
+
+  public regionZonePanel(geo: string): Locator {
+    return this.page.testSubj.locator(`manageRegionsZone-${geo}`);
   }
 
   public regionCheckbox(cspRegionKey: string): Locator {

@@ -487,6 +487,27 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
 };
 ```
 
+#### Conversation details flyout
+
+Register `renderConversationDetailsContent` to render your attachment in a conversation details tab:
+
+```tsx
+const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
+  getLabel: (attachment) => attachment.description ?? 'My attachment',
+  renderConversationDetailsContent: ({ attachment }) => (
+    <MyAttachmentDetails attachment={attachment} />
+  ),
+};
+
+agentBuilder.attachments.addAttachmentType('my.attachment', myAttachmentDefinition);
+```
+
+The renderer receives `ConversationDetailsRenderProps<TAttachment>`, containing `attachment`.
+The consuming tab selects which attachment version data to pass to the renderer; the registry
+neither selects versions nor filters attachments. Consumers may render the current version or a historical version. This renderer is optional and independent of
+inline and canvas rendering. Capture any plugin services your component needs at registration
+and mount its providers explicitly, since the flyout can open outside the Agent Builder application.
+
 #### Viewport
 
 The `getActionButtons` params include flags to customize behavior per viewport:
@@ -873,6 +894,217 @@ class MyPlugin {
 and [`RendererTypeDefinition`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-server/renderers/type_definition.ts)
 for the full contracts.
 
+## Registering conversation template UI
+
+Conversation templates give a conversation a type: a `template_id` plus typed `metadata` fields, validated server-side. The conversation template UI registry controls what renders in the conversation metadata flyout for a given template: your plugin registers reusable tabs, and per-template definitions that reference those tabs by id.
+
+The model mirrors the attachment registry: Agent Builder owns the flyout shell, and your plugin owns the tab content. The registry is browser-only — nothing UI-related is persisted.
+
+### Browser-side registration
+
+Register tabs and template UI definitions using the `conversationTemplates` API of the `agentBuilder` plugin's start contract:
+
+```ts
+class MyPlugin {
+  start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
+    // Register a reusable tab
+    agentBuilder.conversationTemplates.registerTab('security.entities', () => entitiesTabDefinition);
+
+    // Assign a display name, icon, and tabs (in render order) to a template
+    agentBuilder.conversationTemplates.registerTemplateUIDefinition('phishing', () => ({
+      name: i18n.translate('xpack.securitySolution.conversationTemplates.phishingName', {
+        defaultMessage: 'Phishing Investigation',
+      }),
+      icon: 'mail',
+      tabs: ['security.entities', 'security.overview'],
+    }));
+  }
+}
+```
+
+Tabs and templates register separately, so the same tab can be reused across templates. Agent Builder registers its built-in `timeline` tab through this same API (from the `agentBuilderPlatform` plugin).
+
+### Complete example
+
+```tsx
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import type { CoreStart } from '@kbn/core/public';
+import type { ConversationTemplateTabDefinition, ConversationTemplateUIContext } from '@kbn/agent-builder-browser';
+
+// Tab content must be self-contained: capture the services you need in a closure at
+// registration and mount your own providers inside `content`. The flyout can render
+// outside any KibanaContextProvider, so ambient context (useKibana() etc.) is not available OOTB.
+const createOverviewTab = (
+  core: CoreStart,
+  { attachmentsService }: ConversationTemplateUIContext
+): ConversationTemplateTabDefinition => ({
+  label: i18n.translate('xpack.securitySolution.conversationTabs.overviewLabel', {
+    defaultMessage: 'Overview',
+  }),
+  // Conversation data arrives at render time; the attachments service is captured at registration.
+  content: ({ conversation }) => (
+    <SecurityProviders core={core}>
+      <OverviewView conversation={conversation} attachmentsService={attachmentsService} />
+    </SecurityProviders>
+  ),
+});
+
+class SecurityPlugin {
+  start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
+    agentBuilder.conversationTemplates.registerTab('security.overview', (context) => createOverviewTab(core, context));
+    agentBuilder.conversationTemplates.registerTemplateUIDefinition('phishing', () => ({
+      name: i18n.translate('xpack.securitySolution.conversationTemplates.phishingName', {
+        defaultMessage: 'Phishing Investigation',
+      }),
+      icon: 'mail',
+      tabs: ['security.overview'],
+    }));
+  }
+}
+```
+
+The `content` component receives `conversation` as a prop and captures `attachmentsService`
+from the registration context. This works in both the
+live chat flyout and the snapshot opened with `agentBuilder.openConversationDetails({ conversationId })`. The snapshot loads the conversation
+when opened; the live flyout follows conversation updates.
+
+Inside your tab, select the attachments and versions to display, then look up their renderer.
+This example uses `getLatestVersion` from `@kbn/agent-builder-common/attachments` to render the
+current version; use `getVersion` when displaying a specific historical version:
+
+```tsx
+const latestVersion = getLatestVersion(versionedAttachment);
+const definition = attachmentsService.getAttachmentUiDefinition(versionedAttachment.type);
+
+return latestVersion && definition?.renderConversationDetailsContent
+  ? definition.renderConversationDetailsContent({
+      attachment: {
+        id: versionedAttachment.id,
+        type: versionedAttachment.type,
+        description: versionedAttachment.description,
+        origin: versionedAttachment.origin,
+        data: latestVersion.data,
+      },
+    })
+  : null;
+```
+
+### Shared registration context
+
+Both `registerTab` and `registerTemplateUIDefinition` accept a callback that Agent Builder
+invokes once with the same `ConversationTemplateUIContext`. This shared interface is the
+extension point for additional capabilities. It exposes navigation methods and the public
+`attachmentsService`; consumers only use the capabilities they need.
+Callbacks that do not need any capabilities can ignore the argument.
+
+```tsx
+agentBuilder.conversationTemplates.registerTab('security.overview', (context) => ({
+  label: overviewTabLabel,
+  content: ({ conversation }) => (
+    <OverviewTab
+      conversation={conversation}
+      attachmentsService={context.attachmentsService}
+      onOpenSidebar={() => context.openSidebarConversation(conversation.id)}
+      onOpenFullscreen={() => context.openFullscreenConversation({
+        conversationId: conversation.id,
+        agentId: conversation.agent_id,
+      })}
+    />
+  ),
+}));
+```
+
+The registry stores the returned definitions directly. Components capture capabilities at
+registration; hosts only supply conversation data at render time. Attachment lookups remain
+live, so types registered after the callback runs are also available. No context provider or component wrapper is required.
+
+### Brief cards
+
+A template UI definition can include an optional `briefCard` React component receiving
+`{ conversation }`, where `conversation` is a list endpoint result without rounds.
+Agent Builder calls the registration callback once with its navigation methods. The returned card can capture those methods when needed:
+
+```tsx
+agentBuilder.conversationTemplates.registerTemplateUIDefinition('phishing', (context) => ({
+  name: phishingTemplateName,
+  tabs: ['security.overview'],
+  briefCard: ({ conversation }) => (
+    <PhishingBriefCard
+      conversation={conversation}
+      onOpenSidebar={() => context.openSidebarConversation(conversation.id)}
+      onOpenFullscreen={() => context.openFullscreenConversation({
+        conversationId: conversation.id,
+        agentId: conversation.agent_id,
+      })}
+    />
+  ),
+}));
+```
+
+Sidebar navigation accepts a conversation ID and delegates to the existing sidebar opening behavior.
+Fullscreen navigation accepts `{ conversationId, agentId }`, closes the sidebar, and opens the
+canonical conversation route in the Agent Builder app without fetching the conversation.
+Callers should apply the same access checks as other programmatic chat entry points.
+Consumers pass an inline registration callback; they do not construct the navigation methods.
+Callbacks that do not need navigation can ignore the context argument.
+Cards may use hooks and, like tabs, must supply any solution-specific providers they need.
+
+The registry stores the returned definition directly. The host retrieves the original component
+and supplies only the conversation; no context prop, wrapper, or provider is needed:
+
+```tsx
+const BriefCard = conversation.template_id
+  ? conversationTemplates.getTemplateUIDefinition(conversation.template_id)?.briefCard
+  : undefined;
+return BriefCard ? (
+  <BriefCard conversation={conversation} />
+) : null;
+```
+
+The registry does not fetch card data or provide a default card when none is registered.
+
+### Conversation details header and footer
+
+Tabs, headers, and footers share `ConversationTemplateDetailsFlyoutRenderProps`.
+`isOpenedFromChat` is `true` in the live chat details flyout and `false` when opened through
+`openConversationDetails`. It is supplied at render time, not through registration context.
+
+Template UI definitions can provide optional `detailsFlyout.header` and
+`detailsFlyout.footer` React components. Both receive `{ conversation, isOpenedFromChat }` and can use
+hooks. Agent Builder owns the EUI header/footer wrappers and tab navigation; return
+only the content for each slot. Without a custom header, the default title remains.
+Without a custom footer, no footer is rendered.
+
+Capture Agent Builder capabilities from the existing registration context, and
+provide any solution-specific React providers inside your components:
+
+```tsx
+agentBuilder.conversationTemplates.registerTemplateUIDefinition('investigation', (context) => ({
+  name: investigationTemplateName,
+  tabs: ['investigation.details'],
+  detailsFlyout: {
+    header: InvestigationHeader,
+    footer: ({ conversation }) => (
+      <InvestigationFooter
+        conversation={conversation}
+        onOpenChat={() => context.openSidebarConversation(conversation.id)}
+      />
+    ),
+  },
+}));
+```
+
+### Rules
+
+- **Display name and icon**: `name` is the template's localized display name, shown in the conversation UI (title badge, conversation lists). `icon` is optional; the UI falls back to a default icon without it, and to the raw template id when no UI definition is registered at all.
+- **Naming**: Tab ids are a global keyspace. Always prefix them with your plugin name (`security.overview`). `timeline` is reserved for Agent Builder's built-in tab.
+- **Duplicates**: Registering a duplicate tab id or template id throws.
+- **Resolution**: Tab ids resolve when the flyout opens, so registration order across plugins does not matter. Ids with no registered tab are skipped. Templates with no registered UI definition fall back to the built-in tabs.
+- **Ordering**: Template tabs render in array order. The built-in tabs always render after them.
+
+Refer to [`ConversationTemplateServiceStartContract`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-browser/templates/contract.ts) for the full contract.
+
 ## Chat integration and pending attachments
 
 Plugins can integrate with the active chat surface (the embeddable sidebar and the full-page routed chat) through the `agentBuilder` start contract.
@@ -1212,17 +1444,18 @@ attach them to a conversation.
    Crawler state (which items have been seen) is stored in a separate
    `.chat-sml-crawler-state` index.
 3. **Search**: When the AI agent calls `sml_search`, the SML service queries
-   the data index, filtering by the user's current space and checking Kibana
-   privileges against each result's `permissions` array.
+   the data index with an authorization filter that binds space and action
+   together — a user must hold every action one of the entry's space groups
+   requires, within that single space.
 4. **Attach**: When the AI agent calls `sml_attach` with `entry_ids`, the service loads each entry, resolves the saved object via your `toAttachment()` hook, and adds the result as a conversation attachment (with `origin` when applicable).
 
 #### Security model
 
 - The crawler runs with **internal credentials** (`asInternalUser`) — it indexes
   content from all spaces.
-- Access control is enforced at **query time**: results are filtered by space
-  and by Kibana feature privileges (the `permissions` your optional
-  `getPermissions` hook returns).
+- Access control is enforced at **query time**: results are filtered by the
+  Kibana actions your optional `getPermissions` hook returns, scoped to the
+  space the entry lives in.
 
 ---
 
@@ -1235,7 +1468,7 @@ Create a file in your plugin (e.g.
 
 ```typescript
 import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
-import { kibanaSavedObjectPermissions } from '@kbn/agent-builder-sml-plugin/server';
+import { kibanaPermissions } from '@kbn/agent-builder-sml-plugin/server';
 
 export const myAssetSmlType: SmlTypeDefinition = {
   // Unique identifier — lowercase, alphanumeric, hyphens, underscores.
@@ -1288,12 +1521,12 @@ export const myAssetSmlType: SmlTypeDefinition = {
     }
   },
 
-  // Optional: compute the permissions that gate access to the entry.
+  // Optional: compute the actions that gate access to the entry.
   // Omit for resources that are intentionally public within the space.
-  // Prefer `kibanaSavedObjectPermissions` for saved-object-backed types
-  // instead of hand-writing the privilege string.
-  getPermissions: () =>
-    kibanaSavedObjectPermissions({ savedObjectType: 'my-saved-object-type' }),
+  // Prefer `kibanaPermissions` instead of hand-writing the action string. The
+  // `kiType` is your SML type id, and it MUST match the KI type your feature
+  // declares in `aiIndex: { read: [...] }`.
+  getPermissions: () => kibanaPermissions({ kiType: 'my-sml-type' }),
 
   // Convert an SML document back into a conversation attachment.
   // Called when the AI agent wants to "attach" a search result.
@@ -1351,16 +1584,26 @@ all spaces. The crawler indexes everything; access control happens at query time
 many panels is still a single entry — its panel titles just become part of
 `content`, as in the example above).
 
-The optional `getPermissions` hook returns the Kibana saved object privileges
-required to access the underlying asset. Common patterns:
+The optional `getPermissions` hook returns the Kibana actions required to access the
+underlying asset. Every SML type uses the same helper, whatever backs it:
 
-- `kibanaSavedObjectPermissions({ savedObjectType: 'lens' })` for Lens visualizations
-- `kibanaSavedObjectPermissions({ savedObjectType: 'dashboard' })` for dashboards
-- `kibanaSavedObjectPermissions({ savedObjectType: 'search' })` for saved searches
+- `kibanaPermissions({ kiType: 'visualization' })` for Lens visualizations
+- `kibanaPermissions({ kiType: 'dashboard' })` for dashboards
+- `kibanaPermissions({ kiType: 'workflow' })` for workflows
 
-Users without the listed privileges won't see the item in `sml_search` results.
-Omit `getPermissions` only when the resource is intentionally public within
-the space.
+Each call produces one action, `ai_index:<kiType>/read`. Two things to get right:
+
+- **`kiType` is your SML type id**, not the saved object type or index name backing it.
+- **Your feature must grant that action**, by declaring `aiIndex: { read: ['<kiType>'] }` on
+  the privilege that should confer read access (see `FeatureKibanaPrivileges`). If the two
+  disagree, the action you stamp is one no privilege ever grants, and every entry of your type
+  silently disappears from every user's results.
+
+Users without the action won't see the item in `sml_search` results. Omit
+`getPermissions` only when the resource is intentionally public within the space.
+
+You return actions only. The indexer groups them per space into the stored
+`{ space, name[], count }` shape — never construct that yourself.
 
 ##### `toAttachment()` — Resolving saved objects
 
@@ -1393,7 +1636,7 @@ The visualization SML type is registered in
 It:
 - Lists all `lens` saved objects across all spaces
 - Extracts title, description, chart type, and ES|QL query as searchable content
-- Sets `permissions: { kibana: { privileges: [{ name: 'saved_object:lens/get' }] }, elasticsearch: { indices: [] } }`
+- Gates access on the `ai_index:visualization/read` action, via `kibanaPermissions({ kiType: VISUALIZATION_SML_TYPE })`
 - Converts results back to Lens API format for the attachment renderer
 - Uses a 1-hour crawl interval
 
@@ -1409,7 +1652,7 @@ The full implementation is ~130 lines and serves as the reference for new types.
 The chat streaming layer lives across two folders:
 
 - `public/application/context/streaming/` — the lifted provider, its context hook, the
-  send/regenerate and resume mutation hooks, the chat-events subscriber, and shared types.
+  send and resume mutation hooks, the chat-events subscriber, and shared types.
 - `public/application/hooks/` — the per-conversation convenience hook
   (`use_conversation_stream.ts`) and the "any stream active?" derived hook
   (`use_is_any_conversation_streaming.ts`). They live here because they compose
@@ -1533,4 +1776,3 @@ What this means in practice:
   flight when the user navigates away, a confirm dialog appears; on confirm,
   `cancelAllStreams()` aborts every controller in the map before the platform
   proceeds.
-

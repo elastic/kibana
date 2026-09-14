@@ -108,7 +108,9 @@ describe('AlertEpisodeRunbookSection', () => {
       { wrapper }
     );
 
-    expect(screen.getByTestId('alertingV2EpisodeRunbookSectionLoading')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingV2EpisodeRunbookSectionLoading')).toHaveClass(
+      'euiSkeletonText'
+    );
 
     act(() => {
       resolveSearch(eventsResponse);

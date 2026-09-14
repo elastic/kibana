@@ -21,11 +21,13 @@ export type MetricsState = MetricsGridSettings & MetricsGridSort;
 export const METRICS_STATE_DEF: ProfileStateDefinition<MetricsState> = {
   key: 'metricsState',
   descriptor: {
-    counterAggregation: { type: ProfileStateType.Persistent },
-    gaugeAggregation: { type: ProfileStateType.Persistent },
-    histogramPercentile: { type: ProfileStateType.Persistent },
-    sortField: { type: ProfileStateType.Persistent },
-    sortDirection: { type: ProfileStateType.Persistent },
+    counterAggregation: { type: ProfileStateType.Url },
+    gaugeAggregation: { type: ProfileStateType.Url },
+    histogramPercentile: { type: ProfileStateType.Url },
+    sortField: { type: ProfileStateType.Url },
+    sortDirection: { type: ProfileStateType.Url },
+    dimensions: { type: ProfileStateType.Url },
+    searchTerm: { type: ProfileStateType.Url },
   },
   defaultState: { ...METRICS_GRID_SETTINGS_DEFAULTS, ...METRICS_GRID_SORT_DEFAULTS },
 };

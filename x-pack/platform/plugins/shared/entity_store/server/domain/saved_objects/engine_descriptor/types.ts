@@ -319,11 +319,82 @@ const version6: SavedObjectsFullModelVersion = {
   },
 };
 
+const logExtractionRuntimeStateSchemaV7 = schema.object({
+  checkpointTimestamp: schema.nullable(schema.string()),
+  paginationId: schema.nullable(schema.string()),
+  lastExecutionTimestamp: schema.nullable(schema.string()),
+  sliceEndTimestamp: schema.nullable(schema.string()),
+});
+
+const engineDescriptorSchemaV7 = schema.object({
+  ...engineDescriptorAttributesSchemaV1,
+  logExtractionState: logExtractionRuntimeStateSchemaV7,
+  error: schema.nullable(
+    schema.object({
+      message: schema.string(),
+      action: schema.string(),
+    })
+  ),
+});
+
+// Adds logExtractionState.sliceEndTimestamp. Nullable with a null default, so no data
+// backfill is needed. Runtime cursor fields are stored but not indexed (mappings are
+// dynamic: false), so there is no mappings addition either.
+const version7: SavedObjectsFullModelVersion = {
+  changes: [],
+  schemas: {
+    create: engineDescriptorSchemaV7,
+    forwardCompatibility: engineDescriptorSchemaV7.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
+/** Mirrors the zod `LogExtractionTypeOverride`: every field optional and nullable, without `timeout` and `fieldHistoryLength`. */
+const logExtractionConfigSchemaV8 = schema.object({
+  additionalIndexPatterns: schema.maybe(
+    schema.nullable(schema.arrayOf(schema.string(), { maxSize: 10000 }))
+  ),
+  excludedIndexPatterns: schema.maybe(
+    schema.nullable(schema.arrayOf(schema.string(), { maxSize: 10000 }))
+  ),
+  lookbackPeriod: schema.maybe(schema.nullable(schema.string())),
+  delay: schema.maybe(schema.nullable(schema.string())),
+  docsLimit: schema.maybe(schema.nullable(schema.number())),
+  maxLogsPerPage: schema.maybe(schema.nullable(schema.number())),
+  frequency: schema.maybe(schema.nullable(schema.string())),
+  maxTimeWindowSize: schema.maybe(schema.nullable(schema.string())),
+  maxLogsPerWindow: schema.maybe(schema.nullable(schema.number())),
+  maxLogsPerWindowCapBehavior: schema.maybe(
+    schema.nullable(schema.oneOf([schema.literal('defer'), schema.literal('drop')] as const))
+  ),
+});
+
+const engineDescriptorSchemaV8 = engineDescriptorSchemaV7.extends({
+  logExtractionConfig: schema.maybe(logExtractionConfigSchemaV8),
+});
+
+// Adds logExtractionConfig. Optional, so older descriptors stay valid with no backfill. Not queried, so no mappings addition.
+const version8: SavedObjectsFullModelVersion = {
+  changes: [],
+  schemas: {
+    create: engineDescriptorSchemaV8,
+    forwardCompatibility: engineDescriptorSchemaV8.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
 export const EngineDescriptorType: SavedObjectsType = {
   name: EngineDescriptorTypeName,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: EngineDescriptorTypeMappings,
-  modelVersions: { 1: version1, 2: version2, 3: version3, 4: version4, 5: version5, 6: version6 },
+  modelVersions: {
+    1: version1,
+    2: version2,
+    3: version3,
+    4: version4,
+    5: version5,
+    6: version6,
+    7: version7,
+    8: version8,
+  },
   hiddenFromHttpApis: true,
 };

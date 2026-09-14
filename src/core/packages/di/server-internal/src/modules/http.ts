@@ -30,7 +30,7 @@ export function loadHttp({ bind, onActivation }: ContainerModuleLoadOptions): vo
       scope.bind(Global).toConstantValue(Response);
 
       try {
-        return await scope.get(route, { autobind: true }).handle();
+        return await (await scope.getAsync(route, { autobind: true })).handle();
       } finally {
         scope.unbindAllAsync();
       }

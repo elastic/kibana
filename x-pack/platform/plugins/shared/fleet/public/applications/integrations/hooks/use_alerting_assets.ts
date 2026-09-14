@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import { triggersActionsRoute, getRuleDetailsRoute } from '@kbn/rule-data-utils';
 
-import type { AssetSOObject, KibanaAssetReference, SimpleSOAssetType } from '../../../../common';
+import type { AssetSOObject, KibanaAssetReference } from '../../../../common';
 import { KibanaSavedObjectType } from '../../../../common/types/models';
 
 import type { PackageInfo } from '../../../types';
@@ -17,16 +17,15 @@ import type { PackageInfo } from '../../../types';
 import { useFleetStatus, useStartServices } from '../../../hooks';
 import { sendGetBulkAssets } from '../../../hooks';
 
-import { ALERTING_ASSET_TYPES } from '../sections/epm/screens/detail/alerting';
+import {
+  ALERTING_ASSET_TYPES,
+  type AlertingAsset,
+  type AlertingSOAssetType,
+} from '../sections/epm/screens/detail/alerting';
 
 type AlertingAssetsByType = Record<string, KibanaAssetReference[]>;
 
-type AssetSavedObjectsByType = Record<
-  string,
-  Record<string, SimpleSOAssetType & { appLink?: string }>
->;
-
-type UserCreatedRule = SimpleSOAssetType & { appLink?: string };
+type AssetSavedObjectsByType = Record<string, Record<string, AlertingAsset>>;
 
 export const useAlertingAssets = (packageInfo: PackageInfo) => {
   const { spaceId } = useFleetStatus();
@@ -81,7 +80,7 @@ export const useAlertingAssets = (packageInfo: PackageInfo) => {
     error: fetchError,
     refetch,
   } = useQuery<
-    { assetSavedObjectsByType: AssetSavedObjectsByType; userCreatedRules: UserCreatedRule[] },
+    { assetSavedObjectsByType: AssetSavedObjectsByType; userCreatedRules: AlertingAsset[] },
     Error
   >({
     queryKey: ['alerting-assets', packageInfo.name, packageInfo.version, alertingAssets],
@@ -90,7 +89,9 @@ export const useAlertingAssets = (packageInfo: PackageInfo) => {
 
       if (alertingAssets.length > 0) {
         const assetIds: AssetSOObject[] = alertingAssets.map(({ id, type }) => ({ id, type }));
-        const { data: bulkData, error } = await sendGetBulkAssets({ assetIds });
+        const { data: bulkData, error } = await sendGetBulkAssets<AlertingSOAssetType>({
+          assetIds,
+        });
 
         if (error) {
           throw error;
@@ -121,11 +122,11 @@ export const useAlertingAssets = (packageInfo: PackageInfo) => {
         alertingAssets.filter((a) => a.type === KibanaSavedObjectType.alert).map((a) => a.id)
       );
 
-      const externalRules: UserCreatedRule[] = (rulesRes.data || [])
+      const externalRules: AlertingAsset[] = (rulesRes.data || [])
         .filter((rule) => !fleetManagedRuleIds.has(rule.id))
         .map((rule) => ({
           id: rule.id,
-          type: KibanaSavedObjectType.alert as SimpleSOAssetType['type'],
+          type: KibanaSavedObjectType.alert,
           attributes: { title: rule.name },
           appLink: `${triggersActionsRoute}${getRuleDetailsRoute(encodeURIComponent(rule.id))}`,
         }));

@@ -36,6 +36,7 @@ interface StatsQueryDetail {
 export const statsStructureValidationEvaluator: KIQueryGenerationEvaluator = {
   name: 'stats_structure_validation',
   kind: 'CODE' as const,
+  direction: 'maximize',
   evaluate: async ({ output }) => {
     const queries = getQueriesFromOutput(output);
     const statsQueries = queries.filter((q) => deriveQueryType(q.esql) === QUERY_TYPE_STATS);

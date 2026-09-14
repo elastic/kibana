@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { COUNTER_RATE_ID, COUNTER_RATE_NAME } from '@kbn/lens-formula-docs';
 import type { CounterRateIndexPatternColumn, FormBasedLayer } from '@kbn/lens-common';
+import { DEFAULT_TIME_SCALE } from '@kbn/lens-common';
 import {
   buildLabelFunction,
   getErrorsForDateReference,
@@ -16,7 +17,6 @@ import {
   hasDateField,
   checkForDataLayerType,
 } from './utils';
-import { DEFAULT_TIME_SCALE } from '../../time_scale_utils';
 import type { OperationDefinition } from '..';
 import { getFormatFromPreviousColumn, getFilter } from '../helpers';
 

@@ -147,11 +147,24 @@ describe('EditTransformProjectScopeFlyout', () => {
     renderFlyout('_id:p2');
 
     await waitFor(() => {
-      expect(screen.getByTestId('projectPickerListItemSwitch-p2')).toBeInTheDocument();
+      expect(screen.getByTestId('projectPickerListItemSwitch-p2')).toHaveAttribute(
+        'aria-checked',
+        'true'
+      );
+    });
+    expect(screen.getByTestId('projectPickerListItemSwitch-p1')).toHaveAttribute(
+      'aria-checked',
+      'false'
+    );
+    expect(screen.queryByText('Using space defaults')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('projectPickerGlobalActionsButton'));
+    await userEvent.click(screen.getByText('Revert to space defaults'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('projectPickerFlyoutApplyButton')).toBeEnabled();
     });
 
-    await userEvent.click(screen.getByTestId('projectPickerHeaderActionsButton'));
-    await userEvent.click(screen.getByText('Revert to space defaults'));
     await userEvent.click(screen.getByTestId('projectPickerFlyoutApplyButton'));
 
     expect(screen.getByTestId('projectRoutingProbe')).toHaveTextContent(PROJECT_ROUTING.ORIGIN);

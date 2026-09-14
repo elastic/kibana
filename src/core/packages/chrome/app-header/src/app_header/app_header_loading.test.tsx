@@ -9,16 +9,10 @@
 
 import React from 'react';
 import '@testing-library/jest-dom';
-import { render, screen } from '@testing-library/react';
-import { APP_MENU_TEST_SUBJECTS } from '@kbn/app-menu';
+import { render } from '@testing-library/react';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { AppHeaderLoading, AppHeaderLoadingView } from './app_header_loading';
-import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
-
-jest.mock('@kbn/ui-chrome-layout-utils', () => ({
-  useCurrentChromeApplicationBreakpoint: () => 'xl',
-}));
 
 const renderLoading = (
   ui: React.ReactElement,
@@ -30,59 +24,26 @@ const renderLoading = (
   };
 };
 
-describe('AppHeaderLoadingView', () => {
-  it('skeletons the title and the default overflow + primary menu', () => {
-    renderLoading(<AppHeaderLoadingView />);
-
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.skeleton)).toBeInTheDocument();
-    expect(screen.getByTestId(APP_MENU_TEST_SUBJECTS.loading)).toBeInTheDocument();
-    expect(
-      screen.getByTestId(APP_MENU_TEST_SUBJECTS.loading).querySelectorAll('.euiSkeletonRectangle')
-    ).toHaveLength(2);
-  });
-
-  it('keeps the back button next to the title skeleton', () => {
-    renderLoading(<AppHeaderLoadingView back="/app/my-app" />);
-
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
-      'href',
-      '/app/my-app'
-    );
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.skeleton)).toBeInTheDocument();
-  });
-
-  it('customizes the menu skeleton', () => {
-    renderLoading(<AppHeaderLoadingView menu={{ buttonCount: 2, hasPrimary: false }} />);
-
-    expect(
-      screen.getByTestId(APP_MENU_TEST_SUBJECTS.loading).querySelectorAll('.euiSkeletonRectangle')
-    ).toHaveLength(2);
-  });
-
-  it('omits the menu when nothing is requested', () => {
-    renderLoading(<AppHeaderLoadingView menu={{ buttonCount: 0, hasPrimary: false }} />);
-
-    expect(screen.queryByTestId(APP_MENU_TEST_SUBJECTS.loading)).not.toBeInTheDocument();
-  });
-});
-
 describe('AppHeaderLoading', () => {
-  it('claims the inline app-header slot and releases it on unmount', () => {
+  it('claims the inline app-header slot without a title and releases it on unmount', () => {
     const chrome = chromeServiceMock.createStartContract();
+    const emissions: Array<{ title?: unknown } | undefined> = [];
+    const subscription = chrome.inlineAppHeader.get$().subscribe((value) => emissions.push(value));
+
     const { unmount } = renderLoading(<AppHeaderLoading />, chrome);
 
-    expect(chrome.next.inlineAppHeader.set).toHaveBeenCalledWith(true);
+    expect(chrome.inlineAppHeader.register).toHaveBeenCalledWith(undefined);
 
     unmount();
 
-    expect(chrome.next.inlineAppHeader.set).toHaveBeenCalledWith(false);
+    expect(emissions).toEqual([undefined, {}, undefined]);
+    subscription.unsubscribe();
   });
 
   it('does not claim the slot when only the view is rendered', () => {
     const chrome = chromeServiceMock.createStartContract();
     renderLoading(<AppHeaderLoadingView />, chrome);
 
-    expect(chrome.next.inlineAppHeader.set).not.toHaveBeenCalled();
+    expect(chrome.inlineAppHeader.register).not.toHaveBeenCalled();
   });
 });

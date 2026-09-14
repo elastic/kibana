@@ -6,12 +6,17 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { useRegionPolicy } from '../../hooks/use_region_policy';
-import { useSaveRegionPolicy } from '../../hooks/use_save_region_policy';
+import {
+  useSaveRegionPolicy,
+  type SaveRegionPolicyVariables,
+} from '../../hooks/use_save_region_policy';
 import { useDeleteRegionPolicy } from '../../hooks/use_delete_region_policy';
 import { useEisModels } from '../../hooks/use_eis_models';
 import { getAvailableRegions, getAvailableGeos, regionKey } from '../../utils/eis_utils';
-import type { PolicyMode } from '../../types';
+import { parseRegionPolicyConflict } from '../../utils/parse_region_policy_conflict';
+import type { PolicyMode, RegionPolicyConflictArtifact } from '../../types';
 import { computeSeedState } from '../../utils/compute_seed_state';
 import { useSetSelection } from '../../hooks/use_set_selection';
 import { useRegionTabState } from './use_region_tab_state';
@@ -42,6 +47,9 @@ export const useManageRegionsState = (onClose: () => void) => {
   const [isCallOutDismissed, setIsCallOutDismissed] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [conflictArtifacts, setConflictArtifacts] = useState<
+    RegionPolicyConflictArtifact[] | undefined
+  >(undefined);
 
   // Seed state once both queries finish loading.
   useEffect(() => {
@@ -92,12 +100,14 @@ export const useManageRegionsState = (onClose: () => void) => {
     if (pendingDelete) {
       setShowDeleteConfirmation(true);
     } else {
+      setConflictArtifacts(undefined);
       setShowConfirmation(true);
     }
   }, [pendingDelete]);
 
   const handleCancelConfirmation = useCallback(() => {
     if (isSaving) return;
+    setConflictArtifacts(undefined);
     setShowConfirmation(false);
   }, [isSaving]);
 
@@ -106,39 +116,50 @@ export const useManageRegionsState = (onClose: () => void) => {
     setShowDeleteConfirmation(false);
   }, [isDeleting]);
 
-  const handleConfirmSave = useCallback(() => {
-    if (activeTab === 'geo') {
-      savePolicy(
-        { allowed_geos: [...geoSelection.selected] },
-        {
-          onSuccess: () => {
-            setShowConfirmation(false);
-            onClose();
-          },
-        }
-      );
-    } else {
+  const handleConfirmSave = useCallback(
+    (force?: boolean) => {
+      const forceFields = force === true ? { force: true } : {};
+      const saveOptions = {
+        onSuccess: () => {
+          setConflictArtifacts(undefined);
+          setShowConfirmation(false);
+          onClose();
+        },
+        onError: (err: IHttpFetchError<ResponseErrorBody>) => {
+          const artifacts = parseRegionPolicyConflict(err.body?.attributes);
+          if (artifacts) {
+            setConflictArtifacts(artifacts);
+          }
+        },
+      };
+
+      if (activeTab === 'geo') {
+        const variables: SaveRegionPolicyVariables = {
+          body: { allowed_geos: [...geoSelection.selected] },
+          ...forceFields,
+        };
+        savePolicy(variables, saveOptions);
+        return;
+      }
+
       const allowedRegions = availableRegions
         .filter((r) => regionTab.regionSelection.selected.has(regionKey(r)))
         .map(({ csp, region }) => ({ csp, region }));
-      savePolicy(
-        { allowed_regions: allowedRegions },
-        {
-          onSuccess: () => {
-            setShowConfirmation(false);
-            onClose();
-          },
-        }
-      );
-    }
-  }, [
-    activeTab,
-    geoSelection.selected,
-    regionTab.regionSelection.selected,
-    availableRegions,
-    savePolicy,
-    onClose,
-  ]);
+      const variables: SaveRegionPolicyVariables = {
+        body: { allowed_regions: allowedRegions },
+        ...forceFields,
+      };
+      savePolicy(variables, saveOptions);
+    },
+    [
+      activeTab,
+      geoSelection.selected,
+      regionTab.regionSelection.selected,
+      availableRegions,
+      savePolicy,
+      onClose,
+    ]
+  );
 
   const handleConfirmDelete = useCallback(() => {
     deletePolicy();
@@ -148,32 +169,36 @@ export const useManageRegionsState = (onClose: () => void) => {
     setIsCallOutDismissed(true);
   }, []);
 
+  const { reset: resetGeoSelection } = geoSelection;
+  const { reset: resetRegionSelection } = regionTab.regionSelection;
+  const handleLocationTypeChange = useCallback(
+    (next: PolicyMode) => {
+      if (next === activeTab) return;
+      setActiveTab(next);
+      resetGeoSelection();
+      resetRegionSelection();
+    },
+    [activeTab, setActiveTab, resetGeoSelection, resetRegionSelection]
+  );
+
   const regionTabReturn = useMemo(
     () => ({
       zoneGroups: regionTab.zoneGroups,
       checkedKeys: regionTab.regionSelection.selected,
-      expandedZones: regionTab.expandedZones,
       totalRegions: regionTab.regionSelection.total,
       totalSelected: regionTab.regionSelection.totalSelected,
       allSelected: regionTab.regionSelection.allSelected,
-      isAllExpanded: regionTab.isAllExpanded,
       onSelectAll: regionTab.regionSelection.selectAll,
       onToggleRegion: regionTab.regionSelection.toggle,
-      onToggleExpand: regionTab.handleToggleExpand,
-      onExpandAll: regionTab.handleExpandAll,
     }),
     [
       regionTab.zoneGroups,
       regionTab.regionSelection.selected,
-      regionTab.expandedZones,
       regionTab.regionSelection.total,
       regionTab.regionSelection.totalSelected,
       regionTab.regionSelection.allSelected,
-      regionTab.isAllExpanded,
       regionTab.regionSelection.selectAll,
       regionTab.regionSelection.toggle,
-      regionTab.handleToggleExpand,
-      regionTab.handleExpandAll,
     ]
   );
 
@@ -214,9 +239,11 @@ export const useManageRegionsState = (onClose: () => void) => {
       isCallOutDismissed,
       showConfirmation,
       showDeleteConfirmation,
+      conflictArtifacts,
       setActiveTab,
       setUseCustomPolicy,
       handleDismissCallOut,
+      handleLocationTypeChange,
       handleRequestSave,
       handleConfirmSave,
       handleCancelConfirmation,

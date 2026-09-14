@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiLoadingSpinner, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiPanel, EuiSkeletonRectangle, EuiSkeletonTitle, EuiSpacer, EuiText } from '@elastic/eui';
 import { useFetchEpisodeEventsQuery } from '../../hooks/use_fetch_episode_events_query';
 import { isSupportedEpisodeSeverity } from '../severity/severity_utils';
 import type { AlertEpisodeDetailsServices } from './types';
@@ -18,6 +18,15 @@ const AlertEpisodeLifecycleHeatmap = React.lazy(() =>
 
 const AlertEpisodeSeverityHeatmap = React.lazy(() =>
   import('./severity_heatmap').then((m) => ({ default: m.AlertEpisodeSeverityHeatmap }))
+);
+
+/** Matches the loaded heatmap layout: an xxs title, a spacer, and a 20px-high chart. */
+const HeatmapSkeleton = () => (
+  <>
+    <EuiSkeletonTitle size="xxs" />
+    <EuiSpacer size="m" />
+    <EuiSkeletonRectangle width="100%" height={20} />
+  </>
 );
 
 export interface AlertEpisodeTimelineHeatmapsSectionProps {
@@ -46,10 +55,13 @@ export const AlertEpisodeTimelineHeatmapsSection = ({
 
   if (isLoading) {
     return (
-      <EuiLoadingSpinner
-        size="m"
+      <EuiPanel
+        hasBorder
+        paddingSize="m"
         data-test-subj="alertingV2EpisodeTimelineHeatmapsSectionLoading"
-      />
+      >
+        <HeatmapSkeleton />
+      </EuiPanel>
     );
   }
 
@@ -67,13 +79,13 @@ export const AlertEpisodeTimelineHeatmapsSection = ({
 
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj="alertingV2EpisodeTimelineHeatmapsSection">
-      <React.Suspense fallback={<EuiLoadingSpinner size="m" />}>
+      <React.Suspense fallback={<HeatmapSkeleton />}>
         <AlertEpisodeLifecycleHeatmap eventRows={eventRows ?? []} />
       </React.Suspense>
       {severityEventRows.length > 0 && (
         <>
           <EuiSpacer size="l" />
-          <React.Suspense fallback={<EuiLoadingSpinner size="m" />}>
+          <React.Suspense fallback={<HeatmapSkeleton />}>
             <AlertEpisodeSeverityHeatmap eventRows={severityEventRows} />
           </React.Suspense>
         </>

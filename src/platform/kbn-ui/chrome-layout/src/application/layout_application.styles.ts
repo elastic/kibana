@@ -8,9 +8,9 @@
  */
 
 import { css } from '@emotion/react';
-import { layoutVar, layoutLevels } from '@kbn/ui-chrome-layout-constants';
 import { euiOverflowScroll, euiShadow, type UseEuiTheme } from '@elastic/eui';
-import { getHighContrastBorder } from '@kbn/ui-chrome-layout-utils';
+import { layoutVar, layoutLevels } from '../constants';
+import { getHighContrastBorder } from '../utils';
 import type { LayoutAppearance } from '../layout.types';
 import type { EmotionFn } from '../types';
 
@@ -43,6 +43,12 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
 
         // use outline so it doesn't affect size/layout and cause a scrollbar
         outline: ${getHighContrastBorder(useEuiTheme)};
+
+        // Keep the decorative frame unchanged by global focus-ring styles.
+        &:focus:not(:focus-visible) {
+          outline: ${getHighContrastBorder(useEuiTheme)};
+          outline-offset: 0;
+        }
 
         ${euiShadow(useEuiTheme, 'xs', { border: 'none' })};
       `}

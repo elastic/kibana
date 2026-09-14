@@ -15,7 +15,10 @@ import {
 import {
   INVESTIGATE_STEP_ID,
   investigationStateSchema,
+  MAX_BLIND_SPOTS,
   MAX_HYPOTHESIS_EVIDENCE,
+  MAX_IMPACT_ENTITIES,
+  MAX_RECOMMENDATIONS,
 } from './investigation_state';
 
 interface ParsedInvestigationWorkflow {
@@ -49,11 +52,10 @@ const normalizeSchema = (value: unknown): unknown => {
 /**
  * The `investigate` step's structured-output schema is hand-authored JSON Schema in
  * `investigation_workflow.yaml` (the YAML asset can't import code), and must be kept in sync
- * by hand with `investigationStateSchema` — that's the schema the investigation agent's
- * progress-report tool streams live AND the schema the UI uses to parse the persisted final
- * result, so the structured output must match exactly for the UI to render it. These tests
- * catch drift structurally (via z.toJSONSchema equality) and behaviorally (the same example
- * payloads validate identically against both).
+ * by hand with `investigationStateSchema`, which the investigation agent's progress-report tool
+ * streams live and consumers use to parse persisted results. These tests catch workflow drift
+ * structurally (via z.toJSONSchema equality) and behaviorally (the same payloads validate
+ * identically against both schemas).
  *
  * This lives here — importing the workflow definition from `@kbn/workflows/managed` — rather
  * than as a test in `@kbn/workflows` importing this schema, because `@kbn/workflows` is
@@ -146,8 +148,23 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
       },
     ],
     conclusion: 'Connection pool exhaustion caused by the 14:02 deploy.',
-    gaps_found: ['No profiling data available'],
-    significant_event_updates: [severityUpdate],
+    severity: '80-critical',
+    recommendations: [
+      {
+        title: 'Revert the pool-size config change',
+        confidence: 0.95,
+        description: 'Raise it back above the previous value.',
+        code: 'connection_pool:\n  max_size: 100',
+      },
+    ],
+    blind_spots: [
+      {
+        title: 'No profiling data available',
+        confidence: 0.7,
+        description: 'Would have confirmed whether a leak compounded the exhaustion.',
+      },
+    ],
+    trigger_feedback: [severityUpdate],
   };
 
   it('accepts a valid payload under both the YAML JSON Schema and the zod schema', () => {
@@ -155,10 +172,10 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     expect(investigationStateSchema.safeParse(validPayload).success).toBe(true);
   });
 
-  it('accepts all three event_update field types (severity, status, summary) under both schemas', () => {
+  it('accepts all three trigger feedback field types (severity, status, summary) under both schemas', () => {
     const allFields = {
       ...validPayload,
-      significant_event_updates: [severityUpdate, statusUpdate, summaryUpdate],
+      trigger_feedback: [severityUpdate, statusUpdate, summaryUpdate],
     };
 
     expect(validate(allFields)).toBe(true);
@@ -389,10 +406,122 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     expect(investigationStateSchema.safeParse(oversized).success).toBe(false);
   });
 
-  it('rejects an event_update with an unknown field under both schemas', () => {
+  it('rejects an investigation severity outside the canonical tiers under both schemas', () => {
+    const invalidSeverity = { ...validPayload, severity: 'critical' };
+
+    expect(validate(invalidSeverity)).toBe(false);
+    expect(investigationStateSchema.safeParse(invalidSeverity).success).toBe(false);
+  });
+
+  it('accepts a minimal scored recommendation under both schemas', () => {
+    const minimalRecommendation = {
+      ...validPayload,
+      recommendations: [{ title: 'Roll back the deployment', confidence: 0.9 }],
+    };
+
+    expect(validate(minimalRecommendation)).toBe(true);
+    expect(investigationStateSchema.safeParse(minimalRecommendation).success).toBe(true);
+  });
+
+  it('rejects a recommendation or blind spot without confidence under both schemas', () => {
+    const recommendationWithoutConfidence = {
+      ...validPayload,
+      recommendations: [{ title: 'Roll back the deployment' }],
+    };
+    const blindSpotWithoutConfidence = {
+      ...validPayload,
+      blind_spots: [{ title: 'No traces', description: 'The causal path was unavailable.' }],
+    };
+
+    expect(validate(recommendationWithoutConfidence)).toBe(false);
+    expect(investigationStateSchema.safeParse(recommendationWithoutConfidence).success).toBe(false);
+    expect(validate(blindSpotWithoutConfidence)).toBe(false);
+    expect(investigationStateSchema.safeParse(blindSpotWithoutConfidence).success).toBe(false);
+  });
+
+  it('rejects item confidence outside the 0–1 range under both schemas', () => {
+    const invalidConfidence = {
+      ...validPayload,
+      recommendations: [{ title: 'Roll back the deployment', confidence: 1.1 }],
+    };
+
+    expect(validate(invalidConfidence)).toBe(false);
+    expect(investigationStateSchema.safeParse(invalidConfidence).success).toBe(false);
+  });
+
+  it('sorts items by confidence descending and preserves source order for ties', () => {
+    const parsed = investigationStateSchema.parse({
+      ...validPayload,
+      recommendations: [
+        { title: 'First tied step', confidence: 0.7 },
+        { title: 'Highest step', confidence: 0.9 },
+        { title: 'Second tied step', confidence: 0.7 },
+      ],
+      blind_spots: [
+        { title: 'Lower gap', confidence: 0.4, description: 'Lower relevance.' },
+        { title: 'Higher gap', confidence: 0.8, description: 'Higher relevance.' },
+      ],
+    });
+
+    expect(parsed.recommendations?.map(({ title }) => title)).toEqual([
+      'Highest step',
+      'First tied step',
+      'Second tied step',
+    ]);
+    expect(parsed.blind_spots?.map(({ title }) => title)).toEqual(['Higher gap', 'Lower gap']);
+  });
+
+  it('rejects a recommendations array exceeding MAX_RECOMMENDATIONS under both schemas', () => {
+    const tooManyRecommendations = {
+      ...validPayload,
+      recommendations: Array.from({ length: MAX_RECOMMENDATIONS + 1 }, (_, index) => ({
+        title: `Step ${index}`,
+        confidence: 0.8,
+      })),
+    };
+
+    expect(validate(tooManyRecommendations)).toBe(false);
+    expect(investigationStateSchema.safeParse(tooManyRecommendations).success).toBe(false);
+  });
+
+  it('rejects a recommendation missing its title under both schemas', () => {
+    const missingTitle = {
+      ...validPayload,
+      recommendations: [{ confidence: 0.8, description: 'Do the thing' }],
+    };
+
+    expect(validate(missingTitle)).toBe(false);
+    expect(investigationStateSchema.safeParse(missingTitle).success).toBe(false);
+  });
+
+  it('rejects a blind spot missing its description under both schemas', () => {
+    const missingDescription = {
+      ...validPayload,
+      blind_spots: [{ title: 'No traces for the cart service', confidence: 0.8 }],
+    };
+
+    expect(validate(missingDescription)).toBe(false);
+    expect(investigationStateSchema.safeParse(missingDescription).success).toBe(false);
+  });
+
+  it('rejects a blind_spots array exceeding MAX_BLIND_SPOTS under both schemas', () => {
+    const tooManyBlindSpots = {
+      ...validPayload,
+      blind_spots: Array.from({ length: MAX_BLIND_SPOTS + 1 }, (_, index) => ({
+        title: `Gap ${index}`,
+        confidence: 0.8,
+        description: `Missing data ${index}`,
+      })),
+    };
+
+    expect(validate(tooManyBlindSpots)).toBe(false);
+    expect(investigationStateSchema.safeParse(tooManyBlindSpots).success).toBe(false);
+  });
+
+  it('rejects trigger feedback with an unknown field under both schemas', () => {
     const unknownField = {
       ...validPayload,
-      significant_event_updates: [
+      trigger_feedback: [
         {
           field: 'confidence',
           from: '0.5',
@@ -407,61 +536,137 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     expect(investigationStateSchema.safeParse(unknownField).success).toBe(false);
   });
 
-  it('rejects a severity event_update with an invalid enum value under both schemas', () => {
+  it('rejects severity trigger feedback with an invalid enum value under both schemas', () => {
     const invalidSeverity = {
       ...validPayload,
-      significant_event_updates: [{ ...severityUpdate, to: '90-mega' }],
+      trigger_feedback: [{ ...severityUpdate, to: '90-mega' }],
     };
 
     expect(validate(invalidSeverity)).toBe(false);
     expect(investigationStateSchema.safeParse(invalidSeverity).success).toBe(false);
   });
 
-  it('rejects a status event_update with an invalid enum value under both schemas', () => {
+  it('rejects status trigger feedback with an invalid enum value under both schemas', () => {
     const invalidStatus = {
       ...validPayload,
-      significant_event_updates: [{ ...statusUpdate, to: 'unknown' }],
+      trigger_feedback: [{ ...statusUpdate, to: 'unknown' }],
     };
 
     expect(validate(invalidStatus)).toBe(false);
     expect(investigationStateSchema.safeParse(invalidStatus).success).toBe(false);
   });
 
-  it('rejects an event_update missing a required field (reason) under both schemas', () => {
+  it('rejects trigger feedback missing a required field (reason) under both schemas', () => {
     const { reason, ...withoutReason } = severityUpdate;
-    const missingReason = { ...validPayload, significant_event_updates: [withoutReason] };
+    const missingReason = { ...validPayload, trigger_feedback: [withoutReason] };
 
     expect(validate(missingReason)).toBe(false);
     expect(investigationStateSchema.safeParse(missingReason).success).toBe(false);
   });
 
-  it('rejects an event_update with empty evidence under both schemas', () => {
+  it('rejects trigger feedback with empty evidence under both schemas', () => {
     const emptyEvidence = {
       ...validPayload,
-      significant_event_updates: [{ ...severityUpdate, evidence: [] }],
+      trigger_feedback: [{ ...severityUpdate, evidence: [] }],
     };
 
     expect(validate(emptyEvidence)).toBe(false);
     expect(investigationStateSchema.safeParse(emptyEvidence).success).toBe(false);
   });
 
-  it('rejects a summary event_update with an empty `to` under both schemas', () => {
+  it('rejects summary trigger feedback with an empty `to` under both schemas', () => {
     const emptySummary = {
       ...validPayload,
-      significant_event_updates: [{ ...summaryUpdate, to: '' }],
+      trigger_feedback: [{ ...summaryUpdate, to: '' }],
     };
 
     expect(validate(emptySummary)).toBe(false);
     expect(investigationStateSchema.safeParse(emptySummary).success).toBe(false);
   });
 
-  it('rejects a significant_event_updates array exceeding MAX_SIGNIFICANT_EVENT_UPDATES under both schemas', () => {
+  it('rejects a trigger_feedback array exceeding MAX_TRIGGER_FEEDBACK under both schemas', () => {
     const tooMany = {
       ...validPayload,
-      significant_event_updates: [severityUpdate, statusUpdate, summaryUpdate, severityUpdate],
+      trigger_feedback: [severityUpdate, statusUpdate, summaryUpdate, severityUpdate],
     };
 
     expect(validate(tooMany)).toBe(false);
     expect(investigationStateSchema.safeParse(tooMany).success).toBe(false);
+  });
+
+  it('accepts a payload with an impact entity carrying a name and evidence under both schemas', () => {
+    const withImpact = {
+      ...validPayload,
+      impact: {
+        entities: [
+          {
+            name: 'checkout-service',
+            type: 'service',
+            evidence: {
+              description: 'checkout-service error rate during incident window',
+              esql_query:
+                'FROM traces-* | WHERE service.name == "checkout-service" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS errors = COUNT(*) WHERE event.outcome == "failure"',
+              time_range: { from: '2026-07-28T14:00:00Z', to: '2026-07-28T15:00:00Z' },
+            },
+          },
+        ],
+      },
+    };
+
+    expect(validate(withImpact)).toBe(true);
+    expect(investigationStateSchema.safeParse(withImpact).success).toBe(true);
+  });
+
+  it('accepts an impact entity with only a name (no optional fields) under both schemas', () => {
+    const minimalImpact = {
+      ...validPayload,
+      impact: { entities: [{ name: 'payment-service' }] },
+    };
+
+    expect(validate(minimalImpact)).toBe(true);
+    expect(investigationStateSchema.safeParse(minimalImpact).success).toBe(true);
+  });
+
+  it('accepts an impact entity with feature_id and stream_name under both schemas', () => {
+    const withKi = {
+      ...validPayload,
+      impact: {
+        entities: [
+          {
+            name: 'cart-service',
+            type: 'service',
+            feature_id: 'ki-abc123',
+            stream_name: 'logs-app',
+          },
+        ],
+      },
+    };
+
+    expect(validate(withKi)).toBe(true);
+    expect(investigationStateSchema.safeParse(withKi).success).toBe(true);
+  });
+
+  it('rejects an impact entity missing its required name under both schemas', () => {
+    const missingName = {
+      ...validPayload,
+      impact: { entities: [{ type: 'service' }] },
+    };
+
+    expect(validate(missingName)).toBe(false);
+    expect(investigationStateSchema.safeParse(missingName).success).toBe(false);
+  });
+
+  it('rejects an impact entities array exceeding MAX_IMPACT_ENTITIES under both schemas', () => {
+    const tooManyEntities = {
+      ...validPayload,
+      impact: {
+        entities: Array.from({ length: MAX_IMPACT_ENTITIES + 1 }, (_, i) => ({
+          name: `service-${i}`,
+        })),
+      },
+    };
+
+    expect(validate(tooManyEntities)).toBe(false);
+    expect(investigationStateSchema.safeParse(tooManyEntities).success).toBe(false);
   });
 });
