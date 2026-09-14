@@ -147,19 +147,21 @@ describe('Lens App', () => {
   });
 
   describe('ChromeAppHeaderRegistration', () => {
+    const chrome = () => services.chrome as ReturnType<typeof coreMock.createStart>['chrome'];
+
     function enableChromeNextProjectHeader() {
       (services.chrome.getChromeStyle as jest.Mock).mockReturnValue('project');
       (services.chrome.getChromeStyle$ as jest.Mock).mockReturnValue(
         new BehaviorSubject('project')
       );
-      (services.chrome.appHeader.set as jest.Mock).mockReturnValue(jest.fn());
+      chrome().appHeader.set.mockReturnValue(jest.fn());
     }
 
     it('registers title and leaves menu to setHeaderActionMenu / search bar separate', async () => {
       enableChromeNextProjectHeader();
       await renderApp();
 
-      expect(services.chrome.appHeader.set).toHaveBeenCalledWith(
+      expect(chrome().appHeader.set).toHaveBeenCalledWith(
         expect.objectContaining({
           title: undefined,
           back: undefined,
@@ -188,7 +190,7 @@ describe('Lens App', () => {
         },
       });
 
-      expect(services.chrome.appHeader.set).toHaveBeenCalledWith(
+      expect(chrome().appHeader.set).toHaveBeenCalledWith(
         expect.objectContaining({
           title: 'My Lens visualization',
         })
@@ -203,7 +205,7 @@ describe('Lens App', () => {
         },
       });
 
-      expect(services.chrome.appHeader.set).toHaveBeenCalledWith(
+      expect(chrome().appHeader.set).toHaveBeenCalledWith(
         expect.objectContaining({
           badges: expect.arrayContaining([
             expect.objectContaining({
@@ -225,7 +227,7 @@ describe('Lens App', () => {
 
       await renderApp();
 
-      expect(services.chrome.appHeader.set).toHaveBeenCalledWith(
+      expect(chrome().appHeader.set).toHaveBeenCalledWith(
         expect.objectContaining({
           back: expect.objectContaining({
             href: expect.stringContaining('dashboards'),
@@ -235,9 +237,7 @@ describe('Lens App', () => {
         })
       );
 
-      const registeredConfig = (services.chrome.appHeader.set as jest.Mock).mock.calls.at(
-        -1
-      )?.[0];
+      const registeredConfig = (chrome().appHeader.set as jest.Mock).mock.calls.at(-1)?.[0];
       const event = { preventDefault: jest.fn() };
       registeredConfig.back.onClick(event);
       expect(event.preventDefault).toHaveBeenCalled();
