@@ -53,6 +53,7 @@ export enum DiscoverSidebarReducerStatus {
 
 export interface DiscoverSidebarReducerState {
   dataView: DataView | null | undefined;
+  dataSource: DataSource | undefined;
   allFields: DataViewField[] | null;
   fieldCounts: Record<string, number> | null;
   status: DiscoverSidebarReducerStatus;
@@ -61,6 +62,7 @@ export interface DiscoverSidebarReducerState {
 export function getInitialState(dataView?: DataView | null): DiscoverSidebarReducerState {
   return {
     dataView,
+    dataSource: undefined,
     allFields: null,
     fieldCounts: null,
     status: DiscoverSidebarReducerStatus.INITIAL,
@@ -75,25 +77,37 @@ export function discoverSidebarReducer(
     case DiscoverSidebarReducerActionType.RESET:
       return getInitialState(action.payload.dataView);
     case DiscoverSidebarReducerActionType.DATA_VIEW_SWITCHED:
-      return state.dataView === action.payload.dataView
-        ? state // already updated in `DOCUMENTS_LOADED`
-        : {
-            ...state,
-            dataView: action.payload.dataView,
-            fieldCounts: null,
-            allFields: null,
-            status:
-              state.status === DiscoverSidebarReducerStatus.COMPLETED
-                ? DiscoverSidebarReducerStatus.INITIAL
-                : state.status,
-          };
-    case DiscoverSidebarReducerActionType.DOCUMENTS_LOADING:
+      if (state.dataView === action.payload.dataView) {
+        return state; // already updated in `DOCUMENTS_LOADED`
+      }
+      if (state.dataSource?.kind === 'esql') {
+        // TODO: remove once registerEsqlSourceInDataViewsCache (cache_adapter.ts) is deleted.
+        // The DataView change here is driven by the synthetic ES|QL DataView being registered
+        // after the fetch — don't clear allFields, the field list comes from esqlSource.resultColumns.
+        return { ...state, dataView: action.payload.dataView };
+      }
       return {
         ...state,
+        dataView: action.payload.dataView,
         fieldCounts: null,
-        allFields: action.payload.isEsqlMode ? null : state.allFields,
+        allFields: null,
+        status:
+          state.status === DiscoverSidebarReducerStatus.COMPLETED
+            ? DiscoverSidebarReducerStatus.INITIAL
+            : state.status,
+      };
+    case DiscoverSidebarReducerActionType.DOCUMENTS_LOADING: {
+      const wasEsql = state.dataSource?.kind === 'esql';
+      return {
+        ...state,
+        dataSource: undefined,
+        fieldCounts: null,
+        // Clear when entering ES|QL mode OR when leaving ES|QL mode (transitioning to DataView).
+        // Keep existing fields otherwise (DataView→DataView) to avoid a loading flash.
+        allFields: action.payload.isEsqlMode || wasEsql ? null : state.allFields,
         status: DiscoverSidebarReducerStatus.PROCESSING,
       };
+    }
     case DiscoverSidebarReducerActionType.DOCUMENTS_LOADED: {
       const { dataSource, fieldCounts } = action.payload;
       const mappedAndUnmappedFields =
@@ -108,6 +122,7 @@ export function discoverSidebarReducer(
       return {
         ...state,
         dataView: nextDataView,
+        dataSource,
         fieldCounts,
         allFields: mappedAndUnmappedFields,
         status:

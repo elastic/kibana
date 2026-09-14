@@ -134,8 +134,9 @@ export const buildEsqlFetchSubscribe = ({
     let nextDefaultColumns = prevEsqlData.defaultColumns;
 
     const responseColumns =
-      next.dataSource?.getColumns().map((c) => c.name) ??
-      (next.result?.length ? Object.keys(next.result[0].raw) : undefined);
+      (next.dataSource?.kind === 'esql'
+        ? next.dataSource.getColumns().map((c) => c.name)
+        : undefined) ?? (next.result?.length ? Object.keys(next.result[0].raw) : undefined);
 
     if (responseColumns !== undefined) {
       nextAllColumns = responseColumns;
@@ -213,6 +214,11 @@ export const buildEsqlFetchSubscribe = ({
       }
     }
 
+    dataSubjects.documents$.next({
+      ...next,
+      fetchStatus: FetchStatus.COMPLETE,
+    });
+
     if (next.dataSource?.kind === 'esql') {
       dataSourceService.registerEsqlSource(next.dataSource);
       // TODO: remove once DSL code no longer looks up DataViews for ES|QL sources
@@ -224,11 +230,6 @@ export const buildEsqlFetchSubscribe = ({
         );
       }
     }
-
-    dataSubjects.documents$.next({
-      ...next,
-      fetchStatus: FetchStatus.COMPLETE,
-    });
   };
 
   return { esqlFetchSubscribe, cleanupEsql };
