@@ -13,6 +13,7 @@ import { CoreStart, useService } from '@kbn/core-di-browser';
 import { useContentListPhase } from '@kbn/content-list-provider';
 import { i18n } from '@kbn/i18n';
 import { canAccessTriggersActionsRules, triggersActionsRoute } from '@kbn/rule-data-utils';
+import { useHostTabs } from '../../application/tabs_context';
 import { experimentalBadge } from '../../components/experimental_badge';
 import { paths } from '../../constants';
 
@@ -120,8 +121,9 @@ export const RulesListHeader = ({
 
   const application = useService(CoreStart('application'));
   const basePath = useService(CoreStart('http')).basePath;
+  const hostTabs = useHostTabs();
 
-  const tabs = useMemo<AppHeaderTab[]>(() => {
+  const defaultTabs = useMemo<AppHeaderTab[]>(() => {
     const headerTabs: AppHeaderTab[] = [
       {
         id: 'v2Rules',
@@ -155,6 +157,8 @@ export const RulesListHeader = ({
     // A one-item tablist is not a tablist — omit tabs unless both surfaces are shown.
     return headerTabs.length > 1 ? headerTabs : [];
   }, [basePath, application.capabilities]);
+
+  const tabs = hostTabs ?? defaultTabs;
 
   const headerMenu = useMemo(
     () =>
