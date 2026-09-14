@@ -45,16 +45,16 @@ describe('EventsService', () => {
     });
   });
 
-  describe('getRunEnded$', () => {
+  describe('getStreamEnded$', () => {
     it('only fires for the matching conversation id', () => {
       const service = new EventsService();
       let endedA = 0;
       let endedB = 0;
 
-      service.getRunEnded$('A').subscribe(() => endedA++);
-      service.getRunEnded$('B').subscribe(() => endedB++);
+      service.getStreamEnded$('A').subscribe(() => endedA++);
+      service.getStreamEnded$('B').subscribe(() => endedB++);
 
-      service.notifyRunEnded('A');
+      service.notifyStreamEnded('A');
 
       expect(endedA).toBe(1);
       expect(endedB).toBe(0);
@@ -62,10 +62,10 @@ describe('EventsService', () => {
 
     it('does not replay a run that ended before subscribing', () => {
       const service = new EventsService();
-      service.notifyRunEnded('A');
+      service.notifyStreamEnded('A');
 
       let ended = 0;
-      service.getRunEnded$('A').subscribe(() => ended++);
+      service.getStreamEnded$('A').subscribe(() => ended++);
 
       expect(ended).toBe(0);
     });

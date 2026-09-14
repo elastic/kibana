@@ -11,7 +11,7 @@ import type { ActiveExecutionDraft } from './active_execution_reducer';
 import { activeExecutionReducer } from './active_execution_reducer';
 import type { EventsService } from './events_service';
 
-export type ChatEventSource = Pick<EventsService, 'getChatEvents$' | 'getRunEnded$'>;
+export type ChatEventSource = Pick<EventsService, 'getChatEvents$' | 'getStreamEnded$'>;
 
 interface ConversationStream {
   conversationId: string;
@@ -36,11 +36,13 @@ export class ConversationStreamService {
     const stream: ConversationStream = { conversationId, state$, sub };
     this.streams.set(conversationId, stream);
 
-    sub.add(this.source.getRunEnded$(conversationId).subscribe(() => this.onRunEnded(stream)));
+    sub.add(
+      this.source.getStreamEnded$(conversationId).subscribe(() => this.onStreamEnded(stream))
+    );
     return stream;
   }
 
-  private onRunEnded({ conversationId, state$ }: ConversationStream) {
+  private onStreamEnded({ conversationId, state$ }: ConversationStream) {
     if (state$.getValue()) {
       state$.next(null);
     }

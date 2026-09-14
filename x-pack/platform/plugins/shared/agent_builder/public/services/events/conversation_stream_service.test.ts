@@ -26,17 +26,17 @@ const makeFakeSource = () => {
     if (!subjects.has(id)) subjects.set(id, new Subject());
     return subjects.get(id)!;
   };
-  const getRunEndings = (id: string): Subject<void> => {
+  const getStreamEndings = (id: string): Subject<void> => {
     if (!runEndings.has(id)) runEndings.set(id, new Subject());
     return runEndings.get(id)!;
   };
   const source: ChatEventSource = {
     // BrowserChatEvent = ChatEvent, structurally identical
     getChatEvents$: (conversationId) => getSubject(conversationId).asObservable() as any,
-    getRunEnded$: (conversationId) => getRunEndings(conversationId).asObservable(),
+    getStreamEnded$: (conversationId) => getStreamEndings(conversationId).asObservable(),
   };
   // What `propagateEvents`' `finalize` does in production: the run terminated, however it ended.
-  const endRun = (id: string) => getRunEndings(id).next();
+  const endRun = (id: string) => getStreamEndings(id).next();
   return { source, getSubject, endRun };
 };
 
@@ -151,7 +151,7 @@ describe('ConversationStreamService', () => {
     sub.unsubscribe();
     expect(getSubject('Z').observed).toBe(true); // source still subscribed
 
-    // The run ends: onRunEnded drops the draft, sets ended=true, then calls maybeTeardown:
+    // The run ends: onStreamEnded drops the draft, sets ended=true, then calls maybeTeardown:
     //   observed=false, ended=true -> teardown
     endRun('Z');
     expect(getSubject('Z').observed).toBe(false); // source subscription torn down

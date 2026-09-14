@@ -28,7 +28,7 @@ export function propagateEvents({
       eventsService.propagateChatEvent(conversationId, event);
     }),
     finalize(() => {
-      eventsService.notifyRunEnded(conversationId);
+      eventsService.notifyStreamEnded(conversationId);
     })
   );
 }

@@ -30,7 +30,7 @@ export class EventsService {
     share()
   );
 
-  private readonly runEnded$ = new Subject<string>();
+  private readonly streamEnded$ = new Subject<string>();
 
   private readonly activeConversationState$ = new BehaviorSubject<ActiveConversation | null>(null);
   public readonly activeConversation$ = this.activeConversationState$.asObservable();
@@ -57,13 +57,13 @@ export class EventsService {
    * Signals that the client to server stream for this conversation terminated - completed, errored
    * or aborted.
    */
-  notifyRunEnded(conversationId: string) {
-    this.runEnded$.next(conversationId);
+  notifyStreamEnded(conversationId: string) {
+    this.streamEnded$.next(conversationId);
   }
 
-  /** Fires once when the run for this conversation terminates, however it terminates. */
-  getRunEnded$(conversationId: string): Observable<void> {
-    return this.runEnded$.pipe(
+  /** Fires once when the stream for this conversation terminates, however it terminates. */
+  getStreamEnded$(conversationId: string): Observable<void> {
+    return this.streamEnded$.pipe(
       filter((id) => id === conversationId),
       map(() => undefined)
     );

@@ -24,7 +24,7 @@ const setup = () => {
     .spyOn(eventsService, 'propagateChatEvent')
     .mockImplementation((conversationId, event) => propagated.push([conversationId, event]));
   jest
-    .spyOn(eventsService, 'notifyRunEnded')
+    .spyOn(eventsService, 'notifyStreamEnded')
     .mockImplementation((conversationId) => runsEnded.push(conversationId));
   return {
     operator: propagateEvents({ eventsService, conversationId: 'A' }),
