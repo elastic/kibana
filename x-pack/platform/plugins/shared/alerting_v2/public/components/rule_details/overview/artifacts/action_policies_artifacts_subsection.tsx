@@ -17,9 +17,8 @@ import {
   EuiStat,
   EuiText,
 } from '@elastic/eui';
-import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
-import { paths } from '../../../../constants';
+import { useAlertingLocators } from '../../../../application/locator_context';
 import { useRule } from '../../rule_context';
 import {
   useLinkedActionPolicies,
@@ -69,11 +68,11 @@ const ActionPoliciesSubsectionHeader = ({ openHref }: { openHref: string }) => (
 
 export const ActionPoliciesArtifactsSubsection: React.FC = () => {
   const rule = useRule();
-  const http = useService(CoreStart('http'));
+  const { actionPolicyLocators } = useAlertingLocators();
   const { totalCount, catchAllCount, matchingCriteriaCount, isCountTruncated, isLoading, isError } =
-    useLinkedActionPolicies(rule.id);
+    useLinkedActionPolicies(rule.metadata.tags ?? []);
 
-  const openNotificationPoliciesHref = http.basePath.prepend(paths.actionPolicyList);
+  const openNotificationPoliciesHref = actionPolicyLocators.useUrl({ page: 'list' });
 
   const statTitle = isCountTruncated ? `${totalCount}+` : totalCount;
 
