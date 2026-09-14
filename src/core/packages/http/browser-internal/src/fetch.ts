@@ -25,7 +25,7 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { KIBANA_BUILD_NR_HEADER } from '@kbn/core-http-common';
-import { HttpFetchError } from './http_fetch_error';
+import { createHttpFetchErrorFromCause, HttpFetchError } from './http_fetch_error';
 import { HttpInterceptController } from './http_intercept_controller';
 import { interceptFetch, interceptRequest, interceptResponse } from './intercept';
 import { HttpInterceptHaltError } from './http_intercept_halt_error';
@@ -173,7 +173,7 @@ export class Fetch {
     try {
       response = await window.fetch(request);
     } catch (err) {
-      throw new HttpFetchError(err.message, err.name ?? 'Error', request);
+      throw createHttpFetchErrorFromCause(err, request, undefined, undefined, true);
     }
 
     const contentType = response.headers.get('Content-Type') || '';
@@ -197,7 +197,7 @@ export class Fetch {
         }
       }
     } catch (err) {
-      throw new HttpFetchError(err.message, err.name ?? 'Error', request, response, body);
+      throw createHttpFetchErrorFromCause(err, request, response, body);
     }
 
     if (!response.ok) {

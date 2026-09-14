@@ -402,7 +402,7 @@ describe('Fetch', () => {
     });
 
     it('preserves the name of the original error', async () => {
-      expect.assertions(1);
+      expect.assertions(2);
 
       const abortError = new DOMException('The operation was aborted.', 'AbortError');
 
@@ -410,6 +410,38 @@ describe('Fetch', () => {
 
       await fetchInstance.fetch('/my/path').catch((e) => {
         expect(e.name).toEqual('AbortError');
+        expect(e.message).toEqual('The operation was aborted.');
+      });
+    });
+
+    it('classifies empty fetch rejections as AbortError with a fallback message', async () => {
+      const emptyError = new Error('');
+      fetchMock.get('*', Promise.reject(emptyError));
+
+      await expect(fetchInstance.fetch('/my/path')).rejects.toMatchObject({
+        name: 'AbortError',
+        message: 'The user aborted a request.',
+      });
+    });
+
+    it('classifies aborted request signals as AbortError', async () => {
+      const controller = new AbortController();
+      controller.abort();
+      fetchMock.get('*', Promise.reject(new TypeError('Failed to fetch')));
+
+      await expect(
+        fetchInstance.fetch('/my/path', { signal: controller.signal })
+      ).rejects.toMatchObject({
+        name: 'AbortError',
+      });
+    });
+
+    it('preserves non-empty network error messages', async () => {
+      fetchMock.get('*', Promise.reject(new TypeError('Failed to fetch')));
+
+      await expect(fetchInstance.fetch('/my/path')).rejects.toMatchObject({
+        name: 'TypeError',
+        message: 'Failed to fetch',
       });
     });
 
