@@ -86,6 +86,15 @@ const unifiedFileExternalReference = {
   },
 };
 
+// Bulk-create mock args are typed as saved-object create args (attributes untyped);
+// tests assert on the unified attributes shape instead of repeating this cast.
+interface UnifiedAttachmentSOForTest {
+  attributes: { type?: string; attachmentId: string[]; metadata: { index: string[] } };
+}
+
+const asUnifiedAttachmentSO = (attachment: unknown): UnifiedAttachmentSOForTest =>
+  attachment as UnifiedAttachmentSOForTest;
+
 describe('CaseCommentModel', () => {
   const theCase = mockCases[0];
   const closedCase = mockCases[3];
@@ -364,7 +373,7 @@ describe('CaseCommentModel', () => {
             commentReq: unifiedAlertComment,
             createdDate,
           })
-        ).rejects.toThrow();
+        ).rejects.toThrow('Alert cannot be attached to a closed case');
 
         await expect(
           modelForClosedCase.createComment({
@@ -372,7 +381,7 @@ describe('CaseCommentModel', () => {
             commentReq: unifiedEventComment,
             createdDate,
           })
-        ).rejects.toThrow();
+        ).rejects.toThrow('Event cannot be attached to a closed case');
       });
     });
   });
@@ -399,12 +408,8 @@ describe('CaseCommentModel', () => {
       const attachments =
         clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
 
-      const singleAlertCall = attachments[1] as unknown as {
-        attributes: { attachmentId: string[]; metadata: { index: string[] } };
-      };
-      const multipleAlertsCall = attachments[2] as unknown as {
-        attributes: { attachmentId: string[]; metadata: { index: string[] } };
-      };
+      const singleAlertCall = asUnifiedAttachmentSO(attachments[1]);
+      const multipleAlertsCall = asUnifiedAttachmentSO(attachments[2]);
 
       expect(attachments.length).toBe(3);
       expect(attachments[0].attributes.type).toBe(COMMENT_ATTACHMENT_TYPE);
@@ -443,12 +448,8 @@ describe('CaseCommentModel', () => {
       const attachments =
         clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
 
-      const singleAlertCall = attachments[1] as unknown as {
-        attributes: { attachmentId: string[]; metadata: { index: string[] } };
-      };
-      const multipleAlertsCall = attachments[2] as unknown as {
-        attributes: { attachmentId: string[]; metadata: { index: string[] } };
-      };
+      const singleAlertCall = asUnifiedAttachmentSO(attachments[1]);
+      const multipleAlertsCall = asUnifiedAttachmentSO(attachments[2]);
 
       expect(attachments.length).toBe(3);
       expect(attachments[0].attributes.type).toBe(SECURITY_EVENT_ATTACHMENT_TYPE);
@@ -490,12 +491,8 @@ describe('CaseCommentModel', () => {
         clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
 
       expect(attachments.length).toBe(2);
-      const first = attachments[0] as unknown as {
-        attributes: { attachmentId: string[]; metadata: { index: string[] } };
-      };
-      const second = attachments[1] as unknown as {
-        attributes: { attachmentId: string[]; metadata: { index: string[] } };
-      };
+      const first = asUnifiedAttachmentSO(attachments[0]);
+      const second = asUnifiedAttachmentSO(attachments[1]);
 
       expect(first.attributes.attachmentId).toEqual(['event-id-1', 'event-id-2']);
       expect(first.attributes.metadata.index).toEqual(['idx-1', 'idx-2']);
@@ -546,9 +543,7 @@ describe('CaseCommentModel', () => {
         clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
 
       expect(attachments.length).toBe(1);
-      const unifiedCall = attachments[0] as unknown as {
-        attributes: { attachmentId: string[]; metadata: { index: string[] } };
-      };
+      const unifiedCall = asUnifiedAttachmentSO(attachments[0]);
       expect(unifiedCall.attributes.attachmentId).toEqual(['event-id-1', 'event-id-3']);
       expect(unifiedCall.attributes.metadata.index).toEqual(['idx-1', 'idx-3']);
     });
@@ -594,9 +589,7 @@ describe('CaseCommentModel', () => {
         clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
 
       expect(attachments.length).toBe(1);
-      const unifiedCall = attachments[0] as unknown as {
-        attributes: { attachmentId: string[]; metadata: { index: string[] } };
-      };
+      const unifiedCall = asUnifiedAttachmentSO(attachments[0]);
       expect(unifiedCall.attributes.attachmentId).toEqual([
         'event-id-1',
         'event-id-2',
@@ -619,10 +612,10 @@ describe('CaseCommentModel', () => {
         ],
       });
 
-      const attachments = clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0]
-        .attachments as unknown as Array<{
-        attributes: { type: string; attachmentId: string[]; metadata: { index: string[] } };
-      }>;
+      const attachments =
+        clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments.map(
+          asUnifiedAttachmentSO
+        );
 
       expect(attachments.length).toBe(1);
       expect(attachments[0].attributes.type).toBe(SECURITY_ALERT_ATTACHMENT_TYPE);
@@ -644,10 +637,10 @@ describe('CaseCommentModel', () => {
         ],
       });
 
-      const attachments = clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0]
-        .attachments as unknown as Array<{
-        attributes: { type: string; attachmentId: string[]; metadata: { index: string[] } };
-      }>;
+      const attachments =
+        clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments.map(
+          asUnifiedAttachmentSO
+        );
 
       expect(attachments.length).toBe(1);
       expect(attachments[0].attributes.type).toBe(SECURITY_ALERT_ATTACHMENT_TYPE);
@@ -657,13 +650,11 @@ describe('CaseCommentModel', () => {
 
     it('does not create attachments if the alert is attached to the case', async () => {
       clientArgs.services.attachmentService.getter.getAllAlertIds.mockResolvedValueOnce(
-        new Set(['test-id-1'])
+        new Set(['alert-id-1'])
       );
 
-      await model.createComment({
-        id: 'comment-1',
-        commentReq: unifiedAlertComment,
-        createdDate,
+      await model.bulkCreate({
+        attachments: [{ id: 'comment-1', ...unifiedAlertComment }],
       });
 
       expect(clientArgs.services.attachmentService.bulkCreate).not.toHaveBeenCalled();
@@ -698,12 +689,8 @@ describe('CaseCommentModel', () => {
       const attachments =
         clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
 
-      const singleAlertCall = attachments[1] as unknown as {
-        attributes: { attachmentId: string[]; metadata: { index: string[] } };
-      };
-      const multipleAlertsCall = attachments[2] as unknown as {
-        attributes: { attachmentId: string[]; metadata: { index: string[] } };
-      };
+      const singleAlertCall = asUnifiedAttachmentSO(attachments[1]);
+      const multipleAlertsCall = asUnifiedAttachmentSO(attachments[2]);
 
       expect(attachments.length).toBe(3);
       expect(attachments[0].attributes.type).toBe(COMMENT_ATTACHMENT_TYPE);
@@ -755,15 +742,9 @@ describe('CaseCommentModel', () => {
       const attachments =
         clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
 
-      const alertOne = attachments[1] as unknown as {
-        attributes: { attachmentId: string[]; metadata: { index: string[] } };
-      };
-      const alertTwo = attachments[2] as unknown as {
-        attributes: { attachmentId: string[]; metadata: { index: string[] } };
-      };
-      const alertThree = attachments[3] as unknown as {
-        attributes: { attachmentId: string[]; metadata: { index: string[] } };
-      };
+      const alertOne = asUnifiedAttachmentSO(attachments[1]);
+      const alertTwo = asUnifiedAttachmentSO(attachments[2]);
+      const alertThree = asUnifiedAttachmentSO(attachments[3]);
 
       expect(attachments.length).toBe(4);
       expect(attachments[0].attributes.type).toBe(COMMENT_ATTACHMENT_TYPE);
@@ -800,9 +781,7 @@ describe('CaseCommentModel', () => {
         clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
 
       expect(attachments.length).toBe(1);
-      const unifiedCall = attachments[0] as unknown as {
-        attributes: { attachmentId: string[]; metadata: { index: string[] } };
-      };
+      const unifiedCall = asUnifiedAttachmentSO(attachments[0]);
       // test-id-4 was already on the case → must be filtered out from both attachmentId and metadata.index
       expect(unifiedCall.attributes.attachmentId).toEqual(['test-id-3', 'test-id-5']);
       expect(unifiedCall.attributes.metadata.index).toEqual(['test-index-3', 'test-index-5']);
@@ -854,9 +833,7 @@ describe('CaseCommentModel', () => {
       const attachments =
         clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
 
-      const multipleAlertsCall = attachments[1] as unknown as {
-        attributes: { attachmentId: string[]; metadata: { index: string[] } };
-      };
+      const multipleAlertsCall = asUnifiedAttachmentSO(attachments[1]);
 
       expect(attachments.length).toBe(2);
       expect(attachments[0].attributes.type).toBe(COMMENT_ATTACHMENT_TYPE);

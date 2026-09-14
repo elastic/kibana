@@ -15,18 +15,12 @@ import type {
 } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { isAlertAttachmentType, isEventAttachmentType } from '../../../common/utils/attachments';
-import type {
-  AlertAttachmentPayload,
-  AttachmentAttributes,
-  Case,
-  EventAttachmentPayload,
-} from '../../../common/types/domain';
+import type { AttachmentAttributes, Case } from '../../../common/types/domain';
 import {
   CaseRt,
   CaseStatuses,
   UserActionActions,
   UserActionTypes,
-  AttachmentType,
 } from '../../../common/types/domain';
 
 import { CASE_SAVED_OBJECT, MAX_DOCS_PER_PAGE } from '../../../common/constants';
@@ -59,8 +53,8 @@ type CommentRequestWithId = Array<{ id: string } & UnifiedAttachmentPayload>;
 
 /**
  * Only comment attachments (unified `comment`) are Lens-reference-eligible.
- * A generic `'comment' in payload` check would also match legacy `actions`, which has its
- * own unrelated `comment` field.
+ * A generic `'comment' in payload` check would also match `security.endpoint`, which has
+ * its own unrelated `data.content` field.
  */
 const getCommentTextFromPayload = (payload: UnifiedAttachmentPayload): string | undefined => {
   if (isUnifiedPayloadCommentAttachment(payload)) {
@@ -410,21 +404,23 @@ export class CaseCommentModel {
 
     attachments.forEach((attachment) => {
       if (isAlertAttachmentType(attachment.type)) {
-        if ('attachmentId' in attachment) {
-          const deduped = dedupeUnifiedAttachment(attachment, alertsAttachedToCase);
-          if (deduped) {
-            dedupedAttachments.push(deduped);
-          }
+        if (!('attachmentId' in attachment)) {
+          throw Boom.badRequest(`Alert attachment is missing required field 'attachmentId'`);
+        }
+        const deduped = dedupeUnifiedAttachment(attachment, alertsAttachedToCase);
+        if (deduped) {
+          dedupedAttachments.push(deduped);
         }
         return;
       }
 
       if (isEventAttachmentType(attachment.type)) {
-        if ('attachmentId' in attachment) {
-          const deduped = dedupeUnifiedAttachment(attachment, eventsAttachedToCase);
-          if (deduped) {
-            dedupedAttachments.push(deduped);
-          }
+        if (!('attachmentId' in attachment)) {
+          throw Boom.badRequest(`Event attachment is missing required field 'attachmentId'`);
+        }
+        const deduped = dedupeUnifiedAttachment(attachment, eventsAttachedToCase);
+        if (deduped) {
+          dedupedAttachments.push(deduped);
         }
         return;
       }
@@ -435,13 +431,6 @@ export class CaseCommentModel {
     return dedupedAttachments;
   }
 
-  private getAttachmentsByType<
-    T extends AttachmentType,
-    R = T extends AttachmentType.event ? AlertAttachmentPayload[] : EventAttachmentPayload[]
-  >(attachments: UnifiedAttachmentPayload[], attachmentType: T): R {
-    return attachments.filter((attachment) => attachment.type === attachmentType) as R;
-  }
-
   private async validateCreateCommentRequest(req: Array<UnifiedAttachmentPayload>) {
     if (this.caseInfo.attributes.status === CaseStatuses.closed) {
       const hasAlertsInRequest = req.some((a) => isAlertAttachmentType(a.type));
@@ -450,8 +439,7 @@ export class CaseCommentModel {
         throw Boom.badRequest('Alert cannot be attached to a closed case');
       }
 
-      const eventAttachments = this.getAttachmentsByType(req, AttachmentType.event);
-      const hasEventsInRequest = eventAttachments.length > 0;
+      const hasEventsInRequest = req.some((a) => isEventAttachmentType(a.type));
 
       if (hasEventsInRequest) {
         throw Boom.badRequest('Event cannot be attached to a closed case');
@@ -484,10 +472,10 @@ export class CaseCommentModel {
   private getCommentReferences(commentReq: UnifiedAttachmentPayload) {
     let references: SavedObjectReference[] = [];
 
-    if (commentReq.type === 'comment' && commentReq.data?.content) {
+    if (isUnifiedPayloadCommentAttachment(commentReq)) {
       const commentStringReferences = getOrUpdateLensReferences(
         this.params.lensEmbeddableFactory,
-        commentReq.data?.content as string
+        commentReq.data.content
       );
       references = [...references, ...commentStringReferences];
     }

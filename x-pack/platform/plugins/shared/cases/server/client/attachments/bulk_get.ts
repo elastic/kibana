@@ -8,11 +8,11 @@
 import { partition } from 'lodash';
 import type {
   BulkGetAttachmentsResponse,
-  BulkGetUnifiedAttachmentsResponse,
+  BulkGetAttachmentsResponseV2,
 } from '../../../common/types/api';
 import {
   BulkGetAttachmentsRequestRt,
-  BulkGetUnifiedAttachmentsResponseRt,
+  BulkGetAttachmentsResponseRtV2,
 } from '../../../common/types/api';
 import type { AttachmentAttributes, AttachmentAttributesV2 } from '../../../common/types/domain';
 import { flattenAttachmentSavedObjects } from '../../common/utils';
@@ -35,7 +35,7 @@ export async function bulkGet(
   { savedObjectIds, caseID }: BulkGetArgs,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
-): Promise<BulkGetUnifiedAttachmentsResponse> {
+): Promise<BulkGetAttachmentsResponseV2> {
   const {
     services: { attachmentService },
     logger,
@@ -70,7 +70,7 @@ export async function bulkGet(
       attachments: flattenAttachmentSavedObjects(authorizedAttachments),
       errors,
     };
-    return decodeOrThrow(BulkGetUnifiedAttachmentsResponseRt)(res);
+    return decodeOrThrow(BulkGetAttachmentsResponseRtV2)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to bulk get attachments for case id: ${caseID}: ${error}`,

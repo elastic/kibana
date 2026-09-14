@@ -9,7 +9,7 @@ import type { Case, AttachmentsV2, AttachmentV2 } from '../../../common/types/do
 import type {
   DocumentResponse,
   AttachmentsFindResponseV2,
-  BulkGetUnifiedAttachmentsResponse,
+  BulkGetAttachmentsResponseV2,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 
@@ -48,7 +48,7 @@ export interface AttachmentsSubClient {
    */
   add(params: AddArgs): Promise<Case>;
   bulkCreate(params: BulkCreateArgs): Promise<Case>;
-  bulkGet(params: BulkGetArgs): Promise<BulkGetUnifiedAttachmentsResponse>;
+  bulkGet(params: BulkGetArgs): Promise<BulkGetAttachmentsResponseV2>;
   /**
    * Deletes all attachments associated with a single case.
    */
