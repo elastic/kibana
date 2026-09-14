@@ -38,3 +38,6 @@ export const MAX_EVENTS_PER_REQUEST = 50;
 
 /** Maximum byte length of a conversation event type string. */
 export const CONVERSATION_EVENT_TYPE_MAX_LENGTH = 256;
+
+/** Type discriminator for the built-in example conversation event. */
+export const EXAMPLE_NOTE_EVENT_TYPE = 'example.note';

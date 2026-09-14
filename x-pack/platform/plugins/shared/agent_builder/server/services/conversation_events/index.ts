@@ -18,3 +18,4 @@ export {
   materializeConversationEvents,
   type ConversationEventAddInput,
 } from './materialize_events';
+export { exampleNoteEventType } from './example_event_type';
