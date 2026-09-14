@@ -8,6 +8,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { isEqual } from 'lodash';
 import type { AggregateQuery } from '@kbn/es-query';
+import type { LayerDescriptor } from '../../common/descriptor_types';
 import { SOURCE_DATA_REQUEST_ID, SOURCE_TYPES } from '../../common/constants';
 import type { ESQLSourceDescriptor } from '../../common/descriptor_types';
 import type { MapStore } from '../reducers/store';
@@ -17,8 +18,13 @@ export function initializeEsql(store: MapStore) {
   const esql$ = new BehaviorSubject<AggregateQuery[]>([]);
   const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
 
+  let prevLayerList: LayerDescriptor[] | undefined;
+
   function syncFromStore() {
     const layerList = getLayerListRaw(store.getState());
+
+    if (layerList === prevLayerList) return;
+    prevLayerList = layerList;
 
     const esqlQueries: AggregateQuery[] = [];
     let nextApproximationApplied: boolean | undefined = undefined;
