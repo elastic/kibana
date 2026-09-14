@@ -23,12 +23,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { useFeedbackLoopEnabled } from '../../hooks/use_feedback_loop_enabled';
-import { useKibana } from '../../hooks/use_kibana';
+import { useRunFeedbackAnalysis } from '../../hooks/use_run_feedback_analysis';
 import { useTracesEditor } from '../../hooks/use_traces_editor';
 import { useUpdateFeedbackAnalysis } from '../../hooks/use_update_feedback_analysis';
 import { TraceDisplay } from '../trace_display';
 import { TraceSelector } from '../trace_selector';
-import { FeedbackAnalysisConfig } from './feedback_analysis_config';
 
 interface TracesPanelProps {
   isLoading: boolean;
@@ -37,12 +36,20 @@ interface TracesPanelProps {
   isManaged: boolean;
 }
 
+/**
+ * Whether this index's traces are reviewed on a schedule, plus a way to review them now.
+ *
+ * Which agent runs, how often, and how far back it reads are all defaulted server-side and not
+ * offered here. They are per-index overrides of settings that already have sensible values, and an
+ * index whose analysis needs different ones is the exception; the API still accepts all three, so
+ * that exception has somewhere to go without putting three controls in front of everyone else.
+ *
+ * Its own component because the mutations it needs are keyed on a loaded AI index, which the panel
+ * does not have while the page is still fetching.
+ */
 const AutoImproveControl = ({ aiIndex }: { aiIndex: GetAiIndexResponse }) => {
-  const {
-    services: { getChatOpener },
-  } = useKibana();
-  const chatOpener = getChatOpener?.();
   const updateConfig = useUpdateFeedbackAnalysis(aiIndex);
+  const runAnalysis = useRunFeedbackAnalysis(aiIndex.id);
   const isAnalysisEnabled = aiIndex.feedback_analysis?.enabled ?? false;
 
   return (
@@ -70,7 +77,18 @@ const AutoImproveControl = ({ aiIndex }: { aiIndex: GetAiIndexResponse }) => {
       {isAnalysisEnabled && (
         <>
           <EuiSpacer size="m" />
-          <FeedbackAnalysisConfig aiIndex={aiIndex} showAgentSelector={Boolean(chatOpener)} />
+          {/* Only while enabled: turning it off uninstalls the workflow, so there is nothing to run. */}
+          <EuiButton
+            size="s"
+            iconType="play"
+            onClick={() => runAnalysis.mutate()}
+            isLoading={runAnalysis.isLoading}
+            data-test-subj="contextImprovementsRunNowButton"
+          >
+            {i18n.translate('xpack.contextEngine.aiIndexDetail.traces.runNowButton', {
+              defaultMessage: 'Run now',
+            })}
+          </EuiButton>
         </>
       )}
     </>

@@ -18,6 +18,7 @@ import { TracesPanel } from './traces_panel';
 const mockUseAgentBuilderAgents = jest.fn();
 const mockUseSearchDataStreams = jest.fn();
 const mockPutFeedbackAnalysis = jest.fn();
+const mockRunFeedbackAnalysis = jest.fn();
 const mockFeedbackLoopEnabled = jest.fn();
 const mockToasts = { addSuccess: jest.fn(), addError: jest.fn(), addWarning: jest.fn() };
 
@@ -33,13 +34,12 @@ jest.mock('../../api/ai_indices', () => ({
   putAiIndexFeedbackAnalysis: (...args: unknown[]) => mockPutFeedbackAnalysis(...args),
 }));
 
-jest.mock('../../hooks/use_feedback_loop_enabled', () => ({
-  useFeedbackLoopEnabled: () => mockFeedbackLoopEnabled(),
+jest.mock('../../api/improvements', () => ({
+  runFeedbackAnalysis: (...args: unknown[]) => mockRunFeedbackAnalysis(...args),
 }));
 
-// Pulls in Agent Builder services this panel does not otherwise need.
-jest.mock('./feedback_agent_selector', () => ({
-  FeedbackAgentSelector: () => <div data-test-subj="contextFeedbackAgentSelector" />,
+jest.mock('../../hooks/use_feedback_loop_enabled', () => ({
+  useFeedbackLoopEnabled: () => mockFeedbackLoopEnabled(),
 }));
 
 jest.mock('../../hooks/use_kibana', () => ({
@@ -47,14 +47,11 @@ jest.mock('../../hooks/use_kibana', () => ({
     services: {
       http: {},
       notifications: { toasts: mockToasts },
-      getChatOpener: () => undefined,
     },
   }),
 }));
 
-const buildAiIndex = (
-  overrides: Partial<GetAiIndexResponse> = {}
-): GetAiIndexResponse => ({
+const buildAiIndex = (overrides: Partial<GetAiIndexResponse> = {}): GetAiIndexResponse => ({
   id: 'my-ai-index',
   managed: false,
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
@@ -115,6 +112,7 @@ describe('TracesPanel', () => {
   beforeEach(() => {
     mockFeedbackLoopEnabled.mockReturnValue(false);
     mockPutFeedbackAnalysis.mockResolvedValue({});
+    mockRunFeedbackAnalysis.mockResolvedValue({ execution_id: 'execution-1' });
     mockUseAgentBuilderAgents.mockReturnValue({
       agents: [{ id: 'agent-1', name: 'Loyalty Support Agent' }],
       isLoading: false,
@@ -607,20 +605,25 @@ describe('TracesPanel', () => {
       );
     });
 
-    it('keeps the schedule settings out of the way until analysis is on', () => {
+    it('offers no manual run until analysis is on, since there is no workflow to run', () => {
       mockFeedbackLoopEnabled.mockReturnValue(true);
       renderPanel();
 
-      expect(screen.queryByTestId('contextImprovementsIntervalSelect')).not.toBeInTheDocument();
       expect(screen.queryByTestId('contextImprovementsRunNowButton')).not.toBeInTheDocument();
     });
 
-    it('reveals them once it is', () => {
+    it('offers one once it is', async () => {
       mockFeedbackLoopEnabled.mockReturnValue(true);
       renderPanel({ aiIndex: buildAiIndex({ feedback_analysis: { enabled: true } } as any) });
 
-      expect(screen.getByTestId('contextImprovementsIntervalSelect')).toBeInTheDocument();
-      expect(screen.getByTestId('contextImprovementsRunNowButton')).toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('contextImprovementsRunNowButton'));
+
+      await waitFor(() =>
+        expect(mockRunFeedbackAnalysis).toHaveBeenCalledWith(
+          {},
+          { aiIndexId: 'my-ai-index' }
+        )
+      );
     });
 
     it('is absent while the feedback loop feature flag is off', () => {
