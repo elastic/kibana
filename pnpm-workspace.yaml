@@ -125,7 +125,7 @@ overrides:
   '@types/cheerio': '0.22.35'
   '@types/d3-brush@3.0.1>@types/d3-selection': '3.0.2'
   '@types/d3-transition@3.0.1>@types/d3-selection': '3.0.2'
-  '@types/eslint>@types/estree': '1.0.9'
+  '@types/eslint>@types/estree': '0.0.50'
   '@types/glob-stream': '6.1.0'
   # @types/glob-stream depends on @types/glob@*, which floats to the empty v9
   # deprecation stub; pin to v7 so SrcOptions keeps cwd/dot/nodir (matches yarn).
