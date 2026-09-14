@@ -18,7 +18,7 @@ import { useSpaceId } from './use_space_id';
 import { queryKeys } from '../query_keys';
 import { buildEpisodesHistogramQuery } from '../queries/episodes_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
-import { fetchFromSource } from '../utils/fetch_from_sources';
+import { fetchFromSource, type FetchFromSourceResult } from '../utils/fetch_from_sources';
 import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
 import {
   generateTimeBuckets,
@@ -88,7 +88,7 @@ export const useEpisodesHistogramQuery = ({
             ...(timeRange ? { timeRange } : {}),
           },
           abortSignal: signal,
-        }),
+        }).catch((): HistogramEpisodeRow[] => []),
         fetchFromSource(additionalEpisodesDataSource, (source) =>
           source.fetchHistogram?.({
             services,
@@ -97,7 +97,7 @@ export const useEpisodesHistogramQuery = ({
             breakdownField,
             abortSignal: signal,
           })
-        ),
+        ).catch((): FetchFromSourceResult<never> => ({ results: [], errors: [] })),
       ]);
 
       return {

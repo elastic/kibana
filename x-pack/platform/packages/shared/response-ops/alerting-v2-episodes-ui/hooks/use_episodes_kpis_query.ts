@@ -16,7 +16,7 @@ import { useSpaceId } from './use_space_id';
 import { useCurrentUserProfile } from './use_current_user_profile';
 import { buildEpisodesKpisQuery } from '../queries/episodes_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
-import { fetchFromSource } from '../utils/fetch_from_sources';
+import { fetchFromSource, type FetchFromSourceResult } from '../utils/fetch_from_sources';
 import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
 import { mergeKpis } from '../utils/merge_kpis';
 import { queryKeys } from '../query_keys';
@@ -86,7 +86,7 @@ export const useEpisodesKpisQuery = ({
       additionalEpisodesDataSource?.id
     ),
     queryFn: async ({ signal }) => {
-      const [v2Rows, sourceKpis] = await Promise.all([
+      const [v2Result, sourceKpis] = await Promise.all([
         executeEsqlQuery<EpisodesKpisRow>({
           expressions: services.expressions,
           query: buildEpisodesKpisQuery(spaceId, currentUserUid, filterState),
@@ -96,13 +96,13 @@ export const useEpisodesKpisQuery = ({
             ...(timeRange ? { timeRange } : {}),
           },
           abortSignal: signal,
-        }),
+        }).catch((): EpisodesKpisRow[] => []),
         fetchFromSource(additionalEpisodesDataSource, (source) =>
           source.fetchKpis?.({ services, filterState, timeRange, abortSignal: signal })
-        ),
+        ).catch((): FetchFromSourceResult<EpisodesKpisRow> => ({ results: [], errors: [] })),
       ]);
 
-      const merged = mergeKpis([v2Rows[0], ...sourceKpis.results]);
+      const merged = mergeKpis([v2Result[0], ...sourceKpis.results]);
 
       return merged ? [merged] : [];
     },

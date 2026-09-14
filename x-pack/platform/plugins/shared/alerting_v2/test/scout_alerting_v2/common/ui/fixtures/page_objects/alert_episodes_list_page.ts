@@ -20,6 +20,10 @@ import { OPEN_IN_DISCOVER_EPISODE_ACTION_ID } from '@kbn/alerting-v2-episodes-ui
 export class AlertEpisodesListPage {
   public readonly pageContainer: Locator;
   public readonly itemCount: Locator;
+  public readonly kpisAlertsPanel: Locator;
+  public readonly kpisAlertActionsPanel: Locator;
+  public readonly histogramPanel: Locator;
+  public readonly histogramChart: Locator;
   /** Inline "Open in Discover" leading control (the only read-safe episode action). */
   public readonly openInDiscoverRowControl: Locator;
   /**
@@ -33,6 +37,10 @@ export class AlertEpisodesListPage {
   constructor(private readonly page: ScoutPage) {
     this.pageContainer = this.page.testSubj.locator('alertingV2EpisodesListPage');
     this.itemCount = this.page.testSubj.locator('alertEpisodesItemCount');
+    this.kpisAlertsPanel = this.page.testSubj.locator('episodesKpisAlertsPanel');
+    this.kpisAlertActionsPanel = this.page.testSubj.locator('episodesKpisAlertActionsPanel');
+    this.histogramPanel = this.page.testSubj.locator('episodesHistogramPanel');
+    this.histogramChart = this.page.testSubj.locator('unifiedHistogramChart');
     this.openInDiscoverRowControl = this.page.testSubj.locator(
       `unifiedDataTable_rowControl_${OPEN_IN_DISCOVER_EPISODE_ACTION_ID}`
     );

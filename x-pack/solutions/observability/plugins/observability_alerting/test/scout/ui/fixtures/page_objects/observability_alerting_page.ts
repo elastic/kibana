@@ -42,10 +42,22 @@ export const OBSERVABILITY_ALERTING_SURFACES = [
 export class ObservabilityAlertingPage {
   public readonly pageTitle: Locator;
   public readonly appNotFoundPageContent: Locator;
+  public readonly requiredPrivilegesPrompt: Locator;
+  public readonly episodesListPage: Locator;
+  public readonly episodesKpisAlertsPanel: Locator;
+  public readonly episodesKpisAlertActionsPanel: Locator;
+  public readonly episodesHistogramPanel: Locator;
+  public readonly episodesItemCount: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.pageTitle = this.page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title);
     this.appNotFoundPageContent = this.page.testSubj.locator('appNotFoundPageContent');
+    this.requiredPrivilegesPrompt = this.page.testSubj.locator('alertingRequiredPrivilegesPrompt');
+    this.episodesListPage = this.page.testSubj.locator('alertingV2EpisodesListPage');
+    this.episodesKpisAlertsPanel = this.page.testSubj.locator('episodesKpisAlertsPanel');
+    this.episodesKpisAlertActionsPanel = this.page.testSubj.locator('episodesKpisAlertActionsPanel');
+    this.episodesHistogramPanel = this.page.testSubj.locator('episodesHistogramPanel');
+    this.episodesItemCount = this.page.testSubj.locator('alertEpisodesItemCount');
   }
 
   urlFor(path: string): string {
