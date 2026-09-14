@@ -1,5 +1,5 @@
 {
-  "sha1": "1f3f9dcb87a98944645634b2c2603c2bae619698",
+  "sha1": "6cdb56d1738befa52197f4336f87130fd28995d5",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -21,6 +21,54 @@
       }
     },
     {
+      "id": "b4bbc0e4bf4f7fa-0fc67141f8fcea7",
+      "title": "Observability Alerting inbox and episode host-aware URLs View details from the inbox flyout stays on observability alerting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/inbox_view_details.spec.ts",
+        "line": 37,
+        "column": 25
+      }
+    },
+    {
+      "id": "b4bbc0e4bf4f7fa-4a233ddcf914f9d",
+      "title": "Observability Alerting inbox and episode host-aware URLs View rule details from the inbox flyout stays on observability alerting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/inbox_view_details.spec.ts",
+        "line": 53,
+        "column": 91
+      }
+    },
+    {
+      "id": "b4bbc0e4bf4f7fa-42c197b5bde9409",
+      "title": "Observability Alerting inbox and episode host-aware URLs View rule details from the episode details page stays on observability alerting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/inbox_view_details.spec.ts",
+        "line": 81,
+        "column": 82
+      }
+    },
+    {
       "id": "648c81c97fb0579-c98c179092568db",
       "title": "Observability Alerting URLs returns app not found for Inbox (/inbox) when alerting v2 is disabled",
       "expectedStatus": "passed",
@@ -32,7 +80,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 34,
+        "line": 43,
         "column": 28
       }
     },
@@ -48,7 +96,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 44,
+        "line": 53,
         "column": 15
       }
     },
@@ -64,7 +112,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 34,
+        "line": 43,
         "column": 28
       }
     },
@@ -80,7 +128,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 44,
+        "line": 53,
         "column": 15
       }
     },
@@ -96,7 +144,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 34,
+        "line": 43,
         "column": 28
       }
     },
@@ -112,7 +160,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 44,
+        "line": 53,
         "column": 15
       }
     },
@@ -128,7 +176,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 34,
+        "line": 43,
         "column": 28
       }
     },
@@ -144,7 +192,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 44,
+        "line": 53,
         "column": 15
       }
     },
@@ -160,7 +208,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 34,
+        "line": 43,
         "column": 28
       }
     },
@@ -176,7 +224,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 44,
+        "line": 53,
         "column": 15
       }
     },
@@ -192,7 +240,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 34,
+        "line": 43,
         "column": 28
       }
     },
@@ -208,7 +256,39 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
-        "line": 44,
+        "line": 53,
+        "column": 15
+      }
+    },
+    {
+      "id": "648c81c97fb0579-89258ea684d10c6",
+      "title": "Observability Alerting URLs switches between v1 and v2 rules tabs without leaving observability",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
+        "line": 68,
+        "column": 12
+      }
+    },
+    {
+      "id": "648c81c97fb0579-7e814db24dfd679",
+      "title": "Observability Alerting URLs starts on v1 and keeps host-aware tabs after switching to v2 and back",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_urls.spec.ts",
+        "line": 100,
         "column": 15
       }
     },
