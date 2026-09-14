@@ -99,7 +99,9 @@ export class WaitForInputStepImpl implements NodeImplementation, CancellableNode
 
     const stepInput: Record<string, unknown> = {
       ...(message.length > 0 && { message }),
-      ...(withConfig.schema !== undefined && { schema: withConfig.schema }),
+      ...(withConfig.schema !== undefined && {
+        schema: ctx.renderValueAccordingToContext(withConfig.schema),
+      }),
     };
 
     const channels = withConfig.channels;

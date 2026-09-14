@@ -8,7 +8,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { distinctUntilChanged, map } from 'rxjs';
 import UseUnmount from 'react-use/lib/useUnmount';
 
@@ -38,12 +38,16 @@ import {
 } from '@kbn/presentation-publishing';
 
 import { AppHeader, ChromeAppHeaderRegistration } from '@kbn/app-header';
-import type { AppHeaderBack, AppHeaderBadge, AppHeaderShareAction } from '@kbn/app-header';
+import type {
+  AppHeaderBack,
+  AppHeaderBadge,
+  AppHeaderExperimentalDashboardAiAction,
+  AppHeaderShareAction,
+} from '@kbn/app-header';
 import { useFavorite } from '@kbn/content-management-favorites-public';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
-import type { SaveDashboardReturn } from '../dashboard_api/save_modal/types';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../dashboard_api/use_dashboard_internal_api';
 import {
@@ -70,6 +74,7 @@ import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoritesProvider } from './dashboard_favorite_button';
 import { LegacyDashboardHeader } from './legacy_dashboard_header';
 import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
+import { usePrettifyDashboardAction } from '../dashboard_app/prettify/use_prettify_dashboard_action';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -90,6 +95,7 @@ interface DashboardChromeNextHeaderProps {
   dashboardId?: string;
   viewMode: string;
   share?: AppHeaderShareAction;
+  experimentalDashboardAiAction?: AppHeaderExperimentalDashboardAiAction;
 }
 
 /**
@@ -104,6 +110,7 @@ const DashboardChromeNextHeader = ({
   dashboardId,
   viewMode,
   share,
+  experimentalDashboardAiAction,
 }: DashboardChromeNextHeaderProps) => {
   const favorite = useFavorite({ id: dashboardId });
 
@@ -120,6 +127,7 @@ const DashboardChromeNextHeader = ({
         badges={badges}
         favorite={favorite}
         share={share}
+        experimentalDashboardAiAction={experimentalDashboardAiAction}
         spacing="compact"
       />
     );
@@ -132,6 +140,7 @@ const DashboardChromeNextHeader = ({
       badges={badges}
       favorite={favorite}
       share={share}
+      experimentalDashboardAiAction={experimentalDashboardAiAction}
       spacing="compact"
     />
   );
@@ -377,26 +386,32 @@ export function InternalDashboardTopNav({
     };
   }, [embedSettings, forceHideUnifiedSearch, fullScreenMode, isChromeVisible, viewMode]);
 
-  const maybeRedirect = useCallback(
-    (result?: SaveDashboardReturn) => {
-      if (!result) return;
-      const { redirectRequired, id } = result;
-      if (redirectRequired) {
-        redirectTo({
-          id,
-          editMode: true,
-          useReplace: true,
-          destination: 'dashboard',
-        });
-      }
-    },
-    [redirectTo]
+  // Disable the date picker when the dashboard has data views but none are time-based.
+  const showDatePicker = useMemo(() => {
+    if (!visibilityProps.showDatePicker) {
+      return false;
+    }
+    const disabled =
+      (allDataViews?.length ?? 0) > 0 && !allDataViews?.some((dv) => dv.isTimeBased());
+    return { disabled };
+  }, [visibilityProps.showDatePicker, allDataViews]);
+
+  const shareAction = useDashboardShareAction({ redirectTo });
+  const prettifyAction = usePrettifyDashboardAction(dashboardApi);
+  const experimentalDashboardAiAction = useMemo(
+    () =>
+      viewMode === 'edit' && prettifyAction
+        ? {
+            onClick: () => {
+              void prettifyAction.execute();
+            },
+          }
+        : undefined,
+    [viewMode, prettifyAction]
   );
 
-  const shareAction = useDashboardShareAction({ maybeRedirect });
-
   const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
-    maybeRedirect,
+    redirectTo,
     showResetChange,
     shareAction,
   });
@@ -435,7 +450,7 @@ export function InternalDashboardTopNav({
                     <EuiLink
                       id="dashboardManagedContentPopoverButton"
                       onClick={() => {
-                        dashboardApi.runInteractiveSave().then((result) => maybeRedirect(result));
+                        dashboardApi.runInteractiveSave(redirectTo);
                       }}
                       aria-label={dashboardManagedBadge.getDuplicateButtonAriaLabel()}
                     >
@@ -454,7 +469,7 @@ export function InternalDashboardTopNav({
       });
     }
     return allBadges;
-  }, [isPopoverOpen, dashboardApi, maybeRedirect]);
+  }, [isPopoverOpen, dashboardApi, redirectTo]);
 
   const appHeaderBadges = useMemo<AppHeaderBadge[]>(
     () =>
@@ -502,15 +517,22 @@ export function InternalDashboardTopNav({
             dashboardId={lastSavedId}
             viewMode={viewMode}
             share={shareAction}
+            experimentalDashboardAiAction={experimentalDashboardAiAction}
           />
         </DashboardFavoritesProvider>
       )}
       {headerMode === 'legacy' && (
-        <LegacyDashboardHeader badges={badges} config={appMenuConfig} lastSavedId={lastSavedId} />
+        <LegacyDashboardHeader
+          badges={badges}
+          config={appMenuConfig}
+          lastSavedId={lastSavedId}
+          enhanceAction={experimentalDashboardAiAction}
+        />
       )}
       {viewMode !== 'print' && visibilityProps.showSearchBar && (
         <unifiedSearchService.ui.SearchBar
           {...visibilityProps}
+          showDatePicker={showDatePicker}
           query={query as Query | undefined}
           screenTitle={title}
           useDefaultBehaviors={true}

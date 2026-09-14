@@ -32,18 +32,18 @@ const makeRepository = (): jest.Mocked<RunQuotaSavedObjectsRepository> =>
   } as unknown as jest.Mocked<RunQuotaSavedObjectsRepository>);
 
 describe('run quota settings repository', () => {
-  it('returns disabled enforcement and the default limits when settings do not exist', async () => {
+  it('returns enabled enforcement and the default limits when settings do not exist', async () => {
     const repository = makeRepository();
     repository.get.mockRejectedValue(
       SavedObjectsErrorHelpers.createGenericNotFoundError('settings', 'settings')
     );
 
     await expect(readRunQuotaSettings(repository)).resolves.toEqual({
-      enabled: false,
+      enabled: true,
       limits: {
-        detection: 100,
-        investigation: 30,
-        ki_extraction: 20,
+        detection: 15,
+        investigation: 3,
+        ki_extraction: 3,
       },
     });
   });

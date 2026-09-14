@@ -8,6 +8,7 @@
  */
 
 export * from './auth_types/api_key_header';
+export { ApiKeyHeaderWithTlsAuth } from './auth_types/api_key_header_with_tls';
 export * from './auth_types/api_key_query';
 export { AzureSharedKeyAuth } from './auth_types/azure_shared_key';
 export * from './auth_types/aws_credentials';
@@ -20,6 +21,7 @@ export * from './auth_types/oauth';
 export { OAuthAuthorizationCode } from './auth_types/oauth_authorization_code';
 export { OAuthClientCredentialsPrivateKeyJwt } from './auth_types/oauth_client_credentials_private_key_jwt';
 export { Ears } from './auth_types/ears';
+export { RelayAuth } from './auth_types/relay';
 export { KubernetesGkeAuth } from './auth_types/kubernetes_gke';
 export { KubernetesEksAuth } from './auth_types/kubernetes_eks';
 export { KubernetesAksAuth } from './auth_types/kubernetes_aks';

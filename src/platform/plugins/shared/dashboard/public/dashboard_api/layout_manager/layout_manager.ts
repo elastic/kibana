@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import deepEqual from 'fast-deep-equal';
 import { getSafe } from '@kbn/std';
-import { filter, map as lodashMap, max, pick } from 'lodash';
+import deepEqual from 'fast-deep-equal';
+import { cloneDeep, filter, map as lodashMap, max, pick } from 'lodash';
 import {
   BehaviorSubject,
   combineLatest,
@@ -27,6 +27,11 @@ import {
 import { v4 } from 'uuid';
 
 import { METRIC_TYPE } from '@kbn/analytics';
+import { DEFAULT_PINNED_CONTROL_STATE } from '@kbn/controls-constants';
+import type {
+  PinnedControlLayoutState,
+  PinnedControlLayoutState as PinnedPanelLayoutState,
+} from '@kbn/controls-schemas';
 import type {
   DefaultEmbeddableApi,
   EmbeddablePackageState,
@@ -34,28 +39,29 @@ import type {
 } from '@kbn/embeddable-plugin/public';
 import { PanelNotFoundError, PlacementStrategy } from '@kbn/embeddable-plugin/public';
 import type { GridLayoutData, GridPanelData, GridSectionData } from '@kbn/grid-layout';
-import type { PinnedControlLayoutState as PinnedPanelLayoutState } from '@kbn/controls-schemas';
-import { DEFAULT_PINNED_CONTROL_STATE } from '@kbn/controls-constants';
 import { i18n } from '@kbn/i18n';
-import type { SerializedTitles, PanelPackage } from '@kbn/presentation-publishing';
+import type { PanelPackage, SerializedTitles } from '@kbn/presentation-publishing';
 import {
-  childrenUnsavedChanges$,
   apiHasLibraryTransforms,
   apiHasSerializableState,
   apiPublishesTitle,
+  childrenLatestState$,
+  childrenUnsavedChanges$,
   getTitle,
   logStateDiff,
   shouldLogStateDiff,
+  UNSAVED_CHANGES_DEBOUNCE,
 } from '@kbn/presentation-publishing';
 import { asyncForEach } from '@kbn/std';
+import type { MaybePromise } from '@kbn/utility-types';
 
-import type { PinnedControlLayoutState } from '@kbn/controls-schemas';
 import type { DashboardState } from '../../../common';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../common/constants';
 import type { DashboardPanel } from '../../../server';
 import { dashboardClonePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
 import { placeClonePanel, runPanelPlacementStrategy } from '../../panel_placement';
+import { getPlacementHints } from '../../panel_placement/get_placement_hints';
 import {
   coreServices,
   embeddableService,
@@ -64,7 +70,11 @@ import {
 import { DASHBOARD_UI_METRIC_ID } from '../../utils/telemetry_constants';
 import type { initializeTrackPanel } from '../track_panel';
 import type { initializeViewModeManager } from '../view_mode_manager';
-import { arePanelLayoutsEqual, arePinnedPanelLayoutsEqual } from './are_layouts_equal';
+import {
+  areLayoutsEqual,
+  arePanelLayoutsEqual,
+  arePinnedPanelLayoutsEqual,
+} from './are_layouts_equal';
 import { deserializeLayout } from './deserialize_layout';
 import { serializeLayout } from './serialize_layout';
 import {
@@ -74,12 +84,9 @@ import {
   type DashboardLayoutPanel,
   type DashboardPinnablePanel,
 } from './types';
-import { getPlacementHints } from '../../panel_placement/get_placement_hints';
-import { anyChildrenChanges$ } from './any_children_changes';
 
 export function initializeLayoutManager(
   viewModeManager: ReturnType<typeof initializeViewModeManager>,
-  incomingEmbeddables: EmbeddablePackageState[] | undefined,
   initialPanels: DashboardState['panels'],
   initialPinnedPanels: DashboardState['pinned_panels'],
   trackPanel: ReturnType<typeof initializeTrackPanel>['api']
@@ -87,11 +94,13 @@ export function initializeLayoutManager(
   // --------------------------------------------------------------------------------------
   // Set up panel state manager
   // --------------------------------------------------------------------------------------
+  const childrenStateLoading$ = new BehaviorSubject<boolean>(false);
   const children$ = new BehaviorSubject<DashboardChildren>({});
   const { layout: initialLayout, childState: initialChildState } = deserializeLayout(
     initialPanels,
     initialPinnedPanels
   );
+  let currentChildState = cloneDeep(initialChildState);
 
   const layout$ = new BehaviorSubject<DashboardLayout>(initialLayout); // layout is the source of truth for which panels are in the dashboard.
   const gridLayout$ = new BehaviorSubject(transformDashboardLayoutToGridLayout(initialLayout, {})); // source of truth for rendering
@@ -120,13 +129,11 @@ export function initializeLayoutManager(
     }
   );
 
+  const latestChildrenState$ = childrenLatestState$(children$);
   const childrenChanges$ = childrenUnsavedChanges$(children$);
-  const childrenChangesSubscription = childrenChanges$.subscribe((childrenChanges) => {
-    for (const { uuid, hasUnsavedChanges } of childrenChanges) {
-      const childApi = children$.value[uuid];
-      if (hasUnsavedChanges && childApi && apiHasSerializableState(childApi)) {
-        currentChildState[uuid] = childApi.serializeState();
-      }
+  const stateChangedSubscription = latestChildrenState$.subscribe((childrenState) => {
+    for (const { uuid, latestState } of childrenState) {
+      currentChildState[uuid] = latestState;
     }
   });
 
@@ -149,24 +156,33 @@ export function initializeLayoutManager(
     distinctUntilChanged()
   );
 
-  let currentChildState = initialChildState; // childState is the source of truth for the state of each panel.
   let lastSavedLayout = initialLayout;
-
   let lastSavedChildState = initialChildState;
-  const resetLayout = (state: DashboardState) => {
-    const { layout: layoutToApply, childState: childStateToApply } = deserializeLayout(
-      state.panels,
-      state.pinned_panels
-    );
 
-    layout$.next({ ...layoutToApply }); // triggers removeOrphanedChildrenSubscription to purge orphaned children
-    currentChildState = { ...childStateToApply };
+  const resetLayout = async (state: DashboardState) => {
+    try {
+      childrenStateLoading$.next(true);
 
-    for (const [uuid, child] of Object.entries(children$.value)) {
-      const nextChildState = childStateToApply[uuid];
-      if (nextChildState && apiHasSerializableState(child)) {
-        child.applySerializedState(nextChildState);
+      const { layout: layoutToApply, childState: childStateToApply } = deserializeLayout(
+        state.panels,
+        state.pinned_panels
+      );
+
+      if (!areLayoutsEqual(layout$.getValue(), layoutToApply)) {
+        layout$.next({ ...layoutToApply }); // triggers removeOrphanedChildrenSubscription to purge orphaned children
       }
+      currentChildState = cloneDeep(childStateToApply);
+
+      const setStatePromises: MaybePromise<void>[] = [];
+      for (const [uuid, child] of Object.entries(children$.value)) {
+        const nextChildState = cloneDeep(childStateToApply[uuid]); // prevent shallow copies from being mutated unexpectedly
+        if (nextChildState && apiHasSerializableState(child)) {
+          setStatePromises.push(child.applySerializedState(nextChildState));
+        }
+      }
+      await Promise.all(setStatePromises);
+    } finally {
+      childrenStateLoading$.next(false);
     }
   };
 
@@ -274,9 +290,6 @@ export function initializeLayoutManager(
     trackPanel.setHighlightPanelId(first.embeddableId);
   };
 
-  // On initialization, place incoming embeddables if there is at least one
-  addIncomingEmbeddables(incomingEmbeddables);
-
   // --------------------------------------------------------------------------------------
   // API definition
   // --------------------------------------------------------------------------------------
@@ -376,22 +389,27 @@ export function initializeLayoutManager(
   };
 
   const replacePanel = async (idToRemove: string, panelPackage: PanelPackage) => {
-    const existingGridData = layout$.value.panels[idToRemove]?.grid;
-    const existingPinnedPanelData = layout$.value.pinnedPanels[idToRemove];
-    if (!existingGridData && !existingPinnedPanelData) throw new PanelNotFoundError();
+    try {
+      childrenStateLoading$.next(true);
+      const existingGridData = layout$.value.panels[idToRemove]?.grid;
+      const existingPinnedPanelData = layout$.value.pinnedPanels[idToRemove];
+      if (!existingGridData && !existingPinnedPanelData) throw new PanelNotFoundError();
 
-    removePanel(idToRemove);
-    if (existingGridData) {
-      const newPanel = await addNewPanel<DefaultEmbeddableApi>(
-        panelPackage,
-        { displaySuccessMessage: false },
-        existingGridData
-      );
-      return newPanel.uuid;
-    } else {
-      const prevLayoutState = pick(existingPinnedPanelData, 'grow', 'width', 'order');
-      const newPanel = await addPinnedPanel(panelPackage, prevLayoutState);
-      return newPanel.uuid;
+      removePanel(idToRemove);
+      if (existingGridData) {
+        const newPanel = await addNewPanel<DefaultEmbeddableApi>(
+          panelPackage,
+          { displaySuccessMessage: false },
+          existingGridData
+        );
+        return newPanel.uuid;
+      } else {
+        const prevLayoutState = pick(existingPinnedPanelData, 'grow', 'width', 'order');
+        const newPanel = await addPinnedPanel(panelPackage, prevLayoutState);
+        return newPanel.uuid;
+      }
+    } finally {
+      childrenStateLoading$.next(false);
     }
   };
 
@@ -456,10 +474,12 @@ export function initializeLayoutManager(
     panelPackage: PanelPackage,
     prevLayoutState?: Partial<PinnedControlLayoutState>
   ) => {
-    const newPanelUuid = createPanel(panelPackage);
     const { serializedState } = panelPackage;
+    const { grow, width, ...panelState } =
+      (serializedState as PinnedControlLayoutState) ?? DEFAULT_PINNED_CONTROL_STATE;
+    const newPanelUuid = createPanel({ ...panelPackage, serializedState: panelState });
     const layoutState = {
-      ...(serializedState ? pick(serializedState, 'grow', 'width') : {}),
+      ...(serializedState ? { grow, width } : {}),
       ...prevLayoutState,
     };
     const panelToPin = {
@@ -511,12 +531,13 @@ export function initializeLayoutManager(
   return {
     internalApi: {
       anyStateChange$: merge(
-        layout$.pipe(
-          skip(1),
-          map(() => undefined)
-        ),
-        anyChildrenChanges$(children$)
+        layout$.pipe(skip(1)),
+        latestChildrenState$.pipe(debounceTime(UNSAVED_CHANGES_DEBOUNCE))
+      ).pipe(
+        debounceTime(0), // batch state + layout updates
+        map(() => undefined)
       ),
+      childrenStateLoading$,
       getSerializedStateForPanel: (panelId: string) => currentChildState[panelId],
       getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
       gridLayout$,
@@ -698,7 +719,7 @@ export function initializeLayoutManager(
       },
     },
     cleanup: () => {
-      childrenChangesSubscription.unsubscribe();
+      stateChangedSubscription.unsubscribe();
       gridLayoutSubscription.unsubscribe();
       removeOrphanedChildrenSubscription.unsubscribe();
     },
