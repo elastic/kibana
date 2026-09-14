@@ -16127,10 +16127,6 @@ packages:
   find-root@1.1.0:
     resolution: {integrity: sha512-NKfW6bec6GfKc0SGx1e07QZY9PE99u0Bft/0rzSD5k3sO/vwkVUpDUKVm5Gpp5Ue3YfShPFTX2070tDs5kB9Ng==}
 
-  find-test-names@1.29.18:
-    resolution: {integrity: sha512-PmM4NQiyVVuM2t0FFoCDiliMppVYtIKFIEK1S2E9n+STDG/cpyXiKq5s2XQdF7AnQBeUftBdH5iEs3FUAgjfKA==}
-    hasBin: true
-
   find-test-names@1.29.19:
     resolution: {integrity: sha512-fSO2GXgOU6dH+FdffmRXYN/kLdnd8zkBGIZrKsmAdfLSFUUDLpDFF7+F/h+wjmjDWQmMgD8hPfJZR+igiEUQHQ==}
     hasBin: true
@@ -24291,7 +24287,7 @@ snapshots:
     dependencies:
       cypress: 15.12.0
       debug: 4.4.3(supports-color@8.1.1)
-      find-test-names: 1.29.18(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1)
+      find-test-names: 1.29.19(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1)
       globby: 11.1.0
     transitivePeerDependencies:
       - '@babel/core'
@@ -33186,18 +33182,6 @@ snapshots:
   find-replace@5.0.2: {}
 
   find-root@1.1.0: {}
-
-  find-test-names@1.29.18(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1):
-    dependencies:
-      '@babel/parser': 7.29.8
-      '@babel/plugin-syntax-jsx': 7.29.7(@babel/core@7.29.7(supports-color@8.1.1))
-      acorn-walk: 8.3.4
-      debug: 4.4.3(supports-color@8.1.1)
-      globby: 11.1.0
-      simple-bin-help: 1.8.0
-    transitivePeerDependencies:
-      - '@babel/core'
-      - supports-color
 
   find-test-names@1.29.19(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1):
     dependencies:
