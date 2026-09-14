@@ -461,6 +461,9 @@ export const HeaderCollapseOnScroll: Story = {
     // Fixed, not a control: the tab bar sits in the header's always-visible region, so the story
     // is partly about watching it survive the collapse.
     numTabs: 3,
+    // On by default so the compact row shows the icon and its tooltip; the control stays
+    // toggleable to compare the two title rows.
+    titleIcon: true,
     headerIsCollapsed: false,
   },
   render: HeaderCollapseOnScrollRender,

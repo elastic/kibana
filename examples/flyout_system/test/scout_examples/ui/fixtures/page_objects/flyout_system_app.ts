@@ -119,6 +119,10 @@ export class FlyoutSystemApp {
     return this.childFlyout(form, session, label).locator(subj('flyoutHeaderCollapsibleRegion'));
   }
 
+  titleIcon(form: FlyoutForm, session: string): Locator {
+    return this.flyout(form, session).locator(subj('flyoutHeaderTitleIcon'));
+  }
+
   badgeOverflow(form: FlyoutForm, session: string): Locator {
     return this.flyout(form, session).locator(subj('flyoutHeaderBadgeOverflow'));
   }
