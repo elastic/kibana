@@ -140,6 +140,26 @@ describe('workflow:resume task runner event fields', () => {
     expect(mockResolveInterruptedWorkflowResumeTask).not.toHaveBeenCalled();
   });
 
+  it('lets interrupted resume claims reach recovery even when execution is running', async () => {
+    setupPlugin();
+    mockGetWorkflowExecutionById.mockResolvedValue({ status: 'running' });
+    const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: {
+          ...taskManagerMock.createTask(),
+          id: getWorkflowImmediateResumeTaskId('exec-interrupted'),
+          params: { workflowRunId: 'exec-interrupted', spaceId: 'default' },
+          attempts: 2,
+        },
+        fakeRequest: {} as KibanaRequest,
+      })
+    );
+    await runner.run();
+    expect(mockResolveInterruptedWorkflowResumeTask).toHaveBeenCalledWith(
+      expect.objectContaining({ workflowRunId: 'exec-interrupted', taskAttempts: 2 })
+    );
+  });
+
   it('dispatches a timeout task through the same immediate runner', async () => {
     setupPlugin();
     const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].createTaskRunner(
@@ -166,7 +186,7 @@ describe('workflow:resume task runner event fields', () => {
       taskManagerMock.createRunContext({
         taskInstance: {
           ...taskManagerMock.createTask(),
-          params: { workflowRunId: 'exec-notify', spaceId: 'default', resumeRequest: true },
+          params: { workflowRunId: 'exec-notify', spaceId: 'default' },
           attempts: 2,
         },
         fakeRequest: {} as KibanaRequest,

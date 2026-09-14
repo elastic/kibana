@@ -484,7 +484,6 @@ export class WorkflowsExecutionEnginePlugin
         paramsSchema: schema.object({
           workflowRunId: schema.string(),
           spaceId: schema.string(),
-          resumeRequest: schema.maybe(schema.boolean()),
         }),
         title: 'Resume Workflow',
         description: 'Resumes a paused workflow',
@@ -495,8 +494,7 @@ export class WorkflowsExecutionEnginePlugin
         // Retries allow `resolveInterruptedWorkflowResumeTask` to fail-fast abandoned executions after interrupt.
         maxAttempts: WORKFLOW_RESUME_TASK_MAX_ATTEMPTS,
         createTaskRunner: ({ taskInstance, fakeRequest, signal, setCustomTaskRunEventFields }) => {
-          const { workflowRunId, spaceId, resumeRequest } =
-            taskInstance.params as ResumeWorkflowExecutionParams;
+          const { workflowRunId, spaceId } = taskInstance.params as ResumeWorkflowExecutionParams;
           if (!fakeRequest) {
             return this.createMissingIdentityTaskRunner({
               workflowRunId,
@@ -549,10 +547,7 @@ export class WorkflowsExecutionEnginePlugin
               const { workflowExecutionRepository, stepExecutionRepository } =
                 this.createScopedRepositories();
 
-              if (
-                resumeRequest ||
-                taskInstance.id !== getWorkflowImmediateResumeTaskId(workflowRunId)
-              ) {
+              if (taskInstance.id !== getWorkflowImmediateResumeTaskId(workflowRunId)) {
                 const accepted = await new WorkflowTaskManager(
                   pluginsStart.taskManager
                 ).tryRunImmediateResume({

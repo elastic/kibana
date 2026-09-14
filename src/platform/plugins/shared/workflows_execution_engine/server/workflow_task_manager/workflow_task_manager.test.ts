@@ -71,7 +71,7 @@ describe('WorkflowTaskManager', () => {
       schedule: jest.fn(),
       ensureScheduled: jest.fn(),
       fetch: jest.fn(),
-      runSoon: jest.fn(),
+      runSoon: jest.fn().mockResolvedValue({ id: 'resume-task', forced: false }),
       removeIfExists: jest.fn().mockResolvedValue(undefined),
       get: jest
         .fn()
@@ -110,7 +110,6 @@ describe('WorkflowTaskManager', () => {
           params: {
             workflowRunId: 'test-execution-id',
             spaceId: 'default',
-            resumeRequest: true,
           } as ResumeWorkflowExecutionParams,
           state: {},
           runAt: resumeAt,
@@ -213,7 +212,6 @@ describe('WorkflowTaskManager', () => {
           params: {
             workflowRunId: 'test-execution-id',
             spaceId: 'default',
-            resumeRequest: true,
           } as ResumeWorkflowExecutionParams,
           state: {},
           runAt: resumeAt,
@@ -507,7 +505,7 @@ describe('WorkflowTaskManager', () => {
       expect(mockTaskManager.removeIfExists).not.toHaveBeenCalled();
       expect(mockTaskManager.schedule).toHaveBeenCalledWith(
         expect.objectContaining({
-          params: { workflowRunId: params.executionId, spaceId: 'default', resumeRequest: true },
+          params: { workflowRunId: params.executionId, spaceId: 'default' },
           runAt: expect.any(Date),
         }),
         { request: fakeRequest, cloneApiKey: true }
@@ -530,6 +528,49 @@ describe('WorkflowTaskManager', () => {
   });
 
   describe('external resumes after timer hand-off', () => {
+    it.each([false, true])(
+      'retries a conflicting external wake-up (fallback=%s)',
+      async (fallback) => {
+        if (fallback) {
+          mockTaskManager.runSoon.mockRejectedValueOnce(
+            SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'global')
+          );
+          mockTaskManager.fetch.mockResolvedValue({ docs: [{ id: 'next-deadline' }] } as never);
+        }
+        mockTaskManager.runSoon.mockResolvedValueOnce({
+          id: 'resume-task',
+          forced: false,
+          conflict: true,
+        });
+        await workflowTaskManager.runExistingResumeTask('exec');
+        expect(mockTaskManager.runSoon).toHaveBeenCalledTimes(fallback ? 3 : 2);
+        expect(mockTaskManager.runSoon).toHaveBeenLastCalledWith(
+          fallback ? 'next-deadline' : getWorkflowGlobalTimeoutResumeTaskId('exec')
+        );
+      }
+    );
+
+    it('reports failure when every external wake-up update conflicts', async () => {
+      mockTaskManager.runSoon.mockResolvedValue({
+        id: 'resume-task',
+        forced: false,
+        conflict: true,
+      });
+      await expect(workflowTaskManager.runExistingResumeTask('exec')).rejects.toMatchObject({
+        output: { statusCode: 409 },
+      });
+      expect(mockTaskManager.runSoon).toHaveBeenCalledTimes(3);
+    });
+
+    it('does not replace a claimed external timer', async () => {
+      mockTaskManager.runSoon.mockRejectedValue(new TaskAlreadyRunningError('active'));
+      await expect(workflowTaskManager.runExistingResumeTask('exec')).rejects.toThrow(
+        TaskAlreadyRunningError
+      );
+      expect(mockTaskManager.removeIfExists).not.toHaveBeenCalled();
+      expect(mockTaskManager.schedule).not.toHaveBeenCalled();
+    });
+
     it('wakes the remaining authenticated timer when the global notification has completed', async () => {
       mockTaskManager.runSoon.mockRejectedValueOnce(
         SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'global')

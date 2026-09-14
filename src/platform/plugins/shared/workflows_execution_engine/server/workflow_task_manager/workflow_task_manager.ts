@@ -92,7 +92,6 @@ export class WorkflowTaskManager {
         params: {
           workflowRunId: workflowExecution.id,
           spaceId: workflowExecution.spaceId,
-          resumeRequest: true,
         } satisfies ResumeWorkflowExecutionParams,
         state: {},
         runAt: resumeAt,
@@ -122,7 +121,6 @@ export class WorkflowTaskManager {
         params: {
           workflowRunId: workflowExecution.id,
           spaceId: workflowExecution.spaceId,
-          resumeRequest: true,
         } satisfies ResumeWorkflowExecutionParams,
         state: {},
         runAt: resumeAt,
@@ -292,7 +290,6 @@ export class WorkflowTaskManager {
         params: {
           workflowRunId: params.executionId,
           spaceId: params.spaceId,
-          resumeRequest: true,
         } satisfies ResumeWorkflowExecutionParams,
         state: {},
         runAt: new Date(Date.now() + 1000),
@@ -305,7 +302,7 @@ export class WorkflowTaskManager {
   /** Wakes an existing authenticated timer without creating a task lacking execution credentials. */
   async runExistingResumeTask(executionId: string): Promise<void> {
     try {
-      await this.taskManager.runSoon(getWorkflowGlobalTimeoutResumeTaskId(executionId));
+      await this.runSoonWithConflictRetry(getWorkflowGlobalTimeoutResumeTaskId(executionId));
     } catch (error) {
       if (!SavedObjectsErrorHelpers.isNotFoundError(error)) throw error;
       // A claimed global notification can hand its next deadline to a separate
@@ -323,8 +320,21 @@ export class WorkflowTaskManager {
         },
       });
       if (!docs.length) throw error;
-      await this.taskManager.runSoon(docs[0].id);
+      await this.runSoonWithConflictRetry(docs[0].id);
     }
+  }
+
+  private async runSoonWithConflictRetry(taskId: string): Promise<void> {
+    // Re-read after a conflicting update; never report a wake-up that was not accepted.
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const result = await this.taskManager.runSoon(taskId);
+      if (!result.conflict) return;
+    }
+    throw SavedObjectsErrorHelpers.createConflictError(
+      'task',
+      taskId,
+      'Failed to wake resume task after conflicting updates'
+    );
   }
 
   async forceRunIdleTasks(

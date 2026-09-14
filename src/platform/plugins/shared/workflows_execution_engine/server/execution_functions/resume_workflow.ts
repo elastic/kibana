@@ -26,7 +26,6 @@ import { workflowExecutionLoop } from '../workflow_execution_loop';
 import {
   ensureWorkflowIdleTimeoutResumeAfterLoop,
   getIdleTimeoutResumeDeadlineMs,
-  getWorkflowIdleTimeoutResumeAtAfterLoop,
 } from '../workflow_execution_loop/handle_execution_delay';
 
 export async function resumeWorkflow({
@@ -55,7 +54,7 @@ export async function resumeWorkflow({
   internalResumeWorkflowExecution?: InternalResumeWorkflowExecution;
   workflowExecutionRepository: WorkflowExecutionRepository;
   stepExecutionRepository: StepExecutionRepository;
-}): Promise<{ idleTimeoutResumeAt?: Date; retryAt?: Date }> {
+}): Promise<{ retryAt?: Date }> {
   let setupResult: Awaited<ReturnType<typeof setupDependencies>>;
   try {
     setupResult = await setupDependencies(
@@ -146,11 +145,8 @@ export async function resumeWorkflow({
     workflowTaskManager,
   };
 
-  let idleTimeoutResumeAt: Date | undefined;
-
   try {
     await workflowExecutionLoop(workflowExecutionLoopParams);
-    idleTimeoutResumeAt = getWorkflowIdleTimeoutResumeAtAfterLoop(workflowExecutionLoopParams);
     await ensureWorkflowIdleTimeoutResumeAfterLoop(workflowExecutionLoopParams);
   } finally {
     await emitWorkflowExecutionFailedEventIfFailed({
@@ -175,5 +171,5 @@ export async function resumeWorkflow({
     cloudSetup: dependencies.cloudSetup,
   });
 
-  return { idleTimeoutResumeAt };
+  return {};
 }
