@@ -5,8 +5,13 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import {
   ALERT_COUNT_FIELD,
+  ALERT_CRITICAL_FIELD,
+  ALERT_HIGH_FIELD,
+  ALERT_LOW_FIELD,
+  ALERT_MEDIUM_FIELD,
   ENTITY_ID_FIELD,
   ENTITY_JOIN_FILTER,
   LAST_SEEN_ALERT_FIELD,
@@ -16,7 +21,7 @@ import {
   sortSuffix,
   cursorClause,
 } from './common';
-import type { PageCursor, QueryDeps, SortDir } from './common';
+import type { PageCursor, QueryDeps, RawQuery, Row, SortDir } from './common';
 import { buildAlertEuidPipeline } from './alert_euid_pipeline';
 
 // ── module-level ES|QL fragments ──────────────────────────────────────────────
@@ -167,4 +172,40 @@ export const buildAlertBuckets = (
     else if (sev === 'low') bucket.low += cnt;
   }
   return byId;
+};
+
+// ── enrichment ────────────────────────────────────────────────────────────────
+
+/** Populates alert_count, last_seen_alert, and per-severity counts for a page of entity rows. */
+export const enrichAlerts = async (
+  pageRows: Row[],
+  { alertsIndex, alertCutoff }: QueryDeps,
+  skip: Set<string>,
+  enrichPageQuery: RawQuery,
+  logger: Logger
+): Promise<void> => {
+  // Always runs — severity breakdown is never provided by any sort query.
+  // skip only suppresses last_seen_alert (already populated by last_seen_alert sort).
+  const entityIds = pageRows.map((r) => r[ENTITY_ID_FIELD] as string).filter(Boolean);
+  if (!entityIds.length) return;
+
+  const rows = await enrichPageQuery(
+    alertEnrichQuery(alertsIndex, entityIds, alertCutoff),
+    'alert enrich'
+  ).catch((e: unknown) => {
+    logger.warn(`alert enrich: ${e}`);
+    return null;
+  });
+  if (!rows) return;
+
+  const byId = buildAlertBuckets(rows);
+  for (const row of pageRows) {
+    const bucket = byId.get(row[ENTITY_ID_FIELD] as string);
+    if (!skip.has(LAST_SEEN_ALERT_FIELD)) row[LAST_SEEN_ALERT_FIELD] = bucket?.last_seen ?? null;
+    row[ALERT_COUNT_FIELD] = bucket?.total ?? 0;
+    row[ALERT_CRITICAL_FIELD] = bucket?.critical ?? 0;
+    row[ALERT_HIGH_FIELD] = bucket?.high ?? 0;
+    row[ALERT_MEDIUM_FIELD] = bucket?.medium ?? 0;
+    row[ALERT_LOW_FIELD] = bucket?.low ?? 0;
+  }
 };

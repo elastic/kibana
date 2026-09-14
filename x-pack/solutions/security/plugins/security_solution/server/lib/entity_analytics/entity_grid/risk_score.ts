@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import {
   ALLOWED_ENTITY_TYPES,
   ENTITY_ID_COALESCE,
+  ENTITY_ID_FIELD,
   ENTITY_TYPE_FIELD,
   RISK_SCORE_CHANGE_FIELD,
   RISK_SCORE_COALESCE,
@@ -17,7 +19,7 @@ import {
   sortSuffix,
   cursorClause,
 } from './common';
-import type { PageCursor, QueryDeps, RiskDateWindow, SortDir } from './common';
+import type { PageCursor, QueryDeps, RawQuery, RiskDateWindow, Row, SortDir } from './common';
 
 // ── query builders: risk_score_change sort ────────────────────────────────────
 
@@ -74,6 +76,36 @@ export const riskScoreChangeCountQuery = ({
 /** Fetches (entity_id, reference_score) for a specific set of entity IDs.
  *  Same window as riskScoreChangeBaseQuery — earliest score in [windowStart, windowEnd).
  *  Entities with no score in that window return no row. */
+// ── enrichment ────────────────────────────────────────────────────────────────
+
+/** Populates risk_score_change for a page of entity rows using the earliest reference score in the window. */
+export const enrichRiskScoreChange = async (
+  pageRows: Row[],
+  { riskScoreIndex, riskWindow }: QueryDeps,
+  skip: Set<string>,
+  enrichPageQuery: RawQuery,
+  logger: Logger
+): Promise<void> => {
+  if (skip.has(RISK_SCORE_CHANGE_FIELD)) return;
+
+  const entityIds = pageRows.map((r) => r[ENTITY_ID_FIELD] as string).filter(Boolean);
+  const rows = await enrichPageQuery(
+    referenceScoreEnrichQuery(riskScoreIndex, entityIds, riskWindow),
+    'score enrich'
+  ).catch((e: unknown) => {
+    logger.warn(`score enrich: ${e}`);
+    return null;
+  });
+  if (!rows) return;
+
+  const byId = new Map(rows.map((r) => [r.entity_id as string, r.reference_score as number]));
+  for (const row of pageRows) {
+    const cur = row[RISK_SCORE_NORM_FIELD] as number | null;
+    const ref = byId.get(row[ENTITY_ID_FIELD] as string) ?? null;
+    row[RISK_SCORE_CHANGE_FIELD] = cur != null && ref != null ? cur - ref : null;
+  }
+};
+
 export const referenceScoreEnrichQuery = (
   riskScoreIndex: string,
   entityIds: string[],

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import {
   ANOMALY_COUNT_FIELD,
   ENTITY_ID_FIELD,
@@ -16,7 +17,7 @@ import {
   sortSuffix,
   cursorClause,
 } from './common';
-import type { PageCursor, QueryDeps, SortDir } from './common';
+import type { PageCursor, QueryDeps, RawQuery, Row, SortDir } from './common';
 import { buildAnomalyEuidPipeline } from './alert_euid_pipeline';
 
 // nullify unmapped fields so queries work across heterogeneous .ml-anomalies-* index mappings
@@ -84,4 +85,36 @@ export const anomalyCountEnrichQuery = (
       `| STATS ${ANOMALY_COUNT_FIELD} = COUNT(*) BY \`entity.id\``,
     ].join('\n')
   );
+};
+
+// ── enrichment ────────────────────────────────────────────────────────────────
+
+/** Populates anomaly_count for a page of entity rows. */
+export const enrichAnomalyCount = async (
+  pageRows: Row[],
+  deps: QueryDeps,
+  skip: Set<string>,
+  enrichPageQuery: RawQuery,
+  logger: Logger
+): Promise<void> => {
+  if (skip.has(ANOMALY_COUNT_FIELD)) return;
+
+  const entityIds = pageRows.map((r) => r[ENTITY_ID_FIELD] as string).filter(Boolean);
+  if (!entityIds.length) return;
+
+  const rows = await enrichPageQuery(
+    anomalyCountEnrichQuery(deps, entityIds),
+    'anomaly count enrich'
+  ).catch((e: unknown) => {
+    logger.warn(`anomaly count enrich: ${e}`);
+    return null;
+  });
+  if (!rows) return;
+
+  const byId = new Map(
+    rows.map((r) => [r['entity.id'] as string, r[ANOMALY_COUNT_FIELD] as number])
+  );
+  for (const row of pageRows) {
+    row[ANOMALY_COUNT_FIELD] = byId.get(row[ENTITY_ID_FIELD] as string) ?? 0;
+  }
 };

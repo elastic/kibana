@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import {
   ALLOWED_ENTITY_TYPES,
   ENTITY_ID_FIELD,
@@ -18,7 +19,7 @@ import {
   sortSuffix,
   cursorClause,
 } from './common';
-import type { PageCursor, QueryDeps, SortDir } from './common';
+import type { PageCursor, QueryDeps, RawQuery, Row, SortDir } from './common';
 
 // ── query builders: group_size sort ──────────────────────────────────────────
 
@@ -66,3 +67,38 @@ export const groupSizeEnrichQuery = (entityAlias: string, groupKeys: readonly st
     `| WHERE group_key IN (${toList(groupKeys)})`,
     `| STATS ${GROUP_SIZE_FIELD} = COUNT(*) BY group_key`,
   ].join('\n');
+
+// ── enrichment ────────────────────────────────────────────────────────────────
+
+/** Populates group_size for a page of entity rows. */
+export const enrichGroupSize = async (
+  pageRows: Row[],
+  { entityAlias }: QueryDeps,
+  skip: Set<string>,
+  enrichPageQuery: RawQuery,
+  logger: Logger
+): Promise<void> => {
+  if (skip.has(GROUP_SIZE_FIELD)) return;
+
+  const groupKeys = [
+    ...new Set(pageRows.map((r) => (r[RESOLVED_TO_FIELD] ?? r[ENTITY_ID_FIELD]) as string)),
+  ].filter(Boolean);
+  if (!groupKeys.length) return;
+
+  const rows = await enrichPageQuery(
+    groupSizeEnrichQuery(entityAlias, groupKeys),
+    'group size enrich'
+  ).catch((e: unknown) => {
+    logger.warn(`group size enrich: ${e}`);
+    return null;
+  });
+  if (!rows) return;
+
+  const byGroupKey = new Map(
+    rows.map((r) => [r.group_key as string, r[GROUP_SIZE_FIELD] as number])
+  );
+  for (const row of pageRows) {
+    const gk = (row[RESOLVED_TO_FIELD] as string | null) ?? (row[ENTITY_ID_FIELD] as string);
+    row[GROUP_SIZE_FIELD] = byGroupKey.get(gk) ?? 1;
+  }
+};

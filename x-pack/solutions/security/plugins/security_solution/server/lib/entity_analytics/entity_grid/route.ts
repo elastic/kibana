@@ -9,20 +9,15 @@ import { schema } from '@kbn/config-schema';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
-import type { ElasticsearchClient, ISavedObjectsRepository } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { APP_ID } from '../../../../common/constants';
 import { API_VERSIONS } from '../../../../common/entity_analytics/constants';
 import { ENTITY_GRID_INTERNAL_URL } from '../../../../common/entity_analytics/entity_analytics/constants';
 import type { EntityAnalyticsRoutesDeps } from '../types';
 import {
   ALERT_COUNT_FIELD,
-  ALERT_CRITICAL_FIELD,
-  ALERT_HIGH_FIELD,
-  ALERT_LOW_FIELD,
-  ALERT_MEDIUM_FIELD,
   ALLOWED_ENTITY_TYPES,
   ANOMALY_COUNT_FIELD,
-  CASE_COUNT_FIELD,
   COMPUTED_SORT_FIELDS,
   ENTITY_ID_FIELD,
   ENTITY_TYPE_FIELD,
@@ -30,9 +25,7 @@ import {
   LAST_SEEN_ALERT_FIELD,
   MAX_PAGE_SIZE,
   DEFAULT_PAGE_SIZE,
-  RESOLVED_TO_FIELD,
   RISK_SCORE_CHANGE_FIELD,
-  RISK_SCORE_NORM_FIELD,
   VALID_FIELD_RE,
   alertLookbackCutoff,
   decodeCursor,
@@ -43,32 +36,27 @@ import {
   toRows,
   cursorClause,
 } from './common';
-import type { TimeRange, PageCursor, QueryDeps, Row, SortDir } from './common';
+import type { TimeRange, PageCursor, QueryDeps, RawQuery, Row, SortDir } from './common';
 
 import {
   alertCountSortCountQuery,
   alertCountSortDataQuery,
-  alertEnrichQuery,
-  buildAlertBuckets,
+  enrichAlerts,
   lastSeenAlertCountQuery,
   lastSeenAlertDataQuery,
 } from './alerts';
 import {
-  anomalyCountEnrichQuery,
   anomalyCountSortCountQuery,
   anomalyCountSortDataQuery,
+  enrichAnomalyCount,
 } from './anomalies';
 import {
   riskScoreChangeCountQuery,
   riskScoreChangeDataQuery,
-  referenceScoreEnrichQuery,
+  enrichRiskScoreChange,
 } from './risk_score';
-import {
-  groupSizeEnrichQuery,
-  groupSizeSortCountQuery,
-  groupSizeSortDataQuery,
-} from './group_size';
-import { batchCaseCounts } from './cases';
+import { groupSizeSortCountQuery, groupSizeSortDataQuery, enrichGroupSize } from './group_size';
+import { enrichCaseCounts } from './cases';
 
 // ── query builders: native entity sort ───────────────────────────────────────
 
@@ -182,21 +170,6 @@ const executeSortPage = async (
   return { pageRows: hasNextPage ? allRows.slice(0, pageSize) : allRows, total, hasNextPage };
 };
 
-const enrichCaseCounts = async (
-  pageRows: Row[],
-  soClient: ISavedObjectsRepository,
-  logger: EntityAnalyticsRoutesDeps['logger']
-): Promise<void> => {
-  const counts = await batchCaseCounts(
-    soClient,
-    pageRows.map((r) => r[ENTITY_ID_FIELD] as string).filter(Boolean),
-    logger
-  );
-  for (const row of pageRows) {
-    row[CASE_COUNT_FIELD] = counts.get(row[ENTITY_ID_FIELD] as string) ?? 0;
-  }
-};
-
 const buildNextCursor = (
   pageRows: Row[],
   sort: { field: string; direction: SortDir },
@@ -282,129 +255,6 @@ const buildPageQueries = (
 };
 
 // ── enrichPageRows ────────────────────────────────────────────────────────────
-
-type RawQuery = (q: string, name?: string) => Promise<Row[]>;
-
-const enrichAlerts = async (
-  pageRows: Row[],
-  { alertsIndex, alertCutoff }: QueryDeps,
-  skip: Set<string>,
-  enrichPageQuery: RawQuery,
-  logger: EntityAnalyticsRoutesDeps['logger']
-): Promise<void> => {
-  // Always runs — severity breakdown is never provided by any sort query.
-  // skip only suppresses last_seen_alert (already populated by last_seen_alert sort).
-  const entityIds = pageRows.map((r) => r[ENTITY_ID_FIELD] as string).filter(Boolean);
-  if (!entityIds.length) return;
-
-  const rows = await enrichPageQuery(
-    alertEnrichQuery(alertsIndex, entityIds, alertCutoff),
-    'alert enrich'
-  ).catch((e: unknown) => {
-    logger.warn(`alert enrich: ${e}`);
-    return null;
-  });
-  if (!rows) return;
-
-  const byId = buildAlertBuckets(rows);
-  for (const row of pageRows) {
-    const bucket = byId.get(row[ENTITY_ID_FIELD] as string);
-    if (!skip.has(LAST_SEEN_ALERT_FIELD)) row[LAST_SEEN_ALERT_FIELD] = bucket?.last_seen ?? null;
-    row[ALERT_COUNT_FIELD] = bucket?.total ?? 0;
-    row[ALERT_CRITICAL_FIELD] = bucket?.critical ?? 0;
-    row[ALERT_HIGH_FIELD] = bucket?.high ?? 0;
-    row[ALERT_MEDIUM_FIELD] = bucket?.medium ?? 0;
-    row[ALERT_LOW_FIELD] = bucket?.low ?? 0;
-  }
-};
-
-const enrichRiskScoreChange = async (
-  pageRows: Row[],
-  { riskScoreIndex, riskWindow }: QueryDeps,
-  skip: Set<string>,
-  enrichPageQuery: RawQuery,
-  logger: EntityAnalyticsRoutesDeps['logger']
-): Promise<void> => {
-  if (skip.has(RISK_SCORE_CHANGE_FIELD)) return;
-
-  const entityIds = pageRows.map((r) => r[ENTITY_ID_FIELD] as string).filter(Boolean);
-  const rows = await enrichPageQuery(
-    referenceScoreEnrichQuery(riskScoreIndex, entityIds, riskWindow),
-    'score enrich'
-  ).catch((e: unknown) => {
-    logger.warn(`score enrich: ${e}`);
-    return null;
-  });
-  if (!rows) return;
-
-  const byId = new Map(rows.map((r) => [r.entity_id as string, r.reference_score as number]));
-  for (const row of pageRows) {
-    const cur = row[RISK_SCORE_NORM_FIELD] as number | null;
-    const yday = byId.get(row[ENTITY_ID_FIELD] as string) ?? null;
-    row[RISK_SCORE_CHANGE_FIELD] = cur != null && yday != null ? cur - yday : null;
-  }
-};
-
-const enrichGroupSize = async (
-  pageRows: Row[],
-  { entityAlias }: QueryDeps,
-  skip: Set<string>,
-  enrichPageQuery: RawQuery,
-  logger: EntityAnalyticsRoutesDeps['logger']
-): Promise<void> => {
-  if (skip.has(GROUP_SIZE_FIELD)) return;
-
-  const groupKeys = [
-    ...new Set(pageRows.map((r) => (r[RESOLVED_TO_FIELD] ?? r[ENTITY_ID_FIELD]) as string)),
-  ].filter(Boolean);
-  if (!groupKeys.length) return;
-
-  const rows = await enrichPageQuery(
-    groupSizeEnrichQuery(entityAlias, groupKeys),
-    'group size enrich'
-  ).catch((e: unknown) => {
-    logger.warn(`group size enrich: ${e}`);
-    return null;
-  });
-  if (!rows) return;
-
-  const byGroupKey = new Map(
-    rows.map((r) => [r.group_key as string, r[GROUP_SIZE_FIELD] as number])
-  );
-  for (const row of pageRows) {
-    const gk = (row[RESOLVED_TO_FIELD] as string | null) ?? (row[ENTITY_ID_FIELD] as string);
-    row[GROUP_SIZE_FIELD] = byGroupKey.get(gk) ?? 1;
-  }
-};
-
-const enrichAnomalyCount = async (
-  pageRows: Row[],
-  deps: QueryDeps,
-  skip: Set<string>,
-  enrichPageQuery: RawQuery,
-  logger: EntityAnalyticsRoutesDeps['logger']
-): Promise<void> => {
-  if (skip.has(ANOMALY_COUNT_FIELD)) return;
-
-  const entityIds = pageRows.map((r) => r[ENTITY_ID_FIELD] as string).filter(Boolean);
-  if (!entityIds.length) return;
-
-  const rows = await enrichPageQuery(
-    anomalyCountEnrichQuery(deps, entityIds),
-    'anomaly count enrich'
-  ).catch((e: unknown) => {
-    logger.warn(`anomaly count enrich: ${e}`);
-    return null;
-  });
-  if (!rows) return;
-
-  const byId = new Map(
-    rows.map((r) => [r['entity.id'] as string, r[ANOMALY_COUNT_FIELD] as number])
-  );
-  for (const row of pageRows) {
-    row[ANOMALY_COUNT_FIELD] = byId.get(row[ENTITY_ID_FIELD] as string) ?? 0;
-  }
-};
 
 const enrichPageRows = async (
   pageRows: Row[],

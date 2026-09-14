@@ -72,6 +72,7 @@ export interface EsqlResponse {
   values: unknown[][];
 }
 export type Row = Record<string, unknown>;
+export type RawQuery = (q: string, name?: string) => Promise<Row[]>;
 export type SortDir = 'asc' | 'desc';
 
 export interface PageCursor {
