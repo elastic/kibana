@@ -15,7 +15,6 @@ import {
   CONVERSATION_TITLE_MAX_LENGTH,
   ConversationAccessControlMode,
   isRoundCompleteEvent,
-  isToolCallEvent,
   isToolResultEvent,
 } from '@kbn/agent-builder-common';
 import {
@@ -28,7 +27,7 @@ import type { Streams } from '@kbn/streams-schema';
 import type { AnalysisTarget } from '@kbn/nightshift-ai';
 import { KI_QUERY_GENERATION_AGENT_ID } from '../../agent_builder/agents/ki_query_generation';
 import {
-  WRITE_QUERIES_TOOL_ID,
+  SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
   type AcceptedQuery,
 } from '../../agent_builder/skills/ki_query_generation';
 import { chatTokenCountFromModelUsage } from './features/chat_token_count';
@@ -84,47 +83,30 @@ export async function executeKIQueryGenerationAgent({
 
   const events = await firstValueFrom(events$.pipe(toArray()));
 
-  const writeResultEvent = events
+  const validationResultEvent = events
     .filter(isToolResultEvent)
-    .findLast(
-      (event) =>
-        event.data.tool_id === WRITE_QUERIES_TOOL_ID &&
-        event.data.results.some(
-          (result) =>
-            typeof result.data === 'object' &&
-            result.data !== null &&
-            'written' in result.data &&
-            result.data.written === true &&
-            'queries' in result.data &&
-            Array.isArray(result.data.queries)
-        )
-    );
-
-  const writeResult = writeResultEvent?.data.results.find(
+    .filter((event) => event.data.tool_id === SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID)
+    .at(-1);
+  const finalizedResult = validationResultEvent?.data.results.find(
     (result) =>
       typeof result.data === 'object' &&
       result.data !== null &&
-      'written' in result.data &&
-      result.data.written === true &&
-      'queries' in result.data &&
-      Array.isArray(result.data.queries)
-  );
-  const writeEvent = events.findLast(
-    (event) =>
-      isToolCallEvent(event) &&
-      event.data.tool_id === WRITE_QUERIES_TOOL_ID &&
-      event.data.tool_call_id === writeResultEvent?.data.tool_call_id
+      'finalized' in result.data &&
+      result.data.finalized === true &&
+      'finalized_queries' in result.data &&
+      Array.isArray(result.data.finalized_queries)
   );
 
-  if (!writeEvent || !isToolCallEvent(writeEvent) || !writeResult) {
-    throw new Error('KI query generation agent did not successfully call write_queries');
+  if (!finalizedResult) {
+    throw new Error('KI query generation agent did not finalize validate_queries');
   }
 
   const roundEvent = events.find(isRoundCompleteEvent);
-  const rawQueries = (writeResult.data as { queries: AcceptedQuery[] }).queries;
+  const rawQueries = (finalizedResult.data as { finalized_queries: AcceptedQuery[] })
+    .finalized_queries;
 
   if (!Array.isArray(rawQueries)) {
-    throw new Error('KI query generation agent returned invalid write_queries output');
+    throw new Error('KI query generation agent returned invalid validate_queries output');
   }
 
   const queries: GeneratedSignificantEventQuery[] = rawQueries.map((q) => ({

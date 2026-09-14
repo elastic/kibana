@@ -12,11 +12,11 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { KibanaRequest } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Streams } from '@kbn/streams-schema';
-import { WRITE_QUERIES_TOOL_ID } from '../../agent_builder/skills/ki_query_generation';
+import { SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID } from '../../agent_builder/skills/ki_query_generation';
 import { executeKIQueryGenerationAgent } from './identify_ki_queries_via_agent';
 
 describe('executeKIQueryGenerationAgent', () => {
-  it('returns the server-validated queries from the successful write result', async () => {
+  it('returns finalized queries from the latest validation result', async () => {
     const validatedQuery = {
       type: 'match' as const,
       title: 'Validated query',
@@ -29,24 +29,32 @@ describe('executeKIQueryGenerationAgent', () => {
     const executeAgent = jest.fn().mockResolvedValue({
       events$: of(
         {
-          type: ChatEventType.toolCall,
+          type: ChatEventType.toolResult,
           data: {
-            tool_id: WRITE_QUERIES_TOOL_ID,
-            tool_call_id: 'write-1',
-            params: {
-              queries: [{ ...validatedQuery, esql: { query: 'FROM unvalidated-stream' } }],
-            },
+            tool_id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
+            tool_call_id: 'validate-1',
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  finalized: true,
+                  finalized_queries: [
+                    { ...validatedQuery, esql: { query: 'FROM superseded-validation' } },
+                  ],
+                },
+              },
+            ],
           },
         },
         {
           type: ChatEventType.toolResult,
           data: {
-            tool_id: WRITE_QUERIES_TOOL_ID,
-            tool_call_id: 'write-1',
+            tool_id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
+            tool_call_id: 'validate-2',
             results: [
               {
                 type: ToolResultType.other,
-                data: { written: true, count: 1, queries: [validatedQuery] },
+                data: { finalized: true, finalized_queries: [validatedQuery] },
               },
             ],
           },

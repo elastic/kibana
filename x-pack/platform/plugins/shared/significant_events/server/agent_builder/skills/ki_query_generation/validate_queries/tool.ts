@@ -14,15 +14,19 @@ import {
   createQueryValidationContext,
   QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
   validateKIQueries,
+  type ValidatedKIQuery,
 } from '@kbn/nightshift-ai';
 import { z } from '@kbn/zod/v4';
 import type { GetScopedClients } from '../../../../routes/types';
 import { getRequestAbortSignal } from '../../../../routes/utils/get_request_abort_signal';
 import { streamToAnalysisTarget } from '../../../../lib/significant_events/stream_to_analysis_target';
-import type { AcceptedQuery } from '../write_queries/tool';
 
 export const SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID =
   'platform.sig_events.ki_queries_validate';
+
+export type AcceptedQuery = Omit<ValidatedKIQuery, 'esql' | 'expects_matches'> & {
+  esql: { query: string };
+};
 
 const MAX_QUERIES_PER_CALL = 100;
 const MAX_FEATURE_IDS_PER_QUERY = 100;
@@ -83,28 +87,36 @@ const validateQueriesSchema = z.object({
     .describe('Target identifier against which the candidate ES|QL queries must be validated.'),
   queries: z
     .array(candidateQuerySchema)
-    .min(1)
     .max(MAX_QUERIES_PER_CALL)
-    .describe('Complete candidate query batch. Resubmit repaired queries after validation errors.'),
+    .describe(
+      'Complete candidate query batch. Resubmit the full repaired batch after validation errors, or pass an empty array to finalize with no queries.'
+    ),
 });
 
 export const createValidateQueriesTool = ({
   getScopedClients,
   logger,
-  setValidatedQueries,
 }: {
   getScopedClients: GetScopedClients;
   logger: Logger;
-  setValidatedQueries: (queries: AcceptedQuery[] | undefined) => void;
 }): BuiltinSkillBoundedTool<typeof validateQueriesSchema> => {
   return {
     id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
     type: ToolType.builtin,
     description:
-      'Validate candidate KI queries against a target. Rewrites sources, verifies feature links, rejects duplicates and over-broad predicates, and executes ES|QL with LIMIT 0. Use the returned errors to repair rejected queries before finalizing.',
+      'Validate and finalize a complete KI query batch. Rewrites sources, verifies feature links, rejects duplicates and over-broad predicates, and executes ES|QL with LIMIT 0. A batch is finalized only when every query passes.',
     schema: validateQueriesSchema,
     handler: async ({ target_id: targetId, queries }, context) => {
-      setValidatedQueries(undefined);
+      if (queries.length === 0) {
+        return {
+          results: [
+            {
+              type: ToolResultType.other,
+              data: { queries: [], finalized: true, finalized_queries: [] },
+            },
+          ],
+        };
+      }
 
       try {
         const scopedClients = await getScopedClients({ request: context.request });
@@ -154,7 +166,8 @@ export const createValidateQueriesTool = ({
             esql: { query: esql },
           })
         );
-        setValidatedQueries(validatedQueries);
+        const finalized =
+          results.length === queries.length && results.every(({ valid }) => valid === true);
 
         return {
           results: [
@@ -162,7 +175,8 @@ export const createValidateQueriesTool = ({
               type: ToolResultType.other,
               data: {
                 queries: results,
-                accepted_queries: validatedQueries,
+                finalized,
+                ...(finalized ? { finalized_queries: validatedQueries } : {}),
               },
             },
           ],

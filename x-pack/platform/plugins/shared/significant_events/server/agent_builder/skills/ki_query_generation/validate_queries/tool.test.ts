@@ -43,7 +43,6 @@ describe('ki_queries_validate tool', () => {
   const getStream = jest.fn().mockResolvedValue(stream);
   const getFeatures = jest.fn();
   const getStreamToQueryLinksMap = jest.fn();
-  const setValidatedQueries = jest.fn();
   const getScopedClients = jest.fn(async () => {
     return {
       streamsClient: { getStream },
@@ -112,7 +111,6 @@ describe('ki_queries_validate tool', () => {
     createValidateQueriesTool({
       getScopedClients,
       logger,
-      setValidatedQueries,
     });
 
   it('bounds its input', () => {
@@ -124,7 +122,10 @@ describe('ki_queries_validate tool', () => {
     expect(tool.schema.safeParse({ target_id: 'logs.test', queries: [candidate] }).success).toBe(
       true
     );
-    expect(tool.schema.safeParse({ target_id: 'logs.test', queries: [] }).success).toBe(false);
+    expect(tool.schema.safeParse({ target_id: 'logs.test', queries: [] }).success).toBe(true);
+    expect(
+      tool.schema.safeParse({ target_id: 'logs.test', queries: Array(101).fill(candidate) }).success
+    ).toBe(false);
   });
 
   it('resolves an analysis target, queries KI state, and returns validated results', async () => {
@@ -162,23 +163,13 @@ describe('ki_queries_validate tool', () => {
         queryValidationTimeoutMs: 12_000,
       })
     );
-    expect(setValidatedQueries).toHaveBeenLastCalledWith([
-      {
-        type: 'match',
-        esql: { query: 'FROM logs.test | WHERE message:"failure"' },
-        title: 'Failures',
-        description: 'Detects failures',
-        category: 'error',
-        severity_score: 60,
-        features: [{ id: 'feature-1', run_id: 'run-1' }],
-      },
-    ]);
     expect(result.results).toEqual([
       {
         type: 'other',
         data: {
           queries: [{ query: candidate, valid: true, status: 'Added' }],
-          accepted_queries: [
+          finalized: true,
+          finalized_queries: [
             {
               type: 'match',
               esql: { query: 'FROM logs.test | WHERE message:"failure"' },
@@ -190,6 +181,53 @@ describe('ki_queries_validate tool', () => {
             },
           ],
         },
+      },
+    ]);
+  });
+
+  it('does not finalize a batch containing rejected queries', async () => {
+    validateKIQueriesMock.mockResolvedValueOnce({
+      results: [{ query: candidate, valid: false, status: 'Failed to add' }],
+      acceptedQueries: [],
+      hasIntentFailures: false,
+      hasNonIntentFailures: true,
+    });
+
+    const result = await invokeHandler(
+      createTool(),
+      { target_id: 'logs.test', queries: [candidate] },
+      createMockToolContext()
+    );
+    if (!('results' in result)) {
+      throw new Error('Expected a standard tool result');
+    }
+
+    expect(result.results).toEqual([
+      {
+        type: 'other',
+        data: {
+          queries: [{ query: candidate, valid: false, status: 'Failed to add' }],
+          finalized: false,
+        },
+      },
+    ]);
+  });
+
+  it('finalizes an explicit empty batch without loading target state', async () => {
+    const result = await invokeHandler(
+      createTool(),
+      { target_id: 'logs.test', queries: [] },
+      createMockToolContext()
+    );
+    if (!('results' in result)) {
+      throw new Error('Expected a standard tool result');
+    }
+
+    expect(getScopedClients).not.toHaveBeenCalled();
+    expect(result.results).toEqual([
+      {
+        type: 'other',
+        data: { queries: [], finalized: true, finalized_queries: [] },
       },
     ]);
   });
@@ -209,6 +247,5 @@ describe('ki_queries_validate tool', () => {
     expect(result.results).toEqual([
       { type: 'error', data: { message: 'KI storage unavailable' } },
     ]);
-    expect(setValidatedQueries).toHaveBeenLastCalledWith(undefined);
   });
 });

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { WRITE_QUERIES_TOOL_ID } from '@kbn/significant-events-plugin/server';
+import { SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID } from '@kbn/significant-events-plugin/server';
 import {
   collectQueryAttempts,
   computeToolUsage,
-  getSuccessfulWriteQueriesParams,
+  getFinalizedQueries,
 } from './run_ki_query_generation_agent';
 
 describe('computeToolUsage', () => {
@@ -23,8 +23,9 @@ describe('computeToolUsage', () => {
         },
         {
           type: 'tool_call',
-          tool_id: WRITE_QUERIES_TOOL_ID,
-          results: [{ type: 'other', data: { written: true, queries: [{}] } }],
+          tool_id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
+          params: { queries: [{}] },
+          results: [{ type: 'other', data: { finalized: true, finalized_queries: [{}] } }],
         },
       ])
     ).toEqual({
@@ -33,14 +34,14 @@ describe('computeToolUsage', () => {
     });
   });
 
-  it('treats a successful empty write as abstention rather than add_queries usage', () => {
+  it('treats a finalized empty batch as abstention rather than add_queries usage', () => {
     expect(
       computeToolUsage([
         {
           type: 'tool_call',
-          tool_id: WRITE_QUERIES_TOOL_ID,
+          tool_id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
           params: { queries: [] },
-          results: [{ type: 'other', data: { written: true, count: 0, queries: [] } }],
+          results: [{ type: 'other', data: { finalized: true, finalized_queries: [] } }],
         },
       ]).add_queries
     ).toEqual({ calls: 0, failures: 0, latency_ms: 0 });
@@ -108,39 +109,19 @@ describe('collectQueryAttempts', () => {
   });
 });
 
-describe('getSuccessfulWriteQueriesParams', () => {
-  it('uses the last successfully completed write_queries call', () => {
+describe('getFinalizedQueries', () => {
+  it('returns a finalized batch', () => {
     expect(
-      getSuccessfulWriteQueriesParams([
+      getFinalizedQueries([
         {
           type: 'tool_call',
-          tool_id: WRITE_QUERIES_TOOL_ID,
-          params: {},
-          results: [{ type: 'error', data: { message: 'Invalid parameters' } }],
-        },
-        {
-          type: 'tool_call',
-          tool_id: WRITE_QUERIES_TOOL_ID,
-          params: {
-            queries: [
-              {
-                type: 'match',
-                title: 'Unvalidated query',
-                description: 'unvalidated',
-                esql: { query: 'FROM other-stream' },
-                category: 'error',
-                severity_score: 1,
-                features: [{ id: 'other-feature' }],
-              },
-            ],
-          },
+          tool_id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
           results: [
             {
               type: 'other',
               data: {
-                written: true,
-                count: 1,
-                queries: [
+                finalized: true,
+                finalized_queries: [
                   {
                     type: 'match',
                     title: 'Detects errors',
@@ -156,43 +137,43 @@ describe('getSuccessfulWriteQueriesParams', () => {
           ],
         },
       ])
-    ).toEqual({
-      queries: [
-        {
-          type: 'match',
-          title: 'Detects errors',
-          description: 'desc',
-          esql: { query: 'FROM logs' },
-          category: 'error',
-          severity_score: 70,
-          features: [{ id: 'f1', run_id: 'r1' }],
-        },
-      ],
-    });
+    ).toEqual([
+      {
+        type: 'match',
+        title: 'Detects errors',
+        description: 'desc',
+        esql: { query: 'FROM logs' },
+        category: 'error',
+        severity_score: 70,
+        features: [{ id: 'f1', run_id: 'r1' }],
+      },
+    ]);
   });
 
-  it('does not accept a written result without server-validated queries', () => {
+  it('does not fall back when the latest validation is not finalized', () => {
     expect(() =>
-      getSuccessfulWriteQueriesParams([
+      getFinalizedQueries([
         {
           type: 'tool_call',
-          tool_id: WRITE_QUERIES_TOOL_ID,
-          params: {
-            queries: [
-              {
-                type: 'match',
-                title: 'Detects errors',
-                description: 'desc',
-                esql: { query: 'FROM logs' },
-                category: 'error',
-                severity_score: 70,
-                features: [{ id: 'f1', run_id: 'r1' }],
+          tool_id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
+          params: { queries: [{}] },
+          results: [
+            {
+              type: 'other',
+              data: {
+                finalized: true,
+                finalized_queries: [{}],
               },
-            ],
-          },
-          results: [{ type: 'other', data: { written: true, count: 1 } }],
+            },
+          ],
+        },
+        {
+          type: 'tool_call',
+          tool_id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
+          params: { queries: [{}] },
+          results: [{ type: 'other', data: { finalized: false, queries: [] } }],
         },
       ])
-    ).toThrow('did not successfully call write_queries');
+    ).toThrow('did not finalize validate_queries');
   });
 });

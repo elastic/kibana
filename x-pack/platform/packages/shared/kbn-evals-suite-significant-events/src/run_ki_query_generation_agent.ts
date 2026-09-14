@@ -17,7 +17,7 @@ import {
 import { createAgentBuilderClient, type ConverseStep } from '@kbn/evals';
 import {
   KI_QUERY_GENERATION_AGENT_ID,
-  WRITE_QUERIES_TOOL_ID,
+  SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
   buildKIQueryGenerationUserMessage,
   type AcceptedQuery,
 } from '@kbn/significant-events-plugin/server';
@@ -38,7 +38,6 @@ export interface RunKIQueryGenerationAgentResult {
 }
 
 const GET_FEATURES_STEP_TOOL_ID = 'platform_sig_events_ki_features_get';
-const VALIDATE_QUERIES_STEP_TOOL_ID = 'platform_sig_events_ki_queries_validate';
 const normalizedToolId = (toolId: string): string => toolId.replaceAll('.', '_');
 
 /** Adapts Agent Builder tool events to the legacy evaluator telemetry shape. */
@@ -75,8 +74,8 @@ export const computeToolUsage = (steps: ConverseStep[]): SignificantEventsToolUs
       Array.isArray(data.features)
     ),
     add_queries: usageFor(
-      WRITE_QUERIES_TOOL_ID,
-      (data) => data.written === true && Array.isArray(data.queries) && data.queries.length > 0,
+      SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
+      (data) => data.finalized === true && Array.isArray(data.finalized_queries),
       (step) =>
         (typeof step.params === 'object' &&
           step.params !== null &&
@@ -91,9 +90,9 @@ export const computeToolUsage = (steps: ConverseStep[]): SignificantEventsToolUs
               'data' in result &&
               typeof result.data === 'object' &&
               result.data !== null &&
-              'queries' in result.data &&
-              Array.isArray(result.data.queries) &&
-              result.data.queries.length > 0
+              'finalized_queries' in result.data &&
+              Array.isArray(result.data.finalized_queries) &&
+              result.data.finalized_queries.length > 0
           )
         )
     ),
@@ -109,7 +108,8 @@ export const collectQueryAttempts = (steps: ConverseStep[]): QueryAttempt[] =>
       (step) =>
         step.type === 'tool_call' &&
         typeof step.tool_id === 'string' &&
-        normalizedToolId(step.tool_id) === normalizedToolId(VALIDATE_QUERIES_STEP_TOOL_ID)
+        normalizedToolId(step.tool_id) ===
+          normalizedToolId(SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID)
     )
     .flatMap((step) => step.results ?? [])
     .flatMap((result) => {
@@ -173,33 +173,34 @@ export const collectQueryAttempts = (steps: ConverseStep[]): QueryAttempt[] =>
       });
     });
 
-const isSuccessfulWriteResult = (
+const isFinalizedValidationResult = (
   result: unknown
-): result is { data: { written: true; queries: AcceptedQuery[] } } =>
+): result is { data: { finalized: true; finalized_queries: AcceptedQuery[] } } =>
   typeof result === 'object' &&
   result !== null &&
   'data' in result &&
   typeof result.data === 'object' &&
   result.data !== null &&
-  'written' in result.data &&
-  result.data.written === true &&
-  'queries' in result.data &&
-  Array.isArray(result.data.queries);
+  'finalized' in result.data &&
+  result.data.finalized === true &&
+  'finalized_queries' in result.data &&
+  Array.isArray(result.data.finalized_queries);
 
-export const getSuccessfulWriteQueriesParams = (
-  steps: ConverseStep[]
-): { queries: AcceptedQuery[] } => {
-  const writeStep = steps.findLast(
-    (step) =>
-      step.type === 'tool_call' &&
-      step.tool_id === WRITE_QUERIES_TOOL_ID &&
-      step.results?.some(isSuccessfulWriteResult)
-  );
-  const writeResult = writeStep?.results?.find(isSuccessfulWriteResult);
-  if (!writeResult) {
-    throw new Error('KI query generation agent did not successfully call write_queries');
+export const getFinalizedQueries = (steps: ConverseStep[]): AcceptedQuery[] => {
+  const validationStep = steps
+    .filter(
+      (step) =>
+        step.type === 'tool_call' &&
+        typeof step.tool_id === 'string' &&
+        normalizedToolId(step.tool_id) ===
+          normalizedToolId(SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID)
+    )
+    .at(-1);
+  const validationResult = validationStep?.results?.find(isFinalizedValidationResult);
+  if (!validationResult) {
+    throw new Error('KI query generation agent did not finalize validate_queries');
   }
-  return { queries: writeResult.data.queries };
+  return validationResult.data.finalized_queries;
 };
 
 export async function runKIQueryGenerationAgent({
@@ -222,7 +223,7 @@ export async function runKIQueryGenerationAgent({
     conversationId: conversation.id,
     input: userMessage,
   });
-  const { queries } = getSuccessfulWriteQueriesParams(result.steps);
+  const queries = getFinalizedQueries(result.steps);
   return {
     queries,
     queryAttempts: collectQueryAttempts(result.steps),
