@@ -368,7 +368,6 @@ function onDataLoadAbort(layerId: string, dataId: string, requestToken: symbol) 
       type: LAYER_DATA_LOAD_ENDED,
       layerId,
       dataId,
-      data: {},
       meta: {},
       requestToken,
     });
