@@ -10,6 +10,7 @@ import { LensDatatable } from './lens_datatable';
 import { LensDimensions } from './lens_dimensions';
 import { LensDragDrop } from './lens_drag_drop';
 import { LensFields } from './lens_fields';
+import { LensFieldsList } from './lens_fields_list';
 import { LensLayers } from './lens_layers';
 import { LensMetric } from './lens_metric';
 import { LensStyle } from './lens_style';
@@ -32,6 +33,8 @@ export class LensEditorApp extends LensApp {
   public readonly datatable: LensDatatable;
   /** Data-panel field creation, editing, and removal. */
   public readonly fields: LensFields;
+  /** Field-list popover stats (top values, distribution, empty/available counts). */
+  public readonly fieldsList: LensFieldsList;
   /** Workspace chrome: navigation, apply/discard, settings, tag cloud, formula. */
   public readonly workspace: LensWorkspace;
   /**
@@ -56,6 +59,7 @@ export class LensEditorApp extends LensApp {
     this.fields = createLazyPageObject(LensFields, page, {
       getFieldListPanelFieldLocator: (field: string) => this.getFieldListPanelFieldLocator(field),
     });
+    this.fieldsList = createLazyPageObject(LensFieldsList, page);
     this.workspace = createLazyPageObject(LensWorkspace, page, {
       closeDimensionEditorButton: this.closeDimensionEditorButton,
       waitForLensApp: () => this.waitForLensApp(),

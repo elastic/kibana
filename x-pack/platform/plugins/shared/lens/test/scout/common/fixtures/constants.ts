@@ -49,6 +49,12 @@ export const LOGSTASH_IN_RANGE_DATES = {
   to: 'Sep 23, 2015 @ 18:31:44.000',
 } as const;
 
+/** Time window with no logstash documents; used to move fields into the empty bucket. */
+export const LOGSTASH_OUT_OF_RANGE = {
+  from: 'Sep 17, 2015 @ 06:31:44.000',
+  to: 'Sep 18, 2015 @ 06:31:44.000',
+} as const;
+
 export const TSDB_ISO_TIME_RANGE = {
   start: '2023-04-16T00:00:00.000Z',
   end: '2023-06-16T00:00:00.000Z',
