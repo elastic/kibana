@@ -59,11 +59,10 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
     page,
   }) => {
     const { dashboard, lens } = pageObjects;
-    // Scoped to the panel embeddable — the dashboard also has a library metric with the same title.
+    // Scope reads to this embeddable — the dashboard also has a library metric with the same title.
     const inlineMetricPanel = dashboard.getPanelByEmbeddableId(
       testData.ESQL_CONVERSION_PANEL_IDS.INLINE_METRIC
     );
-    const metricVis = inlineMetricPanel.getByTestId('mtrVis');
 
     await openInlineEditorAndWaitVisible(
       pageObjects,
@@ -90,9 +89,11 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
           'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger-textBased'
         )
       ).toHaveText('Average of bytes');
-      await expect(metricVis).toContainText('Average of bytes');
-      await expect(metricVis.locator('.echMetricText__valueBlock')).not.toHaveText('');
-      await expect(inlineMetricPanel.locator(lens.metric.metricProgressBar)).toBeVisible();
+      await expect(lens.metric.metricTiles(inlineMetricPanel)).toHaveCount(1);
+      await expect(lens.metric.progressBar(inlineMetricPanel)).toBeVisible();
+      const [{ title, value }] = await lens.metric.getMetricVisualizationData(inlineMetricPanel);
+      expect(title).toBe('Average of bytes');
+      expect(value).toMatch(/\S/);
     });
 
     await test.step('apply conversion', async () => {
@@ -100,9 +101,11 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
     });
 
     await test.step('assert panel after apply', async () => {
-      await expect(metricVis).toContainText('Average of bytes');
-      await expect(metricVis.locator('.echMetricText__valueBlock')).not.toHaveText('');
-      await expect(inlineMetricPanel.locator(lens.metric.metricProgressBar)).toBeVisible();
+      await expect(lens.metric.metricTiles(inlineMetricPanel)).toHaveCount(1);
+      await expect(lens.metric.progressBar(inlineMetricPanel)).toBeVisible();
+      const [{ title, value }] = await lens.metric.getMetricVisualizationData(inlineMetricPanel);
+      expect(title).toBe('Average of bytes');
+      expect(value).toMatch(/\S/);
     });
 
     await test.step('reopen and assert query persisted', async () => {
