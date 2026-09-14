@@ -9,13 +9,9 @@ import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
-import {
-  RULES_UI_EDIT,
-  SIEM_MIGRATIONS_FEATURE_ID,
-} from '@kbn/security-solution-features/constants';
+import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
 import { z } from '@kbn/zod/v4';
 import { NonEmptyString } from '../../../../../common/api/model/primitives.gen';
-import { RULES_FEATURE_ID } from '../../../../../common/constants';
 import { SIEM_RULE_MIGRATION_INSTALL_PATH } from '../../../../../common/siem_migrations/constants';
 import {
   InstallMigrationRulesRequestBody,
@@ -26,7 +22,8 @@ import type { ProductFeaturesService } from '../../../../lib/product_features_se
 import { createSelfClient, type SelfClient } from '../../../../common/self_client/self_client';
 import { createSiemMigrationAvailability } from '../common/availability';
 import { createMissingPrivilegeError, createToolErrorResult } from '../common/tool_results';
-import { hasSiemMigrationPrivileges } from '../common/privileges';
+import { hasRuleMigrationPrivileges } from '../common/privileges';
+import { RULE_MIGRATION_SKILLS } from '../../../skills/siem_migration/rules/skill_ids';
 import { SIEM_MIGRATION_INSTALL_RULE_MIGRATION_TOOL_ID } from './tool_ids';
 
 const schema = InstallMigrationRulesRequestBody.extend({
@@ -53,24 +50,28 @@ export const installMigrationRulesTool = (
   return {
     id: SIEM_MIGRATION_INSTALL_RULE_MIGRATION_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Install Migration Rules',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     availability: createSiemMigrationAvailability(core, productFeaturesService, logger),
     confirmation: { askUser: 'always' },
-    description: `Install fully translated rules from an Automatic Rule Migration.
+    description: `Install fully translated rules from an Automatic Rule Migration. Mutating.
 
-Mutating. See the automatic-migration-rules-install-rules skill for scope confirmation, integration-readiness checks, enabled-state policy, and result interpretation.`,
+See the ${RULE_MIGRATION_SKILLS.INSTALL} skill for the full workflow.`,
     schema,
     tags: ['security', 'siem-migration', 'rules'],
     handler: async (input, { request }) => {
       const { migration_id: migrationId, ids, enabled } = input;
-      const [, startPlugins] = await core.getStartServices();
-      const canInstall = await hasSiemMigrationPrivileges(core, request, [
-        `${SIEM_MIGRATIONS_FEATURE_ID}.all`,
-        startPlugins.security.authz.actions.ui.get(RULES_FEATURE_ID, RULES_UI_EDIT),
-      ]);
+      const canInstall = await hasRuleMigrationPrivileges(core, request, [RULES_API_ALL]);
 
       if (!canInstall) {
         return createMissingPrivilegeError(
-          'install migration rules; Automatic Migration: All and Detection Rules: All are required'
+          'install migration rules',
+          'Security > Automatic Migration: All and Detection Rules: All'
         );
       }
 

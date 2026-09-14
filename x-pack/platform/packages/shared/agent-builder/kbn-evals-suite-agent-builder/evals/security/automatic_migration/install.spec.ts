@@ -117,7 +117,7 @@ integration first. Which option do you prefer?`,
                   metadata: {
                     query_intent: 'Install Rules With Missing Integration',
                     expectedSkill: 'automatic-migration-rules-install-rules',
-                    expectedToolId: 'security.siem_migration.group_rules_by_integration',
+                    expectedToolId: 'security.siem_migration.group_rules_by_integrations',
                     shouldNotCallToolId: 'security.siem_migration.install_migration_rules',
                     requiredTerms: ['definitely_missing_eval_integration'],
                   },

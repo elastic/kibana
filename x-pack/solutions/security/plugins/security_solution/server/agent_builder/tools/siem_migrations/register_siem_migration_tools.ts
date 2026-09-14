@@ -44,8 +44,8 @@ export const registerSiemMigrationTools = (
   agentBuilder.tools.register(stopRuleMigrationTool(core, logger, productFeaturesService));
   agentBuilder.tools.register(updateRuleMigrationTool(core, logger, productFeaturesService));
   agentBuilder.tools.register(deleteRuleMigrationTool(core, logger, productFeaturesService));
+  agentBuilder.tools.register(installMigrationRulesTool(core, logger, productFeaturesService));
   agentBuilder.tools.register(
     groupRulesByIntegrationsTool(core, logger, productFeaturesService, getSiemMigrationContext)
   );
-  agentBuilder.tools.register(installMigrationRulesTool(core, logger, productFeaturesService));
 };

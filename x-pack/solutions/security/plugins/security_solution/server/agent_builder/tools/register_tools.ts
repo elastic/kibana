@@ -69,9 +69,9 @@ export const registerTools = (
   ml: SetupPlugins['ml'],
   rulePreviewDeps: RunRulePreviewDeps,
   getSiemMigrationContext: GetSiemMigrationContext,
-  toolsConfig: RegisterToolsConfig
+  config: RegisterToolsConfig
 ) => {
-  const { isServerless = false, kibanaVersion, hasEncryptionKey = false } = toolsConfig;
+  const { isServerless = false, kibanaVersion, hasEncryptionKey = false } = config;
   agentBuilder.tools.register(entityRiskScoreTool(core, logger));
   agentBuilder.tools.register(attackDiscoverySearchTool(core, logger));
   agentBuilder.tools.register(securityLabsSearchTool(core));
@@ -129,6 +129,12 @@ export const registerTools = (
     !experimentalFeatures.siemMigrationsDisabled &&
     experimentalFeatures.siemRuleMigrationsAgentBuilderEnabled
   ) {
-    registerSiemMigrationTools(agentBuilder, core, productFeaturesService, logger, getSiemMigrationContext);
+    registerSiemMigrationTools(
+      agentBuilder,
+      core,
+      productFeaturesService,
+      logger,
+      getSiemMigrationContext
+    );
   }
 };

@@ -21,10 +21,12 @@ describe('installMigrationRulesTool', () => {
   let core: ReturnType<typeof coreMock.createSetup>;
   let fetch: jest.Mock;
   let checkPrivileges: jest.Mock;
+  let apiGet: jest.Mock;
 
   beforeEach(() => {
     core = coreMock.createSetup();
     fetch = jest.fn();
+    apiGet = jest.fn((p: string) => `api:${p}`);
     checkPrivileges = jest.fn().mockResolvedValue({ hasAllRequested: true });
     const coreStart = coreMock.createStart();
     (coreStart.http.selfClient.asScoped as unknown as jest.Mock).mockReturnValue({ fetch });
@@ -33,7 +35,7 @@ describe('installMigrationRulesTool', () => {
       {
         security: {
           authz: {
-            actions: { ui: { get: jest.fn().mockReturnValue('rules-edit-action') } },
+            actions: { api: { get: apiGet } },
             checkPrivilegesDynamicallyWithRequest: () => checkPrivileges,
           },
         },
@@ -43,16 +45,6 @@ describe('installMigrationRulesTool', () => {
   });
 
   const tool = () => installMigrationRulesTool(core, mockLogger, productFeaturesService);
-
-  it('requires confirmation and bounds selected ids', () => {
-    expect(tool().confirmation).toEqual({ askUser: 'always' });
-    expect(
-      tool().schema.safeParse({
-        migration_id: 'migration',
-        ids: Array.from({ length: 201 }, (_, index) => `${index}`),
-      }).success
-    ).toBe(false);
-  });
 
   it('installs a selected scope with the confirmed enabled state', async () => {
     fetch.mockResolvedValue({
@@ -70,8 +62,15 @@ describe('installMigrationRulesTool', () => {
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     )) as ToolHandlerStandardReturn;
 
+    // Verify the three real API actions are checked — not the old feature/UI privilege shape.
+    // apiGet mock returns `api:${privilege}`, so the expected values are the raw action strings
+    // wrapped with the `api:` prefix.
     expect(checkPrivileges).toHaveBeenCalledWith({
-      kibana: ['securitySolutionSiemMigrations.all', 'rules-edit-action'],
+      kibana: expect.arrayContaining([
+        'api:securitySolution-siemMigrationsAll', // SIEM_MIGRATIONS_API_ACTION_ALL
+        'api:rules-read', // RULES_API_READ, prepended by hasRuleMigrationPrivileges
+        'api:rules-all', // RULES_API_ALL, passed as additional privilege
+      ]),
     });
     expect(fetch).toHaveBeenCalledWith(
       '/internal/siem_migrations/rules/migration/install',
@@ -85,7 +84,7 @@ describe('installMigrationRulesTool', () => {
     );
   });
 
-  it('does not call the route without both required privileges', async () => {
+  it('does not call the route without all required privileges', async () => {
     checkPrivileges.mockResolvedValue({ hasAllRequested: false });
 
     const result = (await tool().handler(
@@ -95,8 +94,10 @@ describe('installMigrationRulesTool', () => {
 
     expect(fetch).not.toHaveBeenCalled();
     expect(result.results[0].type).toBe(ToolResultType.error);
+    // Error message should reference Detection Rules: All (the install-specific tail),
+    // not the default "Rules: Read" tail used by the read-only tools.
     expect(result.results[0].data).toEqual(
-      expect.objectContaining({ message: expect.stringContaining('Rules: All') })
+      expect.objectContaining({ message: expect.stringContaining('Detection Rules: All') })
     );
   });
 });

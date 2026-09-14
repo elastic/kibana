@@ -307,10 +307,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     const experimentalFeatures = this.config.experimentalFeatures;
     const endpointAppContextService = this.endpointAppContextService;
 
-    // SIEM migration clients for agent-builder tools, so they can use the migrations clients
-    // directly instead of round-tripping through an HTTP route. Safe to build during `setup()`:
-    // the factory only memoizes thunks, so nothing reads `esClusterClient` — assigned later in
-    // the deferred `getStartServices()` callback — until a tool handler calls a getter.
     const getSiemMigrationContext = createSiemMigrationContextFactory({
       core,
       siemMigrationsService: this.siemMigrationsService,

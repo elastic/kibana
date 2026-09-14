@@ -100,9 +100,6 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.siem_migration.install_migration_rules`,
   `${internalNamespaces.security}.alert-triage`,
 
-  // Fleet
-  `${internalNamespaces.platformFleet}.get_integration_details`,
-
   // Streams
   `${internalNamespaces.streams}.inspect_streams`,
   `${internalNamespaces.streams}.diagnose_stream`,
