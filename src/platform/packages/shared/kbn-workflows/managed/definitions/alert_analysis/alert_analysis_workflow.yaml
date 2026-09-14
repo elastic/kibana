@@ -109,19 +109,14 @@ steps:
     type: data.set
     with:
       normalized_version: "{{ consts.workflow_version | downcase | replace: ' ', '_' }}"
-      # One entry per alert, appended by each batch call: { id, classification,
-      # confidence_score, rationale, contributing_factors }.
-      all_verdicts: []
       # One entry per alert: { id, summary } — the related-alert graph, pre-rendered.
-      # Reset at the start of each batch iteration (see classify_alert_batches).
+      # Seeded here and reset at the start of each branch (see classify_alert_batches);
+      # branches inherit it at admission and their writes stay branch-local.
       related_summaries: []
-      # Alert ids that qualify for auto-close; accumulated inside apply_verdicts using
-      # foreach.item._id so the list is always the real alert id, never the model's echo.
+      # Alert ids that qualify for auto-close; accumulated branch-locally inside
+      # apply_batch_verdicts using foreach.item._id so the list is always the real alert
+      # id, never the model's echo. Each branch closes only its own batch.
       auto_close_ids: []
-      # Token usage summed across the batch calls, reported on every verdict note.
-      batch_input_tokens: 0
-      batch_output_tokens: 0
-      batch_llm_calls: 0
 
   # ---------------------------------------------------------------------------
   # Read this space's configuration at run time
@@ -1067,10 +1062,10 @@ steps:
                   - verdicts
 
           # -------------------------------------------------------------------
-          # Collect this batch's verdicts
+          # A batch that returns nothing is logged and skipped: its alerts take the
+          # no-verdict path of this branch's apply loop below (error note, no tags),
+          # and the remaining branches still run.
           # -------------------------------------------------------------------
-          # A batch that returns nothing is logged and skipped: the alerts it covered get an
-          # error note from the apply loop below, and the remaining batches still run.
           - name: check_batch_output_exists
             type: if
             condition: "not steps.runAgent_step.output.structured_output.verdicts:*"
@@ -1081,14 +1076,6 @@ steps:
                   message: >-
                     Alert analysis batch {{ foreach.index }} returned no verdicts for
                     {{ foreach.item | size }} alerts.
-            else:
-              - name: collect_batch_verdicts
-                type: data.set
-                with:
-                  all_verdicts: "${{ variables.all_verdicts | concat: steps.runAgent_step.output.structured_output.verdicts }}"
-                  batch_input_tokens: "${{ variables.batch_input_tokens | plus: steps.runAgent_step.output.metadata.usage.inputTokens }}"
-                  batch_output_tokens: "${{ variables.batch_output_tokens | plus: steps.runAgent_step.output.metadata.usage.outputTokens }}"
-                  batch_llm_calls: "${{ variables.batch_llm_calls | plus: 1 }}"
 
       # -----------------------------------------------------------------------
       # Write the verdicts back to the alerts
