@@ -24,7 +24,7 @@ export interface ConversationsUrlParams {
   selectedConversationId?: string;
   /**
    * Tab the flyout shows. Undefined while a bare conversation id is being completed, and for a
-   * `show` the app does not recognise — an unrecognised tab opens nothing.
+   * `show` the app does not recognize — an unrecognized tab opens nothing.
    */
   show?: InvestigationFlyoutTab;
   selectConversation: (id: string) => void;
