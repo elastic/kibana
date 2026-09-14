@@ -30,8 +30,8 @@ type AllResult = Date[] & {
 
 const ALL_LIMIT = 10000;
 const TIMEOUT_LIMIT = 100000;
-// Enough to step over the longest run of skippable periods a month-length or bymonth gap can create
-const MAX_CONSECUTIVE_EMPTY_PERIODS = 12;
+// 4 years of monthly steps covers leap-day pinned to February; impossible rules still terminate.
+const MAX_CONSECUTIVE_EMPTY_PERIODS = 48;
 
 export class RRule {
   private options: Options;

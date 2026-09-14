@@ -970,6 +970,22 @@ describe('RRule', () => {
         ]
       `);
     });
+
+    it('reaches the next leap February for a monthly rule pinned to February 29', () => {
+      const rule = new RRule({
+        dtstart: new Date('2021-03-01T00:00:00.000Z'),
+        freq: Frequency.MONTHLY,
+        interval: 1,
+        tzid: 'UTC',
+        bymonth: [2],
+        bymonthday: [29],
+      });
+      expect(rule.all(1)).toMatchInlineSnapshot(`
+        Array [
+          2024-02-29T00:00:00.000Z,
+        ]
+      `);
+    });
   });
 
   describe('negative bymonthday', () => {
