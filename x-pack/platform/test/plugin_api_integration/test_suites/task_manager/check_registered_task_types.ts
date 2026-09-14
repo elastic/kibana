@@ -243,6 +243,7 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:verify_permissions',
         'fleet:version-specific-policy-assignment-task',
         'gap-auto-fill-scheduler-task',
+        'lists:coalesce-rebuild',
         'maintenance-window:generate-events',
         'notification-center:cleanup',
         'osquery:backfillScheduleIds',

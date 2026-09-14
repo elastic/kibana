@@ -32,6 +32,7 @@ import type { Version, VersionOrUndefined } from '@kbn/securitysolution-io-ts-ty
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 
 import type { ConfigType } from '../../config';
+import type { ScheduleCoalesceRebuild } from '../../types';
 
 /**
  * Constructor options to {@link ListClient:constructor}
@@ -45,6 +46,8 @@ export interface ConstructorOptions {
   spaceId: string;
   /** The user associated with the value list */
   user: string;
+  /** Enqueue the background coalesced-range rebuild after a range source mutation */
+  scheduleCoalesceRebuild: ScheduleCoalesceRebuild;
 }
 
 /**

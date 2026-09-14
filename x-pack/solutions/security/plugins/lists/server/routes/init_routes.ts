@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ListsPluginRouter } from '../types';
+import type { ListsPluginRouter, ValueListMigrationRuleScanner } from '../types';
 import type { ConfigType } from '../config';
 
 import {
@@ -35,6 +35,7 @@ import {
   importExceptionsRoute,
   importListItemRoute,
   internalCreateExceptionListRoute,
+  migrateListRoute,
   patchListItemRoute,
   patchListRoute,
   readEndpointListItemRoute,
@@ -55,7 +56,8 @@ import {
 export const initRoutes = (
   router: ListsPluginRouter,
   config: ConfigType,
-  kibanaVersion: string
+  kibanaVersion: string,
+  getMigrationRuleScanner: () => ValueListMigrationRuleScanner | undefined
 ): void => {
   // lists
   createListRoute(router, kibanaVersion);
@@ -66,6 +68,7 @@ export const initRoutes = (
   findListRoute(router);
   readPrivilegesRoute(router);
   findListsBySizeRoute(router);
+  migrateListRoute(router, getMigrationRuleScanner); // POC: migrate a list to a lookup index + warn about referencing rules
 
   // list items
   createListItemRoute(router);
