@@ -20,7 +20,7 @@ import { getMissingRuleMigrationResourcesTool } from './rules/get_missing_rule_m
 import { stopRuleMigrationTool } from './rules/stop_rule_migration_tool';
 import { updateRuleMigrationTool } from './rules/update_rule_migration_tool';
 import { deleteRuleMigrationTool } from './rules/delete_rule_migration_tool';
-import { groupRulesByIntegrationsTool } from './rules/group_rules_by_integrations_tool';
+import { getIntegrationStatsTool } from './rules/get_integration_stats_tool';
 import { installMigrationRulesTool } from './rules/install_migration_rules_tool';
 
 export const registerSiemMigrationTools = (
@@ -46,6 +46,6 @@ export const registerSiemMigrationTools = (
   agentBuilder.tools.register(deleteRuleMigrationTool(core, logger, productFeaturesService));
   agentBuilder.tools.register(installMigrationRulesTool(core, logger, productFeaturesService));
   agentBuilder.tools.register(
-    groupRulesByIntegrationsTool(core, logger, productFeaturesService, getSiemMigrationContext)
+    getIntegrationStatsTool(core, logger, productFeaturesService, getSiemMigrationContext)
   );
 };

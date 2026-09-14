@@ -96,7 +96,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.siem_migration.stop_rule_migration`,
   `${internalNamespaces.security}.siem_migration.update_rule_migration`,
   `${internalNamespaces.security}.siem_migration.delete_rule_migration`,
-  `${internalNamespaces.security}.siem_migration.group_rules_by_integrations`,
+  `${internalNamespaces.security}.siem_migration.get_integration_stats`,
   `${internalNamespaces.security}.siem_migration.install_migration_rules`,
   `${internalNamespaces.security}.alert-triage`,
 

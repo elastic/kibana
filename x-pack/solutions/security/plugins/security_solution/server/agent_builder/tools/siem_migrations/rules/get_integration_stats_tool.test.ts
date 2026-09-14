@@ -12,7 +12,7 @@ import type { ProductFeaturesService } from '../../../../lib/product_features_se
 import type { GetSiemMigrationContext } from '../../../../lib/siem_migrations/get_siem_migration_context';
 import type { RuleMigrationAllIntegrationsStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { createToolHandlerContext, createToolTestMocks } from '../../../__mocks__/test_helpers';
-import { groupRulesByIntegrationsTool } from './group_rules_by_integrations_tool';
+import { getIntegrationStatsTool } from './get_integration_stats_tool';
 
 jest.mock('../common/privileges', () => ({
   hasRuleMigrationPrivileges: jest.fn(),
@@ -29,7 +29,7 @@ const SAMPLE_STATS: RuleMigrationAllIntegrationsStats = [
   { id: 'system', total_rules: 2 },
 ];
 
-describe('groupRulesByIntegrationsTool', () => {
+describe('getIntegrationStatsTool', () => {
   const { mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
   let core: ReturnType<typeof coreMock.createSetup>;
   let mockGetIntegrationStats: jest.Mock;
@@ -60,8 +60,8 @@ describe('groupRulesByIntegrationsTool', () => {
     jest.clearAllMocks();
   });
 
-  it('returns scoped integration groups and forwards optional ids', async () => {
-    const tool = groupRulesByIntegrationsTool(
+  it('returns scoped integration stats and forwards optional ids', async () => {
+    const tool = getIntegrationStatsTool(
       core,
       mockLogger,
       productFeaturesService,
@@ -79,14 +79,14 @@ describe('groupRulesByIntegrationsTool', () => {
       installable: true,
     });
     expect(result.results[0]).toEqual(
-      expect.objectContaining({ type: ToolResultType.other, data: { groups: SAMPLE_STATS } })
+      expect.objectContaining({ type: ToolResultType.other, data: SAMPLE_STATS })
     );
   });
 
   it('returns error when user lacks privileges', async () => {
     hasRuleMigrationPrivileges.mockResolvedValue(false);
 
-    const tool = groupRulesByIntegrationsTool(
+    const tool = getIntegrationStatsTool(
       core,
       mockLogger,
       productFeaturesService,
@@ -109,7 +109,7 @@ describe('groupRulesByIntegrationsTool', () => {
   it('returns error when migration does not exist', async () => {
     mockMigrationsGet.mockResolvedValue(undefined);
 
-    const tool = groupRulesByIntegrationsTool(
+    const tool = getIntegrationStatsTool(
       core,
       mockLogger,
       productFeaturesService,
@@ -130,7 +130,7 @@ describe('groupRulesByIntegrationsTool', () => {
   });
 
   it('passes installable:true and normalises empty ids to undefined', async () => {
-    const tool = groupRulesByIntegrationsTool(
+    const tool = getIntegrationStatsTool(
       core,
       mockLogger,
       productFeaturesService,
@@ -150,7 +150,7 @@ describe('groupRulesByIntegrationsTool', () => {
   it('catches unexpected errors from context factory and returns an error result', async () => {
     getSiemMigrationContext.mockRejectedValue(new Error('client construction failed'));
 
-    const tool = groupRulesByIntegrationsTool(
+    const tool = getIntegrationStatsTool(
       core,
       mockLogger,
       productFeaturesService,
@@ -170,7 +170,7 @@ describe('groupRulesByIntegrationsTool', () => {
   });
 
   it('bounds ids array to 200 items', () => {
-    const tool = groupRulesByIntegrationsTool(
+    const tool = getIntegrationStatsTool(
       core,
       mockLogger,
       productFeaturesService,
@@ -185,14 +185,14 @@ describe('groupRulesByIntegrationsTool', () => {
   });
 
   it('has the required annotations block', () => {
-    const tool = groupRulesByIntegrationsTool(
+    const tool = getIntegrationStatsTool(
       core,
       mockLogger,
       productFeaturesService,
       getSiemMigrationContext
     );
     expect(tool.annotations).toMatchObject({
-      title: 'Group Migration Rules By Integrations',
+      title: 'Get Migration Integration Stats',
       readOnlyHint: true,
       destructiveHint: false,
       idempotentHint: true,

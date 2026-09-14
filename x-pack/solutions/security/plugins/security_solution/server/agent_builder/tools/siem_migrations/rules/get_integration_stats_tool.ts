@@ -19,46 +19,48 @@ import { createSiemMigrationAvailability } from '../common/availability';
 import { hasRuleMigrationPrivileges } from '../common/privileges';
 import { createMissingPrivilegeError } from '../common/tool_results';
 import { MIGRATION_ID_NOT_FOUND } from '../../../../lib/siem_migrations/common/translations';
-import { SIEM_MIGRATION_GROUP_RULES_BY_INTEGRATIONS_TOOL_ID } from './tool_ids';
+import { SIEM_MIGRATION_GET_INTEGRATION_STATS_TOOL_ID } from './tool_ids';
 
 const schema = z.object({
-  migration_id: NonEmptyString.describe('The id of the rule migration to group.'),
+  migration_id: NonEmptyString.describe(
+    'The id of the rule migration to get integration stats for.'
+  ),
   ids: z
     .array(NonEmptyString)
     .max(200)
     .optional()
-    .describe('Optional migration rule item ids that restrict the grouping scope.'),
+    .describe('Optional migration rule item ids that restrict the aggregation scope.'),
 });
 
-export const groupRulesByIntegrationsTool = (
+export const getIntegrationStatsTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
   productFeaturesService: ProductFeaturesService,
   getSiemMigrationContext: GetSiemMigrationContext
 ): BuiltinToolDefinition<typeof schema> => {
   return {
-    id: SIEM_MIGRATION_GROUP_RULES_BY_INTEGRATIONS_TOOL_ID,
+    id: SIEM_MIGRATION_GET_INTEGRATION_STATS_TOOL_ID,
     type: ToolType.builtin,
     annotations: {
-      title: 'Group Migration Rules By Integrations',
+      title: 'Get Migration Integration Stats',
       readOnlyHint: true,
       destructiveHint: false,
       idempotentHint: true,
       openWorldHint: false,
     },
     availability: createSiemMigrationAvailability(core, productFeaturesService, logger),
-    description: `Group the installable rules of one Automatic Rule Migration by inferred integration.
+    description: `Get per-integration rule counts for the installable rules of one Automatic Rule Migration.
 
-Returns \`{ groups: [{ id, total_rules }] }\` — each inferred integration id with the number of installable rules in scope that reference it. Only rules that are fully translated and not yet installed are counted, so these are the integrations the pending installation depends on. A rule referencing multiple integrations is counted once in every matching group, consistent with the Automatic Migrations management page. Rules with no inferred integration are not represented in any group.
+Returns \`[{ id, total_rules }]\` — each inferred integration id with the number of installable rules in scope that reference it. Only rules that are fully translated and not yet installed are counted, so these are the integrations the pending installation depends on. A rule referencing multiple integrations is counted once for every integration it references, consistent with the Automatic Migrations management page. Rules with no inferred integration are not represented in any entry.
 
-Use this for integration readiness, not for counts — take the authoritative installable total from \`get_rule_migration_translation_stats\`. Group totals can exceed it because a rule appears in every integration it references.
+Use this for integration readiness, not for counts — take the authoritative installable total from \`get_rule_migration_translation_stats\`. The sum of \`total_rules\` can exceed it because a rule appears once per integration it references.
 
 Pass \`ids\` to restrict the aggregation to a selected migration-rule scope. Read-only.`,
     schema,
     tags: ['security', 'siem-migration', 'rules', 'integrations'],
     handler: async ({ migration_id: migrationId, ids }, { request, spaceId }) => {
       if (!(await hasRuleMigrationPrivileges(core, request))) {
-        return createMissingPrivilegeError('group migration rules by integrations');
+        return createMissingPrivilegeError('get migration integration stats');
       }
 
       let stats: RuleMigrationAllIntegrationsStats;
@@ -86,15 +88,14 @@ Pass \`ids\` to restrict the aggregation to a selected migration-rule scope. Rea
           installable: true,
         });
       } catch (err) {
-        logger.error(`groupRulesByIntegrationsTool: failed for migration "${migrationId}": ${err}`);
+        logger.error(`getIntegrationStatsTool: failed for migration "${migrationId}": ${err}`);
         return {
           results: [
             {
               tool_result_id: getToolResultId(),
               type: ToolResultType.error,
               data: {
-                message: `Failed to group migration rules by integrations for "${migrationId}": ${err?.message ?? err
-                  }`,
+                message: `Failed to get integration stats for "${migrationId}": ${err?.message ?? err}`,
               },
             },
           ],
@@ -106,7 +107,7 @@ Pass \`ids\` to restrict the aggregation to a selected migration-rule scope. Rea
           {
             tool_result_id: getToolResultId(),
             type: ToolResultType.other,
-            data: { groups: stats },
+            data: stats,
           },
         ],
       };

@@ -11,7 +11,7 @@ import {
   SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID,
   SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID,
   SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID,
-  SIEM_MIGRATION_GROUP_RULES_BY_INTEGRATIONS_TOOL_ID,
+  SIEM_MIGRATION_GET_INTEGRATION_STATS_TOOL_ID,
   SIEM_MIGRATION_INSTALL_RULE_MIGRATION_TOOL_ID,
 } from '../../tools/siem_migrations';
 import { SECURITY_BUILD_REDIRECT_URL_TOOL_ID } from '../../tools';
@@ -51,7 +51,7 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
 ## Mandatory Tool Sequence
 
 **Before any \`${SIEM_MIGRATION_INSTALL_RULE_MIGRATION_TOOL_ID}\` call you MUST have called
-\`${SIEM_MIGRATION_GROUP_RULES_BY_INTEGRATIONS_TOOL_ID}\`, run the Fleet readiness APIs when
+\`${SIEM_MIGRATION_GET_INTEGRATION_STATS_TOOL_ID}\`, run the Fleet readiness APIs when
 applicable (step 5), and MUST have rendered the integration readiness summary in a reply to the
 user.** Do NOT call \`${SIEM_MIGRATION_INSTALL_RULE_MIGRATION_TOOL_ID}\` without them.
 
@@ -67,7 +67,7 @@ ${MIGRATION_STATE_FRESHNESS_BLOCK}
 - \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\` — verify a pasted id and inspect task state.
 - \`${SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID}\` — authoritative installable and missing-index counts.
 - \`${SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID}\` — resolve titles to internal item ids and retain up to 3 custom rules for the result sample.
-- \`${SIEM_MIGRATION_GROUP_RULES_BY_INTEGRATIONS_TOOL_ID}\` — integrations required by the installable rules in scope, with a rule count each. A multi-integration rule appears in every matching group. Use for readiness only; authoritative installable count comes from \`get_rule_migration_translation_stats\`.
+- \`${SIEM_MIGRATION_GET_INTEGRATION_STATS_TOOL_ID}\` — per-integration counts of the installable rules in scope, as \`[{ id, total_rules }]\`. A rule counts once per integration it references. Use for readiness only; authoritative installable count comes from \`get_rule_migration_translation_stats\`.
 - \`execute_api\` (target: \`kibana\`) — call Fleet APIs directly to check integration readiness:
   - \`elastic-package-manager-epm.get-fleet-epm-packages-installed\` — list installed Fleet packages.
   - \`fleet-package-policies.get-fleet-package-policies\` — list package policies with input enabled-state.
@@ -88,20 +88,20 @@ ${MIGRATION_STATE_FRESHNESS_BLOCK}
      \`ids: []\`; an empty array matches zero documents. The list endpoint forces
      \`isEligibleForTranslation: true\`, so any displayed list is illustrative and may omit
      non-translation-eligible but installable building-block rules.
-4. Call \`group_rules_by_integrations\` with the migration id and the selected item ids when the
+4. Call \`get_integration_stats\` with the migration id and the selected item ids when the
    scope is explicit; omit \`ids\` entirely for all rules (never pass \`ids: []\`). The tool returns
-   only installable rules (fully translated, not yet installed), so \`total_rules\` per group reflects
-   the integration's actual stake in the installation. Group totals may exceed the installable count
-   from step 2 because a rule referencing multiple integrations appears in every matching group — do
+   only installable rules (fully translated, not yet installed), so \`total_rules\` per entry reflects
+   the integration's actual stake in the installation. Entry totals may exceed the installable count
+   from step 2 because a rule referencing multiple integrations appears in every matching entry — do
    not sum the column or treat the discrepancy as an error.
 
-   - If \`groups\` is empty: state "no installable rule in scope infers an integration" and skip
-     step 5. Proceed directly to step 6.
-   - If \`groups\` is non-empty: present the results as a table and continue to step 5.
+   - If the result is an empty array: state "no installable rule in scope infers an integration" and
+     skip step 5. Proceed directly to step 6.
+   - If the result is a non-empty array: present the results as a table and continue to step 5.
 
 
 5. Check integration readiness using Fleet APIs via \`execute_api\` (target: \`kibana\`).
-   Only run this step when step 4 returned non-empty \`groups\`.
+   Only run this step when step 4 returned a non-empty array.
 
    - Call \`elastic-package-manager-epm.get-fleet-epm-packages-installed\`. Each item returns
      \`{ name, status, dataStreams[] }\`. A package is installed when its \`name\` appears in the
@@ -192,7 +192,7 @@ never be requested from or displayed to the user.
     SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID,
     SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID,
     SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID,
-    SIEM_MIGRATION_GROUP_RULES_BY_INTEGRATIONS_TOOL_ID,
+    SIEM_MIGRATION_GET_INTEGRATION_STATS_TOOL_ID,
     SECURITY_BUILD_REDIRECT_URL_TOOL_ID,
     SIEM_MIGRATION_INSTALL_RULE_MIGRATION_TOOL_ID,
   ],
