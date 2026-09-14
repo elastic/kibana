@@ -66,6 +66,7 @@ export function useServiceFlyoutTransactionData({
   searchQuery,
   refreshToken,
   offset,
+  projectRouting,
 }: {
   http: HttpStart;
   notifications: NotificationsStart;
@@ -78,6 +79,7 @@ export function useServiceFlyoutTransactionData({
   searchQuery: string;
   refreshToken?: number;
   offset?: string;
+  projectRouting?: string;
 }) {
   const enabled = !!transactionType && !!latencyAggregationType;
 
@@ -87,7 +89,7 @@ export function useServiceFlyoutTransactionData({
     dataSource,
     isLoading: isDataSourceLoading,
     error: dataSourceError,
-  } = usePreferredTransactionDataSource({ http, start, end });
+  } = usePreferredTransactionDataSource({ http, start, end, projectRouting });
 
   useEffect(() => {
     if (
@@ -118,7 +120,7 @@ export function useServiceFlyoutTransactionData({
 
   useEffect(() => {
     setMaxCountExceeded(false);
-  }, [serviceName, environment, start, end, transactionType]);
+  }, [serviceName, environment, start, end, transactionType, projectRouting]);
 
   const serverSearchQuery = maxCountExceeded ? searchQuery : '';
 
@@ -131,6 +133,7 @@ export function useServiceFlyoutTransactionData({
         )}/transactions/groups/main_statistics`,
         {
           signal,
+          ...(projectRouting ? { headers: { 'x-project-routing': projectRouting } } : {}),
           query: {
             environment,
             kuery: '',
@@ -160,6 +163,7 @@ export function useServiceFlyoutTransactionData({
       enabled,
       dataSource,
       refreshToken,
+      projectRouting,
     ]
   );
 
@@ -200,6 +204,7 @@ export function useServiceFlyoutTransactionData({
         )}/transactions/groups/detailed_statistics`,
         {
           signal,
+          ...(projectRouting ? { headers: { 'x-project-routing': projectRouting } } : {}),
           query: {
             environment,
             kuery: '',
@@ -229,6 +234,7 @@ export function useServiceFlyoutTransactionData({
       offset,
       enabled,
       dataSource,
+      projectRouting,
     ]
   );
 

@@ -13,11 +13,9 @@ import type { RunQuotaSavedObjectsRepository } from './repository';
 export const consumeRunQuota = async ({
   internalRepository,
   group,
-  allowOverLimit = false,
 }: {
   internalRepository: RunQuotaSavedObjectsRepository;
   group: RunQuotaGroup;
-  allowOverLimit?: boolean;
 }): Promise<RunQuotaConsumeResponse> => {
   const date = dayKey(resolveDailyWindow());
   const settings = await readRunQuotaSettings(internalRepository);
@@ -28,7 +26,7 @@ export const consumeRunQuota = async ({
     date,
     group,
     mutation: (ledger) => {
-      if (settings.enabled && limit > 0 && ledger.count >= limit && !allowOverLimit) {
+      if (settings.enabled && limit > 0 && ledger.count >= limit) {
         return { result: { allowed: false } };
       }
 

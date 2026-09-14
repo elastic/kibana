@@ -8,12 +8,13 @@
  */
 
 import React from 'react';
+import { htmlIdGenerator } from '@elastic/eui';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { showSaveModal } from '@kbn/saved-objects-plugin/public';
+import { openLazyModal } from '@kbn/presentation-util';
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
-import type { DashboardSaveOptions, SaveDashboardReturn } from './types';
+import type { DashboardSaveOptions } from './types';
 import {
   coreServices,
   cpsService,
@@ -22,7 +23,7 @@ import {
 import type { DashboardState } from '../../../common';
 import { SAVED_OBJECT_POST_TIME } from '../../utils/telemetry_constants';
 import { DashboardSaveModal } from './save_modal';
-import { saveDashboard } from './save_dashboard';
+import { generateDashboardNotSavedToast, saveDashboard } from './save_dashboard';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { getSaveAsTitle } from './get_save_as_title';
 
@@ -30,7 +31,7 @@ import { getSaveAsTitle } from './get_save_as_title';
  * @description exclusively for user directed dashboard save actions, also
  * accounts for scenarios of cloning elastic managed dashboard into user managed dashboards
  */
-export async function openSaveModal({
+export function openSaveModal({
   description,
   isManaged,
   lastSavedId,
@@ -43,6 +44,8 @@ export async function openSaveModal({
   title,
   viewMode,
   accessControl,
+  onSave,
+  onClose,
 }: {
   description?: string;
   isManaged: boolean;
@@ -56,31 +59,44 @@ export async function openSaveModal({
   title: string;
   viewMode: ViewMode;
   accessControl?: Partial<SavedObjectAccessControl>;
+  onSave: (saveResult: {
+    id: string;
+    redirectRequired?: boolean;
+    savedState: DashboardState;
+  }) => void;
+  onClose: () => void;
 }) {
-  try {
-    if (viewMode === 'edit' && isManaged) {
-      return undefined;
-    }
+  if (viewMode === 'edit' && isManaged) {
+    onClose();
+    return;
+  }
 
-    /**
-     * Only add access control for new dashboards being created by a logged in user that is not an anonymous user or
-     * user authenticated via authenticating proxy.
-     */
-    const getShouldAddAccessControl = async () => {
+  const modalTitleId = htmlIdGenerator()();
+
+  openLazyModal({
+    core: coreServices,
+    onClose,
+    ariaLabelledBy: modalTitleId,
+    loadContent: async ({ closeModal }) => {
       try {
-        const currentProfileUid = (await coreServices.security.authc.getCurrentUser()).profile_uid;
-        const isCreatingNewDashboard = Boolean(!lastSavedId);
-        return isCreatingNewDashboard && Boolean(currentProfileUid);
-      } catch {
-        return false;
-      }
-    };
+        /**
+         * Only add access control for new dashboards being created by a logged in user that is not an anonymous user or
+         * user authenticated via authenticating proxy.
+         */
+        const getShouldAddAccessControl = async () => {
+          try {
+            const currentProfileUid = (await coreServices.security.authc.getCurrentUser())
+              .profile_uid;
+            const isCreatingNewDashboard = Boolean(!lastSavedId);
+            return isCreatingNewDashboard && Boolean(currentProfileUid);
+          } catch {
+            return false;
+          }
+        };
 
-    const shouldAddAccessControl = await getShouldAddAccessControl();
+        const shouldAddAccessControl = await getShouldAddAccessControl();
+        const saveAsTitle = lastSavedId ? await getSaveAsTitle(title) : title;
 
-    const saveAsTitle = lastSavedId ? await getSaveAsTitle(title) : title;
-    return new Promise<(SaveDashboardReturn & { savedState: DashboardState }) | undefined>(
-      (resolve) => {
         const onSaveAttempt = async ({
           newTags,
           newTitle,
@@ -89,62 +105,51 @@ export async function openSaveModal({
           newTimeRestore,
           newAccessMode,
           newProjectRoutingRestore,
-        }: DashboardSaveOptions): Promise<SaveDashboardReturn> => {
-          const saveOptions = {
-            confirmOverwrite: false,
-            saveAsCopy: lastSavedId ? true : newCopyOnSave,
+        }: DashboardSaveOptions): Promise<void> => {
+          setTimeRestore(newTimeRestore);
+          setProjectRoutingRestore(newProjectRoutingRestore);
+          const dashboardState = serializeState();
+
+          const dashboardStateToSave: DashboardState = {
+            ...dashboardState,
+            title: newTitle,
+            tags: savedObjectsTaggingService && newTags ? newTags : ([] as string[]),
+            description: newDescription,
           };
 
-          try {
-            setTimeRestore(newTimeRestore);
-            setProjectRoutingRestore(newProjectRoutingRestore);
-            const dashboardState = serializeState();
+          // TODO If this is a managed dashboard - unlink all by reference embeddables on clone
+          // https://github.com/elastic/kibana/issues/190138
 
-            const dashboardStateToSave: DashboardState = {
-              ...dashboardState,
-              title: newTitle,
-              tags: savedObjectsTaggingService && newTags ? newTags : ([] as string[]),
-              description: newDescription,
-            };
+          const beforeAddTime = window.performance.now();
 
-            // TODO If this is a managed dashboard - unlink all by reference embeddables on clone
-            // https://github.com/elastic/kibana/issues/190138
+          const saveResult = await saveDashboard({
+            saveOptions: {
+              confirmOverwrite: false,
+              saveAsCopy: lastSavedId ? true : newCopyOnSave,
+            },
+            dashboardState: dashboardStateToSave,
+            lastSavedId,
+            accessMode: shouldAddAccessControl && newAccessMode ? newAccessMode : undefined,
+          });
 
-            const beforeAddTime = window.performance.now();
+          if ('error' in saveResult) return;
 
-            const saveResult = await saveDashboard({
-              saveOptions,
-              dashboardState: dashboardStateToSave,
-              lastSavedId,
-              accessMode: shouldAddAccessControl && newAccessMode ? newAccessMode : undefined,
-            });
+          reportPerformanceMetricEvent(coreServices.analytics, {
+            eventName: SAVED_OBJECT_POST_TIME,
+            duration: window.performance.now() - beforeAddTime,
+            meta: { saved_object_type: DASHBOARD_SAVED_OBJECT_TYPE },
+          });
 
-            const addDuration = window.performance.now() - beforeAddTime;
-
-            reportPerformanceMetricEvent(coreServices.analytics, {
-              eventName: SAVED_OBJECT_POST_TIME,
-              duration: addDuration,
-              meta: {
-                saved_object_type: DASHBOARD_SAVED_OBJECT_TYPE,
-              },
-            });
-
-            resolve({ ...saveResult, savedState: dashboardStateToSave });
-            return saveResult;
-          } catch (error) {
-            coreServices.notifications.toasts.addDanger(
-              generateDashboardNotSavedToast(title, error.message)
-            );
-            return error;
-          }
+          onSave({ ...saveResult, savedState: dashboardStateToSave });
+          closeModal();
         };
 
-        showSaveModal(
+        return (
           <DashboardSaveModal
             tags={tags}
             lastSavedTitle={lastSavedId ? title : ''}
             title={saveAsTitle}
-            onClose={() => resolve(undefined)}
+            onClose={closeModal}
             timeRestore={timeRestore}
             projectRoutingRestore={projectRoutingRestore}
             showStoreTimeOnSave={!lastSavedId}
@@ -155,16 +160,17 @@ export async function openSaveModal({
             accessControl={accessControl}
             customModalTitle={getCustomModalTitle(viewMode, lastSavedId)}
             showAccessContainer={shouldAddAccessControl}
+            modalTitleId={modalTitleId}
           />
         );
+      } catch (error) {
+        coreServices.notifications.toasts.addDanger(
+          generateDashboardNotSavedToast(title, error.message)
+        );
+        return null;
       }
-    );
-  } catch (error) {
-    coreServices.notifications.toasts.addDanger(
-      generateDashboardNotSavedToast(title, error.message)
-    );
-    return undefined;
-  }
+    },
+  });
 }
 
 function getCustomModalTitle(viewMode: ViewMode, lastSavedId: string | undefined) {
@@ -178,17 +184,4 @@ function getCustomModalTitle(viewMode: ViewMode, lastSavedId: string | undefined
       defaultMessage: 'Duplicate dashboard',
     });
   return undefined;
-}
-
-function generateDashboardNotSavedToast(title: string, errorMessage: any) {
-  return {
-    title: i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {
-      defaultMessage: `Dashboard ''{title}'' was not saved. Error: {errorMessage}`,
-      values: {
-        title,
-        errorMessage,
-      },
-    }),
-    'data-test-subj': 'saveDashboardFailure',
-  };
 }

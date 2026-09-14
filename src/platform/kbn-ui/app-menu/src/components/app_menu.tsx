@@ -15,6 +15,7 @@ import { AppMenuItem } from './app_menu_item';
 import { AppMenuOverflowButton } from './app_menu_overflow_button';
 import { AppMenuSwitchComponent } from './app_menu_switch';
 import type { AppMenuConfig, AppMenuStaticItem } from '../types';
+import { AppMenuHistoryComponent } from './app_menu_history';
 import {
   AppMenuApplicationResponsiveContent,
   AppMenuViewportResponsiveContent,
@@ -69,6 +70,7 @@ export const AppMenuComponent = ({
 
   const primaryActionItem = config?.primaryActionItem;
   const switchConfig = config?.switch;
+  const historyConfig = config?.historyConfig;
   const showMoreButtonId = 'show-more';
   const processedStaticItems = processStaticItems(staticItems);
   const hasStaticItems = processedStaticItems.length > 0;
@@ -120,6 +122,7 @@ export const AppMenuComponent = ({
       <>
         {hasSecondaryActions && (
           <div css={secondaryActionsCss}>
+            {historyConfig && <AppMenuHistoryComponent historyConfig={historyConfig} />}
             {switchConfig && <AppMenuSwitchComponent switchConfig={switchConfig} />}
             {inlineItems.map((menuItem) => (
               <AppMenuItem
