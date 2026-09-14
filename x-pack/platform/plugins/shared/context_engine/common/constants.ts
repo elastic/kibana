@@ -11,6 +11,17 @@ export const internalApiPath = '/internal/context_engine';
 export const aiIndexPath = `${publicApiPath}/ai_index`;
 export const aiIndexByIdPath = `${aiIndexPath}/{aiIndexId}`;
 export const aiIndexKiSummaryPath = `${internalApiPath}/ai_index/{aiIndexId}/ki_summary`;
+export const aiIndexFeedbackAnalysisPath = `${internalApiPath}/ai_index/{aiIndexId}/feedback_analysis`;
+export const aiIndexKiListPath = `${internalApiPath}/ai_index/{aiIndexId}/kis`;
+export const aiIndexKiByIdPath = `${aiIndexKiListPath}/{kiId}`;
+
+/** Default and maximum page size when listing Knowledge Indicators for an AI index. */
+export const DEFAULT_KI_PAGE_SIZE = 25;
+export const MAX_KI_PAGE_SIZE = 100;
+/** Page size for summary-only KI list requests, no rows. */
+export const KI_SUMMARY_PAGE_SIZE = 0;
+
+export const MAX_KI_TYPE_FILTER_LENGTH = 256;
 
 /** Read-only Signals routes (internal): a preaggregated grouped list and a per-group fetch. */
 export const signalGroupsPath = `${internalApiPath}/signals/groups`;
@@ -25,6 +36,10 @@ export const MAX_SIGNAL_GROUPS = 100;
 /** Default and maximum page size when fetching the individual signals in a group. */
 export const DEFAULT_SIGNALS_PAGE_SIZE = 25;
 export const MAX_SIGNALS_PAGE_SIZE = 100;
+
+/** Default and maximum page size when listing improvements (one entry per improvement lineage). */
+export const DEFAULT_IMPROVEMENTS_PAGE_SIZE = 25;
+export const MAX_IMPROVEMENTS_PAGE_SIZE = 100;
 
 /**
  * Version of the public AI index API, shared between the server route
@@ -61,6 +76,30 @@ export const MAX_AI_INDEX_SOURCE_VALUE_LENGTH = 10240;
 export const MAX_AI_INDEX_AUTOMATIONS = 100;
 export const MAX_AI_INDEX_SOURCES = 100;
 
+export const MAX_FEEDBACK_ANALYSIS_INTERVAL_LENGTH = 16;
+export const MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH = 64;
+export const MAX_FEEDBACK_ANALYSIS_SIGNAL_FILTER_LENGTH = 4096;
+
+/** Floor on the feedback-analysis schedule interval. */
+export const MIN_FEEDBACK_ANALYSIS_INTERVAL_MINUTES = 15;
+
+/** Applied when a feedback-analysis block omits the corresponding field. */
+export const DEFAULT_FEEDBACK_ANALYSIS_INTERVAL = '24h';
+export const DEFAULT_FEEDBACK_ANALYSIS_SIGNAL_TIME_RANGE_FROM = 'now-30d';
+
+/** Cap on the ranked pattern groups handed to a run. */
+export const MAX_ANALYSIS_SIGNAL_GROUPS = 25;
+
+/** Cap on the signal ids recorded per group. */
+export const MAX_GROUP_SIGNAL_IDS = 20;
+
+/** Cap on the proposals one run may record. */
+export const MAX_IMPROVEMENTS_PER_RUN = 25;
+
+/** Bounds on the free text a run may attach to a proposal. */
+export const MAX_IMPROVEMENT_TITLE_LENGTH = 512;
+export const MAX_IMPROVEMENT_RATIONALE_LENGTH = 4096;
+
 /** Advanced setting that gates the Context Engine feedback loop. */
 export const CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID = 'contextEngine:feedbackLoopEnabled';
 
@@ -69,8 +108,8 @@ export const SIGNAL_GENERATOR_TASK_TYPE = 'contextEngine:signalGenerator';
 export const SIGNAL_GENERATOR_TASK_ID = 'contextengine-signal-generator';
 export const SIGNAL_GENERATOR_SCHEDULE_INTERVAL = '1h';
 
-/** Agent id whose tool calls are left untagged. */
-export const MANAGEMENT_AGENT_ID = 'platform.context_engine.agent';
+/** Skill id of the feedback loop's own analysis skill; rounds that load it are excluded from signal generation. */
+export const ANALYZE_AND_IMPROVE_SKILL_ID = 'analyze-and-improve';
 
 /**
  * Prefix for the per-space Agent Builder OTel traces indices (one per Kibana space). Kept

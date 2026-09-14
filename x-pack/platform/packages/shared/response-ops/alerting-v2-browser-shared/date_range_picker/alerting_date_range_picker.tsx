@@ -67,6 +67,8 @@ export interface AlertingDateRangePickerProps {
   showTimeWindowButtons?: boolean | TimeWindowButtonsConfig;
   width?: 'auto' | 'restricted' | 'full';
   compressed?: boolean;
+  /** Hide the date range label and show only the duration badge. @default false */
+  collapsed?: boolean;
   persistPresets?: boolean;
   'data-test-subj'?: string;
 }
@@ -81,6 +83,7 @@ export const AlertingDateRangePicker = ({
   showTimeWindowButtons = false,
   width = 'auto',
   compressed = true,
+  collapsed = false,
   persistPresets = true,
   'data-test-subj': dataTestSubj,
 }: AlertingDateRangePickerProps) => {
@@ -116,6 +119,7 @@ export const AlertingDateRangePicker = ({
   const value = `${from} to ${to}`;
   const timeZone = uiSettings.get<string>('dateFormat:tz', 'Browser');
   const dateFormat = uiSettings.get<string>('dateFormat');
+  const inputDateFormats = useMemo(() => (dateFormat ? [dateFormat] : undefined), [dateFormat]);
   const canAccessAdvancedSettings =
     (application.capabilities.advancedSettings?.save as boolean | undefined) ?? false;
 
@@ -192,7 +196,8 @@ export const AlertingDateRangePicker = ({
       onRefresh={onRefresh}
       width={width}
       compressed={compressed}
-      dateFormat={dateFormat}
+      collapsed={collapsed}
+      inputDateFormats={inputDateFormats}
       timeZone={timeZone}
       prependBasePath={http.basePath.prepend}
       canAccessAdvancedSettings={canAccessAdvancedSettings}

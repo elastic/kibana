@@ -39,12 +39,12 @@ describe('MetricSeries', () => {
   it('should call toggleVisible function', () => {
     const wrapper = mountWithIntl(<MetricSeries.WrappedComponent {...defaultProps} />);
     wrapper.find('EuiButtonIcon').at(0).simulate('click');
-    expect(defaultProps.toggleVisible).toBeCalled();
+    expect(defaultProps.toggleVisible).toHaveBeenCalled();
   });
 
   it('should call onAdd function', () => {
     const wrapper = mountWithIntl(<MetricSeries.WrappedComponent {...defaultProps} />);
     wrapper.find('EuiButtonIcon').at(3).simulate('click');
-    expect(defaultProps.onAdd).toBeCalled();
+    expect(defaultProps.onAdd).toHaveBeenCalled();
   });
 });

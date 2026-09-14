@@ -1,8 +1,7 @@
 {
-  "sha1": "fa6168c55f224d688925dbf8e634eeabe8e095d7",
+  "sha1": "9dd461fb95829a00f0b171cc146877377bd57470",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -56,7 +55,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/tests/graph_visualization/cps/project_routing.spec.ts",
-        "line": 182,
+        "line": 183,
         "column": 14
       }
     },
@@ -70,7 +69,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/tests/graph_visualization/cps/project_routing.spec.ts",
-        "line": 204,
+        "line": 205,
         "column": 14
       }
     }

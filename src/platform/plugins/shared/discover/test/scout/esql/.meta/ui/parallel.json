@@ -1,21 +1,9 @@
 {
-  "sha1": "c5fe1e33c9f710268d9891f0eb4cc68a2273f8dd",
+  "sha1": "f83b158a9fc278c50e47a36b4ac2c9321143d1ca",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "6b65b70854fa803-48161d5725dd982",
-      "title": "Teardown ES|QL tests data",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/global.teardown.ts",
-        "line": 7,
-        "column": 1
-      }
-    },
     {
       "id": "105be4110b5c303-214247a23f937d6",
       "title": "Setup ES|QL tests data",
@@ -25,6 +13,32 @@
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/global.setup.ts",
         "line": 7,
         "column": 1
+      }
+    },
+    {
+      "id": "f0aa70d045832f5-cefaa0e86801e0f",
+      "title": "ES|QL Discover session dashboard editing saves a linked session edit and returns to the dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_session_dashboard_editing.spec.ts",
+        "line": 23,
+        "column": 35
+      }
+    },
+    {
+      "id": "f0aa70d045832f5-0d2d13699cc210b",
+      "title": "ES|QL Discover session dashboard editing opens a normal Discover session when saving a linked edit as new",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_session_dashboard_editing.spec.ts",
+        "line": 38,
+        "column": 25
       }
     },
     {
@@ -285,6 +299,17 @@
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/lookup_index_editor_save_without_close.spec.ts",
         "line": 35,
         "column": 42
+      }
+    },
+    {
+      "id": "6b65b70854fa803-48161d5725dd982",
+      "title": "Teardown ES|QL tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
       }
     }
   ]

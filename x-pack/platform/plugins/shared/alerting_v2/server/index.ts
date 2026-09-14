@@ -10,6 +10,7 @@ import type { PluginConfigDescriptor } from '@kbn/core/server';
 import type { PluginConfig } from './config';
 import { configSchema } from './config';
 import { bindAgentBuilder } from './setup/bind_agent_builder';
+import { bindArtifactTypes } from './setup/bind_artifact_types';
 import { bindContract } from './setup/bind_contract';
 import { bindOnSetup } from './setup/bind_on_setup';
 import { bindOnStart } from './setup/bind_on_start';
@@ -35,6 +36,7 @@ export const config: PluginConfigDescriptor<PluginConfig> = {
 
 const pluginModule = new ContainerModule((options) => {
   bindOnSetup(options);
+  bindArtifactTypes(options);
   bindAgentBuilder(options);
   bindOnStart(options);
   bindContract(options);
@@ -49,7 +51,13 @@ const pluginModule = new ContainerModule((options) => {
 export { pluginModule as module };
 
 export type { PluginConfig as AlertingV2Config } from './config';
-export type { AlertingServerStart, RulesClientApi, ActionPolicyClientApi } from './types';
+export type {
+  AlertingServerSetup,
+  AlertingServerStart,
+  RulesClientApi,
+  ActionPolicyClientApi,
+} from './types';
+export type { ArtifactTypeDefinition, ArtifactReferenceDescriptor } from './lib/artifact_types';
 export type { FindRulesArgs } from './lib/rules_client';
 export type { FindActionPoliciesArgs } from './lib/action_policy_client';
 

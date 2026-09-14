@@ -585,7 +585,7 @@ describe('convertValueToString', () => {
     const flattened = convertValueToString(params).formattedString;
     const nested = convertValueToString({
       ...params,
-      sourceDisplayMode: 'json',
+      documentsDisplayMode: 'json',
       shouldShowFieldHandler: () => true,
     }).formattedString;
 

@@ -24,11 +24,19 @@ export const ReadRiskEngineSettingsResponse = lazySchema(() =>
     /**
      * Include closed alerts in the risk score calculation
      */
-    includeClosedAlerts: z.boolean().optional(),
+    includeClosedAlerts: z
+      .boolean()
+      .optional()
+      .describe('Include closed alerts in the risk score calculation'),
     /**
      * Whether to enable resetting risk scores to zero when there are no alerts in the selected date range
      */
-    enableResetToZero: z.boolean().optional(),
+    enableResetToZero: z
+      .boolean()
+      .optional()
+      .describe(
+        'Whether to enable resetting risk scores to zero when there are no alerts in the selected date range'
+      ),
     filters: z
       .array(
         z.object({
@@ -36,7 +44,7 @@ export const ReadRiskEngineSettingsResponse = lazySchema(() =>
           /**
            * KQL filter string
            */
-          filter: z.string(),
+          filter: z.string().describe('KQL filter string'),
         })
       )
       .optional(),
