@@ -122,7 +122,41 @@ spaceTest.describe(
 
     spaceTest(
       'cancels the ES|QL request when navigating away from the dashboard',
-      async ({ page, pageObjects }) => {
+      async ({ page, apiServices, scoutSpace, pageObjects }) => {
+        const title = `ES|QL Lens Dashboard ${Date.now()}`;
+
+        const dashboardId = await apiServices.dashboard.create(
+          {
+            title,
+            time_range: {
+              from: testData.LOGSTASH_IN_RANGE_DATES.from,
+              to: testData.LOGSTASH_IN_RANGE_DATES.to,
+              mode: 'absolute',
+            },
+            panels: [buildEsqlLensPanel(), buildClassicLensPanel()],
+            filters: [
+              {
+                type: 'dsl',
+                dsl: {
+                  query: {
+                    error_query: {
+                      indices: [
+                        {
+                          name: '*',
+                          error_type: 'warning',
+                          message: "'Watch out!'",
+                          stall_time_seconds: 5,
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          scoutSpace.id
+        );
+
         // Set up listener before opening the dashboard to avoid race conditions
         const searchInitiationResponsePromises = [
           page.waitForResponse((res) => res.url().endsWith('/esql_async') && res.ok()),
@@ -154,8 +188,6 @@ spaceTest.describe(
           page.waitForResponse((res) => res.url().endsWith('/esql_async') && res.ok()),
           page.waitForResponse((res) => res.url().endsWith('/ese') && res.ok()),
         ];
-
-        // await page.waitForTimeout(4000);
 
         await pageObjects.dashboard.openDashboardWithId(dashboardId, { waitForRender: false });
 
