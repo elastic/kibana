@@ -8,7 +8,6 @@
  */
 
 import {
-  EuiBadge,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiCode,
@@ -29,6 +28,7 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  useEuiFontSize,
   useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -249,7 +249,7 @@ function DefaultPanel() {
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiIcon type="download" color="subdued" size="m" aria-hidden />
+                <EuiIcon type="download" color="primary" size="m" aria-hidden />
               </EuiFlexItem>
             </EuiFlexGroup>
           </button>
@@ -378,6 +378,7 @@ function StepDetailPanel({
   onAdd: () => void;
   styles: ReturnType<typeof useMemoCss<typeof panelStyles>>;
 }) {
+  const requiredFont = useEuiFontSize('xxs');
   const displayTitle = step.label || step.id;
   const displayDescription =
     step.description && step.description !== step.id && step.description !== displayTitle
@@ -392,7 +393,7 @@ function StepDetailPanel({
       color="transparent"
       css={styles.scroll}
     >
-      <EuiTitle size="xs">
+      <EuiTitle size="xxs">
         <h3>{displayTitle}</h3>
       </EuiTitle>
       {displayDescription && (
@@ -524,18 +525,20 @@ function StepDetailPanel({
                         </EuiText>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiCode>{field.typeName}</EuiCode>
+                        <EuiText size="xs">
+                          <EuiCode>{field.typeName}</EuiCode>
+                        </EuiText>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>
                   {field.required && (
                     <EuiFlexItem grow={false}>
-                      <EuiBadge color="danger">
+                      <EuiText color="danger" css={requiredFont}>
                         <FormattedMessage
                           id="workflows.actionsMenu.preview.required"
                           defaultMessage="Required"
                         />
-                      </EuiBadge>
+                      </EuiText>
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
