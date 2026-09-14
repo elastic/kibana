@@ -68,10 +68,8 @@ Identity limitations: SHA-1 and SHA-256 representations of the same file are not
 
 ## Validation boundary
 
-cloud_targets.test.ts checks unchanged original branch conditions and precedence, guards on additions, retained Azure/Vertex mappings, and sample identity resolution through the shared in-memory EUID implementation. Sample identity tests start with already-enriched fields: they do not execute ES|QL.
+enrichment_query.test.ts checks the generated assignments for the affected actor/target fields, plus the original CloudTrail user.target.id assignment. Each case names its integration and destination field, and asserts the exact conditions, values, fallback order, populated-value preservation, and typed null default. These are query-construction tests, not ES|QL execution tests.
 
-documented_cloud_targets.test.ts checks the five resource-target additions against fixtures/cloud_targets_baseline.json, captured from the target phases at Kibana commit 60c97eca1a73. Every original assignment and branch must remain present in the same order with the same condition and return value. Additional tests check the exact guarded branches and sample resource identities alongside service identities. These tests do not prove ES|QL execution or live node-set preservation.
-
-additional_integrations.test.ts compares every existing phase and branch for the latest four evaluators against fixtures/additional_integrations_baseline.json (the working tree before this batch, including earlier Vertex resource-target additions). It checks the exact new guards and already-enriched identity examples. fetch_events_graph.test.ts checks that principal-subject enrichment appears before actor resolution and generic entity.id remains last in its COALESCE. Elasticsearch calls in that test are mocked.
+fetch_events_graph.test.ts checks that principal-subject enrichment appears before actor resolution and generic entity.id remains last in its COALESCE. Elasticsearch calls in that test are mocked.
 
 Live Elasticsearch execution and before/after node-set comparisons remain required. Test missing parameters, wrong services/datasets, populated targets, and OTel field encoding using indexed fixtures. Compare resolved identities per event, not only non-null field counts. Previously resolved identities should be a subset of the new result for these additive fallbacks. Real-world precision and recall have not been measured.
