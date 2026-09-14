@@ -23,13 +23,8 @@ import { createProposalUserResolver } from './proposals/services/resolve_proposa
 import type { ResolveProposalUser } from './proposals/services/resolve_proposal_user';
 import { registerStepDefinitions } from './proposals/step_types';
 import { createProposalsStorageClient } from './proposals/storage/proposals_storage';
-import {
-  InvestigationsService,
-  type InvestigationsConversationsClient,
-} from './investigations/services/investigations_service';
-import { createInvestigationsStorageClient } from './investigations/storage/investigations_storage';
 import { registerInvestigationAttachmentTypes } from './investigations/attachments';
-import { registerInvestigationRoutes } from './investigations/routes';
+import type { GetNsiClient, NsiInvestigationsClientLike } from './investigations/nsi_client';
 import type {
   AgenticInvestigationsPluginSetup,
   AgenticInvestigationsPluginStart,
@@ -47,18 +42,17 @@ export class AgenticInvestigationsPlugin
     >
 {
   private readonly logger: Logger;
-  private readonly kibanaVersion: string;
   private workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
   // `workflowsManagement` is a required plugin, so this is set in setup() and
   // read only from start() onwards; the getter asserts that ordering.
   private proposalsService?: ProposalsService;
-  private investigationsService?: InvestigationsService;
+  /** NSI investigations client factory; set in start() from the optional dep. */
+  private nsiGetClient?: GetNsiClient;
   private spaces?: AgenticInvestigationsStartDependencies['spaces'];
   private resolveUser?: ResolveProposalUser;
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
-    this.kibanaVersion = context.env.packageInfo.version;
   }
 
   setup(
@@ -76,9 +70,10 @@ export class AgenticInvestigationsPlugin
     registerFeatures({ features });
 
     // Register all four investigation attachment types with Agent Builder.
-    // Service is resolved lazily at request time (after start()); agentBuilder.attachments is setup-only.
-    registerInvestigationAttachmentTypes(agentBuilder.attachments, () =>
-      this.requireInvestigationsService()
+    // The NSI client factory is resolved lazily at request time (after start());
+    // agentBuilder.attachments is setup-only.
+    registerInvestigationAttachmentTypes(agentBuilder.attachments, (request, spaceId) =>
+      this.requireNsiClient(request, spaceId)
     );
 
     // Declares ownership of this plugin's managed workflows. Without it the
@@ -100,14 +95,6 @@ export class AgenticInvestigationsPlugin
       getProposalsService: () => this.requireProposalsService(),
       getSpaceId: (request) => this.getSpaceId(request),
       resolveUser: (request) => this.requireUserResolver()(request),
-    });
-
-    // Register investigation routes; service is resolved lazily after start().
-    registerInvestigationRoutes({
-      router: coreSetup.http.createRouter(),
-      logger: this.logger,
-      getInvestigationsService: () => this.requireInvestigationsService(),
-      getSpaceId: (request) => this.getSpaceId(request),
     });
 
     return {};
@@ -137,27 +124,16 @@ export class AgenticInvestigationsPlugin
       getWorkflowsApi: () => this.requireWorkflowsApi(),
     });
 
-    // Instantiate the shared investigations storage and service.
-    const investigationsStorage = createInvestigationsStorageClient({
-      esClient: coreStart.elasticsearch.client.asInternalUser,
-      kibanaVersion: this.kibanaVersion,
-      logger: this.logger,
-    });
-
-    const investigationsConversationsClient: InvestigationsConversationsClient = {
-      patchMetadata: async (_conversationId, _metadata) => {
-        // TODO: implement via a scoped conversations client when Agent Builder exposes patchMetadata
-      },
-      bulkGet: async (_ids) => {
-        // TODO: implement via a scoped conversations client when Agent Builder exposes bulkGet
-        return [];
-      },
-    };
-
-    this.investigationsService = new InvestigationsService(
-      investigationsStorage,
-      investigationsConversationsClient
-    );
+    // Wire the NSI investigations client factory so the attachment types can
+    // resolve investigation data from the nightshiftInvestigations plugin.
+    // nightshiftInvestigations is an optional dep that starts AFTER this plugin
+    // (it requires agenticInvestigations), so plugins.nightshiftInvestigations
+    // will be undefined here — the factory captures the reference and the actual
+    // plugin is available by the time resolve() is called at request time.
+    if (plugins.nightshiftInvestigations) {
+      const nsi = plugins.nightshiftInvestigations;
+      this.nsiGetClient = (request, spaceId) => nsi.getInvestigationsClient(request, spaceId);
+    }
 
     void initializeManagedWorkflows({
       workflowsExtensions: plugins.workflowsExtensions,
@@ -172,7 +148,10 @@ export class AgenticInvestigationsPlugin
 
     return {
       getProposalsService: () => this.requireProposalsService(),
-      getInvestigationsService: () => this.requireInvestigationsService(),
+      // POC: service implementation removed; nightshiftInvestigations casts
+      // the return value via `as unknown as ConcreteType` — the empty object
+      // satisfies InvestigationsServiceHandle structurally.
+      getInvestigationsService: () => ({}),
     };
   }
 
@@ -194,13 +173,19 @@ export class AgenticInvestigationsPlugin
     return this.proposalsService;
   }
 
-  private requireInvestigationsService(): InvestigationsService {
-    if (!this.investigationsService) {
+  /**
+   * Returns an NSI investigations client for the given request and space. Called
+   * lazily at request time after all plugins have started — this is what allows
+   * the factory to be registered during setup() while nightshiftInvestigations
+   * starts after agenticInvestigations.
+   */
+  private requireNsiClient(request: KibanaRequest, spaceId: string): NsiInvestigationsClientLike {
+    if (!this.nsiGetClient) {
       throw new Error(
-        'Investigations service is not available until the agenticInvestigations plugin has started'
+        'nightshiftInvestigations is not available; investigation attachments cannot be resolved'
       );
     }
-    return this.investigationsService;
+    return this.nsiGetClient(request, spaceId);
   }
 
   private getSpaceId(request: KibanaRequest): string {

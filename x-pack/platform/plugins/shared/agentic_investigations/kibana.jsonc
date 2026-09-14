@@ -11,7 +11,7 @@
     "browser": true,
     "server": true,
     "requiredPlugins": ["agentBuilder", "features", "workflowsExtensions", "workflowsManagement"],
-    "optionalPlugins": ["spaces"],
+    "optionalPlugins": ["nightshiftInvestigations", "spaces"],
     "extraPublicDirs": ["common"]
   }
 }

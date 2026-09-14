@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type {
@@ -14,7 +15,17 @@ import type {
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { ProposalsService } from './proposals/services/proposals_service';
-import type { InvestigationsService } from './investigations/services/investigations_service';
+import type { NsiInvestigationsClientLike } from './investigations/nsi_client';
+
+/**
+ * Minimal structural interface for the nightshiftInvestigations start contract.
+ * Defined locally to avoid a circular module dependency: the NSI plugin already
+ * imports from @kbn/agentic-investigations-plugin/server, so importing from
+ * @kbn/nightshift-investigations-plugin/server here would create a cycle.
+ */
+interface NightshiftInvestigationsStart {
+  getInvestigationsClient(request: KibanaRequest, spaceId?: string): NsiInvestigationsClientLike;
+}
 
 export interface AgenticInvestigationsSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
@@ -25,9 +36,19 @@ export interface AgenticInvestigationsSetupDependencies {
 
 export interface AgenticInvestigationsStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
+  nightshiftInvestigations?: NightshiftInvestigationsStart;
   spaces?: SpacesPluginStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
 }
+
+/**
+ * Opaque handle for the shared investigations service. Callers narrow it to
+ * their concrete interface via `as unknown as ConcreteServiceType` — the double
+ * cast is intentional: the full InvestigationsService class is not exported on
+ * the public contract to avoid exposing implementation details.
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface InvestigationsServiceHandle {}
 
 /**
  * Exposed so a solution plugin can reach an entity in-process rather than over
@@ -36,7 +57,11 @@ export interface AgenticInvestigationsStartDependencies {
  */
 export interface AgenticInvestigationsPluginStart {
   getProposalsService: () => ProposalsService;
-  getInvestigationsService: () => InvestigationsService;
+  /**
+   * Returns the shared InvestigationsService handle. Callers cast this to their
+   * concrete service interface — the handle is opaque to avoid circular imports.
+   */
+  getInvestigationsService: () => InvestigationsServiceHandle;
 }
 
 export type AgenticInvestigationsPluginSetup = Record<string, never>;

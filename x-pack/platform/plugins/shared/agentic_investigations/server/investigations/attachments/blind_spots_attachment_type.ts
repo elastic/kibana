@@ -5,20 +5,22 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import type { z } from '@kbn/zod/v4';
+import { investigationBlindSpotSchema } from '@kbn/significant-events-schema';
 import { INVESTIGATION_ATTACHMENT_IDS } from '../../../common/investigations/constants';
-import { investigationSchema } from '../../../common/investigations/investigation';
-import type { InvestigationsService } from '../services/investigations_service';
+import type { GetNsiClient } from '../nsi_client';
 
 const ATTACHMENT_ID = INVESTIGATION_ATTACHMENT_IDS.BLIND_SPOTS;
 type AttachmentId = typeof ATTACHMENT_ID;
 
-const blindSpotsAttachmentDataSchema = investigationSchema.pick({ blindSpots: true });
+const blindSpotsAttachmentDataSchema = z.object({
+  blind_spots: z.array(investigationBlindSpotSchema),
+});
 type BlindSpotsAttachmentData = z.infer<typeof blindSpotsAttachmentDataSchema>;
 
 export const createBlindSpotsAttachmentType = (
-  getService: () => InvestigationsService
+  getClient: GetNsiClient
 ): AttachmentTypeDefinition<AttachmentId, BlindSpotsAttachmentData> => ({
   id: ATTACHMENT_ID,
   isReadonly: true,
@@ -31,25 +33,20 @@ export const createBlindSpotsAttachmentType = (
   },
   resolve: async (origin, context) => {
     try {
-      const record = await getService().get(context.spaceId, origin);
-      if (!record) {
-        return undefined;
-      }
-      return { blindSpots: record.blindSpots };
+      const client = getClient(context.request, context.spaceId);
+      const investigation = await client.get(origin);
+      return { blind_spots: investigation.blind_spots ?? [] };
     } catch {
       return undefined;
     }
   },
   isStale: async (attachment, context) => {
     try {
-      const record = await getService().get(context.spaceId, attachment.origin);
-      if (!record) {
-        return false;
-      }
-      if (!attachment.origin_snapshot_at) {
-        return true;
-      }
-      return new Date(record.updatedAt) > new Date(attachment.origin_snapshot_at);
+      const client = getClient(context.request, context.spaceId);
+      const investigation = await client.get(attachment.origin);
+      if (!attachment.origin_snapshot_at) return true;
+      if (!investigation.completed_at) return false;
+      return new Date(investigation.completed_at) > new Date(attachment.origin_snapshot_at);
     } catch {
       return false;
     }

@@ -8,9 +8,9 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { AttachmentResolveContext } from '@kbn/agent-builder-server/attachments';
 import type { VersionedAttachmentWithOrigin } from '@kbn/agent-builder-common/attachments';
-import type { Investigation, ImpactedEntity } from '../../../common/investigations/investigation';
+import type { InvestigationImpactEntity } from '@kbn/significant-events-schema';
 import { INVESTIGATION_ATTACHMENT_IDS } from '../../../common/investigations/constants';
-import type { InvestigationsService } from '../services/investigations_service';
+import type { NsiGetInvestigationResult, NsiInvestigationsClientLike } from '../nsi_client';
 import { createImpactAttachmentType } from './impact_attachment_type';
 
 const IMPACT_ATTACHMENT_ID = INVESTIGATION_ATTACHMENT_IDS.IMPACT;
@@ -21,19 +21,13 @@ const createResolveContext = (spaceId = 'default'): AttachmentResolveContext => 
   savedObjectsClient: {} as unknown as AttachmentResolveContext['savedObjectsClient'],
 });
 
-const createMinimalInvestigation = (overrides: Partial<Investigation> = {}): Investigation => ({
-  id: 'investigation-1',
-  spaceId: 'default',
-  solution: 'observability',
-  subjectType: 'significant_event',
-  subjectId: 'event-1',
-  status: 'completed',
-  createdAt: '2026-01-01T00:00:00.000Z',
-  updatedAt: '2026-01-01T00:00:00.000Z',
-  impactedEntities: [],
+const createMinimalResult = (
+  overrides: Partial<NsiGetInvestigationResult> = {}
+): NsiGetInvestigationResult => ({
   hypotheses: [],
   recommendations: [],
-  blindSpots: [],
+  blind_spots: [],
+  impact: { entities: [] },
   ...overrides,
 });
 
@@ -42,7 +36,7 @@ const createVersionedAttachment = (
   originSnapshotAt: string
 ): VersionedAttachmentWithOrigin<
   typeof IMPACT_ATTACHMENT_ID,
-  { impactedEntities: ImpactedEntity[] }
+  { entities: InvestigationImpactEntity[] }
 > => ({
   id: 'attachment-1',
   type: IMPACT_ATTACHMENT_ID,
@@ -52,49 +46,49 @@ const createVersionedAttachment = (
   versions: [
     {
       version: 1,
-      data: { impactedEntities: [] },
+      data: { entities: [] },
       created_at: '2026-01-01T00:00:00.000Z',
       content_hash: 'abc123',
     },
   ],
 });
 
-const createMockService = (record: Investigation | undefined): InvestigationsService =>
-  ({ get: jest.fn().mockResolvedValue(record) } as unknown as InvestigationsService);
+const createMockClient = (result: NsiGetInvestigationResult): NsiInvestigationsClientLike => ({
+  get: jest.fn().mockResolvedValue(result),
+});
 
 describe('createImpactAttachmentType', () => {
-  it('resolve() returns { impactedEntities } from the investigation record', async () => {
-    const entity: ImpactedEntity = {
-      name: 'payment-service',
-      nameText: 'payment-service',
-      type: 'service',
-    };
-    const investigation = createMinimalInvestigation({
-      impactedEntities: [entity],
-    });
-    const type = createImpactAttachmentType(() => createMockService(investigation));
+  it('resolve() returns { entities } from the investigation impact', async () => {
+    const entity: InvestigationImpactEntity = { name: 'payment-service', type: 'service' };
+    const result = createMinimalResult({ impact: { entities: [entity] } });
+    const client = createMockClient(result);
+    const type = createImpactAttachmentType(() => client);
 
     await expect(type.resolve?.('investigation-1', createResolveContext())).resolves.toEqual({
-      impactedEntities: [entity],
+      entities: [entity],
     });
   });
 
-  it('isStale() returns true when updatedAt on the record is newer than origin_snapshot_at on the attachment', async () => {
-    const investigation = createMinimalInvestigation({
-      updatedAt: '2026-01-01T01:00:00.000Z',
-    });
+  it('isStale() returns true when completed_at on the result is newer than origin_snapshot_at', async () => {
+    const result = createMinimalResult({ completed_at: '2026-01-01T01:00:00.000Z' });
     const attachment = createVersionedAttachment('investigation-1', '2026-01-01T00:00:00.000Z');
-    const type = createImpactAttachmentType(() => createMockService(investigation));
+    const type = createImpactAttachmentType(() => createMockClient(result));
 
     await expect(type.isStale?.(attachment, createResolveContext())).resolves.toBe(true);
   });
 
-  it('isStale() returns false when updatedAt equals origin_snapshot_at on the attachment', async () => {
-    const investigation = createMinimalInvestigation({
-      updatedAt: '2026-01-01T00:00:00.000Z',
-    });
+  it('isStale() returns false when investigation is still running (no completed_at)', async () => {
+    const result = createMinimalResult({ completed_at: undefined });
     const attachment = createVersionedAttachment('investigation-1', '2026-01-01T00:00:00.000Z');
-    const type = createImpactAttachmentType(() => createMockService(investigation));
+    const type = createImpactAttachmentType(() => createMockClient(result));
+
+    await expect(type.isStale?.(attachment, createResolveContext())).resolves.toBe(false);
+  });
+
+  it('isStale() returns false when completed_at equals origin_snapshot_at', async () => {
+    const result = createMinimalResult({ completed_at: '2026-01-01T00:00:00.000Z' });
+    const attachment = createVersionedAttachment('investigation-1', '2026-01-01T00:00:00.000Z');
+    const type = createImpactAttachmentType(() => createMockClient(result));
 
     await expect(type.isStale?.(attachment, createResolveContext())).resolves.toBe(false);
   });
