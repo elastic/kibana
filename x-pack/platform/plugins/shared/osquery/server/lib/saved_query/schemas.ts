@@ -134,10 +134,10 @@ export const packSchemaV3 = packSchemaV2.extends({
 // `unknowns: 'allow'`.
 export const packSchemaV4 = packSchemaV3;
 
-// V5 adds two pack-level execution defaults: `min_osquery_version` (string
-// keyword) and `result_type` (enum keyword). The field name
-// `min_osquery_version` avoids colliding with the pack-asset `version: long`.
-// The third default, `platform`, lands in V6 below.
+// V5 adds three pack-level execution defaults: `min_osquery_version` (string
+// keyword), `result_type` (enum keyword), and `platform` (comma-separated
+// keyword). The field name `min_osquery_version` avoids colliding with the
+// pack-asset `version: long`.
 //
 // These are *defaults that fan out onto inheriting queries*, never pack-level
 // gates — a query's own value always wins.
@@ -152,14 +152,7 @@ export const packSchemaV5 = packSchemaV4.extends({
       ])
     )
   ),
-});
-
-// V6 adds the third pack-level execution default, `platform` (comma-separated
-// keyword). It is a separate model version rather than an in-place extension of
-// V5 because a cluster that already migrated to V5 records that version in the
-// SO index `_meta`; adding a field to V5 after the fact is silently skipped,
-// leaving the mapping without the field. Same semantics as its two siblings:
-// a default that fans out onto inheriting queries, never a pack-level gate.
-export const packSchemaV6 = packSchemaV5.extends({
   platform: schema.maybe(schema.nullable(schema.string())),
 });
+
+export const packSchemaV6 = packSchemaV5;
