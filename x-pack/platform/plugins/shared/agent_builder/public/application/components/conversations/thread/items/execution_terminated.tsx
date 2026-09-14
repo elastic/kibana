@@ -58,7 +58,6 @@ export const ExecutionTerminated: React.FC<ExecutionTerminatedProps> = ({
       steps={steps}
       response={outcome.response}
       isLoading={false}
-      isLastRound={false}
       rawRound={toSyntheticRound(event, steps)}
     />
   );

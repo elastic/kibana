@@ -23,11 +23,11 @@ export const ExecutionAborted: React.FC<ExecutionAbortedProps> = ({ event }) => 
   return (
     <EuiText color="subdued" size="s">
       {label
-        ? i18n.translate('xpack.agentBuilder.conversation.timeline.executionAborted.stoppedBy', {
+        ? i18n.translate('xpack.agentBuilder.conversation.thread.executionAborted.stoppedBy', {
             defaultMessage: 'Response stopped by {actor}',
             values: { actor: label },
           })
-        : i18n.translate('xpack.agentBuilder.conversation.timeline.executionAborted.stopped', {
+        : i18n.translate('xpack.agentBuilder.conversation.thread.executionAborted.stopped', {
             defaultMessage: 'Response stopped',
           })}
     </EuiText>

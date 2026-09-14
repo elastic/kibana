@@ -16,27 +16,27 @@ import {
 } from '@elastic/eui';
 import type { Meta, StoryObj } from '@storybook/react';
 import type { ChatEvent, TimelineEvent } from '@kbn/agent-builder-common';
-import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
+import { isRoundCompleteEvent, ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { AgentBuilderStorybookProvider } from '../../../__storybook__/agent_builder_storybook_provider';
-import { Timeline } from './timeline';
+import { Thread } from './thread';
 import { DevSseEmitter } from './dev_sse_emitter';
 import {
   activeExecutionReducer,
   type ActiveExecutionDraft,
 } from '../../../../services/events/active_execution_reducer';
-import { toTimelineItems } from './group_timeline_events';
+import { toThreadItems } from './to_thread_items';
 import { createUserMessageEvent } from './items/user_message.factory';
 import { createExecutionStartedEvent } from './items/execution_started.factory';
 import { createExecutionStepEvent } from './items/execution_step.factory';
 import { createExecutionTerminatedEvent } from './items/execution_terminated.factory';
 import {
   createUserMessageItem,
-  createAgentTurnItem,
-  createAgentFailedItem,
-  createAgentAbortedItem,
-} from './items/timeline_item.factory';
+  createCompletedTurnItem,
+  createFailedTurnItem,
+  createAbortedTurnItem,
+  createStreamingTurnItem,
+} from './items/thread_item.factory';
 
-// The service clears the draft when the stream ends; in stories `round_complete` stands in for that signal.
 const storyReducer = (
   state: ActiveExecutionDraft | null,
   event: ChatEvent
@@ -55,7 +55,10 @@ const seedEvents: TimelineEvent[] = [
     execution_id: 'seed-exec-1',
     trigger_event_id: 'seed-1',
     data: {
-      step: { type: 'reasoning' as const, reasoning: 'Looking at the available tools...' },
+      step: {
+        type: ConversationRoundStepType.reasoning,
+        reasoning: 'Looking at the available tools...',
+      },
       sequence: 0,
     },
   }),
@@ -64,7 +67,7 @@ const seedEvents: TimelineEvent[] = [
     execution_id: 'seed-exec-1',
     trigger_event_id: 'seed-1',
     data: {
-      step: { type: 'reasoning' as const, reasoning: 'Querying host metrics.' },
+      step: { type: ConversationRoundStepType.reasoning, reasoning: 'Querying host metrics.' },
       sequence: 1,
     },
   }),
@@ -79,9 +82,9 @@ const seedEvents: TimelineEvent[] = [
   }),
 ];
 
-const meta: Meta<typeof Timeline> = {
-  title: 'Conversations/Timeline/Timeline',
-  component: Timeline,
+const meta: Meta<typeof Thread> = {
+  title: 'Conversations/Thread/Thread',
+  component: Thread,
   decorators: [
     (Story) => (
       <AgentBuilderStorybookProvider conversationId="story-conversation-1">
@@ -94,13 +97,31 @@ const meta: Meta<typeof Timeline> = {
 };
 export default meta;
 
-type Story = StoryObj<typeof Timeline>;
+type Story = StoryObj<typeof Thread>;
+
+export const FullConversation: Story = {
+  args: {
+    items: [
+      createUserMessageItem(),
+      createCompletedTurnItem(),
+      createUserMessageItem({
+        key: 'pending-1',
+        isPending: true,
+        event: createUserMessageEvent({
+          id: 'pending-1',
+          data: { message: 'Are there any anomalies in the last hour?' },
+        }),
+      }),
+      createStreamingTurnItem({ key: 'execution-2' }),
+    ],
+  },
+};
 
 export const Default: Story = {
   args: {
     items: [
       createUserMessageItem(),
-      createAgentTurnItem(),
+      createCompletedTurnItem(),
       createUserMessageItem({
         key: 'event-3',
         event: createUserMessageEvent({
@@ -108,7 +129,7 @@ export const Default: Story = {
           data: { message: 'Are there any anomalies in the last hour?' },
         }),
       }),
-      createAgentTurnItem({
+      createCompletedTurnItem({
         key: 'execution-2',
         startedAt: '2026-09-03T11:18:00.000Z',
         terminal: createExecutionTerminatedEvent({
@@ -141,7 +162,7 @@ export const WithPendingMessage: Story = {
   args: {
     items: [
       createUserMessageItem(),
-      createAgentTurnItem(),
+      createCompletedTurnItem(),
       createUserMessageItem({
         key: 'pending-1',
         isPending: true,
@@ -156,23 +177,22 @@ export const WithPendingMessage: Story = {
 
 export const FailedExecution: Story = {
   args: {
-    items: [createUserMessageItem(), createAgentFailedItem()],
+    items: [createUserMessageItem(), createFailedTurnItem()],
   },
 };
 
 export const AbortedExecution: Story = {
   args: {
-    items: [createUserMessageItem(), createAgentAbortedItem()],
+    items: [createUserMessageItem(), createAbortedTurnItem()],
   },
 };
 
-// Inner stateful component so `key` remount cleanly resets the reducer.
 const InteractiveInner: React.FC<{ onReset: () => void }> = ({ onReset }) => {
   const [activeExecution, dispatch] = useReducer(storyReducer, null);
   const emit = useCallback((event: ChatEvent) => dispatch(event), []);
 
-  const toTimelineItemsInput = { events: seedEvents, activeExecution };
-  const items = toTimelineItems(toTimelineItemsInput);
+  const toThreadItemsInput = { events: seedEvents, activeExecution };
+  const items = toThreadItems(toThreadItemsInput);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
@@ -181,14 +201,14 @@ const InteractiveInner: React.FC<{ onReset: () => void }> = ({ onReset }) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiPanel hasBorder paddingSize="l">
-          <Timeline items={items} />
+          <Thread items={items} />
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiAccordion id="debug-source" buttonContent="Source">
           <EuiSpacer size="s" />
           <EuiCodeBlock language="json" isCopyable overflowHeight={300}>
-            {JSON.stringify(toTimelineItemsInput, null, 2)}
+            {JSON.stringify(toThreadItemsInput, null, 2)}
           </EuiCodeBlock>
         </EuiAccordion>
       </EuiFlexItem>

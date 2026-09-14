@@ -12,23 +12,27 @@ import useObservable from 'react-use/lib/useObservable';
 import type { UserMessageEvent } from '@kbn/agent-builder-common';
 import { TimelineEventType, EventActorType } from '@kbn/agent-builder-common';
 import type { ActiveExecutionDraft } from '../../../../services/events/active_execution_reducer';
-import { useConversation } from '../../../hooks/use_conversation';
+import { useConversation, useAgentId } from '../../../hooks/use_conversation';
+import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import {
   useStreamRecord,
   useConversationStreamService,
 } from '../../../context/streaming/streaming_context';
-import { toTimelineItems } from './group_timeline_events';
-import { Timeline } from './timeline';
+import { toThreadItems } from './to_thread_items';
+import { Thread } from './thread';
 
 const PENDING_USER_MESSAGE_ID = 'pending::user_message';
 
 /**
  * @todo: errors not handled yet. Probably should read the streaming context error state here
  */
-export const TimelineConnector: React.FC = () => {
+export const ThreadConnector: React.FC = () => {
   const { conversation } = useConversation();
   const conversationStreamService = useConversationStreamService();
   const conversationId = conversation?.id;
+
+  const agentId = useAgentId();
+  const { agent } = useAgentBuilderAgentById(agentId);
 
   const activeStream$: Observable<ActiveExecutionDraft | null> = useMemo(
     () => (conversationId ? conversationStreamService.getActiveStream$(conversationId) : of(null)),
@@ -52,10 +56,11 @@ export const TimelineConnector: React.FC = () => {
   );
 
   const persistedEvents = conversation?.events;
+  const conversationAttachments = conversation?.attachments;
 
   const items = useMemo(
     () =>
-      toTimelineItems({
+      toThreadItems({
         events: persistedEvents ?? [],
         pendingUserMessage,
         activeExecution,
@@ -63,5 +68,5 @@ export const TimelineConnector: React.FC = () => {
     [persistedEvents, pendingUserMessage, activeExecution]
   );
 
-  return <Timeline items={items} />;
+  return <Thread items={items} agent={agent} conversationAttachments={conversationAttachments} />;
 };

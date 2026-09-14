@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import { ConversationOriginType } from '@kbn/agent-builder-common';
 import {
-  groupTimelineEvents,
-  toTimelineItems,
+  ConversationOriginType,
+  ConversationRoundStepType,
+  EventActorType,
+} from '@kbn/agent-builder-common';
+import {
+  groupThreadEvents,
+  toThreadItems,
+  activeExecutionToItem,
   ACTIVE_EXECUTION_ITEM_KEY,
-} from './group_timeline_events';
+} from './to_thread_items';
 import { createUserMessageEvent } from './items/user_message.factory';
 import { createExecutionStartedEvent } from './items/execution_started.factory';
 import { createExecutionTerminatedEvent } from './items/execution_terminated.factory';
@@ -19,13 +24,16 @@ import { createExecutionAbortedEvent } from './items/execution_aborted.factory';
 import { createExecutionStepEvent } from './items/execution_step.factory';
 import { createPromptResponseEvent } from './items/prompt_response.factory';
 import type { ActiveExecutionDraft } from '../../../../services/events/active_execution_reducer';
+import type { TimelineEvent } from '@kbn/agent-builder-common';
 
-describe('groupTimelineEvents', () => {
+const makeEventsById = (events: TimelineEvent[]) => new Map(events.map((e) => [e.id, e]));
+
+describe('groupThreadEvents', () => {
   it('returns empty array for empty input', () => {
-    expect(groupTimelineEvents([])).toEqual([]);
+    expect(groupThreadEvents([], new Map())).toEqual([]);
   });
 
-  it('groups a full round into 2 items with steps and terminal', () => {
+  it('groups a full round into 2 items — one agentTurn with status completed', () => {
     const userMsg = createUserMessageEvent({ id: 'user-1' });
     const started = createExecutionStartedEvent({
       id: 'exec-started-1',
@@ -36,7 +44,7 @@ describe('groupTimelineEvents', () => {
       id: 'step-0',
       execution_id: 'exec-1',
       data: {
-        step: { type: 'reasoning' as const, reasoning: 'step 0' },
+        step: { type: ConversationRoundStepType.reasoning, reasoning: 'step 0' },
         sequence: 0,
       },
     });
@@ -44,7 +52,7 @@ describe('groupTimelineEvents', () => {
       id: 'step-1',
       execution_id: 'exec-1',
       data: {
-        step: { type: 'reasoning' as const, reasoning: 'step 1' },
+        step: { type: ConversationRoundStepType.reasoning, reasoning: 'step 1' },
         sequence: 1,
       },
     });
@@ -54,7 +62,8 @@ describe('groupTimelineEvents', () => {
       trigger_event_id: 'user-1',
     });
 
-    const items = groupTimelineEvents([userMsg, started, step0, step1, terminated]);
+    const events = [userMsg, started, step0, step1, terminated];
+    const items = groupThreadEvents(events, makeEventsById(events));
 
     expect(items).toHaveLength(2);
 
@@ -64,6 +73,7 @@ describe('groupTimelineEvents', () => {
     expect(item1.kind).toBe('agentTurn');
     if (item1.kind === 'agentTurn') {
       expect(item1.key).toBe('exec-1');
+      expect(item1.status).toBe('completed');
       expect(item1.steps).toHaveLength(2);
       expect(item1.steps[0]).toEqual(step0.data.step);
       expect(item1.steps[1]).toEqual(step1.data.step);
@@ -82,16 +92,8 @@ describe('groupTimelineEvents', () => {
     const step2 = createExecutionStepEvent({ execution_id: 'exec-2', id: 'step-2' });
     const term2 = createExecutionTerminatedEvent({ execution_id: 'exec-2', id: 'et-2' });
 
-    const items = groupTimelineEvents([
-      user1,
-      started1,
-      step1,
-      term1,
-      user2,
-      started2,
-      step2,
-      term2,
-    ]);
+    const events = [user1, started1, step1, term1, user2, started2, step2, term2];
+    const items = groupThreadEvents(events, makeEventsById(events));
 
     expect(items).toHaveLength(4);
 
@@ -100,6 +102,7 @@ describe('groupTimelineEvents', () => {
     expect(i1.kind).toBe('agentTurn');
     if (i1.kind === 'agentTurn') {
       expect(i1.key).toBe('exec-1');
+      expect(i1.status).toBe('completed');
       expect(i1.steps).toHaveLength(1);
       expect(i1.steps[0]).toEqual(step1.data.step);
     }
@@ -107,22 +110,25 @@ describe('groupTimelineEvents', () => {
     expect(i3.kind).toBe('agentTurn');
     if (i3.kind === 'agentTurn') {
       expect(i3.key).toBe('exec-2');
+      expect(i3.status).toBe('completed');
       expect(i3.steps).toHaveLength(1);
       expect(i3.steps[0]).toEqual(step2.data.step);
     }
   });
 
-  it('creates an agentRunning item with no terminal when the run is still in progress', () => {
+  it('creates an agentTurn with status running when no terminal event yet', () => {
     const user1 = createUserMessageEvent({ id: 'user-1' });
     const started = createExecutionStartedEvent({ execution_id: 'exec-1' });
     const step = createExecutionStepEvent({ execution_id: 'exec-1' });
 
-    const items = groupTimelineEvents([user1, started, step]);
+    const events = [user1, started, step];
+    const items = groupThreadEvents(events, makeEventsById(events));
 
     expect(items).toHaveLength(2);
     const [, execItem] = items;
-    expect(execItem.kind).toBe('agentRunning');
-    if (execItem.kind === 'agentRunning') {
+    expect(execItem.kind).toBe('agentTurn');
+    if (execItem.kind === 'agentTurn') {
+      expect(execItem.status).toBe('running');
       expect(execItem.steps).toHaveLength(1);
     }
   });
@@ -134,31 +140,35 @@ describe('groupTimelineEvents', () => {
       id: 'term-orphan',
     });
 
-    const items = groupTimelineEvents([step, terminal]);
+    const events = [step, terminal];
+    const items = groupThreadEvents(events, makeEventsById(events));
 
     expect(items).toHaveLength(1);
     const [execItem] = items;
     expect(execItem.kind).toBe('agentTurn');
     if (execItem.kind === 'agentTurn') {
       expect(execItem.key).toBe('exec-orphan');
+      expect(execItem.status).toBe('completed');
       expect(execItem.steps).toHaveLength(1);
       expect(execItem.terminal).toBe(terminal);
     }
   });
 
-  it('creates an execution item lazily when only a terminal event arrives with no preceding execution_started', () => {
+  it('creates an agentTurn with status failed when only a failed terminal arrives', () => {
     const terminal = createExecutionFailedEvent({
       execution_id: 'exec-orphan-2',
       id: 'term-orphan-2',
     });
 
-    const items = groupTimelineEvents([terminal]);
+    const events = [terminal];
+    const items = groupThreadEvents(events, makeEventsById(events));
 
     expect(items).toHaveLength(1);
     const [execItem] = items;
-    expect(execItem.kind).toBe('agentFailed');
-    if (execItem.kind === 'agentFailed') {
+    expect(execItem.kind).toBe('agentTurn');
+    if (execItem.kind === 'agentTurn') {
       expect(execItem.key).toBe('exec-orphan-2');
+      expect(execItem.status).toBe('failed');
       expect(execItem.terminal).toBe(terminal);
     }
   });
@@ -166,45 +176,49 @@ describe('groupTimelineEvents', () => {
   it('renders prompt_response as its own promptResponse item', () => {
     const promptResponse = createPromptResponseEvent({ id: 'pr-1' });
 
-    const items = groupTimelineEvents([promptResponse]);
+    const events = [promptResponse];
+    const items = groupThreadEvents(events, makeEventsById(events));
 
     expect(items).toHaveLength(1);
     expect(items[0]).toEqual({ kind: 'promptResponse', key: 'pr-1', event: promptResponse });
   });
 
-  it('handles execution_aborted as terminal', () => {
+  it('handles execution_aborted as aborted status', () => {
     const started = createExecutionStartedEvent({ execution_id: 'exec-abort' });
     const aborted = createExecutionAbortedEvent({ execution_id: 'exec-abort' });
 
-    const items = groupTimelineEvents([started, aborted]);
+    const events = [started, aborted];
+    const items = groupThreadEvents(events, makeEventsById(events));
 
     expect(items).toHaveLength(1);
     const [execItem] = items;
-    expect(execItem.kind).toBe('agentAborted');
-    if (execItem.kind === 'agentAborted') {
+    expect(execItem.kind).toBe('agentTurn');
+    if (execItem.kind === 'agentTurn') {
+      expect(execItem.status).toBe('aborted');
       expect(execItem.terminal).toBe(aborted);
     }
   });
 });
 
-describe('toTimelineItems', () => {
+describe('toThreadItems', () => {
   it('resolves origin from the trigger event for execution items', () => {
     const origin = { type: ConversationOriginType.Slack };
     const userMsg = createUserMessageEvent({
       id: 'user-origin-1',
-      actor: { type: 'user' as const, id: 'u1', origin },
+      actor: { type: EventActorType.user, id: 'u1', origin },
     });
     const terminated = createExecutionTerminatedEvent({
       execution_id: 'exec-origin-1',
       trigger_event_id: 'user-origin-1',
     });
 
-    const items = toTimelineItems({ events: [userMsg, terminated] });
+    const items = toThreadItems({ events: [userMsg, terminated] });
 
     expect(items).toHaveLength(2);
     const [, execItem] = items;
     expect(execItem.kind).toBe('agentTurn');
     if (execItem.kind === 'agentTurn') {
+      expect(execItem.status).toBe('completed');
       expect(execItem.origin).toEqual(origin);
     }
   });
@@ -212,7 +226,7 @@ describe('toTimelineItems', () => {
   it('leaves origin undefined when trigger event is absent', () => {
     const terminated = createExecutionTerminatedEvent({ execution_id: 'exec-no-trigger' });
 
-    const items = toTimelineItems({ events: [terminated] });
+    const items = toThreadItems({ events: [terminated] });
 
     expect(items).toHaveLength(1);
     const [execItem] = items;
@@ -222,25 +236,27 @@ describe('toTimelineItems', () => {
     }
   });
 
-  it('emits agentRunning for in-flight persisted executions and agentTurn for completed ones', () => {
+  it('emits agentTurn running for in-flight persisted executions and completed for terminated ones', () => {
     const inFlight = createExecutionStartedEvent({ execution_id: 'exec-in-flight' });
     const terminated = createExecutionTerminatedEvent({ execution_id: 'exec-done' });
 
-    const items = toTimelineItems({ events: [inFlight, terminated] });
+    const items = toThreadItems({ events: [inFlight, terminated] });
 
     expect(items).toHaveLength(2);
     const [inFlightItem, doneItem] = items;
 
-    expect(inFlightItem.kind).toBe('agentRunning');
+    expect(inFlightItem.kind).toBe('agentTurn');
+    if (inFlightItem.kind === 'agentTurn') expect(inFlightItem.status).toBe('running');
+
     expect(doneItem.kind).toBe('agentTurn');
+    if (doneItem.kind === 'agentTurn') expect(doneItem.status).toBe('completed');
   });
 
   it('appends a pending user message item with isPending=true', () => {
     const pending = createUserMessageEvent({ id: 'pending::user_message' });
 
-    const items = toTimelineItems({ events: [], pendingUserMessage: pending });
+    const items = toThreadItems({ events: [], pendingUserMessage: pending });
 
-    // pending user item + synthetic agentRunning (empty steps)
     expect(items).toHaveLength(2);
     const [userItem] = items;
     expect(userItem.kind).toBe('userMessage');
@@ -250,21 +266,22 @@ describe('toTimelineItems', () => {
     }
   });
 
-  it('appends an agentRunning item with empty steps when pendingUserMessage is set but activeExecution is absent', () => {
+  it('appends an agentTurn running placeholder with empty steps when pendingUserMessage is set but activeExecution is absent', () => {
     const pending = createUserMessageEvent({ id: 'pending::user_message' });
 
-    const items = toTimelineItems({ events: [], pendingUserMessage: pending });
+    const items = toThreadItems({ events: [], pendingUserMessage: pending });
 
     expect(items).toHaveLength(2);
     const [, execItem] = items;
-    expect(execItem.kind).toBe('agentRunning');
-    if (execItem.kind === 'agentRunning') {
+    expect(execItem.kind).toBe('agentTurn');
+    if (execItem.kind === 'agentTurn') {
       expect(execItem.key).toBe(ACTIVE_EXECUTION_ITEM_KEY);
+      expect(execItem.status).toBe('running');
       expect(execItem.steps).toHaveLength(0);
     }
   });
 
-  it('appends an agentActive item carrying the draft when activeExecution is present', () => {
+  it('appends an agentTurn item from the draft when activeExecution is present', () => {
     const pending = createUserMessageEvent({ id: 'pending::user_message' });
     const draft: ActiveExecutionDraft = {
       status: 'running',
@@ -272,7 +289,7 @@ describe('toTimelineItems', () => {
       message: 'hello',
     };
 
-    const items = toTimelineItems({
+    const items = toThreadItems({
       events: [],
       pendingUserMessage: pending,
       activeExecution: draft,
@@ -280,28 +297,29 @@ describe('toTimelineItems', () => {
 
     expect(items).toHaveLength(2);
     const [, execItem] = items;
-    expect(execItem.kind).toBe('agentActive');
-    if (execItem.kind === 'agentActive') {
+    expect(execItem.kind).toBe('agentTurn');
+    if (execItem.kind === 'agentTurn') {
       expect(execItem.key).toBe(ACTIVE_EXECUTION_ITEM_KEY);
-      expect(execItem.draft).toBe(draft);
+      expect(execItem.status).toBe('running');
+      expect(execItem.response).toEqual({ message: 'hello' });
     }
   });
 
-  it('appends an agentActive item even when pendingUserMessage is absent', () => {
+  it('appends an agentTurn item even when pendingUserMessage is absent', () => {
     const draft: ActiveExecutionDraft = {
       status: 'running',
       steps: [],
       message: '',
     };
 
-    const items = toTimelineItems({ events: [], activeExecution: draft });
+    const items = toThreadItems({ events: [], activeExecution: draft });
 
     expect(items).toHaveLength(1);
     const [execItem] = items;
-    expect(execItem.kind).toBe('agentActive');
-    if (execItem.kind === 'agentActive') {
+    expect(execItem.kind).toBe('agentTurn');
+    if (execItem.kind === 'agentTurn') {
       expect(execItem.key).toBe(ACTIVE_EXECUTION_ITEM_KEY);
-      expect(execItem.draft).toBe(draft);
+      expect(execItem.status).toBe('running');
     }
   });
 
@@ -309,7 +327,7 @@ describe('toTimelineItems', () => {
     const userMsg = createUserMessageEvent({ id: 'u1' });
     const terminated = createExecutionTerminatedEvent({ execution_id: 'e1' });
 
-    const items = toTimelineItems({ events: [userMsg, terminated] });
+    const items = toThreadItems({ events: [userMsg, terminated] });
 
     expect(items).toHaveLength(2);
     expect(items[0].kind).toBe('userMessage');
@@ -318,4 +336,36 @@ describe('toTimelineItems', () => {
       expect(items[1].key).not.toBe(ACTIVE_EXECUTION_ITEM_KEY);
     }
   });
+});
+
+describe('activeExecutionToItem', () => {
+  it('normalizes running draft', () => {
+    const draft: ActiveExecutionDraft = { status: 'running', steps: [], message: 'partial' };
+    const item = activeExecutionToItem(draft);
+    expect(item.kind).toBe('agentTurn');
+    expect(item.status).toBe('running');
+    expect(item.key).toBe(ACTIVE_EXECUTION_ITEM_KEY);
+    expect(item.response).toEqual({ message: 'partial' });
+  });
+
+  it('normalizes awaiting_prompt draft', () => {
+    const draft: ActiveExecutionDraft = {
+      status: 'awaiting_prompt',
+      steps: [],
+      message: '',
+      pendingPrompts: [],
+    };
+    const item = activeExecutionToItem(draft);
+    expect(item.status).toBe('awaiting_prompt');
+    expect(item.response).toBeUndefined();
+    expect(item.pendingPrompts).toEqual([]);
+  });
+
+  it('omits response when message is empty', () => {
+    const draft: ActiveExecutionDraft = { status: 'running', steps: [], message: '' };
+    const item = activeExecutionToItem(draft);
+    expect(item.response).toBeUndefined();
+  });
+
+  // @todo: Add test covering sealed draft vs server events producing deep-equal items
 });

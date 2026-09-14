@@ -8,12 +8,12 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { AgentBuilderStorybookProvider } from '../../../../__storybook__/agent_builder_storybook_provider';
-import { UserTurn } from './user_turn';
-import { createUserMessageEvent } from './user_message.factory';
+import { ExecutionFailed } from './execution_failed';
+import { createExecutionFailedEvent } from './execution_failed.factory';
 
-const meta: Meta<typeof UserTurn> = {
-  title: 'Conversations/Timeline/User Turn',
-  component: UserTurn,
+const meta: Meta<typeof ExecutionFailed> = {
+  title: 'Conversations/Thread/Execution Failed',
+  component: ExecutionFailed,
   decorators: [
     (Story) => (
       <AgentBuilderStorybookProvider conversationId="story-conversation-1">
@@ -26,10 +26,10 @@ const meta: Meta<typeof UserTurn> = {
 };
 export default meta;
 
-type Story = StoryObj<typeof UserTurn>;
+type Story = StoryObj<typeof ExecutionFailed>;
 
 export const Default: Story = {
   args: {
-    event: createUserMessageEvent(),
+    event: createExecutionFailedEvent(),
   },
 };

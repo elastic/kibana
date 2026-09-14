@@ -8,12 +8,12 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { AgentBuilderStorybookProvider } from '../../../../__storybook__/agent_builder_storybook_provider';
-import { ExecutionTerminated } from './execution_terminated';
-import { createExecutionTerminatedEvent } from './execution_terminated.factory';
+import { PromptResponse } from './prompt_response';
+import { createPromptResponseEvent } from './prompt_response.factory';
 
-const meta: Meta<typeof ExecutionTerminated> = {
-  title: 'Conversations/Timeline/Execution Terminated',
-  component: ExecutionTerminated,
+const meta: Meta<typeof PromptResponse> = {
+  title: 'Conversations/Thread/Prompt Response',
+  component: PromptResponse,
   decorators: [
     (Story) => (
       <AgentBuilderStorybookProvider conversationId="story-conversation-1">
@@ -26,10 +26,10 @@ const meta: Meta<typeof ExecutionTerminated> = {
 };
 export default meta;
 
-type Story = StoryObj<typeof ExecutionTerminated>;
+type Story = StoryObj<typeof PromptResponse>;
 
 export const Default: Story = {
   args: {
-    event: createExecutionTerminatedEvent(),
+    event: createPromptResponseEvent(),
   },
 };

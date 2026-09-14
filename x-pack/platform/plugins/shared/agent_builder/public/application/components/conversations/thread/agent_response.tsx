@@ -19,7 +19,6 @@ interface AgentResponseProps {
   steps: ConversationRoundStep[];
   response: AssistantResponse;
   isLoading: boolean;
-  isLastRound: boolean;
   /** The round shape the response actions still expect. Faked by callers until events are grouped. */
   rawRound: ConversationRound;
   /** Reasoning shown live while streaming, never a persisted step. */
@@ -31,7 +30,6 @@ export const AgentResponse: React.FC<AgentResponseProps> = ({
   steps,
   response,
   isLoading,
-  isLastRound,
   rawRound,
   transientReasoning,
 }) => (
@@ -54,7 +52,6 @@ export const AgentResponse: React.FC<AgentResponseProps> = ({
         steps={steps}
         isLoading={isLoading}
         hasError={false}
-        isLastRound={isLastRound}
         rawRound={rawRound}
       />
     </EuiFlexItem>

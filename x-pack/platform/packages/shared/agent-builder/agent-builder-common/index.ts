@@ -175,6 +175,7 @@ export {
   type AgentCreateRequest,
   type AgentUpdateRequest,
   type AgentDeleteRequest,
+  type PromptRequest,
 } from './agents';
 export {
   CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,

@@ -20,7 +20,7 @@ import { ChatEventType, ConversationRoundStatus, ToolResultType } from '@kbn/age
 
 // Storybook-only harness that fakes the SSE stream so the active-execution reducer can be driven by
 // hand. Each button emits one `ChatEvent`; the deck groups them by phase and offers a single "Next"
-// that walks the happy path. Lives here permanently for the Timeline stories - not shipped in the app.
+// that walks the happy path. Lives here permanently for the Thread stories - not shipped in the app.
 
 interface DevSseEmitterProps {
   emit: (event: ChatEvent) => void;

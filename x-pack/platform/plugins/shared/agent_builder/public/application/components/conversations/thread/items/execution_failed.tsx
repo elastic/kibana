@@ -20,7 +20,7 @@ export const ExecutionFailed: React.FC<ExecutionFailedProps> = ({ event }) => {
 
   return (
     <EuiCallOut
-      title={i18n.translate('xpack.agentBuilder.conversation.timeline.executionFailed.title', {
+      title={i18n.translate('xpack.agentBuilder.conversation.thread.executionFailed.title', {
         defaultMessage: 'The agent run failed',
       })}
       color="danger"

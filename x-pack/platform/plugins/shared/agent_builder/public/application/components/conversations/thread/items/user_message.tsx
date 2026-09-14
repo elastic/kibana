@@ -6,14 +6,17 @@
  */
 
 import React from 'react';
-import type { UserMessageEvent, ConversationRoundAuthor } from '@kbn/agent-builder-common';
-import { useConversation } from '../../../../hooks/use_conversation';
+import type {
+  UserMessageEvent,
+  ConversationRoundAuthor,
+  VersionedAttachment,
+} from '@kbn/agent-builder-common';
 import { RoundInput } from '../../conversation_rounds/round_input';
 
-interface UserTurnProps {
+interface UserMessageProps {
   event: UserMessageEvent;
-  /** Just sent and not persisted yet, so it has no author attribution - resolved via `isPendingCurrentRound`. */
   isPending?: boolean;
+  conversationAttachments?: VersionedAttachment[];
 }
 
 const toRoundAuthor = (actor: UserMessageEvent['actor']): ConversationRoundAuthor => ({
@@ -22,9 +25,11 @@ const toRoundAuthor = (actor: UserMessageEvent['actor']): ConversationRoundAutho
   full_name: actor.full_name,
 });
 
-export const UserTurn: React.FC<UserTurnProps> = ({ event, isPending = false }) => {
-  const { conversation } = useConversation();
-
+export const UserMessage: React.FC<UserMessageProps> = ({
+  event,
+  isPending = false,
+  conversationAttachments,
+}) => {
   return (
     <RoundInput
       input={event.data.message}
@@ -34,7 +39,7 @@ export const UserTurn: React.FC<UserTurnProps> = ({ event, isPending = false }) 
       isPendingCurrentRound={isPending}
       attachmentRefs={event.data.attachment_refs}
       fallbackAttachments={event.data.attachments}
-      conversationAttachments={conversation?.attachments}
+      conversationAttachments={conversationAttachments}
     />
   );
 };

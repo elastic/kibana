@@ -16,22 +16,22 @@ import {
 } from '@kbn/agent-builder-common/agents';
 
 const labels = {
-  approved: i18n.translate('xpack.agentBuilder.conversation.timeline.promptResponse.approved', {
+  approved: i18n.translate('xpack.agentBuilder.conversation.thread.promptResponse.approved', {
     defaultMessage: 'Approved',
   }),
-  denied: i18n.translate('xpack.agentBuilder.conversation.timeline.promptResponse.denied', {
+  denied: i18n.translate('xpack.agentBuilder.conversation.thread.promptResponse.denied', {
     defaultMessage: 'Denied',
   }),
-  authorized: i18n.translate('xpack.agentBuilder.conversation.timeline.promptResponse.authorized', {
+  authorized: i18n.translate('xpack.agentBuilder.conversation.thread.promptResponse.authorized', {
     defaultMessage: 'Authorized',
   }),
-  declined: i18n.translate('xpack.agentBuilder.conversation.timeline.promptResponse.declined', {
+  declined: i18n.translate('xpack.agentBuilder.conversation.thread.promptResponse.declined', {
     defaultMessage: 'Declined',
   }),
-  responded: i18n.translate('xpack.agentBuilder.conversation.timeline.promptResponse.responded', {
+  responded: i18n.translate('xpack.agentBuilder.conversation.thread.promptResponse.responded', {
     defaultMessage: 'Responded',
   }),
-  skipped: i18n.translate('xpack.agentBuilder.conversation.timeline.promptResponse.skipped', {
+  skipped: i18n.translate('xpack.agentBuilder.conversation.thread.promptResponse.skipped', {
     defaultMessage: 'Skipped',
   }),
 };

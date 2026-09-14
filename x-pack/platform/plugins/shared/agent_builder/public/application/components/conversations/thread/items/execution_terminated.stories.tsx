@@ -8,12 +8,12 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { AgentBuilderStorybookProvider } from '../../../../__storybook__/agent_builder_storybook_provider';
-import { ExecutionFailed } from './execution_failed';
-import { createExecutionFailedEvent } from './execution_failed.factory';
+import { ExecutionTerminated } from './execution_terminated';
+import { createExecutionTerminatedEvent } from './execution_terminated.factory';
 
-const meta: Meta<typeof ExecutionFailed> = {
-  title: 'Conversations/Timeline/Execution Failed',
-  component: ExecutionFailed,
+const meta: Meta<typeof ExecutionTerminated> = {
+  title: 'Conversations/Thread/Execution Terminated',
+  component: ExecutionTerminated,
   decorators: [
     (Story) => (
       <AgentBuilderStorybookProvider conversationId="story-conversation-1">
@@ -26,10 +26,10 @@ const meta: Meta<typeof ExecutionFailed> = {
 };
 export default meta;
 
-type Story = StoryObj<typeof ExecutionFailed>;
+type Story = StoryObj<typeof ExecutionTerminated>;
 
 export const Default: Story = {
   args: {
-    event: createExecutionFailedEvent(),
+    event: createExecutionTerminatedEvent(),
   },
 };
