@@ -12,15 +12,22 @@ import type { ReactNode } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiIconTip } from '@elastic/eui';
 import type { EuiIconProps } from '@elastic/eui';
 
+/** Test subject shared by both title icon forms, so collapsed and expanded headers locate alike. */
+export const TITLE_ICON_TEST_SUBJ = 'flyoutHeaderTitleIcon';
+
 /** Renders an optional title icon or accessible tooltip anchor. */
 export const renderTitleIcon = (
   icon: EuiIconProps['type'] | undefined,
   tooltip: ReactNode
 ): ReactNode =>
   tooltip ? (
-    <EuiIconTip type={icon ?? 'info'} content={tooltip} />
+    <EuiIconTip
+      type={icon ?? 'info'}
+      content={tooltip}
+      anchorProps={{ 'data-test-subj': TITLE_ICON_TEST_SUBJ }}
+    />
   ) : icon ? (
-    <EuiIcon type={icon} aria-hidden />
+    <EuiIcon type={icon} aria-hidden data-test-subj={TITLE_ICON_TEST_SUBJ} />
   ) : null;
 
 /** Renders a title node with an optional trailing icon. */

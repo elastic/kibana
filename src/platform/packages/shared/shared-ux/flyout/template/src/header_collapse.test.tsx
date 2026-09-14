@@ -199,6 +199,32 @@ describe('FlyoutTemplate header collapse on scroll', () => {
     expect(heading.id).toMatch(/^flyoutTemplateTitle/);
   });
 
+  it('keeps the title tooltip anchor focusable after collapsing on scroll', () => {
+    const { container } = render(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header
+          title="Long title"
+          description="A timestamp"
+          titleTooltip="Extra context"
+        />
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+    const overflowEl = screen.getByTestId('euiFlyoutBodyOverflow');
+
+    collapseByScroll(overflowEl);
+    expect(screen.getByTestId('flyoutHeaderCollapsibleRegion')).toHaveAttribute(
+      'aria-hidden',
+      'true'
+    );
+
+    const anchor = container.querySelector('.euiToolTipAnchor');
+    expect(anchor).not.toBeNull();
+    expect(anchor?.querySelector('[data-euiicon-type="info"]')).toHaveAttribute('tabindex', '0');
+  });
+
   it('stays expanded when the body does not overflow enough to cover the collapse budget', () => {
     renderCollapsibleFlyout();
     const overflowEl = screen.getByTestId('euiFlyoutBodyOverflow');
@@ -534,6 +560,40 @@ describe('FlyoutTemplate Header collapsed prop', () => {
     renderCollapsedHeader();
     const heading = screen.getByRole('heading', { name: 'Compact title' });
     expect(heading).toHaveAttribute('title', 'Compact title');
+  });
+
+  it('keeps a decorative title icon beside the compact title', () => {
+    const { container } = render(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title="Compact title" titleIcon="warning" collapsed />
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(container.querySelector('[data-euiicon-type="warning"]')).toHaveAttribute(
+      'aria-hidden',
+      'true'
+    );
+  });
+
+  it('keeps the title tooltip reachable beside the compact title', () => {
+    const { container } = render(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title="Compact title" titleTooltip="Extra context" collapsed />
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    const anchor = container.querySelector('.euiToolTipAnchor');
+    expect(anchor).not.toBeNull();
+    expect(anchor?.querySelector('[data-euiicon-type="info"]')).toHaveAttribute('tabindex', '0');
+
+    // The anchor sits in the always-visible title row, not the region that collapse hides.
+    expect(screen.getByTestId('flyoutHeaderCollapsibleRegion').contains(anchor)).toBe(false);
   });
 
   /** Records which elements a `scroll` listener gets attached to during `render`. */

@@ -310,6 +310,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
           <FlyoutTemplate onClose={onClose}>
             <FlyoutTemplate.Header
               title={title}
+              titleTooltip="This flyout demonstrates the flyout template."
               description={
                 <>
                   Opened with <EuiCode>openFlyoutTemplate</EuiCode>
