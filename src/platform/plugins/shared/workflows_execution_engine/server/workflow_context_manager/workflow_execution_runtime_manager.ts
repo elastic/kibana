@@ -510,7 +510,14 @@ export class WorkflowExecutionRuntimeManager {
         this.workflowExecutionCursor.error
       ).toSerializableObject();
     } else if (!this.workflowExecutionCursor.currentNode) {
-      workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
+      // Parked waits must stay WAITING*; COMPLETED here races TM resume.
+      const isParkedWait =
+        workflowExecution.status === ExecutionStatus.WAITING ||
+        workflowExecution.status === ExecutionStatus.WAITING_FOR_INPUT ||
+        workflowExecution.status === ExecutionStatus.WAITING_FOR_CHILD;
+      if (!isParkedWait) {
+        workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
+      }
     }
 
     if (

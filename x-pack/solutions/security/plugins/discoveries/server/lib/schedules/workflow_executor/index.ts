@@ -273,6 +273,12 @@ export const workflowExecutor = async ({
 
       const attacks = await Promise.all(
         attackDiscoveries.map(async (attackDiscovery) => {
+          // IMPORTANT: `generationSource` is deliberately omitted. Kibana Attack
+          // Discovery schedules must keep the hashes they have already persisted —
+          // contributing a value here would shift every existing attack id and
+          // produce a duplicate wave on upgrade. It must also stay in step with
+          // the de-duplication lookup in `deduplicateScheduledDiscoveries`, which
+          // omits it for the same reason.
           const alertInstanceId = generateAttackDiscoveryAlertHash({
             attackDiscovery,
             computeSha256Hash,

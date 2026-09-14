@@ -104,14 +104,13 @@ describe('useWorkflowExecutionPolling', () => {
 
   const flushPoll = async () => {
     await act(async () => {
-      await Promise.resolve();
+      await jest.advanceTimersByTimeAsync(0);
     });
   };
 
   const advancePollInterval = async () => {
     await act(async () => {
-      jest.advanceTimersByTime(WORKFLOW_EXECUTION_POLL_INTERVAL_MS);
-      await Promise.resolve();
+      await jest.advanceTimersByTimeAsync(WORKFLOW_EXECUTION_POLL_INTERVAL_MS);
     });
   };
 
@@ -197,14 +196,13 @@ describe('useWorkflowExecutionPolling', () => {
 
         await act(async () => {
           rerender();
-          await Promise.resolve();
+          await jest.advanceTimersByTimeAsync(0);
         });
 
         mockLoadExecution.mockClear();
 
         await act(async () => {
-          jest.advanceTimersByTime(WORKFLOW_EXECUTION_POLL_INTERVAL_MS * 4);
-          await Promise.resolve();
+          await jest.advanceTimersByTimeAsync(WORKFLOW_EXECUTION_POLL_INTERVAL_MS * 4);
         });
         expect(mockLoadExecution).not.toHaveBeenCalled();
       });
@@ -220,8 +218,7 @@ describe('useWorkflowExecutionPolling', () => {
         mockLoadExecution.mockClear();
 
         await act(async () => {
-          jest.advanceTimersByTime(WORKFLOW_EXECUTION_POLL_INTERVAL_MS * 4);
-          await Promise.resolve();
+          await jest.advanceTimersByTimeAsync(WORKFLOW_EXECUTION_POLL_INTERVAL_MS * 4);
         });
         expect(mockLoadExecution).not.toHaveBeenCalled();
       });
@@ -248,8 +245,7 @@ describe('useWorkflowExecutionPolling', () => {
     mockLoadExecution.mockClear();
 
     await act(async () => {
-      jest.advanceTimersByTime(WORKFLOW_EXECUTION_POLL_INTERVAL_MS * 4);
-      await Promise.resolve();
+      await jest.advanceTimersByTimeAsync(WORKFLOW_EXECUTION_POLL_INTERVAL_MS * 4);
     });
     expect(mockLoadExecution).not.toHaveBeenCalled();
   });
@@ -271,7 +267,7 @@ describe('useWorkflowExecutionPolling', () => {
     setupMock(waitingExecution);
     await act(async () => {
       rerender();
-      await Promise.resolve();
+      await jest.advanceTimersByTimeAsync(0);
     });
 
     await advancePollInterval();
@@ -281,14 +277,13 @@ describe('useWorkflowExecutionPolling', () => {
     setupMock(completedExecution);
     await act(async () => {
       rerender();
-      await Promise.resolve();
+      await jest.advanceTimersByTimeAsync(0);
     });
 
     mockLoadExecution.mockClear();
 
     await act(async () => {
-      jest.advanceTimersByTime(WORKFLOW_EXECUTION_POLL_INTERVAL_MS * 4);
-      await Promise.resolve();
+      await jest.advanceTimersByTimeAsync(WORKFLOW_EXECUTION_POLL_INTERVAL_MS * 4);
     });
     expect(mockLoadExecution).not.toHaveBeenCalled();
   });
@@ -311,7 +306,7 @@ describe('useWorkflowExecutionPolling', () => {
 
     await act(async () => {
       hookResult?.rerender({ id: 'new-execution-id' });
-      await Promise.resolve();
+      await jest.advanceTimersByTimeAsync(0);
     });
     expect(mockLoadExecution).toHaveBeenCalledWith({ id: 'new-execution-id' });
 

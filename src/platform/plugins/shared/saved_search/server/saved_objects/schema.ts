@@ -174,16 +174,16 @@ export const SCHEMA_DISCOVER_SESSION_V14 = SCHEMA_DISCOVER_SESSION_V13.extends({
   tabs: schema.arrayOf(SCHEMA_TAB_V14, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
 });
 
+const SCHEMA_JSON_MODE_SETTINGS_V15 = schema.object({
+  hideNulls: schema.maybe(schema.boolean()),
+  wrapLines: schema.maybe(schema.boolean()),
+});
+
 const SCHEMA_TAB_ATTRIBUTES_V15 = SCHEMA_TAB_ATTRIBUTES_V14.extends({
   documentsDisplayMode: schema.maybe(
     schema.oneOf([schema.literal('table'), schema.literal('json')])
   ),
-  jsonModeSettings: schema.maybe(
-    schema.object({
-      hideNulls: schema.maybe(schema.boolean()),
-      wrapLines: schema.maybe(schema.boolean()),
-    })
-  ),
+  jsonModeSettings: schema.maybe(SCHEMA_JSON_MODE_SETTINGS_V15),
 });
 
 const SCHEMA_TAB_V15 = SCHEMA_TAB_V14.extends({
@@ -236,6 +236,22 @@ const SCHEMA_DISCOVER_SESSION_V16 = SCHEMA_DISCOVER_SESSION_V15.extends({
   tabs: schema.arrayOf(SCHEMA_TAB_V16, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
 });
 
+const SCHEMA_JSON_MODE_SETTINGS_V17 = SCHEMA_JSON_MODE_SETTINGS_V15.extends({
+  defaultRenderedNodes: schema.maybe(schema.number({ min: 10, max: 200 })),
+});
+
+const SCHEMA_TAB_ATTRIBUTES_V17 = SCHEMA_TAB_ATTRIBUTES_V16.extends({
+  jsonModeSettings: schema.maybe(SCHEMA_JSON_MODE_SETTINGS_V17),
+});
+
+const SCHEMA_TAB_V17 = SCHEMA_TAB_V16.extends({
+  attributes: SCHEMA_TAB_ATTRIBUTES_V17,
+});
+
+const SCHEMA_DISCOVER_SESSION_V17 = SCHEMA_DISCOVER_SESSION_V16.extends({
+  tabs: schema.arrayOf(SCHEMA_TAB_V17, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
+});
+
 // Add new model versions here, which automatically registers them
 export const DISCOVER_SESSION_MODEL_VERSIONS: SavedObjectsModelVersionMap = {
   13: {
@@ -275,11 +291,18 @@ export const DISCOVER_SESSION_MODEL_VERSIONS: SavedObjectsModelVersionMap = {
       create: SCHEMA_DISCOVER_SESSION_V16,
     },
   },
+  17: {
+    changes: [],
+    schemas: {
+      forwardCompatibility: SCHEMA_DISCOVER_SESSION_V17.extends({}, { unknowns: 'ignore' }),
+      create: SCHEMA_DISCOVER_SESSION_V17,
+    },
+  },
 };
 
 // Set constants to the latest schemas, which updates derived types and content management
-export const SCHEMA_TAB_LATEST = SCHEMA_TAB_V16;
-export const SCHEMA_DISCOVER_SESSION_LATEST = SCHEMA_DISCOVER_SESSION_V16;
+export const SCHEMA_TAB_LATEST = SCHEMA_TAB_V17;
+export const SCHEMA_DISCOVER_SESSION_LATEST = SCHEMA_DISCOVER_SESSION_V17;
 
 export type DiscoverSessionTabAttributes = TypeOf<typeof SCHEMA_TAB_LATEST>['attributes'];
 export type DiscoverSessionTab = TypeOf<typeof SCHEMA_TAB_LATEST>;

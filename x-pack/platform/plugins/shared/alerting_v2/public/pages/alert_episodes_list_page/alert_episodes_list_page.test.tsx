@@ -9,14 +9,15 @@ import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient } from '@kbn/react-query';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
-import { ListPageTestProviders } from '../../test_utils/test_providers';
+import { createMockLocators, ListPageTestProviders } from '../../test_utils/test_providers';
 import { AlertEpisodesListPage } from './alert_episodes_list_page';
 import type { CustomBulkActions } from '@kbn/unified-data-table';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { UnifiedDataTable, getRenderCustomToolbarWithElements } from '@kbn/unified-data-table';
 import { fetchAlertingEpisodes } from '@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes';
+import { fetchClassicAlertsAsEpisodes } from '@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_episodes';
 import { useAlertingEpisodesDataView } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_episodes_data_view';
-import { useEpisodesKpisQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query';
+import { ALERT_EPISODES_LIST_PAGE_SIZE } from '@kbn/alerting-v2-episodes-ui/constants';
 import { queryKeys } from '@kbn/alerting-v2-episodes-ui/query_keys';
 import userEvent from '@testing-library/user-event';
 import { DEFAULT_EPISODES_LIST_FILTER } from './utils/episodes_list_url_state';
@@ -64,13 +65,12 @@ jest.mock('@kbn/unified-data-table', () => ({
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes');
+jest.mock('@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_episodes');
 
 // useAlertingEpisodesDataView uses react-use/useAsync internally with getEsqlDataView,
 // which requires heavy Kibana data-view infra. Mock the hook so useFetchAlertingEpisodesQuery
 // gets a ready dataView without going through the full data-view construction path.
 jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_alerting_episodes_data_view');
-
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query');
 
 jest.mock('@kbn/alerting-v2-episodes-ui/actions', () => ({
   createEpisodeActions: jest.fn(() => []),
@@ -224,25 +224,12 @@ const mockEpisodes = [
 // return values are set once at module scope and persist across all tests.
 jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
 jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
+jest.mocked(fetchClassicAlertsAsEpisodes).mockResolvedValue([]);
 mockHttp.post.mockResolvedValue({ rules: [] });
 
 const mockCreateEpisodeActions = jest.mocked(createEpisodeActions);
 
-const mockedUseEpisodesKpisQuery = jest.mocked(useEpisodesKpisQuery);
-
-const defaultKpisImpl: typeof useEpisodesKpisQuery = () => ({
-  data: {
-    alertsCount: 3,
-    firingRules: 0,
-    assignedToMe: 0,
-    unassigned: 0,
-    acknowledged: 0,
-    snoozed: 0,
-  },
-  isLoading: false,
-  isError: false,
-});
-mockedUseEpisodesKpisQuery.mockImplementation(defaultKpisImpl);
+const mockLocators = createMockLocators();
 
 const getCapturedBulkActions = (): CustomBulkActions => {
   const calls = mockUnifiedDataTable.mock.calls;
@@ -252,7 +239,7 @@ const getCapturedBulkActions = (): CustomBulkActions => {
 
 const renderPage = () => {
   return render(
-    <ListPageTestProviders>
+    <ListPageTestProviders locators={mockLocators}>
       <AlertEpisodesListPage />
     </ListPageTestProviders>
   );
@@ -265,6 +252,7 @@ describe('AlertEpisodesListPage', () => {
     mockCreateEpisodeActions.mockReturnValue([]);
     jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
     jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
+    jest.mocked(fetchClassicAlertsAsEpisodes).mockResolvedValue([]);
     mockHttp.post.mockResolvedValue({ rules: [] });
     renderPage();
     // Wait for episodes to load so bulk action handlers have access to episode data
@@ -280,8 +268,10 @@ describe('AlertEpisodesListPage', () => {
   });
 
   it('renders the manage rules link in the app header menu', async () => {
+    const { rulesLocators } = mockLocators;
     const manageRulesLink = await screen.findByTestId('alertingV2EpisodesListManageRules');
-    expect(manageRulesLink).toHaveAttribute('href', '/app/management/alertingV2/rules');
+    expect(rulesLocators.useUrl).toHaveBeenCalledWith({});
+    expect(manageRulesLink).toHaveAttribute('href', '/mock-locator-url');
   });
 
   it('passes customBulkActions derived from episode actions to UnifiedDataTable', () => {
@@ -372,6 +362,43 @@ describe('AlertEpisodesListPage', () => {
     expect(node).toBeTruthy();
   });
 
+  it('passes host-aware getRuleDetailsHref into the episode details flyout', () => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    const renderDocumentView = lastCall?.renderDocumentView as (hit: {
+      flattened: Record<string, unknown>;
+    }) => React.ReactElement;
+    const node = renderDocumentView({ flattened: { 'episode.id': 'ep-1' } });
+    expect(typeof node.props.getRuleDetailsHref).toBe('function');
+    expect(node.props.getRuleDetailsHref('rule-1')).toBe('/mock-locator-url');
+    expect(mockLocators.rulesLocators.getRedirectUrl).toHaveBeenCalledWith({ ruleId: 'rule-1' });
+  });
+
+  it('passes host-aware getEpisodeDetailsHref into the episode details flyout', () => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    const renderDocumentView = lastCall?.renderDocumentView as (hit: {
+      flattened: Record<string, unknown>;
+    }) => React.ReactElement;
+    const node = renderDocumentView({ flattened: { 'episode.id': 'ep-1' } });
+    expect(typeof node.props.getEpisodeDetailsHref).toBe('function');
+    expect(node.props.getEpisodeDetailsHref('ep-1')).toBe('/mock-locator-url');
+    expect(mockLocators.episodesLocators.getRedirectUrl).toHaveBeenCalledWith({
+      episodeId: 'ep-1',
+    });
+  });
+
+  it('renderDocumentView returns the ClassicAlertDetailsFlyout for classic-sourced rows', () => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    const renderDocumentView = lastCall?.renderDocumentView as (hit: {
+      flattened: Record<string, unknown>;
+    }) => React.ReactElement;
+    const node = renderDocumentView({
+      flattened: { 'episode.id': 'classic-alert-id', supports_timeline: false },
+    });
+    expect(node).toBeTruthy();
+    expect(node.type).toBeDefined();
+    expect(node.props.alertId).toBe('classic-alert-id');
+  });
+
   it('passes a renderCustomToolbar to UnifiedDataTable', () => {
     const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
     expect(typeof lastCall?.renderCustomToolbar).toBe('function');
@@ -394,6 +421,7 @@ describe('query invalidation', () => {
     mockCreateEpisodeActions.mockReturnValue([]);
     jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
     jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
+    jest.mocked(fetchClassicAlertsAsEpisodes).mockResolvedValue([]);
     mockHttp.post.mockResolvedValue({ rules: [] });
   });
 
@@ -468,20 +496,45 @@ describe('episode count + reset filters toolbar', () => {
     mockCreateEpisodeActions.mockReturnValue([]);
     jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
     jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
+    jest.mocked(fetchClassicAlertsAsEpisodes).mockResolvedValue([]);
     mockHttp.post.mockResolvedValue({ rules: [] });
-    mockedUseEpisodesKpisQuery.mockImplementation(defaultKpisImpl);
   });
 
-  it('renders the episode count', async () => {
+  it('renders the loaded episode count when under the page size cap', async () => {
+    jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
     renderPage();
     const node = await screen.findByTestId('alertEpisodesItemCount');
     expect(node.textContent).toMatch(/^Showing\s+3\s+episodes$/);
   });
 
-  it('fires useEpisodesKpisQuery only with filterState', () => {
+  it('uses the loaded row count even when it differs from a larger filter total', async () => {
+    // Previously the toolbar used KPI alertsCount; it must follow the table rows instead.
+    jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
     renderPage();
-    const calls = mockedUseEpisodesKpisQuery.mock.calls.map(([args]) => args);
-    expect(calls.every((c) => c.filterState !== undefined)).toBe(true);
+    const node = await screen.findByTestId('alertEpisodesItemCount');
+    expect(node).toHaveTextContent('Showing 3 episodes');
+    expect(node).not.toHaveTextContent('Showing first');
+  });
+
+  it('renders the capped label and tooltip when the page size limit is reached', async () => {
+    const cappedEpisodes = Array.from({ length: ALERT_EPISODES_LIST_PAGE_SIZE }, (_, index) => ({
+      'episode.id': `ep${index}`,
+      'rule.id': `rule${index}`,
+      group_hash: `gh${index}`,
+      '@timestamp': '2026-01-01T00:00:00Z',
+    }));
+    jest.mocked(fetchAlertingEpisodes).mockResolvedValue(cappedEpisodes as any);
+
+    renderPage();
+
+    await waitFor(() => {
+      const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+      expect(lastCall?.rows?.length).toBe(ALERT_EPISODES_LIST_PAGE_SIZE);
+    });
+
+    const node = await screen.findByTestId('alertEpisodesItemCount');
+    expect(node.textContent).toMatch(/^Showing first\s+1,?000\s+episodes$/);
+    expect(node).toHaveAttribute('tabindex', '0');
   });
 
   it('disables the reset filters button when filter state equals the default', async () => {
@@ -531,8 +584,8 @@ describe('privilege gating', () => {
     jest.clearAllMocks();
     jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
     jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
+    jest.mocked(fetchClassicAlertsAsEpisodes).mockResolvedValue([]);
     mockHttp.post.mockResolvedValue({ rules: [] });
-    mockedUseEpisodesKpisQuery.mockImplementation(defaultKpisImpl);
     mockCreateEpisodeActions.mockReturnValue([ackAction, discoverAction]);
   });
 
@@ -584,7 +637,6 @@ describe('rule summary flyout', () => {
     jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
     jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
     mockHttp.post.mockResolvedValue({ rules: [] });
-    mockedUseEpisodesKpisQuery.mockImplementation(defaultKpisImpl);
     renderPage();
     await waitFor(() => {
       const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];

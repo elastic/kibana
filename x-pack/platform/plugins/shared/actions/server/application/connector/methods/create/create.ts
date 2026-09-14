@@ -18,9 +18,15 @@ import type { HookServices, RawAction } from '../../../../types';
 import { tryCatch } from '../../../../lib';
 import { invokePostCreateListeners } from '../../../../lib/invoke_lifecycle_listeners';
 import { ensureConfigAuthType } from '../../../../lib/ensure_config_auth_type';
+import { ensureNotKibanaManagedAuthType } from '../../../../lib/ensure_not_kibana_managed_auth_type';
 import { inferAuthMode } from '../../../../lib/infer_auth_mode';
 import { validateConnectorId } from '../../../../../common/validate_connector_id';
 import { preserveInboundIngressHashIfNeeded } from '../../../../inbound/ensure_connector_ingress_credentials';
+import {
+  invalidateStoredConnectorEventIdentity,
+  mintInboundEventIdentityAttributes,
+  toRawActionIdentityAttributes,
+} from '../../../../inbound/event_identity';
 
 export async function create({
   context,
@@ -73,6 +79,8 @@ export async function create({
       })
     );
   }
+
+  ensureNotKibanaManagedAuthType({ actionTypeId, secrets, config });
 
   const actionType = context.actionTypeRegistry.get(actionTypeId);
   const configurationUtilities = context.actionTypeRegistry.getUtils();
@@ -144,6 +152,11 @@ export async function create({
     config: configForSave as Record<string, unknown>,
   });
 
+  const identityAttributes = await mintInboundEventIdentityAttributes(context, {
+    connectorId: id,
+    actionTypeId,
+  });
+
   const result = await tryCatch(
     async () =>
       await context.unsecuredSavedObjectsClient.create<RawAction>(
@@ -155,10 +168,15 @@ export async function create({
           config: configWithIngress,
           secrets: validatedActionTypeSecrets,
           ...(authMode !== undefined ? { authMode } : {}),
+          ...(identityAttributes ? toRawActionIdentityAttributes(identityAttributes) : {}),
         },
         { id }
       )
   );
+
+  if (result instanceof Error) {
+    await invalidateStoredConnectorEventIdentity(context, id, identityAttributes);
+  }
 
   const wasSuccessful = !(result instanceof Error);
   const label = `connectorId: "${id}"; type: ${actionTypeId}`;
