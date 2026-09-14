@@ -13,11 +13,16 @@ import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices'
 import { TracesPanel } from './traces_panel';
 
 const mockPutFeedbackAnalysis = jest.fn();
+const mockRunFeedbackAnalysis = jest.fn();
 const mockFeedbackLoopEnabled = jest.fn();
 const mockToasts = { addSuccess: jest.fn(), addError: jest.fn(), addWarning: jest.fn() };
 
 jest.mock('../../api/ai_indices', () => ({
   putAiIndexFeedbackAnalysis: (...args: unknown[]) => mockPutFeedbackAnalysis(...args),
+}));
+
+jest.mock('../../api/improvements', () => ({
+  runFeedbackAnalysis: (...args: unknown[]) => mockRunFeedbackAnalysis(...args),
 }));
 
 jest.mock('../../hooks/use_feedback_loop_enabled', () => ({
@@ -30,11 +35,6 @@ jest.mock('../../hooks/use_agent_builder_agents', () => ({
     isLoading: false,
     error: undefined,
   }),
-}));
-
-// Pulls in Agent Builder services this panel does not otherwise need.
-jest.mock('./feedback_agent_selector', () => ({
-  FeedbackAgentSelector: () => <div data-test-subj="contextFeedbackAgentSelector" />,
 }));
 
 jest.mock('../../hooks/use_kibana', () => ({
@@ -78,6 +78,7 @@ describe('TracesPanel', () => {
     jest.clearAllMocks();
     mockFeedbackLoopEnabled.mockReturnValue(true);
     mockPutFeedbackAnalysis.mockResolvedValue({});
+    mockRunFeedbackAnalysis.mockResolvedValue({ execution_id: 'execution-1' });
   });
 
   describe('trace selection', () => {
@@ -140,18 +141,30 @@ describe('TracesPanel', () => {
       );
     });
 
-    it('keeps the schedule settings out of the way until analysis is on', () => {
+    it('offers no manual run until analysis is on, since there is no workflow to run', () => {
       renderPanel();
 
-      expect(screen.queryByTestId('contextImprovementsIntervalSelect')).not.toBeInTheDocument();
       expect(screen.queryByTestId('contextImprovementsRunNowButton')).not.toBeInTheDocument();
     });
 
-    it('reveals them once it is', () => {
+    it('offers one once it is', async () => {
       renderPanel({ aiIndex: buildAiIndex({ enabled: true }) });
 
-      expect(screen.getByTestId('contextImprovementsIntervalSelect')).toBeInTheDocument();
-      expect(screen.getByTestId('contextImprovementsRunNowButton')).toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('contextImprovementsRunNowButton'));
+
+      await waitFor(() =>
+        expect(mockRunFeedbackAnalysis).toHaveBeenCalledWith({}, { aiIndexId: 'my-ai-index' })
+      );
+    });
+
+    it('leaves the agent, interval and signal window to their defaults', () => {
+      // They are per-index overrides of settings that already have server-side defaults, so the
+      // API keeps taking them while the page stays down to the decision that matters.
+      renderPanel({ aiIndex: buildAiIndex({ enabled: true }) });
+
+      expect(screen.queryByTestId('contextImprovementsIntervalSelect')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('contextImprovementsSignalWindowSelect')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('contextFeedbackAgentSelect')).not.toBeInTheDocument();
     });
 
     it('is absent while the feedback loop is off, though traces stay selectable', () => {

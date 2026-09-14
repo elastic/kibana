@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiButton,
   EuiButtonGroup,
   EuiComboBox,
   EuiFormRow,
@@ -24,9 +25,8 @@ import React, { useState } from 'react';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { useAgentBuilderAgents } from '../../hooks/use_agent_builder_agents';
 import { useFeedbackLoopEnabled } from '../../hooks/use_feedback_loop_enabled';
-import { useKibana } from '../../hooks/use_kibana';
+import { useRunFeedbackAnalysis } from '../../hooks/use_run_feedback_analysis';
 import { useUpdateFeedbackAnalysis } from '../../hooks/use_update_feedback_analysis';
-import { FeedbackAnalysisConfig } from './feedback_analysis_config';
 
 interface TracesPanelProps {
   isLoading: boolean;
@@ -52,19 +52,19 @@ const TRACE_SOURCE_OPTIONS = [
 ];
 
 /**
- * Whether this index's traces are reviewed on a schedule, and how.
+ * Whether this index's traces are reviewed on a schedule, plus a way to review them now.
  *
- * Its own component because the mutation it needs is keyed on a loaded AI index, which the panel
+ * Which agent runs, how often, and how far back it reads are all defaulted server-side and not
+ * offered here. They are per-index overrides of settings that already have sensible values, and an
+ * index whose analysis needs different ones is the exception; the API still accepts all three, so
+ * that exception has somewhere to go without putting three controls in front of everyone else.
+ *
+ * Its own component because the mutations it needs are keyed on a loaded AI index, which the panel
  * does not have while the page is still fetching.
  */
-const AutoImproveControl = ({
-  aiIndex,
-  showAgentSelector,
-}: {
-  aiIndex: GetAiIndexResponse;
-  showAgentSelector: boolean;
-}) => {
+const AutoImproveControl = ({ aiIndex }: { aiIndex: GetAiIndexResponse }) => {
   const updateConfig = useUpdateFeedbackAnalysis(aiIndex);
+  const runAnalysis = useRunFeedbackAnalysis(aiIndex.id);
   const isAnalysisEnabled = aiIndex.feedback_analysis?.enabled ?? false;
 
   return (
@@ -92,7 +92,18 @@ const AutoImproveControl = ({
       {isAnalysisEnabled && (
         <>
           <EuiSpacer size="m" />
-          <FeedbackAnalysisConfig aiIndex={aiIndex} showAgentSelector={showAgentSelector} />
+          {/* Only while enabled: turning it off uninstalls the workflow, so there is nothing to run. */}
+          <EuiButton
+            size="s"
+            iconType="play"
+            onClick={() => runAnalysis.mutate()}
+            isLoading={runAnalysis.isLoading}
+            data-test-subj="contextImprovementsRunNowButton"
+          >
+            {i18n.translate('xpack.contextEngine.aiIndexDetail.traces.runNowButton', {
+              defaultMessage: 'Run now',
+            })}
+          </EuiButton>
         </>
       )}
     </>
@@ -109,11 +120,6 @@ const AutoImproveControl = ({
  * belongs to can be reviewed alongside the automatic-improvement control, which is real.
  */
 export const TracesPanel = ({ isLoading, aiIndex }: TracesPanelProps) => {
-  const {
-    services: { getChatOpener },
-  } = useKibana();
-  const chatOpener = getChatOpener?.();
-
   const feedbackLoopEnabled = useFeedbackLoopEnabled();
   const [kind, setKind] = useState<TraceSourceKind>('elastic_agent');
   const [selected, setSelected] = useState<EuiComboBoxOptionOption[]>([]);
@@ -228,7 +234,7 @@ export const TracesPanel = ({ isLoading, aiIndex }: TracesPanelProps) => {
       {feedbackLoopEnabled && aiIndex && (
         <>
           <EuiHorizontalRule margin="m" />
-          <AutoImproveControl aiIndex={aiIndex} showAgentSelector={Boolean(chatOpener)} />
+          <AutoImproveControl aiIndex={aiIndex} />
         </>
       )}
     </EuiPanel>

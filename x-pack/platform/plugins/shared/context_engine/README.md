@@ -91,6 +91,11 @@ record:
   observe-only: the run still reports what it found but may not propose a
   change.
 
+Only `enabled` is exposed in the UI. Every other field is a per-index override
+of something that already has a server-side default, so the detail page sets
+none of them and an index wanting different values is configured through this
+route.
+
 The dedicated `PUT .../feedback_analysis` route replaces only this block,
 leaving the rest of the record untouched. Unlike a full AI index replace it is
 permitted on **managed** AI indices: their definition is owned by the plugin
