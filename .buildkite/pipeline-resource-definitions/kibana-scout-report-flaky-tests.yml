@@ -1,0 +1,62 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: bk-kibana-scout-report-flaky-tests
+  description: Aggregates test events from the AppEx QA cluster into a flaky test report and publishes it as a build artifact
+  links:
+    - url: 'https://buildkite.com/elastic/kibana-scout-report-flaky-tests'
+      title: Pipeline link
+spec:
+  type: buildkite-pipeline
+  owner: 'group:apps-dx'
+  system: buildkite
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / scout / report-flaky-tests
+      description: Aggregates test events from the AppEx QA cluster into a flaky test report and publishes it as a build artifact
+    spec:
+      env:
+        # Set a channel and flip to 'true' once the report has an owning channel
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'false'
+        # Inputs of .buildkite/scripts/steps/scout_report_flaky_tests.sh. Schedules may override
+        # them to produce different reports (other pipelines, consistently failing tests, ...).
+        FLAKY_TESTS_PIPELINES: 'kibana-on-merge'
+        FLAKY_TESTS_LOOKBACK_DAYS: '7'
+        FLAKY_TESTS_CLASSIFICATIONS: 'flaky'
+      allow_rebuilds: true
+      branch_configuration: main
+      cancel_intermediate_builds: true
+      default_branch: main
+      repository: elastic/kibana
+      pipeline_file: .buildkite/pipelines/scout_report_flaky_tests.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/scout_report_flaky_tests.yml
+            cleanup_sparse_state: true
+      provider_settings:
+        build_branches: false
+        build_pull_requests: false
+        publish_commit_status: false
+        trigger_mode: none
+        prefix_pull_request_fork_branch_names: false
+        skip_pull_request_builds_for_existing_commits: false
+      teams:
+        everyone:
+          access_level: BUILD_AND_READ
+        kibana-operations:
+          access_level: MANAGE_BUILD_AND_READ
+        appex-qa:
+          access_level: MANAGE_BUILD_AND_READ
+        kibana-tech-leads:
+          access_level: MANAGE_BUILD_AND_READ
+      schedules:
+        Daily flaky tests (kibana-on-merge):
+          cronline: 0 6 * * * America/New_York
+          message: Daily flaky test report for kibana-on-merge
+          branch: main
+      tags:
+        - kibana

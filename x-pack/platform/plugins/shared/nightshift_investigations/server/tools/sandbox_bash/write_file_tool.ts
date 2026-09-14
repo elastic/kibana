@@ -10,9 +10,9 @@ import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SandboxConnectionManager } from './grpc_client';
-import { getConversationId, resolveAbsolutePath } from './tool_utils';
+import { getScopedConversationId, getSandboxCallContext, resolveAbsolutePath } from './tool_utils';
 
 export const SANDBOX_WRITE_FILE_TOOL_ID = 'nightshift_sandbox_write_file';
 
@@ -31,9 +31,11 @@ const writeFileSchema = z.object({
 
 export const createSandboxWriteFileTool = ({
   connectionManager,
+  getSpaceId,
   logger,
 }: {
   connectionManager: SandboxConnectionManager;
+  getSpaceId: (request: KibanaRequest) => string;
   logger: Logger;
 }): BuiltinToolDefinition<typeof writeFileSchema> => ({
   id: SANDBOX_WRITE_FILE_TOOL_ID,
@@ -50,7 +52,7 @@ export const createSandboxWriteFileTool = ({
     openWorldHint: false,
   },
   handler: async (params, context) => {
-    const conversationId = getConversationId(context);
+    const conversationId = getScopedConversationId(context, getSpaceId);
     if (!conversationId) {
       return {
         results: [
@@ -65,14 +67,14 @@ export const createSandboxWriteFileTool = ({
     try {
       const parentDir = path.posix.dirname(resolvedPath);
       if (parentDir && parentDir !== '.' && parentDir !== '/') {
-        await connectionManager.mkdirs(conversationId, [parentDir], context.request);
+        await connectionManager.mkdirs(conversationId, [parentDir], getSandboxCallContext(context));
       }
 
       const contentBuf = Buffer.from(params.content, 'utf8');
       const writeResult = await connectionManager.writeFiles(
         conversationId,
         [{ path: resolvedPath, content: contentBuf }],
-        context.request
+        getSandboxCallContext(context)
       );
 
       if (!writeResult[0]?.success) {

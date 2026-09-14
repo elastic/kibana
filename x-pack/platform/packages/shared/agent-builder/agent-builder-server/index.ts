@@ -104,7 +104,7 @@ export type {
   BeforeAgentHookContext,
   BeforeToolCallHookContext,
   AfterToolCallHookContext,
-  AfterAgentHookContext,
+  AfterExecutionHookContext,
 } from './hooks/types';
 export { HookLifecycle, HookExecutionMode } from './hooks/types';
 export {
@@ -112,7 +112,7 @@ export {
   applyBeforeAgentResult,
   applyBeforeToolCallResult,
   applyAfterToolCallResult,
-  applyAfterAgentResult,
+  applyAfterExecutionResult,
 } from './hooks/apply_result';
 export { chatSystemIndex, chatSystemIndexPrefix } from './indices';
 export type { AgentBuilderAnalytics, AgentBuilderTracking, SkillInvokedEvent } from './telemetry';
@@ -161,7 +161,17 @@ export type {
   ConversationsStart,
   ConversationTemplatesSetup,
   ConversationTemplatesStart,
+  AttachmentsStart,
 } from './plugin_contract';
+export type {
+  AttachmentPublicClient,
+  ListAttachmentsResult,
+  CreateAttachmentArgs,
+  GetAttachmentArgs,
+  UpdateAttachmentArgs,
+  DeleteAttachmentArgs,
+  ListAttachmentsArgs,
+} from './attachments';
 export type { ConversationPublicClient, ConversationCreatePublicRequest } from './conversations';
 export { describeZodSchema, formatSchemaForLlm } from './tools';
 export type {

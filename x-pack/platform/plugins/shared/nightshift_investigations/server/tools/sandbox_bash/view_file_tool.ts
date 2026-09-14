@@ -9,9 +9,9 @@ import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SandboxConnectionManager } from './grpc_client';
-import { getConversationId, resolveAbsolutePath } from './tool_utils';
+import { getScopedConversationId, getSandboxCallContext, resolveAbsolutePath } from './tool_utils';
 
 export const SANDBOX_VIEW_FILE_TOOL_ID = 'nightshift_sandbox_view_file';
 
@@ -40,9 +40,11 @@ const viewFileSchema = z.object({
 
 export const createSandboxViewFileTool = ({
   connectionManager,
+  getSpaceId,
   logger,
 }: {
   connectionManager: SandboxConnectionManager;
+  getSpaceId: (request: KibanaRequest) => string;
   logger: Logger;
 }): BuiltinToolDefinition<typeof viewFileSchema> => ({
   id: SANDBOX_VIEW_FILE_TOOL_ID,
@@ -59,7 +61,7 @@ export const createSandboxViewFileTool = ({
     openWorldHint: false,
   },
   handler: async (params, context) => {
-    const conversationId = getConversationId(context);
+    const conversationId = getScopedConversationId(context, getSpaceId);
     if (!conversationId) {
       return {
         results: [
@@ -76,7 +78,11 @@ export const createSandboxViewFileTool = ({
     );
 
     try {
-      const [stat] = await connectionManager.statFiles(conversationId, [resolvedPath], context.request);
+      const [stat] = await connectionManager.statFiles(
+        conversationId,
+        [resolvedPath],
+        getSandboxCallContext(context)
+      );
       if (!stat.exists || stat.is_dir) {
         return {
           results: [
@@ -105,7 +111,7 @@ export const createSandboxViewFileTool = ({
       const [readResult] = await connectionManager.readFiles(
         conversationId,
         [{ path: resolvedPath, maxReadBytes: MAX_FILE_SIZE_BYTES }],
-        context.request
+        getSandboxCallContext(context)
       );
       if (!readResult.success) {
         return {

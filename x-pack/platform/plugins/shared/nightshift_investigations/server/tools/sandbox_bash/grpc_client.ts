@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+/* eslint-disable no-bitwise, max-classes-per-file */
+// Protobuf encoding/decoding uses intentional bitwise operations throughout.
+// Two classes (SandboxApiClient + SandboxConnectionManager) are co-located by design.
+
 import { promisify } from 'util';
 import { readFileSync } from 'fs';
 import * as grpc from '@grpc/grpc-js';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { NightshiftInvestigationsConfig } from '../../config';
-import { seedSandbox } from './seed_sandbox';
-import type { ConnectorSource } from './connector_sources';
+import type { SandboxCallContext } from './tool_utils';
 
 // ---------------------------------------------------------------------------
 // Protobuf encode/decode for SandboxService RPCs
@@ -551,7 +554,11 @@ export class SandboxApiClient {
 
 // ---------------------------------------------------------------------------
 // SandboxConnectionManager — wraps SandboxApiClient with per-conversation
-// initialization (workspace restore + connector credential seeding).
+// initialization (workspace restore + connector manifest write).
+//
+// Commands run over the unary RunCommand RPC only. Kibana never serves connector
+// callbacks from inside the sandbox: connector credentials are resolved in Kibana
+// and injected into a single command's environment by the bash tool instead.
 // ---------------------------------------------------------------------------
 
 type SandboxConfig = NonNullable<NightshiftInvestigationsConfig['sandbox']>;
@@ -561,22 +568,27 @@ const readPem = (path: string | undefined): Buffer | undefined =>
 
 export class SandboxConnectionManager {
   private readonly logger: Logger;
-  private readonly apiClient: SandboxApiClient;
-  private readonly getConnectors?: ConnectorSource;
-  /** Tracks conversations that have been initialized (seeded). */
+  readonly apiClient: SandboxApiClient;
+  private readonly writeManifest?: (
+    conversationId: string,
+    callContext: SandboxCallContext
+  ) => Promise<void>;
+  /** Tracks conversations that have been initialized (manifest write). */
   private readonly initialized = new Map<string, Promise<void>>();
+  /** conversationId → JSON.stringify(allowedConnectorIds) for manifest refresh detection. */
+  private readonly lastAllowedIds = new Map<string, string>();
 
   constructor({
     config,
     logger,
-    getConnectors,
+    writeManifest,
   }: {
     config: SandboxConfig;
     logger: Logger;
-    getConnectors?: ConnectorSource;
+    writeManifest?: (conversationId: string, callContext: SandboxCallContext) => Promise<void>;
   }) {
     this.logger = logger;
-    this.getConnectors = getConnectors;
+    this.writeManifest = writeManifest;
     this.apiClient = new SandboxApiClient({
       host: config.sandbox_api_host,
       port: config.sandbox_api_port,
@@ -590,9 +602,10 @@ export class SandboxConnectionManager {
   async runCommand(
     conversationId: string,
     params: RunCommandParams,
-    request: KibanaRequest
+    callContext: SandboxCallContext
   ): Promise<RunCommandResult> {
-    await this.ensureInitialized(conversationId, request);
+    await this.ensureInitialized(conversationId, callContext);
+    await this.maybeRefreshManifest(conversationId, callContext);
     return this.withUnavailableReset(conversationId, () =>
       this.apiClient.runCommand(conversationId, params)
     );
@@ -601,9 +614,9 @@ export class SandboxConnectionManager {
   async statFiles(
     conversationId: string,
     paths: string[],
-    request: KibanaRequest
+    callContext: SandboxCallContext
   ): Promise<FileMetadata[]> {
-    await this.ensureInitialized(conversationId, request);
+    await this.ensureInitialized(conversationId, callContext);
     return this.withUnavailableReset(conversationId, () =>
       this.apiClient.statFiles(conversationId, paths)
     );
@@ -612,9 +625,9 @@ export class SandboxConnectionManager {
   async readFiles(
     conversationId: string,
     requests: Array<{ path: string; maxReadBytes?: number }>,
-    request: KibanaRequest
+    callContext: SandboxCallContext
   ): Promise<ReadFileResult[]> {
-    await this.ensureInitialized(conversationId, request);
+    await this.ensureInitialized(conversationId, callContext);
     return this.withUnavailableReset(conversationId, () =>
       this.apiClient.readFiles(conversationId, requests)
     );
@@ -623,9 +636,9 @@ export class SandboxConnectionManager {
   async writeFiles(
     conversationId: string,
     requests: Array<{ path: string; content: Buffer }>,
-    request: KibanaRequest
+    callContext: SandboxCallContext
   ): Promise<WriteFileResult[]> {
-    await this.ensureInitialized(conversationId, request);
+    await this.ensureInitialized(conversationId, callContext);
     return this.withUnavailableReset(conversationId, () =>
       this.apiClient.writeFiles(conversationId, requests)
     );
@@ -634,16 +647,16 @@ export class SandboxConnectionManager {
   async mkdirs(
     conversationId: string,
     paths: string[],
-    request: KibanaRequest
+    callContext: SandboxCallContext
   ): Promise<boolean[]> {
-    await this.ensureInitialized(conversationId, request);
+    await this.ensureInitialized(conversationId, callContext);
     return this.withUnavailableReset(conversationId, () =>
       this.apiClient.mkdirs(conversationId, paths)
     );
   }
 
   /** If the sandbox returns UNAVAILABLE (pod self-exited), clear initialized so the
-   *  next call triggers a fresh restore + seed before re-allocating via sandbox-api. */
+   *  next call triggers a fresh restore + manifest write before re-allocating via sandbox-api. */
   private async withUnavailableReset<T>(conversationId: string, fn: () => Promise<T>): Promise<T> {
     try {
       return await fn();
@@ -651,6 +664,7 @@ export class SandboxConnectionManager {
       const code: number | undefined = err?.code;
       if (code === 14 /* UNAVAILABLE */) {
         this.initialized.delete(conversationId);
+        this.lastAllowedIds.delete(conversationId);
         this.logger.warn(
           `Sandbox UNAVAILABLE for conversation ${conversationId} — cleared init state for re-initialization on next call`
         );
@@ -659,11 +673,30 @@ export class SandboxConnectionManager {
     }
   }
 
-  private ensureInitialized(conversationId: string, request: KibanaRequest): Promise<void> {
+  private async maybeRefreshManifest(
+    conversationId: string,
+    callContext: SandboxCallContext
+  ): Promise<void> {
+    if (!this.writeManifest) return;
+    const currentKey = JSON.stringify([...callContext.allowedConnectorIds].sort());
+    const lastKey = this.lastAllowedIds.get(conversationId);
+    if (lastKey === currentKey) return;
+    this.lastAllowedIds.set(conversationId, currentKey);
+    await this.writeManifest(conversationId, callContext).catch((err) => {
+      this.logger.warn(
+        `Connector manifest refresh failed for conversation ${conversationId}: ${err.message}`
+      );
+    });
+  }
+
+  private ensureInitialized(
+    conversationId: string,
+    callContext: SandboxCallContext
+  ): Promise<void> {
     const existing = this.initialized.get(conversationId);
     if (existing) return existing;
 
-    const promise = this.initializeConversation(conversationId, request).catch((err) => {
+    const promise = this.initializeConversation(conversationId, callContext).catch((err) => {
       this.initialized.delete(conversationId);
       throw err;
     });
@@ -673,18 +706,17 @@ export class SandboxConnectionManager {
 
   private async initializeConversation(
     conversationId: string,
-    request: KibanaRequest
+    callContext: SandboxCallContext
   ): Promise<void> {
     this.logger.debug(`Initializing sandbox for conversation ${conversationId}`);
-    if (this.getConnectors) {
-      await seedSandbox({
-        conversationId,
-        apiClient: this.apiClient,
-        request,
-        getConnectors: this.getConnectors,
-        logger: this.logger,
-      }).catch((err) => {
-        this.logger.warn(`Sandbox seeding failed: ${err.message}`);
+
+    if (this.writeManifest) {
+      const currentKey = JSON.stringify([...callContext.allowedConnectorIds].sort());
+      this.lastAllowedIds.set(conversationId, currentKey);
+      await this.writeManifest(conversationId, callContext).catch((err) => {
+        this.logger.warn(
+          `Connector manifest write failed for conversation ${conversationId}: ${err.message}`
+        );
       });
     }
   }
@@ -692,5 +724,6 @@ export class SandboxConnectionManager {
   close(): void {
     this.apiClient.close();
     this.initialized.clear();
+    this.lastAllowedIds.clear();
   }
 }

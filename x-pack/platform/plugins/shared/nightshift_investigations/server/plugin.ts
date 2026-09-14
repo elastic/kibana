@@ -12,6 +12,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import type { KibanaRequest } from '@kbn/core/server';
@@ -35,12 +36,17 @@ import { createSandboxBashTool } from './tools/sandbox_bash/tool';
 import { createSandboxViewFileTool } from './tools/sandbox_bash/view_file_tool';
 import { createSandboxStrReplaceTool } from './tools/sandbox_bash/str_replace_tool';
 import { createSandboxWriteFileTool } from './tools/sandbox_bash/write_file_tool';
-import { preconfiguredConnectorSource } from './tools/sandbox_bash/connector_sources';
+import { writeConnectorManifest } from './tools/sandbox_bash/connector_manifest';
+import { createConnectorCredentialResolver } from './tools/sandbox_bash/connector_credentials';
 import {
   nightshiftInvestigationSavedObjectType,
   NIGHTSHIFT_INVESTIGATION_SO_TYPE,
 } from './saved_objects';
 import { SavedObjectInvestigationRepository } from './storage';
+import {
+  registerInvestigationReconciliationTask,
+  scheduleInvestigationReconciliationTask,
+} from './tasks/investigation_reconciliation_task';
 import type {
   NightshiftInvestigationsServerSetup,
   NightshiftInvestigationsServerStart,
@@ -63,9 +69,10 @@ export class NightshiftInvestigationsPlugin
   private spaces?: NightshiftInvestigationsStartDeps['spaces'];
   private agentBuilder?: NightshiftInvestigationsStartDeps['agentBuilder'];
   private searchInferenceEndpoints?: NightshiftInvestigationsStartDeps['searchInferenceEndpoints'];
-  private actionsStart?: NightshiftInvestigationsStartDeps['actions'];
+  private ruleRegistry?: NightshiftInvestigationsStartDeps['ruleRegistry'];
   private savedObjects?: CoreStart['savedObjects'];
   private sandboxConnectionManager?: SandboxConnectionManager;
+  private actionsStart?: ActionsPluginStart;
 
   constructor(private readonly ctx: PluginInitializerContext<NightshiftInvestigationsConfig>) {
     this.logger = ctx.logger.get();
@@ -80,6 +87,13 @@ export class NightshiftInvestigationsPlugin
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
 
     core.savedObjects.registerType(nightshiftInvestigationSavedObjectType);
+
+    registerInvestigationReconciliationTask({
+      core,
+      taskManager: plugins.taskManager,
+      logger: this.logger.get('investigation_reconciliation'),
+      getWorkflowsManagement: () => this.workflowsManagement,
+    });
 
     const getTriggerEmitter = (request: KibanaRequest): TriggerEmitter | undefined =>
       createTriggerEmitter({
@@ -102,31 +116,48 @@ export class NightshiftInvestigationsPlugin
 
       const config = this.ctx.config.get();
       if (config.sandbox) {
+        const sandboxLogger = this.logger.get('sandbox_bash_tool');
+        const getSpaceId = (req: KibanaRequest) =>
+          this.spaces?.spacesService.getSpaceId(req) ?? DEFAULT_SPACE_ID;
+
         const connectionManager = new SandboxConnectionManager({
           config: config.sandbox,
-          logger: this.logger.get('sandbox_bash_tool'),
-          // this.actionsStart is set in start(); the source is invoked at seed time, so the
-          // reference is populated before any tool handler fires.
-          // Returns [] when the actions plugin is absent — seedSandbox no-ops on an empty list.
-          getConnectors: preconfiguredConnectorSource(
-            () => this.actionsStart,
-            (req) => this.actionsStart!.getActionsClientWithRequest(req)
-          ),
+          logger: sandboxLogger,
+          writeManifest: (conversationId, callContext) =>
+            writeConnectorManifest({
+              conversationId,
+              apiClient: connectionManager.apiClient,
+              callContext,
+              getActionsClient: this.actionsStart
+                ? (req) => this.actionsStart!.getActionsClientWithRequest(req)
+                : undefined,
+              logger: sandboxLogger,
+            }),
         });
         this.sandboxConnectionManager = connectionManager;
-        const sandboxLogger = this.logger.get('sandbox_bash_tool');
+
+        // Start deps are read lazily: tools are registered in setup() but only run after start().
+        const resolveConnectorCredentials = createConnectorCredentialResolver({
+          getDeps: () => ({ actions: this.actionsStart }),
+          logger: sandboxLogger.get('connector_credentials'),
+        });
 
         plugins.agentBuilder.tools.register(
-          createSandboxBashTool({ connectionManager, logger: sandboxLogger })
+          createSandboxBashTool({
+            connectionManager,
+            resolveConnectorCredentials,
+            getSpaceId,
+            logger: sandboxLogger,
+          })
         );
         plugins.agentBuilder.tools.register(
-          createSandboxViewFileTool({ connectionManager, logger: sandboxLogger })
+          createSandboxViewFileTool({ connectionManager, getSpaceId, logger: sandboxLogger })
         );
         plugins.agentBuilder.tools.register(
-          createSandboxStrReplaceTool({ connectionManager, logger: sandboxLogger })
+          createSandboxStrReplaceTool({ connectionManager, getSpaceId, logger: sandboxLogger })
         );
         plugins.agentBuilder.tools.register(
-          createSandboxWriteFileTool({ connectionManager, logger: sandboxLogger })
+          createSandboxWriteFileTool({ connectionManager, getSpaceId, logger: sandboxLogger })
         );
       }
     }
@@ -147,6 +178,8 @@ export class NightshiftInvestigationsPlugin
         dependencies: {
           getInvestigationsClient: this.getInvestigationsClient,
           getTriggerEmitter,
+          getAlertsClient: (request: KibanaRequest) =>
+            this.ruleRegistry?.getRacClientWithRequest(request),
         },
         core,
         logger: this.logger,
@@ -167,8 +200,9 @@ export class NightshiftInvestigationsPlugin
     this.workflowsExtensionsStart = plugins.workflowsExtensions;
     this.agentBuilder = plugins.agentBuilder;
     this.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
-    this.actionsStart = plugins.actions;
+    this.ruleRegistry = plugins.ruleRegistry;
     this.savedObjects = coreStart.savedObjects;
+    this.actionsStart = plugins.actions;
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
     // agent exists wherever an investigation runs. This narrower install exists so the agent is
@@ -187,6 +221,12 @@ export class NightshiftInvestigationsPlugin
         this.logger.error(
           `Failed to install nightshift investigations managed workflows: ${err.message}`
         );
+      });
+    }
+
+    if (this.workflowsManagement) {
+      scheduleInvestigationReconciliationTask({ taskManager: plugins.taskManager }).catch((err) => {
+        this.logger.error(`Failed to schedule investigation reconciliation task: ${err.message}`);
       });
     }
 

@@ -7,9 +7,8 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ToolsStart } from '@kbn/agent-builder-server';
-import type { ComputedFeatureProvider } from '@kbn/streams-ai';
+import type { ComputedFeatureProvider } from '@kbn/nightshift-ai';
 import { getSigEventsLogPatternsEsql } from '@kbn/ai-tools';
-import { getStreamSamplingSource } from '@kbn/streams-schema';
 import { createTracedEsClient } from '@kbn/traced-es-client';
 import {
   formatToolResults,
@@ -139,7 +138,7 @@ export const createCodeAnalysisProvider = ({
   request,
   onOutcome,
 }: CodeAnalysisProviderDeps): ComputedFeatureProvider => {
-  return async ({ stream, start, end, esClient, logger }) => {
+  return async ({ target, start, end, esClient, logger }) => {
     const emit = (outcome: CodeAnalysisOutcome) => {
       try {
         onOutcome?.(outcome);
@@ -176,7 +175,7 @@ export const createCodeAnalysisProvider = ({
     try {
       const patterns = await getSigEventsLogPatternsEsql({
         esClient: tracedClient,
-        samplingSource: getStreamSamplingSource(stream),
+        samplingSource: target.samplingSource,
         start,
         end,
         fields: LOG_MESSAGE_FIELDS,
@@ -195,7 +194,7 @@ export const createCodeAnalysisProvider = ({
 
     if (distinctiveStrings.length === 0) {
       logger.debug(
-        `code_analysis: no distinctive log strings for stream "${stream.name}"; skipping`
+        `code_analysis: no distinctive log strings for stream "${target.name}"; skipping`
       );
       emit({ status: 'no_strings', candidateCount: 0, verifiedCount: 0 });
       return undefined;
@@ -273,7 +272,7 @@ export const createCodeAnalysisProvider = ({
 
     if (!best || best.verified.size < MIN_VERIFIED_STRINGS) {
       logger.debug(
-        `code_analysis: no candidate repository verified enough log strings for stream "${stream.name}"; skipping`
+        `code_analysis: no candidate repository verified enough log strings for stream "${target.name}"; skipping`
       );
       emit({ status: 'no_match', candidateCount: candidates.length, verifiedCount: 0 });
       return undefined;
@@ -281,7 +280,7 @@ export const createCodeAnalysisProvider = ({
 
     const repository = best.candidate.repository ?? best.candidate.index ?? best.candidate.label;
     logger.debug(
-      `code_analysis: selected "${repository}" for stream "${stream.name}" (${best.verified.size} verified strings)`
+      `code_analysis: selected "${repository}" for stream "${target.name}" (${best.verified.size} verified strings)`
     );
 
     emit({

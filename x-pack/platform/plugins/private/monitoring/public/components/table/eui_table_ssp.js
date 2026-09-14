@@ -56,7 +56,7 @@ export function EuiMonitoringSSPTable({
     footerContent = (
       <Fragment>
         <EuiSpacer size="m" />
-        <EuiButton iconType="flag" onClick={() => setupMode.openFlyout({}, true)}>
+        <EuiButton iconType="pencil" onClick={() => setupMode.openFlyout({}, true)}>
           {i18n.translate('xpack.monitoring.euiSSPTable.setupNewButtonLabel', {
             defaultMessage: 'Set up monitoring for new {identifier}',
             values: {
