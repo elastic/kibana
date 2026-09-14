@@ -9,7 +9,10 @@ import type { EsqlESQLParams } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
-import { AGENT_BUILDER_TRACES_INDEX_PREFIX, MANAGEMENT_AGENT_ID } from '../../common/constants';
+import {
+  AGENT_BUILDER_TRACES_INDEX_PREFIX,
+  ANALYZE_AND_IMPROVE_SKILL_ID,
+} from '../../common/constants';
 import type { AgentInfo, ExecuteToolSpan } from './transform';
 
 /** Max rows read per ES|QL query in a single run (the per-run cap). */
@@ -24,6 +27,9 @@ const TRACES_INDEX_PATTERN = `${TRACES_INDEX_PREFIX}*`;
  * they are never fetched only to be discarded by `build()` (query_kind === 'other').
  */
 const EXECUTE_ESQL_TOOL_NAME = 'platform.core.execute_esql';
+
+const LOAD_SKILL_TOOL_NAME = 'load_skill';
+
 const BACKING_INDEX_PREFIX = '.ds-';
 const GENERATIONAL_SUFFIX = /-\d{4}\.\d{2}\.\d{2}-\d{6}$/;
 
@@ -36,6 +42,11 @@ export interface InvokeAgentSpanRow {
 
 export interface ToolSpanReadRow extends ExecuteToolSpan {
   _index?: string | null;
+}
+
+export interface LoadSkillSpanRow {
+  trace_id: string;
+  'attributes.gen_ai.tool.call.arguments'?: string | null;
 }
 
 /** Derives the Kibana space from a traces span's `_index`. */
@@ -107,6 +118,47 @@ FROM ${TRACES_INDEX_PATTERN}
   return response ? esqlRowsToObjects<InvokeAgentSpanRow>(response) : [];
 };
 
+const referencesAnalysisSkill = (args: string | undefined | null): boolean => {
+  if (!args) {
+    return false;
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(args);
+  } catch {
+    return false;
+  }
+  const skill = (parsed as { skill?: unknown } | null)?.skill;
+  return typeof skill === 'string' && skill.toLowerCase().includes(ANALYZE_AND_IMPROVE_SKILL_ID);
+};
+
+/** Reads the rounds that loaded the feedback loop's own analysis skill. */
+export const querySelfAnalysisTraceIds = async (
+  esClient: ElasticsearchClient,
+  traceIds: string[],
+  signal: AbortSignal
+): Promise<Set<string>> => {
+  if (traceIds.length === 0) {
+    return new Set();
+  }
+  const placeholders = traceIds.map(() => '?').join(', ');
+  const query = `
+FROM ${TRACES_INDEX_PATTERN}
+| WHERE attributes.gen_ai.operation.name == "execute_tool" AND attributes.gen_ai.tool.name == "${LOAD_SKILL_TOOL_NAME}" AND trace_id IN (${placeholders})
+| SORT @timestamp ASC
+| LIMIT ${MAX_ROWS_PER_QUERY}
+| KEEP trace_id, attributes.gen_ai.tool.call.arguments`;
+
+  const response = await runEsqlQuery(esClient, query, signal, traceIds);
+  const rows = response ? esqlRowsToObjects<LoadSkillSpanRow>(response) : [];
+  return new Set(
+    rows
+      .filter((row) => referencesAnalysisSkill(row['attributes.gen_ai.tool.call.arguments']))
+      .map((row) => row.trace_id)
+      .filter((traceId): traceId is string => !!traceId)
+  );
+};
+
 /** Reads new `execute_tool` spans across all spaces since the watermark. */
 export const queryExecuteToolSpans = async (
   esClient: ElasticsearchClient,
@@ -138,11 +190,9 @@ export const buildConvAgentMap = (rows: InvokeAgentSpanRow[]): Map<string, Agent
     if (!row.trace_id || map.has(row.trace_id)) {
       continue;
     }
-    const id = row['attributes.gen_ai.agent.id'] ?? '';
     map.set(row.trace_id, {
       name: row['attributes.gen_ai.agent.name'] ?? '',
-      id,
-      class: id === MANAGEMENT_AGENT_ID ? 'management' : 'user',
+      id: row['attributes.gen_ai.agent.id'] ?? '',
       conversationId: row['attributes.gen_ai.conversation.id'] ?? '',
     });
   }
