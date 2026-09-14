@@ -80,13 +80,11 @@ describe('handleConcurrencyBlockedExecution', () => {
       logger,
     });
 
-    // The parent is resumed without a request so it wakes its own pre-scheduled resume task
-    // under its original identity. `request` belongs to the child's run and must not be
-    // forwarded here — see resume_sync_parent_if_needed.ts.
     expect(internalResumeWorkflowExecution).toHaveBeenCalledWith(
       parentWorkflowExecutionId,
       spaceId,
-      undefined
+      undefined,
+      request
     );
     expect(workflowTaskManager.scheduleDormantQueuedRunTask).not.toHaveBeenCalled();
   });

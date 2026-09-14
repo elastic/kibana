@@ -20,6 +20,7 @@ import { useFetchGroupActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fet
 import { useFetchRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule';
 import { RuleStateStatus } from '@kbn/alerting-v2-episodes-ui/types/rule_state';
 import { createEpisodeActions } from '@kbn/alerting-v2-episodes-ui/actions';
+import { AlertEpisodeRuleOverviewPanelSection } from '@kbn/alerting-v2-episodes-ui/components/details/rule_overview_panel_section';
 import { createMockLocators, TestProviders } from '../../test_utils/test_providers';
 import { useEpisodeAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { EpisodeDetailsPage } from './episode_details_page';
@@ -103,7 +104,9 @@ jest.mock('@kbn/alerting-v2-episodes-ui/components/details/related_section', () 
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/components/details/rule_overview_panel_section', () => ({
-  AlertEpisodeRuleOverviewPanelSection: () => <div data-test-subj="stubRuleOverviewPanelSection" />,
+  AlertEpisodeRuleOverviewPanelSection: jest.fn(() => (
+    <div data-test-subj="stubRuleOverviewPanelSection" />
+  )),
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/components/details/runbook_section', () => ({
@@ -141,6 +144,7 @@ const mockUseFetchGroupActions = jest.mocked(useFetchGroupActions);
 const mockUseFetchRule = jest.mocked(useFetchRule);
 const mockCreateEpisodeActions = jest.mocked(createEpisodeActions);
 const mockUseEpisodeAutoAttach = jest.mocked(useEpisodeAutoAttach);
+const mockRuleOverviewPanelSection = jest.mocked(AlertEpisodeRuleOverviewPanelSection);
 
 type EpisodeQueryResult = ReturnType<typeof useFetchEpisodeQuery>;
 type FetchRuleResult = ReturnType<typeof useFetchRule>;
@@ -271,6 +275,20 @@ describe('EpisodeDetailsPage', () => {
     expect(screen.getByTestId('alertingV2EpisodeDetailsPage')).toBeInTheDocument();
     expect(screen.getByTestId('alertingV2EpisodeDetailsSidebar')).toBeInTheDocument();
     expect(screen.getByTestId('stubTimelineHeatmapsSection')).toBeInTheDocument();
+  });
+
+  it('passes a host-aware getRuleDetailsHref to the rule overview panel', () => {
+    renderPage();
+
+    expect(mockRuleOverviewPanelSection).toHaveBeenCalledWith(
+      expect.objectContaining({ getRuleDetailsHref: expect.any(Function) }),
+      expect.anything()
+    );
+    const { getRuleDetailsHref } = mockRuleOverviewPanelSection.mock.calls[0][0] as {
+      getRuleDetailsHref: (ruleId: string) => string;
+    };
+    expect(getRuleDetailsHref('rule-1')).toBe('/mock-locator-url');
+    expect(mockLocators.rulesLocators.getRedirectUrl).toHaveBeenCalledWith({ ruleId: 'rule-1' });
   });
 
   it('renders the app header title, tabs, back link, and badges', () => {
