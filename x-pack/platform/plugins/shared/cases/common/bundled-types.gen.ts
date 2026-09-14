@@ -1711,21 +1711,22 @@ export type GetCaseFieldDefinitionsResponse = z.infer<typeof GetCaseFieldDefinit
 
 Resource limits (enforced on write; a violation returns `400`): an owner may have at most 200 field definitions per space. The `definition` string may not exceed 30000 characters.
 
-Identity constraints: the `name` property must match the `name` key in the YAML `definition`. Once created, a field's `name` and YAML `type` are immutable — they determine the key under which case values are stored. An attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified.
+Identity constraints: the `name` property must match the `name` key in the YAML `definition`. When `name` is omitted, the server extracts it from the `definition` YAML automatically. Once created, a field's `name` and YAML `type` are immutable — they determine the key under which case values are stored. An attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified.
 
   */
 export const FieldDefinitionWriteRequest = lazySchema(() =>
   z.object({
     /**
-      * The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. Immutable after creation.
+      * The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation.
 
       */
     name: z
       .string()
       .min(1)
       .max(50)
+      .optional()
       .describe(
-        'The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. Immutable after creation.\n'
+        'The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation.\n'
       ),
     owner: Owner,
     /**
