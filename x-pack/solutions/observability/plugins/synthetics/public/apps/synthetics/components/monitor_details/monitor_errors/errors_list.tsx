@@ -97,7 +97,12 @@ export const ErrorsList = ({
 
   const { failedSteps } = useErrorFailedStep(checkGroups);
 
-  const hasBrowserErrors = errorStates.some((e) => e.monitor.type === 'browser');
+  // Both browser and API journeys emit `synthetics.step` events, so the
+  // "Failed step" column applies to either. HTTP/TCP/ICMP errors have no
+  // step concept and should drop the column.
+  const hasStepBasedErrors = errorStates.some(
+    (e) => e.monitor.type === 'browser' || e.monitor.type === 'api'
+  );
   const hasHttpStatusCodes = errorStates.some((e) => e.http?.response?.status_code);
 
   const history = useHistory();
@@ -189,7 +194,7 @@ export const ErrorsList = ({
           },
         ]
       : []),
-    ...(hasBrowserErrors
+    ...(hasStepBasedErrors
       ? [
           {
             field: 'monitor.check_group',
@@ -205,7 +210,7 @@ export const ErrorsList = ({
               return failedStep.synthetics?.step?.name;
             },
             render: (value: string, item: PingState) => {
-              if (item.monitor.type !== 'browser') {
+              if (item.monitor.type !== 'browser' && item.monitor.type !== 'api') {
                 return (
                   <>{i18n.translate('xpack.synthetics.columns.Label', { defaultMessage: '--' })}</>
                 );
@@ -375,8 +380,8 @@ export const ErrorsList = ({
   );
 };
 
-const ERRORS_LIST_LABEL = i18n.translate('xpack.synthetics.errorsList.label', {
-  defaultMessage: 'Errors list',
+const ERRORS_LIST_LABEL = i18n.translate('xpack.synthetics.errorStatesList.label', {
+  defaultMessage: 'Error states list',
 });
 
 const ERROR_DURATION_LABEL = i18n.translate('xpack.synthetics.errorDuration.label', {

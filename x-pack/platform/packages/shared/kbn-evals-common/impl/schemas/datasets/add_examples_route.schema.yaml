@@ -32,6 +32,16 @@ paths:
                   maxItems: 10000
                   items:
                     $ref: '#/components/schemas/AddExamplesPayload'
+                source:
+                  type: string
+                  enum:
+                    - import
+                on_duplicate:
+                  type: string
+                  enum:
+                    - error
+                    - skip
+                  default: error
               required:
                 - examples
       responses:
@@ -44,8 +54,11 @@ paths:
                 properties:
                   added:
                     type: integer
+                  skipped_duplicates:
+                    type: integer
                 required:
                   - added
+                  - skipped_duplicates
         '404':
           description: Dataset not found
           content:

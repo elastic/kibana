@@ -6,7 +6,7 @@
  */
 
 import type { ConversationWithoutRounds, CurrentUser } from '@kbn/agent-builder-common';
-import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
+import { isPublicConversation } from '@kbn/agent-builder-common';
 
 export type ConversationAccess = 'converse' | 'owner' | 'rename' | 'delete' | 'updateAccessControl';
 
@@ -31,14 +31,6 @@ export const isConversationOwner = ({
   }
 
   return false;
-};
-
-const isPublicConversation = ({
-  conversation,
-}: {
-  conversation: ConversationWithoutRounds;
-}): boolean => {
-  return conversation.access_control?.access_mode === ConversationAccessControlMode.Public;
 };
 
 export const isConversationMember = ({
@@ -73,7 +65,10 @@ export const hasConversationConverseAccess = ({
     return true;
   }
 
-  return isPublicConversation({ conversation }) || isConversationMember({ conversation, user });
+  return (
+    isPublicConversation(conversation.access_control) ||
+    isConversationMember({ conversation, user })
+  );
 };
 
 export const hasConversationOwnerAccess = ({
@@ -96,7 +91,7 @@ export const hasConversationRenameAccess = ({
   user: CurrentUser;
 }): boolean =>
   hasConversationOwnerAccess({ conversation, user }) ||
-  (user.isAdmin && isPublicConversation({ conversation }));
+  (user.isAdmin && isPublicConversation(conversation.access_control));
 
 export const hasConversationDeleteAccess = ({
   conversation,
@@ -106,7 +101,7 @@ export const hasConversationDeleteAccess = ({
   user: CurrentUser;
 }): boolean =>
   hasConversationOwnerAccess({ conversation, user }) ||
-  (user.isAdmin && isPublicConversation({ conversation }));
+  (user.isAdmin && isPublicConversation(conversation.access_control));
 
 export const hasConversationUpdateAccessControlAccess = ({
   conversation,
