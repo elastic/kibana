@@ -71,7 +71,6 @@ REFERENCE_MODELS = [
 
 MISSING_REASONS = {
     "anthropic-claude-5-opus": "no EIS connector exists",
-    "google-gemini-2.5-flash-lite": "broken at render time (2026-09-11 directive) — no successful run in window; top-up skipped",
     "google-gemini-3.5-flash-lite": "no EIS connector exists",
     "google-gemini-3.6-flash": "no EIS connector exists",
     "google/gemma-4-31b-it": "no EIS connector exists",
@@ -80,6 +79,9 @@ MISSING_REASONS = {
     "openai-gpt-5.6-terra": "no EIS connector exists",
     "Qwen36_27b": "no EIS connector exists",
     "zai-glm-5-2": "connector blocked by upstream issue #288469",
+    # 2026-09-14: google-gemini-2.5-flash-lite and gp-llm-v2 were re-run by the
+    # Azure wave (630 docs each, Sep 13-14) and are covered rows now; their old
+    # "broken/skip" entries were removed. Do not re-add without checking golden.
 }
 
 # Golden model ids mix two spellings: EIS connector runs emit dash-separated
