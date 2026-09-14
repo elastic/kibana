@@ -9,7 +9,6 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -20,13 +19,11 @@ import {
 import { useLoadConnectors } from '@kbn/inference-connectors';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useUiPrivileges } from '../../../../../hooks/use_ui_privileges';
 import { useNavigation } from '../../../../../hooks/use_navigation';
-import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 import { useConnectorSelection } from '../../../../../hooks/chat/use_connector_selection';
 import { useDefaultConnector } from '../../../../../hooks/chat/use_default_connector';
 import { useKibana } from '../../../../../hooks/use_kibana';
@@ -38,7 +35,7 @@ import {
 import { InputPopoverButton } from '../input_popover_button';
 import { OptionText } from '../option_text';
 import { ConnectorIcon } from './connector_icon';
-import { ModelBadgesReveal, ModelRetirementIcon } from './model_badges';
+import { ModelRetirementIcon } from './model_badges';
 
 const selectableAriaLabel = i18n.translate(
   'xpack.agentBuilder.conversationInput.connectorSelector.selectableAriaLabel',
@@ -154,15 +151,9 @@ const manageConnectorsAriaLabel = i18n.translate(
   }
 );
 
-const compareModelsAriaLabel = i18n.translate(
-  'xpack.agentBuilder.conversationInput.connectorSelector.compareModels.ariaLabel',
-  { defaultMessage: 'Compare models, opens in a new tab' }
-);
-
 const ConnectorListFooter: React.FC = () => {
   const { manageConnectorsUrl } = useNavigation();
   const { write: hasWritePrivilege } = useUiPrivileges();
-  const { docLinksService } = useAgentBuilderServices();
   const manageButtonProps = {
     size: 's' as const,
     iconType: 'gear',
@@ -177,7 +168,7 @@ const ConnectorListFooter: React.FC = () => {
   return (
     <EuiPopoverFooter paddingSize="s">
       <EuiFlexGroup responsive={false} justifyContent="spaceBetween" gutterSize="s">
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem>
           {hasWritePrivilege ? (
             <EuiButton {...manageButtonProps} href={manageConnectorsUrl}>
               <FormattedMessage
@@ -194,27 +185,12 @@ const ConnectorListFooter: React.FC = () => {
             </EuiButton>
           )}
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            iconType="external"
-            iconSide="right"
-            href={`${docLinksService.models}#recommended-models`}
-            target="_blank"
-            aria-label={compareModelsAriaLabel}
-          >
-            <FormattedMessage
-              id="xpack.agentBuilder.conversationInput.connectorSelector.compareModels"
-              defaultMessage="Compare models"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPopoverFooter>
   );
 };
 
-type ConnectorOptionData = EuiSelectableOption<{ metadata?: EisInferenceEndpointMetadata }>;
+type ConnectorOptionData = EuiSelectableOption<{}>;
 
 export const ConnectorSelector: React.FC<{}> = () => {
   const {
@@ -269,11 +245,9 @@ export const ConnectorSelector: React.FC<{}> = () => {
       append: (
         <>
           <ModelRetirementIcon metadata={connector.metadata} />
-          <ModelBadgesReveal metadata={connector.metadata} />
           {connector.id === defaultConnectorId && <DefaultConnectorBadge />}
         </>
       ),
-      metadata: connector.metadata,
     });
     const groupLabel = (label: string, dataTestSubj: string): ConnectorOptionData =>
       ({
