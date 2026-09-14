@@ -29,6 +29,7 @@ import type {
 import type { AgentPolicyAgentVersionCondition } from '../../common/types/models/agent_policy';
 
 import type {
+  AgentConditionExpression,
   PackagePolicy,
   PackagePolicyInput,
   PackagePolicyPackage,
@@ -180,7 +181,7 @@ export interface PackagePolicySOAttributes {
   latest_revision?: boolean;
   inputs_for_versions?: Record<string, PackagePolicyInput[]>;
   package_agent_version_condition?: string;
-  condition?: string | null;
+  condition?: AgentConditionExpression | null;
 }
 
 export interface OutputSoBaseAttributes {

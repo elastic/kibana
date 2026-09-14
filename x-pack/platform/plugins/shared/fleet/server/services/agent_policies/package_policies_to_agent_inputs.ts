@@ -13,6 +13,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { FullAgentPolicyAddFields, GlobalDataTag } from '../../../common/types';
 import { getAgentlessGlobalDataTags } from '../../../common/services/agentless_policy_helper';
 
+import type { AgentConditionExpression } from '../../../common/types/models/package_policy';
 import type {
   PackagePolicy,
   FullAgentPolicyInput,
@@ -195,7 +196,7 @@ export interface GetFullInputStreamsOptions {
   /** Map of stream ids <destinationId, originalId>. */
   streamsOriginalIdsMap?: Map<string, string>;
   /** Pre-gated by the caller; layered onto the input-level condition. */
-  userIntegrationCondition?: string | null;
+  userIntegrationCondition?: AgentConditionExpression | null;
 }
 
 export const getFullInputStreams = (
