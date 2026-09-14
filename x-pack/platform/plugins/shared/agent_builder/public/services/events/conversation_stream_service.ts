@@ -43,7 +43,8 @@ export class ConversationStreamService {
   }
 
   private onStreamEnded({ conversationId, state$ }: ConversationStream) {
-    if (state$.getValue()) {
+    const current = state$.getValue();
+    if (current && current.status !== 'completed') {
       state$.next(null);
     }
     this.maybeTeardown(conversationId);
@@ -54,7 +55,9 @@ export class ConversationStreamService {
     if (!stream) {
       return;
     }
-    const canReclaim = !stream.state$.observed && !stream.state$.getValue();
+    const value = stream.state$.getValue();
+    const isSealed = value?.status === 'completed';
+    const canReclaim = !stream.state$.observed && (!value || isSealed);
     if (!canReclaim) {
       return;
     }

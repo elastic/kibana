@@ -14,8 +14,8 @@ import type {
   ExecutionAbortedEvent,
   ConversationRoundStep,
   ConversationRoundOrigin,
-  PromptRequest,
 } from '@kbn/agent-builder-common';
+import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import { TimelineEventType } from '@kbn/agent-builder-common';
 import type { ActiveExecutionDraft } from '../../../../services/events/active_execution_reducer';
 
@@ -80,11 +80,30 @@ const accumulatorToItem = (
 export const ACTIVE_EXECUTION_ITEM_KEY = 'active';
 
 export const activeExecutionToItem = (draft: ActiveExecutionDraft): AgentTurnItem => {
+  const key = draft.executionId ?? ACTIVE_EXECUTION_ITEM_KEY;
+  const startedAt = draft.startedAt ?? new Date().toISOString();
+
+  if (draft.status === 'completed' && draft.terminalEvent) {
+    const { terminalEvent } = draft;
+    const item: AgentTurnItem = {
+      kind: 'agentTurn',
+      key,
+      status: 'completed',
+      startedAt,
+      steps: draft.steps,
+      terminal: terminalEvent,
+    };
+    if (terminalEvent.data.outcome.type === 'responded') {
+      item.response = terminalEvent.data.outcome.response;
+    }
+    return item;
+  }
+
   const item: AgentTurnItem = {
     kind: 'agentTurn',
-    key: ACTIVE_EXECUTION_ITEM_KEY,
+    key,
     status: draft.status,
-    startedAt: new Date().toISOString(),
+    startedAt,
     steps: draft.steps,
   };
   if (draft.message) item.response = { message: draft.message };
@@ -184,6 +203,15 @@ interface ToThreadItemsParams {
   activeExecution?: ActiveExecutionDraft | null;
 }
 
+const appendDraftItem = (items: ThreadItem[], activeExecution: ActiveExecutionDraft): void => {
+  const draftItem = activeExecutionToItem(activeExecution);
+  const alreadyPersisted =
+    draftItem.key !== ACTIVE_EXECUTION_ITEM_KEY && items.some((it) => it.key === draftItem.key);
+  if (!alreadyPersisted) {
+    items.push(draftItem);
+  }
+};
+
 export const toThreadItems = ({
   events,
   pendingUserMessage,
@@ -201,7 +229,7 @@ export const toThreadItems = ({
     });
 
     if (activeExecution) {
-      items.push(activeExecutionToItem(activeExecution));
+      appendDraftItem(items, activeExecution);
     } else {
       items.push({
         kind: 'agentTurn',
@@ -212,7 +240,7 @@ export const toThreadItems = ({
       });
     }
   } else if (activeExecution) {
-    items.push(activeExecutionToItem(activeExecution));
+    appendDraftItem(items, activeExecution);
   }
 
   return items;

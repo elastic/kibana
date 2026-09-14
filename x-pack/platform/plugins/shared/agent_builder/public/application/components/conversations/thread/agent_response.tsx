@@ -19,8 +19,8 @@ interface AgentResponseProps {
   steps: ConversationRoundStep[];
   response: AssistantResponse;
   isLoading: boolean;
-  /** The round shape the response actions still expect. Faked by callers until events are grouped. */
-  rawRound: ConversationRound;
+  /** The round shape the response actions still expect. Omitted while streaming - actions are hidden then. */
+  rawRound?: ConversationRound;
   /** Reasoning shown live while streaming, never a persisted step. */
   transientReasoning?: string;
 }

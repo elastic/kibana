@@ -6,7 +6,12 @@
  */
 
 import { Subject } from 'rxjs';
-import { ChatEventType, type ChatEvent } from '@kbn/agent-builder-common';
+import {
+  ChatEventType,
+  TimelineEventType,
+  EventActorType,
+  type ChatEvent,
+} from '@kbn/agent-builder-common';
 import { ConversationStreamService, type ChatEventSource } from './conversation_stream_service';
 import type { ActiveExecutionDraft } from './active_execution_reducer';
 
@@ -15,6 +20,27 @@ const messageChunkEvent = (chunk: string): ChatEvent =>
   ({
     type: ChatEventType.messageChunk,
     data: { message_id: 'm1', text_chunk: chunk },
+  } as ChatEvent);
+
+const executionTerminatedEvent = (execution_id = 'exec-1'): ChatEvent =>
+  ({
+    type: TimelineEventType.executionTerminated,
+    id: `${execution_id}::execution_terminated`,
+    created_at: new Date().toISOString(),
+    actor: { type: EventActorType.agent, id: 'agent' },
+    execution_id,
+    data: {
+      model_usage: {
+        connector_id: '',
+        llm_calls: 1,
+        input_tokens: 10,
+        output_tokens: 5,
+        model: 'test',
+      },
+      time_to_first_token: 100,
+      time_to_last_token: 200,
+      outcome: { type: 'responded', response: { message: 'done' } },
+    },
   } as ChatEvent);
 
 // Inject a fake source backed by per-conversation Subjects, so the fold can be driven event by
@@ -230,6 +256,50 @@ describe('ConversationStreamService', () => {
     const service = new ConversationStreamService(source);
 
     expect(() => service.releaseStream('nope')).not.toThrow();
+  });
+
+  it('sealed draft (status completed) survives streamEnded', () => {
+    const { source, getSubject, endRun } = makeFakeSource();
+    const service = new ConversationStreamService(source);
+
+    let state: ActiveExecutionDraft | null | undefined;
+    service.getActiveStream$('A').subscribe((next) => (state = next));
+
+    getSubject('A').next(executionTerminatedEvent('exec-1'));
+    expect(state?.status).toBe('completed');
+
+    endRun('A');
+    expect(state?.status).toBe('completed');
+  });
+
+  it('unsealed draft is still nulled on streamEnded', () => {
+    const { source, getSubject, endRun } = makeFakeSource();
+    const service = new ConversationStreamService(source);
+
+    let state: ActiveExecutionDraft | null | undefined;
+    service.getActiveStream$('A').subscribe((next) => (state = next));
+
+    getSubject('A').next(messageChunkEvent('partial'));
+    expect(state?.status).toBe('running');
+
+    endRun('A');
+    expect(state).toBeNull();
+  });
+
+  it('sealed unobserved stream gets torn down by maybeTeardown', () => {
+    const { source, getSubject, endRun } = makeFakeSource();
+    const service = new ConversationStreamService(source);
+
+    const sub = service.getActiveStream$('A').subscribe(() => {});
+    getSubject('A').next(executionTerminatedEvent('exec-1'));
+    endRun('A');
+
+    // sealed draft kept, subscriber still active - not torn down yet
+    expect(getSubject('A').observed).toBe(true);
+
+    // Unsubscribe - finalize fires maybeTeardown: sealed + unobserved → teardown allowed
+    sub.unsubscribe();
+    expect(getSubject('A').observed).toBe(false);
   });
 
   it('re-subscribe after ended stream creates a fresh stream emitting null', () => {

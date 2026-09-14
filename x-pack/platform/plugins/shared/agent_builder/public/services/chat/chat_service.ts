@@ -13,7 +13,7 @@ import type { ChatEvent } from '@kbn/agent-builder-common';
 import { type PromptResponse } from '@kbn/agent-builder-common/agents';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
-import { publicApiPath, internalApiPath } from '../../../common/constants';
+import { chatApiPath, internalApiPath } from '../../../common/constants';
 import type { ChatRequestBodyPayload } from '../../../common/http_api/chat';
 import { unwrapAgentBuilderErrors } from '../utils/errors';
 import type { EventsService } from '../events';
@@ -104,7 +104,7 @@ export class ChatService {
 
   private converse(signal: AbortSignal | undefined, payload: ConversePayload) {
     return defer(() => {
-      return this.http.post(`${publicApiPath}/converse/async`, {
+      return this.http.post(`${chatApiPath}/converse/async`, {
         signal,
         asResponse: true,
         rawResponse: true,

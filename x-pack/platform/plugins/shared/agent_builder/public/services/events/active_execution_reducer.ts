@@ -11,6 +11,7 @@ import type {
   CompactionStep,
   BackgroundAgentCompleteStep,
   TodosStep,
+  ExecutionTerminatedEvent,
 } from '@kbn/agent-builder-common';
 import {
   isMessageChunkEvent,
@@ -29,6 +30,8 @@ import {
   isCompactionStep,
   findTodosStep,
   ConversationRoundStepType,
+  isExecutionStartedEvent,
+  isExecutionTerminatedEvent,
 } from '@kbn/agent-builder-common';
 import {
   createReasoningStep,
@@ -37,7 +40,7 @@ import {
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 
 export interface ActiveExecutionDraft {
-  status: 'running' | 'awaiting_prompt';
+  status: 'running' | 'awaiting_prompt' | 'completed';
   steps: ConversationRoundStep[];
   /** Accumulated assistant message text. */
   message: string;
@@ -45,6 +48,12 @@ export interface ActiveExecutionDraft {
   transientReasoning?: string;
   timeToFirstToken?: number;
   pendingPrompts?: PromptRequest[];
+  /** Execution id from the SSE execution_started event - matches the persisted execution_id. */
+  executionId?: string;
+  /** ISO timestamp from the SSE execution_started event. */
+  startedAt?: string;
+  /** Terminal event stored when the draft is sealed (status === 'completed'). */
+  terminalEvent?: ExecutionTerminatedEvent;
 }
 
 const emptyActiveExecution = (): ActiveExecutionDraft => ({
@@ -57,7 +66,8 @@ export const activeExecutionReducer = (
   state: ActiveExecutionDraft | null,
   event: ChatEvent
 ): ActiveExecutionDraft | null => {
-  const draft = state ?? emptyActiveExecution();
+  // Reset when a new run starts while a sealed draft is still present.
+  const draft = state === null || state.status === 'completed' ? emptyActiveExecution() : state;
 
   if (isReasoningEvent(event)) {
     if (event.data.transient) {
@@ -190,6 +200,25 @@ export const activeExecutionReducer = (
         )
       : [...draft.steps, { type: ConversationRoundStepType.updateTodos, todos } as TodosStep];
     return { ...draft, steps };
+  }
+
+  if (isExecutionStartedEvent(event)) {
+    return {
+      ...draft,
+      ...(event.execution_id ? { executionId: event.execution_id } : {}),
+      startedAt: event.created_at,
+    };
+  }
+
+  if (isExecutionTerminatedEvent(event)) {
+    return {
+      ...draft,
+      status: 'completed',
+      terminalEvent: event,
+      transientReasoning: undefined,
+      ...(draft.executionId ? {} : event.execution_id ? { executionId: event.execution_id } : {}),
+      ...(draft.startedAt ? {} : { startedAt: event.created_at }),
+    };
   }
 
   return state;

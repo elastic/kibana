@@ -9,8 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { AgentDefinition, ConversationRound } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import type { AgentDefinition } from '@kbn/agent-builder-common';
 import { AgentAvatar } from '../../common/agent_avatar';
 import { RoundAuthorHeader } from '../conversation_rounds/round_author_header';
 import { AgentResponse } from './agent_response';
@@ -28,24 +27,6 @@ interface AgentTurnProps {
   item: AgentTurnItem;
   agent?: AgentDefinition | null;
 }
-
-const toSyntheticRound = (item: AgentTurnItem): ConversationRound => ({
-  id: 'active',
-  status: ConversationRoundStatus.inProgress,
-  input: { message: '' },
-  steps: item.steps,
-  response: { message: item.response?.message ?? '' },
-  started_at: new Date().toISOString(),
-  time_to_first_token: item.timeToFirstToken ?? 0,
-  time_to_last_token: 0,
-  model_usage: {
-    connector_id: '',
-    llm_calls: 0,
-    input_tokens: 0,
-    output_tokens: 0,
-    model: '',
-  },
-});
 
 const renderContent = (item: AgentTurnItem): React.ReactNode => {
   if (isCompletedTurn(item)) {
@@ -65,7 +46,6 @@ const renderContent = (item: AgentTurnItem): React.ReactNode => {
       steps={item.steps}
       response={{ message: item.response?.message ?? '' }}
       isLoading
-      rawRound={toSyntheticRound(item)}
       transientReasoning={item.transientReasoning}
     />
   );

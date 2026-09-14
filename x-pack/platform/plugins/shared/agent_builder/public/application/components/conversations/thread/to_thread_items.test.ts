@@ -367,5 +367,129 @@ describe('activeExecutionToItem', () => {
     expect(item.response).toBeUndefined();
   });
 
-  // @todo: Add test covering sealed draft vs server events producing deep-equal items
+  it('uses executionId as key when present', () => {
+    const draft: ActiveExecutionDraft = {
+      status: 'running',
+      steps: [],
+      message: '',
+      executionId: 'exec-real',
+    };
+    const item = activeExecutionToItem(draft);
+    expect(item.key).toBe('exec-real');
+  });
+
+  it('uses startedAt from draft when present', () => {
+    const draft: ActiveExecutionDraft = {
+      status: 'running',
+      steps: [],
+      message: '',
+      startedAt: '2026-01-01T00:00:00.000Z',
+    };
+    const item = activeExecutionToItem(draft);
+    expect(item.startedAt).toBe('2026-01-01T00:00:00.000Z');
+  });
+
+  it('sealed draft maps to completed agentTurn with terminal event and response', () => {
+    const terminal = createExecutionTerminatedEvent({
+      id: 'term-1',
+      execution_id: 'exec-sealed',
+    });
+    const draft: ActiveExecutionDraft = {
+      status: 'completed',
+      steps: [],
+      message: '',
+      executionId: 'exec-sealed',
+      startedAt: '2026-06-01T10:00:00.000Z',
+      terminalEvent: terminal,
+    };
+    const item = activeExecutionToItem(draft);
+    expect(item.status).toBe('completed');
+    expect(item.key).toBe('exec-sealed');
+    expect(item.terminal).toBe(terminal);
+    expect(item.response).toEqual({ message: 'Here is a summary of your active hosts.' });
+  });
+
+  it('sealed draft with prompt_requested outcome does not set response', () => {
+    const terminal = createExecutionTerminatedEvent({
+      id: 'term-pr',
+      execution_id: 'exec-pr',
+      data: {
+        steps: [],
+        model_usage: {
+          connector_id: '',
+          llm_calls: 1,
+          input_tokens: 10,
+          output_tokens: 5,
+          model: 'test',
+        },
+        time_to_first_token: 100,
+        time_to_last_token: 200,
+        outcome: { type: 'prompt_requested', prompts: [] },
+      },
+    });
+    const draft: ActiveExecutionDraft = {
+      status: 'completed',
+      steps: [],
+      message: '',
+      terminalEvent: terminal,
+    };
+    const item = activeExecutionToItem(draft);
+    expect(item.status).toBe('completed');
+    expect(item.response).toBeUndefined();
+  });
+});
+
+describe('toThreadItems - dedupe', () => {
+  it('drops the draft when a persisted item with the same executionId already exists', () => {
+    const terminated = createExecutionTerminatedEvent({
+      id: 'term-1',
+      execution_id: 'exec-real',
+    });
+    const draft: ActiveExecutionDraft = {
+      status: 'completed',
+      steps: [],
+      message: '',
+      executionId: 'exec-real',
+      terminalEvent: terminated,
+    };
+
+    const items = toThreadItems({ events: [terminated], activeExecution: draft });
+
+    // Only one agentTurn - the persisted one wins, the draft is deduped away
+    const agentTurns = items.filter((it) => it.kind === 'agentTurn');
+    expect(agentTurns).toHaveLength(1);
+    if (agentTurns[0].kind === 'agentTurn') {
+      expect(agentTurns[0].key).toBe('exec-real');
+    }
+  });
+
+  it('appends the draft when its executionId is not yet in persisted items', () => {
+    const terminated = createExecutionTerminatedEvent({
+      id: 'term-other',
+      execution_id: 'exec-other',
+    });
+    const draft: ActiveExecutionDraft = {
+      status: 'running',
+      steps: [],
+      message: 'in flight',
+      executionId: 'exec-new',
+    };
+
+    const items = toThreadItems({ events: [terminated], activeExecution: draft });
+
+    const agentTurns = items.filter((it) => it.kind === 'agentTurn');
+    expect(agentTurns).toHaveLength(2);
+    const keys = agentTurns.map((it) => it.key);
+    expect(keys).toContain('exec-other');
+    expect(keys).toContain('exec-new');
+  });
+
+  it('draft with no executionId always appends (uses ACTIVE_EXECUTION_ITEM_KEY)', () => {
+    const draft: ActiveExecutionDraft = { status: 'running', steps: [], message: '' };
+    const items = toThreadItems({ events: [], activeExecution: draft });
+    expect(items).toHaveLength(1);
+    if (items[0].kind === 'agentTurn') {
+      expect(items[0].key).toBe(ACTIVE_EXECUTION_ITEM_KEY);
+    }
+  });
 });

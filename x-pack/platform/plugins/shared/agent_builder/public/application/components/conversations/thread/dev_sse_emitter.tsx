@@ -16,7 +16,14 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { ChatEvent, ConversationRound } from '@kbn/agent-builder-common';
-import { ChatEventType, ConversationRoundStatus, ToolResultType } from '@kbn/agent-builder-common';
+import {
+  ChatEventType,
+  ConversationRoundStatus,
+  ToolResultType,
+  TimelineEventType,
+  EventActorType,
+  TimelineTriggerType,
+} from '@kbn/agent-builder-common';
 
 // Storybook-only harness that fakes the SSE stream so the active-execution reducer can be driven by
 // hand. Each button emits one `ChatEvent`; the deck groups them by phase and offers a single "Next"
@@ -29,6 +36,7 @@ interface DevSseEmitterProps {
 
 const MESSAGE_ID = 'dev-message';
 const TOOL_CALL_ID = 'dev-tool-call';
+const DEV_EXECUTION_ID = 'dev-execution';
 
 const fakeRound = (): ConversationRound => ({
   id: `dev-round-${Date.now()}`,
@@ -42,7 +50,7 @@ const fakeRound = (): ConversationRound => ({
   model_usage: { connector_id: '', llm_calls: 0, input_tokens: 0, output_tokens: 0, model: '' },
 });
 
-type Phase = 'Reasoning' | 'Tool' | 'Message' | 'Seal';
+type Phase = 'Init' | 'Reasoning' | 'Tool' | 'Message' | 'Seal';
 
 interface EventButton {
   id: string;
@@ -52,6 +60,19 @@ interface EventButton {
 }
 
 const BUTTONS: EventButton[] = [
+  {
+    id: 'execution-started',
+    label: 'execution_started',
+    phase: 'Init',
+    build: (): ChatEvent => ({
+      type: TimelineEventType.executionStarted,
+      id: `${DEV_EXECUTION_ID}::execution_started`,
+      created_at: new Date().toISOString(),
+      actor: { type: EventActorType.agent, id: 'dev-agent' },
+      execution_id: DEV_EXECUTION_ID,
+      data: { trigger_type: TimelineTriggerType.userMessage },
+    }),
+  },
   {
     id: 'reasoning-transient',
     label: 'reasoning (transient)',
@@ -133,6 +154,33 @@ const BUTTONS: EventButton[] = [
     }),
   },
   {
+    id: 'execution-terminated',
+    label: 'execution_terminated (seal)',
+    phase: 'Seal',
+    build: (): ChatEvent => ({
+      type: TimelineEventType.executionTerminated,
+      id: `${DEV_EXECUTION_ID}::execution_terminated`,
+      created_at: new Date().toISOString(),
+      actor: { type: EventActorType.agent, id: 'dev-agent' },
+      execution_id: DEV_EXECUTION_ID,
+      data: {
+        model_usage: {
+          connector_id: '',
+          llm_calls: 1,
+          input_tokens: 100,
+          output_tokens: 50,
+          model: 'dev',
+        },
+        time_to_first_token: 100,
+        time_to_last_token: 500,
+        outcome: {
+          type: 'responded',
+          response: { message: 'Hello there, all hosts look healthy.' },
+        },
+      },
+    }),
+  },
+  {
     id: 'round-complete',
     label: 'round_complete (end stream)',
     phase: 'Seal',
@@ -143,10 +191,11 @@ const BUTTONS: EventButton[] = [
   },
 ];
 
-const PHASES: Phase[] = ['Reasoning', 'Tool', 'Message', 'Seal'];
+const PHASES: Phase[] = ['Init', 'Reasoning', 'Tool', 'Message', 'Seal'];
 
 // A realistic run, in order, for the "Next" button to walk through.
 const HAPPY_PATH: string[] = [
+  'execution-started',
   'reasoning-transient',
   'tool-call',
   'tool-progress',
@@ -156,6 +205,7 @@ const HAPPY_PATH: string[] = [
   'message-chunk',
   'thinking-complete',
   'message-complete',
+  'execution-terminated',
   'round-complete',
 ];
 
