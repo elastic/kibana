@@ -98,84 +98,84 @@ export const SubagentsSection: React.FC<SubagentsSectionProps<any>> = ({
     <>
       <EuiHorizontalRule margin="xl" />
       <EuiPanel hasBorder paddingSize="l" data-test-subj="subagentsSection">
-      <EuiTitle size="xxs">
-        <h4>
-          {i18n.translate('xpack.agentBuilder.subagents.title', {
-            defaultMessage: 'Subagents',
+        <EuiTitle size="xxs">
+          <h4>
+            {i18n.translate('xpack.agentBuilder.subagents.title', {
+              defaultMessage: 'Subagents',
+            })}
+          </h4>
+        </EuiTitle>
+        <EuiSpacer size="xs" />
+        <EuiText size="s" color="subdued">
+          {i18n.translate('xpack.agentBuilder.subagents.description', {
+            defaultMessage:
+              'Allow this agent to delegate tasks to other agents. When disabled, this agent cannot spawn subagents.',
           })}
-        </h4>
-      </EuiTitle>
-      <EuiSpacer size="xs" />
-      <EuiText size="s" color="subdued">
-        {i18n.translate('xpack.agentBuilder.subagents.description', {
-          defaultMessage:
-            'Allow this agent to delegate tasks to other agents. When disabled, this agent cannot spawn subagents.',
-        })}
-      </EuiText>
-      <EuiSpacer size="s" />
+        </EuiText>
+        <EuiSpacer size="s" />
 
-      <Controller
-        name={fieldName}
-        control={control}
-        render={({ field: { value, onChange } }) => {
-          const currentValue = (value as string[] | undefined) ?? [];
-          return (
-            <>
-              <EuiCheckbox
-                id={checkboxId}
-                label={i18n.translate('xpack.agentBuilder.subagents.enableLabel', {
-                  defaultMessage: 'Enable subagents',
-                })}
-                checked={enabled}
-                onChange={(e) => {
-                  const nowEnabled = e.target.checked;
-                  setEnabled(nowEnabled);
-                  if (nowEnabled) {
-                    if (currentValue.length === 0) {
-                      onChange([SELF_AGENT_ID]);
+        <Controller
+          name={fieldName}
+          control={control}
+          render={({ field: { value, onChange } }) => {
+            const currentValue = (value as string[] | undefined) ?? [];
+            return (
+              <>
+                <EuiCheckbox
+                  id={checkboxId}
+                  label={i18n.translate('xpack.agentBuilder.subagents.enableLabel', {
+                    defaultMessage: 'Enable subagents',
+                  })}
+                  checked={enabled}
+                  onChange={(e) => {
+                    const nowEnabled = e.target.checked;
+                    setEnabled(nowEnabled);
+                    if (nowEnabled) {
+                      if (currentValue.length === 0) {
+                        onChange([SELF_AGENT_ID]);
+                      }
+                    } else {
+                      onChange([]);
                     }
-                  } else {
-                    onChange([]);
-                  }
-                }}
-                data-test-subj="subagentsEnableCheckbox"
-              />
-              {enabled && (
-                <>
-                  <EuiSpacer size="m" />
-                  <EuiFormRow
-                    label={i18n.translate('xpack.agentBuilder.subagents.pickerLabel', {
-                      defaultMessage: 'Delegable subagents',
-                    })}
-                    helpText={i18n.translate('xpack.agentBuilder.subagents.pickerHelpText', {
-                      defaultMessage:
-                        "Pick the agents this one can spawn. Use 'This agent (self-fork)' to let it delegate to a copy of itself.",
-                    })}
-                    isInvalid={!!subagentIdsError}
-                    error={subagentIdsError?.message as string | undefined}
-                    fullWidth
-                  >
-                    <EuiComboBox
+                  }}
+                  data-test-subj="subagentsEnableCheckbox"
+                />
+                {enabled && (
+                  <>
+                    <EuiSpacer size="m" />
+                    <EuiFormRow
+                      label={i18n.translate('xpack.agentBuilder.subagents.pickerLabel', {
+                        defaultMessage: 'Delegable subagents',
+                      })}
+                      helpText={i18n.translate('xpack.agentBuilder.subagents.pickerHelpText', {
+                        defaultMessage:
+                          "Pick the agents this one can spawn. Use 'This agent (self-fork)' to let it delegate to a copy of itself.",
+                      })}
                       isInvalid={!!subagentIdsError}
-                      isClearable
-                      options={options}
-                      selectedOptions={currentValue.map(
-                        (id) =>
-                          options.find((o) => o.value === id) ?? {
-                            value: id,
-                            label: id,
-                          }
-                      )}
-                      onChange={(next) => onChange(next.map((o) => o.value as string))}
-                      data-test-subj="subagentsPicker"
-                    />
-                  </EuiFormRow>
-                </>
-              )}
-            </>
-          );
-        }}
-      />
+                      error={subagentIdsError?.message as string | undefined}
+                      fullWidth
+                    >
+                      <EuiComboBox
+                        isInvalid={!!subagentIdsError}
+                        isClearable
+                        options={options}
+                        selectedOptions={currentValue.map(
+                          (id) =>
+                            options.find((o) => o.value === id) ?? {
+                              value: id,
+                              label: id,
+                            }
+                        )}
+                        onChange={(next) => onChange(next.map((o) => o.value as string))}
+                        data-test-subj="subagentsPicker"
+                      />
+                    </EuiFormRow>
+                  </>
+                )}
+              </>
+            );
+          }}
+        />
       </EuiPanel>
     </>
   );
