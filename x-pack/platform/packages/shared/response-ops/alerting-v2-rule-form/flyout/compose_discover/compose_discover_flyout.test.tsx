@@ -35,12 +35,15 @@ let latestFlyoutOnClose: CapturedFlyoutOnClose | undefined;
 jest.mock('@elastic/eui', () => {
   const ReactActual = jest.requireActual('react') as typeof import('react');
   const actual = jest.requireActual('@elastic/eui') as typeof import('@elastic/eui');
+  const EuiFlyoutActual = actual.EuiFlyout;
   return {
     ...actual,
-    EuiFlyout: ReactActual.forwardRef((props: Record<string, unknown>, ref) => {
-      latestFlyoutOnClose = props.onClose as CapturedFlyoutOnClose;
-      return ReactActual.createElement(actual.EuiFlyout, { ...props, ref });
-    }),
+    EuiFlyout: ReactActual.forwardRef<HTMLElement, React.ComponentProps<typeof EuiFlyoutActual>>(
+      (props, ref) => {
+        latestFlyoutOnClose = props.onClose as CapturedFlyoutOnClose;
+        return ReactActual.createElement(EuiFlyoutActual, { ...props, ref });
+      }
+    ),
   };
 });
 
