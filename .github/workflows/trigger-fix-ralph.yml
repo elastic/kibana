@@ -10,6 +10,10 @@ on:
 permissions:
   contents: none
 
+concurrency:
+  group: ralph-fix-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
 jobs:
   acknowledge:
     name: 'Acknowledge /ralph-fix'
