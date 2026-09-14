@@ -19,6 +19,7 @@ import type { ProfileStateRegistry } from '../../../../../common/context_awarene
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverAppState, TabState } from './types';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
+import { migrateLegacyQuery } from '../../../../utils/migrate_legacy_query';
 import { DEFAULT_TAB_STATE } from './constants';
 import { parseControlGroupJson } from './utils';
 import { createSearchSource } from '../utils/create_search_source';
@@ -28,6 +29,10 @@ export const fromSavedObjectTabToAppState = ({
 }: {
   tab: DiscoverSessionTab;
 }): DiscoverAppState => {
+  const query = tab.serializedSearchSource.query
+    ? migrateLegacyQuery(tab.serializedSearchSource.query)
+    : undefined;
+
   return omitBy<DiscoverAppState>(
     {
       columns: tab.columns,
@@ -36,10 +41,10 @@ export const fromSavedObjectTabToAppState = ({
       hideChart: tab.hideChart,
       hideTable: tab.hideTable,
       dataSource: createDataSource({
-        query: tab.serializedSearchSource.query,
+        query,
         dataView: tab.serializedSearchSource.index,
       }),
-      query: tab.serializedSearchSource.query,
+      query,
       sort: tab.sort,
       viewMode: tab.viewMode,
       hideAggregatedPreview: tab.hideAggregatedPreview,

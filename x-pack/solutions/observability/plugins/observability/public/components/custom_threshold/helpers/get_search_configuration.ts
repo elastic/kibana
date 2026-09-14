@@ -27,6 +27,14 @@ export const getSearchConfiguration = (
   fields: SerializedSearchSourceFields,
   onWarning: (title: string) => void
 ): CustomThresholdSearchSourceFields => {
+  if (typeof fields.query === 'string') {
+    onWarning(searchConfigQueryWarning);
+    return adjustSearchConfigurationFilter({
+      ...fields,
+      query: defaultQuery,
+    });
+  }
+
   if (fields.query && !isOfQueryType(fields.query)) {
     onWarning(searchConfigQueryWarning);
     return adjustSearchConfigurationFilter({
