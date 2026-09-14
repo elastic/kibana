@@ -494,7 +494,7 @@ describe('ServiceAccountFakeRequests', () => {
       expect(request.headers.authorization).toBe('Bearer essu_token_1');
     });
 
-    it('a release during an in-flight mint leaves the request header untouched', async () => {
+    it('discards a mint that lands after the release rather than handing back its token', async () => {
       const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
       mintToken.mockClear();
 
@@ -509,10 +509,32 @@ describe('ServiceAccountFakeRequests', () => {
       expect(fakeRequests.release(request)).toBe(true);
       resolveMint('essu_token_late');
 
-      // The caller that was already awaiting the mint still receives its token, but the
-      // released request's credential is never extended.
-      await expect(inflight).resolves.toBe('essu_token_late');
+      // The execution bracket has closed, so the caller that was awaiting this mint is refused
+      // rather than allowed to continue on a credential minted after the release.
+      await expect(inflight).rejects.toThrowError(
+        'The request bound to this service account was released while its credential was being replaced.'
+      );
       expect(request.headers.authorization).toBe('Bearer essu_token_1');
+    });
+
+    it('does not record a refresh failure against a request that was already released', async () => {
+      const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
+      mintToken.mockClear();
+
+      let rejectMint!: (error: Error) => void;
+      mintToken.mockImplementationOnce(
+        () => new Promise<string>((_resolve, reject) => (rejectMint = reject))
+      );
+
+      jest.advanceTimersByTime(MAX_AGE_MS);
+      const inflight = fakeRequests.ensureFreshToken(request, MAX_AGE_MS);
+
+      fakeRequests.release(request);
+      rejectMint(new Error('exchange failed'));
+
+      await expect(inflight).rejects.toThrowError('exchange failed');
+      // Nothing will ever ask this entry to refresh again, so there is no failure to report.
+      expect(logger.warn).not.toHaveBeenCalled();
     });
   });
 });

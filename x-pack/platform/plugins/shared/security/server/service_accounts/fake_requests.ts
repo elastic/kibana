@@ -228,24 +228,27 @@ export class ServiceAccountFakeRequests {
       },
     })
       .then((token) => {
+        this.ensureStillRegistered(request, entry);
         this.ensureWithinLifetime(entry);
-        // A release() while the mint was in flight wins: the request is no longer ours to
-        // refresh, so its header stays untouched. Callers already awaiting this mint still
-        // receive the token they asked for.
-        if (this.registry.get(request) === entry) {
-          // Registry-owned fake requests share mutable raw headers, so subsequent scoped clients
-          // observe this replacement despite KibanaRequest exposing the headers as readonly.
-          (request.headers as Record<string, string>).authorization = `Bearer ${token}`;
-          entry.token = token;
-          entry.mintedAt = Date.now();
-          entry.retryAt = undefined;
-          this.logger.debug(
-            `Replaced the token of a fake request bound to service account ${entry.serviceAccountId}`
-          );
-        }
+
+        // Registry-owned fake requests share mutable raw headers, so subsequent scoped clients
+        // observe this replacement despite KibanaRequest exposing the headers as readonly.
+        (request.headers as Record<string, string>).authorization = `Bearer ${token}`;
+        entry.token = token;
+        entry.mintedAt = Date.now();
+        entry.retryAt = undefined;
+        this.logger.debug(
+          `Replaced the token of a fake request bound to service account ${entry.serviceAccountId}`
+        );
         return token;
       })
       .catch((err) => {
+        // A released entry can never refresh again, so recording a backoff or a terminal error
+        // on it would only describe a request nothing will ask about.
+        if (this.registry.get(request) !== entry) {
+          throw err;
+        }
+
         const raisedByInterceptor =
           entry.mintInterceptor !== undefined &&
           !(exchangeFailure !== undefined && err === exchangeFailure.error);
@@ -299,6 +302,17 @@ export class ServiceAccountFakeRequests {
         throw error;
       });
     return mintInterceptor ? mintInterceptor(mint) : mint();
+  }
+
+  private ensureStillRegistered(
+    request: KibanaRequest,
+    entry: ServiceAccountFakeRequestEntry
+  ): void {
+    if (this.registry.get(request) !== entry) {
+      throw new Error(
+        'The request bound to this service account was released while its credential was being replaced.'
+      );
+    }
   }
 
   private ensureWithinLifetime(entry: ServiceAccountFakeRequestEntry): void {
