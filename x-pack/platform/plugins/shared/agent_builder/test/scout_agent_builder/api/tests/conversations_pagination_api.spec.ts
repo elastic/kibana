@@ -81,7 +81,7 @@ apiTest.describe(
       await deleteAgentViaKbn(kbnClient, agentId);
       await esClient.deleteByQuery({
         index: CHAT_CONVERSATIONS_INDEX,
-        query: { match_all: {} },
+        query: { term: { agent_id: agentId } },
         wait_for_completion: true,
         refresh: true,
         conflicts: 'proceed',
