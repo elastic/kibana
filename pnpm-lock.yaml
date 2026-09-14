@@ -12147,9 +12147,6 @@ packages:
   '@types/d3-interpolate@3.0.1':
     resolution: {integrity: sha512-jx5leotSeac3jr0RePOH1KdR9rISG91QIE4Q2PYTu4OymLTZfA3SrnURSLzKH48HmXVUru50b8nje4E79oQSQw==}
 
-  '@types/d3-interpolate@3.0.4':
-    resolution: {integrity: sha512-mgLPETlrpVV1YRJIglr4Ez47g7Yxjl1lj7YKsiMCb27VJH9W8NVM6Bb9d8kkpG/uAQS5AmbA48q2IAolKKo1MA==}
-
   '@types/d3-path@2.0.2':
     resolution: {integrity: sha512-3YHpvDw9LzONaJzejXLOwZ3LqwwkoXb9LI2YN7Hbd6pkGo5nIlJ09ul4bQhBN4hQZJKmUpX8HkVqbzgUKY48cg==}
 
@@ -12206,12 +12203,6 @@ packages:
 
   '@types/eslint@8.44.2':
     resolution: {integrity: sha512-sdPRb9K6iL5XZOmBubg8yiFp5yS/JdUDQsq5e6h95km91MCYMuvp7mh1fjPEYUhvHepKpZOjnEaMBR4PxjWDzg==}
-
-  '@types/eslint@8.56.7':
-    resolution: {integrity: sha512-SjDvI/x3zsZnOkYZ3lCt9lOZWZLB2jIlNKz+LBgCtDurK0JZcwucxYHn1w2BJkD34dgX9Tjnak0txtq4WTggEA==}
-
-  '@types/estree@1.0.8':
-    resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
 
   '@types/estree@1.0.9':
     resolution: {integrity: sha512-GhdPgy1el4/ImP05X05Uw4cw2/M93BCUmnEvWZNStlCzEKME4Fkk+YpoA5OiHNQmoS7Cafb8Xa3Pya8m1Qrzeg==}
@@ -12399,9 +12390,6 @@ packages:
 
   '@types/minimatch@2.0.29':
     resolution: {integrity: sha512-HMjwFKEsu7AWge4XGwDf+aB1LbQ+YHlRZth1YfmzXft5+5DROWamftev/ZLTtjvp3//yY4Iqc0pFQrqJwTiKYg==}
-
-  '@types/minimatch@3.0.3':
-    resolution: {integrity: sha512-tHq6qdbT9U1IRSGf14CL0pUlULksvY9OZ+5eEgl1N7t+OA3tGvNpxJCzuKQlsNgCVwbAs670L1vcVQi8j9HjnA==}
 
   '@types/minimist@1.2.5':
     resolution: {integrity: sha512-hov8bUuiLiyFPGyFPE1lwWhmzYbirOXQNNo40+y3zow8aFVTeyn3VWL0VFFfdNddA8S4Vf0Tc062rzyNr7Paag==}
@@ -12769,12 +12757,6 @@ packages:
     peerDependencies:
       typescript: 5.9.3
 
-  '@typescript-eslint/project-service@8.53.1':
-    resolution: {integrity: sha512-WYC4FB5Ra0xidsmlPb+1SsnaSKPmS3gsjIARwbEkHkoWloQmuzcfypljaJcR78uyLA1h8sHdWWPHSLDI+MtNog==}
-    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-    peerDependencies:
-      typescript: 5.9.3
-
   '@typescript-eslint/scope-manager@8.46.3':
     resolution: {integrity: sha512-FCi7Y1zgrmxp3DfWfr+3m9ansUUFoy8dkEdeQSgA9gbm8DaHYvZCdkFRQrtKiedFf3Ha6VmoqoAaP68+i+22kg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
@@ -12812,12 +12794,6 @@ packages:
     peerDependencies:
       typescript: 5.9.3
 
-  '@typescript-eslint/typescript-estree@8.53.1':
-    resolution: {integrity: sha512-RGlVipGhQAG4GxV1s34O91cxQ/vWiHJTDHbXRr0li2q/BGg3RR/7NM8QDWgkEgrwQYCvmJV9ichIwyoKCQ+DTg==}
-    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-    peerDependencies:
-      typescript: 5.9.3
-
   '@typescript-eslint/utils@8.46.3':
     resolution: {integrity: sha512-VXw7qmdkucEx9WkmR3ld/u6VhRyKeiF1uxWwCy/iuNfokjJ7VhsgLSOTjsol8BunSw190zABzpwdNsze2Kpo4g==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
@@ -12827,10 +12803,6 @@ packages:
 
   '@typescript-eslint/visitor-keys@8.46.3':
     resolution: {integrity: sha512-uk574k8IU0rOF/AjniX8qbLSGURJVUCeM5e4MIMKBFFi8weeiLrG1fyQejyLXQpRZbU/1BuQasleV/RfHC3hHg==}
-    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-
-  '@typescript-eslint/visitor-keys@8.53.1':
-    resolution: {integrity: sha512-oy+wV7xDKFPRyNggmXuZQSBzvoLnpmJs+GhzRhPjrxl2b/jIlyjVokzm47CZCDUdXKr2zd7ZLodPfOBpOPyPlg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
   '@typescript/typescript-aix-ppc64@7.0.2':
@@ -13592,9 +13564,6 @@ packages:
 
   axios@1.19.0:
     resolution: {integrity: sha512-ht/iuYZXEjFxLH/Hkezgd7m6JKlHHXEUSneaDz8uZe1Gj5QZtCnpyDsckvAiEnT89OEbCLmnte4R4sn7P0EKFw==}
-
-  axios@1.20.0:
-    resolution: {integrity: sha512-r8aOh8j9cGKpgQAqpzrUHnSIc6a59Y3Xf/cv8sy1DrHCkZHzQGEuoq1tARk6qSyDdtQGSDgpb9kFlruzPvrgwg==}
 
   axobject-query@3.2.1:
     resolution: {integrity: sha512-jsyHu61e6N4Vbz/v18DHwWYKK0bSWLqn47eeDSKPB7m8tqMHF9YJ+mhIk2lVteyZrY8tnSj/jHOv4YiTCuCJgg==}
@@ -18528,10 +18497,6 @@ packages:
     resolution: {integrity: sha512-oRjTw/97aTBN0RHbYCdtF1MQfvusSIBQM0IZEgzl6426+8jSC0nF1a/GmnVLpfB9yyr6g6FTqWqiZVbxrtaCIg==}
     engines: {node: 18 || 20 || >=22}
 
-  minimatch@10.2.5:
-    resolution: {integrity: sha512-MULkVLfKGYDFYejP07QOurDLLQpcjk7Fw+7jXS2R2czRQzR56yHRveU5NDJEOviH+hETZKSkIk5c+T23GjFUMg==}
-    engines: {node: 18 || 20 || >=22}
-
   minimatch@3.1.5:
     resolution: {integrity: sha512-VgjWUsnnT6n+NUk6eZq77zeFdpW2LWDzP6zFGrCbHXiYNul5Dzqk2HHQ5uFH2DNW5Xbp8+jVzaeNt94ssEEl4w==}
 
@@ -23094,7 +23059,7 @@ snapshots:
 
   '@apm-js-collab/code-transformer@0.18.1':
     dependencies:
-      '@types/estree': 1.0.8
+      '@types/estree': 1.0.9
       astring: 1.9.0
       esquery: 1.7.0
       meriyah: 6.1.4
@@ -24718,8 +24683,8 @@ snapshots:
 
   '@elastic/transport@8.11.0(supports-color@8.1.1)':
     dependencies:
-      '@opentelemetry/api': 1.9.1
-      '@opentelemetry/core': 2.10.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/api': 1.9.0
+      '@opentelemetry/core': 2.10.0(@opentelemetry/api@1.9.0)
       debug: 4.4.3(supports-color@8.1.1)
       hpagent: 1.2.0
       ms: 2.1.3
@@ -24831,7 +24796,7 @@ snapshots:
       '@emotion/memoize': 0.9.0
       '@emotion/unitless': 0.10.0
       '@emotion/utils': 1.4.2
-      csstype: 3.2.3
+      csstype: 3.0.7
 
   '@emotion/server@11.11.0(@emotion/css@11.13.5(supports-color@8.1.1))':
     dependencies:
@@ -25975,7 +25940,7 @@ snapshots:
       '@loaders.gl/schema': 3.4.7
       '@mapbox/vector-tile': 1.3.1
       '@math.gl/polygon': 3.6.3
-      pbf: 3.3.0
+      pbf: 3.2.1
 
   '@loaders.gl/json@3.4.7':
     dependencies:
@@ -25991,7 +25956,7 @@ snapshots:
 
   '@loaders.gl/schema@3.4.7':
     dependencies:
-      '@types/geojson': 7946.0.16
+      '@types/geojson': 7946.0.10
 
   '@loaders.gl/shapefile@3.4.7':
     dependencies:
@@ -26095,11 +26060,11 @@ snapshots:
 
   '@math.gl/types@3.6.3': {}
 
-  '@mdx-js/react@3.1.0(@types/react@18.2.79)(react@18.2.0)':
+  '@mdx-js/react@3.1.0(@types/react@18.2.79)(react@17.0.2)':
     dependencies:
       '@types/mdx': 2.0.13
       '@types/react': 18.2.79
-      react: 18.2.0
+      react: 17.0.2
 
   '@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(supports-color@8.1.1)(zod@3.25.76)':
     dependencies:
@@ -26178,7 +26143,7 @@ snapshots:
 
   '@mswjs/http-middleware@0.10.1(msw@2.11.6(@types/node@24.10.13)(typescript@5.9.3))(supports-color@8.1.1)':
     dependencies:
-      express: 4.22.1(supports-color@8.1.1)
+      express: 4.22.0(supports-color@8.1.1)
       msw: 2.11.6(@types/node@24.10.13)(typescript@5.9.3)
       strict-event-emitter: 0.5.1
     transitivePeerDependencies:
@@ -26444,11 +26409,11 @@ snapshots:
 
   '@opentelemetry/api-logs@0.219.0':
     dependencies:
-      '@opentelemetry/api': 1.9.1
+      '@opentelemetry/api': 1.9.0
 
   '@opentelemetry/api-logs@0.220.0':
     dependencies:
-      '@opentelemetry/api': 1.9.1
+      '@opentelemetry/api': 1.9.0
 
   '@opentelemetry/api@1.9.0': {}
 
@@ -26458,7 +26423,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.9.0(@opentelemetry/api@1.9.0)
-      yaml: 2.9.0
+      yaml: 2.8.3
 
   '@opentelemetry/context-async-hooks@2.8.0(@opentelemetry/api@1.9.0)':
     dependencies:
@@ -26471,11 +26436,6 @@ snapshots:
   '@opentelemetry/core@2.10.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/semantic-conventions': 1.41.1
-
-  '@opentelemetry/core@2.10.0(@opentelemetry/api@1.9.1)':
-    dependencies:
-      '@opentelemetry/api': 1.9.1
       '@opentelemetry/semantic-conventions': 1.41.1
 
   '@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.0)':
@@ -27167,12 +27127,6 @@ snapshots:
       '@opentelemetry/core': 2.9.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources': 2.9.0(@opentelemetry/api@1.9.0)
 
-  '@opentelemetry/sdk-metrics@2.9.0(@opentelemetry/api@1.9.1)':
-    dependencies:
-      '@opentelemetry/api': 1.9.1
-      '@opentelemetry/core': 2.9.0(@opentelemetry/api@1.9.1)
-      '@opentelemetry/resources': 2.9.0(@opentelemetry/api@1.9.1)
-
   '@opentelemetry/sdk-node@0.220.0(@opentelemetry/api@1.9.0)(supports-color@8.1.1)':
     dependencies:
       '@opentelemetry/api': 1.9.0
@@ -27635,7 +27589,7 @@ snapshots:
     dependencies:
       '@slack/types': 2.11.0
       '@types/node': 24.10.13
-      axios: 1.20.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1)
+      axios: 1.19.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1)
     transitivePeerDependencies:
       - debug
       - supports-color
@@ -27705,7 +27659,7 @@ snapshots:
       '@types/semver': 7.7.1
       archy: 1.0.0
       jora: 1.0.0-beta.8
-      semver: 7.8.5
+      semver: 7.8.0
 
   '@statoscope/report-writer@5.28.1':
     dependencies:
@@ -27824,7 +27778,7 @@ snapshots:
       '@storybook/addon-highlight': 8.6.18(storybook@8.6.18(prettier@2.8.8)(supports-color@8.1.1))
       '@storybook/global': 5.0.0
       '@storybook/test': 8.6.18(storybook@8.6.18(prettier@2.8.8)(supports-color@8.1.1))
-      axe-core: 4.12.1
+      axe-core: 4.11.0
       storybook: 8.6.18(prettier@2.8.8)(supports-color@8.1.1)
 
   '@storybook/addon-actions@8.6.18(storybook@8.6.18(prettier@2.8.8)(supports-color@8.1.1))':
@@ -27852,12 +27806,12 @@ snapshots:
 
   '@storybook/addon-docs@8.6.18(@types/react@18.2.79)(storybook@8.6.18(prettier@2.8.8)(supports-color@8.1.1))':
     dependencies:
-      '@mdx-js/react': 3.1.0(@types/react@18.2.79)(react@18.2.0)
-      '@storybook/blocks': 8.6.18(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(storybook@8.6.18(prettier@2.8.8)(supports-color@8.1.1))
+      '@mdx-js/react': 3.1.0(@types/react@18.2.79)(react@17.0.2)
+      '@storybook/blocks': 8.6.18(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(storybook@8.6.18(prettier@2.8.8)(supports-color@8.1.1))
       '@storybook/csf-plugin': 8.6.18(storybook@8.6.18(prettier@2.8.8)(supports-color@8.1.1))
-      '@storybook/react-dom-shim': 8.6.18(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(storybook@8.6.18(prettier@2.8.8)(supports-color@8.1.1))
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
+      '@storybook/react-dom-shim': 8.6.18(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(storybook@8.6.18(prettier@2.8.8)(supports-color@8.1.1))
+      react: 17.0.2
+      react-dom: 17.0.2(react@17.0.2)
       storybook: 8.6.18(prettier@2.8.8)(supports-color@8.1.1)
       ts-dedent: 2.2.0
     transitivePeerDependencies:
@@ -27936,15 +27890,6 @@ snapshots:
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
 
-  '@storybook/blocks@8.6.18(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(storybook@8.6.18(prettier@2.8.8)(supports-color@8.1.1))':
-    dependencies:
-      '@storybook/icons': 1.3.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      storybook: 8.6.18(prettier@2.8.8)(supports-color@8.1.1)
-      ts-dedent: 2.2.0
-    optionalDependencies:
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-
   '@storybook/builder-webpack5@8.6.18(@swc/core@1.15.18)(esbuild@0.27.2)(storybook@8.6.18(prettier@2.8.8)(supports-color@8.1.1))(typescript@5.9.3)(uglify-js@3.19.3)(webpack-cli@5.1.4)':
     dependencies:
       '@storybook/core-webpack': 8.6.18(storybook@8.6.18(prettier@2.8.8)(supports-color@8.1.1))
@@ -27960,7 +27905,7 @@ snapshots:
       magic-string: 0.30.21
       path-browserify: 1.0.1
       process: 0.11.10
-      semver: 7.8.5
+      semver: 7.8.0
       storybook: 8.6.18(prettier@2.8.8)(supports-color@8.1.1)
       style-loader: 3.3.4(webpack@5.96.1)
       terser-webpack-plugin: 5.3.17(@swc/core@1.15.18)(esbuild@0.27.2)(uglify-js@3.19.3)(webpack@5.96.1)
@@ -28008,7 +27953,7 @@ snapshots:
       jsdoc-type-pratt-parser: 4.1.0
       process: 0.11.10
       recast: 0.23.19
-      semver: 7.8.5
+      semver: 7.8.0
       util: 0.12.5
       ws: 8.21.3
     optionalDependencies:
@@ -28031,11 +27976,6 @@ snapshots:
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
 
-  '@storybook/icons@1.3.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
-    dependencies:
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-
   '@storybook/instrumenter@8.6.18(storybook@8.6.18(prettier@2.8.8)(supports-color@8.1.1))':
     dependencies:
       '@storybook/global': 5.0.0
@@ -28057,8 +27997,8 @@ snapshots:
       react: 17.0.2
       react-docgen: 7.1.1(supports-color@8.1.1)
       react-dom: 17.0.2(react@17.0.2)
-      resolve: 1.22.11
-      semver: 7.8.5
+      resolve: 1.22.8
+      semver: 7.8.0
       storybook: 8.6.18(prettier@2.8.8)(supports-color@8.1.1)
       tsconfig-paths: 4.2.0
       webpack: 5.96.1(@swc/core@1.15.18)(esbuild@0.27.2)(uglify-js@3.19.3)(webpack-cli@5.1.4)
@@ -28094,12 +28034,6 @@ snapshots:
     dependencies:
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
-      storybook: 8.6.18(prettier@2.8.8)(supports-color@8.1.1)
-
-  '@storybook/react-dom-shim@8.6.18(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(storybook@8.6.18(prettier@2.8.8)(supports-color@8.1.1))':
-    dependencies:
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
       storybook: 8.6.18(prettier@2.8.8)(supports-color@8.1.1)
 
   '@storybook/react-webpack5@8.6.18(@storybook/test@8.6.18(storybook@8.6.18(prettier@2.8.8)(supports-color@8.1.1)))(@swc/core@1.15.18)(esbuild@0.27.2)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(storybook@8.6.18(prettier@2.8.8)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@5.9.3)(uglify-js@3.19.3)(webpack-cli@5.1.4)':
@@ -28540,19 +28474,15 @@ snapshots:
 
   '@types/d3-brush@3.0.1':
     dependencies:
-      '@types/d3-selection': 3.0.10
+      '@types/d3-selection': 3.0.2
 
   '@types/d3-color@2.0.1': {}
 
   '@types/d3-drag@3.0.7':
     dependencies:
-      '@types/d3-selection': 3.0.10
+      '@types/d3-selection': 3.0.2
 
   '@types/d3-interpolate@3.0.1':
-    dependencies:
-      '@types/d3-color': 2.0.1
-
-  '@types/d3-interpolate@3.0.4':
     dependencies:
       '@types/d3-color': 2.0.1
 
@@ -28574,16 +28504,16 @@ snapshots:
 
   '@types/d3-transition@3.0.1':
     dependencies:
-      '@types/d3-selection': 3.0.10
+      '@types/d3-selection': 3.0.2
 
   '@types/d3-transition@3.0.8':
     dependencies:
-      '@types/d3-selection': 3.0.10
+      '@types/d3-selection': 3.0.2
 
   '@types/d3-zoom@3.0.8':
     dependencies:
-      '@types/d3-interpolate': 3.0.4
-      '@types/d3-selection': 3.0.10
+      '@types/d3-interpolate': 3.0.1
+      '@types/d3-selection': 3.0.2
 
   '@types/d3@3.5.43': {}
 
@@ -28604,8 +28534,8 @@ snapshots:
 
   '@types/eslint-scope@3.7.7':
     dependencies:
-      '@types/eslint': 8.56.7
-      '@types/estree': 1.0.8
+      '@types/eslint': 8.44.2
+      '@types/estree': 1.0.9
 
   '@types/eslint@7.29.0':
     dependencies:
@@ -28616,13 +28546,6 @@ snapshots:
     dependencies:
       '@types/estree': 1.0.9
       '@types/json-schema': 7.0.15
-
-  '@types/eslint@8.56.7':
-    dependencies:
-      '@types/estree': 1.0.9
-      '@types/json-schema': 7.0.15
-
-  '@types/estree@1.0.8': {}
 
   '@types/estree@1.0.9': {}
 
@@ -28665,7 +28588,7 @@ snapshots:
 
   '@types/geojson-vt@3.2.5':
     dependencies:
-      '@types/geojson': 7946.0.16
+      '@types/geojson': 7946.0.10
 
   '@types/geojson@7946.0.10': {}
 
@@ -28680,7 +28603,7 @@ snapshots:
 
   '@types/glob@7.2.0':
     dependencies:
-      '@types/minimatch': 3.0.3
+      '@types/minimatch': 2.0.29
       '@types/node': 24.10.13
 
   '@types/graceful-fs@4.1.3':
@@ -28792,15 +28715,15 @@ snapshots:
 
   '@types/mapbox__vector-tile@1.3.0':
     dependencies:
-      '@types/geojson': 7946.0.16
+      '@types/geojson': 7946.0.10
       '@types/mapbox__point-geometry': 0.1.4
-      '@types/pbf': 3.0.5
+      '@types/pbf': 3.0.2
 
   '@types/mapbox__vector-tile@1.3.4':
     dependencies:
-      '@types/geojson': 7946.0.16
+      '@types/geojson': 7946.0.10
       '@types/mapbox__point-geometry': 0.1.4
-      '@types/pbf': 3.0.5
+      '@types/pbf': 3.0.2
 
   '@types/markdown-it@12.2.3':
     dependencies:
@@ -28834,8 +28757,6 @@ snapshots:
   '@types/mime@2.0.1': {}
 
   '@types/minimatch@2.0.29': {}
-
-  '@types/minimatch@3.0.3': {}
 
   '@types/minimist@1.2.5': {}
 
@@ -29019,7 +28940,7 @@ snapshots:
   '@types/react@18.2.79':
     dependencies:
       '@types/prop-types': 15.7.5
-      csstype: 3.2.3
+      csstype: 3.0.7
 
   '@types/readdir-glob@1.1.5':
     dependencies:
@@ -29061,7 +28982,7 @@ snapshots:
 
   '@types/serve-index@1.9.4':
     dependencies:
-      '@types/express': 4.17.25
+      '@types/express': 4.17.21
 
   '@types/serve-static@1.15.10':
     dependencies:
@@ -29107,7 +29028,7 @@ snapshots:
 
   '@types/supercluster@7.1.3':
     dependencies:
-      '@types/geojson': 7946.0.16
+      '@types/geojson': 7946.0.10
 
   '@types/supertest@7.2.0':
     dependencies:
@@ -29132,12 +29053,12 @@ snapshots:
 
   '@types/topojson-client@3.1.5':
     dependencies:
-      '@types/geojson': 7946.0.16
+      '@types/geojson': 7946.0.10
       '@types/topojson-specification': 1.0.1
 
   '@types/topojson-specification@1.0.1':
     dependencies:
-      '@types/geojson': 7946.0.16
+      '@types/geojson': 7946.0.10
 
   '@types/tough-cookie@4.0.5': {}
 
@@ -29288,15 +29209,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/project-service@8.53.1(supports-color@8.1.1)(typescript@5.9.3)':
-    dependencies:
-      '@typescript-eslint/tsconfig-utils': 8.53.1(typescript@5.9.3)
-      '@typescript-eslint/types': 8.53.1
-      debug: 4.4.3(supports-color@8.1.1)
-      typescript: 5.9.3
-    transitivePeerDependencies:
-      - supports-color
-
   '@typescript-eslint/scope-manager@8.46.3':
     dependencies:
       '@typescript-eslint/types': 8.46.3
@@ -29336,22 +29248,7 @@ snapshots:
       fast-glob: 3.3.3
       is-glob: 4.0.3
       minimatch: 9.0.9
-      semver: 7.8.5
-      ts-api-utils: 2.4.0(typescript@5.9.3)
-      typescript: 5.9.3
-    transitivePeerDependencies:
-      - supports-color
-
-  '@typescript-eslint/typescript-estree@8.53.1(supports-color@8.1.1)(typescript@5.9.3)':
-    dependencies:
-      '@typescript-eslint/project-service': 8.53.1(supports-color@8.1.1)(typescript@5.9.3)
-      '@typescript-eslint/tsconfig-utils': 8.53.1(typescript@5.9.3)
-      '@typescript-eslint/types': 8.53.1
-      '@typescript-eslint/visitor-keys': 8.53.1
-      debug: 4.4.3(supports-color@8.1.1)
-      minimatch: 9.0.9
-      semver: 7.8.5
-      tinyglobby: 0.2.15
+      semver: 7.8.0
       ts-api-utils: 2.4.0(typescript@5.9.3)
       typescript: 5.9.3
     transitivePeerDependencies:
@@ -29371,11 +29268,6 @@ snapshots:
   '@typescript-eslint/visitor-keys@8.46.3':
     dependencies:
       '@typescript-eslint/types': 8.46.3
-      eslint-visitor-keys: 4.2.1
-
-  '@typescript-eslint/visitor-keys@8.53.1':
-    dependencies:
-      '@typescript-eslint/types': 8.53.1
       eslint-visitor-keys: 4.2.1
 
   '@typescript/typescript-aix-ppc64@7.0.2':
@@ -30142,16 +30034,6 @@ snapshots:
       - debug
       - supports-color
 
-  axios@1.20.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1):
-    dependencies:
-      follow-redirects: 1.16.0(debug@4.4.3(supports-color@8.1.1))
-      form-data: 4.0.6
-      https-proxy-agent: 5.0.1(supports-color@8.1.1)
-      proxy-from-env: 2.1.0
-    transitivePeerDependencies:
-      - debug
-      - supports-color
-
   axobject-query@3.2.1:
     dependencies:
       dequal: 2.0.3
@@ -30208,7 +30090,7 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.29.7
       cosmiconfig: 7.1.0
-      resolve: 1.22.11
+      resolve: 1.22.8
 
   babel-plugin-polyfill-corejs2@0.4.17(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1):
     dependencies:
@@ -30529,7 +30411,7 @@ snapshots:
 
   browser-resolve@2.0.0:
     dependencies:
-      resolve: 1.22.11
+      resolve: 1.22.8
 
   browser-stdout@1.3.1: {}
 
@@ -30614,7 +30496,7 @@ snapshots:
 
   buildkite-test-collector@1.8.1(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1):
     dependencies:
-      axios: 1.20.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1)
+      axios: 1.19.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1)
       dotenv: 16.5.0
       request-spy: 0.0.10
       strip-ansi: 6.0.1
@@ -30863,7 +30745,7 @@ snapshots:
     dependencies:
       '@testim/chrome-version': 1.1.4
       adm-zip: 0.6.0
-      axios: 1.20.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1)
+      axios: 1.19.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1)
       compare-versions: 6.1.1
       proxy-agent: 8.0.2(supports-color@8.1.1)
       proxy-from-env: 2.1.0
@@ -31344,7 +31226,7 @@ snapshots:
       postcss-modules-scope: 3.2.0(postcss@8.5.26)
       postcss-modules-values: 4.0.0(postcss@8.5.26)
       postcss-value-parser: 4.2.0
-      semver: 7.8.5
+      semver: 7.8.0
     optionalDependencies:
       webpack: 5.96.1(@swc/core@1.15.18)(esbuild@0.27.2)(uglify-js@3.19.3)(webpack-cli@5.1.4)
 
@@ -31357,7 +31239,7 @@ snapshots:
       postcss-modules-scope: 3.2.0(postcss@8.5.26)
       postcss-modules-values: 4.0.0(postcss@8.5.26)
       postcss-value-parser: 4.2.0
-      semver: 7.8.5
+      semver: 7.8.0
     optionalDependencies:
       webpack: 5.96.1(@swc/core@1.15.18)(esbuild@0.27.2)(uglify-js@3.19.3)(webpack-cli@5.1.4)
 
@@ -31514,7 +31396,7 @@ snapshots:
       debug: 4.4.3(supports-color@8.1.1)
       lodash: 4.18.1
       mocha: 11.3.0
-      semver: 7.8.5
+      semver: 7.8.0
     transitivePeerDependencies:
       - supports-color
 
@@ -31645,12 +31527,12 @@ snapshots:
   d3-geo-projection@4.0.0:
     dependencies:
       commander: 7.2.0
-      d3-array: 3.2.4
+      d3-array: 2.12.1
       d3-geo: 3.1.1
 
   d3-geo@3.1.1:
     dependencies:
-      d3-array: 3.2.4
+      d3-array: 2.12.1
 
   d3-hierarchy@3.1.2: {}
 
@@ -31683,10 +31565,10 @@ snapshots:
 
   d3-scale@4.0.2:
     dependencies:
-      d3-array: 3.2.4
+      d3-array: 2.12.1
       d3-format: 3.1.0
       d3-interpolate: 3.0.1
-      d3-time: 3.1.0
+      d3-time: 2.1.1
       d3-time-format: 4.1.0
 
   d3-selection@3.0.0: {}
@@ -31705,7 +31587,7 @@ snapshots:
 
   d3-time-format@4.1.0:
     dependencies:
-      d3-time: 3.1.0
+      d3-time: 2.1.1
 
   d3-time@2.1.1:
     dependencies:
@@ -31713,7 +31595,7 @@ snapshots:
 
   d3-time@3.1.0:
     dependencies:
-      d3-array: 3.2.4
+      d3-array: 2.12.1
 
   d3-timer@3.0.1: {}
 
@@ -31969,7 +31851,7 @@ snapshots:
       minimist: 1.2.8
       pkg-up: 3.1.0
       read-package-json: 2.1.1
-      resolve: 1.22.11
+      resolve: 1.22.8
     transitivePeerDependencies:
       - supports-color
 
@@ -31992,7 +31874,7 @@ snapshots:
       prompts: 2.4.2
       rechoir: 0.8.0
       safe-regex: 2.1.1
-      semver: 7.8.5
+      semver: 7.8.0
       tsconfig-paths-webpack-plugin: 4.2.0
       watskeburt: 4.2.3
 
@@ -32066,7 +31948,7 @@ snapshots:
 
   detective-typescript@14.0.0(supports-color@8.1.1)(typescript@5.9.3):
     dependencies:
-      '@typescript-eslint/typescript-estree': 8.53.1(supports-color@8.1.1)(typescript@5.9.3)
+      '@typescript-eslint/typescript-estree': 8.46.3(supports-color@8.1.1)(typescript@5.9.3)
       ast-module-types: 6.0.1
       node-source-walk: 7.0.1
       typescript: 5.9.3
@@ -32261,9 +32143,9 @@ snapshots:
   elastic-apm-node@4.18.0(supports-color@8.1.1):
     dependencies:
       '@elastic/ecs-pino-format': 1.5.0
-      '@opentelemetry/api': 1.9.1
-      '@opentelemetry/core': 2.10.0(@opentelemetry/api@1.9.1)
-      '@opentelemetry/sdk-metrics': 2.9.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/api': 1.9.0
+      '@opentelemetry/core': 2.10.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/sdk-metrics': 2.9.0(@opentelemetry/api@1.9.0)
       after-all-results: 2.0.0
       agentkeepalive: 4.2.1(supports-color@8.1.1)
       async-value-promise: 1.1.1
@@ -32291,7 +32173,7 @@ snapshots:
       readable-stream: 3.6.2
       relative-microtime: 2.0.0
       require-in-the-middle: 8.0.1(supports-color@8.1.1)
-      semver: 7.8.5
+      semver: 7.8.0
       shallow-clone-shim: 2.0.0
       source-map: 0.8.0-beta.0
       sql-summary: 1.0.1
@@ -32587,7 +32469,7 @@ snapshots:
     dependencies:
       debug: 3.2.7(supports-color@8.1.1)
       is-core-module: 2.16.1
-      resolve: 1.22.11
+      resolve: 1.22.8
     transitivePeerDependencies:
       - supports-color
 
@@ -32614,7 +32496,7 @@ snapshots:
     dependencies:
       fd-package-json: 1.2.0
       module-replacements: 2.3.2
-      semver: 7.8.5
+      semver: 7.8.0
 
   eslint-plugin-es@3.0.0(eslint@8.57.0(supports-color@8.1.1)):
     dependencies:
@@ -32626,7 +32508,7 @@ snapshots:
     dependencies:
       '@formatjs/icu-messageformat-parser': 2.7.6
       '@formatjs/ts-transformer': 3.13.12
-      '@types/eslint': 8.56.7
+      '@types/eslint': 8.44.2
       '@types/picomatch': 2.3.0
       '@typescript-eslint/utils': 8.46.3(eslint@8.57.0(supports-color@8.1.1))(supports-color@8.1.1)(typescript@5.9.3)
       emoji-regex: 10.3.0
@@ -32658,7 +32540,7 @@ snapshots:
       object.fromentries: 2.0.6
       object.groupby: 1.0.0
       object.values: 1.1.6
-      resolve: 1.22.11
+      resolve: 1.22.8
       semver: 6.3.1
       tsconfig-paths: 3.14.2
     optionalDependencies:
@@ -32686,7 +32568,7 @@ snapshots:
       array-includes: 3.1.6
       array.prototype.flatmap: 1.3.1
       ast-types-flow: 0.0.7
-      axe-core: 4.12.1
+      axe-core: 4.11.0
       axobject-query: 3.2.1
       damerau-levenshtein: 1.0.8
       emoji-regex: 9.2.2
@@ -32716,7 +32598,7 @@ snapshots:
       eslint-utils: 2.1.0
       ignore: 5.3.2
       minimatch: 3.1.5
-      resolve: 1.22.11
+      resolve: 1.22.8
       semver: 6.3.1
 
   eslint-plugin-playwright@2.9.0(eslint@8.57.0(supports-color@8.1.1)):
@@ -32868,7 +32750,7 @@ snapshots:
 
   estree-walker@3.0.3:
     dependencies:
-      '@types/estree': 1.0.8
+      '@types/estree': 1.0.9
 
   esutils@2.0.2: {}
 
@@ -33368,7 +33250,7 @@ snapshots:
       minimatch: 3.1.5
       node-abort-controller: 3.1.1
       schema-utils: 3.3.0
-      semver: 7.8.5
+      semver: 7.8.0
       tapable: 2.3.0
       typescript: 5.9.3
       webpack: 5.96.1(@swc/core@1.15.18)(esbuild@0.27.2)(uglify-js@3.19.3)(webpack-cli@5.1.4)
@@ -33630,14 +33512,14 @@ snapshots:
     dependencies:
       foreground-child: 3.3.1
       jackspeak: 4.2.3
-      minimatch: 10.2.5
+      minimatch: 10.2.4
       minipass: 7.1.3
       package-json-from-dist: 1.0.0
       path-scurry: 2.0.2
 
   glob@13.0.6:
     dependencies:
-      minimatch: 10.2.5
+      minimatch: 10.2.4
       minipass: 7.1.3
       path-scurry: 2.0.2
 
@@ -34684,7 +34566,7 @@ snapshots:
       '@babel/parser': 7.29.8
       '@istanbuljs/schema': 0.1.3
       istanbul-lib-coverage: 3.2.0
-      semver: 7.8.5
+      semver: 7.8.0
     transitivePeerDependencies:
       - supports-color
 
@@ -34932,7 +34814,7 @@ snapshots:
       jest-pnp-resolver: 1.2.2(jest-resolve@29.7.0)
       jest-util: 29.7.0
       jest-validate: 29.7.0
-      resolve: 1.22.11
+      resolve: 1.22.8
       resolve.exports: 2.0.2
       slash: 3.0.0
 
@@ -35010,7 +34892,7 @@ snapshots:
       jest-util: 29.7.0
       natural-compare: 1.4.0
       pretty-format: 29.7.0
-      semver: 7.8.5
+      semver: 7.8.0
     transitivePeerDependencies:
       - supports-color
 
@@ -35257,7 +35139,7 @@ snapshots:
       lodash.isstring: 4.0.1
       lodash.once: 4.1.1
       ms: 2.1.3
-      semver: 7.8.5
+      semver: 7.8.0
 
   jsprim@2.0.2:
     dependencies:
@@ -36086,10 +35968,6 @@ snapshots:
     dependencies:
       brace-expansion: 5.0.9
 
-  minimatch@10.2.5:
-    dependencies:
-      brace-expansion: 5.0.9
-
   minimatch@3.1.5:
     dependencies:
       brace-expansion: 1.1.18
@@ -36272,7 +36150,7 @@ snapshots:
       vscode-languageserver-textdocument: 1.0.7
       vscode-languageserver-types: 3.17.5
       vscode-uri: 3.0.8
-      yaml: 2.9.0
+      yaml: 2.8.3
 
   monitor-event-loop-delay@1.0.0: {}
 
@@ -36512,15 +36390,15 @@ snapshots:
   normalize-package-data@2.5.0:
     dependencies:
       hosted-git-info: 2.8.9
-      resolve: 1.22.11
+      resolve: 1.22.8
       semver: 5.7.2
       validate-npm-package-license: 3.0.1
 
   normalize-package-data@3.0.0:
     dependencies:
       hosted-git-info: 3.0.8
-      resolve: 1.22.11
-      semver: 7.8.5
+      resolve: 1.22.8
+      semver: 7.8.0
       validate-npm-package-license: 3.0.1
 
   normalize-path@3.0.0: {}
@@ -37220,7 +37098,7 @@ snapshots:
   postcss-load-config@5.1.0(jiti@2.5.1)(postcss@8.5.26)(tsx@4.21.0):
     dependencies:
       lilconfig: 3.1.3
-      yaml: 2.9.0
+      yaml: 2.8.3
     optionalDependencies:
       jiti: 2.5.1
       postcss: 8.5.26
@@ -37231,7 +37109,7 @@ snapshots:
       cosmiconfig: 9.0.0(typescript@5.9.3)
       jiti: 2.5.1
       postcss: 8.5.26
-      semver: 7.8.5
+      semver: 7.8.0
     optionalDependencies:
       webpack: 5.96.1(@swc/core@1.15.18)(esbuild@0.27.2)(uglify-js@3.19.3)(webpack-cli@5.1.4)
     transitivePeerDependencies:
@@ -37752,7 +37630,7 @@ snapshots:
       '@types/doctrine': 0.0.9
       '@types/resolve': 1.20.6
       doctrine: 3.0.0
-      resolve: 1.22.11
+      resolve: 1.22.8
       strip-indent: 4.0.0
     transitivePeerDependencies:
       - supports-color
@@ -37768,12 +37646,6 @@ snapshots:
     dependencies:
       loose-envify: 1.4.0
       react: 17.0.2
-      scheduler: 0.23.2
-
-  react-dom@18.2.0(react@18.2.0):
-    dependencies:
-      loose-envify: 1.4.0
-      react: 18.2.0
       scheduler: 0.23.2
 
   react-dropzone@11.7.1(react@17.0.2):
@@ -38218,7 +38090,7 @@ snapshots:
 
   rechoir@0.8.0:
     dependencies:
-      resolve: 1.22.11
+      resolve: 1.22.8
 
   redent@3.0.0:
     dependencies:
@@ -38449,7 +38321,7 @@ snapshots:
     dependencies:
       debug: 4.4.3(supports-color@8.1.1)
       module-details-from-path: 1.0.4
-      resolve: 1.22.11
+      resolve: 1.22.8
     transitivePeerDependencies:
       - supports-color
 
@@ -38748,7 +38620,7 @@ snapshots:
       loader-utils: 2.0.4
       neo-async: 2.6.2
       schema-utils: 3.3.0
-      semver: 7.8.5
+      semver: 7.8.0
       webpack: 5.96.1(@swc/core@1.15.18)(esbuild@0.27.2)(uglify-js@3.19.3)(webpack-cli@5.1.4)
 
   sass-lookup@6.1.1:
@@ -39125,7 +38997,7 @@ snapshots:
       detect-newline: 4.0.1
       git-hooks-list: 4.1.1
       is-plain-obj: 4.1.0
-      semver: 7.8.5
+      semver: 7.8.0
       sort-object-keys: 1.1.3
       tinyglobby: 0.2.15
 
@@ -40437,7 +40309,7 @@ snapshots:
 
   vega-expression@6.1.0:
     dependencies:
-      '@types/estree': 1.0.8
+      '@types/estree': 1.0.9
       vega-util: 2.1.0
 
   vega-force@5.1.0:
@@ -40741,7 +40613,7 @@ snapshots:
     dependencies:
       '@mapbox/point-geometry': 0.1.0
       '@mapbox/vector-tile': 1.3.1
-      pbf: 3.3.0
+      pbf: 3.2.1
 
   w3c-xmlserializer@3.0.0:
     dependencies:
@@ -40924,7 +40796,7 @@ snapshots:
   webpack@5.96.1(@swc/core@1.15.18)(esbuild@0.27.2)(uglify-js@3.19.3)(webpack-cli@5.1.4):
     dependencies:
       '@types/eslint-scope': 3.7.7
-      '@types/estree': 1.0.8
+      '@types/estree': 1.0.9
       '@webassemblyjs/ast': 1.12.1
       '@webassemblyjs/wasm-edit': 1.12.1
       '@webassemblyjs/wasm-parser': 1.12.1
