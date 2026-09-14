@@ -45,7 +45,7 @@ import {
   createRound,
 } from '../../test_utils';
 import { pausedAndResumedRoundTimeline } from '../../test_utils/timeline';
-import { withConverseSpan } from '../../tracing';
+import { loadTracingPrivacySettings, withConverseSpan } from '../../tracing';
 import { executeAgent$, generateTitle, resolveServices } from './utils';
 import type { Span } from '@opentelemetry/api';
 
@@ -95,6 +95,9 @@ jest.mock('../../tracing', () => {
 const executeAgentMock = executeAgent$ as jest.MockedFunction<typeof executeAgent$>;
 const resolveServicesMock = resolveServices as jest.MockedFunction<typeof resolveServices>;
 const withConverseSpanMock = withConverseSpan as jest.MockedFunction<typeof withConverseSpan>;
+const loadTracingPrivacySettingsMock = loadTracingPrivacySettings as jest.MockedFunction<
+  typeof loadTracingPrivacySettings
+>;
 const generateTitleMock = generateTitle as jest.MockedFunction<typeof generateTitle>;
 
 const createModelProviderMock = () => ({
@@ -217,6 +220,82 @@ describe('handleAgentExecution', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     generateTitleMock.mockReturnValue(of('Generated title'));
+  });
+
+  it('loads tracing privacy settings from the request-scoped saved objects client', async () => {
+    const conversation = createEmptyConversation({
+      id: 'conversation-1',
+      agent_id: 'test-agent',
+      user: { id: 'owner-id', username: 'owner' },
+    });
+    const conversationClient = createConversationClientMock();
+    conversationClient.get.mockResolvedValue(conversation);
+    conversationClient.update.mockResolvedValue(conversation);
+    conversationClient.upsertRound.mockResolvedValue(conversation);
+    stubResolveServices(conversationClient);
+    executeAgentMock.mockReturnValue(
+      of({
+        type: ChatEventType.roundComplete,
+        data: { round: createRound({}) },
+      } as RoundCompleteEvent)
+    );
+
+    const request = { headers: {} } as never;
+    const soClient = { id: 'so-marketing' };
+    const uiSettingsClient = { id: 'ui-marketing' };
+    const privacySettings = {
+      enabled: true,
+      includeUserPrompts: false,
+      includeLlmResponses: false,
+      includeToolDetails: false,
+      includeSystemPrompt: false,
+      includeRealNames: false,
+      includeRealIds: false,
+      includeUserData: false,
+    };
+    loadTracingPrivacySettingsMock.mockResolvedValue(privacySettings);
+
+    const deps = createDeps({ conversationClient });
+    const getScopedClient = jest.fn().mockReturnValue(soClient);
+    const asScopedToClient = jest.fn().mockReturnValue(uiSettingsClient);
+    (deps as { savedObjects: { getScopedClient: jest.Mock } }).savedObjects.getScopedClient =
+      getScopedClient;
+    (deps as { uiSettings: { asScopedToClient: jest.Mock } }).uiSettings.asScopedToClient =
+      asScopedToClient;
+    (deps as { spaces: { spacesService: { getSpaceId: jest.Mock } } }).spaces = {
+      spacesService: { getSpaceId: jest.fn().mockReturnValue('marketing') },
+    };
+
+    const events$ = await handleAgentExecution({
+      execution: {
+        executionId: 'execution-1',
+        executionMode: AgentExecutionMode.conversation,
+        agentParams: {
+          agentId: 'test-agent',
+          conversationId: 'conversation-1',
+          nextInput: { message: 'Hello' },
+        },
+      } as never,
+      deps,
+      request,
+      abortSignal: new AbortController().signal,
+    });
+    await lastValueFrom(events$.pipe(toArray()));
+
+    expect(getScopedClient).toHaveBeenCalledWith(request);
+    expect(asScopedToClient).toHaveBeenCalledWith(soClient);
+    expect(loadTracingPrivacySettingsMock).toHaveBeenCalledWith({
+      uiSettingsClient,
+      logger: deps.logger,
+      spaceId: 'marketing',
+    });
+    expect(withConverseSpanMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        spaceId: 'marketing',
+        privacySettings,
+      }),
+      expect.any(Function)
+    );
   });
 
   it('reports metering with the resolved conversation id when continuing by origin', async () => {

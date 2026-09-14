@@ -33,6 +33,7 @@ describe('loadTracingPrivacySettings', () => {
     const settings = await loadTracingPrivacySettings({
       uiSettingsClient: uiSettingsClient as never,
       logger,
+      spaceId: 'default',
     });
 
     expect(settings).toEqual({
@@ -71,11 +72,14 @@ describe('loadTracingPrivacySettings', () => {
     const settings = await loadTracingPrivacySettings({
       uiSettingsClient: uiSettingsClient as never,
       logger,
+      spaceId: 'marketing',
     });
 
     expect(settings).toEqual(DISABLED_TRACING_SETTINGS);
     expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to fetch Agent Builder tracing settings')
+      expect.stringContaining(
+        'Failed to fetch Agent Builder tracing settings for space [marketing]'
+      )
     );
   });
 });

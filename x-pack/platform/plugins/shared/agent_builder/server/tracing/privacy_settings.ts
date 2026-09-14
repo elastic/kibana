@@ -47,9 +47,11 @@ export const DISABLED_TRACING_SETTINGS: TracingPrivacySettings = {
 export const loadTracingPrivacySettings = async ({
   uiSettingsClient,
   logger,
+  spaceId,
 }: {
   uiSettingsClient: IUiSettingsClient;
   logger: Logger;
+  spaceId: string;
 }): Promise<TracingPrivacySettings> => {
   try {
     const [
@@ -83,7 +85,9 @@ export const loadTracingPrivacySettings = async ({
       includeUserData,
     };
   } catch (error) {
-    logger.error(`Failed to fetch Agent Builder tracing settings: ${error.message}`);
+    logger.error(
+      `Failed to fetch Agent Builder tracing settings for space [${spaceId}]: ${error.message}`
+    );
     return DISABLED_TRACING_SETTINGS;
   }
 };

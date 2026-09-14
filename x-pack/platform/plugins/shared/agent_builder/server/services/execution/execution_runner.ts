@@ -318,6 +318,7 @@ const handleConversationExecution = async ({
   const privacySettings = await loadTracingPrivacySettings({
     uiSettingsClient: deps.uiSettings.asScopedToClient(deps.savedObjects.getScopedClient(request)),
     logger,
+    spaceId,
   });
 
   return withConverseSpan(
