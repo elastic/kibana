@@ -84,7 +84,6 @@ const GRID_COLUMNS: EuiDataGridColumn[] = [
     id: 'entity.lifecycle.first_seen',
     displayAsText: 'First seen',
     initialWidth: 180,
-    isSortable: false,
   },
   { id: '@timestamp', displayAsText: 'Last seen', initialWidth: 180 },
 ];
@@ -92,7 +91,7 @@ const GRID_COLUMNS: EuiDataGridColumn[] = [
 interface EntityGridResponse {
   entities: Array<Record<string, unknown>>;
   next_cursor: string | null;
-  total: number;
+  total: number | null;
 }
 
 const pageWrapperOverride = css`
@@ -143,7 +142,7 @@ const useEntityGridData = ({
     },
     {
       onSuccess: (result) => {
-        setCachedTotal(result.total);
+        if (result.total != null) setCachedTotal(result.total);
         if (result.next_cursor && !cursors[pageIndex + 1]) {
           onNextCursor(pageIndex + 1, result.next_cursor);
         }
@@ -155,6 +154,8 @@ const useEntityGridData = ({
     rows: data?.entities ?? [],
     total: cachedTotal,
     isFetching,
+    // True once the current page has loaded and there is no further page.
+    isLastPage: data != null && data.next_cursor == null,
   };
 };
 
@@ -204,16 +205,23 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   const [pageSize, setPageSize] = useState(25);
   // cursors[i] is the cursor to pass when loading page i; cursors[0] is always null (first page)
   const [cursors, setCursors] = useState<Array<string | null>>([null]);
+  // When the user jumps to a page beyond what we've loaded, we chain fetches to reach it.
+  const [targetPageIndex, setTargetPageIndex] = useState<number | null>(null);
 
   const resetPagination = useCallback(() => {
     setPageIndex(0);
     setCursors([null]);
+    setTargetPageIndex(null);
   }, []);
+
+  // Serialize esFilter so the effect only fires when the filter content actually changes,
+  // not on every render due to unstable object references from buildEsQuery/dataView.
+  const esFilterJson = useMemo(() => JSON.stringify(esFilter), [esFilter]);
 
   // Reset pagination when the search filter changes.
   useEffect(() => {
     resetPagination();
-  }, [esFilter, resetPagination]);
+  }, [esFilterJson, resetPagination]);
 
   const onNextCursor = useCallback((idx: number, cursor: string) => {
     setCursors((prev) => {
@@ -223,7 +231,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     });
   }, []);
 
-  const { rows, total, isFetching } = useEntityGridData({
+  const { rows, total, isFetching, isLastPage } = useEntityGridData({
     sortField,
     sortDirection,
     pageIndex,
@@ -232,6 +240,20 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     onNextCursor,
     filter: esFilter,
   });
+
+  // Chain-fetch forward when the user jumped to a page beyond what's been loaded.
+  // Each time a new cursor lands (cursors grows), advance one page toward the target.
+  useEffect(() => {
+    if (targetPageIndex == null) return;
+    if (pageIndex >= targetPageIndex || isLastPage) {
+      setTargetPageIndex(null);
+      return;
+    }
+    const nextPage = pageIndex + 1;
+    if (cursors[nextPage] != null) {
+      setPageIndex(nextPage);
+    }
+  }, [cursors, pageIndex, targetPageIndex, isLastPage]);
 
   const [visibleColumns, setVisibleColumns] = useState(GRID_COLUMNS.map((c) => c.id));
 
@@ -348,13 +370,24 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       pageIndex,
       pageSize,
       pageSizeOptions: PAGE_SIZE_OPTIONS,
-      onChangePage: (newPage: number) => setPageIndex(newPage),
+      onChangePage: (newPage: number) => {
+        if (cursors[newPage] !== undefined) {
+          // Cursor already available — navigate directly (covers backward jumps and next-page).
+          setTargetPageIndex(null);
+          setPageIndex(newPage);
+        } else {
+          // Cursor not yet fetched — chain-fetch toward the target starting from the furthest
+          // page we have a cursor for. The useEffect above advances one page per cursor received.
+          setTargetPageIndex(newPage);
+          setPageIndex(cursors.length - 1);
+        }
+      },
       onChangeItemsPerPage: (newSize: number) => {
         setPageSize(newSize);
         resetPagination();
       },
     }),
-    [pageIndex, pageSize, resetPagination]
+    [pageIndex, pageSize, cursors, resetPagination]
   );
 
   const menu = useMemo<AppHeaderMenu>(
