@@ -48,8 +48,7 @@ export const getDateHistogramSerializedFormat: GetSerializedFormatFn<
     }
   }
 
-  const rangeMs =
-    new Date(dateRange.toDate).getTime() - new Date(dateRange.fromDate).getTime();
+  const rangeMs = new Date(dateRange.toDate).getTime() - new Date(dateRange.fromDate).getTime();
   if (rangeMs > 24 * 60 * 60 * 1000 && /[Hh]/.test(pattern) && !/D/.test(pattern)) {
     pattern = `YYYY-MM-DD ${pattern}`;
   }
