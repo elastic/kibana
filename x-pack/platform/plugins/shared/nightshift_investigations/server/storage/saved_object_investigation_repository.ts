@@ -192,6 +192,8 @@ export class SavedObjectInvestigationRepository implements InvestigationReposito
     const result = await this.savedObjectsClient.find<Pick<InvestigationAttributes, 'impact'>>({
       type: NIGHTSHIFT_INVESTIGATION_SO_TYPE,
       filter: buildBaseInvestigationFilter(query),
+      sortField: 'created_at',
+      sortOrder: 'desc',
       perPage: 1000,
       fields: ['impact'],
     });

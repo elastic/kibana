@@ -457,6 +457,8 @@ describe('SavedObjectInvestigationRepository', () => {
           ` AND ${TYPE}.attributes.started_at <= "2024-01-30T00:00:00Z"` +
           ` AND ${TYPE}.attributes.completed_at >= "2024-01-03T00:00:00Z"` +
           ` AND ${TYPE}.attributes.completed_at <= "2024-01-29T00:00:00Z"`,
+        sortField: 'created_at',
+        sortOrder: 'desc',
         perPage: 1_000,
         fields: ['impact'],
       });
@@ -476,6 +478,8 @@ describe('SavedObjectInvestigationRepository', () => {
       expect(savedObjectsClient.find).toHaveBeenCalledWith({
         type: TYPE,
         filter: undefined,
+        sortField: 'created_at',
+        sortOrder: 'desc',
         perPage: 1_000,
         fields: ['impact'],
       });
