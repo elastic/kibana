@@ -183,17 +183,6 @@ export const ParamsList = () => {
     );
   };
 
-  const renderToolRight = () => {
-    return [
-      <AddParamFlyout
-        isEditingItem={isEditingItem}
-        setIsEditingItem={setIsEditingItem}
-        items={items}
-        key="add-param-flyout"
-      />,
-    ];
-  };
-
   const [query, setQuery] = useState('');
   const [debouncedValue, setDebouncedValue] = useState('');
 
@@ -257,7 +246,6 @@ export const ParamsList = () => {
         search={{
           onChange: ({ query: queryText }) => setQuery(queryText?.text ?? ''),
           toolsLeft: renderToolsLeft(),
-          toolsRight: renderToolRight(),
           box: {
             incremental: true,
             'data-test-subj': 'syntheticsParamsSearchInput',
@@ -277,6 +265,11 @@ export const ParamsList = () => {
           ],
         }}
         noItemsMessage={isLoading ? LOADING_TEXT : undefined}
+      />
+      <AddParamFlyout
+        isEditingItem={isEditingItem}
+        setIsEditingItem={setIsEditingItem}
+        items={items}
       />
       {isDeleteModalVisible && deleteParam && (
         <DeleteParam items={deleteParam} setIsDeleteModalVisible={setIsDeleteModalVisible} />

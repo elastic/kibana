@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { Redirect, useParams } from 'react-router-dom';
 import { EuiPanel } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { PLUGIN } from '../../../../../common/constants/plugin';
 import type { ClientPluginsStart } from '../../../../plugin';
 import { SyntheticsPage } from '../common/app_header';
+import {
+  SettingsHeaderActionProvider,
+  type SettingsHeaderPrimaryAction,
+} from './settings_header_action';
 import { AlertDefaultsForm } from './alerting_defaults/alert_defaults_form';
 import { ProjectAPIKeys } from './project_api_keys/project_api_keys';
 import type { SettingsTabId } from './page_header';
@@ -35,6 +39,10 @@ export const SettingsPage = () => {
   const settingsTabs = useSettingsAppHeaderTabs(
     application.getUrlForApp(PLUGIN.SYNTHETICS_PLUGIN_ID)
   );
+  const [primaryActionItem, setPrimaryActionItem] = useState<SettingsHeaderPrimaryAction>();
+  const registerPrimaryAction = useCallback((item: SettingsHeaderPrimaryAction) => {
+    setPrimaryActionItem(item);
+  }, []);
 
   const renderTab = () => {
     switch (tabId) {
@@ -70,14 +78,16 @@ export const SettingsPage = () => {
   };
 
   return (
-    <SyntheticsPage
-      title={SETTINGS_PAGE_TITLE}
-      tabs={settingsTabs}
-      description={getSettingsAppHeaderDescription(tabId)}
-      menu={{ showSettings: false, showDiagnostics: true }}
-      paddingSize="m"
-    >
-      <div>{renderTab()}</div>
-    </SyntheticsPage>
+    <SettingsHeaderActionProvider register={registerPrimaryAction}>
+      <SyntheticsPage
+        title={SETTINGS_PAGE_TITLE}
+        tabs={settingsTabs}
+        description={getSettingsAppHeaderDescription(tabId)}
+        menu={{ showSettings: false, showDiagnostics: true, primaryActionItem }}
+        paddingSize="m"
+      >
+        <div>{renderTab()}</div>
+      </SyntheticsPage>
+    </SettingsHeaderActionProvider>
   );
 };
