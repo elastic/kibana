@@ -37,6 +37,7 @@ import { initializeTimesliceManager } from './timeslice_manager';
 import { initializeTrackContentfulRender } from './track_contentful_render';
 import { initializeTrackOverlay } from './track_overlay';
 import { initializeTrackPanel } from './track_panel';
+import type { DashboardRedirect } from '../dashboard_app/types';
 import type {
   DashboardApi,
   DashboardCreationOptions,
@@ -266,7 +267,7 @@ export function getDashboardApi({
       attributes: getState(),
     }),
     setState,
-    runInteractiveSave: async () => {
+    runInteractiveSave: (redirectTo?: DashboardRedirect) => {
       trackOverlayApi.clearOverlays();
       const previousDashboardId = savedObjectId$.value;
 
@@ -277,7 +278,11 @@ export function getDashboardApi({
         project_routing_restore: projectRoutingRestore,
         title,
       } = settingsManager.api.getSettings();
-      const saveResult = await openSaveModal({
+
+      let resolve: ((results: { id: string } | undefined) => void) | undefined;
+      const promise = new Promise<{ id: string } | undefined>((_resolve) => (resolve = _resolve));
+
+      openSaveModal({
         description,
         isManaged,
         lastSavedId: savedObjectId$.value,
@@ -285,35 +290,44 @@ export function getDashboardApi({
         setTimeRestore: (newTimeRestore: boolean) =>
           settingsManager.api.setSettings({ time_restore: newTimeRestore }),
         setProjectRoutingRestore: (newProjectRoutingRestore: boolean) =>
-          settingsManager.api.setSettings({ project_routing_restore: newProjectRoutingRestore }),
+          settingsManager.api.setSettings({
+            project_routing_restore: newProjectRoutingRestore,
+          }),
         tags,
         timeRestore,
         projectRoutingRestore,
         title,
         viewMode: viewModeManager.api.viewMode$.value,
         accessControl: accessControlManager.api.accessControl$.value,
+        onSave: ({ id, redirectRequired, savedState }) => {
+          const settings = settingsManager.api.getSettings();
+          settingsManager.api.setSettings({
+            ...settings,
+            hide_panel_titles: settings.hide_panel_titles ?? false,
+            description: savedState.description,
+            tags: savedState.tags,
+            title: savedState.title,
+          });
+          savedObjectId$.next(id);
+          onSave$.next({
+            previousDashboardId,
+            dashboardId: id,
+            dashboardState: getState(),
+          });
+          if (redirectTo && redirectRequired) {
+            redirectTo({
+              id,
+              editMode: true,
+              useReplace: true,
+              destination: 'dashboard',
+            });
+          }
+          resolve?.({ id });
+        },
+        onClose: () => resolve?.(undefined),
       });
 
-      if (!saveResult || saveResult.error) {
-        return;
-      }
-
-      const settings = settingsManager.api.getSettings();
-      settingsManager.api.setSettings({
-        ...settings,
-        hide_panel_titles: settings.hide_panel_titles ?? false,
-        description: saveResult.savedState.description,
-        tags: saveResult.savedState.tags,
-        title: saveResult.savedState.title,
-      });
-      savedObjectId$.next(saveResult.id);
-      onSave$.next({
-        previousDashboardId,
-        dashboardId: saveResult.id,
-        dashboardState: getState(),
-      });
-
-      return saveResult;
+      return promise;
     },
     runQuickSave: async () => {
       if (isManaged) return;
@@ -326,7 +340,7 @@ export function getDashboardApi({
         accessMode: accessControlManager.api.accessControl$.value?.accessMode,
       });
 
-      if (saveResult?.error) return;
+      if ('error' in saveResult) return;
       onSave$.next({
         previousDashboardId,
         dashboardId: saveResult?.id ?? previousDashboardId,

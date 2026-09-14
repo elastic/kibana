@@ -56,6 +56,7 @@ import type { SignificantEventsAlertingContext } from './lib/significant_events/
 import { EbtTelemetryService } from './lib/telemetry/ebt';
 import { significantEventsRouteRepository } from './routes';
 import type { GetScopedClients, RouteHandlerScopedClients } from './routes/types';
+import { createPriceService } from './lib/cost/price_service';
 import type {
   SignificantEventsPluginSetupDependencies,
   SignificantEventsPluginStartDependencies,
@@ -382,6 +383,17 @@ export class SignificantEventsPlugin
       getScopedClients: this.getScopedClients,
     });
 
+    const priceService = createPriceService({
+      fetchFn: fetch,
+      getNow: () => new Date(),
+      logger: this.logger.get('cost'),
+      timeoutMs: 10_000,
+      cacheTtlMs: 6 * 60 * 60 * 1000,
+      maxBodyBytes: 4 * 1024 * 1024,
+      maxScopedRows: 10_000,
+      baseUrl: plugins.cloud?.baseUrl ?? 'https://cloud.elastic.co',
+    });
+
     registerRoutes({
       repository: significantEventsRouteRepository,
       dependencies: {
@@ -394,6 +406,7 @@ export class SignificantEventsPlugin
         significantEventsScheduledWorkflowsService,
         workflowClients,
         maintenanceService: this.maintenanceService,
+        priceService,
         getSpaceId: async (request: KibanaRequest) => {
           const [, pluginsStart] = await core.getStartServices();
           return pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
