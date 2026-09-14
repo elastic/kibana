@@ -25,6 +25,7 @@ import { BaseDataGenerator } from './base_data_generator';
 import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
   GLOBAL_ARTIFACT_TAG,
+  DISABLED_ARTIFACT_TAG,
   CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
 } from '../service/artifacts/constants';
 import { ENDPOINT_EVENTS_LOG_INDEX_FIELDS } from './common/alerts_ecs_fields';
@@ -505,7 +506,7 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
       this.generateYaraRuleText(osMeta)
     ).join('\n\n');
 
-    return this.generate({
+    const item = this.generate({
       name: `YARA Signature ${this.randomString(5)}`,
       list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
       item_id: `generator_endpoint_yara_signature_${this.seededUUIDv4()}`,
@@ -520,6 +521,12 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
       ...overrides,
       os_types: osTypes as ExceptionListItemSchema['os_types'],
     });
+
+    if (this.randomBoolean(1 / 3) && !item.tags.includes(DISABLED_ARTIFACT_TAG)) {
+      item.tags = [...item.tags, DISABLED_ARTIFACT_TAG];
+    }
+
+    return item;
   }
 
   generateCustomYaraSignatureForCreate(
