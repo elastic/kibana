@@ -98,8 +98,7 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
     });
 
     await test.step('location cannot be deleted with assigned monitor', async () => {
-      await page.testSubj.click('settings-page-link');
-      await pageObjects.syntheticsApp.navigateToSettingsTab('Private Locations');
+      await pageObjects.syntheticsApp.navigateToPrivateLocations();
       await expect(page.locator(`td:has-text("${NEW_LOCATION_LABEL}")`)).toBeVisible();
       const deleteLocationButton = page.testSubj.locator('action-delete');
       await expect(deleteLocationButton).toBeDisabled();

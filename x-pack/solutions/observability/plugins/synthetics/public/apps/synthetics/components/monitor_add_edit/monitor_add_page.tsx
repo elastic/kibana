@@ -59,7 +59,8 @@ export const MonitorAddPage = () => {
     error: locationsError,
   } = useSelector(selectServiceLocationsState);
 
-  if (locationsLoaded && locations.length === 0) {
+  // `locationsLoaded` is set when the request starts, not when it finishes.
+  if (locationsLoaded && !locationsLoading && !locationsError && locations.length === 0) {
     return <Redirect to={{ pathname: GETTING_STARTED_ROUTE, search }} />;
   }
 

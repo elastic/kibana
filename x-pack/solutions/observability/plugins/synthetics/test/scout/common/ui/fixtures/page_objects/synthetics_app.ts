@@ -38,6 +38,10 @@ export class SyntheticsAppPage {
     await this.page.testSubj.waitForSelector('createConnectorButton');
   }
 
+  async navigateToPrivateLocations() {
+    await this.page.goto(this.kbnUrl.get('/app/synthetics/settings/private-locations'));
+  }
+
   async navigateToParamsSettings() {
     await this.page.goto(this.kbnUrl.get('/app/synthetics/settings/params'));
     await this.page.testSubj.waitForSelector('syntheticsParamsTable-loaded');
