@@ -69,8 +69,7 @@ function shouldCloseByPush(
 const changeAlertsStatusToClose = async (
   caseId: string,
   caseService: CasesClientArgs['services']['caseService'],
-  alertsService: CasesClientArgs['services']['alertsService'],
-  isCasesAttachmentsEnabled: boolean
+  alertsService: CasesClientArgs['services']['alertsService']
 ) => {
   const legacyAlertFilter = nodeBuilder.is(
     `${CASE_COMMENT_SAVED_OBJECT}.attributes.type`,
@@ -95,7 +94,6 @@ const changeAlertsStatusToClose = async (
     options: {
       filter: alertFilter,
     },
-    mode: isCasesAttachmentsEnabled ? 'unified' : 'legacy',
   });
 
   const alerts = alertAttachments.saved_objects
@@ -155,10 +153,7 @@ export const push = async (
     spaceId,
     publicBaseUrl,
     usageCounter,
-    config,
   } = clientArgs;
-
-  const isCasesAttachmentsEnabled = config.attachments?.enabled === true;
 
   try {
     /* Start of push to external service */
@@ -316,12 +311,7 @@ export const push = async (
       });
 
       if (myCase.attributes.settings.syncAlerts) {
-        await changeAlertsStatusToClose(
-          myCase.id,
-          caseService,
-          alertsService,
-          isCasesAttachmentsEnabled
-        );
+        await changeAlertsStatusToClose(myCase.id, caseService, alertsService);
       }
     }
 

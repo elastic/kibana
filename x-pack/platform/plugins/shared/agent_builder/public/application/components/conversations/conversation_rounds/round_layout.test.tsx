@@ -148,8 +148,6 @@ describe('RoundLayout', () => {
       removeError: jest.fn(),
       resumeRound: jest.fn(),
       isResuming: false,
-      regenerate: jest.fn(),
-      isRegenerating: false,
     } as ReturnType<typeof useConversationStream>);
   });
 
@@ -375,8 +373,6 @@ describe('RoundLayout', () => {
       removeError: jest.fn(),
       resumeRound: jest.fn(),
       isResuming: false,
-      regenerate: jest.fn(),
-      isRegenerating: false,
     } as ReturnType<typeof useConversationStream>);
 
     const round = createRound(1);

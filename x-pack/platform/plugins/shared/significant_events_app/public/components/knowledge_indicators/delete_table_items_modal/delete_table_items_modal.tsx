@@ -23,7 +23,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';
-import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import { upperFirst } from 'lodash';
 import React, { useMemo } from 'react';
 import { SeverityBadge } from '../../../pages/significant_events/components/severity_badge/severity_badge';

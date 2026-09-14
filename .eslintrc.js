@@ -2416,8 +2416,6 @@ module.exports = {
     {
       files: [
         'src/platform/plugins/private/interactive_setup/**/*.{js,mjs,ts,tsx}',
-        'src/platform/test/interactive_setup_api_integration/**/*.{js,mjs,ts,tsx}',
-        'src/platform/test/interactive_setup_functional/**/*.{js,mjs,ts,tsx}',
 
         'packages/kbn-mock-idp-plugin/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/private/kbn-mock-idp-utils/**/*.{js,mjs,ts,tsx}',
@@ -2479,8 +2477,6 @@ module.exports = {
     {
       files: [
         'src/platform/plugins/private/interactive_setup/**/*.{ts,tsx}',
-        'src/platform/test/interactive_setup_api_integration/**/*.{ts,tsx}',
-        'src/platform/test/interactive_setup_functional/**/*.{ts,tsx}',
 
         'packages/kbn-mock-idp-plugin/**/*.{ts,tsx}',
         'src/platform/packages/private/kbn-mock-idp-utils/**/*.{ts,tsx}',
@@ -2778,18 +2774,22 @@ module.exports = {
       },
     },
     /**
-     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
+     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with Node. It needs a few tweaks because of this.
      */
     {
-      files: '.buildkite/**/*.{js,ts}',
+      files: '.buildkite/**/*.{cjs,js,mjs,ts}',
+      parserOptions: {
+        ecmaVersion: 2022,
+      },
       rules: {
         'no-console': 'off',
         '@kbn/imports/no_unresolvable_imports': 'off',
+        '@kbn/imports/uniform_imports': ['error', { preserveFileExtensions: true }],
       },
     },
 
     /**
-     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
+     * Repository tooling packages run outside the standard application bundles and need a few targeted lint overrides.
      */
     {
       files: [
@@ -3161,6 +3161,7 @@ module.exports = {
               '!@kbn/ui-chrome-layout',
               '!@kbn/ui-app-menu',
               '!@kbn/ui-favorite-button',
+              '!@kbn/ui-ai-components',
             ],
           },
         ],

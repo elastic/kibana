@@ -81,7 +81,8 @@ describe('mapUiamConvertResponseToKeyResults', () => {
 
     expect(converted).toEqual([]);
     expect(provisioningStatusForFailedConversions).toHaveLength(1);
-    expect(provisioningStatusForFailedConversions[0].id).toBe('task-b');
+    expect(provisioningStatusForFailedConversions[0].id).toBe('task:task-b');
+    expect(provisioningStatusForFailedConversions[0].attributes.entityId).toBe('task-b');
     expect(provisioningStatusForFailedConversions[0].attributes.status).toBe(
       UiamApiKeyProvisioningStatus.FAILED
     );
@@ -127,6 +128,6 @@ describe('mapUiamConvertResponseToKeyResults', () => {
     expect(converted).toHaveLength(1);
     expect(converted[0].taskId).toBe('a');
     expect(provisioningStatusForFailedConversions).toHaveLength(1);
-    expect(provisioningStatusForFailedConversions[0].id).toBe('b');
+    expect(provisioningStatusForFailedConversions[0].id).toBe('task:b');
   });
 });

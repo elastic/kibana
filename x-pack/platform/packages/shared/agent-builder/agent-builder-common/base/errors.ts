@@ -30,6 +30,10 @@ export enum AgentBuilderErrorCode {
   hookExecutionError = 'hookExecutionError',
   workflowAborted = 'workflowAborted',
   workflowExecutionFailed = 'workflowExecutionFailed',
+  attachmentNotFound = 'attachmentNotFound',
+  attachmentAlreadyExists = 'attachmentAlreadyExists',
+  attachmentPermanentDeleteBlocked = 'attachmentPermanentDeleteBlocked',
+  attachmentInvalid = 'attachmentInvalid',
 }
 
 const AgentBuilderError = ServerSentEventError;
@@ -462,6 +466,127 @@ export const isContextLengthExceededAgentError = (
 };
 
 /**
+ * Error thrown when a conversation attachment cannot be found.
+ */
+export type AgentBuilderAttachmentNotFoundError =
+  AgentBuilderError<AgentBuilderErrorCode.attachmentNotFound>;
+
+export const isAttachmentNotFoundError = (
+  err: unknown
+): err is AgentBuilderAttachmentNotFoundError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.attachmentNotFound;
+};
+
+export const createAttachmentNotFoundError = ({
+  attachmentId,
+  customMessage,
+  meta = {},
+}: {
+  attachmentId: string;
+  customMessage?: string;
+  meta?: Record<string, any>;
+}): AgentBuilderAttachmentNotFoundError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.attachmentNotFound,
+    customMessage ?? `Attachment '${attachmentId}' not found`,
+    { ...meta, attachmentId, statusCode: 404 }
+  );
+};
+
+/**
+ * Error thrown when creating an attachment whose id already exists on the conversation.
+ */
+export type AgentBuilderAttachmentAlreadyExistsError =
+  AgentBuilderError<AgentBuilderErrorCode.attachmentAlreadyExists>;
+
+export const isAttachmentAlreadyExistsError = (
+  err: unknown
+): err is AgentBuilderAttachmentAlreadyExistsError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.attachmentAlreadyExists;
+};
+
+export const createAttachmentAlreadyExistsError = ({
+  attachmentId,
+  meta = {},
+}: {
+  attachmentId: string;
+  meta?: Record<string, any>;
+}): AgentBuilderAttachmentAlreadyExistsError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.attachmentAlreadyExists,
+    `Attachment with ID '${attachmentId}' already exists`,
+    { ...meta, attachmentId, statusCode: 409 }
+  );
+};
+
+/**
+ * Error thrown when an attachment cannot be permanently deleted because it is
+ * still referenced (either by client_id / flyout configuration or by prior
+ * conversation rounds).
+ */
+export type AgentBuilderAttachmentPermanentDeleteBlockedError = AgentBuilderError<
+  AgentBuilderErrorCode.attachmentPermanentDeleteBlocked,
+  { reason: 'client_id' | 'referenced_in_rounds'; attachmentId: string; statusCode: number }
+>;
+
+export const isAttachmentPermanentDeleteBlockedError = (
+  err: unknown
+): err is AgentBuilderAttachmentPermanentDeleteBlockedError => {
+  return (
+    isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.attachmentPermanentDeleteBlocked
+  );
+};
+
+export const createAttachmentPermanentDeleteBlockedError = ({
+  attachmentId,
+  reason,
+  meta = {},
+}: {
+  attachmentId: string;
+  reason: 'client_id' | 'referenced_in_rounds';
+  meta?: Record<string, any>;
+}): AgentBuilderAttachmentPermanentDeleteBlockedError => {
+  const messageByReason: Record<'client_id' | 'referenced_in_rounds', string> = {
+    client_id: `Cannot permanently delete attachment '${attachmentId}' because it was created from flyout configuration`,
+    referenced_in_rounds: `Cannot permanently delete attachment '${attachmentId}' because it is referenced in conversation rounds`,
+  };
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.attachmentPermanentDeleteBlocked,
+    messageByReason[reason],
+    {
+      ...meta,
+      attachmentId,
+      reason,
+      statusCode: 409,
+    }
+  );
+};
+
+/**
+ * Error thrown when attachment input fails validation or when an operation is
+ * attempted against an attachment in an invalid state (e.g. updating a soft-
+ * deleted attachment, deleting a screen_context attachment).
+ */
+export type AgentBuilderAttachmentInvalidError =
+  AgentBuilderError<AgentBuilderErrorCode.attachmentInvalid>;
+
+export const isAttachmentInvalidError = (
+  err: unknown
+): err is AgentBuilderAttachmentInvalidError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.attachmentInvalid;
+};
+
+export const createAttachmentInvalidError = (
+  message: string,
+  meta: Record<string, any> = {}
+): AgentBuilderAttachmentInvalidError => {
+  return new AgentBuilderError(AgentBuilderErrorCode.attachmentInvalid, message, {
+    ...meta,
+    statusCode: 400,
+  });
+};
+
+/**
  * Represents an error related to hook execution
  */
 export type AgentBuilderHooksExecutionError =
@@ -507,6 +632,10 @@ export const AgentBuilderErrorUtils = {
   isWorkflowExecutionError,
   isAgentExecutionError,
   isContextLengthExceededAgentError,
+  isAttachmentNotFoundError,
+  isAttachmentAlreadyExistsError,
+  isAttachmentPermanentDeleteBlockedError,
+  isAttachmentInvalidError,
   createInternalError,
   createForbiddenError,
   createToolNotFoundError,
@@ -521,4 +650,8 @@ export const AgentBuilderErrorUtils = {
   createAgentExecutionError,
   createHooksExecutionError,
   isHooksExecutionError,
+  createAttachmentNotFoundError,
+  createAttachmentAlreadyExistsError,
+  createAttachmentPermanentDeleteBlockedError,
+  createAttachmentInvalidError,
 };
