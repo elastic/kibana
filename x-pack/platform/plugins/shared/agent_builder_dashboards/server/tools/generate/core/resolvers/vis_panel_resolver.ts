@@ -112,6 +112,7 @@ export const createVisPanelResolver = ({
           index,
           esql,
           existingSpec: getExistingVegaSpec(existingPanel),
+          appearanceOnly,
           chartType,
           modelProvider,
           logger,

@@ -219,6 +219,7 @@ describe('createVisPanelResolver', () => {
       operationType: 'edit_panels',
       identifier: 'panel-1',
       nlQuery: 'make it a line chart',
+      appearanceOnly: true,
       // A stale "lens" request must be ignored: edits keep the existing renderer.
       renderer: 'lens',
       existingPanel: {
@@ -237,7 +238,9 @@ describe('createVisPanelResolver', () => {
       },
       authoringNote: 'Changed the panel to a line chart.',
     });
-    expect(mockedBuildVegaConfig).toHaveBeenCalledWith(expect.objectContaining({ existingSpec }));
+    expect(mockedBuildVegaConfig).toHaveBeenCalledWith(
+      expect.objectContaining({ existingSpec, appearanceOnly: true })
+    );
     expect(mockedBuildLensConfig).not.toHaveBeenCalled();
   });
 
