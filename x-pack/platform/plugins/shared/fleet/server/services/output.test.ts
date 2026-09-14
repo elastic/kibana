@@ -4305,5 +4305,33 @@ describe('Output Service', () => {
 
       expect(output.ssl).toEqual(undefined);
     });
+
+    it('should use canonical output_id even when attributes contain a poisoned id field', () => {
+      const so = mockOutputSO('output-test', {
+        type: 'elasticsearch',
+        id: '../../../malicious-id',
+      });
+
+      const output = outputSavedObjectToOutput(so);
+
+      expect(output.id).toBe('output-test');
+    });
+
+    it('should use so.id as fallback when output_id is absent, not attributes.id', () => {
+      const so = {
+        id: 'uuid-fallback',
+        type: 'ingest-outputs',
+        references: [],
+        attributes: {
+          name: 'Test',
+          type: 'elasticsearch',
+          id: 'poisoned-id',
+        },
+      };
+
+      const output = outputSavedObjectToOutput(so as any);
+
+      expect(output.id).toBe('uuid-fallback');
+    });
   });
 });
