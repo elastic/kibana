@@ -21,6 +21,7 @@ import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { useRunWorkflow, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { buildReplayInputsFromExecutionContext } from '../../../pages/executions/build_replay_inputs_from_execution_context';
 
 interface ExecutionTakeActionSplitButtonProps {
@@ -34,6 +35,7 @@ export const ExecutionTakeActionSplitButton = React.memo<ExecutionTakeActionSpli
     const { notifications, application } = useKibana().services;
     const { canExecuteWorkflow, canUpdateWorkflow } = useWorkflowsCapabilities();
     const { mutateAsync: runWorkflow, isLoading: isRerunning } = useRunWorkflow();
+    const { setSelectedExecution } = useWorkflowUrlState();
     const { href: executionHref } = useNavigateToExecution({
       workflowId: execution.workflowId ?? '',
       executionId: execution.id,
@@ -45,7 +47,7 @@ export const ExecutionTakeActionSplitButton = React.memo<ExecutionTakeActionSpli
     const handleRerun = useCallback(async () => {
       if (!canExecuteWorkflow || !execution.workflowId) return;
       try {
-        await runWorkflow({
+        const { workflowExecutionId } = await runWorkflow({
           id: execution.workflowId,
           inputs: buildReplayInputsFromExecutionContext(execution.context),
         });
@@ -55,6 +57,7 @@ export const ExecutionTakeActionSplitButton = React.memo<ExecutionTakeActionSpli
           }),
           { toastLifeTimeMs: 3000 }
         );
+        setSelectedExecution(workflowExecutionId);
       } catch (err) {
         notifications.toasts.addError(err instanceof Error ? err : new Error(String(err)), {
           title: i18n.translate('workflows.executionFlyout.takeAction.reRunError', {
@@ -68,6 +71,7 @@ export const ExecutionTakeActionSplitButton = React.memo<ExecutionTakeActionSpli
       execution.workflowId,
       notifications.toasts,
       runWorkflow,
+      setSelectedExecution,
     ]);
 
     const handleEditWorkflow = useCallback(() => {
