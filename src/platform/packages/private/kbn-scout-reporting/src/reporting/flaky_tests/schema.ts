@@ -68,20 +68,6 @@ export const FlakyTestBranchStatsSchema = z.object({
 export type FlakyTestBranchStats = z.infer<typeof FlakyTestBranchStatsSchema>;
 
 /**
- * Build counts of one test per UTC day over the last `days` days of the report scope, oldest
- * first; the last day is the one containing the window end and is usually partial. Days without
- * builds are 0.
- */
-export const FlakyTestTrendSchema = z.object({
-  days: z.int().min(1),
-  /** Start of the first day. */
-  from: z.coerce.date(),
-  buildsPerDay: z.array(z.int()),
-  failedBuildsPerDay: z.array(z.int()),
-});
-export type FlakyTestTrend = z.infer<typeof FlakyTestTrendSchema>;
-
-/**
  * The branch that qualified a test: the one with the highest build failure rate among the
  * branches that clear every threshold on their own, so that a clean branch cannot dilute a
  * flaky one.
@@ -137,8 +123,6 @@ export const FlakyTestEntrySchema = z.object({
   /** Absent only if the test emitted no execution events in the window (should not happen). */
   latestRun: z.optional(FlakyTestLatestRunSchema),
   sampleFailures: z.array(FlakyTestSampleFailureSchema),
-  /** Absent in reports written before trends existed or when `trendDays` is 0. */
-  trend: z.optional(FlakyTestTrendSchema),
 });
 export type FlakyTestEntry = z.infer<typeof FlakyTestEntrySchema>;
 
@@ -206,8 +190,6 @@ export interface FlakyTestReportOptions {
   classifications: FlakyTestClassification[];
   thresholds: FlakyTestReportThresholds;
   samplesPerTest: number;
-  /** Days of per-day build counts attached to each test; 0 disables the trend. */
-  trendDays: number;
   /** Upper bound of the window; defaults to the current time. */
   now?: Date;
 }
@@ -226,7 +208,6 @@ export const DEFAULT_FLAKY_TEST_REPORT_OPTIONS: Omit<FlakyTestReportOptions, 'no
     maxInactiveHours: 24,
   },
   samplesPerTest: 3,
-  trendDays: 14,
 };
 
 export const FlakyTestReportSchema = z.object({
