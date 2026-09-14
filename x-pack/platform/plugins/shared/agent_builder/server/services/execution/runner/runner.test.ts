@@ -442,6 +442,8 @@ describe('AgentBuilder runner', () => {
       expect(runnerDeps.modelProviderFactory).toHaveBeenCalledWith(
         expect.objectContaining({ agentId: 'root-agent' })
       );
+      // agentId must also reach the scoped runner so the registry lookup succeeds
+      expect(agentClient.get).toHaveBeenCalledWith('root-agent', expect.anything());
     });
 
   });

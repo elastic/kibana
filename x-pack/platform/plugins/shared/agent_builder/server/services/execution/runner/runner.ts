@@ -445,7 +445,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
           conversation,
         }),
       });
-      return runner.runAgent(otherParams);
+      return runner.runAgent({ ...otherParams, agentId });
     },
   };
 };
