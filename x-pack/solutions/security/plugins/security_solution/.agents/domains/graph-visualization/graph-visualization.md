@@ -98,15 +98,9 @@ The graph visualization feature is owned by **@elastic/contextual-security-apps*
 
 - **No FF gating for expand popover option** — Entity expand popover option should not be gated behind entityStoreV2 FF; graph gating on entity store is expected later. (@kfirpeled, [PR #252803](https://github.com/elastic/kibana/pull/252803) · `use_entity_node_expand_popover.ts`)
 
-- **Unconditional enrichment calls need justification** — A reviewer asked whether an enrichment call in `enrichment_utils.ts` was "supposed to be unconditional now"; the thread received no author reply and no resolution. (@JordanSh, [PR #285449](https://github.com/elastic/kibana/pull/285449) · `x-pack/solutions/security/plugins/cloud_security_posture/server/routes/graph/utils/enrichment_utils.ts`)
-
-  > **[VERIFY]:** Was making that enrichment call unconditional intentional, and if so what is the rule reviewers should apply — when may enrichment be skipped?
-
 ## Security considerations
 
-- **Silently weakened EUID filters are an authorization-adjacent correctness risk** — A filter that falls through to `return []` for an unmodeled clause shape does not fail visibly; it renders a chip that matches a broader entity population than the user's namespace intends (`user.email: alice@example.com` matching `alice@aws`, `alice@okta`, `alice@entra_id`). Reviewers must treat the fail-closed rule as a data-scoping guarantee, not a cosmetic filter-bar concern. ([PR #289467](https://github.com/elastic/kibana/pull/289467) · @niros1 · `search_filters.ts`)
-
-  > **[VERIFY]:** Is the over-matching filter purely a display/investigation-scope concern, or can it cause a user to act on entities outside the namespace they intended to inspect?
+- **Silently weakened EUID filters are an authorization-adjacent correctness risk** — A filter that falls through to `return []` for an unmodeled clause shape does not fail visibly; it renders a chip that matches a broader entity population than the user's namespace intends (`user.email: alice@example.com` matching `alice@aws`, `alice@okta`, `alice@entra_id`). Reviewers must treat the fail-closed rule as a data-scoping guarantee, not a cosmetic filter-bar concern. An over-matching filter should not reach the user in practice — it can appear only briefly before the EUID API loads. ([PR #289467](https://github.com/elastic/kibana/pull/289467) · @niros1 · `search_filters.ts`)
 
 - **Origin IDs must not be logged** — Server route logging must omit origin IDs that may contain PII (e.g. IP addresses); operational logs can propagate PII into Kibana observability paths. ([PR #227784](https://github.com/elastic/kibana/pull/227784) · @kfirpeled · `cloud_security_posture/server/routes/graph/route.ts`)
 
