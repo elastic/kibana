@@ -9,7 +9,7 @@ import { mkdtempSync, rmSync } from 'fs';
 import type { Socket } from 'net';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 import type { LoggerContextConfigInput, ServiceStatus } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
@@ -24,6 +24,7 @@ import type {
 } from '@kbn/core-logging-server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
+import type { SecurityLicense, SecurityLicenseFeatures } from '@kbn/security-plugin-types-common';
 import type { AuditEvent } from '@kbn/security-plugin-types-server';
 
 import {
@@ -1182,13 +1183,15 @@ describe('runtime audit log write failures', () => {
     rmSync(testDir, { recursive: true, force: true });
   });
 
-  const setupWithFileAppender = () => {
+  const setupWithFileAppender = (
+    securityLicense: SecurityLicense = licenseMock.create({ allowAuditLogging: true })
+  ) => {
     const fileName = join(testDir, 'audit.log');
     const audit = new AuditService(logger);
     const statusMock = statusServiceMock.createSetupContract();
 
     audit.setup({
-      license: licenseMock.create({ allowAuditLogging: true }),
+      license: securityLicense,
       config: createAuditConfig({
         enabled: true,
         appender: { type: 'file', fileName, layout: { type: 'json' } },
@@ -1267,6 +1270,29 @@ describe('runtime audit log write failures', () => {
 
     expect(loggingConfigs).toHaveLength(configCount + 1);
     expect(loggingConfigs.at(-1)!.loggers![0].level).toEqual('off');
+    audit.stop();
+  });
+
+  it('stays paused across a license change, since the probe cannot see a full disk', () => {
+    const features$ = new BehaviorSubject({
+      allowAuditLogging: true,
+    } as SecurityLicenseFeatures);
+    const { audit, fileName, loggingConfigs, statuses } = setupWithFileAppender(
+      licenseMock.create(features$)
+    );
+    const { onWriteError } = auditAppender(loggingConfigs[0]);
+
+    onWriteError!({ path: fileName, code: 'ENOSPC', reason: 'ENOSPC: no space left on device' });
+
+    expect(loggingConfigs.at(-1)!.loggers![0].level).toEqual('off');
+    expect(statuses.at(-1)!.level).toEqual(ServiceStatusLevels.degraded);
+
+    features$.next({ allowAuditLogging: false } as SecurityLicenseFeatures);
+    features$.next({ allowAuditLogging: true } as SecurityLicenseFeatures);
+
+    expect(loggingConfigs.at(-1)!.loggers![0].level).toEqual('off');
+    expect(auditAppender(loggingConfigs.at(-1)!).type).toEqual('console');
+    expect(statuses.at(-1)!.level).toEqual(ServiceStatusLevels.degraded);
     audit.stop();
   });
 

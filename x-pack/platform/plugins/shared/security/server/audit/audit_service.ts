@@ -6,13 +6,13 @@
  */
 
 import {
+  combineLatest,
   distinctUntilKeyChanged,
   map,
-  merge,
   shareReplay,
+  startWith,
   Subject,
   take,
-  withLatestFrom,
 } from 'rxjs';
 
 import type {
@@ -116,14 +116,16 @@ export class AuditService {
       shareReplay(1)
     );
 
-    const state$ = merge(
+    const state$ = combineLatest([
       probed$,
-      runtimeWriteAccess$.pipe(
-        take(1),
-        withLatestFrom(probed$),
-        map(([writeAccess, { features }]) => ({ features, writeAccess }))
-      )
-    ).pipe(shareReplay(1));
+      runtimeWriteAccess$.pipe(take(1), startWith(undefined)),
+    ]).pipe(
+      map(([{ features, writeAccess }, runtimeFailure]) => ({
+        features,
+        writeAccess: features.allowAuditLogging ? runtimeFailure ?? writeAccess : writeAccess,
+      })),
+      shareReplay(1)
+    );
 
     const writeAccess$ = auditLogPath
       ? state$.pipe(map(({ writeAccess }) => writeAccess))
