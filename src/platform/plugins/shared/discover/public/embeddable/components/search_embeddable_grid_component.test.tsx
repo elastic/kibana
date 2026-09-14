@@ -248,7 +248,7 @@ describe('SearchEmbeddableGridComponent', () => {
         expect(getLastFlyoutMenuTrailingActions()).toBeDefined();
       });
 
-      getLastFlyoutMenuTrailingActions()?.[0].onClick();
+      getLastFlyoutMenuTrailingActions()?.[0]?.onClick?.();
 
       await waitFor(() => {
         expect(servicesWithAccess.locator.getRedirectUrl).toHaveBeenCalled();
@@ -280,7 +280,7 @@ describe('SearchEmbeddableGridComponent', () => {
         expect(getLastFlyoutMenuTrailingActions()).toBeDefined();
       });
 
-      getLastFlyoutMenuTrailingActions()?.[0].onClick();
+      getLastFlyoutMenuTrailingActions()?.[0]?.onClick?.();
 
       await waitFor(() => {
         expect(servicesWithAccess.locator.getRedirectUrl).toHaveBeenCalled();
