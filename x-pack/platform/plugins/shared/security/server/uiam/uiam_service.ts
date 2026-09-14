@@ -18,6 +18,9 @@ import {
 } from '@kbn/core-security-server';
 import type {
   CreateUiamOAuthClientParams,
+  ServiceAccount,
+  ServiceAccountAssumableBy,
+  ServiceAccountRoleAssignments,
   UiamOAuthClientLogo,
   UiamOAuthClientResponse,
   UiamOAuthClientType,
@@ -35,6 +38,20 @@ import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 import type { UiamConfigType } from '../config';
 import { getDetailedErrorMessage } from '../errors';
 import { securityTelemetry } from '../otel/instrumentation';
+
+/**
+ * Represents the request body for creating a service account via UIAM.
+ */
+interface CreateServiceAccountRequestBody {
+  /** Organization that owns the service account. */
+  organization_id: string;
+  /** A descriptive name for the service account. */
+  name: string;
+  /** Roles granted to the service account, referenced by name. */
+  role_assignments: ServiceAccountRoleAssignments;
+  /** Principals allowed to exchange the service account's credentials for a token. */
+  assumable_by: ServiceAccountAssumableBy[];
+}
 
 /**
  * Represents the request body for granting an API key via UIAM.
@@ -59,17 +76,17 @@ export interface GrantUiamApiKeyRequestBody {
 }
 
 /**
- * Options that control how the grant request itself is authenticated to UIAM.
+ * Options that control how a request is authenticated to UIAM.
  */
-export interface GrantUiamApiKeyOptions {
+export interface UiamClientAuthenticationOptions {
   /**
-   * Whether to present Kibana's shared secret header alongside the granting credential. UIAM
+   * Whether to present Kibana's shared secret header alongside the caller credential. UIAM
    * authenticates the credential and Kibana independently, and requires the two to agree: an
    * internal API key or a session token must arrive with the shared secret, while an external
    * (organization) API key must arrive without it, so that internal credentials that leak cannot
-   * be replayed through customer-facing code paths. Presenting the wrong combination fails the
-   * grant. The mTLS client certificate is always presented when configured, regardless of this
-   * option.
+   * be replayed through customer-facing code paths. Presenting the wrong combination fails
+   * authentication. The mTLS client certificate is always presented when configured, regardless
+   * of this option.
    *
    * Defaults to `true`, which is correct for everything except an external API key.
    */
@@ -225,7 +242,7 @@ export interface UiamServicePublic {
   grantApiKey(
     authorization: HTTPAuthorizationHeader,
     params: GrantUiamAPIKeyParams,
-    options?: GrantUiamApiKeyOptions
+    options?: UiamClientAuthenticationOptions
   ): Promise<GrantUiamApiKeyResponse>;
 
   /**
@@ -250,6 +267,22 @@ export interface UiamServicePublic {
    * @returns A promise that resolves to a response containing per-key success/failure results.
    */
   convertApiKeys(keys: string[]): Promise<ConvertUiamApiKeysResponse>;
+
+  /**
+   * Creates a service account via the UIAM service.
+   *
+   * Called with the caller's own credential, so UIAM downscopes the new account
+   * to a subset of that caller's privileges.
+   *
+   * @param authorization The caller's UIAM authorization header.
+   * @param body The request body for creating the service account.
+   * @param options Whether to include Kibana client authentication.
+   */
+  createServiceAccount(
+    authorization: HTTPAuthorizationHeader,
+    body: CreateServiceAccountRequestBody,
+    options?: UiamClientAuthenticationOptions
+  ): Promise<ServiceAccount>;
 
   /**
    * Creates an OAuth client via the UIAM service.
@@ -554,7 +587,7 @@ export class UiamService implements UiamServicePublic {
   async grantApiKey(
     authorization: HTTPAuthorizationHeader,
     params: GrantUiamAPIKeyParams,
-    { includeClientAuthentication = true }: GrantUiamApiKeyOptions = {}
+    { includeClientAuthentication = true }: UiamClientAuthenticationOptions = {}
   ) {
     this.#logger.debug(
       `Attempting to grant API key using authorization scheme: ${authorization.scheme}`
@@ -670,6 +703,43 @@ export class UiamService implements UiamServicePublic {
       return response;
     } catch (err) {
       this.#logger.error(() => `Failed to convert API keys: ${getDetailedErrorMessage(err)}`);
+
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamService.createServiceAccount}.
+   */
+  async createServiceAccount(
+    authorization: HTTPAuthorizationHeader,
+    body: CreateServiceAccountRequestBody,
+    { includeClientAuthentication = true }: UiamClientAuthenticationOptions = {}
+  ): Promise<ServiceAccount> {
+    try {
+      this.#logger.debug('Attempting to create service account.');
+
+      const requestOptions: RequestInit & { dispatcher?: Agent } = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': this.#userAgentHeader,
+          ...(includeClientAuthentication
+            ? { [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret }
+            : {}),
+          Authorization: authorization.toString(),
+        },
+        body: JSON.stringify({ ...body, type: 'project' }),
+        dispatcher: this.#dispatcher,
+      };
+      const response = await UiamService.#parseUiamResponse(
+        await fetch(`${this.#config.url}/uiam/api/v1/service-accounts`, requestOptions)
+      );
+
+      this.#logger.debug(`Successfully created service account with id ${response.id}`);
+      return response;
+    } catch (err) {
+      this.#logger.error(() => `Failed to create service account: ${getDetailedErrorMessage(err)}`);
 
       throw err;
     }

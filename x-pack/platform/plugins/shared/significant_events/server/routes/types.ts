@@ -28,6 +28,7 @@ import type { SyncWorkflowService } from '../lib/workflows/sync_workflow';
 import type { SignificantEventsScheduledWorkflowsService } from '../lib/workflows/significant_events_scheduled_workflows';
 import type { WorkflowClients } from '../lib/workflows/create_workflow_clients';
 import type { SignificantEventsMaintenanceService } from '../lib/maintenance/maintenance_service';
+import type { PriceService } from '../lib/cost/price_service';
 
 export type GetScopedClients = (params: {
   request: KibanaRequest;
@@ -68,5 +69,6 @@ export type SignificantEventsRouteHandlerResources = {
   significantEventsScheduledWorkflowsService?: SignificantEventsScheduledWorkflowsService;
   workflowClients: WorkflowClients;
   maintenanceService: SignificantEventsMaintenanceService;
+  priceService: PriceService;
   getSpaceId: (request: KibanaRequest) => Promise<string>;
 } & DefaultRouteHandlerResources;
