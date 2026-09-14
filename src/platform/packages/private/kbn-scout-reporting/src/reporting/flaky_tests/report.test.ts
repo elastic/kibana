@@ -29,6 +29,12 @@ import * as queries from './queries';
 
 const thresholds = { minBuilds: 10, minFailedBuilds: 2, minFailRate: 0, lastRunWithinHours: 24 };
 
+describe('DEFAULT_FLAKY_TEST_REPORT_OPTIONS', () => {
+  it('requires a 3% build failure rate on a branch by default', () => {
+    expect(DEFAULT_FLAKY_TEST_REPORT_OPTIONS.thresholds.minFailRate).toBe(0.03);
+  });
+});
+
 describe('mayQualify', () => {
   it('needs enough builds and failed builds in total, ignoring the failure rate', () => {
     expect(mayQualify({ builds: 9, failedBuilds: 5 }, thresholds)).toBe(false);

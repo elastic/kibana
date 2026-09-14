@@ -158,7 +158,7 @@ export const discoverFlakyTests: Command<void> = {
     --classifications    (optional)  Comma-separated subset of ${ALL_CLASSIFICATIONS} [default: all]
     --minBuilds          (optional)  Builds a branch must have run the test in to qualify it [default: ${DEFAULT_MIN_BUILDS}]
     --minFailedBuilds    (optional)  Builds a branch must have failed the test in to qualify it [default: ${DEFAULT_MIN_FAILED_BUILDS}]
-    --minFailRate        (optional)  Fraction (0-1) of its builds a branch must have failed the test in to qualify it, e.g. 0.01 for 1% [default: ${DEFAULT_MIN_FAIL_RATE}]
+    --minFailRate        (optional)  Fraction (0-1) of its builds a branch must have failed the test in to qualify it; 0 disables [default: ${DEFAULT_MIN_FAIL_RATE}, i.e. 3%]
     --maxTests           (optional)  Maximum tests per list in the report [default: ${DEFAULT_MAX_TESTS}]
     --lastRunWithinHours (optional)  Keep only tests that ran in the last N hours of the window; the rest were skipped, moved or deleted [default: ${DEFAULT_LAST_RUN_WITHIN_HOURS}]
     --samplesPerTest     (optional)  Recent failure messages per test [default: ${DEFAULT_SAMPLES_PER_TEST}]
