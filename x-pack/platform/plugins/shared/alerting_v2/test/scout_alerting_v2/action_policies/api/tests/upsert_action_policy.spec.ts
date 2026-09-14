@@ -64,22 +64,19 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     }
   );
 
-  apiTest(
-    'matcher: scopes a policy to rules via tags on create-via-PUT',
-    async ({ apiClient }) => {
-      const matcher = { tags: ['notify-upsert-scoped'] };
-      const response = await apiClient.put(getActionPolicyUrl('upsert-tag-scoped-policy'), {
-        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-        body: buildCreateActionPolicyData({
-          name: 'tag-scoped-via-put',
-          matcher,
-        }),
-      });
+  apiTest('matcher: scopes a policy to rules via tags on create-via-PUT', async ({ apiClient }) => {
+    const matcher = { tags: ['notify-upsert-scoped'] };
+    const response = await apiClient.put(getActionPolicyUrl('upsert-tag-scoped-policy'), {
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+      body: buildCreateActionPolicyData({
+        name: 'tag-scoped-via-put',
+        matcher,
+      }),
+    });
 
-      expect(response).toHaveStatusCode(201);
-      expect(response.body.matcher).toMatchObject(matcher);
-    }
-  );
+    expect(response).toHaveStatusCode(201);
+    expect(response.body.matcher).toMatchObject(matcher);
+  });
 
   apiTest(
     'upsert: 200 replaces and rotates version+updated_at, preserves created_at/created_by',

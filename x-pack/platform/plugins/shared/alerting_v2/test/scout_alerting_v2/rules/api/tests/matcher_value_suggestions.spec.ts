@@ -123,19 +123,16 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
     expect(response.body).toStrictEqual(['active']);
   });
 
-  apiTest(
-    'episode_status: filters suggestions by the query prefix',
-    async ({ apiClient }) => {
-      const response = await suggestValues(
-        apiClient,
-        { field: 'episode_status', query: 'rec' },
-        { headers: writerHeaders }
-      );
+  apiTest('episode_status: filters suggestions by the query prefix', async ({ apiClient }) => {
+    const response = await suggestValues(
+      apiClient,
+      { field: 'episode_status', query: 'rec' },
+      { headers: writerHeaders }
+    );
 
-      expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual(['recovering']);
-    }
-  );
+    expect(response).toHaveStatusCode(200);
+    expect(response.body).toStrictEqual(['recovering']);
+  });
 
   apiTest(
     'group_hash: aggregates the values stored on the alert events',
