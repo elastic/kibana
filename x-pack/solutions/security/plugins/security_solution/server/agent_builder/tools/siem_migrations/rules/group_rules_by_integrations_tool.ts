@@ -14,7 +14,7 @@ import { NonEmptyString } from '../../../../../common/api/model/primitives.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 import type { GetSiemMigrationContext } from '../../../../lib/siem_migrations/get_siem_migration_context';
-import type { RuleMigrationIntegrationRuleGroups } from '../../../../lib/siem_migrations/rules/data/rule_migrations_data_rules_client';
+import type { RuleMigrationAllIntegrationsStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { createSiemMigrationAvailability } from '../common/availability';
 import { hasRuleMigrationPrivileges } from '../common/privileges';
 import { createMissingPrivilegeError } from '../common/tool_results';
@@ -47,11 +47,13 @@ export const groupRulesByIntegrationsTool = (
       openWorldHint: false,
     },
     availability: createSiemMigrationAvailability(core, productFeaturesService, logger),
-    description: `Group rules in one Automatic Rule Migration by inferred integration.
+    description: `Group the installable rules of one Automatic Rule Migration by inferred integration.
 
-Returns each integration id with total, installed, and not-installed rule counts. A rule referencing multiple integrations is counted once in every matching integration group, consistent with the Automatic Migrations management page. Also returns counts for rules without inferred integrations.
+Returns \`{ groups: [{ id, total_rules }] }\` — each inferred integration id with the number of installable rules in scope that reference it. Only rules that are fully translated and not yet installed are counted, so these are the integrations the pending installation depends on. A rule referencing multiple integrations is counted once in every matching group, consistent with the Automatic Migrations management page. Rules with no inferred integration are not represented in any group.
 
-Pass ids to restrict the aggregation to a selected migration-rule scope. Read-only.`,
+Use this for integration readiness, not for counts — take the authoritative installable total from \`get_rule_migration_translation_stats\`. Group totals can exceed it because a rule appears in every integration it references.
+
+Pass \`ids\` to restrict the aggregation to a selected migration-rule scope. Read-only.`,
     schema,
     tags: ['security', 'siem-migration', 'rules', 'integrations'],
     handler: async ({ migration_id: migrationId, ids }, { request, spaceId }) => {
@@ -59,7 +61,7 @@ Pass ids to restrict the aggregation to a selected migration-rule scope. Read-on
         return createMissingPrivilegeError('group migration rules by integrations');
       }
 
-      let groups: RuleMigrationIntegrationRuleGroups;
+      let stats: RuleMigrationAllIntegrationsStats;
       try {
         const { getRulesClient } = await getSiemMigrationContext(request, spaceId);
         const rulesClient = getRulesClient();
@@ -77,10 +79,12 @@ Pass ids to restrict the aggregation to a selected migration-rule scope. Read-on
           };
         }
 
-        groups = await rulesClient.data.items.groupByIntegrations(
-          migrationId,
-          ids && ids.length > 0 ? ids : undefined
-        );
+        stats = await rulesClient.data.items.getIntegrationStats(migrationId, {
+          ids: ids && ids.length > 0 ? ids : undefined,
+          // Count only rules that will actually be installed (fully translated, not yet installed)
+          // so "rules impacted" in the skill's readiness table matches the install scope.
+          installable: true,
+        });
       } catch (err) {
         logger.error(`groupRulesByIntegrationsTool: failed for migration "${migrationId}": ${err}`);
         return {
@@ -102,7 +106,7 @@ Pass ids to restrict the aggregation to a selected migration-rule scope. Read-on
           {
             tool_result_id: getToolResultId(),
             type: ToolResultType.other,
-            data: groups,
+            data: { groups: stats },
           },
         ],
       };

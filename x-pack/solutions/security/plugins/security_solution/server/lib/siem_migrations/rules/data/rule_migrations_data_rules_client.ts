@@ -36,20 +36,6 @@ export type RuleMigrationAllDataStats = RuleMigrationDataStats[];
 
 export type RuleMigrationGetRulesOptions = SiemMigrationGetItemsOptions<RuleMigrationFilters>;
 
-export interface RuleMigrationIntegrationRuleCounts {
-  total_rules: number;
-  installed_rules: number;
-  not_installed_rules: number;
-}
-
-export interface RuleMigrationIntegrationRuleGroup extends RuleMigrationIntegrationRuleCounts {
-  integration_id: string;
-}
-
-export interface RuleMigrationIntegrationRuleGroups {
-  groups: RuleMigrationIntegrationRuleGroup[];
-  without_integrations: RuleMigrationIntegrationRuleCounts;
-}
 
 export class RuleMigrationsDataRulesClient extends SiemMigrationsDataItemClient<RuleMigrationRule> {
   protected type = 'rule' as const;
@@ -105,7 +91,9 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataItemClient<
   }
 
   /** Retrieves the stats for the integrations of all the migration rules */
-  public async getAllIntegrationsStats(): Promise<RuleMigrationAllIntegrationsStats> {
+  public async getAllIntegrationsStats(
+    query?: QueryDslQueryContainer
+  ): Promise<RuleMigrationAllIntegrationsStats> {
     const index = await this.getIndexName();
     const aggregations: { integrationIds: AggregationsAggregationContainer } = {
       integrationIds: {
@@ -117,7 +105,7 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataItemClient<
       },
     };
     const result = await this.esClient
-      .search({ index, aggregations, _source: false })
+      .search({ index, size: 0, ...(query ? { query } : {}), aggregations, _source: false })
       .catch((error) => {
         this.logger.error(`Error getting all integrations stats: ${error.message}`);
         throw error;
@@ -131,64 +119,12 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataItemClient<
     }));
   }
 
-  /** Groups rules in one migration by inferred integration and installation status. */
-  public async groupByIntegrations(
+  /** Retrieves the integrations stats for the installable rules of a single migration */
+  public async getIntegrationStats(
     migrationId: string,
-    ids?: string[]
-  ): Promise<RuleMigrationIntegrationRuleGroups> {
-    const index = await this.getIndexName();
-    const query = this.getFilterQuery(migrationId, { ids });
-    const installationAggregations = {
-      installed: { filter: dsl.isInstalled() },
-      notInstalled: { filter: dsl.isNotInstalled() },
-    } satisfies Record<string, AggregationsAggregationContainer>;
-    const result = await this.esClient.search({
-      index,
-      size: 0,
-      query,
-      aggregations: {
-        integrationIds: {
-          terms: {
-            field: 'elastic_rule.integration_ids',
-            exclude: '',
-            size: MAX_ES_SEARCH_SIZE,
-          },
-          aggregations: installationAggregations,
-        },
-        withoutIntegrations: {
-          filter: {
-            bool: {
-              must_not: [{ exists: { field: 'elastic_rule.integration_ids' } }],
-            },
-          },
-          aggregations: installationAggregations,
-        },
-      },
-    });
-
-    interface CountsAggregation {
-      doc_count: number;
-      installed: AggregationsFilterAggregate;
-      notInstalled: AggregationsFilterAggregate;
-    }
-    const integrationIds = result.aggregations?.integrationIds as AggregationsStringTermsAggregate;
-    const buckets =
-      (integrationIds?.buckets as Array<AggregationsStringTermsBucket & CountsAggregation>) ?? [];
-    const withoutIntegrations = result.aggregations?.withoutIntegrations as CountsAggregation;
-
-    return {
-      groups: buckets.map((bucket) => ({
-        integration_id: `${bucket.key}`,
-        total_rules: bucket.doc_count,
-        installed_rules: bucket.installed.doc_count,
-        not_installed_rules: bucket.notInstalled.doc_count,
-      })),
-      without_integrations: {
-        total_rules: withoutIntegrations?.doc_count ?? 0,
-        installed_rules: withoutIntegrations?.installed.doc_count ?? 0,
-        not_installed_rules: withoutIntegrations?.notInstalled.doc_count ?? 0,
-      },
-    };
+    filters: RuleMigrationFilters = {}
+  ): Promise<RuleMigrationAllIntegrationsStats> {
+    return this.getAllIntegrationsStats(this.getFilterQuery(migrationId, filters));
   }
 
   protected getFilterQuery(

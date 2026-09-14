@@ -10,7 +10,7 @@ import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools'
 import { coreMock } from '@kbn/core/server/mocks';
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 import type { GetSiemMigrationContext } from '../../../../lib/siem_migrations/get_siem_migration_context';
-import type { RuleMigrationIntegrationRuleGroups } from '../../../../lib/siem_migrations/rules/data/rule_migrations_data_rules_client';
+import type { RuleMigrationAllIntegrationsStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { createToolHandlerContext, createToolTestMocks } from '../../../__mocks__/test_helpers';
 import { groupRulesByIntegrationsTool } from './group_rules_by_integrations_tool';
 
@@ -24,39 +24,28 @@ const productFeaturesService = {
   isEnabled: jest.fn().mockReturnValue(true),
 } as unknown as ProductFeaturesService;
 
-const SAMPLE_GROUPS: RuleMigrationIntegrationRuleGroups = {
-  groups: [
-    {
-      integration_id: 'endpoint',
-      total_rules: 3,
-      installed_rules: 1,
-      not_installed_rules: 2,
-    },
-  ],
-  without_integrations: {
-    total_rules: 1,
-    installed_rules: 0,
-    not_installed_rules: 1,
-  },
-};
+const SAMPLE_STATS: RuleMigrationAllIntegrationsStats = [
+  { id: 'endpoint', total_rules: 3 },
+  { id: 'system', total_rules: 2 },
+];
 
 describe('groupRulesByIntegrationsTool', () => {
   const { mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
   let core: ReturnType<typeof coreMock.createSetup>;
-  let mockGroupByIntegrations: jest.Mock;
+  let mockGetIntegrationStats: jest.Mock;
   let mockMigrationsGet: jest.Mock;
   let getSiemMigrationContext: jest.MockedFunction<GetSiemMigrationContext>;
 
   beforeEach(() => {
     core = coreMock.createSetup();
 
-    mockGroupByIntegrations = jest.fn().mockResolvedValue(SAMPLE_GROUPS);
+    mockGetIntegrationStats = jest.fn().mockResolvedValue(SAMPLE_STATS);
     mockMigrationsGet = jest.fn().mockResolvedValue({ id: 'migration-1' });
 
     const rulesClient = {
       data: {
         migrations: { get: mockMigrationsGet },
-        items: { groupByIntegrations: mockGroupByIntegrations },
+        items: { getIntegrationStats: mockGetIntegrationStats },
       },
     };
 
@@ -85,9 +74,12 @@ describe('groupRulesByIntegrationsTool', () => {
 
     expect(getSiemMigrationContext).toHaveBeenCalledWith(mockRequest, 'default');
     expect(mockMigrationsGet).toHaveBeenCalledWith('migration-1');
-    expect(mockGroupByIntegrations).toHaveBeenCalledWith('migration-1', ['rule-1']);
+    expect(mockGetIntegrationStats).toHaveBeenCalledWith('migration-1', {
+      ids: ['rule-1'],
+      installable: true,
+    });
     expect(result.results[0]).toEqual(
-      expect.objectContaining({ type: ToolResultType.other, data: SAMPLE_GROUPS })
+      expect.objectContaining({ type: ToolResultType.other, data: { groups: SAMPLE_STATS } })
     );
   });
 
@@ -128,12 +120,30 @@ describe('groupRulesByIntegrationsTool', () => {
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     )) as ToolHandlerStandardReturn;
 
-    expect(mockGroupByIntegrations).not.toHaveBeenCalled();
+    expect(mockGetIntegrationStats).not.toHaveBeenCalled();
     expect(result.results[0]).toEqual(
       expect.objectContaining({ type: ToolResultType.error })
     );
     expect(result.results[0].data).toMatchObject({
       message: expect.stringContaining('unknown-migration'),
+    });
+  });
+
+  it('passes installable:true and normalises empty ids to undefined', async () => {
+    const tool = groupRulesByIntegrationsTool(
+      core,
+      mockLogger,
+      productFeaturesService,
+      getSiemMigrationContext
+    );
+    await tool.handler(
+      { migration_id: 'migration-1' },
+      createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+    );
+
+    expect(mockGetIntegrationStats).toHaveBeenCalledWith('migration-1', {
+      ids: undefined,
+      installable: true,
     });
   });
 

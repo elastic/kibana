@@ -763,60 +763,28 @@ describe('RuleMigrationsDataRulesClient', () => {
     });
   });
 
-  describe('groupByIntegrations', () => {
-    test('returns per-integration installation counts and the no-integration group', async () => {
+  describe('getIntegrationStats', () => {
+    const mockBuckets = [
+      { key: 'endpoint', doc_count: 3 },
+      { key: 'system', doc_count: 2 },
+    ];
+
+    beforeEach(() => {
       esClient.asInternalUser.search = jest.fn().mockResolvedValue({
-        aggregations: {
-          integrationIds: {
-            buckets: [
-              {
-                key: 'endpoint',
-                doc_count: 3,
-                installed: { doc_count: 1 },
-                notInstalled: { doc_count: 2 },
-              },
-              {
-                key: 'system',
-                doc_count: 2,
-                installed: { doc_count: 0 },
-                notInstalled: { doc_count: 2 },
-              },
-            ],
-          },
-          withoutIntegrations: {
-            doc_count: 1,
-            installed: { doc_count: 0 },
-            notInstalled: { doc_count: 1 },
-          },
-        },
+        aggregations: { integrationIds: { buckets: mockBuckets } },
       });
+    });
 
-      const result = await ruleMigrationsDataRulesClient.groupByIntegrations('migration1', [
-        'rule1',
-        'rule2',
+    test('returns per-integration stats scoped to a migration with ids filter', async () => {
+      const result = await ruleMigrationsDataRulesClient.getIntegrationStats(
+        'migration1',
+        { ids: ['rule1', 'rule2'] }
+      );
+
+      expect(result).toEqual([
+        { id: 'endpoint', total_rules: 3 },
+        { id: 'system', total_rules: 2 },
       ]);
-
-      expect(result).toEqual({
-        groups: [
-          {
-            integration_id: 'endpoint',
-            total_rules: 3,
-            installed_rules: 1,
-            not_installed_rules: 2,
-          },
-          {
-            integration_id: 'system',
-            total_rules: 2,
-            installed_rules: 0,
-            not_installed_rules: 2,
-          },
-        ],
-        without_integrations: {
-          total_rules: 1,
-          installed_rules: 0,
-          not_installed_rules: 1,
-        },
-      });
       expect(esClient.asInternalUser.search).toHaveBeenCalledWith(
         expect.objectContaining({
           query: {
@@ -836,6 +804,25 @@ describe('RuleMigrationsDataRulesClient', () => {
       );
     });
 
+    test('returns per-integration stats scoped to a migration without ids filter', async () => {
+      const result = await ruleMigrationsDataRulesClient.getIntegrationStats(
+        'migration1'
+      );
+
+      expect(result).toEqual([
+        { id: 'endpoint', total_rules: 3 },
+        { id: 'system', total_rules: 2 },
+      ]);
+      expect(esClient.asInternalUser.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              filter: [{ term: { migration_id: 'migration1' } }],
+            },
+          },
+        })
+      );
+    });
   });
 
   describe('prepareDelete', () => {

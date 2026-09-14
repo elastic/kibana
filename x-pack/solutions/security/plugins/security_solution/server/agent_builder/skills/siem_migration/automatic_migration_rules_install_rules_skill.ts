@@ -67,7 +67,7 @@ ${MIGRATION_STATE_FRESHNESS_BLOCK}
 - \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\` — verify a pasted id and inspect task state.
 - \`${SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID}\` — authoritative installable and missing-index counts.
 - \`${SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID}\` — resolve titles to internal item ids and retain up to 3 custom rules for the result sample.
-- \`${SIEM_MIGRATION_GROUP_RULES_BY_INTEGRATIONS_TOOL_ID}\` — migration-scoped integration groups with installed/not-installed rule counts. A multi-integration rule appears in every matching group.
+- \`${SIEM_MIGRATION_GROUP_RULES_BY_INTEGRATIONS_TOOL_ID}\` — integrations required by the installable rules in scope, with a rule count each. A multi-integration rule appears in every matching group. Use for readiness only; authoritative installable count comes from \`get_rule_migration_translation_stats\`.
 - \`execute_api\` (target: \`kibana\`) — call Fleet APIs directly to check integration readiness:
   - \`elastic-package-manager-epm.get-fleet-epm-packages-installed\` — list installed Fleet packages.
   - \`fleet-package-policies.get-fleet-package-policies\` — list package policies with input enabled-state.
@@ -89,10 +89,13 @@ ${MIGRATION_STATE_FRESHNESS_BLOCK}
      \`isEligibleForTranslation: true\`, so any displayed list is illustrative and may omit
      non-translation-eligible but installable building-block rules.
 4. Call \`group_rules_by_integrations\` with the migration id and the selected item ids when the
-   scope is explicit; omit \`ids\` entirely for all rules (never pass \`ids: []\`). Use \`not_installed_rules\` to identify integration
-   requirements that remain relevant to installation. Report \`without_integrations\` separately.
+   scope is explicit; omit \`ids\` entirely for all rules (never pass \`ids: []\`). The tool returns
+   only installable rules (fully translated, not yet installed), so \`total_rules\` per group reflects
+   the integration's actual stake in the installation. Group totals may exceed the installable count
+   from step 2 because a rule referencing multiple integrations appears in every matching group — do
+   not sum the column or treat the discrepancy as an error.
 
-   - If \`groups\` is empty: state "no inferred integrations were found for this scope" and skip
+   - If \`groups\` is empty: state "no installable rule in scope infers an integration" and skip
      step 5. Proceed directly to step 6.
    - If \`groups\` is non-empty: present the results as a table and continue to step 5.
 
@@ -112,9 +115,7 @@ ${MIGRATION_STATE_FRESHNESS_BLOCK}
    |---|---|---|---|
    | <id> | <total_rules> | ✅ / ❌ | ✅ / ❌ |
 
-   Use ✅ when \`is_installed\` / \`is_enabled\` is true, ❌ when false. Add a row for
-   "No integration" using \`without_integrations\` counts; leave Installed and Enabled blank for
-   that row.
+   Use ✅ when \`is_installed\` / \`is_enabled\` is true, ❌ when false.
 
    Only mark ✅ when the API confirms it — never invent readiness.
    A Fleet call returned 403 → state that readiness is unknown for that dimension.
@@ -132,6 +133,8 @@ ${MIGRATION_STATE_FRESHNESS_BLOCK}
    - Without an enabled integration and active data flow, the rule will not receive relevant
      events to evaluate.
    - No inferred integrations does not prove readiness; remind the user to verify data ingestion.
+     Rules without an inferred integration are not listed in the readiness table, so the table does
+     not account for every rule in the install scope.
 8. Confirm enabled state with a multiple-choice question. Omitting \`enabled\` means false.
    \`enabled\` applies only to newly created rules; already-installed prebuilt matches are linked
    and are not re-enabled.
