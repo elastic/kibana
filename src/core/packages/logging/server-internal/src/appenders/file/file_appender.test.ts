@@ -189,7 +189,18 @@ describe('write failures', () => {
     pid: 5355,
   };
 
-  const createMockStream = () => Object.assign(new EventEmitter(), { write: jest.fn() });
+  const createMockStream = () => {
+    const stream = Object.assign(new EventEmitter(), {
+      write: jest.fn(),
+      destroyed: false,
+      destroy: jest.fn(),
+      end: jest.fn((cb?: () => void) => cb?.()),
+    });
+    stream.destroy.mockImplementation(() => {
+      stream.destroyed = true;
+    });
+    return stream;
+  };
 
   const enospc = () =>
     Object.assign(new Error("ENOSPC: no space left on device, write 'mock://path/file.log'"), {
@@ -260,6 +271,44 @@ describe('write failures', () => {
       expect(onWriteError).toHaveBeenCalledWith(
         expect.objectContaining({ code: 'ENOSPC', path: 'mock://path/file.log' })
       );
+    });
+
+    it('discards the errored stream and reopens the file on the next `append()`', () => {
+      const failed = createMockStream();
+      const reopened = createMockStream();
+      mockCreateWriteStream.mockReturnValueOnce(failed).mockReturnValue(reopened);
+      const onWriteError = jest.fn();
+
+      const appender = new FileAppender(
+        { format: () => 'formatted' },
+        'mock://path/file.log',
+        onWriteError
+      );
+      appender.append(record);
+      failed.emit('error', enospc());
+
+      expect(failed.destroy).toHaveBeenCalledTimes(1);
+
+      appender.append(record);
+
+      expect(mockCreateWriteStream).toHaveBeenCalledTimes(2);
+      expect(reopened.write).toHaveBeenCalledWith('formatted\n');
+      expect(failed.write).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports errors from a reopened stream too', () => {
+      const failed = createMockStream();
+      const reopened = createMockStream();
+      mockCreateWriteStream.mockReturnValueOnce(failed).mockReturnValue(reopened);
+      const onWriteError = jest.fn();
+
+      const appender = new FileAppender({ format: () => '' }, 'mock://path/file.log', onWriteError);
+      appender.append(record);
+      failed.emit('error', enospc());
+      appender.append(record);
+
+      expect(() => reopened.emit('error', enospc())).not.toThrow();
+      expect(onWriteError).toHaveBeenCalledTimes(2);
     });
 
     it('lets a layout failure through instead of blaming the file', () => {

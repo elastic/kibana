@@ -1254,6 +1254,22 @@ describe('runtime audit log write failures', () => {
     audit.stop();
   });
 
+  it('reconfigures the logger only once, no matter how many writes fail before it goes off', () => {
+    const { audit, fileName, loggingConfigs } = setupWithFileAppender();
+    const { onWriteError } = auditAppender(loggingConfigs[0]);
+    const configCount = loggingConfigs.length;
+
+    // The appender now discards an errored stream and reopens the file, so records still in flight
+    // before the logger turns off each report a failure.
+    onWriteError!({ path: fileName, code: 'ENOSPC', reason: 'ENOSPC: no space left on device' });
+    onWriteError!({ path: fileName, code: 'ENOSPC', reason: 'ENOSPC: no space left on device' });
+    onWriteError!({ path: fileName, code: 'ENOSPC', reason: 'ENOSPC: no space left on device' });
+
+    expect(loggingConfigs).toHaveLength(configCount + 1);
+    expect(loggingConfigs.at(-1)!.loggers![0].level).toEqual('off');
+    audit.stop();
+  });
+
   it('always installs its own handler, ignoring anything an operator put in the appender config', () => {
     const operatorHandler = jest.fn();
     const auditHandler = jest.fn();

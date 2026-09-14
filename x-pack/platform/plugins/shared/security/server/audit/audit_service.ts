@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { distinctUntilKeyChanged, map, merge, shareReplay, Subject, withLatestFrom } from 'rxjs';
+import {
+  distinctUntilKeyChanged,
+  map,
+  merge,
+  shareReplay,
+  Subject,
+  take,
+  withLatestFrom,
+} from 'rxjs';
 
 import type {
   HttpServiceSetup,
@@ -111,6 +119,7 @@ export class AuditService {
     const state$ = merge(
       probed$,
       runtimeWriteAccess$.pipe(
+        take(1),
         withLatestFrom(probed$),
         map(([writeAccess, { features }]) => ({ features, writeAccess }))
       )

@@ -65,15 +65,19 @@ export class FileAppender implements DisposableAppender {
    * @param record `LogRecord` instance to be logged.
    */
   public append(record: LogRecord) {
-    if (this.outputStream === undefined) {
+    if (this.outputStream === undefined || this.outputStream.destroyed) {
       this.ensureDirectory(this.path);
       this.outputStream = createWriteStream(this.path, {
         encoding: 'utf8',
         flags: 'a',
       });
 
-      if (this.reportWriteError) {
-        this.outputStream.on('error', this.reportWriteError);
+      const reportWriteError = this.reportWriteError;
+      if (reportWriteError) {
+        this.outputStream.on('error', (error) => {
+          this.outputStream?.destroy();
+          reportWriteError(error);
+        });
       }
     }
 
