@@ -48,7 +48,6 @@ export const mockAiIndexService = (dest: AiIndexDest, managed = false): AiIndexS
     get: jest.fn().mockResolvedValue({ id: 'my-ai-index', dest, managed }),
   } as unknown as AiIndexService);
 
-/** The provenance `createMockStepContext` yields for the executing workflow. */
 export const mockKiWriter = { uri: 'workflow://wf-1', metadata: { version: 3, run_id: 'exec-1' } };
 
 /** Fresh telemetry deps (analytics service + logger mocks) for a KI step definition. */

@@ -177,7 +177,7 @@ describe('getUpdateKiStepDefinition', () => {
     );
   });
 
-  it('merges nested objects and replaces arrays when appending a revision', async () => {
+  it('merges object fields and replaces arrays when appending a revision', async () => {
     const existing = {
       ...storedKi,
       attributes: { owner: 'search', confidence: 0.4 },
