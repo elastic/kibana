@@ -17,7 +17,7 @@ export interface EuiBasicTableSortTypes {
 }
 
 export interface EuiBasicTableOnChange {
-  page: {
+  page?: {
     index: number;
     size: number;
   };
