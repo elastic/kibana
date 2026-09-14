@@ -66,6 +66,14 @@ curl -X POST "$KIBANA_URL/api/actions/events/.inboundWebhook/$CONNECTOR_ID" \
 
 A nested `payload.challenge` is emitted, not acked. A bad or rotated-away token returns **404** (fail-closed; same as unknown connector).
 
+## Who a matching workflow runs as
+
+The ingest token only authenticates the POST. After it is accepted, Actions decrypts the connector and emits with a fake request built from the last-saver Kibana API key on the `action` saved object. Matching workflows therefore run **as the last person who saved that inbound connector**, not as `kibana_system` and not as the workflow YAML author. Anyone who holds the ingest token can trigger work with that user's privileges.
+
+- Last save wins: inbound create/update remints the framework key and invalidates the previous one.
+- Rotate ingest token does **not** remint that identity.
+- Missing or undecryptable identity still returns **202** and does **not** emit.
+
 ## Rotate (first mint and later rotations)
 
 Mints a new token, invalidates the previous one immediately (if any), and returns `{ "ingest_token": "<token>" }` once. This is an internal UI route (`access: internal`); include `x-elastic-internal-origin` when calling it from curl. The Stack Management flyout rotates once after create to show the first token.
@@ -77,4 +85,4 @@ curl -u elastic:changeme -X POST \
   -H 'x-elastic-internal-origin: kibana'
 ```
 
-POST the hub with the old token → 404. Use the new token from the rotate response.
+POST the hub with the old token → 404. Use the new token from the rotate response. Rotate does not remint the last-saver identity.
