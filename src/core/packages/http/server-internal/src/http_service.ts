@@ -29,7 +29,9 @@ import type {
   IContextContainer,
   IContextProvider,
   IRouter,
+  HttpSelfUnauthorizedErrorHandler,
 } from '@kbn/core-http-server';
+import type { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type {
   InternalContextSetup,
   InternalContextPreboot,
@@ -81,6 +83,10 @@ export class HttpService
   private configSubscription?: Subscription;
   private currentConfig?: HttpConfig;
   private selfClient?: InternalHttpSelfService;
+  private selfClientUnauthorizedErrorHandler?: HttpSelfUnauthorizedErrorHandler;
+  private selfClientAttestationProvider?: (
+    credential: HTTPAuthorizationHeader
+  ) => Record<string, string>;
 
   private readonly log: Logger;
   private readonly env: Env;
@@ -213,6 +219,12 @@ export class HttpService
         Router.on('onPostValidate', cb);
       },
       getRegisteredDeprecatedApis: () => serverContract.getDeprecatedRoutes(),
+      setSelfClientUnauthorizedErrorHandler: (handler) => {
+        if (this.selfClientUnauthorizedErrorHandler) {
+          throw new Error('The self client unauthorized error handler was already set');
+        }
+        this.selfClientUnauthorizedErrorHandler = handler;
+      },
       externalUrl: new ExternalUrlConfig(config.externalUrl),
       createRouter: <Context extends RequestHandlerContextBase = RequestHandlerContextBase>(
         path: string,
@@ -257,9 +269,16 @@ export class HttpService
         kibanaVersion: this.env.packageInfo.version,
         log: this.log.get('self-client'),
         target: internalSetup.config.selfHttp.target,
+        // Resolved at call time: both are registered after the start contract is built.
+        getUnauthorizedErrorHandler: () => this.selfClientUnauthorizedErrorHandler,
+        getInternalCallerAttestationHeaders: (credential) =>
+          this.selfClientAttestationProvider?.(credential) ?? {},
       })),
       setRedactedSessionIdGetter: (getter) => {
         this.httpServer.setRedactedSessionIdGetter(getter);
+      },
+      setSelfClientInternalCallerAttestationProvider: (provider) => {
+        this.selfClientAttestationProvider = provider;
       },
     };
   }
