@@ -31,6 +31,12 @@ export interface TrendlineQueryCase {
   readonly groupByFields?: readonly string[];
   /** When set, unit consumers assert the generated metricFieldMap equals this record. */
   readonly expectedMetricFieldMap?: Readonly<Record<string, string>>;
+  /**
+   * When set, unit consumers assert these requested metric fields are reported
+   * as unavailable (not producible by the rewritten query, e.g. a secondary
+   * metric from a FORK branch other than the flattened one).
+   */
+  readonly expectedUnavailableMetricFields?: readonly string[];
 }
 
 export const buildTrendlineQueryCases = ({ index }: { index: string }): TrendlineQueryCase[] => {
@@ -197,6 +203,38 @@ export const buildTrendlineQueryCases = ({ index }: { index: string }): Trendlin
       expectedTimeField: 'time_bucket',
       expectedMetricFields: ['event_count'],
       metricFields: ['event_count'],
+    },
+    {
+      // primary metric (first entry) dictates branch selection; the secondary
+      // metric's branch is discarded and the field reported unavailable so the
+      // caller can drop its trendline layer column instead of referencing a
+      // column missing from the result table
+      description: 'FORK query with primary and secondary metrics from different branches',
+      sourceQuery: `FROM ${index} | FORK (STATS avg_bytes = AVG(bytes)) (STATS \`Event Count\` = COUNT(*))`,
+      expectedQuery: `FROM ${index} | STATS \`Event Count\` = COUNT(*) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
+      expectedTimeField: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+      expectedMetricFields: ['Event Count'],
+      metricFields: ['Event Count', 'avg_bytes'],
+      expectedUnavailableMetricFields: ['avg_bytes'],
+    },
+    {
+      description: 'FORK query with primary and secondary metrics from the same branch',
+      sourceQuery: `FROM ${index} | FORK (STATS avg_bytes = AVG(bytes), med_bytes = MEDIAN(bytes)) (STATS total = COUNT(*))`,
+      expectedQuery: `FROM ${index} | STATS avg_bytes = AVG(bytes), med_bytes = MEDIAN(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
+      expectedTimeField: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+      expectedMetricFields: ['avg_bytes', 'med_bytes'],
+      metricFields: ['avg_bytes', 'med_bytes'],
+      expectedUnavailableMetricFields: [],
+    },
+    {
+      // secondary metric bound to a BY grouping key counts as available output
+      description: 'STATS query with a secondary metric on a BY grouping key',
+      sourceQuery: `FROM ${index} | STATS total = COUNT(*) BY request`,
+      expectedQuery: `FROM ${index} | STATS total = COUNT(*) BY request, BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
+      expectedTimeField: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+      expectedMetricFields: ['total', 'request'],
+      metricFields: ['total', 'request'],
+      expectedUnavailableMetricFields: [],
     },
     {
       description: 'FORK query without metric fields falls back to the first STATS branch',

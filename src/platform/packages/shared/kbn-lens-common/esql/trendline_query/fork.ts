@@ -44,19 +44,40 @@ export const commandsHaveStats = (commands: ESQLCommand[]): boolean =>
       (command.name === 'fork' && getForkBranches(command).some(commandsHaveStats))
   );
 
-/** Returns the result column names produced by a STATS command's aggregations. */
-const getStatsResultColumns = (statsCommand: ESQLCommand): string[] => {
-  const columns: string[] = [];
-  for (const arg of statsCommand.args) {
-    if (Array.isArray(arg) || isOptionNode(arg)) continue;
-    if (isAssignment(arg) && isColumn(arg.args[0])) {
-      columns.push(arg.args[0].name);
-    } else if (isFunctionExpression(arg) || isColumn(arg)) {
-      columns.push(BasicPrettyPrinter.expression(arg));
-    }
-  }
-  return columns;
+/** Returns the result column name of a STATS aggregation or BY grouping expression. */
+const getExpressionResultColumn = (arg: ESQLCommand['args'][number]): string | undefined => {
+  if (Array.isArray(arg) || isOptionNode(arg)) return undefined;
+  if (isAssignment(arg) && isColumn(arg.args[0])) return arg.args[0].name;
+  if (isFunctionExpression(arg) || isColumn(arg)) return BasicPrettyPrinter.expression(arg);
+  return undefined;
 };
+
+/** Returns the result column names produced by a STATS command's aggregations. */
+const getStatsResultColumns = (statsCommand: ESQLCommand): string[] =>
+  statsCommand.args
+    .map(getExpressionResultColumn)
+    .filter((column): column is string => column !== undefined);
+
+/** Returns the output column names of a STATS command: aggregation results plus BY grouping keys. */
+const getStatsOutputColumns = (statsCommand: ESQLCommand): string[] => {
+  const byColumns = (statsCommand.args.find(isOptionNode)?.args ?? [])
+    .map(getExpressionResultColumn)
+    .filter((column): column is string => column !== undefined);
+  return [...getStatsResultColumns(statsCommand), ...byColumns];
+};
+
+/**
+ * Returns true when any of the produced columns still resolves to the given
+ * name after the renames in the remaining pipeline segment.
+ */
+const outputScopeContains = (
+  producedColumns: string[],
+  commandsAfterStats: ESQLCommand[],
+  columnName: string
+): boolean =>
+  producedColumns.some(
+    (column) => resolveTrackedColumn(commandsAfterStats, column).name === columnName
+  );
 
 /**
  * Returns true when the branch's output scope contains the given column:
@@ -67,26 +88,42 @@ const branchProducesColumn = (branch: ESQLCommand[], columnName: string): boolea
   const statsIndex = branch.findLastIndex((command) => command.name === 'stats');
   if (statsIndex === -1) return false;
 
-  const producedColumns = getStatsResultColumns(branch[statsIndex]);
-  const commandsAfterStats = branch.slice(statsIndex + 1);
-  return producedColumns.some(
-    (column) => resolveTrackedColumn(commandsAfterStats, column).name === columnName
+  return outputScopeContains(
+    getStatsResultColumns(branch[statsIndex]),
+    branch.slice(statsIndex + 1),
+    columnName
   );
 };
 
 /**
- * Selects the FORK branch to derive the trendline from: the first branch whose
- * output scope contains one of the requested metric columns, otherwise the
- * first branch containing a STATS command, otherwise the first branch.
+ * Returns true when the command list's output scope contains the given column.
+ * Unlike `branchProducesColumn`, BY grouping keys count as output, and a
+ * command list without STATS keeps all source fields in scope.
+ */
+export const commandsProduceColumn = (commands: ESQLCommand[], columnName: string): boolean => {
+  const statsIndex = commands.findLastIndex((command) => command.name === 'stats');
+  if (statsIndex === -1) return true;
+
+  return outputScopeContains(
+    getStatsOutputColumns(commands[statsIndex]),
+    commands.slice(statsIndex + 1),
+    columnName
+  );
+};
+
+/**
+ * Selects the FORK branch to derive the trendline from. Metric fields are
+ * checked in priority order (the first entry is the primary metric): the
+ * first branch producing the highest-priority metric column wins, so a
+ * secondary metric from an earlier branch cannot hijack the selection.
+ * Fallback: first branch containing a STATS command, then the first branch.
  */
 const selectForkBranch = (
   branches: ESQLCommand[][],
   metricFields?: string[]
 ): ESQLCommand[] | undefined => {
-  if (metricFields && metricFields.length > 0) {
-    const match = branches.find((branch) =>
-      metricFields.some((field) => branchProducesColumn(branch, field))
-    );
+  for (const field of metricFields ?? []) {
+    const match = branches.find((branch) => branchProducesColumn(branch, field));
     if (match) return match;
   }
   return branches.find((branch) => branch.some((c) => c.name === 'stats')) ?? branches[0];

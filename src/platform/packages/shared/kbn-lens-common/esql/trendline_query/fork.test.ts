@@ -49,6 +49,19 @@ describe('queryHasStatsCommand', () => {
 });
 
 describe('flattenForkCommands', () => {
+  // primary-first branch priority is covered end-to-end by the shared case
+  // matrix ('FORK query with primary and secondary metrics from different
+  // branches'); this pins the fallback ordering, which is not executable there
+  it('falls back to lower-priority metric fields when no branch produces the first', () => {
+    expect(
+      flatten('FROM index | FORK (STATS `Averagee` = AVG(bytes)) (STATS `Event Count` = COUNT())', [
+        'missing',
+        'Averagee',
+      ])
+      // pretty printer unquotes backtick idents that need no quoting
+    ).toBe('FROM index | STATS Averagee = AVG(bytes)');
+  });
+
   it('flattens a FORK nested inside a FORK branch', () => {
     expect(
       flatten('FROM index | FORK (FORK (STATS total = COUNT(*)) (WHERE bytes > 0)) (LIMIT 5)', [

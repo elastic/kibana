@@ -18,7 +18,7 @@ import {
   getTbucketResultColumn,
   getBucketResultColumnForField,
 } from './bucket';
-import { commandsHaveStats, flattenForkCommands } from './fork';
+import { commandsHaveStats, commandsProduceColumn, flattenForkCommands } from './fork';
 import { resolveTrackedColumn, trackColumnAndEnsureKept } from './scope_walker';
 
 export { buildTrendlineBucketExpression } from './bucket';
@@ -176,6 +176,13 @@ export interface TrendlineQueryWithMetricFieldMap {
   query: string;
   metricFieldMap: Map<string, string>;
   timeField: string;
+  /**
+   * Requested metric fields the rewritten query does not produce, e.g. a
+   * secondary metric from a FORK branch other than the flattened one. Callers
+   * must drop layer columns referencing these fields, because the trendline
+   * result table has no matching column.
+   */
+  unavailableMetricFields: string[];
 }
 
 /**
@@ -208,6 +215,10 @@ export const buildTrendlineQueryWithMetricFieldMap = (
     metricFields.forEach((field) => metricFieldMap.set(field, `AVG(${esql.col(field)})`));
   }
 
+  const unavailableMetricFields = sourceQueryHasStats
+    ? metricFields.filter((field) => !commandsProduceColumn(root.commands, field))
+    : [];
+
   const timeResultColumn = rewriteTrendlineAst(
     root,
     timeField,
@@ -219,5 +230,6 @@ export const buildTrendlineQueryWithMetricFieldMap = (
     query: BasicPrettyPrinter.print(root),
     metricFieldMap,
     timeField: timeResultColumn,
+    unavailableMetricFields,
   };
 };
