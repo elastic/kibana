@@ -91,7 +91,7 @@ const messagesOf = (events: TimelineEvent[] = []): string[] =>
     event.type === TimelineEventType.userMessage ? [event.data.message] : []
   );
 
-describe('ConversationService.appendContextMessage', () => {
+describe('ConversationService.appendUserMessage', () => {
   const es = elasticsearchServiceMock.createElasticsearchClient();
   const agentRegistry = createMockedAgentRegistry();
   let stored: ConversationProperties;
@@ -108,7 +108,7 @@ describe('ConversationService.appendContextMessage', () => {
   });
 
   const append = (message: string, attachments?: AttachmentInput[]) =>
-    service.appendContextMessage({ request, conversationId: 'conversation', message, attachments });
+    service.appendUserMessage({ request, conversationId: 'conversation', message, attachments });
 
   const readConversation = async () => {
     const client = await service.getScopedClient({ request });
@@ -164,7 +164,7 @@ describe('ConversationService.appendContextMessage', () => {
 
   it('defaults the message and attachments, stamping the event with the current time', async () => {
     const before = Date.now();
-    const conversation = await service.appendContextMessage({
+    const conversation = await service.appendUserMessage({
       request,
       conversationId: 'conversation',
     });

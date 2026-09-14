@@ -304,7 +304,7 @@ export const conversePayloadSchema = schema.object({
   ),
 });
 
-export const contextMessagePayloadSchema = schema.object({
+export const userMessagePayloadSchema = schema.object({
   trigger_mode: schema.literal('never'),
   conversation_id: conversationIdSchema,
   input: inputSchema,
@@ -312,11 +312,11 @@ export const contextMessagePayloadSchema = schema.object({
 });
 
 export const chatPayloadSchema = schema.oneOf([
-  contextMessagePayloadSchema,
+  userMessagePayloadSchema,
   conversePayloadSchema.extends({
     trigger_mode: schema.oneOf([schema.literal('always')], {
       defaultValue: 'always',
-      meta: { description: 'Use never to append a context message without executing the agent.' },
+      meta: { description: 'Use never to append a user message without executing the agent.' },
     }),
   }),
 ]);

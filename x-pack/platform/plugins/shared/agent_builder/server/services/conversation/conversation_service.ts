@@ -32,7 +32,7 @@ import { userMessageActor } from './client/rounds_to_events';
 import type { ConversationWithPermissions } from '../../../common/http_api/conversations';
 import type { ConversationEventBus } from '../../workflows/triggers/conversation_event_bus';
 
-export interface AppendContextMessageOptions {
+export interface AppendUserMessageOptions {
   request: KibanaRequest;
   conversationId: string;
   message?: string;
@@ -45,7 +45,7 @@ export interface ConversationService {
     request: KibanaRequest;
     origin?: ExecutionConversationOrigin;
   }): Promise<ConversationRoundAuthor | undefined>;
-  appendContextMessage(options: AppendContextMessageOptions): Promise<ConversationWithPermissions>;
+  appendUserMessage(options: AppendUserMessageOptions): Promise<ConversationWithPermissions>;
 }
 
 interface ConversationServiceDeps {
@@ -104,17 +104,17 @@ export class ConversationServiceImpl implements ConversationService {
     });
   }
 
-  async appendContextMessage({
+  async appendUserMessage({
     request,
     conversationId,
     message = '',
     attachments = [],
-  }: AppendContextMessageOptions): Promise<ConversationWithPermissions> {
+  }: AppendUserMessageOptions): Promise<ConversationWithPermissions> {
     const client = await this.getScopedClient({ request });
     const conversation = await client.get(conversationId);
 
     if (!isEventsNativeVersion(conversation.schema_version)) {
-      throw createInternalError('Standalone messages require canonical event storage');
+      throw createInternalError('User messages require canonical event storage');
     }
 
     const snapshot = conversation.attachments ?? [];

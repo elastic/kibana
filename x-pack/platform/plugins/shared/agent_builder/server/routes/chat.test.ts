@@ -13,7 +13,7 @@ import { internalApiPath, publicApiPath } from '../../common/constants';
 import {
   callbackConversePayloadSchema,
   chatPayloadSchema,
-  contextMessagePayloadSchema,
+  userMessagePayloadSchema,
   conversePayloadSchema,
   promptResponseEntrySchema,
   registerChatRoutes,
@@ -156,10 +156,10 @@ describe('chatPayloadSchema', () => {
   });
 });
 
-describe('contextMessagePayloadSchema', () => {
-  it('accepts only context message fields', () => {
+describe('userMessagePayloadSchema', () => {
+  it('accepts only user message fields', () => {
     expect(() =>
-      contextMessagePayloadSchema.validate({
+      userMessagePayloadSchema.validate({
         trigger_mode: 'never',
         conversation_id: '00000000-0000-4000-8000-000000000001',
         input: 'context',
@@ -169,14 +169,14 @@ describe('contextMessagePayloadSchema', () => {
   });
 
   it('requires conversation_id', () => {
-    expect(() => contextMessagePayloadSchema.validate({ trigger_mode: 'never' })).toThrow(
+    expect(() => userMessagePayloadSchema.validate({ trigger_mode: 'never' })).toThrow(
       /conversation_id/
     );
   });
 
   it.each(['agent_id', 'access_control', 'read_only', 'connector_id'])('rejects %s', (field) => {
     expect(() =>
-      contextMessagePayloadSchema.validate({
+      userMessagePayloadSchema.validate({
         trigger_mode: 'never',
         conversation_id: '00000000-0000-4000-8000-000000000001',
         input: 'context',

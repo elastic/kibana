@@ -43,11 +43,10 @@ export interface ChatRequestBodyPayload {
 }
 
 /**
- * Body payload for a context message request (`trigger_mode: 'never'`), which persists a message
+ * Body payload for a user message request (`trigger_mode: 'never'`), which persists a message
  * on an existing conversation without executing the agent.
  */
-export interface ContextMessagePayload
-  extends Pick<ChatRequestBodyPayload, 'input' | 'attachments'> {
+export interface UserMessagePayload extends Pick<ChatRequestBodyPayload, 'input' | 'attachments'> {
   trigger_mode: 'never';
   conversation_id: string;
 }

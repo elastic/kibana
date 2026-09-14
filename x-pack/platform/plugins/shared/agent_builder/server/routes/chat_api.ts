@@ -15,7 +15,7 @@ import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type {
   ChatRequestBodyPayload,
   ChatConverseResponse,
-  ContextMessagePayload,
+  UserMessagePayload,
 } from '../../common/http_api/chat';
 import { chatApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
@@ -24,28 +24,28 @@ import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
 import { getConverseHelpers } from './converse_helpers';
 import { findConversationEvent } from '../services/execution/utils/chat_response';
-import { chatPayloadSchema, contextMessagePayloadSchema, conversePayloadSchema } from './chat';
+import { chatPayloadSchema, userMessagePayloadSchema, conversePayloadSchema } from './chat';
 
 /**
  * Validates a `trigger_mode: 'never'` chat request, rejecting execution-only options and
  * requests with neither input nor attachments.
  */
-const validateContextMessagePayload = (payload: ChatRequestBodyPayload): ContextMessagePayload => {
-  let contextMessagePayload: ContextMessagePayload;
+const validateUserMessagePayload = (payload: ChatRequestBodyPayload): UserMessagePayload => {
+  let userMessagePayload: UserMessagePayload;
 
   try {
-    contextMessagePayload = contextMessagePayloadSchema.validate(payload);
+    userMessagePayload = userMessagePayloadSchema.validate(payload);
   } catch (error) {
     throw createBadRequestError(error instanceof Error ? error.message : String(error));
   }
 
-  const { input, attachments } = contextMessagePayload;
+  const { input, attachments } = userMessagePayload;
 
   if (!input?.trim() && !attachments?.length) {
-    throw createBadRequestError('Context message requests require input or attachments');
+    throw createBadRequestError('User message requests require input or attachments');
   }
 
-  return contextMessagePayload;
+  return userMessagePayload;
 };
 
 /** Events-native chat API */
@@ -70,7 +70,7 @@ export function registerChatApiRoutes({
       access: 'public',
       summary: 'Send chat message',
       description:
-        'Send a message to an agent and receive the full conversation, including its event timeline. This synchronous endpoint waits for the agent to finish before returning. With trigger_mode: never, appends a context message without execution and returns the updated conversation; execution-only options are rejected.',
+        'Send a message to an agent and receive the full conversation, including its event timeline. This synchronous endpoint waits for the agent to finish before returning. With trigger_mode: never, appends a user message without execution and returns the updated conversation; execution-only options are rejected.',
       options: {
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,
@@ -98,7 +98,7 @@ export function registerChatApiRoutes({
               conversation_id: conversationId,
               input,
               attachments: attachmentInputs,
-            } = validateContextMessagePayload(payload);
+            } = validateUserMessagePayload(payload);
 
             const { attachments: attachmentsService, conversations: conversationsService } =
               getInternalServices();
@@ -110,7 +110,7 @@ export function registerChatApiRoutes({
               throw createBadRequestError(error instanceof Error ? error.message : String(error));
             }
 
-            const body = await conversationsService.appendContextMessage({
+            const body = await conversationsService.appendUserMessage({
               request,
               conversationId,
               message: input,

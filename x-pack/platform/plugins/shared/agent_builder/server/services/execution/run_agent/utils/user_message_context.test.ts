@@ -44,7 +44,7 @@ const context = () => {
   return value;
 };
 
-describe('context messages', () => {
+describe('user messages', () => {
   it('preserves ordered, attributed human inputs without artificial assistant responses', async () => {
     const events = [message('a', 'Pool limit is 200'), message('b', 'Errors recovered')];
     const timeline = eventsForContext(eventsNativeConversation(events));
@@ -65,7 +65,7 @@ describe('context messages', () => {
     expect(groupTimelineRounds(conversation.timeline)).toEqual([]);
   });
 
-  it('preserves stored order when context messages and executions share a timestamp', () => {
+  it('preserves stored order when user messages and executions share a timestamp', () => {
     const timestamp = '2026-01-01T00:00:00.000Z';
     const timeline = eventsForContext(
       eventsNativeConversation([
@@ -94,7 +94,7 @@ describe('context messages', () => {
     expect(groupTimelineEntries(normalized).map((entry) => entry.userMessage.id)).toEqual(['a']);
   });
 
-  it('keeps context messages through HITL normalization', () => {
+  it('keeps user messages through HITL normalization', () => {
     const timeline = eventsForContext(
       eventsNativeConversation([...pausedAndResumedRoundTimeline(), message('a'), message('b')])
     );

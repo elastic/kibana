@@ -224,18 +224,18 @@ describe('registerChatApiRoutes', () => {
   });
 });
 
-describe('context message acknowledgements', () => {
+describe('user message acknowledgements', () => {
   it('persists through sync converse without execution setup', async () => {
     const { router, handlers } = captureHandlers();
     const conversation = { id: 'conv-1', events: [{ id: 'message-1' }] };
-    const appendContextMessage = jest.fn().mockResolvedValue(conversation);
+    const appendUserMessage = jest.fn().mockResolvedValue(conversation);
     const executeAgent = jest.fn();
     const validateCallbackUrl = jest.fn();
     const getStartServices = jest.fn();
     const services = {
       conversations: {
         getScopedClient: async () => ({ get: async () => conversation }),
-        appendContextMessage,
+        appendUserMessage,
       },
       attachments: {
         getTypeDefinition: jest.fn(),
@@ -275,7 +275,7 @@ describe('context message acknowledgements', () => {
     );
     expect(result.status).toBe(200);
     expect(services.attachments.validate).toHaveBeenCalledWith(undefined, expect.any(Object));
-    expect(appendContextMessage).toHaveBeenCalledTimes(1);
+    expect(appendUserMessage).toHaveBeenCalledTimes(1);
     expect(result.payload).toEqual(conversation);
     expect(executeAgent).not.toHaveBeenCalled();
     expect(validateCallbackUrl).not.toHaveBeenCalled();
@@ -295,7 +295,7 @@ describe('context message acknowledgements', () => {
     'browser_api_tools',
     'configuration_overrides',
     'project_routing',
-  ])('rejects %s before persisting a context message request', async (field) => {
+  ])('rejects %s before persisting a user message request', async (field) => {
     const { router, handlers } = captureHandlers();
     const getInternalServices = jest.fn();
 
@@ -325,13 +325,13 @@ describe('context message acknowledgements', () => {
     expect(getInternalServices).not.toHaveBeenCalled();
   });
 
-  it('returns a bad request when context message attachments are invalid', async () => {
+  it('returns a bad request when user message attachments are invalid', async () => {
     const { router, handlers } = captureHandlers();
-    const appendContextMessage = jest.fn();
+    const appendUserMessage = jest.fn();
     const services = {
       conversations: {
         getScopedClient: async () => ({ get: async () => ({}) }),
-        appendContextMessage,
+        appendUserMessage,
       },
       attachments: {
         getTypeDefinition: jest.fn(),
@@ -365,10 +365,10 @@ describe('context message acknowledgements', () => {
     );
 
     expect(result.status).toBe(400);
-    expect(appendContextMessage).not.toHaveBeenCalled();
+    expect(appendUserMessage).not.toHaveBeenCalled();
   });
 
-  it('requires input or attachments before persisting a context message request', async () => {
+  it('requires input or attachments before persisting a user message request', async () => {
     const { router, handlers } = captureHandlers();
     const getInternalServices = jest.fn();
 
