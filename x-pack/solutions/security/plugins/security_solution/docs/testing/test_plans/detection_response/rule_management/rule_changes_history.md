@@ -38,20 +38,21 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [View the rule change history](#view-the-rule-change-history)
     - [**Scenario: Opening the Rule Changes History page from the Rule Details page**](#scenario-opening-the-rule-changes-history-page-from-the-rule-details-page)
     - [**Scenario: Listing the newest change items first**](#scenario-listing-the-newest-change-items-first)
-    - [**Scenario: Auto-selecting the newest change item**](#scenario-auto-selecting-the-newest-change-item)
+    - [**Scenario: Auto-selecting the newest diffable change item**](#scenario-auto-selecting-the-newest-diffable-change-item)
     - [**Scenario: Showing details for a selected change item**](#scenario-showing-details-for-a-selected-change-item)
     - [**Scenario: Showing a diff against the previous revision**](#scenario-showing-a-diff-against-the-previous-revision)
     - [**Scenario: Loading more change items on scroll**](#scenario-loading-more-change-items-on-scroll)
-    - [**Scenario: A single change touches many fields should have "+N" overflow badge**](#scenario-a-single-change-touches-many-fields-should-have-n-overflow-badge)
+    - [**Scenario: A single change that touches many fields shows an "N changes" count**](#scenario-a-single-change-that-touches-many-fields-shows-an-n-changes-count)
     - [**Scenario: Explaining when history tracking started**](#scenario-explaining-when-history-tracking-started)
   - [Restore a rule revision](#restore-a-rule-revision)
     - [**Scenario: Restore a rule to a selected historical revision**](#scenario-restore-a-rule-to-a-selected-historical-revision)
     - [**Scenario: Restore applies to custom and prebuilt rules**](#scenario-restore-applies-to-custom-and-prebuilt-rules)
     - [**Scenario: Restoring the current revision**](#scenario-restoring-the-current-revision)
-    - [**Scenario: Restoring a snapshot whose action is not diffable**](#scenario-restoring-a-snapshot-whose-action-is-not-diffable)
+    - [**Scenario: Restore is only offered on diffable change items**](#scenario-restore-is-only-offered-on-diffable-change-items)
+    - [**Scenario: Restore conflict shows a modal with review and restore-anyway actions**](#scenario-restore-conflict-shows-a-modal-with-review-and-restore-anyway-actions)
     - [**Scenario: Conflict-retry restore is distinguished in telemetry**](#scenario-conflict-retry-restore-is-distinguished-in-telemetry)
     - [**Scenario: Restoring a rule that was never created**](#scenario-restoring-a-rule-that-was-never-created)
-    - [**Scenario: Restoring to a non-existent revision should fail**](#scenario-restoring-to-a-non-existent-revision-should-fail)
+    - [**Scenario: Restoring to a non-existent changeId should fail**](#scenario-restoring-to-a-non-existent-changeid-should-fail)
     - [**Scenario: Restoring a deleted rule**](#scenario-restoring-a-deleted-rule)
   - [Concurrency control](#concurrency-control)
     - [**Scenario: Restore with a stale revision is rejected**](#scenario-restore-with-a-stale-revision-is-rejected)
@@ -64,6 +65,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: Rejecting invalid pagination parameters**](#scenario-rejecting-invalid-pagination-parameters)
     - [**Scenario: Showing an error state when history fails to load**](#scenario-showing-an-error-state-when-history-fails-to-load)
   - [Edge cases](#edge-cases)
+    - [**Scenario: An unreadable snapshot is skipped and the rest of history still loads**](#scenario-an-unreadable-snapshot-is-skipped-and-the-rest-of-history-still-loads)
     - [**Scenario: History remains accessible after rule deletion**](#scenario-history-remains-accessible-after-rule-deletion)
     - [**Scenario: Rule with no captured history**](#scenario-rule-with-no-captured-history)
     - [**Scenario: History is empty when the rule's type metadata cannot be resolved**](#scenario-history-is-empty-when-the-rules-type-metadata-cannot-be-resolved)
@@ -198,7 +200,7 @@ And the items should include metadata describing the bulk operation
 Given a user "userA" is authenticated
 When userA updates a rule
 And opens the Rule Changes History page for that rule
-Then the newest change item should attribute the change to userA's login
+Then the newest change item should attribute the change to userA's display name
 And user.id should be present when the auth realm provides a profile id
 ```
 
@@ -287,23 +289,23 @@ Given a rule has been changed multiple times at distinct timestamps
 When a user opens the Rule Changes History page
 Then the change items should be listed ordered by date-time descending
 And the first item should correspond to the most recent change
-And each row should show the date-time, user, action badge, and changed field names
+And each row should show the date-time, user, action badge, and an "N changes" count
 ```
 
-#### **Scenario: Auto-selecting the newest change item**
+#### **Scenario: Auto-selecting the newest diffable change item**
 
 **Automation**: 1 e2e test.
 
 ```Gherkin
 Given a rule with multiple captured change items
 When a user opens the Rule Changes History page
-Then the first (newest) change item should be auto-selected
+Then the first (newest) diffable change item should be auto-selected
 And its details and diff should be rendered without any further interaction
 When a user open a rule edit page
 And changes any fields
 And saves the rule
 And a user navigated to "Rule Changes History" page for the rule
-Then the first (newest) change item corresponding to the latest rule edit should be auto-selected
+Then the first (newest) diffable change item corresponding to the latest rule edit should be auto-selected
 And its details and diff should be rendered without any further interaction
 ```
 
@@ -345,17 +347,14 @@ And there should be no duplicate or skipped items across pages
 And scrolling should continue until all items are loaded
 ```
 
-#### **Scenario: A single change touches many fields should have "+N" overflow badge**
+#### **Scenario: A single change that touches many fields shows an "N changes" count**
 
 **Automation**: 1 e2e test.
 
 ```Gherkin
-Given a change item that modified more fields than the inline changed-fields limit
-  (e.g. a bulk edit or prebuilt rule upgrade)
+Given a change item that modified several fields (e.g. a bulk edit or prebuilt rule upgrade)
 When a user views that item in the timeline
-Then the first few changed-field badges should be shown inline
-And the remainder should be collapsed into a trailing "+N" overflow badge
-And the row height should remain stable
+Then the row should show an "N changes" count matching the number of user-facing field changes
 ```
 
 #### **Scenario: Explaining when history tracking started**
@@ -381,6 +380,7 @@ This section covers the **Rule Restore** feature ([epic](https://github.com/elas
 Given a rule with multiple captured revisions in its history
 When a user restores the rule to an earlier revision
 Then the rule's current configuration should match that revision's snapshot
+And the rule's enabled state should be unchanged
 And the rule's revision should be incremented (a new revision is created)
 And the existing history should be preserved (no items removed)
 And a new change item with action "rule_restore" should be captured as the newest item
@@ -417,15 +417,33 @@ Then the request should be handled gracefully without corrupting the rule
 And the rule's current configuration should remain unchanged
 ```
 
-#### **Scenario: Restoring a snapshot whose action is not diffable**
+#### **Scenario: Restore is only offered on diffable change items**
 
 **Automation**: 1 e2e test.
 
 ```Gherkin
-Given a change item whose action is not eligible for diffing (e.g. rule_enable, rule_disable, rule_snooze, rule_unsnooze, rule_update_api_key, rule_delete)
-When a user opens the restore actions menu for that item
-Then the restore action should still be available and should succeed
-  even though the item itself cannot be selected to view a diff
+Given a rule with a mix of diffable and non-diffable change items
+When a user opens the Rule Changes History page
+Then the newest row should not offer a restore action
+And rows whose action is not diffable (e.g. rule_enable, rule_disable, rule_snooze, rule_unsnooze, rule_update_api_key, rule_delete) should not offer a restore action
+And other diffable rows (`rule_update`, `rule_create`, `rule_install`, `rule_upgrade`, `rule_duplicate`, `rule_import`, `rule_revert`, `rule_restore`) should offer restore if the user has rule write privileges
+And a user without rule write privileges should see no restore action on any row
+```
+
+#### **Scenario: Restore conflict shows a modal with review and restore-anyway actions**
+
+**Automation**: 1 e2e test.
+
+```Gherkin
+Given a restore attempt that fails with a 409 Conflict
+Then a conflict modal should be shown
+And it should offer Cancel, Review changes, and Restore anyway
+When the rule was deleted (no current revision)
+Then the modal copy should describe a deleted-rule conflict
+When the user chooses Review changes
+Then the modal should close and the history list should refresh
+When the user chooses Restore anyway
+Then the restore should be retried and succeed or fail without a second modal
 ```
 
 #### **Scenario: Conflict-retry restore is distinguished in telemetry**
@@ -450,13 +468,13 @@ When a user requests a restore for a ruleId that has no associated history
 Then the API should return a 404 Not Found response
 ```
 
-#### **Scenario: Restoring to a non-existent revision should fail**
+#### **Scenario: Restoring to a non-existent changeId should fail**
 
 **Automation**: 1 integration test.
 
 ```Gherkin
 Given a rule exists
-When a user requests a restore to a revision that is not present in the rule's history
+When a user requests a restore with a changeId that is not present in the rule's history
 Then the API should return a 404 Not Found response
 And the rule should remain unchanged
 ```
@@ -470,7 +488,7 @@ Given a rule was created and then deleted
 And the rule has at least one captured change item
 When a user requests a restore of that rule to a captured revision
   And omits the revision field (signalling the caller expects the rule to be absent)
-Then the API should recreate the rule from the historical snapshot and return 200
+Then the API should recreate the rule from the historical snapshot as disabled, and return 200
 And a new change item with action "rule_restore" should be captured
 ```
 
@@ -528,8 +546,9 @@ And no rule should be recreated
 ```Gherkin
 Given the "Enable detection rule changes history" advanced setting is disabled
 When a user makes changes to a rule
-Then no history should be captures
+Then no history should be captured
 And the get history API should return a 403 Forbidden response
+And the restore API should return a 403 Forbidden response
 ```
 
 ### Error handling
@@ -578,6 +597,21 @@ And the view should not display a partial or stale timeline as if it were comple
 ```
 
 ### Edge cases
+
+#### **Scenario: An unreadable snapshot is skipped and the rest of history still loads**
+
+**Automation**: 1 integration test (needs a seeded invalid snapshot; not a normal API write).
+
+```Gherkin
+ Given a rule with several captured change items
+ And one of those items has a snapshot that cannot be hydrated
+   (e.g. corrupt or schema-incompatible stored JSON)
+ When a user requests the rule's history
+ Then the API should return a 200 response
+ And the unreadable item should be omitted
+ And the remaining change items should still be returned
+ And the request should not fail the whole history response
+```
 
 #### **Scenario: History remains accessible after rule deletion**
 
@@ -719,7 +753,7 @@ And the rule should remain unchanged
 
 **Automation**: 1 integration test per case.
 
-Restore is subject to the same field-level write checks as a regular rule update: it fails with 403 if the user lacks the sub-feature privilege for a field present in the restored snapshot, independent of the top-level rules-write privilege used above. Every restore also carries `enabled`, so the "enable/disable rules" privilege is required on every restore, not only when explicitly toggling a rule's status.
+Restore is subject to the same field-level write checks as a regular rule update: it fails with 403 if the user lacks the sub-feature privilege for a field present in the restored snapshot, independent of the top-level rules-write privilege used above.
 
 ```Gherkin
 Given a user missing the <sub-feature privilege> privilege
@@ -733,7 +767,6 @@ And the rule should remain unchanged
 
 | `<sub-feature privilege>`      | `<field>`              |
 | ------------------------------ | ---------------------- |
-| Enable/disable rules           | `enabled` (always set) |
 | Edit exceptions                | `exceptions_list`      |
 | Edit custom highlighted fields | `investigation_fields` |
 | Edit investigation guides      | `note`                 |
