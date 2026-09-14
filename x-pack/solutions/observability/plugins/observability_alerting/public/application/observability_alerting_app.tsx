@@ -6,11 +6,16 @@
  */
 
 import type { CoreStart, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
-import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
+import type { AlertingV2PublicStart, PrivilegeCheck } from '@kbn/alerting-v2-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { OBSERVABILITY_ALERTING_APP_ID } from '@kbn/deeplinks-observability';
+import {
+  OBSERVABILITY_ALERTS_FEATURE_ID,
+  STACK_ALERTS_ONLY_FEATURE_ID,
+  AlertConsumers,
+} from '@kbn/rule-data-utils';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
 import { EuiPageSection } from '@elastic/eui';
 import {
@@ -21,6 +26,19 @@ import {
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from '../constants';
+
+const ALERTING_V2_FEATURE_IDS: Record<string, string> = {
+  rules: 'alerting_v2_rules',
+  alerts: 'alerting_v2_alerts',
+  actionPolicies: 'alerting_v2_action_policies',
+  executionHistory: 'alerting_v2_execution_history',
+};
+
+const V1_ALERTING_FEATURE_IDS: readonly string[] = [
+  OBSERVABILITY_ALERTS_FEATURE_ID,
+  STACK_ALERTS_ONLY_FEATURE_ID,
+  AlertConsumers.LOGS,
+];
 
 interface ObservabilityAlertingAppProps {
   coreStart: CoreStart;
@@ -81,6 +99,24 @@ export const ObservabilityAlertingApp = ({
     [createAlertingV2HostApp]
   );
 
+  const privilegeCheck: PrivilegeCheck = useCallback(
+    (_features, capability) => {
+      const caps = coreStart.application.capabilities;
+      const v1CapKey = capability === 'all' ? 'write' : 'show';
+      const hasV1 = V1_ALERTING_FEATURE_IDS.some(
+        (featureId) => caps[featureId]?.[v1CapKey] === true
+      );
+
+      const v2CapKey = capability === 'all' ? 'all' : 'read';
+      const hasV2 = _features.every(
+        (f) => caps[ALERTING_V2_FEATURE_IDS[f]]?.[v2CapKey] === true
+      );
+
+      return hasV1 || hasV2;
+    },
+    [coreStart]
+  );
+
   return (
     <Routes>
       <Route exact path="/">
@@ -88,7 +124,12 @@ export const ObservabilityAlertingApp = ({
       </Route>
       <Route path={OBSERVABILITY_ALERTING_INBOX_PATH}>
         <EuiPageSection paddingSize="m">
-          <EpisodesPage coreStart={coreStart} setBreadcrumbs={setBreadcrumbs} hostApp={hostApp} />
+          <EpisodesPage
+            coreStart={coreStart}
+            setBreadcrumbs={setBreadcrumbs}
+            hostApp={hostApp}
+            privilegeCheck={privilegeCheck}
+          />
         </EuiPageSection>
       </Route>
       <Route path={OBSERVABILITY_ALERTING_RULES_V1_PATH}>
@@ -103,7 +144,12 @@ export const ObservabilityAlertingApp = ({
       </Route>
       <Route path={OBSERVABILITY_ALERTING_RULES_V2_PATH}>
         <EuiPageSection paddingSize="m">
-          <RulesPage coreStart={coreStart} setBreadcrumbs={setBreadcrumbs} hostApp={hostApp} />
+          <RulesPage
+            coreStart={coreStart}
+            setBreadcrumbs={setBreadcrumbs}
+            hostApp={hostApp}
+            privilegeCheck={privilegeCheck}
+          />
         </EuiPageSection>
       </Route>
       <Route path={OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH}>
@@ -112,6 +158,7 @@ export const ObservabilityAlertingApp = ({
             coreStart={coreStart}
             setBreadcrumbs={setBreadcrumbs}
             hostApp={hostApp}
+            privilegeCheck={privilegeCheck}
           />
         </EuiPageSection>
       </Route>
@@ -121,6 +168,7 @@ export const ObservabilityAlertingApp = ({
             coreStart={coreStart}
             setBreadcrumbs={setBreadcrumbs}
             hostApp={hostApp}
+            privilegeCheck={privilegeCheck}
           />
         </EuiPageSection>
       </Route>
@@ -130,6 +178,7 @@ export const ObservabilityAlertingApp = ({
             coreStart={coreStart}
             setBreadcrumbs={setBreadcrumbs}
             hostApp={hostApp}
+            privilegeCheck={privilegeCheck}
           />
         </EuiPageSection>
       </Route>
