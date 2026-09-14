@@ -7,9 +7,10 @@
 
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiText, EuiButton, EuiEmptyPrompt, EuiPageSection } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
+import { filledPageSectionContentCss } from './empty_states/layout';
 import { useTrialStatus } from '../hooks/use_trial_status';
 import { LoadingPrompt } from './loading_page';
 import { PageTemplate } from './page_template';
@@ -19,9 +20,9 @@ const loadingMessage = i18n.translate('xpack.infra.ml.splash.loadingMessage', {
   defaultMessage: 'Checking license...',
 });
 
-export const SubscriptionSplashPage: React.FC<LazyObservabilityPageTemplateProps> = (
-  templateProps
-) => {
+export const SubscriptionSplashPage: React.FC<
+  LazyObservabilityPageTemplateProps & { header?: React.ReactNode }
+> = ({ header, pageHeader, ...templateProps }) => {
   const { loadState, isTrialAvailable, checkTrialAvailability } = useTrialStatus();
   const manageLicenseURL = useLicenseUrl();
 
@@ -29,8 +30,36 @@ export const SubscriptionSplashPage: React.FC<LazyObservabilityPageTemplateProps
     checkTrialAvailability();
   }, [checkTrialAvailability]);
 
+  const renderWithOptionalHeader = (body: React.ReactNode) => {
+    if (!header) {
+      return (
+        <PageTemplate {...templateProps} pageHeader={pageHeader} isEmptyState>
+          {body}
+        </PageTemplate>
+      );
+    }
+
+    return (
+      <PageTemplate
+        {...templateProps}
+        pageSectionProps={{
+          paddingSize: 'none',
+          contentProps: {
+            css: filledPageSectionContentCss,
+          },
+        }}
+      >
+        {header}
+        <EuiPageSection alignment="center" grow>
+          {body}
+        </EuiPageSection>
+      </PageTemplate>
+    );
+  };
+
   if (loadState === 'pending') {
-    return <LoadingPrompt message={loadingMessage} />;
+    const pendingPrompt = <LoadingPrompt message={loadingMessage} />;
+    return header ? renderWithOptionalHeader(pendingPrompt) : pendingPrompt;
   }
 
   const canStartTrial = isTrialAvailable && loadState === 'resolved';
@@ -94,19 +123,17 @@ export const SubscriptionSplashPage: React.FC<LazyObservabilityPageTemplateProps
     );
   }
 
-  return (
-    <PageTemplate {...templateProps} isEmptyState>
-      <EuiEmptyPrompt
-        iconType={'chartLine'}
-        title={<h2>{title}</h2>}
-        body={
-          <EuiText>
-            <p>{description}</p>
-          </EuiText>
-        }
-        actions={cta}
-      />
-    </PageTemplate>
+  return renderWithOptionalHeader(
+    <EuiEmptyPrompt
+      iconType={'chartLine'}
+      title={<h2>{title}</h2>}
+      body={
+        <EuiText>
+          <p>{description}</p>
+        </EuiText>
+      }
+      actions={cta}
+    />
   );
 };
 

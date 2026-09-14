@@ -26,6 +26,12 @@ export const INFRA_EBT_ACTIONS = {
   CREATE_METRIC_THRESHOLD_RULE: 'createMetricThresholdRule',
   /** User intends to create a custom threshold rule. */
   CREATE_CUSTOM_THRESHOLD_RULE: 'createCustomThresholdRule',
+  /** User intends to create a log threshold rule. */
+  CREATE_LOG_THRESHOLD_RULE: 'createLogThresholdRule',
+  /** User intends to recreate a logs ML job. */
+  RECREATE_ML_JOB: 'recreateMlJob',
+  /** User intends to open the Machine Learning anomaly explorer. */
+  ANALYZE_IN_ML: 'analyzeInMl',
   /** User intends to manage existing rules. */
   MANAGE_RULES: 'manageRules',
   /** User intends to open Metrics settings. */
