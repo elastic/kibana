@@ -16,8 +16,6 @@
  * ALERTZERO_WATCH_WORKFLOW_IDS. The eval asserts this exact document is present — it does not create or
  * carry its own copy, so eval and production cannot drift.
  */
-import { platformCoreTools } from '@kbn/agent-builder-common/tools';
-
 export { ALERTZERO_RULE_CREATION_WORKFLOW_ID as RULE_CREATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 
 /**
@@ -38,23 +36,13 @@ export const REVIEW_STEP_ID = 'review_creation';
 export const RULE_CREATION_TOOL_ID = 'security.create_detection_rule';
 
 /**
- * Skill the workflow's `ai.agent` step is instructed to route through. Consumed by the
- * Tool Routing evaluator (src/evaluators/tool_routing.ts).
+ * Skill the workflow's `ai.agent` step is instructed to route through. Its registered tool ids
+ * are read from the running stack at setup (see workflow_fixture.ts) for the Trajectory evaluators.
  */
 export const RULE_CREATION_SKILL_ID = 'detection-rule-edit';
 
-// Inlined like RULE_CREATION_TOOL_ID: the source constants live in the security_solution plugin.
-export const SECURITY_LABS_SEARCH_TOOL_ID = 'security.security_labs_search';
-export const RULE_PREVIEW_TOOL_ID = 'security.run_rule_preview';
-
-/** Mirrors `getRegistryTools` of the detection-rule-edit skill; keep in sync. */
-export const SKILL_REGISTRY_TOOL_IDS: ReadonlySet<string> = new Set([
-  RULE_CREATION_TOOL_ID,
-  SECURITY_LABS_SEARCH_TOOL_ID,
-  platformCoreTools.generateEsql,
-  platformCoreTools.productDocumentation,
-  RULE_PREVIEW_TOOL_ID,
-]);
+/** Public Agent Builder API version (`Elastic-Api-Version` header). */
+export const AGENT_BUILDER_API_VERSION = '2023-10-31';
 
 // Provisional: sized from the skill's prescribed path, not from sampled traces.
 export const TRAJECTORY_MAX_TOOL_CALLS = 8;

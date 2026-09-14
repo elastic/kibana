@@ -15,11 +15,57 @@ import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
+  AGENT_BUILDER_API_VERSION,
+  RULE_CREATION_SKILL_ID,
   RULE_CREATION_WORKFLOW_ID,
   WORKFLOWS_API_VERSION,
   DRAFT_STEP_ID,
   REVIEW_STEP_ID,
 } from './constants';
+
+/**
+ * The tool ids the detection-rule-edit skill registers on the stack under test. Read live rather
+ * than pinned: the skill's list is conditional (rule preview is feature-flagged), so a constant
+ * could never match every stack, and the Known Tools evaluator would penalize legitimate calls.
+ */
+export const fetchSkillToolIds = async ({
+  fetch,
+  log,
+}: {
+  fetch: HttpHandler;
+  log: ToolingLog;
+}): Promise<ReadonlySet<string>> => {
+  let skill: { tool_ids?: string[] };
+  try {
+    skill = await fetch<{ tool_ids?: string[] }>(
+      `/api/agent_builder/skills/${RULE_CREATION_SKILL_ID}`,
+      {
+        method: 'GET',
+        version: AGENT_BUILDER_API_VERSION,
+        headers: { 'elastic-api-version': AGENT_BUILDER_API_VERSION },
+      }
+    );
+  } catch (err) {
+    throw new Error(
+      `Could not read skill "${RULE_CREATION_SKILL_ID}" from Agent Builder. The Trajectory: Known ` +
+        `Tools evaluator scores against this skill's registered tools, so without it every run ` +
+        `would be judged against an empty list. Original error: ${
+          err instanceof Error ? err.message : String(err)
+        }`
+    );
+  }
+  const toolIds = skill.tool_ids ?? [];
+  if (toolIds.length === 0) {
+    throw new Error(
+      `Skill "${RULE_CREATION_SKILL_ID}" registers no tools on this stack — the draft agent has ` +
+        `nothing to call and Trajectory: Known Tools would penalize every span.`
+    );
+  }
+  log.info(
+    `Skill ${RULE_CREATION_SKILL_ID} registers ${toolIds.length} tool(s): ${toolIds.join(', ')}`
+  );
+  return new Set(toolIds);
+};
 
 // The model connector (used by the workflow's ai.agent step) is not checked here — if it is
 // misconfigured the workflow execution will fail loudly on its own. Only the judge connector

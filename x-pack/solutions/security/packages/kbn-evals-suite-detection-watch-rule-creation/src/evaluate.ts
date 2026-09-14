@@ -8,6 +8,7 @@
 import { evaluate as base } from '@kbn/evals';
 import { RuleCreationClient } from './rule_creation_client';
 import { seedSecurityData } from './seed_security_data';
+import { fetchSkillToolIds } from './workflow_fixture';
 
 // Extend the base evaluate fixture with our client.
 // Playwright constructs RuleCreationClient once per worker and passes it
@@ -17,7 +18,7 @@ import { seedSecurityData } from './seed_security_data';
 // `Record<string, never>` here. See x-pack/platform/plugins/private/logstash/test/scout.
 export const evaluate = base.extend<
   {},
-  { securityData: void; ruleCreationClient: RuleCreationClient }
+  { securityData: void; ruleCreationClient: RuleCreationClient; skillToolIds: ReadonlySet<string> }
 >({
   // `auto` so a spec cannot silently skip seeding and score an empty stack. See
   // seed_security_data.ts for why a purpose-built fixture is used over a stock es_archive.
@@ -34,6 +35,12 @@ export const evaluate = base.extend<
       const client = new RuleCreationClient(fetch, log);
       await use(client);
       await client.cancelPending();
+    },
+    { scope: 'worker' },
+  ],
+  skillToolIds: [
+    async ({ fetch, log }, use) => {
+      await use(await fetchSkillToolIds({ fetch, log }));
     },
     { scope: 'worker' },
   ],

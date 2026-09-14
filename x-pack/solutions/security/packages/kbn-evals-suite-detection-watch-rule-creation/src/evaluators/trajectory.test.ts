@@ -7,15 +7,9 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { internalTools, platformCoreTools } from '@kbn/agent-builder-common/tools';
+import { internalTools } from '@kbn/agent-builder-common/tools';
 import type { RuleCreationResult } from '../rule_creation_client';
-import {
-  DRAFT_STEP_ID,
-  RULE_CREATION_TOOL_ID,
-  RULE_PREVIEW_TOOL_ID,
-  SECURITY_LABS_SEARCH_TOOL_ID,
-  TRAJECTORY_MAX_TOOL_CALLS,
-} from '../constants';
+import { DRAFT_STEP_ID, RULE_CREATION_TOOL_ID, TRAJECTORY_MAX_TOOL_CALLS } from '../constants';
 import {
   createTrajectoryEvaluators,
   createTrajectoryFetcher,
@@ -29,6 +23,13 @@ const log = {
   warning: jest.fn(),
   error: jest.fn(),
 } as unknown as ToolingLog;
+
+const CREATE = RULE_CREATION_TOOL_ID;
+const PREVIEW = 'security.run_rule_preview';
+const LABS = 'security.security_labs_search';
+const INTERNAL = internalTools.loadSkill;
+// What GET /api/agent_builder/skills/detection-rule-edit would return as tool_ids.
+const KNOWN = new Set([CREATE, PREVIEW, LABS]);
 
 const NAME_COL = [{ name: 'attributes.gen_ai.tool.name', type: 'keyword' }];
 const rows = (names: Array<string | null>) => ({
@@ -61,18 +62,21 @@ const noWait = { settleMs: 0, sleep: async () => {} };
 const fetcher = (client: EsClient, opts: { maxPolls?: number } = {}) =>
   createTrajectoryFetcher({ traceEsClient: client, log, ...noWait, ...opts });
 
+const evaluators = (client: EsClient, maxPolls?: number) =>
+  createTrajectoryEvaluators({
+    traceEsClient: client,
+    log,
+    knownToolIds: KNOWN,
+    ...noWait,
+    maxPolls,
+  });
+
 const evaluateAll = async (client: EsClient, output: RuleCreationResult, maxPolls?: number) =>
   Promise.all(
-    createTrajectoryEvaluators({ traceEsClient: client, log, ...noWait, maxPolls }).map((e) =>
+    evaluators(client, maxPolls).map((e) =>
       e.evaluate({ input: {}, output, expected: {}, metadata: undefined } as never)
     )
   );
-
-const CREATE = RULE_CREATION_TOOL_ID;
-const PREVIEW = RULE_PREVIEW_TOOL_ID;
-const LABS = SECURITY_LABS_SEARCH_TOOL_ID;
-const GEN_ESQL = platformCoreTools.generateEsql;
-const INTERNAL = internalTools.loadSkill;
 
 const settled = (toolNames: string[]) => ({
   available: true as const,
@@ -146,8 +150,10 @@ describe('createTrajectoryFetcher', () => {
 describe('createTrajectoryEvaluators', () => {
   it('emits two independently named series', () => {
     const { client } = esReturning([CREATE]);
-    const names = createTrajectoryEvaluators({ traceEsClient: client, log }).map((e) => e.name);
-    expect(names).toEqual(['Trajectory: Call Count', 'Trajectory: Known Tools']);
+    expect(evaluators(client).map((e) => e.name)).toEqual([
+      'Trajectory: Call Count',
+      'Trajectory: Known Tools',
+    ]);
   });
 
   it('scores a skill-conformant run 1 on every series', async () => {
@@ -180,28 +186,39 @@ describe('scoreCallCount', () => {
   });
 
   it('is 0 past the bound', () => {
-    expect(scoreCallCount(settled(Array(TRAJECTORY_MAX_TOOL_CALLS + 1).fill(CREATE))).score).toBe(
-      0
-    );
+    const over = Array(TRAJECTORY_MAX_TOOL_CALLS + 1).fill(CREATE);
+    expect(scoreCallCount(settled(over)).score).toBe(0);
   });
 });
 
 describe('scoreKnownTools', () => {
-  it('accepts every skill registry tool and Agent Builder internal tools', () => {
-    const r = scoreKnownTools(settled([LABS, GEN_ESQL, INTERNAL, CREATE, PREVIEW]));
+  const score = scoreKnownTools(KNOWN);
+
+  it('accepts the skill registry tools it was given and Agent Builder internal tools', () => {
+    const r = score(settled([LABS, INTERNAL, CREATE, PREVIEW]));
     expect(r.score).toBe(1);
     expect(r.metadata).toMatchObject({ internal: [INTERNAL], unknown: [] });
   });
 
+  it('judges against the stack under test, not a fixed list', () => {
+    // A tool that exists elsewhere but is not registered on this skill is unreachable here.
+    expect(score(settled([CREATE, 'platform.core.generate_esql'])).score).toBe(0.5);
+    expect(
+      scoreKnownTools(new Set([CREATE, 'platform.core.generate_esql']))(
+        settled([CREATE, 'platform.core.generate_esql'])
+      ).score
+    ).toBe(1);
+  });
+
   it('does not treat privacy-anonymized "custom" spans as hallucinated', () => {
-    const r = scoreKnownTools(settled([CREATE, 'custom']));
+    const r = score(settled([CREATE, 'custom']));
     expect(r.score).toBe(1);
     expect(r.metadata.anonymized).toEqual(['custom']);
     expect(r.explanation).toContain('anonymized');
   });
 
   it('penalizes proportionally and names the unreachable tools', () => {
-    const r = scoreKnownTools(settled([CREATE, 'made_up_tool', 'made_up_tool', PREVIEW]));
+    const r = score(settled([CREATE, 'made_up_tool', 'made_up_tool', PREVIEW]));
     expect(r.score).toBe(0.5);
     expect(r.metadata.unknown).toEqual(['made_up_tool', 'made_up_tool']);
     expect(r.explanation).toContain('made_up_tool');

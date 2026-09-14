@@ -9,7 +9,7 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator } from '@kbn/evals';
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
-import { SKILL_REGISTRY_TOOL_IDS, TRAJECTORY_MAX_TOOL_CALLS } from '../constants';
+import { TRAJECTORY_MAX_TOOL_CALLS } from '../constants';
 import type { RuleCreationResult } from '../rule_creation_client';
 import {
   TOOL_KIND,
@@ -172,41 +172,51 @@ export const scoreCallCount: ScoreFn = ({ toolNames }) => {
 };
 
 // Anonymized spans are unnameable, not invented, so they are reported but not penalized.
-export const scoreKnownTools: ScoreFn = ({ toolNames }) => {
-  const registry: string[] = [];
-  const internal: string[] = [];
-  const anonymized: string[] = [];
-  const unknown: string[] = [];
-  for (const name of toolNames) {
-    if (SKILL_REGISTRY_TOOL_IDS.has(name)) registry.push(name);
-    else if (isInternalTool(name)) internal.push(name);
-    else if (name === ANONYMIZED_TOOL_NAME) anonymized.push(name);
-    else unknown.push(name);
-  }
-  const score = 1 - unknown.length / toolNames.length;
-  return {
-    score,
-    explanation:
-      unknown.length === 0
-        ? `all ${toolNames.length} call(s) name reachable tools${
-            anonymized.length > 0
-              ? `; ${anonymized.length} anonymized by tracing privacy settings`
-              : ''
-          }`
-        : `${unknown.length} call(s) name tools the agent cannot reach: ${[
-            ...new Set(unknown),
-          ].join(', ')}`,
-    metadata: { registry, internal, anonymized, unknown },
+export const scoreKnownTools =
+  (knownToolIds: ReadonlySet<string>): ScoreFn =>
+  ({ toolNames }) => {
+    const registry: string[] = [];
+    const internal: string[] = [];
+    const anonymized: string[] = [];
+    const unknown: string[] = [];
+    for (const name of toolNames) {
+      if (knownToolIds.has(name)) registry.push(name);
+      else if (isInternalTool(name)) internal.push(name);
+      else if (name === ANONYMIZED_TOOL_NAME) anonymized.push(name);
+      else unknown.push(name);
+    }
+    const score = 1 - unknown.length / toolNames.length;
+    return {
+      score,
+      explanation:
+        unknown.length === 0
+          ? `all ${toolNames.length} call(s) name reachable tools${
+              anonymized.length > 0
+                ? `; ${anonymized.length} anonymized by tracing privacy settings`
+                : ''
+            }`
+          : `${unknown.length} call(s) name tools the agent cannot reach: ${[
+              ...new Set(unknown),
+            ].join(', ')}`,
+      metadata: { registry, internal, anonymized, unknown },
+    };
   };
-};
 
-/** Separate series rather than one average, so a failing dimension cannot hide behind a passing one. */
-export const createTrajectoryEvaluators = (
-  deps: { traceEsClient: EsClient; log: ToolingLog } & TrajectoryFetchOptions
-): Evaluator[] => {
+/**
+ * Separate series rather than one average, so a failing dimension cannot hide behind a passing one.
+ * `knownToolIds` is the skill's registered tool list read from the stack under test.
+ */
+export const createTrajectoryEvaluators = ({
+  knownToolIds,
+  ...deps
+}: {
+  traceEsClient: EsClient;
+  log: ToolingLog;
+  knownToolIds: ReadonlySet<string>;
+} & TrajectoryFetchOptions): Evaluator[] => {
   const fetchTrajectory = createTrajectoryFetcher(deps);
   return [
     trajectoryEvaluator('Trajectory: Call Count', fetchTrajectory, scoreCallCount),
-    trajectoryEvaluator('Trajectory: Known Tools', fetchTrajectory, scoreKnownTools),
+    trajectoryEvaluator('Trajectory: Known Tools', fetchTrajectory, scoreKnownTools(knownToolIds)),
   ];
 };
