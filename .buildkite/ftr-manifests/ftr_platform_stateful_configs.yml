@@ -86,7 +86,6 @@ enabled:
   - src/platform/test/functional/apps/management/group1/config.ts
   - src/platform/test/functional/apps/management/group2/config.ts
   - src/platform/test/functional/apps/management/group3/config.ts
-  - src/platform/test/functional/apps/management/group4/config.ts
   - src/platform/test/functional/apps/visualize/group1/config.ts
   - src/platform/test/functional/apps/visualize/group2/config.ts
   - src/platform/test/functional/apps/visualize/group3/config.ts
@@ -243,7 +242,6 @@ enabled:
   - x-pack/platform/test/functional/apps/transform/actions/config.ts
   - x-pack/platform/test/functional/apps/transform/edit_clone/config.ts
   - x-pack/platform/test/functional/apps/transform/permissions/config.ts
-  - x-pack/platform/test/functional/apps/user_profiles/config.ts
   - x-pack/platform/test/functional/apps/visualize/config.ts
   - x-pack/platform/test/functional/config_security_basic.ts
   - x-pack/platform/test/functional/config.ccs.ts

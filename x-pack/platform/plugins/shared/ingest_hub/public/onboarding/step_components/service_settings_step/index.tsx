@@ -258,7 +258,8 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
             const inp = dsVars?.enabledInputs?.[0];
             if (inp) {
               const regionField = getRegionFieldName(service, inp);
-              override = dsVars.varsByInput?.[inp]?.[regionField]?.trim() || undefined;
+              const rawRegion = dsVars.varsByInput?.[inp]?.[regionField];
+              override = (Array.isArray(rawRegion) ? rawRegion[0] : rawRegion)?.trim() || undefined;
               break;
             }
           }

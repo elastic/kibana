@@ -9,9 +9,11 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 
 import { buildMockDashboardApi } from '../mocks';
-import { dataService } from '../services/kibana_services';
+import { coreServices, dataService } from '../services/kibana_services';
+import { getDashboardRecentlyAccessedService } from '../services/dashboard_recently_accessed_service';
 import { DashboardRenderer } from './dashboard_renderer';
 import { loadDashboardApi } from '../dashboard_api/load_dashboard_api';
 import type { DashboardPinnedPanelsState } from '../../common';
@@ -60,6 +62,19 @@ describe('Dashboard Renderer', () => {
     await waitFor(async () => {
       expect(await screen.queryByTestId('dshDashboardViewport')).toBeInTheDocument();
       expect(await screen.queryByTestId('controls-group-wrapper')).not.toBeInTheDocument();
+    });
+  });
+
+  it('removes a missing dashboard from recently accessed', async () => {
+    (loadDashboardApi as jest.Mock).mockRejectedValueOnce(
+      new SavedObjectNotFound({ type: 'dashboard', id: 'missing-id' })
+    );
+
+    render(<DashboardRenderer savedObjectId="missing-id" />);
+
+    await waitFor(() => {
+      expect(getDashboardRecentlyAccessedService().remove).toHaveBeenCalledWith('missing-id');
+      expect(coreServices.chrome.recentlyAccessed.remove).toHaveBeenCalledWith('missing-id');
     });
   });
 });
