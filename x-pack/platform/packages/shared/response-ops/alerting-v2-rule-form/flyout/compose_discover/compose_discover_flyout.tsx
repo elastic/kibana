@@ -222,8 +222,9 @@ export interface ComposeDiscoverFlyoutProps {
   ruleId?: string;
   onClose: () => void;
   /**
-   * Called when EUI navigates Back in a stacked session. Must unmount this flyout
-   * without dismissing the parent picker, so the same create path can be opened again.
+   * Called when EUI navigates Back in a stacked session (or after the user confirms
+   * discard on that path). Must unmount this flyout without dismissing the parent
+   * picker, so the same create path can be opened again.
    */
   onHistoryBack?: () => void;
   services: RuleFormServices;
@@ -441,14 +442,10 @@ export function ComposeDiscoverFlyout({
   const methods = useForm<FormValues>({ mode: 'onBlur', defaultValues });
   const [isConfirmCloseVisible, setIsConfirmCloseVisible] = useState(false);
   /*
-   * EuiFlyout with session="start" uses EUI's managed flyout system, which
-   * calls closeAllFlyouts() synchronously (via flushSync) *before* invoking
-   * our onClose callback for EUI-managed close paths (X, ESC, outside click).
-   * By the time handleRequestClose runs, the flyout is already unregistered
-   * from the manager. Incrementing the key forces React to re-mount the
-   * EuiFlyout, re-registering it with the manager. The Cancel button doesn't
-   * go through closeAllFlyouts(), so no remount is needed for that path.
-   * Form state is preserved because FormProvider sits above the flyout.
+   * EuiFlyout with session="start" calls closeAllFlyouts() (or goBack()) before
+   * onClose. Remounting via flyoutKey re-registers this flyout so it stays on
+   * top of a stacked picker while the unsaved-changes modal is open. Form state
+   * is preserved because FormProvider sits above the flyout.
    */
   const [flyoutKey, setFlyoutKey] = useState(0);
   const isDirtyRef = useRef(false);
@@ -467,17 +464,9 @@ export function ComposeDiscoverFlyout({
   const hasBeenEditedRef = useRef(false);
 
   /*
-   * Tracks whether the close was triggered by the Cancel button ('button')
-   * or by EUI's managed paths — X, ESC, outside click ('eui'). Only the
-   * EUI path calls closeAllFlyouts() which unregisters the flyout and
-   * requires a flyoutKey remount.
-   */
-  const closeSourceRef = useRef<'button' | 'eui'>('eui');
-
-  /*
-   * After "Continue editing" on the EUI-managed path, the flyoutKey remount
-   * cascade-closes the sandbox. This ref tells the subsequent effect whether
-   * to re-dispatch OPEN_CHILD to restore it.
+   * After unsaved-changes confirm remounts the EuiFlyout, the sandbox may have
+   * been cascade-closed. This ref tells the subsequent effect whether to
+   * re-dispatch OPEN_CHILD to restore it.
    */
   const reopenChildRef = useRef(false);
 
@@ -492,49 +481,65 @@ export function ComposeDiscoverFlyout({
     { query: string | undefined; esqlVariables: ESQLControlVariable[] | undefined } | undefined
   >();
 
+  /*
+   * True when the confirm dialog was opened from EUI Back. Discard then unmounts
+   * this flyout only (`onHistoryBack`); X/ESC still dismisses the whole session.
+   */
+  const pendingHistoryBackRef = useRef(false);
+
+  const restoreFlyoutAfterEuiClose = useCallback(() => {
+    reopenChildRef.current = uiState.yamlMode || uiState.childOpen;
+    setFlyoutKey((k) => k + 1);
+  }, [uiState.yamlMode, uiState.childOpen]);
+
   const handleRequestClose: EuiFlyoutProps['onClose'] = useCallback(
     (_event, meta) => {
-      // Back returns to the picker with no confirm. Unmount this flyout (without
-      // dismissing the picker) so choosing the same path can push a new session.
-      if (meta?.reason === 'navigation-back') {
-        onHistoryBack?.();
-        return;
-      }
-      // Parent session closed (picker dismissed). Tear down without confirm.
-      if (meta?.reason === 'navigation-cascade') {
-        onClose();
-        return;
-      }
+      const leaveToPicker = meta?.reason === 'navigation-back';
       const yamlDirty =
         yamlBaselineRef.current !== null && yamlTextRef.current !== yamlBaselineRef.current;
-      if (isDirtyRef.current || yamlDirty || hasBeenEditedRef.current) {
-        setIsConfirmCloseVisible(true);
-      } else {
-        onClose();
+      const hasUnsavedChanges = isDirtyRef.current || yamlDirty || hasBeenEditedRef.current;
+
+      if (isConfirmCloseVisible) {
+        restoreFlyoutAfterEuiClose();
+        return;
       }
+
+      if (meta?.reason === 'navigation-cascade') {
+        pendingHistoryBackRef.current = false;
+        onClose();
+        return;
+      }
+
+      if (!hasUnsavedChanges) {
+        if (leaveToPicker) {
+          onHistoryBack?.();
+        } else {
+          onClose();
+        }
+        return;
+      }
+
+      pendingHistoryBackRef.current = leaveToPicker;
+      setIsConfirmCloseVisible(true);
+      restoreFlyoutAfterEuiClose();
     },
-    [onClose, onHistoryBack]
+    [isConfirmCloseVisible, onClose, onHistoryBack, restoreFlyoutAfterEuiClose]
   );
 
   const handleConfirmDiscard = useCallback(() => {
     setIsConfirmCloseVisible(false);
-    closeSourceRef.current = 'eui';
+    if (pendingHistoryBackRef.current) {
+      pendingHistoryBackRef.current = false;
+      (onHistoryBack ?? onClose)();
+      return;
+    }
     onClose();
-  }, [onClose]);
+  }, [onClose, onHistoryBack]);
 
   const handleCancelDiscard = useCallback(() => {
     setIsConfirmCloseVisible(false);
-    if (closeSourceRef.current === 'eui') {
-      /*
-       * EUI-managed close already called closeAllFlyouts() — remount to
-       * re-register the flyout with the manager, and reopen the sandbox
-       * if it was cascade-closed.
-       */
-      reopenChildRef.current = uiState.yamlMode || uiState.childOpen;
-      setFlyoutKey((k) => k + 1);
-    }
-    closeSourceRef.current = 'eui';
-  }, [uiState.yamlMode, uiState.childOpen]);
+    pendingHistoryBackRef.current = false;
+  }, []);
 
   const [sandboxQuery, setSandboxQuery] = useState<RuleQuery>(() => methods.getValues('query'));
   const [sandboxTimeField, setSandboxTimeField] = useState<string>(() =>
@@ -675,11 +680,12 @@ export function ComposeDiscoverFlyout({
   isAlertRef.current = isAlert;
 
   /*
-   * After "Continue editing" bumps flyoutKey and the EuiFlyout remounts,
-   * the sandbox (cascade-closed by closeAllFlyouts()) needs reopening on the
-   * tab it would default to for the current step/recovery/manual-split state.
-   * isAlert is read via ref so this effect doesn't fire on kind toggles; the
-   * body is gated by reopenChildRef, so extra runs from other deps are no-ops.
+   * After unsaved-changes confirm remounts the EuiFlyout (EUI already
+   * unregistered it), the sandbox (cascade-closed by closeAllFlyouts()) needs
+   * reopening on the tab it would default to for the current step/recovery/
+   * manual-split state. isAlert is read via ref so this effect doesn't fire on
+   * kind toggles; the body is gated by reopenChildRef, so extra runs from other
+   * deps are no-ops.
    */
   useEffect(() => {
     if (reopenChildRef.current) {

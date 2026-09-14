@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -16,6 +16,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RuleCreateOptionsPanel, type LegacyRuleTypeItem } from './rule_create_options_panel';
 
@@ -65,9 +66,27 @@ export const RuleCreateOptionsFlyout = ({
   historyKey,
 }: RuleCreateOptionsFlyoutProps) => {
   const isStacked = historyKey !== undefined;
+  const [flyoutKey, setFlyoutKey] = useState(0);
+
+  const handleFlyoutClose: EuiFlyoutProps['onClose'] = useCallback(
+    (_event, meta) => {
+      if (isStacked && meta?.reason === 'navigation-cascade') {
+        /*
+         * The stacked form shares this historyKey and session="start", so its X/ESC
+         * closeAllFlyouts() unregisters the picker too. Stay mounted and re-register
+         * so the form can stack on top again while it confirms unsaved changes.
+         */
+        setFlyoutKey((key) => key + 1);
+        return;
+      }
+      onClose();
+    },
+    [isStacked, onClose]
+  );
 
   return (
     <EuiFlyout
+      key={flyoutKey}
       type={isStacked ? 'overlay' : 'push'}
       size={isStacked ? STACKED_FLYOUT_SIZE : 's'}
       minWidth={isStacked ? STACKED_FLYOUT_MIN_WIDTH : undefined}
@@ -80,7 +99,7 @@ export const RuleCreateOptionsFlyout = ({
       }
       ownFocus
       hideCloseButton
-      onClose={onClose}
+      onClose={handleFlyoutClose}
       aria-labelledby={FLYOUT_TITLE_ID}
       data-test-subj="ruleCreateOptionsFlyout"
     >

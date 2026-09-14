@@ -82,9 +82,6 @@ export const RulesListPage = () => {
     closeCreateOptionsFlyout();
   }, [closeFlyout, closeCreateOptionsFlyout]);
 
-  const onCreateEsqlRuleFromOptionsFlyout = () => {
-    openCreateFlyout();
-  };
   const onCreateWithAgentFromOptionsFlyout = () => {
     closeCreateSession();
     navigateToAgentBuilder();
@@ -201,7 +198,7 @@ export const RulesListPage = () => {
         <RuleCreateOptionsFlyout
           historyKey={createSessionHistoryKey}
           onClose={closeCreateSession}
-          onCreateEsqlRule={onCreateEsqlRuleFromOptionsFlyout}
+          onCreateEsqlRule={openCreateFlyout}
           onCreateWithAgent={onCreateWithAgentFromOptionsFlyout}
           createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
           createWithAgentTooltipText={createWithAgentTooltipText}
