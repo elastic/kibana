@@ -1956,7 +1956,7 @@ describe('storedPackagePolicyToAgentInputs - condition handling', () => {
     expect('condition' in (result[0].streams?.[0] ?? {})).toBe(false);
   });
 
-  it('non-string condition value (e.g. boolean true) does not throw — #273082', () => {
+  it('non-string condition value (e.g. boolean true) does not throw', () => {
     // The Fleet UI can persist condition as boolean `true`; combineConditions must not call
     // .trim() on a non-string value or it throws "c?.trim is not a function".
     expect(() =>

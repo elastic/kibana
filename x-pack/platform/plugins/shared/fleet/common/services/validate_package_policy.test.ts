@@ -747,7 +747,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         expect(validationHasErrors(result)).toBe(true);
       });
 
-      it('does not throw and returns no condition errors for a boolean condition — #273082', () => {
+      it('does not throw and returns no condition errors for a boolean condition', () => {
         // Handlebars can coerce 'true'/'false' text to boolean; validateCondition must not
         // call .trim() on the raw boolean value.
         expect(() =>
