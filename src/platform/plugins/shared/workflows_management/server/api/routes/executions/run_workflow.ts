@@ -18,7 +18,7 @@ import { idParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerRunWorkflowRoute(deps: RouteDependencies) {
-  const { router, api, spaces, audit } = deps;
+  const { router, api, logger, spaces, audit } = deps;
   router.versioned
     .post({
       path: '/api/workflows/workflow/{id}/run',
@@ -97,7 +97,14 @@ export function registerRunWorkflowRoute(deps: RouteDependencies) {
             workflowId: request.params.id,
             error,
           });
-          return handleRouteError(response, error);
+          return handleRouteError(response, error, {
+            logger,
+            logContext: {
+              route: 'POST /api/workflows/workflow/{id}/run',
+              workflowId: request.params.id,
+              spaceId: spaces.getSpaceId(request),
+            },
+          });
         }
       })
     );

@@ -281,8 +281,9 @@ steps:
             description: >
               Concrete, actionable steps to resolve or mitigate the issue — prefer specific commands,
               config changes, or code over general advice like "investigate further" or "monitor the
-              situation".
-            maxItems: 5
+              situation". Score how strongly the findings support that each action will help, sort
+              by confidence descending, and return only the 3 strongest items.
+            maxItems: 3
             items:
               type: object
               properties:
@@ -290,6 +291,11 @@ steps:
                   type: string
                   maxLength: 512
                   description: The action itself, stated concretely (e.g. "Revert the pool-size config change").
+                confidence:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                  description: How strongly the findings support that this action will resolve or mitigate the confirmed problem.
                 description:
                   type: string
                   maxLength: 10000
@@ -302,6 +308,7 @@ steps:
                     Raw source, not a fenced markdown block.
               required:
                 - title
+                - confidence
           blind_spots:
             type: array
             description: >
@@ -314,7 +321,9 @@ steps:
               Do NOT include incident-specific observations (e.g. "the pod crashed", "no logs during the
               outage window") — those are incident facts, not actionable knowledge gaps. Reduce the
               finding to what data source is missing and why it matters, not what happened during the incident.
-            maxItems: 10
+              Score how strongly the findings support that closing each gap would materially improve
+              the investigation, sort by confidence descending, and return only the 3 strongest items.
+            maxItems: 3
             items:
               type: object
               properties:
@@ -322,12 +331,18 @@ steps:
                   type: string
                   maxLength: 512
                   description: The missing data source or access, named concisely (e.g. "No traces for the cart service").
+                confidence:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                  description: How strongly the findings support that closing this gap would materially improve the investigation.
                 description:
                   type: string
                   maxLength: 10000
                   description: Why this gap mattered to the investigation.
               required:
                 - title
+                - confidence
                 - description
           trigger_feedback:
             type: array
@@ -783,7 +798,7 @@ steps:
       message: |
         Call load_skill with path skills/platform/streams/significant-events-memory to get the memory tools.
 
-        The following knowledge gaps were identified during an investigation, as JSON objects each carrying a `title` (the missing data source, named concisely) and a `description` (why that gap mattered):
+        The following knowledge gaps were identified during an investigation, as JSON objects each carrying a `title` (the missing data source, named concisely), `confidence` (its relevance to the investigation), and a `description` (why that gap mattered):
 
         {{ steps.investigate.output.structured_output.blind_spots | json }}
 
