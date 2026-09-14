@@ -33,7 +33,7 @@ import type {
   ProcessedUserMessageEvent,
   TimelineRound,
 } from './context_timeline';
-import { groupTimelineRounds, groupTimelineEntries } from './context_timeline';
+import { groupTimelineRounds, groupTimelineEntries, isTimelineRound } from './context_timeline';
 
 export interface ProcessedConversation {
   /**
@@ -125,7 +125,7 @@ export const prepareConversation = async ({
   const processedTimeline: ProcessedTimelineEvent[] = [];
   const includedRounds = new Set(effectiveRounds.map((round) => round.id));
   for (const round of groupTimelineEntries(timeline)) {
-    if ('terminated' in round && !includedRounds.has(round.id)) continue;
+    if (isTimelineRound(round) && !includedRounds.has(round.id)) continue;
     attachmentStateManager.clearAccessTracking();
     const input = round.userMessage.data;
     if (input.attachments && input.attachments.length > 0) {
@@ -151,7 +151,7 @@ export const prepareConversation = async ({
       ...round.userMessage,
       data: processedInput,
     };
-    const events = 'terminated' in round ? round.events : [round.userMessage];
+    const events = isTimelineRound(round) ? round.events : [round.userMessage];
 
     for (const event of events) {
       if (event === round.userMessage) {

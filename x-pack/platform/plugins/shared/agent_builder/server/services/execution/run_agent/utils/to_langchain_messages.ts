@@ -45,6 +45,8 @@ import {
   groupTimelineRounds,
   groupTimelineEntries,
   isAwaitingPrompt,
+  isTimelineRound,
+  isTimelineStandaloneUserMessage,
   roundResponse,
   type ProcessedTimelineEvent,
   type TimelineRound,
@@ -105,7 +107,7 @@ export const prepareMessages = async ({
   // we also uses the last message's input as the "next" input (given the actual input will be the prompt response)
   const lastRound = previousRounds[previousRounds.length - 1];
   if (lastRound && isAwaitingPrompt(lastRound)) {
-    entries = entries.filter((entry) => !('terminated' in entry) || entry.id !== lastRound.id);
+    entries = entries.filter((entry) => !isTimelineRound(entry) || entry.id !== lastRound.id);
     input = lastRound.userMessage.data;
     inputTimestamp = lastRound.userMessage.created_at;
   }
@@ -127,7 +129,7 @@ export const prepareMessages = async ({
   }
 
   for (const round of entries) {
-    if (!('terminated' in round)) {
+    if (isTimelineStandaloneUserMessage(round)) {
       messages.push(
         formatRoundInput({
           input: round.userMessage.data,

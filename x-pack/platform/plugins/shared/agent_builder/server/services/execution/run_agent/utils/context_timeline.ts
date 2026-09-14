@@ -170,6 +170,15 @@ export type TimelineEntry<E extends AnyTimelineEvent = TimelineEvent> =
   | TimelineRound<E>
   | TimelineStandaloneUserMessage<E>;
 
+/** Narrows an entry to a round; a standalone user message has no execution to terminate. */
+export const isTimelineRound = <E extends AnyTimelineEvent>(
+  entry: TimelineEntry<E>
+): entry is TimelineRound<E> => 'terminated' in entry;
+
+export const isTimelineStandaloneUserMessage = <E extends AnyTimelineEvent>(
+  entry: TimelineEntry<E>
+): entry is TimelineStandaloneUserMessage<E> => !isTimelineRound(entry);
+
 /** Selects user messages, excluding execution triggers and receipt-time round inputs. */
 export const standaloneUserMessages = <E extends AnyTimelineEvent>(
   timeline: E[]
