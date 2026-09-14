@@ -4,7 +4,7 @@ exports[`LinkToAlertsPage component renders correctly with default props 1`] = `
 <div>
   <a
     aria-label="Show all alerts"
-    class="euiLink emotion-euiLink"
+    class="euiLink emotion-euiLink-text"
     data-test-subj="test-link"
     href="/app/observability/alerts?_a=(rangeFrom:'2024-04-01',rangeTo:'2024-04-15',status:all)"
     rel="noreferrer"
@@ -18,7 +18,7 @@ exports[`LinkToAlertsPage component renders correctly with optional props 1`] = 
 <div>
   <a
     aria-label="Show all alerts"
-    class="euiLink emotion-euiLink"
+    class="euiLink emotion-euiLink-text"
     data-test-subj="test-link"
     href="/app/observability/alerts?_a=(kuery:'foo:bar',rangeFrom:'2024-04-01',rangeTo:'2024-04-15',status:all)"
     rel="noreferrer"

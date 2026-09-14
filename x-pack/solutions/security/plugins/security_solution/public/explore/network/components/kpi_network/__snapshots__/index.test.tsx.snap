@@ -30,7 +30,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                   class="euiFlexItem emotion-euiFlexItem-grow-1"
                 >
                   <div
-                    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-stretch-row"
+                    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
                   >
                     <div
                       class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -116,7 +116,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                   class="euiFlexItem emotion-euiFlexItem-grow-1"
                 >
                   <div
-                    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-stretch-row"
+                    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
                   >
                     <div
                       class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -209,7 +209,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                   class="euiFlexItem emotion-euiFlexItem-grow-1"
                 >
                   <div
-                    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-stretch-row"
+                    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
                   >
                     <div
                       class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -295,7 +295,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                   class="euiFlexItem emotion-euiFlexItem-grow-1"
                 >
                   <div
-                    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-stretch-row"
+                    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
                   >
                     <div
                       class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -383,7 +383,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
               class="euiFlexItem emotion-euiFlexItem-grow-1"
             >
               <div
-                class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-stretch-row"
+                class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
               >
                 <div
                   class="euiFlexItem emotion-euiFlexItem-growZero"

@@ -21,18 +21,8 @@ exports[`LicenseStatus component should display display warning is expired 1`] =
             <div
               class="css-1hi0jzn-titleWrapper-titleOffsetStyle-Title"
             >
-              Your Platinum license has expired
-            </span>
-          </h1>
-          <div
-            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-          />
-          <div
-            class="euiText emotion-euiText-constrainedWidth-s"
-          >
-            <p>
-              <span
-                data-test-subj="licenseSubText"
+              <h1
+                class="euiTitle emotion-euiTitle-s"
               >
                 <span
                   class="css-brsrfa-titleFrame"
@@ -129,18 +119,8 @@ exports[`LicenseStatus component should display normally when license is active 
             <div
               class="css-1hi0jzn-titleWrapper-titleOffsetStyle-Title"
             >
-              Your Gold license is active
-            </span>
-          </h1>
-          <div
-            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-          />
-          <div
-            class="euiText emotion-euiText-constrainedWidth-s"
-          >
-            <p>
-              <span
-                data-test-subj="licenseSubText"
+              <h1
+                class="euiTitle emotion-euiTitle-s"
               >
                 <span
                   class="css-brsrfa-titleFrame"
