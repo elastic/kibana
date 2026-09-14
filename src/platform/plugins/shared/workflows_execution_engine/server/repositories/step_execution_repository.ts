@@ -11,8 +11,8 @@ import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import type { StepExecutionsDataClient } from './data_access_layer';
 import { getStepExecutionsByWorkflowExecution as getStepExecutionsByWorkflowExecutionShared } from './data_access_layer/lib/get_step_executions_by_workflow_execution';
-
-export type StepExecutionField = keyof EsWorkflowStepExecution;
+import type { StepExecutionField, StepExecutionPersistence } from './execution_persistence';
+export type { StepExecutionField } from './execution_persistence';
 
 /**
  * Step documents share the workflow-execution document's concurrent-writer problem: the run's own
@@ -21,7 +21,7 @@ export type StepExecutionField = keyof EsWorkflowStepExecution;
  */
 const UPDATE_RETRY_ON_CONFLICT = 3;
 
-export class StepExecutionRepository {
+export class StepExecutionRepository implements StepExecutionPersistence {
   constructor(private stepExecutionsDataClient: StepExecutionsDataClient) {}
 
   /**

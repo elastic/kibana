@@ -8,7 +8,8 @@
  */
 
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
-import type { StepExecutionField } from './step_execution_repository';
+
+export type StepExecutionField = keyof EsWorkflowStepExecution;
 
 export interface WorkflowExecutionPersistence {
   getWorkflowExecutionById(
@@ -87,6 +88,7 @@ export class InMemoryExecutionPersistence
       );
     }
   }
+
   public async getStepExecutionsByIds(
     ids: string[],
     sourceIncludes?: StepExecutionField[],
@@ -96,11 +98,6 @@ export class InMemoryExecutionPersistence
       const execution = this.stepExecutions.get(id);
       if (!execution) {
         return [];
-      }
-      if (!isCompleteStepExecution(execution)) {
-        throw new Error(
-          `Step execution ${id} was read before its required fields were initialized`
-        );
       }
       let copy: Record<string, unknown>;
       try {
@@ -158,18 +155,3 @@ export class InMemoryExecutionPersistence
     }
   }
 }
-
-const isCompleteStepExecution = (
-  execution: Partial<EsWorkflowStepExecution>
-): execution is EsWorkflowStepExecution =>
-  typeof execution.spaceId === 'string' &&
-  typeof execution.id === 'string' &&
-  typeof execution.stepId === 'string' &&
-  Array.isArray(execution.scopeStack) &&
-  typeof execution.workflowRunId === 'string' &&
-  typeof execution.workflowId === 'string' &&
-  execution.status !== undefined &&
-  typeof execution.startedAt === 'string' &&
-  typeof execution.topologicalIndex === 'number' &&
-  typeof execution.globalExecutionIndex === 'number' &&
-  typeof execution.stepExecutionIndex === 'number';

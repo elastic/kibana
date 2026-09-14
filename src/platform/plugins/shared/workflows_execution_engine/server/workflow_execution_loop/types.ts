@@ -8,7 +8,6 @@
  */
 
 import type { CoreStart, ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowExecutionPersistence } from '../repositories/execution_persistence';
 import type { NodesFactory } from '../step/nodes_factory';
 import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
