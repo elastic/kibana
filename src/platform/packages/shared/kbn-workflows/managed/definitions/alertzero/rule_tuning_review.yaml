@@ -203,13 +203,21 @@ steps:
                     operator:
                       enum: [is, is_not, matches, does_not_match]
                   required: [value]
+                  not:
+                    required: [values]
                 - properties:
                     operator:
                       enum: [is_one_of, is_not_one_of]
                   required: [values]
+                  not:
+                    required: [value]
                 - properties:
                     operator:
                       enum: [exists, does_not_exist]
+                  not:
+                    anyOf:
+                      - required: [value]
+                      - required: [values]
           proposed_query:
             type: string
           proposed_risk_score:
