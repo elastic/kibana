@@ -544,36 +544,6 @@ export class SandboxApiClient {
     return call(paths, this.metadata(conversationId));
   }
 
-  async backupState(
-    conversationId: string,
-    destinationUrl: string,
-    targetPath: string
-  ): Promise<StateOperationResult> {
-    const call = promisify(
-      (this.client as any).backupState.bind(this.client) as (
-        request: { destinationUrl: string; targetPath: string },
-        metadata: grpc.Metadata,
-        callback: (err: grpc.ServiceError | null, response: StateOperationResult) => void
-      ) => void
-    );
-    return call({ destinationUrl, targetPath }, this.metadata(conversationId));
-  }
-
-  async restoreState(
-    conversationId: string,
-    sourceUrl: string,
-    targetPath: string
-  ): Promise<StateOperationResult> {
-    const call = promisify(
-      (this.client as any).restoreState.bind(this.client) as (
-        request: { sourceUrl: string; targetPath: string },
-        metadata: grpc.Metadata,
-        callback: (err: grpc.ServiceError | null, response: StateOperationResult) => void
-      ) => void
-    );
-    return call({ sourceUrl, targetPath }, this.metadata(conversationId));
-  }
-
   close(): void {
     this.client.close();
   }
