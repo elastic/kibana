@@ -8,10 +8,15 @@
 import type { KibanaRole } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test, makeEsQueryRule, openRulesListAndSearch } from '../fixtures';
+import { triggersActionsRoute } from '@kbn/rule-data-utils';
+import {
+  test,
+  makeEsQueryRule,
+  openRulesListAndSearch,
+  CLASSIC_RULES_LIST_URL_RE,
+} from '../fixtures';
 
 const RULES_APP = 'rules';
-const SM_BASE = 'management/insightsAndAlerting/triggersActions';
 const APP_TITLE_SUBJ = 'appHeaderTitle';
 
 const ALERTS_AND_ACTIONS_ROLE: KibanaRole = {
@@ -52,7 +57,7 @@ test.describe('Rules home page', { tag: tags.stateful.classic }, () => {
     await page.gotoApp(RULES_APP);
 
     await expect(page.testSubj.locator(APP_TITLE_SUBJ)).toHaveText('Rules');
-    expect(page.url()).toContain(`/app/${SM_BASE}`);
+    await expect(page).toHaveURL(CLASSIC_RULES_LIST_URL_RE);
   });
 
   test('shows the no-permission prompt when the user has actions but no alerting privilege', async ({
@@ -70,7 +75,7 @@ test.describe('Rules home page', { tag: tags.stateful.classic }, () => {
     await page.gotoApp(RULES_APP);
 
     await expect(page.testSubj.locator(APP_TITLE_SUBJ)).toHaveText('Rules');
-    expect(page.url()).toContain(`/app/${SM_BASE}`);
+    await expect(page).toHaveURL(CLASSIC_RULES_LIST_URL_RE);
   });
 
   test('renders a newly-created rule and opens its details', async ({
@@ -106,7 +111,7 @@ test.describe('Rules home page', { tag: tags.stateful.classic }, () => {
     await test.step('navigates to the rule details page when clicking the rule', async () => {
       await rules.clickRuleName(ruleName);
       await page.waitForURL(new RegExp(`/rule/${ruleId}(\\b|$)`));
-      expect(page.url()).toContain(`/app/${SM_BASE}/rule/${ruleId}`);
+      await expect(page).toHaveURL(new RegExp(`${triggersActionsRoute}/rule/${ruleId}`));
     });
   });
 });

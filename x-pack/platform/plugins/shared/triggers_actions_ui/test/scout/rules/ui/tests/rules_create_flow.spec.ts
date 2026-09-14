@@ -7,6 +7,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import { triggersActionsRoute } from '@kbn/rule-data-utils';
 import {
   test,
   defineIndexThresholdRule,
@@ -14,9 +15,9 @@ import {
   findRuleIdByName,
   deleteRuleById,
   openRulesListAndSearch,
+  CLASSIC_RULES_CREATE_URL_RE,
+  CLASSIC_RULES_LIST_URL_RE,
 } from '../fixtures';
-
-const SM_BASE = 'management/insightsAndAlerting/triggersActions';
 
 test.describe('Rules create flow', { tag: tags.stateful.classic }, () => {
   const createdRuleNames: string[] = [];
@@ -73,7 +74,7 @@ test.describe('Rules create flow', { tag: tags.stateful.classic }, () => {
     await test.step('selecting a rule type navigates to the create form within management', async () => {
       await page.testSubj.click('.es-query-SelectOption');
       await expect(page.testSubj.locator('ruleForm')).toBeVisible();
-      expect(page.url()).toContain(`/app/${SM_BASE}/create/`);
+      await expect(page).toHaveURL(CLASSIC_RULES_CREATE_URL_RE);
     });
   });
 
@@ -104,12 +105,12 @@ test.describe('Rules create flow', { tag: tags.stateful.classic }, () => {
       await expect(page.testSubj.locator('appHeaderTitle')).toBeVisible({ timeout: 15000 });
       const ruleId = await findRuleIdByName(kbnClient, ruleName);
       expect(ruleId).toBeDefined();
-      expect(page.url()).toContain(`/app/${SM_BASE}/rule/${ruleId}`);
+      await expect(page).toHaveURL(new RegExp(`${triggersActionsRoute}/rule/${ruleId}`));
     });
 
     await test.step('displays the rule in the rules list within management', async () => {
       await openRulesListAndSearch(page, ruleName);
-      expect(page.url()).toContain(`/app/${SM_BASE}`);
+      await expect(page).toHaveURL(CLASSIC_RULES_LIST_URL_RE);
       await expect(
         page.testSubj
           .locator('rulesList')
