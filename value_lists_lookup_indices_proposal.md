@@ -111,7 +111,10 @@ The one path that does not go through the ListClient is indicator match when it 
 
 **The registry is the existing list container.** We do not add a new store. The `.lists-<space>` container already holds one document per list with its metadata, and already supports find and sort. We extend that document with a `storage` field. This plays the registry role for every list, legacy or new, so `_find` keeps querying `.lists-<space>` as it does today.
 
-**No upgrade migration.** A list created before the feature has no `storage` field, and the resolve step reads a missing `storage` as `{ type: 'data_stream' }`. So every pre-existing list is correct with zero writes. The new field reaches the mapping through the path that already runs on startup, where the plugin reapplies the list templates, so the schema change is additive and needs no data move.
+**No upgrade migration.** A list created before the feature has no `storage` field, and the resolve step reads a missing `storage` as `{ type: 'data_stream' }`. So every pre-existing list is correct with zero writes. The field is additive, and the mapping is `strict`, so it has to be in place before the first write that sets `storage` (the first lookup list created or the first list migrated). The provisioning flow that already creates the list indices applies it, and startup is a reliable trigger for that flow: a version upgrade restarts the Kibana process and runs the plugin start lifecycle, and enabling the flag is a config change that also requires a restart. It handles both cases by whether the data stream exists:
+
+- New installation: the data stream does not exist yet, and the field is in the container index template, so the flow creates `.lists-<space>` from the template with `storage` already mapped. Nothing more is needed.
+- Existing installation: the data stream already exists with the old mapping, so the flow applies a one-time additive `PUT mapping` to add the field, gated on the data stream existing and the feature flag being enabled. The `PUT mapping` is idempotent, so repeating it is harmless, and it is safe under a rolling multi node upgrade because an old node never writes `storage`.
 
 **Metadata for every list stays in `.lists-<space>`.** Only items diverge by storage. Legacy lists keep their items in the shared `.items-<space>`. Lookup lists keep their metadata in `.lists-<space>` like every other list, and hold their items in the per list index. So `.lists-<space>` is the one place that names all value lists, whatever their storage.
 
@@ -127,6 +130,8 @@ storage: {
 `storage.type` names the storage kind. `storage.locator` holds the real location, stored and not derived, so a naming change or a new storage kind needs no convention rewrite. Legacy lists use `{ type: 'data_stream' }`, or no `storage` field at all, which reads the same, with items in the shared `.items-<space>`. New lookup lists use `{ type: 'lookup_index', locator: { index } }`, with items in the per list index.
 
 **Metadata and items are separate.** Metadata always lives in the `.lists-<space>` document. Items live where `storage` says. A migration rewrites items and changes `storage`, and leaves metadata, id, and exception references untouched. A later move to a different storage kind is the same operation with a new `storage.type` and a new strategy.
+
+**Storage is read-only through the public API.** The `storage` field is set when a list is provisioned (at create, or at migration through an internal update), and the public update and patch endpoints never write it. So a user cannot repoint a list's storage by hand, and the field only ever changes through a code path that also moves the items to match.
 
 ### Resolution through the ListClient
 

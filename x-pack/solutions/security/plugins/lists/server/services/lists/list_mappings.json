@@ -20,6 +20,20 @@
       "enabled": "false",
       "type": "object"
     },
+    "storage": {
+      "properties": {
+        "type": {
+          "type": "keyword"
+        },
+        "locator": {
+          "properties": {
+            "index": {
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    },
     "created_at": {
       "type": "date"
     },

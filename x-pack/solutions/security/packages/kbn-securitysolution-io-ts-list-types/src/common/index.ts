@@ -53,6 +53,7 @@ export * from './search_after';
 export * from './serializer';
 export * from './sort_field';
 export * from './sort_order';
+export * from './storage';
 export * from './tags';
 export * from './tie_breaker_id';
 export * from './timestamp';

@@ -92,7 +92,7 @@ const main = async () => {
   const items = await es('POST', `/${ITEMS_INDEX}/_count`, { query: { term: { list_id: MIG_LIST } } });
   check('.items rows still present (non-destructive)', (items.json.count ?? 0) >= 1);
   const listMeta = await kbn('GET', `/api/lists?id=${MIG_LIST}`);
-  check('storage descriptor flipped to lookup', listMeta.json?.meta?.__vlStorage?.type === 'lookup', JSON.stringify(listMeta.json?.meta ?? {}));
+  check('storage descriptor flipped to lookup', listMeta.json?.storage?.type === 'lookup_index', JSON.stringify(listMeta.json?.storage ?? {}));
 
   log('\n=== migrate a non-referenced list (rule reads .items but for another list) ===');
   const migMaybe = await kbn('POST', '/internal/lists/_migrate', { id: MAYBE_LIST }, ih);

@@ -63,6 +63,28 @@ components:
       additionalProperties: true
       description: Placeholder for metadata about the value list.
 
+    ListStorage:
+      type: object
+      description: |
+        Storage descriptor for the value list. Names the storage kind, and for a
+        lookup list the concrete index that holds its items. Absent for legacy
+        data-stream lists. This field is read-only and is never set through the
+        update or patch APIs.
+      properties:
+        type:
+          type: string
+          enum:
+            - data_stream
+            - lookup_index
+            - regular_index
+        locator:
+          type: object
+          properties:
+            index:
+              type: string
+      required:
+        - type
+
     ListVersion:
       type: integer
       minimum: 1

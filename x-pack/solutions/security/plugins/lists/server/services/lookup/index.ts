@@ -29,7 +29,8 @@ export { coalesceRangeValues } from './coalesce_ranges';
 export {
   STORAGE_META_KEY,
   readStorageDescriptor,
-  withStorageDescriptor,
   isLookupList,
+  lookupIndexOf,
+  lookupStorage,
 } from './storage';
-export type { StorageDescriptor, StorageType } from './storage';
+export type { ListStorageSource } from './storage';
