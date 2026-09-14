@@ -294,11 +294,34 @@ export const WorkerSettings = lazySchema(() =>
     workerId: z.string(),
     autonomy: WatchAutonomyLevel,
     /**
+     * Subset of the shared autonomy scale this Worker offers. Same meaning as WatchAutonomyLevel everywhere; availability is per-Worker. Omitted means all three.
+     */
+    allowedAutonomyLevels: z
+      .array(WatchAutonomyLevel)
+      .min(1)
+      .max(3)
+      .optional()
+      .describe(
+        'Subset of the shared autonomy scale this Worker offers. Same meaning as WatchAutonomyLevel everywhere; availability is per-Worker. Omitted means all three.'
+      ),
+    /**
      * Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to render the interval control.
      */
     scheduleInterval: WorkerScheduleInterval.optional().describe(
       'Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to render the interval control.'
     ),
+    /**
+     * Attack Discovery only. Max candidates considered per run. Omitted for other Workers; presence is what tells the extras slot to render the control.
+     */
+    candidateLimit: z
+      .number()
+      .int()
+      .min(1)
+      .max(1000)
+      .optional()
+      .describe(
+        'Attack Discovery only. Max candidates considered per run. Omitted for other Workers; presence is what tells the extras slot to render the control.'
+      ),
   })
 );
 export type WorkerSettings = z.infer<typeof WorkerSettings>;

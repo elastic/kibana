@@ -264,11 +264,27 @@ components:
           type: string
         autonomy:
           $ref: '#/components/schemas/WatchAutonomyLevel'
+        allowedAutonomyLevels:
+          type: array
+          items:
+            $ref: '#/components/schemas/WatchAutonomyLevel'
+          minItems: 1
+          maxItems: 3
+          description: >-
+            Subset of the shared autonomy scale this Worker offers. Same meaning as
+            WatchAutonomyLevel everywhere; availability is per-Worker. Omitted means all three.
         scheduleInterval:
           $ref: '#/components/schemas/WorkerScheduleInterval'
           description: >-
             Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to
             render the interval control.
+        candidateLimit:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          description: >-
+            Attack Discovery only. Max candidates considered per run. Omitted for other Workers;
+            presence is what tells the extras slot to render the control.
 
     Worker:
       type: object

@@ -53,6 +53,13 @@ paths:
                     New interval for a schedule-driven Worker. Rejected with a 400 for a Worker
                     that owns no schedule. Changing it rewrites the Worker's workflow YAML and
                     re-registers its Task Manager schedule.
+                candidateLimit:
+                  type: integer
+                  minimum: 1
+                  maximum: 1000
+                  description: >-
+                    New candidate limit for Attack Discovery. Rejected with a 400 for a Worker
+                    that does not own this setting.
       responses:
         '200':
           description: Successful response

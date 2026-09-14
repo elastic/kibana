@@ -12,6 +12,8 @@ import type { ManagedWorkflowTemplateValues } from '../../types';
 export interface CommonWorkerTemplateValues extends ManagedWorkflowTemplateValues {
   settingsVersion: number;
   autonomyLevel: 'manual' | 'assisted' | 'supervised';
+  /** Attack Discovery only. Present in template values when that Worker opts in. */
+  candidateLimit?: number;
 }
 
 export const renderCommonWorkerYaml = (
