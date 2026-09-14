@@ -36,17 +36,18 @@ export function registerInternalConnectorRoutes({ router, coreSetup, logger }: R
 
       const allConnectors = await actionsClient.getAll();
 
-      const connectors: AgentConnectorSummary[] = allConnectors
-        .filter((connector) => !!getConnectorSpec(connector.actionTypeId))
-        .map((connector) => {
-          const spec = getConnectorSpec(connector.actionTypeId);
-          return {
+      const connectors: AgentConnectorSummary[] = allConnectors.flatMap((connector) => {
+        const spec = getConnectorSpec(connector.actionTypeId);
+        if (!spec) return [];
+        return [
+          {
             id: connector.id,
             name: connector.name,
             type: connector.actionTypeId,
-            description: spec?.metadata.description ?? connector.name,
-          };
-        });
+            description: spec.metadata.description ?? connector.name,
+          },
+        ];
+      });
 
       return response.ok<ListAgentConnectorsResponse>({ body: connectors });
     })

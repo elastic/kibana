@@ -37,18 +37,19 @@ export const createListConnectorsTool = ({
 
       const allowedIds = context.agentConfiguration?.connector_ids;
 
-      const connectors = allConnectors
-        .filter((connector) => !!getConnectorSpec(connector.actionTypeId))
-        .filter((connector) => !allowedIds || allowedIds.includes(connector.id))
-        .map((connector) => {
-          const spec = getConnectorSpec(connector.actionTypeId);
-          return {
+      const connectors = allConnectors.flatMap((connector) => {
+        const spec = getConnectorSpec(connector.actionTypeId);
+        if (!spec) return [];
+        if (allowedIds && !allowedIds.includes(connector.id)) return [];
+        return [
+          {
             id: connector.id,
             name: connector.name,
             type: connector.actionTypeId,
-            description: spec?.metadata.description ?? connector.name,
-          };
-        });
+            description: spec.metadata.description ?? connector.name,
+          },
+        ];
+      });
 
       return {
         results: [
