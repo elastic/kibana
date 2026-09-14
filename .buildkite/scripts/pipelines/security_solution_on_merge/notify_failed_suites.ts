@@ -16,8 +16,8 @@ import { BuildkiteClient } from '#pipeline-utils';
 import type { Job } from '#pipeline-utils';
 
 const NOTIFY_STEP_KEY = 'notify_owning_teams';
-/** Slack truncates a message block at 3000 chars, and a fully red build can fail dozens of jobs. */
-const MAX_LISTED_JOBS = 20;
+/** Slack truncates a message block at 3000 chars; stay under it with headroom for mrkdwn expansion. */
+const SLACK_MESSAGE_CHAR_BUDGET = 2800;
 /** Set after a successful pipeline upload so a retried notify step cannot double-post. */
 export const SLACK_NOTIFY_UPLOADED_META_KEY = 'security_solution_on_merge:slack_notify_uploaded';
 const DRY_RUN = !!process.env.DRY_RUN?.match(/(1|true)/i);
@@ -87,26 +87,43 @@ export function composeChannelMessage(
     }
   }
 
-  const entries = [...unique.entries()];
-  const lines = entries.slice(0, MAX_LISTED_JOBS).map(([displayName, { job, count }]) => {
+  const candidates = [...unique.entries()].map(([displayName, { job, count }]) => {
     const suffix = count > 1 ? ` (${count} failed jobs)` : '';
     return `• <${job.webUrl}|[job]> ${displayName}${suffix}`;
   });
 
-  const omitted = entries.length - lines.length;
-  if (omitted > 0) {
-    lines.push(`• …and ${omitted} more failed step${omitted > 1 ? 's' : ''}`);
+  const omissionLine = (count: number) =>
+    `• …and ${count} more failed step${count > 1 ? 's' : ''}`;
+
+  const render = (lines: string[]) =>
+    [
+      ':alert: *kibana-security-solution-on-merge* failed',
+      '',
+      'Parent kibana-on-merge is `soft_fail`, so treat this as release-blocking for Security.',
+      '',
+      ...lines,
+      '',
+      `<${buildUrl}|View build #${buildNumber}>`,
+    ].join('\n');
+
+  // Job URLs and suite labels are unbounded, so budget by rendered length rather than
+  // by entry count. Reserve room for the omission line whenever anything is dropped,
+  // sized against the total so its digit count can never push the message over.
+  const listed: string[] = [];
+  for (const [index, candidate] of candidates.entries()) {
+    const isLast = index === candidates.length - 1;
+    const projected = isLast
+      ? [...listed, candidate]
+      : [...listed, candidate, omissionLine(candidates.length)];
+
+    if (render(projected).length > SLACK_MESSAGE_CHAR_BUDGET) {
+      break;
+    }
+    listed.push(candidate);
   }
 
-  return [
-    ':alert: *kibana-security-solution-on-merge* failed',
-    '',
-    'Parent kibana-on-merge is `soft_fail`, so treat this as release-blocking for Security.',
-    '',
-    ...lines,
-    '',
-    `<${buildUrl}|View build #${buildNumber}>`,
-  ].join('\n');
+  const omitted = candidates.length - listed.length;
+  return render(omitted > 0 ? [...listed, omissionLine(omitted)] : listed);
 }
 
 export function composeFanOutFailureMessage(

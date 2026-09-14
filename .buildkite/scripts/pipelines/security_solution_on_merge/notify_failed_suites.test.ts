@@ -37,6 +37,16 @@ const job = (overrides: Partial<Job>): Job =>
     ...overrides,
   } as Job);
 
+const BUILD_URL = 'https://buildkite.com/elastic/kibana-security-solution-on-merge/builds/473';
+
+/** Real-world label and job-URL lengths, which is what the Slack budget has to survive. */
+const realisticJobs = (count: number) =>
+  Array.from({ length: count }, (_, index) => ({
+    id: `0199e2bb-6f4c-4a1b-9d3e-${String(index).padStart(12, '0')}`,
+    name: `Rule Management - Prebuilt Rules Upgrade ${index} - Security Solution Cypress Tests`,
+    webUrl: `${BUILD_URL}#0199e2bb-6f4c-4a1b-9d3e-${String(index).padStart(12, '0')}`,
+  }));
+
 describe('collectFailedScriptJobs', () => {
   it('keeps failed script jobs and drops passed, retried, and wait jobs', () => {
     const jobs = [
@@ -146,18 +156,31 @@ describe('composeChannelMessage', () => {
     );
   });
 
-  it('caps the listed steps so the message stays under the Slack block limit', () => {
-    const jobs = Array.from({ length: 25 }, (_, index) => ({
-      id: `job-${index}`,
-      name: `Suite ${index} - Security Solution Cypress Tests`,
-      webUrl: `https://example.test/${index}`,
-    }));
+  it('lists every failed step when the message fits in the Slack budget', () => {
+    const message = composeChannelMessage(realisticJobs(5), BUILD_URL, 473);
 
-    const message = composeChannelMessage(jobs, 'https://example.test/build', 473);
+    expect(message).toContain('Rule Management - Prebuilt Rules Upgrade 4');
+    expect(message).not.toContain('more failed step');
+  });
 
-    expect(message).toContain('Suite 19 - Security Solution Cypress Tests');
-    expect(message).not.toContain('Suite 20 - Security Solution Cypress Tests');
-    expect(message).toContain('…and 5 more failed steps');
+  it('drops entries to stay under the Slack block limit and reports the remainder', () => {
+    const jobs = realisticJobs(40);
+
+    const message = composeChannelMessage(jobs, BUILD_URL, 473);
+
+    expect(message.length).toBeLessThanOrEqual(3000);
+
+    const listed = message.split('\n').filter((line) => line.includes('|[job]>')).length;
+    expect(listed).toBeGreaterThan(0);
+    expect(listed).toBeLessThan(jobs.length);
+    expect(message).toContain(`…and ${jobs.length - listed} more failed steps`);
+  });
+
+  it('keeps the build link when almost everything is dropped', () => {
+    const message = composeChannelMessage(realisticJobs(200), BUILD_URL, 473);
+
+    expect(message.length).toBeLessThanOrEqual(3000);
+    expect(message).toContain(`<${BUILD_URL}|View build #473>`);
   });
 });
 
