@@ -28,7 +28,7 @@ export interface AgentConditionSyntaxError {
 export const validateAgentConditionExpression = (
   expression: string | undefined
 ): AgentConditionSyntaxError[] => {
-  if (typeof expression !== 'string' || !expression.trim()) return [];
+  if (!expression?.trim()) return [];
 
   const listener = new CollectingErrorListener();
 

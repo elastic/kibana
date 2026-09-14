@@ -159,7 +159,10 @@ const validateCondition = (
   conditionValidator: ValidatePackagePolicyDeps['conditionValidator']
 ): Errors => {
   if (!conditionValidator) return null;
-  const errors = conditionValidator(expr ?? undefined);
+  // Handlebars can parse text values like 'true'/'false' as booleans; coerce to string.
+  const normalized =
+    typeof (expr as unknown) === 'boolean' ? String(expr as unknown) : (expr ?? undefined);
+  const errors = conditionValidator(normalized);
   if (!errors.length) return null;
   return errors.map(({ line, column, message }) =>
     i18n.translate('xpack.fleet.packagePolicyValidation.conditionSyntaxErrorMessage', {
