@@ -128,7 +128,12 @@ export const createVerifyKiStepDefinition = (
       const totalController = new AbortController();
       const totalTimer = setTimeout(() => totalController.abort(), totalTimeoutMs);
       const onStepAbort = () => totalController.abort();
-      context.abortSignal.addEventListener('abort', onStepAbort, { once: true });
+      // The abort event only fires once, so a signal aborted before this point must be mirrored explicitly.
+      if (context.abortSignal.aborted) {
+        onStepAbort();
+      } else {
+        context.abortSignal.addEventListener('abort', onStepAbort, { once: true });
+      }
       const abortSignal = totalController.signal;
 
       let summary;

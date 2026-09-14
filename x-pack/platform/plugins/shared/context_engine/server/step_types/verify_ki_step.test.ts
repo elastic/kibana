@@ -38,12 +38,14 @@ const makeHandlerContext = (
     metadata,
     parent,
     total_timeout_sec,
+    abortSignal,
   }: {
     verifiers?: VerifyKiVerifiers;
     getScopedEsClient?: () => unknown;
     metadata?: Record<string, unknown>;
     parent?: { workflowId: string; executionId: string };
     total_timeout_sec?: number;
+    abortSignal?: AbortSignal;
   } = {}
 ): VerifyKiHandlerContext =>
   ({
@@ -60,7 +62,7 @@ const makeHandlerContext = (
       }),
     },
     logger: loggingSystemMock.createLogger(),
-    abortSignal: new AbortController().signal,
+    abortSignal: abortSignal ?? new AbortController().signal,
     stepId: 'verify_ki',
     stepType: 'context-engine.verifyKi',
   } as unknown as VerifyKiHandlerContext);
@@ -366,6 +368,28 @@ describe('verify_ki workflow step', () => {
       errorType: undefined,
     });
     expect(telemetry.logger.debug).toHaveBeenCalledWith('KI verification aborted');
+  });
+
+  it('stops immediately when the step is already cancelled before verifiers start', async () => {
+    setContextEngineEnabled(true);
+    const stepController = new AbortController();
+    stepController.abort();
+
+    await expect(
+      makeDefinition().handler(
+        makeHandlerContext({ attributes: { esql: 'FROM logs-*' } }, esClient, {
+          verifiers: [ESQL_VALID_RUNTIME_VERIFIER_ID],
+          abortSignal: stepController.signal,
+        })
+      )
+    ).rejects.toThrow();
+
+    expect(esClient.esql.query).not.toHaveBeenCalled();
+    expect(telemetry.analyticsService.reportKiVerification).toHaveBeenCalledWith({
+      outcome: 'aborted',
+      workflowId: 'parent-wf',
+      errorType: undefined,
+    });
   });
 
   it('aborts when the total timeout fires before verifiers finish', async () => {

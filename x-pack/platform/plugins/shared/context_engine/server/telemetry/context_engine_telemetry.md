@@ -6,7 +6,7 @@ The Context Engine plugin reports event-based telemetry (EBT) for Knowledge Indi
 
 - KI free text is never reported. No `title`, `description`, `content`, `tags`, or `attributes` values appear in any payload.
 
-- Verifier failure `reason` strings echo query text and user data, so they appear only in the step output. Built-in verifier ids are reported verbatim; custom verifier workflow ids derive from user-typed names and collapse to `workflow`.
+- Verifier failure `reason` strings echo query text and user data, so they appear only in the step output. Verifier ids are reported verbatim.
 
 - AI index ids are reported verbatim.
 
