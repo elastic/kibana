@@ -7,10 +7,6 @@
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
-import {
-  ALERTING_V2_RULES_BASE_PATH,
-  ALERTING_V2_EPISODES_BASE_PATH,
-} from '@kbn/alerting-v2-constants';
 
 export const EMPTY_VALUE = '—';
 export const LAST_EPISODE_TIMESTAMP_ESQL_VARIABLE = 'lastEpisodeTimestamp';
@@ -54,9 +50,3 @@ export const HISTOGRAM_BREAKDOWN_COLUMNS: DatatableColumn[] = [
 export const HISTOGRAM_EPISODE_LIMIT = 10_000;
 export const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 export const FLYOUT_FOOTER_OFFSET = 80;
-
-export const getAlertEpisodeDetailsPath = (episodeId: string) =>
-  `${ALERTING_V2_EPISODES_BASE_PATH}/${encodeURIComponent(episodeId)}`;
-
-export const getRuleDetailsPath = (ruleId: string) =>
-  `${ALERTING_V2_RULES_BASE_PATH}/${encodeURIComponent(ruleId)}`;
