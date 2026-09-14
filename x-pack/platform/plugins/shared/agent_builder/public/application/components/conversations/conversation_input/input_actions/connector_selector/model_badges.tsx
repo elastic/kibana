@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
 import React from 'react';
@@ -37,15 +37,13 @@ export const ModelRetirementIcon: React.FC<ModelRetirementIconProps> = ({ metada
   const msUntilEol = Date.parse(endOfLifeDate) - Date.now();
   if (msUntilEol > RETIREMENT_WARNING_DAYS * 24 * 60 * 60 * 1000) return null;
   return (
-    <EuiToolTip content={retirementWarningTooltip(endOfLifeDate)}>
-      <EuiIcon
-        type="warning"
-        size="s"
-        color="warning"
-        tabIndex={0}
-        aria-label={retirementWarningTooltip(endOfLifeDate)}
-        data-test-subj="modelBadgeRetirement"
-      />
-    </EuiToolTip>
+    <EuiIconTip
+      type="warning"
+      size="s"
+      color="warning"
+      content={retirementWarningTooltip(endOfLifeDate)}
+      aria-label={retirementWarningTooltip(endOfLifeDate)}
+      data-test-subj="modelBadgeRetirement"
+    />
   );
 };
