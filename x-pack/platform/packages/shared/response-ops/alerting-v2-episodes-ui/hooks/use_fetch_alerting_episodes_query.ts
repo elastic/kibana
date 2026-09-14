@@ -20,9 +20,9 @@ import { useAlertingEpisodesDataView } from './use_alerting_episodes_data_view';
 import { fetchAlertingEpisodes } from '../apis/fetch_alerting_episodes';
 import { mergeEpisodes } from '../utils/merge_episodes';
 import {
-  fetchFromSource,
+  EMPTY_SOURCE_ERRORS,
+  fetchFromV2AndSource,
   type EpisodeSourceError,
-  type FetchFromSourceResult,
 } from '../utils/fetch_from_sources';
 
 interface CombinedEpisodesResult {
@@ -71,17 +71,19 @@ export const useFetchAlertingEpisodesQuery = ({
     enabled: dataView != null,
     queryKey,
     queryFn: async ({ signal: abortSignal }) => {
-      const [v2Rows, sourceEpisodes] = await Promise.all([
-        fetchAlertingEpisodes({
-          spaceId,
-          abortSignal,
-          pageSize,
-          services,
-          filterState,
-          sortState,
-          timeRange,
-        }).catch(() => [] as Awaited<ReturnType<typeof fetchAlertingEpisodes>>),
-        fetchFromSource(additionalEpisodesDataSource, (source) =>
+      const { v2, additional, errors } = await fetchFromV2AndSource({
+        v2: () =>
+          fetchAlertingEpisodes({
+            spaceId,
+            abortSignal,
+            pageSize,
+            services,
+            filterState,
+            sortState,
+            timeRange,
+          }),
+        source: additionalEpisodesDataSource,
+        fromSource: (source) =>
           source.fetchEpisodes({
             services,
             abortSignal,
@@ -89,18 +91,17 @@ export const useFetchAlertingEpisodesQuery = ({
             filterState,
             sortState,
             timeRange,
-          })
-        ).catch((): FetchFromSourceResult<AlertEpisode[]> => ({ results: [], errors: [] })),
-      ]);
+          }),
+      });
 
-      const v2Episodes: AlertEpisode[] = v2Rows.map((ep) => ({
+      const v2Episodes: AlertEpisode[] = (v2 ?? []).map((ep) => ({
         ...ep,
         last_tags: normalizeTags(ep.last_tags),
       }));
 
       return {
-        episodes: mergeEpisodes([v2Episodes, ...sourceEpisodes.results], sortState, pageSize),
-        sourceErrors: sourceEpisodes.errors,
+        episodes: mergeEpisodes([v2Episodes, ...additional], sortState, pageSize),
+        sourceErrors: errors,
       };
     },
     keepPreviousData: true,
@@ -109,7 +110,7 @@ export const useFetchAlertingEpisodesQuery = ({
   return {
     ...query,
     data: query.data?.episodes,
-    sourceErrors: query.data?.sourceErrors ?? [],
+    sourceErrors: query.data?.sourceErrors ?? EMPTY_SOURCE_ERRORS,
     dataView,
   };
 };

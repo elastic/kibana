@@ -10,6 +10,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiCallOut, EuiTitle } fr
 import type { TimeRange } from '@kbn/es-query';
 import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import { useEpisodesKpisQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query';
+import {
+  EPISODES_KPIS_ERROR_PREFIX,
+  useReportSourceErrors,
+} from '@kbn/alerting-v2-episodes-ui/context/episodes_page_errors_context';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -41,11 +45,13 @@ export interface EpisodesKpisProps {
 }
 
 export const EpisodesKpis = ({ services, filterState, timeRange }: EpisodesKpisProps) => {
-  const { data, isLoading, isError } = useEpisodesKpisQuery({
+  const { data, isLoading, isError, sourceErrors } = useEpisodesKpisQuery({
     services,
     filterState,
     timeRange,
   });
+
+  useReportSourceErrors(EPISODES_KPIS_ERROR_PREFIX, sourceErrors);
 
   if (isError) {
     return (

@@ -28,6 +28,10 @@ import {
 } from '@kbn/unified-histogram';
 import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import { useEpisodesHistogramQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_histogram_query';
+import {
+  EPISODES_HISTOGRAM_ERROR_PREFIX,
+  useReportSourceErrors,
+} from '@kbn/alerting-v2-episodes-ui/context/episodes_page_errors_context';
 import { useSpaceId } from '@kbn/alerting-v2-episodes-ui/hooks/use_space_id';
 import { buildEpisodesHistogramQuery } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { computeBucketInterval } from '@kbn/alerting-v2-episodes-ui/utils/histogram_utils';
@@ -109,6 +113,7 @@ export const EpisodesHistogram = ({
     isCapHit,
     error,
     refetch,
+    sourceErrors,
   } = useEpisodesHistogramQuery({
     services: { expressions: services.expressions, spaces: services.spaces, http: services.http },
     filterState,
@@ -116,6 +121,8 @@ export const EpisodesHistogram = ({
     bucketInterval,
     breakdownField,
   });
+
+  useReportSourceErrors(EPISODES_HISTOGRAM_ERROR_PREFIX, sourceErrors);
 
   const unifiedHistogramServices = useMemo(
     () => ({

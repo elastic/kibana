@@ -16,9 +16,14 @@ import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import { useSpaceId } from './use_space_id';
 import { queryKeys } from '../query_keys';
+import { HISTOGRAM_EPISODE_LIMIT } from '../constants';
 import { buildEpisodesHistogramQuery } from '../queries/episodes_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
-import { fetchFromSource, type FetchFromSourceResult } from '../utils/fetch_from_sources';
+import {
+  EMPTY_SOURCE_ERRORS,
+  fetchFromV2AndSource,
+  type EpisodeSourceError,
+} from '../utils/fetch_from_sources';
 import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
 import {
   generateTimeBuckets,
@@ -26,11 +31,11 @@ import {
   formatHistogramDatatable,
   type HistogramEpisodeRow,
 } from '../utils/histogram_utils';
-import { HISTOGRAM_EPISODE_LIMIT } from '../constants';
 
 interface HistogramQueryData {
   rows: HistogramEpisodeRow[];
   isCapHit: boolean;
+  sourceErrors: EpisodeSourceError[];
 }
 
 export interface UseEpisodesHistogramQueryOptions {
@@ -51,6 +56,7 @@ export interface UseEpisodesHistogramQueryResult {
   error: Error | undefined;
   isCapHit: boolean;
   refetch: () => void;
+  sourceErrors: EpisodeSourceError[];
 }
 
 export const useEpisodesHistogramQuery = ({
@@ -78,33 +84,36 @@ export const useEpisodesHistogramQuery = ({
       additionalEpisodesDataSource?.id
     ),
     queryFn: async ({ signal }) => {
-      const [v2Rows, sourceHistograms] = await Promise.all([
-        executeEsqlQuery<HistogramEpisodeRow>({
-          expressions: services.expressions,
-          query: buildEpisodesHistogramQuery(spaceId, filterState, breakdownField).print('basic'),
-          input: {
-            type: 'kibana_context' as const,
-            esqlVariables: [],
-            ...(timeRange ? { timeRange } : {}),
-          },
-          abortSignal: signal,
-        }).catch((): HistogramEpisodeRow[] => []),
-        fetchFromSource(additionalEpisodesDataSource, (source) =>
+      const { v2, additional, errors } = await fetchFromV2AndSource({
+        v2: () =>
+          executeEsqlQuery<HistogramEpisodeRow>({
+            expressions: services.expressions,
+            query: buildEpisodesHistogramQuery(spaceId, filterState, breakdownField).print('basic'),
+            input: {
+              type: 'kibana_context' as const,
+              esqlVariables: [],
+              ...(timeRange ? { timeRange } : {}),
+            },
+            abortSignal: signal,
+          }),
+        source: additionalEpisodesDataSource,
+        fromSource: (source) =>
           source.fetchHistogram?.({
             services,
             filterState,
             timeRange,
             breakdownField,
             abortSignal: signal,
-          })
-        ).catch((): FetchFromSourceResult<never> => ({ results: [], errors: [] })),
-      ]);
+          }),
+      });
+
+      const v2Rows = v2 ?? [];
 
       return {
-        rows: [...v2Rows, ...sourceHistograms.results.flatMap(({ rows }) => rows)],
+        rows: [...v2Rows, ...additional.flatMap(({ rows }) => rows)],
         isCapHit:
-          v2Rows.length >= HISTOGRAM_EPISODE_LIMIT ||
-          sourceHistograms.results.some(({ isCapHit }) => isCapHit),
+          v2Rows.length >= HISTOGRAM_EPISODE_LIMIT || additional.some(({ isCapHit }) => isCapHit),
+        sourceErrors: errors,
       };
     },
   });
@@ -145,5 +154,6 @@ export const useEpisodesHistogramQuery = ({
     error: error ?? undefined,
     isCapHit,
     refetch,
+    sourceErrors: queryResult?.sourceErrors ?? EMPTY_SOURCE_ERRORS,
   };
 };

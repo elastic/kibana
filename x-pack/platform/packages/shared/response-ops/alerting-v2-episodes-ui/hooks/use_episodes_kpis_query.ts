@@ -16,7 +16,11 @@ import { useSpaceId } from './use_space_id';
 import { useCurrentUserProfile } from './use_current_user_profile';
 import { buildEpisodesKpisQuery } from '../queries/episodes_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
-import { fetchFromSource, type FetchFromSourceResult } from '../utils/fetch_from_sources';
+import {
+  EMPTY_SOURCE_ERRORS,
+  fetchFromV2AndSource,
+  type EpisodeSourceError,
+} from '../utils/fetch_from_sources';
 import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
 import { mergeKpis } from '../utils/merge_kpis';
 import { queryKeys } from '../query_keys';
@@ -50,10 +54,16 @@ export interface UseEpisodesKpisQueryOptions {
   timeRange?: TimeRange;
 }
 
+interface EpisodesKpisQueryData {
+  row?: EpisodesKpisRow;
+  sourceErrors: EpisodeSourceError[];
+}
+
 export interface UseEpisodesKpisQueryResult {
   data: EpisodesKpisData | undefined;
   isLoading: boolean;
   isError: boolean;
+  sourceErrors: EpisodeSourceError[];
 }
 
 export const useEpisodesKpisQuery = ({
@@ -77,7 +87,7 @@ export const useEpisodesKpisQuery = ({
     data,
     isLoading: isKpisLoading,
     error,
-  } = useQuery<EpisodesKpisRow[], Error, EpisodesKpisData | undefined>({
+  } = useQuery<EpisodesKpisQueryData, Error>({
     queryKey: queryKeys.kpis(
       spaceId,
       filterState,
@@ -86,36 +96,26 @@ export const useEpisodesKpisQuery = ({
       additionalEpisodesDataSource?.id
     ),
     queryFn: async ({ signal }) => {
-      const [v2Result, sourceKpis] = await Promise.all([
-        executeEsqlQuery<EpisodesKpisRow>({
-          expressions: services.expressions,
-          query: buildEpisodesKpisQuery(spaceId, currentUserUid, filterState),
-          input: {
-            type: 'kibana_context' as const,
-            esqlVariables: [],
-            ...(timeRange ? { timeRange } : {}),
-          },
-          abortSignal: signal,
-        }).catch((): EpisodesKpisRow[] => []),
-        fetchFromSource(additionalEpisodesDataSource, (source) =>
-          source.fetchKpis?.({ services, filterState, timeRange, abortSignal: signal })
-        ).catch((): FetchFromSourceResult<EpisodesKpisRow> => ({ results: [], errors: [] })),
-      ]);
+      const { v2, additional, errors } = await fetchFromV2AndSource({
+        v2: () =>
+          executeEsqlQuery<EpisodesKpisRow>({
+            expressions: services.expressions,
+            query: buildEpisodesKpisQuery(spaceId, currentUserUid, filterState),
+            input: {
+              type: 'kibana_context' as const,
+              esqlVariables: [],
+              ...(timeRange ? { timeRange } : {}),
+            },
+            abortSignal: signal,
+          }),
+        source: additionalEpisodesDataSource,
+        fromSource: (source) =>
+          source.fetchKpis?.({ services, filterState, timeRange, abortSignal: signal }),
+      });
 
-      const merged = mergeKpis([v2Result[0], ...sourceKpis.results]);
-
-      return merged ? [merged] : [];
-    },
-    select: (rows) => {
-      const row = rows[0];
-      if (!row) return undefined;
       return {
-        alertsCount: row.alerts_count ?? 0,
-        firingRules: row.firing_rules ?? 0,
-        assignedToMe: row.assigned_to_me ?? 0,
-        unassigned: row.unassigned ?? 0,
-        acknowledged: row.acknowledged ?? 0,
-        snoozed: row.snoozed ?? 0,
+        row: mergeKpis([v2?.[0], ...additional]),
+        sourceErrors: errors,
       };
     },
     // Wait until the profile query settles (resolved or `null`) so the KPIs
@@ -124,9 +124,20 @@ export const useEpisodesKpisQuery = ({
     enabled: !isCurrentUserLoading,
   });
 
+  const row = data?.row;
   return {
-    data,
+    data: row
+      ? {
+          alertsCount: row.alerts_count ?? 0,
+          firingRules: row.firing_rules ?? 0,
+          assignedToMe: row.assigned_to_me ?? 0,
+          unassigned: row.unassigned ?? 0,
+          acknowledged: row.acknowledged ?? 0,
+          snoozed: row.snoozed ?? 0,
+        }
+      : undefined,
     isLoading: isCurrentUserLoading || isKpisLoading,
     isError: !!error,
+    sourceErrors: data?.sourceErrors ?? EMPTY_SOURCE_ERRORS,
   };
 };

@@ -681,3 +681,73 @@ describe('rule summary flyout', () => {
     expect(getExpandedDoc()).toBeDefined();
   });
 });
+
+const httpError = (status: number, message: string) =>
+  Object.assign(new Error(message), { response: { status }, body: { statusCode: status } });
+
+const classicEpisodes = [
+  {
+    'episode.id': 'classic-1',
+    'rule.id': 'classic-rule',
+    group_hash: 'classic-gh',
+    '@timestamp': '2026-01-01T00:00:00Z',
+  },
+];
+
+describe('AlertEpisodesListPage fetch errors', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockCapabilities = WRITE_CAPABILITIES;
+    mockCreateEpisodeActions.mockReturnValue([]);
+    jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
+    jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
+    jest.mocked(fetchClassicAlertsAsEpisodes).mockResolvedValue([]);
+    mockHttp.post.mockResolvedValue({ rules: [] });
+  });
+
+  it('shows the fetch error callout when classic alerts return 500', async () => {
+    jest
+      .mocked(fetchClassicAlertsAsEpisodes)
+      .mockRejectedValue(httpError(500, 'classic alerts failed'));
+
+    renderPage();
+
+    expect(await screen.findByTestId('alertingV2EpisodesListFetchError')).toBeInTheDocument();
+    expect(screen.getByText('Unable to load some alerts')).toBeInTheDocument();
+    expect(screen.getByText('classic alerts failed')).toBeInTheDocument();
+  });
+
+  it.each([403, 503])(
+    'does not show the fetch error callout when classic alerts return %s',
+    async (status) => {
+      jest
+        .mocked(fetchClassicAlertsAsEpisodes)
+        .mockRejectedValue(httpError(status, `classic ${status}`));
+
+      renderPage();
+
+      await waitFor(() => {
+        const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+        expect(lastCall?.rows?.length).toBeGreaterThan(0);
+      });
+
+      expect(screen.queryByTestId('alertingV2EpisodesListFetchError')).not.toBeInTheDocument();
+      expect(screen.queryByText(`classic ${status}`)).not.toBeInTheDocument();
+    }
+  );
+
+  it('shows the callout and classic rows when v2 returns 500', async () => {
+    jest.mocked(fetchAlertingEpisodes).mockRejectedValue(httpError(500, 'v2 episodes failed'));
+    jest.mocked(fetchClassicAlertsAsEpisodes).mockResolvedValue(classicEpisodes as any);
+
+    renderPage();
+
+    expect(await screen.findByTestId('alertingV2EpisodesListFetchError')).toBeInTheDocument();
+    expect(screen.getByText('v2 episodes failed')).toBeInTheDocument();
+
+    await waitFor(() => {
+      const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+      expect(lastCall?.rows?.map((row: { id?: string }) => row.id)).toEqual(['classic-1']);
+    });
+  });
+});
