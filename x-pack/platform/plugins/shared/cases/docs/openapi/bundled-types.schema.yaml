@@ -1223,10 +1223,19 @@ paths:
       summary: Create a reusable field definition
       operationId: createCaseFieldDefinitionDefaultSpace
       description: |
-        Creates a reusable field definition in the field library. You must have the "Manage templates" sub-privilege for the Cases feature of the owning solution. Requires the Cases feature to be enabled in the space.
+        Creates a reusable field definition in the field library. You must have the "Manage templates" sub-privilege for the Cases feature of the owning solution. Requires the Cases feature to be enabled in the space. Use `dry_run=true` to validate the request without writing anything.
       x-state: Technical preview
       tags:
         - cases
+      parameters:
+        - in: query
+          name: dry_run
+          description: |
+            When true, runs authorization, body, and name-uniqueness validation without creating the field definition. Returns `{ "valid": true }` on success.
+          required: false
+          schema:
+            type: boolean
+            default: false
       requestBody:
         required: true
         content:
@@ -1284,16 +1293,71 @@ paths:
                 response409:
                   $ref: '#/components/examples/response_409'
   /api/cases/field_definitions/{field_definition_id}:
-    put:
-      summary: Update editable attributes of a reusable field definition
-      operationId: updateCaseFieldDefinitionDefaultSpace
+    get:
+      summary: Get a reusable field definition by ID
+      operationId: getCaseFieldDefinitionDefaultSpace
       description: |
-        Updates editable attributes of a reusable field definition. Server-managed attributes (`displayOrder`, `legacyKey`) are preserved. You must have the "Manage templates" sub-privilege for the Cases feature of the owning solution. A field's `name` and YAML `type` are immutable after creation — an attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified. Once `isGlobal` is set to `true` it cannot be set back to `false`. Requires the Cases feature to be enabled in the space.
+        Returns a single reusable field definition by its ID. Requires the Cases feature to be enabled in the space.
       x-state: Technical preview
       tags:
         - cases
       parameters:
         - $ref: '#/components/parameters/field_definition_id'
+      responses:
+        '200':
+          description: Indicates a successful call. Returns the field definition.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/field_definition_response'
+              examples:
+                getCaseFieldDefinitionResponse:
+                  $ref: '#/components/examples/get_case_field_definition_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
+        '403':
+          description: The user does not have permission to read field definitions for the owner.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response403:
+                  $ref: '#/components/examples/response_403'
+        '404':
+          description: The field definition was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response404:
+                  $ref: '#/components/examples/response_404'
+    put:
+      summary: Update editable attributes of a reusable field definition
+      operationId: updateCaseFieldDefinitionDefaultSpace
+      description: |
+        Updates editable attributes of a reusable field definition. Server-managed attributes (`displayOrder`, `legacyKey`) are preserved. You must have the "Manage templates" sub-privilege for the Cases feature of the owning solution. A field's `name` and YAML `type` are immutable after creation — an attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified. Once `isGlobal` is set to `true` it cannot be set back to `false`. Requires the Cases feature to be enabled in the space. Use `dry_run=true` to validate the request without writing anything.
+      x-state: Technical preview
+      tags:
+        - cases
+      parameters:
+        - $ref: '#/components/parameters/field_definition_id'
+        - in: query
+          name: dry_run
+          description: |
+            When true, runs authorization, body, and identity-immutability validation without updating the field definition. Returns `{ "valid": true }` on success.
+          required: false
+          schema:
+            type: boolean
+            default: false
       requestBody:
         required: true
         content:
@@ -4018,10 +4082,9 @@ components:
 
         Resource limits (enforced on write; a violation returns `400`): an owner may have at most 200 field definitions per space. The `definition` string may not exceed 30000 characters.
 
-        Identity constraints: the `name` property must match the `name` key in the YAML `definition`. Once created, a field's `name` and YAML `type` are immutable — they determine the key under which case values are stored. An attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified.
+        Identity constraints: the `name` property must match the `name` key in the YAML `definition`. When `name` is omitted, the server extracts it from the `definition` YAML automatically. Once created, a field's `name` and YAML `type` are immutable — they determine the key under which case values are stored. An attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified.
       type: object
       required:
-        - name
         - owner
         - definition
       properties:
@@ -4030,7 +4093,7 @@ components:
           minLength: 1
           maxLength: 50
           description: |
-            The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. Immutable after creation.
+            The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation.
         owner:
           $ref: '#/components/schemas/owner'
         definition:

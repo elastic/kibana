@@ -21336,8 +21336,17 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates a reusable field definition in the field library. You must have the "Manage templates" sub-privilege for the Cases feature of the owning solution. Requires the Cases feature to be enabled in the space.
+        Creates a reusable field definition in the field library. You must have the "Manage templates" sub-privilege for the Cases feature of the owning solution. Requires the Cases feature to be enabled in the space. Use `dry_run=true` to validate the request without writing anything.
       operationId: createCaseFieldDefinitionDefaultSpace
+      parameters:
+        - description: |
+            When true, runs authorization, body, and name-uniqueness validation without creating the field definition. Returns `{ "valid": true }` on success.
+          in: query
+          name: dry_run
+          required: false
+          schema:
+            default: false
+            type: boolean
       requestBody:
         content:
           application/json:
@@ -21402,6 +21411,62 @@ paths:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/cases/field_definitions/{field_definition_id}:
+    get:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/field_definitions/{field_definition_id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a single reusable field definition by its ID. Requires the Cases feature to be enabled in the space.
+      operationId: getCaseFieldDefinitionDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_field_definition_id'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getCaseFieldDefinitionResponse:
+                  $ref: '#/components/examples/Cases_get_case_field_definition_response'
+              schema:
+                $ref: '#/components/schemas/Cases_field_definition_response'
+          description: Indicates a successful call. Returns the field definition.
+        '401':
+          content:
+            application/json:
+              examples:
+                response401:
+                  $ref: '#/components/examples/Cases_response_401'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Authorization information is missing or invalid.
+        '403':
+          content:
+            application/json:
+              examples:
+                response403:
+                  $ref: '#/components/examples/Cases_response_403'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The user does not have permission to read field definitions for the owner.
+        '404':
+          content:
+            application/json:
+              examples:
+                response404:
+                  $ref: '#/components/examples/Cases_response_404'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The field definition was not found.
+      summary: Get a reusable field definition by ID
+      tags:
+        - cases
+      x-state: Technical preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
     delete:
       description: |
         **Spaces method and path for this operation:**
@@ -21469,10 +21534,18 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Updates editable attributes of a reusable field definition. Server-managed attributes (`displayOrder`, `legacyKey`) are preserved. You must have the "Manage templates" sub-privilege for the Cases feature of the owning solution. A field's `name` and YAML `type` are immutable after creation — an attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified. Once `isGlobal` is set to `true` it cannot be set back to `false`. Requires the Cases feature to be enabled in the space.
+        Updates editable attributes of a reusable field definition. Server-managed attributes (`displayOrder`, `legacyKey`) are preserved. You must have the "Manage templates" sub-privilege for the Cases feature of the owning solution. A field's `name` and YAML `type` are immutable after creation — an attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified. Once `isGlobal` is set to `true` it cannot be set back to `false`. Requires the Cases feature to be enabled in the space. Use `dry_run=true` to validate the request without writing anything.
       operationId: updateCaseFieldDefinitionDefaultSpace
       parameters:
         - $ref: '#/components/parameters/Cases_field_definition_id'
+        - description: |
+            When true, runs authorization, body, and identity-immutability validation without updating the field definition. Returns `{ "valid": true }` on success.
+          in: query
+          name: dry_run
+          required: false
+          schema:
+            default: false
+            type: boolean
       requestBody:
         content:
           application/json:
@@ -89133,7 +89206,7 @@ components:
 
         Resource limits (enforced on write; a violation returns `400`): an owner may have at most 200 field definitions per space. The `definition` string may not exceed 30000 characters.
 
-        Identity constraints: the `name` property must match the `name` key in the YAML `definition`. Once created, a field's `name` and YAML `type` are immutable — they determine the key under which case values are stored. An attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified.
+        Identity constraints: the `name` property must match the `name` key in the YAML `definition`. When `name` is omitted, the server extracts it from the `definition` YAML automatically. Once created, a field's `name` and YAML `type` are immutable — they determine the key under which case values are stored. An attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified.
       properties:
         definition:
           description: The field definition as a YAML string describing a single field (type, label, control, metadata).
@@ -89157,14 +89230,13 @@ components:
           type: boolean
         name:
           description: |
-            The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. Immutable after creation.
+            The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation.
           maxLength: 50
           minLength: 1
           type: string
         owner:
           $ref: '#/components/schemas/Cases_owner'
       required:
-        - name
         - owner
         - definition
       title: Field definition write request

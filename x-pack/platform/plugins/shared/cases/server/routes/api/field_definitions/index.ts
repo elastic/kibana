@@ -11,6 +11,7 @@ import { postFieldDefinitionRoute } from './post_field_definition_route';
 import { putFieldDefinitionRoute } from './put_field_definition_route';
 import { deleteFieldDefinitionRoute } from './delete_field_definition_route';
 import { getPublicFieldDefinitionsRoute } from './get_public_field_definitions_route';
+import { getPublicFieldDefinitionRoute } from './get_public_field_definition_route';
 import { postPublicFieldDefinitionRoute } from './post_public_field_definition_route';
 import { putPublicFieldDefinitionRoute } from './put_public_field_definition_route';
 import { deletePublicFieldDefinitionRoute } from './delete_public_field_definition_route';
@@ -41,6 +42,7 @@ export const getPublicFieldDefinitionRoutes = (config: ConfigType) => {
 
   return [
     getPublicFieldDefinitionsRoute,
+    getPublicFieldDefinitionRoute,
     postPublicFieldDefinitionRoute,
     putPublicFieldDefinitionRoute,
     deletePublicFieldDefinitionRoute,
