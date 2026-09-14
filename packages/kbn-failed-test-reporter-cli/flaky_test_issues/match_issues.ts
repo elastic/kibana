@@ -11,17 +11,17 @@ import Path from 'path';
 import { getLocationFromClassname } from '../failed_tests_reporter/get_failures';
 import type { GithubIssue } from '../failed_tests_reporter/github_api';
 import { getIssueMetadata } from '../failed_tests_reporter/issue_metadata';
-import { readSuiteFilePath } from './issue_title';
+import { readFlakySuiteIssueMetadata, readSuiteFilePathFromTitle } from './issue_body';
 import type { FlakySuite } from './suites';
 
 /**
- * What a `failed-test` issue says about its test: a suite issue names the file in its title, a
- * per-test issue filed by `report_failed_tests` carries metadata. Every field is best effort:
- * older issues lack some metadata, hand-written ones lack all of it.
+ * What a `failed-test` issue says about its test: a suite issue records the file in its
+ * metadata, a per-test issue filed by `report_failed_tests` carries other metadata. Every field
+ * is best effort: older issues lack some metadata, hand-written ones lack all of it.
  */
 export interface IssueDetails {
   issue: GithubIssue;
-  /** File named by a `Flaky … test suite: <file>` title. */
+  /** File a suite issue is about: from its `flaky-test-suite` metadata or a legacy title. */
   suiteFilePath?: string;
   /** Scout test id from the `Test ID` row; the same id `discover-flaky-tests` reports. */
   scoutTestId?: string;
@@ -71,7 +71,9 @@ export const describeIssue = (issue: GithubIssue): IssueDetails => {
   const location = issue.body.match(LOCATION_ROW)?.[1];
   return {
     issue,
-    suiteFilePath: readSuiteFilePath(issue.title),
+    suiteFilePath:
+      readFlakySuiteIssueMetadata(issue.body)?.['suite.filePath'] ??
+      readSuiteFilePathFromTitle(issue.title),
     scoutTestId: issue.body.match(SCOUT_TEST_ID_ROW)?.[1],
     filePath: location
       ? undot(location)

@@ -42,7 +42,9 @@ const ALL_CLASSIFICATIONS = FLAKY_TEST_CLASSIFICATIONS.join(',');
 const DEFAULT_MIN_BUILDS = defaults.thresholds.minBuilds;
 const DEFAULT_MIN_FAILED_BUILDS = defaults.thresholds.minFailedBuilds;
 const DEFAULT_MAX_TESTS = defaults.thresholds.maxTests;
+const DEFAULT_MAX_INACTIVE_HOURS = defaults.thresholds.maxInactiveHours;
 const DEFAULT_SAMPLES_PER_TEST = defaults.samplesPerTest;
+const DEFAULT_TREND_DAYS = defaults.trendDays;
 // Only affects the printed summary; the JSON report is bounded by --maxTests
 const DEFAULT_SUMMARY_LIMIT = 10;
 
@@ -116,7 +118,9 @@ export const discoverFlakyTests: Command<void> = {
       'minBuilds',
       'minFailedBuilds',
       'maxTests',
+      'maxInactiveHours',
       'samplesPerTest',
+      'trendDays',
       'outputPath',
       'summaryLimit',
       'summaryWidth',
@@ -133,7 +137,9 @@ export const discoverFlakyTests: Command<void> = {
       minBuilds: String(DEFAULT_MIN_BUILDS),
       minFailedBuilds: String(DEFAULT_MIN_FAILED_BUILDS),
       maxTests: String(DEFAULT_MAX_TESTS),
+      maxInactiveHours: String(DEFAULT_MAX_INACTIVE_HOURS),
       samplesPerTest: String(DEFAULT_SAMPLES_PER_TEST),
+      trendDays: String(DEFAULT_TREND_DAYS),
       outputPath: SCOUT_FLAKY_TESTS_PATH,
       summaryLimit: String(DEFAULT_SUMMARY_LIMIT),
     },
@@ -150,7 +156,9 @@ export const discoverFlakyTests: Command<void> = {
     --minBuilds        (optional)  Ignore tests seen in fewer builds [default: ${DEFAULT_MIN_BUILDS}]
     --minFailedBuilds  (optional)  Ignore tests that failed in fewer builds [default: ${DEFAULT_MIN_FAILED_BUILDS}]
     --maxTests         (optional)  Maximum tests per list in the report [default: ${DEFAULT_MAX_TESTS}]
+    --maxInactiveHours (optional)  Drop tests that did not execute in this many hours before the window end, i.e. skipped, moved or deleted [default: ${DEFAULT_MAX_INACTIVE_HOURS}]
     --samplesPerTest   (optional)  Recent failure messages per test [default: ${DEFAULT_SAMPLES_PER_TEST}]
+    --trendDays        (optional)  Days of per-day build counts attached to each test; 0 disables [default: ${DEFAULT_TREND_DAYS}]
     --outputPath       (optional)  Where to write the flaky test report [default: ${SCOUT_FLAKY_TESTS_PATH}]
     --summaryLimit     (optional)  Tests shown in the summary table; 0 hides it [default: ${DEFAULT_SUMMARY_LIMIT}]
     --summaryWidth     (optional)  Columns the summary table may use [default: terminal width, or ${DEFAULT_TERMINAL_WIDTH} when not a terminal]
@@ -171,6 +179,14 @@ export const discoverFlakyTests: Command<void> = {
     const lookbackDays = flagsReader.requiredNumber('lookbackDays');
     if (!Number.isInteger(lookbackDays) || lookbackDays < 1) {
       throw createFlagError('--lookbackDays must be a positive integer');
+    }
+    const maxInactiveHours = flagsReader.requiredNumber('maxInactiveHours');
+    if (!Number.isInteger(maxInactiveHours) || maxInactiveHours < 1) {
+      throw createFlagError('--maxInactiveHours must be a positive integer');
+    }
+    const trendDays = flagsReader.requiredNumber('trendDays');
+    if (!Number.isInteger(trendDays) || trendDays < 0) {
+      throw createFlagError('--trendDays must be a non-negative integer');
     }
     const summaryLimit = flagsReader.requiredNumber('summaryLimit');
     if (!Number.isInteger(summaryLimit) || summaryLimit < 0) {
@@ -205,8 +221,10 @@ export const discoverFlakyTests: Command<void> = {
           minBuilds: flagsReader.requiredNumber('minBuilds'),
           minFailedBuilds: flagsReader.requiredNumber('minFailedBuilds'),
           maxTests: flagsReader.requiredNumber('maxTests'),
+          maxInactiveHours,
         },
         samplesPerTest: flagsReader.requiredNumber('samplesPerTest'),
+        trendDays,
       },
       log
     );

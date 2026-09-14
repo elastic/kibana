@@ -11,7 +11,13 @@ import type { Client as ESClient } from '@elastic/elasticsearch';
 import { SCOUT_TEST_EVENTS_INDEX_PATTERN } from '@kbn/scout-info';
 import { ESQL_ROW_LIMIT, inList, quoteEsqlString } from './esql';
 import { buildExecutionModels } from './execution_model';
-import type { FlakyTestBranchStats, FlakyTestSampleFailure, TestFramework } from './schema';
+import type {
+  FlakyTestBranchStats,
+  FlakyTestPipelineStats,
+  FlakyTestSampleFailure,
+  FlakyTestTrend,
+  TestFramework,
+} from './schema';
 
 export interface FlakyTestQueryScope {
   from: Date;
@@ -52,6 +58,17 @@ const asArray = (value: string | string[] | null | undefined): string[] => {
   if (value === null || value === undefined) return [];
   return Array.isArray(value) ? value : [value];
 };
+
+/** Tests split by execution model, so each group can be queried the way its framework requires. */
+const groupByExecutionModel = (
+  tests: ReadonlyArray<{ testId: string; framework: TestFramework }>
+): Array<{ frameworks: readonly TestFramework[]; testIds: string[] }> =>
+  buildExecutionModels([...new Set(tests.map((test) => test.framework))]).map((model) => ({
+    frameworks: model.frameworks,
+    testIds: tests
+      .filter((test) => model.frameworks.includes(test.framework))
+      .map((test) => test.testId),
+  }));
 
 const scopeClauses = (scope: FlakyTestQueryScope): string[] => {
   const clauses = [
@@ -150,6 +167,7 @@ export const buildBranchStatsQuery = (
     'STATS builds = COUNT_DISTINCT(CASE(is_execution == 1, buildkite.build.id, NULL)),' +
       ' failed_builds = COUNT_DISTINCT(CASE(failed == 1, buildkite.build.id, NULL)),' +
       ' last_failed_at = MAX(CASE(failed == 1, @timestamp, NULL)),' +
+      ' latest_execution_at = MAX(CASE(is_execution == 1, @timestamp, NULL)),' +
       ' latest_status = LAST(status, @timestamp),' +
       ' latest_at = MAX(@timestamp),' +
       ' latest_build_url = LAST(buildkite.build.url, @timestamp)' +
@@ -278,23 +296,15 @@ export const fetchBranchStats = async (
   scope: FlakyTestQueryScope,
   tests: ReadonlyArray<{ testId: string; framework: TestFramework }>
 ): Promise<Map<string, FlakyTestBranchStats[]>> => {
-  const modelTests = buildExecutionModels([...new Set(tests.map((test) => test.framework))]).map(
-    (model) => ({
-      frameworks: model.frameworks,
-      testIds: tests
-        .filter((test) => model.frameworks.includes(test.framework))
-        .map((test) => test.testId),
-    })
-  );
-
   const results = await Promise.all(
-    modelTests.map(({ frameworks, testIds }) =>
+    groupByExecutionModel(tests).map(({ frameworks, testIds }) =>
       runEsql<{
         test_id: string;
         branch: string | null;
         builds: number;
         failed_builds: number;
         last_failed_at: string | null;
+        latest_execution_at: string | null;
         latest_status: string | null;
         latest_at: string | null;
         latest_build_url: string | null;
@@ -312,6 +322,9 @@ export const fetchBranchStats = async (
       failedBuilds: record.failed_builds,
       buildFailRate: record.builds > 0 ? record.failed_builds / record.builds : 0,
       lastFailedAt: record.last_failed_at ? new Date(record.last_failed_at) : undefined,
+      latestExecutionAt: record.latest_execution_at
+        ? new Date(record.latest_execution_at)
+        : undefined,
       latestRun:
         record.latest_status && record.latest_at
           ? {
@@ -327,6 +340,173 @@ export const fetchBranchStats = async (
     stats.sort((a, b) => b.failedBuilds - a.failedBuilds || b.builds - a.builds);
   }
   return byTest;
+};
+
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+/** Midnight UTC of the day containing `date`. */
+export const startOfUtcDay = (date: Date): Date =>
+  new Date(Math.floor(date.getTime() / MS_PER_DAY) * MS_PER_DAY);
+
+/** Start of the first of the `days` UTC days ending with the one that contains `to`. */
+export const trendFrom = (to: Date, days: number): Date =>
+  new Date(startOfUtcDay(to).getTime() - (days - 1) * MS_PER_DAY);
+
+/**
+ * Per-test, per-UTC-day build counts for the given tests of one execution model. Grouping by
+ * `test.id` is affordable because of the `test.id` filter; days without executions produce no
+ * row and are filled in by the caller.
+ */
+export const buildDailyTrendQuery = (
+  scope: FlakyTestQueryScope,
+  frameworks: readonly TestFramework[],
+  testIds: readonly string[]
+): string => {
+  const [model] = buildExecutionModels(frameworks);
+
+  return [
+    `FROM ${SCOUT_TEST_EVENTS_INDEX_PATTERN}`,
+    `WHERE ${[
+      ...scopeClauses(scope),
+      model.executionFilter,
+      `test.id IN (${inList(testIds)})`,
+    ].join(' AND ')}`,
+    `EVAL failed = ${model.failedExpression}, day = DATE_TRUNC(1 day, @timestamp)`,
+    'STATS builds = COUNT_DISTINCT(buildkite.build.id),' +
+      ' failed_builds = COUNT_DISTINCT(CASE(failed == 1, buildkite.build.id, NULL))' +
+      ' BY test.id, day',
+    'RENAME test.id AS test_id',
+    `LIMIT ${ESQL_ROW_LIMIT}`,
+  ].join(' | ');
+};
+
+/**
+ * Per-day build counts over the `days` UTC days ending with the one containing `scope.to`, in
+ * the pipelines and branches of the scope. Every test gets an entry, with zeros for days it did
+ * not run. The window end is respected, so the last day is partial when `to` is not midnight.
+ */
+export const fetchDailyTrend = async (
+  es: ESClient,
+  scope: FlakyTestQueryScope,
+  tests: ReadonlyArray<{ testId: string; framework: TestFramework }>,
+  days: number
+): Promise<Map<string, FlakyTestTrend>> => {
+  if (tests.length === 0 || days <= 0) {
+    return new Map();
+  }
+
+  const from = trendFrom(scope.to, days);
+  const results = await Promise.all(
+    groupByExecutionModel(tests).map(({ frameworks, testIds }) =>
+      runEsql<{ test_id: string; day: string; builds: number; failed_builds: number }>(
+        es,
+        buildDailyTrendQuery({ ...scope, from }, frameworks, testIds)
+      )
+    )
+  );
+
+  const byTest = new Map<string, FlakyTestTrend>(
+    tests.map(({ testId }) => [
+      testId,
+      {
+        days,
+        from,
+        buildsPerDay: new Array<number>(days).fill(0),
+        failedBuildsPerDay: new Array<number>(days).fill(0),
+      },
+    ])
+  );
+  for (const record of results.flat()) {
+    const trend = byTest.get(record.test_id);
+    const index = Math.floor((new Date(record.day).getTime() - from.getTime()) / MS_PER_DAY);
+    if (!trend || index < 0 || index >= days) continue;
+    trend.buildsPerDay[index] = record.builds;
+    trend.failedBuildsPerDay[index] = record.failed_builds;
+  }
+  return byTest;
+};
+
+/** Buildkite organisation the test events come from; build URLs are rebuilt from it. */
+const BUILDKITE_ORG_URL = 'https://buildkite.com/elastic';
+
+/**
+ * Per-file, per-pipeline build counts for the given tests of one execution model, across every
+ * pipeline and branch in the window: the report scope narrows which tests qualify, this shows
+ * where else they hurt. A build counts once however many of the file's tests failed in it.
+ */
+export const buildFilePipelineStatsQuery = (
+  window: Pick<FlakyTestQueryScope, 'from' | 'to'>,
+  frameworks: readonly TestFramework[],
+  testIds: readonly string[]
+): string => {
+  const [model] = buildExecutionModels(frameworks);
+
+  return [
+    `FROM ${SCOUT_TEST_EVENTS_INDEX_PATTERN}`,
+    `WHERE ${[
+      ...scopeClauses({ ...window, pipelines: [], branches: [] }),
+      model.executionFilter,
+      `test.id IN (${inList(testIds)})`,
+    ].join(' AND ')}`,
+    `EVAL failed = ${model.failedExpression}`,
+    'STATS builds = COUNT_DISTINCT(buildkite.build.id),' +
+      ' failed_builds = COUNT_DISTINCT(CASE(failed == 1, buildkite.build.id, NULL)),' +
+      ' failed_branches = COUNT_DISTINCT(CASE(failed == 1, buildkite.branch, NULL)),' +
+      ' last_failed_at = MAX(CASE(failed == 1, @timestamp, NULL)),' +
+      ' last_failed_build_number = MAX(CASE(failed == 1, buildkite.build.number, NULL))' +
+      ' BY test.file.path, buildkite.pipeline.slug',
+    'WHERE failed_builds > 0',
+    'RENAME test.file.path AS file_path, buildkite.pipeline.slug AS pipeline',
+    `LIMIT ${ESQL_ROW_LIMIT}`,
+  ].join(' | ');
+};
+
+/** Per-pipeline stats keyed by file path, most failed builds first. */
+export const fetchFilePipelineStats = async (
+  es: ESClient,
+  window: Pick<FlakyTestQueryScope, 'from' | 'to'>,
+  tests: ReadonlyArray<{ testId: string; framework: TestFramework }>
+): Promise<Map<string, FlakyTestPipelineStats[]>> => {
+  if (tests.length === 0) {
+    return new Map();
+  }
+
+  const results = await Promise.all(
+    groupByExecutionModel(tests).map(({ frameworks, testIds }) =>
+      runEsql<{
+        file_path: string | null;
+        pipeline: string | null;
+        builds: number;
+        failed_builds: number;
+        failed_branches: number;
+        last_failed_at: string | null;
+        last_failed_build_number: number | null;
+      }>(es, buildFilePipelineStatsQuery(window, frameworks, testIds))
+    )
+  );
+
+  const byFile = new Map<string, FlakyTestPipelineStats[]>();
+  for (const record of results.flat()) {
+    if (record.file_path === null || record.pipeline === null) continue;
+    const stats = byFile.get(record.file_path) ?? [];
+    stats.push({
+      pipeline: record.pipeline,
+      builds: record.builds,
+      failedBuilds: record.failed_builds,
+      buildFailRate: record.builds > 0 ? record.failed_builds / record.builds : 0,
+      failedBranches: record.failed_branches,
+      lastFailedAt: record.last_failed_at ? new Date(record.last_failed_at) : undefined,
+      lastFailedBuildUrl:
+        record.last_failed_build_number !== null
+          ? `${BUILDKITE_ORG_URL}/${record.pipeline}/builds/${record.last_failed_build_number}`
+          : undefined,
+    });
+    byFile.set(record.file_path, stats);
+  }
+  for (const stats of byFile.values()) {
+    stats.sort((a, b) => b.failedBuilds - a.failedBuilds || b.builds - a.builds);
+  }
+  return byFile;
 };
 
 const scopeFilter = (scope: FlakyTestQueryScope): object[] => {
@@ -387,19 +567,30 @@ interface SampleFailureSource {
   '@timestamp': string;
   event?: { error?: { message?: string } };
   buildkite?: { build?: { url?: string } };
+  suite?: { title?: string };
 }
 
+/** Recent failures of one test, plus the suite title read off the same documents. */
+export interface TestFailureSamples {
+  failures: FlakyTestSampleFailure[];
+  /** Title of the enclosing describe blocks; the Jest reporter writes `unknown` when there are none. */
+  suiteTitle?: string;
+}
+
+const UNKNOWN_SUITE_TITLE = 'unknown';
+
 /**
- * Most recent failure messages per test. Error messages are mapped as `text` and cannot be
- * aggregated in ES|QL, so this uses a `terms` + `top_hits` search over attempt-level `test-end`
- * failures instead (attempt failures carry the error for every framework, including Playwright).
+ * Most recent failure messages per test. Error messages, like suite titles, are mapped as `text`
+ * and cannot be aggregated in ES|QL, so this uses a `terms` + `top_hits` search over attempt-level
+ * `test-end` failures instead (attempt failures carry the error for every framework, including
+ * Playwright) and reads both off the same documents.
  */
 export const fetchSampleFailures = async (
   es: ESClient,
   scope: FlakyTestQueryScope,
   testIds: readonly string[],
   samplesPerTest: number
-): Promise<Map<string, FlakyTestSampleFailure[]>> => {
+): Promise<Map<string, TestFailureSamples>> => {
   if (testIds.length === 0 || samplesPerTest <= 0) {
     return new Map();
   }
@@ -414,14 +605,17 @@ export const fetchSampleFailures = async (
     ],
     testIds,
     samplesPerTest,
-    ['@timestamp', 'event.error.message', 'buildkite.build.url']
+    ['@timestamp', 'event.error.message', 'buildkite.build.url', 'suite.title']
   );
 
-  const samples = new Map<string, FlakyTestSampleFailure[]>();
+  const samples = new Map<string, TestFailureSamples>();
   for (const [testId, sources] of hits) {
-    samples.set(
-      testId,
-      sources.flatMap((source) => {
+    const suiteTitle = sources
+      .map((source) => source.suite?.title?.trim())
+      .find((title) => title && title !== UNKNOWN_SUITE_TITLE);
+    samples.set(testId, {
+      suiteTitle: suiteTitle || undefined,
+      failures: sources.flatMap((source) => {
         const message = source.event?.error?.message?.trim();
         if (!message) return [];
         return [
@@ -431,8 +625,8 @@ export const fetchSampleFailures = async (
             timestamp: new Date(source['@timestamp']),
           },
         ];
-      })
-    );
+      }),
+    });
   }
 
   return samples;

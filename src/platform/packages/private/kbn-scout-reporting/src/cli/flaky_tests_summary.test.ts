@@ -310,10 +310,11 @@ describe('displaySummary', () => {
       frameworks: ['jest', 'playwright'],
       classifications: ['flaky', 'consistently-failing'],
     },
-    thresholds: { minBuilds: 10, minFailedBuilds: 2, maxTests: 200 },
+    thresholds: { minBuilds: 10, minFailedBuilds: 2, maxTests: 200, maxInactiveHours: 24 },
     summary: { totalFlaky: 2, totalConsistentlyFailing: 1, flakyByFramework: { jest: 2 } },
     flaky: [entry({ testId: 't1', title: 'first' }), entry({ testId: 't2', title: 'second' })],
     consistentlyFailing: [],
+    files: [],
   };
   const alwaysBroken = entry({
     testId: 'c1',
