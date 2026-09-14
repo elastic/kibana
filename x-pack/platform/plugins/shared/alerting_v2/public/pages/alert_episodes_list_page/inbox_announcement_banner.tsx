@@ -14,16 +14,16 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { ALERTING_V2_SECTION_ID, ALERTING_V2_EPISODES_APP_ID } from '@kbn/alerting-v2-constants';
 
 export const INBOX_ANNOUNCEMENT_BANNER_DISMISSED_STORAGE_KEY =
-  `${ALERTING_V2_SECTION_ID}.${ALERTING_V2_EPISODES_APP_ID}.inboxIntroBannerDismissed.v3` as const;
+  `${ALERTING_V2_SECTION_ID}.${ALERTING_V2_EPISODES_APP_ID}.inboxIntroBannerDismissed.v4` as const;
 
 const TITLE = i18n.translate('xpack.alertingV2.episodesList.inboxAnnouncementBanner.title', {
-  defaultMessage: 'Introducing Inbox: every alert in one place',
+  defaultMessage: 'Introducing a new alerts experience',
 });
 const DESCRIPTION = i18n.translate(
   'xpack.alertingV2.episodesList.inboxAnnouncementBanner.description',
   {
     defaultMessage:
-      "We've improved the alerts experience to work across alerting frameworks. Inbox includes alerts from v1, v2, and external sources so you can triage them in one place.",
+      "We've improved the alerts experience to work across alerting frameworks. This new alerts page includes alerts from ES|QL native rules, classic rules, and external sources so you can triage them in one place.",
   }
 );
 

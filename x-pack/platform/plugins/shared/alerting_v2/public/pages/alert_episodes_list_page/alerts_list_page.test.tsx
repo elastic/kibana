@@ -262,7 +262,7 @@ describe('AlertsListPage', () => {
   });
 
   it('renders the page title without an experimental badge', () => {
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Inbox');
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Alerts');
     expect(screen.queryByTestId('alertingV2ExperimentalBadge')).not.toBeInTheDocument();
   });
 
