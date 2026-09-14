@@ -43,6 +43,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { SecurityStartMock } from '@kbn/core-security-server-mocks';
 import type { ActionsAuthorizationMock } from '@kbn/actions-plugin/server/authorization/actions_authorization.mock';
 import type { BackfillClient } from './backfill_client/backfill_client';
+import { bulkMarkApiKeysForInvalidation } from './invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 
 let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
 let savedObjectsService: ReturnType<typeof savedObjectsServiceMock.createInternalStartContract>;
@@ -66,6 +67,7 @@ let scopedChangeTrackingService: {
 
 jest.mock('./rules_client');
 jest.mock('./authorization/alerting_authorization');
+jest.mock('./invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation');
 
 describe('RulesClientFactory', () => {
   beforeEach(() => {
@@ -617,7 +619,36 @@ describe('RulesClientFactory', () => {
         metadata: { managed: true, kibana: { type: 'alerting_rule' } },
         name: 'test',
         role_descriptors: {},
-      }
+      },
+      { refresh: undefined }
+    );
+  });
+
+  test('createAPIKey() forwards refresh to grantAsInternalUser', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+    });
+    await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce({
+      api_key: '123',
+      id: 'abc',
+      name: '',
+    });
+    await constructorCall.createAPIKey('test', false);
+    expect(securityService.authc.apiKeys.grantAsInternalUser).toHaveBeenCalledWith(
+      expect.any(Object),
+      {
+        metadata: { managed: true, kibana: { type: 'alerting_rule' } },
+        name: 'test',
+        role_descriptors: {},
+      },
+      { refresh: false }
     );
   });
 
@@ -1152,6 +1183,36 @@ describe('RulesClientFactory', () => {
       });
 
       expect(uiamInvalidate).not.toHaveBeenCalled();
+    });
+
+    test('queues the key when ES invalidate finds nothing', async () => {
+      const constructorCall = await setupFactory();
+      securityService.authc.apiKeys.invalidateAsInternalUser.mockResolvedValueOnce({
+        invalidated_api_keys: [],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+      });
+
+      await constructorCall.invalidateApiKeyNow({ ruleName: 'rule-x', apiKey: esApiKey });
+
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+        { apiKeys: [esApiKey] },
+        expect.anything(),
+        rulesClientFactoryParams.internalSavedObjectsRepository
+      );
+    });
+
+    test('does not queue when ES invalidate succeeds', async () => {
+      const constructorCall = await setupFactory();
+      securityService.authc.apiKeys.invalidateAsInternalUser.mockResolvedValueOnce({
+        invalidated_api_keys: ['es-id'],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+      });
+
+      await constructorCall.invalidateApiKeyNow({ ruleName: 'rule-x', apiKey: esApiKey });
+
+      expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
     });
   });
 });

@@ -187,7 +187,7 @@ export function TrainedModelsDeploymentModal({
             'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.forceSaveMappingsDescription',
             {
               defaultMessage:
-                'Saving a semantic text field referencing a model that is not running will break ingesting documents and searching over documents using or referencing that field.',
+                'Saving a semantic text or semantic field referencing a model that is not running will break ingesting documents and searching over documents using or referencing that field.',
             }
           )}
 
@@ -200,7 +200,7 @@ export function TrainedModelsDeploymentModal({
             label={i18n.translate(
               'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.allowForceSaveMappingsLabel',
               {
-                defaultMessage: 'Allow semantic text mapping updates without a deployed model',
+                defaultMessage: 'Allow mapping updates without a deployed model',
               }
             )}
           />

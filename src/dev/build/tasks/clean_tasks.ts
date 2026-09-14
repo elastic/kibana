@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Fsp from 'fs/promises';
+import Path from 'path';
 import { getPackages } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { Task, GlobalTask } from '../lib';
+import { asyncForEachWithLimit } from '@kbn/std';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { Task, GlobalTask, Build } from '../lib';
 import { deleteAll, deleteEmptyFolders, scanDelete } from '../lib';
 
 export const Clean: GlobalTask = {
@@ -32,7 +36,14 @@ export const CleanPackageManagerRelatedFiles: Task = {
   description: 'Cleaning package manager related files from the build folder',
 
   async run(config, log, build) {
-    await deleteAll([build.resolvePath('yarn.lock'), build.resolvePath('.npmrc')], log);
+    await deleteAll(
+      [
+        build.resolvePath('pnpm-lock.yaml'),
+        build.resolvePath('pnpm-workspace.yaml'),
+        build.resolvePath('.npmrc'),
+      ],
+      log
+    );
   },
 };
 
@@ -164,6 +175,7 @@ export const CleanExtraFilesFromModules: Task = {
           '**/component.json',
           '**/bower.json',
           '**/yarn.lock',
+          '**/pnpm-lock.yaml',
 
           // nested package manager artifacts (e.g. pnpm virtual store leaked into published packages)
           '**/.pnpm',
@@ -217,9 +229,46 @@ export const CleanEmptyFolders: Task = {
 export const DeletePackagesFromBuildRoot: Task = {
   description: 'Deleting package source directories as they are now installed as node_modules',
   async run(config, log, build) {
+    // Under the hoisted linker pnpm links local @kbn/* packages into node_modules
+    // as symlinks back to their in-build source dirs. Replace those with real
+    // copies first, otherwise deleting the sources below leaves dangling links
+    // that the later scanCopy (CreateArchivesSources) follows and fails on.
+    await materializeWorkspaceSymlinks(build, log);
+
     await deleteAll(
       getPackages(REPO_ROOT).map((pkg) => build.resolvePath(pkg.normalizedRepoRelativeDir)),
       log
     );
   },
 };
+
+async function materializeWorkspaceSymlinks(build: Build, log: ToolingLog) {
+  const nodeModules = build.resolvePath('node_modules');
+  let materialized = 0;
+
+  await asyncForEachWithLimit(getPackages(REPO_ROOT), 20, async (pkg) => {
+    const linkPath = build.resolvePath('node_modules', pkg.id);
+
+    const stat = await Fsp.lstat(linkPath).catch(() => undefined);
+    if (!stat?.isSymbolicLink()) return;
+
+    // Only materialize links that escape node_modules (i.e. point at source we're
+    // about to delete). Links that stay inside node_modules are self-contained.
+    const target = await Fsp.realpath(linkPath).catch(() => undefined);
+    if (!target || isInside(nodeModules, target)) return;
+
+    const tmpPath = `${linkPath}.materialized`;
+    await Fsp.rm(tmpPath, { recursive: true, force: true });
+    await Fsp.cp(target, tmpPath, { recursive: true, dereference: true });
+    await Fsp.rm(linkPath);
+    await Fsp.rename(tmpPath, linkPath);
+    materialized += 1;
+  });
+
+  log.debug(`Materialized ${materialized} workspace package symlink(s) into real copies`);
+}
+
+function isInside(parent: string, child: string) {
+  const rel = Path.relative(parent, child);
+  return rel === '' || (!rel.startsWith('..') && !Path.isAbsolute(rel));
+}
