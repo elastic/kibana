@@ -1,5 +1,5 @@
 {
-  "sha1": "0521a9fb629c4378458ce407b1f71a6d5a02df51",
+  "sha1": "627e75f7a5b272d661966e4c519820ce9988765c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 336,
-        "column": 81
+        "line": 348,
+        "column": 85
       }
     },
     {
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 345,
-        "column": 94
+        "line": 359,
+        "column": 26
       }
     },
     {
@@ -42,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 375,
-        "column": 84
+        "line": 388,
+        "column": 26
       }
     },
     {
@@ -56,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 396,
-        "column": 7
+        "line": 409,
+        "column": 16
       }
     },
     {
@@ -70,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 416,
-        "column": 6
+        "line": 408,
+        "column": 27
       }
     },
     {
@@ -84,7 +84,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 472,
+        "line": 485,
         "column": 11
       }
     },
@@ -98,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 494,
-        "column": 29
+        "line": 507,
+        "column": 23
       }
     },
     {
@@ -112,7 +112,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 589,
+        "line": 602,
         "column": 18
       }
     },
@@ -126,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 642,
-        "column": 17
+        "line": 655,
+        "column": 11
       }
     },
     {
@@ -140,7 +140,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 676,
+        "line": 689,
         "column": 16
       }
     },
@@ -154,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 718,
-        "column": 6
+        "line": 732,
+        "column": 13
       }
     },
     {
@@ -168,8 +168,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 746,
-        "column": 16
+        "line": 758,
+        "column": 32
       }
     },
     {
@@ -182,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 724,
-        "column": 27
+        "line": 767,
+        "column": 5
       }
     },
     {
@@ -196,13 +196,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 770,
-        "column": 19
+        "line": 783,
+        "column": 7
       }
     },
     {
-      "id": "d18f81a84aa5c84-645b019a74319ed",
-      "title": "Agent Builder — agents access-control API /_suggest_user_profiles requires manageAgents (reader gets 403)",
+      "id": "d18f81a84aa5c84-6448818daa2a62f",
+      "title": "Agent Builder — agents access-control API /_suggest_user_profiles only requires agentBuilder read",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -210,8 +210,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 778,
-        "column": 28
+        "line": 798,
+        "column": 10
+      }
+    },
+    {
+      "id": "d18f81a84aa5c84-895a195894da255",
+      "title": "Agent Builder — agents access-control API /_suggest_user_profiles rejects callers without Agent Builder privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
+        "line": 813,
+        "column": 9
       }
     },
     {
@@ -608,8 +622,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/availability_gating_api.spec.ts",
-        "line": 77,
-        "column": 30
+        "line": 76,
+        "column": 16
       }
     },
     {
@@ -622,8 +636,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/availability_gating_api.spec.ts",
-        "line": 90,
-        "column": 7
+        "line": 86,
+        "column": 6
       }
     },
     {
@@ -636,8 +650,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/availability_gating_api.spec.ts",
-        "line": 102,
-        "column": 7
+        "line": 98,
+        "column": 6
       }
     },
     {
@@ -650,8 +664,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/availability_gating_api.spec.ts",
-        "line": 110,
-        "column": 16
+        "line": 108,
+        "column": 27
       }
     },
     {
@@ -2371,77 +2385,63 @@
     {
       "id": "1b65711126013c6-4680cb5f8075c8c",
       "title": "Agent Builder — SML internal API POST /internal/agent_builder_sml/sml/_search autocomplete",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 160,
-        "column": 8
+        "line": 164,
+        "column": 10
       }
     },
     {
       "id": "1b65711126013c6-7588b6188fdff3b",
       "title": "Agent Builder — SML internal API POST /internal/agent_builder_sml/sml/_search wildcard returns item fields",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 173,
-        "column": 17
+        "line": 177,
+        "column": 19
       }
     },
     {
       "id": "1b65711126013c6-7d12781749f488c",
       "title": "Agent Builder — SML internal API POST /internal/agent_builder_sml/sml/_search rejects empty query",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 190,
-        "column": 40
+        "line": 194,
+        "column": 42
       }
     },
     {
       "id": "1b65711126013c6-d9883c8d06f0990",
       "title": "Agent Builder — SML internal API POST /internal/agent_builder_sml/sml/_autocomplete prefix-matches a title",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 214,
-        "column": 13
+        "line": 218,
+        "column": 15
       }
     },
     {
       "id": "1b65711126013c6-b3616fc1758e737",
       "title": "Agent Builder — SML internal API POST /internal/agent_builder_sml/sml/_autocomplete prefix-matches a bare type",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 219,
-        "column": 4
-      }
-    },
-    {
-      "id": "1b65711126013c6-25dab90e656270e",
-      "title": "Agent Builder — SML internal API POST /internal/agent_builder_sml/sml/_autocomplete matches each half of a \"type/title\" query",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -2449,27 +2449,27 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
         "line": 223,
-        "column": 30
+        "column": 6
       }
     },
     {
-      "id": "1b65711126013c6-4115ff4a07e13fb",
-      "title": "Agent Builder — SML internal API POST /internal/agent_builder_sml/sml/_autocomplete matches a type stored as \"Workflow\"",
-      "expectedStatus": "passed",
+      "id": "1b65711126013c6-25dab90e656270e",
+      "title": "Agent Builder — SML internal API POST /internal/agent_builder_sml/sml/_autocomplete matches each half of a \"type/title\" query",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 234,
-        "column": 14
+        "line": 227,
+        "column": 32
       }
     },
     {
-      "id": "1b65711126013c6-9c39d31ec7fb44d",
-      "title": "Agent Builder — SML internal API POST /internal/agent_builder_sml/sml/_autocomplete finds a title that contains a slash",
-      "expectedStatus": "passed",
+      "id": "1b65711126013c6-4115ff4a07e13fb",
+      "title": "Agent Builder — SML internal API POST /internal/agent_builder_sml/sml/_autocomplete matches a type stored as \"Workflow\"",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -2477,118 +2477,132 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
         "line": 238,
-        "column": 4
+        "column": 16
       }
     },
     {
-      "id": "1b65711126013c6-b7293a2bb41b97e",
-      "title": "Agent Builder — SML internal API POST /internal/agent_builder_sml/sml/_autocomplete requires every token of a multi-token prefix",
-      "expectedStatus": "passed",
+      "id": "1b65711126013c6-9c39d31ec7fb44d",
+      "title": "Agent Builder — SML internal API POST /internal/agent_builder_sml/sml/_autocomplete finds a title that contains a slash",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 248,
+        "line": 242,
+        "column": 6
+      }
+    },
+    {
+      "id": "1b65711126013c6-b7293a2bb41b97e",
+      "title": "Agent Builder — SML internal API POST /internal/agent_builder_sml/sml/_autocomplete requires every token of a multi-token prefix",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
+        "line": 249,
         "column": 27
       }
     },
     {
       "id": "1b65711126013c6-fff0a042e90bc4e",
       "title": "Agent Builder — SML internal API POST /internal/agent_builder/sml/_attach returns 404 when conversation missing",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 263,
-        "column": 14
+        "line": 267,
+        "column": 16
       }
     },
     {
       "id": "1b65711126013c6-af2271c43253dbd",
       "title": "Agent Builder — SML internal API POST /internal/agent_builder/sml/_attach attaches entry and persists attachment refs",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 278,
-        "column": 14
+        "line": 282,
+        "column": 16
       }
     },
     {
       "id": "a150241e02b2685-cf7d004e4902d97",
       "title": "Agent Builder — SML type permission contract entries of a type without a getPermissions hook are visible to a caller holding no ai_index action",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_type_permissions_api.spec.ts",
-        "line": 209,
+        "line": 210,
         "column": 29
       }
     },
     {
       "id": "a150241e02b2685-61683183c03ea3a",
       "title": "Agent Builder — SML type permission contract entries of a type with a getPermissions hook are hidden from a caller lacking its action",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_type_permissions_api.spec.ts",
-        "line": 216,
+        "line": 217,
         "column": 16
       }
     },
     {
       "id": "a150241e02b2685-c699fad28ccb44b",
       "title": "Agent Builder — SML type permission contract granting the gating feature makes the gated type visible",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_type_permissions_api.spec.ts",
-        "line": 220,
+        "line": 221,
         "column": 6
       }
     },
     {
       "id": "a150241e02b2685-a01eb49d2110224",
       "title": "Agent Builder — SML type permission contract a hook-less type is public within its own spaces only, not across spaces",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_type_permissions_api.spec.ts",
-        "line": 223,
+        "line": 224,
         "column": 27
       }
     },
     {
       "id": "a150241e02b2685-81736073f340074",
       "title": "Agent Builder — SML type permission contract a count-0 element naming an action is hidden from every caller, though its count-1 form is visible to the holder",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_type_permissions_api.spec.ts",
-        "line": 231,
+        "line": 232,
         "column": 83
       }
     },

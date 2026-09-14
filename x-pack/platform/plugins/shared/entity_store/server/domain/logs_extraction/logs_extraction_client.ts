@@ -14,6 +14,7 @@ import { entityStoreMetrics } from '../../monitor/metrics';
 import type {
   EntityType,
   ManagedEntityDefinition,
+  ExtractionMode,
 } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import { type LogSlicePaginationParams, type PaginationParams } from './query_builder_commons';
@@ -35,10 +36,16 @@ import {
   validateExtractionWindow,
 } from './extraction_window';
 import { capAtMaxLogsPerWindow, pickSampleProbability } from './effective_page_limits';
+import { getMergedConfig } from '../config';
 import { resolveLatestEntitiesIndexName } from '../asset_manager/resolve_entity_store_indices';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
+import { executeEsqlQueryRetryingRemoteResources } from '../../infra/elasticsearch/remote_resource_not_supported';
 import { ingestEntities } from '../../infra/elasticsearch/ingest';
 import { resolveClosedIndexAdjustments } from '../../infra/elasticsearch/resolve_closed_indices';
+import {
+  isPositiveInternalEsqlViewIndexPattern,
+  withInternalEsqlViewExclusions,
+} from './internal_esql_view_patterns';
 import {
   getAlertsIndexName,
   getSecuritySolutionDataViewName,
@@ -96,6 +103,7 @@ export interface LogsExtractionClientDependencies {
   dataViewsService: DataViewsService;
   engineDescriptorClient: EngineDescriptorClient;
   globalStateClient: EntityStoreGlobalStateClient;
+  extractionMode?: ExtractionMode;
 }
 
 export class LogsExtractionClient {
@@ -105,6 +113,7 @@ export class LogsExtractionClient {
   dataViewsService: DataViewsService;
   engineDescriptorClient: EngineDescriptorClient;
   globalStateClient: EntityStoreGlobalStateClient;
+  extractionMode: ExtractionMode;
   constructor({
     logger,
     namespace,
@@ -112,6 +121,7 @@ export class LogsExtractionClient {
     dataViewsService,
     engineDescriptorClient,
     globalStateClient,
+    extractionMode,
   }: LogsExtractionClientDependencies) {
     this.logger = logger;
     this.namespace = namespace;
@@ -119,6 +129,7 @@ export class LogsExtractionClient {
     this.dataViewsService = dataViewsService;
     this.engineDescriptorClient = engineDescriptorClient;
     this.globalStateClient = globalStateClient;
+    this.extractionMode = extractionMode ?? 'single';
   }
 
   private async getLogExtractionConfigAndState(
@@ -128,8 +139,20 @@ export class LogsExtractionClient {
     if (engineDescriptor.status !== ENGINE_STATUS.STARTED) {
       throw new EntityStoreNotRunningError();
     }
-    const globalState = await this.globalStateClient.findOrThrow();
-    return { config: globalState.logsExtraction, engineState: engineDescriptor.logExtractionState };
+    const globalOverrides = await this.globalStateClient.findLogExtractionOverrides();
+    return {
+      config: getMergedConfig(type, globalOverrides, engineDescriptor.logExtractionConfig),
+      engineState: engineDescriptor.logExtractionState,
+    };
+  }
+
+  /** Config in effect for one entity type, without requiring the engine to be started. */
+  public async getMergedConfigForType(type: EntityType): Promise<LogExtractionConfig> {
+    const [globalOverrides, engineDescriptor] = await Promise.all([
+      this.globalStateClient.findLogExtractionOverrides(),
+      this.engineDescriptorClient.findOrThrow(type),
+    ]);
+    return getMergedConfig(type, globalOverrides, engineDescriptor.logExtractionConfig);
   }
 
   public async extractLogs(
@@ -199,7 +222,7 @@ export class LogsExtractionClient {
     }
   }
 
-  public async updateConfig(params: LogExtractionInstallParams): Promise<LogExtractionConfig> {
+  public async updateConfig(params?: LogExtractionInstallParams): Promise<LogExtractionConfig> {
     const state = await this.globalStateClient.update({ logsExtraction: params });
     return state.logsExtraction;
   }
@@ -231,7 +254,12 @@ export class LogsExtractionClient {
       config.excludedIndexPatterns
     );
 
-    const allIndexPatterns = [...localIndexPatterns, ...remoteIndexPatterns];
+    // ES|QL cannot query remote views (CPS/CCS). Exclude `$.*` on origin and on
+    // every remote cluster alias (`*:-$.*`) without naming linked projects.
+    const allIndexPatterns = withInternalEsqlViewExclusions([
+      ...localIndexPatterns,
+      ...remoteIndexPatterns,
+    ]);
 
     const mainResult = await this.runMainPath({
       type,
@@ -661,26 +689,29 @@ export class LogsExtractionClient {
     sampleProbability: number;
     opts?: LogsExtractionOptions;
   }): Promise<LogPaginationCursor> {
-    const logPaginationCursorProbeQuery = buildLogPaginationCursorProbeEsql({
-      indexPatterns,
-      type,
-      fromDateISO,
-      toDateISO,
-      logsPageCursorStart,
-      maxLogsPerPage,
-      sampleProbability,
-    });
-
     const probeStart = Date.now();
-    const logPaginationCursorProbeResponse = await executeEsqlQuery({
-      esClient: this.esClient,
-      query: logPaginationCursorProbeQuery,
-      signal: opts?.signal,
-      telemetry: {
-        name: 'probe_query',
-        namespace: this.namespace,
-        type,
-      },
+    const logPaginationCursorProbeResponse = await executeEsqlQueryRetryingRemoteResources({
+      indexPatterns,
+      logger: this.logger,
+      execute: (patterns) =>
+        executeEsqlQuery({
+          esClient: this.esClient,
+          query: buildLogPaginationCursorProbeEsql({
+            indexPatterns: patterns,
+            type,
+            fromDateISO,
+            toDateISO,
+            logsPageCursorStart,
+            maxLogsPerPage,
+            sampleProbability,
+          }),
+          signal: opts?.signal,
+          telemetry: {
+            name: 'probe_query',
+            namespace: this.namespace,
+            type,
+          },
+        }),
     });
     entityStoreMetrics.extractionProbeQueryDurationMs.record(Date.now() - probeStart, {
       entity_type: type,
@@ -756,6 +787,7 @@ export class LogsExtractionClient {
         pagination,
         logsPageCursorStart,
         logsPageCursorEnd,
+        extractionMode: this.extractionMode,
       });
 
       this.logger.debug(
@@ -964,12 +996,14 @@ export class LogsExtractionClient {
   ): Promise<{ localIndexPatterns: string[]; remoteIndexPatterns: string[] }> {
     const all = await this.getAllIndexPatternsIncludingRemote(additionalIndexPatterns);
     const alertsIndex = getAlertsIndexName(this.namespace);
-    const withoutAlerts = all.filter((index) => index !== alertsIndex);
+    const withoutAlertsOrEsqlViews = all
+      .filter((index) => index !== alertsIndex)
+      .filter((index) => !isPositiveInternalEsqlViewIndexPattern(index));
 
     const localIndexPatterns: string[] = [];
     const remoteIndexPatterns: string[] = [];
 
-    withoutAlerts.forEach((index) => {
+    withoutAlertsOrEsqlViews.forEach((index) => {
       if (isNonLocalIndexName(index)) {
         remoteIndexPatterns.push(index);
       } else {

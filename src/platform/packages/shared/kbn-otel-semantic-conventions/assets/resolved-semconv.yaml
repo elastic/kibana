@@ -273,14 +273,22 @@ groups:
       - name: server.address
         type: string
         brief: |
-          Name of the database host.
+          The database address specified in the client configuration.
         examples:
           - example.com
           - 10.1.2.80
           - /tmp/my.sock
         requirement_level: recommended
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
+          Instrumentation SHOULD set `server.address` to the database address specified in the client configuration.
+          It SHOULD NOT derive the value from the server selected for an operation.
+
+          > [!WARNING]
+          >
+          > `server.address` MUST NOT contain credentials or other sensitive information.
+
+          See [Database server address](/docs/db/database-spans.md#database-server-address) for guidance and
+          examples.
         stability: stable
       - name: server.port
         type: int
@@ -290,9 +298,10 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If using a port other than the default port for this DBMS and if `server.address` is set.
+          conditionally_required: |
+            If `server.address` is set and the client is configured with a single database server endpoint that uses a non-default port.
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
+          `server.port` SHOULD reflect the database port specified in the client configuration. It SHOULD NOT be derived from the server selected for an operation.
         stability: stable
     lineage:
       provenance:
@@ -367,19 +376,19 @@ groups:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - examples
-            - note
             - requirement_level
             - stability
           locally_overridden_fields:
             - brief
+            - note
         server.port:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
   - id: attributes.cli.common
     type: attribute_group
@@ -530,6 +539,66 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+  - id: attributes.db.client.connection
+    type: attribute_group
+    brief: Database client connection attributes
+    attributes:
+      - name: server.address
+        type: string
+        brief: |
+          The database address specified in the client configuration.
+        examples:
+          - example.com
+          - 10.1.2.80
+          - /tmp/my.sock
+        requirement_level: recommended
+        note: |
+          Instrumentation SHOULD set `server.address` to the database address specified in the client configuration.
+          It SHOULD NOT derive the value from the server selected for an operation.
+
+          > [!WARNING]
+          >
+          > `server.address` MUST NOT contain credentials or other sensitive information.
+
+          See [Database server address](/docs/db/database-spans.md#database-server-address) for guidance and
+          examples.
+        stability: stable
+      - name: server.port
+        type: int
+        brief: Server port number.
+        examples:
+          - 80
+          - 8080
+          - 443
+        requirement_level:
+          conditionally_required: |
+            If `server.address` is set and the client is configured with a single database server endpoint that uses a non-default port.
+        note: |
+          `server.port` SHOULD reflect the database port specified in the client configuration. It SHOULD NOT be derived from the server selected for an operation.
+        stability: stable
+    lineage:
+      provenance:
+        schema_url: https://opentelemetry.io/schemas/1.45.0-unreleased
+        path: /home/weaver/source/db/common.yaml
+      attributes:
+        server.address:
+          source_group: registry.home.weaver.source.server.registry
+          inherited_fields:
+            - examples
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - brief
+            - note
+        server.port:
+          source_group: registry.home.weaver.source.server.registry
+          inherited_fields:
+            - brief
+            - examples
+            - stability
+          locally_overridden_fields:
+            - note
+            - requirement_level
   - id: attributes.db.client.minimal
     type: attribute_group
     brief: Database Client attributes
@@ -573,14 +642,22 @@ groups:
       - name: server.address
         type: string
         brief: |
-          Name of the database host.
+          The database address specified in the client configuration.
         examples:
           - example.com
           - 10.1.2.80
           - /tmp/my.sock
         requirement_level: recommended
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
+          Instrumentation SHOULD set `server.address` to the database address specified in the client configuration.
+          It SHOULD NOT derive the value from the server selected for an operation.
+
+          > [!WARNING]
+          >
+          > `server.address` MUST NOT contain credentials or other sensitive information.
+
+          See [Database server address](/docs/db/database-spans.md#database-server-address) for guidance and
+          examples.
         stability: stable
       - name: server.port
         type: int
@@ -590,14 +667,16 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If using a port other than the default port for this DBMS and if `server.address` is set.
+          conditionally_required: |
+            If `server.address` is set and the client is configured with a single database server endpoint that uses a non-default port.
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
+          `server.port` SHOULD reflect the database port specified in the client configuration. It SHOULD NOT be derived from the server selected for an operation.
         stability: stable
     lineage:
       provenance:
         schema_url: https://opentelemetry.io/schemas/1.45.0-unreleased
         path: /home/weaver/source/db/common.yaml
+      extends_group: attributes.db.client.connection
       attributes:
         db.response.status_code:
           source_group: registry.db
@@ -621,19 +700,19 @@ groups:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - examples
-            - note
             - requirement_level
             - stability
           locally_overridden_fields:
             - brief
+            - note
         server.port:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
   - id: attributes.db.client.with_query
     type: attribute_group
@@ -718,14 +797,22 @@ groups:
       - name: server.address
         type: string
         brief: |
-          Name of the database host.
+          The database address specified in the client configuration.
         examples:
           - example.com
           - 10.1.2.80
           - /tmp/my.sock
         requirement_level: recommended
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
+          Instrumentation SHOULD set `server.address` to the database address specified in the client configuration.
+          It SHOULD NOT derive the value from the server selected for an operation.
+
+          > [!WARNING]
+          >
+          > `server.address` MUST NOT contain credentials or other sensitive information.
+
+          See [Database server address](/docs/db/database-spans.md#database-server-address) for guidance and
+          examples.
         stability: stable
       - name: server.port
         type: int
@@ -735,9 +822,10 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If using a port other than the default port for this DBMS and if `server.address` is set.
+          conditionally_required: |
+            If `server.address` is set and the client is configured with a single database server endpoint that uses a non-default port.
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
+          `server.port` SHOULD reflect the database port specified in the client configuration. It SHOULD NOT be derived from the server selected for an operation.
         stability: stable
     lineage:
       provenance:
@@ -784,19 +872,19 @@ groups:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - examples
-            - note
             - requirement_level
             - stability
           locally_overridden_fields:
             - brief
+            - note
         server.port:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
   - id: attributes.db.client.with_query_and_collection
     type: attribute_group
@@ -930,14 +1018,22 @@ groups:
       - name: server.address
         type: string
         brief: |
-          Name of the database host.
+          The database address specified in the client configuration.
         examples:
           - example.com
           - 10.1.2.80
           - /tmp/my.sock
         requirement_level: recommended
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
+          Instrumentation SHOULD set `server.address` to the database address specified in the client configuration.
+          It SHOULD NOT derive the value from the server selected for an operation.
+
+          > [!WARNING]
+          >
+          > `server.address` MUST NOT contain credentials or other sensitive information.
+
+          See [Database server address](/docs/db/database-spans.md#database-server-address) for guidance and
+          examples.
         stability: stable
       - name: server.port
         type: int
@@ -947,9 +1043,10 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If using a port other than the default port for this DBMS and if `server.address` is set.
+          conditionally_required: |
+            If `server.address` is set and the client is configured with a single database server endpoint that uses a non-default port.
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
+          `server.port` SHOULD reflect the database port specified in the client configuration. It SHOULD NOT be derived from the server selected for an operation.
         stability: stable
     lineage:
       provenance:
@@ -1014,19 +1111,19 @@ groups:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - examples
-            - note
             - requirement_level
             - stability
           locally_overridden_fields:
             - brief
+            - note
         server.port:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
   - id: attributes.faas.common
     type: attribute_group
@@ -8068,7 +8165,8 @@ groups:
   - id: cloudevents
     type: attribute_group
     brief: |
-      This document defines attributes for CloudEvents. CloudEvents is a specification on how to define event data in a standard way. These attributes can be attached to spans when performing operations with CloudEvents, regardless of the protocol being used.
+      These attributes can be attached to spans when performing operations with CloudEvents, regardless of the protocol being used.
+    stability: development
     attributes:
       - name: cloudevents.event_id
         type: string
@@ -8115,7 +8213,7 @@ groups:
     lineage:
       provenance:
         schema_url: https://opentelemetry.io/schemas/1.45.0-unreleased
-        path: /home/weaver/source/cloudevents/spans.yaml
+        path: /home/weaver/source/cloudevents/common.yaml
       attributes:
         cloudevents.event_id:
           source_group: registry.cloudevents
@@ -15567,6 +15665,8 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+      includes_group:
+        - exception
   - id: event.device.app.lifecycle
     type: event
     brief: |
@@ -15755,6 +15855,8 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+      includes_group:
+        - exception
   - id: event.faas.invocation.exception
     type: event
     brief: |
@@ -15834,6 +15936,8 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+      includes_group:
+        - exception
   - id: event.feature_flag.evaluation
     type: event
     brief: |
@@ -18432,6 +18536,8 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+      includes_group:
+        - exception
   - id: event.http.server.request.exception
     type: event
     brief: |
@@ -18511,6 +18617,8 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+      includes_group:
+        - exception
   - id: event.messaging.create.exception
     type: event
     brief: |
@@ -18590,6 +18698,8 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+      includes_group:
+        - exception
   - id: event.messaging.process.exception
     type: event
     brief: |
@@ -18669,6 +18779,8 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+      includes_group:
+        - exception
   - id: event.messaging.receive.exception
     type: event
     brief: |
@@ -18748,6 +18860,8 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+      includes_group:
+        - exception
   - id: event.messaging.send.exception
     type: event
     brief: |
@@ -18827,6 +18941,8 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+      includes_group:
+        - exception
   - id: event.messaging.settle.exception
     type: event
     brief: |
@@ -18906,6 +19022,8 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+      includes_group:
+        - exception
   - id: event.rpc.client.call.exception
     type: event
     brief: |
@@ -18985,6 +19103,8 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+      includes_group:
+        - exception
   - id: event.rpc.message
     type: event
     brief: Describes a message sent or received within the context of an RPC call.
@@ -19156,6 +19276,8 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+      includes_group:
+        - exception
   - id: event.session.end
     type: event
     brief: |
@@ -19191,7 +19313,7 @@ groups:
     brief: |
       Indicates that a new session has been started, optionally linking to the prior session.
     note: |
-      For instrumentation that tracks user behavior during user sessions, a `session.start` event MUST be emitted every time a session is created. When a new session is created as a continuation of a prior session, the `session.previous_id` SHOULD be included in the event. The values of `session.id` and `session.previous_id` MUST be different.
+      For instrumentation that tracks user behavior during user sessions, a `session.start` event MUST be emitted every time a session is created. When a new session is created as a continuation of a prior session, the `session.previous_id` MUST be included in the event. The values of `session.id` and `session.previous_id` MUST be different.
       When the `session.start` event contains both `session.id` and `session.previous_id` fields, the event indicates that the previous session has ended. If the session ID in `session.previous_id` has not yet ended via explicit `session.end` event, then the consumer SHOULD treat this continuation event as semantically equivalent to `session.end(session.previous_id)` and `session.start(session.id)`.
     stability: development
     attributes:
@@ -19204,12 +19326,12 @@ groups:
         stability: development
       - name: session.previous_id
         type: string
-        brief: The previous `session.id` for this user, when known.
+        brief: The previous `session.id` for this user.
         examples:
           - 00112233-4455-6677-8899-aabbccddeeff
         requirement_level:
           conditionally_required: |
-            If the new session is being created as a continuation of a previous session, the `session.previous_id` SHOULD be included in the event. The `session.id` and `session.previous_id` attributes MUST have different values.
+            If the new session is being created as a continuation of a previous session, the `session.previous_id` MUST be included in the event. The `session.id` and `session.previous_id` attributes MUST have different values.
         stability: development
     name: session.start
     lineage:
@@ -19234,6 +19356,80 @@ groups:
             - stability
           locally_overridden_fields:
             - brief
+            - requirement_level
+  - id: exception
+    type: attribute_group
+    brief: |
+      Describes a single exception and may be used on any signal that reports an exception.
+    stability: stable
+    attributes:
+      - name: exception.message
+        type: string
+        brief: The exception message.
+        examples:
+          - Division by zero
+          - Can't convert 'int' object to str implicitly
+        requirement_level:
+          conditionally_required: Required if `exception.type` is not set, recommended otherwise.
+        note: |
+          > [!WARNING]
+          >
+          > This attribute may contain sensitive information.
+        stability: stable
+      - name: exception.stacktrace
+        type: string
+        brief: |
+          A stacktrace as a string in the natural representation for the language runtime. The representation is to be determined and documented by each language SIG.
+        examples: |
+          Exception in thread "main" java.lang.RuntimeException: Test exception\n at com.example.GenerateTrace.methodB(GenerateTrace.java:13)\n at com.example.GenerateTrace.methodA(GenerateTrace.java:9)\n at com.example.GenerateTrace.main(GenerateTrace.java:5)
+        requirement_level: recommended
+        stability: stable
+      - name: exception.type
+        type: string
+        brief: |
+          The type of the exception (its fully-qualified class name, if applicable). The dynamic type of the exception should be preferred over the static type in languages that support it.
+        examples:
+          - java.net.ConnectException
+          - OSError
+        requirement_level:
+          conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        note: |
+          If the recorded exception type is a wrapper that is not meaningful for
+          failure classification, instrumentation MAY use the type of the inner
+          exception instead. For example, in Go, errors created with `fmt.Errorf`
+          using `%w` MAY be unwrapped when the wrapper type does not help
+          classify the failure.
+        stability: stable
+    lineage:
+      provenance:
+        schema_url: https://opentelemetry.io/schemas/1.45.0-unreleased
+        path: /home/weaver/source/exceptions/common.yaml
+      attributes:
+        exception.message:
+          source_group: registry.exception
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        exception.stacktrace:
+          source_group: registry.exception
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+        exception.type:
+          source_group: registry.exception
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
             - requirement_level
   - id: gcp.client.attributes
     type: attribute_group
@@ -19624,79 +19820,6 @@ groups:
           locally_overridden_fields:
             - brief
             - examples
-  - id: log-exception
-    type: attribute_group
-    brief: |
-      This document defines attributes for exceptions represented using Log Records.
-    attributes:
-      - name: exception.message
-        type: string
-        brief: The exception message.
-        examples:
-          - Division by zero
-          - Can't convert 'int' object to str implicitly
-        requirement_level:
-          conditionally_required: Required if `exception.type` is not set, recommended otherwise.
-        note: |
-          > [!WARNING]
-          >
-          > This attribute may contain sensitive information.
-        stability: stable
-      - name: exception.stacktrace
-        type: string
-        brief: |
-          A stacktrace as a string in the natural representation for the language runtime. The representation is to be determined and documented by each language SIG.
-        examples: |
-          Exception in thread "main" java.lang.RuntimeException: Test exception\n at com.example.GenerateTrace.methodB(GenerateTrace.java:13)\n at com.example.GenerateTrace.methodA(GenerateTrace.java:9)\n at com.example.GenerateTrace.main(GenerateTrace.java:5)
-        requirement_level: recommended
-        stability: stable
-      - name: exception.type
-        type: string
-        brief: |
-          The type of the exception (its fully-qualified class name, if applicable). The dynamic type of the exception should be preferred over the static type in languages that support it.
-        examples:
-          - java.net.ConnectException
-          - OSError
-        requirement_level:
-          conditionally_required: Required if `exception.message` is not set, recommended otherwise.
-        note: |
-          If the recorded exception type is a wrapper that is not meaningful for
-          failure classification, instrumentation MAY use the type of the inner
-          exception instead. For example, in Go, errors created with `fmt.Errorf`
-          using `%w` MAY be unwrapped when the wrapper type does not help
-          classify the failure.
-        stability: stable
-    lineage:
-      provenance:
-        schema_url: https://opentelemetry.io/schemas/1.45.0-unreleased
-        path: /home/weaver/source/exceptions/logs.yaml
-      attributes:
-        exception.message:
-          source_group: registry.exception
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        exception.stacktrace:
-          source_group: registry.exception
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - requirement_level
-            - stability
-        exception.type:
-          source_group: registry.exception
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
   - id: log.record
     type: attribute_group
     brief: |
@@ -24838,14 +24961,22 @@ groups:
       - name: server.address
         type: string
         brief: |
-          Name of the database host.
+          The database address specified in the client configuration.
         examples:
           - example.com
           - 10.1.2.80
           - /tmp/my.sock
         requirement_level: recommended
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
+          Instrumentation SHOULD set `server.address` to the database address specified in the client configuration.
+          It SHOULD NOT derive the value from the server selected for an operation.
+
+          > [!WARNING]
+          >
+          > `server.address` MUST NOT contain credentials or other sensitive information.
+
+          See [Database server address](/docs/db/database-spans.md#database-server-address) for guidance and
+          examples.
         stability: stable
       - name: server.port
         type: int
@@ -24855,9 +24986,10 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If using a port other than the default port for this DBMS and if `server.address` is set.
+          conditionally_required: |
+            If `server.address` is set and the client is configured with a single database server endpoint that uses a non-default port.
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
+          `server.port` SHOULD reflect the database port specified in the client configuration. It SHOULD NOT be derived from the server selected for an operation.
         stability: stable
     metric_name: azure.cosmosdb.client.active_instance.count
     instrument: updowncounter
@@ -24866,24 +24998,25 @@ groups:
       provenance:
         schema_url: https://opentelemetry.io/schemas/1.45.0-unreleased
         path: /home/weaver/source/azure/cosmosdb-metrics.yaml
+      extends_group: attributes.db.client.connection
       attributes:
         server.address:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - examples
-            - note
             - requirement_level
             - stability
           locally_overridden_fields:
             - brief
+            - note
         server.port:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
     annotations:
       code_generation:
@@ -25035,14 +25168,22 @@ groups:
       - name: server.address
         type: string
         brief: |
-          Name of the database host.
+          The database address specified in the client configuration.
         examples:
           - example.com
           - 10.1.2.80
           - /tmp/my.sock
         requirement_level: recommended
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
+          Instrumentation SHOULD set `server.address` to the database address specified in the client configuration.
+          It SHOULD NOT derive the value from the server selected for an operation.
+
+          > [!WARNING]
+          >
+          > `server.address` MUST NOT contain credentials or other sensitive information.
+
+          See [Database server address](/docs/db/database-spans.md#database-server-address) for guidance and
+          examples.
         stability: stable
       - name: server.port
         type: int
@@ -25052,9 +25193,10 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If using a port other than the default port for this DBMS and if `server.address` is set.
+          conditionally_required: |
+            If `server.address` is set and the client is configured with a single database server endpoint that uses a non-default port.
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
+          `server.port` SHOULD reflect the database port specified in the client configuration. It SHOULD NOT be derived from the server selected for an operation.
         stability: stable
     metric_name: azure.cosmosdb.client.operation.request_charge
     instrument: histogram
@@ -25141,19 +25283,19 @@ groups:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - examples
-            - note
             - requirement_level
             - stability
           locally_overridden_fields:
             - brief
+            - note
         server.port:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
     annotations:
       code_generation:
@@ -25848,11 +25990,9 @@ groups:
     type: metric
     brief: Container filesystem available bytes.
     note: |
-      In K8s, this metric is derived from the
-      [FsStats.AvailableBytes](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#FsStats) field
-      of the [ContainerStats.Rootfs](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#ContainerStats)
-      of the Kubelet's stats API.
-    stability: development
+      Available filesystem space for the container's `rootfs`.
+      In K8s, this metric is derived from the [FsStats.AvailableBytes](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#FsStats) field of the [ContainerStats.Rootfs](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#ContainerStats) of the Kubelet's stats API.
+    stability: release_candidate
     metric_name: container.filesystem.available
     instrument: updowncounter
     unit: By
@@ -25869,11 +26009,10 @@ groups:
     type: metric
     brief: Container filesystem capacity.
     note: |
-      In K8s, this metric is derived from the
-      [FsStats.CapacityBytes](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#FsStats) field
-      of the [ContainerStats.Rootfs](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#ContainerStats)
-      of the Kubelet's stats API.
-    stability: development
+      Total filesystem capacity for the container's `rootfs`.
+      In general, this metric can be derived from [cadvisor](https://github.com/google/cadvisor/blob/v0.53.0/docs/storage/prometheus.md#prometheus-container-metrics) and specifically the `container_fs_limit_bytes` metric for the container's `rootfs` device.
+      In K8s, this metric is derived from the [FsStats.CapacityBytes](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#FsStats) field of the [ContainerStats.Rootfs](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#ContainerStats) of the Kubelet's stats API.
+    stability: release_candidate
     metric_name: container.filesystem.capacity
     instrument: updowncounter
     unit: By
@@ -25890,13 +26029,11 @@ groups:
     type: metric
     brief: Container filesystem usage.
     note: |
-      This may not equal capacity - available.
-
-      In K8s, this metric is derived from the
-      [FsStats.UsedBytes](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#FsStats) field
-      of the [ContainerStats.Rootfs](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#ContainerStats)
-      of the Kubelet's stats API.
-    stability: development
+      Filesystem space used by the container's `rootfs`.
+      In general, this metric can be derived from [cadvisor](https://github.com/google/cadvisor/blob/v0.53.0/docs/storage/prometheus.md#prometheus-container-metrics) and specifically the `container_fs_usage_bytes` metric for the container's `rootfs` device.
+      In K8s, this metric is derived from the [FsStats.UsedBytes](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#FsStats) field of the [ContainerStats.Rootfs](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#ContainerStats) of the Kubelet's stats API.
+      Capacity and available are reported for the backing filesystem, which may be shared with other workloads; therefore, usage may not equal `capacity - available`.
+    stability: release_candidate
     metric_name: container.filesystem.usage
     instrument: updowncounter
     unit: By
@@ -27226,14 +27363,22 @@ groups:
       - name: server.address
         type: string
         brief: |
-          Name of the database host.
+          The database address specified in the client configuration.
         examples:
           - example.com
           - 10.1.2.80
           - /tmp/my.sock
         requirement_level: recommended
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
+          Instrumentation SHOULD set `server.address` to the database address specified in the client configuration.
+          It SHOULD NOT derive the value from the server selected for an operation.
+
+          > [!WARNING]
+          >
+          > `server.address` MUST NOT contain credentials or other sensitive information.
+
+          See [Database server address](/docs/db/database-spans.md#database-server-address) for guidance and
+          examples.
         stability: stable
       - name: server.port
         type: int
@@ -27243,9 +27388,10 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If using a port other than the default port for this DBMS and if `server.address` is set.
+          conditionally_required: |
+            If `server.address` is set and the client is configured with a single database server endpoint that uses a non-default port.
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
+          `server.port` SHOULD reflect the database port specified in the client configuration. It SHOULD NOT be derived from the server selected for an operation.
         stability: stable
     metric_name: db.client.cosmosdb.active_instance.count
     instrument: updowncounter
@@ -27254,24 +27400,25 @@ groups:
       provenance:
         schema_url: https://opentelemetry.io/schemas/1.45.0-unreleased
         path: /home/weaver/source/db/deprecated/metrics-deprecated.yaml
+      extends_group: attributes.db.client.connection
       attributes:
         server.address:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - examples
-            - note
             - requirement_level
             - stability
           locally_overridden_fields:
             - brief
+            - note
         server.port:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
     annotations:
       code_generation:
@@ -27826,14 +27973,22 @@ groups:
       - name: server.address
         type: string
         brief: |
-          Name of the database host.
+          The database address specified in the client configuration.
         examples:
           - example.com
           - 10.1.2.80
           - /tmp/my.sock
         requirement_level: recommended
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
+          Instrumentation SHOULD set `server.address` to the database address specified in the client configuration.
+          It SHOULD NOT derive the value from the server selected for an operation.
+
+          > [!WARNING]
+          >
+          > `server.address` MUST NOT contain credentials or other sensitive information.
+
+          See [Database server address](/docs/db/database-spans.md#database-server-address) for guidance and
+          examples.
         stability: stable
       - name: server.port
         type: int
@@ -27843,9 +27998,10 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If using a port other than the default port for this DBMS and if `server.address` is set.
+          conditionally_required: |
+            If `server.address` is set and the client is configured with a single database server endpoint that uses a non-default port.
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
+          `server.port` SHOULD reflect the database port specified in the client configuration. It SHOULD NOT be derived from the server selected for an operation.
         stability: stable
     metric_name: db.client.operation.duration
     instrument: histogram
@@ -27958,19 +28114,19 @@ groups:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - examples
-            - note
             - requirement_level
             - stability
           locally_overridden_fields:
             - brief
+            - note
         server.port:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
     annotations:
       code_generation:
@@ -28314,14 +28470,22 @@ groups:
       - name: server.address
         type: string
         brief: |
-          Name of the database host.
+          The database address specified in the client configuration.
         examples:
           - example.com
           - 10.1.2.80
           - /tmp/my.sock
         requirement_level: recommended
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
+          Instrumentation SHOULD set `server.address` to the database address specified in the client configuration.
+          It SHOULD NOT derive the value from the server selected for an operation.
+
+          > [!WARNING]
+          >
+          > `server.address` MUST NOT contain credentials or other sensitive information.
+
+          See [Database server address](/docs/db/database-spans.md#database-server-address) for guidance and
+          examples.
         stability: stable
       - name: server.port
         type: int
@@ -28331,9 +28495,10 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If using a port other than the default port for this DBMS and if `server.address` is set.
+          conditionally_required: |
+            If `server.address` is set and the client is configured with a single database server endpoint that uses a non-default port.
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
+          `server.port` SHOULD reflect the database port specified in the client configuration. It SHOULD NOT be derived from the server selected for an operation.
         stability: stable
     metric_name: db.client.response.returned_rows
     instrument: histogram
@@ -28437,19 +28602,19 @@ groups:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - examples
-            - note
             - requirement_level
             - stability
           locally_overridden_fields:
             - brief
+            - note
         server.port:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
     annotations:
       code_generation:
@@ -45922,28 +46087,28 @@ groups:
   - id: metric.jvm.file_descriptor.count
     type: metric
     brief: Number of open file descriptors as reported by the JVM.
-    stability: development
+    stability: release_candidate
     metric_name: jvm.file_descriptor.count
     instrument: updowncounter
     unit: "{file_descriptor}"
     lineage:
       provenance:
         schema_url: https://opentelemetry.io/schemas/1.45.0-unreleased
-        path: /home/weaver/source/jvm/metrics-experimental.yaml
+        path: /home/weaver/source/jvm/metrics.yaml
     annotations:
       code_generation:
         metric_value_type: int
   - id: metric.jvm.file_descriptor.limit
     type: metric
     brief: Measure of max open file descriptors as reported by the JVM.
-    stability: development
+    stability: release_candidate
     metric_name: jvm.file_descriptor.limit
     instrument: updowncounter
     unit: "{file_descriptor}"
     lineage:
       provenance:
         schema_url: https://opentelemetry.io/schemas/1.45.0-unreleased
-        path: /home/weaver/source/jvm/metrics-experimental.yaml
+        path: /home/weaver/source/jvm/metrics.yaml
     annotations:
       code_generation:
         metric_value_type: int
@@ -46654,7 +46819,7 @@ groups:
     type: metric
     brief: Maximum ephemeral storage resource limit set for the container.
     note: |
-      See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#resourcerequirements-v1-core for details.
+      See the [Kubernetes ResourceRequirements API](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#resourcerequirements-v1-core) for details.
     stability: development
     metric_name: k8s.container.ephemeral_storage.limit
     instrument: updowncounter
@@ -46672,7 +46837,7 @@ groups:
     type: metric
     brief: Ephemeral storage resource requested for the container.
     note: |
-      See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#resourcerequirements-v1-core for details.
+      See the [Kubernetes ResourceRequirements API](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#resourcerequirements-v1-core) for details.
     stability: development
     metric_name: k8s.container.ephemeral_storage.request
     instrument: updowncounter
@@ -47045,7 +47210,7 @@ groups:
     type: metric
     brief: Maximum storage resource limit set for the container.
     note: |
-      See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#resourcerequirements-v1-core for details.
+      See the [Kubernetes ResourceRequirements API](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#resourcerequirements-v1-core) for details.
     stability: development
     metric_name: k8s.container.storage.limit
     instrument: updowncounter
@@ -47063,7 +47228,7 @@ groups:
     type: metric
     brief: Storage resource requested for the container.
     note: |
-      See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#resourcerequirements-v1-core for details.
+      See the [Kubernetes ResourceRequirements API](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#resourcerequirements-v1-core) for details.
     stability: development
     metric_name: k8s.container.storage.request
     instrument: updowncounter
@@ -48225,10 +48390,10 @@ groups:
     brief: Node filesystem available bytes.
     note: |
       This metric is derived from the
-      [FsStats.AvailableBytes](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#FsStats) field
-      of the [NodeStats.Fs](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#NodeStats)
+      [FsStats.AvailableBytes](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#FsStats) field
+      of the [NodeStats.Fs](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#NodeStats)
       of the Kubelet's stats API.
-    stability: development
+    stability: release_candidate
     metric_name: k8s.node.filesystem.available
     instrument: updowncounter
     unit: By
@@ -48246,10 +48411,10 @@ groups:
     brief: Node filesystem capacity.
     note: |
       This metric is derived from the
-      [FsStats.CapacityBytes](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#FsStats) field
-      of the [NodeStats.Fs](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#NodeStats)
+      [FsStats.CapacityBytes](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#FsStats) field
+      of the [NodeStats.Fs](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#NodeStats)
       of the Kubelet's stats API.
-    stability: development
+    stability: release_candidate
     metric_name: k8s.node.filesystem.capacity
     instrument: updowncounter
     unit: By
@@ -48267,10 +48432,10 @@ groups:
     brief: The total inodes in the node's root filesystem.
     note: |
       This metric is derived from the
-      [FsStats.Inodes](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#FsStats) field
-      of the [NodeStats.Fs](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#NodeStats)
+      [FsStats.Inodes](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#FsStats) field
+      of the [NodeStats.Fs](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#NodeStats)
       of the Kubelet's stats API.
-    stability: development
+    stability: release_candidate
     metric_name: k8s.node.filesystem.inode.count
     instrument: updowncounter
     unit: "{inode}"
@@ -48288,10 +48453,10 @@ groups:
     brief: The free inodes in the node's root filesystem.
     note: |
       This metric is derived from the
-      [FsStats.InodesFree](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#FsStats) field
-      of the [NodeStats.Fs](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#NodeStats)
+      [FsStats.InodesFree](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#FsStats) field
+      of the [NodeStats.Fs](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#NodeStats)
       of the Kubelet's stats API.
-    stability: development
+    stability: release_candidate
     metric_name: k8s.node.filesystem.inode.free
     instrument: updowncounter
     unit: "{inode}"
@@ -48308,13 +48473,15 @@ groups:
     type: metric
     brief: Node filesystem usage.
     note: |
-      This may not equal capacity - available.
-
       This metric is derived from the
-      [FsStats.UsedBytes](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#FsStats) field
-      of the [NodeStats.Fs](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#NodeStats)
+      [FsStats.UsedBytes](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#FsStats) field
+      of the [NodeStats.Fs](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#NodeStats)
       of the Kubelet's stats API.
-    stability: development
+
+      Capacity and available are reported for the backing filesystem,
+      which may be shared with other workloads; therefore,
+      usage may not equal `capacity - available`.
+    stability: release_candidate
     metric_name: k8s.node.filesystem.usage
     instrument: updowncounter
     unit: By
@@ -48469,7 +48636,7 @@ groups:
   - id: metric.k8s.node.network.errors
     type: metric
     brief: Node network errors.
-    stability: development
+    stability: release_candidate
     attributes:
       - name: network.interface.name
         type: string
@@ -48526,7 +48693,7 @@ groups:
   - id: metric.k8s.node.network.io
     type: metric
     brief: Network bytes for the Node.
-    stability: development
+    stability: release_candidate
     attributes:
       - name: network.interface.name
         type: string
@@ -48951,10 +49118,10 @@ groups:
     brief: Pod filesystem available bytes.
     note: |
       This metric is derived from the
-      [FsStats.AvailableBytes](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#FsStats) field
-      of the [PodStats.EphemeralStorage](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#PodStats)
+      [FsStats.AvailableBytes](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#FsStats) field
+      of the [PodStats.EphemeralStorage](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#PodStats)
       of the Kubelet's stats API.
-    stability: development
+    stability: release_candidate
     metric_name: k8s.pod.filesystem.available
     instrument: updowncounter
     unit: By
@@ -48972,10 +49139,10 @@ groups:
     brief: Pod filesystem capacity.
     note: |
       This metric is derived from the
-      [FsStats.CapacityBytes](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#FsStats) field
-      of the [PodStats.EphemeralStorage](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#PodStats)
+      [FsStats.CapacityBytes](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#FsStats) field
+      of the [PodStats.EphemeralStorage](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#PodStats)
       of the Kubelet's stats API.
-    stability: development
+    stability: release_candidate
     metric_name: k8s.pod.filesystem.capacity
     instrument: updowncounter
     unit: By
@@ -48992,13 +49159,14 @@ groups:
     type: metric
     brief: Pod filesystem usage.
     note: |
-      This may not equal capacity - available.
-
       This metric is derived from the
-      [FsStats.UsedBytes](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#FsStats) field
-      of the [PodStats.EphemeralStorage](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#PodStats)
+      [FsStats.UsedBytes](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#FsStats) field
+      of the [PodStats.EphemeralStorage](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#PodStats)
       of the Kubelet's stats API.
-    stability: development
+
+      Capacity and available are reported for the backing filesystem, which may be shared
+      with other workloads; therefore, usage may not equal `capacity - available`.
+    stability: release_candidate
     metric_name: k8s.pod.filesystem.usage
     instrument: updowncounter
     unit: By
@@ -49137,7 +49305,7 @@ groups:
   - id: metric.k8s.pod.network.errors
     type: metric
     brief: Pod network errors.
-    stability: development
+    stability: release_candidate
     attributes:
       - name: network.interface.name
         type: string
@@ -49194,7 +49362,7 @@ groups:
   - id: metric.k8s.pod.network.io
     type: metric
     brief: Network bytes for the Pod.
-    stability: development
+    stability: release_candidate
     attributes:
       - name: network.interface.name
         type: string
@@ -49442,8 +49610,8 @@ groups:
     brief: Pod volume storage space available.
     note: |
       This metric is derived from the
-      [VolumeStats.AvailableBytes](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#VolumeStats) field
-      of the [PodStats](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#PodStats) of the
+      [VolumeStats.AvailableBytes](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#VolumeStats) field
+      of the [PodStats](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#PodStats) of the
       Kubelet's stats API.
     stability: development
     attributes:
@@ -49525,8 +49693,8 @@ groups:
     brief: Pod volume total capacity.
     note: |
       This metric is derived from the
-      [VolumeStats.CapacityBytes](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#VolumeStats) field
-      of the [PodStats](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#PodStats) of the
+      [VolumeStats.CapacityBytes](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#VolumeStats) field
+      of the [PodStats](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#PodStats) of the
       Kubelet's stats API.
     stability: development
     attributes:
@@ -49608,8 +49776,8 @@ groups:
     brief: The total inodes in the filesystem of the Pod's volume.
     note: |
       This metric is derived from the
-      [VolumeStats.Inodes](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#VolumeStats) field
-      of the [PodStats](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#PodStats) of the
+      [VolumeStats.Inodes](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#VolumeStats) field
+      of the [PodStats](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#PodStats) of the
       Kubelet's stats API.
     stability: development
     attributes:
@@ -49691,8 +49859,8 @@ groups:
     brief: The free inodes in the filesystem of the Pod's volume.
     note: |
       This metric is derived from the
-      [VolumeStats.InodesFree](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#VolumeStats) field
-      of the [PodStats](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#PodStats) of the
+      [VolumeStats.InodesFree](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#VolumeStats) field
+      of the [PodStats](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#PodStats) of the
       Kubelet's stats API.
     stability: development
     attributes:
@@ -49774,8 +49942,8 @@ groups:
     brief: The inodes used by the filesystem of the Pod's volume.
     note: |
       This metric is derived from the
-      [VolumeStats.InodesUsed](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#VolumeStats) field
-      of the [PodStats](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#PodStats) of the
+      [VolumeStats.InodesUsed](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#VolumeStats) field
+      of the [PodStats](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#PodStats) of the
       Kubelet's stats API.
 
       This may not be equal to `inodes - free` because filesystem may share inodes with other filesystems.
@@ -49861,8 +50029,8 @@ groups:
       This may not equal capacity - available.
 
       This metric is derived from the
-      [VolumeStats.UsedBytes](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#VolumeStats) field
-      of the [PodStats](https://pkg.go.dev/k8s.io/kubelet@v0.33.0/pkg/apis/stats/v1alpha1#PodStats) of the
+      [VolumeStats.UsedBytes](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#VolumeStats) field
+      of the [PodStats](https://pkg.go.dev/k8s.io/kubelet@v0.34.0/pkg/apis/stats/v1alpha1#PodStats) of the
       Kubelet's stats API.
     stability: development
     attributes:
@@ -50748,6 +50916,7 @@ groups:
       See [K8s EndpointConditions](https://kubernetes.io/docs/reference/kubernetes-api/service-resources/endpoint-slice-v1/) for more details.
 
       The conditions represent:
+
       - `ready`: Endpoints capable of receiving new connections.
       - `serving`: Endpoints currently handling traffic.
       - `terminating`: Endpoints that are being phased out but may still be handling existing connections.
@@ -50942,6 +51111,25 @@ groups:
       provenance:
         schema_url: https://opentelemetry.io/schemas/1.45.0-unreleased
         path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
+    entity_associations:
+      - k8s.statefulset
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.statefulset.pod.available
+    type: metric
+    brief: Total number of available replica pods (ready for at least minReadySeconds) targeted by this statefulset.
+    note: |
+      This metric aligns with the `availableReplicas` field of the
+      [K8s StatefulSetStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#statefulsetstatus-v1-apps).
+    stability: development
+    metric_name: k8s.statefulset.pod.available
+    instrument: updowncounter
+    unit: "{pod}"
+    lineage:
+      provenance:
+        schema_url: https://opentelemetry.io/schemas/1.45.0-unreleased
+        path: /home/weaver/source/k8s/metrics.yaml
     entity_associations:
       - k8s.statefulset
     annotations:
@@ -68606,202 +68794,6 @@ groups:
     annotations:
       code_generation:
         metric_value_type: int
-  - id: network-connection-and-carrier
-    type: attribute_group
-    brief: |
-      These attributes may be used for any network related operation.
-    attributes:
-      - name: network.carrier.icc
-        type: string
-        brief: The ISO 3166-1 alpha-2 2-character country code associated with the mobile carrier network.
-        examples: DE
-        requirement_level: recommended
-        stability: development
-      - name: network.carrier.mcc
-        type: string
-        brief: The mobile carrier country code.
-        examples: "310"
-        requirement_level: recommended
-        stability: development
-      - name: network.carrier.mnc
-        type: string
-        brief: The mobile carrier network code.
-        examples: "001"
-        requirement_level: recommended
-        stability: development
-      - name: network.carrier.name
-        type: string
-        brief: The name of the mobile carrier.
-        examples: sprint
-        requirement_level: recommended
-        stability: development
-      - name: network.connection.subtype
-        type:
-          members:
-            - id: gprs
-              value: gprs
-              brief: GPRS
-              stability: development
-            - id: edge
-              value: edge
-              brief: EDGE
-              stability: development
-            - id: umts
-              value: umts
-              brief: UMTS
-              stability: development
-            - id: cdma
-              value: cdma
-              brief: CDMA
-              stability: development
-            - id: evdo_0
-              value: evdo_0
-              brief: EVDO Rel. 0
-              stability: development
-            - id: evdo_a
-              value: evdo_a
-              brief: EVDO Rev. A
-              stability: development
-            - id: cdma2000_1xrtt
-              value: cdma2000_1xrtt
-              brief: CDMA2000 1XRTT
-              stability: development
-            - id: hsdpa
-              value: hsdpa
-              brief: HSDPA
-              stability: development
-            - id: hsupa
-              value: hsupa
-              brief: HSUPA
-              stability: development
-            - id: hspa
-              value: hspa
-              brief: HSPA
-              stability: development
-            - id: iden
-              value: iden
-              brief: IDEN
-              stability: development
-            - id: evdo_b
-              value: evdo_b
-              brief: EVDO Rev. B
-              stability: development
-            - id: lte
-              value: lte
-              brief: LTE
-              stability: development
-            - id: ehrpd
-              value: ehrpd
-              brief: EHRPD
-              stability: development
-            - id: hspap
-              value: hspap
-              brief: HSPAP
-              stability: development
-            - id: gsm
-              value: gsm
-              brief: GSM
-              stability: development
-            - id: td_scdma
-              value: td_scdma
-              brief: TD-SCDMA
-              stability: development
-            - id: iwlan
-              value: iwlan
-              brief: IWLAN
-              stability: development
-            - id: nr
-              value: nr
-              brief: 5G NR (New Radio)
-              stability: development
-            - id: nrnsa
-              value: nrnsa
-              brief: 5G NRNSA (New Radio Non-Standalone)
-              stability: development
-            - id: lte_ca
-              value: lte_ca
-              brief: LTE CA
-              stability: development
-        brief: This describes more details regarding the connection.type. It may be the type of cell technology connection, but it could be used for describing details about a Wi-Fi connection.
-        examples: LTE
-        requirement_level: recommended
-        stability: development
-      - name: network.connection.type
-        type:
-          members:
-            - id: wifi
-              value: wifi
-              brief: Wi-Fi
-              stability: development
-            - id: wired
-              value: wired
-              stability: development
-            - id: cell
-              value: cell
-              stability: development
-            - id: unavailable
-              value: unavailable
-              stability: development
-            - id: unknown
-              value: unknown
-              stability: development
-        brief: The internet connection type.
-        examples: wifi
-        requirement_level: recommended
-        stability: development
-    lineage:
-      provenance:
-        schema_url: https://opentelemetry.io/schemas/1.45.0-unreleased
-        path: /home/weaver/source/network/common.yaml
-      attributes:
-        network.carrier.icc:
-          source_group: registry.network
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - requirement_level
-            - stability
-        network.carrier.mcc:
-          source_group: registry.network
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - requirement_level
-            - stability
-        network.carrier.mnc:
-          source_group: registry.network
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - requirement_level
-            - stability
-        network.carrier.name:
-          source_group: registry.network
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - requirement_level
-            - stability
-        network.connection.subtype:
-          source_group: registry.network
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - requirement_level
-            - stability
-        network.connection.type:
-          source_group: registry.network
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - requirement_level
-            - stability
   - id: network-core
     type: attribute_group
     brief: |
@@ -68980,41 +68972,6 @@ groups:
             - note
             - requirement_level
             - stability
-  - id: opentracing
-    type: attribute_group
-    brief: This document defines semantic conventions for the OpenTracing Shim
-    note: |
-      These conventions are used by the OpenTracing Shim layer.
-    attributes:
-      - name: opentracing.ref_type
-        type:
-          members:
-            - id: child_of
-              value: child_of
-              brief: The parent Span depends on the child Span in some capacity
-              stability: development
-            - id: follows_from
-              value: follows_from
-              brief: The parent Span doesn't depend in any way on the result of the child Span
-              stability: development
-        brief: Parent-child Reference type
-        requirement_level: recommended
-        note: |
-          The causal relationship between a child Span and a parent Span.
-        stability: development
-    lineage:
-      provenance:
-        schema_url: https://opentelemetry.io/schemas/1.45.0-unreleased
-        path: /home/weaver/source/opentracing/common.yaml
-      attributes:
-        opentracing.ref_type:
-          source_group: registry.opentracing
-          inherited_fields:
-            - brief
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
   - id: os.zos
     type: attribute_group
     brief: The operating system on a z/OS system.
@@ -69559,6 +69516,11 @@ groups:
               value: luajit
               brief: |
                 [LuaJIT](https://en.wikipedia.org/wiki/LuaJIT)
+              stability: development
+            - id: cuda
+              value: cuda
+              brief: |
+                [CUDA](https://wikipedia.org/wiki/CUDA)
               stability: development
         brief: |
           Describes the interpreter or compiler of a single frame.
@@ -77557,6 +77519,33 @@ groups:
       provenance:
         schema_url: https://opentelemetry.io/schemas/1.45.0-unreleased
         path: /home/weaver/source/destination/registry.yaml
+  - id: registry.home.weaver.source.opentracing.deprecated.registry-deprecated
+    type: attribute_group
+    brief: <synthetic v2>
+    attributes:
+      - name: opentracing.ref_type
+        type:
+          members:
+            - id: child_of
+              value: child_of
+              brief: The parent Span depends on the child Span in some capacity
+              stability: development
+            - id: follows_from
+              value: follows_from
+              brief: The parent Span doesn't depend in any way on the result of the child Span
+              stability: development
+        brief: Parent-child Reference type
+        requirement_level: recommended
+        note: |
+          The causal relationship between a child Span and a parent Span.
+        stability: development
+        deprecated:
+          reason: obsoleted
+          note: OpenTracing compatibility requirements are [deprecated in OpenTelemetry Specification](https://opentelemetry.io/docs/specs/otel/compatibility/opentracing/)
+    lineage:
+      provenance:
+        schema_url: https://opentelemetry.io/schemas/1.45.0-unreleased
+        path: /home/weaver/source/opentracing/deprecated/registry-deprecated.yaml
   - id: registry.home.weaver.source.server.registry
     type: attribute_group
     brief: <synthetic v2>
@@ -81649,31 +81638,6 @@ groups:
         schema_url: https://opentelemetry.io/schemas/1.45.0-unreleased
         path: /home/weaver/source/openshift/registry.yaml
     display_name: Openshift Attributes
-  - id: registry.opentracing
-    type: attribute_group
-    brief: Attributes used by the OpenTracing Shim layer.
-    attributes:
-      - name: opentracing.ref_type
-        type:
-          members:
-            - id: child_of
-              value: child_of
-              brief: The parent Span depends on the child Span in some capacity
-              stability: development
-            - id: follows_from
-              value: follows_from
-              brief: The parent Span doesn't depend in any way on the result of the child Span
-              stability: development
-        brief: Parent-child Reference type
-        requirement_level: recommended
-        note: |
-          The causal relationship between a child Span and a parent Span.
-        stability: development
-    lineage:
-      provenance:
-        schema_url: https://opentelemetry.io/schemas/1.45.0-unreleased
-        path: /home/weaver/source/opentracing/registry.yaml
-    display_name: OpenTracing Attributes
   - id: registry.oracle_cloud
     type: attribute_group
     brief: |
@@ -82767,6 +82731,11 @@ groups:
               value: luajit
               brief: |
                 [LuaJIT](https://en.wikipedia.org/wiki/LuaJIT)
+              stability: development
+            - id: cuda
+              value: cuda
+              brief: |
+                [CUDA](https://wikipedia.org/wiki/CUDA)
               stability: development
         brief: |
           Describes the interpreter or compiler of a single frame.
@@ -85526,6 +85495,9 @@ groups:
   - id: service.peer
     type: attribute_group
     brief: Operations that access some remote service MAY fill out these attributes to describe that remote service.
+    note: |
+      Users can define what the name of a service is based on their particular semantics in their distributed system.
+    stability: development
     attributes:
       - name: service.peer.name
         type: string
@@ -89864,7 +89836,7 @@ groups:
       - name: server.address
         type: string
         brief: |
-          Name of the database host.
+          The database address specified in the client configuration.
         examples:
           - example.com
           - 10.1.2.80
@@ -89872,7 +89844,15 @@ groups:
         requirement_level: recommended
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
+          Instrumentation SHOULD set `server.address` to the database address specified in the client configuration.
+          It SHOULD NOT derive the value from the server selected for an operation.
+
+          > [!WARNING]
+          >
+          > `server.address` MUST NOT contain credentials or other sensitive information.
+
+          See [Database server address](/docs/db/database-spans.md#database-server-address) for guidance and
+          examples.
         stability: stable
       - name: server.port
         type: int
@@ -89885,7 +89865,7 @@ groups:
           conditionally_required: If not default (443).
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
+          `server.port` SHOULD reflect the database port specified in the client configuration. It SHOULD NOT be derived from the server selected for an operation.
         stability: stable
       - name: user_agent.original
         type: string
@@ -90068,20 +90048,20 @@ groups:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - examples
-            - note
             - requirement_level
             - stability
           locally_overridden_fields:
             - brief
+            - note
             - sampling_relevant
         server.port:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
             - sampling_relevant
         user_agent.original:
@@ -91069,7 +91049,7 @@ groups:
       - name: server.address
         type: string
         brief: |
-          Name of the database host.
+          The database address specified in the client configuration.
         examples:
           - example.com
           - 10.1.2.80
@@ -91077,7 +91057,15 @@ groups:
         requirement_level: recommended
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
+          Instrumentation SHOULD set `server.address` to the database address specified in the client configuration.
+          It SHOULD NOT derive the value from the server selected for an operation.
+
+          > [!WARNING]
+          >
+          > `server.address` MUST NOT contain credentials or other sensitive information.
+
+          See [Database server address](/docs/db/database-spans.md#database-server-address) for guidance and
+          examples.
         stability: stable
       - name: server.port
         type: int
@@ -91087,10 +91075,11 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If using a port other than the default port for this DBMS and if `server.address` is set.
+          conditionally_required: |
+            If `server.address` is set and the client is configured with a single database server endpoint that uses a non-default port.
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
+          `server.port` SHOULD reflect the database port specified in the client configuration. It SHOULD NOT be derived from the server selected for an operation.
         stability: stable
     span_kind: client
     lineage:
@@ -91261,20 +91250,20 @@ groups:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - examples
-            - note
             - requirement_level
             - stability
           locally_overridden_fields:
             - brief
+            - note
             - sampling_relevant
         server.port:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
             - sampling_relevant
   - id: span.db.client
@@ -91740,7 +91729,7 @@ groups:
       - name: server.address
         type: string
         brief: |
-          Name of the database host.
+          The database address specified in the client configuration.
         examples:
           - example.com
           - 10.1.2.80
@@ -91748,7 +91737,15 @@ groups:
         requirement_level: recommended
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
+          Instrumentation SHOULD set `server.address` to the database address specified in the client configuration.
+          It SHOULD NOT derive the value from the server selected for an operation.
+
+          > [!WARNING]
+          >
+          > `server.address` MUST NOT contain credentials or other sensitive information.
+
+          See [Database server address](/docs/db/database-spans.md#database-server-address) for guidance and
+          examples.
         stability: stable
       - name: server.port
         type: int
@@ -91758,10 +91755,11 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If using a port other than the default port for this DBMS and if `server.address` is set.
+          conditionally_required: |
+            If `server.address` is set and the client is configured with a single database server endpoint that uses a non-default port.
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
+          `server.port` SHOULD reflect the database port specified in the client configuration. It SHOULD NOT be derived from the server selected for an operation.
         stability: stable
     span_kind: client
     lineage:
@@ -91904,20 +91902,20 @@ groups:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - examples
-            - note
             - requirement_level
             - stability
           locally_overridden_fields:
             - brief
+            - note
             - sampling_relevant
         server.port:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
             - sampling_relevant
   - id: span.db.couchdb.client
@@ -92023,7 +92021,7 @@ groups:
       - name: server.address
         type: string
         brief: |
-          Name of the database host.
+          The database address specified in the client configuration.
         examples:
           - example.com
           - 10.1.2.80
@@ -92031,7 +92029,15 @@ groups:
         requirement_level: recommended
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
+          Instrumentation SHOULD set `server.address` to the database address specified in the client configuration.
+          It SHOULD NOT derive the value from the server selected for an operation.
+
+          > [!WARNING]
+          >
+          > `server.address` MUST NOT contain credentials or other sensitive information.
+
+          See [Database server address](/docs/db/database-spans.md#database-server-address) for guidance and
+          examples.
         stability: stable
       - name: server.port
         type: int
@@ -92041,10 +92047,11 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If using a port other than the default port for this DBMS and if `server.address` is set.
+          conditionally_required: |
+            If `server.address` is set and the client is configured with a single database server endpoint that uses a non-default port.
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
+          `server.port` SHOULD reflect the database port specified in the client configuration. It SHOULD NOT be derived from the server selected for an operation.
         stability: stable
     span_kind: client
     lineage:
@@ -92103,20 +92110,20 @@ groups:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - examples
-            - note
             - requirement_level
             - stability
           locally_overridden_fields:
             - brief
+            - note
             - sampling_relevant
         server.port:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
             - sampling_relevant
   - id: span.db.elasticsearch.client
@@ -92350,7 +92357,7 @@ groups:
       - name: server.address
         type: string
         brief: |
-          Name of the database host.
+          The database address specified in the client configuration.
         examples:
           - example.com
           - 10.1.2.80
@@ -92358,7 +92365,15 @@ groups:
         requirement_level: recommended
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
+          Instrumentation SHOULD set `server.address` to the database address specified in the client configuration.
+          It SHOULD NOT derive the value from the server selected for an operation.
+
+          > [!WARNING]
+          >
+          > `server.address` MUST NOT contain credentials or other sensitive information.
+
+          See [Database server address](/docs/db/database-spans.md#database-server-address) for guidance and
+          examples.
         stability: stable
       - name: server.port
         type: int
@@ -92368,10 +92383,11 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If using a port other than the default port for this DBMS and if `server.address` is set.
+          conditionally_required: |
+            If `server.address` is set and the client is configured with a single database server endpoint that uses a non-default port.
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
+          `server.port` SHOULD reflect the database port specified in the client configuration. It SHOULD NOT be derived from the server selected for an operation.
         stability: stable
       - name: url.full
         type: string
@@ -92526,20 +92542,20 @@ groups:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - examples
-            - note
             - requirement_level
             - stability
           locally_overridden_fields:
             - brief
+            - note
             - sampling_relevant
         server.port:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
             - sampling_relevant
         url.full:
@@ -92677,7 +92693,7 @@ groups:
       - name: server.address
         type: string
         brief: |
-          Name of the database host.
+          The database address specified in the client configuration.
         examples:
           - example.com
           - 10.1.2.80
@@ -92685,7 +92701,15 @@ groups:
         requirement_level: recommended
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
+          Instrumentation SHOULD set `server.address` to the database address specified in the client configuration.
+          It SHOULD NOT derive the value from the server selected for an operation.
+
+          > [!WARNING]
+          >
+          > `server.address` MUST NOT contain credentials or other sensitive information.
+
+          See [Database server address](/docs/db/database-spans.md#database-server-address) for guidance and
+          examples.
         stability: stable
       - name: server.port
         type: int
@@ -92695,10 +92719,11 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If using a port other than the default port for this DBMS and if `server.address` is set.
+          conditionally_required: |
+            If `server.address` is set and the client is configured with a single database server endpoint that uses a non-default port.
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
+          `server.port` SHOULD reflect the database port specified in the client configuration. It SHOULD NOT be derived from the server selected for an operation.
         stability: stable
     span_kind: client
     lineage:
@@ -92767,20 +92792,20 @@ groups:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - examples
-            - note
             - requirement_level
             - stability
           locally_overridden_fields:
             - brief
+            - note
             - sampling_relevant
         server.port:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
             - sampling_relevant
   - id: span.db.mariadb.client
@@ -93010,7 +93035,7 @@ groups:
       - name: server.address
         type: string
         brief: |
-          Name of the database host.
+          The database address specified in the client configuration.
         examples:
           - example.com
           - 10.1.2.80
@@ -93018,7 +93043,15 @@ groups:
         requirement_level: recommended
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
+          Instrumentation SHOULD set `server.address` to the database address specified in the client configuration.
+          It SHOULD NOT derive the value from the server selected for an operation.
+
+          > [!WARNING]
+          >
+          > `server.address` MUST NOT contain credentials or other sensitive information.
+
+          See [Database server address](/docs/db/database-spans.md#database-server-address) for guidance and
+          examples.
         stability: stable
       - name: server.port
         type: int
@@ -93028,10 +93061,11 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If using a port other than the default port for this DBMS and if `server.address` is set.
+          conditionally_required: |
+            If `server.address` is set and the client is configured with a single database server endpoint that uses a non-default port.
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
+          `server.port` SHOULD reflect the database port specified in the client configuration. It SHOULD NOT be derived from the server selected for an operation.
         stability: stable
     span_kind: client
     lineage:
@@ -93145,20 +93179,20 @@ groups:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - examples
-            - note
             - requirement_level
             - stability
           locally_overridden_fields:
             - brief
+            - note
             - sampling_relevant
         server.port:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
             - sampling_relevant
   - id: span.db.mongodb.client
@@ -93273,7 +93307,7 @@ groups:
       - name: server.address
         type: string
         brief: |
-          Name of the database host.
+          The database address specified in the client configuration.
         examples:
           - example.com
           - 10.1.2.80
@@ -93281,7 +93315,15 @@ groups:
         requirement_level: recommended
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
+          Instrumentation SHOULD set `server.address` to the database address specified in the client configuration.
+          It SHOULD NOT derive the value from the server selected for an operation.
+
+          > [!WARNING]
+          >
+          > `server.address` MUST NOT contain credentials or other sensitive information.
+
+          See [Database server address](/docs/db/database-spans.md#database-server-address) for guidance and
+          examples.
         stability: stable
       - name: server.port
         type: int
@@ -93291,10 +93333,11 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If using a port other than the default port for this DBMS and if `server.address` is set.
+          conditionally_required: |
+            If `server.address` is set and the client is configured with a single database server endpoint that uses a non-default port.
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
+          `server.port` SHOULD reflect the database port specified in the client configuration. It SHOULD NOT be derived from the server selected for an operation.
         stability: stable
     span_kind: client
     lineage:
@@ -93363,20 +93406,20 @@ groups:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - examples
-            - note
             - requirement_level
             - stability
           locally_overridden_fields:
             - brief
+            - note
             - sampling_relevant
         server.port:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
             - sampling_relevant
   - id: span.db.mysql.client
@@ -93604,7 +93647,7 @@ groups:
       - name: server.address
         type: string
         brief: |
-          Name of the database host.
+          The database address specified in the client configuration.
         examples:
           - example.com
           - 10.1.2.80
@@ -93612,7 +93655,15 @@ groups:
         requirement_level: recommended
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
+          Instrumentation SHOULD set `server.address` to the database address specified in the client configuration.
+          It SHOULD NOT derive the value from the server selected for an operation.
+
+          > [!WARNING]
+          >
+          > `server.address` MUST NOT contain credentials or other sensitive information.
+
+          See [Database server address](/docs/db/database-spans.md#database-server-address) for guidance and
+          examples.
         stability: stable
       - name: server.port
         type: int
@@ -93622,10 +93673,11 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If using a port other than the default port for this DBMS and if `server.address` is set.
+          conditionally_required: |
+            If `server.address` is set and the client is configured with a single database server endpoint that uses a non-default port.
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
+          `server.port` SHOULD reflect the database port specified in the client configuration. It SHOULD NOT be derived from the server selected for an operation.
         stability: stable
     span_kind: client
     lineage:
@@ -93739,20 +93791,20 @@ groups:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - examples
-            - note
             - requirement_level
             - stability
           locally_overridden_fields:
             - brief
+            - note
             - sampling_relevant
         server.port:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
             - sampling_relevant
   - id: span.db.oracledb.client
@@ -94049,7 +94101,7 @@ groups:
       - name: server.address
         type: string
         brief: |
-          Name of the database host.
+          The database address specified in the client configuration.
         examples:
           - example.com
           - 10.1.2.80
@@ -94057,7 +94109,15 @@ groups:
         requirement_level: recommended
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
+          Instrumentation SHOULD set `server.address` to the database address specified in the client configuration.
+          It SHOULD NOT derive the value from the server selected for an operation.
+
+          > [!WARNING]
+          >
+          > `server.address` MUST NOT contain credentials or other sensitive information.
+
+          See [Database server address](/docs/db/database-spans.md#database-server-address) for guidance and
+          examples.
         stability: stable
       - name: server.port
         type: int
@@ -94067,10 +94127,11 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If using a port other than the default port for this DBMS and if `server.address` is set.
+          conditionally_required: |
+            If `server.address` is set and the client is configured with a single database server endpoint that uses a non-default port.
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
+          `server.port` SHOULD reflect the database port specified in the client configuration. It SHOULD NOT be derived from the server selected for an operation.
         stability: stable
     span_kind: client
     lineage:
@@ -94234,20 +94295,20 @@ groups:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - examples
-            - note
             - requirement_level
             - stability
           locally_overridden_fields:
             - brief
+            - note
             - sampling_relevant
         server.port:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
             - sampling_relevant
   - id: span.db.postgresql.client
@@ -94484,7 +94545,7 @@ groups:
       - name: server.address
         type: string
         brief: |
-          Name of the database host.
+          The database address specified in the client configuration.
         examples:
           - example.com
           - 10.1.2.80
@@ -94492,7 +94553,15 @@ groups:
         requirement_level: recommended
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
+          Instrumentation SHOULD set `server.address` to the database address specified in the client configuration.
+          It SHOULD NOT derive the value from the server selected for an operation.
+
+          > [!WARNING]
+          >
+          > `server.address` MUST NOT contain credentials or other sensitive information.
+
+          See [Database server address](/docs/db/database-spans.md#database-server-address) for guidance and
+          examples.
         stability: stable
       - name: server.port
         type: int
@@ -94502,10 +94571,11 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If using a port other than the default port for this DBMS and if `server.address` is set.
+          conditionally_required: |
+            If `server.address` is set and the client is configured with a single database server endpoint that uses a non-default port.
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
+          `server.port` SHOULD reflect the database port specified in the client configuration. It SHOULD NOT be derived from the server selected for an operation.
         stability: stable
     span_kind: client
     lineage:
@@ -94619,20 +94689,20 @@ groups:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - examples
-            - note
             - requirement_level
             - stability
           locally_overridden_fields:
             - brief
+            - note
             - sampling_relevant
         server.port:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
             - sampling_relevant
   - id: span.db.redis.client
@@ -94793,7 +94863,7 @@ groups:
       - name: server.address
         type: string
         brief: |
-          Name of the database host.
+          The database address specified in the client configuration.
         examples:
           - example.com
           - 10.1.2.80
@@ -94801,7 +94871,15 @@ groups:
         requirement_level: recommended
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
+          Instrumentation SHOULD set `server.address` to the database address specified in the client configuration.
+          It SHOULD NOT derive the value from the server selected for an operation.
+
+          > [!WARNING]
+          >
+          > `server.address` MUST NOT contain credentials or other sensitive information.
+
+          See [Database server address](/docs/db/database-spans.md#database-server-address) for guidance and
+          examples.
         stability: stable
       - name: server.port
         type: int
@@ -94811,10 +94889,11 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If using a port other than the default port for this DBMS and if `server.address` is set.
+          conditionally_required: |
+            If `server.address` is set and the client is configured with a single database server endpoint that uses a non-default port.
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
+          `server.port` SHOULD reflect the database port specified in the client configuration. It SHOULD NOT be derived from the server selected for an operation.
         stability: stable
     span_kind: client
     lineage:
@@ -94910,20 +94989,20 @@ groups:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - examples
-            - note
             - requirement_level
             - stability
           locally_overridden_fields:
             - brief
+            - note
             - sampling_relevant
         server.port:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
             - sampling_relevant
   - id: span.db.sql_server.client
@@ -95157,7 +95236,7 @@ groups:
       - name: server.address
         type: string
         brief: |
-          Name of the database host.
+          The database address specified in the client configuration.
         examples:
           - example.com
           - 10.1.2.80
@@ -95165,7 +95244,15 @@ groups:
         requirement_level: recommended
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
+          Instrumentation SHOULD set `server.address` to the database address specified in the client configuration.
+          It SHOULD NOT derive the value from the server selected for an operation.
+
+          > [!WARNING]
+          >
+          > `server.address` MUST NOT contain credentials or other sensitive information.
+
+          See [Database server address](/docs/db/database-spans.md#database-server-address) for guidance and
+          examples.
         stability: stable
       - name: server.port
         type: int
@@ -95175,10 +95262,11 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If using a port other than the default port for this DBMS and if `server.address` is set.
+          conditionally_required: |
+            If `server.address` is set and the client is configured with a single database server endpoint that uses a non-default port.
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
+          `server.port` SHOULD reflect the database port specified in the client configuration. It SHOULD NOT be derived from the server selected for an operation.
         stability: stable
     span_kind: client
     lineage:
@@ -95292,20 +95380,20 @@ groups:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - examples
-            - note
             - requirement_level
             - stability
           locally_overridden_fields:
             - brief
+            - note
             - sampling_relevant
         server.port:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
             - sampling_relevant
   - id: span.db.sql.client
@@ -95600,7 +95688,7 @@ groups:
       - name: server.address
         type: string
         brief: |
-          Name of the database host.
+          The database address specified in the client configuration.
         examples:
           - example.com
           - 10.1.2.80
@@ -95608,7 +95696,15 @@ groups:
         requirement_level: recommended
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
+          Instrumentation SHOULD set `server.address` to the database address specified in the client configuration.
+          It SHOULD NOT derive the value from the server selected for an operation.
+
+          > [!WARNING]
+          >
+          > `server.address` MUST NOT contain credentials or other sensitive information.
+
+          See [Database server address](/docs/db/database-spans.md#database-server-address) for guidance and
+          examples.
         stability: stable
       - name: server.port
         type: int
@@ -95618,10 +95714,11 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If using a port other than the default port for this DBMS and if `server.address` is set.
+          conditionally_required: |
+            If `server.address` is set and the client is configured with a single database server endpoint that uses a non-default port.
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
+          `server.port` SHOULD reflect the database port specified in the client configuration. It SHOULD NOT be derived from the server selected for an operation.
         stability: stable
     span_kind: client
     lineage:
@@ -95734,20 +95831,20 @@ groups:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - examples
-            - note
             - requirement_level
             - stability
           locally_overridden_fields:
             - brief
+            - note
             - sampling_relevant
         server.port:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
             - sampling_relevant
   - id: span.dotnet.dns.lookup.internal
@@ -133463,7 +133560,7 @@ groups:
       - name: server.address
         type: string
         brief: |
-          Name of the database host.
+          The database address specified in the client configuration.
         examples:
           - example.com
           - 10.1.2.80
@@ -133471,7 +133568,15 @@ groups:
         requirement_level: recommended
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
+          Instrumentation SHOULD set `server.address` to the database address specified in the client configuration.
+          It SHOULD NOT derive the value from the server selected for an operation.
+
+          > [!WARNING]
+          >
+          > `server.address` MUST NOT contain credentials or other sensitive information.
+
+          See [Database server address](/docs/db/database-spans.md#database-server-address) for guidance and
+          examples.
         stability: stable
       - name: server.port
         type: int
@@ -133481,10 +133586,11 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If using a port other than the default port for this DBMS and if `server.address` is set.
+          conditionally_required: |
+            If `server.address` is set and the client is configured with a single database server endpoint that uses a non-default port.
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
+          `server.port` SHOULD reflect the database port specified in the client configuration. It SHOULD NOT be derived from the server selected for an operation.
         stability: stable
     lineage:
       provenance:
@@ -133626,20 +133732,20 @@ groups:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - examples
-            - note
             - requirement_level
             - stability
           locally_overridden_fields:
             - brief
+            - note
             - sampling_relevant
         server.port:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
             - sampling_relevant
   - id: trace.db.common.minimal
@@ -133746,7 +133852,7 @@ groups:
       - name: server.address
         type: string
         brief: |
-          Name of the database host.
+          The database address specified in the client configuration.
         examples:
           - example.com
           - 10.1.2.80
@@ -133754,7 +133860,15 @@ groups:
         requirement_level: recommended
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
+          Instrumentation SHOULD set `server.address` to the database address specified in the client configuration.
+          It SHOULD NOT derive the value from the server selected for an operation.
+
+          > [!WARNING]
+          >
+          > `server.address` MUST NOT contain credentials or other sensitive information.
+
+          See [Database server address](/docs/db/database-spans.md#database-server-address) for guidance and
+          examples.
         stability: stable
       - name: server.port
         type: int
@@ -133764,10 +133878,11 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If using a port other than the default port for this DBMS and if `server.address` is set.
+          conditionally_required: |
+            If `server.address` is set and the client is configured with a single database server endpoint that uses a non-default port.
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
+          `server.port` SHOULD reflect the database port specified in the client configuration. It SHOULD NOT be derived from the server selected for an operation.
         stability: stable
     lineage:
       provenance:
@@ -133815,20 +133930,20 @@ groups:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - examples
-            - note
             - requirement_level
             - stability
           locally_overridden_fields:
             - brief
+            - note
             - sampling_relevant
         server.port:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
             - sampling_relevant
   - id: trace.db.common.query
@@ -133996,7 +134111,7 @@ groups:
       - name: server.address
         type: string
         brief: |
-          Name of the database host.
+          The database address specified in the client configuration.
         examples:
           - example.com
           - 10.1.2.80
@@ -134004,7 +134119,15 @@ groups:
         requirement_level: recommended
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
+          Instrumentation SHOULD set `server.address` to the database address specified in the client configuration.
+          It SHOULD NOT derive the value from the server selected for an operation.
+
+          > [!WARNING]
+          >
+          > `server.address` MUST NOT contain credentials or other sensitive information.
+
+          See [Database server address](/docs/db/database-spans.md#database-server-address) for guidance and
+          examples.
         stability: stable
       - name: server.port
         type: int
@@ -134014,10 +134137,11 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If using a port other than the default port for this DBMS and if `server.address` is set.
+          conditionally_required: |
+            If `server.address` is set and the client is configured with a single database server endpoint that uses a non-default port.
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
+          `server.port` SHOULD reflect the database port specified in the client configuration. It SHOULD NOT be derived from the server selected for an operation.
         stability: stable
     lineage:
       provenance:
@@ -134093,20 +134217,20 @@ groups:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - examples
-            - note
             - requirement_level
             - stability
           locally_overridden_fields:
             - brief
+            - note
             - sampling_relevant
         server.port:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
             - sampling_relevant
   - id: trace.db.common.query_and_collection
@@ -134325,7 +134449,7 @@ groups:
       - name: server.address
         type: string
         brief: |
-          Name of the database host.
+          The database address specified in the client configuration.
         examples:
           - example.com
           - 10.1.2.80
@@ -134333,7 +134457,15 @@ groups:
         requirement_level: recommended
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
+          Instrumentation SHOULD set `server.address` to the database address specified in the client configuration.
+          It SHOULD NOT derive the value from the server selected for an operation.
+
+          > [!WARNING]
+          >
+          > `server.address` MUST NOT contain credentials or other sensitive information.
+
+          See [Database server address](/docs/db/database-spans.md#database-server-address) for guidance and
+          examples.
         stability: stable
       - name: server.port
         type: int
@@ -134343,10 +134475,11 @@ groups:
           - 8080
           - 443
         requirement_level:
-          conditionally_required: If using a port other than the default port for this DBMS and if `server.address` is set.
+          conditionally_required: |
+            If `server.address` is set and the client is configured with a single database server endpoint that uses a non-default port.
         sampling_relevant: true
         note: |
-          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
+          `server.port` SHOULD reflect the database port specified in the client configuration. It SHOULD NOT be derived from the server selected for an operation.
         stability: stable
     lineage:
       provenance:
@@ -134442,20 +134575,20 @@ groups:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - examples
-            - note
             - requirement_level
             - stability
           locally_overridden_fields:
             - brief
+            - note
             - sampling_relevant
         server.port:
           source_group: registry.home.weaver.source.server.registry
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
             - sampling_relevant
   - id: trace.mcp.common.attributes

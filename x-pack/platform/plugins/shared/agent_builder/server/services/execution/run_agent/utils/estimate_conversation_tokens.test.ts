@@ -14,8 +14,17 @@ import {
 } from '@kbn/agent-builder-common';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
-import type { ProcessedConversationRound } from './prepare_conversation';
-import { estimateMessagesTokens, estimatePerRoundTokens } from './estimate_conversation_tokens';
+import type { ProcessedConversationRound } from '../../../../test_utils/timeline';
+import {
+  estimateMessagesTokens,
+  estimatePerRoundTokens as estimateTimelineTokens,
+} from './estimate_conversation_tokens';
+import { timelineFromRounds } from '../../../../test_utils/timeline';
+
+const estimatePerRoundTokens = (
+  rounds: ProcessedConversationRound[],
+  deps: Parameters<typeof estimateTimelineTokens>[1]
+) => estimateTimelineTokens(timelineFromRounds(rounds), deps);
 
 const createMockToolManager = (
   summarizers: Map<

@@ -10,6 +10,7 @@ import {
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiTitle,
   EuiTabs,
   EuiTab,
@@ -24,7 +25,6 @@ import { useQuery } from '@kbn/react-query';
 import type { Conversation } from '@kbn/agent-builder-common';
 import type { ConversationTemplateTabDefinition } from '@kbn/agent-builder-browser';
 import { BUILTIN_TAB_IDS } from '@kbn/agent-builder-browser';
-import { createPublicAttachmentContract, type AttachmentsService } from '../services/attachments';
 import type { ConversationsService } from '../services/conversations/conversations_service';
 import type { ConversationTemplatesService } from '../services/conversation_templates';
 import { useConversation } from '../application/hooks/use_conversation';
@@ -60,11 +60,13 @@ const buildTabs = (
 
 interface FlyoutFrameProps {
   titleId: string;
+  header?: React.ReactNode;
+  footer?: React.ReactNode;
   tabs?: React.ReactNode;
   children: React.ReactNode;
 }
 
-const FlyoutFrame = ({ titleId, tabs, children }: FlyoutFrameProps) => {
+const FlyoutFrame = ({ titleId, header, footer, tabs, children }: FlyoutFrameProps) => {
   const { euiTheme } = useEuiTheme();
 
   // Align the selected-tab underline with the flyout header border.
@@ -74,10 +76,14 @@ const FlyoutFrame = ({ titleId, tabs, children }: FlyoutFrameProps) => {
 
   return (
     <>
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="xs">
-          <h4 id={titleId}>{FLYOUT_TITLE}</h4>
-        </EuiTitle>
+      <EuiFlyoutHeader hasBorder={Boolean(tabs)}>
+        {header ? (
+          <div id={titleId}>{header}</div>
+        ) : (
+          <EuiTitle size="xs">
+            <h4 id={titleId}>{FLYOUT_TITLE}</h4>
+          </EuiTitle>
+        )}
         {tabs && (
           <EuiTabs css={tabsStyles} bottomBorder={false}>
             {tabs}
@@ -85,22 +91,32 @@ const FlyoutFrame = ({ titleId, tabs, children }: FlyoutFrameProps) => {
         )}
       </EuiFlyoutHeader>
       <EuiFlyoutBody>{children}</EuiFlyoutBody>
+      {footer && (
+        <EuiFlyoutFooter
+          css={{
+            backgroundColor: euiTheme.colors.backgroundBasePlain,
+            borderBlockStart: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+          }}
+        >
+          {footer}
+        </EuiFlyoutFooter>
+      )}
     </>
   );
 };
 
 export interface ConversationDetailsFlyoutContentProps {
+  isOpenedFromChat: boolean;
   conversation: Conversation;
   conversationTemplatesService: ConversationTemplatesService;
-  attachmentsService: AttachmentsService;
   titleId: string;
 }
 
 /** Presentational only — renders whatever conversation it is given; not responsible for data fetching. */
 export const ConversationDetailsFlyoutContent = ({
+  isOpenedFromChat,
   conversation,
   conversationTemplatesService,
-  attachmentsService,
   titleId,
 }: ConversationDetailsFlyoutContentProps) => {
   const [selectedTabId, setSelectedTabId] = useState<string | undefined>(undefined);
@@ -115,31 +131,39 @@ export const ConversationDetailsFlyoutContent = ({
   );
   const effectiveSelectedTabId = selectedTabId ?? tabs[0]?.id;
   const selectedTab = tabs.find((entry) => entry.id === effectiveSelectedTabId);
-  const publicAttachmentsService = useMemo(
-    () => createPublicAttachmentContract({ attachmentsService }),
-    [attachmentsService]
-  );
   // Render as a component so registered tabs can use hooks.
   const SelectedTabContent = selectedTab?.content;
+  const definition = conversation.template_id
+    ? conversationTemplatesService.getTemplateUIDefinition(conversation.template_id)
+    : undefined;
+  const Header = definition?.detailsFlyout?.header;
+  const Footer = definition?.detailsFlyout?.footer;
+
+  const shouldRenderTabs = tabs.length > 1;
 
   return (
     <FlyoutFrame
       titleId={titleId}
-      tabs={tabs.map((entry) => (
-        <EuiTab
-          key={entry.id}
-          isSelected={entry.id === effectiveSelectedTabId}
-          onClick={() => setSelectedTabId(entry.id)}
-        >
-          {entry.label}
-        </EuiTab>
-      ))}
+      header={Header && <Header conversation={conversation} isOpenedFromChat={isOpenedFromChat} />}
+      footer={Footer && <Footer conversation={conversation} isOpenedFromChat={isOpenedFromChat} />}
+      tabs={
+        shouldRenderTabs &&
+        tabs.map((entry) => (
+          <EuiTab
+            key={entry.id}
+            isSelected={entry.id === effectiveSelectedTabId}
+            onClick={() => setSelectedTabId(entry.id)}
+          >
+            {entry.label}
+          </EuiTab>
+        ))
+      }
     >
       {selectedTab && SelectedTabContent && (
         <SelectedTabContent
           key={selectedTab.id}
           conversation={conversation}
-          attachmentsService={publicAttachmentsService}
+          isOpenedFromChat={isOpenedFromChat}
         />
       )}
     </FlyoutFrame>
@@ -150,7 +174,6 @@ export interface ConversationDetailsFlyoutSnapshotProps {
   conversationId: string;
   conversationsService: ConversationsService;
   conversationTemplatesService: ConversationTemplatesService;
-  attachmentsService: AttachmentsService;
   titleId: string;
 }
 
@@ -159,7 +182,6 @@ export const ConversationDetailsFlyoutSnapshot = ({
   conversationId,
   conversationsService,
   conversationTemplatesService,
-  attachmentsService,
   titleId,
 }: ConversationDetailsFlyoutSnapshotProps) => {
   const {
@@ -191,9 +213,9 @@ export const ConversationDetailsFlyoutSnapshot = ({
 
   return (
     <ConversationDetailsFlyoutContent
+      isOpenedFromChat={false}
       conversation={conversation}
       conversationTemplatesService={conversationTemplatesService}
-      attachmentsService={attachmentsService}
       titleId={titleId}
     />
   );
@@ -209,11 +231,14 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
     prefix: 'agentBuilderConversationDetailsFlyoutTitle',
   });
   const { conversation, isLoading } = useConversation();
-  const { conversationTemplatesService, attachmentsService } = useAgentBuilderServices();
+  const { conversationTemplatesService } = useAgentBuilderServices();
 
   return (
     <EuiFlyout
       onClose={onClose}
+      session="never"
+      flyoutMenuDisplayMode="always"
+      flyoutMenuProps={{}}
       size="s"
       type="push"
       paddingSize="m"
@@ -223,9 +248,9 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
     >
       {conversation ? (
         <ConversationDetailsFlyoutContent
+          isOpenedFromChat
           conversation={conversation}
           conversationTemplatesService={conversationTemplatesService}
-          attachmentsService={attachmentsService}
           titleId={titleId}
         />
       ) : (

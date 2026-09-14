@@ -518,6 +518,81 @@ describe('InferenceChatModel', () => {
         })
       );
     });
+
+    it('forwards reasoning per-call option to chatComplete', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question', {
+        reasoning: { effort: 'low' },
+      });
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          reasoning: { effort: 'low' },
+        })
+      );
+    });
+
+    it('omits reasoning from chatComplete when not set', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question');
+
+      expect(chatComplete.mock.calls[0][0].reasoning).toBeUndefined();
+    });
+
+    it('forwards constructor-level reasoning to chatComplete', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        reasoning: { effort: 'medium' },
+      });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question');
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          reasoning: { effort: 'medium' },
+        })
+      );
+    });
+
+    it('per-call reasoning takes precedence over constructor-level reasoning', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        reasoning: { effort: 'medium' },
+      });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question', {
+        reasoning: { effort: 'high' },
+      });
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          reasoning: { effort: 'high' },
+        })
+      );
+    });
+
+    it('forwards reasoning via withConfig', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector }).withConfig({
+        reasoning: { effort: 'none' },
+      });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question');
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          reasoning: { effort: 'none' },
+        })
+      );
+    });
   });
 
   describe('Response handling', () => {

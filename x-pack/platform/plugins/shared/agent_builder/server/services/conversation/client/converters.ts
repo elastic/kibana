@@ -12,7 +12,9 @@ import type {
   ConversationRoundStep,
   ConversationWithoutRounds,
   CurrentUser,
+  RoundInput,
   ToolResult,
+  TimelineEvent,
   UserIdAndName,
   SerializedMetadataValue,
   ConversationParentRelation,
@@ -59,7 +61,12 @@ import {
   needsMigration,
   applyAttachmentRefsToRounds,
 } from './migrate_attachments';
-import { isRoundDerivedEventId, roundsToEvents } from './rounds_to_events';
+import {
+  isRoundDerivedEventId,
+  parseExecutionId,
+  roundToEvents,
+  roundsToEvents,
+} from './rounds_to_events';
 import { eventsToRounds } from './events_to_rounds';
 
 export type Document = Omit<
@@ -80,14 +87,45 @@ export const isConversationDocument = (hit: Partial<Document>): hit is Document 
   );
 };
 
+/** True when a round's stored timeline spans more than one execution (a HITL resume). */
+const hasResumeExecution = (roundId: string, storedEvents: TimelineEvent[]): boolean =>
+  storedEvents.some((event) => {
+    const execution = event.execution_id ? parseExecutionId(event.execution_id) : undefined;
+    return execution?.roundId === roundId && execution.index > 0;
+  });
+
 /**
- * Rebuilds the stored timeline on write: round events keep their order, and additive events
- * (like errors) get slotted in by timestamp. That keeps a future error where it actually
- * happened instead of dumped at the end.
+ * Rebuilds round-derived events on a rounds-path write, preserving resumed executions and additive
+ * events. Only attachment refs are refreshed: the folded message belongs to the resume, not the
+ * original user message. Undefined refs mean no update; an empty array explicitly clears them.
  */
-const reconcileEvents = (merged: Conversation) => {
-  const roundDerived = roundsToEvents(merged);
-  const additive = (merged.events ?? []).filter((event) => !isRoundDerivedEventId(event.id));
+const reconcileEvents = (merged: Conversation): TimelineEvent[] => {
+  const stored = merged.events ?? [];
+  const additive = stored.filter((event) => !isRoundDerivedEventId(event.id));
+
+  const roundDerived: TimelineEvent[] = [];
+  for (const round of merged.rounds) {
+    const storedForRound = stored.filter(
+      (event) => event.id.startsWith(`${round.id}::`) && isRoundDerivedEventId(event.id)
+    );
+    if (hasResumeExecution(round.id, storedForRound)) {
+      const userMessageId = `${round.id}::user_message`;
+      roundDerived.push(
+        ...storedForRound.map((event) => {
+          if (event.id !== userMessageId || !round.input.attachment_refs) {
+            return event;
+          }
+          const data = event.data as RoundInput;
+          return {
+            ...event,
+            data: { ...data, attachment_refs: round.input.attachment_refs },
+          } as TimelineEvent;
+        })
+      );
+    } else {
+      roundDerived.push(...roundToEvents(round, merged));
+    }
+  }
 
   const events = [...roundDerived];
   for (const event of additive) {
@@ -488,7 +526,7 @@ export const updateConversation = ({
     };
   }
 
-  if (!isEventsNativeVersion(merged.schema_version)) {
+  if (!isEventsNativeVersion(merged.schema_version) || safeUpdate.rounds === undefined) {
     return merged;
   }
 
