@@ -127,8 +127,6 @@ describe('useDashboardMenuItems', () => {
     });
 
     test('does not include Schedule export when only exportJson and scheduledReports are available', () => {
-      const { api } = buildMockDashboardApi({ savedObjectId: 'test-id' });
-
       jest
         .mocked(shareService!.availableIntegrations)
         .mockImplementation((_objectType: string, groupId?: string): ShareActionIntents[] => {
@@ -159,16 +157,10 @@ describe('useDashboardMenuItems', () => {
       const { result } = renderHook(
         () =>
           useDashboardMenuItems({
-            isLabsShown: false,
-            setIsLabsShown: jest.fn(),
-            maybeRedirect: jest.fn(),
+            redirectTo: jest.fn(),
           }),
         {
-          wrapper: ({ children }) => (
-            <I18nProvider>
-              <DashboardContext.Provider value={api}>{children}</DashboardContext.Provider>
-            </I18nProvider>
-          ),
+          wrapper: dashboardContextWrapper({ savedObjectId: 'test-id' }),
         }
       );
 
@@ -188,8 +180,6 @@ describe('useDashboardMenuItems', () => {
     });
 
     test('includes Schedule export when a schedulable export integration is available', () => {
-      const { api } = buildMockDashboardApi({ savedObjectId: 'test-id' });
-
       jest
         .mocked(shareService!.availableIntegrations)
         .mockImplementation((_objectType: string, groupId?: string): ShareActionIntents[] => {
@@ -227,16 +217,10 @@ describe('useDashboardMenuItems', () => {
       const { result } = renderHook(
         () =>
           useDashboardMenuItems({
-            isLabsShown: false,
-            setIsLabsShown: jest.fn(),
-            maybeRedirect: jest.fn(),
+            redirectTo: jest.fn(),
           }),
         {
-          wrapper: ({ children }) => (
-            <I18nProvider>
-              <DashboardContext.Provider value={api}>{children}</DashboardContext.Provider>
-            </I18nProvider>
-          ),
+          wrapper: dashboardContextWrapper({ savedObjectId: 'test-id' }),
         }
       );
 

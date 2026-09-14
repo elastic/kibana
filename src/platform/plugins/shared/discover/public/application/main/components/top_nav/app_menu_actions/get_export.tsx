@@ -150,7 +150,7 @@ export const getExportAppMenuItem = ({
 
   const exportIntegrations = share.availableIntegrations('search', 'export');
   const canScheduleExport = exportIntegrations.some(
-    (item) =>
+    (item: ShareActionIntents) =>
       isShareIntegration(item) &&
       (item.id === 'pdfReports' || item.id === 'imageReports' || item.id === 'csvReports')
   );
@@ -170,7 +170,7 @@ export const getExportAppMenuItem = ({
   const exportDerivativeItems: DiscoverAppMenuPopoverItem[] = share
     .availableIntegrations('search', 'exportDerivatives')
     .filter(isShareIntegration)
-    .filter((item) => item.id !== 'scheduledReports' || canScheduleExport)
+    .filter((item: ShareIntegration) => item.id !== 'scheduledReports' || canScheduleExport)
     .map(({ id: integrationId }: ShareIntegration) => ({
       ...getShareExportMenuItemProps(integrationId),
       id: integrationId,
