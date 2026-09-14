@@ -1,7 +1,11 @@
 version: '1'
 name: 'Context Engine Feedback Analysis'
 description: 'Analyzes the signals for one Context Engine AI index and records the improvements it proposes.'
-enabled: true
+# Installed disabled, then enabled by Context Engine with the request of whoever turned analysis
+# on for the AI index. Installing only writes the workflow document; the enable is what registers
+# the scheduled trigger with Task Manager and mints the API key the runs execute under, so a
+# schedule has no identity to run as until then.
+enabled: false
 tags:
   - context-engine
   - feedback-loop

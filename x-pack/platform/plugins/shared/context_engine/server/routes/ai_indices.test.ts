@@ -852,7 +852,22 @@ describe('ai indices routes', () => {
       expect(scheduleService.reconcile).toHaveBeenCalledWith({
         aiIndexId: 'customer_support',
         feedbackAnalysis,
+        request: expect.anything(),
       });
+    });
+
+    it('reconciles with the caller, whose credentials the scheduled runs use', async () => {
+      aiIndexService.setFeedbackAnalysis.mockResolvedValue(feedbackAnalysis);
+      aiIndexService.get.mockResolvedValue({ ...aiIndexItem, feedback_analysis: feedbackAnalysis });
+
+      await callRoute('PUT', aiIndexFeedbackAnalysisPath, {
+        params: { aiIndexId: 'customer_support' },
+        body: feedbackAnalysis,
+        headers: { authorization: 'Basic whoever-turned-it-on' },
+      });
+
+      const [{ request }] = scheduleService.reconcile.mock.calls[0];
+      expect(request.headers.authorization).toBe('Basic whoever-turned-it-on');
     });
 
     it('reconciles against the stored document, not the request body', async () => {
@@ -881,6 +896,7 @@ describe('ai indices routes', () => {
       expect(scheduleService.reconcile).toHaveBeenCalledWith({
         aiIndexId: 'customer_support',
         feedbackAnalysis,
+        request: expect.anything(),
       });
     });
 
@@ -895,6 +911,7 @@ describe('ai indices routes', () => {
 
       expect(scheduleService.reconcile).toHaveBeenCalledWith({
         aiIndexId: 'customer_support',
+        request: expect.anything(),
       });
     });
 

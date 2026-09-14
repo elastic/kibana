@@ -28,7 +28,10 @@ import type {
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
 import { registerSignalRoutes } from './routes/signals';
-import type { FeedbackAnalysisScheduleService } from './feedback_analysis/schedule';
+import type {
+  FeedbackAnalysisScheduleService,
+  WorkflowEnablementApi,
+} from './feedback_analysis/schedule';
 import { createFeedbackAnalysisScheduleService } from './feedback_analysis/schedule';
 import { AiIndexService } from './ai_indices/service';
 import { AiIndexRegistry } from './ai_indices/registry';
@@ -61,6 +64,8 @@ export class ContextEnginePlugin
   private createImprovementsService?: (esClient: ElasticsearchClient) => ImprovementsService;
   private esClient?: ElasticsearchClient;
   private scheduleService?: FeedbackAnalysisScheduleService;
+  /** Captured at setup because the schedule service, built at start, enables workflows with it. */
+  private workflowsManagement?: WorkflowEnablementApi;
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();
   private analyticsService?: ContextEngineAnalyticsService;
@@ -74,6 +79,8 @@ export class ContextEnginePlugin
     setupDeps: ContextEngineSetupDependencies
   ): ContextEnginePluginSetup {
     registerFeatures({ features: setupDeps.features });
+
+    this.workflowsManagement = setupDeps.workflowsManagement?.management;
 
     this.analyticsService = new ContextEngineAnalyticsService(
       coreSetup.analytics,
@@ -254,6 +261,7 @@ export class ContextEnginePlugin
       logger: this.logger,
       getManagedWorkflowsClient: () =>
         startDeps.workflowsExtensions.initManagedWorkflowsClient(CONTEXT_ENGINE_WORKFLOW_OWNER),
+      ...(this.workflowsManagement ? { workflowsManagement: this.workflowsManagement } : {}),
     });
 
     const aiIndexService = this.aiIndexService;

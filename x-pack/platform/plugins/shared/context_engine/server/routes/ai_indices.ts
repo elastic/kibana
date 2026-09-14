@@ -8,7 +8,13 @@
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import type { ElasticsearchClient, IRouter, KibanaResponseFactory, Logger } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  IRouter,
+  KibanaRequest,
+  KibanaResponseFactory,
+  Logger,
+} from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
 import {
   AI_INDEX_API_VERSION,
@@ -309,12 +315,13 @@ export const registerAiIndexRoutes = ({
   getScheduleService: () => FeedbackAnalysisScheduleService;
   getActions: () => Promise<ActionsPluginStart>;
 }) => {
-  const reconcileSchedule = async (aiIndexId: string) => {
+  const reconcileSchedule = async (aiIndexId: string, request: KibanaRequest) => {
     try {
       const aiIndex = await getAiIndexService().get(aiIndexId);
       await getScheduleService().reconcile({
         aiIndexId,
         ...(aiIndex.feedback_analysis ? { feedbackAnalysis: aiIndex.feedback_analysis } : {}),
+        request,
       });
     } catch (error) {
       logger.warn(
@@ -358,7 +365,7 @@ export const registerAiIndexRoutes = ({
           });
           await getAiIndexService().create(id, properties);
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.CREATE, id }));
-          await reconcileSchedule(id);
+          await reconcileSchedule(id, request);
           const body: CreateAiIndexResponse = { status: 'created' };
           return response.created({ body });
         } catch (error) {
@@ -405,7 +412,7 @@ export const registerAiIndexRoutes = ({
           const putAction =
             status === 'created' ? AiIndexAuditAction.CREATE : AiIndexAuditAction.UPDATE;
           auditLogger.log(aiIndexAuditEvent({ action: putAction, id: aiIndexId }));
-          await reconcileSchedule(aiIndexId);
+          await reconcileSchedule(aiIndexId, request);
           const body: PutAiIndexResponse = { status };
           return status === 'created' ? response.created({ body }) : response.ok({ body });
         } catch (error) {
@@ -603,7 +610,7 @@ export const registerAiIndexRoutes = ({
             request.body
           );
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.UPDATE, id: aiIndexId }));
-          await reconcileSchedule(aiIndexId);
+          await reconcileSchedule(aiIndexId, request);
           const body: PutAiIndexFeedbackAnalysisResponse = { feedback_analysis: feedbackAnalysis };
           return response.ok({ body });
         } catch (error) {

@@ -21,10 +21,14 @@ export interface ContextEngineFeedbackAnalysisWorkflowTemplateValues
   intervalMinutes: number;
 }
 
+// `restorable` rather than `enforced`: an instance is enabled after install, by the request of
+// whoever turned analysis on, and that enablement is what holds its Task Manager trigger. Enforced
+// enablement reapplies the template's `enabled` on every managed update, which would unschedule a
+// running instance the next time this definition ships a new version.
 const CONTEXT_ENGINE_WORKFLOW_MANAGEMENT = {
   lifecycle: 'dynamic',
   versionStrategy: 'auto',
-  enablement: 'enforced',
+  enablement: 'restorable',
 } as const;
 
 const renderTemplate = (template: string, values: Record<string, string | number>): string =>

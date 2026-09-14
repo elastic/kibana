@@ -61,8 +61,9 @@ record:
 }
 ```
 
-- `enabled` is *desired* state. A schedule also needs credentials bound to it,
-  so the scheduler stays authoritative for whether analysis is really running.
+- `enabled` is *desired* state, reconciled onto the scheduler after the write.
+  Enabling it schedules the analysis under the credentials of whoever asked, so
+  the scheduler stays authoritative for whether analysis is really running.
 - `agent_id` is the Agent Builder agent that analyzes this index's signals. It
   is also the agent the interactive "Analyze & improve" hand-off opens.
 - `schedule.interval` defaults to `24h` and must be at least 15 minutes. Every
@@ -289,12 +290,28 @@ address the same instance whichever space the write came from.
 The workflow carries a `concurrency` guard keyed on the AI index with
 `strategy: drop`, so two runs for one index never overlap.
 
-`enablement: 'enforced'` makes the workflow instance's existence the desired
-state, so reconciliation is install-or-uninstall: turning analysis off removes
-the instance. Changing the interval reinstalls, since a scheduled trigger's
-interval is written into the YAML at install time. Everything else about a run —
-which agent, which signals, which actions — is read per run through the context
-step.
+Turning analysis on installs the instance and then enables it; turning it off
+uninstalls it. Both steps matter, because installing a managed workflow only
+writes its document: enabling is what registers the scheduled trigger with Task
+Manager, under an API key minted from the request that enabled it. That is where
+the owner identity above comes from, and why the template ships `enabled: false`
+— an installed-but-never-enabled instance would look configured and never run.
+Disabling needs no such care, since uninstalling drops the trigger along with the
+document.
+
+Enabling an already-enabled instance re-mints that key, so every write of the
+configuration reconciles rather than only the writes that change it. The schedule
+then belongs to whoever saved it last instead of expiring with the account that
+first turned it on.
+
+The definition is `enablement: 'restorable'` rather than `'enforced'` for the
+same reason: enforced enablement reapplies the template's `enabled` on every
+managed update, which would unschedule a running instance the next time this
+definition ships a new version.
+
+Changing the interval reinstalls, since a scheduled trigger's interval is written
+into the YAML at install time. Everything else about a run — which agent, which
+signals, which actions — is read per run through the context step.
 
 Reconciliation is best-effort and happens after the configuration is stored. A
 failure to reconcile does not fail the configuration write.
