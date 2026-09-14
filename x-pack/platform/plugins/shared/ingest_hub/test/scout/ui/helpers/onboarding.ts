@@ -14,6 +14,7 @@ import { test } from '../fixtures';
 export const SERVICES_STEP_SESSION_KEY = 'onboarding.aws.servicesStep';
 export const SERVICE_SETTINGS_SESSION_KEY = 'onboarding.aws.serviceSettingsStep';
 export const ECF_LAUNCH_STEP_SESSION_KEY = 'onboarding.aws.ecfLaunchStep';
+export const AUTHENTICATE_AND_DEPLOY_SESSION_KEY = 'onboarding.aws.authenticateAndDeployStep';
 export const DETECT_AND_REVIEW_SESSION_KEY = 'onboarding.aws.detectAndReviewStep';
 
 // Derives the root test-subj for a step from its id, matching the convention used in each step's
@@ -43,6 +44,11 @@ export async function navigateToOnboardingStep(
     instances?: unknown[];
     /** Optional ECF launch step to seed — sets the post-launch state without clicking the button. */
     ecfLaunchStep?: PersistedEcfLaunchStep;
+    /** Optional authenticate-and-deploy step to seed (connector or static-keys auth). */
+    authenticateAndDeployStep?: {
+      connectorId?: string;
+      authMethod?: 'identity_federation' | 'static_keys';
+    };
     /** Seed detectAndReviewStep session state to simulate post-deploy conditions. */
     detectAndReviewStep?: {
       policyIdsByInstance?: Record<string, string>;
@@ -56,6 +62,7 @@ export async function navigateToOnboardingStep(
     serviceVars = {},
     instances,
     ecfLaunchStep,
+    authenticateAndDeployStep,
     detectAndReviewStep,
   } = opts;
   await browserAuth.loginAsAdmin();
@@ -67,10 +74,12 @@ export async function navigateToOnboardingStep(
       vars,
       insts,
       ecfStep,
+      authStep,
       detectReview,
       servicesKey,
       settingsKey,
       ecfStepKey,
+      authStepKey,
       detectReviewKey,
     }: {
       ids: string[];
@@ -78,12 +87,14 @@ export async function navigateToOnboardingStep(
       vars: Record<string, ServiceVars>;
       insts: unknown[] | undefined;
       ecfStep: PersistedEcfLaunchStep | undefined;
+      authStep: { connectorId?: string; authMethod?: string } | undefined;
       detectReview:
         | { policyIdsByInstance?: Record<string, string>; serviceStatuses?: Record<string, string> }
         | undefined;
       servicesKey: string;
       settingsKey: string;
       ecfStepKey: string;
+      authStepKey: string;
       detectReviewKey: string;
     }) => {
       sessionStorage.setItem(servicesKey, JSON.stringify({ selectedServiceIds: ids }));
@@ -92,6 +103,9 @@ export async function navigateToOnboardingStep(
       sessionStorage.setItem(settingsKey, JSON.stringify(settingsPayload));
       if (ecfStep !== undefined) {
         sessionStorage.setItem(ecfStepKey, JSON.stringify(ecfStep));
+      }
+      if (authStep !== undefined) {
+        sessionStorage.setItem(authStepKey, JSON.stringify(authStep));
       }
       if (detectReview !== undefined) {
         sessionStorage.setItem(
@@ -109,10 +123,12 @@ export async function navigateToOnboardingStep(
       vars: serviceVars,
       insts: instances,
       ecfStep: ecfLaunchStep,
+      authStep: authenticateAndDeployStep,
       detectReview: detectAndReviewStep,
       servicesKey: SERVICES_STEP_SESSION_KEY,
       settingsKey: SERVICE_SETTINGS_SESSION_KEY,
       ecfStepKey: ECF_LAUNCH_STEP_SESSION_KEY,
+      authStepKey: AUTHENTICATE_AND_DEPLOY_SESSION_KEY,
       detectReviewKey: DETECT_AND_REVIEW_SESSION_KEY,
     }
   );
