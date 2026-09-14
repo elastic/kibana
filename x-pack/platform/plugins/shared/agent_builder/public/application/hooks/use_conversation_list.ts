@@ -100,6 +100,7 @@ export const useConversationList = ({
         perPage: perPage ?? DEFAULT_CONVERSATIONS_PAGE_SIZE,
       }),
     getNextPageParam: getNextConversationPageParam,
+    enabled: !isSearching,
   });
 
   // --- unified output ----------------------------------------------------
