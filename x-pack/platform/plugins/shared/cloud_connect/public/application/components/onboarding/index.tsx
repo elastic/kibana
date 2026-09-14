@@ -13,9 +13,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageSection,
-  EuiImage,
+  EuiIllustration,
   EuiLink,
+  useEuiTheme,
 } from '@elastic/eui';
+import { arrowDeployCloud } from '@elastic/eui-illustrations';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useCloudConnectedAppContext } from '../../app_context';
@@ -28,12 +30,16 @@ interface OnboardingPageProps {
 }
 
 export const OnboardingPage: React.FC<OnboardingPageProps> = ({ onConnect }) => {
-  const { http, docLinks, hasConfigurePermission, telemetryService } =
-    useCloudConnectedAppContext();
+  const { euiTheme } = useEuiTheme();
+  const { docLinks, hasConfigurePermission, telemetryService } = useCloudConnectedAppContext();
 
   return (
-    <EuiPageSection restrictWidth={1200}>
-      <EuiFlexGroup alignItems="center" gutterSize="xl">
+    <EuiPageSection
+      restrictWidth={1200}
+      paddingSize="xl"
+      css={{ marginBlockStart: euiTheme.size.xl }}
+    >
+      <EuiFlexGroup alignItems="center" gutterSize="xl" justifyContent="spaceBetween">
         <EuiFlexItem>
           <EuiTitle size="l">
             <h1>
@@ -93,18 +99,13 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ onConnect }) => 
             </>
           )}
         </EuiFlexItem>
-        <EuiFlexItem style={{ width: 90 }} grow={false} />
-        <EuiFlexItem grow={false}>
-          <EuiImage
+        <EuiFlexItem style={{ maxWidth: 340 }}>
+          <EuiIllustration
+            type={arrowDeployCloud}
             alt={i18n.translate('xpack.cloudConnect.onboarding.illustration.alt', {
-              defaultMessage: 'Illustration for cloud data migration',
+              defaultMessage: 'Illustration for Cloud Connect',
             })}
-            src={
-              http.basePath.prepend('/plugins/kibanaReact/assets/') +
-              'illustration_cloud_migration.png'
-            }
-            size="fullWidth"
-            style={{ maxWidth: `${COLUMN_SIZE}px` }}
+            style={{ maxWidth: `${COLUMN_SIZE * 0.5}px`, marginInline: 'auto' }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
