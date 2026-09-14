@@ -153,7 +153,9 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     'matcher: scopes a policy to a single rule via tags',
     async ({ apiClient, apiServices }) => {
       await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'rule-for-scoped-policy', tags: ['notify-scoped'] } })
+        buildCreateRuleData({
+          metadata: { name: 'rule-for-scoped-policy', tags: ['notify-scoped'] },
+        })
       );
 
       const matcher = { tags: ['notify-scoped'] };
