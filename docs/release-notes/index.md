@@ -38,7 +38,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Relabel the top-level **Alerting** privilege as **Alerting V2** in the Roles UI and mark it experimental [#288163]({{kib-pull}}288163).
 * Fix the **Tracking containment** rule editor breaking when you select a data view [#289778]({{kib-pull}}289778).
 * Fix **Sync alerts** and **Extract observables** not applying when you change a case template from the sidebar [#288636]({{kib-pull}}288636).
-* Fix Alerting V2 not saving when you remove all tags from a rule [#288962]({{kib-pull}}288962).
+* Fix Alerting V2 rules from not saving when you remove all rule tags [#288962]({{kib-pull}}288962).
 
 **Dashboards and Visualizations**:
 * Fix the **Update filter** button being unreachable when the filter editor is taller than the screen [#289163]({{kib-pull}}289163).
