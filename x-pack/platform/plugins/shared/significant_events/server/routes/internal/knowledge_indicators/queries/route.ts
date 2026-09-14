@@ -11,13 +11,16 @@ import type {
   QueriesGetResponse,
   QueriesOccurrencesGetResponse,
   SignificantEventsQueriesGenerationResult,
+  StreamQuery,
 } from '@kbn/significant-events-schema';
 import {
   MAX_ID_LENGTH,
   MAX_TEXT_LENGTH,
   generatedSignificantEventQuerySchema,
+  upsertStreamQueryRequestSchema,
 } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import { deriveQueryType, MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import { sortQueryLinksForTable } from '../../../../lib/significant_events/utils';
 import { generateKIQueries } from '../../../../lib/significant_events/ki_queries_generation_service';
 import { createServerRoute } from '../../../create_server_route';
@@ -40,8 +43,13 @@ import { resolveStreamNames } from '../../../utils/resolve_stream_names';
 import type { PersistQueriesResult } from '../../../../lib/significant_events/persist_queries';
 import { persistQueries } from '../../../../lib/significant_events/persist_queries';
 import { queryFromLink } from '../../../../lib/knowledge_indicators/knowledge_indicator_client/serializers';
-import type { PromoteQueriesResult } from '../../../../lib/knowledge_indicators';
+import type {
+  KnowledgeIndicatorClient,
+  PromoteQueriesResult,
+} from '../../../../lib/knowledge_indicators';
 import { cleanupStaleEvents } from '../../../../lib/significant_events/events/cleanup_stale_events';
+import { QueryNotFoundError } from '../../../../lib/errors/query_not_found_error';
+import { validateEsqlQueryForStreamOrThrow } from '../../../../lib/significant_events/validate_esql_query';
 
 const RECONCILE_STREAM_CONCURRENCY = 3;
 // Manual repair endpoint: keep each request small so operators batch large migrations explicitly.
@@ -757,6 +765,93 @@ const persistQueriesRoute = createServerRoute({
   },
 });
 
+const upsertQueryRoute = createServerRoute({
+  endpoint: 'PUT /internal/significant_events/queries/{queryId}',
+  options: {
+    access: 'internal',
+    summary: 'Upsert a significant-events query',
+    description:
+      'Creates or updates a stored significant-events query. When `target_name` is omitted, the stream is resolved from the existing query link.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({
+      queryId: z.string().max(MAX_ID_LENGTH).describe('The identifier of the query.'),
+    }),
+    body: upsertStreamQueryRequestSchema.extend({
+      target_name: z
+        .string()
+        .min(1)
+        .max(MAX_STREAM_NAME_LENGTH)
+        .optional()
+        .describe(
+          'Optional analysis target (stream name). Required when creating a query; omitted updates resolve the target from the existing query.'
+        ),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    maintenanceService,
+  }): Promise<{ acknowledged: boolean }> => {
+    const authUser = server.core.security.authc.getCurrentUser(request);
+    const cloneApiKeysOnCreate = authUser?.authentication_type === 'api_key';
+    const scopedClients = await getScopedClients({
+      request,
+      rulesClientOptions: { cloneApiKeysOnCreate },
+    });
+    const { streamsClient, licensing } = scopedClients;
+    const {
+      path: { queryId },
+      body: { target_name: targetName, ...queryBody },
+    } = params;
+
+    await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
+
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
+    const streamName = targetName ?? (await resolveExistingQueryStreamName(kiClient, queryId));
+    const definition = await streamsClient.getStream(streamName);
+
+    validateEsqlQueryForStreamOrThrow({
+      esqlQuery: queryBody.esql.query,
+      stream: definition,
+    });
+
+    const query: StreamQuery = {
+      ...queryBody,
+      id: queryId,
+      type: deriveQueryType(queryBody.esql.query),
+    };
+    await kiClient.upsertQuery(definition, query);
+
+    return { acknowledged: true };
+  },
+});
+
+async function resolveExistingQueryStreamName(
+  kiClient: KnowledgeIndicatorClient,
+  queryId: string
+): Promise<string> {
+  // Empty stream list means "no stream filter"; include expired and unbacked so
+  // an omitted target_name can still resolve an existing query for update.
+  const [existing] = await kiClient.getQueryLinks([], {
+    queryIds: [queryId],
+    ruleUnbacked: 'include',
+    includeExpired: true,
+  });
+  if (!existing) {
+    throw new QueryNotFoundError(`Query [${queryId}] not found`);
+  }
+  return existing.stream_name;
+}
+
 export const internalKIQueriesRoutes = {
   ...promoteUnbackedQueriesRoute,
   ...demoteBackedQueriesRoute,
@@ -766,4 +861,5 @@ export const internalKIQueriesRoutes = {
   ...getDiscoveryQueriesOccurrencesRoute,
   ...generateQueriesRoute,
   ...persistQueriesRoute,
+  ...upsertQueryRoute,
 };

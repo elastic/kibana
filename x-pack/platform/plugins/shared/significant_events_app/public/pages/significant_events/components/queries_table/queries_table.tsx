@@ -202,7 +202,7 @@ export function QueriesTable() {
 
   const deleteQueryMutation = useMutation<void, Error, { queryId: string; streamName: string }>({
     mutationFn: async ({ queryId, streamName }) => {
-      await removeQuery({ queryId, streamName });
+      await removeQuery({ queryId });
     },
     onSuccess: async (_, { queryId }) => {
       await invalidateQueriesData();
