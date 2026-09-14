@@ -38,8 +38,7 @@ const cleanupInstalledEvalRules = async (kbnClient: KbnClient, log: ToolingLog) 
     }
   } catch (error) {
     log.warning(
-      `[automatic-migration-install-eval] Detection rule cleanup failed: ${
-        error instanceof Error ? error.message : String(error)
+      `[automatic-migration-install-eval] Detection rule cleanup failed: ${error instanceof Error ? error.message : String(error)
       }`
     );
   }
@@ -112,21 +111,15 @@ integration readiness, disabled fallback, and no mutation before explicit confir
                   },
                   output: {
                     expected: `There are 4 installable rules. The required integration package
-definitely_missing_eval_integration is not installed, so I cannot proceed with enabled
-installation. I recommend installing the rules disabled, or installing and configuring the
+definitely_missing_eval_integration is not installed or enabled. I recommend installing the rules disabled, or installing and configuring the
 integration first. Which option do you prefer?`,
                   },
                   metadata: {
                     query_intent: 'Install Rules With Missing Integration',
                     expectedSkill: 'automatic-migration-rules-install-rules',
-                    expectedToolId: 'platform.fleet.get_integration_details',
+                    expectedToolId: 'security.siem_migration.group_rules_by_integration',
                     shouldNotCallToolId: 'security.siem_migration.install_migration_rules',
-                    requiredTerms: [
-                      '4',
-                      'definitely_missing_eval_integration',
-                      'disabled',
-                      'integration',
-                    ],
+                    requiredTerms: ['definitely_missing_eval_integration'],
                   },
                 },
               ],

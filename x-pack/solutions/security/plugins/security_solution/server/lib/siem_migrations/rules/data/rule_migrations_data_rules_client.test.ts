@@ -835,6 +835,7 @@ describe('RuleMigrationsDataRulesClient', () => {
         })
       );
     });
+
   });
 
   describe('prepareDelete', () => {

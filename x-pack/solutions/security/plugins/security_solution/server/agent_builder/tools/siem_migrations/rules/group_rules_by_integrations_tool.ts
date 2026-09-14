@@ -77,7 +77,10 @@ Pass ids to restrict the aggregation to a selected migration-rule scope. Read-on
           };
         }
 
-        groups = await rulesClient.data.items.groupByIntegrations(migrationId, ids);
+        groups = await rulesClient.data.items.groupByIntegrations(
+          migrationId,
+          ids && ids.length > 0 ? ids : undefined
+        );
       } catch (err) {
         logger.error(`groupRulesByIntegrationsTool: failed for migration "${migrationId}": ${err}`);
         return {
@@ -86,7 +89,8 @@ Pass ids to restrict the aggregation to a selected migration-rule scope. Read-on
               tool_result_id: getToolResultId(),
               type: ToolResultType.error,
               data: {
-                message: `Failed to group migration rules by integrations for "${migrationId}": ${err?.message ?? err}`,
+                message: `Failed to group migration rules by integrations for "${migrationId}": ${err?.message ?? err
+                  }`,
               },
             },
           ],

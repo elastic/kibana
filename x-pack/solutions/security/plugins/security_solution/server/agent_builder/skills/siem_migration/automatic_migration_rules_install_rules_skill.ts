@@ -20,9 +20,10 @@ import {
   AUTOMATIC_MIGRATION_NAVIGATION_BLOCK,
   AUTOMATIC_RULE_MIGRATION_CAPABILITIES_BLOCK,
   MIGRATION_NAME_DISAMBIGUATION_BLOCK,
+  MIGRATION_STATE_FRESHNESS_BLOCK,
   MIGRATION_TYPE_DISAMBIGUATION_BLOCK,
   NAME_NEVER_ID_BLOCK,
-} from './shared/content';
+} from './rules/content';
 
 export const automaticMigrationRulesInstallRulesSkill = defineSkillType({
   id: 'automatic-migration-rules-install-rules',
@@ -46,16 +47,31 @@ ${NAME_NEVER_ID_BLOCK}
 
 ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
 
+## Mandatory Tool Sequence
+
+**Before any \`${SIEM_MIGRATION_INSTALL_RULE_MIGRATION_TOOL_ID}\` call you MUST have called
+\`${SIEM_MIGRATION_GROUP_RULES_BY_INTEGRATIONS_TOOL_ID}\`, run the Fleet readiness APIs when
+applicable (step 5), and MUST have rendered the integration readiness summary in a reply to the
+user.** Do NOT call \`${SIEM_MIGRATION_INSTALL_RULE_MIGRATION_TOOL_ID}\` without them.
+
+A user pre-confirmation waives only the step 8 enabled-state question. It never waives steps 4, 5
+(when applicable), or 7. If you have not run the readiness preflight, you are not ready to install.
+Do not skip it.
+
+${MIGRATION_STATE_FRESHNESS_BLOCK}
+
 ## Available tools
 
-- \`security.siem_migration.get_all_rule_migration_stats\` — resolve migration name to id.
-- \`security.siem_migration.get_rule_migration_stats\` — verify a pasted id and inspect task state.
-- \`security.siem_migration.get_rule_migration_translation_stats\` — authoritative installable and missing-index counts.
-- \`security.siem_migration.get_migration_rules\` — resolve titles to internal item ids and retain up to 3 custom rules for the result sample.
-- \`security.siem_migration.group_rules_by_integrations\` — migration-scoped integration groups with installed/not-installed rule counts. A multi-integration rule appears in every matching group.
-- \`execute_api\` (Kibana target) — call Fleet APIs directly to check integration readiness (see step 5).
-- \`security.build_redirect_url\` — build space/base-path-safe Detection Rule links.
-- \`security.siem_migration.install_migration_rules\` — install the selected or all installable rules.
+- \`${SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID}\` — resolve migration name to id.
+- \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\` — verify a pasted id and inspect task state.
+- \`${SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID}\` — authoritative installable and missing-index counts.
+- \`${SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID}\` — resolve titles to internal item ids and retain up to 3 custom rules for the result sample.
+- \`${SIEM_MIGRATION_GROUP_RULES_BY_INTEGRATIONS_TOOL_ID}\` — migration-scoped integration groups with installed/not-installed rule counts. A multi-integration rule appears in every matching group.
+- \`execute_api\` (target: \`kibana\`) — call Fleet APIs directly to check integration readiness:
+  - \`elastic-package-manager-epm.get-fleet-epm-packages-installed\` — list installed Fleet packages.
+  - \`fleet-package-policies.get-fleet-package-policies\` — list package policies with input enabled-state.
+- \`${SECURITY_BUILD_REDIRECT_URL_TOOL_ID}\` — build space/base-path-safe Detection Rule links.
+- \`${SIEM_MIGRATION_INSTALL_RULE_MIGRATION_TOOL_ID}\` — install the selected or all installable rules.
 
 ## Workflow
 
@@ -67,13 +83,29 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
 3. Resolve the install scope:
    - Specific titles: call \`get_migration_rules\`, resolve every title to its migration item id,
      show the exact selection, and pass those ids to later grouping and installation calls.
-   - All installable rules: omit ids when installing. The list endpoint forces
+   - All installable rules: **do not pass \`ids\` at all** — omit the field entirely. Never pass
+     \`ids: []\`; an empty array matches zero documents. The list endpoint forces
      \`isEligibleForTranslation: true\`, so any displayed list is illustrative and may omit
      non-translation-eligible but installable building-block rules.
 4. Call \`group_rules_by_integrations\` with the migration id and the selected item ids when the
-   scope is explicit; omit ids for all rules. Use \`not_installed_rules\` to identify integration
+   scope is explicit; omit \`ids\` entirely for all rules (never pass \`ids: []\`). Use \`not_installed_rules\` to identify integration
    requirements that remain relevant to installation. Report \`without_integrations\` separately.
-   Present the results as a table:
+
+   - If \`groups\` is empty: state "no inferred integrations were found for this scope" and skip
+     step 5. Proceed directly to step 6.
+   - If \`groups\` is non-empty: present the results as a table and continue to step 5.
+
+
+5. Check integration readiness using Fleet APIs via \`execute_api\` (target: \`kibana\`).
+   Only run this step when step 4 returned non-empty \`groups\`.
+
+   - Call \`elastic-package-manager-epm.get-fleet-epm-packages-installed\`. Each item returns
+     \`{ name, status, dataStreams[] }\`. A package is installed when its \`name\` appears in the
+     response. If the call returns a 403, report readiness as unknown for the Installed dimension.
+   - Call \`fleet-package-policies.get-fleet-package-policies\`. An integration is enabled when at
+     least one policy's \`inputs\` entry has \`enabled: true\` and its \`policy_template\` (or
+     \`type\`) matches the integration name. For single-template packages, any enabled input counts.
+     On 403, mark all \`is_enabled\` values as unknown.
 
    | Integration | Rules Impacted | Installed | Enabled |
    |---|---|---|---|
@@ -83,18 +115,8 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
    "No integration" using \`without_integrations\` counts; leave Installed and Enabled blank for
    that row.
 
-5. Check integration readiness using Fleet APIs:
-
-   - Call the Fleet "list installed packages" API. Each item returns \`{ name, status, dataStreams[] }\`.
-     A package is installed when its \`name\` appears in the response. If the call returns a 403,
-     report readiness as unknown and skip to step 6.
-   - Call the Fleet "list package policies" API. An integration is enabled when at least one
-     policy's \`inputs\` entry has \`enabled: true\` and its \`policy_template\` (or \`type\`)
-     matches the integration name. For single-template packages, any enabled input counts. On 403,
-     mark all \`is_enabled\` values as unknown.
-
-   Use the combined results to populate the Installed and Enabled columns in the step 4 table.
    Only mark ✅ when the API confirms it — never invent readiness.
+   A Fleet call returned 403 → state that readiness is unknown for that dimension.
 
 6. Present this pre-install checklist:
    - Migration and exact installable count resolved.
