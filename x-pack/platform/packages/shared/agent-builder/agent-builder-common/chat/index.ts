@@ -142,6 +142,8 @@ export {
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
   isConversationIdSetEvent,
+  isExecutionStartedEvent,
+  isExecutionTerminatedEvent,
   isPromptRequestEvent,
   type CompactionStartedEvent,
   type CompactionStartedEventData,
