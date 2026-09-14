@@ -9,6 +9,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { UpdateWorkerResponse } from '@kbn/alertzero-common';
 import {
   ListWorkersResponse,
+  touchesWorkerSettings,
   type UpdateWorkerRequestBody,
   type Worker,
 } from '@kbn/alertzero-common';
@@ -143,7 +144,7 @@ export class WorkersService {
       return { outcome: 'not-found' };
     }
 
-    const touchesSettings = patch.autonomyLevel != null || patch.scheduleInterval != null;
+    const touchesSettings = touchesWorkerSettings(patch);
     const managedWorkflows = await this.requireManagedWorkflows();
     const management = this.requireManagement();
     let status = await managedWorkflows.getWorkflowStatus(registration.id, {
@@ -166,7 +167,7 @@ export class WorkersService {
       const currentValues = state?.templateValues
         ? registration.settings.migrate(state.templateValues).values
         : registration.settings.createDefaultValues();
-      const applied = registration.settings.applyPatch(currentValues, patch);
+      const applied = registration.settings.applyPatch(currentValues, patch.settings ?? {});
       if ('rejected' in applied) {
         return { outcome: 'rejected', what: applied.rejected };
       }

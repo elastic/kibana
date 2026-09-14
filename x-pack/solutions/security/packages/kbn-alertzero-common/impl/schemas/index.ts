@@ -37,10 +37,15 @@ export {
   WatchTriggersSettings,
   WatchWorker,
   WatchWorkerAttachment,
+  AnalysisWindowDays,
+  RuleTuningWorkerSettings,
+  ScheduledWorkerSettings,
+  SharedOnlyWorkerSettings,
   Worker,
   WorkerRunState,
   WorkerScheduleInterval,
   WorkerSettings,
+  WorkerSettingsWrite,
 } from './components/watch_settings.gen';
 
 export {

@@ -38,6 +38,12 @@ export const WorkerScheduleInterval = lazySchema(() =>
 export type WorkerScheduleInterval = z.infer<typeof WorkerScheduleInterval>;
 
 /**
+ * How many days of alerts feed Rule Tuning analysis. Matches the tuning sweep's analysis_window_days input. Omitted for every Worker except Rule Tuning.
+ */
+export const AnalysisWindowDays = lazySchema(() => z.number().int().min(1).max(30));
+export type AnalysisWindowDays = z.infer<typeof AnalysisWindowDays>;
+
+/**
  * Run health of a long-running worker, shown instead of a timestamp when not ok. Workers only — a skill is invoked rather than run continuously, so it has no health of its own.
  */
 export const WorkerRunState = lazySchema(() => z.enum(['ok', 'paused', 'degraded', 'unavailable']));
@@ -287,21 +293,80 @@ export const WatchSettings = lazySchema(() =>
 export type WatchSettings = z.infer<typeof WatchSettings>;
 
 /**
- * Durable per-Worker settings stored as managed template values.
+ * Complete settings for a Worker that only carries the shared autonomy dial. Watch-owned custom fields are absent by construction.
+ */
+export const SharedOnlyWorkerSettings = lazySchema(() =>
+  z
+    .object({
+      workerId: z.string(),
+      autonomy: WatchAutonomyLevel,
+    })
+    .strict()
+);
+export type SharedOnlyWorkerSettings = z.infer<typeof SharedOnlyWorkerSettings>;
+
+/**
+ * Complete settings for a schedule-driven Worker with no Watch-owned custom fields.
+ */
+export const ScheduledWorkerSettings = lazySchema(() =>
+  z
+    .object({
+      workerId: z.string(),
+      autonomy: WatchAutonomyLevel,
+      scheduleInterval: WorkerScheduleInterval,
+    })
+    .strict()
+);
+export type ScheduledWorkerSettings = z.infer<typeof ScheduledWorkerSettings>;
+
+/**
+ * Complete Detection Watch / Rule Tuning settings. Owned by Detection Watch; CWL reviews the field list and UI, the Watch team owns the values.
+ */
+export const RuleTuningWorkerSettings = lazySchema(() =>
+  z
+    .object({
+      workerId: z.literal('system-security-detection-rule-tuning'),
+      autonomy: WatchAutonomyLevel,
+      scheduleInterval: WorkerScheduleInterval,
+      analysisWindowDays: AnalysisWindowDays,
+    })
+    .strict()
+);
+export type RuleTuningWorkerSettings = z.infer<typeof RuleTuningWorkerSettings>;
+
+/**
+ * Durable per-Worker settings stored as managed template values. Shared fields plus any Watch-owned custom fields that Worker declares. Unknown keys are rejected. Completeness for a given Worker is the matching SharedOnlyWorkerSettings, ScheduledWorkerSettings, or RuleTuningWorkerSettings schema.
  */
 export const WorkerSettings = lazySchema(() =>
-  z.object({
-    workerId: z.string(),
-    autonomy: WatchAutonomyLevel,
-    /**
-     * Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to render the interval control.
-     */
-    scheduleInterval: WorkerScheduleInterval.optional().describe(
-      'Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to render the interval control.'
-    ),
-  })
+  z
+    .object({
+      workerId: z.string(),
+      autonomy: WatchAutonomyLevel,
+      /**
+       * Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to render the interval control.
+       */
+      scheduleInterval: WorkerScheduleInterval.optional().describe(
+        'Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to render the interval control.'
+      ),
+      analysisWindowDays: AnalysisWindowDays.optional(),
+    })
+    .strict()
 );
 export type WorkerSettings = z.infer<typeof WorkerSettings>;
+
+/**
+ * Partial settings patch. Field names match WorkerSettings. Omitted fields keep their stored values; unknown keys and wrong-Worker fields are rejected.
+ */
+export const WorkerSettingsWrite = lazySchema(() =>
+  z
+    .object({
+      autonomy: WatchAutonomyLevel.optional(),
+      scheduleInterval: WorkerScheduleInterval.optional(),
+      analysisWindowDays: AnalysisWindowDays.optional(),
+    })
+    .strict()
+);
+export type WorkerSettingsWrite = z.infer<typeof WorkerSettingsWrite>;
 
 /**
  * A live registered Worker with Watch membership and durable settings.

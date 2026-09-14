@@ -34,6 +34,57 @@ export const ENABLED_SWITCH_LABEL = i18n.translate(
   }
 );
 
+export const SAVE_WATCH_SETTINGS = i18n.translate(
+  'xpack.alertzero.watches.settings.saveWatchSettings',
+  { defaultMessage: 'Save' }
+);
+
+export const DISCARD_WATCH_SETTINGS = i18n.translate(
+  'xpack.alertzero.watches.settings.discardWatchSettings',
+  { defaultMessage: 'Discard' }
+);
+
+export const RUN_WORKER = i18n.translate('xpack.alertzero.watches.settings.runWorker', {
+  defaultMessage: 'Run',
+});
+
+export const RUN_WORKER_DIRTY = i18n.translate('xpack.alertzero.watches.settings.runWorkerDirty', {
+  defaultMessage: 'Save or discard unsaved changes before running this Worker.',
+});
+
+export const TUNING_THRESHOLDS_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.tuningThresholds.title',
+  { defaultMessage: 'Tuning thresholds' }
+);
+
+export const ANALYSIS_WINDOW_DAYS_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.analysisWindowDays.label',
+  { defaultMessage: 'Analysis window (days)' }
+);
+
+export const ANALYSIS_WINDOW_DAYS_HELP = i18n.translate(
+  'xpack.alertzero.watches.settings.analysisWindowDays.help',
+  {
+    defaultMessage:
+      'How many days of alerts Rule Tuning analyses. Applies to this Worker only. Between 1 and 30.',
+  }
+);
+
+export const ANALYSIS_WINDOW_DAYS_ARIA_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.analysisWindowDays.ariaLabel',
+  { defaultMessage: 'Analysis window in days' }
+);
+
+export const WORKER_SETTINGS_SAVE_ERROR = i18n.translate(
+  'xpack.alertzero.watches.settings.worker.saveError',
+  { defaultMessage: 'Could not save this Worker. Other saved changes were kept.' }
+);
+
+export const WATCH_SETTINGS_INVALID = i18n.translate(
+  'xpack.alertzero.watches.settings.invalidDrafts',
+  { defaultMessage: 'Fix invalid settings before saving.' }
+);
+
 /* -------------------------------------------------------------------------- */
 /* Section headings                                                           */
 /* -------------------------------------------------------------------------- */

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter, Route } from '@kbn/shared-ux-router';
 import {
   SYSTEM_SECURITY_WATCH_DARK_ID,
@@ -86,6 +86,12 @@ const detectionWorkers: Worker[] = [
     id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
     name: 'Rule Tuning',
     watchIds: [SYSTEM_SECURITY_WATCH_DETECTION_ID],
+    settings: {
+      workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+      autonomy: 'manual',
+      scheduleInterval: '2h',
+      analysisWindowDays: 14,
+    },
   }),
   createWorker({
     id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
@@ -108,7 +114,8 @@ const renderWatch = (watchId: string, workers: Worker[]) => {
     refetch: jest.fn(),
   } as never);
   const mutate = jest.fn();
-  mockUseUpdateWorker.mockReturnValue({ mutate } as never);
+  const mutateAsync = jest.fn().mockResolvedValue({ worker: workers[0] });
+  mockUseUpdateWorker.mockReturnValue({ mutate, mutateAsync } as never);
 
   render(
     <MemoryRouter initialEntries={[`/watches/${watchId}`]}>
@@ -118,7 +125,7 @@ const renderWatch = (watchId: string, workers: Worker[]) => {
     </MemoryRouter>
   );
 
-  return { mutate };
+  return { mutate, mutateAsync };
 };
 
 describe('WatchDetailPage', () => {
@@ -209,7 +216,7 @@ describe('WatchDetailPage', () => {
       error: new Error('workers unavailable'),
       refetch: jest.fn(),
     } as never);
-    mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn() } as never);
+    mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync: jest.fn() } as never);
 
     render(
       <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
@@ -259,5 +266,38 @@ describe('WatchDetailPage', () => {
         `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
       )
     ).not.toBeInTheDocument();
+  });
+
+  it('shows the analysis window only on Rule Tuning and does not write while editing', () => {
+    const { mutate, mutateAsync } = renderWatch(
+      SYSTEM_SECURITY_WATCH_DETECTION_ID,
+      detectionWorkers
+    );
+    const ruleTuning = screen.getByTestId(
+      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+    );
+    const ruleCreation = screen.getByTestId(
+      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID}`
+    );
+
+    expect(within(ruleTuning).getByTestId('alertZeroAnalysisWindowDays')).toHaveValue(14);
+    expect(
+      within(ruleCreation).queryByTestId('alertZeroAnalysisWindowDays')
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeDisabled();
+    expect(screen.getByTestId('alertZeroWatchSettingsDiscard')).toBeDisabled();
+
+    fireEvent.click(
+      screen.getByTestId(
+        `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+      )
+    );
+
+    expect(mutate).not.toHaveBeenCalled();
+    expect(mutateAsync).not.toHaveBeenCalled();
+    expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeEnabled();
+    expect(
+      screen.getByTestId(`alertZeroWorkerRun-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`)
+    ).toBeDisabled();
   });
 });
