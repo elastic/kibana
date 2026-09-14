@@ -50,7 +50,7 @@ import { SparkPlot } from '../../../../components/spark_plot';
 import { SignificantEventsSearchBar } from '../../../../components/search_bar';
 import { SeverityBadge } from '../severity_badge/severity_badge';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
-import { buildDiscoverParams } from '../../utils/discover_helpers';
+import { buildDiscoverParams } from '../../../../util/discover_helpers';
 import {
   ACTIONS_COLUMN_TITLE,
   CHART_SERIES_NAME,
@@ -329,7 +329,9 @@ export function QueriesTable() {
             description: OPEN_IN_DISCOVER_ACTION_DESCRIPTION,
             enabled: () => discoverLocator !== undefined,
             onClick: (item: SignificantEventQueryRow) => {
-              discoverLocator?.navigate(buildDiscoverParams(item.query, timeState));
+              discoverLocator?.navigate(
+                buildDiscoverParams(item.query.esql.query, timeState.timeRange)
+              );
             },
             isPrimary: true,
             'data-test-subj': 'significant_events_table_open_in_discover_action',
