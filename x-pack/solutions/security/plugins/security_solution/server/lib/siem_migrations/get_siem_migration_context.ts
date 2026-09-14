@@ -8,7 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
-import { getSiemMigrationClients } from './index';
+import { getSiemMigrationClients } from '.';
 import type { SiemMigrationsService } from './siem_migrations_service';
 
 export type SiemMigrationClients = ReturnType<typeof getSiemMigrationClients>;

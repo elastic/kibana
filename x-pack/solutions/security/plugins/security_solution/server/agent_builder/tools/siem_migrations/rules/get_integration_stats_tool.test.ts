@@ -49,9 +49,9 @@ describe('getIntegrationStatsTool', () => {
       },
     };
 
-    getSiemMigrationContext = jest
-      .fn()
-      .mockResolvedValue({ getRulesClient: () => rulesClient }) as jest.MockedFunction<GetSiemMigrationContext>;
+    getSiemMigrationContext = jest.fn().mockResolvedValue({
+      getRulesClient: () => rulesClient,
+    }) as jest.MockedFunction<GetSiemMigrationContext>;
 
     hasRuleMigrationPrivileges.mockResolvedValue(true);
   });
@@ -98,9 +98,7 @@ describe('getIntegrationStatsTool', () => {
     )) as ToolHandlerStandardReturn;
 
     expect(getSiemMigrationContext).not.toHaveBeenCalled();
-    expect(result.results[0]).toEqual(
-      expect.objectContaining({ type: ToolResultType.error })
-    );
+    expect(result.results[0]).toEqual(expect.objectContaining({ type: ToolResultType.error }));
     expect(result.results[0].data).toMatchObject({
       message: expect.stringContaining('privileges'),
     });
@@ -121,9 +119,7 @@ describe('getIntegrationStatsTool', () => {
     )) as ToolHandlerStandardReturn;
 
     expect(mockGetIntegrationStats).not.toHaveBeenCalled();
-    expect(result.results[0]).toEqual(
-      expect.objectContaining({ type: ToolResultType.error })
-    );
+    expect(result.results[0]).toEqual(expect.objectContaining({ type: ToolResultType.error }));
     expect(result.results[0].data).toMatchObject({
       message: expect.stringContaining('unknown-migration'),
     });
@@ -161,9 +157,7 @@ describe('getIntegrationStatsTool', () => {
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     )) as ToolHandlerStandardReturn;
 
-    expect(result.results[0]).toEqual(
-      expect.objectContaining({ type: ToolResultType.error })
-    );
+    expect(result.results[0]).toEqual(expect.objectContaining({ type: ToolResultType.error }));
     expect(result.results[0].data).toMatchObject({
       message: expect.stringContaining('client construction failed'),
     });

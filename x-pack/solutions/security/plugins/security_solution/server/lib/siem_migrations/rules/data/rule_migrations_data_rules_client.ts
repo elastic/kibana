@@ -36,7 +36,6 @@ export type RuleMigrationAllDataStats = RuleMigrationDataStats[];
 
 export type RuleMigrationGetRulesOptions = SiemMigrationGetItemsOptions<RuleMigrationFilters>;
 
-
 export class RuleMigrationsDataRulesClient extends SiemMigrationsDataItemClient<RuleMigrationRule> {
   protected type = 'rule' as const;
 

@@ -95,7 +95,9 @@ Pass \`ids\` to restrict the aggregation to a selected migration-rule scope. Rea
               tool_result_id: getToolResultId(),
               type: ToolResultType.error,
               data: {
-                message: `Failed to get integration stats for "${migrationId}": ${err?.message ?? err}`,
+                message: `Failed to get integration stats for "${migrationId}": ${
+                  err?.message ?? err
+                }`,
               },
             },
           ],

@@ -38,7 +38,8 @@ const cleanupInstalledEvalRules = async (kbnClient: KbnClient, log: ToolingLog) 
     }
   } catch (error) {
     log.warning(
-      `[automatic-migration-install-eval] Detection rule cleanup failed: ${error instanceof Error ? error.message : String(error)
+      `[automatic-migration-install-eval] Detection rule cleanup failed: ${
+        error instanceof Error ? error.message : String(error)
       }`
     );
   }

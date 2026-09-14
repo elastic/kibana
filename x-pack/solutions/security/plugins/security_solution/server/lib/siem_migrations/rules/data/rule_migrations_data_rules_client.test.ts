@@ -776,10 +776,9 @@ describe('RuleMigrationsDataRulesClient', () => {
     });
 
     test('returns per-integration stats scoped to a migration with ids filter', async () => {
-      const result = await ruleMigrationsDataRulesClient.getIntegrationStats(
-        'migration1',
-        { ids: ['rule1', 'rule2'] }
-      );
+      const result = await ruleMigrationsDataRulesClient.getIntegrationStats('migration1', {
+        ids: ['rule1', 'rule2'],
+      });
 
       expect(result).toEqual([
         { id: 'endpoint', total_rules: 3 },
@@ -805,9 +804,7 @@ describe('RuleMigrationsDataRulesClient', () => {
     });
 
     test('returns per-integration stats scoped to a migration without ids filter', async () => {
-      const result = await ruleMigrationsDataRulesClient.getIntegrationStats(
-        'migration1'
-      );
+      const result = await ruleMigrationsDataRulesClient.getIntegrationStats('migration1');
 
       expect(result).toEqual([
         { id: 'endpoint', total_rules: 3 },
