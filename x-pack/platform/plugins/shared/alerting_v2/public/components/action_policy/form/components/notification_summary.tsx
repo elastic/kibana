@@ -9,8 +9,11 @@ import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { GroupingMode, ThrottleStrategy } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useFormContext, useWatch } from 'react-hook-form';
+import { GROUPING_MODE_HELP_TEXT } from '../constants';
+import type { ActionPolicyFormState } from '../types';
 
-interface DispatchConfigSummaryProps {
+interface DispatchSummaryInput {
   groupingMode: GroupingMode;
   groupBy: string[];
   throttleStrategy: ThrottleStrategy;
@@ -19,8 +22,8 @@ interface DispatchConfigSummaryProps {
 
 type DurationUnit = 's' | 'm' | 'h' | 'd';
 
-const isDurationUnit = (c: string): c is DurationUnit =>
-  c === 's' || c === 'm' || c === 'h' || c === 'd';
+const isDurationUnit = (c: string): c is DurationUnit => 
+  ['s', 'm', 'h', 'd'].includes(c);
 
 const formatInterval = (raw: string): string => {
   if (!raw) return '';
@@ -51,12 +54,17 @@ const formatInterval = (raw: string): string => {
   }
 };
 
-const getDispatchSummary = ({
+/**
+ * Human-readable outcome sentence for the current notification configuration.
+ * Returns an empty string when the configuration is incomplete (e.g. group mode
+ * without a selected field).
+ */
+export const getDispatchSummary = ({
   groupingMode,
   groupBy,
   throttleStrategy,
   throttleInterval,
-}: DispatchConfigSummaryProps): string => {
+}: DispatchSummaryInput): string => {
   const interval = formatInterval(throttleInterval);
   const fields = groupBy.join(', ');
 
@@ -66,8 +74,7 @@ const getDispatchSummary = ({
         return i18n.translate(
           'xpack.alertingV2.actionPolicy.form.dispatchSummary.episode.statusChange',
           {
-            defaultMessage:
-              'Sends one notification when an episode opens and one when it recovers.',
+            defaultMessage: 'Sends one notification when an episode opens and one when it recovers.',
           }
         );
       case 'per_status_interval':
@@ -143,14 +150,11 @@ const getDispatchSummary = ({
             }
           );
         }
-        return i18n.translate(
-          'xpack.alertingV2.actionPolicy.form.dispatchSummary.digest.throttle',
-          {
-            defaultMessage:
-              'Combines all matching episodes into one notification at most every {interval}.',
-            values: { interval },
-          }
-        );
+        return i18n.translate('xpack.alertingV2.actionPolicy.form.dispatchSummary.digest.throttle', {
+          defaultMessage:
+            'Combines all matching episodes into one notification at most every {interval}.',
+          values: { interval },
+        });
       case 'every_time':
         return i18n.translate(
           'xpack.alertingV2.actionPolicy.form.dispatchSummary.digest.everyEvaluation',
@@ -165,17 +169,27 @@ const getDispatchSummary = ({
   return '';
 };
 
-export const DispatchConfigSummary = (props: DispatchConfigSummaryProps) => {
-  const summary = getDispatchSummary(props);
+/**
+ * Live summary for the Notification controls section, rendered in the described-form-group
+ * left column. Reads the current form state and describes the selected notify-per mode
+ * followed by the resulting notification outcome.
+ */
+export const NotificationSummary = () => {
+  const { control } = useFormContext<ActionPolicyFormState>();
+  const [groupingMode, groupBy, throttleStrategy, throttleInterval] = useWatch({
+    control,
+    name: ['groupingMode', 'groupBy', 'throttleStrategy', 'throttleInterval'],
+  });
 
-  if (!summary) return null;
+  const modeDescription = GROUPING_MODE_HELP_TEXT[groupingMode];
+  const outcome = getDispatchSummary({ groupingMode, groupBy, throttleStrategy, throttleInterval });
 
   return (
     <EuiPanel
       color="subdued"
       paddingSize="m"
       hasBorder={false}
-      data-test-subj="dispatchConfigCallout"
+      data-test-subj="notificationSummary"
     >
       <EuiTitle size="xxs">
         <h4>
@@ -184,10 +198,18 @@ export const DispatchConfigSummary = (props: DispatchConfigSummaryProps) => {
           })}
         </h4>
       </EuiTitle>
-      <EuiSpacer size="xs" />
-      <EuiText size="s" color="subdued" data-test-subj="dispatchConfigSummaryText">
-        {summary}
+      <EuiSpacer size="s" />
+      <EuiText size="s" color="subdued" data-test-subj="notificationSummaryModeText">
+        {modeDescription}
       </EuiText>
+      {outcome ? (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued" data-test-subj="notificationSummaryOutcomeText">
+            {outcome}
+          </EuiText>
+        </>
+      ) : null}
     </EuiPanel>
   );
 };

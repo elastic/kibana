@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonGroup, EuiComboBox, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
+import { EuiButtonGroup, EuiComboBox, EuiFormRow, EuiSelect } from '@elastic/eui';
 import type { GroupingMode, ThrottleStrategy } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
@@ -24,14 +24,13 @@ import {
 } from '../constants';
 import { needsInterval } from '../form_utils';
 import type { ActionPolicyFormState } from '../types';
-import { DispatchConfigSummary } from './dispatch_config_summary';
 import { DurationInput } from './duration_input/duration_input';
 
 export const DispatchSection = () => {
   const { control, setValue, getValues } = useFormContext<ActionPolicyFormState>();
-  const [groupingMode, groupBy, throttleStrategy, throttleInterval, matcher] = useWatch({
+  const [groupingMode, throttleStrategy, matcher] = useWatch({
     control,
-    name: ['groupingMode', 'groupBy', 'throttleStrategy', 'throttleInterval', 'matcher'],
+    name: ['groupingMode', 'throttleStrategy', 'matcher'],
   });
   const { data: dataFieldNames } = useFetchRuleEventFields(matcher);
 
@@ -201,14 +200,6 @@ export const DispatchSection = () => {
           )}
         />
       )}
-
-      <EuiSpacer size="m" />
-      <DispatchConfigSummary
-        groupingMode={groupingMode}
-        groupBy={groupBy}
-        throttleStrategy={throttleStrategy}
-        throttleInterval={throttleInterval}
-      />
     </>
   );
 };

@@ -20,6 +20,7 @@ import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useFetchRuleEventFields } from '../../../hooks/use_fetch_rule_event_fields';
 import { DispatchSection } from './components/dispatch_section';
 import { MatcherInput } from './components/matcher_input';
+import { NotificationSummary } from './components/notification_summary';
 import { QuickFilters } from './components/quick_filters';
 import { SimpleWorkflowBuilder } from './components/simple_workflow_builder';
 import { TagsInput } from './components/tags_input';
@@ -194,12 +195,7 @@ export const ActionPolicyForm = () => {
             />
           </h3>
         }
-        description={
-          <FormattedMessage
-            id="xpack.alertingV2.actionPolicy.form.dispatch.description"
-            defaultMessage="Controls how matching episodes are grouped and how often notifications are sent."
-          />
-        }
+        description={<NotificationSummary />}
       >
         <DispatchSection />
       </EuiDescribedFormGroup>
