@@ -57125,7 +57125,6 @@
     "xpack.synthetics.monitorSummary.runTestManually": "手动运行测试",
     "xpack.synthetics.monitorSummary.selectMonitor": "选择不同监测以查看其详情",
     "xpack.synthetics.monitorSummary.viewAlerts": "查看告警",
-    "xpack.synthetics.monitorSummaryRoute.monitorBreadcrumb": "监测",
     "xpack.synthetics.monitorTestResult.screenshotImageLabel": "“{stepName}”，第 {stepNumber} 步，共 {totalSteps} 步",
     "xpack.synthetics.monitorTypesSelectPlaceholder": "选择监测类型",
     "xpack.synthetics.namespaceValidation.error": "命名空间无效：{error}",

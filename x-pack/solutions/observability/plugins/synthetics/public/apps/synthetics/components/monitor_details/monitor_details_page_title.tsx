@@ -16,14 +16,20 @@ import {
 import { SyntheticsRemoteBadge } from '../common/components/synthetics_remote_badge';
 import { SyntheticsHeartbeatBadge } from '../common/components/synthetics_heartbeat_badge';
 
-export const MonitorDetailsPageTitle = () => {
+export const MonitorDetailsPageTitle = ({ hideName = false }: { hideName?: boolean } = {}) => {
   const { monitor } = useSelectedMonitor();
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false} data-test-subj="monitorNameTitle">
-        {monitor?.name}
-      </EuiFlexItem>
+      {hideName ? (
+        <span data-test-subj="monitorNameTitle" hidden>
+          {monitor?.name}
+        </span>
+      ) : (
+        <EuiFlexItem grow={false} data-test-subj="monitorNameTitle">
+          {monitor?.name}
+        </EuiFlexItem>
+      )}
       {isRemoteSyntheticsMonitor(monitor) && (
         <EuiFlexItem grow={false}>
           <SyntheticsRemoteBadge remote={monitor.remote} />

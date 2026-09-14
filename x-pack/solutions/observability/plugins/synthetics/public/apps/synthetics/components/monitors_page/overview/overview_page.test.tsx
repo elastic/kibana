@@ -49,6 +49,11 @@ jest.mock('../hooks/use_monitor_list', () => ({
   useMonitorList: () => mockUseMonitorList(),
 }));
 
+jest.mock('../../common/app_header', () => ({
+  MonitorsListingPage: ({ children }: { children: React.ReactNode }) => children,
+  SyntheticsHeaderToolbar: () => null,
+}));
+
 jest.mock('../../../hooks', () => ({
   useEnablement: jest.fn(() => ({
     isEnabled: true,

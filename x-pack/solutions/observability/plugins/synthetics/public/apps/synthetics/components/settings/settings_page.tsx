@@ -8,9 +8,14 @@
 import React from 'react';
 import { Redirect, useParams } from 'react-router-dom';
 import { EuiPanel } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { PLUGIN } from '../../../../../common/constants/plugin';
+import type { ClientPluginsStart } from '../../../../plugin';
+import { SyntheticsPage } from '../common/app_header';
 import { AlertDefaultsForm } from './alerting_defaults/alert_defaults_form';
 import { ProjectAPIKeys } from './project_api_keys/project_api_keys';
 import type { SettingsTabId } from './page_header';
+import { SETTINGS_PAGE_TITLE, useSettingsAppHeaderTabs } from './page_header';
 import { ParamsList } from './global_params/params_list';
 import { DataRetentionTab } from './data_retention';
 import { useSettingsBreadcrumbs } from './use_settings_breadcrumbs';
@@ -22,6 +27,10 @@ export const SettingsPage = () => {
   useSettingsBreadcrumbs();
 
   const { tabId } = useParams<{ tabId: SettingsTabId }>();
+  const { application } = useKibana<ClientPluginsStart>().services;
+  const settingsTabs = useSettingsAppHeaderTabs(
+    application.getUrlForApp(PLUGIN.SYNTHETICS_PLUGIN_ID)
+  );
 
   const renderTab = () => {
     switch (tabId) {
@@ -56,5 +65,14 @@ export const SettingsPage = () => {
     }
   };
 
-  return <div>{renderTab()}</div>;
+  return (
+    <SyntheticsPage
+      title={SETTINGS_PAGE_TITLE}
+      tabs={settingsTabs}
+      menu={{ showSettings: false, showDiagnostics: true }}
+      paddingSize="m"
+    >
+      <div>{renderTab()}</div>
+    </SyntheticsPage>
+  );
 };

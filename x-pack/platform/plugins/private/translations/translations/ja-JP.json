@@ -57122,7 +57122,6 @@
     "xpack.synthetics.monitorSummary.runTestManually": "手動でテストを実行",
     "xpack.synthetics.monitorSummary.selectMonitor": "詳細を表示するには、別のモニターを選択してください",
     "xpack.synthetics.monitorSummary.viewAlerts": "アラートを表示",
-    "xpack.synthetics.monitorSummaryRoute.monitorBreadcrumb": "監視",
     "xpack.synthetics.monitorTestResult.screenshotImageLabel": "\"{stepName}\"、{stepNumber}/{totalSteps}",
     "xpack.synthetics.monitorTypesSelectPlaceholder": "モニタータイプを選択",
     "xpack.synthetics.namespaceValidation.error": "無効な名前空間：{error}",

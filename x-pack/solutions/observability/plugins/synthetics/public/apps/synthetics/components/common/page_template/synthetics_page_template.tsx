@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiPageSection } from '@elastic/eui';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import React, { useMemo } from 'react';
 import { of } from 'rxjs';
@@ -15,7 +16,17 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import type { ClientPluginsStart } from '../../../../../plugin';
 
-export const WrappedPageTemplate = (props: LazyObservabilityPageTemplateProps) => {
+export type SyntheticsPageTemplateProps = LazyObservabilityPageTemplateProps & {
+  header?: React.ReactNode;
+};
+
+export const WrappedPageTemplate = ({
+  header,
+  pageHeader,
+  pageSectionProps,
+  children,
+  ...props
+}: SyntheticsPageTemplateProps) => {
   const { chrome, observabilityShared } = useKibana<ClientPluginsStart>().services;
   const PageTemplateComponent = observabilityShared.navigation.PageTemplate;
 
@@ -31,12 +42,31 @@ export const WrappedPageTemplate = (props: LazyObservabilityPageTemplateProps) =
 
   // The chrome header renders its own back button, so in-page breadcrumbs would duplicate it.
   const hasChromeBackButton = chromeStyle === 'project';
-  const pageHeader =
-    hasChromeBackButton && props.pageHeader
-      ? { ...props.pageHeader, breadcrumbs: undefined }
-      : props.pageHeader;
+  const resolvedPageHeader =
+    hasChromeBackButton && pageHeader ? { ...pageHeader, breadcrumbs: undefined } : pageHeader;
 
-  return <PageTemplateComponent {...props} pageHeader={pageHeader} />;
+  const originalPadding = pageSectionProps?.paddingSize;
+  const shouldPadBody = Boolean(header) && originalPadding !== 'none';
+
+  return (
+    <PageTemplateComponent
+      {...props}
+      pageHeader={resolvedPageHeader}
+      pageSectionProps={header ? { ...pageSectionProps, paddingSize: 'none' } : pageSectionProps}
+    >
+      {header}
+      {shouldPadBody ? (
+        <EuiPageSection
+          paddingSize={originalPadding ?? 'l'}
+          contentProps={{ style: { paddingTop: 0 } }}
+        >
+          {children}
+        </EuiPageSection>
+      ) : (
+        children
+      )}
+    </PageTemplateComponent>
+  );
 };
 
 export const SyntheticsPageTemplateComponent = euiStyled(WrappedPageTemplate)`

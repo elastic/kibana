@@ -56943,7 +56943,6 @@
     "xpack.synthetics.monitorSummary.runTestManually": "Führen Sie den Test manuell aus.",
     "xpack.synthetics.monitorSummary.selectMonitor": "Wählen Sie einen anderen Monitor aus, um seine Details anzuzeigen",
     "xpack.synthetics.monitorSummary.viewAlerts": "Alerts anzeigen",
-    "xpack.synthetics.monitorSummaryRoute.monitorBreadcrumb": "Monitore",
     "xpack.synthetics.monitorTestResult.screenshotImageLabel": "„{stepName}“, {stepNumber} von {totalSteps}",
     "xpack.synthetics.monitorTypesSelectPlaceholder": "Monitortyp auswählen",
     "xpack.synthetics.namespaceValidation.error": "Ungültiger Namespace: {error}",

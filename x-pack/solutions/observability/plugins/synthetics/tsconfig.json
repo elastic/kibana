@@ -139,7 +139,9 @@
     "@kbn/cps-utils",
     "@kbn/cps-server-utils",
     "@kbn/observability-utils-server",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/app-header",
+    "@kbn/app-menu"
   ],
   "exclude": ["target/**/*"]
 }
