@@ -448,7 +448,9 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
                     submitEsqlQuery={handleSubmitRecommendedQuery}
                   />
                 )}
-                <EsqlMenu hideHistory docsFlyoutSize="s" />
+                {/* Visor (KQL / NL search) is owned by the full editor, which the sandbox
+                    doesn't mount — hide the button so it isn't shown enabled but inert. */}
+                <EsqlMenu hideHistory hideVisor docsFlyoutSize="s" />
               </EsqlEditorActionsProvider>
             </EuiFlexItem>
           )}

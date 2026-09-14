@@ -44,6 +44,7 @@ const helpPopoverFallback = (
 
 export const ESQLMenu: React.FC<{
   hideHistory?: boolean;
+  hideVisor?: boolean;
   onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
   docsFlyoutSize?: EuiFlyoutProps['size'];
 }> = (props) => {
