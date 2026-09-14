@@ -7,7 +7,6 @@
 
 import { z } from '@kbn/zod/v4';
 import {
-  INVESTIGATION_STATUSES,
   INVESTIGATION_SUBJECT_TYPES,
   MAX_KEYWORD_LENGTH,
 } from '../../common';
@@ -37,10 +36,6 @@ export const getSeverityCountsRoute = createNightshiftInvestigationsServerRoute(
   },
   params: z.object({
     query: z.object({
-      statuses: z
-        .union([z.enum(INVESTIGATION_STATUSES), z.array(z.enum(INVESTIGATION_STATUSES)).max(5)])
-        .transform((v) => (Array.isArray(v) ? v : [v]))
-        .optional(),
       subject_types: z
         .union([
           z.enum(INVESTIGATION_SUBJECT_TYPES),
@@ -52,10 +47,6 @@ export const getSeverityCountsRoute = createNightshiftInvestigationsServerRoute(
       concurrency_key: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
       created_after: z.string().max(100).datetime({ offset: true }).optional(),
       created_before: z.string().max(100).datetime({ offset: true }).optional(),
-      started_after: z.string().max(100).datetime({ offset: true }).optional(),
-      started_before: z.string().max(100).datetime({ offset: true }).optional(),
-      completed_after: z.string().max(100).datetime({ offset: true }).optional(),
-      completed_before: z.string().max(100).datetime({ offset: true }).optional(),
     }),
   }),
   handler: async ({ request, params, getInvestigationsClient }) =>

@@ -24,7 +24,6 @@ import type {
   AlertInvestigationContext,
   GetInvestigationResponse,
   InvestigationContext,
-  InvestigationStatus,
   InvestigationSubject,
   InvestigationSubjectType,
   InvestigationTriggerType,
@@ -47,7 +46,6 @@ import {
 } from '../../common';
 import { buildInvestigationMessage } from './build_investigation_message';
 import {
-  InvestigationConflictError,
   InvestigationNotFoundError,
   InvalidInvestigationContextError,
   InvestigationSubjectMissingError,
@@ -61,18 +59,6 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
 function asString(v: unknown): string | undefined {
   return typeof v === 'string' ? v || undefined : undefined;
 }
-
-function isTerminalStatus(status: InvestigationStatus): boolean {
-  return status === 'completed' || status === 'failed' || status === 'cancelled';
-}
-
-/** Used when persist omits `error`. */
-const FALLBACK_INVESTIGATION_ERROR = 'Investigation failed';
-
-const SUPERSEDED_STATUSES = [
-  'pending',
-  'running',
-] as const satisfies ReadonlyArray<InvestigationStatus>;
 
 const isSubjectType = (value: unknown): value is InvestigationSubjectType =>
   typeof value === 'string' && INVESTIGATION_SUBJECT_TYPES.some((type) => type === value);
@@ -115,9 +101,6 @@ const toSubject = ({
 
 /**
  * Shared camelCase investigation record shape the service exposes.
- * Fields marked "nightshift-specific" do not yet exist in the shared
- * Investigation entity; they are added via the spine change requests for this leaf
- * (see `agentic_investigations/common/investigations/investigation.ts`).
  */
 export interface NightshiftInvestigationRecord {
   id: string;
@@ -126,23 +109,18 @@ export interface NightshiftInvestigationRecord {
   subjectType: InvestigationSubjectType;
   subjectId: string;
   subjectSummary?: string;
-  status: InvestigationStatus;
   severity?: Severity;
   title?: string;
   summary?: string;
   createdAt: string;
-  startedAt?: string;
-  completedAt?: string;
   updatedAt: string;
   conversationId?: string;
   hypotheses?: InvestigationHypothesis[];
   recommendations?: InvestigationRecommendation[];
   blindSpots?: InvestigationBlindSpot[];
-  /** nightshift-specific — added to shared Investigation via spine change */
   triggerType?: InvestigationTriggerType;
   concurrencyKey?: string;
   executedBy?: string;
-  error?: string;
   conclusion?: string;
   triggerFeedback?: TriggerFeedback[];
   impact?: InvestigationImpact;
@@ -151,25 +129,12 @@ export interface NightshiftInvestigationRecord {
 /** Document shape for writes — id lives in `_id`. */
 type NightshiftInvestigationDoc = Omit<NightshiftInvestigationRecord, 'id'>;
 
-/**
- * Extended list-query shape, mirroring `ListInvestigationsQuery` in
- * `agentic_investigations` but with nightshift-specific filters.
- * Spine change: add concurrencyKey, createdAfter/Before, startedAfter/Before,
- * completedAfter/Before, sortField, page to InvestigationsService.list().
- */
 interface NightshiftListQuery {
-  status?: InvestigationStatus;
   severity?: Severity;
   solution?: string;
   subjectType?: InvestigationSubjectType;
   concurrencyKey?: string;
-  createdAfter?: string;
-  createdBefore?: string;
-  startedAfter?: string;
-  startedBefore?: string;
-  completedAfter?: string;
-  completedBefore?: string;
-  sortField?: 'createdAt' | 'completedAt' | 'severity';
+  sortField?: 'createdAt' | 'severity';
   sortOrder?: 'asc' | 'desc';
   size: number;
   from: number;
@@ -181,22 +146,11 @@ interface NightshiftListResult {
   severityCounts: Record<string, number>;
 }
 
-/**
- * Extended severity-counts query for nightshift-specific filters.
- * Spine change: add concurrencyKey, date-range filters to InvestigationsService.getSeverityCounts().
- */
 interface NightshiftSeverityCountsQuery {
-  status?: InvestigationStatus;
   solution?: string;
   subjectType?: InvestigationSubjectType;
 }
 
-/**
- * Minimal contract this client requires from the shared investigations service.
- * Signatures match the actual `InvestigationsService` from `agentic_investigations`;
- * the spine change requests for this leaf extend the Investigation entity and the
- * list/getSeverityCounts queries to support nightshift-specific fields.
- */
 export interface NightshiftInvestigationsService {
   upsert(spaceId: string, doc: NightshiftInvestigationDoc): Promise<NightshiftInvestigationRecord>;
   /** Returns null when no investigation with `id` exists in `spaceId`. */
@@ -226,10 +180,7 @@ export interface NightshiftInvestigationsClientDeps {
 
 const toListItem = (record: NightshiftInvestigationRecord): ListInvestigationItem => ({
   investigation_id: record.id,
-  status: record.status,
   created_at: record.createdAt,
-  started_at: record.startedAt,
-  completed_at: record.completedAt,
   severity: record.severity,
   concurrency_key: record.concurrencyKey,
   executed_by: record.executedBy,
@@ -248,7 +199,6 @@ const toInvestigationResponse = (
 ): GetInvestigationResponse => ({
   ...toListItem(record),
   trigger_type: record.triggerType,
-  error: record.error,
   summary: record.summary,
   conclusion: record.conclusion,
   hypotheses: record.hypotheses,
@@ -276,11 +226,6 @@ const parseExecutionInvestigationMetadata = (
   };
 };
 
-/**
- * The investigation subject an execution's inputs describe, summary included, or undefined when
- * they describe none. Shared by `ensureOrCreate()` and the write path so they cannot disagree
- * about what a run is investigating.
- */
 function recoverSubjectFromInput(
   input: Record<string, unknown> | undefined
 ): InvestigationSubject | undefined {
@@ -356,8 +301,6 @@ export class NightshiftInvestigationsClient {
       if (!parsed.success) {
         throw new InvalidInvestigationContextError(subject.type, parsed.error);
       }
-      // An alert investigation always gets the brief composed from its alert data — that is what
-      // the alert context exists for. Every other subject keeps the caller-supplied message.
       return { message: buildInvestigationMessage(parsed.data), context: parsed.data };
     }
 
@@ -394,11 +337,6 @@ export class NightshiftInvestigationsClient {
 
     const spaceId = this.getSpaceId();
 
-    // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
-    // agent exists wherever an investigation runs. This narrower install stays because the run
-    // below executes the *stored* workflow definition, which predates that step until the managed
-    // install has upgraded it — and that install is fire-and-forget. Deliberately without the
-    // step's visibility retry: the workflow owns that, and this request path should not pay for it.
     await installInvestigationAgent({ agentBuilder: this.agentBuilder, spaceId });
 
     const workflow = await this.workflowsManagement.management.getWorkflow(
@@ -452,11 +390,6 @@ export class NightshiftInvestigationsClient {
     return { investigation_id: executionId };
   }
 
-  /**
-   * Creates a new investigation record as `pending`. Called from start() so the id is readable
-   * immediately. The workflow's persist_investigation_started step later transitions the record
-   * to `running` via ensureOrCreate().
-   */
   async create({
     investigationId,
     subject,
@@ -468,27 +401,20 @@ export class NightshiftInvestigationsClient {
     triggerType: InvestigationTriggerType;
     concurrencyKey?: string;
   }): Promise<void> {
-    if (concurrencyKey) {
-      await this.cancelSupersededInvestigation({ concurrencyKey, investigationId });
-    }
-
     const spaceId = this.getSpaceId();
     const existing = await this.investigationsService.get(spaceId, investigationId);
     if (existing) {
-      // Already created (e.g. ensureOrCreate ran first); leave it untouched.
       return;
     }
 
     const now = new Date().toISOString();
     await this.investigationsService.upsert(spaceId, {
-      // Key the SO by the investigation/execution ID so get(spaceId, investigationId) round-trips.
       conversationId: investigationId,
       spaceId,
       solution: 'observability',
       subjectType: subject.type,
       subjectId: subject.id,
       subjectSummary: subject.summary,
-      status: 'pending',
       triggerType,
       concurrencyKey,
       createdAt: now,
@@ -500,26 +426,14 @@ export class NightshiftInvestigationsClient {
   }
 
   /**
-   * Ensures the investigation record exists and is running. Called by the workflow's
-   * persist_investigation_started step. If a pending record exists (created by start()), transitions
-   * it to running. If no record exists (workflow triggered without start()), creates one as running
-   * from the execution document. Already-running records are left untouched. A settled record
-   * (completed, failed, or cancelled) throws so the persist step fails the run rather than
-   * continuing through the agent.
-   *
-   * Both write paths read the execution document, so `started_at` and `executed_by` mean the same
-   * thing however the record came to exist: `start()` cannot know the id the engine assigns to the
-   * run's executor, and stamping the transition with the wall clock would date the record to when
-   * the persist step happened to run rather than to when the run began.
+   * Ensures the investigation record exists. Called by the workflow's
+   * persist_investigation_started step. Creates the SO from the execution document if it
+   * doesn't already exist (e.g. when the workflow is triggered without going through start()).
    */
   async ensureOrCreate(investigationId: string): Promise<void> {
     const spaceId = this.getSpaceId();
     const existing = await this.investigationsService.get(spaceId, investigationId);
-
-    if (existing && isTerminalStatus(existing.status)) {
-      throw InvestigationConflictError.settled(investigationId, existing.status);
-    }
-    if (existing && existing.status !== 'pending') {
+    if (existing) {
       return;
     }
 
@@ -540,22 +454,6 @@ export class NightshiftInvestigationsClient {
       throw new InvestigationNotFoundError(investigationId);
     }
 
-    const startedAt = execution.startedAt ?? new Date().toISOString();
-    const now = new Date().toISOString();
-
-    if (existing) {
-      // Transition pending → running.
-      const { id: _id, ...existingDoc } = existing;
-      await this.investigationsService.upsert(spaceId, {
-        ...existingDoc,
-        status: 'running',
-        startedAt,
-        executedBy: execution.executedBy,
-        updatedAt: now,
-      });
-      return;
-    }
-
     const { subject, triggerType, concurrencyKey } = parseExecutionInvestigationMetadata(
       execution.context
     );
@@ -564,84 +462,25 @@ export class NightshiftInvestigationsClient {
       throw new InvestigationSubjectMissingError(investigationId);
     }
 
-    if (concurrencyKey) {
-      await this.cancelSupersededInvestigation({ concurrencyKey, investigationId });
-    }
+    const startedAt = execution.startedAt ?? new Date().toISOString();
+    const now = new Date().toISOString();
 
     await this.investigationsService.upsert(spaceId, {
-      // Key the SO by investigationId so get(spaceId, investigationId) round-trips.
       conversationId: investigationId,
       spaceId,
       solution: 'observability',
       subjectType: subject.type,
       subjectId: subject.id,
       subjectSummary: subject.summary,
-      status: 'running',
       triggerType,
       concurrencyKey,
       executedBy: execution.executedBy,
       createdAt: startedAt,
-      startedAt,
       updatedAt: now,
       hypotheses: [],
       recommendations: [],
       blindSpots: [],
     });
-  }
-
-  /**
-   * Cancels the in-flight investigation that `investigationId` supersedes, if there is one.
-   *
-   * `investigationId` is excluded rather than assumed absent: both callers run while the workflow's
-   * `_ensure` step may be creating the very same record, so without the guard the newest match can
-   * be the incoming investigation itself — cancelling a record whose execution is alive and which
-   * nothing superseded. Two results are fetched because the excluded record can occupy the first.
-   *
-   * Spine change: InvestigationsService.list() must accept a `concurrencyKey` filter for this to
-   * enforce uniqueness across concurrent callers. See spine change requests.
-   */
-  private async cancelSupersededInvestigation({
-    concurrencyKey,
-    investigationId,
-  }: {
-    concurrencyKey: string;
-    investigationId: string;
-  }): Promise<void> {
-    const spaceId = this.getSpaceId();
-    // List pending/running investigations with the same concurrency key.
-    // Spine change required: add `concurrencyKey` to NightshiftListQuery.
-    const { items } = await this.investigationsService.list(spaceId, {
-      concurrencyKey,
-      size: 2,
-      from: 0,
-      sortField: 'createdAt',
-      sortOrder: 'desc',
-    });
-
-    // Filter for superseded statuses.
-    const superseded = items.find(
-      ({ id, status }) =>
-        id !== investigationId &&
-        (SUPERSEDED_STATUSES as readonly InvestigationStatus[]).includes(status)
-    );
-    if (!superseded) {
-      return;
-    }
-
-    const now = new Date().toISOString();
-    const { id: _id, ...supersededDoc } = superseded;
-    await this.investigationsService
-      .upsert(spaceId, {
-        ...supersededDoc,
-        status: 'cancelled',
-        completedAt: now,
-        updatedAt: now,
-      })
-      .catch((error) => {
-        this.logger.warn(
-          `Skipped cancelling superseded investigation "${superseded.id}": ${error.message}`
-        );
-      });
   }
 
   async update(investigationId: string, state: UpdateInvestigationRequest): Promise<void> {
@@ -651,26 +490,12 @@ export class NightshiftInvestigationsClient {
       throw new InvestigationNotFoundError(investigationId);
     }
 
-    const { status, error, conversation_id, ...output } = state;
-
-    if (isTerminalStatus(existing.status)) {
-      if (status === existing.status) {
-        return;
-      }
-      throw InvestigationConflictError.settled(investigationId, existing.status);
-    }
-
-    if (status === 'failed' && error) {
-      this.logger.warn(`Investigation "${investigationId}" failed: ${error}`);
-    }
+    const { conversation_id, ...output } = state;
 
     const now = new Date().toISOString();
     const { id: _id, ...existingDoc } = existing;
     await this.investigationsService.upsert(spaceId, {
       ...existingDoc,
-      status,
-      ...(isTerminalStatus(status) && { completedAt: now }),
-      ...(status === 'failed' && { error: error ?? FALLBACK_INVESTIGATION_ERROR }),
       ...(conversation_id !== undefined && { conversationId: conversation_id }),
       ...(output.summary !== undefined && { summary: output.summary }),
       ...(output.conclusion !== undefined && { conclusion: output.conclusion }),
@@ -684,12 +509,6 @@ export class NightshiftInvestigationsClient {
     });
   }
 
-  /**
-   * Returns the stored investigation. `running` is not checked against the workflow engine, so it
-   * can linger after edge cases where no persist step ran: user cancel, cancel-in-progress that
-   * ensureOrCreate() did not see, timeout, or a worker dying mid-run. Complete/fail still go
-   * through PATCH; a superseded run is cancelled in ensureOrCreate().
-   */
   async get(investigationId: string): Promise<GetInvestigationResponse> {
     const spaceId = this.getSpaceId();
     const record = await this.investigationsService.get(spaceId, investigationId);
@@ -700,17 +519,12 @@ export class NightshiftInvestigationsClient {
   }
 
   async list({
-    statuses,
     severities,
     subject_types,
     query: _query,
     concurrency_key,
     created_after: _createdAfter,
     created_before: _createdBefore,
-    started_after: _startedAfter,
-    started_before: _startedBefore,
-    completed_after: _completedAfter,
-    completed_before: _completedBefore,
     sort_field,
     sort_order,
     page = 1,
@@ -719,17 +533,9 @@ export class NightshiftInvestigationsClient {
     const spaceId = this.getSpaceId();
 
     const sortFieldMapped =
-      sort_field === 'created_at'
-        ? 'createdAt'
-        : sort_field === 'completed_at'
-        ? 'completedAt'
-        : (sort_field as 'severity' | undefined);
+      sort_field === 'created_at' ? 'createdAt' : (sort_field as 'severity' | undefined);
 
-    // Nightshift list() supports arrays; the underlying InvestigationsService.list() uses
-    // scalar filters (spine change required to add array support and date-range filters).
-    // For now, take the first element of each array as a best-effort single-value filter.
     const result = await this.investigationsService.list(spaceId, {
-      status: statuses?.[0],
       severity: severities?.[0],
       subjectType: subject_types?.[0],
       concurrencyKey: concurrency_key,
@@ -739,7 +545,6 @@ export class NightshiftInvestigationsClient {
       from: (page - 1) * size,
     });
 
-    // Stored `running` is not reconciled with the engine — same edge cases as get().
     return {
       results: result.items.map(toListItem),
       page,
@@ -748,22 +553,12 @@ export class NightshiftInvestigationsClient {
     };
   }
 
-  /**
-   * Severity facet counts under the given filters, for the homepage tiles.
-   *
-   * Separate from `list()` because the counts are independent of pagination and sort — bundling
-   * them would recompute an identical aggregation on every page change.
-   */
   async getSeverityCounts({
-    statuses,
     subject_types,
   }: SeverityCountsRequest = {}): Promise<SeverityCountsResponse> {
     const spaceId = this.getSpaceId();
 
-    // Spine change required: add statuses-array and date-range filters to
-    // InvestigationsService.getSeverityCounts(). For now, scalar single-value mapping.
     const severityCounts = await this.investigationsService.getSeverityCounts(spaceId, {
-      status: statuses?.[0],
       subjectType: subject_types?.[0],
       solution: 'observability',
     });

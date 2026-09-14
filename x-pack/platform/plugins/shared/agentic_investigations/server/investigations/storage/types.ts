@@ -6,22 +6,18 @@
  */
 
 /**
- * Raw attribute shape stored in the `nightshift-investigation` saved object.
+ * Raw attribute shape stored in the `investigation-details` saved object.
  * Uses `string` for fields that NSI narrows to enums — this layer is
  * schema-neutral; domain validation happens in the NSI client.
  */
 export interface InvestigationAttributes {
-  status: string;
   subject_type: string;
   subject_id: string;
   subject_summary?: string;
   trigger_type: string;
   concurrency_key?: string;
   created_at: string;
-  started_at?: string;
-  completed_at?: string;
   executed_by?: string;
-  error?: string;
   summary?: string;
   conclusion?: string;
   severity?: string;

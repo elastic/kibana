@@ -16,7 +16,6 @@ import {
   severitySchema,
   triggerFeedbackSchema,
 } from '@kbn/significant-events-schema';
-import { UPDATABLE_INVESTIGATION_STATUSES } from '../../common';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 import { rethrowInvestigationClientError } from './rethrow_investigation_client_error';
@@ -32,8 +31,6 @@ const orAbsent = <T extends z.ZodType>(schema: T) =>
   );
 
 const updateInvestigationBodySchema = z.object({
-  status: z.enum(UPDATABLE_INVESTIGATION_STATUSES),
-  error: orAbsent(z.string().max(MAX_TEXT_LENGTH)),
   summary: orAbsent(z.string().max(MAX_TEXT_LENGTH)),
   conclusion: orAbsent(z.string().max(MAX_TEXT_LENGTH)),
   severity: orAbsent(severitySchema),

@@ -43,8 +43,7 @@ export const createRecommendationsAttachmentType = (
     try {
       const investigation = await service.get(context.spaceId, attachment.origin);
       if (!attachment.origin_snapshot_at) return true;
-      if (!investigation?.completedAt) return false;
-      return new Date(investigation.completedAt) > new Date(attachment.origin_snapshot_at);
+      return false;
     } catch {
       return false;
     }

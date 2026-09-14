@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import type { InvestigationStatus } from '@kbn/nightshift-investigations-plugin/common';
-import { getInvestigationTimeLabel } from './investigation_presentation';
-
 /**
  * Returns the headline text for an investigation list row or flyout header.
  * Prefers the AI-generated `summary` (post-run diagnosis) over `subject.summary`
@@ -40,25 +37,4 @@ export const getInvestigationSubtitleText = (investigation: {
   return hasAiSummary && subjectSummary ? subjectSummary : undefined;
 };
 
-/**
- * Wrapper around `getInvestigationTimeLabel` that handles the optional `started_at` from
- * the new API (unset until a run leaves `pending`). Returns `undefined` for pending rows.
- */
-export const getInvestigationRunTimeLabel = ({
-  startedAt,
-  completedAt,
-  status,
-}: {
-  startedAt: string | undefined;
-  completedAt: string | undefined;
-  status: InvestigationStatus;
-}): string | undefined => {
-  if (!startedAt) {
-    return undefined;
-  }
-  return getInvestigationTimeLabel({
-    startedAt,
-    endedAt: completedAt,
-    isRunning: status === 'running',
-  });
-};
+

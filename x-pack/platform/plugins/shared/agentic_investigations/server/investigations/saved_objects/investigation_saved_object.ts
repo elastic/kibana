@@ -21,7 +21,6 @@ import type { InvestigationAttributes } from '../storage/types';
 export const INVESTIGATION_DETAILS_SO_TYPE = 'investigation-details';
 
 // Inlined from nightshift_investigations/common to avoid a cross-plugin dependency.
-const INVESTIGATION_STATUSES = ['pending', 'running', 'completed', 'failed', 'cancelled'] as const;
 const INVESTIGATION_SUBJECT_TYPES = ['significant_event', 'alert'] as const;
 const INVESTIGATION_TRIGGER_TYPES = ['automatic', 'manual'] as const;
 const MAX_KEYWORD_LENGTH = 500;
@@ -54,7 +53,7 @@ const opaqueArray = (maxSize: number) =>
   schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize }));
 
 const investigationAttributesSchemaV1 = schema.object({
-  status: enumOf(INVESTIGATION_STATUSES),
+  status: schema.maybe(schema.string()),
   subject_type: enumOf(INVESTIGATION_SUBJECT_TYPES),
   subject_id: keyword,
   subject_summary: optionalText,
@@ -82,6 +81,31 @@ const investigationAttributesSchemaV1 = schema.object({
   ),
 });
 
+const investigationAttributesSchemaV3 = schema.object({
+  subject_type: enumOf(INVESTIGATION_SUBJECT_TYPES),
+  subject_id: keyword,
+  subject_summary: optionalText,
+  trigger_type: enumOf(INVESTIGATION_TRIGGER_TYPES),
+  concurrency_key: optionalKeyword,
+  created_at: isoDateStringSchema,
+  executed_by: optionalKeyword,
+  summary: optionalText,
+  conclusion: optionalText,
+  severity: schema.maybe(enumOf(SEVERITY_OPTIONS)),
+  hypotheses: opaqueArray(MAX_HYPOTHESES),
+  recommendations: opaqueArray(MAX_RECOMMENDATIONS),
+  blind_spots: opaqueArray(MAX_BLIND_SPOTS),
+  trigger_feedback: opaqueArray(MAX_TRIGGER_FEEDBACK),
+  conversation_id: optionalKeyword,
+  impact: schema.maybe(
+    schema.object({
+      entities: schema.arrayOf(schema.object({}, { unknowns: 'allow' }), {
+        maxSize: MAX_IMPACT_ENTITIES,
+      }),
+    })
+  ),
+});
+
 export const investigationDetailsSavedObjectType: SavedObjectsType<InvestigationAttributes> = {
   name: INVESTIGATION_DETAILS_SO_TYPE,
   hidden: true,
@@ -89,14 +113,11 @@ export const investigationDetailsSavedObjectType: SavedObjectsType<Investigation
   mappings: {
     dynamic: false,
     properties: {
-      status: { type: 'keyword', ignore_above: 1024 },
       subject_type: { type: 'keyword', ignore_above: 1024 },
       subject_id: { type: 'keyword', ignore_above: 1024 },
       subject_summary: { type: 'text' },
       concurrency_key: { type: 'keyword', ignore_above: 1024 },
       created_at: { type: 'date' },
-      started_at: { type: 'date' },
-      completed_at: { type: 'date' },
       summary: { type: 'text' },
       conclusion: { type: 'text' },
       severity: { type: 'keyword', ignore_above: 1024 },
@@ -205,6 +226,13 @@ export const investigationDetailsSavedObjectType: SavedObjectsType<Investigation
       schemas: {
         create: investigationAttributesSchemaV1,
         forwardCompatibility: investigationAttributesSchemaV1.extends({}, { unknowns: 'ignore' }),
+      },
+    },
+    3: {
+      changes: [],
+      schemas: {
+        create: investigationAttributesSchemaV3,
+        forwardCompatibility: investigationAttributesSchemaV3.extends({}, { unknowns: 'ignore' }),
       },
     },
   },

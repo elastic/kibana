@@ -89,23 +89,6 @@ export interface StartInvestigationResponse {
 /** Bound for investigation ids, concurrency keys, and other keyword-sized strings. */
 export const MAX_KEYWORD_LENGTH = 500;
 
-export const INVESTIGATION_STATUSES = [
-  'pending',
-  'running',
-  'completed',
-  'failed',
-  'cancelled',
-] as const;
-export type InvestigationStatus = (typeof INVESTIGATION_STATUSES)[number];
-
-export const UPDATABLE_INVESTIGATION_STATUSES = [
-  'running',
-  'completed',
-  'failed',
-  'cancelled',
-] as const;
-export type UpdatableInvestigationStatus = (typeof UPDATABLE_INVESTIGATION_STATUSES)[number];
-
 export interface InvestigationStructuredOutput {
   summary?: string;
   conclusion?: string;
@@ -119,8 +102,6 @@ export interface InvestigationStructuredOutput {
 
 /** Body of PATCH /internal/nightshift/investigations/{id}. */
 export interface UpdateInvestigationRequest extends InvestigationStructuredOutput {
-  status: UpdatableInvestigationStatus;
-  error?: string;
   conversation_id?: string;
 }
 
@@ -128,25 +109,13 @@ export interface GetInvestigationResponse extends InvestigationStructuredOutput 
   investigation_id: string;
   subject: InvestigationSubject;
   trigger_type?: InvestigationTriggerType;
-  status: InvestigationStatus;
   created_at: string;
-  /** Unset until the run leaves `pending`, so it can lag `created_at` by minutes. */
-  started_at?: string;
-  completed_at?: string;
   concurrency_key?: string;
   executed_by?: string;
-  error?: string;
   conversation_id?: string;
 }
 
-export interface InvestigationStatusEvent {
-  type: 'investigation_status';
-  investigation_id: string;
-  status: InvestigationStatus;
-}
-
 export interface ListInvestigationsRequest {
-  statuses?: InvestigationStatus[];
   severities?: Severity[];
   subject_types?: InvestigationSubjectType[];
   /**
@@ -156,11 +125,7 @@ export interface ListInvestigationsRequest {
   concurrency_key?: string;
   created_after?: string;
   created_before?: string;
-  started_after?: string;
-  started_before?: string;
-  completed_after?: string;
-  completed_before?: string;
-  sort_field?: 'created_at' | 'completed_at' | 'severity';
+  sort_field?: 'created_at' | 'severity';
   sort_order?: 'asc' | 'desc';
   page?: number;
   size?: number;
@@ -169,10 +134,7 @@ export interface ListInvestigationsRequest {
 export type ListInvestigationItem = Pick<
   GetInvestigationResponse,
   | 'investigation_id'
-  | 'status'
   | 'created_at'
-  | 'started_at'
-  | 'completed_at'
   | 'severity'
   | 'concurrency_key'
   | 'executed_by'

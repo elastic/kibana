@@ -25,7 +25,6 @@ import { nightshiftBackgroundTransition } from '../common/transition';
 import { useKibana } from '../hooks/use_kibana';
 import {
   getInvestigationPrimaryText,
-  getInvestigationRunTimeLabel,
   getInvestigationSubtitleText,
 } from './investigation_list_presentation';
 
@@ -90,13 +89,7 @@ export function InvestigationListItem({
   };
 
   const primaryText = getInvestigationPrimaryText(investigation);
-  const subtitleText =
-    getInvestigationSubtitleText(investigation) ??
-    getInvestigationRunTimeLabel({
-      startedAt: investigation.started_at,
-      completedAt: investigation.completed_at,
-      status: investigation.status,
-    });
+  const subtitleText = getInvestigationSubtitleText(investigation);
 
   const severityDotColorKey =
     investigation.severity != null ? SEVERITY_DOT_COLOR_KEY[investigation.severity] : 'primary';
@@ -108,7 +101,6 @@ export function InvestigationListItem({
         ? getEbtProps({
             action: NIGHTSHIFT_EBT_ACTIONS.VIEW_INVESTIGATION,
             element: NIGHTSHIFT_EBT_ELEMENTS.INVESTIGATIONS_LIST,
-            detail: investigation.status,
           })
         : {})}
       role={onClick ? 'button' : undefined}

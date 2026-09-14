@@ -50,7 +50,7 @@ export const emitLifecycleEventRoute = createNightshiftInvestigationsServerRoute
       .get(params.path.id)
       .catch(rethrowInvestigationClientError);
 
-    const { subject, trigger_type, started_at: startedAt } = execution;
+    const { subject, trigger_type } = execution;
     if (!subject) {
       // Runs without an entity (bare manual workflow runs) have nothing to attribute the
       // event to, so no lifecycle event is emitted.
@@ -60,7 +60,7 @@ export const emitLifecycleEventRoute = createNightshiftInvestigationsServerRoute
       investigation_id: params.path.id,
       subject,
       trigger_type: trigger_type ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
-      started_at: startedAt ?? new Date().toISOString(),
+      started_at: execution.created_at ?? new Date().toISOString(),
     };
 
     switch (params.body.status) {
