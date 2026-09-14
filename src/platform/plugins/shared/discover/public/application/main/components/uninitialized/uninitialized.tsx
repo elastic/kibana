@@ -42,6 +42,7 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
 
   const startSearchingPrompt = (
     <EuiEmptyPrompt
+      data-test-subj="discoverUninitialized"
       iconType="discoverApp"
       title={
         <h2>
@@ -100,8 +101,10 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
   }
 
   return (
-    <EuiText size="m" data-test-subj="discoverUninitializedKeyboardShortcuts">
-      <h3 id={shortcutsLabelId}>{shortcutsLabel}</h3>
+    <EuiText size="m" data-test-subj="discoverUninitialized">
+      <h3 id={shortcutsLabelId} data-test-subj="discoverUninitializedKeyboardShortcuts">
+        {shortcutsLabel}
+      </h3>
       <EuiDescriptionList
         aria-labelledby={shortcutsLabelId}
         type="column"

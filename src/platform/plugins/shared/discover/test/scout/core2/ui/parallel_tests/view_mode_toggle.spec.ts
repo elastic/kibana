@@ -65,6 +65,7 @@ spaceTest.describe('Discover view mode toggle', { tag: '@local-stateful-classic'
       await expect(toggleButton).toHaveAttribute('data-selected-value', 'documents');
 
       await pageObjects.discover.selectTextBaseLang();
+      await pageObjects.discover.waitUntilTabIsLoaded();
 
       await expect(page.testSubj.locator('dscViewModeToggleButton')).toBeHidden();
       await expect(page.testSubj.locator('discoverQueryTotalHits')).toBeVisible();

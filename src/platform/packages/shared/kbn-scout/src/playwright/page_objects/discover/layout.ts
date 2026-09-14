@@ -150,7 +150,9 @@ export abstract class LayoutMixin extends SaveMixin {
       await expect(this.getSelectedDataView()).toHaveText(title, { timeout: 20_000 });
     }).toPass({ timeout: 45_000, intervals: [0] });
 
-    await this.waitUntilTabIsLoaded();
+    if (!(await this.isUninitialized())) {
+      await this.waitUntilTabIsLoaded();
+    }
   }
 
   /**
@@ -822,16 +824,8 @@ export abstract class LayoutMixin extends SaveMixin {
     return this.getHitCountLocator().innerText();
   }
 
-  getRefreshDataButton(): Locator {
-    return this.page.testSubj.locator('refreshDataButton');
-  }
-
   getQueryInEsqlButton(): Locator {
     return this.page.testSubj.locator('queryInEsqlButton');
-  }
-
-  getUninitializedKeyboardShortcuts(): Locator {
-    return this.page.testSubj.locator('discoverUninitializedKeyboardShortcuts');
   }
 
   getQuerySubmitButton(): Locator {

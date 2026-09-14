@@ -263,12 +263,21 @@ export class DiscoverPageObject extends FtrService {
 
   /**
    * Opens a new Discover tab and runs the current query so the tab is initialized.
-   * New tabs skip the initial fetch; use `unifiedTabs.createNewTab()` when the test
-   * needs the uninitialized empty state.
+   * New ES|QL tabs start empty, so the previous query is copied onto the tab first.
+   * Use `unifiedTabs.createNewTab()` for the uninitialized empty state.
    */
   public async createNewTabAndSearch() {
     const unifiedTabs = this.ctx.getPageObject('unifiedTabs');
+    const esqlQuery = (await this.testSubjects.exists('ESQLEditor'))
+      ? (await this.ctx.getService('esql').getEsqlEditorQuery()).trim()
+      : '';
+
     await unifiedTabs.createNewTab();
+
+    if (esqlQuery) {
+      await this.ctx.getService('monacoEditor').setCodeEditorValue(esqlQuery);
+    }
+
     await this.queryBar.clickQuerySubmitButton();
     await this.waitUntilTabIsLoaded();
   }

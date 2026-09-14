@@ -200,6 +200,7 @@ spaceTest.describe(
       await expect(historyPanel).toBeVisible();
       await discover.toggleEsqlHistoryPanel();
       await expect(historyPanel).toBeHidden();
+      await discover.codeEditor.setCodeEditorValue(DEFAULT_ESQL_QUERY);
       await discover.submitQueryAndWait();
       await expect(historyPanel).toBeHidden();
       expect(await discover.getEsqlEditorHeight()).toBe(initialHeight);

@@ -65,6 +65,7 @@ describe('DiscoverUninitialized', () => {
   it('shows the start searching prompt in classic mode', async () => {
     await setup({ isEsqlMode: false });
 
+    expect(screen.getByTestId('discoverUninitialized')).toBeVisible();
     expect(screen.getByTestId('refreshDataButton')).toBeVisible();
     expect(screen.getByTestId('queryInEsqlButton')).toBeVisible();
     expect(screen.queryByTestId('discoverUninitializedKeyboardShortcuts')).not.toBeInTheDocument();
@@ -73,6 +74,7 @@ describe('DiscoverUninitialized', () => {
   it('shows Discover-owned ES|QL keyboard shortcuts in ES|QL mode', async () => {
     await setup({ isEsqlMode: true });
 
+    expect(screen.getByTestId('discoverUninitialized')).toBeVisible();
     expect(screen.getByTestId('discoverUninitializedKeyboardShortcuts')).toBeVisible();
     expect(screen.getByText('Keyboard shortcuts')).toBeVisible();
     expect(screen.getByText('Run query')).toBeVisible();

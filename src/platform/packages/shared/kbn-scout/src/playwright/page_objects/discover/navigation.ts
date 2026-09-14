@@ -43,6 +43,18 @@ export abstract class NavigationMixin extends DiscoverAppBase {
     });
   }
 
+  getRefreshDataButton(): Locator {
+    return this.page.testSubj.locator('refreshDataButton');
+  }
+
+  getUninitializedKeyboardShortcuts(): Locator {
+    return this.page.testSubj.locator('discoverUninitializedKeyboardShortcuts');
+  }
+
+  async isUninitialized(): Promise<boolean> {
+    return this.page.testSubj.locator('discoverUninitialized').isVisible();
+  }
+
   // Waits for a Discover tab to finish loading.
   async waitUntilTabIsLoaded() {
     await this.waitForDiscoverPage();
@@ -108,7 +120,6 @@ export abstract class NavigationMixin extends DiscoverAppBase {
       await this.page.testSubj.click('select-text-based-language-btn');
     }
 
-    await this.waitUntilSearchingHasFinished();
     await this.codeEditor.waitCodeEditorReady('ESQLEditor');
   }
 
@@ -163,11 +174,25 @@ export abstract class NavigationMixin extends DiscoverAppBase {
 
   /**
    * Opens a new Discover tab and runs the current query so the tab is initialized.
-   * New tabs skip the initial fetch; use `unifiedTabs.createNewTab()` when the test
-   * needs the uninitialized empty state.
+   * New tabs skip the initial fetch and ES|QL tabs start with an empty query, so
+   * this recopies the previous ES|QL query before submit. Use
+   * `unifiedTabs.createNewTab()` when the test needs the uninitialized empty state.
    */
   async createNewTabAndSearch() {
+    const previousMode = await this.getCurrentQueryMode();
+    const previousEsqlQuery =
+      previousMode === 'esql' ? (await this.getEsqlQueryValue()).trim() : '';
+
     await this.unifiedTabs.createNewTab();
+
+    if (previousMode === 'esql') {
+      await this.selectTextBaseLang();
+      const currentQuery = (await this.getEsqlQueryValue()).trim();
+      if (!currentQuery && previousEsqlQuery) {
+        await this.codeEditor.setCodeEditorValue(previousEsqlQuery);
+      }
+    }
+
     await this.submitQueryAndWait();
   }
 
