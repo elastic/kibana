@@ -59,6 +59,12 @@ export const MAX_IMPROVEMENTS_PAGE_SIZE = 100;
 export const MAX_IMPROVEMENTS_RESULT_WINDOW = 10000;
 
 /**
+ * How much a reviewer may write when rejecting a suggestion. Shared with the input that collects
+ * it, so the field stops at the length the route would refuse rather than failing on submit.
+ */
+export const MAX_IMPROVEMENT_REJECT_REASON_LENGTH = 2048;
+
+/**
  * Version of the public AI index API, shared between the server route
  * registration and browser clients.
  */
