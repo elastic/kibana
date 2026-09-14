@@ -433,6 +433,17 @@ describe('IacProvisionerService', () => {
     expect(debugLogged).not.toContain('artifact expires at');
     expect(debugLogged).not.toContain('X-Amz-Signature');
   });
+
+  it('rejects a 200 body that is missing blueprint', async () => {
+    mockConfig();
+    mockedFetch.mockResolvedValueOnce(
+      jsonResponse(200, { templateSha: 'sha256:661cb7def1c7101f', render: true })
+    );
+
+    await expect(iacProvisionerService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
+      /invalid render body/
+    );
+  });
 });
 
 describe('parseIacProvisionerErrors', () => {

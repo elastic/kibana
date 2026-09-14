@@ -92,8 +92,6 @@ export interface CloudConnectorIacState {
   templateSha?: string | null;
   blueprintId?: string | null;
   blueprintVersion?: string | null;
-  stackId?: string;
-  region?: string;
 }
 
 export interface CloudConnector {
@@ -112,8 +110,6 @@ export interface CloudConnector {
   templateSha?: string | null;
   blueprintId?: string | null;
   blueprintVersion?: string | null;
-  stackId?: string;
-  region?: string;
 }
 
 export interface CloudConnectorListOptions {

@@ -57,8 +57,6 @@ const IAC_CONFIRM_KEYS: Array<keyof CloudConnectorIacState> = [
   'templateSha',
   'blueprintId',
   'blueprintVersion',
-  'stackId',
-  'region',
 ];
 
 export const hasIacConfirm = (iac: CloudConnectorIacState | undefined): boolean =>
@@ -85,12 +83,6 @@ export const iacAttributesFromConfirm = (
   }
   if (iac.blueprintVersion !== undefined) {
     attrs.blueprintVersion = iac.blueprintVersion;
-  }
-  if (iac.stackId !== undefined) {
-    attrs.stackId = iac.stackId;
-  }
-  if (iac.region !== undefined) {
-    attrs.region = iac.region;
   }
 
   return attrs;

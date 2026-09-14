@@ -184,6 +184,11 @@ describe('useCloudConnectorTemplate', () => {
       expect(mockedSendRenderIacTemplate).not.toHaveBeenCalled();
       const openedUrl = windowOpenSpy.mock.calls[0][0] as string;
       expect(openedUrl).toContain('static.example');
+      expect(result.current.iacConfirm).toEqual({
+        templateSha: null,
+        blueprintId: null,
+        blueprintVersion: null,
+      });
       expect(reportEvent).toHaveBeenCalledWith('iac_provisioner_render_fallback', {
         flow: 'cloud_connector',
         reason: 'missing_render_context',
@@ -231,6 +236,11 @@ describe('useCloudConnectorTemplate', () => {
       await launch(result);
 
       expect(cloudFormationTab.location.href).toContain('static.example');
+      expect(result.current.iacConfirm).toEqual({
+        templateSha: null,
+        blueprintId: null,
+        blueprintVersion: null,
+      });
       expect(reportEvent).toHaveBeenCalledWith('iac_provisioner_render_fallback', {
         flow: 'cloud_connector',
         reason: 'render_failed',
@@ -311,6 +321,34 @@ describe('useCloudConnectorTemplate', () => {
       expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith(
         expect.not.objectContaining({ templateSha: expect.anything() })
       );
+    });
+
+    it('clears a stale fallback confirm when a later launch reports render false', async () => {
+      mockedSendRenderIacTemplate
+        .mockResolvedValueOnce({
+          data: null,
+          error: { message: 'unrenderable', statusCode: 422 },
+        } as any)
+        .mockResolvedValueOnce({
+          data: {
+            templateSha: 'sha256:661cb7def1c7101f',
+            render: false,
+            blueprint: { id: 'federated-identity', version: 'v1' },
+          },
+          error: null,
+        } as any);
+
+      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
+      await launch(result);
+      expect(result.current.iacConfirm).toEqual({
+        templateSha: null,
+        blueprintId: null,
+        blueprintVersion: null,
+      });
+
+      await launch(result);
+      expect(result.current.iacConfirm).toBeUndefined();
+      expect(result.current.templateAlreadyCurrent).toBeDefined();
     });
 
     it('closes the pre-opened tab and reports the stack is current when render is false', async () => {

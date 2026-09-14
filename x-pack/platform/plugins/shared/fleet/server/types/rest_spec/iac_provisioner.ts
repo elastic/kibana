@@ -8,9 +8,14 @@
 import { schema } from '@kbn/config-schema';
 
 import { AWS_CLOUD_PROVIDER } from '../../../common/types/models/cloud_connector';
+import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../common/types/rest_spec/iac_provisioner';
 import { CLOUD_CONNECTOR_RENDER_FLOW } from '../../../common/telemetry/iac_provisioner_events';
 
-const IacProvisionerFlowSchema = schema.literal(CLOUD_CONNECTOR_RENDER_FLOW);
+const IacProvisionerFlowSchema = schema.oneOf([schema.literal(CLOUD_CONNECTOR_RENDER_FLOW)], {
+  meta: {
+    description: 'The Kibana flow requesting the render; reported in telemetry.',
+  },
+});
 
 const IacPolicyTemplateSelectionSchema = schema.object({
   name: schema.string({
@@ -54,13 +59,7 @@ export const RenderIacTemplateRequestSchema = {
     provider: schema.oneOf([schema.literal(AWS_CLOUD_PROVIDER)], {
       meta: { description: 'The cloud provider the template targets. Only AWS is supported.' },
     }),
-    workflow: schema.string({
-      minLength: 1,
-      maxLength: 255,
-      validate: (value) =>
-        /^[a-z][a-z0-9_]*$/.test(value)
-          ? undefined
-          : 'must be a lowercase identifier (e.g. federated_identity)',
+    workflow: schema.oneOf([schema.literal(IAC_FEDERATED_IDENTITY_WORKFLOW)], {
       meta: {
         description:
           'Identity mechanism. Kibana name for the connector type; IaCP looks up the matching blueprint lineage.',
@@ -77,12 +76,6 @@ export const RenderIacTemplateRequestSchema = {
             'Stored template digest from this connector. Omit on first render and after a static-template fallback.',
         },
       })
-    ),
-    userParams: schema.maybe(
-      schema.recordOf(
-        schema.string({ minLength: 1, maxLength: 255 }),
-        schema.string({ minLength: 1, maxLength: 1024 })
-      )
     ),
   }),
 };

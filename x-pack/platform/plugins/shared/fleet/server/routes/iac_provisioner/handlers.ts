@@ -34,6 +34,10 @@ interface RequestedIntegration {
   policyTemplates: IacPolicyTemplateSelection[];
 }
 
+const isBuildError = (
+  result: IacProvisionerRenderIntegration | { errorMessage: string }
+): result is { errorMessage: string } => 'errorMessage' in result;
+
 /**
  * Merges duplicate package entries and unions enabledInputs per policy
  * template, then loads each package and validates that every requested
@@ -60,56 +64,60 @@ export const buildIacProvisionerIntegrations = async ({
     templatesByPackage.set(name, templates);
   }
 
-  const integrations: IacProvisionerRenderIntegration[] = [];
-  for (const [pkgName, policyTemplates] of templatesByPackage) {
-    // Empty pkgVersion resolves to the installed version, falling back to
-    // the latest available: at connector-creation time the package may not
-    // be installed yet. skipArchive: registry info covers everything read
-    // here; without it each request downloads and unpacks the archive.
-    const packageInfo = await getPackageInfo({
-      savedObjectsClient,
-      pkgName,
-      pkgVersion: '',
-      skipArchive: true,
-    });
+  const resolved = await Promise.all(
+    Array.from(templatesByPackage, async ([pkgName, policyTemplates]) => {
+      // Empty pkgVersion resolves to the installed version, falling back to
+      // the latest available: at connector-creation time the package may not
+      // be installed yet. skipArchive: registry info covers everything read
+      // here; without it each request downloads and unpacks the archive.
+      const packageInfo = await getPackageInfo({
+        savedObjectsClient,
+        pkgName,
+        pkgVersion: '',
+        skipArchive: true,
+      });
 
-    const resolvedPolicyTemplates: IacPolicyTemplateSelection[] = [];
-    for (const [templateName, enabledInputSet] of policyTemplates) {
-      const template = (packageInfo.policy_templates ?? []).find(
-        ({ name }) => name === templateName
-      );
-      if (!template) {
-        return {
-          errorMessage: `${pkgName} has no policy template named ${templateName}`,
-        };
+      const resolvedPolicyTemplates: IacPolicyTemplateSelection[] = [];
+      for (const [templateName, enabledInputSet] of policyTemplates) {
+        const template = (packageInfo.policy_templates ?? []).find(
+          ({ name }) => name === templateName
+        );
+        if (!template) {
+          return {
+            errorMessage: `${pkgName} has no policy template named ${templateName}`,
+          };
+        }
+        const inputs = 'inputs' in template ? template.inputs ?? [] : [];
+        const declaredInputs = new Set(inputs.map(({ type }) => type));
+        const enabledInputs = Array.from(enabledInputSet);
+        const unknown = enabledInputs.filter((type) => !declaredInputs.has(type));
+        if (unknown.length) {
+          return {
+            errorMessage: `${pkgName} policy template ${templateName} has no inputs named ${unknown.join(
+              ', '
+            )}`,
+          };
+        }
+        resolvedPolicyTemplates.push({ name: templateName, enabledInputs });
       }
-      const inputs = 'inputs' in template ? template.inputs ?? [] : [];
-      const declaredInputs = new Set(inputs.map(({ type }) => type));
-      const enabledInputs = Array.from(enabledInputSet);
-      const unknown = enabledInputs.filter((type) => !declaredInputs.has(type));
-      if (unknown.length) {
-        return {
-          errorMessage: `${pkgName} policy template ${templateName} has no inputs named ${unknown.join(
-            ', '
-          )}`,
-        };
-      }
-      resolvedPolicyTemplates.push({ name: templateName, enabledInputs });
-    }
 
-    integrations.push({
-      name: pkgName,
-      version: packageInfo.version,
-      policyTemplates: resolvedPolicyTemplates,
-    });
+      return {
+        name: pkgName,
+        version: packageInfo.version,
+        policyTemplates: resolvedPolicyTemplates,
+      };
+    })
+  );
+
+  const firstError = resolved.find(isBuildError);
+  if (firstError) {
+    return firstError;
   }
 
-  return integrations;
+  return resolved.filter(
+    (integration): integration is IacProvisionerRenderIntegration => !isBuildError(integration)
+  );
 };
-
-const isBuildError = (
-  result: IacProvisionerRenderIntegration[] | { errorMessage: string }
-): result is { errorMessage: string } => 'errorMessage' in result;
 
 export const renderIacTemplateHandler: FleetRequestHandler<
   undefined,
@@ -125,7 +133,6 @@ export const renderIacTemplateHandler: FleetRequestHandler<
     workflow,
     templateSha,
     integrations: requestedIntegrations,
-    userParams,
   } = request.body;
 
   const iacProvisionerEnabled = await isIacProvisionerEnabled();
@@ -141,7 +148,7 @@ export const renderIacTemplateHandler: FleetRequestHandler<
       savedObjectsClient: internalSoClient,
       requestedIntegrations,
     });
-    if (isBuildError(integrations)) {
+    if (!Array.isArray(integrations)) {
       return response.badRequest({ body: { message: integrations.errorMessage } });
     }
 
@@ -155,7 +162,6 @@ export const renderIacTemplateHandler: FleetRequestHandler<
       workflow,
       integrations,
       ...(templateSha ? { templateSha } : {}),
-      ...(userParams ? { userParams } : {}),
     });
 
     reportIacProvisionerRenderCompleted({

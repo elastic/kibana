@@ -30,6 +30,12 @@ import { getCloudConnectorRemoteRoleTemplate } from '../utils';
 
 const TEMPLATE_URL_PARAM_REGEX = /templateURL=[^&]+/;
 
+const STATIC_FALLBACK_IAC: CloudConnectorIacState = {
+  templateSha: null,
+  blueprintId: null,
+  blueprintVersion: null,
+};
+
 export interface UseCloudConnectorTemplateParams {
   cloud?: CloudSetupForCloudConnector;
   accountType: AccountType;
@@ -68,7 +74,7 @@ export interface UseCloudConnectorTemplateResult {
   templateGenerationError?: string;
   /** Shown when IaCP reports the stored templateSha still matches. */
   templateAlreadyCurrent?: string;
-  /** Written onto the package policy and persisted on the connector at confirm. */
+  /** Persisted on the cloud connector when the package policy is saved. */
   iacConfirm?: CloudConnectorIacState;
 }
 
@@ -122,7 +128,7 @@ export const useCloudConnectorTemplate = ({
     ) {
       if (staticTemplateUrl) {
         reportFallback(IAC_PROVISIONER_FALLBACK_REASON_MISSING_CONTEXT);
-        setIacConfirm({ templateSha: null });
+        setIacConfirm(STATIC_FALLBACK_IAC);
         window.open(staticTemplateUrl, '_blank');
       } else {
         setTemplateGenerationError(
@@ -151,7 +157,7 @@ export const useCloudConnectorTemplate = ({
 
     const fallbackToStatic = (reason: string) => {
       reportFallback(reason);
-      setIacConfirm({ templateSha: null });
+      setIacConfirm(STATIC_FALLBACK_IAC);
       navigateTo(staticTemplateUrl);
     };
 
@@ -172,6 +178,7 @@ export const useCloudConnectorTemplate = ({
 
       if (data.render === false) {
         cloudFormationTab?.close();
+        setIacConfirm(undefined);
         setTemplateAlreadyCurrent(
           i18n.translate('xpack.fleet.cloudConnector.iacProvisioner.templateAlreadyCurrent', {
             defaultMessage:

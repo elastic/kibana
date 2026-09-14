@@ -78,6 +78,9 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
 
   useEffect(() => {
     setPendingCloudConnectorIac(newPolicy.name, iacConfirm);
+    return () => {
+      setPendingCloudConnectorIac(newPolicy.name, undefined);
+    };
   }, [iacConfirm, newPolicy.name]);
 
   // Use accessor to get vars from the correct location (package-level or input-level)
