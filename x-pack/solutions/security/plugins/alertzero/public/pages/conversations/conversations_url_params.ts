@@ -29,7 +29,13 @@ export interface ConversationsUrlParams {
   show?: InvestigationFlyoutTab;
   selectConversation: (id: string) => void;
   showTab: (tab: InvestigationFlyoutTab) => void;
+  /** Closes the flyout, leaving a history entry so Back reopens it. */
   clearSelectedConversation: () => void;
+  /**
+   * Drops a conversation the queue does not have, without leaving a history entry. Back would
+   * otherwise return to the bad id and re-run the not-found handling on every press.
+   */
+  dismissMissingConversation: () => void;
 }
 
 /**
@@ -93,17 +99,20 @@ export const useConversationsUrlParams = (): ConversationsUrlParams => {
     [navigate]
   );
 
-  const clearSelectedConversation = useCallback(
-    () =>
+  const clearParams = useCallback(
+    (replace: boolean) =>
       navigate(
         (params) => {
           params.delete(SELECTED_CONVERSATION_ID_PARAM);
           params.delete(SHOW_PARAM);
         },
-        { replace: false }
+        { replace }
       ),
     [navigate]
   );
+
+  const clearSelectedConversation = useCallback(() => clearParams(false), [clearParams]);
+  const dismissMissingConversation = useCallback(() => clearParams(true), [clearParams]);
 
   // A link carrying only a conversation id is completed rather than ignored, so the address bar
   // always names the tab on screen. `replace`, not `push`: pushing would make Back return to the
@@ -130,5 +139,6 @@ export const useConversationsUrlParams = (): ConversationsUrlParams => {
     selectConversation,
     showTab,
     clearSelectedConversation,
+    dismissMissingConversation,
   };
 };

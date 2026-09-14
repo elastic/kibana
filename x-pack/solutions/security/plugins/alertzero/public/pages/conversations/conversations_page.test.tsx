@@ -15,14 +15,20 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { Investigation } from '@kbn/alertzero-common';
 import { useInvestigations } from '../../hooks/use_investigations_api';
+import { usePendingProposals } from '../../hooks/use_proposals_api';
 import { ConversationsPage } from './conversations_page';
 
 jest.mock('../../hooks/use_investigations_api');
+jest.mock('../../hooks/use_proposals_api');
 jest.mock('../../components/pending_proposals', () => ({
   PendingProposalsPanel: () => null,
 }));
+jest.mock('../../components/proposals_trend_chart', () => ({
+  ProposalsTrendChartRow: () => null,
+}));
 
 const mockUseInvestigations = useInvestigations as jest.Mock;
+const mockUsePendingProposals = usePendingProposals as jest.Mock;
 
 const investigation: Investigation = {
   id: 'inv-1',
@@ -61,6 +67,11 @@ describe('ConversationsPage details flyout URL state', () => {
   beforeEach(() => {
     mockUseInvestigations.mockReturnValue({
       data: { investigations: [investigation], total: 1 },
+      isLoading: false,
+      error: undefined,
+    });
+    mockUsePendingProposals.mockReturnValue({
+      data: { proposals: [], total: 0 },
       isLoading: false,
       error: undefined,
     });
@@ -117,6 +128,19 @@ describe('ConversationsPage details flyout URL state', () => {
     );
     expect(history.location.search).toBe('');
     expect(screen.queryByTestId('investigationDetailsFlyout')).not.toBeInTheDocument();
+  });
+
+  it('leaves no history entry pointing at the missing conversation', async () => {
+    const { core, history } = renderPage('/?selectedConversationId=missing&show=overview');
+
+    await waitFor(() => {
+      expect(core.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
+    });
+
+    // Going back must not land on the bad id and warn all over again.
+    expect(history.entries.map((entry) => entry.search)).not.toContain(
+      '?selectedConversationId=missing&show=overview'
+    );
   });
 
   it('does not warn while the investigations are still loading', () => {
