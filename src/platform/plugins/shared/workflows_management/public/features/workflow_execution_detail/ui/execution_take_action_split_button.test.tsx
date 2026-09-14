@@ -11,14 +11,14 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { ExecutionStatus } from '@kbn/workflows';
 import { useRunWorkflow, useWorkflowsApi, useWorkflowsCapabilities } from '@kbn/workflows-ui';
-import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
+import { createMockWorkflowApi, createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { ExecutionTakeActionSplitButton } from './execution_take_action_split_button';
 import { createStartServicesMock } from '../../../mocks';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
 import { createMockWorkflowExecutionDto } from '../../../shared/test_utils';
 
 const mockRunWorkflow = jest.fn();
-const mockCancelExecution = jest.fn();
+const mockWorkflowApi = createMockWorkflowApi();
 
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
@@ -37,14 +37,12 @@ describe('ExecutionTakeActionSplitButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockRunWorkflow.mockResolvedValue({ workflowExecutionId: 'new-exec' });
-    mockCancelExecution.mockResolvedValue({});
+    mockWorkflowApi.cancelExecution.mockResolvedValue(undefined);
     jest.mocked(useRunWorkflow).mockReturnValue({
       mutateAsync: mockRunWorkflow,
       isLoading: false,
-    } as ReturnType<typeof useRunWorkflow>);
-    jest.mocked(useWorkflowsApi).mockReturnValue({
-      cancelExecution: mockCancelExecution,
-    } as ReturnType<typeof useWorkflowsApi>);
+    } as unknown as ReturnType<typeof useRunWorkflow>);
+    jest.mocked(useWorkflowsApi).mockReturnValue(mockWorkflowApi);
     jest.mocked(useWorkflowsCapabilities).mockReturnValue(createMockWorkflowsCapabilities());
     services.notifications.toasts.addSuccess = jest.fn();
     services.notifications.toasts.addError = jest.fn();
@@ -72,7 +70,7 @@ describe('ExecutionTakeActionSplitButton', () => {
     fireEvent.click(cancelItem);
 
     await waitFor(() => {
-      expect(mockCancelExecution).toHaveBeenCalledWith('exec-1');
+      expect(mockWorkflowApi.cancelExecution).toHaveBeenCalledWith('exec-1');
     });
   });
 
@@ -92,6 +90,6 @@ describe('ExecutionTakeActionSplitButton', () => {
 
     openTakeActionMenu();
     fireEvent.click(screen.getByTestId('workflowExecutionFlyoutCancelExecution'));
-    expect(mockCancelExecution).not.toHaveBeenCalled();
+    expect(mockWorkflowApi.cancelExecution).not.toHaveBeenCalled();
   });
 });
