@@ -111,7 +111,7 @@ const VisualizationStateAnnotation = Annotation.Root({
    * Appearance-only edit: the existing per-layer `data_source` is kept verbatim
    * instead of being replaced by the (single) resolved query.
    */
-  appearanceOnly: Annotation<boolean>({ reducer: (_, newValue) => newValue, default: () => false }),
+  appearanceOnly: Annotation<boolean>(),
   presentationMode: Annotation<PresentationMode>(),
   // internal
   esqlQuery: Annotation<string>(),
