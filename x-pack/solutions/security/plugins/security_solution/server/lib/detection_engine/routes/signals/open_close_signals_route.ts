@@ -27,6 +27,11 @@ import {
   getSessionIDfromKibanaRequest,
   createAlertStatusPayloads,
 } from '../../../telemetry/insights';
+import {
+  buildRuntimeMappingsFromFieldTypes,
+  mergeBulkCloseRuntimeMappings,
+  MAX_RUNTIME_FIELDS_PER_REQUEST,
+} from './bulk_close_runtime_mappings';
 
 export const setSignalsStatusRoute = (
   router: SecuritySolutionPluginRouter,
@@ -99,12 +104,37 @@ export const setSignalsStatusRoute = (
 
             return response.ok({ body });
           } else {
-            const { conflicts, query, runtime_fields: runtimeFields } = request.body;
+            const {
+              conflicts,
+              query,
+              runtime_fields: runtimeFields,
+              runtime_mappings: passthroughRuntimeMappings,
+            } = request.body;
+
+            // Enforce combined limit since Zod schema doesn't validate maxProperties.
+            const runtimeFieldUnion = new Set([
+              ...Object.keys(runtimeFields ?? {}),
+              ...Object.keys(passthroughRuntimeMappings ?? {}),
+            ]);
+            if (runtimeFieldUnion.size > MAX_RUNTIME_FIELDS_PER_REQUEST) {
+              return siemResponse.error({
+                statusCode: 400,
+                body: `runtime_fields and runtime_mappings combined are limited to ${MAX_RUNTIME_FIELDS_PER_REQUEST} entries per request, received ${runtimeFieldUnion.size} unique field names`,
+              });
+            }
+
+            // Merge runtime_fields (name→type, server synthesises _source reader) and
+            // runtime_mappings (full mapping forwarded verbatim preserving Painless scripts).
+            // Passthrough entries win on key collision.
+            const runtimeMappings = mergeBulkCloseRuntimeMappings(
+              buildRuntimeMappingsFromFieldTypes(runtimeFields),
+              passthroughRuntimeMappings
+            );
 
             const body = await updateSignalsStatusByQuery(
               status,
               query,
-              { conflicts: conflicts ?? 'abort', runtimeFields },
+              { conflicts: conflicts ?? 'abort', runtimeMappings },
               spaceId,
               esClient,
               user
@@ -153,18 +183,12 @@ const updateSignalsStatusByIds = async (
 const updateSignalsStatusByQuery = async (
   status: SetAlertsStatusRequestBody['status'],
   query: object | undefined,
-  options: { conflicts: 'abort' | 'proceed'; runtimeFields?: Record<string, string> },
+  options: { conflicts: 'abort' | 'proceed'; runtimeMappings?: Record<string, object> },
   spaceId: string,
   esClient: ElasticsearchClient,
   user: AuthenticatedUser | null
-) => {
-  const runtimeMappings = options.runtimeFields
-    ? Object.fromEntries(
-        Object.entries(options.runtimeFields).map(([name, type]) => [name, { type }])
-      )
-    : undefined;
-
-  return esClient.updateByQuery({
+) =>
+  esClient.updateByQuery({
     index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
     conflicts: options.conflicts,
     refresh: true,
@@ -175,11 +199,10 @@ const updateSignalsStatusByQuery = async (
           filter: query,
         },
       },
-      ...(runtimeMappings ? { runtime_mappings: runtimeMappings } : {}),
+      ...(options.runtimeMappings ? { runtime_mappings: options.runtimeMappings } : {}),
     },
     ignore_unavailable: true,
   });
-};
 
 const getUpdateSignalStatusScript = (
   status: SetAlertsStatusRequestBody['status'],

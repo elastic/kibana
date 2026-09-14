@@ -6,6 +6,7 @@
  */
 
 import type { Status } from '../../../../../common/api/detection_engine';
+import type { BulkCloseRuntimeMappings } from '../../../../common/components/toolbar/bulk_actions/runtime_mappings_for_bulk_close';
 
 export interface BasicSignals {
   signal: AbortSignal;
@@ -43,6 +44,15 @@ export interface UpdateAlertStatusByQueryProps {
   status: Status;
   signal?: AbortSignal;
   runtimeFields?: Record<string, string>;
+  /**
+   * Optional verbatim runtime field mappings forwarded directly to the
+   * `_update_by_query` as `runtime_mappings`. Preserves the caller's Painless
+   * script (if any) so Elasticsearch evaluates it at query time rather than
+   * falling back to a `_source` read.
+   *
+   * Build from `dataView.getRuntimeMappings()` via `toBulkCloseRuntimeMappings`.
+   */
+  runtimeMappings?: BulkCloseRuntimeMappings;
 }
 
 export interface UpdateAlertStatusByIdsProps {

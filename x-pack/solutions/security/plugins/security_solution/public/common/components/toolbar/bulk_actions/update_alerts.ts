@@ -11,6 +11,7 @@ import {
   updateAlertStatusByIds,
   updateAlertStatusByQuery,
 } from '../../../../detections/containers/detection_engine/alerts/api';
+import type { BulkCloseRuntimeMappings } from './runtime_mappings_for_bulk_close';
 
 interface UpdatedAlertsResponse {
   updated: number;
@@ -23,18 +24,13 @@ interface UpdatedAlertsProps {
   signalIds?: string[];
   signal?: AbortSignal;
   runtimeFields?: Record<string, string>;
+  runtimeMappings?: BulkCloseRuntimeMappings;
 }
 
 /**
  * Update alert status by query or signalIds.
- *  Either query or signalIds must be provided
+ * Either query or signalIds must be provided.
  * `signalIds` is the preferred way to update alerts because it is more cost effective on Serverless.
- *
- * @param status to update to('open' / 'closed' / 'acknowledged')
- * @param index index to be updated
- * @param query optional query object to update alerts by query.
- * @param signalIds optional signalIds to update alerts by signalIds.
- * @param signal to cancel request
  *
  * @throws An error if response is not OK
  */
@@ -44,6 +40,7 @@ export const updateAlertStatus = ({
   signalIds,
   signal,
   runtimeFields,
+  runtimeMappings,
 }: UpdatedAlertsProps): Promise<UpdatedAlertsResponse> => {
   if (signalIds && signalIds.length > 0) {
     return updateAlertStatusByIds({ status, signalIds, signal }).then(({ updated }) => ({
@@ -51,7 +48,7 @@ export const updateAlertStatus = ({
       version_conflicts: 0,
     }));
   } else if (query) {
-    return updateAlertStatusByQuery({ status, query, signal, runtimeFields }).then(
+    return updateAlertStatusByQuery({ status, query, signal, runtimeFields, runtimeMappings }).then(
       ({ updated, version_conflicts: conflicts }) => ({
         updated: updated ?? 0,
         version_conflicts: conflicts,

@@ -19,6 +19,28 @@ import { z } from '@kbn/zod';
 import { NonEmptyString } from '../../../model/primitives.gen';
 import { AlertStatus } from '../../../model/alert.gen';
 
+/**
+ * The data type for the runtime field type. Determines how the field value is indexed and queried.
+ */
+export const RuntimeFieldType = z.enum(['keyword', 'long', 'double', 'date', 'ip', 'boolean', 'geo_point']);
+export type RuntimeFieldType = z.infer<typeof RuntimeFieldType>;
+export type RuntimeFieldTypeEnum = typeof RuntimeFieldType.enum;
+export const RuntimeFieldTypeEnum = RuntimeFieldType.enum;
+
+/**
+ * A runtime field included in the status-update query so the query can match fields that are not in the alerts index mapping, for example scripted fields on a data view. Elasticsearch evaluates the field at query time.
+ */
+export const RuntimeFieldMapping = z.object({
+  type: RuntimeFieldType,
+  script: z
+    .object({
+      source: z.string().max(10000),
+    })
+    .strict()
+    .optional(),
+  format: z.string().max(100).optional(),
+});
+export type RuntimeFieldMapping = z.infer<typeof RuntimeFieldMapping>;
 export type SetAlertsStatusByIds = z.infer<typeof SetAlertsStatusByIds>;
 export const SetAlertsStatusByIds = z.object({
   /**
@@ -36,7 +58,11 @@ export const SetAlertsStatusByQuery = z.object({
   /**
    * Optional map of field name to runtime field type. For each entry, a runtime field of the specified type is created reading its value from `_source[fieldName]` and included in the query as `runtime_mappings`. Use this to reference fields stored on the alert `_source` that are not part of the alerts index mapping, for example, custom fields added via data view runtime fields.
    */
-  runtime_fields: z.object({}).catchall(z.string()).optional(),
+  runtime_fields: z.object({}).catchall(RuntimeFieldType).optional(),
+  /**
+   * Use this when the query references fields that are not in the alerts index mapping, for example data view runtime fields with a Painless script.
+   */
+  runtime_mappings: z.object({}).catchall(RuntimeFieldMapping).optional(),
 });
 
 export type SetAlertsStatusRequestBody = z.infer<typeof SetAlertsStatusRequestBody>;
