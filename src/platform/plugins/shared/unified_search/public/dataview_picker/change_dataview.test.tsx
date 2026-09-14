@@ -11,12 +11,19 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { copyToClipboard } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { ChangeDataView } from './change_dataview';
 import { dataViewMock, dataViewMockEsql } from './mocks/dataview';
 import type { DataViewPickerProps } from './data_view_picker';
+
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  copyToClipboard: jest.fn(),
+}));
 
 // Mock DOM measurement functions to prevent EUI truncation width errors
 Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
@@ -35,6 +42,7 @@ Object.defineProperty(HTMLElement.prototype, 'clientWidth', {
 });
 
 describe('DataView component', () => {
+  const notifications = notificationServiceMock.createStartContract();
   const createMockWebStorage = () => ({
     clear: jest.fn(),
     getItem: jest.fn(),
@@ -89,6 +97,7 @@ describe('DataView component', () => {
       data: dataMock,
       storage: getStorage(storageValue),
       dataViewEditor: dataViewEditorMock,
+      notifications,
       uiSettings: {
         get: jest.fn(() => uiSettingValue),
       },
@@ -98,7 +107,7 @@ describe('DataView component', () => {
       currentDataViewId: 'dataview-1',
       trigger: {
         label: 'Dataview 1',
-        title: 'Dataview 1',
+        title: 'dataview-1-*',
         fullWidth: true,
         'data-test-subj': 'dataview-trigger',
       },
@@ -323,5 +332,37 @@ describe('DataView component', () => {
     await userEvent.click(screen.getByTestId('dataview-create-new'));
 
     expect(onClosePopoverSpy).toHaveBeenCalled();
+  });
+
+  it('copies the current index pattern from the trigger without opening the picker', async () => {
+    const user = userEvent.setup();
+    render(wrapDataViewComponentInContext());
+
+    await user.click(screen.getByTestId('indexPattern-copy-name'));
+
+    expect(copyToClipboard).toHaveBeenCalledWith('dataview-1-*');
+    expect(copyToClipboard).not.toHaveBeenCalledWith('Dataview 1');
+    expect(notifications.toasts.addSuccess).toHaveBeenCalledWith(
+      expect.objectContaining({ text: 'dataview-1-*' })
+    );
+    expect(screen.queryByTestId('changeDataViewPopover')).not.toBeInTheDocument();
+  });
+
+  it('copies the current index pattern from the picker menu without data view management actions', async () => {
+    const user = userEvent.setup();
+    render(wrapDataViewComponentInContext());
+
+    await user.click(screen.getByTestId('dataview-trigger'));
+
+    const copyMenuItem = screen.getByTestId('indexPattern-copy-name-menu');
+    expect(copyMenuItem).toHaveTextContent('Copy index pattern');
+    expect(screen.queryByTestId('indexPattern-add-field')).not.toBeInTheDocument();
+
+    await user.click(copyMenuItem);
+
+    expect(copyToClipboard).toHaveBeenCalledWith('dataview-1-*');
+    expect(notifications.toasts.addSuccess).toHaveBeenCalledWith(
+      expect.objectContaining({ text: 'dataview-1-*' })
+    );
   });
 });
