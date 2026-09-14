@@ -346,7 +346,14 @@ describe('AuthenticateAndDeployStep', () => {
 
     it('does not pass hasFailed when the hook reports failures with no deploy attempted', () => {
       mockUseAgentBasedDeploy.mockReturnValue({
-        targets: [{ groupId: 'aws', instanceIds: ['vpcflow'], members: [{ instance: { instanceId: 'vpcflow' }, service: agentService }], isDuplicateGroup: false }],
+        targets: [
+          {
+            groupId: 'aws',
+            instanceIds: ['vpcflow'],
+            members: [{ instance: { instanceId: 'vpcflow' }, service: agentService }],
+            isDuplicateGroup: false,
+          },
+        ],
         isDeploying: false,
         failedInstances: ['vpcflow'],
         isAlreadyDeployed: false,
@@ -361,7 +368,14 @@ describe('AuthenticateAndDeployStep', () => {
     it('passes hasFailed once a deploy has actually been attempted', () => {
       const handleDeploy = jest.fn().mockResolvedValue({ failed: true });
       mockUseAgentBasedDeploy.mockReturnValue({
-        targets: [{ groupId: 'aws', instanceIds: ['vpcflow'], members: [{ instance: { instanceId: 'vpcflow' }, service: agentService }], isDuplicateGroup: false }],
+        targets: [
+          {
+            groupId: 'aws',
+            instanceIds: ['vpcflow'],
+            members: [{ instance: { instanceId: 'vpcflow' }, service: agentService }],
+            isDuplicateGroup: false,
+          },
+        ],
         isDeploying: false,
         failedInstances: ['vpcflow'],
         isAlreadyDeployed: false,
@@ -387,19 +401,24 @@ describe('AuthenticateAndDeployStep', () => {
     });
 
     describe('Next button — agent-based deploy', () => {
-      const agentTargets = [{ groupId: 'aws', instanceIds: ['vpcflow'], members: [{ instance: { instanceId: 'vpcflow' }, service: agentService }], isDuplicateGroup: false }];
+      const agentTargets = [
+        {
+          groupId: 'aws',
+          instanceIds: ['vpcflow'],
+          members: [{ instance: { instanceId: 'vpcflow' }, service: agentService }],
+          isDuplicateGroup: false,
+        },
+      ];
 
       beforeEach(() => {
         // Render a Next button that is enabled (no gating conditions active).
-        MockAgentBasedSection.mockImplementation(
-          ({ onDeploy }: { onDeploy: () => void }) => (
-            <div>
-              <button data-test-subj="mock-agent-deploy-btn" onClick={onDeploy}>
-                Add agent
-              </button>
-            </div>
-          )
-        );
+        MockAgentBasedSection.mockImplementation(({ onDeploy }: { onDeploy: () => void }) => (
+          <div>
+            <button data-test-subj="mock-agent-deploy-btn" onClick={onDeploy}>
+              Add agent
+            </button>
+          </div>
+        ));
       });
 
       it('calls onContinue when agent deploy succeeds', async () => {

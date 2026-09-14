@@ -34,7 +34,11 @@ export function buildAgentBasedTargets(
   selectedServiceIds: string[],
   servicesMap: Map<string, AwsServiceMatrixEntry>
 ): DeployGroup[] {
-  const resolved: ServiceInstance[] = reconcileInstances(instances, selectedServiceIds, servicesMap);
+  const resolved: ServiceInstance[] = reconcileInstances(
+    instances,
+    selectedServiceIds,
+    servicesMap
+  );
 
   const originals: Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }> = [];
   const duplicates: Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }> = [];

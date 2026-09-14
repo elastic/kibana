@@ -6,9 +6,7 @@
  */
 
 import type { AwsServiceMatrixEntry } from '../../../aws_service_matrix';
-import type {
-  AuthenticateAndDeployStepState,
-} from '../../../onboarding_flow_context';
+import type { AuthenticateAndDeployStepState } from '../../../onboarding_flow_context';
 import type { ServiceVars } from '../../service_settings_step/use_service_settings';
 import { buildPackageInputs, buildPackageVars, getPackageVarNames } from '../package_inputs';
 import type { PackageInputEntry, AgentCredentialVars } from '../package_inputs';
@@ -205,8 +203,7 @@ export async function buildGroupPackagePolicy(
   // Look up vars by instanceId first; fall back to serviceId for sessions predating instance keying.
   const serviceVarsMap: Record<string, ServiceVars> = {};
   for (const { instance, service } of members) {
-    serviceVarsMap[service.id] =
-      storedServiceVars[instance.instanceId] ??
+    serviceVarsMap[service.id] = storedServiceVars[instance.instanceId] ??
       storedServiceVars[instance.serviceId] ?? {
         enabledDataStreams: service.dataStreams,
         varsByDataStream: {},

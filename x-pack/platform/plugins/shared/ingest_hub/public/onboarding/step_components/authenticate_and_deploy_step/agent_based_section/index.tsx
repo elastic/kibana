@@ -6,12 +6,7 @@
  */
 
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  EuiLoadingSpinner,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiLoadingSpinner, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { i18n } from '@kbn/i18n';

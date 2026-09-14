@@ -58,7 +58,11 @@ export function buildDeployGroups(
   // use_service_settings applies in-memory. Without this, a user who goes back to step 1 and
   // changes their selection would deploy stale instances (deselected services deployed, newly
   // selected services skipped) because setGlobalRegion and Continue don't re-persist instances.
-  const resolved: ServiceInstance[] = reconcileInstances(instances, selectedServiceIds, servicesMap);
+  const resolved: ServiceInstance[] = reconcileInstances(
+    instances,
+    selectedServiceIds,
+    servicesMap
+  );
 
   const originals: Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }> = [];
   const duplicates: Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }> = [];

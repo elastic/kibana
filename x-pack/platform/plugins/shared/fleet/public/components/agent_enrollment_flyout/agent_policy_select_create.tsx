@@ -92,11 +92,19 @@ export const SelectCreateAgentPolicy: React.FC<Props> = ({
   );
 
   useEffect(() => {
-    setShowCreatePolicy(forceCreatePolicy || (regularAgentPolicies.length === 0 && !selectedPolicyId));
+    setShowCreatePolicy(
+      forceCreatePolicy || (regularAgentPolicies.length === 0 && !selectedPolicyId)
+    );
     if (!defaultAgentPolicyName) {
       setNewName(incrementPolicyName(regularAgentPolicies, isFleetServerPolicy));
     }
-  }, [regularAgentPolicies, isFleetServerPolicy, selectedPolicyId, forceCreatePolicy, defaultAgentPolicyName]);
+  }, [
+    regularAgentPolicies,
+    isFleetServerPolicy,
+    selectedPolicyId,
+    forceCreatePolicy,
+    defaultAgentPolicyName,
+  ]);
 
   const onAgentPolicyCreated = useCallback(
     async (policy: AgentPolicy | null, errorMessage?: JSX.Element) => {

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  sendCreatePackagePolicy,
-  sendGetPackageInfoByKeyForRq,
-} from '@kbn/fleet-plugin/public';
+import { sendCreatePackagePolicy, sendGetPackageInfoByKeyForRq } from '@kbn/fleet-plugin/public';
 
 import type { DeployGroup } from '../deploy_groups';
 import { collectDeployResults } from '../deploy_group_helpers';
