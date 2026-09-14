@@ -14,6 +14,7 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { AGENTIC_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER_ID } from '../common/constants';
 import { registerFeatures } from './features';
 import { initializeManagedWorkflows } from './proposals/managed_workflows/initialize_managed_workflows';
@@ -46,6 +47,7 @@ export class AgenticInvestigationsPlugin
   private proposalsService?: ProposalsService;
   private spaces?: AgenticInvestigationsStartDependencies['spaces'];
   private resolveUser?: ResolveProposalUser;
+  private security?: SecurityPluginStart;
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
@@ -71,6 +73,9 @@ export class AgenticInvestigationsPlugin
       workflowsExtensions,
       getProposalsService: () => this.requireProposalsService(),
       resolveUser: (request) => this.requireUserResolver()(request),
+      // Threading the getter (not the instance): setup runs before start, and
+      // step handlers resolve it at execution time, like resolveUser above.
+      getSecurity: () => this.requireSecurity(),
     });
 
     registerRoutes({
@@ -89,6 +94,7 @@ export class AgenticInvestigationsPlugin
     plugins: AgenticInvestigationsStartDependencies
   ): AgenticInvestigationsPluginStart {
     this.spaces = plugins.spaces;
+    this.security = plugins.security;
     this.resolveUser = createProposalUserResolver({
       userProfile: coreStart.userProfile,
       security: coreStart.security,
@@ -150,6 +156,15 @@ export class AgenticInvestigationsPlugin
    * Server-derived so a caller can never attribute a decision to someone else.
    * Built in `start()`, and only ever called from a request handler or a step.
    */
+  private requireSecurity(): SecurityPluginStart {
+    if (!this.security) {
+      throw new Error(
+        'Security is not available until the agenticInvestigations plugin has started'
+      );
+    }
+    return this.security;
+  }
+
   private requireUserResolver(): ResolveProposalUser {
     if (!this.resolveUser) {
       throw new Error(

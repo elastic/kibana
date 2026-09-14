@@ -6,6 +6,7 @@
  */
 
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type {
   WorkflowsExtensionsServerPluginSetup,
@@ -22,6 +23,7 @@ export interface AgenticInvestigationsSetupDependencies {
 
 export interface AgenticInvestigationsStartDependencies {
   spaces?: SpacesPluginStart;
+  security: SecurityPluginStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
 }
 

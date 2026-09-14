@@ -10,7 +10,7 @@
     "configPath": ["xpack", "agenticInvestigations"],
     "browser": true,
     "server": true,
-    "requiredPlugins": ["features", "workflowsExtensions", "workflowsManagement"],
+    "requiredPlugins": ["features", "security", "workflowsExtensions", "workflowsManagement"],
     "optionalPlugins": ["spaces"],
     "extraPublicDirs": ["common"]
   }

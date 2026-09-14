@@ -54,6 +54,9 @@ const storageSettings = {
       executionError: types.text({}),
 
       workflowExecutionId: types.keyword({}),
+      // Written only by the recovery flow when a clone supersedes the errored
+      // proposal. Absent = live; the queue filters on this.
+      supersededBy: types.keyword({}),
 
       createdAt: types.date({}),
       createdBy: types.object({

@@ -6,19 +6,29 @@
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { updateProposalStepCommonDefinition } from '../../../common/proposals/step_types/update_proposal_step';
+import { assertManageProposals } from './assert_manage_proposals';
 import type { ProposalsService } from '../services/proposals_service';
 
 export const getUpdateProposalStepDefinition = ({
   getProposalsService,
+  getSecurity,
 }: {
   getProposalsService: () => ProposalsService;
+  getSecurity: () => SecurityPluginStart;
 }) =>
   createServerStepDefinition({
     ...updateProposalStepCommonDefinition,
     handler: async (context) => {
       try {
         const spaceId = context.contextManager.getContext().workflow.spaceId;
+
+        await assertManageProposals({
+          request: context.contextManager.getFakeRequest(),
+          security: getSecurity(),
+          spaceId,
+        });
 
         const proposal = await getProposalsService().update(
           {

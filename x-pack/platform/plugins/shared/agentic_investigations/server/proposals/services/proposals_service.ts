@@ -67,6 +67,12 @@ export interface UpdateProposalParams {
   id: string;
   status: Extract<ProposalStatus, 'executing' | 'succeeded' | 'failed' | 'dismissed'>;
   executionError?: string;
+  /**
+   * Recovery flow only: id of the clone that supersedes this proposal. The
+   * status guard above still applies — `supersededBy` is written on the same
+   * transition to `failed` that records `executionError`.
+   */
+  supersededBy?: string;
 }
 
 export interface ProposalsServiceDeps {
@@ -221,7 +227,8 @@ export class ProposalsService {
       query: {
         bool: {
           filter: [{ term: { spaceId } }],
-          // TODO(#19258): add `must_not: { exists: { field: 'supersededBy' } }` once the field lands.
+          // Landed in #19287: the queue shows only the live head of a chain.
+          must_not: [{ exists: { field: 'supersededBy' } }],
           should: [
             ...statusClause,
             { range: { decidedAt: { gte: `now-${query.decidedWithinHours}h` } } },
@@ -329,7 +336,7 @@ export class ProposalsService {
    * every caller.
    */
   async update(
-    { id, status, executionError }: UpdateProposalParams,
+    { id, status, executionError, supersededBy }: UpdateProposalParams,
     spaceId: string
   ): Promise<Proposal> {
     const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
@@ -340,7 +347,7 @@ export class ProposalsService {
       );
     }
 
-    const updated: StoredProposalRecord = { ...proposal, status, executionError };
+    const updated: StoredProposalRecord = { ...proposal, status, executionError, supersededBy };
     const { id: _id, ...document } = updated;
 
     await this.deps.storage.index({

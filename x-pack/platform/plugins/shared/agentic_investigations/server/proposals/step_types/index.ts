@@ -6,6 +6,7 @@
  */
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { ProposalsService } from '../services/proposals_service';
 import type { ResolveProposalUser } from '../services/resolve_proposal_user';
 import { getCreateProposalStepDefinition } from './create_proposal_step';
@@ -15,16 +16,18 @@ export const registerStepDefinitions = ({
   workflowsExtensions,
   getProposalsService,
   resolveUser,
+  getSecurity,
 }: {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   getProposalsService: () => ProposalsService;
   resolveUser: ResolveProposalUser;
+  getSecurity: () => SecurityPluginStart;
 }) => {
   workflowsExtensions.registerStepDefinition(
-    getCreateProposalStepDefinition({ getProposalsService, resolveUser })
+    getCreateProposalStepDefinition({ getProposalsService, resolveUser, getSecurity })
   );
   workflowsExtensions.registerStepDefinition(
-    getUpdateProposalStepDefinition({ getProposalsService })
+    getUpdateProposalStepDefinition({ getProposalsService, getSecurity })
   );
 };
 
