@@ -841,7 +841,7 @@ src/platform/plugins/private/event_annotation @elastic/kibana-dashboards
 src/platform/plugins/private/event_annotation_listing @elastic/kibana-dashboards
 src/platform/plugins/private/files_management @elastic/appex-sharedux
 src/platform/plugins/private/ftr_apis @elastic/kibana-core
-src/platform/plugins/private/image_embeddable @elastic/appex-sharedux
+src/platform/plugins/private/image_embeddable @elastic/kibana-dashboards
 src/platform/plugins/private/input_control_vis @elastic/kibana-dashboards
 src/platform/plugins/private/inspect_component @elastic/appex-sharedux
 src/platform/plugins/private/interactive_setup @elastic/kibana-security
@@ -1183,7 +1183,7 @@ x-pack/platform/plugins/private/data_federation @elastic/kibana-management
 x-pack/platform/plugins/private/data_usage @elastic/kibana-management
 x-pack/platform/plugins/private/data_visualizer @elastic/search-ml-ux
 x-pack/platform/plugins/private/discover_enhanced @elastic/kibana-discover
-x-pack/platform/plugins/private/drilldowns/url_drilldown @elastic/appex-sharedux
+x-pack/platform/plugins/private/drilldowns/url_drilldown @elastic/kibana-dashboards
 x-pack/platform/plugins/private/feedback @elastic/appex-sharedux
 x-pack/platform/plugins/private/file_upload @elastic/kibana-dashboards @elastic/search-ml-ux
 x-pack/platform/plugins/private/gen_ai_settings @elastic/search-ml-ux
