@@ -37,8 +37,8 @@ import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useInvestigations } from '../../hooks/use_investigations_api';
 import { QUEUE_PAGE_INFO } from './translations';
 import { PendingProposalsPanel } from '../../components/pending_proposals';
-import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
-import { ProposalChartsSummaryRow } from '../../components/proposal_charts_summary';
+import { usePendingProposals } from '../../hooks/use_proposals_api';
+import { ProposalsTrendChartRow } from '../../components/proposals_trend_chart';
 
 const QUEUE_STATUSES = new Set(['open', 'investigating', 'in-progress', 'escalated']);
 
@@ -65,17 +65,16 @@ export const ConversationsPage: React.FC = () => {
   // TODO: update data fetching to use the new conversations API (useConversations) and remove the useInvestigations hook
   const conversations = useMemo(() => data?.investigations ?? [], [data?.investigations]);
 
+  // The header's count comes from the proposals list API, which already returns a
+  // `track_total_hits` total for the same set the queue acts on — not summed in
+  // the browser, and deliberately independent of the trend chart's own query, so
+  // a chart failure can neither zero the count nor hold the header in loading.
   const {
-    data: statsData,
-    isLoading: isStatsLoading,
-    error: statsError,
-  } = useProposalChartsSummary();
-  const proposalCount = useMemo(() => {
-    const lastBucket = statsData?.buckets.at(-1);
-    if (!lastBucket) return 0;
-    // Every category, not just the three with cards, so `escalate` is counted too.
-    return Object.values(lastBucket.counts).reduce((a, b) => a + b, 0);
-  }, [statsData]);
+    data: pendingProposalsData,
+    isLoading: isPendingProposalsLoading,
+    error: pendingProposalsError,
+  } = usePendingProposals();
+  const proposalCount = pendingProposalsData?.total ?? 0;
 
   const onClickAction: BaseActionsProps['onClickAction'] = useCallback(
     (action, recordId, assignee = null) => {
@@ -214,19 +213,17 @@ export const ConversationsPage: React.FC = () => {
       <EuiFlexGroup gutterSize="l" direction="column" wrap>
         <EuiFlexItem grow={false}>
           <AlertZeroPageHeader
-            // Both queries: the header states something about each, so settling
-            // one while the other is in flight would flash a title the next
-            // render contradicts.
-            isLoading={isLoading || (isStatsLoading && !statsData)}
-            hasError={Boolean(statsError)}
-            isQueueEmpty={
-              !isStatsLoading && sortedConversations.length === 0 && proposalCount === 0
-            }
+            // Both queries the header speaks for — the conversation queue and
+            // the proposal count — so settling one while the other is in flight
+            // would flash a title the next render contradicts.
+            isLoading={isLoading || isPendingProposalsLoading}
+            hasError={Boolean(pendingProposalsError)}
+            isQueueEmpty={sortedConversations.length === 0 && proposalCount === 0}
             eventCount={proposalCount}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <ProposalChartsSummaryRow />
+          <ProposalsTrendChartRow />
         </EuiFlexItem>
         <EuiFlexItem>
           <BlastRadius

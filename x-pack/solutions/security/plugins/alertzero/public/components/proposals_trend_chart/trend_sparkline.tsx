@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiScreenReaderOnly, useEuiTheme } from '@elastic/eui';
 import {
   AreaSeries,
   Axis,
@@ -27,7 +27,14 @@ export interface SparklinePoint {
   y: number;
 }
 
-interface ProposalSparklineProps {
+/**
+ * The `euiTheme.size` key the chart is drawn at, exported so the card's loading
+ * skeleton reserves exactly the height the chart will occupy — a literal in
+ * either place would let the two drift and make the card jump on load.
+ */
+export const SPARKLINE_HEIGHT_SIZE = 'xxxl';
+
+interface TrendSparklineProps {
   series: SparklinePoint[];
   /** Already resolved to a real colour value by the parent. */
   color: string;
@@ -43,7 +50,7 @@ interface ProposalSparklineProps {
   bucketMinutes: number;
 }
 
-export const ProposalSparkline: React.FC<ProposalSparklineProps> = ({
+export const TrendSparkline: React.FC<TrendSparklineProps> = ({
   series,
   color,
   ariaLabel,
@@ -51,6 +58,7 @@ export const ProposalSparkline: React.FC<ProposalSparklineProps> = ({
   seriesName,
   bucketMinutes,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const chartBaseTheme = useElasticChartsTheme();
   const locale = i18n.getLocale();
   const timeZone = useKibanaTimeZone();
@@ -73,7 +81,7 @@ export const ProposalSparkline: React.FC<ProposalSparklineProps> = ({
   // Goes on the series as `tickFormat`, which is where the tooltip reads the
   // value format from — `Tooltip` no longer takes a `valueFormatter`.
   const valueFormatter = (count: number) =>
-    i18n.translate('xpack.alertzero.proposalStats.tooltipOpen', {
+    i18n.translate('xpack.alertzero.proposalsTrendChart.tooltipOpen', {
       defaultMessage: '{count} open',
       values: { count },
     });
@@ -94,9 +102,9 @@ export const ProposalSparkline: React.FC<ProposalSparklineProps> = ({
         <span>{ariaLabel}</span>
       </EuiScreenReaderOnly>
       <Chart
-        size={{ height: 48, width: '100%' }}
+        size={{ height: euiTheme.size[SPARKLINE_HEIGHT_SIZE], width: '100%' }}
         aria-hidden="true"
-        data-test-subj="alertZeroProposalSparkline"
+        data-test-subj="alertZeroProposalsTrendSparkline"
       >
         <Settings
           theme={[partialTheme]}

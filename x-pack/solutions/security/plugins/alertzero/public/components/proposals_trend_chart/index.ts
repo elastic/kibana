@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ProposalChartsSummaryRow } from './proposal_charts_summary_row';
+export { ProposalsTrendChartRow } from './proposals_trend_chart_row';

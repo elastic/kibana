@@ -7,31 +7,37 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const RESPOND_LABEL = i18n.translate('xpack.alertzero.proposalStats.respondLabel', {
+export const RESPOND_LABEL = i18n.translate('xpack.alertzero.proposalsTrendChart.respondLabel', {
   defaultMessage: 'Respond',
 });
 
-export const INVESTIGATE_LABEL = i18n.translate('xpack.alertzero.proposalStats.investigateLabel', {
-  defaultMessage: 'Investigate',
-});
+export const INVESTIGATE_LABEL = i18n.translate(
+  'xpack.alertzero.proposalsTrendChart.investigateLabel',
+  {
+    defaultMessage: 'Investigate',
+  }
+);
 
-export const CONFIGURE_LABEL = i18n.translate('xpack.alertzero.proposalStats.configureLabel', {
-  defaultMessage: 'Configure',
-});
+export const CONFIGURE_LABEL = i18n.translate(
+  'xpack.alertzero.proposalsTrendChart.configureLabel',
+  {
+    defaultMessage: 'Configure',
+  }
+);
 
 /** Takes the window rather than hardcoding 24h, which the chart no longer assumes. */
 export const HOURS_AGO = (windowHours: number) =>
-  i18n.translate('xpack.alertzero.proposalStats.hoursAgo', {
+  i18n.translate('xpack.alertzero.proposalsTrendChart.hoursAgo', {
     defaultMessage: '{windowHours}h ago',
     values: { windowHours },
   });
 
-export const NOW = i18n.translate('xpack.alertzero.proposalStats.now', {
+export const NOW = i18n.translate('xpack.alertzero.proposalsTrendChart.now', {
   defaultMessage: 'Now',
 });
 
 export const CHART_ARIA_LABEL = (label: string, count: number, windowHours: number) =>
-  i18n.translate('xpack.alertzero.proposalStats.chartAriaLabel', {
+  i18n.translate('xpack.alertzero.proposalsTrendChart.chartAriaLabel', {
     defaultMessage: '{label}: {count} open proposals over the last {windowHours} hours',
     values: { label, count, windowHours },
   });
@@ -42,7 +48,7 @@ export const CHART_ARIA_LABEL = (label: string, count: number, windowHours: numb
  * would sit outside `i18n.translate` where the i18n CI check cannot see it.
  */
 export const CHART_SERIES_NAME = (label: string) =>
-  i18n.translate('xpack.alertzero.proposalStats.chartSeriesName', {
+  i18n.translate('xpack.alertzero.proposalsTrendChart.chartSeriesName', {
     defaultMessage: '{label} actions',
     values: { label },
   });

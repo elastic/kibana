@@ -12,19 +12,16 @@ import {
   DEFAULT_WINDOW_HOURS,
   useProposalChartsSummary,
 } from '../../hooks/use_proposal_charts_summary';
-import { CHARTS_SUMMARY_PANELS } from './constants';
-import { ProposalChartsSummaryCard } from './proposal_charts_summary_card';
+import { TREND_CHART_PANELS } from './constants';
+import { ProposalsTrendChartCard } from './proposals_trend_chart_card';
 
-interface ProposalChartsSummaryRowProps {
-  windowHours?: number;
-  bucketMinutes?: number;
-}
-
-export const ProposalChartsSummaryRow: React.FC<ProposalChartsSummaryRowProps> = ({
-  windowHours = DEFAULT_WINDOW_HOURS,
-  bucketMinutes = DEFAULT_BUCKET_MINUTES,
-}) => {
-  const { data, isLoading, error } = useProposalChartsSummary({ windowHours, bucketMinutes });
+/**
+ * The window is not a prop: no caller varies it today, and a prop nothing sets
+ * is a second place for the fetched window and the rendered one to disagree.
+ * Thread it through when a caller actually needs a different one.
+ */
+export const ProposalsTrendChartRow: React.FC = () => {
+  const { data, isLoading, error } = useProposalChartsSummary();
 
   // Hide rather than error out: the queue below is the primary surface. Gated on
   // `!data` so keepPreviousData keeps the cards up through a transient refetch failure.
@@ -39,9 +36,9 @@ export const ProposalChartsSummaryRow: React.FC<ProposalChartsSummaryRowProps> =
     <EuiFlexGroup
       gutterSize="m"
       responsive={false}
-      data-test-subj="alertZeroProposalChartsSummaryRow"
+      data-test-subj="alertZeroProposalsTrendChartRow"
     >
-      {CHARTS_SUMMARY_PANELS.map(({ id, category, label, color }) => {
+      {TREND_CHART_PANELS.map(({ id, category, label, color }) => {
         const series = buckets.map((b) => ({
           x: b.timestamp,
           y: b.counts[category] ?? 0,
@@ -50,15 +47,15 @@ export const ProposalChartsSummaryRow: React.FC<ProposalChartsSummaryRowProps> =
 
         return (
           <EuiFlexItem key={id}>
-            <ProposalChartsSummaryCard
+            <ProposalsTrendChartCard
               id={id}
               label={label}
               color={color}
               count={count}
               series={series}
               isLoading={isLoading}
-              windowHours={windowHours}
-              bucketMinutes={bucketMinutes}
+              windowHours={DEFAULT_WINDOW_HOURS}
+              bucketMinutes={DEFAULT_BUCKET_MINUTES}
             />
           </EuiFlexItem>
         );

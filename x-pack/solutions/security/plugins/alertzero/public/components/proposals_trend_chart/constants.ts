@@ -7,12 +7,17 @@
 
 import * as i18n from './translations';
 
-/** `escalate` is omitted until there is a design decision on where it belongs. */
-export const CHARTS_SUMMARY_PANELS = [
+/**
+ * `escalate` is omitted until there is a design decision on where it belongs.
+ *
+ * Frozen rather than only `as const`: `as const` is a compile-time promise,
+ * and this module-level array is shared by every card on the page.
+ */
+export const TREND_CHART_PANELS = Object.freeze([
   { id: 'respond', category: 'contain', label: i18n.RESPOND_LABEL, color: 'danger' },
   { id: 'investigate', category: 'investigate', label: i18n.INVESTIGATE_LABEL, color: 'warning' },
   { id: 'configure', category: 'tune', label: i18n.CONFIGURE_LABEL, color: 'primary' },
-] as const;
+] as const);
 
-export type ChartsSummaryPanelId = (typeof CHARTS_SUMMARY_PANELS)[number]['id'];
-export type ChartsSummaryPanelColor = (typeof CHARTS_SUMMARY_PANELS)[number]['color'];
+export type TrendChartPanelId = (typeof TREND_CHART_PANELS)[number]['id'];
+export type TrendChartPanelColor = (typeof TREND_CHART_PANELS)[number]['color'];

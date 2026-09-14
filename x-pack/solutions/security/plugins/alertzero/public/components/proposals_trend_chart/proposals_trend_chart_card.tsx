@@ -9,31 +9,32 @@ import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingChart,
   EuiPanel,
+  EuiSkeletonRectangle,
+  EuiSkeletonTitle,
   EuiSpacer,
   EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { ProposalSparkline } from './proposal_sparkline';
+import { SPARKLINE_HEIGHT_SIZE, TrendSparkline, type SparklinePoint } from './trend_sparkline';
 import { CHART_ARIA_LABEL, CHART_SERIES_NAME, HOURS_AGO, NOW } from './translations';
-import type { ChartsSummaryPanelColor } from './constants';
+import type { TrendChartPanelColor } from './constants';
 
-interface ProposalChartsSummaryCardProps {
+interface ProposalsTrendChartCardProps {
   id: string;
   label: string;
-  color: ChartsSummaryPanelColor;
+  color: TrendChartPanelColor;
   count: number;
   /** Oldest-first. */
-  series: Array<{ x: number; y: number }>;
+  series: SparklinePoint[];
   isLoading: boolean;
   /** The window the series was fetched for; labels and tooltips read from it. */
   windowHours: number;
   bucketMinutes: number;
 }
 
-export const ProposalChartsSummaryCard: React.FC<ProposalChartsSummaryCardProps> = ({
+export const ProposalsTrendChartCard: React.FC<ProposalsTrendChartCardProps> = ({
   id,
   label,
   color,
@@ -45,32 +46,47 @@ export const ProposalChartsSummaryCard: React.FC<ProposalChartsSummaryCardProps>
 }) => {
   const { euiTheme } = useEuiTheme();
 
-  // @elastic/charts needs a real colour value, not an EUI token name.
-  const colorMap: Record<ChartsSummaryPanelColor, string> = {
-    danger: euiTheme.colors.danger,
-    warning: euiTheme.colors.warning,
-    primary: euiTheme.colors.primary,
+  // @elastic/charts needs a real colour value, not an EUI token name, and the
+  // `vis` palette rather than the status colours: visualization colours are
+  // curated for charts and stay correct as the palette evolves.
+  const colorMap: Record<TrendChartPanelColor, string> = {
+    danger: euiTheme.colors.vis.euiColorVisDanger0,
+    warning: euiTheme.colors.vis.euiColorVisWarning0,
+    primary: euiTheme.colors.vis.euiColorVisBase0,
   };
   const resolvedColor = colorMap[color];
+  const sparklineHeight = euiTheme.size[SPARKLINE_HEIGHT_SIZE];
 
   return (
     <EuiPanel
       hasBorder
       paddingSize="m"
       css={{ borderRadius: euiTheme.size.s }}
-      data-test-subj={`alertZeroProposalChartsSummaryCard-${id}`}
+      data-test-subj={`alertZeroProposalsTrendChartCard-${id}`}
     >
       <EuiTitle size="xxs">
-        <h3 style={{ fontWeight: euiTheme.font.weight.semiBold }}>{label}</h3>
+        <h3 css={{ fontWeight: euiTheme.font.weight.semiBold }}>{label}</h3>
       </EuiTitle>
-      <EuiText size="s" style={{ fontWeight: euiTheme.font.weight.bold, fontSize: '1.75rem' }}>
-        {isLoading ? <EuiLoadingChart size="m" /> : <span>{count}</span>}
-      </EuiText>
+      {isLoading ? (
+        <EuiSkeletonTitle
+          size="l"
+          data-test-subj={`alertZeroProposalsTrendChartCountLoading-${id}`}
+        />
+      ) : (
+        <EuiTitle size="l">
+          <p data-test-subj={`alertZeroProposalsTrendChartCount-${id}`}>{count}</p>
+        </EuiTitle>
+      )}
       <EuiSpacer size="s" />
       {isLoading ? (
-        <div style={{ height: 48 }} />
+        <EuiSkeletonRectangle
+          width="100%"
+          height={sparklineHeight}
+          borderRadius="m"
+          data-test-subj={`alertZeroProposalsTrendChartLoading-${id}`}
+        />
       ) : (
-        <ProposalSparkline
+        <TrendSparkline
           series={series}
           color={resolvedColor}
           ariaLabel={CHART_ARIA_LABEL(label, count, windowHours)}
