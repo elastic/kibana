@@ -14,7 +14,7 @@ import {
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core/server';
 import { parseDurationToMs } from '../infra/time';
-import { TasksConfig } from './config';
+import { getHistorySnapshotTaskId, TasksConfig } from './config';
 import { EntityStoreTaskType } from './constants';
 import type { EntityStoreCoreSetup } from '../types';
 import { EntityStoreGlobalStateClient } from '../domain/saved_objects';
@@ -24,8 +24,7 @@ import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_ta
 
 const config = TasksConfig[EntityStoreTaskType.enum.historySnapshot];
 
-export const getHistorySnapshotTaskId = (namespace: string): string =>
-  `${config.type}:${namespace}`;
+export { getHistorySnapshotTaskId };
 
 interface RunHistorySnapshotTaskParams {
   taskInstance: { state: Record<string, unknown>; id: string };
@@ -51,7 +50,7 @@ async function runHistorySnapshotTask({
     return { state: taskInstance.state };
   }
 
-  const [start] = await core.getStartServices();
+  const [start, plugins] = await core.getStartServices();
   if (
     await shouldDeleteOrphanedEntityStoreTask({
       coreStart: start,
@@ -77,6 +76,7 @@ async function runHistorySnapshotTask({
     esClient,
     namespace,
     globalStateClient,
+    taskManager: plugins.taskManager,
   });
 
   await historySnapshotClient.runHistorySnapshot({

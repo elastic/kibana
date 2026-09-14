@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type {
+  BulkUpdateTaskResult,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
 import { entityStoreMetrics } from '../../monitor/metrics';
-import type { EntityStoreGlobalState } from '../saved_objects';
-import type { EntityStoreGlobalStateClient } from '../saved_objects';
+import type {
+  EntityStoreGlobalState,
+  EntityStoreGlobalStateClient,
+  HistorySnapshotStatus,
+} from '../saved_objects';
 import { createIndex, reindex, updateByQueryWithScript } from '../../infra/elasticsearch';
 import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
 import { getErrorMessage } from '../../../common';
@@ -18,6 +25,8 @@ import {
   getLegacySecurityHistorySnapshotIndexName,
 } from '../asset_manager/history_snapshot_index';
 import { resolveLatestEntitiesIndexName } from '../asset_manager/resolve_entity_store_indices';
+import { getHistorySnapshotTaskId } from '../../tasks/config';
+import { EntityStoreNotInstalledError } from '../errors';
 import { HISTORY_SNAPSHOT_RESET_SCRIPT } from './constants';
 
 export type RunHistorySnapshotResult =
@@ -39,6 +48,44 @@ export interface HistorySnapshotClientDependencies {
   esClient: ElasticsearchClient;
   namespace: string;
   globalStateClient: EntityStoreGlobalStateClient;
+  taskManager: TaskManagerStartContract;
+}
+
+const HISTORY_SNAPSHOT_TASK_RUN_SOON_ON_ENABLE = false;
+
+function getTaskUpdateErrorStatusCode(
+  result: BulkUpdateTaskResult['errors'][number]
+): number | undefined {
+  const { error, status } = result;
+  if (typeof error === 'object' && error !== null && 'statusCode' in error) {
+    const { statusCode } = error;
+    if (typeof statusCode === 'number') {
+      return statusCode;
+    }
+  }
+  return status;
+}
+
+function getTaskUpdateErrorMessage(result: BulkUpdateTaskResult['errors'][number]): string {
+  const { error } = result;
+  if (typeof error === 'object' && error !== null && 'message' in error) {
+    return String(error.message);
+  }
+  return getErrorMessage(error);
+}
+
+function throwIfHistorySnapshotTaskUpdateFailed(
+  result: BulkUpdateTaskResult,
+  action: 'enable' | 'disable'
+): void {
+  const [error] = result.errors;
+  if (!error) {
+    return;
+  }
+  if (getTaskUpdateErrorStatusCode(error) === 404) {
+    throw new EntityStoreNotInstalledError();
+  }
+  throw new Error(`Failed to ${action} history snapshot task: ${getTaskUpdateErrorMessage(error)}`);
 }
 
 export class HistorySnapshotClient {
@@ -46,17 +93,28 @@ export class HistorySnapshotClient {
   private readonly esClient: ElasticsearchClient;
   private readonly namespace: string;
   private readonly globalStateClient: EntityStoreGlobalStateClient;
+  private readonly taskManager: TaskManagerStartContract;
 
   constructor({
     logger,
     esClient,
     namespace,
     globalStateClient,
+    taskManager,
   }: HistorySnapshotClientDependencies) {
     this.logger = logger;
     this.esClient = esClient;
     this.namespace = namespace;
     this.globalStateClient = globalStateClient;
+    this.taskManager = taskManager;
+  }
+
+  public async enable(request: KibanaRequest): Promise<void> {
+    await this.setTaskEnabled(true, request);
+  }
+
+  public async disable(request: KibanaRequest): Promise<void> {
+    await this.setTaskEnabled(false, request);
   }
 
   public async runHistorySnapshot(
@@ -139,6 +197,28 @@ export class HistorySnapshotClient {
       await this.updateGlobalStateOnError(globalState, caughtError);
       return { ok: false, error: new Error('History snapshot failed') };
     }
+  }
+
+  private async setTaskEnabled(enabled: boolean, request: KibanaRequest): Promise<void> {
+    const globalState = await this.globalStateClient.findOrThrow();
+    const taskId = getHistorySnapshotTaskId(this.namespace);
+    const action = enabled ? 'enable' : 'disable';
+    const result = enabled
+      ? await this.taskManager.bulkEnable([taskId], HISTORY_SNAPSHOT_TASK_RUN_SOON_ON_ENABLE, {
+          request,
+        })
+      : await this.taskManager.bulkDisable([taskId], false, { request });
+
+    throwIfHistorySnapshotTaskUpdateFailed(result, action);
+
+    const status: HistorySnapshotStatus = enabled ? 'started' : 'stopped';
+    await this.globalStateClient.update({
+      historySnapshot: {
+        ...globalState.historySnapshot,
+        status,
+      },
+    });
+    this.logger.debug(`${enabled ? 'Enabled' : 'Disabled'} history snapshot task ${taskId}`);
   }
 
   private async updateGlobalStateOnSuccess(globalState: EntityStoreGlobalState): Promise<void> {
