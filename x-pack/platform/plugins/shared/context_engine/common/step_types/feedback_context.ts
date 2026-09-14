@@ -31,10 +31,11 @@ export const feedbackContextOutputSchema = z.object({
     .describe(
       "JSON Schema for the run's structured output, narrowed to the actions this AI index permits."
     ),
-  has_signals: z
+  has_signals: z.boolean().describe('Whether any selected signal was classified as a problem.'),
+  can_analyze: z
     .boolean()
     .describe(
-      'Whether any selected signal was classified as a problem. False means there is nothing to analyze and the agent should not be run.'
+      'Whether this index has anything worth reading: signals, indicators, sources or automations. False means an index with nothing configured and nothing observed, where a run would have no material, and the agent should not be run.'
     ),
   signal_window: z
     .object({ from: z.string(), to: z.string() })
@@ -69,8 +70,10 @@ export const feedbackContextStepCommonDefinition: CommonStepDefinition<
           'Selects the signals relevant to one AI index, folds them into ranked patterns, and ' +
           'renders the briefing an analysis run is given, together with the agent to run it and ' +
           'the output schema it must answer with. Reads signals across every space, because an ' +
-          'AI index is global while signals are per-space. Check has_signals before running the ' +
-          'agent: a window with no classified patterns has nothing to analyze.',
+          'AI index is global while signals are per-space. Signals are not required: the briefing ' +
+          'also carries the index\u2019s indicators, sources, automations and prior proposals, which ' +
+          'are enough to review a setup nobody has queried yet. Check can_analyze before running ' +
+          'the agent, which is false only for an index with nothing configured and nothing observed.',
       }
     ),
     examples: [

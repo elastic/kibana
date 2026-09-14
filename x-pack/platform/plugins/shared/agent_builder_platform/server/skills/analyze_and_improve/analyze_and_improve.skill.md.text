@@ -264,6 +264,27 @@ from: it has already been scoped to this index and window, and it is what your o
 reconciled against. Query the indices yourself for the denominator, and otherwise only when no
 signals came with the run.
 
+### When there are no signals
+
+A run whose window holds no signals is still worth doing, and is the one case the rules above do
+not cover. Nothing has queried the index, or nothing that did was traced. That settles only what
+you cannot say: nothing about what agents asked for, what came back, or which retrievals failed.
+
+The index itself is still there to read, and most of what makes it good or bad is visible without a
+single retrieval:
+
+- **Indicators against their source.** A KI whose claim the source data no longer supports is
+  wrong whether or not anyone has hit it.
+- **Automations against their output.** An automation that has produced nothing, or whose
+  indicators all predate its last edit, is not doing its job.
+- **Sources against coverage.** A source no indicator draws on is either unused or unreachable.
+- **The description against the indicators.** An index promising coverage its KIs do not hold is
+  one that will fail the first agent to trust it.
+
+Propose from those, and say in the rationale what you read, since there are no signal ids to cite.
+An empty answer is still better than a padded one — but "no signals" is not by itself a reason to
+return nothing, and an index nobody has queried yet is exactly when a bad setup is cheapest to fix.
+
 ## Reading what the index does today
 
 Before proposing a change to something, read it.
