@@ -44,7 +44,7 @@ For information about building the documentation, see the README in [elastic/doc
 
 ### Elasticsearch & Kibana Compatibility
 
-- __Major Versions:__ Must strictly match.
+- __Major Versions:__ Must strictly match (with exceptions for `prevmajor.last`)
 - __Kibana Patch Ahead:__ Kibana can run on a newer patch version than Elasticsearch (e.g. Elasticsearch 9.4.0 with Kibana 9.4.2) to allow easier Kibana-only patching.
 - __Kibana Minor Behind:__ Kibana can run using an older minor version than Elasticsearch (e.g. Kibana 9.3 with Elasticsearch 9.4) to simplify rolling upgrades.
 - __Upgrade Guidance:__ We strongly recommend upgrading Kibana to the matching version. If you encounter issues on mismatched versions, you will first be asked to upgrade to a matching minor before support or troubleshooting can begin.
@@ -56,7 +56,7 @@ _Note: The version numbers below are only examples, meant to illustrate the rela
 | Versions are the same.    | 9.4.1                     | 9.4.1              | OK      |
 | ES patch number is newer. | 9.4.__0__                 | 9.4.__1__          | Logged warning   |
 | ES minor number is newer. | 9.__3__.2                 | 9.__4__.0          | Logged warning   |
-| ES major number is newer. | __8__.19.1                | __9__.0.0          | Fatal error      |
+| ES major number is newer. | __8__.14.1                | __9__.0.0          | Fatal error      |
 | ES patch number is older. | 9.4.__1__                 | 9.4.__0__          | Logged warning   |
 | ES minor number is older. | 9.__4__.1                 | 9.__3__.2          | Fatal error      |
 | ES major number is older. | __9__.0.0                 | __8__.19.1         | Fatal error      |
