@@ -87,7 +87,8 @@ const initializeSearchSource = async (
 const initializedSavedSearch = (
   stateManager: SearchEmbeddableStateManager,
   searchSource: ISearchSource,
-  discoverServices: DiscoverServices
+  discoverServices: DiscoverServices,
+  tabTypeState: SavedSearch['tabTypeState']
 ): SavedSearch => {
   return {
     ...Object.keys(stateManager).reduce((prev, key) => {
@@ -97,6 +98,7 @@ const initializedSavedSearch = (
       };
     }, discoverServices.savedSearch.getNew()),
     searchSource,
+    ...(tabTypeState !== undefined && { tabTypeState }),
   };
 };
 
@@ -112,7 +114,7 @@ export const initializeSearchEmbeddableApi = async ({
   dataLoading$,
   discoverServices,
 }: {
-  initialState: SearchEmbeddableSerializedAttributes;
+  initialState: SearchEmbeddableSerializedAttributes & Pick<SavedSearch, 'tabTypeState'>;
   dataLoading$: BehaviorSubject<boolean | undefined>;
   discoverServices: DiscoverServices;
 }): Promise<{
@@ -205,7 +207,7 @@ export const initializeSearchEmbeddableApi = async ({
 
   /** The saved search should be the source of truth for all state  */
   const savedSearch$ = new BehaviorSubject(
-    initializedSavedSearch(stateManager, searchSource, discoverServices)
+    initializedSavedSearch(stateManager, searchSource, discoverServices, initialState.tabTypeState)
   );
 
   /** This will fire when any of the **editable** state changes */

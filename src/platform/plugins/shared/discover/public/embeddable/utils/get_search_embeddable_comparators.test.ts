@@ -8,13 +8,16 @@
  */
 
 import { runComparator } from '@kbn/presentation-publishing';
-import { getDiscoverSessionEmbeddableComparators } from './get_search_embeddable_comparators';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
+import { DiscoverTabType } from '@kbn/discover-utils';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import type { DiscoverSessionEmbeddableByValueProps } from '../../../server';
+import { getDiscoverSessionEmbeddableComparators } from './get_search_embeddable_comparators';
 
 describe('getDiscoverSessionEmbeddableComparators', () => {
   const language = 'kql' as const;
-  const baseTab = {
+  const baseTab: DiscoverSessionEmbeddableByValueProps['tabs'][number] = {
+    type: DiscoverTabType.Default,
     query: { language, expression: '*' },
     filters: [],
     sort: [],
@@ -70,29 +73,37 @@ describe('getDiscoverSessionEmbeddableComparators', () => {
 
     it('treats tab arrays as equal when each tab is deeply equal', () => {
       const cmp = getTabsComparator();
-      const tab = { ...baseTab };
+      const tab: DiscoverSessionEmbeddableByValueProps['tabs'][number] = { ...baseTab };
       expect(runComparator(cmp, undefined, undefined, [baseTab], [tab])).toBe(true);
     });
 
     it('treats omitted optional fields as equal to explicit undefined (e.g. query)', () => {
       const cmp = getTabsComparator();
       const { query, ...tabWithoutQuery } = baseTab;
-      const tabA = { ...tabWithoutQuery };
-      const tabB = { ...tabWithoutQuery, query: undefined };
+      const tabA: DiscoverSessionEmbeddableByValueProps['tabs'][number] = { ...tabWithoutQuery };
+      const tabB: DiscoverSessionEmbeddableByValueProps['tabs'][number] = {
+        ...tabWithoutQuery,
+        query: undefined,
+      };
       expect(runComparator(cmp, undefined, undefined, [tabA], [tabB])).toBe(true);
     });
 
     it('treats tab arrays as not equal when a tab differs', () => {
       const cmp = getTabsComparator();
-      const tabA = { ...baseTab, query: { language, expression: 'a' } };
-      const tabB = { ...baseTab, query: { language, expression: 'b' } };
+      const tabA: DiscoverSessionEmbeddableByValueProps['tabs'][number] = {
+        ...baseTab,
+        query: { language, expression: 'a' },
+      };
+      const tabB: DiscoverSessionEmbeddableByValueProps['tabs'][number] = {
+        ...baseTab,
+        query: { language, expression: 'b' },
+      };
       expect(runComparator(cmp, undefined, undefined, [tabA], [tabB])).toBe(false);
     });
 
     it('treats tab arrays as not equal when lengths differ', () => {
       const cmp = getTabsComparator();
-      const tab = { ...baseTab };
-      expect(runComparator(cmp, undefined, undefined, [tab], [tab, tab])).toBe(false);
+      expect(runComparator(cmp, undefined, undefined, [baseTab], [baseTab, baseTab])).toBe(false);
     });
   });
 

@@ -43,6 +43,7 @@ export { config } from './config';
 export type {
   DiscoverSessionClassicTab,
   DiscoverSessionEsqlTab,
+  DiscoverSessionMetricsTab,
   DiscoverSessionTab,
   DiscoverSessionPanelOverrides,
   DiscoverSessionEmbeddableByValueProps,

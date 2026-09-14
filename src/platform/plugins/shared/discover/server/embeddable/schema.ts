@@ -22,6 +22,10 @@ import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import { dataViewSchema } from '@kbn/as-code-data-views-schema';
 import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
 import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import {
+  discoverSessionDefaultTabTypeStateSchema,
+  discoverSessionMetricsTabTypeStateSchema,
+} from '../../common/session/metrics';
 
 const columnSettingsEntrySchema = z
   .object({
@@ -228,7 +232,22 @@ export const esqlTabSchema = z
     description: 'ES|QL (Elasticsearch Query Language) data source.',
   });
 
+const metricsTabSchema = esqlTabSchema.extend(discoverSessionMetricsTabTypeStateSchema.shape).meta({
+  title: 'Metrics tab',
+  description:
+    'An ES|QL tab with saved metrics grid settings. ' +
+    'The dashboard panel persists this configuration for use in Discover and renders the data table, not the metrics grid.',
+});
+
 export const tabSchema = z.union([classicTabSchema, esqlTabSchema]);
+
+const byValueTabSchema = z.union([
+  classicTabSchema.extend(discoverSessionDefaultTabTypeStateSchema.shape),
+  esqlTabSchema.extend(discoverSessionDefaultTabTypeStateSchema.shape).meta({
+    description: 'ES|QL (Elasticsearch Query Language) data source.',
+  }),
+  metricsTabSchema,
+]);
 
 const DISCOVER_SUPPORTED_DRILLDOWN_TRIGGERS = [ON_OPEN_PANEL_MENU];
 
@@ -255,7 +274,7 @@ function withPanelSchemas<T extends z.ZodRawShape>(
 
 const discoverSessionByValuePropsSchema = z
   .object({
-    tabs: z.array(tabSchema).min(1).max(1).meta({
+    tabs: z.array(byValueTabSchema).min(1).max(1).meta({
       description:
         'Inline tab configuration. Used when no `ref_id` is set. Currently supports one tab.',
     }),
@@ -291,6 +310,7 @@ export const getDiscoverSessionEmbeddableSchema = (
 
 export type DiscoverSessionPanelOverrides = z.output<typeof panelOverridesSchema>;
 export type DiscoverSessionClassicTab = z.output<typeof classicTabSchema>;
+export type DiscoverSessionMetricsTab = z.output<typeof metricsTabSchema>;
 export type DiscoverSessionEsqlTab = z.output<typeof esqlTabSchema>;
 export type DiscoverSessionTab = z.output<typeof tabSchema>;
 export type DiscoverSessionEmbeddableByValueProps = z.output<

@@ -31,6 +31,7 @@ import type {
 } from '@kbn/presentation-publishing';
 import type {
   DiscoverSessionTab,
+  DiscoverSessionTabTypeState,
   SavedSearch,
   SerializableSavedSearch,
 } from '@kbn/saved-search-plugin/common/types';
@@ -93,6 +94,7 @@ export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes 
     savedObjectDescription?: string;
     nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
     selectedTabId?: string;
+    tabTypeState?: DiscoverSessionTabTypeState;
     tabs?: DiscoverSessionTab[];
   };
 

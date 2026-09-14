@@ -58,6 +58,7 @@ export const fromDiscoverSessionAttributesToSavedSearch = <
     density: attributes.density,
     documentsDisplayMode: attributes.documentsDisplayMode,
     jsonModeSettings: attributes.jsonModeSettings,
+    ...(attributes.tabTypeState !== undefined && { tabTypeState: attributes.tabTypeState }),
     tabs,
     managed,
     sharingSavedObjectProps,
@@ -68,8 +69,8 @@ export const fromDiscoverSessionAttributesToSavedSearch = <
 export const toSavedSearchAttributes = (
   savedSearch: SavedSearch,
   searchSourceJSON: string
-): SavedSearchAttributes =>
-  extractTabs({
+): SavedSearchAttributes => {
+  const attributes = extractTabs({
     kibanaSavedObjectMeta: { searchSourceJSON },
     title: savedSearch.title ?? '',
     sort: savedSearch.sort ?? [],
@@ -97,3 +98,23 @@ export const toSavedSearchAttributes = (
     chartInterval: savedSearch.chartInterval,
     visContext: savedSearch.visContext,
   });
+
+  if (savedSearch.tabTypeState === undefined) {
+    return attributes;
+  }
+
+  const [tab] = attributes.tabs;
+
+  return {
+    ...attributes,
+    tabs: [
+      {
+        ...tab,
+        attributes: {
+          ...tab.attributes,
+          tabTypeState: savedSearch.tabTypeState,
+        },
+      },
+    ],
+  };
+};

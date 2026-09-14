@@ -11,6 +11,7 @@ export { createSearchEmbeddableFactory } from './search_embeddable_factory';
 export type {
   DiscoverSessionClassicTab,
   DiscoverSessionEsqlTab,
+  DiscoverSessionMetricsTab,
   DiscoverSessionTab,
   DiscoverSessionPanelOverrides,
   DiscoverSessionEmbeddableByValueProps,

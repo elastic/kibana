@@ -303,6 +303,9 @@ export const getSearchEmbeddableFactory = ({
 
       const toolkit = createInMemoryContextAwarenessToolkit({
         profileStateRegistry: discoverServices.profileStateRegistry,
+        initialProfileState: discoverServices.profileStateRegistry.fromSavedState(
+          runtimeState.tabTypeState
+        ),
         actions: {
           addFilter: enableFilters ? addFilter : undefined,
           refreshData: () => refreshTrigger$.next(undefined),
