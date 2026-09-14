@@ -1796,7 +1796,11 @@ describe('WorkflowStepExecutionTree', () => {
             execution={createMockExecution({
               status: ExecutionStatus.COMPLETED,
               stepExecutions: [
-                createMockStepExecution({ id: 'foreach-exec', stepId: 'loop', stepType: 'foreach' }),
+                createMockStepExecution({
+                  id: 'foreach-exec',
+                  stepId: 'loop',
+                  stepType: 'foreach',
+                }),
                 ...Array.from({ length: 6 }, (_, i) =>
                   createMockStepExecution({
                     id: `step-${i}`,
