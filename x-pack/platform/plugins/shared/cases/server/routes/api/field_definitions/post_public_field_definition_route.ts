@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { isBoom } from '@hapi/boom';
 import { CASE_FIELD_DEFINITIONS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
@@ -13,10 +14,12 @@ import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 import { PublicFieldDefinitionWriteBodySchema } from './public_field_definition_write_body';
 import { toPublicFieldDefinition } from './to_public_field_definition';
+import { validateFieldDefinitionYaml } from './validate_field_definition_input';
 
 /**
  * POST /api/cases/field_definitions
- * Public route — create a reusable field definition.
+ * Public route — create a reusable field definition. `dry_run=true` runs the full
+ * authorization + body + name-uniqueness validation without writing anything.
  */
 export const postPublicFieldDefinitionRoute = createCasesRoute({
   method: 'post',
@@ -26,6 +29,11 @@ export const postPublicFieldDefinitionRoute = createCasesRoute({
     access: 'public',
     summary: 'Create a reusable field definition',
     tags: ['oas-tag:cases'],
+  },
+  params: {
+    query: schema.object({
+      dry_run: schema.boolean({ defaultValue: false }),
+    }),
   },
   handler: async ({ context, request, response }) => {
     try {
@@ -39,7 +47,23 @@ export const postPublicFieldDefinitionRoute = createCasesRoute({
         });
       }
 
-      const created = await casesClient.fieldDefinitions.createFieldDefinition(bodyResult.data);
+      const definitionValidation = validateFieldDefinitionYaml(bodyResult.data.definition);
+      if (!definitionValidation.valid) {
+        return response.badRequest({ body: { message: definitionValidation.message } });
+      }
+
+      // Resolve `name` from the YAML when the caller omitted it.
+      const input = {
+        ...bodyResult.data,
+        name: bodyResult.data.name ?? definitionValidation.name,
+      };
+
+      if (request.query.dry_run) {
+        await casesClient.fieldDefinitions.validateCreateFieldDefinition(input);
+        return response.ok({ body: { valid: true } });
+      }
+
+      const created = await casesClient.fieldDefinitions.createFieldDefinition(input);
 
       return response.ok({ body: toPublicFieldDefinition(created.attributes) });
     } catch (error) {

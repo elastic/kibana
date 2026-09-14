@@ -8,13 +8,13 @@ description: >
 
 
   Identity constraints: the `name` property must match the `name` key in the YAML `definition`.
+  When `name` is omitted, the server extracts it from the `definition` YAML automatically.
   Once created, a field's `name` and YAML `type` are immutable — they determine the key under which
   case values are stored. An attempt to change either returns `409` with
   `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity
   attributes were modified.
 type: object
 required:
-  - name
   - owner
   - definition
 properties:
@@ -24,7 +24,8 @@ properties:
     maxLength: 50
     description: >
       The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML
-      definition. Immutable after creation.
+      definition. When omitted, the name is extracted from the definition YAML automatically.
+      Immutable after creation.
   owner:
     $ref: 'owner.yaml'
   definition:

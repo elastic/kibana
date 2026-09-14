@@ -17,10 +17,12 @@ import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 import { PublicFieldDefinitionWriteBodySchema } from './public_field_definition_write_body';
 import { toPublicFieldDefinition } from './to_public_field_definition';
+import { validateFieldDefinitionYaml } from './validate_field_definition_input';
 
 /**
  * PUT /api/cases/field_definitions/{field_definition_id}
- * Public route — update editable attributes of a reusable field definition.
+ * Public route — update editable attributes of a reusable field definition. `dry_run=true` runs
+ * the full authorization + body + identity-immutability validation without writing anything.
  */
 export const putPublicFieldDefinitionRoute = createCasesRoute({
   method: 'put',
@@ -34,6 +36,9 @@ export const putPublicFieldDefinitionRoute = createCasesRoute({
   params: {
     params: schema.object({
       field_definition_id: schema.string({ maxLength: MAX_FIELD_DEFINITION_ID_LENGTH }),
+    }),
+    query: schema.object({
+      dry_run: schema.boolean({ defaultValue: false }),
     }),
   },
   handler: async ({ context, request, response }) => {
@@ -52,9 +57,25 @@ export const putPublicFieldDefinitionRoute = createCasesRoute({
         });
       }
 
+      const definitionValidation = validateFieldDefinitionYaml(bodyResult.data.definition);
+      if (!definitionValidation.valid) {
+        return response.badRequest({ body: { message: definitionValidation.message } });
+      }
+
+      // Resolve `name` from the YAML when the caller omitted it.
+      const input = {
+        ...bodyResult.data,
+        name: bodyResult.data.name ?? definitionValidation.name,
+      };
+
+      if (request.query.dry_run) {
+        await casesClient.fieldDefinitions.validateUpdateFieldDefinition(fieldDefinitionId, input);
+        return response.ok({ body: { valid: true } });
+      }
+
       const updated = await casesClient.fieldDefinitions.updateFieldDefinition(
         fieldDefinitionId,
-        bodyResult.data
+        input
       );
 
       return response.ok({ body: toPublicFieldDefinition(updated.attributes) });

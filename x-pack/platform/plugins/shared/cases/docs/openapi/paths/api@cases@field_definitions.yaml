@@ -80,10 +80,20 @@ post:
   description: >
     Creates a reusable field definition in the field library. You must have the "Manage templates"
     sub-privilege for the Cases feature of the owning solution. Requires the Cases feature to be
-    enabled in the space.
+    enabled in the space. Use `dry_run=true` to validate the request without writing anything.
   x-state: Technical preview
   tags:
     - cases
+  parameters:
+    - in: query
+      name: dry_run
+      description: >
+        When true, runs authorization, body, and name-uniqueness validation without creating the
+        field definition. Returns `{ "valid": true }` on success.
+      required: false
+      schema:
+        type: boolean
+        default: false
   requestBody:
     required: true
     content:

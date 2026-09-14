@@ -41,10 +41,14 @@ export interface FieldDefinitionsSubClient {
   getFieldDefinitions(params: FieldDefinitionsFindRequest): Promise<FieldDefinitionsFindResponse>;
   getFieldDefinition(id: string): Promise<SavedObject<FieldDefinition>>;
   createFieldDefinition(input: CreateFieldDefinitionInput): Promise<SavedObject<FieldDefinition>>;
+  /** Runs authorization + cap + uniqueness validation without writing. Used by the `dry_run` path. */
+  validateCreateFieldDefinition(input: CreateFieldDefinitionInput): Promise<void>;
   updateFieldDefinition(
     id: string,
     input: UpdateFieldDefinitionInput
   ): Promise<SavedObject<FieldDefinition>>;
+  /** Runs authorization + identity-immutability validation without writing. Used by the `dry_run` path. */
+  validateUpdateFieldDefinition(id: string, input: UpdateFieldDefinitionInput): Promise<void>;
   deleteFieldDefinition(id: string): Promise<void>;
 }
 
@@ -64,7 +68,9 @@ const usageCounterByMethod = {
   getFieldDefinitions: null,
   getFieldDefinition: null,
   createFieldDefinition: 'create_field_definition',
+  validateCreateFieldDefinition: null,
   updateFieldDefinition: 'update_field_definition',
+  validateUpdateFieldDefinition: null,
   deleteFieldDefinition: 'delete_field_definition',
 } as const satisfies Record<keyof FieldDefinitionsSubClient, string | null>;
 
@@ -239,6 +245,36 @@ export const createFieldDefinitionsSubClient = (
       }
     ),
 
+    validateCreateFieldDefinition: async (input: CreateFieldDefinitionInput) => {
+      await authorization.ensureAuthorized({
+        operation: Operations.manageTemplate,
+        entities: [{ owner: input.owner, id: input.name }],
+      });
+
+      const existing = await fieldDefinitionsService.getFieldDefinitions([input.owner]);
+
+      if (existing.total >= MAX_FIELD_DEFINITIONS_PER_OWNER) {
+        throw Boom.badRequest(
+          `Cannot create more than ${MAX_FIELD_DEFINITIONS_PER_OWNER} field definitions per owner.`
+        );
+      }
+
+      const nameLower = input.name.toLowerCase();
+      const conflict = existing.fieldDefinitions.find(
+        (fd) => fd.name.toLowerCase() === nameLower
+      );
+      if (conflict) {
+        throw Boom.conflict(
+          `A field definition with name "${conflict.name}" already exists for this owner.`
+        );
+      }
+
+      const identity = parseFieldDefinitionIdentity(input.definition);
+      if (identity) {
+        assertNameMatchesYamlDefinition(input.name, identity.name);
+      }
+    },
+
     // Field definitions are library-level objects, not case-level objects. They are
     // not part of any case's audit trail so no UserAction is created for mutations.
     updateFieldDefinition: withUsageCounter(
@@ -314,6 +350,56 @@ export const createFieldDefinitionsSubClient = (
         });
       }
     ),
+
+    validateUpdateFieldDefinition: async (id: string, input: UpdateFieldDefinitionInput) => {
+      const fieldDef = await fieldDefinitionsService.getFieldDefinition(id);
+      await ensureCanManageOrHideExistence(fieldDef, id);
+      if (input.owner !== fieldDef.attributes.owner) {
+        throw Boom.badRequest(
+          `Cannot change the owner of a field definition. Current owner: ${fieldDef.attributes.owner}`
+        );
+      }
+
+      const submitted = parseFieldDefinitionIdentity(input.definition);
+      if (submitted) {
+        assertNameMatchesYamlDefinition(input.name, submitted.name);
+
+        const persisted = parseFieldDefinitionIdentity(fieldDef.attributes.definition);
+        const changed: Array<'name' | 'type'> = [];
+
+        if (submitted.name !== fieldDef.attributes.name) {
+          changed.push('name');
+        }
+        if (persisted && submitted.type !== persisted.type) {
+          changed.push('type');
+        }
+
+        if (changed.length > 0) {
+          incrementIdentityRejectionCounters(usageCounter, changed);
+          throw createTypedApiError({
+            statusCode: 409,
+            message:
+              `Cannot change the ${changed.join(' or ')} of field definition ` +
+              `"${fieldDef.attributes.name}". A field's name and type determine how its values ` +
+              `are stored in case data and Cases analytics, so they cannot be changed after creation.`,
+            attributes: {
+              code: CASES_API_ERROR_CODES.FIELD_IDENTITY_IMMUTABLE,
+              changed,
+            },
+          });
+        }
+      }
+
+      if (fieldDef.attributes.isGlobal && input.isGlobal === false) {
+        if (await isDefinitionActivelyLinked(fieldDef)) {
+          throw Boom.conflict(
+            `Cannot remove the global flag from field definition "${fieldDef.attributes.name}": ` +
+              `it is linked to an active custom field in the Cases settings. Remove the custom ` +
+              `field from the configuration first.`
+          );
+        }
+      }
+    },
 
     deleteFieldDefinition: withUsageCounter(
       usageCounterByMethod.deleteFieldDefinition,
