@@ -66,5 +66,7 @@
     "@kbn/securitysolution-list-constants",
     "@kbn/kbn-client",
     "@kbn/entity-store",
+    "@kbn/files-plugin",
+    "@kbn/utility-types",
   ]
 }
