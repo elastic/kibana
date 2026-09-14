@@ -7,8 +7,9 @@
 
 import type { IntervalSchedule } from '../task';
 
-export const TASK_ID = 'snapshot_telemetry';
-export const TASK_TYPE = `task_manager:${TASK_ID}`;
+// Task Manager's own telemetry task
+export const TASK_ID = 'task_manager_snapshot_telemetry';
+export const TASK_TYPE = 'task_manager:snapshot_telemetry';
 export const SCHEDULE: IntervalSchedule = { interval: '1d' };
 export const TASK_TIMEOUT = '5m';
 

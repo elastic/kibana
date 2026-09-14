@@ -81,10 +81,10 @@ export function taskRunner(logger: Logger, coreStartServices: CoreStartServices)
         } catch (e) {
           logger.warn(`Error executing ${TASK_ID} task, received ${e.message}`);
 
-          // Retain the previously collected stats so a transient failure does not blank out
-          // telemetry until the next successful run.
+          // Reset to the empty defaults. The error fields and run counter are preserved
+          // so the failure stays visible in telemetry.
           const updatedState: LatestTaskStateSchema = {
-            ...state,
+            ...emptyState,
             has_errors: true,
             error_messages: [e.message],
             runs: (state.runs ?? 0) + 1,

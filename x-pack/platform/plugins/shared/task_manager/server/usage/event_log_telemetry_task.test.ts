@@ -133,7 +133,7 @@ describe('taskRunner', () => {
     );
   });
 
-  it('retains previously collected stats when the aggregation fails', async () => {
+  it('discards previously collected stats when the aggregation fails', async () => {
     getEventLogStatsMock.mockRejectedValue(new Error('search_phase_execution_exception'));
 
     const runner = taskRunner(logger, createCoreStartServices())(runContext({ runs: 4, ...stats }));
@@ -141,13 +141,18 @@ describe('taskRunner', () => {
 
     expect(result).toEqual({
       state: {
-        ...stats,
+        ...emptyState,
         has_errors: true,
         error_messages: ['search_phase_execution_exception'],
         runs: 5,
       },
       schedule: SCHEDULE,
     });
+    // Stale stats must not survive a failed run, otherwise they would be reported as current.
+    expect(result.state.total_task_runs_24hr).toBeUndefined();
+    expect(result.state.task_runs_by_type_24hr).toBeUndefined();
+    expect(result.state.task_runs_other_24hr).toBeUndefined();
+    expect(result.state.schedule_delay_ms_24hr).toBeUndefined();
     expect(logger.warn).toHaveBeenCalledWith(
       `Error executing ${TASK_ID} task, received search_phase_execution_exception`
     );

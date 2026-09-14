@@ -238,7 +238,9 @@ describe('registerTaskManagerUsageCollector', () => {
     const getTaskManagerStart = jest.fn().mockResolvedValue({
       get: jest
         .fn()
-        .mockRejectedValue(new Error('Saved object [task/snapshot_telemetry] not found')),
+        .mockRejectedValue(
+          new Error('Saved object [task/task_manager_snapshot_telemetry] not found')
+        ),
     } as unknown as TaskManagerStartContract);
 
     registerTaskManagerUsageCollector(
