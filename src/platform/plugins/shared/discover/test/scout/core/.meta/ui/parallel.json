@@ -1,5 +1,5 @@
 {
-  "sha1": "8f7ce3a09b5c9b43e65247c38dab034c7d637fad",
+  "sha1": "6d5807ea403e79f61ac8ac7e4b403dc0a0fd4d7b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -24,7 +24,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/global.setup.ts",
-        "line": 47,
+        "line": 55,
         "column": 5
       }
     },
@@ -137,6 +137,137 @@
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/date_nanos_mixed.spec.ts",
         "line": 28,
         "column": 23
+      }
+    },
+    {
+      "id": "36010fca82c109c-a24da44fb7bfb4f",
+      "title": "Discover by-value session dashboard editing discards edits when cancelling a by-value panel edit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_session_dashboard_editing.spec.ts",
+        "line": 21,
+        "column": 35
+      }
+    },
+    {
+      "id": "36010fca82c109c-6796ac910365984",
+      "title": "Discover by-value session dashboard editing keeps the library session unchanged when editing a by-value panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_session_dashboard_editing.spec.ts",
+        "line": 34,
+        "column": 25
+      }
+    },
+    {
+      "id": "36010fca82c109c-77a46234531c598",
+      "title": "Discover by-value session dashboard editing opens a normal Discover session when saving a by-value edit as new",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_session_dashboard_editing.spec.ts",
+        "line": 63,
+        "column": 15
+      }
+    },
+    {
+      "id": "7df104855764c8e-f4db7af9bba3c57",
+      "title": "Discover session dashboard filter actions propagates embeddable cell actions to the dashboard filter bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_session_dashboard_filter_actions.spec.ts",
+        "line": 31,
+        "column": 53
+      }
+    },
+    {
+      "id": "d3cc86bf46b2cb3-41c3d67e462a43f",
+      "title": "Discover session panel interactions surfaces an invalid KQL error in a dashboard panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_session_dashboard_interactions.spec.ts",
+        "line": 27,
+        "column": 33
+      }
+    },
+    {
+      "id": "d3cc86bf46b2cb3-2169dcf36842d37",
+      "title": "Discover session panel interactions persists rows per page after saving and reloading a dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_session_dashboard_interactions.spec.ts",
+        "line": 35,
+        "column": 80
+      }
+    },
+    {
+      "id": "a4d2eecd9e86c4a-5d3afc68384d956",
+      "title": "Discover linked session dashboard editing resets to a normal Discover session after leaving a dashboard edit session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_session_dashboard_linked_editing.spec.ts",
+        "line": 21,
+        "column": 35
+      }
+    },
+    {
+      "id": "a4d2eecd9e86c4a-e1c11c2dfd695f0",
+      "title": "Discover linked session dashboard editing saves a linked session edit and returns to the dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_session_dashboard_linked_editing.spec.ts",
+        "line": 32,
+        "column": 65
+      }
+    },
+    {
+      "id": "a4d2eecd9e86c4a-24be8364bbf1c34",
+      "title": "Discover linked session dashboard editing opens a normal Discover session when saving a linked edit as new",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/discover_session_dashboard_linked_editing.spec.ts",
+        "line": 53,
+        "column": 36
       }
     },
     {

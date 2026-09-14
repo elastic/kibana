@@ -11,6 +11,7 @@
     "@kbn/scout",
     // Merged `test` fixture, constants, and connector/rule helpers shared
     // across all triggers_actions_ui UI namespaces.
-    { "path": "../../common/ui/tsconfig.json" }
+    { "path": "../../common/ui/tsconfig.json" },
+    "@kbn/app-header"
   ]
 }

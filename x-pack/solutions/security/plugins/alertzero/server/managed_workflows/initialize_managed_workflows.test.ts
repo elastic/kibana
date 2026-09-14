@@ -6,7 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { ALERTZERO_RULE_WORKFLOW_IDS } from '@kbn/workflows/managed';
+import { ALERTZERO_ACTION_WORKFLOW_IDS, ALERTZERO_RULE_WORKFLOW_IDS } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { initializeManagedWorkflows } from './initialize_managed_workflows';
@@ -37,12 +37,15 @@ const createDependencies = () => {
 };
 
 describe('initializeManagedWorkflows', () => {
-  it('installs only global rule workflows before reconciliation', async () => {
+  it('installs only global workflows before reconciliation', async () => {
     const { client, workflowsExtensions, logger } = createDependencies();
 
     await initializeManagedWorkflows({ workflowsExtensions, logger });
 
-    expect(client.install.mock.calls.map(([id]) => id)).toEqual(ALERTZERO_RULE_WORKFLOW_IDS);
+    expect(client.install.mock.calls.map(([id]) => id)).toEqual([
+      ...ALERTZERO_RULE_WORKFLOW_IDS,
+      ...ALERTZERO_ACTION_WORKFLOW_IDS,
+    ]);
     expect(client.install).not.toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ workflowIdSuffix: expect.any(String) })
