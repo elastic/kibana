@@ -10,7 +10,6 @@
 // Two classes (SandboxApiClient + SandboxConnectionManager) are co-located by design.
 
 import { promisify } from 'util';
-import { readFileSync } from 'fs';
 import * as grpc from '@grpc/grpc-js';
 import type { Logger } from '@kbn/core/server';
 import type { NightshiftInvestigationsConfig } from '../../config';
@@ -452,20 +451,11 @@ export class SandboxApiClient {
     host: string;
     port: number;
     apiKey: string;
-    rootCertPem?: Buffer;
-    clientCertPem?: Buffer;
-    clientKeyPem?: Buffer;
+    rootCertPem: Buffer;
+    clientCertPem: Buffer;
+    clientKeyPem: Buffer;
   }) {
-    let credentials: grpc.ChannelCredentials;
-    if (rootCertPem || clientCertPem) {
-      credentials = grpc.credentials.createSsl(
-        rootCertPem ?? null,
-        clientKeyPem ?? null,
-        clientCertPem ?? null
-      );
-    } else {
-      credentials = grpc.credentials.createInsecure();
-    }
+    const credentials = grpc.credentials.createSsl(rootCertPem, clientKeyPem, clientCertPem);
     this.client = new SandboxServiceConstructor(`${host}:${port}`, credentials);
     this.apiKey = apiKey;
   }
@@ -563,9 +553,6 @@ export class SandboxApiClient {
 
 type SandboxConfig = NonNullable<NightshiftInvestigationsConfig['sandbox']>;
 
-const readPem = (path: string | undefined): Buffer | undefined =>
-  path ? readFileSync(path) : undefined;
-
 export class SandboxConnectionManager {
   private readonly logger: Logger;
   readonly apiClient: SandboxApiClient;
@@ -593,9 +580,9 @@ export class SandboxConnectionManager {
       host: config.sandbox_api_host,
       port: config.sandbox_api_port,
       apiKey: config.sandbox_api_key,
-      rootCertPem: readPem(config.sandbox_api_tls_ca),
-      clientCertPem: readPem(config.sandbox_api_tls_cert),
-      clientKeyPem: readPem(config.sandbox_api_tls_key),
+      rootCertPem: Buffer.from(config.sandbox_api_tls_ca),
+      clientCertPem: Buffer.from(config.sandbox_api_tls_cert),
+      clientKeyPem: Buffer.from(config.sandbox_api_tls_key),
     });
   }
 

@@ -15,12 +15,10 @@ const sandboxConfigSchema = schema.object({
   sandbox_api_port: schema.number({ defaultValue: 9090 }),
   // API key required by sandbox-api for authentication (ApiKey scheme).
   sandbox_api_key: schema.string(),
-  // TLS / mTLS (all fields are file paths to PEM files). All optional.
-  // sandbox_api_tls_ca: CA cert used to verify the server certificate.
-  // sandbox_api_tls_cert + sandbox_api_tls_key: Kibana client cert + key (mTLS).
-  sandbox_api_tls_ca: schema.maybe(schema.string()),
-  sandbox_api_tls_cert: schema.maybe(schema.string()),
-  sandbox_api_tls_key: schema.maybe(schema.string()),
+  // mTLS PEM strings — all required.
+  sandbox_api_tls_ca: schema.string(),
+  sandbox_api_tls_cert: schema.string(),
+  sandbox_api_tls_key: schema.string(),
 });
 
 const configSchema = schema.object({
