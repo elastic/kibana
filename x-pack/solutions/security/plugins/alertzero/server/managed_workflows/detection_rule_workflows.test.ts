@@ -394,7 +394,7 @@ describe('detection rule workflows', () => {
           "steps.diagnose_rule.output.structured_output.change_type == 'query'"
         );
         expect(acknowledged.if).toContain(
-          'steps.record_auto_apply_support.output.supported == false'
+          'steps.can_preview_query_change.output.supported == false'
         );
         expect(acknowledged.with?.tags_to_add).toEqual([
           '{{ consts.reviewed_tag }}',
@@ -549,7 +549,7 @@ describe('detection rule workflows', () => {
       });
 
       it('excludes rule modes with omitted preview fields from auto-apply', () => {
-        const support = reviewSteps.find(({ name }) => name === 'record_auto_apply_support')!;
+        const support = reviewSteps.find(({ name }) => name === 'can_preview_query_change')!;
         expect(String(support.with?.supported)).toContain(
           'steps.fetch_rule.output.data_view_id == null'
         );
@@ -568,7 +568,7 @@ describe('detection rule workflows', () => {
 
         const eligibility = reviewSteps.find(({ name }) => name === 'decide_apply')!;
         expect(String(eligibility.with?.eligible)).toContain(
-          'steps.record_auto_apply_support.output.supported == true'
+          'steps.can_preview_query_change.output.supported == true'
         );
       });
 

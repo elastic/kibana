@@ -252,7 +252,7 @@ steps:
   # Rules using a data view, timestamp override, or alert suppression need fields
   # the preview API cannot conditionally omit, so query auto-apply is restricted.
   # Gated on fetch_rule so a skipped diagnose_rule leaves supported null/false.
-  - name: record_auto_apply_support
+  - name: can_preview_query_change
     type: data.set
     if: >-
       ${{ steps.fetch_rule.error == null
@@ -272,7 +272,7 @@ steps:
   # events analysts judged; anchoring at now can miss those events.
   - name: run_previews
     type: workflow.execute
-    if: "${{ steps.record_auto_apply_support.output.supported == true }}"
+    if: "${{ steps.can_preview_query_change.output.supported == true }}"
     with:
       workflow-id: system-security-rule-preview
       inputs:
@@ -384,7 +384,7 @@ steps:
         Proposed query:
         {{ steps.diagnose_rule.output.structured_output.proposed_query }}
 
-        {% if steps.record_auto_apply_support.output.supported %}
+        {% if steps.can_preview_query_change.output.supported %}
         Backtest ({{ inputs.preview_invocation_count | default: consts.preview_invocation_count }} simulated executions of interval {{ steps.fetch_rule.output.interval }},
         lookback {{ steps.fetch_rule.output.from }}, ending at the newest false positive
         {{ inputs.last_fp_at }} — usually a much shorter span than the false positives cover):
@@ -428,7 +428,7 @@ steps:
     type: kibana.request
     if: >-
       ${{ steps.review_tuning.output.response.approved == true
-        and steps.record_auto_apply_support.output.supported == true }}
+        and steps.can_preview_query_change.output.supported == true }}
     with:
       method: GET
       path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?id={{ inputs.rule_uuid | url_encode }}"
@@ -444,7 +444,7 @@ steps:
     with:
       eligible: >-
         ${{ steps.review_tuning.output.response.approved == true
-          and steps.record_auto_apply_support.output.supported == true
+          and steps.can_preview_query_change.output.supported == true
           and steps.record_preview_outcome.output.current_succeeded == true
           and steps.record_preview_outcome.output.current_is_aborted == false
           and steps.record_preview_outcome.output.proposed_succeeded == true
@@ -549,7 +549,7 @@ steps:
       ${{ steps.review_tuning.output.response.approved == true
         and steps.diagnose_rule.output.structured_output.change_type == 'manual'
         or steps.diagnose_rule.output.structured_output.change_type == 'query'
-        and steps.record_auto_apply_support.output.supported == false }}
+        and steps.can_preview_query_change.output.supported == false }}
     with:
       alert_ids: "${{ inputs.alert_ids }}"
       tags_to_add:
