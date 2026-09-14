@@ -181,8 +181,9 @@ describe('rspack compile integration', () => {
         testPlugins: false,
       };
 
-      const config = await createSingleCompileConfig(options);
+      const { config, bundleCount } = await createSingleCompileConfig(options);
 
+      expect(bundleCount).toBeGreaterThan(1);
       expect(config.name).toBe('kibana');
       expect(config.mode).toBe('development');
       expect(config.entry).toBeDefined();
@@ -209,7 +210,7 @@ describe('rspack compile integration', () => {
     });
 
     it('sets production mode and minimizer when dist is true', async () => {
-      const config = await createSingleCompileConfig({
+      const { config } = await createSingleCompileConfig({
         repoRoot: REPO_ROOT,
         dist: true,
         watch: false,

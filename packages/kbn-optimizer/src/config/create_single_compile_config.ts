@@ -107,6 +107,12 @@ export interface SingleCompileConfigOptions {
   limitsPath?: string;
 }
 
+export interface SingleCompileConfig {
+  config: Configuration;
+  /** Number of discovered bundles (core + plugins), reported to ci-stats. */
+  bundleCount: number;
+}
+
 /**
  * Create a SINGLE RSPack configuration that builds ALL plugins together.
  *
@@ -118,7 +124,7 @@ export interface SingleCompileConfigOptions {
  */
 export async function createSingleCompileConfig(
   options: SingleCompileConfigOptions
-): Promise<Configuration> {
+): Promise<SingleCompileConfig> {
   const {
     repoRoot,
     outputRoot = repoRoot,
@@ -196,7 +202,7 @@ export async function createSingleCompileConfig(
 
   const bundlesDir = resolveBundlesDir(outputRoot);
 
-  return {
+  const config: Configuration = {
     name: 'kibana',
     mode: dist ? 'production' : 'development',
     // No sourcemaps in dist; cheap-module-source-map in dev for original-source
@@ -489,4 +495,6 @@ export async function createSingleCompileConfig(
     // Use shared ignore warnings (same as external plugins)
     ignoreWarnings: getSharedIgnoreWarnings(),
   };
+
+  return { config, bundleCount: 1 + plugins.length };
 }

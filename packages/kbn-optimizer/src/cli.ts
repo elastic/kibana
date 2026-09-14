@@ -216,6 +216,11 @@ export function runRspackCli(options: CliOptions = {}): void {
 
       const result = await runBuild(buildOptions);
 
+      const { close } = result;
+      if (close) {
+        addCleanupTask(() => void close());
+      }
+
       const elapsedMs = Date.now() - startTime;
       const duration = (elapsedMs / 1000).toFixed(2);
 
@@ -223,6 +228,10 @@ export function runRspackCli(options: CliOptions = {}): void {
 
       if (result.success) {
         log.success(`RSPack build completed in ${duration}s`);
+      } else if (result.done) {
+        // Watcher is still running: the initial compilation failed but rebuilds
+        // continue on file changes, so treat this as recoverable.
+        log.error(`RSPack build failed after ${duration}s — waiting for changes to fix errors...`);
       } else {
         throw new Error(`RSPack build failed after ${duration}s`);
       }

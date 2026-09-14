@@ -9,6 +9,7 @@
 
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
 
 import type { BuildOptions, BuildResult } from './run_build';
 
@@ -35,11 +36,11 @@ export async function reportOptimizerTimings(
         ms,
         meta: {
           optimizerSuccess: result.success,
-          optimizerBundleCount: result.entryCount ?? 0,
+          optimizerBundleCount: result.bundleCount ?? 0,
           optimizerWatch: options.watch ?? false,
           optimizerProduction: options.dist ?? false,
           optimizerCache: options.cache ?? true,
-          optimizerBundleThemeTagsCount: options.themeTags?.length ?? 0,
+          optimizerBundleThemeTagsCount: (options.themeTags ?? DEFAULT_THEME_TAGS).length,
         },
       },
     ],
