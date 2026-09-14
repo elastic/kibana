@@ -92,7 +92,14 @@ describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
       // expect about step to populate
       cy.get(RULE_NAME_INPUT).invoke('val').should('eql', existingRule.name);
       cy.get(RULE_DESCRIPTION_INPUT).should('have.text', existingRule.description);
-      cy.get(TAGS_FIELD).should('have.text', existingRule.tags?.join(''));
+      cy.get(TAGS_FIELD)
+        .invoke('text')
+        .then((text) => {
+          cy.wrap(text.replace('Missing Elastic Cloud API Key', '')).should(
+            'equal',
+            existingRule.tags?.join('')
+          );
+        });
       cy.get(SEVERITY_DROPDOWN).should('contain.text', 'High');
       cy.get(DEFAULT_RISK_SCORE_INPUT).invoke('val').should('eql', `${existingRule.risk_score}`);
 
@@ -135,7 +142,17 @@ describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(ABOUT_DETAILS).within(() => {
         getDetails(SEVERITY_DETAILS).should('have.text', 'Medium');
         getDetails(RISK_SCORE_DETAILS).should('have.text', `${getEditedRule().risk_score}`);
-        getDetails(TAGS_DETAILS).should('have.text', expectedEditedtags);
+        // On MKI, the alerting framework appends "Missing Elastic Cloud API Key" to rules
+        // created with an ES API key and no UIAM key (see https://github.com/elastic/kibana/pull/289195).
+        // Strip it so the assertion holds on both ECH and serverless.
+        getDetails(TAGS_DETAILS)
+          .invoke('text')
+          .then((text) => {
+            cy.wrap(text.replace('Missing Elastic Cloud API Key', '')).should(
+              'equal',
+              expectedEditedtags
+            );
+          });
       });
       cy.get(INVESTIGATION_NOTES_TOGGLE).click();
       cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', getEditedRule().note);
