@@ -431,7 +431,18 @@ export class ListingTableService extends FtrService {
    * Clicks NewItem button on Landing page
    */
   public async clickNewButton(): Promise<void> {
-    await this.testSubjects.click('newItemButton');
+    await this.retry.try(async () => {
+      if (await this.testSubjects.exists('newItemButton', { timeout: 1000 })) {
+        await this.testSubjects.click('newItemButton');
+        return;
+      }
+      if (await this.testSubjects.exists('app-menu-overflow-button', { timeout: 1000 })) {
+        await this.testSubjects.click('app-menu-overflow-button');
+        await this.testSubjects.click('newItemButton');
+        return;
+      }
+      throw new Error('newItemButton not found');
+    });
   }
 
   public async isShowingEmptyPromptCreateNewButton(): Promise<void> {
