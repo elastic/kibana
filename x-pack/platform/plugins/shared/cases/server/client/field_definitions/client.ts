@@ -193,7 +193,7 @@ export const createFieldDefinitionsSubClient = (
     getFieldDefinition: async (id: string) => {
       const fieldDef = await fieldDefinitionsService.getFieldDefinition(id);
       await authorization.ensureAuthorized({
-        operation: Operations.manageTemplate,
+        operation: Operations.getFieldDefinitions,
         entities: [{ owner: fieldDef.attributes.owner, id: fieldDef.id }],
       });
       return fieldDef;
