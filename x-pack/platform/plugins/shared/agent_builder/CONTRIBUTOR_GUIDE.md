@@ -1652,7 +1652,7 @@ The full implementation is ~130 lines and serves as the reference for new types.
 The chat streaming layer lives across two folders:
 
 - `public/application/context/streaming/` — the lifted provider, its context hook, the
-  send/regenerate and resume mutation hooks, the chat-events subscriber, and shared types.
+  send and resume mutation hooks, the chat-events subscriber, and shared types.
 - `public/application/hooks/` — the per-conversation convenience hook
   (`use_conversation_stream.ts`) and the "any stream active?" derived hook
   (`use_is_any_conversation_streaming.ts`). They live here because they compose
@@ -1776,4 +1776,3 @@ What this means in practice:
   flight when the user navigates away, a confirm dialog appears; on confirm,
   `cancelAllStreams()` aborts every controller in the map before the platform
   proceeds.
-
