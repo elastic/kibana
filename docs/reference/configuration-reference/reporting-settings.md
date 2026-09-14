@@ -32,6 +32,8 @@ On {{serverless-full}}, reporting support depends on the surface and export type
 
 PDF and PNG export types default to disabled (`xpack.reporting.export_types.pdf.enabled` and `xpack.reporting.export_types.png.enabled` are `false`) and cannot be turned on.
 
+Compared with {{ech}}, Serverless does not generate or schedule dashboard PDF or PNG reports.
+
 For user-facing steps, refer to [Reporting and sharing](docs-content://explore-analyze/report-and-share.md) and [Automatically generate reports](docs-content://explore-analyze/report-and-share/automating-report-generation.md).
 
 ## Enable reporting [general-reporting-settings]
