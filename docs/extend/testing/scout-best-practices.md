@@ -308,6 +308,8 @@ test('returns 403 when missing read privilege', async ({ apiClient }) => {
 
 Prefer “one role + one flow per file” and keep spec files small — roughly 4–5 short tests, or 2–3 when scenarios are longer (lean toward the lower end once any single scenario runs longer than ~30s). The test runner balances work at the spec-file level, so small files parallelize better (an oversized file becomes a single-worker bottleneck) and limit blast radius: skipping one flaky test drops only its small group rather than a whole large suite. See [parallel execution](../testing/parallelism.md). Put shared login/navigation in `beforeEach`.
 
+`@kbn/eslint/scout_max_tests_per_file` warns when a UI spec exceeds **8** tests or an API spec exceeds **15**. Those caps are a hard floor for review, not a target — split earlier when the file mixes roles or flows. Do not disable the rule to keep a large suite; split the file instead.
+
 :::::{dropdown} Example
 
 ```ts
