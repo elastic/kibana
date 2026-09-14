@@ -88,9 +88,12 @@ describe('evaluateUploadPackage', () => {
 
   it('blocks a name that matches a normalized Automatic Import title', () => {
     expect(
-      evaluateUploadPackage('nginx_logs', '1.1.0', [], [
-        { integrationId: 'some_id', title: 'Nginx Logs' },
-      ])
+      evaluateUploadPackage(
+        'nginx_logs',
+        '1.1.0',
+        [],
+        [{ integrationId: 'some_id', title: 'Nginx Logs' }]
+      )
     ).toEqual({
       kind: 'error',
       reason: 'automatic_import',
