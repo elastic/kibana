@@ -116,6 +116,18 @@ export {
   type SerializedAgentBuilderError,
   isHooksExecutionError,
   createHooksExecutionError,
+  isAttachmentNotFoundError,
+  isAttachmentAlreadyExistsError,
+  isAttachmentPermanentDeleteBlockedError,
+  isAttachmentInvalidError,
+  createAttachmentNotFoundError,
+  createAttachmentAlreadyExistsError,
+  createAttachmentPermanentDeleteBlockedError,
+  createAttachmentInvalidError,
+  type AgentBuilderAttachmentNotFoundError,
+  type AgentBuilderAttachmentAlreadyExistsError,
+  type AgentBuilderAttachmentPermanentDeleteBlockedError,
+  type AgentBuilderAttachmentInvalidError,
 } from './base/errors';
 export { HookLifecycle, HookExecutionMode } from './hooks/lifecycle';
 export { type UserIdAndName, type CurrentUser } from './base/users';
@@ -170,6 +182,9 @@ export {
   ConversationAccessControlRole,
   getDefaultConversationAccessControl,
   isConversationAccessControlRole,
+  isPrivatelySharedConversation,
+  isPublicConversation,
+  isSharedConversation,
   normalizeConversationAccessControl,
   type RoundInput,
   type ConverseInput,
