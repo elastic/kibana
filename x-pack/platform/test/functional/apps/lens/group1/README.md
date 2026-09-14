@@ -44,7 +44,8 @@ node scripts/playwright test --project local \
   --config x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel.playwright.config.ts
 ```
 
-This FTR config is CCS-only. Run the group through the CCS config, or grep a remaining CCS file:
+The files left in this directory only run in the cross-cluster-search config, so there is no
+group-specific FTR config anymore. Run them through `config.ccs.ts`:
 
 ```bash
 node scripts/functional_tests --config x-pack/platform/test/functional/config.ccs.ts
