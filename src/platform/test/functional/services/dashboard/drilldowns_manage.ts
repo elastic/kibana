@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Key } from 'selenium-webdriver';
 import type {
   ON_CLICK_IMAGE,
   ON_CLICK_VALUE,
@@ -26,9 +25,8 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
   const testSubjects = getService('testSubjects');
   const flyout = getService('flyout');
   const comboBox = getService('comboBox');
-  const find = getService('find');
-  const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
+  const monacoEditor = getService('monacoEditor');
   return new (class DashboardDrilldownsManage {
     readonly DASHBOARD_WITH_PIE_CHART_NAME = 'Dashboard with Pie Chart';
     readonly DASHBOARD_WITH_AREA_CHART_NAME = 'Dashboard With Area Chart';
@@ -117,24 +115,13 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
       }
     }
 
-    async eraseInput(maxChars: number) {
-      const keys = [
-        ...Array(maxChars).fill(Key.ARROW_RIGHT),
-        ...Array(maxChars).fill(Key.BACK_SPACE),
-      ];
-      await browser
-        .getActions()
-        .sendKeys(...keys)
-        .perform();
-    }
-
     async fillInURLTemplate(destinationURLTemplate: string) {
-      const monaco = await find.byCssSelector(
-        '[data-test-subj="url-template-editor-container"] .monaco-editor'
+      // Use Monaco API instead of Selenium keyboard (Monaco 0.54.0 has aria-hidden textarea)
+      await monacoEditor.typeCodeEditorValue(
+        destinationURLTemplate,
+        'url-template-editor-container',
+        false
       );
-      await monaco.clickMouseButton();
-      await this.eraseInput(300);
-      await browser.pressKeys(destinationURLTemplate);
     }
 
     async saveChanges() {

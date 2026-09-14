@@ -18,6 +18,7 @@ import {
   GET_DISCOVER_FIELD_BROWSER_POPOVER_FIELD_ADD_BUTTON,
 } from '../screens/discover';
 import { GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON } from '../screens/search_bar';
+import { setCodeEditorValue, getCodeEditorValue } from './common/monaco';
 
 export const waitForDiscoverFieldsToLoad = () => {
   cy.get(AVAILABLE_FIELD_COUNT).should('be.visible');
@@ -28,40 +29,11 @@ export const assertFieldsAreLoaded = () => {
 };
 
 export const fillEsqlQueryBar = (query: string) => {
-  // eslint-disable-next-line cypress/no-force
-  cy.get(DISCOVER_ESQL_EDITABLE_INPUT).should('exist').click({ force: true });
+  return setCodeEditorValue(DISCOVER_CONTAINER, query);
+};
 
-  const selectAll = Cypress.platform === 'darwin' ? '{cmd}a' : '{ctrl}a';
-  // eslint-disable-next-line cypress/no-force
-  cy.get(DISCOVER_ESQL_EDITABLE_INPUT).type(`${selectAll}{del}`, { force: true });
-
-  cy.get(DISCOVER_ESQL_EDITABLE_INPUT).then(($textarea) => {
-    const dataTransfer = new DataTransfer();
-    dataTransfer.setData('text/plain', query);
-    const pasteEvent = new ClipboardEvent('paste', {
-      clipboardData: dataTransfer,
-      bubbles: true,
-      cancelable: true,
-    });
-    $textarea[0].dispatchEvent(pasteEvent);
-  });
-
-  cy.window().then((win) => {
-    const monacoApi = (win as any).MonacoEnvironment?.monaco;
-    if (monacoApi) {
-      monacoApi.editor.getModels().forEach((model: any) => {
-        const value = model.getValue();
-        const normalized = value.replace(/\u00a0/g, ' ');
-        if (normalized !== value) {
-          model.setValue(normalized);
-        }
-      });
-    }
-  });
-
-  cy.get(DISCOVER_ESQL_INPUT_TEXT_CONTAINER).should(($input) => {
-    expect(convertEditorNonBreakingSpaceToSpace($input.text())).to.eq(query);
-  });
+export const getEsqlQueryBarValue = () => {
+  return getCodeEditorValue(DISCOVER_CONTAINER);
 };
 
 export const selectCurrentDiscoverEsqlQuery = (
@@ -76,8 +48,23 @@ export const selectCurrentDiscoverEsqlQuery = (
 };
 
 export const addDiscoverEsqlQuery = (esqlQuery: string) => {
-  fillEsqlQueryBar(esqlQuery);
-  cy.get(DISCOVER_ESQL_EDITABLE_INPUT).blur();
+  recurse(
+    () => {
+      // ESQL input uses the monaco editor which doesn't allow for traditional input updates
+      selectCurrentDiscoverEsqlQuery();
+      fillEsqlQueryBar(esqlQuery);
+      return getEsqlQueryBarValue();
+    },
+    (val) =>
+      val === esqlQuery || val.replaceAll(/\s/, '\u00b7') === esqlQuery.replaceAll(/\s/, '\u00b7'),
+    {
+      delay: 1000,
+      limit: 5,
+      log: (k) => {
+        cy.log(`query found-${k}.`);
+      },
+    }
+  );
   cy.get(GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON(DISCOVER_CONTAINER)).click();
 };
 

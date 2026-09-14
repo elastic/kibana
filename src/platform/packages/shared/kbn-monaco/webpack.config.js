@@ -12,7 +12,7 @@ const path = require('path');
 const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
 
 /**
- * @typedef {(import('./src/register_globals').LangSpecificWorkerIds)} WorkerType - list of supported languages to build workers for
+ * @typedef {(import('./src/worker_factory').LangSpecificWorkerIds)} WorkerType - list of supported languages to build workers for
  */
 
 const getWorkerEntry = (language) => {
@@ -87,18 +87,6 @@ const workerConfig = (languages) => ({
             presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
           },
         },
-      },
-    ],
-  },
-  optimization: {
-    minimizer: [
-      (compiler) => {
-        const TerserPlugin = require('terser-webpack-plugin');
-        new TerserPlugin({
-          // exclude this file from being processed by terser,
-          // because attempts at tree shaking actually botches up the file
-          exclude: /monaco-editor[\\/]esm[\\/]vs[\\/]base[\\/]common[\\/]map.js/,
-        }).apply(compiler);
       },
     ],
   },
