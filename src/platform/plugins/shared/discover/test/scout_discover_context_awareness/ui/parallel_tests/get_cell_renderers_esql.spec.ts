@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   spaceTest,
   setupContextAwareness,
   teardownContextAwareness,
   ALL_TIMESTAMPS_DESC,
+  CLASSIC_NAV_DEPLOYMENTS,
   CONTEXT_AWARENESS_DATA_VIEWS,
   GRID_VIEWPORT,
   LOGS_LEVELS_DESC,
@@ -26,13 +26,18 @@ import {
  * `my-example-logs`. Querying `my-example-*` resolves the root profile alone, so the timestamp
  * renderer applies and the log level one must not — the assertion is about which layer won, which
  * is why this runs in a browser rather than as a component test.
+ *
+ * Classic navigation only: `example-root-profile` bails out once a solution view is active, so the
+ * custom timestamp renderer never applies there. The solution view side is covered by
+ * get_cell_renderers_esql_solution_view.spec.ts.
  */
 spaceTest.describe(
   'Discover context awareness - extension getCellRenderers, ES|QL mode',
-  { tag: tags.deploymentAgnostic },
+  { tag: CLASSIC_NAV_DEPLOYMENTS },
   () => {
-    // Needed by the default-columns case: its tall summary column means the shorter default
-    // viewport virtualises away two of the six rows, so the whole-result-set assertion undercounts.
+    // Needed by 'root profile renders a custom timestamp field': it runs on the default summary
+    // column, whose height means the shorter default viewport virtualises away two of the six rows,
+    // leaving the whole-result-set assertion to undercount.
     spaceTest.use({ viewport: GRID_VIEWPORT });
 
     spaceTest.beforeAll(async ({ scoutSpace }) => {

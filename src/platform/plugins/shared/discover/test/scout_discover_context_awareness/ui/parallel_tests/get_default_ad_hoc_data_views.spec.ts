@@ -13,14 +13,14 @@ import {
   spaceTest,
   setupContextAwareness,
   teardownContextAwareness,
-  ALL_TIMESTAMPS_DESC,
+  ALL_TIMES_DESC,
   GRID_VIEWPORT,
   PROFILE_DATA_VIEW,
+  PROFILE_DATA_VIEW_FIELD_COUNT,
 } from '../fixtures';
 
 const SESSION_NAME = 'Default profile data view session';
 const SESSION_DATA_VIEW = `${PROFILE_DATA_VIEW} (${SESSION_NAME})`;
-const PROFILE_DATA_VIEW_FIELD_COUNT = '7';
 
 const managedBadge = (dataViewName: string) => `dataViewItemManagedBadge-${dataViewName}`;
 
@@ -68,10 +68,9 @@ spaceTest.describe(
           PROFILE_DATA_VIEW_FIELD_COUNT
         );
 
-        // A grid cell carries its expand-button chrome next to the value, so the timestamps are
-        // matched by containment rather than equality.
-        await expect(dataGrid.getCell(0, '@timestamp')).toContainText(ALL_TIMESTAMPS_DESC[0]);
-        await expect(dataGrid.getCell(5, '@timestamp')).toContainText(ALL_TIMESTAMPS_DESC[5]);
+        // First and last row together show the grid rendered the whole result set, in order.
+        await expect(dataGrid.getCell(0, '@timestamp')).toContainText(ALL_TIMES_DESC[0]);
+        await expect(dataGrid.getCell(5, '@timestamp')).toContainText(ALL_TIMES_DESC[5]);
       }
     );
 
@@ -117,8 +116,8 @@ spaceTest.describe(
         await expect(unifiedFieldList.getSidebarSectionCountLocator('available')).toHaveText(
           PROFILE_DATA_VIEW_FIELD_COUNT
         );
-        await expect(dataGrid.getCell(0, '@timestamp')).toContainText(ALL_TIMESTAMPS_DESC[0]);
-        await expect(dataGrid.getCell(5, '@timestamp')).toContainText(ALL_TIMESTAMPS_DESC[5]);
+        await expect(dataGrid.getCell(0, '@timestamp')).toContainText(ALL_TIMES_DESC[0]);
+        await expect(dataGrid.getCell(5, '@timestamp')).toContainText(ALL_TIMES_DESC[5]);
 
         // The managed original stays available and unchanged next to the copy.
         await discover.selectDataView(PROFILE_DATA_VIEW, { createAdHocIfMissing: false });
@@ -131,8 +130,8 @@ spaceTest.describe(
         await expect(unifiedFieldList.getSidebarSectionCountLocator('available')).toHaveText(
           PROFILE_DATA_VIEW_FIELD_COUNT
         );
-        await expect(dataGrid.getCell(0, '@timestamp')).toContainText(ALL_TIMESTAMPS_DESC[0]);
-        await expect(dataGrid.getCell(5, '@timestamp')).toContainText(ALL_TIMESTAMPS_DESC[5]);
+        await expect(dataGrid.getCell(0, '@timestamp')).toContainText(ALL_TIMES_DESC[0]);
+        await expect(dataGrid.getCell(5, '@timestamp')).toContainText(ALL_TIMES_DESC[5]);
       }
     );
   }

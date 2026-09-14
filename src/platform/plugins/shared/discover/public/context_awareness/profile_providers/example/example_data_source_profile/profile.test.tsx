@@ -111,6 +111,39 @@ const renderExampleDocView = async (
 };
 
 describe('createExampleDataSourceProfileProvider', () => {
+  describe('getAdditionalCellActions', () => {
+    const getActions = () => {
+      const provider = createExampleDataSourceProfileProvider();
+
+      // Non-null assertion: accessors are optional on the profile type, this one is implemented here.
+      return provider.profile.getAdditionalCellActions!(() => [], {} as never)();
+    };
+
+    it('offers both actions for a column they are compatible with', async () => {
+      const actions = getActions();
+      const context = { field: { name: '@timestamp' } } as never;
+
+      expect(actions.map(({ id }) => id)).toStrictEqual([
+        'example-data-source-action',
+        'another-example-data-source-action',
+      ]);
+
+      for (const action of actions) {
+        // An action without `isCompatible` is compatible with everything.
+        expect(await (action.isCompatible?.(context) ?? true)).toBe(true);
+      }
+    });
+
+    it('withholds the action that declares itself incompatible with the message column', async () => {
+      const actions = getActions();
+      const context = { field: { name: 'message' } } as never;
+
+      const [exampleAction, anotherExampleAction] = actions;
+      expect(await (exampleAction.isCompatible?.(context) ?? true)).toBe(true);
+      expect(await anotherExampleAction.isCompatible?.(context)).toBe(false);
+    });
+  });
+
   describe('getDocViewer', () => {
     it('renders the record formatted by the formatter from the resolved context (ES|QL)', async () => {
       await renderExampleDocView(ESQL_PARAMS, buildRecord(ESQL_FLATTENED));

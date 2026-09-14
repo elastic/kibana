@@ -11,11 +11,23 @@ import kbnRison from '@kbn/rison';
 import type { DataGrid, ScoutPage } from '@kbn/scout';
 import type { DocViewer } from '@kbn/unified-doc-viewer/test/scout/ui/fixtures/page_objects';
 
+/**
+ * The predecessor and successor searches on the Surrounding documents page are issued separately
+ * from the page render and are slower than a plain Discover fetch, so their controls can take
+ * noticeably longer than the default assertion timeout to appear.
+ */
 const CONTEXT_LOAD_TIMEOUT = 30_000;
 
 const GRID_DISPLAY_SELECTOR_BUTTON = 'dataGridDisplaySelectorButton';
 const ROW_HEIGHT_LINE_COUNT = 'unifiedDataTableRowHeightSettings_lineCountNumber';
 const PROFILE_STATE_DOC_VIEW_TAB = 'doc_view_profile_state_example';
+
+/**
+ * Id of the locator the Surrounding documents flyout action navigates through, as registered in
+ * `public/application/context/services/locator.ts`. Inlined rather than imported: it is not part of
+ * the plugin's public API, and a test has no business reaching into `public/` internals.
+ */
+const DISCOVER_CONTEXT_APP_LOCATOR = 'DISCOVER_CONTEXT_APP_LOCATOR';
 
 export interface RowHeightSetting {
   value: 'Auto' | 'Custom';
@@ -95,7 +107,13 @@ export function getStoredTabs(page: ScoutPage): Promise<string> {
   return page.evaluate(() => window.localStorage.getItem('discover.tabs') ?? '');
 }
 
-/** Opens the profile state doc viewer tab, reusing the flyout when it is already open. */
+/**
+ * Opens the profile state doc viewer tab.
+ *
+ * Whether the flyout is already open genuinely varies by call site — it survives a Discover tab
+ * switch but not a page reload or a tab restore — and the branch is here rather than at the call
+ * sites so the specs read as "show me the profile state" throughout.
+ */
 export async function openProfileStateDocView(page: ScoutPage, docViewer: DocViewer) {
   const isFlyoutOpen = await page.testSubj.locator('docViewerFlyout').isVisible();
 
@@ -152,9 +170,14 @@ export function captureNextDialogMessage(page: ScoutPage): Promise<string> {
 export async function openSurroundingDocs(page: ScoutPage, dataGrid: DataGrid) {
   await dataGrid.openDocumentDetails({ rowIndex: 0 });
 
-  // Row actions are ordered as they appear in the flyout; the second one opens surrounding docs.
-  const [, surroundingDocsAction] = await dataGrid.getRowActions();
-  await surroundingDocsAction.click();
+  // Both flyout actions share the `docTableRowAction` subject, so they are told apart by the
+  // locator they navigate to: each renders as a link to `/app/r?l=<locator id>`. Their visible text
+  // is not usable — the flyout renders them as icon-only buttons here, with the label only in
+  // `aria-label` — and matching that label would tie the spec to a translated string.
+  await page.testSubj
+    .locator('docViewerFlyout')
+    .locator(`[data-test-subj~="docTableRowAction"][href*="${DISCOVER_CONTEXT_APP_LOCATOR}"]`)
+    .click();
   await waitForSurroundingDocs(page);
 
   await page.reload();

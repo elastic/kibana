@@ -16,10 +16,7 @@ import {
   CONTEXT_AWARENESS_DATA_VIEWS,
 } from '../fixtures';
 
-const RESTORABLE_STATE_TAB = 'doc_view_restorable_state_example';
 const EXAMPLE_TAB = 'doc_view_example';
-const INCREMENT_BUTTON = 'example-restorable-state-doc-view-increment-button';
-const COUNT = 'example-restorable-state-doc-view-count';
 const UPDATE_ESQL_QUERY_BUTTON = 'exampleDataSourceProfileDocViewUpdateEsqlQuery';
 const OPEN_NEW_TAB_BUTTON = 'exampleDataSourceProfileDocViewOpenNewTab';
 
@@ -27,10 +24,12 @@ const OPEN_NEW_TAB_BUTTON = 'exampleDataSourceProfileDocViewOpenNewTab';
 const UPDATED_ESQL_QUERY = 'FROM my-example-logs | LIMIT 5';
 
 /**
- * The doc viewer tabs contributed by `example-data-source-profile` are interactive: one keeps a
- * counter in restorable state, which has to stay scoped to the Discover tab it was incremented in,
- * and the other exposes toolkit actions that rewrite the ES|QL query or open a new tab. Those
- * actions reach back out of the flyout into the session, which is what makes them browser tests.
+ * The Example doc viewer tab contributed by `example-data-source-profile` exposes toolkit actions
+ * that rewrite the ES|QL query or open a named Discover tab. Both reach back out of the flyout into
+ * the session, which is what makes them browser tests.
+ *
+ * The restorable state tab the same accessor registers is covered by
+ * get_doc_viewer_restorable_state.spec.ts, which needs a narrower deployment tag.
  */
 spaceTest.describe(
   'Discover context awareness - extension getDocViewer, interactions',
@@ -47,37 +46,6 @@ spaceTest.describe(
     spaceTest.afterAll(async ({ scoutSpace }) => {
       await teardownContextAwareness(scoutSpace);
     });
-
-    spaceTest(
-      'ES|QL mode keeps the restorable counter state per Discover tab',
-      async ({ page, pageObjects }) => {
-        const { discover, docViewer, unifiedTabs } = pageObjects;
-
-        await discover.goto({ queryMode: 'esql' });
-        await discover.writeAndSubmitEsqlQuery(
-          `from ${CONTEXT_AWARENESS_DATA_VIEWS.LOGS} | sort @timestamp desc`
-        );
-
-        await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
-        await docViewer.openTab(RESTORABLE_STATE_TAB);
-        await page.testSubj.click(INCREMENT_BUTTON);
-        await page.testSubj.click(INCREMENT_BUTTON);
-        await expect(page.testSubj.locator(COUNT)).toHaveText('Count: 2');
-
-        // A second Discover tab gets its own counter, so incrementing here must not leak back.
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
-        await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
-        await docViewer.openTab(RESTORABLE_STATE_TAB);
-        await page.testSubj.click(INCREMENT_BUTTON);
-        await expect(page.testSubj.locator(COUNT)).toHaveText('Count: 1');
-
-        await unifiedTabs.selectTab(0);
-        await discover.waitUntilTabIsLoaded();
-
-        await expect(page.testSubj.locator(COUNT)).toHaveText('Count: 2');
-      }
-    );
 
     spaceTest(
       'ES|QL mode rewrites the query from the custom doc viewer action',
@@ -119,36 +87,6 @@ spaceTest.describe(
         expect(await unifiedTabs.getTabLabels()).toStrictEqual(['Untitled', 'My new tab']);
         expect(await unifiedTabs.getSelectedTabLabel()).toBe('My new tab');
         expect(await discover.getEsqlQueryValue()).toBe(UPDATED_ESQL_QUERY);
-      }
-    );
-
-    spaceTest(
-      'data view mode keeps the restorable counter state per Discover tab',
-      async ({ page, pageObjects }) => {
-        const { discover, docViewer, unifiedTabs } = pageObjects;
-
-        await discover.goto({ queryMode: 'classic' });
-        await discover.selectDataView(CONTEXT_AWARENESS_DATA_VIEWS.LOGS, {
-          createAdHocIfMissing: false,
-        });
-
-        await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
-        await docViewer.openTab(RESTORABLE_STATE_TAB);
-        await page.testSubj.click(INCREMENT_BUTTON);
-        await page.testSubj.click(INCREMENT_BUTTON);
-        await expect(page.testSubj.locator(COUNT)).toHaveText('Count: 2');
-
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
-        await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
-        await docViewer.openTab(RESTORABLE_STATE_TAB);
-        await page.testSubj.click(INCREMENT_BUTTON);
-        await expect(page.testSubj.locator(COUNT)).toHaveText('Count: 1');
-
-        await unifiedTabs.selectTab(0);
-        await discover.waitUntilTabIsLoaded();
-
-        await expect(page.testSubj.locator(COUNT)).toHaveText('Count: 2');
       }
     );
   }

@@ -13,15 +13,18 @@ import {
   spaceTest,
   setupContextAwareness,
   teardownContextAwareness,
+  AUTO_ROW_HEIGHT,
   BREAKDOWN_FIELD,
+  BREAKDOWN_SELECTOR,
   CONTEXT_AWARENESS_DATA_VIEWS,
   DEFAULT_PROFILE_COLUMNS,
+  DEFAULT_PROFILE_ROW_HEIGHT,
   getGridColumnIds,
   LOGS_PROFILE_COLUMNS,
+  LOGS_PROFILE_ROW_HEIGHT,
+  readRowHeight,
+  setRowHeight,
 } from '../fixtures';
-
-const ROW_HEIGHT_LINE_COUNT = 'unifiedDataTableRowHeightSettings_lineCountNumber';
-const BREAKDOWN_SELECTOR = 'unifiedHistogramBreakdownSelectorButton';
 
 /**
  * Same default state as the ES|QL cases, but resolved from the selected data view: `my-example-logs`
@@ -55,9 +58,7 @@ spaceTest.describe(
 
       await expect.poll(() => getGridColumnIds(page)).toStrictEqual(LOGS_PROFILE_COLUMNS);
 
-      await dataGrid.openGridDisplaySettings();
-      expect(await dataGrid.getCurrentRowHeight()).toBe('Custom');
-      await expect(page.testSubj.locator(ROW_HEIGHT_LINE_COUNT)).toHaveValue('5');
+      expect(await readRowHeight(page, dataGrid)).toStrictEqual(LOGS_PROFILE_ROW_HEIGHT);
 
       await expect(page.testSubj.locator(BREAKDOWN_SELECTOR)).toHaveAttribute(
         'data-selected-value',
@@ -76,9 +77,7 @@ spaceTest.describe(
 
         await expect.poll(() => getGridColumnIds(page)).toStrictEqual(DEFAULT_PROFILE_COLUMNS);
 
-        await dataGrid.openGridDisplaySettings();
-        expect(await dataGrid.getCurrentRowHeight()).toBe('Custom');
-        await expect(page.testSubj.locator(ROW_HEIGHT_LINE_COUNT)).toHaveValue('3');
+        expect(await readRowHeight(page, dataGrid)).toStrictEqual(DEFAULT_PROFILE_ROW_HEIGHT);
 
         await discover.selectDataView(CONTEXT_AWARENESS_DATA_VIEWS.LOGS, {
           createAdHocIfMissing: false,
@@ -86,9 +85,7 @@ spaceTest.describe(
 
         await expect.poll(() => getGridColumnIds(page)).toStrictEqual(LOGS_PROFILE_COLUMNS);
 
-        await dataGrid.openGridDisplaySettings();
-        expect(await dataGrid.getCurrentRowHeight()).toBe('Custom');
-        await expect(page.testSubj.locator(ROW_HEIGHT_LINE_COUNT)).toHaveValue('5');
+        expect(await readRowHeight(page, dataGrid)).toStrictEqual(LOGS_PROFILE_ROW_HEIGHT);
 
         await expect(page.testSubj.locator(BREAKDOWN_SELECTOR)).toHaveAttribute(
           'data-selected-value',
@@ -109,17 +106,14 @@ spaceTest.describe(
       await unifiedFieldList.clickFieldListItemRemove('message');
       await expect.poll(() => getGridColumnIds(page)).toStrictEqual(DEFAULT_PROFILE_COLUMNS);
 
-      await dataGrid.openGridDisplaySettings();
-      await dataGrid.setRowHeight('Auto');
-      expect(await dataGrid.getCurrentRowHeight()).toBe('Auto');
+      await setRowHeight(page, dataGrid, 'Auto');
+      expect(await readRowHeight(page, dataGrid)).toStrictEqual(AUTO_ROW_HEIGHT);
 
       await discover.clickNewSearch();
 
       await expect.poll(() => getGridColumnIds(page)).toStrictEqual(LOGS_PROFILE_COLUMNS);
 
-      await dataGrid.openGridDisplaySettings();
-      expect(await dataGrid.getCurrentRowHeight()).toBe('Custom');
-      await expect(page.testSubj.locator(ROW_HEIGHT_LINE_COUNT)).toHaveValue('5');
+      expect(await readRowHeight(page, dataGrid)).toStrictEqual(LOGS_PROFILE_ROW_HEIGHT);
 
       await expect(page.testSubj.locator(BREAKDOWN_SELECTOR)).toHaveAttribute(
         'data-selected-value',

@@ -12,10 +12,12 @@ import {
   spaceTest,
   setupContextAwareness,
   teardownContextAwareness,
+  AUTO_ROW_HEIGHT,
   CONTEXT_AWARENESS_DATA_VIEWS,
   getProfileUrlState,
   getStoredTabs,
   openProfileStateDocView,
+  LOGS_PROFILE_ROW_HEIGHT,
   readRowHeight,
   setRowHeight,
 } from '../fixtures';
@@ -23,9 +25,6 @@ import {
 const TIMESTAMP_COLOR_SELECT = 'exampleProfileStateTimestampColorSelect';
 const ROW_CONTROL_COLOR_SELECT = 'exampleProfileStateRowControlColorSelect';
 const BOX_COLOR_SELECT = 'exampleProfileStateBoxColorSelect';
-
-const PROFILE_DEFAULT_ROW_HEIGHT = { value: 'Custom', lineCount: '5' } as const;
-const AUTO_ROW_HEIGHT = { value: 'Auto', lineCount: null } as const;
 
 /**
  * A profile can park state in three places, each with different lifetime rules: UI state lives only
@@ -61,7 +60,7 @@ spaceTest.describe(
       async ({ page, pageObjects }) => {
         const { dataGrid, discover, unifiedTabs } = pageObjects;
 
-        expect(await readRowHeight(page, dataGrid)).toStrictEqual(PROFILE_DEFAULT_ROW_HEIGHT);
+        expect(await readRowHeight(page, dataGrid)).toStrictEqual(LOGS_PROFILE_ROW_HEIGHT);
 
         await setRowHeight(page, dataGrid, 'Auto');
         expect(await readRowHeight(page, dataGrid)).toStrictEqual(AUTO_ROW_HEIGHT);
@@ -69,7 +68,7 @@ spaceTest.describe(
         // A fresh tab resolves the profile from scratch, so it starts from the default again.
         await unifiedTabs.createNewTab();
         await discover.waitUntilTabIsLoaded();
-        expect(await readRowHeight(page, dataGrid)).toStrictEqual(PROFILE_DEFAULT_ROW_HEIGHT);
+        expect(await readRowHeight(page, dataGrid)).toStrictEqual(LOGS_PROFILE_ROW_HEIGHT);
 
         await unifiedTabs.selectTab(0);
         await discover.waitUntilTabIsLoaded();
@@ -82,7 +81,7 @@ spaceTest.describe(
       async ({ page, pageObjects }) => {
         const { dataGrid, discover } = pageObjects;
 
-        expect(await readRowHeight(page, dataGrid)).toStrictEqual(PROFILE_DEFAULT_ROW_HEIGHT);
+        expect(await readRowHeight(page, dataGrid)).toStrictEqual(LOGS_PROFILE_ROW_HEIGHT);
         await setRowHeight(page, dataGrid, 'Auto');
 
         // `my-example-*` resolves no data source profile, so it inherits rather than resets.

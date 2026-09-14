@@ -12,34 +12,22 @@ import {
   spaceTest,
   setupContextAwareness,
   teardownContextAwareness,
-  ALL_TIMESTAMPS_DESC,
-  CLASSIC_NAV_DEPLOYMENTS,
   CONTEXT_AWARENESS_DATA_VIEWS,
-  GRID_VIEWPORT,
   LOGS_LEVELS_DESC,
-  LOGS_TIMESTAMPS_DESC,
+  SOLUTION_VIEW_DEPLOYMENTS,
 } from '../fixtures';
 
 /**
- * Same profile-layering assertions as the ES|QL cases, but reached by selecting a data view instead
- * of writing a query: the resolved data source has to drive the cell renderers identically in both
- * modes. `my-example-*` resolves `example-root-profile` alone, so `@timestamp` gets the custom
- * renderer and `log.level` does not; `my-example-logs` also resolves
- * `example-data-source-profile`, which adds the log level renderer.
- *
- * Classic navigation only: `example-root-profile` bails out once a solution view is active, so the
- * custom timestamp renderer never applies there. The solution view side is covered by
- * get_cell_renderers_data_view_solution_view.spec.ts.
+ * The solution view counterpart of get_cell_renderers_data_view.spec.ts: with
+ * `example-solution-view-root-profile` resolved in place of `example-root-profile`, no cell
+ * renderer is contributed at the root layer, so the custom `@timestamp` is absent for every data
+ * view. `example-data-source-profile` is unaffected and still renders `log.level` for
+ * `my-example-logs`.
  */
 spaceTest.describe(
-  'Discover context awareness - extension getCellRenderers, data view mode',
-  { tag: CLASSIC_NAV_DEPLOYMENTS },
+  'Discover context awareness - extension getCellRenderers under a solution view, data view mode',
+  { tag: SOLUTION_VIEW_DEPLOYMENTS },
   () => {
-    // Needed by 'root profile renders a custom timestamp field': it runs on the default summary
-    // column, whose height means the shorter default viewport virtualises away two of the six rows,
-    // leaving the whole-result-set assertion to undercount.
-    spaceTest.use({ viewport: GRID_VIEWPORT });
-
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await setupContextAwareness(scoutSpace);
     });
@@ -53,21 +41,22 @@ spaceTest.describe(
       await teardownContextAwareness(scoutSpace);
     });
 
-    spaceTest('root profile renders a custom timestamp field', async ({ page, pageObjects }) => {
-      const { discover } = pageObjects;
+    spaceTest(
+      'root profile does not render a custom timestamp field',
+      async ({ page, pageObjects }) => {
+        const { discover } = pageObjects;
 
-      await discover.selectDataView(CONTEXT_AWARENESS_DATA_VIEWS.ALL, {
-        createAdHocIfMissing: false,
-      });
-      await discover.waitUntilSearchingHasFinished();
+        await discover.selectDataView(CONTEXT_AWARENESS_DATA_VIEWS.ALL, {
+          createAdHocIfMissing: false,
+        });
+        await discover.waitUntilSearchingHasFinished();
 
-      await expect(page.testSubj.locator('exampleRootProfileTimestamp')).toHaveText(
-        ALL_TIMESTAMPS_DESC
-      );
-    });
+        await expect(page.testSubj.locator('exampleRootProfileTimestamp')).toHaveCount(0);
+      }
+    );
 
     spaceTest(
-      'data source profile renders a custom timestamp field but not a custom log.level',
+      'renders neither a custom timestamp field nor a custom log.level',
       async ({ page, pageObjects }) => {
         const { discover, unifiedFieldList } = pageObjects;
 
@@ -80,15 +69,13 @@ spaceTest.describe(
         await unifiedFieldList.clickFieldListItemAdd('@timestamp');
         await unifiedFieldList.clickFieldListItemAdd('log.level');
 
-        await expect(page.testSubj.locator('exampleRootProfileTimestamp')).toHaveText(
-          ALL_TIMESTAMPS_DESC
-        );
+        await expect(page.testSubj.locator('exampleRootProfileTimestamp')).toHaveCount(0);
         await expect(page.testSubj.locator('exampleDataSourceProfileLogLevel')).toHaveCount(0);
       }
     );
 
     spaceTest(
-      'data source profile renders a custom timestamp field and a custom log.level',
+      'data source profile renders a custom log.level but still no custom timestamp field',
       async ({ page, pageObjects }) => {
         const { discover, unifiedFieldList } = pageObjects;
 
@@ -101,9 +88,7 @@ spaceTest.describe(
         await unifiedFieldList.clickFieldListItemAdd('@timestamp');
         await unifiedFieldList.clickFieldListItemAdd('log.level');
 
-        await expect(page.testSubj.locator('exampleRootProfileTimestamp')).toHaveText(
-          LOGS_TIMESTAMPS_DESC
-        );
+        await expect(page.testSubj.locator('exampleRootProfileTimestamp')).toHaveCount(0);
         await expect(page.testSubj.locator('exampleDataSourceProfileLogLevel')).toHaveText(
           LOGS_LEVELS_DESC
         );

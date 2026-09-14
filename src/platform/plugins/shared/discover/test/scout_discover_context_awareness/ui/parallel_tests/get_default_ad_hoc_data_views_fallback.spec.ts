@@ -11,23 +11,22 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   spaceTest,
-  ALL_TIMESTAMPS_DESC,
+  ALL_TIMES_DESC,
   CONTEXT_AWARENESS_TIME_RANGE,
   PROFILE_DATA_VIEW,
+  PROFILE_DATA_VIEW_FIELD_COUNT,
 } from '../fixtures';
-
-const PROFILE_DATA_VIEW_FIELD_COUNT = '7';
 
 /**
  * What Discover falls back to when a space has no data views of its own: the ad hoc data view from
  * `example-root-profile` takes over, so the user lands on something usable rather than the
  * onboarding page. The space deliberately never loads the context awareness saved objects.
  *
- * The companion case — the onboarding page winning when there is no data at all, so that a
- * profile-contributed data view cannot mask it — is not covered here. It needs a server lane with
- * an empty cluster (see the `shared_ux_no_data` config set); it cannot be reached by revoking index
- * privileges, because a user who cannot read existing data gets Discover's error state rather than
- * the onboarding page.
+ * The companion case — the onboarding page still winning when there is no data at all, so that a
+ * profile-contributed data view cannot mask it — is covered in Jest, by
+ * application/main/discover_main_route.test.ts. It belongs there rather than here: asserting it in
+ * a browser means asserting that nothing on the whole deployment holds data, which no amount of
+ * cleanup can guarantee on a shared server.
  */
 spaceTest.describe(
   'Discover context awareness - extension getDefaultAdHocDataViews, fallback',
@@ -65,7 +64,7 @@ spaceTest.describe(
         await expect(unifiedFieldList.getSidebarSectionCountLocator('available')).toHaveText(
           PROFILE_DATA_VIEW_FIELD_COUNT
         );
-        await expect(dataGrid.getCell(0, '@timestamp')).toContainText(ALL_TIMESTAMPS_DESC[0]);
+        await expect(dataGrid.getCell(0, '@timestamp')).toContainText(ALL_TIMES_DESC[0]);
       }
     );
   }
