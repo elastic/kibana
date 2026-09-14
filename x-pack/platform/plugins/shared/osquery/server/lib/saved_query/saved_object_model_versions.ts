@@ -16,7 +16,6 @@ import {
   packSchemaV3,
   packSchemaV4,
   packSchemaV5,
-  packSchemaV6,
 } from './schemas';
 import {
   deriveEffectiveQueryKey,
