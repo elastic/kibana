@@ -87,10 +87,6 @@ jest.mock('@kbn/core-di-browser', () => {
   };
 });
 
-jest.mock('@kbn/core-di', () => ({
-  PluginStart: (key: string) => key,
-}));
-
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
   ComposeDiscoverFlyout: ({ onCreateRule }: { onCreateRule: (payload: unknown) => void }) => (
     <button data-test-subj="composeDiscoverFlyout" onClick={() => onCreateRule({})}>
@@ -773,7 +769,7 @@ describe('RulesListPage', () => {
     fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('cloneRule-rule-1')).toHaveTextContent('Clone rule');
+      expect(screen.getByTestId('cloneRule-rule-1')).toHaveTextContent('Clone');
     });
   });
 
