@@ -4,6 +4,7 @@ get:
   description: >
     Returns a paginated list of reusable field definitions (field library entries) for the given
     owner. Requires the Cases feature to be enabled in the space.
+  x-state: Technical preview
   tags:
     - cases
   parameters:
@@ -26,7 +27,7 @@ get:
       name: isGlobal
       description: >
         When true, returns only global field definitions (rendered on every case). When false,
-        returns only non-global definitions. Omit to return all.
+        returns all definitions. Omit to return all.
       required: false
       schema:
         type: boolean
@@ -64,6 +65,15 @@ get:
           examples:
             response401:
               $ref: '../components/examples/response_401.yaml'
+    '403':
+      description: The user does not have permission to read field definitions for the owner.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response403:
+              $ref: '../components/examples/response_403.yaml'
 post:
   summary: Create a reusable field definition
   operationId: createCaseFieldDefinitionDefaultSpace

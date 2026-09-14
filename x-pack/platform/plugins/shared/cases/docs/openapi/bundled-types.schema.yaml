@@ -1151,6 +1151,7 @@ paths:
       operationId: getCaseFieldDefinitionsDefaultSpace
       description: |
         Returns a paginated list of reusable field definitions (field library entries) for the given owner. Requires the Cases feature to be enabled in the space.
+      x-state: Technical preview
       tags:
         - cases
       parameters:
@@ -1171,7 +1172,7 @@ paths:
         - in: query
           name: isGlobal
           description: |
-            When true, returns only global field definitions (rendered on every case). When false, returns only non-global definitions. Omit to return all.
+            When true, returns only global field definitions (rendered on every case). When false, returns all definitions. Omit to return all.
           required: false
           schema:
             type: boolean
@@ -1209,6 +1210,15 @@ paths:
               examples:
                 response401:
                   $ref: '#/components/examples/response_401'
+        '403':
+          description: The user does not have permission to read field definitions for the owner.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response403:
+                  $ref: '#/components/examples/response_403'
     post:
       summary: Create a reusable field definition
       operationId: createCaseFieldDefinitionDefaultSpace
@@ -1278,7 +1288,7 @@ paths:
       summary: Update editable attributes of a reusable field definition
       operationId: updateCaseFieldDefinitionDefaultSpace
       description: |
-        Updates editable attributes of a reusable field definition. Server-managed attributes (`displayOrder`, `legacyKey`) are preserved. You must have the "Manage templates" sub-privilege for the Cases feature of the owning solution. A field's `name` and YAML `type` are immutable after creation — an attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified. Requires the Cases feature to be enabled in the space.
+        Updates editable attributes of a reusable field definition. Server-managed attributes (`displayOrder`, `legacyKey`) are preserved. You must have the "Manage templates" sub-privilege for the Cases feature of the owning solution. A field's `name` and YAML `type` are immutable after creation — an attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified. Once `isGlobal` is set to `true` it cannot be set back to `false`. Requires the Cases feature to be enabled in the space.
       x-state: Technical preview
       tags:
         - cases

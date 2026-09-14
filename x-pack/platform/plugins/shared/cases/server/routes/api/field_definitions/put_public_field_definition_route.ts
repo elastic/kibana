@@ -20,7 +20,7 @@ import { toPublicFieldDefinition } from './to_public_field_definition';
 
 /**
  * PUT /api/cases/field_definitions/{field_definition_id}
- * Public route — fully replace a reusable field definition.
+ * Public route — update editable attributes of a reusable field definition.
  */
 export const putPublicFieldDefinitionRoute = createCasesRoute({
   method: 'put',
