@@ -121,14 +121,17 @@ No changes to the Context Engine plugin are required.
 ## Signals
 
 Signals are observations classified from Agent Builder traces and stored in the
-per-space `context-engine-signals-<space>` index. The AI index detail page
-renders a read-only **Signals** panel: a preaggregated grouped-by-tag list, a
-drill-down into a group's individual signals (each with a trace waterfall in a
-flyout), and an "Analyze & improve" button that opens Agent Builder when a chat
-opener has been registered.
+per-space `context-engine-signals-<space>` index.
 
-The panel is backed by two internal, read-only routes (reads run as the current
-user against the current space's signals index):
+They have no panel on the AI index detail page. A `SignalsPanel` component
+exists — a grouped-by-tag list, a drill-down into a group's individual signals
+with a trace waterfall per signal, and an "Analyze & improve" button — but
+nothing renders it. It was a view of the evidence behind suggestions, and those
+are now shown in the panel they would change (see
+[Improvements](#improvements)), which left it without an audience of its own.
+
+Its routes are still served — two internal, read-only ones, where reads run as
+the current user against the current space's signals index:
 
 | Method | Path                                      | Description                                            |
 | ------ | ----------------------------------------- | ------------------------------------------------------ |
@@ -167,8 +170,38 @@ An **improvement** is a proposed change to one AI index's KI pipeline, derived
 from that index's signals. They live in the single global
 `context-engine-improvements` index, exposed to the server as
 `ContextEnginePluginStart.getImprovementsService(esClient)` and written by an
-analysis run (see [Feedback analysis runs](#feedback-analysis-runs)). The review
-UI that applies them comes later.
+analysis run (see [Feedback analysis runs](#feedback-analysis-runs)).
+
+### Reviewing them
+
+Suggestions are shown in the panel whose part of the AI index they would change
+— source proposals under **Sources**, automation proposals under
+**Automations** — rather than in a queue of their own. A proposal to add a
+source is a question about the sources, and answering it means looking at what
+is already configured. Each panel filters one cached list client-side, so the
+panels between them cost a single request, and a panel with nothing to review
+renders as it did before.
+
+Approving is the authorization boundary: both the store access and the change it
+materializes run on the approving user's own Elasticsearch client and request,
+so an approval can never effect something the reviewer could not do themselves.
+Rejecting asks why first — the reason is optional, but when given it is recorded
+on `resolution.reason`, which is what later runs read to avoid re-proposing the
+same thing.
+
+The panels are backed by four internal routes, all gated by the
+`contextEngine:feedbackLoopEnabled` setting on top of `contextEngine:enabled`:
+
+| Method | Path                                                                    | Description                                        |
+| ------ | ----------------------------------------------------------------------- | -------------------------------------------------- |
+| `GET`  | `/internal/context_engine/ai_index/{id}/improvements`                   | Open suggestions for an AI index, paginated        |
+| `POST` | `/internal/context_engine/ai_index/{id}/improvements/{impId}/approve`   | Apply the change and record it as applied          |
+| `POST` | `/internal/context_engine/ai_index/{id}/improvements/{impId}/reject`    | Record it as rejected, with an optional `reason`   |
+| `POST` | `/internal/context_engine/ai_index/{id}/feedback_analysis/_run`         | Start one analysis run off-schedule                |
+
+KI proposals (`add_ki`, `edit_ki`, `remove_ki`) currently have no panel. The
+loop is not expected to propose them, and the apply path for them exists either
+way.
 
 Unlike signals, the store is **global rather than per-space**: an improvement
 targets an AI index's KI pipeline, and the AI index registry has no space
