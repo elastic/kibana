@@ -57,7 +57,7 @@ Array [
       class="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed"
     >
       <a
-        class="euiLink emotion-euiLink-primary"
+        class="euiLink emotion-euiLink-text"
         data-test-subj="syntheticsMonitorTagsSetTagsLink"
         href="https://www.elastic.co/docs/reference/beats/heartbeat/monitor-options#monitor-tags"
         rel="noopener noreferrer"

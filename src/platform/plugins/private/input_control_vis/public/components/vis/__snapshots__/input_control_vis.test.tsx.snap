@@ -108,7 +108,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
             class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <button
-              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+              class="euiButton emotion-euiButtonDisplay-m-fill-primary"
               data-test-subj="inputControlSubmitBtn"
               type="button"
             >
@@ -273,7 +273,7 @@ exports[`Clear btns enabled when there are values 1`] = `
             class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <button
-              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-fill-disabled"
+              class="euiButton emotion-euiButtonDisplay-m-isDisabled-fill-disabled"
               data-test-subj="inputControlSubmitBtn"
               disabled=""
               type="button"
@@ -439,7 +439,7 @@ exports[`Renders list control 1`] = `
             class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <button
-              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-fill-disabled"
+              class="euiButton emotion-euiButtonDisplay-m-isDisabled-fill-disabled"
               data-test-subj="inputControlSubmitBtn"
               disabled=""
               type="button"
@@ -661,7 +661,7 @@ exports[`Renders range control 1`] = `
             class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <button
-              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-fill-disabled"
+              class="euiButton emotion-euiButtonDisplay-m-isDisabled-fill-disabled"
               data-test-subj="inputControlSubmitBtn"
               disabled=""
               type="button"
