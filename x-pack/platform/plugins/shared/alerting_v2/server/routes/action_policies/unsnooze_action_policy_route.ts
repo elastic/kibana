@@ -26,7 +26,13 @@ import {
 } from './action_policy_route_descriptions';
 
 const unsnoozeActionPolicyParamsSchema = z.object({
-  id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
+  id: z
+    .string()
+    .min(1)
+    .max(ID_MAX_LENGTH)
+    .describe(
+      'The ID of the action policy to unsnooze. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.'
+    ),
 });
 
 @injectable()
