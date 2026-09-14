@@ -128,12 +128,12 @@ export const prepareMessages = async ({
     }
   }
 
-  for (const round of entries) {
-    if (isTimelineStandaloneUserMessage(round)) {
+  for (const entry of entries) {
+    if (isTimelineStandaloneUserMessage(entry)) {
       messages.push(
-        formatRoundInput({
-          input: round.userMessage.data,
-          timestamp: round.userMessage.created_at,
+        formatUserInput({
+          input: entry.userMessage.data,
+          timestamp: entry.userMessage.created_at,
           attachmentTypes: conversation.attachmentTypes,
           attachmentTypeInstructionsProvided,
         })
@@ -141,7 +141,7 @@ export const prepareMessages = async ({
       continue;
     }
     messages.push(
-      ...(await roundToLangchain(round, {
+      ...(await roundToLangchain(entry, {
         resultTransformer,
         ignoreSteps,
         attachmentTypes: conversation.attachmentTypes,
@@ -151,7 +151,7 @@ export const prepareMessages = async ({
   }
 
   messages.push(
-    formatRoundInput({
+    formatUserInput({
       input,
       timestamp: inputTimestamp,
       attachmentTypes: conversation.attachmentTypes,
@@ -182,7 +182,7 @@ export const roundToLangchain = async (
 
   // user message
   messages.push(
-    formatRoundInput({
+    formatUserInput({
       input: round.userMessage.data,
       timestamp: round.userMessage.created_at,
       attachmentTypes,
@@ -239,7 +239,7 @@ export const roundToLangchain = async (
   return messages;
 };
 
-export const formatRoundInput = ({
+export const formatUserInput = ({
   input,
   timestamp,
   attachmentTypes,
