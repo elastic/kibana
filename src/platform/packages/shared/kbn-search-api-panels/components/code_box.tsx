@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useId, useState } from 'react';
+import React, { useState } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -17,11 +17,8 @@ import {
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiPanel,
   EuiPopover,
-  EuiThemeProvider,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ApplicationStart } from '@kbn/core-application-browser';
@@ -30,7 +27,6 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
 import type { LanguageDefinition } from '../types';
-import * as Styles from './styles';
 
 interface CodeBoxProps {
   languages?: LanguageDefinition[];
@@ -63,8 +59,6 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
   showTopBar = true,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
-  const { euiTheme } = useEuiTheme();
-  const selectLangDescriptionId = useId();
 
   const selectLanguageDescription = consoleTitle
     ? i18n.translate('searchApiPanels.welcomeBanner.codeBox.selectAriaLabel', {
@@ -109,82 +103,73 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
     : [];
 
   const button = selectedLanguage ? (
-    <>
-      <span id={selectLangDescriptionId} className="euiScreenReaderOnly" aria-hidden="true">
-        {selectLanguageDescription}
-      </span>
-      <EuiButtonEmpty
-        color="text"
-        iconType="chevronSingleDown"
-        iconSide="right"
-        size="s"
-        aria-describedby={selectLangDescriptionId}
-        onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-      >
-        {selectedLanguage.name}
-      </EuiButtonEmpty>
-    </>
+    <EuiButtonEmpty
+      color="text"
+      iconType="chevronSingleDown"
+      iconSide="right"
+      size="s"
+      aria-label={selectLanguageDescription}
+      onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+    >
+      {selectedLanguage.name}
+    </EuiButtonEmpty>
   ) : null;
 
   return (
-
-    <EuiPanel
-      paddingSize="xs"
-      data-test-subj="codeBlockControlsPanel"
-      hasBorder={true}
-    >
+    <EuiPanel paddingSize="xs" data-test-subj="codeBlockControlsPanel" hasBorder>
       {showTopBar && (
-        <>
-          <EuiFlexGroup
-            alignItems="center"
-            responsive={false}
-            gutterSize="s"
-            justifyContent={languages && languages.length !== 0 ? 'spaceBetween' : 'flexEnd'}
-          >
-            {languages && button && (
-              <EuiFlexItem>
-                <EuiPopover
-                  aria-label={selectLanguageDescription}
-                  button={button}
-                  isOpen={isPopoverOpen}
-                  closePopover={() => setIsPopoverOpen(false)}
-                  panelPaddingSize="none"
-                  anchorPosition="downLeft"
-                >
-                  <EuiContextMenuPanel items={items} />
-                </EuiPopover>
-              </EuiFlexItem>
-            )}
+        <EuiFlexGroup
+          alignItems="center"
+          responsive={false}
+          gutterSize="s"
+          justifyContent={languages && languages.length !== 0 ? 'spaceBetween' : 'flexEnd'}
+        >
+          {languages && button && (
             <EuiFlexItem grow={false}>
-              <EuiCopy textToCopy={codeSnippet}>
-                {(copy) => (
-                  <EuiButtonEmpty
-                    color="text"
-                    iconType="copy"
-                    size="s"
-                    onClick={copy}
-                    aria-label={getCopyButtonAriaLabel}
-                  >
-                    {i18n.translate('searchApiPanels.welcomeBanner.codeBox.copyButtonLabel', {
-                      defaultMessage: 'Copy',
-                    })}
-                  </EuiButtonEmpty>
-                )}
-              </EuiCopy>
+              <EuiPopover
+                aria-label={selectLanguageDescription}
+                button={button}
+                isOpen={isPopoverOpen}
+                closePopover={() => setIsPopoverOpen(false)}
+                panelPaddingSize="none"
+                anchorPosition="downLeft"
+              >
+                <EuiContextMenuPanel items={items} />
+              </EuiPopover>
             </EuiFlexItem>
-            {consoleRequest !== undefined && sharePlugin && (
+          )}
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
               <EuiFlexItem grow={false}>
-                <TryInConsoleButton
-                  request={consoleRequest}
-                  application={application}
-                  consolePlugin={consolePlugin}
-                  sharePlugin={sharePlugin}
-                />
+                <EuiCopy textToCopy={codeSnippet}>
+                  {(copy) => (
+                    <EuiButtonEmpty
+                      color="text"
+                      iconType="copy"
+                      size="s"
+                      onClick={copy}
+                      aria-label={getCopyButtonAriaLabel}
+                    >
+                      {i18n.translate('searchApiPanels.welcomeBanner.codeBox.copyButtonLabel', {
+                        defaultMessage: 'Copy',
+                      })}
+                    </EuiButtonEmpty>
+                  )}
+                </EuiCopy>
               </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-          {/* <EuiHorizontalRule margin="none" /> */}
-        </>
+              {consoleRequest !== undefined && sharePlugin && (
+                <EuiFlexItem grow={false}>
+                  <TryInConsoleButton
+                    request={consoleRequest}
+                    application={application}
+                    consolePlugin={consolePlugin}
+                    sharePlugin={sharePlugin}
+                  />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       )}
       <EuiCodeBlock
         isCopyable={!showTopBar}
