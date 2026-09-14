@@ -25,6 +25,7 @@ import {
   postSessionInvalidate,
   putNativeUser,
   refreshSessionIndex,
+  SAML_USERNAME,
   SESSION_API_HEADERS,
 } from '../../../scout_session_management/helpers';
 
@@ -104,7 +105,7 @@ test.describe('Session Invalidate', { tag: [...LOCAL_STATEFUL_TAGS] }, () => {
     expect(noopResponse.body.total).toBe(0);
 
     await assertSessionCookie(apiClient, basicCookie, TEST_USERNAME, BASIC_PROVIDER);
-    await assertSessionCookie(apiClient, samlCookie, 'a@b.c', SAML_PROVIDER);
+    await assertSessionCookie(apiClient, samlCookie, SAML_USERNAME, SAML_PROVIDER);
   });
 
   test('should be able to invalidate session only for a specific provider type', async ({
@@ -122,7 +123,7 @@ test.describe('Session Invalidate', { tag: [...LOCAL_STATEFUL_TAGS] }, () => {
     expect(invalidateBasic.body.total).toBe(1);
 
     await assertSessionExpired(apiClient, basicCookie);
-    await assertSessionCookie(apiClient, samlCookie, 'a@b.c', SAML_PROVIDER);
+    await assertSessionCookie(apiClient, samlCookie, SAML_USERNAME, SAML_PROVIDER);
 
     const invalidateSaml = await postSessionInvalidate(apiClient, config, {
       match: 'query',
@@ -156,7 +157,7 @@ test.describe('Session Invalidate', { tag: [...LOCAL_STATEFUL_TAGS] }, () => {
     expect(noop2.body.total).toBe(0);
 
     await assertSessionCookie(apiClient, basicCookie, TEST_USERNAME, BASIC_PROVIDER);
-    await assertSessionCookie(apiClient, samlCookie, 'a@b.c', SAML_PROVIDER);
+    await assertSessionCookie(apiClient, samlCookie, SAML_USERNAME, SAML_PROVIDER);
   });
 
   test('should be able to invalidate session only for a specific provider name', async ({
@@ -208,7 +209,7 @@ test.describe('Session Invalidate', { tag: [...LOCAL_STATEFUL_TAGS] }, () => {
     expect(noop2.body.total).toBe(0);
 
     await assertSessionCookie(apiClient, basicCookie, TEST_USERNAME, BASIC_PROVIDER);
-    await assertSessionCookie(apiClient, samlCookie, 'a@b.c', SAML_PROVIDER);
+    await assertSessionCookie(apiClient, samlCookie, SAML_USERNAME, SAML_PROVIDER);
   });
 
   test('should be able to invalidate session only for a specific user', async ({
@@ -226,11 +227,11 @@ test.describe('Session Invalidate', { tag: [...LOCAL_STATEFUL_TAGS] }, () => {
     expect(invalidateBasicUser.body.total).toBe(1);
 
     await assertSessionExpired(apiClient, basicCookie);
-    await assertSessionCookie(apiClient, samlCookie, 'a@b.c', SAML_PROVIDER);
+    await assertSessionCookie(apiClient, samlCookie, SAML_USERNAME, SAML_PROVIDER);
 
     const invalidateSamlUser = await postSessionInvalidate(apiClient, config, {
       match: 'query',
-      query: { provider: { type: 'saml', name: 'saml1' }, username: 'a@b.c' },
+      query: { provider: { type: 'saml', name: 'saml1' }, username: SAML_USERNAME },
     });
     expect(invalidateSamlUser).toHaveStatusCode(200);
     expect(invalidateSamlUser.body.total).toBe(1);
@@ -275,7 +276,7 @@ test.describe('Session Invalidate', { tag: [...LOCAL_STATEFUL_TAGS] }, () => {
     expect(forbidden3).toHaveStatusCode(403);
 
     await assertSessionCookie(apiClient, basicCookie, TEST_USERNAME, BASIC_PROVIDER);
-    await assertSessionCookie(apiClient, samlCookie, 'a@b.c', SAML_PROVIDER);
+    await assertSessionCookie(apiClient, samlCookie, SAML_USERNAME, SAML_PROVIDER);
 
     await putNativeUser(
       esClient,

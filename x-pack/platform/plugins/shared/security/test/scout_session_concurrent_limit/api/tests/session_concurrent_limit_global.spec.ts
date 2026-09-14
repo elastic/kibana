@@ -22,6 +22,7 @@ import {
   loginWithSAML,
   putNativeUser,
   refreshSessionIndex,
+  SAML_USERNAME,
   SESSION_API_HEADERS,
   toggleSessionCleanupTask,
 } from '../../../scout_session_management/helpers';
@@ -30,7 +31,6 @@ const TEST_USERNAME = 'concurrent_test_user';
 const TEST_PASSWORD = 'changeme';
 const ANONYMOUS_USERNAME = 'anonymous_user';
 const ANONYMOUS_PASSWORD = 'changeme';
-const SAML_USERNAME = 'a@b.c';
 const BASIC_PROVIDER = { type: 'basic', name: 'basic1' } as const;
 const SAML_PROVIDER = { type: 'saml', name: 'saml1' } as const;
 const ANONYMOUS_PROVIDER = { type: 'anonymous', name: 'anonymous1' } as const;
@@ -49,7 +49,6 @@ test.describe('Session Concurrent Limit global', { tag: [...LOCAL_STATEFUL_TAGS]
   });
 
   test.beforeEach(async ({ apiClient, config, esClient }) => {
-    await refreshSessionIndex(apiClient, config);
     await ensureSessionIndexReady(esClient);
     await enableSessionAuthcDebugLogs(esClient);
     await clearAllSessions(apiClient, config, esClient);

@@ -21,6 +21,8 @@ export const SESSION_API_HEADERS = {
 /** Custom session-server suites only run locally — the timeouts/SAML realm are not on Cloud. */
 export const LOCAL_STATEFUL_TAGS = ['@local-stateful-classic'] as const;
 
+export const SAML_USERNAME = 'a@b.c';
+
 const SESSION_INDEX = '.kibana_security_session*';
 
 export function samlCallbackUrl(config: ScoutTestConfig): string {
@@ -165,12 +167,15 @@ export async function clearAllSessions(
   await expect
     .poll(
       async () => {
-        await refreshSessionIndex(apiClient, config);
-        const response = await postSessionInvalidate(apiClient, config, { match: 'all' });
-        if (response.statusCode !== 200) {
+        if ((await postRefreshSessionIndex(apiClient, config)).statusCode !== 200) {
           return -1;
         }
-        await refreshSessionIndex(apiClient, config);
+        if ((await postSessionInvalidate(apiClient, config, { match: 'all' })).statusCode !== 200) {
+          return -1;
+        }
+        if ((await postRefreshSessionIndex(apiClient, config)).statusCode !== 200) {
+          return -1;
+        }
         return getSessionCount(esClient);
       },
       { timeout: 15000 }
@@ -250,7 +255,7 @@ export async function loginWithSAML(
   // Flush the pre-auth doc deletion so callers polling getSessionCount see the
   // correct count without waiting for the next auto-refresh cycle.
   await refreshSessionIndex(apiClient, config);
-  await assertSessionCookie(apiClient, sessionCookie, 'a@b.c', {
+  await assertSessionCookie(apiClient, sessionCookie, SAML_USERNAME, {
     type: 'saml',
     name: providerName,
   });
@@ -284,14 +289,22 @@ export async function runCleanupTask(
     .toBe(200);
 }
 
+async function postRefreshSessionIndex(
+  apiClient: ApiClientFixture,
+  config: ScoutTestConfig
+): Promise<{ statusCode: number }> {
+  const response = await apiClient.post('/session/_refresh_session_index', {
+    headers: adminHeaders(config),
+  });
+  return { statusCode: response.statusCode };
+}
+
 export async function refreshSessionIndex(
   apiClient: ApiClientFixture,
   config: ScoutTestConfig
 ): Promise<void> {
-  const response = await apiClient.post('/session/_refresh_session_index', {
-    headers: adminHeaders(config),
-  });
-  expect(response).toHaveStatusCode(200);
+  const { statusCode } = await postRefreshSessionIndex(apiClient, config);
+  expect(statusCode).toBe(200);
 }
 
 export async function toggleSessionCleanupTask(

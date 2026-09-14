@@ -16,7 +16,6 @@ import {
   ensureSessionIndexReady,
   LOCAL_STATEFUL_TAGS,
   loginWithBasic,
-  refreshSessionIndex,
   SESSION_API_HEADERS,
 } from '../../../scout_session_management/helpers';
 
@@ -33,7 +32,6 @@ test.describe('Session Idle expired', { tag: [...LOCAL_STATEFUL_TAGS] }, () => {
     test.setTimeout(100000);
 
     const cookie = await loginWithBasic(apiClient, config.auth.username, config.auth.password);
-    await refreshSessionIndex(apiClient, config);
 
     // Wait out the idle timeout without touching the session — any authenticated
     // request would reset the idle clock, preventing the 401 from ever firing.

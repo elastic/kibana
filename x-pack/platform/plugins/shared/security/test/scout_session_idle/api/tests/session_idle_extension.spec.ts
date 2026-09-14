@@ -21,6 +21,8 @@ import {
   SESSION_API_HEADERS,
 } from '../../../scout_session_management/helpers';
 
+const IDLE_TIMEOUT_MS = 10_000;
+
 test.describe('Session Idle extension', { tag: [...LOCAL_STATEFUL_TAGS] }, () => {
   let sessionCookie: string;
 
@@ -71,12 +73,12 @@ test.describe('Session Idle extension', { tag: [...LOCAL_STATEFUL_TAGS] }, () =>
     const allCreatedAtBefore = await getSessionsCreatedAt(esClient);
     expect(allCreatedAtBefore.every((value) => value > 0)).toBe(true);
 
+    await setTimeoutAsync(200);
+
     const getBeforeExtend = await apiClient.get('/internal/security/session', {
       headers: { ...SESSION_API_HEADERS, 'kbn-system-request': 'true', Cookie: sessionCookie },
     });
     expect(getBeforeExtend).toHaveStatusCode(200);
-
-    await setTimeoutAsync(200);
 
     const extendResponse = await apiClient.post('/internal/security/session', {
       headers: { ...SESSION_API_HEADERS, Cookie: sessionCookie },
@@ -92,6 +94,7 @@ test.describe('Session Idle extension', { tag: [...LOCAL_STATEFUL_TAGS] }, () =>
     });
     expect(getResponse).toHaveStatusCode(200);
     expect(getResponse.body.expiresInMs).toBeGreaterThan(getBeforeExtend.body.expiresInMs);
+    expect(getResponse.body.expiresInMs).toBeLessThanOrEqual(IDLE_TIMEOUT_MS);
 
     await refreshSessionIndex(apiClient, config);
     const allCreatedAtAfter = await getSessionsCreatedAt(esClient);

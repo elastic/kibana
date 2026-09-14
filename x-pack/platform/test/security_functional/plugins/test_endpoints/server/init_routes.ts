@@ -640,7 +640,7 @@ export function initRoutes(
         index: '.kibana_security_session*',
         expand_wildcards: 'all',
         ignore_unavailable: true,
-      } as any);
+      });
       return response.ok();
     }
   );
@@ -668,7 +668,7 @@ export function initRoutes(
         script: 'ctx._source.remove("createdAt")',
         query: { ids: { values: ids } },
         refresh: true,
-      } as any);
+      });
       return response.ok();
     }
   );
