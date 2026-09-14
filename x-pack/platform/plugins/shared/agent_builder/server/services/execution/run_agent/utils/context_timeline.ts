@@ -161,12 +161,14 @@ export const lastExecutionTerminated = (
       event.type === TimelineEventType.executionTerminated
   );
 
+/** A user message that triggered no execution, as it appears on the context timeline. */
+export interface TimelineStandaloneUserMessage<E extends AnyTimelineEvent = TimelineEvent> {
+  userMessage: UserMessageOf<E>;
+}
+
 export type TimelineEntry<E extends AnyTimelineEvent = TimelineEvent> =
   | TimelineRound<E>
-  | {
-      userMessage: UserMessageOf<E>;
-      events: E[];
-    };
+  | TimelineStandaloneUserMessage<E>;
 
 /** Selects user messages, excluding execution triggers and receipt-time round inputs. */
 export const standaloneUserMessages = <E extends AnyTimelineEvent>(
@@ -188,10 +190,7 @@ export const groupTimelineEntries = <E extends AnyTimelineEvent>(
 ): Array<TimelineEntry<E>> => {
   const entries: Array<TimelineEntry<E>> = [
     ...groupTimelineRounds(timeline),
-    ...standaloneUserMessages(timeline).map((userMessage) => ({
-      userMessage,
-      events: [userMessage] as E[],
-    })),
+    ...standaloneUserMessages(timeline).map((userMessage) => ({ userMessage })),
   ];
   const positions = new Map(timeline.map((event, index) => [event.id, index]));
   return entries.sort(

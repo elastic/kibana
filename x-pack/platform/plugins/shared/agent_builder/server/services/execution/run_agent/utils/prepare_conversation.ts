@@ -151,7 +151,9 @@ export const prepareConversation = async ({
       ...round.userMessage,
       data: processedInput,
     };
-    for (const event of round.events) {
+    const events = 'terminated' in round ? round.events : [round.userMessage];
+
+    for (const event of events) {
       if (event === round.userMessage) {
         processedTimeline.push(processedUserMessage);
       } else if (event.type !== TimelineEventType.userMessage) {
