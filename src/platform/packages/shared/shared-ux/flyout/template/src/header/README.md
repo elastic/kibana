@@ -28,7 +28,7 @@ All three groups live in the header's collapsible region, so they animate away w
 
 ### Scroll behavior
 
-When the user scrolls the flyout body, the header automatically collapses to a compact row showing only the title: it drops to an `xs` heading on a single ellipsized line, with the full text available as a hover tooltip when it is a plain string. The description, meta blocks, badges, and info blocks slide away to give the body the recovered space. The title row, the tab bar, and the divider stay pinned in both states.
+When the user scrolls the flyout body, the header automatically collapses to a compact row showing only the title and its icon: the title drops to an `xs` heading on a single ellipsized line, with the full text available as a hover tooltip when it is a plain string. The description, meta blocks, badges, and info blocks slide away to give the body the recovered space. The title row, the tab bar, and the divider stay pinned in both states.
 
 Scrolling back to the top restores the full header. The collapse reverses with the same animation, and `prefers-reduced-motion` turns it into an instant swap.
 

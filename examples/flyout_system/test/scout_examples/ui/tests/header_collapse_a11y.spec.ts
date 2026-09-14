@@ -63,6 +63,33 @@ test.describe(
       await expect(flyout).toHaveAccessibleName(session);
     });
 
+    test('keeps the title tooltip available while the header is collapsed', async ({
+      page,
+      pageObjects,
+    }) => {
+      const app = pageObjects.flyoutSystem;
+      const session = app.session('component');
+      await app.openFlyout('component', session);
+
+      const icon = app.titleIcon('component', session);
+      await expect(icon).toBeVisible();
+
+      await app.scrollBodyByKeyboard('component', session, 'PageDown');
+      await expect(app.collapsibleRegion('component', session)).toHaveAttribute(
+        'aria-hidden',
+        'true'
+      );
+
+      // The compact title row carries the icon, so the only route to this content survives collapse.
+      await expect(icon).toBeVisible();
+      const anchor = icon.locator('[tabindex="0"]');
+      await anchor.focus();
+      await expect(anchor).toBeFocused();
+      await expect(page.getByRole('tooltip')).toContainText(
+        'This flyout demonstrates the flyout template.'
+      );
+    });
+
     test('takes the collapsed header content out of the tab order', async ({
       page,
       pageObjects,

@@ -161,7 +161,11 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
           onClose={handleCloseFlyout}
           data-test-subj={`flyoutComponent${titleKey}`}
         >
-          <FlyoutTemplate.Header title={title} description="Rendered with @kbn/flyout-template">
+          <FlyoutTemplate.Header
+            title={title}
+            titleTooltip="This flyout demonstrates the flyout template."
+            description="Rendered with @kbn/flyout-template"
+          >
             {headerBlocks()}
           </FlyoutTemplate.Header>
           <FlyoutTemplate.Body>
