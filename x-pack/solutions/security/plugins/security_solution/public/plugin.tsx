@@ -37,6 +37,7 @@ import type {
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { ProductFeatureAssistantKey } from '@kbn/security-solution-features/src/product_features_keys';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
+import { CLOUD_SECURITY_POSTURE_BASE_PATH } from '@kbn/cloud-security-posture-common';
 import { getLazyCloudSecurityPosturePliAuthBlockExtension } from './cloud_security_posture/lazy_cloud_security_posture_pli_auth_block_extension';
 import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
 import type {
@@ -421,7 +422,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     // Enable CPS picker in READ_ONLY mode for all Security Solution pages except for Value Report
     plugins.cps?.cpsManager?.registerAppAccess(APP_UI_ID, (location: string) =>
-      location.includes(AI_VALUE_PATH)
+      location.includes(AI_VALUE_PATH) || location.includes(CLOUD_SECURITY_POSTURE_BASE_PATH)
         ? ProjectRoutingAccess.DISABLED
         : ProjectRoutingAccess.READONLY
     );
