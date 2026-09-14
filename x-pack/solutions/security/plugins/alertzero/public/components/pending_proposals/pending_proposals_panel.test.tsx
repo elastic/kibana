@@ -43,7 +43,7 @@ const proposal = (overrides: Partial<ProposalWithMetadata> = {}): ProposalWithMe
     expired: false,
     action: { name: 'Create detection rule', category: 'tune' },
     ...overrides,
-  } as ProposalWithMetadata);
+  }) as ProposalWithMetadata;
 
 const setup = ({
   proposals = [proposal()],

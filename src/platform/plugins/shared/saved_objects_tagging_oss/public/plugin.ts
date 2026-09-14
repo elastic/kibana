@@ -11,9 +11,11 @@ import type { CoreSetup, CoreStart, PluginInitializerContext, Plugin } from '@kb
 import type { SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart } from './types';
 import type { SavedObjectsTaggingApi } from './api';
 
-export class SavedObjectTaggingOssPlugin
-  implements Plugin<SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart, {}>
-{
+export class SavedObjectTaggingOssPlugin implements Plugin<
+  SavedObjectTaggingOssPluginSetup,
+  SavedObjectTaggingOssPluginStart,
+  {}
+> {
   private apiRegistered = false;
   private api?: SavedObjectsTaggingApi;
 

@@ -231,7 +231,8 @@ export type SortingHint = string;
 export type ValueLabelConfig = 'hide' | 'show';
 
 export interface IndexPattern {
-  getFormatterForField( // used extensively in lens
+  getFormatterForField(
+    // used extensively in lens
     sourceField: string
   ): unknown;
   id: string;

@@ -87,9 +87,8 @@ export function parseRawSecurityResponseHeadersConfig(
   }
 
   if (raw.permissionsPolicyReportOnly && reportTo) {
-    securityResponseHeaders[
-      'Permissions-Policy-Report-Only'
-    ] = `${raw.permissionsPolicyReportOnly}${reportTo}`;
+    securityResponseHeaders['Permissions-Policy-Report-Only'] =
+      `${raw.permissionsPolicyReportOnly}${reportTo}`;
   }
 
   if (raw.crossOriginOpenerPolicy) {

@@ -219,7 +219,7 @@ export interface ChatCompleteRetryConfiguration {
  * whether API was called with stream mode enabled or not.
  */
 export type ChatCompleteCompositeResponse<
-  TOptions extends ChatCompleteCompositeResponseOptions = ChatCompleteCompositeResponseOptions
+  TOptions extends ChatCompleteCompositeResponseOptions = ChatCompleteCompositeResponseOptions,
 > =
   | (true extends TOptions['stream'] ? ChatCompleteStreamResponse<TOptions> : never)
   | (false extends TOptions['stream'] ? Promise<ChatCompleteResponse<TOptions>> : never);
@@ -230,14 +230,14 @@ export type ChatCompleteCompositeResponse<
  * Observable of {@link ChatCompletionEvent}
  */
 export type ChatCompleteStreamResponse<
-  TOptions extends ChatCompleteResponseOptions = ChatCompleteResponseOptions
+  TOptions extends ChatCompleteResponseOptions = ChatCompleteResponseOptions,
 > = Observable<ChatCompletionEvent<TOptions>>;
 
 /**
  * Response from the {@link ChatCompleteAPI} when streaming is not enabled.
  */
 export interface ChatCompleteResponse<
-  TOptions extends ChatCompleteResponseOptions = ChatCompleteResponseOptions
+  TOptions extends ChatCompleteResponseOptions = ChatCompleteResponseOptions,
 > {
   /**
    * The text content of the LLM response.

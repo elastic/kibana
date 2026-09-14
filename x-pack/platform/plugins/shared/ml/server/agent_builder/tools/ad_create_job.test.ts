@@ -25,7 +25,7 @@ const createContext = (mlMock = createMlMock()) =>
   ({
     esClient: { asCurrentUser: { ml: mlMock } },
     request: {},
-  } as any);
+  }) as any;
 
 describe('adCreateJobTool', () => {
   it('has the correct ID and type', () => {

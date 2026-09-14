@@ -37,7 +37,7 @@ const createMockAxiosInstance = () =>
   ({
     defaults: { headers: { common: {} } },
     interceptors: { request: { clear: jest.fn(), use: jest.fn() } },
-  } as unknown as AxiosInstance);
+  }) as unknown as AxiosInstance;
 
 const mockContext = {
   getCustomHostSettings: jest.fn(),

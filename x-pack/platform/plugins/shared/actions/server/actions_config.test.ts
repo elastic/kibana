@@ -512,7 +512,7 @@ describe('getEARSSSLSettings', () => {
         ...defaultActionsConfig.auth,
         ears: { enabled: true, enableExperimental: false, ssl },
       },
-    } as ActionsConfig);
+    }) as ActionsConfig;
 
   test('returns verificationMode from the EARS ssl configuration', () => {
     let sslSettings = getActionsConfigurationUtilities(

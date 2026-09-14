@@ -12,9 +12,8 @@ import { pipeline, Transform } from 'stream';
 import { promisify } from 'util';
 
 import vfs from 'vinyl-fs';
-import prettier from 'prettier';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { transformFileStream } from '@kbn/dev-utils';
+import { formatWithOxfmt, transformFileStream } from '@kbn/dev-utils';
 import ejs from 'ejs';
 import { Minimatch } from 'minimatch';
 
@@ -74,7 +73,7 @@ const stripTemplateDir = (templateDir: 'classic' | 'di') =>
  * Stream all the files from the template directory, ignoring
  * certain files based on the answers, process the .ejs templates
  * to the output files they represent, renaming the .ejs files to
- * remove that extension, then run every file through prettier
+ * remove that extension, then run every file through oxfmt
  * before writing the files to the output directory.
  */
 export async function renderTemplates({
@@ -84,7 +83,6 @@ export async function renderTemplates({
   outputDir: string;
   answers: Answers;
 }) {
-  const prettierConfig = await prettier.resolveConfig(process.cwd());
   const useDi = !!answers.di;
 
   const defaultTemplateData = {
@@ -150,17 +148,16 @@ export async function renderTemplates({
       file.basename = file.stem;
     }),
 
-    // format each file with prettier
-    transformFileStream((file) => {
+    // format each file with oxfmt as if it lived at the same path inside the repo; JS/TS templates
+    // get formatted, everything else (.json, .md) is outside the repo formatting scope and passes
+    // through unchanged, so keep those templates hand-formatted
+    transformFileStream(async (file) => {
       if (!file.extname) {
         return;
       }
 
       file.contents = Buffer.from(
-        prettier.format(file.contents.toString('utf8'), {
-          ...prettierConfig,
-          filepath: file.path,
-        })
+        await formatWithOxfmt(file.relative, file.contents.toString('utf8'))
       );
     }),
 

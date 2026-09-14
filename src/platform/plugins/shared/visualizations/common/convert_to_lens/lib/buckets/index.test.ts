@@ -171,7 +171,7 @@ describe('convertBucketToColumns', () => {
       string,
       Parameters<typeof convertBucketToColumns>,
       () => void,
-      Partial<TermsColumn | DateHistogramColumn | FiltersColumn | RangeColumn> | null
+      Partial<TermsColumn | DateHistogramColumn | FiltersColumn | RangeColumn> | null,
     ]
   >([
     [

@@ -81,7 +81,7 @@ interface SecuritySolutionDomainEventPayloadByType {
 export type SecuritySolutionDomainEventType = keyof SecuritySolutionDomainEventPayloadByType;
 
 export interface SecuritySolutionEventPayload<
-  TType extends SecuritySolutionDomainEventType = SecuritySolutionDomainEventType
+  TType extends SecuritySolutionDomainEventType = SecuritySolutionDomainEventType,
 > {
   readonly type: TType;
   readonly payload: SecuritySolutionDomainEventPayloadByType[TType];

@@ -94,18 +94,18 @@ type LoadPage = () => void;
 type TimelineRequest<T extends KueryFilterQueryKind> = T extends 'kuery'
   ? TimelineEventsAllOptionsInput
   : T extends 'lucene'
-  ? TimelineEventsAllOptionsInput
-  : T extends 'eql'
-  ? TimelineEqlRequestOptionsInput
-  : TimelineEventsAllOptionsInput;
+    ? TimelineEventsAllOptionsInput
+    : T extends 'eql'
+      ? TimelineEqlRequestOptionsInput
+      : TimelineEventsAllOptionsInput;
 
 type TimelineResponse<T extends KueryFilterQueryKind> = T extends 'kuery'
   ? TimelineEventsAllStrategyResponse
   : T extends 'lucene'
-  ? TimelineEventsAllStrategyResponse
-  : T extends 'eql'
-  ? TimelineEqlResponse
-  : TimelineEventsAllStrategyResponse;
+    ? TimelineEventsAllStrategyResponse
+    : T extends 'eql'
+      ? TimelineEqlResponse
+      : TimelineEventsAllStrategyResponse;
 
 /**
  * Raw response fields that signal incomplete results. EQL reports dropped shards in

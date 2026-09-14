@@ -48,9 +48,7 @@ export const stateHasTitles = (state: unknown): state is SerializedTitles => {
 };
 
 export interface TitlesApi
-  extends PublishesWritableTitle,
-    PublishesWritableDescription,
-    PublishesWritableHideBorder {}
+  extends PublishesWritableTitle, PublishesWritableDescription, PublishesWritableHideBorder {}
 
 export const initializeTitleManager = (initialTitlesState: SerializedTitles): TitleManager => {
   return initializeStateManager(initialTitlesState, defaultTitlesState);

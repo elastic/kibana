@@ -61,8 +61,8 @@ export const getNonEmptyValidator = (
             const fieldLocation = isSecrets
               ? PROVIDER_SECRETS
               : field.location === TASK_SETTINGS
-              ? TASK_TYPE_CONFIG
-              : PROVIDER_CONFIG;
+                ? TASK_TYPE_CONFIG
+                : PROVIDER_CONFIG;
             if (path.includes(fieldLocation)) {
               if (
                 !configData[field.key] ||

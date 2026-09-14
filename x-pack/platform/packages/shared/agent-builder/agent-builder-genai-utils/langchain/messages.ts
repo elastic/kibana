@@ -151,7 +151,7 @@ export const createToolResultMessage = ({
   toolCallId: string;
   wrapToolResult?: boolean;
 }): ToolMessage => {
-  const serialized = typeof content === 'string' ? content : JSON.stringify(content) ?? '';
+  const serialized = typeof content === 'string' ? content : (JSON.stringify(content) ?? '');
   return new ToolMessage({
     content: wrapToolResult ? wrapToolResultContent(serialized) : serialized,
     tool_call_id: toolCallId,

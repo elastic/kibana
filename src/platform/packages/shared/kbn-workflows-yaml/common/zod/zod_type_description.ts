@@ -189,7 +189,7 @@ function generateDetailedDescriptionImpl(
 
   const description =
     includeDescriptions && 'description' in schema
-      ? (schema as unknown as { description?: string }).description ?? null
+      ? ((schema as unknown as { description?: string }).description ?? null)
       : null;
 
   const descriptionSuffix = description ? ` // ${description}` : '';

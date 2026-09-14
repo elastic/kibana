@@ -206,12 +206,15 @@ async function getNextSpaceBatch(
 }
 
 function buildDeleteQuery(settings: SpaceSloSettings[]): QueryContainer {
-  const byThreshold = settings.reduce((acc, setting) => {
-    const spaces = acc[setting.staleThresholdInHours] || [];
-    spaces.push(setting.spaceId);
-    acc[setting.staleThresholdInHours] = spaces;
-    return acc;
-  }, {} as Record<number, string[]>);
+  const byThreshold = settings.reduce(
+    (acc, setting) => {
+      const spaces = acc[setting.staleThresholdInHours] || [];
+      spaces.push(setting.spaceId);
+      acc[setting.staleThresholdInHours] = spaces;
+      return acc;
+    },
+    {} as Record<number, string[]>
+  );
 
   const shouldClauses = Object.entries(byThreshold).map(([thresholdHours, spaceIds]) => {
     return {

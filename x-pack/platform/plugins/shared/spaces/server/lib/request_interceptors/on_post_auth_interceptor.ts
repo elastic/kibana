@@ -63,7 +63,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
     if (shouldCheckInitialSolutionSetup) {
       const next = isRequestingApplication
         ? `${request.url.pathname}${request.url.search}`
-        : request.url.searchParams.get('next') ?? undefined;
+        : (request.url.searchParams.get('next') ?? undefined);
       const setupRedirect = await maybeRedirectForInitialSolutionSetup({
         request,
         response,

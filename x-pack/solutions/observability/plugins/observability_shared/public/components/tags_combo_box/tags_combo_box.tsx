@@ -13,11 +13,10 @@ import { createTagsPasteHandler, getNewTags, splitTags } from './tags_input';
 
 // Everything except the props this component derives internally from `selectedTags` passes
 // straight through to the underlying `EuiComboBox` (fullWidth, isInvalid, placeholder, etc.).
-export interface TagsComboBoxProps
-  extends Omit<
-    EuiComboBoxProps<string>,
-    'selectedOptions' | 'onChange' | 'onCreateOption' | 'onPaste'
-  > {
+export interface TagsComboBoxProps extends Omit<
+  EuiComboBoxProps<string>,
+  'selectedOptions' | 'onChange' | 'onCreateOption' | 'onPaste'
+> {
   selectedTags: string[];
   onChange: (tags: string[]) => void;
   copyButtonDataTestSubj?: string;

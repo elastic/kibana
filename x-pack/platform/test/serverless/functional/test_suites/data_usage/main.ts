@@ -110,9 +110,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.svlDataUsagePage.findDatastreamsDropdownFilterButton();
 
       // Find the badge element within the button (using its CSS class)
-      const notificationBadge = await datastreamsDropdownFilterButton.findByCssSelector(
-        '.euiNotificationBadge'
-      );
+      const notificationBadge =
+        await datastreamsDropdownFilterButton.findByCssSelector('.euiNotificationBadge');
 
       // Retrieve the text content of the badge
       const activeFiltersCount = await notificationBadge.getVisibleText();
@@ -137,15 +136,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const ingestRateChart = await pageObjects.svlDataUsagePage.findIngestRateChart();
       const storageRetainedChart = await pageObjects.svlDataUsagePage.storageRetainedChart();
 
-      const ingestLegendItems = await pageObjects.svlDataUsagePage.findLegendItemsInChart(
-        ingestRateChart
-      );
+      const ingestLegendItems =
+        await pageObjects.svlDataUsagePage.findLegendItemsInChart(ingestRateChart);
 
       expect(ingestLegendItems.length).to.eql(4); // 3 data streams + 1 Total line series
 
-      const storageLegendItems = await pageObjects.svlDataUsagePage.findLegendItemsInChart(
-        storageRetainedChart
-      );
+      const storageLegendItems =
+        await pageObjects.svlDataUsagePage.findLegendItemsInChart(storageRetainedChart);
       expect(storageLegendItems.length).to.eql(4); // same number of data streams + total line series
     });
     it('renders actions popover with correct links', async () => {

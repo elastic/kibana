@@ -103,10 +103,10 @@ export async function runAppMenuAction({
 type EnhancedAppMenuItem<T> = T extends DiscoverAppMenuItemType
   ? AppMenuItemType
   : T extends DiscoverAppMenuPrimaryActionItem
-  ? AppMenuPrimaryActionItem
-  : T extends DiscoverAppMenuPopoverItem
-  ? AppMenuPopoverItem
-  : never;
+    ? AppMenuPrimaryActionItem
+    : T extends DiscoverAppMenuPopoverItem
+      ? AppMenuPopoverItem
+      : never;
 
 type DiscoverAppMenuItem =
   | DiscoverAppMenuItemType
@@ -142,12 +142,11 @@ export function enhanceAppMenuItemWithRunAction<T extends DiscoverAppMenuItem>({
 
   const enhancedItems =
     'items' in appMenuItem && Array.isArray(appMenuItem.items)
-      ? appMenuItem.items.map(
-          (nestedItem): AppMenuPopoverItem =>
-            enhanceAppMenuItemWithRunAction({
-              appMenuItem: nestedItem,
-              services,
-            })
+      ? appMenuItem.items.map((nestedItem): AppMenuPopoverItem =>
+          enhanceAppMenuItemWithRunAction({
+            appMenuItem: nestedItem,
+            services,
+          })
         )
       : undefined;
 

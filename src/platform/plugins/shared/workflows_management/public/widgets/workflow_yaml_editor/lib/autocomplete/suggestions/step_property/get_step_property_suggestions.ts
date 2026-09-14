@@ -98,18 +98,16 @@ export async function getStepPropertySuggestions(
 
   cacheSearchOptions(focusedStepInfo.stepType, context.scope, handlerKey, options, values);
 
-  return options.map(
-    (option): monaco.languages.CompletionItem => ({
-      label: option.label ?? String(option.value),
-      kind: monaco.languages.CompletionItemKind.Value,
-      insertText: String(option.value),
-      range: replaceRange,
-      detail: option.description,
-      documentation: option.documentation,
-      filterText: `${option.value} ${option.label} "${option.label}" '${option.label}'`,
-      sortText: option.label,
-    })
-  );
+  return options.map((option): monaco.languages.CompletionItem => ({
+    label: option.label ?? String(option.value),
+    kind: monaco.languages.CompletionItemKind.Value,
+    insertText: String(option.value),
+    range: replaceRange,
+    detail: option.description,
+    documentation: option.documentation,
+    filterText: `${option.value} ${option.label} "${option.label}" '${option.label}'`,
+    sortText: option.label,
+  }));
 }
 
 /**

@@ -84,8 +84,8 @@ export function SuggestedStreamPanel({
   const selectedPreview = useStreamSamplesSelector((snapshot) => snapshot.context.selectedPreview);
   const isSelected = Boolean(
     selectedPreview &&
-      selectedPreview.type === 'suggestion' &&
-      selectedPreview.name === currentSuggestion.name
+    selectedPreview.type === 'suggestion' &&
+    selectedPreview.name === currentSuggestion.name
   );
 
   const conditionError = React.useMemo(() => {

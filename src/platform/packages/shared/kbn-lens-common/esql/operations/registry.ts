@@ -126,5 +126,5 @@ export const getToEsqlFn = (operationType: string): ToEsqlFn | undefined =>
 /** Dynamic-dispatch read of {@link esqlOperationMetaRegistry}; see {@link getToEsqlFn}. */
 export const getEsqlOperationMeta = (operationType: string): EsqlOperationMeta =>
   isEsqlSupportedOperation(operationType, esqlOperationMetaRegistry)
-    ? (esqlOperationMetaRegistry[operationType] as EsqlOperationMeta) ?? {}
+    ? ((esqlOperationMetaRegistry[operationType] as EsqlOperationMeta) ?? {})
     : {};

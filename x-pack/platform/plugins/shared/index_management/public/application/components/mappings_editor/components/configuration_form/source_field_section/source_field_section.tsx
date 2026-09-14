@@ -257,10 +257,10 @@ export const SourceFieldSection = ({
           return sourceField?.option === STORED_SOURCE_OPTION
             ? renderFormFields()
             : sourceField?.option === DISABLED_SOURCE_OPTION
-            ? renderDisableWarning()
-            : indexMode === LOGSDB_INDEX_MODE
-            ? renderSyntheticWarning()
-            : null;
+              ? renderDisableWarning()
+              : indexMode === LOGSDB_INDEX_MODE
+                ? renderSyntheticWarning()
+                : null;
         }}
       </FormDataProvider>
     </FormRow>

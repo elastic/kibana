@@ -97,19 +97,22 @@ export function getAllTestPackagesZip() {
 }
 
 export function getAllTestPackagesPaths() {
-  return TEST_PACKAGE_DIRECTORIES.reduce((acc, dir) => {
-    const packageVersionPaths = getAllPackagesFromDir(path.join(__dirname, dir));
-    const [_, dirs] = partition(packageVersionPaths, (p) => p.endsWith('.zip'));
+  return TEST_PACKAGE_DIRECTORIES.reduce(
+    (acc, dir) => {
+      const packageVersionPaths = getAllPackagesFromDir(path.join(__dirname, dir));
+      const [_, dirs] = partition(packageVersionPaths, (p) => p.endsWith('.zip'));
 
-    const allPackageDirPaths = dirs.map(getAllPathsFromDir);
-    return [
-      ...acc,
-      ...[...allPackageDirPaths.entries()].map(([i, paths]) => ({
-        topLevelDir: packageVersionPaths[i],
-        paths,
-      })),
-    ];
-  }, [] as Array<{ topLevelDir: string; paths: string[] }>);
+      const allPackageDirPaths = dirs.map(getAllPathsFromDir);
+      return [
+        ...acc,
+        ...[...allPackageDirPaths.entries()].map(([i, paths]) => ({
+          topLevelDir: packageVersionPaths[i],
+          paths,
+        })),
+      ];
+    },
+    [] as Array<{ topLevelDir: string; paths: string[] }>
+  );
 }
 
 export const verifyAllTestPackages = async (

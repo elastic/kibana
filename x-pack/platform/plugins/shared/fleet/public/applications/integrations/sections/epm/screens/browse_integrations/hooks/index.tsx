@@ -51,7 +51,7 @@ export function useBrowseIntegrationHook({
   const urlFilters = useUrlFilters();
 
   const localSearch = useLocalSearch(allCards, !!isLoading);
-  const searchTerm = urlFilters.q ?? urlFilters.q !== '' ? urlFilters.q : undefined;
+  const searchTerm = (urlFilters.q ?? urlFilters.q !== '') ? urlFilters.q : undefined;
 
   const sortedCards: IntegrationCardItem[] = useMemo(() => {
     const sortKey = urlFilters.sort ?? 'recent-old';
@@ -74,9 +74,9 @@ export function useBrowseIntegrationHook({
   // Used to compute accurate category counts in the sidebar.
   const nonCategoryFilteredCards = useMemo(() => {
     const searchResults = searchTerm
-      ? (localSearch?.search(searchTerm) as IntegrationCardItem[])?.map(
+      ? ((localSearch?.search(searchTerm) as IntegrationCardItem[])?.map(
           (match) => match[searchIdField]
-        ) ?? []
+        ) ?? [])
       : [];
 
     let cards = searchTerm

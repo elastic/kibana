@@ -55,7 +55,7 @@ const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord
     raw: { _id: 'event-id' },
     flattened,
     isAnchor: false,
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 const mockOnShowAnalyzer = jest.fn();
 const mockHit = createMockHit({});

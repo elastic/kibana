@@ -22,7 +22,7 @@ const createMockExecutionClient = (
     peek: jest.fn(),
     readEvents: jest.fn(),
     ...overrides,
-  } as jest.Mocked<AgentExecutionClient>);
+  }) as jest.Mocked<AgentExecutionClient>;
 
 describe('AbortMonitor', () => {
   let logger: MockedLogger;

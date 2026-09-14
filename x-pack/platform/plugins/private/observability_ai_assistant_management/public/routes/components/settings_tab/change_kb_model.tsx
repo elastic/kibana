@@ -368,38 +368,38 @@ export function ChangeKbModel({
                                 }
                               )
                           : knowledgeBase.status.value.inferenceModelState ===
-                            InferenceModelState.NOT_INSTALLED
-                          ? i18n.translate(
-                              'xpack.observabilityAiAssistantManagement.knowledgeBase.stateNotInstalled',
-                              {
-                                defaultMessage: 'Not installed',
-                              }
-                            )
-                          : knowledgeBase.status.value.inferenceModelState ===
-                            InferenceModelState.MODEL_PENDING_ALLOCATION
-                          ? i18n.translate(
-                              'xpack.observabilityAiAssistantManagement.knowledgeBase.stateModelPendingAllocation',
-                              {
-                                defaultMessage: 'Model pending allocation',
-                              }
-                            )
-                          : knowledgeBase.status.value.inferenceModelState ===
-                            InferenceModelState.MODEL_PENDING_DEPLOYMENT
-                          ? i18n.translate(
-                              'xpack.observabilityAiAssistantManagement.knowledgeBase.stateModelPendingDeployment',
-                              {
-                                defaultMessage: 'Model pending deployment...',
-                              }
-                            )
-                          : knowledgeBase.status.value.inferenceModelState ===
-                            InferenceModelState.DEPLOYING_MODEL
-                          ? i18n.translate(
-                              'xpack.observabilityAiAssistantManagement.knowledgeBase.stateModelPendingDeployment',
-                              {
-                                defaultMessage: 'Deploying model...',
-                              }
-                            )
-                          : knowledgeBase.status.value.inferenceModelState}
+                              InferenceModelState.NOT_INSTALLED
+                            ? i18n.translate(
+                                'xpack.observabilityAiAssistantManagement.knowledgeBase.stateNotInstalled',
+                                {
+                                  defaultMessage: 'Not installed',
+                                }
+                              )
+                            : knowledgeBase.status.value.inferenceModelState ===
+                                InferenceModelState.MODEL_PENDING_ALLOCATION
+                              ? i18n.translate(
+                                  'xpack.observabilityAiAssistantManagement.knowledgeBase.stateModelPendingAllocation',
+                                  {
+                                    defaultMessage: 'Model pending allocation',
+                                  }
+                                )
+                              : knowledgeBase.status.value.inferenceModelState ===
+                                  InferenceModelState.MODEL_PENDING_DEPLOYMENT
+                                ? i18n.translate(
+                                    'xpack.observabilityAiAssistantManagement.knowledgeBase.stateModelPendingDeployment',
+                                    {
+                                      defaultMessage: 'Model pending deployment...',
+                                    }
+                                  )
+                                : knowledgeBase.status.value.inferenceModelState ===
+                                    InferenceModelState.DEPLOYING_MODEL
+                                  ? i18n.translate(
+                                      'xpack.observabilityAiAssistantManagement.knowledgeBase.stateModelPendingDeployment',
+                                      {
+                                        defaultMessage: 'Deploying model...',
+                                      }
+                                    )
+                                  : knowledgeBase.status.value.inferenceModelState}
                       </EuiBadge>
                     </EuiFlexItem>
                     {isKnowledgeBaseInLoadingState && (

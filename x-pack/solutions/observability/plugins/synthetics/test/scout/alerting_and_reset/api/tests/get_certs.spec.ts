@@ -442,9 +442,8 @@ apiTest.describe(
         const spaceId = `cert-space-${uuidv4()}`;
         await kbnClient.spaces.create({ id: spaceId, name: `Cert space ${spaceId}` });
         try {
-          const spaceLocation = await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(
-            spaceId
-          );
+          const spaceLocation =
+            await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(spaceId);
           const created = await addMonitor(
             apiClient,
             editorHeaders,

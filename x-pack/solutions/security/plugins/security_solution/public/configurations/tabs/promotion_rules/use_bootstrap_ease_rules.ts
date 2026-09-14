@@ -37,7 +37,7 @@ export const useBootstrapEaseRules = () => {
 
   const prebuiltRulesPackageError =
     prebuiltRulesFlowState?.result?.status === INITIALIZATION_FLOW_STATUS_ERROR
-      ? prebuiltRulesFlowState.result.error ?? 'Unknown error'
+      ? (prebuiltRulesFlowState.result.error ?? 'Unknown error')
       : null;
 
   const { mutate: bootstrapEaseRules } = useBootstrapEaseRulesMutation({

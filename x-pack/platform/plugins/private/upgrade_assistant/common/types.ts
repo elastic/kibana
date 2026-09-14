@@ -132,11 +132,10 @@ export type CorrectiveAction =
   | DataStreamsAction
   | HealthIndicatorAction;
 
-export interface EnrichedDeprecationInfo
-  extends Omit<
-    estypes.MigrationDeprecationsDeprecation,
-    'level' | 'resolve_during_rolling_upgrade'
-  > {
+export interface EnrichedDeprecationInfo extends Omit<
+  estypes.MigrationDeprecationsDeprecation,
+  'level' | 'resolve_during_rolling_upgrade'
+> {
   type: keyof estypes.MigrationDeprecationsResponse | 'health_indicator';
   level: MIGRATION_DEPRECATION_LEVEL;
   status?: estypes.HealthReportIndicatorHealthStatus;

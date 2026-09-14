@@ -140,13 +140,13 @@ export function ActionsContextMenu({
                   },
                 }
               : action.href
-              ? { href: action.href, target: '_self' as const }
-              : {
-                  onClick: () => {
-                    action.onClick!();
-                    closePopover();
-                  },
-                }),
+                ? { href: action.href, target: '_self' as const }
+                : {
+                    onClick: () => {
+                      action.onClick!();
+                      closePopover();
+                    },
+                  }),
             ...(action.ebt ? getEbtProps(action.ebt) : {}),
             'data-test-subj': `${dataTestSubjPrefix}Item-${action.id}`,
           });

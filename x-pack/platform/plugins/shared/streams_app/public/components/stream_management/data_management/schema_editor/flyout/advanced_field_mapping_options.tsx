@@ -120,7 +120,7 @@ export const AdvancedFieldMappingOptions = ({
 const getValidFlag = (additionalParameters?: FieldDefinitionConfigAdvancedParameters) => {
   return Boolean(
     !additionalParameters ||
-      additionalParameters === '' ||
-      isSchema(recursiveRecord, additionalParameters)
+    additionalParameters === '' ||
+    isSchema(recursiveRecord, additionalParameters)
   );
 };

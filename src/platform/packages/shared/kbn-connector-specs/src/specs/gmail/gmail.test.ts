@@ -784,7 +784,7 @@ describe('replyMessage', () => {
     // Confirm no metadataHeaders array param was passed (axios would serialize it wrong).
     const [, getConfig] = mockClient.get.mock.calls[0] as [
       string,
-      { params: Record<string, unknown> }
+      { params: Record<string, unknown> },
     ];
     expect(Object.keys(getConfig.params)).not.toContain('metadataHeaders');
   });
@@ -800,7 +800,7 @@ describe('replyMessage', () => {
 
     const [, postBody] = mockClient.post.mock.calls[0] as [
       string,
-      { raw: string; threadId: string }
+      { raw: string; threadId: string },
     ];
     expect(postBody.threadId).toBe('thread-1');
 
@@ -878,7 +878,7 @@ describe('replyMessage', () => {
 
     const [, postBody] = mockClient.post.mock.calls[0] as [
       string,
-      { raw: string; threadId: string }
+      { raw: string; threadId: string },
     ];
     expect(postBody.threadId).toBe('thread-1');
     const { headerLines } = decodeRaw(postBody.raw);
@@ -937,8 +937,8 @@ describe('auth guard', () => {
         actionName === 'modifyLabels'
           ? { messageId: 'msg-1', addLabelIds: ['L'] }
           : actionName === 'sendMessage'
-          ? { to: ['a@b.com'], subject: 'Hi', body: 'body' }
-          : { messageId: 'msg-1', body: 'body' };
+            ? { to: ['a@b.com'], subject: 'Hi', body: 'body' }
+            : { messageId: 'msg-1', body: 'body' };
 
       await expect(
         GmailConnector.actions[actionName].handler(mockEarsContext, input)
@@ -953,8 +953,8 @@ describe('auth guard', () => {
         actionName === 'modifyLabels'
           ? { messageId: 'msg-1', addLabelIds: ['L'] }
           : actionName === 'sendMessage'
-          ? { to: ['a@b.com'], subject: 'Hi', body: 'body' }
-          : { messageId: 'msg-1', body: 'body' };
+            ? { to: ['a@b.com'], subject: 'Hi', body: 'body' }
+            : { messageId: 'msg-1', body: 'body' };
 
       await expect(
         GmailConnector.actions[actionName].handler(mockStaleOAuthContext, input)

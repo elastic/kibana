@@ -10,7 +10,7 @@ import type { OverrideBodyQuery } from '../types';
 import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
 
 interface BuildEventsSearchQuery<
-  TAggs extends Record<string, estypes.AggregationsAggregationContainer> | undefined = undefined
+  TAggs extends Record<string, estypes.AggregationsAggregationContainer> | undefined = undefined,
 > {
   aggregations: TAggs;
   index: string[];
@@ -114,7 +114,7 @@ export const buildTimeRangeFilter = ({
 };
 
 export const buildEventsSearchQuery = <
-  TAggs extends Record<string, estypes.AggregationsAggregationContainer> | undefined
+  TAggs extends Record<string, estypes.AggregationsAggregationContainer> | undefined,
 >({
   aggregations,
   index,

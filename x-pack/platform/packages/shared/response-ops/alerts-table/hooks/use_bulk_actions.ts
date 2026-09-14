@@ -193,7 +193,7 @@ export const useBulkAddToCaseActions = ({
             onClick: (alerts?: TimelineItem[]) => {
               createCaseFlyout.open({
                 getAttachments: (owner) =>
-                  alerts ? casesService?.helpers.groupAlertsByRule(alerts, owner) ?? [] : [],
+                  alerts ? (casesService?.helpers.groupAlertsByRule(alerts, owner) ?? []) : [],
               });
             },
           },
@@ -208,7 +208,7 @@ export const useBulkAddToCaseActions = ({
                 getAttachments: ({ theCase }) => {
                   if (theCase == null) {
                     return alerts && caseOwner
-                      ? casesService?.helpers.groupAlertsByRule(alerts, caseOwner) ?? []
+                      ? (casesService?.helpers.groupAlertsByRule(alerts, caseOwner) ?? [])
                       : [];
                   }
 

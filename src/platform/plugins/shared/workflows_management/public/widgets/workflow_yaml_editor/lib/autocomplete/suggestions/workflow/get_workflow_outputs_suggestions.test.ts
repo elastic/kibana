@@ -101,7 +101,7 @@ const createMockAutocompleteContext = (
     esqlRegion: null,
     esqlOffsetInQuery: null,
     ...overrides,
-  } satisfies AutocompleteContext);
+  }) satisfies AutocompleteContext;
 
 describe('isInWorkflowOutputWithBlock', () => {
   it('should return true when focused step type is workflow.output', () => {

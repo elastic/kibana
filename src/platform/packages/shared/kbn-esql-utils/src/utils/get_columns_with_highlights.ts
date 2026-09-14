@@ -127,10 +127,10 @@ export function getColumnsWithHighlights(query: string): ESQLColumnsWithHighligh
     const optionsMap = isMap(command.namedParameters) ? command.namedParameters : undefined;
 
     const preTag = optionsMap
-      ? getHighlightTagName(optionsMap, PRE_TAGS_OPTION_NAME) ?? DEFAULT_HIGHLIGHT_PRE_TAG
+      ? (getHighlightTagName(optionsMap, PRE_TAGS_OPTION_NAME) ?? DEFAULT_HIGHLIGHT_PRE_TAG)
       : DEFAULT_HIGHLIGHT_PRE_TAG;
     const postTag = optionsMap
-      ? getHighlightTagName(optionsMap, POST_TAGS_OPTION_NAME) ?? DEFAULT_HIGHLIGHT_POST_TAG
+      ? (getHighlightTagName(optionsMap, POST_TAGS_OPTION_NAME) ?? DEFAULT_HIGHLIGHT_POST_TAG)
       : DEFAULT_HIGHLIGHT_POST_TAG;
 
     const prefix = command.prefix?.valueUnquoted ?? HIGHLIGHT_COMMAND_DEFAULT_PREFIX;

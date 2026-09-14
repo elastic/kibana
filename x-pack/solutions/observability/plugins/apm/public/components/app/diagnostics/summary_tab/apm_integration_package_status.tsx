@@ -27,8 +27,8 @@ export function ApmIntegrationPackageStatus() {
       {isLoading
         ? '...'
         : isInstalled
-        ? `APM integration (${packageVersion})`
-        : 'APM integration: not installed'}
+          ? `APM integration (${packageVersion})`
+          : 'APM integration: not installed'}
 
       {!isImported ? (
         <EuiLink

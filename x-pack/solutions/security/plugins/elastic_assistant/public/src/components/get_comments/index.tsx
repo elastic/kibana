@@ -99,7 +99,7 @@ export const getComments: GetComments =
                 regenerateMessage={regenerateMessageOfConversation}
                 setIsStreaming={setIsStreaming}
                 contentReferencesVisible={contentReferencesVisible}
-                transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
+                transformMessage={() => ({ content: '' }) as unknown as ContentMessage}
                 resumeGraph={mockResumeGraph}
                 isLastInConversation={true}
                 contentReferences={null}
@@ -133,7 +133,7 @@ export const getComments: GetComments =
                   resumeGraph={mockResumeGraph}
                   contentReferences={null}
                   contentReferencesVisible={contentReferencesVisible}
-                  transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
+                  transformMessage={() => ({ content: '' }) as unknown as ContentMessage}
                   messageRole={'assistant'}
                   isLastInConversation={currentConversation.messages.length === 0}
                   // we never need to append to a code block in the system comment, which is what this index is used for
@@ -148,7 +148,7 @@ export const getComments: GetComments =
         const isUser = message.role === 'user';
         const replacements = currentConversation.replacements;
         const user = isUser
-          ? message.user ?? getCurrentConversationOwner(currentConversation)
+          ? (message.user ?? getCurrentConversationOwner(currentConversation))
           : undefined;
         const messageProps = {
           timelineAvatar: isUser ? (

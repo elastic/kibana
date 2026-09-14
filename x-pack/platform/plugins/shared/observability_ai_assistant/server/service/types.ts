@@ -76,7 +76,7 @@ export type RegisterInstruction = (...instruction: InstructionOrCallback[]) => v
 export type RegisterFunction = <
   TParameters extends CompatibleJSONSchema = any,
   TResponse extends FunctionResponse = any,
-  TArguments = FromSchema<TParameters>
+  TArguments = FromSchema<TParameters>,
 >(
   definition: FunctionDefinition<TParameters>,
   respond: RespondFunction<TArguments, TResponse>

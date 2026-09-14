@@ -15,15 +15,12 @@ import type {
   StreamsAppStartDependencies,
 } from './types';
 
-export class StreamsAppPlugin
-  implements
-    Plugin<
-      StreamsAppServerSetup,
-      StreamsAppServerStart,
-      StreamsAppSetupDependencies,
-      StreamsAppStartDependencies
-    >
-{
+export class StreamsAppPlugin implements Plugin<
+  StreamsAppServerSetup,
+  StreamsAppServerStart,
+  StreamsAppSetupDependencies,
+  StreamsAppStartDependencies
+> {
   logger: Logger;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {

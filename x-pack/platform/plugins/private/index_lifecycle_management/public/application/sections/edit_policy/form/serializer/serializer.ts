@@ -171,8 +171,9 @@ export const createSerializer =
           if (_meta.hot?.downsample?.enabled) {
             hotPhaseActions.downsample = {
               ...hotPhaseActions.downsample,
-              fixed_interval: `${_meta.hot.downsample.fixedIntervalSize!}${_meta.hot.downsample
-                .fixedIntervalUnits!}`,
+              fixed_interval: `${_meta.hot.downsample.fixedIntervalSize!}${
+                _meta.hot.downsample.fixedIntervalUnits!
+              }`,
             };
           } else {
             delete hotPhaseActions.downsample;
@@ -286,8 +287,9 @@ export const createSerializer =
       if (_meta.warm?.downsample?.enabled) {
         warmPhase.actions.downsample = {
           ...warmPhase.actions.downsample,
-          fixed_interval: `${_meta.warm.downsample.fixedIntervalSize!}${_meta.warm.downsample
-            .fixedIntervalUnits!}`,
+          fixed_interval: `${_meta.warm.downsample.fixedIntervalSize!}${
+            _meta.warm.downsample.fixedIntervalUnits!
+          }`,
         };
       } else {
         delete warmPhase.actions.downsample;
@@ -373,8 +375,9 @@ export const createSerializer =
       if (_meta.cold?.downsample?.enabled) {
         coldPhase.actions.downsample = {
           ...coldPhase.actions.downsample,
-          fixed_interval: `${_meta.cold.downsample.fixedIntervalSize!}${_meta.cold.downsample
-            .fixedIntervalUnits!}`,
+          fixed_interval: `${_meta.cold.downsample.fixedIntervalSize!}${
+            _meta.cold.downsample.fixedIntervalUnits!
+          }`,
         };
       } else {
         delete coldPhase.actions.downsample;

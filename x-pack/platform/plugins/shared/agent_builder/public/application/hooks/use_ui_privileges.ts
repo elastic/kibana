@@ -25,11 +25,14 @@ export const useUiPrivileges = (): AgentBuilderUiPrivileges => {
   const agentBuilderCapabilities = useMemo((): AgentBuilderUiPrivileges => {
     const capabilities = application?.capabilities?.[AGENTBUILDER_FEATURE_ID] ?? {};
 
-    const fromFeature = Object.keys(uiPrivileges).reduce((acc, key) => {
-      const privilegeKey = key as keyof typeof uiPrivileges;
-      acc[privilegeKey] = !!capabilities[uiPrivileges[privilegeKey]];
-      return acc;
-    }, {} as { [K in keyof typeof uiPrivileges]: boolean });
+    const fromFeature = Object.keys(uiPrivileges).reduce(
+      (acc, key) => {
+        const privilegeKey = key as keyof typeof uiPrivileges;
+        acc[privilegeKey] = !!capabilities[uiPrivileges[privilegeKey]];
+        return acc;
+      },
+      {} as { [K in keyof typeof uiPrivileges]: boolean }
+    );
 
     return {
       ...fromFeature,

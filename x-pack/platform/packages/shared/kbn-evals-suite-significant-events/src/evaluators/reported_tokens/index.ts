@@ -67,7 +67,7 @@ const createReportedTokensEvaluator = <TExample extends Example, TTaskOutput ext
  */
 export const createReportedTokenEvaluators = <
   TExample extends Example = Example,
-  TTaskOutput extends TaskOutput = TaskOutput
+  TTaskOutput extends TaskOutput = TaskOutput,
 >(): Array<Evaluator<TExample, TTaskOutput>> => [
   createReportedTokensEvaluator<TExample, TTaskOutput>({
     name: 'reported_input_tokens',

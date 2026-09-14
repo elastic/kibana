@@ -50,7 +50,7 @@ function getXScaleType(xColumn?: Column) {
 
 function getLabelOrientation(data?: CategoryAxis, isTimeChart = false) {
   // lens doesn't support 75 as rotate option, we should use 45 instead
-  return -(data?.labels.rotate === 75 ? 45 : data?.labels.rotate ?? (isTimeChart ? 0 : 90));
+  return -(data?.labels.rotate === 75 ? 45 : (data?.labels.rotate ?? (isTimeChart ? 0 : 90)));
 }
 
 function getExtents(axis: ValueAxis, series: SeriesParam[]) {
@@ -83,7 +83,7 @@ function getSeriesType(
   isPercentage?: boolean
 ): XYDataLayerConfig['seriesType'] {
   let seriesType: XYDataLayerConfig['seriesType'] =
-    type === 'histogram' ? SeriesTypes.BAR : type ?? SeriesTypes.AREA;
+    type === 'histogram' ? SeriesTypes.BAR : (type ?? SeriesTypes.AREA);
 
   // only bar chart supports horizontal mode
   if (isHorizontal && seriesType === SeriesTypes.BAR) {
@@ -270,7 +270,7 @@ export const getConfiguration = (
     yRightTitle: yRightAxis?.title.text,
     xTitle: xAxis.title.text,
     valueLabels:
-      vis.params.labels.show ?? vis.type.visConfig.defaults.labels?.show ? 'show' : 'hide',
+      (vis.params.labels.show ?? vis.type.visConfig.defaults.labels?.show) ? 'show' : 'hide',
     showCurrentTimeMarker: isTimeChart
       ? Boolean(vis.params.addTimeMarker ?? vis.type.visConfig.defaults.addTimeMarker)
       : undefined,

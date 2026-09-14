@@ -58,7 +58,7 @@ export const InternalCoreStart = createServiceIdentifierFactory<InternalCoreStar
 export function createSetupModule<
   TPluginInitializerContext extends InternalPluginInitializerContext,
   TCoreSetupContext extends object,
-  TPluginsSetup extends object
+  TPluginsSetup extends object,
 >(
   pluginInitializerContext: TPluginInitializerContext,
   coreSetupContext: TCoreSetupContext,
@@ -74,7 +74,7 @@ export function createSetupModule<
 /** @internal */
 export function createStartModule<
   TCoreStartContext extends InternalCoreStartContext,
-  TPluginsStart extends object
+  TPluginsStart extends object,
 >(coreStartContext: TCoreStartContext, plugins: TPluginsStart) {
   return new ContainerModule((options) => {
     loadEach(options, coreStartContext, InternalCoreStart);

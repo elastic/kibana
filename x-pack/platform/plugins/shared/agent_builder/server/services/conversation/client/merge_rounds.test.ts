@@ -28,7 +28,7 @@ const toolCallStep = (toolCallId: string, results: unknown[] = []): Conversation
     tool_id: 'my_tool',
     params: { q: 1 },
     results,
-  } as unknown as ConversationRoundStep);
+  }) as unknown as ConversationRoundStep;
 
 const askStep = (promptId: string, answers?: AskUserQuestionAnswer[]): ConversationRoundStep =>
   ({
@@ -38,7 +38,7 @@ const askStep = (promptId: string, answers?: AskUserQuestionAnswer[]): Conversat
       { question: 'pick one', options: [{ label: 'a' }, { label: 'b' }], multi_select: false },
     ],
     ...(answers ? { answers } : {}),
-  } as unknown as ConversationRoundStep);
+  }) as unknown as ConversationRoundStep;
 
 const baseRound = (overrides: Partial<ConversationRound> = {}): ConversationRound => ({
   id: 'round-1',

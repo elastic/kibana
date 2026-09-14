@@ -109,8 +109,9 @@ export const SourceConfigurationRT = rt.type({
 
 export const SavedSourceConfigurationRuntimeType = rt.partial(SourceConfigurationRT.props);
 
-export interface InfraSavedSourceConfiguration
-  extends rt.TypeOf<typeof SavedSourceConfigurationRuntimeType> {}
+export interface InfraSavedSourceConfiguration extends rt.TypeOf<
+  typeof SavedSourceConfigurationRuntimeType
+> {}
 
 /**
  * Static source configuration, the result of merging values from the config file and
@@ -121,8 +122,9 @@ export const StaticSourceConfigurationRuntimeType = rt.partial({
   ...SourceConfigurationRT.props,
 });
 
-export interface InfraStaticSourceConfiguration
-  extends rt.TypeOf<typeof StaticSourceConfigurationRuntimeType> {}
+export interface InfraStaticSourceConfiguration extends rt.TypeOf<
+  typeof StaticSourceConfigurationRuntimeType
+> {}
 
 /**
  * Full source configuration type after all cleanup has been done at the edges
@@ -133,8 +135,9 @@ export const SourceConfigurationRuntimeType = rt.type({
   logColumns: rt.array(SourceConfigurationColumnRuntimeType),
 });
 
-export interface InfraSourceConfiguration
-  extends rt.TypeOf<typeof SourceConfigurationRuntimeType> {}
+export interface InfraSourceConfiguration extends rt.TypeOf<
+  typeof SourceConfigurationRuntimeType
+> {}
 
 /**
  * Source status

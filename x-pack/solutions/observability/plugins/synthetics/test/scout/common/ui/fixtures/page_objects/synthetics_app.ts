@@ -11,7 +11,10 @@ import { FormMonitorType } from '../constants';
 
 export class SyntheticsAppPage {
   public readonly ruleMonitorCount: Locator;
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.ruleMonitorCount = page.testSubj.locator('syntheticsStatusRuleVizMonitorCount');
   }
 

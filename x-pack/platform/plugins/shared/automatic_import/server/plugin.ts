@@ -38,15 +38,12 @@ import {
 } from './services/saved_objects/constants';
 import { telemetryEventsSchemas } from './telemetry';
 
-export class AutomaticImportPlugin
-  implements
-    Plugin<
-      AutomaticImportPluginSetup,
-      AutomaticImportPluginStart,
-      AutomaticImportPluginSetupDependencies,
-      AutomaticImportPluginStartDependencies
-    >
-{
+export class AutomaticImportPlugin implements Plugin<
+  AutomaticImportPluginSetup,
+  AutomaticImportPluginStart,
+  AutomaticImportPluginSetupDependencies,
+  AutomaticImportPluginStartDependencies
+> {
   private readonly loggerFactory: LoggerFactory;
   private readonly logger: Logger;
   private pluginStop$: Subject<void>;

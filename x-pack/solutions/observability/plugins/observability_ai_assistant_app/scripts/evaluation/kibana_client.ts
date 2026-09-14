@@ -295,7 +295,7 @@ export class KibanaClient {
     }> = [];
 
     function serializeAndHandleRetryableErrors<
-      T extends StreamingChatResponseEvent
+      T extends StreamingChatResponseEvent,
     >(): OperatorFunction<Buffer, Exclude<T, ChatCompletionErrorEvent>> {
       return (source$) => {
         const processed$ = source$.pipe(

@@ -91,15 +91,18 @@ export class CrowdStrikeSessionManager {
     }
 
     this.logger.debug('Starting RTR session refresh interval');
-    this.refreshInterval = setInterval(() => {
-      this.refreshSession(connectorUsageCollector).catch((error) => {
-        this.logger.error('RTR session refresh failed', {
-          error: error.message,
-          batch_id: this.currentBatchId,
+    this.refreshInterval = setInterval(
+      () => {
+        this.refreshSession(connectorUsageCollector).catch((error) => {
+          this.logger.error('RTR session refresh failed', {
+            error: error.message,
+            batch_id: this.currentBatchId,
+          });
+          this.clearSessionState();
         });
-        this.clearSessionState();
-      });
-    }, 5 * 60 * 1000); // Refresh every 5 minutes
+      },
+      5 * 60 * 1000
+    ); // Refresh every 5 minutes
   }
 
   private async refreshSession(connectorUsageCollector: ConnectorUsageCollector): Promise<void> {
@@ -145,14 +148,17 @@ export class CrowdStrikeSessionManager {
     }
 
     this.logger.debug('Resetting session close timeout');
-    this.closeSessionTimeout = setTimeout(() => {
-      this.logger.debug('Session timeout reached, terminating session');
-      this.terminateSession().catch((error) => {
-        this.logger.error('Failed to terminate session on timeout', {
-          error: error.message,
+    this.closeSessionTimeout = setTimeout(
+      () => {
+        this.logger.debug('Session timeout reached, terminating session');
+        this.terminateSession().catch((error) => {
+          this.logger.error('Failed to terminate session on timeout', {
+            error: error.message,
+          });
         });
-      });
-    }, 10 * 60 * 1000); // Close session after 10 minutes of inactivity
+      },
+      10 * 60 * 1000
+    ); // Close session after 10 minutes of inactivity
   }
 
   private async terminateSession(): Promise<void> {

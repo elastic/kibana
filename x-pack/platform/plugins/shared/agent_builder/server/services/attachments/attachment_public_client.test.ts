@@ -29,7 +29,7 @@ const makeAttachment = (overrides: Partial<VersionedAttachment> = {}): Versioned
     ],
     active: true,
     ...overrides,
-  } as VersionedAttachment);
+  }) as VersionedAttachment;
 
 const buildDeps = () => {
   const request = httpServerMock.createKibanaRequest() as unknown as KibanaRequest;

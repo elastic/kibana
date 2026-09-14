@@ -14,4 +14,4 @@ export const createUrlTrackerMock = () =>
     setTrackedUrl: jest.fn(),
     restorePreviousUrl: jest.fn(),
     setTrackingEnabled: jest.fn(),
-  } as UrlTracker);
+  }) as UrlTracker;

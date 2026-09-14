@@ -36,7 +36,7 @@ jest.mock('./proposals/routes/register_routes', () => ({
 const createContext = () =>
   ({
     logger: { get: () => loggerMock.create() },
-  } as unknown as ConstructorParameters<typeof AgenticInvestigationsPlugin>[0]);
+  }) as unknown as ConstructorParameters<typeof AgenticInvestigationsPlugin>[0];
 
 const setupPlugin = () => {
   const plugin = new AgenticInvestigationsPlugin(createContext());

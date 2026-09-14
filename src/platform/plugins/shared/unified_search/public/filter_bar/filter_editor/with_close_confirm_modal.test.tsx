@@ -25,7 +25,7 @@ const phraseFilter = (value: string): Filter =>
       alias: null,
     },
     query: { match_phrase: { host: value } },
-  } as Filter);
+  }) as Filter;
 
 // Approximates a FilterItem / AddFilterPopover consumer:
 //   - mounts the "editor" (renders `.filterEditor__hiddenItem`, the selector

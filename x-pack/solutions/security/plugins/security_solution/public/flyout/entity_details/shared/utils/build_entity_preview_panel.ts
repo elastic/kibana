@@ -38,8 +38,8 @@ export const buildEntityPreviewPanel = ({
     engineType && engineType in EntityPanelKeyByType
       ? // `EntityPanelKeyByType[generic]` is `undefined` (no dedicated generic key), so fall back to
         // the generic entity panel — otherwise generic entities open nothing from the graph.
-        EntityPanelKeyByType[engineType as keyof typeof EntityPanelKeyByType] ??
-        GenericEntityPanelKey
+        (EntityPanelKeyByType[engineType as keyof typeof EntityPanelKeyByType] ??
+        GenericEntityPanelKey)
       : GenericEntityPanelKey;
 
   if (!id) {
@@ -50,10 +50,10 @@ export const buildEntityPreviewPanel = ({
     engineType === 'host'
       ? { hostName: entityName }
       : engineType === 'user'
-      ? { userName: entityName }
-      : engineType === 'service'
-      ? { serviceName: entityName }
-      : {};
+        ? { userName: entityName }
+        : engineType === 'service'
+          ? { serviceName: entityName }
+          : {};
 
   return {
     id,

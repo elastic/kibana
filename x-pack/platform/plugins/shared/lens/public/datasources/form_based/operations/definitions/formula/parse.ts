@@ -283,10 +283,10 @@ function generateFormulaColumns(
   columns[id] = {
     ...column,
     label: !column.customLabel
-      ? formula ??
+      ? (formula ??
         i18n.translate('xpack.lens.indexPattern.formulaLabel', {
           defaultMessage: 'Formula',
-        })
+        }))
       : column.label,
     references: !isValid ? [] : [getManagedId(id, extracted.length - 1)],
     params: {

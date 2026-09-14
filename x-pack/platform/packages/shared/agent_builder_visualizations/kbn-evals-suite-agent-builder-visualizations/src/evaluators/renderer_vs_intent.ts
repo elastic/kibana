@@ -16,7 +16,7 @@ export const RENDERER_VS_INTENT_EVALUATOR_NAME = 'Renderer vs Intent';
  */
 export function createRendererVsIntentEvaluator<
   TExample extends Example = Example,
-  TTaskOutput extends TaskOutput = TaskOutput
+  TTaskOutput extends TaskOutput = TaskOutput,
 >(config: {
   visualizationExtractor: (output: TTaskOutput) => ExtractedVisualization[];
   expectedRendererExtractor: (expected: TExample['output']) => 'lens' | 'vega' | undefined;

@@ -78,8 +78,8 @@ export class ChatFunctionClient {
         error instanceof z.ZodError
           ? error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`).join(', ')
           : error instanceof Error
-          ? error.message
-          : 'Unknown validation error';
+            ? error.message
+            : 'Unknown validation error';
 
       throw createToolValidationError(`Tool call arguments for ${name} were invalid`, {
         name,

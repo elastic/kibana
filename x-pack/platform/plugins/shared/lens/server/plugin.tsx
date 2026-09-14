@@ -78,9 +78,12 @@ export interface LensServerPluginSetup {
   ) => void;
 }
 
-export class LensServerPlugin
-  implements Plugin<LensServerPluginSetup, {}, PluginSetupContract, PluginStartContract>
-{
+export class LensServerPlugin implements Plugin<
+  LensServerPluginSetup,
+  {},
+  PluginSetupContract,
+  PluginStartContract
+> {
   private customVisualizationMigrations: CustomVisualizationMigrations = {};
   private readonly logger: Logger;
 

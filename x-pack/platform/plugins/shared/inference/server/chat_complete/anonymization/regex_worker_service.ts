@@ -21,7 +21,10 @@ export class RegexWorkerService {
   private worker?: Piscina;
   private readonly config: AnonymizationWorkerConfig;
 
-  constructor(config: AnonymizationWorkerConfig, private readonly logger: Logger) {
+  constructor(
+    config: AnonymizationWorkerConfig,
+    private readonly logger: Logger
+  ) {
     this.config = config;
     this.enabled = config.enabled;
 

@@ -34,7 +34,7 @@ interface MitreNode {
 }
 
 const mitreNodeLabel = ({ id, name }: MitreNode): string =>
-  name && id ? `${name} (${id})` : name ?? id ?? '';
+  name && id ? `${name} (${id})` : (name ?? id ?? '');
 
 const MitreNodeLink: React.FC<{ node: MitreNode; 'data-test-subj': string }> = ({
   node,

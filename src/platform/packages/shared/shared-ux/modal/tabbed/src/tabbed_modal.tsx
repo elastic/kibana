@@ -60,8 +60,10 @@ export interface IModalTabDeclaration<S = {}> extends EuiTabProps, ITabDeclarati
   modalActionBtn?: IModalTabActionBtn<S>;
 }
 
-export interface ITabbedModalInner
-  extends Pick<ComponentProps<typeof EuiModal>, 'onClose' | 'outsideClickCloses'> {
+export interface ITabbedModalInner extends Pick<
+  ComponentProps<typeof EuiModal>,
+  'onClose' | 'outsideClickCloses'
+> {
   modalWidth?: number;
   modalTitle?: string;
   anchorElement?: HTMLElement;

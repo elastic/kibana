@@ -65,7 +65,7 @@ const DEFAULT_TAB_UUID_NAMESPACE = '617f8ea7-754a-4a75-86bf-58c4b2f99690';
 export function extractTabs<
   T extends
     | TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_5>
-    | TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_12_SO_API_WORKAROUND>
+    | TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_12_SO_API_WORKAROUND>,
 >(attributes: T, discoverSessionId?: string) {
   const { title, description, hits, version, ...tabAttrs } = attributes;
   const id = discoverSessionId ? uuidv5(discoverSessionId, DEFAULT_TAB_UUID_NAMESPACE) : uuidv4();

@@ -92,14 +92,16 @@ const ChipRow: React.FC<ChipRowProps> = ({
           transition: opacity 120ms ease;
           z-index: ${Number(euiTheme.levels.content) + 3};
           pointer-events: none;
-          ${alignDotToEnd
-            ? css`
-                right: 4px;
-                left: auto;
-              `
-            : css`
-                left: 4px;
-              `}
+          ${
+            alignDotToEnd
+              ? css`
+                  right: 4px;
+                  left: auto;
+                `
+              : css`
+                  left: 4px;
+                `
+          }
         `}
       />
       <div
@@ -107,15 +109,17 @@ const ChipRow: React.FC<ChipRowProps> = ({
         className="mitreTacticDotV3__hoverChip"
         css={css`
           position: absolute;
-          ${alignDotToEnd || flipToRight
-            ? css`
-                right: calc(100% - 4px);
-                left: auto;
-              `
-            : css`
-                left: 4px;
-                right: auto;
-              `}
+          ${
+            alignDotToEnd || flipToRight
+              ? css`
+                  right: calc(100% - 4px);
+                  left: auto;
+                `
+              : css`
+                  left: 4px;
+                  right: auto;
+                `
+          }
           bottom: ${TICK_HEIGHT + CHIP_TICK_GAP}px;
           opacity: ${isChipVisible ? 1 : 0};
           pointer-events: ${isChipVisible ? 'auto' : 'none'};
@@ -387,14 +391,16 @@ export const MitreTacticDot: React.FC<MitreTacticDotProps> = ({
             border: 2px solid ${color};
             border-radius: 50%;
             z-index: ${Number(euiTheme.levels.content) + 2};
-            ${alignDotToEnd
-              ? css`
-                  right: 0;
-                  left: auto;
-                `
-              : css`
-                  left: 0;
-                `}
+            ${
+              alignDotToEnd
+                ? css`
+                    right: 0;
+                    left: auto;
+                  `
+                : css`
+                    left: 0;
+                  `
+            }
           `}
         />
         {/* Outer halo — full opacity + expanded when selected. */}
@@ -410,16 +416,23 @@ export const MitreTacticDot: React.FC<MitreTacticDotProps> = ({
             border-radius: 50%;
             opacity: ${haloOpacity};
             z-index: ${Number(euiTheme.levels.content) + 1};
-            transition: width 120ms ease, height 120ms ease, opacity 120ms ease, left 120ms ease,
-              right 120ms ease, top 120ms ease;
-            ${alignDotToEnd
-              ? css`
-                  right: ${haloOffset}px;
-                  left: auto;
-                `
-              : css`
-                  left: ${haloOffset}px;
-                `}
+            transition:
+              width 120ms ease,
+              height 120ms ease,
+              opacity 120ms ease,
+              left 120ms ease,
+              right 120ms ease,
+              top 120ms ease;
+            ${
+              alignDotToEnd
+                ? css`
+                    right: ${haloOffset}px;
+                    left: auto;
+                  `
+                : css`
+                    left: ${haloOffset}px;
+                  `
+            }
           `}
         />
         {/* Connector line — 4 px stub when last, full cell otherwise. */}

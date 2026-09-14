@@ -100,14 +100,11 @@ export interface SOContentStorageConstructorParams<Types extends CMCrudTypes> {
   throwOnResultValidationError: boolean;
 }
 
-export abstract class SOContentStorage<Types extends CMCrudTypes>
-  implements
-    ContentStorage<
-      Types['Item'],
-      Types['PartialItem'],
-      MSearchConfig<Types['Item'], Types['Attributes']>
-    >
-{
+export abstract class SOContentStorage<Types extends CMCrudTypes> implements ContentStorage<
+  Types['Item'],
+  Types['PartialItem'],
+  MSearchConfig<Types['Item'], Types['Attributes']>
+> {
   constructor({
     savedObjectType,
     cmServicesDefinition,

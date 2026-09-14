@@ -79,7 +79,7 @@ export class MonitoringEntitySourceDataClient {
       } else {
         // source not managed so we don't use default matchers to compare, fallback to existing matchers check
         matchersModifiedByUser = areMatchersEqual(sanitizedMatchers, existing.matchers)
-          ? existing.matchersModifiedByUser ?? false
+          ? (existing.matchersModifiedByUser ?? false)
           : true;
       }
     }

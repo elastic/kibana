@@ -22,7 +22,7 @@ describe('KibanaTaskStore', () => {
       executionMode: AgentExecutionMode.conversation,
       agentParams: { nextInput: { message: 'hello' } },
       ...overrides,
-    } as AgentExecution);
+    }) as AgentExecution;
 
   const createStore = (
     getExecution: jest.Mock,
@@ -32,7 +32,7 @@ describe('KibanaTaskStore', () => {
       ({
         execution: { getExecution },
         spaces: { spacesService: { getSpaceId: jest.fn().mockReturnValue(currentSpaceId) } },
-      } as any);
+      }) as any;
     const kibanaRequest = {} as any;
     return new KibanaTaskStore(getInternalServices, kibanaRequest);
   };

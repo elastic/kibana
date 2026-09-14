@@ -55,8 +55,8 @@ export const RetryWaitAnnotation = React.memo<RetryWaitAnnotationProps>(
         css={css`
           padding: ${TREE_ROW_PADDING_Y_PX}px ${euiTheme.size[TREE_ROW_PADDING_X_SIZE]};
           padding-left: calc(
-            ${euiTheme.size[TREE_ROW_PADDING_X_SIZE]} + ${chevronGutter}${TREE_ROW_ICON_SLOT_PX}px +
-              ${euiTheme.size[TREE_ROW_GAP_SIZE]}
+            ${euiTheme.size[TREE_ROW_PADDING_X_SIZE]} + ${chevronGutter}
+              ${TREE_ROW_ICON_SLOT_PX}px + ${euiTheme.size[TREE_ROW_GAP_SIZE]}
           );
         `}
       >

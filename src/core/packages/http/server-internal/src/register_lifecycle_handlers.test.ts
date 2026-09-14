@@ -39,7 +39,7 @@ const createRegistrarMock = (authGet = jest.fn()) =>
     registerOnPreResponse: jest.fn(),
     registerOnPreRouting: jest.fn(),
     auth: { get: authGet, isAuthenticated: jest.fn() },
-  } as unknown as CoreHandlerDependencies);
+  }) as unknown as CoreHandlerDependencies;
 
 const createConfigMock = () =>
   ({
@@ -49,7 +49,7 @@ const createConfigMock = () =>
       versionResolution: 'newest',
       strictClientVersionCheck: false,
     },
-  } as unknown as HttpConfig);
+  }) as unknown as HttpConfig;
 
 describe('registerCoreHandlers', () => {
   beforeEach(() => {

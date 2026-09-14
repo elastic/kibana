@@ -176,8 +176,8 @@ export const useFetchDocumentDetails = <_Source = unknown>({
         total: number.is(hits.total)
           ? hits.total
           : hits.total && number.is(hits.total.value)
-          ? hits.total.value
-          : 0,
+            ? hits.total.value
+            : 0,
       };
     },
     {

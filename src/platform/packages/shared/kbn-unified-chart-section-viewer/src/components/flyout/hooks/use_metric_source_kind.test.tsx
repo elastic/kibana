@@ -44,10 +44,10 @@ const matchedItem = (name: string, key: IndexKind): MatchedItem =>
     name,
     tags: [{ key, name: key, color: 'default' }],
     item: { name },
-  } as unknown as MatchedItem);
+  }) as unknown as MatchedItem;
 
 const buildDataViews = (impl: jest.Mock) =>
-  ({ getIndices: impl } as unknown as DataViewsPublicPluginStart);
+  ({ getIndices: impl }) as unknown as DataViewsPublicPluginStart;
 
 const buildWrapper = (externalServices: ExternalServices | undefined) => {
   const Wrapper = ({ children }: { children: React.ReactNode }) => (

@@ -64,7 +64,7 @@ describe('approveIntegrationRoute telemetry', () => {
         reportTelemetryEvent,
         isAvailable: () => true,
       }),
-    } as unknown as AutomaticImportPluginRequestHandlerContext);
+    }) as unknown as AutomaticImportPluginRequestHandlerContext;
 
   const makeRequest = (integrationId = 'int_1') =>
     httpServerMock.createKibanaRequest({
@@ -149,7 +149,7 @@ describe('downloadIntegrationRoute telemetry', () => {
         fieldsMetadataClient: {},
         isAvailable: () => true,
       }),
-    } as unknown as AutomaticImportPluginRequestHandlerContext);
+    }) as unknown as AutomaticImportPluginRequestHandlerContext;
 
   const makeRequest = (intent?: (typeof DownloadIntentEnum)[keyof typeof DownloadIntentEnum]) =>
     httpServerMock.createKibanaRequest({

@@ -21,7 +21,7 @@ const buildAvailabilityContext = (flags: Record<string, boolean>) =>
     uiSettings: {
       get: jest.fn(async (key: string) => flags[key]),
     },
-  } as unknown as ToolAvailabilityContext);
+  }) as unknown as ToolAvailabilityContext;
 
 const mockResolveSmlAttachItems = jest.fn();
 const mockAttachmentsAdd = jest.fn();

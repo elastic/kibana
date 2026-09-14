@@ -218,12 +218,12 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
       {
         title: USER_DOMAIN,
         description: userDomainValue
-          ? renderCellActions({
+          ? (renderCellActions({
               field: 'user.domain',
               value: userDomainValue,
               scopeId,
               children: <>{userDomainValue}</>,
-            }) ?? getEmptyTagValue()
+            }) ?? getEmptyTagValue())
           : getEmptyTagValue(),
       },
     ],
@@ -258,7 +258,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
 
   const [userRiskLevel] = useMemo(() => {
     const level = userRiskData?.user?.risk?.calculated_level;
-    const severity = level != null ? normalizeRiskLevel(level) ?? (level as RiskSeverity) : null;
+    const severity = level != null ? (normalizeRiskLevel(level) ?? (level as RiskSeverity)) : null;
     return [
       {
         title: (

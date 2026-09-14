@@ -56,7 +56,7 @@ const buildHit = (overrides: Record<string, unknown> = {}): DataTableRecord =>
       'kibana.alert.attack_discovery.alert_ids': ['alert-1', 'alert-2'],
       ...overrides,
     },
-  } as unknown as DataTableRecord);
+  }) as unknown as DataTableRecord;
 
 describe('StatusPopoverButton (attack flyout v2)', () => {
   const onAttackUpdated = jest.fn();

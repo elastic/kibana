@@ -283,15 +283,15 @@ export const IntegrationStatus: React.FunctionComponent<{
                         customAsset.sync_status === SyncStatus.FAILED
                           ? 'danger'
                           : customAsset.sync_status === SyncStatus.WARNING
-                          ? 'warning'
-                          : 'success'
+                            ? 'warning'
+                            : 'success'
                       }
                       type={
                         customAsset.sync_status === SyncStatus.FAILED
                           ? 'errorFill'
                           : customAsset.sync_status === SyncStatus.WARNING
-                          ? 'warning'
-                          : 'checkCircleFill'
+                            ? 'warning'
+                            : 'checkCircleFill'
                       }
                       aria-label={
                         customAsset.sync_status === SyncStatus.FAILED
@@ -299,12 +299,12 @@ export const IntegrationStatus: React.FunctionComponent<{
                               defaultMessage: 'Sync failed',
                             })
                           : customAsset.sync_status === SyncStatus.WARNING
-                          ? i18n.translate('xpack.fleet.integrationSyncStatus.warningIconLabel', {
-                              defaultMessage: 'Sync warning',
-                            })
-                          : i18n.translate('xpack.fleet.integrationSyncStatus.syncedIconLabel', {
-                              defaultMessage: 'Synced',
-                            })
+                            ? i18n.translate('xpack.fleet.integrationSyncStatus.warningIconLabel', {
+                                defaultMessage: 'Sync warning',
+                              })
+                            : i18n.translate('xpack.fleet.integrationSyncStatus.syncedIconLabel', {
+                                defaultMessage: 'Synced',
+                              })
                       }
                     />
                   )

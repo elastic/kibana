@@ -319,7 +319,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
 
       const availableTaskTypes = allowedTaskTypes
         ? (newProvider?.task_types ?? []).filter((t) => (allowedTaskTypes as string[]).includes(t))
-        : newProvider?.task_types ?? [];
+        : (newProvider?.task_types ?? []);
       setTaskTypeOptions(getTaskTypeOptions(availableTaskTypes));
       if (availableTaskTypes.length > 0) {
         onTaskTypeOptionsSelect(availableTaskTypes[0], provider);

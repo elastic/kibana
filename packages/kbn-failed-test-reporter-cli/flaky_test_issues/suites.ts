@@ -26,9 +26,10 @@ export const groupIntoSuites = (entries: readonly FlakyTestEntry[]): FlakySuite[
     byFile.set(entry.filePath, [...(byFile.get(entry.filePath) ?? []), entry]);
   }
 
-  const suites = [...byFile.entries()].map(
-    ([filePath, tests]): FlakySuite => ({ filePath, tests: rankTests(tests) })
-  );
+  const suites = [...byFile.entries()].map(([filePath, tests]): FlakySuite => ({
+    filePath,
+    tests: rankTests(tests),
+  }));
 
   return suites.sort((a, b) => compareByFailedBuilds(a.tests[0], b.tests[0]));
 };

@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-/* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import type { IntegrationEvaluations } from "../types";
+import type { IntegrationEvaluations } from '../types';
 
 export const aws_cloudtrail_otelEvaluations = {
-  integration: "aws_cloudtrail_otel",
+  integration: 'aws_cloudtrail_otel',
   evaluations: [
     {
-      id: "actor",
-      section: "Combined ES|QL \u2014 actor fields",
+      id: 'actor',
+      section: 'Combined ES|QL \u2014 actor fields',
       esql: `| EVAL
   user.id = CASE(
     user.id IS NOT NULL, user.id,
@@ -39,8 +38,8 @@ export const aws_cloudtrail_otelEvaluations = {
   )`,
     },
     {
-      id: "event_action",
-      section: "Combined ES|QL \u2014 event action",
+      id: 'event_action',
+      section: 'Combined ES|QL \u2014 event action',
       esql: `| EVAL
   event.action = CASE(
     event.action IS NOT NULL, event.action,
@@ -49,8 +48,8 @@ export const aws_cloudtrail_otelEvaluations = {
   )`,
     },
     {
-      id: "target",
-      section: "Combined ES|QL \u2014 target fields",
+      id: 'target',
+      section: 'Combined ES|QL \u2014 target fields',
       esql: `| EVAL
   service.target.name = CASE(
     service.target.name IS NOT NULL, service.target.name,

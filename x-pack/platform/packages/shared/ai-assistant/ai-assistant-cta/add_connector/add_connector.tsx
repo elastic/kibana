@@ -17,8 +17,10 @@ export const DATA_TEST_SUBJ_ADD_CONNECTOR_BUTTON = 'aiCTAAddConnectorButton';
 /**
  * Props for the `AddConnector` call to action.
  */
-export interface AddConnectorProps
-  extends Pick<AssistantCallToActionProps, 'data-test-subj' | 'centered'> {
+export interface AddConnectorProps extends Pick<
+  AssistantCallToActionProps,
+  'data-test-subj' | 'centered'
+> {
   /** Callback to handle adding a connector. */
   onAddConnector: () => void;
 }

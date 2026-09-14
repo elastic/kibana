@@ -38,14 +38,14 @@ const createMockToolManager = (
 ): ToolManager =>
   ({
     getSummarizer: jest.fn((toolId: string) => summarizers.get(toolId)),
-  } as unknown as ToolManager);
+  }) as unknown as ToolManager;
 
 const createMockToolRegistry = (
   tools: Map<string, { summarizeToolReturn?: (step: ToolCallWithResult) => ToolResult[] | null }>
 ): ToolRegistry =>
   ({
     get: jest.fn(async (toolId: string) => tools.get(toolId)),
-  } as unknown as ToolRegistry);
+  }) as unknown as ToolRegistry;
 
 describe('tool_summarization markers', () => {
   it('isSummaryResult detects the marker', () => {

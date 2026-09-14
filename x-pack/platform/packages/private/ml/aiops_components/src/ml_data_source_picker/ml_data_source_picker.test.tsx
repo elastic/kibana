@@ -62,7 +62,7 @@ const buildServices = (
     contentManagement: { client: {} },
     uiSettings: {},
     ...overrides,
-  } as unknown as MlDataSourcePickerServices);
+  }) as unknown as MlDataSourcePickerServices;
 
 const MockSavedObjectFinder = () => <div data-test-subj="mockSavedObjectFinder" />;
 

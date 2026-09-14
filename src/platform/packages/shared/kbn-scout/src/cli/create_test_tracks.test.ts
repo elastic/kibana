@@ -49,7 +49,7 @@ const createMockLog = (): ToolingLog =>
     write: jest.fn(),
     error: jest.fn(),
     success: jest.fn(),
-  } as unknown as ToolingLog);
+  }) as unknown as ToolingLog;
 
 const createMockConfig = (overrides: Partial<ScoutTestConfig> = {}): ScoutTestConfig => ({
   path: 'plugin/test/scout/ui/config.playwright.config.ts',
@@ -99,7 +99,7 @@ const createStatsEntry = (
       max: estimate,
       estimate,
     },
-  } as ScoutTestConfigStatsEntry);
+  }) as ScoutTestConfigStatsEntry;
 
 describe('msToHuman', () => {
   it('returns "0s" for zero', () => {

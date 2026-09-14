@@ -59,7 +59,7 @@ export type TimeseriesSubmitIdParts = Omit<TimeseriesNotificationIdParts, 'names
  */
 export type NotificationSubmitInput<
   N extends NotificationNamespace,
-  T extends NotificationTypeName<N>
+  T extends NotificationTypeName<N>,
 > = NotificationContent &
   (NotificationKindOf<N, T> extends 'timeseries' ? TimeseriesSubmitIdParts : StateSubmitIdParts);
 

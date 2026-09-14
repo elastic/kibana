@@ -122,7 +122,7 @@ describe('CloudConnectorSetup', () => {
       isLoading: false,
       isError: false,
       error: null,
-    } as UseQueryResult<CloudConnector[], unknown>);
+    }) as UseQueryResult<CloudConnector[], unknown>;
 
   beforeEach(() => {
     jest.clearAllMocks();

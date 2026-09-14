@@ -21,9 +21,9 @@ export function checkChartAvailability({
 }): boolean {
   return Boolean(
     chart &&
-      dataView &&
-      dataView.id &&
-      dataView.type !== DataViewType.ROLLUP &&
-      (isPlainRecord || (!isPlainRecord && dataView.isTimeBased()))
+    dataView &&
+    dataView.id &&
+    dataView.type !== DataViewType.ROLLUP &&
+    (isPlainRecord || (!isPlainRecord && dataView.isTimeBased()))
   );
 }

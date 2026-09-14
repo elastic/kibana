@@ -41,14 +41,14 @@ export interface TextareaInputArgumentProps<
   /** List of arguments that the command supports and that the console parses by default */
   TArgs extends SupportedArguments = any,
   /** The `state` that is stored for Argument Selectors. See the full definition under the ` Command ` type */
-  TSelectorArgsState extends object = any
+  TSelectorArgsState extends object = any,
 > extends CommandArgumentValueSelectorProps<
-    string,
-    TextareaInputArgumentState,
-    EndpointCommandDefinitionMeta,
-    TArgs,
-    TSelectorArgsState
-  > {
+  string,
+  TextareaInputArgumentState,
+  EndpointCommandDefinitionMeta,
+  TArgs,
+  TSelectorArgsState
+> {
   width?: string;
   /**
    * Any help content to be made available in the popup. If defined, a help icon will

@@ -17,7 +17,7 @@ describe('resolve_code_index', () => {
   });
 
   describe('resolveRepositoryForCodeIndex', () => {
-    const makeEsClient = (search: jest.Mock) => ({ search } as unknown as ElasticsearchClient);
+    const makeEsClient = (search: jest.Mock) => ({ search }) as unknown as ElasticsearchClient;
 
     it('reads the repository keyword from a code index document', async () => {
       const search = jest.fn().mockResolvedValue({

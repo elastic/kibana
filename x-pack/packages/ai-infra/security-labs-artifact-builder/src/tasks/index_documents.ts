@@ -40,22 +40,25 @@ export const indexDocuments = async ({
     const response = await client.bulk(
       {
         refresh: 'wait_for',
-        operations: chunk.reduce((operations, document) => {
-          // IMPORTANT:
-          // Avoid indexing empty strings for `semantic_text` fields.
-          // If the field exists (even as ""), Elasticsearch may attempt inference bookkeeping
-          // and conflict with precomputed `_inference_fields`, causing duplicate field errors.
-          const cleaned: Record<string, unknown> = { ...document };
-          if (typeof cleaned.description === 'string' && cleaned.description.trim() === '') {
-            delete cleaned.description;
-          }
-          if (typeof cleaned.content === 'string' && cleaned.content.trim() === '') {
-            delete cleaned.content;
-          }
+        operations: chunk.reduce(
+          (operations, document) => {
+            // IMPORTANT:
+            // Avoid indexing empty strings for `semantic_text` fields.
+            // If the field exists (even as ""), Elasticsearch may attempt inference bookkeeping
+            // and conflict with precomputed `_inference_fields`, causing duplicate field errors.
+            const cleaned: Record<string, unknown> = { ...document };
+            if (typeof cleaned.description === 'string' && cleaned.description.trim() === '') {
+              delete cleaned.description;
+            }
+            if (typeof cleaned.content === 'string' && cleaned.content.trim() === '') {
+              delete cleaned.content;
+            }
 
-          operations!.push(...[{ index: { _index: index } }, cleaned]);
-          return operations;
-        }, [] as BulkRequest['operations']),
+            operations!.push(...[{ index: { _index: index } }, cleaned]);
+            return operations;
+          },
+          [] as BulkRequest['operations']
+        ),
       },
       { requestTimeout: 10 * 60 * 1000 }
     );

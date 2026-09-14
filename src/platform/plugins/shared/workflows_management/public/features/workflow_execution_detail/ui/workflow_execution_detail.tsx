@@ -87,7 +87,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
     );
     const isStepSelectionControlled = onSelectedStepExecutionChange !== undefined;
     const selectedStepExecutionId = isStepSelectionControlled
-      ? controlledSelectedStepExecutionId ?? undefined
+      ? (controlledSelectedStepExecutionId ?? undefined)
       : urlState.selectedStepExecutionId;
     const setSelectedStepExecution = isStepSelectionControlled
       ? onSelectedStepExecutionChange
@@ -278,7 +278,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
     // Lazy-load full step data (with input/output) for real steps
     const { data: fullStepData, isLoading: isLoadingStepData } = useStepExecution(
       resolvedExecutionId,
-      isPseudoStep ? undefined : selectedStepExecutionId ?? undefined,
+      isPseudoStep ? undefined : (selectedStepExecutionId ?? undefined),
       lightweightStep?.status
     );
 

@@ -10,9 +10,8 @@ import type { PackagePolicyEditExtensionComponent } from '@kbn/fleet-plugin/publ
 
 export const LazySyntheticsPolicyEditExtension = lazy<PackagePolicyEditExtensionComponent>(
   async () => {
-    const { SyntheticsPolicyEditExtensionWrapper } = await import(
-      './synthetics_policy_edit_extension_wrapper'
-    );
+    const { SyntheticsPolicyEditExtensionWrapper } =
+      await import('./synthetics_policy_edit_extension_wrapper');
     return {
       default: SyntheticsPolicyEditExtensionWrapper,
     };

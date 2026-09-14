@@ -89,12 +89,11 @@ const buildSchemaClosure = async (
 };
 
 const getClosureLoader = (target: ApiTarget) => {
-  const load = memoize(
-    (schema: Record<string, unknown>): Promise<SchemaClosure> =>
-      buildSchemaClosure(target, schema).catch((error) => {
-        load.cache.delete(schema);
-        throw error;
-      })
+  const load = memoize((schema: Record<string, unknown>): Promise<SchemaClosure> =>
+    buildSchemaClosure(target, schema).catch((error) => {
+      load.cache.delete(schema);
+      throw error;
+    })
   );
   return load;
 };

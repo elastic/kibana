@@ -30,9 +30,10 @@ import {
 } from './routes';
 import { ResultsDataStream } from './lib/data_stream/results_data_stream';
 
-export class EcsDataQualityDashboardPlugin
-  implements Plugin<EcsDataQualityDashboardPluginSetup, EcsDataQualityDashboardPluginStart>
-{
+export class EcsDataQualityDashboardPlugin implements Plugin<
+  EcsDataQualityDashboardPluginSetup,
+  EcsDataQualityDashboardPluginStart
+> {
   private readonly logger: Logger;
   private readonly resultsDataStream: ResultsDataStream;
   private pluginStop$: Subject<void>;

@@ -107,7 +107,7 @@ describe('Tooltip', () => {
   const formatFactory: FormatFactory = (format) =>
     ({
       convertToText: (value) => `formatted-${format?.id}-${value}`,
-    } as FieldFormat);
+    }) as FieldFormat;
 
   it('should render plain tooltip', () => {
     const tooltip = shallow(

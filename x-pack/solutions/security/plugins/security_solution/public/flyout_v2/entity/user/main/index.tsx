@@ -205,16 +205,16 @@ export const User: FC<UserProps> = memo(function User({
   useQueryInspector({
     deleteQuery,
     inspect: useEntityStoreInspectForRisk
-      ? entityFromStoreResult?.inspect ?? null
+      ? (entityFromStoreResult?.inspect ?? null)
       : inspectRiskScore,
-    loading: useEntityStoreInspectForRisk ? entityFromStoreResult?.isLoading ?? false : loading,
+    loading: useEntityStoreInspectForRisk ? (entityFromStoreResult?.isLoading ?? false) : loading,
     queryId: USER_PANEL_RISK_SCORE_QUERY_ID,
-    refetch: useEntityStoreInspectForRisk ? entityFromStoreResult?.refetch ?? noop : refetch,
+    refetch: useEntityStoreInspectForRisk ? (entityFromStoreResult?.refetch ?? noop) : refetch,
     setQuery,
   });
 
   const entityFromStore: EntityStoreRecord | undefined = entityStoreV2Enabled
-    ? observedUser.entityRecord ?? undefined
+    ? (observedUser.entityRecord ?? undefined)
     : undefined;
   const riskScoreStateFromStore =
     entityStoreV2Enabled && observedUser.entityRecord
@@ -460,7 +460,9 @@ export const User: FC<UserProps> = memo(function User({
             recalculatingScore={recalculatingScore}
             onAssetCriticalityChange={onAssetCriticalityChanged}
             isPreviewMode={false}
-            entityRecord={entityStoreV2Enabled ? observedUser.entityRecord ?? undefined : undefined}
+            entityRecord={
+              entityStoreV2Enabled ? (observedUser.entityRecord ?? undefined) : undefined
+            }
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
             onShowEntity={onShowRelatedEntityFromResolution}

@@ -64,12 +64,12 @@ export const useInvestigateAlert = ({
         defaultMessage: 'Investigating',
       })
     : latestStatus === 'completed'
-    ? i18n.translate('xpack.observability.alerts.reinvestigate', {
-        defaultMessage: 'Re-investigate',
-      })
-    : i18n.translate('xpack.observability.alerts.investigate', {
-        defaultMessage: 'Investigate',
-      });
+      ? i18n.translate('xpack.observability.alerts.reinvestigate', {
+          defaultMessage: 'Re-investigate',
+        })
+      : i18n.translate('xpack.observability.alerts.investigate', {
+          defaultMessage: 'Investigate',
+        });
 
   const handleInvestigate = async () => {
     if (!alertId || !investigationsClient || isInvestigating) return;

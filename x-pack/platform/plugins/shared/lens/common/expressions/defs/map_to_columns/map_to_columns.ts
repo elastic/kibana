@@ -32,9 +32,8 @@ export const mapToColumns: MapToColumnsExpressionFunction = {
   inputTypes: ['datatable'],
   async fn(...args) {
     /** Build optimization: prevent adding extra code into initial bundle **/
-    const { mapToOriginalColumns, mapToOriginalColumnsTextBased } = await import(
-      '../../impl/async_fns'
-    );
+    const { mapToOriginalColumns, mapToOriginalColumnsTextBased } =
+      await import('../../impl/async_fns');
 
     return args?.[1]?.isTextBased
       ? mapToOriginalColumnsTextBased(...args)

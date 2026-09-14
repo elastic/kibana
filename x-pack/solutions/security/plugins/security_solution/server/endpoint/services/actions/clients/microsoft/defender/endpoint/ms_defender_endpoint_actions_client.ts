@@ -211,16 +211,19 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     const agentIdsFound: string[] = [];
     const fleetAgentIdToMsDefenderAgentIdMap: Record<string, string> = (
       msDefenderLogEsResults.hits.hits ?? []
-    ).reduce((acc, esDoc) => {
-      const doc = esDoc.inner_hits?.most_recent.hits.hits[0]._source;
+    ).reduce(
+      (acc, esDoc) => {
+        const doc = esDoc.inner_hits?.most_recent.hits.hits[0]._source;
 
-      if (doc) {
-        agentIdsFound.push(doc.cloud.instance.id);
-        acc[doc.agent.id] = doc.cloud.instance.id;
-      }
+        if (doc) {
+          agentIdsFound.push(doc.cloud.instance.id);
+          acc[doc.agent.id] = doc.cloud.instance.id;
+        }
 
-      return acc;
-    }, {} as Record<string, string>);
+        return acc;
+      },
+      {} as Record<string, string>
+    );
     const elasticAgentIds = Object.keys(fleetAgentIdToMsDefenderAgentIdMap);
 
     if (elasticAgentIds.length === 0) {
@@ -255,7 +258,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
   protected async handleResponseActionCreation<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends {} = {}
+    TMeta extends {} = {},
   >(
     actionRequestOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       TParameters,
@@ -300,7 +303,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
    */
   private async sendAction<
     TResponse = unknown,
-    TParams extends Record<string, unknown> = Record<string, unknown>
+    TParams extends Record<string, unknown> = Record<string, unknown>,
   >(
     actionType: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION,
     actionParams: TParams
@@ -341,7 +344,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
   protected async writeActionRequestToEndpointIndex<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends {} = MicrosoftDefenderEndpointActionRequestCommonMeta
+    TMeta extends {} = MicrosoftDefenderEndpointActionRequestCommonMeta,
   >(
     actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       TParameters,
@@ -1314,7 +1317,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
   private async fetchEsResponseDocForAgentId<
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends {} = {}
+    TMeta extends {} = {},
   >(actionId: string, agentId: string): Promise<LogsEndpointActionResponse<TOutputContent, TMeta>> {
     const agentResponse = (
       await this.fetchActionResponseEsDocs<TOutputContent, TMeta>(actionId, [agentId])

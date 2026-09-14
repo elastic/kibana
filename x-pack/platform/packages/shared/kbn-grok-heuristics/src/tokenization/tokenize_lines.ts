@@ -49,8 +49,8 @@ export function tokenizeLines(lines: MaskedMessage[], delimiter: string, splitCh
             isLastTokenAcrossAllColumns
               ? undefined
               : isLastTokenInColumn
-              ? delimiterValue
-              : nextValue
+                ? delimiterValue
+                : nextValue
           );
           return {
             value,

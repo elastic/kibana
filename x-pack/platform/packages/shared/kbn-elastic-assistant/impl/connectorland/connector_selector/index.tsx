@@ -182,7 +182,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       (option: EuiSelectableOption) => {
         const attackDiscoveryStats =
           stats !== null
-            ? stats.statsPerConnector.find((s) => s.connectorId === option.key) ?? null
+            ? (stats.statsPerConnector.find((s) => s.connectorId === option.key) ?? null)
             : null;
 
         return (

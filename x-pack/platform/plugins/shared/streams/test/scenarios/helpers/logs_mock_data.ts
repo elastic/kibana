@@ -157,7 +157,7 @@ export const getLinuxMessages = () =>
         Math.random() * 10000
       )}]: Keep-alive timeout on connection ${Math.floor(Math.random() * 10000)}.`,
     ],
-  } as Record<string, string[]>);
+  }) as Record<string, string[]>;
 
 export const KUBERNETES_SERVICES = [
   'auth-service',
@@ -291,7 +291,7 @@ export const getKubernetesMessages = () =>
       `Reminder notification sent to user <userID-${getStableShortId()}>.`,
       `System maintenance notification sent to all users.`,
     ],
-  } as Record<string, string[]>);
+  }) as Record<string, string[]>;
 
 export const getJavaMessages = () => [
   '[main] com.example1.core.ApplicationCore - Critical failure: NullPointerException encountered during startup',

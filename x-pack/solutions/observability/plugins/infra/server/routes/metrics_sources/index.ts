@@ -256,12 +256,12 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
                       ...existsQuery(findInventoryFields('awsSQS').id),
                     ]
                   : source === 'host' && hostIntegration
-                  ? [
-                      ...termQuery(EVENT_MODULE, hostIntegration.beats),
-                      ...termQuery(METRICSET_MODULE, hostIntegration.beats),
-                      ...termQuery(DATASTREAM_DATASET, hostIntegration.otel),
-                    ]
-                  : [],
+                    ? [
+                        ...termQuery(EVENT_MODULE, hostIntegration.beats),
+                        ...termQuery(METRICSET_MODULE, hostIntegration.beats),
+                        ...termQuery(DATASTREAM_DATASET, hostIntegration.otel),
+                      ]
+                    : [],
               minimum_should_match: 1,
             },
           },

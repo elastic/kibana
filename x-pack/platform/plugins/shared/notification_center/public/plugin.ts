@@ -8,9 +8,10 @@
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { NotificationCenterPublicSetup, NotificationCenterPublicStart } from './types';
 
-export class NotificationCenterPlugin
-  implements Plugin<NotificationCenterPublicSetup, NotificationCenterPublicStart>
-{
+export class NotificationCenterPlugin implements Plugin<
+  NotificationCenterPublicSetup,
+  NotificationCenterPublicStart
+> {
   public setup(_core: CoreSetup): NotificationCenterPublicSetup {
     return {};
   }

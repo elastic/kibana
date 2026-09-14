@@ -52,7 +52,7 @@ const toFeature = (ki: StoredKiFeature): Feature =>
     confidence: ki.feature?.confidence,
     evidence: ki.evidence,
     filter: ki.feature?.filter,
-  } as Feature);
+  }) as Feature;
 
 const formatFeature = (feature: Feature): string[] => {
   const lines: string[] = [];

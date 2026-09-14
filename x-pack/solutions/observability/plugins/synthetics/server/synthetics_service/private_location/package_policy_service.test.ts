@@ -78,10 +78,10 @@ const makeServer = () => {
 };
 
 const policy = (overrides: Partial<NewPackagePolicyWithId> = {}): NewPackagePolicyWithId =>
-  ({ id: 'testId-policyId', policy_ids: ['policyId'], ...overrides } as NewPackagePolicyWithId);
+  ({ id: 'testId-policyId', policy_ids: ['policyId'], ...overrides }) as NewPackagePolicyWithId;
 
 const agentPolicy = (spaceIds?: string[]): AgentPolicy =>
-  ({ id: 'policyId', space_ids: spaceIds } as AgentPolicy);
+  ({ id: 'policyId', space_ids: spaceIds }) as AgentPolicy;
 
 describe('PackagePolicyService.getByIds', () => {
   it('uses one unscoped bulk get across unique spaces and forwards requested fields', async () => {

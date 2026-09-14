@@ -124,7 +124,7 @@ export function QueriesTable() {
   const selectedQuery = useMemo(
     () =>
       routeQuery?.selectedItem
-        ? queriesData?.queries.find((q) => q.query.id === routeQuery.selectedItem) ?? null
+        ? (queriesData?.queries.find((q) => q.query.id === routeQuery.selectedItem) ?? null)
         : null,
     [queriesData?.queries, routeQuery?.selectedItem]
   );

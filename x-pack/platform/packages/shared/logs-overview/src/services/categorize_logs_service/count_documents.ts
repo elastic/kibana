@@ -48,8 +48,8 @@ export const countDocuments = ({ search }: { search: ISearchGeneric }) =>
         totalHitsResponse.hits.total == null
           ? 0
           : typeof totalHitsResponse.hits.total === 'number'
-          ? totalHitsResponse.hits.total
-          : totalHitsResponse.hits.total.value;
+            ? totalHitsResponse.hits.total
+            : totalHitsResponse.hits.total.value;
       const samplingProbability = getSampleProbability(documentCount);
 
       return {

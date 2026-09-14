@@ -26,18 +26,20 @@ export const Loader = React.memo<LoaderProps>(({ children, overlay, overlayBackg
 
   const asideStyles = css`
     padding: ${euiTheme.size.m};
-    ${overlay &&
-    css`
-      background: ${overlayBackground
-        ? rgba(overlayBackground, 0.9)
-        : rgba(euiTheme.colors.emptyShade, 0.9)};
-      bottom: 0;
-      left: 0;
-      position: absolute;
-      right: 0;
-      top: 0;
-      z-index: ${euiTheme.levels.flyout};
-    `}
+    ${
+      overlay &&
+      css`
+        background: ${
+          overlayBackground ? rgba(overlayBackground, 0.9) : rgba(euiTheme.colors.emptyShade, 0.9)
+        };
+        bottom: 0;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+        z-index: ${euiTheme.levels.flyout};
+      `
+    }
   `;
 
   const flexGroupStyles = overlay

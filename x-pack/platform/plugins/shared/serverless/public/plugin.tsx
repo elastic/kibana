@@ -16,15 +16,12 @@ import type {
   ServerlessPluginStartDependencies,
 } from './types';
 
-export class ServerlessPlugin
-  implements
-    Plugin<
-      ServerlessPluginSetup,
-      ServerlessPluginStart,
-      ServerlessPluginSetupDependencies,
-      ServerlessPluginStartDependencies
-    >
-{
+export class ServerlessPlugin implements Plugin<
+  ServerlessPluginSetup,
+  ServerlessPluginStart,
+  ServerlessPluginSetupDependencies,
+  ServerlessPluginStartDependencies
+> {
   constructor() {}
 
   public setup(

@@ -150,8 +150,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         const link = (await testSubjects.exists(`visualizationListingListingTitleLink-${title}`))
           ? `visualizationListingListingTitleLink-${title}`
           : (await testSubjects.exists(`visListingTitleLink-${title}`))
-          ? `visListingTitleLink-${title}`
-          : `visualizationListingTitleLink-${title}`;
+            ? `visListingTitleLink-${title}`
+            : `visualizationListingTitleLink-${title}`;
         await testSubjects.click(link);
         await this.isLensPageOrFail();
       });
@@ -426,8 +426,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         metaKey === 'shift'
           ? browser.keys.SHIFT
           : metaKey === 'alt'
-          ? browser.keys.ALT
-          : browser.keys.COMMAND;
+            ? browser.keys.ALT
+            : browser.keys.COMMAND;
       log.debug(`Press ${metaKey} with keyboard`);
       await retry.try(async () => {
         await browser.pressKeys(browserKey);

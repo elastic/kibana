@@ -20,8 +20,10 @@ import { clearSearchTermRegExpCache } from './in_table_search_highlights_wrapper
 import { getHighlightColors } from './get_highlight_colors';
 import { getActiveMatchCss } from './get_active_match_css';
 
-export interface UseDataGridInTableSearchProps
-  extends Pick<InTableSearchControlProps, 'rows' | 'visibleColumns'> {
+export interface UseDataGridInTableSearchProps extends Pick<
+  InTableSearchControlProps,
+  'rows' | 'visibleColumns'
+> {
   enableInTableSearch?: boolean;
   dataGridWrapper: HTMLElement | null;
   dataGridRef: React.RefObject<EuiDataGridRefProps | null>;

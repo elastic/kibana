@@ -175,10 +175,10 @@ export const createSaveAutomationTool = ({
       // — `workflowId` on its own attaches an existing workflow and writes nothing.
       const targetWorkflowId =
         workflowAttachmentId || workflowYaml
-          ? workflowId ??
+          ? (workflowId ??
             (workflowAttachmentId
               ? tryResolveWorkflowOriginFromAttachments(attachments, workflowAttachmentId)
-              : undefined)
+              : undefined))
           : undefined;
 
       let draftName: string | undefined;
@@ -231,8 +231,8 @@ export const createSaveAutomationTool = ({
       const enabledAfterSave = workflowYaml
         ? parseWorkflowEnabledFromYaml(workflowYaml)
         : workflowAttachmentId
-        ? tryResolveWorkflowEnabledFromAttachments(attachments, workflowAttachmentId)
-        : attachTargetEnabled;
+          ? tryResolveWorkflowEnabledFromAttachments(attachments, workflowAttachmentId)
+          : attachTargetEnabled;
 
       // Enabling to run outlasts the run, including a run that fails, so it is a second change to
       // the workflow and not a detail of the first. This dialog is the only place it is visible.

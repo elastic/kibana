@@ -85,7 +85,7 @@ export const getAttachmentAuthorizationFilter = async (
     : undefined;
 
   const combinedFilter =
-    filter && unifiedFilter ? nodeBuilder.or([filter, unifiedFilter]) : filter ?? unifiedFilter;
+    filter && unifiedFilter ? nodeBuilder.or([filter, unifiedFilter]) : (filter ?? unifiedFilter);
 
   return {
     filter: combinedFilter,

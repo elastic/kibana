@@ -204,8 +204,8 @@ export async function generateCases(
     concurrencyOverride && concurrencyOverride > 0
       ? concurrencyOverride
       : totalAttachments > 0
-      ? 10
-      : 30;
+        ? 10
+        : 30;
   const createdCaseRefs: CreatedCaseRef[] = [];
 
   // Precompute per-case offsets so concurrent pMap tasks don't race on shared cursors.

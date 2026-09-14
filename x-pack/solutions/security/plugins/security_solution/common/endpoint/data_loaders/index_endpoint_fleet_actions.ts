@@ -112,8 +112,7 @@ interface BuildIEndpointAndFleetActionsBulkOperationsOptions {
   alertIds?: string[];
 }
 
-interface BuildIEndpointAndFleetActionsBulkOperationsResponse
-  extends IndexedEndpointAndFleetActionsForHostResponse {
+interface BuildIEndpointAndFleetActionsBulkOperationsResponse extends IndexedEndpointAndFleetActionsForHostResponse {
   operations: Required<BulkRequest>['operations'];
 }
 

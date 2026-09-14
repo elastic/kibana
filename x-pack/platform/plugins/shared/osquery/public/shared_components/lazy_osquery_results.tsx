@@ -18,9 +18,8 @@ const OsqueryResults = lazy(() => import('./osquery_results/osquery_results'));
 
 export const getLazyOsqueryResults =
   // eslint-disable-next-line react/display-name
-  (services: BigServices) => (props: OsqueryActionResultsProps) =>
-    (
-      <Suspense fallback={null}>
-        <OsqueryResults services={services} {...props} />
-      </Suspense>
-    );
+  (services: BigServices) => (props: OsqueryActionResultsProps) => (
+    <Suspense fallback={null}>
+      <OsqueryResults services={services} {...props} />
+    </Suspense>
+  );

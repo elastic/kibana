@@ -40,7 +40,7 @@ const buildConnectorType = (id: string): ConnectorType =>
     id,
     name: `Type ${id}`,
     supportedFeatureIds: ['contextEngine'],
-  } as unknown as ConnectorType);
+  }) as unknown as ConnectorType;
 
 describe('validateConnectorSources', () => {
   let actionsClient: ReturnType<typeof actionsClientMock.create>;

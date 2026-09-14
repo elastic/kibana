@@ -167,12 +167,12 @@ function getLensTopNavConfig(options: {
         defaultMessage: 'Save to library',
       })
     : actions.saveAndReturn.visible
-    ? i18n.translate('xpack.lens.app.saveAs', {
-        defaultMessage: 'Save as',
-      })
-    : i18n.translate('xpack.lens.app.save', {
-        defaultMessage: 'Save',
-      });
+      ? i18n.translate('xpack.lens.app.saveAs', {
+          defaultMessage: 'Save as',
+        })
+      : i18n.translate('xpack.lens.app.save', {
+          defaultMessage: 'Save',
+        });
 
   if (contextOriginatingApp && !actions.cancel.visible) {
     topNavMenu.push({
@@ -584,9 +584,9 @@ export const LensTopNavMenu = ({
   // Opened from a container view (e.g. Dashboard "Edit visualization in Lens"), not from a library listing page.
   const isComingFromDashboardView = Boolean(
     incomingState?.originatingApp &&
-      incomingState.originatingApp !== 'visualize' &&
-      incomingState?.originatingPath &&
-      !incomingState.originatingPath.includes('/list/')
+    incomingState.originatingApp !== 'visualize' &&
+    incomingState?.originatingPath &&
+    !incomingState.originatingPath.includes('/list/')
   );
 
   const topNavConfig = useMemo(() => {
@@ -1278,11 +1278,11 @@ export const LensTopNavMenu = ({
             isOnTextBasedMode ||
             Boolean(
               allLoaded &&
-                activeDatasourceId &&
-                datasourceMap[activeDatasourceId].isTimeBased(
-                  datasourceStates[activeDatasourceId].state,
-                  dataViews.indexPatterns
-                )
+              activeDatasourceId &&
+              datasourceMap[activeDatasourceId].isTimeBased(
+                datasourceStates[activeDatasourceId].state,
+                dataViews.indexPatterns
+              )
             )
           }
           showFilterBar={true}

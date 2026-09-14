@@ -356,18 +356,17 @@ describe('TraceWaterfallContextProvider - scroll strategy', () => {
 
   const createWrapper =
     (props: Partial<React.ComponentProps<typeof TraceWaterfallContextProvider>>) =>
-    ({ children }: { children: React.ReactNode }) =>
-      (
-        <TraceWaterfallContextProvider
-          traceItems={[mockTraceItem]}
-          showAccordion={false}
-          isEmbeddable={false}
-          showLegend={false}
-          {...props}
-        >
-          {children}
-        </TraceWaterfallContextProvider>
-      );
+    ({ children }: { children: React.ReactNode }) => (
+      <TraceWaterfallContextProvider
+        traceItems={[mockTraceItem]}
+        showAccordion={false}
+        isEmbeddable={false}
+        showLegend={false}
+        {...props}
+      >
+        {children}
+      </TraceWaterfallContextProvider>
+    );
 
   it('defaults scrollStrategy to "window" when not provided', () => {
     const { result } = renderHook(() => useTraceWaterfallContext(), {
@@ -419,18 +418,17 @@ describe('TraceWaterfallContextProvider - controlled/uncontrolled showCriticalPa
 
   const createWrapper =
     (props: Partial<React.ComponentProps<typeof TraceWaterfallContextProvider>>) =>
-    ({ children }: { children: React.ReactNode }) =>
-      (
-        <TraceWaterfallContextProvider
-          traceItems={[mockTraceItem]}
-          showAccordion={false}
-          isEmbeddable={false}
-          showLegend={false}
-          {...props}
-        >
-          {children}
-        </TraceWaterfallContextProvider>
-      );
+    ({ children }: { children: React.ReactNode }) => (
+      <TraceWaterfallContextProvider
+        traceItems={[mockTraceItem]}
+        showAccordion={false}
+        isEmbeddable={false}
+        showLegend={false}
+        {...props}
+      >
+        {children}
+      </TraceWaterfallContextProvider>
+    );
 
   describe('uncontrolled mode', () => {
     it('uses defaultShowCriticalPath as initial value when no controlled value is provided', () => {

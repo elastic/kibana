@@ -34,10 +34,10 @@ const createMockToolManager = (
 ): ToolManager =>
   ({
     getSummarizer: jest.fn((toolId: string) => summarizers.get(toolId)),
-  } as unknown as ToolManager);
+  }) as unknown as ToolManager;
 
 const createMockToolRegistry = (): ToolRegistry =>
-  ({ get: jest.fn(async () => undefined) } as unknown as ToolRegistry);
+  ({ get: jest.fn(async () => undefined) }) as unknown as ToolRegistry;
 
 const createMockRound = (toolResultValue: string): ProcessedConversationRound =>
   ({
@@ -57,7 +57,7 @@ const createMockRound = (toolResultValue: string): ProcessedConversationRound =>
       },
     ],
     response: { message: 'done' },
-  } as unknown as ProcessedConversationRound);
+  }) as unknown as ProcessedConversationRound;
 
 describe('estimateMessagesTokens', () => {
   it('counts message content (~4 chars per token)', () => {

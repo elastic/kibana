@@ -100,7 +100,7 @@ export const AlertEpisodeTrendChartSection = ({
   const effectiveSelected =
     selectedMetricLabel && metricGroups?.some((g) => g.metricLabel === selectedMetricLabel)
       ? selectedMetricLabel
-      : metricGroups?.[0]?.metricLabel ?? null;
+      : (metricGroups?.[0]?.metricLabel ?? null);
 
   const selectedGroup = metricGroups?.find((g) => g.metricLabel === effectiveSelected) ?? null;
 

@@ -150,7 +150,7 @@ describe('updatePackageHandler — ILM policy validation', () => {
     ({
       params: { pkgName: 'nginx' },
       body: { namespace_customization_settings: settings },
-    } as any);
+    }) as any;
 
   it('rejects the request when the caller lacks the manage_ilm privilege', async () => {
     hasPrivileges.mockResolvedValue({ has_all_requested: false });

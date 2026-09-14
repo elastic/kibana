@@ -247,7 +247,7 @@ class Package {
           `Detected unknown group: ${group}, this module's definition of KIBANA_SOLUTIONS is probably outdated.`
         );
       }
-      visibility = isSolution ? 'private' : this.manifest.visibility ?? 'shared';
+      visibility = isSolution ? 'private' : (this.manifest.visibility ?? 'shared');
     }
 
     return { group, visibility };

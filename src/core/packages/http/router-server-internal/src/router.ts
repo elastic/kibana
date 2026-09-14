@@ -47,7 +47,7 @@ export type ContextEnhancer<
   Q,
   B,
   Method extends RouteMethod,
-  Context extends RequestHandlerContextBase
+  Context extends RequestHandlerContextBase,
 > = (handler: RequestHandler<P, Q, B, Context, Method>) => RequestHandlerEnhanced<P, Q, B, Method>;
 
 /** @internal */
@@ -105,9 +105,9 @@ type RouterEvents =
 /**
  * @internal
  */
-export class Router<Context extends RequestHandlerContextBase = RequestHandlerContextBase>
-  implements IRouter<Context>
-{
+export class Router<
+  Context extends RequestHandlerContextBase = RequestHandlerContextBase,
+> implements IRouter<Context> {
   /**
    * Used for global request events at the router level, similar to what we get from Hapi's request lifecycle events.
    *

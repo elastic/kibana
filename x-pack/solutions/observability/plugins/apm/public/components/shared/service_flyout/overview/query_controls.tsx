@@ -159,7 +159,7 @@ export function ServiceFlyoutQueryControls() {
                         ]
                       : transactionTypeOptions
                   }
-                  value={isTransactionTypeDisabled ? '' : selectedTransactionType ?? ''}
+                  value={isTransactionTypeDisabled ? '' : (selectedTransactionType ?? '')}
                   onChange={(event) => setTransactionType?.(event.currentTarget.value)}
                 />
               </EuiFlexItem>

@@ -10,7 +10,10 @@
 export class WorkflowConflictError extends Error {
   public readonly statusCode = 409;
 
-  constructor(message: string, public readonly workflowId: string) {
+  constructor(
+    message: string,
+    public readonly workflowId: string
+  ) {
     super(message);
     this.name = 'WorkflowConflictError';
   }

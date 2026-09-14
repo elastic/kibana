@@ -156,10 +156,11 @@ export const ManageIntegrationActions: React.FC<{
         { defaultMessage: 'This integration has already been approved.' }
       )
     : !isPackageReady
-    ? i18n.translate('xpack.fleet.epmList.manageIntegrations.actions.reviewApproveDisabledHelp', {
-        defaultMessage: 'Review & Approve is available only when all data streams are successful.',
-      })
-    : undefined;
+      ? i18n.translate('xpack.fleet.epmList.manageIntegrations.actions.reviewApproveDisabledHelp', {
+          defaultMessage:
+            'Review & Approve is available only when all data streams are successful.',
+        })
+      : undefined;
 
   return (
     <>

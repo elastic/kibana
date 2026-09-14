@@ -60,7 +60,7 @@ export const initializeSingleMetricViewerDataFetcher = (
         bounds = timefilter.calculateBounds(
           fetchContext?.timeRange
             ? fetchContext?.timeRange
-            : api.timeRange$?.value ?? timefilter.getTime()
+            : (api.timeRange$?.value ?? timefilter.getTime())
         );
         lastRefresh = Date.now();
       }

@@ -110,10 +110,10 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
               criterion.aggType === 'count'
                 ? DOCUMENT_COUNT_I18N
                 : isCustom(criterion) && criterion.label
-                ? criterion.label
-                : criterion.aggType === 'custom'
-                ? CUSTOM_EQUATION_I18N
-                : criterion.metric,
+                  ? criterion.label
+                  : criterion.aggType === 'custom'
+                    ? CUSTOM_EQUATION_I18N
+                    : criterion.metric,
             currentValue: result.value,
             timestamp: moment(calculatedTimerange.end).toISOString(),
             shouldFire: result.trigger,

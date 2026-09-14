@@ -20,7 +20,7 @@ import { saveEvalExperimentTool } from './save_eval_experiment';
 import { runEvalExperimentTool } from './run_eval_experiment';
 
 const createContext = (spaceId = 'default'): ToolHandlerContext =>
-  ({ request: httpServerMock.createKibanaRequest(), spaceId } as unknown as ToolHandlerContext);
+  ({ request: httpServerMock.createKibanaRequest(), spaceId }) as unknown as ToolHandlerContext;
 
 const firstResult = (ret: unknown) =>
   (ret as { results: Array<{ type: string; data: any }> }).results[0];
@@ -78,7 +78,7 @@ const securityWith = (hasAllRequested: boolean) =>
         }),
       },
     },
-  } as unknown as Awaited<ReturnType<EvalExperimentsToolDeps['getStartDependencies']>>);
+  }) as unknown as Awaited<ReturnType<EvalExperimentsToolDeps['getStartDependencies']>>;
 
 const denyingDeps = () => ({
   getStartDependencies: jest

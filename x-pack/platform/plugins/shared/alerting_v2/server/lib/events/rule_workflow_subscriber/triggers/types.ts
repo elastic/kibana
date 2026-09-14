@@ -15,7 +15,7 @@ import type { RuleEvent } from '../../rule_event_publisher/events';
  */
 export interface RuleWorkflowTriggerBinding<
   TEvent extends RuleEvent = RuleEvent,
-  TSchema extends z.ZodType = z.ZodType
+  TSchema extends z.ZodType = z.ZodType,
 > {
   readonly eventType: TEvent['type'];
   readonly triggerId: string;

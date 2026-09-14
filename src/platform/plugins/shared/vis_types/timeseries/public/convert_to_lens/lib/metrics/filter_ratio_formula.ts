@@ -26,7 +26,7 @@ const constructFilterRationFormula = (
   return `${operation}${metric?.language === 'lucene' ? 'lucene' : 'kql'}='${
     metric?.query && typeof metric?.query === 'string'
       ? escapeQuotes(metric?.query)
-      : metric?.query ?? '*'
+      : (metric?.query ?? '*')
   }'${additionalArgs ? addAdditionalArgs(additionalArgs) : ''})`;
 };
 

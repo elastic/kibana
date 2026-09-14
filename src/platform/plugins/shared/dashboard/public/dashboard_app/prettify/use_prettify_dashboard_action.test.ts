@@ -22,7 +22,7 @@ const createDashboardApi = (): TestDashboardApi =>
   ({
     viewMode$: new BehaviorSubject('edit'),
     children$: new BehaviorSubject({}),
-  } as unknown as TestDashboardApi);
+  }) as unknown as TestDashboardApi;
 
 describe('usePrettifyDashboardAction', () => {
   const mockExecute = jest.fn();

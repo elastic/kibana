@@ -29,7 +29,7 @@ const buildAttachment = (origin?: string): ConnectorSetupAttachment =>
     version: 1,
     versionCount: 1,
     origin,
-  } as unknown as ConnectorSetupAttachment);
+  }) as unknown as ConnectorSetupAttachment;
 
 const setup = () => {
   let formProps: Record<string, any> | null = null;

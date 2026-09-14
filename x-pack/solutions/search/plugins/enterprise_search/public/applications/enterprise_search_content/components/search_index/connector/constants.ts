@@ -24,11 +24,11 @@ export const getConnectorTemplate = ({
   -
     connector_id: "${connectorData.id}"
     service_type: "${connectorData.service_type || 'changeme'}"${
-  apiKeyData?.encoded
-    ? `
+      apiKeyData?.encoded
+        ? `
     api_key: "${apiKeyData?.encoded}"`
-    : ''
-}
+        : ''
+    }
 
   elasticsearch:
     host: "${host || 'http://localhost:9200'}"

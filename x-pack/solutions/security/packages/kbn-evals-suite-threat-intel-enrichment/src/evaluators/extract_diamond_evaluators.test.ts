@@ -130,7 +130,7 @@ describe('withMajorityVote', () => {
 
   it('preserves getModel so the executor can attribute the score to the judge', () => {
     const getModel = () =>
-      ({ id: 'judge-model' } as ReturnType<NonNullable<Evaluator['getModel']>>);
+      ({ id: 'judge-model' }) as ReturnType<NonNullable<Evaluator['getModel']>>;
     const wrapped = withMajorityVote(baseFromRuns([{ score: 1 }], { getModel }), 3);
     expect(wrapped.getModel).toBe(getModel);
   });

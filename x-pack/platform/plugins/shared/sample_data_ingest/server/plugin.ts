@@ -18,9 +18,12 @@ import { SampleDataManager } from './services/sample_data_manager';
 import { registerRoutes } from './routes';
 import { registerTaskDefinitions } from './tasks';
 
-export class SampleDataIngestPlugin
-  implements Plugin<{}, {}, SampleDataSetupDependencies, SampleDataStartDependencies>
-{
+export class SampleDataIngestPlugin implements Plugin<
+  {},
+  {},
+  SampleDataSetupDependencies,
+  SampleDataStartDependencies
+> {
   private readonly logger: Logger;
   private internalServices?: InternalServices;
   private readonly isServerlessPlatform: boolean;

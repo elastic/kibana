@@ -15,7 +15,7 @@ import { useSignificantEventsAppParams } from '../../hooks/use_significant_event
 
 export function RedirectTo<
   TPath extends PathsOf<SignificantEventsAppRoutes>,
-  TParams extends TypeOf<SignificantEventsAppRoutes, TPath, false>
+  TParams extends TypeOf<SignificantEventsAppRoutes, TPath, false>,
 >({
   children,
   path,

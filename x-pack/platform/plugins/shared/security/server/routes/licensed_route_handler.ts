@@ -15,7 +15,7 @@ export const createLicensedRouteHandler = <
   B,
   Context extends SecurityRequestHandlerContext,
   M extends RouteMethod,
-  R extends KibanaResponseFactory
+  R extends KibanaResponseFactory,
 >(
   handler: RequestHandler<P, Q, B, Context, M, R>
 ) => {

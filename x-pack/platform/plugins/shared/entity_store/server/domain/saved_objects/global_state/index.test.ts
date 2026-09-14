@@ -50,7 +50,7 @@ describe('EntityStoreGlobalStateClient', () => {
     }));
     soClient.update.mockImplementation(
       async (type, id, attributes) =>
-        ({ id, type, attributes, references: [] } as SavedObjectsUpdateResponse<unknown>)
+        ({ id, type, attributes, references: [] }) as SavedObjectsUpdateResponse<unknown>
     );
   });
 

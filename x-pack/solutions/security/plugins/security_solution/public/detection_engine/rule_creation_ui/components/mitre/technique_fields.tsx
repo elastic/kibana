@@ -286,8 +286,8 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
         const techniqueErrorMessage = techniqueUnsupported
           ? i18n.UNSUPPORTED_MITRE_ID_ERROR(technique.id)
           : techniqueReassigned
-          ? i18n.TECHNIQUE_REASSIGNED_FROM_TACTIC_ERROR(technique.id)
-          : undefined;
+            ? i18n.TECHNIQUE_REASSIGNED_FROM_TACTIC_ERROR(technique.id)
+            : undefined;
         return (
           <div key={index}>
             <EuiSpacer size="s" />

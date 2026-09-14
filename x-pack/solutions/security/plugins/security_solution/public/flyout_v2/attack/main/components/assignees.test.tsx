@@ -89,7 +89,7 @@ const buildHit = (
       'kibana.alert.workflow_assignee_ids': ['uid-1'],
       ...overrides,
     },
-  } as unknown as DataTableRecord);
+  }) as unknown as DataTableRecord;
 
 const renderAssignees = (hit = buildHit(), onAttackUpdated = jest.fn()) =>
   render(

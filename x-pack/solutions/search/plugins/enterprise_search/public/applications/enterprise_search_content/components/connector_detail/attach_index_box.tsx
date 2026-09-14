@@ -134,12 +134,12 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
   // This takes care of the initial component state where all indices could be displayed briefly
   const options: Array<EuiComboBoxOptionOption<string>> = isLoading
     ? []
-    : data?.indexNames
+    : (data?.indexNames
         .filter((name) => !connector.is_native || name.startsWith(MANAGED_CONNECTOR_INDEX_PREFIX))
         .map((name) => ({
           label: name,
           value: removePrefixConnectorIndex(name),
-        })) ?? [];
+        })) ?? []);
 
   const hasMatchingOptions =
     data?.indexNames.some((name) =>

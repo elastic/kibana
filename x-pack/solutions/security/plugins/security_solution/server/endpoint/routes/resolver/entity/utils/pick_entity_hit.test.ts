@@ -13,7 +13,7 @@ const hit = (index: string, id: string): estypes.SearchHit<unknown> =>
     _index: index,
     _id: id,
     _source: { process: { entity_id: id } },
-  } as estypes.SearchHit<unknown>);
+  }) as estypes.SearchHit<unknown>;
 
 describe('pickEntityHit', () => {
   it('returns undefined when there are no hits', () => {

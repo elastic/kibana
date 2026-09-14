@@ -19,15 +19,12 @@ export interface GlobalSearchPluginStartDeps {
   licensing: LicensingPluginStart;
 }
 
-export class GlobalSearchPlugin
-  implements
-    Plugin<
-      GlobalSearchPluginSetup,
-      GlobalSearchPluginStart,
-      GlobalSearchPluginSetupDeps,
-      GlobalSearchPluginStartDeps
-    >
-{
+export class GlobalSearchPlugin implements Plugin<
+  GlobalSearchPluginSetup,
+  GlobalSearchPluginStart,
+  GlobalSearchPluginSetupDeps,
+  GlobalSearchPluginStartDeps
+> {
   private readonly config: GlobalSearchClientConfigType;
   private licenseChecker?: ILicenseChecker;
   private readonly searchService = new SearchService();

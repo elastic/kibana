@@ -19,7 +19,7 @@ const services = {
         ({
           convertToText: (value: unknown) => value,
           convertToReact: (value: unknown) => value,
-        } as unknown as FieldFormat)
+        }) as unknown as FieldFormat
     ),
   } as unknown as FieldFormatsStart,
 };

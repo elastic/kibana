@@ -41,9 +41,7 @@ export interface SignificantEventsAppLocatorParams extends SerializableRecord {
 
 export type SignificantEventsAppLocator = LocatorPublic<SignificantEventsAppLocatorParams>;
 
-export class SignificantEventsAppLocatorDefinition
-  implements LocatorDefinition<SignificantEventsAppLocatorParams>
-{
+export class SignificantEventsAppLocatorDefinition implements LocatorDefinition<SignificantEventsAppLocatorParams> {
   public readonly id = SIGNIFICANT_EVENTS_APP_LOCATOR_ID;
 
   public readonly getLocation = async ({

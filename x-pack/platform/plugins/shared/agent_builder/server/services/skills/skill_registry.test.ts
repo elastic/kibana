@@ -93,7 +93,7 @@ const createMockPersistedProvider = (
 const createMockToolRegistry = (toolIds: string[] = []): ToolRegistry =>
   ({
     has: jest.fn(async (id: string) => toolIds.includes(id)),
-  } as unknown as ToolRegistry);
+  }) as unknown as ToolRegistry;
 
 describe('createSkillRegistry', () => {
   const builtinSkill1 = createMockInternalSkillDefinition({

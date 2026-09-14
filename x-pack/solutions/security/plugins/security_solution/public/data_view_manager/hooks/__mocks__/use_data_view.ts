@@ -15,7 +15,7 @@ export const defaultImplementation = () =>
   ({
     dataView: dataViewWithoutMatchedIndices,
     status: 'ready',
-  } as UseDataViewReturnValue);
+  }) as UseDataViewReturnValue;
 
 const dataViewWithMatchedIndices = getMockDataViewWithMatchedIndices();
 
@@ -23,7 +23,7 @@ export const withMatchedIndices = () =>
   ({
     dataView: dataViewWithMatchedIndices,
     status: 'ready',
-  } as UseDataViewReturnValue);
+  }) as UseDataViewReturnValue;
 
 export const withIndices = (
   indices: string[],

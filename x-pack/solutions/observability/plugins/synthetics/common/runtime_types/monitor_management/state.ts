@@ -13,7 +13,7 @@ import { MONITOR_STATUS_ENUM } from '../../constants/monitor_management';
 const useLogicalAndFileLiteral = useLogicalAndFields.map((f) => t.literal(f)) as unknown as [
   Mixed,
   Mixed,
-  ...Mixed[]
+  ...Mixed[],
 ];
 
 const FetchMonitorQueryArgsCommon = {

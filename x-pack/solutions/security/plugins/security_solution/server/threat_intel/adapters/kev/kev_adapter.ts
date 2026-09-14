@@ -26,13 +26,13 @@ import type { FetchAdapter, NormalizedReport, SourceHit, AdapterRunContext } fro
 const isCompleteKevEntry = (vuln: KevVulnerability): boolean =>
   Boolean(
     vuln.cveID &&
-      vuln.vendorProject &&
-      vuln.product &&
-      vuln.vulnerabilityName &&
-      vuln.shortDescription &&
-      vuln.requiredAction &&
-      vuln.dateAdded &&
-      vuln.dueDate
+    vuln.vendorProject &&
+    vuln.product &&
+    vuln.vulnerabilityName &&
+    vuln.shortDescription &&
+    vuln.requiredAction &&
+    vuln.dateAdded &&
+    vuln.dueDate
   );
 
 const KEV_FEED_URL =

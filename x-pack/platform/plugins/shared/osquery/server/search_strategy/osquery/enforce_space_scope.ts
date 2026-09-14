@@ -39,8 +39,8 @@ export const enforceSpaceScope = (
   const existingFilter = Array.isArray(bool.filter)
     ? bool.filter
     : bool.filter != null
-    ? [bool.filter]
-    : [];
+      ? [bool.filter]
+      : [];
 
   return {
     ...dsl,

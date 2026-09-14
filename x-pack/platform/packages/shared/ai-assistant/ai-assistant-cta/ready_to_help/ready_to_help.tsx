@@ -13,8 +13,10 @@ import { translations } from './ready_to_help.translations';
 /**
  * Props for the `ReadyToHelp`.
  */
-export interface ReadyToHelpProps
-  extends Pick<AssistantCallToActionProps, 'data-test-subj' | 'centered'> {
+export interface ReadyToHelpProps extends Pick<
+  AssistantCallToActionProps,
+  'data-test-subj' | 'centered'
+> {
   /** The type of serverless project or project focus for the deployment. */
   type?: 'stack' | 'security' | 'oblt' | 'search';
 }

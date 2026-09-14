@@ -27,7 +27,7 @@ import type { KnownTypeToValue, SettingType } from './setting_type';
  */
 export interface FieldDefinition<
   T extends SettingType = SettingType,
-  V = KnownTypeToValue<T> | null
+  V = KnownTypeToValue<T> | null,
 > {
   /** UX ARIA attributes derived from the setting. */
   ariaAttributes: {

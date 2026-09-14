@@ -60,7 +60,9 @@ export function getCriticalPath<T extends CriticalPathBase>(
           // - The span/tx ends before the start of the initial scan period.
           // - The span ends _after_ the current scan time.
 
-          (normalizedChildStart >= scanTime || normalizedChildEnd < start || childEnd > scanTime)
+          normalizedChildStart >= scanTime ||
+          normalizedChildEnd < start ||
+          childEnd > scanTime
         );
 
         if (!isOnCriticalPath) {

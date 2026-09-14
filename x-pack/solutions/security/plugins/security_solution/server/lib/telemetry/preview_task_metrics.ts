@@ -24,7 +24,10 @@ export class PreviewTaskMetricsService implements ITaskMetricsService {
 
   private readonly composite: TaskMetricsService;
 
-  constructor(logger: Logger, private readonly sender: ITelemetryEventsSender) {
+  constructor(
+    logger: Logger,
+    private readonly sender: ITelemetryEventsSender
+  ) {
     this.logger = logger;
     this.composite = new TaskMetricsService(logger, sender);
   }

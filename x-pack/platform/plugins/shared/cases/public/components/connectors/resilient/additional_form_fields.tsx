@@ -89,19 +89,22 @@ export const AdditionalFormFields = React.memo<{
 
   useEffect(() => {
     const fieldsMetadataRecord = fieldsData?.data?.fieldsObj || {};
-    const transformedFields = additionalFields.reduce((acc, field) => {
-      const key = field.value;
-      const value = fields[key || ''];
-      if (key === undefined) {
+    const transformedFields = additionalFields.reduce(
+      (acc, field) => {
+        const key = field.value;
+        const value = fields[key || ''];
+        if (key === undefined) {
+          return acc;
+        }
+        const fieldMetaData = fieldsMetadataRecord[key];
+        if (!fieldMetaData) {
+          return acc;
+        }
+        acc[key] = formFieldToResilientFieldValue(value, fieldMetaData);
         return acc;
-      }
-      const fieldMetaData = fieldsMetadataRecord[key];
-      if (!fieldMetaData) {
-        return acc;
-      }
-      acc[key] = formFieldToResilientFieldValue(value, fieldMetaData);
-      return acc;
-    }, {} as Record<string, unknown>);
+      },
+      {} as Record<string, unknown>
+    );
     const newValue = JSON.stringify(transformedFields);
     if (newValue !== additionalFieldsFormField.value) {
       if (newValue === '{}') {

@@ -7,8 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import execa from 'execa';
+import { relative } from 'path';
+import { runOxfmt } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
+/**
+ * Formats the given file or glob in place. oxfmt only expands globs relative to its cwd, so the
+ * path is made relative to the repo root first.
+ */
 export async function formatOutput(path: string) {
-  await execa('npx', ['prettier', '--write', path]);
+  await runOxfmt([relative(REPO_ROOT, path)]);
 }

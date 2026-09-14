@@ -50,9 +50,10 @@ export interface InternalRateLimiterSetup {
 export type InternalRateLimiterStart = void;
 
 /** @internal */
-export class HttpRateLimiterService
-  implements CoreService<InternalRateLimiterSetup, InternalRateLimiterStart>
-{
+export class HttpRateLimiterService implements CoreService<
+  InternalRateLimiterSetup,
+  InternalRateLimiterStart
+> {
   private status$ = new BehaviorSubject<ServiceStatus | undefined>(undefined);
   private state$ = new BehaviorSubject<State | undefined>(undefined);
   private ready$ = new Subject<boolean>();

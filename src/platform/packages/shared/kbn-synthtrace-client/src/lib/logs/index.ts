@@ -150,7 +150,10 @@ export type LogDocument = Fields &
   }>;
 
 class Log extends Serializable<LogDocument> {
-  constructor(fields: LogDocument, private logsOptions: LogsOptions) {
+  constructor(
+    fields: LogDocument,
+    private logsOptions: LogsOptions
+  ) {
     super({
       ...fields,
     });

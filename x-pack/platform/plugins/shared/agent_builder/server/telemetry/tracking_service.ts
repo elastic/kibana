@@ -46,7 +46,10 @@ export class TrackingService {
   private queryStartTimes = new Map<string, number>();
   private conversationsWithErrors = new Set<string>();
 
-  constructor(private readonly usageCounter: UsageCounter, private readonly logger: Logger) {}
+  constructor(
+    private readonly usageCounter: UsageCounter,
+    private readonly logger: Logger
+  ) {}
 
   /**
    * Track a tool call

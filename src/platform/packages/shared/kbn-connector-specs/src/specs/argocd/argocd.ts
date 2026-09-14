@@ -270,15 +270,15 @@ const normalizeArgoError = (error: unknown): Error => {
       typeof body.message === 'string'
         ? body.message
         : typeof body.error === 'string'
-        ? body.error
-        : undefined;
+          ? body.error
+          : undefined;
     if (message) {
       const code =
         typeof body.code === 'number'
           ? ` (${body.code})`
           : typeof status === 'number'
-          ? ` (${status})`
-          : '';
+            ? ` (${status})`
+            : '';
       return new Error(`Argo CD API error${code}: ${message}`);
     }
   }
@@ -326,8 +326,8 @@ const slimApplication = (app: ArgoApplication) => {
   const sources = app.spec?.sources?.length
     ? app.spec.sources.map(summarizeSource)
     : summarizeSource(app.spec?.source)
-    ? [summarizeSource(app.spec?.source)]
-    : undefined;
+      ? [summarizeSource(app.spec?.source)]
+      : undefined;
 
   return {
     metadata: {

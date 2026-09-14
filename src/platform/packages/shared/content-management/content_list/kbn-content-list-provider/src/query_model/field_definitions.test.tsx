@@ -21,9 +21,10 @@ import { useFieldDefinitions } from './field_definitions';
 // Shared mocks
 // ---------------------------------------------------------------------------
 
-const mockFindItems = jest.fn(
-  async (_params: FindItemsParams): Promise<FindItemsResult> => ({ items: [], total: 0 })
-);
+const mockFindItems = jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+  items: [],
+  total: 0,
+}));
 
 const mockTags = [
   { id: 'tag-1', name: 'Production', description: '', color: '#FF0000', managed: false },

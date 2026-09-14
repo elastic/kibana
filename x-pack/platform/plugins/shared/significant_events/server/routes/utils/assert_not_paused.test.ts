@@ -21,7 +21,7 @@ const makeService = (
     getStatus: jest.fn(async () => ({ state })),
     pause: jest.fn(),
     resume: jest.fn(),
-  } as unknown as SignificantEventsMaintenanceService);
+  }) as unknown as SignificantEventsMaintenanceService;
 
 describe('assertNotPaused', () => {
   it('throws a 409 SignificantEventsPausedError in a state that blocks activity', async () => {

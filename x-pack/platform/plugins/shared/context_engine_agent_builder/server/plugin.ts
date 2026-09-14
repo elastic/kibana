@@ -14,15 +14,12 @@ import type {
 } from './types';
 import { registerContextEngineAgentBuilderIntegration } from './register_agent_builder_integration';
 
-export class ContextEngineAgentBuilderPlugin
-  implements
-    Plugin<
-      ContextEngineAgentBuilderPluginSetup,
-      ContextEngineAgentBuilderPluginStart,
-      ContextEngineAgentBuilderSetupDependencies,
-      ContextEngineAgentBuilderStartDependencies
-    >
-{
+export class ContextEngineAgentBuilderPlugin implements Plugin<
+  ContextEngineAgentBuilderPluginSetup,
+  ContextEngineAgentBuilderPluginStart,
+  ContextEngineAgentBuilderSetupDependencies,
+  ContextEngineAgentBuilderStartDependencies
+> {
   constructor(_initializerContext: PluginInitializerContext) {}
 
   setup(

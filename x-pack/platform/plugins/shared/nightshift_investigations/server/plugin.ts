@@ -56,15 +56,12 @@ import type {
   NightshiftInvestigationsStartDeps,
 } from './types';
 
-export class NightshiftInvestigationsPlugin
-  implements
-    Plugin<
-      NightshiftInvestigationsServerSetup,
-      NightshiftInvestigationsServerStart,
-      NightshiftInvestigationsSetupDeps,
-      NightshiftInvestigationsStartDeps
-    >
-{
+export class NightshiftInvestigationsPlugin implements Plugin<
+  NightshiftInvestigationsServerSetup,
+  NightshiftInvestigationsServerStart,
+  NightshiftInvestigationsSetupDeps,
+  NightshiftInvestigationsStartDeps
+> {
   private readonly logger: Logger;
   private workflowsManagement?: NightshiftInvestigationsSetupDeps['workflowsManagement'];
   private workflowsExtensionsStart?: NightshiftInvestigationsStartDeps['workflowsExtensions'];

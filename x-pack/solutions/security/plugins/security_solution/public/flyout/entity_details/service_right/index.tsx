@@ -234,7 +234,7 @@ export const ServicePanel = memo(function ServicePanel({
           serviceName={serviceName}
           identityFields={documentEntityIdentifiers}
           entity={
-            entityStoreV2Enabled ? entityFromStoreResult.entityRecord ?? undefined : undefined
+            entityStoreV2Enabled ? (entityFromStoreResult.entityRecord ?? undefined) : undefined
           }
         />
       )}

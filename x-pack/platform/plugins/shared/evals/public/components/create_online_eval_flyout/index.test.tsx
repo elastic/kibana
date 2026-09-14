@@ -46,8 +46,8 @@ jest.mock('@elastic/eui', () => {
             selectedValuesFromDom.length > 0
               ? selectedValuesFromDom
               : event.currentTarget.value
-              ? [event.currentTarget.value]
-              : [];
+                ? [event.currentTarget.value]
+                : [];
           const selected = selectedValuesFallback.map((selectedValue) => {
             const match = options.find(
               (option) => (option.value ?? option.label) === selectedValue

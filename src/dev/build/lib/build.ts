@@ -18,7 +18,10 @@ export class Build {
   private name = 'kibana';
   private logTag = chalk`{cyan [  kibana  ]}`;
 
-  constructor(private config: Config, private bufferLogs = false) {}
+  constructor(
+    private config: Config,
+    private bufferLogs = false
+  ) {}
 
   resolvePath(...args: string[]) {
     return this.config.resolveFromRepo('build', this.name, ...args);

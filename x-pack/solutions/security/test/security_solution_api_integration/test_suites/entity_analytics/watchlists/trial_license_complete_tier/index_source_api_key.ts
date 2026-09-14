@@ -63,8 +63,8 @@ export default ({ getService }: FtrProviderContext) => {
       method === 'put'
         ? supertestWithoutAuth.put(path)
         : method === 'delete'
-        ? supertestWithoutAuth.delete(path)
-        : supertestWithoutAuth.post(path);
+          ? supertestWithoutAuth.delete(path)
+          : supertestWithoutAuth.post(path);
 
     const authedReq = isServerless
       ? req.set(restrictedUserApiKeyHeader)

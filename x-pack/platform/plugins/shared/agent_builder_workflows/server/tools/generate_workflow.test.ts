@@ -70,7 +70,7 @@ describe('generateWorkflowTool', () => {
       runContext: {
         stack: overrides.stack ?? [],
       },
-    } as any);
+    }) as any;
 
   beforeEach(() => {
     generateWorkflowMock.mockReset();

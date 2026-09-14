@@ -118,8 +118,8 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
           round.trace_id == null
             ? null
             : Array.isArray(round.trace_id)
-            ? round.trace_id[0] ?? null
-            : round.trace_id;
+              ? (round.trace_id[0] ?? null)
+              : round.trace_id;
 
         return {
           label: i18n.translate('xpack.agentBuilder.conversationActions.turnLabel', {

@@ -291,16 +291,16 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   // not the regular ES input. Use the default output hosts instead.
   // For an existing ES output (incl. the PrivateLink output) always show that output's own
   // hosts; only fall back to the default when creating a new output in serverless.
-  const outputHosts = output && isBeatsOutput(output) ? output.hosts ?? [] : [];
+  const outputHosts = output && isBeatsOutput(output) ? (output.hosts ?? []) : [];
   const defaultHosts =
-    defaultOutput && isBeatsOutput(defaultOutput) ? defaultOutput.hosts ?? [] : [];
+    defaultOutput && isBeatsOutput(defaultOutput) ? (defaultOutput.hosts ?? []) : [];
   const elasticsearchUrlDefaultValue = isEditingRemoteEsOutput
     ? defaultHosts
     : outputHosts.length
-    ? outputHosts
-    : isServerless
-    ? defaultHosts
-    : [];
+      ? outputHosts
+      : isServerless
+        ? defaultHosts
+        : [];
   const elasticsearchUrlDisabled = isServerless || isDisabled('hosts');
   const elasticsearchUrlInput = useComboInput(
     'esHostsComboxBox',
@@ -321,8 +321,8 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
 
   const presetInput = useInput(
     output && isBeatsOutput(output)
-      ? output.preset ??
-          getDefaultPresetForEsOutput(output.config_yaml ?? '', yaml?.parse ?? (() => ({})))
+      ? (output.preset ??
+          getDefaultPresetForEsOutput(output.config_yaml ?? '', yaml?.parse ?? (() => ({}))))
       : getDefaultPresetForEsOutput('', yaml?.parse ?? (() => ({}))),
     () => undefined,
     isDisabled('preset')
@@ -1062,10 +1062,10 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
                     topic: kafkaStaticTopicInput.value,
                   }
                 : kafkaTopicsInput.value === kafkaTopicsType.Dynamic && kafkaDynamicTopicInput.value
-                ? {
-                    topic: kafkaDynamicTopicInput.value,
-                  }
-                : {}),
+                  ? {
+                      topic: kafkaDynamicTopicInput.value,
+                    }
+                  : {}),
               headers: kafkaHeadersInput.value,
               timeout: parseIntegerIfStringDefined(kafkaBrokerTimeoutInput.value),
               broker_timeout: parseIntegerIfStringDefined(
@@ -1286,10 +1286,10 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   const isHostsMissing = isKafka
     ? !kafkaHostsInput.value.some((v) => v.trim())
     : isLogstash
-    ? !logstashHostsInput.value.some((v) => v.trim())
-    : isRemoteElasticsearch
-    ? !remoteElasticsearchUrlInput.value.some((v) => v.trim())
-    : !elasticsearchUrlInput.value.some((v) => v.trim());
+      ? !logstashHostsInput.value.some((v) => v.trim())
+      : isRemoteElasticsearch
+        ? !remoteElasticsearchUrlInput.value.some((v) => v.trim())
+        : !elasticsearchUrlInput.value.some((v) => v.trim());
 
   return {
     inputs,

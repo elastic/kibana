@@ -415,8 +415,8 @@ export const validateFile = async ({
         ? 'template'
         : 'strict'
       : variantMode === 'managed'
-      ? 'strict'
-      : variantMode;
+        ? 'strict'
+        : variantMode;
 
   const issues: ValidationIssue[] = [];
   let body: Record<string, unknown> | null = isRecord(json) ? json : null;

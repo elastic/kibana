@@ -38,15 +38,12 @@ import { ConversationProposalsService } from './services/conversation_proposals/
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
 
-export class AlertZeroPlugin
-  implements
-    Plugin<
-      AlertZeroPluginSetup,
-      AlertZeroPluginStart,
-      AlertZeroSetupDependencies,
-      AlertZeroStartDependencies
-    >
-{
+export class AlertZeroPlugin implements Plugin<
+  AlertZeroPluginSetup,
+  AlertZeroPluginStart,
+  AlertZeroSetupDependencies,
+  AlertZeroStartDependencies
+> {
   private readonly logger: Logger;
   private readonly config: AlertZeroConfig;
   private spaces?: AlertZeroStartDependencies['spaces'];

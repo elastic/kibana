@@ -32,8 +32,10 @@ export interface DuplicateExceptionListProps extends BaseParams {
   includeExpiredExceptions: boolean;
 }
 
-export interface ApiListDuplicateProps
-  extends Omit<DuplicateExceptionListProps, 'http' | 'signal'> {
+export interface ApiListDuplicateProps extends Omit<
+  DuplicateExceptionListProps,
+  'http' | 'signal'
+> {
   onError: (err: Error) => void;
   onSuccess: (newList: ExceptionListSchema) => void;
 }
@@ -132,8 +134,7 @@ export interface ApiCallGetExceptionFilterFromIdsMemoProps extends GetExceptionF
   onSuccess: (arg: Filter) => void;
 }
 
-export interface ApiCallGetExceptionFilterFromExceptionsMemoProps
-  extends GetExceptionFilterOptionalProps {
+export interface ApiCallGetExceptionFilterFromExceptionsMemoProps extends GetExceptionFilterOptionalProps {
   exceptions: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
   onError: (arg: string[]) => void;
   onSuccess: (arg: Filter) => void;
@@ -226,8 +227,7 @@ export interface GetExceptionFilterOptionalProps {
   excludeExceptions?: boolean;
 }
 
-export interface GetExceptionFilterFromExceptionListIdsProps
-  extends GetExceptionFilterOptionalProps {
+export interface GetExceptionFilterFromExceptionListIdsProps extends GetExceptionFilterOptionalProps {
   http: HttpStart;
   exceptionListIds: ExceptionListId[];
 }

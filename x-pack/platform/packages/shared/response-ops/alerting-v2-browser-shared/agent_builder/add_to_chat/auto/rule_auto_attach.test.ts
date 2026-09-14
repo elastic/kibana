@@ -29,7 +29,7 @@ const createRule = (overrides?: Partial<RuleResponse>): RuleResponse =>
     updated_by: 'alice',
     updated_at: '2026-01-01T00:00:00.000Z',
     ...overrides,
-  } as RuleResponse);
+  }) as RuleResponse;
 
 describe('registerRuleAutoAttach', () => {
   let currentAppId$: BehaviorSubject<string | null>;

@@ -40,10 +40,10 @@ export const actionResults: EndpointFactory<ResponseActionsQueries.results> = {
     const status = isExpired
       ? 'failed'
       : isCompleted
-      ? wasSuccessful
-        ? 'successful'
-        : 'failed'
-      : 'pending';
+        ? wasSuccessful
+          ? 'successful'
+          : 'failed'
+        : 'pending';
 
     return {
       ...response,

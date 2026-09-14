@@ -22,7 +22,7 @@ const makePackSO = (
   ({
     id,
     attributes: { name, queries } as unknown as PackSavedObject,
-  } as { id: string; attributes: PackSavedObject });
+  }) as { id: string; attributes: PackSavedObject };
 
 describe('buildPackLookup', () => {
   test('maps by UUID schedule_id when present', () => {

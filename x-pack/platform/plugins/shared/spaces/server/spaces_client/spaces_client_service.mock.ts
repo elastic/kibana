@@ -12,12 +12,12 @@ const createSpacesClientServiceSetupMock = () =>
   ({
     registerClientWrapper: jest.fn(),
     setClientRepositoryFactory: jest.fn(),
-  } as jest.Mocked<SpacesClientServiceSetup>);
+  }) as jest.Mocked<SpacesClientServiceSetup>;
 
 const createSpacesClientServiceStartMock = () =>
   ({
     createSpacesClient: jest.fn().mockReturnValue(spacesClientMock.create()),
-  } as jest.Mocked<SpacesClientServiceStart>);
+  }) as jest.Mocked<SpacesClientServiceStart>;
 
 export const spacesClientServiceMock = {
   createSetup: createSpacesClientServiceSetupMock,

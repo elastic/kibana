@@ -25,7 +25,7 @@ const createEsClient = (getTransform: jest.Mock, deleteTransform: jest.Mock) => 
 });
 
 const createCtx = (esClient: unknown) =>
-  ({ core: { elasticsearch: { client: { asCurrentUser: esClient } } } } as any);
+  ({ core: { elasticsearch: { client: { asCurrentUser: esClient } } } }) as any;
 
 const createRequest = (
   transformsInfo = [{ id: 'transform-1', state: TRANSFORM_STATE.STOPPED }]

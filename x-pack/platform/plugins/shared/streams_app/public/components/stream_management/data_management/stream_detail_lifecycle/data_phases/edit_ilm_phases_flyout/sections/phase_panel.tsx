@@ -76,10 +76,10 @@ export const PhasePanel = ({
     phase === 'hot'
       ? Boolean(hotDownsampleEnabled)
       : phase === 'warm'
-      ? Boolean(warmDownsampleEnabled)
-      : phase === 'cold'
-      ? Boolean(coldDownsampleEnabled)
-      : false;
+        ? Boolean(warmDownsampleEnabled)
+        : phase === 'cold'
+          ? Boolean(coldDownsampleEnabled)
+          : false;
 
   return (
     <div hidden={isHidden} data-test-subj={`${dataTestSubj}Panel-${phase}`}>

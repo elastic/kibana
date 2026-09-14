@@ -29,7 +29,7 @@ export interface OpenDataControlEditorParams<State extends DataControlState = Da
 }
 
 export interface ReopenDataControlEditorOverrides<
-  State extends DataControlState = DataControlState
+  State extends DataControlState = DataControlState,
 > {
   initialState?: Partial<State>;
   controlType?: string;

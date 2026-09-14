@@ -254,8 +254,8 @@ export function DateRangePickerProvider({
       showTimeWindowButtons === false
         ? false
         : showTimeWindowButtons === true
-        ? {}
-        : showTimeWindowButtons,
+          ? {}
+          : showTimeWindowButtons,
     [showTimeWindowButtons]
   );
 

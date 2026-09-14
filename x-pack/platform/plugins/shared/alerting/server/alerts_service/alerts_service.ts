@@ -159,7 +159,7 @@ interface IAlertsService {
     LegacyState extends AlertInstanceState,
     LegacyContext extends AlertInstanceContext,
     ActionGroupIds extends string,
-    RecoveryActionGroupId extends string
+    RecoveryActionGroupId extends string,
   >(
     opts: CreateAlertsClientParams
   ): Promise<IAlertsClient<
@@ -224,7 +224,7 @@ export class AlertsService implements IAlertsService {
     LegacyState extends AlertInstanceState,
     LegacyContext extends AlertInstanceContext,
     ActionGroupIds extends string,
-    RecoveryActionGroupId extends string
+    RecoveryActionGroupId extends string,
   >(
     opts: CreateAlertsClientParams
   ): Promise<IAlertsClient<

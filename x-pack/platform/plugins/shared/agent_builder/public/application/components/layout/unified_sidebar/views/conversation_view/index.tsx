@@ -150,8 +150,8 @@ export const ConversationSidebarView: React.FC = () => {
       hoveredDroppableId === id
         ? euiTheme.colors.backgroundLightPrimary
         : draggingFromId !== null
-        ? euiTheme.colors.backgroundBasePrimary
-        : 'transparent';
+          ? euiTheme.colors.backgroundBasePrimary
+          : 'transparent';
     return {
       [DROPPABLE_IDS.PINNED]: bg(DROPPABLE_IDS.PINNED),
       [DROPPABLE_IDS.CHATS]: bg(DROPPABLE_IDS.CHATS),

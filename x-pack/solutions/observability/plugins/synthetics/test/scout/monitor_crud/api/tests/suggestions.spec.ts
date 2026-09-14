@@ -108,9 +108,8 @@ apiTest.describe(
 
       spaceId = `test-space-${uuidv4()}`;
       await kbnClient.spaces.create({ id: spaceId, name: `test-space-name ${uuidv4()}` });
-      privateLocation = await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(
-        spaceId
-      );
+      privateLocation =
+        await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(spaceId);
     });
 
     apiTest.beforeEach(async ({ kbnClient }) => {

@@ -47,7 +47,7 @@ interface UnparsedEsqlResponseOf<TOutput extends EsqlOutput> {
 
 interface ParsedEsqlResponseOf<
   TOutput extends EsqlOutput,
-  TOptions extends EsqlOptions | undefined = { transform: 'none' }
+  TOptions extends EsqlOptions | undefined = { transform: 'none' },
 > {
   hits: Array<
     MaybeUnflatten<
@@ -61,7 +61,7 @@ interface ParsedEsqlResponseOf<
 
 export type InferEsqlResponseOf<
   TOutput extends EsqlOutput,
-  TOptions extends EsqlOptions | undefined = { transform: 'none' }
+  TOptions extends EsqlOptions | undefined = { transform: 'none' },
 > = TOptions extends { transform: 'plain' | 'unflatten' }
   ? ParsedEsqlResponseOf<TOutput, TOptions>
   : UnparsedEsqlResponseOf<TOutput>;
@@ -102,7 +102,7 @@ export interface TracedElasticsearchClient {
   ): Promise<InferEsqlResponseOf<TOutput, { transform: 'none' }>>;
   esql<
     TOutput extends EsqlOutput = EsqlOutput,
-    TEsqlOptions extends EsqlOptions = { transform: 'none' }
+    TEsqlOptions extends EsqlOptions = { transform: 'none' },
   >(
     operationName: string,
     parameters: ObservabilityEsQueryRequest,

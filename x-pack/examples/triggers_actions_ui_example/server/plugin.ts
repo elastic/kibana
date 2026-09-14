@@ -30,9 +30,12 @@ export interface TriggersActionsUiStartDeps {
   taskManager: TaskManagerStartContract;
 }
 
-export class TriggersActionsUiExamplePlugin
-  implements Plugin<void, void, TriggersActionsUiExampleSetupDeps, TriggersActionsUiStartDeps>
-{
+export class TriggersActionsUiExamplePlugin implements Plugin<
+  void,
+  void,
+  TriggersActionsUiExampleSetupDeps,
+  TriggersActionsUiStartDeps
+> {
   public setup(
     core: CoreSetup<TriggersActionsUiStartDeps>,
     { actions, alerting, taskManager }: TriggersActionsUiExampleSetupDeps

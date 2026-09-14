@@ -26,7 +26,7 @@ const createMockEntity = (entityId: string, resolvedTo?: string): Entity =>
       id: entityId,
       ...(resolvedTo ? { relationships: { resolution: { resolved_to: resolvedTo } } } : {}),
     },
-  } as unknown as Entity);
+  }) as unknown as Entity;
 
 describe('processResolutionCsvUpload', () => {
   let mockCrudClient: jest.Mocked<EntityStoreCRUDClient>;

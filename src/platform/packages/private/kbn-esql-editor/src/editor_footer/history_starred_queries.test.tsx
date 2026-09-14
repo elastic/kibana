@@ -64,7 +64,7 @@ const createMockStarredQueriesService = (items: StarredQueryItem[] = []) =>
     renderStarredButton: jest.fn(() => null),
     checkIfQueryIsStarred: jest.fn(() => false),
     onDiscardModalClose: jest.fn(async () => {}),
-  } as unknown as EsqlStarredQueriesService);
+  }) as unknown as EsqlStarredQueriesService;
 
 describe('Starred and History queries components', () => {
   const services = {

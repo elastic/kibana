@@ -266,16 +266,16 @@ export const IndexViewLogic = kea<
       () => [selectors.connector],
       (connector?: Connector) =>
         connector?.features
-          ? connector.features[FeatureName.SYNC_RULES]?.advanced?.enabled ??
-            connector.features[FeatureName.FILTERING_ADVANCED_CONFIG]
+          ? (connector.features[FeatureName.SYNC_RULES]?.advanced?.enabled ??
+            connector.features[FeatureName.FILTERING_ADVANCED_CONFIG])
           : false,
     ],
     hasBasicFilteringFeature: [
       () => [selectors.connector],
       (connector?: Connector) =>
         connector?.features
-          ? connector.features[FeatureName.SYNC_RULES]?.basic?.enabled ??
-            connector.features[FeatureName.FILTERING_RULES]
+          ? (connector.features[FeatureName.SYNC_RULES]?.basic?.enabled ??
+            connector.features[FeatureName.FILTERING_RULES])
           : false,
     ],
     hasDocumentLevelSecurityFeature: [

@@ -147,7 +147,7 @@ describe.skip('ConversationClient', () => {
           entries,
         },
       },
-    } as Document);
+    }) as Document;
 
   const mockGetDocumentResponse = (doc: Document) => {
     mockRawEsClient.get.mockResolvedValue({
@@ -1591,7 +1591,7 @@ describe.skip('ConversationClient', () => {
         ...(templateVersion !== undefined ? { template_version: templateVersion } : {}),
         ...(Object.keys(metadata).length ? { metadata } : {}),
       },
-    } as Document);
+    }) as Document;
 
   describe('template metadata response conversion', () => {
     const template = makeTemplate('template-1', {
@@ -2705,7 +2705,7 @@ describe.skip('ConversationClient', () => {
         execution_id: `${roundId}::execution`,
         trigger_event_id: `${roundId}::user_message`,
         data: { step: { type: 'reasoning', reasoning: `step ${sequence}` }, sequence },
-      } as TimelineEvent);
+      }) as TimelineEvent;
 
     it('merges concurrent appendEvents flushes on OCC conflict so no events are lost and none duplicate', async () => {
       const start = startTimelineEvents('round-1');

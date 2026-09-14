@@ -159,8 +159,8 @@ export function OtelApmQuickstartFlow() {
             status: (hasData || hasPreExistingDataFinal
               ? 'complete'
               : isMonitoringStepActive
-              ? 'current'
-              : 'incomplete') as EuiStepStatus,
+                ? 'current'
+                : 'incomplete') as EuiStepStatus,
             children: isMonitoringStepActive ? (
               <>
                 {!hasPreExistingDataFinal && (

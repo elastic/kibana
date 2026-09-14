@@ -36,8 +36,7 @@ import { LabelsPanel } from './labels_panel';
 import { legendPositions, scaleTypes } from '../collections';
 
 export interface HeatmapOptionsProps
-  extends VisEditorOptionsProps<HeatmapVisParams>,
-    HeatmapTypeProps {}
+  extends VisEditorOptionsProps<HeatmapVisParams>, HeatmapTypeProps {}
 
 const HeatmapOptions = (props: HeatmapOptionsProps) => {
   const { stateParams, uiState, setValue, setValidity, setTouched, showElasticChartsOptions } =

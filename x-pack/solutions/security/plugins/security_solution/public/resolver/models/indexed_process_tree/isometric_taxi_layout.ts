@@ -492,7 +492,7 @@ const isometricTransformMatrix: Matrix3 = [
   Math.sqrt(2) / 2,   -(Math.sqrt(2) / 2),  0,
   Math.sqrt(6) / 6,   Math.sqrt(6) / 6,     -(Math.sqrt(6) / 3),
   0,                  0,                    1,
-]
+];
 
 const unit = 140;
 const distanceBetweenNodesInUnits = 2;

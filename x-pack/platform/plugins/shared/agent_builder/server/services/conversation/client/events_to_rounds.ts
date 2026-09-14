@@ -83,17 +83,18 @@ export const eventsToRounds = (events: TimelineEvent[]): ConversationRound[] => 
     const stepEvents = group.filter(
       (event): event is ExecutionStepEvent => event.type === TimelineEventType.executionStep
     );
-    const steps = stepEvents.length > 0 ? stepsFromEvents(stepEvents) : terminated.data.steps ?? [];
+    const steps =
+      stepEvents.length > 0 ? stepsFromEvents(stepEvents) : (terminated.data.steps ?? []);
 
     const userMessage = isInitial ? (trigger as UserMessageEvent) : undefined;
     const resumeInput = isResume ? (trigger as PromptResponseEvent).data.input : undefined;
     const startedEvent = group.find((event) => event.type === TimelineEventType.executionStarted);
     const round: ConversationRound = {
       id: execution.roundId,
-      input: userMessage ? toRoundInput(userMessage) : resumeInput ?? { message: '' },
+      input: userMessage ? toRoundInput(userMessage) : (resumeInput ?? { message: '' }),
       started_at: userMessage
         ? userMessage.created_at
-        : startedEvent?.created_at ?? terminated.created_at,
+        : (startedEvent?.created_at ?? terminated.created_at),
       ...(userMessage ? authorAndOrigin(userMessage) : {}),
       ...terminatedRoundFields(terminated.data, steps),
     };

@@ -41,8 +41,8 @@ export function date(): ExpressionFunctionDefinition<'date', null, Arguments, nu
         argDate && format
           ? moment.utc(argDate, format).toDate()
           : argDate
-          ? new Date(argDate)
-          : new Date();
+            ? new Date(argDate)
+            : new Date();
 
       if (isNaN(outputDate.getTime())) {
         throw errors.invalidDateInput(argDate);

@@ -360,11 +360,11 @@ const parseScaleOpts = (raw: Record<string, unknown> | undefined): ScaleOpts => 
   const archetypes = Array.isArray(opts.archetypes)
     ? opts.archetypes.map((id) => String(id).trim()).filter(Boolean)
     : typeof opts.archetypes === 'string'
-    ? opts.archetypes
-        .split(/[+,]/)
-        .map((id) => id.trim())
-        .filter(Boolean)
-    : undefined;
+      ? opts.archetypes
+          .split(/[+,]/)
+          .map((id) => id.trim())
+          .filter(Boolean)
+      : undefined;
 
   if (archetypes) {
     if (archetypes.length === 0) {

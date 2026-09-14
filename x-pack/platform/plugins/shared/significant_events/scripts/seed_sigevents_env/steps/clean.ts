@@ -137,7 +137,7 @@ export async function cleanSeedData(
       ctx.space
     );
     const failed =
-      delRes.status >= 300 ? queryIds.length : (delRes.data as { failed?: number }).failed ?? 0;
+      delRes.status >= 300 ? queryIds.length : ((delRes.data as { failed?: number }).failed ?? 0);
     if (failed > 0) {
       throw new Error(
         `clean: bulk delete queries failed (HTTP ${delRes.status}) ${JSON.stringify(delRes.data)}`

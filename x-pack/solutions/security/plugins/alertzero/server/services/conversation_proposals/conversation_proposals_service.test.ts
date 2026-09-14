@@ -38,7 +38,7 @@ const makeProposalsService = (
       total: total ?? proposals.length,
       truncated: truncated ?? false,
     }),
-  } as unknown as ReturnType<AgenticInvestigationsPluginStart['getProposalsService']>);
+  }) as unknown as ReturnType<AgenticInvestigationsPluginStart['getProposalsService']>;
 
 const makeAgentBuilder = (
   getTitleForId: (id: string) => Promise<string> = async (id) => `Title for ${id}`
@@ -51,7 +51,7 @@ const makeAgentBuilder = (
           .mockImplementation(async (id: string) => ({ title: await getTitleForId(id) })),
       }),
     },
-  } as unknown as AgentBuilderPluginStart);
+  }) as unknown as AgentBuilderPluginStart;
 
 describe('ConversationProposalsService', () => {
   const logger = loggingSystemMock.createLogger();

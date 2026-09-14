@@ -67,7 +67,7 @@ const buildAlert = (
       [ALERT_ACTION_GROUP]: actionGroup,
       [ALERT_RULE_PARAMETERS]: { sloId: 'test-slo', ...(windows !== null && { windows }) },
     },
-  } as unknown as BurnRateAlert);
+  }) as unknown as BurnRateAlert;
 
 const CRITICAL_REASON =
   'CRITICAL: The burn rate for the past 1h is 89.88 and for the past 5m is 88. Alert when above 14.4 for both windows';

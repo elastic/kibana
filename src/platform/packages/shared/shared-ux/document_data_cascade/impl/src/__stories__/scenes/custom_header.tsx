@@ -47,19 +47,22 @@ export const CascadeCustomHeaderImplementation: StoryObj<
 
     const generateGroupFieldRecord = useCallback(
       (nodePath?: string[], nodePathMap?: Record<string, string>) => {
-        return groupByFields.reduce<Record<string, string>>((acc, field) => {
-          return {
-            ...acc,
-            [field]:
-              nodePathMap && nodePath?.indexOf(field) !== -1
-                ? nodePathMap[field]
-                : /purchase_date/.test(field)
-                ? faker.date.past({ years: 2 }).toLocaleDateString()
-                : /order_value/.test(field)
-                ? faker.commerce.price({ min: 100, max: 10000, symbol: '$' })
-                : faker.person.fullName(),
-          };
-        }, {} as Record<string, string>);
+        return groupByFields.reduce<Record<string, string>>(
+          (acc, field) => {
+            return {
+              ...acc,
+              [field]:
+                nodePathMap && nodePath?.indexOf(field) !== -1
+                  ? nodePathMap[field]
+                  : /purchase_date/.test(field)
+                    ? faker.date.past({ years: 2 }).toLocaleDateString()
+                    : /order_value/.test(field)
+                      ? faker.commerce.price({ min: 100, max: 10000, symbol: '$' })
+                      : faker.person.fullName(),
+            };
+          },
+          {} as Record<string, string>
+        );
       },
       [groupByFields]
     );

@@ -11,7 +11,6 @@ import { getAllLogsDataViewSpec } from '@kbn/discover-utils/src';
 import type { ObservabilityRootProfileProvider } from '../types';
 
 export const getDefaultAdHocDataViews: ObservabilityRootProfileProvider['profile']['getDefaultAdHocDataViews'] =
-
     (prev, { context }) =>
     () => {
       const prevDataViews = prev();

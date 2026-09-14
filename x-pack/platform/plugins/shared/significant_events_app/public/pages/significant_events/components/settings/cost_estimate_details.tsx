@@ -147,8 +147,8 @@ const CoverageBadge = ({ coverage }: { coverage: TokenTrackingCoverage }) => {
         coverage.status === 'full'
           ? 'success'
           : coverage.status === 'partial'
-          ? 'warning'
-          : 'hollow'
+            ? 'warning'
+            : 'hollow'
       }
       data-test-subj="significantEventsTokenTrackingCoverage"
     >

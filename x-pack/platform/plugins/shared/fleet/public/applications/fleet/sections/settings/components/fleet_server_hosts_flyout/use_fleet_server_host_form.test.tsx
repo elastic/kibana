@@ -403,7 +403,7 @@ describe('useFleetServerHostsForm', () => {
       expect(onSuccess).toHaveBeenCalled();
       const [, putOptions] = testRenderer.startServices.http.put.mock.calls[0] as unknown as [
         string,
-        { body: string }
+        { body: string },
       ];
       const body = JSON.parse(putOptions.body);
       expect(body.secrets?.ssl?.key).toBeNull();
@@ -441,7 +441,7 @@ describe('useFleetServerHostsForm', () => {
       expect(onSuccess).toHaveBeenCalled();
       const [, putOptions] = testRenderer.startServices.http.put.mock.calls[0] as unknown as [
         string,
-        { body: string }
+        { body: string },
       ];
       const body = JSON.parse(putOptions.body);
       expect(body.secrets?.ssl?.key).toBeNull();

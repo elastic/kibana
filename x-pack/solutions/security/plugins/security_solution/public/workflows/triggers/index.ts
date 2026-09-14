@@ -21,61 +21,51 @@ export const registerSecurityWorkflowTriggers = (
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
 ): void => {
   workflowsExtensions.registerTriggerDefinition(() =>
-    import('../../../common/workflows/triggers').then(
-      (m): PublicTriggerDefinition => ({
-        ...m.alertStatusChangedTriggerDef,
-        icon: securityWorkflowIcon,
-      })
-    )
+    import('../../../common/workflows/triggers').then((m): PublicTriggerDefinition => ({
+      ...m.alertStatusChangedTriggerDef,
+      icon: securityWorkflowIcon,
+    }))
   );
   workflowsExtensions.registerTriggerDefinition(() =>
-    import('../../../common/workflows/triggers').then(
-      (m): PublicTriggerDefinition => ({
-        ...m.alertTagsChangedTriggerDef,
-        icon: securityWorkflowIcon,
-      })
-    )
+    import('../../../common/workflows/triggers').then((m): PublicTriggerDefinition => ({
+      ...m.alertTagsChangedTriggerDef,
+      icon: securityWorkflowIcon,
+    }))
   );
   workflowsExtensions.registerTriggerDefinition(() =>
-    import('../../../common/workflows/triggers').then(
-      (m): PublicTriggerDefinition => ({
-        ...m.alertAssigneesChangedTriggerDef,
-        icon: securityWorkflowIcon,
-      })
-    )
+    import('../../../common/workflows/triggers').then((m): PublicTriggerDefinition => ({
+      ...m.alertAssigneesChangedTriggerDef,
+      icon: securityWorkflowIcon,
+    }))
   );
   workflowsExtensions.registerTriggerDefinition(() =>
-    import('../../../common/workflows/triggers').then(
-      (m): PublicTriggerDefinition => ({
-        ...m.attackStatusChangedTriggerDef,
-        icon: securityWorkflowIcon,
-      })
-    )
+    import('../../../common/workflows/triggers').then((m): PublicTriggerDefinition => ({
+      ...m.attackStatusChangedTriggerDef,
+      icon: securityWorkflowIcon,
+    }))
   );
   workflowsExtensions.registerTriggerDefinition(() =>
-    import('../../../common/workflows/triggers').then(
-      (m): PublicTriggerDefinition => ({
-        ...m.attackTagsChangedTriggerDef,
-        icon: securityWorkflowIcon,
-      })
-    )
+    import('../../../common/workflows/triggers').then((m): PublicTriggerDefinition => ({
+      ...m.attackTagsChangedTriggerDef,
+      icon: securityWorkflowIcon,
+    }))
   );
   workflowsExtensions.registerTriggerDefinition(() =>
-    import('../../../common/workflows/triggers').then(
-      (m): PublicTriggerDefinition => ({
-        ...m.attackAssigneesChangedTriggerDef,
-        icon: securityWorkflowIcon,
-      })
-    )
+    import('../../../common/workflows/triggers').then((m): PublicTriggerDefinition => ({
+      ...m.attackAssigneesChangedTriggerDef,
+      icon: securityWorkflowIcon,
+    }))
   );
   workflowsExtensions.registerTriggerDefinition(() =>
-    import('../../../common/workflows/triggers').then(
-      (m): PublicTriggerDefinition => ({ ...m.noteCreatedTriggerDef, icon: securityWorkflowIcon })
-    )
+    import('../../../common/workflows/triggers').then((m): PublicTriggerDefinition => ({
+      ...m.noteCreatedTriggerDef,
+      icon: securityWorkflowIcon,
+    }))
   );
   workflowsExtensions.registerTriggerDefinition(() =>
-    import('../../../common/workflows/triggers').then(
-      (m): PublicTriggerDefinition => ({ ...m.noteUpdatedTriggerDef, icon: securityWorkflowIcon })
-    )
+    import('../../../common/workflows/triggers').then((m): PublicTriggerDefinition => ({
+      ...m.noteUpdatedTriggerDef,
+      icon: securityWorkflowIcon,
+    }))
   );
 };

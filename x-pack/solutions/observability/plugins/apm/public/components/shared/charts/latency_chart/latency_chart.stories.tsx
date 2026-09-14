@@ -77,8 +77,8 @@ const stories: Meta<Args> = {
         latencyChartResponse !== undefined
           ? latencyChartResponse
           : serviceName
-          ? toLatencyChartResponse(opbeansScenario(), serviceName)
-          : undefined;
+            ? toLatencyChartResponse(opbeansScenario(), serviceName)
+            : undefined;
 
       const contextServiceName = serviceName ?? 'opbeans-node';
 

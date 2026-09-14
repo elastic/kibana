@@ -290,12 +290,12 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
   });
 
   const hasRuleAttachmentError = statsQuery.isError || ruleAttachmentsQuery.isError;
-  const stats = hasRuleAttachmentError ? undefined : statsQuery.data ?? ruleAttachmentsQuery.data;
+  const stats = hasRuleAttachmentError ? undefined : (statsQuery.data ?? ruleAttachmentsQuery.data);
   const totalRules = stats?.total ?? 0;
   const isLoadingPreview =
     !hasRuleAttachmentError && (statsQuery.isLoading || ruleAttachmentsQuery.isFetching);
   const pageRules = useMemo(
-    () => (hasRuleAttachmentError ? [] : ruleAttachmentsQuery.data?.rules ?? []),
+    () => (hasRuleAttachmentError ? [] : (ruleAttachmentsQuery.data?.rules ?? [])),
     [hasRuleAttachmentError, ruleAttachmentsQuery.data?.rules]
   );
   const selectedRuleIdsSet = useMemo(() => new Set(selectedRuleIds), [selectedRuleIds]);
@@ -698,7 +698,7 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
               pageSizeOptions: [5, 10, 20],
               totalItemCount: hasRuleAttachmentError
                 ? 0
-                : ruleAttachmentsQuery.data?.total ?? totalRules,
+                : (ruleAttachmentsQuery.data?.total ?? totalRules),
             }}
             tableCaption={i18n.translate(
               'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentTableCaption',

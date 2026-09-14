@@ -23,6 +23,6 @@ export interface PublishesEsqlUsage {
 export const apiPublishesEsqlUsage = (unknownApi: unknown): unknownApi is PublishesEsqlUsage =>
   Boolean(
     unknownApi &&
-      (unknownApi as PublishesEsqlUsage)?.usesEsql$ !== undefined &&
-      (unknownApi as PublishesEsqlUsage)?.approximationApplied$ !== undefined
+    (unknownApi as PublishesEsqlUsage)?.usesEsql$ !== undefined &&
+    (unknownApi as PublishesEsqlUsage)?.approximationApplied$ !== undefined
   );

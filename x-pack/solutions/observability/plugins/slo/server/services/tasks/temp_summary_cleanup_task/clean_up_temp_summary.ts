@@ -45,9 +45,8 @@ export class CleanUpTempSummary {
 
     let searchAfterKey: AggBucketKey | undefined;
     do {
-      const { buckets, nextSearchAfterKey } = await this.findDuplicateTemporaryDocuments(
-        searchAfterKey
-      );
+      const { buckets, nextSearchAfterKey } =
+        await this.findDuplicateTemporaryDocuments(searchAfterKey);
       searchAfterKey = nextSearchAfterKey;
 
       if (buckets.length > 0) {

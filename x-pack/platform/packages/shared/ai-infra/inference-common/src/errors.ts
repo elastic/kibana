@@ -21,7 +21,7 @@ export enum InferenceTaskErrorCode {
 const InferenceTaskError = ServerSentEventError;
 type InferenceTaskError<
   TCode extends string,
-  TMeta extends Record<string, any> | undefined
+  TMeta extends Record<string, any> | undefined,
 > = ServerSentEventError<TCode, TMeta>;
 
 export type InferenceTaskErrorEvent = InferenceTaskEventBase<

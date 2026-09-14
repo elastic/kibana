@@ -85,7 +85,8 @@ const visLegendStyles = {
       padding: ${euiTheme.size.xs};
       margin: ${euiTheme.size.s};
       background-color: ${euiTheme.colors.backgroundBasePlain};
-      transition: opacity ${euiTheme.animation.fast} ${euiTheme.animation.resistance},
+      transition:
+        opacity ${euiTheme.animation.fast} ${euiTheme.animation.resistance},
         background-color ${euiTheme.animation.fast} ${euiTheme.animation.resistance}
           ${euiTheme.animation.extraSlow};
 

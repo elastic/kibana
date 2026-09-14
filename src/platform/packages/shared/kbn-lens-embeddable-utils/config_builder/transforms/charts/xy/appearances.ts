@@ -111,7 +111,7 @@ export function convertStylingToAPIFormat(
     // Lines + areas shared (alphabetical)
     fitting: hasLinesOrAreas ? convertFittingToAPIFormat(config) : undefined,
     interpolation: hasLinesOrAreas
-      ? curveTypeCompat.toAPI(config.curveType) ?? DEFAULT_LINES_INTERPOLATION
+      ? (curveTypeCompat.toAPI(config.curveType) ?? DEFAULT_LINES_INTERPOLATION)
       : undefined,
     points: hasLinesOrAreas
       ? {

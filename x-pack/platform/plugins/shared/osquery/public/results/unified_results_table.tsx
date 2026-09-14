@@ -215,8 +215,8 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         mapping && typeof mapping === 'object' && 'name' in mapping
           ? (mapping as { name: string }).name
           : typeof mapping === 'string'
-          ? mapping
-          : undefined;
+            ? mapping
+            : undefined;
 
       if (fieldName) {
         handleFilter({ name: fieldName } as DataViewField, value, mode);

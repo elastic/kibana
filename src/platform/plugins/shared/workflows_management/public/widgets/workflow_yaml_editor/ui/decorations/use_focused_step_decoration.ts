@@ -46,8 +46,8 @@ export const useFocusedStepDecoration = (
     const range = overrideRange
       ? overrideRange
       : focusedInfo
-      ? { lineStart: focusedInfo.lineStart, lineEnd: focusedInfo.lineEnd }
-      : null;
+        ? { lineStart: focusedInfo.lineStart, lineEnd: focusedInfo.lineEnd }
+        : null;
 
     if (!range) {
       decorationsCollection.clear();

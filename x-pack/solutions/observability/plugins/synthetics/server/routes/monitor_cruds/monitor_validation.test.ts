@@ -501,7 +501,7 @@ describe('validateMonitor', () => {
   // Partial updates validate the *merged* monitor (previous + patch), not the patch alone.
   describe('merged partial-update gate', () => {
     const mergedWith = (patch: Record<string, unknown>) =>
-      ({ ...testHTTPFields, ...patch } as unknown as MonitorFields);
+      ({ ...testHTTPFields, ...patch }) as unknown as MonitorFields;
 
     it('accepts a valid partial patch on a known field', () => {
       const result = validateMonitor(mergedWith({ [ConfigKey.ENABLED]: false }), 'default');

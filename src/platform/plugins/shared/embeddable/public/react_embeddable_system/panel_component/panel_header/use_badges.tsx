@@ -24,7 +24,7 @@ interface PanelBadgeExtension {
 }
 
 export const useBadges = <
-  ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi
+  ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
 >(
   showBadges: boolean,
   api: ApiType,

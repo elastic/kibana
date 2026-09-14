@@ -17,7 +17,7 @@ const createEndpoint = (overrides: Partial<EisInferenceEndpoint> = {}): EisInfer
     service: 'elastic',
     service_settings: { model_id: MODEL_ID },
     ...overrides,
-  } as EisInferenceEndpoint);
+  }) as EisInferenceEndpoint;
 
 describe('isModelUnavailableUnderRegionPolicy', () => {
   it('returns false when the model has no endpoints', () => {

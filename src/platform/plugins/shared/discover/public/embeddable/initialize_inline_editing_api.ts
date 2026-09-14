@@ -25,7 +25,9 @@ import {
 
 // This type forces our snapshot to include all keys so we don't overlook new ones
 type InlineEditSnapshot = {
-  [K in keyof Required<SearchEmbeddableSerializedAttributes>]: SearchEmbeddableSerializedAttributes[K];
+  [
+    K in keyof Required<SearchEmbeddableSerializedAttributes>
+  ]: SearchEmbeddableSerializedAttributes[K];
 };
 
 interface SearchEmbeddableDeps {
@@ -174,7 +176,7 @@ export const initializeInlineEditingApi = ({
     analytics.reportEvent(DISCOVER_IN_DASHBOARD_EVENT_TYPE, {
       [DiscoverInDashboardEventDataKeys.EVENT_NAME]: DiscoverInDashboardEventName.tabSwitched,
       [DiscoverInDashboardEventDataKeys.DASHBOARD_ID]: apiPublishesSavedObjectId(parentApi)
-        ? parentApi.savedObjectId$.getValue() ?? 'new'
+        ? (parentApi.savedObjectId$.getValue() ?? 'new')
         : undefined,
       [DiscoverInDashboardEventDataKeys.EMBEDDABLE_PANEL_ID]: uuid,
       [DiscoverInDashboardEventDataKeys.SAVED_SESSION_ID]: savedObjectId$.getValue(),

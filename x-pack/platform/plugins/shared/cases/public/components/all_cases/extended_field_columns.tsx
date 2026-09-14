@@ -170,7 +170,7 @@ const UserPickerFieldCell: React.FC<{
 }> = ({ field, theCase, userProfiles }) => {
   const rawValue = theCase.extendedFields?.[getFieldCamelKey(field.name, field.type)];
   const assignees = useMemo(
-    () => (rawValue ? parseUserPickerAssignees(rawValue) ?? [] : []),
+    () => (rawValue ? (parseUserPickerAssignees(rawValue) ?? []) : []),
     [rawValue]
   );
 

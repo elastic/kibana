@@ -28,7 +28,7 @@ const meta = (configId: string, name = configId): OverviewStatusMetaData =>
     isStatusAlertEnabled: false,
     overallStatus: 'up',
     locations: [{ id: 'us_east', label: 'US East', status: 'up' }],
-  } as OverviewStatusMetaData);
+  }) as OverviewStatusMetaData;
 
 describe('isOverviewGrouped / getGroupedFillPageState', () => {
   it('treats none and monitor as ungrouped', () => {

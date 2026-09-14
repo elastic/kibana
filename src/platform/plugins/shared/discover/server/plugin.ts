@@ -38,9 +38,12 @@ import {
 import { getSearchEmbeddableTransforms } from '../common/embeddable';
 import { createProfileStateRegistry } from '../common/context_awareness';
 
-export class DiscoverServerPlugin
-  implements Plugin<object, DiscoverServerPluginStart, object, DiscoverServerPluginStartDeps>
-{
+export class DiscoverServerPlugin implements Plugin<
+  object,
+  DiscoverServerPluginStart,
+  object,
+  DiscoverServerPluginStartDeps
+> {
   private readonly config: ConfigSchema;
   private readonly logger: Logger;
   private readonly profileStateRegistry = createProfileStateRegistry();

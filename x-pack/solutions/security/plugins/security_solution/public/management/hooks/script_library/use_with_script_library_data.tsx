@@ -73,9 +73,9 @@ export const useWithScriptLibraryData = (
   useEffect(() => {
     const hasFilters = Boolean(
       queryParams?.os?.length ||
-        queryParams?.fileType?.length ||
-        queryParams?.category?.length ||
-        queryParams?.searchTerms?.length
+      queryParams?.fileType?.length ||
+      queryParams?.category?.length ||
+      queryParams?.searchTerms?.length
     );
     if (
       isMounted() &&

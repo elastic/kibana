@@ -21,4 +21,4 @@ export const mkEdge = (id: string, source: string, target: string): ServiceMapEd
       color: '#ccc',
     },
     data: { isBidirectional: false },
-  } as ServiceMapEdge);
+  }) as ServiceMapEdge;

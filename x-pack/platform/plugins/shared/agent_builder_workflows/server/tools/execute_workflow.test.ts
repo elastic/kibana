@@ -51,7 +51,7 @@ describe('executeWorkflowTool', () => {
       attachments: {
         get: overrides.get ?? jest.fn(),
       },
-    } as any);
+    }) as any;
 
   beforeEach(() => {
     executeWorkflowMock.mockReset();
@@ -90,7 +90,7 @@ describe('executeWorkflowTool', () => {
           actions: { api: { get: (a: string) => `api:${a}` } },
           checkPrivilegesWithRequest: () => ({ atSpace }),
         },
-      } as any);
+      }) as any;
     const tool = executeWorkflowTool({ workflowsManagement, getSecurity: denyingSecurity });
 
     const result = await invokeHandler(tool, { workflowId: 'wf-1', inputs: {} }, buildContext());

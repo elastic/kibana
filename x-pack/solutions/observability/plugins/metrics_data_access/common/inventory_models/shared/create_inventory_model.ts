@@ -11,7 +11,7 @@ export function createInventoryModel<
   TType extends InventoryItemType,
   TAggsConfigMap extends AggregationConfigMap,
   TFormulasConfigMap extends FormulasConfigMap | undefined = undefined,
-  TCharts extends ChartsConfigMap | undefined = undefined
+  TCharts extends ChartsConfigMap | undefined = undefined,
 >(
   id: TType,
   config: Omit<InventoryModel<TType, TAggsConfigMap, TFormulasConfigMap, TCharts>, 'id'>

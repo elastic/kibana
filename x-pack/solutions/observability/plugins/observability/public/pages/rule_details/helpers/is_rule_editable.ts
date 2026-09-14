@@ -31,9 +31,9 @@ export function isRuleEditable({ capabilities, rule, ruleType, ruleTypeRegistry 
   return Boolean(
     // can the user save the rule
     canSaveRule &&
-      // is this rule type editable from within Rules Management
-      (ruleTypeRegistry.has(rule.ruleTypeId)
-        ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
-        : false)
+    // is this rule type editable from within Rules Management
+    (ruleTypeRegistry.has(rule.ruleTypeId)
+      ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
+      : false)
   );
 }

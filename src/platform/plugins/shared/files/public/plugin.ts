@@ -49,15 +49,12 @@ export type FilesPublicStart = Pick<FilesPublicSetup, 'filesClientFactory'> & {
 /**
  * Bringing files to Kibana
  */
-export class FilesPlugin
-  implements
-    Plugin<
-      FilesPublicSetup,
-      FilesPublicStart,
-      FilesPublicSetupDependencies,
-      FilesPublicStartDependencies
-    >
-{
+export class FilesPlugin implements Plugin<
+  FilesPublicSetup,
+  FilesPublicStart,
+  FilesPublicSetupDependencies,
+  FilesPublicStartDependencies
+> {
   private registry = new FileKindsRegistryImpl<FileKindBrowser>();
   private filesClientFactory?: FilesClientFactory;
 

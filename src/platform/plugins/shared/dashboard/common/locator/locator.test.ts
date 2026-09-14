@@ -260,8 +260,8 @@ describe('dashboard locator', () => {
           return dashboardId === 'dashboard1'
             ? [savedFilter1]
             : dashboardId === 'dashboard2'
-            ? [savedFilter2]
-            : [];
+              ? [savedFilter2]
+              : [];
         },
       });
 

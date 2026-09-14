@@ -131,7 +131,7 @@ export function calculateAssetCount(
 
   const knowledgeBaseAssetCount = includeKnowledgeBase
     ? 0
-    : packageAssets.elasticsearch?.knowledge_base?.length ?? 0;
+    : (packageAssets.elasticsearch?.knowledge_base?.length ?? 0);
 
   return assetCount - knowledgeBaseAssetCount;
 }

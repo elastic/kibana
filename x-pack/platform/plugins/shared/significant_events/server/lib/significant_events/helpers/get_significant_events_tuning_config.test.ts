@@ -16,7 +16,7 @@ import { getSignificantEventsTuningConfig } from './get_significant_events_tunin
 const makeUiSettingsClient = (stored: unknown): jest.Mocked<IUiSettingsClient> =>
   ({
     get: jest.fn().mockResolvedValue(JSON.stringify(stored)),
-  } as unknown as jest.Mocked<IUiSettingsClient>);
+  }) as unknown as jest.Mocked<IUiSettingsClient>;
 
 const makeLogger = (): jest.Mocked<Logger> =>
   ({
@@ -24,7 +24,7 @@ const makeLogger = (): jest.Mocked<Logger> =>
     error: jest.fn(),
     debug: jest.fn(),
     info: jest.fn(),
-  } as unknown as jest.Mocked<Logger>);
+  }) as unknown as jest.Mocked<Logger>;
 
 describe('getSignificantEventsTuningConfig', () => {
   it('returns defaults when uiSettings throws', async () => {

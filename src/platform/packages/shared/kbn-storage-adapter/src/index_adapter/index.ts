@@ -173,7 +173,7 @@ export interface StorageIndexAdapterOptions<TApplicationType> {
  */
 export class StorageIndexAdapter<
   TStorageSettings extends IndexStorageSettings,
-  TApplicationType extends Partial<StorageDocumentOf<TStorageSettings>>
+  TApplicationType extends Partial<StorageDocumentOf<TStorageSettings>>,
 > {
   private static readonly INDEX_SETTINGS = {
     auto_expand_replicas: '0-1',

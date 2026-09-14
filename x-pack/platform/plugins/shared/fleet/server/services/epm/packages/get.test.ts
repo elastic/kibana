@@ -1610,7 +1610,7 @@ owner: elastic`,
         name: 'my-package',
         version: '1.0.0',
         ...(requires ? { requires } : {}),
-      } as unknown as RegistryPackage);
+      }) as unknown as RegistryPackage;
 
     it('enriches dependency entries with the title from the registry', async () => {
       MockRegistry.fetchInfo.mockResolvedValue(

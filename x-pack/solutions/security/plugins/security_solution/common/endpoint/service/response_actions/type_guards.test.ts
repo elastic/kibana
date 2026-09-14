@@ -19,7 +19,7 @@ import {
 import type { ActionDetails } from '../../types';
 
 const makeAction = (command: ActionDetails['command']): Pick<ActionDetails, 'command'> =>
-  ({ command } as Pick<ActionDetails, 'command'>);
+  ({ command }) as Pick<ActionDetails, 'command'>;
 
 describe('type_guards', () => {
   describe('isCancelAction()', () => {

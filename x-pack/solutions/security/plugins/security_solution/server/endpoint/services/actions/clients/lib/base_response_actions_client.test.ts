@@ -819,7 +819,7 @@ class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
   public async writeActionRequestToEndpointIndex<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends {} = {}
+    TMeta extends {} = {},
   >(
     actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       TParameters,
@@ -833,7 +833,7 @@ class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
   }
 
   public async writeActionResponseToEndpointIndex<
-    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
   >(
     options: ResponseActionsClientWriteActionResponseToEndpointIndexOptions<TOutputContent>
   ): Promise<LogsEndpointActionResponse<TOutputContent>> {
@@ -843,7 +843,7 @@ class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
   public fetchAllPendingActions<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends {} = {}
+    TMeta extends {} = {},
   >(): AsyncIterable<
     Array<ResponseActionsClientPendingAction<TParameters, TOutputContent, TMeta>>
   > {

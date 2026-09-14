@@ -49,7 +49,9 @@ export const SolutionNavCollapseButton = ({
       z-index: 2;
 
       ${euiCanAnimate} {
-        transition: opacity ${euiTheme.animation.fast}, left ${euiTheme.animation.fast},
+        transition:
+          opacity ${euiTheme.animation.fast},
+          left ${euiTheme.animation.fast},
           background ${euiTheme.animation.fast};
       }
 

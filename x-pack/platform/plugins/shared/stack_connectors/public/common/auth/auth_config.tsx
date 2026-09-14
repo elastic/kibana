@@ -97,7 +97,7 @@ export const AuthConfig: FunctionComponent<Props> = ({
   const authTypeDefaultValue =
     getFieldDefaultValue('config.hasAuth') === false
       ? null
-      : getFieldDefaultValue('config.authType') ?? AuthType.Basic;
+      : (getFieldDefaultValue('config.authType') ?? AuthType.Basic);
   const certTypeDefaultValue: SSLCertType =
     getFieldDefaultValue('config.certType') ?? SSLCertType.CRT;
   const hasCADefaultValue =

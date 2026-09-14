@@ -61,8 +61,9 @@ export interface FooterProps {
   collapseButton?: ReactNode;
 }
 
-interface FooterComponent
-  extends ForwardRefExoticComponent<FooterProps & RefAttributes<HTMLElement>> {
+interface FooterComponent extends ForwardRefExoticComponent<
+  FooterProps & RefAttributes<HTMLElement>
+> {
   Item: typeof FooterItem;
 }
 

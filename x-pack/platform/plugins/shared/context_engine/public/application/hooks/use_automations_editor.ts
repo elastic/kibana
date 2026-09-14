@@ -77,7 +77,7 @@ export const useAutomationsEditor = ({
 
   const savedAutomations = aiIndex?.automations;
   const automations = useMemo(
-    () => (state.status === 'editing' ? state.draft : savedAutomations ?? []),
+    () => (state.status === 'editing' ? state.draft : (savedAutomations ?? [])),
     [state, savedAutomations]
   );
   const workflowIds = useMemo(
@@ -127,7 +127,7 @@ export const useAutomationsEditor = ({
     if (!aiIndex) {
       return undefined;
     }
-    const currentAutomations = state.status === 'editing' ? state.draft : savedAutomations ?? [];
+    const currentAutomations = state.status === 'editing' ? state.draft : (savedAutomations ?? []);
     const workflowId = await createWorkflow(buildStarterWorkflowYaml(aiIndex.id));
     if (!workflowId) {
       return undefined;

@@ -112,7 +112,7 @@ const resolveCapabilities = async ({
 
 function recursiveApplyChanges<
   TDestination extends Record<string, any>,
-  TSource extends Record<string, any>
+  TSource extends Record<string, any>,
 >(destination: TDestination, source: TSource): TDestination {
   return Object.keys(destination)
     .map((key) => {
@@ -156,8 +156,8 @@ const buildGetAggregatedSwitchers =
         switcherIdsToApply.add(switcherId)
       );
     });
-    const switchersToApply = [...switcherIdsToApply].map(
-      (switcherId) => switcherMap.get(switcherId)!
+    const switchersToApply = [...switcherIdsToApply].map((switcherId) =>
+      switcherMap.get(switcherId)!
     );
 
     // split the switchers into buckets for parallel execution

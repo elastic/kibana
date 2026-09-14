@@ -24,8 +24,10 @@ export interface SpacesData {
  * The data that was fetched for a specific space. Includes optional additional fields that are needed to handle edge cases in the
  * share-to-space components that consume it.
  */
-export interface SpacesDataEntry
-  extends Omit<GetSpaceResult, 'disabledFeatures' | 'authorizedPurposes'> {
+export interface SpacesDataEntry extends Omit<
+  GetSpaceResult,
+  'disabledFeatures' | 'authorizedPurposes'
+> {
   /** True if this space is the active space. */
   isActiveSpace?: true;
   /** True if the current feature (specified in the `SpacesContext`) is disabled in this space. */

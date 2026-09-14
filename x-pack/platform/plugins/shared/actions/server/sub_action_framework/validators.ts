@@ -13,7 +13,7 @@ import { ValidatorType } from './types';
 import type { ValidatorType as ValidationSchema } from '../types';
 export const buildValidators = <
   Config extends ActionTypeConfig,
-  Secrets extends ActionTypeSecrets
+  Secrets extends ActionTypeSecrets,
 >({
   connector,
   configurationUtilities,

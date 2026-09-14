@@ -51,9 +51,12 @@ export interface GraphPluginStartDependencies {
   contentManagement: ContentManagementPublicStart;
 }
 
-export class GraphPlugin
-  implements Plugin<void, void, GraphPluginSetupDependencies, GraphPluginStartDependencies>
-{
+export class GraphPlugin implements Plugin<
+  void,
+  void,
+  GraphPluginSetupDependencies,
+  GraphPluginStartDependencies
+> {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}

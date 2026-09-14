@@ -36,14 +36,14 @@ const createNightshiftInvestigations = (
 const getStartMock = (nightshiftInvestigations: NightshiftInvestigationsServerStart) =>
   (nightshiftInvestigations.getInvestigationsClient as jest.Mock).mock.results[0].value.start;
 
-const createRequest = () => ({} as KibanaRequest);
+const createRequest = () => ({}) as KibanaRequest;
 const createLogger = () =>
   ({
     debug: jest.fn(),
     info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 describe('triggerInvestigationWorkflow', () => {
   it('returns the execution id when the investigation starts successfully', async () => {

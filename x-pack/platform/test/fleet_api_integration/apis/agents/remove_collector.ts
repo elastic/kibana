@@ -88,7 +88,7 @@ export default function (providerContext: FtrProviderContext) {
           },
         });
         const total =
-          typeof res.hits.total === 'number' ? res.hits.total : res.hits.total?.value ?? 0;
+          typeof res.hits.total === 'number' ? res.hits.total : (res.hits.total?.value ?? 0);
         expect(total).to.eql(0);
       });
 
@@ -180,7 +180,7 @@ export default function (providerContext: FtrProviderContext) {
           },
         });
         const total =
-          typeof res.hits.total === 'number' ? res.hits.total : res.hits.total?.value ?? 0;
+          typeof res.hits.total === 'number' ? res.hits.total : (res.hits.total?.value ?? 0);
         expect(total).to.eql(0);
       });
     });

@@ -23,7 +23,7 @@ describe('getHandlerWrapper', () => {
       licensing: Promise.resolve({
         license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
       }),
-    } as any);
+    }) as any;
 
   const req = httpServerMock.createKibanaRequest();
 

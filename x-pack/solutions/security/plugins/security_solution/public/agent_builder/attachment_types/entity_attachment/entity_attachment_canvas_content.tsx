@@ -22,8 +22,7 @@ import {
 import { EntityCardFlyoutOverviewCanvas } from '../../components/entity_card_flyout_overview_canvas';
 import { useEntityAnalyticsAgentNavigation } from '../entity_analytics_agent_navigation_context';
 
-export interface EntityAttachmentCanvasContentProps
-  extends AttachmentRenderProps<EntityAttachment> {
+export interface EntityAttachmentCanvasContentProps extends AttachmentRenderProps<EntityAttachment> {
   experimentalFeatures: ExperimentalFeatures;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }

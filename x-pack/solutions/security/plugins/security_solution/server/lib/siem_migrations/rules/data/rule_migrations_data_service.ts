@@ -49,7 +49,11 @@ export class RuleMigrationsDataService extends SiemMigrationsBaseDataService {
 
   private readonly adapters: RuleMigrationAdapters;
 
-  constructor(private logger: Logger, protected kibanaVersion: string, elserInferenceId?: string) {
+  constructor(
+    private logger: Logger,
+    protected kibanaVersion: string,
+    elserInferenceId?: string
+  ) {
     super(kibanaVersion);
     this.adapters = {
       migrations: this.createRuleIndexPatternAdapter({

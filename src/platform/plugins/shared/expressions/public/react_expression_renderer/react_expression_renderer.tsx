@@ -17,8 +17,10 @@ import { useExpressionRenderer } from './use_expression_renderer';
 
 // Accept all options of the runner as props except for the
 // dom element which is provided by the component itself
-export interface ReactExpressionRendererProps
-  extends Omit<ExpressionRendererParams, 'hasCustomErrorRenderer'> {
+export interface ReactExpressionRendererProps extends Omit<
+  ExpressionRendererParams,
+  'hasCustomErrorRenderer'
+> {
   className?: string;
   dataAttrs?: string[];
   renderError?: (

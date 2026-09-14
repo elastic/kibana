@@ -27,7 +27,7 @@ const ruleParamsOf = (params: Partial<NewTermsRuleParams>): NewTermsRuleParams =
     immutable: false,
     newTermsFields: ['host.name'],
     ...params,
-  } as NewTermsRuleParams);
+  }) as NewTermsRuleParams;
 
 describe('createNewTermsFieldCardinalityTracker', () => {
   let mockAnalytics: jest.Mocked<AnalyticsServiceSetup>;

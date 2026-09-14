@@ -44,7 +44,10 @@ interface GetWorkflowExecutionOptions {
 }
 
 export class WorkflowsApiService {
-  constructor(private readonly spaceId: string, private readonly kbnClient: KbnClient) {}
+  constructor(
+    private readonly spaceId: string,
+    private readonly kbnClient: KbnClient
+  ) {}
 
   /** POST /api/workflows/workflow — create a single workflow from YAML. */
   async create(yaml: string): Promise<WorkflowDetailDto> {

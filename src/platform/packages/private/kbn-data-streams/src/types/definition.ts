@@ -16,7 +16,7 @@ export type AnyDataStreamDefinition = DataStreamDefinition<any, any, any>;
 export interface DataStreamDefinition<
   Mappings extends MappingsDefinition,
   FullMappings extends GetFieldsOf<Mappings> = GetFieldsOf<Mappings>,
-  SearchRuntimeMappings extends BaseSearchRuntimeMappings = never
+  SearchRuntimeMappings extends BaseSearchRuntimeMappings = never,
 > {
   /**
    * @remark Once released this should never change.

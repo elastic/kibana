@@ -49,7 +49,7 @@ const createMockLogger = (): Logger =>
     error: jest.fn(),
     info: jest.fn(),
     warn: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 const createEsClient = (overrides: {
   search?: jest.Mock;
@@ -60,7 +60,7 @@ const createEsClient = (overrides: {
       search: overrides.search ?? jest.fn(),
       fieldCaps: overrides.fieldCaps ?? jest.fn(),
     },
-  } as unknown as IScopedClusterClient);
+  }) as unknown as IScopedClusterClient;
 
 const minMaxResponse = (minMs: number | null, maxMs: number | null) => ({
   aggregations: { min_time: { value: minMs }, max_time: { value: maxMs } },

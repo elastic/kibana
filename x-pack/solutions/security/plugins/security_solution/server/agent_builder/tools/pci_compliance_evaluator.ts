@@ -111,10 +111,10 @@ function buildResult(
     status === 'GREEN'
       ? 'compliant'
       : status === 'RED'
-      ? 'non-compliant'
-      : status === 'AMBER'
-      ? 'partially assessable'
-      : 'not assessable';
+        ? 'non-compliant'
+        : status === 'AMBER'
+          ? 'partially assessable'
+          : 'not assessable';
 
   return {
     requirement: definition.id,

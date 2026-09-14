@@ -109,7 +109,7 @@ export const groupTimelineRounds = <E extends AnyTimelineEvent>(
     const steps =
       stepEvents.length > 0
         ? stepEvents.map((event) => event.data.step)
-        : terminated.data.steps ?? [];
+        : (terminated.data.steps ?? []);
     rounds.push({
       id: parseExecutionId(executionId)?.roundId ?? executionId,
       userMessage,

@@ -112,14 +112,16 @@ const gradientLabelCss = (
   color: transparent !important;
   -webkit-text-fill-color: transparent !important;
 
-  ${hoverGradient
-    ? `button:hover:not(:disabled) &,
+  ${
+    hoverGradient
+      ? `button:hover:not(:disabled) &,
       button:focus-visible:not(:disabled) & {
         background: ${hoverGradient} !important;
         background-clip: text !important;
         -webkit-background-clip: text !important;
       }`
-    : ''}
+      : ''
+  }
   button:disabled & {
     color: ${euiTheme.colors.textDisabled} !important;
     background: none !important;
@@ -161,9 +163,13 @@ const outlinedBorderGradientCss = (
     padding: 1px;
     background: ${borderGradient};
     pointer-events: none;
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
     mask-composite: exclude;
   }
 
@@ -303,9 +309,11 @@ export const useAiButtonGradientStyles = ({
         }
       }
       &:disabled {
-        background: ${variant === 'empty' || variant === 'outlined'
-          ? 'transparent'
-          : euiTheme.colors.backgroundBaseDisabled} !important;
+        background: ${
+          variant === 'empty' || variant === 'outlined'
+            ? 'transparent'
+            : euiTheme.colors.backgroundBaseDisabled
+        } !important;
 
         color: ${euiTheme.colors.textDisabled} !important;
         -webkit-text-fill-color: ${euiTheme.colors.textDisabled} !important;

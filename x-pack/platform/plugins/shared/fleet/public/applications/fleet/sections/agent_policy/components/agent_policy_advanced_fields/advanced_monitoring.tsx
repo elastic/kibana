@@ -287,7 +287,7 @@ export const AgentPolicyAdvancedMonitoringOptions: React.FunctionComponent<{
               }
               isInvalid={Boolean(
                 touchedFields['monitoring_diagnostics.limit.interval'] &&
-                  validation['monitoring_diagnostics.limit.interval']
+                validation['monitoring_diagnostics.limit.interval']
               )}
             >
               <EuiFieldText
@@ -310,7 +310,7 @@ export const AgentPolicyAdvancedMonitoringOptions: React.FunctionComponent<{
                 }
                 isInvalid={Boolean(
                   touchedFields['monitoring_diagnostics.limit.interval'] &&
-                    validation['monitoring_diagnostics.limit.interval']
+                  validation['monitoring_diagnostics.limit.interval']
                 )}
               />
             </EuiFormRow>
@@ -332,7 +332,7 @@ export const AgentPolicyAdvancedMonitoringOptions: React.FunctionComponent<{
               }
               isInvalid={Boolean(
                 touchedFields['monitoring_diagnostics.limit.burst'] &&
-                  validation['monitoring_diagnostics.limit.burst']
+                validation['monitoring_diagnostics.limit.burst']
               )}
             >
               <EuiFieldNumber
@@ -354,7 +354,7 @@ export const AgentPolicyAdvancedMonitoringOptions: React.FunctionComponent<{
                 onBlur={() => updateTouchedFields({ 'monitoring_diagnostics.limit.burst': true })}
                 isInvalid={Boolean(
                   touchedFields['monitoring_diagnostics.limit.burst'] &&
-                    validation['monitoring_diagnostics.limit.burst']
+                  validation['monitoring_diagnostics.limit.burst']
                 )}
               />
             </EuiFormRow>
@@ -409,7 +409,7 @@ export const AgentPolicyAdvancedMonitoringOptions: React.FunctionComponent<{
               }
               isInvalid={Boolean(
                 touchedFields['monitoring_diagnostics.uploader.max_retries'] &&
-                  validation['monitoring_diagnostics.uploader.max_retries']
+                validation['monitoring_diagnostics.uploader.max_retries']
               )}
             >
               <EuiFieldNumber
@@ -433,7 +433,7 @@ export const AgentPolicyAdvancedMonitoringOptions: React.FunctionComponent<{
                 }
                 isInvalid={Boolean(
                   touchedFields['monitoring_diagnostics.uploader.max_retries'] &&
-                    validation['monitoring_diagnostics.uploader.max_retries']
+                  validation['monitoring_diagnostics.uploader.max_retries']
                 )}
               />
             </EuiFormRow>
@@ -455,7 +455,7 @@ export const AgentPolicyAdvancedMonitoringOptions: React.FunctionComponent<{
               }
               isInvalid={Boolean(
                 touchedFields['monitoring_diagnostics.uploader.init_dur'] &&
-                  validation['monitoring_diagnostics.uploader.init_dur']
+                validation['monitoring_diagnostics.uploader.init_dur']
               )}
             >
               <EuiFieldText
@@ -478,7 +478,7 @@ export const AgentPolicyAdvancedMonitoringOptions: React.FunctionComponent<{
                 }
                 isInvalid={Boolean(
                   touchedFields['monitoring_diagnostics.uploader.init_dur'] &&
-                    validation['monitoring_diagnostics.uploader.init_dur']
+                  validation['monitoring_diagnostics.uploader.init_dur']
                 )}
               />
             </EuiFormRow>
@@ -500,7 +500,7 @@ export const AgentPolicyAdvancedMonitoringOptions: React.FunctionComponent<{
               }
               isInvalid={Boolean(
                 touchedFields['monitoring_diagnostics.uploader.max_dur'] &&
-                  validation['monitoring_diagnostics.uploader.max_dur']
+                validation['monitoring_diagnostics.uploader.max_dur']
               )}
             >
               <EuiFieldText
@@ -523,7 +523,7 @@ export const AgentPolicyAdvancedMonitoringOptions: React.FunctionComponent<{
                 }
                 isInvalid={Boolean(
                   touchedFields['monitoring_diagnostics.uploader.max_dur'] &&
-                    validation['monitoring_diagnostics.uploader.max_dur']
+                  validation['monitoring_diagnostics.uploader.max_dur']
                 )}
               />
             </EuiFormRow>

@@ -37,10 +37,10 @@ const mockedGetKibanaModuleData = getKibanaModuleData as jest.MockedFunction<
 >;
 
 const createMockConfig = (configFile?: string): FullConfig =>
-  ({ configFile } as unknown as FullConfig);
+  ({ configFile }) as unknown as FullConfig;
 
 const createMockSuite = (tests: TestCase[]): Suite =>
-  ({ allTests: () => tests } as unknown as Suite);
+  ({ allTests: () => tests }) as unknown as Suite;
 
 const createMockTestCase = (overrides: {
   outcome: ReturnType<TestCase['outcome']>;
@@ -72,9 +72,9 @@ const createMockResult = (
     attachments: [],
     error: { message: 'boom', stack: 'stack trace' },
     stdout: [],
-  } as unknown as TestResult);
+  }) as unknown as TestResult;
 
-const createMockFullResult = (): FullResult => ({ status: 'failed', duration: 1000 } as FullResult);
+const createMockFullResult = (): FullResult => ({ status: 'failed', duration: 1000 }) as FullResult;
 
 describe('ScoutFailedTestReporter', () => {
   let reporter: ScoutFailedTestReporter;

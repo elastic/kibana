@@ -17,12 +17,12 @@ const categorizeResponse = (values: unknown[][]): ESQLSearchResponse =>
       { name: 'pattern', type: 'keyword' },
     ],
     values,
-  } as unknown as ESQLSearchResponse);
+  }) as unknown as ESQLSearchResponse;
 
 const createTracedEsClient = (esql: jest.Mock) =>
   ({
     esql,
-  } as unknown as TracedElasticsearchClient);
+  }) as unknown as TracedElasticsearchClient;
 
 describe('buildCategorizeWithSampleQuery', () => {
   it('defaults to regex CATEGORIZE, rare-tail truncation, and no SAMPLE at probability 1', () => {

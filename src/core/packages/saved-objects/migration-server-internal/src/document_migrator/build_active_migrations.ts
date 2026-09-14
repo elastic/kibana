@@ -68,7 +68,7 @@ const buildTypeTransforms = ({
   referenceTransforms: Transform[];
 }): TypeTransforms => {
   const migrationsMap =
-    typeof type.migrations === 'function' ? type.migrations() : type.migrations ?? {};
+    typeof type.migrations === 'function' ? type.migrations() : (type.migrations ?? {});
 
   const migrationTransforms = Object.entries(migrationsMap ?? {}).map<Transform>(
     ([version, transform]) => ({

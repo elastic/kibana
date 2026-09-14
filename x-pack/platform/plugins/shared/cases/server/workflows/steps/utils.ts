@@ -126,7 +126,7 @@ export const safeParseCaseForWorkflowOutput = <TCaseSchema extends z.ZodType>(
 export function createCasesStepHandler<
   TInput = unknown,
   TConfig = unknown,
-  TOutputCase extends WorkflowStepCaseResult = WorkflowStepCaseResult
+  TOutputCase extends WorkflowStepCaseResult = WorkflowStepCaseResult,
 >(
   getCasesClient: GetCasesClientFn,
   operation: (client: CasesClient, input: TInput, config: TConfig) => Promise<TOutputCase>,

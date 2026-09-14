@@ -37,15 +37,12 @@ import { executeWorkflowTool } from './tools/execute_workflow';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 
-export class AgentBuilderWorkflowsPlugin
-  implements
-    Plugin<
-      AgentBuilderWorkflowsPluginSetup,
-      AgentBuilderWorkflowsPluginStart,
-      PluginSetupDependencies,
-      PluginStartDependencies
-    >
-{
+export class AgentBuilderWorkflowsPlugin implements Plugin<
+  AgentBuilderWorkflowsPluginSetup,
+  AgentBuilderWorkflowsPluginStart,
+  PluginSetupDependencies,
+  PluginStartDependencies
+> {
   private readonly logger: Logger;
   private api: WorkflowsManagementApi | null = null;
   private security?: SecurityPluginStart;

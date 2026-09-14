@@ -23,8 +23,10 @@ export const DATA_TEST_SUBJ_SETTINGS_CATEGORY = 'settingsCategory';
 /**
  * Props for a {@link FieldCategory} component.
  */
-export interface FieldCategoryProps
-  extends Pick<ClearQueryLinkProps, 'onClearQuery' | 'fieldCount'> {
+export interface FieldCategoryProps extends Pick<
+  ClearQueryLinkProps,
+  'onClearQuery' | 'fieldCount'
+> {
   /** The name of the category. */
   category: string;
   /** Children-- should be {@link FieldRow} components. */

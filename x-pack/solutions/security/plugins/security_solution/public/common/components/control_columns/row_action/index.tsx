@@ -161,7 +161,7 @@ const RowActionComponent = ({
         // not included in any data view pattern. Convert to the alias and resolve via the
         // pattern-based wrapper.
         const resolvedIndex = indexName
-          ? getAlertIndexAlias(indexName, spaceId) ?? indexName
+          ? (getAlertIndexAlias(indexName, spaceId) ?? indexName)
           : undefined;
         openDocumentFlyoutFromPattern({
           documentId: eventId,

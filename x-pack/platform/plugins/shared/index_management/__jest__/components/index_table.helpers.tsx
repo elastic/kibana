@@ -59,7 +59,7 @@ const createIndices = (): Index[] => {
       documents_deleted: 100,
       size: '156kb',
       primary_size: '156kb',
-    } as unknown as Omit<Index, 'name'>);
+    }) as unknown as Omit<Index, 'name'>;
 
   for (let i = 0; i <= MAX_TESTY_INDEX; i++) {
     indicesList.push({
@@ -91,7 +91,7 @@ const urlServiceMock: AppDependencies['url'] = {
     get: () =>
       ({
         navigate: async () => {},
-      } as unknown),
+      }) as unknown,
   },
 } as unknown as AppDependencies['url'];
 

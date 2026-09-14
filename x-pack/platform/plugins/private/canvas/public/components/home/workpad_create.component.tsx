@@ -10,8 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton } from '@elastic/eui';
 import type { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
 
-export interface Props
-  extends Omit<EuiButtonPropsForButton, 'iconType' | 'fill' | 'data-test-subj' | 'children'> {
+export interface Props extends Omit<
+  EuiButtonPropsForButton,
+  'iconType' | 'fill' | 'data-test-subj' | 'children'
+> {
   canUserWrite: boolean;
 }
 

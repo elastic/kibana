@@ -19,7 +19,7 @@ const createRegistry = (definition: {
   ({
     has: () => true,
     get: () => definition,
-  } as unknown as AttachmentTypeRegistry);
+  }) as unknown as AttachmentTypeRegistry;
 
 describe('validateAttachment', () => {
   const resolveContext = createResolveContextMock();

@@ -47,8 +47,10 @@ export class WorkspaceManager {
     // MinIO even when the host URL isn't resolvable from inside Docker.
     const endpoint =
       method === 'HEAD'
-        ? this.config.s3_endpoint ?? 'https://s3.amazonaws.com'
-        : this.config.s3_sandbox_endpoint ?? this.config.s3_endpoint ?? 'https://s3.amazonaws.com';
+        ? (this.config.s3_endpoint ?? 'https://s3.amazonaws.com')
+        : (this.config.s3_sandbox_endpoint ??
+          this.config.s3_endpoint ??
+          'https://s3.amazonaws.com');
     return presignS3Url({
       endpoint,
       bucket: this.config.sandbox_workspace_bucket!,

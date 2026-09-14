@@ -283,7 +283,7 @@ class TimeseriesVisualization extends Component {
             initialRender={initialRender}
             isLastBucketDropped={Boolean(
               model.drop_last_bucket ||
-                model.series.some((series) => series.series_drop_last_bucket)
+              model.series.some((series) => series.series_drop_last_bucket)
             )}
           />
         </div>

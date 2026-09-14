@@ -20,7 +20,7 @@ const buildLogger = (): ScopedLogger =>
     info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
-  } as unknown as ScopedLogger);
+  }) as unknown as ScopedLogger;
 
 interface MockBucketSpec {
   source: Record<string, unknown>;

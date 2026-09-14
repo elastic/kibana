@@ -21,13 +21,13 @@ describe('registerStepDefinitions', () => {
 
     registerStepDefinitions({
       workflowsExtensions,
-      getAiIndexService: () => ({} as AiIndexService),
+      getAiIndexService: () => ({}) as AiIndexService,
       isContextEngineEnabled: async () => true,
       checkWritePrivilege: async () => true,
       ...telemetry,
       feedbackAnalysis: {
-        getAiIndexService: () => ({} as AiIndexService),
-        getImprovementsService: () => ({} as ImprovementsServiceApi),
+        getAiIndexService: () => ({}) as AiIndexService,
+        getImprovementsService: () => ({}) as ImprovementsServiceApi,
         getAuditLogger: async () => undefined,
         isContextEngineEnabled: async () => true,
         isFeedbackLoopEnabled: async () => true,

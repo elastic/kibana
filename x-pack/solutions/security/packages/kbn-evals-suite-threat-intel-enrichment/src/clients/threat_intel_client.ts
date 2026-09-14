@@ -37,7 +37,10 @@ const INTERNAL_API_HEADERS = {
  * Each method POSTs the stage input and returns the route's parsed JSON body.
  */
 export class ThreatIntelClient {
-  constructor(private readonly kbnClient: KbnClient, private readonly log: ToolingLog) {}
+  constructor(
+    private readonly kbnClient: KbnClient,
+    private readonly log: ToolingLog
+  ) {}
 
   async assessRelevance(input: AssessRelevanceInput): Promise<RelevanceResponse> {
     this.log.debug(`[ThreatIntelClient] POST ${ASSESS_RELEVANCE_URL}`);

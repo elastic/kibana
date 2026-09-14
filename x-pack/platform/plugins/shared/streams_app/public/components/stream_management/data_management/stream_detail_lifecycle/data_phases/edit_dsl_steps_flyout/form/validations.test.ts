@@ -40,7 +40,7 @@ const createArg = ({
       provider: async () => undefined,
       value: undefined,
     },
-  } as unknown as ValidationFuncArg<FlatFormData, unknown>);
+  }) as unknown as ValidationFuncArg<FlatFormData, unknown>;
 
 describe('streams DSL steps flyout validations', () => {
   it('returns undefined for non-step paths', () => {

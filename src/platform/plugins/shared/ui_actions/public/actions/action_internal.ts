@@ -19,8 +19,9 @@ import { getNotifications } from '../services';
  */
 export class ActionInternal<
   Context extends object = object,
-  ActionExtension extends object = object
-> implements Action<Context, ActionExtension>, Presentable<Context>
+  ActionExtension extends object = object,
+>
+  implements Action<Context, ActionExtension>, Presentable<Context>
 {
   public readonly id: string;
   public readonly type: string;

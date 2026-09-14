@@ -22,11 +22,10 @@ export const contentLabel = i18n.translate('unifiedDocViewer.docView.logsOvervie
   defaultMessage: 'Content breakdown',
 });
 
-interface LogsOverviewHeaderProps
-  extends Pick<
-    DocViewRenderProps,
-    'filter' | 'onAddColumn' | 'onRemoveColumn' | 'hit' | 'dataView'
-  > {
+interface LogsOverviewHeaderProps extends Pick<
+  DocViewRenderProps,
+  'filter' | 'onAddColumn' | 'onRemoveColumn' | 'hit' | 'dataView'
+> {
   formattedDoc: LogDocumentOverview;
   renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
   cpsHasLinkedProjects?: boolean;

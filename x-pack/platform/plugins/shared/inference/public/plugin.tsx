@@ -18,15 +18,12 @@ import type {
 } from './types';
 import { createChatCompleteRestApi } from '../common/rest/chat_complete';
 
-export class InferencePlugin
-  implements
-    Plugin<
-      InferencePublicSetup,
-      InferencePublicStart,
-      InferenceSetupDependencies,
-      InferenceStartDependencies
-    >
-{
+export class InferencePlugin implements Plugin<
+  InferencePublicSetup,
+  InferencePublicStart,
+  InferenceSetupDependencies,
+  InferenceStartDependencies
+> {
   logger: Logger;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {

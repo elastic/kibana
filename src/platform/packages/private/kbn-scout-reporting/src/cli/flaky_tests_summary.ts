@@ -289,8 +289,8 @@ export const displaySummary = (
       dedent(`\
         Results
           Flaky                : ${summary.totalFlaky}${
-        flakyByFramework ? ` (${flakyByFramework})` : ''
-      }
+            flakyByFramework ? ` (${flakyByFramework})` : ''
+          }
           Consistently failing : ${summary.totalConsistentlyFailing}
         `),
     ]

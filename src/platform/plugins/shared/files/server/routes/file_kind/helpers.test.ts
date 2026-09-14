@@ -98,7 +98,7 @@ describe('helpers', () => {
           extension: 'txt',
           fileKind: 'test',
         } as FileJSON,
-      } as File);
+      }) as File;
 
     it('should return undefined when fileName is undefined', () => {
       const file = createFile('image/png');

@@ -28,10 +28,13 @@ export const getValidationAggregationBuilder: () => OptionsListValidationAggrega
     }: OptionsListRequestBody) => {
       let selectedOptionsFilters;
       if (selectedOptions) {
-        selectedOptionsFilters = selectedOptions.reduce((acc, currentOption) => {
-          acc[currentOption] = { match: { [fieldName]: currentOption } };
-          return acc;
-        }, {} as { [key: string]: { match: { [key: string]: OptionsListSelection } } });
+        selectedOptionsFilters = selectedOptions.reduce(
+          (acc, currentOption) => {
+            acc[currentOption] = { match: { [fieldName]: currentOption } };
+            return acc;
+          },
+          {} as { [key: string]: { match: { [key: string]: OptionsListSelection } } }
+        );
       }
 
       if (isEmpty(selectedOptionsFilters ?? [])) {

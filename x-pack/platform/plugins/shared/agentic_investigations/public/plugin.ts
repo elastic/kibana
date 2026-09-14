@@ -13,9 +13,10 @@ import type {
   AgenticInvestigationsPublicSetupDependencies,
 } from './types';
 
-export class AgenticInvestigationsPublicPlugin
-  implements Plugin<AgenticInvestigationsPublicPluginSetup, AgenticInvestigationsPublicPluginStart>
-{
+export class AgenticInvestigationsPublicPlugin implements Plugin<
+  AgenticInvestigationsPublicPluginSetup,
+  AgenticInvestigationsPublicPluginStart
+> {
   setup(
     _core: CoreSetup,
     { workflowsExtensions }: AgenticInvestigationsPublicSetupDependencies

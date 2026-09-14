@@ -47,10 +47,10 @@ export const useDateRangePicker = (isFlyout: boolean) => {
     ...DEFAULT_DATE_RANGE_OPTIONS,
     startDate: isFlyout
       ? DEFAULT_DATE_RANGE_OPTIONS.startDate
-      : startDateFromUrl ?? DEFAULT_DATE_RANGE_OPTIONS.startDate,
+      : (startDateFromUrl ?? DEFAULT_DATE_RANGE_OPTIONS.startDate),
     endDate: isFlyout
       ? DEFAULT_DATE_RANGE_OPTIONS.endDate
-      : endDateFromUrl ?? DEFAULT_DATE_RANGE_OPTIONS.endDate,
+      : (endDateFromUrl ?? DEFAULT_DATE_RANGE_OPTIONS.endDate),
   });
 
   const updateActionListDateRanges = useCallback(
@@ -293,45 +293,51 @@ export const useActionsLogFilter = ({
     isTypesFilter
       ? typesFilterInitialState
       : isStatusesFilter
-      ? RESPONSE_ACTION_STATUS.map((statusName) => ({
-          key: statusName,
-          label: (<ResponseActionStatusBadge status={statusName} />) as unknown as string,
-          searchableLabel: statusName,
-          checked: !isFlyout && statuses?.includes(statusName) ? 'on' : undefined,
-          'data-test-subj': `${filterName}-filter-option`,
-        }))
-      : isHostsFilter
-      ? []
-      : RESPONSE_ACTION_API_COMMANDS_NAMES.filter((commandName) => {
-          const featureFlags = ExperimentalFeaturesService.get();
+        ? RESPONSE_ACTION_STATUS.map((statusName) => ({
+            key: statusName,
+            label: (<ResponseActionStatusBadge status={statusName} />) as unknown as string,
+            searchableLabel: statusName,
+            checked: !isFlyout && statuses?.includes(statusName) ? 'on' : undefined,
+            'data-test-subj': `${filterName}-filter-option`,
+          }))
+        : isHostsFilter
+          ? []
+          : RESPONSE_ACTION_API_COMMANDS_NAMES.filter((commandName) => {
+              const featureFlags = ExperimentalFeaturesService.get();
 
-          if (
-            commandName === 'runscript' &&
-            !featureFlags.microsoftDefenderEndpointRunScriptEnabled &&
-            !featureFlags.crowdstrikeRunScriptEnabled
-          ) {
-            return false;
-          }
-          if (commandName === 'cancel' && !featureFlags.microsoftDefenderEndpointCancelEnabled) {
-            return false;
-          }
-          if (commandName === 'memory-dump' && !featureFlags.responseActionsEndpointMemoryDump) {
-            return false;
-          }
+              if (
+                commandName === 'runscript' &&
+                !featureFlags.microsoftDefenderEndpointRunScriptEnabled &&
+                !featureFlags.crowdstrikeRunScriptEnabled
+              ) {
+                return false;
+              }
+              if (
+                commandName === 'cancel' &&
+                !featureFlags.microsoftDefenderEndpointCancelEnabled
+              ) {
+                return false;
+              }
+              if (
+                commandName === 'memory-dump' &&
+                !featureFlags.responseActionsEndpointMemoryDump
+              ) {
+                return false;
+              }
 
-          return true;
-        }).map((commandName) => ({
-          key: commandName,
-          label: RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[commandName],
-          checked:
-            !isFlyout &&
-            commands
-              ?.map((command) => RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[command])
-              .includes(commandName)
-              ? 'on'
-              : undefined,
-          'data-test-subj': `${filterName}-filter-option`,
-        }))
+              return true;
+            }).map((commandName) => ({
+              key: commandName,
+              label: RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[commandName],
+              checked:
+                !isFlyout &&
+                commands
+                  ?.map((command) => RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[command])
+                  .includes(commandName)
+                  ? 'on'
+                  : undefined,
+              'data-test-subj': `${filterName}-filter-option`,
+            }))
   );
 
   useEffect(() => {

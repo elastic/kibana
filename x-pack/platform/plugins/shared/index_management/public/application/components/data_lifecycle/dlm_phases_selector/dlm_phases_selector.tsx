@@ -107,8 +107,8 @@ export const DlmPhasesSelector = ({
           },
         })
       : maximumRetentionPeriod && value.delete.enabled
-      ? strings.deleteMaximumRetentionText(maximumRetentionPeriod)
-      : undefined;
+        ? strings.deleteMaximumRetentionText(maximumRetentionPeriod)
+        : undefined;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>

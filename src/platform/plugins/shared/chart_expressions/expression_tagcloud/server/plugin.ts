@@ -25,10 +25,12 @@ interface StartDeps {
 export type ExpressionTagcloudPluginSetup = void;
 export type ExpressionTagcloudPluginStart = void;
 
-export class ExpressionTagcloudPlugin
-  implements
-    Plugin<ExpressionTagcloudPluginSetup, ExpressionTagcloudPluginStart, SetupDeps, StartDeps>
-{
+export class ExpressionTagcloudPlugin implements Plugin<
+  ExpressionTagcloudPluginSetup,
+  ExpressionTagcloudPluginStart,
+  SetupDeps,
+  StartDeps
+> {
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionTagcloudPluginSetup {
     expressions.registerFunction(tagcloudFunction);
   }

@@ -43,9 +43,8 @@ apiTest.describe(
 
       await kbnClient.savedObjects.clean({ types: SYNTHETICS_MONITOR_SO_TYPES });
       await apiServices.syntheticsPrivateLocations.installSyntheticsPackage();
-      privateLocation = await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(
-        'default'
-      );
+      privateLocation =
+        await apiServices.syntheticsPrivateLocations.addTestPrivateLocation('default');
     });
 
     apiTest.afterAll(async ({ apiServices, kbnClient }) => {

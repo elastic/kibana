@@ -21,26 +21,26 @@ const createDetection = (overrides: StoredDetection): Omit<Detection, 'processed
     rule_name: overrides.rule_name ?? 'Rule 1',
     change_point_type: overrides.change_point_type ?? 'spike',
     ...overrides,
-  } as Omit<Detection, 'processed'>);
+  }) as Omit<Detection, 'processed'>;
 
 const sourceResponse = (docs: Array<Record<string, unknown>>): ESQLSearchResponse =>
   ({
     columns: [{ name: '_source', type: 'object' }],
     values: docs.map((d) => [d]),
-  } as unknown as ESQLSearchResponse);
+  }) as unknown as ESQLSearchResponse;
 
 const countResponse = (total: number): ESQLSearchResponse =>
   ({
     columns: [{ name: 'total', type: 'long' }],
     values: [[total]],
-  } as unknown as ESQLSearchResponse);
+  }) as unknown as ESQLSearchResponse;
 
 // One row per detection_id that has a processed marker.
 const markerResponse = (ids: string[]): ESQLSearchResponse =>
   ({
     columns: [{ name: 'detection_id', type: 'keyword' }],
     values: ids.map((id) => [id]),
-  } as unknown as ESQLSearchResponse);
+  }) as unknown as ESQLSearchResponse;
 
 interface MockResponses {
   // Detections returned by the latest/find data query (already collapsed by groupBy).

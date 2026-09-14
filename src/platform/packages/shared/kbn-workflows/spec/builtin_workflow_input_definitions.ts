@@ -148,7 +148,7 @@ const builtinRefList = Object.keys(builtinWorkflowInputDefinitions).map(
  */
 export const builtinWorkflowInputDefinitionRefValuesForZod = builtinRefList as [
   string,
-  ...string[]
+  ...string[],
 ];
 
 /**

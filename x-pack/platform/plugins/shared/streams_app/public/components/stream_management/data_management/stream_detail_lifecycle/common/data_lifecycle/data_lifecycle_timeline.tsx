@@ -104,10 +104,10 @@ export const DataLifecycleTimeline = ({
             const isInvalidPhasePoint = isPhaseAligned
               ? phaseNameAtIndex !== undefined && invalidPhasesSet.has(phaseNameAtIndex)
               : segment.isDelete
-              ? invalidPhasesSet.has('delete')
-              : segment.isFrozen
-              ? invalidPhasesSet.has('frozen')
-              : false;
+                ? invalidPhasesSet.has('delete')
+                : segment.isFrozen
+                  ? invalidPhasesSet.has('frozen')
+                  : false;
             const isInvalidStepPoint =
               segment.stepIndex !== undefined && invalidStepIndicesSet.has(segment.stepIndex);
 

@@ -20,7 +20,10 @@ export class IndexPatternAdapter extends IndexAdapter {
   protected installIndexPromise?: Promise<InstallIndex>;
   protected readonly expandIndexPattern: boolean;
 
-  constructor(protected readonly prefix: string, options: IndexPatternAdapterParams) {
+  constructor(
+    protected readonly prefix: string,
+    options: IndexPatternAdapterParams
+  ) {
     const { expandIndexPattern = false, ...restOptions } = options;
     super(`${prefix}-*`, restOptions); // make indexTemplate `indexPatterns` match all index names
     this.expandIndexPattern = expandIndexPattern;

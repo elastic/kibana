@@ -9,15 +9,18 @@ import { assertNever } from '@kbn/std';
 import * as moment from 'moment';
 
 enum DurationUnit {
-  'Minute' = 'm',
-  'Hour' = 'h',
-  'Day' = 'd',
-  'Week' = 'w',
-  'Month' = 'M',
+  Minute = 'm',
+  Hour = 'h',
+  Day = 'd',
+  Week = 'w',
+  Month = 'M',
 }
 
 class Duration {
-  constructor(public readonly value: number, public readonly unit: DurationUnit) {
+  constructor(
+    public readonly value: number,
+    public readonly unit: DurationUnit
+  ) {
     if (isNaN(value) || value <= 0) {
       throw new Error('invalid duration value');
     }

@@ -12,7 +12,7 @@ import type {
 import type { SupportedHostOsType } from '../constants';
 
 export interface EndpointScript<
-  TFileType extends ScriptLibraryAllowedFileType | undefined = ScriptLibraryAllowedFileType
+  TFileType extends ScriptLibraryAllowedFileType | undefined = ScriptLibraryAllowedFileType,
 > {
   id: string;
   name: string;

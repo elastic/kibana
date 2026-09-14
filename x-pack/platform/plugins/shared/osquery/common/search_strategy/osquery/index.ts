@@ -64,27 +64,27 @@ export interface RequestOptionsPaginated<Field = string> extends RequestBasicOpt
 export type StrategyResponseType<T extends FactoryQueryTypes> = T extends OsqueryQueries.actions
   ? ActionsStrategyResponse
   : T extends OsqueryQueries.actionDetails
-  ? ActionDetailsStrategyResponse
-  : T extends OsqueryQueries.actionResults
-  ? ActionResultsStrategyResponse
-  : T extends OsqueryQueries.results
-  ? ResultsStrategyResponse
-  : T extends OsqueryQueries.scheduledActionResults
-  ? ScheduledActionResultsStrategyResponse
-  : T extends OsqueryQueries.exportResults
-  ? ExportResultsStrategyResponse
-  : never;
+    ? ActionDetailsStrategyResponse
+    : T extends OsqueryQueries.actionResults
+      ? ActionResultsStrategyResponse
+      : T extends OsqueryQueries.results
+        ? ResultsStrategyResponse
+        : T extends OsqueryQueries.scheduledActionResults
+          ? ScheduledActionResultsStrategyResponse
+          : T extends OsqueryQueries.exportResults
+            ? ExportResultsStrategyResponse
+            : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends OsqueryQueries.actions
   ? ActionsRequestOptions
   : T extends OsqueryQueries.actionDetails
-  ? ActionDetailsRequestOptions
-  : T extends OsqueryQueries.actionResults
-  ? ActionResultsRequestOptions
-  : T extends OsqueryQueries.results
-  ? ResultsRequestOptions
-  : T extends OsqueryQueries.scheduledActionResults
-  ? ScheduledActionResultsRequestOptions
-  : T extends OsqueryQueries.exportResults
-  ? ExportResultsRequestOptions
-  : never;
+    ? ActionDetailsRequestOptions
+    : T extends OsqueryQueries.actionResults
+      ? ActionResultsRequestOptions
+      : T extends OsqueryQueries.results
+        ? ResultsRequestOptions
+        : T extends OsqueryQueries.scheduledActionResults
+          ? ScheduledActionResultsRequestOptions
+          : T extends OsqueryQueries.exportResults
+            ? ExportResultsRequestOptions
+            : never;

@@ -91,7 +91,7 @@ export function getIngestionStatus(index?: ElasticsearchIndexWithIngestion): Ing
 }
 
 export function getLastUpdated(index?: ElasticsearchIndexWithIngestion): string | null {
-  return isConnectorIndex(index) ? index.connector.last_synced ?? 'never' : null;
+  return isConnectorIndex(index) ? (index.connector.last_synced ?? 'never') : null;
 }
 
 export function getContentExtractionDisabled(index?: ElasticsearchIndexWithIngestion): boolean {

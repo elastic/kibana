@@ -42,7 +42,7 @@ const makeAgent = (overrides?: Partial<Agent>): Agent =>
     non_identifying_attributes: { 'elastic.display.name': 'prod-west-gateway' },
     capabilities: ['logs', 'metrics', 'traces'],
     ...overrides,
-  } as Agent);
+  }) as Agent;
 
 describe('CollectorDetail', () => {
   let testRenderer: TestRenderer;

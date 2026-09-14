@@ -26,7 +26,7 @@ let mockProjectScopePickerProps: Record<string, any> = {};
 let mockStepDefineFormProps: Record<string, any> = {};
 let mockStepDetailsFormProps: Record<string, any> = {};
 const mockUseGetTransformCpsEnabled = jest.fn(
-  (_args?: { enabled: boolean }) => ({ data: true } as { data: boolean | undefined })
+  (_args?: { enabled: boolean }) => ({ data: true }) as { data: boolean | undefined }
 );
 
 jest.mock('../../../../app_dependencies');

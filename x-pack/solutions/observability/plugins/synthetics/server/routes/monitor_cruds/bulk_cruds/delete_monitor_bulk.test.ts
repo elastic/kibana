@@ -21,7 +21,7 @@ const installExecuteResult = (executeResult: any) => {
 const mockRouteContext = () =>
   ({
     request: { body: { ids: ['mon-1'] } } as any,
-  } as any);
+  }) as any;
 
 describe('deleteSyntheticsMonitorBulkRoute', () => {
   const route = deleteSyntheticsMonitorBulkRoute();

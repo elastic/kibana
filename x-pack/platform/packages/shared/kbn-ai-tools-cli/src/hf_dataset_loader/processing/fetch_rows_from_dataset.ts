@@ -74,10 +74,13 @@ async function readFromCsv(
     });
 
     // Add timeout to prevent hanging
-    const timeout = setTimeout(() => {
-      logger.error('CSV parsing timeout after 3 minutes');
-      reject(new Error('CSV parsing timeout'));
-    }, 3 * 60 * 1000); // 3 minutes
+    const timeout = setTimeout(
+      () => {
+        logger.error('CSV parsing timeout after 3 minutes');
+        reject(new Error('CSV parsing timeout'));
+      },
+      3 * 60 * 1000
+    ); // 3 minutes
 
     // Override resolve to clear timeout
     const originalResolve = resolve;

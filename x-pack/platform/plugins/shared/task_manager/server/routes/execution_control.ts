@@ -194,12 +194,12 @@ export function executionControlRoutes(params: ExecutionControlRouteParams) {
         !taskTypes
           ? `Task Manager execution resumed by ${username ?? 'unknown user'}.`
           : removedTaskTypes.length
-          ? `Task Manager execution resumed for task types [${removedTaskTypes.join(', ')}] by ${
-              username ?? 'unknown user'
-            }.`
-          : `Task Manager execution resume requested by ${
-              username ?? 'unknown user'
-            }, but none of the requested task types [${taskTypes.join(', ')}] were paused.`
+            ? `Task Manager execution resumed for task types [${removedTaskTypes.join(', ')}] by ${
+                username ?? 'unknown user'
+              }.`
+            : `Task Manager execution resume requested by ${
+                username ?? 'unknown user'
+              }, but none of the requested task types [${taskTypes.join(', ')}] were paused.`
       );
       return res.ok({ body: toResponseBody(next) });
     }

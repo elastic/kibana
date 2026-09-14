@@ -33,12 +33,15 @@ export function mappingFromFieldMap(
     const mapped = multi_fields
       ? {
           ...rest,
-          fields: multi_fields.reduce((acc, multi_field: MultiField) => {
-            acc[multi_field.name] = {
-              type: multi_field.type,
-            };
-            return acc;
-          }, {} as Record<string, unknown>),
+          fields: multi_fields.reduce(
+            (acc, multi_field: MultiField) => {
+              acc[multi_field.name] = {
+                type: multi_field.type,
+              };
+              return acc;
+            },
+            {} as Record<string, unknown>
+          ),
         }
       : rest;
 

@@ -56,7 +56,7 @@ describe('Create service account route', () => {
 
     const serviceAccountsMock =
       'serviceAccounts' in options
-        ? options.serviceAccounts ?? null
+        ? (options.serviceAccounts ?? null)
         : serviceAccountsServiceMock.createStart();
     mockRouteDefinitionParams.getServiceAccountsService.mockReturnValue(serviceAccountsMock);
 

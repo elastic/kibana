@@ -261,8 +261,8 @@ describe('createEpisodeAttachmentType', () => {
     it('returns undefined without fetching when user lacks Alerts: Read', async () => {
       const unauthorizedDefinition = createEpisodeAttachmentType({
         logger: loggerService,
-        getEpisodesClient: () => ({ get: getEpisode } as unknown as EpisodesClient),
-        getRulesClient: () => ({ getRule } as unknown as RulesClient),
+        getEpisodesClient: () => ({ get: getEpisode }) as unknown as EpisodesClient,
+        getRulesClient: () => ({ getRule }) as unknown as RulesClient,
         getPrivilegeChecker: () => createPrivilegeCheckerMock(false),
       });
 

@@ -28,7 +28,7 @@ const mockCard = (name: string, categories?: string[]) =>
     release: 'ga',
     categories: categories ?? [],
     isUnverified: false,
-  } as IntegrationCardItem);
+  }) as IntegrationCardItem;
 
 describe('applyCategoryBadgeAndStyling', () => {
   const mockInt = mockCard('crowdstrike', ['edr_xdr']);

@@ -33,7 +33,7 @@ const createPolicy = (overrides?: Partial<ActionPolicyResponse>): ActionPolicyRe
     updated_at: '2026-01-01T00:00:00.000Z',
     auth: { owner: 'alice', created_by_user: true },
     ...overrides,
-  } as ActionPolicyResponse);
+  }) as ActionPolicyResponse;
 
 describe('registerActionPolicyAutoAttach', () => {
   let currentAppId$: BehaviorSubject<string | null>;

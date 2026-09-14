@@ -74,7 +74,7 @@ const createMockExceptionItem = (
     type: 'simple',
     comments: [],
     ...overrides,
-  } as ExceptionListItemSchema);
+  }) as ExceptionListItemSchema;
 
 describe('getEndpointArtifactsTool', () => {
   let mockEndpointAppContextService: EndpointAppContextService;

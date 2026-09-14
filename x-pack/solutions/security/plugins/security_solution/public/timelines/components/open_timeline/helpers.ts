@@ -118,14 +118,14 @@ const setEventIdToNoteIds = (duplicate: boolean, eventIdToNoteIds: Note[] | null
   duplicate
     ? {}
     : eventIdToNoteIds != null
-    ? eventIdToNoteIds.reduce((acc, note) => {
-        if (note.eventId != null) {
-          const eventNotes = getOr([], note.eventId, acc);
-          return { ...acc, [note.eventId]: [...eventNotes, note.noteId] };
-        }
-        return acc;
-      }, {})
-    : {};
+      ? eventIdToNoteIds.reduce((acc, note) => {
+          if (note.eventId != null) {
+            const eventNotes = getOr([], note.eventId, acc);
+            return { ...acc, [note.eventId]: [...eventNotes, note.noteId] };
+          }
+          return acc;
+        }, {})
+      : {};
 
 const setPinnedEventsSaveObject = (
   duplicate: boolean,
@@ -134,21 +134,21 @@ const setPinnedEventsSaveObject = (
   duplicate
     ? {}
     : pinnedEventsSaveObject != null
-    ? pinnedEventsSaveObject.reduce(
-        (acc, pinnedEvent) => ({
-          ...acc,
-          ...(pinnedEvent.eventId != null ? { [pinnedEvent.eventId]: pinnedEvent } : {}),
-        }),
-        {}
-      )
-    : {};
+      ? pinnedEventsSaveObject.reduce(
+          (acc, pinnedEvent) => ({
+            ...acc,
+            ...(pinnedEvent.eventId != null ? { [pinnedEvent.eventId]: pinnedEvent } : {}),
+          }),
+          {}
+        )
+      : {};
 
 const setPinnedEventIds = (duplicate: boolean, pinnedEventIds: string[] | null | undefined) =>
   duplicate
     ? {}
     : pinnedEventIds != null
-    ? pinnedEventIds.reduce((acc, pinnedEventId) => ({ ...acc, [pinnedEventId]: true }), {})
-    : {};
+      ? pinnedEventIds.reduce((acc, pinnedEventId) => ({ ...acc, [pinnedEventId]: true }), {})
+      : {};
 
 const getTemplateTimelineId = (
   timeline: TimelineResponse,
@@ -246,14 +246,16 @@ export const defaultTimelineToTimelineModel = (
           }
         : timeline.dateRange,
     dataProviders: getDataProviders(duplicate, timeline.dataProviders, timelineType),
-    excludedRowRendererIds: isTemplate ? [] : timeline.excludedRowRendererIds ?? RowRendererValues,
+    excludedRowRendererIds: isTemplate
+      ? []
+      : (timeline.excludedRowRendererIds ?? RowRendererValues),
     eventIdToNoteIds: setEventIdToNoteIds(duplicate, timeline.eventIdToNoteIds),
     filters: timeline.filters != null ? timeline.filters.map(setTimelineFilters) : [],
     isFavorite: duplicate
       ? false
       : timeline.favorite != null
-      ? timeline.favorite.length > 0
-      : false,
+        ? timeline.favorite.length > 0
+        : false,
     noteIds: duplicate ? [] : timeline.noteIds != null ? timeline.noteIds : [],
     pinnedEventIds: setPinnedEventIds(duplicate, timeline.pinnedEventIds),
     pinnedEventsSaveObject: setPinnedEventsSaveObject(duplicate, timeline.pinnedEventsSaveObject),

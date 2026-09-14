@@ -9,7 +9,7 @@
 
 export type ServerSentEventBase<
   TEventType extends string,
-  TData extends Record<string, any>
+  TData extends Record<string, any>,
 > = keyof TData extends 'type'
   ? never
   : TData & {

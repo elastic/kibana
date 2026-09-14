@@ -125,7 +125,7 @@ export function loadEmbeddableData(
     : ({} as LensPublicCallbacks);
 
   const getConsumerMessages = () =>
-    apiHasUserMessages(parentApi) ? parentApi.userMessages ?? [] : [];
+    apiHasUserMessages(parentApi) ? (parentApi.userMessages ?? []) : [];
 
   // Some convenience api for the user messaging
   const {
@@ -390,9 +390,8 @@ export function loadEmbeddableData(
       .pipe(filter((updatedGroupId) => hasAnnotationGroupReference(getState(), updatedGroupId)))
       .subscribe(async (updatedGroupId) => {
         try {
-          const libraryGroup = await services.eventAnnotationService.loadAnnotationGroup(
-            updatedGroupId
-          );
+          const libraryGroup =
+            await services.eventAnnotationService.loadAnnotationGroup(updatedGroupId);
           const updated = updateAttributesWithAnnotation(getState(), updatedGroupId, libraryGroup);
           if (updated) {
             internalApi.updateAttributes(updated.attributes);

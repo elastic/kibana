@@ -61,8 +61,8 @@ export async function getHealthScanResults(
       status: isScanScheduledSoon
         ? 'pending'
         : scanTask?.state.isDone === false
-        ? 'pending'
-        : 'completed',
+          ? 'pending'
+          : 'completed',
     },
     total,
     searchAfter: nextSearchAfter ? encodeSearchAfter(nextSearchAfter) : undefined,
@@ -109,7 +109,7 @@ async function getScanResults(
 
   const hits = result.hits.hits;
   const total =
-    typeof result.hits.total === 'number' ? result.hits.total : result.hits.total?.value ?? 0;
+    typeof result.hits.total === 'number' ? result.hits.total : (result.hits.total?.value ?? 0);
   const lastHit = hits[hits.length - 1];
   const nextSearchAfter = lastHit && hits.length === size ? lastHit.sort : undefined;
 

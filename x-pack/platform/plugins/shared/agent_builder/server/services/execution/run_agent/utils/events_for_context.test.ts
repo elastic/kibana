@@ -38,7 +38,7 @@ const conversationWith = (parts: Partial<Conversation>): Conversation =>
     updated_at: '2026-01-01T00:00:00.000Z',
     rounds: [],
     ...parts,
-  } as Conversation);
+  }) as Conversation;
 
 describe('eventsForContext', () => {
   it('normalizes an events-native conversation from its timeline, not its stored rounds', () => {

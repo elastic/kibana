@@ -32,10 +32,13 @@ export function ContentPackObjectsList({
   const [selection, setSelection] = useState<Record<string, { selected: boolean }>>({
     ...objects
       .filter((entry): entry is ContentPackStream => entry.type === 'stream')
-      .reduce((map, stream) => {
-        map[stream.name] = { selected: true };
-        return map;
-      }, {} as Record<string, { selected: boolean }>),
+      .reduce(
+        (map, stream) => {
+          map[stream.name] = { selected: true };
+          return map;
+        },
+        {} as Record<string, { selected: boolean }>
+      ),
   });
 
   const { rootEntry, descendants } = useMemo(() => {

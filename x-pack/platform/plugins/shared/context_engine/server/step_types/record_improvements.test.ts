@@ -50,7 +50,7 @@ const buildStep = ({
 } = {}) => {
   const get = jest.fn().mockResolvedValue(aiIndex);
   const definition = getRecordImprovementsStepDefinition({
-    getAiIndexService: () => ({ get } as unknown as AiIndexService),
+    getAiIndexService: () => ({ get }) as unknown as AiIndexService,
     getImprovementsService: () => improvementsService,
     getAuditLogger: async () => auditLogger,
     isContextEngineEnabled: async () => contextEngineEnabled,
@@ -167,7 +167,7 @@ describe('getRecordImprovementsStepDefinition', () => {
     const context = createMockStepContext({ input: INPUT, esClient: {} });
     const definition = getRecordImprovementsStepDefinition({
       getAiIndexService: () =>
-        ({ get: jest.fn().mockRejectedValue(new AiIndexNotFoundError('orders')) } as never),
+        ({ get: jest.fn().mockRejectedValue(new AiIndexNotFoundError('orders')) }) as never,
       getImprovementsService: () => improvementsService,
       getAuditLogger: async () => undefined,
       isContextEngineEnabled: async () => true,

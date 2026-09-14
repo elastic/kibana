@@ -17,11 +17,11 @@ const BUILT_IN_ACTION_GROUPS: Set<string> = new Set(getBuiltinActionGroups().map
 
 export type ActionGroupWithCondition<
   T,
-  ActionGroupIds extends string
+  ActionGroupIds extends string,
 > = ActionGroup<ActionGroupIds> &
   (
     | // allow isRequired=false with or without conditions
-    {
+      {
         conditions?: T;
         isRequired?: false;
       }

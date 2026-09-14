@@ -12,7 +12,7 @@ import { Serializable } from '../serializable';
 
 export abstract class AbstractSpan<
   TFields extends Fields,
-  TChild extends AbstractSpan<TFields, TChild>
+  TChild extends AbstractSpan<TFields, TChild>,
 > extends Serializable<TFields> {
   protected _children: TChild[] = [];
 

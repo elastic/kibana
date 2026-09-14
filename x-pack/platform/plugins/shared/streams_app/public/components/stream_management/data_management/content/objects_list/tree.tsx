@@ -44,16 +44,19 @@ export function StreamTree({
   const [rows, setRows] = React.useState(
     streams
       .sort((a, b) => a.name.localeCompare(b.name))
-      .reduce((map, stream, index, sorted) => {
-        const next = sorted[index + 1];
-        map[stream.name] = {
-          name: stream.name,
-          expanded: true,
-          selected: true,
-          parent: !!(next && isDescendantOf(stream.name, next.name)),
-        };
-        return map;
-      }, {} as Record<string, StreamRow>)
+      .reduce(
+        (map, stream, index, sorted) => {
+          const next = sorted[index + 1];
+          map[stream.name] = {
+            name: stream.name,
+            expanded: true,
+            selected: true,
+            parent: !!(next && isDescendantOf(stream.name, next.name)),
+          };
+          return map;
+        },
+        {} as Record<string, StreamRow>
+      )
   );
 
   const sortedRows = React.useMemo(() => {

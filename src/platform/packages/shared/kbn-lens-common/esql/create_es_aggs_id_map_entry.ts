@@ -47,25 +47,25 @@ export function createEsAggsIdMapEntry({
 }: CreateEsAggsIdMapEntryParams): OriginalColumn[] {
   const label = col.customLabel
     ? col.label
-    : getDefaultLabelFn(col.operationType)?.(
+    : (getDefaultLabelFn(col.operationType)?.(
         col,
         layer.columns,
         indexPattern,
         uiSettings,
         dateRange
-      ) ?? col.label;
+      ) ?? col.label);
 
   // Build the entry with proper typing for the discriminated union
   if (
     isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col) &&
     interval !== undefined
   ) {
-    const sourceField = col.sourceField ? col.sourceField : indexPattern.timeFieldName ?? '';
+    const sourceField = col.sourceField ? col.sourceField : (indexPattern.timeFieldName ?? '');
     const { usedField } = getTimeZoneAndInterval({ ...col, sourceField }, indexPattern);
 
     const dropPartials = Boolean(
       col.params?.dropPartials &&
-        (indexPattern.timeFieldName === usedField?.name || !col.params?.ignoreTimeRange)
+      (indexPattern.timeFieldName === usedField?.name || !col.params?.ignoreTimeRange)
     );
 
     return [

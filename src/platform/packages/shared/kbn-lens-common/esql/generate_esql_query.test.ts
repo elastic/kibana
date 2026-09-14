@@ -403,8 +403,8 @@ describe('generateEsqlQuery', () => {
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.esql).toBe(
-        // eslint-disable-next-line prettier/prettier
-          'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) WHERE KQL(\"geo.src:\\\"US\\\"\") BY BUCKET(order_date, 75, ?_tstart, ?_tend)'
+        // prettier-ignore
+        'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) WHERE KQL(\"geo.src:\\\"US\\\"\") BY BUCKET(order_date, 75, ?_tstart, ?_tend)'
       );
     }
   });

@@ -434,9 +434,12 @@ export const mockIndexFields = flatten(
   Object.values(mockBrowserFields).map((fieldItem) => Object.values(fieldItem.fields ?? {}))
 );
 
-export const mockIndexFieldsByName = mockIndexFields.reduce((acc, indexFieldObj) => {
-  if (indexFieldObj.name) {
-    acc[indexFieldObj.name] = indexFieldObj;
-  }
-  return acc;
-}, {} as { [fieldName: string]: Partial<FieldSpec> });
+export const mockIndexFieldsByName = mockIndexFields.reduce(
+  (acc, indexFieldObj) => {
+    if (indexFieldObj.name) {
+      acc[indexFieldObj.name] = indexFieldObj;
+    }
+    return acc;
+  },
+  {} as { [fieldName: string]: Partial<FieldSpec> }
+);

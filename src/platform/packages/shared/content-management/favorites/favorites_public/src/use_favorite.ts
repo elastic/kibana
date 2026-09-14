@@ -48,12 +48,12 @@ export const useFavorite = ({ id }: { id?: string }): FavoriteToggleState | unde
     !id || !data
       ? undefined
       : isAdding
-      ? 'adding'
-      : isRemoving
-      ? 'removing'
-      : isPersistedFavorite
-      ? 'favorited'
-      : 'unfavorited';
+        ? 'adding'
+        : isRemoving
+          ? 'removing'
+          : isPersistedFavorite
+            ? 'favorited'
+            : 'unfavorited';
 
   return useMemo(() => (status ? { status, onToggle } : undefined), [status, onToggle]);
 };

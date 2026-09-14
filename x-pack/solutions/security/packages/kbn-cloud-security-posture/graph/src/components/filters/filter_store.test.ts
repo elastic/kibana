@@ -32,7 +32,7 @@ const buildPhraseFilter = (field: string, value: string): Filter =>
       params: { query: value },
     },
     query: { match_phrase: { [field]: value } },
-  } as Filter);
+  }) as Filter;
 
 // Generates a unique scope ID per call to avoid cross-test pollution
 let scopeCounter = 0;

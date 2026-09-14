@@ -36,8 +36,8 @@ const detectionSignal = (
   ...(evidence === 'found'
     ? { evidence: { esql_query: 'FROM logs | LIMIT 1', result: 'found' as const } }
     : evidence === 'quiet'
-    ? { evidence: null }
-    : {}),
+      ? { evidence: null }
+      : {}),
   metadata: {
     rule_uuid: ruleUuid,
     rule_name: ruleUuid,

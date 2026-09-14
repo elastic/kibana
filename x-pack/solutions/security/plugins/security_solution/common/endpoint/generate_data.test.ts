@@ -521,13 +521,9 @@ describe('data generator', () => {
     });
 
     it('with n-1 process events', () => {
-      for (let i = events.length - 2; i > 0; ) {
+      for (let i = events.length - 2; i > 0;) {
         const parentEntityIdOfChild = parentEntityIDSafeVersion(events[i]);
-        for (
-          ;
-          --i >= -1 && (events[i].event?.kind !== 'event' || !isCategoryProcess(events[i]));
-
-        ) {
+        for (; --i >= -1 && (events[i].event?.kind !== 'event' || !isCategoryProcess(events[i]));) {
           // related event - skip it
         }
         expect(i).toBeGreaterThanOrEqual(0);
