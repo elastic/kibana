@@ -63,7 +63,7 @@ settings:
 # Adjust these values to tune workflow behaviour without editing step logic.
 
 consts:
-  workflow_version: "v0.0.3"
+  workflow_version: "v0.0.4"
 
   # When false, the workflow skips alerts that already carry the workflow tag prefix.
   # Set to true to re-evaluate previously analyzed alerts.
@@ -1318,6 +1318,7 @@ steps:
         with:
           message: >-
             Alert analysis finished for rule {{ event.rule.name }}:
-            {{ variables.all_verdicts | size }} verdicts for {{ variables.pending_alert_count }} alerts
-            in {{ variables.batch_llm_calls }} model call(s);
-            {{ variables.auto_close_ids | size }} alert(s) matched the auto-close thresholds.
+            {{ steps.classify_alert_batches.output.succeeded }} of
+            {{ steps.classify_alert_batches.output.total }} batch(es) completed for
+            {{ variables.pending_alert_count }} alerts
+            ({{ steps.classify_alert_batches.output.failed }} failed).
