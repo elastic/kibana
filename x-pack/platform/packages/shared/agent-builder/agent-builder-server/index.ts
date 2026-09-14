@@ -177,7 +177,12 @@ export type {
   DeleteAttachmentArgs,
   ListAttachmentsArgs,
 } from './attachments';
-export type { ConversationPublicClient, ConversationCreatePublicRequest } from './conversations';
+export type {
+  ConversationAddEventInput,
+  ConversationAddEventsRequest,
+  ConversationCreatePublicRequest,
+  ConversationPublicClient,
+} from './conversations';
 export { describeZodSchema, formatSchemaForLlm } from './tools';
 export type {
   AvailabilityContext,
