@@ -84,9 +84,10 @@ export type CloudConnectorVars =
 export type VerificationStatus = 'pending' | 'success' | 'failed';
 
 /**
- * IaC provenance written on the connector when the user confirms
- * (saves the package policy after applying the template). Never written
- * on render. After a static-template fallback, `templateSha` is null.
+ * IaC provenance stored on the cloud connector saved object. Written when
+ * the user confirms (saves the package policy after applying the template).
+ * Never written on render. After a static-template fallback, `templateSha`
+ * is null.
  */
 export interface CloudConnectorIacState {
   templateSha?: string | null;

@@ -26,6 +26,7 @@ import { ORGANIZATION_ACCOUNT } from '../constants';
 
 import { CloudConnectorInputFields } from '../form/cloud_connector_input_fields';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
+import { setPendingCloudConnectorIac } from '../../../hooks/use_request/pending_cloud_connector_iac';
 import { useCloudConnectorTemplate } from '../hooks/use_cloud_connector_template';
 
 import { getAwsCloudConnectorsCredentialsFormOptions } from './aws_cloud_connector_options';
@@ -34,13 +35,13 @@ import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_guide
 export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   newPolicy,
   packageInfo,
-  updatePolicy,
   cloud,
   hasInvalidRequiredVars = false,
   credentials,
   setCredentials,
   accountType = ORGANIZATION_ACCOUNT,
   iacTemplateUrl,
+  templateSha,
 }) => {
   // The rendered template must cover every policy template the user enabled
   // in this policy, and only the inputs they actually turned on.
@@ -72,28 +73,12 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
     iacTemplateUrl,
     packageName: packageInfo?.name,
     policyTemplates: enabledPolicyTemplates,
-    templateSha: newPolicy.cloud_connector_iac?.templateSha ?? undefined,
+    templateSha,
   });
 
   useEffect(() => {
-    if (!iacConfirm) {
-      return;
-    }
-    const current = newPolicy.cloud_connector_iac;
-    if (
-      current?.templateSha === iacConfirm.templateSha &&
-      current?.blueprintId === iacConfirm.blueprintId &&
-      current?.blueprintVersion === iacConfirm.blueprintVersion
-    ) {
-      return;
-    }
-    updatePolicy({
-      updatedPolicy: {
-        ...newPolicy,
-        cloud_connector_iac: iacConfirm,
-      },
-    });
-  }, [iacConfirm, newPolicy, updatePolicy]);
+    setPendingCloudConnectorIac(newPolicy.name, iacConfirm);
+  }, [iacConfirm, newPolicy.name]);
 
   // Use accessor to get vars from the correct location (package-level or input-level)
   const inputVars = extractRawCredentialVars(newPolicy, packageInfo);
