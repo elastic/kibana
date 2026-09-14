@@ -35,6 +35,7 @@ interface WorkflowDetailPageProps {
 
 const mockUseWorkflowsBreadcrumbs = jest.fn();
 const mockUseWorkflowUrlState = jest.fn();
+const mockUseGlobalExecutionsViewEnabled = jest.fn();
 
 let mockLoadConnectors = jest.fn();
 let mockLoadWorkflow = jest.fn();
@@ -48,6 +49,9 @@ jest.mock('../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs', ()
 }));
 jest.mock('../../../hooks/use_workflow_url_state', () => ({
   useWorkflowUrlState: () => mockUseWorkflowUrlState(),
+}));
+jest.mock('../../../hooks/use_global_executions_view_enabled', () => ({
+  useGlobalExecutionsViewEnabled: () => mockUseGlobalExecutionsViewEnabled(),
 }));
 
 jest.mock('@kbn/workflows-ui', () => ({
@@ -106,13 +110,23 @@ jest.mock('./workflow_detail_test_step_modal', () => ({
   ),
 }));
 jest.mock('../../../features/workflow_execution_detail', () => ({
+  WorkflowExecutionFlyout: ({ executionId }: { executionId: string }) => (
+    <div data-test-subj="workflow-execution-flyout">{executionId}</div>
+  ),
+}));
+jest.mock('../../../features/workflow_execution_detail_old', () => ({
   WorkflowExecutionDetail: ({ executionId }: { executionId: string }) => (
     <div data-test-subj="workflow-execution-detail">{executionId}</div>
   ),
 }));
-jest.mock('../../../features/workflow_execution_list/ui/workflow_execution_list_stateful', () => ({
+jest.mock('../../../features/workflow_execution_list_old', () => ({
   WorkflowExecutionList: ({ workflowId }: { workflowId: string }) => (
     <div data-test-subj="workflow-execution-list">{workflowId}</div>
+  ),
+}));
+jest.mock('../../../features/workflow_execution_list/ui/workflow_execution_list_flyout', () => ({
+  WorkflowExecutionListFlyout: ({ workflowId }: { workflowId: string }) => (
+    <div data-test-subj="workflow-execution-list-flyout">{workflowId}</div>
   ),
 }));
 
@@ -185,6 +199,7 @@ describe('WorkflowDetailPage', () => {
     mockLoadWorkflow = jest.fn().mockReturnValue(Promise.resolve());
 
     mockUseWorkflowsBreadcrumbs.mockImplementation(() => undefined);
+    mockUseGlobalExecutionsViewEnabled.mockReturnValue(false);
     mockUseWorkflowsCapabilities.mockReturnValue(mockWorkflowsManagementCapabilities);
     mockUseWorkflowUrlState.mockReturnValue({
       activeTab: 'workflow' as const,
@@ -354,6 +369,49 @@ describe('WorkflowDetailPage', () => {
       expect(screen.getByTestId('workflow-detail-header')).toBeInTheDocument();
       expect(screen.getByTestId('workflow-detail-editor')).toBeInTheDocument();
       expect(screen.getByTestId('workflow-editor-layout')).toBeInTheDocument();
+      expect(screen.queryByTestId('workflow-execution-list')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workflow-execution-detail')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('when executions view flag is enabled', () => {
+    beforeEach(() => {
+      mockUseGlobalExecutionsViewEnabled.mockReturnValue(true);
+    });
+
+    it('does not mount the sidebar execution list on the executions tab', () => {
+      mockUseWorkflowUrlState.mockReturnValue({
+        activeTab: 'executions' as const,
+        selectedExecutionId: undefined,
+        setSelectedExecution: jest.fn(),
+        setActiveTab: jest.fn(),
+      });
+
+      renderWithProviders({ id: 'test-workflow-123' }, (s) => {
+        s.dispatch(setWorkflow(mockWorkflow));
+      });
+
+      expect(screen.queryByTestId('workflow-execution-list')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workflow-execution-detail')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workflow-execution-flyout')).not.toBeInTheDocument();
+    });
+
+    it('mounts execution flyouts instead of the sidebar when an execution is selected', () => {
+      mockUseWorkflowUrlState.mockReturnValue({
+        activeTab: 'executions' as const,
+        selectedExecutionId: 'execution-123',
+        setSelectedExecution: jest.fn(),
+        setActiveTab: jest.fn(),
+      });
+
+      renderWithProviders({ id: 'test-workflow-123' }, (s) => {
+        s.dispatch(setWorkflow(mockWorkflow));
+      });
+
+      expect(screen.getByTestId('workflow-execution-list-flyout')).toHaveTextContent(
+        'test-workflow-123'
+      );
+      expect(screen.getByTestId('workflow-execution-flyout')).toHaveTextContent('execution-123');
       expect(screen.queryByTestId('workflow-execution-list')).not.toBeInTheDocument();
       expect(screen.queryByTestId('workflow-execution-detail')).not.toBeInTheDocument();
     });

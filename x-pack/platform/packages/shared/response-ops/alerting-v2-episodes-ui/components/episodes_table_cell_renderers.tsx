@@ -24,6 +24,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
+import { DURATION_LOWER_BOUND_FIELD } from '@kbn/alerting-v2-common-queries';
 import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import type { EpisodeActionState, EpisodeStatusGroupAction } from '../types/action';
 import { AlertingEpisodeGroupingTags } from './grouping/alerting_episode_grouping_tags';
@@ -31,6 +32,7 @@ import { AlertEpisodeStatusBadges } from './status/status_badges';
 import { TagBadges } from './actions/tags';
 import { AlertEpisodeSeverityBadge } from './severity/episode_severity_badge';
 import type { EpisodeSeverity } from './severity/severity_utils';
+import { EMPTY_VALUE } from '../constants';
 import * as i18n from './translations';
 
 type Rule = FindRulesResponse['items'][number];
@@ -62,6 +64,31 @@ export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
       episodeAction={episodeAction}
       groupAction={groupAction}
     />
+  );
+};
+
+/**
+ * Renders the episode duration, marked as a lower bound when the query did not
+ * see the episode start because it predates the selected time range.
+ */
+export const EpisodeDurationCell = ({ row, columnId, dataView }: CellRendererProps) => {
+  const duration = row.flattened[columnId] as number | null | undefined;
+  if (duration == null) {
+    return <>{EMPTY_VALUE}</>;
+  }
+  const field = dataView.getFieldByName(columnId);
+  const formatted = field
+    ? dataView.getFormatterForField(field).convertToText(duration)
+    : `${duration}`;
+  if (!row.flattened[DURATION_LOWER_BOUND_FIELD]) {
+    return <>{formatted}</>;
+  }
+  return (
+    <EuiToolTip content={i18n.DURATION_LOWER_BOUND_TOOLTIP}>
+      <span tabIndex={0} data-test-subj="episodeDurationLowerBound">
+        {i18n.getDurationLowerBoundLabel(formatted)}
+      </span>
+    </EuiToolTip>
   );
 };
 
@@ -150,8 +177,6 @@ export const EpisodeRuleCell = ({
     const episodeData = parseEpisodeDataJson(row.flattened.episode_data);
     const dataRuleName =
       typeof episodeData.rule_name === 'string' ? episodeData.rule_name : undefined;
-    // External alerts: prefer data.rule_name when the caller put it in data.*,
-    // then fall back to rule.name from the event.
     const displayName = dataRuleName ?? eventRuleName;
 
     if (displayName) {
@@ -162,14 +187,9 @@ export const EpisodeRuleCell = ({
       return <span>{i18n.RULE_CELL_EMPTY_RULE}</span>;
     }
 
-    // There is no rule to link to and no name to show, so identify the episode by rule id. The
-    // struck through link icon and its tooltip say why this row has no link, and the id chip is a
-    // button because a tooltip alone cannot offer the full id for copying
     return (
       <span
         css={css`
-          /* One line tall with the contents centered, so the icons line up with the text
-             optically. Top aligned because a box as tall as the line would grow it. */
           display: inline-flex;
           align-items: center;
           block-size: 1lh;
@@ -208,14 +228,10 @@ export const EpisodeRuleCell = ({
           afterMessage={i18n.RULE_CELL_RULE_ID_COPIED}
         >
           {(copy) => (
-            // EuiLink without href renders a plain button we can attach the copy action to
             // eslint-disable-next-line @elastic/eui/require-href-for-link
             <EuiLink color="subdued" onClick={copy} data-test-subj="episodeRuleCellCopyRuleId">
               <EuiCode
                 css={css`
-                  /* Inline flex so the chip keeps its own formatting context and the link's hover
-                     underline stops at its edge. Block padding and the inherited line height would
-                     make it taller than its line. */
                   display: inline-flex;
                   align-items: center;
                   padding-block: 0;
@@ -236,7 +252,6 @@ export const EpisodeRuleCell = ({
 
   const episodeData = parseEpisodeDataJson(row.flattened.episode_data);
   const groupingFields = rule.grouping?.fields ?? [];
-  // Single line rows have no room for the query. `auto` (-1) grows to fit whatever we render.
   const showQuery = rowHeight !== ROWS_HEIGHT_OPTIONS.single;
   const detailsHref = getRuleDetailsHref(ruleId);
   // The href stays on the link either way, so opening the rule page in a new tab keeps working.
@@ -261,7 +276,7 @@ export const EpisodeRuleCell = ({
           />
         </>
       ) : null}
-      {showQuery ? (
+      {showQuery && rule.query ? (
         <>
           <br />
           <EuiCode

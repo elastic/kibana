@@ -23,7 +23,7 @@ export const GetWatchlistRequestParams = lazySchema(() =>
     /**
      * Unique ID of the watchlist
      */
-    id: z.string(),
+    id: z.string().describe('Unique ID of the watchlist'),
   })
 );
 export type GetWatchlistRequestParams = z.infer<typeof GetWatchlistRequestParams>;
