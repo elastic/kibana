@@ -401,7 +401,7 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       cloud: { provider: 'aws' },
     },
   },
-  // --- IDP: IAM event types (idpEventTypeCondition), not asset kind ---
+  // --- IAM event types without `event.kind: asset`: no longer an IdP create path ---
   {
     id: 'idp-iam-okta-user-id',
     query: {
@@ -414,13 +414,10 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       event: { kind: 'any-random', category: 'iam', type: 'user', module: 'okta' },
       host: { entity: { id: 'host-505' } },
     },
-    expectedEuid: 'user:user-505@okta',
-    expectedMeta: {
-      namespace: 'okta',
-      confidence: ENTITY_CONFIDENCE.High,
-      entityName: 'karen.green',
-    },
+    expectedEuid: undefined,
+    expectNoPerDocumentDsl: true,
   },
+  // IAM lifecycle doc with a valid `user.name` + `host.id` pair: classified as `local`.
   {
     id: 'idp-iam-azure-null-kind-email',
     query: {
@@ -436,10 +433,10 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       event: { kind: null, category: 'iam', type: 'creation', module: 'azure' },
       host: { id: 'host-606' },
     },
-    expectedEuid: 'user:larry@example.com@entra_id',
+    expectedEuid: 'user:larry.black@host-606@local',
     expectedMeta: {
-      namespace: 'entra_id',
-      confidence: ENTITY_CONFIDENCE.High,
+      namespace: USER_ENTITY_NAMESPACE.Local,
+      confidence: ENTITY_CONFIDENCE.Medium,
       entityName: 'larry.black',
     },
   },
@@ -453,12 +450,8 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       event: { category: 'iam', type: 'group', module: 'entityanalytics_ad' },
       host: { name: 'server-07' },
     },
-    expectedEuid: 'user:mary.blue@corp@active_directory',
-    expectedMeta: {
-      namespace: 'active_directory',
-      confidence: ENTITY_CONFIDENCE.High,
-      entityName: 'mary.blue',
-    },
+    expectedEuid: undefined,
+    expectNoPerDocumentDsl: true,
   },
   // --- Namespace from data_stream.dataset (first segment) ---
   {
@@ -469,12 +462,8 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       event: { category: 'iam', type: 'deletion' },
       data_stream: { dataset: 'entityanalytics_okta.users' },
     },
-    expectedEuid: 'user:okta.from.dataset@okta',
-    expectedMeta: {
-      namespace: 'okta',
-      confidence: ENTITY_CONFIDENCE.High,
-      entityName: 'okta.from.dataset',
-    },
+    expectedEuid: undefined,
+    expectNoPerDocumentDsl: true,
   },
   {
     id: 'idp-asset-aws-from-dataset',
@@ -646,8 +635,9 @@ export const USER_SCOUT_INVALID_PER_DOCUMENT_FILTER_EXAMPLES: readonly UserScout
 
 /**
  * Expected number of user documents in `es_archives/updates` that pass
- * `getEuidDslDocumentsContainsIdFilter('user')` (documentsFilter ∧ postAggFilter).
- * Keep in sync: archive user docs with defined EUID; this table lists archive-backed cases with EUID + cases without; ingested-only
- * case is excluded here.
+ * `getEuidDslDocumentsContainsIdFilter('user')`, which is built from `documentsFilter` only (see
+ * `common/domain/euid/dsl.ts`). Documents that pass `documentsFilter` but fail `postAggFilter` are
+ * still counted here, so this number is independent of the `postAggFilter` gates. Ingested-only
+ * cases are excluded.
  */
 export const USER_TS_ARCHIVE_EXPECTED_CONTAINS_ID_COUNT = 29;

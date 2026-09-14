@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 
 export const getKnowledgeIndicatorStreamName = (knowledgeIndicator: KnowledgeIndicator): string =>
   knowledgeIndicator.kind === 'feature'

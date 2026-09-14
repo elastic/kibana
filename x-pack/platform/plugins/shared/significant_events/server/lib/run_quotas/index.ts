@@ -6,6 +6,7 @@
  */
 
 export { consumeRunQuota } from './consume';
+export { assertCanManageRunQuotas, canManageRunQuotas } from './privileges';
 export {
   createRunQuotaInternalRepository,
   patchRunQuotaSettings,

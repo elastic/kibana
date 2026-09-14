@@ -75,6 +75,7 @@ export const getActionResultsRoute = (
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
         try {
+          const cpsActive = await osqueryContext.isCpsActive(request);
           let integrationNamespaces: Record<string, string[]> = {};
 
           const logger = osqueryContext.logFactory.get('get_action_results');
@@ -102,14 +103,14 @@ export const getActionResultsRoute = (
           const search = await getScopedSearch(
             context,
             request,
-            osqueryContext.cpsEnabled,
+            cpsActive,
             osqueryContext.getStartServices
           );
 
-          if (osqueryContext.cpsEnabled) {
+          if (cpsActive) {
             const [coreStartServices] = await osqueryContext.getStartServices();
             const clusterClient = coreStartServices.elasticsearch.client;
-            const readEsClient = getReadEsClient(clusterClient, request, true);
+            const readEsClient = getReadEsClient(clusterClient, request, cpsActive);
             const actionsIndexExists = await clusterClient.asInternalUser.indices.exists({
               index: `${ACTIONS_INDEX}*`,
             });

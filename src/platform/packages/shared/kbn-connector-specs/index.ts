@@ -12,6 +12,7 @@ export type * from './src/connector_spec';
 export type { ConnectorActionErrorMeta } from './src/connector_utils';
 export * as authTypeSpecs from './src/all_auth_types';
 export { EARS_AUTH_ID, EARS_PROVIDERS } from './src/auth_types/ears';
+export { RELAY_AUTH_ID } from './src/auth_types/relay';
 export { OAUTH_AUTHORIZATION_CODE_AUTH_ID } from './src/auth_types/oauth_authorization_code';
 export {
   CERTIFICATE_BINDING_KINDS,
@@ -87,6 +88,9 @@ export type { ConnectorAuthorizationReason } from './src/errors';
 export {
   AUTH_MODE_BY_AUTH_TYPE_ID,
   getAuthModeForAuthTypeId,
+  USES_RELAY_BY_AUTH_TYPE_ID,
+  authTypeUsesRelay,
+  isKibanaManagedAuthTypeId,
 } from './src/auth_mode_by_auth_type_id';
 export { getMeta, setMeta, addMeta } from './src/connector_spec_ui';
 export type { BaseMetadata } from './src/connector_spec_ui';

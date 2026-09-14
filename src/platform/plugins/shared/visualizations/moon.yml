@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-visualizations'
   sourceRoot: src/platform/plugins/shared/visualizations
 dependsOn:
+  - '@kbn/app-header'
   - '@kbn/core'
   - '@kbn/charts-plugin'
   - '@kbn/data-plugin'
@@ -74,7 +75,6 @@ dependsOn:
   - '@kbn/content-management-table-list-view-common'
   - '@kbn/chart-expressions-common'
   - '@kbn/shared-ux-utility'
-  - '@kbn/managed-content-badge'
   - '@kbn/presentation-publishing'
   - '@kbn/shared-ux-markdown'
   - '@kbn/react-kibana-context-render'

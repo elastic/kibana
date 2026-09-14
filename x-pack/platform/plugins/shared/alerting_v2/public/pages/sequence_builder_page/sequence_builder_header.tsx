@@ -13,32 +13,33 @@ import { useFormContext, useWatch } from 'react-hook-form';
 import { isSequenceValid } from '@kbn/alerting-v2-rule-form';
 import type { FormValues, SequenceFormValues } from '@kbn/alerting-v2-rule-form';
 import { experimentalBadge } from '../../components/experimental_badge';
+import type { SequenceBuilderStep } from './use_sequence_builder_form';
 import { DEFAULT_SEQUENCE_RULE_NAME } from './use_sequence_builder_form';
+import { useCanSaveSequenceRule } from './use_can_save_sequence_rule';
 
 export interface SequenceBuilderHeaderProps {
+  step: SequenceBuilderStep;
   seqValues: SequenceFormValues;
   isSaving: boolean;
   rulesListHref: string;
+  onStepChange: (step: SequenceBuilderStep) => void;
   onSave: () => void;
   onCancel: () => void;
 }
 
 export const SequenceBuilderHeader: React.FC<SequenceBuilderHeaderProps> = ({
+  step,
   seqValues,
   isSaving,
   rulesListHref,
+  onStepChange,
   onSave,
   onCancel,
 }) => {
   const { setValue } = useFormContext<FormValues>();
   const ruleName = useWatch<FormValues, 'metadata.name'>({ name: 'metadata.name' });
   const sequenceValid = isSequenceValid(seqValues);
-  const trimmedName = (ruleName ?? '').trim();
-  const canSave =
-    !isSaving &&
-    sequenceValid &&
-    trimmedName.length > 0 &&
-    trimmedName !== DEFAULT_SEQUENCE_RULE_NAME;
+  const canSave = useCanSaveSequenceRule(seqValues, isSaving);
 
   const onTitleSave = useCallback(
     async (newName: string) => {
@@ -71,8 +72,40 @@ export const SequenceBuilderHeader: React.FC<SequenceBuilderHeaderProps> = ({
   }, [isSaving, sequenceValid, canSave]);
 
   const menu = useMemo((): AppHeaderMenu => {
+    const items: AppHeaderMenu['items'] = [
+      {
+        id: 'alertStep',
+        label: i18n.translate('xpack.alertingV2.sequenceBuilderPage.alertConditionButton', {
+          defaultMessage: 'Alert condition',
+        }),
+        iconType: 'bell',
+        order: 1,
+        run: () => onStepChange('alert'),
+        disableButton: isSaving,
+        isSelected: step === 'alert',
+        testId: 'sequenceBuilderGoToAlert',
+      },
+      {
+        id: 'recoveryStep',
+        label: i18n.translate('xpack.alertingV2.sequenceBuilderPage.recoveryConditionButton', {
+          defaultMessage: 'Recovery condition',
+        }),
+        iconType: 'checkCircle',
+        order: 2,
+        run: () => onStepChange('recovery'),
+        disableButton: isSaving || !sequenceValid,
+        tooltipContent: sequenceValid
+          ? undefined
+          : i18n.translate('xpack.alertingV2.sequenceBuilderPage.recoveryDisabledTooltip', {
+              defaultMessage: 'Add at least two steps with rules to proceed',
+            }),
+        isSelected: step === 'recovery',
+        testId: 'sequenceBuilderGoToRecovery',
+      },
+    ];
+
     return {
-      items: [],
+      items,
       primaryActionItem: {
         id: 'save',
         label: i18n.translate('xpack.alertingV2.sequenceBuilderPage.saveButton', {
@@ -86,7 +119,7 @@ export const SequenceBuilderHeader: React.FC<SequenceBuilderHeaderProps> = ({
         testId: 'sequenceBuilderSave',
       },
     };
-  }, [isSaving, canSave, saveDisabledReason, onSave]);
+  }, [step, isSaving, sequenceValid, canSave, saveDisabledReason, onStepChange, onSave]);
 
   return (
     <AppHeader
