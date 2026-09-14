@@ -4804,6 +4804,9 @@ importers:
       '@types/eslint':
         specifier: 8.44.2
         version: 8.44.2
+      '@types/estree':
+        specifier: 0.0.50
+        version: 0.0.50
       '@types/express':
         specifier: 4.17.21
         version: 4.17.21

@@ -1690,6 +1690,7 @@
     "@types/ejs": "3.1.5",
     "@types/enzyme": "3.10.12",
     "@types/eslint": "8.44.2",
+    "@types/estree": "0.0.50",
     "@types/express": "4.17.21",
     "@types/extract-zip": "2.0.3",
     "@types/fetch-mock": "7.3.1",
