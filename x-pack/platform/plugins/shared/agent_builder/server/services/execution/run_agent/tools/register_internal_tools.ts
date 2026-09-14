@@ -9,6 +9,7 @@ import {
   AgentExecutionMode,
   agentBuilderDefaultAgentId,
   ToolOrigin,
+  type AgentConfiguration,
   type ConversationTemplate,
   type MetadataFieldValue,
 } from '@kbn/agent-builder-common';
@@ -64,11 +65,11 @@ export interface RegisterInternalToolsParams {
   /** Existence probe for stale-entry recovery in persistent `run_subagent`. */
   conversationExists: (conversationId: string) => Promise<boolean>;
   /**
-   * The persisted `configuration.subagent_ids` for the currently-executing agent.
-   * Passed through by the caller (`run_chat_agent.ts`) — the resolved,
-   * access-filtered allowlist is what drives sub-agent tool registration.
+   * The executing agent's persisted configuration. Consulted for
+   * config-driven tool decisions such as the `subagent_ids` allowlist that
+   * gates `run_subagent` / `send_message` / `sleep`.
    */
-  configuredSubagentIds?: string[];
+  agentConfiguration: AgentConfiguration;
 }
 
 /**
@@ -89,7 +90,7 @@ export const registerInternalTools = async ({
   parentConversationId,
   subagentTracker,
   conversationExists,
-  configuredSubagentIds,
+  agentConfiguration,
 }: RegisterInternalToolsParams): Promise<void> => {
   const {
     toolManager,
@@ -144,7 +145,7 @@ export const registerInternalTools = async ({
   // `send_message` is enforced in the handler (§3.5 of the design).
   if (experimentalFeatures.subagents && canSpawnSubagents) {
     const allowedSubagents = await resolveAllowedSubagents({
-      configuredIds: configuredSubagentIds ?? [],
+      configuredIds: agentConfiguration.subagent_ids ?? [],
       agentRegistry,
       logger,
     });

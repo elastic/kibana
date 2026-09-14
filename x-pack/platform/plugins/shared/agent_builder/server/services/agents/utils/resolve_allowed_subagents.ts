@@ -9,12 +9,8 @@ import pLimit from 'p-limit';
 import type { Logger } from '@kbn/logging';
 import { SELF_AGENT_ID } from '@kbn/agent-builder-common';
 
-/**
- * One entry in a resolved `subagent_ids` allowlist. `id` is either a real
- * agent id or the `SELF_AGENT_ID` sentinel; the sentinel stays as-is through
- * the tool schema and is only substituted at the executor call seam.
- */
 export interface ResolvedSubagent {
+  /** real ID or SELF_AGENT_ID */
   id: string;
   description: string;
 }
@@ -24,9 +20,7 @@ const NO_DESCRIPTION = '(no description)';
 const CONCURRENCY = 5;
 
 /**
- * Minimal shape needed from the agent registry — accepts anything with a
- * `.get(id)` that resolves to a definition (or throws on missing/denied).
- * Kept intentionally narrow so tests can supply a plain object.
+ * Minimal shape needed from the agent registry
  */
 export interface SubagentRegistryLookup {
   get: (id: string) => Promise<{ description?: string } | undefined>;

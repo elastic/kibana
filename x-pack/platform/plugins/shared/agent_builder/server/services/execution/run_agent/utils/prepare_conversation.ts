@@ -52,7 +52,7 @@ export interface ProcessedConversation {
   attachmentStateManager: AttachmentStateManager;
   /** Compaction summary covering older rounds that were replaced by this summary */
   compactionSummary?: CompactionSummary;
-  /** Persistent sub-agent roster (name → entry with conversation id and backing agent id). */
+  /** Persistent sub-agent roster */
   subagentRosterFallback?: Record<string, SubagentEntry>;
   /**
    * Deserialized metadata from the active conversation template.

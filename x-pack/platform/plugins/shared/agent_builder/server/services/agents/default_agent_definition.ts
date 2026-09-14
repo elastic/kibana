@@ -28,7 +28,7 @@ export const getDefaultAgentCreateRequest = (): AgentCreateRequest => ({
     enable_elastic_capabilities: true,
     tools: [],
     skill_ids: [],
-    // Preserve today's self-fork behavior via the canonical sentinel.
+    // Main agent can self-fork by default
     subagent_ids: [SELF_AGENT_ID],
   },
 });

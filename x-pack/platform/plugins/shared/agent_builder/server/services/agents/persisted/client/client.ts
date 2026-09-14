@@ -650,20 +650,6 @@ class AgentClientImpl implements AgentClient {
     }
   }
 
-  /**
-   * Validates a proposed `configuration.subagent_ids` value:
-   *   1. Duplicates (including duplicate `_self`) are rejected.
-   *   2. Listing the agent's own bare id is rejected on update with a message
-   *      pointing to the `_self` sentinel. On create the id does not exist
-   *      yet, so this check is trivially satisfied.
-   *   3. The `_self` sentinel is accepted unconditionally — it resolves at
-   *      runtime to the executing agent's id.
-   *   4. Every non-sentinel id must be readable by the caller. `_get` is
-   *      intentionally used (not `.get`) so we can distinguish "does not
-   *      exist" from "readable" at the storage layer, then collapse both
-   *      failure modes into a coarse error message to avoid leaking the
-   *      existence of hidden agents.
-   */
   private async validateSubagentIds({
     agentId,
     subagentIds,

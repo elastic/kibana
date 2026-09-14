@@ -10,6 +10,7 @@ import {
   EuiCheckbox,
   EuiComboBox,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -52,7 +53,7 @@ interface SubagentsSectionProps<
  *   - a master "Enable sub-agents" checkbox
  *   - a multi-select revealed by the checkbox, with a fixed `_self` row
  *
- * Interaction rules (§5.1 of the configurable-subagents design):
+ * Interaction rules:
  *   - On load, the checkbox is derived from `subagent_ids.length > 0`.
  *   - Checking the box appends `_self` to the list (if empty) and reveals
  *     the picker with `_self` selected.
@@ -94,7 +95,9 @@ export const SubagentsSection: React.FC<SubagentsSectionProps<any>> = ({
   if (!experimentalOn) return null;
 
   return (
-    <EuiPanel hasBorder paddingSize="l" data-test-subj="subagentsSection">
+    <>
+      <EuiHorizontalRule margin="xl" />
+      <EuiPanel hasBorder paddingSize="l" data-test-subj="subagentsSection">
       <EuiTitle size="xxs">
         <h4>
           {i18n.translate('xpack.agentBuilder.subagents.title', {
@@ -173,6 +176,7 @@ export const SubagentsSection: React.FC<SubagentsSectionProps<any>> = ({
           );
         }}
       />
-    </EuiPanel>
+      </EuiPanel>
+    </>
   );
 };

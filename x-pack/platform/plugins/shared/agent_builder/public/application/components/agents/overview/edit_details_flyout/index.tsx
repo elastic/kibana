@@ -176,7 +176,6 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
             <EuiHorizontalRule margin="xl" />
             <CustomizationSection showWorkflowSection={showWorkflowSection} agentId={agent.id} />
 
-            <EuiHorizontalRule margin="xl" />
             <SubagentsSection agentId={agent.id} />
 
             <EuiHorizontalRule margin="xl" />

@@ -11,11 +11,6 @@ import type { SubagentEntry } from '@kbn/agent-builder-common';
  * Filters a persistent sub-agent tracker snapshot down to entries whose
  * backing `agent_id` is still in the parent agent's resolved allowlist.
  * Sentinel-to-sentinel matches naturally by exact-string comparison.
- *
- * Used by the `send_message` handler at call time to reject a `to: name`
- * whose backing agent has been removed from the parent's `subagent_ids`.
- * Kept pure so it can be exercised in isolation and reused if we surface
- * reachability elsewhere.
  */
 export const filterReachableSubagents = ({
   entries,

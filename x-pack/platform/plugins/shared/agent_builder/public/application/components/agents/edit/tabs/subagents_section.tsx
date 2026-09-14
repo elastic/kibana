@@ -32,12 +32,7 @@ interface SubagentsSectionProps {
 }
 
 /**
- * Full-page-editor variant of the sub-agents section. Matches the two-column
- * (icon + title on the left, controls on the right) layout used by the other
- * sections in `settings_tab.tsx` (see `AiIndicesSection`). The flyout has its
- * own variant under `overview/edit_details_flyout/subagents_section.tsx` — the
- * codebase convention here is one file per surface (see `ai_indices_section`
- * duplication) rather than a shared component.
+ * Full-page-editor variant of the sub-agents section.
  */
 export const SubagentsSection: React.FC<SubagentsSectionProps> = ({ agentId }) => {
   const experimentalOn = useExperimentalFeatures();
@@ -60,9 +55,7 @@ export const SubagentsSection: React.FC<SubagentsSectionProps> = ({ agentId }) =
   // control open so the user can add another entry.
   const [enabled, setEnabled] = useState<boolean>(hasValues);
   // If the initial mount happened before the async agent fetch resolved,
-  // `hasValues` was false. Flip `enabled` on once values arrive; do NOT
-  // flip it off when the picker later empties (that's the whole point of
-  // the "checkbox is the only collapse control" behavior — §5.1).
+  // `hasValues` was false. Flip `enabled` on once values arrive
   useEffect(() => {
     if (hasValues) setEnabled(true);
   }, [hasValues]);
@@ -186,12 +179,6 @@ export const SubagentsSection: React.FC<SubagentsSectionProps> = ({ agentId }) =
   );
 };
 
-/**
- * RHF nests errors following the schema path. For an array field, the error
- * can end up at the array itself (`.message` present) OR at a nested item
- * (`.message` only under a numeric child key). This walks the shape to find
- * the first string `message` so `EuiFormRow`'s `error` prop always gets text.
- */
 const findFirstErrorMessage = (node: unknown): string | undefined => {
   if (!node) return undefined;
   if (typeof node === 'string') return node;
