@@ -231,7 +231,7 @@ export class NightshiftInvestigationsPlugin
     this.ruleRegistry = plugins.ruleRegistry;
     this.actionsStart = plugins.actions;
 
-    // The nightshift-investigation SO type is registered and owned by agenticInvestigations.
+    // The investigation-details SO type is registered and owned by agenticInvestigations.
     // Get the SO-backed service from its start contract.
     this.investigationsService =
       plugins.agenticInvestigations.getInvestigationsService() as unknown as NightshiftInvestigationsService;

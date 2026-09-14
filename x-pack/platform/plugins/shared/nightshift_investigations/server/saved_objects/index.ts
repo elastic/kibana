@@ -9,4 +9,4 @@
  * The saved object type name for nightshift investigations.
  * The SO type is registered and owned by the agenticInvestigations plugin.
  */
-export const NIGHTSHIFT_INVESTIGATION_SO_TYPE = 'nightshift-investigation';
+export const NIGHTSHIFT_INVESTIGATION_SO_TYPE = 'investigation-details';

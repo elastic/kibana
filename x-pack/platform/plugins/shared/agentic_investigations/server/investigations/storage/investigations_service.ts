@@ -7,7 +7,7 @@
 
 import type { ISavedObjectsRepository, SavedObjectsServiceStart } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { NIGHTSHIFT_INVESTIGATION_SO_TYPE } from '../saved_objects/investigation_saved_object';
+import { INVESTIGATION_DETAILS_SO_TYPE } from '../saved_objects/investigation_saved_object';
 import type { InvestigationAttributes } from './types';
 
 /**
@@ -136,7 +136,7 @@ export class SoInvestigationsService implements InvestigationsService {
   private readonly repo: ISavedObjectsRepository;
 
   constructor({ savedObjects }: SoInvestigationsServiceDeps) {
-    this.repo = savedObjects.createInternalRepository([NIGHTSHIFT_INVESTIGATION_SO_TYPE]);
+    this.repo = savedObjects.createInternalRepository([INVESTIGATION_DETAILS_SO_TYPE]);
   }
 
   private ns(spaceId: string): string | undefined {
@@ -148,13 +148,13 @@ export class SoInvestigationsService implements InvestigationsService {
     const attrs = docToAttrs(doc);
     const ns = this.ns(spaceId);
     try {
-      await this.repo.get(NIGHTSHIFT_INVESTIGATION_SO_TYPE, id, { namespace: ns });
-      await this.repo.update<InvestigationAttributes>(NIGHTSHIFT_INVESTIGATION_SO_TYPE, id, attrs, {
+      await this.repo.get(INVESTIGATION_DETAILS_SO_TYPE, id, { namespace: ns });
+      await this.repo.update<InvestigationAttributes>(INVESTIGATION_DETAILS_SO_TYPE, id, attrs, {
         namespace: ns,
       });
     } catch (err) {
       if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-        await this.repo.create<InvestigationAttributes>(NIGHTSHIFT_INVESTIGATION_SO_TYPE, attrs, {
+        await this.repo.create<InvestigationAttributes>(INVESTIGATION_DETAILS_SO_TYPE, attrs, {
           id,
           namespace: ns,
         });
@@ -162,7 +162,7 @@ export class SoInvestigationsService implements InvestigationsService {
         throw err;
       }
     }
-    const so = await this.repo.get<InvestigationAttributes>(NIGHTSHIFT_INVESTIGATION_SO_TYPE, id, {
+    const so = await this.repo.get<InvestigationAttributes>(INVESTIGATION_DETAILS_SO_TYPE, id, {
       namespace: ns,
     });
     return soTypeToRecord(so.id, so.attributes, spaceId);
@@ -172,7 +172,7 @@ export class SoInvestigationsService implements InvestigationsService {
     const ns = this.ns(spaceId);
     try {
       const so = await this.repo.get<InvestigationAttributes>(
-        NIGHTSHIFT_INVESTIGATION_SO_TYPE,
+        INVESTIGATION_DETAILS_SO_TYPE,
         id,
         { namespace: ns }
       );
@@ -185,7 +185,7 @@ export class SoInvestigationsService implements InvestigationsService {
 
   async list(spaceId: string, query: InvestigationsListQuery): Promise<InvestigationsListResult> {
     const ns = this.ns(spaceId);
-    const a = (f: string) => `${NIGHTSHIFT_INVESTIGATION_SO_TYPE}.attributes.${f}`;
+    const a = (f: string) => `${INVESTIGATION_DETAILS_SO_TYPE}.attributes.${f}`;
     const filters: string[] = [];
     if (query.status) filters.push(`${a('status')}: "${query.status}"`);
     if (query.severity) filters.push(`${a('severity')}: "${query.severity}"`);
@@ -195,7 +195,7 @@ export class SoInvestigationsService implements InvestigationsService {
 
     const [listResult, countsResult] = await Promise.all([
       this.repo.find<InvestigationAttributes>({
-        type: NIGHTSHIFT_INVESTIGATION_SO_TYPE,
+        type: INVESTIGATION_DETAILS_SO_TYPE,
         namespaces: [ns ?? 'default'],
         filter,
         sortField:
@@ -225,20 +225,20 @@ export class SoInvestigationsService implements InvestigationsService {
     query: { status?: string; solution?: string; subjectType?: string }
   ): Promise<Record<string, number>> {
     const ns = this.ns(spaceId);
-    const a = (f: string) => `${NIGHTSHIFT_INVESTIGATION_SO_TYPE}.attributes.${f}`;
+    const a = (f: string) => `${INVESTIGATION_DETAILS_SO_TYPE}.attributes.${f}`;
     const filters: string[] = [];
     if (query.status) filters.push(`${a('status')}: "${query.status}"`);
     if (query.subjectType) filters.push(`${a('subject_type')}: "${query.subjectType}"`);
     type Aggs = { severity: { buckets: Array<{ key: string; doc_count: number }> } };
     const result = await this.repo.find<InvestigationAttributes, Aggs>({
-      type: NIGHTSHIFT_INVESTIGATION_SO_TYPE,
+      type: INVESTIGATION_DETAILS_SO_TYPE,
       namespaces: [ns ?? 'default'],
       filter: filters.length ? filters.join(' AND ') : undefined,
       perPage: 0,
       aggs: {
         severity: {
           terms: {
-            field: `${NIGHTSHIFT_INVESTIGATION_SO_TYPE}.attributes.severity`,
+            field: `${INVESTIGATION_DETAILS_SO_TYPE}.attributes.severity`,
             size: 10,
           },
         },

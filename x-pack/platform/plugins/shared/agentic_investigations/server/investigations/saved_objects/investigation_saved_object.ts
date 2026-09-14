@@ -18,7 +18,7 @@ import {
 } from '@kbn/significant-events-schema';
 import type { InvestigationAttributes } from '../storage/types';
 
-export const NIGHTSHIFT_INVESTIGATION_SO_TYPE = 'nightshift-investigation';
+export const INVESTIGATION_DETAILS_SO_TYPE = 'investigation-details';
 
 // Inlined from nightshift_investigations/common to avoid a cross-plugin dependency.
 const INVESTIGATION_STATUSES = ['pending', 'running', 'completed', 'failed', 'cancelled'] as const;
@@ -82,8 +82,8 @@ const investigationAttributesSchemaV1 = schema.object({
   ),
 });
 
-export const nightshiftInvestigationSavedObjectType: SavedObjectsType<InvestigationAttributes> = {
-  name: NIGHTSHIFT_INVESTIGATION_SO_TYPE,
+export const investigationDetailsSavedObjectType: SavedObjectsType<InvestigationAttributes> = {
+  name: INVESTIGATION_DETAILS_SO_TYPE,
   hidden: true,
   namespaceType: 'single',
   mappings: {

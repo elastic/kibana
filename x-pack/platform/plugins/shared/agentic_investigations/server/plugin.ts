@@ -24,7 +24,7 @@ import type { ResolveProposalUser } from './proposals/services/resolve_proposal_
 import { registerStepDefinitions } from './proposals/step_types';
 import { createProposalsStorageClient } from './proposals/storage/proposals_storage';
 import { registerInvestigationAttachmentTypes } from './investigations/attachments';
-import { nightshiftInvestigationSavedObjectType } from './investigations/saved_objects/investigation_saved_object';
+import { investigationDetailsSavedObjectType } from './investigations/saved_objects/investigation_saved_object';
 import {
   SoInvestigationsService,
   type InvestigationsService,
@@ -71,7 +71,7 @@ export class AgenticInvestigationsPlugin
 
     // Own the nightshift-investigation SO type. Registering it here (not in NSI)
     // means any plugin that depends on agenticInvestigations gets the type registered.
-    coreSetup.savedObjects.registerType(nightshiftInvestigationSavedObjectType);
+    coreSetup.savedObjects.registerType(investigationDetailsSavedObjectType);
 
     // Register all four investigation attachment types. The service is resolved
     // lazily via requireInvestigationsService() which is safe at request time after start().
