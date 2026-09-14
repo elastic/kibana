@@ -18,8 +18,8 @@ import type {
 import type { RouteSecurity } from '@kbn/core-http-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
-import type { DeleteWorkflowsApi } from '../types';
 import { isResponseError } from '@kbn/es-errors';
+import type { DeleteWorkflowsApi } from '../types';
 import {
   AI_INDEX_API_VERSION,
   AI_INDEX_INTERNAL_API_VERSION,
