@@ -260,9 +260,7 @@ export const createFieldDefinitionsSubClient = (
       }
 
       const nameLower = input.name.toLowerCase();
-      const conflict = existing.fieldDefinitions.find(
-        (fd) => fd.name.toLowerCase() === nameLower
-      );
+      const conflict = existing.fieldDefinitions.find((fd) => fd.name.toLowerCase() === nameLower);
       if (conflict) {
         throw Boom.conflict(
           `A field definition with name "${conflict.name}" already exists for this owner.`
