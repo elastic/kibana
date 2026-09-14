@@ -19,7 +19,6 @@ import {
   createAgentNotFoundError,
   createBadRequestError,
   isAgentNotFoundError,
-  SELF_AGENT_ID,
   type AgentAccessControl,
   type CurrentUser,
   type ToolSelection,
@@ -466,10 +465,6 @@ class AgentClientImpl implements AgentClient {
     });
 
     await this.validateAgentToolSelection(profile.configuration.tools);
-    await this.validateSubagentIds({
-      agentId: profile.id,
-      subagentIds: profile.configuration.subagent_ids ?? [],
-    });
 
     const attributes = createRequestToEs({
       profile,
@@ -543,13 +538,6 @@ class AgentClientImpl implements AgentClient {
 
     if (profileUpdate.configuration?.tools) {
       await this.validateAgentToolSelection(profileUpdate.configuration.tools);
-    }
-
-    if (profileUpdate.configuration?.subagent_ids !== undefined) {
-      await this.validateSubagentIds({
-        agentId,
-        subagentIds: profileUpdate.configuration.subagent_ids,
-      });
     }
 
     const updatedAgent = updateRequestToEs({
@@ -647,51 +635,6 @@ class AgentClientImpl implements AgentClient {
       throw createBadRequestError(
         `Agent tool selection validation failed:\n` + errors.map((e) => `- ${e}`).join('\n')
       );
-    }
-  }
-
-  private async validateSubagentIds({
-    agentId,
-    subagentIds,
-  }: {
-    agentId: string;
-    subagentIds: string[];
-  }): Promise<void> {
-    if (subagentIds.length === 0) {
-      return;
-    }
-
-    const seen = new Set<string>();
-    for (const id of subagentIds) {
-      if (seen.has(id)) {
-        throw createBadRequestError(`subagent_ids must be unique (duplicate: "${id}")`);
-      }
-      seen.add(id);
-    }
-
-    if (subagentIds.includes(agentId)) {
-      throw createBadRequestError(
-        `subagent_ids contains this agent's own id — use '${SELF_AGENT_ID}' to enable self-fork`
-      );
-    }
-
-    for (const id of subagentIds) {
-      if (id === SELF_AGENT_ID) continue;
-      let readable = false;
-      try {
-        const document = await this._get(id);
-        readable =
-          document !== undefined &&
-          hasRequiredDocumentFields(document) &&
-          hasReadAccess({ source: document._source, user: this.user });
-      } catch {
-        readable = false;
-      }
-      if (!readable) {
-        throw createBadRequestError(
-          `subagent_ids contains an unknown or inaccessible agent: "${id}"`
-        );
-      }
     }
   }
 
