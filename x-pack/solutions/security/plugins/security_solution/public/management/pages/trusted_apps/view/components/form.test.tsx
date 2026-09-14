@@ -720,9 +720,7 @@ describe('Trusted apps form', () => {
 
     it('should validate invalid Hash value', () => {
       setTextFieldValue(getConditionValue(getCondition()), 'someHASH');
-      formProps.item = createItem({
-        entries: [createEntry(ConditionEntryField.HASH, 'match', 'someHASH')],
-      });
+      formProps.item = (formProps.onChange as jest.Mock).mock.calls.at(-2)[0].item;
       rerender();
       expect(renderResult.getByText(INPUT_ERRORS.invalidHash(0)));
     });
