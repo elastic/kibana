@@ -128,7 +128,8 @@ export const renderIacTemplateHandler: FleetRequestHandler<
     userParams,
   } = request.body;
 
-  if (!isIacProvisionerEnabled()) {
+  const iacProvisionerEnabled = await isIacProvisionerEnabled();
+  if (!iacProvisionerEnabled) {
     return response.notFound({
       body: { message: 'IaC Provisioner is not enabled' },
     });

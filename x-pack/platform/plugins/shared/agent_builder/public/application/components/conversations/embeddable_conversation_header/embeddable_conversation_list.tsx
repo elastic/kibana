@@ -20,6 +20,7 @@ import { useStreamingContext } from '../../../context/streaming/streaming_contex
 import { useConversationList } from '../../../hooks/use_conversation_list';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { getConversationTemplateIcon } from '../../../hooks/use_conversation_template_display';
+import { useInfiniteScroll } from '../../../hooks/use_infinite_scroll';
 import {
   createConversationListItemStyles,
   createActiveConversationListItemStyles,
@@ -39,7 +40,14 @@ export const EmbeddableConversationList: React.FC<EmbeddableConversationListProp
   const { agentId, conversationId, setConversationId, resetAttachments } = useConversationContext();
   const { removeAllErrors } = useStreamingContext();
   const { conversationTemplatesService } = useAgentBuilderServices();
-  const { conversations = [], isLoading } = useConversationList({ agentId });
+  const {
+    conversations = [],
+    isLoading,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useConversationList({ agentId });
+  const sentinelRef = useInfiniteScroll({ hasNextPage, isFetchingNextPage, fetchNextPage });
 
   const sortedConversations = useMemo(
     () =>
@@ -119,6 +127,19 @@ export const EmbeddableConversationList: React.FC<EmbeddableConversationListProp
           </EuiFlexItem>
         );
       })}
+
+      <EuiFlexItem grow={false}>
+        <div ref={sentinelRef} data-test-subj="agentBuilderEmbeddableConversationsScrollSentinel" />
+      </EuiFlexItem>
+      {isFetchingNextPage && (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup justifyContent="center" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="s" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

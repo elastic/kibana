@@ -30,15 +30,15 @@ describe('registerSkills', () => {
   it('inlines the dashboard design guidance directly in the skill body', () => {
     expect(skill.content).toContain('Dashboard Composition Guidelines');
     expect(skill.content).toContain('Grid Packing Rules');
+    expect(skill.content).toContain('show avg/min/max in the legend');
+    expect(skill.content).toContain('at least one and at most two of those primary time-series XY');
   });
 
-  it('includes the shared chart type selection guidance', () => {
+  it('inlines chart-type selection in the skill body so the dashboard agent sees it', () => {
     expect(skill.content).toContain('Chart Type Guidance');
     expect(skill.content).toContain('Available chart types');
     expect(skill.content).toContain('- region_map:');
-    expect(skill.content).toContain(
-      'Choose for cross-tabulations (e.g. "request methods by status code"'
-    );
+    expect(skill.content).toContain('only when the terms are short strings');
     expect(skill.content).toContain(
       'provide a new `chartType` when the request changes the chart family'
     );

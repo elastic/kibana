@@ -264,8 +264,8 @@ describe('Download Service', () => {
         { id: 'download-source-test' }
       );
 
-      expect(soClientMock.create).toBeCalled();
-      expect(esoClientMock.getDecryptedAsInternalUser).toBeCalledWith(
+      expect(soClientMock.create).toHaveBeenCalled();
+      expect(esoClientMock.getDecryptedAsInternalUser).toHaveBeenCalledWith(
         DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
         'download-source-test'
       );
@@ -291,7 +291,7 @@ describe('Download Service', () => {
         { id: 'download-source-test' }
       );
 
-      expect(soClientMock.update).not.toBeCalled();
+      expect(soClientMock.update).not.toHaveBeenCalled();
     });
 
     it('should update existing default download source when creating a new default one', async () => {
@@ -305,8 +305,8 @@ describe('Download Service', () => {
         host: 'http://test.co',
       });
 
-      expect(soClientMock.update).toBeCalledTimes(1);
-      expect(soClientMock.update).toBeCalledWith(
+      expect(soClientMock.update).toHaveBeenCalledTimes(1);
+      expect(soClientMock.update).toHaveBeenCalledWith(
         expect.anything(),
         'existing-default-download-source',
         { is_default: false }
@@ -345,7 +345,7 @@ describe('Download Service', () => {
         },
         { id: 'download-source-test' }
       );
-      expect(soClientMock.create).toBeCalled();
+      expect(soClientMock.create).toHaveBeenCalled();
     });
 
     describe('secret storage', () => {
@@ -374,13 +374,13 @@ describe('Download Service', () => {
           { id: 'download-source-test' }
         );
 
-        expect(mockedExtractAndWriteDownloadSourcesSecrets).toBeCalledWith(
+        expect(mockedExtractAndWriteDownloadSourcesSecrets).toHaveBeenCalledWith(
           expect.objectContaining({
             includeSSLSecrets: true,
             includeAuthSecrets: false,
           })
         );
-        expect(soClientMock.create).toBeCalledWith(
+        expect(soClientMock.create).toHaveBeenCalledWith(
           expect.anything(),
           expect.objectContaining({
             secrets: { ssl: { key: { id: 'secret-id' } } },
@@ -414,13 +414,13 @@ describe('Download Service', () => {
           { id: 'download-source-test' }
         );
 
-        expect(mockedExtractAndWriteDownloadSourcesSecrets).toBeCalledWith(
+        expect(mockedExtractAndWriteDownloadSourcesSecrets).toHaveBeenCalledWith(
           expect.objectContaining({
             includeSSLSecrets: false,
             includeAuthSecrets: true,
           })
         );
-        expect(soClientMock.create).toBeCalledWith(
+        expect(soClientMock.create).toHaveBeenCalledWith(
           expect.anything(),
           expect.objectContaining({
             secrets: { auth: { password: { id: 'auth-secret-id' } } },
@@ -461,7 +461,7 @@ describe('Download Service', () => {
           { id: 'download-source-test' }
         );
 
-        expect(mockedExtractAndWriteDownloadSourcesSecrets).toBeCalledWith(
+        expect(mockedExtractAndWriteDownloadSourcesSecrets).toHaveBeenCalledWith(
           expect.objectContaining({
             includeSSLSecrets: true,
             includeAuthSecrets: true,
@@ -486,8 +486,8 @@ describe('Download Service', () => {
           { id: 'download-source-test' }
         );
 
-        expect(mockedExtractAndWriteDownloadSourcesSecrets).not.toBeCalled();
-        expect(soClientMock.create).toBeCalledWith(
+        expect(mockedExtractAndWriteDownloadSourcesSecrets).not.toHaveBeenCalled();
+        expect(soClientMock.create).toHaveBeenCalledWith(
           expect.anything(),
           expect.objectContaining({
             ssl: JSON.stringify({ key: 'my-ssl-key' }),
@@ -513,8 +513,8 @@ describe('Download Service', () => {
           { id: 'download-source-test' }
         );
 
-        expect(mockedExtractAndWriteDownloadSourcesSecrets).not.toBeCalled();
-        expect(soClientMock.create).toBeCalledWith(
+        expect(mockedExtractAndWriteDownloadSourcesSecrets).not.toHaveBeenCalled();
+        expect(soClientMock.create).toHaveBeenCalledWith(
           expect.anything(),
           expect.objectContaining({
             auth: JSON.stringify({ password: 'my-password' }),
@@ -552,14 +552,14 @@ describe('Download Service', () => {
           { id: 'download-source-test' }
         );
 
-        expect(mockedExtractAndWriteDownloadSourcesSecrets).toBeCalledWith(
+        expect(mockedExtractAndWriteDownloadSourcesSecrets).toHaveBeenCalledWith(
           expect.objectContaining({
             includeSSLSecrets: true,
             includeAuthSecrets: false,
           })
         );
         // Auth should be stored as plain text
-        expect(soClientMock.create).toBeCalledWith(
+        expect(soClientMock.create).toHaveBeenCalledWith(
           expect.anything(),
           expect.objectContaining({
             auth: JSON.stringify({ password: 'my-password' }),
@@ -597,14 +597,14 @@ describe('Download Service', () => {
           { id: 'download-source-test' }
         );
 
-        expect(mockedExtractAndWriteDownloadSourcesSecrets).toBeCalledWith(
+        expect(mockedExtractAndWriteDownloadSourcesSecrets).toHaveBeenCalledWith(
           expect.objectContaining({
             includeSSLSecrets: false,
             includeAuthSecrets: true,
           })
         );
         // SSL should be stored as plain text
-        expect(soClientMock.create).toBeCalledWith(
+        expect(soClientMock.create).toHaveBeenCalledWith(
           expect.anything(),
           expect.objectContaining({
             ssl: JSON.stringify({ key: 'my-ssl-key' }),
@@ -640,14 +640,14 @@ describe('Download Service', () => {
         host: 'http://test.co',
       });
 
-      expect(soClientMock.update).toBeCalledWith(
+      expect(soClientMock.update).toHaveBeenCalledWith(
         expect.anything(),
         'existing-default-download-source',
         {
           is_default: false,
         }
       );
-      expect(soClientMock.update).toBeCalledWith(expect.anything(), 'download-source-test', {
+      expect(soClientMock.update).toHaveBeenCalledWith(expect.anything(), 'download-source-test', {
         is_default: true,
         name: 'New default',
         host: 'http://test.co',
@@ -670,8 +670,8 @@ describe('Download Service', () => {
         }
       );
 
-      expect(soClientMock.update).toBeCalledTimes(1);
-      expect(soClientMock.update).toBeCalledWith(
+      expect(soClientMock.update).toHaveBeenCalledTimes(1);
+      expect(soClientMock.update).toHaveBeenCalledWith(
         expect.anything(),
         'existing-default-download-source',
         {
@@ -702,7 +702,7 @@ describe('Download Service', () => {
           secrets: { ssl: { key: 'new-ssl-key' } },
         });
 
-        expect(mockedExtractAndUpdateDownloadSourceSecrets).toBeCalledWith(
+        expect(mockedExtractAndUpdateDownloadSourceSecrets).toHaveBeenCalledWith(
           expect.objectContaining({
             includeSSLSecrets: true,
             includeAuthSecrets: false,
@@ -729,7 +729,7 @@ describe('Download Service', () => {
           secrets: { auth: { password: 'new-password' } },
         });
 
-        expect(mockedExtractAndUpdateDownloadSourceSecrets).toBeCalledWith(
+        expect(mockedExtractAndUpdateDownloadSourceSecrets).toHaveBeenCalledWith(
           expect.objectContaining({
             includeSSLSecrets: false,
             includeAuthSecrets: true,
@@ -763,7 +763,7 @@ describe('Download Service', () => {
           },
         });
 
-        expect(mockedExtractAndUpdateDownloadSourceSecrets).toBeCalledWith(
+        expect(mockedExtractAndUpdateDownloadSourceSecrets).toHaveBeenCalledWith(
           expect.objectContaining({
             includeSSLSecrets: true,
             includeAuthSecrets: true,
@@ -782,8 +782,8 @@ describe('Download Service', () => {
           secrets: { ssl: { key: 'new-ssl-key' } },
         });
 
-        expect(mockedExtractAndUpdateDownloadSourceSecrets).not.toBeCalled();
-        expect(soClientMock.update).toBeCalledWith(
+        expect(mockedExtractAndUpdateDownloadSourceSecrets).not.toHaveBeenCalled();
+        expect(soClientMock.update).toHaveBeenCalledWith(
           expect.anything(),
           'download-source-test',
           expect.objectContaining({
@@ -803,8 +803,8 @@ describe('Download Service', () => {
           secrets: { auth: { password: 'new-password' } },
         });
 
-        expect(mockedExtractAndUpdateDownloadSourceSecrets).not.toBeCalled();
-        expect(soClientMock.update).toBeCalledWith(
+        expect(mockedExtractAndUpdateDownloadSourceSecrets).not.toHaveBeenCalled();
+        expect(soClientMock.update).toHaveBeenCalledWith(
           expect.anything(),
           'download-source-test',
           expect.objectContaining({
@@ -836,14 +836,14 @@ describe('Download Service', () => {
           },
         });
 
-        expect(mockedExtractAndUpdateDownloadSourceSecrets).toBeCalledWith(
+        expect(mockedExtractAndUpdateDownloadSourceSecrets).toHaveBeenCalledWith(
           expect.objectContaining({
             includeSSLSecrets: true,
             includeAuthSecrets: false,
           })
         );
         // Auth should be stored as plain text
-        expect(soClientMock.update).toBeCalledWith(
+        expect(soClientMock.update).toHaveBeenCalledWith(
           expect.anything(),
           'download-source-test',
           expect.objectContaining({
@@ -883,7 +883,7 @@ describe('Download Service', () => {
         });
 
         // Verify the update was called with secrets containing only api_key (not password)
-        expect(soClientMock.update).toBeCalledWith(
+        expect(soClientMock.update).toHaveBeenCalledWith(
           expect.anything(),
           'download-source-test',
           expect.objectContaining({
@@ -916,7 +916,7 @@ describe('Download Service', () => {
         });
 
         // Verify username is NOT in the stored auth
-        expect(soClientMock.update).toBeCalledWith(
+        expect(soClientMock.update).toHaveBeenCalledWith(
           expect.anything(),
           'download-source-test',
           expect.objectContaining({
@@ -954,7 +954,7 @@ describe('Download Service', () => {
         });
 
         // Verify username is cleared (auth should be null or empty)
-        expect(soClientMock.update).toBeCalledWith(
+        expect(soClientMock.update).toHaveBeenCalledWith(
           expect.anything(),
           'download-source-test',
           expect.objectContaining({
@@ -991,9 +991,9 @@ describe('Download Service', () => {
           name: 'Updated Name',
         });
 
-        expect(mockedDeleteSecrets).not.toBeCalled();
+        expect(mockedDeleteSecrets).not.toHaveBeenCalled();
 
-        expect(soClientMock.update).toBeCalledWith(
+        expect(soClientMock.update).toHaveBeenCalledWith(
           expect.anything(),
           'download-source-test',
           expect.objectContaining({
@@ -1032,9 +1032,9 @@ describe('Download Service', () => {
           name: 'Updated Name',
         });
 
-        expect(mockedDeleteSecrets).not.toBeCalled();
+        expect(mockedDeleteSecrets).not.toHaveBeenCalled();
 
-        expect(soClientMock.update).toBeCalledWith(
+        expect(soClientMock.update).toHaveBeenCalledWith(
           expect.anything(),
           'download-source-test',
           expect.objectContaining({
@@ -1071,7 +1071,7 @@ describe('Download Service', () => {
           auth: null,
         } as Parameters<typeof downloadSourceService.update>[3]);
 
-        expect(mockedDeleteSecrets).toBeCalledWith(
+        expect(mockedDeleteSecrets).toHaveBeenCalledWith(
           expect.objectContaining({
             ids: ['existing-auth-secret-id'],
           })
@@ -1106,13 +1106,13 @@ describe('Download Service', () => {
           auth: { headers: [{ key: 'X-Custom', value: 'test' }] },
         });
 
-        expect(mockedDeleteSecrets).toBeCalledWith(
+        expect(mockedDeleteSecrets).toHaveBeenCalledWith(
           expect.objectContaining({
             ids: ['existing-auth-secret-id'],
           })
         );
 
-        expect(soClientMock.update).toBeCalledWith(
+        expect(soClientMock.update).toHaveBeenCalledWith(
           expect.anything(),
           'download-source-test',
           expect.objectContaining({
@@ -1127,21 +1127,21 @@ describe('Download Service', () => {
     it('Call removeDefaultSourceFromAll before deleting the value', async () => {
       const soClientMock = getMockedSoClient();
       await downloadSourceService.delete('download-source-test');
-      expect(mockedAgentPolicyService.removeDefaultSourceFromAll).toBeCalled();
-      expect(soClientMock.delete).toBeCalled();
+      expect(mockedAgentPolicyService.removeDefaultSourceFromAll).toHaveBeenCalled();
+      expect(soClientMock.delete).toHaveBeenCalled();
     });
 
     it('should delete secrets when deleting a download source', async () => {
       const soClientMock = getMockedSoClient();
       await downloadSourceService.delete('download-source-test');
-      expect(mockedDeleteDownloadSourceSecrets).toBeCalledWith(
+      expect(mockedDeleteDownloadSourceSecrets).toHaveBeenCalledWith(
         expect.objectContaining({
           downloadSource: expect.objectContaining({
             id: 'download-source-test',
           }),
         })
       );
-      expect(soClientMock.delete).toBeCalled();
+      expect(soClientMock.delete).toHaveBeenCalled();
     });
 
     it('should throw when deleting a preconfigured source without fromPreconfiguration option', async () => {
@@ -1200,7 +1200,7 @@ describe('Download Service', () => {
       });
       const defaultId = await downloadSourceService.getDefaultDownloadSourceId();
 
-      expect(soClientMock.find).toBeCalled();
+      expect(soClientMock.find).toHaveBeenCalled();
       expect(defaultId).toEqual('existing-default-download-source');
     });
   });
@@ -1214,7 +1214,7 @@ describe('Download Service', () => {
       await expect(
         async () => await downloadSourceService.requireUniqueName({ name: 'Test' })
       ).rejects.toThrow(`Download Source 'download-source-test' already exists with name 'Test'`);
-      expect(soClientMock.find).toBeCalled();
+      expect(soClientMock.find).toHaveBeenCalled();
     });
 
     it('does not throw if the name is unique', () => {
@@ -1224,7 +1224,7 @@ describe('Download Service', () => {
       expect(
         async () => await downloadSourceService.requireUniqueName({ name: 'Test' })
       ).not.toThrow();
-      expect(soClientMock.find).toBeCalled();
+      expect(soClientMock.find).toHaveBeenCalled();
     });
   });
 });

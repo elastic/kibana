@@ -64,7 +64,8 @@ describe('communicatesWithMaintainer', () => {
           totalNotFound: 0,
           totalWriteErrors: 0,
           totalMetadataDocsApplied: 6,
-          totalDroppedTargets: 0,
+          totalMetadataDocsFailed: 0,
+          totalTargetIdsNotInStore: 0,
           totalIterations: 8,
           truncated: false,
           lastRunTimestamp: '2026-05-21T00:00:00.000Z',
@@ -85,8 +86,10 @@ describe('communicatesWithMaintainer', () => {
       proposed: 6,
       applied: 6,
       droppedNotInStore: 0,
+      targetIdsNotInStore: 0,
       failed: 0,
       metadataDocsApplied: 6,
+      metadataDocsFailed: 0,
     });
 
     expect(payload.sources).toEqual([

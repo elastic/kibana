@@ -80,7 +80,6 @@ export const privateLocationsStateReducer = createReducer(initialState, (builder
     })
     .addCase(editPrivateLocationAction.fail, (state, action) => {
       state.editLoading = false;
-      state.privateLocationToEdit = undefined;
       state.error = action.payload;
     })
     .addCase(deletePrivateLocationAction.get, (state) => {

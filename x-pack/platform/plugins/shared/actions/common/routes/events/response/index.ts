@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { ingestEventsResponseSchema } from './schemas/latest';
-export { ingestEventsResponseSchema as ingestEventsResponseSchemaV1 } from './schemas/v1';
+export { ingestEventsResponseSchema, ingestEventsAckResponseSchema } from './schemas/latest';
+export {
+  ingestEventsResponseSchema as ingestEventsResponseSchemaV1,
+  ingestEventsAckResponseSchema as ingestEventsAckResponseSchemaV1,
+} from './schemas/v1';

@@ -28,6 +28,7 @@ interface ComposeDiscoverTabsProps {
   tabs: QueryTab[];
   onAlertEditorMount?: (editor: IStandaloneCodeEditor) => void;
   onRecoveryEditorMount?: (editor: IStandaloneCodeEditor) => void;
+  onBaseEditorMount?: (editor: IStandaloneCodeEditor) => void;
   /**
    * When true, only the editor content is rendered — the tab bar is omitted.
    * Used when the parent renders tabs in the flyout header instead.
@@ -44,6 +45,7 @@ const LOCKED_EDITOR_STYLES: React.CSSProperties = {
 
 interface LockedBaseEditorProps {
   query: string;
+  dataTestSubj?: string;
 }
 
 const SPLIT_EDITOR_CONTAINER_STYLES: React.CSSProperties = {
@@ -68,7 +70,7 @@ const LOCKED_BASE_EDITOR_OPTIONS: monaco.editor.IStandaloneEditorConstructionOpt
   overviewRulerLanes: 0,
 };
 
-const LockedBaseEditor: React.FC<LockedBaseEditorProps> = ({ query }) => {
+const LockedBaseEditor: React.FC<LockedBaseEditorProps> = ({ query, dataTestSubj }) => {
   const [height, setHeight] = useState(() => query.split('\n').length * ESQL_EDITOR_LINE_HEIGHT);
 
   const handleEditorMount = useCallback((editor: IStandaloneCodeEditor) => {
@@ -85,6 +87,7 @@ const LockedBaseEditor: React.FC<LockedBaseEditorProps> = ({ query }) => {
         height={height}
         options={LOCKED_BASE_EDITOR_OPTIONS}
         editorDidMount={handleEditorMount}
+        dataTestSubj={dataTestSubj}
       />
     </div>
   );
@@ -99,6 +102,7 @@ interface BlockEditorProps {
   readOnly?: boolean;
   /** Drop top padding so this editor sits flush against the locked base above. */
   flushTop?: boolean;
+  dataTestSubj?: string;
 }
 
 const BlockEditor: React.FC<BlockEditorProps> = ({
@@ -108,6 +112,7 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
   onEditorMount,
   readOnly = false,
   flushTop = false,
+  dataTestSubj,
 }) => {
   const options = useMemo(
     (): monaco.editor.IStandaloneEditorConstructionOptions => ({
@@ -130,6 +135,7 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
       height="100%"
       options={options}
       editorDidMount={onEditorMount}
+      dataTestSubj={dataTestSubj}
     />
   );
 };
@@ -259,6 +265,7 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
   tabs,
   onAlertEditorMount,
   onRecoveryEditorMount,
+  onBaseEditorMount,
   hideTabBar = false,
   readOnly = false,
 }) => {
@@ -290,13 +297,17 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
             value={baseQuery}
             onChange={onBaseQueryChange}
             lineNumberOffset={0}
+            onEditorMount={onBaseEditorMount}
             readOnly={readOnly}
+            dataTestSubj="composeDiscoverBlockEditor-base"
           />
         );
       case 'alert':
         return (
           <div style={SPLIT_EDITOR_CONTAINER_STYLES}>
-            {baseQuery && <LockedBaseEditor query={baseQuery} />}
+            {baseQuery && (
+              <LockedBaseEditor query={baseQuery} dataTestSubj="composeDiscoverLockedBaseEditor" />
+            )}
             <div ref={blockEditorRef} style={BLOCK_EDITOR_WRAPPER_STYLES}>
               <BlockEditor
                 value={alertBlock}
@@ -305,6 +316,7 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
                 onEditorMount={onAlertEditorMount}
                 readOnly={readOnly}
                 flushTop={Boolean(baseQuery)}
+                dataTestSubj="composeDiscoverBlockEditor-alert"
               />
             </div>
           </div>
@@ -312,7 +324,9 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
       case 'recovery':
         return (
           <div style={SPLIT_EDITOR_CONTAINER_STYLES}>
-            {baseQuery && <LockedBaseEditor query={baseQuery} />}
+            {baseQuery && (
+              <LockedBaseEditor query={baseQuery} dataTestSubj="composeDiscoverLockedBaseEditor" />
+            )}
             <div ref={blockEditorRef} style={BLOCK_EDITOR_WRAPPER_STYLES}>
               <BlockEditor
                 value={recoveryBlock}
@@ -321,6 +335,7 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
                 onEditorMount={onRecoveryEditorMount}
                 readOnly={readOnly}
                 flushTop={Boolean(baseQuery)}
+                dataTestSubj="composeDiscoverBlockEditor-recovery"
               />
             </div>
           </div>

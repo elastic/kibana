@@ -367,6 +367,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     },
     conversationClient: {
       exists: jest.fn().mockResolvedValue(false),
+      patchMetadata: jest.fn().mockResolvedValue({ changedFields: [] }),
     },
     executionMode: AgentExecutionMode.conversation,
     interactivity: { enabled: true },
@@ -453,6 +454,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     security: securityServiceMock.createStart(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
+    deductiveRegister: false,
     spaces: spacesMock.createStart(),
     actions: actionsMock.createStart(),
     modelProvider: createModelProviderMock(),
@@ -504,6 +506,7 @@ export const createRunnerDepsMock = (): CreateRunnerDepsMock => {
     security: securityServiceMock.createStart(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
+    deductiveRegister: false,
     spaces: spacesMock.createStart(),
     actions: actionsMock.createStart(),
     modelProviderFactory: createModelProviderFactoryMock(),

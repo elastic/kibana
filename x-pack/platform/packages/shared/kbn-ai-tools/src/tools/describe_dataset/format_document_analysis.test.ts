@@ -61,6 +61,44 @@ describe('formatDocumentAnalysis', () => {
     });
   });
 
+  it('annotates conflicts with the recommended cast, or an ambiguity marker when ES suggests none, even when the window shows a single type', () => {
+    const analysis: DocumentAnalysis = {
+      total: 10,
+      sampled: 2,
+      fields: [
+        {
+          name: 'exception.message',
+          types: ['keyword'],
+          cardinality: 1,
+          values: [{ value: 'boom', count: 2 }],
+          empty: false,
+          documentsWithValue: 2,
+        },
+        {
+          name: 'client.ip',
+          types: ['ip'],
+          cardinality: 1,
+          values: [{ value: '10.0.0.1', count: 1 }],
+          empty: false,
+          documentsWithValue: 1,
+        },
+      ],
+    };
+
+    const result = formatDocumentAnalysis(analysis, {
+      limit: 10,
+      conflicts: {
+        'exception.message': { types: ['keyword', 'text'], suggestedCast: 'keyword' },
+        'client.ip': { types: ['ip', 'keyword'] },
+      },
+    });
+
+    expect(result.fields).toEqual({
+      'exception.message (keyword, text - recommended: keyword)': ['boom (100%)'],
+      'client.ip (ip, keyword - ambiguous, no safe cast)': ['10.0.0.1 (50%)', '(no value) (50%)'],
+    });
+  });
+
   it('supports fields that are both leaves and have nested sub-fields', () => {
     const analysis: DocumentAnalysis = {
       total: 20,

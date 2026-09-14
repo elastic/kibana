@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { ELASTIC_INTERNAL_ORIGIN_HEADER } from '@kbn/scout-security';
+
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
-  'x-elastic-internal-origin': 'kibana',
   'Content-Type': 'application/json;charset=UTF-8',
+  ...ELASTIC_INTERNAL_ORIGIN_HEADER,
 };

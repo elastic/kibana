@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiFormRow, EuiSpacer, EuiTextArea } from '@elastic/eui';
+import { EuiFormRow, EuiSpacer, EuiTextArea } from '@elastic/eui';
 import React from 'react';
 import { useFormContext, useFormState } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { OptionalText } from '../components/optional_text';
 import type { ListParamItem } from './params_list';
 import type { SyntheticsParams } from '../../../../../../common/runtime_types';
@@ -37,14 +38,13 @@ export const ParamValueField = ({ isEditingItem }: { isEditingItem: ListParamIte
           />
         </EuiFormRow>
         <EuiSpacer size="xs" />
-        <EuiCallOut
+        <KbnInfoCallout
           announceOnMount
           size="s"
           title={i18n.translate('xpack.synthetics.paramValueField.euiCallOut.newValue', {
             defaultMessage:
               'Assign a new value to update this parameter, or leave blank to keep the current value.',
           })}
-          iconType="info"
         />
       </>
     );

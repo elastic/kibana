@@ -25,9 +25,7 @@ export const fromCumulativeSumAPItoLensState = (
     operationType: 'cumulative_sum',
     references: [], // populated later when we have the ID of the referenced column
     ...getLensStateMetricSharedProps(options),
-    params: {
-      ...(format ? { format: fromFormatAPIToLensState(format) } : {}),
-    },
+    ...(format ? { params: { format: fromFormatAPIToLensState(format) } } : {}),
   };
 };
 

@@ -51,7 +51,7 @@ describe('fetchEvents', () => {
         spaceId: 'default',
         esQuery: undefined,
       })
-    ).rejects.toThrowError(/Invalid index pattern/);
+    ).rejects.toThrow(/Invalid index pattern/);
   });
 
   it('should execute the esql query and return records for valid inputs', async () => {
@@ -67,7 +67,7 @@ describe('fetchEvents', () => {
       esQuery: undefined,
     });
 
-    expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+    expect(esClient.asCurrentUser.helpers.esql).toHaveBeenCalledTimes(1);
     const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
     expect(args.query).toContain('FROM valid_index');
     expect(result).toEqual({ columns: [], records: [{ id: 'dummy' }] });
