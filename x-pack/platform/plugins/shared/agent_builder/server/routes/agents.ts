@@ -336,6 +336,18 @@ export function registerAgentRoutes({
                       { maxSize: 100 }
                     )
                   ),
+                  post_execution_workflow_ids: schema.maybe(
+                    schema.arrayOf(
+                      schema.string({
+                        maxLength: 512,
+                        meta: {
+                          description:
+                            'Optional list of workflow IDs. When set, these workflows run after the agent finishes each round.',
+                        },
+                      }),
+                      { maxSize: 100 }
+                    )
+                  ),
                   plugin_ids: schema.maybe(PLUGINS_SCHEMA),
                   connector_ids: schema.maybe(CONNECTORS_SCHEMA),
                   ai_indices: schema.maybe(AI_INDICES_SCHEMA),
@@ -469,6 +481,18 @@ export function registerAgentRoutes({
                           meta: {
                             description:
                               'Updated list of workflow IDs. When set, these workflows run every agent execution, in order.',
+                          },
+                        }),
+                        { maxSize: 100 }
+                      )
+                    ),
+                    post_execution_workflow_ids: schema.maybe(
+                      schema.arrayOf(
+                        schema.string({
+                          maxLength: 512,
+                          meta: {
+                            description:
+                              'Updated list of workflow IDs. When set, these workflows run after the agent finishes each round.',
                           },
                         }),
                         { maxSize: 100 }

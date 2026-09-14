@@ -12,7 +12,7 @@ import { ListActionPoliciesPage } from '../pages/list_action_policies_page/list_
 import { ActionPolicyFormPage } from '../pages/action_policy_form_page/action_policy_form_page';
 import { RequireAlertingPrivilege } from '../components/require_alerting_privilege';
 
-export const ActionPoliciesApp = () => {
+export const ActionPoliciesApp = ({ basePath = '' }: { basePath?: string }) => {
   return (
     <RequireAlertingPrivilege
       features={['actionPolicies']}
@@ -21,7 +21,7 @@ export const ActionPoliciesApp = () => {
       })}
     >
       <Routes>
-        <Route exact path="/create">
+        <Route exact path={`${basePath}/create`}>
           <RequireAlertingPrivilege
             features={['actionPolicies']}
             capability="all"
@@ -32,7 +32,7 @@ export const ActionPoliciesApp = () => {
             <ActionPolicyFormPage />
           </RequireAlertingPrivilege>
         </Route>
-        <Route exact path="/edit/:id">
+        <Route exact path={`${basePath}/edit/:id`}>
           <RequireAlertingPrivilege
             features={['actionPolicies']}
             capability="all"
@@ -43,7 +43,7 @@ export const ActionPoliciesApp = () => {
             <ActionPolicyFormPage />
           </RequireAlertingPrivilege>
         </Route>
-        <Route exact path="/">
+        <Route exact path={`${basePath}/`}>
           <ListActionPoliciesPage />
         </Route>
       </Routes>

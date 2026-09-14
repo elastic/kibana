@@ -12,7 +12,7 @@ import { AlertEpisodesListPage } from '../pages/alert_episodes_list_page/alert_e
 import { EpisodeDetailsPage } from '../pages/episode_details_page/episode_details_page';
 import { RequireAlertingPrivilege } from '../components/require_alerting_privilege';
 
-export const EpisodesApp = () => {
+export const EpisodesApp = ({ basePath = '' }: { basePath?: string }) => {
   return (
     <RequireAlertingPrivilege
       features={['alerts']}
@@ -21,10 +21,10 @@ export const EpisodesApp = () => {
       })}
     >
       <Routes>
-        <Route exact path="/">
+        <Route exact path={`${basePath}/`}>
           <AlertEpisodesListPage />
         </Route>
-        <Route path="/:episodeId">
+        <Route path={`${basePath}/:episodeId`}>
           <EpisodeDetailsPage />
         </Route>
       </Routes>

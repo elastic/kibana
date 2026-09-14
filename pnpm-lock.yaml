@@ -392,6 +392,9 @@ importers:
       '@kbn/agentic-investigations-common':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-agentic-investigations-common
+      '@kbn/agentic-investigations-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/shared/agentic_investigations
       '@kbn/ai-assistant':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-ai-assistant
@@ -2423,9 +2426,6 @@ importers:
       '@kbn/management-settings-utilities':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-management/settings/utilities
-      '@kbn/management-test-plugin':
-        specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/management_test_plugin
       '@kbn/mapbox-gl':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-mapbox-gl
@@ -2630,6 +2630,9 @@ importers:
       '@kbn/observability-alert-details':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/alert-details
+      '@kbn/observability-alerting-plugin':
+        specifier: workspace:*
+        version: link:x-pack/solutions/observability/plugins/observability_alerting
       '@kbn/observability-alerting-test-data':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/alerting-test-data
@@ -3608,6 +3611,9 @@ importers:
       '@kbn/ui-actions-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/ui_actions
+      '@kbn/ui-ai-components':
+        specifier: workspace:*
+        version: link:src/platform/kbn-ui/ai-components
       '@kbn/ui-app-header':
         specifier: workspace:*
         version: link:src/platform/kbn-ui/app-header
@@ -7313,6 +7319,8 @@ importers:
 
   src/dev: {}
 
+  src/platform/kbn-ui/ai-components: {}
+
   src/platform/kbn-ui/app-header: {}
 
   src/platform/kbn-ui/app-menu: {}
@@ -8487,8 +8495,6 @@ importers:
 
   src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations: {}
 
-  src/platform/test/plugin_functional/plugins/management_test_plugin: {}
-
   src/platform/test/plugin_functional/plugins/rendering_plugin: {}
 
   src/platform/test/plugin_functional/plugins/saved_object_export_transforms: {}
@@ -9017,6 +9023,8 @@ importers:
 
   x-pack/platform/plugins/shared/agent_builder_workflows: {}
 
+  x-pack/platform/plugins/shared/agentic_investigations: {}
+
   x-pack/platform/plugins/shared/ai_infra/llm_tasks: {}
 
   x-pack/platform/plugins/shared/ai_infra/product_doc_base: {}
@@ -9292,6 +9300,8 @@ importers:
   x-pack/solutions/observability/plugins/observability_agent_builder: {}
 
   x-pack/solutions/observability/plugins/observability_ai_assistant_app: {}
+
+  x-pack/solutions/observability/plugins/observability_alerting: {}
 
   x-pack/solutions/observability/plugins/observability_logs_explorer: {}
 

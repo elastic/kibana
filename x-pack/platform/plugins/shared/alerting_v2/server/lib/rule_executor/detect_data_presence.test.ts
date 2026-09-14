@@ -6,6 +6,7 @@
  */
 
 import type { DiagnosticResult } from '@elastic/elasticsearch';
+import { QueryResponseSizeExceededError } from '../errors/query_response_size_exceeded_error';
 import { errors } from '@elastic/elasticsearch';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
@@ -207,8 +208,12 @@ describe('detectDataPresence', () => {
       logger: loggerService,
     }).catch((e: Error) => e);
 
-    expect(error).toBeInstanceOf(Error);
+    expect(error).toBeInstanceOf(QueryResponseSizeExceededError);
     expect(getErrorSource(error as Error)).toBe(TaskErrorSource.USER);
+    expect((error as Error).message).toContain(
+      'ES|QL query response exceeded the maximum allowed size'
+    );
+    expect((error as Error).message).toContain('KEEP');
   });
 
   it('does not classify ES|QL 5xx errors as user errors (server-side, retryable)', async () => {

@@ -207,9 +207,11 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'streams-gap-detection',
 
   // Platform – Context Engine
-  'ki-automation-generation',
   'ki-retrieval',
   'analyze-and-improve',
+  'context-engine-signals',
+  'ai-index-sources',
+  'ai-index-automations',
 
   // Platform – Workflows
   'workflow-authoring',
@@ -229,6 +231,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'recommend-prebuilt-rules',
   'threat-hunting',
   'find-security-rules',
+  'detection-coverage',
   'pci-compliance',
   'endpoint-forensic-analysis',
   'investigate-rule',

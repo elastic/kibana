@@ -116,6 +116,9 @@ const createMockRepository = (): jest.Mocked<InvestigationRepository> => ({
   get: jest.fn().mockResolvedValue(undefined),
   update: jest.fn().mockResolvedValue(undefined),
   find: jest.fn().mockResolvedValue(findResult([])),
+  countBySeverity: jest
+    .fn()
+    .mockResolvedValue({ '80-critical': 0, '60-high': 0, '40-medium': 0, '20-low': 0 }),
 });
 
 beforeEach(() => {
@@ -314,13 +317,16 @@ describe('NightshiftInvestigationsClient.list()', () => {
       concurrency_key: 'key-1',
       executed_by: 'test-user',
       subject: { type: 'alert', id: 'alert-42' },
+      // Rendered by the list row: the AI headline and the entity chips.
+      summary: 'All clear.',
+      impact: undefined,
     });
     expect(result.results[0]).not.toHaveProperty('trigger_type');
     expect(result.results[0]).not.toHaveProperty('error');
-    expect(result.results[0]).not.toHaveProperty('summary');
     expect(result.results[0]).not.toHaveProperty('conclusion');
     expect(result.results[0]).not.toHaveProperty('hypotheses');
-    expect(result.results[0]).not.toHaveProperty('impact');
+    expect(result.results[0]).not.toHaveProperty('recommendations');
+    expect(result.results[0]).not.toHaveProperty('blind_spots');
     expect(result.results[0]).not.toHaveProperty('conversation_id');
   });
 
