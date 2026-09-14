@@ -15,6 +15,7 @@ import { defineCreateServiceAccountRoute } from './create';
 import { createServiceAccountBodySchema } from './schemas';
 import { SERVICE_ACCOUNT_NAME_MAX_LENGTH } from '../../../common/service_accounts';
 import { EsServiceAccounts, type ServiceAccountsServiceStart } from '../../service_accounts';
+import { createNotImplementedWorkloadBindings } from '../../service_accounts/bindings';
 import { serviceAccountsServiceMock } from '../../service_accounts/service_accounts_service.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
 
@@ -140,7 +141,12 @@ describe('Create service account route', () => {
   });
 
   it('reaches the Elasticsearch backend without serverless context', async () => {
-    const { routeHandler } = setup({ serviceAccounts: new EsServiceAccounts(), serverless: false });
+    const { routeHandler } = setup({
+      serviceAccounts: Object.assign(new EsServiceAccounts(), {
+        workloads: createNotImplementedWorkloadBindings(),
+      }),
+      serverless: false,
+    });
     expect((await callRoute(routeHandler)).status).toBe(501);
   });
 

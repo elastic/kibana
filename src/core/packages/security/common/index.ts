@@ -19,4 +19,8 @@ export type {
   ServiceAccountAssumableBy,
   ServiceAccountRoleAssignments,
   CreateServiceAccountParams,
+  ServiceAccountWorkloadBinder,
+  ServiceAccountWorkloadBinding,
+  BindServiceAccountWorkloadParams,
+  ServiceAccountWorkloadCoordinates,
 } from './src/service_accounts';

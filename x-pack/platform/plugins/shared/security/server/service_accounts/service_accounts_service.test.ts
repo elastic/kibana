@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { loggingSystemMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 
 import { EsServiceAccounts } from './es_service_accounts';
 import { ServiceAccountsService } from './service_accounts_service';
@@ -18,23 +20,38 @@ describe('ServiceAccountsService', () => {
   const startParams = (
     config: { serviceAccounts?: { enabled: boolean; requestLifetime?: string } },
     overrides = {}
-  ) => ({
-    config: createConfig(
-      ConfigSchema.validate(config, { serverless: config.serviceAccounts !== undefined }),
-      loggingSystemMock.createLogger(),
-      { isTLSEnabled: false }
-    ),
-    license: licenseMock.create(),
-    uiam: uiamServiceMock.create(),
-    checkPrivilegesWithRequest: jest.fn(),
-    getCurrentUser: jest.fn(),
-    cloudProjectContext: {
-      organizationId: 'organization-id',
-      projectId: 'project-id',
-      projectType: 'security' as const,
-    },
-    ...overrides,
-  });
+  ) => {
+    // One client the test can drive, rather than a fresh mock per `getClient` call.
+    const encryptedClient = encryptedSavedObjectsMock.createClient();
+    encryptedClient.getDecryptedAsInternalUser.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError('binding', 'id')
+    );
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createStart();
+    encryptedSavedObjects.getClient.mockReturnValue(encryptedClient);
+
+    return {
+      config: createConfig(
+        ConfigSchema.validate(config, { serverless: config.serviceAccounts !== undefined }),
+        loggingSystemMock.createLogger(),
+        { isTLSEnabled: false }
+      ),
+      license: licenseMock.create(),
+      uiam: uiamServiceMock.create(),
+      checkPrivilegesWithRequest: jest.fn(),
+      getCurrentUser: jest.fn(),
+      cloudProjectContext: {
+        organizationId: 'organization-id',
+        projectId: 'project-id',
+        projectType: 'security' as const,
+      },
+      savedObjects: savedObjectsServiceMock.createStartContract(),
+      encryptedSavedObjects,
+      canEncrypt: true,
+      getCurrentProfileId: jest.fn().mockResolvedValue(null),
+      getSpaceId: jest.fn().mockReturnValue('default'),
+      ...overrides,
+    };
+  };
 
   let service: ServiceAccountsService;
 
@@ -85,6 +102,31 @@ describe('ServiceAccountsService', () => {
       } finally {
         jest.useRealTimers();
       }
+    });
+
+    it('exposes real workload bindings alongside the UIAM backend', async () => {
+      const params = startParams({ serviceAccounts: { enabled: true } });
+      params.license.isEnabled.mockReturnValue(true);
+      const start = service.start(params)!;
+
+      // A real binding layer reports "no binding" rather than refusing outright.
+      await expect(
+        start.workloads.getBinding('operation', { workloadType: 'rule', workloadId: 'rule-id' })
+      ).resolves.toBeNull();
+    });
+
+    it('refuses workload bindings on the Elasticsearch backend', async () => {
+      const start = service.start(
+        startParams({ serviceAccounts: { enabled: true } }, { uiam: undefined })
+      )!;
+
+      await expect(
+        start.workloads.getBinding('operation', { workloadType: 'rule', workloadId: 'rule-id' })
+      ).rejects.toMatchObject({
+        message:
+          'Service account workload bindings are not yet implemented for the Elasticsearch backend',
+        output: { statusCode: 501 },
+      });
     });
   });
 });

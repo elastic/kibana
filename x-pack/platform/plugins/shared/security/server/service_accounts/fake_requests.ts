@@ -25,11 +25,31 @@ export const SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS = 10_000;
  */
 export const SERVICE_ACCOUNT_MINT_FAILURE_BACKOFF_MS = 5_000;
 
+/**
+ * Wraps a credential mint for a service account bound fake request. The interceptor decides
+ * whether minting may proceed (throw to refuse — e.g. when a workload binding no longer exists)
+ * and observes the outcome; it must call `mint` at most once and return its result.
+ */
+export type ServiceAccountMintInterceptor = (mint: () => Promise<string>) => Promise<string>;
+
 export interface CreateServiceAccountFakeRequestParams {
   /** The ID of the service account the request should be bound to. */
   serviceAccountId: string;
   /** The space the request is scoped to. Defaults to the default space. */
   spaceId?: string;
+  /**
+   * How long transparent credential replacement stays available for this request. Defaults to the
+   * configured `xpack.security.serviceAccounts.requestLifetime`; size it to the expected workload
+   * duration, or pass `Number.POSITIVE_INFINITY` when a `mintInterceptor` gates minting on a
+   * stricter, revocable condition instead.
+   */
+  maxLifetimeMs?: number;
+  /**
+   * Wraps every credential mint for this request — the initial one included. Interceptor
+   * failures are treated exactly like mint failures: propagated to the caller and, on refresh,
+   * subject to the mint-failure backoff.
+   */
+  mintInterceptor?: ServiceAccountMintInterceptor;
 }
 
 interface ServiceAccountFakeRequestEntry {
@@ -41,6 +61,8 @@ interface ServiceAccountFakeRequestEntry {
   inflight?: Promise<string>;
   retryAt?: number;
   nonRetryableError?: Error;
+  maxLifetimeMs: number;
+  mintInterceptor?: ServiceAccountMintInterceptor;
 }
 
 /**
@@ -77,8 +99,10 @@ export class ServiceAccountFakeRequests {
   async create({
     serviceAccountId,
     spaceId,
+    maxLifetimeMs,
+    mintInterceptor,
   }: CreateServiceAccountFakeRequestParams): Promise<KibanaRequest> {
-    const token = await this.mintToken(serviceAccountId);
+    const token = await this.mintWithInterceptor(serviceAccountId, mintInterceptor);
 
     // The lowercase `authorization` key is load-bearing: the ES client derives a fake request's
     // credential by picking exact lowercased keys off its headers, so any other casing would
@@ -99,6 +123,8 @@ export class ServiceAccountFakeRequests {
       token,
       createdAt: now,
       mintedAt: now,
+      maxLifetimeMs: maxLifetimeMs ?? this.requestLifetimeMs,
+      mintInterceptor,
     });
 
     this.logger.debug(`Created a fake request bound to service account ${serviceAccountId}`);
@@ -143,18 +169,23 @@ export class ServiceAccountFakeRequests {
       return entry.token;
     }
 
-    entry.inflight = this.mintToken(entry.serviceAccountId)
+    entry.inflight = this.mintWithInterceptor(entry.serviceAccountId, entry.mintInterceptor)
       .then((token) => {
         this.ensureWithinLifetime(entry);
-        // Registry-owned fake requests share mutable raw headers, so subsequent scoped clients
-        // observe this replacement despite KibanaRequest exposing the headers as readonly.
-        (request.headers as Record<string, string>).authorization = `Bearer ${token}`;
-        entry.token = token;
-        entry.mintedAt = Date.now();
-        entry.retryAt = undefined;
-        this.logger.debug(
-          `Replaced the token of a fake request bound to service account ${entry.serviceAccountId}`
-        );
+        // A release() while the mint was in flight wins: the request is no longer ours to
+        // refresh, so its header stays untouched. Callers already awaiting this mint still
+        // receive the token they asked for.
+        if (this.registry.get(request) === entry) {
+          // Registry-owned fake requests share mutable raw headers, so subsequent scoped clients
+          // observe this replacement despite KibanaRequest exposing the headers as readonly.
+          (request.headers as Record<string, string>).authorization = `Bearer ${token}`;
+          entry.token = token;
+          entry.mintedAt = Date.now();
+          entry.retryAt = undefined;
+          this.logger.debug(
+            `Replaced the token of a fake request bound to service account ${entry.serviceAccountId}`
+          );
+        }
         return token;
       })
       .catch((err) => {
@@ -181,9 +212,30 @@ export class ServiceAccountFakeRequests {
     return await entry.inflight;
   }
 
+  /**
+   * Drops the request from the registry: transparent credential replacement is permanently
+   * disabled and the request rides out the remainder of its current token. Idempotent; returns
+   * whether the request was registered.
+   */
+  release(request: KibanaRequest): boolean {
+    const released = this.registry.delete(request);
+    if (released) {
+      this.logger.debug('Released a service account bound fake request');
+    }
+    return released;
+  }
+
+  private mintWithInterceptor(
+    serviceAccountId: string,
+    mintInterceptor?: ServiceAccountMintInterceptor
+  ): Promise<string> {
+    const mint = () => this.mintToken(serviceAccountId);
+    return mintInterceptor ? mintInterceptor(mint) : mint();
+  }
+
   private ensureWithinLifetime(entry: ServiceAccountFakeRequestEntry): void {
     // Expiry stops replacement; an already-issued token retains its upstream expiration.
-    if (Date.now() - entry.createdAt >= this.requestLifetimeMs) {
+    if (Date.now() - entry.createdAt >= entry.maxLifetimeMs) {
       this.logger.debug(
         `Refresh lifetime expired for a fake request bound to service account ${entry.serviceAccountId}`
       );
