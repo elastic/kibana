@@ -1976,11 +1976,19 @@ describe('config schema', () => {
 describe('audit.savedObjectDiff config', () => {
   it('applies defaults when the block is configured', () => {
     const config = ConfigSchema.validate({
-      audit: { enabled: true, savedObjectDiff: { enabled: true } },
+      audit: { enabled: true, savedObjectDiff: { enabled: true, typesToInclude: ['dashboard'] } },
     });
     expect(config.audit.savedObjectDiff.enabled).toBe(true);
-    expect(config.audit.savedObjectDiff.typesToInclude).toEqual([]);
+    expect(config.audit.savedObjectDiff.typesToInclude).toEqual(['dashboard']);
     expect(config.audit.savedObjectDiff.fieldSizeLimit.getValueInBytes()).toBe(49152);
+  });
+
+  it('throws when savedObjectDiff.enabled is true but typesToInclude is empty', () => {
+    expect(() =>
+      ConfigSchema.validate({
+        audit: { enabled: true, savedObjectDiff: { enabled: true, typesToInclude: [] } },
+      })
+    ).toThrow(/savedObjectDiff\.typesToInclude must be non-empty/);
   });
 
   it('applies defaults when not configured', () => {

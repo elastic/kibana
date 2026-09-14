@@ -331,6 +331,9 @@ export const ConfigSchema = schema.object({
         if (value.savedObjectDiff.enabled && !value.enabled) {
           return 'xpack.security.audit.savedObjectDiff.enabled requires xpack.security.audit.enabled to be true';
         }
+        if (value.savedObjectDiff.enabled && value.savedObjectDiff.typesToInclude.length === 0) {
+          return 'xpack.security.audit.savedObjectDiff.typesToInclude must be non-empty when savedObjectDiff.enabled is true';
+        }
       },
     }
   ),
