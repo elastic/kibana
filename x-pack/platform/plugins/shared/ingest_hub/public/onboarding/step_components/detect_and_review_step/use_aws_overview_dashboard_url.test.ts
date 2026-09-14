@@ -5,75 +5,134 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
 }));
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useAwsOverviewDashboardUrl } from './use_aws_overview_dashboard_url';
+import { useAwsOverviewDashboardUrl, type InstallationSnapshot } from './use_aws_overview_dashboard_url';
 
 const mockUseKibana = useKibana as jest.Mock;
 const mockPrepend = jest.fn((path: string) => `/base${path}`);
+const mockGetActiveSpace = jest.fn();
+
+function setupKibana(spaceId?: string) {
+  mockGetActiveSpace.mockResolvedValue(spaceId ? { id: spaceId } : undefined);
+  mockUseKibana.mockReturnValue({
+    services: {
+      http: { basePath: { prepend: mockPrepend } },
+      spaces: spaceId !== undefined ? { getActiveSpace: mockGetActiveSpace } : undefined,
+    },
+  });
+}
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockUseKibana.mockReturnValue({
-    services: { http: { basePath: { prepend: mockPrepend } } },
-  });
+  setupKibana('default');
 });
 
 // The canonical package ID for [Metrics AWS] Overview, as shipped in elastic/integrations.
 const OVERVIEW_ID = 'aws-fac28650-7349-11e9-816b-07687310a99a';
 
+const primaryRef = { id: OVERVIEW_ID, type: 'dashboard' as const };
+const otherRef = { id: 'aws-ec2-id', type: 'dashboard' as const };
+
 describe('useAwsOverviewDashboardUrl', () => {
-  it('returns undefined when installedKibana is empty', () => {
-    const { result } = renderHook(() => useAwsOverviewDashboardUrl([]));
+  it('returns undefined when installationInfo is undefined', async () => {
+    const { result } = renderHook(() => useAwsOverviewDashboardUrl(undefined));
+    await act(async () => {});
     expect(result.current).toBeUndefined();
   });
 
-  it('returns undefined when no dashboard ref matches the overview ID', () => {
-    const { result } = renderHook(() =>
-      useAwsOverviewDashboardUrl([{ id: 'aws-some-other-id', type: 'dashboard' as any }])
-    );
-    expect(result.current).toBeUndefined();
+  describe('primary space (installed_kibana_space_id === currentSpaceId)', () => {
+    it('returns the basePath-prefixed URL when the overview ref is in installed_kibana', async () => {
+      const info: InstallationSnapshot = {
+        installed_kibana: [otherRef, primaryRef],
+        installed_kibana_space_id: 'default',
+      };
+      const { result } = renderHook(() => useAwsOverviewDashboardUrl(info));
+      await act(async () => {});
+      expect(result.current).toBe(`/base/app/dashboards#/view/${OVERVIEW_ID}`);
+    });
+
+    it('returns undefined when the overview dashboard is not in installed_kibana', async () => {
+      const info: InstallationSnapshot = {
+        installed_kibana: [otherRef],
+        installed_kibana_space_id: 'default',
+      };
+      const { result } = renderHook(() => useAwsOverviewDashboardUrl(info));
+      await act(async () => {});
+      expect(result.current).toBeUndefined();
+    });
+
+    it('treats missing installed_kibana_space_id as primary space', async () => {
+      const info: InstallationSnapshot = {
+        installed_kibana: [primaryRef],
+      };
+      const { result } = renderHook(() => useAwsOverviewDashboardUrl(info));
+      await act(async () => {});
+      expect(result.current).toBe(`/base/app/dashboards#/view/${OVERVIEW_ID}`);
+    });
   });
 
-  it('returns undefined when the ref type is not dashboard', () => {
-    const { result } = renderHook(() =>
-      useAwsOverviewDashboardUrl([{ id: OVERVIEW_ID, type: 'index-pattern' as any }])
-    );
-    expect(result.current).toBeUndefined();
+  describe('non-primary space (installed_kibana_space_id !== currentSpaceId)', () => {
+    const SPACE_LOCAL_ID = 'some-space-specific-uuid';
+
+    beforeEach(() => setupKibana('my-space'));
+
+    it('returns the URL using the space-local id matched by originId', async () => {
+      const info: InstallationSnapshot = {
+        installed_kibana: [primaryRef], // primary space refs (different space)
+        installed_kibana_space_id: 'default',
+        additional_spaces_installed_kibana: {
+          'my-space': [
+            { id: SPACE_LOCAL_ID, originId: OVERVIEW_ID, type: 'dashboard' as const },
+          ],
+        },
+      };
+      const { result } = renderHook(() => useAwsOverviewDashboardUrl(info));
+      await act(async () => {});
+      expect(result.current).toBe(`/base/app/dashboards#/view/${SPACE_LOCAL_ID}`);
+    });
+
+    it('returns undefined when the current space has no additional_spaces entry', async () => {
+      const info: InstallationSnapshot = {
+        installed_kibana: [primaryRef],
+        installed_kibana_space_id: 'default',
+        additional_spaces_installed_kibana: {},
+      };
+      const { result } = renderHook(() => useAwsOverviewDashboardUrl(info));
+      await act(async () => {});
+      expect(result.current).toBeUndefined();
+    });
+
+    it('returns undefined when the space entry exists but has no overview dashboard', async () => {
+      const info: InstallationSnapshot = {
+        installed_kibana: [primaryRef],
+        installed_kibana_space_id: 'default',
+        additional_spaces_installed_kibana: {
+          'my-space': [{ id: 'some-other-uuid', originId: 'aws-ec2-id', type: 'dashboard' as const }],
+        },
+      };
+      const { result } = renderHook(() => useAwsOverviewDashboardUrl(info));
+      await act(async () => {});
+      expect(result.current).toBeUndefined();
+    });
   });
 
-  it('returns the basePath-prefixed URL when a ref matches by id (default space)', () => {
-    const { result } = renderHook(() =>
-      useAwsOverviewDashboardUrl([{ id: OVERVIEW_ID, type: 'dashboard' as any }])
-    );
-    expect(result.current).toBe(`/base/app/dashboards#/view/${OVERVIEW_ID}`);
-    expect(mockPrepend).toHaveBeenCalledWith(`/app/dashboards#/view/${OVERVIEW_ID}`);
-  });
+  describe('spaces service unavailable', () => {
+    beforeEach(() => setupKibana(undefined));
 
-  it('returns the basePath-prefixed URL using the space-local id when originId matches (non-default space)', () => {
-    const spaceLocalId = 'some-space-specific-uuid';
-    const { result } = renderHook(() =>
-      useAwsOverviewDashboardUrl([
-        { id: spaceLocalId, originId: OVERVIEW_ID, type: 'dashboard' as any },
-      ])
-    );
-    expect(result.current).toBe(`/base/app/dashboards#/view/${spaceLocalId}`);
-    expect(mockPrepend).toHaveBeenCalledWith(`/app/dashboards#/view/${spaceLocalId}`);
-  });
-
-  it('picks the overview ref and ignores other dashboard refs', () => {
-    const { result } = renderHook(() =>
-      useAwsOverviewDashboardUrl([
-        { id: 'aws-ec2-dashboard', type: 'dashboard' as any },
-        { id: OVERVIEW_ID, type: 'dashboard' as any },
-        { id: 'aws-s3-dashboard', type: 'dashboard' as any },
-      ])
-    );
-    expect(result.current).toBe(`/base/app/dashboards#/view/${OVERVIEW_ID}`);
+    it('falls back to primary space logic when spaces service is absent', async () => {
+      const info: InstallationSnapshot = {
+        installed_kibana: [primaryRef],
+        installed_kibana_space_id: 'default',
+      };
+      const { result } = renderHook(() => useAwsOverviewDashboardUrl(info));
+      await act(async () => {});
+      expect(result.current).toBe(`/base/app/dashboards#/view/${OVERVIEW_ID}`);
+    });
   });
 });

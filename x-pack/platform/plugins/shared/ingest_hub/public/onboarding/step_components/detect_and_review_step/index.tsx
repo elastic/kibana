@@ -79,7 +79,7 @@ export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepP
   const installedEs: EsAssetReference[] = installationInfo?.installed_es ?? [];
 
   // Resolve the href to [Metrics AWS] Overview for the "Take me to my data" button.
-  const overviewHref = useAwsOverviewDashboardUrl(installedKibana);
+  const overviewHref = useAwsOverviewDashboardUrl(installationInfo);
 
   const hasDeployedServices = selectedServiceIds.length > 0;
 
