@@ -58,6 +58,12 @@ export interface InvestigationsListResult {
   severityCounts: Record<string, number>;
 }
 
+export interface CrossSpaceSweepRecord {
+  id: string;
+  createdAt: string;
+  spaceId: string;
+}
+
 export interface InvestigationsService {
   upsert(spaceId: string, doc: Omit<InvestigationRecord, 'id'>): Promise<InvestigationRecord>;
   get(spaceId: string, id: string): Promise<InvestigationRecord | null>;
@@ -66,6 +72,18 @@ export interface InvestigationsService {
     spaceId: string,
     query: { status?: string; solution?: string; subjectType?: string }
   ): Promise<Record<string, number>>;
+  findAcrossSpaces(query: {
+    statuses: readonly string[];
+    sortField: string;
+    sortOrder: 'asc' | 'desc';
+    page: number;
+    size: number;
+  }): Promise<{ results: CrossSpaceSweepRecord[]; total: number }>;
+  updateInSpace(params: {
+    id: string;
+    spaceId: string;
+    patch: { status: string; completedAt: string; error?: string };
+  }): Promise<void>;
 }
 
 const soTypeToRecord = (
@@ -218,6 +236,64 @@ export class SoInvestigationsService implements InvestigationsService {
       total: listResult.total,
       severityCounts: countsResult,
     };
+  }
+
+  async findAcrossSpaces(query: {
+    statuses: readonly string[];
+    sortField: string;
+    sortOrder: 'asc' | 'desc';
+    page: number;
+    size: number;
+  }): Promise<{ results: CrossSpaceSweepRecord[]; total: number }> {
+    const a = (f: string) => `${INVESTIGATION_DETAILS_SO_TYPE}.attributes.${f}`;
+    const statusFilter =
+      query.statuses.length > 0
+        ? `(${query.statuses.map((s) => `${a('status')}: "${s}"`).join(' OR ')})`
+        : undefined;
+
+    const sortFieldMap: Record<string, string> = {
+      createdAt: 'created_at',
+      completedAt: 'completed_at',
+      severity: 'severity',
+    };
+
+    const result = await this.repo.find<InvestigationAttributes>({
+      type: INVESTIGATION_DETAILS_SO_TYPE,
+      namespaces: ['*'],
+      filter: statusFilter,
+      sortField: sortFieldMap[query.sortField] ?? query.sortField,
+      sortOrder: query.sortOrder,
+      page: query.page,
+      perPage: query.size,
+    });
+
+    return {
+      results: result.saved_objects.map((so) => ({
+        id: so.id,
+        createdAt: so.attributes.created_at,
+        spaceId: (so.namespaces?.[0] ?? 'default') === '*' ? 'default' : (so.namespaces?.[0] ?? 'default'),
+      })),
+      total: result.total,
+    };
+  }
+
+  async updateInSpace(params: {
+    id: string;
+    spaceId: string;
+    patch: { status: string; completedAt: string; error?: string };
+  }): Promise<void> {
+    const ns = this.ns(params.spaceId);
+    const attrs: Partial<InvestigationAttributes> = {
+      status: params.patch.status,
+      completed_at: params.patch.completedAt,
+      ...(params.patch.error !== undefined && { error: params.patch.error }),
+    };
+    await this.repo.update<InvestigationAttributes>(
+      INVESTIGATION_DETAILS_SO_TYPE,
+      params.id,
+      attrs as InvestigationAttributes,
+      { namespace: ns }
+    );
   }
 
   async getSeverityCounts(

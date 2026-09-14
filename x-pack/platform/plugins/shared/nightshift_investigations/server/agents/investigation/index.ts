@@ -41,7 +41,7 @@ export const investigationAgentType = {
     tools: [
       {
         tool_ids: [
-          platformSignificantEventsTools.reportInvestigationProgress,
+          platformSignificantEventsTools.updateInvestigation,
           platformSignificantEventsTools.searchKnowledgeIndicators,
           platformCoreTools.executeEsql,
           platformCoreTools.generateEsql,

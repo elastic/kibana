@@ -80,6 +80,7 @@ export const platformSignificantEventsTools = {
   eventsWrite: `${internalNamespaces.platformSignificantEvents}.events_write`,
   attachInvestigation: `${internalNamespaces.platformStreams}.sig_events.event_investigation_attach`,
   reportInvestigationProgress: `${internalNamespaces.platformStreams}.investigation_progress_report`,
+  updateInvestigation: `${internalNamespaces.platformStreams}.investigation_update`,
 } as const;
 
 export const attachmentTools = {

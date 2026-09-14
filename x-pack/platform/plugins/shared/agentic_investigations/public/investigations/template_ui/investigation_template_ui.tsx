@@ -6,7 +6,15 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   ConversationTemplateServiceStartContract,
@@ -16,8 +24,10 @@ import { INVESTIGATION_ATTACHMENT_IDS } from '../../../common/investigations/con
 
 const INVESTIGATION_TEMPLATE_ID = 'investigation';
 const INVESTIGATION_IMPACT_TAB_ID = 'investigations.impact_tab';
+const INVESTIGATION_HYPOTHESES_TAB_ID = 'investigations.hypotheses_tab';
+const INVESTIGATION_RECOMMENDATIONS_TAB_ID = 'investigations.recommendations_tab';
+const INVESTIGATION_BLIND_SPOTS_TAB_ID = 'investigations.blind_spots_tab';
 
-/** Maps investigation severity to an EUI badge color. */
 const severityBadgeColor = (severity: string | undefined): string => {
   switch (severity) {
     case 'critical':
@@ -33,12 +43,13 @@ const severityBadgeColor = (severity: string | undefined): string => {
   }
 };
 
-/** Maps investigation status to an EUI badge color. */
 const statusBadgeColor = (status: string | undefined): string => {
   switch (status) {
     case 'completed':
+    case 'closed':
       return 'success';
     case 'running':
+    case 'open':
       return 'primary';
     case 'failed':
       return 'danger';
@@ -49,22 +60,28 @@ const statusBadgeColor = (status: string | undefined): string => {
   }
 };
 
+const hypothesisStatusColor = (status: string): string => {
+  switch (status) {
+    case 'confirmed':
+      return 'success';
+    case 'dismissed':
+      return 'default';
+    default:
+      return 'primary';
+  }
+};
+
+const confidenceLabel = (confidence: number): string => `${Math.round(confidence * 100)}%`;
+
+// ── Header ────────────────────────────────────────────────────────────────────
+
 const InvestigationDetailsHeader = ({
   conversation,
 }: ConversationTemplateDetailsFlyoutRenderProps) => {
   const metadata = conversation.metadata ?? {};
-  const severity =
-    typeof metadata['investigation.severity'] === 'string'
-      ? metadata['investigation.severity']
-      : undefined;
-  const status =
-    typeof metadata['investigation.status'] === 'string'
-      ? metadata['investigation.status']
-      : undefined;
-  const summary =
-    typeof metadata['investigation.summary'] === 'string'
-      ? metadata['investigation.summary']
-      : undefined;
+  const severity = typeof metadata['severity'] === 'string' ? metadata['severity'] : undefined;
+  const status = typeof metadata['status'] === 'string' ? metadata['status'] : undefined;
+  const summary = typeof metadata['summary'] === 'string' ? metadata['summary'] : undefined;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -83,24 +100,14 @@ const InvestigationDetailsHeader = ({
           {severity && (
             <EuiFlexItem grow={false}>
               <EuiBadge color={severityBadgeColor(severity)}>
-                {i18n.translate('xpack.agenticInvestigations.templateUI.header.severityBadge', {
-                  defaultMessage: '{severity}',
-                  values: {
-                    severity: severity.charAt(0).toUpperCase() + severity.slice(1),
-                  },
-                })}
+                {severity.charAt(0).toUpperCase() + severity.slice(1)}
               </EuiBadge>
             </EuiFlexItem>
           )}
           {status && (
             <EuiFlexItem grow={false}>
               <EuiBadge color={statusBadgeColor(status)}>
-                {i18n.translate('xpack.agenticInvestigations.templateUI.header.statusBadge', {
-                  defaultMessage: '{status}',
-                  values: {
-                    status: status.charAt(0).toUpperCase() + status.slice(1),
-                  },
-                })}
+                {status.charAt(0).toUpperCase() + status.slice(1)}
               </EuiBadge>
             </EuiFlexItem>
           )}
@@ -116,6 +123,8 @@ const InvestigationDetailsHeader = ({
     </EuiFlexGroup>
   );
 };
+
+// ── Impact tab ────────────────────────────────────────────────────────────────
 
 const ImpactTabContent = ({ conversation }: ConversationTemplateDetailsFlyoutRenderProps) => {
   const impactAttachment = conversation.attachments?.find(
@@ -170,7 +179,246 @@ const ImpactTabContent = ({ conversation }: ConversationTemplateDetailsFlyoutRen
   );
 };
 
-/** Registers the investigation conversation template and its associated tabs. */
+// ── Hypotheses tab ────────────────────────────────────────────────────────────
+
+interface Hypothesis {
+  candidate: string;
+  confidence: number;
+  status: 'investigating' | 'dismissed' | 'confirmed';
+  reason?: string;
+}
+
+const HypothesesTabContent = ({ conversation }: ConversationTemplateDetailsFlyoutRenderProps) => {
+  const attachment = conversation.attachments?.find(
+    (att) => att.type === INVESTIGATION_ATTACHMENT_IDS.HYPOTHESES
+  );
+
+  if (!attachment) {
+    return (
+      <EuiText size="s" color="subdued">
+        {i18n.translate('xpack.agenticInvestigations.templateUI.hypothesesTab.noData', {
+          defaultMessage: 'No hypotheses recorded for this investigation.',
+        })}
+      </EuiText>
+    );
+  }
+
+  const data = attachment.versions.find((v) => v.version === attachment.current_version)
+    ?.data as { hypotheses?: Hypothesis[] } | undefined;
+  const hypotheses = data?.hypotheses ?? [];
+
+  if (!hypotheses.length) {
+    return (
+      <EuiText size="s" color="subdued">
+        {i18n.translate('xpack.agenticInvestigations.templateUI.hypothesesTab.empty', {
+          defaultMessage: 'No hypotheses evaluated yet.',
+        })}
+      </EuiText>
+    );
+  }
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="m">
+      {hypotheses.map((h, idx) => (
+        <EuiFlexItem key={idx} grow={false}>
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow>
+                  <EuiText size="s">
+                    <strong>{h.candidate}</strong>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color={hypothesisStatusColor(h.status)}>
+                    {h.status.charAt(0).toUpperCase() + h.status.slice(1)}
+                  </EuiBadge>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    {confidenceLabel(h.confidence)}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            {h.reason && (
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  <p>{h.reason}</p>
+                </EuiText>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+          {idx < hypotheses.length - 1 && <EuiHorizontalRule margin="s" />}
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
+  );
+};
+
+// ── Recommendations tab ───────────────────────────────────────────────────────
+
+interface Recommendation {
+  title: string;
+  confidence: number;
+  description?: string;
+  code?: string;
+}
+
+const RecommendationsTabContent = ({
+  conversation,
+}: ConversationTemplateDetailsFlyoutRenderProps) => {
+  const attachment = conversation.attachments?.find(
+    (att) => att.type === INVESTIGATION_ATTACHMENT_IDS.RECOMMENDATIONS
+  );
+
+  if (!attachment) {
+    return (
+      <EuiText size="s" color="subdued">
+        {i18n.translate('xpack.agenticInvestigations.templateUI.recommendationsTab.noData', {
+          defaultMessage: 'No recommendations recorded for this investigation.',
+        })}
+      </EuiText>
+    );
+  }
+
+  const data = attachment.versions.find((v) => v.version === attachment.current_version)
+    ?.data as { recommendations?: Recommendation[] } | undefined;
+  const recommendations = data?.recommendations ?? [];
+
+  if (!recommendations.length) {
+    return (
+      <EuiText size="s" color="subdued">
+        {i18n.translate('xpack.agenticInvestigations.templateUI.recommendationsTab.empty', {
+          defaultMessage: 'No recommendations yet.',
+        })}
+      </EuiText>
+    );
+  }
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="m">
+      {recommendations.map((rec, idx) => (
+        <EuiFlexItem key={idx} grow={false}>
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow>
+                  <EuiText size="s">
+                    <strong>{rec.title}</strong>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    {confidenceLabel(rec.confidence)}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            {rec.description && (
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  <p>{rec.description}</p>
+                </EuiText>
+              </EuiFlexItem>
+            )}
+            {rec.code && (
+              <EuiFlexItem grow={false}>
+                <EuiSpacer size="xs" />
+                <EuiText size="xs">
+                  <pre
+                    style={{
+                      background: 'rgba(0,0,0,0.05)',
+                      padding: '8px',
+                      borderRadius: '4px',
+                      overflow: 'auto',
+                      fontSize: '11px',
+                    }}
+                  >
+                    {rec.code}
+                  </pre>
+                </EuiText>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+          {idx < recommendations.length - 1 && <EuiHorizontalRule margin="s" />}
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
+  );
+};
+
+// ── Blind spots tab ───────────────────────────────────────────────────────────
+
+interface BlindSpot {
+  title: string;
+  confidence: number;
+  description: string;
+}
+
+const BlindSpotsTabContent = ({ conversation }: ConversationTemplateDetailsFlyoutRenderProps) => {
+  const attachment = conversation.attachments?.find(
+    (att) => att.type === INVESTIGATION_ATTACHMENT_IDS.BLIND_SPOTS
+  );
+
+  if (!attachment) {
+    return (
+      <EuiText size="s" color="subdued">
+        {i18n.translate('xpack.agenticInvestigations.templateUI.blindSpotsTab.noData', {
+          defaultMessage: 'No blind spots recorded for this investigation.',
+        })}
+      </EuiText>
+    );
+  }
+
+  const data = attachment.versions.find((v) => v.version === attachment.current_version)
+    ?.data as { blind_spots?: BlindSpot[] } | undefined;
+  const blindSpots = data?.blind_spots ?? [];
+
+  if (!blindSpots.length) {
+    return (
+      <EuiText size="s" color="subdued">
+        {i18n.translate('xpack.agenticInvestigations.templateUI.blindSpotsTab.empty', {
+          defaultMessage: 'No blind spots identified.',
+        })}
+      </EuiText>
+    );
+  }
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="m">
+      {blindSpots.map((bs, idx) => (
+        <EuiFlexItem key={idx} grow={false}>
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow>
+                  <EuiText size="s">
+                    <strong>{bs.title}</strong>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    {confidenceLabel(bs.confidence)}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                <p>{bs.description}</p>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {idx < blindSpots.length - 1 && <EuiHorizontalRule margin="s" />}
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
+  );
+};
+
+// ── Registration ──────────────────────────────────────────────────────────────
+
 export const registerInvestigationTemplateUI = (
   conversationTemplates: ConversationTemplateServiceStartContract
 ): void => {
@@ -181,12 +429,38 @@ export const registerInvestigationTemplateUI = (
     content: ImpactTabContent,
   }));
 
+  conversationTemplates.registerTab(INVESTIGATION_HYPOTHESES_TAB_ID, () => ({
+    label: i18n.translate('xpack.agenticInvestigations.templateUI.hypothesesTab.label', {
+      defaultMessage: 'Hypotheses',
+    }),
+    content: HypothesesTabContent,
+  }));
+
+  conversationTemplates.registerTab(INVESTIGATION_RECOMMENDATIONS_TAB_ID, () => ({
+    label: i18n.translate('xpack.agenticInvestigations.templateUI.recommendationsTab.label', {
+      defaultMessage: 'Recommendations',
+    }),
+    content: RecommendationsTabContent,
+  }));
+
+  conversationTemplates.registerTab(INVESTIGATION_BLIND_SPOTS_TAB_ID, () => ({
+    label: i18n.translate('xpack.agenticInvestigations.templateUI.blindSpotsTab.label', {
+      defaultMessage: 'Blind Spots',
+    }),
+    content: BlindSpotsTabContent,
+  }));
+
   conversationTemplates.registerTemplateUIDefinition(INVESTIGATION_TEMPLATE_ID, () => ({
     name: i18n.translate('xpack.agenticInvestigations.templateUI.templateName', {
       defaultMessage: 'Investigation',
     }),
     icon: 'inspect',
-    tabs: [INVESTIGATION_IMPACT_TAB_ID],
+    tabs: [
+      INVESTIGATION_IMPACT_TAB_ID,
+      INVESTIGATION_HYPOTHESES_TAB_ID,
+      INVESTIGATION_RECOMMENDATIONS_TAB_ID,
+      INVESTIGATION_BLIND_SPOTS_TAB_ID,
+    ],
     detailsFlyout: {
       header: InvestigationDetailsHeader,
     },

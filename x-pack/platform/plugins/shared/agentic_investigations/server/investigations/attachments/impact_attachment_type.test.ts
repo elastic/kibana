@@ -66,6 +66,8 @@ const createMockService = (record: InvestigationRecord | null): InvestigationsSe
   upsert: jest.fn(),
   list: jest.fn(),
   getSeverityCounts: jest.fn(),
+  findAcrossSpaces: jest.fn(),
+  updateInSpace: jest.fn(),
 });
 
 describe('createImpactAttachmentType', () => {

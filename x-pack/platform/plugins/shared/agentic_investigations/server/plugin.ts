@@ -183,7 +183,7 @@ export class AgenticInvestigationsPlugin
     return new Proxy({} as InvestigationsService, {
       get(_target, prop) {
         const svc = self.requireInvestigationsService();
-        return (svc as Record<string | symbol, unknown>)[prop];
+        return (svc as unknown as Record<string | symbol, unknown>)[prop];
       },
     });
   }
