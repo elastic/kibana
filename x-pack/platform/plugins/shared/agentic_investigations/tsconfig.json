@@ -24,7 +24,8 @@
     "@kbn/workflows-management-plugin",
     "@kbn/zod",
     "@kbn/core-http-server-mocks",
-    "@kbn/zod-helpers"
+    "@kbn/zod-helpers",
+    "@kbn/std"
   ],
   "exclude": ["target/**/*"]
 }
