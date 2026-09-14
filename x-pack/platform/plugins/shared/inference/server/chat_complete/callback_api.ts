@@ -265,6 +265,7 @@ function createChatCompletePipeline({
               toolChoice,
               cacheControl,
               sessionId,
+              reasoning,
               ...(spanModel ? { model: spanModel } : {}),
               ...metadata?.attributes,
             },

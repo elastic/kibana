@@ -7,7 +7,9 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
+import type { AttachmentPublicClient } from '@kbn/agent-builder-server';
 import type { ConversationClient } from '../services/conversation';
+import type { AgentRegistry } from '../services/agents';
 
 interface CreateStepHandlerContextParams {
   input?: unknown;
@@ -47,14 +49,62 @@ export const createStepHandlerContext = ({
 };
 
 export const createWorkflowStepConversationClientMock = (
-  overrides: Partial<{ get: jest.Mock; patchMetadata: jest.Mock }> = {}
+  overrides: Partial<{
+    get: jest.Mock;
+    list: jest.Mock;
+    patchMetadata: jest.Mock;
+    create: jest.Mock;
+    exists: jest.Mock;
+  }> = {}
 ) => {
   const get = overrides.get ?? jest.fn();
+  const list = overrides.list ?? jest.fn();
   const patchMetadata = overrides.patchMetadata ?? jest.fn();
+  const create = overrides.create ?? jest.fn();
+  const exists = overrides.exists ?? jest.fn().mockResolvedValue(false);
   const getConversationClient = jest.fn().mockResolvedValue({
     get,
+    list,
     patchMetadata,
+    create,
+    exists,
   } as unknown as ConversationClient);
 
-  return { get, patchMetadata, getConversationClient };
+  return { get, list, patchMetadata, create, exists, getConversationClient };
+};
+
+export const createWorkflowStepAgentRegistryMock = (
+  overrides: Partial<{ get: jest.Mock }> = {}
+) => {
+  const get = overrides.get ?? jest.fn().mockResolvedValue({ id: 'elastic-default-agent' });
+  const getAgentRegistry = jest.fn().mockResolvedValue({
+    get,
+  } as unknown as AgentRegistry);
+
+  return { get, getAgentRegistry };
+};
+
+export const createWorkflowStepAttachmentClientMock = (
+  overrides: Partial<{
+    create: jest.Mock;
+    get: jest.Mock;
+    update: jest.Mock;
+    delete: jest.Mock;
+    list: jest.Mock;
+  }> = {}
+) => {
+  const create = overrides.create ?? jest.fn();
+  const get = overrides.get ?? jest.fn();
+  const update = overrides.update ?? jest.fn();
+  const del = overrides.delete ?? jest.fn();
+  const list = overrides.list ?? jest.fn();
+  const getAttachmentClient = jest.fn().mockResolvedValue({
+    create,
+    get,
+    update,
+    delete: del,
+    list,
+  } as unknown as AttachmentPublicClient);
+
+  return { create, get, update, delete: del, list, getAttachmentClient };
 };

@@ -8,11 +8,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import { getStreamSamplingSource, getStreamTypeFromDefinition } from '@kbn/streams-schema';
-import type { InferenceDocument } from '@kbn/streams-ai';
+import type { InferenceDocument } from '@kbn/nightshift-ai';
 import {
   MAX_ID_LENGTH,
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
 } from '@kbn/significant-events-schema';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import { createServerRoute } from '../../../create_server_route';
@@ -211,14 +210,8 @@ const identifyInferredFeaturesRoute = createServerRoute({
     maintenanceService,
   }) => {
     const scopedClients = await getScopedClients({ request });
-    const {
-      scopedClusterClient,
-      streamsClient,
-      inferenceClient,
-      soClient,
-      tuningConfig,
-      licensing,
-    } = scopedClients;
+    const { scopedClusterClient, streamsClient, inferenceClient, tuningConfig, licensing } =
+      scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
@@ -256,21 +249,14 @@ const identifyInferredFeaturesRoute = createServerRoute({
       const result = await identifyInferredFeatures({
         esClient: scopedClusterClient.asCurrentUser,
         kiClient,
-        soClient,
-        inferenceClient: inferenceClient.bindTo({
-          connectorId,
-          metadata: {
-            connectorTelemetry: {
-              pluginId: SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-              aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
-            },
-          },
-        }),
+        agentBuilder: server.agentBuilder,
+        request,
         connectorId,
         logger: routeLogger,
         signal: getRequestAbortSignal(request),
         streamName,
         streamType,
+        definition: stream,
         runId,
         documents,
         totalFilters,
@@ -282,11 +268,6 @@ const identifyInferredFeaturesRoute = createServerRoute({
           maxPreviouslyIdentifiedFeatures,
         },
         trackFeaturesIdentified: (data) => telemetry.trackFeaturesIdentified(data),
-        // Expose prior Significant Events (read-only search) to feature
-        // extraction when Agent Builder tools are available.
-        ...(server.agentBuilder?.tools
-          ? { agentBuilderTools: server.agentBuilder.tools, request }
-          : {}),
       });
 
       await bootstrapSyncWorkflow({

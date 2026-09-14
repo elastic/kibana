@@ -33,8 +33,14 @@ jest.mock('./rule_overview_panel_section', () => ({
 const { AlertEpisodeOverviewListSection } = jest.requireMock('./overview_list_section') as {
   AlertEpisodeOverviewListSection: jest.Mock;
 };
+const { AlertEpisodeRuleOverviewPanelSection } = jest.requireMock(
+  './rule_overview_panel_section'
+) as {
+  AlertEpisodeRuleOverviewPanelSection: jest.Mock;
+};
 
 const mockServices = createMockServices();
+const mockGetRuleDetailsHref = (ruleId: string) => `/host-aware/rules/${ruleId}`;
 
 describe('AlertEpisodeOverviewSection', () => {
   beforeEach(() => {
@@ -43,7 +49,12 @@ describe('AlertEpisodeOverviewSection', () => {
 
   it('stacks all sub-sections', () => {
     render(
-      <AlertEpisodeOverviewSection episodeId="ep-1" groupHash="gh-1" services={mockServices} />
+      <AlertEpisodeOverviewSection
+        episodeId="ep-1"
+        groupHash="gh-1"
+        services={mockServices}
+        getRuleDetailsHref={mockGetRuleDetailsHref}
+      />
     );
 
     expect(screen.getByTestId('overviewListSectionStub')).toBeInTheDocument();
@@ -54,11 +65,32 @@ describe('AlertEpisodeOverviewSection', () => {
 
   it('forwards groupHash to the overview list section', () => {
     render(
-      <AlertEpisodeOverviewSection episodeId="ep-1" groupHash="gh-1" services={mockServices} />
+      <AlertEpisodeOverviewSection
+        episodeId="ep-1"
+        groupHash="gh-1"
+        services={mockServices}
+        getRuleDetailsHref={mockGetRuleDetailsHref}
+      />
     );
 
     expect(AlertEpisodeOverviewListSection).toHaveBeenCalledWith(
       expect.objectContaining({ episodeId: 'ep-1', groupHash: 'gh-1' }),
+      expect.anything()
+    );
+  });
+
+  it('forwards getRuleDetailsHref to the rule overview panel section', () => {
+    render(
+      <AlertEpisodeOverviewSection
+        episodeId="ep-1"
+        groupHash="gh-1"
+        services={mockServices}
+        getRuleDetailsHref={mockGetRuleDetailsHref}
+      />
+    );
+
+    expect(AlertEpisodeRuleOverviewPanelSection).toHaveBeenCalledWith(
+      expect.objectContaining({ episodeId: 'ep-1', getRuleDetailsHref: mockGetRuleDetailsHref }),
       expect.anything()
     );
   });
