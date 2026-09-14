@@ -278,6 +278,7 @@ describe('events_write tool', () => {
     await invokeHandler(
       createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
       {
+        source: 'discovery',
         items: [
           {
             ...input,
@@ -314,6 +315,7 @@ describe('events_write tool', () => {
     });
     expect(eventsWriteBulkHandler).toHaveBeenCalledWith({
       eventClient: {},
+      source: 'discovery',
       inputs: [
         expect.objectContaining({
           causal_features: [
@@ -370,6 +372,7 @@ describe('events_write tool', () => {
           causal_features: [expect.objectContaining({ type: 'technology', subtype: 'web_server' })],
         }),
       ],
+      source: undefined,
     });
   });
 
@@ -389,6 +392,7 @@ describe('events_write tool', () => {
     expect(eventsWriteBulkHandler).toHaveBeenCalledWith({
       eventClient: {},
       inputs: [expect.objectContaining({ causal_features: causalFeatures })],
+      source: undefined,
     });
   });
 
