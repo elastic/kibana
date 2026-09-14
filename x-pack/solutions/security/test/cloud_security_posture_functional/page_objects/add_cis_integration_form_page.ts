@@ -543,6 +543,8 @@ export function AddCisIntegrationFormPageProvider({
     const flyout = await testSubjects.find(TEST_IDS.CREATE_PACKAGE_POLICY_PAGE);
     const nameField = await flyout.findAllByCssSelector('input[id="name"]');
     const name = uuidv4();
+    // Clear the auto-generated default name so the saved policy name equals `name` exactly and `clickPolicyToBeEdited(name)` can match its row.
+    await nameField[0].clearValueWithKeyboard();
     await nameField[0].type(name);
     return name;
   };
