@@ -13,6 +13,7 @@ import type { RuleType } from '@kbn/triggers-actions-ui-types';
 import type {
   AttackDiscoveryScheduleCreateProps,
   AttackDiscoveryScheduleUpdateProps,
+  BulkActionAttackDiscoverySchedulesResponse,
   CreateAttackDiscoverySchedulesResponse,
   DeleteAttackDiscoverySchedulesResponse,
   DisableAttackDiscoverySchedulesResponse,
@@ -25,6 +26,9 @@ import {
   transformAttackDiscoveryScheduleCreatePropsToApi,
   transformAttackDiscoveryScheduleUpdatePropsToApi,
   ATTACK_DISCOVERY_SCHEDULES,
+  ATTACK_DISCOVERY_SCHEDULES_BULK_DELETE,
+  ATTACK_DISCOVERY_SCHEDULES_BULK_DISABLE,
+  ATTACK_DISCOVERY_SCHEDULES_BULK_ENABLE,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE,
@@ -160,6 +164,57 @@ export const disableAttackDiscoverySchedule = async ({
   return KibanaServices.get().http.post<DisableAttackDiscoverySchedulesResponse>(
     replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE, { id }),
     {
+      version: API_VERSIONS.public.v1,
+      signal,
+    }
+  );
+};
+
+export interface BulkActionAttackDiscoveryScheduleParams {
+  /** `ids` of the attack discovery schedules */
+  ids: string[];
+  /** Optional AbortSignal for cancelling request */
+  signal?: AbortSignal;
+}
+/** Enables the attack discovery schedules. */
+export const bulkEnableAttackDiscoverySchedules = async ({
+  ids,
+  signal,
+}: BulkActionAttackDiscoveryScheduleParams): Promise<BulkActionAttackDiscoverySchedulesResponse> => {
+  return KibanaServices.get().http.post<BulkActionAttackDiscoverySchedulesResponse>(
+    ATTACK_DISCOVERY_SCHEDULES_BULK_ENABLE,
+    {
+      body: JSON.stringify({ ids }),
+      version: API_VERSIONS.public.v1,
+      signal,
+    }
+  );
+};
+
+/** Disables the attack discovery schedules. */
+export const bulkDisableAttackDiscoverySchedules = async ({
+  ids,
+  signal,
+}: BulkActionAttackDiscoveryScheduleParams): Promise<BulkActionAttackDiscoverySchedulesResponse> => {
+  return KibanaServices.get().http.post<BulkActionAttackDiscoverySchedulesResponse>(
+    ATTACK_DISCOVERY_SCHEDULES_BULK_DISABLE,
+    {
+      body: JSON.stringify({ ids }),
+      version: API_VERSIONS.public.v1,
+      signal,
+    }
+  );
+};
+
+/** Deletes the attack discovery schedules. */
+export const bulkDeleteAttackDiscoverySchedules = async ({
+  ids,
+  signal,
+}: BulkActionAttackDiscoveryScheduleParams): Promise<BulkActionAttackDiscoverySchedulesResponse> => {
+  return KibanaServices.get().http.post<BulkActionAttackDiscoverySchedulesResponse>(
+    ATTACK_DISCOVERY_SCHEDULES_BULK_DELETE,
+    {
+      body: JSON.stringify({ ids }),
       version: API_VERSIONS.public.v1,
       signal,
     }

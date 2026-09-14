@@ -24,7 +24,7 @@ const INDEX_THRESHOLD_PARAMS = {
 
 const RULE_NAME = 'scout-create-rule';
 
-// Failing: See https://github.com/elastic/kibana/issues/264522
+// Failing: See https://github.com/elastic/kibana/issues/261886
 apiTest.describe.skip('Alerting Rule', { tag: tags.serverless.observability.complete }, () => {
   let createdRuleId: string;
 

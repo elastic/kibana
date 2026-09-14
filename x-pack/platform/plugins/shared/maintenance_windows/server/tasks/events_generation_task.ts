@@ -12,7 +12,7 @@ import type {
   ISavedObjectsPointInTimeFinder,
   StartServicesAccessor,
 } from '@kbn/core/server';
-import { type Logger } from '@kbn/core/server';
+import { type Logger, isSavedObjectErrorResult } from '@kbn/core/server';
 import type {
   IntervalSchedule,
   TaskManagerSetupContract,
@@ -206,7 +206,7 @@ export const updateMaintenanceWindowsEvents = async ({
           );
 
           for (const savedObject of result.saved_objects) {
-            if (savedObject.error) {
+            if (isSavedObjectErrorResult(savedObject)) {
               logger.error(
                 `MW event generator: Failed to update maintenance window "${savedObject.id}". Error: ${savedObject.error.message}`
               );

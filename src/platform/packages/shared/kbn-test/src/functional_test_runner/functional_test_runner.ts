@@ -9,11 +9,13 @@
 
 import { writeFileSync, mkdirSync } from 'fs';
 import Path, { dirname } from 'path';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { Suite, Test } from './fake_mocha_types';
-import type { Providers, Config } from './lib';
+import type { Providers } from './lib';
 import {
+  Config,
   Lifecycle,
   ProviderCollection,
   readProviderSpec,
@@ -28,6 +30,13 @@ import {
   activateTiming,
 } from './lib';
 import { createEsClientForFtrConfig } from '../ftr_es_client';
+import { reconcileRetryJunitReports } from '../mocha';
+
+interface FunctionalTestRunnerRunResult {
+  failureCount: number;
+  failedTestFiles: string[];
+  customTestRunnerResult?: any; // matches main's inferred Promise<any> contract
+}
 
 export class FunctionalTestRunner {
   private readonly esVersion: EsVersion;
@@ -44,7 +53,55 @@ export class FunctionalTestRunner {
         : new EsVersion(esVersion);
   }
 
-  async run(abortSignal?: AbortSignal) {
+  async run(abortSignal?: AbortSignal, retry = 0) {
+    let result = await this.runWithResult(abortSignal);
+
+    if (result.customTestRunnerResult !== undefined) {
+      return result.customTestRunnerResult;
+    }
+
+    let didRetry = false;
+    for (let attempt = 1; attempt <= retry; attempt++) {
+      if (result.failureCount === 0) {
+        break;
+      }
+
+      if (result.failedTestFiles.length === 0) {
+        // Failures that can't be attributed to a test file (e.g. a root/global
+        // `before` hook failure) leave nothing to retry, so make the skipped
+        // retry visible instead of looking like retries were exhausted.
+        this.log.warning(
+          `Skipping retry: ${result.failureCount} failure(s) could not be attributed to a test ` +
+            `file, so there is nothing to retry.`
+        );
+        break;
+      }
+
+      this.log.info(
+        `Retrying failed test files (${attempt}/${retry}):\n` +
+          result.failedTestFiles.map((file) => `- ${file}`).join('\n')
+      );
+
+      const retryConfig = this.createRetryConfig(result.failedTestFiles);
+      const retryRunner = new FunctionalTestRunner(this.log, retryConfig, this.esVersion);
+      result = await retryRunner.runWithResult(abortSignal);
+      didRetry = true;
+    }
+
+    // Each run writes its own JUnit report, so a file that failed then passed on
+    // retry would still be counted as a failure by CI reporting. Reconcile the
+    // reports so each test file is represented only by its most recent run.
+    if (didRetry && this.config.get('junit.enabled') && this.config.get('junit.reportName')) {
+      await reconcileRetryJunitReports({
+        log: this.log,
+        reportName: this.config.get('junit.reportName'),
+      });
+    }
+
+    return result.failureCount;
+  }
+
+  private async runWithResult(abortSignal?: AbortSignal): Promise<FunctionalTestRunnerRunResult> {
     const testStats = await this.getTestStats();
     const realServices =
       !testStats || (testStats.testCount > 0 && testStats.nonSkippedTestCount > 0);
@@ -84,7 +141,11 @@ export class FunctionalTestRunner {
         this.log.warning(
           'custom test runner defined, ignoring all mocha/suite/filtering related options'
         );
-        return (await providers.invokeProviderFn(customTestRunner)) || 0;
+        return {
+          failureCount: 0,
+          failedTestFiles: [],
+          customTestRunnerResult: (await providers.invokeProviderFn(customTestRunner)) || 0,
+        };
       }
 
       let reporter;
@@ -117,19 +178,28 @@ export class FunctionalTestRunner {
       // the mocha object and writing a report file with similar structure to the json report
       // (just leave out some execution details like timing, retry and erros)
       if (this.config.get('mochaOpts.dryRun')) {
-        return this.simulateMochaDryRun(mocha);
+        return {
+          failureCount: this.simulateMochaDryRun(mocha),
+          failedTestFiles: [],
+        };
       }
 
       if (abortSignal?.aborted) {
         this.log.warning('run aborted');
-        return;
+        return {
+          failureCount: 0,
+          failedTestFiles: [],
+        };
       }
 
       if (realServices) {
         await lifecycle.beforeTests.trigger(mocha.suite);
         if (abortSignal?.aborted) {
           this.log.warning('run aborted');
-          return;
+          return {
+            failureCount: 0,
+            failedTestFiles: [],
+          };
         }
       }
 
@@ -137,7 +207,29 @@ export class FunctionalTestRunner {
       if (ftrTimingEnabled) {
         activateTiming();
       }
-      return await runTests(lifecycle, mocha, abortSignal);
+      return await runTests(
+        lifecycle,
+        mocha,
+        this.log,
+        { abortOnTimeout: this.config.get('mochaOpts.abortOnTimeout') },
+        abortSignal
+      );
+    });
+  }
+
+  private createRetryConfig(failedTestFiles: string[]) {
+    const settings = this.config.getAll();
+
+    return new Config({
+      settings: {
+        ...settings,
+        suiteFiles: {
+          ...settings.suiteFiles,
+          include: failedTestFiles,
+        },
+      },
+      path: this.config.path,
+      module: this.config.module,
     });
   }
 
@@ -297,7 +389,7 @@ export class FunctionalTestRunner {
       throw runError;
     } finally {
       try {
-        await lifecycle.cleanup.trigger();
+        await this.triggerCleanup(lifecycle);
       } catch (closeError) {
         if (runErrorOccurred) {
           this.log.error('failed to close functional_test_runner');
@@ -307,6 +399,42 @@ export class FunctionalTestRunner {
           throw closeError;
         }
       }
+    }
+  }
+
+  private async triggerCleanup(lifecycle: Lifecycle) {
+    if (!lifecycle.isAborting) {
+      return await lifecycle.cleanup.trigger();
+    }
+
+    const timeoutMs = this.config.get('mochaOpts.abortCleanupTimeout');
+    let timedOut = false;
+    const cleanup = lifecycle.cleanup.trigger();
+    // The timer stays ref'd (default) so it can hold the event loop open long enough to
+    // bound a hung cleanup handler. If `cleanup` wins the race we abort the timer in the
+    // `finally` so it doesn't keep the loop alive for the remaining `timeoutMs` — otherwise
+    // an embedder that awaits `run()` without a hard `process.exit()` would have its exit
+    // delayed by up to `timeoutMs`.
+    const cancelTimeout = new AbortController();
+    try {
+      await Promise.race([
+        cleanup,
+        setTimeoutAsync(timeoutMs, undefined, { signal: cancelTimeout.signal }).then(
+          () => {
+            timedOut = true;
+          },
+          () => {
+            // timer was cancelled because cleanup finished first; ignore the AbortError
+          }
+        ),
+      ]);
+    } finally {
+      cancelTimeout.abort();
+    }
+
+    if (timedOut) {
+      this.log.warning(`cleanup did not finish within ${timeoutMs}ms of aborting, moving on`);
+      void cleanup.catch(() => {});
     }
   }
 

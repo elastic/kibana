@@ -33,16 +33,20 @@ export type ActionBuilderContext = BuilderContext;
  * declaration to the matching config entry.
  *
  * Built-in IDs ({@link KnownActionId}) are intentionally excluded —
- * use `Action.Edit`, `Action.Delete`, or `Action.Inspect` for those so
- * preset defaults (read-only gating, danger color, etc.) are applied.
+ * use `Action.Edit` or `Action.Delete` for those so preset defaults
+ * (read-only gating, danger color, etc.) are applied. The content editor
+ * (`Action.ContentEditor`) is also intentionally excluded; its handler
+ * lives on `features.contentEditor.open` rather than on `item.actions`,
+ * so a custom `<Action id="contentEditor" />` cannot wire it up.
  */
 export interface ActionProps {
   /**
    * Unique identifier for the action. Must NOT be one of the built-in
-   * IDs (`'edit'`, `'delete'`, `'inspect'`) — use the matching preset
-   * (`Action.Edit`, `Action.Delete`, `Action.Inspect`) for those.
+   * IDs (`'edit'`, `'delete'`) or `'contentEditor'` — use the matching
+   * preset (`Action.Edit`, `Action.Delete`, `Action.ContentEditor`) for
+   * those.
    */
-  id: Exclude<ActionId, KnownActionId>;
+  id: Exclude<ActionId, KnownActionId | 'contentEditor'>;
   /** Display name for the action (shown in menu and tooltip). */
   name: string | ((item: ContentListItem) => ReactNode);
   /** Accessible description for the action. */
@@ -65,13 +69,13 @@ export interface ActionProps {
  * Namespace interface for `Action` sub-components.
  *
  * The base `Action` accepts {@link ActionProps}; pre-built actions
- * are properties (e.g., `Action.Edit`, `Action.Delete`, `Action.Inspect`).
+ * are properties (e.g., `Action.Edit`, `Action.Delete`, `Action.ContentEditor`).
  */
 export interface ActionNamespace {
   (props: ActionProps): ReactNode;
   Edit: (props: EditActionProps) => ReactNode;
   Delete: (props: DeleteActionProps) => ReactNode;
-  Inspect: (props: InspectActionProps) => ReactNode;
+  ContentEditor: (props: ContentEditorActionProps) => ReactNode;
 }
 
 /**
@@ -95,11 +99,16 @@ export interface DeleteActionProps {
 }
 
 /**
- * Props for the `Action.Inspect` preset component.
+ * Props for the `Action.ContentEditor` preset component.
+ *
+ * Renders the content editor (view details) row icon. Behavior is wired
+ * at the provider level via `features.contentEditor.open` — the action
+ * has no direct binding on `item.actions`. When `open` is not configured,
+ * the action returns `undefined` and the table omits the icon entirely.
  */
-export interface InspectActionProps {
+export interface ContentEditorActionProps {
   /**
-   * Custom label for the inspect action. Defaults to `'View details'`.
+   * Custom label for the content editor action. Defaults to `'View details'`.
    *
    * Pass a function to derive the label from the item (e.g.
    * `'View {itemTitle} details'`); the default deliberately omits the

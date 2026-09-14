@@ -12,6 +12,7 @@ import type {
   SavedObjectAttributes,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
+import type { ChangeHistoryActionId } from '@kbn/change-history';
 import type { Filter } from '@kbn/es-query';
 import type { RuleNotifyWhenType, RRuleParams } from '.';
 
@@ -31,7 +32,52 @@ export enum RuleChangeTrackingAction {
   ruleDelete = 'rule_delete',
 }
 
-export type ChangeTrackingAction = RuleChangeTrackingAction;
+export interface RuleChangeTrackingMetadata {
+  /**
+   * Bulk operation rules count. Due to chunking the actual total number of rules isn't available
+   * inside RulesClient. Passing this number will result in logging in change tracking item's metadata.
+   */
+  bulkCount?: number;
+  /**
+   * Rule duplication action original rule's Saved Object id
+   */
+  originalRuleSoId?: string;
+  /**
+   * Rule restore action — the change-history event id of the snapshot being restored from.
+   */
+  restoredFromChangeId?: string;
+  /**
+   * Rule restore action — the rule's revision from the snapshot the rule being restored from.
+   * This is a de-normalized from as the rule's revision could be fetched from the changes
+   * history by restoredFromChangeId. However it requires an extra request to ES and besides
+   * that the desired change history item could be removed by the ILM policy.
+   */
+  restoredFromRevision?: number;
+}
+
+/**
+ * Rule change tracking context.
+ * Contains information to be logged when change tracking functionality is active.
+ */
+export interface RuleChangeTracking<ChangeAction extends string = ChangeHistoryActionId> {
+  /**
+   * Change action to be logged. Must be a {@link ChangeHistoryActionId}.
+   * RulesClient defaults to a {@link RuleChangeTrackingAction} for the current operation when omitted.
+   * The action is indexed and searchable.
+   */
+  action?: ChangeAction;
+  /**
+   * Optional change tracking metadata to be logged. It contains extra information regarding the
+   * change. E.g. `metadata.bulkCount` says about how many rules were involved in a bulk operation.
+   */
+  metadata?: RuleChangeTrackingMetadata;
+  /**
+   * Controls ES index refresh behavior after the change is written.
+   * Use `'wait_for'` when the caller needs the history entry to be immediately
+   * searchable (e.g. rule restore, where the client refetches history right after).
+   */
+  refresh?: boolean | 'wait_for';
+}
 
 export const ISO_WEEKDAYS = [1, 2, 3, 4, 5, 6, 7] as const;
 export type IsoWeekday = (typeof ISO_WEEKDAYS)[number];
@@ -55,7 +101,11 @@ export interface AlertsFilterTimeframe extends SavedObjectAttributes {
   };
 }
 
-export interface AlertsFilter extends SavedObjectAttributes {
+// Uses a permissive `unknown` index rather than `extends SavedObjectAttributes`: `query.filters`
+// holds es-query Filter[], which is not a SavedObjectAttribute primitive (tsgo enforces
+// index-signature conformance strictly), while keeping the type indexable for SO storage.
+export interface AlertsFilter {
+  [key: string]: unknown;
   query?: {
     kql: string;
     filters: Filter[];

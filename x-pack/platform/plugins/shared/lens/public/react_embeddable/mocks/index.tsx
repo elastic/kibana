@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject, NEVER, Subject } from 'rxjs';
+import { BehaviorSubject, NEVER, of, Subject } from 'rxjs';
 import deepMerge from 'deepmerge';
 import React from 'react';
 import { faker } from '@faker-js/faker';
@@ -77,6 +77,8 @@ function getDefaultLensApiMock() {
     canUnlinkFromLibrary: jest.fn(async () => false),
     hasLibraryItemWithTitle: jest.fn().mockResolvedValue(false),
     /** New embeddable api inherited methods */
+    anyStateChange$: of(),
+    latestState$: of({}),
     serializeState: jest.fn(),
     getLegacySerializedState: jest.fn(),
     saveToLibrary: jest.fn(async () => 'saved-id'),
@@ -111,6 +113,10 @@ function getDefaultLensApiMock() {
     hasUnsavedChanges$: new BehaviorSubject<boolean>(false),
     applySerializedState: jest.fn(),
     projectRoutingOverrides$: new BehaviorSubject<ProjectRoutingOverrides | undefined>(undefined),
+    usesEsql$: new BehaviorSubject<boolean>(false),
+    approximationApplied$: new BehaviorSubject<boolean | undefined>(false),
+    supportsJsonExport: true,
+    cancelRequests: jest.fn(),
   };
   return LensApiMock;
 }
@@ -127,6 +133,33 @@ function getDefaultLensSerializedStateMock() {
 
 export function getLensAttributesMock(attributes?: Partial<LensRuntimeState['attributes']>) {
   return deepMerge(getDefaultLensSerializedStateMock().attributes!, attributes ?? {});
+}
+
+/**
+ * Text-based (ES|QL) serialized state mock: the query lives on the
+ * authoritative text-based layer, mirroring what the suggestion pipeline
+ * produces for real documents.
+ */
+export function getTextBasedLensSerializedStateMock(
+  esql: string = 'FROM index'
+): LensSerializedState {
+  const state = createEmptyLensState('lnsXY', faker.lorem.words(), faker.lorem.text());
+  return {
+    ...state,
+    attributes: {
+      ...state.attributes,
+      state: {
+        ...state.attributes.state,
+        datasourceStates: {
+          textBased: {
+            layers: {
+              layer1: { query: { esql }, columns: [], index: 'index' },
+            },
+          },
+        },
+      },
+    },
+  };
 }
 
 export function getLensApiMock(overrides: Partial<LensApi> = {}): LensApi {

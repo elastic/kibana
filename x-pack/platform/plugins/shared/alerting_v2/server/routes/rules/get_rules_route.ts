@@ -8,15 +8,43 @@
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { z } from '@kbn/zod/v4';
-import { findRulesParamsSchema, findRulesResponseSchema } from '@kbn/alerting-v2-schemas';
+import {
+  errorResponseSchema,
+  findRulesRequestSchema,
+  findRulesResponseSchema,
+  type FindRulesRequest,
+} from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
+import type { FindRulesArgs } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import { assertAllFieldsMapped, type Complete } from '../mapper_types';
+import { listRulesOasExamples } from './list_rules_oas_example';
+
+export const toFindRulesArgs = ({
+  page,
+  per_page: perPage,
+  filter,
+  search,
+  sort_field: sortField,
+  sort_order: sortOrder,
+  ...rest
+}: FindRulesRequest): Complete<FindRulesArgs> => {
+  assertAllFieldsMapped(rest);
+  return {
+    page,
+    perPage,
+    filter,
+    search,
+    sortField,
+    sortOrder,
+  };
+};
 
 @injectable()
 export class GetRulesRoute extends BaseAlertingRoute {
@@ -29,18 +57,20 @@ export class GetRulesRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     summary: 'List rules',
+    oasOperationObject: listRulesOasExamples,
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      query: buildRouteValidationWithZod(findRulesParamsSchema),
+      query: findRulesRequestSchema,
     },
     response: {
       200: {
         body: () => findRulesResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns a paginated list of rules.',
       },
       400: {
-        description: 'Indicates an invalid schema or parameters.',
+        body: () => errorResponseSchema,
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
     },
   };
@@ -52,7 +82,7 @@ export class GetRulesRoute extends BaseAlertingRoute {
     @inject(Request)
     private readonly request: KibanaRequest<
       unknown,
-      z.infer<typeof findRulesParamsSchema>,
+      z.infer<typeof findRulesRequestSchema>,
       unknown
     >,
     @inject(RulesClient) private readonly rulesClient: RulesClient
@@ -61,14 +91,7 @@ export class GetRulesRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const result = await this.rulesClient.findRules({
-      page: this.request.query.page,
-      perPage: this.request.query.perPage,
-      filter: this.request.query.filter,
-      search: this.request.query.search,
-      sortField: this.request.query.sortField,
-      sortOrder: this.request.query.sortOrder,
-    });
+    const result = await this.rulesClient.findRules(toFindRulesArgs(this.request.query));
     return this.ctx.response.ok({ body: result });
   }
 }

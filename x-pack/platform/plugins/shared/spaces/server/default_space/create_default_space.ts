@@ -8,17 +8,22 @@
 import type { Logger, SavedObjectsRepository, SavedObjectsServiceStart } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SolutionId } from '@kbn/core-chrome-browser';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { i18n } from '@kbn/i18n';
-
-import { DEFAULT_SPACE_ID } from '../../common/constants';
 
 interface Deps {
   getSavedObjects: () => Promise<Pick<SavedObjectsServiceStart, 'createInternalRepository'>>;
   logger: Logger;
   solution?: SolutionId;
+  solutionSetupRequired?: boolean;
 }
 
-export async function createDefaultSpace({ getSavedObjects, logger, solution }: Deps) {
+export async function createDefaultSpace({
+  getSavedObjects,
+  logger,
+  solution,
+  solutionSetupRequired,
+}: Deps) {
   const { createInternalRepository } = await getSavedObjects();
 
   const savedObjectsRepository = createInternalRepository(['space']);
@@ -51,6 +56,7 @@ export async function createDefaultSpace({ getSavedObjects, logger, solution }: 
         disabledFeatures: [],
         _reserved: true,
         ...(solution ? { solution } : {}),
+        ...(solutionSetupRequired && !solution ? { solutionSetupRequired: true } : {}),
       },
       options
     );

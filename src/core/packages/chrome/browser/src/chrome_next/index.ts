@@ -8,3 +8,34 @@
  */
 
 export type { ChromeNext } from './chrome_next';
+export type { ChromeAiButton, GlobalSearchConfig } from '../controls';
+export type {
+  AppHeaderBack,
+  AppHeaderBadge,
+  AppHeaderBadgeItem,
+  AppHeaderConfig,
+  AppHeaderDescription,
+  AppHeaderEditableTitle,
+  AppHeaderFavoriteAction,
+  AppHeaderFavoriteStatus,
+  AppHeaderShareAction,
+  /**
+   * @internal Experimental. Dashboard edit Enhance only. Do not use from other apps.
+   * Not a stable App Header contract.
+   */
+  AppHeaderExperimentalDashboardAiAction,
+  AppHeaderMetadataButtonItem,
+  AppHeaderMetadataHealthItem,
+  AppHeaderMetadataItem,
+  AppHeaderMetadataItems,
+  AppHeaderMetadataTextItem,
+  AppHeaderSpacing,
+  AppHeaderTab,
+  AppHeaderTabAction,
+  AppHeaderTabActions,
+  AppHeaderTabBadge,
+  AppHeaderTabIconBadge,
+  AppHeaderTitle,
+  AppHeaderTitleSaveResult,
+  ChromeAppHeaderConfig,
+} from '../app_header';

@@ -185,6 +185,7 @@ export { GAP_AUTO_FILL_STATUS } from './constants';
 export type { GapAutoFillStatus } from './constants';
 export { backfillInitiator } from './constants';
 export type { BackfillInitiator } from './constants';
+export { PROVISION_UIAM_API_KEYS_FEATURE_FLAG } from './constants';
 export {
   mappingFromFieldMap,
   getComponentTemplateFromFieldMap,
@@ -200,12 +201,23 @@ export interface DateRange {
 export const LEGACY_BASE_ALERT_API_PATH = '/api/alerts';
 export const BASE_ALERTING_API_PATH = '/api/alerting';
 
+/**
+ * Request header a Kibana-internal caller sets on rule create to declare that the API key it
+ * authenticates with is borrowed (e.g. granted to a background task by Task Manager) and must not
+ * become the API key the rule runs with; alerting mints the rule its own framework-managed key
+ * instead. A header rather than a body field because it is a request-handling directive between
+ * Kibana services, not rule content, and it must stay out of the public create-rule contract.
+ */
+export const ALERTING_CLONE_API_KEY_HEADER = 'x-kbn-alerting-clone-api-key';
+
 // Internal
 export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting' as const;
 export const INTERNAL_ALERTING_SNOOZE_RULE =
   `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_snooze` as const;
 export const INTERNAL_ALERTING_API_FIND_RULES_PATH =
   `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_find` as const;
+export const INTERNAL_ALERTING_API_FIND_MUTED_ALERT_INSTANCES_PATH =
+  `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_find_muted_alerts` as const;
 
 export const INTERNAL_ALERTING_BACKFILL_API_PATH =
   `${INTERNAL_BASE_ALERTING_API_PATH}/rules/backfill` as const;

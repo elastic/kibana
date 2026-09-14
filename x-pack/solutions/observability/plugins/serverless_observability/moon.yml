@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/serverless-observability'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-presentation-team'
+  defaultOwner: '@elastic/observability-ui'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/serverless-observability'
   description: Moon project for @kbn/serverless-observability
   channel: ''
-  owner: '@elastic/obs-presentation-team'
+  owner: '@elastic/observability-ui'
   sourceRoot: x-pack/solutions/observability/plugins/serverless_observability
 dependsOn:
   - '@kbn/core'
@@ -35,8 +35,13 @@ dependsOn:
   - '@kbn/deeplinks-management'
   - '@kbn/ai-assistant-common'
   - '@kbn/management-settings-ids'
+  - '@kbn/alerting-v2-utils'
+  - '@kbn/deeplinks-workflows'
+  - '@kbn/deeplinks-evals'
   - '@kbn/scout-oblt'
   - '@kbn/workflows-management-plugin'
+  - '@kbn/significant-events-plugin'
+  - '@kbn/navigation-plugin'
 tags:
   - plugin
   - prod

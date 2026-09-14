@@ -183,6 +183,50 @@ describe('registerAttachments', () => {
         'Invalid ES|QL query results attachment data'
       );
     });
+
+    it('emits a Shape Profile block when playbookContribution is present, intersected against columns', () => {
+      const attachment = createAttachment({
+        query: 'FROM logs-* | LIMIT 10',
+        columns: [
+          { name: '@timestamp', type: 'date' },
+          { name: 'log.level', type: 'keyword' },
+          { name: 'service.name', type: 'keyword' },
+        ],
+        sampleRows: [],
+        totalHits: 1,
+        playbookContribution: {
+          shapeId: 'logs',
+          shapeLabel: 'Application & infrastructure logs',
+          characteristicFields: ['log.level', 'service.name', 'host.name'],
+          guidance: 'Prefer STATS BY log.level and service.name.',
+          interestingSignals: ['spikes in log.level=error'],
+        },
+      });
+
+      const formatted = attachmentType.format(attachment, context) as AgentFormattedAttachment;
+      const text = getFormattedText(formatted);
+
+      expect(text).toContain('Shape Profile:');
+      expect(text).toContain('Application & infrastructure logs (logs)');
+      expect(text).toContain('Characteristic fields present: log.level, service.name');
+      expect(text).not.toContain('host.name');
+      expect(text).toContain('Guidance: Prefer STATS BY log.level and service.name.');
+      expect(text).toContain('- spikes in log.level=error');
+    });
+
+    it('omits the Shape Profile block when no playbookContribution is provided', () => {
+      const attachment = createAttachment({
+        query: 'FROM logs-*',
+        columns: [{ name: 'status', type: 'keyword' }],
+        sampleRows: [],
+        totalHits: 0,
+      });
+
+      const formatted = attachmentType.format(attachment, context) as AgentFormattedAttachment;
+      const text = getFormattedText(formatted);
+
+      expect(text).not.toContain('Shape Profile');
+    });
   });
 
   describe('getAgentDescription', () => {

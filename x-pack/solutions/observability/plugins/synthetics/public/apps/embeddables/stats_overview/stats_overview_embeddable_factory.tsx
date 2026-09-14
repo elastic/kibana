@@ -25,8 +25,8 @@ import {
   fetch$,
   titleComparators,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
-import { BehaviorSubject, Subject, map, merge } from 'rxjs';
+import { initializeStateApi } from '@kbn/presentation-publishing';
+import { BehaviorSubject, Subject, map, merge, skip } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import type { ClientPluginsStart } from '../../../plugin';
 import { StatsOverviewComponent } from './stats_overview_component';
@@ -84,42 +84,41 @@ export const getStatsOverviewEmbeddableFactory = (
 
       const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
 
-      function serializeState(): OverviewStatsEmbeddableState {
-        return {
+      const stateApi = initializeStateApi<OverviewStatsEmbeddableState>({
+        parentApi,
+        uuid,
+        serializeState: () => ({
           ...titleManager.getLatestState(),
           filters: filters$.getValue(),
           ...drilldownsManager.getLatestState(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<OverviewStatsEmbeddableState>({
-        parentApi,
-        uuid,
-        serializeState,
+        }),
         anyStateChange$: merge(
           titleManager.anyStateChange$,
-          filters$,
+          filters$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
           drilldownsManager.anyStateChange$
-        ).pipe(map(() => undefined)),
+        ),
         getComparators: () => ({
           ...titleComparators,
-          filters: 'referenceEquality',
+          filters: 'deepEquality',
           ...drilldownsManager.comparators,
         }),
         defaultState: {
           filters: DEFAULT_FILTERS,
         },
-        onReset: (lastSaved) => {
-          drilldownsManager.reinitializeState(lastSaved ?? {});
-          titleManager.reinitializeState(lastSaved);
-          filters$.next(lastSaved?.filters ?? DEFAULT_FILTERS);
+        applySerializedState: (nextState) => {
+          drilldownsManager.reinitializeState(nextState);
+          titleManager.reinitializeState(nextState);
+          filters$.next(nextState.filters ?? DEFAULT_FILTERS);
         },
       });
 
       const api = finalizeApi({
         ...titleManager.api,
         ...drilldownsManager.api,
-        ...unsavedChangesApi,
+        ...stateApi,
         supportedTriggers: () => SYNTHETICS_STATS_SUPPORTED_TRIGGERS,
         defaultTitle$,
         getTypeDisplayName: () =>
@@ -146,7 +145,6 @@ export const getStatsOverviewEmbeddableFactory = (
             return Promise.reject();
           }
         },
-        serializeState,
       });
 
       const fetchSubscription = fetch$(api)
@@ -171,7 +169,6 @@ export const getStatsOverviewEmbeddableFactory = (
               style={{
                 width: '100%',
               }}
-              data-shared-item="" // TODO: Remove data-shared-item and data-rendering-count as part of https://github.com/elastic/kibana/issues/179376
             >
               <StatsOverviewComponent reload$={reload$} filters={filters || DEFAULT_FILTERS} />
             </div>

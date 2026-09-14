@@ -26,6 +26,10 @@ export const InspectKnowledgeBasePopover = ({
   return knowledgeBase.status.value?.modelStats ? (
     <EuiFlexItem grow={false}>
       <EuiPopover
+        aria-label={i18n.translate(
+          'xpack.aiAssistant.welcomeMessage.inspectErrorsPopoverAriaLabel',
+          { defaultMessage: 'Knowledge base setup errors' }
+        )}
         button={
           <EuiButtonEmpty
             data-test-subj="observabilityAiAssistantWelcomeMessageInspectErrorsButton"

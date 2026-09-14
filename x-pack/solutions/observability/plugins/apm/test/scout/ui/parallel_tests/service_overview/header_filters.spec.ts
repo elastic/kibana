@@ -64,9 +64,7 @@ test.describe(
       });
 
       await test.step('Verify service name is visible', async () => {
-        await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText(
-          testData.SERVICE_OPBEANS_NODE
-        );
+        await expect(page.getByTestId('appHeaderTitle')).toHaveText(testData.SERVICE_OPBEANS_NODE);
         await expect(page.getByTestId('instanceActionsButton_opbeans-node-prod-1')).toBeVisible({
           timeout: EXTENDED_TIMEOUT,
         });

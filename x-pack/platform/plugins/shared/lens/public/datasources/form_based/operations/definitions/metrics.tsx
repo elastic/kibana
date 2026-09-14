@@ -26,6 +26,7 @@ import {
 import type {
   AvgIndexPatternColumn,
   BaseIndexPatternColumn,
+  ColumnBuildHints,
   MaxIndexPatternColumn,
   MedianIndexPatternColumn,
   MetricColumn,
@@ -33,16 +34,22 @@ import type {
   StandardDeviationIndexPatternColumn,
   SumIndexPatternColumn,
 } from '@kbn/lens-common';
-import { esql } from '@elastic/esql';
+import {
+  toEsqlRegistry,
+  ofNameMetric,
+  type ToEsqlFn,
+  adjustTimeScaleLabelSuffix,
+  getSafeName,
+  metricEsqlMeta,
+} from '@kbn/lens-common';
 import type { LayerSettingsFeatures, OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
-  getSafeName,
   getFilter,
-  isColumnOfType,
+  hasOperationType,
+  getBooleanParam,
 } from './helpers';
-import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { updateColumnParam } from '../layer_helpers';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 import { getGroupByKey } from './get_group_by_key';
@@ -56,15 +63,6 @@ const typeToFn: Record<string, string> = {
   standard_deviation: 'aggStdDeviation',
 };
 
-const typeToESQLFn: Record<string, string> = {
-  min: 'MIN',
-  max: 'MAX',
-  average: 'AVG',
-  sum: 'SUM',
-  median: 'MEDIAN',
-  standard_deviation: 'MEDIAN_ABSOLUTE_DEVIATION',
-};
-
 const supportedTypes = ['number', 'histogram'];
 
 function isTimeSeriesCompatible(type: string, timeSeriesMetric?: string) {
@@ -76,6 +74,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   displayName,
   description,
   ofName,
+  toESQL,
   priority,
   optionalTimeScaling,
   supportsDate,
@@ -87,6 +86,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   type: T['operationType'];
   displayName: string;
   ofName: (name: string) => string;
+  toESQL?: ToEsqlFn<T>;
   priority?: number;
   optionalTimeScaling?: boolean;
   description?: string;
@@ -97,7 +97,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   quickFunctionDocumentation?: string;
   unsupportedSettings?: LayerSettingsFeatures;
 }) {
-  const labelLookup = (name: string, column?: BaseIndexPatternColumn) => {
+  const labelLookup = (name: string, column?: ColumnBuildHints | BaseIndexPatternColumn) => {
     const label = ofName(name);
     return adjustTimeScaleLabelSuffix(
       label,
@@ -163,8 +163,8 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         params: {
           ...getFormatFromPreviousColumn(previousColumn),
           emptyAsNull:
-            hideZeroOption && previousColumn && isColumnOfType<T>(type, previousColumn)
-              ? previousColumn.params?.emptyAsNull
+            hideZeroOption && hasOperationType(previousColumn, type)
+              ? getBooleanParam(previousColumn, 'emptyAsNull')
               : !columnParams?.usedInMath,
         },
       } as T;
@@ -213,13 +213,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         },
       ];
     },
-    toESQL: (column) => {
-      if (column.timeShift) return;
-      if (!typeToESQLFn[type]) return;
-      return {
-        template: `${typeToESQLFn[type]}(${esql.col(column.sourceField)})`,
-      };
-    },
+    toESQL,
     toEsAggsFn: (column, columnId, _indexPattern) => {
       return buildExpressionFunction(typeToFn[type], {
         id: columnId,
@@ -244,8 +238,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       ...getInvalidFieldMessage(layer, columnId, indexPattern),
       ...getColumnReducedTimeRangeError(layer, columnId, indexPattern),
     ],
-    filterable: true,
-    canReduceTimeRange: true,
+    ...metricEsqlMeta,
     quickFunctionDocumentation,
     shiftable: true,
   } as OperationDefinition<T, 'field', {}, true>;
@@ -254,11 +247,8 @@ function buildMetricOperation<T extends MetricColumn<string>>({
 export const minOperation = buildMetricOperation<MinIndexPatternColumn>({
   type: MIN_ID,
   displayName: MIN_NAME,
-  ofName: (name) =>
-    i18n.translate('xpack.lens.indexPattern.minOf', {
-      defaultMessage: 'Minimum of {name}',
-      values: { name },
-    }),
+  ofName: (name) => ofNameMetric(MIN_ID, name),
+  toESQL: toEsqlRegistry[MIN_ID],
   description: i18n.translate('xpack.lens.indexPattern.min.description', {
     defaultMessage:
       'A single-value metrics aggregation that returns the minimum value among the numeric values extracted from the aggregated documents.',
@@ -276,11 +266,8 @@ export const minOperation = buildMetricOperation<MinIndexPatternColumn>({
 export const maxOperation = buildMetricOperation<MaxIndexPatternColumn>({
   type: MAX_ID,
   displayName: MAX_NAME,
-  ofName: (name) =>
-    i18n.translate('xpack.lens.indexPattern.maxOf', {
-      defaultMessage: 'Maximum of {name}',
-      values: { name },
-    }),
+  ofName: (name) => ofNameMetric(MAX_ID, name),
+  toESQL: toEsqlRegistry[MAX_ID],
   description: i18n.translate('xpack.lens.indexPattern.max.description', {
     defaultMessage:
       'A single-value metrics aggregation that returns the maximum value among the numeric values extracted from the aggregated documents.',
@@ -299,11 +286,8 @@ export const averageOperation = buildMetricOperation<AvgIndexPatternColumn>({
   type: AVG_ID,
   priority: 2,
   displayName: AVG_NAME,
-  ofName: (name) =>
-    i18n.translate('xpack.lens.indexPattern.avgOf', {
-      defaultMessage: 'Average of {name}',
-      values: { name },
-    }),
+  ofName: (name) => ofNameMetric(AVG_ID, name),
+  toESQL: toEsqlRegistry[AVG_ID],
   description: i18n.translate('xpack.lens.indexPattern.avg.description', {
     defaultMessage:
       'A single-value metric aggregation that computes the average of numeric values that are extracted from the aggregated documents',
@@ -320,11 +304,8 @@ export const standardDeviationOperation = buildMetricOperation<StandardDeviation
   {
     type: STD_DEVIATION_ID,
     displayName: STD_DEVIATION_NAME,
-    ofName: (name) =>
-      i18n.translate('xpack.lens.indexPattern.standardDeviationOf', {
-        defaultMessage: 'Standard deviation of {name}',
-        values: { name },
-      }),
+    ofName: (name) => ofNameMetric(STD_DEVIATION_ID, name),
+    toESQL: toEsqlRegistry[STD_DEVIATION_ID],
     description: i18n.translate('xpack.lens.indexPattern.standardDeviation.description', {
       defaultMessage:
         'A single-value metric aggregation that computes the standard deviation of numeric values that are extracted from the aggregated documents',
@@ -346,11 +327,8 @@ export const sumOperation = buildMetricOperation<SumIndexPatternColumn>({
   type: SUM_ID,
   priority: 1,
   displayName: SUM_NAME,
-  ofName: (name) =>
-    i18n.translate('xpack.lens.indexPattern.sumOf', {
-      defaultMessage: 'Sum of {name}',
-      values: { name },
-    }),
+  ofName: (name) => ofNameMetric(SUM_ID, name),
+  toESQL: toEsqlRegistry[SUM_ID],
   optionalTimeScaling: true,
   description: i18n.translate('xpack.lens.indexPattern.sum.description', {
     defaultMessage:
@@ -369,11 +347,8 @@ export const medianOperation = buildMetricOperation<MedianIndexPatternColumn>({
   type: MEDIAN_ID,
   priority: 3,
   displayName: MEDIAN_NAME,
-  ofName: (name) =>
-    i18n.translate('xpack.lens.indexPattern.medianOf', {
-      defaultMessage: 'Median of {name}',
-      values: { name },
-    }),
+  ofName: (name) => ofNameMetric(MEDIAN_ID, name),
+  toESQL: toEsqlRegistry[MEDIAN_ID],
   description: i18n.translate('xpack.lens.indexPattern.median.description', {
     defaultMessage:
       'A single-value metrics aggregation that computes the median value that are extracted from the aggregated documents.',

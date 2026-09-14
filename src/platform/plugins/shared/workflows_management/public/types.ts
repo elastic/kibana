@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -24,8 +25,12 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
+import type {
+  WorkflowsExtensionsPublicPluginSetup,
+  WorkflowsExtensionsPublicPluginStart,
+} from '@kbn/workflows-extensions/public';
 import type {
   AvailabilityService,
   ServerlessTierRequiredProducts,
@@ -37,7 +42,9 @@ import type { WorkflowsBaseTelemetry } from './common/service/telemetry';
 export interface WorkflowsPublicPluginSetup {}
 
 export interface WorkflowsPublicPluginSetupDependencies {
+  actions: ActionsPublicPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
 }
 
 export interface WorkflowsPublicPluginStart {
@@ -79,6 +86,7 @@ export interface WorkflowsPublicPluginStartDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   workflowsExtensions: WorkflowsExtensionsPublicPluginStart;
   licensing: LicensingPluginStart;
+  uiActions: UiActionsStart;
   cloud?: CloudStart;
 }
 
@@ -88,9 +96,6 @@ export interface WorkflowsPublicPluginStartAdditionalServices {
     telemetry: TelemetryServiceClient;
     agentBuilder?: AgentBuilderPluginStart;
     availability: AvailabilityService;
-    globalExecutionsView: {
-      enabled: boolean;
-    };
   };
 }
 

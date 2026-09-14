@@ -19,7 +19,7 @@ import { EventOutcome } from '../../../../common/event_outcome';
 import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import type { Coordinate } from '../../../../typings/timeseries';
-import { nullifyLeadingTrailingEmptyRedMetricPoints } from '../../../../common/utils/red_metric_value_for_histogram_bucket';
+import { nullifyEmptyRedMetricPoints } from '../../../../common/utils/red_metric_value_for_histogram_bucket';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   getBackwardCompatibleDocumentTypeFilter,
@@ -169,7 +169,7 @@ export async function getServiceInstancesTransactionStatistics<T extends true | 
         const { timeseries } = serviceNodeBucket;
         return {
           serviceNodeName,
-          errorRate: nullifyLeadingTrailingEmptyRedMetricPoints(
+          errorRate: nullifyEmptyRedMetricPoints(
             timeseries.buckets.map((dateBucket) => ({
               x: dateBucket.key,
               docCount: dateBucket.doc_count,
@@ -179,14 +179,14 @@ export async function getServiceInstancesTransactionStatistics<T extends true | 
                   : null,
             }))
           ),
-          throughput: nullifyLeadingTrailingEmptyRedMetricPoints(
+          throughput: nullifyEmptyRedMetricPoints(
             timeseries.buckets.map((dateBucket) => ({
               x: dateBucket.key,
               docCount: dateBucket.doc_count,
               y: dateBucket.doc_count / bucketSizeInMinutes,
             }))
           ),
-          latency: nullifyLeadingTrailingEmptyRedMetricPoints(
+          latency: nullifyEmptyRedMetricPoints(
             timeseries.buckets.map((dateBucket) => ({
               x: dateBucket.key,
               docCount: dateBucket.doc_count,

@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import type { z } from '@kbn/zod';
 import type { LensByValueSerializedState } from '@kbn/lens-common';
 import type { LensByRefSerializedAPIConfig } from '@kbn/lens-common-2';
-import type { TypeOf } from '@kbn/config-schema';
 
 import type { getLensByValuePanelSchema } from './transforms';
 
 export type * from './api/types';
 
-export type FlattenedLensByValuePanelSchema = TypeOf<ReturnType<typeof getLensByValuePanelSchema>>;
+export type FlattenedLensByValuePanelSchema = z.output<
+  ReturnType<typeof getLensByValuePanelSchema>
+>;
 
 /**
  * All possible panel states from a dashboard

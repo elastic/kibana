@@ -11,6 +11,7 @@ import React from 'react';
 import type { EmbeddablePublicDefinition } from './types';
 import { buildEmbeddable } from './build_embeddable';
 import { PhaseTracker } from './phase_tracker';
+import { of } from 'rxjs';
 
 const phaseTracker = new PhaseTracker(performance.now());
 
@@ -22,7 +23,9 @@ const testEmbeddableFactory: EmbeddablePublicDefinition<{ name: string; bork: st
         name: initialState.name,
         bork: initialState.bork,
       }),
+      anyStateChange$: of(),
       applySerializedState: jest.fn(),
+      latestState$: of(initialState),
     });
     return {
       Component: () => (
@@ -51,6 +54,9 @@ it('should return Component and componentApi', async () => {
   expect(Component).toMatchInlineSnapshot(`[Function]`);
   expect(componentApi).toMatchInlineSnapshot(`
     Object {
+      "anyStateChange$": Observable {
+        "_subscribe": [Function],
+      },
       "applySerializedState": [MockFunction],
       "hasLockedHoverActions$": BehaviorSubject {
         "_value": false,
@@ -65,6 +71,9 @@ it('should return Component and componentApi', async () => {
       "isDuplicable": true,
       "isExpandable": true,
       "isPinnable": false,
+      "latestState$": Observable {
+        "_subscribe": [Function],
+      },
       "lockHoverActions": [Function],
       "parentApi": Object {
         "getSerializedStateForChild": [Function],

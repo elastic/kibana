@@ -11,9 +11,11 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
+import type { DiscoverTabType } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { isObject } from 'lodash';
+import { isObject, isUndefined, omitBy } from 'lodash';
 import { createDataSource } from '../../../../../common/data_sources';
+import type { ProfileStateRegistry } from '../../../../../common/context_awareness';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverAppState, TabState } from './types';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
@@ -21,37 +23,53 @@ import { DEFAULT_TAB_STATE } from './constants';
 import { parseControlGroupJson } from './utils';
 import { createSearchSource } from '../utils/create_search_source';
 
+export const fromSavedObjectTabToAppState = ({
+  tab,
+}: {
+  tab: DiscoverSessionTab;
+}): DiscoverAppState => {
+  return omitBy<DiscoverAppState>(
+    {
+      columns: tab.columns,
+      filters: tab.serializedSearchSource.filter,
+      grid: tab.grid,
+      hideChart: tab.hideChart,
+      hideTable: tab.hideTable,
+      dataSource: createDataSource({
+        query: tab.serializedSearchSource.query,
+        dataView: tab.serializedSearchSource.index,
+      }),
+      query: tab.serializedSearchSource.query,
+      sort: tab.sort,
+      viewMode: tab.viewMode,
+      hideAggregatedPreview: tab.hideAggregatedPreview,
+      rowHeight: tab.rowHeight,
+      headerRowHeight: tab.headerRowHeight,
+      rowsPerPage: tab.rowsPerPage,
+      sampleSize: tab.sampleSize,
+      breakdownField: tab.breakdownField,
+      interval: tab.chartInterval,
+      density: tab.density,
+      documentsDisplayMode: tab.documentsDisplayMode,
+      jsonModeSettings: tab.jsonModeSettings,
+      esqlApproximation: tab.esqlApproximation,
+    },
+    isUndefined
+  );
+};
+
 export const fromSavedObjectTabToTabState = ({
   tab,
   existingTab,
   initialAppState,
+  profileStateRegistry,
 }: {
   tab: DiscoverSessionTab;
   existingTab?: TabState;
   initialAppState?: DiscoverAppState;
+  profileStateRegistry: ProfileStateRegistry;
 }): TabState => {
-  const appState: DiscoverAppState = initialAppState ?? {
-    columns: tab.columns,
-    filters: tab.serializedSearchSource.filter,
-    grid: tab.grid,
-    hideChart: tab.hideChart,
-    hideTable: tab.hideTable,
-    dataSource: createDataSource({
-      query: tab.serializedSearchSource.query,
-      dataView: tab.serializedSearchSource.index,
-    }),
-    query: tab.serializedSearchSource.query,
-    sort: tab.sort,
-    viewMode: tab.viewMode,
-    hideAggregatedPreview: tab.hideAggregatedPreview,
-    rowHeight: tab.rowHeight,
-    headerRowHeight: tab.headerRowHeight,
-    rowsPerPage: tab.rowsPerPage,
-    sampleSize: tab.sampleSize,
-    breakdownField: tab.breakdownField,
-    interval: tab.chartInterval,
-    density: tab.density,
-  };
+  const appState: DiscoverAppState = initialAppState ?? fromSavedObjectTabToAppState({ tab });
 
   const globalState = {
     timeRange: tab.timeRestore ? tab.timeRange : existingTab?.globalState.timeRange,
@@ -65,8 +83,13 @@ export const fromSavedObjectTabToTabState = ({
     ...existingTab,
     id: tab.id,
     label: tab.label,
+    profileState: profileStateRegistry.mergeState(
+      existingTab?.profileState,
+      profileStateRegistry.fromSavedState(tab.tabTypeState)
+    ),
     initialInternalState: {
       serializedSearchSource: tab.serializedSearchSource,
+      tabType: tab.tabTypeState?.type,
     },
     appState,
     previousAppState: existingTab?.appState ?? appState,
@@ -133,6 +156,8 @@ export const fromSavedObjectTabToSavedSearch = async ({
   breakdownField: tab.breakdownField,
   chartInterval: tab.chartInterval,
   density: tab.density,
+  documentsDisplayMode: tab.documentsDisplayMode,
+  jsonModeSettings: tab.jsonModeSettings,
   visContext: tab.visContext, // managed via Redux state now
   controlGroupJson: tab.controlGroupJson, // managed via Redux state now
 });
@@ -142,11 +167,13 @@ export const fromTabStateToSavedObjectTab = ({
   overridenTimeRestore,
   services,
   currentDataView,
+  tabType,
 }: {
   tab: TabState;
   overridenTimeRestore?: boolean;
   services: DiscoverServices;
   currentDataView: DataView | undefined;
+  tabType: DiscoverTabType | undefined;
 }): DiscoverSessionTab => {
   const allowedSampleSize = getAllowedSampleSize(tab.appState.sampleSize, services.uiSettings);
   const timeRestore = overridenTimeRestore ?? tab.attributes.timeRestore ?? false;
@@ -164,6 +191,8 @@ export const fromTabStateToSavedObjectTab = ({
 
   const usesAdHocDataView = isObject(serializedSearchSource.index);
 
+  const isTextBasedQuery = isOfAggregateQueryType(tab.appState.query);
+
   return {
     id: tab.id,
     label: tab.label,
@@ -172,13 +201,14 @@ export const fromTabStateToSavedObjectTab = ({
     grid: tab.appState.grid ?? {},
     hideChart: tab.appState.hideChart ?? false,
     hideTable: tab.appState.hideTable ?? false,
-    isTextBasedQuery: isOfAggregateQueryType(tab.appState.query),
+    isTextBasedQuery,
     usesAdHocDataView,
     serializedSearchSource,
     viewMode: tab.appState.viewMode,
     hideAggregatedPreview: tab.appState.hideAggregatedPreview,
     rowHeight: tab.appState.rowHeight,
     headerRowHeight: tab.appState.headerRowHeight,
+    esqlApproximation: isTextBasedQuery ? tab.appState.esqlApproximation : undefined,
     timeRestore,
     timeRange: timeRestore ? tab.globalState.timeRange : undefined,
     refreshInterval: timeRestore ? tab.globalState.refreshInterval : undefined,
@@ -190,10 +220,13 @@ export const fromTabStateToSavedObjectTab = ({
     breakdownField: tab.appState.breakdownField || '',
     chartInterval: tab.appState.interval,
     density: tab.appState.density,
+    documentsDisplayMode: tab.appState.documentsDisplayMode,
+    jsonModeSettings: tab.appState.jsonModeSettings,
     visContext: tab.attributes.visContext,
     controlGroupJson: tab.attributes.controlGroupState
       ? JSON.stringify(tab.attributes.controlGroupState)
       : undefined,
+    tabTypeState: services.profileStateRegistry.toSavedState(tabType, tab.profileState),
   };
 };
 
@@ -249,6 +282,8 @@ export const fromSavedSearchToSavedObjectTab = ({
     breakdownField: savedSearch.breakdownField,
     chartInterval: savedSearch.chartInterval,
     density: savedSearch.density,
+    documentsDisplayMode: savedSearch.documentsDisplayMode,
+    jsonModeSettings: savedSearch.jsonModeSettings,
     visContext: tab.attributes ? tab.attributes?.visContext : savedSearch.visContext,
     controlGroupJson: tab.attributes
       ? tab.attributes?.controlGroupState

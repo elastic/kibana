@@ -31,6 +31,7 @@ interface Props {
   http: HttpSetup;
   includeUniqueAlertIds?: boolean;
   isAssistantEnabled: boolean;
+  includeAllAuthors?: boolean;
   end?: string;
   search?: string;
   page?: number;
@@ -73,6 +74,7 @@ export const useFindAttackDiscoveries = ({
   http,
   includeUniqueAlertIds = false,
   isAssistantEnabled,
+  includeAllAuthors,
   end,
   search,
   page = DEFAULT_PAGE,
@@ -101,6 +103,7 @@ export const useFindAttackDiscoveries = ({
         connector_names: connectorNames,
         end,
         include_unique_alert_ids: includeUniqueAlertIds,
+        include_all_authors: includeAllAuthors,
         ids,
         page: pageParam?.page ?? page,
         per_page: pageParam?.perPage ?? perPage,
@@ -129,6 +132,7 @@ export const useFindAttackDiscoveries = ({
       connectorNames,
       end,
       http,
+      includeAllAuthors,
       ids,
       includeUniqueAlertIds,
       page,
@@ -173,6 +177,7 @@ export const useFindAttackDiscoveries = ({
       connectorNames,
       end,
       ids,
+      includeAllAuthors,
       page,
       perPage,
       search,

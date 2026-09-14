@@ -6,10 +6,12 @@
  */
 
 import React from 'react';
-import { Link } from 'react-router-dom-v5-compat';
+import { Link } from 'react-router-dom';
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { getEbtProps } from '@kbn/ebt-click';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 
 import type { SidebarNavItem } from '../../../../route_config';
 
@@ -30,19 +32,24 @@ export const SidebarNavList: React.FC<SidebarNavListProps> = ({ items, isActive,
     padding: 6px ${euiTheme.size.s};
     border-radius: ${euiTheme.border.radius.small};
     text-decoration: none;
-    color: ${euiTheme.colors.textParagraph};
+    color: ${euiTheme.components.buttons.textColorText};
 
     &:hover {
-      background-color: ${euiTheme.colors.backgroundLightPrimary};
-      color: ${euiTheme.colors.textPrimary};
+      background-color: ${euiTheme.components.buttons.backgroundEmptyTextHover};
+      color: ${euiTheme.components.buttons.textColorText};
       text-decoration: none;
     }
   `;
 
   const activeLinkStyles = css`
     ${baseLinkStyles}
-    background-color: ${euiTheme.colors.backgroundLightPrimary};
-    color: ${euiTheme.colors.textPrimary};
+    background-color: ${euiTheme.components.buttons.backgroundPrimary};
+    color: ${euiTheme.components.buttons.textColorPrimary};
+
+    &:hover {
+      background-color: ${euiTheme.components.buttons.backgroundPrimaryHover};
+      color: ${euiTheme.components.buttons.textColorPrimary};
+    }
   `;
 
   return (
@@ -54,6 +61,11 @@ export const SidebarNavList: React.FC<SidebarNavListProps> = ({ items, isActive,
               to={item.path}
               css={isActive(item.path) ? activeLinkStyles : baseLinkStyles}
               onClick={onItemClick}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.sidebar,
+                action: AGENT_BUILDER_UI_EBT.action.navSidebar.SIDEBAR_NAVIGATION_CLICK,
+                detail: item.path.split('/').filter(Boolean).pop() ?? item.path,
+              })}
             >
               {item.icon && <EuiIcon type={item.icon} size="s" aria-hidden={true} />}
               {item.label}

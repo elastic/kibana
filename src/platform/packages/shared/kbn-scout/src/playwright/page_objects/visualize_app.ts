@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { APP_HEADER_TEST_SUBJECTS, APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
 import type { ScoutPage } from '..';
 import { expect } from '..';
+import { SavedObjectSaveModal } from './saved_object_save_modal';
 
 type VisType = 'lens' | 'vega' | 'metrics' | 'aggbased' | 'maps';
 
@@ -19,32 +21,67 @@ export class VisualizeApp {
   private readonly visNewDialogTypes;
   private readonly legacyTab;
   private readonly visualizeSaveButton;
-  private readonly saveModal;
-  private readonly savedObjectTitleInput;
-  private readonly confirmSaveButton;
   private readonly visualizationLoader;
-  private readonly dashboardPicker;
+  private readonly editInLensButton;
+  /** Save modal locators/actions, shared with other apps (e.g. Maps) via `SavedObjectSaveModal`. */
+  readonly saveModal: SavedObjectSaveModal;
 
   constructor(private readonly page: ScoutPage) {
     this.landingPage = this.page.testSubj.locator('visualizationLandingPage');
-    this.newItemButton = this.page.testSubj.locator('newItemButton');
+    this.newItemButton = this.page.locator(
+      `[data-test-subj="${APP_HEADER_TEST_SUBJECTS.root}"] [data-test-subj="newItemButton"]`
+    );
     this.visNewDialogGroups = this.page.testSubj.locator('visNewDialogGroups');
     this.visNewDialogTypes = this.page.testSubj.locator('visNewDialogTypes');
     this.legacyTab = this.page.testSubj.locator('groupModalLegacyTab');
     this.visualizeSaveButton = this.page.testSubj.locator('visualizeSaveButton');
-    this.saveModal = this.page.testSubj.locator('savedObjectSaveModal');
-    this.savedObjectTitleInput = this.page.testSubj.locator('savedObjectTitle');
-    this.confirmSaveButton = this.page.testSubj.locator('confirmSaveSavedObjectButton');
     this.visualizationLoader = this.page.testSubj.locator('visualizationLoader');
-    this.dashboardPicker = this.page.testSubj.locator('open-dashboard-picker');
+    this.editInLensButton = this.page.testSubj.locator('visualizeEditInLensButton');
+    this.saveModal = new SavedObjectSaveModal(this.page);
   }
 
   async goto() {
     await this.page.gotoApp('visualize');
-    await expect(this.landingPage).toBeVisible();
+    // Kibana bootstrap ("Loading Elastic") regularly exceeds the default 10s expect
+    // timeout under parallel Scout load — wait for the listing shell instead.
+    await expect(this.landingPage).toBeVisible({ timeout: 30_000 });
+  }
+
+  private async revealAppMenuItem(item: typeof this.visualizeSaveButton) {
+    if (await item.isVisible()) {
+      return;
+    }
+
+    const overflowButton = this.page.testSubj.locator(APP_MENU_TEST_SUBJECTS.overflowButton);
+    const popover = this.page.testSubj.locator(APP_MENU_TEST_SUBJECTS.popover);
+
+    // Poll separately: `.or().waitFor()` throws in strict mode when both
+    // locators are visible, and `.first()` is banned.
+    await expect
+      .poll(async () => (await item.isVisible()) || (await overflowButton.isVisible()))
+      .toBeTruthy();
+    if (await item.isVisible()) {
+      return;
+    }
+
+    if (await popover.isVisible()) {
+      await overflowButton.click();
+      await expect(popover).toBeHidden();
+    }
+
+    await overflowButton.click();
+    const popoverOpened = await popover
+      .waitFor({ state: 'visible', timeout: 2000 })
+      .then(() => true)
+      .catch(() => false);
+    if (!popoverOpened) {
+      await overflowButton.click();
+    }
+    await item.waitFor({ state: 'visible' });
   }
 
   async openNewVisualizationWizard() {
+    await this.revealAppMenuItem(this.newItemButton);
     await this.newItemButton.click();
     await expect(this.visNewDialogGroups).toBeVisible();
   }
@@ -69,67 +106,43 @@ export class VisualizeApp {
   }
 
   async waitForVisualizationLoaded() {
+    // Agg-based / legacy visualizations can exceed the 10s expect timeout while rendering.
     await expect(this.visualizationLoader).toHaveAttribute('data-render-complete', 'true', {
       timeout: 30_000,
     });
   }
 
-  async openSavedVisualization(title: string) {
+  async clickSavedVisualization(title: string) {
     await this.page.testSubj.click(`visListingTitleLink-${title.split(' ').join('-')}`);
-    await this.waitForVisualizationLoaded();
+  }
+
+  async openSavedVisualization(title: string, options?: { waitFor?: 'agg' | 'lens' }) {
+    await this.clickSavedVisualization(title);
+    if (options?.waitFor === 'lens') {
+      await this.page.testSubj.locator('lnsApp').waitFor({ state: 'visible' });
+    } else {
+      await this.waitForVisualizationLoaded();
+    }
   }
 
   async openSaveModal() {
+    await this.revealAppMenuItem(this.visualizeSaveButton);
     await this.visualizeSaveButton.click();
-    await expect(this.saveModal).toBeVisible();
-  }
-
-  async fillVisTitle(name: string) {
-    await this.savedObjectTitleInput.fill(name);
-  }
-
-  async selectExistingDashboard(dashboardTitle: string) {
-    await this.page.locator('label[for="existing-dashboard-option"]').click();
-    await this.dashboardPicker.click();
-    await this.page.testSubj
-      .locator(`dashboard-picker-option-${dashboardTitle.split(' ').join('-')}`)
-      .click();
-  }
-
-  async selectNewDashboard() {
-    await this.page.locator('label[for="new-dashboard-option"]').click();
-  }
-
-  async confirmSave() {
-    await this.confirmSaveButton.click();
-    await expect(this.saveModal).toBeHidden();
+    await expect(this.saveModal.modal).toBeVisible();
   }
 
   async saveToExistingDashboard(visName: string, dashboardTitle: string) {
     await this.openSaveModal();
-    await this.fillVisTitle(visName);
-    await this.selectExistingDashboard(dashboardTitle);
-    await this.confirmSave();
+    await this.saveModal.saveToExistingDashboard(visName, dashboardTitle);
   }
 
   async saveToNewDashboard(visName: string) {
     await this.openSaveModal();
-    await this.fillVisTitle(visName);
-    await this.selectNewDashboard();
-    await this.confirmSave();
-  }
-
-  async selectNoDashboard() {
-    await this.page.locator('label[for="add-to-library-option"]').click();
+    await this.saveModal.saveToNewDashboard(visName);
   }
 
   async saveToLibrary(visName: string) {
-    await this.fillVisTitle(visName);
-    await this.selectNoDashboard();
-    const addToLibraryCheckbox = this.page.locator('input#add-to-library-checkbox');
-    await expect(addToLibraryCheckbox).toBeChecked();
-    await expect(addToLibraryCheckbox).toBeDisabled();
-    await this.confirmSave();
+    await this.saveModal.saveToLibrary(visName);
   }
 
   async createAggBasedVisualization(subType: string, dataSource: string) {
@@ -150,7 +163,7 @@ export class VisualizeApp {
     await this.goto();
     await this.openNewVisualizationWizard();
     await this.clickVisType('maps');
-    await expect(this.page.testSubj.locator('breadcrumb first')).toHaveText('Maps');
+    await expect(this.page.testSubj.locator('breadcrumb first')).toHaveText('Visualize library');
   }
 
   async createTSVBVisualization() {
@@ -159,5 +172,19 @@ export class VisualizeApp {
     await this.clickLegacyTab();
     await this.clickVisType('metrics');
     await this.waitForVisualizationLoaded();
+  }
+
+  async clickEditInLensButton() {
+    await this.revealAppMenuItem(this.editInLensButton);
+    await this.editInLensButton.click();
+  }
+
+  async expectEditInLensButtonVisible() {
+    await this.revealAppMenuItem(this.editInLensButton);
+    await expect(this.editInLensButton).toBeVisible();
+  }
+
+  getEditInLensButton() {
+    return this.editInLensButton;
   }
 }

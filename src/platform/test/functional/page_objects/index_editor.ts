@@ -10,11 +10,13 @@
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
-const ADD_ROW_COLUMN_INDEX = 1;
+// Grid index of the add-row control column (after the color-indicator and selection columns)
+const ADD_ROW_COLUMN_INDEX = 2;
 
 export class IndexEditorObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
+  private readonly find = this.ctx.getService('find');
   private readonly common = this.ctx.getPageObject('common');
   private readonly dataGrid = this.ctx.getService('dataGrid');
   private readonly es = this.ctx.getService('es');
@@ -135,9 +137,20 @@ export class IndexEditorObject extends FtrService {
   }
 
   public async search(query: string): Promise<void> {
-    const searchBar = await this.testSubjects.find('indexEditorQueryBar');
-    await searchBar.clearValue();
-    await searchBar.type(query);
+    // clearValue does not update controlled KQL input; use clearValueWithKeyboard.
+    await this.retry.try(async () => {
+      await this.testSubjects.click('indexEditorQueryBar');
+      const input = await this.find.activeElement();
+      await input.clearValueWithKeyboard();
+      await input.type(query);
+      const currentQuery =
+        (await this.testSubjects.getAttribute('indexEditorQueryBar', 'value')) ?? '';
+      if (currentQuery !== query) {
+        throw new Error(
+          `Failed to set index editor query to "${query}", instead query is "${currentQuery}"`
+        );
+      }
+    });
     await this.common.pressEnterKey();
   }
 }

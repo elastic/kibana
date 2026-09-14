@@ -22,6 +22,8 @@ dependsOn:
   - '@kbn/agent-builder-server'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/inference-plugin'
+  - '@kbn/inference-common'
+  - '@kbn/inference-langchain'
   - '@kbn/zod'
   - '@kbn/logging'
   - '@kbn/logging-mocks'

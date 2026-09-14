@@ -240,6 +240,35 @@ describe('buildDatasourceStates', () => {
       }
     `);
   });
+
+  test('skips annotation layers so only the data layer gets a text-based datasource', async () => {
+    const results = await buildDatasourceStates(
+      {
+        title: 'test',
+        layers: [
+          {
+            dataset: {
+              esql: 'from test | limit 10',
+            },
+            yAxis: [{ label: 'test', value: 'test' }],
+          },
+          {
+            type: 'annotation' as const,
+            yAxis: [],
+            events: [{ name: 'cp', datetime: '2023-01-01T00:00:00.000Z' }],
+          },
+        ],
+      },
+      {},
+      () => undefined,
+      () => [],
+      {
+        get: async () => ({ id: 'test' }),
+        create: async () => ({ id: 'test' }),
+      } as any
+    );
+    expect(Object.keys(results.textBased?.layers ?? {})).toEqual(['layer_0']);
+  });
 });
 
 describe('mapToFormula', () => {

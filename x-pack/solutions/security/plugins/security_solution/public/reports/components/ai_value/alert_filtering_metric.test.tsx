@@ -46,6 +46,7 @@ const mockUseSignalIndexWithDefault = useSignalIndexWithDefault as jest.MockedFu
 >;
 
 const defaultProps = {
+  isSample: false as const,
   attackAlertIds: ['alert-1', 'alert-2', 'alert-3'],
   from: '2023-01-01T00:00:00.000Z',
   to: '2023-01-31T23:59:59.999Z',
@@ -204,5 +205,10 @@ describe('AlertFilteringMetric', () => {
     rerender(<AlertFilteringMetric {...newProps} />);
 
     expect(mockGetExcludeAlertsFilters).toHaveBeenCalledWith(['new-alert-1', 'new-alert-2']);
+  });
+
+  it('should not render VisualizationEmbeddable when isSample is true', () => {
+    const { queryByTestId } = render(<AlertFilteringMetric {...defaultProps} isSample={true} />);
+    expect(queryByTestId('mock-visualization-embeddable')).not.toBeInTheDocument();
   });
 });

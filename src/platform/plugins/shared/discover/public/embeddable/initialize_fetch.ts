@@ -136,6 +136,7 @@ export function initializeFetch({
   refreshTrigger$,
   setDataLoading,
   setBlockingError,
+  setApproximationApplied,
 }: {
   api: SavedSearchPartialFetchApi;
   stateManager: SearchEmbeddableStateManager;
@@ -144,6 +145,7 @@ export function initializeFetch({
   refreshTrigger$: BehaviorSubject<void>;
   setDataLoading: (dataLoading: boolean | undefined) => void;
   setBlockingError: (error: Error | undefined) => void;
+  setApproximationApplied: (value: boolean | undefined) => void;
 }) {
   const inspectorAdapters = { requests: new RequestAdapter() };
   let abortController: AbortController | undefined;
@@ -225,6 +227,7 @@ export function initializeFetch({
               searchSessionId,
               esqlVariables: getRelevantESQLVariables(savedSearch, fetchContext.esqlVariables),
               projectRouting: fetchContext.projectRouting,
+              esqlApproximation: fetchContext.isApproximate,
             });
             return {
               columnsMeta: result.esqlQueryColumns
@@ -232,6 +235,7 @@ export function initializeFetch({
                 : undefined,
               rows: result.records,
               hitCount: result.records.length,
+              approximationApplied: result.approximationApplied,
               fetchContext,
             };
           }
@@ -297,9 +301,14 @@ export function initializeFetch({
       if (Object.hasOwn(next, 'columnsMeta')) {
         stateManager.columnsMeta.next(next.columnsMeta);
       }
+      setApproximationApplied(next.approximationApplied);
     });
 
-  return () => {
-    fetchSubscription.unsubscribe();
+  return {
+    cleanup: () => fetchSubscription.unsubscribe(),
+    cancelRequests: () => {
+      abortController?.abort();
+      abortController = undefined;
+    },
   };
 }

@@ -11,4 +11,5 @@ export const searchParamNames = {
   skillId: 'skillId',
   toolId: 'toolId',
   pluginId: 'pluginId',
+  connectorId: 'connectorId',
 } as const;

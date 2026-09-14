@@ -16,12 +16,18 @@
  * - Page listing within sites
  * - Cross-site search functionality
  *
- * Requires OAuth2 client credentials authentication with Microsoft Entra ID.
+ * Supports three Microsoft Entra ID auth flows:
+ * - Delegated: OAuth 2.0 Authorization Code (per-user access)
+ * - App-only:
+ *    - certificate-based OAuth 2.0 client credentials, signed with a
+ *   JWT assertion (PS256 + x5t#S256), per Microsoft's recommendation for
+ *   production app-only access to Graph/SharePoint
+ *   - secret-based OAuth 2.0 client credentials
  */
 
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
-import type { ConnectorSpec } from '../../connector_spec';
+import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 /**
  * Common output schema for Microsoft Graph API responses that return a collection.
  * Uses z.any() for the array items to avoid over-specifying the response structure.
@@ -33,6 +39,16 @@ const GraphCollectionOutputSchema = lazySchema(() =>
   })
 );
 
+const APP_ONLY_AUTH_TYPES = new Set([
+  'oauth_client_credentials',
+  'oauth_client_credentials_private_key_jwt',
+]);
+
+const isAppOnlyAuth = (ctx: ActionContext): boolean => {
+  const authType = ctx.secrets?.authType;
+  return typeof authType === 'string' && APP_ONLY_AUTH_TYPES.has(authType);
+};
+
 export const SharepointOnline: ConnectorSpec = {
   metadata: {
     id: '.sharepoint-online',
@@ -43,35 +59,20 @@ export const SharepointOnline: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
     types: [
       {
-        type: 'oauth_client_credentials',
-        defaults: {
-          scope: 'https://graph.microsoft.com/.default',
-        },
+        type: 'ears',
+        isRecommended: true,
         overrides: {
-          meta: {
-            scope: { hidden: true },
-            tokenUrl: {
-              label: i18n.translate(
-                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauth.tokenUrl.label',
-                { defaultMessage: 'Token URL' }
-              ),
-              placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauth.tokenUrl.helpText',
-                {
-                  defaultMessage:
-                    "Replace '{tenantId}' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
-                  values: { tenantId: '{tenant-id}' },
-                }
-              ),
-            },
-          },
+          meta: { scope: { disabled: true } },
+        },
+        defaults: {
+          provider: 'microsoft',
+          scope: 'Sites.Selected Files.Read.All offline_access',
         },
       },
       {
@@ -104,13 +105,91 @@ export const SharepointOnline: ConnectorSpec = {
         },
       },
       {
-        type: 'ears',
-        overrides: {
-          meta: { scope: { disabled: true } },
-        },
+        type: 'oauth_client_credentials',
         defaults: {
-          provider: 'microsoft',
-          scope: 'Sites.Selected Files.Read.All offline_access',
+          scope: 'https://graph.microsoft.com/.default',
+        },
+        overrides: {
+          meta: {
+            scope: { hidden: true },
+            tokenUrl: {
+              label: i18n.translate(
+                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauth.tokenUrl.label',
+                { defaultMessage: 'Token URL' }
+              ),
+              placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauth.tokenUrl.helpText',
+                {
+                  defaultMessage:
+                    "Replace '{tenantId}' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
+                  values: { tenantId: '{tenant-id}' },
+                }
+              ),
+            },
+          },
+        },
+      },
+      {
+        type: 'oauth_client_credentials_private_key_jwt',
+        defaults: {
+          scope: 'https://graph.microsoft.com/.default',
+          algorithm: 'PS256',
+          certificateBinding: 'x5t#S256',
+        },
+        overrides: {
+          meta: {
+            scope: { hidden: true },
+            algorithm: { hidden: true },
+            certificateBinding: { hidden: true },
+            keyId: { hidden: true },
+            tokenUrl: {
+              placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauthCert.tokenUrl.helpText',
+                {
+                  defaultMessage:
+                    "Replace '{tenant-id}' with your Microsoft Entra tenant ID. Before using this auth method, register an application in Microsoft Entra ID, grant it Microsoft Graph application permissions (Sites.Selected, Files.Read.All), and upload a self-signed or CA-issued X.509 certificate under Certificates & secrets > Certificates.",
+                }
+              ),
+            },
+            clientId: {
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauthCert.clientId.helpText',
+                {
+                  defaultMessage:
+                    'The Application (client) ID of the Entra app registration (Azure Portal > Entra ID > App registrations > your app > Overview).',
+                }
+              ),
+            },
+            certificate: {
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauthCert.certificate.helpText',
+                {
+                  defaultMessage:
+                    'Upload the PEM-encoded public certificate you uploaded to the Entra app registration. Must begin with -----BEGIN CERTIFICATE-----.',
+                }
+              ),
+            },
+            privateKey: {
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauthCert.privateKey.helpText',
+                {
+                  defaultMessage:
+                    'Upload the PEM-encoded private key that matches the uploaded certificate. Must begin with -----BEGIN PRIVATE KEY-----, -----BEGIN RSA PRIVATE KEY-----, or -----BEGIN ENCRYPTED PRIVATE KEY-----.',
+                }
+              ),
+            },
+            passphrase: {
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauthCert.passphrase.helpText',
+                {
+                  defaultMessage:
+                    'Only required if the private key is encrypted (ENCRYPTED PRIVATE KEY).',
+                }
+              ),
+            },
+          },
         },
       },
     ],
@@ -119,6 +198,7 @@ export const SharepointOnline: ConnectorSpec = {
   actions: {
     getAllSites: {
       isTool: true,
+      scope: 'read',
       description:
         'List all SharePoint sites the connector has access to. With app-only (client credentials) auth, returns all sites via /sites/getAllSites. With delegated (authorization code) auth, falls back to /sites?search= because getAllSites requires application permissions. Use this to discover site IDs needed by getSite, getSitePages, getSiteDrives, getSiteLists, and getSiteListItems.',
       input: z
@@ -134,9 +214,8 @@ export const SharepointOnline: ConnectorSpec = {
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as { search?: string } | undefined;
-        const isAppOnly = ctx.secrets?.authType === 'oauth_client_credentials';
 
-        if (isAppOnly) {
+        if (isAppOnlyAuth(ctx)) {
           ctx.log.debug('SharePoint listing all sites (app-only auth)');
           const response = await ctx.client.get(
             'https://graph.microsoft.com/v1.0/sites/getAllSites/',
@@ -165,6 +244,7 @@ export const SharepointOnline: ConnectorSpec = {
 
     getSitePages: {
       isTool: true,
+      scope: 'read',
       description:
         'List all pages in a SharePoint site. Returns page metadata (id, title, description, webUrl, createdDateTime, lastModifiedDateTime). Use getAllSites to discover siteId values, and then use getSitePageContents to fetch the full content of a specific page.',
       input: lazySchema(() =>
@@ -201,6 +281,7 @@ export const SharepointOnline: ConnectorSpec = {
 
     getSitePageContents: {
       isTool: true,
+      scope: 'read',
       description:
         'Fetch the full HTML content of a SharePoint site page, including its canvas layout. Use this to read wiki/news pages. Use getAllSites to discover siteId values, and getSitePages to discover pageId values for a given site.',
       input: lazySchema(() =>
@@ -249,6 +330,7 @@ export const SharepointOnline: ConnectorSpec = {
 
     getSite: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve details for a single SharePoint site by either its site ID or its relative URL. Returns id, displayName, webUrl, siteCollection, createdDateTime, and lastModifiedDateTime. Use getAllSites to discover site IDs, or provide a relativeUrl in the format "contoso.sharepoint.com:/sites/hr:".',
       input: lazySchema(() =>
@@ -302,6 +384,7 @@ export const SharepointOnline: ConnectorSpec = {
 
     getSiteDrives: {
       isTool: true,
+      scope: 'read',
       description:
         'List all document libraries (drives) within a SharePoint site. Returns drive metadata including id, name, driveType, webUrl, and owner. Use getAllSites to discover siteId values. Drive IDs returned here are required by getDriveItems and downloadDriveItem.',
       input: lazySchema(() =>
@@ -340,6 +423,7 @@ export const SharepointOnline: ConnectorSpec = {
 
     getSiteLists: {
       isTool: true,
+      scope: 'read',
       description:
         'List all SharePoint lists within a site (e.g., custom lists, document libraries represented as lists). Returns id, displayName, name, webUrl, and description for each list. Use getAllSites to discover siteId values. List IDs returned here are required by getSiteListItems.',
       input: lazySchema(() =>
@@ -380,6 +464,7 @@ export const SharepointOnline: ConnectorSpec = {
 
     getSiteListItems: {
       isTool: true,
+      scope: 'read',
       description:
         'Fetch all items from a specific list within a SharePoint site. Returns item metadata (id, webUrl, createdDateTime, lastModifiedDateTime, createdBy, lastModifiedBy). Use getAllSites to discover siteId values and getSiteLists to discover listId values.',
       input: lazySchema(() =>
@@ -430,6 +515,7 @@ export const SharepointOnline: ConnectorSpec = {
 
     getDriveItems: {
       isTool: true,
+      scope: 'read',
       description:
         'List files and folders within a SharePoint document library (drive), optionally scoped to a subfolder path. Returns item metadata including id, name, webUrl, size, and @microsoft.graph.downloadUrl. Use getSiteDrives to discover driveId values. The @microsoft.graph.downloadUrl field can be passed to downloadItemFromURL.',
       input: lazySchema(() =>
@@ -472,6 +558,7 @@ export const SharepointOnline: ConnectorSpec = {
 
     downloadDriveItem: {
       isTool: true,
+      scope: 'read',
       description:
         'Download the content of a file from a SharePoint document library and return it as UTF-8 text. Best suited for plain-text or markdown files. For PDFs, .docx, and other binary formats that require preprocessing, use downloadItemFromURL instead (which returns base64 for Elasticsearch ingest pipeline extraction). Use getSiteDrives to find driveId and getDriveItems to find itemId.',
       input: lazySchema(() =>
@@ -526,6 +613,7 @@ export const SharepointOnline: ConnectorSpec = {
 
     downloadItemFromURL: {
       isTool: true,
+      scope: 'read',
       description:
         'Download a SharePoint file using its pre-authenticated @microsoft.graph.downloadUrl and return the content as a base64-encoded string. Use this for PDFs, .docx, and other binary formats that require preprocessing via an Elasticsearch ingest pipeline attachment processor. For plain-text or markdown files you can use downloadDriveItem instead. Use getDriveItems to find the @microsoft.graph.downloadUrl field on a file item.',
       input: lazySchema(() =>
@@ -570,6 +658,7 @@ export const SharepointOnline: ConnectorSpec = {
 
     callGraphAPI: {
       isTool: true,
+      scope: 'destroy',
       description: 'Call a Microsoft Graph v1.0 endpoint by path only (e.g., /v1.0/me).',
       input: lazySchema(() =>
         z.object({
@@ -620,6 +709,7 @@ export const SharepointOnline: ConnectorSpec = {
 
     search: {
       isTool: true,
+      scope: 'read',
       description:
         'Search SharePoint content using the Microsoft Graph Search API with Keyword Query Language (KQL). Supports searching across sites, lists, list items, drives, and drive items. Note: not all entity type combinations can be mixed in a single request — valid groupings are (driveItem, listItem), (site, list), or (drive) alone.',
       input: lazySchema(() =>
@@ -673,8 +763,6 @@ export const SharepointOnline: ConnectorSpec = {
 
         // region is only required for app-only (client credentials) auth.
         // Sending region with delegated auth can cause a 400 error.
-        const isAppOnly = ctx.secrets?.authType === 'oauth_client_credentials';
-
         const searchRequest = {
           requests: [
             {
@@ -682,7 +770,7 @@ export const SharepointOnline: ConnectorSpec = {
               query: {
                 queryString: typedInput.query,
               },
-              ...(isAppOnly && { region: typedInput.region ?? 'NAM' }),
+              ...(isAppOnlyAuth(ctx) && { region: typedInput.region ?? 'NAM' }),
               ...(typedInput.from !== undefined && { from: typedInput.from }),
               ...(typedInput.size !== undefined && { size: typedInput.size }),
             },
@@ -704,19 +792,10 @@ export const SharepointOnline: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       ctx.log.debug('SharePoint Online test handler');
-
-      try {
-        const response = await ctx.client.get('https://graph.microsoft.com/v1.0/');
-        const siteName = response.data.displayName || 'Unknown';
-        return {
-          ok: true,
-          message: `Successfully connected to SharePoint Online: ${siteName}`,
-        };
-      } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        return { ok: false, message };
-      }
+      await ctx.client.get('https://graph.microsoft.com/v1.0/');
+      return {};
     },
+    enabled: true,
   },
 
   skill: [
@@ -736,7 +815,7 @@ export const SharepointOnline: ConnectorSpec = {
     '- **Use browse** (`getAllSites` → `getSiteDrives` → `getDriveItems`) when you need structured navigation — e.g., listing everything in a specific folder or enumerating all items in a library.',
     '',
     '### Auth Mode Differences',
-    '- **App-only auth (`oauth_client_credentials`)**: `getAllSites` calls `/sites/getAllSites` and returns all sites the app has access to. The `search` parameter is ignored. The `search` action requires a `region` parameter (defaults to `NAM`).',
+    '- **App-only auth (`oauth_client_credentials` or `oauth_client_credentials_private_key_jwt`)**: `getAllSites` calls `/sites/getAllSites` and returns all sites the app has access to. The `search` parameter is ignored. The `search` action requires a `region` parameter (defaults to `NAM`).',
     '- **Delegated auth (`oauth_authorization_code` or `ears`)**: `getAllSites` falls back to `/sites?search=` — provide a keyword or omit for wildcard (`*`). The `search` action does not use `region` (omit it to avoid 400 errors).',
     '',
     '### Escape Hatch',

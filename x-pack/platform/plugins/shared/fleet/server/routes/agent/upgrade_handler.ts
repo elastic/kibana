@@ -152,6 +152,7 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
     rollout_duration_seconds: upgradeDurationSeconds,
     start_time: startTime,
     batchSize,
+    dryRun,
   } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();
   try {
@@ -179,10 +180,14 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
     upgradeDurationSeconds,
     startTime,
     batchSize,
+    dryRun,
   };
   const results = await AgentService.sendUpgradeAgentsActions(soClient, esClient, upgradeOptions);
 
-  return response.ok({ body: { actionId: results.actionId } });
+  if (dryRun) {
+    return response.ok({ body: { count: (results as { count: number }).count } });
+  }
+  return response.ok({ body: { actionId: (results as { actionId: string }).actionId } });
 };
 
 export const checkKibanaVersion = (version: string, kibanaVersion: string, force = false) => {

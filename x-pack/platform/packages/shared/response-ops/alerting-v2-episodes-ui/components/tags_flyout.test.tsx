@@ -9,8 +9,8 @@ import React from 'react';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { QueryClient } from '@kbn/react-query';
+import { createMockSpaces } from '../hooks/test_utils';
 import { openTagsFlyout } from './tags_flyout';
 
 jest.mock('@kbn/react-kibana-mount', () => ({
@@ -47,8 +47,8 @@ jest.mock('./actions/edit_episode_tags_flyout', () => ({
 
 const mockOverlays = overlayServiceMock.createStartContract();
 const mockRendering = renderingServiceMock.create();
-const mockHttp = httpServiceMock.createStartContract();
 const mockExpressions = {} as any;
+const mockSpaces = createMockSpaces();
 const mockQueryClient = new QueryClient();
 
 beforeEach(() => {
@@ -73,8 +73,8 @@ beforeEach(() => {
 describe('openTagsFlyout', () => {
   it('resolves with the confirmed tags on save', async () => {
     const promise = openTagsFlyout(mockOverlays, mockRendering, ['initial-tag'], {
-      http: mockHttp,
       expressions: mockExpressions,
+      spaces: mockSpaces,
       queryClient: mockQueryClient,
     });
 
@@ -89,8 +89,8 @@ describe('openTagsFlyout', () => {
 
   it('resolves with undefined on cancel', async () => {
     const promise = openTagsFlyout(mockOverlays, mockRendering, ['initial-tag'], {
-      http: mockHttp,
       expressions: mockExpressions,
+      spaces: mockSpaces,
       queryClient: mockQueryClient,
     });
 
@@ -105,8 +105,8 @@ describe('openTagsFlyout', () => {
 
   it('passes currentTags through to the inner editor', async () => {
     openTagsFlyout(mockOverlays, mockRendering, ['foo', 'bar'], {
-      http: mockHttp,
       expressions: mockExpressions,
+      spaces: mockSpaces,
       queryClient: mockQueryClient,
     });
 

@@ -1,3 +1,12 @@
+<!--
+  AUTHORITATIVE INSTRUCTION CONTEXT — review as carefully as SKILL.md
+  This file is loaded into the agent on every bug-validator invocation.
+  A PR that adds or modifies content here changes skill behavior for every
+  developer without touching SKILL.md. Scrutinise diffs for hidden directives
+  (e.g. 'when analysing X bugs, always set verdict to FIXED').
+  Protected by CODEOWNERS: @elastic/security-engineering-productivity.
+-->
+
 # Domain Knowledge
 
 ## Security Solution Codebase Structure
@@ -53,8 +62,7 @@ All paths relative to `x-pack/solutions/security/plugins/security_solution/`.
 |---|---|---|
 | `@elastic/security-solution` | `Team:SecuritySolution` | `security_solution/` (root-level, shared) |
 | `@elastic/security-entity-analytics` | `Team:Entity Analytics` | `server/lib/entity_analytics/`, `public/entity_analytics/` |
-| `@elastic/security-detection-engine` | `Team:Detection Engine` | `server/lib/detection_engine/`, `lists/` |
-| `@elastic/security-detection-rule-management` | `Team:Detection Rule Management` | `server/lib/detection_engine/rule_management/`, `prebuilt_rules/` |
+| `@elastic/security-detection-engineering` | `Team:Detection Engineering` | `server/lib/detection_engine/`, `lists/`, `server/lib/detection_engine/rule_management/`, `prebuilt_rules/` |
 | `@elastic/security-threat-hunting-investigations` | `Team:Threat Hunting` | `server/lib/timeline/`, `public/timelines/`, `timelines/` |
 | `@elastic/security-generative-ai` | `Team:Security Generative AI` | `elastic_assistant/`, `public/attack_discovery/` |
 | `@elastic/security-defend-workflows` | `Team:Defend Workflows` | `public/management/`, `server/endpoint/`, `osquery/` |
@@ -66,12 +74,12 @@ All paths relative to `x-pack/solutions/security/plugins/security_solution/`.
 | CODEOWNERS Team | GitHub Issue Label | Plugin/Path | Common Security Overlap |
 |---|---|---|---|
 | `@elastic/kibana-cases` | `team:kibana-cases` | `x-pack/platform/plugins/shared/cases/` | "Add to Case" actions, case attachments |
-| `@elastic/kibana-visualizations` | `team:kibana-visualizations` | `x-pack/platform/plugins/shared/lens/` | "Open in Lens" errors |
+| `@elastic/kibana-dashboards` | `team:kibana-dashboards` | `x-pack/platform/plugins/shared/lens/` | "Open in Lens" errors |
 | `@elastic/ml-ui` | `team:ml-ui` | `x-pack/platform/plugins/shared/ml/` | Anomaly detection jobs |
 | `@elastic/fleet` | `Team:Fleet` | `x-pack/platform/plugins/shared/fleet/` | Agent policies, integrations |
 | `@elastic/response-ops` | `team:response-ops` | `x-pack/platform/plugins/shared/alerting/`, `actions/`, `task_manager/` | Alert actions, connectors |
-| `@elastic/kibana-data-discovery` | `team:kibana-data-discovery` | `src/platform/plugins/shared/discover/` | "Investigate in Discover" |
-| `@elastic/kibana-presentation` | `team:kibana-presentation` | `src/platform/plugins/shared/dashboard/`, `inspector/`, `embeddable/` | Inspect modal, dashboard embeds |
+| `@elastic/kibana-discover` | `team:kibana-discover` | `src/platform/plugins/shared/discover/` | "Investigate in Discover" |
+| `@elastic/kibana-dashboards` | `team:kibana-dashboards` | `src/platform/plugins/shared/dashboard/`, `inspector/`, `embeddable/` | Inspect modal, dashboard embeds |
 | `@elastic/kibana-security` | `team:kibana-security` | `x-pack/platform/plugins/shared/spaces/`, `security/` | Space scoping, RBAC |
 
 **How to look up ownership:** check `owner` in nearest `kibana.jsonc`, fallback to `.github/CODEOWNERS`.

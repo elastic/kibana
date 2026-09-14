@@ -11,7 +11,8 @@ import { useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { useEuiTheme, type EuiBasicTableColumn } from '@elastic/eui';
 import { useContentListConfig, type ContentListItem } from '@kbn/content-list-provider';
-import type { ParsedPart, SkeletonOutput } from '@kbn/content-list-assembly';
+import type { ParsedPart } from '@kbn/ui-react-assembly';
+import type { SkeletonOutput } from '../skeleton/descriptor';
 import type { ColumnBuilderContext } from '../column/types';
 import { column } from '../column/part';
 import { inferColumnSkeleton } from '../skeleton/infer_skeleton';
@@ -99,7 +100,7 @@ export const useColumns = (
   children: ReactNode,
   onDelete?: (items: ContentListItem[]) => void
 ): ResolvedColumn[] => {
-  const { item: itemConfig, isReadOnly, labels, supports } = useContentListConfig();
+  const { item: itemConfig, isReadOnly, labels, supports, features } = useContentListConfig();
   const { euiTheme } = useEuiTheme();
 
   return useMemo(() => {
@@ -109,6 +110,7 @@ export const useColumns = (
       isReadOnly,
       entityName: labels.entity,
       supports,
+      features,
       actions: { onDelete },
       euiTheme,
     };
@@ -135,5 +137,5 @@ export const useColumns = (
     // parent render, so including them would defeat memoization. Re-running when context
     // deps change is sufficient.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [itemConfig, isReadOnly, labels.entity, supports, onDelete, euiTheme]);
+  }, [itemConfig, isReadOnly, labels.entity, supports, features, onDelete, euiTheme]);
 };

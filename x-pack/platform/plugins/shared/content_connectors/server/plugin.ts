@@ -30,6 +30,7 @@ import { registerApiKeysRoutes } from './routes/api_keys';
 import type { SearchConnectorsConfig } from './config';
 import { AgentlessConnectorDeploymentsSyncService } from './task';
 import { AgentlessConnectorsInfraServiceFactory } from './services/infra_service_factory';
+import { registerTelemetryUsageCollector } from './collectors/connectors/telemetry';
 
 export class SearchConnectorsPlugin
   implements
@@ -43,6 +44,7 @@ export class SearchConnectorsPlugin
   private connectors: ConnectorServerSideDefinition[];
   private readonly logger: LoggerFactory;
   private readonly config: SearchConnectorsConfig;
+  private readonly isServerless: boolean;
   private agentlessConnectorDeploymentsSyncService: AgentlessConnectorDeploymentsSyncService;
   private agentlessConnectorsInfraServiceFactory: AgentlessConnectorsInfraServiceFactory;
 
@@ -50,6 +52,7 @@ export class SearchConnectorsPlugin
     this.connectors = [];
     this.logger = initializerContext.logger;
     this.config = initializerContext.config.get();
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
     this.agentlessConnectorDeploymentsSyncService = new AgentlessConnectorDeploymentsSyncService(
       this.logger.get()
     );
@@ -76,6 +79,10 @@ export class SearchConnectorsPlugin
     });
 
     this.connectors = getConnectorTypes(http.staticAssets);
+
+    if (this.isServerless && plugins.usageCollection) {
+      registerTelemetryUsageCollector(plugins.usageCollection, this.logger.get());
+    }
 
     // There seems to be no way to check for agentless here
     // So we register a task, but do not execute it in `start` method

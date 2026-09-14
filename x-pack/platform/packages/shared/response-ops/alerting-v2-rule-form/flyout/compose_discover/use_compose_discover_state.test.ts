@@ -5,16 +5,8 @@
  * 2.0.
  */
 
-import { createInitialState, reducer, getSandboxTabConfig } from './use_compose_discover_state';
+import { createInitialState, reducer, getSandboxTabs } from './use_compose_discover_state';
 import type { ComposeDiscoverState } from './types';
-
-// ── helpers ───────────────────────────────────────────────────────────────────
-
-const FULL_QUERY = 'FROM logs-*\n| STATS count = COUNT(*) BY host.name\n| WHERE count > 100';
-const BASE_QUERY = 'FROM logs-*\n| STATS count = COUNT(*) BY host.name';
-const ALERT_BLOCK = '| WHERE count > 100';
-const RECOVERY_FULL = 'FROM logs-*\n| STATS count = COUNT(*) BY host.name\n| WHERE count < 100';
-const RECOVERY_BLOCK = '| WHERE count < 100';
 
 const createState = (overrides: Partial<ComposeDiscoverState> = {}): ComposeDiscoverState => ({
   ...createInitialState({ mode: 'create' }),
@@ -24,234 +16,274 @@ const createState = (overrides: Partial<ComposeDiscoverState> = {}): ComposeDisc
 // ── createInitialState ────────────────────────────────────────────────────────
 
 describe('createInitialState', () => {
-  it('creates default state for create mode', () => {
+  it('creates default state for create mode (alert)', () => {
     const state = createInitialState({ mode: 'create' });
 
-    expect(state.mode).toBe('create');
-    expect(state.tracking).toBe(false);
-    expect(state.fullQuery).toBe('');
-    expect(state.childOpen).toBe(true);
+    expect(state.childOpen).toBe(false);
     expect(state.queryCommitted).toBe(false);
+    /*
+     * Create uses a single unified editor (no split tabs), so the default tab
+     * falls back to 'alert'.
+     */
+    expect(state.activeTab).toBe('alert');
   });
 
-  it('seeds fullQuery and marks committed in edit mode', () => {
-    const state = createInitialState({ mode: 'edit', initialQuery: FULL_QUERY });
+  it('starts on the alert tab for signal create (single editor)', () => {
+    const state = createInitialState({ mode: 'create', initialKind: 'signal' });
 
-    expect(state.mode).toBe('edit');
-    expect(state.fullQuery).toBe(FULL_QUERY);
+    expect(state.activeTab).toBe('alert');
+  });
+
+  it('sets childOpen false and queryCommitted true in edit mode', () => {
+    const state = createInitialState({ mode: 'edit', initialKind: 'signal' });
+
     expect(state.childOpen).toBe(false);
     expect(state.queryCommitted).toBe(true);
   });
 
-  it('does not enable tracking when no recovery query is provided', () => {
-    const state = createInitialState({ mode: 'edit', initialQuery: FULL_QUERY });
+  it('keeps the query sandbox closed in create mode', () => {
+    const state = createInitialState({ mode: 'create' });
 
-    expect(state.tracking).toBe(false);
-    expect(state.baseQuery).toBe('');
-    expect(state.alertBlock).toBe('');
-    expect(state.recoveryBlock).toBe('');
-    expect(state.recoveryType).toBe('default');
+    expect(state.childOpen).toBe(false);
+    expect(state.queryCommitted).toBe(false);
   });
 
-  it('enables tracking and reconstructs split when a recovery query is provided', () => {
-    const state = createInitialState({
-      mode: 'edit',
-      initialQuery: FULL_QUERY,
-      initialRecoveryQuery: RECOVERY_FULL,
-    });
+  it('sets queryCommitted true in create mode when isQueryPrePopulated is true', () => {
+    const state = createInitialState({ mode: 'create', isQueryPrePopulated: true });
 
-    expect(state.tracking).toBe(true);
-    expect(state.recoveryType).toBe('custom');
-    expect(state.baseQuery).toBe(BASE_QUERY);
-    expect(state.alertBlock).toBe(ALERT_BLOCK);
-    expect(state.recoveryBlock).toBe(RECOVERY_BLOCK);
+    expect(state.queryCommitted).toBe(true);
+    expect(state.childOpen).toBe(false);
+  });
+
+  it('sets queryCommitted false when Discover query has no splittable alert condition', () => {
+    const state = createInitialState({ mode: 'create', isQueryPrePopulated: false });
+
+    expect(state.queryCommitted).toBe(false);
+  });
+
+  it('starts in YAML mode with sandbox open when forceYamlMode is true', () => {
+    const state = createInitialState({ mode: 'edit', forceYamlMode: true });
+
+    expect(state.yamlMode).toBe(true);
+    expect(state.childOpen).toBe(true);
+  });
+
+  it('does not start in YAML mode when forceYamlMode is false', () => {
+    const state = createInitialState({ mode: 'edit', forceYamlMode: false });
+
+    expect(state.yamlMode).toBe(false);
+    expect(state.childOpen).toBe(false);
   });
 });
 
-// ── reducer: commit actions ───────────────────────────────────────────────────
+// ── reducer ───────────────────────────────────────────────────────────────────
 
 describe('reducer', () => {
-  describe('COMMIT_CHILD_QUERY', () => {
-    it('sets fullQuery and marks committed', () => {
-      const state = createState({ queryCommitted: false });
-      const next = reducer(state, { type: 'COMMIT_CHILD_QUERY', fullQuery: FULL_QUERY });
+  describe('KIND_CHANGE', () => {
+    it('kind=alert keeps the current step and does not force the sandbox open', () => {
+      const state = createState({ step: 2, childOpen: false, activeTab: 'alert' });
+      const next = reducer(state, { type: 'KIND_CHANGE', kind: 'alert' });
 
-      expect(next.fullQuery).toBe(FULL_QUERY);
+      expect(next.childOpen).toBe(false);
+      expect(next.step).toBe(2);
+      expect(next.activeTab).toBe('base');
+    });
+
+    it('kind=signal keeps the current step and childOpen', () => {
+      const state = createState({ step: 1, childOpen: true });
+      const next = reducer(state, { type: 'KIND_CHANGE', kind: 'signal' });
+
+      expect(next.childOpen).toBe(true);
+      expect(next.step).toBe(1);
+    });
+  });
+
+  describe('COMMIT_QUERY', () => {
+    it('marks queryCommitted and preserves childOpen', () => {
+      const state = createState({ queryCommitted: false, childOpen: true, yamlMode: false });
+      const next = reducer(state, { type: 'COMMIT_QUERY' });
+
       expect(next.queryCommitted).toBe(true);
-      expect(next.childOpen).toBe(false);
+      expect(next.childOpen).toBe(true);
     });
-  });
 
-  describe('COMMIT_CHILD_SPLIT', () => {
-    it('sets split fields and marks committed', () => {
-      const state = createState({ tracking: true, queryCommitted: false });
-      const next = reducer(state, {
-        type: 'COMMIT_CHILD_SPLIT',
-        baseQuery: BASE_QUERY,
-        alertBlock: ALERT_BLOCK,
-        recoveryBlock: RECOVERY_BLOCK,
-      });
+    it('keeps childOpen when in yaml mode', () => {
+      const state = createState({ queryCommitted: false, childOpen: true, yamlMode: true });
+      const next = reducer(state, { type: 'COMMIT_QUERY' });
 
-      expect(next.baseQuery).toBe(BASE_QUERY);
-      expect(next.alertBlock).toBe(ALERT_BLOCK);
-      expect(next.recoveryBlock).toBe(RECOVERY_BLOCK);
       expect(next.queryCommitted).toBe(true);
-      expect(next.childOpen).toBe(false);
+      expect(next.childOpen).toBe(true);
     });
   });
 
-  describe('ENABLE_TRACKING → DISABLE_TRACKING roundtrip', () => {
-    it('reassembles fullQuery when tracking is disabled', () => {
-      let state = createState({ fullQuery: FULL_QUERY, queryCommitted: true });
+  describe('OPEN_CHILD', () => {
+    it('focuses the tab passed as focusedTab', () => {
+      const state = createState({ step: 1 });
+      const next = reducer(state, { type: 'OPEN_CHILD', isAlert: true, focusedTab: 'recovery' });
 
-      state = reducer(state, {
-        type: 'ENABLE_TRACKING',
-        base: BASE_QUERY,
-        alertBlock: ALERT_BLOCK,
-      });
-      expect(state.tracking).toBe(true);
-      expect(state.baseQuery).toBe(BASE_QUERY);
-      expect(state.alertBlock).toBe(ALERT_BLOCK);
-
-      state = reducer(state, { type: 'DISABLE_TRACKING' });
-      expect(state.tracking).toBe(false);
-      expect(state.fullQuery).toBe(`${BASE_QUERY}\n${ALERT_BLOCK}`);
-      expect(state.baseQuery).toBe('');
-      expect(state.alertBlock).toBe('');
-      expect(state.recoveryBlock).toBe('');
-    });
-
-    it('ENABLE_TRACKING closes the child so it remounts with fresh local state', () => {
-      const state = createState({
-        fullQuery: FULL_QUERY,
-        queryCommitted: true,
-        childOpen: true,
-      });
-
-      const next = reducer(state, {
-        type: 'ENABLE_TRACKING',
-        base: BASE_QUERY,
-        alertBlock: ALERT_BLOCK,
-      });
-
-      expect(next.childOpen).toBe(false);
-    });
-
-    it('DISABLE_TRACKING closes the child so it remounts with fresh local state', () => {
-      const state = createState({
-        tracking: true,
-        baseQuery: BASE_QUERY,
-        alertBlock: ALERT_BLOCK,
-        queryCommitted: true,
-        childOpen: true,
-      });
-
-      const next = reducer(state, { type: 'DISABLE_TRACKING' });
-
-      expect(next.childOpen).toBe(false);
-    });
-  });
-
-  describe('sandbox isolation', () => {
-    it('CLOSE_CHILD does not alter split query fields', () => {
-      const state = createState({
-        tracking: true,
-        childOpen: true,
-        queryCommitted: true,
-        baseQuery: BASE_QUERY,
-        alertBlock: ALERT_BLOCK,
-        recoveryBlock: RECOVERY_BLOCK,
-      });
-
-      const next = reducer(state, { type: 'CLOSE_CHILD' });
-
-      expect(next.childOpen).toBe(false);
-      expect(next.baseQuery).toBe(BASE_QUERY);
-      expect(next.alertBlock).toBe(ALERT_BLOCK);
-      expect(next.recoveryBlock).toBe(RECOVERY_BLOCK);
-    });
-
-    it('only COMMIT_CHILD_SPLIT updates baseQuery/alertBlock/recoveryBlock', () => {
-      const state = createState({
-        tracking: true,
-        queryCommitted: true,
-        baseQuery: BASE_QUERY,
-        alertBlock: ALERT_BLOCK,
-        recoveryBlock: '',
-      });
-
-      const newBase = 'FROM new-*\n| STATS c = COUNT(*)';
-      const newAlert = '| WHERE c > 50';
-      const newRecovery = '| WHERE c < 50';
-
-      const next = reducer(state, {
-        type: 'COMMIT_CHILD_SPLIT',
-        baseQuery: newBase,
-        alertBlock: newAlert,
-        recoveryBlock: newRecovery,
-      });
-
-      expect(next.baseQuery).toBe(newBase);
-      expect(next.alertBlock).toBe(newAlert);
-      expect(next.recoveryBlock).toBe(newRecovery);
-      expect(next.queryCommitted).toBe(true);
-      expect(next.childOpen).toBe(false);
-    });
-  });
-
-  describe('SET_RECOVERY_TYPE', () => {
-    it('seeds recovery block from alert block when switching to custom', () => {
-      const state = createState({
-        tracking: true,
-        alertBlock: ALERT_BLOCK,
-        recoveryBlock: '',
-        recoveryType: 'default',
-      });
-
-      const next = reducer(state, { type: 'SET_RECOVERY_TYPE', recoveryType: 'custom' });
-
-      expect(next.recoveryType).toBe('custom');
-      expect(next.recoveryBlock).toBe(RECOVERY_BLOCK);
       expect(next.childOpen).toBe(true);
       expect(next.activeTab).toBe('recovery');
     });
 
-    it('preserves existing recovery block when switching to custom', () => {
-      const existing = '| WHERE status == "ok"';
-      const state = createState({
-        tracking: true,
-        alertBlock: ALERT_BLOCK,
-        recoveryBlock: existing,
-        recoveryType: 'default',
-      });
+    it('falls back to the step default tab when focusedTab is omitted', () => {
+      const state = createState({ step: 1, activeTab: 'recovery' });
+      const next = reducer(state, { type: 'OPEN_CHILD', isAlert: true });
 
-      const next = reducer(state, { type: 'SET_RECOVERY_TYPE', recoveryType: 'custom' });
+      expect(next.childOpen).toBe(true);
+      expect(next.activeTab).toBe('alert');
+    });
+  });
 
-      expect(next.recoveryBlock).toBe(existing);
+  describe('SET_YAML_MODE', () => {
+    it('opens child when enabling yaml mode', () => {
+      const state = createState({ childOpen: false, yamlMode: false });
+      const next = reducer(state, { type: 'SET_YAML_MODE', enabled: true });
+
+      expect(next.yamlMode).toBe(true);
+      expect(next.childOpen).toBe(true);
+    });
+
+    it('closes child when disabling yaml mode', () => {
+      const state = createState({ childOpen: true, yamlMode: true });
+      const next = reducer(state, { type: 'SET_YAML_MODE', enabled: false });
+
+      expect(next.yamlMode).toBe(false);
+      expect(next.childOpen).toBe(false);
+    });
+  });
+
+  describe('GO_NEXT', () => {
+    it('closes preview when advancing in non-builder mode', () => {
+      const state = createState({ step: 0, childOpen: true });
+      const next = reducer(state, { type: 'GO_NEXT', isAlert: true });
+
+      expect(next.step).toBe(1);
+      expect(next.childOpen).toBe(false);
+    });
+
+    it('preserves preview state when advancing in builder mode', () => {
+      const state = createState({ step: 0, childOpen: true });
+      const next = reducer(state, { type: 'GO_NEXT', isAlert: true, isBuilderMode: true });
+
+      expect(next.step).toBe(1);
+      expect(next.childOpen).toBe(true);
+    });
+
+    it('keeps preview closed if user closed it in builder mode', () => {
+      const state = createState({ step: 0, childOpen: false });
+      const next = reducer(state, { type: 'GO_NEXT', isAlert: true, isBuilderMode: true });
+
+      expect(next.step).toBe(1);
+      expect(next.childOpen).toBe(false);
+    });
+  });
+
+  describe('GO_BACK', () => {
+    it('closes preview when going back in non-builder mode', () => {
+      const state = createState({ step: 2, childOpen: true });
+      const next = reducer(state, { type: 'GO_BACK' });
+
+      expect(next.step).toBe(1);
+      expect(next.childOpen).toBe(false);
+    });
+
+    it('preserves preview state when going back in builder mode', () => {
+      const state = createState({ step: 2, childOpen: true });
+      const next = reducer(state, { type: 'GO_BACK', isBuilderMode: true });
+
+      expect(next.step).toBe(1);
+      expect(next.childOpen).toBe(true);
+    });
+  });
+
+  describe('CLOSE_CHILD', () => {
+    it('sets childOpen false without changing other fields', () => {
+      const state = createState({ childOpen: true, queryCommitted: true });
+      const next = reducer(state, { type: 'CLOSE_CHILD' });
+
+      expect(next.childOpen).toBe(false);
+      expect(next.queryCommitted).toBe(true);
     });
   });
 });
 
-// ── getSandboxTabConfig ───────────────────────────────────────────────────────
+// ── getSandboxTabs ────────────────────────────────────────────────────────────
 
-describe('getSandboxTabConfig', () => {
-  it('returns single when tracking is off', () => {
-    const state = createState({ tracking: false });
-    expect(getSandboxTabConfig(state)).toEqual({ type: 'single' });
+describe('getSandboxTabs', () => {
+  it('returns undefined when isAlert is false', () => {
+    expect(
+      getSandboxTabs(false, { step: 0, hasCustomRecovery: false, manualSplitEnabled: false })
+    ).toBeUndefined();
   });
 
-  it('returns base-alert on alertCondition step with tracking', () => {
-    const state = createState({ tracking: true, step: 0 });
-    expect(getSandboxTabConfig(state)).toEqual({ type: 'base-alert' });
+  it('returns undefined on alertCondition step (unified editor by default)', () => {
+    expect(
+      getSandboxTabs(true, { step: 0, hasCustomRecovery: false, manualSplitEnabled: false })
+    ).toBeUndefined();
   });
 
-  it('returns base-recovery on recoveryCondition step with custom recovery', () => {
-    const state = createState({ tracking: true, step: 1, recoveryType: 'custom' });
-    expect(getSandboxTabConfig(state)).toEqual({ type: 'base-recovery' });
+  it('returns [base, alert] on alertCondition step when manualSplitEnabled', () => {
+    expect(
+      getSandboxTabs(true, { step: 0, hasCustomRecovery: false, manualSplitEnabled: true })
+    ).toEqual(['base', 'alert']);
   });
 
-  it('returns single on recoveryCondition step with default recovery', () => {
-    const state = createState({ tracking: true, step: 1, recoveryType: 'default' });
-    expect(getSandboxTabConfig(state)).toEqual({ type: 'single' });
+  it('returns [recovery] on outcome step with custom recovery', () => {
+    expect(
+      getSandboxTabs(true, { step: 1, hasCustomRecovery: true, manualSplitEnabled: false })
+    ).toEqual(['recovery']);
+  });
+
+  it('returns undefined on outcome step without custom recovery', () => {
+    expect(
+      getSandboxTabs(true, { step: 1, hasCustomRecovery: false, manualSplitEnabled: false })
+    ).toBeUndefined();
+  });
+});
+
+// ── ENABLE_MANUAL_SPLIT / DISABLE_MANUAL_SPLIT ────────────────────────────────
+
+describe('reducer — manual split actions', () => {
+  it('initializes manualSplitEnabled to false', () => {
+    const state = createInitialState({ mode: 'create' });
+    expect(state.manualSplitEnabled).toBe(false);
+  });
+
+  it('ENABLE_MANUAL_SPLIT sets manualSplitEnabled to true and switches to base tab', () => {
+    const state = createState({ manualSplitEnabled: false, activeTab: 'alert' });
+    const next = reducer(state, { type: 'ENABLE_MANUAL_SPLIT' });
+    expect(next.manualSplitEnabled).toBe(true);
+    expect(next.activeTab).toBe('base');
+  });
+
+  it('DISABLE_MANUAL_SPLIT sets manualSplitEnabled to false and returns to unified tab', () => {
+    const state = createState({ manualSplitEnabled: true, activeTab: 'base' });
+    const next = reducer(state, { type: 'DISABLE_MANUAL_SPLIT' });
+    expect(next.manualSplitEnabled).toBe(false);
+    expect(next.activeTab).toBe('alert');
+  });
+
+  it('SET_YAML_MODE clears manualSplitEnabled when entering YAML', () => {
+    const state = createState({ manualSplitEnabled: true });
+    const next = reducer(state, { type: 'SET_YAML_MODE', enabled: true });
+    expect(next.manualSplitEnabled).toBe(false);
+    expect(next.yamlMode).toBe(true);
+  });
+
+  it('SET_YAML_MODE does not change manualSplitEnabled when exiting YAML', () => {
+    const state = createState({ manualSplitEnabled: false, yamlMode: true });
+    const next = reducer(state, { type: 'SET_YAML_MODE', enabled: false });
+    expect(next.manualSplitEnabled).toBe(false);
+    expect(next.yamlMode).toBe(false);
+  });
+
+  it('KIND_CHANGE resets manualSplitEnabled to false', () => {
+    const state = createState({ manualSplitEnabled: true });
+
+    const toAlert = reducer(state, { type: 'KIND_CHANGE', kind: 'alert' });
+    expect(toAlert.manualSplitEnabled).toBe(false);
+
+    const toSignal = reducer(state, { type: 'KIND_CHANGE', kind: 'signal' });
+    expect(toSignal.manualSplitEnabled).toBe(false);
   });
 });

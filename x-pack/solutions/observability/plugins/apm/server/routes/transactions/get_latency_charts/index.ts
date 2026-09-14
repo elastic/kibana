@@ -7,6 +7,7 @@
 import type { BoolQuery } from '@kbn/es-query';
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { getDurationFieldForTransactions } from '@kbn/apm-data-access-plugin/server/utils';
+import type { TransactionLatencyResponse } from '@kbn/apm-api-shared';
 import type { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
 import {
   FAAS_ID,
@@ -18,9 +19,8 @@ import type { LatencyAggregationType } from '../../../../common/latency_aggregat
 import type { RollupInterval } from '../../../../common/rollup';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
-import { nullifyLeadingTrailingEmptyRedMetricPoints } from '../../../../common/utils/red_metric_value_for_histogram_bucket';
+import { nullifyEmptyRedMetricPoints } from '../../../../common/utils/red_metric_value_for_histogram_bucket';
 import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
-import type { Coordinate } from '../../../../typings/timeseries';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import {
   getLatencyAggregation,
@@ -171,7 +171,7 @@ export async function getLatencyTimeseries({
 
   return {
     overallAvgDuration: response.aggregations.overall_avg_duration.value || null,
-    latencyTimeseries: nullifyLeadingTrailingEmptyRedMetricPoints(
+    latencyTimeseries: nullifyEmptyRedMetricPoints(
       response.aggregations.latencyTimeseries.buckets.map((bucket) => {
         const y = getLatencyValue({
           latencyAggregationType,
@@ -184,17 +184,6 @@ export async function getLatencyTimeseries({
         };
       })
     ),
-  };
-}
-
-export interface TransactionLatencyResponse {
-  currentPeriod: {
-    overallAvgDuration: number | null;
-    latencyTimeseries: Coordinate[];
-  };
-  previousPeriod: {
-    overallAvgDuration: number | null;
-    latencyTimeseries: Coordinate[];
   };
 }
 

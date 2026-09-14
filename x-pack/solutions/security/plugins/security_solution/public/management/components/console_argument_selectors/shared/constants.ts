@@ -40,7 +40,7 @@ export const CUSTOM_SCRIPTS_CONFIG: BaseSelectorConfig = {
 };
 
 /**
- * Configuration for PendingActionsSelector
+ * Configuration for CancelablePendingActionsSelector
  */
 export const PENDING_ACTIONS_CONFIG: BaseSelectorConfig = {
   initialLabel: i18n.translate(

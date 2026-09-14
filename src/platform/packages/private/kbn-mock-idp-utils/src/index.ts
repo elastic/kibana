@@ -30,6 +30,7 @@ export {
   MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_CLIENTS,
   MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_AUTHORIZATION_CODES,
   MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS,
+  MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_ORGANIZATION_SERVICE_ACCOUNTS,
   MOCK_IDP_UIAM_COSMOS_DB_INTERNAL_URL,
   MOCK_IDP_UIAM_COSMOS_DB_NAME,
   MOCK_IDP_UIAM_COSMOS_DB_URL,
@@ -51,7 +52,15 @@ export {
   ensureSAMLRoleMapping,
   generateCosmosDBApiRequestHeaders,
   getSAMLRequestId,
+  parseSAMLRequest,
   createUiamSessionTokens,
   createUiamOAuthAccessToken,
   projectTypeToAlias,
 } from './utils';
+export type { SAMLRequestInfo } from './utils';
+
+export {
+  seedTestOAuthConnection,
+  updateTestOAuthConnection,
+  deleteTestOAuthConnection,
+} from './cosmos_db_seeder';

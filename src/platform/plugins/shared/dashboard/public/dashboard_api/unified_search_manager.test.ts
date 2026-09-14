@@ -34,6 +34,7 @@ describe('initializeUnifiedSearchManager', () => {
         new BehaviorSubject<boolean>(false),
         new Subject<void>(),
         () => lastSavedState$.value,
+        new Subject(),
         {
           useUnifiedSearchIntegration: false,
         }
@@ -52,6 +53,7 @@ describe('initializeUnifiedSearchManager', () => {
           new BehaviorSubject<boolean>(false),
           new Subject<void>(),
           () => lastSavedState$.value,
+          new Subject(),
           {
             useUnifiedSearchIntegration: false,
           }
@@ -74,6 +76,7 @@ describe('initializeUnifiedSearchManager', () => {
           new BehaviorSubject<boolean>(true),
           new Subject<void>(),
           () => lastSavedState$.value,
+          new Subject(),
           {
             useUnifiedSearchIntegration: false,
           }
@@ -104,6 +107,7 @@ describe('initializeUnifiedSearchManager', () => {
           timeRestore$,
           new Subject<void>(),
           () => lastSavedState$.value,
+          new Subject(),
           {
             useUnifiedSearchIntegration: false,
           }
@@ -163,6 +167,7 @@ describe('initializeUnifiedSearchManager', () => {
         new BehaviorSubject<boolean>(false),
         new Subject<void>(),
         () => lastSavedState$.value,
+        new Subject(),
         {
           useUnifiedSearchIntegration: false,
         }

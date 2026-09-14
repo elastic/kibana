@@ -273,6 +273,55 @@ describe('ContentListToolbar', () => {
       });
     });
 
+    it('surfaces parse errors in a visible hint and clears it on recovery', async () => {
+      // Reported as https://github.com/elastic/kibana/issues/271705 — the
+      // built-in invalid-icon + browser title tooltip is easy to miss, so the
+      // toolbar renders a danger-colored hint popover below the input.
+      const Wrapper = createWrapper();
+      render(
+        <Wrapper>
+          <ContentListToolbar />
+        </Wrapper>
+      );
+
+      const searchBox = await screen.findByTestId('contentListToolbar-searchBox');
+
+      expect(screen.queryByTestId('contentListToolbar-searchParseError')).not.toBeInTheDocument();
+
+      // Typing a special character `[` triggers a parse error in the EUI parser.
+      fireEvent.change(searchBox, { target: { value: '[' } });
+
+      const errorMessage = await screen.findByTestId('contentListToolbar-searchParseError');
+      expect(errorMessage).toHaveTextContent(/Invalid search:/);
+
+      // Recovering with a valid query clears the hint.
+      fireEvent.change(searchBox, { target: { value: 'valid' } });
+      await waitFor(() => {
+        expect(screen.queryByTestId('contentListToolbar-searchParseError')).not.toBeInTheDocument();
+      });
+    });
+
+    it('keeps focus in the search box when a parse error appears', async () => {
+      const Wrapper = createWrapper();
+      render(
+        <Wrapper>
+          <ContentListToolbar />
+        </Wrapper>
+      );
+
+      const searchBox = await screen.findByTestId('contentListToolbar-searchBox');
+      searchBox.focus();
+      expect(searchBox).toHaveFocus();
+
+      // Typing a special character `[` triggers a parse error in the EUI parser.
+      fireEvent.change(searchBox, { target: { value: '[' } });
+      await screen.findByTestId('contentListToolbar-searchParseError');
+
+      // The input must not have been remounted, so focus is retained.
+      expect(searchBox).toBeInTheDocument();
+      expect(searchBox).toHaveFocus();
+    });
+
     it('uses the configured search placeholder', async () => {
       const Wrapper = createWrapper({ searchPlaceholder: 'Search dashboards...' });
       render(

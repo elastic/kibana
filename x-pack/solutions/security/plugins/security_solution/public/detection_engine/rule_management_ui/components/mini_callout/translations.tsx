@@ -18,8 +18,13 @@ export const DISMISS = i18n.translate('xpack.securitySolution.detectionEngine.ru
 export const NEW_PREBUILT_RULES_AVAILABLE_CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.newPrebuiltRulesCalloutTitle',
   {
-    defaultMessage:
-      'New Elastic rules are available to be installed. Click on the “Add Elastic Rules” button to Review and install.',
+    defaultMessage: 'New Elastic rules are available to be installed.',
+  }
+);
+export const NEW_PREBUILT_RULES_AVAILABLE_CALLOUT_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.newPrebuiltRulesCalloutText',
+  {
+    defaultMessage: 'Click on the “Add Elastic Rules” button to Review and install.',
   }
 );
 
@@ -31,10 +36,16 @@ export const RULE_UPDATES_LINK = i18n.translate(
 );
 
 type OnClick = () => void;
-export const getUpdateRulesCalloutTitle = (onClick: OnClick) => (
+export const getUpdateRulesCalloutTitle = () => (
   <FormattedMessage
     id="xpack.securitySolution.detectionEngine.rules.updatePrebuiltRulesCalloutTitle"
-    defaultMessage="Some Elastic rules have updates available. Update them to ensure you get the best detection experience. Review and update in&nbsp;{link}."
+    defaultMessage="Some Elastic rules have updates available. Update them to ensure you get the best detection experience."
+  />
+);
+export const getUpdateRulesCalloutText = (onClick: OnClick) => (
+  <FormattedMessage
+    id="xpack.securitySolution.detectionEngine.rules.updatePrebuiltRulesCalloutText"
+    defaultMessage="Review and update in&nbsp;{link}."
     values={{
       link: (
         <EuiLink

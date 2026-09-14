@@ -6,6 +6,7 @@
  */
 import React, { useCallback, memo } from 'react';
 import { EuiFlyout } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { useEndpointSelector } from '../hooks';
 import { uiQueryParams } from '../../store/selectors';
@@ -35,6 +36,9 @@ export const EndpointDetailsFlyout = memo(() => {
       size="m"
       paddingSize="l"
       ownFocus={false}
+      aria-label={i18n.translate('xpack.securitySolution.endpoint.details.flyout.ariaLabel', {
+        defaultMessage: 'Endpoint details',
+      })}
     >
       <EndpointDetails />
     </EuiFlyout>

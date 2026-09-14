@@ -69,7 +69,7 @@ Scout automatically:
 │                                                          │
 │  form.tsx → sendCreateAgentlessPolicy()                  │
 │             ↓                                            │
-│  POST /api/fleet/agentless_policies                      │
+│  POST /api/fleet/managed_integrations                    │
 │             ↓                                            │
 │  Request intercepted by Playwright                       │
 └─────────────────────────────────────────────────────────┘
@@ -87,7 +87,7 @@ Tests intercept the agentless policy API, capture request data, and validate sha
 let capturedRequestBody: AgentlessPolicyRequestBody | null = null;
 
 // Route handler ONLY captures data - no assertions here (avoids conditional expect)
-await page.route(/\/api\/fleet\/agentless_policies/, async (route, request) => {
+await page.route(/\/api\/fleet\/managed_integrations/, async (route, request) => {
   if (request.method() === 'POST') {
     capturedRequestBody = request.postDataJSON();
     await route.fulfill({
@@ -153,7 +153,7 @@ interface AgentlessPolicyRequestBody {
 }
 ```
 
-> **Note:** Use regex pattern `/\/api\/fleet\/agentless_policies/` to match URLs with space prefixes and query parameters.
+> **Note:** Use regex pattern `/\/api\/fleet\/managed_integrations/` to match the route with space prefixes and query parameters. The UI only calls `managed_integrations`; the deprecated `agentless_policies` alias is never hit from our code, so it does not need to be intercepted.
 
 ---
 
@@ -192,10 +192,10 @@ These tests validate request shapes for:
 
 | Scenario                | API Endpoint                    | Key Assertions                                                                                                                                            |
 | ----------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| New AWS connector       | `/api/fleet/agentless_policies` | `cloud_connector.enabled === true`, `cloud_connector.name` defined                                                                                        |
-| Reuse AWS connector     | `/api/fleet/agentless_policies` | `cloud_connector.cloud_connector_id` defined, `cloud_connector.name` undefined                                                                            |
-| AWS direct access keys  | `/api/fleet/agentless_policies` | `cloud_connector` undefined, `aws.supports_cloud_connectors` not in stream vars                                                                           |
-| Azure service principal | `/api/fleet/agentless_policies` | `cloud_connector` undefined, `azure.credentials.type === 'service_principal_with_client_secret'`                                                          |
+| New AWS connector       | `/api/fleet/managed_integrations` | `cloud_connector.enabled === true`, `cloud_connector.name` defined                                                                                        |
+| Reuse AWS connector     | `/api/fleet/managed_integrations` | `cloud_connector.cloud_connector_id` defined, `cloud_connector.name` undefined                                                                            |
+| AWS direct access keys  | `/api/fleet/managed_integrations` | `cloud_connector` undefined, `aws.supports_cloud_connectors` not in stream vars                                                                           |
+| Azure service principal | `/api/fleet/managed_integrations` | `cloud_connector` undefined, `azure.credentials.type === 'service_principal_with_client_secret'`                                                          |
 | AWS agent-based         | `/api/fleet/package_policies`   | No POST to agentless API, `cloud_connector` undefined, `supports_cloud_connectors` undefined, `aws.supports_cloud_connectors` not `true` in stream vars   |
 | Azure agent-based       | `/api/fleet/package_policies`   | No POST to agentless API, `cloud_connector` undefined, `supports_cloud_connectors` undefined, `azure.supports_cloud_connectors` not `true` in stream vars |
 

@@ -69,6 +69,7 @@ export const dataViewSpecSchema = schema.object(
           ),
         }),
         {
+          maxSize: 5_000,
           meta: {
             description:
               'An array of field patterns to exclude from `_source` in document results.',
@@ -152,6 +153,7 @@ export const dataViewSpecSchema = schema.object(
     ),
     namespaces: schema.maybe(
       schema.arrayOf(schema.string(), {
+        maxSize: 100,
         meta: {
           description: 'The Kibana namespaces (spaces) where this data view is available.',
         },
@@ -169,7 +171,7 @@ export const dataViewSpecSchema = schema.object(
 export const dataViewsRuntimeResponseSchema = () =>
   schema.object({
     [SERVICE_KEY]: dataViewSpecSchema,
-    fields: schema.arrayOf(schema.object(fieldSpecSchemaFields)),
+    fields: schema.arrayOf(schema.object(fieldSpecSchemaFields), { maxSize: 50_000 }),
   });
 
 export const indexPatternsRuntimeResponseSchema = () =>

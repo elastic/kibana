@@ -15,7 +15,8 @@ spaceTest.describe(
   'Attacks schedule flyout',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    spaceTest.beforeAll(async ({ apiServices }) => {
+    spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
+      await scoutSpace.savedObjects.cleanStandardList();
       await apiServices.attackDiscovery.seedAttackData();
       await apiServices.attackDiscovery.seedAttackSchedule();
     });
@@ -24,11 +25,15 @@ spaceTest.describe(
       await scoutSpace.uiSettings.set({
         [ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING]: true,
       });
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPlatformEngineer();
     });
 
     spaceTest.afterEach(async ({ scoutSpace }) => {
       await scoutSpace.uiSettings.unset(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING);
+    });
+
+    spaceTest.afterAll(async ({ scoutSpace }) => {
+      await scoutSpace.savedObjects.cleanStandardList();
     });
 
     spaceTest('opens the schedule flyout from attacks page', async ({ pageObjects }) => {
@@ -42,5 +47,21 @@ spaceTest.describe(
       await expect(detectionsAttackDiscoveryPage.settingsFlyout).toBeVisible();
       await expect(detectionsAttackDiscoveryPage.schedulesTable).toBeVisible();
     });
+
+    spaceTest(
+      'opens the schedule details flyout from the attack table row',
+      async ({ pageObjects }) => {
+        const { detectionsAttackDiscoveryPage } = pageObjects;
+
+        await detectionsAttackDiscoveryPage.navigateToAttacksPage();
+        await detectionsAttackDiscoveryPage.collapseKpisSection();
+
+        await expect(detectionsAttackDiscoveryPage.attacksTableSection).toBeVisible();
+        await expect(detectionsAttackDiscoveryPage.tableScheduleButtons).toHaveCount(1);
+
+        await detectionsAttackDiscoveryPage.openFirstScheduleDetailsFromTable();
+        await expect(detectionsAttackDiscoveryPage.scheduleDetailsFlyout).toBeVisible();
+      }
+    );
   }
 );

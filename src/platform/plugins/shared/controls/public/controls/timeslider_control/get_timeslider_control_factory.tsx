@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { BehaviorSubject, debounceTime, first, map, merge, pairwise } from 'rxjs';
+import { BehaviorSubject, debounceTime, first, map, merge, pairwise, skip } from 'rxjs';
 
 import { EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -18,7 +18,9 @@ import {
   getViewModeSubject,
   useBatchedPublishingSubjects,
   apiPublishesSettings,
-  initializeUnsavedChanges,
+  initializeRelatedPanels,
+  initializeStateApi,
+  apiHasUseGlobalFiltersSetting,
 } from '@kbn/presentation-publishing';
 
 import { DEFAULT_TIME_SLIDER_STATE, TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
@@ -223,20 +225,19 @@ export const getTimesliderControlFactory = (): EmbeddablePublicDefinition<
         })
       );
 
-      function serializeState() {
-        return {
-          ...timeRangePercentage.getLatestState(),
-          is_anchored: isAnchored$.value,
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<TimeSliderControlState>({
+      const stateApi = initializeStateApi<TimeSliderControlState>({
         uuid,
         parentApi,
-        serializeState,
+        serializeState: () => ({
+          ...timeRangePercentage.getLatestState(),
+          is_anchored: isAnchored$.value,
+        }),
         anyStateChange$: merge(
           timeRangePercentage.anyStateChange$,
-          isAnchored$.pipe(map(() => undefined))
+          isAnchored$.pipe(
+            skip(1),
+            map(() => undefined)
+          )
         ),
         getComparators: () => {
           return {
@@ -245,18 +246,29 @@ export const getTimesliderControlFactory = (): EmbeddablePublicDefinition<
             is_anchored: 'referenceEquality',
           };
         },
-        onReset: (lastSaved) => {
-          timeRangePercentage.reinitializeState(lastSaved);
-          setIsAnchored(lastSaved?.is_anchored ?? DEFAULT_TIME_SLIDER_STATE.is_anchored);
+        applySerializedState: (nextState) => {
+          timeRangePercentage.reinitializeState(nextState);
+          setIsAnchored(nextState.is_anchored ?? DEFAULT_TIME_SLIDER_STATE.is_anchored);
         },
+      });
+      const relatedPanelsApi = initializeRelatedPanels({
+        uuid,
+        parentApi,
+        // Timeslider always applies global filters, so only compare if the sibling uses global filters
+        isRelated: (sibling) => {
+          return apiHasUseGlobalFiltersSetting(sibling)
+            ? Boolean(sibling.useGlobalFilters$.getValue())
+            : true;
+        },
+        siblingDependentObservableNames: ['useGlobalFilters$'],
       });
 
       const api = finalizeApi({
-        ...unsavedChangesApi,
+        ...relatedPanelsApi,
+        ...stateApi,
         isPinnable: false, // Disable the user-facing unpin action; panel can still be pinned programatically when it's created
         label$: new BehaviorSubject<string>(displayName),
         appliedTimeslice$: timeslice$,
-        serializeState,
         clearSelections: () => {
           setTimeslice(undefined);
           hasTimeSliceSelection$.next(false);

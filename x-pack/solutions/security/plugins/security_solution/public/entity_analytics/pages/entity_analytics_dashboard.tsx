@@ -9,7 +9,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { ENTITY_ANALYTICS } from '../../app/translations';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { HeaderPage } from '../../common/components/header_page';
 import { EmptyPrompt } from '../../common/components/empty_prompt';
@@ -20,40 +19,24 @@ import { EntityAnalyticsHeader } from '../components/entity_analytics_header';
 import { EntityAnalyticsAnomalies } from '../components/entity_analytics_anomalies';
 
 import { EntityStoreDashboardPanels } from '../components/entity_store/components/dashboard_entity_store_panels';
-import { EntityAnalyticsRiskScores } from '../components/entity_analytics_risk_score';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
-import { useEntityAnalyticsTypes } from '../hooks/use_enabled_entity_types';
 import { PageLoader } from '../../common/components/page_loader';
 import { EaMlJobCallout } from '../components/ea_ml_job_callout';
 
 const EntityAnalyticsComponent = () => {
   const [skipEmptyPrompt, setSkipEmptyPrompt] = React.useState(false);
   const onSkip = React.useCallback(() => setSkipEmptyPrompt(true), [setSkipEmptyPrompt]);
-  const {
-    indicesExist: oldIndicesExist,
-    loading: oldIsSourcererLoading,
-    sourcererDataView: oldSourcererDataViewSpec,
-  } = useSourcererDataView();
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const { dataView, status } = useDataView();
-
   const indicesExist = useMemo(
-    () => (newDataViewPickerEnabled ? !!dataView?.matchedIndices?.length : oldIndicesExist),
-    [dataView?.matchedIndices?.length, newDataViewPickerEnabled, oldIndicesExist]
+    () => !!dataView?.matchedIndices?.length,
+    [dataView?.matchedIndices?.length]
   );
-  const isSourcererLoading = useMemo(
-    () => (newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading),
-    [newDataViewPickerEnabled, oldIsSourcererLoading, status]
-  );
+  const isDataViewLoading = useMemo(() => status !== 'ready', [status]);
 
-  const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
   const showEmptyPrompt = !indicesExist && !skipEmptyPrompt;
-  const entityTypes = useEntityAnalyticsTypes();
 
-  if (newDataViewPickerEnabled && status === 'pristine') {
+  if (status === 'pristine') {
     return <PageLoader />;
   }
 
@@ -64,11 +47,7 @@ const EntityAnalyticsComponent = () => {
       ) : (
         <>
           <FiltersGlobal>
-            <SiemSearchBar
-              dataView={dataView}
-              id={InputsModelId.global}
-              sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
-            />
+            <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsPage">
@@ -76,7 +55,7 @@ const EntityAnalyticsComponent = () => {
 
             <EaMlJobCallout />
 
-            {isSourcererLoading ? (
+            {isDataViewLoading ? (
               <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsLoader" />
             ) : (
               <EuiFlexGroup direction="column" data-test-subj="entityAnalyticsSections">
@@ -84,19 +63,9 @@ const EntityAnalyticsComponent = () => {
                   <EntityAnalyticsHeader />
                 </EuiFlexItem>
 
-                {!isEntityStoreFeatureFlagDisabled ? (
-                  <EuiFlexItem>
-                    <EntityStoreDashboardPanels />
-                  </EuiFlexItem>
-                ) : (
-                  <>
-                    {entityTypes.map((entityType) => (
-                      <EuiFlexItem key={entityType}>
-                        <EntityAnalyticsRiskScores riskEntity={entityType} />
-                      </EuiFlexItem>
-                    ))}
-                  </>
-                )}
+                <EuiFlexItem>
+                  <EntityStoreDashboardPanels />
+                </EuiFlexItem>
 
                 <EuiFlexItem>
                   <EntityAnalyticsAnomalies />

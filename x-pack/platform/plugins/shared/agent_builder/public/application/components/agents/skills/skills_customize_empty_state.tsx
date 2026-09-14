@@ -17,6 +17,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { labels } from '../../../utils/i18n';
 import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -48,6 +50,11 @@ export const SkillsCustomizeEmptyState: React.FC<SkillsCustomizeEmptyStateProps>
           <EuiLink
             data-test-subj="agentSkillsCustomizeEmptyStateLinkPlugins"
             onClick={() => navigateToAgentBuilderUrl(appPaths.agent.plugins({ agentId: agentId! }))}
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.libraryPanel.CROSS_NAV_LINK,
+              detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+            })}
           >
             Plugins
           </EuiLink>
@@ -56,6 +63,11 @@ export const SkillsCustomizeEmptyState: React.FC<SkillsCustomizeEmptyStateProps>
           <EuiLink
             data-test-subj="agentSkillsCustomizeEmptyStateLinkTools"
             onClick={() => navigateToAgentBuilderUrl(appPaths.agent.tools({ agentId: agentId! }))}
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.libraryPanel.CROSS_NAV_LINK,
+              detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+            })}
           >
             Tools
           </EuiLink>
@@ -71,6 +83,11 @@ export const SkillsCustomizeEmptyState: React.FC<SkillsCustomizeEmptyStateProps>
           <EuiLink
             data-test-subj="agentSkillsCustomizeEmptyStateLinkTools"
             onClick={() => navigateToAgentBuilderUrl(appPaths.agent.tools({ agentId: agentId! }))}
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.libraryPanel.CROSS_NAV_LINK,
+              detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+            })}
           >
             Tools
           </EuiLink>
@@ -102,6 +119,11 @@ export const SkillsCustomizeEmptyState: React.FC<SkillsCustomizeEmptyStateProps>
       learnMoreLabel={labels.customizeLandingEmptyState.learnMore}
       learnMoreSuffix={labels.agentSkills.emptyStateLearnMoreSuffix}
       footer={footer}
+      learnMoreEbtProps={getEbtProps({
+        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+        action: AGENT_BUILDER_UI_EBT.action.libraryPanel.LEARN_MORE_DOCS,
+        detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+      })}
       primaryAction={
         canEditAgent ? (
           <EuiButton
@@ -110,13 +132,25 @@ export const SkillsCustomizeEmptyState: React.FC<SkillsCustomizeEmptyStateProps>
             iconType="plus"
             iconSide="left"
             onClick={onOpenLibrary}
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.libraryPanel.EMPTY_STATE_OPEN_LIBRARY,
+              detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+            })}
           >
             {labels.agentSkills.emptyStateAddButton}
           </EuiButton>
         ) : undefined
       }
       secondaryAction={
-        <EuiButtonEmpty href={createAgentBuilderUrl(appPaths.manage.skills)}>
+        <EuiButtonEmpty
+          href={createAgentBuilderUrl(appPaths.manage.skills)}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.libraryPanel.EMPTY_STATE_MANAGE_ALL,
+            detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+          })}
+        >
           {labels.agentSkills.manageAllSkills}
         </EuiButtonEmpty>
       }

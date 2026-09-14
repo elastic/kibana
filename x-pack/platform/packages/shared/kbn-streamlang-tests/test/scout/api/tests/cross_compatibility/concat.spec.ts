@@ -51,7 +51,7 @@ apiTest.describe(
         ];
 
         await testBed.ingest('ingest-e2e-test-concat-basic', docs, processors);
-        const ingestResult = await testBed.getDocs('ingest-e2e-test-concat-basic');
+        const ingestResult = await testBed.getDocsOrdered('ingest-e2e-test-concat-basic');
 
         await testBed.ingest('esql-e2e-test-concat-basic', docs);
         const esqlResult = await esql.queryOnIndex('esql-e2e-test-concat-basic', query);
@@ -60,9 +60,9 @@ apiTest.describe(
         expect(ingestResult[0]?.full_email).toBe('john.doe@example.com');
         expect(ingestResult[1]?.full_email).toBe('jane.smith@example.com');
 
-        expect(esqlResult.documents).toHaveLength(2);
-        expect(esqlResult.documents[0]?.full_email).toBe('john.doe@example.com');
-        expect(esqlResult.documents[1]?.full_email).toBe('jane.smith@example.com');
+        expect(esqlResult.documentsOrdered).toHaveLength(2);
+        expect(esqlResult.documentsOrdered[0]?.full_email).toBe('john.doe@example.com');
+        expect(esqlResult.documentsOrdered[1]?.full_email).toBe('jane.smith@example.com');
       }
     );
 
@@ -98,7 +98,7 @@ apiTest.describe(
         ];
 
         await testBed.ingest('ingest-e2e-test-concat-with-where', docs, processors);
-        const ingestResult = await testBed.getDocs('ingest-e2e-test-concat-with-where');
+        const ingestResult = await testBed.getDocsOrdered('ingest-e2e-test-concat-with-where');
 
         await testBed.ingest('esql-e2e-test-concat-with-where', docs);
         const esqlResult = await esql.queryOnIndex('esql-e2e-test-concat-with-where', query);
@@ -107,9 +107,9 @@ apiTest.describe(
         expect(ingestResult[0]?.full_email).toBe('john.doe@example.com');
         expect(ingestResult[1]?.full_email).toBeUndefined();
 
-        expect(esqlResult.documents).toHaveLength(2);
-        expect(esqlResult.documents[0]?.full_email).toBe('john.doe@example.com');
-        expect(esqlResult.documents[1]?.full_email).toBeNull();
+        expect(esqlResult.documentsOrdered).toHaveLength(2);
+        expect(esqlResult.documentsOrdered[0]?.full_email).toBe('john.doe@example.com');
+        expect(esqlResult.documentsOrdered[1]?.full_email).toBeNull();
       }
     );
 
@@ -149,7 +149,7 @@ apiTest.describe(
         ];
 
         await testBed.ingest('ingest-e2e-test-concat-basic', docs, processors);
-        const ingestResult = await testBed.getDocs('ingest-e2e-test-concat-basic');
+        const ingestResult = await testBed.getDocsOrdered('ingest-e2e-test-concat-basic');
 
         await testBed.ingest('esql-e2e-test-concat-basic', docs);
         const esqlResult = await esql.queryOnIndex('esql-e2e-test-concat-basic', query);
@@ -158,9 +158,9 @@ apiTest.describe(
         expect(ingestResult[0]?.full_email).toBe('john.doe@example.com');
         expect(ingestResult[1]?.full_email).toBe('jane.smith@');
 
-        expect(esqlResult.documents).toHaveLength(2);
-        expect(esqlResult.documents[0]?.full_email).toBe('john.doe@example.com');
-        expect(esqlResult.documents[1]?.full_email).toBe('jane.smith@');
+        expect(esqlResult.documentsOrdered).toHaveLength(2);
+        expect(esqlResult.documentsOrdered[0]?.full_email).toBe('john.doe@example.com');
+        expect(esqlResult.documentsOrdered[1]?.full_email).toBe('jane.smith@');
       }
     );
 
@@ -199,7 +199,7 @@ apiTest.describe(
         ];
 
         await testBed.ingest('ingest-e2e-test-concat-basic', docs, processors);
-        const ingestResult = await testBed.getDocs('ingest-e2e-test-concat-basic');
+        const ingestResult = await testBed.getDocsOrdered('ingest-e2e-test-concat-basic');
 
         await testBed.ingest('esql-e2e-test-concat-basic', docs);
         const esqlResult = await esql.queryOnIndex('esql-e2e-test-concat-basic', query);
@@ -208,9 +208,9 @@ apiTest.describe(
         expect(ingestResult[0]?.full_email).toBe('john.doe@example.com');
         expect(ingestResult[1]?.full_email).toBeUndefined();
 
-        expect(esqlResult.documents).toHaveLength(2);
-        expect(esqlResult.documents[0]?.full_email).toBe('john.doe@example.com');
-        expect(esqlResult.documents[1]?.full_email).toBeNull();
+        expect(esqlResult.documentsOrdered).toHaveLength(2);
+        expect(esqlResult.documentsOrdered[0]?.full_email).toBe('john.doe@example.com');
+        expect(esqlResult.documentsOrdered[1]?.full_email).toBeNull();
       }
     );
   }

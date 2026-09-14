@@ -34,7 +34,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./configure/post_configure'));
     loadTestFile(require.resolve('./internal/metrics/get_case_metrics'));
     loadTestFile(require.resolve('./internal/metrics/get_case_metrics_alerts'));
-    loadTestFile(require.resolve('./internal/metrics/get_case_metrics_actions'));
     loadTestFile(require.resolve('./internal/metrics/get_case_metrics_connectors'));
     loadTestFile(require.resolve('./internal/metrics/get_cases_metrics'));
 
@@ -51,12 +50,8 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./internal/replace_custom_field'));
     loadTestFile(require.resolve('./internal/find_user_actions.ts'));
 
-    /**
-     * Attachments framework
-     */
-
-    loadTestFile(require.resolve('./attachments_framework/external_references.ts'));
-    loadTestFile(require.resolve('./attachments_framework/persistable_state.ts'));
+    // NOTE: The attachments-framework suites are flag-sensitive and run under
+    // their own configs with the feature flag pinned
 
     /**
      * Cases client

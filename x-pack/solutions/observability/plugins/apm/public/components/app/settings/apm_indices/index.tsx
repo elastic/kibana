@@ -21,9 +21,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { APMIndices } from '@kbn/apm-sources-access-plugin/public';
+import {
+  type APMIndices,
+  type ApmIndexValidationErrors,
+  type ApmIndexValidationIssue,
+  validateApmIndices,
+} from '@kbn/apm-sources-access-plugin/public';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import type { ApmPluginStartDeps } from '../../../../plugin';
@@ -64,6 +69,25 @@ const APM_INDEX_LABELS: ReadonlyArray<{ configurationName: keyof APMIndices; lab
 // avoid infinite loop by initializing the state outside the component
 const INITIAL_STATE = { apmIndexSettings: [] };
 
+function getApmIndexValidationMessage(issue: ApmIndexValidationIssue) {
+  switch (issue.code) {
+    case 'maxLength':
+      return i18n.translate('xpack.apm.settings.apmIndices.validation.maxLength', {
+        defaultMessage: 'Must be {maxLength} characters or fewer',
+        values: { maxLength: issue.maxLength },
+      });
+  }
+}
+
+function getApmIndexValidationMessages(validationIssues: ApmIndexValidationErrors) {
+  return Object.fromEntries(
+    Object.entries(validationIssues).map(([setting, issue]) => [
+      setting,
+      getApmIndexValidationMessage(issue),
+    ])
+  ) as Partial<Record<keyof APMIndices, string>>;
+}
+
 export function ApmIndices() {
   const { core } = useApmPluginContext();
   const { services } = useKibana<ApmPluginStartDeps>();
@@ -98,10 +122,22 @@ export function ApmIndices() {
     );
   }, [data]);
 
+  const { validationErrors, hasInvalidChanges } = useMemo(() => {
+    const validationIssues = validateApmIndices(apmIndices);
+
+    return {
+      validationErrors: getApmIndexValidationMessages(validationIssues),
+      hasInvalidChanges: Object.keys(validationIssues).length > 0,
+    };
+  }, [apmIndices]);
+
   const handleApplyChangesEvent = async (
     event: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>
   ) => {
     event.preventDefault();
+    if (hasInvalidChanges) {
+      return;
+    }
     setIsSaving(true);
     try {
       await services.apmSourcesAccess.saveApmIndices({ body: apmIndices });
@@ -123,7 +159,7 @@ export function ApmIndices() {
         }),
         text: i18n.translate('xpack.apm.settings.apmIndices.applyChanges.failed.text', {
           defaultMessage: 'Something went wrong when applying indices. Error: {errorMessage}',
-          values: { errorMessage: error.message },
+          values: { errorMessage: error.body?.message || error.message },
         }),
       });
     } finally {
@@ -194,9 +230,11 @@ export function ApmIndices() {
               );
               const defaultValue = matchedConfiguration ? matchedConfiguration.defaultValue : '';
               const savedUiIndexValue = apmIndices[configurationName];
+              const validationError = validationErrors[configurationName];
               return (
                 <EuiFormRow
                   key={configurationName}
+                  error={validationError}
                   label={label}
                   helpText={i18n.translate('xpack.apm.settings.apmIndices.helpText', {
                     defaultMessage: 'Overrides {configurationName}: {defaultValue}',
@@ -206,14 +244,16 @@ export function ApmIndices() {
                     },
                   })}
                   fullWidth
+                  isInvalid={Boolean(validationError)}
                 >
                   <EuiFieldText
                     data-test-subj="apmApmIndicesFieldText"
                     disabled={!canSave}
                     fullWidth
+                    isInvalid={Boolean(validationError)}
                     name={configurationName}
                     placeholder={defaultValue}
-                    value={savedUiIndexValue}
+                    value={savedUiIndexValue ?? ''}
                     onChange={handleChangeIndexConfigurationEvent}
                   />
                 </EuiFormRow>
@@ -243,7 +283,7 @@ export function ApmIndices() {
                     fill
                     onClick={handleApplyChangesEvent}
                     isLoading={isSaving}
-                    isDisabled={!canSave}
+                    isDisabled={!canSave || hasInvalidChanges}
                   >
                     {i18n.translate('xpack.apm.settings.apmIndices.applyButton', {
                       defaultMessage: 'Apply changes',

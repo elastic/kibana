@@ -37,23 +37,23 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
   );
 
   const viewProps = { foo: 'bar' };
-  const viewObjectProps = {
-    timelineAvatar: 'casesApp',
+  const creationActivityProps = {
     children: getLazyComponent(),
     event: <>{'My event'}</>,
   };
 
-  const getAttachmentViewObject = jest.fn().mockReturnValue(viewObjectProps);
-  const getAttachmentRemovalObject = jest.fn();
+  const getIcon = jest.fn(() => 'test-icon');
+  const getCreationActivity = jest.fn().mockReturnValue(creationActivityProps);
+  const getRemovalActivity = jest.fn();
   const getAttachmentViewProps = jest.fn().mockReturnValue(viewProps);
   const getId = jest.fn().mockReturnValue(attachmentTypeId);
 
   const item = {
     id: attachmentTypeId,
-    icon: 'test-icon',
-    displayName: 'Test',
-    getAttachmentViewObject,
-    getAttachmentRemovalObject,
+    getIcon,
+    getLabel: () => 'Test',
+    getCreationActivity,
+    getRemovalActivity,
   };
 
   registry.register(item);
@@ -64,6 +64,7 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
     userAction: builderArgs.userAction,
     userProfiles: builderArgs.userProfiles,
     caseData: builderArgs.caseData,
+    permissions: builderArgs.permissions,
     handleDeleteComment: builderArgs.handleDeleteComment,
     getId,
     getAttachmentViewProps,
@@ -82,6 +83,19 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
     ).toMatchSnapshot();
   });
 
+  it('uses getIcon as the user action icon', () => {
+    const [userAction] = createRegisteredAttachmentUserActionBuilder(userActionBuilderArgs).build();
+
+    expect(getIcon).toHaveBeenCalledWith(
+      expect.objectContaining({
+        savedObjectId: attachment.id,
+        caseData: { id: builderArgs.caseData.id, title: builderArgs.caseData.title },
+      })
+    );
+    expect(userAction.timelineAvatar).toBe('test-icon');
+    expect(userAction.timelineAvatarAriaLabel).toBe('Test');
+  });
+
   it('returns an unknown user action if the attachment type is not registered', async () => {
     expect(
       createRegisteredAttachmentUserActionBuilder({
@@ -91,11 +105,11 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
     ).toMatchSnapshot();
   });
 
-  it('calls getAttachmentViewObject with correct arguments', async () => {
+  it('calls getCreationActivity with correct arguments', async () => {
     createRegisteredAttachmentUserActionBuilder(userActionBuilderArgs).build();
 
     expect(getAttachmentViewProps).toHaveBeenCalled();
-    expect(getAttachmentViewObject).toBeCalledWith(
+    expect(getCreationActivity).toHaveBeenCalledWith(
       expect.objectContaining({
         ...viewProps,
         savedObjectId: attachment.id,
@@ -110,7 +124,7 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
 
     createRegisteredAttachmentUserActionBuilder(userActionBuilderArgs).build();
 
-    expect(getAttachmentViewObject).toBeCalledWith(
+    expect(getCreationActivity).toHaveBeenCalledWith(
       expect.objectContaining({
         savedObjectId: attachment.id,
         attachmentId: refAttachmentId,
@@ -134,7 +148,7 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
       },
     ];
 
-    getAttachmentViewObject.mockReturnValue({ ...viewObjectProps, getActions: () => actions });
+    getCreationActivity.mockReturnValue({ ...creationActivityProps, getActions: () => actions });
 
     expect(
       createRegisteredAttachmentUserActionBuilder(userActionBuilderArgs).build()
@@ -157,8 +171,8 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
       },
     ];
 
-    getAttachmentViewObject.mockReturnValue({
-      ...viewObjectProps,
+    getCreationActivity.mockReturnValue({
+      ...creationActivityProps,
       getActions: () => actions,
       hideDefaultActions: true,
     });

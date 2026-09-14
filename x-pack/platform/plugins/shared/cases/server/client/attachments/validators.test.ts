@@ -13,13 +13,12 @@ import {
   LEGACY_FILE_ATTACHMENT_TYPE,
   LENS_ATTACHMENT_TYPE,
   LEGACY_LENS_ATTACHMENT_TYPE,
+  SECURITY_ENDPOINT_ATTACHMENT_TYPE,
 } from '../../../common/constants/attachments';
 import { CommentAttachmentPayloadSchema } from '../../../common/types/domain_zod/attachment/comment/v2';
 import { LensAttachmentPayloadSchema } from '../../../common/types/domain_zod/attachment/lens/v2';
 import { FileAttachmentPayloadSchema } from '../../../common/types/domain_zod/attachment/file/v2';
 import { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
-import { ExternalReferenceAttachmentTypeRegistry } from '../../attachment_framework/external_reference_registry';
-import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import {
   validateLegacyRegisteredAttachments,
   validateUnifiedRegisteredAttachments,
@@ -44,19 +43,20 @@ describe('validateUnifiedRegisteredAttachments', () => {
     ).toThrow(/is not registered in unified attachment type registry/);
   });
 
-  it('throws when neither `schema` nor `schemaValidator` is set', () => {
+  it('throws a Boom badRequest when a registered type has no schema (runtime misuse)', () => {
     const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
-    unifiedAttachmentTypeRegistry.register({ id: COMMENT_ATTACHMENT_TYPE });
+    // Simulate a type registered via `as any` that bypasses the required-schema type.
+    unifiedAttachmentTypeRegistry.register({ id: COMMENT_ATTACHMENT_TYPE } as never);
 
     expect(() =>
       validateUnifiedRegisteredAttachments({
         query: { ...validCommentPayload },
         unifiedAttachmentTypeRegistry,
       })
-    ).toThrow(/does not define a schema validator/);
+    ).toThrow(/Attachment type 'comment' does not define a schema/);
   });
 
-  describe('when `schema` is set (preferred path)', () => {
+  describe('when `schema` is set', () => {
     it('accepts a valid payload', () => {
       const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
       unifiedAttachmentTypeRegistry.register({
@@ -101,78 +101,6 @@ describe('validateUnifiedRegisteredAttachments', () => {
         })
       ).toThrow(/data\.content: Comment content must be a non-empty string/);
     });
-
-    it('prefers `schema` over a (legacy) `schemaValidator` when both are set', () => {
-      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
-      const legacyValidator = jest.fn();
-      unifiedAttachmentTypeRegistry.register({
-        id: COMMENT_ATTACHMENT_TYPE,
-        schema: CommentAttachmentPayloadSchema,
-        schemaValidator: legacyValidator,
-      });
-
-      validateUnifiedRegisteredAttachments({
-        query: { ...validCommentPayload },
-        unifiedAttachmentTypeRegistry,
-      });
-
-      expect(legacyValidator).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('when only legacy `schemaValidator` is set (fallback path)', () => {
-    it('passes the `data` slice for unified value attachments', () => {
-      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
-      const schemaValidator = jest.fn();
-      unifiedAttachmentTypeRegistry.register({
-        id: COMMENT_ATTACHMENT_TYPE,
-        schemaValidator,
-      });
-
-      validateUnifiedRegisteredAttachments({
-        query: { ...validCommentPayload },
-        unifiedAttachmentTypeRegistry,
-      });
-
-      expect(schemaValidator).toHaveBeenCalledWith(validCommentPayload.data);
-    });
-
-    it('passes the `metadata` slice (or null) for unified reference attachments', () => {
-      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
-      const schemaValidator = jest.fn();
-      unifiedAttachmentTypeRegistry.register({
-        id: 'security.alert',
-        schemaValidator,
-      });
-
-      validateUnifiedRegisteredAttachments({
-        query: {
-          type: 'security.alert',
-          owner: 'securitySolution',
-          attachmentId: 'alert-1',
-        },
-        unifiedAttachmentTypeRegistry,
-      });
-
-      expect(schemaValidator).toHaveBeenCalledWith(null);
-    });
-
-    it('rejects when the legacy validator throws', () => {
-      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
-      unifiedAttachmentTypeRegistry.register({
-        id: COMMENT_ATTACHMENT_TYPE,
-        schemaValidator: () => {
-          throw new Error('legacy boom');
-        },
-      });
-
-      expect(() =>
-        validateUnifiedRegisteredAttachments({
-          query: { ...validCommentPayload },
-          unifiedAttachmentTypeRegistry,
-        })
-      ).toThrow(/legacy boom/);
-    });
   });
 
   it('applies the registered schema regardless of the registered id', () => {
@@ -193,9 +121,6 @@ describe('validateUnifiedRegisteredAttachments', () => {
 });
 
 describe('validateLegacyRegisteredAttachments (migrated subtypes)', () => {
-  const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
-  const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
-
   const validFileEntry = {
     name: 'screenshot',
     extension: 'png',
@@ -235,8 +160,6 @@ describe('validateLegacyRegisteredAttachments (migrated subtypes)', () => {
       expect(() =>
         validateLegacyRegisteredAttachments({
           query: buildLegacyFilePayload() as never,
-          persistableStateAttachmentTypeRegistry,
-          externalReferenceAttachmentTypeRegistry,
           unifiedAttachmentTypeRegistry,
         })
       ).not.toThrow();
@@ -256,8 +179,6 @@ describe('validateLegacyRegisteredAttachments (migrated subtypes)', () => {
               files: [{ ...validFileEntry, extra: 'not-allowed' }],
             },
           }) as never,
-          persistableStateAttachmentTypeRegistry,
-          externalReferenceAttachmentTypeRegistry,
           unifiedAttachmentTypeRegistry,
         })
       ).toThrow(/Invalid attachment payload for type 'file'/);
@@ -275,8 +196,6 @@ describe('validateLegacyRegisteredAttachments (migrated subtypes)', () => {
           query: buildLegacyFilePayload({
             externalReferenceMetadata: { files: [{ name: 'screenshot' }] },
           }) as never,
-          persistableStateAttachmentTypeRegistry,
-          externalReferenceAttachmentTypeRegistry,
           unifiedAttachmentTypeRegistry,
         })
       ).toThrow(/Invalid attachment payload for type 'file'/);
@@ -294,11 +213,110 @@ describe('validateLegacyRegisteredAttachments (migrated subtypes)', () => {
           query: buildLegacyFilePayload({
             externalReferenceMetadata: { files: [] },
           }) as never,
-          persistableStateAttachmentTypeRegistry,
-          externalReferenceAttachmentTypeRegistry,
           unifiedAttachmentTypeRegistry,
         })
       ).toThrow(/Invalid attachment payload for type 'file'/);
+    });
+  });
+
+  describe('migrated external reference (endpoint, with data.content lift)', () => {
+    // Mirrors the shape of `EndpointAttachmentPayloadSchema` registered by
+    // security_solution. We redeclare it here (rather than importing across
+    // plugin boundaries) to assert the cases-plugin lift + validator contract
+    // independently of the security_solution registration.
+    const endpointSchema = z
+      .object({
+        type: z.literal(SECURITY_ENDPOINT_ATTACHMENT_TYPE),
+        owner: z.string(),
+        attachmentId: z.string(),
+        data: z.object({ content: z.string() }).strict(),
+        metadata: z
+          .object({
+            command: z.string(),
+            targets: z
+              .array(
+                z
+                  .object({
+                    endpointId: z.string(),
+                    hostname: z.string(),
+                    agentType: z.string(),
+                  })
+                  .strict()
+              )
+              .min(1),
+          })
+          .strict(),
+      })
+      .strict();
+
+    const buildLegacyEndpointPayload = (overrides: Record<string, unknown> = {}) => ({
+      type: AttachmentType.externalReference,
+      externalReferenceAttachmentTypeId: 'endpoint',
+      externalReferenceId: 'action-1',
+      externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
+      externalReferenceMetadata: {
+        command: 'isolate',
+        comment: 'host isolated',
+        targets: [{ endpointId: 'ep-1', hostname: 'host-1', agentType: 'endpoint' }],
+      },
+      owner: 'securitySolution',
+      ...overrides,
+    });
+
+    it('accepts a legacy endpoint payload: lifts metadata.comment to data.content before validating', () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register({
+        id: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+        schema: endpointSchema,
+      });
+
+      expect(() =>
+        validateLegacyRegisteredAttachments({
+          query: buildLegacyEndpointPayload() as never,
+          unifiedAttachmentTypeRegistry,
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects a legacy endpoint payload whose externalReferenceMetadata has no `comment` (no data.content to lift)', () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register({
+        id: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+        schema: endpointSchema,
+      });
+
+      expect(() =>
+        validateLegacyRegisteredAttachments({
+          query: buildLegacyEndpointPayload({
+            externalReferenceMetadata: {
+              command: 'isolate',
+              targets: [{ endpointId: 'ep-1', hostname: 'host-1', agentType: 'endpoint' }],
+            },
+          }) as never,
+          unifiedAttachmentTypeRegistry,
+        })
+      ).toThrow(/Invalid attachment payload for type 'security\.endpoint'/);
+    });
+
+    it('rejects a legacy endpoint payload with an empty targets array', () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register({
+        id: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+        schema: endpointSchema,
+      });
+
+      expect(() =>
+        validateLegacyRegisteredAttachments({
+          query: buildLegacyEndpointPayload({
+            externalReferenceMetadata: {
+              command: 'isolate',
+              comment: 'host isolated',
+              targets: [],
+            },
+          }) as never,
+          unifiedAttachmentTypeRegistry,
+        })
+      ).toThrow(/Invalid attachment payload for type 'security\.endpoint'/);
     });
   });
 
@@ -313,8 +331,6 @@ describe('validateLegacyRegisteredAttachments (migrated subtypes)', () => {
       expect(() =>
         validateLegacyRegisteredAttachments({
           query: buildLegacyLensPayload() as never,
-          persistableStateAttachmentTypeRegistry,
-          externalReferenceAttachmentTypeRegistry,
           unifiedAttachmentTypeRegistry,
         })
       ).not.toThrow();
@@ -332,8 +348,6 @@ describe('validateLegacyRegisteredAttachments (migrated subtypes)', () => {
       expect(() =>
         validateLegacyRegisteredAttachments({
           query: buildLegacyLensPayload() as never,
-          persistableStateAttachmentTypeRegistry,
-          externalReferenceAttachmentTypeRegistry,
           unifiedAttachmentTypeRegistry,
         })
       ).toThrow(/Invalid attachment payload for type 'lens'/);

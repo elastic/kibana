@@ -22,13 +22,20 @@ export async function deleteConnectorById(
 }
 
 export async function deleteAllConnectors(kbnClient: KbnClient): Promise<void> {
-  const list = await kbnClient.request<Array<{ id: string }>>({
+  const list = await kbnClient.request<
+    Array<{ id: string; is_preconfigured?: boolean; is_system_action?: boolean }>
+  >({
     method: 'GET',
     path: '/api/actions/connectors',
   });
   const connectors = Array.isArray(list.data) ? list.data : [];
+  // Preconfigured and system connectors cannot be deleted via the API (the
+  // DELETE endpoint returns 400), so only remove user-created connectors.
+  const deletable = connectors.filter(
+    (connector) => !connector.is_preconfigured && !connector.is_system_action
+  );
   await Promise.all(
-    connectors.map((connector) =>
+    deletable.map((connector) =>
       kbnClient.request({
         method: 'DELETE',
         path: `/api/actions/connector/${encodeURIComponent(connector.id)}`,

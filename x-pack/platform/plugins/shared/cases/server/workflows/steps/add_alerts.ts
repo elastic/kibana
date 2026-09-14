@@ -7,14 +7,16 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { AlertAttachmentPayload } from '../../../common/types/domain';
 import {
   addAlertsStepCommonDefinition,
   type AddAlertsStepInput,
 } from '../../../common/workflows/steps/add_alerts';
-import { AttachmentType } from '../../../common';
+import { LEGACY_ALERT_TYPE } from '../../../common/constants/attachments';
+import type { AttachmentRequestV2 } from '../../../common/types/api';
+import { toLegacyCaseResponse } from '../../common/attachments';
 import type { CasesClient } from '../../client';
 import { createCasesStepHandler, safeParseCaseForWorkflowOutput, withCaseOwner } from './utils';
+import { toUnifiedAttachmentType } from '../../../common/utils/attachments';
 
 const NO_RULE_ID_GROUP = '__no_rule_id__';
 
@@ -49,19 +51,18 @@ export const addAlertsStepDefinition = (
     ...addAlertsStepCommonDefinition,
     handler: createCasesStepHandler(getCasesClient, async (client, input: AddAlertsStepInput) => {
       return withCaseOwner(client, input.case_id, async (owner) => {
-        const attachments: AlertAttachmentPayload[] = [
+        const attachments: AttachmentRequestV2[] = [
           ...groupAlertsByRule(input.alerts).values(),
         ].map((group) => {
           const [first] = group;
           return {
-            type: AttachmentType.alert,
-            alertId: group.map((alert) => alert.alertId),
-            index: group.map((alert) => alert.index),
-            owner,
-            rule: {
-              id: first.rule?.id ?? null,
-              name: first.rule?.name ?? null,
+            type: toUnifiedAttachmentType(LEGACY_ALERT_TYPE, owner),
+            attachmentId: group.map((alert) => alert.alertId),
+            metadata: {
+              index: group.map((alert) => alert.index),
+              rule: { id: first.rule?.id ?? null, name: first.rule?.name ?? null },
             },
+            owner,
           };
         });
 
@@ -70,9 +71,11 @@ export const addAlertsStepDefinition = (
           attachments,
         });
 
+        // The client returns unified comments; the output schema mirrors the
+        // public (legacy) wire shape, so convert back before validating.
         return safeParseCaseForWorkflowOutput(
           addAlertsStepCommonDefinition.outputSchema.shape.case,
-          updatedCase
+          toLegacyCaseResponse(updatedCase)
         );
       });
     }),

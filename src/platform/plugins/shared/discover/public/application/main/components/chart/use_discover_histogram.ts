@@ -207,6 +207,7 @@ export const useDiscoverHistogram = (
   const timeInterval = useAppStateSelector((state) => state.interval);
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
+  const esqlApproximation = useAppStateSelector((state) => state.esqlApproximation);
   const visContext = useCurrentTabSelector((tab) => tab.attributes.visContext);
 
   const getModifiedVisAttributesAccessor = useProfileAccessor('getModifiedVisAttributes');
@@ -229,17 +230,19 @@ export const useDiscoverHistogram = (
       breakdownField,
       timeInterval,
       esqlVariables,
+      isApproximate: esqlApproximation,
       controlsState: getDefinedControlGroupState(currentTabControlState),
       // visContext should be in sync with current query
       externalVisContext: isEsqlMode && canImportVisContext(visContext) ? visContext : undefined,
       getModifiedVisAttributes,
-    };
+    } satisfies UnifiedHistogramFetchParamsExternal;
   }, [
     breakdownField,
     timeInterval,
     currentTabControlState,
     dataView,
     esqlVariables,
+    esqlApproximation,
     filters,
     inspectorAdapters.requests,
     isEsqlMode,
@@ -445,11 +448,11 @@ const createUnifiedHistogramStateObservable = (state$?: Observable<UnifiedHistog
         return changes;
       }
 
-      if (prev?.lensRequestAdapter !== curr.lensRequestAdapter) {
+      if (!prev || prev.lensRequestAdapter !== curr.lensRequestAdapter) {
         changes.lensRequestAdapter = curr.lensRequestAdapter;
       }
 
-      if (prev?.chartHidden !== curr.chartHidden) {
+      if (!prev || prev.chartHidden !== curr.chartHidden) {
         changes.hideChart = curr.chartHidden;
       }
 

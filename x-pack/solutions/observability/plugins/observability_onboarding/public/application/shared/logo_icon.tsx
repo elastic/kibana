@@ -44,11 +44,14 @@ const SUPPORTED_LOGOS = [
   'windows',
   'apple_black',
   'apple_white',
-  'slack',
-  'jira',
-  'confluence',
-  'salesforce',
-  'splunk',
+  'supabase',
+  'vercel_black',
+  'vercel_white',
+  'apm',
+  'synthetics',
+  'auto_import',
+  'upload_file',
+  'custom_logs',
 ] as const;
 
 export type SupportedLogo = (typeof SUPPORTED_LOGOS)[number];
@@ -59,7 +62,7 @@ export function isSupportedLogo(logo: string): logo is SupportedLogo {
 
 // Logos that EUI ships natively. Anything not listed here falls through to a
 // bundled SVG asset served from the plugin's `public/assets/` folder.
-const EUI_LOGO_BY_BRAND: Partial<Record<SupportedLogo, string>> = {
+export const EUI_LOGO_BY_BRAND: Partial<Record<SupportedLogo, string>> = {
   aws: 'logoAWS',
   azure: 'logoAzure',
   gcp: 'logoGCP',
@@ -68,16 +71,20 @@ const EUI_LOGO_BY_BRAND: Partial<Record<SupportedLogo, string>> = {
   prometheus: 'logoPrometheus',
   docker: 'logoDocker',
   windows: 'logoWindows',
-  slack: 'logoSlack',
   apache: 'logoApache',
   mysql: 'logoMySQL',
   redis: 'logoRedis',
   rabbitmq: 'logoRabbitmq',
   couchbase: 'logoCouchbase',
   logstash: 'logoLogstash',
+  apm: 'apmApp',
+  synthetics: 'logoUptime',
+  auto_import: 'download',
+  upload_file: 'addDataApp',
+  custom_logs: 'filebeatApp',
 };
 
-function useIconForLogo(logo?: SupportedLogo): string | undefined {
+export function useIconForLogo(logo?: SupportedLogo): string | undefined {
   const {
     services: { http },
   } = useKibana();
@@ -93,7 +100,7 @@ export interface LogoIconProps {
   isAvatar?: boolean;
   size?: LogoIconSizeProp;
   className?: string;
-  type?: EuiAvatarProps['type'];
+  avatarType?: EuiAvatarProps['type'];
   hasBorder?: boolean;
   color?: EuiAvatarProps['color'];
 }
@@ -108,7 +115,7 @@ export function LogoIcon({
   isAvatar,
   size,
   className,
-  type,
+  avatarType,
   hasBorder,
   color = 'subdued',
 }: LogoIconProps) {
@@ -120,9 +127,9 @@ export function LogoIcon({
       <EuiAvatar
         color={color}
         iconType={resolvedIconType}
-        name="logoIcon"
+        name=""
         size={size}
-        type={type}
+        type={avatarType}
         className={className}
         aria-hidden={true}
         css={

@@ -46,6 +46,7 @@ import {
   userConnectorTokenModelVersions,
 } from './model_versions';
 import { connectorModelVersions } from './model_versions/connector_model_versions';
+import { userConnectorTokenEncryptedRegistrationV2 } from './user_connector_token_encryption';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
@@ -209,19 +210,7 @@ export function setupSavedObjects(
     modelVersions: userConnectorTokenModelVersions,
   });
 
-  encryptedSavedObjects.registerType({
-    type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['credentials']),
-    attributesToIncludeInAAD: new Set([
-      'profileUid',
-      'connectorId',
-      'credentialType',
-      'expiresAt',
-      'refreshTokenExpiresAt',
-      'createdAt',
-      'updatedAt',
-    ]),
-  });
+  encryptedSavedObjects.registerType(userConnectorTokenEncryptedRegistrationV2);
 
   savedObjects.registerType({
     name: OAUTH_STATE_SAVED_OBJECT_TYPE,

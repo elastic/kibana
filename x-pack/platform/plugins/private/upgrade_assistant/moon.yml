@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/plugins/private/upgrade_assistant
 dependsOn:
   - '@kbn/core'
+  - '@kbn/app-header'
   - '@kbn/management-plugin'
   - '@kbn/usage-collection-plugin'
   - '@kbn/features-plugin'
@@ -47,6 +48,8 @@ dependsOn:
   - '@kbn/upgrade-assistant-pkg-common'
   - '@kbn/reindex-service-plugin'
   - '@kbn/core-doc-links-browser-mocks'
+  - '@kbn/scout'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
@@ -59,6 +62,8 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
+    - test/scout_upgrade_assistant_integration/**/*
     - public/**/*.json
     - server/**/*.json
     - '!target/**/*'

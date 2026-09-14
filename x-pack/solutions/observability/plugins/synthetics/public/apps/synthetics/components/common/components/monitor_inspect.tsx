@@ -11,8 +11,6 @@ import { i18n } from '@kbn/i18n';
 
 import {
   EuiBasicTable,
-  EuiButtonEmpty,
-  EuiCallOut,
   EuiFlyout,
   EuiButton,
   EuiCodeBlock,
@@ -28,9 +26,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 
-import yaml from 'js-yaml';
+import { stringify } from 'yaml';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
 import type {
@@ -262,25 +261,21 @@ const PackagePolicyLinksTable = ({
       <EuiSpacer size="s" />
       {hasMissingReferences && (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             title={MISSING_REFERENCES_TITLE}
-            color="warning"
-            iconType="warning"
             size="s"
             announceOnMount
             data-test-subj="syntheticsPackagePolicyMissingReferencesCallout"
-          >
-            <p>{MISSING_REFERENCES_DESCRIPTION}</p>
-            <EuiButtonEmpty
-              size="s"
-              color="warning"
-              isLoading={isMigrating}
-              onClick={handleMigrate}
-              data-test-subj="syntheticsPackagePolicyMigrateButton"
-            >
-              {MIGRATE_LABEL}
-            </EuiButtonEmpty>
-          </EuiCallOut>
+            text={MISSING_REFERENCES_DESCRIPTION}
+            actionProps={{
+              primary: {
+                isLoading: isMigrating,
+                onClick: handleMigrate,
+                'data-test-subj': 'syntheticsPackagePolicyMigrateButton',
+                children: MIGRATE_LABEL,
+              },
+            }}
+          />
           <EuiSpacer size="s" />
         </>
       )}
@@ -321,7 +316,7 @@ const formatContent = (result: MonitorInspectResponse, asJson: boolean) => {
 
   const data = { publicConfig: firstResult ?? {}, privateConfig: compiledConfig ?? {} };
   if (!asJson) {
-    return yaml.dump(data);
+    return stringify(data);
   }
 
   return JSON.stringify(data, null, 2);

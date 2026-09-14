@@ -78,6 +78,15 @@ export const defaultGroupTitleRenderers: GroupPanelRenderer<AlertsGroupingAggreg
           dataTestSubj="source-ip"
         />
       );
+    case 'destination.ip':
+      return (
+        <GroupWithIconContent
+          title={bucket.key}
+          icon="globe"
+          nullGroupMessage={nullGroupMessage}
+          dataTestSubj="destination-ip"
+        />
+      );
   }
 };
 
@@ -140,7 +149,12 @@ export const GroupWithIconContent = React.memo<{
     alignItems="center"
   >
     <EuiFlexItem grow={false}>
-      <EuiIcon data-test-subj={`${dataTestSubj}-group-renderer-icon`} size="m" type={icon} />
+      <EuiIcon
+        data-test-subj={`${dataTestSubj}-group-renderer-icon`}
+        size="m"
+        type={icon}
+        aria-hidden={true}
+      />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiTitle data-test-subj={`${dataTestSubj}-group-renderer-title`} size="xs">

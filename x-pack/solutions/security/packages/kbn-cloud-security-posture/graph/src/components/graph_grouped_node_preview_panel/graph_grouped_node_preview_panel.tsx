@@ -58,6 +58,21 @@ export interface GraphGroupedNodePreviewPanelProps {
   documentIds: string[];
   // entities data reused from graph
   entityItems: EntityItem[];
+  /**
+   * Invoked to open a single document (event or alert) preview for a clicked item.
+   * The consumer owns how the preview is rendered (e.g. the flyout v2 system flyout, or the
+   * legacy expandable flyout) — this component does not open any flyout itself.
+   */
+  onShowDocument: (docId: string, indexName?: string, isEvent?: boolean) => void;
+  /**
+   * Invoked to open an entity preview for a clicked item. As with `onShowDocument`, the consumer
+   * owns how the preview is rendered — this component does not open any flyout itself.
+   */
+  onShowEntity: (params: {
+    engineType: string | undefined;
+    entityId: string;
+    entityName: string | undefined;
+  }) => void;
 }
 
 interface PaginatedData {
@@ -127,7 +142,7 @@ const useContentMetadata = (
  * Panel to be displayed in the document details expandable flyout on top of right section
  */
 export const GraphGroupedNodePreviewPanel: FC<GraphGroupedNodePreviewPanelProps> = memo(
-  ({ docMode, scopeId, dataViewId, documentIds, entityItems }) => {
+  ({ docMode, scopeId, dataViewId, documentIds, entityItems, onShowDocument, onShowEntity }) => {
     // Initialize pagination state with localStorage persistence
     // - For 'grouped-entities': Pass entityItems.length to enable client-side pagination validation
     // - For 'grouped-events': Pass 0 since events use server-side pagination (handled by useFetchDocumentDetails)
@@ -162,6 +177,8 @@ export const GraphGroupedNodePreviewPanel: FC<GraphGroupedNodePreviewPanelProps>
         groupedItemsType={groupedItemsType}
         pagination={pagination}
         scopeId={scopeId}
+        onShowDocument={onShowDocument}
+        onShowEntity={onShowEntity}
       />
     );
   }

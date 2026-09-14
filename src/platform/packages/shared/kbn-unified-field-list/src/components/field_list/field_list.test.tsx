@@ -8,39 +8,47 @@
  */
 
 import React from 'react';
-import { EuiText, EuiProgress } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { EuiText } from '@elastic/eui';
 import { FieldList } from './field_list';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 
 describe('UnifiedFieldList <FieldList />', () => {
-  it('should render correctly when processing', async () => {
-    expect(mountWithIntl(<FieldList isProcessing={true} />).find(EuiProgress)?.length).toBe(1);
-    expect(mountWithIntl(<FieldList isProcessing={false} />).find(EuiProgress)?.length).toBe(0);
+  it('should render the loading indicator when processing', () => {
+    renderWithI18n(<FieldList isProcessing={true} />);
+
+    expect(screen.getByTestId('fieldListLoading')).toBeVisible();
   });
 
-  it('should render correctly with content', async () => {
-    const wrapper = mountWithIntl(
+  it('should not render the loading indicator when not processing', () => {
+    renderWithI18n(<FieldList isProcessing={false} />);
+
+    expect(screen.queryByTestId('fieldListLoading')).not.toBeInTheDocument();
+  });
+
+  it('should render correctly with content', () => {
+    renderWithI18n(
       <FieldList isProcessing={false}>
         <EuiText>{'content'}</EuiText>
       </FieldList>
     );
 
-    expect(wrapper.find(EuiText).first().text()).toBe('content');
+    expect(screen.getByText('content')).toBeVisible();
   });
 
-  it('should render correctly with additional elements', async () => {
-    const wrapper = mountWithIntl(
+  it('should render correctly with additional elements', () => {
+    renderWithI18n(
       <FieldList
+        append={<EuiText>{'append'}</EuiText>}
         isProcessing={false}
         prepend={<EuiText>{'prepend'}</EuiText>}
-        append={<EuiText>{'append'}</EuiText>}
       >
         <EuiText>{'content'}</EuiText>
       </FieldList>
     );
 
-    expect(wrapper.find(EuiText).first().text()).toBe('prepend');
-    expect(wrapper.find(EuiText).at(1).text()).toBe('content');
-    expect(wrapper.find(EuiText).at(2).text()).toBe('append');
+    expect(screen.getByText('prepend')).toBeVisible();
+    expect(screen.getByText('content')).toBeVisible();
+    expect(screen.getByText('append')).toBeVisible();
   });
 });

@@ -10,6 +10,7 @@
 import type {
   InjectedMetadata,
   InjectedMetadataClusterInfo,
+  InjectedMetadataDisplayLanguage,
   InjectedMetadataExternalUrlPolicy,
   InjectedMetadataPlugin,
   InjectedMetadataTheme,
@@ -29,6 +30,7 @@ export interface InjectedMetadataParams {
 export interface InternalInjectedMetadataSetup {
   getBasePath: () => string;
   getServerBasePath: () => string;
+  getSpaceId: () => string;
   getPublicBaseUrl: () => string | undefined;
   getAssetsHrefBase: () => string;
   getKibanaBuildNumber: () => number;
@@ -42,6 +44,7 @@ export interface InternalInjectedMetadataSetup {
   };
   getTheme: () => InjectedMetadataTheme;
   getElasticsearchInfo: () => InjectedMetadataClusterInfo;
+  getI18nInfo: () => InjectedMetadataDisplayLanguage;
   /**
    * An array of frontend plugins in topological order.
    */
@@ -64,6 +67,10 @@ export interface InternalInjectedMetadataSetup {
         initialFeatureFlags: Record<string, unknown>;
       }
     | undefined;
+  getUserStorage: () => {
+    available: boolean;
+    values: Record<string, unknown>;
+  };
 }
 
 /** @internal */

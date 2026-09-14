@@ -7,7 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiButtonEmptyProps } from '@elastic/eui';
+import type { EuiButtonEmptyProps, IconType } from '@elastic/eui';
+
+/** @public */
+export interface ChromeHelpMenuLink {
+  title: string;
+  href?: string;
+  onClick?: () => void;
+  iconType?: string;
+  dataTestSubj?: string;
+}
 
 /** @public */
 export interface ChromeHelpExtension {
@@ -24,8 +33,13 @@ export interface ChromeHelpExtension {
 /** @public */
 export type ChromeHelpExtensionLinkBase = Pick<
   EuiButtonEmptyProps,
-  'iconType' | 'target' | 'rel' | 'data-test-subj'
->;
+  'target' | 'rel' | 'data-test-subj'
+> & {
+  /**
+   * @deprecated Extension items don't support icons. This property will be removed in a future release.
+   */
+  iconType?: IconType;
+};
 
 /** @public */
 export interface ChromeHelpExtensionMenuDocumentationLink extends ChromeHelpExtensionLinkBase {

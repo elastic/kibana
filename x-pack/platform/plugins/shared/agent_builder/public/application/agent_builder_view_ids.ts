@@ -31,4 +31,6 @@ export const agentBuilderViewIds = {
   manageToolBulkImportMcp: 'agent_builder_manage_tools_bulk_import_mcp',
   manageToolDetails: 'agent_builder_manage_tools_detail',
   manageMcpClients: 'agent_builder_manage_mcp_clients',
+  manageMcpClientCreate: 'agent_builder_manage_mcp_clients_create',
+  manageMcpClientEdit: 'agent_builder_manage_mcp_clients_edit',
 } as const;

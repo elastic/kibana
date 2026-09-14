@@ -73,7 +73,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
   };
 
-  describe('@ess @serverless @serverlessQA Risk Scoring Entity Calculation API', function () {
+  describe('@ess @serverless @serverlessQA @skipInServerlessMKI Risk Scoring Entity Calculation API', function () {
     this.tags(['esGate']);
 
     context('with auditbeat data', () => {

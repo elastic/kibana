@@ -22,6 +22,7 @@ import {
   type ChatCompletionChunkEvent,
   MessageRole,
   isChatCompletionChunkEvent,
+  isChatCompletionTokenCountEvent,
   createInferenceProviderError,
   InferenceTaskErrorCode,
 } from '@kbn/inference-common';
@@ -31,6 +32,7 @@ import {
   createInferenceExecutorMock,
   createRegexWorkerServiceMock,
   chunkEvent,
+  tokensEvent,
 } from '../test_utils';
 import { createChatCompleteApi } from './api';
 import { createChatCompleteCallbackApi } from './callback_api';
@@ -159,6 +161,20 @@ describe('createChatCompleteApi', () => {
     });
   });
 
+  it('forwards `maxContentLength` down to `inferenceAdapter.chatComplete`', async () => {
+    await chatComplete({
+      connectorId: 'connectorId',
+      messages: [{ role: MessageRole.User, content: 'question' }],
+      maxContentLength: 10 * 1024 * 1024,
+      maxRetries: 0,
+    });
+
+    expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(1);
+    expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
+      expect.objectContaining({ maxContentLength: 10 * 1024 * 1024 })
+    );
+  });
+
   it('throws if the connector is not compatible', async () => {
     getInferenceAdapterMock.mockReturnValue(undefined);
 
@@ -285,6 +301,55 @@ describe('createChatCompleteApi', () => {
       });
     });
 
+    it('returns the successful attempt token counts when a tool validation error is retried', async () => {
+      let count = 0;
+      inferenceAdapter.chatComplete.mockImplementation(() => {
+        count++;
+        const isFirstAttempt = count === 1;
+        return of(
+          chunkEvent('', [
+            {
+              index: 0,
+              toolCallId: `call-${count}`,
+              function: {
+                name: 'myTool',
+                arguments: isFirstAttempt ? 'not-valid-json{' : '{}',
+              },
+            },
+          ]),
+          tokensEvent(
+            isFirstAttempt
+              ? { prompt: 1, completion: 2, total: 3 }
+              : { prompt: 4, completion: 5, total: 6 },
+            { model: isFirstAttempt ? 'failed_attempt_model' : 'success_attempt_model' }
+          )
+        );
+      });
+
+      const response = await chatComplete({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        tools: {
+          myTool: {
+            description: 'my tool',
+            schema: { type: 'object', properties: {} },
+          },
+        },
+        maxRetries: 1,
+        retryConfiguration: {
+          initialDelay: 1,
+          backoffMultiplier: 1,
+        },
+      });
+
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(2);
+      expect(response.tokens).toEqual({ prompt: 4, completion: 5, total: 6 });
+      expect(response.model).toBe('success_attempt_model');
+      expect(response.toolCalls).toEqual([
+        { toolCallId: 'call-2', function: { name: 'myTool', arguments: {} } },
+      ]);
+    });
+
     describe('request cancellation', () => {
       it('passes the abortSignal down to `inferenceAdapter.chatComplete`', async () => {
         const abortController = new AbortController();
@@ -372,6 +437,102 @@ describe('createChatCompleteApi', () => {
       ]);
     });
 
+    it('only emits the successful attempt token counts when a tool validation error is retried', async () => {
+      let count = 0;
+      inferenceAdapter.chatComplete.mockImplementation(() => {
+        count++;
+        const isFirstAttempt = count === 1;
+        return of(
+          chunkEvent('', [
+            {
+              index: 0,
+              toolCallId: `call-${count}`,
+              function: {
+                name: 'myTool',
+                arguments: isFirstAttempt ? 'not-valid-json{' : '{}',
+              },
+            },
+          ]),
+          tokensEvent(
+            isFirstAttempt
+              ? { prompt: 1, completion: 2, total: 3 }
+              : { prompt: 4, completion: 5, total: 6 },
+            { model: isFirstAttempt ? 'failed_attempt_model' : 'success_attempt_model' }
+          )
+        );
+      });
+
+      const events$ = chatComplete({
+        stream: true,
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        tools: {
+          myTool: {
+            description: 'my tool',
+            schema: { type: 'object', properties: {} },
+          },
+        },
+        maxRetries: 1,
+        retryConfiguration: {
+          initialDelay: 1,
+          backoffMultiplier: 1,
+        },
+      });
+
+      const events = await firstValueFrom(events$.pipe(toArray()));
+      const tokenEvents = events.filter(isChatCompletionTokenCountEvent);
+
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(2);
+      expect(tokenEvents).toEqual([
+        tokensEvent({ prompt: 4, completion: 5, total: 6 }, { model: 'success_attempt_model' }),
+      ]);
+    });
+
+    it('emits the token counts before the error when the call fails terminally', async () => {
+      inferenceAdapter.chatComplete.mockImplementation(() => {
+        return of(
+          chunkEvent('', [
+            {
+              index: 0,
+              toolCallId: 'call-1',
+              function: { name: 'myTool', arguments: 'not-valid-json{' },
+            },
+          ]),
+          tokensEvent({ prompt: 1, completion: 2, total: 3 }, { model: 'failed_attempt_model' })
+        );
+      });
+
+      const events$ = chatComplete({
+        stream: true,
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        tools: {
+          myTool: {
+            description: 'my tool',
+            schema: { type: 'object', properties: {} },
+          },
+        },
+        maxRetries: 0,
+      });
+
+      const emitted: unknown[] = [];
+      let caughtError: any;
+      await new Promise<void>((resolve) => {
+        events$.subscribe({
+          next: (event) => emitted.push(event),
+          error: (err) => {
+            caughtError = err;
+            resolve();
+          },
+        });
+      });
+
+      expect(caughtError).toBeInstanceOf(Error);
+      expect(emitted).toContainEqual(
+        tokensEvent({ prompt: 1, completion: 2, total: 3 }, { model: 'failed_attempt_model' })
+      );
+    });
+
     it('implicitly retries errors when configured to', async () => {
       let count = 0;
       inferenceAdapter.chatComplete.mockImplementation(() => {
@@ -449,6 +610,213 @@ describe('createChatCompleteApi', () => {
     });
   });
 
+  describe('default connector only restriction', () => {
+    const createChatCompleteWithCheck = ({
+      isDefaultConnectorOnly,
+      getDefaultConnectorId,
+    }: {
+      isDefaultConnectorOnly: () => Promise<boolean>;
+      getDefaultConnectorId: () => Promise<string | undefined>;
+    }) => {
+      const callbackApi = createChatCompleteCallbackApi({
+        request,
+        namespace: 'default',
+        actions,
+        logger,
+        anonymizationRulesPromise: Promise.resolve([]),
+        regexWorker,
+        esClient: mockEsClient,
+        endpointIdCache,
+        isDefaultConnectorOnly,
+        getDefaultConnectorId,
+      });
+      return createChatCompleteApi({ callbackApi });
+    };
+
+    it('blocks the call when the setting is enabled and another connector is used', async () => {
+      const isDefaultConnectorOnly = jest.fn().mockResolvedValue(true);
+      const getDefaultConnectorId = jest.fn().mockResolvedValue('default-connector-id');
+      const chatCompleteWithCheck = createChatCompleteWithCheck({
+        isDefaultConnectorOnly,
+        getDefaultConnectorId,
+      });
+
+      await expect(
+        chatCompleteWithCheck({
+          connectorId: 'connectorId',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          maxRetries: 0,
+        })
+      ).rejects.toMatchObject({
+        code: InferenceTaskErrorCode.requestError,
+        message: expect.stringContaining('not allowed'),
+      });
+
+      expect(isDefaultConnectorOnly).toHaveBeenCalledTimes(1);
+      expect(getInferenceExecutorMock).not.toHaveBeenCalled();
+      expect(inferenceAdapter.chatComplete).not.toHaveBeenCalled();
+    });
+
+    it('allows the call when the connector matches the default connector', async () => {
+      const isDefaultConnectorOnly = jest.fn().mockResolvedValue(true);
+      const getDefaultConnectorId = jest.fn().mockResolvedValue('connectorId');
+      const chatCompleteWithCheck = createChatCompleteWithCheck({
+        isDefaultConnectorOnly,
+        getDefaultConnectorId,
+      });
+
+      const response = await chatCompleteWithCheck({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+      });
+
+      expect(response.content).toBe('chunk-1');
+      expect(getDefaultConnectorId).toHaveBeenCalledTimes(1);
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(1);
+    });
+
+    it('allows other connectors when the setting is disabled', async () => {
+      const isDefaultConnectorOnly = jest.fn().mockResolvedValue(false);
+      const getDefaultConnectorId = jest.fn().mockResolvedValue('default-connector-id');
+      const chatCompleteWithCheck = createChatCompleteWithCheck({
+        isDefaultConnectorOnly,
+        getDefaultConnectorId,
+      });
+
+      const response = await chatCompleteWithCheck({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+      });
+
+      expect(response.content).toBe('chunk-1');
+      expect(isDefaultConnectorOnly).toHaveBeenCalledTimes(1);
+      expect(getDefaultConnectorId).not.toHaveBeenCalled();
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(1);
+    });
+
+    it('blocks the call when the setting is enabled and no default connector resolves', async () => {
+      const isDefaultConnectorOnly = jest.fn().mockResolvedValue(true);
+      const getDefaultConnectorId = jest.fn().mockResolvedValue(undefined);
+      const chatCompleteWithCheck = createChatCompleteWithCheck({
+        isDefaultConnectorOnly,
+        getDefaultConnectorId,
+      });
+
+      await expect(
+        chatCompleteWithCheck({
+          connectorId: 'connectorId',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          maxRetries: 0,
+        })
+      ).rejects.toMatchObject({
+        code: InferenceTaskErrorCode.requestError,
+        message: expect.stringContaining('not allowed'),
+      });
+
+      expect(inferenceAdapter.chatComplete).not.toHaveBeenCalled();
+    });
+
+    it('allows an inference endpoint whose id matches the default connector id', async () => {
+      mockEsClient.inference.get.mockResolvedValueOnce({
+        endpoints: [
+          { inference_id: 'my-endpoint', task_type: 'chat_completion', service: 'openai' },
+        ],
+      });
+      resolveInferenceEndpointMock.mockResolvedValue({
+        inferenceId: 'my-endpoint',
+        provider: 'openai',
+        modelId: 'gpt-4o',
+        taskType: 'chat_completion',
+      });
+      createInferenceEndpointExecutorMock.mockReturnValue({ invoke: jest.fn() });
+      inferenceEndpointAdapterMock.chatComplete.mockReturnValue(of(chunkEvent('endpoint-chunk')));
+
+      const isDefaultConnectorOnly = jest.fn().mockResolvedValue(true);
+      const getDefaultConnectorId = jest.fn().mockResolvedValue('my-endpoint');
+      const chatCompleteWithCheck = createChatCompleteWithCheck({
+        isDefaultConnectorOnly,
+        getDefaultConnectorId,
+      });
+
+      const response = await chatCompleteWithCheck({
+        connectorId: 'my-endpoint',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+      });
+
+      expect(response.content).toBe('endpoint-chunk');
+      expect(inferenceEndpointAdapterMock.chatComplete).toHaveBeenCalledTimes(1);
+    });
+
+    it('fails closed when reading the setting fails', async () => {
+      const isDefaultConnectorOnly = jest.fn().mockRejectedValue(new Error('ui settings down'));
+      const getDefaultConnectorId = jest.fn().mockResolvedValue('connectorId');
+      const chatCompleteWithCheck = createChatCompleteWithCheck({
+        isDefaultConnectorOnly,
+        getDefaultConnectorId,
+      });
+
+      await expect(
+        chatCompleteWithCheck({
+          connectorId: 'connectorId',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          maxRetries: 0,
+        })
+      ).rejects.toMatchObject({
+        code: InferenceTaskErrorCode.internalError,
+        message: 'Failed to verify the default AI connector restriction',
+      });
+
+      expect(inferenceAdapter.chatComplete).not.toHaveBeenCalled();
+    });
+
+    it('fails closed when resolving the default connector fails', async () => {
+      const isDefaultConnectorOnly = jest.fn().mockResolvedValue(true);
+      const getDefaultConnectorId = jest.fn().mockRejectedValue(new Error('so client down'));
+      const chatCompleteWithCheck = createChatCompleteWithCheck({
+        isDefaultConnectorOnly,
+        getDefaultConnectorId,
+      });
+
+      await expect(
+        chatCompleteWithCheck({
+          connectorId: 'connectorId',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          maxRetries: 0,
+        })
+      ).rejects.toMatchObject({
+        code: InferenceTaskErrorCode.internalError,
+        message: 'Failed to verify the default AI connector restriction',
+      });
+
+      expect(inferenceAdapter.chatComplete).not.toHaveBeenCalled();
+    });
+
+    it('blocks an inference endpoint whose id differs from the default connector id', async () => {
+      const isDefaultConnectorOnly = jest.fn().mockResolvedValue(true);
+      const getDefaultConnectorId = jest.fn().mockResolvedValue('other-endpoint');
+      const chatCompleteWithCheck = createChatCompleteWithCheck({
+        isDefaultConnectorOnly,
+        getDefaultConnectorId,
+      });
+
+      await expect(
+        chatCompleteWithCheck({
+          connectorId: 'my-endpoint',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          maxRetries: 0,
+        })
+      ).rejects.toMatchObject({
+        code: InferenceTaskErrorCode.requestError,
+        message: expect.stringContaining('not allowed'),
+      });
+
+      expect(inferenceEndpointAdapterMock.chatComplete).not.toHaveBeenCalled();
+    });
+  });
+
   describe('upstream provider 404 errors', () => {
     it('does not rewrite upstream provider 404 errors as connector-not-found errors', async () => {
       const providerError = createInferenceProviderError(
@@ -512,6 +880,13 @@ describe('createChatCompleteApi', () => {
         esClient: mockEsClient,
       });
       expect(inferenceEndpointAdapterMock.chatComplete).toHaveBeenCalledTimes(1);
+      expect(inferenceEndpointAdapterMock.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          executor: mockEndpointExecutor,
+          endpointModelId: 'gpt-4o',
+          provider: 'openai',
+        })
+      );
       expect(getInferenceAdapterMock).not.toHaveBeenCalled();
     });
 
@@ -603,6 +978,8 @@ describe('createChatCompleteApi', () => {
           executor: mockEndpointExecutor,
           temperature: 0.5,
           modelName: 'gpt-4o-mini',
+          endpointModelId: 'gpt-4o',
+          provider: 'openai',
           logger,
         })
       );

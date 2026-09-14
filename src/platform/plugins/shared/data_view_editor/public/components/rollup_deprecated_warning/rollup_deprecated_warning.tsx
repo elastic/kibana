@@ -10,8 +10,9 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import type { DocLinksStart } from '@kbn/core/public';
 
 interface RollupDeprecatedWarningProps {
@@ -26,31 +27,30 @@ const rollupBetaWarningTitle = i18n.translate(
 );
 
 export const RollupDeprecatedWarning = ({ docLinksService }: RollupDeprecatedWarningProps) => (
-  <EuiCallOut
+  <KbnWarningCallout
     title={rollupBetaWarningTitle}
-    color="warning"
-    iconType="question"
     data-test-subj="rollupDeprecationCallout"
-  >
-    <FormattedMessage
-      id="indexPatternEditor.rollupDataView.deprecationWarning.textParagraphOne"
-      defaultMessage="Rollups are deprecated and will be removed in a future version. {downsamplingLink} can be used as an alternative."
-      values={{
-        downsamplingLink: (
-          <EuiLink
-            href={docLinksService.links.elasticsearch.rollupMigratingToDownsampling}
-            target="_blank"
-            data-test-subj="downsamplingLink"
-          >
-            {i18n.translate(
-              'indexPatternEditor.rollupDataView.deprecationWarning.downsamplingLink',
-              {
-                defaultMessage: 'Downsampling',
-              }
-            )}
-          </EuiLink>
-        ),
-      }}
-    />
-  </EuiCallOut>
+    text={
+      <FormattedMessage
+        id="indexPatternEditor.rollupDataView.deprecationWarning.textParagraphOne"
+        defaultMessage="Rollups are deprecated and will be removed in a future version. {downsamplingLink} can be used as an alternative."
+        values={{
+          downsamplingLink: (
+            <EuiLink
+              href={docLinksService.links.elasticsearch.rollupMigratingToDownsampling}
+              target="_blank"
+              data-test-subj="downsamplingLink"
+            >
+              {i18n.translate(
+                'indexPatternEditor.rollupDataView.deprecationWarning.downsamplingLink',
+                {
+                  defaultMessage: 'Downsampling',
+                }
+              )}
+            </EuiLink>
+          ),
+        }}
+      />
+    }
+  />
 );

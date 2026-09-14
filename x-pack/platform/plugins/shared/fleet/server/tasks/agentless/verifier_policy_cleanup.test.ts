@@ -67,7 +67,7 @@ describe('verifier_policy_cleanup', () => {
       } as any);
       mockedAgentPolicyService.deleteVerifierPolicy.mockResolvedValue();
 
-      await runVerifierPolicyCleanup(new AbortController());
+      await runVerifierPolicyCleanup(new AbortController().signal);
 
       expect(mockedAgentPolicyService.deleteVerifierPolicy).toHaveBeenCalledWith(
         expect.anything(),
@@ -82,7 +82,7 @@ describe('verifier_policy_cleanup', () => {
         items: [{ id: 'fresh-verifier', created_at: twoMinutesAgo, updated_at: twoMinutesAgo }],
       } as any);
 
-      await runVerifierPolicyCleanup(new AbortController());
+      await runVerifierPolicyCleanup(new AbortController().signal);
 
       expect(mockedAgentPolicyService.deleteVerifierPolicy).not.toHaveBeenCalled();
     });
@@ -90,7 +90,7 @@ describe('verifier_policy_cleanup', () => {
     it('lists verifier policies across all spaces', async () => {
       mockedAgentPolicyService.list.mockResolvedValueOnce({ items: [] } as any);
 
-      await runVerifierPolicyCleanup(new AbortController());
+      await runVerifierPolicyCleanup(new AbortController().signal);
 
       expect(mockedAgentPolicyService.list).toHaveBeenCalledWith(
         expect.anything(),
@@ -104,7 +104,7 @@ describe('verifier_policy_cleanup', () => {
     it('logs when list fails', async () => {
       mockedAgentPolicyService.list.mockRejectedValueOnce(new Error('list exploded'));
 
-      await runVerifierPolicyCleanup(new AbortController());
+      await runVerifierPolicyCleanup(new AbortController().signal);
 
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to cleanup verifier policies')
@@ -123,7 +123,7 @@ describe('verifier_policy_cleanup', () => {
         .mockRejectedValueOnce(new Error('delete failed'))
         .mockResolvedValueOnce(undefined);
 
-      await runVerifierPolicyCleanup(new AbortController());
+      await runVerifierPolicyCleanup(new AbortController().signal);
 
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to delete verifier policy bad-verifier')
@@ -136,7 +136,7 @@ describe('verifier_policy_cleanup', () => {
         enableOTelVerifier: false,
       } as any);
 
-      await runVerifierPolicyCleanup(new AbortController());
+      await runVerifierPolicyCleanup(new AbortController().signal);
 
       expect(mockedAgentPolicyService.list).not.toHaveBeenCalled();
     });

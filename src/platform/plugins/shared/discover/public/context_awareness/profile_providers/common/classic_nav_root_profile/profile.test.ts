@@ -9,6 +9,7 @@
 
 import { SolutionType } from '../../../profiles';
 import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../toolkit';
 import { createClassicNavRootProfileProvider } from './profile';
 
 const mockServices = createProfileProviderSharedServicesMock();
@@ -49,7 +50,7 @@ describe('classicNavRootProfileProvider', () => {
       expect(result.context.allLogsIndexPattern).toEqual('logs-*');
       const defaultDataViews = classicNavRootProfileProvider.profile.getDefaultAdHocDataViews?.(
         () => [],
-        { context: result.context }
+        { context: result.context, toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT }
       )();
       expect(defaultDataViews).toEqual([
         {
@@ -57,6 +58,7 @@ describe('classicNavRootProfileProvider', () => {
           name: 'All logs',
           timeFieldName: '@timestamp',
           title: 'logs-*',
+          managed: true,
         },
       ]);
     });
@@ -72,7 +74,7 @@ describe('classicNavRootProfileProvider', () => {
       expect(result.context.allLogsIndexPattern).toEqual(undefined);
       const defaultDataViews = classicNavRootProfileProvider.profile.getDefaultAdHocDataViews?.(
         () => [],
-        { context: result.context }
+        { context: result.context, toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT }
       )();
       expect(defaultDataViews).toEqual([]);
     });

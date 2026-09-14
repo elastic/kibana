@@ -1,0 +1,67 @@
+openapi: 3.0.0
+info:
+  title: Get Evaluation Experiment Dataset Examples API endpoint
+  version: '1'
+paths:
+  /internal/evals/experiments/{experimentId}/datasets/{datasetId}/examples:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: GetEvaluationExperimentDatasetExamples
+      description: Get evaluation score documents grouped by example for an experiment and dataset
+      summary: Get evaluation experiment dataset examples
+      tags:
+        - Evals API
+      parameters:
+        - name: experimentId
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 1024
+        - name: datasetId
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 1024
+        - name: execution_id
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 1024
+          description: When provided, fetches examples for all experiments in this execution
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  examples:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EvaluationExperimentDatasetExample'
+                required:
+                  - examples
+components:
+  schemas:
+    EvaluationExperimentDatasetExample:
+      type: object
+      properties:
+        example_id:
+          type: string
+          maxLength: 1024
+        example_index:
+          type: integer
+          nullable: true
+        scores:
+          type: array
+          items:
+            $ref: '../common_attributes.schema.yaml#/components/schemas/EvaluationScoreDocument'
+      required:
+        - example_id
+        - example_index
+        - scores

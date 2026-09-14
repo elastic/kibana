@@ -66,6 +66,9 @@ export function ChangeDataView({
   onCreateDefaultAdHocDataView,
   onClosePopover,
   getDataViewHelpText,
+  compressed = true,
+  showDataViewLabel = true,
+  showDropdownIcon = true,
 }: DataViewPickerProps) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
@@ -126,7 +129,7 @@ export function ChangeDataView({
     const { label, title, 'data-test-subj': dataTestSubj, fullWidth, ...rest } = trigger;
     return (
       <EuiFormControlButton
-        compressed
+        compressed={compressed}
         css={styles.trigger}
         isInvalid={isMissingCurrent}
         title={trigger.label}
@@ -328,11 +331,15 @@ export function ChangeDataView({
       <>
         <EuiFlexItem grow={true} css={shrinkableContainerCss}>
           <EuiFormControlLayout
-            compressed
-            isDropdown
-            prepend={i18n.translate('unifiedSearch.query.queryBar.esqlMenu.switcherLabelTitle', {
-              defaultMessage: 'Data view',
-            })}
+            compressed={compressed}
+            isDropdown={showDropdownIcon}
+            prepend={
+              showDataViewLabel
+                ? i18n.translate('unifiedSearch.query.queryBar.esqlMenu.switcherLabelTitle', {
+                    defaultMessage: 'Data view',
+                  })
+                : undefined
+            }
             {...(trigger.fullWidth && { fullWidth: true })}
           >
             <EuiPopover

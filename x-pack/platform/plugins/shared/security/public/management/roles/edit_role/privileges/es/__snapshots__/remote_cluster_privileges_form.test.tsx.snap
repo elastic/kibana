@@ -93,13 +93,18 @@ exports[`it renders without crashing 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <EuiButtonIcon
-        aria-label="Delete remote cluster privilege"
-        color="danger"
-        data-test-subj="deleteRemoteClusterPrivilegesButton0"
-        iconType="trash"
-        onClick={[MockFunction]}
-      />
+      <EuiToolTip
+        content="Delete remote cluster privilege"
+        disableScreenReaderOutput={true}
+      >
+        <EuiButtonIcon
+          aria-label="Delete remote cluster privilege"
+          color="danger"
+          data-test-subj="deleteRemoteClusterPrivilegesButton0"
+          iconType="trash"
+          onClick={[MockFunction]}
+        />
+      </EuiToolTip>
     </EuiFlexItem>
   </EuiFlexGroup>
 </Fragment>

@@ -64,6 +64,13 @@ describe('useResolvedFields', () => {
     expect(result.current.resolvedFields).toHaveLength(0);
   });
 
+  it('resolves a $ref that differs from the library name only in case', () => {
+    const refField: Field = { $ref: 'LIB_Field' };
+    const { result } = renderHook(() => useResolvedFields([refField], 'securitySolution'));
+    expect(result.current.resolvedFields).toHaveLength(1);
+    expect(result.current.resolvedFields[0].name).toBe('lib_field');
+  });
+
   it('silently drops a $ref whose library definition contains invalid YAML', () => {
     mockUseGetFieldDefinitions.mockReturnValue({
       data: {
@@ -136,6 +143,15 @@ describe('useResolvedFields', () => {
       const refField: Field = { $ref: 'lib_field' };
       const { result } = renderHook(() => useResolvedFields([refField], 'securitySolution'));
       expect(result.current.resolvedFields[0].metadata).toMatchObject({ default: 'from_lib' });
+    });
+
+    it('clears the inherited library default when the override is explicitly null', () => {
+      // A migrated v1 template that cleared this field emits `metadata.default: null` — the field
+      // must resolve to "no default" (empty), not inherit the library default.
+      const refField: Field = { $ref: 'lib_field', metadata: { default: null } };
+      const { result } = renderHook(() => useResolvedFields([refField], 'securitySolution'));
+      expect(result.current.resolvedFields).toHaveLength(1);
+      expect(result.current.resolvedFields[0].metadata?.default).toBeUndefined();
     });
 
     it('combines name alias and metadata.default override on the same entry', () => {

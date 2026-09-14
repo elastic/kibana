@@ -34,6 +34,11 @@ import {
 import { registerDrilldown } from './drilldowns/registry';
 import { registerActions } from './ui_actions/register_actions';
 import { closeSetup } from './react_embeddable_system/react_embeddable_registry';
+import type {
+  SearchLibraryRequestType,
+  SearchLibraryResponseType,
+} from '../server/search_route/types';
+import { SEARCH_ROUTE_PATH } from '../common/constants';
 import { getEmbeddableDefinition } from './react_embeddable_system/react_embeddable_registry';
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
@@ -67,6 +72,20 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     );
 
     const embeddableStart: EmbeddableStart = {
+      getSavedObjects: async (request: SearchLibraryRequestType) => {
+        try {
+          const result = await core.http.post(SEARCH_ROUTE_PATH, {
+            body: JSON.stringify(request),
+          });
+          return result as SearchLibraryResponseType;
+        } catch (e) {
+          if (e.body.statusCode === 403) {
+            // we should not surface any forbidden errors to the front end
+            return { hits: [], total: 0 } as SearchLibraryResponseType;
+          }
+          throw e;
+        }
+      },
       getAddFromLibraryComponent: async () => {
         const { AddFromLibraryFlyout } = await import('./add_from_library/add_from_library_flyout');
         return AddFromLibraryFlyout;

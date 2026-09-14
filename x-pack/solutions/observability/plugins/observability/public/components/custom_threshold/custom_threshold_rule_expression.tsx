@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
 import {
   EuiButtonEmpty,
-  EuiCallOut,
   EuiEmptyPrompt,
   EuiFormErrorText,
   EuiFormRow,
@@ -21,13 +20,14 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import deepEqual from 'fast-deep-equal';
 import type { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { ISearchSource, Query } from '@kbn/data-plugin/common';
 import { type SavedQuery } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewBase } from '@kbn/es-query';
-import { type Filter } from '@kbn/es-query';
+import { type Filter, FilterStateStore } from '@kbn/es-query';
 import { DataViewSelectPopover } from '@kbn/stack-alerts-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -81,6 +81,18 @@ export const defaultExpression: MetricExpression = {
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 const EMPTY_FILTERS: Filter[] = [];
+
+/**
+ * Saved filters are persisted without `$state` (only `meta` and `query` are stored). The unified
+ * search filter editor's `onSubmit` returns early when `$state.store` is missing, so editing a
+ * saved filter would be a no-op. Re-add `$state` before handing filters back to the `SearchBar`.
+ */
+const ensureFiltersHaveState = (filters: Filter[]): Filter[] =>
+  filters.map((filter) =>
+    filter.$state?.store != null
+      ? filter
+      : { ...filter, $state: { store: FilterStateStore.APP_STATE } }
+  );
 
 const convertToMinutes = (timeWindowSize: number, timeWindowUnit: TimeUnitChar): number => {
   switch (timeWindowUnit) {
@@ -194,6 +206,7 @@ export default function Expressions(props: CustomThresholdRuleExpressionProps) {
     data,
     dataViews,
     dataViewEditor,
+    notifications: { toasts },
 
     unifiedSearch: {
       ui: { SearchBar },
@@ -424,6 +437,11 @@ export default function Expressions(props: CustomThresholdRuleExpressionProps) {
     [setRuleParams, ruleParams.searchConfiguration]
   );
 
+  const searchBarFilters = useMemo(
+    () => ensureFiltersHaveState(ruleParams.searchConfiguration?.filter ?? EMPTY_FILTERS),
+    [ruleParams.searchConfiguration?.filter]
+  );
+
   const onQuerySubmit = useCallback(
     ({ query: newQuery }: { query?: Query }) => {
       setParamsWarning(undefined);
@@ -554,7 +572,7 @@ export default function Expressions(props: CustomThresholdRuleExpressionProps) {
     <>
       {!!paramsWarning && (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
             title={i18n.translate(
               'xpack.observability.customThreshold.rule.alertFlyout.warning.title',
@@ -562,12 +580,9 @@ export default function Expressions(props: CustomThresholdRuleExpressionProps) {
                 defaultMessage: 'Warning',
               }
             )}
-            color="warning"
-            iconType="warning"
             data-test-subj="thresholdRuleExpressionWarning"
-          >
-            {paramsWarning}
-          </EuiCallOut>
+            text={paramsWarning}
+          />
           <EuiSpacer size="s" />
         </>
       )}
@@ -581,45 +596,41 @@ export default function Expressions(props: CustomThresholdRuleExpressionProps) {
       </EuiTitle>
       <EuiSpacer size="s" />
       {paramsError && !triggerResetDataView ? (
-        <EuiCallOut
+        <KbnDangerCallout
           announceOnMount
-          color="danger"
-          iconType="warning"
-          data-test-subj="thresholdRuleExpressionError"
-        >
-          <p>
-            {i18n.translate('xpack.observability.customThreshold.rule.alertFlyout.error.message', {
+          title={i18n.translate(
+            'xpack.observability.customThreshold.rule.alertFlyout.error.message',
+            {
               defaultMessage: 'Error fetching search source',
-            })}
-            <br />
-            {i18n.translate(
-              'xpack.observability.customThreshold.rule.alertFlyout.error.messageDescription',
-              {
-                defaultMessage: 'Could not locate that data view (id: {id})',
-                values: { id: paramsError?.savedObjectId },
-              }
-            )}
-            <br />
-            <EuiButtonEmpty
-              data-test-subj="thresholdRuleExpressionErrorButton"
-              flush="left"
-              onClick={() => {
+            }
+          )}
+          data-test-subj="thresholdRuleExpressionError"
+          text={i18n.translate(
+            'xpack.observability.customThreshold.rule.alertFlyout.error.messageDescription',
+            {
+              defaultMessage: 'Could not locate that data view (id: {id})',
+              values: { id: paramsError?.savedObjectId },
+            }
+          )}
+          actionProps={{
+            primary: {
+              'data-test-subj': 'thresholdRuleExpressionErrorButton',
+              onClick: () => {
                 initSearchSource(true, data);
                 setTriggerResetDataView(true);
-              }}
-            >
-              {i18n.translate(
+              },
+              children: i18n.translate(
                 'xpack.observability.customThreshold.rule.alertFlyout.error.message',
                 {
                   defaultMessage: 'Click here to choose a new data view',
                 }
-              )}
-            </EuiButtonEmpty>
-          </p>
-        </EuiCallOut>
+              ),
+            },
+          }}
+        />
       ) : (
         <DataViewSelectPopover
-          dependencies={{ dataViews, dataViewEditor }}
+          dependencies={{ dataViews, dataViewEditor, toasts }}
           dataView={dataView}
           metadata={{ adHocDataViewList: metadata?.adHocDataViewList || [] }}
           onSelectDataView={onSelectDataView}
@@ -661,7 +672,7 @@ export default function Expressions(props: CustomThresholdRuleExpressionProps) {
         onSaved={onSavedQueryUpdated}
         dataTestSubj="thresholdRuleUnifiedSearchBar"
         query={ruleParams.searchConfiguration?.query}
-        filters={ruleParams.searchConfiguration?.filter ?? EMPTY_FILTERS}
+        filters={searchBarFilters}
         savedQuery={savedQuery}
         onFiltersUpdated={onFilterUpdated}
         hiddenFilterPanelOptions={HIDDEN_FILTER_PANEL_OPTIONS}

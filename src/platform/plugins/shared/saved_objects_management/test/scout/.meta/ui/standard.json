@@ -1,0 +1,246 @@
+{
+  "sha1": "8f5ab55cbd3a224d921ca90eb9bef235b87b3634",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "12438030416ccc4-0ca770f7b4f667b",
+      "title": "Saved objects management feature controls global:all listing — select-all enables the delete action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/feature_controls.spec.ts",
+        "line": 21,
+        "column": 27
+      }
+    },
+    {
+      "id": "12438030416ccc4-51982b0fbee0771",
+      "title": "Saved objects management feature controls savedObjectsManagement:read listing — select-all keeps the delete action disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/feature_controls.spec.ts",
+        "line": 26,
+        "column": 42
+      }
+    },
+    {
+      "id": "12438030416ccc4-dce64f844af6395",
+      "title": "Saved objects management feature controls global:all inspect view shows the delete button and the JSON editor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/feature_controls.spec.ts",
+        "line": 34,
+        "column": 9
+      }
+    },
+    {
+      "id": "12438030416ccc4-bc22fac1b29fcde",
+      "title": "Saved objects management feature controls savedObjectsManagement:read inspect view shows the JSON editor but hides delete & save",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/feature_controls.spec.ts",
+        "line": 43,
+        "column": 8
+      }
+    },
+    {
+      "id": "12438030416ccc4-f6ef64a91aecb10",
+      "title": "Saved objects management feature controls visualize:minimal_all alone routes the SOM listing URL to appNotFound",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/feature_controls.spec.ts",
+        "line": 51,
+        "column": 23
+      }
+    },
+    {
+      "id": "12438030416ccc4-a28daf6a54b69f1",
+      "title": "Saved objects management feature controls visualize:minimal_all alone routes the SOM inspect URL to appNotFound",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/feature_controls.spec.ts",
+        "line": 57,
+        "column": 5
+      }
+    },
+    {
+      "id": "919736241b0bdf7-c2099c09adb7828",
+      "title": "Saved objects management - import conflicts imports an object after pointing its missing data view at an existing one",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/import_conflicts.spec.ts",
+        "line": 32,
+        "column": 21
+      }
+    },
+    {
+      "id": "919736241b0bdf7-0d55990767271ac",
+      "title": "Saved objects management - import conflicts overwrites an existing object when the user confirms",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/import_conflicts.spec.ts",
+        "line": 42,
+        "column": 8
+      }
+    },
+    {
+      "id": "919736241b0bdf7-17d500a93162f1f",
+      "title": "Saved objects management - import conflicts keeps the existing object when the user skips the overwrite",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/import_conflicts.spec.ts",
+        "line": 61,
+        "column": 91
+      }
+    },
+    {
+      "id": "919736241b0bdf7-1e96bcd7fbdc5cb",
+      "title": "Saved objects management - import conflicts drops a visualization whose saved search keeps an unresolvable data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/import_conflicts.spec.ts",
+        "line": 76,
+        "column": 15
+      }
+    },
+    {
+      "id": "919736241b0bdf7-b94d3db5345d8a2",
+      "title": "Saved objects management - import conflicts imports a visualization whose saved search had an unresolved data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/import_conflicts.spec.ts",
+        "line": 101,
+        "column": 9
+      }
+    },
+    {
+      "id": "9f7d4f477606ab1-10f2c4f8f00ccf4",
+      "title": "Saved objects management - import objects imports a visualization and lists it as a child of its data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/import_objects.spec.ts",
+        "line": 36,
+        "column": 21
+      }
+    },
+    {
+      "id": "9f7d4f477606ab1-abd11af51c307c8",
+      "title": "Saved objects management - import objects imports objects that reference each other in a cycle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/import_objects.spec.ts",
+        "line": 65,
+        "column": 7
+      }
+    },
+    {
+      "id": "4022d6a310e4ec6-bac22a7edb9da76",
+      "title": "Saved objects management - imports (UI) importing 7.13 saved objects lets the imported dashboard render without errors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/imports.spec.ts",
+        "line": 48,
+        "column": 13
+      }
+    },
+    {
+      "id": "4022d6a310e4ec6-e40218f624b2679",
+      "title": "Saved objects management - imports (UI) copy-to-space flyout copies a dashboard from one space to another",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/imports.spec.ts",
+        "line": 63,
+        "column": 9
+      }
+    },
+    {
+      "id": "987c0ab5efbd1a4-c627cd271149970",
+      "title": "Saved objects management - inspect view inspect-view delete removes the object from the listing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/inspect.spec.ts",
+        "line": 21,
+        "column": 8
+      }
+    },
+    {
+      "id": "77b1962f6738a14-8afa6a6e237d707",
+      "title": "Saved objects management - spaces integration inspecting an object from a non-default space stays in that space and renders the JSON editor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/spaces_integration.spec.ts",
+        "line": 31,
+        "column": 9
+      }
+    }
+  ]
+}

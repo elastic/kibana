@@ -25,6 +25,13 @@ const readIngestRoute = createServerRoute({
       stability: 'experimental',
     },
     oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
       responses: {
         200: {
           description: 'Ingest settings for the stream.',
@@ -109,7 +116,7 @@ const upsertIngestRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients }) => {
-    const { streamsClient, getQueryClient, attachmentClient } = await getScopedClients({
+    const { streamsClient, attachmentClient } = await getScopedClients({
       request,
     });
 
@@ -131,12 +138,9 @@ const upsertIngestRoute = createServerRoute({
       );
     }
 
-    const queryClient = await getQueryClient();
-
     if (WiredIngestUpsertRequest.is(ingest)) {
       return await updateWiredIngest({
         streamsClient,
-        queryClient,
         attachmentClient,
         name,
         ingest,
@@ -145,7 +149,6 @@ const upsertIngestRoute = createServerRoute({
 
     return await updateClassicIngest({
       streamsClient,
-      queryClient,
       attachmentClient,
       name,
       ingest,

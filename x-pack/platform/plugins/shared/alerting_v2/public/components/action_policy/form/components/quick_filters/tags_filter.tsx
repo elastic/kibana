@@ -7,7 +7,6 @@
 
 import React, { useMemo, useState } from 'react';
 import {
-  EuiCode,
   EuiFilterButton,
   EuiPopover,
   EuiPopoverFooter,
@@ -18,13 +17,12 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
+import { useDebouncedValue } from '@kbn/react-hooks';
 import { useFetchRuleTags } from '../../../../../hooks/use_fetch_rule_tags';
-import {
-  mergeRuleTagsIntoMatcher,
-  parseRuleTagsFromMatcher,
-} from '../../matcher_quick_filter_utils';
 import { POPOVER_PANEL_STYLE, SELECTABLE_LIST_PROPS, type QuickFiltersProps } from './constants';
+
+const TAG_SEARCH_DEBOUNCE_MS = 300;
 
 interface TagSelectableMeta {
   value: string;
@@ -32,19 +30,24 @@ interface TagSelectableMeta {
 
 export const TagsFilter = ({ matcher, onChange }: QuickFiltersProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [tagSearch, setTagSearch] = useState('');
 
   const tagsPopoverId = useGeneratedHtmlId({ prefix: 'npQuickFilterTags' });
 
+  const debouncedTagSearch = useDebouncedValue(tagSearch, TAG_SEARCH_DEBOUNCE_MS);
+
   const { data: apiTags = [], isLoading } = useFetchRuleTags({
     enabled: isOpen,
+    kind: 'alert',
+    search: debouncedTagSearch || undefined,
   });
-  const selectedTags = useMemo(() => parseRuleTagsFromMatcher(matcher), [matcher]);
+  const selectedTags = useMemo(() => matcher?.tags ?? [], [matcher]);
 
   const tagOptions = useMemo((): Array<EuiSelectableOption<TagSelectableMeta>> => {
     const selectedSet = new Set(selectedTags);
     const apiTagSet = new Set(apiTags);
 
-    // Tags in matcher but not from API (orphaned) — show at top as checked
+    // Tags in matcher but not from API (orphaned/out-of-cap) — show at top as checked
     const orphaned = selectedTags
       .filter((t) => !apiTagSet.has(t))
       .map((tag) => ({
@@ -64,8 +67,10 @@ export const TagsFilter = ({ matcher, onChange }: QuickFiltersProps) => {
 
   const handleTagsChange = (newOptions: Array<EuiSelectableOption<TagSelectableMeta>>) => {
     const tags = newOptions.filter((o) => o.checked === 'on').map((o) => o.value);
-    onChange(mergeRuleTagsIntoMatcher(matcher, tags));
+    onChange({ ...matcher, tags: tags.length > 0 ? tags : null });
   };
+
+  const showCapGuidance = apiTags.length >= TAGS_RESPONSE_LIMIT;
 
   return (
     <EuiPopover
@@ -81,7 +86,7 @@ export const TagsFilter = ({ matcher, onChange }: QuickFiltersProps) => {
       panelStyle={POPOVER_PANEL_STYLE}
       button={
         <EuiFilterButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={() => setIsOpen((o) => !o)}
           isSelected={isOpen}
@@ -100,14 +105,17 @@ export const TagsFilter = ({ matcher, onChange }: QuickFiltersProps) => {
           'xpack.alertingV2.actionPolicy.form.quickFilters.tags.selectableAria',
           { defaultMessage: 'Filter by rule tags' }
         )}
-        searchable
         isLoading={isLoading}
+        isPreFiltered
         options={tagOptions}
         onChange={handleTagsChange}
+        searchable
         searchProps={{
+          value: tagSearch,
+          onChange: (searchValue: string) => setTagSearch(searchValue),
           placeholder: i18n.translate(
             'xpack.alertingV2.actionPolicy.form.quickFilters.tags.search',
-            { defaultMessage: 'Search tags' }
+            { defaultMessage: 'Search rule tags' }
           ),
           'data-test-subj': 'quickFilterTagsSearch',
         }}
@@ -126,15 +134,16 @@ export const TagsFilter = ({ matcher, onChange }: QuickFiltersProps) => {
           </>
         )}
       </EuiSelectable>
-      <EuiPopoverFooter paddingSize="s">
-        <EuiText size="xs" color="subdued">
-          <FormattedMessage
-            id="xpack.alertingV2.actionPolicy.form.quickFilters.tags.footer"
-            defaultMessage="Adds {code} to the filter"
-            values={{ code: <EuiCode>{'rule.tags: ("...")'}</EuiCode> }}
-          />
-        </EuiText>
-      </EuiPopoverFooter>
+      {showCapGuidance && (
+        <EuiPopoverFooter paddingSize="s">
+          <EuiText size="xs" color="subdued" data-test-subj="quickFilterTagsCapGuidance">
+            {i18n.translate('xpack.alertingV2.actionPolicy.form.quickFilters.tags.capGuidance', {
+              defaultMessage: 'Showing first {cap} most-used, type to search',
+              values: { cap: TAGS_RESPONSE_LIMIT },
+            })}
+          </EuiText>
+        </EuiPopoverFooter>
+      )}
     </EuiPopover>
   );
 };

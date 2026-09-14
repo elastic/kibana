@@ -75,6 +75,8 @@ describe('Tags', () => {
     await userEvent.type(screen.getByRole('combobox'), 'test{enter}');
     await userEvent.type(screen.getByRole('combobox'), 'case{enter}');
 
+    expect(await screen.findByTitle('test')).toBeInTheDocument();
+    expect(await screen.findByTitle('case')).toBeInTheDocument();
     expect(globalForm.getFormData()).toEqual({ tags: ['test', 'case'] });
   });
 
@@ -87,9 +89,9 @@ describe('Tags', () => {
 
     await userEvent.type(screen.getByRole('combobox'), ' {enter}');
 
-    await waitFor(() => {
-      expect(screen.getByText('A tag must contain at least one non-space character.'));
-    });
+    expect(
+      await screen.findByText('A tag must contain at least one non-space character.')
+    ).toBeInTheDocument();
   });
 
   it('it shows error when tag is too long', async () => {

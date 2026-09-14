@@ -306,7 +306,7 @@ describe('getOrCreateAttackDataView', () => {
     expect(result.id).toBe(dataViewId);
   });
 
-  it('returns existing attack data view without creating when it already exists', async () => {
+  it('returns existing attack data view without creating when it already exists and matches', async () => {
     const service = createMockDataViewsService();
     const existingTitle = patternList.join();
     const existing = makeDataViewListItem(dataViewId, existingTitle, 'Security solution attacks');
@@ -319,7 +319,33 @@ describe('getOrCreateAttackDataView', () => {
     });
 
     expect(service.createAndSave).not.toHaveBeenCalled();
+    expect(service.updateSavedObject).not.toHaveBeenCalled();
     expect(result.id).toBe(dataViewId);
+  });
+
+  it('updates the data view when the pattern list differs', async () => {
+    const service = createMockDataViewsService();
+    const existingTitle = '.attack-discovery-default';
+    const existing = makeDataViewListItem(dataViewId, existingTitle, 'Security solution attacks');
+
+    const mockDataView = {
+      id: dataViewId,
+      title: existingTitle,
+      name: 'Security solution attacks',
+    };
+    service.get.mockResolvedValue(mockDataView as unknown as DataView);
+
+    const result = await getOrCreateAttackDataView({
+      dataViewsService: service,
+      allDataViews: [existing],
+      dataViewId,
+      patternList,
+    });
+
+    expect(service.get).toHaveBeenCalledWith(dataViewId);
+    expect(service.updateSavedObject).toHaveBeenCalledTimes(1);
+    expect(mockDataView.title).toBe(patternList.join());
+    expect(result.patternList).toEqual(patternList);
   });
 
   it('handles DuplicateDataViewError by fetching the existing data view', async () => {

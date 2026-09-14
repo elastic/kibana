@@ -49,94 +49,97 @@ describe('evaluateExpression', () => {
   };
 
   describe('simple path resolution', () => {
-    it('should resolve top-level context properties', () => {
-      expect(evaluateExpression({ expression: 'inputs', context: mockContext })).toEqual({
+    it('should resolve top-level context properties', async () => {
+      expect(await evaluateExpression({ expression: 'inputs', context: mockContext })).toEqual({
         userId: 'user-123',
         greeting: 'hello',
       });
 
-      expect(evaluateExpression({ expression: 'consts', context: mockContext })).toEqual({
+      expect(await evaluateExpression({ expression: 'consts', context: mockContext })).toEqual({
         indexName: 'test-index',
         apiUrl: 'https://api.example.com',
       });
     });
 
-    it('should resolve nested paths', () => {
-      expect(evaluateExpression({ expression: 'inputs.userId', context: mockContext })).toBe(
+    it('should resolve nested paths', async () => {
+      expect(await evaluateExpression({ expression: 'inputs.userId', context: mockContext })).toBe(
         'user-123'
       );
 
-      expect(evaluateExpression({ expression: 'consts.indexName', context: mockContext })).toBe(
-        'test-index'
-      );
+      expect(
+        await evaluateExpression({ expression: 'consts.indexName', context: mockContext })
+      ).toBe('test-index');
 
       expect(
-        evaluateExpression({
+        await evaluateExpression({
           expression: 'steps.search_data.output.hits.total',
           context: mockContext,
         })
       ).toBe(5);
     });
 
-    it('should resolve array access', () => {
+    it('should resolve array access', async () => {
       expect(
-        evaluateExpression({
+        await evaluateExpression({
           expression: 'steps.search_data.output.hits.hits[0]._source.name',
           context: mockContext,
         })
       ).toBe('Item 1');
 
       expect(
-        evaluateExpression({
+        await evaluateExpression({
           expression: 'steps.search_data.output.hits.hits[1]._source.value',
           context: mockContext,
         })
       ).toBe(200);
     });
 
-    it('should return undefined for non-existent paths', () => {
+    it('should return undefined for non-existent paths', async () => {
       expect(
-        evaluateExpression({ expression: 'nonexistent.path', context: mockContext })
+        await evaluateExpression({ expression: 'nonexistent.path', context: mockContext })
       ).toBeUndefined();
     });
   });
 
   describe('filter support', () => {
-    it('should apply string filters', () => {
+    it('should apply string filters', async () => {
       expect(
-        evaluateExpression({ expression: 'inputs.greeting | upcase', context: mockContext })
+        await evaluateExpression({ expression: 'inputs.greeting | upcase', context: mockContext })
       ).toBe('HELLO');
 
       expect(
-        evaluateExpression({ expression: 'inputs.greeting | capitalize', context: mockContext })
+        await evaluateExpression({
+          expression: 'inputs.greeting | capitalize',
+          context: mockContext,
+        })
       ).toBe('Hello');
     });
 
-    it('should apply number filters', () => {
+    it('should apply number filters', async () => {
       expect(
-        evaluateExpression({
+        await evaluateExpression({
           expression: 'steps.search_data.output.hits.total | plus: 10',
           context: mockContext,
         })
       ).toBe(15);
 
       expect(
-        evaluateExpression({
+        await evaluateExpression({
           expression: 'steps.search_data.output.hits.total | times: 2',
           context: mockContext,
         })
       ).toBe(10);
     });
 
-    it('should apply array filters', () => {
-      const result = evaluateExpression({
+    it('should apply array filters', async () => {
+      const result = await evaluateExpression({
         expression: 'steps.search_data.output.hits.hits | first',
         context: mockContext,
       });
 
       expect(result).toEqual({ _source: { name: 'Item 1', value: 100 } });
 
-      const size = evaluateExpression({
+      const size = await evaluateExpression({
         expression: 'steps.search_data.output.hits.hits | size',
         context: mockContext,
       });
@@ -144,8 +147,8 @@ describe('evaluateExpression', () => {
       expect(size).toBe(3);
     });
 
-    it('should apply json filter (stringify)', () => {
-      const result = evaluateExpression({
+    it('should apply json filter (stringify)', async () => {
+      const result = await evaluateExpression({
         expression: 'inputs | json',
         context: mockContext,
       });
@@ -157,7 +160,7 @@ describe('evaluateExpression', () => {
       expect(result).toContain('"hello"');
     });
 
-    it('should apply json_parse filter', () => {
+    it('should apply json_parse filter', async () => {
       const contextWithJson: ExecutionContext = {
         ...mockContext,
         inputs: {
@@ -166,7 +169,7 @@ describe('evaluateExpression', () => {
         },
       };
 
-      const result = evaluateExpression({
+      const result = await evaluateExpression({
         expression: 'inputs.jsonString | json_parse',
         context: contextWithJson,
       });
@@ -174,8 +177,8 @@ describe('evaluateExpression', () => {
       expect(result).toEqual({ key: 'value', number: 42 });
     });
 
-    it('should chain multiple filters', () => {
-      const result = evaluateExpression({
+    it('should chain multiple filters', async () => {
+      const result = await evaluateExpression({
         expression: 'inputs.greeting | upcase | append: " WORLD"',
         context: mockContext,
       });
@@ -183,18 +186,34 @@ describe('evaluateExpression', () => {
       expect(result).toBe('HELLO WORLD');
     });
 
-    it('should handle map filter on arrays', () => {
-      const result = evaluateExpression({
+    it('should handle map filter on arrays', async () => {
+      const result = await evaluateExpression({
         expression: 'steps.search_data.output.hits.hits | map: "_source" | map: "name"',
         context: mockContext,
       });
 
       expect(result).toEqual(['Item 1', 'Item 2', 'Item 3']);
     });
+
+    it('should apply sha256 and hmac_sha256 filters (Shopify reference vectors)', async () => {
+      expect(
+        await evaluateExpression({
+          expression: '"Polyjuice" | sha256',
+          context: mockContext,
+        })
+      ).toBe('44ac1d7a2936e30a5de07082fd65d6fe9b1fb658a1a98bfe65bc5959beac5dd0');
+
+      expect(
+        await evaluateExpression({
+          expression: '"Polyjuice" | hmac_sha256: "Polina"',
+          context: mockContext,
+        })
+      ).toBe('8e0d5d65cff1242a4af66c8f4a32854fd5fb80edcc8aabe9b302b29c7c71dc20');
+    });
   });
 
   describe('foreach.item support', () => {
-    it('should resolve foreach.item when foreach step exists', () => {
+    it('should resolve foreach.item when foreach step exists', async () => {
       const contextWithForeach: ExecutionContext = {
         ...mockContext,
         steps: {
@@ -215,7 +234,7 @@ describe('evaluateExpression', () => {
         },
       };
 
-      const result = evaluateExpression({
+      const result = await evaluateExpression({
         expression: 'foreach.item._source.name',
         context: contextWithForeach,
       });
@@ -223,7 +242,7 @@ describe('evaluateExpression', () => {
       expect(result).toBe('Park 1');
     });
 
-    it('should resolve foreach.item._source when foreach step exists', () => {
+    it('should resolve foreach.item._source when foreach step exists', async () => {
       const contextWithForeach: ExecutionContext = {
         ...mockContext,
         steps: {
@@ -243,7 +262,7 @@ describe('evaluateExpression', () => {
         },
       };
 
-      const result = evaluateExpression({
+      const result = await evaluateExpression({
         expression: 'foreach.item._source',
         context: contextWithForeach,
       });
@@ -251,7 +270,7 @@ describe('evaluateExpression', () => {
       expect(result).toEqual({ name: 'Park 1', location: 'NY' });
     });
 
-    it('should resolve foreach.index and foreach.total', () => {
+    it('should resolve foreach.index and foreach.total', async () => {
       const contextWithForeach: ExecutionContext = {
         ...mockContext,
         steps: {
@@ -268,17 +287,17 @@ describe('evaluateExpression', () => {
         },
       };
 
-      expect(evaluateExpression({ expression: 'foreach.index', context: contextWithForeach })).toBe(
-        0
-      );
+      expect(
+        await evaluateExpression({ expression: 'foreach.index', context: contextWithForeach })
+      ).toBe(0);
 
-      expect(evaluateExpression({ expression: 'foreach.total', context: contextWithForeach })).toBe(
-        3
-      );
+      expect(
+        await evaluateExpression({ expression: 'foreach.total', context: contextWithForeach })
+      ).toBe(3);
     });
 
-    it('should return undefined for foreach.item when no foreach step exists', () => {
-      const result = evaluateExpression({
+    it('should return undefined for foreach.item when no foreach step exists', async () => {
+      const result = await evaluateExpression({
         expression: 'foreach.item',
         context: mockContext,
       });
@@ -286,7 +305,7 @@ describe('evaluateExpression', () => {
       expect(result).toBeUndefined();
     });
 
-    it('should apply filters to foreach.item', () => {
+    it('should apply filters to foreach.item', async () => {
       const contextWithForeach: ExecutionContext = {
         ...mockContext,
         steps: {
@@ -303,7 +322,7 @@ describe('evaluateExpression', () => {
         },
       };
 
-      const result = evaluateExpression({
+      const result = await evaluateExpression({
         expression: 'foreach.item._source.name | upcase',
         context: contextWithForeach,
       });
@@ -313,10 +332,10 @@ describe('evaluateExpression', () => {
   });
 
   describe('error handling', () => {
-    it('should handle invalid filter with strictFilters', () => {
+    it('should handle invalid filter with strictFilters', async () => {
       // With strictFilters: true, unknown filters should throw an error
       // The error is caught and we fallback to path resolution
-      const result = evaluateExpression({
+      const result = await evaluateExpression({
         expression: 'inputs.userId | unknown_filter',
         context: mockContext,
       });
@@ -325,9 +344,9 @@ describe('evaluateExpression', () => {
       expect(result).toBe('user-123');
     });
 
-    it('should fallback to path resolution when liquid evaluation fails', () => {
+    it('should fallback to path resolution when liquid evaluation fails', async () => {
       // Even with a syntax error, it should try fallback path resolution
-      const result = evaluateExpression({
+      const result = await evaluateExpression({
         expression: 'inputs.userId',
         context: mockContext,
       });
@@ -337,8 +356,8 @@ describe('evaluateExpression', () => {
   });
 
   describe('bracket notation', () => {
-    it('should resolve numeric array index', () => {
-      const result = evaluateExpression({
+    it('should resolve numeric array index', async () => {
+      const result = await evaluateExpression({
         expression: 'steps.search_data.output.hits.hits[0]._source.name',
         context: mockContext,
       });
@@ -346,7 +365,7 @@ describe('evaluateExpression', () => {
       expect(result).toBe('Item 1');
     });
 
-    it('should resolve string key with dots in bracket notation', () => {
+    it('should resolve string key with dots in bracket notation', async () => {
       const contextWithDottedKeys: ExecutionContext = {
         ...mockContext,
         inputs: {
@@ -358,7 +377,7 @@ describe('evaluateExpression', () => {
         },
       };
 
-      const result = evaluateExpression({
+      const result = await evaluateExpression({
         expression: "inputs.fields['exception.message']",
         context: contextWithDottedKeys,
       });
@@ -366,7 +385,7 @@ describe('evaluateExpression', () => {
       expect(result).toBe('Error occurred');
     });
 
-    it('should resolve bracket notation in middle of path', () => {
+    it('should resolve bracket notation in middle of path', async () => {
       const contextWithArrays: ExecutionContext = {
         ...mockContext,
         steps: {
@@ -379,7 +398,7 @@ describe('evaluateExpression', () => {
         },
       };
 
-      const result = evaluateExpression({
+      const result = await evaluateExpression({
         expression: 'steps.formatMessage.output[0].result',
         context: contextWithArrays,
       });
@@ -389,7 +408,7 @@ describe('evaluateExpression', () => {
   });
 
   describe('complex real-world scenarios', () => {
-    it('should handle foreach with json filter', () => {
+    it('should handle foreach with json filter', async () => {
       const contextWithForeach: ExecutionContext = {
         ...mockContext,
         steps: {
@@ -419,7 +438,7 @@ describe('evaluateExpression', () => {
       };
 
       // Simulate the foreach expression itself
-      const foreachArray = evaluateExpression({
+      const foreachArray = await evaluateExpression({
         expression: 'steps.search_park_data.output.hits.hits',
         context: contextWithForeach,
       });
@@ -427,7 +446,7 @@ describe('evaluateExpression', () => {
       expect(foreachArray).toHaveLength(2);
 
       // Simulate accessing item within foreach
-      const itemName = evaluateExpression({
+      const itemName = await evaluateExpression({
         expression: 'foreach.item._source.name',
         context: contextWithForeach,
       });
@@ -435,8 +454,8 @@ describe('evaluateExpression', () => {
       expect(itemName).toBe('Central Park');
     });
 
-    it('should handle deeply nested path with filters', () => {
-      const result = evaluateExpression({
+    it('should handle deeply nested path with filters', async () => {
+      const result = await evaluateExpression({
         expression: 'steps.search_data.output.hits.hits[0]._source.name | upcase',
         context: mockContext,
       });

@@ -14,6 +14,7 @@ export class ExportPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
+  private readonly browser = this.ctx.getService('browser');
 
   async exportButtonExists() {
     return await this.testSubjects.exists('exportTopNavButton');
@@ -72,6 +73,16 @@ export class ExportPageObject extends FtrService {
     });
 
     await this.testSubjects.click(`exportMenuItem-${label}`);
+  }
+
+  async closeExportPopover() {
+    await this.retry.waitFor('export popover to close', async () => {
+      if (!(await this.isExportPopoverOpen())) {
+        return true; // It was already closed
+      }
+      await this.browser.pressKeys(this.browser.keys.ESCAPE);
+      return !(await this.isExportPopoverOpen());
+    });
   }
 
   async isExportFlyoutOpen() {

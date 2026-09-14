@@ -19,12 +19,11 @@ export const NotionConnector: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
     types: [
-      'bearer',
       {
         type: 'oauth_authorization_code',
         overrides: {
@@ -39,6 +38,7 @@ export const NotionConnector: ConnectorSpec = {
           tokenUrl: 'https://api.notion.com/v1/oauth/token',
         },
       },
+      { type: 'bearer', isLegacy: true, defaults: {} },
     ],
     headers: {
       'Notion-Version': '2025-09-03',
@@ -49,6 +49,7 @@ export const NotionConnector: ConnectorSpec = {
     // https://developers.notion.com/reference/post-search
     searchPageOrDSByTitle: {
       isTool: true,
+      scope: 'read',
       description:
         'Search for Notion pages or data sources (databases) whose title contains a given string. Use this to discover what pages or databases exist before fetching their content or querying their rows.',
       input: lazySchema(() =>
@@ -96,6 +97,7 @@ export const NotionConnector: ConnectorSpec = {
     // https://developers.notion.com/reference/retrieve-a-page
     getPage: {
       isTool: true,
+      scope: 'read',
       description:
         'Given the ID of a Notion page, retrieve its metadata — including title, properties, parent, created/edited timestamps, and URL. Use this after finding a page ID via searchPageOrDSByTitle.',
       input: lazySchema(() =>
@@ -119,6 +121,7 @@ export const NotionConnector: ConnectorSpec = {
     // https://developers.notion.com/reference/retrieve-a-data-source
     getDataSource: {
       isTool: true,
+      scope: 'read',
       description:
         'Given the ID of a Notion data source (database), retrieve its schema — including the names, types, and options for all columns/properties. Use this before querying rows so you know what filters and fields are available.',
       input: lazySchema(() =>
@@ -142,6 +145,7 @@ export const NotionConnector: ConnectorSpec = {
     // https://developers.notion.com/reference/query-a-data-source
     queryDataSource: {
       isTool: true,
+      scope: 'read',
       description:
         'Given the ID of a Notion data source (database), query its rows. Returns up to 10 rows by default. Supports filtering via the Notion filter JSON format (see https://developers.notion.com/reference/filter-data-source-entries) and cursor-based pagination. Use getDataSource first to understand the available columns and their types before constructing a filter.',
       input: lazySchema(() =>
@@ -228,17 +232,9 @@ export const NotionConnector: ConnectorSpec = {
     // if listing all users feels a bit too much
     handler: async (ctx) => {
       ctx.log.debug('Notion test handler');
-
-      try {
-        const response = await ctx.client.get('https://api.notion.com/v1/users');
-        const numOfUsers = response.data.results.length;
-        return {
-          ok: true,
-          message: `Successfully connected to Notion API: found ${numOfUsers} users`,
-        };
-      } catch (error) {
-        return { ok: false, message: error.message };
-      }
+      await ctx.client.get('https://api.notion.com/v1/users');
+      return {};
     },
+    enabled: true,
   },
 };

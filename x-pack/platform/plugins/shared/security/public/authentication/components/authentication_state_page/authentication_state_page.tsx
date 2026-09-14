@@ -27,7 +27,7 @@ export const AuthenticationStatePage: FC<PropsWithChildren<Props>> = (props) => 
   const logo = customLogo ? (
     <EuiImage src={customLogo} size={40} alt="logo" />
   ) : (
-    <EuiIcon type="logoElastic" size="xxl" />
+    <EuiIcon type="logoElastic" size="xxl" aria-hidden={true} />
   );
   // custom logo needs to be centered
   const logoStyle = customLogo ? { padding: 0 } : {};

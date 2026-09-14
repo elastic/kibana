@@ -18,10 +18,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
-import { useFetchDataFields } from '../../../hooks/use_fetch_data_fields';
+import { useFetchRuleEventFields } from '../../../hooks/use_fetch_rule_event_fields';
 import { DispatchSection } from './components/dispatch_section';
 import { MatcherInput } from './components/matcher_input';
 import { QuickFilters } from './components/quick_filters';
+import { SimpleWorkflowBuilder } from './components/simple_workflow_builder';
 import { TagsInput } from './components/tags_input';
 import { WorkflowSelector } from './components/workflow_selector';
 import type { ActionPolicyFormState } from './types';
@@ -37,7 +38,7 @@ const optionalLabel = (
 export const ActionPolicyForm = () => {
   const { control } = useFormContext<ActionPolicyFormState>();
   const matcher = useWatch({ control, name: 'matcher' });
-  const { data: dataFieldNames } = useFetchDataFields(matcher);
+  const { data: dataFieldNames } = useFetchRuleEventFields(matcher?.expression ?? undefined);
 
   return (
     <>
@@ -148,7 +149,7 @@ export const ActionPolicyForm = () => {
           <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.alertingV2.actionPolicy.form.matchConditions.description"
-              defaultMessage="Define which alerts this policy applies to."
+              defaultMessage="Define which alerts this policy applies to. Tags and expression conditions are combined with AND."
             />
           </EuiText>
         </EuiSplitPanel.Inner>
@@ -162,18 +163,20 @@ export const ActionPolicyForm = () => {
                 <EuiSpacer size="m" />
                 <EuiFormRow
                   label={i18n.translate('xpack.alertingV2.actionPolicy.form.matcher', {
-                    defaultMessage: 'Match conditions',
+                    defaultMessage: 'Query',
                   })}
                   labelAppend={optionalLabel}
                   helpText={i18n.translate('xpack.alertingV2.actionPolicy.form.matcher.helpText', {
                     defaultMessage:
-                      'A KQL expression that defines which alert episodes meet the conditions for this policy. Leave empty to apply the policy to all episodes in the space.',
+                      'A KQL query combined with the conditions above using AND. Leave all conditions empty to apply the policy to all episodes in the space.',
                   })}
                   fullWidth
                 >
                   <MatcherInput
-                    value={field.value}
-                    onChange={field.onChange}
+                    value={field.value?.expression ?? ''}
+                    onChange={(expr) =>
+                      field.onChange({ ...field.value, expression: expr || null })
+                    }
                     fullWidth
                     data-test-subj="matcherInput"
                     dataFieldNames={dataFieldNames}
@@ -236,6 +239,8 @@ export const ActionPolicyForm = () => {
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner>
           <WorkflowSelector />
+          <EuiSpacer size="m" />
+          <SimpleWorkflowBuilder />
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>
     </>

@@ -14,6 +14,7 @@ import { getQueriesFromOutput } from '../types';
 export const severityComplianceEvaluator: KIQueryGenerationEvaluator = {
   name: 'severity_compliance',
   kind: 'CODE' as const,
+  direction: 'maximize',
   evaluate: async ({ output }) => {
     const queries = getQueriesFromOutput(output);
     if (queries.length === 0) {
@@ -31,7 +32,7 @@ export const severityComplianceEvaluator: KIQueryGenerationEvaluator = {
               .map((q) => `"${q.title}" has severity ${q.severity_score}`)
               .join('; ')}`
           : `All ${queries.length} queries have valid severity scores`,
-      details: {
+      metadata: {
         total: queries.length,
         invalidQueries: invalidQueries.map((q) => ({
           title: q.title,

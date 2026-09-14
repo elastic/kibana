@@ -10,7 +10,6 @@
 import React from 'react';
 import {
   EuiButton,
-  EuiCallOut,
   EuiConfirmModal,
   EuiModal,
   EuiModalBody,
@@ -22,6 +21,8 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
+import { KbnInfoCallout, KbnDangerCallout } from '@kbn/ui-callout';
 import type { ContentListItem } from '../../item';
 import type { BulkActionSkippedItem } from '../../bulk_actions';
 
@@ -84,7 +85,7 @@ export const DeleteConfirmationComponent = ({
       <EuiModal
         aria-labelledby={titleId}
         onClose={onCancel}
-        data-test-subj="contentListDeleteConfirmation"
+        data-test-subj={CONTENT_LIST_TEST_SUBJECTS.deleteConfirmation}
       >
         <EuiModalHeader>
           <EuiModalHeaderTitle id={titleId}>
@@ -110,7 +111,7 @@ export const DeleteConfirmationComponent = ({
           <EuiButton
             onClick={onCancel}
             fill
-            data-test-subj="contentListDeleteConfirmation-closeButton"
+            data-test-subj={CONTENT_LIST_TEST_SUBJECTS.deleteConfirmationCloseButton}
           >
             {i18n.translate('contentManagement.contentList.deleteConfirmation.close', {
               defaultMessage: 'Close',
@@ -146,15 +147,13 @@ export const DeleteConfirmationComponent = ({
       defaultFocusedButton="cancel"
       buttonColor="danger"
       isLoading={isDeleting}
-      data-test-subj="contentListDeleteConfirmation"
+      data-test-subj={CONTENT_LIST_TEST_SUBJECTS.deleteConfirmation}
     >
       {skippedCount > 0 && (
         <>
-          <EuiCallOut
+          <KbnInfoCallout
             announceOnMount
             size="s"
-            color="primary"
-            iconType="iInCircle"
             title={i18n.translate(
               'contentManagement.contentList.deleteConfirmation.skippedCalloutTitle',
               {
@@ -163,10 +162,10 @@ export const DeleteConfirmationComponent = ({
                 values: { skippedCount, skippedEntityName },
               }
             )}
-            data-test-subj="contentListDeleteConfirmation-skippedCallout"
+            data-test-subj={CONTENT_LIST_TEST_SUBJECTS.deleteConfirmationSkippedCallout}
           >
             <SkippedItemList skipped={skipped} compact />
-          </EuiCallOut>
+          </KbnInfoCallout>
           <EuiSpacer size="s" />
         </>
       )}
@@ -179,18 +178,16 @@ export const DeleteConfirmationComponent = ({
       {error && (
         <>
           <EuiSpacer size="s" />
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
             size="s"
-            color="danger"
             title={i18n.translate('contentManagement.contentList.deleteConfirmation.error', {
               defaultMessage: 'Unable to delete {entityNamePlural}',
               values: { entityNamePlural },
             })}
-            data-test-subj="contentListDeleteError"
-          >
-            <p>{error}</p>
-          </EuiCallOut>
+            text={error}
+            data-test-subj={CONTENT_LIST_TEST_SUBJECTS.deleteError}
+          />
         </>
       )}
     </EuiConfirmModal>
@@ -215,7 +212,10 @@ const SkippedItemList = ({
   const uniformReason = reasons.size === 1 ? skipped[0].reason : undefined;
 
   return (
-    <EuiText size={compact ? 'xs' : 's'} data-test-subj="contentListDeleteConfirmation-skippedList">
+    <EuiText
+      size={compact ? 'xs' : 's'}
+      data-test-subj={CONTENT_LIST_TEST_SUBJECTS.deleteConfirmationSkippedList}
+    >
       {uniformReason ? (
         <>
           <p>{uniformReason}</p>

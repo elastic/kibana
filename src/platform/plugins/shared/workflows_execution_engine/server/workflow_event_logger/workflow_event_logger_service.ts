@@ -29,7 +29,7 @@ export class WorkflowEventLoggerService implements IWorkflowEventLoggerService {
     private readonly logger: Logger,
     private readonly enableConsoleLogging: boolean = false
   ) {
-    this.logsRepository = new LogsRepository(dataStreams);
+    this.logsRepository = new LogsRepository(dataStreams, logger);
   }
 
   public createLogger(context: WorkflowEventLoggerContext): IWorkflowEventLogger {

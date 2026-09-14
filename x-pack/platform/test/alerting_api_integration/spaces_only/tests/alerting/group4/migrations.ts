@@ -18,15 +18,19 @@ import type { FtrProviderContext } from '../../../../common/ftr_provider_context
 export default function createGetTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('migrations', () => {
     before(async () => {
-      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/alerts');
+      await kibanaServer.importExport.load(
+        'x-pack/platform/test/functional/fixtures/kbn_archives/alerts/alerts.json'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/alerts');
+      await kibanaServer.importExport.unload(
+        'x-pack/platform/test/functional/fixtures/kbn_archives/alerts/alerts.json'
+      );
     });
 
     it('7.10.0 migrates the `alerting` consumer to be the `alerts`', async () => {
@@ -96,7 +100,10 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       );
 
       expect(response.status).toEqual(200);
-      expect(response.body.updated_at).toEqual('2020-06-17T15:35:39.839Z');
+      // The migration copies doc.updated_at into attributes.updatedAt, but when importing
+      // via kibanaServer.importExport.load the SO layer always stamps updated_at with the
+      // import time, so we can only assert the field is present and a valid ISO date.
+      expect(response.body.updated_at).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
     });
 
     it('7.11.0 migrates alerts to contain `notifyWhen` field', async () => {
@@ -532,7 +539,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             {
               duration: 60000,
               success: true,
-              timestamp: '2022-08-24T19:05:49.817Z',
+              timestamp: 1661367949817,
             },
           ],
           calculated_metrics: {
@@ -573,8 +580,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       const alert = response.body._source?.alert;
 
       expect(alert?.lastRun?.outcome).toEqual('warning');
-      expect(alert?.lastRun?.warning).toEqual('warning reason');
-      expect(alert?.lastRun?.outcomeMsg).toEqual('warning message');
+      expect(alert?.lastRun?.warning).toEqual('ruleExecution');
+      expect(alert?.lastRun?.outcomeMsg).toEqual(['warning message']);
     });
 
     it('8.7.0 adds aggType and groupBy to ES query rules', async () => {

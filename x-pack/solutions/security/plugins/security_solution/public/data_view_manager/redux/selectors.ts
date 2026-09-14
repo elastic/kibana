@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { createSelector } from '@reduxjs/toolkit';
+import { createSelector } from 'redux-toolkit-v1';
 
 import type { PageScope } from '../constants';
 import type { RootState } from './reducer';
 
-export const sourcererAdapterSelector = (scope: PageScope) =>
+export const scopedDataViewSelector = (scope: PageScope) =>
   createSelector([(state: RootState) => state.dataViewManager], (dataViewManager) => {
     const scopedState = dataViewManager[scope];
 
@@ -22,6 +22,11 @@ export const sourcererAdapterSelector = (scope: PageScope) =>
 export const sharedStateSelector = createSelector(
   [(state: RootState) => state.dataViewManager],
   (dataViewManager) => dataViewManager.shared
+);
+
+export const sharedStatusSelector = createSelector(
+  [(state: RootState) => state.dataViewManager],
+  (dataViewManager) => dataViewManager.shared.status
 );
 
 // NOTE: This will be subject to cleanup tasks https://github.com/elastic/security-team/issues/11959

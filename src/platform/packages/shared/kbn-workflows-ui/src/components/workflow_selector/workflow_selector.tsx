@@ -29,10 +29,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import * as i18n from './translations';
 import { WorkflowSelectorEmptyState } from './workflow_selector_empty_state';
-import { getSelectedWorkflowDisabledError, processWorkflowsToOptions } from './workflow_utils';
+import {
+  getSelectedWorkflowDisabledError,
+  getWorkflowsListQueryParams,
+  processWorkflowsToOptions,
+} from './workflow_utils';
 import type { WorkflowOption, WorkflowSelectorConfig } from './workflow_utils';
 import { IconDisabledWorkflow } from '../../assets/icons';
-import { useWorkflows } from '../../hooks';
+import { useWorkflows, useWorkflowsCapabilities } from '../../hooks';
 
 interface WorkflowSelectorProps {
   selectedWorkflowId?: string;
@@ -68,19 +72,23 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
   const [isSearching, setIsSearching] = useState(true);
   const { application } = useKibana().services;
   const { euiTheme } = useEuiTheme();
+  const { canReadManagedWorkflow } = useWorkflowsCapabilities();
 
   const finalConfig = useMemo(() => ({ ...defaultConfig, ...config }), [config]);
 
-  // Fetch workflows using the hook
+  // Include managed workflows only when: (a) the caller declared a visibility context, and
+  // (b) the user has the canReadManagedWorkflow capability. Without a visibility context the
+  // server would return every managed workflow in the space, leaking other solutions' workflows.
   const {
     data: workflowsData,
     isLoading,
     error: fetchError,
-  } = useWorkflows({
-    size: 1000,
-    page: 1,
-    query: '',
-  });
+  } = useWorkflows(
+    getWorkflowsListQueryParams({
+      visibility: finalConfig.visibility,
+      canReadManagedWorkflow,
+    })
+  );
 
   // Process workflows using utility function
   const workflowOptions = useMemo(
@@ -136,7 +144,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
         if (wasSelectedButNowDisabled) {
           return (
             <EuiIcon
-              type="alert"
+              type="warning"
               color="warning"
               style={{ marginRight: '8px' }}
               aria-label={i18n.WORKFLOW_DISABLED_WARNING}
@@ -218,10 +226,10 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
         if (finalConfig.showSelectedInSearch) {
           setInputValue(changedOption.name);
           setIsSearching(false);
-        } else {
-          setInputValue('');
-          setIsSearching(true);
         }
+        // When showSelectedInSearch is false (list view), leave the search term as-is.
+        // The selected item is already visible — the user just clicked it — and clearing
+        // the search would reset the scroll position to the top, losing the selection context.
       } else {
         onWorkflowChange('');
         setInputValue('');
@@ -285,9 +293,9 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
   const renderListView = useCallback(
     (list: ReactElement, search?: ReactElement) => {
       return (
-        <EuiPanel paddingSize="none">
+        <>
           {search}
-          <div>{list}</div>
+          <div css={{ marginTop: euiTheme.size.xs }}>{list}</div>
           {workflowOptions.length > 0 && !finalConfig.hideViewWorkflowLink && (
             <EuiPanel
               paddingSize="s"
@@ -305,11 +313,12 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
               </EuiText>
             </EuiPanel>
           )}
-        </EuiPanel>
+        </>
       );
     },
     [
       euiTheme.colors.backgroundBaseSubdued,
+      euiTheme.size.xs,
       finalConfig.hideViewWorkflowLink,
       workflowManagementLinkProps,
       workflowOptions.length,

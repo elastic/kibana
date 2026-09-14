@@ -1,5 +1,8 @@
 {
-  "sha1": "141ee12ba7c6d8ac5dd2c654f776a257139dd4bc",
+  "sha1": "44ac1dd1c4ac0de1f8d4e7369c63837d5f14d707",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "b77b3725a7cda3a-a405bc5e45e74c0",
@@ -13,8 +16,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/global.setup.ts",
-        "line": 10,
-        "column": 16
+        "line": 53,
+        "column": 3
       }
     },
     {
@@ -23,12 +26,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
-        "line": 18,
-        "column": 7
+        "line": 17,
+        "column": 25
       }
     },
     {
@@ -37,12 +42,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
-        "line": 41,
-        "column": 7
+        "line": 32,
+        "column": 13
       }
     },
     {
@@ -51,12 +58,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
-        "line": 54,
-        "column": 7
+        "line": 44,
+        "column": 76
       }
     },
     {
@@ -65,12 +74,62 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
-        "line": 73,
-        "column": 7
+        "line": 61,
+        "column": 18
+      }
+    },
+    {
+      "id": "1b1baaef6ea75c6-d584ec1839b42bf",
+      "title": "Composite SLO UI renders SLOs and Composite SLOs tabs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/composite_slo_ui.spec.ts",
+        "line": 27,
+        "column": 46
+      }
+    },
+    {
+      "id": "1b1baaef6ea75c6-3b88ce926900368",
+      "title": "Composite SLO UI shows Create composite SLO option in create dropdown",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/composite_slo_ui.spec.ts",
+        "line": 29,
+        "column": 71
+      }
+    },
+    {
+      "id": "1b1baaef6ea75c6-aa9b5daab7a8160",
+      "title": "Composite SLO UI renders composite SLO table when Composite SLOs tab is clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/composite_slo_ui.spec.ts",
+        "line": 33,
+        "column": 59
       }
     },
     {
@@ -85,8 +144,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/explore_from_slo_details.spec.ts",
-        "line": 75,
-        "column": 9
+        "line": 68,
+        "column": 25
       }
     },
     {
@@ -101,8 +160,56 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/health_scan_pagination.spec.ts",
-        "line": 71,
-        "column": 9
+        "line": 66,
+        "column": 22
+      }
+    },
+    {
+      "id": "19d28556f6339bb-853a135b3f756e3",
+      "title": "SLO Overview Embeddable configures a single SLO overview panel from the add panel flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/slo_overview_embeddable.spec.ts",
+        "line": 35,
+        "column": 7
+      }
+    },
+    {
+      "id": "19d28556f6339bb-336a9b37545e893",
+      "title": "SLO Overview Embeddable configures a group SLO overview panel from the add panel flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/slo_overview_embeddable.spec.ts",
+        "line": 63,
+        "column": 15
+      }
+    },
+    {
+      "id": "19d28556f6339bb-227f727b7a48158",
+      "title": "SLO Overview Embeddable renders a single SLO overview panel when ES query inspection is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/slo_overview_embeddable.spec.ts",
+        "line": 86,
+        "column": 55
       }
     },
     {
@@ -117,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/slos_overview.spec.ts",
-        "line": 26,
-        "column": 9
+        "line": 21,
+        "column": 61
       }
     }
   ]

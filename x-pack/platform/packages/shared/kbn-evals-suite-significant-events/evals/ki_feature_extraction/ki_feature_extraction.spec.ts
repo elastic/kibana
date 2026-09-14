@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { identifyFeatures } from '@kbn/streams-ai';
-import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
+import { sumTokens, type InferenceDocument } from '@kbn/nightshift-ai';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
+import { compactInferenceDocuments } from '@kbn/significant-events-plugin/server';
 import { tags } from '@kbn/scout';
-import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import type { GcsConfig } from '../../src/data_generators/replay';
+import {
+  getCurrentTraceId,
+  createChatCallsEvaluator,
+  createSpanLatencyEvaluator,
+} from '@kbn/evals';
 import {
   SIGEVENTS_SNAPSHOT_RUN,
   cleanSignificantEventsDataStreams,
-  listAvailableSnapshots,
   replaySignificantEventsSnapshot,
 } from '../../src/data_generators/replay';
 import { evaluate } from '../../src/evaluate';
@@ -27,36 +29,56 @@ import {
   snapshotCatalogKey,
   type KIFeatureExtractionScenario,
 } from '../../src/datasets';
+import { buildAvailableSnapshotsBySource } from '../shared';
 import { collectSampleDocuments } from './collect_sample_documents';
+import { runFeatureIdentificationAgent } from '../../src/run_feature_identification_agent';
 
 const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
 
 interface CollectedExample {
   scenario: KIFeatureExtractionScenario;
-  sampleDocuments: Array<SearchHit<Record<string, unknown>>>;
+  sampleDocuments: InferenceDocument[];
 }
 
 evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.complete }, () => {
   const activeDatasets = getActiveDatasets();
   const availableSnapshotsBySource = new Map<string, Set<string>>();
 
-  evaluate.beforeAll(async ({ esClient, log }) => {
-    const uniqueCatalogSources = new Map<string, GcsConfig>();
-    for (const dataset of activeDatasets) {
-      for (const scenario of dataset.kiFeatureExtraction) {
-        const source = resolveScenarioSnapshotSource({
-          scenarioId: scenario.input.scenario_id,
-          datasetGcs: dataset.gcs,
-          snapshotSource: scenario.snapshot_source,
-        });
-        uniqueCatalogSources.set(snapshotCatalogKey(source.gcs), source.gcs);
-      }
-    }
+  evaluate.beforeAll(async ({ esClient, kbnClient, log, uiSettings }) => {
+    await uiSettings.set({ 'agentBuilder:experimentalFeatures': true });
+    await kbnClient.request({
+      path: '/internal/core/_settings',
+      method: 'PUT',
+      headers: { 'elastic-api-version': '1' },
+      body: {
+        'feature_flags.overrides': {
+          [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+        },
+      },
+    });
+    log.info('Enabled significant events availability feature flag');
 
-    for (const [catalogSourceKey, gcs] of uniqueCatalogSources.entries()) {
-      const availableSnapshots = await listAvailableSnapshots(esClient, log, gcs);
-      availableSnapshotsBySource.set(catalogSourceKey, new Set(availableSnapshots));
-    }
+    const snapshots = await buildAvailableSnapshotsBySource(
+      activeDatasets,
+      (dataset) => dataset.kiFeatureExtraction,
+      esClient,
+      log
+    );
+    snapshots.forEach((v, k) => availableSnapshotsBySource.set(k, v));
+  });
+
+  evaluate.afterAll(async ({ kbnClient, uiSettings }) => {
+    await uiSettings.unset('agentBuilder:experimentalFeatures');
+    await kbnClient.request({
+      path: '/internal/core/_settings',
+      method: 'PUT',
+      headers: { 'elastic-api-version': '1' },
+      body: {
+        'feature_flags.overrides': {
+          [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: null,
+        },
+      },
+    });
   });
 
   for (const dataset of activeDatasets) {
@@ -86,11 +108,12 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
           await replaySignificantEventsSnapshot(esClient, log, source.snapshotName, source.gcs);
           await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
 
-          const sampleDocuments = await collectSampleDocuments({
+          const sampledHits = await collectSampleDocuments({
             esClient,
             scenario,
             log,
           });
+          const sampleDocuments = compactInferenceDocuments(sampledHits);
           if (sampleDocuments.length === 0) {
             throw new Error(
               `No log documents found after replaying snapshot ${source.snapshotName}`
@@ -108,7 +131,7 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
 
       evaluate(
         'KI feature extraction',
-        async ({ executorClient, evaluators, inferenceClient, logger, traceEsClient, log }) => {
+        async ({ fetch, connector, executorClient, evaluators, traceEsClient, log }) => {
           const heavyDataByScenario = new Map(
             collectedExamples.map(({ scenario, sampleDocuments }) => [
               scenario.input.scenario_id,
@@ -118,19 +141,21 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
 
           await executorClient.runExperiment(
             {
-              dataset: {
-                name: `sigevents: KI feature extraction (${dataset.id})`,
-                description: `[${dataset.id}] KI feature extraction across scenarios`,
-                examples: collectedExamples.map(({ scenario }) => ({
-                  id: scenario.input.scenario_id,
-                  input: {
-                    ...scenario.input,
-                    snapshot_source: scenario.snapshot_source,
-                  },
-                  output: scenario.output,
-                  metadata: scenario.metadata,
-                })),
-              },
+              datasets: [
+                {
+                  name: `sigevents: KI feature extraction (${dataset.id})`,
+                  description: `[${dataset.id}] KI feature extraction across scenarios`,
+                  examples: collectedExamples.map(({ scenario }) => ({
+                    id: scenario.input.scenario_id,
+                    input: {
+                      ...scenario.input,
+                      snapshot_source: scenario.snapshot_source,
+                    },
+                    output: scenario.output,
+                    metadata: scenario.metadata,
+                  })),
+                },
+              ],
               concurrency: 1,
               trustUpstreamDataset: TRUST_UPSTREAM,
               task: async ({ input }: { input: KIFeatureExtractionScenario['input'] }) => {
@@ -139,17 +164,17 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
                   throw new Error(`No pre-collected data for scenario "${input.scenario_id}"`);
                 }
 
-                const { features } = await identifyFeatures({
+                const { features, tokensUsed } = await runFeatureIdentificationAgent({
+                  fetch,
+                  log,
                   streamName: MANAGED_STREAM_NAME,
+                  connectorId: connector.id,
                   sampleDocuments: heavy.sampleDocuments,
-                  systemPrompt: featuresPrompt,
-                  inferenceClient,
-                  logger,
-                  signal: new AbortController().signal,
                 });
 
                 return {
                   features,
+                  tokens_used: sumTokens({ added: tokensUsed }),
                   traceId: getCurrentTraceId(),
                   sample_documents: heavy.sampleDocuments,
                 };
@@ -162,7 +187,8 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
               evaluators.traceBasedEvaluators.inputTokens,
               evaluators.traceBasedEvaluators.outputTokens,
               evaluators.traceBasedEvaluators.cachedTokens,
-              createSpanLatencyEvaluator({ traceEsClient, log, spanName: 'ChatComplete' }),
+              createChatCallsEvaluator({ traceEsClient, log }),
+              createSpanLatencyEvaluator({ traceEsClient, log, operationName: 'chat' }),
             ]
           );
         }

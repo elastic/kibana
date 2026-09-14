@@ -28,6 +28,7 @@ export const InspectFlyout: React.FC<InspectFlyoutProps> = ({ searchSession }) =
         <CodeEditor
           languageId="json"
           value={JSON.stringify(searchSession, null, 2)}
+          enableFindAction
           options={{
             readOnly: true,
             lineNumbers: 'off',
