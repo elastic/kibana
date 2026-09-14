@@ -12,11 +12,12 @@
  * `./edit_monitor_bulk.ts`) for the ES write + Fleet sync.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-common';
+import { routeId } from '../../zod_query';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import type { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
 import { ConfigKey, type MonitorFields } from '../../../../common/runtime_types';
@@ -51,15 +52,17 @@ export const updateSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
   validate: {},
   validation: {
     request: {
-      body: schema.object({
-        // `maxSize` matches the 500-per-page decrypt in `findDecryptedMonitors`;
-        updates: schema.arrayOf(
-          schema.object({
-            id: schema.string({ minLength: 1, maxLength: 1024 }),
-            attributes: schema.object({}, { unknowns: 'allow' }),
-          }),
-          { minSize: 1, maxSize: 500 }
-        ),
+      body: z.object({
+        // `max` matches the 500-per-page decrypt in `findDecryptedMonitors`;
+        updates: z
+          .array(
+            z.object({
+              id: routeId,
+              attributes: z.looseObject({}).default({}),
+            })
+          )
+          .min(1)
+          .max(500),
       }),
     },
   },

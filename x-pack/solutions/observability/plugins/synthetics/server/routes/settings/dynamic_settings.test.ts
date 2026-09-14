@@ -221,13 +221,13 @@ describe('dynamic settings routes', () => {
   describe('DynamicSettingsSchema', () => {
     it('accepts a boolean rebalancePrivateLocationShardsEnabled', () => {
       expect(
-        DynamicSettingsSchema.validate({ rebalancePrivateLocationShardsEnabled: false })
+        DynamicSettingsSchema.parse({ rebalancePrivateLocationShardsEnabled: false })
       ).toMatchObject({ rebalancePrivateLocationShardsEnabled: false });
     });
 
     it('rejects a non-boolean rebalancePrivateLocationShardsEnabled', () => {
       expect(() =>
-        DynamicSettingsSchema.validate({ rebalancePrivateLocationShardsEnabled: 'nope' })
+        DynamicSettingsSchema.parse({ rebalancePrivateLocationShardsEnabled: 'nope' })
       ).toThrow();
     });
   });

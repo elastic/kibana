@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { queryBoolean, queryNumber } from '../zod_query';
 import { syntheticsMonitorAttributes } from '../../../common/types/saved_objects';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { processMonitors } from '../../saved_objects/synthetics_monitor/process_monitors';
@@ -23,34 +24,34 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
   method: 'GET',
   path: SYNTHETICS_API_URLS.CERTS,
   validate: {
-    query: schema.object({
-      pageIndex: schema.maybe(schema.number()),
-      size: schema.maybe(schema.number()),
-      sortBy: schema.maybe(schema.string({ maxLength: 256 })),
-      direction: schema.maybe(schema.string({ maxLength: 256 })),
-      search: schema.maybe(schema.string({ maxLength: 1024 })),
-      from: schema.maybe(schema.string({ maxLength: 256 })),
-      to: schema.maybe(schema.string({ maxLength: 256 })),
+    query: z.object({
+      pageIndex: queryNumber.optional(),
+      size: queryNumber.optional(),
+      sortBy: z.string().max(256).optional(),
+      direction: z.string().max(256).optional(),
+      search: z.string().max(1024).optional(),
+      from: z.string().max(256).optional(),
+      to: z.string().max(256).optional(),
       // Upper bound on certificate `not_after` (datemath, e.g. `now+30d`), powering
       // the "Expiring within" quick filter. Already-expired certs are included.
-      notValidAfter: schema.maybe(schema.string({ maxLength: 256 })),
+      notValidAfter: z.string().max(256).optional(),
       // Comma-separated filters (e.g. `http,browser`) sent as strings to avoid
       // query-array serialization edge cases. `monitorTypes` scopes by monitor
       // type; `browserResourceTypes` and `certOrigin` are browser-only quick
       // filters; `tags` scopes by monitor tag.
-      monitorTypes: schema.maybe(schema.string({ maxLength: 1024 })),
-      browserResourceTypes: schema.maybe(schema.string({ maxLength: 1024 })),
-      certOrigin: schema.maybe(schema.string({ maxLength: 256 })),
-      tags: schema.maybe(schema.string({ maxLength: 1024 })),
+      monitorTypes: z.string().max(1024).optional(),
+      browserResourceTypes: z.string().max(1024).optional(),
+      certOrigin: z.string().max(256).optional(),
+      tags: z.string().max(1024).optional(),
       // Comma-separated issuer (certificate authority) common names; scopes the
       // list to certs signed by the selected CA(s).
-      issuers: schema.maybe(schema.string({ maxLength: 4096 })),
+      issuers: z.string().max(4096).optional(),
       // Comma-separated remote cluster aliases; honoured only when CCS is on.
       // Empty/absent → every configured cluster.
-      remoteNames: schema.maybe(schema.string({ maxLength: 1024 })),
+      remoteNames: z.string().max(1024).optional(),
       // Same contract as Overview/Management: load enabled monitors from every
       // space the user can read, and drop the CCS remote-branch space gate.
-      showFromAllSpaces: schema.maybe(schema.boolean()),
+      showFromAllSpaces: queryBoolean.optional(),
     }),
   },
   handler: async ({
