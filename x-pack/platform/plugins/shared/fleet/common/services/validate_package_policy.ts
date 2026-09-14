@@ -155,17 +155,12 @@ export type PackagePolicyValidationResults = {
 } & PackagePolicyConfigValidationResults;
 
 const validateCondition = (
-  expr: string | null | undefined,
+  expr: string | boolean | null | undefined,
   conditionValidator: ValidatePackagePolicyDeps['conditionValidator']
 ): Errors => {
   if (!conditionValidator) return null;
   // Handlebars can parse text values like 'true'/'false' as booleans; coerce to string.
-  const normalized =
-    typeof expr === 'string'
-      ? expr
-      : typeof (expr as unknown) === 'boolean'
-      ? String(expr as unknown)
-      : undefined;
+  const normalized = typeof expr === 'string' ? expr : typeof expr === 'boolean' ? String(expr) : undefined;
   const errors = conditionValidator(normalized);
   if (!errors.length) return null;
   return errors.map(({ line, column, message }) =>
