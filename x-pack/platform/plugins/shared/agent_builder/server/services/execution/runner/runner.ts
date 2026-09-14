@@ -409,6 +409,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     runAgent: async (params) => {
       const {
         request,
+        agentId,
         defaultConnectorId,
         projectRouting,
         telemetryMetadata,
@@ -420,7 +421,6 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         parentExecutionId,
         ...otherParams
       } = params;
-      const { agentId } = params;
       const { nextInput, conversation } = params.agentParams;
       const interactivity = normalizeInteractive(interactive, executionMode);
       const runner = await createScopedRunnerWithDeps({
@@ -429,7 +429,6 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         defaultConnectorId,
         projectRouting,
         telemetryMetadata,
-        agentId: otherParams.agentId,
         maxContentLength,
         reasoningLevel,
         conversation,
