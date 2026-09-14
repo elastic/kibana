@@ -21,9 +21,6 @@ const useSecretHeadersMock = useSecretHeaders as jest.Mock;
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
   const originalModule = jest.requireActual('@kbn/triggers-actions-ui-plugin/public');
-  // Simulate a 404 "connector ID available" HTTP error that satisfies isHttpFetchError().
-  // The ConnectorFormFieldsGlobal async ID validator calls http.head() to check availability;
-  // without a proper mock, http is undefined and the ID field always fails validation.
   const notFoundError = Object.assign(new Error('Not Found'), {
     request: {},
     response: { status: 404 },
@@ -487,10 +484,6 @@ describe('CasesWebhookActionConnectorFields renders', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      // Keep the outer beforeEach's isLoading: true so that the headers section renders
-      // a loading spinner instead of the UseArray-backed HeaderFields. This prevents an
-      // empty placeholder header row from being registered as a form field, which would
-      // fail the non-nullable key validator and cause isValid: false on submission.
       user = userEvent.setup();
     });
 
