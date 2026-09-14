@@ -75,6 +75,7 @@ export const azure_ai_foundryEvaluations = {
   entity.target.id = CASE(
     entity.target.id IS NOT NULL, entity.target.id,
     data_stream.dataset == "azure_ai_foundry.logs" AND data_stream.type == "logs" AND azure.ai_foundry.category == "GatewayLogs", azure.ai_foundry.properties.backend_response_body.id,
+    data_stream.dataset == "azure_ai_foundry.logs" AND data_stream.type == "logs" AND azure.ai_foundry.category IN ("Audit", "RequestResponse") AND azure.resource.id IS NOT NULL, azure.resource.id,
     null
   )`,
     },
