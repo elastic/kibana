@@ -453,8 +453,9 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
           value={mappings}
           compressed
           fieldEditDisplay="inline"
-          showFieldSearch={false}
-          allowMultiFields={false}
+          {...(isFlow396
+            ? { showFieldSearch: false as const, allowMultiFields: false as const }
+            : {})}
           fieldsDescription={fieldsDescription}
           afterFieldsDescription={timestampFieldMappingSection}
           showFieldRename={isFlow396}

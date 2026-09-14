@@ -115,6 +115,42 @@ export const buildDatasetRequestText = (values: DatasetWizardFormValues): string
   return `${endpoint}\n${body}`;
 };
 
+const getEffectiveWizardSettings = (
+  settings: DatasetWizardFormValues['settings'],
+  customJson?: string
+): DatasetWizardFormValues['settings'] =>
+  customJson ? applyCustomJsonToFormSettings(settings, customJson) : settings;
+
+const getReviewFlow396LogisticsSettingBadge = (
+  flowVariant: DatasetWizardFlowVariant
+): ReviewSettingBadge | undefined =>
+  isDatasetWizardFlow396(flowVariant) ? 'modified' : undefined;
+
+const getReviewFormatRow = (
+  format: Exclude<DatasetWizardFormValues['settings']['format'], ''>,
+  resource: string,
+  flowVariant: DatasetWizardFlowVariant = DATASET_WIZARD_FLOW_VARIANT_2
+): ReviewSummaryRow => {
+  const flow396Badge = getReviewFlow396LogisticsSettingBadge(flowVariant);
+  if (flow396Badge) {
+    return {
+      label: createDatasetFlyoutStrings.settingsFormatLabel(),
+      displayValue: getFormatLabel(format),
+      badge: flow396Badge,
+    };
+  }
+
+  const inferredFormat = inferFormatFromResource(resource);
+  const formatBadge =
+    inferredFormat && inferredFormat === format ? undefined : ('modified' as const);
+
+  return {
+    label: createDatasetFlyoutStrings.settingsFormatLabel(),
+    displayValue: getFormatLabel(format),
+    ...(formatBadge ? { badge: formatBadge } : {}),
+  };
+};
+
 const getFormatLabel = (
   format: Exclude<DatasetWizardFormValues['settings']['format'], ''>
 ): string => {
@@ -191,13 +227,24 @@ export const getReviewLogisticsRows = (
     });
   }
 
+  const effectiveSettings = getEffectiveWizardSettings(
+    values.settings,
+    values.settings_custom_json
+  );
+  const resource = values.resource.trim();
+  const logisticsSettingBadge = getReviewFlow396LogisticsSettingBadge(flowVariant);
+
+  if (isDatasetWizardFlow396(flowVariant) && effectiveSettings.format) {
+    rows.push(getReviewFormatRow(effectiveSettings.format, resource, flowVariant));
+  }
+
   // Settings asked for beside the resource are summarized with it rather than with the format
   // settings, so the summary follows the steps.
   for (const fieldId of getVisibleResourceOwnedSettingsFieldIds(
     flowVariant,
-    values.settings.partition_detection
+    effectiveSettings.partition_detection
   )) {
-    const value = values.settings[fieldId];
+    const value = effectiveSettings[fieldId];
     if (!value || value.trim() === '') {
       continue;
     }
@@ -205,6 +252,7 @@ export const getReviewLogisticsRows = (
     rows.push({
       label: getDatasetSettingsFieldLabel(fieldId),
       displayValue: formatSettingsFieldDisplayValue(fieldId, value),
+      ...(logisticsSettingBadge ? { badge: logisticsSettingBadge } : {}),
     });
   }
 
@@ -223,22 +271,13 @@ export const getReviewSettingsRows = (
     return [];
   }
 
-  const effectiveSettings = customJson
-    ? applyCustomJsonToFormSettings(settings, customJson)
-    : settings;
+  const effectiveSettings = getEffectiveWizardSettings(settings, customJson);
   const defaults = getDefaultSettingsForFormat(format);
   const isFlow396 = isDatasetWizardFlow396(flowVariant);
-  const inferredFormat = inferFormatFromResource(resource);
-  const formatBadge =
-    inferredFormat && inferredFormat === format ? undefined : ('modified' as const);
 
-  const rows: ReviewSummaryRow[] = [
-    {
-      label: createDatasetFlyoutStrings.settingsFormatLabel(),
-      displayValue: getFormatLabel(format),
-      ...(formatBadge ? { badge: formatBadge } : {}),
-    },
-  ];
+  const rows: ReviewSummaryRow[] = isFlow396
+    ? []
+    : [getReviewFormatRow(format, resource, flowVariant)];
 
   for (const fieldId of DATASET_SETTINGS_FIELD_IDS) {
     if (excludeFieldIds.includes(fieldId)) {
@@ -326,9 +365,10 @@ export const getReviewSchemaMappingRows = (
   }
 
   if (isDatasetWizardFlow396(flowVariant)) {
-    const effectiveSettings = values.settings_custom_json
-      ? applyCustomJsonToFormSettings(values.settings, values.settings_custom_json)
-      : values.settings;
+    const effectiveSettings = getEffectiveWizardSettings(
+      values.settings,
+      values.settings_custom_json
+    );
     const format = effectiveSettings.format;
 
     if (format) {

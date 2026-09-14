@@ -269,10 +269,20 @@ describe('review_step_utils', () => {
 
     expect(logisticsRows).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ label: 'Partition detection', displayValue: 'Hive' }),
+        expect.objectContaining({
+          label: 'Format',
+          displayValue: 'Parquet',
+          badge: 'modified',
+        }),
+        expect.objectContaining({
+          label: 'Partition detection',
+          displayValue: 'Hive',
+          badge: 'modified',
+        }),
       ])
     );
     expect(logisticsRows.map(({ label }) => label)).not.toContain('Partition path');
+    expect(settingsRows.map(({ label }) => label)).not.toContain('Format');
     expect(settingsRows.map(({ label }) => label)).not.toContain('Partition detection');
     expect(settingsRows.map(({ label }) => label)).not.toContain('Partition path');
   });
@@ -462,6 +472,34 @@ describe('review_step_utils', () => {
     const delimiterRow = rows.find((row) => row.displayValue === 'Comma (,)');
 
     expect(delimiterRow?.badge).toBe('modified');
+  });
+
+  it('summarizes format on the define-dataset column in Flow 3 9.6', () => {
+    const values = {
+      ...emptyDatasetWizardFormValues(),
+      resource: 's3://obs-logs-prod/**/*.csv',
+      settings: applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'csv'),
+    };
+
+    const logisticsRows = getReviewLogisticsRows(
+      values,
+      [s3DataSource],
+      DATASET_WIZARD_FLOW_VARIANT_3_9_6
+    );
+    const settingsRows = getReviewSettingsRows(
+      values.settings,
+      values.resource,
+      undefined,
+      getReviewAdditionalSettingsExcludeFieldIds(DATASET_WIZARD_FLOW_VARIANT_3_9_6),
+      DATASET_WIZARD_FLOW_VARIANT_3_9_6
+    );
+
+    expect(logisticsRows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ label: 'Format', displayValue: 'CSV', badge: 'modified' }),
+      ])
+    );
+    expect(settingsRows.map(({ label }) => label)).not.toContain('Format');
   });
 
   it('summarizes schema mapping settings on the schema review column in Flow 3 9.6', () => {
