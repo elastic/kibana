@@ -1337,9 +1337,11 @@ export class DashboardApp {
     await this.page.keyboard.press(selectAll);
     await this.page.keyboard.type(url);
 
-    if (openInNewTab) {
-      await this.page.testSubj.click('urlDrilldownAdditionalOptions');
-      await this.page.testSubj.click('urlDrilldownOpenInNewTab');
+    await this.page.testSubj.click('urlDrilldownAdditionalOptions');
+    const openInNewTabSwitch = this.page.testSubj.locator('urlDrilldownOpenInNewTab');
+    const isOpenInNewTab = (await openInNewTabSwitch.getAttribute('aria-checked')) === 'true';
+    if (isOpenInNewTab !== openInNewTab) {
+      await openInNewTabSwitch.click();
     }
 
     await this.selectDrilldownTriggerAndSubmit(trigger);
