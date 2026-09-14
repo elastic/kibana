@@ -34,14 +34,20 @@ export const memory: SchemaBasedAggregations = {
         buckets_path: 'memory_utilization_used.avg',
       },
     },
+    memory_utilization_used_stats: {
+      stats_bucket: {
+        buckets_path: 'memory_utilization_used.avg',
+      },
+    },
     memory: {
       bucket_script: {
         buckets_path: {
+          memoryUsedCount: 'memory_utilization_used_stats.count',
           memoryUsedTotal: 'memory_utilization_used_total',
         },
         // Align with semconv Lens formula and avoid nulling memory usage when
         // optional buffered/slab states are not reported.
-        script: 'params.memoryUsedTotal',
+        script: 'params.memoryUsedCount > 0 ? params.memoryUsedTotal : null',
         gap_policy: 'skip',
       },
     },

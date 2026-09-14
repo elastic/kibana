@@ -52,39 +52,53 @@ export const CreatePacksResponse = lazySchema(() =>
       /**
        * The saved object ID of the pack.
        */
-      saved_object_id: z.string(),
+      saved_object_id: z.string().describe('The saved object ID of the pack.'),
       name: PackName,
       description: PackDescriptionOrUndefined.optional(),
       queries: ObjectQueries.optional(),
       /**
        * The pack version number.
        */
-      version: z.number().int().optional(),
+      version: z.number().int().optional().describe('The pack version number.'),
       enabled: EnabledOrUndefined.optional(),
       /**
        * The date and time the pack was created.
        */
-      created_at: z.string().datetime().optional(),
+      created_at: z
+        .string()
+        .datetime()
+        .optional()
+        .describe('The date and time the pack was created.'),
       /**
        * The user who created the pack.
        */
-      created_by: z.string().nullable().optional(),
+      created_by: z.string().nullable().optional().describe('The user who created the pack.'),
       /**
        * The profile UID of the user who created the pack.
        */
-      created_by_profile_uid: z.string().optional(),
+      created_by_profile_uid: z
+        .string()
+        .optional()
+        .describe('The profile UID of the user who created the pack.'),
       /**
        * The date and time the pack was last updated.
        */
-      updated_at: z.string().datetime().optional(),
+      updated_at: z
+        .string()
+        .datetime()
+        .optional()
+        .describe('The date and time the pack was last updated.'),
       /**
        * The user who last updated the pack.
        */
-      updated_by: z.string().nullable().optional(),
+      updated_by: z.string().nullable().optional().describe('The user who last updated the pack.'),
       /**
        * The profile UID of the user who last updated the pack.
        */
-      updated_by_profile_uid: z.string().optional(),
+      updated_by_profile_uid: z
+        .string()
+        .optional()
+        .describe('The profile UID of the user who last updated the pack.'),
       policy_ids: PolicyIdsOrUndefined.optional(),
       /**
        * Shard configuration as an array of key-value pairs.
@@ -96,7 +110,8 @@ export const CreatePacksResponse = lazySchema(() =>
             value: z.number().optional(),
           })
         )
-        .optional(),
+        .optional()
+        .describe('Shard configuration as an array of key-value pairs.'),
       schedule_type: ScheduleType.optional(),
       interval: PackInterval.optional(),
       rrule_schedule: RRuleScheduleConfig.optional(),

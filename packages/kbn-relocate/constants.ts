@@ -49,6 +49,7 @@ export const EXCLUDED_FOLDERS = [
   './.native_modules',
   './.node_binaries',
   './.vscode',
+  './.pnpm-store',
   './.yarn-local-mirror',
   './build',
   './core_http.codeql',
