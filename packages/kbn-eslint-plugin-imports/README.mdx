@@ -27,6 +27,10 @@ This rule is not configurable, should never be skipped, and is auto-fixable.
 
 If a valid import request can't be resolved for some reason please reach out to Kibana Operations to work on either a different strategy for the import or help updating the resolve to support the new import strategy.
 
+## `@kbn/imports/no_quarantined_imports`
+
+This rule blocks imports of quarantined packages outside their allowlisted files. Config lives in `@kbn/dependency-quarantine` (`packages/kbn-dependency-quarantine/configs/`). Expanding an allowlist requires review from `@elastic/kibana-security`. `eslint-disable` comments do not apply to this rule.
+
 ## `@kbn/imports/uniform_imports`
 
 This rule validates that every import request in the repository follows a standard set of formatting rules. See the rule implementation for a full breakdown but here is a brief summary:

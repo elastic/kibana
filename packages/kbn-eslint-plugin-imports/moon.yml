@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/repo-info'
   - '@kbn/repo-packages'
   - '@kbn/projects-solutions-groups'
+  - '@kbn/dependency-quarantine'
 tags:
   - shared-common
   - package

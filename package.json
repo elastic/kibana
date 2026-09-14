@@ -1802,6 +1802,7 @@
     "@kbn/cypress-config": "workspace:*",
     "@kbn/cypress-test-helper": "workspace:*",
     "@kbn/dependency-ownership": "workspace:*",
+    "@kbn/dependency-quarantine": "workspace:*",
     "@kbn/dependency-usage": "workspace:*",
     "@kbn/detections-response-ftr-services": "workspace:*",
     "@kbn/dev": "workspace:*",
