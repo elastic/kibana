@@ -95,7 +95,6 @@ export default function ({ getService }: FtrProviderContext) {
             queryActivity: ['all', 'read', 'minimal_all', 'minimal_read'],
             maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
             streams: ['all', 'read', 'minimal_all', 'minimal_read'],
-            nightshift: ['all', 'read', 'minimal_all', 'minimal_read'],
             dataQuality: ['all', 'read', 'minimal_all', 'minimal_read'],
             manageReporting: ['all', 'read', 'minimal_all', 'minimal_read'],
             alerting_v2_rules: ['all', 'read', 'minimal_all', 'minimal_read'],
