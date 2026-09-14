@@ -310,8 +310,8 @@ describe('SchemaMappingsStep flow 3 9.6', () => {
     expect(getByTestId('datasetWizardInferredSchemaMappingsEditor')).toBeInTheDocument();
   });
 
-  it('offers dynamic fields as the first schema setting and explains what it does', async () => {
-    const { getByTestId } = render(
+  it('does not render dynamic fields inside schema settings in flow 3 9.6', () => {
+    const { getByTestId, queryByTestId } = render(
       <TestHarness
         dataSources={[s3DataSource]}
         dataSource="s3-source"
@@ -326,27 +326,11 @@ describe('SchemaMappingsStep flow 3 9.6', () => {
       />
     );
 
-    const setting = getByTestId('datasetWizardDynamicFieldsSetting');
-    const toggle = getByTestId('datasetWizardDynamicFieldsEnabled');
-
-    expect(getByTestId('datasetWizardSchemaMappingSettings')).toContainElement(setting);
     expect(
-      setting.compareDocumentPosition(getByTestId('datasetWizardSettingsSchemaSampleSize')) &
-        Node.DOCUMENT_POSITION_FOLLOWING
-    ).toBeTruthy();
-    expect(toggle).toBeChecked();
-    expect(setting).toHaveTextContent(
-      'Fields that are not mapped will remain dynamic and will be inferred at query time.'
-    );
-
-    fireEvent.click(toggle);
-
-    await waitFor(() => {
-      expect(toggle).not.toBeChecked();
-      expect(setting).toHaveTextContent(
-        'Only mapped fields will be used. Unmapped fields will not be inferred at query time.'
-      );
-    });
+      queryByTestId('datasetWizardDynamicFieldsEnabled', {
+        container: getByTestId('datasetWizardSchemaMappingSettings'),
+      })
+    ).toBeNull();
   });
 
   it('groups the schema mapping settings in a section that opens by default', () => {

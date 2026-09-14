@@ -17,10 +17,8 @@ import { mainTranslations } from './main_i18n';
 import { DataSourcesTabContent } from './data_sources_tab_content';
 import { DatasetsTabContent } from './datasets_tab_content';
 import type { DataFederationKibanaServices } from './types';
+import { ESQL_DATA_FEDERATION_DOCUMENTATION_URL } from './data_federation_documentation_urls';
 import { useLoadList } from './use_load_list';
-
-const DATA_FEDERATION_DOCS_URL =
-  'https://www.elastic.co/docs/reference/query-languages/esql/esql-data-federation';
 
 export const DataFederationHome: FunctionComponent = () => {
   const location = useLocation();
@@ -148,7 +146,7 @@ export const DataFederationHome: FunctionComponent = () => {
         badges={headerBadges}
         description={{
           text: mainTranslations.pageDescription,
-          learnMoreUrl: DATA_FEDERATION_DOCS_URL,
+          learnMoreUrl: ESQL_DATA_FEDERATION_DOCUMENTATION_URL,
           fullWidth: true,
         }}
         tabs={headerTabs}

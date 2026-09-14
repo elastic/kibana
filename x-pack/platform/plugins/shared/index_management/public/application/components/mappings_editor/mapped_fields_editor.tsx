@@ -27,6 +27,9 @@ export interface MappedFieldsEditorProps {
   compressed?: boolean;
   fieldEditDisplay?: 'flyout' | 'inline';
   fieldsDescription?: React.ReactNode;
+  afterFieldsDescription?: React.ReactNode;
+  showFieldSearch?: boolean;
+  allowMultiFields?: boolean;
   showFieldRename?: boolean;
   fieldSourceNames?: Record<string, string>;
   onFieldSourceNameChange?: (change: FieldSourceNameChange) => void;
@@ -41,6 +44,9 @@ export const MappedFieldsEditor = React.memo(
     compressed,
     fieldEditDisplay,
     fieldsDescription,
+    afterFieldsDescription,
+    showFieldSearch = true,
+    allowMultiFields = true,
     showFieldRename,
     fieldSourceNames,
     onFieldSourceNameChange,
@@ -77,6 +83,7 @@ export const MappedFieldsEditor = React.memo(
         docLinks,
         indexSettings: indexSettings ?? {},
         fieldEditDisplay,
+        allowMultiFields,
         showFieldRename,
         fieldSourceNames,
         onFieldSourceNameChange: showFieldRename ? stableOnFieldSourceNameChange : undefined,
@@ -86,6 +93,7 @@ export const MappedFieldsEditor = React.memo(
       docLinks,
       indexSettings,
       fieldEditDisplay,
+      allowMultiFields,
       showFieldRename,
       fieldSourceNames,
       stableOnFieldSourceNameChange,
@@ -112,12 +120,14 @@ export const MappedFieldsEditor = React.memo(
                 onSearchChange={onSearchChange}
                 compressed={compressed}
                 description={fieldsDescription}
+                showFieldSearch={showFieldSearch}
               />
-              <EuiSpacer size="m" />
+              {afterFieldsDescription}
+              {afterFieldsDescription ? null : <EuiSpacer size="m" />}
             </>
           }
           searchResultComponent={
-            state.search.term.trim() !== '' ? (
+            showFieldSearch && state.search.term.trim() !== '' ? (
               <SearchResult
                 result={state.search.result}
                 documentFieldsState={state.documentFields}

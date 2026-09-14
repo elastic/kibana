@@ -25,7 +25,6 @@ import {
   isDatasetWizardFlow396,
 } from '../dataset_wizard_flow_variant';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
-import { DynamicFieldsSetting } from '../dynamic_fields_setting';
 import type { DatasetWizardFormValues, SchemaMappingMode } from '../dataset_wizard_form_state';
 import { emptyDatasetWizardFormValues } from '../dataset_wizard_form_state';
 import { getSchemaMappingSettingsFieldIds } from '../schema_mapping_settings_fields';
@@ -86,6 +85,8 @@ export const SchemaMappingsStepFlow2: FunctionComponent<SchemaMappingsStepProps>
   const isFlow396 = isDatasetWizardFlow396(flowVariant);
   const format = useWatch({ control, name: 'settings.format' }) as DatasetFormatFormValue;
   const errorMode = useWatch({ control, name: 'settings.error_mode' });
+  const dynamicFieldsEnabled = useWatch({ control, name: 'dynamic_fields_enabled' });
+  const isTimestampMappingRequired = dynamicFieldsEnabled === false;
   const hasFormatSelected = isKnownFormat(format);
   const schemaMappingSettingsFields = useMemo(
     () =>
@@ -175,22 +176,18 @@ export const SchemaMappingsStepFlow2: FunctionComponent<SchemaMappingsStepProps>
             dataTestSubj="datasetWizardSchemaSettingsAccordion"
             fieldsDataTestSubj="datasetWizardSchemaMappingSettings"
           >
-            <DynamicFieldsSetting control={control} />
             {hasFormatSelected && schemaMappingSettingsFields.length > 0 ? (
-              <>
-                <EuiSpacer size="m" />
-                <DatasetSettingDefaultHintsProvider format={format} isEnabled>
-                  <DatasetSettingsFieldsLayout
-                    control={control}
-                    fields={schemaMappingSettingsFields}
-                    testSubjPrefix="datasetWizard"
-                    columns={1}
-                    rowSpacerSize="m"
-                    constrainWidth={false}
-                    variant="step"
-                  />
-                </DatasetSettingDefaultHintsProvider>
-              </>
+              <DatasetSettingDefaultHintsProvider format={format} isEnabled>
+                <DatasetSettingsFieldsLayout
+                  control={control}
+                  fields={schemaMappingSettingsFields}
+                  testSubjPrefix="datasetWizard"
+                  columns={1}
+                  rowSpacerSize="m"
+                  constrainWidth={false}
+                  variant="step"
+                />
+              </DatasetSettingDefaultHintsProvider>
             ) : null}
           </DatasetSettingsSectionAccordion>
         </>
@@ -203,6 +200,7 @@ export const SchemaMappingsStepFlow2: FunctionComponent<SchemaMappingsStepProps>
             control={control}
             flowVariant={flowVariant}
             inferredFields={automaticSchemaSampleFields}
+            isTimestampMappingRequired={isTimestampMappingRequired}
           />
         </div>
       ) : (

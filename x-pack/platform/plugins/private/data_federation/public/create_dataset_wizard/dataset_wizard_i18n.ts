@@ -599,6 +599,11 @@ export const datasetWizardStrings = {
       defaultMessage: 'Enabled',
     }),
 
+  mappedFieldsDynamicFieldsToggleLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.mappedFieldsDynamicFieldsToggleLabel', {
+      defaultMessage: 'Dynamic fields',
+    }),
+
   dynamicFieldsDisabled: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.dynamicFieldsDisabled', {
       defaultMessage:
@@ -608,6 +613,65 @@ export const datasetWizardStrings = {
   mappedFieldsTitle: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.mappedFieldsTitle', {
       defaultMessage: 'Mapped fields (optional)',
+    }),
+
+  timestampMappingSectionTitle: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.timestampMappingSectionTitle', {
+      defaultMessage: 'Timestamp field',
+    }),
+
+  timestampMappingRequiredBadge: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.timestampMappingRequiredBadge', {
+      defaultMessage: 'Required',
+    }),
+
+  timestampMappingRecommendedBadge: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.timestampMappingRecommendedBadge', {
+      defaultMessage: 'Recommended',
+    }),
+
+  timestampMappingTypeLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.timestampMappingTypeLabel', {
+      defaultMessage: 'Field type',
+    }),
+
+  timestampMappingTypeOptionLabel: (type: 'date' | 'date_nanos') =>
+    type === 'date_nanos'
+      ? i18n.translate('xpack.dataFederation.datasetWizard.timestampMappingTypeDateNanosLabel', {
+          defaultMessage: 'Date nanoseconds',
+        })
+      : i18n.translate('xpack.dataFederation.datasetWizard.timestampMappingTypeDateLabel', {
+          defaultMessage: 'Date',
+        }),
+
+  timestampMappingPathLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.timestampMappingPathLabel', {
+      defaultMessage: 'Path',
+    }),
+
+  timestampMappingPathHelp: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.timestampMappingPathHelp', {
+      defaultMessage: 'Source column or JSON path.',
+    }),
+
+  timestampMappingPathPlaceholder: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.timestampMappingPathPlaceholder', {
+      defaultMessage: 'e.g. event_time or $.@timestamp',
+    }),
+
+  timestampMappingFormatLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.timestampMappingFormatLabel', {
+      defaultMessage: 'Format',
+    }),
+
+  timestampMappingFormatHelp: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.timestampMappingFormatHelp', {
+      defaultMessage: 'Pattern for text timestamps.',
+    }),
+
+  timestampMappingFormatPlaceholder: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.timestampMappingFormatPlaceholder', {
+      defaultMessage: 'e.g. yyyy-MM-dd HH:mm:ss.SSS',
     }),
 
   mapFieldButton: () =>

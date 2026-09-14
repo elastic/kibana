@@ -8,6 +8,7 @@
 import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
 import { EuiProvider } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
 import type { MappedFieldsEditorProps } from '@kbn/index-management-shared-types';
@@ -25,6 +26,8 @@ import { InferredSchemaMappingsEditor } from './inferred_schema_mappings_editor'
 const FakeMappedFieldsEditor: FunctionComponent<MappedFieldsEditorProps> = ({
   value,
   onChange,
+  fieldsDescription,
+  afterFieldsDescription,
 }) => {
   const [mappings, setMappings] = useState(value ?? {});
   const [isCreateFieldFormOpen, setIsCreateFieldFormOpen] = useState(false);
@@ -62,6 +65,10 @@ const FakeMappedFieldsEditor: FunctionComponent<MappedFieldsEditorProps> = ({
 
   return (
     <div>
+      {fieldsDescription ? (
+        <div data-test-subj="fakeMappedFieldsDescription">{fieldsDescription}</div>
+      ) : null}
+      {afterFieldsDescription}
       <div data-test-subj="fakeMappedFieldsValue">{JSON.stringify(mappings)}</div>
       {Object.keys(properties).map((name) => (
         <button
@@ -121,14 +128,16 @@ const TestHarness = ({
 
   return (
     <EuiProvider>
-      <InferredSchemaMappingsEditor
-        control={control}
-        flowVariant={flowVariant}
-        inferredFields={inferredFields}
-      />
-      <span data-test-subj="automaticFieldTypesValue">
-        {JSON.stringify(watch('automatic_field_types'))}
-      </span>
+      <I18nProvider>
+        <InferredSchemaMappingsEditor
+          control={control}
+          flowVariant={flowVariant}
+          inferredFields={inferredFields}
+        />
+        <span data-test-subj="automaticFieldTypesValue">
+          {JSON.stringify(watch('automatic_field_types'))}
+        </span>
+      </I18nProvider>
     </EuiProvider>
   );
 };
@@ -284,29 +293,46 @@ describe('InferredSchemaMappingsEditor', () => {
 
     await waitFor(() => {
       expect(getByTestId('createFieldForm')).toBeInTheDocument();
-      expect(queryByTestId('datasetWizardAddField')).toBeNull();
+      expect(getByTestId('datasetWizardAddField')).toHaveAttribute('aria-hidden', 'true');
     });
 
     fireEvent.click(getByTestId('fakeConfirmAddField'));
 
     await waitFor(() => {
       expect(queryByTestId('createFieldForm')).toBeNull();
-      expect(getByTestId('datasetWizardAddField')).toBeInTheDocument();
+      expect(getByTestId('datasetWizardAddField')).not.toHaveAttribute('aria-hidden', 'true');
       expect(getByTestId('automaticFieldTypesValue')).toHaveTextContent(
         JSON.stringify({ manual_field: 'keyword' })
       );
     });
   });
 
-  it('leaves the dynamic fields section to the schema settings in flow 3 9.6', () => {
+  it('renders the dynamic fields toggle on the mapped fields accordion in flow 3 9.6', async () => {
     const { getByTestId, queryByTestId } = render(
       <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />
     );
 
+    const accordion = getByTestId('datasetWizardMappedFieldsAccordion');
+    const toggle = getByTestId('datasetWizardDynamicFieldsEnabled');
+
     expect(getByTestId('datasetWizardMappedFields')).toBeInTheDocument();
+    expect(accordion).toContainElement(toggle);
+    expect(queryByTestId('datasetWizardDynamicFieldsSetting')).toBeNull();
     expect(queryByTestId('datasetWizardDynamicFields')).toBeNull();
-    expect(queryByTestId('datasetWizardDynamicFieldsEnabled')).toBeNull();
     expect(queryByTestId('datasetWizardInferSchema')).toBeNull();
     expect(queryByTestId('datasetWizardDynamicFieldsTable')).toBeNull();
+    expect(toggle).toBeChecked();
+    expect(getByTestId('fakeMappedFieldsDescription')).toHaveTextContent(
+      'Fields that are not mapped will remain dynamic and will be inferred at query time.'
+    );
+
+    fireEvent.click(toggle);
+
+    await waitFor(() => {
+      expect(toggle).not.toBeChecked();
+      expect(getByTestId('fakeMappedFieldsDescription')).toHaveTextContent(
+        'Only mapped fields will be used. Unmapped fields will not be inferred at query time.'
+      );
+    });
   });
 });

@@ -13,7 +13,6 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
@@ -28,7 +27,6 @@ import type {
   FieldSourceNameChange,
   MappedFieldsEditorProps,
 } from '@kbn/index-management-shared-types';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 import { debounce } from 'lodash';
@@ -50,11 +48,13 @@ import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
 import { formatMappedFieldTypeLabel } from '../inferred_field_type_options';
 import type { TestConfigurationPreviewField } from '../test_configuration_preview_utils';
+import { TimestampFieldMappingSection } from '../timestamp_field_mapping_section';
 
 export interface InferredSchemaMappingsEditorProps {
   control: Control<DatasetWizardFormValues>;
   flowVariant: DatasetWizardFlowVariant;
   inferredFields: readonly TestConfigurationPreviewField[];
+  isTimestampMappingRequired?: boolean;
 }
 
 interface DynamicFieldRow {
@@ -62,6 +62,19 @@ interface DynamicFieldRow {
   name: string;
   type: string;
 }
+
+const areStringRecordsEqual = (
+  left: Record<string, string>,
+  right: Record<string, string>
+): boolean => {
+  const leftKeys = Object.keys(left);
+
+  if (leftKeys.length !== Object.keys(right).length) {
+    return false;
+  }
+
+  return leftKeys.every((key) => left[key] === right[key]);
+};
 
 const DynamicFieldsTable: FunctionComponent<{
   items: DynamicFieldRow[];
@@ -129,21 +142,9 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
   control,
   flowVariant,
   inferredFields,
+  isTimestampMappingRequired = false,
 }) => {
   const isFlow396 = isDatasetWizardFlow396(flowVariant);
-  const fieldsDescription = useMemo(
-    () =>
-      isFlow396 ? (
-        <FormattedMessage
-          id="xpack.dataFederation.datasetWizard.schemaMappingsFieldsAdditionalDescription"
-          defaultMessage="Mapping your timestamp field and renaming it to {timestampField} is recommended."
-          values={{
-            timestampField: <EuiCode>@timestamp</EuiCode>,
-          }}
-        />
-      ) : undefined,
-    [isFlow396]
-  );
   const { euiTheme } = useEuiTheme();
   /** Holds the header row still while the button gives way to the inline add form. */
   const mappedFieldsHeaderCss = css`
@@ -170,6 +171,16 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
     name: 'dynamic_fields_enabled',
   });
   const isDynamicEnabled = dynamicFieldsEnabledField.value !== false;
+
+  const fieldsDescription = useMemo(() => {
+    if (!isFlow396) {
+      return undefined;
+    }
+
+    return isDynamicEnabled
+      ? datasetWizardStrings.dynamicFieldsEnabledHelp()
+      : datasetWizardStrings.dynamicFieldsDisabled();
+  }, [isDynamicEnabled, isFlow396]);
 
   const [schemaEditorKey, setSchemaEditorKey] = useState(0);
   const [isAddFieldFormOpen, setIsAddFieldFormOpen] = useState(false);
@@ -233,18 +244,28 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
     ({ getData }) => {
       const nextMappings = (getData() ?? {}) as Record<string, unknown>;
       const nextFieldTypes = mappingsToAutomaticFieldTypes(nextMappings);
-      latestFieldTypesRef.current = nextFieldTypes;
-      setMappedFieldTypes(nextFieldTypes);
-      debouncedSyncToForm(nextFieldTypes);
+      const fieldTypesChanged = !areStringRecordsEqual(
+        nextFieldTypes,
+        latestFieldTypesRef.current
+      );
 
-      if (isFlow396) {
+      if (fieldTypesChanged) {
+        latestFieldTypesRef.current = nextFieldTypes;
+        setMappedFieldTypes(nextFieldTypes);
+        debouncedSyncToForm(nextFieldTypes);
+      }
+
+      if (isFlow396 && fieldTypesChanged) {
         const nextSourceNames = pruneAutomaticFieldSourceNames(
           nextFieldTypes,
           latestFieldSourceNamesRef.current
         );
-        latestFieldSourceNamesRef.current = nextSourceNames;
-        setMappedFieldSourceNames(nextSourceNames);
-        syncSourceNamesRef.current(nextSourceNames);
+
+        if (!areStringRecordsEqual(nextSourceNames, latestFieldSourceNamesRef.current)) {
+          latestFieldSourceNamesRef.current = nextSourceNames;
+          setMappedFieldSourceNames(nextSourceNames);
+          syncSourceNamesRef.current(nextSourceNames);
+        }
       }
     },
     [debouncedSyncToForm, isFlow396]
@@ -303,10 +324,20 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
   );
 
   const handleAddField = useCallback(() => {
-    // The inline form opens inside the section, so a collapsed one would swallow it.
-    setIsMappedFieldsOpen(true);
+    // Flow 3 9.6 keeps Add field inside the section; earlier flows expose it in the header.
+    if (!isFlow396) {
+      setIsMappedFieldsOpen(true);
+    }
     addFieldButtonRef.current?.click();
-  }, []);
+  }, [isFlow396]);
+
+  const timestampFieldMappingSection = useMemo(
+    () =>
+      isFlow396 ? (
+        <TimestampFieldMappingSection isRequired={isTimestampMappingRequired} />
+      ) : undefined,
+    [isFlow396, isTimestampMappingRequired]
+  );
 
   useEffect(() => {
     const root = containerRef.current;
@@ -362,6 +393,26 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
     };
   }, [schemaEditorKey]);
 
+  const mappedFieldsAddFieldButtonHiddenCss = css`
+    visibility: hidden;
+    pointer-events: none;
+  `;
+
+  const mappedFieldsAddFieldButton = (
+    <EuiButton
+      iconType="plusCircle"
+      color="primary"
+      size="s"
+      data-test-subj="datasetWizardAddField"
+      onClick={handleAddField}
+      css={isAddFieldFormOpen ? mappedFieldsAddFieldButtonHiddenCss : undefined}
+      tabIndex={isAddFieldFormOpen ? -1 : undefined}
+      aria-hidden={isAddFieldFormOpen}
+    >
+      {datasetWizardStrings.addFieldButton()}
+    </EuiButton>
+  );
+
   return (
     <div
       ref={containerRef}
@@ -376,22 +427,23 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
         id={mappedFieldsAccordionId}
         title={datasetWizardStrings.mappedFieldsTitle()}
         contentLayout="plain"
-        forceState={isMappedFieldsOpen ? 'open' : 'closed'}
-        onToggle={setIsMappedFieldsOpen}
+        initialIsOpen={isFlow396 ? true : isMappedFieldsOpen}
+        forceState={isFlow396 ? undefined : isMappedFieldsOpen ? 'open' : 'closed'}
+        onToggle={isFlow396 ? undefined : setIsMappedFieldsOpen}
         extraAction={
-          <div css={mappedFieldsHeaderCss}>
-            {!isAddFieldFormOpen ? (
-              <EuiButton
-                iconType="plusCircle"
-                color="primary"
-                size="s"
-                data-test-subj="datasetWizardAddField"
-                onClick={handleAddField}
-              >
-                {datasetWizardStrings.addFieldButton()}
-              </EuiButton>
-            ) : null}
-          </div>
+          isFlow396 ? (
+            <EuiSwitch
+              compressed
+              label={datasetWizardStrings.mappedFieldsDynamicFieldsToggleLabel()}
+              checked={isDynamicEnabled}
+              onChange={(event) => {
+                dynamicFieldsEnabledField.onChange(event.target.checked);
+              }}
+              data-test-subj="datasetWizardDynamicFieldsEnabled"
+            />
+          ) : (
+            <div css={mappedFieldsHeaderCss}>{mappedFieldsAddFieldButton}</div>
+          )
         }
         dataTestSubj="datasetWizardMappedFieldsAccordion"
         fieldsDataTestSubj="datasetWizardMappedFields"
@@ -401,15 +453,18 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
           value={mappings}
           compressed
           fieldEditDisplay="inline"
+          showFieldSearch={false}
+          allowMultiFields={false}
           fieldsDescription={fieldsDescription}
+          afterFieldsDescription={timestampFieldMappingSection}
           showFieldRename={isFlow396}
           fieldSourceNames={mappedFieldSourceNames}
           onFieldSourceNameChange={isFlow396 ? handleFieldSourceNameChange : undefined}
           onChange={onMappingsChange}
         />
+        {isFlow396 ? mappedFieldsAddFieldButton : null}
       </DatasetSettingsSectionAccordion>
 
-      {/* Flow 3 9.6 offers this as a setting on the schema settings section instead. */}
       {!isFlow396 ? (
         <>
           <EuiSpacer size="xl" />

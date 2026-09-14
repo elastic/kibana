@@ -192,6 +192,12 @@ export interface MappedFieldsEditorProps {
   fieldEditDisplay?: 'flyout' | 'inline';
   /** Optional description shown above the fields list instead of the default copy. */
   fieldsDescription?: ReactNode;
+  /** Optional content rendered below the description row and above the fields list. */
+  afterFieldsDescription?: ReactNode;
+  /** When false, hides the mapped fields search control. Defaults to true. */
+  showFieldSearch?: boolean;
+  /** When false, hides actions to add multi-fields. Defaults to true. */
+  allowMultiFields?: boolean;
   /** When enabled, inline add/edit forms show separate source and display name fields. */
   showFieldRename?: boolean;
   /** Source names keyed by mapped (display) field name. */

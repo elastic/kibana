@@ -61,6 +61,9 @@ export const MappedFieldsEditorWithContext = React.memo(
     compressed,
     fieldEditDisplay,
     fieldsDescription,
+    afterFieldsDescription,
+    showFieldSearch,
+    allowMultiFields,
     showFieldRename,
     fieldSourceNames,
     onFieldSourceNameChange,
@@ -122,6 +125,9 @@ export const MappedFieldsEditorWithContext = React.memo(
                   compressed={compressed}
                   fieldEditDisplay={fieldEditDisplay}
                   fieldsDescription={fieldsDescription}
+                  afterFieldsDescription={afterFieldsDescription}
+                  showFieldSearch={showFieldSearch}
+                  allowMultiFields={allowMultiFields}
                   showFieldRename={showFieldRename}
                   fieldSourceNames={fieldSourceNames}
                   onFieldSourceNameChange={onFieldSourceNameChange}

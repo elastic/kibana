@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 
+import { ESQL_DATA_FEDERATION_DATA_SOURCES_DOCUMENTATION_URL } from '../data_federation_documentation_urls';
+import { mainTranslations } from '../main_i18n';
 import { datasetWizardStrings } from './dataset_wizard_i18n';
 
 export const ExistingDataSourceAuthNotice = ({ show }: { show: boolean }) => {
@@ -25,7 +27,17 @@ export const ExistingDataSourceAuthNotice = ({ show }: { show: boolean }) => {
         title={datasetWizardStrings.existingDataSourceAuthNoticeTitle()}
         data-test-subj="datasetWizardExistingDataSourceAuthNotice"
       >
-        <p>{datasetWizardStrings.existingDataSourceAuthNoticeBody()}</p>
+        <p>
+          {datasetWizardStrings.existingDataSourceAuthNoticeBody()}{' '}
+          <EuiLink
+            href={ESQL_DATA_FEDERATION_DATA_SOURCES_DOCUMENTATION_URL}
+            target="_blank"
+            external
+            data-test-subj="datasetWizardExistingDataSourceAuthNoticeLearnMore"
+          >
+            {mainTranslations.docsLink}
+          </EuiLink>
+        </p>
       </EuiCallOut>
       <EuiSpacer size="m" />
     </>

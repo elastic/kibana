@@ -67,7 +67,12 @@ export const ManualSchemaMappingsEditor: FunctionComponent<ManualSchemaMappingsE
 
   return (
     <div data-test-subj="datasetWizardManualSchemaMappingsEditor">
-      <MappedFieldsEditorComponent value={mappings} onChange={onMappingsChange} />
+      <MappedFieldsEditorComponent
+        value={mappings}
+        onChange={onMappingsChange}
+        showFieldSearch={false}
+        allowMultiFields={false}
+      />
     </div>
   );
 };

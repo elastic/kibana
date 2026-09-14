@@ -17,6 +17,7 @@ interface ContextState {
   indexSettings: IndexSettings;
   docLinks?: DocLinksStart;
   fieldEditDisplay?: FieldEditDisplay;
+  allowMultiFields?: boolean;
   showFieldRename?: boolean;
   fieldSourceNames?: Record<string, string>;
   onFieldSourceNameChange?: (change: FieldSourceNameChange) => void;

@@ -60,6 +60,9 @@ export const INFERRED_FIELD_TYPE_OPTIONS = [
   ...new Set([...INDEX_MANAGEMENT_MAIN_FIELD_TYPES, ...INFERRED_CONCRETE_FIELD_TYPES]),
 ].sort((left, right) => left.localeCompare(right));
 
+/** Elasticsearch mapping types valid for @timestamp in the dataset wizard. */
+export const TIMESTAMP_FIELD_MAPPING_TYPE_OPTIONS = ['date', 'date_nanos'] as const;
+
 export type InferredFieldTypeOption = (typeof INFERRED_FIELD_TYPE_OPTIONS)[number];
 
 export const isInferredFieldTypeOption = (value: string): value is InferredFieldTypeOption =>

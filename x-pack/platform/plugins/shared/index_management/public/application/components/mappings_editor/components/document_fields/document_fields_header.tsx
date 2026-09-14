@@ -18,12 +18,22 @@ interface Props {
   onSearchChange(value: string): void;
   compressed?: boolean;
   description?: React.ReactNode;
+  showFieldSearch?: boolean;
 }
 
 export const DocumentFieldsHeader = React.memo(
-  ({ searchValue, onSearchChange, compressed, description }: Props) => {
+  ({
+    searchValue,
+    onSearchChange,
+    compressed,
+    description,
+    showFieldSearch = true,
+  }: Props) => {
     return (
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup
+        justifyContent={showFieldSearch ? 'spaceBetween' : 'flexStart'}
+        alignItems="center"
+      >
         <EuiFlexItem>
           <EuiText size="s" color="subdued">
             {description ?? (
@@ -50,11 +60,13 @@ export const DocumentFieldsHeader = React.memo(
             )}
           </EuiText>
         </EuiFlexItem>
-        <DocumentFieldsSearch
-          searchValue={searchValue}
-          onSearchChange={onSearchChange}
-          compressed={compressed}
-        />
+        {showFieldSearch ? (
+          <DocumentFieldsSearch
+            searchValue={searchValue}
+            onSearchChange={onSearchChange}
+            compressed={compressed}
+          />
+        ) : null}
       </EuiFlexGroup>
     );
   }

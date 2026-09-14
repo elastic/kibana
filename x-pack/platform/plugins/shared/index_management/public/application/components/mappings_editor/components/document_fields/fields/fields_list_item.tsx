@@ -118,7 +118,7 @@ function FieldListItemComponent(
   } = field;
   const { euiTheme } = useEuiTheme();
   const {
-    value: { showFieldRename, fieldSourceNames },
+    value: { showFieldRename, fieldSourceNames, allowMultiFields = true },
   } = useConfig();
   const styles = getListItemStyle(euiTheme);
   const sourceName = fieldSourceNames?.[source.name];
@@ -178,7 +178,7 @@ function FieldListItemComponent(
       i18nTexts;
     return (
       <EuiFlexGroup gutterSize="s" css={styles.actions}>
-        {canHaveMultiFields && (
+        {canHaveMultiFields && allowMultiFields ? (
           <EuiFlexItem grow={false}>
             <EuiToolTip content={addMultiFieldButtonLabel} disableScreenReaderOutput>
               <EuiButtonIcon
@@ -189,7 +189,7 @@ function FieldListItemComponent(
               />
             </EuiToolTip>
           </EuiFlexItem>
-        )}
+        ) : null}
 
         {canHaveChildFields && (
           <EuiFlexItem grow={false}>
