@@ -73,9 +73,18 @@ describe('installMlModel', () => {
   it('should traverse the archive exactly once for multiple models', async () => {
     const archiveIterator = createArchiveIteratorFromMap(twoModelAssetsMap);
     const traverseSpy = jest.spyOn(archiveIterator, 'traverseEntries');
-    const ctx = { ...makeContext([MODEL_A_PATH, MODEL_B_PATH], twoModelAssetsMap), archiveIterator };
+    const ctx = {
+      ...makeContext([MODEL_A_PATH, MODEL_B_PATH], twoModelAssetsMap),
+      archiveIterator,
+    };
 
-    await installMlModel(ctx as unknown as PackageInstallContext, esClient, soClient, logger, existingRefs);
+    await installMlModel(
+      ctx as unknown as PackageInstallContext,
+      esClient,
+      soClient,
+      logger,
+      existingRefs
+    );
 
     expect(traverseSpy).toHaveBeenCalledTimes(1);
   });
@@ -87,7 +96,13 @@ describe('installMlModel', () => {
     const traverseSpy = jest.spyOn(archiveIterator, 'traverseEntries');
     const ctx = { ...makeContext([MODEL_A_PATH], assetsMap), archiveIterator };
 
-    await installMlModel(ctx as unknown as PackageInstallContext, esClient, soClient, logger, existingRefs);
+    await installMlModel(
+      ctx as unknown as PackageInstallContext,
+      esClient,
+      soClient,
+      logger,
+      existingRefs
+    );
 
     const [, predicate] = traverseSpy.mock.calls[0];
     expect(predicate!(MODEL_A_PATH)).toBe(true);
@@ -116,7 +131,13 @@ describe('installMlModel', () => {
     const ctx = { ...makeContext([ilmPath], assetsMap), archiveIterator };
     const refs: EsAssetReference[] = [{ id: 'existing', type: ElasticsearchAssetType.ilmPolicy }];
 
-    const result = await installMlModel(ctx as unknown as PackageInstallContext, esClient, soClient, logger, refs);
+    const result = await installMlModel(
+      ctx as unknown as PackageInstallContext,
+      esClient,
+      soClient,
+      logger,
+      refs
+    );
 
     expect(result).toBe(refs);
     expect(traverseSpy).not.toHaveBeenCalled();
@@ -134,15 +155,14 @@ describe('installMlModel', () => {
       } as any);
     });
 
-    await expect(installMlModel(ctx, esClient, soClient, logger, existingRefs)).resolves.not.toThrow();
+    await expect(
+      installMlModel(ctx, esClient, soClient, logger, existingRefs)
+    ).resolves.not.toThrow();
     expect(esClient.ml.putTrainedModel).toHaveBeenCalledTimes(2);
   });
 
   it('should propagate non-resource_already_exists errors', async () => {
-    const ctx = makeContext(
-      [MODEL_A_PATH],
-      new Map([[MODEL_A_PATH, MODEL_A_CONTENT]])
-    );
+    const ctx = makeContext([MODEL_A_PATH], new Map([[MODEL_A_PATH, MODEL_A_CONTENT]]));
 
     esClient.ml.putTrainedModel.mockImplementationOnce(() => {
       throw new errors.ResponseError({
