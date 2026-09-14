@@ -199,7 +199,7 @@ describe('verifyCloudConnectorIacKey', () => {
     logger = loggingSystemMock.createLogger();
     jest.spyOn(appContextService, 'getLogger').mockReturnValue(logger);
     soClient.update.mockResolvedValue({} as any);
-    mockedSupported.mockReturnValue(true);
+    mockedSupported.mockResolvedValue(true);
     mockedSelections.mockResolvedValue([
       { name: 'aws', policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }] },
     ]);
@@ -207,7 +207,7 @@ describe('verifyCloudConnectorIacKey', () => {
   });
 
   it('returns matches:true without calling IaCP for unsupported providers', async () => {
-    mockedSupported.mockReturnValue(false);
+    mockedSupported.mockResolvedValue(false);
     soClient.get.mockResolvedValueOnce(connector({ cloudProvider: 'azure' }));
 
     const result = await verifyCloudConnectorIacKey(soClient, 'cc-1');
@@ -482,7 +482,7 @@ describe('verifyCloudConnectorIacKey', () => {
     });
 
     it('leaves the stored status alone for an unsupported provider', async () => {
-      mockedSupported.mockReturnValue(false);
+      mockedSupported.mockResolvedValue(false);
       soClient.get.mockResolvedValueOnce(connector({ cloudProvider: 'azure' }));
 
       await verifyCloudConnectorIacKey(soClient, 'cc-1');
@@ -536,12 +536,12 @@ describe('compareIacKey', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(appContextService, 'getLogger').mockReturnValue(loggingSystemMock.createLogger());
-    mockedSupported.mockReturnValue(true);
+    mockedSupported.mockResolvedValue(true);
     mockedResolve.mockResolvedValue(RESOLVED_AWS);
   });
 
   it('returns unsupported_provider when IaCP does not support the provider', async () => {
-    mockedSupported.mockReturnValue(false);
+    mockedSupported.mockResolvedValue(false);
     const result = await compareIacKey(
       soClient,
       { cloudProvider: 'aws', iac_key: 'sha256:old' },

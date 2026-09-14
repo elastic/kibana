@@ -15,6 +15,7 @@ import type {
   CoreStart,
   ElasticsearchClient,
   ElasticsearchServiceStart,
+  FeatureFlagsStart,
   HttpServiceSetup,
   KibanaRequest,
   Logger,
@@ -248,6 +249,7 @@ export interface FleetAppContext {
   lockManagerService?: LockManagerService;
   alertingStart?: AlertingServerStart;
   reportingStart?: ReportingStart;
+  featureFlags: FeatureFlagsStart;
 }
 
 export type FleetSetupContract = void;
@@ -860,6 +862,7 @@ export class FleetPlugin
       fleetPolicyRevisionsCleanupTask: this.fleetPolicyRevisionsCleanupTask,
       alertingStart: plugins.alerting,
       reportingStart: plugins.reporting,
+      featureFlags: core.featureFlags,
     });
     licenseService.start(plugins.licensing.license$);
     this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});

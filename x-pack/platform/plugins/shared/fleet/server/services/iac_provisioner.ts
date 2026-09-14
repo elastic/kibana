@@ -139,7 +139,7 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
     const traceId = apm.currentTransaction?.traceparent;
     const iacProvisionerConfig = appContextService.getConfig()?.iacProvisioner;
 
-    if (!isIacProvisionerEnabled()) {
+    if (!(await isIacProvisionerEnabled())) {
       throw new IacProvisionerConfigError('IaC Provisioner is not enabled');
     }
     if (!iacProvisionerConfig?.api?.url) {

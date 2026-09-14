@@ -162,7 +162,7 @@ export const compareIacKey = async (
 ): Promise<IacKeyVerificationOutcome> => {
   // The literal comparison narrows the provider for the render call; the gate adds the
   // "IaCP enabled" half.
-  if (cloudProvider !== AWS_CLOUD_PROVIDER || !isIacProvisionerSupportedFor(cloudProvider)) {
+  if (cloudProvider !== AWS_CLOUD_PROVIDER || !(await isIacProvisionerSupportedFor(cloudProvider))) {
     return 'unsupported_provider';
   }
   if (integrations.length === 0) {

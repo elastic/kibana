@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ENABLE_IAC_PROVISIONER_FLAG } from '../../../common/constants';
 import { AWS_CLOUD_PROVIDER } from '../../../common/types/models/cloud_connector';
 import type { CloudProvider } from '../../../common/types/models/cloud_connector';
 
@@ -13,7 +14,6 @@ import { appContextService } from '..';
 import { isAgentlessEnabled } from './agentless';
 
 export interface IacProvisionerConfig {
-  enabled?: boolean;
   api?: {
     url?: string;
     tls?: {
@@ -28,9 +28,22 @@ export interface IacProvisionerConfig {
  * The IaC Provisioner is only reachable from agentless-capable environments for
  * the MVP; on-prem support is pending the auth decision in
  * https://github.com/elastic/security-team/issues/18240.
+ *
+ * Runtime activation is the LaunchDarkly flag `fleet.enableIacProvisioner`
+ * (fallback false). URL and TLS stay in kibana.yml; do not read
+ * `xpack.fleet.iacProvisioner.enabled`.
  */
-export const isIacProvisionerEnabled = (): boolean => {
-  return isAgentlessEnabled() && Boolean(appContextService.getConfig()?.iacProvisioner?.enabled);
+export const isIacProvisionerEnabled = async (): Promise<boolean> => {
+  if (!isAgentlessEnabled()) {
+    return false;
+  }
+
+  const featureFlags = appContextService.getFeatureFlags();
+  if (!featureFlags) {
+    return false;
+  }
+
+  return await featureFlags.getBooleanValue(ENABLE_IAC_PROVISIONER_FLAG, false);
 };
 
 // Providers the IaC Provisioner has blueprints for. Adding one here is not enough on its own:
@@ -50,5 +63,5 @@ const IAC_PROVISIONER_SUPPORTED_PROVIDERS: readonly CloudProvider[] = [AWS_CLOUD
  * keyless Azure/GCP connectors are never flagged for an upgrade that has no dynamic template.
  * Design: https://github.com/elastic/ingest-dev/issues/9415
  */
-export const isIacProvisionerSupportedFor = (provider: CloudProvider): boolean =>
-  isIacProvisionerEnabled() && IAC_PROVISIONER_SUPPORTED_PROVIDERS.includes(provider);
+export const isIacProvisionerSupportedFor = async (provider: CloudProvider): Promise<boolean> =>
+  IAC_PROVISIONER_SUPPORTED_PROVIDERS.includes(provider) && (await isIacProvisionerEnabled());

@@ -68,7 +68,7 @@ describe('iac_upgrade_check_task', () => {
     jest
       .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
       .mockReturnValue(mockSoClient);
-    mockedEnabled.mockReturnValue(true);
+    mockedEnabled.mockResolvedValue(true);
     mockedSelections.mockResolvedValue([
       { name: 'aws', policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }] },
     ]);
@@ -100,7 +100,7 @@ describe('iac_upgrade_check_task', () => {
   });
 
   it('does nothing when IaCP is disabled', async () => {
-    mockedEnabled.mockReturnValue(false);
+    mockedEnabled.mockResolvedValue(false);
     await runIacUpgradeCheckTask(signal);
     expect(mockSoClient.createPointInTimeFinder).not.toHaveBeenCalled();
     expect(reportIacProvisionerUpgradeCheckCompleted).not.toHaveBeenCalled();

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import rison from '@kbn/rison';
@@ -64,7 +65,7 @@ export class DatasetQualityDetailsPage {
 
   constructor(private readonly page: ScoutPage) {
     this.container = page.testSubj.locator('datasetDetailsContainer');
-    this.title = page.testSubj.locator('datasetQualityDetailsTitle');
+    this.title = page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title);
     this.headerButton = page.testSubj.locator('datasetQualityDetailsHeaderButton');
     this.emptyPrompt = page.testSubj.locator('datasetQualityDetailsEmptyPrompt');
     this.qualityIssuesTable = page.testSubj.locator('datasetQualityDetailsDegradedFieldTable');

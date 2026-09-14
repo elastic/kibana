@@ -37,6 +37,8 @@ export const zodMessages = (schema: z.ZodType, input: unknown): string[] => {
  * accept/reject verdict, and — when accepted — the same decoded value, which
  * catches stripping and coercion differences the verdict alone would hide.
  */
+export const asCases = (inputs: unknown[]) => inputs.map((input) => [input]);
+
 export const expectSameOutcome = (
   ioTsCodec: t.Mixed,
   zodSchema: z.ZodType,
@@ -50,4 +52,39 @@ export const expectSameOutcome = (
   if (ioTsResult.success && zodResult.success) {
     expect(zodResult.value).toEqual(ioTsResult.value);
   }
+};
+
+export interface CodecParityCase {
+  label: string;
+  ioTs: t.Mixed;
+  zod: z.ZodType;
+  valid: unknown[];
+  invalid: unknown[];
+}
+
+export const describeCodecParity = ({
+  label,
+  ioTs,
+  zod,
+  valid,
+  invalid,
+}: CodecParityCase): void => {
+  describe(label, () => {
+    it.each(asCases(valid))('accepts and agrees on %p', (input) => {
+      expect(decode(ioTs, input).success).toBe(true);
+      expectSameOutcome(ioTs, zod, input);
+    });
+
+    it.each(asCases(invalid))('rejects and agrees on %p', (input) => {
+      expect(decode(ioTs, input).success).toBe(false);
+      expectSameOutcome(ioTs, zod, input);
+    });
+
+    const first = valid[0];
+    if (first && typeof first === 'object' && first !== null && !Array.isArray(first)) {
+      it('keeps unknown keys', () => {
+        expectSameOutcome(ioTs, zod, { ...(first as Record<string, unknown>), extraKey: 'kept' });
+      });
+    }
+  });
 };

@@ -95,7 +95,7 @@ run(
       );
 
       try {
-        await execa('yarn', ['kbn', 'bootstrap'], { cwd: REPO_ROOT, stdio: 'inherit' });
+        await execa('pnpm', ['kbn', 'bootstrap'], { cwd: REPO_ROOT, stdio: 'inherit' });
       } catch {
         log.error('[Bootstrap] Bootstrap failed. Fix it manually: yarn kbn bootstrap');
         throw createFailError('Bootstrap failed');

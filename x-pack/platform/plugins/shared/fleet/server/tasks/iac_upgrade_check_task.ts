@@ -96,7 +96,7 @@ export const runIacUpgradeCheckTask = async (
   const counts: IacUpgradeCheckCounts = { upToDate: 0, upgradeAvailable: 0, skipped: 0 };
   const startTime = Date.now();
 
-  if (!isIacProvisionerEnabled()) {
+  if (!(await isIacProvisionerEnabled())) {
     logger.debug(`${IAC_UPGRADE_CHECK_TASK} IaC Provisioner disabled, skipping`);
     return counts;
   }
