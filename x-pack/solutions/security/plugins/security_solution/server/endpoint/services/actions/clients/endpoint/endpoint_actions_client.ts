@@ -207,7 +207,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     }
 
     // Kill Process: `kill_descendants` is gated by a feature flag and requires that the
-    // Endpoint supports it (via the `kill_process_descendents` capability).
+    // Endpoint supports it (via the `kill_process_descendants` capability).
     if (
       actionRequest.command === 'kill-process' &&
       actionRequest.parameters?.kill_descendants === true
@@ -232,7 +232,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       const unsupportedAgents = endpointMetadata
         .filter(
           (endpointMeta) =>
-            !endpointMeta.Endpoint.capabilities?.includes('kill_process_descendents')
+            !endpointMeta.Endpoint.capabilities?.includes('kill_process_descendants')
         )
         .map(
           (endpointMeta) =>
