@@ -418,8 +418,7 @@
       "matchDepNames": [
         "monaco-yaml",
         "monaco-editor",
-        "monaco-promql",
-        "monaco-marker-data-provider"
+        "monaco-promql"
       ],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],

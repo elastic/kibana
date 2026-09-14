@@ -38,7 +38,7 @@ overrides:
   cheerio: 1.0.0-rc.12
   chokidar: 3.5.3
   d3-scale>d3-color: npm:@elastic/kibana-d3-color@2.0.1
-  dompurify: 3.4.1
+  dompurify: 3.4.14
   esbuild: 0.27.2
   fast-xml-parser: 5.5.7
   flatted: 3.4.2
@@ -4216,8 +4216,8 @@ importers:
         specifier: 3.6.0
         version: 3.6.0
       dompurify:
-        specifier: 3.4.1
-        version: 3.4.1
+        specifier: 3.4.14
+        version: 3.4.14
       dotenv:
         specifier: 17.4.2
         version: 17.4.2
@@ -4407,9 +4407,6 @@ importers:
       monaco-editor:
         specifier: 0.54.0
         version: 0.54.0
-      monaco-marker-data-provider:
-        specifier: 1.2.5
-        version: 1.2.5
       monaco-promql:
         specifier: 1.8.0
         version: 1.8.0
@@ -18096,8 +18093,8 @@ packages:
     resolution: {integrity: sha512-cgwlv/1iFQiFnU96XXgROh8xTeetsnJiDsTc7TYCLFd9+/WNkIqPTxiM/8pSd8VIrhXGTf1Ny1q1hquVqDJB5w==}
     engines: {node: '>= 4'}
 
-  dompurify@3.4.1:
-    resolution: {integrity: sha512-JahakDAIg1gyOm7dlgWSDjV4n7Ip2PKR55NIT6jrMfIgLFgWo81vdr1/QGqWtFNRqXP9UV71oVePtjqS2ebnPw==}
+  dompurify@3.4.14:
+    resolution: {integrity: sha512-dVoH9z+MY+C9IilgGCk3YfFqjLi3fChm2OiKJMzh6axrJ5qwxqWaZamgmHrpv22CN/KdbZJuGEGgfQoL00LTdg==}
 
   domutils@2.8.0:
     resolution: {integrity: sha512-w96Cjofp72M5IIhpjgobBimYEfoPjx1Vx0BSX9P30WBdZW2WIKU0T1Bd0kz2eNZ9ikjKgHbEyKx8BB6H1L3h3A==}
@@ -36089,7 +36086,7 @@ snapshots:
     dependencies:
       domelementtype: 2.3.0
 
-  dompurify@3.4.1:
+  dompurify@3.4.14:
     optionalDependencies:
       '@types/trusted-types': 2.0.7
 
@@ -39946,7 +39943,7 @@ snapshots:
 
   md5.js@1.3.5:
     dependencies:
-      hash-base: 3.1.2
+      hash-base: 3.0.5
       inherits: 2.0.4
       safe-buffer: 5.2.1
 
@@ -40607,7 +40604,7 @@ snapshots:
 
   monaco-editor@0.54.0:
     dependencies:
-      dompurify: 3.4.1
+      dompurify: 3.4.14
       marked: 14.0.0
 
   monaco-languageserver-types@0.4.1:
