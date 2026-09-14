@@ -43,11 +43,11 @@ const RETRYABLE_NETWORK_ERROR_CODES = new Set([
 const RETRYABLE_HTTP_STATUS_CODES = new Set([429, 502, 503, 504]);
 
 /**
- * Transient gRPC status codes: DEADLINE_EXCEEDED (4), RESOURCE_EXHAUSTED (8), UNAVAILABLE (14).
- * The JS SDK never retries gRPC exports, so these mirror the OTLP spec's retryable statuses.
+ * Transient gRPC status codes: DEADLINE_EXCEEDED (4) and UNAVAILABLE (14). The JS SDK never
+ * retries gRPC exports, so these mirror the OTLP spec's retryable statuses.
  * No collision with the HTTP set above: gRPC statuses are 0-16, HTTP statuses are >= 100.
  */
-const RETRYABLE_GRPC_STATUS_CODES = new Set([4, 8, 14]);
+const RETRYABLE_GRPC_STATUS_CODES = new Set([4, 14]);
 
 /**
  * Classifies an error surfaced by an OTLP log exporter as transient (worth retrying) or not.

@@ -54,12 +54,16 @@ describe('isRetryableExportError', () => {
   });
 
   it('classifies transient gRPC statuses as retryable', () => {
-    // 4 = DEADLINE_EXCEEDED, 8 = RESOURCE_EXHAUSTED, 14 = UNAVAILABLE
-    for (const code of [4, 8, 14]) {
+    // 4 = DEADLINE_EXCEEDED, 14 = UNAVAILABLE
+    for (const code of [4, 14]) {
       expect(isRetryableExportError(httpError(code))).toBe(true);
       // At runtime @grpc/grpc-js surfaces the status as a numeric string, despite its types.
       expect(isRetryableExportError(networkError(String(code)))).toBe(true);
     }
+    // 8 = RESOURCE_EXHAUSTED: retryable per OTLP spec only with RetryInfo (not parsed here);
+    // commonly a permanently oversized request, so retrying would stall the serial pipeline.
+    expect(isRetryableExportError(httpError(8))).toBe(false);
+    expect(isRetryableExportError(networkError('8'))).toBe(false);
     // 16 = UNAUTHENTICATED
     expect(isRetryableExportError(httpError(16))).toBe(false);
     expect(isRetryableExportError(networkError('16'))).toBe(false);
