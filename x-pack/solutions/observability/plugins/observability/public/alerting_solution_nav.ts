@@ -33,7 +33,7 @@ export const getAlertingSolutionNavItem = ({
           id: 'alerting_inbox_page',
           link: 'management:episodes',
           title: i18n.translate('xpack.observability.obltNav.alerting.inbox', {
-            defaultMessage: 'Inbox',
+            defaultMessage: 'Alerts',
           }),
           badgeType: 'new',
         },
@@ -57,13 +57,13 @@ export const getAlertingSolutionNavItem = ({
       }),
       children: [
         {
-          link: 'management:rules',
+          link: 'management:triggersActions',
           title: i18n.translate('xpack.observability.obltNav.alerting.rules', {
             defaultMessage: 'Rules',
           }),
           children: [
             {
-              link: 'management:triggersActions',
+              link: 'management:rules',
               sideNavStatus: 'hidden',
             },
           ],

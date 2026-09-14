@@ -95,14 +95,14 @@ describe('RulesListHeader', () => {
     expect(await screen.findAllByRole('tab')).toHaveLength(2);
   });
 
-  it('orders the V2 rules tab before the V1 rules tab', async () => {
+  it('orders the V1 rules tab before the V2 rules tab', async () => {
     renderHeader();
 
     const tabs = await screen.findAllByRole('tab');
 
     expect(tabs.map((tab) => tab.getAttribute('data-test-subj'))).toEqual([
-      'v2RulesTab',
       'v1RulesTab',
+      'v2RulesTab',
     ]);
   });
 

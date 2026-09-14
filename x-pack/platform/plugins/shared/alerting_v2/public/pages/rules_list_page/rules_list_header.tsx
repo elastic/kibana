@@ -121,7 +121,21 @@ export const RulesListHeader = ({
   const basePath = useService(CoreStart('http')).basePath;
 
   const tabs = useMemo<AppHeaderTab[]>(() => {
-    const headerTabs: AppHeaderTab[] = [
+    if (!canAccessTriggersActionsRules(application.capabilities)) {
+      // A one-item tablist is not a tablist — omit tabs unless both surfaces are shown.
+      return [];
+    }
+
+    return [
+      {
+        id: 'v1Rules',
+        label: i18n.translate('xpack.alertingV2.rulesList.v1RulesTabTitle', {
+          defaultMessage: 'V1 rules',
+        }),
+        isSelected: false,
+        href: basePath.prepend(triggersActionsRoute),
+        'data-test-subj': 'v1RulesTab',
+      },
       {
         id: 'v2Rules',
         label: i18n.translate('xpack.alertingV2.rulesList.v2RulesTabTitle', {
@@ -139,21 +153,6 @@ export const RulesListHeader = ({
         'data-test-subj': 'v2RulesTab',
       },
     ];
-
-    if (canAccessTriggersActionsRules(application.capabilities)) {
-      headerTabs.push({
-        id: 'v1Rules',
-        label: i18n.translate('xpack.alertingV2.rulesList.v1RulesTabTitle', {
-          defaultMessage: 'V1 rules',
-        }),
-        isSelected: false,
-        href: basePath.prepend(triggersActionsRoute),
-        'data-test-subj': 'v1RulesTab',
-      });
-    }
-
-    // A one-item tablist is not a tablist — omit tabs unless both surfaces are shown.
-    return headerTabs.length > 1 ? headerTabs : [];
   }, [basePath, application.capabilities]);
 
   const headerMenu = useMemo(

@@ -174,12 +174,12 @@ describe('Navigation Tree', () => {
         children: expect.arrayContaining([
           expect.objectContaining({
             id: 'alerting_inbox',
-            children: [expect.objectContaining({ link: 'management:episodes', title: 'Inbox' })],
+            children: [expect.objectContaining({ link: 'management:episodes', title: 'Alerts' })],
           }),
           expect.objectContaining({
             id: 'alerting_rule_management',
             children: expect.arrayContaining([
-              expect.objectContaining({ link: 'management:rules', title: 'Rules' }),
+              expect.objectContaining({ link: 'management:triggersActions', title: 'Rules' }),
               expect.objectContaining({
                 link: 'management:rule_library',
                 title: 'Rules library',
@@ -210,7 +210,7 @@ describe('Navigation Tree', () => {
     );
   });
 
-  it('shows the classic Alerts page under Inbox when alerting:v1:enabled is on', () => {
+  it('shows the classic Alerts page under Alerts when alerting:v1:enabled is on', () => {
     core.settings.globalClient.get = <T>(key: string) =>
       (key === 'alerting:v1:enabled' ? true : false) as T;
 
@@ -221,7 +221,7 @@ describe('Navigation Tree', () => {
     const inbox = alertingPanel?.children?.find((item) => item.id === 'alerting_inbox');
 
     expect(inbox?.children).toEqual([
-      expect.objectContaining({ link: 'management:episodes', title: 'Inbox' }),
+      expect.objectContaining({ link: 'management:episodes', title: 'Alerts' }),
       expect.objectContaining({
         link: 'observability-overview:alerts',
         title: 'Alerts',

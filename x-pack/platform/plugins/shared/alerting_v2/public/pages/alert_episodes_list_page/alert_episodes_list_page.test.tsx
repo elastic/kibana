@@ -265,7 +265,7 @@ describe('AlertEpisodesListPage', () => {
   });
 
   it('renders the page title without an experimental badge', () => {
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Inbox');
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Alerts');
     expect(screen.queryByTestId('alertingV2ExperimentalBadge')).not.toBeInTheDocument();
   });
 
@@ -480,7 +480,7 @@ describe('episode count + reset filters toolbar', () => {
     jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
     renderPage();
     const node = await screen.findByTestId('alertEpisodesItemCount');
-    expect(node.textContent).toMatch(/^Showing\s+3\s+episodes$/);
+    expect(node.textContent).toMatch(/^Showing\s+3\s+alerts$/);
   });
 
   it('uses the loaded row count even when it differs from a larger filter total', async () => {
@@ -488,7 +488,7 @@ describe('episode count + reset filters toolbar', () => {
     jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
     renderPage();
     const node = await screen.findByTestId('alertEpisodesItemCount');
-    expect(node).toHaveTextContent('Showing 3 episodes');
+    expect(node).toHaveTextContent('Showing 3 alerts');
     expect(node).not.toHaveTextContent('Showing first');
   });
 
@@ -509,7 +509,7 @@ describe('episode count + reset filters toolbar', () => {
     });
 
     const node = await screen.findByTestId('alertEpisodesItemCount');
-    expect(node.textContent).toMatch(/^Showing first\s+1,?000\s+episodes$/);
+    expect(node.textContent).toMatch(/^Showing first\s+1,?000\s+alerts$/);
     expect(node).toHaveAttribute('tabindex', '0');
   });
 

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export { RESOLVE_ACTION_REASON } from '@kbn/alerting-v2-episodes-ui/components/actions/translations';
 
 export const EPISODES_LIST_PAGE_TITLE = i18n.translate('xpack.alertingV2.episodes.listPageTitle', {
-  defaultMessage: 'Inbox',
+  defaultMessage: 'Alerts',
 });
 
 export const EPISODES_LIST_MANAGE_RULES = i18n.translate(
@@ -57,20 +57,20 @@ export const EPISODES_LIST_COLUMN_ASSIGNEES = i18n.translate(
 
 export const EPISODES_LIST_ITEM_COUNT = (count: number) =>
   i18n.translate('xpack.alertingV2.episodes.itemCount', {
-    defaultMessage: 'Showing {count, plural, one {# episode} other {# episodes}}',
+    defaultMessage: 'Showing {count, plural, one {# alert} other {# alerts}}',
     values: { count },
   });
 
 export const EPISODES_LIST_ITEM_COUNT_CAPPED = (count: number) =>
   i18n.translate('xpack.alertingV2.episodes.itemCountCapped', {
-    defaultMessage: 'Showing first {count} episodes',
+    defaultMessage: 'Showing first {count} alerts',
     values: { count },
   });
 
 export const EPISODES_LIST_ITEM_COUNT_CAPPED_TOOLTIP = (count: number) =>
   i18n.translate('xpack.alertingV2.episodes.itemCountCappedTooltip', {
     defaultMessage:
-      'The table loads at most {count} episodes. Narrow the time range or filters to find others.',
+      'The table loads at most {count} alerts. Narrow the time range or filters to find others.',
     values: { count },
   });
 

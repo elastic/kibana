@@ -78,7 +78,7 @@ export class ObservabilityAlertingPlugin
         {
           id: OBSERVABILITY_ALERTING_INBOX_DEEP_LINK_ID,
           title: i18n.translate('xpack.observabilityAlerting.deepLinks.inboxTitle', {
-            defaultMessage: 'Inbox',
+            defaultMessage: 'Alerts',
           }),
           path: OBSERVABILITY_ALERTING_INBOX_PATH,
           visibleIn: [],
