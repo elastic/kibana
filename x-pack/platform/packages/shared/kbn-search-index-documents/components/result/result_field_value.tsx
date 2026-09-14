@@ -125,7 +125,7 @@ export const ResultFieldValue: React.FC<ResultFieldValueProps> = ({
     (['object', 'array', 'nested'].includes(fieldType) || Array.isArray(fieldValue))
   ) {
     return (
-      <EuiCodeBlock language="json" transparentBackground fontSize="s">
+      <EuiCodeBlock language="json" transparentBackground fontSize="s" paddingSize="none">
         {fieldValue}
       </EuiCodeBlock>
     );

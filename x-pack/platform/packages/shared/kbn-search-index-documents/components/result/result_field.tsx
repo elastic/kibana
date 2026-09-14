@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
 import type { IconType } from '@elastic/eui';
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopover,
   EuiTableRow,
   EuiTableRowCell,
   EuiText,
@@ -71,7 +69,7 @@ const TypeLine: React.FC<{ iconType: IconType; label: string; fieldTypeLabel?: s
   fieldTypeLabel,
 }) => {
   return (
-    <EuiFlexGroup direction="row" alignItems="center" gutterSize="m" justifyContent="flexStart">
+    <EuiFlexGroup direction="row" alignItems="center" gutterSize="s" justifyContent="flexStart" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiToken iconType={iconType} size="s" />
       </EuiFlexItem>
@@ -99,7 +97,7 @@ export const ResultField: React.FC<ResultFieldProps> = ({
   const resolvedIconType = iconType || (fieldType ? iconMap[fieldType] : defaultToken);
 
   const fieldTypeLabel = i18n.translate('xpack.searchIndexDocuments.result.fieldTypeAriaLabel', {
-    defaultMessage: 'This field is of the type {fieldType}',
+    defaultMessage: 'Field type: {fieldType}',
     values: { fieldType },
   });
 
@@ -139,10 +137,10 @@ export const ResultField: React.FC<ResultFieldProps> = ({
 
   return (
     <EuiTableRow css={Styles.resultField(euiTheme)}>
-      <EuiTableRowCell className="resultFieldRowCell" valign="middle" truncateText={!isExpanded}>
+      <EuiTableRowCell className="resultFieldRowCell" valign="top" truncateText={!isExpanded} width="20%">
         <TypeLine iconType={resolvedIconType} label={fieldName} fieldTypeLabel={fieldTypeLabel} />
       </EuiTableRowCell>
-      <EuiTableRowCell className="resultFieldRowCell" truncateText={shouldTruncate} valign="middle">
+      <EuiTableRowCell className="resultFieldRowCell" truncateText={shouldTruncate} valign="top">
         <ResultFieldValue
           fieldValue={fieldValue}
           fieldType={fieldType}

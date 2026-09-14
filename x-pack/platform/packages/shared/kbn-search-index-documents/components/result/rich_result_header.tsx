@@ -17,7 +17,6 @@ import {
   EuiPanel,
   EuiPopover,
   EuiPopoverFooter,
-  EuiPopoverTitle,
   EuiText,
   EuiTextColor,
   EuiTitle,
