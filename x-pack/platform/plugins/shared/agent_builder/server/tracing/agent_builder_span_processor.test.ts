@@ -30,7 +30,6 @@ import {
   AGENT_BUILDER_OWNER_BAGGAGE_KEY,
   AGENT_BUILDER_OWNER_BAGGAGE_VALUE,
   DATA_STREAM_NAMESPACE_ATTR,
-  DEFAULT_TRACING_SPACE_ID,
   SPACE_ID_BAGGAGE_KEY,
 } from './agent_builder_context';
 
@@ -184,10 +183,7 @@ describe('AgentBuilderSpanProcessor', () => {
     await processor.onStart(span, parentContext);
 
     expect(span.setAttribute).toHaveBeenCalledWith(SHOULD_TRACK_ATTR, true);
-    expect(span.setAttribute).toHaveBeenCalledWith(
-      DATA_STREAM_NAMESPACE_ATTR,
-      DEFAULT_TRACING_SPACE_ID
-    );
+    expect(span.setAttribute).toHaveBeenCalledWith(DATA_STREAM_NAMESPACE_ATTR, 'default');
     expect(mockBatch.onStart).toHaveBeenCalledWith(span, parentContext);
   });
 
