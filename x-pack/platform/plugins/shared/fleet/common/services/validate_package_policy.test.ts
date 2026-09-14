@@ -750,15 +750,18 @@ describe('Fleet - validatePackagePolicy()', () => {
       it('does not throw and returns no condition errors for a boolean condition', () => {
         // Handlebars can coerce 'true'/'false' text to boolean; validateCondition must not
         // call .trim() on the raw boolean value.
-        expect(() =>
-          validatePackagePolicy(
-            { ...validPackagePolicy, condition: true as any },
-            mockPackage,
-            deps
-          )
-        ).not.toThrow();
         const result = validatePackagePolicy(
-          { ...validPackagePolicy, condition: true as any },
+          { ...validPackagePolicy, condition: true },
+          mockPackage,
+          deps
+        );
+        expect(result.condition).toBeNull();
+        expect(validationHasErrors(result)).toBe(false);
+      });
+
+      it('does not throw and returns no condition errors for boolean false condition', () => {
+        const result = validatePackagePolicy(
+          { ...validPackagePolicy, condition: false },
           mockPackage,
           deps
         );
