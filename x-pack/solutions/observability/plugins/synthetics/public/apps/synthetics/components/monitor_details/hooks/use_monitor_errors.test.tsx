@@ -8,6 +8,10 @@
 import { renderHook } from '@testing-library/react';
 import { useMonitorErrors } from './use_monitor_errors';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import {
+  EXCLUDE_RUN_ONCE_FILTER,
+  SUMMARY_FILTER,
+} from '../../../../../../common/constants/client_defaults';
 
 const mockUseReduxEsSearch = jest.fn();
 jest.mock('../../../hooks/use_redux_es_search', () => ({
@@ -70,6 +74,22 @@ describe('useMonitorErrors', () => {
     expect(mockUseReduxEsSearch).toHaveBeenCalledWith(
       expect.objectContaining({ index: `remote-a:${SYNTHETICS_INDEX_PATTERN}` }),
       expect.arrayContaining(['remote-a']),
+      expect.any(Object)
+    );
+  });
+
+  it('restricts error states to summary docs and excludes run-once checks', () => {
+    renderHook(() => useMonitorErrors());
+
+    expect(mockUseReduxEsSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.objectContaining({
+          bool: expect.objectContaining({
+            filter: expect.arrayContaining([SUMMARY_FILTER, EXCLUDE_RUN_ONCE_FILTER]),
+          }),
+        }),
+      }),
+      expect.anything(),
       expect.any(Object)
     );
   });

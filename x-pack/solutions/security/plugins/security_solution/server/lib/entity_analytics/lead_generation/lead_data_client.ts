@@ -324,7 +324,9 @@ const PAINLESS_NOW_ISO = 'Instant.ofEpochMilli(System.currentTimeMillis()).toStr
  * - Same content_hash: refresh timestamp to indicate leads was seen again
  * - Different content_hash: replace evidence + narrative, bump version and changed_at;
  *   status only flips when `params.allow_reopen` is true (a dismissal landing between
- *   classify and persist must not be clobbered)
+ *   classify and persist must not be clobbered). `origin` always reflects the latest
+ *   run (a lead can graduate or reclassify between observations and exploratory),
+ *   unlike status which is guarded.
  * - Never touches created_at on updates
  */
 const LEAD_UPDATE_SCRIPT_SOURCE = `
@@ -536,12 +538,11 @@ export const createLeadDataClient = ({
     }
 
     try {
-      // Adhoc generate does not go through enable, so the first write must create
-      // the index with plugin mappings. Otherwise ES auto-creates without the correct mappings.
+      // Adhoc generate does not go through enable, so persist must reconcile the
+      // index mapping on every write. createIndex is idempotent (exists -> putMapping)
+      // and picks up new fields such as origin on pre-existing strict indices.
       const indexService = createLeadIndexService({ esClient, logger, spaceId });
-      if (!(await indexService.doesIndexExist())) {
-        await indexService.createIndex();
-      }
+      await indexService.createIndex();
 
       const bulkBody: object[] = [];
 

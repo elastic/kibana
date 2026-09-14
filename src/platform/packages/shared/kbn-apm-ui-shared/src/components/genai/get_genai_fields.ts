@@ -24,6 +24,10 @@ import {
   ATTRIBUTE_GEN_AI_RESPONSE_MODEL,
   ATTRIBUTE_GEN_AI_SYSTEM,
   ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS,
+  ATTRIBUTE_GEN_AI_TOOL_CALL_ARGUMENTS,
+  ATTRIBUTE_GEN_AI_TOOL_CALL_RESULT,
+  ATTRIBUTE_GEN_AI_TOOL_DEFINITIONS,
+  ATTRIBUTE_GEN_AI_TOOL_NAME,
   ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS,
   ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS,
 } from '@kbn/apm-types/es_fields';
@@ -58,6 +62,10 @@ export interface GenAiFields {
   inputMessages: GenAiMessage[];
   outputMessages: GenAiMessage[];
   systemInstructions?: string;
+  toolDefinitions?: unknown;
+  toolName?: string;
+  toolCallArguments?: unknown;
+  toolCallResult?: unknown;
 }
 
 const GEN_AI_PATTERN = /(^|\.)gen[_.]ai[._]/;
@@ -168,8 +176,60 @@ export function getMessageCopyText(message: GenAiMessage): string {
   return JSON.stringify(message, null, 2);
 }
 
+function parseJsonValue(raw: unknown): unknown {
+  if (typeof raw !== 'string') return raw;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return raw;
+  }
+}
+
+function stringifyFallback(raw: unknown): string | undefined {
+  if (typeof raw === 'string') return raw;
+  try {
+    return JSON.stringify(raw);
+  } catch {
+    return undefined;
+  }
+}
+
+/** Unwraps structured OTel system instructions into plain text. */
+function parseSystemInstructions(raw: unknown): string | undefined {
+  if (raw == null || raw === '') return undefined;
+
+  const parsed = parseJsonValue(raw);
+  if (Array.isArray(parsed)) {
+    const text = parsed
+      .filter(
+        (part): part is { type: string; content: string } =>
+          part != null &&
+          typeof part === 'object' &&
+          part.type === 'text' &&
+          typeof part.content === 'string'
+      )
+      .map((part) => part.content)
+      .join('\n');
+    return text.length > 0 ? text : stringifyFallback(raw);
+  }
+  if (parsed && typeof parsed === 'object' && 'content' in parsed) {
+    const { content } = parsed;
+    if (typeof content === 'string') return content;
+  }
+
+  return stringifyFallback(raw);
+}
+
 export function getGenAiFields(metadata: Record<string, unknown>): GenAiFields {
   const f = (key: string) => first(metadata, key);
+  const toolDefinitionsValue = rawValue(metadata, ATTRIBUTE_GEN_AI_TOOL_DEFINITIONS);
+  const nonNullToolDefinitions = Array.isArray(toolDefinitionsValue)
+    ? toolDefinitionsValue.filter((value) => value != null)
+    : [];
+  const toolDefinitions =
+    nonNullToolDefinitions.length === 1 && typeof nonNullToolDefinitions[0] === 'string'
+      ? nonNullToolDefinitions[0]
+      : toolDefinitionsValue;
 
   return {
     operationName: f(ATTRIBUTE_GEN_AI_OPERATION_NAME) as string | undefined,
@@ -198,6 +258,10 @@ export function getGenAiFields(metadata: Record<string, unknown>): GenAiFields {
     outputMessages: parseGenAiMessages(
       allValues<string>(metadata, ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES)
     ),
-    systemInstructions: f(ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS) as string | undefined,
+    systemInstructions: parseSystemInstructions(f(ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS)),
+    toolDefinitions,
+    toolName: f(ATTRIBUTE_GEN_AI_TOOL_NAME) as string | undefined,
+    toolCallArguments: f(ATTRIBUTE_GEN_AI_TOOL_CALL_ARGUMENTS),
+    toolCallResult: f(ATTRIBUTE_GEN_AI_TOOL_CALL_RESULT),
   };
 }

@@ -7,6 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
+import { MAX_PROMOTED_LEADS } from '../../../../common/entity_analytics/lead_generation/constants';
 import type { LeadCandidate } from './engine/lead_generation_engine';
 import type { RelatedEntity } from './types';
 
@@ -22,9 +23,12 @@ jest.mock('@langchain/core/prompts', () => ({
   },
 }));
 
-const { buildExploratoryLeads, POOL_SIZE } = jest.requireActual('./exploratory_leads') as {
+const { buildExploratoryLeads, POOL_SIZE, MAX_POOL_PAYLOAD_CHARS } = jest.requireActual(
+  './exploratory_leads'
+) as {
   buildExploratoryLeads: typeof import('./exploratory_leads').buildExploratoryLeads;
   POOL_SIZE: typeof import('./exploratory_leads').POOL_SIZE;
+  MAX_POOL_PAYLOAD_CHARS: typeof import('./exploratory_leads').MAX_POOL_PAYLOAD_CHARS;
 };
 
 const logger = loggingSystemMock.createLogger();
@@ -81,6 +85,26 @@ const relatedEntity = (overrides: Partial<RelatedEntity> = {}): RelatedEntity =>
   kinds: ['owns'],
   ...overrides,
 });
+
+const paddingRelated = (count: number, prefix: string): RelatedEntity[] =>
+  Array.from({ length: count }, (_, i) =>
+    relatedEntity({
+      id: `${prefix}-${i}`,
+      name: `${prefix}-${i}-${'n'.repeat(120)}`,
+    })
+  );
+
+const denseCandidate = ({
+  leadId,
+  significantRelated = [],
+}: {
+  leadId: string;
+  significantRelated?: RelatedEntity[];
+}): LeadCandidate =>
+  buildCandidate({
+    leadId,
+    topRelatedEntities: [...significantRelated, ...paddingRelated(30, `${leadId}-pad`)],
+  });
 
 describe('buildExploratoryLeads', () => {
   beforeEach(() => {
@@ -282,6 +306,32 @@ describe('buildExploratoryLeads', () => {
     ]);
   });
 
+  it('keeps the first MAX_PROMOTED_LEADS picks when the LLM returns more than the cap', async () => {
+    const candidates = Array.from({ length: MAX_PROMOTED_LEADS + 2 }, (_, i) =>
+      buildCandidate({
+        leadId: `pick-${i}`,
+        topRelatedEntities: [relatedEntity({ riskLevel: 'High' })],
+      })
+    );
+    mockChainInvokeResult = {
+      selections: candidates.map((c) => ({
+        euid: c.entity.id,
+        reason: 'hunt-worthy combination of facts',
+        confidence: 'medium' as const,
+      })),
+    };
+
+    const result = await buildExploratoryLeads(candidates, {
+      chatModel: fakeChatModel,
+      logger,
+    });
+
+    expect(result).toHaveLength(MAX_PROMOTED_LEADS);
+    expect(result.map((c) => c.leadId)).toEqual(
+      candidates.slice(0, MAX_PROMOTED_LEADS).map((c) => c.leadId)
+    );
+  });
+
   it('rejects an LLM pick whose EUID is not in the pool', async () => {
     const candidate = buildCandidate({
       leadId: 'alice',
@@ -313,6 +363,78 @@ describe('buildExploratoryLeads', () => {
     expect(result).toEqual([]);
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('LLM exploratory lead selection failed')
+    );
+  });
+
+  it('trims the pool by payload budget before POOL_SIZE when entities are dense', async () => {
+    const high = denseCandidate({
+      leadId: 'high',
+      significantRelated: [
+        relatedEntity({ id: 'high-a', name: 'high-a', riskLevel: 'High' }),
+        relatedEntity({ id: 'high-b', name: 'high-b', riskLevel: 'High' }),
+      ],
+    });
+    const fillers = Array.from({ length: POOL_SIZE - 2 }, (_, i) =>
+      denseCandidate({
+        leadId: `filler-${i}`,
+        significantRelated: [relatedEntity({ id: `filler-${i}-rel`, riskLevel: 'High' })],
+      })
+    );
+    const low = denseCandidate({ leadId: 'low' });
+
+    mockChainInvokeResult = {
+      selections: [
+        {
+          euid: high.entity.id,
+          reason: 'touches two High-risk hosts',
+          confidence: 'high',
+        },
+        {
+          euid: low.entity.id,
+          reason: 'dense but low significance',
+          confidence: 'medium',
+        },
+      ],
+    };
+
+    const result = await buildExploratoryLeads([low, ...fillers, high], {
+      chatModel: fakeChatModel,
+      logger,
+    });
+
+    expect(result.map((c) => c.leadId)).toEqual(['high']);
+    expect(logger.info).toHaveBeenCalledWith(
+      expect.stringMatching(
+        new RegExp(
+          `Exploratory pool trimmed by payload budget: \\d+/${POOL_SIZE} candidates, \\d+/${MAX_POOL_PAYLOAD_CHARS} chars`
+        )
+      )
+    );
+  });
+
+  it('keeps up to POOL_SIZE when entities are light', async () => {
+    const light = Array.from({ length: POOL_SIZE - 1 }, (_, i) =>
+      buildCandidate({ leadId: `light-${i}` })
+    );
+    const tail = buildCandidate({ leadId: 'tail' });
+    mockChainInvokeResult = {
+      selections: [
+        {
+          euid: tail.entity.id,
+          reason: 'light candidate still in a full-size pool',
+          confidence: 'medium',
+        },
+      ],
+    };
+
+    const result = await buildExploratoryLeads([...light, tail], {
+      chatModel: fakeChatModel,
+      logger,
+    });
+
+    expect(result.map((c) => c.leadId)).toEqual(['tail']);
+    expect(logger.info).not.toHaveBeenCalledWith(
+      expect.stringContaining('Exploratory pool trimmed by payload budget')
     );
   });
 });

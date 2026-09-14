@@ -1536,7 +1536,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       };
     }, [showSummaryColumn, paginationMode, throttledHandleOnScroll]);
 
-    const isRenderComplete = loadingState !== DataLoadingState.loading;
+    const isLoaded = loadingState === DataLoadingState.loaded;
 
     if (!rowCount && loadingState === DataLoadingState.loading) {
       return (
@@ -1562,10 +1562,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         <div
           className="euiDataGrid__noResults"
           css={styles.emptyRow}
-          data-render-complete={isRenderComplete}
-          data-shared-item=""
-          data-title={searchTitle}
-          data-description={searchDescription}
+          data-table-loaded={isLoaded}
           data-document-number={0}
         >
           <EuiText size="xs" color="subdued" textAlign="center">
@@ -1588,11 +1585,7 @@ const InternalUnifiedDataTable = React.forwardRef<
             ref={setDataGridWrapper}
             key={isCompareActive ? 'comparisonTable' : 'docTable'}
             data-test-subj="discoverDocTable"
-            data-render-complete={isRenderComplete}
-            data-shared-item=""
-            data-rendering-count={1} // TODO: Fix this as part of https://github.com/elastic/kibana/issues/179376
-            data-title={searchTitle}
-            data-description={searchDescription}
+            data-table-loaded={isLoaded}
             data-document-number={displayedRows.length}
             className={classnames(className, 'unifiedDataTable__table')}
             css={[styles.dataTable, inTableSearchTermCss]}
@@ -1619,6 +1612,9 @@ const InternalUnifiedDataTable = React.forwardRef<
               />
             ) : (
               <EuiDataGridMemoized
+                // Remount on display-mode change to reset EuiDataGrid's auto-height cache; otherwise
+                // some rows stay stuck at the taller JSON height when switching back to table mode.
+                key={documentsDisplayMode}
                 id={dataGridId}
                 aria-describedby={randomId}
                 aria-labelledby={ariaLabelledBy}

@@ -87,9 +87,19 @@ describe('createExecuteConnectorSubActionTool', () => {
         supportedFeatureIds: [],
       },
       actions: {
-        searchMessages: { isTool: true, input: {} as any, handler: jest.fn() },
-        listChannels: { isTool: true, input: {} as any, handler: jest.fn() },
-        sendMessage: { isTool: true, input: {} as any, handler: jest.fn() },
+        searchMessages: {
+          isTool: true,
+          scope: 'read' as const,
+          input: {} as any,
+          handler: jest.fn(),
+        },
+        listChannels: {
+          isTool: true,
+          scope: 'read' as const,
+          input: {} as any,
+          handler: jest.fn(),
+        },
+        sendMessage: { isTool: true, scope: 'read' as const, input: {} as any, handler: jest.fn() },
       },
       test: { handler: jest.fn(), enabled: false },
     });
@@ -223,7 +233,14 @@ describe('createExecuteConnectorSubActionTool', () => {
         minimumLicense: 'enterprise' as const,
         supportedFeatureIds: [],
       },
-      actions: { internalAction: { isTool: false, input: {} as any, handler: jest.fn() } },
+      actions: {
+        internalAction: {
+          isTool: false,
+          scope: 'read' as const,
+          input: {} as any,
+          handler: jest.fn(),
+        },
+      },
       test: { handler: jest.fn(), enabled: false },
     });
     isToolActionMock.mockReturnValue(false);

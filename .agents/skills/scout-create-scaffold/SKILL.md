@@ -77,7 +77,7 @@ The generator **does not** create **`tsconfig.json`** files. Playwright runs wit
 
 Pick **one** pattern and wire it after `node scripts/scout generate` completes:
 
-### Pattern A — plugin root includes Scout (e.g. `discover_enhanced`)
+### Pattern A — plugin root includes Scout (e.g. `discover`)
 
 - In the **plugin or package root** `tsconfig.json`, add **`test/<scout-root>/**/*`** (or broader **`test/**/*`**) to **`include`**.
 - Add **`kbn_references`** for the Scout stack you use:

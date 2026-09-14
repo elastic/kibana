@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  MAX_LEADS_PER_RUN,
+  MAX_PROMOTED_LEADS,
+} from '@kbn/security-solution-plugin/common/entity_analytics/lead_generation/constants';
 import { bulkSeedEntities, type SeedEntityOptions } from '../seeding/seed_entities';
 import { seedRelationshipObservation } from '../seeding/seed_relationship_metadata';
 import { runLeadGeneration } from '../steps/run_lead_generation';
@@ -12,6 +16,8 @@ import { createLeadGenerationBasicEvaluator } from '../evaluators/lead_generatio
 import { createLeadGenerationRubricEvaluator } from '../evaluators/lead_generation_rubric_evaluator';
 import type { Lead, Scenario, ScenarioContext, StepResult, ScenarioTaskOutput } from '../types';
 
+// Matches `POOL_SIZE` in exploratory_leads.ts. Seeds are sparse, so the
+// payload budget (`MAX_POOL_PAYLOAD_CHARS`) does not bind before this cap.
 const POOL_SIZE = 150;
 const EARLY_POSITION_WINDOW = 20;
 
@@ -20,13 +26,11 @@ const daysAgo = (days: number): string => new Date(NOW - days * 24 * 60 * 60 * 1
 const SIX_MONTHS_AGO = daysAgo(180);
 const RECENTLY = daysAgo(2);
 
-// Ten entities with an overwhelming, single-module risk signal.
-// This reliably saturates their risk priority to the 1-10 scale's maximum,
-// so they occupy the confident top 10 regardless of anything below — leaving
-// the should-promotes and distractors to compete for a place in the
-// *exploratory* pool instead, which is what this scenario is actually about:
-// the LLM's promotion judgment, not deterministic ranking.
-const CONFIDENT_FILLER_COUNT = 10;
+// Saturated single-module risk so these occupy every confident slot
+// (`MAX_LEADS_PER_RUN`) and leave the should-promotes/distractors in the
+// *exploratory* pool. This scenario grades the LLM's promotion judgment, not
+// deterministic ranking.
+const CONFIDENT_FILLER_COUNT = MAX_LEADS_PER_RUN;
 const confidentFillerEuid = (index: number): string => `user:promotion-precision-filler-${index}`;
 const CONFIDENT_FILLER_EUIDS = Array.from({ length: CONFIDENT_FILLER_COUNT }, (_, i) =>
   confidentFillerEuid(i)
@@ -35,7 +39,9 @@ const CONFIDENT_FILLER_EUIDS = Array.from({ length: CONFIDENT_FILLER_COUNT }, (_
 // Each combines two signals the exploratory-promotion prompt calls out by
 // name as hunt-worthy: newly-observed/governance-gap attributes together with
 // an interesting relationship (or with each other). Weak enough individually
-// to rank below the filler entities, but a genuine combination.
+// to rank below the filler entities, but a genuine combination. Count must
+// stay at or under `MAX_PROMOTED_LEADS` so recall=1 remains reachable after
+// the over-cap slice.
 const SHOULD_PROMOTE_EUIDS = [
   'user:promotion-precision-should-promote-newly-observed-governance-gap',
   'user:promotion-precision-should-promote-newly-observed-new-control',
@@ -43,8 +49,8 @@ const SHOULD_PROMOTE_EUIDS = [
 ] as const;
 
 // Each has exactly one generic fact and nothing else — the exploratory
-// prompt's own rule is that "a single attribute or a generic 'unusual'
-// observation is not enough", so a correct promotion decision excludes all of these.
+// prompt rejects a lone High/Critical score, a lone critical-asset
+// relationship, or a generic "unusual" observation with no other signal.
 const DISTRACTOR_EUIDS = [
   'user:promotion-precision-distractor-governance-gap-alone',
   'user:promotion-precision-distractor-newly-observed-alone',
@@ -113,6 +119,12 @@ const backgroundOptions = (euid: string): SeedEntityOptions => ({
 });
 
 const seedPool = async (ctx: ScenarioContext): Promise<void> => {
+  if (SHOULD_PROMOTE_EUIDS.length > MAX_PROMOTED_LEADS) {
+    throw new Error(
+      `promotion precision seeds ${SHOULD_PROMOTE_EUIDS.length} should-promotes, over MAX_PROMOTED_LEADS=${MAX_PROMOTED_LEADS}`
+    );
+  }
+
   await bulkSeedEntities({
     esClient: ctx.esClient,
     entities: [

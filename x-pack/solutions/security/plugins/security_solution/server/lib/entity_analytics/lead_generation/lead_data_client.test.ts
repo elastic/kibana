@@ -8,9 +8,11 @@
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 
+const mockCreateIndex = jest.fn().mockResolvedValue(undefined);
+
 jest.mock('./indices/lead_index_service', () => ({
   createLeadIndexService: () => ({
-    createIndex: jest.fn().mockResolvedValue(undefined),
+    createIndex: mockCreateIndex,
     doesIndexExist: jest.fn().mockResolvedValue(true),
     deleteIndex: jest.fn(),
   }),
@@ -257,6 +259,22 @@ describe('LeadDataClient', () => {
 
       expect(result).toBe(0);
       expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('reconciles the index mapping even when the index already exists', async () => {
+      const lead = makeTestLead();
+      esClient.bulk.mockResolvedValueOnce({ errors: false, items: [], took: 1 });
+
+      await client.persistLeads({
+        executionId: 'exec-mapping',
+        sourceType: 'adhoc',
+        timestamp: lead.timestamp,
+        refreshes: [],
+        creates: [lead],
+        updates: [],
+      });
+
+      expect(mockCreateIndex).toHaveBeenCalled();
     });
 
     it('handles leads creation successfully', async () => {

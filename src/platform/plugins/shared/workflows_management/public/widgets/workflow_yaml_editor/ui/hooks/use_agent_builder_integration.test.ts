@@ -878,6 +878,7 @@ describe('useAgentBuilderIntegration', () => {
         greetingMessage: WORKFLOW_EDITOR_GREETING,
         initialMessage: undefined,
         autoSendInitialMessage: undefined,
+        newConversation: undefined,
         attachments: [
           expectedAttachment(INITIAL_YAML, { workflowId: 'wf-456', name: 'Test Flow' }),
         ],
@@ -903,6 +904,7 @@ describe('useAgentBuilderIntegration', () => {
         result.current.openAgentChat({
           initialMessage: 'Fix this workflow',
           autoSendInitialMessage: true,
+          newConversation: true,
         });
       });
 
@@ -910,6 +912,41 @@ describe('useAgentBuilderIntegration', () => {
         expect.objectContaining({
           initialMessage: 'Fix this workflow',
           autoSendInitialMessage: true,
+          newConversation: true,
+        })
+      );
+    });
+
+    it('attaches the current workflow YAML when a new conversation replaces a persisted one', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      mockHasPersistedConversation.mockReturnValue(true);
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      const { result } = renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+          workflowId: 'wf-456',
+          workflowName: 'Test Flow',
+        })
+      );
+
+      await flushChatAccessCheck();
+
+      act(() => {
+        result.current.openAgentChat({
+          initialMessage: 'Fix this workflow',
+          newConversation: true,
+        });
+      });
+
+      expect(agentBuilder.openChat).toHaveBeenCalledWith(
+        expect.objectContaining({
+          newConversation: true,
+          attachments: [
+            expectedAttachment(INITIAL_YAML, { workflowId: 'wf-456', name: 'Test Flow' }),
+          ],
         })
       );
     });
