@@ -292,7 +292,11 @@ describe('Public Field Definition Routes', () => {
 
     it('updates and returns the updated field definition', async () => {
       const context = createMockContext();
-      const request = { params: { field_definition_id: 'fd-1' }, body: validBody, query: { dry_run: false } };
+      const request = {
+        params: { field_definition_id: 'fd-1' },
+        body: validBody,
+        query: { dry_run: false },
+      };
       const response = createMockResponse();
 
       // @ts-expect-error: mocking necessary properties for handler logic only
@@ -309,7 +313,11 @@ describe('Public Field Definition Routes', () => {
         toSavedObject({ ...makeFieldDef(), legacyKey: 'ck-1' })
       );
       const context = createMockContext(client);
-      const request = { params: { field_definition_id: 'fd-1' }, body: validBody, query: { dry_run: false } };
+      const request = {
+        params: { field_definition_id: 'fd-1' },
+        body: validBody,
+        query: { dry_run: false },
+      };
       const response = createMockResponse();
 
       // @ts-expect-error: mocking necessary properties for handler logic only
@@ -321,7 +329,11 @@ describe('Public Field Definition Routes', () => {
 
     it('returns 400 when name is an empty string', async () => {
       const context = createMockContext();
-      const request = { params: { field_definition_id: 'fd-1' }, body: { ...validBody, name: '' }, query: { dry_run: false } };
+      const request = {
+        params: { field_definition_id: 'fd-1' },
+        body: { ...validBody, name: '' },
+        query: { dry_run: false },
+      };
       const response = createMockResponse();
 
       // @ts-expect-error: mocking necessary properties for handler logic only
@@ -341,7 +353,11 @@ describe('Public Field Definition Routes', () => {
       };
       client.updateFieldDefinition.mockRejectedValue(identityImmutableError);
       const context = createMockContext(client);
-      const request = { params: { field_definition_id: 'fd-1' }, body: validBody, query: { dry_run: false } };
+      const request = {
+        params: { field_definition_id: 'fd-1' },
+        body: validBody,
+        query: { dry_run: false },
+      };
       const response = createMockResponse();
 
       // @ts-expect-error: mocking necessary properties for handler logic only
@@ -360,7 +376,11 @@ describe('Public Field Definition Routes', () => {
       const client = createMockFieldDefinitionsClient();
       client.updateFieldDefinition.mockRejectedValue(Boom.notFound('Field definition not found'));
       const context = createMockContext(client);
-      const request = { params: { field_definition_id: 'fd-missing' }, body: validBody, query: { dry_run: false } };
+      const request = {
+        params: { field_definition_id: 'fd-missing' },
+        body: validBody,
+        query: { dry_run: false },
+      };
       const response = createMockResponse();
 
       // @ts-expect-error: mocking necessary properties for handler logic only
@@ -373,7 +393,11 @@ describe('Public Field Definition Routes', () => {
       const client = createMockFieldDefinitionsClient();
       client.updateFieldDefinition.mockRejectedValue(Boom.forbidden('Insufficient privileges'));
       const context = createMockContext(client);
-      const request = { params: { field_definition_id: 'fd-1' }, body: validBody, query: { dry_run: false } };
+      const request = {
+        params: { field_definition_id: 'fd-1' },
+        body: validBody,
+        query: { dry_run: false },
+      };
       const response = createMockResponse();
 
       // @ts-expect-error: mocking necessary properties for handler logic only
