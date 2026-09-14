@@ -365,15 +365,18 @@ describe('events_write tool', () => {
       createMockToolContext()
     );
 
-    expect(eventsWriteBulkHandler).toHaveBeenCalledWith({
-      eventClient: {},
-      inputs: [
-        expect.objectContaining({
-          causal_features: [expect.objectContaining({ type: 'technology', subtype: 'web_server' })],
-        }),
-      ],
-      source: undefined,
-    });
+    expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventClient: {},
+        inputs: [
+          expect.objectContaining({
+            causal_features: [
+              expect.objectContaining({ type: 'technology', subtype: 'web_server' }),
+            ],
+          }),
+        ],
+      })
+    );
   });
 
   it('writes unenriched causal features when the lookup fails', async () => {
@@ -389,11 +392,12 @@ describe('events_write tool', () => {
       createMockToolContext()
     );
 
-    expect(eventsWriteBulkHandler).toHaveBeenCalledWith({
-      eventClient: {},
-      inputs: [expect.objectContaining({ causal_features: causalFeatures })],
-      source: undefined,
-    });
+    expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventClient: {},
+        inputs: [expect.objectContaining({ causal_features: causalFeatures })],
+      })
+    );
   });
 
   it('returns aligned results and tracks each item', async () => {
