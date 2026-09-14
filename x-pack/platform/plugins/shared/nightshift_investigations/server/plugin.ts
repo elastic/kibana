@@ -23,8 +23,6 @@ import {
   NightshiftInvestigationsClient,
   type NightshiftInvestigationsService,
 } from './client/investigations_client';
-import { nightshiftInvestigationSavedObjectType } from './saved_objects';
-import { SoNightshiftInvestigationsService } from './storage/so_investigations_service';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
 import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
 import { installInvestigationAgent } from './lib/install_investigation_agent';
@@ -86,8 +84,6 @@ export class NightshiftInvestigationsPlugin
     // Core gates the plugin on xpack.nightshift_investigations.enabled.
     this.workflowsManagement = plugins.workflowsManagement;
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
-
-    core.savedObjects.registerType(nightshiftInvestigationSavedObjectType);
 
     registerInvestigationReconciliationTask({
       core,
@@ -235,12 +231,10 @@ export class NightshiftInvestigationsPlugin
     this.ruleRegistry = plugins.ruleRegistry;
     this.actionsStart = plugins.actions;
 
-    // Use the SO-backed service for persistence (nightshift-investigation SO type).
-    // The shared agenticInvestigations plugin only stores proposals; investigation
-    // records live in the nightshift SO.
-    this.investigationsService = new SoNightshiftInvestigationsService({
-      savedObjects: coreStart.savedObjects,
-    });
+    // The nightshift-investigation SO type is registered and owned by agenticInvestigations.
+    // Get the SO-backed service from its start contract.
+    this.investigationsService =
+      plugins.agenticInvestigations.getInvestigationsService() as unknown as NightshiftInvestigationsService;
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
     // agent exists wherever an investigation runs. This narrower install exists so the agent is

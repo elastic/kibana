@@ -24,7 +24,11 @@ import type { ResolveProposalUser } from './proposals/services/resolve_proposal_
 import { registerStepDefinitions } from './proposals/step_types';
 import { createProposalsStorageClient } from './proposals/storage/proposals_storage';
 import { registerInvestigationAttachmentTypes } from './investigations/attachments';
-import type { GetNsiClient, NsiInvestigationsClientLike } from './investigations/nsi_client';
+import { nightshiftInvestigationSavedObjectType } from './investigations/saved_objects/investigation_saved_object';
+import {
+  SoInvestigationsService,
+  type InvestigationsService,
+} from './investigations/storage/investigations_service';
 import type {
   AgenticInvestigationsPluginSetup,
   AgenticInvestigationsPluginStart,
@@ -43,11 +47,8 @@ export class AgenticInvestigationsPlugin
 {
   private readonly logger: Logger;
   private workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
-  // `workflowsManagement` is a required plugin, so this is set in setup() and
-  // read only from start() onwards; the getter asserts that ordering.
   private proposalsService?: ProposalsService;
-  /** NSI investigations client factory; set in start() from the optional dep. */
-  private nsiGetClient?: GetNsiClient;
+  private investigationsService?: InvestigationsService;
   private spaces?: AgenticInvestigationsStartDependencies['spaces'];
   private resolveUser?: ResolveProposalUser;
 
@@ -64,21 +65,21 @@ export class AgenticInvestigationsPlugin
       workflowsManagement,
     }: AgenticInvestigationsSetupDependencies
   ): AgenticInvestigationsPluginSetup {
-    // The workflows management API is only exposed on the setup contract.
     this.workflowsManagementApi = workflowsManagement.management;
 
     registerFeatures({ features });
 
-    // Register all four investigation attachment types with Agent Builder.
-    // The NSI client factory is resolved lazily at request time (after start());
-    // agentBuilder.attachments is setup-only.
-    registerInvestigationAttachmentTypes(agentBuilder.attachments, (request, spaceId) =>
-      this.requireNsiClient(request, spaceId)
+    // Own the nightshift-investigation SO type. Registering it here (not in NSI)
+    // means any plugin that depends on agenticInvestigations gets the type registered.
+    coreSetup.savedObjects.registerType(nightshiftInvestigationSavedObjectType);
+
+    // Register all four investigation attachment types. The service is resolved
+    // lazily via requireInvestigationsService() which is safe at request time after start().
+    registerInvestigationAttachmentTypes(
+      agentBuilder.attachments,
+      this.lazyInvestigationsService()
     );
 
-    // Declares ownership of this plugin's managed workflows. Without it the
-    // startup orphan sweep treats every workflow we installed as owned by an
-    // unregistered plugin and force-deletes it.
     workflowsExtensions.registerManagedWorkflowOwner(
       AGENTIC_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER_ID
     );
@@ -111,8 +112,6 @@ export class AgenticInvestigationsPlugin
       logger: this.logger,
     });
 
-    // Reads and writes go through the internal user; authorization is enforced
-    // at the API layer.
     const storage = createProposalsStorageClient({
       esClient: coreStart.elasticsearch.client.asInternalUser,
       logger: this.logger,
@@ -124,16 +123,11 @@ export class AgenticInvestigationsPlugin
       getWorkflowsApi: () => this.requireWorkflowsApi(),
     });
 
-    // Wire the NSI investigations client factory so the attachment types can
-    // resolve investigation data from the nightshiftInvestigations plugin.
-    // nightshiftInvestigations is an optional dep that starts AFTER this plugin
-    // (it requires agenticInvestigations), so plugins.nightshiftInvestigations
-    // will be undefined here — the factory captures the reference and the actual
-    // plugin is available by the time resolve() is called at request time.
-    if (plugins.nightshiftInvestigations) {
-      const nsi = plugins.nightshiftInvestigations;
-      this.nsiGetClient = (request, spaceId) => nsi.getInvestigationsClient(request, spaceId);
-    }
+    // Build the SO-backed investigations service. This plugin owns the SO type
+    // (registered in setup()) so no other plugin needs to register it.
+    this.investigationsService = new SoInvestigationsService({
+      savedObjects: coreStart.savedObjects,
+    });
 
     void initializeManagedWorkflows({
       workflowsExtensions: plugins.workflowsExtensions,
@@ -148,10 +142,7 @@ export class AgenticInvestigationsPlugin
 
     return {
       getProposalsService: () => this.requireProposalsService(),
-      // POC: service implementation removed; nightshiftInvestigations casts
-      // the return value via `as unknown as ConcreteType` — the empty object
-      // satisfies InvestigationsServiceHandle structurally.
-      getInvestigationsService: () => ({}),
+      getInvestigationsService: () => this.requireInvestigationsService(),
     };
   }
 
@@ -173,29 +164,34 @@ export class AgenticInvestigationsPlugin
     return this.proposalsService;
   }
 
-  /**
-   * Returns an NSI investigations client for the given request and space. Called
-   * lazily at request time after all plugins have started — this is what allows
-   * the factory to be registered during setup() while nightshiftInvestigations
-   * starts after agenticInvestigations.
-   */
-  private requireNsiClient(request: KibanaRequest, spaceId: string): NsiInvestigationsClientLike {
-    if (!this.nsiGetClient) {
+  private requireInvestigationsService(): InvestigationsService {
+    if (!this.investigationsService) {
       throw new Error(
-        'nightshiftInvestigations is not available; investigation attachments cannot be resolved'
+        'Investigations service is not available until the agenticInvestigations plugin has started'
       );
     }
-    return this.nsiGetClient(request, spaceId);
+    return this.investigationsService;
+  }
+
+  /**
+   * Returns a proxy that defers service resolution to request time (after start()).
+   * Used to wire the attachment types during setup() before the service is created.
+   */
+  private lazyInvestigationsService(): InvestigationsService {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const self = this;
+    return new Proxy({} as InvestigationsService, {
+      get(_target, prop) {
+        const svc = self.requireInvestigationsService();
+        return (svc as Record<string | symbol, unknown>)[prop];
+      },
+    });
   }
 
   private getSpaceId(request: KibanaRequest): string {
     return this.spaces?.spacesService.getSpaceId(request) ?? 'default';
   }
 
-  /**
-   * Server-derived so a caller can never attribute a decision to someone else.
-   * Built in `start()`, and only ever called from a request handler or a step.
-   */
   private requireUserResolver(): ResolveProposalUser {
     if (!this.resolveUser) {
       throw new Error(

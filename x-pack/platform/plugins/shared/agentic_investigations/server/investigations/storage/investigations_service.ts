@@ -7,46 +7,80 @@
 
 import type { ISavedObjectsRepository, SavedObjectsServiceStart } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type {
-  InvestigationBlindSpot,
-  InvestigationHypothesis,
-  InvestigationImpact,
-  InvestigationRecommendation,
-  Severity,
-  TriggerFeedback,
-} from '@kbn/significant-events-schema';
-import type {
-  InvestigationStatus,
-  InvestigationSubjectType,
-  InvestigationTriggerType,
-} from '../../common';
-import type {
-  NightshiftInvestigationRecord,
-  NightshiftInvestigationsService,
-} from '../client/investigations_client';
-import { NIGHTSHIFT_INVESTIGATION_SO_TYPE } from '../saved_objects';
+import { NIGHTSHIFT_INVESTIGATION_SO_TYPE } from '../saved_objects/investigation_saved_object';
 import type { InvestigationAttributes } from './types';
 
-/** Local alias for NightshiftListResult (private in investigations_client.ts). */
-interface ListResult {
-  items: NightshiftInvestigationRecord[];
+/**
+ * CamelCase record shape this service returns. Uses `string` for fields that the
+ * NSI domain layer narrows to enums — callers may cast to their concrete types.
+ */
+export interface InvestigationRecord {
+  id: string;
+  spaceId: string;
+  solution: string;
+  subjectType: string;
+  subjectId: string;
+  subjectSummary?: string;
+  status: string;
+  severity?: string;
+  summary?: string;
+  conclusion?: string;
+  createdAt: string;
+  startedAt?: string;
+  completedAt?: string;
+  updatedAt: string;
+  conversationId?: string;
+  hypotheses?: Array<Record<string, unknown>>;
+  recommendations?: Array<Record<string, unknown>>;
+  blindSpots?: Array<Record<string, unknown>>;
+  triggerType?: string;
+  concurrencyKey?: string;
+  executedBy?: string;
+  error?: string;
+  triggerFeedback?: Array<Record<string, unknown>>;
+  impact?: { entities: Array<Record<string, unknown>> };
+}
+
+export interface InvestigationsListQuery {
+  status?: string;
+  severity?: string;
+  subjectType?: string;
+  concurrencyKey?: string;
+  sortField?: 'createdAt' | 'completedAt' | 'severity';
+  sortOrder?: 'asc' | 'desc';
+  size: number;
+  from: number;
+}
+
+export interface InvestigationsListResult {
+  items: InvestigationRecord[];
   total: number;
   severityCounts: Record<string, number>;
+}
+
+export interface InvestigationsService {
+  upsert(spaceId: string, doc: Omit<InvestigationRecord, 'id'>): Promise<InvestigationRecord>;
+  get(spaceId: string, id: string): Promise<InvestigationRecord | null>;
+  list(spaceId: string, query: InvestigationsListQuery): Promise<InvestigationsListResult>;
+  getSeverityCounts(
+    spaceId: string,
+    query: { status?: string; solution?: string; subjectType?: string }
+  ): Promise<Record<string, number>>;
 }
 
 const soTypeToRecord = (
   id: string,
   attrs: InvestigationAttributes,
   spaceId: string
-): NightshiftInvestigationRecord => ({
+): InvestigationRecord => ({
   id,
   spaceId,
   solution: 'nightshift',
-  subjectType: attrs.subject_type as InvestigationSubjectType,
+  subjectType: attrs.subject_type,
   subjectId: attrs.subject_id,
   subjectSummary: attrs.subject_summary,
-  status: attrs.status as InvestigationStatus,
-  severity: attrs.severity as Severity | undefined,
+  status: attrs.status,
+  severity: attrs.severity,
   summary: attrs.summary,
   conclusion: attrs.conclusion,
   createdAt: attrs.created_at,
@@ -54,23 +88,23 @@ const soTypeToRecord = (
   completedAt: attrs.completed_at,
   updatedAt: attrs.completed_at ?? attrs.started_at ?? attrs.created_at,
   conversationId: attrs.conversation_id,
-  hypotheses: attrs.hypotheses as InvestigationHypothesis[] | undefined,
-  recommendations: attrs.recommendations as InvestigationRecommendation[] | undefined,
-  blindSpots: attrs.blind_spots as InvestigationBlindSpot[] | undefined,
-  triggerType: attrs.trigger_type as InvestigationTriggerType | undefined,
+  hypotheses: attrs.hypotheses,
+  recommendations: attrs.recommendations,
+  blindSpots: attrs.blind_spots,
+  triggerType: attrs.trigger_type,
   concurrencyKey: attrs.concurrency_key,
   executedBy: attrs.executed_by,
   error: attrs.error,
-  triggerFeedback: attrs.trigger_feedback as TriggerFeedback[] | undefined,
-  impact: attrs.impact as InvestigationImpact | undefined,
+  triggerFeedback: attrs.trigger_feedback,
+  impact: attrs.impact,
 });
 
-const docToAttrs = (doc: Omit<NightshiftInvestigationRecord, 'id'>): InvestigationAttributes => ({
+const docToAttrs = (doc: Omit<InvestigationRecord, 'id'>): InvestigationAttributes => ({
   status: doc.status,
   subject_type: doc.subjectType,
   subject_id: doc.subjectId,
   subject_summary: doc.subjectSummary,
-  trigger_type: (doc.triggerType as InvestigationTriggerType | undefined) ?? 'manual',
+  trigger_type: doc.triggerType ?? 'manual',
   concurrency_key: doc.concurrencyKey,
   created_at: doc.createdAt,
   started_at: doc.startedAt,
@@ -88,18 +122,20 @@ const docToAttrs = (doc: Omit<NightshiftInvestigationRecord, 'id'>): Investigati
   impact: doc.impact,
 });
 
-export interface SoNightshiftInvestigationsServiceDeps {
+export interface SoInvestigationsServiceDeps {
   savedObjects: SavedObjectsServiceStart;
 }
 
 /**
- * SO-backed NightshiftInvestigationsService.
- * Uses the internal SO repository — authorization is enforced at the route / step layer.
+ * SO-backed InvestigationsService.
+ * Uses the internal SO repository; authorization is enforced at the route / step layer.
+ * Uses conversationId as the SO document id so attachment resolve(origin) round-trips
+ * to SO.get(conversationId).
  */
-export class SoNightshiftInvestigationsService implements NightshiftInvestigationsService {
+export class SoInvestigationsService implements InvestigationsService {
   private readonly repo: ISavedObjectsRepository;
 
-  constructor({ savedObjects }: SoNightshiftInvestigationsServiceDeps) {
+  constructor({ savedObjects }: SoInvestigationsServiceDeps) {
     this.repo = savedObjects.createInternalRepository([NIGHTSHIFT_INVESTIGATION_SO_TYPE]);
   }
 
@@ -107,11 +143,7 @@ export class SoNightshiftInvestigationsService implements NightshiftInvestigatio
     return spaceId === 'default' ? undefined : spaceId;
   }
 
-  async upsert(
-    spaceId: string,
-    doc: Omit<NightshiftInvestigationRecord, 'id'>
-  ): Promise<NightshiftInvestigationRecord> {
-    // Use conversationId as the SO id so attachment resolve(origin) works with conversationId.
+  async upsert(spaceId: string, doc: Omit<InvestigationRecord, 'id'>): Promise<InvestigationRecord> {
     const id = doc.conversationId ?? doc.subjectId;
     const attrs = docToAttrs(doc);
     const ns = this.ns(spaceId);
@@ -136,7 +168,7 @@ export class SoNightshiftInvestigationsService implements NightshiftInvestigatio
     return soTypeToRecord(so.id, so.attributes, spaceId);
   }
 
-  async get(spaceId: string, id: string): Promise<NightshiftInvestigationRecord | null> {
+  async get(spaceId: string, id: string): Promise<InvestigationRecord | null> {
     const ns = this.ns(spaceId);
     try {
       const so = await this.repo.get<InvestigationAttributes>(
@@ -151,19 +183,7 @@ export class SoNightshiftInvestigationsService implements NightshiftInvestigatio
     }
   }
 
-  async list(
-    spaceId: string,
-    query: {
-      status?: InvestigationStatus;
-      severity?: Severity;
-      subjectType?: InvestigationSubjectType;
-      concurrencyKey?: string;
-      sortField?: 'createdAt' | 'completedAt' | 'severity';
-      sortOrder?: 'asc' | 'desc';
-      size: number;
-      from: number;
-    }
-  ): Promise<ListResult> {
+  async list(spaceId: string, query: InvestigationsListQuery): Promise<InvestigationsListResult> {
     const ns = this.ns(spaceId);
     const a = (f: string) => `${NIGHTSHIFT_INVESTIGATION_SO_TYPE}.attributes.${f}`;
     const filters: string[] = [];
@@ -190,16 +210,11 @@ export class SoNightshiftInvestigationsService implements NightshiftInvestigatio
         page: Math.floor(query.from / query.size) + 1,
         perPage: query.size,
       }),
-      this.getSeverityCounts(spaceId, {
-        status: query.status,
-        subjectType: query.subjectType,
-      }),
+      this.getSeverityCounts(spaceId, { status: query.status, subjectType: query.subjectType }),
     ]);
 
     return {
-      items: listResult.saved_objects.map((so) =>
-        soTypeToRecord(so.id, so.attributes, spaceId)
-      ),
+      items: listResult.saved_objects.map((so) => soTypeToRecord(so.id, so.attributes, spaceId)),
       total: listResult.total,
       severityCounts: countsResult,
     };
@@ -207,7 +222,7 @@ export class SoNightshiftInvestigationsService implements NightshiftInvestigatio
 
   async getSeverityCounts(
     spaceId: string,
-    query: { status?: InvestigationStatus; solution?: string; subjectType?: InvestigationSubjectType }
+    query: { status?: string; solution?: string; subjectType?: string }
   ): Promise<Record<string, number>> {
     const ns = this.ns(spaceId);
     const a = (f: string) => `${NIGHTSHIFT_INVESTIGATION_SO_TYPE}.attributes.${f}`;

@@ -7,7 +7,7 @@
 
 import type { AttachmentsSetup } from '@kbn/agent-builder-server';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import type { GetNsiClient } from '../nsi_client';
+import type { InvestigationsService } from '../storage/investigations_service';
 import { createImpactAttachmentType } from './impact_attachment_type';
 import { createHypothesesAttachmentType } from './hypotheses_attachment_type';
 import { createRecommendationsAttachmentType } from './recommendations_attachment_type';
@@ -15,24 +15,23 @@ import { createBlindSpotsAttachmentType } from './blind_spots_attachment_type';
 
 /**
  * Registers all four investigation attachment types with the Agent Builder attachment registry.
- * Accepts a lazy `getClient` factory so the types can be registered during `setup()` while the
- * NSI investigations client is only available after `start()` (resolve / isStale are called at
- * request time, after all plugins have started).
+ * Accepts the shared InvestigationsService which this plugin owns and instantiates.
+ * resolve / isStale call the service at request time, after all plugins have started.
  */
 export const registerInvestigationAttachmentTypes = (
   attachmentRegistry: AttachmentsSetup,
-  getClient: GetNsiClient
+  service: InvestigationsService
 ): void => {
   attachmentRegistry.registerType(
-    createImpactAttachmentType(getClient) as AttachmentTypeDefinition
+    createImpactAttachmentType(service) as AttachmentTypeDefinition
   );
   attachmentRegistry.registerType(
-    createHypothesesAttachmentType(getClient) as AttachmentTypeDefinition
+    createHypothesesAttachmentType(service) as AttachmentTypeDefinition
   );
   attachmentRegistry.registerType(
-    createRecommendationsAttachmentType(getClient) as AttachmentTypeDefinition
+    createRecommendationsAttachmentType(service) as AttachmentTypeDefinition
   );
   attachmentRegistry.registerType(
-    createBlindSpotsAttachmentType(getClient) as AttachmentTypeDefinition
+    createBlindSpotsAttachmentType(service) as AttachmentTypeDefinition
   );
 };

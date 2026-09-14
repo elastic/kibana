@@ -16,16 +16,15 @@ import {
   MAX_TEXT_LENGTH,
   SEVERITY_OPTIONS,
 } from '@kbn/significant-events-schema';
-import {
-  INVESTIGATION_STATUSES,
-  INVESTIGATION_SUBJECT_TYPES,
-  INVESTIGATION_TRIGGER_TYPES,
-  MAX_KEYWORD_LENGTH,
-} from '../../common';
 import type { InvestigationAttributes } from '../storage/types';
 
 export const NIGHTSHIFT_INVESTIGATION_SO_TYPE = 'nightshift-investigation';
 
+// Inlined from nightshift_investigations/common to avoid a cross-plugin dependency.
+const INVESTIGATION_STATUSES = ['pending', 'running', 'completed', 'failed', 'cancelled'] as const;
+const INVESTIGATION_SUBJECT_TYPES = ['significant_event', 'alert'] as const;
+const INVESTIGATION_TRIGGER_TYPES = ['automatic', 'manual'] as const;
+const MAX_KEYWORD_LENGTH = 500;
 const MAX_ISO_DATE_LENGTH = 64;
 
 const isoDateStringSchema = schema.string({
