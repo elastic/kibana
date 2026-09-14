@@ -9,21 +9,18 @@
 
 import {
   buildBranchStatsQuery,
-  buildDailyTrendQuery,
   buildFailingFilesQuery,
   buildBranchCountsQuery,
   buildFilePipelineStatsQuery,
   buildTestMetadataQuery,
   buildTestStatsQuery,
   fetchBranchStats,
-  fetchDailyTrend,
   fetchFailingFiles,
   fetchBranchCounts,
   fetchFilePipelineStats,
   fetchSampleFailures,
   fetchTestMetadata,
   fetchTestStats,
-  trendFrom,
   type FlakyTestQueryScope,
 } from './queries';
 
@@ -543,89 +540,6 @@ describe('fetchSampleFailures', () => {
     expect(request.aggs.by_test.terms.size).toBe(3);
     expect(request.aggs.by_test.aggs.latest.top_hits.size).toBe(3);
     expect(request.aggs.by_test.aggs.latest.top_hits._source).toContain('suite.title');
-  });
-});
-
-describe('trendFrom', () => {
-  it('starts at midnight UTC of the first of the days ending with the one containing `to`', () => {
-    expect(trendFrom(new Date('2026-09-07T10:30:00.000Z'), 14)).toEqual(
-      new Date('2026-08-25T00:00:00.000Z')
-    );
-    expect(trendFrom(new Date('2026-09-07T00:00:00.000Z'), 1)).toEqual(
-      new Date('2026-09-07T00:00:00.000Z')
-    );
-  });
-});
-
-describe('buildDailyTrendQuery', () => {
-  it('counts builds and failed builds per test and UTC day for the given tests only', () => {
-    const query = buildDailyTrendQuery(scope, ['playwright'], ['p1', 'p2']);
-
-    expect(query).toContain('@timestamp >= "2026-08-31T00:00:00.000Z"');
-    expect(query).toContain('buildkite.pipeline.slug IN ("kibana-on-merge")');
-    expect(query).toContain(
-      '(event.action == "test-outcome" AND reporter.type IN ("playwright") AND test.outcome IN ("expected", "unexpected", "flaky")) AND test.id IN ("p1", "p2")'
-    );
-    expect(query).toContain(
-      'EVAL failed = CASE(test.outcome IN ("unexpected", "flaky"), 1, 0), day = DATE_TRUNC(1 day, @timestamp)'
-    );
-    expect(query).toContain(
-      'STATS builds = COUNT_DISTINCT(buildkite.build.id), failed_builds = COUNT_DISTINCT(CASE(failed == 1, buildkite.build.id, NULL)) BY test.id, day'
-    );
-  });
-});
-
-describe('fetchDailyTrend', () => {
-  const tests = [
-    { testId: 'j1', framework: 'jest' as const },
-    { testId: 'p1', framework: 'playwright' as const },
-  ];
-
-  it('returns an empty map without a query when there are no tests or no days', async () => {
-    const { client, esql } = mockEs([]);
-
-    expect(await fetchDailyTrend(client, scope, [], 14)).toEqual(new Map());
-    expect(await fetchDailyTrend(client, scope, tests, 0)).toEqual(new Map());
-    expect(esql).not.toHaveBeenCalled();
-  });
-
-  it('fills one entry per test with zeros for days without rows, from the trend start', async () => {
-    const { client, esql } = mockEs([]);
-    esql
-      .mockReturnValueOnce({
-        toRecords: jest.fn().mockResolvedValue({
-          records: [
-            { test_id: 'j1', day: '2026-09-05T00:00:00.000Z', builds: 7, failed_builds: 2 },
-            { test_id: 'j1', day: '2026-09-06T00:00:00.000Z', builds: 5, failed_builds: 0 },
-            // outside the requested days: ignored
-            { test_id: 'j1', day: '2026-09-03T00:00:00.000Z', builds: 9, failed_builds: 9 },
-          ],
-        }),
-      })
-      .mockReturnValueOnce({ toRecords: jest.fn().mockResolvedValue({ records: [] }) });
-
-    const trends = await fetchDailyTrend(client, scope, tests, 3);
-
-    expect(esql).toHaveBeenCalledTimes(2);
-    // the query window starts at the trend start, not the report window start
-    const queries = esql.mock.calls.map(([{ query }]) => query as string);
-    expect(queries[0]).toContain('@timestamp >= "2026-09-05T00:00:00.000Z"');
-    expect(queries[0]).toContain('@timestamp < "2026-09-07T00:00:00.000Z"');
-    expect(queries[0]).toContain('test.id IN ("j1")');
-    expect(queries[1]).toContain('test.id IN ("p1")');
-
-    expect(trends.get('j1')).toEqual({
-      days: 3,
-      from: new Date('2026-09-05T00:00:00.000Z'),
-      buildsPerDay: [7, 5, 0],
-      failedBuildsPerDay: [2, 0, 0],
-    });
-    expect(trends.get('p1')).toEqual({
-      days: 3,
-      from: new Date('2026-09-05T00:00:00.000Z'),
-      buildsPerDay: [0, 0, 0],
-      failedBuildsPerDay: [0, 0, 0],
-    });
   });
 });
 

@@ -15,7 +15,6 @@ import { ESQL_ROW_LIMIT } from './esql';
 import {
   fetchBranchCounts,
   fetchBranchStats,
-  fetchDailyTrend,
   fetchFailingFiles,
   fetchFilePipelineStats,
   fetchSampleFailures,
@@ -41,7 +40,6 @@ import {
   type FlakyTestReport,
   type FlakyTestReportOptions,
   type FlakyTestReportThresholds,
-  type FlakyTestTrend,
   type TestFramework,
 } from './schema';
 
@@ -182,7 +180,7 @@ const elapsed = (startedAt: number): string =>
  * Failures are rare, so everything starts from them: find files with failures, aggregate
  * per-test execution and build counts scoped to those files, check the thresholds branch by
  * branch and drop the tests that no longer execute, then decorate the highest ranked ones with
- * metadata, per-branch and per-pipeline stats, trends and recent failure samples.
+ * metadata, per-branch and per-pipeline stats and recent failure samples.
  */
 const buildReport = async (
   es: ESClient,
@@ -191,9 +189,6 @@ const buildReport = async (
 ): Promise<FlakyTestReport> => {
   if (!Number.isInteger(options.lookbackDays) || options.lookbackDays < 1) {
     throw new Error(`lookbackDays must be a positive integer, got ${options.lookbackDays}`);
-  }
-  if (!Number.isInteger(options.trendDays) || options.trendDays < 0) {
-    throw new Error(`trendDays must be a non-negative integer, got ${options.trendDays}`);
   }
   if (options.classifications.length === 0) {
     throw new Error(
@@ -305,10 +300,9 @@ const buildReport = async (
 
   let branchStats = new Map<string, FlakyTestBranchStats[]>();
   let samples = new Map<string, TestFailureSamples>();
-  let trends = new Map<string, FlakyTestTrend>();
   let pipelineStats = new Map<string, FlakyTestPipelineStats[]>();
   if (admitted.length > 0) {
-    [branchStats, samples, trends, pipelineStats] = await Promise.all([
+    [branchStats, samples, pipelineStats] = await Promise.all([
       timed('per-branch stats', fetchBranchStats(es, scope, admitted)),
       timed(
         'failure samples',
@@ -318,10 +312,6 @@ const buildReport = async (
           admitted.map((entry) => entry.testId),
           options.samplesPerTest
         )
-      ),
-      timed(
-        `${options.trendDays}-day trends`,
-        fetchDailyTrend(es, scope, admitted, options.trendDays)
       ),
       timed('per-pipeline stats', fetchFilePipelineStats(es, scope, admitted)),
     ]);
@@ -333,7 +323,6 @@ const buildReport = async (
     latestRun: latestRunAcrossBranches(branchStats.get(entry.testId)),
     byBranch: branchStats.get(entry.testId) ?? [],
     sampleFailures: samples.get(entry.testId)?.failures ?? [],
-    trend: trends.get(entry.testId),
   });
 
   // One file entry per (path, framework) over the tests of both lists, in ranking order
