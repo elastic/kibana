@@ -43,9 +43,3 @@ export interface IrEvaluatorConfig<TOutput = unknown, TReferenceOutput = unknown
   /** Filter evaluation to only indices present in ground truth. Default: from env var INDEX_FOCUSED_IR_EVAL */
   filterByGroundTruthIndices?: boolean;
 }
-
-/** @deprecated Use {@link IrEvaluatorConfig} instead. */
-export type RagEvaluatorConfig<TOutput = unknown, TReferenceOutput = unknown> = IrEvaluatorConfig<
-  TOutput,
-  TReferenceOutput
->;

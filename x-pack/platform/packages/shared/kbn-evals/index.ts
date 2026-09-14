@@ -165,12 +165,10 @@ export {
   createNdcgAtKEvaluator,
   createMapAtKEvaluator,
   createIrEvaluators,
-  createRagEvaluators,
 } from './src/evaluators/ir';
 export type {
   GroundTruth,
   IrEvaluatorConfig,
-  RagEvaluatorConfig,
   RetrievedDocsExtractor,
   GroundTruthExtractor,
   RetrievedDoc,

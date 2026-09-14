@@ -130,7 +130,9 @@ SELECTED_EVALUATORS="Factuality,Relevance,Groundedness" node scripts/playwright 
 IR_EVAL_K=5 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
 
 # Run IR evaluators with multiple K values using patterns (Precision@K matches Precision@5, Precision@10, etc.)
-SELECTED_EVALUATORS="Precision@K,Recall@K,F1@K,NDCG@K,MRR@K,HitRate@K,MAP@K,Factuality" IR_EVAL_K=5,10,20 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
+# This suite registers Precision, Recall, F1 and HitRate only. MRR, NDCG and MAP are omitted because
+# multi-hop search concatenates results from several tool calls in call order, not by relevance rank.
+SELECTED_EVALUATORS="Precision@K,Recall@K,F1@K,HitRate@K,Factuality" IR_EVAL_K=5,10,20 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
 
 # Override IR evaluator K value (supports comma-separated values for multi-K evaluation)
 IR_EVAL_K=5,10,20 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts

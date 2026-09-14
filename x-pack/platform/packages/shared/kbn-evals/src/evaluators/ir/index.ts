@@ -355,6 +355,3 @@ export function createIrEvaluators<TOutput = unknown, TReferenceOutput = unknown
     createMapAtKEvaluator(config, kValue),
   ]);
 }
-
-/** @deprecated Use {@link createIrEvaluators} instead. */
-export const createRagEvaluators = createIrEvaluators;

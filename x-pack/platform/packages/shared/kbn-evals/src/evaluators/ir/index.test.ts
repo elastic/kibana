@@ -14,7 +14,6 @@ import {
   createNdcgAtKEvaluator,
   createMapAtKEvaluator,
   createIrEvaluators,
-  createRagEvaluators,
 } from '.';
 import type { IrEvaluatorConfig, GroundTruth, RetrievedDoc } from './types';
 
@@ -986,12 +985,6 @@ describe('IR Evaluators', () => {
 
       // Without filtering, irrelevant doc_X occupies the single top-K slot
       expect(result.score).toBe(0);
-    });
-  });
-
-  describe('deprecated createRagEvaluators alias', () => {
-    it('is the same function as createIrEvaluators', () => {
-      expect(createRagEvaluators).toBe(createIrEvaluators);
     });
   });
 });
