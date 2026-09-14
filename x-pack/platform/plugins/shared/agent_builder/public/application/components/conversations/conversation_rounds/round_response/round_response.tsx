@@ -27,7 +27,6 @@ export interface RoundResponseProps {
   steps: ConversationRoundStep[];
   isLoading: boolean;
   hasError: boolean;
-  isLastRound: boolean;
   conversationAttachments?: VersionedAttachment[];
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
@@ -39,7 +38,6 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   response,
   steps,
   isLoading,
-  isLastRound,
   conversationAttachments,
   attachmentRefs,
   conversationId,
@@ -83,12 +81,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
       </EuiFlexItem>
       {!isLoading && !hasError && (
         <EuiFlexItem grow={false}>
-          <RoundResponseActions
-            content={response.message}
-            isVisible
-            isLastRound={isLastRound}
-            rawRound={rawRound}
-          />
+          <RoundResponseActions content={response.message} isVisible rawRound={rawRound} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

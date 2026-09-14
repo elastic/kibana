@@ -1,0 +1,90 @@
+version: "1"
+name: Create detection rule
+description: >
+  AlertZero action: creates a custom query detection rule. Executed by the
+  investigation proposal gate once an analyst approves, so the rule is
+  attributed to the approver.
+enabled: true
+tags:
+  # Generic tag every action workflow carries, so the catalog can be
+  # discovered by tag rather than a hardcoded list.
+  - action
+  - alertzero
+consts:
+  # Self-describing catalog metadata, read back by the proposals service when a
+  # proposal referencing this workflow is created or rendered. Metadata has to
+  # live under `consts`: unknown top-level keys are stripped by the schema.
+  actionMetadata:
+    name: Create detection rule
+    description: Creates a new, disabled custom query detection rule.
+    category: tune
+    impact: low
+    reversible: true
+    approvalPolicy: always-gate
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        actionInput:
+          type: object
+          description: >
+            Rule fields. Every action workflow takes a single `actionInput`
+            object so the generic gate workflow never needs to know an
+            action's parameter names.
+          properties:
+            name:
+              type: string
+              description: Rule name.
+            description:
+              type: string
+              description: Rule description.
+            query:
+              type: string
+              description: KQL query the rule runs.
+            index:
+              type: array
+              items:
+                type: string
+              description: Index patterns the rule searches.
+            severity:
+              type: string
+              enum: ["low", "medium", "high", "critical"]
+            risk_score:
+              type: number
+          required:
+            - name
+            - description
+            - query
+            - index
+      required:
+        - actionInput
+      additionalProperties: false
+outputs:
+  - name: ruleId
+    type: string
+  - name: ruleName
+    type: string
+steps:
+  # Always creates the rule disabled — the step ignores `rule.enabled`. Add a
+  # `security.enableRule` step if an active rule is ever wanted.
+  - name: create_rule
+    type: security.createRule
+    with:
+      rule:
+        type: query
+        language: kuery
+        name: "{{ inputs.actionInput.name }}"
+        description: "{{ inputs.actionInput.description }}"
+        query: "{{ inputs.actionInput.query }}"
+        index: "${{ inputs.actionInput.index }}"
+        severity: "{{ inputs.actionInput.severity | default: 'low' }}"
+        risk_score: "${{ inputs.actionInput.risk_score | default: 21 }}"
+
+  # `workflow.execute` declares its output as unknown, so the parent falls back
+  # to a heuristic read of the last step unless the child emits explicitly.
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      ruleId: "{{ steps.create_rule.output.id }}"
+      ruleName: "{{ steps.create_rule.output.name }}"
