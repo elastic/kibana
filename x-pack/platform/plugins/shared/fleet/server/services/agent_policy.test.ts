@@ -887,6 +887,7 @@ describe('Agent policy', () => {
     });
 
     it('should force-revoke agents before deleting an agentless policy', async () => {
+      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const agentlessSoClient = getSavedObjectMock({
         revision: 1,
         name: 'Test agentless',
@@ -919,6 +920,7 @@ describe('Agent policy', () => {
     });
 
     it('should force-revoke agents before calling deleteAgentlessAgent', async () => {
+      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const agentlessSoClient = getSavedObjectMock({
         revision: 1,
         name: 'Test agentless',
