@@ -234,6 +234,16 @@ describe('ConversationService.appendUserMessage', () => {
     await append('m1', [{ type: 'text', data: { text: 'same' } }]);
     const conversation = await append('m2', [{ type: 'text', data: { text: 'same' } }]);
     expect(conversation.attachments).toHaveLength(1);
+
+    const [attachment] = conversation.attachments ?? [];
+    const refsOf = (index: number) => {
+      const event = conversation.events?.[index];
+
+      return event?.type === TimelineEventType.userMessage ? event.data.attachment_refs : undefined;
+    };
+    // Both messages reference it, the second one without storing a copy.
+    expect(refsOf(0)).toEqual([expect.objectContaining({ attachment_id: attachment.id })]);
+    expect(refsOf(1)).toEqual([expect.objectContaining({ attachment_id: attachment.id })]);
   });
 
   it('authorizes private/shared writes independently of attribution and checks agent use', async () => {
