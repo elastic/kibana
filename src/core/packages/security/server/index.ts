@@ -32,6 +32,7 @@ export type {
   ServiceAccountWorkloadBinder,
   ServiceAccountWorkloadBinding,
   BindServiceAccountWorkloadParams,
+  ServiceAccountWorkloadRef,
   ServiceAccountWorkloadCoordinates,
 } from '@kbn/core-security-common';
 export type {

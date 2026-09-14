@@ -86,26 +86,36 @@ export interface ServiceAccountWorkloadBinding {
 }
 
 /**
- * Identifies a workload. Workload IDs are not guaranteed unique across spaces, so the space is
- * part of a binding's identity and is supplied explicitly on every path: a binding is written,
- * read, removed and executed under one and the same set of coordinates.
+ * Names a workload within the space of the request that is acting on it. Used by the paths that
+ * change a binding, which take the space from the authenticated request.
  *
  * @public
  */
-export interface ServiceAccountWorkloadCoordinates {
+export interface ServiceAccountWorkloadRef {
   /** Kind of workload within the operation, e.g. `rule` or `workflow`. */
   workloadType: string;
   workloadId: string;
+}
+
+/**
+ * Fully identifies a workload, space included. Workload IDs are not guaranteed unique across
+ * spaces, so the space is part of a binding's identity.
+ *
+ * @public
+ */
+export interface ServiceAccountWorkloadCoordinates extends ServiceAccountWorkloadRef {
   /** The space the workload lives in. */
   spaceId: string;
 }
 
 /**
- * Parameters for binding a service account to a workload.
+ * Parameters for binding a service account to a workload. The binding is created in the space of
+ * the request, and the returned {@link ServiceAccountWorkloadBinding} reports which space that
+ * was, for a caller that has to name it again later.
  *
  * @public
  */
-export interface BindServiceAccountWorkloadParams extends ServiceAccountWorkloadCoordinates {
+export interface BindServiceAccountWorkloadParams extends ServiceAccountWorkloadRef {
   serviceAccountId: string;
 }
 

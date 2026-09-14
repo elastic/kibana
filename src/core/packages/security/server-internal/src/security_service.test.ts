@@ -227,12 +227,7 @@ describe('SecurityService', function () {
         } as unknown as CoreSecurityDelegateContract);
 
         const request = {} as any;
-        const params = {
-          serviceAccountId: 'sa',
-          workloadType: 'rule',
-          workloadId: 'rule-id',
-          spaceId: 'default',
-        };
+        const params = { serviceAccountId: 'sa', workloadType: 'rule', workloadId: 'rule-id' };
         await handle.bindWorkload(request, params);
 
         expect(bindWorkload).toHaveBeenCalledWith('alerting_rule', request, params);

@@ -22,5 +22,6 @@ export type {
   ServiceAccountWorkloadBinder,
   ServiceAccountWorkloadBinding,
   BindServiceAccountWorkloadParams,
+  ServiceAccountWorkloadRef,
   ServiceAccountWorkloadCoordinates,
 } from './src/service_accounts';

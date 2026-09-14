@@ -12,6 +12,7 @@ import type {
   BindServiceAccountWorkloadParams,
   ServiceAccountWorkloadBinding,
   ServiceAccountWorkloadCoordinates,
+  ServiceAccountWorkloadRef,
 } from '@kbn/core-security-common';
 
 /**
@@ -56,7 +57,8 @@ export interface ServiceAccountOperationRegistration {
 export interface ServiceAccountOperationHandle {
   /**
    * Binds a service account to a workload, so that the workload runs as that account until it
-   * is unbound.
+   * is unbound. The binding is created in the space of the request, which the returned binding
+   * reports for a caller that has to name it again at execution time.
    */
   bindWorkload(
     request: KibanaRequest,
@@ -64,10 +66,10 @@ export interface ServiceAccountOperationHandle {
   ): Promise<ServiceAccountWorkloadBinding>;
 
   /**
-   * Removes a workload's binding. Succeeds whether or not a binding existed, and takes effect on
-   * a running execution at its next credential mint.
+   * Removes the binding of a workload in the space of the request. Succeeds whether or not a
+   * binding existed, and takes effect on a running execution at its next credential mint.
    */
-  unbindWorkload(request: KibanaRequest, params: ServiceAccountWorkloadCoordinates): Promise<void>;
+  unbindWorkload(request: KibanaRequest, params: ServiceAccountWorkloadRef): Promise<void>;
 
   /**
    * Returns the workload's binding, or `null` when it has none. Throws if the stored binding fails

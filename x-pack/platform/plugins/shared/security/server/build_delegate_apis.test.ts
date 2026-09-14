@@ -247,7 +247,9 @@ describe('buildSecurityApi', () => {
   });
 
   describe('workload bindings', () => {
-    const WORKLOAD = { workloadType: 'rule', workloadId: 'rule-id', spaceId: 'default' };
+    // Mutations name a workload; reads and executions name the space it lives in as well.
+    const WORKLOAD = { workloadType: 'rule', workloadId: 'rule-id' };
+    const WORKLOAD_IN_SPACE = { ...WORKLOAD, spaceId: 'default' };
 
     it('delegates bindWorkload, forwarding the operation type Core supplied', async () => {
       const request = httpServerMock.createKibanaRequest();
@@ -278,20 +280,27 @@ describe('buildSecurityApi', () => {
       const binding = { operationType: 'alerting_rule' } as never;
       serviceAccounts!.workloads.getBinding.mockResolvedValue(binding);
 
-      await expect(api.serviceAccounts.getWorkloadBinding('alerting_rule', WORKLOAD)).resolves.toBe(
-        binding
+      await expect(
+        api.serviceAccounts.getWorkloadBinding('alerting_rule', WORKLOAD_IN_SPACE)
+      ).resolves.toBe(binding);
+      expect(serviceAccounts!.workloads.getBinding).toHaveBeenCalledWith(
+        'alerting_rule',
+        WORKLOAD_IN_SPACE
       );
-      expect(serviceAccounts!.workloads.getBinding).toHaveBeenCalledWith('alerting_rule', WORKLOAD);
     });
 
     it('delegates withScopedRequest, passing the callback through', async () => {
       const fn = jest.fn();
 
-      await api.serviceAccounts.withScopedRequestForWorkload('alerting_rule', WORKLOAD, fn);
+      await api.serviceAccounts.withScopedRequestForWorkload(
+        'alerting_rule',
+        WORKLOAD_IN_SPACE,
+        fn
+      );
 
       expect(serviceAccounts!.workloads.withScopedRequest).toHaveBeenCalledWith(
         'alerting_rule',
-        WORKLOAD,
+        WORKLOAD_IN_SPACE,
         fn
       );
     });
@@ -316,12 +325,16 @@ describe('buildSecurityApi', () => {
       ],
       [
         'getWorkloadBinding',
-        () => api.serviceAccounts.getWorkloadBinding('alerting_rule', WORKLOAD),
+        () => api.serviceAccounts.getWorkloadBinding('alerting_rule', WORKLOAD_IN_SPACE),
       ],
       [
         'withScopedRequestForWorkload',
         () =>
-          api.serviceAccounts.withScopedRequestForWorkload('alerting_rule', WORKLOAD, jest.fn()),
+          api.serviceAccounts.withScopedRequestForWorkload(
+            'alerting_rule',
+            WORKLOAD_IN_SPACE,
+            jest.fn()
+          ),
       ],
     ])('rejects %s when service accounts are not enabled', async (_name, invoke) => {
       serviceAccounts = null;

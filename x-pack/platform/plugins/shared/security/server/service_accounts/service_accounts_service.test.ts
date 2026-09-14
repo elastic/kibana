@@ -48,6 +48,7 @@ describe('ServiceAccountsService', () => {
       encryptedSavedObjects,
       canEncrypt: true,
       getCurrentProfileId: jest.fn().mockResolvedValue(null),
+      getSpaceId: jest.fn().mockReturnValue('default'),
       ...overrides,
     };
   };

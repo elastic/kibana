@@ -40,6 +40,7 @@ export interface ServiceAccountsServiceStartParams {
   canEncrypt: boolean;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
   getCurrentProfileId: (request: KibanaRequest) => Promise<string | null>;
+  getSpaceId: (request: KibanaRequest) => string;
 }
 
 export class ServiceAccountsService {
@@ -60,6 +61,7 @@ export class ServiceAccountsService {
     canEncrypt,
     getCurrentUser,
     getCurrentProfileId,
+    getSpaceId,
   }: ServiceAccountsServiceStartParams): ServiceAccountsServiceStart | null {
     if (!config.serviceAccounts?.enabled) {
       this.logger.debug('Service accounts are not enabled.');
@@ -110,6 +112,7 @@ export class ServiceAccountsService {
         checkPrivilegesWithRequest,
         getCurrentUser,
         getCurrentProfileId,
+        getSpaceId,
         canEncrypt,
       }),
     };

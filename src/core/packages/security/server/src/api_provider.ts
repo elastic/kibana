@@ -12,6 +12,7 @@ import type {
   BindServiceAccountWorkloadParams,
   ServiceAccountWorkloadBinding,
   ServiceAccountWorkloadCoordinates,
+  ServiceAccountWorkloadRef,
 } from '@kbn/core-security-common';
 
 import type { CoreAuditService } from './audit';
@@ -64,10 +65,10 @@ export type AuditServiceContract = CoreAuditService;
  */
 export interface ServiceAccountsServiceContract extends CoreServiceAccountsService {
   /**
-   * Binds a workload to a service account.
+   * Binds a workload to a service account, in the space of the request.
    *
    * @param operationType - The type of operation.
-   * @param request - The request.
+   * @param request - The request, whose space the binding is created in.
    * @param params - The parameters.
    * @returns The workload binding.
    */
@@ -78,16 +79,16 @@ export interface ServiceAccountsServiceContract extends CoreServiceAccountsServi
   ): Promise<ServiceAccountWorkloadBinding>;
 
   /**
-   * Unbinds a workload from a service account.
+   * Unbinds a workload from a service account, in the space of the request.
    * @param operationType - The type of operation.
-   * @param request - The request.
+   * @param request - The request, whose space the binding is removed from.
    * @param params - The parameters.
    * @returns A promise that resolves when the workload is unbound.
    */
   unbindWorkload(
     operationType: string,
     request: KibanaRequest,
-    params: ServiceAccountWorkloadCoordinates
+    params: ServiceAccountWorkloadRef
   ): Promise<void>;
 
   /**

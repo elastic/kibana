@@ -13,6 +13,7 @@ import type {
   BindServiceAccountWorkloadParams,
   ServiceAccountWorkloadBinding,
   ServiceAccountWorkloadCoordinates,
+  ServiceAccountWorkloadRef,
 } from '@kbn/core-security-server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 
@@ -45,7 +46,7 @@ export interface ServiceAccountWorkloadBindingsApi {
   unbindWorkload(
     operationType: string,
     request: KibanaRequest,
-    params: ServiceAccountWorkloadCoordinates
+    params: ServiceAccountWorkloadRef
   ): Promise<void>;
 
   getBinding(
@@ -72,6 +73,10 @@ export interface ServiceAccountWorkloadBindingsOptions {
    * bindings traceable to a person; failures are tolerated rather than failing the bind.
    */
   getCurrentProfileId: (request: KibanaRequest) => Promise<string | null>;
+  /**
+   * Resolves the space a request is acting in.
+   */
+  getSpaceId: (request: KibanaRequest) => string;
   /** Whether saved object encryption is possible at all; without it, bindings cannot be trusted. */
   canEncrypt: boolean;
 }
@@ -84,6 +89,7 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
   private readonly checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
   private readonly getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
   private readonly getCurrentProfileId: (request: KibanaRequest) => Promise<string | null>;
+  private readonly getSpaceId: (request: KibanaRequest) => string;
   private readonly canEncrypt: boolean;
 
   constructor({
@@ -94,6 +100,7 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     checkPrivilegesWithRequest,
     getCurrentUser,
     getCurrentProfileId,
+    getSpaceId,
     canEncrypt,
   }: ServiceAccountWorkloadBindingsOptions) {
     this.logger = logger;
@@ -103,13 +110,14 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     this.checkPrivilegesWithRequest = checkPrivilegesWithRequest;
     this.getCurrentUser = getCurrentUser;
     this.getCurrentProfileId = getCurrentProfileId;
+    this.getSpaceId = getSpaceId;
     this.canEncrypt = canEncrypt;
   }
 
   async bindWorkload(
     operationType: string,
     request: KibanaRequest,
-    { serviceAccountId, workloadType, workloadId, spaceId }: BindServiceAccountWorkloadParams
+    { serviceAccountId, workloadType, workloadId }: BindServiceAccountWorkloadParams
   ): Promise<ServiceAccountWorkloadBinding> {
     this.ensureAvailable();
 
@@ -127,7 +135,7 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
       workloadType,
       workloadId,
       serviceAccountId,
-      spaceId,
+      spaceId: this.getSpaceId(request),
       boundBy: await resolveWorkloadBinder(user, () => this.resolveUserProfileId(request)),
       boundAt: new Date().toISOString(),
       // Regenerated on every bind so a rebind cannot be rolled back to a previous binding by
@@ -145,7 +153,7 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
   async unbindWorkload(
     operationType: string,
     request: KibanaRequest,
-    params: ServiceAccountWorkloadCoordinates
+    { workloadType, workloadId }: ServiceAccountWorkloadRef
   ): Promise<void> {
     this.ensureAvailable();
 
@@ -153,8 +161,12 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     // as much a privileged change as granting one.
     await this.ensureCanManage(request, 'unbind a service account from a workload');
 
-    const { workloadType, workloadId } = params;
-    const deleted = await this.store.delete(this.toCoordinates(operationType, params));
+    const deleted = await this.store.delete({
+      operationType,
+      workloadType,
+      workloadId,
+      spaceId: this.getSpaceId(request),
+    });
 
     if (deleted) {
       this.logger.debug(
