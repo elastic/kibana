@@ -227,6 +227,33 @@ describe('saved search embeddable', () => {
 
       expect(discoverComponent.queryByTestId('dscFieldStatsEmbeddedContent')).toBeInTheDocument();
     });
+
+    it('should render pattern analysis table in PATTERN_LEVEL view mode and not fetch documents', async () => {
+      const { search } = createSearchFnMock(0);
+      runtimeState = getInitialRuntimeState({
+        searchMock: search,
+        partialState: { viewMode: VIEW_MODE.PATTERN_LEVEL },
+      });
+
+      const { Component, api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: mockedDashboardApi,
+      });
+      await waitOneTick(); // wait for build to complete
+
+      const discoverComponent = render(<Component />);
+
+      // Pattern analysis mode should not trigger document fetching
+      expect(search).not.toHaveBeenCalled();
+      expect(api.dataLoading$.getValue()).toBe(false);
+
+      expect(
+        discoverComponent.queryByTestId('dscPatternAnalysisEmbeddedContent')
+      ).toBeInTheDocument();
+    });
   });
 
   describe('missing data view', () => {
