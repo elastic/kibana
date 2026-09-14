@@ -8,6 +8,7 @@
 import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { MAX_CONVERSATION_SEARCH_PER_PAGE } from '../../../common/constants';
 import { useConversationList } from './use_conversation_list';
 
 const mockAddError = jest.fn();
@@ -128,7 +129,7 @@ describe('useConversationList', () => {
           query: 'sales',
           agentId: 'agent-1',
           page: 1,
-          perPage: 25,
+          perPage: MAX_CONVERSATION_SEARCH_PER_PAGE,
         });
       });
     });
@@ -177,11 +178,11 @@ describe('useConversationList', () => {
     });
 
     it('stops paging once the next page would exceed the ES result window', async () => {
-      // MAX_RESULT_WINDOW = 10_000, SEARCH_PAGE_SIZE = 25 → window caps at page 400.
+      // MAX_RESULT_WINDOW = 10_000, MAX_CONVERSATION_SEARCH_PER_PAGE = 50 → window caps at page 200.
       // total = 20_000 keeps `page * perPage < total` true, so only the window boundary
       // (not exhausted results) should stop paging here.
       mockSearch.mockResolvedValue({
-        pagination: { total: 20_000, page: 400, per_page: 25 },
+        pagination: { total: 20_000, page: 200, per_page: MAX_CONVERSATION_SEARCH_PER_PAGE },
         results: [],
       });
 

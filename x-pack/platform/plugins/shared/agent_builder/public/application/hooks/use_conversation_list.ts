@@ -10,6 +10,7 @@ import { useDebouncedValue } from '@kbn/react-hooks';
 import { useInfiniteQuery } from '@kbn/react-query';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { i18n } from '@kbn/i18n';
+import { MAX_CONVERSATION_SEARCH_PER_PAGE } from '../../../common/constants';
 import { queryKeys } from '../query_keys';
 import { dedupeById, getNextConversationPageParam } from '../utils/conversation_pagination';
 import { useAgentBuilderServices } from './use_agent_builder_service';
@@ -17,7 +18,6 @@ import { useKibana } from './use_kibana';
 
 const DEFAULT_CONVERSATIONS_PAGE_SIZE = 50;
 const SEARCH_DEBOUNCE_MS = 250;
-const SEARCH_PAGE_SIZE = 25;
 
 const searchErrorToastTitle = i18n.translate('xpack.agentBuilder.conversationSearch.errorTitle', {
   defaultMessage: 'Unable to search conversations',
@@ -62,7 +62,7 @@ export const useConversationList = ({
         query: trimmedQuery,
         agentId,
         page: pageParam ?? 1,
-        perPage: SEARCH_PAGE_SIZE,
+        perPage: MAX_CONVERSATION_SEARCH_PER_PAGE,
       }),
     getNextPageParam: getNextConversationPageParam,
     enabled: isSearching,
