@@ -50,12 +50,7 @@ import { RetryingLogRecordExporter } from './retrying_log_exporter';
 
 const DISPOSE_TIMEOUT_MS = 5_000;
 
-/**
- * Extra headroom added to the batch processor's `exportTimeoutMillis` on top of the retry
- * budget (`maxElapsedTime`): the processor abandons an export operation after that timeout,
- * so it must outlast the budget plus one final in-flight attempt (the exporter's own request
- * timeout defaults to 10s).
- */
+/** Headroom over the retry budget so the processor outlasts it plus one in-flight attempt. */
 const EXPORT_TIMEOUT_MARGIN_MS = 30_000;
 
 const isPromiseLike = (value: unknown): value is PromiseLike<unknown> =>
@@ -238,22 +233,15 @@ export class OtelAppender implements DisposableAppender {
     url: schema.string(),
     headers: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
     /**
-     * Serverless / internal only. Maximum number of log records buffered in memory by the batch
-     * processor while the endpoint is unreachable; once full, new records are dropped. Note the
-     * queue is count-based: OTel has no byte-size cap for log bodies, so the memory bound is
-     * `maxQueueSize` times the assumed maximum event size.
-     *
-     * Floored at 512 (the SDK's default `maxExportBatchSize`): below that, the SDK would warn on
-     * boot and silently shrink its export batches to fit the queue.
+     * Serverless / internal only. Max log records buffered by the batch processor; once full,
+     * new records are dropped. Floored at 512, the SDK's default export batch size.
      */
     maxQueueSize: offeringBasedSchema({
       serverless: schema.number({ defaultValue: 15_000, min: 512, max: 1_000_000 }),
     }),
     /**
-     * Serverless / internal only. Wall-clock budget during which failed exports are retried
-     * (transient failures only: timeouts, common network errors, HTTP 429/502/503/504 and
-     * equivalent gRPC statuses) before the batch is dropped. The SDK's built-in retry only
-     * covers ~13s; this enables the custom retry layer ({@link RetryingLogRecordExporter}).
+     * Serverless / internal only. How long transient export failures are retried before the
+     * batch is dropped; enables {@link RetryingLogRecordExporter}.
      */
     maxElapsedTime: offeringBasedSchema({
       serverless: schema.duration({ defaultValue: '2m' }),
@@ -321,10 +309,8 @@ export class OtelAppender implements DisposableAppender {
       })
     ),
     dropResourceAttributes: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
-    // The YAML schema gates these two options on the serverless offering via a context ref
-    // that only the config service provides. This runtime path is internal (plugins calling
-    // `LoggingServiceSetup.configure`), so they are allowed plainly here — with no defaults,
-    // so a plugin that doesn't opt in keeps the SDK behavior.
+    // The YAML schema gates these on the serverless offering; this runtime path is internal
+    // (plugins calling `LoggingServiceSetup.configure`), so no gating and no defaults.
     maxQueueSize: schema.maybe(schema.number({ min: 512, max: 1_000_000 })),
     maxElapsedTime: schema.maybe(schema.duration()),
   });
@@ -342,9 +328,7 @@ export class OtelAppender implements DisposableAppender {
     const meterProvider = metrics.getMeterProvider();
     const maxElapsedTimeMs = config.maxElapsedTime?.asMilliseconds();
     const baseExporter = createExporter(config, meterProvider);
-    // When a retry budget is configured, wrap the exporter in the custom retry layer: the
-    // SDK's built-in retry gives up after ~13s, far short of the collector unavailability
-    // (~2m) Kibana serverless must tolerate.
+    // The SDK's built-in retry gives up after ~13s; the retry layer extends it to the budget.
     const exporter =
       maxElapsedTimeMs !== undefined
         ? new RetryingLogRecordExporter(baseExporter, maxElapsedTimeMs)
@@ -414,11 +398,8 @@ export class OtelAppender implements DisposableAppender {
         new BatchLogRecordProcessor({
           exporter,
           selfObsMeterProvider: meterProvider,
-          // Bounded in-memory buffer; on overflow, new records are dropped (count-based:
-          // OTel imposes no byte-size cap on log bodies).
           ...(config.maxQueueSize !== undefined && { maxQueueSize: config.maxQueueSize }),
-          // The processor abandons an export after exportTimeoutMillis (SDK default: 30s),
-          // so it must outlast the retry budget for the budget to be honored.
+          // The processor abandons exports after this timeout, so it must outlast the retry budget.
           ...(maxElapsedTimeMs !== undefined && {
             exportTimeoutMillis: maxElapsedTimeMs + EXPORT_TIMEOUT_MARGIN_MS,
           }),

@@ -8,19 +8,12 @@
  */
 
 /**
- * End-to-end coverage for the otel appender's retry budget (`maxElapsedTime`) and bounded
- * queue (`maxQueueSize`) against the REAL OTel SDK pipeline (BatchLogRecordProcessor +
- * OTLPLogExporter) and an in-process collector — nothing mocked. The unit tests mock the
- * SDK, so they cannot catch drift in the SDK error shapes that the retry layer's
- * transient-failure classification depends on; this suite exists to catch exactly that,
- * e.g. on OTel SDK upgrades.
- *
- * The gRPC transport is used because the SDK's HTTP transport loads `http`/`https` via
- * dynamic `import()`, which jest's VM sandbox does not support. gRPC is also the transport
- * where the retry layer matters most: the JS SDK has NO built-in retry for gRPC exports, so
- * the classification of gRPC statuses (UNAVAILABLE etc.) below is exercised for real here.
- * gRPC replies also carry no inner SDK retries, so every request the collector sees maps
- * 1:1 to one attempt by the retry layer, making the assertions exact.
+ * Covers the otel appender's retry budget (`maxElapsedTime`) and bounded queue (`maxQueueSize`)
+ * against the real OTel SDK pipeline and an in-process collector, to catch drift in the SDK
+ * error shapes the retry layer classifies (the unit tests mock the SDK). gRPC is used because
+ * the SDK's HTTP transport needs dynamic `import()` (unsupported in jest's VM sandbox), and
+ * because the SDK has no inner retry over gRPC, each collector request maps 1:1 to one attempt
+ * by the retry layer.
  */
 
 import { Server, ServerCredentials, status as grpcStatus } from '@grpc/grpc-js';
@@ -42,9 +35,8 @@ interface Collector {
 }
 
 /**
- * A minimal in-process OTLP/gRPC logs collector. Export payloads are kept as raw protobuf
- * buffers; since protobuf encodes strings as plain UTF-8, log messages can be asserted on
- * by searching the payload bytes for marker strings.
+ * Minimal in-process OTLP/gRPC logs collector. Payloads are kept as raw protobuf buffers, so
+ * log messages can be asserted on by searching the bytes for marker strings.
  */
 const startCollector = async (): Promise<Collector> => {
   let mode: CollectorMode = 'ok';
@@ -126,9 +118,8 @@ const waitFor = async (condition: () => boolean, timeoutMs = 20_000): Promise<vo
 };
 
 /**
- * Builds a logging system whose root logger ships to the collector through a real otel
- * appender. The config goes through the real YAML schema with the serverless context, so
- * this also exercises the offering-gated options end to end.
+ * Builds a logging system shipping to the collector through a real otel appender, validated
+ * with the real YAML schema under the serverless context.
  */
 const startLoggingSystem = async (
   collectorUrl: string,
@@ -168,9 +159,7 @@ describe('OtelAppender (real OTel SDK)', () => {
 
     system.get('test').info('marker-buffered');
 
-    // Every request is one attempt by the retry layer (no inner SDK retry over gRPC), so
-    // two rejected requests prove the export outlived the plain SDK behavior of failing
-    // the batch on the first UNAVAILABLE response.
+    // Two rejected requests prove retries beyond the SDK's single gRPC attempt.
     await waitFor(() => collector.requestCounts().unavailable >= 2);
     expect(collector.countReceived('marker-buffered')).toBe(0);
 
@@ -184,8 +173,7 @@ describe('OtelAppender (real OTel SDK)', () => {
 
     system.get('test').info('marker-dropped');
 
-    // First export starts ~1s after the emit (batch delay) and its 2s budget expires ~3s
-    // later; by t=6s the batch must have been dropped.
+    // First export starts ~1s after the emit; its 2s budget must be exhausted by t=6s.
     await timer(6_000);
 
     collector.setMode('ok');
@@ -204,8 +192,7 @@ describe('OtelAppender (real OTel SDK)', () => {
 
     await waitFor(() => collector.requestCounts().unauthenticated >= 1);
     await timer(3_000);
-    // Exactly one attempt: UNAUTHENTICATED is not transient, so the retry layer gives up
-    // immediately instead of burning the 15s budget.
+    // Exactly one attempt: UNAUTHENTICATED is not retried.
     expect(collector.requestCounts().unauthenticated).toBe(1);
 
     collector.setMode('ok');
@@ -222,14 +209,12 @@ describe('OtelAppender (real OTel SDK)', () => {
     });
     const logger = system.get('test');
 
-    // Get one batch in-flight and stuck retrying: while an export is in progress, the
-    // processor only queues new records (it never starts a concurrent export), which is the
-    // only situation in which the queue can actually overflow.
+    // Keep one batch in-flight and retrying: the processor never exports concurrently, so
+    // records emitted meanwhile pile up in the queue and can overflow it.
     logger.info('marker-first');
     await waitFor(() => collector.requestCounts().unavailable >= 1);
 
-    // Emitted synchronously while the first batch retries: 0..511 fill the queue, 512..599
-    // overflow and are dropped by the processor.
+    // 0..511 fill the queue, 512..599 overflow and are dropped.
     for (let i = 0; i < 600; i++) {
       logger.info(`marker-queue-${i}.`);
     }

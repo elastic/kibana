@@ -60,8 +60,7 @@ describe('isRetryableExportError', () => {
       // At runtime @grpc/grpc-js surfaces the status as a numeric string, despite its types.
       expect(isRetryableExportError(networkError(String(code)))).toBe(true);
     }
-    // 8 = RESOURCE_EXHAUSTED: retryable per OTLP spec only with RetryInfo (not parsed here);
-    // commonly a permanently oversized request, so retrying would stall the serial pipeline.
+    // 8 = RESOURCE_EXHAUSTED: only retryable per OTLP spec when RetryInfo is present (not parsed here).
     expect(isRetryableExportError(httpError(8))).toBe(false);
     expect(isRetryableExportError(networkError('8'))).toBe(false);
     // 16 = UNAUTHENTICATED
@@ -156,8 +155,7 @@ describe('RetryingLogRecordExporter', () => {
     const callback = jest.fn();
 
     exporter.export(logs, callback);
-    // Uncapped backoff sequence would be 1000 * 1.5^n; after the 6th retry it exceeds 10s and
-    // is capped. Advancing in 10s steps must trigger exactly one further attempt per step.
+    // After the 6th retry the backoff (1000 * 1.5^n) exceeds 10s and is capped: one attempt per 10s step.
     jest.advanceTimersByTime(60_000);
     const attemptsSoFar = delegate.export.mock.calls.length;
     jest.advanceTimersByTime(10_000);
@@ -169,8 +167,7 @@ describe('RetryingLogRecordExporter', () => {
   it('drops the batch once the retry budget is exhausted', () => {
     const lastFailure = failure(httpError(503));
     const delegate = makeDelegate(failure(networkError()), failure(networkError()), lastFailure);
-    // Budget of 3s: attempts at t=0 (backoff 1000ms), t=1000 (backoff 1500ms), t=2500;
-    // the next backoff (2250ms) would land past the 3000ms deadline, so the batch is dropped.
+    // 3s budget: attempts at t=0, 1000, 2500; the next backoff (2250ms) would pass the deadline.
     const exporter = new RetryingLogRecordExporter(delegate, 3_000);
     const callback = jest.fn();
 

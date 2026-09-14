@@ -80,27 +80,15 @@ export interface OtelAppenderConfig {
    */
   headers?: Record<string, string>;
   /**
-   * **Serverless / internal only** — not accepted in YAML on the traditional offering.
-   *
-   * Maximum number of log records buffered in memory by the batch processor while the OTLP
-   * endpoint is unreachable; once the queue is full, new records are dropped. The queue is
-   * count-based — OTel imposes no byte-size cap on log bodies — so the effective memory bound
-   * is `maxQueueSize` × the assumed maximum event size.
-   *
-   * Must be at least `512` (the SDK's default export batch size — smaller queues would make the
-   * SDK warn and silently shrink its batches). Defaults to `15000` on serverless; unset
-   * elsewhere (SDK default: `2048`).
+   * Serverless / internal only — not accepted in YAML on the traditional offering.
+   * Max log records buffered in memory; once full, new records are dropped. Must be at least
+   * `512` (the SDK's export batch size). Defaults to `15000` on serverless (SDK default: `2048`).
    */
   maxQueueSize?: number;
   /**
-   * **Serverless / internal only** — not accepted in YAML on the traditional offering.
-   *
-   * Wall-clock budget during which failed exports are retried with backoff and jitter before
-   * the batch is dropped. Only transient failures are retried: timeouts, common network errors,
-   * HTTP 429/502/503/504 and equivalent gRPC statuses. When unset, only the OTel SDK's built-in
-   * retry applies (5 attempts within ~13s).
-   *
-   * Defaults to `2m` on serverless; unset elsewhere.
+   * Serverless / internal only — not accepted in YAML on the traditional offering.
+   * How long failed exports are retried (transient errors only) before the batch is dropped.
+   * When unset, only the SDK's built-in ~13s retry applies. Defaults to `2m` on serverless.
    */
   maxElapsedTime?: Duration;
   /**

@@ -16,18 +16,13 @@ type ExportResultCallback = Parameters<LogRecordExporter['export']>[1];
 /** `ExportResultCode.SUCCESS` from `@opentelemetry/core` (not a direct dependency). */
 const EXPORT_RESULT_SUCCESS = 0;
 
-// Backoff parameters, mirroring the SDK's internal RetryingTransport but with a higher
-// backoff cap: the SDK caps at 5s because its whole retry window is ~13s, while this
-// layer is designed for a multi-minute budget.
+// Mirrors the SDK's internal RetryingTransport, with a higher cap to suit a multi-minute budget.
 const INITIAL_BACKOFF_MS = 1_000;
 const MAX_BACKOFF_MS = 10_000;
 const BACKOFF_MULTIPLIER = 1.5;
 const JITTER = 0.2;
 
-/**
- * Transient Node network error codes, same set the SDK's HTTP transport treats as retryable
- * (see `isHttpTransportNetworkErrorRetryable` in `@opentelemetry/otlp-exporter-base`).
- */
+/** Transient network error codes, same set the SDK's HTTP transport treats as retryable. */
 const RETRYABLE_NETWORK_ERROR_CODES = new Set([
   'ECONNRESET',
   'ECONNREFUSED',
@@ -42,26 +37,14 @@ const RETRYABLE_NETWORK_ERROR_CODES = new Set([
 /** HTTP statuses the SDK treats as retryable (see `isExportHTTPErrorRetryable`). */
 const RETRYABLE_HTTP_STATUS_CODES = new Set([429, 502, 503, 504]);
 
-/**
- * Transient gRPC status codes: DEADLINE_EXCEEDED (4) and UNAVAILABLE (14). The JS SDK never
- * retries gRPC exports, so these mirror the OTLP spec's retryable statuses.
- * No collision with the HTTP set above: gRPC statuses are 0-16, HTTP statuses are >= 100.
- */
+/** DEADLINE_EXCEEDED (4) and UNAVAILABLE (14); gRPC statuses (0-16) never collide with HTTP ones. */
 const RETRYABLE_GRPC_STATUS_CODES = new Set([4, 14]);
 
 /**
  * Classifies an error surfaced by an OTLP log exporter as transient (worth retrying) or not.
- *
- * The exporters don't expose a structured "retryable" flag on failure, so this inspects the
- * shapes they actually produce:
- * - Node network errors carry a string `code` (e.g. `ECONNREFUSED`).
- * - HTTP error responses surface as `OTLPExporterError` with the status as a numeric `code`.
- * - gRPC errors carry the gRPC status on `code`; `@grpc/grpc-js` types it as a number but at
- *   runtime it surfaces as a numeric string (e.g. `'14'`), so both forms are handled.
- * - Two transient cases surface with no `code` at all, identified only by their fixed messages:
- *   request timeouts (`'Request timed out'`, from the SDK's HTTP transport) and retryable
- *   responses whose inner SDK retries were exhausted (`'Export failed with retryable status'`,
- *   from the SDK's export delegate — e.g. a collector consistently answering 429/503).
+ * Exporters expose no structured "retryable" flag: network errors carry a string `code`,
+ * HTTP/gRPC failures a numeric (or numeric-string) `code`, and two transient SDK cases
+ * (request timeout, inner retries exhausted) only a fixed message.
  */
 export const isRetryableExportError = (error: Error | undefined): boolean => {
   if (!error) {
@@ -90,21 +73,12 @@ interface PendingRetry {
 }
 
 /**
- * A {@link LogRecordExporter} decorator that keeps retrying transient export failures with
- * exponential backoff (plus jitter) until a wall-clock budget (`maxElapsedTimeMs`) is spent,
- * then drops the batch.
+ * A {@link LogRecordExporter} decorator that retries transient export failures with jittered
+ * exponential backoff until `maxElapsedTimeMs` is spent, then drops the batch. It extends the
+ * SDK's built-in ~13s retry window, which still runs within each attempt made here.
  *
- * The SDK's built-in retry (`RetryingTransport`) is hardcoded to 5 attempts within ~13s, which
- * is far short of the ~2 minutes of collector unavailability Kibana serverless must tolerate.
- * That inner retry still runs within each attempt made by this layer; this layer only decides
- * whether to schedule another attempt after the inner one gives up.
- *
- * Note for callers: the batch processor abandons an export after its `exportTimeoutMillis`,
- * so it must be configured to exceed `maxElapsedTimeMs` for the budget to be honored.
- *
- * Retry timers are unref'd and cancelled on `shutdown()`, so a pending retry never keeps the
- * process alive. `forceFlush()` fast-forwards pending backoff waits into immediate attempts so
- * a flush is not held hostage by a backoff timer.
+ * Callers must configure the batch processor's `exportTimeoutMillis` above `maxElapsedTimeMs`.
+ * Timers are unref'd; `shutdown()` aborts pending retries and `forceFlush()` runs them now.
  *
  * @internal
  */
@@ -144,8 +118,7 @@ export class RetryingLogRecordExporter implements LogRecordExporter {
           return;
         }
 
-        // `pending` is created before the timer so the timer callback can never observe it
-        // uninitialized; its own closures only run after this block completes.
+        // `pending` must be created before the timer so its callback never sees it uninitialized.
         const pending: PendingRetry = {
           runNow: () => {
             clearTimeout(timer);

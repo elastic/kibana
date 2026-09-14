@@ -290,9 +290,7 @@ describe('OtelAppender', () => {
     });
 
     it('accepts maxQueueSize and maxElapsedTime without offering context, with no defaults', () => {
-      // The runtime path is internal (LoggingServiceSetup.configure) and is validated without
-      // the `serverless` context ref, so the options are allowed plainly and stay unset unless
-      // the plugin opts in.
+      // The runtime path is internal, so the options are allowed without the serverless context.
       const result = OtelAppender.runtimeConfigSchema.validate({
         ...validConfig,
         maxQueueSize: 5_000,
