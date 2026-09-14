@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/features-plugin'
   - '@kbn/kibana-react-plugin'
   - '@kbn/alertzero-common'
+  - '@kbn/agentic-investigations-plugin'
   - '@kbn/zod'
   - '@kbn/zod-helpers'
   - '@kbn/i18n'
@@ -45,6 +46,8 @@ dependsOn:
   - '@kbn/core-spaces-common'
   - '@kbn/logging-mocks'
   - '@kbn/core-http-server-mocks'
+  - '@kbn/std'
+  - '@kbn/core-security-server'
 tags:
   - plugin
   - prod

@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback } from 'react';
 import type { EuiContextMenuItemProps } from '@elastic/eui';
-import type { MouseEventHandler } from 'react';
+import type { MouseEventHandler, Attributes } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { NavigateToAppOptions } from '@kbn/core/public';
@@ -28,6 +28,7 @@ export interface ContextMenuItemNavByRouterProps extends EuiContextMenuItemProps
   /** Disables navigation */
   isNavigationDisabled?: boolean;
   children: React.ReactNode;
+  key?: Attributes['key'];
 }
 
 /**
