@@ -120,7 +120,7 @@ export const AppBadge = ({ badge }: { badge: AppHeaderBadge }) => {
       css={badgeStyle}
       iconType={hasItems ? 'chevronSingleDown' : undefined}
       iconSide={hasItems ? 'right' : undefined}
-      {...(isTooltipOnly ? { tabIndex: 0 } : {})}
+      tabIndex={isTooltipOnly ? 0 : undefined}
     >
       {label}
     </EuiBadge>
