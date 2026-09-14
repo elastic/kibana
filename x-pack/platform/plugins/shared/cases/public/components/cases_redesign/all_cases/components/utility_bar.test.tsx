@@ -23,7 +23,6 @@ import { VIEW_TOGGLE_LIST_ID, VIEW_TOGGLE_TABLE_ID } from '../constants';
 
 jest.mock('../../../../common/use_cases_local_storage');
 
-// https://github.com/elastic/kibana/issues/275455
 describe('Severity form field', () => {
   const deselectCases = jest.fn();
   const localStorageKey = 'securitySolution.cases.utilityBar.hideMaxLimitWarning';
