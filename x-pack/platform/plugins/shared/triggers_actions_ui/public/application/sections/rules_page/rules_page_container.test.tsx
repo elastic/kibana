@@ -89,6 +89,7 @@ describe('rulesPage', () => {
     useKibanaMock().services.http.basePath.prepend = jest.fn(
       (path: string) => `${MOCK_BASE_PATH}${path}`
     );
+    useKibanaMock().services.tabs = undefined;
   });
 
   it('renders rule list components', async () => {
@@ -277,6 +278,33 @@ describe('rulesPage', () => {
           'href',
           `${MOCK_BASE_PATH}${ALERTING_V2_RULES_BASE_PATH}`
         );
+      });
+
+      it('renders host-provided tabs instead of management hrefs', async () => {
+        useKibanaMock().services.tabs = [
+          {
+            id: 'v2Rules',
+            label: 'V2 rules',
+            isSelected: false,
+            href: '/obs/rules/v2',
+            'data-test-subj': 'v2RulesTab',
+          },
+          {
+            id: 'v1Rules',
+            label: 'V1 rules',
+            isSelected: true,
+            href: '/obs/rules/v1',
+            'data-test-subj': 'v1RulesTab',
+          },
+        ];
+
+        const history = createMemoryHistory({ initialEntries: ['/'] });
+        renderRulesPage(history);
+
+        expect(await screen.findByTestId('v2RulesTab')).toHaveAttribute('href', '/obs/rules/v2');
+        expect(await screen.findByTestId('v1RulesTab')).toHaveAttribute('href', '/obs/rules/v1');
+        expect(screen.getByTestId('v1RulesTab')).toHaveAttribute('aria-selected', 'true');
+        expect(screen.getByTestId('v2RulesTab')).toHaveAttribute('aria-selected', 'false');
       });
 
       it('uses a Logs heading with a back button to Rules and no Logs menu item', async () => {
