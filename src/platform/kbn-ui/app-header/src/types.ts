@@ -227,6 +227,16 @@ export interface AppHeaderShareAction {
 }
 
 /**
+ * @internal Experimental. Dashboard edit Enhance only. Do not use from other apps.
+ * Not a stable App Header contract.
+ */
+export interface AppHeaderExperimentalDashboardAiAction {
+  onClick: (context: { returnFocus: () => void }) => void;
+  isDisabled?: boolean;
+  testId?: string;
+}
+
+/**
  * Plain-text page description. Use the object form to add a URL rendered with a fixed
  * "Learn more" label.
  */
@@ -246,8 +256,14 @@ interface AppHeaderConfigBase {
   favorite?: AppHeaderFavoriteAction;
   share?: AppHeaderShareAction;
   /**
+   * @internal Experimental. Dashboard edit Enhance only. Do not use from other apps.
+   * Not a stable App Header contract.
+   */
+  experimentalDashboardAiAction?: AppHeaderExperimentalDashboardAiAction;
+  /**
    * Defaults to `standard`, except a sparse header (no title, badges, tabs, description, metadata,
-   * title append, favorite, or share) defaults to `compact`. An explicit value always wins.
+   * title append, favorite, share, or experimental dashboard AI action) defaults to `compact`.
+   * An explicit value always wins.
    */
   spacing?: AppHeaderSpacing;
 }
