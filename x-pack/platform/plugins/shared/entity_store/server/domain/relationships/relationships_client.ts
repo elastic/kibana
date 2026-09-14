@@ -8,9 +8,10 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
-import type {
-  RelationshipKind,
-  RelationshipMetadataDoc,
+import {
+  RELATIONSHIP_OBSERVED_ACTION,
+  type RelationshipKind,
+  type RelationshipMetadataDoc,
 } from '../../../common/domain/entity_metadata/relationship_metadata';
 import { ENTITY_METADATA, getEntitiesAlias } from '../../../common/domain/entity_index';
 import { runWithSpan } from '../../telemetry/traces';
@@ -26,6 +27,21 @@ interface ListRelationshipMetadataParams {
   perPage?: number;
   sortField?: '@timestamp' | 'event.ingested';
   sortOrder?: SortOrder;
+}
+
+interface EarliestObservationByTargetParams {
+  entityId: string;
+  kind: RelationshipKind;
+  targets: string[];
+}
+
+interface EarliestObservationByTargetAggs {
+  by_target: {
+    buckets: Array<{
+      key: string;
+      earliest?: { value?: number | null };
+    }>;
+  };
 }
 
 interface ListRelationshipMetadataResult {
@@ -77,6 +93,25 @@ export class RelationshipsClient {
       configurable: true,
       writable: true,
     });
+
+    const baseGetEarliestObservationByTarget = this.getEarliestObservationByTarget.bind(this);
+    const tracedGetEarliestObservationByTarget = (
+      params: EarliestObservationByTargetParams
+    ): Promise<Map<string, number>> =>
+      runWithSpan({
+        name: 'entityStore.relationships.earliest_observation_by_target',
+        namespace,
+        attributes: {
+          'entity_store.relationships.operation': 'earliest_observation_by_target',
+        },
+        cb: () => baseGetEarliestObservationByTarget(params),
+      });
+
+    Object.defineProperty(this, 'getEarliestObservationByTarget', {
+      value: tracedGetEarliestObservationByTarget,
+      configurable: true,
+      writable: true,
+    });
   }
 
   public async listRelationshipMetadata(
@@ -107,5 +142,43 @@ export class RelationshipsClient {
       typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total?.value ?? 0;
 
     return { records, total, page, perPage };
+  }
+
+  public async getEarliestObservationByTarget(
+    params: EarliestObservationByTargetParams
+  ): Promise<Map<string, number>> {
+    const { entityId, kind, targets } = params;
+    const result = new Map<string, number>();
+    if (targets.length === 0) return result;
+
+    const targetField = `entity.relationships.${kind}.target`;
+    const resp = await this.esClient.search<unknown, EarliestObservationByTargetAggs>({
+      index: getEntitiesAlias(ENTITY_METADATA, this.namespace),
+      size: 0,
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [
+            { term: { 'event.action': RELATIONSHIP_OBSERVED_ACTION } },
+            { term: { 'entity.id': entityId } },
+            { terms: { [targetField]: targets } },
+          ],
+        },
+      },
+      aggs: {
+        by_target: {
+          terms: { field: targetField, include: targets, size: targets.length },
+          aggs: { earliest: { min: { field: '@timestamp' } } },
+        },
+      },
+    });
+
+    const buckets = resp.aggregations?.by_target.buckets ?? [];
+    for (const bucket of buckets) {
+      const earliestMs = bucket.earliest?.value;
+      if (typeof earliestMs === 'number') result.set(bucket.key, earliestMs);
+    }
+
+    return result;
   }
 }

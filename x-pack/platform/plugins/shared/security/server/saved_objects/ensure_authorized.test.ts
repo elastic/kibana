@@ -79,7 +79,7 @@ describe('ensureAuthorized', () => {
   test('throws an error when privilege check fails', async () => {
     const deps = setupDependencies();
     deps.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(new Error('Oh no!'));
-    await expect(ensureAuthorized(deps, [], [], [])).rejects.toThrowError('Oh no!');
+    await expect(ensureAuthorized(deps, [], [], [])).rejects.toThrow('Oh no!');
   });
 
   describe('fully authorized', () => {

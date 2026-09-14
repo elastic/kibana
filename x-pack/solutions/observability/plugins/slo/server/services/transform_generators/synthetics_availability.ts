@@ -41,7 +41,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
       this.buildAggregations(slo),
       this.buildSettings(slo, this.isServerless ? '@timestamp' : 'event.ingested'),
       slo,
-      this.isServerless && this.isCpsEnabled
+      this.getProjectRouting(slo)
     );
   }
 

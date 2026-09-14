@@ -6,44 +6,65 @@
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { ExecutionError } from '@kbn/workflows/server';
 import { createKiStepCommonDefinition } from '../../common/step_types/create_ki';
 import type { KiStepDependencies } from './helpers';
 import {
   assertContextEngineEnabled,
   assertKiWritePrivilege,
   assertWritableDest,
-  resolveOrCreateAiIndexDest,
+  resolveOrCreateAiIndex,
+  withKiWriteTelemetry,
 } from './helpers';
 
 export const getCreateKiStepDefinition = ({
   getAiIndexService,
   isContextEngineEnabled,
   checkWritePrivilege,
+  analyticsService,
+  logger,
 }: KiStepDependencies) =>
   createServerStepDefinition({
     ...createKiStepCommonDefinition,
     handler: async (context) => {
       const request = context.contextManager.getFakeRequest();
       await assertContextEngineEnabled(isContextEngineEnabled, request);
-      await assertKiWritePrivilege(checkWritePrivilege, request);
 
-      const { ai_index_id: aiIndexId, ki } = context.input;
+      const { ai_index_id: aiIndexId, ki_id: kiId, ki } = context.input;
+      return withKiWriteTelemetry({
+        action: 'create',
+        aiIndexId,
+        analyticsService,
+        logger,
+        run: async (setManaged) => {
+          await assertKiWritePrivilege(checkWritePrivilege, request);
 
-      const dest = await resolveOrCreateAiIndexDest(getAiIndexService, aiIndexId);
-      assertWritableDest(aiIndexId, dest);
-      const esClient = context.contextManager.getScopedEsClient();
+          const { dest, managed } = await resolveOrCreateAiIndex(getAiIndexService, aiIndexId);
+          setManaged(managed);
+          assertWritableDest(aiIndexId, dest);
+          if (kiId !== undefined && dest.type === 'data_stream') {
+            throw new ExecutionError({
+              type: 'ValidationError',
+              message: `Cannot create KI '${kiId}' in AI index '${aiIndexId}': the data stream backing store '${dest.value}' generates document ids`,
+              details: { aiIndexId, kiId, destValue: dest.value },
+            });
+          }
+          const esClient = context.contextManager.getScopedEsClient();
 
-      const response = await esClient.index(
-        {
-          index: dest.value,
-          document: { '@timestamp': new Date().toISOString(), ...ki },
-          // Data streams only accept `create`; `wait_for` makes the KI visible to later steps.
-          ...(dest.type === 'data_stream' && { op_type: 'create' as const }),
-          refresh: 'wait_for',
+          const response = await esClient.index(
+            {
+              index: dest.value,
+              ...(kiId !== undefined && { id: kiId }),
+              document: { '@timestamp': new Date().toISOString(), ...ki },
+              // Data streams only accept `create`; `wait_for` makes the KI visible to later steps.
+              ...(dest.type === 'data_stream' && { op_type: 'create' as const }),
+              refresh: 'wait_for',
+            },
+            { signal: context.abortSignal }
+          );
+
+          return { output: { id: response._id } };
         },
-        { signal: context.abortSignal }
-      );
-
-      return { output: { id: response._id } };
+      });
     },
   });

@@ -14,10 +14,13 @@
 const SESSION_TAG_PREFIX = 'workflow-editor:';
 const STORAGE_KEY_PREFIX = 'agentBuilder.lastConversation.';
 
-let lastCreateAttachmentId: string | undefined;
+// Session id of the `/workflows/create` chat, so its conversation can be moved
+// onto the saved workflow's session tag. This is the id the tag is built from,
+// not the id of the attachment the chat carries.
+let lastCreateSessionId: string | undefined;
 
-export const setLastCreateAttachmentId = (attachmentId: string | undefined): void => {
-  lastCreateAttachmentId = attachmentId;
+export const setLastCreateSessionId = (sessionId: string | undefined): void => {
+  lastCreateSessionId = sessionId;
 };
 
 let sidebarOpen = false;
@@ -43,14 +46,29 @@ export const consumeSidebarRestoreFor = (workflowId: string): boolean => {
 };
 
 /**
+ * True when the sidebar will restore a conversation for this session, which the
+ * editor cannot sync into until it knows which attachment that conversation
+ * already holds. Mirrors the key `agent_builder` writes on open.
+ */
+export const hasPersistedConversation = (sessionId: string): boolean => {
+  if (typeof window === 'undefined' || !window.localStorage) return false;
+
+  const prefix = `${STORAGE_KEY_PREFIX}${SESSION_TAG_PREFIX}${sessionId}.`;
+  for (let i = 0; i < window.localStorage.length; i++) {
+    if (window.localStorage.key(i)?.startsWith(prefix)) return true;
+  }
+  return false;
+};
+
+/**
  * Rewrite persisted conversation-id localStorage entries from the create
  * session's tag onto `savedWorkflowId`'s tag. Iterates a prefix because keys
  * include a trailing agentId we don't know here. No-op if no create session
  * was tracked or `localStorage` is unavailable.
  */
 export const carryConversationToWorkflow = (savedWorkflowId: string): void => {
-  const from = lastCreateAttachmentId;
-  lastCreateAttachmentId = undefined;
+  const from = lastCreateSessionId;
+  lastCreateSessionId = undefined;
 
   if (!from || from === savedWorkflowId) return;
   if (typeof window === 'undefined' || !window.localStorage) return;

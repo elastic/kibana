@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
 import {
-  EMPTY_TOKENS,
   identifyFeatures,
   sumTokens,
   toPreviouslyIdentifiedFeature,
+  type InferenceDocument,
   type SearchSimilarFeaturesArguments,
+  type AnalysisTarget,
   type SimilarFeatureHit,
-} from '@kbn/streams-ai';
-import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
+  featuresPrompt,
+} from '@kbn/nightshift-ai';
 import { tags } from '@kbn/scout';
 import {
   createChatCallsEvaluator,
@@ -24,6 +25,8 @@ import {
   type Evaluator,
   type Example,
 } from '@kbn/evals';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
+import { compactInferenceDocuments } from '@kbn/significant-events-plugin/server';
 import { FeatureAccumulator, type BaseFeature, mergeFeature } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
@@ -49,6 +52,7 @@ import {
 } from '../../src/datasets';
 import { buildAvailableSnapshotsBySource } from '../shared';
 import { collectSampleDocuments } from '../ki_feature_extraction/collect_sample_documents';
+import { runFeatureIdentificationAgent } from '../../src/run_feature_identification_agent';
 
 interface AvailableDeduplicationScenario {
   scenario: KIFeatureDeduplicationScenario;
@@ -56,7 +60,7 @@ interface AvailableDeduplicationScenario {
 }
 
 interface DedupContextInput extends Record<string, unknown> {
-  sampleDocuments: Array<SearchHit<Record<string, string>>>;
+  sampleDocuments: InferenceDocument[];
   knownFeatureIds: string;
   similarFeature?: SimilarFeatureHit;
 }
@@ -73,10 +77,9 @@ interface DedupContextOutput {
   searchCalls: SearchSimilarFeaturesArguments[];
 }
 
-const checkoutDocument: SearchHit<Record<string, string>> = {
+const checkoutDocument: InferenceDocument = {
   _id: 'checkout-doc',
-  _index: 'logs-synthetic',
-  _source: {
+  fields: {
     'service.name': 'checkout-api',
     'event.dataset': 'checkout-api.logs',
     message: 'checkout-api handled GET /checkout',
@@ -123,6 +126,7 @@ const dedupContextDataset: EvaluationDataset<DedupContextExample> = {
 const dedupContextContractEvaluator: Evaluator<DedupContextExample, DedupContextOutput> = {
   name: 'dedup_context_contract',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output, expected }) => {
     if (!expected) {
       return { score: 0, explanation: 'Expected deduplication contract is missing' };
@@ -167,7 +171,20 @@ evaluate.describe(
     const activeDatasets = getActiveDatasets();
     const availableSnapshotsBySource = new Map<string, Set<string>>();
 
-    evaluate.beforeAll(async ({ esClient, log }) => {
+    evaluate.beforeAll(async ({ esClient, kbnClient, log, uiSettings }) => {
+      await uiSettings.set({ 'agentBuilder:experimentalFeatures': true });
+      await kbnClient.request({
+        path: '/internal/core/_settings',
+        method: 'PUT',
+        headers: { 'elastic-api-version': '1' },
+        body: {
+          'feature_flags.overrides': {
+            [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+          },
+        },
+      });
+      log.info('Enabled significant events availability feature flag');
+
       const snapshots = await buildAvailableSnapshotsBySource(
         activeDatasets,
         (dataset) => dataset.kiFeatureDeduplication,
@@ -175,6 +192,20 @@ evaluate.describe(
         log
       );
       snapshots.forEach((v, k) => availableSnapshotsBySource.set(k, v));
+    });
+
+    evaluate.afterAll(async ({ kbnClient, uiSettings }) => {
+      await uiSettings.unset('agentBuilder:experimentalFeatures');
+      await kbnClient.request({
+        path: '/internal/core/_settings',
+        method: 'PUT',
+        headers: { 'elastic-api-version': '1' },
+        body: {
+          'feature_flags.overrides': {
+            [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: null,
+          },
+        },
+      });
     });
 
     for (const dataset of activeDatasets) {
@@ -225,10 +256,11 @@ evaluate.describe(
           'KI feature deduplication',
           async ({
             esClient,
-            inferenceClient,
+            fetch,
+            connector,
             evaluators,
             evaluationConnector,
-            logger,
+            inferenceClient,
             executorClient,
             traceEsClient,
             log,
@@ -302,33 +334,34 @@ evaluate.describe(
                   const accumulated = new FeatureAccumulator();
                   const mergeEvents = [];
                   const fingerprintOnlyMergeEvents = [];
-                  // Deduplication identifies once per iteration, so provider
-                  // token counts are summed to match the trace-derived totals.
-                  let tokensUsed = EMPTY_TOKENS;
+                  let tokensUsed = sumTokens({});
 
                   for (let i = 0; i < input.iterations; i++) {
-                    const sampleDocuments = await collectSampleDocuments({
+                    const sampledHits = await collectSampleDocuments({
                       esClient,
                       scenario: extractionScenario,
                       log,
                     });
+                    const sampleDocuments = compactInferenceDocuments(sampledHits);
 
                     const previouslyIdentifiedFeatures = accumulated
                       .getAll()
                       .map(toPreviouslyIdentifiedFeature);
 
-                    const { features: identifiedFeatures, tokensUsed: iterationTokens } =
-                      await identifyFeatures({
-                        streamName: input.stream_name,
-                        sampleDocuments,
-                        systemPrompt: featuresPrompt,
-                        inferenceClient,
-                        logger,
-                        signal: new AbortController().signal,
-                        previouslyIdentifiedFeatures,
-                      });
+                    const iterationResult = await runFeatureIdentificationAgent({
+                      fetch,
+                      log,
+                      streamName: MANAGED_STREAM_NAME,
+                      connectorId: connector.id,
+                      sampleDocuments,
+                      previouslyIdentifiedFeatures,
+                    });
 
-                    tokensUsed = sumTokens({ accumulated: tokensUsed, added: iterationTokens });
+                    const identifiedFeatures = iterationResult.features;
+                    tokensUsed = sumTokens({
+                      accumulated: tokensUsed,
+                      added: iterationResult.tokensUsed,
+                    });
 
                     iterations.push({
                       features: identifiedFeatures,
@@ -357,8 +390,8 @@ evaluate.describe(
                     mergeEvents,
                     fingerprintOnlyMergeEvents,
                     finalFeatures: accumulated.getAll(),
-                    traceId: getCurrentTraceId(),
                     tokens_used: tokensUsed,
+                    traceId: getCurrentTraceId(),
                   };
                 },
               },
@@ -401,27 +434,64 @@ evaluate.describe(
               }
 
               const searchCalls: SearchSimilarFeaturesArguments[] = [];
+              const searchTool: ToolDefinition = {
+                description:
+                  'Search known features by meaning. Pass every uncertain candidate in the candidates array; results are grouped by candidate_id.',
+                schema: {
+                  type: 'object',
+                  properties: {
+                    candidates: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          candidate_id: { type: 'string' },
+                          title: { type: 'string' },
+                          description: { type: 'string' },
+                          type: { type: 'string' },
+                        },
+                        required: ['candidate_id', 'title', 'description', 'type'],
+                      },
+                    },
+                  },
+                  required: ['candidates'],
+                },
+              };
+              const searchCallback: ToolCallback = async (toolCall) => {
+                const rawCandidates = toolCall.function.arguments?.candidates;
+                const candidates = (
+                  Array.isArray(rawCandidates) ? rawCandidates : []
+                ) as SearchSimilarFeaturesArguments[];
+                const results = candidates.map((candidate) => {
+                  searchCalls.push(candidate);
+                  const searchText =
+                    `${candidate.candidate_id} ${candidate.title} ${candidate.description}`.toLowerCase();
+                  const features: SimilarFeatureHit[] =
+                    input.similarFeature &&
+                    candidate.type === 'entity' &&
+                    searchText.includes('checkout')
+                      ? [input.similarFeature]
+                      : [];
+                  return { candidate_id: candidate.candidate_id, features };
+                });
+                return { response: { results } };
+              };
+
               const { features } = await identifyFeatures({
-                streamName: MANAGED_STREAM_NAME,
+                target: {
+                  id: MANAGED_STREAM_NAME,
+                  name: MANAGED_STREAM_NAME,
+                  sources: [MANAGED_STREAM_NAME, `${MANAGED_STREAM_NAME}.*`],
+                  samplingSource: MANAGED_STREAM_NAME,
+                } satisfies AnalysisTarget,
                 sampleDocuments: input.sampleDocuments,
                 systemPrompt: featuresPrompt,
                 inferenceClient,
                 logger,
                 signal: new AbortController().signal,
                 knownFeatureIds: input.knownFeatureIds,
-                searchSimilarFeatures: async (args) => {
-                  searchCalls.push(args);
-                  const searchText =
-                    `${args.candidate_id} ${args.title} ${args.description}`.toLowerCase();
-                  if (
-                    input.similarFeature &&
-                    args.type === 'entity' &&
-                    searchText.includes('checkout')
-                  ) {
-                    return [input.similarFeature];
-                  }
-                  return [];
-                },
+                additionalTools: { search_similar_features: searchTool },
+                additionalToolCallbacks: { search_similar_features: searchCallback },
               });
 
               return { features, searchCalls };

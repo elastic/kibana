@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import type { EuiFilePickerProps } from '@elastic/eui';
+import type { EuiFilePickerRef } from '@elastic/eui';
 import {
   EuiButton,
   EuiCallOut,
@@ -22,7 +22,6 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import type { EuiFilePickerClass } from '@elastic/eui/src/components/form/file_picker/file_picker';
 import type { MigrationSource, MigrationStepProps } from '../../../../../common/types';
 import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { QRadarMitreMappingsData } from '../../../../../../../common/siem_migrations/model/vendor/rules/qradar.gen';
@@ -90,7 +89,7 @@ const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProp
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [parsedData, setParsedData] = useState<QRadarMitreMappingsData | null>(null);
     const [addedEnhancements, setAddedEnhancements] = useState<AddedEnhancement[]>([]);
-    const filePickerRef = React.useRef<EuiFilePickerClass>(null);
+    const filePickerRef = React.useRef<EuiFilePickerRef>(null);
     const { euiTheme } = useEuiTheme();
 
     const { enhanceRules, isLoading } = useEnhanceRules();
@@ -199,7 +198,7 @@ const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProp
               >
                 <EuiFilePicker
                   id="enhancementFilePicker"
-                  ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
+                  ref={filePickerRef}
                   initialPromptText={i18n.FILE_PICKER_PROMPT}
                   onChange={onFileChange}
                   accept=".json"

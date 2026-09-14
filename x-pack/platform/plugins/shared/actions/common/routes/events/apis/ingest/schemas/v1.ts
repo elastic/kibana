@@ -9,9 +9,9 @@ import { schema } from '@kbn/config-schema';
 import { MAX_CONNECTOR_TYPE_ID_LENGTH } from '@kbn/connector-specs';
 
 import { CONNECTOR_ID_MAX_LENGTH } from '../../../../..';
+import { INBOUND_EVENTS_TOKEN_MAX_LENGTH } from '../../../../../inbound_events';
 
-/** Max length for ingest token (Bearer header or optional `token` query). */
-export const INBOUND_EVENTS_TOKEN_MAX_LENGTH = 128;
+export { INBOUND_EVENTS_TOKEN_MAX_LENGTH };
 
 export const ingestEventsRequestParamsSchema = schema.object({
   // maxLength is pre-normalize; hub rejects if normalize prepends '.' past the cap.
@@ -48,7 +48,7 @@ export const ingestEventsRequestQuerySchema = schema.object(
 );
 
 /**
- * Opaque JSON body for the connector spoke `handleEvents` implementation.
+ * Opaque JSON body for the connector `handleEvents` implementation.
  * Shape is connector-type specific; not validated by the hub.
  */
 export const ingestEventsRequestBodySchema = schema.maybe(

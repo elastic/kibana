@@ -11,6 +11,7 @@ import { AlertEpisodesTagFilter } from './tag_filter';
 import * as inlineFilterPopoverModule from './inline_filter_popover';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { createMockSpaces } from '../../hooks/test_utils';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import * as useFetchEpisodeTagOptionsModule from '../../hooks/use_fetch_episode_tag_options';
 import userEvent from '@testing-library/user-event';
 
@@ -28,7 +29,11 @@ describe('TagFilter', () => {
   const defaultProps = {
     selectedTags: null as string[] | null,
     onTagsChange: jest.fn(),
-    services: { expressions: {} as ExpressionsStart, spaces: createMockSpaces() },
+    services: {
+      expressions: {} as ExpressionsStart,
+      http: httpServiceMock.createStartContract(),
+      spaces: createMockSpaces(),
+    },
     timeRange: { from: 'now-24h', to: 'now' },
     'data-test-subj': 'test-tag-filter',
   };
@@ -46,7 +51,7 @@ describe('TagFilter', () => {
   describe('rendering', () => {
     it('renders the filter button with correct label', () => {
       render(<AlertEpisodesTagFilter {...defaultProps} />);
-      expect(screen.getByText('Tags')).toBeInTheDocument();
+      expect(screen.getByText('Alert tags')).toBeInTheDocument();
     });
 
     it('shows hasActiveFilters when tags are selected', () => {

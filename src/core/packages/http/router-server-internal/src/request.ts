@@ -47,7 +47,7 @@ import {
   type RequestValidationSource,
 } from './request_validation_failure';
 import { isSafeMethod } from './route';
-import { KibanaSocket } from './socket';
+import { KibanaSocket, resolveRawSocket } from './socket';
 import { patchRequest } from './patch_requests';
 import { RequestTimingImpl } from './timing';
 
@@ -233,7 +233,7 @@ export class CoreKibanaRequest<
 
     this.route = deepFreeze(this.getRouteInfo(request));
     this.socket = isRealReq
-      ? new KibanaSocket(request.raw.req.socket)
+      ? new KibanaSocket(resolveRawSocket(request.raw.req))
       : KibanaSocket.getFakeSocket();
     this.events = this.getEvents(request);
 

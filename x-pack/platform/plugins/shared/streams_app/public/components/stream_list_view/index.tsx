@@ -7,11 +7,6 @@
 
 import { EuiEmptyPrompt, EuiLoadingElastic } from '@elastic/eui';
 import type { AppHeaderMenu } from '@kbn/app-header';
-import {
-  SIGNIFICANT_EVENTS_APP_ID,
-  SIGNIFICANT_EVENTS_APP_LOCATOR_ID,
-} from '@kbn/deeplinks-observability';
-import type { SignificantEventsAppLocatorParams } from '@kbn/significant-events-app-plugin/common';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
@@ -31,7 +26,6 @@ import { StreamsTreeTable } from './tree_table';
 import { LegacyLogsDeprecationCallout } from './legacy_logs_deprecation_callout';
 import { CreateQueryStreamFlyoutContent } from '../query_streams/create_query_stream_flyout';
 import { getFormattedError } from '../../util/errors';
-import { useSignificantEventsApp } from '../../hooks/use_significant_events_app';
 
 export function StreamListView() {
   const context = useKibana();
@@ -39,7 +33,6 @@ export function StreamListView() {
     dependencies: {
       start: {
         streams: { streamsRepositoryClient, getClassicStatus, getWiredStatus },
-        share,
       },
     },
     core,
@@ -64,7 +57,6 @@ export function StreamListView() {
     ui: { manage: canManageStreamsKibana },
     features: { queryStreams },
   } = useStreamsPrivileges();
-  const { isAvailable: isSignificantEventsAvailable } = useSignificantEventsApp();
 
   const [canManageClassicElasticsearch, setCanManageClassicElasticsearch] =
     useState<boolean>(false);
@@ -156,10 +148,6 @@ export function StreamListView() {
     'xpack.streams.streamsListView.createClassicStreamButtonLabel',
     { defaultMessage: 'Create classic stream' }
   );
-  const significantEventsLabel = i18n.translate(
-    'xpack.streams.streamsListView.sigEventsButtonLabel',
-    { defaultMessage: 'Significant Events' }
-  );
   const createLabel = i18n.translate('xpack.streams.streamsListView.createButtonLabel', {
     defaultMessage: 'Create',
   });
@@ -172,13 +160,8 @@ export function StreamListView() {
     { defaultMessage: 'Classic stream' }
   );
 
-  const showSignificantEvents = isSignificantEventsAvailable;
   const showQueryStreams = Boolean(queryStreams?.enabled);
   const canCreateClassicStream = canManageStreamsKibana && canManageClassicElasticsearch;
-  const significantEventsHref =
-    share.url.locators
-      .get<SignificantEventsAppLocatorParams>(SIGNIFICANT_EVENTS_APP_LOCATOR_ID)
-      ?.getRedirectUrl({}) ?? core.application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID);
 
   const menu = useMemo<AppHeaderMenu>(() => {
     const items: NonNullable<AppHeaderMenu['items']> = [
@@ -192,17 +175,6 @@ export function StreamListView() {
         testId: 'streamsAppSettingsButton',
       },
     ];
-
-    if (showSignificantEvents) {
-      items.push({
-        id: 'significantEvents',
-        order: 2,
-        label: significantEventsLabel,
-        iconType: 'significantEvents',
-        href: significantEventsHref,
-        testId: 'streamsSignificantEventsButton',
-      });
-    }
 
     if (showQueryStreams) {
       return {
@@ -252,9 +224,6 @@ export function StreamListView() {
     queryStreamMenuItemLabel,
     settingsLabel,
     showQueryStreams,
-    showSignificantEvents,
-    significantEventsHref,
-    significantEventsLabel,
   ]);
 
   return (

@@ -146,7 +146,7 @@ describe('Edit ', () => {
     );
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         ...customField,
         value: customFieldConfiguration.defaultValue,
       });
@@ -238,7 +238,7 @@ describe('Edit ', () => {
     );
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         ...customField,
         value: 123412345,
       });
@@ -274,7 +274,7 @@ describe('Edit ', () => {
     );
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         ...customField,
         value: 0,
       });
@@ -314,7 +314,7 @@ describe('Edit ', () => {
     );
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         ...customField,
         value: customFieldConfiguration.defaultValue,
       });
@@ -350,7 +350,7 @@ describe('Edit ', () => {
     );
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         ...customField,
         value: null,
       });
@@ -675,7 +675,7 @@ describe('Edit inline variant', () => {
     );
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         ...customField,
         value: (customFieldConfiguration.defaultValue as number) + 1,
       });
@@ -700,7 +700,7 @@ describe('Edit inline variant', () => {
     await userEvent.type(await screen.findByTestId(formFieldTestId), '12345');
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         ...customField,
         value: 12345,
       });
@@ -725,7 +725,7 @@ describe('Edit inline variant', () => {
     await userEvent.type(await screen.findByTestId(formFieldTestId), '0');
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         ...customField,
         value: 0,
       });
@@ -749,7 +749,7 @@ describe('Edit inline variant', () => {
     await userEvent.clear(await screen.findByTestId(formFieldTestId));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         ...customField,
         value: null,
       });
@@ -774,7 +774,7 @@ describe('Edit inline variant', () => {
     await userEvent.type(await screen.findByTestId(formFieldTestId), '321');
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         ...customField,
         value: 321,
       });
@@ -827,7 +827,7 @@ describe('Edit inline variant', () => {
     await userEvent.clear(await screen.findByTestId(formFieldTestId));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         ...customField,
         value: null,
       });

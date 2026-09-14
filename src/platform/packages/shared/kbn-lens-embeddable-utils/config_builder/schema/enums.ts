@@ -10,16 +10,16 @@
 import { z } from '@kbn/zod';
 
 export const orientationSchema = z.enum(['horizontal', 'vertical', 'angled']).meta({
-  id: 'vis_api_orientation',
+  id: 'visApiOrientation',
   description: 'Orientation',
 });
 
 export const simpleOrientationSchema = z.enum(['horizontal', 'vertical']).meta({
-  id: 'vis_api_simple_orientation',
+  id: 'visApiSimpleOrientation',
   description: 'Orientation',
 });
 
 export const directionSchema = z.enum(['asc', 'desc']).meta({
-  id: 'vis_api_direction',
+  id: 'visApiDirection',
   description: 'Direction',
 });

@@ -18,4 +18,4 @@ export {
   COMMON_HEADERS,
   SESSION_VERSION_HEADER,
 } from './constants';
-export { waitFor, randomSessionId, randomHash } from './helpers';
+export { waitFor, randomSessionId, randomHash, submitSearch, saveSession } from './helpers';

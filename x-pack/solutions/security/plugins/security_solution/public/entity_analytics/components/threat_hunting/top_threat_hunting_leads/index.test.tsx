@@ -69,6 +69,9 @@ const createMockLead = (overrides: Partial<HuntingLead> = {}): HuntingLead => ({
   status: 'active',
   observations: [createMockObservation()],
   sourceType: 'adhoc',
+  topRelatedEntities: [],
+  relatedEntityCounts: {},
+  origin: 'observations',
   ...overrides,
 });
 

@@ -74,6 +74,7 @@ export const getLiveQueryDetailsRoute = (
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
         try {
+          const cpsActive = await osqueryContext.isCpsActive(request);
           const spaceId = osqueryContext?.service?.getActiveSpace
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
             : DEFAULT_SPACE_ID;
@@ -105,7 +106,7 @@ export const getLiveQueryDetailsRoute = (
           const search = await getScopedSearch(
             context,
             request,
-            osqueryContext.cpsEnabled,
+            cpsActive,
             osqueryContext.getStartServices
           );
           const { actionDetails } = await lastValueFrom(

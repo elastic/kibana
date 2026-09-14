@@ -79,7 +79,7 @@ describe('useStepState', () => {
       act(() => result.current.markStepComplete('services'));
       act(() => result.current.markStepComplete('service-settings'));
       act(() => result.current.markStepComplete('authenticate-and-deploy'));
-      act(() => result.current.markStepComplete('deploy-and-detect'));
+      act(() => result.current.markStepComplete('detect-and-review'));
 
       act(() => result.current.markStepsIncomplete(['service-settings']));
 

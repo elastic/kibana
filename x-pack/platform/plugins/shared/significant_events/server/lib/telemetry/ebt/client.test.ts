@@ -52,6 +52,7 @@ describe('EbtTelemetryClient', () => {
             latency_ms: 100,
           },
         },
+        external_content_tool_continuations: 3,
       });
 
       expect(analyticsService.reportEvent).toHaveBeenCalledWith(
@@ -77,6 +78,7 @@ describe('EbtTelemetryClient', () => {
               latency_ms: 100,
             },
           },
+          external_content_tool_continuations: 3,
         }
       );
     });

@@ -20,6 +20,7 @@ import {
   EuiSpacer,
   EuiText,
   useEuiTheme,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -77,12 +78,28 @@ const pinnedLabel = i18n.translate('xpack.agentBuilder.sidebar.conversation.pinn
   defaultMessage: 'Pinned',
 });
 
+const pinnedListScrollRegionLabel = i18n.translate(
+  'xpack.agentBuilder.sidebar.conversation.pinnedListScrollRegion',
+  {
+    defaultMessage: 'Pinned conversation list',
+  }
+);
+
 const conversationListScrollRegionLabel = i18n.translate(
   'xpack.agentBuilder.sidebar.conversation.conversationListScrollRegion',
   {
     defaultMessage: 'Conversation list',
   }
 );
+
+const pinnedSectionCss = css`
+  overflow: hidden;
+  max-block-size: 40%;
+`;
+
+const sectionLabelCss = ({ euiTheme }: UseEuiTheme) => css`
+  padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+`;
 
 export const ConversationSidebarView: React.FC = () => {
   const { pathname } = useLocation();
@@ -98,8 +115,18 @@ export const ConversationSidebarView: React.FC = () => {
   const { agentId: lastAgentId, isReady: isLastAgentIdReady } = useLastAgentId();
   const routeAccessConfig = useRouteAccessConfig();
 
-  const { conversations = [] } = useConversationList({ agentId });
-  const hasConversations = conversations.length > 0;
+  // Pinned and unpinned conversations are fetched via separate server-side filtered queries.
+  const {
+    conversations: pinnedConversations,
+    total: pinnedTotal,
+    hasNextPage: pinnedHasNextPage,
+    fetchNextPage: fetchNextPinnedPage,
+    isFetchingNextPage: isFetchingNextPinnedPage,
+  } = useConversationList({ agentId, pinned: true });
+  const { total: unpinnedTotal } = useConversationList({ agentId, pinned: false });
+  // Enable the Search button when any conversations exist across either list.
+  const hasConversations = unpinnedTotal > 0 || pinnedTotal > 0;
+
   const { removeAllErrors, removeError } = useStreamingContext();
 
   const { markAsPinned, markAsUnpinned } = useConversationListMutations({
@@ -117,19 +144,6 @@ export const ConversationSidebarView: React.FC = () => {
   const onDragUpdate = useCallback(({ destination }: DragUpdate) => {
     setHoveredDroppableId(destination?.droppableId ?? null);
   }, []);
-
-  const pinnedConversations = useMemo(
-    () =>
-      conversations
-        .filter((c) => c.pinned)
-        .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()),
-    [conversations]
-  );
-
-  const pinnedConversationIds = useMemo(
-    () => new Set(pinnedConversations.map((c) => c.id)),
-    [pinnedConversations]
-  );
 
   const dropBackgrounds = useMemo(() => {
     const bg = (id: string) =>
@@ -187,13 +201,6 @@ export const ConversationSidebarView: React.FC = () => {
   const isActive = (path: string) => pathname === path;
 
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
-
-  const sectionLabelCss = useMemo(
-    () => css`
-      padding: ${euiTheme.size.xs} ${euiTheme.size.s};
-    `,
-    [euiTheme]
-  );
 
   useEffect(() => {
     // Once agents have loaded, redirect to the last valid agent if the current agent ID
@@ -296,10 +303,20 @@ export const ConversationSidebarView: React.FC = () => {
                           {pinnedLabel}
                         </EuiText>
                         <EuiSpacer size="xs" />
+                      </EuiFlexItem>
+                      <EuiFlexItem
+                        grow={false}
+                        role="region"
+                        aria-label={pinnedListScrollRegionLabel}
+                        css={pinnedSectionCss}
+                      >
                         <PinnedConversationList
                           agentId={agentId}
                           currentConversationId={conversationId}
                           pinnedConversations={pinnedConversations}
+                          hasNextPage={pinnedHasNextPage}
+                          fetchNextPage={fetchNextPinnedPage}
+                          isFetchingNextPage={isFetchingNextPinnedPage}
                           isDropDisabled={draggingFromId === DROPPABLE_IDS.PINNED}
                           backgroundColor={dropBackgrounds[DROPPABLE_IDS.PINNED]}
                           onItemClick={handleConversationItemClick}
@@ -375,7 +392,6 @@ export const ConversationSidebarView: React.FC = () => {
                           currentConversationId={conversationId}
                           isNewConversationRoute={isNewConversationRoute}
                           onItemClick={handleConversationItemClick}
-                          pinnedConversationIds={pinnedConversationIds}
                           isDropDisabled={draggingFromId === DROPPABLE_IDS.CHATS}
                           backgroundColor={dropBackgrounds[DROPPABLE_IDS.CHATS]}
                         />

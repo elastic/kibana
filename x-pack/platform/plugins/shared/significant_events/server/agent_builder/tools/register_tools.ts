@@ -10,6 +10,7 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 import type { GetScopedClients } from '../../routes/types';
+import { createFeatureSimilaritySearchTool } from './feature_similarity_search/tool';
 import { createFeatureKnowledgeIndicatorTool } from './create_feature_knowledge_indicator/tool';
 import { createQueryKnowledgeIndicatorTool } from './create_query_knowledge_indicator/tool';
 import { createSearchKnowledgeIndicatorsTool } from './search_knowledge_indicators/tool';
@@ -18,10 +19,6 @@ import { createEventTool } from './event_create/tool';
 import { createEventStatusUpdateTool } from './event_status_update/tool';
 import { createEventInvestigationAttachTool } from '../../memory_and_investigation/tools/event_investigation_attach/tool';
 import { createEventsWriteTool } from './event_write/tool';
-import {
-  createInvestigationProgressReportTool,
-  SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID,
-} from '../../memory_and_investigation/tools/investigation_progress_report/tool';
 export {
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_FEATURE_TOOL_ID,
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_QUERY_TOOL_ID,
@@ -30,8 +27,8 @@ export {
   SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID,
   SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID,
   SIGNIFICANT_EVENTS_EVENT_INVESTIGATION_ATTACH_TOOL_ID,
+  SIGNIFICANT_EVENTS_FEATURE_SIMILARITY_SEARCH_TOOL_ID,
 } from './tool_ids';
-export { SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID };
 
 export function registerAgentBuilderTools({
   agentBuilder,
@@ -56,6 +53,11 @@ export function registerAgentBuilderTools({
       getScopedClients,
       server,
       logger: logger.get('ki_search_tool'),
+    }),
+    createFeatureSimilaritySearchTool({
+      getScopedClients,
+      server,
+      logger: logger.get('ki_feature_similarity_search_tool'),
     }),
     createFeatureKnowledgeIndicatorTool({
       getScopedClients,
@@ -98,10 +100,6 @@ export function registerAgentBuilderTools({
       server,
       logger: logger.get('events_write_tool'),
       telemetry,
-    }),
-    createInvestigationProgressReportTool({
-      server,
-      logger: logger.get('investigation_progress_report_tool'),
     }),
   ];
 

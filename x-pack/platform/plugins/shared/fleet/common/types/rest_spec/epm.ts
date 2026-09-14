@@ -265,8 +265,8 @@ export interface GetBulkAssetsRequest {
   };
 }
 
-export interface GetBulkAssetsResponse {
-  items: Array<SimpleSOAssetType & { appLink?: string }>;
+export interface GetBulkAssetsResponse<TAsset extends SimpleSOAssetType = SimpleSOAssetType> {
+  items: Array<TAsset & { appLink?: string }>;
 }
 
 export interface GetInputsTemplatesRequest {
