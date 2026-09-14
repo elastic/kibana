@@ -50,6 +50,11 @@ export const BLOCKLIST_TAB = i18n.translate('xpack.securitySolution.artifacts.ta
   defaultMessage: 'Blocklist',
 });
 
+export const CUSTOM_YARA_SIGNATURES_TAB = i18n.translate(
+  'xpack.securitySolution.artifacts.tabs.customYaraSignatures',
+  { defaultMessage: 'Custom YARA signatures' }
+);
+
 export const OS_TITLES: Readonly<{ [K in OperatingSystem]: string }> = {
   [OperatingSystem.WINDOWS]: i18n.translate('xpack.securitySolution.administration.os.windows', {
     defaultMessage: 'Windows',
@@ -558,4 +563,16 @@ export const RESPONSE_ACTION_STATUS = Object.freeze({
   successMessage: i18n.translate('xpack.securitySolution.responseActionStatus.success', {
     defaultMessage: 'Action successful',
   }),
+});
+
+export const ENDPOINT_VERSION_NOT_SUPPORTED = (unsupportedFeature: string): string => {
+  return i18n.translate('xpack.securitySolution.translations.endpointVersionNotSupported', {
+    defaultMessage:
+      'The version of Endpoint running on this host does not support {unsupportedFeature}.',
+    values: { unsupportedFeature },
+  });
+};
+
+export const HOST_ISOLATION = i18n.translate('xpack.securitySolution.translations.hostIsolation', {
+  defaultMessage: 'host isolation',
 });
