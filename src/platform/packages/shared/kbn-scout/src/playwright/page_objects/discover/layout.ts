@@ -830,6 +830,10 @@ export abstract class LayoutMixin extends SaveMixin {
     return this.page.testSubj.locator('queryInEsqlButton');
   }
 
+  getUninitializedKeyboardShortcuts(): Locator {
+    return this.page.testSubj.locator('discoverUninitializedKeyboardShortcuts');
+  }
+
   getQuerySubmitButton(): Locator {
     return this.page.testSubj.locator('querySubmitButton');
   }

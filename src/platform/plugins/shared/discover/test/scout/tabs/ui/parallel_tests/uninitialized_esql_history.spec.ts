@@ -116,6 +116,26 @@ spaceTest.describe(
       await discover.getQueryInEsqlButton().click();
 
       expect(await discover.getCurrentQueryMode()).toBe('esql');
+      await expect(discover.getUninitializedKeyboardShortcuts()).toBeVisible();
     });
+
+    spaceTest(
+      'shows keyboard shortcuts and disables search on an empty ES|QL tab until a query is entered',
+      async ({ pageObjects }) => {
+        const { discover, unifiedTabs } = pageObjects;
+
+        await discover.goto({ queryMode: 'esql' });
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedTabs.createNewTab();
+
+        await expect(discover.getUninitializedKeyboardShortcuts()).toBeVisible();
+        await expect(discover.getQuerySubmitButton()).toBeDisabled();
+
+        await discover.codeEditor.setCodeEditorValue(QUERY);
+
+        await expect(discover.getQuerySubmitButton()).toBeEnabled();
+        await expect(discover.getUninitializedKeyboardShortcuts()).toBeVisible();
+      }
+    );
   }
 );
