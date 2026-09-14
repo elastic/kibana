@@ -7,12 +7,12 @@
 
 import type { CloudConnectorIacState } from '../../../common/types/models/cloud_connector';
 
+import { sendUpdateCloudConnector } from './cloud_connector';
+
 const IAC_CONFIRM_KEYS: Array<keyof CloudConnectorIacState> = [
   'templateSha',
   'blueprintId',
   'blueprintVersion',
-  'stackId',
-  'region',
 ];
 
 const pendingByPolicyName = new Map<string, CloudConnectorIacState>();
@@ -47,4 +47,22 @@ export const takePendingCloudConnectorIac = (
   const value = pendingByPolicyName.get(policyName);
   pendingByPolicyName.delete(policyName);
   return value;
+};
+
+export const persistPendingCloudConnectorIac = async ({
+  policyName,
+  cloudConnectorId,
+}: {
+  policyName?: string;
+  cloudConnectorId?: string | null;
+}): Promise<void> => {
+  if (!cloudConnectorId) {
+    return;
+  }
+  const iac = takePendingCloudConnectorIac(policyName);
+  if (!iac || !hasPendingIacConfirm(iac)) {
+    return;
+  }
+  // Policy save already succeeded; a failed IAC write must not fail the save.
+  await sendUpdateCloudConnector(cloudConnectorId, iac);
 };

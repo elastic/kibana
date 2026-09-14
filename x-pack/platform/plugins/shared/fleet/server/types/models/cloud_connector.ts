@@ -42,8 +42,6 @@ const CloudConnectorIacFields = {
   templateSha: schema.maybe(schema.nullable(schema.string())),
   blueprintId: schema.maybe(schema.nullable(schema.string())),
   blueprintVersion: schema.maybe(schema.nullable(schema.string())),
-  stackId: schema.maybe(schema.string()),
-  region: schema.maybe(schema.string()),
 };
 
 export const CloudConnectorSchemaV5 = CloudConnectorSchemaV4.extends(CloudConnectorIacFields);

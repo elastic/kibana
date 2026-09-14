@@ -12,7 +12,10 @@ import type { Logger } from '@kbn/logging';
 import apm from 'elastic-apm-node';
 
 import type { AWS_CLOUD_PROVIDER } from '../../common/types/models/cloud_connector';
-import type { IacPolicyTemplateSelection } from '../../common/types/rest_spec/iac_provisioner';
+import type {
+  IacPolicyTemplateSelection,
+  IAC_FEDERATED_IDENTITY_WORKFLOW,
+} from '../../common/types/rest_spec/iac_provisioner';
 
 import {
   IacProvisionerConfigError,
@@ -49,10 +52,9 @@ export interface IacProvisionerRenderRequest {
   // Only AWS is supported today; typed off the shared constant so the value
   // and type can't drift and adding a provider is a one-line change.
   provider: typeof AWS_CLOUD_PROVIDER;
-  workflow: string;
+  workflow: typeof IAC_FEDERATED_IDENTITY_WORKFLOW;
   integrations: IacProvisionerRenderIntegration[];
   templateSha?: string;
-  userParams?: Record<string, string>;
 }
 
 export interface IacProvisionerRenderResponse {
@@ -77,6 +79,22 @@ interface IacProvisionerErrorBody {
 export interface IacProvisionerService {
   renderTemplate(request: IacProvisionerRenderRequest): Promise<IacProvisionerRenderResponse>;
 }
+
+const isIacProvisionerRenderResponse = (value: unknown): value is IacProvisionerRenderResponse => {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+  const body = value as Record<string, unknown>;
+  const blueprint = body.blueprint;
+  return (
+    typeof body.templateSha === 'string' &&
+    typeof body.render === 'boolean' &&
+    !!blueprint &&
+    typeof blueprint === 'object' &&
+    typeof (blueprint as { id?: unknown }).id === 'string' &&
+    typeof (blueprint as { version?: unknown }).version === 'string'
+  );
+};
 
 /**
  * Extracts the provider's error codes/messages, tolerating both the single
@@ -117,6 +135,9 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
       request,
       logger
     );
+    if (!isIacProvisionerRenderResponse(rendered)) {
+      throw new IacProvisionerUnavailableError('provider returned an invalid render body');
+    }
     // artifactUrl embeds signing credentials — only the expiry (when present)
     // and blueprint identity are loggable.
     const expiry = rendered.expiresAt ? `, artifact expires at ${rendered.expiresAt}` : '';

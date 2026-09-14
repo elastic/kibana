@@ -37,7 +37,7 @@ export interface RenderIacTemplateRequest {
    * up the matching blueprint lineage and always renders the newest
    * supported version.
    */
-  workflow: string;
+  workflow: typeof IAC_FEDERATED_IDENTITY_WORKFLOW;
   /** The Kibana flow requesting the render; reported in telemetry. */
   flow: IacProvisionerRenderFlow;
   integrations: RenderIacTemplateIntegration[];
@@ -46,8 +46,6 @@ export interface RenderIacTemplateRequest {
    * after a static-template fallback. Send on dynamic reuse.
    */
   templateSha?: string;
-  /** Optional user-supplied parameters forwarded to the template. */
-  userParams?: Record<string, string>;
 }
 
 export interface RenderedIacBlueprint {

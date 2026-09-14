@@ -373,8 +373,6 @@ export interface CloudConnectorSOAttributes {
   templateSha?: string | null;
   blueprintId?: string | null;
   blueprintVersion?: string | null;
-  stackId?: string;
-  region?: string;
 }
 
 export interface CloudOnboardingDeploymentSOAttributes {

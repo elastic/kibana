@@ -26,26 +26,10 @@ import type {
 
 import { API_VERSIONS } from '../../../common/constants';
 
-import { hasPendingIacConfirm, takePendingCloudConnectorIac } from './pending_cloud_connector_iac';
+import { persistPendingCloudConnectorIac } from './pending_cloud_connector_iac';
 
 import type { RequestError } from './use_request';
 import { sendRequest, sendRequestForRq, useRequest } from './use_request';
-import { sendUpdateCloudConnector } from './cloud_connector';
-
-const persistPendingCloudConnectorIac = async ({
-  policyName,
-  cloudConnectorId,
-}: {
-  policyName?: string;
-  cloudConnectorId?: string | null;
-}): Promise<void> => {
-  const iac = takePendingCloudConnectorIac(policyName);
-  if (!cloudConnectorId || !iac || !hasPendingIacConfirm(iac)) {
-    return;
-  }
-  // Policy save already succeeded; a failed IAC write must not fail the save.
-  await sendUpdateCloudConnector(cloudConnectorId, iac);
-};
 
 /**
  * @deprecated use sendCreatePackagePolicyForRq instead

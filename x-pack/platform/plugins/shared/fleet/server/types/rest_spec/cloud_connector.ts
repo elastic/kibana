@@ -13,8 +13,6 @@ const IacFieldsSchema = {
   templateSha: schema.maybe(schema.nullable(schema.string({ minLength: 1, maxLength: 255 }))),
   blueprintId: schema.maybe(schema.nullable(schema.string({ minLength: 1, maxLength: 255 }))),
   blueprintVersion: schema.maybe(schema.nullable(schema.string({ minLength: 1, maxLength: 64 }))),
-  stackId: schema.maybe(schema.string({ minLength: 1, maxLength: 512 })),
-  region: schema.maybe(schema.string({ minLength: 1, maxLength: 64 })),
 };
 
 const IacStateSchema = schema.maybe(

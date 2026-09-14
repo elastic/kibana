@@ -182,21 +182,6 @@ describe('renderIacTemplateHandler', () => {
     );
   });
 
-  it('forwards userParams when the caller supplies them', async () => {
-    mockedGetPackageInfo.mockResolvedValue(CSPM_PACKAGE_INFO as any);
-    mockedRenderTemplate.mockResolvedValue(RENDERED);
-
-    await renderIacTemplateHandler(
-      buildContext(),
-      buildRequest(renderBody({ userParams: { ElasticResourceId: 'abc' } })),
-      response
-    );
-
-    expect(mockedRenderTemplate).toHaveBeenCalledWith(
-      expect.objectContaining({ userParams: { ElasticResourceId: 'abc' } })
-    );
-  });
-
   it('forwards templateSha when the caller supplies it', async () => {
     mockedGetPackageInfo.mockResolvedValue(CSPM_PACKAGE_INFO as any);
     mockedRenderTemplate.mockResolvedValue(RENDERED);
@@ -488,6 +473,16 @@ describe('renderIacTemplateHandler', () => {
     );
     expect(appContextService.getLogger().get().error).toHaveBeenCalledWith(
       expect.stringContaining('unexpected boom')
+    );
+    expect(response.customError).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({
+          message: expect.stringContaining('unexpected boom'),
+        }),
+      })
+    );
+    expect(reportIacProvisionerRenderCompleted).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false, httpStatus: 500 })
     );
   });
 
