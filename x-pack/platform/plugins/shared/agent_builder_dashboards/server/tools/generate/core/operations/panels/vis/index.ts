@@ -7,7 +7,10 @@
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
-import type { PresentationMode } from '@kbn/agent-builder-visualizations-server';
+import {
+  presentationModeSchema,
+  type PresentationMode,
+} from '@kbn/agent-builder-visualizations-server';
 import {
   MAX_VEGA_SPEC_LENGTH,
   VEGA_VIS_TYPE,
@@ -197,8 +200,7 @@ export const editPanelRequestInputSchema = panelRequestBaseSchema
       .describe(
         '(optional) Set true when the edit only changes presentation (title, legend, axes, colors, number formats, thresholds): the existing query is kept and not regenerated. Omit it when the edit changes what the panel measures.'
       ),
-    presentationMode: z
-      .enum(['focused', 'enhance'])
+    presentationMode: presentationModeSchema
       .optional()
       .describe(
         'Lens only. "enhance" applies all presentation defaults, replacing custom styling; "focused" (default) changes only requested settings. Independent of appearanceOnly: enhancement can accompany a query change.'

@@ -13,6 +13,7 @@ export {
 export { getPaletteCatalogPromptContent } from './lens/color_palettes';
 export { seriesStatisticsAgentGuidance } from './shared/series_statistics_prompt';
 export { getEsqlDataSourceCarriers } from './lens/graph_lens';
+export { presentationModeSchema } from './lens/types';
 export type { PresentationMode, VisualizationConfig } from './lens/types';
 export { selectDefaultTimeRange } from './time_range/select_default_time_range';
 export type {
