@@ -64,6 +64,7 @@ const StateAnnotation = Annotation.Root({
   rowLimit: Annotation<number | undefined>(),
   disableNamedParams: Annotation<boolean | undefined>(),
   timeRange: Annotation<TimeRange>(),
+  dropNullColumns: Annotation<boolean | undefined>(),
   // internal
   resource: Annotation<ResolvedResourceWithSampling>(),
   currentTry: Annotation<number>({ reducer: (a, b) => b, default: () => 0 }),
@@ -294,6 +295,7 @@ export const createNlToEsqlGraph = ({
       const results = await executeEsql({
         query,
         params: buildTimeRangeParams(state.timeRange),
+        ...(state.dropNullColumns !== undefined ? { dropNullColumns: state.dropNullColumns } : {}),
         esClient,
       });
       action = {
