@@ -87,9 +87,6 @@ const AI_INDICES_SCHEMA = schema.arrayOf(
   }
 );
 
-const AI_INDICES_NOT_ENABLED_MESSAGE =
-  '[request body.configuration.ai_indices]: the Context Engine is not enabled. Set contextEngine:enabled to true to enable it.';
-
 /**
  * `ai_indices` is only readable and writable while the Context Engine is enabled. The setting is
  * registered by the `agentBuilderSml` plugin, a required dependency of `agentBuilder`.
@@ -97,6 +94,28 @@ const AI_INDICES_NOT_ENABLED_MESSAGE =
 export const isContextEngineEnabled = async (ctx: AgentBuilderHandlerContext): Promise<boolean> => {
   const { uiSettings } = await ctx.core;
   return Boolean(await uiSettings.client.get(CONTEXT_ENGINE_ENABLED_SETTING_ID));
+};
+
+/**
+ * Strips fields gated by experimental feature flags from an incoming write body,
+ * leaving stored values intact so they reactivate when the flag is toggled back on.
+ */
+const handleExperimentalFeatures = async <T extends { configuration?: { ai_indices?: string[] } }>(
+  body: T,
+  ctx: AgentBuilderHandlerContext
+): Promise<{ body: T; contextEngineEnabled: boolean }> => {
+  const contextEngineEnabled = await isContextEngineEnabled(ctx);
+
+  if (!body.configuration) {
+    return { body, contextEngineEnabled };
+  }
+
+  if (!contextEngineEnabled) {
+    const { ai_indices: _stripped, ...restConfig } = body.configuration;
+    return { body: { ...body, configuration: restConfig } as T, contextEngineEnabled };
+  }
+
+  return { body, contextEngineEnabled };
 };
 
 /**
@@ -336,6 +355,18 @@ export function registerAgentRoutes({
                       { maxSize: 100 }
                     )
                   ),
+                  post_execution_workflow_ids: schema.maybe(
+                    schema.arrayOf(
+                      schema.string({
+                        maxLength: 512,
+                        meta: {
+                          description:
+                            'Optional list of workflow IDs. When set, these workflows run after the agent finishes each round.',
+                        },
+                      }),
+                      { maxSize: 100 }
+                    )
+                  ),
                   plugin_ids: schema.maybe(PLUGINS_SCHEMA),
                   connector_ids: schema.maybe(CONNECTORS_SCHEMA),
                   ai_indices: schema.maybe(AI_INDICES_SCHEMA),
@@ -355,13 +386,13 @@ export function registerAgentRoutes({
         const { agents, auditLogService } = getInternalServices();
         const service = await agents.getRegistry({ request });
 
-        const contextEngineEnabled = await isContextEngineEnabled(ctx);
-        if (request.body.configuration.ai_indices !== undefined && !contextEngineEnabled) {
-          return response.badRequest({ body: { message: AI_INDICES_NOT_ENABLED_MESSAGE } });
-        }
+        const { body: createBody, contextEngineEnabled } = await handleExperimentalFeatures(
+          request.body,
+          ctx
+        );
 
         try {
-          const createdProfile = await service.create(request.body);
+          const createdProfile = await service.create(createBody);
           analyticsService?.reportAgentCreated({
             agentId: request.body.id,
             toolSelection: request.body.configuration.tools,
@@ -474,6 +505,18 @@ export function registerAgentRoutes({
                         { maxSize: 100 }
                       )
                     ),
+                    post_execution_workflow_ids: schema.maybe(
+                      schema.arrayOf(
+                        schema.string({
+                          maxLength: 512,
+                          meta: {
+                            description:
+                              'Updated list of workflow IDs. When set, these workflows run after the agent finishes each round.',
+                          },
+                        }),
+                        { maxSize: 100 }
+                      )
+                    ),
                     plugin_ids: schema.maybe(PLUGINS_SCHEMA),
                     connector_ids: schema.maybe(CONNECTORS_SCHEMA),
                     ai_indices: schema.maybe(AI_INDICES_SCHEMA),
@@ -494,13 +537,13 @@ export function registerAgentRoutes({
         const { agents, auditLogService } = getInternalServices();
         const service = await agents.getRegistry({ request });
 
-        const contextEngineEnabled = await isContextEngineEnabled(ctx);
-        if (request.body.configuration?.ai_indices !== undefined && !contextEngineEnabled) {
-          return response.badRequest({ body: { message: AI_INDICES_NOT_ENABLED_MESSAGE } });
-        }
+        const { body: updateBody, contextEngineEnabled } = await handleExperimentalFeatures(
+          request.body,
+          ctx
+        );
 
         try {
-          const profile = await service.update(request.params.id, request.body);
+          const profile = await service.update(request.params.id, updateBody);
           analyticsService?.reportAgentUpdated({
             agentId: profile.id,
             toolSelection: profile.configuration.tools,
