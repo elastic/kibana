@@ -57,8 +57,7 @@ describe('Slack', () => {
 
   it('should have correct metadata', () => {
     expect(Slack.metadata.id).toBe('.slack2');
-    expect(Slack.metadata.displayName).toBe('Slack');
-    expect(Slack.metadata.featureUsageName).toBe('Slack (v2)');
+    expect(Slack.metadata.displayName).toBe('Slack (v2)');
     expect(Slack.metadata.minimumLicense).toBe('enterprise');
     expect(Slack.metadata.isTechnicalPreview).toBeUndefined();
     expect(Slack.metadata.supportedFeatureIds).toEqual([

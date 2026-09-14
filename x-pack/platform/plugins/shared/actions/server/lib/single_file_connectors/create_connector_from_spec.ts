@@ -110,7 +110,6 @@ export const createConnectorTypeFromSpec = (
     id: spec.metadata.id,
     minimumLicenseRequired: spec.metadata.minimumLicense,
     name: spec.metadata.displayName,
-    featureUsageName: spec.metadata.featureUsageName,
     supportedFeatureIds: spec.metadata.supportedFeatureIds,
     validate: {
       config: generateConfigSchema(schemaForConfig),

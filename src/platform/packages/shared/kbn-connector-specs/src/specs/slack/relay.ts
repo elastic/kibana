@@ -93,6 +93,10 @@ export async function relaySendMessage(
     throw new Error('channel and text are required when sending through the Elastic Slack app');
   }
 
+  if (input.blocks !== undefined) {
+    throw new Error('Block Kit messages are not supported through the Elastic Slack app');
+  }
+
   if (input.unfurlLinks !== undefined || input.unfurlMedia !== undefined) {
     ctx.log.debug(
       'Slack sendMessage: unfurl options are not supported through the Elastic Slack app and were ignored'
