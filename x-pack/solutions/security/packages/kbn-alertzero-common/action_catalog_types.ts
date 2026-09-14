@@ -22,6 +22,8 @@
 
 import type { ActionApprovalPolicy, ActionCategory, ActionImpact } from '@kbn/workflows';
 
+export type { ActionApprovalPolicy, ActionCategory, ActionImpact };
+
 /**
  * One entry of the action catalog: the lightweight, agent-facing projection of
  * an installed action workflow. Mirrors `consts.actionMetadata` on the
