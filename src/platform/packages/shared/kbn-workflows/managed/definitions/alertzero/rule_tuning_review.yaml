@@ -172,99 +172,98 @@ steps:
           analyst should do manually in the Detection Rules UI.
       schema:
         type: object
-        properties:
-          change_type:
-            type: string
-            enum: [exception, query, risk_score, manual]
-          summary:
-            type: string
-          exception_entries:
-            type: array
-            minItems: 1
-            items:
-              type: object
-              properties:
-                field:
-                  type: string
-                operator:
-                  type: string
-                  enum: [is, is_not, is_one_of, is_not_one_of, matches, does_not_match, exists, does_not_exist]
-                value:
-                  type: string
-                  minLength: 1
-                values:
-                  type: array
-                  items:
-                    type: string
-                  minItems: 1
-              required: [field, operator]
-              oneOf:
-                - properties:
-                    operator:
-                      enum: [is, is_not, matches, does_not_match]
-                  required: [value]
-                  not:
-                    required: [values]
-                - properties:
-                    operator:
-                      enum: [is_one_of, is_not_one_of]
-                  required: [values]
-                  not:
-                    required: [value]
-                - properties:
-                    operator:
-                      enum: [exists, does_not_exist]
-                  not:
-                    anyOf:
-                      - required: [value]
-                      - required: [values]
-          proposed_query:
-            type: string
-          proposed_risk_score:
-            type: integer
-            minimum: 0
-            maximum: 100
-          proposed_severity:
-            type: string
-            enum: [low, medium, high, critical]
-        # proposed_risk_score and proposed_severity are always paired: the detection
-        # engine treats them as a unit and the apply step patches both together.
-        required: [change_type, summary]
-        if:
-          properties:
-            change_type:
-              const: risk_score
-        then:
-          required: [proposed_risk_score, proposed_severity]
+        oneOf:
+          - type: object
+            properties:
+              change_type:
+                const: exception
+              summary:
+                type: string
+              exception_entries:
+                type: array
+                minItems: 1
+                items:
+                  oneOf:
+                    - type: object
+                      properties:
+                        field:
+                          type: string
+                        operator:
+                          type: string
+                          enum: [is, is_not, matches, does_not_match]
+                        value:
+                          type: string
+                          minLength: 1
+                      required: [field, operator, value]
+                    - type: object
+                      properties:
+                        field:
+                          type: string
+                        operator:
+                          type: string
+                          enum: [is_one_of, is_not_one_of]
+                        values:
+                          type: array
+                          items:
+                            type: string
+                          minItems: 1
+                      required: [field, operator, values]
+                    - type: object
+                      properties:
+                        field:
+                          type: string
+                        operator:
+                          type: string
+                          enum: [exists, does_not_exist]
+                      required: [field, operator]
+            required: [change_type, summary, exception_entries]
+          - type: object
+            properties:
+              change_type:
+                const: query
+              summary:
+                type: string
+              proposed_query:
+                type: string
+                minLength: 1
+            required: [change_type, summary, proposed_query]
+          - type: object
+            properties:
+              change_type:
+                const: risk_score
+              summary:
+                type: string
+              proposed_risk_score:
+                type: integer
+                minimum: 0
+                maximum: 100
+              proposed_severity:
+                type: string
+                enum: [low, medium, high, critical]
+            required: [change_type, summary, proposed_risk_score, proposed_severity]
+          - type: object
+            properties:
+              change_type:
+                const: manual
+              summary:
+                type: string
+            required: [change_type, summary]
 
-  # Decided once so the apply branches stay exact complements and the tagging steps
-  # can reference a single gate rather than duplicating the conditions.
-  # Gated on fetch_rule so a skipped diagnose_rule cannot carry a stale proposal.
-  - name: classify_proposal
+  # Rules using a data view, timestamp override, or alert suppression need fields
+  # the preview API cannot conditionally omit, so query auto-apply is restricted.
+  # Gated on fetch_rule so a skipped diagnose_rule leaves supported null/false.
+  - name: record_auto_apply_support
     type: data.set
     if: >-
       ${{ steps.fetch_rule.error == null
         and steps.fetch_rule.output.enabled == true }}
     with:
-      # Rules using a data view, timestamp override, or alert suppression need
-      # fields the preview API cannot conditionally omit, so query auto-apply is
-      # restricted to rules without those modes.
-      can_apply_query: >-
+      supported: >-
         ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
-          and steps.diagnose_rule.output.structured_output.proposed_query != null
-          and steps.diagnose_rule.output.structured_output.proposed_query != ''
           and steps.fetch_rule.output.type == 'query'
           and steps.fetch_rule.output.data_view_id == null
           and steps.fetch_rule.output.timestamp_override == null
           and steps.fetch_rule.output.alert_suppression == null }}
-      can_apply_exception: >-
-        ${{ steps.diagnose_rule.output.structured_output.change_type == 'exception'
-          and steps.diagnose_rule.output.structured_output.exception_entries != null
-          and steps.diagnose_rule.output.structured_output.exception_entries.size > 0 }}
-      can_apply_risk_score: >-
-        ${{ steps.diagnose_rule.output.structured_output.change_type == 'risk_score'
-          and steps.diagnose_rule.output.structured_output.proposed_risk_score != null
-          and steps.diagnose_rule.output.structured_output.proposed_severity != null }}
 
   # One preview worker run backtests both queries. A single synchronous child per
   # wake-up cycle is safe; two consecutive child calls share one immediate-resume
@@ -273,7 +272,7 @@ steps:
   # events analysts judged; anchoring at now can miss those events.
   - name: run_previews
     type: workflow.execute
-    if: "${{ steps.classify_proposal.output.can_apply_query == true }}"
+    if: "${{ steps.record_auto_apply_support.output.supported == true }}"
     with:
       workflow-id: system-security-rule-preview
       inputs:
@@ -376,12 +375,7 @@ steps:
         {% for entry in steps.diagnose_rule.output.structured_output.exception_entries %}
         - {{ entry.field }} {{ entry.operator }}{% if entry.values %} {{ entry.values | join: ", " }}{% elsif entry.value %} {{ entry.value }}{% endif %}
         {% endfor %}
-        {% if steps.classify_proposal.output.can_apply_exception %}
         Approving adds the exception to the rule's own exception list. It can be removed in the Detection Rules UI.
-        {% else %}
-        The exception proposal is incomplete — apply it manually in the Detection Rules UI.
-        Approving marks these alerts acknowledged.
-        {% endif %}
         {% endif %}
         {% if steps.diagnose_rule.output.structured_output.change_type == "query" %}
         Current query:
@@ -390,7 +384,7 @@ steps:
         Proposed query:
         {{ steps.diagnose_rule.output.structured_output.proposed_query }}
 
-        {% if steps.classify_proposal.output.can_apply_query %}
+        {% if steps.record_auto_apply_support.output.supported %}
         Backtest ({{ inputs.preview_invocation_count | default: consts.preview_invocation_count }} simulated executions of interval {{ steps.fetch_rule.output.interval }},
         lookback {{ steps.fetch_rule.output.from }}, ending at the newest false positive
         {{ inputs.last_fp_at }} — usually a much shorter span than the false positives cover):
@@ -406,9 +400,9 @@ steps:
         rule has not been edited since this diagnosis. Otherwise no rule or alert tags
         change, and a later sweep can retry with current data.
         {% else %}
-        This rule uses a data view, timestamp override, or alert suppression, so it
-        is not previewed or applied automatically. Approving marks these alerts
-        acknowledged; apply the change manually in the Detection Rules UI.
+        This rule is not a query rule, or uses a data view, timestamp override, or
+        alert suppression, so the proposed query is not previewed or applied automatically.
+        Approving marks these alerts acknowledged; apply the change manually in the Detection Rules UI.
         {% endif %}
         {% endif %}
         {% if steps.diagnose_rule.output.structured_output.change_type == "risk_score" %}
@@ -416,12 +410,7 @@ steps:
         Current severity: {{ steps.fetch_rule.output.severity }}
         Proposed risk score: {{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}
         Proposed severity: {{ steps.diagnose_rule.output.structured_output.proposed_severity }}
-        {% if steps.classify_proposal.output.can_apply_risk_score %}
         Approving patches the rule's risk score and severity. It can be changed back in the Detection Rules UI.
-        {% else %}
-        The proposal is incomplete (both risk_score and severity are required) — apply it manually in the Detection Rules UI.
-        Approving marks these alerts acknowledged.
-        {% endif %}
         {% endif %}
         {% if steps.diagnose_rule.output.structured_output.change_type == "manual" %}
         No automated change can be applied safely for this rule.
@@ -439,7 +428,7 @@ steps:
     type: kibana.request
     if: >-
       ${{ steps.review_tuning.output.response.approved == true
-        and steps.classify_proposal.output.can_apply_query == true }}
+        and steps.record_auto_apply_support.output.supported == true }}
     with:
       method: GET
       path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?id={{ inputs.rule_uuid | url_encode }}"
@@ -455,7 +444,7 @@ steps:
     with:
       eligible: >-
         ${{ steps.review_tuning.output.response.approved == true
-          and steps.classify_proposal.output.can_apply_query == true
+          and steps.record_auto_apply_support.output.supported == true
           and steps.record_preview_outcome.output.current_succeeded == true
           and steps.record_preview_outcome.output.current_is_aborted == false
           and steps.record_preview_outcome.output.proposed_succeeded == true
@@ -477,7 +466,7 @@ steps:
     type: security.createRuleException
     if: >-
       ${{ steps.review_tuning.output.response.approved == true
-        and steps.classify_proposal.output.can_apply_exception == true }}
+        and steps.diagnose_rule.output.structured_output.change_type == 'exception' }}
     on-failure:
       continue: true
     with:
@@ -490,7 +479,7 @@ steps:
     type: security.patchRule
     if: >-
       ${{ steps.review_tuning.output.response.approved == true
-        and steps.classify_proposal.output.can_apply_risk_score == true }}
+        and steps.diagnose_rule.output.structured_output.change_type == 'risk_score' }}
     on-failure:
       continue: true
     with:
@@ -510,11 +499,11 @@ steps:
           and steps.apply_query_tuning.error == null }}
       exception_applied: >-
         ${{ steps.review_tuning.output.response.approved == true
-          and steps.classify_proposal.output.can_apply_exception == true
+          and steps.diagnose_rule.output.structured_output.change_type == 'exception'
           and steps.apply_exception_tuning.error == null }}
       risk_score_applied: >-
         ${{ steps.review_tuning.output.response.approved == true
-          and steps.classify_proposal.output.can_apply_risk_score == true
+          and steps.diagnose_rule.output.structured_output.change_type == 'risk_score'
           and steps.apply_risk_score_tuning.error == null }}
 
   # Liquid cannot parenthesise conditions, so the OR-of-ANDs for rule_patched is
@@ -552,13 +541,15 @@ steps:
   # the rule returns once new false positives accumulate past the watermark. The
   # auto-apply path stays untagged when its apply fell through (failed backtest,
   # stale edit), so a later sweep can retry with current data.
+  # Liquid evaluates right-to-left: approved gates both the manual path and the
+  # unsupported-query path without needing parentheses.
   - name: mark_alerts_acknowledged
     type: security.setAlertTags
     if: >-
       ${{ steps.review_tuning.output.response.approved == true
-        and steps.classify_proposal.output.can_apply_query == false
-        and steps.classify_proposal.output.can_apply_exception == false
-        and steps.classify_proposal.output.can_apply_risk_score == false }}
+        and steps.diagnose_rule.output.structured_output.change_type == 'manual'
+        or steps.diagnose_rule.output.structured_output.change_type == 'query'
+        and steps.record_auto_apply_support.output.supported == false }}
     with:
       alert_ids: "${{ inputs.alert_ids }}"
       tags_to_add:
