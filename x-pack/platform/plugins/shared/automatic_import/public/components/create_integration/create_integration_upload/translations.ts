@@ -37,6 +37,13 @@ export const UPLOAD_ERROR = i18n.translate('xpack.automaticImport.createIntegrat
   defaultMessage: 'Error installing package',
 });
 
+export const VALIDATION_ERROR = i18n.translate(
+  'xpack.automaticImport.createIntegrationUpload.validationError',
+  {
+    defaultMessage: 'Unable to check whether this package can be installed. Try again.',
+  }
+);
+
 export const SUCCESS_TITLE = i18n.translate(
   'xpack.automaticImport.createIntegrationUpload.successTitle',
   {

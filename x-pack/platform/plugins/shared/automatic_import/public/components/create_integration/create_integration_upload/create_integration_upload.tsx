@@ -148,7 +148,9 @@ export const CreateIntegrationUpload = React.memo(() => {
           setError(evaluationErrorMessage(evaluation));
         }
       } catch {
-        // Silently ignore — the install step will surface any errors
+        if (!abortController.signal.aborted) {
+          setError(i18n.VALIDATION_ERROR);
+        }
       } finally {
         if (!abortController.signal.aborted) setIsValidating(false);
       }

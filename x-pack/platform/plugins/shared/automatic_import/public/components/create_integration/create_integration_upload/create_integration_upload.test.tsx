@@ -243,6 +243,20 @@ describe('CreateIntegrationUpload', () => {
       });
     });
 
+    it('disables the install button when package lookup fails', async () => {
+      mockEvaluateUploadedZipPackage.mockRejectedValue(new Error('network error'));
+
+      const { container, getByTestId, getByText } = renderUpload();
+      await selectFile(container);
+
+      await waitFor(() => {
+        expect(
+          getByText(/Unable to check whether this package can be installed/)
+        ).toBeInTheDocument();
+        expect(getByTestId('buttonsFooter-actionButton')).toBeDisabled();
+      });
+    });
+
     it('clears a previous error when a new file is selected', async () => {
       mockEvaluateUploadedZipPackage
         .mockResolvedValueOnce({
