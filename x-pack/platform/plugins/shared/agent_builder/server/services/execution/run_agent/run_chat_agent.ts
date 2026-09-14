@@ -19,6 +19,7 @@ import type {
   ConversationRound,
   MetadataFieldValue,
   RoundInput,
+  SubagentEntry,
 } from '@kbn/agent-builder-common';
 import { ToolOrigin } from '@kbn/agent-builder-common';
 import {
@@ -279,6 +280,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     parentConversationId: conversation?.id,
     subagentTracker,
     conversationExists: (id: string) => conversationClient.exists(id),
+    agentConfiguration,
   });
 
   // Then add dynamic tools
@@ -529,7 +531,7 @@ const getConversationState = ({
   backgroundExecutionService: BackgroundExecutionService;
   compactionSummary?: CompactionSummary;
   todoStateManager: TodoStateManager;
-  subagents?: Record<string, string>;
+  subagents?: Record<string, SubagentEntry>;
 }): ConversationInternalState => {
   const bgState = backgroundExecutionService.getPendingState();
   const todos = todoStateManager.get();

@@ -10,7 +10,7 @@
 import { isObject } from 'lodash';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
-import type { DiscoverSessionApiTab } from '../../server';
+import type { DiscoverSessionApiTab } from '@kbn/as-code-discover-schema';
 
 /** Converts the API ES|QL control array to a controlGroupJson string, or undefined when empty. */
 export const serializeEsqlControls = (controls: DiscoverSessionApiTab['control_panels']) => {

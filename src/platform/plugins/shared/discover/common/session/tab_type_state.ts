@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DiscoverTabType } from '@kbn/discover-utils';
+import { DiscoverTabType } from '@kbn/discover-session-constants';
 import type { DiscoverSessionTabAttributes } from '@kbn/saved-search-plugin/server';
-import { isDiscoverSessionEsqlTab } from '../embeddable';
 import type {
   DiscoverSessionApiClassicTab,
   DiscoverSessionApiEsqlTab,
   DiscoverSessionApiTab,
   DiscoverSessionApiTabTypeState,
-} from '../../server';
+} from '@kbn/as-code-discover-schema';
+import { isDiscoverSessionEsqlTab } from '../embeddable';
 
 type StoredTabTypeState = DiscoverSessionTabAttributes['tabTypeState'];
 type TabWithoutTypeState =
