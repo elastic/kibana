@@ -64,6 +64,11 @@ export const azure_openaiEvaluations = {
     data_stream.dataset == "azure_openai.logs" AND azure.open_ai.category == "GatewayLogs", azure.open_ai.properties.backend_request_body.model,
     null
   ),
+  entity.target.id = CASE(
+    entity.target.id IS NOT NULL, entity.target.id,
+    data_stream.dataset == "azure_openai.logs" AND azure.open_ai.category IN ("Audit", "RequestResponse") AND azure.resource.id IS NOT NULL, azure.resource.id,
+    null
+  ),
   service.target.name = CASE(
     service.target.name IS NOT NULL, service.target.name,
     data_stream.dataset == "azure_openai.logs" AND azure.open_ai.category == "Audit", azure.resource.name,
