@@ -30,25 +30,9 @@ export const sortSchema = z
   })
   .strict();
 
-export const jsonModeSettingsSchema = z
-  .object({
-    hide_nulls: z.boolean().optional().meta({
-      description: 'When true, fields with null values are hidden while in JSON mode.',
-    }),
-    wrap_lines: z.boolean().optional().meta({
-      description:
-        'When false, long values are truncated to a single line instead of wrapping while in JSON mode.',
-    }),
-    default_rendered_nodes: z.number().min(10).max(200).optional().meta({
-      description: 'How many rows each JSON cell renders by default while in JSON mode.',
-    }),
-  })
-  .strict()
-  .optional()
-  .meta({
-    description:
-      'Settings that only apply when the source column is displayed in JSON mode (`documents_display_mode: "json"`).',
-  });
+export const documentsDisplayModeSchema = z
+  .union([z.literal('table'), z.literal('json')])
+  .optional();
 
 export const dataTableLimitsSchema = z
   .object({
@@ -58,7 +42,7 @@ export const dataTableLimitsSchema = z
     }),
     sample_size: z.number().min(10).max(10000).optional().meta({
       description:
-        'The number of documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".',
+        'Discover display option: controls how many documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".',
     }),
   })
   .strict()
@@ -90,30 +74,38 @@ export const dataTableSchema = z
       .optional()
       .meta({
         description:
-          'Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.',
+          'Discover display option: controls table row spacing. Choose "compact", "expanded", or "normal". If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.',
       }),
     header_row_height: z
       .union([z.number().min(1).max(5), z.literal('auto')])
       .optional()
       .meta({
         description:
-          'Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.',
+          'Discover display option: controls table header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.',
       }),
     row_height: z
       .union([z.number().min(1).max(20), z.literal('auto')])
       .optional()
       .meta({
         description:
-          'Data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".',
+          'Discover display option: controls table data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".',
       }),
-    documents_display_mode: z
-      .union([z.literal('table'), z.literal('json')])
-      .optional()
-      .meta({
-        description:
-          'Documents display mode: "table" for the formatted summary, or "json" for the raw JSON tree. When set, overrides the referenced saved object or the inline tab config in `tabs`.',
-      }),
-    json_mode_settings: jsonModeSettingsSchema,
+    documents_display_mode: documentsDisplayModeSchema.meta({
+      description:
+        'Discover display option: controls whether documents are shown as a formatted table ("table") or as a raw JSON tree ("json").',
+    }),
+    hide_nulls: z.boolean().optional().meta({
+      description:
+        'Discover display option: controls whether fields with null values are hidden in JSON document view.',
+    }),
+    wrap_lines: z.boolean().optional().meta({
+      description:
+        'Discover display option: controls whether long values wrap in JSON document view. When false, values are truncated to a single line.',
+    }),
+    default_rendered_nodes: z.number().min(10).max(200).optional().meta({
+      description:
+        'Discover display option: controls how many nodes each JSON cell renders by default in JSON document view.',
+    }),
   })
   .strict()
   .meta({ id: 'discoverSessionEmbeddableDataTableSchema' });
