@@ -772,32 +772,32 @@ describe('YourComponent', () => {
 
 ```bash
 # Run specific test file
-yarn test:jest your_component.test.tsx
+pnpm test:jest your_component.test.tsx
 
 # Run specific test by name
-yarn test:jest your_component.test.tsx --testNamePattern="renders child component"
+pnpm test:jest your_component.test.tsx --testNamePattern="renders child component"
 
 # Watch mode for development
-yarn test:jest your_component.test.tsx --watch
+pnpm test:jest your_component.test.tsx --watch
 
 # Debug with verbose output
-yarn test:jest your_component.test.tsx --verbose
+pnpm test:jest your_component.test.tsx --verbose
 ```
 
 ### Quick Test Commands
 
 ```bash
 # Test specific component
-yarn test:jest aws_credentials_form.test.tsx --no-coverage
+pnpm test:jest aws_credentials_form.test.tsx --no-coverage
 
 # Test all fleet extensions
-yarn test:jest --testPathPattern='fleet_extensions' --watch
+pnpm test:jest --testPathPattern='fleet_extensions' --watch
 
 # Debug test with verbose output
-yarn test:jest component.test.tsx --no-coverage --verbose
+pnpm test:jest component.test.tsx --no-coverage --verbose
 
 # Debug specific failing test
-yarn test:jest component.test.tsx --testNamePattern="shows direct access key fields"
+pnpm test:jest component.test.tsx --testNamePattern="shows direct access key fields"
 ```
 
 ## � Key Testing Principles

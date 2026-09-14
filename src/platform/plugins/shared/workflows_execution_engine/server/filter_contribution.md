@@ -254,7 +254,7 @@ When upgrading liquidjs:
 ### Version Update Process
 
 1. Update `package.json` dependency
-2. Run tests: `yarn test templating_engine`
+2. Run tests: `pnpm test templating_engine`
 3. Test error message extraction
 4. Validate UI parsing
 5. Update documentation if behavior changes

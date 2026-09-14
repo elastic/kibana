@@ -203,5 +203,5 @@ import { FrozenDefaultRepositoryRequiredCallout } from '@kbn/data-lifecycle-phas
 View and develop the components in Storybook:
 
 ```bash
-yarn storybook data_lifecycle_phases
+pnpm storybook data_lifecycle_phases
 ```

@@ -380,11 +380,11 @@ Run the following from the Kibana repository root.
 **Unit tests** (Jest, no Elasticsearch):
 
 ```bash
-yarn test:jest --config=x-pack/platform/packages/shared/kbn-change-history/jest.config.js
+pnpm test:jest --config=x-pack/platform/packages/shared/kbn-change-history/jest.config.js
 ```
 
 **Integration tests** (Jest with a real Elasticsearch node; slower):
 
 ```bash
-yarn test:jest_integration --config=x-pack/platform/packages/shared/kbn-change-history/jest.integration.config.js
+pnpm test:jest_integration --config=x-pack/platform/packages/shared/kbn-change-history/jest.integration.config.js
 ```

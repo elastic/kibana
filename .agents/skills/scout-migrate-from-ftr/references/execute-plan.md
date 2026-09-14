@@ -172,7 +172,7 @@ Add the same Scout **`kbn_references`** on **whichever `tsconfig.json` includes 
 
 #### Where Scout tests are typechecked (choose one)
 
-See **TypeScript layout** in the `scout-create-scaffold` skill for full **Pattern A** / **Pattern B** details (what to add to `tsconfig.json`, `kbn_references`, and the `yarn kbn bootstrap` / `type_check` steps).
+See **TypeScript layout** in the `scout-create-scaffold` skill for full **Pattern A** / **Pattern B** details (what to add to `tsconfig.json`, `kbn_references`, and the `pnpm kbn bootstrap` / `type_check` steps).
 
 **Choosing:** Prefer **Pattern A** when migrating FTR tests that already imported registration constants or server helpers. Prefer **Pattern B** when you want minimal plugin compile cost and can keep imports boundary-safe.
 

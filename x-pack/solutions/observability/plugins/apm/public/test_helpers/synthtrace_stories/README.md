@@ -59,10 +59,10 @@ Benefits:
 
 ```bash
 # dev server (port 9001)
-yarn storybook apm
+pnpm storybook apm
 
 # static build
-yarn storybook --site apm
+pnpm storybook --site apm
 ```
 
 Navigate to **app/ServiceMap/ServiceMap → SynthtraceGenerated** to see the scenario-driven

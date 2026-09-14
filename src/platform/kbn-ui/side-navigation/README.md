@@ -23,6 +23,6 @@ Consumer guide (props, usage, badges): [`docs-dev/kbn-ui/side-navigation.md`](..
 Shared Storybook and docs preview: [`docs-dev/kbn-ui/index.md`](../../../../docs-dev/kbn-ui/index.md#kbn-ui-development).
 
 ```bash
-yarn storybook kbn_ui
-yarn test:jest src/platform/kbn-ui/side-navigation
+pnpm storybook kbn_ui
+pnpm test:jest src/platform/kbn-ui/side-navigation
 ```

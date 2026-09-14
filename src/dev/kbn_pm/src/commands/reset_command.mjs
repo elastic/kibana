@@ -32,7 +32,7 @@ export const command = {
   `,
   async run({ log }) {
     log.warning(dedent`
-      In most cases, 'yarn kbn clean' is all that should be needed to recover a consistent state when
+      In most cases, 'pnpm kbn clean' is all that should be needed to recover a consistent state when
       problems arise. However for the rare cases where something get corrupt on node_modules you might need this command.
       If you think you need to use this command very often (which is not normal), please let us know.
     `);

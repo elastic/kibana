@@ -24,8 +24,8 @@ src/platform/packages/shared/kbn-connector-specs/.claude/skills/activate-connect
 If the script reports that it cannot detect a running Kibana instance, stop and tell the user:
 > Kibana does not appear to be running. Please start Elasticsearch and Kibana first:
 > ```
-> yarn es snapshot   # in one terminal
-> yarn start         # in another terminal
+> pnpm es snapshot   # in one terminal
+> pnpm start         # in another terminal
 > ```
 > Then re-run this skill.
 

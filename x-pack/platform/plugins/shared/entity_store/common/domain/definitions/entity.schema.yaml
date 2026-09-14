@@ -1,5 +1,5 @@
 # Generate schema by calling:
-# cd x-pack/platform/plugins/shared/entity_store && yarn openapi:generate
+# cd x-pack/platform/plugins/shared/entity_store && pnpm openapi:generate
 openapi: 3.0.0
 info:
   title: Common Entities Schemas

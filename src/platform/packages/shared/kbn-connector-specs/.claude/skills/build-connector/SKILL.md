@@ -116,8 +116,8 @@ Use `AskUserQuestion` to ask the user to start Elasticsearch and Kibana:
 > To test the connector, I need Elasticsearch and Kibana running. Please start them if they aren't already:
 >
 > ```
-> yarn es snapshot          # in one terminal
-> yarn start                # in another terminal
+> pnpm es snapshot          # in one terminal
+> pnpm start                # in another terminal
 > ```
 >
 > Let me know when both are ready.
