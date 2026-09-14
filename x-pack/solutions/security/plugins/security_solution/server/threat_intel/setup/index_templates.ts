@@ -66,7 +66,11 @@ const threatReportsTemplate = {
         // scope reads to the current space plus `'*'`. This is not an Elasticsearch
         // authorization boundary on the hidden reports index while supply is disabled.
         space_id: { type: 'keyword' as const },
-        // Monotonic hunt-relevant revision. Init 1 on create/ingest; bump on enrich.
+        // Enrichment completion marker, not a change feed. Init 1 on
+        // create/ingest; bumped exactly once to 2 by a successful enrichment
+        // (evidence writes never touch it, and an enriched report is never
+        // re-enriched), so it never moves again. Consumers must not build
+        // polling, cache-invalidation, or re-dispatch logic on it.
         revision: { type: 'integer' as const },
         source: {
           properties: {
@@ -301,11 +305,10 @@ const threatReportsTemplate = {
               },
             },
             // Hunt Watch's writer (per hunt run; no writer lands in this branch).
+            // A completed hunt (hit or clean no-hit) writes this and the report
+            // leaves the candidate pool for good; there is no cooldown or
+            // revision-triggered re-hunt.
             last_hunted_at: { type: 'date' as const },
-            // Report.revision echoed at hunt time so continuous_threat_hunt can
-            // bypass the time cooldown when enrich bumps revision. Reserved
-            // mapping only until the hunt_feedback route lands.
-            last_hunted_revision: { type: 'integer' as const },
             // Latest targeted hunt status echo (keyword for mapping stability).
             last_hunt_status: { type: 'keyword' as const },
             last_hunt_run_id: { type: 'keyword' as const },

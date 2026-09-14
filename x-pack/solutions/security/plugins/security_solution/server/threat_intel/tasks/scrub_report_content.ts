@@ -27,8 +27,8 @@ const TASK_TIMEOUT = '10m';
 /**
  * Retention window for the untrusted part of a report. Enrichment and evidence
  * fields are deliberately kept past this point: they drive ranking
- * and hunt cooldown, and they are our own derived data rather than fetched
- * third-party content.
+ * and the hunt-once candidate pool, and they are our own derived data rather
+ * than fetched third-party content.
  */
 export const CONTENT_RETENTION_DAYS = 30;
 

@@ -565,8 +565,8 @@ describe('index_templates — mapping coverage guard', () => {
     expect((properties.evidence as { properties: Record<string, unknown> }).properties).toEqual(
       expect.objectContaining({
         alert_hits_total: { type: 'integer' },
+        last_hunted_at: { type: 'date' },
         last_hunt_status: { type: 'keyword' },
-        last_hunted_revision: { type: 'integer' },
         corroborated_rank_score: { type: 'float' },
       })
     );
