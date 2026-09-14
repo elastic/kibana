@@ -692,6 +692,7 @@ class OutputService {
       ...omit(output, ['ssl', 'secrets']),
       ...(options?.id ? { output_id: options.id } : {}),
     } as OutputSOAttributes;
+    this._validateCanBeDefault(data, isPreconfigured);
 
     if (outputTypeSupportPresets(output)) {
       if (
@@ -1148,6 +1149,8 @@ class OutputService {
 
     const mergedType = data.type ?? originalOutput.type;
     const mergedIsDefault = data.is_default ?? originalOutput.is_default;
+    const mergedIsDefaultMonitoring =
+      data.is_default_monitoring ?? originalOutput.is_default_monitoring;
     const isTypeChanged = mergedType !== originalOutput.type;
 
     await this.assertOtlpOutputAllowed({ type: mergedType }, esClient, soClient);
@@ -1164,6 +1167,14 @@ class OutputService {
     } as Nullable<Partial<OutputSOAttributes>> & {
       type: ValueOf<OutputType>;
     };
+    this._validateCanBeDefault(
+      {
+        type: mergedType,
+        is_default: mergedIsDefault,
+        is_default_monitoring: mergedIsDefaultMonitoring,
+      },
+      isPreconfigured
+    );
 
     if (outputTypeSupportPresets(updateData)) {
       if (
@@ -1651,6 +1662,26 @@ class OutputService {
         validateOutputSslPaths(output);
       }
       ensureNoDuplicateSecrets(output);
+    } catch (e) {
+      if (isPreconfigured && e instanceof OutputInvalidError) {
+        appContextService.getLogger().warn(`Preconfigured output failed validation: ${e.message}`);
+      } else {
+        throw e;
+      }
+    }
+  }
+
+  private _validateCanBeDefault(
+    output: { type: ValueOf<OutputType>; is_default: boolean; is_default_monitoring: boolean },
+    isPreconfigured: boolean
+  ): void {
+    try {
+      if (output.type === outputType.Otlp && output.is_default_monitoring) {
+        throw new OutputInvalidError('An OTLP output cannot be the default monitoring output.');
+      }
+      if (output.type === outputType.Otlp && output.is_default) {
+        throw new OutputInvalidError('An OTLP output cannot be the default data output.');
+      }
     } catch (e) {
       if (isPreconfigured && e instanceof OutputInvalidError) {
         appContextService.getLogger().warn(`Preconfigured output failed validation: ${e.message}`);
