@@ -9,7 +9,7 @@ import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient } from '@kbn/react-query';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
-import { ListPageTestProviders } from '../../test_utils/test_providers';
+import { createMockLocators, ListPageTestProviders } from '../../test_utils/test_providers';
 import { AlertEpisodesListPage } from './alert_episodes_list_page';
 import type { CustomBulkActions } from '@kbn/unified-data-table';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -229,6 +229,8 @@ mockHttp.post.mockResolvedValue({ rules: [] });
 
 const mockCreateEpisodeActions = jest.mocked(createEpisodeActions);
 
+const mockLocators = createMockLocators();
+
 const getCapturedBulkActions = (): CustomBulkActions => {
   const calls = mockUnifiedDataTable.mock.calls;
   const lastCall = calls[calls.length - 1][0];
@@ -237,7 +239,7 @@ const getCapturedBulkActions = (): CustomBulkActions => {
 
 const renderPage = () => {
   return render(
-    <ListPageTestProviders>
+    <ListPageTestProviders locators={mockLocators}>
       <AlertEpisodesListPage />
     </ListPageTestProviders>
   );
@@ -266,8 +268,10 @@ describe('AlertEpisodesListPage', () => {
   });
 
   it('renders the manage rules link in the app header menu', async () => {
+    const { rulesLocators } = mockLocators;
     const manageRulesLink = await screen.findByTestId('alertingV2EpisodesListManageRules');
-    expect(manageRulesLink).toHaveAttribute('href', '/app/management/alertingV2/rules');
+    expect(rulesLocators.useUrl).toHaveBeenCalledWith({});
+    expect(manageRulesLink).toHaveAttribute('href', '/mock-locator-url');
   });
 
   it('passes customBulkActions derived from episode actions to UnifiedDataTable', () => {
@@ -356,6 +360,30 @@ describe('AlertEpisodesListPage', () => {
     }) => React.ReactNode;
     const node = renderDocumentView({ flattened: { 'episode.id': 'ep-1' } });
     expect(node).toBeTruthy();
+  });
+
+  it('passes host-aware getRuleDetailsHref into the episode details flyout', () => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    const renderDocumentView = lastCall?.renderDocumentView as (hit: {
+      flattened: Record<string, unknown>;
+    }) => React.ReactElement;
+    const node = renderDocumentView({ flattened: { 'episode.id': 'ep-1' } });
+    expect(typeof node.props.getRuleDetailsHref).toBe('function');
+    expect(node.props.getRuleDetailsHref('rule-1')).toBe('/mock-locator-url');
+    expect(mockLocators.rulesLocators.getRedirectUrl).toHaveBeenCalledWith({ ruleId: 'rule-1' });
+  });
+
+  it('passes host-aware getEpisodeDetailsHref into the episode details flyout', () => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    const renderDocumentView = lastCall?.renderDocumentView as (hit: {
+      flattened: Record<string, unknown>;
+    }) => React.ReactElement;
+    const node = renderDocumentView({ flattened: { 'episode.id': 'ep-1' } });
+    expect(typeof node.props.getEpisodeDetailsHref).toBe('function');
+    expect(node.props.getEpisodeDetailsHref('ep-1')).toBe('/mock-locator-url');
+    expect(mockLocators.episodesLocators.getRedirectUrl).toHaveBeenCalledWith({
+      episodeId: 'ep-1',
+    });
   });
 
   it('renderDocumentView returns the ClassicAlertDetailsFlyout for classic-sourced rows', () => {
