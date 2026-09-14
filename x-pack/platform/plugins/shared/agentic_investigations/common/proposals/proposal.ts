@@ -198,6 +198,29 @@ export interface ListProposalsResponse {
   total: number;
 }
 
+export const MAX_PROPOSALS_SIZE = 500;
+
+export const proposalsQuerySchema = z.object({
+  windowHours: z.coerce.number().int().min(1).max(168).default(24),
+});
+export type ProposalsQuery = z.infer<typeof proposalsQuerySchema>;
+
+export interface ProposalsListResponse {
+  proposals: ProposalWithMetadata[];
+  total: number;
+  truncated: boolean;
+}
+
+/**
+ * Parameters for `listByWindow`. Callers declare which statuses to include in
+ * the "pending" leg of the query rather than having the platform hardcode them,
+ * keeping AlertZero-specific semantics out of platform code.
+ */
+export interface ListByWindowQuery {
+  includeStatuses: ProposalStatus[];
+  decidedWithinHours: number;
+}
+
 /** Terminal states: a decided or executed proposal can no longer be acted on. */
 export const isDecided = (status: ProposalStatus): boolean => status !== 'pending';
 
