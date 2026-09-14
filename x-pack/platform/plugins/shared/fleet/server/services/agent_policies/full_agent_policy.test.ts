@@ -3310,7 +3310,7 @@ ssl.test: 123
     expect(result).toEqual({ type: 'otlp' });
   });
 
-  it('should include secrets in a compiled OTLP output when present', () => {
+  it('should not include secrets in a compiled OTLP output even when present on the output SO', () => {
     const tlsSecret = { id: 'secret-ref-abc' };
     const result = transformOutputToFullPolicyOutput({
       id: 'otlp-id',
@@ -3322,10 +3322,7 @@ ssl.test: 123
       secrets: { otlp_exporter: { tls: { key_pem: tlsSecret } } },
     } as any);
 
-    expect(result).toEqual({
-      type: 'otlp',
-      secrets: { otlp_exporter: { tls: { key_pem: tlsSecret } } },
-    });
+    expect(result).toEqual({ type: 'otlp' });
   });
 });
 
