@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -41,7 +41,7 @@ export const EndpointExceptionsPerPolicyOptInCallout: React.FC<EndpointException
             />
             {!canOptIn && (
               <>
-                {' '}
+                <EuiSpacer size="m" />
                 <FormattedMessage
                   id="xpack.securitySolution.endpointExceptions.perPolicyOptInCalloutNoPermission"
                   defaultMessage="Contact your administrator to update details."
