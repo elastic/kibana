@@ -8376,7 +8376,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: List action policies
       tags:
         - alerting-v2
@@ -8531,7 +8531,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Create an action policy
       tags:
         - alerting-v2
@@ -8654,7 +8654,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Delete action policies in bulk by ID
       tags:
         - alerting-v2
@@ -8777,7 +8777,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Disable action policies in bulk by ID
       tags:
         - alerting-v2
@@ -8900,7 +8900,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Enable action policies in bulk by ID
       tags:
         - alerting-v2
@@ -9024,7 +9024,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Snooze action policies in bulk by ID
       tags:
         - alerting-v2
@@ -9147,7 +9147,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Cancel snooze for action policies in bulk by ID
       tags:
         - alerting-v2
@@ -9270,7 +9270,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Rotate API keys for action policies in bulk by ID
       tags:
         - alerting-v2
@@ -9287,7 +9287,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Delete an action policy by identifier.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies.
+        Deletes the action policy whose ID you include in the URL path. Use the `id` returned when you created the policy, or from get or list. This request has no body.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies.
       operationId: delete-alerting-v2-action-policies-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -9297,7 +9297,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The action policy identifier.
+        - description: The ID of the action policy to delete. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -9365,7 +9365,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Not Found
-                    message: Action policy with id "action-policy-1" not found
+                    message: Action policy with ID "action-policy-1" not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an action policy with the given ID does not exist.
@@ -9394,7 +9394,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Delete an action policy
       tags:
         - alerting-v2
@@ -9413,7 +9413,7 @@ paths:
         Get an action policy by identifier.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-action-policies.
       operationId: get-alerting-v2-action-policies-id
       parameters:
-        - description: The action policy identifier.
+        - description: The ID of the action policy to get. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -9514,7 +9514,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Not Found
-                    message: Action policy with id "action-policy-1" not found
+                    message: Action policy with ID "action-policy-1" not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an action policy with the given ID does not exist.
@@ -9543,7 +9543,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Get an action policy
       tags:
         - alerting-v2
@@ -9569,7 +9569,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The action policy identifier.
+        - description: The ID of the action policy to update. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -9683,7 +9683,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Not Found
-                    message: Action policy with id "action-policy-1" not found
+                    message: Action policy with ID "action-policy-1" not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an action policy with the given ID does not exist.
@@ -9698,7 +9698,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Conflict
-                    message: Action policy with id "action-policy-1" has already been updated by another user
+                    message: Action policy with ID "action-policy-1" has already been updated by another user
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the action policy was concurrently updated by another caller.
@@ -9727,7 +9727,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Partially update an action policy.
       tags:
         - alerting-v2
@@ -9766,7 +9766,7 @@ paths:
           application/json:
             examples:
               upsertActionPolicyRequest:
-                summary: Action policy to create or replace at the given id
+                summary: Action policy to create or replace at the given ID
                 value:
                   description: Sends notifications for alerts generated by rules with the production tag.
                   destinations:
@@ -9911,7 +9911,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Not Found
-                    message: Action policy with id "action-policy-1" not found
+                    message: Action policy with ID "action-policy-1" not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an action policy with the given ID does not exist.
@@ -9926,7 +9926,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Conflict
-                    message: Action policy with id "action-policy-1" has already been updated by another user
+                    message: Action policy with ID "action-policy-1" has already been updated by another user
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the action policy was created or updated concurrently by another caller.
@@ -9955,7 +9955,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Create or replace an action policy
       tags:
         - alerting-v2
@@ -9982,7 +9982,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The action policy identifier.
+        - description: The ID of the action policy to disable. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10083,7 +10083,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Not Found
-                    message: Action policy with id "action-policy-1" not found
+                    message: Action policy with ID "action-policy-1" not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an action policy with the given ID does not exist.
@@ -10098,7 +10098,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Conflict
-                    message: Action policy with id "action-policy-1" has already been updated by another user
+                    message: Action policy with ID "action-policy-1" has already been updated by another user
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the action policy was concurrently updated by another caller.
@@ -10127,7 +10127,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Disable an action policy
       tags:
         - alerting-v2
@@ -10154,7 +10154,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The action policy identifier.
+        - description: The ID of the action policy to enable. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10255,7 +10255,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Not Found
-                    message: Action policy with id "action-policy-1" not found
+                    message: Action policy with ID "action-policy-1" not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an action policy with the given ID does not exist.
@@ -10270,7 +10270,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Conflict
-                    message: Action policy with id "action-policy-1" has already been updated by another user
+                    message: Action policy with ID "action-policy-1" has already been updated by another user
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the action policy was concurrently updated by another caller.
@@ -10299,7 +10299,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Enable an action policy
       tags:
         - alerting-v2
@@ -10326,7 +10326,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The action policy identifier.
+        - description: The ID of the action policy to snooze. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10437,7 +10437,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Not Found
-                    message: Action policy with id "action-policy-1" not found
+                    message: Action policy with ID "action-policy-1" not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an action policy with the given ID does not exist.
@@ -10452,7 +10452,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Conflict
-                    message: Action policy with id "action-policy-1" has already been updated by another user
+                    message: Action policy with ID "action-policy-1" has already been updated by another user
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the action policy was concurrently updated by another caller.
@@ -10481,7 +10481,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Snooze an action policy
       tags:
         - alerting-v2
@@ -10508,7 +10508,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The action policy identifier.
+        - description: The ID of the action policy to unsnooze. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10609,7 +10609,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Not Found
-                    message: Action policy with id "action-policy-1" not found
+                    message: Action policy with ID "action-policy-1" not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an action policy with the given ID does not exist.
@@ -10624,7 +10624,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Conflict
-                    message: Action policy with id "action-policy-1" has already been updated by another user
+                    message: Action policy with ID "action-policy-1" has already been updated by another user
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the action policy was concurrently updated by another caller.
@@ -10653,7 +10653,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Unsnooze an action policy
       tags:
         - alerting-v2
@@ -10680,7 +10680,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The action policy identifier.
+        - description: The ID of the action policy of the API key to update. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.
           in: path
           name: id
           required: true
@@ -10748,7 +10748,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Not Found
-                    message: Action policy with id "action-policy-1" not found
+                    message: Action policy with ID "action-policy-1" not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an action policy with the given ID does not exist.
@@ -10763,7 +10763,7 @@ paths:
                     details:
                       action_policy_id: action-policy-1
                     error: Conflict
-                    message: Action policy with id "action-policy-1" has already been updated by another user
+                    message: Action policy with ID "action-policy-1" has already been updated by another user
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the action policy was concurrently updated by another caller.
@@ -10792,7 +10792,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Update an action policy API key
       tags:
         - alerting-v2
@@ -10916,7 +10916,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Bulk create alert actions
       tags:
         - alerting-v2
@@ -11048,7 +11048,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Acknowledge an alert
       tags:
         - alerting-v2
@@ -11181,7 +11181,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Activate an alert
       tags:
         - alerting-v2
@@ -11314,7 +11314,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Assign an alert to a user
       tags:
         - alerting-v2
@@ -11447,7 +11447,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Deactivate an alert
       tags:
         - alerting-v2
@@ -11579,7 +11579,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Snooze an alert
       tags:
         - alerting-v2
@@ -11713,7 +11713,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Add tags to an alert
       tags:
         - alerting-v2
@@ -11845,7 +11845,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Unacknowledge an alert
       tags:
         - alerting-v2
@@ -11976,7 +11976,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Unsnooze an alert
       tags:
         - alerting-v2
@@ -12166,7 +12166,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: List action policy executions
       tags:
         - alerting-v2
@@ -12361,7 +12361,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: List rule executions
       tags:
         - alerting-v2
@@ -12546,7 +12546,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: List rules
       tags:
         - alerting-v2
@@ -12712,7 +12712,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Create a rule
       tags:
         - alerting-v2
@@ -12832,7 +12832,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Delete rules in bulk by ID
       tags:
         - alerting-v2
@@ -12952,7 +12952,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Disable rules in bulk by ID
       tags:
         - alerting-v2
@@ -13072,7 +13072,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Enable rules in bulk by ID
       tags:
         - alerting-v2
@@ -13234,7 +13234,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Get rules in bulk
       tags:
         - alerting-v2
@@ -13354,7 +13354,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Update the API key of rules in bulk by ID
       tags:
         - alerting-v2
@@ -13476,7 +13476,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Delete rules matching a query (dry-run by default)
       tags:
         - alerting-v2
@@ -13598,7 +13598,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Disable rules matching a query (dry-run by default)
       tags:
         - alerting-v2
@@ -13720,7 +13720,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Enable rules matching a query (dry-run by default)
       tags:
         - alerting-v2
@@ -13842,7 +13842,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Update the API key of rules matching a query (dry-run by default)
       tags:
         - alerting-v2
@@ -13966,7 +13966,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Delete a rule
       tags:
         - alerting-v2
@@ -14120,7 +14120,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Get a rule
       tags:
         - alerting-v2
@@ -14306,7 +14306,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Update a rule
       tags:
         - alerting-v2
@@ -14550,7 +14550,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Create or replace a rule
       tags:
         - alerting-v2
@@ -14727,7 +14727,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Disable a rule
       tags:
         - alerting-v2
@@ -14900,7 +14900,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Enable a rule
       tags:
         - alerting-v2
@@ -15034,7 +15034,7 @@ paths:
                     message: Alerting is disabled.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: This Alerting V2 API is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Run a rule now
       tags:
         - alerting-v2
