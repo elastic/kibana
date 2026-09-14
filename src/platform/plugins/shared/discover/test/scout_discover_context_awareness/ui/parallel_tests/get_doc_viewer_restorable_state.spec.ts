@@ -26,10 +26,10 @@ const COUNT = 'example-restorable-state-doc-view-count';
  * stays open, which is what the doc view itself tells the user. So the tab has to be switched with
  * the flyout still up, and that is the whole shape of these tests.
  *
- * Stateful classic only. The doc viewer flyout draws an `ownFocus` overlay mask, and on a solution
- * view deployment the Discover tabs bar sits inside the masked region — the "New tab" button
- * resolves and is visible, but the mask swallows the click, so the flow is not drivable there at
- * all. The FTR covered this on stateful only for the same reason.
+ * Classic navigation only. The doc viewer flyout draws an `ownFocus` overlay mask, and on a
+ * solution view deployment the Discover tabs bar sits inside the masked region: the "New tab"
+ * button resolves and reports visible, but the mask swallows the click, so switching tabs with the
+ * flyout open is not possible there.
  */
 spaceTest.describe(
   'Discover context awareness - extension getDocViewer, restorable state',

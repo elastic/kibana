@@ -176,8 +176,7 @@ describe('DiscoverMainRoute', () => {
 
     await waitForLoad();
 
-    // The profile really did contribute its data view on this render — without this the assertion
-    // below would pass just as well with no profile at all, and stop covering anything.
+    // The profile contributed its ad hoc data view on this render.
     expect(discoverServiceMock.data.dataViews.create).toHaveBeenCalledWith(
       { ...defaultAdHocDataViews[0], managed: true },
       true

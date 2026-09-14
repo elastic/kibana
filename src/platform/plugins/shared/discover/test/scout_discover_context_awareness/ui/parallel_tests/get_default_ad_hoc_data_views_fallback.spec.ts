@@ -22,11 +22,10 @@ import {
  * `example-root-profile` takes over, so the user lands on something usable rather than the
  * onboarding page. The space deliberately never loads the context awareness saved objects.
  *
- * The companion case — the onboarding page still winning when there is no data at all, so that a
- * profile-contributed data view cannot mask it — is covered in Jest, by
- * application/main/discover_main_route.test.ts. It belongs there rather than here: asserting it in
- * a browser means asserting that nothing on the whole deployment holds data, which no amount of
- * cleanup can guarantee on a shared server.
+ * The companion case — the onboarding page still winning when the cluster holds no data at all, so
+ * that a profile-contributed data view cannot mask it — is covered by
+ * application/main/discover_main_route.test.tsx. It cannot live here: a shared deployment gives no
+ * way to guarantee that nothing anywhere holds data.
  */
 spaceTest.describe(
   'Discover context awareness - extension getDefaultAdHocDataViews, fallback',

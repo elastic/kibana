@@ -170,10 +170,9 @@ export function captureNextDialogMessage(page: ScoutPage): Promise<string> {
 export async function openSurroundingDocs(page: ScoutPage, dataGrid: DataGrid) {
   await dataGrid.openDocumentDetails({ rowIndex: 0 });
 
-  // Both flyout actions share the `docTableRowAction` subject, so they are told apart by the
-  // locator they navigate to: each renders as a link to `/app/r?l=<locator id>`. Their visible text
-  // is not usable — the flyout renders them as icon-only buttons here, with the label only in
-  // `aria-label` — and matching that label would tie the spec to a translated string.
+  // Both flyout actions share the `docTableRowAction` subject and render as icon-only links here,
+  // so neither a test subject nor visible text can tell them apart. Their `href` can: it is a
+  // redirect of the form `/app/r?l=<locator id>`.
   await page.testSubj
     .locator('docViewerFlyout')
     .locator(`[data-test-subj~="docTableRowAction"][href*="${DISCOVER_CONTEXT_APP_LOCATOR}"]`)

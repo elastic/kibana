@@ -32,7 +32,8 @@ const BOX_COLOR_SELECT = 'exampleProfileStateBoxColorSelect';
  * the `_p` hash parameter — but reached by switching data views instead of editing a query, which
  * is a different resolve path through the profile service.
  *
- * Stateful only: `_profile_state.ts` has no serverless counterpart.
+ * Classic navigation only: the timestamp whose colour is asserted is rendered by
+ * `example-root-profile`, which stops resolving once a solution view is active.
  */
 spaceTest.describe(
   'Discover context awareness - profile state, data view mode',
