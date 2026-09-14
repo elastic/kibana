@@ -50,7 +50,7 @@ export function registerAgentBuilderAttachments(
       getLabel(
         attachment,
         i18n.translate('xpack.ml.agentBuilder.attachments.anomalySwimLane.label', {
-          defaultMessage: 'Anomaly Swim Lane',
+          defaultMessage: 'Anomaly swim lane',
         })
       ),
     getIcon: () => 'machineLearningApp',
@@ -72,7 +72,7 @@ export function registerAgentBuilderAttachments(
         getLabel(
           attachment,
           i18n.translate('xpack.ml.agentBuilder.attachments.anomalyCharts.label', {
-            defaultMessage: 'Anomaly Charts',
+            defaultMessage: 'Anomaly charts',
           })
         ),
       getIcon: () => 'machineLearningApp',

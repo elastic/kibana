@@ -27,14 +27,14 @@ const baseProps = {
   }),
 };
 
-const anomalySwimLaneOverallSchema = z
+export const anomalySwimLaneOverallSchema = z
   .object({
     ...baseProps,
     swimlane_type: z.literal('overall'),
   })
   .strip();
 
-const anomalySwimLaneViewBySchema = z
+export const anomalySwimLaneViewBySchema = z
   .object({
     ...baseProps,
     swimlane_type: z.literal('viewBy'),
