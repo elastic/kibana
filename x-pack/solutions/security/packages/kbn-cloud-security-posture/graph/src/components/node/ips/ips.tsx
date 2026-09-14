@@ -13,6 +13,7 @@ import {
   useNodeDetailsPopover,
   type UseNodeDetailsPopoverReturn,
 } from '../../popovers/details/use_node_details_popover';
+import { PlusCountBadge } from '../plus_count_badge/plus_count_badge';
 import {
   GRAPH_IPS_TEXT_ID,
   GRAPH_IPS_PLUS_COUNT_ID,
@@ -71,7 +72,6 @@ export interface IpsProps {
 
 export const Ips = ({ ips, onIpClick }: IpsProps) => {
   const sFontSize = useEuiFontSize('s');
-  const xsFontSize = useEuiFontSize('xs');
 
   if (ips.length === 0) return null;
 
@@ -126,34 +126,12 @@ export const Ips = ({ ips, onIpClick }: IpsProps) => {
 
   const counter =
     ips.length > VISIBLE_IPS_LIMIT ? (
-      onIpClick ? (
-        <EuiButtonEmpty
-          size="xs"
-          color="text"
-          data-test-subj={GRAPH_IPS_PLUS_COUNT_BUTTON_ID}
-          onClick={onIpClick}
-          aria-label={popoverTipAriaLabel}
-          flush="both"
-          css={css`
-            font-weight: medium;
-          `}
-        >
-          {`+${ips.length - VISIBLE_IPS_LIMIT}`}
-        </EuiButtonEmpty>
-      ) : (
-        <EuiText
-          size="xs"
-          color="subdued"
-          aria-label={popoverTipAriaLabel}
-          data-test-subj={GRAPH_IPS_PLUS_COUNT_ID}
-          css={css`
-            font-weight: medium;
-            ${xsFontSize};
-          `}
-        >
-          {`+${ips.length - VISIBLE_IPS_LIMIT}`}
-        </EuiText>
-      )
+      <PlusCountBadge
+        count={ips.length - VISIBLE_IPS_LIMIT}
+        onClick={onIpClick}
+        ariaLabel={popoverTipAriaLabel}
+        data-test-subj={onIpClick ? GRAPH_IPS_PLUS_COUNT_BUTTON_ID : GRAPH_IPS_PLUS_COUNT_ID}
+      />
     ) : null;
 
   return (

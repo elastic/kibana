@@ -25,6 +25,20 @@ export interface Size {
 
 interface BaseNodeDataViewModel {
   interactive?: boolean;
+  showMetadata?: boolean;
+}
+
+export interface EntityRiskScore {
+  value?: number;
+  min?: number;
+  max?: number;
+}
+
+export interface EntityAssetCriticality {
+  extreme?: number;
+  high?: number;
+  medium?: number;
+  low?: number;
 }
 
 export type NodeClickCallback = (e: React.MouseEvent<HTMLElement>, node: NodeProps) => void;
@@ -39,6 +53,8 @@ export type IpClickCallback = (e: React.MouseEvent<HTMLElement>) => void;
 
 export type CountryClickCallback = (e: React.MouseEvent<HTMLElement>) => void;
 
+export type EntityIdClickCallback = (e: React.MouseEvent<HTMLElement>) => void;
+
 export type EventClickCallback = (e: React.MouseEvent<HTMLButtonElement>) => void;
 
 export interface EntityNodeViewModel
@@ -49,6 +65,11 @@ export interface EntityNodeViewModel
   nodeClick?: NodeClickCallback;
   ipClickHandler?: IpClickCallback;
   countryClickHandler?: CountryClickCallback;
+  entityIdClickHandler?: EntityIdClickCallback;
+  entityType?: string;
+  entityIds?: string[];
+  riskScore?: EntityRiskScore;
+  assetCriticality?: EntityAssetCriticality;
 }
 
 export interface GroupNodeViewModel
