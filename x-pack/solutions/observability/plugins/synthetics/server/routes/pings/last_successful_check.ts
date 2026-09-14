@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { queryNumber, optionalQueryString, routeId } from '../zod_query';
 import { getJourneyScreenshot } from '../../queries/get_journey_screenshot';
 import { getLastSuccessfulCheck } from '../../queries/get_last_successful_check';
 import type { Ping } from '../../../common/runtime_types';
@@ -17,12 +18,12 @@ export const createLastSuccessfulCheckRoute: SyntheticsRestApiRouteFactory = () 
   method: 'GET',
   path: SYNTHETICS_API_URLS.SYNTHETICS_SUCCESSFUL_CHECK,
   validate: {
-    query: schema.object({
-      monitorId: schema.string(),
-      stepIndex: schema.number(),
-      timestamp: schema.string(),
-      location: schema.maybe(schema.string()),
-      remoteName: schema.maybe(schema.string({ maxLength: 256 })),
+    query: z.object({
+      monitorId: routeId,
+      stepIndex: queryNumber,
+      timestamp: z.string().max(64),
+      location: optionalQueryString,
+      remoteName: z.string().max(256).optional(),
     }),
   },
   handler: async (routeProps) => {

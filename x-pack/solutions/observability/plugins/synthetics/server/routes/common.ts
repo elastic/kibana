@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Type, TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { isEmpty } from 'lodash';
 import { escapeQuotes } from '@kbn/es-query';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
@@ -23,100 +22,107 @@ import {
 import { getAllLocations } from '../synthetics_service/get_all_locations';
 import type { PrivateLocation, ServiceLocation } from '../../common/runtime_types';
 import { syntheticsMonitorAttributes } from '../../common/types/saved_objects';
+import {
+  MAX_DATE_RANGE_LENGTH,
+  MAX_ROUTE_STRING_LENGTH,
+  queryBoolean,
+  queryNumber,
+} from './zod_query';
 
-// A datemath expression or ISO-8601 timestamp is well under this; the cap only
-// exists to keep the date-range query params from being unbounded strings.
-const MAX_DATE_RANGE_PARAM_LENGTH = 256;
 const MAX_MONITOR_QUERY_IDS_IN_BODY = 10000;
 const MAX_MONITOR_QUERY_ID_LENGTH = 256;
+const MAX_FILTER_ITEM_LENGTH = 512;
+const MAX_FILTER_ARRAY_SIZE = 1000;
+const MAX_SEARCH_AFTER_SIZE = 50;
 
-const StringOrArraySchema = schema.maybe(
-  schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
-);
-
-const UseLogicalAndFieldLiterals = useLogicalAndFields.map((f) => schema.literal(f)) as [
-  Type<string>
-];
+const stringOrArray = z
+  .union([
+    z.string().max(MAX_FILTER_ITEM_LENGTH),
+    z.array(z.string().max(MAX_FILTER_ITEM_LENGTH)).max(MAX_FILTER_ARRAY_SIZE),
+  ])
+  .optional();
 
 const CommonQuerySchema = {
-  query: schema.maybe(schema.string()),
-  filter: schema.maybe(schema.string()),
-  tags: StringOrArraySchema,
-  monitorTypes: StringOrArraySchema,
-  locations: StringOrArraySchema,
-  projects: StringOrArraySchema,
-  schedules: StringOrArraySchema,
+  query: z.string().max(MAX_ROUTE_STRING_LENGTH).optional(),
+  filter: z.string().max(MAX_ROUTE_STRING_LENGTH).optional(),
+  tags: stringOrArray,
+  monitorTypes: stringOrArray,
+  locations: stringOrArray,
+  projects: stringOrArray,
+  schedules: stringOrArray,
   // Remote cluster aliases. Only honoured by the overview status route, where
   // it scopes pings to documents whose `_index` is prefixed by one of the
   // selected aliases (CCS pattern `<alias>:<index>`). Saved-object-backed
   // routes ignore it because remote monitors have no local saved object.
-  remoteNames: StringOrArraySchema,
-  status: StringOrArraySchema,
-  monitorQueryIds: StringOrArraySchema,
-  configIds: StringOrArraySchema,
-  showFromAllSpaces: schema.maybe(schema.boolean()),
-  useLogicalAndFor: schema.maybe(
-    schema.oneOf([schema.string(), schema.arrayOf(schema.oneOf(UseLogicalAndFieldLiterals))])
-  ),
+  remoteNames: stringOrArray,
+  status: stringOrArray,
+  monitorQueryIds: stringOrArray,
+  configIds: stringOrArray,
+  showFromAllSpaces: queryBoolean.optional(),
+  useLogicalAndFor: z
+    .union([
+      z.string().max(MAX_FILTER_ITEM_LENGTH),
+      z.array(z.enum(useLogicalAndFields)).max(MAX_FILTER_ARRAY_SIZE),
+    ])
+    .optional(),
   // Date-range window for the overview list (see runtime type docs). The
   // overview page always sends these; their presence scopes each monitor's
   // status to the window instead of the default "current status" look-back.
   // Bounded length: these only ever carry a short datemath expression
   // (`now-15m`) or an ISO-8601 timestamp, so cap the input to avoid unbounded
   // strings reaching `datemath.parse` (CodeQL: unbounded string DoS).
-  dateRangeStart: schema.maybe(schema.string({ maxLength: MAX_DATE_RANGE_PARAM_LENGTH })),
-  dateRangeEnd: schema.maybe(schema.string({ maxLength: MAX_DATE_RANGE_PARAM_LENGTH })),
+  dateRangeStart: z.string().max(MAX_DATE_RANGE_LENGTH).optional(),
+  dateRangeEnd: z.string().max(MAX_DATE_RANGE_LENGTH).optional(),
 };
 
-export const QuerySchema = schema.object({
+export const QuerySchema = z.object({
   ...CommonQuerySchema,
-  page: schema.maybe(schema.number()),
-  perPage: schema.maybe(schema.number()),
+  page: queryNumber.optional(),
+  perPage: queryNumber.optional(),
   sortField: MonitorSortFieldSchema,
-  sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
-  searchAfter: schema.maybe(schema.arrayOf(schema.string())),
-  internal: schema.maybe(
-    schema.boolean({
-      defaultValue: false,
-    })
-  ),
+  sortOrder: z.enum(['desc', 'asc']).optional(),
+  searchAfter: z
+    .array(z.string().max(MAX_FILTER_ITEM_LENGTH))
+    .max(MAX_SEARCH_AFTER_SIZE)
+    .optional(),
+  internal: queryBoolean.optional().default(false),
 });
 
-export type MonitorsQuery = TypeOf<typeof QuerySchema>;
+export type MonitorsQuery = z.infer<typeof QuerySchema>;
 
-export const OverviewStatusSchema = schema.object({
+export const OverviewStatusSchema = z.object({
   ...CommonQuerySchema,
-  scopeStatusByLocation: schema.maybe(schema.boolean()),
-  groupByMonitor: schema.maybe(schema.boolean()),
+  scopeStatusByLocation: queryBoolean.optional(),
+  groupByMonitor: queryBoolean.optional(),
   // When explicitly `false`, read-only Heartbeat / Elastic Agent managed
   // monitors (no saved object, `origin: 'heartbeat'`) are excluded from the
   // overview. Defaults to showing them; remote (CCS) monitors are unaffected.
-  includeHeartbeatMonitors: schema.maybe(schema.boolean()),
-  page: schema.maybe(schema.number({ min: 1 })),
-  perPage: schema.maybe(schema.number({ min: 1, max: OVERVIEW_STATUS_MAX_PER_PAGE })),
+  includeHeartbeatMonitors: queryBoolean.optional(),
+  page: queryNumber.min(1).optional(),
+  perPage: queryNumber.min(1).max(OVERVIEW_STATUS_MAX_PER_PAGE).optional(),
   sortField: OverviewStatusSortFieldSchema,
-  sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
-  statusFilter: schema.maybe(
-    schema.oneOf([
-      schema.literal(MONITOR_STATUS_ENUM.UP),
-      schema.literal(MONITOR_STATUS_ENUM.DOWN),
-      schema.literal(MONITOR_STATUS_ENUM.PENDING),
-      schema.literal(MONITOR_STATUS_ENUM.STALE),
-      schema.literal(MONITOR_STATUS_ENUM.DISABLED),
+  sortOrder: z.enum(['asc', 'desc']).optional(),
+  statusFilter: z
+    .enum([
+      MONITOR_STATUS_ENUM.UP,
+      MONITOR_STATUS_ENUM.DOWN,
+      MONITOR_STATUS_ENUM.PENDING,
+      MONITOR_STATUS_ENUM.STALE,
+      MONITOR_STATUS_ENUM.DISABLED,
     ])
-  ),
+    .optional(),
 });
 
-export type OverviewStatusQuery = TypeOf<typeof OverviewStatusSchema>;
+export type OverviewStatusQuery = z.infer<typeof OverviewStatusSchema>;
 
-export const OverviewStatusStaleBodySchema = schema.object({
-  monitorQueryIds: schema.arrayOf(schema.string({ maxLength: MAX_MONITOR_QUERY_ID_LENGTH }), {
-    minSize: 1,
-    maxSize: MAX_MONITOR_QUERY_IDS_IN_BODY,
-  }),
+export const OverviewStatusStaleBodySchema = z.object({
+  monitorQueryIds: z
+    .array(z.string().max(MAX_MONITOR_QUERY_ID_LENGTH))
+    .min(1)
+    .max(MAX_MONITOR_QUERY_IDS_IN_BODY),
 });
 
-export type OverviewStatusStaleBody = TypeOf<typeof OverviewStatusStaleBodySchema>;
+export type OverviewStatusStaleBody = z.infer<typeof OverviewStatusStaleBodySchema>;
 
 export const MONITOR_SEARCH_FIELDS = [
   'name',
@@ -164,7 +170,7 @@ interface Filters {
 }
 
 export const getMonitorFilters = async (
-  context: RouteContext<Record<string, any>, OverviewStatusQuery>,
+  context: RouteContext,
   attr: string = syntheticsMonitorAttributes
 ) => {
   const {

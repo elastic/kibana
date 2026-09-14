@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { queryBoolean, routeId } from '../zod_query';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
@@ -15,11 +16,11 @@ export const resetSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => 
   method: 'POST',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITOR_RESET,
   validate: {
-    params: schema.object({
-      monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
+    params: z.object({
+      monitorId: routeId,
     }),
-    query: schema.object({
-      force: schema.boolean({ defaultValue: false }),
+    query: z.object({
+      force: queryBoolean.default(false),
     }),
   },
   handler: async (routeContext): Promise<any> => {

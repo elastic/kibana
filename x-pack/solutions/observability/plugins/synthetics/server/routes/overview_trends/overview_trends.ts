@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ObjectType } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { routeId } from '../zod_query';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import type { TrendRequest, TrendTable } from '../../../common/types';
 import type { TrendsQuery } from './fetch_trends';
@@ -58,14 +58,15 @@ export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
   writeAccess: false,
   path: SYNTHETICS_API_URLS.OVERVIEW_TRENDS,
   validate: {
-    body: schema.arrayOf(
-      schema.object({
-        configId: schema.string(),
-        locationIds: schema.arrayOf(schema.string(), { maxSize: 100 }),
-        schedule: schema.string(),
-      }),
-      { maxSize: 500 }
-    ) as unknown as ObjectType,
+    body: z
+      .array(
+        z.object({
+          configId: routeId,
+          locationIds: z.array(z.string().max(1024)).max(100),
+          schedule: z.string().max(64),
+        })
+      )
+      .max(500),
   },
   handler: async (routeContext): Promise<TrendTable> => {
     const esClient = routeContext.syntheticsEsClient;

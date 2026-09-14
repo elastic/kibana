@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { routeId } from '../zod_query';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 
@@ -14,8 +15,8 @@ export const getMonitorsHealthRoute: SyntheticsRestApiRouteFactory = () => ({
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_HEALTH,
   writeAccess: false,
   validate: {
-    body: schema.object({
-      monitorIds: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 500 }),
+    body: z.object({
+      monitorIds: z.array(routeId).min(1).max(500),
     }),
   },
   handler: async (routeContext) => {

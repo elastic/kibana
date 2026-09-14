@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { routeId, MAX_DATE_RANGE_LENGTH } from '../zod_query';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
@@ -29,12 +30,12 @@ export const getMonitorSummaryStatsRoute: SyntheticsRestApiRouteFactory<
   writeAccess: false,
   path: SYNTHETICS_API_URLS.MONITOR_SUMMARY_STATS,
   validate: {
-    query: schema.object({
-      monitorId: schema.string(),
-      locationLabel: schema.string(),
-      from: schema.string({ defaultValue: 'now-30d' }),
-      to: schema.string({ defaultValue: 'now' }),
-      remoteName: schema.maybe(schema.string({ maxLength: 256 })),
+    query: z.object({
+      monitorId: routeId,
+      locationLabel: z.string().max(1024),
+      from: z.string().max(MAX_DATE_RANGE_LENGTH).default('now-30d'),
+      to: z.string().max(MAX_DATE_RANGE_LENGTH).default('now'),
+      remoteName: z.string().max(256).optional(),
     }),
   },
   handler: async ({ syntheticsEsClient, request }): Promise<MonitorSummaryStats> => {

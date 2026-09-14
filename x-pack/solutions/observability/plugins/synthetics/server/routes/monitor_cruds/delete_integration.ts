@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { routeId } from '../zod_query';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
@@ -12,8 +13,8 @@ export const deletePackagePolicyRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'DELETE',
   path: SYNTHETICS_API_URLS.DELETE_PACKAGE_POLICY,
   validate: {
-    params: schema.object({
-      packagePolicyId: schema.string({ minLength: 1, maxLength: 1024 }),
+    params: z.object({
+      packagePolicyId: routeId,
     }),
   },
   handler: async ({ request, savedObjectsClient, server, syntheticsEsClient }): Promise<any> => {

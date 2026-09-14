@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { routeId } from '../../zod_query';
 import { DeleteMonitorAPI } from '../services/delete_monitor_api';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
@@ -21,10 +22,8 @@ export const deleteSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
   validate: {},
   validation: {
     request: {
-      body: schema.object({
-        ids: schema.arrayOf(schema.string(), {
-          minSize: 1,
-        }),
+      body: z.object({
+        ids: z.array(routeId).min(1).max(500),
       }),
     },
   },

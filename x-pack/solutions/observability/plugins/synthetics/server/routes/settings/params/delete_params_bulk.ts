@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { getExistingParamsInfo } from './delete_param';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
@@ -24,8 +24,8 @@ export const deleteSyntheticsParamsBulkRoute: SyntheticsRestApiRouteFactory<
   validate: {},
   validation: {
     request: {
-      body: schema.object({
-        ids: schema.arrayOf(schema.string()),
+      body: z.object({
+        ids: z.array(z.string().max(1024)).max(1000),
       }),
     },
   },
