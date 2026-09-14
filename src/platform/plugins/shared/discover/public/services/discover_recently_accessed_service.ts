@@ -35,10 +35,14 @@ export const rememberDiscoverSession = (
   chrome: { recentlyAccessed: Pick<RecentlyAccessed, 'add'> },
   session: { id: string; title?: string }
 ) => {
-  const link = getSavedSearchFullPathUrl(session.id);
-  const label = session.title || untitledDiscoverSessionTitle();
-  chrome.recentlyAccessed.add(link, label, session.id);
-  getDiscoverRecentlyAccessedService(http).add(link, label, session.id);
+  try {
+    const link = getSavedSearchFullPathUrl(session.id);
+    const label = session.title || untitledDiscoverSessionTitle();
+    chrome.recentlyAccessed.add(link, label, session.id);
+    getDiscoverRecentlyAccessedService(http).add(link, label, session.id);
+  } catch {
+    // localStorage quota/security must not fail save or open
+  }
 };
 
 export const forgetDiscoverSession = (
@@ -46,6 +50,10 @@ export const forgetDiscoverSession = (
   chrome: { recentlyAccessed: Pick<RecentlyAccessed, 'remove'> },
   id: string
 ) => {
-  getDiscoverRecentlyAccessedService(http).remove(id);
-  chrome.recentlyAccessed.remove(id);
+  try {
+    getDiscoverRecentlyAccessedService(http).remove(id);
+    chrome.recentlyAccessed.remove(id);
+  } catch {
+    // localStorage quota/security must not fail the 404 path
+  }
 };
