@@ -255,7 +255,9 @@ describe('handleAgentExecution', () => {
     };
     loadTracingPrivacySettingsMock.mockResolvedValue(privacySettings);
 
+    const logger = loggingSystemMock.createLogger();
     const deps = createDeps({ conversationClient });
+    (deps as { logger: ReturnType<typeof loggingSystemMock.createLogger> }).logger = logger;
     const getScopedClient = jest.fn().mockReturnValue(soClient);
     const asScopedToClient = jest.fn().mockReturnValue(uiSettingsClient);
     (deps as { savedObjects: { getScopedClient: jest.Mock } }).savedObjects.getScopedClient =
@@ -286,7 +288,7 @@ describe('handleAgentExecution', () => {
     expect(asScopedToClient).toHaveBeenCalledWith(soClient);
     expect(loadTracingPrivacySettingsMock).toHaveBeenCalledWith({
       uiSettingsClient,
-      logger: deps.logger,
+      logger,
       spaceId: 'marketing',
     });
     expect(withConverseSpanMock).toHaveBeenCalledWith(
