@@ -99,9 +99,6 @@ describe('ErrorHandlingMiddleware', () => {
     expect(loggedMessage).not.toContain('secret_field');
   });
 
-  // https://github.com/elastic/kibana/issues/290199 regression: a bare `abort()`
-  // (the shape the dispatcher's deadline/tick controllers actually issue - no
-  // reason passed) must be recognized as a cancellation, not logged as a step failure.
   it('does not log RULE_EXECUTION_STEP_FAILED for a bare-abort cancellation', async () => {
     const abortController = new AbortController();
     abortController.abort();
@@ -112,6 +109,7 @@ describe('ErrorHandlingMiddleware', () => {
         executionContext.throwIfAborted();
       })()
     );
+
     const context = createRuleExecutionMiddlewareContext({ name: 'execute_rule_query' });
 
     await expect(
