@@ -47,6 +47,7 @@ test.describe('Action Policies - create and edit', { tag: [...tags.stateful.clas
   test('creates a policy from the form and persists what was typed', async ({
     apiServices,
     browserAuth,
+    page,
     pageObjects,
   }) => {
     await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICY_FORM_ROLE);
@@ -72,6 +73,7 @@ test.describe('Action Policies - create and edit', { tag: [...tags.stateful.clas
 
     await test.step('the form returns to the list with the new policy', async () => {
       await expect(actionPoliciesList.detailsLink(CREATED_POLICY_NAME)).toBeVisible();
+      await expect(page).toHaveURL(/\/app\/management\/alertingV2\/action_policies(\?|$|#|\/)/);
     });
 
     await test.step('the persisted policy matches the submitted form', async () => {
@@ -82,7 +84,7 @@ test.describe('Action Policies - create and edit', { tag: [...tags.stateful.clas
       expect(items).toHaveLength(1);
       expect(items[0]).toMatchObject({
         name: CREATED_POLICY_NAME,
-        matcher: MATCHER,
+        matcher: { expression: MATCHER },
         grouping_mode: 'per_episode',
         throttle: { strategy: 'on_status_change' },
         destinations: [{ type: 'workflow', id: workflowId }],
@@ -93,12 +95,13 @@ test.describe('Action Policies - create and edit', { tag: [...tags.stateful.clas
   test('edits an existing policy without dropping untouched fields', async ({
     apiServices,
     browserAuth,
+    page,
     pageObjects,
   }) => {
     const seeded = await apiServices.alertingV2.actionPolicies.create(
       buildCreateActionPolicyData({
         name: SEEDED_POLICY_NAME,
-        matcher: MATCHER,
+        matcher: { expression: MATCHER },
         destinations: [{ type: 'workflow', id: workflowId }],
       })
     );
@@ -116,6 +119,7 @@ test.describe('Action Policies - create and edit', { tag: [...tags.stateful.clas
       await actionPolicyForm.setName(EDITED_POLICY_NAME);
       await actionPolicyForm.submit();
       await expect(actionPoliciesList.detailsLink(EDITED_POLICY_NAME)).toBeVisible();
+      await expect(page).toHaveURL(/\/app\/management\/alertingV2\/action_policies(\?|$|#|\/)/);
     });
 
     await test.step('the update carries the hydrated fields back unchanged', async () => {
@@ -123,7 +127,7 @@ test.describe('Action Policies - create and edit', { tag: [...tags.stateful.clas
 
       expect(updated).toMatchObject({
         name: EDITED_POLICY_NAME,
-        matcher: MATCHER,
+        matcher: { expression: MATCHER },
         destinations: [{ type: 'workflow', id: workflowId }],
       });
     });
