@@ -105,6 +105,9 @@ describe('createAiIndexAttachmentType', () => {
     );
     expect(description).toMatch(/naming the automation being replaced/);
     expect(description).toMatch(/Propose values rather than asking for them/);
+    // The plan belongs in chat: `ask_user_question` documents its own question and option
+    // lengths, and asking for the plan inside the question overrides it into a wall of text.
+    expect(description).toMatch(/Lay the plan out in chat before it/);
   });
 
   it('suppresses the workflow preview, which other attachments ask the agent to render', () => {
