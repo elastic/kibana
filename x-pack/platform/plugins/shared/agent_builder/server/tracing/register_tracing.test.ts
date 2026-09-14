@@ -237,6 +237,40 @@ describe('registerTracingExporter', () => {
     expect(coreStart.uiSettings.asScopedToClient).toHaveBeenCalledWith({ namespace: 'space-b' });
   });
 
+  it('getSettings shares one in-flight lookup per space', async () => {
+    const coreStart = createCore();
+    const scopedUiSettings = jest.mocked(coreStart.uiSettings.asScopedToClient(jest.fn() as never));
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    scopedUiSettings.get.mockImplementation(async () => {
+      await gate;
+      return true;
+    });
+
+    const tracingConfig: TracingConfig = {
+      exporters: [],
+      scheduledDelay: 100,
+      opik_distributed_tracing: false,
+    };
+
+    await registerTracingExporter({ core: coreStart, tracingConfig, logger });
+
+    const { getSettings } = MockedAgentBuilderProcessor.mock.calls[0][0];
+    const first = getSettings('marketing');
+    const second = getSettings('marketing');
+
+    const unsafeClient = coreStart.savedObjects.getUnsafeInternalClient();
+    expect(unsafeClient.asScopedToNamespace).toHaveBeenCalledTimes(1);
+    expect(unsafeClient.asScopedToNamespace).toHaveBeenCalledWith('marketing');
+
+    release();
+    const [firstSettings, secondSettings] = await Promise.all([first, second]);
+    expect(firstSettings.enabled).toBe(true);
+    expect(secondSettings.enabled).toBe(true);
+  });
+
   it('logs error and fail-closes when settings lookup rejects', async () => {
     const coreStart = createCore();
     const scopedUiSettings = jest.mocked(coreStart.uiSettings.asScopedToClient(jest.fn() as never));

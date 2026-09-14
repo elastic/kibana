@@ -52,52 +52,71 @@ const DISABLED_TRACING_SETTINGS: TracingPrivacySettings = {
 
 /**
  * Loads tracing privacy uiSettings for the span's space on demand.
+ * Concurrent calls for the same space share one in-flight lookup so each
+ * exporter processor does not issue duplicate Saved Objects reads.
  */
 const createTracingSettingsLoader = (
   core: CoreStart,
   logger: Logger
 ): { getSettings: (spaceId?: string) => Promise<TracingPrivacySettings> } => {
   const internalClient = core.savedObjects.getUnsafeInternalClient();
+  const inFlight = new Map<string, Promise<TracingPrivacySettings>>();
+
+  const loadSettings = async (namespace: string): Promise<TracingPrivacySettings> => {
+    try {
+      const soClient = internalClient.asScopedToNamespace(namespace);
+      const client = core.uiSettings.asScopedToClient(soClient);
+      const [
+        enabled,
+        includeUserPrompts,
+        includeLlmResponses,
+        includeToolDetails,
+        includeSystemPrompt,
+        includeRealNames,
+        includeRealIds,
+        includeUserData,
+      ] = await Promise.all([
+        client.get<boolean>(AGENT_BUILDER_TRACING_ENABLED_SETTING_ID),
+        client.get<boolean>(AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID),
+        client.get<boolean>(AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID),
+        client.get<boolean>(AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID),
+        client.get<boolean>(AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID),
+        client.get<boolean>(AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID),
+        client.get<boolean>(AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID),
+        client.get<boolean>(AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID),
+      ]);
+      return {
+        enabled,
+        includeUserPrompts,
+        includeLlmResponses,
+        includeToolDetails,
+        includeSystemPrompt,
+        includeRealNames,
+        includeRealIds,
+        includeUserData,
+      };
+    } catch (error) {
+      logger.error(`Failed to fetch tracing settings for space [${namespace}]: ${error.message}`);
+      return DISABLED_TRACING_SETTINGS;
+    }
+  };
 
   return {
-    getSettings: async (spaceId = 'default') => {
+    getSettings: (spaceId = 'default') => {
       const namespace = spaceId || 'default';
-      try {
-        const soClient = internalClient.asScopedToNamespace(namespace);
-        const client = core.uiSettings.asScopedToClient(soClient);
-        const [
-          enabled,
-          includeUserPrompts,
-          includeLlmResponses,
-          includeToolDetails,
-          includeSystemPrompt,
-          includeRealNames,
-          includeRealIds,
-          includeUserData,
-        ] = await Promise.all([
-          client.get<boolean>(AGENT_BUILDER_TRACING_ENABLED_SETTING_ID),
-          client.get<boolean>(AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID),
-          client.get<boolean>(AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID),
-          client.get<boolean>(AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID),
-          client.get<boolean>(AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID),
-          client.get<boolean>(AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID),
-          client.get<boolean>(AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID),
-          client.get<boolean>(AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID),
-        ]);
-        return {
-          enabled,
-          includeUserPrompts,
-          includeLlmResponses,
-          includeToolDetails,
-          includeSystemPrompt,
-          includeRealNames,
-          includeRealIds,
-          includeUserData,
-        };
-      } catch (error) {
-        logger.error(`Failed to fetch tracing settings for space [${namespace}]: ${error.message}`);
-        return DISABLED_TRACING_SETTINGS;
+      const existing = inFlight.get(namespace);
+      if (existing) {
+        return existing;
       }
+
+      const pending = loadSettings(namespace);
+      inFlight.set(namespace, pending);
+      void pending.finally(() => {
+        if (inFlight.get(namespace) === pending) {
+          inFlight.delete(namespace);
+        }
+      });
+      return pending;
     },
   };
 };

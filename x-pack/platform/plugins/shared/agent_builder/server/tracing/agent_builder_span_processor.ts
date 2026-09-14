@@ -54,10 +54,14 @@ export type GetTracingPrivacySettings = (
   spaceId?: string
 ) => TracingPrivacySettings | Promise<TracingPrivacySettings>;
 
+/** Matches the default BatchSpanProcessor maxQueueSize so pre-export work cannot grow without bound. */
+export const MAX_PENDING_EXPORTS = 2048;
+
 interface AgentBuilderSpanProcessorOpts {
   exporter: tracing.SpanExporter;
   scheduledDelayMillis: number;
   getSettings: GetTracingPrivacySettings;
+  maxPendingExports?: number;
 }
 
 /**
@@ -291,6 +295,7 @@ function isPromise<T>(value: T | Promise<T>): value is Promise<T> {
 export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
   private readonly batchProcessor: tracing.SpanProcessor;
   private readonly getSettings: GetTracingPrivacySettings;
+  private readonly maxPendingExports: number;
   private readonly pendingExports = new Set<Promise<void>>();
 
   constructor(opts: AgentBuilderSpanProcessorOpts) {
@@ -298,6 +303,7 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
       scheduledDelayMillis: opts.scheduledDelayMillis,
     });
     this.getSettings = opts.getSettings;
+    this.maxPendingExports = opts.maxPendingExports ?? MAX_PENDING_EXPORTS;
   }
 
   onStart(span: tracing.Span, parentContext: api.Context): void {
@@ -310,6 +316,10 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
 
   onEnd(span: tracing.ReadableSpan): void {
     if (!span.attributes[SHOULD_TRACK_ATTR]) {
+      return;
+    }
+
+    if (this.pendingExports.size >= this.maxPendingExports) {
       return;
     }
 

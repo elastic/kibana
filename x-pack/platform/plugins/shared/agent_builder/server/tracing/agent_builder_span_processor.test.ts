@@ -404,6 +404,33 @@ describe('AgentBuilderSpanProcessor', () => {
     expect(exported.attributes).toEqual({ existing: 'keep-me' });
   });
 
+  it('onEnd drops spans when the pending export queue is full', async () => {
+    let resolveSettings: (settings: TracingPrivacySettings) => void;
+    const settingsPromise = new Promise<TracingPrivacySettings>((resolve) => {
+      resolveSettings = resolve;
+    });
+    const getSettings = jest.fn().mockReturnValue(settingsPromise);
+
+    const processor = new AgentBuilderSpanProcessor({
+      exporter: createExporter(),
+      scheduledDelayMillis: 1,
+      getSettings,
+      maxPendingExports: 1,
+    });
+
+    processor.onEnd(createMockReadableSpan({ [SHOULD_TRACK_ATTR]: true, id: 'kept' }));
+    processor.onEnd(createMockReadableSpan({ [SHOULD_TRACK_ATTR]: true, id: 'dropped' }));
+
+    expect(getSettings).toHaveBeenCalledTimes(1);
+
+    resolveSettings!(createSettings());
+    await processor.forceFlush();
+
+    expect(mockBatch.onEnd).toHaveBeenCalledTimes(1);
+    const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
+    expect(exported.attributes).toEqual({ id: 'kept' });
+  });
+
   it('onEnd skips when enabled is false even if span was marked at onStart', async () => {
     let enabled = true;
     const processor = new AgentBuilderSpanProcessor({
