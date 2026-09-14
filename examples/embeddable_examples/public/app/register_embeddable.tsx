@@ -54,7 +54,7 @@ export const RegisterEmbeddable = () => {
           initial plugin bundle size. The example below uses <strong>addTriggerActionAsync </strong>
           to register the action lazily. Notice usage of <strong>grouping</strong> to nest related
           panel types and avoid bloating <em>Add panel</em> menu. Please reach out to
-          @elastic/kibana-presentation team to coordinate menu updates.
+          @elastic/kibana-dashboards team to coordinate menu updates.
         </p>
       </EuiText>
       <EuiSpacer size="s" />
