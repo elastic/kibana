@@ -22,12 +22,15 @@ const getMemberChain = (node) => {
   return chain;
 };
 
-// Returns { hasStateful, hasServerless }.
-// Unknown/computed nodes → both false → no warning (conservative).
-// tags.performance → both false → no warning (perf tests have no arch requirement).
+// Returns { hasStateful, hasServerless, hasUnknown }.
+// hasUnknown: true means an unresolvable node (variable, computed expression) was found;
+// it may provide the missing architecture, so the one-arch warning is suppressed.
+// Known-neutral nodes (tags.performance, null elements) set hasUnknown: false so they
+// do not suppress the warning — e.g. [...tags.stateful.classic, ...tags.performance]
+// still warns as stateful-only.
 // tags.deploymentAgnostic → both true → no warning (covers all archs).
 const getArchInfo = (node) => {
-  if (!node) return { hasStateful: false, hasServerless: false };
+  if (!node) return { hasStateful: false, hasServerless: false, hasUnknown: false };
 
   if (node.type === 'ArrayExpression') {
     const results = node.elements.map((el) =>
@@ -36,6 +39,7 @@ const getArchInfo = (node) => {
     return {
       hasStateful: results.some((r) => r.hasStateful),
       hasServerless: results.some((r) => r.hasServerless),
+      hasUnknown: results.some((r) => r.hasUnknown),
     };
   }
 
@@ -43,20 +47,26 @@ const getArchInfo = (node) => {
     return {
       hasStateful: node.value.includes('-stateful-'),
       hasServerless: node.value.includes('-serverless-'),
+      hasUnknown: false,
     };
   }
 
   if (node.type === 'MemberExpression') {
     const chain = getMemberChain(node);
     if (chain[0] === 'tags') {
-      if (chain[1] === 'deploymentAgnostic') return { hasStateful: true, hasServerless: true };
-      if (chain[1] === 'stateful') return { hasStateful: true, hasServerless: false };
-      if (chain[1] === 'serverless') return { hasStateful: false, hasServerless: true };
-      // 'performance' and future keys → both false → no warning
+      // Known tags.* shapes — none are unknown
+      if (chain[1] === 'deploymentAgnostic') return { hasStateful: true, hasServerless: true, hasUnknown: false };
+      if (chain[1] === 'stateful') return { hasStateful: true, hasServerless: false, hasUnknown: false };
+      if (chain[1] === 'serverless') return { hasStateful: false, hasServerless: true, hasUnknown: false };
+      // tags.performance and future keys → known neutral
+      return { hasStateful: false, hasServerless: false, hasUnknown: false };
     }
+    // Non-tags MemberExpression (e.g. sharedTags.foo) → unresolvable
+    return { hasStateful: false, hasServerless: false, hasUnknown: true };
   }
 
-  return { hasStateful: false, hasServerless: false };
+  // Identifier, CallExpression, etc. → unresolvable
+  return { hasStateful: false, hasServerless: false, hasUnknown: true };
 };
 
 const isDescribeCall = (node) =>
@@ -102,7 +112,9 @@ module.exports = {
         );
         if (!tagProp) return;
 
-        const { hasStateful, hasServerless } = getArchInfo(tagProp.value);
+        const { hasStateful, hasServerless, hasUnknown } = getArchInfo(tagProp.value);
+
+        if (hasUnknown) return;
 
         if (hasStateful && !hasServerless) {
           context.report({ node: tagProp, messageId: 'statefulOnly' });

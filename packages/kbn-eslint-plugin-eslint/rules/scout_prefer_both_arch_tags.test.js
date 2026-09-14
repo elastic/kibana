@@ -85,10 +85,27 @@ ruleTester.run('@kbn/eslint/scout_prefer_both_arch_tags', rule, {
         });
       `,
     },
-    // Unknown variable — conservative, no warning
+    // Unknown variable alone — conservative, no warning
     {
       code: dedent`
         test.describe('my suite', { tag: myCustomTags }, () => {
+          test('works', () => {});
+        });
+      `,
+    },
+    // Unknown variable spread alongside a known arch — could provide the missing arch, suppress
+    {
+      code: dedent`
+        import { tags } from '@kbn/scout';
+        test.describe('my suite', { tag: [...tags.stateful.classic, ...sharedTags] }, () => {
+          test('works', () => {});
+        });
+      `,
+    },
+    // Non-tags MemberExpression — unresolvable, suppress
+    {
+      code: dedent`
+        test.describe('my suite', { tag: [...tags.stateful.classic, ...config.extraTags] }, () => {
           test('works', () => {});
         });
       `,
