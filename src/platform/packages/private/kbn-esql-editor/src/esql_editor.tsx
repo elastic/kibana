@@ -905,6 +905,16 @@ const ESQLEditorInternal = function ESQLEditor({
                     onLayoutChangeRef.current(layoutInfoEvent);
                   });
 
+                  const tabKeyDisposable = editor.onKeyDown((e) => {
+                    if (
+                      e.keyCode === monaco.KeyCode.Tab &&
+                      !e.shiftKey &&
+                      !isSuggestionPopupOpenRef.current
+                    ) {
+                      suppressSuggestionsRef.current = true;
+                    }
+                  });
+
                   const modelContentDisposable = editor.onDidChangeModelContent(async () => {
                     trackInputLatencyOnKeystroke(editor.getValue() ?? '');
                     await addLookupIndicesDecorator();
@@ -918,6 +928,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     mouseDownDisposable,
                     focusDisposable,
                     layoutChangeDisposable,
+                    tabKeyDisposable,
                     modelContentDisposable,
                     suggestionPopupDisposable,
                     commentLineDisposable,

@@ -11,6 +11,7 @@ import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/man
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import { investigationStateSchema } from '@kbn/significant-events-schema';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import type {
   AlertInvestigationContext,
@@ -23,6 +24,8 @@ import type {
   ListInvestigationItem,
   ListInvestigationsRequest,
   ListInvestigationsResponse,
+  SeverityCountsRequest,
+  SeverityCountsResponse,
   UpdateInvestigationRequest,
   StartInvestigationRequest,
   StartInvestigationResponse,
@@ -124,6 +127,8 @@ const LIST_INVESTIGATION_ITEM_FIELDS = {
   concurrency_key: ['concurrency_key'],
   executed_by: ['executed_by'],
   subject: ['subject_type', 'subject_id', 'subject_summary'],
+  summary: ['summary'],
+  impact: ['impact'],
 } as const satisfies Record<
   keyof ListInvestigationItem,
   readonly (keyof InvestigationAttributes)[]
@@ -149,21 +154,30 @@ const toListInvestigationItem = (record: ListInvestigationRecord): ListInvestiga
     subjectId: record.subject_id,
     subjectSummary: record.subject_summary,
   }),
-});
-
-const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationResponse => ({
-  ...toListInvestigationItem(record),
-  trigger_type: record.trigger_type,
-  error: record.error,
   summary: record.summary,
-  conclusion: record.conclusion,
-  hypotheses: record.hypotheses,
-  recommendations: record.recommendations,
-  blind_spots: record.blind_spots,
-  trigger_feedback: record.trigger_feedback,
-  conversation_id: record.conversation_id,
   impact: record.impact,
 });
+
+const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationResponse => {
+  const recommendations = investigationStateSchema.shape.recommendations.safeParse(
+    record.recommendations
+  );
+  const blindSpots = investigationStateSchema.shape.blind_spots.safeParse(record.blind_spots);
+
+  return {
+    ...toListInvestigationItem(record),
+    trigger_type: record.trigger_type,
+    error: record.error,
+    summary: record.summary,
+    conclusion: record.conclusion,
+    hypotheses: record.hypotheses,
+    recommendations: recommendations.success ? recommendations.data : undefined,
+    blind_spots: blindSpots.success ? blindSpots.data : undefined,
+    trigger_feedback: record.trigger_feedback,
+    conversation_id: record.conversation_id,
+    impact: record.impact,
+  };
+};
 
 const parseExecutionInvestigationMetadata = (
   executionContext: Record<string, unknown> | undefined
@@ -639,6 +653,9 @@ export class NightshiftInvestigationsClient {
 
   async list({
     statuses,
+    severities,
+    subject_types,
+    query,
     concurrency_key,
     created_after,
     created_before,
@@ -653,6 +670,9 @@ export class NightshiftInvestigationsClient {
   }: ListInvestigationsRequest = {}): Promise<ListInvestigationsResponse> {
     const result = await this.investigationRepository.find({
       statuses,
+      severities,
+      subjectTypes: subject_types,
+      query,
       concurrencyKey: concurrency_key,
       createdAfter: created_after,
       createdBefore: created_before,
@@ -674,5 +694,39 @@ export class NightshiftInvestigationsClient {
       size: result.size,
       total: result.total,
     };
+  }
+
+  /**
+   * Severity facet counts under the given filters, for the homepage tiles.
+   *
+   * Separate from `list()` because the counts are independent of pagination and sort — bundling
+   * them would recompute an identical aggregation on every page change.
+   */
+  async getSeverityCounts({
+    statuses,
+    subject_types,
+    query,
+    concurrency_key,
+    created_after,
+    created_before,
+    started_after,
+    started_before,
+    completed_after,
+    completed_before,
+  }: SeverityCountsRequest = {}): Promise<SeverityCountsResponse> {
+    const severityCounts = await this.investigationRepository.countBySeverity({
+      statuses,
+      subjectTypes: subject_types,
+      query,
+      concurrencyKey: concurrency_key,
+      createdAfter: created_after,
+      createdBefore: created_before,
+      startedAfter: started_after,
+      startedBefore: started_before,
+      completedAfter: completed_after,
+      completedBefore: completed_before,
+    });
+
+    return { severity_counts: severityCounts };
   }
 }
