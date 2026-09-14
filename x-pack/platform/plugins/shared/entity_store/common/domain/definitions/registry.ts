@@ -14,15 +14,36 @@ import { userEntityDefinition } from './user';
 import { serviceEntityDefinition } from './service';
 import { genericEntityDefinition } from './generic';
 
-const entitiesDefinitionRegistry = {
-  host: hostEntityDefinition,
-  user: userEntityDefinition,
-  service: serviceEntityDefinition,
-  generic: genericEntityDefinition,
-} as const satisfies Record<EntityType, EntityDefinitionWithoutId>;
+/**
+ * Extraction variants of one entity type. `single` is the definition every consumer outside log
+ * extraction resolves to. `priority` and `nonPriority` are registered as a pair: a priority gate
+ * without its complement would leave the documents that gate rejects unscanned.
+ */
+type EntityDefinitionVariants =
+  | { single: EntityDefinitionWithoutId; priority?: undefined; nonPriority?: undefined }
+  | {
+      single: EntityDefinitionWithoutId;
+      priority: EntityDefinitionWithoutId;
+      nonPriority: EntityDefinitionWithoutId;
+    };
 
-/** Stub: always false until priority definition variants are registered. */
-export const hasPriorityVariant = (_type: EntityType): boolean => false;
+const entitiesDefinitionRegistry = {
+  host: { single: hostEntityDefinition },
+  user: { single: userEntityDefinition },
+  service: { single: serviceEntityDefinition },
+  generic: { single: genericEntityDefinition },
+} as const satisfies Record<EntityType, EntityDefinitionVariants>;
+
+const getEntityDefinitionVariants = (type: EntityType): EntityDefinitionVariants => {
+  const variants = entitiesDefinitionRegistry[type];
+  assert(variants, `No entity description found for type: ${type}`);
+
+  return variants;
+};
+
+/** Dual-process capability is derived from the registry, so it cannot be declared without being implemented. */
+export const hasPriorityVariant = (type: EntityType): boolean =>
+  getEntityDefinitionVariants(type).priority !== undefined;
 
 /** 'nonPriority' is excluded: the non-priority task hardcodes its own identity directly. */
 export const resolveExtractionMode = (
@@ -36,8 +57,12 @@ export const resolveExtractionMode = (
 export const getEntityDefinitionId = (entityType: EntityType, space: string) =>
   `security_${entityType}_${space}`;
 
-export function getEntityDefinition(type: EntityType, namespace: string): ManagedEntityDefinition {
-  const definition = getEntityDefinitionWithoutId(type);
+export function getEntityDefinition(
+  type: EntityType,
+  namespace: string,
+  extractionMode: ExtractionMode = 'single'
+): ManagedEntityDefinition {
+  const definition = getEntityDefinitionWithoutId(type, extractionMode);
 
   return {
     ...definition,
@@ -46,9 +71,19 @@ export function getEntityDefinition(type: EntityType, namespace: string): Manage
   };
 }
 
-export function getEntityDefinitionWithoutId(type: EntityType): EntityDefinitionWithoutId {
-  const definition = entitiesDefinitionRegistry[type];
-  assert(definition, `No entity description found for type: ${type}`);
+/**
+ * Resolves an entity definition. The default `'single'` mode returns the definition used by every
+ * consumer outside log extraction.
+ */
+export function getEntityDefinitionWithoutId(
+  type: EntityType,
+  extractionMode: ExtractionMode = 'single'
+): EntityDefinitionWithoutId {
+  const definition = getEntityDefinitionVariants(type)[extractionMode];
+  assert(
+    definition,
+    `No '${extractionMode}' extraction variant registered for entity type: ${type}`
+  );
 
   return definition;
 }
