@@ -95,14 +95,39 @@ describe('coalesceRangeValues', () => {
     });
 
     it('leaves disjoint stored bounds fragmented (localized delete: no bridge)', () => {
+      // A real gap: 10.0.1.x sits between the two, so they do not merge.
+      expect(
+        coalesceBounds('ip_range', [
+          { range_end: '10.0.0.255', range_start: '10.0.0.0' },
+          { range_end: '10.0.2.255', range_start: '10.0.2.0' },
+        ])
+      ).toEqual([
+        { range_end: '10.0.0.255', range_start: '10.0.0.0' },
+        { range_end: '10.0.2.255', range_start: '10.0.2.0' },
+      ]);
+    });
+
+    it('merges exactly adjacent discrete ip ranges (10.0.0.255 + 1 = 10.0.1.0)', () => {
       expect(
         coalesceBounds('ip_range', [
           { range_end: '10.0.0.255', range_start: '10.0.0.0' },
           { range_end: '10.0.2.255', range_start: '10.0.1.0' },
         ])
-      ).toEqual([
-        { range_end: '10.0.0.255', range_start: '10.0.0.0' },
-        { range_end: '10.0.2.255', range_start: '10.0.1.0' },
+      ).toEqual([{ range_end: '10.0.2.255', range_start: '10.0.0.0' }]);
+    });
+  });
+
+  describe('adjacency merge by type', () => {
+    it('merges exactly adjacent integer ranges (5 and 6 touch)', () => {
+      expect(coalesceRangeValues('long_range', ['1-5', '6-10'])).toEqual([
+        { range_end: '10', range_start: '1' },
+      ]);
+    });
+
+    it('does not merge the same adjacent bounds for a continuous type (double is not discrete)', () => {
+      expect(coalesceRangeValues('double_range', ['1-5', '6-10'])).toEqual([
+        { range_end: '5', range_start: '1' },
+        { range_end: '10', range_start: '6' },
       ]);
     });
   });

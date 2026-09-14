@@ -592,6 +592,28 @@ export class ListClient {
   };
 
   /**
+   * POC: bring an already-provisioned `.lists` data stream up to date with the
+   * additive `storage` field. New installations get the field from the index template,
+   * but the startup flow only reapplies the template when it is missing, so an existing
+   * data stream needs this one additive `PUT mapping` (idempotent) before the first
+   * write that sets `storage`. No-op unless the lookup-indices flag is on. The caller
+   * only invokes this when the data stream already exists.
+   */
+  public updateListStorageMapping = async (): Promise<void> => {
+    const { esClient, config } = this;
+    if (!config.enableLookupIndices) {
+      return;
+    }
+    const listName = this.getListName();
+    const storageMapping = (listMappings as { properties: Record<string, MappingProperty> })
+      .properties.storage;
+    await esClient.indices.putMapping({
+      index: listName,
+      properties: { storage: storageMapping },
+    });
+  };
+
+  /**
    * Sets the list policy
    * @returns The contents of the list policy set
    * @deprecated after moving to data streams there should not be need to use it

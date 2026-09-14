@@ -87,6 +87,24 @@ export const expectedIndexCoalescedOps = (bounds: CoalescedBound[]): unknown[] =
 export const expectedDeleteOps = (ids: string[]): unknown[] =>
   ids.map((id) => ({ delete: { _id: id } }));
 
+/**
+ * The bulk operations a write should send when it journals dirty region markers,
+ * one per window. The marker `_id` is a random uuid, so it is matched by prefix.
+ */
+export const expectedDirtyMarkerOps = (windows: CoalescedBound[]): unknown[] =>
+  windows.flatMap((window) => [
+    { index: { _id: expect.stringMatching(/^dirty:/) as unknown as string } },
+    { kind: 'dirty', range_end: window.range_end, range_start: window.range_start },
+  ]);
+
+/** The dirty windows a set of authored values collapses to (mirrors the write path). */
+export const expectedDirtyWindows = (type: Type, values: string[]): CoalescedBound[] => {
+  const bounds = values
+    .map((value) => parseValueToBound(type, value))
+    .filter((b): b is CoalescedBound => b != null);
+  return coalesceBounds(type, bounds);
+};
+
 export const equalityId = (value: string): string => sha256(value);
 
 export const expectedEqualityOps = (type: Type, values: string[]): unknown[] =>
