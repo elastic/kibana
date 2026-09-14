@@ -45,7 +45,7 @@ spaceTest.describe(
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsPrivilegedUser();
+      await browserAuth.loginAsAdmin();
       await pageObjects.discover.goto({ queryMode: 'classic' });
       await pageObjects.discover.selectDataView(CONTEXT_AWARENESS_DATA_VIEWS.LOGS, {
         createAdHocIfMissing: false,

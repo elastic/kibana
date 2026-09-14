@@ -46,7 +46,7 @@ spaceTest.describe(
       async ({ browserAuth, page, pageObjects }) => {
         const { dataGrid, discover, unifiedFieldList } = pageObjects;
 
-        await browserAuth.loginAsPrivilegedUser();
+        await browserAuth.loginAsAdmin();
         await discover.goto({ queryMode: 'classic' });
         await discover.waitUntilSearchingHasFinished();
 

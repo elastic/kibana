@@ -46,7 +46,7 @@ spaceTest.describe(
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsPrivilegedUser();
+      await browserAuth.loginAsAdmin();
       await pageObjects.discover.goto({ queryMode: 'esql' });
       await pageObjects.discover.writeAndSubmitEsqlQuery(
         `from ${CONTEXT_AWARENESS_DATA_VIEWS.LOGS}`

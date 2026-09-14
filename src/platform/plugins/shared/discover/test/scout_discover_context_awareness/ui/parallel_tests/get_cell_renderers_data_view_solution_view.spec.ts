@@ -33,7 +33,7 @@ spaceTest.describe(
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsPrivilegedUser();
+      await browserAuth.loginAsAdmin();
       await pageObjects.discover.goto({ queryMode: 'classic' });
     });
 

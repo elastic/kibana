@@ -36,7 +36,7 @@ spaceTest.describe(
     });
 
     spaceTest.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsPrivilegedUser();
+      await browserAuth.loginAsAdmin();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
