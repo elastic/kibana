@@ -42,7 +42,11 @@ For information about building the documentation, see the README in [elastic/doc
 
 ## Version Compatibility with Elasticsearch
 
-Ideally, you should be running Elasticsearch and Kibana with matching version numbers. If your Elasticsearch has an older version number or a newer _major_ number than Kibana, then Kibana will fail to run. If Elasticsearch has a newer minor or patch number than Kibana, then the Kibana Server will log a warning.
+If your Elasticsearch has an older version number or a newer _major_ number than Kibana, then Kibana will fail to run. 
+If Elasticsearch has a newer minor or patch number than Kibana, then the Kibana Server will log a warning. 
+
+Once an Elasticsearch upgrade has completed, we strongly recommend upgrading Kibana to the matching version. 
+If you encounter issues on mismatched versions, you will be asked to upgrade.
 
 _Note: The version numbers below are only examples, meant to illustrate the relationships between different types of version numbers._
 
