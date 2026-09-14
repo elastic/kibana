@@ -491,3 +491,23 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+
+  - command: .buildkite/scripts/steps/test/scout_edr_real_fleet.sh
+    label: 'Scout EDR Real Fleet'
+    branches: main
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      enableNestedVirtualization: true
+      machineType: n2-highmem-4
+      diskSizeGb: 130
+      preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
+          limit: 1
