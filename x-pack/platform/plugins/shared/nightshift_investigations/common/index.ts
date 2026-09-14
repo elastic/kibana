@@ -179,6 +179,7 @@ export type ListInvestigationItem = Pick<
   | 'subject'
   | 'summary'
   | 'impact'
+  | 'conversation_id'
 >;
 
 export interface PaginatedResponse<T> {

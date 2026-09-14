@@ -240,6 +240,7 @@ const toListItem = (record: NightshiftInvestigationRecord): ListInvestigationIte
   }),
   summary: record.summary,
   impact: record.impact,
+  conversation_id: record.conversationId,
 });
 
 const toInvestigationResponse = (

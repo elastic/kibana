@@ -9,6 +9,7 @@ import { css } from '@emotion/react';
 import React from 'react';
 import {
   EuiBadge,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
@@ -16,15 +17,25 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
+import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import type { ListInvestigationItem, Severity } from '@kbn/nightshift-investigations-plugin/common';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 import { nightshiftBackgroundTransition } from '../common/transition';
+import { useKibana } from '../hooks/use_kibana';
 import {
   getInvestigationPrimaryText,
   getInvestigationRunTimeLabel,
   getInvestigationSubtitleText,
 } from './investigation_list_presentation';
+
+const AGENT_BUILDER_APP_ID = 'agent_builder';
+const INVESTIGATION_AGENT_ID = 'significant-events.investigation';
+
+const openChatLabel = i18n.translate(
+  'xpack.nightshift.investigation.listItem.openChatAriaLabel',
+  { defaultMessage: 'Open investigation chat' }
+);
 
 const MAX_VISIBLE_ENTITY_CHIPS = 3;
 
@@ -47,6 +58,13 @@ export function InvestigationListItem({
   onClick,
 }: InvestigationListItemProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
+  const { application } = useKibana().services;
+
+  const chatHref = investigation.conversation_id
+    ? application.getUrlForApp(AGENT_BUILDER_APP_ID, {
+        path: `/agents/${INVESTIGATION_AGENT_ID}/conversations/${investigation.conversation_id}`,
+      })
+    : undefined;
 
   const handleClick = (clickEvent: React.MouseEvent<HTMLDivElement>) => {
     if (
@@ -129,23 +147,39 @@ export function InvestigationListItem({
 
         {/* headline */}
         <EuiFlexItem grow={false}>
-          <EuiText
-            size="s"
-            css={css`
-              font-weight: ${euiTheme.font.weight.semiBold};
-              line-height: ${euiTheme.size.l};
-            `}
-          >
-            <p
-              className="eui-textTruncate"
-              title={primaryText}
-              css={css`
-                margin: 0;
-              `}
-            >
-              {primaryText}
-            </p>
-          </EuiText>
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+            <EuiFlexItem grow>
+              <EuiText
+                size="s"
+                css={css`
+                  font-weight: ${euiTheme.font.weight.semiBold};
+                  line-height: ${euiTheme.size.l};
+                `}
+              >
+                <p
+                  className="eui-textTruncate"
+                  title={primaryText}
+                  css={css`
+                    margin: 0;
+                  `}
+                >
+                  {primaryText}
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+            {chatHref && (
+              <EuiFlexItem grow={false} data-prevent-row-click="">
+                <EuiButtonIcon
+                  aria-label={openChatLabel}
+                  href={chatHref}
+                  iconType="productAgent"
+                  size="xs"
+                  color="text"
+                  data-prevent-row-click=""
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexItem>
 
         {/* secondary line */}
