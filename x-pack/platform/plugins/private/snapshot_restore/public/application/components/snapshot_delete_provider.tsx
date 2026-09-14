@@ -48,6 +48,10 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
     if (!ids || !ids.length) {
       throw new Error('No snapshot IDs specified for deletion');
     }
+    // A deletion in flight owns the modal and the success callback until Elasticsearch answers.
+    if (isDeleting) {
+      return;
+    }
     setIsModalOpen(true);
     setSnapshotIds(ids);
     onSuccessCallback.current = onSuccess;
@@ -56,6 +60,14 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
   const closeModal = () => {
     setIsModalOpen(false);
     setSnapshotIds([]);
+  };
+
+  // Dismissing the modal would not stop the deletion, so it stays open until the result arrives.
+  const cancelDelete = () => {
+    if (isDeleting) {
+      return;
+    }
+    closeModal();
   };
 
   const deleteSnapshot = () => {
@@ -137,7 +149,7 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
           )
         }
         titleProps={{ id: modalTitleId }}
-        onCancel={closeModal}
+        onCancel={cancelDelete}
         onConfirm={deleteSnapshot}
         cancelButtonText={
           <FormattedMessage

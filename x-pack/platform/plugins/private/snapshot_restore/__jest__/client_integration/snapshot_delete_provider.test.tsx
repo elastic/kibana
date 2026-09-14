@@ -72,6 +72,48 @@ describe('WHEN deleting snapshots', () => {
     expect(addDanger).not.toHaveBeenCalled();
   });
 
+  it('SHOULD keep the modal and its callback until a pending deletion completes', async () => {
+    const ids = [{ repository: 'test-repository', snapshot: 'snapshot-1' }];
+    const otherIds = [{ repository: 'test-repository', snapshot: 'snapshot-2' }];
+    const otherOnSuccess = jest.fn();
+    let resolveDeletion: (result: Awaited<ReturnType<typeof deleteSnapshots>>) => void = () => {};
+    jest.mocked(deleteSnapshots).mockReturnValue(
+      new Promise((resolve) => {
+        resolveDeletion = resolve;
+      })
+    );
+
+    render(
+      <Provider>
+        {(prompt) => (
+          <>
+            <button onClick={() => prompt(ids, onSuccess)}>Open delete dialog</button>
+            <button onClick={() => prompt(otherIds, otherOnSuccess)}>Open other dialog</button>
+          </>
+        )}
+      </Provider>
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Open delete dialog' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Delete snapshot' }));
+    expect(screen.getByText('Deleting snapshot')).toBeVisible();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    fireEvent.keyDown(screen.getByTestId('srdeleteSnapshotConfirmationModal'), { key: 'Escape' });
+    fireEvent.click(screen.getByRole('button', { name: 'Open other dialog' }));
+
+    expect(screen.getByTestId('srdeleteSnapshotConfirmationModal')).toBeVisible();
+    expect(screen.getByText("Delete snapshot 'snapshot-1'?")).toBeVisible();
+    expect(deleteSnapshots).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      resolveDeletion({ data: { itemsDeleted: ids, errors: [] }, error: null });
+    });
+
+    expect(screen.queryByTestId('srdeleteSnapshotConfirmationModal')).not.toBeInTheDocument();
+    expect(onSuccess).toHaveBeenCalledWith(ids);
+    expect(otherOnSuccess).not.toHaveBeenCalled();
+  });
+
   it('SHOULD report a failed deletion without a success notification', async () => {
     const ids = [{ repository: 'test-repository', snapshot: 'snapshot-1' }];
     jest.mocked(deleteSnapshots).mockResolvedValue({
