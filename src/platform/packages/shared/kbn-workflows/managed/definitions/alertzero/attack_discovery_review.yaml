@@ -199,6 +199,8 @@ steps:
     with:
       title: "{{ inputs.title }}"
       verdict: "{{ inputs.stub_verdict | default: consts.default_verdict }}"
-      # Always true while open_investigation is a console stub. Becomes a real
-      # assertion about the created Investigation in #19022.
-      investigation_opened: true
+      # `false` while open_investigation is a console stub: nothing is created, so
+      # this must not claim otherwise. #19022 replaces that step and flips this to a
+      # real assertion about the Investigation it opened. Not verdict- or
+      # autonomy-dependent: the Investigation is opened before either is known.
+      investigation_opened: false

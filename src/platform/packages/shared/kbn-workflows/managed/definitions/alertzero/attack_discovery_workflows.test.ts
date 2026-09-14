@@ -584,6 +584,14 @@ describe('Attack Discovery worker chain', () => {
     it.each(['investigation_opened', 'title', 'verdict'])('returns %s from each review', (name) => {
       expect((review.outputs ?? []).map((output) => output.name)).toContain(name);
     });
+
+    // Every action in the review is a console stub, so no Investigation exists and
+    // the output must not claim one. #19022 replaces `open_investigation` and flips
+    // this to a real assertion. The value does not depend on the verdict or on
+    // autonomy: the Investigation is opened before either is known.
+    it('reports investigation_opened as false while the investigation step is a stub', () => {
+      expect(stepIn(reviewSteps, 'emit_result')?.with?.investigation_opened).toBe(false);
+    });
   });
 
   describe('input bounds', () => {
