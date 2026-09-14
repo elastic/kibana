@@ -58,6 +58,8 @@ export {
 } from './constants';
 export {
   makeEsQueryRule,
+  makeV1EsQueryRuleTemplateAttributes,
+  RULE_TEMPLATE_SO_TYPE,
   makeIndexThresholdRule,
   fillIndexThresholdForm,
   defineIndexThresholdRule,

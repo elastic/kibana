@@ -40,6 +40,7 @@ import {
   getCreateRuleRoute,
   getCreateRuleFromTemplateRoute,
   getEditRuleRoute,
+  getTriggersActionsManagementPath,
 } from '@kbn/rule-data-utils';
 import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import type {
@@ -316,7 +317,7 @@ export const RulesList = ({
     }
 
     navigateToApp('management', {
-      path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(ruleItem.id)}`,
+      path: getTriggersActionsManagementPath(getEditRuleRoute(ruleItem.id)),
       state: {
         returnApp: 'management',
         returnPath: `insightsAndAlerting/triggersActions/rules`,
@@ -1048,7 +1049,7 @@ export const RulesList = ({
                 navigateToCreateRuleForm(ruleTypeId);
               } else {
                 navigateToApp('management', {
-                  path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
+                  path: getTriggersActionsManagementPath(getCreateRuleRoute(ruleTypeId)),
                 });
               }
             }}
@@ -1057,9 +1058,9 @@ export const RulesList = ({
                 navigateToCreateRuleFromTemplateForm(templateId);
               } else {
                 navigateToApp('management', {
-                  path: `insightsAndAlerting/triggersActions/${getCreateRuleFromTemplateRoute(
-                    encodeURIComponent(templateId)
-                  )}`,
+                  path: getTriggersActionsManagementPath(
+                    getCreateRuleFromTemplateRoute(encodeURIComponent(templateId))
+                  ),
                 });
               }
             }}

@@ -32,6 +32,8 @@ export class ClassicRulesPage {
   public readonly rulesList: Locator;
   public readonly createButton: Locator;
   public readonly ruleTypeModal: Locator;
+  public readonly templateModeButton: Locator;
+  public readonly ruleTypeModalSearch: Locator;
   public readonly esQueryRuleTypeOption: Locator;
   public readonly ruleForm: Locator;
   public readonly cancelButton: Locator;
@@ -45,6 +47,11 @@ export class ClassicRulesPage {
     this.rulesList = this.page.testSubj.locator('rulesList');
     this.createButton = this.page.testSubj.locator('createRuleButton');
     this.ruleTypeModal = this.page.testSubj.locator('ruleTypeModal');
+    this.templateModeButton = this.ruleTypeModal.getByRole('button', {
+      name: 'Template',
+      exact: true,
+    });
+    this.ruleTypeModalSearch = this.page.testSubj.locator('ruleTypeModalSearch');
     this.esQueryRuleTypeOption = this.page.testSubj.locator('.es-query-SelectOption');
     this.ruleForm = this.page.testSubj.locator('ruleForm');
     this.cancelButton = this.page.testSubj.locator('rulePageFooterCancelButton');
@@ -105,6 +112,19 @@ export class ClassicRulesPage {
     await this.esQueryRuleTypeOption.click();
     await this.page.waitForURL(CLASSIC_RULES_CREATE_URL_RE);
     await this.ruleForm.waitFor({ state: 'visible' });
+  }
+
+  templateOption(templateId: string): Locator {
+    return this.page.testSubj.locator(`${templateId}-SelectOption`);
+  }
+
+  async selectTemplate(templateId: string, templateName: string): Promise<void> {
+    await this.templateModeButton.click();
+    await this.ruleTypeModalSearch.fill(templateName);
+    await this.templateOption(templateId).click();
+    await this.page.waitForURL(
+      new RegExp(`${triggersActionsRoute}/create/template/${templateId}(/|$|\\?|#)`)
+    );
   }
 
   async clickCancel(): Promise<void> {

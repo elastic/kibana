@@ -319,6 +319,74 @@ describe('rules_list component empty', () => {
 
     expect(await screen.findByTestId('ruleTypeModal')).toBeInTheDocument();
   });
+
+  describe('empty-state create from template', () => {
+    const templateId = 'empty-state-template';
+    const mockTemplatesResponse = {
+      page: 1,
+      per_page: 10,
+      total: 1,
+      data: [
+        {
+          id: templateId,
+          name: 'Empty state template',
+          tags: [],
+          rule_type_id: '.es-query',
+        },
+      ],
+    };
+
+    const selectEmptyStateTemplate = async () => {
+      fireEvent.click(await screen.findByTestId('createFirstRuleButton'));
+      expect(await screen.findByTestId('ruleTypeModal')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: /^Template$/ }));
+      fireEvent.click(await screen.findByTestId(`${templateId}-SelectOption`));
+    };
+
+    beforeEach(() => {
+      window.IntersectionObserver = jest.fn().mockReturnValue({
+        observe: jest.fn(),
+        unobserve: jest.fn(),
+        disconnect: jest.fn(),
+      });
+      (useKibanaMock().services.http.get as jest.Mock).mockImplementation(async (path: string) => {
+        if (path.includes('rule_template/_find')) {
+          return mockTemplatesResponse;
+        }
+        return {};
+      });
+    });
+
+    it('uses navigateToCreateRuleFromTemplateForm instead of the management app', async () => {
+      const navigateToCreateRuleFromTemplateForm = jest.fn();
+      const { navigateToApp } = useKibanaMock().services.application;
+
+      renderWithProviders(
+        <RulesList
+          showCreateRuleButtonInPrompt
+          navigateToCreateRuleFromTemplateForm={navigateToCreateRuleFromTemplateForm}
+        />
+      );
+
+      await selectEmptyStateTemplate();
+
+      expect(navigateToCreateRuleFromTemplateForm).toHaveBeenCalledWith(templateId);
+      expect(navigateToApp).not.toHaveBeenCalled();
+    });
+
+    it('falls back to the management app when navigateToCreateRuleFromTemplateForm is omitted', async () => {
+      const { navigateToApp } = useKibanaMock().services.application;
+
+      renderWithProviders(<RulesList showCreateRuleButtonInPrompt />);
+
+      await selectEmptyStateTemplate();
+
+      expect(navigateToApp).toHaveBeenCalledWith('management', {
+        path: `insightsAndAlerting/triggersActions/create/template/${templateId}`,
+      });
+    });
+  });
 });
 
 describe('rules_list ', () => {

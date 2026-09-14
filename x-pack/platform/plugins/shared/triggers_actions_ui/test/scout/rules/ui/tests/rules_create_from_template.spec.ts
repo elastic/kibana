@@ -5,43 +5,69 @@
  * 2.0.
  */
 
+import type { ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import {
+  CLASSIC_RULES_CREATE_URL_RE,
+  CLASSIC_RULES_NESTED_RULES_URL_RE,
+  MANAGEMENT_ALERTING_V2_URL_RE,
+  STANDALONE_RULES_APP_URL_RE,
+  makeV1EsQueryRuleTemplateAttributes,
+  RULE_TEMPLATE_SO_TYPE,
+  test,
+} from '../fixtures';
 
-const SM_BASE = 'management/insightsAndAlerting/triggersActions';
-const RULES_CREATE_URL_RE = new RegExp(`/app/${SM_BASE}/create/template/`);
+const expectManagementHost = async (page: ScoutPage, pathRe: RegExp) => {
+  await expect(page).toHaveURL(pathRe);
+  await expect(page).not.toHaveURL(CLASSIC_RULES_NESTED_RULES_URL_RE);
+  await expect(page).not.toHaveURL(STANDALONE_RULES_APP_URL_RE);
+  await expect(page).not.toHaveURL(MANAGEMENT_ALERTING_V2_URL_RE);
+};
+
+const templateId = `scout-v1-template-sm-${Date.now()}`;
+const templateName = `Scout v1 template ${templateId}`;
 
 test.describe(
   'Create rule from template',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
-    test('stays on the host mount when selecting a template', async ({ browserAuth, page }) => {
+    test.beforeAll(async ({ kbnClient }) => {
+      await kbnClient.savedObjects.create({
+        type: RULE_TEMPLATE_SO_TYPE,
+        id: templateId,
+        overwrite: true,
+        attributes: makeV1EsQueryRuleTemplateAttributes(templateName),
+      });
+    });
+
+    test.afterAll(async ({ kbnClient }) => {
+      try {
+        await kbnClient.savedObjects.delete({
+          type: RULE_TEMPLATE_SO_TYPE,
+          id: templateId,
+        });
+      } catch {
+        // beforeAll may have failed before the template was created
+      }
+    });
+
+    test('stays on the host mount when selecting a template', async ({
+      browserAuth,
+      kbnUrl,
+      page,
+      pageObjects,
+    }) => {
+      const rules = pageObjects.classicRulesPage;
+
       await browserAuth.loginAsAdmin();
-      await page.gotoApp('rules');
-      await expect(page.testSubj.locator('createRuleButton')).toBeVisible({ timeout: 30_000 });
-      await page.testSubj.click('createRuleButton');
-      await expect(page.testSubj.locator('ruleTypeModal')).toBeVisible();
+      await rules.goto(kbnUrl);
+      await expect(rules.createButton).toBeVisible({ timeout: 30_000 });
+      await rules.openCreateRuleTypeModal();
+      await rules.selectTemplate(templateId, templateName);
 
-      const templateTab = page.testSubj.locator('ruleTypeModal').getByText('Templates');
-      const hasTemplates = await templateTab.isVisible().catch(() => false);
-
-      test.skip(
-        !hasTemplates,
-        'No Templates tab available in this config; gap covered by unit test'
-      );
-
-      await templateTab.click();
-
-      const firstTemplate = page.testSubj
-        .locator('ruleTypeModal')
-        .locator('[data-test-subj$="-SelectOption"]')
-        .first();
-      await expect(firstTemplate).toBeVisible({ timeout: 10_000 });
-      await firstTemplate.click();
-
-      await expect(page).toHaveURL(RULES_CREATE_URL_RE);
-      expect(page.url()).toContain(`/app/${SM_BASE}/create/template/`);
+      await expectManagementHost(page, CLASSIC_RULES_CREATE_URL_RE);
+      expect(page.url()).toContain(`/create/template/${templateId}`);
     });
   }
 );

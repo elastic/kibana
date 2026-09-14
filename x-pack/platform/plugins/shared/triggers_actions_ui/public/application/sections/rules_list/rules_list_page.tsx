@@ -49,6 +49,7 @@ export const RulesListContainer = () => {
     openCreateRuleModal,
     openSettingsFlyout,
     navigateToCreateRuleForm,
+    navigateToCreateRuleFromTemplateForm,
     navigateToEditRuleForm,
   } = useRulesPageActions();
 
@@ -143,6 +144,7 @@ export const RulesListContainer = () => {
         showCreateRuleButtonInPrompt={true}
         navigateToEditRuleForm={navigateToEditRuleForm}
         navigateToCreateRuleForm={navigateToCreateRuleForm}
+        navigateToCreateRuleFromTemplateForm={navigateToCreateRuleFromTemplateForm}
         ruleDetailsRoute={rulesAppDetailsRoute}
       />
     </>

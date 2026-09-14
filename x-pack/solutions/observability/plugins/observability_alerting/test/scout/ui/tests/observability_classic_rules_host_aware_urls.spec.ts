@@ -8,8 +8,8 @@
 import type { Locator, ScoutPage } from '@kbn/scout-oblt';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
+import { makeEsQueryRule } from '@kbn/triggers-actions-ui-plugin/test/scout/common/ui/fixtures/helpers';
 import { test } from '../fixtures';
-import { makeEsQueryRule } from '../fixtures/helpers';
 import {
   setAlertingV2EnabledSetting,
   unsetAlertingV2EnabledSetting,

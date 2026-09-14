@@ -13,7 +13,7 @@ import {
 } from '../../../../../public/constants';
 
 const V1_BASE = `${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V1_PATH}`;
-const escapeRe = (value: string) => value.replace(/\//g, '\\/');
+const escapeRe = (value: string) => value.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&');
 const V1_BASE_RE = escapeRe(V1_BASE);
 
 export const OBS_V1_LIST_URL_RE = new RegExp(`${V1_BASE_RE}\\/?(?:\\?|#|$)`);
@@ -30,7 +30,6 @@ export const OBS_V1_NESTED_RULES_URL_RE = /\/observability\/alerting\/rules\/v1\
 export const MANAGEMENT_CLASSIC_RULES_URL_RE =
   /\/app\/management\/insightsAndAlerting\/triggersActions(\/|$|\?|#)/;
 export const STANDALONE_RULES_APP_URL_RE = /\/app\/rules(\/|$|\?|#)/;
-export const MANAGEMENT_ALERTING_V2_URL_RE = /\/app\/management\/alertingV2(\/|$|\?|#)/;
 
 /**
  * Drives the classic (v1) Rules page on the Observability Alerting mount
@@ -42,6 +41,8 @@ export class ObservabilityClassicRulesPage {
   public readonly rulesList: Locator;
   public readonly createButton: Locator;
   public readonly ruleTypeModal: Locator;
+  public readonly templateModeButton: Locator;
+  public readonly ruleTypeModalSearch: Locator;
   public readonly esQueryRuleTypeOption: Locator;
   public readonly ruleForm: Locator;
   public readonly cancelButton: Locator;
@@ -61,6 +62,11 @@ export class ObservabilityClassicRulesPage {
     this.rulesList = this.page.testSubj.locator('rulesList');
     this.createButton = this.page.testSubj.locator('createRuleButton');
     this.ruleTypeModal = this.page.testSubj.locator('ruleTypeModal');
+    this.templateModeButton = this.ruleTypeModal.getByRole('button', {
+      name: 'Template',
+      exact: true,
+    });
+    this.ruleTypeModalSearch = this.page.testSubj.locator('ruleTypeModalSearch');
     this.esQueryRuleTypeOption = this.page.testSubj.locator('.es-query-SelectOption');
     this.ruleForm = this.page.testSubj.locator('ruleForm');
     this.cancelButton = this.page.testSubj.locator('rulePageFooterCancelButton');
@@ -126,6 +132,19 @@ export class ObservabilityClassicRulesPage {
     await this.esQueryRuleTypeOption.click();
     await this.page.waitForURL(OBS_V1_CREATE_URL_RE);
     await this.ruleForm.waitFor({ state: 'visible' });
+  }
+
+  templateOption(templateId: string): Locator {
+    return this.page.testSubj.locator(`${templateId}-SelectOption`);
+  }
+
+  async selectTemplate(templateId: string, templateName: string): Promise<void> {
+    await this.templateModeButton.click();
+    await this.ruleTypeModalSearch.fill(templateName);
+    await this.templateOption(templateId).click();
+    await this.page.waitForURL(
+      new RegExp(`${V1_BASE_RE}\\/create\\/template\\/${templateId}(\\/|$|\\?|#)`)
+    );
   }
 
   async clickCancel(): Promise<void> {

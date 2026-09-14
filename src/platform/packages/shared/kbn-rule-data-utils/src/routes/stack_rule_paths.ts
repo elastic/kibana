@@ -24,3 +24,10 @@ export const getCreateRuleRoute = (ruleTypeId: string) =>
 export const getCreateRuleFromTemplateRoute = (templateId: string) =>
   createRuleFromTemplateRoute.replace(':templateId', templateId);
 export const getEditRuleRoute = (ruleId: string) => editRuleRoute.replace(':id', ruleId);
+
+/**
+ * Management app `path` for a classic v1 Rules sub-route.
+ * Route helpers already include a leading slash; joining with another `/` produces `//create`.
+ */
+export const getTriggersActionsManagementPath = (route: string): string =>
+  `insightsAndAlerting/triggersActions${route.startsWith('/') ? route : `/${route}`}`;
