@@ -1233,7 +1233,6 @@ x-pack/platform/plugins/shared/alerting_v2 @elastic/rna-project-team
 x-pack/platform/plugins/shared/anonymization @elastic/workchat-eng @elastic/security-threat-hunting
 x-pack/platform/plugins/shared/apm_sources_access @elastic/obs-signals-traces-team
 x-pack/platform/plugins/shared/automatic_import @elastic/siem-conduit
-x-pack/platform/plugins/shared/automatic_import_v2 @elastic/siem-conduit
 x-pack/platform/plugins/shared/cases @elastic/kibana-cases
 x-pack/platform/plugins/shared/cloud @elastic/kibana-core
 x-pack/platform/plugins/shared/cloud_connect @elastic/kibana-management
@@ -1262,7 +1261,6 @@ x-pack/platform/plugins/shared/inference @elastic/search-ml-ux
 x-pack/platform/plugins/shared/inference_endpoint @elastic/search-ml-ux
 x-pack/platform/plugins/shared/inference_workflows @elastic/search-ml-ux
 x-pack/platform/plugins/shared/ingest_hub @elastic/streams-ui
-x-pack/platform/plugins/shared/ingest_hub/public/onboarding/step_components/authenticate_and_deploy_step @elastic/streams-ui @elastic/siem-conduit
 x-pack/platform/plugins/shared/ingest_pipelines @elastic/kibana-management
 x-pack/platform/plugins/shared/lens @elastic/kibana-dashboards
 x-pack/platform/plugins/shared/license_management @elastic/kibana-management
