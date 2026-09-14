@@ -92,7 +92,7 @@ Do not review or comment on:
 Use these definitions when assigning severity:
 
 - **Blocker**: Will cause test failures, breaks CI, missing required coverage (migration parity gaps), security or data leak risks
-- **Major**: Likely to cause flakiness, incorrect test coverage, permission/auth errors, violates core best practices in ways that affect correctness
+- **Major**: Likely to cause flakiness, incorrect test coverage (including an oversized spec whose skip blast radius drops a large suite), permission/auth errors, violates core best practices in ways that affect correctness
 - **Minor**: Suboptimal patterns, missed reuse opportunities, efficiency improvements, style inconsistencies that don't affect correctness
 - **Nit**: Cosmetic issues, naming suggestions, optional improvements, "nice to have" changes
 
