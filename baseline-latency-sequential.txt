@@ -1,0 +1,2 @@
+sequential-baseline rep 0 (warmup): 854455ms status=completed pending=undefined valid=false tokens={"in":318328,"out":87247,"calls":5} trace=d6cfbb9dad4b759901c780f472f6edbc
+sequential-baseline rep 1: 456709ms status=failed pending=undefined valid=false tokens={"in":234029,"out":68477,"calls":4} trace=d48ad7c5a9c4b3bfc49bc77388246dca

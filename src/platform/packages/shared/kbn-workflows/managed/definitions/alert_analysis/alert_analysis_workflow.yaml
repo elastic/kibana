@@ -530,14 +530,22 @@ steps:
       # Classify the alerts, one batch per AI agent call
       # -----------------------------------------------------------------------
       # `chunk` groups the pending alerts into batches of consts.batch_size, so each
-      # iteration of this loop classifies a whole batch in one call.
+      # branch classifies a whole batch in one call.
       #
-      # Related-alert enrichment runs at the top of each batch iteration rather than as a
+      # One parallel branch per batch: each branch enriches, classifies, applies and
+      # closes its own batch. mode: settled absorbs a failed batch so the remaining
+      # batches still complete; concurrency 5 matches the agent-call cost profile.
+      # Branch-local writes (variables.*) never reach the parent; the parent reads only
+      # the aggregate steps.classify_alert_batches.output.{results,total,succeeded,failed}.
+      #
+      # Related-alert enrichment runs at the top of each branch rather than as a
       # top-level pass over all pending alerts. Resetting related_summaries at the start of
-      # each batch keeps the accumulator bounded to consts.batch_size entries (not growing to
+      # each branch keeps the accumulator bounded to consts.batch_size entries (not growing to
       # the total alert count), so workflow-execution state stays proportional to batch size.
       - name: classify_alert_batches
-        type: foreach
+        type: parallel
+        mode: settled
+        concurrency: 5
         foreach: "{{ event.alerts | reject_exp: 'a', variables.pending_filter_expr | chunk: consts.batch_size | json }}"
         steps:
 
