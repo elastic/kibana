@@ -150,6 +150,25 @@ const toEntry = (
   lastFailedAt: stats.lastFailedAt,
 });
 
+/** Number of tests per branch they qualified on, largest count first. */
+export const countByFlakiestBranch = (
+  entries: ReadonlyArray<{ flakiestBranch?: Pick<FlakyTestFlakiestBranch, 'branch'> }>
+): Record<string, number> => {
+  const counts = new Map<string, number>();
+  for (const { flakiestBranch } of entries) {
+    if (!flakiestBranch) continue;
+    counts.set(flakiestBranch.branch, (counts.get(flakiestBranch.branch) ?? 0) + 1);
+  }
+  return Object.fromEntries([...counts].sort(([, a], [, b]) => b - a));
+};
+
+/** `main: 167, 9.5: 19` */
+export const formatCounts = (counts: Readonly<Partial<Record<string, number>>>): string =>
+  Object.entries(counts)
+    .filter(([, count]) => count !== undefined)
+    .map(([key, count]) => `${key}: ${count}`)
+    .join(', ');
+
 const MS_PER_HOUR = 60 * 60 * 1000;
 
 /** Whether the test ran on any branch in the last `lastRunWithinHours` of the window. */
@@ -262,10 +281,12 @@ const buildReport = async (
         qualified.push({ row, flakiestBranch });
       }
     }
+    const qualifiedByBranch = countByFlakiestBranch(qualified);
     log.info(
       `Checked ${candidates.length} tests branch by branch in ${elapsed(startedAt)}: ` +
-        `${qualified.length} qualify, ${belowThresholds} clear the thresholds on no single ` +
-        `branch, ${notRunLately} did not run in the last ${thresholds.lastRunWithinHours}h ` +
+        `${qualified.length} qualify (${formatCounts(qualifiedByBranch) || 'none'}), ` +
+        `${belowThresholds} clear the thresholds on no single branch, ` +
+        `${notRunLately} did not run in the last ${thresholds.lastRunWithinHours}h ` +
         `(skipped, moved or deleted)`
     );
   }
@@ -359,6 +380,7 @@ const buildReport = async (
       totalFlaky: rankedFlaky.length,
       totalConsistentlyFailing: rankedConsistentlyFailing.length,
       flakyByFramework,
+      flakyByBranch: countByFlakiestBranch(rankedFlaky),
     },
     flaky: rankedFlaky.map(decorate),
     consistentlyFailing: rankedConsistentlyFailing.map(decorate),

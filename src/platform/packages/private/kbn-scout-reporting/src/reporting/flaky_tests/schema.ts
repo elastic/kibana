@@ -236,6 +236,11 @@ export const FlakyTestReportSchema = z.object({
     totalFlaky: z.int(),
     totalConsistentlyFailing: z.int(),
     flakyByFramework: z.partialRecord(TestFrameworkSchema, z.int()),
+    /**
+     * Flaky tests by the branch they qualified on (`flakiestBranch.branch`), largest count
+     * first. Empty in reports written before thresholds applied per branch.
+     */
+    flakyByBranch: z.record(z.string(), z.int()).default({}),
   }),
   /** Tests that failed in some builds and passed in others, ranked by failed builds. */
   flaky: z.array(FlakyTestEntrySchema),

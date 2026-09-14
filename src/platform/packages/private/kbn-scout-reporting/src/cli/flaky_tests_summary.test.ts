@@ -317,7 +317,12 @@ describe('displaySummary', () => {
       maxTests: 200,
       lastRunWithinHours: 24,
     },
-    summary: { totalFlaky: 2, totalConsistentlyFailing: 1, flakyByFramework: { jest: 2 } },
+    summary: {
+      totalFlaky: 2,
+      totalConsistentlyFailing: 1,
+      flakyByFramework: { jest: 2 },
+      flakyByBranch: { main: 1, '9.5': 1 },
+    },
     flaky: [entry({ testId: 't1', title: 'first' }), entry({ testId: 't2', title: 'second' })],
     consistentlyFailing: [],
     files: [],
@@ -383,6 +388,9 @@ describe('displaySummary', () => {
     expect(output).toContain('Max tests         : 200 per list');
     expect(output).toContain('Consistently failing = qualifying test that never passed');
     expect(output).toContain('Flaky                : 2 (jest: 2)');
+    expect(output).toContain(
+      'Flaky by branch      : main: 1, 9.5: 1 (branch each test qualified on)'
+    );
     expect(output).toContain('Consistently failing : 1');
     expect(output).toContain('Top 1 failing tests by failed builds');
     expect(output).toContain('first');
@@ -393,7 +401,7 @@ describe('displaySummary', () => {
     const output = renderSummary(
       {
         ...report,
-        summary: { totalFlaky: 2, totalConsistentlyFailing: 1, flakyByFramework: { jest: 2 } },
+        summary: { ...report.summary, totalConsistentlyFailing: 1 },
         consistentlyFailing: [alwaysBroken],
       },
       1
@@ -409,13 +417,19 @@ describe('displaySummary', () => {
     const output = renderSummary(
       {
         ...report,
-        summary: { totalFlaky: 0, totalConsistentlyFailing: 0, flakyByFramework: {} },
+        summary: {
+          totalFlaky: 0,
+          totalConsistentlyFailing: 0,
+          flakyByFramework: {},
+          flakyByBranch: {},
+        },
         flaky: [],
       },
       10
     );
 
     expect(output).toContain('Flaky                : 0');
+    expect(output).not.toContain('Flaky by branch');
     expect(output).not.toContain('failing tests by failed builds');
   });
 });

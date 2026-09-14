@@ -89,6 +89,7 @@ export const flakyReport = (flaky: FlakyTestEntry[]): FlakyTestReport => ({
     totalFlaky: flaky.length,
     totalConsistentlyFailing: 0,
     flakyByFramework: { playwright: flaky.length },
+    flakyByBranch: { main: flaky.length },
   },
   flaky,
   consistentlyFailing: [],

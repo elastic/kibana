@@ -13,6 +13,7 @@ import dedent from 'dedent';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   compareByFailedBuilds,
+  formatCounts,
   type FlakyTestBranchStats,
   type FlakyTestClassification,
   type FlakyTestEntry,
@@ -251,9 +252,8 @@ export const displaySummary = (
   width: number = terminalWidth()
 ): void => {
   const { window, scope, thresholds, summary } = report;
-  const flakyByFramework = Object.entries(summary.flakyByFramework)
-    .map(([framework, count]) => `${framework}: ${count}`)
-    .join(', ');
+  const flakyByFramework = formatCounts(summary.flakyByFramework);
+  const flakyByBranch = formatCounts(summary.flakyByBranch);
 
   const panel = new CliTable3();
   panel.push(
@@ -297,6 +297,10 @@ export const displaySummary = (
         Results
           Flaky                : ${summary.totalFlaky}${
         flakyByFramework ? ` (${flakyByFramework})` : ''
+      }${
+        flakyByBranch
+          ? `\n          Flaky by branch      : ${flakyByBranch} (branch each test qualified on)`
+          : ''
       }
           Consistently failing : ${summary.totalConsistentlyFailing}
         `),
