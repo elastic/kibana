@@ -16,7 +16,6 @@ import React from 'react';
 
 jest.mock('../../../containers/api');
 
-// https://github.com/elastic/kibana/issues/208663
 describe('useDeleteAction', () => {
   const onAction = jest.fn();
   const onActionSuccess = jest.fn();

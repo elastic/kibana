@@ -9,7 +9,7 @@ import React from 'react';
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { waitFor, fireEvent, screen, act } from '@testing-library/react';
-import userEvent, { type UserEvent } from '@testing-library/user-event';
+import userEvent from '@testing-library/user-event';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import * as i18n from '../../common/translations';
 
@@ -149,8 +149,6 @@ describe('EditableMarkdown', () => {
   });
 
   describe('draft comment ', () => {
-    let user: UserEvent;
-
     beforeAll(() => {
       jest.useFakeTimers();
     });
@@ -165,11 +163,9 @@ describe('EditableMarkdown', () => {
     });
 
     beforeEach(() => {
-      user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       jest.clearAllMocks();
     });
 
-    // https://github.com/elastic/kibana/issues/288576
     it('Save button click clears session storage', async () => {
       // Wrap in a component that unmounts the editor when onChangeEditable fires,
       // mirroring real usage where the parent switches from edit to view mode.

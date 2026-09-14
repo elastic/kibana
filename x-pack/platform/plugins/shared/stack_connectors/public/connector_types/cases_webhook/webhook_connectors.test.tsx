@@ -218,7 +218,6 @@ describe('CasesWebhookActionConnectorFields renders', () => {
     expect(screen.queryByTestId('webhookHeadersValueInput')).not.toBeInTheDocument();
   });
 
-  // https://github.com/elastic/kibana/issues/237095
   describe('Step Validation', () => {
     let user: UserEvent;
 
@@ -482,7 +481,6 @@ describe('CasesWebhookActionConnectorFields renders', () => {
     // this validation is tested in the main validation section
   });
 
-  // https://github.com/elastic/kibana/issues/205731
   describe('Validation', () => {
     let user: UserEvent;
     const onSubmit = jest.fn();

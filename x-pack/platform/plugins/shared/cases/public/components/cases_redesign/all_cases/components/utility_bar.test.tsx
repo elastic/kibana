@@ -129,7 +129,7 @@ describe('Severity form field', () => {
 
     await userEvent.click(await screen.findByTestId('case-table-bulk-actions-link-icon'));
 
-    const contextMenu = await screen.findByTestId('case-table-bulk-actions-context-menu');
+    await screen.findByTestId('case-table-bulk-actions-context-menu');
 
     await userEvent.click(await screen.findByTestId('case-table-bulk-actions-link-icon'));
 

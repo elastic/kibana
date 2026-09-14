@@ -24,7 +24,6 @@ const asAssignee = (profile: UserProfileWithAvatar): AssigneeWithProfile => ({
   profile,
 });
 
-// https://github.com/elastic/kibana/issues/216570
 describe('SuggestUsersPopover', () => {
   let user: UserEvent;
 

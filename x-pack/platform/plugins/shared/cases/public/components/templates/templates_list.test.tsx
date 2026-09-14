@@ -13,7 +13,6 @@ import { TemplatesList } from './templates_list';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { renderWithTestingProviders } from '../../common/mock';
 
-// https://github.com/elastic/kibana/issues/208265
 describe('TemplatesList', () => {
   let user: UserEvent;
 
