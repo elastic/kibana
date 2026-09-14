@@ -1355,6 +1355,8 @@
       "@kbn/evals-suite-observability-ai/*": ["./x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai/*"],
       "@kbn/evals-suite-pci-compliance": ["./x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance"],
       "@kbn/evals-suite-pci-compliance/*": ["./x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/*"],
+      "@kbn/evals-suite-rule-tuning": ["./x-pack/solutions/security/packages/kbn-evals-suite-rule-tuning"],
+      "@kbn/evals-suite-rule-tuning/*": ["./x-pack/solutions/security/packages/kbn-evals-suite-rule-tuning/*"],
       "@kbn/evals-suite-security-ai-rules": ["./x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules"],
       "@kbn/evals-suite-security-ai-rules/*": ["./x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules/*"],
       "@kbn/evals-suite-security-alert-triage": ["./x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage"],

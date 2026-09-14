@@ -5250,6 +5250,9 @@ importers:
       '@kbn/evals-suite-pci-compliance':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance
+      '@kbn/evals-suite-rule-tuning':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/kbn-evals-suite-rule-tuning
       '@kbn/evals-suite-security-ai-rules':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules
@@ -9410,6 +9413,8 @@ importers:
   x-pack/solutions/security/packages/kbn-evals-suite-lead-generation: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance: {}
+
+  x-pack/solutions/security/packages/kbn-evals-suite-rule-tuning: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules: {}
 

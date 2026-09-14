@@ -1845,6 +1845,7 @@
     "@kbn/evals-suite-ml": "workspace:*",
     "@kbn/evals-suite-observability-ai": "workspace:*",
     "@kbn/evals-suite-pci-compliance": "workspace:*",
+    "@kbn/evals-suite-rule-tuning": "workspace:*",
     "@kbn/evals-suite-security-ai-rules": "workspace:*",
     "@kbn/evals-suite-security-alert-triage": "workspace:*",
     "@kbn/evals-suite-security-automatic-migrations": "workspace:*",
