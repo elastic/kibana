@@ -69,7 +69,13 @@ const TypeLine: React.FC<{ iconType: IconType; label: string; fieldTypeLabel?: s
   fieldTypeLabel,
 }) => {
   return (
-    <EuiFlexGroup direction="row" alignItems="center" gutterSize="s" justifyContent="flexStart" responsive={false}>
+    <EuiFlexGroup
+      direction="row"
+      alignItems="center"
+      gutterSize="s"
+      justifyContent="flexStart"
+      responsive={false}
+    >
       <EuiFlexItem grow={false}>
         <EuiToken iconType={iconType} size="s" />
       </EuiFlexItem>
@@ -137,7 +143,12 @@ export const ResultField: React.FC<ResultFieldProps> = ({
 
   return (
     <EuiTableRow css={Styles.resultField(euiTheme)}>
-      <EuiTableRowCell className="resultFieldRowCell" valign="top" truncateText={!isExpanded} width="20%">
+      <EuiTableRowCell
+        className="resultFieldRowCell"
+        valign="top"
+        truncateText={!isExpanded}
+        width="20%"
+      >
         <TypeLine iconType={resolvedIconType} label={fieldName} fieldTypeLabel={fieldTypeLabel} />
       </EuiTableRowCell>
       <EuiTableRowCell className="resultFieldRowCell" truncateText={shouldTruncate} valign="top">

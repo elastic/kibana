@@ -39,9 +39,19 @@ export const IndexDocuments: React.FC<IndexDocumentsProps> = ({
   }
   return (
     <>
-      <EuiFlexGroup direction="row" justifyContent="spaceBetween" alignItems="center" gutterSize="s">
+      <EuiFlexGroup
+        direction="row"
+        justifyContent="spaceBetween"
+        alignItems="center"
+        gutterSize="s"
+      >
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="row" justifyContent="flexStart" alignItems="center" gutterSize="s">
+          <EuiFlexGroup
+            direction="row"
+            justifyContent="flexStart"
+            alignItems="center"
+            gutterSize="s"
+          >
             <EuiFlexItem grow={false}>
               <EuiTitle size="xs">
                 <h2>
@@ -65,7 +75,9 @@ export const IndexDocuments: React.FC<IndexDocumentsProps> = ({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty iconType="refresh" size="s" onClick={() => { }}>Refresh</EuiButtonEmpty>
+          <EuiButtonEmpty iconType="refresh" size="s" onClick={() => {}}>
+            Refresh
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
 
