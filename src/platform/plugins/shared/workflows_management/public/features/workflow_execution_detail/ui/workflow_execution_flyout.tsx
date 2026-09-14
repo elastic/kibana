@@ -47,6 +47,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { AiStepSection } from './ai_step_section';
 import { ExecutionTakeActionSplitButton } from './execution_take_action_split_button';
 import { ForeachIterationsSection } from './foreach_iterations_section';
+import { ResumeExecutionButton } from './resume_execution_button';
 import { StepDataValueCell } from './step_data_value_cell';
 import { StepDetailAccordionSection } from './step_detail_accordion_section';
 import {
@@ -61,6 +62,7 @@ import {
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
 import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations/status_translations';
 import { FormattedRelativeEnhanced } from '../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced';
@@ -79,6 +81,7 @@ import { isTokenUsageTableField } from '../lib/is_token_usage_table_field';
 import { normalizeStepAi } from '../lib/normalize_step_ai';
 import { useChildWorkflowExecutions } from '../model/use_child_workflow_executions';
 import { useStepExecution } from '../model/use_step_execution';
+import { useWaitingStepResume } from '../model/use_waiting_step_resume';
 
 export interface WorkflowExecutionFlyoutProps {
   executionId: string;
@@ -460,6 +463,14 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
     const autoExpandedForExecutionIdRef = useRef<string | null>(null);
 
     const { workflowExecution, error } = useWorkflowExecutionPolling(executionId);
+    const { shouldAutoResume } = useWorkflowUrlState();
+    const {
+      waitingStepExecutionId,
+      waitingStepStartedAt,
+      resumeMessage,
+      resumeSchema,
+      approvalLabels,
+    } = useWaitingStepResume(executionId, workflowExecution);
 
     const workflowName =
       workflowNameProp ||
@@ -888,6 +899,30 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                     {!isPseudoStep && stepAiWithModel && (
                       <AiStepSection ai={stepAiWithModel} connectorName={aiConnectorName} />
                     )}
+                    {!isPseudoStep &&
+                      selectedStepExecutionId === waitingStepExecutionId &&
+                      waitingStepExecutionId && (
+                        <div
+                          css={{
+                            paddingTop: euiTheme.size.m,
+                            paddingBottom: euiTheme.size.m,
+                          }}
+                        >
+                          <ResumeExecutionButton
+                            executionId={executionId}
+                            workflowId={workflowExecution?.workflowId}
+                            stepStartedAt={
+                              selectedLightStep?.startedAt ??
+                              activeStepExecution?.startedAt ??
+                              waitingStepStartedAt
+                            }
+                            resumeMessage={resumeMessage}
+                            resumeSchema={resumeSchema}
+                            approvalLabels={approvalLabels}
+                            waitingStepExecutionId={selectedStepExecutionId}
+                          />
+                        </div>
+                      )}
                     <StepDataSection
                       key={`input-${selectedStepExecutionId}`}
                       label={i18n.translate('workflows.executionFlyout.stepDetail.input', {
@@ -1259,6 +1294,19 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                   </div>
                 ) : (
                   <EuiLoadingSpinner size="m" />
+                )}
+
+                {waitingStepExecutionId && workflowExecution && (
+                  <ResumeExecutionButton
+                    executionId={executionId}
+                    workflowId={workflowExecution.workflowId}
+                    stepStartedAt={waitingStepStartedAt}
+                    resumeMessage={resumeMessage}
+                    resumeSchema={resumeSchema}
+                    approvalLabels={approvalLabels}
+                    autoOpen={shouldAutoResume}
+                    waitingStepExecutionId={waitingStepExecutionId}
+                  />
                 )}
               </div>
             </EuiFlyoutHeader>
