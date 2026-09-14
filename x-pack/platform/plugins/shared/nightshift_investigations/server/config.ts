@@ -15,21 +15,12 @@ const sandboxConfigSchema = schema.object({
   sandbox_api_port: schema.number({ defaultValue: 9090 }),
   // API key required by sandbox-api for authentication (ApiKey scheme).
   sandbox_api_key: schema.string(),
-  // Optional PEM-encoded TLS CA cert for sandbox-api. Omit for insecure (dev).
-  sandbox_api_server_cert: schema.maybe(schema.string()),
-  // S3/MinIO workspace persistence — optional. When set, sandbox /workspace is
-  // snapshotted to S3 after each write tool call and restored on reconnect.
-  sandbox_workspace_bucket: schema.maybe(schema.string()),
-  // Endpoint Kibana uses when issuing its own S3 requests (e.g. HEAD object-exists check).
-  s3_endpoint: schema.maybe(schema.string()),
-  // Endpoint embedded in presigned URLs that the sandbox containers will use for GET/PUT.
-  // Required when Kibana and the sandbox run in different network namespaces (e.g. Docker
-  // dev where 'localhost' in the container refers to the container, not the host).
-  // Falls back to s3_endpoint when absent.
-  s3_sandbox_endpoint: schema.maybe(schema.string()),
-  s3_access_key_id: schema.maybe(schema.string()),
-  s3_secret_access_key: schema.maybe(schema.string()),
-  s3_region: schema.string({ defaultValue: 'us-east-1' }),
+  // TLS / mTLS (all fields are file paths to PEM files). All optional.
+  // sandbox_api_tls_ca: CA cert used to verify the server certificate.
+  // sandbox_api_tls_cert + sandbox_api_tls_key: Kibana client cert + key (mTLS).
+  sandbox_api_tls_ca: schema.maybe(schema.string()),
+  sandbox_api_tls_cert: schema.maybe(schema.string()),
+  sandbox_api_tls_key: schema.maybe(schema.string()),
 });
 
 const configSchema = schema.object({
