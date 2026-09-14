@@ -50,6 +50,8 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: Restoring the current revision**](#scenario-restoring-the-current-revision)
     - [**Scenario: Restore is only offered on diffable change items**](#scenario-restore-is-only-offered-on-diffable-change-items)
     - [**Scenario: Restore conflict shows a modal with review and restore-anyway actions**](#scenario-restore-conflict-shows-a-modal-with-review-and-restore-anyway-actions)
+    - [**Scenario: Opening the History page and a diff are recorded in telemetry**](#scenario-opening-the-history-page-and-a-diff-are-recorded-in-telemetry)
+    - [**Scenario: Restore outcomes are recorded in telemetry**](#scenario-restore-outcomes-are-recorded-in-telemetry)
     - [**Scenario: Conflict-retry restore is distinguished in telemetry**](#scenario-conflict-retry-restore-is-distinguished-in-telemetry)
     - [**Scenario: Restoring a rule that was never created**](#scenario-restoring-a-rule-that-was-never-created)
     - [**Scenario: Restoring to a non-existent changeId should fail**](#scenario-restoring-to-a-non-existent-changeid-should-fail)
@@ -217,6 +219,7 @@ Then the resulting rule_duplicate change item should include metadata.original_r
   set to the saved-object id of the original rule
 And old_values should be null (duplication creates a new rule, not a delta)
 And the snapshot's exceptions_list should match what is expected for <exceptions state> and <include_exceptions>
+And exactly one change item should be captured for the duplicated rule (a single rule_duplicate item — no phantom or "no visible field changes" entries; see PR [#275559](https://github.com/elastic/kibana/pull/275559))
 ```
 
 **Cases:**
@@ -446,6 +449,29 @@ When the user chooses Restore anyway
 Then the restore should be retried and succeed or fail without a second modal
 ```
 
+#### **Scenario: Opening the History page and a diff are recorded in telemetry**
+
+**Automation**: 1 telemetry test.
+
+```Gherkin
+When a user opens the Rule Changes History page
+Then a ChangesHistoryViewed event should be fired once
+When the user explicitly selects a change item
+Then a ChangesHistoryDiffOpened event should be fired with isPrebuiltRule
+And auto-selection should not fire ChangesHistoryDiffOpened
+```
+
+#### **Scenario: Restore outcomes are recorded in telemetry**
+
+**Automation**: 1 telemetry test.
+
+```Gherkin
+When a restore succeeds, is a no-op, conflicts, or errors
+Then a ChangesHistoryRestoreTriggered event should be fired
+And status should be one of success, no_change, conflict, error
+And the event should include ruleType, isPrebuilt, isCustomized, and isConflictRetry
+```
+
 #### **Scenario: Conflict-retry restore is distinguished in telemetry**
 
 **Automation**: 1 telemetry test.
@@ -615,7 +641,7 @@ And the view should not display a partial or stale timeline as if it were comple
 
 #### **Scenario: History remains accessible after rule deletion**
 
-**Automation**: 1 integration test.
+**Automation**: 1 integration test + 1 e2e test.
 
 ```Gherkin
 Given a rule with captured change history
@@ -623,6 +649,9 @@ When a user deletes the rule
 And then requests the rule's history using its former id
 Then the API should return a 200 response
 And the response should include all previously captured change items
+When a user opens the Rule Changes History page for that deleted rule
+Then the History page should load
+And the timeline should show the previously captured change items
 ```
 
 #### **Scenario: Rule with no captured history**
