@@ -23,10 +23,16 @@ import { useKibanaTimeZone } from '../../hooks/use_kibana_time_zone';
  * `timeZone` rather than `new Date().getHours()`: the OS timezone is not
  * necessarily the one Kibana renders in, and greeting someone "good evening" at
  * 10am is the visible cost of assuming it is.
+ *
+ * `hourCycle: 'h23'` rather than `hour12: false`: the two agree on every engine
+ * Kibana targets today, but ECMA-402 originally had `hour12: false` resolve to
+ * the 1–24 cycle for locales whose default is `h12` — `en-US` among them — so
+ * midnight formatted as `"24"` and fell past both branches into "Good evening".
+ * Naming the cycle is immune to that history.
  */
 const getAlertZeroGreeting = (timeZone?: string): string => {
   const hour = Number(
-    new Intl.DateTimeFormat('en-US', { hour: 'numeric', hour12: false, timeZone }).format(
+    new Intl.DateTimeFormat('en-US', { hour: 'numeric', hourCycle: 'h23', timeZone }).format(
       new Date()
     )
   );

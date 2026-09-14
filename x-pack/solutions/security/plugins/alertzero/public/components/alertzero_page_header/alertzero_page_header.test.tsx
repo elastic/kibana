@@ -67,4 +67,57 @@ describe('AlertZeroPageHeader', () => {
 
     expect(heading()).toContain('Looking into your data...');
   });
+
+  /**
+   * The greeting reads the hour out of `Intl`, whose 0–23 output is not a given:
+   * `hour12: false` resolved to the 1–24 cycle for `en-US` on engines shipped
+   * before 2024, which turned midnight into `"24"` and greeted the small hours
+   * with "Good evening". The boundaries are asserted against a fixed clock so a
+   * future change to the formatter options can't quietly reintroduce that.
+   */
+  describe('greeting', () => {
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    const greetingAtUtcHour = (hour: number, minute = 0) => {
+      jest.useFakeTimers().setSystemTime(Date.UTC(2026, 8, 14, hour, minute));
+      setup({ eventCount: 1 });
+      return heading();
+    };
+
+    it.each([
+      [0, 'Good morning!'],
+      [11, 'Good morning!'],
+      [12, 'Good afternoon!'],
+      [17, 'Good afternoon!'],
+      [18, 'Good evening!'],
+      [23, 'Good evening!'],
+    ])('should greet %i:00 UTC with "%s"', (hour, expected) => {
+      expect(greetingAtUtcHour(hour)).toContain(expected);
+    });
+
+    it('should not treat midnight as the end of the day', () => {
+      expect(greetingAtUtcHour(0, 30)).not.toContain('Good evening!');
+    });
+
+    /**
+     * The boundaries above cannot catch a revert to `hour12: false`, because the
+     * engine this suite runs on resolves both spellings to `h23`. Asserting the
+     * options themselves is what pins the fix on every engine.
+     */
+    it('should ask Intl for the 0-23 cycle by name rather than via hour12', () => {
+      const spy = jest.spyOn(Intl, 'DateTimeFormat');
+      setup({ eventCount: 1 });
+
+      const options = spy.mock.calls.map(([, opts]) => opts).filter((opts) => opts?.hour);
+      expect(options).not.toHaveLength(0);
+      options.forEach((opts) => {
+        expect(opts).toMatchObject({ hourCycle: 'h23' });
+        expect(opts).not.toHaveProperty('hour12');
+      });
+
+      spy.mockRestore();
+    });
+  });
 });
