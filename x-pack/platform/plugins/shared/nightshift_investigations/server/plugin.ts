@@ -33,7 +33,6 @@ import { triggerInvestigationStepDefinition } from './step_definitions/trigger_i
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { registerInvestigationAgentType } from './agents/investigation';
-import { createUpdateInvestigationTool } from './tools/update_investigation/tool';
 import { SandboxConnectionManager } from './tools/sandbox_bash/grpc_client';
 import { createSandboxBashTool } from './tools/sandbox_bash/tool';
 import { createSandboxViewFileTool } from './tools/sandbox_bash/view_file_tool';
@@ -48,7 +47,7 @@ import type {
   NightshiftInvestigationsSetupDeps,
   NightshiftInvestigationsStartDeps,
 } from './types';
-import type { InvestigationsService } from '@kbn/agentic-investigations-plugin/server';
+
 
 export class NightshiftInvestigationsPlugin
   implements
@@ -95,12 +94,6 @@ export class NightshiftInvestigationsPlugin
 
     if (plugins.agentBuilder) {
       registerInvestigationAgentType(plugins.agentBuilder);
-      plugins.agentBuilder.tools.register(
-        createUpdateInvestigationTool({
-          getInvestigationsService: () => this.investigationsService as unknown as InvestigationsService | undefined,
-          logger: this.logger.get('update_investigation_tool'),
-        })
-      );
 
       const config = this.ctx.config.get();
       if (config.sandbox) {

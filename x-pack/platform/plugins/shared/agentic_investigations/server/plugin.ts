@@ -24,6 +24,7 @@ import type { ResolveProposalUser } from './proposals/services/resolve_proposal_
 import { registerStepDefinitions } from './proposals/step_types';
 import { createProposalsStorageClient } from './proposals/storage/proposals_storage';
 import { registerInvestigationAttachmentTypes } from './investigations/attachments';
+import { createUpdateInvestigationTool } from './investigations/tools/update_investigation/tool';
 import { investigationDetailsSavedObjectType } from './investigations/saved_objects/investigation_saved_object';
 import {
   SoInvestigationsService,
@@ -78,6 +79,15 @@ export class AgenticInvestigationsPlugin
     registerInvestigationAttachmentTypes(
       agentBuilder.attachments,
       this.lazyInvestigationsService()
+    );
+
+    // Register the update_investigation tool. Owned here because it writes to the
+    // investigation SO and conversation attachments — both owned by this plugin.
+    agentBuilder.tools.register(
+      createUpdateInvestigationTool({
+        investigationsService: this.lazyInvestigationsService(),
+        logger: this.logger.get('update_investigation_tool'),
+      })
     );
 
     workflowsExtensions.registerManagedWorkflowOwner(

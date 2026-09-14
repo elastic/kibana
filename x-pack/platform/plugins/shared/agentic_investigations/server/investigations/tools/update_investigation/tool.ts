@@ -14,15 +14,15 @@ import {
   INVESTIGATION_PROGRESS_UI_EVENT,
   investigationStateSchema,
 } from '@kbn/significant-events-schema';
-import { INVESTIGATION_ATTACHMENT_IDS } from '@kbn/agentic-investigations-plugin/common';
-import type { InvestigationsService } from '@kbn/agentic-investigations-plugin/server';
 import dedent from 'dedent';
+import { INVESTIGATION_ATTACHMENT_IDS } from '../../../../common/investigations/constants';
+import type { InvestigationsService } from '../../storage/investigations_service';
 
 export const UPDATE_INVESTIGATION_TOOL_ID = platformSignificantEventsTools.updateInvestigation;
 
 const toolDescription = dedent`
   ${i18n.translate(
-    'xpack.nightshiftInvestigations.agentBuilder.tools.updateInvestigation.description',
+    'xpack.agenticInvestigations.tools.updateInvestigation.description',
     {
       defaultMessage:
         'Update the investigation state: persist impact entities, hypotheses, recommendations, and blind spots directly as conversation attachments. Also emits a live UI event so the user sees progress in real time. Call this after every meaningful change — a new hypothesis, a confidence update, a confirmed root cause — and always include the full current state (not just the delta).',
@@ -58,10 +58,10 @@ const ATTACHMENT_TYPES = [
 ] as const;
 
 export const createUpdateInvestigationTool = ({
-  getInvestigationsService,
+  investigationsService,
   logger,
 }: {
-  getInvestigationsService: () => InvestigationsService | undefined;
+  investigationsService: InvestigationsService;
   logger: Logger;
 }): BuiltinToolDefinition<typeof investigationStateSchema> => ({
   id: UPDATE_INVESTIGATION_TOOL_ID,
@@ -111,28 +111,25 @@ export const createUpdateInvestigationTool = ({
     // parentExecutionId is the workflow execution ID when the agent is spawned by a workflow step.
     const investigationId = context.parentExecutionId ?? conversationId;
     if (investigationId) {
-      const investigationsService = getInvestigationsService();
-      if (investigationsService) {
-        try {
-          const existing = await investigationsService.get(spaceId, investigationId);
-          if (existing) {
-            await investigationsService.upsert(spaceId, {
-              ...existing,
-              summary: state.summary,
-              severity: state.severity,
-              hypotheses: state.hypotheses as Array<Record<string, unknown>>,
-              recommendations: (state.recommendations ?? []) as Array<Record<string, unknown>>,
-              blindSpots: (state.blind_spots ?? []) as Array<Record<string, unknown>>,
-              impact: state.impact
-                ? { entities: state.impact.entities as Array<Record<string, unknown>> }
-                : existing.impact,
-            });
-          }
-        } catch (err) {
-          logger.warn(
-            `Failed to update investigation SO for id "${investigationId}": ${err.message}`
-          );
+      try {
+        const existing = await investigationsService.get(spaceId, investigationId);
+        if (existing) {
+          await investigationsService.upsert(spaceId, {
+            ...existing,
+            summary: state.summary,
+            severity: state.severity,
+            hypotheses: state.hypotheses as Array<Record<string, unknown>>,
+            recommendations: (state.recommendations ?? []) as Array<Record<string, unknown>>,
+            blindSpots: (state.blind_spots ?? []) as Array<Record<string, unknown>>,
+            impact: state.impact
+              ? { entities: state.impact.entities as Array<Record<string, unknown>> }
+              : existing.impact,
+          });
         }
+      } catch (err) {
+        logger.warn(
+          `Failed to update investigation SO for id "${investigationId}": ${err.message}`
+        );
       }
     }
 
