@@ -50,13 +50,13 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % * Increase the TinyMath expression length limit so longer visualization formulas no longer fail [#290314]({{kib-pull}}290314).
 
 **Data ingestion and {{fleet}}**:
-* Fix {{fleet}} blocking a package policy save with an incompatible-agent-version error when every enrolled agent is incompatible or reports a pre-release version. {{fleet}} now warns instead [#289596]({{kib-pull}}289596).
-* Fix managed integrations appearing in the {{fleet}} Agents list when they use a version-specific policy [#289394]({{kib-pull}}289394).
+* Fix {{fleet}} blocking a package policy save when every enrolled agent is incompatible with the package version, including agents that report a pre-release version. {{fleet}} shows a warning instead of blocking the save [#289596]({{kib-pull}}289596).
+* Fix managed integrations appearing in the {{fleet}} **Agents** list when they use a version-specific policy [#289394]({{kib-pull}}289394).
 * Fix package policy space assignments becoming stale after you move an agent policy to another {{kib}} space [#288966]({{kib-pull}}288966).
 * Fix Elastic Defend metadata transforms accumulating as duplicates in {{es}} across stack upgrades [#288379]({{kib-pull}}288379) [#288902]({{kib-pull}}288902).
-* Fix {{fleet}} agent policy advanced YAML settings rejecting values that contain only comments [#288430]({{kib-pull}}288430).
+* Fix comment-only values in {{fleet}} agent policy advanced YAML settings leaving agents stuck on an outdated policy [#288430]({{kib-pull}}288430).
 % !!DEFERRED!! Not yet confirmed in build candidate 9.5.4-a5c2bed4 (backport merged after BC cutoff). Re-verify against the next BC before publishing.
-% * Fix deleted agentless policies leaving the agent record active by force-revoking the agent [#290181]({{kib-pull}}290181).
+% * Fix deleting a managed integration policy leaving the agent listed as active [#290181]({{kib-pull}}290181).
 
 **Data management**:
 * Fix classic streams leaving a stale {{es}} data stream mappings override after you remove all field overrides [#288788]({{kib-pull}}288788).
