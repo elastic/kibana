@@ -48,7 +48,7 @@ export const initializeManagedWorkflows = async ({
   // The recovery companion must be installed alongside the gate it recovers;
   // a failure to install either is logged and degrades reconciliation.
   const installedCreate = await install(CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID);
-  const installedRecover = await install(RECOVER_INVESTIGATION_PROPOSAL_WORKFLOW_ID);
+  const installedRecover = await install(RECOVER_INVESTIGATION_PROPOSAL_WORKFLOW_ID as any);
   const canReconcile = installedCreate && installedRecover;
 
   if (canReconcile) {
