@@ -55,6 +55,7 @@ overrides:
   # Generated from package.json#resolutions by `kbn bootstrap` — edit
   # resolutions, not this block (yarn keys are mapped: `**/a` -> `a`, `a/b` -> `a>b`).
   # START GENERATED OVERRIDES
+  '@actions/http-client>undici': '6.28.1'
   '@aws-sdk/client-bedrock-agent-runtime': '3.1089.0'
   '@aws-sdk/client-bedrock-runtime': '3.1089.0'
   '@aws-sdk/client-kendra': '3.1089.0'
@@ -70,6 +71,8 @@ overrides:
   '@babel/runtime': '7.29.7'
   '@babel/traverse': '7.29.8'
   '@babel/types': '7.29.8'
+  '@elastic/opamp-client-node>undici': '6.28.1'
+  '@elastic/transport@8>undici': '6.28.1'
   '@emotion/sheet': 'npm:@elastic/emotion-sheet@1.4.1'
   '@hapi/mimos>mime-db': '1.53.0'
   '@hello-pangea/dnd': '18.0.1'
