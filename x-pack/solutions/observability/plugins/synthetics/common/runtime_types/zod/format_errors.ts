@@ -11,6 +11,7 @@ import type { z } from '@kbn/zod';
 /**
  * Mirrors `@kbn/securitysolution-io-ts-utils` `formatErrors` for zod issues so
  * API `details` strings stay stable across the io-ts → zod cutover.
+ * https://github.com/elastic/kibana/blob/0cc78184957fcd12110dabae50353392ea937508/src/platform/packages/shared/kbn-securitysolution-io-ts-utils/src/format_errors/index.ts#L13-L36
  *
  * Prefer a codec's own message when present (custom refine / `error:` option);
  * otherwise render `Invalid value "…" supplied to "…"`. Zod v4 issues do not
