@@ -36,9 +36,7 @@ describe('getDispatchSummary', () => {
     });
 
     it('describes status change + repeat with an interval', () => {
-      expect(
-        summary({ throttleStrategy: 'per_status_interval', throttleInterval: '5m' })
-      ).toBe(
+      expect(summary({ throttleStrategy: 'per_status_interval', throttleInterval: '5m' })).toBe(
         'Sends a notification on status change and repeats every 5 minutes while the episode remains active.'
       );
     });
@@ -58,9 +56,9 @@ describe('getDispatchSummary', () => {
 
   describe('per_field (group) mode', () => {
     it('prompts to select a field when none are set', () => {
-      expect(summary({ groupingMode: 'per_field', groupBy: [], throttleStrategy: 'time_interval' })).toBe(
-        'Select a field in Group by to configure group notifications.'
-      );
+      expect(
+        summary({ groupingMode: 'per_field', groupBy: [], throttleStrategy: 'time_interval' })
+      ).toBe('Select a field in Group by to configure group notifications.');
     });
 
     it('describes the throttle strategy with fields and interval', () => {
@@ -89,7 +87,11 @@ describe('getDispatchSummary', () => {
 
     it('describes the every-evaluation strategy with fields', () => {
       expect(
-        summary({ groupingMode: 'per_field', groupBy: ['host.name'], throttleStrategy: 'every_time' })
+        summary({
+          groupingMode: 'per_field',
+          groupBy: ['host.name'],
+          throttleStrategy: 'every_time',
+        })
       ).toBe(
         'Sends a notification for each group on every rule evaluation. No limit on notification frequency.'
       );
@@ -117,9 +119,7 @@ describe('getDispatchSummary', () => {
   });
 
   it('formats different duration units', () => {
-    expect(
-      summary({ throttleStrategy: 'per_status_interval', throttleInterval: '30s' })
-    ).toBe(
+    expect(summary({ throttleStrategy: 'per_status_interval', throttleInterval: '30s' })).toBe(
       'Sends a notification on status change and repeats every 30 seconds while the episode remains active.'
     );
   });

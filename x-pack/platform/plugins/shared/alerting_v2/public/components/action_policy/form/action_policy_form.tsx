@@ -171,9 +171,7 @@ export const ActionPolicyForm = () => {
               >
                 <MatcherInput
                   value={field.value?.expression ?? ''}
-                  onChange={(expr) =>
-                    field.onChange({ ...field.value, expression: expr || null })
-                  }
+                  onChange={(expr) => field.onChange({ ...field.value, expression: expr || null })}
                   fullWidth
                   data-test-subj="matcherInput"
                   dataFieldNames={dataFieldNames}

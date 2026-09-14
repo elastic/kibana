@@ -22,8 +22,7 @@ interface DispatchSummaryInput {
 
 type DurationUnit = 's' | 'm' | 'h' | 'd';
 
-const isDurationUnit = (c: string): c is DurationUnit => 
-  ['s', 'm', 'h', 'd'].includes(c);
+const isDurationUnit = (c: string): c is DurationUnit => ['s', 'm', 'h', 'd'].includes(c);
 
 const formatInterval = (raw: string): string => {
   if (!raw) return '';
@@ -74,7 +73,8 @@ export const getDispatchSummary = ({
         return i18n.translate(
           'xpack.alertingV2.actionPolicy.form.dispatchSummary.episode.statusChange',
           {
-            defaultMessage: 'Sends one notification when an episode opens and one when it recovers.',
+            defaultMessage:
+              'Sends one notification when an episode opens and one when it recovers.',
           }
         );
       case 'per_status_interval':
@@ -150,11 +150,14 @@ export const getDispatchSummary = ({
             }
           );
         }
-        return i18n.translate('xpack.alertingV2.actionPolicy.form.dispatchSummary.digest.throttle', {
-          defaultMessage:
-            'Combines all matching episodes into one notification at most every {interval}.',
-          values: { interval },
-        });
+        return i18n.translate(
+          'xpack.alertingV2.actionPolicy.form.dispatchSummary.digest.throttle',
+          {
+            defaultMessage:
+              'Combines all matching episodes into one notification at most every {interval}.',
+            values: { interval },
+          }
+        );
       case 'every_time':
         return i18n.translate(
           'xpack.alertingV2.actionPolicy.form.dispatchSummary.digest.everyEvaluation',
