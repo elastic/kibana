@@ -427,11 +427,14 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
 
     const verdict = { id: 'a1', classification: 'false_positive', confidence_score: 0.97 };
     const withVerdicts = {
+      // eslint-disable-next-line @typescript-eslint/naming-convention -- mirrors the yaml step name `runAgent_step`
       steps: { runAgent_step: { output: { structured_output: { verdicts: [verdict] } } } },
     };
 
     // Matching alert id -> the verdict itself.
-    expect(engine.evalValueSync(verdictExpr, { ...withVerdicts, foreach: { item: { _id: 'a1' } } })).toEqual(verdict);
+    expect(
+      engine.evalValueSync(verdictExpr, { ...withVerdicts, foreach: { item: { _id: 'a1' } } })
+    ).toEqual(verdict);
     // Non-matching id -> undefined verdict, count 0.
     expect(
       engine.evalValueSync(countExpr, { ...withVerdicts, foreach: { item: { _id: 'other' } } })
@@ -440,6 +443,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     // undefined to [] so the count is 0 and every alert takes the no-verdict path.
     expect(
       engine.evalValueSync(countExpr, {
+        // eslint-disable-next-line @typescript-eslint/naming-convention -- mirrors the yaml step name `runAgent_step`
         steps: { runAgent_step: { output: {} } },
         foreach: { item: { _id: 'a1' } },
       })
@@ -585,7 +589,9 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     // alerts. auto_close_ids is branch-local; each batch closes only its own alerts.
     const containers = enclosingContainers(workflow.steps, 'push_auto_close_id');
     expect(containers.some((c) => c.name === 'apply_batch_verdicts')).toBe(true);
-    expect(containers.some((c) => c.name === 'classify_alert_batches' && c.type === 'parallel')).toBe(true);
+    expect(
+      containers.some((c) => c.name === 'classify_alert_batches' && c.type === 'parallel')
+    ).toBe(true);
   });
 
   it('auto-closes each batch qualifying alerts in one bulk call per batch, inside the branch', () => {
@@ -624,7 +630,9 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(closeStep.with.conflicts).toBe('proceed');
 
     const containers = enclosingContainers(workflow.steps, 'close_alerts_as_false_positive');
-    expect(containers.some((c) => c.name === 'classify_alert_batches' && c.type === 'parallel')).toBe(true);
+    expect(
+      containers.some((c) => c.name === 'classify_alert_batches' && c.type === 'parallel')
+    ).toBe(true);
   });
 
   // ------------------------------- structural escaping / truncation checks -------------------

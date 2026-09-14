@@ -41,3 +41,17 @@ no usage attributes.
 ## Latency benchmark
 
 See baseline-latency-sequential.txt (250 alerts x 5 measured reps + 1 warmup, sequential yaml).
+
+
+## Phase 3-4: TDD false-green check (Task 4.5)
+
+Mutation-verify: swapped `alert_analysis_workflow.yaml` for the pre-parallel commit
+(bb36920b99a0, the old sequential `foreach` yaml) while keeping the rewritten
+(parallel-structure) test file in place.
+
+- With OLD yaml + NEW tests: `node scripts/jest .../alert_analysis --runInBand` -> 9 FAILED, 22 passed
+  (exactly the 8 rewritten assertions from Task 3.2 + the new runtime-resolution test from Task 3.3).
+- Restored NEW (parallel) yaml, same tests: 31 PASSED, 31 total.
+
+Conclusion: the rewritten tests genuinely assert on the parallel structure; they are not
+vacuously true against either yaml.
