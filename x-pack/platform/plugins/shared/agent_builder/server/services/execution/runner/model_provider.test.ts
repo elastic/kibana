@@ -241,9 +241,9 @@ describe('createModelProvider', () => {
       );
     });
 
-    it('uses the recommended fast model endpoint when effortLevel is low', async () => {
+    it('uses the fast endpoint returned by getForFeature when effortLevel is low', async () => {
       const deps = setupDeps({
-        fastEndpoints: [{ connectorId: 'fast-connector', isRecommended: true }],
+        fastEndpoints: [{ connectorId: 'fast-connector' }],
       });
       setupChatAndClient(deps.inference);
 
@@ -252,20 +252,19 @@ describe('createModelProvider', () => {
 
       expect(deps.searchInferenceEndpoints.endpoints.getForFeature).toHaveBeenCalledWith(
         AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID,
-        deps.request
+        deps.request,
+        { onlyReturnConfigured: true }
       );
       expect(deps.inference.getChatModel).toHaveBeenCalledWith(
         expect.objectContaining({ connectorId: 'fast-connector' })
       );
     });
 
-    it('picks the first recommended endpoint when several are returned', async () => {
+    it('always uses endpoints[0] — trusting getForFeature priority ordering', async () => {
+      // getForFeature with onlyReturnConfigured returns endpoints already ordered
+      // (SO override → EIS recommended). Agent Builder just takes endpoints[0].
       const deps = setupDeps({
-        fastEndpoints: [
-          { connectorId: 'non-recommended', isRecommended: false },
-          { connectorId: 'first-recommended', isRecommended: true },
-          { connectorId: 'second-recommended', isRecommended: true },
-        ],
+        fastEndpoints: [{ connectorId: 'first-endpoint' }, { connectorId: 'second-endpoint' }],
       });
       setupChatAndClient(deps.inference);
 
@@ -273,24 +272,7 @@ describe('createModelProvider', () => {
       await provider.selectModel({ effortLevel: 'low' });
 
       expect(deps.inference.getChatModel).toHaveBeenCalledWith(
-        expect.objectContaining({ connectorId: 'first-recommended' })
-      );
-    });
-
-    it('falls back to the default connector when no fast endpoint is recommended', async () => {
-      const deps = setupDeps({
-        fastEndpoints: [
-          { connectorId: 'fast-connector', isRecommended: false },
-          { connectorId: 'other-connector' },
-        ],
-      });
-      setupChatAndClient(deps.inference);
-
-      const provider = createModelProvider(deps);
-      await provider.selectModel({ effortLevel: 'low' });
-
-      expect(deps.inference.getChatModel).toHaveBeenCalledWith(
-        expect.objectContaining({ connectorId: 'default-connector' })
+        expect.objectContaining({ connectorId: 'first-endpoint' })
       );
     });
 
