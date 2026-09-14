@@ -77,7 +77,9 @@ export class ObservabilityAlertingPage {
     this.requiredPrivilegesPrompt = this.page.testSubj.locator('alertingRequiredPrivilegesPrompt');
     this.episodesListPage = this.page.testSubj.locator('alertingV2EpisodesListPage');
     this.episodesKpisAlertsPanel = this.page.testSubj.locator('episodesKpisAlertsPanel');
-    this.episodesKpisAlertActionsPanel = this.page.testSubj.locator('episodesKpisAlertActionsPanel');
+    this.episodesKpisAlertActionsPanel = this.page.testSubj.locator(
+      'episodesKpisAlertActionsPanel'
+    );
     this.episodesHistogramPanel = this.page.testSubj.locator('episodesHistogramPanel');
     this.episodesItemCount = this.page.testSubj.locator('alertEpisodesItemCount');
     this.v1RulesTab = this.page.testSubj.locator('v1RulesTab');

@@ -6,11 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import {
-  ALERTING_V2_ALERTS_ALL_ROLE,
-  ALERTING_V2_ALERTS_READ_ROLE,
-  test,
-} from '../fixtures';
+import { ALERTING_V2_ALERTS_ALL_ROLE, ALERTING_V2_ALERTS_READ_ROLE, test } from '../fixtures';
 
 /*
  * Covers privilege gating on the Alerts (episodes) management page. The
@@ -33,10 +29,7 @@ test.describe(
   'Alerts management page - privilege-based access',
   { tag: '@local-stateful-classic' },
   () => {
-    test('alerting_v2_alerts all user sees the full page', async ({
-      browserAuth,
-      pageObjects,
-    }) => {
+    test('alerting_v2_alerts all user sees the full page', async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginWithCustomRole(ALERTING_V2_ALERTS_ALL_ROLE);
       const { alertEpisodesList, alertingNavigation } = pageObjects;
       await alertEpisodesList.goto();
