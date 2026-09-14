@@ -44,10 +44,11 @@ For information about building the documentation, see the README in [elastic/doc
 
 ### Elasticsearch & Kibana Compatibility
 
+The recommended configuration is to run Elasticsearch and Kibana using the same version number. If you encounter issues on mismatched versions, you will first be asked to upgrade before support or troubleshooting can begin.
+
 - __Major Versions:__ Must strictly match (with exceptions for `prevmajor.last`)
 - __Kibana Patch Ahead:__ Kibana can run on a newer patch version than Elasticsearch (e.g. Elasticsearch 9.4.0 with Kibana 9.4.2) to allow easier Kibana-only patching.
-- __Kibana Minor Behind:__ Kibana can run using an older minor version than Elasticsearch (e.g. Kibana 9.3 with Elasticsearch 9.4) to simplify rolling upgrades.
-- __Upgrade Guidance:__ We strongly recommend upgrading Kibana to the matching version. If you encounter issues on mismatched versions, you will first be asked to upgrade to a matching minor before support or troubleshooting can begin.
+- __Kibana Minor Behind:__ Kibana can run using an older minor version than Elasticsearch (e.g. Kibana 9.3.x with Elasticsearch 9.4.x) to simplify rolling upgrades.
 
 _Note: The version numbers below are only examples, meant to illustrate the relationships between different types of version numbers._
 
