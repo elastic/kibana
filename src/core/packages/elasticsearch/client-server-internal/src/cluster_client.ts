@@ -233,16 +233,19 @@ export class ClusterClient implements ICustomClusterClient {
     }
 
     // The effective credential is whatever ends up in `scopedHeaders`: for real requests the auth
-    // provider's post-authentication headers override the one that came in on the wire. If the
-    // credential is an internal UIAM credential, it might require client authentication.
+    // provider's post-authentication headers override the one that came in on the wire.
+    //
+    // A UIAM bearer token brings its own client authentication, so whatever rode in with it in
+    // `scopedHeaders` is forwarded verbatim - including nothing at all, which UIAM denies if the
+    // token required it. Kibana's shared secret is never substituted: the token may be bound to
+    // another client. Any other credential (notably a UIAM API key) is one Kibana can vouch for,
+    // so it may require client authentication of Kibana's own.
     let clientAuthentication: string | undefined | null;
     if (this.security?.uiam) {
       const credential = HTTPAuthorizationHeader.parseFromRequest({ headers: scopedHeaders });
-      const hasUiamInboundClientAuthentication =
-        credential?.scheme.toLowerCase() === 'bearer' &&
-        isUiamCredential(credential) &&
-        scopedHeaders[ES_CLIENT_AUTHENTICATION_HEADER] !== undefined;
-      if (credential && !hasUiamInboundClientAuthentication) {
+      const isUiamInboundToken =
+        credential?.scheme.toLowerCase() === 'bearer' && isUiamCredential(credential);
+      if (credential && !isUiamInboundToken) {
         clientAuthentication = this.security.uiam.getElasticsearchClientAuthentication(
           requestHeaders
             ? { credentialSource: 'inbound', credential, requestHeaders }
@@ -275,27 +278,28 @@ export class ClusterClient implements ICustomClusterClient {
       );
     }
 
-    // If the credential is an internal UIAM credential, it might require client authentication.
-    // Use `internal` regardless of the request shape: unlike `getScopedHeaders`, this never reads a
-    // credential off the wire. For a real request it takes the auth provider's post-authentication
-    // headers (Kibana already vouched for that credential), and for a fake one the credential was
-    // minted by Kibana itself, so neither needs an attestation to be trusted. The exception is a
-    // fake request explicitly marked as carrying a user-created (external) UIAM credential, which
-    // UIAM rejects when presented with client authentication.
+    // A UIAM bearer token brings its own client authentication, so forward whatever rode in with it
+    // verbatim and never substitute Kibana's shared secret: the token may be bound to another
+    // client. If it required client authentication and none arrived, UIAM denies the call, which is
+    // the correct outcome.
+    //
+    // Any other credential (notably a UIAM API key) is one Kibana vouches for itself, so it gets
+    // Kibana's own secret. `internal` applies regardless of the request shape: for a real request
+    // these are the auth provider's post-authentication headers, and for a fake one the credential
+    // was minted by Kibana, so neither needs an attestation to be trusted. The exception is a fake
+    // request explicitly marked as carrying a user-created (external) UIAM credential, which UIAM
+    // rejects when presented with client authentication.
     const isUiamInboundToken =
       authorizationHeader.scheme.toLowerCase() === 'bearer' &&
       isUiamCredential(authorizationHeader);
-    const inboundUiamClientAuthentication = isUiamInboundToken
-      ? authHeaders?.[ES_CLIENT_AUTHENTICATION_HEADER]
-      : undefined;
     const isExternalCredential =
       !isRealRequest(request) && isKibanaRequest(request) && isExternalUiamCredential(request);
-    const clientAuthentication =
-      inboundUiamClientAuthentication ??
-      this.security?.uiam?.getElasticsearchClientAuthentication({
-        credentialSource: isExternalCredential ? 'external' : 'internal',
-        credential: authorizationHeader,
-      });
+    const clientAuthentication = isUiamInboundToken
+      ? authHeaders?.[ES_CLIENT_AUTHENTICATION_HEADER]
+      : this.security?.uiam?.getElasticsearchClientAuthentication({
+          credentialSource: isExternalCredential ? 'external' : 'internal',
+          credential: authorizationHeader,
+        });
 
     return {
       ...getDefaultHeaders(this.kibanaVersion),
