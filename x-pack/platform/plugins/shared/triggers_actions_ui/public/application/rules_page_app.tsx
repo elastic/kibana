@@ -27,7 +27,7 @@ import type { TriggersAndActionsUiServices } from './rules_app';
 const RuleDetailsRouteWrapper = lazy(
   () => import('./sections/rule_details/components/rule_details_route_wrapper')
 );
-const RulesPage = lazy(() => import('./sections/rules_page/rules_page'));
+const RulesPage = lazy(() => import('./sections/rules_page/rules_page_container'));
 const RuleFormRoute = lazy(() => import('./sections/rule_form/rule_form_route'));
 
 export const renderRulesPageApp = (deps: TriggersAndActionsUiServices) => {

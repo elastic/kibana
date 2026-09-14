@@ -7,7 +7,10 @@
 
 import React, { createContext, useContext, useCallback, useMemo, useRef, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
-import type { AwsStaticKeyCredentials } from '@kbn/fleet-plugin/public';
+import type {
+  AwsStaticKeyCredentials,
+  CloudOnboardingDeploymentAuthMethod,
+} from '@kbn/fleet-plugin/public';
 
 import type { AwsServiceMatrixEntry, DataFormat, DeploymentMethod } from './aws_service_matrix';
 import { useAwsServiceMatrix } from './use_aws_service_matrix';
@@ -18,6 +21,7 @@ export interface AuthenticateAndDeployStepState {
   connectorId?: string;
   connectorName?: string;
   staticKeys?: AwsStaticKeyCredentials;
+  authMethod?: CloudOnboardingDeploymentAuthMethod;
 }
 
 export type ServiceChipState = 'instantiating' | 'detecting' | 'receiving' | 'error' | 'timeout';
@@ -28,13 +32,17 @@ export interface DetectAndReviewStepState {
   policyIdsByInstance: Record<string, string>;
   failedInstances: string[];
   deployErrors: Record<string, string>;
+  /** SO id of the cloud-onboarding-deployment record created at Deploy time. Used to update the record after allSettled and on retry. */
+  onboardingDeploymentId?: string;
+  /** ECF stacks last written to the SO. Used to skip redundant PUT calls on Back→Next. */
+  ecfStacks?: Array<{ family: string; stackName: string; templateVersion: string }>;
 }
 
 // Only non-sensitive fields are persisted — password values are never written to session storage
 interface PersistedAuthenticateAndDeployStep {
   connectorId?: string;
   connectorName?: string;
-  authType?: 'identity_federation' | 'static_keys';
+  authMethod?: CloudOnboardingDeploymentAuthMethod;
   accessKeyId?: string;
   deploymentMethod?: DeploymentMethod;
 }
@@ -55,6 +63,8 @@ interface PersistedDetectAndReviewStep {
   policyIdsByInstance: Record<string, string>;
   failedInstances: string[];
   deployErrors: Record<string, string>;
+  onboardingDeploymentId?: string;
+  ecfStacks?: Array<{ family: string; stackName: string; templateVersion: string }>;
 }
 
 const DEFAULT_SELECTED_IDS: string[] = [];
@@ -97,7 +107,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
 
   // secret_access_key lives in memory only; access_key_id is restored from session storage.
   const [staticKeys, setStaticKeysState] = useState<AwsStaticKeyCredentials | undefined>(() =>
-    persistedAuthenticateAndDeployStep?.authType === 'static_keys' &&
+    persistedAuthenticateAndDeployStep?.authMethod === 'static_keys' &&
     persistedAuthenticateAndDeployStep.accessKeyId
       ? { access_key_id: persistedAuthenticateAndDeployStep.accessKeyId, secret_access_key: '' }
       : undefined
@@ -115,7 +125,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         ...persistedAuthStepRef.current,
         connectorId: id,
         connectorName: id ? name : undefined,
-        authType: id ? 'identity_federation' : undefined,
+        authMethod: id ? 'identity_federation' : undefined,
         accessKeyId: undefined,
       });
     },
@@ -129,7 +139,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         ...persistedAuthStepRef.current,
         connectorId: undefined,
         connectorName: undefined,
-        authType: keys ? 'static_keys' : undefined,
+        authMethod: keys ? 'static_keys' : undefined,
         accessKeyId: keys?.access_key_id,
       });
     },
@@ -188,6 +198,8 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
           failedInstances: rest.failedInstances ?? prev?.failedInstances ?? [],
           deployErrors:
             rest.deployErrors !== undefined ? rest.deployErrors : prev?.deployErrors ?? {},
+          onboardingDeploymentId: rest.onboardingDeploymentId ?? prev?.onboardingDeploymentId,
+          ecfStacks: rest.ecfStacks ?? prev?.ecfStacks,
         });
       }
     },
@@ -208,6 +220,8 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         deployErrors: Object.fromEntries(
           Object.entries(prev?.deployErrors ?? {}).filter(([id]) => id !== instanceId)
         ),
+        onboardingDeploymentId: prev?.onboardingDeploymentId,
+        ecfStacks: prev?.ecfStacks,
       });
     },
     [setPersistedDetectAndReviewStep]
@@ -267,6 +281,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     connectorId: persistedAuthenticateAndDeployStep?.connectorId,
     connectorName: persistedAuthenticateAndDeployStep?.connectorName,
     staticKeys,
+    authMethod: persistedAuthenticateAndDeployStep?.authMethod,
   };
 
   const detectAndReviewStep: DetectAndReviewStepState = {

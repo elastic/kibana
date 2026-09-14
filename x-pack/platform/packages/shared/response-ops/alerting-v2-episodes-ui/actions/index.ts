@@ -15,5 +15,5 @@ export { createUnsnoozeAction } from './unsnooze';
 export { createResolveAction } from './resolve';
 export { createUnresolveAction } from './unresolve';
 export { createEditTagsAction } from './edit_tags';
-export { createEditAssigneeAction } from './edit_assignee';
+export { createEditAssigneeAction, EDIT_EPISODE_ASSIGNEE_ACTION_ID } from './edit_assignee';
 export { createOpenInDiscoverAction, OPEN_IN_DISCOVER_EPISODE_ACTION_ID } from './open_in_discover';
