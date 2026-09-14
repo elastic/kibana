@@ -6,19 +6,17 @@
  */
 
 import type { Observable, Subscription } from 'rxjs';
-import { BehaviorSubject, finalize, scan } from 'rxjs';
-import type { BrowserChatEvent } from '@kbn/agent-builder-browser/events';
-import type { ActiveStreamState } from './active_stream_state';
-import { activeStreamReducer, initialActiveStreamState } from './active_stream_state';
+import { BehaviorSubject, defer, finalize } from 'rxjs';
+import type { ActiveExecutionDraft } from './active_execution_reducer';
+import { activeExecutionReducer } from './active_execution_reducer';
+import type { EventsService } from './events_service';
 
-export interface ChatEventSource {
-  getChatEvents$: (conversationId: string) => Observable<BrowserChatEvent>;
-}
+export type ChatEventSource = Pick<EventsService, 'getChatEvents$' | 'getStreamEnded$'>;
 
 interface ConversationStream {
-  state$: BehaviorSubject<ActiveStreamState>;
+  conversationId: string;
+  state$: BehaviorSubject<ActiveExecutionDraft | null>;
   sub: Subscription;
-  ended: boolean;
 }
 
 export class ConversationStreamService {
@@ -27,25 +25,37 @@ export class ConversationStreamService {
   constructor(private readonly source: ChatEventSource) {}
 
   private ensure(conversationId: string): ConversationStream {
-    const existing = this.streams.get(conversationId);
-    if (existing) {
-      existing.ended = false;
-      return existing;
-    }
-    const state$ = new BehaviorSubject<ActiveStreamState>(initialActiveStreamState);
+    return this.streams.get(conversationId) ?? this.createStream(conversationId);
+  }
+
+  private createStream(conversationId: string): ConversationStream {
+    const state$ = new BehaviorSubject<ActiveExecutionDraft | null>(null);
     const sub = this.source
       .getChatEvents$(conversationId)
-      .pipe(scan(activeStreamReducer, initialActiveStreamState))
-      .subscribe(state$);
-    const stream: ConversationStream = { state$, sub, ended: false };
+      .subscribe((event) => state$.next(activeExecutionReducer(state$.getValue(), event)));
+    const stream: ConversationStream = { conversationId, state$, sub };
     this.streams.set(conversationId, stream);
+
+    sub.add(
+      this.source.getStreamEnded$(conversationId).subscribe(() => this.onStreamEnded(stream))
+    );
     return stream;
+  }
+
+  private onStreamEnded({ conversationId, state$ }: ConversationStream) {
+    if (state$.getValue()) {
+      state$.next(null);
+    }
+    this.maybeTeardown(conversationId);
   }
 
   private maybeTeardown(conversationId: string) {
     const stream = this.streams.get(conversationId);
-    const isIdle = !stream?.state$.getValue().activeExecution;
-    if (!stream || stream.state$.observed || (!stream.ended && !isIdle)) {
+    if (!stream) {
+      return;
+    }
+    const canReclaim = !stream.state$.observed && !stream.state$.getValue();
+    if (!canReclaim) {
       return;
     }
     stream.sub.unsubscribe();
@@ -54,24 +64,20 @@ export class ConversationStreamService {
 
   /**
    * Hot state stream for one conversation. Consumers subscribe (e.g. via `useObservable`)
-   * and receive the folded `ActiveStreamState` as the agent runs.
+   * and receive the folded `ActiveExecutionDraft` as the agent runs, `null` when idle.
    */
-  getActiveStream$(conversationId: string): Observable<ActiveStreamState> {
-    const { state$ } = this.ensure(conversationId);
-    return state$.pipe(finalize(() => this.maybeTeardown(conversationId)));
+  getActiveStream$(conversationId: string): Observable<ActiveExecutionDraft | null> {
+    return defer(() => this.ensure(conversationId).state$).pipe(
+      finalize(() => this.maybeTeardown(conversationId))
+    );
   }
 
   /** Non-reactive snapshot: is this conversation mid-run right now. */
   isStreamActive(conversationId: string): boolean {
-    return !!this.streams.get(conversationId)?.state$.getValue().activeExecution;
+    return !!this.streams.get(conversationId)?.state$.getValue();
   }
 
-  notifyStreamEnded(conversationId: string) {
-    const stream = this.streams.get(conversationId);
-    if (!stream) {
-      return;
-    }
-    stream.ended = true;
+  releaseStream(conversationId: string) {
     this.maybeTeardown(conversationId);
   }
 }

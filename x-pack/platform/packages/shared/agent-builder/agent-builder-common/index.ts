@@ -236,6 +236,7 @@ export {
   isTodosStep,
   findTodosStep,
   type TodosStep,
+  type TodoItem,
   carriedOverTodos,
   ChatEventType,
   ConversationRoundStatus,
