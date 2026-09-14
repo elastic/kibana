@@ -50,6 +50,7 @@ dependsOn:
   - '@kbn/safer-lodash-set'
   - '@kbn/core-di-internal'
   - '@kbn/i18n'
+  - '@kbn/ui-callout'
   - '@kbn/zod-helpers'
   - '@kbn/core-saved-objects-api-server-mocks'
   - '@kbn/apm-utils'
