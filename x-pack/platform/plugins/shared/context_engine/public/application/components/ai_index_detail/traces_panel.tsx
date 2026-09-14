@@ -9,6 +9,8 @@ import {
   EuiButton,
   EuiButtonGroup,
   EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
   EuiHorizontalRule,
   EuiPanel,
@@ -69,15 +71,36 @@ const AutoImproveControl = ({ aiIndex }: { aiIndex: GetAiIndexResponse }) => {
 
   return (
     <>
-      <EuiSwitch
-        checked={isAnalysisEnabled}
-        disabled={updateConfig.isLoading}
-        onChange={(event) => updateConfig.mutate({ enabled: event.target.checked })}
-        label={i18n.translate('xpack.contextEngine.aiIndexDetail.traces.autoImproveLabel', {
-          defaultMessage: 'Suggest improvements automatically',
-        })}
-        data-test-subj="contextTracesAutoImproveSwitch"
-      />
+      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+        <EuiFlexItem>
+          <EuiSwitch
+            checked={isAnalysisEnabled}
+            disabled={updateConfig.isLoading}
+            onChange={(event) => updateConfig.mutate({ enabled: event.target.checked })}
+            label={i18n.translate('xpack.contextEngine.aiIndexDetail.traces.autoImproveLabel', {
+              defaultMessage: 'Suggest improvements automatically',
+            })}
+            data-test-subj="contextTracesAutoImproveSwitch"
+          />
+        </EuiFlexItem>
+
+        {/* Only while enabled: turning it off uninstalls the workflow, so there is nothing to run. */}
+        {isAnalysisEnabled && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              iconType="play"
+              onClick={() => runAnalysis.mutate()}
+              isLoading={runAnalysis.isLoading}
+              data-test-subj="contextImprovementsRunNowButton"
+            >
+              {i18n.translate('xpack.contextEngine.aiIndexDetail.traces.runNowButton', {
+                defaultMessage: 'Run now',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
 
       <EuiSpacer size="s" />
       <EuiText size="xs" color="subdued">
@@ -88,24 +111,6 @@ const AutoImproveControl = ({ aiIndex }: { aiIndex: GetAiIndexResponse }) => {
           })}
         </p>
       </EuiText>
-
-      {isAnalysisEnabled && (
-        <>
-          <EuiSpacer size="m" />
-          {/* Only while enabled: turning it off uninstalls the workflow, so there is nothing to run. */}
-          <EuiButton
-            size="s"
-            iconType="play"
-            onClick={() => runAnalysis.mutate()}
-            isLoading={runAnalysis.isLoading}
-            data-test-subj="contextImprovementsRunNowButton"
-          >
-            {i18n.translate('xpack.contextEngine.aiIndexDetail.traces.runNowButton', {
-              defaultMessage: 'Run now',
-            })}
-          </EuiButton>
-        </>
-      )}
     </>
   );
 };
