@@ -128,7 +128,7 @@ describe('improvements routes', () => {
       write: jest.fn(),
       list: jest.fn().mockResolvedValue({ items: [], total: 0 }),
       get: jest.fn().mockResolvedValue(improvement()),
-      historyFor: jest.fn(),
+      historySummaryFor: jest.fn(),
       transition: jest.fn().mockImplementation(async (_id, to) => improvement({ status: to })),
       deleteByAiIndex: jest.fn(),
     };
@@ -381,9 +381,12 @@ describe('improvements routes', () => {
         params: { aiIndexId: AI_INDEX_ID },
       });
 
+      // No space is passed: the schedule is pinned where it was installed, so a run started from
+      // any space addresses that one instance rather than looking for one of its own.
       expect(scheduleService.run).toHaveBeenCalledWith(
-        expect.objectContaining({ aiIndexId: AI_INDEX_ID, spaceId: 'default' })
+        expect.objectContaining({ aiIndexId: AI_INDEX_ID })
       );
+      expect(scheduleService.run.mock.calls[0][0]).not.toHaveProperty('spaceId');
       expect(response.ok).toHaveBeenCalledWith({ body: { execution_id: 'execution-1' } });
     });
 
