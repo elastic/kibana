@@ -21,14 +21,20 @@ const FACET_AGG_ID_CHUNK_SIZE = 1024;
 export interface TermsAggBuckets {
   buckets: Array<{
     key: string | number | boolean;
+    key_as_string?: string;
     doc_count: number;
   }>;
 }
 
+/**
+ * Elasticsearch returns numeric keys (`1`/`0`) for terms aggregations over boolean
+ * fields and puts the human readable value into `key_as_string`, so prefer it to keep
+ * facet keys consistent with the filter values (`"true"`/`"false"`).
+ */
 const bucketsToFacetMap = (buckets: TermsAggBuckets['buckets']): Record<string, number> => {
   const facetCounts: Record<string, number> = {};
   for (const bucket of buckets) {
-    const filterValue = String(bucket.key);
+    const filterValue = bucket.key_as_string ?? String(bucket.key);
     facetCounts[filterValue] = bucket.doc_count;
   }
   return facetCounts;

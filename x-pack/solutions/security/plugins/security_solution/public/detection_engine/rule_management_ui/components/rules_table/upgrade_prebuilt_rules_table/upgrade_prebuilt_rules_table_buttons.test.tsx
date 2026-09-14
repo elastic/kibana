@@ -43,8 +43,8 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
     });
   });
 
-  describe('Selected scope force-upgrade-to-Elastic-version', () => {
-    it('Test 1: happy path end to end — sends every selected rule to upgradeRulesToTarget after confirming the danger modal', async () => {
+  describe('Selected scope (upgrade to TARGET)', () => {
+    it('sends every selected rule to upgradeRulesToTarget after confirming the danger modal', async () => {
       const user = userEvent.setup();
       const upgradeRulesToTarget = jest.fn();
       const getSelectedRulesCustomizationCounts = jest
@@ -68,7 +68,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       expect(upgradeRulesToTarget).toHaveBeenCalledWith(['rule-customized', 'rule-plain']);
     });
 
-    it('Test 2 (CONF-07 uniformity): includes the non-customized rule id alongside the customized one, no filtering to the customized subset', async () => {
+    it('includes the non-customized rule id alongside the customized one, no filtering to the customized subset', async () => {
       const user = userEvent.setup();
       const upgradeRulesToTarget = jest.fn();
       const selectedRules = [
@@ -95,7 +95,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       });
     });
 
-    it('Test 3 (CONF-04 counts): the modal body renders both counts and no rule name', async () => {
+    it('the modal body renders both counts and no rule name', async () => {
       const user = userEvent.setup();
       const selectedRules = [
         createRuleUpgradeStateMock({ ruleId: 'rule-customized', isCustomized: true }),
@@ -119,7 +119,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       expect(modal).not.toHaveTextContent('rule-plain');
     });
 
-    it('Test 4: does not display the modal before the dropdown action is confirmed', () => {
+    it('does not display the modal before the dropdown action is confirmed', () => {
       const selectedRules = [createRuleUpgradeStateMock({ ruleId: 'rule-plain' })];
 
       mockContext({
@@ -135,7 +135,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('CONF-05: a zero-customized target set upgrades immediately with no modal', async () => {
+    it('a zero-customized target set upgrades immediately with no modal', async () => {
       const user = userEvent.setup();
       const upgradeRulesToTarget = jest.fn();
       const selectedRules = [
@@ -163,7 +163,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('CONF-04 cancel: cancelling the modal removes it and leaves upgradeRulesToTarget uncalled', async () => {
+    it('cancelling the confirmation modal does not upgrade rules', async () => {
       const user = userEvent.setup();
       const upgradeRulesToTarget = jest.fn();
       const selectedRules = [
@@ -191,7 +191,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       expect(upgradeRulesToTarget).not.toHaveBeenCalled();
     });
 
-    it('CONF-03: the secondary segment stays enabled when the primary is disabled by non-solvable conflicts, and still reaches upgradeRulesToTarget', async () => {
+    it('the secondary segment stays enabled when the primary is disabled by non-solvable conflicts, and still reaches upgradeRulesToTarget', async () => {
       const user = userEvent.setup();
       const upgradeRulesToTarget = jest.fn();
       const selectedRules = [
@@ -227,7 +227,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       });
     });
 
-    it('CONF-01: clicking the primary segment calls upgradeRules with the selected ids and never calls upgradeRulesToTarget', async () => {
+    it('clicking the primary segment calls upgradeRules with the selected ids and never calls upgradeRulesToTarget', async () => {
       const user = userEvent.setup();
       const upgradeRules = jest.fn();
       const upgradeRulesToTarget = jest.fn();
@@ -328,8 +328,8 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
     });
   });
 
-  describe('All scope force-upgrade-to-Elastic-version', () => {
-    it('CONF-02 happy path: confirming the All modal upgrades the whole filtered set with no arguments', async () => {
+  describe('All scope (upgrade to TARGET)', () => {
+    it('confirming the All modal upgrades the whole filtered set with no arguments', async () => {
       const user = userEvent.setup();
       const upgradeAllRulesToTarget = jest.fn();
       const upgradeRulesToTarget = jest.fn();
@@ -355,7 +355,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       expect(upgradeRulesToTarget).not.toHaveBeenCalled();
     });
 
-    it('CONF-05 for the All scope: a zero-customized target set upgrades immediately with no modal', async () => {
+    it('a zero-customized target set upgrades immediately with no modal', async () => {
       const user = userEvent.setup();
       const upgradeAllRulesToTarget = jest.fn();
 
@@ -376,7 +376,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('CONF-04 cancel for the All scope: cancelling leaves upgradeAllRulesToTarget uncalled and removes the modal', async () => {
+    it('cancelling the confirmation modal does not upgrade rules', async () => {
       const user = userEvent.setup();
       const upgradeAllRulesToTarget = jest.fn();
 
@@ -398,7 +398,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       expect(upgradeAllRulesToTarget).not.toHaveBeenCalled();
     });
 
-    it('CONF-02 primary unchanged: clicking the primary All segment calls upgradeAllRules and never upgradeAllRulesToTarget', async () => {
+    it('clicking the primary All segment calls upgradeAllRules and never upgradeAllRulesToTarget', async () => {
       const user = userEvent.setup();
       const upgradeAllRules = jest.fn();
       const upgradeAllRulesToTarget = jest.fn();
@@ -444,7 +444,61 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
     });
   });
 
-  describe('confirmation-gate independence (CONF-06)', () => {
+  describe('prebuilt rules customization disabled', () => {
+    beforeEach(() => {
+      mockUsePrebuiltRulesCustomizationStatus.mockReturnValue({
+        isRulesCustomizationEnabled: false,
+      });
+    });
+
+    it('renders plain buttons without the "Update to Elastic version" secondary segment', () => {
+      mockContext();
+      renderButtons([createRuleUpgradeStateMock({ ruleId: 'rule-1' })]);
+
+      expect(screen.getByTestId('upgradeSelectedRulesButton')).toBeEnabled();
+      expect(screen.getByTestId('upgradeAllRulesButton')).toBeEnabled();
+      expect(screen.queryByTestId('upgradeSelectedRulesButton-secondary')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('upgradeAllRulesButton-secondary')).not.toBeInTheDocument();
+    });
+
+    it('primary buttons still call upgradeRules and upgradeAllRules', async () => {
+      const user = userEvent.setup();
+      const upgradeRules = jest.fn();
+      const upgradeAllRules = jest.fn();
+
+      mockContext({ upgradeRules, upgradeAllRules });
+      renderButtons([createRuleUpgradeStateMock({ ruleId: 'rule-1' })]);
+
+      await user.click(screen.getByTestId('upgradeSelectedRulesButton'));
+      await user.click(screen.getByTestId('upgradeAllRulesButton'));
+
+      expect(upgradeRules).toHaveBeenCalledWith(['rule-1']);
+      expect(upgradeAllRules).toHaveBeenCalledTimes(1);
+    });
+
+    it('shows the no-permissions tooltip on the plain buttons', async () => {
+      mockUseUserPrivileges.mockReturnValue({
+        ...initialUserPrivilegesState(),
+        rulesPrivileges: {
+          ...initialUserPrivilegesState().rulesPrivileges,
+          rules: { read: true, edit: false },
+        },
+      });
+      mockContext();
+      renderButtons([createRuleUpgradeStateMock({ ruleId: 'rule-1' })]);
+
+      expect(screen.getByTestId('upgradeSelectedRulesButton')).toBeDisabled();
+      expect(screen.getByTestId('upgradeAllRulesButton')).toBeDisabled();
+
+      fireEvent.mouseOver(screen.getByTestId('upgradeAllRulesButton'));
+
+      expect(
+        await screen.findByText("You don't have permissions to update rules")
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe('confirmation-gate independence', () => {
     it('confirming the All modal while the Selected modal is open only calls upgradeAllRulesToTarget, and the Selected modal is unaffected', async () => {
       const user = userEvent.setup();
       const upgradeAllRulesToTarget = jest.fn();
@@ -555,7 +609,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       });
     });
 
-    it('order independence: running the All flow before the Selected flow produces the same per-scope outcomes as the forward order', async () => {
+    it('running the All flow before the Selected flow produces the same per-scope outcomes as the forward order', async () => {
       const user = userEvent.setup();
       const upgradeAllRulesToTarget = jest.fn();
       const upgradeRulesToTarget = jest.fn();
@@ -592,7 +646,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       expect(upgradeAllRulesToTarget).toHaveBeenCalledTimes(1);
     });
 
-    it('CONF-07 uniformity, both scopes: the Selected call receives every selected id and the All call receives no arguments at all', async () => {
+    it('the Selected call receives every selected id and the All call receives no arguments at all', async () => {
       const user = userEvent.setup();
       const upgradeAllRulesToTarget = jest.fn();
       const upgradeRulesToTarget = jest.fn();
@@ -630,7 +684,7 @@ describe('UpgradePrebuiltRulesTableButtons', () => {
       });
     });
 
-    it('zero-customized independence: the Selected flow shows no modal while the All flow still shows one in the same render', async () => {
+    it('skips the Selected confirmation modal when no selected rules are customized while the All flow still shows its confirmation modal for customized rules', async () => {
       const user = userEvent.setup();
       const upgradeAllRulesToTarget = jest.fn();
       const upgradeRulesToTarget = jest.fn();

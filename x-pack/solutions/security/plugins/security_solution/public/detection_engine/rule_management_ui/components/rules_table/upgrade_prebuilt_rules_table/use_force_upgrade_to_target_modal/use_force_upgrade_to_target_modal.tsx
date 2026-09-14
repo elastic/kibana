@@ -24,21 +24,22 @@ interface UseForceUpgradeToTargetModalArgs {
 /**
  * Independent per-invocation confirmation gate for force-upgrading a rule set to the
  * Elastic (TARGET) version. Skips the modal entirely when the target set contains no
- * customized rules (CONF-05); otherwise shows a danger-styled confirmation naming both
- * counts and resolves only once the user confirms or cancels (CONF-04/CONF-07).
+ * customized rules; otherwise shows a danger-styled confirmation naming both counts and
+ * resolves only once the user confirms or cancels.
  *
- * Holds no module-level or shared state — instantiate once per invocation scope so
- * confirming/cancelling one instance can never resolve or dismiss another (CONF-06).
+ * Holds no module-level or shared state, so instantiate once per invocation scope and
+ * confirming/cancelling one instance can never resolve or dismiss another.
  */
 export function useForceUpgradeToTargetModal({
   dataTestSubj,
 }: UseForceUpgradeToTargetModalArgs): UseForceUpgradeToTargetModalResult {
   const [isVisible, { on: showModal, off: hideModal }] = useBoolean(false);
   const [selectedCounts, setSelectedCounts] = useState<RuleUpgradeCustomizationCounts | null>(null);
-  const [initConfirmation, confirm, cancel] = useAsyncConfirmation({
+  const [initConfirmation, confirm, cancel] = useAsyncConfirmation<boolean>({
     onInit: showModal,
     onFinish: hideModal,
   });
+  const handleConfirm = useCallback(() => confirm(true), [confirm]);
 
   const confirmForceUpgradeToTarget = useCallback(
     async (counts: RuleUpgradeCustomizationCounts) => {
@@ -59,7 +60,7 @@ export function useForceUpgradeToTargetModal({
         total={selectedCounts.total}
         customizedCount={selectedCounts.customizedCount}
         dataTestSubj={dataTestSubj}
-        onConfirm={confirm}
+        onConfirm={handleConfirm}
         onCancel={cancel}
       />
     ),

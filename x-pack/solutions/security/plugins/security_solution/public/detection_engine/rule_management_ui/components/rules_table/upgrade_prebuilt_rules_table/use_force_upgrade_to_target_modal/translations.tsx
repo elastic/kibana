@@ -37,9 +37,10 @@ export const ForceUpgradeToTargetModalBody = ({
 }: RuleUpgradeCustomizationCounts) => (
   <FormattedMessage
     id="xpack.securitySolution.detectionEngine.forceUpgradeToTargetModal.body"
-    defaultMessage="{total} {total, plural, one {rule} other {rules}} will be updated to the exact Elastic version. {customizedCountBold} of {totalBold} {total, plural, one {is a rule} other {are rules}} you've customized — updating will permanently discard those customizations."
+    defaultMessage="{total} {total, plural, one {rule} other {rules}} will be updated to the exact Elastic version. {customizedCountBold} of {totalBold} {customizedCount, plural, one {is a rule} other {are rules}} you've customized — updating will permanently discard those customizations."
     values={{
       total,
+      customizedCount,
       customizedCountBold: <strong>{customizedCount}</strong>,
       totalBold: <strong>{total}</strong>,
     }}

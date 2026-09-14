@@ -6,13 +6,17 @@
  */
 
 import {
+  EuiButton,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiSplitButton,
+  EuiToolTip,
 } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
+import type { ReactElement, ReactNode } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { useBoolean } from '@kbn/react-hooks';
 import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
@@ -149,86 +153,185 @@ export const UpgradePrebuiltRulesTableButtons = ({
     [onUpdateAllRulesToTarget]
   );
 
+  const selectedRulesSecondaryAction = useMemo<BulkUpgradeSecondaryAction | undefined>(
+    () =>
+      isRulesCustomizationEnabled
+        ? {
+            isDisabled: !canEditRules || isRequestInProgress,
+            tooltip: secondaryActionsButtonTooltip,
+            ariaLabel: i18n.UPDATE_SELECTED_RULES_MORE_ACTIONS_ARIA_LABEL,
+            dataTestSubj: 'upgradeSelectedRulesButton-secondary',
+            isPopoverOpen: isSelectedPopoverOpen,
+            togglePopover: toggleSelectedPopover,
+            closePopover: closeSelectedPopover,
+            menuItems: selectedRulesToTargetMenuItems,
+          }
+        : undefined,
+    [
+      canEditRules,
+      closeSelectedPopover,
+      isRequestInProgress,
+      isRulesCustomizationEnabled,
+      isSelectedPopoverOpen,
+      secondaryActionsButtonTooltip,
+      selectedRulesToTargetMenuItems,
+      toggleSelectedPopover,
+    ]
+  );
+
+  const allRulesSecondaryAction = useMemo<BulkUpgradeSecondaryAction | undefined>(
+    () =>
+      isRulesCustomizationEnabled
+        ? {
+            isDisabled: !canEditRules || !hasRulesToUpgrade || isRequestInProgress,
+            tooltip: secondaryActionsButtonTooltip,
+            ariaLabel: i18n.UPDATE_ALL_RULES_MORE_ACTIONS_ARIA_LABEL,
+            dataTestSubj: 'upgradeAllRulesButton-secondary',
+            isPopoverOpen: isAllPopoverOpen,
+            togglePopover: toggleAllPopover,
+            closePopover: closeAllPopover,
+            menuItems: allRulesToTargetMenuItems,
+          }
+        : undefined,
+    [
+      allRulesToTargetMenuItems,
+      canEditRules,
+      closeAllPopover,
+      hasRulesToUpgrade,
+      isAllPopoverOpen,
+      isRequestInProgress,
+      isRulesCustomizationEnabled,
+      secondaryActionsButtonTooltip,
+      toggleAllPopover,
+    ]
+  );
+
   return (
     <>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
         {shouldDisplayUpgradeSelectedRulesButton ? (
           <EuiFlexItem grow={false}>
-            <EuiSplitButton color="primary" size="m">
-              <EuiSplitButton.ActionPrimary
-                onClick={upgradeSelectedRules}
-                isDisabled={!canEditRules || isRequestInProgress || doAllSelectedRulesHaveConflicts}
-                tooltipProps={
-                  selectedRulesButtonTooltip ? { content: selectedRulesButtonTooltip } : undefined
-                }
-                data-test-subj="upgradeSelectedRulesButton"
-              >
-                <>
-                  {i18n.UPDATE_SELECTED_RULES(numberOfSelectedRules)}
-                  {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : undefined}
-                </>
-              </EuiSplitButton.ActionPrimary>
-              <EuiSplitButton.ActionSecondary
-                iconType="chevronSingleDown"
-                isDisabled={!canEditRules || isRequestInProgress}
-                tooltipProps={
-                  secondaryActionsButtonTooltip
-                    ? { content: secondaryActionsButtonTooltip }
-                    : undefined
-                }
-                aria-label={i18n.UPDATE_SELECTED_RULES_MORE_ACTIONS_ARIA_LABEL}
-                data-test-subj="upgradeSelectedRulesButton-secondary"
-                onClick={toggleSelectedPopover}
-                popoverProps={{
-                  isOpen: isSelectedPopoverOpen,
-                  closePopover: closeSelectedPopover,
-                  panelPaddingSize: 's',
-                  anchorPosition: 'downRight',
-                  children: <EuiContextMenuPanel items={selectedRulesToTargetMenuItems} />,
-                }}
-              />
-            </EuiSplitButton>
+            <BulkUpgradeButton
+              onClick={upgradeSelectedRules}
+              isDisabled={!canEditRules || isRequestInProgress || doAllSelectedRulesHaveConflicts}
+              tooltip={selectedRulesButtonTooltip}
+              dataTestSubj="upgradeSelectedRulesButton"
+              isLoading={isRuleUpgrading}
+              secondaryAction={selectedRulesSecondaryAction}
+            >
+              {i18n.UPDATE_SELECTED_RULES(numberOfSelectedRules)}
+            </BulkUpgradeButton>
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem grow={false}>
-          <EuiSplitButton color="primary" fill size="m">
-            <EuiSplitButton.ActionPrimary
-              onClick={upgradeAllRules}
-              iconType="plusCircle"
-              isDisabled={!canEditRules || !hasRulesToUpgrade || isRequestInProgress}
-              tooltipProps={allRulesButtonTooltip ? { content: allRulesButtonTooltip } : undefined}
-              data-test-subj="upgradeAllRulesButton"
-            >
-              <>
-                {i18n.UPDATE_ALL}
-                {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : undefined}
-              </>
-            </EuiSplitButton.ActionPrimary>
-            <EuiSplitButton.ActionSecondary
-              iconType="chevronSingleDown"
-              isDisabled={!canEditRules || !hasRulesToUpgrade || isRequestInProgress}
-              tooltipProps={
-                secondaryActionsButtonTooltip
-                  ? { content: secondaryActionsButtonTooltip }
-                  : undefined
-              }
-              aria-label={i18n.UPDATE_ALL_RULES_MORE_ACTIONS_ARIA_LABEL}
-              data-test-subj="upgradeAllRulesButton-secondary"
-              onClick={toggleAllPopover}
-              popoverProps={{
-                isOpen: isAllPopoverOpen,
-                closePopover: closeAllPopover,
-                panelPaddingSize: 's',
-                anchorPosition: 'downRight',
-                children: <EuiContextMenuPanel items={allRulesToTargetMenuItems} />,
-              }}
-            />
-          </EuiSplitButton>
+          <BulkUpgradeButton
+            fill
+            iconType="plusCircle"
+            onClick={upgradeAllRules}
+            isDisabled={!canEditRules || !hasRulesToUpgrade || isRequestInProgress}
+            tooltip={allRulesButtonTooltip}
+            dataTestSubj="upgradeAllRulesButton"
+            isLoading={isRuleUpgrading}
+            secondaryAction={allRulesSecondaryAction}
+          >
+            {i18n.UPDATE_ALL}
+          </BulkUpgradeButton>
         </EuiFlexItem>
       </EuiFlexGroup>
       {forceUpgradeSelectedRulesToTargetModal}
       {forceUpgradeAllRulesToTargetModal}
     </>
+  );
+};
+
+interface BulkUpgradeSecondaryAction {
+  isDisabled: boolean;
+  tooltip: string | undefined;
+  ariaLabel: string;
+  dataTestSubj: string;
+  isPopoverOpen: boolean;
+  togglePopover: () => void;
+  closePopover: () => void;
+  menuItems: ReactElement[];
+}
+
+interface BulkUpgradeButtonProps {
+  children: ReactNode;
+  onClick: () => void;
+  isDisabled: boolean;
+  tooltip: string | undefined;
+  dataTestSubj: string;
+  isLoading: boolean;
+  fill?: boolean;
+  iconType?: IconType;
+  /**
+   * When omitted (prebuilt rules customization is disabled) the primary action already
+   * upgrades to the Elastic version, so a plain button is rendered instead of a split one.
+   */
+  secondaryAction?: BulkUpgradeSecondaryAction;
+}
+
+const BulkUpgradeButton = ({
+  children,
+  onClick,
+  isDisabled,
+  tooltip,
+  dataTestSubj,
+  isLoading,
+  fill,
+  iconType,
+  secondaryAction,
+}: BulkUpgradeButtonProps) => {
+  const label = (
+    <>
+      {children}
+      {isLoading ? <EuiLoadingSpinner size="s" /> : undefined}
+    </>
+  );
+
+  if (!secondaryAction) {
+    return (
+      <EuiToolTip content={tooltip}>
+        <EuiButton
+          fill={fill}
+          iconType={iconType}
+          onClick={onClick}
+          disabled={isDisabled}
+          data-test-subj={dataTestSubj}
+        >
+          {label}
+        </EuiButton>
+      </EuiToolTip>
+    );
+  }
+
+  return (
+    <EuiSplitButton color="primary" fill={fill} size="m">
+      <EuiSplitButton.ActionPrimary
+        onClick={onClick}
+        iconType={iconType}
+        isDisabled={isDisabled}
+        tooltipProps={tooltip ? { content: tooltip } : undefined}
+        data-test-subj={dataTestSubj}
+      >
+        {label}
+      </EuiSplitButton.ActionPrimary>
+      <EuiSplitButton.ActionSecondary
+        iconType="chevronSingleDown"
+        isDisabled={secondaryAction.isDisabled}
+        tooltipProps={secondaryAction.tooltip ? { content: secondaryAction.tooltip } : undefined}
+        aria-label={secondaryAction.ariaLabel}
+        data-test-subj={secondaryAction.dataTestSubj}
+        onClick={secondaryAction.togglePopover}
+        popoverProps={{
+          isOpen: secondaryAction.isPopoverOpen,
+          closePopover: secondaryAction.closePopover,
+          panelPaddingSize: 's',
+          anchorPosition: 'downRight',
+          children: <EuiContextMenuPanel items={secondaryAction.menuItems} />,
+        }}
+      />
+    </EuiSplitButton>
   );
 };
 
@@ -258,9 +361,9 @@ const useBulkUpdateButtonsTooltipContent = ({
   }
 
   if (doAllSelectedRulesHaveConflicts) {
-    // The secondary ("Update to Elastic version") action is never conflict-gated (CONF-03),
-    // so it must not inherit the primary's conflicts tooltip — that sentence would state a
-    // reason that does not apply to the one action that can resolve the conflict.
+    // The secondary ("Update to Elastic version") action is never conflict-gated, so it must
+    // not inherit the primary's conflicts tooltip: that reason does not apply to the one action
+    // that can resolve the conflict.
     return {
       selectedRulesButtonTooltip: i18n.BULK_UPDATE_SELECTED_RULES_BUTTON_TOOLTIP_CONFLICTS,
       secondaryActionsButtonTooltip: undefined,
