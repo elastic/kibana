@@ -20,6 +20,8 @@ import {
   INBOUND_INGRESS_OUTCOME_DETAIL_MAX_LENGTH,
   truncateInboundIngressDetail,
 } from './log_inbound_ingress_outcome';
+import type { RawAction } from '../types';
+import { encodeApiKey } from './event_identity/encode_api_key';
 import type {
   ConnectorEventEmitParams,
   ConnectorEventEmitter,
@@ -45,6 +47,8 @@ describe('ingestInboundEvent', () => {
   const emitConnectorEvents = jest
     .fn<Promise<DispatchConnectorEventsResult>, []>()
     .mockResolvedValue({ ok: true });
+  const storedApiKey = encodeApiKey('es-id', 'es-secret')!;
+  const getDecryptedConnectorAttributes = jest.fn<Promise<RawAction>, [string, string]>();
 
   const connectorId = 'connector-1';
   const token = 'ingest-token-value';
@@ -82,6 +86,14 @@ describe('ingestInboundEvent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     emitConnectorEvents.mockResolvedValue({ ok: true });
+    getDecryptedConnectorAttributes.mockResolvedValue({
+      actionTypeId: '.myConnector',
+      name: 'Test',
+      isMissingSecrets: false,
+      config: { ingestTokenHash },
+      secrets: {},
+      apiKey: storedApiKey,
+    });
     getUnsecuredSavedObjectsClient.mockResolvedValue(unsecuredSavedObjectsClient);
     unsecuredSavedObjectsClient.get.mockResolvedValue({
       id: connectorId,
@@ -124,6 +136,7 @@ describe('ingestInboundEvent', () => {
       emitConnectorEvents: overrides?.emit ?? emitConnectorEvents,
       logger,
       getUnsecuredSavedObjectsClient,
+      getDecryptedConnectorAttributes,
       inMemoryConnectors: [],
     });
     mapIngestResultToResponse(result, response);
@@ -343,7 +356,13 @@ describe('ingestInboundEvent', () => {
       connectorId,
       connectorTypeId: '.myConnector',
       correlationKey: 'corr-1',
+      request: expect.objectContaining({
+        headers: expect.objectContaining({
+          authorization: `ApiKey ${storedApiKey}`,
+        }),
+      }),
     });
+    expect(JSON.stringify(logger.info.mock.calls)).not.toContain('es-secret');
     expectOutcome('info', 'accepted');
   });
 
@@ -356,6 +375,7 @@ describe('ingestInboundEvent', () => {
     const { response: res } = await run();
     expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
     expect(emitConnectorEvents).not.toHaveBeenCalled();
+    expect(getDecryptedConnectorAttributes).not.toHaveBeenCalled();
     expectOutcome('info', 'accepted');
   });
 
@@ -518,6 +538,7 @@ describe('ingestInboundEvent', () => {
     expect(res.accepted).not.toHaveBeenCalled();
     expect(res.customError).not.toHaveBeenCalled();
     expect(emitConnectorEvents).not.toHaveBeenCalled();
+    expect(getDecryptedConnectorAttributes).not.toHaveBeenCalled();
     expectOutcome('info', 'http_ack');
   });
 
@@ -692,6 +713,57 @@ describe('ingestInboundEvent', () => {
     expect(res.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
     expect(emitConnectorEvents).not.toHaveBeenCalled();
     expectOutcome('error', 'validate_fail');
+  });
+
+  it('returns 202 and does not emit when the connector has no last-saver apiKey', async () => {
+    const eventId = buildEventId('.myConnector', 'received');
+    getDecryptedConnectorAttributes.mockResolvedValueOnce({
+      actionTypeId: '.myConnector',
+      name: 'Test',
+      isMissingSecrets: false,
+      config: { ingestTokenHash },
+      secrets: {},
+    });
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(
+        jest.fn().mockResolvedValue({
+          type: 'emit',
+          events: [{ eventId, correlationKey: 'corr-1', payload: { body: {} } }],
+        })
+      ) as ReturnType<typeof getConnectorSpec>
+    );
+
+    const { response: res } = await run();
+    expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
+    expect(emitConnectorEvents).not.toHaveBeenCalled();
+    expectOutcome('warn', 'identity_missing');
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('missing_api_key'),
+      expect.anything()
+    );
+  });
+
+  it('returns 202 and does not emit when identity decrypt fails', async () => {
+    const eventId = buildEventId('.myConnector', 'received');
+    getDecryptedConnectorAttributes.mockRejectedValueOnce(new Error('cannot decrypt'));
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(
+        jest.fn().mockResolvedValue({
+          type: 'emit',
+          events: [{ eventId, correlationKey: 'corr-1', payload: { body: {} } }],
+        })
+      ) as ReturnType<typeof getConnectorSpec>
+    );
+
+    const { response: res } = await run();
+    expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
+    expect(emitConnectorEvents).not.toHaveBeenCalled();
+    expectOutcome('warn', 'identity_missing');
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('decrypt_failed'),
+      expect.anything()
+    );
+    expect(JSON.stringify(logger.warn.mock.calls)).not.toContain('es-secret');
   });
 });
 

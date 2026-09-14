@@ -28,6 +28,7 @@ import type {
   WorkflowSettings,
 } from '@kbn/workflows';
 import {
+  WorkflowDisabledError,
   WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
 } from '@kbn/workflows/common/errors';
@@ -50,6 +51,7 @@ import {
   UNKNOWN_EXECUTION_IDENTITY,
 } from './lib/execution_identity';
 import { getAuthenticatedUser } from './lib/get_user';
+import { logWorkflowTaskFailure } from './lib/log_workflow_task_failure';
 import {
   failExecutionMissingIdentity,
   markScheduledExecutionFailedAfterTaskError,
@@ -128,6 +130,8 @@ const WORKFLOW_RUN_TASK_MAX_ATTEMPTS = 3;
  * after a handler failure - so extra attempts also cover resume work that runs and may throw.
  */
 const WORKFLOW_RESUME_TASK_MAX_ATTEMPTS = 3;
+
+const WORKFLOW_SCHEDULED_TASK_MAX_ATTEMPTS = 3;
 
 /** Batch size for bulk cancel search_after paging (internal; not exposed on the public API). */
 const BULK_CANCEL_PAGE_SIZE = 10;
@@ -413,6 +417,16 @@ export class WorkflowsExecutionEnginePlugin implements Plugin<
                   }
                 }
               } catch (error) {
+                const aborted = taskAbortController.signal.aborted;
+                logWorkflowTaskFailure(logger, error, {
+                  taskType: WORKFLOW_RUN_TASK_TYPE,
+                  workflowRunId,
+                  spaceId,
+                  taskId: taskInstance.id,
+                  attempt: taskInstance.attempts,
+                  maxAttempts: WORKFLOW_RUN_TASK_MAX_ATTEMPTS,
+                  aborted,
+                });
                 await resolveExhaustedWorkflowRunTask({
                   workflowExecutionRepository,
                   stepExecutionRepository,
@@ -423,7 +437,7 @@ export class WorkflowsExecutionEnginePlugin implements Plugin<
                   error,
                   logger,
                 });
-                if (taskAbortController.signal.aborted) {
+                if (aborted) {
                   stampWorkflowTaskRunEventFields(setCustomTaskRunEventFields, {
                     workflow_execution_id: workflowRunId,
                     space_id: spaceId,
@@ -615,6 +629,16 @@ export class WorkflowsExecutionEnginePlugin implements Plugin<
                   }
                 }
               } catch (error) {
+                const aborted = taskAbortController.signal.aborted;
+                logWorkflowTaskFailure(logger, error, {
+                  taskType: WORKFLOW_RESUME_TASK_TYPE,
+                  workflowRunId,
+                  spaceId,
+                  taskId: taskInstance.id,
+                  attempt: taskInstance.attempts,
+                  maxAttempts: WORKFLOW_RESUME_TASK_MAX_ATTEMPTS,
+                  aborted,
+                });
                 await resolveExhaustedWorkflowRunTask({
                   workflowExecutionRepository,
                   stepExecutionRepository,
@@ -625,7 +649,7 @@ export class WorkflowsExecutionEnginePlugin implements Plugin<
                   error,
                   logger,
                 });
-                if (taskAbortController.signal.aborted) {
+                if (aborted) {
                   stampWorkflowTaskRunEventFields(setCustomTaskRunEventFields, {
                     workflow_execution_id: workflowRunId,
                     space_id: spaceId,
@@ -671,7 +695,7 @@ export class WorkflowsExecutionEnginePlugin implements Plugin<
         // This is high value to allow long-running workflows.
         // The workflow timeout logic defined in workflow execution engine logic is the primary control.
         timeout: '365d',
-        maxAttempts: 3,
+        maxAttempts: WORKFLOW_SCHEDULED_TASK_MAX_ATTEMPTS,
         createTaskRunner: ({ taskInstance, fakeRequest, signal, setCustomTaskRunEventFields }) => {
           const { workflowId, spaceId } = taskInstance.params as {
             workflowId: string;
@@ -1016,7 +1040,18 @@ export class WorkflowsExecutionEnginePlugin implements Plugin<
                   `Successfully executed ${scheduleType}-scheduled workflow ${workflow.id}`
                 );
               } catch (error) {
-                if (taskAbortController.signal.aborted) {
+                const aborted = taskAbortController.signal.aborted;
+                logWorkflowTaskFailure(logger, error, {
+                  taskType: WORKFLOW_SCHEDULED_TASK_TYPE,
+                  workflowId,
+                  workflowRunId: workflowExecutionId,
+                  spaceId,
+                  taskId: taskInstance.id,
+                  attempt: taskInstance.attempts,
+                  maxAttempts: WORKFLOW_SCHEDULED_TASK_MAX_ATTEMPTS,
+                  aborted,
+                });
+                if (aborted) {
                   stampWorkflowTaskRunEventFields(setCustomTaskRunEventFields, {
                     workflow_execution_id: workflowExecutionId,
                     workflow_id: workflowId,
@@ -1098,7 +1133,7 @@ export class WorkflowsExecutionEnginePlugin implements Plugin<
         includeGlobal: true,
       });
       if (!stillEnabled) {
-        throw new Error(`Workflow is disabled: ${workflow.id}. Enable the workflow to run it.`);
+        throw new WorkflowDisabledError(workflow.id);
       }
     };
 
