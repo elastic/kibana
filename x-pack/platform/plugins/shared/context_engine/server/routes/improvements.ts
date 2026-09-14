@@ -44,6 +44,7 @@ import {
 } from '../../common/http_api/improvements';
 import { validateAiIndexId } from '../../common/validation';
 import type { AiIndexService } from '../ai_indices/service';
+import { FeedbackAnalysisAlreadyRunningError } from '../feedback_analysis/schedule';
 import type { FeedbackAnalysisScheduleService } from '../feedback_analysis/schedule';
 import { ApplyImprovementError, applyImprovement } from '../improvements/apply';
 import { ImprovementConflictError, ImprovementNotFoundError } from '../improvements/errors';
@@ -414,6 +415,13 @@ export const registerImprovementRoutes = ({
               error: error instanceof Error ? error : new Error(String(error)),
             })
           );
+
+          // A collision with a run already in flight, which is a state rather than a failure: the
+          // analysis the caller asked for is happening, so the answer is what is true, not an error.
+          if (error instanceof FeedbackAnalysisAlreadyRunningError) {
+            return response.conflict({ body: { message: error.message } });
+          }
+
           throw error;
         }
       })

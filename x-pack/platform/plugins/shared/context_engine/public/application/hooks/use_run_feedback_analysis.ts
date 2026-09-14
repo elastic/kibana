@@ -10,6 +10,7 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { RunFeedbackAnalysisResponse } from '../../../common/http_api/improvements';
 import { runFeedbackAnalysis } from '../api/improvements';
 import { getErrorMessage } from '../utils/get_error_message';
+import { isConflict } from '../utils/is_conflict';
 import { contextEngineQueryKeys } from './query_keys';
 import { useKibana } from './use_kibana';
 
@@ -42,6 +43,29 @@ export const useRunFeedbackAnalysis = (aiIndexId: string) => {
       });
     },
     onError: (error: Error) => {
+      // A run was already in flight, so the analysis the user wanted is happening — it just is not
+      // theirs. Reported as what is true rather than as a failure, and the improvements are
+      // invalidated so the panels pick up whatever that run records.
+      if (isConflict(error)) {
+        queryClient.invalidateQueries({
+          queryKey: contextEngineQueryKeys.improvements.all(aiIndexId),
+        });
+        notifications.toasts.addWarning({
+          title: i18n.translate(
+            'xpack.contextEngine.aiIndexDetail.improvements.runAlreadyRunningTitle',
+            { defaultMessage: 'Analysis is already running' }
+          ),
+          text: i18n.translate(
+            'xpack.contextEngine.aiIndexDetail.improvements.runAlreadyRunningBody',
+            {
+              defaultMessage:
+                'Only one run at a time analyzes an index. Any improvements it suggests appear here when it finishes.',
+            }
+          ),
+        });
+        return;
+      }
+
       const toastMessage = getErrorMessage(error);
       notifications.toasts.addError(error, {
         title: i18n.translate('xpack.contextEngine.aiIndexDetail.improvements.runError', {

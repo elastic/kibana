@@ -18,6 +18,7 @@ import { apiPrivileges } from '../../common/features';
 import type { Improvement } from '../../common/http_api/improvements';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
+import { FeedbackAnalysisAlreadyRunningError } from '../feedback_analysis/schedule';
 import type { FeedbackAnalysisScheduleService } from '../feedback_analysis/schedule';
 import { applyImprovement, ApplyImprovementError } from '../improvements/apply';
 import { ImprovementConflictError } from '../improvements/errors';
@@ -388,6 +389,19 @@ describe('improvements routes', () => {
       );
       expect(scheduleService.run.mock.calls[0][0]).not.toHaveProperty('spaceId');
       expect(response.ok).toHaveBeenCalledWith({ body: { execution_id: 'execution-1' } });
+    });
+
+    it('returns 409 when a run is already in flight', async () => {
+      // Not an error: the analysis the caller asked for is happening, so 200 would report a run
+      // that the engine discarded and leave them waiting on improvements nothing is producing.
+      scheduleService.run.mockRejectedValue(new FeedbackAnalysisAlreadyRunningError(AI_INDEX_ID));
+
+      await callRoute('POST', aiIndexFeedbackAnalysisRunPath, {
+        params: { aiIndexId: AI_INDEX_ID },
+      });
+
+      expect(response.conflict).toHaveBeenCalled();
+      expect(response.ok).not.toHaveBeenCalled();
     });
 
     it('explains that analysis has to be enabled first', async () => {
