@@ -83,7 +83,7 @@ export const flakyReport = (flaky: FlakyTestEntry[]): FlakyTestReport => ({
     minFailedBuilds: 2,
     minFailRate: 0,
     maxTests: 200,
-    maxInactiveHours: 24,
+    lastRunWithinHours: 24,
   },
   summary: {
     totalFlaky: flaky.length,
