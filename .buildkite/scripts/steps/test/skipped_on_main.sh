@@ -32,13 +32,32 @@ resolve_skipped_on_main_target() {
   return 1
 }
 
-# Usage: forgive_skipped_on_main <context> <--junit-file path ...|--scout-failures path ...>
-# Returns 0 when every failure in the given reports is skipped on the target branch but not at
-# the merge base; the caller then treats the run as passed. Annotates the build with the
-# forgiven tests.
-forgive_skipped_on_main() {
+# Usage: forgive_skipped_on_main_reports <context> <--junit-file|--scout-failures> <marker> <find args...>
+# Collects reports matching the find expression that are newer than <marker> (a file created
+# just before the run) and evaluates them. Returns 0 when every failure in those reports is
+# skipped on the target branch but not at the merge base; the caller then treats the run as
+# passed. Annotates the build with the forgiven tests; logs why when it returns non-zero.
+forgive_skipped_on_main_reports() {
   local context="$1"
-  shift
+  local report_flag="$2"
+  local marker="$3"
+  shift 3
+
+  if ! skipped_on_main_applicable; then
+    skipped_on_main_skipped "$context" "not a PR build or flaky test runner"
+    return 1
+  fi
+
+  local report_args=()
+  local report_file
+  while IFS= read -r report_file; do
+    report_args+=("$report_flag" "$report_file")
+  done < <(find "$@" -newer "$marker" 2>/dev/null)
+
+  if [[ ${#report_args[@]} -eq 0 ]]; then
+    skipped_on_main_skipped "$context" "no report was written (failure happened before tests ran)"
+    return 1
+  fi
 
   resolve_skipped_on_main_target || return 1
 
@@ -47,7 +66,7 @@ forgive_skipped_on_main() {
   if ! evaluation=$(node scripts/check_skipped_on_main \
     --main-ref "$SKIPPED_ON_MAIN_TARGET_SHA" \
     --base-ref "$GITHUB_PR_MERGE_BASE" \
-    "$@"); then
+    "${report_args[@]}"); then
     echo "[skipped-on-main] keeping failures for $context"
     return 1
   fi
@@ -71,4 +90,11 @@ ${forgiven}
 
 EOF
   return 0
+}
+
+# Usage: forgive_skipped_on_main_scout <context> <marker>
+# Scout variant: reads the failure NDJSON files the Scout failed-test reporter wrote since <marker>.
+forgive_skipped_on_main_scout() {
+  forgive_skipped_on_main_reports "$1" --scout-failures "$2" \
+    .scout/reports -path '*scout-playwright-test-failures-*' -name 'scout-failures-*.ndjson'
 }

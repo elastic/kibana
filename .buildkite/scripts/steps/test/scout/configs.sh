@@ -220,21 +220,8 @@ while read -r config_path; do
     EXIT_CODE=$?
     set -e;
 
-    if [[ $EXIT_CODE -ne 0 && $EXIT_CODE -ne 2 ]]; then
-      if skipped_on_main_applicable; then
-        failureArgs=()
-        while IFS= read -r failuresFile; do
-          failureArgs+=(--scout-failures "$failuresFile")
-        done < <(find .scout/reports -path '*scout-playwright-test-failures-*' -name 'scout-failures-*.ndjson' -newer "$failuresMarker" 2>/dev/null)
-
-        if [[ ${#failureArgs[@]} -eq 0 ]]; then
-          skipped_on_main_skipped "$config_path ($mode)" "no failure report was written (failure happened before tests ran)"
-        elif forgive_skipped_on_main "$config_path ($mode)" "${failureArgs[@]}"; then
-          EXIT_CODE=0
-        fi
-      else
-        skipped_on_main_skipped "$config_path ($mode)" "not a PR build or flaky test runner"
-      fi
+    if [[ $EXIT_CODE -ne 0 && $EXIT_CODE -ne 2 ]] && forgive_skipped_on_main_scout "$config_path ($mode)" "$failuresMarker"; then
+      EXIT_CODE=0
     fi
     rm -f "$failuresMarker"
 

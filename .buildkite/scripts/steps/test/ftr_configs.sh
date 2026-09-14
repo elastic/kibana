@@ -122,19 +122,8 @@ while read -r config; do
   if [[ $lastCode -ne 0 ]]; then
     if [[ $lastCode -ne 11 ]]; then
       skipped_on_main_skipped "$config" "exit code $lastCode is not the test-failures code (11): the run stopped early or hit a runner error"
-    elif skipped_on_main_applicable; then
-      junitArgs=()
-      while IFS= read -r junitFile; do
-        junitArgs+=(--junit-file "$junitFile")
-      done < <(find "target/junit/$JOB" -name '*.xml' -newer "$junitMarker" 2>/dev/null)
-
-      if [[ ${#junitArgs[@]} -eq 0 ]]; then
-        skipped_on_main_skipped "$config" "no JUnit report was written (failure happened before tests ran)"
-      elif forgive_skipped_on_main "$config" "${junitArgs[@]}"; then
-        lastCode=0
-      fi
-    else
-      skipped_on_main_skipped "$config" "not a PR build or flaky test runner"
+    elif forgive_skipped_on_main_reports "$config" --junit-file "$junitMarker" "target/junit/$JOB" -name '*.xml'; then
+      lastCode=0
     fi
   fi
   rm -f "$junitMarker"

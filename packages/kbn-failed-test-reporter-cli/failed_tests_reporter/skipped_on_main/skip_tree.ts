@@ -73,7 +73,10 @@ const getTitle = (call: ts.CallExpression): string | null => {
   return null;
 };
 
-const getIssueFromLeadingComment = (call: ts.CallExpression, source: ts.SourceFile) => {
+const getIssueFromLeadingComment = (
+  call: ts.CallExpression,
+  source: ts.SourceFile
+): string | undefined => {
   let statement: ts.Node = call;
   while (statement.parent && !ts.isExpressionStatement(statement)) {
     statement = statement.parent;

@@ -63,11 +63,29 @@ export async function collectJUnitFailures(xmlPaths: string[]): Promise<Evaluabl
   return failures;
 }
 
+const SCOUT_FAILURES_FILE_RE = /^scout-failures-(.*)\.ndjson$/;
+
 /**
- * Reads Scout failures from `scout-failures-<runId>.ndjson`. Runner-level errors (global
- * setup/teardown, config, run timeout) are written by the reporter to a sibling
- * `scout-runner-errors-<runId>.json`; they have no test file, so they always evaluate as real
- * and prevent the run from being forgiven on the strength of its test failures alone.
+ * Runner-level errors (global setup/teardown, config, run timeout) are written by the reporter
+ * to `scout-runner-errors-<runId>.json` next to `scout-failures-<runId>.ndjson`.
+ */
+const readScoutRunnerErrors = (ndjsonPath: string): string[] => {
+  const runId = Path.basename(ndjsonPath).match(SCOUT_FAILURES_FILE_RE)?.[1];
+  if (runId === undefined) {
+    return [];
+  }
+  const runnerErrorsPath = Path.join(Path.dirname(ndjsonPath), `scout-runner-errors-${runId}.json`);
+  if (!Fs.existsSync(runnerErrorsPath)) {
+    return [];
+  }
+  const { errors } = JSON.parse(Fs.readFileSync(runnerErrorsPath, 'utf8')) as { errors: string[] };
+  return errors;
+};
+
+/**
+ * Reads Scout failures from `scout-failures-<runId>.ndjson` plus the sibling runner errors.
+ * Runner errors have no test file, so they always evaluate as real and prevent the run from
+ * being forgiven on the strength of its test failures alone.
  */
 export function collectScoutFailures(ndjsonPaths: string[]): EvaluableFailure[] {
   const failures: EvaluableFailure[] = [];
@@ -84,21 +102,8 @@ export function collectScoutFailures(ndjsonPaths: string[]): EvaluableFailure[] 
         title: entry.title,
       });
     }
-
-    const runnerErrorsPath = Path.join(
-      Path.dirname(ndjsonPath),
-      Path.basename(ndjsonPath).replace(
-        /^scout-failures-(.*)\.ndjson$/,
-        'scout-runner-errors-$1.json'
-      )
-    );
-    if (runnerErrorsPath !== ndjsonPath && Fs.existsSync(runnerErrorsPath)) {
-      const { errors } = JSON.parse(Fs.readFileSync(runnerErrorsPath, 'utf8')) as {
-        errors: string[];
-      };
-      for (const message of errors) {
-        failures.push({ kind: 'scout', file: '', suite: 'Scout runner', title: message });
-      }
+    for (const message of readScoutRunnerErrors(ndjsonPath)) {
+      failures.push({ kind: 'scout', file: '', suite: 'Scout runner', title: message });
     }
   }
   return failures;
@@ -116,36 +121,43 @@ export function evaluateFailures(
   failures: EvaluableFailure[],
   { mainRef, baseRef, readFile }: { mainRef: string; baseRef: string; readFile: RefFileReader }
 ): SkippedOnMainEvaluation {
-  const trees: Record<string, SuiteNode[] | undefined> = {};
-  const getTree = (ref: string, file: string) => {
+  const trees = new Map<string, SuiteNode[] | undefined>();
+  const getTree = (ref: string, file: string): SuiteNode[] | undefined => {
     const key = `${ref}:${file}`;
-    if (!(key in trees)) {
+    if (!trees.has(key)) {
       const source = readFile(ref, file);
-      trees[key] = source === undefined ? undefined : parseSuiteTree(source, file);
+      trees.set(key, source === undefined ? undefined : parseSuiteTree(source, file));
     }
-    return trees[key];
+    return trees.get(key);
   };
 
-  const findSkip = (tree: SuiteNode[], failure: EvaluableFailure) =>
+  const findSkip = (tree: SuiteNode[], failure: EvaluableFailure): SuiteNode | undefined =>
     failure.kind === 'ftr'
       ? findSkipForFullTitle(tree, failure.fullTitle)
       : findSkipForScoutFailure(tree, failure.suite, failure.title);
 
-  const evaluation: SkippedOnMainEvaluation = { knownSkipped: [], real: [] };
-  for (const failure of failures) {
+  /** The skip on `mainRef` that explains `failure`, if it is absent at `baseRef`. */
+  const findNewSkipOnMain = (failure: EvaluableFailure): SuiteNode | undefined => {
     if (!failure.file) {
-      evaluation.real.push(failure);
-      continue;
+      return undefined;
     }
     const mainTree = getTree(mainRef, failure.file);
     const baseTree = getTree(baseRef, failure.file);
     if (!mainTree || !baseTree) {
-      evaluation.real.push(failure);
-      continue;
+      return undefined;
     }
     const skipOnMain = findSkip(mainTree, failure);
-    if (skipOnMain && !findSkip(baseTree, failure)) {
-      evaluation.knownSkipped.push({ failure, issue: skipOnMain.issue });
+    if (!skipOnMain || findSkip(baseTree, failure)) {
+      return undefined;
+    }
+    return skipOnMain;
+  };
+
+  const evaluation: SkippedOnMainEvaluation = { knownSkipped: [], real: [] };
+  for (const failure of failures) {
+    const skip = findNewSkipOnMain(failure);
+    if (skip) {
+      evaluation.knownSkipped.push({ failure, issue: skip.issue });
     } else {
       evaluation.real.push(failure);
     }
