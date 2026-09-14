@@ -48,8 +48,7 @@ export const ALERTZERO_PROPOSALS_URL = `${ALERTZERO_INTERNAL_URL}/proposals` as 
 export const ALERTZERO_ACTIONS_URL = `${ALERTZERO_INTERNAL_URL}/actions` as const;
 
 /** Agent Builder builtin tool wrapping the action catalog API. */
-export const ALERTZERO_ACTIONS_LIST_BY_CATEGORY_TOOL_ID =
-  'security.alertzero.actions.list_by_category' as const;
+export const ALERTZERO_ACTIONS_LIST_TOOL_ID = 'security.alertzero.actions.list' as const;
 
 /**
  * Shared thin AlertZero agent for all Worker `ai.agent` steps.

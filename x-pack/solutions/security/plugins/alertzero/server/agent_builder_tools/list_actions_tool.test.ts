@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { listActionsByCategoryTool } from './list_actions_by_category_tool';
+import { listActionsTool } from './list_actions_tool';
 import type { ActionsService } from '../services/actions/actions_service';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
@@ -17,7 +17,7 @@ const run = async (
   service: Pick<ActionsService, 'list'>,
   input: { categories?: string[] } = {}
 ) => {
-  const tool = listActionsByCategoryTool(() => service);
+  const tool = listActionsTool(() => service);
   const result = await tool.handler(input, { logger: logger() } as never);
   if (!('results' in result)) {
     throw new Error('expected a standard tool result');
@@ -32,7 +32,7 @@ const ACTION = (over: Partial<Record<string, unknown>> = {}) => ({
   ...over,
 });
 
-describe('listActionsByCategoryTool', () => {
+describe('listActionsTool', () => {
   it('lists all actions when called without categories', async () => {
     const list = jest.fn().mockResolvedValue({
       actions: [ACTION(), ACTION({ workflowId: 'a2', name: 'Isolate host', category: 'contain' })],
@@ -62,8 +62,8 @@ describe('listActionsByCategoryTool', () => {
   });
 
   it('declares the documented tool id and read-only annotations', () => {
-    const tool = listActionsByCategoryTool(() => serviceWith(jest.fn()));
-    expect(tool.id).toBe('security.alertzero.actions.list_by_category');
+    const tool = listActionsTool(() => serviceWith(jest.fn()));
+    expect(tool.id).toBe('security.alertzero.actions.list');
     expect(tool.annotations).toMatchObject({
       readOnlyHint: true,
       destructiveHint: false,

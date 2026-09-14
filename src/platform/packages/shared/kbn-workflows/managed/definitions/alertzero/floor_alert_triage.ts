@@ -19,7 +19,7 @@ export const ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW = {
   id: ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 2,
+  version: 3,
   yamlTemplate: (values: CommonWorkerTemplateValues): string =>
     renderCommonWorkerYaml(FLOOR_ALERT_TRIAGE_YAML, values),
 } as const satisfies ManagedWorkflowDefinition<CommonWorkerTemplateValues>;

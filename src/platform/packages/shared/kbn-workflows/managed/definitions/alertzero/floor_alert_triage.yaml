@@ -23,7 +23,7 @@ steps:
           - alert-analysis
         tools:
           - tool_ids:
-              - security.alertzero.actions.list_by_category
+              - security.alertzero.actions.list
       message: >
         Triage the security alert context below. Prefer
         recall over precision when unsure. Return a structured

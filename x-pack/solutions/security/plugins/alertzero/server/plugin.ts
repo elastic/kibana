@@ -37,7 +37,7 @@ import { WorkersService } from './services/workers/workers_service';
 import { ConversationProposalsService } from './services/conversation_proposals/conversation_proposals_service';
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
 import { ActionsService } from './services/actions/actions_service';
-import { listActionsByCategoryTool } from './agent_builder_tools/list_actions_by_category_tool';
+import { listActionsTool } from './agent_builder_tools/list_actions_tool';
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
 
 export class AlertZeroPlugin
@@ -89,7 +89,7 @@ export class AlertZeroPlugin
     // Registered in setup so the builtin tool is available to Agent Builder before
     // the first agent run; the handler resolves the service lazily like the routes do.
     agentBuilder.tools.register({
-      ...listActionsByCategoryTool(() => this.requireActionsService()),
+      ...listActionsTool(() => this.requireActionsService()),
     });
 
     features.registerKibanaFeature({

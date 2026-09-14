@@ -11,7 +11,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import { ToolType } from '@kbn/agent-builder-common';
 import { actionCategorySchema } from '@kbn/workflows/managed';
-import { ALERTZERO_ACTIONS_LIST_BY_CATEGORY_TOOL_ID } from '@kbn/alertzero-common';
+import { ALERTZERO_ACTIONS_LIST_TOOL_ID } from '@kbn/alertzero-common';
 import type { ActionsService } from '../services/actions/actions_service';
 
 const listByCategorySchema = z.object({
@@ -25,17 +25,17 @@ const listByCategorySchema = z.object({
 });
 
 /**
- * `security.alertzero.actions.list_by_category` — lets an agent discover the
+ * `security.alertzero.actions.list` — lets an agent discover the
  * installed action workflows at runtime instead of hard-coding workflow ids.
  *
  * Registered by the AlertZero plugin (setup), reads the catalog through
  * {@link ActionsService} — the same service backing the HTTP API — so the tool
  * and the API can never drift.
  */
-export const listActionsByCategoryTool = (
+export const listActionsTool = (
   getActionsService: () => Pick<ActionsService, 'list'>
 ): BuiltinToolDefinition<typeof listByCategorySchema> => ({
-  id: ALERTZERO_ACTIONS_LIST_BY_CATEGORY_TOOL_ID,
+  id: ALERTZERO_ACTIONS_LIST_TOOL_ID,
   type: ToolType.builtin,
   description:
     'List available AlertZero actions, optionally filtered by category. Each result includes the workflowId to reference when proposing the action, plus its name, description, category, impact (low/medium/high/critical) and approvalPolicy (always-gate/autonomy-dependent). Call this before proposing an action so the proposal references a real, installed workflow.',
