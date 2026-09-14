@@ -456,12 +456,19 @@ export function ComposeDiscoverFlyout({
    * it establishes new default values. Two extra refs compensate:
    * - yamlBaselineRef/yamlTextRef: detect edits while in YAML mode.
    * - hasBeenEditedRef: survives reset() calls so exiting YAML mode after
-   *   editing still shows the confirmation dialog. Intentionally sticky for the
+   *   editing still shows the confirmation dialog. Also set when builder
+   *   state (threshold form) changes, because those fields live outside RHF
+   *   and do not set formState.isDirty. Intentionally sticky for the
    *   flyout's lifetime — resets only on unmount (close/discard).
    */
   const yamlBaselineRef = useRef<string | null>(null);
   const yamlTextRef = useRef('');
   const hasBeenEditedRef = useRef(false);
+
+  const handleBuilderStateChange = useCallback((next: BuilderState) => {
+    hasBeenEditedRef.current = true;
+    setBuilderState(next);
+  }, []);
 
   /*
    * After unsaved-changes confirm remounts the EuiFlyout, the sandbox may have
@@ -795,7 +802,7 @@ export function ComposeDiscoverFlyout({
         }
         if (isBuilderMode && builderState) {
           const { recovery: _, ...rest } = builderState as Record<string, unknown>;
-          setBuilderState(rest);
+          handleBuilderStateChange(rest);
         }
         /*
          * (b) Close sandbox in non-YAML mode — prevents a pending Apply from
@@ -809,14 +816,15 @@ export function ComposeDiscoverFlyout({
       }
     },
     [
-      dispatch,
       methods,
-      isAlert,
       isBuilderMode,
-      builderState,
+      dispatch,
+      isAlert,
       uiState.queryCommitted,
       uiState.childOpen,
       uiState.yamlMode,
+      builderState,
+      handleBuilderStateChange,
     ]
   );
 
@@ -1398,7 +1406,7 @@ export function ComposeDiscoverFlyout({
                   {validationCallout}
                   <BuilderStateProvider
                     builderState={builderState}
-                    setBuilderState={setBuilderState}
+                    setBuilderState={handleBuilderStateChange}
                   >
                     <ComposeDiscoverForm
                       state={uiState}
