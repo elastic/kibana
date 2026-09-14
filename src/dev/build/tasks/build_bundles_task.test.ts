@@ -20,6 +20,7 @@ import { getMockConfig } from '../lib/__mocks__/get_config';
 
 jest.mock('@kbn/optimizer', () => ({
   runBuild: jest.fn(),
+  reportOptimizerTimings: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('globby', () => ({ globby: jest.fn() }));

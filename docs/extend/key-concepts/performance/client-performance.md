@@ -87,7 +87,8 @@ ls -lh target/public/bundles/ target/public/bundles/chunks/
 All plugins are compiled together in a single unified build. Your plugin's
 code lives in the `plugin-my_plugin` chunk plus any shared chunks it
 contributes to; the per-plugin `page load bundle size` is reported in
-`target/optimizer_bundle_metrics.json`. The rule of thumb is to keep the
+`target/public/bundles/metrics.json` (copied to
+`target/optimizer_bundle_metrics.json` by `node scripts/build`). The rule of thumb is to keep the
 eagerly loaded portion as small as possible and to move other parts of your
 plugin behind `import()` boundaries so they become separate async chunks. If
 you want to investigate what your plugin bundle consists of, run

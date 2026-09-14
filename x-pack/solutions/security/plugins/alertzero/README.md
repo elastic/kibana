@@ -257,5 +257,5 @@ Measure with:
 
 ```bash
 node scripts/build_kibana_platform_plugins.js --dist --no-cache
-# inspect target/optimizer_bundle_metrics.json → "page load bundle size" for alertzero
+# inspect target/public/bundles/metrics.json → "page load bundle size" for alertzero
 ```

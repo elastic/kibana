@@ -15,7 +15,7 @@ Use this workflow to keep limits stable by moving non-critical code out of the e
 
 ```bash
 node scripts/build_kibana_platform_plugins --dist
-jq '.[] | select(.id == "<pluginId>" and .group == "page load bundle size")' target/optimizer_bundle_metrics.json
+jq '.[] | select(.id == "<pluginId>" and .group == "page load bundle size")' target/public/bundles/metrics.json
 ```
 
 3. If this is a regression investigation, compare plugin limits on branch vs upstream.

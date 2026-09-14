@@ -15,7 +15,8 @@ import { createFlagError } from '@kbn/dev-cli-errors';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { parseThemeTags } from '@kbn/core-ui-settings-common';
 import { KIBANA_GROUPS, type KibanaGroup } from '@kbn/projects-solutions-groups';
-import { runBuild } from './run_build';
+import { runBuild, type BuildOptions } from './run_build';
+import { reportOptimizerTimings } from './report_optimizer_timings';
 import {
   validateLimitsForAllBundles,
   updateBundleLimits,
@@ -197,7 +198,7 @@ export function runRspackCli(options: CliOptions = {}): void {
 
       log.info('Building with RSPack unified compilation...');
 
-      const result = await runBuild({
+      const buildOptions: BuildOptions = {
         repoRoot: REPO_ROOT,
         outputRoot,
         watch: updateLimits ? false : watch,
@@ -211,9 +212,14 @@ export function runRspackCli(options: CliOptions = {}): void {
         profile: false,
         hmr: hmr ? undefined : false,
         limitsPath,
-      });
+      };
 
-      const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+      const result = await runBuild(buildOptions);
+
+      const elapsedMs = Date.now() - startTime;
+      const duration = (elapsedMs / 1000).toFixed(2);
+
+      await reportOptimizerTimings(log, buildOptions, result, elapsedMs);
 
       if (result.success) {
         log.success(`RSPack build completed in ${duration}s`);

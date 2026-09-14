@@ -38,6 +38,7 @@ export { getExternals } from './config/externals';
 
 // Build runner
 export { runBuild, type BuildOptions, type BuildResult } from './run_build';
+export { reportOptimizerTimings } from './report_optimizer_timings';
 
 // CLI
 export { runRspackCli, type CliOptions } from './cli';

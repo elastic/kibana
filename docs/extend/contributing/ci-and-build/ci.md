@@ -281,7 +281,7 @@ In many regressions, a short workflow is enough to avoid raising limits:
 If you are using a coding agent with repository skills, run the `/optimize-bundle-size` skill command to start this workflow for you and help reduce plugin `page load bundle size`.
 :::::
 
-1. Build dist metrics and confirm the current value for your plugin in `target/optimizer_bundle_metrics.json`:
+1. Build dist metrics and confirm the current value for your plugin in `target/public/bundles/metrics.json`:
 
     ```shell
     node scripts/build_kibana_platform_plugins --dist
@@ -308,7 +308,7 @@ While you're tracking down changes that will improve the bundle size, run this l
 node scripts/build_kibana_platform_plugins --dist --watch
 ```
 
-This builds the front-end bundles in distributable mode. When you make changes, the bundles rebuild and you can inspect `target/optimizer_bundle_metrics.json` to see if your changes lower `page load bundle size`.
+This builds the front-end bundles in distributable mode. When you make changes, the bundles rebuild and you can inspect `target/public/bundles/metrics.json` to see if your changes lower `page load bundle size`.
 
 To check `limits.yml` against the discovered plugins without building:
 

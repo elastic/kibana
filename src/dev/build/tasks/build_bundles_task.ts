@@ -15,7 +15,7 @@ import { availableParallelism } from 'os';
 
 import { globby } from 'globby';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { runBuild } from '@kbn/optimizer';
+import { runBuild, reportOptimizerTimings, type BuildOptions } from '@kbn/optimizer';
 import { asyncForEachWithLimit } from '@kbn/std';
 
 import type { Task } from '../lib';
@@ -26,7 +26,7 @@ const brotliCompressAsync = promisify(zlib.brotliCompress);
 export const BuildBundles: Task = {
   description: 'Building distributable versions of Kibana bundles',
   async run(buildConfig, log, build) {
-    const result = await runBuild({
+    const buildOptions: BuildOptions = {
       repoRoot: REPO_ROOT,
       outputRoot: build.resolvePath(),
       dist: true,
@@ -36,7 +36,11 @@ export const BuildBundles: Task = {
       examples: buildConfig.pluginSelector.examples,
       testPlugins: buildConfig.pluginSelector.testPlugins,
       log,
-    });
+    };
+
+    const startTime = Date.now();
+    const result = await runBuild(buildOptions);
+    await reportOptimizerTimings(log, buildOptions, result, Date.now() - startTime);
 
     if (!result.success) {
       throw new Error(`RSPack build failed: ${result.errors?.join(', ') ?? 'unknown error'}`);
