@@ -31,6 +31,9 @@ export const useAiIndex = (id: string): UseAiIndexResult => {
   const { data, isLoading, error, refetch } = useQuery<GetAiIndexResponse, Error>({
     queryKey: contextEngineQueryKeys.aiIndex.detail(id),
     queryFn: ({ signal }) => getAiIndex(http, { aiIndexId: id, signal }),
+    // Creating an automation navigates away before its refetch settles, so the cache
+    // can go stale; always refetch on mount to show it when the user comes back.
+    refetchOnMount: 'always',
   });
 
   return { aiIndex: data, isLoading, error: error ?? undefined, refetch };
