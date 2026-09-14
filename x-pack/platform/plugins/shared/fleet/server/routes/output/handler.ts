@@ -76,7 +76,7 @@ export const putOutputHandler: RequestHandler<
     if (bodyId !== undefined && bodyId !== request.params.outputId) {
       return response.badRequest({
         body: {
-          message: `Cannot change output ID: body id "${bodyId}" does not match path outputId "${request.params.outputId}"`,
+          message: `Cannot change output ID: body id does not match path outputId "${request.params.outputId}"`,
         },
       });
     }
