@@ -17,6 +17,7 @@ import {
   MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS,
   MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_AUTHORIZATION_CODES,
   MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_CLIENTS,
+  MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_ORGANIZATION_SERVICE_ACCOUNTS,
   MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION,
   MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS,
   MOCK_IDP_UIAM_COSMOS_DB_INTERNAL_URL,
@@ -213,6 +214,10 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
       `uiam.cosmos.container.oauth_client=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_CLIENTS}`,
       '--env',
       `uiam.cosmos.container.oauth_app_connection=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS}`,
+      '--env',
+      `uiam.cosmos.container.organization_service_account=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_ORGANIZATION_SERVICE_ACCOUNTS}`,
+      '--env',
+      'uiam.cosmos.organization_service_account.enabled=true',
       '--env',
       `uiam.cosmos.container.token_invalidation=${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION}`,
       '--env',
@@ -487,6 +492,10 @@ export async function initializeUiamContainers(log: ToolingLog) {
     {
       id: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS,
       partitionKeyPath: '/client_id',
+    },
+    {
+      id: MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_ORGANIZATION_SERVICE_ACCOUNTS,
+      partitionKeyPath: '/id',
     },
   ];
 
