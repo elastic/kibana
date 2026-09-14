@@ -1077,233 +1077,241 @@ steps:
                     Alert analysis batch {{ foreach.index }} returned no verdicts for
                     {{ foreach.item | size }} alerts.
 
-      # -----------------------------------------------------------------------
-      # Write the verdicts back to the alerts
-      # -----------------------------------------------------------------------
-      # Built once outside the loop: a filter expression matching any existing workflow tag
-      # (used for tag replacement on re-runs).
-      - name: build_tags_filter_expr
-        type: data.set
-        with:
-          tags_filter_expr: 'tag contains "{{ variables.tag_prefix }}."'
-
-      - name: apply_verdicts
-        type: foreach
-        foreach: "{{ event.alerts | reject_exp: 'a', variables.pending_filter_expr | json }}"
-        steps:
-          - name: select_alert_verdict
+          # -----------------------------------------------------------------
+          # Apply this batch's verdicts: notes, tags, and close candidates
+          # -----------------------------------------------------------------
+          # Filter expression matching any existing workflow tag (used for tag
+          # replacement on re-runs). Branch-local; every branch needs its own copy
+          # because branch writes never reach siblings or the parent.
+          - name: build_tags_filter_expr
             type: data.set
             with:
-              # The model echoes the alert id back with each verdict, which is what pairs a
-              # verdict with its alert. An alert the model skipped has no match here.
-              alert_verdict: "${{ variables.all_verdicts | where: 'id', foreach.item._id | first }}"
-              # Branch on the match count, not on `alert_verdict` being empty: `variables` is the
-              # merge of every data.set output in execution order, and a key whose value is empty
-              # does not reliably shadow the value the previous iteration set. A count is always a
-              # concrete number, so an alert with no verdict can never inherit its predecessor's.
-              alert_verdict_count: "${{ variables.all_verdicts | where: 'id', foreach.item._id | size }}"
+              tags_filter_expr: 'tag contains "{{ variables.tag_prefix }}."'
 
-          - name: check_alert_verdict_exists
-            type: if
-            condition: "${{ variables.alert_verdict_count == 0 }}"
+          # One iteration per alert of THIS batch (the parallel branch's foreach.item
+          # re-bound to each alert). Verdicts come from this branch's agent step output.
+          - name: apply_batch_verdicts
+            type: foreach
+            foreach: "{{ foreach.item | json }}"
             steps:
-              - name: log_alert_link_no_verdict
-                type: console
-                with:
-                  message: >-
-                    No verdict returned for alert {{ foreach.item._id }}:
-                    /app/security/alerts/redirect/{{ foreach.item._id }}
-
-              # The alert stays untagged, so a re-run of the workflow will pick it up again.
-              - name: add_no_data_note_to_alert
-                type: kibana.request
-                on-failure:
-                  retry:
-                    max-attempts: 3
-                    delay: 5s
-                with:
-                  method: PATCH
-                  path: "/s/{{ workflow.spaceId }}/api/note"
-                  body:
-                    note:
-                      eventId: '{{ foreach.item._id }}'
-                      timelineId: ''
-                      note: |
-                        ❌ [{{workflow.name}}:{{execution.id}}]({{execution.url}})
-
-                        ---
-                        Error: the batch this alert was analyzed in returned no verdict for it.
-                  headers:
-                    kbn-xsrf: string
-                    Content-Type: application/json
-            else:
-
-              # -------------------------------------------------------------------
-              # Write the verdict note to the alert timeline
-              # -------------------------------------------------------------------
-              - name: add_verdict_note_to_alert
-                type: kibana.request
-                on-failure:
-                  retry:
-                    max-attempts: 3
-                    delay: 5s
-                with:
-                  method: PATCH
-                  path: "/s/{{ workflow.spaceId }}/api/note"
-                  body:
-                    note:
-                      eventId: '{{ foreach.item._id }}'
-                      note: |
-                        ✅ [{{workflow.name}}:{{execution.id}}]({{execution.url}})
-
-                        ---
-                        ## Automated Alert Analysis
-                        ### Classification
-                        **{{ variables.alert_verdict.classification }}**
-
-                        ### Confidence Score
-                        {{ variables.alert_verdict.confidence_score }}
-
-                        ### Rationale
-                        {{ variables.alert_verdict.rationale }}
-
-                        ### Contributing Factors
-                        {% for factor in variables.alert_verdict.contributing_factors %}
-                        - {{ factor }}
-                        {%- endfor %}
-
-                        ### Analysis Details
-                        - Workflow version: {{ variables.normalized_version }}
-                        - Tag prefix: {{ variables.tag_prefix }}
-                        - Connector: {{ variables.connector_id }}
-                        - Analyzed in a batch of up to {{ consts.batch_size }} alerts
-                        {% if variables.auto_close_enabled -%}
-                        - Auto-close confidence range: {{ variables.auto_close_confidence_score_min_threshold }} to {{ variables.auto_close_confidence_score_max_threshold }}
-                        {%- endif %}
-
-                        ### Token Usage
-                        Shared across the {{ variables.pending_alert_count }} alerts of this execution,
-                        classified in {{ variables.batch_llm_calls }} model call(s):
-                        - Input tokens: {{ variables.batch_input_tokens }}
-                        - Output tokens: {{ variables.batch_output_tokens }}
-                        - Total tokens: {{ variables.batch_input_tokens | plus: variables.batch_output_tokens }}
-
-                        ### Timestamp
-                        {{ execution.startedAt | date: '%B %d, %Y at %H:%M:%S UTC' }}
-
-                      timelineId: ''
-                  headers:
-                    kbn-xsrf: string
-                    Content-Type: application/json
-
-              # -------------------------------------------------------------------
-              # Apply workflow tags to the alert
-              # -------------------------------------------------------------------
-              # Tags follow the convention (<prefix> is the configurable tag prefix):
-              #   <prefix>                          - marks the alert as processed
-              #   <prefix>.version.<ver>            - tracks the workflow version
-              #   <prefix>.classification.<cls>     - records the verdict
-              #   <prefix>.confidence.<score>       - records the confidence score
-              - name: set_tags
+              - name: select_alert_verdict
                 type: data.set
                 with:
-                  tags_to_add:
-                    - "{{ variables.tag_prefix }}"
-                    - "{{ variables.tag_prefix }}.version.{{ variables.normalized_version }}"
-                    - "{{ variables.tag_prefix }}.classification.{{ variables.alert_verdict.classification | downcase }}"
-                    - "{{ variables.tag_prefix }}.confidence.{{ variables.alert_verdict.confidence_score }}"
-                  tags_to_remove: "${{ foreach.item.kibana.alert.workflow_tags | where_exp: 'tag', variables.tags_filter_expr }}"
+                  # The model echoes the alert id back with each verdict, which is what pairs
+                  # a verdict with its alert. An alert the model skipped has no match here.
+                  # If the agent call failed and continued, the verdicts reference resolves
+                  # to undefined and `where` maps it to [], so the count is 0 for every
+                  # alert in the batch.
+                  alert_verdict: "${{ steps.runAgent_step.output.structured_output.verdicts | where: 'id', foreach.item._id | first }}"
+                  # Branch on the match count: a concrete number, so an alert with no
+                  # verdict can never inherit its predecessor's.
+                  alert_verdict_count: "${{ steps.runAgent_step.output.structured_output.verdicts | where: 'id', foreach.item._id | size }}"
 
-              # Remove stale tags first (if any) to avoid conflicts with the add.
-              - name: has_tags_to_remove
+              - name: check_alert_verdict_exists
                 type: if
-                condition: "${{ variables.tags_to_remove | has_exp: 'item', 'true' }}"
+                condition: "${{ variables.alert_verdict_count == 0 }}"
                 steps:
-                  - name: remove_stale_tags
+                  - name: log_alert_link_no_verdict
+                    type: console
+                    with:
+                      message: >-
+                        No verdict returned for alert {{ foreach.item._id }}:
+                        /app/security/alerts/redirect/{{ foreach.item._id }}
+
+                  # The alert stays untagged, so a re-run of the workflow will pick it up again.
+                  # NO continue: true here or on any apply write step: `continue` moves to the
+                  # NEXT body step (it does not skip the iteration), so a failed note write
+                  # would fall through to tagging/closing an alert that has no note. An
+                  # exhausted write fails this branch; mode: settled absorbs it and the
+                  # batch's remaining alerts stay untagged for a re-run.
+                  - name: add_no_data_note_to_alert
+                    type: kibana.request
+                    on-failure:
+                      retry:
+                        max-attempts: 3
+                        delay: 5s
+                    with:
+                      method: PATCH
+                      path: "/s/{{ workflow.spaceId }}/api/note"
+                      body:
+                        note:
+                          eventId: '{{ foreach.item._id }}'
+                          timelineId: ''
+                          note: |
+                            ❌ [{{workflow.name}}:{{execution.id}}]({{execution.url}})
+
+                            ---
+                            Error: the batch this alert was analyzed in returned no verdict for it.
+                      headers:
+                        kbn-xsrf: string
+                        Content-Type: application/json
+                else:
+
+                  # ---------------------------------------------------------------
+                  # Write the verdict note to the alert timeline
+                  # ---------------------------------------------------------------
+                  - name: add_verdict_note_to_alert
+                    type: kibana.request
+                    on-failure:
+                      retry:
+                        max-attempts: 3
+                        delay: 5s
+                    with:
+                      method: PATCH
+                      path: "/s/{{ workflow.spaceId }}/api/note"
+                      body:
+                        note:
+                          eventId: '{{ foreach.item._id }}'
+                          note: |
+                            ✅ [{{workflow.name}}:{{execution.id}}]({{execution.url}})
+
+                            ---
+                            ## Automated Alert Analysis
+                            ### Classification
+                            **{{ variables.alert_verdict.classification }}**
+
+                            ### Confidence Score
+                            {{ variables.alert_verdict.confidence_score }}
+
+                            ### Rationale
+                            {{ variables.alert_verdict.rationale }}
+
+                            ### Contributing Factors
+                            {% for factor in variables.alert_verdict.contributing_factors %}
+                            - {{ factor }}
+                            {%- endfor %}
+
+                            ### Analysis Details
+                            - Workflow version: {{ variables.normalized_version }}
+                            - Tag prefix: {{ variables.tag_prefix }}
+                            - Connector: {{ variables.connector_id }}
+                            - Analyzed in a batch of up to {{ consts.batch_size }} alerts
+                            {% if variables.auto_close_enabled -%}
+                            - Auto-close confidence range: {{ variables.auto_close_confidence_score_min_threshold }} to {{ variables.auto_close_confidence_score_max_threshold }}
+                            {%- endif %}
+
+                            ### Token Usage
+                            Usage of this batch's model call (shared by up to {{ consts.batch_size }} alerts):
+                            - Input tokens: {{ steps.runAgent_step.output.metadata.usage.inputTokens }}
+                            - Output tokens: {{ steps.runAgent_step.output.metadata.usage.outputTokens }}
+                            - Total tokens: {{ steps.runAgent_step.output.metadata.usage.inputTokens | plus: steps.runAgent_step.output.metadata.usage.outputTokens }}
+
+                            ### Timestamp
+                            {{ execution.startedAt | date: '%B %d, %Y at %H:%M:%S UTC' }}
+
+                          timelineId: ''
+                      headers:
+                        kbn-xsrf: string
+                        Content-Type: application/json
+
+                  # ---------------------------------------------------------------
+                  # Apply workflow tags to the alert
+                  # ---------------------------------------------------------------
+                  # Tags follow the convention (<prefix> is the configurable tag prefix):
+                  #   <prefix>                          - marks the alert as processed
+                  #   <prefix>.version.<ver>            - tracks the workflow version
+                  #   <prefix>.classification.<cls>     - records the verdict
+                  #   <prefix>.confidence.<score>       - records the confidence score
+                  - name: set_tags
+                    type: data.set
+                    with:
+                      tags_to_add:
+                        - "{{ variables.tag_prefix }}"
+                        - "{{ variables.tag_prefix }}.version.{{ variables.normalized_version }}"
+                        - "{{ variables.tag_prefix }}.classification.{{ variables.alert_verdict.classification | downcase }}"
+                        - "{{ variables.tag_prefix }}.confidence.{{ variables.alert_verdict.confidence_score }}"
+                      tags_to_remove: "${{ foreach.item.kibana.alert.workflow_tags | where_exp: 'tag', variables.tags_filter_expr }}"
+
+                  # Remove stale tags first (if any) to avoid conflicts with the add.
+                  - name: has_tags_to_remove
+                    type: if
+                    condition: "${{ variables.tags_to_remove | has_exp: 'item', 'true' }}"
+                    steps:
+                      - name: remove_stale_tags
+                        type: kibana.SetAlertTags
+                        with:
+                          ids:
+                            - '{{ foreach.item._id }}'
+                          tags:
+                            tags_to_remove: "${{ variables.tags_to_remove }}"
+                            tags_to_add: []
+
+                  # Add the new tags for this execution.
+                  - name: add_result_tags
                     type: kibana.SetAlertTags
+                    on-failure:
+                      retry:
+                        max-attempts: 3
+                        delay: 5s
                     with:
                       ids:
                         - '{{ foreach.item._id }}'
                       tags:
-                        tags_to_remove: "${{ variables.tags_to_remove }}"
-                        tags_to_add: []
+                        tags_to_remove: []
+                        tags_to_add: "${{ variables.tags_to_add }}"
 
-              # Add the new tags for this execution.
-              - name: add_result_tags
+                  # Accumulate the real alert id (foreach.item._id) — never the model's echo —
+                  # for this branch's bulk auto-close below. auto_close_ids is branch-local:
+                  # a fabricated id in the model's output cannot close an alert outside this
+                  # batch, and this batch cannot close another batch's alerts.
+                  - name: check_auto_close_qualifying
+                    type: if
+                    condition: "${{ variables.auto_close_enabled and variables.alert_verdict.classification == 'false_positive' and variables.alert_verdict.confidence_score >= variables.auto_close_confidence_score_min_threshold and variables.alert_verdict.confidence_score <= variables.auto_close_confidence_score_max_threshold }}"
+                    steps:
+                      - name: push_auto_close_id
+                        type: data.set
+                        with:
+                          auto_close_ids: "${{ variables.auto_close_ids | push: foreach.item._id }}"
+
+          # -----------------------------------------------------------------
+          # Auto-close: close this batch's qualifying alerts in bulk
+          # -----------------------------------------------------------------
+          # Branch-local auto_close_ids: two bulk calls per batch (tag + close), running
+          # in parallel across batches, instead of one global call after all batches.
+          # Same exhausted-write rule as the apply steps: a failed close marks this
+          # branch failed (settled absorbs it); the summary surfaces the failure.
+          - name: check_auto_close_conditions
+            type: if
+            condition: "${{ variables.auto_close_enabled and variables.auto_close_ids.size > 0 }}"
+            steps:
+              # Tag the alerts so they can be identified as auto-closed.
+              - name: set_close_tags
                 type: kibana.SetAlertTags
                 on-failure:
                   retry:
                     max-attempts: 3
                     delay: 5s
                 with:
-                  ids:
-                    - '{{ foreach.item._id }}'
+                  ids: "${{ variables.auto_close_ids }}"
                   tags:
                     tags_to_remove: []
-                    tags_to_add: "${{ variables.tags_to_add }}"
+                    tags_to_add:
+                      - "{{variables.tag_prefix}}.{{consts.closed_tag_suffix}}"
 
-              # Accumulate the real alert id (foreach.item._id) — never the model's echo — for
-              # the bulk auto-close call below. Using the actual alert id means a fabricated id
-              # in the model's output cannot close an alert it was not supposed to.
-              - name: check_auto_close_qualifying
-                type: if
-                condition: "${{ variables.auto_close_enabled and variables.alert_verdict.classification == 'false_positive' and variables.alert_verdict.confidence_score >= variables.auto_close_confidence_score_min_threshold and variables.alert_verdict.confidence_score <= variables.auto_close_confidence_score_max_threshold }}"
-                steps:
-                  - name: push_auto_close_id
-                    type: data.set
-                    with:
-                      auto_close_ids: "${{ variables.auto_close_ids | push: foreach.item._id }}"
-
-      # -----------------------------------------------------------------------
-      # Auto-close: close every alert that meets the FP thresholds, in bulk
-      # -----------------------------------------------------------------------
-      # When auto_close_enabled is true, alerts classified as false_positive with a
-      # confidence score inside the configured range are tagged and closed. Both APIs take
-      # a list of ids, so the whole execution closes in two calls rather than two per alert.
-      # auto_close_ids is accumulated inside apply_verdicts using foreach.item._id (the real
-      # alert id, never the model's echo), so a fabricated model id cannot close an unrelated alert.
-
-      - name: check_auto_close_conditions
-        type: if
-        condition: "${{ variables.auto_close_enabled and variables.auto_close_ids.size > 0 }}"
-        steps:
-          # Tag the alerts so they can be identified as auto-closed.
-          - name: set_close_tags
-            type: kibana.SetAlertTags
-            on-failure:
-              retry:
-                max-attempts: 3
-                delay: 5s
-            with:
-              ids: "${{ variables.auto_close_ids }}"
-              tags:
-                tags_to_remove: []
-                tags_to_add:
-                  - "{{variables.tag_prefix}}.{{consts.closed_tag_suffix}}"
-
-          # Close the alerts with reason "false_positive".
-          #
-          # Addressed by query rather than by `signal_ids`, because the step's `signal_ids` is a
-          # static list of ids in the document and this list is only known at run time. The
-          # detection-engine route treats both forms the same way: a `_update_by_query` filtered on
-          # `terms._id` running the same workflow-status script (see
-          # update_alerts_workflow_status.ts). `conflicts: proceed` keeps one alert that changed
-          # underneath us from aborting the close for the whole batch.
-          - name: close_alerts_as_false_positive
-            type: kibana.SetAlertsStatus
-            on-failure:
-              retry:
-                max-attempts: 3
-                delay: 5s
-            with:
-              status: 'closed'
-              reason: 'false_positive'
-              conflicts: 'proceed'
-              query:
-                bool:
-                  filter:
-                    terms:
-                      _id: "${{ variables.auto_close_ids }}"
+              # Close the alerts with reason "false_positive".
+              #
+              # Addressed by query rather than by `signal_ids`, because the step's
+              # `signal_ids` is a static list of ids in the document and this list is only
+              # known at run time. The detection-engine route treats both forms the same
+              # way: a `_update_by_query` filtered on `terms._id` running the same
+              # workflow-status script (see update_alerts_workflow_status.ts).
+              # `conflicts: proceed` keeps one alert that changed underneath us from
+              # aborting the close for the whole batch.
+              - name: close_alerts_as_false_positive
+                type: kibana.SetAlertsStatus
+                on-failure:
+                  retry:
+                    max-attempts: 3
+                    delay: 5s
+                with:
+                  status: 'closed'
+                  reason: 'false_positive'
+                  conflicts: 'proceed'
+                  query:
+                    bool:
+                      filter:
+                        terms:
+                          _id: "${{ variables.auto_close_ids }}"
 
       - name: log_batch_summary
         type: console
