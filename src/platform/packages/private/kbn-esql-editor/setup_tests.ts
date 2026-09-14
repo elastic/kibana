@@ -41,31 +41,14 @@ beforeAll(() => {
   }
 });
 
-// Monaco 0.54.0 Safari clipboard workaround cancels internal DeferredPromises, which surface as
-// unhandled rejections in Jest. Mock the clipboard API and swallow expected Canceled errors.
+// JSDOM has no navigator.clipboard. Monaco 0.54.0's WebKit clipboard workaround calls
+// navigator.clipboard.write() from a click/keydown listener on the editor container,
+// so we provide a minimal stub to keep that handler from throwing.
 Object.defineProperty(navigator, 'clipboard', {
   value: {
     writeText: jest.fn().mockResolvedValue(undefined),
     readText: jest.fn().mockResolvedValue(''),
-    write: jest.fn((items?: ClipboardItem[]) => {
-      // ClipboardItem data values may be cancelled DeferredPromises — attach .catch() so their
-      // rejection doesn't propagate, but rethrow anything that isn't an expected cancellation.
-      items?.forEach((item: any) => {
-        if (item?.data) {
-          Object.values(item.data).forEach((value: any) => {
-            if (value?.catch) {
-              value.catch((error: any) => {
-                // Only suppress expected cancellations; let real errors fail tests
-                if (error?.message !== 'Canceled' && error?.name !== 'Canceled') {
-                  throw error;
-                }
-              });
-            }
-          });
-        }
-      });
-      return Promise.resolve();
-    }),
+    write: jest.fn().mockResolvedValue(undefined),
     read: jest.fn().mockResolvedValue([]),
   },
   configurable: true,
