@@ -542,6 +542,36 @@ export const isNoDataQueryProvidedForStrategy = (data: {
 export const isNoDataStrategyNotEmit = (data: {
   no_data_strategy?: NoDataStrategy | null;
 }): boolean => data.no_data_strategy !== noDataStrategy.emit;
+
+/**
+ * Recovery transition thresholds are inert when recovery is disabled
+ * (`recovery_strategy` is `none` or unset), so we reject any `recovering_count`
+ * (including `0`) or `recovering_timeframe`. `recovering_count: 0` is not a
+ * delay — the episode recovers immediately — so it must not be configured while
+ * recovery is off.
+ */
+export const isRecoveryTransitionConsistentWithStrategy = (data: {
+  recovery_strategy?: RecoveryStrategy | null;
+  state_transition?: {
+    recovering_count?: number | null;
+    recovering_timeframe?: string | null;
+  } | null;
+}): boolean => {
+  const recoveryEnabled =
+    data.recovery_strategy != null && data.recovery_strategy !== recoveryStrategy.none;
+  if (recoveryEnabled) {
+    return true;
+  }
+
+  const stateTransition = data.state_transition;
+  if (stateTransition == null) {
+    return true;
+  }
+
+  const hasRecoveringConfig =
+    stateTransition.recovering_count != null || stateTransition.recovering_timeframe != null;
+  return !hasRecoveringConfig;
+};
 const rejectEmitNoDataStrategy = {
   message: 'no_data_strategy "emit" is not currently supported.',
   path: ['no_data_strategy'],
@@ -582,7 +612,12 @@ const applyCreateRuleRefinements = <T extends z.ZodObject<z.ZodRawShape>>(schema
         'query.no_data is required when no_data_strategy is not "none" for standalone-format rules.',
       path: ['query', 'no_data'],
     })
-    .refine(isNoDataStrategyNotEmit, rejectEmitNoDataStrategy);
+    .refine(isNoDataStrategyNotEmit, rejectEmitNoDataStrategy)
+    .refine(isRecoveryTransitionConsistentWithStrategy, {
+      message:
+        'state_transition.recovering_count and recovering_timeframe have no effect when recovery is disabled (recovery_strategy is "none" or unset).',
+      path: ['state_transition', 'recovering_count'],
+    });
 
 export const createRuleDataSchema = applyCreateRuleRefinements(createRuleDataBaseSchema).meta({
   id: 'alerting_new_rule',
