@@ -47,32 +47,13 @@ export function registerInternalConnectorRoutes({
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
-  // List agent-callable connectors (internal — for use by the connector discovery skill)
+  // List agent-callable connectors, or get detail for one via ?id=<connectorId>
   router.get(
     {
       path: `${internalApiPath}/connectors`,
-      validate: false,
-      options: { access: 'internal' },
-      security: AGENT_BUILDER_READ_SECURITY,
-    },
-    wrapHandler(async (_ctx, request, response) => {
-      const [, pluginsStart] = await coreSetup.getStartServices();
-      const actionsClient = await pluginsStart.actions.getActionsClientWithRequest(request);
-
-      const allowedIds = await resolveAllowedConnectorIds(request, getInternalServices());
-      const connectors = await listAgentConnectors(actionsClient, { allowedIds });
-
-      return response.ok<ListAgentConnectorsResponse>({ body: connectors });
-    })
-  );
-
-  // Get sub-actions for a specific connector (internal — for use by the connector discovery skill)
-  router.get(
-    {
-      path: `${internalApiPath}/connector/{connectorId}/sub_actions`,
       validate: {
-        params: schema.object({
-          connectorId: schema.string({ minLength: 1, maxLength: 512 }),
+        query: schema.object({
+          id: schema.maybe(schema.string({ minLength: 1, maxLength: 512 })),
         }),
       },
       options: { access: 'internal' },
@@ -81,33 +62,37 @@ export function registerInternalConnectorRoutes({
     wrapHandler(async (_ctx, request, response) => {
       const [, pluginsStart] = await coreSetup.getStartServices();
       const actionsClient = await pluginsStart.actions.getActionsClientWithRequest(request);
-
-      const { connectorId } = request.params;
-
       const allowedIds = await resolveAllowedConnectorIds(request, getInternalServices());
 
-      let detail: Awaited<ReturnType<typeof getAgentConnectorDetail>>;
-      try {
-        detail = await getAgentConnectorDetail(actionsClient, connectorId, { allowedIds });
-      } catch (e) {
-        const statusCode = (e as { output?: { statusCode?: number } }).output?.statusCode;
-        if (statusCode === 404) {
+      const { id: connectorId } = request.query;
+
+      if (connectorId) {
+        let detail: Awaited<ReturnType<typeof getAgentConnectorDetail>>;
+        try {
+          detail = await getAgentConnectorDetail(actionsClient, connectorId, { allowedIds });
+        } catch (e) {
+          const statusCode = (e as { output?: { statusCode?: number } }).output?.statusCode;
+          if (statusCode === 404) {
+            return response.notFound({
+              body: { message: `Connector '${connectorId}' not found.` },
+            });
+          }
+          throw e;
+        }
+
+        if (!detail) {
           return response.notFound({
-            body: { message: `Connector '${connectorId}' not found.` },
+            body: {
+              message: `Connector '${connectorId}' does not have a connector spec and cannot be used as an agent tool.`,
+            },
           });
         }
-        throw e;
+
+        return response.ok<AgentConnectorDetailResponse>({ body: detail });
       }
 
-      if (!detail) {
-        return response.notFound({
-          body: {
-            message: `Connector '${connectorId}' does not have a connector spec and cannot be used as an agent tool.`,
-          },
-        });
-      }
-
-      return response.ok<AgentConnectorDetailResponse>({ body: detail });
+      const connectors = await listAgentConnectors(actionsClient, { allowedIds });
+      return response.ok<ListAgentConnectorsResponse>({ body: connectors });
     })
   );
 }
