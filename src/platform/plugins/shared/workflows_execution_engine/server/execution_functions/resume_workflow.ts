@@ -109,6 +109,8 @@ export async function resumeWorkflow({
     node?.type !== 'enter-parallel' &&
     node?.stepId
   ) {
+    // Deadline checks need persisted step metadata before resume changes the execution status.
+    await stepIoService.load();
     const stepExecution = workflowExecutionState.getLatestStepExecution(node.stepId);
     const resumeAt = stepExecution?.state?.resumeAt;
     if (typeof resumeAt === 'string') {

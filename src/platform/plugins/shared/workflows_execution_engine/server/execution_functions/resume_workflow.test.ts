@@ -143,7 +143,12 @@ describe('resumeWorkflow', () => {
         const retryAt = new Date(startedAt.getTime() + 60_000);
         const expectedRetryAt = timeout ? new Date(startedAt.getTime() + 10_000) : retryAt;
         const resume = jest.fn();
+        let stepsLoaded = false;
+        const load = jest.fn(async () => {
+          stepsLoaded = true;
+        });
         mockSetupDependencies.mockResolvedValue({
+          stepIoService: { load },
           workflowRuntime: { resume, getCurrentNode: () => ({ type: 'wait', stepId: 'pause' }) },
           workflowExecutionGraph: { getWorkflowLevelTimeout: () => timeout },
           workflowExecutionCursor: { currentStackFrames: [] },
@@ -153,7 +158,8 @@ describe('resumeWorkflow', () => {
               currentNodeId: 'pause',
               startedAt: startedAt.toISOString(),
             }),
-            getLatestStepExecution: () => ({ state: { resumeAt: retryAt.toISOString() } }),
+            getLatestStepExecution: () =>
+              stepsLoaded ? { state: { resumeAt: retryAt.toISOString() } } : undefined,
           },
         } as never);
         const result = await resumeWorkflow({
@@ -171,6 +177,7 @@ describe('resumeWorkflow', () => {
           stepExecutionRepository: mockStepExecutionRepositoryForResume,
         });
         expect(result).toEqual({ retryAt: expectedRetryAt });
+        expect(load).toHaveBeenCalledTimes(1);
         expect(resume).not.toHaveBeenCalled();
         expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
       }
