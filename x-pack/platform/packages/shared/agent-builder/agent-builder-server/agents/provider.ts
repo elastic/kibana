@@ -313,9 +313,7 @@ export interface AgentHandlerContext {
    */
   subAgentExecutor: SubAgentExecutor;
   /**
-   * Agent registry scoped to the current user. Used to resolve peer agents by
-   * id — e.g. to look up descriptions for entries in `configuration.subagent_ids`
-   * when composing the `run_subagent` tool schema.
+   * Agent registry scoped to the current user
    */
   agentRegistry: AgentRegistry;
   /**
