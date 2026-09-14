@@ -471,10 +471,8 @@ export class EndpointAppContextService {
   }
 
   /**
-   * Resolve the username of the currently authenticated user for a request.
-   * Used to attribute actions (e.g. response actions dispatched by an AI agent
-   * skill) to the initiating analyst rather than the default system user, so
-   * the Response Actions audit trail records who requested the action.
+   * Username of the authenticated user for a request. Used to attribute
+   * agent-dispatched response actions to the initiating analyst for the audit trail.
    */
   public getCurrentUsername(request: KibanaRequest): string | undefined {
     return this.security?.authc.getCurrentUser(request)?.username;
