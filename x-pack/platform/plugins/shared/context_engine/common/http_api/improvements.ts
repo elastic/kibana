@@ -82,7 +82,11 @@ export interface ImprovementResolution {
 export interface ImprovementProvenance {
   /** The analysis run that produced it. */
   agent_run_id: string;
-  /** Signals it was derived from. */
+  /**
+   * Signals it was derived from. Empty when the evidence was the index itself rather than an
+   * observed retrieval — an indicator its source contradicts, an automation producing nothing —
+   * which is all a run over a window with no signals has to go on.
+   */
   signal_ids: string[];
   /** Spaces those signals came from. */
   signal_spaces: string[];

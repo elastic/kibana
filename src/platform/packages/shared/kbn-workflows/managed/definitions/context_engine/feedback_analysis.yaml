@@ -38,9 +38,13 @@ steps:
     with:
       ai_index_id: '{{ consts.AI_INDEX_ID }}'
 
+  # Runs whether or not there are signals. Signals are the sharpest evidence an index gives up, but
+  # not the only kind: an indicator contradicted by its source, an automation producing nothing, a
+  # source nothing covers are all visible without a single failed retrieval, and an index nobody has
+  # queried yet is exactly when its setup is worth checking.
   - name: analyze_and_record
     type: if
-    condition: '${{ steps.fetch_context.output.has_signals == true }}'
+    condition: '${{ steps.fetch_context.output.can_analyze == true }}'
     steps:
       - name: run_analysis_agent
         type: ai.agent
@@ -65,6 +69,6 @@ steps:
   - name: output_result
     type: workflow.output
     with:
-      analyzed: '${{ steps.fetch_context.output.has_signals | default: false }}'
+      analyzed: '${{ steps.fetch_context.output.can_analyze | default: false }}'
       recorded: '${{ steps.record_improvements.output.recorded | size | default: 0 }}'
       skipped: '${{ steps.record_improvements.output.skipped | size | default: 0 }}'
