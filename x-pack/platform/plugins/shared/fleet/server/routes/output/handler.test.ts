@@ -302,7 +302,9 @@ describe('Outputs handler', () => {
 
       expect(mockResponse.badRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({ message: expect.stringContaining('Cannot change output ID') }),
+          body: expect.objectContaining({
+            message: expect.stringContaining('Cannot change output ID'),
+          }),
         })
       );
       expect(outputService.update).not.toHaveBeenCalled();
