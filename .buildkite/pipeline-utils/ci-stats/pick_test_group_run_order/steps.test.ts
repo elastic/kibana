@@ -16,8 +16,8 @@ import {
   buildJestStep,
   registerCancelKeys,
   sortFunctionalGroups,
-} from './steps';
-import type { FunctionalGroup } from './types';
+} from './steps.ts';
+import type { FunctionalGroup } from './types.ts';
 
 describe('buildJestStep', () => {
   const baseOpts = {
