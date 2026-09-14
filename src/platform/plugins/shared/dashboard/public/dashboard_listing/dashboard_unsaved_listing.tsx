@@ -83,7 +83,7 @@ const DashboardUnsavedItem = ({
           <EuiIcon
             color="text"
             css={styles.icon}
-            type={title ? 'dashboardApp' : 'clock'}
+            type={title ? 'productDashboard' : 'clock'}
             aria-hidden={true}
           />
         </EuiFlexItem>

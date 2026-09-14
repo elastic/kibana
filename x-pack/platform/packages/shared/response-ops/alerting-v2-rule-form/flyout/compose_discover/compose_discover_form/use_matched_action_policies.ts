@@ -15,8 +15,6 @@ import { ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH } from '@kbn/alerting-v2-co
 
 interface UseMatchedActionPoliciesParams {
   http: HttpStart;
-  ruleId?: string;
-  name?: string;
   tags?: string[];
 }
 
@@ -29,34 +27,23 @@ export interface UseMatchedActionPoliciesResult {
 
 export const useMatchedActionPolicies = ({
   http,
-  ruleId,
-  name,
   tags,
 }: UseMatchedActionPoliciesParams): UseMatchedActionPoliciesResult => {
-  const enabled = Boolean(ruleId) || Boolean(name) || Boolean(tags?.length);
-
-  const body = {
-    rule: {
-      ...(ruleId ? { id: ruleId } : {}),
-      ...(name ? { name } : {}),
-      ...(tags?.length ? { tags } : {}),
-    },
-  };
+  const body = { rule: tags?.length ? { tags } : {} };
 
   const { isLoading, error, data } = useQuery({
-    queryKey: ['matchedActionPolicies', ruleId, name, tags],
+    queryKey: ['matchedActionPolicies', tags],
     queryFn: () =>
       http.fetch<MatchActionPoliciesForRuleResponse>(
         `${ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH}/_match_for_rule`,
         { method: 'POST', body: JSON.stringify(body) }
       ),
-    enabled,
     keepPreviousData: true,
     refetchOnWindowFocus: false,
   });
 
   return {
-    isLoading: enabled && isLoading,
+    isLoading,
     error: error instanceof Error ? error : error != null ? new Error(String(error)) : null,
     items: data?.items ?? [],
     total: data?.total ?? 0,

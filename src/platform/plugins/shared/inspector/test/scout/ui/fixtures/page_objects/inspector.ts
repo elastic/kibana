@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
 import type { Locator, ScoutPage } from '@kbn/scout';
 
 export type InspectorView = 'Requests' | 'Data';
@@ -52,7 +53,14 @@ export class Inspector {
   }
 
   async open(openButtonTestSubj: string = 'openInspectorButton') {
-    await this.page.testSubj.click(openButtonTestSubj);
+    const openButton = this.page.testSubj.locator(openButtonTestSubj);
+    if (!(await openButton.isVisible())) {
+      const overflowButton = this.page.testSubj.locator(APP_MENU_TEST_SUBJECTS.overflowButton);
+      if (await overflowButton.isVisible()) {
+        await overflowButton.click();
+      }
+    }
+    await openButton.click();
     await this.panel.waitFor({ state: 'visible' });
   }
 
