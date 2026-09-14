@@ -33,6 +33,14 @@ classification, and internal request authentication come from #286850.
   This is an integration gap beyond #286850's stated ES-client-401 refresh scope.
   The expiry suite retains a failing assertion for this scenario, alongside the
   passing ES-first case; do not treat the suite as green.
+- Saved Slack Stack connector after expiry: passed against a local mock webhook.
+  After two 40-second HTTP calls, the connector sent the expected body using its
+  stored webhook URL. No SA Authorization header was sent to the webhook, and the
+  following Kibana identity call authenticated as the bound SA. This exercises the
+  in-process, request-scoped Actions client path, which uses dynamic privilege checks.
+  Other connector types have not been established by this probe. The Index connector
+  was attempted but is not a supported workflow step in this revision; validation
+  rejected it before execution.
 - Agent Builder execution: passed, but the triggering user's conversation lookup
   still returned 404.
 - Editor execution: passed; denied editor YAML rebinding still returned 500 rather
@@ -71,8 +79,10 @@ an unrelated ES step into user workflows.
 - The full repository-check invocation was not clean: it recorded the subsequently
   fixed generated metadata and the worker crash, and did not finish the whole
   Workflows management suite. The affected focused checks passed independently.
-- Live expiry suite: one pass (ES first), one failure (Kibana first). This failure
+- Direct-request live expiry suite: one pass (ES first), one failure (Kibana first). This failure
   remains unresolved and is intentionally visible in the draft integration.
+
+- Saved-connector expiry probe: one pass; its lint and scoped type checks passed.
 
 ## Reproduction
 

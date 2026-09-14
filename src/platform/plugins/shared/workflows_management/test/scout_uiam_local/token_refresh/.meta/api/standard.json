@@ -1,9 +1,23 @@
 {
-  "sha1": "",
+  "sha1": "5420f5c032b715f729e51ce2dc0821690d56d8c1",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "488a8ebd21091b8-377c7109d74e9bf",
+      "title": "Workflow Stack connector service-account token refresh executes a saved Slack connector after token expiry",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_uiam_local/token_refresh/api/tests/service_account_connector_refresh.spec.ts",
+        "line": 26,
+        "column": 15
+      }
+    },
     {
       "id": "1fd313bab75077f-1e6d7f9bf4fc487",
       "title": "Workflow service-account token refresh keeps the bound identity when elasticsearch is called first after expiry",
