@@ -626,7 +626,46 @@ describe('TracesPanel', () => {
       );
     });
 
-    it('is absent while the feedback loop feature flag is off', () => {
+    it('says a run is already going rather than claiming this one started', async () => {
+      // The workflow runs one analysis per index at a time and discards the rest. A success toast
+      // here would promise improvements from a run that was thrown away.
+      mockRunFeedbackAnalysis.mockRejectedValue(
+        Object.assign(new Error('Feedback analysis is already running'), {
+          body: { statusCode: 409 },
+        })
+      );
+
+      renderPanel({ aiIndex: buildAiIndex({ enabled: true }) });
+
+      fireEvent.click(screen.getByTestId('contextImprovementsRunNowButton'));
+
+      await waitFor(() => expect(mockToasts.addWarning).toHaveBeenCalled());
+      expect(mockToasts.addError).not.toHaveBeenCalled();
+      expect(mockToasts.addSuccess).not.toHaveBeenCalled();
+    });
+
+    it('still reports a run that genuinely failed as an error', async () => {
+      mockRunFeedbackAnalysis.mockRejectedValue(new Error('workflows unavailable'));
+
+      renderPanel({ aiIndex: buildAiIndex({ enabled: true }) });
+
+      fireEvent.click(screen.getByTestId('contextImprovementsRunNowButton'));
+
+      await waitFor(() => expect(mockToasts.addError).toHaveBeenCalled());
+      expect(mockToasts.addWarning).not.toHaveBeenCalled();
+    });
+
+    it('leaves the agent, interval and signal window to their defaults', () => {
+      // They are per-index overrides of settings that already have server-side defaults, so the
+      // API keeps taking them while the page stays down to the decision that matters.
+      renderPanel({ aiIndex: buildAiIndex({ enabled: true }) });
+
+      expect(screen.queryByTestId('contextImprovementsIntervalSelect')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('contextImprovementsSignalWindowSelect')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('contextFeedbackAgentSelect')).not.toBeInTheDocument();
+    });
+
+    it('is absent while the feedback loop is off, though traces stay selectable', () => {
       mockFeedbackLoopEnabled.mockReturnValue(false);
       renderPanel();
 

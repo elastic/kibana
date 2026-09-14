@@ -37,7 +37,7 @@ import { registerDataStreamsRoutes } from './routes/data_streams';
 import type { WorkflowProvider } from './workflows/provider';
 import type {
   FeedbackAnalysisScheduleService,
-  WorkflowEnablementApi,
+  WorkflowsManagementPort,
 } from './feedback_analysis/schedule';
 import { createFeedbackAnalysisScheduleService } from './feedback_analysis/schedule';
 import { AiIndexDataReadService } from './ai_indices/data_read_service';
@@ -79,7 +79,7 @@ export class ContextEnginePlugin
   private esClient?: ElasticsearchClient;
   private scheduleService?: FeedbackAnalysisScheduleService;
   /** Captured at setup because the schedule service, built at start, enables workflows with it. */
-  private workflowsManagement?: WorkflowEnablementApi;
+  private workflowsManagement?: WorkflowsManagementPort;
   /** Registered by `contextEngineAgentBuilder`, which can depend on both this plugin and workflows. */
   private workflowProvider?: WorkflowProvider;
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;

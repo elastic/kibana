@@ -10,20 +10,15 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { MutateImprovementResponse } from '../../../common/http_api/improvements';
 import { approveImprovement, rejectImprovement } from '../api/improvements';
 import { getErrorMessage } from '../utils/get_error_message';
+import { isConflict } from '../utils/is_conflict';
 import { contextEngineQueryKeys } from './query_keys';
 import { useKibana } from './use_kibana';
-
-/** HTTP status the decision routes use for an improvement someone else decided first. */
-const CONFLICT = 409;
 
 interface DecideImprovementVariables {
   improvementId: string;
   /** Only carried by a rejection. */
   reason?: string;
 }
-
-const isConflict = (error: Error): boolean =>
-  (error as { body?: { statusCode?: number } }).body?.statusCode === CONFLICT;
 
 /**
  * Approves or rejects a single improvement.
