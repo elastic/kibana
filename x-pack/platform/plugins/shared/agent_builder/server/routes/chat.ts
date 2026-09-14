@@ -311,14 +311,16 @@ export const userMessagePayloadSchema = schema.object({
   attachments: attachmentsSchema,
 });
 
+const triggerAgentPayloadSchema = conversePayloadSchema.extends({
+  trigger_mode: schema.oneOf([schema.literal('always')], {
+    defaultValue: 'always',
+    meta: { description: 'Use never to append a user message without executing the agent.' },
+  }),
+});
+
 export const chatPayloadSchema = schema.oneOf([
   userMessagePayloadSchema,
-  conversePayloadSchema.extends({
-    trigger_mode: schema.oneOf([schema.literal('always')], {
-      defaultValue: 'always',
-      meta: { description: 'Use never to append a user message without executing the agent.' },
-    }),
-  }),
+  triggerAgentPayloadSchema,
 ]);
 
 export const callbackConversePayloadSchema = conversePayloadSchema.extends({
