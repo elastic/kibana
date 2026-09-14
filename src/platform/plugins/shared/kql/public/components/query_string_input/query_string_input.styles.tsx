@@ -40,11 +40,17 @@ const queryStringInputStyles = {
         },
         '> .euiFormControlLayoutIcons': {
           maxHeight: euiTheme.size.xxl,
+          // Icons are siblings of EuiTextArea's FormControlLayout wrapper, not of the
+          // <textarea> itself — keep them above the field so the clear gutter can cover
+          // glyphs that paint into the padding box (elastic/kibana#106963).
+          zIndex: euiTheme.levels.flyout,
         },
-        // Opaque gutter behind the clear control. A <textarea> with overflow:hidden
-        // clips at the padding edge, so paddingRight alone cannot keep unbroken /
-        // nowrap glyphs from painting under the × (see elastic/kibana#106963).
-        '&:has(> .kbnQueryBar__textarea--isClearable) > .euiFormControlLayoutIcons:last-child': {
+        // Opaque gutter behind the clear control. EuiTextArea wraps the <textarea> in
+        // EuiFormControlLayout, so a direct-child :has(> .kbnQueryBar__textarea--) never
+        // matches; target the icons group that actually contains the clear button instead.
+        // paddingRight alone cannot keep unbroken / nowrap glyphs from painting under the ×
+        // because textarea overflow clips at the padding edge.
+        '> .euiFormControlLayoutIcons:has(.euiFormControlLayoutClearButton)': {
           backgroundColor: euiTheme.components.forms.background,
           // Match the clearable paddingRight affordance (xxl) and sit flush to the
           // field edge so the scrim covers the full gutter EUI insets from `right`.
@@ -84,15 +90,6 @@ const queryStringInputStyles = {
           whiteSpace: `pre-wrap`,
           maxHeight: `calc(35vh - 100px)`,
           minHeight: euiTheme.size.xl,
-        },
-
-        '~.euiFormControlLayoutIcons': {
-          // By default form control layout icon is vertically centered, but our textarea
-          // can expand to be multi-line, so we position it with padding that matches
-          // the parent textarea padding
-          zIndex: euiTheme.levels.flyout,
-          top: euiTheme.size.m,
-          bottom: 'unset',
         },
 
         '&.kbnQueryBar__textarea--withPrepend': {
