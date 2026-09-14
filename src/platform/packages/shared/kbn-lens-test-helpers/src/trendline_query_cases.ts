@@ -327,6 +327,18 @@ export const buildTrendlineQueryCases = ({ index }: { index: string }): Trendlin
       metricFields: ['total'],
     },
     {
+      // a non-STATS branch is metric-matched when its KEEP projection makes
+      // the output scope enumerable and it carries the raw metric field
+      description: 'FORK query selecting a KEEP-projected branch by raw metric field',
+      sourceQuery: `FROM ${index} | FORK (WHERE bytes > 0 | KEEP bytes) (STATS total = COUNT(*))`,
+      expectedQuery: `FROM ${index} | WHERE bytes > 0 | KEEP bytes, @timestamp | STATS AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
+      expectedTimeField: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+      expectedMetricFields: ['AVG(bytes)'],
+      metricFields: ['bytes'],
+      expectedMetricFieldMap: { bytes: 'AVG(bytes)' },
+      expectedUnavailableMetricFields: [],
+    },
+    {
       description: 'FORK query with WHERE-only branches and raw metric fields',
       sourceQuery: `FROM ${index} | FORK (WHERE bytes > 0) (WHERE bytes <= 0)`,
       expectedQuery: `FROM ${index} | WHERE bytes > 0 | STATS AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,

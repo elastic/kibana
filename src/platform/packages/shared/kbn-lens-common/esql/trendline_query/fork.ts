@@ -92,6 +92,11 @@ export const commandsProduceColumn = (commands: ESQLCommand[], columnName: strin
  * first branch producing the highest-priority metric column wins, so a
  * secondary metric from an earlier branch cannot hijack the selection.
  * Fallback: first branch containing a STATS command, then the first branch.
+ *
+ * Only branches with an enumerable output scope can be metric-matched: a
+ * branch ending in STATS or a KEEP projection. Open-scope branches (e.g.
+ * WHERE-only) may well carry a raw metric field but cannot prove it, so they
+ * are never selected by metric and are reachable only via the fallbacks.
  */
 const selectForkBranch = (
   branches: ESQLCommand[][],
