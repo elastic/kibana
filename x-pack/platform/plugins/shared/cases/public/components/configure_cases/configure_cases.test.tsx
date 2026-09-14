@@ -10,38 +10,38 @@ import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 
-import { ConnectorTypes } from '../../../../common/types/domain';
+import { ConnectorTypes } from '../../../common/types/domain';
 import { ConfigureCasesRedesign } from './configure_cases';
 import {
   customFieldsConfigurationMock,
   observableTypesMock,
   templatesConfigurationMock,
-} from '../../../containers/mock';
-import { renderWithTestingProviders } from '../../../common/mock';
-import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
-import { usePersistConfiguration } from '../../../containers/configure/use_persist_configuration';
-import { useGetActionTypes } from '../../../containers/configure/use_action_types';
-import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
-import { useLicense } from '../../../common/use_license';
-import { useKibana } from '../../../common/lib/kibana';
+} from '../../containers/mock';
+import { renderWithTestingProviders } from '../../common/mock';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { usePersistConfiguration } from '../../containers/configure/use_persist_configuration';
+import { useGetActionTypes } from '../../containers/configure/use_action_types';
+import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
+import { useLicense } from '../../common/use_license';
+import { useKibana } from '../../common/lib/kibana';
 import {
   useActionTypesResponse,
   useCaseConfigureResponse,
   useConnectorsResponse,
   usePersistConfigurationMockResponse,
-} from '../../configure_cases/__mock__';
-import * as configureCasesI18n from '../../configure_cases/translations';
-import * as customFieldsI18n from '../../custom_fields/translations';
-import * as templatesI18n from '../../templates/translations';
-import * as observableTypesI18n from '../../observable_types/translations';
-import { CASE_SETTINGS_TITLE } from '../translations';
+} from './__mock__';
+import * as configureCasesI18n from './translations';
+import * as customFieldsI18n from '../custom_fields/translations';
+import * as templatesI18n from '../templates/translations';
+import * as observableTypesI18n from '../observable_types/translations';
+import { CASE_SETTINGS_TITLE } from './translations';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../containers/configure/use_get_supported_action_connectors');
-jest.mock('../../../containers/configure/use_get_case_configuration');
-jest.mock('../../../containers/configure/use_persist_configuration');
-jest.mock('../../../containers/configure/use_action_types');
-jest.mock('../../../common/use_license');
+jest.mock('../../common/lib/kibana');
+jest.mock('../../containers/configure/use_get_supported_action_connectors');
+jest.mock('../../containers/configure/use_get_case_configuration');
+jest.mock('../../containers/configure/use_persist_configuration');
+jest.mock('../../containers/configure/use_action_types');
+jest.mock('../../common/use_license');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
@@ -94,7 +94,7 @@ describe('ConfigureCasesRedesign', () => {
       isAtLeastPlatinum: () => true,
     });
 
-    const { useCasesConfig } = jest.requireMock('../../../common/lib/kibana');
+    const { useCasesConfig } = jest.requireMock('../../common/lib/kibana');
     useCasesConfig.mockReturnValue({
       attachmentsEnabled: false,
       chatEnabled: false,
@@ -188,7 +188,7 @@ describe('ConfigureCasesRedesign', () => {
   });
 
   it('renders the legacy section with switch off by default when templates v2 is enabled', async () => {
-    const { useCasesConfig } = jest.requireMock('../../../common/lib/kibana');
+    const { useCasesConfig } = jest.requireMock('../../common/lib/kibana');
     useCasesConfig.mockReturnValue({
       attachmentsEnabled: false,
       chatEnabled: false,
@@ -206,7 +206,7 @@ describe('ConfigureCasesRedesign', () => {
   });
 
   it('shows legacy custom fields and templates lists when the switch is turned on', async () => {
-    const { useCasesConfig } = jest.requireMock('../../../common/lib/kibana');
+    const { useCasesConfig } = jest.requireMock('../../common/lib/kibana');
     useCasesConfig.mockReturnValue({
       attachmentsEnabled: false,
       chatEnabled: false,
@@ -224,7 +224,7 @@ describe('ConfigureCasesRedesign', () => {
   });
 
   it('forces the show-legacy switch on when required fields lack defaults', async () => {
-    const { useCasesConfig } = jest.requireMock('../../../common/lib/kibana');
+    const { useCasesConfig } = jest.requireMock('../../common/lib/kibana');
     useCasesConfig.mockReturnValue({
       attachmentsEnabled: false,
       chatEnabled: false,
@@ -254,7 +254,7 @@ describe('ConfigureCasesRedesign', () => {
   });
 
   it('shows add buttons for empty legacy custom fields and templates when the switch is on', async () => {
-    const { useCasesConfig } = jest.requireMock('../../../common/lib/kibana');
+    const { useCasesConfig } = jest.requireMock('../../common/lib/kibana');
     useCasesConfig.mockReturnValue({
       attachmentsEnabled: false,
       chatEnabled: false,
@@ -288,7 +288,7 @@ describe('ConfigureCasesRedesign', () => {
   });
 
   it('opens add custom field flyout with add header when switch is on', async () => {
-    const { useCasesConfig } = jest.requireMock('../../../common/lib/kibana');
+    const { useCasesConfig } = jest.requireMock('../../common/lib/kibana');
     useCasesConfig.mockReturnValue({
       attachmentsEnabled: false,
       chatEnabled: false,
@@ -307,7 +307,7 @@ describe('ConfigureCasesRedesign', () => {
   });
 
   it('opens add flyout after edit without keeping the previous field', async () => {
-    const { useCasesConfig } = jest.requireMock('../../../common/lib/kibana');
+    const { useCasesConfig } = jest.requireMock('../../common/lib/kibana');
     useCasesConfig.mockReturnValue({
       attachmentsEnabled: false,
       chatEnabled: false,
@@ -336,7 +336,7 @@ describe('ConfigureCasesRedesign', () => {
   });
 
   it('persists custom field deletion when switch is on', async () => {
-    const { useCasesConfig } = jest.requireMock('../../../common/lib/kibana');
+    const { useCasesConfig } = jest.requireMock('../../common/lib/kibana');
     useCasesConfig.mockReturnValue({
       attachmentsEnabled: false,
       chatEnabled: false,
