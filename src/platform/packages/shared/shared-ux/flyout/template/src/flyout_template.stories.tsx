@@ -10,7 +10,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { FlyoutTemplate } from './flyout_template';
 import {
   type SharedStoryArgs,
@@ -406,6 +415,35 @@ export const MenuBarHistory: Story = {
   render: WithHistoryRender,
 };
 
+const NotifyOnChangeSwitch = (): React.JSX.Element => {
+  const [checked, setChecked] = useState(false);
+  return (
+    <EuiSwitch
+      compressed
+      label="Notify on change"
+      checked={checked}
+      onChange={(event) => setChecked(event.target.checked)}
+    />
+  );
+};
+
+/**
+ * Header blocks whose values are real tab stops, so the collapsible region is not inert content.
+ * Returned as an array to keep each part a direct child of `Header`.
+ */
+const focusableHeaderBlocks = () => [
+  <FlyoutTemplate.Header.MetaBlock key="oncall" title="On call">
+    <EuiToolTip content="Platform team, paged until Friday 18:00 UTC">
+      <EuiLink href="#" onClick={(event) => event.preventDefault()}>
+        platform-oncall@elastic.co
+      </EuiLink>
+    </EuiToolTip>
+  </FlyoutTemplate.Header.MetaBlock>,
+  <FlyoutTemplate.Header.InfoBlock key="notifications" title="Notifications">
+    <NotifyOnChangeSwitch />
+  </FlyoutTemplate.Header.InfoBlock>,
+];
+
 const HeaderCollapseOnScrollRender = (args: Args): React.JSX.Element => {
   const pagination = usePaginationProps(args);
   const body = (
@@ -425,7 +463,7 @@ const HeaderCollapseOnScrollRender = (args: Args): React.JSX.Element => {
       {headerZone(
         args,
         'Flyout title is quite long, so that it takes up 2 lines of text and then some',
-        undefined,
+        focusableHeaderBlocks(),
         { collapsed: args.headerIsCollapsed }
       )}
       {bodyZone(
