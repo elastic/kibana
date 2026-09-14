@@ -47,6 +47,7 @@ import type { SecurityStartMock } from '@kbn/core-security-server-mocks';
 import type { ActionsAuthorizationMock } from '@kbn/actions-plugin/server/authorization/actions_authorization.mock';
 import type { BackfillClient } from './backfill_client/backfill_client';
 import { asSpaceId } from '@kbn/core-spaces-common';
+import { bulkMarkApiKeysForInvalidation } from './invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 
 let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
 let savedObjectsService: ReturnType<typeof savedObjectsServiceMock.createInternalStartContract>;
@@ -70,6 +71,7 @@ let scopedChangeTrackingService: {
 
 jest.mock('./rules_client');
 jest.mock('./authorization/alerting_authorization');
+jest.mock('./invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation');
 
 describe('RulesClientFactory', () => {
   beforeEach(() => {
@@ -1316,6 +1318,36 @@ describe('RulesClientFactory', () => {
       });
 
       expect(uiamInvalidate).not.toHaveBeenCalled();
+    });
+
+    test('queues the key when ES invalidate finds nothing', async () => {
+      const constructorCall = await setupFactory();
+      securityService.authc.apiKeys.invalidateAsInternalUser.mockResolvedValueOnce({
+        invalidated_api_keys: [],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+      });
+
+      await constructorCall.invalidateApiKeyNow({ ruleName: 'rule-x', apiKey: esApiKey });
+
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+        { apiKeys: [esApiKey] },
+        expect.anything(),
+        rulesClientFactoryParams.internalSavedObjectsRepository
+      );
+    });
+
+    test('does not queue when ES invalidate succeeds', async () => {
+      const constructorCall = await setupFactory();
+      securityService.authc.apiKeys.invalidateAsInternalUser.mockResolvedValueOnce({
+        invalidated_api_keys: ['es-id'],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+      });
+
+      await constructorCall.invalidateApiKeyNow({ ruleName: 'rule-x', apiKey: esApiKey });
+
+      expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
     });
   });
 });
