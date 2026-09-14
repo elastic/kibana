@@ -412,6 +412,8 @@ steps:
         {% endif %}
         {% endif %}
         {% if steps.diagnose_rule.output.structured_output.change_type == "risk_score" %}
+        Current risk score: {{ steps.fetch_rule.output.risk_score }}
+        Current severity: {{ steps.fetch_rule.output.severity }}
         Proposed risk score: {{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}
         Proposed severity: {{ steps.diagnose_rule.output.structured_output.proposed_severity }}
         {% if steps.classify_proposal.output.can_apply_risk_score %}
