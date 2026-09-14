@@ -14,6 +14,7 @@ import { LICENSING_CASE_OBSERVABLES_FEATURE } from '../../common/constants';
 import { getObservablesFromEcs } from '../../../common/observables/get_observables_from_ecs';
 import type { FlattedEcsData } from '../../../common/observables/get_observables_from_ecs';
 import { toStringArray } from '../../../common/utils/attachments/string_utils';
+import { getIndexFromMetadata } from '../../../common/utils/attachments/index_metadata';
 import {
   isUnifiedAlertAttachment,
   isUnifiedEventAttachment,
@@ -39,8 +40,10 @@ const zipIdsAndIndices = (ids: string[], indices: string[]): AlertInfo[] => {
  */
 const getAlertInfoFromAttachment = (attachment: UnifiedAttachmentPayload): AlertInfo[] => {
   if (isUnifiedAlertAttachment(attachment) || isUnifiedEventAttachment(attachment)) {
-    const metadata = (attachment.metadata ?? {}) as { index?: unknown };
-    return zipIdsAndIndices(toStringArray(attachment.attachmentId), toStringArray(metadata.index));
+    return zipIdsAndIndices(
+      toStringArray(attachment.attachmentId),
+      toStringArray(getIndexFromMetadata(attachment.metadata))
+    );
   }
 
   return [];

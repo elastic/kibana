@@ -46,6 +46,7 @@ import { extractCommentContent, isUnifiedPayloadCommentAttachment } from '../att
 import type {
   AttachmentAttributesV2,
   UnifiedAttachmentPayload,
+  UnifiedReferenceAttachmentPayload,
 } from '../../../common/types/domain/attachment/v2';
 
 type CaseCommentModelParams = Omit<CasesClientArgs, 'authorization'>;
@@ -332,13 +333,11 @@ export class CaseCommentModel {
     // metadata.index is "scalar broadcast OR 1-to-1 array of matching length"; an array
     // whose length does not match attachmentId has no sensible interpretation and is
     // rejected.
-    const dedupeUnifiedAttachment = <
-      T extends { attachmentId: string | string[]; metadata?: unknown }
-    >(
+    const dedupeUnifiedAttachment = <T extends UnifiedReferenceAttachmentPayload>(
       attachment: T,
       idsAlreadyInCase: Set<string>
     ): T | undefined => {
-      const { ids } = getIDsAndIndicesAsArrays(attachment as unknown as UnifiedAttachmentPayload);
+      const { ids } = getIDsAndIndicesAsArrays(attachment);
       const existingMetadata =
         attachment.metadata && typeof attachment.metadata === 'object'
           ? (attachment.metadata as Record<string, unknown>)

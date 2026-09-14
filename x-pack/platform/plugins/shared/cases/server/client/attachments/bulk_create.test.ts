@@ -56,6 +56,15 @@ describe('bulkCreate', () => {
     ).rejects.toThrow('invalid keys "foo"');
   });
 
+  it('rejects a legacy v1 body', async () => {
+    const v1Comment = { type: 'user', comment: 'a legacy comment', owner: SECURITY_SOLUTION_OWNER };
+
+    await expect(
+      // @ts-expect-error: legacy v1 shape is no longer accepted, client is unified-only
+      bulkCreate({ attachments: [v1Comment], caseId }, clientArgs)
+    ).rejects.toThrow();
+  });
+
   it(`throws error when attachments are more than ${MAX_BULK_CREATE_ATTACHMENTS}`, async () => {
     const attachments = Array(MAX_BULK_CREATE_ATTACHMENTS + 1).fill(comment);
 

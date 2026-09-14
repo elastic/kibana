@@ -38,15 +38,17 @@ export const bulkCreate = async (
   } = clientArgs;
 
   try {
-    decodeWithExcessOrThrow(BulkCreateUnifiedAttachmentsRequestRt)(attachments);
+    const decodedAttachments = decodeWithExcessOrThrow(BulkCreateUnifiedAttachmentsRequestRt)(
+      attachments
+    );
 
     await validateMaxUserActions({
       caseId,
       userActionService,
-      userActionsToAdd: attachments.length,
+      userActionsToAdd: decodedAttachments.length,
     });
 
-    attachments.forEach((attachment) => {
+    decodedAttachments.forEach((attachment) => {
       validateUnifiedAttachments({
         query: attachment,
         unifiedAttachmentTypeRegistry,
@@ -56,7 +58,9 @@ export const bulkCreate = async (
     const [attachmentsWithIds, entities]: [
       Array<{ id: string } & UnifiedAttachmentPayload>,
       OwnerEntity[]
-    ] = attachments.reduce<[Array<{ id: string } & UnifiedAttachmentPayload>, OwnerEntity[]]>(
+    ] = decodedAttachments.reduce<
+      [Array<{ id: string } & UnifiedAttachmentPayload>, OwnerEntity[]]
+    >(
       ([a, e], attachment) => {
         const savedObjectID = SavedObjectsUtils.generateId();
         return [
@@ -90,7 +94,7 @@ export const bulkCreate = async (
     }
 
     // This call never throws — failures are logged and do not abort the attachment creation.
-    await extractAndAddObservables(caseId, attachments, updatedCase, clientArgs);
+    await extractAndAddObservables(caseId, decodedAttachments, updatedCase, clientArgs);
 
     return updatedCase;
   } catch (error) {
