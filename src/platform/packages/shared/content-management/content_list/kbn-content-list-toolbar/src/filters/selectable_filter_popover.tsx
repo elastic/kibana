@@ -337,7 +337,12 @@ export const SelectableFilterPopover = <T extends object = Record<string, unknow
               )}
               <EuiHorizontalRule margin="none" />
               {headerContent && (
-                <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" style={{ paddingBottom: 0 }}>
+                <EuiPanel
+                  hasBorder={false}
+                  hasShadow={false}
+                  paddingSize="s"
+                  style={{ paddingBottom: 0 }}
+                >
                   {headerContent}
                 </EuiPanel>
               )}
