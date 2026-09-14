@@ -11,6 +11,7 @@ import React from 'react';
 import type { EuiButtonProps } from '@elastic/eui';
 import type { UiCounterMetricType } from '@kbn/analytics';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FieldVisualizeButtonInner } from './field_visualize_button_inner';
@@ -50,8 +51,17 @@ export const FieldVisualizeButton: React.FC<FieldVisualizeButtonProps> = React.m
     const handleVisualizeLinkClick = async (
       event: React.MouseEvent<HTMLAnchorElement, MouseEvent>
     ) => {
+      if (
+        visualizeInfo.href &&
+        (event.defaultPrevented || event.button !== 0 || hasActiveModifierKey(event))
+      ) {
+        // let the browser handle the modified click on the link natively (e.g. open in a new tab)
+        return;
+      }
+
       // regular link click. let the uiActions code handle the navigation and show popup if needed
       event.preventDefault();
+      const openInNewTab = hasActiveModifierKey(event);
 
       const triggerVisualization = (updatedDataView: DataView) => {
         trackUiMetric?.(METRIC_TYPE.CLICK, 'visualize_link_click');
@@ -60,7 +70,8 @@ export const FieldVisualizeButton: React.FC<FieldVisualizeButtonProps> = React.m
           visualizeInfo.field,
           contextualFields,
           originatingApp,
-          updatedDataView
+          updatedDataView,
+          { openInNewTab }
         );
       };
       triggerVisualization(dataView);
