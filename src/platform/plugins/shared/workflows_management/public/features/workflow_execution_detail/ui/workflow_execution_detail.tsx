@@ -110,7 +110,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
           isTerminalStatus(workflowExecution?.status) ||
           workflowExecution?.status === ExecutionStatus.QUEUED)
       ) {
-        setSelectedStepExecution(PSEUDO_STEP_OVERVIEW);
+        setSelectedStepExecution(PSEUDO_STEP_TRIGGER);
       }
     }, [workflowExecution, selectedStepExecutionId, setSelectedStepExecution, executionId]);
 
@@ -334,6 +334,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               selectedId={selectedStepExecutionId ?? null}
               childExecutionsMap={childExecutions}
               isLoadingChildExecutions={isLoadingChildExecutions}
+              onBeforeDiagnose={() => setSelectedStepExecutionId(null)}
             />
           }
           fixedPanelSize={sidebarWidth}
@@ -344,6 +345,8 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
             <WorkflowStepExecutionDetails
               workflowExecutionId={executionId}
               stepExecution={selectedStepExecution}
+              allStepExecutions={workflowExecution?.stepExecutions ?? []}
+              onSelectStepExecution={setSelectedStepExecutionId}
               workflowExecutionDuration={workflowExecution?.duration ?? undefined}
               workflowExecutionUsage={workflowExecution?.usage}
               isLoadingStepData={isLoadingStepData && !isPseudoStep}
