@@ -49,6 +49,12 @@ describe('queryHasStatsCommand', () => {
 });
 
 describe('flattenForkCommands', () => {
+  it('selects a branch by an EVAL-derived metric column', () => {
+    expect(
+      flatten('FROM index | FORK (STATS a = COUNT(*) | EVAL t = a * 2) (STATS b = COUNT(*))', ['t'])
+    ).toBe('FROM index | STATS a = COUNT(*) | EVAL t = a * 2');
+  });
+
   // primary-first branch priority is covered end-to-end by the shared case
   // matrix ('FORK query with primary and secondary metrics from different
   // branches'); this pins the fallback ordering, which is not executable there

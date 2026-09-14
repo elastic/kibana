@@ -18,7 +18,6 @@ import {
   isQuery,
 } from '@elastic/esql';
 import type { ESQLCommand, ESQLProperNode, ESQLSingleAstItem } from '@elastic/esql/types';
-import { resolveTrackedColumn } from './scope_walker';
 
 /** Synthetic discriminator column added by FORK to its merged output. */
 const FORK_DISCRIMINATOR_COLUMN = '_fork';
@@ -67,48 +66,24 @@ const getStatsOutputColumns = (statsCommand: ESQLCommand): string[] => {
 };
 
 /**
- * Returns true when any of the produced columns still resolves to the given
- * name after the renames in the remaining pipeline segment.
- */
-const outputScopeContains = (
-  producedColumns: string[],
-  commandsAfterStats: ESQLCommand[],
-  columnName: string
-): boolean =>
-  producedColumns.some(
-    (column) => resolveTrackedColumn(commandsAfterStats, column).name === columnName
-  );
-
-/**
- * Returns true when the branch's output scope contains the given column:
- * the last STATS command produces it (directly or via an alias) and it
- * survives renames in the rest of the branch.
+ * Returns true when the branch's enumerable output scope contains the given
+ * column: STATS outputs (aggregations and BY keys) tracked through later
+ * RENAME/KEEP/DROP/EVAL commands. An open scope (no STATS, or an unmodeled
+ * command) returns false so branch selection falls back explicitly.
  */
 const branchProducesColumn = (branch: ESQLCommand[], columnName: string): boolean => {
-  const statsIndex = branch.findLastIndex((command) => command.name === 'stats');
-  if (statsIndex === -1) return false;
-
-  return outputScopeContains(
-    getStatsResultColumns(branch[statsIndex]),
-    branch.slice(statsIndex + 1),
-    columnName
-  );
+  const scope = computeScope(branch);
+  return scope !== null && scope.has(columnName);
 };
 
 /**
  * Returns true when the command list's output scope contains the given column.
- * Unlike `branchProducesColumn`, BY grouping keys count as output, and a
- * command list without STATS keeps all source fields in scope.
+ * Unlike `branchProducesColumn`, an open scope (no STATS, or an unmodeled
+ * command) conservatively counts the column as available.
  */
 export const commandsProduceColumn = (commands: ESQLCommand[], columnName: string): boolean => {
-  const statsIndex = commands.findLastIndex((command) => command.name === 'stats');
-  if (statsIndex === -1) return true;
-
-  return outputScopeContains(
-    getStatsOutputColumns(commands[statsIndex]),
-    commands.slice(statsIndex + 1),
-    columnName
-  );
+  const scope = computeScope(commands);
+  return scope === null || scope.has(columnName);
 };
 
 /**

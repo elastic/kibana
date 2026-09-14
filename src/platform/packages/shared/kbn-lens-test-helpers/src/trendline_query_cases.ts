@@ -227,6 +227,17 @@ export const buildTrendlineQueryCases = ({ index }: { index: string }): Trendlin
       expectedUnavailableMetricFields: [],
     },
     {
+      // EVAL-derived metrics count as available output: the rewrite keeps the
+      // EVAL, so the trendline result table contains the derived column
+      description: 'STATS query with an EVAL-derived secondary metric',
+      sourceQuery: `FROM ${index} | STATS a = COUNT(*) | EVAL total = a * 2 | KEEP a, total`,
+      expectedQuery: `FROM ${index} | STATS a = COUNT(*) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend) | EVAL total = a * 2 | KEEP a, total, \`BUCKET(@timestamp, 75, ?_tstart, ?_tend)\``,
+      expectedTimeField: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+      expectedMetricFields: ['a', 'total'],
+      metricFields: ['a', 'total'],
+      expectedUnavailableMetricFields: [],
+    },
+    {
       // secondary metric bound to a BY grouping key counts as available output
       description: 'STATS query with a secondary metric on a BY grouping key',
       sourceQuery: `FROM ${index} | STATS total = COUNT(*) BY request`,
