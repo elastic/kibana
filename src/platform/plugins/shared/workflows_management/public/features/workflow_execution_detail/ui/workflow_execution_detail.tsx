@@ -34,6 +34,7 @@ import {
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import type { RerunWorkflowExecutionParams } from '../../../pages/executions/build_replay_inputs_from_execution_context';
+import { resolveSelectedStepExecution } from '../model/resolve_selected_step_execution';
 import { useChildWorkflowExecutions } from '../model/use_child_workflow_executions';
 import { useStepExecution } from '../model/use_step_execution';
 import { useWaitingStepResume } from '../model/use_waiting_step_resume';
@@ -163,57 +164,27 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
       };
     }, [dispatch]);
 
-    // Find the lightweight step from the polled execution (has status/duration but no I/O).
-    // If not found in root steps, check child workflow execution steps.
     const {
       lightweightStep,
-      stepExecutionId: resolvedExecutionId,
+      resolvedExecutionId,
+      childWorkflowExecution: selectedStepChildExecution,
       parentWorkflowExecution,
-    } = useMemo(() => {
-      if (!selectedStepExecutionId || isPseudoStep) {
-        return {
-          lightweightStep: undefined,
-          stepExecutionId: executionId,
-          parentWorkflowExecution: undefined,
-        };
-      }
-
-      const parentStep = workflowExecution?.stepExecutions?.find(
-        (step) => step.id === selectedStepExecutionId
-      );
-      if (parentStep) {
-        return {
-          lightweightStep: parentStep,
-          stepExecutionId: executionId,
-          parentWorkflowExecution: undefined,
-        };
-      }
-
-      for (const childWorkflowExecution of childExecutions.values()) {
-        const childStep = childWorkflowExecution.stepExecutions.find(
-          (step) => step.id === selectedStepExecutionId
-        );
-        if (childStep) {
-          return {
-            lightweightStep: childStep,
-            stepExecutionId: childWorkflowExecution.executionId,
-            parentWorkflowExecution: childWorkflowExecution,
-          };
-        }
-      }
-
-      return {
-        lightweightStep: undefined,
-        stepExecutionId: executionId,
-        parentWorkflowExecution: undefined,
-      };
-    }, [
-      workflowExecution?.stepExecutions,
-      selectedStepExecutionId,
-      isPseudoStep,
-      executionId,
-      childExecutions,
-    ]);
+    } = useMemo(
+      () =>
+        resolveSelectedStepExecution({
+          selectedStepExecutionId: isPseudoStep ? undefined : selectedStepExecutionId,
+          parentExecutionId: executionId,
+          parentStepExecutions: workflowExecution?.stepExecutions,
+          childExecutions,
+        }),
+      [
+        selectedStepExecutionId,
+        isPseudoStep,
+        executionId,
+        workflowExecution?.stepExecutions,
+        childExecutions,
+      ]
+    );
 
     // Lazy-load full step data (with input/output) for real steps
     const { data: fullStepData, isLoading: isLoadingStepData } = useStepExecution(
@@ -221,11 +192,6 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
       isPseudoStep ? undefined : selectedStepExecutionId ?? undefined,
       lightweightStep?.status
     );
-
-    const selectedStepChildExecution = useMemo(() => {
-      if (!selectedStepExecutionId || isPseudoStep) return undefined;
-      return childExecutions.get(selectedStepExecutionId);
-    }, [selectedStepExecutionId, isPseudoStep, childExecutions]);
 
     const selectedStepExecution = useMemo<WorkflowStepExecutionDto | undefined>(() => {
       if (!selectedStepExecutionId) {

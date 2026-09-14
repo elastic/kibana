@@ -28,7 +28,16 @@ jest.mock('../../../hooks/use_workflow_url_state', () => ({
 }));
 
 jest.mock('../../../hooks/navigation/use_navigate_to_execution', () => ({
-  useNavigateToExecution: () => ({ href: '/app/workflows/wf-1?executionId=exec-1' }),
+  useNavigateToExecution: ({
+    workflowId,
+    executionId,
+  }: {
+    workflowId: string;
+    executionId?: string;
+  }) => ({
+    href: `/app/workflows/${workflowId}${executionId ? `?executionId=${executionId}` : ''}`,
+    navigate: jest.fn(),
+  }),
 }));
 
 jest.mock('../../../entities/connectors/model/use_available_connectors', () => ({
@@ -36,8 +45,9 @@ jest.mock('../../../entities/connectors/model/use_available_connectors', () => (
   useFetchConnector: () => ({ data: undefined }),
 }));
 
+const mockChildExecutions = new Map();
 jest.mock('../model/use_child_workflow_executions', () => ({
-  useChildWorkflowExecutions: () => ({ childExecutions: new Map(), isLoading: false }),
+  useChildWorkflowExecutions: () => ({ childExecutions: mockChildExecutions, isLoading: false }),
 }));
 
 const mockWaitingStepResume = {
@@ -68,13 +78,29 @@ jest.mock('./workflow_step_execution_tree', () => ({
   }: {
     onStepExecutionClick: (id: string) => void;
   }) => (
-    <button
-      type="button"
-      data-test-subj="select-waiting-step"
-      onClick={() => onStepExecutionClick('step-wait')}
-    >
-      {'Select waiting step'}
-    </button>
+    <>
+      <button
+        type="button"
+        data-test-subj="select-waiting-step"
+        onClick={() => onStepExecutionClick('step-wait')}
+      >
+        {'Select waiting step'}
+      </button>
+      <button
+        type="button"
+        data-test-subj="select-execute-step"
+        onClick={() => onStepExecutionClick('parent-execute')}
+      >
+        {'Select execute step'}
+      </button>
+      <button
+        type="button"
+        data-test-subj="select-child-step"
+        onClick={() => onStepExecutionClick('child-lookup')}
+      >
+        {'Select child step'}
+      </button>
+    </>
   ),
 }));
 
@@ -91,17 +117,19 @@ jest.mock('../../../entities/workflows/model/use_workflow_execution_polling', ()
   useWorkflowExecutionPolling: () => mockPollingResult,
 }));
 
+const mockUseStepExecution = jest.fn(() => ({
+  data: {
+    id: 'step-wait',
+    stepId: 'request_approval',
+    stepType: 'waitForInput',
+    status: 'waiting_for_input',
+    input: { message: 'Approve this' },
+  },
+  isLoading: false,
+}));
+
 jest.mock('../model/use_step_execution', () => ({
-  useStepExecution: () => ({
-    data: {
-      id: 'step-wait',
-      stepId: 'request_approval',
-      stepType: 'waitForInput',
-      status: 'waiting_for_input',
-      input: { message: 'Approve this' },
-    },
-    isLoading: false,
-  }),
+  useStepExecution: (...args: unknown[]) => mockUseStepExecution(...args),
 }));
 
 describe('WorkflowExecutionFlyout resume', () => {
@@ -130,6 +158,17 @@ describe('WorkflowExecutionFlyout resume', () => {
     mockWaitingStepResume.resumeMessage = undefined;
     mockPollingResult.workflowExecution = waitingExecution;
     mockPollingResult.error = null;
+    mockChildExecutions.clear();
+    mockUseStepExecution.mockReturnValue({
+      data: {
+        id: 'step-wait',
+        stepId: 'request_approval',
+        stepType: 'waitForInput',
+        status: 'waiting_for_input',
+        input: { message: 'Approve this' },
+      },
+      isLoading: false,
+    });
   });
 
   const renderFlyout = () =>
@@ -177,5 +216,107 @@ describe('WorkflowExecutionFlyout resume', () => {
     // Only the always-visible run control auto-opens from ?resume=true.
     expect(resumeButtons[0]).toHaveAttribute('data-auto-open', 'false');
     expect(resumeButtons[1]).toHaveAttribute('data-auto-open', 'false');
+  });
+});
+
+describe('WorkflowExecutionFlyout child workflow steps', () => {
+  const services = createStartServicesMock();
+
+  const childStep = createMockStepExecutionDto({
+    id: 'child-lookup',
+    stepId: 'lookup_host',
+    stepType: 'data.set',
+    status: ExecutionStatus.COMPLETED,
+  });
+
+  const childExecution = {
+    parentStepExecutionId: 'parent-execute',
+    workflowId: 'flyout-test-child',
+    workflowName: 'Flyout test - child',
+    executionId: 'child-exec-1',
+    status: ExecutionStatus.COMPLETED,
+    stepExecutions: [childStep],
+  };
+
+  const parentExecution = createMockWorkflowExecutionDto({
+    id: 'parent-exec',
+    workflowId: 'flyout-test-parent',
+    status: ExecutionStatus.COMPLETED,
+    stepExecutions: [
+      createMockStepExecutionDto({
+        id: 'parent-execute',
+        stepId: 'run_child',
+        stepType: 'workflow.execute',
+        status: ExecutionStatus.COMPLETED,
+      }),
+    ],
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockChildExecutions.clear();
+    mockChildExecutions.set('parent-execute', childExecution);
+    mockPollingResult.workflowExecution = parentExecution;
+    mockPollingResult.error = null;
+    mockUseStepExecution.mockReturnValue({
+      data: {
+        id: 'child-lookup',
+        stepId: 'lookup_host',
+        input: { hostname: 'workstation-7' },
+        output: { risk: 'high' },
+      },
+      isLoading: false,
+    });
+  });
+
+  const renderFlyout = () =>
+    render(<WorkflowExecutionFlyout executionId="parent-exec" onClose={jest.fn()} />, {
+      wrapper: getTestProvider({ services }),
+    });
+
+  it('fetches I/O from the child run and links to it when a child step is selected', () => {
+    renderFlyout();
+    fireEvent.click(screen.getByTestId('select-child-step'));
+
+    expect(mockUseStepExecution).toHaveBeenCalledWith(
+      'child-exec-1',
+      'child-lookup',
+      ExecutionStatus.COMPLETED
+    );
+    const owningLink = screen.getByTestId('workflowExecutionOwningRunLink');
+    expect(owningLink).toHaveTextContent('Flyout test - child: lookup_host');
+    expect(owningLink).toHaveAttribute(
+      'href',
+      '/app/workflows/flyout-test-child?executionId=child-exec-1'
+    );
+    expect(screen.getByText('hostname')).toBeInTheDocument();
+    expect(screen.getByText('workstation-7')).toBeInTheDocument();
+  });
+
+  it('links a workflow.execute step to the child run and fetches parent I/O', () => {
+    mockUseStepExecution.mockReturnValue({
+      data: {
+        id: 'parent-execute',
+        stepId: 'run_child',
+        input: { 'workflow-id': 'flyout-test-child' },
+        output: { status: 'completed' },
+      },
+      isLoading: false,
+    });
+
+    renderFlyout();
+    fireEvent.click(screen.getByTestId('select-execute-step'));
+
+    expect(mockUseStepExecution).toHaveBeenCalledWith(
+      'parent-exec',
+      'parent-execute',
+      ExecutionStatus.COMPLETED
+    );
+    const childLink = screen.getByTestId('workflowExecutionChildRunLink');
+    expect(childLink).toHaveTextContent('workflow.execute: Flyout test - child');
+    expect(childLink).toHaveAttribute(
+      'href',
+      '/app/workflows/flyout-test-child?executionId=child-exec-1'
+    );
   });
 });

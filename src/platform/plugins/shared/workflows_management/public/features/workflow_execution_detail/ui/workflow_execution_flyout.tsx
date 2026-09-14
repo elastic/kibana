@@ -47,6 +47,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { AiStepSection } from './ai_step_section';
 import { ExecutionTakeActionSplitButton } from './execution_take_action_split_button';
 import { ForeachIterationsSection } from './foreach_iterations_section';
+import { NestedWorkflowExecutionLinks } from './nested_workflow_execution_links';
 import { ResumeExecutionButton } from './resume_execution_button';
 import { StepDataValueCell } from './step_data_value_cell';
 import { StepDetailAccordionSection } from './step_detail_accordion_section';
@@ -79,6 +80,7 @@ import { getFailedStepPosition } from '../lib/get_failed_step_position';
 import { getRunMode } from '../lib/get_run_mode';
 import { isTokenUsageTableField } from '../lib/is_token_usage_table_field';
 import { normalizeStepAi } from '../lib/normalize_step_ai';
+import { resolveSelectedStepExecution } from '../model/resolve_selected_step_execution';
 import { useChildWorkflowExecutions } from '../model/use_child_workflow_executions';
 import { useStepExecution } from '../model/use_step_execution';
 import { useWaitingStepResume } from '../model/use_waiting_step_resume';
@@ -556,10 +558,8 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
       [application, workflowExecution?.workflowId]
     );
 
-    const selectedLightStep = useMemo(
-      () => workflowExecution?.stepExecutions.find((s) => s.id === selectedStepExecutionId) ?? null,
-      [workflowExecution?.stepExecutions, selectedStepExecutionId]
-    );
+    const { childExecutions, isLoading: isLoadingChildExecutions } =
+      useChildWorkflowExecutions(workflowExecution);
 
     const isPseudoStep =
       selectedStepExecutionId === '__overview' ||
@@ -627,13 +627,33 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
       return buildOverviewStepExecutionFromContext(workflowExecution).input;
     }, [selectedStepExecutionId, workflowExecution]);
 
+    const {
+      lightweightStep: selectedLightStep,
+      resolvedExecutionId,
+      childWorkflowExecution,
+      parentWorkflowExecution,
+    } = useMemo(
+      () =>
+        resolveSelectedStepExecution({
+          selectedStepExecutionId: isPseudoStep ? undefined : selectedStepExecutionId,
+          parentExecutionId: executionId,
+          parentStepExecutions: workflowExecution?.stepExecutions,
+          childExecutions,
+        }),
+      [
+        isPseudoStep,
+        selectedStepExecutionId,
+        executionId,
+        workflowExecution?.stepExecutions,
+        childExecutions,
+      ]
+    );
+
     const { data: fullStepExecution, isLoading: isLoadingStepData } = useStepExecution(
-      executionId,
+      resolvedExecutionId,
       isPseudoStep ? undefined : selectedStepExecutionId ?? undefined,
       selectedLightStep?.status
     );
-    const { childExecutions, isLoading: isLoadingChildExecutions } =
-      useChildWorkflowExecutions(workflowExecution);
 
     const startedAt = useMemo(
       () => (workflowExecution?.startedAt ? new Date(workflowExecution.startedAt) : null),
@@ -653,7 +673,19 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
     const executedByValue = workflowExecution?.executedBy?.trim() || '';
     const executedByDisplay = executedByValue || '-';
 
-    const activeStepExecution = fullStepExecution ?? pseudoStepExecution;
+    const activeStepExecution = useMemo(() => {
+      if (isPseudoStep) {
+        return pseudoStepExecution;
+      }
+      if (selectedLightStep && fullStepExecution) {
+        return {
+          ...selectedLightStep,
+          input: fullStepExecution.input,
+          output: fullStepExecution.output,
+        };
+      }
+      return selectedLightStep ?? fullStepExecution ?? pseudoStepExecution;
+    }, [isPseudoStep, pseudoStepExecution, selectedLightStep, fullStepExecution]);
     const stepName = selectedLightStep?.stepId ?? activeStepExecution?.stepId ?? '';
 
     const activeStepType = selectedLightStep?.stepType ?? activeStepExecution?.stepType;
@@ -821,6 +853,20 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                   minWidth: 0,
                 }}
               >
+                {!isPseudoStep && (childWorkflowExecution || parentWorkflowExecution) && (
+                  <div
+                    css={{
+                      paddingTop: euiTheme.size.m,
+                      paddingBottom: euiTheme.size.m,
+                    }}
+                  >
+                    <NestedWorkflowExecutionLinks
+                      stepExecution={activeStepExecution ?? selectedLightStep}
+                      childWorkflowExecution={childWorkflowExecution}
+                      parentWorkflowExecution={parentWorkflowExecution}
+                    />
+                  </div>
+                )}
                 {isLoadingStepData && !isPseudoStep ? (
                   <EuiFlexGroup justifyContent="center">
                     <EuiFlexItem grow={false}>
