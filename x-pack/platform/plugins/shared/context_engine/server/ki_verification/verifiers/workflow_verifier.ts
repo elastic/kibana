@@ -265,6 +265,8 @@ export const createWorkflowVerifier = (
         throw error;
       }
       auditLogger?.log(workflowRunAuditEvent(workflowId, { executionId: workflowExecutionId }));
+      // cancelExecution privilege is not checked separately because we are cancelling
+      // an execution we started ourselves, not an arbitrary one.
       const cancel = () =>
         workflowsManagement
           .cancelWorkflowExecution(workflowExecutionId, spaceId, request)
