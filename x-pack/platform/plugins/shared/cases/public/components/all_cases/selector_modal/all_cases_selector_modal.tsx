@@ -20,7 +20,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import type { CaseStatuses } from '../../../../common/types/domain';
 import type { CaseUI } from '../../../../common/ui/types';
 import * as i18n from '../../../common/translations';
-import { AllCasesList } from '../all_cases_list';
+import { AllCasesList } from '../../cases_redesign/all_cases/all_cases_list';
 import { type GetAttachments } from './use_cases_add_to_existing_case_modal';
 
 export interface AllCasesSelectorModalProps {
