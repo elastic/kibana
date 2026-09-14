@@ -33,13 +33,13 @@ export const validateUnifiedAttachments = ({
   query: UnifiedAttachmentPayload;
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
 }) => {
-  const attachmentType = unifiedAttachmentTypeRegistry.get(query.type);
-  if (!attachmentType) {
+  if (!unifiedAttachmentTypeRegistry.has(query.type)) {
     throw Boom.badRequest(
       `Attachment type ${query.type} is not registered in unified attachment type registry.`
     );
   }
 
+  const attachmentType = unifiedAttachmentTypeRegistry.get(query.type);
   if (!attachmentType.schema) {
     throw Boom.badRequest(`Attachment type '${query.type}' does not define a schema.`);
   }
