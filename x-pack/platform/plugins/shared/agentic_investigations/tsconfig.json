@@ -25,7 +25,8 @@
     "@kbn/zod",
     "@kbn/core-http-server-mocks",
     "@kbn/zod-helpers",
-    "@kbn/std"
+    "@kbn/std",
+    "@kbn/security-plugin-types-server"
   ],
   "exclude": ["target/**/*"]
 }

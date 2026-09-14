@@ -802,9 +802,7 @@ describe('ProposalsService', () => {
       await service.listByWindow(activityQuery(), SPACE_ID);
 
       const [[searchArgs]] = storage.search.mock.calls;
-      expect(searchArgs.query.bool.must_not).toEqual([
-        { exists: { field: 'supersededBy' } },
-      ]);
+      expect(searchArgs.query.bool.must_not).toEqual([{ exists: { field: 'supersededBy' } }]);
     });
 
     it('returns truncated=true when total exceeds the cap', async () => {
@@ -864,7 +862,6 @@ describe('ProposalsService', () => {
   });
 });
 
-
 describe('ProposalsService.update supersededBy', () => {
   it('persists supersededBy alongside the failed transition', async () => {
     const storage = createStorage(baseDocument({ status: 'executing' }));
@@ -894,10 +891,7 @@ describe('ProposalsService.update supersededBy', () => {
     const { service } = createService(storage);
 
     await expect(
-      service.update(
-        { id: 'p1', status: 'failed', supersededBy: 'clone-1' },
-        SPACE_ID
-      )
+      service.update({ id: 'p1', status: 'failed', supersededBy: 'clone-1' }, SPACE_ID)
     ).rejects.toThrow(/already settled/);
   });
 });
