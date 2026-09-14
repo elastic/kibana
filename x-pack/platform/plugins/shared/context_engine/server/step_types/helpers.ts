@@ -131,14 +131,7 @@ export const withKiVerificationTelemetry = async ({
       outcome: 'success',
       passed: summary.passed,
       verifiersRun: summary.results.length,
-      // Workflow ids are user-chosen names, so collapse all custom verifiers to 'workflow' in telemetry.
-      failedVerifierIds: [
-        ...new Set(
-          failures.map(({ verifier }) =>
-            verifier.startsWith(WORKFLOW_VERIFIER_ID_PREFIX) ? 'workflow' : verifier
-          )
-        ),
-      ],
+      failedVerifierIds: [...new Set(failures.map(({ verifier }) => verifier))],
       failedWorkflowVerifierCount,
       workflowId,
       aiIndexId,

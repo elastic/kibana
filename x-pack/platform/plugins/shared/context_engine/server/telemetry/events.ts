@@ -122,8 +122,7 @@ const kiVerificationEventSchema: RootSchema<ReportKiVerificationEventParams> = {
     items: {
       type: 'keyword',
       _meta: {
-        description:
-          'Built-in verifier id, verbatim; custom verifier workflows collapse to "workflow".',
+        description: 'Verifier id: built-in ids verbatim; custom verifiers as "workflow:<id>".',
       },
     },
     _meta: {

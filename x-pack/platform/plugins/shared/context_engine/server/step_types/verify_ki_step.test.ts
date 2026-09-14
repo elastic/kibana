@@ -483,7 +483,7 @@ describe('verify_ki workflow step', () => {
       });
     });
 
-    it('records custom verifier failures as "workflow" in telemetry, not the workflow id', async () => {
+    it('records custom verifier failures with their full workflow id in telemetry', async () => {
       setContextEngineEnabled(true);
       workflowsManagement.getWorkflowExecution.mockResolvedValue(
         completedWith({ passed: false, reason: 'nope' })
@@ -498,7 +498,7 @@ describe('verify_ki workflow step', () => {
         outcome: 'success',
         passed: false,
         verifiersRun: 2,
-        failedVerifierIds: [ESQL_VALID_SYNTAX_VERIFIER_ID, 'workflow'],
+        failedVerifierIds: [ESQL_VALID_SYNTAX_VERIFIER_ID, 'workflow:no-pii'],
         failedWorkflowVerifierCount: 1,
         workflowId: 'parent-wf',
       });
@@ -669,7 +669,7 @@ describe('verify_ki workflow step', () => {
       expect(output.passed).toBe(true);
     });
 
-    it('collapses multiple failing custom verifiers into one "workflow" telemetry entry', async () => {
+    it('records each failing custom verifier with its own workflow id in telemetry', async () => {
       setContextEngineEnabled(true);
       workflowsManagement.getWorkflowExecution.mockResolvedValue(
         completedWith({ passed: false, reason: 'nope' })
@@ -683,7 +683,7 @@ describe('verify_ki workflow step', () => {
       expect(telemetry.analyticsService.reportKiVerification).toHaveBeenCalledWith(
         expect.objectContaining({
           verifiersRun: 2,
-          failedVerifierIds: ['workflow'],
+          failedVerifierIds: ['workflow:no-pii', 'workflow:has-owner'],
           failedWorkflowVerifierCount: 2,
         })
       );
