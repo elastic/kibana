@@ -70,6 +70,7 @@ overrides:
   '@babel/runtime': '7.29.7'
   '@babel/traverse': '7.29.8'
   '@babel/types': '7.29.8'
+  '@emotion/serialize>csstype': '3.0.7'
   '@hapi/mimos>mime-db': '1.53.0'
   '@hello-pangea/dnd': '16.6.0'
   '@langchain/core': '1.2.3'
@@ -79,8 +80,8 @@ overrides:
   '@types/prop-types': '15.7.5'
   '@types/react': '18.2.79'
   '@types/react-dom': '18.2.25'
+  '@types/react>csstype': '3.0.7'
   '@typescript-eslint/utils': '8.46.3'
-  '@xstate5/react>xstate': '5.19.2'
   'adm-zip': '0.6.0'
   'apache-arrow': '20.x - 21.x'
   'baseline-browser-mapping': '2.9.14'
@@ -120,6 +121,8 @@ overrides:
   # @types/enzyme pulls @types/cheerio@*, which floats to the empty v1 stub and
   # drops the `cheerio` namespace; pin to the 0.22 line (matches yarn).
   '@types/cheerio': '0.22.35'
+  '@types/d3-brush@3.0.1>@types/d3-selection': '3.0.2'
+  '@types/d3-transition@3.0.1>@types/d3-selection': '3.0.2'
   '@types/eslint>@types/estree': '1.0.9'
   '@types/glob-stream': '6.1.0'
   # @types/glob-stream depends on @types/glob@*, which floats to the empty v9

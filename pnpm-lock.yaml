@@ -20,6 +20,7 @@ overrides:
   '@babel/runtime': 7.29.7
   '@babel/traverse': 7.29.8
   '@babel/types': 7.29.8
+  '@emotion/serialize>csstype': 3.0.7
   '@hapi/mimos>mime-db': 1.53.0
   '@hello-pangea/dnd': 16.6.0
   '@langchain/core': 1.2.3
@@ -29,8 +30,8 @@ overrides:
   '@types/prop-types': 15.7.5
   '@types/react': 18.2.79
   '@types/react-dom': 18.2.25
+  '@types/react>csstype': 3.0.7
   '@typescript-eslint/utils': 8.46.3
-  '@xstate5/react>xstate': 5.19.2
   adm-zip: 0.6.0
   apache-arrow: 20.x - 21.x
   baseline-browser-mapping: 2.9.14
@@ -62,6 +63,8 @@ overrides:
   '@redux-saga/types': 1.2.1
   '@types/babel__traverse': 7.20.6
   '@types/cheerio': 0.22.35
+  '@types/d3-brush@3.0.1>@types/d3-selection': 3.0.2
+  '@types/d3-transition@3.0.1>@types/d3-selection': 3.0.2
   '@types/eslint>@types/estree': 1.0.9
   '@types/glob-stream': 6.1.0
   '@types/glob-stream>@types/glob': 7.2.0
@@ -109,7 +112,7 @@ overrides:
   vega-util: 2.1.0
   vscode-languageserver-types: 3.17.5
 
-pnpmfileChecksum: sha256-JL9Z/8IecLxwanP1rhrhbsvFTvupuyak+iLixXT5Rmk=
+pnpmfileChecksum: sha256-CBMxaHcPsXR8PrO+nlcPFfu2ppV8yxvMhebNzO2x3Ys=
 
 importers:
 
@@ -3179,8 +3182,8 @@ importers:
         specifier: 3.2.2
         version: 3.2.2(@types/react@18.2.79)(react@17.0.2)(xstate@4.38.3)
       '@xstate5/react':
-        specifier: npm:@xstate/react@^5.0.3
-        version: '@xstate/react@5.0.5(@types/react@18.2.79)(react@17.0.2)(xstate@4.38.3)'
+        specifier: npm:@xstate/react@5.0.3
+        version: '@xstate/react@5.0.3(@types/react@18.2.79)(react@17.0.2)'
       '@xterm/xterm':
         specifier: 6.0.0
         version: 6.0.0
@@ -13078,14 +13081,10 @@ packages:
       xstate:
         optional: true
 
-  '@xstate/react@5.0.5':
-    resolution: {integrity: sha512-MfF/cPHa3lNKJmGFpUycMbNP25qBXyZXrxc8VYNroAu0Nnk0DV5WzAkTcQXma0xEC4dSwsoA+YQuKbZATtqvgg==}
+  '@xstate/react@5.0.3':
+    resolution: {integrity: sha512-Zdnn0VTPcVdoaAiW0OX6Nkvdoe7SNGjfaZqM61NKhjt2aNULqiicmDu2tOd1ChzlRWYDxGTdbzVqqVyMLpoHJw==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-      xstate: ^5.19.4
-    peerDependenciesMeta:
-      xstate:
-        optional: true
 
   '@xterm/xterm@6.0.0':
     resolution: {integrity: sha512-TQwDdQGtwwDt+2cgKDLn0IRaSxYu1tSUjgKarSDkUM0ZNiSRXFpjxEsvc/Zgc5kq5omJ+V0a8/kIM2WD3sMOYg==}
@@ -29542,13 +29541,12 @@ snapshots:
     transitivePeerDependencies:
       - '@types/react'
 
-  '@xstate/react@5.0.5(@types/react@18.2.79)(react@17.0.2)(xstate@4.38.3)':
+  '@xstate/react@5.0.3(@types/react@18.2.79)(react@17.0.2)':
     dependencies:
       react: 17.0.2
       use-isomorphic-layout-effect: 1.2.1(@types/react@18.2.79)(react@17.0.2)
       use-sync-external-store: 1.4.0(react@17.0.2)
-    optionalDependencies:
-      xstate: 4.38.3
+      xstate: 5.19.2
     transitivePeerDependencies:
       - '@types/react'
 

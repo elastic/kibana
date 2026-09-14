@@ -30,6 +30,16 @@ const REWRITE_RULES = {
       },
     },
   ],
+  '@xstate/react': [
+    {
+      name: 'bind v5 React adapter to xstate 5',
+      matchVersion: (version) => version.startsWith('5.'),
+      rewrite: (pkg) => {
+        delete pkg.peerDependencies?.xstate;
+        pkg.dependencies = { ...pkg.dependencies, xstate: 'npm:xstate@5.19.2' };
+      },
+    },
+  ],
 };
 
 function readPackage(pkg) {
