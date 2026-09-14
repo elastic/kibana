@@ -151,7 +151,11 @@ describe('AuthenticateAndDeployStep', () => {
       awsServicesMap: awsServicesMapWithMI,
       deploymentMethod: 'managed_integration',
       setDeploymentMethod: jest.fn(),
-      detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {}, onboardingDeploymentId: undefined },
+      detectAndReviewStep: {
+        serviceStatuses: {},
+        policyIdsByInstance: {},
+        onboardingDeploymentId: undefined,
+      },
       updateDetectAndReviewStep: jest.fn(),
     });
     mockUseOnboardingSO.mockReturnValue({
@@ -271,7 +275,11 @@ describe('AuthenticateAndDeployStep', () => {
         awsServicesMap: awsServicesMapEmpty,
         deploymentMethod: 'managed_integration',
         setDeploymentMethod: jest.fn(),
-        detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {}, onboardingDeploymentId: undefined },
+        detectAndReviewStep: {
+          serviceStatuses: {},
+          policyIdsByInstance: {},
+          onboardingDeploymentId: undefined,
+        },
         updateDetectAndReviewStep: jest.fn(),
       });
       mockUseEcfDeployment.mockReturnValue(makeEcfReturn({ hasAnyEcf: false }));
@@ -387,7 +395,11 @@ describe('AuthenticateAndDeployStep', () => {
         awsServicesMap: new Map([['cloudtrail', ecfService]]),
         deploymentMethod: 'managed_integration',
         setDeploymentMethod: jest.fn(),
-        detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {}, onboardingDeploymentId: undefined },
+        detectAndReviewStep: {
+          serviceStatuses: {},
+          policyIdsByInstance: {},
+          onboardingDeploymentId: undefined,
+        },
         updateDetectAndReviewStep: jest.fn(),
       });
     });
@@ -427,7 +439,11 @@ describe('AuthenticateAndDeployStep', () => {
         ]),
         deploymentMethod: 'managed_integration',
         setDeploymentMethod: jest.fn(),
-        detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {}, onboardingDeploymentId: undefined },
+        detectAndReviewStep: {
+          serviceStatuses: {},
+          policyIdsByInstance: {},
+          onboardingDeploymentId: undefined,
+        },
         updateDetectAndReviewStep: jest.fn(),
       });
     });
