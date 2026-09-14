@@ -20,9 +20,9 @@ export function getSpaceIdFromContext(parentContext: api.Context): string {
   return value && value.length > 0 ? value : 'default';
 }
 
-export function getSpaceIdFromSpan(span: tracing.ReadableSpan): string {
+export function getSpaceIdFromSpan(span: tracing.ReadableSpan): string | undefined {
   const namespace = span.attributes[DATA_STREAM_NAMESPACE_ATTR];
-  return typeof namespace === 'string' && namespace.length > 0 ? namespace : 'default';
+  return typeof namespace === 'string' && namespace.length > 0 ? namespace : undefined;
 }
 
 /**
@@ -40,9 +40,9 @@ export const withAgentBuilderContext = <T>(
   baggage = baggage.setEntry(AGENT_BUILDER_OWNER_BAGGAGE_KEY, {
     value: AGENT_BUILDER_OWNER_BAGGAGE_VALUE,
   });
-  if (options?.spaceId) {
-    baggage = baggage.setEntry(SPACE_ID_BAGGAGE_KEY, { value: options.spaceId });
-  }
+  baggage = baggage.setEntry(SPACE_ID_BAGGAGE_KEY, {
+    value: options?.spaceId && options.spaceId.length > 0 ? options.spaceId : 'default',
+  });
   if (options?.conversationId) {
     baggage = baggage.setEntry(CONVERSATION_ID_BAGGAGE_KEY, { value: options.conversationId });
   }

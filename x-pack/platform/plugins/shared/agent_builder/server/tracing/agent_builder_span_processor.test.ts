@@ -139,7 +139,10 @@ describe('AgentBuilderSpanProcessor', () => {
       droppedAttributesCount: 0,
       droppedEventsCount: 0,
       droppedLinksCount: 0,
-      attributes: attrs,
+      attributes: {
+        [DATA_STREAM_NAMESPACE_ATTR]: 'default',
+        ...attrs,
+      },
       spanContext: () => ({
         traceId: 't'.repeat(32),
         spanId: 's'.repeat(16),
@@ -250,6 +253,22 @@ describe('AgentBuilderSpanProcessor', () => {
     expect(getSettings).toHaveBeenCalledWith('marketing');
   });
 
+  it('onEnd skips tracked spans with no data stream namespace', () => {
+    const getSettings = jest.fn().mockReturnValue(createSettings());
+    const processor = new AgentBuilderSpanProcessor({
+      exporter: createExporter(),
+      scheduledDelayMillis: 1,
+      getSettings,
+    });
+
+    const readable = createMockReadableSpan({ [SHOULD_TRACK_ATTR]: true });
+    delete readable.attributes[DATA_STREAM_NAMESPACE_ATTR];
+    processor.onEnd(readable);
+
+    expect(getSettings).not.toHaveBeenCalled();
+    expect(mockBatch.onEnd).not.toHaveBeenCalled();
+  });
+
   it('onStart still marks the span when enabled is false', () => {
     const processor = new AgentBuilderSpanProcessor({
       exporter: createExporter(),
@@ -297,9 +316,11 @@ describe('AgentBuilderSpanProcessor', () => {
       existing: 'keep-me',
     });
     expect(exported.resource.attributes).toEqual(
-      expect.objectContaining({ 'data_stream.dataset': 'agent_builder' })
+      expect.objectContaining({
+        'data_stream.dataset': 'agent_builder',
+        [DATA_STREAM_NAMESPACE_ATTR]: 'default',
+      })
     );
-    expect(exported.resource.attributes).not.toHaveProperty(DATA_STREAM_NAMESPACE_ATTR);
     expect(exported.spanContext().traceFlags).toBe(TraceFlags.NONE);
     expect(SHOULD_TRACK_ATTR in exported.attributes).toBe(false);
   });

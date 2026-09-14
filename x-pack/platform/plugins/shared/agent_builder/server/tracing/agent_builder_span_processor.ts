@@ -319,11 +319,16 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
       return;
     }
 
+    const spaceId = getSpaceIdFromSpan(span);
+    if (!spaceId) {
+      return;
+    }
+
     if (this.pendingExports.size >= this.maxPendingExports) {
       return;
     }
 
-    const settingsOrPromise = this.getSettings(getSpaceIdFromSpan(span));
+    const settingsOrPromise = this.getSettings(spaceId);
     if (!isPromise(settingsOrPromise)) {
       this.exportWithSettings(span, settingsOrPromise);
       return;
