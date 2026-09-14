@@ -240,7 +240,7 @@ export const MysqlConnector: ConnectorSpec = {
     },
 
     executeSql: {
-      isTool: true,
+      isTool: false,
       scope: 'destroy',
       description:
         'Execute any SQL statement against the MySQL database. No restrictions — INSERT, UPDATE, DELETE, DROP, and DDL are all permitted. Use only when the workflow explicitly requires a write or destructive operation. Prefer query for read-only access.',

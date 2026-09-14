@@ -121,10 +121,12 @@ describe('MysqlConnector', () => {
   });
 
   describe('tool exposure and scope', () => {
-    it('marks every action as an agent-facing tool', () => {
-      for (const action of Object.values(MysqlConnector.actions)) {
-        expect(action.isTool).toBe(true);
+    it('marks read actions as agent-facing tools and executeSql as workflow-only', () => {
+      const toolActions = ['query', 'listDatabases', 'listTables', 'describeTable', 'searchRows'];
+      for (const name of toolActions) {
+        expect(MysqlConnector.actions[name].isTool).toBe(true);
       }
+      expect(MysqlConnector.actions.executeSql.isTool).toBe(false);
     });
 
     it('marks all discovery/query actions as read scope', () => {

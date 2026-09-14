@@ -89,13 +89,15 @@ describe('Widget Registry', () => {
     });
   });
 
-  describe('getDefaultWidgetForSchema - unknown schema types', () => {
+  describe('getDefaultWidgetForSchema - number schemas', () => {
     it('should return NumberWidget for z.number() without explicit widget', () => {
       const schema = z.number();
       const component = getWidgetComponent(schema);
       expect(component).toBe(NumberWidget);
     });
+  });
 
+  describe('getDefaultWidgetForSchema - unsupported schema types', () => {
     it('should throw error for z.boolean() without explicit widget', () => {
       const schema = z.boolean();
 
