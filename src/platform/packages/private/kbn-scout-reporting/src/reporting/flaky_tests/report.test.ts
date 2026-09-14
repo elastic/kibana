@@ -232,6 +232,12 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     jest.restoreAllMocks();
   });
 
+  it('rejects a negative or fractional trend length', async () => {
+    await expect(
+      ScoutFlakyTests.fromElasticsearch(es, { ...options, trendDays: -1 }, log)
+    ).rejects.toThrow('trendDays must be a non-negative integer, got -1');
+  });
+
   it('rejects a non-positive or fractional lookback', async () => {
     await expect(
       ScoutFlakyTests.fromElasticsearch(es, { ...options, lookbackDays: 0 }, log)
@@ -267,6 +273,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     const fetchSampleFailures = jest
       .spyOn(queries, 'fetchSampleFailures')
       .mockResolvedValue(new Map());
+    jest.spyOn(queries, 'fetchDailyTrend').mockResolvedValue(new Map());
     jest.spyOn(queries, 'fetchFilePipelineStats').mockResolvedValue(new Map());
 
     const { data: report } = await ScoutFlakyTests.fromElasticsearch(
@@ -395,6 +402,15 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
         ['jest-broken', [activeBranch()]],
       ])
     );
+    const trend = {
+      days: 14,
+      from: new Date('2026-08-25T00:00:00.000Z'),
+      buildsPerDay: new Array<number>(14).fill(7),
+      failedBuildsPerDay: new Array<number>(14).fill(2),
+    };
+    const fetchDailyTrend = jest
+      .spyOn(queries, 'fetchDailyTrend')
+      .mockResolvedValue(new Map([['jest-flaky-high', trend]]));
     const pipelineStats = [
       {
         pipeline: 'kibana-on-merge',
@@ -451,6 +467,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
         { branch: '9.5', builds: 10, failedBuilds: 0, latestRun: { status: 'skipped' } },
       ],
       sampleFailures: [{ message: 'boom', buildUrl: 'https://b/1' }],
+      trend,
     });
 
     expect(report.consistentlyFailing.map((entry) => entry.testId)).toEqual(['jest-broken']);
@@ -462,6 +479,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       sampleFailures: [],
     });
     expect(report.consistentlyFailing[0].suiteTitle).toBeUndefined();
+    expect(report.consistentlyFailing[0].trend).toBeUndefined();
 
     // one file entry per (framework, path) over both lists, carrying the per-pipeline breakdown
     expect(report.files).toEqual([
@@ -498,6 +516,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       options.samplesPerTest
     );
     expect(fetchFilePipelineStats).toHaveBeenCalledWith(es, expect.anything(), admitted);
+    expect(fetchDailyTrend).toHaveBeenCalledWith(es, expect.anything(), admitted, 14);
   });
 
   it('checks thresholds per branch before ranking, so the cap is filled with tests that qualify', async () => {
@@ -541,6 +560,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     const fetchSampleFailures = jest
       .spyOn(queries, 'fetchSampleFailures')
       .mockResolvedValue(new Map());
+    jest.spyOn(queries, 'fetchDailyTrend').mockResolvedValue(new Map());
     jest.spyOn(queries, 'fetchFilePipelineStats').mockResolvedValue(new Map());
 
     const { data: report } = await ScoutFlakyTests.fromElasticsearch(
@@ -605,6 +625,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     const fetchTestMetadata = jest.spyOn(queries, 'fetchTestMetadata');
     const fetchBranchStats = jest.spyOn(queries, 'fetchBranchStats');
     const fetchSampleFailures = jest.spyOn(queries, 'fetchSampleFailures');
+    const fetchDailyTrend = jest.spyOn(queries, 'fetchDailyTrend');
     const fetchFilePipelineStats = jest.spyOn(queries, 'fetchFilePipelineStats');
 
     const { data: report } = await ScoutFlakyTests.fromElasticsearch(es, options, log);
@@ -618,6 +639,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     expect(fetchBranchStats).not.toHaveBeenCalled();
     expect(fetchSampleFailures).not.toHaveBeenCalled();
     expect(fetchFilePipelineStats).not.toHaveBeenCalled();
+    expect(fetchDailyTrend).not.toHaveBeenCalled();
   });
 });
 

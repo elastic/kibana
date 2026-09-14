@@ -15,6 +15,7 @@ import { ESQL_ROW_LIMIT } from './esql';
 import {
   fetchBranchCounts,
   fetchBranchStats,
+  fetchDailyTrend,
   fetchFailingFiles,
   fetchFilePipelineStats,
   fetchSampleFailures,
@@ -41,6 +42,7 @@ import {
   type FlakyTestSampleFailure,
   type FlakyTestReportOptions,
   type FlakyTestReportThresholds,
+  type FlakyTestTrend,
   type TestFramework,
 } from './schema';
 
@@ -198,6 +200,9 @@ const buildReport = async (
   if (!Number.isInteger(options.lookbackDays) || options.lookbackDays < 1) {
     throw new Error(`lookbackDays must be a positive integer, got ${options.lookbackDays}`);
   }
+  if (!Number.isInteger(options.trendDays) || options.trendDays < 0) {
+    throw new Error(`trendDays must be a non-negative integer, got ${options.trendDays}`);
+  }
   if (options.classifications.length === 0) {
     throw new Error(
       `classifications must include at least one of: ${FLAKY_TEST_CLASSIFICATIONS.join(', ')}`
@@ -307,8 +312,9 @@ const buildReport = async (
   let branchStats = new Map<string, FlakyTestBranchStats[]>();
   let samples = new Map<string, FlakyTestSampleFailure[]>();
   let pipelineStats = new Map<string, FlakyTestPipelineStats[]>();
+  let trends = new Map<string, FlakyTestTrend>();
   if (admitted.length > 0) {
-    [branchStats, samples, pipelineStats] = await Promise.all([
+    [branchStats, samples, pipelineStats, trends] = await Promise.all([
       timed('per-branch stats', fetchBranchStats(es, scope, admitted)),
       timed(
         'failure samples',
@@ -320,6 +326,10 @@ const buildReport = async (
         )
       ),
       timed('per-pipeline stats', fetchFilePipelineStats(es, scope, admitted)),
+      timed(
+        `${options.trendDays}-day trends`,
+        fetchDailyTrend(es, scope, admitted, options.trendDays)
+      ),
     ]);
   }
 
@@ -328,6 +338,7 @@ const buildReport = async (
     latestRun: latestRunAcrossBranches(branchStats.get(entry.testId)),
     byBranch: branchStats.get(entry.testId) ?? [],
     sampleFailures: samples.get(entry.testId) ?? [],
+    trend: trends.get(entry.testId),
   });
 
   // One file entry per (path, framework) over the tests of both lists, in ranking order

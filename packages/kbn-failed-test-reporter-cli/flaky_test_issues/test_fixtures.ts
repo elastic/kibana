@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FlakyTestEntry, FlakyTestReport } from '@kbn/scout-reporting';
+import type {
+  FlakyTestEntry,
+  FlakyTestFileStats,
+  FlakyTestPipelineStats,
+  FlakyTestReport,
+} from '@kbn/scout-reporting';
 import type { GithubIssue } from '../failed_tests_reporter/github_api';
 
 export const GENERATED_AT = new Date('2026-09-09T09:04:41.000Z');
@@ -32,6 +37,7 @@ export const flakyTest = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEnt
   failedBuilds: 49,
   buildFailRate: 49 / 509,
   failedBranches: 1,
+  flakiestBranch: { branch: 'main', builds: 509, failedBuilds: 49, buildFailRate: 49 / 509 },
   byBranch: [
     {
       branch: 'main',
@@ -61,10 +67,33 @@ export const flakyTest = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEnt
       timestamp: new Date('2026-09-09T06:12:00.000Z'),
     },
   ],
+  suiteTitle: 'Default status alert',
+  trend: {
+    days: 14,
+    from: new Date('2026-08-27T00:00:00.000Z'),
+    buildsPerDay: [0, 0, 60, 70, 72, 68, 75, 71, 66, 74, 70, 69, 73, 41],
+    failedBuildsPerDay: [0, 0, 0, 2, 5, 3, 8, 6, 1, 2, 9, 7, 4, 2],
+  },
   ...overrides,
 });
 
-export const flakyReport = (flaky: FlakyTestEntry[]): FlakyTestReport => ({
+export const pipelineStats = (
+  overrides: Partial<FlakyTestPipelineStats> = {}
+): FlakyTestPipelineStats => ({
+  pipeline: 'kibana-on-merge',
+  builds: 509,
+  failedBuilds: 49,
+  buildFailRate: 49 / 509,
+  failedBranches: 1,
+  lastFailedAt: new Date('2026-09-09T06:12:00.000Z'),
+  lastFailedBuildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12345',
+  ...overrides,
+});
+
+export const flakyReport = (
+  flaky: FlakyTestEntry[],
+  files: FlakyTestFileStats[] = []
+): FlakyTestReport => ({
   schemaVersion: 1,
   generatedAt: GENERATED_AT,
   window: {
@@ -78,12 +107,7 @@ export const flakyReport = (flaky: FlakyTestEntry[]): FlakyTestReport => ({
     frameworks: ['jest', 'ftr', 'cypress', 'playwright'],
     classifications: ['flaky'],
   },
-  thresholds: {
-    minBuilds: 10,
-    minFailedBuilds: 2,
-    minFailRate: 0,
-    maxTests: 200,
-  },
+  thresholds: { minBuilds: 10, minFailedBuilds: 2, minFailRate: 0, maxTests: 200 },
   summary: {
     totalFlaky: flaky.length,
     totalConsistentlyFailing: 0,
@@ -92,7 +116,7 @@ export const flakyReport = (flaky: FlakyTestEntry[]): FlakyTestReport => ({
   },
   flaky,
   consistentlyFailing: [],
-  files: [],
+  files,
 });
 
 export const githubIssue = (overrides: Partial<GithubIssue> & { number: number }): GithubIssue => ({

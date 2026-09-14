@@ -1,0 +1,88 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renderFlakySuiteIssueBody renders a multi-test suite with distinct failures, a skipped note and related issues 1`] = `
+"A **flaky** test suite fails frequently on \`main\`: in the top 30 flakiest tests on \`kibana-on-merge\` in the last 7 days (2–9 Sep 2026). Latest run on \`main\` was skipped (2026-09-09).
+
+### Scout suite
+
+#### Flaky tests
+
+| Test | Failed builds | Flakiest branch | Trend (14d) | Test ID |
+|---|---|---|---|---|
+| does not keep a hidden histogram after visiting Dashboard | 23 / 264 (9%) | \`main\` · 20 / 200 | - | a |
+| reverts breakdown, interval, and visibility on a saved session | 10 / 264 (4%) | \`main\` | \`··▁▃▅▄█▆▂▃█▇▅▃\` | b |
+| persists hide/show of the histogram on a saved session | 9 / 264 (3%) | \`main\` | \`··▁▃▅▄█▆▂▃█▇▅▃\` | c |
+
+#### Suite details
+
+| Field | Value |
+|---|---|
+| **File** | [\`x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts\`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts) |
+| **Framework** | Scout (Playwright) · [\`x-pack/solutions/observability/plugins/synthetics/test/scout/ui/playwright.config.ts\`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/synthetics/test/scout/ui/playwright.config.ts) |
+| **Owners** | \`elastic/obs-ux-management-team\`, \`elastic/kibana-data-discovery\`, \`elastic/other-team\` |
+
+### Failures
+
+2 distinct errors.
+
+*does not keep a hidden histogram after…* (2 of the 3 sampled failures):
+
+\`\`\`text
+Error: expect(locator).toBeVisible() failed
+
+Locator: chart | pipe
+\`\`\`
+
+*reverts breakdown, interval, and visibi…* (1 of the 3 sampled failures):
+
+\`\`\`text
+TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+\`\`\`
+
+Possibly related: #7, #8.
+
+<!-- kibanaCiData = {\\"flaky-test-suite\\":{\\"suite.filePath\\":\\"x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts\\",\\"suite.framework\\":\\"playwright\\",\\"suite.testIds\\":[\\"a\\",\\"b\\",\\"c\\"],\\"report.generatedAt\\":\\"2026-09-09T09:04:41.000Z\\",\\"report.count\\":1,\\"report.history\\":[{\\"generatedAt\\":\\"2026-09-09T09:04:41.000Z\\",\\"builds\\":264,\\"failedBuilds\\":23}]}} -->"
+`;
+
+exports[`renderFlakySuiteIssueBody renders a single-test suite with a dashboard link 1`] = `
+"A **flaky** test suite fails frequently on \`main\`: in the top 5 flakiest tests on \`kibana-on-merge\` in the last 7 days (2–9 Sep 2026) — [dashboard with latest stats](https://dashboard.example).
+
+### Scout suite
+
+#### Flaky tests
+
+| Test | Failed builds | Flakiest branch | Trend (14d) | Test ID |
+|---|---|---|---|---|
+| creates default alert, triggers on down status, and recovers | 49 / 509 (10%) | \`main\` | \`··▁▃▅▄█▆▂▃█▇▅▃\` | playwright:default_status_alert:creates default alert |
+
+#### Suite details
+
+| Field | Value |
+|---|---|
+| **File** | [\`x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts\`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts) |
+| **Framework** | Scout (Playwright) · [\`x-pack/solutions/observability/plugins/synthetics/test/scout/ui/playwright.config.ts\`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/synthetics/test/scout/ui/playwright.config.ts) |
+| **Owners** | \`elastic/obs-ux-management-team\` |
+
+### Failures
+
+One sampled failure:
+
+\`\`\`text
+Error: Timed out 30000ms waiting for expect(locator).toBeVisible()
+\`\`\`
+
+<details>
+<summary><b>Failures by pipeline</b></summary>
+
+2–9 Sep 2026, all branches:
+
+| Pipeline | Failed builds | Branches | Sample failure |
+|---|---|---|---|
+| [\`kibana-pull-request\`](https://buildkite.com/elastic/kibana-pull-request) | 70 / 661 (**11%**) | 64 | [#498441](https://buildkite.com/elastic/kibana-pull-request/builds/498441) · 2026-09-08 16:05 UTC |
+| [\`kibana-on-merge\`](https://buildkite.com/elastic/kibana-on-merge) | 49 / 509 (**10%**) | 1 | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345) · 2026-09-09 06:12 UTC |
+| [\`kibana-elasticsearch-snapshot-verify\`](https://buildkite.com/elastic/kibana-elasticsearch-snapshot-verify) | 1 / 5 (20%) | 1 | 2026-09-09 06:12 UTC |
+
+</details>
+
+<!-- kibanaCiData = {\\"flaky-test-suite\\":{\\"suite.filePath\\":\\"x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts\\",\\"suite.framework\\":\\"playwright\\",\\"suite.testIds\\":[\\"playwright:default_status_alert:creates default alert\\"],\\"report.generatedAt\\":\\"2026-09-09T09:04:41.000Z\\",\\"report.count\\":1,\\"report.history\\":[{\\"generatedAt\\":\\"2026-09-09T09:04:41.000Z\\",\\"builds\\":509,\\"failedBuilds\\":49}]}} -->"
+`;
