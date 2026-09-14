@@ -60,7 +60,6 @@ ruleTester.run('@kbn/eslint/scout_max_tests_per_file', rule, {
           test.skip('two', async () => {});
           test.only('three', async () => {});
           test.fixme('four', async () => {});
-          test.each([1, 2, 3])('parameterized', async () => {});
           test.step('not a test', async () => {});
           test.beforeEach(async () => {});
         });
@@ -95,6 +94,33 @@ ruleTester.run('@kbn/eslint/scout_max_tests_per_file', rule, {
       filename:
         'x-pack/solutions/security/plugins/security_solution/test/scout/timelines/ui/fixtures/helpers.ts',
     },
+    {
+      // A for-loop around test() is one syntactic call site, even if it generates many runtime tests.
+      code: dedent`
+        test.describe('suite', () => {
+          for (const x of [1, 2, 3, 4, 5, 6, 7, 8, 9]) {
+            test(\`case \${x}\`, async () => {});
+          }
+        });
+      `,
+      filename: UI_FILENAME,
+    },
+    {
+      code: dedent`
+        const title = 'case';
+        test.describe('suite', () => {
+          test(title, async () => {});
+          test(title, async () => {});
+          test(title, async () => {});
+          test(title, async () => {});
+          test(title, async () => {});
+          test(title, async () => {});
+          test(title, async () => {});
+          test(title, async () => {});
+        });
+      `,
+      filename: UI_FILENAME,
+    },
   ],
 
   invalid: [
@@ -126,11 +152,46 @@ ruleTester.run('@kbn/eslint/scout_max_tests_per_file', rule, {
           test.skip('two', async () => {});
           test.only('three', async () => {});
           test.fixme('four', async () => {});
-          test.each([1])('five', async () => {});
-          test.skip.each([1])('six', async () => {});
+          test('five', async () => {});
+          test('six', async () => {});
           test('seven', async () => {});
           test('eight', async () => {});
           test('nine', async () => {});
+        });
+      `,
+      filename: UI_FILENAME,
+      errors: [{ messageId: 'tooManyTests' }],
+    },
+    {
+      code: dedent`
+        const title = 'case';
+        test.describe('suite', () => {
+          test(title, async () => {});
+          test(title, async () => {});
+          test(title, async () => {});
+          test(title, async () => {});
+          test(title, async () => {});
+          test(title, async () => {});
+          test(title, async () => {});
+          test(title, async () => {});
+          test(title, async () => {});
+        });
+      `,
+      filename: UI_FILENAME,
+      errors: [{ messageId: 'tooManyTests' }],
+    },
+    {
+      code: dedent`
+        test.describe('suite', () => {
+          test('one', { tag: '@local-stateful-classic' }, async () => {});
+          test('two', { tag: '@local-stateful-classic' }, async () => {});
+          test('three', { tag: '@local-stateful-classic' }, async () => {});
+          test('four', { tag: '@local-stateful-classic' }, async () => {});
+          test('five', { tag: '@local-stateful-classic' }, async () => {});
+          test('six', { tag: '@local-stateful-classic' }, async () => {});
+          test('seven', { tag: '@local-stateful-classic' }, async () => {});
+          test('eight', { tag: '@local-stateful-classic' }, async () => {});
+          test('nine', { tag: '@local-stateful-classic' }, async () => {});
         });
       `,
       filename: UI_FILENAME,
