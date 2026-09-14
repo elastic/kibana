@@ -167,6 +167,20 @@ describe('connector-discovery inline tools', () => {
       expect(data.connectors[0].id).toBe('c1');
     });
 
+    it('blocks all connectors when connector_ids is an empty array', async () => {
+      const { actionsStart } = makeActionsStart([
+        makeConnector({ id: 'c1', actionTypeId: '.github' }),
+      ]);
+      mockGetConnectorSpec.mockReturnValue(makeSpec());
+      const tool = createListConnectorsTool({ getActionsStart: async () => actionsStart });
+
+      const result = (await tool.handler({}, makeContext([]))) as ToolHandlerStandardReturn;
+
+      const data = result.results[0].data as { connectors: unknown[]; total: number };
+      expect(data.connectors).toHaveLength(0);
+      expect(data.total).toBe(0);
+    });
+
     it('returns all spec-eligible connectors when connector_ids is not set', async () => {
       const { actionsStart } = makeActionsStart([
         makeConnector({ id: 'c1', actionTypeId: '.github' }),
@@ -287,6 +301,18 @@ describe('connector-discovery inline tools', () => {
       const result = (await tool.handler(
         { connector_id: 'conn-1' },
         makeContext(['other-id'])
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results[0].type).toBe(ToolResultType.error);
+    });
+
+    it('blocks access when connector_ids is an empty array', async () => {
+      const { actionsStart } = makeActionsStart([makeConnector({ id: 'conn-1' })]);
+      const tool = createGetConnectorSubActionsTool({ getActionsStart: async () => actionsStart });
+
+      const result = (await tool.handler(
+        { connector_id: 'conn-1' },
+        makeContext([])
       )) as ToolHandlerStandardReturn;
 
       expect(result.results[0].type).toBe(ToolResultType.error);
