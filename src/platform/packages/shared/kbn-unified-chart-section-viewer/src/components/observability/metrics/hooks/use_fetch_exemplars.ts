@@ -16,6 +16,7 @@ import { isSuppressedFetchError } from '../../../chart/utils/is_suppressed_fetch
 import { useReportChartSectionError } from '../../../chart/hooks/use_report_chart_section_error';
 import { createExemplarsQuery } from '../../../../common/utils/esql/create_exemplars_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
+import { MetricsExecutionContextName } from '../utils/execution_context_enums';
 
 /**
  * Raw ES|QL response shape produced by `executeEsqlQuery`. Column names and row
@@ -88,8 +89,10 @@ export const useFetchExemplars = ({
           signal,
           dataView,
           timeRange: fetchParams.timeRange,
+          filters: fetchParams.filters,
           uiSettings,
           profileId,
+          executionContextName: MetricsExecutionContextName.EXEMPLARS,
         });
 
         if (!isEsqlRawResponse(rawResponse)) {
@@ -115,6 +118,7 @@ export const useFetchExemplars = ({
       originalSource,
       search,
       fetchParams.timeRange,
+      fetchParams.filters,
       uiSettings,
       profileId,
       reportError,

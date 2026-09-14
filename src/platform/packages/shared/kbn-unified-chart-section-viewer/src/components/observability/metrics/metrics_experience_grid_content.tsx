@@ -88,20 +88,29 @@ export const MetricsExperienceGridContent = ({
     [filteredFieldsCount]
   );
 
-  const getUserMessages = useCallback(
-    (metricItem: ParsedMetricItem) => {
-      const messages = [
-        ...(isLegacyHistogram(
-          firstNonNullable(metricItem.fieldTypes),
-          firstNonNullable(metricItem.metricTypes)
-        )
-          ? LEGACY_HISTOGRAM_USER_MESSAGES
-          : []),
-        ...(exemplarsAvailability.hasProbeFailed ? EXEMPLARS_PROBE_FAILED_USER_MESSAGES : []),
-      ];
-      return messages.length > 0 ? messages : undefined;
-    },
+  // Memoized so each chart sees a stable `userMessages` identity: it feeds a shallow
+  // `React.memo` and the Lens props dependency list.
+  const probeFailedMessages = useMemo(
+    () => (exemplarsAvailability.hasProbeFailed ? EXEMPLARS_PROBE_FAILED_USER_MESSAGES : undefined),
     [exemplarsAvailability.hasProbeFailed]
+  );
+  const legacyHistogramMessages = useMemo(
+    () =>
+      probeFailedMessages
+        ? [...LEGACY_HISTOGRAM_USER_MESSAGES, ...probeFailedMessages]
+        : LEGACY_HISTOGRAM_USER_MESSAGES,
+    [probeFailedMessages]
+  );
+
+  const getUserMessages = useCallback(
+    (metricItem: ParsedMetricItem) =>
+      isLegacyHistogram(
+        firstNonNullable(metricItem.fieldTypes),
+        firstNonNullable(metricItem.metricTypes)
+      )
+        ? legacyHistogramMessages
+        : probeFailedMessages,
+    [legacyHistogramMessages, probeFailedMessages]
   );
 
   const duplicateMetricNames = useMemo(() => getDuplicateMetricNames(metricItems), [metricItems]);

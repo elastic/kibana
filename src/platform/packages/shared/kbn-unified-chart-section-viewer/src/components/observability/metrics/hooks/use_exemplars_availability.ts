@@ -18,6 +18,7 @@ import { useFeatureFlag } from '../../../../hooks/use_feature_flag';
 import { isSuppressedFetchError } from '../../../chart/utils/is_suppressed_fetch_error';
 import { useReportChartSectionError } from '../../../chart/hooks/use_report_chart_section_error';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
+import { MetricsExecutionContextName } from '../utils/execution_context_enums';
 
 /**
  * Asks Elasticsearch which metrics have exemplars. `LIMIT 0` returns column metadata
@@ -69,8 +70,9 @@ const PROBE_FAILED: ExemplarsAvailabilityResult = Object.freeze({
 
 /**
  * Detects which metrics have OTLP exemplars, with one request for the whole grid.
- * Never throws: a failed probe degrades to "nothing available" and is reported to APM
- * under its own `chart_section_source` so it stays distinguishable from chart errors.
+ * Never throws: a failed probe degrades to "nothing available" and is reported to APM.
+ * Probe and per-metric fetch failures share the `useFetchExemplars` source on purpose:
+ * this probe goes away once `TS_EXEMPLARS` exists, so it does not get its own label.
  */
 export const useExemplarsAvailability = ({
   fetchParams,
@@ -187,6 +189,7 @@ const fetchMetricsWithExemplars = async ({
     dataView,
     uiSettings,
     profileId,
+    executionContextName: MetricsExecutionContextName.EXEMPLARS,
   });
 
   return new Set(extractColumnNames(rawResponse));

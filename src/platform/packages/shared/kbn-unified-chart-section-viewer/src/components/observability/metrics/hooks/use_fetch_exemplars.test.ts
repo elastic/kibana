@@ -25,12 +25,14 @@ jest.mock('../../../chart/hooks/use_report_chart_section_error', () => ({
 
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import { FEATURE_FLAGS } from '../../../../common/constants';
 import { useFeatureFlag } from '../../../../hooks/use_feature_flag';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
+import { MetricsExecutionContextName } from '../utils/execution_context_enums';
 import { createExemplarsQuery } from '../../../../common/utils/esql/create_exemplars_query';
 import type { ParsedMetricItem } from '../../../../types';
 import { useFetchExemplars, type UseFetchExemplarsParams } from './use_fetch_exemplars';
@@ -42,6 +44,12 @@ const mockCreateExemplarsQuery = createExemplarsQuery as jest.MockedFunction<
 >;
 
 const TEST_PROFILE_ID = 'metrics-data-source-profile';
+const TEST_FILTERS: Filter[] = [
+  {
+    meta: { key: 'attributes.http.route' },
+    query: { match_phrase: { 'attributes.http.route': '/orders' } },
+  },
+];
 const TEST_ESQL_QUERY =
   'FROM exemplars-generic.otel-default | WHERE `metrics.http.server.request.duration` IS NOT NULL | KEEP @timestamp | SORT @timestamp DESC | LIMIT 500';
 
@@ -79,7 +87,7 @@ const createParams = (
     query: { esql: 'TS metrics-generic.otel-default' },
     dataView: createMockDataView(),
     timeRange: { from: 'now-15m', to: 'now' },
-    filters: [],
+    filters: TEST_FILTERS,
   }),
   services: createMockServices(),
   metricItem: mockMetric,
@@ -205,7 +213,7 @@ describe('useFetchExemplars', () => {
     });
   });
 
-  it('forwards the signal, search, dataView, uiSettings, timeRange, and profileId to executeEsqlQuery', async () => {
+  it('forwards the signal, search, dataView, uiSettings, timeRange, filters, and profileId to executeEsqlQuery under the exemplars execution context', async () => {
     const params = createParams();
 
     renderHook(() => useFetchExemplars(params));
@@ -219,6 +227,8 @@ describe('useFetchExemplars', () => {
         uiSettings: params.services.uiSettings,
         profileId: TEST_PROFILE_ID,
         timeRange: params.fetchParams.timeRange,
+        filters: TEST_FILTERS,
+        executionContextName: MetricsExecutionContextName.EXEMPLARS,
         signal: expect.any(AbortSignal),
       })
     );

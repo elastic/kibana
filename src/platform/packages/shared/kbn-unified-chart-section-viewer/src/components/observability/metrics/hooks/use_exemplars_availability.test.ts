@@ -27,6 +27,7 @@ import { getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_param
 import { FEATURE_FLAGS } from '../../../../common/constants';
 import { useFeatureFlag } from '../../../../hooks/use_feature_flag';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
+import { MetricsExecutionContextName } from '../utils/execution_context_enums';
 import {
   EXEMPLARS_PROBE_QUERY,
   resetExemplarsAvailabilityCache,
@@ -160,6 +161,7 @@ describe('useExemplarsAvailability', () => {
       dataView: params.fetchParams.dataView,
       uiSettings: params.services.uiSettings,
       profileId: TEST_PROFILE_ID,
+      executionContextName: MetricsExecutionContextName.EXEMPLARS,
     });
   });
 
