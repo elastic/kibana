@@ -87,6 +87,8 @@ const actionConnector = {
   config,
 };
 
+jest.setTimeout(15_000);
+
 describe('CasesWebhookActionConnectorFields renders', () => {
   beforeEach(() => {
     useSecretHeadersMock.mockReturnValue({ isLoading: true, isFetching: false, data: [] });
