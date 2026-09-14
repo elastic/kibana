@@ -336,6 +336,11 @@ export interface WorkflowExecutionListDto {
   page: number;
   size: number;
   total: number;
+  /**
+   * Opaque `search_after` sort values for the next window.
+   * Absent when there are no further results.
+   */
+  searchAfter?: unknown[];
 }
 
 export interface WorkflowStepExecutionListDto {
@@ -483,6 +488,7 @@ export interface WorkflowDetailDto extends WorkflowAccessSubject {
   definition: WorkflowYaml | null;
   yaml: string;
   valid: boolean;
+  tags?: string[];
   version?: number;
 }
 
