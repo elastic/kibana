@@ -7,6 +7,7 @@
 
 import type {
   AuthenticatedUser,
+  IClusterClient,
   KibanaRequest,
   Logger,
   SavedObjectsServiceStart,
@@ -20,6 +21,7 @@ import {
   ServiceAccountWorkloadBindings,
   WorkloadBindingStore,
 } from './bindings';
+import { SERVICE_ACCOUNT_CREDENTIAL_TYPE, ServiceAccountCredentialStore } from './credentials';
 import { EsServiceAccounts } from './es_service_accounts';
 import type { CloudProjectContext, ServiceAccountsServiceStart } from './types';
 import { UiamServiceAccounts } from './uiam_service_accounts';
@@ -34,6 +36,7 @@ export interface ServiceAccountsServiceStartParams {
   uiam?: UiamServicePublic;
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
   cloudProjectContext?: CloudProjectContext;
+  clusterClient: IClusterClient;
   savedObjects: SavedObjectsServiceStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   /** Whether saved object encryption is possible, captured from the encrypted saved objects setup contract. */
@@ -56,6 +59,7 @@ export class ServiceAccountsService {
     uiam,
     checkPrivilegesWithRequest,
     cloudProjectContext,
+    clusterClient,
     savedObjects,
     encryptedSavedObjects,
     canEncrypt,
@@ -68,14 +72,33 @@ export class ServiceAccountsService {
       return null;
     }
 
-    // Backend selection keys off UIAM availability rather than the build flavor, so
-    // that the Elasticsearch path is reachable and testable before it is finished.
+    // UIAM and Elasticsearch are mutually exclusive: serverless deployments run UIAM, every
+    // other offering runs Elasticsearch's user-managed service accounts. Selection keys off UIAM
+    // availability rather than the build flavor so the Elasticsearch path stays testable.
     if (!uiam || !cloudProjectContext) {
-      this.logger.debug(
-        'UIAM is not available; falling back to the Elasticsearch service accounts backend.'
-      );
+      this.logger.debug('UIAM is not available; using the Elasticsearch service accounts backend.');
       return {
-        backend: new EsServiceAccounts(),
+        backend: new EsServiceAccounts({
+          logger: this.logger.get('elasticsearch'),
+          license,
+          clusterClient,
+          checkPrivilegesWithRequest,
+          credentialStore: new ServiceAccountCredentialStore({
+            client: savedObjects.getUnsafeInternalClient({
+              includedHiddenTypes: [SERVICE_ACCOUNT_CREDENTIAL_TYPE],
+            }),
+            encryptedClient: encryptedSavedObjects.getClient({
+              includedHiddenTypes: [SERVICE_ACCOUNT_CREDENTIAL_TYPE],
+            }),
+            isEncryptionError: encryptedSavedObjects.isEncryptionError,
+            logger: this.logger.get('credentials'),
+          }),
+          canEncrypt,
+          getCurrentUser,
+          getCurrentUserProfileId,
+        }),
+        // Workload binding is a UIAM-only capability until the Elasticsearch token exchange
+        // lands; see https://github.com/elastic/kibana/issues/284465.
         workloads: createNotImplementedWorkloadBindings(),
       };
     }

@@ -126,6 +126,16 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
+    // UIAM's first iteration grants the account its creator's privileges and offers no way to
+    // narrow them, so a caller-supplied role list cannot be honoured. Rejected rather than
+    // ignored, so the asymmetry with the Elasticsearch backend is discoverable.
+    if (params.roles) {
+      throw Boom.badRequest(
+        'Cannot create a service account: `roles` is not supported on this deployment; the ' +
+          "service account is granted the creator's privileges"
+      );
+    }
+
     const authorization = getUiamAuthorizationHeaderFromRequest(request);
 
     await ensureManageSecurityPrivilege({
@@ -156,10 +166,11 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
         this.logger.error(
           `Service account payload from UIAM failed validation: ${parsed.error.message}`
         );
-        return result;
       }
 
-      return parsed.data;
+      // Only the backend-agnostic fields cross the contract boundary; the rest of UIAM's payload
+      // is validated above purely to catch an upstream shape change.
+      return { id: result.id, name: result.name };
     } catch (e) {
       this.logger.error(`Failed to create service account: ${getDetailedErrorMessage(e)}`);
       throw e;

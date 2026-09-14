@@ -6,7 +6,11 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { loggingSystemMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  loggingSystemMock,
+  savedObjectsServiceMock,
+} from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 
 import { EsServiceAccounts } from './es_service_accounts';
@@ -44,6 +48,7 @@ describe('ServiceAccountsService', () => {
         projectId: 'project-id',
         projectType: 'security' as const,
       },
+      clusterClient: elasticsearchServiceMock.createClusterClient(),
       savedObjects: savedObjectsServiceMock.createStartContract(),
       encryptedSavedObjects,
       canEncrypt: true,

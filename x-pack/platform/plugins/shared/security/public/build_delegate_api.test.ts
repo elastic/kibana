@@ -67,7 +67,7 @@ describe('buildSecurityApi', () => {
       );
     });
 
-    it('returns false when the setting is not available, as is the case outside of serverless', () => {
+    it('returns false when the setting was not exposed to the browser at all', () => {
       expect(api.serviceAccounts.isEnabled()).toBe(false);
     });
   });
