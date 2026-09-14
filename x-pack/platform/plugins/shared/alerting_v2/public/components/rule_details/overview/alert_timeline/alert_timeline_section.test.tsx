@@ -8,7 +8,11 @@
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { createMockLocators, MockLocatorProvider } from '../../../../test_utils/test_providers';
 import { AlertTimelineSection } from './alert_timeline_section';
+import { AlertingV2EpisodesLocatorDefinition } from '../../../../locators';
+
+const mockLocators = createMockLocators();
 
 const mockUseFetchRuleEvents = jest.fn();
 let capturedOnRefresh: (() => void) | undefined;
@@ -18,7 +22,7 @@ jest.mock('../../../../hooks/use_fetch_rule_events', () => ({
 }));
 
 jest.mock('./use_alert_timeline_url_state', () => ({
-  useAlertTimelineUrlState: () => [{ from: 'now-7d', to: 'now' }, jest.fn()],
+  useAlertTimelineUrlState: () => [{ from: 'now-24h', to: 'now' }, jest.fn()],
 }));
 
 jest.mock('../../../../utils/discover_href_for_episode', () => ({
@@ -75,9 +79,11 @@ const successResult = {
 
 const renderSection = () =>
   render(
-    <I18nProvider>
-      <AlertTimelineSection />
-    </I18nProvider>
+    <MockLocatorProvider locators={mockLocators}>
+      <I18nProvider>
+        <AlertTimelineSection />
+      </I18nProvider>
+    </MockLocatorProvider>
   );
 
 describe('AlertTimelineSection', () => {
@@ -123,6 +129,42 @@ describe('AlertTimelineSection', () => {
     expect(successResult.refetch).toHaveBeenCalledTimes(1);
   });
 
+  it('passes time-window deps to episodes.useUrl so the href tracks the selected range', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-08-14T12:00:00.000Z'));
+    renderSection();
+
+    const windowStartMs = Date.parse('2026-08-13T12:00:00.000Z');
+    const windowEndMs = Date.parse('2026-08-14T12:00:00.000Z');
+    const { episodesLocators } = mockLocators;
+
+    expect(episodesLocators.useUrl).toHaveBeenCalledWith(
+      {
+        filters: { ruleId: 'rule-1', status: 'all' },
+        timeRange: {
+          from: new Date(windowStartMs).toISOString(),
+          to: new Date(windowEndMs).toISOString(),
+        },
+      },
+      undefined,
+      ['rule-1', windowStartMs, windowEndMs]
+    );
+    jest.useRealTimers();
+  });
+
+  it('episodes link params resolve to management episodes URL with filters', async () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-08-14T12:00:00.000Z'));
+    renderSection();
+
+    const { episodesLocators } = mockLocators;
+    const [params] = jest.mocked(episodesLocators.useUrl).mock.calls[0];
+    const location = await AlertingV2EpisodesLocatorDefinition.getLocation(params);
+    expect(location.app).toBe('management');
+    expect(location.path).toMatch(/^\/alertingV2\/episodes\?_a=/);
+    jest.useRealTimers();
+  });
+
   it('slides a relative window forward on refresh without calling refetch', () => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2026-08-14T12:00:00.000Z'));
@@ -137,7 +179,7 @@ describe('AlertTimelineSection', () => {
     expect(successResult.refetch).not.toHaveBeenCalled();
     expect(mockUseFetchRuleEvents).toHaveBeenCalledWith(
       expect.objectContaining({
-        windowStartMs: Date.parse('2026-08-07T12:05:00.000Z'),
+        windowStartMs: Date.parse('2026-08-13T12:05:00.000Z'),
         windowEndMs: Date.parse('2026-08-14T12:05:00.000Z'),
       })
     );

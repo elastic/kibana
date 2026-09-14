@@ -1,0 +1,7 @@
+{
+  "name": "@kbn/infra-plugin",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Elastic License 2.0",
+  "kbnGenerated": true
+}

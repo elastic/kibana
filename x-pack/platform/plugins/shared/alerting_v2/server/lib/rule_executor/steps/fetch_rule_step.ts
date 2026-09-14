@@ -23,16 +23,12 @@ export class FetchRuleStep implements RuleExecutionStep {
       const { ruleId } = input;
       const logger = state.logger.withLabels({ step: this.name });
 
-      logger.debug({
-        message: `[${this.name}] Starting step for rule ${ruleId}`,
-      });
+      logger.debug({ message: 'Starting fetch rule step' });
 
       try {
         const rule = await this.rulesClient.getRule({ id: ruleId });
 
-        logger.debug({
-          message: () => `[${this.name}] Fetched rule ${ruleId}`,
-        });
+        logger.debug({ message: 'Fetched rule' });
 
         return {
           type: 'continue',
@@ -44,11 +40,11 @@ export class FetchRuleStep implements RuleExecutionStep {
         };
       } catch (error) {
         if (Boom.isBoom(error) && error.output.statusCode === 404) {
-          logger.debug({ message: `[${this.name}] Rule ${ruleId} not found, halting` });
+          logger.debug({ message: 'Rule not found, halting' });
           return { type: 'halt', reason: 'rule_deleted', state };
         }
 
-        logger.debug({ message: `[${this.name}] Failed to fetch rule ${ruleId}` });
+        logger.debug({ message: 'Failed to fetch rule' });
         throw error;
       }
     });

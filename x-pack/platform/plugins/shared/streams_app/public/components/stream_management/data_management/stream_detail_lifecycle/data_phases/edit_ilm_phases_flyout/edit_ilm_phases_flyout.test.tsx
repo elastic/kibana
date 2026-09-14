@@ -11,6 +11,10 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { IlmPolicyPhases, PhaseName } from '@kbn/streams-schema';
 import { EditIlmPhasesFlyout } from './edit_ilm_phases_flyout';
 
+jest.mock('../../../../../../hooks/use_streams_privileges', () => ({
+  useStreamsPrivileges: jest.fn(() => ({ features: { canvas: { enabled: false } } })),
+}));
+
 jest.mock('../../hooks/use_ilm_phases_color_and_description', () => ({
   useIlmPhasesColorAndDescription: () => ({
     ilmPhases: {

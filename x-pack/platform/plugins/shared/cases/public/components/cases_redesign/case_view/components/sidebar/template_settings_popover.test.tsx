@@ -75,7 +75,11 @@ const otherParsedTemplate = {
   deletedAt: null,
   isLatest: true,
   latestVersion: 1,
-  definition: { name: otherTemplate.name, fields: [{ name: 'severity', control: 'INPUT_TEXT' }] },
+  definition: {
+    name: otherTemplate.name,
+    fields: [{ name: 'severity', control: 'INPUT_TEXT' }],
+    settings: { syncAlerts: true, extractObservables: true },
+  },
 };
 
 const mockTemplatesList = { templates: [appliedTemplate, otherTemplate] };
@@ -243,7 +247,9 @@ describe('TemplateSettingsPopover', () => {
             id: otherTemplate.templateId,
             version: otherTemplate.templateVersion,
             fields: otherParsedTemplate.definition.fields,
+            settings: otherParsedTemplate.definition.settings,
           },
+          entryPoint: 'case_view_sidebar',
         },
         expect.objectContaining({ onSuccess: expect.any(Function) })
       );
@@ -338,7 +344,7 @@ describe('TemplateSettingsPopover', () => {
       await user.click(screen.getByTestId('confirm-change-template-modal-confirm'));
 
       expect(mockMutate).toHaveBeenCalledWith(
-        { caseData: caseWithTemplate, newTemplate: null },
+        { caseData: caseWithTemplate, newTemplate: null, entryPoint: 'case_view_sidebar' },
         expect.objectContaining({ onSuccess: expect.any(Function) })
       );
     });

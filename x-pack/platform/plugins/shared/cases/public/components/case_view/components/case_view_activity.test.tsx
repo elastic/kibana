@@ -129,7 +129,6 @@ const useGetCasesFeaturesRes = {
   metricsFeatures: [CaseMetricsFeature.ALERTS_COUNT],
   pushToServiceAuthorized: true,
   caseAssignmentAuthorized: true,
-  isAlertsEnabled: true,
   isSyncAlertsEnabled: true,
 };
 

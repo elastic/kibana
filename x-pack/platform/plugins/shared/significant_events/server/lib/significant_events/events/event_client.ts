@@ -147,7 +147,14 @@ export interface EventsFilterOptions {
   topologyFeatureIds?: string[];
 }
 
+type EventsCurrentStateSearchOptions = CommonSearchOptions & EventsFilterOptions;
+
 export type EventsPaginatedSearchOptions = PaginatedSearchOptions & EventsFilterOptions;
+
+export type EventsBatchSearchOptions = EventsCurrentStateSearchOptions & {
+  afterEventId?: string;
+  batchSize: number;
+};
 
 export class EventClient {
   constructor(
@@ -194,6 +201,62 @@ export class EventClient {
     return where;
   }
 
+  private buildLatestByCurrentStateQuery(options: EventsCurrentStateSearchOptions): ComposerQuery {
+    const candidateWhere = continuationCandidateFilter({
+      streamNames: options.stream,
+      ruleUuids: options.ruleUuids,
+    });
+    const eventIdWhere = inFilter({
+      where: undefined,
+      field: FIELD_EVENT_ID,
+      values: options.eventIds,
+    });
+    const topologyWhere = topologyFeatureFilter(options.topologyFeatureIds);
+
+    let query = fromIndexForSpace({
+      index: EVENTS_DATA_STREAM,
+      space: this.clients.space,
+      columns: ['_id', '_source'],
+    }).pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(FIELD_EVENT_ID)}`;
+
+    query = applyTimeRange({
+      query,
+      from: options.from,
+      to: options.to,
+    });
+
+    // Free-text search runs pre-latest; current state and continuation-candidate filters run
+    // post-latest so stale versions cannot make a closed episode appear open.
+    const searchWhere = this.buildWhere({ search: options.search });
+    if (searchWhere) {
+      query = query.where`${searchWhere}`;
+    }
+
+    query = pickLatestPerGroup(query, FIELD_EVENT_ID);
+
+    if (options.status?.length) {
+      query = query.where`${esql.col('status')} IN (${options.status.map((status) =>
+        esql.str(status)
+      )})`;
+    }
+    if (options.severity?.length) {
+      query = query.where`${esql.col('severity')} IN (${options.severity.map((severity) =>
+        esql.str(severity)
+      )})`;
+    }
+    if (candidateWhere) {
+      query = query.where`${candidateWhere}`;
+    }
+    if (eventIdWhere) {
+      query = query.where`${eventIdWhere}`;
+    }
+    if (topologyWhere) {
+      query = query.where`${topologyWhere}`;
+    }
+
+    return query;
+  }
+
   async bulkCreate(
     events: SignificantEvent[],
     { throwOnFail = false, refresh }: BulkCreateOptions = {}
@@ -234,67 +297,12 @@ export class EventClient {
     const page = options.page ?? 1;
     const perPage = options.perPage ?? 25;
 
-    const candidateWhere = continuationCandidateFilter({
-      streamNames: options.stream,
-      ruleUuids: options.ruleUuids,
-    });
-    const eventIdWhere = inFilter({
-      where: undefined,
-      field: FIELD_EVENT_ID,
-      values: options.eventIds,
-    });
-    const topologyWhere = topologyFeatureFilter(options.topologyFeatureIds);
-
-    const buildBaseQuery = (): ComposerQuery => {
-      let query = fromIndexForSpace({
-        index: EVENTS_DATA_STREAM,
-        space: this.clients.space,
-        columns: ['_id', '_source'],
-      }).pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(FIELD_EVENT_ID)}`;
-
-      query = applyTimeRange({
-        query,
-        from: options.from,
-        to: options.to,
-      });
-
-      // Free-text search runs pre-latest; current state and continuation-candidate filters run
-      // post-latest so stale versions cannot make a closed episode appear open.
-      const searchWhere = this.buildWhere({ search: options.search });
-      if (searchWhere) {
-        query = query.where`${searchWhere}`;
-      }
-
-      query = pickLatestPerGroup(query, FIELD_EVENT_ID);
-
-      if (options.status?.length) {
-        query = query.where`${esql.col('status')} IN (${options.status.map((status) =>
-          esql.str(status)
-        )})`;
-      }
-      if (options.severity?.length) {
-        query = query.where`${esql.col('severity')} IN (${options.severity.map((severity) =>
-          esql.str(severity)
-        )})`;
-      }
-      if (candidateWhere) {
-        query = query.where`${candidateWhere}`;
-      }
-      if (eventIdWhere) {
-        query = query.where`${eventIdWhere}`;
-      }
-      if (topologyWhere) {
-        query = query.where`${topologyWhere}`;
-      }
-
-      return query;
-    };
-
-    const dataQuery = buildBaseQuery()
+    const dataQuery = this.buildLatestByCurrentStateQuery(options)
       .sort(['@timestamp', 'DESC'], ['_id', 'ASC'])
       .limit(page * perPage)
       .keep('_source', 'created_at');
-    const countQuery = buildBaseQuery().pipe`STATS total = COUNT(*)`.keep('total');
+    const countQuery = this.buildLatestByCurrentStateQuery(options)
+      .pipe`STATS total = COUNT(*)`.keep('total');
 
     const [total, hits] = await Promise.all([
       executeCountQuery({ esClient: this.clients.esClient, query: countQuery }),
@@ -316,6 +324,31 @@ export class EventClient {
       page,
       perPage,
       total,
+    };
+  }
+
+  async findLatestByCurrentStateBatch(
+    options: EventsBatchSearchOptions
+  ): Promise<{ hits: SignificantEventResponse[] }> {
+    let query = this.buildLatestByCurrentStateQuery(options);
+    if (options.afterEventId !== undefined) {
+      query = query.where`${esql.col(FIELD_EVENT_ID)} > ${esql.str(options.afterEventId)}`;
+    }
+
+    const hits = await executeEsqlQuery<SignificantEventResponse>({
+      esClient: this.clients.esClient,
+      query: query
+        .sort([FIELD_EVENT_ID, 'ASC'])
+        .limit(options.batchSize)
+        .keep('_source', 'created_at'),
+      fields: ['created_at'],
+    });
+
+    return {
+      hits: hits.map((event) => ({
+        ...normalizeLegacyVerification(event),
+        created_at: event.created_at,
+      })),
     };
   }
 

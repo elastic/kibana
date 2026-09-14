@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import type { Logger } from '@kbn/core/server';
+import {
+  createWorkflowTriggerForwarder,
+  type WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
 import type { CasesEventBus } from '../../events/event_bus';
 import {
   CaseCreatedTriggerId,
@@ -14,7 +17,9 @@ import {
   AttachmentsAddedTriggerId,
   CommentsAddedTriggerId,
   CaseStatusUpdatedTriggerId,
+  ExtendedFieldsUpdatedTriggerId,
 } from '../../../common/workflows/triggers';
+import { buildExtendedFieldsUpdatedPayload } from './extended_fields_updated_payload';
 
 /**
  * Registers bridge listeners that forward Cases domain events to workflows_extensions.
@@ -28,14 +33,7 @@ export function registerCasesWorkflowEventBridge(
     return;
   }
 
-  const forward = async (eventType: string, payload: unknown, request: KibanaRequest) => {
-    try {
-      const client = await workflowsExtensions.getClient(request);
-      await client.emitEvent(eventType, payload as Record<string, unknown>);
-    } catch (error) {
-      logger.warn(`Failed to emit workflow trigger "${eventType}": ${error}`);
-    }
-  };
+  const forward = createWorkflowTriggerForwarder(workflowsExtensions, logger);
 
   casesEventBus.onCaseCreated((event) => {
     void forward(CaseCreatedTriggerId, event.payload, event.request);
@@ -55,6 +53,22 @@ export function registerCasesWorkflowEventBridge(
           { ...reducedPayload, status, previousStatus },
           event.request
         );
+      }
+    }
+
+    // Do NOT gate this on `updatedFields.includes('extended_fields')`. A patch to `customFields`
+    // on a field linked to a global field definition mirrors into `extended_fields` server-side,
+    // but `updatedFields` only contains `['customFields']` in that case (computed before the
+    // adapter runs). Derive from a value diff instead.
+    if (previousCase && updatedCase) {
+      const extendedFieldsPayload = buildExtendedFieldsUpdatedPayload({
+        ...reducedPayload,
+        previousExtendedFields: previousCase.attributes.extended_fields,
+        extendedFields: updatedCase.extended_fields,
+      });
+
+      if (extendedFieldsPayload) {
+        void forward(ExtendedFieldsUpdatedTriggerId, extendedFieldsPayload, event.request);
       }
     }
   });

@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { getHistorySnapshotIndexPattern } from '@kbn/entity-store/server';
+import { resolveHistorySnapshotIndexPatterns } from '@kbn/entity-store/server';
 import type { EntityType as EntityTypeOpenAPI } from '@kbn/entity-store/common';
 import type { LeadEntity, Observation, ObservationModule, ObservationSeverity } from '../types';
 import { DEFAULT_MAX_TERMS_QUERY_COUNT } from '../../utils/elasticsearch_terms_limits';
@@ -86,7 +86,9 @@ const fetchPrivilegeEscalations = async (
     const ofType = privilegedEntities.filter((e) => e.type === entityType);
     if (ofType.length > 0) {
       const euids = ofType.map((e) => e.id);
-      const historyPattern = getHistorySnapshotIndexPattern(spaceId);
+      const historyPattern = (await resolveHistorySnapshotIndexPatterns(esClient, spaceId)).join(
+        ','
+      );
 
       try {
         for (let offset = 0; offset < euids.length; offset += DEFAULT_MAX_TERMS_QUERY_COUNT) {

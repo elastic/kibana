@@ -152,7 +152,7 @@ const getDefaultState = (scopedProfilesManager: ScopedProfilesManager, dataView:
   return getDefaultAppState({ dataView });
 };
 
-const shouldResetProfileAppStateDefaultField = (
+export const shouldResetProfileAppStateDefaultField = (
   profileAppStateDefaults: TabState['profileAppStateDefaults'],
   field: ProfileAppStateDefaultField
 ) =>
