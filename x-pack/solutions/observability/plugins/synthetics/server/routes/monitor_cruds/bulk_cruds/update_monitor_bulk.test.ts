@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Type } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { updateSyntheticsMonitorBulkRoute } from './update_monitor_bulk';
 
@@ -82,11 +82,11 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
   });
 
   describe('body schema', () => {
-    const bodySchema = (route.validation as { request: { body: Type<unknown> } }).request.body;
+    const bodySchema = (route.validation as { request: { body: z.ZodType } }).request.body;
 
     it('accepts a non-empty updates array of { id, attributes }', () => {
       expect(() =>
-        bodySchema.validate({
+        bodySchema.parse({
           updates: [
             { id: 'monitor-id-1', attributes: { enabled: false } },
             { id: 'monitor-id-2', attributes: { tags: ['x'] } },
@@ -95,9 +95,9 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
       ).not.toThrow();
     });
 
-    it('allows unknown keys inside attributes — schema uses unknowns: allow', () => {
+    it('allows unknown keys inside attributes — looseObject keeps extras', () => {
       expect(() =>
-        bodySchema.validate({
+        bodySchema.parse({
           updates: [
             {
               id: 'monitor-id-1',
@@ -112,39 +112,33 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
     });
 
     it('rejects an empty updates array', () => {
-      expect(() => bodySchema.validate({ updates: [] })).toThrow(
-        /array size is \[0\], but cannot be smaller than \[1\]/
-      );
+      expect(() => bodySchema.parse({ updates: [] })).toThrow(/too small|at least 1|>=1/i);
     });
 
     it('rejects a missing updates field', () => {
-      expect(() => bodySchema.validate({})).toThrow(
-        /\[updates\]: expected value of type \[array\] but got \[undefined\]/
-      );
+      expect(() => bodySchema.parse({})).toThrow(/expected.*array|required|undefined/i);
     });
 
     it('rejects an update item missing id', () => {
-      expect(() => bodySchema.validate({ updates: [{ attributes: { enabled: false } }] })).toThrow(
-        /\[updates\.0\.id\]: expected value of type \[string\] but got \[undefined\]/
+      expect(() => bodySchema.parse({ updates: [{ attributes: { enabled: false } }] })).toThrow(
+        /expected.*string|required|undefined/i
       );
     });
 
     it('rejects an update item with an empty id', () => {
       expect(() =>
-        bodySchema.validate({ updates: [{ id: '', attributes: { enabled: false } }] })
-      ).toThrow(
-        /\[updates\.0\.id\]: value has length \[0\] but it must have a minimum length of \[1\]/
-      );
+        bodySchema.parse({ updates: [{ id: '', attributes: { enabled: false } }] })
+      ).toThrow(/too small|minimum|>=1/i);
     });
 
     it('rejects an update item with a non-string id', () => {
-      expect(() => bodySchema.validate({ updates: [{ id: 1, attributes: {} }] })).toThrow(
-        /\[updates\.0\.id\]: expected value of type \[string\]/
+      expect(() => bodySchema.parse({ updates: [{ id: 1, attributes: {} }] })).toThrow(
+        /expected.*string|invalid/i
       );
     });
 
     it('treats a missing attributes field as an empty update — handler enforces non-empty', () => {
-      const value = bodySchema.validate({ updates: [{ id: 'monitor-id-1' }] }) as {
+      const value = bodySchema.parse({ updates: [{ id: 'monitor-id-1' }] }) as {
         updates: Array<{ id: string; attributes: Record<string, unknown> }>;
       };
       expect(value.updates[0].attributes).toEqual({});
@@ -155,19 +149,15 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
         id: `monitor-id-${i}`,
         attributes: { enabled: false },
       }));
-      expect(() => bodySchema.validate({ updates })).toThrow(
-        /array size is \[501\], but cannot be greater than \[500\]/
-      );
+      expect(() => bodySchema.parse({ updates })).toThrow(/too big|maximum|<=500/i);
     });
 
     it('rejects an id longer than 1024 characters', () => {
       expect(() =>
-        bodySchema.validate({
+        bodySchema.parse({
           updates: [{ id: 'a'.repeat(1025), attributes: { enabled: false } }],
         })
-      ).toThrow(
-        /\[updates\.0\.id\]: value has length \[1025\] but it must have a maximum length of \[1024\]/
-      );
+      ).toThrow(/too big|maximum|<=1024/i);
     });
   });
 

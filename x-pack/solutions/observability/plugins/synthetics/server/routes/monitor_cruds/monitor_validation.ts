@@ -7,8 +7,9 @@
 import { i18n } from '@kbn/i18n';
 
 import { omit, isEmpty } from 'lodash';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { AlertConfigSchema } from '../../../common/runtime_types/monitor_management/alert_config_schema';
+import { formatZodErrors } from '../../../common/runtime_types/zod/format_errors';
 import type { CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { flattenAndFormatObject } from '../../synthetics_service/project_monitor/normalizers/common_fields';
 import type {
@@ -55,8 +56,7 @@ export class MonitorValidationError extends Error {
  * @param spaceId
  */
 export function validateMonitor(monitorFields: MonitorFields, spaceId: string): ValidationResult {
-  const { MonitorTypeCodec, formatZodErrors, monitorTypeToCodecMap, ICMPFieldsCodec } =
-    getZodMonitorCodecs();
+  const { MonitorTypeCodec, monitorTypeToCodecMap, ICMPFieldsCodec } = getZodMonitorCodecs();
 
   const { [ConfigKey.MONITOR_TYPE]: monitorType, [ConfigKey.KIBANA_SPACES]: kSpaces } =
     monitorFields;
@@ -101,13 +101,12 @@ export function validateMonitor(monitorFields: MonitorFields, spaceId: string): 
 
   const alert = monitorFields.alert;
   if (alert) {
-    try {
-      AlertConfigSchema.validate(alert);
-    } catch (e) {
+    const decodedAlert = AlertConfigSchema.safeParse(alert);
+    if (!decodedAlert.success) {
       return {
         valid: false,
         reason: 'Invalid alert configuration',
-        details: e.message,
+        details: formatZodErrors(decodedAlert.error, { input: alert }).join(' | '),
         payload: monitorFields,
       };
     }
@@ -191,7 +190,7 @@ export function validateMonitor(monitorFields: MonitorFields, spaceId: string): 
 }
 
 export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
-  const { MonitorTypeCodec, formatZodErrors } = getZodMonitorCodecs();
+  const { MonitorTypeCodec } = getZodMonitorCodecs();
   const monitorType = monitor.type as MonitorTypeEnum;
   const decodedType = MonitorTypeCodec.safeParse(monitorType);
 
@@ -331,7 +330,7 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
   }
   return { formattedConfig };
 };
-const RecordSchema = schema.recordOf(schema.string(), schema.string());
+const RecordSchema = z.record(z.string(), z.string());
 
 const validateParams = (jsonString: string | any) => {
   if (typeof jsonString === 'string') {
@@ -343,9 +342,12 @@ const validateParams = (jsonString: string | any) => {
     }
   }
   try {
-    RecordSchema.validate(jsonString);
+    RecordSchema.parse(jsonString);
     return { value: JSON.stringify(jsonString) };
   } catch (e) {
+    if (e instanceof z.ZodError) {
+      return { error: new Error(formatZodErrors(e, { input: jsonString }).join(' | ')) };
+    }
     return { error: e };
   }
 };
@@ -371,7 +373,7 @@ export function validateProjectMonitor(
   publicLocations: Locations,
   privateLocations: SyntheticsPrivateLocations
 ): ValidationResult {
-  const { ProjectMonitorCodec, formatZodErrors } = getZodMonitorCodecs();
+  const { ProjectMonitorCodec } = getZodMonitorCodecs();
   const locationsError = validateLocation(monitorFields, publicLocations, privateLocations);
   // Cast it to ICMPCodec to satisfy typing. During runtime, correct codec will be used to decode.
   const decodedMonitor = ProjectMonitorCodec.safeParse(monitorFields);

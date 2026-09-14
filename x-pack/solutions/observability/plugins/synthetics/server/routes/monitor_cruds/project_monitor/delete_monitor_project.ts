@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { routeId } from '../../zod_query';
 import { syntheticsMonitorAttributes } from '../../../../common/types/saved_objects';
 import { DeleteMonitorAPI } from '../services/delete_monitor_api';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
@@ -19,11 +20,11 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
   method: 'DELETE',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE,
   validate: {
-    body: schema.object({
-      monitors: schema.arrayOf(schema.string(), { maxSize: MAX_MONITORS_TO_DELETE }),
+    body: z.object({
+      monitors: z.array(routeId).max(MAX_MONITORS_TO_DELETE),
     }),
-    params: schema.object({
-      projectName: schema.string(),
+    params: z.object({
+      projectName: routeId,
     }),
   },
   handler: async (routeContext): Promise<any> => {

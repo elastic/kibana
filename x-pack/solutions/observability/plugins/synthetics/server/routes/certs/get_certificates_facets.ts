@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { queryBoolean } from '../zod_query';
 import { syntheticsMonitorAttributes } from '../../../common/types/saved_objects';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { processMonitors } from '../../saved_objects/synthetics_monitor/process_monitors';
@@ -33,11 +34,11 @@ export const getSyntheticsCertsFacetsRoute: SyntheticsRestApiRouteFactory<{
   method: 'GET',
   path: SYNTHETICS_API_URLS.CERTS_FACETS,
   validate: {
-    query: schema.object({
-      from: schema.maybe(schema.string({ maxLength: 256 })),
-      to: schema.maybe(schema.string({ maxLength: 256 })),
-      remoteNames: schema.maybe(schema.string({ maxLength: 1024 })),
-      showFromAllSpaces: schema.maybe(schema.boolean()),
+    query: z.object({
+      from: z.string().max(256).optional(),
+      to: z.string().max(256).optional(),
+      remoteNames: z.string().max(1024).optional(),
+      showFromAllSpaces: queryBoolean.optional(),
     }),
   },
   handler: async ({

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { queryNumber, routeId } from '../zod_query';
 import { journeyScreenshotHandler } from '../../queries/journey_screenshots';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
@@ -14,13 +15,13 @@ export const createJourneyScreenshotRoute: SyntheticsRestApiRouteFactory = () =>
   method: 'GET',
   path: SYNTHETICS_API_URLS.JOURNEY_SCREENSHOT,
   validate: {
-    params: schema.object({
-      checkGroup: schema.string(),
-      stepIndex: schema.number(),
+    params: z.object({
+      checkGroup: routeId,
+      stepIndex: queryNumber,
     }),
-    query: schema.object({
-      remoteName: schema.maybe(schema.string({ maxLength: 256 })),
-      timestamp: schema.maybe(schema.string({ maxLength: 30 })),
+    query: z.object({
+      remoteName: z.string().max(256).optional(),
+      timestamp: z.string().max(30).optional(),
     }),
   },
   handler: async (routeProps) => {

@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import type { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { queryBoolean, routeId } from '../zod_query';
 import { ELASTIC_MANAGED_LOCATIONS_DISABLED } from './project_monitor/add_monitor_project';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { generateProjectAPIKey } from '../../synthetics_service/get_api_key';
@@ -20,9 +21,9 @@ export const getAPIKeySyntheticsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.SYNTHETICS_PROJECT_APIKEY,
   validate: {
-    query: schema.object({
-      spaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
-      accessToElasticManagedLocations: schema.maybe(schema.boolean()),
+    query: z.object({
+      spaces: z.array(routeId).max(100).optional(),
+      accessToElasticManagedLocations: queryBoolean.optional(),
     }),
   },
   handler: async ({
