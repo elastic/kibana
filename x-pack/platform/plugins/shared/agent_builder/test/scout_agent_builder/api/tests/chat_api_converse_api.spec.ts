@@ -61,6 +61,13 @@ const parseSseBlocks = (streamText: string): ParsedSseBlock[] => {
   return blocks;
 };
 
+/**
+ * Rebuilds the full event from an SSE block. The server moves `type` onto the SSE `event:` line and
+ * serializes the rest as `data:`, and the SSE client re-attaches it as `{ type, ...data }` — mirror
+ * that so parsed blocks can be compared against persisted timeline events.
+ */
+const sseBlockToEvent = (block: ParsedSseBlock): unknown => ({ type: block.type, ...block.data });
+
 const conversationIdFromSseStream = (streamText: string): string | undefined => {
   for (const block of parseSseBlocks(streamText)) {
     if (
@@ -243,8 +250,9 @@ apiTest.describe(
         'execution_terminated must arrive after message_complete'
       ).toBeGreaterThan(messageCompleteIndex);
 
-      // The SSE payloads must match the persisted timeline events byte-for-byte, so the frontend
-      // can de-duplicate the local copies against fetched history using event id.
+      // The SSE payloads must match the persisted timeline events exactly (once `type` is restored
+      // from the SSE `event:` line), so the frontend can de-duplicate the local copies against
+      // fetched history using event id.
       const fetched = await getConversation(
         apiClient,
         adminCredentials.apiKeyHeader,
@@ -258,8 +266,8 @@ apiTest.describe(
       );
       expect(persistedStarted).toBeDefined();
       expect(persistedTerminated).toBeDefined();
-      expect(blocks[startedIndex].data).toStrictEqual(persistedStarted);
-      expect(blocks[terminatedIndex].data).toStrictEqual(persistedTerminated);
+      expect(sseBlockToEvent(blocks[startedIndex])).toStrictEqual(persistedStarted);
+      expect(sseBlockToEvent(blocks[terminatedIndex])).toStrictEqual(persistedTerminated);
     });
 
     apiTest('invalid converse payload returns 400', async ({ apiClient }) => {
