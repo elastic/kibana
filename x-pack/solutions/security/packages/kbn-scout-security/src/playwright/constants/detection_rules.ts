@@ -6,9 +6,9 @@
  */
 
 export interface CustomQueryRuleResponseAction {
-  action_type_id: string;
+  action_type_id: '.endpoint';
   params: {
-    command: string;
+    command: 'isolate' | 'kill-process' | 'suspend-process' | 'runscript';
     comment?: string;
     config?: {
       field: string;
