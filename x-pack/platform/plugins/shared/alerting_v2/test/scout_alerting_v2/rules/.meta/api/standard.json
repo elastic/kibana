@@ -3002,8 +3002,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 90,
-        "column": 65
+        "line": 84,
+        "column": 5
       }
     },
     {
@@ -3015,47 +3015,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 106,
-        "column": 14
+        "line": 100,
+        "column": 7
       }
     },
     {
-      "id": "fc474d7c402bdfc-7759773fc3b7aae",
-      "title": "Matcher value suggestions API rule.name: narrows the saved object search to names matching the query prefix",
+      "id": "fc474d7c402bdfc-ea697a52fc467d1",
+      "title": "Matcher value suggestions API episode_status: filters suggestions by the query prefix",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 122,
-        "column": 11
-      }
-    },
-    {
-      "id": "fc474d7c402bdfc-1d340d0aaa0c2a4",
-      "title": "Matcher value suggestions API rule.tags: returns the deduplicated tags across all rules",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 143,
-        "column": 38
-      }
-    },
-    {
-      "id": "fc474d7c402bdfc-950c0b50dd2bec5",
-      "title": "Matcher value suggestions API rule.tags: caps the result at 10 suggestions",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 171,
-        "column": 14
+        "line": 115,
+        "column": 22
       }
     },
     {
@@ -3067,8 +3041,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 191,
-        "column": 8
+        "line": 128,
+        "column": 30
       }
     },
     {
@@ -3080,8 +3054,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 207,
-        "column": 20
+        "line": 143,
+        "column": 25
       }
     },
     {
@@ -3093,8 +3067,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 223,
-        "column": 20
+        "line": 159,
+        "column": 25
       }
     },
     {
@@ -3106,8 +3080,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 239,
-        "column": 39
+        "line": 175,
+        "column": 25
       }
     },
     {
@@ -3119,21 +3093,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 256,
-        "column": 20
-      }
-    },
-    {
-      "id": "fc474d7c402bdfc-76e03773677b2a5",
-      "title": "Matcher value suggestions API space isolation: only suggests rules that live in the requested space",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 267,
-        "column": 46
+        "line": 192,
+        "column": 25
       }
     },
     {
@@ -3145,8 +3106,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 300,
-        "column": 20
+        "line": 205,
+        "column": 11
       }
     },
     {
@@ -3158,8 +3119,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 313,
-        "column": 44
+        "line": 214,
+        "column": 5
       }
     },
     {
@@ -3171,8 +3132,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 330,
-        "column": 41
+        "line": 232,
+        "column": 14
       }
     },
     {
@@ -3184,8 +3145,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 339,
-        "column": 4
+        "line": 239,
+        "column": 20
       }
     },
     {
@@ -3197,8 +3158,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 349,
-        "column": 12
+        "line": 250,
+        "column": 22
       }
     },
     {
@@ -3210,8 +3171,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 357,
-        "column": 6
+        "line": 260,
+        "column": 74
       }
     },
     {
@@ -3223,8 +3184,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 367,
-        "column": 7
+        "line": 271,
+        "column": 11
       }
     },
     {
@@ -3236,8 +3197,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 378,
-        "column": 18
+        "line": 282,
+        "column": 80
       }
     },
     {
@@ -3249,8 +3210,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 393,
-        "column": 9
+        "line": 295,
+        "column": 25
       }
     },
     {
@@ -3262,8 +3223,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
-        "line": 405,
-        "column": 24
+        "line": 306,
+        "column": 4
       }
     },
     {

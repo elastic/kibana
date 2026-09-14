@@ -150,17 +150,34 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
   });
 
   apiTest(
-    'matcher: scopes a policy to a single rule via a rule.id matcher',
+    'matcher: scopes a policy to a single rule via tags',
     async ({ apiClient, apiServices }) => {
-      const rule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'rule-for-scoped-policy' } })
+      await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-for-scoped-policy', tags: ['notify-scoped'] } })
       );
 
-      const matcher = { expression: `rule.id: "${rule.id}"` };
+      const matcher = { tags: ['notify-scoped'] };
       const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: buildCreateActionPolicyData({
-          name: 'rule-scoped-policy',
+          name: 'tag-scoped-policy',
+          matcher,
+        }),
+      });
+
+      expect(response).toHaveStatusCode(201);
+      expect(response.body).toMatchObject({ matcher });
+    }
+  );
+
+  apiTest(
+    'matcher: API accepts legacy rule.* expression (AC#3 — stored unchanged, not evaluated)',
+    async ({ apiClient }) => {
+      const matcher = { expression: 'rule.id: "some-legacy-rule-id"' };
+      const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: buildCreateActionPolicyData({
+          name: 'legacy-rule-expression-policy',
           matcher,
         }),
       });

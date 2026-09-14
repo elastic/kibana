@@ -199,7 +199,7 @@ describe('createActionPolicySmlType', () => {
         content: [
           'Critical alerts → Slack',
           'Route every critical-priority alert to #oncall',
-          '(alert.severity = "critical")',
+          'expression: "alert.severity = "critical""',
           'per_episode',
           'workflow:wf-critical-route',
           'oncall, critical',
