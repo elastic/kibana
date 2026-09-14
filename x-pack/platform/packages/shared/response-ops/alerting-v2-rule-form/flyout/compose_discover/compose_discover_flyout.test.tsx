@@ -24,6 +24,7 @@ import { createTestQueryClient } from '../../test_utils';
 import { ComposeDiscoverFlyout } from './compose_discover_flyout';
 import type { ComposeDiscoverFlyoutProps } from './compose_discover_flyout';
 import type { ComposeDiscoverForm } from './compose_discover_form';
+import type { QueryTab } from './types';
 
 type FormProps = React.ComponentProps<typeof ComposeDiscoverForm>;
 
@@ -114,6 +115,8 @@ jest.mock('./compose_discover_form', () => {
 interface SandboxFlyoutMockProps {
   query: RuleQuery;
   onQueryChange?: (query: RuleQuery) => void;
+  tabs?: QueryTab[];
+  activeTab?: QueryTab;
   timeField?: string;
   onTimeFieldChange?: (timeField: string) => void;
   timeFieldOptions?: Array<{ value: string; text: string }>;
@@ -124,6 +127,9 @@ interface SandboxFlyoutMockProps {
 }
 
 let sandboxFlyoutProps: SandboxFlyoutMockProps | undefined;
+let yamlRuleFormProps:
+  | { setYamlText: (yaml: string) => void; onBlurSync: (values: FormValues) => void }
+  | undefined;
 let readCommittedQuery: (() => RuleQuery) | undefined;
 let readRecoveryStrategy: (() => FormValues['recoveryStrategy']) | undefined;
 let readTimeField: (() => FormValues['timeField']) | undefined;
@@ -218,17 +224,23 @@ let mockParseYamlToFormValues: (yaml: string) => {
 });
 
 jest.mock('../../form/yaml_rule_form', () => ({
-  YamlRuleForm: ({ setYamlText }: { setYamlText: (yaml: string) => void }) => (
-    <div data-test-subj="yamlRuleFormMock">
-      <button
-        data-test-subj="mockMakeYamlDirty"
-        onClick={() => setYamlText('name: changed\n')}
-        type="button"
-      >
-        Make YAML dirty
-      </button>
-    </div>
-  ),
+  YamlRuleForm: (props: {
+    setYamlText: (yaml: string) => void;
+    onBlurSync: (values: FormValues) => void;
+  }) => {
+    yamlRuleFormProps = props;
+    return (
+      <div data-test-subj="yamlRuleFormMock">
+        <button
+          data-test-subj="mockMakeYamlDirty"
+          onClick={() => props.setYamlText('name: changed\n')}
+          type="button"
+        >
+          Make YAML dirty
+        </button>
+      </div>
+    );
+  },
 }));
 
 const createMockServices = (): RuleFormServices => ({
@@ -276,6 +288,7 @@ const clickEditMode = (mode: 'form' | 'yaml') => {
 describe('ComposeDiscoverFlyout', () => {
   beforeEach(() => {
     sandboxFlyoutProps = undefined;
+    yamlRuleFormProps = undefined;
     readCommittedQuery = undefined;
     readRecoveryStrategy = undefined;
     readTimeField = undefined;
@@ -1060,7 +1073,7 @@ describe('ComposeDiscoverFlyout', () => {
         mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
 
       act(() => {
-        getLatestFormProps().onRecoveryTypeChange('custom');
+        getLatestFormProps().onRecoveryTypeChange('query');
       });
 
       const firstRecoveryEdit: RuleQuery = {
@@ -1310,7 +1323,7 @@ describe('ComposeDiscoverFlyout', () => {
       fireEvent.click(screen.getByTestId('composeDiscoverNext'));
 
       act(() => {
-        getLatestFormProps().onRecoveryTypeChange('custom');
+        getLatestFormProps().onRecoveryTypeChange('query');
       });
 
       expect(screen.getByTestId('composeDiscoverChildMock')).toBeInTheDocument();
@@ -1421,33 +1434,7 @@ describe('ComposeDiscoverFlyout', () => {
       expect(screen.queryByTestId('yamlRuleFormMock')).not.toBeInTheDocument();
     });
 
-    it('initializes recoveryType to none for recovery_strategy: none', () => {
-      const rule = { ...ruleWithRecoveryStrategy, recovery_strategy: 'none' as const };
-      renderFlyout({ mode: 'edit', rule: rule as any });
-
-      const latestProps =
-        mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
-      expect(latestProps.state.recoveryType).toBe('none');
-    });
-
-    it('initializes recoveryType to none when recovery_strategy is null', () => {
-      const rule = { ...ruleWithRecoveryStrategy, recovery_strategy: undefined };
-      renderFlyout({ mode: 'edit', rule: rule as any });
-
-      const latestProps =
-        mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
-      expect(latestProps.state.recoveryType).toBe('none');
-    });
-
-    it('initializes recoveryType to default for recovery_strategy: no_breach', () => {
-      renderFlyout({ mode: 'edit', rule: ruleWithRecoveryStrategy as any });
-
-      const latestProps =
-        mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
-      expect(latestProps.state.recoveryType).toBe('default');
-    });
-
-    it('sets recoveryType and recoveryStrategy to none when No recovery is selected', () => {
+    it('sets recoveryStrategy to none when No recovery is selected', () => {
       renderFlyout({ mode: 'edit', rule: ruleWithRecoveryStrategy as any });
 
       const getLatestFormProps = () =>
@@ -1457,7 +1444,6 @@ describe('ComposeDiscoverFlyout', () => {
         getLatestFormProps().onRecoveryTypeChange('none');
       });
 
-      expect(getLatestFormProps().state.recoveryType).toBe('none');
       expect(readRecoveryStrategy?.()).toBe('none');
     });
 
@@ -1469,25 +1455,26 @@ describe('ComposeDiscoverFlyout', () => {
         mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
 
       act(() => {
-        getLatestFormProps().onRecoveryTypeChange('default');
+        getLatestFormProps().onRecoveryTypeChange('no_breach');
       });
 
-      expect(getLatestFormProps().state.recoveryType).toBe('default');
       expect(readRecoveryStrategy?.()).toBe('no_breach');
     });
 
-    it('clears recoveryStrategy when Custom is selected, so it is re-derived from the recovery query', () => {
+    it('sets recoveryStrategy to query when Custom is selected, and keeps the recovery tab visible', () => {
       renderFlyout({ mode: 'edit', rule: ruleWithRecoveryStrategy as any });
+
+      fireEvent.click(screen.getByTestId('composeDiscoverNext'));
 
       const getLatestFormProps = () =>
         mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
 
       act(() => {
-        getLatestFormProps().onRecoveryTypeChange('custom');
+        getLatestFormProps().onRecoveryTypeChange('query');
       });
 
-      expect(getLatestFormProps().state.recoveryType).toBe('custom');
-      expect(readRecoveryStrategy?.()).toBeUndefined();
+      expect(readRecoveryStrategy?.()).toBe('query');
+      expect(sandboxFlyoutProps?.tabs).toEqual(['recovery']);
     });
 
     it('clears recoveryStrategy when kind changes to signal, so it is never sent for signal rules', () => {
@@ -1535,6 +1522,84 @@ describe('ComposeDiscoverFlyout', () => {
       renderFlyout({ mode: 'edit', rule: rule as any });
 
       expect(screen.getByTestId('yamlRuleFormMock')).toBeInTheDocument();
+    });
+  });
+
+  describe('recovery sync from YAML edits', () => {
+    const alertYamlFormValues: FormValues = {
+      ...defaultYamlFormValues,
+      kind: 'alert',
+      query: {
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: '| WHERE count > 100' },
+      },
+      recoveryStrategy: 'no_breach',
+      noDataStrategy: 'none',
+    };
+
+    const withRecovery = (values: FormValues, segment: string): FormValues => ({
+      ...values,
+      query: {
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: '| WHERE count > 100' },
+        recovery: { segment },
+      },
+      recoveryStrategy: 'query',
+    });
+
+    it('updates the recovery dropdown value when recovery_strategy is edited in YAML and the user returns to form view', () => {
+      mockParseYamlToFormValues = (yaml) => ({
+        values:
+          yaml === 'name: changed\n'
+            ? { ...alertYamlFormValues, recoveryStrategy: 'none' }
+            : alertYamlFormValues,
+        error: null,
+      });
+      renderFlyout();
+
+      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
+      clickEditMode('yaml');
+      expect(readRecoveryStrategy?.()).toBe('no_breach');
+
+      fireEvent.click(screen.getByTestId('mockMakeYamlDirty'));
+      clickEditMode('form');
+
+      expect(readRecoveryStrategy?.()).toBe('none');
+    });
+
+    it('adds the recovery tab when YAML gains a custom recovery block', () => {
+      mockParseYamlToFormValues = () => ({ values: alertYamlFormValues, error: null });
+      renderFlyout();
+
+      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
+      clickEditMode('yaml');
+      expect(sandboxFlyoutProps?.tabs).toEqual(['base', 'alert']);
+
+      act(() => {
+        yamlRuleFormProps?.onBlurSync(withRecovery(alertYamlFormValues, '| WHERE count < 50'));
+      });
+
+      expect(sandboxFlyoutProps?.tabs).toEqual(['base', 'alert', 'recovery']);
+    });
+
+    it('removes the recovery tab when YAML drops the custom recovery block', () => {
+      mockParseYamlToFormValues = () => ({
+        values: withRecovery(alertYamlFormValues, '| WHERE count < 50'),
+        error: null,
+      });
+      renderFlyout();
+
+      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
+      clickEditMode('yaml');
+      expect(sandboxFlyoutProps?.tabs).toEqual(['base', 'alert', 'recovery']);
+
+      act(() => {
+        yamlRuleFormProps?.onBlurSync({ ...alertYamlFormValues, recoveryStrategy: 'none' });
+      });
+
+      expect(sandboxFlyoutProps?.tabs).toEqual(['base', 'alert']);
     });
   });
 });
