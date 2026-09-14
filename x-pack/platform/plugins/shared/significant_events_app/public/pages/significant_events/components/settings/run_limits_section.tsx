@@ -228,7 +228,7 @@ export const RunLimitsSection = () => {
             )}
           </EuiFlexGroup>
         </EuiSplitPanel.Inner>
-        <EuiSplitPanel.Inner hasBorder={false}>
+        <EuiSplitPanel.Inner>
           <EuiText size="s">
             <p>
               {i18n.translate('xpack.significantEventsApp.settings.runLimits.sectionDescription', {
