@@ -23,10 +23,24 @@ import {
   updateFleetServerHost,
 } from '../../services/fleet_server_host';
 import type {
+  FleetRequestHandler,
+  FleetServerHost,
   GetOneFleetServerHostRequestSchema,
   PostFleetServerHostRequestSchema,
   PutFleetServerHostRequestSchema,
 } from '../../types';
+
+function sanitizeFleetServerHostForNonSettingsRead(host: FleetServerHost): FleetServerHost {
+  const { secrets, ...hostWithoutSecrets } = host;
+  const sanitizedHost: FleetServerHost = { ...hostWithoutSecrets };
+
+  if (host.ssl) {
+    const { key, es_key, agent_key, ...sslWithoutSecrets } = host.ssl;
+    sanitizedHost.ssl = sslWithoutSecrets;
+  }
+
+  return sanitizedHost;
+}
 
 async function checkFleetServerHostsWriteAPIsAllowed(
   soClient: SavedObjectsClientContract,
@@ -163,11 +177,19 @@ export const putFleetServerHostHandler: RequestHandler<
   }
 };
 
-export const getAllFleetServerHostsHandler: RequestHandler = async (context, request, response) => {
+export const getAllFleetServerHostsHandler: FleetRequestHandler = async (
+  context,
+  request,
+  response
+) => {
   const soClient = (await context.core).savedObjects.client;
+  const fleetContext = await context.fleet;
   const res = await listFleetServerHosts(soClient);
+  const items = fleetContext.authz.fleet.readSettings
+    ? res.items
+    : res.items.map(sanitizeFleetServerHostForNonSettingsRead);
   const body = {
-    items: res.items,
+    items,
     page: res.page,
     perPage: res.perPage,
     total: res.total,
