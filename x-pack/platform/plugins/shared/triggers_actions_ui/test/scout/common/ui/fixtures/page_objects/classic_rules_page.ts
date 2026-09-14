@@ -10,6 +10,10 @@ import { triggersActionsRoute } from '@kbn/rule-data-utils';
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout';
 
 export const CLASSIC_RULES_LIST_URL_RE = new RegExp(`${triggersActionsRoute}/?(?:\\?|#|$)`);
+/** Extra `/rules` after the management mount — click-nav must land on `/` instead. */
+export const CLASSIC_RULES_NESTED_RULES_URL_RE = new RegExp(
+  `${triggersActionsRoute}/rules(/|$|\\?|#)`
+);
 export const CLASSIC_RULES_LOGS_URL_RE = new RegExp(`${triggersActionsRoute}/logs(/|$|\\?|#)`);
 export const CLASSIC_RULES_CREATE_URL_RE = new RegExp(`${triggersActionsRoute}/create/`);
 export const CLASSIC_RULES_EDIT_URL_RE = new RegExp(`${triggersActionsRoute}/edit/`);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout-oblt';
+import type { Locator, ScoutPage } from '@kbn/scout-oblt';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
@@ -23,22 +23,30 @@ import {
   OBS_V1_LIST_HREF_RE,
   OBS_V1_LIST_URL_RE,
   OBS_V1_LOGS_URL_RE,
+  OBS_V1_NESTED_RULES_URL_RE,
   OBS_V1_RULE_NAME_HREF_RE,
   STANDALONE_RULES_APP_URL_RE,
 } from '../fixtures/page_objects';
 
 const expectObservabilityHost = async (page: ScoutPage, pathRe: RegExp) => {
   await expect(page).toHaveURL(pathRe);
+  await expect(page).not.toHaveURL(OBS_V1_NESTED_RULES_URL_RE);
   await expect(page).not.toHaveURL(MANAGEMENT_CLASSIC_RULES_URL_RE);
   await expect(page).not.toHaveURL(STANDALONE_RULES_APP_URL_RE);
   await expect(page).not.toHaveURL(MANAGEMENT_ALERTING_V2_URL_RE);
 };
 
+const expectObservabilityHref = async (locator: Locator) => {
+  await expect(locator).not.toHaveAttribute('href', OBS_V1_NESTED_RULES_URL_RE);
+  await expect(locator).not.toHaveAttribute('href', MANAGEMENT_CLASSIC_RULES_URL_RE);
+  await expect(locator).not.toHaveAttribute('href', STANDALONE_RULES_APP_URL_RE);
+  await expect(locator).not.toHaveAttribute('href', MANAGEMENT_ALERTING_V2_URL_RE);
+};
+
 /*
- * Corresponding coverage to the Stack Management classic v1 host-aware Scout
- * tests: landing each nested v1 route, then clicking through list / details /
- * create / edit / logs / settings and asserting the host stays Observability
- * Alerting (`/app/observability/alerting/rules/v1`).
+ * Host-aware coverage for classic v1 Rules on Observability Alerting.
+ * Assert page URLs only after in-page clicks (or browser back/forward), never
+ * after a direct goto of the URL under test.
  */
 test.describe(
   'Observability classic (v1) Rules host-aware URLs',
@@ -67,45 +75,6 @@ test.describe(
       await unsetAlertingV2EnabledSetting(kbnClient);
     });
 
-    test('loads the rules list under Observability Alerting', async ({ page, pageObjects }) => {
-      const rules = pageObjects.observabilityClassicRules;
-      await rules.goto();
-      await expect(rules.rulesList).toBeVisible({ timeout: 30_000 });
-      await expectObservabilityHost(page, OBS_V1_LIST_URL_RE);
-    });
-
-    test('loads logs under Observability Alerting', async ({ page, pageObjects }) => {
-      const rules = pageObjects.observabilityClassicRules;
-      await rules.goto('/logs');
-      await expect(rules.pageTitle).toHaveText('Logs', { timeout: 30_000 });
-      await expectObservabilityHost(page, OBS_V1_LOGS_URL_RE);
-    });
-
-    test('loads the create form under Observability Alerting', async ({ page, pageObjects }) => {
-      const rules = pageObjects.observabilityClassicRules;
-      await rules.goto('/create/.es-query');
-      await expect(rules.ruleForm).toBeVisible({ timeout: 30_000 });
-      await expectObservabilityHost(page, OBS_V1_CREATE_URL_RE);
-    });
-
-    test('loads rule details under Observability Alerting', async ({ page, pageObjects }) => {
-      const rules = pageObjects.observabilityClassicRules;
-      await rules.goto(`/rule/${ruleId}`);
-
-      await expect(rules.pageTitle).toBeVisible({ timeout: 30_000 });
-      await expectObservabilityHost(page, OBS_V1_DETAILS_URL_RE);
-      await expect(page).toHaveURL(new RegExp(`/rule/${ruleId}(/|$|\\?|#)`));
-    });
-
-    test('loads the edit form under Observability Alerting', async ({ page, pageObjects }) => {
-      const rules = pageObjects.observabilityClassicRules;
-      await rules.goto(`/edit/${ruleId}`);
-
-      await expect(rules.ruleForm).toBeVisible({ timeout: 30_000 });
-      await expectObservabilityHost(page, OBS_V1_EDIT_URL_RE);
-      await expect(page).toHaveURL(new RegExp(`/edit/${ruleId}(/|$|\\?|#)`));
-    });
-
     test('clicking a rule name stays on Observability Alerting', async ({ page, pageObjects }) => {
       const rules = pageObjects.observabilityClassicRules;
 
@@ -117,18 +86,7 @@ test.describe(
           'href',
           OBS_V1_RULE_NAME_HREF_RE
         );
-        await expect(rules.ruleNameLink(ruleName)).not.toHaveAttribute(
-          'href',
-          MANAGEMENT_CLASSIC_RULES_URL_RE
-        );
-        await expect(rules.ruleNameLink(ruleName)).not.toHaveAttribute(
-          'href',
-          STANDALONE_RULES_APP_URL_RE
-        );
-        await expect(rules.ruleNameLink(ruleName)).not.toHaveAttribute(
-          'href',
-          MANAGEMENT_ALERTING_V2_URL_RE
-        );
+        await expectObservabilityHref(rules.ruleNameLink(ruleName));
       });
 
       await test.step('click navigates to details on the observability mount', async () => {
@@ -144,13 +102,13 @@ test.describe(
       pageObjects,
     }) => {
       const rules = pageObjects.observabilityClassicRules;
-      await rules.goto(`/rule/${ruleId}`);
+      await rules.openListAndSearch(ruleName);
+      await rules.clickRuleName(ruleName);
       await expect(rules.backLink).toBeVisible({ timeout: 30_000 });
 
-      await test.step('back href stays on the observability mount', async () => {
+      await test.step('back href stays on the observability list, not /rules/v1/rules', async () => {
         await expect(rules.backLink).toHaveAttribute('href', OBS_V1_LIST_HREF_RE);
-        await expect(rules.backLink).not.toHaveAttribute('href', MANAGEMENT_CLASSIC_RULES_URL_RE);
-        await expect(rules.backLink).not.toHaveAttribute('href', STANDALONE_RULES_APP_URL_RE);
+        await expectObservabilityHref(rules.backLink);
       });
 
       await test.step('clicking back lands on the rules list', async () => {
@@ -218,7 +176,7 @@ test.describe(
 
       await test.step('back from logs returns to the observability rules list', async () => {
         await expect(rules.backLink).toHaveAttribute('href', OBS_V1_LIST_HREF_RE);
-        await expect(rules.backLink).not.toHaveAttribute('href', MANAGEMENT_CLASSIC_RULES_URL_RE);
+        await expectObservabilityHref(rules.backLink);
         await rules.clickBack();
         await expect(rules.rulesList).toBeVisible({ timeout: 30_000 });
         await expectObservabilityHost(page, OBS_V1_LIST_URL_RE);
@@ -256,14 +214,12 @@ test.describe(
     });
 
     test('list page omits the Alerts back link on the Observability mount', async ({
-      page,
       pageObjects,
     }) => {
       const rules = pageObjects.observabilityClassicRules;
       await rules.goto();
       await expect(rules.rulesList).toBeVisible({ timeout: 30_000 });
       await expect(rules.backLink).toHaveCount(0);
-      await expectObservabilityHost(page, OBS_V1_LIST_URL_RE);
     });
 
     test('click-through list, details, tabs, edit, and back stays on Observability Alerting', async ({
@@ -279,14 +235,7 @@ test.describe(
           'href',
           OBS_V1_RULE_NAME_HREF_RE
         );
-        await expect(rules.ruleNameLink(ruleName)).not.toHaveAttribute(
-          'href',
-          MANAGEMENT_CLASSIC_RULES_URL_RE
-        );
-        await expect(rules.ruleNameLink(ruleName)).not.toHaveAttribute(
-          'href',
-          STANDALONE_RULES_APP_URL_RE
-        );
+        await expectObservabilityHref(rules.ruleNameLink(ruleName));
       });
 
       await test.step('click the rule name onto details', async () => {
@@ -298,8 +247,7 @@ test.describe(
       await test.step('details back href is createHref to the observability list', async () => {
         await expect(rules.backLink).toBeVisible();
         await expect(rules.backLink).toHaveAttribute('href', OBS_V1_LIST_HREF_RE);
-        await expect(rules.backLink).not.toHaveAttribute('href', MANAGEMENT_CLASSIC_RULES_URL_RE);
-        await expect(rules.backLink).not.toHaveAttribute('href', STANDALONE_RULES_APP_URL_RE);
+        await expectObservabilityHref(rules.backLink);
       });
 
       await test.step('alerts and history tabs stay on the observability details URL', async () => {
@@ -333,7 +281,9 @@ test.describe(
       pageObjects,
     }) => {
       const rules = pageObjects.observabilityClassicRules;
-      await rules.goto('/logs');
+      await rules.goto();
+      await expect(rules.rulesList).toBeVisible({ timeout: 30_000 });
+      await rules.clickLogsMenuItem();
       await expect(rules.pageTitle).toHaveText('Logs', { timeout: 30_000 });
       await expectObservabilityHost(page, OBS_V1_LOGS_URL_RE);
 

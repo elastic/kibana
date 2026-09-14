@@ -23,6 +23,8 @@ export const OBS_V1_EDIT_URL_RE = new RegExp(`${V1_BASE_RE}\\/edit\\/`);
 export const OBS_V1_DETAILS_URL_RE = new RegExp(`${V1_BASE_RE}\\/rule\\/[^/?#]+`);
 export const OBS_V1_RULE_NAME_HREF_RE = /\/observability\/alerting\/rules\/v1\/rule\//;
 export const OBS_V1_LIST_HREF_RE = /\/observability\/alerting\/rules\/v1\/?(?:\?|#|$)/;
+/** `/rules/v1` is the list; an extra `/rules` segment is the old TAU redirect path. */
+export const OBS_V1_NESTED_RULES_URL_RE = /\/observability\/alerting\/rules\/v1\/rules(\/|$|\?|#)/;
 
 /** Stack Management classic (v1) Rules tree — observability host-aware nav must not land here. */
 export const MANAGEMENT_CLASSIC_RULES_URL_RE =

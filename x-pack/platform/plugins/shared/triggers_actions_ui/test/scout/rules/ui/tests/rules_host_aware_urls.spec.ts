@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout';
+import type { Locator, ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
@@ -14,6 +14,7 @@ import {
   CLASSIC_RULES_EDIT_URL_RE,
   CLASSIC_RULES_LIST_URL_RE,
   CLASSIC_RULES_LOGS_URL_RE,
+  CLASSIC_RULES_NESTED_RULES_URL_RE,
   MANAGEMENT_ALERTING_V2_URL_RE,
   STANDALONE_RULES_APP_URL_RE,
   makeEsQueryRule,
@@ -22,14 +23,21 @@ import {
 
 const expectManagementHost = async (page: ScoutPage, pathRe: RegExp) => {
   await expect(page).toHaveURL(pathRe);
+  await expect(page).not.toHaveURL(CLASSIC_RULES_NESTED_RULES_URL_RE);
   await expect(page).not.toHaveURL(STANDALONE_RULES_APP_URL_RE);
   await expect(page).not.toHaveURL(MANAGEMENT_ALERTING_V2_URL_RE);
 };
 
+const expectManagementHref = async (locator: Locator) => {
+  await expect(locator).not.toHaveAttribute('href', CLASSIC_RULES_NESTED_RULES_URL_RE);
+  await expect(locator).not.toHaveAttribute('href', STANDALONE_RULES_APP_URL_RE);
+  await expect(locator).not.toHaveAttribute('href', MANAGEMENT_ALERTING_V2_URL_RE);
+};
+
 /*
- * Corresponding coverage to observability alerting host-aware Scout tests
- * (PR #290603): landing each nested v1 route, then clicking through list /
- * details / create / edit / tabs and asserting the host stays Stack Management.
+ * Host-aware coverage for classic v1 Rules on Stack Management.
+ * Assert page URLs only after in-page clicks (or browser back/forward), never
+ * after a direct goto of the URL under test.
  */
 test.describe('Classic (v1) Rules host-aware URLs', { tag: tags.stateful.classic }, () => {
   let ruleId: string;
@@ -53,45 +61,6 @@ test.describe('Classic (v1) Rules host-aware URLs', { tag: tags.stateful.classic
     }
   });
 
-  test('loads the rules list under Stack Management', async ({ kbnUrl, page, pageObjects }) => {
-    const rules = pageObjects.classicRulesPage;
-    await rules.goto(kbnUrl);
-    await expect(rules.rulesList).toBeVisible({ timeout: 30_000 });
-    await expectManagementHost(page, CLASSIC_RULES_LIST_URL_RE);
-  });
-
-  test('loads logs under Stack Management', async ({ kbnUrl, page, pageObjects }) => {
-    const rules = pageObjects.classicRulesPage;
-    await rules.goto(kbnUrl, '/logs');
-    await expect(rules.logsTab).toBeVisible({ timeout: 30_000 });
-    await expectManagementHost(page, CLASSIC_RULES_LOGS_URL_RE);
-  });
-
-  test('loads the create form under Stack Management', async ({ kbnUrl, page, pageObjects }) => {
-    const rules = pageObjects.classicRulesPage;
-    await rules.goto(kbnUrl, '/create/.es-query');
-    await expect(rules.ruleForm).toBeVisible({ timeout: 30_000 });
-    await expectManagementHost(page, CLASSIC_RULES_CREATE_URL_RE);
-  });
-
-  test('loads rule details under Stack Management', async ({ kbnUrl, page, pageObjects }) => {
-    const rules = pageObjects.classicRulesPage;
-    await rules.goto(kbnUrl, `/rule/${ruleId}`);
-
-    await expect(rules.pageTitle).toBeVisible({ timeout: 30_000 });
-    await expectManagementHost(page, CLASSIC_RULES_DETAILS_URL_RE);
-    await expect(page).toHaveURL(new RegExp(`/rule/${ruleId}(/|$|\\?|#)`));
-  });
-
-  test('loads the edit form under Stack Management', async ({ kbnUrl, page, pageObjects }) => {
-    const rules = pageObjects.classicRulesPage;
-    await rules.goto(kbnUrl, `/edit/${ruleId}`);
-
-    await expect(rules.ruleForm).toBeVisible({ timeout: 30_000 });
-    await expectManagementHost(page, CLASSIC_RULES_EDIT_URL_RE);
-    await expect(page).toHaveURL(new RegExp(`/edit/${ruleId}(/|$|\\?|#)`));
-  });
-
   test('clicking a rule name stays on Stack Management', async ({ kbnUrl, page, pageObjects }) => {
     const rules = pageObjects.classicRulesPage;
 
@@ -103,14 +72,7 @@ test.describe('Classic (v1) Rules host-aware URLs', { tag: tags.stateful.classic
         'href',
         /\/triggersActions\/rule\//
       );
-      await expect(rules.ruleNameLink(ruleName)).not.toHaveAttribute(
-        'href',
-        STANDALONE_RULES_APP_URL_RE
-      );
-      await expect(rules.ruleNameLink(ruleName)).not.toHaveAttribute(
-        'href',
-        MANAGEMENT_ALERTING_V2_URL_RE
-      );
+      await expectManagementHref(rules.ruleNameLink(ruleName));
     });
 
     await test.step('click navigates to details on the management mount', async () => {
@@ -127,13 +89,13 @@ test.describe('Classic (v1) Rules host-aware URLs', { tag: tags.stateful.classic
     pageObjects,
   }) => {
     const rules = pageObjects.classicRulesPage;
-    await rules.goto(kbnUrl, `/rule/${ruleId}`);
+    await rules.openListAndSearch(kbnUrl, ruleName);
+    await rules.clickRuleName(ruleName);
     await expect(rules.backLink).toBeVisible({ timeout: 30_000 });
 
-    await test.step('back href stays on the management mount', async () => {
+    await test.step('back href stays on the management list, not /triggersActions/rules', async () => {
       await expect(rules.backLink).toHaveAttribute('href', /\/triggersActions\/?(?:\?|#|$)/);
-      await expect(rules.backLink).not.toHaveAttribute('href', STANDALONE_RULES_APP_URL_RE);
-      await expect(rules.backLink).not.toHaveAttribute('href', MANAGEMENT_ALERTING_V2_URL_RE);
+      await expectManagementHref(rules.backLink);
     });
 
     await test.step('clicking back lands on the rules list', async () => {
