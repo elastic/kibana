@@ -26,7 +26,7 @@ describe('List artifact hook', () => {
         perPage: number;
         policies: string[];
         sortField?: string;
-        sortOrder?: string;
+        sortOrder?: 'asc' | 'desc';
       }
     | undefined;
 
@@ -81,6 +81,33 @@ describe('List artifact hook', () => {
       },
     });
     expect(onSuccessMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses the provided sort field and order', async () => {
+    const apiResponse = getFoundExceptionListItemSchemaMock(10);
+    fakeHttpServices.get.mockResolvedValueOnce(apiResponse);
+    options = {
+      filter: '',
+      page: 1,
+      perPage: 10,
+      policies: [],
+      sortField: 'name',
+      sortOrder: 'asc',
+    };
+
+    result = await renderQuery(
+      () => useListArtifact(instance, options, searchableFields, { retry: false }),
+      'isSuccess'
+    );
+
+    expect(result.data).toBe(apiResponse);
+    expect(fakeHttpServices.get).toHaveBeenCalledWith('/api/exception_lists/items/_find', {
+      version: '2023-10-31',
+      query: expect.objectContaining({
+        sort_field: 'name',
+        sort_order: 'asc',
+      }),
+    });
   });
 
   it('throw when getting a list of exceptions', async () => {
