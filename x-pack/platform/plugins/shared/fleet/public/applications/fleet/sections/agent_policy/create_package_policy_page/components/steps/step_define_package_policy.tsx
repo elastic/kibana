@@ -896,9 +896,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                   {!isAgentless && !allInputsAreOtel && (
                     <EuiFlexItem>
                       <PackagePolicyConditionField
-                        value={
-                          packagePolicy.condition != null ? String(packagePolicy.condition) : ''
-                        }
+                        value={packagePolicy.condition ?? ''}
                         onChange={(v) => updatePackagePolicy({ condition: v })}
                         isInvalid={submitAttempted && Boolean(validationResults?.condition)}
                         errors={validationResults?.condition ?? null}

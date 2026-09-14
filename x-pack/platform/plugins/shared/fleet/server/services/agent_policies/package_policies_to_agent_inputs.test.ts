@@ -1968,7 +1968,7 @@ describe('storedPackagePolicyToAgentInputs - condition handling', () => {
               id: 'stream-1',
               enabled: true,
               data_stream: { dataset: 'foo', type: 'logs' },
-              condition: true,
+              condition: true as any,
             },
           ],
         }),
@@ -1987,7 +1987,7 @@ describe('storedPackagePolicyToAgentInputs - condition handling', () => {
               id: 'stream-1',
               enabled: true,
               data_stream: { dataset: 'foo', type: 'logs' },
-              condition: false,
+              condition: false as any,
             },
           ],
         }),
@@ -2001,7 +2001,7 @@ describe('storedPackagePolicyToAgentInputs - condition handling', () => {
       ...basePolicy,
       inputs: [
         makeInput({
-          condition: true,
+          condition: true as any,
           streams: [
             {
               id: 'stream-1',

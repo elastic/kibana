@@ -7,6 +7,7 @@
 import { isEmpty, omit, pick } from 'lodash';
 
 import type {
+  AgentConditionExpression,
   NewPackagePolicyInput,
   NewPackagePolicyInputStream,
   PackagePolicyConfigRecord,
@@ -49,7 +50,7 @@ export type SimplifiedPackagePolicyStreams = Record<
   {
     enabled?: undefined | boolean;
     vars?: SimplifiedVars;
-    condition?: string | null;
+    condition?: AgentConditionExpression | null;
   }
 >;
 
@@ -59,7 +60,7 @@ export type SimplifiedInputs = Record<
     enabled?: boolean | undefined;
     vars?: SimplifiedVars;
     streams?: SimplifiedPackagePolicyStreams;
-    condition?: string | null;
+    condition?: AgentConditionExpression | null;
   }
 >;
 
@@ -81,7 +82,7 @@ export interface SimplifiedPackagePolicy {
   // Only available for agentless integration policies.
   // On standard package policies this field is rejected by server-side validation.
   global_data_tags?: Array<{ name: string; value: string | number }> | null;
-  condition?: string | null;
+  condition?: AgentConditionExpression | null;
 }
 
 export interface FormattedPackagePolicy extends Omit<PackagePolicy, 'inputs' | 'vars'> {
@@ -136,9 +137,7 @@ export function formatInputs(
       // disallowed input forces its streams off)
       // For `default` mode `isInputAllowed` is always true, so this is a no-op there.
       streams: formatStreams(input.streams, isInputAllowed),
-      ...(input.condition !== undefined
-        ? { condition: input.condition != null ? String(input.condition) : null }
-        : {}),
+      ...(input.condition !== undefined ? { condition: input.condition } : {}),
     };
 
     return acc;
@@ -173,9 +172,7 @@ function formatStreams(
     acc[stream.data_stream.dataset] = {
       enabled: isInputAllowed === false ? false : stream.enabled,
       vars: formatVars(stream.vars),
-      ...(stream.condition !== undefined
-        ? { condition: stream.condition != null ? String(stream.condition) : null }
-        : {}),
+      ...(stream.condition !== undefined ? { condition: stream.condition } : {}),
     };
 
     return acc;

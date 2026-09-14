@@ -7,6 +7,8 @@
 
 import { uniq } from 'lodash';
 
+import type { TypeOf } from '@kbn/config-schema';
+
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -15,7 +17,12 @@ import { isAgentlessEnabled } from '../../../services/utils/agentless';
 
 import { getAgentlessAgentPolicyNameFromPackagePolicyName } from '../../../../common/services/agentless_policy_helper';
 
-import type { PackagePolicy, PackagePolicyInput, NewPackagePolicyInput } from '../../../types';
+import type {
+  CreatePackagePolicyRequestSchema,
+  PackagePolicy,
+  PackagePolicyInput,
+  NewPackagePolicyInput,
+} from '../../../types';
 import { agentPolicyService } from '../../../services';
 import type { SimplifiedPackagePolicy } from '../../../../common/services/simplified_package_policy_helper';
 import { PackagePolicyRequestError } from '../../../errors';
@@ -43,10 +50,10 @@ export async function haveAgentlessAgentPolicies(
 }
 
 export function isSimplifiedCreatePackagePolicyRequest(
-  body: unknown
+  body: Omit<TypeOf<typeof CreatePackagePolicyRequestSchema.body>, 'force' | 'package'>
 ): body is SimplifiedPackagePolicy {
   // If `inputs` is not defined or if it's a non-array, the request body is using the new simplified API
-  if (body && typeof body === 'object' && 'inputs' in body && Array.isArray(body.inputs)) {
+  if (body.inputs && Array.isArray(body.inputs)) {
     return false;
   }
 

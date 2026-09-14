@@ -751,7 +751,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         // Handlebars can coerce 'true'/'false' text to boolean; validateCondition must not
         // call .trim() on the raw boolean value.
         const result = validatePackagePolicy(
-          { ...validPackagePolicy, condition: true },
+          { ...validPackagePolicy, condition: true as any },
           mockPackage,
           deps
         );
@@ -761,7 +761,7 @@ describe('Fleet - validatePackagePolicy()', () => {
 
       it('does not throw and returns no condition errors for boolean false condition', () => {
         const result = validatePackagePolicy(
-          { ...validPackagePolicy, condition: false },
+          { ...validPackagePolicy, condition: false as any },
           mockPackage,
           deps
         );
