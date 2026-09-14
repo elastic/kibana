@@ -49,16 +49,20 @@ export function useAwsOverviewDashboardUrl(
 ): string | undefined {
   const { services } = useKibana<CoreStart & { spaces?: SpacesPluginStart }>();
 
-  // Resolve the current space ID. Defaults to 'default' so the primary-space path works
-  // immediately on first render in the common case. A non-default space triggers a
-  // re-render once getActiveSpace() resolves.
-  const [currentSpaceId, setCurrentSpaceId] = useState<string>('default');
+  // Resolve the current space ID. When the spaces service is present we cannot know
+  // the active space synchronously, so start undefined and emit no href until it
+  // resolves — otherwise, in a non-default space, we would build a primary-space
+  // dashboard id that does not exist there (a broken link). Without the spaces
+  // service, fall back to the primary space.
+  const [currentSpaceId, setCurrentSpaceId] = useState<string | undefined>(
+    services.spaces ? undefined : 'default'
+  );
   useEffect(() => {
     if (!services.spaces) return;
     services.spaces.getActiveSpace().then((space) => setCurrentSpaceId(space.id));
   }, [services.spaces]);
 
-  if (!installationInfo) return undefined;
+  if (!installationInfo || currentSpaceId === undefined) return undefined;
 
   const { installed_kibana, installed_kibana_space_id, additional_spaces_installed_kibana } =
     installationInfo;
