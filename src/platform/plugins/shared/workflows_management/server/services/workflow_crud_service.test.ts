@@ -834,6 +834,43 @@ describe('WorkflowCrudService', () => {
       expect(client.bulk).not.toHaveBeenCalled();
     });
 
+    it.each([false, true])(
+      'stores ownership on new bulk documents (overwrite=%s)',
+      async (overwrite) => {
+        const core = coreMock.createStart();
+        core.userProfile.getCurrentProfileId.mockResolvedValue('creator-profile');
+        const { deps, client } = makeDeps(undefined, { getCoreStart: () => core });
+        const existing = occSearchHit('existing', {
+          owner_id: 'original-owner',
+          access_control: { access_mode: 'public', entries: [] },
+        });
+        client.search.mockResolvedValue({ hits: { hits: overwrite ? [existing] : [] } });
+        client.bulk.mockResolvedValue({
+          items: [{ create: { _id: 'new-workflow', status: 201 } }],
+        });
+        const result = await new WorkflowCrudService(deps).bulkCreateWorkflows(
+          [
+            { id: 'new-workflow', yaml: validYaml('New') },
+            ...(overwrite ? [{ id: 'existing', yaml: validYaml('Existing') }] : []),
+          ],
+          'default',
+          request,
+          { overwrite }
+        );
+        expect(result.failed).toEqual([]);
+        expect(result.created.find(({ id }) => id === 'new-workflow')).toMatchObject({
+          owner_id: 'creator-profile',
+          access_control: { access_mode: 'public', entries: [] },
+        });
+        if (overwrite) {
+          expect(result.created.find(({ id }) => id === 'existing')).toMatchObject({
+            owner_id: 'original-owner',
+            access_control: existing._source.access_control,
+          });
+        }
+      }
+    );
+
     it('maps per-item bulk failures to the failed list while still returning successes', async () => {
       const { deps, client } = makeDeps();
       client.search.mockResolvedValue({ hits: { hits: [] } });

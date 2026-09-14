@@ -67,6 +67,32 @@ describe('WorkflowAccessControlService', () => {
     );
   });
 
+  it.each(['public', 'private'] as const)(
+    'redacts %s ACL recipients from non-managers',
+    async (mode) => {
+      for (const role of ['viewer', 'executor', 'editor'] as const) {
+        document.access_control = {
+          access_mode: mode,
+          entries: [{ type: 'user', id: 'reader', role, added_at: '2026-09-10' }],
+        };
+        core.userProfile.getCurrentProfileId.mockResolvedValue('reader');
+        const result = await service.toDto(document, request);
+        expect(result).not.toHaveProperty('owner_id');
+        expect(result).not.toHaveProperty('access_control');
+        expect(result.permissions).toMatchObject({ read: true, manage: false });
+        expect(result.permissions.execute).toBe(mode === 'public' || role !== 'viewer');
+        expect(document.access_control.entries).toHaveLength(1);
+      }
+    }
+  );
+
+  it('retains the full ACL for its owner', async () => {
+    const result = await service.toDto(document, request);
+    expect(result.owner_id).toBe('owner');
+    expect(result.access_control).toEqual(document.access_control);
+    expect(result.permissions.manage).toBe(true);
+  });
+
   it('lets the owner share without changing the workflow definition', async () => {
     const result = await service.update(
       'id',
@@ -74,11 +100,28 @@ describe('WorkflowAccessControlService', () => {
       { access_mode: 'private', entries: [{ type: 'user', id: 'reader', role: 'viewer' }] },
       request
     );
-    expect(result.entries).toEqual([
+    expect(result.access_control?.entries).toEqual([
       { type: 'user', id: 'reader', role: 'viewer', added_at: expect.any(String) },
     ]);
+    expect(result.lastUpdatedAt).toBe(document.updated_at);
+    expect(result.lastUpdatedBy).toBe(document.lastUpdatedBy);
+    expect(result.owner_id).toBe('owner');
     expect(document.yaml).toBe('name: Private workflow');
     expect(document.owner_id).toBe('owner');
+  });
+
+  it('returns only access metadata from the stored workflow', async () => {
+    document.version = 7;
+    const result = await service.update('id', 'default', { access_mode: 'public' }, request);
+    expect(result).toEqual({
+      owner_id: 'owner',
+      access_control: document.access_control,
+      lastUpdatedAt: document.updated_at,
+      lastUpdatedBy: document.lastUpdatedBy,
+      version: 7,
+    });
+    expect(result).not.toHaveProperty('yaml');
+    expect(result).not.toHaveProperty('definition');
   });
 
   it('does not allow an editor to change access', async () => {

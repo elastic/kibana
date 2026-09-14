@@ -12,6 +12,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type {
+  AgentBuilderSmlPluginStart,
   SmlIndexAction,
   SmlIndexAttachmentParams,
 } from '@kbn/agent-builder-sml-plugin/server';
@@ -22,7 +23,6 @@ import { i18n } from '@kbn/i18n';
 import {
   ExecutionStatus,
   getWorkflowJsonSchema,
-  getWorkflowPermissions,
   toWorkflowExecutionEngineModel,
   transformWorkflowYamlJsontoEsWorkflow,
 } from '@kbn/workflows';
@@ -35,8 +35,8 @@ import type {
   ResumeWorkflowExecutionResponseDto,
   UpdatedWorkflowResponseDto,
   ValidateWorkflowResponseDto,
-  WorkflowAccessControl,
   WorkflowAccessControlRole,
+  WorkflowAccessControlUpdateResponseDto,
   WorkflowAccessOperation,
   WorkflowDetailDto,
   WorkflowExecutionDto,
@@ -301,7 +301,10 @@ const isExecuteInlineWorkflowParams = (
 ): params is ExecuteInlineWorkflowParams => params.yaml !== undefined;
 
 export class WorkflowsManagementApi {
-  private smlIndexAttachment: SmlIndexAttachmentFn | null = null;
+  private smlClient: Pick<
+    AgentBuilderSmlPluginStart,
+    'indexAttachment' | 'deleteAttachment'
+  > | null = null;
   private smlLogger: Logger | null = null;
   private audit: WorkflowManagementAuditLog | null = null;
 
@@ -319,25 +322,30 @@ export class WorkflowsManagementApi {
     return this.workflowsService.getWorkflowsExecutionEngine();
   }
 
-  public setSmlIndexAttachment(fn: SmlIndexAttachmentFn, logger: Logger): void {
-    this.smlIndexAttachment = fn;
+  public setSmlClient(
+    client: Pick<AgentBuilderSmlPluginStart, 'indexAttachment' | 'deleteAttachment'>,
+    logger: Logger
+  ): void {
+    this.smlClient = client;
     this.smlLogger = logger;
   }
 
   private notifySml(originId: string, action: SmlIndexAction, request: KibanaRequest): void {
-    if (!this.smlIndexAttachment) {
+    if (!this.smlClient) {
       return;
     }
-    this.smlIndexAttachment({
-      request,
-      originId,
-      attachmentType: WORKFLOW_KI_TYPE,
-      action,
-    }).catch((error) => {
-      this.smlLogger?.warn(
-        `Failed to ${action} SML index for workflow '${originId}': ${(error as Error).message}`
-      );
-    });
+    this.smlClient
+      .indexAttachment({
+        request,
+        originId,
+        attachmentType: WORKFLOW_KI_TYPE,
+        action,
+      })
+      .catch((error) => {
+        this.smlLogger?.warn(
+          `Failed to ${action} SML index for workflow '${originId}': ${(error as Error).message}`
+        );
+      });
   }
 
   public async assertWorkflowAccess(
@@ -357,13 +365,28 @@ export class WorkflowsManagementApi {
     spaceId: string,
     input: AccessControlInput<WorkflowAccessControlRole>,
     request: KibanaRequest
-  ): Promise<WorkflowAccessControl> {
+  ): Promise<WorkflowAccessControlUpdateResponseDto> {
     const workflow = await this.workflowsService.getWorkflow(id, spaceId);
     if (!workflow) throw new WorkflowNotFoundError(id);
     const access = await this.workflowsService.getAccessControl();
     await access.assertAccess(workflow, 'manage', request);
     const result = await access.update(id, spaceId, input, request);
-    this.notifySml(id, 'update', request);
+    if (input.access_mode === 'private') {
+      await this.smlClient?.deleteAttachment({
+        request,
+        originId: id,
+        attachmentType: WORKFLOW_KI_TYPE,
+        ingestionMethod: 'all',
+        strict: true,
+      });
+    } else {
+      await this.smlClient?.indexAttachment({
+        request,
+        originId: id,
+        attachmentType: WORKFLOW_KI_TYPE,
+        action: 'update',
+      });
+    }
     return result;
   }
 
@@ -384,10 +407,7 @@ export class WorkflowsManagementApi {
     return {
       ...workflows,
       results: await Promise.all(
-        workflows.results.map(async (workflow) => ({
-          ...workflow,
-          permissions: await access.permissions(workflow, options?.request),
-        }))
+        workflows.results.map((workflow) => access.toDto(workflow, options?.request))
       ),
     };
   }
@@ -411,9 +431,8 @@ export class WorkflowsManagementApi {
     const workflow = await this.workflowsService.getWorkflow(id, spaceId);
     if (!workflow) return null;
     const access = await this.workflowsService.getAccessControl();
-    const permissions = await access.permissions(workflow, request);
-    if (!permissions.read) return null;
-    return { ...workflow, permissions };
+    const result = await access.toDto(workflow, request);
+    return result.permissions.read ? result : null;
   }
 
   public async getHistoryForWorkflow(
@@ -432,8 +451,8 @@ export class WorkflowsManagementApi {
   ): Promise<WorkflowDetailDto[]> {
     const workflows = await this.workflowsService.getWorkflowsByIds(ids, spaceId);
     const access = await this.workflowsService.getAccessControl();
-    const profileId = request ? await access.getProfileId(request) : undefined;
-    return workflows.filter((workflow) => getWorkflowPermissions(workflow, profileId).read);
+    const results = await Promise.all(workflows.map((workflow) => access.toDto(workflow, request)));
+    return results.filter((workflow) => workflow.permissions.read);
   }
 
   public async findExistingWorkflowIds(ids: string[]): Promise<string[]> {
@@ -486,7 +505,11 @@ export class WorkflowsManagementApi {
     for (const created of result.created) {
       this.notifySml(created.id, 'create', request);
     }
-    return result;
+    const access = await this.workflowsService.getAccessControl();
+    return {
+      ...result,
+      created: await Promise.all(result.created.map((workflow) => access.toDto(workflow, request))),
+    };
   }
 
   public async cloneWorkflow(
@@ -1341,16 +1364,6 @@ export class WorkflowsManagementApi {
       ...options,
       accessControlFilter: await access.executionFilter(spaceId, options.request),
     });
-  }
-
-  /** Claims a `waitForInput` step by writing server-derived HITL audit metadata. */
-  public async markStepAsResponded(
-    stepExecutionId: string,
-    request: KibanaRequest,
-    channel: string | undefined,
-    spaceId: string
-  ): Promise<boolean> {
-    return this.workflowsService.markStepAsResponded(stepExecutionId, request, channel, spaceId);
   }
 
   public async getWorkflowStats(

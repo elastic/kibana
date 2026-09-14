@@ -610,6 +610,7 @@ export class WorkflowCrudService {
       request
     );
     const authenticatedUser = getAuthenticatedUser(request, this.deps.getSecurity());
+    const profileId = await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request });
     const now = new Date();
     const triggerDefinitions = this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
 
@@ -632,6 +633,11 @@ export class WorkflowCrudService {
           spaceId,
           triggerDefinitions,
         });
+
+        if (profileId) {
+          prepared.workflowData.owner_id = profileId;
+          prepared.workflowData.access_control = { access_mode: 'public', entries: [] };
+        }
 
         validWorkflows.push({
           idx: i,
@@ -663,6 +669,7 @@ export class WorkflowCrudService {
       const overwriteResult = await this.executeBulkOverwrite(resolvedWorkflows, spaceId, {
         request,
         timestamp: now,
+        profileId: profileId ?? undefined,
       });
       created.push(...overwriteResult.created);
       failed.push(...overwriteResult.failed);
@@ -1136,7 +1143,7 @@ export class WorkflowCrudService {
   private async executeBulkOverwrite(
     entries: BulkWorkflowEntry[],
     spaceId: string,
-    params: { request: KibanaRequest; timestamp: Date }
+    params: { request: KibanaRequest; timestamp: Date; profileId?: string }
   ): Promise<{
     created: WorkflowDetailDto[];
     failed: BulkFailureEntry[];
@@ -1156,10 +1163,7 @@ export class WorkflowCrudService {
     }
 
     const client = this.deps.workflowStorage.getClient();
-    const profileId =
-      (await this.deps
-        .getCoreStart()
-        .userProfile.getCurrentProfileId({ request: params.request })) ?? undefined;
+    const { profileId } = params;
     const { refreshed: occHits } = await fetchOccHitsByIds(
       client,
       entries.map((entry) => entry.id)

@@ -18,12 +18,13 @@ import type { AccessControlInput } from '@kbn/entity-access-control';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import {
   getWorkflowPermissions,
+  pickWorkflowDocumentVersion,
   WORKFLOW_ACCESS_CONTROL_ROLES,
   WorkflowsManagementApiActions,
 } from '@kbn/workflows';
 import type {
-  WorkflowAccessControl,
   WorkflowAccessControlRole,
+  WorkflowAccessControlUpdateResponseDto,
   WorkflowAccessOperation,
   WorkflowAccessSubject,
   WorkflowPermissions,
@@ -87,6 +88,19 @@ export class WorkflowAccessControlService {
         this.core.security.authc.getCurrentUser(request)?.username === workflow.createdBy;
     }
     return permissions;
+  }
+
+  async toDto<T extends WorkflowAccessSubject & { createdBy?: string }>(
+    workflow: T,
+    request?: KibanaRequest
+  ): Promise<T & { permissions: WorkflowPermissions }> {
+    const permissions = await this.permissions(workflow, request);
+    const result = { ...workflow, permissions };
+    if (!permissions.manage) {
+      delete result.owner_id;
+      delete result.access_control;
+    }
+    return result;
   }
 
   async assertAccess(
@@ -184,7 +198,7 @@ export class WorkflowAccessControlService {
     spaceId: string,
     input: AccessControlInput<WorkflowAccessControlRole>,
     request: KibanaRequest
-  ): Promise<WorkflowAccessControl> {
+  ): Promise<WorkflowAccessControlUpdateResponseDto> {
     const profileId = await this.getProfileId(request);
     if (!profileId) throw new WorkflowAccessDeniedError();
     const { access_mode, entries = [] } = input;
@@ -239,6 +253,12 @@ export class WorkflowAccessControlService {
     });
     this.executionFilters.delete(request);
     if (!document.access_control) throw new Error('Access control was not saved.');
-    return document.access_control;
+    return {
+      owner_id: document.owner_id,
+      access_control: document.access_control,
+      lastUpdatedAt: document.updated_at,
+      lastUpdatedBy: document.lastUpdatedBy,
+      ...pickWorkflowDocumentVersion(document),
+    };
   }
 }

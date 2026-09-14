@@ -31,8 +31,8 @@ import { useQuery } from '@kbn/react-query';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type {
-  WorkflowAccessControl,
   WorkflowAccessControlRole,
+  WorkflowAccessControlUpdateResponseDto,
   WorkflowDetailDto,
 } from '@kbn/workflows';
 import { setWorkflow } from '../../../entities/workflows/store/workflow_detail/slice';
@@ -107,11 +107,11 @@ export const WorkflowAccessControlModal = ({
     setHasError(false);
     setIsInvalidAccess(false);
     try {
-      const accessControl = await http.put<WorkflowAccessControl>(
+      const savedAccess = await http.put<WorkflowAccessControlUpdateResponseDto>(
         `/internal/workflows/${encodeURIComponent(workflow.id)}/access_control`,
         { body: JSON.stringify(value) }
       );
-      dispatch(setWorkflow({ ...workflow, owner_id: ownerId, access_control: accessControl }));
+      dispatch(setWorkflow({ ...workflow, ...savedAccess }));
       onClose();
     } catch (error) {
       setHasError(true);

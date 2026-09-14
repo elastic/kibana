@@ -103,9 +103,17 @@ steps:
           body: { access_mode: 'private', entries: [{ type: 'user', id: readerProfileId, role }] },
         });
         expect(shared).toHaveStatusCode(200);
-        expect(shared.body.entries[0].added_at).toBeDefined();
+        expect(shared.body.access_control.entries[0].added_at).toBeDefined();
         const read = await apiClient.get(workflowPath, { headers: readerHeaders });
         expect(read).toHaveStatusCode(200);
+        expect(read.body.access_control).toBeUndefined();
+        expect(read.body.owner_id).toBeUndefined();
+        const partial = await apiClient.post(`s/${spaceId}/api/workflows/mget`, {
+          headers: readerHeaders,
+          body: { ids: [workflowId], source: ['access_control', 'owner_id'] },
+        });
+        expect(partial).toHaveStatusCode(200);
+        expect(partial.body).toStrictEqual([{ id: workflowId }]);
         expect(read.body.permissions).toMatchObject({
           read: true,
           execute: role !== 'viewer',

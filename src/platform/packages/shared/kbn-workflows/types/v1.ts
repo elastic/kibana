@@ -492,6 +492,11 @@ export interface WorkflowDetailDto extends WorkflowAccessSubject {
   version?: number;
 }
 
+export type WorkflowAccessControlUpdateResponseDto = Pick<
+  WorkflowDetailDto,
+  'owner_id' | 'access_control' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'version'
+>;
+
 export interface WorkflowPartialDetailDto extends Partial<WorkflowDetailDto> {
   id: string;
 }

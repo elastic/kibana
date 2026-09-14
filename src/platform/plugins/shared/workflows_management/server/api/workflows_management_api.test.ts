@@ -37,6 +37,7 @@ import {
   WorkflowsManagementApi,
 } from './workflows_management_api';
 import type { WorkflowsService } from './workflows_management_service';
+import { WorkflowAccessControlService } from '../services/workflow_access_control';
 
 jest.mock('./external_resume/external_resume_service', () => ({
   ...jest.requireActual('./external_resume/external_resume_service'),
@@ -79,6 +80,8 @@ describe('WorkflowsManagementApi', () => {
         permissions: jest
           .fn()
           .mockResolvedValue({ read: true, execute: true, edit: true, manage: false }),
+        toDto: WorkflowAccessControlService.prototype.toDto,
+        update: jest.fn(),
         assertAccess: jest.fn(),
         readFilter: jest.fn().mockResolvedValue({ match_all: {} }),
         getProfileId: jest.fn().mockResolvedValue('test-profile'),
@@ -98,6 +101,7 @@ describe('WorkflowsManagementApi', () => {
       }),
       getWorkflowsByIds: jest.fn(),
       getWorkflows: jest.fn(),
+      getWorkflowsSourceByIds: jest.fn(),
       getChildWorkflowExecutions: jest.fn(),
       getWorkflowZodSchema: jest.fn(),
       createWorkflow: jest.fn(),
@@ -123,6 +127,64 @@ describe('WorkflowsManagementApi', () => {
 
     mockRequest = httpServerMock.createKibanaRequest();
   });
+
+  it.each([false, true])(
+    'redacts reads and bulk overwrite responses for manage=%s',
+    async (manage) => {
+      const workflow = await mockWorkflowsService.getWorkflow('workflow-123', 'default');
+      if (!workflow) throw new Error('Missing workflow fixture');
+      const stored = {
+        ...workflow,
+        description: '',
+        owner_id: 'owner',
+        access_control: {
+          access_mode: 'public' as const,
+          entries: [
+            {
+              type: 'user' as const,
+              id: 'recipient',
+              role: 'viewer' as const,
+              added_at: '2026-09-10',
+            },
+          ],
+        },
+      };
+      const permissions = { read: true, execute: true, edit: true, manage };
+      const access = await mockWorkflowsService.getAccessControl();
+      jest.mocked(access.permissions).mockResolvedValue(permissions);
+      mockWorkflowsService.getWorkflow.mockResolvedValue(stored);
+      mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([stored]);
+      mockWorkflowsService.getWorkflows.mockResolvedValue({
+        results: [stored],
+        total: 1,
+        page: 1,
+        size: 10,
+      });
+      const single = await api.getWorkflow(stored.id, 'default', mockRequest);
+      const batch = await api.getWorkflowsByIds([stored.id], 'default', mockRequest);
+      const list = await api.getWorkflows({ page: 1, size: 10 }, 'default', {
+        request: mockRequest,
+      });
+      mockWorkflowsService.bulkCreateWorkflows.mockResolvedValue({ created: [stored], failed: [] });
+      const bulk = await api.bulkCreateWorkflows(
+        [{ id: stored.id, yaml: stored.yaml }],
+        'default',
+        mockRequest,
+        { overwrite: true }
+      );
+      for (const result of [single, ...batch, ...list.results, ...bulk.created]) {
+        expect(result?.permissions).toEqual(permissions);
+        if (manage) {
+          expect(result?.access_control).toEqual(stored.access_control);
+          expect(result?.owner_id).toBe('owner');
+        } else {
+          expect(result).not.toHaveProperty('access_control');
+          expect(result).not.toHaveProperty('owner_id');
+        }
+      }
+      expect(stored.access_control.entries).toHaveLength(1);
+    }
+  );
 
   it('includes ACL permissions in workflow list results', async () => {
     const workflow = await mockWorkflowsService.getWorkflow('workflow-123', 'default');
@@ -1382,6 +1444,7 @@ steps:
 
   describe('SML notifications', () => {
     let mockSmlIndex: jest.MockedFunction<SmlIndexAttachmentFn>;
+    const mockSmlDelete = jest.fn();
     let mockSmlLogger: jest.Mocked<Logger>;
 
     const createWorkflowDto = (overrides: Partial<WorkflowDetailDto> = {}): WorkflowDetailDto => ({
@@ -1402,10 +1465,46 @@ steps:
     beforeEach(() => {
       mockSmlIndex = jest.fn().mockResolvedValue(undefined);
       mockSmlLogger = { warn: jest.fn(), debug: jest.fn(), info: jest.fn() } as any;
-      api.setSmlIndexAttachment(mockSmlIndex, mockSmlLogger);
+      mockSmlDelete.mockReset().mockResolvedValue(undefined);
+      api.setSmlClient(
+        { indexAttachment: mockSmlIndex, deleteAttachment: mockSmlDelete },
+        mockSmlLogger
+      );
     });
 
-    it('does not notify SML when setSmlIndexAttachment has not been called', async () => {
+    it('waits for SML before completing an access update', async () => {
+      const access = await mockWorkflowsService.getAccessControl();
+      const saved = createWorkflowDto({ access_control: { access_mode: 'private', entries: [] } });
+      jest.mocked(access.update).mockResolvedValue(saved);
+      let completeIndex = () => {};
+      const indexing = new Promise<void>((resolve) => {
+        completeIndex = resolve;
+      });
+      mockSmlDelete.mockReturnValue(indexing);
+      let completed = false;
+      const update = api
+        .updateAccessControl('wf-1', 'default', { access_mode: 'private' }, mockRequest)
+        .then((result) => {
+          completed = true;
+          return result;
+        });
+      await new Promise((resolve) => setImmediate(resolve));
+      expect(mockSmlDelete).toHaveBeenCalledWith(
+        expect.objectContaining({ originId: 'wf-1', ingestionMethod: 'all', strict: true })
+      );
+      expect(completed).toBe(false);
+      completeIndex();
+      await expect(update).resolves.toBe(saved);
+    });
+
+    it('surfaces SML failure during an access update', async () => {
+      mockSmlDelete.mockRejectedValue(new Error('SML unavailable'));
+      await expect(
+        api.updateAccessControl('wf-1', 'default', { access_mode: 'private' }, mockRequest)
+      ).rejects.toThrow('SML unavailable');
+    });
+
+    it('does not notify SML when setSmlClient has not been called', async () => {
       const freshApi = new WorkflowsManagementApi(mockWorkflowsService, true, logger);
       mockWorkflowsService.createWorkflow.mockResolvedValue(createWorkflowDto());
 

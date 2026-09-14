@@ -18,7 +18,10 @@ import { registerWorkflowRoutes } from '.';
 import { ManagedWorkflowReadForbiddenError } from '../../managed_workflow_read_error';
 import type { RouteDependencies } from '../types';
 import { handleRouteError } from '../utils/route_error_handlers';
-import { WORKFLOW_READ_WITH_EXECUTION_EXTENDED_SECURITY } from '../utils/route_security';
+import {
+  WORKFLOW_READ_WITH_EXECUTION_EXTENDED_SECURITY,
+  WORKFLOW_UPDATE_SECURITY,
+} from '../utils/route_security';
 import { createWorkflowManagementAuditLogMock } from '../utils/workflow_audit_logging.mock';
 
 jest.mock('../utils/route_error_handlers', () => ({
@@ -64,6 +67,7 @@ describe('Workflow routes', () => {
   let routeSecurity: Record<string, unknown>;
   let mockApi: Record<string, jest.Mock>;
   let mockSpaces: { getSpaceId: jest.Mock };
+  let mockAudit: ReturnType<typeof createWorkflowManagementAuditLogMock>;
   let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   const mockResponse = () => httpServerMock.createResponseFactory();
@@ -80,6 +84,8 @@ describe('Workflow routes', () => {
     routeSecurity = {};
     mockSpaces = { getSpaceId: jest.fn().mockReturnValue('default-space') };
     mockLogger = loggingSystemMock.createLogger();
+    mockAudit = createWorkflowManagementAuditLogMock();
+    jest.spyOn(mockAudit, 'logWorkflowUpdated');
 
     mockApi = {
       getWorkflows: jest.fn(),
@@ -89,6 +95,7 @@ describe('Workflow routes', () => {
       findExistingWorkflowIds: jest.fn(),
       createWorkflow: jest.fn(),
       updateWorkflow: jest.fn(),
+      updateAccessControl: jest.fn(),
       deleteWorkflows: jest.fn(),
       bulkCreateWorkflows: jest.fn(),
       cloneWorkflow: jest.fn(),
@@ -114,7 +121,17 @@ describe('Workflow routes', () => {
     });
 
     const mockRouter = {
-      put: jest.fn(),
+      put: jest
+        .fn()
+        .mockImplementation(
+          (
+            config: Parameters<IRouter['put']>[0],
+            handler: (typeof routeHandlers)[string]['handler']
+          ) => {
+            routeSecurity[`PUT:${config.path}`] = config.security;
+            routeHandlers[`PUT:${config.path}`] = { handler };
+          }
+        ),
       post: jest.fn(),
       versioned: {
         get: jest.fn().mockImplementation((config: { path: string; security?: unknown }) => {
@@ -141,7 +158,7 @@ describe('Workflow routes', () => {
       api: mockApi as any,
       logger: mockLogger,
       spaces: mockSpaces as any,
-      audit: createWorkflowManagementAuditLogMock(),
+      audit: mockAudit,
     } as unknown as RouteDependencies);
   });
 
@@ -423,6 +440,59 @@ describe('Workflow routes', () => {
         allowManagedWorkflowMutation: false,
       });
       expect(response.ok).toHaveBeenCalledWith({ body: updated });
+    });
+  });
+
+  describe('PUT:/internal/workflows/{id}/access_control', () => {
+    const key = 'PUT:/internal/workflows/{id}/access_control';
+
+    it('returns access metadata to an owner with Update but no Read privilege', async () => {
+      const result = {
+        owner_id: 'owner',
+        access_control: { access_mode: 'private', entries: [] },
+        lastUpdatedAt: '2026-09-14T00:00:00.000Z',
+        lastUpdatedBy: 'owner',
+        version: 7,
+      };
+      mockApi.updateAccessControl.mockResolvedValue(result);
+      const request = httpServerMock.createKibanaRequest({
+        params: { id: 'wf-1' },
+        body: { access_mode: 'private' },
+      });
+      Object.defineProperty(request, 'authzResult', {
+        value: {
+          [WorkflowsManagementApiActions.update]: true,
+          [WorkflowsManagementApiActions.read]: false,
+        },
+      });
+      const response = mockResponse();
+      await routeHandlers[key].handler(createLicensingContext(), request, response);
+      expect(routeSecurity[key]).toEqual(WORKFLOW_UPDATE_SECURITY);
+      expect(mockApi.updateAccessControl).toHaveBeenCalledWith(
+        'wf-1',
+        'default-space',
+        request.body,
+        request
+      );
+      expect(response.ok).toHaveBeenCalledWith({ body: result });
+      expect(response.ok.mock.calls[0][0]?.body).not.toHaveProperty('yaml');
+      expect(response.ok.mock.calls[0][0]?.body).not.toHaveProperty('definition');
+      expect(mockAudit.logWorkflowUpdated).toHaveBeenCalledWith(request, { id: 'wf-1' });
+    });
+
+    it('audits a failed access update, including failure after persistence', async () => {
+      const error = new Error('SML deletion failed after the ACL was saved');
+      mockApi.updateAccessControl.mockRejectedValue(error);
+      const request = httpServerMock.createKibanaRequest({
+        params: { id: 'wf-1' },
+        body: { access_mode: 'private' },
+      });
+      const response = mockResponse();
+      await routeHandlers[key].handler(createLicensingContext(), request, response);
+      expect(mockAudit.logWorkflowUpdated).toHaveBeenCalledTimes(1);
+      expect(mockAudit.logWorkflowUpdated).toHaveBeenCalledWith(request, { id: 'wf-1', error });
+      expect(handleRouteError).toHaveBeenCalledWith(response, error);
+      expect(response.ok).not.toHaveBeenCalled();
     });
   });
 

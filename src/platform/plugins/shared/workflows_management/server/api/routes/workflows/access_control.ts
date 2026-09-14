@@ -30,15 +30,16 @@ export const registerWorkflowAccessControlRoutes = ({
     },
     withAvailabilityCheck(async (context, request, response) => {
       try {
-        const accessControl = await api.updateAccessControl(
+        const result = await api.updateAccessControl(
           request.params.id,
           spaces.getSpaceId(request),
           request.body,
           request
         );
         audit.logWorkflowUpdated(request, { id: request.params.id });
-        return response.ok({ body: accessControl });
+        return response.ok({ body: result });
       } catch (error) {
+        audit.logWorkflowUpdated(request, { id: request.params.id, error });
         return handleRouteError(response, error);
       }
     })

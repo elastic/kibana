@@ -42,8 +42,15 @@ describe('WorkflowAccessControlModal', () => {
         owner_id: ownerId,
         permissions: { read: true, edit: true, execute: true, manage: true },
       });
-      const savedAccess = { access_mode: 'public', entries: [] };
-      mockHttp.put.mockResolvedValue(savedAccess);
+      const savedAccess = { access_mode: 'public' as const, entries: [] };
+      const savedMetadata = {
+        owner_id: 'owner',
+        access_control: savedAccess,
+        lastUpdatedAt: '2026-09-14T12:00:00.000Z',
+        lastUpdatedBy: 'server-owner',
+        version: 3,
+      };
+      mockHttp.put.mockResolvedValue(savedMetadata);
       const store = createMockStore();
       store.dispatch(setWorkflow(workflow));
       store.dispatch(setYamlString('name: unsaved changes'));
@@ -66,11 +73,7 @@ describe('WorkflowAccessControlModal', () => {
         { body: JSON.stringify(savedAccess) }
       );
       expect(mockHttp.get).not.toHaveBeenCalled();
-      expect(store.getState().detail.workflow).toEqual({
-        ...workflow,
-        owner_id: 'owner',
-        access_control: savedAccess,
-      });
+      expect(store.getState().detail.workflow).toEqual({ ...workflow, ...savedMetadata });
       expect(store.getState().detail.yamlString).toBe('name: unsaved changes');
     }
   );

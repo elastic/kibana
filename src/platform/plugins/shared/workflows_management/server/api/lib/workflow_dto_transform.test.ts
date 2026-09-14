@@ -113,6 +113,17 @@ describe('transformStorageDocumentToWorkflowDto', () => {
 });
 
 describe('transformStoragePartialToWorkflowDto', () => {
+  it('omits ACL fields even when included in the requested source', () => {
+    const result = transformStoragePartialToWorkflowDto('wf-1', {
+      owner_id: 'owner',
+      access_control: {
+        access_mode: 'public',
+        entries: [{ type: 'user', id: 'recipient', role: 'viewer', added_at: '2026-09-10' }],
+      },
+    });
+    expect(result).toEqual({ id: 'wf-1' });
+  });
+
   it('only copies fields that are present on the partial source', () => {
     const result = transformStoragePartialToWorkflowDto('wf-1', {
       name: 'Just name',
