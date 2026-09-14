@@ -696,7 +696,6 @@ describe('ai indices routes', () => {
           index: aiIndexItem.dest.value,
           query: {
             bool: {
-              // A data stream dest is searched whole, since the latest revision may follow a rollover.
               filter: [kiIdQuery('ki-1')],
             },
           },

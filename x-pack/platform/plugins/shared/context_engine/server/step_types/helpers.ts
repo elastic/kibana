@@ -51,13 +51,13 @@ export interface ResolvedAiIndex {
   managed: boolean;
 }
 
-/** Who or what wrote a KI revision, as stored under `governance.provenance`. */
+/** A writer as recorded under `governance.provenance`. */
 export interface KiWriter {
   uri: string;
   metadata: Record<string, string | number>;
 }
 
-/** The governance fields a KI step writes. Other keys are the author's KI fields. */
+/** A stored KI document. */
 export interface StoredKi {
   id?: string;
   governance?: {
@@ -67,7 +67,7 @@ export interface StoredKi {
   [key: string]: unknown;
 }
 
-/** The current revision of a KI: the document holding it plus its concurrency tokens. */
+/** The current revision of a KI. */
 export interface KiRevision {
   index: string;
   documentId: string;
@@ -85,7 +85,7 @@ export const kiWriterFromContext = ({ workflow, execution }: StepContext): KiWri
   },
 });
 
-/** The fields a write step stamps on every revision it produces. */
+/** Fields stamped on every revision a step writes. */
 export interface KiRevisionChanges {
   updated_at: string;
   governance: {
@@ -98,7 +98,7 @@ export interface KiRevisionChanges {
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
-/** Applies `changes` to `source` the way the update API applies `doc`: objects merge, everything else is replaced. */
+/** Merges like the update API's `doc`: objects merge, other values are replaced. */
 export const mergeKiDoc = (
   source: Record<string, unknown>,
   changes: Record<string, unknown>
@@ -112,10 +112,7 @@ export const mergeKiDoc = (
   return merged;
 };
 
-/**
- * Writes a new revision of a KI to a data stream: the current source with the
- * changes merged in and a fresh `@timestamp`.
- */
+/** Appends a new revision of a KI to a data stream. */
 export const appendKiRevision = async ({
   esClient,
   destValue,
@@ -377,11 +374,7 @@ export const kiConflictError = (aiIndexId: string, kiId: string): ExecutionError
     message: `KI '${kiId}' in AI index '${aiIndexId}' was modified concurrently`,
   });
 
-/**
- * Finds the current revision of a KI. On an index the KI is the document whose
- * `_id` is the KI id; on a data stream it is the latest document matching
- * {@link kiIdQuery}.
- */
+/** Finds the current revision of a KI. */
 export const findKiRevision = async ({
   esClient,
   aiIndexId,
@@ -411,7 +404,6 @@ export const findKiRevision = async ({
       }),
       size: isDataStream ? 1 : 2,
       seq_no_primary_term: true,
-      // An index revision is updated in place, so only the governance fields are read.
       _source: isDataStream ? true : ['id', 'governance'],
     },
     { signal: abortSignal }

@@ -113,7 +113,6 @@ describe('ki_get', () => {
       id: 'ki-1',
       document: { id: 'ki-1', type: 'playbook', title: 'Latest revision' },
     });
-    // The latest revision may sit in a newer backing index after rollover.
     expect(search).toHaveBeenCalledWith(
       expect.objectContaining({
         index: 'ai-index-ds-sample',

@@ -49,7 +49,7 @@ export const kiLifecycleStatusSchema = z
   .describe('Lifecycle status of the KI. Unset reads as active');
 export type KiLifecycleStatus = z.infer<typeof kiLifecycleStatusSchema>;
 
-/** A URI this KI relates to, with an optional relationship kind and rationale. */
+/** A URI this KI relates to. */
 export const kiReferenceSchema = z.object({
   uri: z
     .string()

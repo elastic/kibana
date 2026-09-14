@@ -15,10 +15,7 @@ const LENIENT_INDEX_OPTIONS = {
   allow_no_indices: true,
 } as const;
 
-/**
- * Matches a KI by its `id` field. Documents written before `id` existed are
- * matched by `_id` instead, so a revision's `_id` never resolves on its own.
- */
+/** Matches a KI by `id`, or by `_id` for documents written before `id` existed. */
 export const kiIdQuery = (kiId: string) => ({
   bool: {
     should: [
@@ -36,11 +33,7 @@ export interface GetKiOptions {
   kiId: string;
 }
 
-/**
- * Resolves a KI by {@link kiIdQuery}. On an index dest the caller's backing
- * index disambiguates pattern dests; on a data stream the latest revision may
- * live in any backing index, so the whole stream is searched.
- */
+/** Fetches the current revision of a KI. */
 export const getKi = async (
   esClient: ElasticsearchClient,
   { aiIndexId, dest, index, kiId }: GetKiOptions
