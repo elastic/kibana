@@ -20,9 +20,9 @@ import {
   displayNameForJob,
   groupJobsByChannel,
   notifyFailedSuites,
-} from './notify_failed_suites';
+} from './notify_failed_suites.ts';
 
-import { FALLBACK_SLACK_CHANNEL } from './failed_suite_channels';
+import { FALLBACK_SLACK_CHANNEL } from './failed_suite_channels.ts';
 
 const job = (overrides: Partial<Job>): Job =>
   ({

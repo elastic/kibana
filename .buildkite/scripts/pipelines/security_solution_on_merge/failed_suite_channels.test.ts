@@ -10,12 +10,9 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
-import { FALLBACK_SLACK_CHANNEL, getChannelForStepLabel } from './failed_suite_channels';
+import { FALLBACK_SLACK_CHANNEL, getChannelForStepLabel } from './failed_suite_channels.ts';
 
-const PIPELINE_YML = join(
-  __dirname,
-  '../../../pipelines/security_solution_on_merge.yml'
-);
+const PIPELINE_YML = join(__dirname, '../../../pipelines/security_solution_on_merge.yml');
 const RESOURCE_YML = join(
   __dirname,
   '../../../pipeline-resource-definitions/kibana-security-solution-on-merge.yml'

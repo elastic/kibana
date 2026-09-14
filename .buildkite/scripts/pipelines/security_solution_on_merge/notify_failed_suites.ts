@@ -10,10 +10,9 @@
 import { execSync } from 'child_process';
 import { stringify } from 'yaml';
 
+import { FALLBACK_SLACK_CHANNEL, getChannelForStepLabel } from './failed_suite_channels.ts';
 import { BuildkiteClient } from '#pipeline-utils';
 import type { Job } from '#pipeline-utils';
-
-import { FALLBACK_SLACK_CHANNEL, getChannelForStepLabel } from './failed_suite_channels';
 
 const NOTIFY_STEP_KEY = 'notify_owning_teams';
 /** Set after a successful pipeline upload so a retried notify step cannot double-post. */
@@ -117,9 +116,7 @@ export function composeFanOutFailureMessage(
 
   if (buildUrl) {
     const label =
-      buildNumber !== undefined && buildNumber !== ''
-        ? `View build #${buildNumber}`
-        : 'View build';
+      buildNumber !== undefined && buildNumber !== '' ? `View build #${buildNumber}` : 'View build';
     lines.push('', `<${buildUrl}|${label}>`);
   }
 
@@ -222,9 +219,7 @@ function notifyFanOutFailure(
     stepKey: () => 'notify-owning-team-fanout-failure',
   });
 
-  console.error(
-    `Fan-out failed; uploading fallback Slack notify to ${FALLBACK_SLACK_CHANNEL}`
-  );
+  console.error(`Fan-out failed; uploading fallback Slack notify to ${FALLBACK_SLACK_CHANNEL}`);
   upload(yaml);
   markSlackNotifyUploaded(buildkite);
 }
@@ -256,7 +251,9 @@ async function runNotifyFailedSuites(
 
   const yaml = buildNotifyPipelineYaml(channelToMessage);
   console.log(
-    `Uploading Slack notify steps for: ${[...channelToMessage.keys()].join(', ') || FALLBACK_SLACK_CHANNEL}`
+    `Uploading Slack notify steps for: ${
+      [...channelToMessage.keys()].join(', ') || FALLBACK_SLACK_CHANNEL
+    }`
   );
   upload(yaml);
 
