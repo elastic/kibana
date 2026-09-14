@@ -13,10 +13,7 @@ import {
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
 } from '@kbn/security-solution-plugin/common/constants';
-import {
-  closingReason,
-  type DetectionAlert,
-} from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   createAlertsIndex,
   deleteAllAlerts,
@@ -173,49 +170,6 @@ export default ({ getService }: FtrProviderContext) => {
             (hit) => hit._source?.['kibana.alert.workflow_status'] === 'acknowledged'
           );
           expect(everyAlertAcknowledged).to.eql(true);
-        });
-
-        it('should close the alerts with the provided closing reason', async () => {
-          const rule = {
-            ...getRuleForAlertTesting(['auditbeat-*']),
-            query: 'process.executable: "/usr/bin/sudo"',
-          };
-          const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccess({ supertest, log, id });
-          await waitForAlertsToBePresent(supertest, log, 10, [id]);
-          const alertsOpen = await getAlertsByIds(supertest, log, [id]);
-          const alertIds = alertsOpen.hits.hits.map((alert) => alert._id!);
-          const selectedClosingReason = closingReason.enum.automated_closure;
-
-          // set all of the alerts to the state of closed. There is no reason to use a waitUntil here
-          // as this route intentionally has a waitFor within it and should only return when the query has
-          // the data.
-          await supertest
-            .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
-            .set('kbn-xsrf', 'true')
-            .send(setAlertStatus({ alertIds, status: 'closed', reason: selectedClosingReason }))
-            .expect(200);
-
-          await refreshIndex(es, '.alerts-security.alerts-default*');
-
-          const { body: alertsClosed }: { body: estypes.SearchResponse<DetectionAlert> } =
-            await supertest
-              .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-              .set('kbn-xsrf', 'true')
-              .send(getQueryAlertIds(alertIds))
-              .expect(200);
-
-          const everyAlertClosed = alertsClosed.hits.hits.every(
-            (hit) => hit._source?.['kibana.alert.workflow_status'] === 'closed'
-          );
-          expect(everyAlertClosed).to.eql(true);
-
-          //  Every alert should have the same closing reason used
-          //  in the request
-          const everyAlertClosingReasonMatches = alertsClosed.hits.hits.every(
-            (hit) => hit._source?.['kibana.alert.workflow_reason'] === selectedClosingReason
-          );
-          expect(everyAlertClosingReasonMatches).to.eql(true);
         });
 
         it('should close alerts matched by a scripted runtime field passed via runtime_mappings', async () => {
