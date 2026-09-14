@@ -12,7 +12,7 @@ import type { KiStepDependencies } from './helpers';
 import {
   assertContextEngineEnabled,
   assertKiWritePrivilege,
-  findKiBackingIndex,
+  findKiRevision,
   kiNotFoundError,
   resolveAiIndex,
   withKiWriteTelemetry,
@@ -44,19 +44,22 @@ export const getDeleteKiStepDefinition = ({
           setManaged(managed);
           const esClient = context.contextManager.getScopedEsClient();
 
-          const backingIndex = await findKiBackingIndex({
+          const revision = await findKiRevision({
             esClient,
             aiIndexId,
-            destValue: dest.value,
+            dest,
             kiId,
             abortSignal: context.abortSignal,
           });
+          if (!revision) {
+            throw kiNotFoundError(aiIndexId, kiId);
+          }
 
           await esClient
             .delete(
               {
-                index: backingIndex,
-                id: kiId,
+                index: revision.index,
+                id: revision.documentId,
                 refresh: 'wait_for',
               },
               { signal: context.abortSignal }

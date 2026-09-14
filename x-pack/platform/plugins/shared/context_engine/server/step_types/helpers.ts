@@ -8,9 +8,11 @@
 import type { AuditLogger } from '@kbn/core/server';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import type { StepContext } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { isIndexPattern, validateAiIndexId } from '../../common/ai_index_dest';
+import type { KiLifecycleStatus } from '../../common/step_types/ki';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import { AiIndexAlreadyExistsError, AiIndexNotFoundError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
@@ -47,6 +49,90 @@ export interface ResolvedAiIndex {
   dest: AiIndexDest;
   managed: boolean;
 }
+
+/** Who or what wrote a KI revision, as stored under `governance.provenance`. */
+export interface KiWriter {
+  uri: string;
+  metadata: Record<string, string | number>;
+}
+
+/** The governance fields a KI step writes. Other keys are the author's KI fields. */
+export interface StoredKi {
+  id?: string;
+  governance?: {
+    provenance?: { created_by?: KiWriter; updated_by?: KiWriter };
+    lifecycle?: { status?: KiLifecycleStatus };
+  };
+  [key: string]: unknown;
+}
+
+/** The current revision of a KI: the document holding it plus its concurrency tokens. */
+export interface KiRevision {
+  index: string;
+  documentId: string;
+  seqNo?: number;
+  primaryTerm?: number;
+  source: StoredKi;
+}
+
+/** The workflow executing the step, as recorded in provenance. */
+export const kiWriterFromContext = ({ workflow, execution }: StepContext): KiWriter => ({
+  uri: `workflow://${workflow.id}`,
+  metadata: {
+    ...(workflow.version !== undefined && { version: workflow.version }),
+    run_id: execution.id,
+  },
+});
+
+/** The fields a write step stamps on every revision it produces. */
+export interface KiRevisionChanges {
+  updated_at: string;
+  governance: {
+    provenance: { updated_by: KiWriter };
+    lifecycle?: { status: KiLifecycleStatus };
+  };
+  [key: string]: unknown;
+}
+
+/**
+ * Writes a new revision of a KI to a data stream: the current source with the
+ * changes applied, a fresh `@timestamp`, and governance merged rather than replaced.
+ */
+export const appendKiRevision = async ({
+  esClient,
+  destValue,
+  kiId,
+  source,
+  changes,
+  abortSignal,
+}: {
+  esClient: ElasticsearchClient;
+  destValue: string;
+  kiId: string;
+  source: StoredKi;
+  changes: KiRevisionChanges;
+  abortSignal: AbortSignal;
+}): Promise<void> => {
+  await esClient.index(
+    {
+      index: destValue,
+      document: {
+        ...source,
+        ...changes,
+        '@timestamp': changes.updated_at,
+        id: source.id ?? kiId,
+        governance: {
+          ...source.governance,
+          ...changes.governance,
+          provenance: { ...source.governance?.provenance, ...changes.governance.provenance },
+        },
+      },
+      op_type: 'create',
+      refresh: 'wait_for',
+    },
+    { signal: abortSignal }
+  );
+};
 
 const KI_WRITE_SUCCESS_VERB: Record<KiWriteAction, string> = {
   create: 'created in',
@@ -262,32 +348,56 @@ export const kiNotFoundError = (aiIndexId: string, kiId: string): ExecutionError
     message: `KI '${kiId}' not found in AI index '${aiIndexId}'`,
   });
 
+export const isKiDeleted = (source: StoredKi): boolean =>
+  source.governance?.lifecycle?.status === 'deleted';
+
+/** The typed error for an update to a KI whose lifecycle status is deleted. */
+export const kiDeletedError = (aiIndexId: string, kiId: string): ExecutionError =>
+  new ExecutionError({
+    type: 'ConflictError',
+    message: `KI '${kiId}' in AI index '${aiIndexId}' has lifecycle status deleted; pass force: true to update it`,
+  });
+
+/** The typed error for a write that lost an optimistic concurrency check. */
+export const kiConflictError = (aiIndexId: string, kiId: string): ExecutionError =>
+  new ExecutionError({
+    type: 'ConflictError',
+    message: `KI '${kiId}' in AI index '${aiIndexId}' was modified concurrently`,
+  });
+
 /**
- * Finds the concrete index holding a KI document. Update and delete must target
- * the backing index directly since the dest may be a data stream or a pattern.
+ * Finds the current revision of a KI. On an index the KI is the document whose
+ * `_id` is the KI id; on a data stream it is the latest document whose `id`
+ * field (or `_id`, for KIs written before `id` existed) matches.
  */
-export const findKiBackingIndex = async ({
+export const findKiRevision = async ({
   esClient,
   aiIndexId,
-  destValue,
+  dest,
   kiId,
   abortSignal,
 }: {
   esClient: ElasticsearchClient;
   aiIndexId: string;
-  destValue: string;
+  dest: AiIndexDest;
   kiId: string;
   abortSignal: AbortSignal;
-}): Promise<string> => {
+}): Promise<KiRevision | undefined> => {
+  const isDataStream = dest.type === 'data_stream';
   // A dest with no physical backing index yet must resolve to empty hits, not an error.
-  const response = await esClient.search(
+  const response = await esClient.search<StoredKi>(
     {
-      index: destValue,
+      index: dest.value,
       ignore_unavailable: true,
       allow_no_indices: true,
-      query: { ids: { values: [kiId] } },
-      size: 2,
-      _source: false,
+      query: isDataStream
+        ? { bool: { should: [{ term: { id: kiId } }, { ids: { values: [kiId] } }] } }
+        : { ids: { values: [kiId] } },
+      ...(isDataStream && {
+        sort: [{ '@timestamp': { order: 'desc' as const, unmapped_type: 'date' as const } }],
+      }),
+      size: isDataStream ? 1 : 2,
+      seq_no_primary_term: true,
     },
     { signal: abortSignal }
   );
@@ -303,9 +413,15 @@ export const findKiBackingIndex = async ({
     });
   }
 
-  const backingIndex = hits[0]?._index;
-  if (!backingIndex) {
-    throw kiNotFoundError(aiIndexId, kiId);
+  const hit = hits[0];
+  if (!hit?._index) {
+    return undefined;
   }
-  return backingIndex;
+  return {
+    index: hit._index,
+    documentId: hit._id ?? kiId,
+    seqNo: hit._seq_no,
+    primaryTerm: hit._primary_term,
+    source: hit._source ?? {},
+  };
 };
