@@ -21,5 +21,6 @@ export const MAX_DISCOVER_SESSION_COLUMNS_SERVERLESS = 50;
 export const MAX_DISCOVER_SESSION_TABS = 25;
 
 export const MAX_METRICS_TAB_DIMENSIONS = 5;
+export const MAX_METRICS_TAB_STATE_STRING_LENGTH = 1000;
 
 export type SavedSearchContentType = typeof SavedSearchType;

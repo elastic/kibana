@@ -168,11 +168,6 @@ export const DocumentAttachmentAttributesRtV2 = rt.union([
 export type DocumentAttachmentAttributesV2 = rt.TypeOf<typeof DocumentAttachmentAttributesRtV2>;
 
 /**
- * Transitional read-shape mode while v1/v2 attachments coexist.
- */
-export type AttachmentMode = 'legacy' | 'unified';
-
-/**
  * Combined v1 legacy and v2 unified attachment types
  */
 export const AttachmentRtV2 = rt.union([AttachmentRt, UnifiedAttachmentRt]);

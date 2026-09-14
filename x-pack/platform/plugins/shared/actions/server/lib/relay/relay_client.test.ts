@@ -219,6 +219,101 @@ describe('RelayClient', () => {
     });
   });
 
+  describe('trigger', () => {
+    it('posts the snake_case outbound body with the Relay SSL overrides', async () => {
+      requestMock.mockResolvedValue({
+        status: 202,
+        data: { ok: true, surface: 'slack', tenant_key: 'team-A', ref: '1700000000.000100' },
+      } as never);
+
+      await expect(
+        createClient().trigger({
+          tenantKey: 'team-A',
+          channel: 'C123',
+          message: 'hello',
+        })
+      ).resolves.toEqual({ ref: '1700000000.000100', tenantKey: 'team-A' });
+
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://relay.test/v1/slack/trigger',
+          method: 'post',
+          data: { tenant_key: 'team-A', channel: 'C123', message: 'hello' },
+          sslOverrides: relaySSLSettings,
+        })
+      );
+    });
+
+    it('includes thread_ts only when replying in a thread', async () => {
+      requestMock.mockResolvedValue({
+        status: 202,
+        data: { ref: '1700000000.000200', tenant_key: 'team-A' },
+      } as never);
+
+      await createClient().trigger({
+        tenantKey: 'team-A',
+        channel: 'C123',
+        message: 'in thread',
+        threadTs: '1700000000.000100',
+      });
+
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ thread_ts: '1700000000.000100' }),
+        })
+      );
+    });
+
+    it.each([403, 409, 502])(
+      'turns a %s into a RelayRequestError carrying the status',
+      async (status) => {
+        requestMock.mockResolvedValue({ status, data: { message: 'nope' } } as never);
+
+        const error = await createClient()
+          .trigger({ tenantKey: 'team-A', channel: 'C123', message: 'hello' })
+          .then(() => undefined)
+          .catch((cause) => cause);
+
+        expect(error).toBeInstanceOf(RelayRequestError);
+        expect(error).toMatchObject({ statusCode: status, relayMessage: 'nope' });
+      }
+    );
+
+    it.each([
+      { label: 'empty body', data: undefined },
+      { label: 'empty object', data: {} },
+      { label: 'empty ref', data: { ref: '', tenant_key: 'team-A' } },
+      { label: 'missing ref', data: { tenant_key: 'team-A' } },
+    ])('throws RelayRequestError when response body has $label', async ({ data }) => {
+      requestMock.mockResolvedValue({ status: 202, data } as never);
+
+      const error = await createClient()
+        .trigger({ tenantKey: 'team-A', channel: 'C123', message: 'hello' })
+        .then(() => undefined)
+        .catch((cause) => cause);
+
+      expect(error).toBeInstanceOf(RelayRequestError);
+      expect(error).toMatchObject({
+        relayMessage: 'Relay invalid response format missing expected `ref`',
+      });
+    });
+
+    it('falls back to the caller tenantKey when tenant_key is absent from the response', async () => {
+      requestMock.mockResolvedValue({
+        status: 202,
+        data: { ref: '1700000000.000400' },
+      } as never);
+
+      await expect(
+        createClient().trigger({
+          tenantKey: 'team-A',
+          channel: 'C123',
+          message: 'hello',
+        })
+      ).resolves.toEqual({ ref: '1700000000.000400', tenantKey: 'team-A' });
+    });
+  });
+
   it('preserves Relay errors', async () => {
     requestMock.mockResolvedValue({
       status: 400,

@@ -12,13 +12,7 @@ import type { ApiTarget } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import {
-  EXPANDABLE_KEY,
-  getUnsupportedReason,
-  loadApi,
-  targetSchema,
-  toDescribedSchema,
-} from '../../api';
+import { EXPANDABLE_KEY, loadApi, targetSchema, toDescribedSchema } from '../../api';
 import type { ApiRegistryDefinition } from '../../api';
 import { apiFailureToErrorResult } from './errors';
 
@@ -31,7 +25,6 @@ export interface ApiDescribeResultData {
   destructive: boolean;
   params_schema_yaml: string;
   expandable_types: string[];
-  unsupported_reason?: string;
 }
 
 const describeSchema = z.object({
@@ -55,8 +48,6 @@ Returns:
   interpolates is one of the parameters below, and must be supplied for the call to run.
 - \`destructive\`: whether the operation modifies or deletes existing data. Prefer a non-destructive
   alternative when one exists.
-- \`unsupported_reason\`: present only when the operation cannot be executed at all — look for
-  another operation that does the same job.
 - A YAML document describing every accepted parameter with its type and description. It is one flat
   set: pass them all in a single \`params\` map and the routing into the URL path, query string, and
   request body is handled for you.
@@ -114,8 +105,6 @@ Use the \`${internalTools.discoverApis}\` tool first to find the \`api\` identif
         }
       }
 
-      const unsupportedReason = getUnsupportedReason(definition);
-
       const data: ApiDescribeResultData = {
         target,
         api,
@@ -125,7 +114,6 @@ Use the \`${internalTools.discoverApis}\` tool first to find the \`api\` identif
         destructive: definition.destructive,
         params_schema_yaml: paramsYaml,
         expandable_types: expandableTypes,
-        ...(unsupportedReason === undefined ? {} : { unsupported_reason: unsupportedReason }),
       };
 
       return {
