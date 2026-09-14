@@ -34,7 +34,7 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
   if (!inputArguments.startsWith('--')) {
     const firstNamedParamsPosition = inputArguments.indexOf('--');
 
-    response.params.push(inputArguments.substring(0, firstNamedParamsPosition));
+    response.params.push(inputArguments.substring(0, firstNamedParamsPosition).trim());
     rawArguments = inputArguments.substring(firstNamedParamsPosition).split(/--/);
   }
 

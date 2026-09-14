@@ -211,7 +211,7 @@ describe('when using parsed command input utils', () => {
               one: ['1'],
               two: ['2'],
             },
-            params: ['bar '],
+            params: ['bar'],
           })
         );
         expect(parsedCommand.hasArgs).toBe(true);
@@ -220,7 +220,7 @@ describe('when using parsed command input utils', () => {
       it('should only capture the text prior to the first named argument as a positional param', () => {
         const parsedCommand = parseCommandInput('foo one two --one 1 three');
 
-        expect(parsedCommand.params).toEqual(['one two ']);
+        expect(parsedCommand.params).toEqual(['one two']);
       });
 
       it('should not populate `params` when the first argument is `--` prefixed', () => {
