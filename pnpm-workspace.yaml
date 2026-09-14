@@ -88,7 +88,7 @@ overrides:
   'cheerio': '1.0.0-rc.12'
   'chokidar': '3.5.3'
   'd3-scale>d3-color': 'npm:@elastic/kibana-d3-color@2.0.1'
-  'dompurify': '3.4.1'
+  'dompurify': '3.4.14'
   'esbuild': '0.27.2'
   'fast-xml-parser': '5.5.7'
   'flatted': '3.4.2'
