@@ -242,9 +242,12 @@ export class OtelAppender implements DisposableAppender {
      * processor while the endpoint is unreachable; once full, new records are dropped. Note the
      * queue is count-based: OTel has no byte-size cap for log bodies, so the memory bound is
      * `maxQueueSize` times the assumed maximum event size.
+     *
+     * Floored at 512 (the SDK's default `maxExportBatchSize`): below that, the SDK would warn on
+     * boot and silently shrink its export batches to fit the queue.
      */
     maxQueueSize: offeringBasedSchema({
-      serverless: schema.number({ defaultValue: 15_000, min: 1, max: 1_000_000 }),
+      serverless: schema.number({ defaultValue: 15_000, min: 512, max: 1_000_000 }),
     }),
     /**
      * Serverless / internal only. Wall-clock budget during which failed exports are retried
@@ -322,7 +325,7 @@ export class OtelAppender implements DisposableAppender {
     // that only the config service provides. This runtime path is internal (plugins calling
     // `LoggingServiceSetup.configure`), so they are allowed plainly here — with no defaults,
     // so a plugin that doesn't opt in keeps the SDK behavior.
-    maxQueueSize: schema.maybe(schema.number({ min: 1, max: 1_000_000 })),
+    maxQueueSize: schema.maybe(schema.number({ min: 512, max: 1_000_000 })),
     maxElapsedTime: schema.maybe(schema.duration()),
   });
 

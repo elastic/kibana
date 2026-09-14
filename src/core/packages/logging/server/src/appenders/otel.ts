@@ -87,7 +87,9 @@ export interface OtelAppenderConfig {
    * count-based — OTel imposes no byte-size cap on log bodies — so the effective memory bound
    * is `maxQueueSize` × the assumed maximum event size.
    *
-   * Defaults to `15000` on serverless; unset elsewhere (SDK default: `2048`).
+   * Must be at least `512` (the SDK's default export batch size — smaller queues would make the
+   * SDK warn and silently shrink its batches). Defaults to `15000` on serverless; unset
+   * elsewhere (SDK default: `2048`).
    */
   maxQueueSize?: number;
   /**

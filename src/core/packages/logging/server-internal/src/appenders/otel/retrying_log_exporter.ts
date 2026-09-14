@@ -56,7 +56,8 @@ const RETRYABLE_GRPC_STATUS_CODES = new Set([4, 8, 14]);
  * shapes they actually produce:
  * - Node network errors carry a string `code` (e.g. `ECONNREFUSED`).
  * - HTTP error responses surface as `OTLPExporterError` with the status as a numeric `code`.
- * - gRPC errors carry the gRPC status as a numeric `code`.
+ * - gRPC errors carry the gRPC status on `code`; `@grpc/grpc-js` types it as a number but at
+ *   runtime it surfaces as a numeric string (e.g. `'14'`), so both forms are handled.
  * - Two transient cases surface with no `code` at all, identified only by their fixed messages:
  *   request timeouts (`'Request timed out'`, from the SDK's HTTP transport) and retryable
  *   responses whose inner SDK retries were exhausted (`'Export failed with retryable status'`,
@@ -67,11 +68,14 @@ export const isRetryableExportError = (error: Error | undefined): boolean => {
     return false;
   }
   const { code } = error as { code?: unknown };
-  if (typeof code === 'string') {
-    return RETRYABLE_NETWORK_ERROR_CODES.has(code);
+  if (typeof code === 'string' && RETRYABLE_NETWORK_ERROR_CODES.has(code)) {
+    return true;
   }
-  if (typeof code === 'number') {
-    return RETRYABLE_HTTP_STATUS_CODES.has(code) || RETRYABLE_GRPC_STATUS_CODES.has(code);
+  if (typeof code === 'string' || typeof code === 'number') {
+    const numericCode = Number(code);
+    return (
+      RETRYABLE_HTTP_STATUS_CODES.has(numericCode) || RETRYABLE_GRPC_STATUS_CODES.has(numericCode)
+    );
   }
   return (
     error.message === 'Export failed with retryable status' || error.message === 'Request timed out'
@@ -140,11 +144,8 @@ export class RetryingLogRecordExporter implements LogRecordExporter {
           return;
         }
 
-        const timer = setTimeout(() => {
-          this.pendingRetries.delete(pending);
-          attempt();
-        }, backoffMs);
-        timer.unref();
+        // `pending` is created before the timer so the timer callback can never observe it
+        // uninitialized; its own closures only run after this block completes.
         const pending: PendingRetry = {
           runNow: () => {
             clearTimeout(timer);
@@ -158,6 +159,11 @@ export class RetryingLogRecordExporter implements LogRecordExporter {
           },
         };
         this.pendingRetries.add(pending);
+        const timer = setTimeout(() => {
+          this.pendingRetries.delete(pending);
+          attempt();
+        }, backoffMs);
+        timer.unref();
       });
     };
 

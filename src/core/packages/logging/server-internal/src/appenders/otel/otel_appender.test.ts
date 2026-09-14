@@ -229,11 +229,24 @@ describe('OtelAppender', () => {
 
     it('accepts explicit maxQueueSize and maxElapsedTime on the serverless offering', () => {
       const result = OtelAppender.configSchema.validate(
-        { ...validConfig, maxQueueSize: 500, maxElapsedTime: '30s' },
+        { ...validConfig, maxQueueSize: 5_000, maxElapsedTime: '30s' },
         { serverless: true }
       );
-      expect(result.maxQueueSize).toBe(500);
+      expect(result.maxQueueSize).toBe(5_000);
       expect(result.maxElapsedTime?.asMilliseconds()).toBe(30_000);
+    });
+
+    it('rejects maxQueueSize below the SDK export batch size (512)', () => {
+      // Below 512 the SDK would warn on boot and silently shrink its export batches.
+      expect(() =>
+        OtelAppender.configSchema.validate(
+          { ...validConfig, maxQueueSize: 511 },
+          { serverless: true }
+        )
+      ).toThrow(/maxQueueSize/);
+      expect(() =>
+        OtelAppender.runtimeConfigSchema.validate({ ...validConfig, maxQueueSize: 511 })
+      ).toThrow(/maxQueueSize/);
     });
   });
 
@@ -282,10 +295,10 @@ describe('OtelAppender', () => {
       // the plugin opts in.
       const result = OtelAppender.runtimeConfigSchema.validate({
         ...validConfig,
-        maxQueueSize: 500,
+        maxQueueSize: 5_000,
         maxElapsedTime: '1m',
       });
-      expect(result.maxQueueSize).toBe(500);
+      expect(result.maxQueueSize).toBe(5_000);
       expect(result.maxElapsedTime?.asMilliseconds()).toBe(60_000);
 
       const defaults = OtelAppender.runtimeConfigSchema.validate(validConfig);
@@ -331,11 +344,11 @@ describe('OtelAppender', () => {
     });
 
     it('passes maxQueueSize through without the retry layer when only maxQueueSize is set', () => {
-      new OtelAppender({ ...validConfig, maxQueueSize: 500 });
+      new OtelAppender({ ...validConfig, maxQueueSize: 5_000 });
 
       const options = mockBatchLogRecordProcessor.mock.calls[0][0];
       expect(options.exporter).toBe(mockOTLPLogExporter.mock.instances[0]);
-      expect(options.maxQueueSize).toBe(500);
+      expect(options.maxQueueSize).toBe(5_000);
       expect(options).not.toHaveProperty('exportTimeoutMillis');
     });
 

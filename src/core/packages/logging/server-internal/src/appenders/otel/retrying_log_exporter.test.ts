@@ -57,9 +57,12 @@ describe('isRetryableExportError', () => {
     // 4 = DEADLINE_EXCEEDED, 8 = RESOURCE_EXHAUSTED, 14 = UNAVAILABLE
     for (const code of [4, 8, 14]) {
       expect(isRetryableExportError(httpError(code))).toBe(true);
+      // At runtime @grpc/grpc-js surfaces the status as a numeric string, despite its types.
+      expect(isRetryableExportError(networkError(String(code)))).toBe(true);
     }
     // 16 = UNAUTHENTICATED
     expect(isRetryableExportError(httpError(16))).toBe(false);
+    expect(isRetryableExportError(networkError('16'))).toBe(false);
   });
 
   it('classifies the code-less transient messages from the SDK as retryable', () => {
