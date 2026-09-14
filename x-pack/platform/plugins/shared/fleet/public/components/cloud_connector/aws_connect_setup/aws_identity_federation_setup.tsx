@@ -19,16 +19,22 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import type { CloudSetupForCloudConnector } from '../types';
 
 import type { AccountType } from '../../../types';
+import { useIacProvisioner } from '../../../hooks';
+import { parseAwsRegionFromArn } from '../../../../common/services/cloud_connectors';
+import type { RenderIacTemplateIntegration } from '../../../../common/types/rest_spec/iac_provisioner';
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
+import { useCloudConnectorTemplate } from '../hooks/use_cloud_connector_template';
 import { CloudConnectorTabs, type CloudConnectorTab } from '../cloud_connector_tabs';
 import { CloudConnectorSelector } from '../form/cloud_connector_selector';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
 import { CloudFormationCloudCredentialsGuide } from '../aws_cloud_connector/aws_cloud_formation_guide';
-import { getCloudConnectorRemoteRoleTemplate, getCloudConnectorNameError } from '../utils';
+import { IacKeyCheck } from '../components/iac_key_check';
+import { getCloudConnectorNameError, INVALID_STACK_ARN_MESSAGE } from '../utils';
 import { TABS } from '../constants';
 import { useCreateCloudConnector } from '../hooks/use_create_cloud_connector';
 
@@ -40,6 +46,16 @@ export interface AwsIdentityFederationSetupProps {
   hasInvalidRequiredVars?: boolean;
   isEditPage?: boolean;
   initialConnectorId?: string;
+  /**
+   * Integrations this identity must cover: one entry per package with the policy templates and
+   * input types the user enabled. When given, the New Identity tab renders the template live and
+   * stores the returned key and stack ARN on the connector, and the Existing Identity tab checks
+   * the selected identity's deployed template against this set
+   * (https://github.com/elastic/ingest-dev/issues/9415). Omit to keep the static-template flow.
+   * Callers must remount this component when the set changes; it is not re-rendered against a
+   * new set (unlike the wizard form, which guards against edits after Launch).
+   */
+  integrations?: RenderIacTemplateIntegration[];
   onReadyChange?: (isReady: boolean) => void;
   onConnectorIdChange?: (connectorId: string | undefined, connectorName?: string) => void;
 }
@@ -52,9 +68,11 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   hasInvalidRequiredVars = false,
   isEditPage = false,
   initialConnectorId,
+  integrations,
   onReadyChange,
   onConnectorIdChange,
 }) => {
+  const { isIacProvisionerEnabled } = useIacProvisioner();
   const { data: cloudConnectors = [], isLoading: isLoadingConnectors } = useGetCloudConnectors({
     cloudProvider: 'aws',
     accountType,
@@ -67,6 +85,14 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   const [selected, setSelected] = useState<{ id: string; name?: string } | undefined>(
     initialConnectorId ? { id: initialConnectorId } : undefined
   );
+  const [iacKey, setIacKey] = useState<string | undefined>(undefined);
+  const [stackArn, setStackArn] = useState('');
+  // IacKeyCheck reports false while the selected identity's deployed template is out of date.
+  const [isCheckValid, setIsCheckValid] = useState(true);
+  // Validate what Create will post: a pasted ARN often carries surrounding whitespace.
+  const trimmedStackArn = stackArn.trim();
+  const stackArnInvalid =
+    trimmedStackArn !== '' && parseAwsRegionFromArn(trimmedStackArn) === undefined;
 
   const hasSetInitialTab = useRef(false);
   useEffect(() => {
@@ -93,26 +119,51 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   // until it lands, otherwise consumers persist an id with no name and render an empty summary.
   const isAwaitingInitialName = !!selected?.id && !selected.name && isLoadingConnectors;
 
+  // A verdict belongs to the identity it was computed for. Clear it in the same update as the
+  // selection change (not in an effect: the remounted IacKeyCheck reports its fresh verdict in a
+  // mount effect that runs before any parent effect, and a parent-effect reset would erase it) so
+  // a stale false from the previous identity cannot block the new one before its check reports.
+  const selectConnector = useCallback((next: { id: string; name?: string } | undefined) => {
+    setSelected(next);
+    setIsCheckValid(true);
+  }, []);
+
   useEffect(() => {
-    onReadyChange?.(!!selected?.id);
+    onReadyChange?.(!!selected?.id && isCheckValid);
     if (isAwaitingInitialName) return;
     onConnectorIdChange?.(selected?.id, selected?.name);
-  }, [selected, isAwaitingInitialName, onReadyChange, onConnectorIdChange]);
+  }, [selected, isCheckValid, isAwaitingInitialName, onReadyChange, onConnectorIdChange]);
 
-  const cloudFormationUrl = cloud
-    ? getCloudConnectorRemoteRoleTemplate({
-        cloud,
-        accountType: accountType || 'single-account',
-        iacTemplateUrl,
-      })
-    : undefined;
+  // Fires right before the console opens with the templateSha of the rendered template; Create
+  // stores it as iac_key so the upgrade check can later compare the deployed template against
+  // what the identity's integrations need (https://github.com/elastic/ingest-dev/issues/9415).
+  // No stale-render guard here: see the `integrations` prop contract.
+  const onTemplateRendered = useCallback(({ key }: { key?: string }) => setIacKey(key), []);
+
+  const {
+    launchButtonProps,
+    isDisabled: isLaunchDisabled,
+    isGeneratingTemplate,
+    templateGenerationError,
+  } = useCloudConnectorTemplate({
+    provider: 'aws',
+    cloud,
+    accountType,
+    iacTemplateUrl,
+    // undefined → static template: a plain href with the provisioner off, the hook's
+    // missing-context fallback (window.open + fallback telemetry) with it on.
+    integrations,
+    onTemplateRendered,
+  });
 
   const { mutate: createConnector, isLoading: isCreating } = useCreateCloudConnector(
     (connector) => {
-      setSelected({ id: connector.id, name: connector.name });
+      selectConnector({ id: connector.id, name: connector.name });
       setSelectedTabId(TABS.EXISTING_CONNECTION);
       setRoleArn('');
       setConnectorName('');
+      setIacKey(undefined);
+      setStackArn('');
     }
   );
 
@@ -124,11 +175,22 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
       vars: {
         role_arn: { value: roleArn, type: 'text' },
       },
+      ...(iacKey ? { iac_key: iacKey } : {}),
+      ...(trimmedStackArn && !stackArnInvalid ? { iac_deployment_id: trimmedStackArn } : {}),
     });
-  }, [createConnector, connectorName, accountType, roleArn]);
+  }, [
+    createConnector,
+    connectorName,
+    accountType,
+    roleArn,
+    iacKey,
+    trimmedStackArn,
+    stackArnInvalid,
+  ]);
 
   const roleArnInvalid = hasInvalidRequiredVars && !roleArn;
-  const isCreateDisabled = !roleArn || !!getCloudConnectorNameError(connectorName);
+  const isCreateDisabled =
+    !roleArn || !!getCloudConnectorNameError(connectorName) || stackArnInvalid;
 
   if (isLoadingConnectors) {
     return <EuiSkeletonText lines={4} data-test-subj="awsIdentityFederationSetup-loading" />;
@@ -137,7 +199,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   const handleTabClick = (tab: { id: string }) => {
     setSelectedTabId(tab.id);
     if (tab.id === TABS.NEW_CONNECTION) {
-      setSelected(undefined);
+      selectConnector(undefined);
     }
   };
 
@@ -175,18 +237,56 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
           </EuiAccordion>
           <EuiSpacer size="l" />
           <EuiButton
-            target="_blank"
             iconSide="left"
             iconType="rocket"
-            href={cloudFormationUrl}
-            isDisabled={!cloudFormationUrl}
+            isLoading={isGeneratingTemplate}
+            // With the provisioner on the hook never disables the button, but a live render still
+            // needs the console URL that only `cloud` provides, so keep the old guard.
+            isDisabled={isLaunchDisabled || !cloud}
             data-test-subj="awsIdentityFederationSetup-launchCloudFormation"
+            {...launchButtonProps}
           >
             <FormattedMessage
               id="xpack.fleet.awsIdentityFederationSetup.launchCloudFormation"
               defaultMessage="Launch CloudFormation"
             />
           </EuiButton>
+          {templateGenerationError && (
+            <>
+              <EuiSpacer size="m" />
+              <KbnDangerCallout
+                announceOnMount
+                size="s"
+                title={templateGenerationError}
+                data-test-subj="awsIdentityFederationSetup-templateError"
+              />
+            </>
+          )}
+          {isIacProvisionerEnabled && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiFormRow
+                fullWidth
+                label={i18n.translate('xpack.fleet.awsIdentityFederationSetup.stackArnLabel', {
+                  defaultMessage: 'CloudFormation stack ARN',
+                })}
+                helpText={i18n.translate('xpack.fleet.awsIdentityFederationSetup.stackArnHelp', {
+                  defaultMessage:
+                    'Copy the StackId output of the stack you just created so Kibana can link straight to it when its template needs an update.',
+                })}
+                isInvalid={stackArnInvalid}
+                error={stackArnInvalid ? INVALID_STACK_ARN_MESSAGE : undefined}
+              >
+                <EuiFieldText
+                  fullWidth
+                  value={stackArn}
+                  isInvalid={stackArnInvalid}
+                  onChange={(e) => setStackArn(e.target.value)}
+                  data-test-subj="awsIdentityFederationSetup-stackArn"
+                />
+              </EuiFormRow>
+            </>
+          )}
           <EuiSpacer size="m" />
           <EuiFormRow
             label={i18n.translate('xpack.fleet.awsIdentityFederationSetup.roleArnLabel', {
@@ -239,18 +339,35 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
         />
       ),
       content: (
-        <CloudConnectorSelector
-          provider="aws"
-          cloudConnectorId={selected?.id}
-          credentials={selected?.id ? { cloudConnectorId: selected.id } : {}}
-          setCredentials={(creds) => {
-            if (creds.cloudConnectorId) {
-              setSelected({ id: creds.cloudConnectorId, name: creds.name });
-            }
-          }}
-          accountType={accountType}
-          packageName={packageName}
-        />
+        <>
+          <CloudConnectorSelector
+            provider="aws"
+            cloudConnectorId={selected?.id}
+            credentials={selected?.id ? { cloudConnectorId: selected.id } : {}}
+            setCredentials={(creds) => {
+              if (creds.cloudConnectorId) {
+                selectConnector({ id: creds.cloudConnectorId, name: creds.name });
+              }
+            }}
+            accountType={accountType}
+            packageName={packageName}
+          />
+          {integrations && integrations.length > 0 && (
+            <>
+              <EuiSpacer size="m" />
+              {/* Keyed per identity so the check's change-only reporting starts fresh for each one. */}
+              <IacKeyCheck
+                key={selected?.id}
+                cloudConnectorId={selected?.id}
+                integrations={integrations}
+                cloud={cloud}
+                accountType={accountType}
+                iacTemplateUrl={iacTemplateUrl}
+                onValidityChange={setIsCheckValid}
+              />
+            </>
+          )}
+        </>
       ),
     },
   ];
