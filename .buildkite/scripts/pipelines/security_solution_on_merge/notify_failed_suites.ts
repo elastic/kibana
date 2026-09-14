@@ -92,8 +92,7 @@ export function composeChannelMessage(
     return `• <${job.webUrl}|[job]> ${displayName}${suffix}`;
   });
 
-  const omissionLine = (count: number) =>
-    `• …and ${count} more failed step${count > 1 ? 's' : ''}`;
+  const omissionLine = (count: number) => `• …and ${count} more failed step${count > 1 ? 's' : ''}`;
 
   const render = (lines: string[]) =>
     [
