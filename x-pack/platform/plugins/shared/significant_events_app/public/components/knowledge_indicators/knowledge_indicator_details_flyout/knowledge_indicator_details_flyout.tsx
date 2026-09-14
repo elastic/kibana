@@ -26,7 +26,7 @@ import {
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import type { Streams } from '@kbn/streams-schema';
 import { isComputedFeature, QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import type { Feature } from '@kbn/significant-events-schema';
@@ -34,7 +34,7 @@ import { upperFirst } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTimefilter } from '../../../hooks/use_timefilter';
-import { buildFeatureDiscoverParams } from '../../../pages/significant_events/utils/discover_helpers';
+import { buildFeatureDiscoverParams } from '../../../util/discover_helpers';
 import { getKnowledgeIndicatorTitle } from '../utils/get_knowledge_indicator_title';
 import { getConfidenceColor } from '../utils/get_confidence_color';
 import { FlyoutMetadataCard } from '../../flyout_components/flyout_metadata_card';
@@ -320,7 +320,7 @@ export function KnowledgeIndicatorDetailsFlyout({
               button={
                 <EuiToolTip content={ACTIONS_MENU_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
                   <EuiButtonIcon
-                    iconType="boxesVertical"
+                    iconType="ellipsis"
                     aria-label={ACTIONS_MENU_BUTTON_ARIA_LABEL}
                     isLoading={isMutating}
                     isDisabled={isMutating}

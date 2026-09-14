@@ -210,6 +210,14 @@ const internalStateSliceDef = createSlice({
         tab.isDataViewLoading = action.payload.isDataViewLoading;
       }),
 
+    setIsWarningCalloutDismissed: (
+      state,
+      action: TabAction<Pick<TabState, 'isWarningCalloutDismissed'>>
+    ) =>
+      withTab(state, action.payload, (tab) => {
+        tab.isWarningCalloutDismissed = action.payload.isWarningCalloutDismissed;
+      }),
+
     setDefaultProfileAdHocDataViewIds: (state, action: PayloadAction<string[]>) => {
       state.defaultProfileAdHocDataViewIds = action.payload;
     },

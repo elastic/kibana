@@ -9,6 +9,12 @@
 
 import type { FtrConfigProviderContext } from '@kbn/test';
 
+/**
+ * Migration recommendation: DELETE this config and ./index.ts once every file below is
+ * resolved. The CCS-only variants are loaded from src/platform/test/functional/config.ccs.ts
+ * (esTestCluster.ccs). Scout's default servers have no remote cluster.
+ */
+
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../../../config.base.js'));
 

@@ -47,6 +47,7 @@ export interface SyntheticsPrivateLocationApi {
   ): Promise<ScoutPrivateLocation>;
   getSharedPrivateLocation(): Promise<ScoutPrivateLocation>;
   resetSharedPrivateLocation(): void;
+  deletePrivateLocation(locationId: string): Promise<void>;
   cleanUpPrivateLocationsAndPolicies(): Promise<void>;
 }
 
@@ -306,6 +307,19 @@ export function createSyntheticsPrivateLocationApi(
     cachedSharedLocation = null;
   };
 
+  const deletePrivateLocation = async (locationId: string): Promise<void> => {
+    await kbnClient.request({
+      method: 'DELETE',
+      path: `${SYNTHETICS_API_URLS.PRIVATE_LOCATIONS}/${locationId}`,
+      headers: { 'elastic-api-version': PUBLIC_API_VERSION },
+      // Route returns 400 when the location is already gone.
+      ignoreErrors: [400, 404],
+    });
+    if (cachedSharedLocation?.id === locationId) {
+      cachedSharedLocation = null;
+    }
+  };
+
   const cleanUpPrivateLocationsAndPolicies = async () => {
     await kbnClient.savedObjects.clean({
       types: ['synthetics-private-location', 'ingest-agent-policies', 'ingest-package-policies'],
@@ -322,6 +336,7 @@ export function createSyntheticsPrivateLocationApi(
     addTestPrivateLocation,
     getSharedPrivateLocation,
     resetSharedPrivateLocation,
+    deletePrivateLocation,
     cleanUpPrivateLocationsAndPolicies,
   };
 }

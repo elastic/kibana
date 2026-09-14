@@ -166,7 +166,7 @@ export const SnapshotSearchBar: React.FunctionComponent<Props> = ({
   ];
 
   const reloadButton = (
-    <EuiButton color="success" iconType="refresh" onClick={reload} data-test-subj="reloadButton">
+    <EuiButton iconType="refresh" onClick={reload} data-test-subj="reloadButton">
       <FormattedMessage
         id="xpack.snapshotRestore.snapshotList.table.reloadSnapshotsButton"
         defaultMessage="Reload"

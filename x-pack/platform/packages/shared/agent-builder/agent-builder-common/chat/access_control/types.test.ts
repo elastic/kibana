@@ -10,6 +10,9 @@ import {
   ConversationAccessControlMode,
   ConversationAccessControlRole,
   getDefaultConversationAccessControl,
+  isPrivatelySharedConversation,
+  isPublicConversation,
+  isSharedConversation,
   normalizeConversationAccessControl,
 } from './types';
 
@@ -70,5 +73,104 @@ describe('normalizeConversationAccessControl', () => {
       access_mode: ConversationAccessControlMode.Public,
       entries: [entry],
     });
+  });
+});
+
+describe('isPublicConversation', () => {
+  it('is not public when access control is undefined', () => {
+    expect(isPublicConversation(undefined)).toBe(false);
+  });
+
+  it('is not public when private', () => {
+    expect(
+      isPublicConversation({
+        access_mode: ConversationAccessControlMode.Private,
+        entries: [entry],
+      })
+    ).toBe(false);
+  });
+
+  it('is public when the access mode is public', () => {
+    expect(
+      isPublicConversation({ access_mode: ConversationAccessControlMode.Public, entries: [] })
+    ).toBe(true);
+  });
+});
+
+describe('isPrivatelySharedConversation', () => {
+  it('is not privately shared when access control is undefined', () => {
+    expect(isPrivatelySharedConversation(undefined)).toBe(false);
+  });
+
+  it('is not privately shared when private with no entries', () => {
+    expect(
+      isPrivatelySharedConversation({
+        access_mode: ConversationAccessControlMode.Private,
+        entries: [],
+      })
+    ).toBe(false);
+  });
+
+  it('is privately shared when private with at least one entry', () => {
+    expect(
+      isPrivatelySharedConversation({
+        access_mode: ConversationAccessControlMode.Private,
+        entries: [entry],
+      })
+    ).toBe(true);
+  });
+
+  it('is not privately shared when public, even with entries', () => {
+    expect(
+      isPrivatelySharedConversation({
+        access_mode: ConversationAccessControlMode.Public,
+        entries: [entry],
+      })
+    ).toBe(false);
+  });
+
+  it('is privately shared for legacy access control with entries and no access mode', () => {
+    expect(isPrivatelySharedConversation({ entries: [entry] })).toBe(true);
+  });
+});
+
+describe('isSharedConversation', () => {
+  it('is not shared when access control is undefined', () => {
+    expect(isSharedConversation(undefined)).toBe(false);
+  });
+
+  it('is not shared when private with no entries', () => {
+    expect(
+      isSharedConversation({
+        access_mode: ConversationAccessControlMode.Private,
+        entries: [],
+      })
+    ).toBe(false);
+  });
+
+  it('is shared when private with at least one entry', () => {
+    expect(
+      isSharedConversation({
+        access_mode: ConversationAccessControlMode.Private,
+        entries: [entry],
+      })
+    ).toBe(true);
+  });
+
+  it('is shared when public with no entries', () => {
+    expect(
+      isSharedConversation({
+        access_mode: ConversationAccessControlMode.Public,
+        entries: [],
+      })
+    ).toBe(true);
+  });
+
+  it('is shared for legacy access control with entries and no access mode', () => {
+    expect(isSharedConversation({ entries: [entry] })).toBe(true);
+  });
+
+  it('is shared for legacy public access control with no entries', () => {
+    expect(isSharedConversation({ access_mode: ConversationAccessControlMode.Public })).toBe(true);
   });
 });

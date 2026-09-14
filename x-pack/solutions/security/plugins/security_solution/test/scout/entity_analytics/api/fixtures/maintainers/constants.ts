@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout-security';
+import { ELASTIC_INTERNAL_ORIGIN_HEADER, PUBLIC_API_HEADERS, tags } from '@kbn/scout-security';
 import {
   ENTITY_LATEST,
   ENTITY_UPDATES,
@@ -19,17 +19,17 @@ import {
 
 const BASE_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
-  'x-elastic-internal-origin': 'kibana',
   'Content-Type': 'application/json;charset=UTF-8',
 };
 
 export const PUBLIC_HEADERS = {
   ...BASE_HEADERS,
-  'elastic-api-version': '2023-10-31',
+  ...PUBLIC_API_HEADERS,
 };
 
 export const INTERNAL_HEADERS = {
   ...BASE_HEADERS,
+  ...ELASTIC_INTERNAL_ORIGIN_HEADER,
   'elastic-api-version': '2',
 };
 

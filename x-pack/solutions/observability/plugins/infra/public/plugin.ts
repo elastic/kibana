@@ -321,7 +321,9 @@ export class Plugin implements InfraClientPluginClass {
         OBSERVABILITY_INFRA_CPS_ENABLED_DEFAULT
       )
     ) {
-      plugins.cps?.cpsManager?.registerAppAccess('logs', () => ProjectRoutingAccess.EDITABLE);
+      // The logs app starts disabled and will later register its own picker access from within its page providers
+      // (useInfraMlCpsPickerAccess), where the ML CPS capability of Elasticsearch is known after resolving asynchronously;
+      plugins.cps?.cpsManager?.registerAppAccess('logs', () => ProjectRoutingAccess.DISABLED);
       plugins.cps?.cpsManager?.registerAppAccess('metrics', () => ProjectRoutingAccess.EDITABLE);
     }
 
