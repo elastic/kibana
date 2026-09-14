@@ -94,7 +94,11 @@ describe('useAwsOverviewDashboardUrl', () => {
         installed_kibana_space_id: 'default',
         additional_spaces_installed_kibana: {
           'my-space': [
-            { id: SPACE_LOCAL_ID, originId: OVERVIEW_ID, type: 'dashboard' } as KibanaAssetReference,
+            {
+              id: SPACE_LOCAL_ID,
+              originId: OVERVIEW_ID,
+              type: 'dashboard',
+            } as KibanaAssetReference,
           ],
         },
       };
@@ -119,7 +123,13 @@ describe('useAwsOverviewDashboardUrl', () => {
         installed_kibana: [primaryRef],
         installed_kibana_space_id: 'default',
         additional_spaces_installed_kibana: {
-          'my-space': [{ id: 'some-other-uuid', originId: 'aws-ec2-id', type: 'dashboard' } as KibanaAssetReference],
+          'my-space': [
+            {
+              id: 'some-other-uuid',
+              originId: 'aws-ec2-id',
+              type: 'dashboard',
+            } as KibanaAssetReference,
+          ],
         },
       };
       const { result } = renderHook(() => useAwsOverviewDashboardUrl(info));
