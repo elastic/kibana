@@ -25,7 +25,10 @@ import {
   WORKFLOWS_NOTIFICATION_REQUESTER_ID,
 } from '@kbn/actions-plugin/server/lib';
 
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import {
+  type ActionTypeExecutorOptions,
+  ConnectorUsageCollector,
+} from '@kbn/actions-plugin/server/types';
 import { sendEmail } from './send_email';
 import type { EmailConnectorType, EmailConnectorTypeExecutorOptions } from '.';
 import type {
@@ -1218,10 +1221,14 @@ describe('execute()', () => {
   test('ensure fixed messageHTML using HTTP_REQUEST', async () => {
     sendEmailMock.mockReset();
 
-    const executorOptionsWithHTTP = {
+    const executorOptionsWithHTTP: ActionTypeExecutorOptions<
+      ConnectorTypeConfigType,
+      ConnectorTypeSecretsType,
+      ActionParamsType
+    > = {
       ...executorOptions,
       params: { ...executorOptions.params, messageHTML: 'this should not be displayed' },
-      config: { ...executorOptions.config, service: 'gmail', allowHTML: true },
+      config: { ...executorOptions.config, service: '__json', allowHtml: true },
       source: { type: ActionExecutionSourceType.HTTP_REQUEST, source: null },
     };
 
@@ -1232,9 +1239,39 @@ describe('execute()', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "actionId": "some-id",
-        "errorSource": "user",
-        "message": "HTML email can only be sent when the connector is configured to allow HTML",
-        "status": "error",
+        "data": undefined,
+        "status": "ok",
+      }
+    `);
+
+    delete sendEmailMock.mock.calls[0][1].configurationUtilities;
+    expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
+      Object {
+        "attachments": undefined,
+        "connectorId": "some-id",
+        "content": Object {
+          "message": "This is a test email from Kibana",
+          "messageHTML": "This is a test email from Kibana",
+          "subject": "This is a test email from Kibana",
+        },
+        "hasAuth": true,
+        "routing": Object {
+          "bcc": Array [
+            "jimmy@example.com",
+          ],
+          "cc": Array [
+            "james@example.com",
+          ],
+          "from": "bob@example.com",
+          "to": Array [
+            "jim@example.com",
+          ],
+        },
+        "transport": Object {
+          "password": "supersecret",
+          "service": "__json",
+          "user": "bob",
+        },
       }
     `);
   });
