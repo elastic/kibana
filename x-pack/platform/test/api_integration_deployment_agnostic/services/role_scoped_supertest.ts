@@ -19,6 +19,12 @@ export interface RequestHeadersOptions {
   withInternalHeaders?: boolean;
   withCommonHeaders?: boolean;
   withCustomHeaders?: Record<string, string>;
+  /**
+   * Deadline in ms for each request made through this instance. Defaults to the
+   * `timeouts.request` FTR config value, which is `0` (no deadline) unless the suite's FTR
+   * config opts in. Pass `0` here to opt out again for a long-running endpoint.
+   */
+  requestTimeout?: number;
 }
 
 export class SupertestWithRoleScope {
@@ -88,6 +94,13 @@ export class SupertestWithRoleScope {
       throw new Error('Instance has been destroyed and cannot be used for making requests.');
     }
     const agent = this.supertestWithoutAuth[method](url);
+
+    // Bound the request so a stalled connection fails here rather than consuming the
+    // enclosing mocha timeout and aborting the whole FTR config.
+    if (this.options.requestTimeout) {
+      void agent.timeout(this.options.requestTimeout);
+    }
+
     return this.addHeaders(agent);
   }
 
@@ -127,6 +140,8 @@ export class SupertestWithRoleScope {
 export function RoleScopedSupertestProvider({ getService }: DeploymentAgnosticFtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const samlAuth = getService('samlAuth');
+  const config = getService('config');
+  const defaultRequestTimeout = config.get('timeouts.request');
 
   return {
     async getSupertestWithRoleScope(
@@ -137,15 +152,25 @@ export function RoleScopedSupertestProvider({ getService }: DeploymentAgnosticFt
         withInternalHeaders: false,
       }
     ) {
+      const withTimeout: RequestHeadersOptions = {
+        requestTimeout: defaultRequestTimeout,
+        ...options,
+      };
+
       // if 'useCookieHeader' set to 'true', HTTP requests will be called with cookie Header (like in browser)
-      if (options.useCookieHeader) {
+      if (withTimeout.useCookieHeader) {
         const cookieHeader = await samlAuth.getM2MApiCookieCredentialsWithRoleScope(role);
-        return new SupertestWithRoleScope(cookieHeader, supertestWithoutAuth, samlAuth, options);
+        return new SupertestWithRoleScope(
+          cookieHeader,
+          supertestWithoutAuth,
+          samlAuth,
+          withTimeout
+        );
       }
 
       // HTTP requests will be called with API key in header by default
       const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope(role);
-      return new SupertestWithRoleScope(roleAuthc, supertestWithoutAuth, samlAuth, options);
+      return new SupertestWithRoleScope(roleAuthc, supertestWithoutAuth, samlAuth, withTimeout);
     },
   };
 }

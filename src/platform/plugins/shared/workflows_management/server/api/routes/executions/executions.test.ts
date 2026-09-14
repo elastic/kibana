@@ -26,6 +26,7 @@ describe('Execution Routes', () => {
   let mockApi: Record<string, jest.Mock>;
   let mockSpaces: { getSpaceId: jest.Mock };
   let mockRouter: IRouter;
+  let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   const mockContext = {
     workflows: Promise.resolve({
@@ -89,10 +90,11 @@ describe('Execution Routes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     routeHandlers = {};
+    mockLogger = loggingSystemMock.createLogger();
     mockSpaces = { getSpaceId: jest.fn().mockReturnValue('default') };
     mockApi = {
       getWorkflow: jest.fn(),
-      runWorkflow: jest.fn(),
+      runWorkflowWithAlertPreprocessing: jest.fn(),
       testWorkflow: jest.fn(),
       testStep: jest.fn(),
       getWorkflowExecutions: jest.fn(),
@@ -155,7 +157,7 @@ describe('Execution Routes', () => {
     registerExecutionRoutes({
       router,
       api: mockApi as any,
-      logger: loggingSystemMock.createLogger(),
+      logger: mockLogger,
       spaces: mockSpaces as any,
       audit: createWorkflowManagementAuditLogMock(),
       config: { hitlExternalResume: { enabled: true } } as WorkflowsManagementConfig,
@@ -173,7 +175,10 @@ describe('Execution Routes', () => {
 
     it('should call api methods with correct arguments when workflow is valid', async () => {
       mockApi.getWorkflow.mockResolvedValue(mockWorkflow);
-      mockApi.runWorkflow.mockResolvedValue('exec-1');
+      mockApi.runWorkflowWithAlertPreprocessing.mockResolvedValue({
+        workflowExecutionId: 'exec-1',
+        inputs: { k: 'v' },
+      });
       const h = handler('POST', path)!;
       const request = {
         params: { id: 'wf-1' },
@@ -183,20 +188,20 @@ describe('Execution Routes', () => {
       const result = await h(mockContext, request as any, mockResponse as any);
 
       expect(mockApi.getWorkflow).toHaveBeenCalledWith('wf-1', 'default');
-      expect(mockApi.runWorkflow).toHaveBeenCalledWith(
-        {
+      expect(mockApi.runWorkflowWithAlertPreprocessing).toHaveBeenCalledWith({
+        workflow: {
           id: 'wf-1',
           name: 'Test',
           enabled: true,
           definition: mockWorkflow.definition,
           yaml: mockWorkflow.yaml,
         },
-        'default',
-        { k: 'v' },
+        spaceId: 'default',
+        inputs: { k: 'v' },
         request,
-        undefined,
-        { src: 'ui' }
-      );
+        preprocessingContext: mockContext,
+        metadata: { src: 'ui' },
+      });
       expect(result).toEqual({ type: 'ok', body: { workflowExecutionId: 'exec-1' } });
     });
 
@@ -209,7 +214,7 @@ describe('Execution Routes', () => {
 
       expect(mockResponse.notFound).toHaveBeenCalled();
       expect(result).toMatchObject({ type: 'notFound' });
-      expect(mockApi.runWorkflow).not.toHaveBeenCalled();
+      expect(mockApi.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
     });
 
     it('should return bad request when workflow is not valid', async () => {
@@ -249,14 +254,23 @@ describe('Execution Routes', () => {
       });
     });
 
-    it('should return custom error when api.runWorkflow throws', async () => {
+    it('should return custom error when api.runWorkflowWithAlertPreprocessing throws', async () => {
       mockApi.getWorkflow.mockResolvedValue(mockWorkflow);
-      mockApi.runWorkflow.mockRejectedValue(new Error('engine failed'));
+      mockApi.runWorkflowWithAlertPreprocessing.mockRejectedValue(new Error('engine failed'));
       const h = handler('POST', path)!;
       const request = { params: { id: 'wf-1' }, body: { inputs: {} } };
 
       const result = await h(mockContext, request as any, mockResponse as any);
 
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Workflows API request failed',
+        expect.objectContaining({
+          route: 'POST /api/workflows/workflow/{id}/run',
+          workflowId: 'wf-1',
+          spaceId: 'default',
+          errorMessage: 'engine failed',
+        })
+      );
       expect(mockResponse.customError).toHaveBeenCalled();
       expect(result).toMatchObject({ type: 'customError', body: expect.objectContaining({}) });
     });
@@ -635,7 +649,9 @@ describe('Execution Routes', () => {
 
       await h(mockContext, request as any, mockResponse as any);
 
-      expect(mockApi.cancelWorkflowExecution).toHaveBeenCalledWith('ex-1', 'default', request);
+      expect(mockApi.cancelWorkflowExecution).toHaveBeenCalledWith('ex-1', 'default', request, {
+        channel: 'kibana_execution_view',
+      });
       expect(mockResponse.ok).toHaveBeenCalled();
     });
 
@@ -668,7 +684,8 @@ describe('Execution Routes', () => {
       expect(mockApi.cancelAllActiveWorkflowExecutions).toHaveBeenCalledWith(
         'wf-1',
         'default',
-        expect.anything()
+        expect.anything(),
+        { channel: 'kibana_execution_view' }
       );
       expect(mockResponse.ok).toHaveBeenCalled();
     });
@@ -760,7 +777,7 @@ describe('Execution Routes', () => {
         'default',
         { resume: true },
         request,
-        { channel: 'kibana_execution_view' }
+        { channel: 'kibana_execution_view', stepExecutionId: undefined }
       );
       expect(result).toMatchObject({
         type: 'ok',
@@ -770,6 +787,27 @@ describe('Execution Routes', () => {
           message: 'Workflow resume scheduled',
         },
       });
+    });
+
+    it('forwards stepExecutionId so the HITL claim skips search lookup', async () => {
+      mockApi.resumeWorkflowExecution.mockResolvedValue({
+        resumedBy: 'user',
+      });
+      const h = handler('POST', path)!;
+      const request = {
+        params: { executionId: 'ex-1' },
+        body: { input: { resume: true }, stepExecutionId: 'step-exec-1' },
+      };
+
+      await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockApi.resumeWorkflowExecution).toHaveBeenCalledWith(
+        'ex-1',
+        'default',
+        { resume: true },
+        request,
+        { channel: 'kibana_execution_view', stepExecutionId: 'step-exec-1' }
+      );
     });
   });
 
@@ -892,6 +930,7 @@ describe('Execution Routes', () => {
           token: 'resume-token',
           approved: 'true',
         },
+        request: expect.any(Object),
       });
       expect(result).toMatchObject({
         type: 'ok',
@@ -996,6 +1035,7 @@ describe('Execution Routes', () => {
         stepId: 'step-exec-1',
         spaceId: 'default',
         input: { severity: 'high' },
+        request: expect.any(Object),
       });
       expect(result).toMatchObject({
         type: 'ok',

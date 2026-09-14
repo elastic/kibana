@@ -163,12 +163,15 @@ dependsOn:
   - '@kbn/apm-types'
   - '@kbn/apm-types-shared'
   - '@kbn/cps'
+  - '@kbn/cps-utils'
   - '@kbn/expressions-plugin'
   - '@kbn/ingest-hub-plugin'
   - '@kbn/core-spaces-common'
   - '@kbn/app-header'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/global-search-plugin'
+  - '@kbn/nightshift-investigations-plugin'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
@@ -181,7 +184,7 @@ fileGroups:
     - public/**/*
     - public/**/*.json
     - server/**/*
-    - test/scout/**/*
+    - test/scout*/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

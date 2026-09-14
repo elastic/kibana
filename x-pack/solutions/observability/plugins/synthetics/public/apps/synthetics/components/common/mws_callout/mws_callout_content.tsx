@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiText } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SyntheticsMaintenanceWindow } from '../../../hooks';
@@ -27,7 +28,7 @@ export const MwsCalloutContent = ({
   if (activeMWs.length) {
     return (
       <>
-        <EuiCallOut
+        <KbnWarningCallout
           announceOnMount
           title={i18n.translate(
             'xpack.synthetics.maintenanceWindowCallout.maintenanceWindowActive.monitors',
@@ -35,8 +36,6 @@ export const MwsCalloutContent = ({
               defaultMessage: 'Maintenance windows are active',
             }
           )}
-          color="warning"
-          iconType="info"
           data-test-subj="maintenanceWindowCallout"
         >
           {i18n.translate(
@@ -61,7 +60,7 @@ export const MwsCalloutContent = ({
             />
           </EuiText>
           {hasOutdatedAgent && <MwsAgentVersionWarningLine />}
-        </EuiCallOut>
+        </KbnWarningCallout>
         <EuiSpacer size="s" />
       </>
     );

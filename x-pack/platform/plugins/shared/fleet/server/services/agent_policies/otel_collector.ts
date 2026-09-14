@@ -10,6 +10,7 @@ import { parse } from 'yaml';
 import type { Logger } from '@kbn/logging';
 
 import type { FleetProxy, Output, TemplateAgentPolicyInput } from '../../types';
+import type { BeatsOutput } from '../../../common/types';
 import type {
   FullAgentPolicyInput,
   FullAgentPolicyInputStream,
@@ -614,7 +615,7 @@ function mergeOtelcolConfigs(otelConfigs: OTelCollectorConfig[]): OTelCollectorC
 }
 
 function buildBeatsauthConfig(
-  output: Output,
+  output: BeatsOutput,
   proxy?: FleetProxy,
   logger?: Logger
 ): Record<string, unknown> {

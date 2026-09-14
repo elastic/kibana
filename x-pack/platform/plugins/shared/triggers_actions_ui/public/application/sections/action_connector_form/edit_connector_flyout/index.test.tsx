@@ -235,6 +235,30 @@ describe('EditConnectorFlyout', () => {
     expect(queryByTestId('edit-connector-flyout-save-btn')).not.toBeInTheDocument();
   });
 
+  it('shows the webhook URL and rotate control for an inbound webhook connector', async () => {
+    const inboundConnector = createMockActionConnector({
+      id: 'sales-ingress',
+      name: 'Sales ingress',
+      actionTypeId: '.inboundWebhook',
+      config: { ingestTokenHash: 'a'.repeat(64) },
+      secrets: {},
+    });
+
+    appMockRenderer.render(
+      <EditConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        connector={inboundConnector}
+        onConnectorUpdated={onConnectorUpdated}
+      />
+    );
+
+    expect(await screen.findByTestId('inbound-ingress-credentials')).toBeInTheDocument();
+    expect(screen.getByTestId('inbound-ingress-webhook-url')).toBeInTheDocument();
+    expect(screen.getByTestId('inbound-ingress-rotate-btn')).toBeInTheDocument();
+    expect(screen.getByTestId('inbound-ingress-token-hidden')).toBeInTheDocument();
+  });
+
   it('disables the buttons when there are error on the form', async () => {
     const { getByTestId } = appMockRenderer.render(
       <EditConnectorFlyout

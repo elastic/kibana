@@ -32,8 +32,10 @@ import {
 import type { InvalidateAPIKeyResult } from '@kbn/core-security-server';
 import type { FakeRawRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { RulesClient } from './rules_client';
+import { ApiKeyType } from './task_runner/types';
 import type { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import type { AlertingRulesConfig } from './config';
 import type { GetAlertIndicesAlias } from './lib';
@@ -69,7 +71,7 @@ export interface RulesClientFactoryOpts {
   ruleTypeRegistry: RuleTypeRegistry;
   securityPluginSetup?: SecurityPluginSetup;
   securityPluginStart?: SecurityPluginStart;
-  getSpaceId: (request: KibanaRequest) => string;
+  getSpaceId: (request: KibanaRequest) => SpaceId;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   internalSavedObjectsRepository: ISavedObjectsRepository;
@@ -88,6 +90,7 @@ export interface RulesClientFactoryOpts {
   uiSettings: CoreStart['uiSettings'];
   securityService: CoreStart['security'];
   shouldGrantUiam: boolean;
+  apiKeyType: ApiKeyType;
   isServerless: boolean;
   featureFlags: CoreStart['featureFlags'];
   analytics: CoreStart['analytics'];
@@ -100,7 +103,7 @@ export class RulesClientFactory {
   private ruleTypeRegistry!: RuleTypeRegistry;
   private securityPluginSetup?: SecurityPluginSetup;
   private securityPluginStart?: SecurityPluginStart;
-  private getSpaceId!: (request: KibanaRequest) => string;
+  private getSpaceId!: (request: KibanaRequest) => SpaceId;
   private spaceIdToNamespace!: SpaceIdToNamespaceFunction;
   private encryptedSavedObjectsClient!: EncryptedSavedObjectsClient;
   private internalSavedObjectsRepository!: ISavedObjectsRepository;
@@ -119,6 +122,7 @@ export class RulesClientFactory {
   private uiSettings!: CoreStart['uiSettings'];
   private securityService!: CoreStart['security'];
   private shouldGrantUiam: boolean = false;
+  private apiKeyType: ApiKeyType = ApiKeyType.ES;
   private isServerless: boolean = false;
   private featureFlags!: CoreStart['featureFlags'];
   private analytics!: CoreStart['analytics'];
@@ -152,6 +156,7 @@ export class RulesClientFactory {
     this.uiSettings = options.uiSettings;
     this.securityService = options.securityService;
     this.shouldGrantUiam = options.shouldGrantUiam;
+    this.apiKeyType = options.apiKeyType;
     this.isServerless = options.isServerless;
     this.featureFlags = options.featureFlags;
     this.analytics = options.analytics;
@@ -181,7 +186,7 @@ export class RulesClientFactory {
   public async createWithSpaceId(
     request: KibanaRequest,
     savedObjects: SavedObjectsServiceStart,
-    spaceId: string,
+    spaceId: SpaceId,
     options?: RulesClientCreateOptions
   ): Promise<RulesClient> {
     return await this.createInternal({
@@ -369,7 +374,7 @@ export class RulesClientFactory {
   }: {
     request: KibanaRequest;
     savedObjects: SavedObjectsServiceStart;
-    spaceId: string;
+    spaceId: SpaceId;
     isExplicitSpaceOverride: boolean;
     options?: RulesClientCreateOptions;
   }): Promise<RulesClient> {
@@ -418,6 +423,7 @@ export class RulesClientFactory {
       connectorAdapterRegistry: this.connectorAdapterRegistry,
       uiSettings: this.uiSettings,
       shouldGrantUiam: this.shouldGrantUiam,
+      apiKeyType: this.apiKeyType,
       isServerless: this.isServerless,
       featureFlags: this.featureFlags,
       analytics: this.analytics,
