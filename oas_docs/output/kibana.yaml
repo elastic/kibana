@@ -8691,7 +8691,7 @@ paths:
                           owner: elastic
                         created_at: '2026-01-15T12:00:00.000Z'
                         created_by: elastic
-                        description: Sends a workflow notification when matching host alerts fire.
+                        description: Sends a workflow notification when alerts from production-tagged rules fire.
                         destinations:
                           - id: workflow-1
                             type: workflow
@@ -8699,8 +8699,9 @@ paths:
                         group_by: null
                         grouping_mode: per_episode
                         id: action-policy-1
-                        matcher: 'host.name: "web-*"'
-                        name: Notify on host alerts
+                        matcher:
+                          expression: 'rule.tags: "production"'
+                        name: Notify on production alerts
                         snoozed_until: null
                         tags:
                           - production
@@ -8818,15 +8819,16 @@ paths:
           application/json:
             examples:
               createActionPolicyRequest:
-                summary: Workflow notification for matching host alerts
+                summary: Workflow notification for production-tagged alerts
                 value:
-                  description: Sends a workflow notification when matching host alerts fire.
+                  description: Sends a workflow notification when alerts from production-tagged rules fire.
                   destinations:
                     - id: workflow-1
                       type: workflow
                   grouping_mode: per_episode
-                  matcher: 'host.name: "web-*"'
-                  name: Notify on host alerts
+                  matcher:
+                    expression: 'rule.tags: "production"'
+                  name: Notify on production alerts
                   tags:
                     - production
                   throttle:
@@ -8846,7 +8848,7 @@ paths:
                       owner: elastic
                     created_at: '2026-01-15T12:00:00.000Z'
                     created_by: elastic
-                    description: Sends a workflow notification when matching host alerts fire.
+                    description: Sends a workflow notification when alerts from production-tagged rules fire.
                     destinations:
                       - id: workflow-1
                         type: workflow
@@ -8854,8 +8856,9 @@ paths:
                     group_by: null
                     grouping_mode: per_episode
                     id: action-policy-1
-                    matcher: 'host.name: "web-*"'
-                    name: Notify on host alerts
+                    matcher:
+                      expression: 'rule.tags: "production"'
+                    name: Notify on production alerts
                     snoozed_until: null
                     tags:
                       - production
@@ -9696,7 +9699,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Returns action policies that match a given rule, categorised as direct, global, or global-filtered.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-action-policies.
+        Returns action policies that currently appear to apply to the given rule. Each result includes a `category`: `catch-all` when the policy has no `matcher.tags` and no `matcher.expression`, or `tags` when the rule has at least one tag listed in the policy's `matcher.tags`. Policies that match only by `matcher.expression` are omitted, because expressions can depend on alert data that is not available here. A `tags` result does not evaluate `matcher.expression`, so a returned policy might still not fire when an alert is dispatched.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-action-policies.
       operationId: post-alerting-v2-action-policies-match-for-rule
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -9714,8 +9717,6 @@ paths:
                 summary: Rule to match action policies against
                 value:
                   rule:
-                    id: rule-1
-                    name: Host CPU high
                     tags:
                       - production
             schema:
@@ -9735,7 +9736,7 @@ paths:
                             owner: elastic
                           created_at: '2026-01-15T12:00:00.000Z'
                           created_by: elastic
-                          description: Sends a workflow notification when matching host alerts fire.
+                          description: Sends a workflow notification when alerts from production-tagged rules fire.
                           destinations:
                             - id: workflow-1
                               type: workflow
@@ -9743,8 +9744,10 @@ paths:
                           group_by: null
                           grouping_mode: per_episode
                           id: action-policy-1
-                          matcher: 'host.name: "web-*"'
-                          name: Notify on host alerts
+                          matcher:
+                            tags:
+                              - production
+                          name: Notify on production alerts
                           snoozed_until: null
                           tags:
                             - production
@@ -9754,7 +9757,7 @@ paths:
                           updated_at: '2026-01-15T12:00:00.000Z'
                           updated_by: elastic
                           version: WzAsMV0=
-                        category: global-filtered
+                        category: tags
                     total: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_match_action_policies_for_rule_response'
@@ -9994,7 +9997,7 @@ paths:
                       owner: elastic
                     created_at: '2026-01-15T12:00:00.000Z'
                     created_by: elastic
-                    description: Sends a workflow notification when matching host alerts fire.
+                    description: Sends a workflow notification when alerts from production-tagged rules fire.
                     destinations:
                       - id: workflow-1
                         type: workflow
@@ -10002,8 +10005,9 @@ paths:
                     group_by: null
                     grouping_mode: per_episode
                     id: action-policy-1
-                    matcher: 'host.name: "web-*"'
-                    name: Notify on host alerts
+                    matcher:
+                      expression: 'rule.tags: "production"'
+                    name: Notify on production alerts
                     snoozed_until: null
                     tags:
                       - production
@@ -10144,7 +10148,7 @@ paths:
                 summary: Rename and update the description
                 value:
                   description: Updated description.
-                  name: Notify on host alerts (updated)
+                  name: Notify on production alerts (updated)
                   version: WzAsMV0=
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_update_action_policy'
@@ -10169,8 +10173,9 @@ paths:
                     group_by: null
                     grouping_mode: per_episode
                     id: action-policy-1
-                    matcher: 'host.name: "web-*"'
-                    name: Notify on host alerts (updated)
+                    matcher:
+                      expression: 'rule.tags: "production"'
+                    name: Notify on production alerts (updated)
                     snoozed_until: null
                     tags:
                       - production
@@ -10326,13 +10331,14 @@ paths:
               upsertActionPolicyRequest:
                 summary: Action policy to create or replace at the given id
                 value:
-                  description: Sends a workflow notification when matching host alerts fire.
+                  description: Sends a workflow notification when alerts from production-tagged rules fire.
                   destinations:
                     - id: workflow-1
                       type: workflow
                   grouping_mode: per_episode
-                  matcher: 'host.name: "web-*"'
-                  name: Notify on host alerts
+                  matcher:
+                    expression: 'rule.tags: "production"'
+                  name: Notify on production alerts
                   tags:
                     - production
                   throttle:
@@ -10352,7 +10358,7 @@ paths:
                       owner: elastic
                     created_at: '2026-01-15T12:00:00.000Z'
                     created_by: elastic
-                    description: Sends a workflow notification when matching host alerts fire.
+                    description: Sends a workflow notification when alerts from production-tagged rules fire.
                     destinations:
                       - id: workflow-1
                         type: workflow
@@ -10360,8 +10366,9 @@ paths:
                     group_by: null
                     grouping_mode: per_episode
                     id: action-policy-1
-                    matcher: 'host.name: "web-*"'
-                    name: Notify on host alerts
+                    matcher:
+                      expression: 'rule.tags: "production"'
+                    name: Notify on production alerts
                     snoozed_until: null
                     tags:
                       - production
@@ -10386,7 +10393,7 @@ paths:
                       owner: elastic
                     created_at: '2026-01-15T12:00:00.000Z'
                     created_by: elastic
-                    description: Sends a workflow notification when matching host alerts fire.
+                    description: Sends a workflow notification when alerts from production-tagged rules fire.
                     destinations:
                       - id: workflow-1
                         type: workflow
@@ -10394,8 +10401,9 @@ paths:
                     group_by: null
                     grouping_mode: per_episode
                     id: action-policy-1
-                    matcher: 'host.name: "web-*"'
-                    name: Notify on host alerts
+                    matcher:
+                      expression: 'rule.tags: "production"'
+                    name: Notify on production alerts
                     snoozed_until: null
                     tags:
                       - production
@@ -10558,7 +10566,7 @@ paths:
                       owner: elastic
                     created_at: '2026-01-15T12:00:00.000Z'
                     created_by: elastic
-                    description: Sends a workflow notification when matching host alerts fire.
+                    description: Sends a workflow notification when alerts from production-tagged rules fire.
                     destinations:
                       - id: workflow-1
                         type: workflow
@@ -10566,8 +10574,9 @@ paths:
                     group_by: null
                     grouping_mode: per_episode
                     id: action-policy-1
-                    matcher: 'host.name: "web-*"'
-                    name: Notify on host alerts
+                    matcher:
+                      expression: 'rule.tags: "production"'
+                    name: Notify on production alerts
                     snoozed_until: null
                     tags:
                       - production
@@ -10729,7 +10738,7 @@ paths:
                       owner: elastic
                     created_at: '2026-01-15T12:00:00.000Z'
                     created_by: elastic
-                    description: Sends a workflow notification when matching host alerts fire.
+                    description: Sends a workflow notification when alerts from production-tagged rules fire.
                     destinations:
                       - id: workflow-1
                         type: workflow
@@ -10737,8 +10746,9 @@ paths:
                     group_by: null
                     grouping_mode: per_episode
                     id: action-policy-1
-                    matcher: 'host.name: "web-*"'
-                    name: Notify on host alerts
+                    matcher:
+                      expression: 'rule.tags: "production"'
+                    name: Notify on production alerts
                     snoozed_until: null
                     tags:
                       - production
@@ -10910,7 +10920,7 @@ paths:
                       owner: elastic
                     created_at: '2026-01-15T12:00:00.000Z'
                     created_by: elastic
-                    description: Sends a workflow notification when matching host alerts fire.
+                    description: Sends a workflow notification when alerts from production-tagged rules fire.
                     destinations:
                       - id: workflow-1
                         type: workflow
@@ -10918,8 +10928,9 @@ paths:
                     group_by: null
                     grouping_mode: per_episode
                     id: action-policy-1
-                    matcher: 'host.name: "web-*"'
-                    name: Notify on host alerts
+                    matcher:
+                      expression: 'rule.tags: "production"'
+                    name: Notify on production alerts
                     snoozed_until: '2026-01-16T12:00:00.000Z'
                     tags:
                       - production
@@ -11081,7 +11092,7 @@ paths:
                       owner: elastic
                     created_at: '2026-01-15T12:00:00.000Z'
                     created_by: elastic
-                    description: Sends a workflow notification when matching host alerts fire.
+                    description: Sends a workflow notification when alerts from production-tagged rules fire.
                     destinations:
                       - id: workflow-1
                         type: workflow
@@ -11089,8 +11100,9 @@ paths:
                     group_by: null
                     grouping_mode: per_episode
                     id: action-policy-1
-                    matcher: 'host.name: "web-*"'
-                    name: Notify on host alerts
+                    matcher:
+                      expression: 'rule.tags: "production"'
+                    name: Notify on production alerts
                     snoozed_until: null
                     tags:
                       - production
@@ -12757,7 +12769,7 @@ paths:
                         outcome: dispatched
                         policy:
                           id: action-policy-1
-                          name: Notify on host alerts
+                          name: Notify on production alerts
                         rules:
                           - id: rule-1
                             name: Host CPU high
@@ -68254,7 +68266,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update the Entity Store log extraction configuration.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+        Update the Entity Store log extraction configuration. Omitting a field leaves it unchanged. Sending `null` for a field clears that override and reverts to the default value.<br/><br/>[Required authorization] Route required privileges: securitySolution.
       operationId: put-security-entity-store
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -68268,6 +68280,13 @@ paths:
         content:
           application/json:
             examples:
+              clearLogExtractionOverrideExample:
+                description: Send null for any field to clear that override and revert it to the default value.
+                summary: Clear log extraction overrides
+                value:
+                  logExtraction:
+                    delay: null
+                    frequency: null
               updateLogExtractionExample:
                 description: Update the log extraction configuration with a new lookback period and frequency.
                 summary: Update log extraction settings
@@ -68289,48 +68308,59 @@ paths:
                         maxLength: 2048
                         type: string
                       maxItems: 1000
+                      nullable: true
                       type: array
                     delay:
                       maxLength: 32
+                      nullable: true
                       pattern: '[smdh]$'
                       type: string
                     docsLimit:
                       maximum: 9007199254740991
                       minimum: 1
+                      nullable: true
                       type: integer
                     excludedIndexPatterns:
                       items:
                         maxLength: 2048
                         type: string
                       maxItems: 1000
+                      nullable: true
                       type: array
                     fieldHistoryLength:
                       maximum: 9007199254740991
                       minimum: -9007199254740991
+                      nullable: true
                       type: integer
                     frequency:
                       maxLength: 32
+                      nullable: true
                       pattern: '[smdh]$'
                       type: string
                     lookbackPeriod:
                       maxLength: 32
+                      nullable: true
                       pattern: '[smdh]$'
                       type: string
                     maxLogsPerPage:
                       maximum: 9007199254740991
                       minimum: 1
+                      nullable: true
                       type: integer
                     maxLogsPerWindow:
                       maximum: 9007199254740991
                       minimum: 0
+                      nullable: true
                       type: integer
                     maxLogsPerWindowCapBehavior:
                       enum:
                         - defer
                         - drop
+                      nullable: true
                       type: string
                     maxTimeWindowSize:
                       maxLength: 32
+                      nullable: true
                       pattern: '[smdh]$'
                       type: string
               required:
@@ -76779,7 +76809,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Install the Entity Store and create engines for the specified entity types. A single `logExtraction` configuration is shared across all entity types. Supply it once at install to customize settings; omit it (or send an empty object) to use defaults on first install or preserve the existing configuration on re-install. To change settings after install, use the update endpoint.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+        Install the Entity Store and create engines for the specified entity types. A single `logExtraction` configuration is shared across all entity types. Supply it once at install to customize settings; omit it (or send an empty object) to use defaults on first install or preserve the existing configuration on re-install. Omitting a field leaves it unchanged. Sending `null` for a field clears that override and reverts to the default value. To change settings after install, use the update endpoint.<br/><br/>[Required authorization] Route required privileges: securitySolution.
       operationId: post-security-entity-store-install
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -76850,48 +76880,59 @@ paths:
                         maxLength: 2048
                         type: string
                       maxItems: 1000
+                      nullable: true
                       type: array
                     delay:
                       maxLength: 32
+                      nullable: true
                       pattern: '[smdh]$'
                       type: string
                     docsLimit:
                       maximum: 9007199254740991
                       minimum: 1
+                      nullable: true
                       type: integer
                     excludedIndexPatterns:
                       items:
                         maxLength: 2048
                         type: string
                       maxItems: 1000
+                      nullable: true
                       type: array
                     fieldHistoryLength:
                       maximum: 9007199254740991
                       minimum: -9007199254740991
+                      nullable: true
                       type: integer
                     frequency:
                       maxLength: 32
+                      nullable: true
                       pattern: '[smdh]$'
                       type: string
                     lookbackPeriod:
                       maxLength: 32
+                      nullable: true
                       pattern: '[smdh]$'
                       type: string
                     maxLogsPerPage:
                       maximum: 9007199254740991
                       minimum: 1
+                      nullable: true
                       type: integer
                     maxLogsPerWindow:
                       maximum: 9007199254740991
                       minimum: 0
+                      nullable: true
                       type: integer
                     maxLogsPerWindowCapBehavior:
                       enum:
                         - defer
                         - drop
+                      nullable: true
                       type: string
                     maxTimeWindowSize:
                       maxLength: 32
+                      nullable: true
                       pattern: '[smdh]$'
                       type: string
       responses:
@@ -86883,6 +86924,14 @@ paths:
             maximum: 100
             minimum: 1
             type: number
+        - description: JSON-encoded search_after sort values from a prior response for cursor pagination.
+          in: query
+          name: searchAfter
+          required: false
+          schema:
+            maxLength: 4096
+            type: string
+            x-state: Generally available; added in 9.5.0
         - description: Datemath lower bound for filtering executions by startedAt (inclusive when parsed).
           in: query
           name: startedAfter
@@ -98417,9 +98466,25 @@ components:
           description: The unique identifier for the action policy.
           type: string
         matcher:
-          description: A KQL query to match alerts, or null to match all.
+          additionalProperties: false
+          description: Criteria that determine which alerts this policy notifies on. Set `tags` to match rules that have any of those tags, and/or `expression` to a KQL query against alert data. When both are omitted or empty, the policy matches all alerts.
           nullable: true
-          type: string
+          type: object
+          properties:
+            expression:
+              description: KQL query evaluated against alert data. Common fields include `rule.id`, `rule.name`, `rule.tags`, `episode_status`, and `severity`. Rule query columns live under `data.*` (for example `data.host.name`). Omit or set to `null` if you do not want an additional query.
+              maxLength: 4096
+              nullable: true
+              type: string
+            tags:
+              description: Rule tags this policy should match. The policy applies to alerts from rules that have at least one of these tags. Omit or set to `null` if you do not want to filter by tags.
+              items:
+                maxLength: 256
+                minLength: 1
+                type: string
+              maxItems: 50
+              nullable: true
+              type: array
         name:
           description: The name of the action policy.
           type: string
@@ -98834,18 +98899,8 @@ components:
           additionalProperties: false
           type: object
           properties:
-            id:
-              description: The ID of the rule.
-              maxLength: 256
-              minLength: 1
-              type: string
-            name:
-              description: The name of the rule, used to evaluate global matcher expressions.
-              maxLength: 256
-              minLength: 1
-              type: string
             tags:
-              description: The tags of the rule, used to evaluate global matcher expressions.
+              description: Tags of the rule you want to check. Used to find policies whose `matcher.tags` include at least one of these values.
               items:
                 maxLength: 256
                 minLength: 1
@@ -98879,10 +98934,10 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
           description: The matched action policy.
         category:
-          description: 'Why this action policy matches the rule: "global" (applies to all rules, no filter), or "global-filtered" (applies to all rules, KQL filter evaluated to true).'
+          description: The reason this policy applies to the rule. `catch-all` means the policy sets neither `matcher.tags` nor `matcher.expression`, so it applies to every rule. `tags` means the rule carries at least one tag listed in the policy's `matcher.tags`.
           enum:
-            - global
-            - global-filtered
+            - catch-all
+            - tags
           type: string
       required:
         - actionPolicy
@@ -98925,9 +98980,24 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_mode'
           description: The grouping mode for alert notifications.
         matcher:
-          description: A KQL query string to match alerts.
-          maxLength: 4096
-          type: string
+          additionalProperties: false
+          description: Criteria that determine which alerts this policy notifies on. Set `tags` to match rules that have any of those tags, and/or `expression` to a KQL query against alert data. When both are omitted or empty, the policy matches all alerts.
+          type: object
+          properties:
+            expression:
+              description: KQL query evaluated against alert data. Common fields include `rule.id`, `rule.name`, `rule.tags`, `episode_status`, and `severity`. Rule query columns live under `data.*` (for example `data.host.name`). Omit or set to `null` if you do not want an additional query.
+              maxLength: 4096
+              nullable: true
+              type: string
+            tags:
+              description: Rule tags this policy should match. The policy applies to alerts from rules that have at least one of these tags. Omit or set to `null` if you do not want to filter by tags.
+              items:
+                maxLength: 256
+                minLength: 1
+                type: string
+              maxItems: 50
+              nullable: true
+              type: array
         name:
           description: The name of the action policy.
           maxLength: 256
@@ -99824,10 +99894,25 @@ components:
           description: The grouping mode for alert notifications.
           nullable: true
         matcher:
-          description: A KQL query string to match alerts.
-          maxLength: 4096
+          additionalProperties: false
+          description: 'Criteria that determine which alerts this policy notifies on. Set `tags` to match rules that have any of those tags, and/or `expression` to a KQL query against alert data. The matcher is replaced as a whole: omitted fields are not kept from the existing matcher. To change `tags` without dropping an existing `expression`, include that same `expression` value in the request. Set `matcher` to `null` to match all alerts.'
           nullable: true
-          type: string
+          type: object
+          properties:
+            expression:
+              description: KQL query evaluated against alert data. Common fields include `rule.id`, `rule.name`, `rule.tags`, `episode_status`, and `severity`. Rule query columns live under `data.*` (for example `data.host.name`). Omit or set to `null` if you do not want an additional query.
+              maxLength: 4096
+              nullable: true
+              type: string
+            tags:
+              description: Rule tags this policy should match. The policy applies to alerts from rules that have at least one of these tags. Omit or set to `null` if you do not want to filter by tags.
+              items:
+                maxLength: 256
+                minLength: 1
+                type: string
+              maxItems: 50
+              nullable: true
+              type: array
         name:
           description: The name of the action policy.
           maxLength: 256
@@ -120228,6 +120313,7 @@ components:
         kibana:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_security_role_kibana_privilege'
+          maxItems: 1000
           type: array
         metadata:
           additionalProperties:
