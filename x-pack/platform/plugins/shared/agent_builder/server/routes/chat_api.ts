@@ -19,6 +19,7 @@ import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
 import { getConverseHelpers } from './converse_helpers';
 import { findConversationEvent } from '../services/execution/utils/chat_response';
 import { conversePayloadSchema } from './chat';
+import { filterEventsNativeApiEvents } from './converse_helpers';
 
 /** Events-native chat API */
 export function registerChatApiRoutes({
@@ -136,10 +137,12 @@ export function registerChatApiRoutes({
             executionService,
           });
 
+          const nativeEvents$ = chatEvents$.pipe(filterEventsNativeApiEvents());
+
           return response.ok({
             headers: getSSEResponseHeaders(),
             body: observableIntoEventSourceStream(
-              chatEvents$ as unknown as Observable<ServerSentEvent>,
+              nativeEvents$ as unknown as Observable<ServerSentEvent>,
               {
                 signal: abortController.signal,
                 flushThrottleMs: 100,
