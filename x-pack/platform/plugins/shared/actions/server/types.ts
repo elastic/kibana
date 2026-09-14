@@ -229,7 +229,6 @@ export interface ActionTypeCoreFields<
 > {
   id: string;
   name: string;
-  featureUsageName?: string;
   maxAttempts?: number;
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];
@@ -317,6 +316,9 @@ export interface RawAction extends Record<string, unknown> {
   config: Record<string, unknown>;
   secrets: Record<string, unknown>;
   authMode?: AuthMode;
+  apiKey?: string | null;
+  uiamApiKey?: string | null;
+  uiamApiKeyExternal?: boolean;
 }
 
 export interface ActionTaskParams extends SavedObjectAttributes {

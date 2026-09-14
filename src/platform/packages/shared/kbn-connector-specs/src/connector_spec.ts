@@ -54,8 +54,6 @@ export function createI18nKeys(connectorId: string) {
 export interface ConnectorMetadata {
   id: string;
   displayName: string;
-  /** Stable name used for licensing feature usage when it differs from the user-facing display name. */
-  featureUsageName?: string;
   icon?: string;
   description: string;
   /**
