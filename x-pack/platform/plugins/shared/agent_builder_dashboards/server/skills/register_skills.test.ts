@@ -46,7 +46,7 @@ describe('registerSkills', () => {
     expect(skill.content).not.toContain('CHART DESIGN GUIDANCE');
     expect(skill.content).not.toContain('COLOR GUIDANCE');
     expect(skill.content).not.toContain('apply_color_to');
-    expect(skill.content).not.toContain('CONFIGURATION RULES');
+    expect(skill.content).not.toContain('CHART RULES FOR');
     expect(skill.referencedContent?.some(({ name }) => name === 'color-palettes')).toBe(false);
   });
 

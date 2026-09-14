@@ -21,16 +21,18 @@ describe('chart type guidance', () => {
     expect(design).toContain('metric:');
     expect(design).not.toContain('apply_color_to');
     expect(design).not.toContain('styling.');
-    expect(design).not.toContain('CONFIGURATION RULES');
+    expect(design).not.toContain('CHART RULES FOR');
   });
 
-  it('gives the config author the design plus the configuration rules for one chart', () => {
+  it('gives the config author each rule once, in Lens terms where available', () => {
     const metricConfig = getChartTypeConfigPromptContent(SupportedChartType.Metric);
 
-    expect(metricConfig).toContain('DESIGN GUIDANCE');
-    expect(metricConfig).toContain('No panel title');
-    expect(metricConfig).toContain('CONFIGURATION RULES FOR METRIC');
+    expect(metricConfig).toContain('CHART RULES FOR METRIC');
+    expect(metricConfig).toContain('Omit the top-level `title`');
+    expect(metricConfig).not.toContain('No panel title');
     expect(metricConfig).toContain('styling.secondary.label.visible');
+    expect(metricConfig).toContain('set `format` on the bound column');
+    expect(metricConfig).not.toContain('show values in their natural unit');
     expect(metricConfig).not.toContain('bar_horizontal');
   });
 
@@ -42,13 +44,10 @@ describe('chart type guidance', () => {
     }
   });
 
-  it.each(Object.values(SupportedChartType))(
-    'compiles design and configuration sections for %s',
-    (chartType) => {
-      const content = getChartTypeConfigPromptContent(chartType);
+  it.each(Object.values(SupportedChartType))('compiles a single rule list for %s', (chartType) => {
+    const content = getChartTypeConfigPromptContent(chartType);
 
-      expect(content).toMatch(/^DESIGN GUIDANCE:\n- /);
-      expect(content).toContain(`\n\nCONFIGURATION RULES FOR ${chartType.toUpperCase()}:\n- `);
-    }
-  );
+    expect(content).toMatch(new RegExp(`^CHART RULES FOR ${chartType.toUpperCase()}:\\n- `));
+    expect(content).not.toContain('\n\n');
+  });
 });

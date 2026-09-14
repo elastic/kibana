@@ -19,7 +19,7 @@ describe('gauge palette previews', () => {
   it('provides four-stop palettes when creating a gauge', () => {
     const prompt = getColorConfigPromptContent(SupportedChartType.Gauge);
 
-    expect(prompt.match(/Available dynamic palettes/g)).toHaveLength(1);
+    expect(prompt.match(/Dynamic palettes \(/g)).toHaveLength(1);
     for (const palette of gradientPalettes) {
       expect(prompt).toContain(`- ${palette.name}: ${palette.colors(4).join(', ')}`);
     }
@@ -55,7 +55,7 @@ describe('gauge palette previews', () => {
         })
       );
 
-      expect(prompt.match(/Available dynamic palettes/g)).toHaveLength(bandCount === 4 ? 1 : 2);
+      expect(prompt.match(/Dynamic palettes \(/g)).toHaveLength(bandCount === 4 ? 1 : 2);
       for (const palette of gradientPalettes) {
         expect(prompt).toContain(`- ${palette.name}: ${palette.colors(bandCount).join(', ')}`);
         expect(prompt).toContain(`- ${palette.name}: ${palette.colors(4).join(', ')}`);

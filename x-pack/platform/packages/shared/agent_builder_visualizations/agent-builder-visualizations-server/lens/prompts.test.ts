@@ -9,7 +9,7 @@ import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result'
 import { createGenerateConfigPrompt } from './prompts';
 import type { PresentationMode } from './types';
 
-describe('Lens edit instructions', () => {
+describe('Lens config prompt', () => {
   const createPrompt = (presentationMode?: PresentationMode) =>
     JSON.stringify(
       createGenerateConfigPrompt({
@@ -23,31 +23,35 @@ describe('Lens edit instructions', () => {
       })
     );
 
-  it('defaults to focused edits without reapplying presentation defaults', () => {
+  it('defaults to focused edits that preserve unrelated presentation', () => {
     const prompt = createPrompt();
 
     expect(prompt).toContain('preserve unrelated presentation settings');
-    expect(prompt).toContain('Do not reapply design defaults');
-    expect(prompt).toContain('Each layer keeps its own existing data_source and column bindings');
+    expect(prompt).toContain('Appearance-only edit: each layer keeps its existing data_source');
     expect(prompt).not.toContain('Bind only result columns from the resolved ES|QL query');
     expect(prompt).not.toContain('Reauthor the presentation:');
   });
 
-  it('delegates comprehensive enhancement without the focused-edit preservation rules', () => {
+  it('switches enhancement to reauthoring without the preservation rule', () => {
     const prompt = createPrompt('enhance');
 
-    expect(prompt).toContain('apply ALL applicable chart design defaults');
-    expect(prompt).toContain('remove all custom palettes and series color overrides');
-    expect(prompt).toContain('remove unsupported threshold coloring');
-    expect(prompt).toContain('Before returning, check the resulting');
-    expect(prompt).toContain('Each layer keeps its own existing data_source and column bindings');
-    expect(prompt).not.toContain('Bind only result columns from the resolved ES|QL query');
-    expect(prompt).toContain(
-      'keep every layer, its order, column bindings, and displayed measures unchanged'
-    );
+    expect(prompt).toContain('Reauthor the presentation: apply every applicable chart rule');
+    expect(prompt).toContain('Existing display text is not a naming instruction');
+    expect(prompt).toContain('Appearance-only edit: each layer keeps its existing data_source');
     expect(prompt).not.toContain('preserve unrelated presentation settings');
-    expect(prompt).not.toContain('Do not reapply design defaults');
-    expect(prompt).not.toContain('preserve explicit user choices');
+  });
+
+  it('omits edit rules and keeps the resolved query for a new chart', () => {
+    const [system, human] = createGenerateConfigPrompt({
+      nlQuery: 'count of logs',
+      esqlQuery: 'FROM logs-* | STATS count = COUNT(*)',
+      chartType: SupportedChartType.Metric,
+      schema: {},
+    });
+
+    expect(system).toEqual(['system', expect.not.stringContaining('EDIT RULES')]);
+    expect(system).toEqual(['system', expect.stringContaining('Bind only result columns')]);
+    expect(human).toEqual(['human', expect.stringContaining('Resolved ES|QL query:')]);
   });
 
   it('supplies the existing configuration and request as human input', () => {
@@ -78,26 +82,32 @@ describe('Lens edit instructions', () => {
     expect(human).toEqual(['human', expect.not.stringContaining('Resolved ES|QL query:')]);
   });
 
-  it('gives metric enhancement only the metric title policy', () => {
-    const prompt = JSON.stringify(
-      createGenerateConfigPrompt({
-        nlQuery: 'Apply presentation defaults.',
-        esqlQuery: 'FROM logs-* | STATS hosts = COUNT_DISTINCT(host)',
-        chartType: SupportedChartType.Metric,
-        schema: {},
-        existingConfig: JSON.stringify({
-          type: 'metric',
-          title: 'Distinct Hosts',
-          metrics: [{ type: 'primary', column: 'hosts', label: 'Distinct Hosts' }],
-        }),
-        presentationMode: 'enhance',
-        appearanceOnly: true,
-      })
-    );
+  it.each([
+    [SupportedChartType.Metric, 'Omit the top-level `title`', 'Set the top-level `title`'],
+    [SupportedChartType.Pie, 'Set the top-level `title`', 'Omit the top-level `title`'],
+  ])('gives %s only its own title policy', (chartType, expected, unexpected) => {
+    const [system] = createGenerateConfigPrompt({
+      nlQuery: 'Apply presentation defaults.',
+      esqlQuery: 'FROM logs-* | STATS hosts = COUNT_DISTINCT(host)',
+      chartType,
+      schema: {},
+    });
 
-    expect(prompt).toContain('Omit the top-level `title` field');
-    expect(prompt).not.toContain('Set the top-level `title`');
-    expect(prompt).not.toContain('Include a concise panel title');
-    expect(prompt).not.toContain('Omit it only for');
+    expect(system).toEqual(['system', expect.stringContaining(expected)]);
+    expect(system).toEqual(['system', expect.not.stringContaining(unexpected)]);
+  });
+
+  it('gives a pie no color mechanics or threshold guidance', () => {
+    const [system] = createGenerateConfigPrompt({
+      nlQuery: 'traffic by browser',
+      esqlQuery: 'FROM logs-* | STATS count = COUNT(*) BY browser',
+      chartType: SupportedChartType.Pie,
+      schema: {},
+    });
+
+    expect(system).toEqual(['system', expect.stringContaining('default palette')]);
+    expect(system).toEqual(['system', expect.not.stringContaining('COLOR MECHANICS')]);
+    expect(system).toEqual(['system', expect.not.stringContaining('threshold')]);
+    expect(system).toEqual(['system', expect.not.stringContaining('COLOR GUIDANCE')]);
   });
 });
