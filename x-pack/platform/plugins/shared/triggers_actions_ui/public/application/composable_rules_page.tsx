@@ -23,6 +23,7 @@ export const ComposableClassicRulesPage = ({
   history,
   hideListBackButton,
   host = RULES_MANAGEMENT_HOST,
+  tabs,
   internalDeps,
 }: ClassicRulesPageProps & { internalDeps: ClassicRulesPageInternalDeps }) => {
   const { pluginsStart } = internalDeps;
@@ -87,6 +88,7 @@ export const ComposableClassicRulesPage = ({
       inspector: pluginsStart.inspector,
       hideListBackButton,
       host,
+      tabs,
     }),
     [
       coreStart,
@@ -97,6 +99,7 @@ export const ComposableClassicRulesPage = ({
       setBreadcrumbs,
       hideListBackButton,
       host,
+      tabs,
     ]
   );
 

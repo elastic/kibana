@@ -6,6 +6,7 @@
  */
 
 import type { ChromeBreadcrumb, CoreStart, ScopedHistory } from '@kbn/core/public';
+import type { AppHeaderTab } from '@kbn/app-header';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
@@ -23,6 +24,7 @@ export interface ClassicRulesPageProps {
   hideListBackButton?: boolean;
   /** Host app and base path for v1 locators. Defaults to Stack Management. */
   host?: RulesLocatorHost;
+  tabs?: AppHeaderTab[];
 }
 
 export type ClassicRulesPagePluginsStart = Pick<
