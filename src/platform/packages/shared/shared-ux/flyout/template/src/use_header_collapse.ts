@@ -34,16 +34,13 @@ const WHEEL_LINE_HEIGHT = 20;
  */
 const WHEEL_PAGE_FRACTION = 0.9;
 
-/** Absorbs fractional-DPR rounding when comparing a scroll offset against its extreme. */
+/** Margin of error for scroll calculations. */
 const SCROLL_EDGE_EPSILON = 1;
 
 /**
- * Whether the scroller can no longer move in the delta's direction.
- *
- * `EuiFlyout` wraps the header, body, and footer in a `.euiFlyout__content` element that becomes
- * a scroll container of its own at short viewports. Calling `preventDefault()` on a wheel event
- * cancels scroll chaining as well as the default scroll, so swallowing the event at the body
- * scroller's extreme would leave that outer container — and the footer with it — unreachable.
+ * Checks if the element is scrolled all the way in the given direction.
+ * We need this because calling preventDefault() stops the outer container from scrolling,
+ * which would make the footer unreachable on small screens.
  */
 const isAtScrollEdge = (scroller: HTMLElement, delta: number): boolean => {
   if (delta === 0) return true;
@@ -115,8 +112,7 @@ export const useHeaderCollapse = ({
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const scrollerRef = useRef<HTMLElement | null>(null);
-  // Mirrors the state so `evaluate` can read the current value without a functional updater,
-  // which must stay free of side effects.
+  // Mirrors state so evaluate can read the current value without a functional updater.
   const isCollapsedRef = useRef(false);
   const collapsibleNodeRef = useRef<HTMLElement | null>(null);
   const collapsibleHeightRef = useRef(0);
@@ -140,16 +136,12 @@ export const useHeaderCollapse = ({
     const wasCollapsed = isCollapsedRef.current;
 
     let next: boolean;
-    // Nothing measured yet, so there is no budget to judge the collapse against. A header with
-    // an empty collapsible region still has one, because the title row and spacer shrink too.
+    // Wait until we have measurements before deciding to collapse.
     if (collapseBudget <= 0) {
       next = false;
     } else if (wasCollapsed) {
-      // The overflow guard gates entry only. Collapsing shrinks the header, which grows the body
-      // and shrinks its scroll range, so re-testing the guard while collapsed judges the state
-      // against geometry the collapse itself produced: it reports "cannot collapse", expands,
-      // which restores the scroll range and re-collapses, and the header oscillates. Leaving
-      // collapse is therefore driven by scroll position alone.
+      // Only check the overflow limit when deciding to collapse.
+      // Checking it while already collapsed causes an infinite loop of expanding and collapsing.
       next = scrollTop > EXPAND_AT;
     } else {
       next = scrollHeight - clientHeight > collapseBudget + EXPAND_AT && scrollTop >= COLLAPSE_AT;
@@ -157,11 +149,8 @@ export const useHeaderCollapse = ({
 
     if (next === wasCollapsed) return;
 
-    // The region is about to become `aria-hidden` and `inert`, which the browser answers by
-    // blurring any focused descendant — focus would land on `<body>`, outside the flyout's focus
-    // trap. Moving it has to happen here, before the state flips: once the attributes are on the
-    // element there is no focused node left to find. The scroll container is the natural
-    // destination, being both focusable and the thing the user was already scrolling.
+    // If focus is inside the region we're about to hide,
+    // move it to the scroll container to keep it inside the flyout.
     if (next && collapsibleNodeRef.current?.contains(document.activeElement)) {
       scroller.focus();
     }
@@ -265,7 +254,7 @@ export const useHeaderCollapse = ({
       // pass through unmodified so the browser can handle them normally.
       if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
       const delta = wheelDeltaToPixels(event, scroller.clientHeight);
-      // Release the event at the extreme so the browser can chain the scroll outward.
+      // Allow the outer container to scroll if this container is at its limit.
       if (isAtScrollEdge(scroller, delta)) return;
       // The header is not scrollable, so the browser would otherwise scroll the page behind it.
       // Requires the non-passive listener below; React's onWheel is passive and cannot do this.

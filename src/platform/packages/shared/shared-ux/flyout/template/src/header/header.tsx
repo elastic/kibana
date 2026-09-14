@@ -91,7 +91,7 @@ const collapsibleRegionStyles = ({ euiTheme }: UseEuiTheme) => {
       padding-inline-end: ${euiTheme.size.xxl};
     `,
     collapsedTitleItem: css`
-      /* Without this the flex item floors at the title's min-content width and the icon is pushed out. */
+      /* Prevent the title from pushing the icon out of the flex container. */
       min-inline-size: 0;
     `,
     collapsedTitle: css`
@@ -329,11 +329,8 @@ export const HeaderZone = ({
                 isCollapsed ? collapseStyles.wrapperCollapsed : collapseStyles.wrapperExpanded,
               ]}
               aria-hidden={isCollapsed || undefined}
-              // `visibility` is delayed by the collapse animation, so it cannot be what removes
-              // this content from the tab order: for the length of the transition the region
-              // would be `aria-hidden` yet still focusable. `inert` applies immediately, which
-              // keeps the accessibility tree and the tab order in agreement. React 18 has no
-              // typing for the native attribute, hence the spread.
+              // Use inert instead of visibility to remove the region from the tab order immediately.
+              // React 18 doesn't type this native attribute, so we spread it.
               {...(isCollapsed && { inert: '' })}
               data-test-subj="flyoutHeaderCollapsibleRegion"
             >

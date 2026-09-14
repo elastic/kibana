@@ -35,9 +35,9 @@ const styles = ({ euiTheme }: UseEuiTheme) => ({
 });
 
 /**
- * A single title/value pair; one grid cell of an `InfoBlocks` panel.
+ * A single title/value pair inside an `InfoBlocks` panel.
  *
- * Renders a `dt`/`dd` pair, so it belongs inside a `dl` — `InfoBlocks` supplies one.
+ * Renders as a `dt`/`dd` pair.
  */
 export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
   title,

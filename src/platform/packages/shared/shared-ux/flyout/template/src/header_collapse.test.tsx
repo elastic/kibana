@@ -166,8 +166,7 @@ describe('FlyoutTemplate header collapse on scroll', () => {
 
     collapseByScroll(overflowEl);
 
-    // Left alone, the browser blurs the hidden descendant and focus escapes to `<body>`,
-    // outside the flyout's focus trap.
+    // Left alone, focus would escape to <body>.
     expect(overflowEl).toHaveFocus();
   });
 
@@ -399,9 +398,7 @@ describe('FlyoutTemplate header collapse on scroll', () => {
 
   /**
    * Renders the flyout and returns the header element plus a mock for the scroller's scrollBy.
-   *
-   * The scroll state has to be set explicitly. jsdom reports `scrollHeight` as 0, which the edge
-   * guard reads as "already at the end" — the default here is mid-scroll so forwarding is live.
+   * We set scroll state explicitly because jsdom reports scrollHeight as 0.
    */
   const setUpWheelForwarding = (
     scrollState = { scrollTop: 100, scrollHeight: 1000, clientHeight: 400 }
@@ -488,8 +485,7 @@ describe('FlyoutTemplate header collapse on scroll', () => {
       notCancelled = fireEvent.wheel(headerEl, { deltaY: 50 });
     });
 
-    // Cancelling here would also cancel scroll chaining, stranding the enclosing
-    // `.euiFlyout__content` scroller and the footer inside it.
+    // This verifies we don't accidentally cancel scroll chaining to the outer scroller.
     expect(notCancelled).toBe(true);
     expect(scrollBy).not.toHaveBeenCalled();
   });
@@ -592,7 +588,7 @@ describe('FlyoutTemplate Header collapsed prop', () => {
     expect(anchor).not.toBeNull();
     expect(anchor?.querySelector('[data-euiicon-type="info"]')).toHaveAttribute('tabindex', '0');
 
-    // The anchor sits in the always-visible title row, not the region that collapse hides.
+    // Ensure the anchor is in the visible title row.
     expect(screen.getByTestId('flyoutHeaderCollapsibleRegion').contains(anchor)).toBe(false);
   });
 

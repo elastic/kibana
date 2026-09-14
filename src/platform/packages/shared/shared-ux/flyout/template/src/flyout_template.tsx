@@ -258,16 +258,12 @@ const FlyoutTemplateRoot = (props: FlyoutTemplateProps) => {
     );
   }, [ignoredPropList]);
 
-  // EUI routes the close button, history navigation, and cascade closes through `onClose`, and
-  // has already dropped the flyout from its manager by the time any of them arrive. Content
-  // that wraps or swallows the handler must not be able to strand the flyout, so teardown runs
-  // regardless of what it does.
+  // Ensure teardown always runs, even if the content wraps or swallows onClose.
   const hasClosedRef = useRef(false);
   const closeManaged = managed?.close;
   const handleManagedClose = useCallback<NonNullable<FlyoutTemplateProps['onClose']>>(
     (event) => {
-      // EUI's history-navigation detector invokes `onClose` before clearing the flag its own
-      // unmount cleanup reads, so the synchronous teardown below re-enters this handler.
+      // Prevent infinite loops from EUI's history-navigation detector re-entering onClose.
       if (hasClosedRef.current) {
         return;
       }

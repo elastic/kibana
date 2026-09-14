@@ -12,12 +12,11 @@ import type { ReactNode } from 'react';
 import type { FlyoutTemplateProps } from '../types';
 
 /**
- * Supplied by an opener that owns the flyout's lifecycle.
+ * Injected by the opener to manage the flyout's lifecycle.
  *
- * Under it, `FlyoutTemplate` takes every root prop from `props` and ignores its own, so the
- * `id` and `session` the opener's bookkeeping matches on cannot be contradicted from inside
- * the subtree. `onClose` stays the element's own, sourced from `useFlyoutClose`, so the
- * declarative contract can keep requiring it.
+ * FlyoutTemplate ignores its own root props and uses these instead, preventing
+ * the subtree from overriding critical state like `id` and `session`.
+ * `onClose` is kept separate to fulfill the declarative contract.
  */
 export interface FlyoutTemplateManaged {
   /** Resolved root props; `children` and `onClose` still come from the `FlyoutTemplate` element. */
@@ -46,10 +45,10 @@ export const useFlyoutTemplateManaged = (): FlyoutTemplateManaged | null =>
   useContext(FlyoutTemplateManagedContext);
 
 /**
- * Dismisses the flyout from anywhere inside managed content, without threading a ref down.
+ * Closes the flyout from anywhere inside it without needing to pass a ref down.
  *
- * A `FlyoutTemplate` rendered directly in a React tree is closed by whatever owns its
- * `onClose`, so there is nothing for this hook to return and it throws.
+ * Throws an error if used outside a managed flyout, as standard flyouts
+ * are closed by whatever owns their `onClose` handler.
  */
 export const useFlyoutClose = (): (() => void) => {
   const managed = useContext(FlyoutTemplateManagedContext);

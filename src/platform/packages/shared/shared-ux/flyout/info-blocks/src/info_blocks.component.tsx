@@ -155,8 +155,7 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({
         hasBorder
         data-test-subj={rest['data-test-subj'] ?? 'infoBlocks'}
       >
-        {/* The grid lives on the `dl` because each block is a `dt`/`dd` pair, which `dl` only
-            accepts wrapped in a single element — so that wrapper has to be the grid cell. */}
+        {/* Apply the grid layout to the dl element. */}
         <dl css={[memoized.grid, memoized.grids[columns]]}>
           {items.map((item, index) => (
             <InfoBlock key={item.id ?? index} {...item} />

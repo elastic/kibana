@@ -124,8 +124,7 @@ export const MetaBlocks: FunctionComponent<MetaBlocksProps> = ({ items, ...rest 
         const truncatableText = getTruncatableText(item.value);
 
         return (
-          // `EuiText` renders a `div`, the one wrapper `dl` accepts around a `dt`/`dd` pair. It
-          // keeps each pair a single flex item, which is what makes the row wrap pair by pair.
+          // EuiText renders a div (which dl accepts) and keeps each pair wrapping as one flex item.
           <EuiText
             key={item.id ?? index}
             size="s"

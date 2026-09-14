@@ -55,8 +55,7 @@ describe('InfoBlocks', () => {
     expect(screen.getAllByRole('term')).toHaveLength(2);
     expect(screen.getAllByRole('definition')).toHaveLength(2);
 
-    // `term` and `definition` take no name from content, so the pairing a screen reader reads out
-    // is carried by adjacency alone.
+    // The pairing is programmatic via adjacency, without extra labels.
     const term = screen.getByText('Owner').closest('dt');
     expect(term).not.toBeNull();
     expect(term!.nextElementSibling?.tagName).toBe('DD');

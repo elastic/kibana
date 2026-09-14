@@ -428,8 +428,8 @@ const NotifyOnChangeSwitch = (): React.JSX.Element => {
 };
 
 /**
- * Header blocks whose values are real tab stops, so the collapsible region is not inert content.
- * Returned as an array to keep each part a direct child of `Header`.
+ * Header blocks with focusable content, keeping the collapsible region active.
+ * Returned as an array so they remain direct children of `Header`.
  */
 const focusableHeaderBlocks = () => [
   <FlyoutTemplate.Header.MetaBlock key="oncall" title="On call">
@@ -499,8 +499,8 @@ export const HeaderCollapseOnScroll: Story = {
     // Fixed, not a control: the tab bar sits in the header's always-visible region, so the story
     // is partly about watching it survive the collapse.
     numTabs: 3,
-    // On by default so the compact row shows the icon and its tooltip; the control stays
-    // toggleable to compare the two title rows.
+    // On by default so the compact row shows the icon and its tooltip.
+    // The control stays toggleable to compare the two title rows.
     titleIcon: true,
     headerIsCollapsed: false,
   },

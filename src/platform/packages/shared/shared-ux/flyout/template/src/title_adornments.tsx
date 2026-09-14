@@ -12,7 +12,7 @@ import type { ReactNode } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiIconTip } from '@elastic/eui';
 import type { EuiIconProps } from '@elastic/eui';
 
-/** Test subject shared by both title icon forms, so collapsed and expanded headers locate alike. */
+/** Test subject for title icons. */
 export const TITLE_ICON_TEST_SUBJ = 'flyoutHeaderTitleIcon';
 
 /** Renders an optional title icon or accessible tooltip anchor. */

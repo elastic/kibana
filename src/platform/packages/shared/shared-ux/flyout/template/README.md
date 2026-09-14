@@ -139,8 +139,8 @@ const AlertDetails = ({ onClose }) => {
 core.overlays.openFlyoutTemplate({ size: 'm', session: 'start' }, AlertDetails);
 ```
 
-The component is a real React boundary, so it may use hooks and re-render. `onClose` is the only root prop it sets — it stays required so a `FlyoutTemplate` can never be rendered without a way to dismiss it — and it arrives as a prop on the content component. Every other root prop comes from the options argument; props passed here are ignored and warn in development. See `@kbn/core-overlays-browser` for the full signature.
+The component is a standard React boundary and can use hooks and re-render. `onClose` is the only root prop it sets—ensuring the flyout can always be dismissed—and it is passed to the content component. All other root props come from the options argument; props passed directly to `FlyoutTemplate` are ignored and will warn in development.
 
-Wrapping `onClose` is fine; declining to call it does not keep the flyout open. EUI's flyout manager routes the close button, history navigation, and cascade closes through that prop and has already removed the flyout by the time a handler runs, so the template tears down regardless. `useFlyoutClose` is available for content nested too deeply to receive the prop.
+Wrapping `onClose` is fine. If you don't call it, the flyout will still close since EUI's flyout manager forces teardown regardless. Use `useFlyoutClose` to close a flyout from a deeply nested component.
 
-**A part written inside another component does not render.** Parts are identified by parsing direct JSX children, so one returned from inside a component sits behind a boundary the parser cannot see through and silently renders nothing. Keep parts in the JSX of the zone that parses them, and put your own components inside those parts.
+**A part written inside another component does not render.** Parts are identified by parsing direct JSX children. If a part is wrapped inside another component, the parser won't find it and it will silently fail to render. Always keep parts directly inside their respective zones, and put your custom components inside the parts instead.
