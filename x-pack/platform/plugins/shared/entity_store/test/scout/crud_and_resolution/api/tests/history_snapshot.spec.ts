@@ -17,6 +17,10 @@ import {
 } from '../../../common/fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
 import {
+  getHistorySnapshotIndexName,
+  getLegacySecurityHistorySnapshotIndexName,
+} from '../../../../../server/domain/asset_manager/history_snapshot_index';
+import {
   clearEntityStoreIndices,
   forceLogExtraction,
   normalizeKeywordList,
@@ -182,6 +186,60 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
         expect(normalizeKeywordList(latestBehaviors?.anomaly_job_ids)).toStrictEqual([]);
         expect((latestEntity.lifecycle as Record<string, unknown>)?.last_activity).toBeDefined();
       }
+    }
+  );
+
+  apiTest(
+    'history snapshot: deletes indices older than retention using the date in the index name',
+    async ({ apiClient, esClient }) => {
+      const utcDaysAgo = (days: number, hours = 0): Date => {
+        const now = new Date();
+        return new Date(
+          Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - days, hours, 0, 0, 0)
+        );
+      };
+
+      const expiredIndex = getHistorySnapshotIndexName('default', utcDaysAgo(31, 0));
+      const cutoffHourZeroIndex = getHistorySnapshotIndexName('default', utcDaysAgo(30, 0));
+      const recentIndex = getHistorySnapshotIndexName('default', utcDaysAgo(5, 12));
+      const expiredLegacyIndex = getLegacySecurityHistorySnapshotIndexName(
+        'default',
+        utcDaysAgo(40, 0)
+      );
+
+      await esClient.indices.delete(
+        {
+          index: [expiredIndex, cutoffHourZeroIndex, recentIndex, expiredLegacyIndex],
+          ignore_unavailable: true,
+        },
+        { ignore: [404] }
+      );
+
+      await Promise.all([
+        esClient.indices.create({ index: expiredIndex }),
+        esClient.indices.create({ index: cutoffHourZeroIndex }),
+        esClient.indices.create({ index: recentIndex }),
+        esClient.indices.create({ index: expiredLegacyIndex }),
+      ]);
+
+      const snapshotResponse = await apiClient.post(
+        ENTITY_STORE_ROUTES.internal.FORCE_HISTORY_SNAPSHOT,
+        {
+          headers: internalHeaders,
+          responseType: 'json',
+          body: {},
+        }
+      );
+      expect(snapshotResponse.statusCode).toBe(200);
+      const body = snapshotResponse.body as { ok: boolean; historySnapshotIndex: string };
+      expect(body.ok).toBe(true);
+      expect(body.historySnapshotIndex).toBeDefined();
+
+      expect(await esClient.indices.exists({ index: expiredIndex })).toBe(false);
+      expect(await esClient.indices.exists({ index: expiredLegacyIndex })).toBe(false);
+      expect(await esClient.indices.exists({ index: cutoffHourZeroIndex })).toBe(true);
+      expect(await esClient.indices.exists({ index: recentIndex })).toBe(true);
+      expect(await esClient.indices.exists({ index: body.historySnapshotIndex })).toBe(true);
     }
   );
 });
