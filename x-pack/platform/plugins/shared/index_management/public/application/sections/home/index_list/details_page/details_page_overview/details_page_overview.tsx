@@ -169,7 +169,11 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({
                         defaultMessage="Use the bulk API to add data to your index. {docsLink}"
                         values={{
                           docsLink: (
-                            <EuiLink href={documentationService.getBulkApi()} target="_blank" external>
+                            <EuiLink
+                              href={documentationService.getBulkApi()}
+                              target="_blank"
+                              external
+                            >
                               <FormattedMessage
                                 id="xpack.idxMgmt.indexDetails.overviewTab.addDocsLink"
                                 defaultMessage="Learn more."
