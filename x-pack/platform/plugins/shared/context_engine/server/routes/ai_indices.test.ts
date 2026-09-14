@@ -1307,6 +1307,7 @@ describe('ai indices routes', () => {
           } as unknown as IRouter,
           logger,
           getAiIndexService: () => aiIndexService as unknown as AiIndexService,
+          getAiIndexDataReadService: () => readService,
           getImprovementsService: () => improvementsService as unknown as ImprovementsServiceApi,
           getScheduleService: () => scheduleService as unknown as FeedbackAnalysisScheduleService,
           getActions: async () => actions,
