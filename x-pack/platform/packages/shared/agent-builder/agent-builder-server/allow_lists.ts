@@ -141,6 +141,7 @@ export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[numbe
 export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
+  'deductive.ai',
 ] as const;
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];
@@ -256,6 +257,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'observability.rca',
   'observability.investigation',
   'observability.service-map',
+  'observability.investigate-service-map',
 
   // ML
   `${internalNamespaces.ml}.anomaly-detection`,
@@ -370,6 +372,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Observability – APM
   'observability.service-map',
+  'observability.service-map-context',
 
   // Platform – Custom Content
   'platform.custom_content.panel_context',
