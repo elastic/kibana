@@ -2,7 +2,7 @@
 
 exports[`LoginPage disabled form states renders CTA and browser settings warning when cookies are disabled, document is embedded inside iframe, and cross-origin cookies are allowed 1`] = `
 <div
-  class="css-1pqcqfr-kbnFullScreenBgCss"
+  class="css-1ca3nia-kbnFullScreenBgCss"
   data-test-subj="loginForm"
 >
   <header
@@ -74,7 +74,7 @@ exports[`LoginPage disabled form states renders CTA and browser settings warning
 
 exports[`LoginPage disabled form states renders CTA and cross-origin cookie warning when cookies are disabled, document is embedded inside iframe, and cross-origin cookies are blocked 1`] = `
 <div
-  class="css-1pqcqfr-kbnFullScreenBgCss"
+  class="css-1ca3nia-kbnFullScreenBgCss"
   data-test-subj="loginForm"
 >
   <header
@@ -146,7 +146,7 @@ exports[`LoginPage disabled form states renders CTA and cross-origin cookie warn
 
 exports[`LoginPage disabled form states renders as expected when a connection to ES is not available 1`] = `
 <div
-  class="css-1pqcqfr-kbnFullScreenBgCss"
+  class="css-1ca3nia-kbnFullScreenBgCss"
   data-test-subj="loginForm"
 >
   <header
@@ -208,7 +208,7 @@ exports[`LoginPage disabled form states renders as expected when a connection to
 
 exports[`LoginPage disabled form states renders as expected when an unknown loginState layout is provided 1`] = `
 <div
-  class="css-1pqcqfr-kbnFullScreenBgCss"
+  class="css-1ca3nia-kbnFullScreenBgCss"
   data-test-subj="loginForm"
 >
   <header
@@ -270,7 +270,7 @@ exports[`LoginPage disabled form states renders as expected when an unknown logi
 
 exports[`LoginPage disabled form states renders as expected when login is not enabled 1`] = `
 <div
-  class="css-1pqcqfr-kbnFullScreenBgCss"
+  class="css-1ca3nia-kbnFullScreenBgCss"
   data-test-subj="loginForm"
 >
   <header
@@ -332,7 +332,7 @@ exports[`LoginPage disabled form states renders as expected when login is not en
 
 exports[`LoginPage disabled form states renders as expected when secure connection is required but not present 1`] = `
 <div
-  class="css-1pqcqfr-kbnFullScreenBgCss"
+  class="css-1ca3nia-kbnFullScreenBgCss"
   data-test-subj="loginForm"
 >
   <header
@@ -394,7 +394,7 @@ exports[`LoginPage disabled form states renders as expected when secure connecti
 
 exports[`LoginPage disabled form states renders as expected when xpack is not available 1`] = `
 <div
-  class="css-1pqcqfr-kbnFullScreenBgCss"
+  class="css-1ca3nia-kbnFullScreenBgCss"
   data-test-subj="loginForm"
 >
   <header
@@ -456,7 +456,7 @@ exports[`LoginPage disabled form states renders as expected when xpack is not av
 
 exports[`LoginPage disabled form states renders warning when cookies are disabled and document is not embedded inside iframe 1`] = `
 <div
-  class="css-1pqcqfr-kbnFullScreenBgCss"
+  class="css-1ca3nia-kbnFullScreenBgCss"
   data-test-subj="loginForm"
 >
   <header
@@ -518,7 +518,7 @@ exports[`LoginPage disabled form states renders warning when cookies are disable
 
 exports[`LoginPage enabled form state renders as expected 1`] = `
 <div
-  class="css-1pqcqfr-kbnFullScreenBgCss"
+  class="css-1ca3nia-kbnFullScreenBgCss"
   data-test-subj="loginForm"
 >
   <header
@@ -702,7 +702,7 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
 
 exports[`LoginPage enabled form state renders as expected when loginAssistanceMessage is set 1`] = `
 <div
-  class="css-1pqcqfr-kbnFullScreenBgCss"
+  class="css-1ca3nia-kbnFullScreenBgCss"
   data-test-subj="loginForm"
 >
   <header
@@ -905,7 +905,7 @@ exports[`LoginPage enabled form state renders as expected when loginAssistanceMe
 
 exports[`LoginPage enabled form state renders as expected when loginHelp is set 1`] = `
 <div
-  class="css-1pqcqfr-kbnFullScreenBgCss"
+  class="css-1ca3nia-kbnFullScreenBgCss"
   data-test-subj="loginForm"
 >
   <header
@@ -1103,7 +1103,7 @@ exports[`LoginPage enabled form state renders as expected when loginHelp is set 
 
 exports[`LoginPage page renders as expected 1`] = `
 <div
-  class="css-1pqcqfr-kbnFullScreenBgCss"
+  class="css-1ca3nia-kbnFullScreenBgCss"
   data-test-subj="loginForm"
 >
   <header
@@ -1287,7 +1287,7 @@ exports[`LoginPage page renders as expected 1`] = `
 
 exports[`LoginPage page renders with custom branding 1`] = `
 <div
-  class="css-1pqcqfr-kbnFullScreenBgCss"
+  class="css-1ca3nia-kbnFullScreenBgCss"
   data-test-subj="loginForm"
 >
   <header
