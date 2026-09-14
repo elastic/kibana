@@ -20,10 +20,12 @@ describe('parseExperimentalConfigValue', () => {
   });
 
   it('should enable a valid feature flag', () => {
-    // Precondition: if the default flips to true, fail here instead of passing vacuously below.
-    expect(allowedExperimentalValues.crossProjectSearch).toBe(false);
-
-    const { features, invalid } = parseExperimentalConfigValue(['crossProjectSearch']);
+    // Every flag currently defaults to true, so pair the bare name with a preceding
+    // `disable:` entry: the assertion then proves the enable was applied, not the default.
+    const { features, invalid } = parseExperimentalConfigValue([
+      'disable:crossProjectSearch',
+      'crossProjectSearch',
+    ]);
 
     expect(features.crossProjectSearch).toBe(true);
     expect(invalid).toEqual([]);
@@ -47,12 +49,12 @@ describe('parseExperimentalConfigValue', () => {
 
   it('should handle mix of valid and invalid feature flags', () => {
     const { features, invalid } = parseExperimentalConfigValue([
-      'crossProjectSearch',
+      'disable:crossProjectSearch',
       'invalidFeature1',
       'invalidFeature2',
     ]);
 
-    expect(features.crossProjectSearch).toBe(true);
+    expect(features.crossProjectSearch).toBe(false);
     expect(invalid).toEqual(['invalidFeature1', 'invalidFeature2']);
   });
 
@@ -97,7 +99,7 @@ describe('allowedExperimentalValues', () => {
     expect(allowedExperimentalValues).toEqual({
       exportResults: true,
       rruleScheduling: true,
-      crossProjectSearch: false,
+      crossProjectSearch: true,
     });
   });
 });
