@@ -108,7 +108,7 @@ export const buildRuntimeMappingsFromFieldTypes = (
  * and the synthesised `_source` reader is the fallback. Nothing sends both
  * today, but the precedence rule ensures correctness if they ever overlap.
  *
- * `on_script_error: 'continue'` is stamped on every passthrough entry for
+ * `on_script_error: 'continue'` is stamped on every scripted passthrough entry for
  * the same reason it is set on synthesised fields: one alert whose value
  * throws inside the Painless script should be skipped rather than aborting
  * the whole `_update_by_query`. The value is never read from the request

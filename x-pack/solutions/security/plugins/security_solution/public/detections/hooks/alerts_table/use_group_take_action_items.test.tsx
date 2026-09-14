@@ -37,6 +37,7 @@ describe('useGroupTakeActionsItems', () => {
   };
 
   beforeEach(() => {
+    jest.clearAllMocks();
     mockUseAlertsPrivileges.mockReturnValue({ hasAlertsUpdate: true });
     (updateAlertStatus as jest.Mock).mockResolvedValue({ updated: 5, version_conflicts: 0 });
   });
