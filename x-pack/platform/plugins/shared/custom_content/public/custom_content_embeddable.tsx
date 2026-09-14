@@ -124,9 +124,13 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const esqlQuery$ = new BehaviorSubject<string | undefined>(readEsqlQuery(initialState));
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
     const previewHtml$ = new BehaviorSubject<string | null>(null);
-    // True while the agent is running a round that involves this panel, so the renderer can show
-    // a generating state until the round completes.
     const isGenerating$ = new BehaviorSubject<boolean>(false);
+    const chatGeneratingCallbacks = {
+      onSubmit: () => isGenerating$.next(true),
+      onClose: () => {
+        if (isGenerating$.getValue()) isGenerating$.next(false);
+      },
+    };
     const usesEsql$ = new BehaviorSubject<boolean>(Boolean(readEsqlQuery(initialState)));
     const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
     const isApproximate$ = new BehaviorSubject<boolean>(false);
@@ -240,10 +244,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               closeFlyout();
               agentBuilder.openChat({
                 newConversation: true,
-                onSubmit: () => isGenerating$.next(true),
-                onClose: () => {
-                  isGenerating$.next(false);
-                },
+                ...chatGeneratingCallbacks,
                 attachments: [
                   buildCustomContentContextAttachment({
                     template: draftTemplate,
@@ -481,10 +482,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           if (tracksOverlays(parentApi)) parentApi.clearOverlays();
           agentBuilder.openChat({
             newConversation: true,
-            onSubmit: () => isGenerating$.next(true),
-            onClose: () => {
-              isGenerating$.next(false);
-            },
+            ...chatGeneratingCallbacks,
             attachments: [
               buildCustomContentContextAttachment({
                 template: '',

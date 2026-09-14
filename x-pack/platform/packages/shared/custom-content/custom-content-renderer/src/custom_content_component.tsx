@@ -142,7 +142,7 @@ export const CustomContentComponent = ({
           </div>
         )
       )}
-      {!error && isGenerating && <CustomContentGeneratingPrompt />}
+      {isGenerating && <CustomContentGeneratingPrompt />}
       {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
     </div>
   );

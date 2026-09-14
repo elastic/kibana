@@ -10,10 +10,6 @@ import { EuiLoadingElastic, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@e
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
-/**
- * Shown while the agent is generating or updating the panel. Rendered as an overlay so it works
- * both for a brand new empty panel and when regenerating a panel that already has content.
- */
 export const CustomContentGeneratingPrompt = () => {
   const { euiTheme } = useEuiTheme();
 
