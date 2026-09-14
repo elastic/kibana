@@ -124,9 +124,7 @@ describe('attackDiscoveryGeneratorSkill', () => {
     });
 
     it('bids a single bounded corroboration pass', () => {
-      expect(attackDiscoveryGeneratorSkill.content).toContain(
-        'One corroboration pass, bounded'
-      );
+      expect(attackDiscoveryGeneratorSkill.content).toContain('One corroboration pass, bounded');
     });
 
     it('forbids post-run tool calls before rendering the report', () => {
