@@ -2000,7 +2000,7 @@
     "@parcel/watcher": "2.5.1",
     "@playwright/test": "1.62.1",
     "@pmmmwh/react-refresh-webpack-plugin": "0.6.2",
-    "@redocly/cli": "2.35.1",
+    "@redocly/cli": "2.36.0",
     "@rsdoctor/rspack-plugin": "1.6.1",
     "@rspack/core": "2.1.8",
     "@rspack/plugin-react-refresh": "2.0.2",
