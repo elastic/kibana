@@ -49,6 +49,7 @@ export {
   type TodoStatus,
   type BackgroundExecutionState,
   type BackgroundExecutionCompletedAt,
+  type SubagentEntry,
   type BackgroundAgentCompleteStep,
   isBackgroundAgentCompleteStep,
   type TodosStep,
