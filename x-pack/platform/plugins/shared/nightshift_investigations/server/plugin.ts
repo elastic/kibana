@@ -159,7 +159,6 @@ export class NightshiftInvestigationsPlugin
         plugins.agentBuilder.tools.register(
           createSandboxWriteFileTool({ connectionManager, getSpaceId, logger: sandboxLogger })
         );
-
       }
     }
 
