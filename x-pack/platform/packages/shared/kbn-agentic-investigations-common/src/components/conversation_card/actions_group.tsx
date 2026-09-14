@@ -18,10 +18,11 @@ export interface ConversationsActionsGroupProps {
   onClickRecommendedAction?: ({ id }: { id: Investigation['id'] }) => void;
 
   onClickAction: BaseActionsProps['onClickAction'];
+  onOpenChat: BaseActionsProps['onOpenChat'];
 }
 
 export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
-  ({ investigation, onClickRecommendedAction, onClickAction }) => {
+  ({ investigation, onClickRecommendedAction, onClickAction, onOpenChat }) => {
     const { euiTheme } = useEuiTheme();
 
     return (
@@ -67,7 +68,11 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
           })}
         />
         <EuiFlexItem grow={false}>
-          <BaseActions investigation={investigation} onClickAction={onClickAction} />
+          <BaseActions
+            investigation={investigation}
+            onClickAction={onClickAction}
+            onOpenChat={onOpenChat}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );

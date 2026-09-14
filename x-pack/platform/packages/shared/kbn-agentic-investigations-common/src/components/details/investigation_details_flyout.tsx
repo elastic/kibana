@@ -17,7 +17,6 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { Investigation } from '../../types';
-import { useOpenInChat } from '../../hooks/use_open_in_chat';
 import { ConversationDetailsFlyoutHeader } from './flyout_header';
 import { ConversationDetailsFlyoutFooter } from './flyout_footer';
 import { OverviewTab, TimelineTab } from './details_flyout_tab_contents';
@@ -33,6 +32,7 @@ const TABS: ReadonlyArray<{ id: LocalTabId; label: string }> = [
 export interface InvestigationDetailsFlyoutProps {
   investigation: Investigation;
   onClose: () => void;
+  onOpenChat: () => void;
 }
 
 /**
@@ -47,10 +47,10 @@ export interface InvestigationDetailsFlyoutProps {
 export const InvestigationDetailsFlyout = ({
   investigation,
   onClose,
+  onOpenChat,
 }: InvestigationDetailsFlyoutProps) => {
   const [selectedTabId, setSelectedTabId] = useState<LocalTabId>('overview');
   const titleId = useGeneratedHtmlId({ prefix: 'investigationDetailsFlyoutTitle' });
-  const onOpenChat = useOpenInChat(investigation.id);
 
   return (
     <EuiFlyout

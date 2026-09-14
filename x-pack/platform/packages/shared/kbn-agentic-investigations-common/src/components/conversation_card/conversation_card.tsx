@@ -27,6 +27,7 @@ interface ConversationCardProps {
   onClickRecommendedAction: BaseActionsProps['onClickRecommendedAction'];
   onClickAction: BaseActionsProps['onClickAction'];
   onClickCard: (id: Investigation['id']) => void;
+  onOpenChat: (id: Investigation['id']) => void;
 }
 
 export const ConversationCard = memo<ConversationCardProps>(
@@ -37,6 +38,7 @@ export const ConversationCard = memo<ConversationCardProps>(
     onClickRecommendedAction,
     onClickAction,
     onClickCard,
+    onOpenChat,
   }) => {
     const { euiTheme } = useEuiTheme();
 
@@ -100,6 +102,7 @@ export const ConversationCard = memo<ConversationCardProps>(
               investigation={investigation}
               onClickRecommendedAction={onClickRecommendedAction}
               onClickAction={onClickAction}
+              onOpenChat={() => onOpenChat(investigation.id)}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

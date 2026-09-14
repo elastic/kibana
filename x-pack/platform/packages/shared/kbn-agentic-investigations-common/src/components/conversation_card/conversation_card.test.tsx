@@ -31,6 +31,7 @@ const renderCard = (isSelected?: boolean, onClickCard = jest.fn()) => {
       isSelected={isSelected}
       onClickCard={onClickCard}
       onClickAction={jest.fn()}
+      onOpenChat={jest.fn()}
       onClickRecommendedAction={jest.fn()}
     />
   );

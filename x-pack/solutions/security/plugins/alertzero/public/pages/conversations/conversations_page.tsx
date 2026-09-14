@@ -32,6 +32,7 @@ import { AlertZeroPageSection } from '../../components/layout/alertzero_page_sec
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useInvestigations } from '../../hooks/use_investigations_api';
+import { useOpenInChat } from '../../hooks/use_open_in_chat';
 import { QUEUE_PAGE_INFO } from './translations';
 import { PendingProposalsPanel } from '../../components/pending_proposals';
 import { usePendingProposals } from '../../hooks/use_proposals_api';
@@ -88,6 +89,7 @@ export const ConversationsPage: React.FC = () => {
     );
 
   const closeDetails = useCallback(() => setSelectedIdForDetails(undefined), []);
+  const openInChat = useOpenInChat();
 
   const selectedDetailsConversation = useMemo(
     () =>
@@ -163,6 +165,7 @@ export const ConversationsPage: React.FC = () => {
         <InvestigationDetailsFlyout
           investigation={selectedDetailsConversation}
           onClose={closeDetails}
+          onOpenChat={() => openInChat(selectedDetailsConversation.id)}
         />
       )}
 
@@ -240,6 +243,7 @@ export const ConversationsPage: React.FC = () => {
                   onClickRecommendedAction={onClickRecommendedAction}
                   onClickAction={onClickAction}
                   onClickCard={setSelectedIdForDetails}
+                  onOpenChat={openInChat}
                   selectedId={selectedIdForDetails}
                 />
               </EuiFlexItem>

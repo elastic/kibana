@@ -11,13 +11,19 @@ import { EuiEmptyPrompt, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
+import { CHAT_ID_PARAM } from './path';
 import * as i18n from './translations';
+
+/** Chats opened without a specific investigation share one session. */
+const DEFAULT_SESSION_TAG = 'alertzero';
 
 export const ChatsPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const history = useHistory();
+  const { search } = useLocation();
+  const sessionTag = new URLSearchParams(search).get(CHAT_ID_PARAM) ?? DEFAULT_SESSION_TAG;
   const { services } = useKibana<{ agentBuilder?: AgentBuilderPluginStart }>();
   const { agentBuilder } = services;
   useAlertZeroDocTitle(i18n.PAGE_TITLE);
@@ -67,7 +73,7 @@ export const ChatsPage: React.FC = () => {
       >
         <EmbeddableConversation
           agentId={agentBuilderDefaultAgentId}
-          sessionTag="alertzero"
+          sessionTag={sessionTag}
           greetingMessage={i18n.GREETING}
           ariaLabelledBy="alertzero-chats-agent-builder"
           onClose={onClose}
