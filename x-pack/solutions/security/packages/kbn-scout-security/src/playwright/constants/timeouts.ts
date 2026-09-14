@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-export * from './fixtures';
-export type {
-  SecurityPageObjects,
-  RuleCreateWizardPage,
-  ThreatMatchRuleCreatePage,
-} from './fixtures/test/page_objects';
+/** First Security app load waits for user-info / lists init and the ad-hoc data view. */
+export const APP_LOAD_TIMEOUT_MS = 60_000;
