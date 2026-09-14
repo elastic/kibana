@@ -229,16 +229,6 @@ steps:
         then:
           required: [proposed_risk_score, proposed_severity]
 
-  # These optional rule modes need fields that cannot be conditionally omitted from
-  # a YAML object, so their query change is not previewed or auto-applied.
-  - name: record_auto_apply_support
-    type: data.set
-    with:
-      supported: >-
-        ${{ steps.fetch_rule.output.data_view_id == null
-          and steps.fetch_rule.output.timestamp_override == null
-          and steps.fetch_rule.output.alert_suppression == null }}
-
   # Decided once so the apply branches stay exact complements and the tagging steps
   # can reference a single gate rather than duplicating the conditions.
   # Gated on fetch_rule so a skipped diagnose_rule cannot carry a stale proposal.
@@ -248,12 +238,17 @@ steps:
       ${{ steps.fetch_rule.error == null
         and steps.fetch_rule.output.enabled == true }}
     with:
+      # Rules using a data view, timestamp override, or alert suppression need
+      # fields the preview API cannot conditionally omit, so query auto-apply is
+      # restricted to rules without those modes.
       can_apply_query: >-
         ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
           and steps.diagnose_rule.output.structured_output.proposed_query != null
           and steps.diagnose_rule.output.structured_output.proposed_query != ''
           and steps.fetch_rule.output.type == 'query'
-          and steps.record_auto_apply_support.output.supported == true }}
+          and steps.fetch_rule.output.data_view_id == null
+          and steps.fetch_rule.output.timestamp_override == null
+          and steps.fetch_rule.output.alert_suppression == null }}
       can_apply_exception: >-
         ${{ steps.diagnose_rule.output.structured_output.change_type == 'exception'
           and steps.diagnose_rule.output.structured_output.exception_entries != null

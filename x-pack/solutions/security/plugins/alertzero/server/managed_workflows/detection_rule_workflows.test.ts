@@ -546,26 +546,23 @@ describe('detection rule workflows', () => {
       });
 
       it('excludes rule modes with omitted preview fields from auto-apply', () => {
-        const support = reviewSteps.find(({ name }) => name === 'record_auto_apply_support')!;
-        const eligibility = reviewSteps.find(({ name }) => name === 'decide_apply')!;
-        const condition = String(eligibility.with?.eligible);
+        expect(reviewSteps.some(({ name }) => name === 'record_auto_apply_support')).toBe(false);
 
-        expect(String(support.with?.supported)).toContain(
-          'steps.fetch_rule.output.data_view_id == null'
-        );
-        expect(String(support.with?.supported)).toContain(
-          'steps.fetch_rule.output.timestamp_override == null'
-        );
-        expect(String(support.with?.supported)).toContain(
-          'steps.fetch_rule.output.alert_suppression == null'
-        );
-        // The supported check is encoded inside classify_proposal.can_apply_query,
-        // which is what decide_apply references.
         const classify = reviewSteps.find(({ name }) => name === 'classify_proposal')!;
         expect(String(classify.with?.can_apply_query)).toContain(
-          'steps.record_auto_apply_support.output.supported == true'
+          'steps.fetch_rule.output.data_view_id == null'
         );
-        expect(condition).toContain('steps.classify_proposal.output.can_apply_query == true');
+        expect(String(classify.with?.can_apply_query)).toContain(
+          'steps.fetch_rule.output.timestamp_override == null'
+        );
+        expect(String(classify.with?.can_apply_query)).toContain(
+          'steps.fetch_rule.output.alert_suppression == null'
+        );
+
+        const eligibility = reviewSteps.find(({ name }) => name === 'decide_apply')!;
+        expect(String(eligibility.with?.eligible)).toContain(
+          'steps.classify_proposal.output.can_apply_query == true'
+        );
       });
 
       it('bounds direct review inputs', () => {
