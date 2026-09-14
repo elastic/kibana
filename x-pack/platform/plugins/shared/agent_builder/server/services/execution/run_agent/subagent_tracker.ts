@@ -15,8 +15,7 @@ import type { SubagentEntry, SubagentRosterEntry } from '@kbn/agent-builder-comm
  */
 export interface SubagentCreation extends SubagentRosterEntry {
   /**
-   * Agent id backing this child — real id or `SELF_AGENT_ID` sentinel,
-   * stored as-is on the tracker entry.
+   * Agent id backing this child — real id or `SELF_AGENT_ID`.
    */
   agent_id: string;
 }
@@ -25,12 +24,6 @@ export interface SubagentCreation extends SubagentRosterEntry {
  * In-memory tracker for persistent sub-agents
  * - seeded from the parent conversation's `state.subagents` at round start
  * - new creations are added mid-round.
- *
- * Each entry carries the backing `agent_id` so `send_message` can filter by
- * the parent's `subagent_ids` allowlist. Legacy state entries (bare strings
- * from pre-persistent-mode data) are normalized to `SubagentEntry` with
- * `agent_id: SELF_AGENT_ID` at hydration time — every persistent sub-agent
- * created before the change was a self-fork.
  */
 export class SubagentTracker {
   private readonly map: Record<string, SubagentEntry>;

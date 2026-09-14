@@ -40,9 +40,6 @@ The sub-agent sees the full history of your prior exchanges with it.
 - The recipient must resolve to a persistent sub-agent in the current conversation's
   active roster (see "Active persistent sub-agents" system notices in the message
   history). Sending to an unknown name fails with a clear error.
-- Sub-agents whose backing agent has been removed from this agent's allowlist
-  are no longer reachable via \`send_message\` — the child conversation still
-  exists but the parent can no longer message it.
 - To create a fresh sub-agent, use \`run_subagent\`. \`send_message\` never creates.
 `;
 
@@ -60,11 +57,6 @@ export const createSendMessageTool = ({
   abortSignal?: AbortSignal;
   backgroundExecutionService?: BackgroundExecutionService;
   subagentTracker?: SubagentTracker;
-  /**
-   * Resolved allowlist of agent ids the parent may currently spawn/message.
-   * Used to filter the tracker snapshot at call time — entries whose backing
-   * `agent_id` is not in this set are rejected with a clear error.
-   */
   allowedIds: Set<string>;
 }): InternalBuiltinToolDefinition<typeof schema> => {
   return {

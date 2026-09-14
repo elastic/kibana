@@ -71,8 +71,7 @@ Brief the agent like a smart colleague who just walked into the room — it hasn
 `;
 
 /**
- * Orders the allowlist so that `_self` (when present) sits first — makes the
- * self-fork option easy to spot in the tool schema description.
+ * Orders the allowlist so that `_self` (when present) sits first
  */
 const orderAllowedWithSelfFirst = (list: ResolvedSubagent[]): ResolvedSubagent[] => {
   const self = list.find((r) => r.id === SELF_AGENT_ID);
@@ -98,16 +97,9 @@ export const createSubagentTool = ({
   subagentTracker,
   conversationExists,
 }: {
-  /**
-   * Id of the agent currently executing (the "owner") — used to resolve the
-   * `_self` sentinel to a real id at the executor call seam.
-   */
+  /** Id of the agent currently executing (the "owner") */
   ownerAgentId: string;
-  /**
-   * Resolved, access-filtered allowlist. Non-empty (empty case is filtered by
-   * the registrar before this factory is invoked). Each entry's `id` is either
-   * a real agent id or the `SELF_AGENT_ID` sentinel.
-   */
+  /** Resolved, access-filtered allowlist of subagents. */
   allowedSubagents: ResolvedSubagent[];
   executionId: string;
   connectorId?: string;
@@ -167,18 +159,14 @@ export const createSubagentTool = ({
       { agent_id, description, prompt, run_in_background = false, effort = 'medium', mode, name },
       { events, modelProvider }
     ) => {
-      // Defense-in-depth: reject an off-enum agent_id even though Zod should
-      // already have filtered it. Compare by sentinel-shaped string so
-      // `_self` matches `_self` and real ids match real ids.
+      // Defense-in-depth: reject an off-enum agent_id even though Zod should already have filtered it.
       if (!allowedIdsSet.has(agent_id)) {
         return {
           results: [createErrorResult(`Agent id "${agent_id}" is not in this agent's allowlist.`)],
         };
       }
 
-      // Sentinel substitution happens at exactly this seam: the tracker,
-      // events, and prompt all continue to speak in sentinel terms; only the
-      // executor sees the real id.
+      // Sentinel substitution happens at exactly this seam - only the executor sees the real id.
       const resolvedAgentId = agent_id === SELF_AGENT_ID ? ownerAgentId : agent_id;
 
       const fullPrompt = `${description}\n\n${prompt}`;
