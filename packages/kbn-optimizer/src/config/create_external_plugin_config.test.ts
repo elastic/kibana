@@ -22,7 +22,10 @@ describe('createCrossPluginExternals', () => {
     ['@kbn/dashboard-plugin', { pluginId: 'dashboard', targets: ['public'] }],
   ]);
 
-  const externals = createCrossPluginExternals(pluginTargets);
+  const externals = createCrossPluginExternals(pluginTargets, {
+    allowedPluginIds: new Set(['core', 'discover']),
+    manifestPath: '/plugins/my_plugin/kibana.json',
+  });
 
   const call = (request: string): Promise<{ err?: Error; result?: string }> =>
     new Promise((resolve) => {
@@ -57,6 +60,17 @@ describe('createCrossPluginExternals', () => {
     const { err } = await call('@kbn/discover-plugin');
     expect(err).toBeInstanceOf(Error);
     expect(err!.message).toMatch(/references a non-public export/);
+  });
+
+  it('errors on an import of a plugin not declared in requiredPlugins/requiredBundles', async () => {
+    const { err, result } = await call('@kbn/dashboard-plugin/public');
+    expect(err).toBeInstanceOf(Error);
+    expect(err!.message).toBe(
+      'import [@kbn/dashboard-plugin/public] references a public export of the [dashboard] bundle, ' +
+        'but that bundle is not in the "requiredPlugins" or "requiredBundles" list in the ' +
+        'plugin manifest [/plugins/my_plugin/kibana.json]'
+    );
+    expect(result).toBeUndefined();
   });
 
   it('passes through unknown @kbn packages (not in pluginTargets)', async () => {

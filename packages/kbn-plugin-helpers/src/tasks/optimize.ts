@@ -43,11 +43,21 @@ export async function optimize({
   await log.indent(2, async () => {
     const outputDir = Path.resolve(dev ? sourceDir : buildDir, 'target/public');
 
+    const { manifest, manifestPath } = plugin;
+
     const config = await createExternalPluginConfig({
       repoRoot: REPO_ROOT,
       pluginDir: sourceDir,
-      pluginId: plugin.manifest.id,
+      pluginId: manifest.id,
       outputDir,
+      manifest: {
+        path: manifestPath,
+        // Legacy `kibana.json` plugins have always exposed `common` as a bundle
+        // target alongside `public`; keep that in addition to any declared dirs.
+        extraPublicDirs: [...new Set(['common', ...manifest.extraPublicDirs])],
+        requiredPlugins: manifest.requiredPlugins,
+        requiredBundles: manifest.requiredBundles,
+      },
       dist: !!dist,
       watch: !!watch,
       cache: !dist, // Disable cache for dist builds

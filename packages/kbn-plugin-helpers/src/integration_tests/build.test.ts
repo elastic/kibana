@@ -29,18 +29,22 @@ describe('scripts/generate_plugin', () => {
   });
   afterEach(async () => await del([PLUGIN_DIR, TMP_DIR]));
 
-  it('builds a generated plugin into a viable archive', async () => {
+  const generatePlugin = async () => {
     await execa(process.execPath, ['scripts/generate_plugin', '-y', '--name', 'fooTestPlugin'], {
       cwd: REPO_ROOT,
       all: true,
     });
+  };
 
-    const filterLogs = (logs: string | undefined) => {
-      return logs
-        ?.split('\n')
-        .filter((l) => !l.includes('failed to reach ci-stats service'))
-        .join('\n');
-    };
+  const filterLogs = (logs: string | undefined) => {
+    return logs
+      ?.split('\n')
+      .filter((l) => !l.includes('failed to reach ci-stats service'))
+      .join('\n');
+  };
+
+  it('builds a generated plugin into a viable archive', async () => {
+    await generatePlugin();
 
     const buildProc = await execa(
       process.execPath,
@@ -63,10 +67,13 @@ describe('scripts/generate_plugin', () => {
     const publicFiles = files.filter((f) => f.includes('target/public/'));
     expect(publicFiles.length).toBeGreaterThanOrEqual(1);
 
-    const mainBundle = publicFiles.find(
-      (f) => f.endsWith('.plugin.js') || f.endsWith('.plugin.js.br')
-    );
+    const mainBundle = publicFiles.find((f) => f.endsWith('fooTestPlugin.plugin.js'));
     expect(mainBundle).toBeDefined();
+
+    // Legacy kibana.json plugins register both `public` and `common` with __kbnBundles__
+    const bundleContent = Fs.readFileSync(Path.resolve(TMP_DIR, mainBundle!), 'utf-8');
+    expect(bundleContent).toContain('plugin/fooTestPlugin/public');
+    expect(bundleContent).toContain('plugin/fooTestPlugin/common');
 
     const serverFiles = files.filter((f) => f.includes('server/'));
     expect(serverFiles.length).toBeGreaterThan(0);
@@ -79,5 +86,27 @@ describe('scripts/generate_plugin', () => {
       server: true,
       ui: true,
     });
+  });
+
+  it('fails the build when browser code imports a plugin not declared in kibana.json', async () => {
+    await generatePlugin();
+
+    const entryPath = Path.resolve(PLUGIN_DIR, 'public/index.ts');
+    Fs.writeFileSync(
+      entryPath,
+      `import '@kbn/navigation-plugin/public';\n${Fs.readFileSync(entryPath, 'utf-8')}`
+    );
+
+    const buildProc = await execa(
+      process.execPath,
+      ['../../scripts/plugin_helpers', 'build', '--kibana-version', '7.5.0'],
+      { cwd: PLUGIN_DIR, all: true, reject: false }
+    );
+
+    expect(buildProc.exitCode).not.toBe(0);
+    expect(filterLogs(buildProc.all)).toContain(
+      'import [@kbn/navigation-plugin/public] references a public export of the [navigation] bundle, ' +
+        'but that bundle is not in the "requiredPlugins" or "requiredBundles" list in the plugin manifest'
+    );
   });
 });

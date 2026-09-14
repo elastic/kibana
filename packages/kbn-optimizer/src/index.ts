@@ -19,6 +19,7 @@ export {
 export {
   createExternalPluginConfig,
   type ExternalPluginConfigOptions,
+  type ExternalPluginManifest,
 } from './config/create_external_plugin_config';
 
 // Shared config utilities
