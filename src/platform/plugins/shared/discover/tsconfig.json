@@ -131,7 +131,6 @@
     "@kbn/as-code-data-views-transforms",
     "@kbn/as-code-export-flyout-component",
     "@kbn/as-code-filters-transforms",
-    "@kbn/as-code-discover-schema",
     "@kbn/as-code-shared-schemas",
     "@kbn/as-code-shared-telemetry",
     "@kbn/as-code-shared-transforms",
@@ -161,7 +160,8 @@
     "@kbn/core-security-server",
     "@kbn/core-http-server",
     "@kbn/ui-callout",
-    "@kbn/discover-session-constants"
+    "@kbn/discover-session-constants",
+    "@kbn/as-code-discover-schema",
   ],
   "exclude": ["target/**/*"]
 }

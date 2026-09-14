@@ -8,7 +8,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import UseUnmount from 'react-use/lib/useUnmount';
 
 import type { EuiBreadcrumb, UseEuiTheme } from '@elastic/eui';
@@ -397,8 +397,6 @@ export function InternalDashboardTopNav({
   const handleCancel = useCallback(() => {
     dashboardApi.cancelAllRequests();
   }, [dashboardApi]);
-
-  const shareAction = useDashboardShareAction({ maybeRedirect });
 
   const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
     redirectTo,
