@@ -30,6 +30,7 @@ export const mountManagementSection = (
         http={coreStart.http}
         data={pluginsStart.data}
         share={pluginsStart.share}
+        docLinks={coreStart.docLinks}
       />
     ),
     element

@@ -9,20 +9,24 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
+  EuiButtonIcon,
   EuiCode,
   EuiCodeBlock,
   EuiConfirmModal,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiLink,
   EuiPopover,
   EuiSpacer,
   EuiInMemoryTable,
+  EuiToolTip,
   useGeneratedHtmlId,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
-import type { HttpStart, NotificationsStart } from '@kbn/core/public';
+import type { DocLinksStart, HttpStart, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
@@ -40,6 +44,7 @@ export interface EsqlViewsAppProps {
   http: HttpStart;
   data: DataPublicPluginStart;
   share: SharePluginStart;
+  docLinks: DocLinksStart;
   /**
    * Lets prototype versions (see `versioned_app.tsx`) swap in an alternate take on the
    * create/edit flyout while reusing this table/list page as-is. Defaults to the V1 flyout.
@@ -98,6 +103,90 @@ const TruncatedQuery: React.FunctionComponent<{ query: string }> = ({ query }) =
   );
 };
 
+type DiscoverAppLocator = ReturnType<SharePluginStart['url']['locators']['get']>;
+
+const EsqlViewRowActions: React.FunctionComponent<{
+  item: EsqlView;
+  discoverLocator: DiscoverAppLocator | undefined;
+  onEdit: (view: EsqlView) => void;
+  onDelete: (view: EsqlView) => void;
+}> = ({ item, discoverLocator, onEdit, onDelete }) => {
+  const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
+  const canOpenInDiscover = Boolean(discoverLocator);
+
+  return (
+    <>
+      <EuiToolTip
+        content={i18n.translate('esqlViews.table.openInDiscoverActionDescription', {
+          defaultMessage: 'Open this view in Discover',
+        })}
+      >
+        <span tabIndex={0}>
+          <EuiButtonIcon
+            aria-label={i18n.translate('esqlViews.table.openInDiscoverAction', {
+              defaultMessage: 'Open in Discover',
+            })}
+            iconType="discoverApp"
+            color="text"
+            isDisabled={!canOpenInDiscover}
+            onClick={() => {
+              discoverLocator?.navigate({ query: { esql: `FROM ${item.name}` } });
+            }}
+            data-test-subj="esqlViewsOpenInDiscoverButton"
+          />
+        </span>
+      </EuiToolTip>
+      <EuiPopover
+        isOpen={isActionsPopoverOpen}
+        closePopover={() => setIsActionsPopoverOpen(false)}
+        panelPaddingSize="none"
+        anchorPosition="leftCenter"
+        button={
+          <EuiToolTip
+            content={i18n.translate('esqlViews.table.allActionsTooltip', {
+              defaultMessage: 'All actions',
+            })}
+          >
+            <EuiButtonIcon
+              aria-label={i18n.translate('esqlViews.table.allActionsAriaLabel', {
+                defaultMessage: 'All actions',
+              })}
+              iconType="boxesVertical"
+              color="text"
+              onClick={() => setIsActionsPopoverOpen((open) => !open)}
+              data-test-subj="euiCollapsedItemActionsButton"
+            />
+          </EuiToolTip>
+        }
+      >
+        <EuiContextMenuPanel className="euiBasicTable__collapsedActions">
+          <EuiContextMenuItem
+            icon="pencil"
+            onClick={() => {
+              onEdit(item);
+              setIsActionsPopoverOpen(false);
+            }}
+            data-test-subj="esqlViewsEditButton"
+          >
+            {i18n.translate('esqlViews.table.editAction', { defaultMessage: 'Edit' })}
+          </EuiContextMenuItem>
+          <EuiContextMenuItem
+            icon="trash"
+            color="danger"
+            onClick={() => {
+              onDelete(item);
+              setIsActionsPopoverOpen(false);
+            }}
+            data-test-subj="esqlViewsDeleteButton"
+          >
+            {i18n.translate('esqlViews.table.deleteAction', { defaultMessage: 'Delete' })}
+          </EuiContextMenuItem>
+        </EuiContextMenuPanel>
+      </EuiPopover>
+    </>
+  );
+};
+
 // Merges the illustrative seed rows with anything created/edited in this browser (cached in
 // localStorage, see `services/local_metadata.ts`), so views created via the real `_query/view`
 // API don't just disappear from the table on refresh.
@@ -129,6 +218,7 @@ export const EsqlViewsApp: React.FunctionComponent<EsqlViewsAppProps> = ({
   http,
   data,
   share,
+  docLinks,
   FlyoutComponent = CreateEditEsqlViewFlyout,
 }) => {
   const discoverLocator = share.url.locators.get(DISCOVER_APP_LOCATOR);
@@ -265,37 +355,14 @@ export const EsqlViewsApp: React.FunctionComponent<EsqlViewsAppProps> = ({
         width: '120px',
         actions: [
           {
-            name: i18n.translate('esqlViews.table.editAction', { defaultMessage: 'Edit' }),
-            description: i18n.translate('esqlViews.table.editActionDescription', {
-              defaultMessage: 'Edit this view',
-            }),
-            icon: 'pencil',
-            type: 'icon',
-            onClick: openEditFlyout,
-          },
-          {
-            name: i18n.translate('esqlViews.table.openInDiscoverAction', {
-              defaultMessage: 'Open in Discover',
-            }),
-            description: i18n.translate('esqlViews.table.openInDiscoverActionDescription', {
-              defaultMessage: 'Open this view in Discover',
-            }),
-            icon: 'discoverApp',
-            type: 'icon',
-            enabled: () => Boolean(discoverLocator),
-            onClick: (item: EsqlView) => {
-              discoverLocator?.navigate({ query: { esql: `FROM ${item.name}` } });
-            },
-          },
-          {
-            name: i18n.translate('esqlViews.table.deleteAction', { defaultMessage: 'Delete' }),
-            description: i18n.translate('esqlViews.table.deleteActionDescription', {
-              defaultMessage: 'Delete this view',
-            }),
-            icon: 'trash',
-            type: 'icon',
-            color: 'danger',
-            onClick: (item: EsqlView) => setViewsPendingDelete([item]),
+            render: (item: EsqlView) => (
+              <EsqlViewRowActions
+                item={item}
+                discoverLocator={discoverLocator}
+                onEdit={openEditFlyout}
+                onDelete={(view) => setViewsPendingDelete([view])}
+              />
+            ),
           },
         ],
       },
@@ -307,6 +374,13 @@ export const EsqlViewsApp: React.FunctionComponent<EsqlViewsAppProps> = ({
     <>
       <AppHeader
         title={i18n.translate('esqlViews.pageTitle', { defaultMessage: 'ES|QL Views' })}
+        description={{
+          text: i18n.translate('esqlViews.pageDescription', {
+            defaultMessage:
+              'ES|QL queries saved as data sources.',
+          }),
+          learnMoreUrl: docLinks.links.query.queryESQLViews,
+        }}
         menu={menu}
         spacing="bleed"
       />
@@ -388,11 +462,11 @@ export const EsqlViewsApp: React.FunctionComponent<EsqlViewsAppProps> = ({
             {viewsPendingDelete.length === 1
               ? i18n.translate('esqlViews.deleteModal.body', {
                   defaultMessage:
-                    'This permanently deletes the view from Elasticsearch and cannot be undone. Saved ES|QL queries that still use this view will start returning errors.',
+                    'This permanently deletes the view from Elasticsearch and cannot be undone. Dashboards, alerts, and other saved objects that still query this view will start returning errors.',
                 })
               : i18n.translate('esqlViews.deleteModal.bulkBody', {
                   defaultMessage:
-                    'This permanently deletes {count} views from Elasticsearch and cannot be undone. Saved ES|QL queries that still use these views will start returning errors.',
+                    'This permanently deletes {count} views from Elasticsearch and cannot be undone. Dashboards, alerts, and other saved objects that still query these views will start returning errors.',
                   values: { count: viewsPendingDelete.length },
                 })}
           </p>
