@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Threat, ThreatTechnique } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   ABOUT_CONTINUE_BTN,
   DEFINE_CONTINUE_BUTTON,
@@ -20,6 +21,12 @@ import {
 } from '../../../../screens/rule_details';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
+  deleteSeededMitreEntities,
+  seedMitreEntities,
+  SEEDED_TACTIC_ALPHA,
+  SEEDED_TECHNIQUE_ONE,
+} from '../../../../tasks/api_calls/mitre_attack';
+import {
   createAndEnableRule,
   expandAdvancedSettings,
   fillCustomQueryInput,
@@ -31,12 +38,11 @@ import { getDetails } from '../../../../tasks/rule_details';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
-import { ruleFields } from '../../../../data/detection_engine';
 
 // Tests the managed MITRE source path (xpack.mitreAttack.managedSourceEnabled=true)
-// for the rule creation MITRE ATT&CK threat picker. The managed API serves the same
-// MITRE v19.1 content as the static blob, so ruleFields.threat (Credential Access /
-// TA0006) is a valid selection under both sources.
+// for the rule creation MITRE ATT&CK threat picker. Synthetic entities at version 99.0
+// are seeded before the suite so the managed API returns only the fixture set, making
+// assertions independent of real MITRE artifact version bumps.
 //
 // NOTE: This file is intentionally separate from `common_flows.cy.ts` (same directory),
 // which covers the MITRE picker under the default (static blob) source, because
@@ -60,6 +66,29 @@ describe(
     },
   },
   () => {
+    const seededThreat: Threat = {
+      framework: 'MITRE ATT&CK',
+      tactic: {
+        name: SEEDED_TACTIC_ALPHA.name,
+        id: SEEDED_TACTIC_ALPHA.id,
+        reference: SEEDED_TACTIC_ALPHA.reference,
+      },
+    };
+
+    const seededTechnique: ThreatTechnique = {
+      name: SEEDED_TECHNIQUE_ONE.name,
+      id: SEEDED_TECHNIQUE_ONE.id,
+      reference: SEEDED_TECHNIQUE_ONE.reference,
+    };
+
+    before(() => {
+      seedMitreEntities();
+    });
+
+    after(() => {
+      deleteSeededMitreEntities();
+    });
+
     beforeEach(() => {
       login();
       deleteAlertsAndRules();
@@ -85,10 +114,9 @@ describe(
       cy.get(MITRE_ATTACK_ADD_TACTIC_BUTTON).should('exist');
       cy.get(MITRE_ATTACK_TACTIC_DROPDOWN).should('exist');
 
-      // Select tactic (Credential Access / TA0006) then add a technique
-      // (OS Credential Dumping / T1003) using the standard helper tasks.
-      fillThreat(ruleFields.threat);
-      fillThreatTechnique();
+      // Select the seeded tactic then add the seeded technique via the standard helper tasks.
+      fillThreat(seededThreat);
+      fillThreatTechnique(seededTechnique);
 
       cy.get(ABOUT_CONTINUE_BTN).click();
 
@@ -98,11 +126,11 @@ describe(
       // --- Create the rule ---
       createAndEnableRule();
 
-      // --- Verify the saved rule contains the MITRE threat ---
+      // --- Verify the saved rule contains the seeded MITRE threat ---
       cy.get(RULE_NAME_HEADER).should('contain', ruleName);
       cy.get(ABOUT_DETAILS).within(() => {
-        getDetails(MITRE_ATTACK_DETAILS).should('contain', ruleFields.threat.tactic.name);
-        getDetails(MITRE_ATTACK_DETAILS).should('contain', 'OS Credential Dumping');
+        getDetails(MITRE_ATTACK_DETAILS).should('contain', seededThreat.tactic.name);
+        getDetails(MITRE_ATTACK_DETAILS).should('contain', seededTechnique.name);
       });
     });
   }

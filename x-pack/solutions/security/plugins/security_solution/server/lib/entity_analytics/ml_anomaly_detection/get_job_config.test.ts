@@ -457,7 +457,7 @@ describe('getJobConfig', () => {
   });
 });
 
-describe('getMitreMaps cache (managed client)', () => {
+describe('managed MITRE list caching', () => {
   const makeMockList = (empty = false) =>
     jest.fn().mockResolvedValue({
       framework: 'enterprise',

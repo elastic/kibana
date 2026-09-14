@@ -37,7 +37,14 @@ export {
   MITRE_ATTACK_ENTITY_SO_TYPE,
 } from './src/constants';
 
-export { buildSoId } from './src/utils';
+export { buildSoId, getMitreEntityDisplayName } from './src/utils';
+
+export {
+  buildMockMitreTacticSummary,
+  buildMockMitreTechniqueSummary,
+  buildMockMitreSubtechniqueSummary,
+  buildMockMitreEntitySummaryBuckets,
+} from './src/mitre_entity_builders';
 
 export { GetMitreEntitiesRequestQuery } from './src/api';
 

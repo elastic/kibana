@@ -38,10 +38,6 @@ export type GetMitreEntitiesRequestQueryOutput = z.output<typeof GetMitreEntitie
 
 /**
  * Client-side request params for GET /internal/mitre/entities. Mirrors GetMitreEntitiesRequestQuery before serialization.
- *
- * Intentionally duplicates the zod schema shape: `z.input<typeof GetMitreEntitiesRequestQuery>`
- * degrades `types` to `{}` under zod v4 because `z.preprocess` erases the input type, making
- * the inferred type unusable on the client side. This explicit interface is the usable contract.
  */
 export interface GetMitreEntitiesRequestParams {
   framework?: MitreFramework;

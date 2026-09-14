@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import {
+  buildMockMitreTacticSummary,
+  buildMockMitreTechniqueSummary,
+  buildMockMitreSubtechniqueSummary,
+} from '@kbn/security-mitre-attack-common';
 import type {
   MitreTacticSummary,
   MitreTechniqueSummary,
@@ -68,78 +73,48 @@ export const getMockCoverageOverviewDashboard = (): CoverageOverviewDashboard =>
 });
 
 export const getMockCoverageOverviewTactics = (): MitreTacticSummary[] => [
-  {
-    framework: 'enterprise',
-    framework_version: '16.1',
-    type: 'tactic',
-    revoked: false,
-    deprecated: false,
+  buildMockMitreTacticSummary({
     id: 'TA001',
     name: 'Tactic 1',
     reference: 'https://some-link/TA001',
     position: 0,
-  },
-  {
-    framework: 'enterprise',
-    framework_version: '16.1',
-    type: 'tactic',
-    revoked: false,
-    deprecated: false,
+  }),
+  buildMockMitreTacticSummary({
     id: 'TA002',
     name: 'Tactic 2',
     reference: 'https://some-link/TA002',
     position: 1,
-  },
+  }),
 ];
 
 export const getMockCoverageOverviewTechniques = (): MitreTechniqueSummary[] => [
-  {
-    framework: 'enterprise',
-    framework_version: '16.1',
-    type: 'technique',
-    revoked: false,
-    deprecated: false,
+  buildMockMitreTechniqueSummary({
     id: 'T001',
     name: 'Technique 1',
     reference: 'https://some-link/T001',
     tactic_ids: ['TA001'],
-  },
-  {
-    framework: 'enterprise',
-    framework_version: '16.1',
-    type: 'technique',
-    revoked: false,
-    deprecated: false,
+  }),
+  buildMockMitreTechniqueSummary({
     id: 'T002',
     name: 'Technique 2',
     reference: 'https://some-link/T002',
     tactic_ids: ['TA001', 'TA002'],
-  },
+  }),
 ];
 
 export const getMockCoverageOverviewSubtechniques = (): MitreSubtechniqueSummary[] => [
-  {
-    framework: 'enterprise',
-    framework_version: '16.1',
-    type: 'subtechnique',
-    revoked: false,
-    deprecated: false,
+  buildMockMitreSubtechniqueSummary({
     id: 'T001.001',
     name: 'Subtechnique 1',
     reference: 'https://some-link/T001/001',
     tactic_ids: ['TA001'],
     technique_id: 'T001',
-  },
-  {
-    framework: 'enterprise',
-    framework_version: '16.1',
-    type: 'subtechnique',
-    revoked: false,
-    deprecated: false,
+  }),
+  buildMockMitreSubtechniqueSummary({
     id: 'T001.002',
     name: 'Subtechnique 2',
     reference: 'https://some-link/T001/002',
     tactic_ids: ['TA001'],
     technique_id: 'T001',
-  },
+  }),
 ];

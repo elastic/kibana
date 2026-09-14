@@ -19,37 +19,35 @@ import { getCustomQueryRuleParams } from '../../../../objects/rule';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
 import { selectCoverageOverviewActivityFilterOption } from '../../../../tasks/rules_coverage_overview';
+import {
+  deleteSeededMitreEntities,
+  seedMitreEntities,
+  SEEDED_TACTIC_ALPHA,
+  SEEDED_TECHNIQUE_ONE,
+} from '../../../../tasks/api_calls/mitre_attack';
 
-// Hard-coded fixture: Credential Access (TA0006) / OS Credential Dumping (T1003).
-// These IDs exist in MITRE ATT&CK v19.1 and are served by both the static blob and
-// the managed API, so assertions remain valid regardless of source.
-const FIXTURE_TACTIC = {
-  name: 'Credential Access',
-  id: 'TA0006',
-  reference: 'https://attack.mitre.org/tactics/TA0006/',
-};
-const FIXTURE_TECHNIQUE = {
-  name: 'OS Credential Dumping',
-  id: 'T1003',
-  reference: 'https://attack.mitre.org/techniques/T1003/',
-};
+// Seeded fixture entities drive the rule threat and all assertions. Version 99.0
+// sorts above any real MITRE release so the managed API returns only the synthetic
+// set, making this suite independent of real artifact version bumps.
 
-const MockRuleThreat: Threat = {
+const seededRuleThreat: Threat = {
   framework: 'MITRE ATT&CK',
-  tactic: FIXTURE_TACTIC,
+  tactic: {
+    name: SEEDED_TACTIC_ALPHA.name,
+    id: SEEDED_TACTIC_ALPHA.id,
+    reference: SEEDED_TACTIC_ALPHA.reference,
+  },
   technique: [
     {
-      id: FIXTURE_TECHNIQUE.id,
-      reference: FIXTURE_TECHNIQUE.reference,
-      name: FIXTURE_TECHNIQUE.name,
+      id: SEEDED_TECHNIQUE_ONE.id,
+      reference: SEEDED_TECHNIQUE_ONE.reference,
+      name: SEEDED_TECHNIQUE_ONE.name,
       subtechnique: [],
     },
   ],
 };
 
 // Tests the managed MITRE source path (xpack.mitreAttack.managedSourceEnabled=true).
-// Hard-coded fixtures (Credential Access / OS Credential Dumping) are used so that
-// this spec remains valid after the static blob is removed.
 //
 // NOTE: This file is intentionally separate from `coverage_overview.cy.ts` (same directory)
 // because `ftrConfig.kbnServerArgs` is read per spec file — the parallel runner parses only
@@ -72,6 +70,14 @@ describe(
     },
   },
   () => {
+    before(() => {
+      seedMitreEntities();
+    });
+
+    after(() => {
+      deleteSeededMitreEntities();
+    });
+
     beforeEach(() => {
       login();
       deleteAlertsAndRules();
@@ -80,7 +86,7 @@ describe(
           rule_id: 'managed_mitre_rule',
           enabled: true,
           name: 'Managed MITRE rule',
-          threat: [MockRuleThreat],
+          threat: [seededRuleThreat],
         })
       );
       visit(RULES_COVERAGE_OVERVIEW_URL);
@@ -94,7 +100,7 @@ describe(
 
       // At least one tactic panel must be present, and the rule's assigned tactic must appear.
       cy.get(COVERAGE_OVERVIEW_TACTIC_PANEL).should('exist');
-      cy.get(COVERAGE_OVERVIEW_TACTIC_PANEL).contains(FIXTURE_TACTIC.name);
+      cy.get(COVERAGE_OVERVIEW_TACTIC_PANEL).contains(SEEDED_TACTIC_ALPHA.name);
     });
 
     it('renders technique cells under the correct tactic column', () => {
@@ -102,8 +108,8 @@ describe(
       cy.get(COVERAGE_OVERVIEW_MITRE_ERROR_CALLOUT).should('not.exist');
 
       // The technique cell appears inside the tactic group that matches the rule's tactic.
-      cy.get(COVERAGE_OVERVIEW_TECHNIQUE_PANEL_IN_TACTIC_GROUP(FIXTURE_TACTIC.id)).contains(
-        FIXTURE_TECHNIQUE.name
+      cy.get(COVERAGE_OVERVIEW_TECHNIQUE_PANEL_IN_TACTIC_GROUP(SEEDED_TACTIC_ALPHA.id)).contains(
+        SEEDED_TECHNIQUE_ONE.name
       );
     });
 

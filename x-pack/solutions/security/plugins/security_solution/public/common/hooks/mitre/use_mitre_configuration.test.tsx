@@ -156,12 +156,12 @@ describe('useMitreConfiguration', () => {
     });
   });
 
-  describe('types param', () => {
-    it('forwards the types array to the managed hook', () => {
+  describe('params', () => {
+    it('forwards the full params object to the managed hook', () => {
       setupKibanaMock(true);
       mockUseFetchMitreEntitiesQuery.mockReturnValue(makeQueryResult(mockManagedData));
 
-      renderHook(() => useMitreConfiguration(['tactic']));
+      renderHook(() => useMitreConfiguration({ types: ['tactic'] }));
 
       expect(mockUseFetchMitreEntitiesQuery).toHaveBeenCalledWith(
         expect.objectContaining({ types: ['tactic'] }),
@@ -169,11 +169,11 @@ describe('useMitreConfiguration', () => {
       );
     });
 
-    it('forwards the types array to the legacy hook', () => {
+    it('forwards only the types field to the legacy hook', () => {
       setupKibanaMock(false);
       mockUseFetchLegacyMitreQuery.mockReturnValue(makeQueryResult(mockLegacyData));
 
-      renderHook(() => useMitreConfiguration(['tactic']));
+      renderHook(() => useMitreConfiguration({ types: ['tactic'] }));
 
       expect(mockUseFetchLegacyMitreQuery).toHaveBeenCalledWith(['tactic'], expect.any(Object));
     });

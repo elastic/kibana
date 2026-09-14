@@ -177,85 +177,83 @@ describe('handleCoverageOverviewRequest', () => {
     expect(result.invalid_mitre_ids['rule-unmapped-id']).toBeUndefined();
   });
 
-  describe('managed data client (flag on)', () => {
-    it('sources MITRE data from the managed client when mitreDataClient is provided', async () => {
-      const validIdSets: ValidMitreIdSets = buildValidMitreIdsFromBuckets({
-        tactics: [{ id: VALID_TACTIC_ID }],
-        techniques: [{ id: VALID_TECHNIQUE_ID }],
-        subtechniques: [],
-      });
-
-      const managedBuckets = makeManagedBuckets(validIdSets);
-      const mockList = jest.fn().mockResolvedValue(managedBuckets);
-      const mitreDataClient: MitreAttackDataClient = { list: mockList, getById: jest.fn() };
-
-      const ruleWithBogusIds: Rule = {
-        id: 'rule-bogus',
-        name: 'Bogus',
-        enabled: true,
-        params: {
-          threat: [
-            {
-              framework: 'MITRE ATT&CK',
-              tactic: {
-                id: BOGUS_TACTIC_ID,
-                name: 'Fake',
-                reference: 'https://attack.mitre.org/tactics/TA9999/',
-              },
-              technique: [],
-            },
-          ],
-        },
-      } as unknown as Rule;
-
-      const ruleWithValidIds: Rule = {
-        id: 'rule-valid',
-        name: 'Valid',
-        enabled: true,
-        params: {
-          threat: [
-            {
-              framework: 'MITRE ATT&CK',
-              tactic: {
-                id: VALID_TACTIC_ID,
-                name: 'Defense Evasion',
-                reference: 'https://attack.mitre.org/tactics/TA0005/',
-              },
-              technique: [
-                {
-                  id: VALID_TECHNIQUE_ID,
-                  name: 'Abuse Elevation Control Mechanism',
-                  reference: 'https://attack.mitre.org/techniques/T1548/',
-                },
-              ],
-            },
-          ],
-        },
-      } as unknown as Rule;
-
-      (findRules as jest.Mock).mockResolvedValueOnce({
-        total: 2,
-        page: 1,
-        perPage: 10000,
-        data: [ruleWithBogusIds, ruleWithValidIds],
-      });
-
-      const result = await handleCoverageOverviewRequest({
-        params: {},
-        deps: { rulesClient: rulesClientMock.create(), mitreDataClient },
-      });
-
-      // The managed client's list() must have been called to resolve MITRE IDs.
-      expect(mockList).toHaveBeenCalledTimes(1);
-
-      // Bogus tactic not in the managed buckets → invalid.
-      expect(result.invalid_mitre_ids['rule-bogus']).toEqual(
-        expect.arrayContaining([BOGUS_TACTIC_ID])
-      );
-
-      // Valid IDs are in the managed buckets → not invalid.
-      expect(result.invalid_mitre_ids['rule-valid']).toBeUndefined();
+  it('sources MITRE data from the managed client when mitreDataClient is provided', async () => {
+    const validIdSets: ValidMitreIdSets = buildValidMitreIdsFromBuckets({
+      tactics: [{ id: VALID_TACTIC_ID }],
+      techniques: [{ id: VALID_TECHNIQUE_ID }],
+      subtechniques: [],
     });
+
+    const managedBuckets = makeManagedBuckets(validIdSets);
+    const mockList = jest.fn().mockResolvedValue(managedBuckets);
+    const mitreDataClient: MitreAttackDataClient = { list: mockList, getById: jest.fn() };
+
+    const ruleWithBogusIds: Rule = {
+      id: 'rule-bogus',
+      name: 'Bogus',
+      enabled: true,
+      params: {
+        threat: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: BOGUS_TACTIC_ID,
+              name: 'Fake',
+              reference: 'https://attack.mitre.org/tactics/TA9999/',
+            },
+            technique: [],
+          },
+        ],
+      },
+    } as unknown as Rule;
+
+    const ruleWithValidIds: Rule = {
+      id: 'rule-valid',
+      name: 'Valid',
+      enabled: true,
+      params: {
+        threat: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: VALID_TACTIC_ID,
+              name: 'Defense Evasion',
+              reference: 'https://attack.mitre.org/tactics/TA0005/',
+            },
+            technique: [
+              {
+                id: VALID_TECHNIQUE_ID,
+                name: 'Abuse Elevation Control Mechanism',
+                reference: 'https://attack.mitre.org/techniques/T1548/',
+              },
+            ],
+          },
+        ],
+      },
+    } as unknown as Rule;
+
+    (findRules as jest.Mock).mockResolvedValueOnce({
+      total: 2,
+      page: 1,
+      perPage: 10000,
+      data: [ruleWithBogusIds, ruleWithValidIds],
+    });
+
+    const result = await handleCoverageOverviewRequest({
+      params: {},
+      deps: { rulesClient: rulesClientMock.create(), mitreDataClient },
+    });
+
+    // The managed client's list() must have been called to resolve MITRE IDs.
+    expect(mockList).toHaveBeenCalledTimes(1);
+
+    // Bogus tactic not in the managed buckets → invalid.
+    expect(result.invalid_mitre_ids['rule-bogus']).toEqual(
+      expect.arrayContaining([BOGUS_TACTIC_ID])
+    );
+
+    // Valid IDs are in the managed buckets → not invalid.
+    expect(result.invalid_mitre_ids['rule-valid']).toBeUndefined();
   });
 });
 

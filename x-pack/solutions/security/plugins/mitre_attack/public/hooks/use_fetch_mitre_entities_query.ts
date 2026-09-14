@@ -25,7 +25,6 @@ const DEFAULT_OPTIONS = {
   refetchOnWindowFocus: false,
 } as const;
 
-// Prefix key — full cache key appends the params object (matching COVERAGE_OVERVIEW_QUERY_KEY convention).
 export const FETCH_MITRE_ENTITIES_QUERY_KEY = ['GET', GET_MITRE_ENTITIES_URL] as const;
 
 export const useFetchMitreEntitiesQuery = (

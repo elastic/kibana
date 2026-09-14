@@ -19,6 +19,7 @@ import styled from 'styled-components';
 
 import type { Threats, ThreatSubtechnique } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { MitreSubtechniqueSummary } from '@kbn/security-mitre-attack-common';
+import { getMitreEntityDisplayName } from '@kbn/security-mitre-attack-common';
 import * as Rulei18n from '../../../common/translations';
 import type { FieldHook } from '../../../../shared_imports';
 import { MyAddItemButton } from '../add_item_form';
@@ -187,7 +188,7 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
                   ]
                 : []),
               ...options.map((option) => ({
-                inputDisplay: <>{`${option.name} (${option.id})`}</>,
+                inputDisplay: <>{getMitreEntityDisplayName(option)}</>,
                 value: option.id,
                 disabled,
               })),

@@ -187,6 +187,25 @@ describe('getAnomalyData', () => {
       );
     });
 
+    it('forwards mitreDataClient to getEntityAnomalies when provided', async () => {
+      jest.mocked(getEntityAnomalies).mockResolvedValue({ anomalies: [], total: 0 });
+
+      const mockMitreDataClient = { getMitreData: jest.fn() } as never;
+
+      await getAnomalyData({
+        ...baseOptions,
+        entities: [makeEntity({ id: 'user:alice', type: 'user' })],
+        experimentalFeatures: experimentalFeaturesApiOn,
+        mitreDataClient: mockMitreDataClient,
+        ml: makeMl() as never,
+        uiSettingsClient: makeUiSettingsClient() as never,
+      });
+
+      expect(jest.mocked(getEntityAnomalies)).toHaveBeenCalledWith(
+        expect.objectContaining({ mitreDataClient: mockMitreDataClient })
+      );
+    });
+
     it('maps anomaly results to AnomalyRecord correctly', async () => {
       const entry = makeAnomalySummaryEntry({ jobId: 'security-job-1', recordScore: 88 });
       jest.mocked(getEntityAnomalies).mockResolvedValue({ anomalies: [entry], total: 1 });

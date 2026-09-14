@@ -61,7 +61,7 @@ export const AnomalyTabTimelineSection: React.FC<AnomalyTabTimelineProps> = ({
   isEmpty = false,
   isLoading = false,
 }) => {
-  const { tactics } = useMitreConfiguration(['tactic']);
+  const { tactics } = useMitreConfiguration({ types: ['tactic'] });
   const tacticNames = useMemo(
     () => [...tactics].sort((a, b) => a.position - b.position).map(({ name }) => name),
     [tactics]

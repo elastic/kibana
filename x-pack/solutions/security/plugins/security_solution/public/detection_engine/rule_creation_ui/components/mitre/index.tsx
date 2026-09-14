@@ -21,6 +21,7 @@ import styled from 'styled-components';
 
 import { isEqual } from 'lodash';
 import type { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
+import { getMitreEntityDisplayName } from '@kbn/security-mitre-attack-common';
 import * as Rulei18n from '../../../common/translations';
 import type { FieldHook } from '../../../../shared_imports';
 import { threatDefault } from '../step_about_rule/default_value';
@@ -153,7 +154,7 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
                     ]
                   : []),
                 ...tactics.map((t) => ({
-                  inputDisplay: <>{`${t.name} (${t.id})`}</>,
+                  inputDisplay: <>{getMitreEntityDisplayName(t)}</>,
                   value: t.id,
                   disabled,
                 })),

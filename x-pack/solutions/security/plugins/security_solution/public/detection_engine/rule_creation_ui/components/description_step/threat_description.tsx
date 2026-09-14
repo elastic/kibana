@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
+import { getMitreEntityDisplayName } from '@kbn/security-mitre-attack-common';
 import type { BuildThreatDescription } from './types';
 import ListTreeIcon from './assets/list_tree_icon.svg';
 import * as i18n from './translations';
@@ -88,8 +89,8 @@ export const ThreatEuiFlexGroup = ({
                     target="_blank"
                   >
                     {tactic != null
-                      ? `${tactic.name} (${tactic.id})`
-                      : `${threatTactic.name} (${threatTactic.id})`}
+                      ? getMitreEntityDisplayName(tactic)
+                      : getMitreEntityDisplayName(threatTactic)}
                   </EuiLink>
                 </EuiFlexItem>
                 {tacticUnsupported && (
@@ -120,8 +121,8 @@ export const ThreatEuiFlexGroup = ({
                             css={techniqueLinkItemStyles}
                           >
                             {myTechnique != null
-                              ? `${myTechnique.name} (${myTechnique.id})`
-                              : `${technique.name} (${technique.id})`}
+                              ? getMitreEntityDisplayName(myTechnique)
+                              : getMitreEntityDisplayName(technique)}
                           </EuiButtonEmpty>
                         </EuiFlexItem>
                         {techniqueUnsupported && (
@@ -157,8 +158,8 @@ export const ThreatEuiFlexGroup = ({
                                       css={techniqueLinkItemStyles}
                                     >
                                       {mySubtechnique != null
-                                        ? `${mySubtechnique.name} (${mySubtechnique.id})`
-                                        : `${subtechnique.name} (${subtechnique.id})`}
+                                        ? getMitreEntityDisplayName(mySubtechnique)
+                                        : getMitreEntityDisplayName(subtechnique)}
                                     </EuiButtonEmpty>
                                   </EuiFlexItem>
                                   {subtechniqueUnsupported && (

@@ -7,6 +7,12 @@
 
 import { formatMitreMapping, addMitreMappingsNode } from './add_mitre_mappings';
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
+import {
+  buildMockMitreTacticSummary,
+  buildMockMitreTechniqueSummary,
+  buildMockMitreSubtechniqueSummary,
+  buildMockMitreEntitySummaryBuckets,
+} from '@kbn/security-mitre-attack-common';
 
 // Mock the prompt so the LangChain chain doesn't need real models or prompt templates.
 jest.mock('./prompts', () => ({
@@ -55,29 +61,39 @@ import { MITRE_MAPPING_SELECTION_PROMPT } from './prompts';
 // Fixture IDs come from the real MITRE dictionary the node validates against:
 // TA0001 Initial Access, TA0002 Execution, T1078 Valid Accounts (belongs to
 // initial-access but NOT execution), T1078.001 Default Accounts (sub of T1078).
-const testBuckets = {
+const testBuckets = buildMockMitreEntitySummaryBuckets({
   tactics: [
-    { id: 'TA0001', name: 'Initial Access', reference: 'https://attack.mitre.org/tactics/TA0001/' },
-    { id: 'TA0002', name: 'Execution', reference: 'https://attack.mitre.org/tactics/TA0002/' },
+    buildMockMitreTacticSummary({
+      id: 'TA0001',
+      name: 'Initial Access',
+      reference: 'https://attack.mitre.org/tactics/TA0001/',
+      position: 0,
+    }),
+    buildMockMitreTacticSummary({
+      id: 'TA0002',
+      name: 'Execution',
+      reference: 'https://attack.mitre.org/tactics/TA0002/',
+      position: 1,
+    }),
   ],
   techniques: [
-    {
+    // T1078 belongs to Initial Access (TA0001) but not Execution (TA0002)
+    buildMockMitreTechniqueSummary({
       id: 'T1078',
       name: 'Valid Accounts',
       reference: 'https://attack.mitre.org/techniques/T1078/',
-      // T1078 belongs to Initial Access (TA0001) but not Execution (TA0002)
       tactic_ids: ['TA0001'],
-    },
+    }),
   ],
   subtechniques: [
-    {
+    buildMockMitreSubtechniqueSummary({
       id: 'T1078.001',
       name: 'Default Accounts',
       reference: 'https://attack.mitre.org/techniques/T1078/001/',
       technique_id: 'T1078',
-    },
+    }),
   ],
-};
+});
 
 describe('formatMitreMapping', () => {
   it('formats a tactic with a matching technique and subtechnique', () => {
@@ -154,12 +170,7 @@ describe('addMitreMappingsNode', () => {
       pipe: jest.fn().mockReturnValue({ invoke }),
     });
 
-    const mockList = jest.fn().mockResolvedValue({
-      framework: 'enterprise',
-      tactics: testBuckets.tactics,
-      techniques: testBuckets.techniques,
-      subtechniques: testBuckets.subtechniques,
-    });
+    const mockList = jest.fn().mockResolvedValue({ framework: 'enterprise', ...testBuckets });
     const mitreDataClient: MitreAttackDataClient = { list: mockList, getById: jest.fn() };
 
     const node = addMitreMappingsNode({

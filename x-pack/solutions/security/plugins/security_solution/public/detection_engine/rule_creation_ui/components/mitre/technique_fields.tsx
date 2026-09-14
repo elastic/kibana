@@ -23,6 +23,7 @@ import type {
   MitreTechniqueSummary,
   MitreSubtechniqueSummary,
 } from '@kbn/security-mitre-attack-common';
+import { getMitreEntityDisplayName } from '@kbn/security-mitre-attack-common';
 import * as Rulei18n from '../../../common/translations';
 import type { FieldHook } from '../../../../shared_imports';
 import { MyAddItemButton } from '../add_item_form';
@@ -213,7 +214,7 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
                   ]
                 : []),
               ...options.map((option) => ({
-                inputDisplay: <>{`${option.name} (${option.id})`}</>,
+                inputDisplay: <>{getMitreEntityDisplayName(option)}</>,
                 value: option.id,
                 disabled,
               })),

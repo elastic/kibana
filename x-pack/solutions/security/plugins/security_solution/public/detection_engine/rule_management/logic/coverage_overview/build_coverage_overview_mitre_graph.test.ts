@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { MitreTacticSummary, MitreTechniqueSummary } from '@kbn/security-mitre-attack-common';
+import {
+  buildMockMitreTacticSummary,
+  buildMockMitreTechniqueSummary,
+} from '@kbn/security-mitre-attack-common';
 import {
   getMockCoverageOverviewTactics,
   getMockCoverageOverviewTechniques,
@@ -89,40 +92,25 @@ describe('buildCoverageOverviewMitreGraph', () => {
   });
 
   it('sorts tactics by position ascending', () => {
-    const shuffledTactics: MitreTacticSummary[] = [
-      {
-        framework: 'enterprise',
-        framework_version: '16.1',
-        type: 'tactic',
-        revoked: false,
-        deprecated: false,
+    const shuffledTactics = [
+      buildMockMitreTacticSummary({
         id: 'TA003',
         name: 'Tactic 3',
         reference: 'https://some-link/TA003',
         position: 2,
-      },
-      {
-        framework: 'enterprise',
-        framework_version: '16.1',
-        type: 'tactic',
-        revoked: false,
-        deprecated: false,
+      }),
+      buildMockMitreTacticSummary({
         id: 'TA001',
         name: 'Tactic 1',
         reference: 'https://some-link/TA001',
         position: 0,
-      },
-      {
-        framework: 'enterprise',
-        framework_version: '16.1',
-        type: 'tactic',
-        revoked: false,
-        deprecated: false,
+      }),
+      buildMockMitreTacticSummary({
         id: 'TA002',
         name: 'Tactic 2',
         reference: 'https://some-link/TA002',
         position: 1,
-      },
+      }),
     ];
 
     const model = buildCoverageOverviewMitreGraph(shuffledTactics, [], []);
@@ -130,29 +118,9 @@ describe('buildCoverageOverviewMitreGraph', () => {
   });
 
   it('does not mutate the input tactics array', () => {
-    const tactics: MitreTacticSummary[] = [
-      {
-        framework: 'enterprise',
-        framework_version: '16.1',
-        type: 'tactic',
-        revoked: false,
-        deprecated: false,
-        id: 'TA002',
-        name: 'Tactic 2',
-        reference: 'https://some-link/TA002',
-        position: 1,
-      },
-      {
-        framework: 'enterprise',
-        framework_version: '16.1',
-        type: 'tactic',
-        revoked: false,
-        deprecated: false,
-        id: 'TA001',
-        name: 'Tactic 1',
-        reference: 'https://some-link/TA001',
-        position: 0,
-      },
+    const tactics = [
+      buildMockMitreTacticSummary({ id: 'TA002', position: 1 }),
+      buildMockMitreTacticSummary({ id: 'TA001', position: 0 }),
     ];
     const originalOrder = tactics.map((t) => t.id);
     buildCoverageOverviewMitreGraph(tactics, [], []);
@@ -160,42 +128,12 @@ describe('buildCoverageOverviewMitreGraph', () => {
   });
 
   it('places a multi-tactic technique under every tactic in tactic_ids', () => {
-    const tactics: MitreTacticSummary[] = [
-      {
-        framework: 'enterprise',
-        framework_version: '16.1',
-        type: 'tactic',
-        revoked: false,
-        deprecated: false,
-        id: 'TA001',
-        name: 'Tactic 1',
-        reference: 'https://some-link/TA001',
-        position: 0,
-      },
-      {
-        framework: 'enterprise',
-        framework_version: '16.1',
-        type: 'tactic',
-        revoked: false,
-        deprecated: false,
-        id: 'TA002',
-        name: 'Tactic 2',
-        reference: 'https://some-link/TA002',
-        position: 1,
-      },
+    const tactics = [
+      buildMockMitreTacticSummary({ id: 'TA001', position: 0 }),
+      buildMockMitreTacticSummary({ id: 'TA002', position: 1 }),
     ];
-    const techniques: MitreTechniqueSummary[] = [
-      {
-        framework: 'enterprise',
-        framework_version: '16.1',
-        type: 'technique',
-        revoked: false,
-        deprecated: false,
-        id: 'T001',
-        name: 'Technique 1',
-        reference: 'https://some-link/T001',
-        tactic_ids: ['TA001', 'TA002'],
-      },
+    const techniques = [
+      buildMockMitreTechniqueSummary({ id: 'T001', tactic_ids: ['TA001', 'TA002'] }),
     ];
 
     const model = buildCoverageOverviewMitreGraph(tactics, techniques, []);
@@ -204,43 +142,11 @@ describe('buildCoverageOverviewMitreGraph', () => {
   });
 
   it('does not place a technique under a tactic not in its tactic_ids', () => {
-    const tactics: MitreTacticSummary[] = [
-      {
-        framework: 'enterprise',
-        framework_version: '16.1',
-        type: 'tactic',
-        revoked: false,
-        deprecated: false,
-        id: 'TA001',
-        name: 'Tactic 1',
-        reference: 'https://some-link/TA001',
-        position: 0,
-      },
-      {
-        framework: 'enterprise',
-        framework_version: '16.1',
-        type: 'tactic',
-        revoked: false,
-        deprecated: false,
-        id: 'TA002',
-        name: 'Tactic 2',
-        reference: 'https://some-link/TA002',
-        position: 1,
-      },
+    const tactics = [
+      buildMockMitreTacticSummary({ id: 'TA001', position: 0 }),
+      buildMockMitreTacticSummary({ id: 'TA002', position: 1 }),
     ];
-    const techniques: MitreTechniqueSummary[] = [
-      {
-        framework: 'enterprise',
-        framework_version: '16.1',
-        type: 'technique',
-        revoked: false,
-        deprecated: false,
-        id: 'T001',
-        name: 'Technique 1',
-        reference: 'https://some-link/T001',
-        tactic_ids: ['TA001'],
-      },
-    ];
+    const techniques = [buildMockMitreTechniqueSummary({ id: 'T001', tactic_ids: ['TA001'] })];
 
     const model = buildCoverageOverviewMitreGraph(tactics, techniques, []);
     // TA001 gets T001

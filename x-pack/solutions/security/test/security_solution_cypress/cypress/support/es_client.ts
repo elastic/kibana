@@ -148,6 +148,22 @@ export const esClient = (
       });
       return null;
     },
+    deleteMitreEntitiesByVersion: async (frameworkVersion: string) => {
+      await client.deleteByQuery({
+        index: '.kibana_security_solution',
+        refresh: true,
+        query: {
+          bool: {
+            must: [
+              { term: { type: 'mitre-attack-entity' } },
+              { term: { 'mitre-attack-entity.framework_version': frameworkVersion } },
+            ],
+          },
+        },
+        conflicts: 'proceed',
+      });
+      return null;
+    },
   });
 
   return Promise.resolve();

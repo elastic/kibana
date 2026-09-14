@@ -8,11 +8,12 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
-import type {
-  MitreTacticSummary,
-  MitreTechniqueSummary,
-  MitreSubtechniqueSummary,
+import {
+  buildMockMitreTacticSummary,
+  buildMockMitreTechniqueSummary,
+  buildMockMitreSubtechniqueSummary,
 } from '@kbn/security-mitre-attack-common';
+import type { MitreTechniqueSummary } from '@kbn/security-mitre-attack-common';
 
 import { AddMitreAttackThreat } from '.';
 import { TestProviders, useFormFieldMock } from '../../../../common/mock';
@@ -29,62 +30,45 @@ jest.mock('../../../../common/hooks/mitre/use_mitre_configuration', () => ({
   useMitreConfiguration: (...args: unknown[]) => mockUseMitreConfiguration(...args),
 }));
 
-const BASE = {
-  framework: 'enterprise' as const,
-  framework_version: '16.1',
-  revoked: false,
-  deprecated: false,
-};
-
-const testTactics: MitreTacticSummary[] = [
-  {
-    ...BASE,
-    type: 'tactic',
+const testTactics = [
+  buildMockMitreTacticSummary({
     id: 'TA001',
     name: 'Tactic 1',
     reference: 'https://example.com/TA001',
     position: 0,
-  },
-  {
-    ...BASE,
-    type: 'tactic',
+  }),
+  buildMockMitreTacticSummary({
     id: 'TA002',
     name: 'Tactic 2',
     reference: 'https://example.com/TA002',
     position: 1,
-  },
+  }),
 ];
 
 const testTechniques: MitreTechniqueSummary[] = [
-  {
-    ...BASE,
-    type: 'technique',
+  buildMockMitreTechniqueSummary({
     id: 'T001',
     name: 'Technique 1',
     reference: 'https://example.com/T001',
     tactic_ids: ['TA001'],
-  },
+  }),
   // Belongs to Tactic 2 only - used to validate the reassigned-from-tactic path.
-  {
-    ...BASE,
-    type: 'technique',
+  buildMockMitreTechniqueSummary({
     id: 'T002',
     name: 'Moved Technique',
     reference: 'https://example.com/T002',
     tactic_ids: ['TA002'],
-  },
+  }),
 ];
 
-const testSubtechniques: MitreSubtechniqueSummary[] = [
-  {
-    ...BASE,
-    type: 'subtechnique',
+const testSubtechniques = [
+  buildMockMitreSubtechniqueSummary({
     id: 'T001.001',
     name: 'Subtechnique 1',
     reference: 'https://example.com/T001/001',
     tactic_ids: ['TA001'],
     technique_id: 'T001',
-  },
+  }),
 ];
 
 const MITRE_FRAMEWORK = 'MITRE ATT&CK';
@@ -353,14 +337,12 @@ describe('AddMitreAttackThreat - renamed MITRE entity handling', () => {
 
   it('renders technique under each tactic it belongs to when it has multiple tactic_ids', async () => {
     // A technique that belongs to both TA001 and TA002 should appear in both cascades.
-    const multiTacticTechnique: MitreTechniqueSummary = {
-      ...BASE,
-      type: 'technique',
+    const multiTacticTechnique = buildMockMitreTechniqueSummary({
       id: 'T003',
       name: 'Multi Tactic Technique',
       reference: 'https://example.com/T003',
       tactic_ids: ['TA001', 'TA002'],
-    };
+    });
     mockUseMitreConfiguration.mockReturnValue({
       tactics: testTactics,
       techniques: [...testTechniques, multiTacticTechnique],
