@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Key } from 'selenium-webdriver';
 import { asyncForEach } from '@kbn/std';
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
