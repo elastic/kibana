@@ -32,8 +32,10 @@ const resolveAllowedConnectorIds = async (
   try {
     const agent = await registry.get(agentId);
     return agent.configuration.connector_ids;
-  } catch {
-    return undefined;
+  } catch (e) {
+    const statusCode = (e as { output?: { statusCode?: number } }).output?.statusCode;
+    if (statusCode === 404) return undefined;
+    throw e;
   }
 };
 
