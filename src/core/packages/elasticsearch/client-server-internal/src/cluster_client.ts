@@ -235,16 +235,19 @@ export class ClusterClient implements ICustomClusterClient {
     // The effective credential is whatever ends up in `scopedHeaders`: for real requests the auth
     // provider's post-authentication headers override the one that came in on the wire.
     //
-    // A UIAM bearer token brings its own client authentication, so whatever rode in with it in
-    // `scopedHeaders` is forwarded verbatim - including nothing at all, which UIAM denies if the
-    // token required it. Kibana's shared secret is never substituted: the token may be bound to
-    // another client. Any other credential (notably a UIAM API key) is one Kibana can vouch for,
-    // so it may require client authentication of Kibana's own.
+    // A UIAM bearer token that rode in over HTTP brings its own client authentication, so whatever
+    // arrived with it in `scopedHeaders` is forwarded verbatim - including nothing at all, which
+    // UIAM denies if the token required it. Kibana's shared secret is never substituted: the token
+    // may be bound to another client. Everything else is a credential Kibana can vouch for - a
+    // UIAM API key, or a bearer token Kibana minted itself and bound to a fake request (service
+    // accounts, task runs) - so it may require client authentication of Kibana's own.
     let clientAuthentication: string | undefined | null;
     if (this.security?.uiam) {
       const credential = HTTPAuthorizationHeader.parseFromRequest({ headers: scopedHeaders });
       const isUiamInboundToken =
-        credential?.scheme.toLowerCase() === 'bearer' && isUiamCredential(credential);
+        requestHeaders !== undefined &&
+        credential?.scheme.toLowerCase() === 'bearer' &&
+        isUiamCredential(credential);
       if (credential && !isUiamInboundToken) {
         clientAuthentication = this.security.uiam.getElasticsearchClientAuthentication(
           requestHeaders
@@ -278,18 +281,20 @@ export class ClusterClient implements ICustomClusterClient {
       );
     }
 
-    // A UIAM bearer token brings its own client authentication, so forward whatever rode in with it
-    // verbatim and never substitute Kibana's shared secret: the token may be bound to another
-    // client. If it required client authentication and none arrived, UIAM denies the call, which is
-    // the correct outcome.
+    // A UIAM bearer token on a real request brings its own client authentication, so forward
+    // whatever rode in with it verbatim and never substitute Kibana's shared secret: the token may
+    // be bound to another client. If it required client authentication and none arrived, UIAM
+    // denies the call, which is the correct outcome.
     //
-    // Any other credential (notably a UIAM API key) is one Kibana vouches for itself, so it gets
-    // Kibana's own secret. `internal` applies regardless of the request shape: for a real request
-    // these are the auth provider's post-authentication headers, and for a fake one the credential
-    // was minted by Kibana, so neither needs an attestation to be trusted. The exception is a fake
-    // request explicitly marked as carrying a user-created (external) UIAM credential, which UIAM
-    // rejects when presented with client authentication.
+    // Everything else is a credential Kibana vouches for itself, so it gets Kibana's own secret.
+    // That includes a fake request's bearer token, which Kibana minted and bound to the request
+    // (service accounts, task runs). `internal` applies regardless of the request shape: for a
+    // real request these are the auth provider's post-authentication headers, and for a fake one
+    // the credential was minted by Kibana, so neither needs an attestation to be trusted. The
+    // exception is a fake request explicitly marked as carrying a user-created (external) UIAM
+    // credential, which UIAM rejects when presented with client authentication.
     const isUiamInboundToken =
+      isRealRequest(request) &&
       authorizationHeader.scheme.toLowerCase() === 'bearer' &&
       isUiamCredential(authorizationHeader);
     const isExternalCredential =

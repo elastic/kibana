@@ -1268,7 +1268,7 @@ describe('ClusterClient', () => {
         onRequestHandlerFactory: mockOnRequestHandlerFactory,
       });
       const fakeRequest = httpServerMock.createFakeKibanaRequest({
-        headers: { [AUTHORIZATION_HEADER]: 'ApiKey essu_dev_yes' },
+        headers: { [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes' },
       });
 
       const scopedClusterClient = clusterClient.asScoped(fakeRequest);
@@ -1280,7 +1280,7 @@ describe('ClusterClient', () => {
         expect.objectContaining({
           headers: {
             ...defaultHeaders,
-            [AUTHORIZATION_HEADER]: 'ApiKey essu_dev_yes',
+            [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes',
             [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
           },
         })
@@ -1770,39 +1770,39 @@ describe('ClusterClient', () => {
       );
     });
 
-    it.each(['upstream-shared-secret', ''])(
-      'preserves inbound secondary client authentication %s',
-      (clientAuthentication) => {
-        const headers = {
-          [AUTHORIZATION_HEADER]: 'Bearer essu_ephemeral_token',
-          [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication,
-        };
-        authHeaders.get.mockReturnValue(headers);
-        const clusterClient = new ClusterClient({
-          config: createConfig(),
-          logger,
-          type: 'custom-type',
-          authHeaders,
-          security: securityServiceMock.createInternalSetup(),
-          agentFactoryProvider,
-          kibanaVersion,
-          onRequestHandlerFactory: mockOnRequestHandlerFactory,
-        });
-        const request = httpServerMock.createKibanaRequest({ headers });
+    it('specifies secondary client authentication for a Kibana-minted bearer token on a fake request', () => {
+      // Service account requests bind a Kibana-minted ephemeral token to a fake request without
+      // any client authentication of their own, so Kibana still has to vouch for it.
+      const security = securityServiceMock.createInternalSetup();
+      const clusterClient = new ClusterClient({
+        config: createConfig(),
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        security,
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+      const fakeRequest = httpServerMock.createFakeKibanaRequest({
+        headers: { [AUTHORIZATION_HEADER]: 'Bearer essu_service_account_token' },
+      });
 
-        client = clusterClient.asScoped(request).asSecondaryAuthUser;
+      client = clusterClient.asScoped(fakeRequest).asSecondaryAuthUser;
 
-        expect(internalClient.child).toHaveBeenCalledWith(
-          expect.objectContaining({
-            headers: {
-              ...defaultHeaders,
-              [ES_SECONDARY_AUTH_HEADER]: headers.authorization,
-              [ES_SECONDARY_CLIENT_AUTH_HEADER]: clientAuthentication,
-            },
-          })
-        );
-      }
-    );
+      expect(security.uiam!.getElasticsearchClientAuthentication).toHaveBeenCalledWith(
+        expect.objectContaining({ credentialSource: 'internal' })
+      );
+      expect(internalClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: {
+            ...defaultHeaders,
+            [ES_SECONDARY_AUTH_HEADER]: 'Bearer essu_service_account_token',
+            [ES_SECONDARY_CLIENT_AUTH_HEADER]: 'some-shared-secret',
+          },
+        })
+      );
+    });
 
     it('does not reattach secondary client authentication for an attested loopback request', () => {
       const authorization = new HTTPAuthorizationHeader('Bearer', 'essu_internal_token');
