@@ -24,7 +24,6 @@ import { MAX_RUNTIME_FIELDS_PER_REQUEST } from './bulk_close_runtime_mappings';
 import { setSignalsStatusRoute } from './open_close_signals_route';
 import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
 
-
 describe('set signal status', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: SecuritySolutionRequestHandlerContextMock;
