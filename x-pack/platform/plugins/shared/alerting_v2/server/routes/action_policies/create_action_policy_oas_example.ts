@@ -17,7 +17,7 @@ export const createActionPolicyOasExamples = (): AlertingOasOperationObject =>
   buildOasOperation({
     requestBody: {
       name: 'createActionPolicyRequest',
-      summary: 'Workflow notification for matching host alerts',
+      summary: 'Workflow notification for production-tagged alerts',
       value: CREATE_ACTION_POLICY_REQUEST,
     },
     responses: {
