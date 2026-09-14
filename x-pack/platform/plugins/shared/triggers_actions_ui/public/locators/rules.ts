@@ -8,7 +8,7 @@
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import {
-  RULES_MANAGEMENT_HOST,
+  STACK_MANAGEMENT_RULES_HOST,
   rulesLocatorID,
   type RulesLocatorParams,
 } from '@kbn/rule-data-utils';
@@ -24,7 +24,7 @@ export class RulesLocatorDefinition implements LocatorDefinition<RulesLocatorPar
     type = [],
     host,
   }: RulesLocatorParams) => {
-    const { app, basePath } = host ?? RULES_MANAGEMENT_HOST;
+    const { app, pathPrefix } = host ?? STACK_MANAGEMENT_RULES_HOST;
     return {
       app,
       path: setStateToKbnUrl(
@@ -37,7 +37,7 @@ export class RulesLocatorDefinition implements LocatorDefinition<RulesLocatorPar
           type,
         },
         { useHash: false, storeInHashQuery: false },
-        basePath
+        pathPrefix
       ),
       state: {},
     };

@@ -140,7 +140,7 @@ describe('ObservabilityAlertingApp', () => {
         history,
         host: {
           app: OBSERVABILITY_ALERTING_APP_ID,
-          basePath: OBSERVABILITY_ALERTING_RULES_V1_PATH,
+          pathPrefix: OBSERVABILITY_ALERTING_RULES_V1_PATH,
         },
       })
     );

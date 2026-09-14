@@ -51,7 +51,7 @@ export const LogsListContainer = () => {
 
   const docLink = docLinks.links.alerting.guide;
   const rulesListHref = host
-    ? getUrlForApp(host.app, { path: host.basePath })
+    ? getUrlForApp(host.app, { path: host.pathPrefix })
     : http.basePath.prepend(triggersActionsRoute);
   const alertsBackHref = getUrlForApp('observability-overview', { path: '/alerts' });
   const mode = useRulesPageMode();

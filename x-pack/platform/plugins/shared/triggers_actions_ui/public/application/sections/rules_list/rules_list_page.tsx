@@ -66,7 +66,7 @@ export const RulesListContainer = () => {
   }, [docTitle, setBreadcrumbs]);
 
   const v1ListHref = host
-    ? getUrlForApp(host.app, { path: host.basePath })
+    ? getUrlForApp(host.app, { path: host.pathPrefix })
     : http.basePath.prepend(triggersActionsRoute);
 
   const rulesListTabs = useMemo(() => {

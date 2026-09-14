@@ -8,6 +8,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
+import { TRIGGERS_ACTIONS_MANAGEMENT_PATH } from './routes/stack_rule_paths';
 
 export const ruleDetailsLocatorID = 'RULE_DETAILS_LOCATOR';
 export const rulesLocatorID = 'RULES_LOCATOR';
@@ -19,18 +20,20 @@ export const RULE_DETAILS_ALERTS_TAB: RuleDetailsTabId = 'alerts';
 export const RULE_DETAILS_HISTORY_TAB: RuleDetailsTabId = 'history';
 
 /**
- * Identifies the host app and base path for v1 rule locators so the same
- * locator resolves to different URL trees depending on which app mounts the
- * classic rules page (Stack Management, Observability, etc.).
+ * Identifies the Kibana app and in-app path prefix for v1 rule locators so the
+ * same locator resolves to different URL trees depending on which app mounts
+ * the classic rules page (Stack Management, Observability, etc.).
+ *
+ * `pathPrefix` is an in-app path, not `core.http.basePath`.
  */
-export interface RulesLocatorHost extends SerializableRecord {
+export interface RuleLocatorHost extends SerializableRecord {
   app: string;
-  basePath: string;
+  pathPrefix: string;
 }
 
-export const RULES_MANAGEMENT_HOST: RulesLocatorHost = {
+export const STACK_MANAGEMENT_RULES_HOST: RuleLocatorHost = {
   app: 'management',
-  basePath: '/insightsAndAlerting/triggersActions',
+  pathPrefix: `/${TRIGGERS_ACTIONS_MANAGEMENT_PATH}`,
 };
 
 export interface RuleDetailsLocatorParams extends SerializableRecord {
@@ -40,7 +43,7 @@ export interface RuleDetailsLocatorParams extends SerializableRecord {
   rangeTo?: string;
   kuery?: string;
   controlConfigs?: SerializableRecord[];
-  host?: RulesLocatorHost;
+  host?: RuleLocatorHost;
 }
 
 export interface RulesLocatorParams extends SerializableRecord {
@@ -49,5 +52,5 @@ export interface RulesLocatorParams extends SerializableRecord {
   search?: string;
   status?: RuleStatus[];
   type?: string[];
-  host?: RulesLocatorHost;
+  host?: RuleLocatorHost;
 }

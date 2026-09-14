@@ -10,11 +10,11 @@ import {
   ALERT_STATUS,
   RULE_DETAILS_ALERTS_TAB,
   RULE_DETAILS_HISTORY_TAB,
-  RULES_MANAGEMENT_HOST,
+  STACK_MANAGEMENT_RULES_HOST,
 } from '@kbn/rule-data-utils';
 import { getRuleDetailsPath, RuleDetailsLocatorDefinition } from './rule_details';
 
-const MGMT_BASE = RULES_MANAGEMENT_HOST.basePath;
+const MGMT_BASE = STACK_MANAGEMENT_RULES_HOST.pathPrefix;
 
 describe('RuleDetailsLocator', () => {
   const locator = new RuleDetailsLocatorDefinition();
@@ -114,7 +114,7 @@ describe('RuleDetailsLocator', () => {
   });
 
   it('should resolve to a custom host when host is provided', async () => {
-    const host = { app: 'observability', basePath: '/alerting/rules/v1' };
+    const host = { app: 'observability', pathPrefix: '/alerting/rules/v1' };
     const location = await locator.getLocation({ ruleId: mockedRuleId, host });
     expect(location.app).toEqual('observability');
     expect(location.path).toEqual(`/alerting/rules/v1${getRuleDetailsPath(mockedRuleId)}`);

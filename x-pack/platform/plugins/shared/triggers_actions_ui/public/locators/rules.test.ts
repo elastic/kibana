@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { RULES_MANAGEMENT_HOST } from '@kbn/rule-data-utils';
+import { STACK_MANAGEMENT_RULES_HOST } from '@kbn/rule-data-utils';
 import { RulesLocatorDefinition } from './rules';
 
-const MGMT_BASE = RULES_MANAGEMENT_HOST.basePath;
+const MGMT_BASE = STACK_MANAGEMENT_RULES_HOST.pathPrefix;
 
 describe('RulesLocator', () => {
   const locator = new RulesLocatorDefinition();
@@ -62,7 +62,7 @@ describe('RulesLocator', () => {
   });
 
   it('should resolve to a custom host when host is provided', async () => {
-    const host = { app: 'observability', basePath: '/alerting/rules/v1' };
+    const host = { app: 'observability', pathPrefix: '/alerting/rules/v1' };
     const location = await locator.getLocation({ host });
     expect(location.app).toEqual('observability');
     expect(location.path).toContain('/alerting/rules/v1');

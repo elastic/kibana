@@ -37,7 +37,7 @@ import {
   editRuleRoute,
   createRuleFromTemplateRoute,
 } from '@kbn/rule-data-utils';
-import type { RulesLocatorHost } from '@kbn/rule-data-utils';
+import type { RuleLocatorHost } from '@kbn/rule-data-utils';
 import { QueryClientProvider } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { CasesService } from '@kbn/response-ops-alerts-table/types';
@@ -103,7 +103,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   cps?: CPSPluginStart;
   inspector?: InspectorStart;
   hideListBackButton?: boolean;
-  host?: RulesLocatorHost;
+  host?: RuleLocatorHost;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {

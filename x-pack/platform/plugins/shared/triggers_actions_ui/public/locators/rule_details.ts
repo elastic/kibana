@@ -12,7 +12,7 @@ import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import {
   RULE_DETAILS_ALERTS_TAB,
   RULE_DETAILS_HISTORY_TAB,
-  RULES_MANAGEMENT_HOST,
+  STACK_MANAGEMENT_RULES_HOST,
   getRulesAppDetailsRoute,
   ruleDetailsLocatorID,
   type RuleDetailsLocatorParams,
@@ -28,7 +28,7 @@ export class RuleDetailsLocatorDefinition implements LocatorDefinition<RuleDetai
 
   public readonly getLocation = async (params: RuleDetailsLocatorParams) => {
     const { controlConfigs, ruleId, kuery, rangeTo, tabId, rangeFrom, host } = params;
-    const { app, basePath } = host ?? RULES_MANAGEMENT_HOST;
+    const { app, pathPrefix } = host ?? STACK_MANAGEMENT_RULES_HOST;
 
     const appState: {
       tabId?: RuleDetailsTabId;
@@ -44,7 +44,7 @@ export class RuleDetailsLocatorDefinition implements LocatorDefinition<RuleDetai
     appState.controlConfigs =
       (controlConfigs as FilterControlConfig[] | undefined) ?? DEFAULT_CONTROLS;
 
-    let path = `${basePath}${getRuleDetailsPath(ruleId)}`;
+    let path = `${pathPrefix}${getRuleDetailsPath(ruleId)}`;
 
     if (tabId === RULE_DETAILS_ALERTS_TAB) {
       path = `${path}?tabId=${tabId}`;

@@ -13,7 +13,6 @@ import { test, makeEsQueryRule, openRulesListAndSearch } from '../fixtures';
 const RULES_APP = 'rules';
 const SM_BASE = 'management/insightsAndAlerting/triggersActions';
 const APP_TITLE_SUBJ = 'appHeaderTitle';
-const RULES_LIST_SUBJ = 'rulesList';
 
 const ALERTS_AND_ACTIONS_ROLE: KibanaRole = {
   elasticsearch: {
@@ -78,7 +77,9 @@ test.describe('Rules home page', { tag: tags.stateful.classic }, () => {
     apiServices,
     browserAuth,
     page,
+    pageObjects,
   }) => {
+    const rules = pageObjects.classicRulesPage;
     const ruleResponse = await apiServices.alerting.rules.create(
       makeEsQueryRule('scout-home-page')
     );
@@ -89,24 +90,21 @@ test.describe('Rules home page', { tag: tags.stateful.classic }, () => {
     await browserAuth.loginAsAdmin();
     await openRulesListAndSearch(page, ruleName);
 
-    const ruleRow = page.testSubj
-      .locator(RULES_LIST_SUBJ)
-      .locator(`[data-test-subj="rulesListTableRowName-${ruleName}"]`);
-
     await test.step('renders the rules list with the rule visible', async () => {
-      await expect(page.testSubj.locator(RULES_LIST_SUBJ)).toBeVisible();
-      await expect(ruleRow).toBeVisible();
+      await expect(rules.rulesList).toBeVisible();
+      await expect(rules.ruleNameLink(ruleName)).toBeVisible();
     });
 
     await test.step('rule-name link href stays within the host mount', async () => {
-      const anchor = ruleRow.locator('a').first();
-      const href = await anchor.getAttribute('href');
-      expect(href).toContain('/triggersActions/rule/');
-      expect(href).not.toMatch(/\/app\/rules\//);
+      await expect(rules.ruleNameLink(ruleName)).toHaveAttribute(
+        'href',
+        /\/triggersActions\/rule\//
+      );
+      await expect(rules.ruleNameLink(ruleName)).not.toHaveAttribute('href', /\/app\/rules\//);
     });
 
     await test.step('navigates to the rule details page when clicking the rule', async () => {
-      await ruleRow.click();
+      await rules.clickRuleName(ruleName);
       await page.waitForURL(new RegExp(`/rule/${ruleId}(\\b|$)`));
       expect(page.url()).toContain(`/app/${SM_BASE}/rule/${ruleId}`);
     });
