@@ -48,111 +48,99 @@ describe('chart type guidance', () => {
       Object {
         "config": Object {
           "data_table": "DESIGN GUIDANCE:
-      - Titles: omit the panel title when the chart already displays the information within itself (metric, gauge, tagcloud, and waffle charts show their value and label directly). When a title is needed, make it self-explanatory and exhaustive so axis titles become unnecessary. Never duplicate information across the title, axis titles, and metric labels.
       - Units: show values in their natural unit whenever the data has a well-known one — percentages for utilization and rates, bytes for storage, memory, and network volume, bits for network throughput, human-readable durations for latency and response times. Column names and the request often reveal the unit (e.g. \\"cpu\\", \\"percent\\", \\"bytes_in\\", \\"disk_used\\", \\"latency_ms\\"); apply it even when nobody asked. Plain counts, rates without a known scale, and ambiguous units stay unformatted.
-      - Defaults are preferences, not proof that an existing setting is wrong. A gauge goal, a threshold, or an unusual color may be intentional; preserve explicit user choices and meaningful existing settings when editing.
+      - Include a concise panel title naming the measure and breakdown; category labels do not replace it.
       - Color table values as badges, and only where color adds meaning (status, severity, magnitude). Do not color cell backgrounds or text unless the user asks.
 
       CONFIGURATION RULES FOR DATA_TABLE:
-      - Titles: omit the \`title\` field to show no title.
-      - Number formats — set \`format\` on the bound column: CPU / utilization percentages → { type: \\"percent\\", decimals: 1, compact: true }; bytes → { type: \\"bytes\\", decimals: 1 }; bits → { type: \\"bits\\", decimals: 1 }; durations → { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" } where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Do NOT apply a format to plain counts or ambiguous units.",
+      - Number formats — set \`format\` on the bound column: CPU / utilization percentages → { type: \\"percent\\", decimals: 1, compact: true }; bytes → { type: \\"bytes\\", decimals: 1 }; bits → { type: \\"bits\\", decimals: 1 }; durations → { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" } where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Do NOT apply a format to plain counts or ambiguous units.
+      - Set the top-level \`title\` field to the panel title.",
           "gauge": "DESIGN GUIDANCE:
-      - Titles: omit the panel title when the chart already displays the information within itself (metric, gauge, tagcloud, and waffle charts show their value and label directly). When a title is needed, make it self-explanatory and exhaustive so axis titles become unnecessary. Never duplicate information across the title, axis titles, and metric labels.
       - Units: show values in their natural unit whenever the data has a well-known one — percentages for utilization and rates, bytes for storage, memory, and network volume, bits for network throughput, human-readable durations for latency and response times. Column names and the request often reveal the unit (e.g. \\"cpu\\", \\"percent\\", \\"bytes_in\\", \\"disk_used\\", \\"latency_ms\\"); apply it even when nobody asked. Plain counts, rates without a known scale, and ambiguous units stay unformatted.
-      - Defaults are preferences, not proof that an existing setting is wrong. A gauge goal, a threshold, or an unusual color may be intentional; preserve explicit user choices and meaningful existing settings when editing.
-      - Gauge bounds and goals describe business targets. Never invent, infer, or backfill minimum, maximum, or goal values from the data or from units like bytes, requests, or rates; set them only when the user provides them, and keep existing ones on edits.
-      - For new gauges, prefer four equal percentage color bands unless the user specifies different bands. When prettifying, request four equal percentage bands explicitly unless the existing bands reflect explicit user thresholds or meaningful business ranges. A focused color or palette edit keeps the existing band count, thresholds, and percentage or absolute scale.
+      - No panel title: the gauge label names the measure.
+      - Gauge bounds and goals describe business targets. Use supplied or meaningful existing bounds and goals; never invent business targets from the data or units.
+      - Default to four equal percentage color bands. During enhancement, evaluate existing thresholds: retain meaningful boundaries, otherwise restore the default bands. A focused palette edit preserves boundaries and scale.
 
       CONFIGURATION RULES FOR GAUGE:
-      - Titles: omit the \`title\` field to show no title.
       - Number formats — set \`format\` on the bound column: CPU / utilization percentages → { type: \\"percent\\", decimals: 1, compact: true }; bytes → { type: \\"bytes\\", decimals: 1 }; bits → { type: \\"bits\\", decimals: 1 }; durations → { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" } where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Do NOT apply a format to plain counts or ambiguous units.
-      - Omit \`min\`, \`max\`, and \`goal\` unless the user supplied them or the existing configuration already has them.",
+      - Omit the top-level \`title\` field. Name the measure using the chart's internal labels.
+      - Omit \`min\`, \`max\`, and \`goal\` unless supplied or meaningful in the existing configuration.",
           "heatmap": "DESIGN GUIDANCE:
-      - Titles: omit the panel title when the chart already displays the information within itself (metric, gauge, tagcloud, and waffle charts show their value and label directly). When a title is needed, make it self-explanatory and exhaustive so axis titles become unnecessary. Never duplicate information across the title, axis titles, and metric labels.
       - Units: show values in their natural unit whenever the data has a well-known one — percentages for utilization and rates, bytes for storage, memory, and network volume, bits for network throughput, human-readable durations for latency and response times. Column names and the request often reveal the unit (e.g. \\"cpu\\", \\"percent\\", \\"bytes_in\\", \\"disk_used\\", \\"latency_ms\\"); apply it even when nobody asked. Plain counts, rates without a known scale, and ambiguous units stay unformatted.
-      - Defaults are preferences, not proof that an existing setting is wrong. A gauge goal, a threshold, or an unusual color may be intentional; preserve explicit user choices and meaningful existing settings when editing.
+      - Include a concise panel title naming the measure and breakdown; category labels do not replace it.
       - Keep the default \\"Temperature\\" palette that Lens binds to the data; use a custom palette or thresholds only when the user asks.
 
       CONFIGURATION RULES FOR HEATMAP:
-      - Titles: omit the \`title\` field to show no title.
-      - Number formats — set \`format\` on the bound column: CPU / utilization percentages → { type: \\"percent\\", decimals: 1, compact: true }; bytes → { type: \\"bytes\\", decimals: 1 }; bits → { type: \\"bits\\", decimals: 1 }; durations → { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" } where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Do NOT apply a format to plain counts or ambiguous units.",
+      - Number formats — set \`format\` on the bound column: CPU / utilization percentages → { type: \\"percent\\", decimals: 1, compact: true }; bytes → { type: \\"bytes\\", decimals: 1 }; bits → { type: \\"bits\\", decimals: 1 }; durations → { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" } where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Do NOT apply a format to plain counts or ambiguous units.
+      - Set the top-level \`title\` field to the panel title.",
           "metric": "DESIGN GUIDANCE:
-      - Titles: omit the panel title when the chart already displays the information within itself (metric, gauge, tagcloud, and waffle charts show their value and label directly). When a title is needed, make it self-explanatory and exhaustive so axis titles become unnecessary. Never duplicate information across the title, axis titles, and metric labels.
       - Units: show values in their natural unit whenever the data has a well-known one — percentages for utilization and rates, bytes for storage, memory, and network volume, bits for network throughput, human-readable durations for latency and response times. Column names and the request often reveal the unit (e.g. \\"cpu\\", \\"percent\\", \\"bytes_in\\", \\"disk_used\\", \\"latency_ms\\"); apply it even when nobody asked. Plain counts, rates without a known scale, and ambiguous units stay unformatted.
-      - Defaults are preferences, not proof that an existing setting is wrong. A gauge goal, a threshold, or an unusual color may be intentional; preserve explicit user choices and meaningful existing settings when editing.
       - No panel title: the primary metric label already names the panel.
       - A single number is fine. When the query results support it and the value benefits from context, add a trend background or a secondary metric instead of leaving a lone number on white.
       - Show a progress bar only when the value has a meaningful maximum.
       - A secondary trend or delta needs no label; label a secondary metric only when it is a distinct named measure.
-      - Color the value, not the background, and only when it carries meaning. Clearly bounded metrics (percent, ratio, CPU/memory/disk utilization, error rate, success rate, SLO compliance) benefit from status bands in the same scale as the value; for adverse metrics such as error rate, higher is worse. Unbounded values (raw counts, bytes, durations, throughput, rates with unknown scale) stay uncolored.
+      - Color the value, not the background, and only when it carries meaning. Bounded metrics (percent, ratio, CPU/memory/disk utilization, error rate, success rate, SLO compliance) can use status bands when meaningful thresholds are supported by the query or context; for adverse metrics such as error rate, higher is worse. Unbounded values and metrics without defensible thresholds stay uncolored.
 
       CONFIGURATION RULES FOR METRIC:
-      - Titles: omit the \`title\` field to show no title.
       - Number formats — set \`format\` on the bound column: CPU / utilization percentages → { type: \\"percent\\", decimals: 1, compact: true }; bytes → { type: \\"bytes\\", decimals: 1 }; bits → { type: \\"bits\\", decimals: 1 }; durations → { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" } where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Do NOT apply a format to plain counts or ambiguous units.
+      - Omit the top-level \`title\` field. Name the measure using the chart's internal labels.
       - Trend backgrounds (\`background_chart: { type: \\"trend\\" }\`) and secondary metrics (a second \`metrics[]\` entry with \`type: \\"secondary\\"\`) must bind columns the same ES|QL query returns. Never invent another index or field.
       - Progress bar: \`background_chart\` with \`type: \\"bar\\"\` and a \`max_value\` column, only for meaningful progress-to-max.
       - For trend/delta secondary metrics, hide the label with \`styling.secondary.label.visible: false\` and omit \`label\`.",
           "mosaic": "DESIGN GUIDANCE:
-      - Titles: omit the panel title when the chart already displays the information within itself (metric, gauge, tagcloud, and waffle charts show their value and label directly). When a title is needed, make it self-explanatory and exhaustive so axis titles become unnecessary. Never duplicate information across the title, axis titles, and metric labels.
       - Units: show values in their natural unit whenever the data has a well-known one — percentages for utilization and rates, bytes for storage, memory, and network volume, bits for network throughput, human-readable durations for latency and response times. Column names and the request often reveal the unit (e.g. \\"cpu\\", \\"percent\\", \\"bytes_in\\", \\"disk_used\\", \\"latency_ms\\"); apply it even when nobody asked. Plain counts, rates without a known scale, and ambiguous units stay unformatted.
-      - Defaults are preferences, not proof that an existing setting is wrong. A gauge goal, a threshold, or an unusual color may be intentional; preserve explicit user choices and meaningful existing settings when editing.
+      - Include a concise panel title naming the measure and breakdown; category labels do not replace it.
 
       CONFIGURATION RULES FOR MOSAIC:
-      - Titles: omit the \`title\` field to show no title.
-      - Number formats — set \`format\` on the bound column: CPU / utilization percentages → { type: \\"percent\\", decimals: 1, compact: true }; bytes → { type: \\"bytes\\", decimals: 1 }; bits → { type: \\"bits\\", decimals: 1 }; durations → { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" } where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Do NOT apply a format to plain counts or ambiguous units.",
+      - Number formats — set \`format\` on the bound column: CPU / utilization percentages → { type: \\"percent\\", decimals: 1, compact: true }; bytes → { type: \\"bytes\\", decimals: 1 }; bits → { type: \\"bits\\", decimals: 1 }; durations → { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" } where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Do NOT apply a format to plain counts or ambiguous units.
+      - Set the top-level \`title\` field to the panel title.",
           "pie": "DESIGN GUIDANCE:
-      - Titles: omit the panel title when the chart already displays the information within itself (metric, gauge, tagcloud, and waffle charts show their value and label directly). When a title is needed, make it self-explanatory and exhaustive so axis titles become unnecessary. Never duplicate information across the title, axis titles, and metric labels.
       - Units: show values in their natural unit whenever the data has a well-known one — percentages for utilization and rates, bytes for storage, memory, and network volume, bits for network throughput, human-readable durations for latency and response times. Column names and the request often reveal the unit (e.g. \\"cpu\\", \\"percent\\", \\"bytes_in\\", \\"disk_used\\", \\"latency_ms\\"); apply it even when nobody asked. Plain counts, rates without a known scale, and ambiguous units stay unformatted.
-      - Defaults are preferences, not proof that an existing setting is wrong. A gauge goal, a threshold, or an unusual color may be intentional; preserve explicit user choices and meaningful existing settings when editing.
+      - Include a concise panel title naming the measure and breakdown; category labels do not replace it.
       - Use the default palette; per-slice or custom colors only when the user asks.
 
       CONFIGURATION RULES FOR PIE:
-      - Titles: omit the \`title\` field to show no title.
-      - Number formats — set \`format\` on the bound column: CPU / utilization percentages → { type: \\"percent\\", decimals: 1, compact: true }; bytes → { type: \\"bytes\\", decimals: 1 }; bits → { type: \\"bits\\", decimals: 1 }; durations → { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" } where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Do NOT apply a format to plain counts or ambiguous units.",
+      - Number formats — set \`format\` on the bound column: CPU / utilization percentages → { type: \\"percent\\", decimals: 1, compact: true }; bytes → { type: \\"bytes\\", decimals: 1 }; bits → { type: \\"bits\\", decimals: 1 }; durations → { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" } where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Do NOT apply a format to plain counts or ambiguous units.
+      - Set the top-level \`title\` field to the panel title.",
           "region_map": "DESIGN GUIDANCE:
-      - Titles: omit the panel title when the chart already displays the information within itself (metric, gauge, tagcloud, and waffle charts show their value and label directly). When a title is needed, make it self-explanatory and exhaustive so axis titles become unnecessary. Never duplicate information across the title, axis titles, and metric labels.
       - Units: show values in their natural unit whenever the data has a well-known one — percentages for utilization and rates, bytes for storage, memory, and network volume, bits for network throughput, human-readable durations for latency and response times. Column names and the request often reveal the unit (e.g. \\"cpu\\", \\"percent\\", \\"bytes_in\\", \\"disk_used\\", \\"latency_ms\\"); apply it even when nobody asked. Plain counts, rates without a known scale, and ambiguous units stay unformatted.
-      - Defaults are preferences, not proof that an existing setting is wrong. A gauge goal, a threshold, or an unusual color may be intentional; preserve explicit user choices and meaningful existing settings when editing.
+      - Include a concise panel title naming the measure and breakdown; category labels do not replace it.
 
       CONFIGURATION RULES FOR REGION_MAP:
-      - Titles: omit the \`title\` field to show no title.
-      - Number formats — set \`format\` on the bound column: CPU / utilization percentages → { type: \\"percent\\", decimals: 1, compact: true }; bytes → { type: \\"bytes\\", decimals: 1 }; bits → { type: \\"bits\\", decimals: 1 }; durations → { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" } where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Do NOT apply a format to plain counts or ambiguous units.",
+      - Number formats — set \`format\` on the bound column: CPU / utilization percentages → { type: \\"percent\\", decimals: 1, compact: true }; bytes → { type: \\"bytes\\", decimals: 1 }; bits → { type: \\"bits\\", decimals: 1 }; durations → { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" } where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Do NOT apply a format to plain counts or ambiguous units.
+      - Set the top-level \`title\` field to the panel title.",
           "tag_cloud": "DESIGN GUIDANCE:
-      - Titles: omit the panel title when the chart already displays the information within itself (metric, gauge, tagcloud, and waffle charts show their value and label directly). When a title is needed, make it self-explanatory and exhaustive so axis titles become unnecessary. Never duplicate information across the title, axis titles, and metric labels.
       - Units: show values in their natural unit whenever the data has a well-known one — percentages for utilization and rates, bytes for storage, memory, and network volume, bits for network throughput, human-readable durations for latency and response times. Column names and the request often reveal the unit (e.g. \\"cpu\\", \\"percent\\", \\"bytes_in\\", \\"disk_used\\", \\"latency_ms\\"); apply it even when nobody asked. Plain counts, rates without a known scale, and ambiguous units stay unformatted.
-      - Defaults are preferences, not proof that an existing setting is wrong. A gauge goal, a threshold, or an unusual color may be intentional; preserve explicit user choices and meaningful existing settings when editing.
+      - No panel title: use the labels within the tag cloud.
 
       CONFIGURATION RULES FOR TAG_CLOUD:
-      - Titles: omit the \`title\` field to show no title.
-      - Number formats — set \`format\` on the bound column: CPU / utilization percentages → { type: \\"percent\\", decimals: 1, compact: true }; bytes → { type: \\"bytes\\", decimals: 1 }; bits → { type: \\"bits\\", decimals: 1 }; durations → { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" } where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Do NOT apply a format to plain counts or ambiguous units.",
+      - Number formats — set \`format\` on the bound column: CPU / utilization percentages → { type: \\"percent\\", decimals: 1, compact: true }; bytes → { type: \\"bytes\\", decimals: 1 }; bits → { type: \\"bits\\", decimals: 1 }; durations → { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" } where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Do NOT apply a format to plain counts or ambiguous units.
+      - Omit the top-level \`title\` field. Name the measure using the chart's internal labels.",
           "treemap": "DESIGN GUIDANCE:
-      - Titles: omit the panel title when the chart already displays the information within itself (metric, gauge, tagcloud, and waffle charts show their value and label directly). When a title is needed, make it self-explanatory and exhaustive so axis titles become unnecessary. Never duplicate information across the title, axis titles, and metric labels.
       - Units: show values in their natural unit whenever the data has a well-known one — percentages for utilization and rates, bytes for storage, memory, and network volume, bits for network throughput, human-readable durations for latency and response times. Column names and the request often reveal the unit (e.g. \\"cpu\\", \\"percent\\", \\"bytes_in\\", \\"disk_used\\", \\"latency_ms\\"); apply it even when nobody asked. Plain counts, rates without a known scale, and ambiguous units stay unformatted.
-      - Defaults are preferences, not proof that an existing setting is wrong. A gauge goal, a threshold, or an unusual color may be intentional; preserve explicit user choices and meaningful existing settings when editing.
+      - Include a concise panel title naming the measure and breakdown; category labels do not replace it.
 
       CONFIGURATION RULES FOR TREEMAP:
-      - Titles: omit the \`title\` field to show no title.
-      - Number formats — set \`format\` on the bound column: CPU / utilization percentages → { type: \\"percent\\", decimals: 1, compact: true }; bytes → { type: \\"bytes\\", decimals: 1 }; bits → { type: \\"bits\\", decimals: 1 }; durations → { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" } where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Do NOT apply a format to plain counts or ambiguous units.",
+      - Number formats — set \`format\` on the bound column: CPU / utilization percentages → { type: \\"percent\\", decimals: 1, compact: true }; bytes → { type: \\"bytes\\", decimals: 1 }; bits → { type: \\"bits\\", decimals: 1 }; durations → { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" } where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Do NOT apply a format to plain counts or ambiguous units.
+      - Set the top-level \`title\` field to the panel title.",
           "waffle": "DESIGN GUIDANCE:
-      - Titles: omit the panel title when the chart already displays the information within itself (metric, gauge, tagcloud, and waffle charts show their value and label directly). When a title is needed, make it self-explanatory and exhaustive so axis titles become unnecessary. Never duplicate information across the title, axis titles, and metric labels.
       - Units: show values in their natural unit whenever the data has a well-known one — percentages for utilization and rates, bytes for storage, memory, and network volume, bits for network throughput, human-readable durations for latency and response times. Column names and the request often reveal the unit (e.g. \\"cpu\\", \\"percent\\", \\"bytes_in\\", \\"disk_used\\", \\"latency_ms\\"); apply it even when nobody asked. Plain counts, rates without a known scale, and ambiguous units stay unformatted.
-      - Defaults are preferences, not proof that an existing setting is wrong. A gauge goal, a threshold, or an unusual color may be intentional; preserve explicit user choices and meaningful existing settings when editing.
+      - No panel title: use the labels within the waffle chart.
 
       CONFIGURATION RULES FOR WAFFLE:
-      - Titles: omit the \`title\` field to show no title.
-      - Number formats — set \`format\` on the bound column: CPU / utilization percentages → { type: \\"percent\\", decimals: 1, compact: true }; bytes → { type: \\"bytes\\", decimals: 1 }; bits → { type: \\"bits\\", decimals: 1 }; durations → { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" } where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Do NOT apply a format to plain counts or ambiguous units.",
+      - Number formats — set \`format\` on the bound column: CPU / utilization percentages → { type: \\"percent\\", decimals: 1, compact: true }; bytes → { type: \\"bytes\\", decimals: 1 }; bits → { type: \\"bits\\", decimals: 1 }; durations → { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" } where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Do NOT apply a format to plain counts or ambiguous units.
+      - Omit the top-level \`title\` field. Name the measure using the chart's internal labels.",
           "xy": "DESIGN GUIDANCE:
-      - Titles: omit the panel title when the chart already displays the information within itself (metric, gauge, tagcloud, and waffle charts show their value and label directly). When a title is needed, make it self-explanatory and exhaustive so axis titles become unnecessary. Never duplicate information across the title, axis titles, and metric labels.
       - Units: show values in their natural unit whenever the data has a well-known one — percentages for utilization and rates, bytes for storage, memory, and network volume, bits for network throughput, human-readable durations for latency and response times. Column names and the request often reveal the unit (e.g. \\"cpu\\", \\"percent\\", \\"bytes_in\\", \\"disk_used\\", \\"latency_ms\\"); apply it even when nobody asked. Plain counts, rates without a known scale, and ambiguous units stay unformatted.
-      - Defaults are preferences, not proof that an existing setting is wrong. A gauge goal, a threshold, or an unusual color may be intentional; preserve explicit user choices and meaningful existing settings when editing.
+      - Include a concise panel title naming the measure and breakdown; category labels do not replace it.
       - No axis titles: the panel title and column labels already convey meaning.
       - Area series use a gradient fill, never a solid fill.
       - Place the legend outside the plot, at the bottom. Hide it when it only repeats what is visible (a single series); show it when it carries legend statistics.
-      - Let Lens assign series colors. Add explicit colors only when the user asks or when the same category must keep one color across charts.
+      - Use the default Lens palette. During enhancement, remove all custom palettes and series color overrides. Outside enhancement, explicit color requests may override the default.
 
       CONFIGURATION RULES FOR XY:
-      - Titles: omit the \`title\` field to show no title.
       - Number formats — set \`format\` on the bound column: CPU / utilization percentages → { type: \\"percent\\", decimals: 1, compact: true }; bytes → { type: \\"bytes\\", decimals: 1 }; bits → { type: \\"bits\\", decimals: 1 }; durations → { type: \\"duration\\", from: \\"<source unit>\\", to: \\"\\" } where <source unit> matches the ES field unit (e.g. \\"ms\\", \\"s\\", \\"micros\\"). Do NOT apply a format to plain counts or ambiguous units.
+      - Set the top-level \`title\` field to the panel title.
       - For horizontal bars, use type: \\"bar_horizontal\\" with x = category field and y = metric field. Example: \\"top OS by count as horizontal bar\\" → type: \\"bar_horizontal\\", x: { column: \\"OS\\" }, y: [{ column: \\"Count\\" }]. Do NOT put the metric on x.
       - Hide axis titles with \`title: { visible: false }\` on both the x and y axes; do not set axis title text.
       - Area series: \`styling.areas.fill: \\"gradient\\"\`.
@@ -163,41 +151,58 @@ describe('chart type guidance', () => {
       The Lens config author follows the same guidance; state the design choices you want and it expresses them in the chart settings.
 
       General:
-      - Titles: omit the panel title when the chart already displays the information within itself (metric, gauge, tagcloud, and waffle charts show their value and label directly). When a title is needed, make it self-explanatory and exhaustive so axis titles become unnecessary. Never duplicate information across the title, axis titles, and metric labels.
       - Units: show values in their natural unit whenever the data has a well-known one — percentages for utilization and rates, bytes for storage, memory, and network volume, bits for network throughput, human-readable durations for latency and response times. Column names and the request often reveal the unit (e.g. \\"cpu\\", \\"percent\\", \\"bytes_in\\", \\"disk_used\\", \\"latency_ms\\"); apply it even when nobody asked. Plain counts, rates without a known scale, and ambiguous units stay unformatted.
-      - Defaults are preferences, not proof that an existing setting is wrong. A gauge goal, a threshold, or an unusual color may be intentional; preserve explicit user choices and meaningful existing settings when editing.
 
       metric:
       - No panel title: the primary metric label already names the panel.
       - A single number is fine. When the query results support it and the value benefits from context, add a trend background or a secondary metric instead of leaving a lone number on white.
       - Show a progress bar only when the value has a meaningful maximum.
       - A secondary trend or delta needs no label; label a secondary metric only when it is a distinct named measure.
-      - Color the value, not the background, and only when it carries meaning. Clearly bounded metrics (percent, ratio, CPU/memory/disk utilization, error rate, success rate, SLO compliance) benefit from status bands in the same scale as the value; for adverse metrics such as error rate, higher is worse. Unbounded values (raw counts, bytes, durations, throughput, rates with unknown scale) stay uncolored.
+      - Color the value, not the background, and only when it carries meaning. Bounded metrics (percent, ratio, CPU/memory/disk utilization, error rate, success rate, SLO compliance) can use status bands when meaningful thresholds are supported by the query or context; for adverse metrics such as error rate, higher is worse. Unbounded values and metrics without defensible thresholds stay uncolored.
 
       gauge:
-      - Gauge bounds and goals describe business targets. Never invent, infer, or backfill minimum, maximum, or goal values from the data or from units like bytes, requests, or rates; set them only when the user provides them, and keep existing ones on edits.
-      - For new gauges, prefer four equal percentage color bands unless the user specifies different bands. When prettifying, request four equal percentage bands explicitly unless the existing bands reflect explicit user thresholds or meaningful business ranges. A focused color or palette edit keeps the existing band count, thresholds, and percentage or absolute scale.
+      - No panel title: the gauge label names the measure.
+      - Gauge bounds and goals describe business targets. Use supplied or meaningful existing bounds and goals; never invent business targets from the data or units.
+      - Default to four equal percentage color bands. During enhancement, evaluate existing thresholds: retain meaningful boundaries, otherwise restore the default bands. A focused palette edit preserves boundaries and scale.
 
       xy:
+      - Include a concise panel title naming the measure and breakdown; category labels do not replace it.
       - No axis titles: the panel title and column labels already convey meaning.
       - Area series use a gradient fill, never a solid fill.
       - Place the legend outside the plot, at the bottom. Hide it when it only repeats what is visible (a single series); show it when it carries legend statistics.
-      - Let Lens assign series colors. Add explicit colors only when the user asks or when the same category must keep one color across charts.
+      - Use the default Lens palette. During enhancement, remove all custom palettes and series color overrides. Outside enhancement, explicit color requests may override the default.
 
       heatmap:
+      - Include a concise panel title naming the measure and breakdown; category labels do not replace it.
       - Keep the default \\"Temperature\\" palette that Lens binds to the data; use a custom palette or thresholds only when the user asks.
 
+      tag_cloud:
+      - No panel title: use the labels within the tag cloud.
+
+      region_map:
+      - Include a concise panel title naming the measure and breakdown; category labels do not replace it.
+
       data_table:
+      - Include a concise panel title naming the measure and breakdown; category labels do not replace it.
       - Color table values as badges, and only where color adds meaning (status, severity, magnitude). Do not color cell backgrounds or text unless the user asks.
 
       pie:
+      - Include a concise panel title naming the measure and breakdown; category labels do not replace it.
       - Use the default palette; per-slice or custom colors only when the user asks.
 
+      treemap:
+      - Include a concise panel title naming the measure and breakdown; category labels do not replace it.
+
+      waffle:
+      - No panel title: use the labels within the waffle chart.
+
+      mosaic:
+      - Include a concise panel title naming the measure and breakdown; category labels do not replace it.
+
       COLOR GUIDANCE:
-      - Add color only when it adds meaning: status colors for meaningful thresholds, intensity colors for magnitude, and one consistent color for the same category wherever it appears across charts. Neutral data with no useful color meaning stays uncolored.
+      - Add color only when it adds meaning: status colors for meaningful thresholds, intensity colors for magnitude, and categorical palettes for distinct categories. Neutral data with no useful color meaning stays uncolored.
       - Choose palettes from the Kibana palette catalog, never invented colors or legacy palettes: \\"Status\\" for threshold bands, \\"Temperature\\" for intensity, \\"Complementary\\" for divergence, \\"Negative\\"/\\"Positive\\" for adverse/favorable values, \\"Cool\\"/\\"Warm\\"/\\"Gray\\" for neutral magnitude, and a categorical palette (e.g. \\"default\\", \\"severity\\") for distinct categories.
-      - Thresholds are data values in the metric's own unit and scale. When only the colors change, keep the existing thresholds.
-      - Respect explicit user choices and meaningful existing color assignments. An off-palette color is not automatically wrong; do not assume an existing color was invented just because its history is unknown.",
+      - Thresholds are data values in the metric's own unit and scale. A bounded value alone does not establish meaningful status thresholds.",
         "selection": "Available chart types — choose the one that best fits the user's intent and the nature of the data being visualized:
       - metric: Displays a single numeric value, KPI, or aggregate statistic (count, sum, average) with an optional trend line. Choose for single numbers without ranges or targets.
       - gauge: Displays a single metric within a range with optional min/max/goal bounds. Choose when showing progress toward a goal or performance against thresholds (e.g. \\"CPU usage as a gauge\\", \\"sales target progress\\").

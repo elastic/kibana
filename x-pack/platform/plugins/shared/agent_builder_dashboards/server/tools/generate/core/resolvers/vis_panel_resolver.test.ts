@@ -132,6 +132,7 @@ describe('createVisPanelResolver', () => {
       identifier: 'panel-1',
       nlQuery: 'change the title',
       appearanceOnly: true,
+      presentationMode: 'enhance',
       existingPanel: {
         id: 'panel-1',
         type: LENS_EMBEDDABLE_TYPE,
@@ -145,6 +146,7 @@ describe('createVisPanelResolver', () => {
         existingConfig: JSON.stringify({ type: 'xy' }),
         parsedExistingConfig: { type: 'xy' },
         appearanceOnly: true,
+        presentationMode: 'enhance',
       })
     );
   });
@@ -236,6 +238,32 @@ describe('createVisPanelResolver', () => {
       authoringNote: 'Changed the panel to a line chart.',
     });
     expect(mockedBuildVegaConfig).toHaveBeenCalledWith(expect.objectContaining({ existingSpec }));
+    expect(mockedBuildLensConfig).not.toHaveBeenCalled();
+  });
+
+  it('reports unsupported Vega enhancement instead of ignoring the presentation mode', async () => {
+    const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
+
+    const result = await resolveVisPanel({
+      type: 'vis',
+      operationType: 'edit_panels',
+      identifier: 'panel-1',
+      nlQuery: 'Enhance this panel',
+      presentationMode: 'enhance',
+      appearanceOnly: true,
+      existingPanel: {
+        id: 'panel-1',
+        type: VEGA_VIS_TYPE,
+        config: { spec: '{"mark":"bar"}' },
+        grid: { w: 24, h: 10, x: 0, y: 0 },
+      },
+    });
+
+    expect(result).toMatchObject({
+      type: 'failure',
+      failure: { error: 'Presentation enhancement is only supported for ES|QL Lens panels.' },
+    });
+    expect(mockedBuildVegaConfig).not.toHaveBeenCalled();
     expect(mockedBuildLensConfig).not.toHaveBeenCalled();
   });
 

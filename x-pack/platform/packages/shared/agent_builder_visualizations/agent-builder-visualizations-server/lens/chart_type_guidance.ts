@@ -23,7 +23,7 @@ export const getChartTypeSelectionPromptContent = () =>
 /**
  * Design guidance across all chart types, compiled from the registry's shared
  * `design` parts plus the general and color design guidance. This is what the
- * dashboard and visualization agents receive so they can review charts and
+ * visualization agent receives so it can review charts and
  * describe the wanted changes; it contains no Lens JSON.
  */
 export const getChartDesignPromptContent = (): string =>

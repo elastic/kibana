@@ -67,10 +67,9 @@ const getCategoricalPalettePreviews = (): string[] =>
   );
 
 export const colorDesignPromptContent = `COLOR GUIDANCE:
-- Add color only when it adds meaning: status colors for meaningful thresholds, intensity colors for magnitude, and one consistent color for the same category wherever it appears across charts. Neutral data with no useful color meaning stays uncolored.
+- Add color only when it adds meaning: status colors for meaningful thresholds, intensity colors for magnitude, and categorical palettes for distinct categories. Neutral data with no useful color meaning stays uncolored.
 - Choose palettes from the Kibana palette catalog, never invented colors or legacy palettes: "Status" for threshold bands, "Temperature" for intensity, "Complementary" for divergence, "Negative"/"Positive" for adverse/favorable values, "Cool"/"Warm"/"Gray" for neutral magnitude, and a categorical palette (e.g. "default", "severity") for distinct categories.
-- Thresholds are data values in the metric's own unit and scale. When only the colors change, keep the existing thresholds.
-- Respect explicit user choices and meaningful existing color assignments. An off-palette color is not automatically wrong; do not assume an existing color was invented just because its history is unknown.`;
+- Thresholds are data values in the metric's own unit and scale. A bounded value alone does not establish meaningful status thresholds.`;
 
 /**
  * The Kibana palette catalog for agents: names, ids, and color previews drawn
@@ -154,7 +153,7 @@ export const getColorConfigPromptContent = (
       'DYNAMIC STEPS — mechanics for when the rules above call for explicit `steps`:',
       '- Pick exactly ONE dynamic palette from the list below, following the color guidance on which palette fits which meaning.',
       chartType === SupportedChartType.Gauge
-        ? '- Choose the band count according to the gauge rules above, not the number of colors in a preview. Use the selected palette preview matching the final band count; the default-count preview is available for explicitly requested normalization, and the existing-count preview for recoloring without changing bands.'
+        ? '- Choose the band count according to the gauge rules above, then use the selected palette preview matching that count.'
         : `- Use exactly ${stepsCount} step${stepsCount === 1 ? '' : 's'}.`,
       '- Every `steps[*].color` hex MUST come from the selected palette preview line exactly as written.',
       '- Step thresholds are data values, not display labels; keep them in the same unit and scale as the metric column. For rates, do not assume per-second thresholds unless the ES|QL query computes per-second values.',

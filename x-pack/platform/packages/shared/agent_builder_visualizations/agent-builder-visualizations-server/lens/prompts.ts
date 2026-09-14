@@ -9,19 +9,34 @@ import type { BaseMessageLike } from '@langchain/core/messages';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getChartTypeConfigPromptContent } from './chart_type_guidance';
 import { colorDesignPromptContent, getColorConfigPromptContent } from './color_palettes';
-import type { VisualizationConfig } from './types';
+import type { PresentationMode, VisualizationConfig } from './types';
 
-const getEditRulesPromptContent = (appearanceOnly: boolean): string =>
+const getEditRulesPromptContent = (
+  appearanceOnly: boolean,
+  presentationMode: PresentationMode
+): string =>
   [
     'EDIT RULES:',
-    '- Return the complete updated configuration. Apply the requested changes and any adjustment they require; leave every unrelated setting as it is, including titles, colors, formats, thresholds, goals, and legends the request does not mention.',
-    '- The design guidance below describes preferences for new charts. Do not reapply it to settings the request does not mention.',
-    '- If an instruction is ambiguous (for example an unknown duration unit), keep the existing setting and say so in the authoring note instead of guessing.',
+    '- Return the complete updated configuration.',
+    ...(presentationMode === 'enhance'
+      ? [
+          '- Reauthor the presentation: apply ALL applicable chart design defaults below. Use the existing configuration as a reference for data, bindings, and thresholds, not as a presentation template.',
+          '- Rewrite titles, labels, and descriptions to name what the queries measure. Existing display text is unverified, not a naming instruction. Business terminology requires query evidence or an explicit instruction in <user_query>.',
+          '- Replace custom palettes and color overrides with chart defaults. Use catalog palettes for semantic coloring only where the chart guidance calls for it.',
+          '- Evaluate existing visual thresholds against the measure, unit, and scale: keep meaningful boundaries, revise those justified by the evidence, and remove unsupported threshold coloring. Never invent business targets.',
+          '- Before returning, check the resulting titles, axes, legends, fills, formats, colors, and thresholds against every applicable rule. Report unresolved ambiguity in the authoring note.',
+        ]
+      : [
+          '- Apply the requested changes and any adjustment they require; preserve unrelated presentation settings, including titles, colors, formats, thresholds, goals, and legends.',
+          '- Do not reapply design defaults to settings the request does not mention. Keep ambiguous settings and report the ambiguity in the authoring note.',
+        ]),
     ...(appearanceOnly
       ? [
-          '- This is an appearance-only edit: the query is unchanged, so keep every column binding exactly as in the existing configuration.',
+          '- This is an appearance-only edit: keep every layer, its order, column bindings, and displayed measures unchanged. Preserve filters and query-related settings.',
         ]
-      : []),
+      : [
+          '- Apply requested data changes using the resolved query below; update column bindings to its result columns. Preserve unrelated filters and query-related settings.',
+        ]),
   ].join('\n');
 
 export const createGenerateConfigPrompt = ({
@@ -32,6 +47,7 @@ export const createGenerateConfigPrompt = ({
   existingConfig,
   parsedExistingConfig,
   appearanceOnly = false,
+  presentationMode = 'focused',
   additionalContext,
 }: {
   nlQuery: string;
@@ -41,10 +57,9 @@ export const createGenerateConfigPrompt = ({
   existingConfig?: string;
   parsedExistingConfig?: VisualizationConfig | null;
   appearanceOnly?: boolean;
+  presentationMode?: PresentationMode;
   additionalContext?: string;
 }): BaseMessageLike[] => {
-  const esqlQueryJson = JSON.stringify(esqlQuery);
-
   const segments = [
     `You are a Kibana Lens visualization configuration expert. Generate a valid configuration for a ${chartType} visualization based on the provided schema and ES|QL query.
 
@@ -52,31 +67,20 @@ Schema for ${chartType}:
 <schema type="${chartType}">
 ${JSON.stringify(schema)}
 </schema>`,
-    existingConfig
-      ? `Existing configuration to modify:
-<existing_configuration>
-${existingConfig}
-</existing_configuration>
-
-${getEditRulesPromptContent(appearanceOnly)}`
-      : '',
+    existingConfig ? getEditRulesPromptContent(appearanceOnly, presentationMode) : '',
     `DATA SOURCE RULES:
 1. The ES|QL query is owned and injected by the system automatically. DO NOT output a 'data_source' field, and do not restate, copy, or modify the query anywhere in the config.
-2. The configuration is built around this query; its result columns are the only columns available to bind: ${esqlQueryJson}
-3. For ES|QL column bindings use { column: '<esql column name>', ...other options }, and every bound column must be one produced by that query.
+2. ${
+      appearanceOnly && existingConfig
+        ? 'Each layer keeps its own existing data_source and column bindings from the existing configuration.'
+        : 'Bind only result columns from the resolved ES|QL query supplied with the request.'
+    }
+3. For ES|QL column bindings use { column: '<esql column name>', ...other options }, and bind only columns produced by the layer's query.
 4. Follow the schema definition strictly, with the single exception that you must omit the 'data_source' field.`,
     getChartTypeConfigPromptContent(chartType),
     colorDesignPromptContent,
     getColorConfigPromptContent(chartType, parsedExistingConfig),
-    `Your task is to generate a ${chartType} visualization configuration based on the following information:
-
-<user_query>
-${nlQuery}
-</user_query>
-
-Generate the ${chartType} visualization configuration.
-
-IMPORTANT: Return ONLY a JSON object wrapped in a markdown code block. The "authoring_note" must be one factual sentence describing the final chart and notable presentation choices, such as omitted titles or hidden legends. Do not include reasoning. The "config" must contain only the Lens configuration:
+    `Return ONLY a JSON object wrapped in a markdown code block. The "authoring_note" must be one factual sentence describing what the final chart measures, its breakdown, and notable presentation choices. Do not include reasoning. The "config" must contain only the Lens configuration:
 \`\`\`json
 {
   "authoring_note": "One-sentence description of the authored chart",
@@ -90,7 +94,22 @@ IMPORTANT: Return ONLY a JSON object wrapped in a markdown code block. The "auth
 
   return [
     ['system', segments.filter(Boolean).join('\n\n')],
-    // Human message required for Bedrock to work properly
-    ['human', 'Generate the visualization configuration.'],
+    [
+      'human',
+      [
+        existingConfig
+          ? `Existing chart data and presentation:\n<existing_configuration>\n${existingConfig}\n</existing_configuration>`
+          : '',
+        appearanceOnly && existingConfig
+          ? ''
+          : `Resolved ES|QL query:\n${JSON.stringify(esqlQuery)}`,
+        `<user_query>\n${nlQuery}\n</user_query>`,
+        existingConfig && presentationMode === 'enhance'
+          ? 'Rebuild the presentation, including all display text, from the queries and chart defaults. Replace unsupported names with factual measure names. Follow the data source rules above.'
+          : 'Generate the visualization configuration for this request.',
+      ]
+        .filter(Boolean)
+        .join('\n\n'),
+    ],
   ];
 };

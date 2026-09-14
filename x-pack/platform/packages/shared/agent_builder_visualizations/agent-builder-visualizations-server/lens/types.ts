@@ -6,3 +6,5 @@
  */
 
 export type { VisualizationConfig } from './chart_type_registry';
+
+export type PresentationMode = 'focused' | 'enhance';

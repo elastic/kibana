@@ -90,6 +90,7 @@ export const createVisPanelResolver = ({
     esql,
     renderer: requestedRenderer,
     appearanceOnly,
+    presentationMode,
     existingPanel,
   }: VisPanelResolutionRequest): Promise<PanelContentAttempt> => {
     try {
@@ -103,6 +104,9 @@ export const createVisPanelResolver = ({
       }
 
       if (renderer === 'vega') {
+        if (presentationMode === 'enhance') {
+          throw new Error('Presentation enhancement is only supported for ES|QL Lens panels.');
+        }
         const { spec, title, authoringNote } = await buildVegaConfig({
           nlQuery,
           index,
@@ -142,6 +146,7 @@ export const createVisPanelResolver = ({
         existingConfig: existingConfig ? JSON.stringify(existingConfig) : undefined,
         parsedExistingConfig: existingConfig,
         appearanceOnly,
+        presentationMode,
         modelProvider,
         logger,
         events,

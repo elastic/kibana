@@ -183,7 +183,11 @@ describe('buildLensConfig', () => {
     expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: '' });
   });
 
-  it('seeds an appearance-only edit with the existing query so no ES|QL is generated', async () => {
+  it.each([
+    { appearanceOnly: true, presentationMode: undefined },
+    { appearanceOnly: true, presentationMode: 'enhance' as const },
+    { appearanceOnly: false, presentationMode: 'enhance' as const },
+  ])('keeps query resolution independent of presentation mode: %j', async (options) => {
     const existingQuery = 'FROM logs-* | STATS count = COUNT(*)';
 
     await buildLensConfig({
@@ -191,8 +195,11 @@ describe('buildLensConfig', () => {
       parsedExistingConfig: {
         type: SupportedChartType.Metric,
         data_source: { type: 'esql', query: existingQuery },
-      } as never,
-      appearanceOnly: true,
+        metrics: [{ column: 'count', type: 'primary' }],
+        ignore_global_filters: false,
+        sampling: 100,
+      },
+      ...options,
       modelProvider,
       logger,
       events,
@@ -200,8 +207,9 @@ describe('buildLensConfig', () => {
     });
 
     expect(invoke.mock.calls[0][0]).toMatchObject({
-      appearanceOnly: true,
-      esqlQuery: existingQuery,
+      appearanceOnly: options.appearanceOnly,
+      presentationMode: options.presentationMode ?? 'focused',
+      esqlQuery: options.appearanceOnly ? existingQuery : '',
     });
   });
 });

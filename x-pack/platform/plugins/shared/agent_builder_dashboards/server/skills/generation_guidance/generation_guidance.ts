@@ -7,9 +7,7 @@
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import {
-  getChartDesignPromptContent,
   getChartTypeSelectionPromptContent,
-  getPaletteCatalogPromptContent,
   seriesStatisticsAgentGuidance,
 } from '@kbn/agent-builder-visualizations-server';
 import { dashboardTools } from '../../../common';
@@ -18,22 +16,23 @@ import { dashboardDesignGuidancePrompt } from './design';
 import { prettifyGuidancePrompt } from './prettify_guidance';
 
 const chartTypeSelectionGuidance = getChartTypeSelectionPromptContent();
-const chartDesignGuidance = getChartDesignPromptContent();
 
-/** Referenced skill file holding the Kibana palette catalog, loaded on demand. */
-const PALETTE_CATALOG_FILE = 'color-palettes';
-
-const guidance = `## Building a Dashboard
+const guidance = `## Dashboard Operations
 
 The ${dashboardTools.generateDashboard} tool builds the resulting dashboard from the current dashboard (if any) plus an ordered \`operations\` array. This section describes the \`operations\` vocabulary; see the environment workflow below for how the current dashboard is referenced and how the result is surfaced.
+
+${prettifyGuidancePrompt}
+
+## Using Dashboard Operations
 
 Every dashboard MUST have a non-empty \`title\`. If the current dashboard's title is empty, missing, or \`"User Dashboard"\`, your first operation MUST be \`set_metadata\` with a title you invent from its contents.
 
 Operations run in order, so earlier operations should set up state needed by later ones. Batch all operations into a single ${dashboardTools.generateDashboard} call whenever possible.
 
 When a dashboard needs sections, prefer a single batched call:
-1. Use \`add_section\` with its optional \`panels\` array when you already know the panels that belong in the new section.
-2. To target a new section in a later operation in the same call, give \`add_section\` a unique \`key\` (e.g. \`"overview"\`), then use that key as \`sectionId\` in \`add_panels\` or \`update_panel_layouts\`. Create the section before referencing it. Keys must not match existing section IDs and are not saved; in later calls, use the generated section ID returned by the tool.
+1. For existing panels, create an empty \`add_section\` with a unique \`key\` (e.g. \`"overview"\`), omitting \`panels\`. Then use \`update_panel_layouts\` with the original \`panelId\` values and that key as \`sectionId\`. This moves the panels with their configurations intact.
+2. Only use \`add_section.panels\` or \`add_panels\` to create new panels. They cannot move existing panels.
+3. Create sections before referencing them. Keys must not match existing section IDs and are not saved; in later calls, use the generated section ID returned by the tool.
 
 For a new dashboard:
 - Start with \`set_metadata\` and provide both \`title\` and \`description\`. Only include \`time_range\` when the user explicitly named a specific time window (e.g. "last 7 days", "May 20–24"). Do not set it otherwise — a data-aware default is applied automatically.
@@ -41,12 +40,15 @@ For a new dashboard:
 - Use \`add_section\` when panels naturally group into distinct topics or the dashboard is large enough that sections improve scanability. Include \`panels\` on the section when you can create that section's initial panels immediately.
 
 For an existing dashboard:
-- Prefer \`edit_panels\` to change existing panel content in place rather than removing and re-adding a panel.
-- Pass along only the requested change in the edit \`query\` (e.g. "make the error series blue"); the chart author preserves unrelated settings. For presentation-only edits (title, legend, axes, colors, number formats, thresholds) set \`appearanceOnly: true\` so the panel's query is kept and not regenerated. Omit it when the edit changes what the panel measures.
+- Use \`edit_panels\` to change existing panel content in place. Reorganizing or enhancing a dashboard does not require replacing panels.
+- For focused edits, pass only the requested change in the edit \`query\` (e.g. "make the error series blue"); the chart author preserves unrelated presentation settings. Set \`presentationMode: "enhance"\` to apply all presentation defaults to an existing ES|QL Lens panel instead.
+- Set \`appearanceOnly: true\` when the panel's query should stay unchanged. Omit it when the edit changes what the panel measures. This is independent of \`presentationMode\`: a query change and presentation enhancement can share one edit.
 - If a requested change targets a DSL, form-based, or other non-ES|QL Lens visualization panel, explicitly tell the user direct editing is not supported and ask for confirmation before replacing that panel with a newly created ES|QL-based Lens panel.
 - Use \`update_panel_layouts\` to resize, reposition, or move existing panels between top-level and sections without changing panel content.
 
 ## Panel Inputs
+
+Each visualization request is authored in a separate context. New-panel authors do not see the dashboard attachment or other panels: pass the exact known \`index\` and describe the measure, fields, and filters in \`query\`. Omit \`index\` only when the source is unknown and discovery is needed. Existing-panel edits receive the original configuration and queries automatically through \`panelId\`.
 
 - Use \`source: "request"\` to create or edit a Lens or Vega panel from a natural-language / ES|QL query — this is the only correct way to make a **new** visualization. Never hand-build a visualization \`config\` for a new visualization.
 - Use \`source: "config"\` only for content you have already resolved (an existing visualization's config, markdown, or custom content). The generation tool never reads an attachment or saved-object store, so the config must be supplied directly.
@@ -90,17 +92,7 @@ ${seriesStatisticsAgentGuidance}
 
 ${chartTypeSelectionGuidance}
 
-## Chart Design Guidance
-
-Use this when describing a new chart's important visual choices, when reviewing existing charts, and when writing edit instructions. Choices you leave unspecified fall back to these same defaults in the chart author.
-
-${chartDesignGuidance}
-
-When choosing or checking palettes, read this skill's \`${PALETTE_CATALOG_FILE}\` reference file for the palette names, ids, and colors. Use the saved color values, not a screenshot, to decide whether a color belongs to a palette.
-
 ${dashboardDesignGuidancePrompt}
-
-${prettifyGuidancePrompt}
 
 ## ES|QL
 
@@ -150,11 +142,4 @@ Do not add controls to dashboards already scoped to a single entity (one host, o
  */
 export const dashboardGeneration: DashboardGuidanceModule = {
   guidance,
-  referencedContent: [
-    {
-      relativePath: '.',
-      name: PALETTE_CATALOG_FILE,
-      content: getPaletteCatalogPromptContent(),
-    },
-  ],
 };

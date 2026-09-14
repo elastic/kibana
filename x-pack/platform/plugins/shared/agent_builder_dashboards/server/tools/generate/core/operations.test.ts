@@ -1715,12 +1715,16 @@ describe('executeDashboardOperations', () => {
                 type: 'vis',
                 panelId: 'panel-1',
                 query: 'make this a bar chart',
+                presentationMode: 'enhance',
+                appearanceOnly: true,
               },
               {
                 source: 'request',
                 type: 'vis',
                 panelId: 'panel-2',
                 query: 'make this a line chart',
+                presentationMode: 'enhance',
+                appearanceOnly: false,
               },
             ],
           },
@@ -1733,6 +1737,21 @@ describe('executeDashboardOperations', () => {
       await waitForNextEventLoopTurn();
 
       expect(resolvePanelContent).toHaveBeenCalledTimes(2);
+
+      expect(resolvePanelContent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          identifier: 'panel-1',
+          presentationMode: 'enhance',
+          appearanceOnly: true,
+        })
+      );
+      expect(resolvePanelContent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          identifier: 'panel-2',
+          presentationMode: 'enhance',
+          appearanceOnly: false,
+        })
+      );
 
       deferredByPanelId
         .get('panel-1')!

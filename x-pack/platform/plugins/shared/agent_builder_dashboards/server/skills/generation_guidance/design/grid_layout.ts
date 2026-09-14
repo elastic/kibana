@@ -68,7 +68,7 @@ Always set \`x\` and \`y\` so panels tile with **no gaps**:
 - A section occupies exactly one row (\`h: 1\`) in the outer dashboard grid. When placing widgets after a section, compute the next outer \`y\` as \`section.grid.y + 1\` (not by summing internal panel heights).
 - Internal section panel heights affect layout inside the section only; they do not increase the section's outer-grid height.
 - When mixing top-level panels and sections, compute outer \`y\` sequentially: top-level panels advance by \`y + h\`, sections advance by \`y + 1\`.
-- **Inserting above existing sections:** Top-level panels and sections share the same outer grid coordinates. If a section occupies \`y: 0\`, a new top-level panel at \`y: 0\` will collide and be pushed **below** the section. To place a panel above an existing section, first \`remove_section\` (with \`panelAction: "promote"\` or \`"delete"\`) and re-add it via \`add_section\` at a higher \`y\` to make room, then add the panel at the freed \`y\`.
+- **Inserting above existing sections:** Top-level panels and sections share the outer grid. To free space above a section, use \`remove_section\` with \`panelAction: "promote"\`, recreate the empty section at a higher \`y\`, then move its original panels back with \`update_panel_layouts\`. Preserve panel IDs and configurations throughout; deleting or regenerating panels is not a layout operation.
 
 ### Example: 4 KPI metrics + 2 time-series charts + 1 breakdown bar chart
 

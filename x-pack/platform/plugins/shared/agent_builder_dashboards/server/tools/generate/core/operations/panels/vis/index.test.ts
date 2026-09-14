@@ -46,4 +46,17 @@ describe('visualization panel request schemas', () => {
       }).success
     ).toBe(true);
   });
+
+  it.each([true, false])('accepts enhancement with appearanceOnly: %s', (appearanceOnly) => {
+    const request = {
+      source: 'request',
+      type: 'vis',
+      panelId: 'panel-1',
+      query: 'Enhance this panel',
+      appearanceOnly,
+      presentationMode: 'enhance',
+    };
+
+    expect(editPanelRequestInputSchema.parse(request)).toEqual(request);
+  });
 });
