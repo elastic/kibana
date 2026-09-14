@@ -46,7 +46,10 @@ export function initializeHistoryManager({
   );
   const onStateChange$ = combineLatest([anyStateChange$, pauseHistory$]).pipe(
     debounceTime(0), // flatten anyStateChange + dataLoading event updates
-    filter(([, paused]) => !paused),
+    filter(([, paused]) => {
+      console.log({ paused });
+      return !paused;
+    }),
     map(() => {
       const state = getState();
       return {

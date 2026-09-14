@@ -61,6 +61,7 @@ export interface LogRateAnalysisEmbeddableWrapperProps {
   onError: (error: Error) => void;
   windowParameters?: WindowParameters;
   filtersApi?: PublishesFilters;
+  parentApi: unknown;
 }
 
 const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps> = ({
@@ -74,7 +75,9 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
   lastReloadRequestTime,
   windowParameters,
   filtersApi,
+  parentApi,
 }) => {
+  console.log({ parentApi });
   const deps = useMemo(() => {
     const {
       lens,

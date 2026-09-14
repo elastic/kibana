@@ -31,6 +31,8 @@ import type { EventRate } from '../use_categorize_request';
 
 import { ExpandedRow } from './expanded_row';
 import { FormattedPatternExamples, FormattedTokens } from '../format_category';
+import { apiHasDisableTriggers, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { BehaviorSubject } from 'rxjs';
 
 interface Props {
   categories: Category[];
@@ -48,6 +50,7 @@ interface Props {
   displayExamples?: boolean;
   selectable?: boolean;
   onRenderComplete?: () => void;
+  parentApi: unknown;
 }
 
 export const CategoryTable: FC<Props> = ({
@@ -61,10 +64,18 @@ export const CategoryTable: FC<Props> = ({
   displayExamples = true,
   selectable = true,
   onRenderComplete,
+  parentApi,
 }) => {
   const { euiTheme } = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
   const { onTableChange, pagination, sorting } = tableState;
+
+  const disableTriggers = useStateFromPublishingSubject(
+    apiHasDisableTriggers(parentApi)
+      ? parentApi.disableTriggers$
+      : new BehaviorSubject<boolean>(false)
+  );
+  const isInteractive = !disableTriggers;
 
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
@@ -140,14 +151,18 @@ export const CategoryTable: FC<Props> = ({
       sortable: true,
       render: (item: Category) => <FormattedPatternExamples category={item} count={1} />,
     },
-    {
-      name: i18n.translate('xpack.aiops.logCategorization.column.actions', {
-        defaultMessage: 'Actions',
-      }),
-      sortable: false,
-      width: '65px',
-      actions,
-    },
+    ...(isInteractive
+      ? [
+          {
+            name: i18n.translate('xpack.aiops.logCategorization.column.actions', {
+              defaultMessage: 'Actions',
+            }),
+            sortable: false,
+            width: '65px',
+            actions,
+          },
+        ]
+      : []),
   ] as Array<EuiBasicTableColumn<Category>>;
 
   if (displayExamples === false) {
@@ -262,6 +277,7 @@ export const CategoryTable: FC<Props> = ({
 
   const renderCompleteListener = useCallback(
     (event: Event) => {
+      console.log('onRenderComplete !!!!');
       if (event.target !== chartWrapperRef.current) {
         return;
       }
@@ -277,6 +293,7 @@ export const CategoryTable: FC<Props> = ({
       throw new Error('Reference to the chart wrapper is not set');
     }
     const chartWrapper = chartWrapperRef.current;
+    console.log('????');
     chartWrapper.addEventListener('renderComplete', renderCompleteListener);
     return () => {
       chartWrapper.removeEventListener('renderComplete', renderCompleteListener);
@@ -293,7 +310,7 @@ export const CategoryTable: FC<Props> = ({
         itemId="key"
         onTableChange={onTableChange}
         pagination={pagination}
-        sorting={sorting}
+        sorting={isInteractive ? sorting : undefined}
         data-test-subj="aiopsLogPatternsTable"
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         css={tableStyle}

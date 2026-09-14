@@ -112,6 +112,7 @@ const PresentationPanelChrome = <
   const panelRef = useRef<HTMLDivElement | null>(null);
   const firstRenderCompleteRef = useRef(false);
   useEffect(() => {
+    console.log('DISPATCH EVENT', isSharedItem, panelRef.current, dataAttributes);
     if (!firstRenderCompleteRef.current && dataAttributes['data-render-complete']) {
       firstRenderCompleteRef.current = true;
       if (isSharedItem && panelRef.current) {
