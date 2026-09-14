@@ -233,6 +233,7 @@ describe('AlertsPage with all capabilities', () => {
     const wrapper = await setup();
     await waitFor(() => {
       expect(wrapper.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Alerts');
+      expect(wrapper.getByTestId('observabilityAlertsV1OnlyBadge')).toHaveTextContent('v1 only');
     });
   });
 

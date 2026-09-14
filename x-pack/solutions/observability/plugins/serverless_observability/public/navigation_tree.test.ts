@@ -225,6 +225,7 @@ describe('Navigation Tree', () => {
       expect.objectContaining({
         link: 'observability-overview:alerts',
         title: 'Alerts',
+        badgeType: 'v1Only',
       }),
     ]);
   });
