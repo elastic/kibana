@@ -207,12 +207,7 @@ export const initializeSearchEmbeddableApi = async ({
 
   /** The saved search should be the source of truth for all state  */
   const savedSearch$ = new BehaviorSubject(
-    initializedSavedSearch(
-      stateManager,
-      searchSource,
-      discoverServices,
-      initialState.tabTypeState
-    )
+    initializedSavedSearch(stateManager, searchSource, discoverServices, initialState.tabTypeState)
   );
 
   /** This will fire when any of the **editable** state changes */
