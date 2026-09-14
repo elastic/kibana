@@ -1186,8 +1186,10 @@ paths:
                       maxItems: 100
                       type: array
                     subagent_ids:
-                      description: "**Technical Preview; added in 9.6.0.** Allowlist of sub-agent ids this agent may spawn. Use '_self' to enable self-fork."
+                      description: "**Technical Preview; added in 9.6.0.** Allowlist of subagent IDs this agent may spawn. Missing or empty disables the `run_subagent` tool. Use '_self' to enable self-fork."
                       items:
+                        description: Agent ID this agent may spawn as a subagent via `run_subagent`. Use '_self' to enable self-fork.
+                        maxLength: 64
                         type: string
                       maxItems: 50
                       type: array
@@ -1718,8 +1720,10 @@ paths:
                       maxItems: 100
                       type: array
                     subagent_ids:
-                      description: "**Technical Preview; added in 9.6.0.** Allowlist of sub-agent ids this agent may spawn. Use '_self' to enable self-fork."
+                      description: "**Technical Preview; added in 9.6.0.** Allowlist of subagent IDs this agent may spawn. Missing or empty disables the `run_subagent` tool. Use '_self' to enable self-fork."
                       items:
+                        description: Agent ID this agent may spawn as a subagent via `run_subagent`. Use '_self' to enable self-fork.
+                        maxLength: 64
                         type: string
                       maxItems: 50
                       type: array
