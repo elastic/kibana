@@ -7,7 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
-import { AgentAccessControlRole, AgentAccessControlMode } from '@kbn/agent-builder-common';
+import {
+  AgentAccessControlRole,
+  AgentAccessControlMode,
+  agentIdMaxLength,
+} from '@kbn/agent-builder-common';
 import { MAX_AI_INDEX_ID_LENGTH } from '@kbn/context-engine-plugin/common/constants';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from './types';
@@ -87,14 +91,23 @@ const AI_INDICES_SCHEMA = schema.arrayOf(
   }
 );
 
-const SUBAGENT_IDS_SCHEMA = schema.arrayOf(schema.string({}), {
-  maxSize: 50,
-  meta: {
-    availability: { stability: 'tech_preview' },
-    description:
-      "**Technical Preview; added in 9.6.0.** Allowlist of sub-agent ids this agent may spawn. Use '_self' to enable self-fork.",
-  },
-});
+const SUBAGENT_IDS_SCHEMA = schema.arrayOf(
+  schema.string({
+    maxLength: agentIdMaxLength,
+    meta: {
+      description:
+        "Agent ID this agent may spawn as a subagent via `run_subagent`. Use '_self' to enable self-fork.",
+    },
+  }),
+  {
+    maxSize: 50,
+    meta: {
+      availability: { stability: 'tech_preview' },
+      description:
+        "**Technical Preview; added in 9.6.0.** Allowlist of subagent IDs this agent may spawn. Missing or empty disables the `run_subagent` tool. Use '_self' to enable self-fork.",
+    },
+  }
+);
 
 /**
  * `ai_indices` is only readable and writable while the Context Engine is enabled. The setting is

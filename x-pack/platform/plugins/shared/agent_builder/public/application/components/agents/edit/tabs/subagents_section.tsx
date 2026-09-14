@@ -91,7 +91,7 @@ export const SubagentsSection: React.FC<SubagentsSectionProps> = ({ agentId }) =
               <EuiTitle size="xs">
                 <h2 id="subagents-section-title">
                   {i18n.translate('xpack.agentBuilder.subagents.title', {
-                    defaultMessage: 'Sub-agents',
+                    defaultMessage: 'Subagents',
                   })}
                 </h2>
               </EuiTitle>
@@ -100,7 +100,7 @@ export const SubagentsSection: React.FC<SubagentsSectionProps> = ({ agentId }) =
               <p>
                 {i18n.translate('xpack.agentBuilder.subagents.description', {
                   defaultMessage:
-                    'Allow this agent to delegate tasks to other agents. When disabled, this agent cannot spawn sub-agents.',
+                    'Allow this agent to delegate tasks to other agents. When disabled, this agent cannot spawn subagents.',
                 })}
               </p>
             </EuiText>
@@ -117,7 +117,7 @@ export const SubagentsSection: React.FC<SubagentsSectionProps> = ({ agentId }) =
                   <EuiCheckbox
                     id={checkboxId}
                     label={i18n.translate('xpack.agentBuilder.subagents.enableLabel', {
-                      defaultMessage: 'Enable sub-agents',
+                      defaultMessage: 'Enable subagents',
                     })}
                     checked={enabled}
                     onChange={(e) => {
@@ -137,11 +137,11 @@ export const SubagentsSection: React.FC<SubagentsSectionProps> = ({ agentId }) =
                       <EuiSpacer size="m" />
                       <EuiFormRow
                         label={i18n.translate('xpack.agentBuilder.subagents.pickerLabel', {
-                          defaultMessage: 'Delegable sub-agents',
+                          defaultMessage: 'Delegable subagents',
                         })}
                         helpText={i18n.translate('xpack.agentBuilder.subagents.pickerHelpText', {
                           defaultMessage:
-                            "Pick the agents this one may spawn. Use 'This agent (self-fork)' to let it delegate to a copy of itself.",
+                            "Pick the agents this one can spawn. Use 'This agent (self-fork)' to let it delegate to a copy of itself.",
                         })}
                         isInvalid={!!subagentIdsErrorNode}
                         error={subagentIdsErrorMessage}
