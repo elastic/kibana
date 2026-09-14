@@ -22312,7 +22312,6 @@
     "xpack.fleet.debug.agentPolicyDebugger.selectLabel": "选择代理策略",
     "xpack.fleet.debug.agentPolicyDebugger.title": "代理策略故障排查程序",
     "xpack.fleet.debug.agentPolicyDebugger.viewAgentPolicyLink": "在 Fleet UI 中查看代理策略",
-    "xpack.fleet.debug.cloudOnboardingDeploymentDebugger.title": "云入门部署调试器",
     "xpack.fleet.debug.dangerZone.description": "此页面提供了一个界面，用于直接管理 Fleet 的底层数据并诊断问题。请注意，这些故障排查工具在本质上可能{strongDestructive}，并可能导致{strongLossOfData}。请谨慎操作。",
     "xpack.fleet.debug.dangerZone.destructive": "破坏性",
     "xpack.fleet.debug.dangerZone.lossOfData": "数据丢失",
