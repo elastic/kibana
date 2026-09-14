@@ -80,6 +80,8 @@ export interface ReportKiVerificationEventParams {
   verifiers_run?: number;
   failed_verifier_ids?: string[];
   failed_workflow_verifier_count?: number;
+  workflow_id?: string;
+  ai_index_id?: string;
   error_type?: string;
 }
 
@@ -135,6 +137,20 @@ const kiVerificationEventSchema: RootSchema<ReportKiVerificationEventParams> = {
     _meta: {
       description:
         'Number of custom verifier workflows that failed. Present when at least one failed.',
+      optional: true,
+    },
+  },
+  workflow_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The id of the workflow that ran this verification.',
+      optional: true,
+    },
+  },
+  ai_index_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The AI index the KI belongs to, when provided by the caller.',
       optional: true,
     },
   },

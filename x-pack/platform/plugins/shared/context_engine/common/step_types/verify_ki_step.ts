@@ -15,7 +15,12 @@ import {
   KI_VERIFIER_IDS,
   WORKFLOW_VERIFIER_ID_PREFIX,
 } from '../ki_verification';
-import { MAX_KI_ATTRIBUTE_KEY_LENGTH, MAX_KI_TYPE_LENGTH, kiPartialFieldsSchema } from './ki';
+import {
+  MAX_KI_ATTRIBUTE_KEY_LENGTH,
+  MAX_KI_TYPE_LENGTH,
+  aiIndexIdSchema,
+  kiPartialFieldsSchema,
+} from './ki';
 
 export const VERIFY_KI_STEP_TYPE_ID = 'context-engine.verifyKi';
 
@@ -71,6 +76,7 @@ export const getKiVerifierEntryKey = (entry: KiVerifierEntry): string =>
 
 export const VerifyKiInputSchema = z.object({
   ki: kiPartialFieldsSchema,
+  ai_index_id: aiIndexIdSchema.optional().describe('AI index the KI belongs to'),
   verifiers: z
     .array(kiVerifierEntrySchema)
     .min(1)

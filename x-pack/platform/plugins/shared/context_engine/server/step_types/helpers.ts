@@ -97,10 +97,14 @@ export const withKiWriteTelemetry = async <Output extends { id: string }>({
 export const withKiVerificationTelemetry = async ({
   analyticsService,
   logger,
+  workflowId,
+  aiIndexId,
   run,
 }: {
   analyticsService: ContextEngineAnalyticsService;
   logger: Logger;
+  workflowId: string;
+  aiIndexId?: string;
   run: () => Promise<KiVerificationSummary>;
 }): Promise<KiVerificationSummary> => {
   try {
@@ -122,6 +126,8 @@ export const withKiVerificationTelemetry = async ({
         ),
       ],
       failedWorkflowVerifierCount,
+      workflowId,
+      aiIndexId,
     });
     if (summary.passed) {
       logger.debug(`KI verification passed (verifiers run: ${summary.results.length})`);
@@ -136,6 +142,7 @@ export const withKiVerificationTelemetry = async ({
     const errorType = aborted ? undefined : errorTypeForTelemetry(error);
     analyticsService.reportKiVerification({
       outcome: aborted ? 'aborted' : 'failure',
+      workflowId,
       errorType,
     });
     logger.debug(aborted ? 'KI verification aborted' : `KI verification errored: ${errorType}`);

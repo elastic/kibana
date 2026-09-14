@@ -51,12 +51,13 @@ export const createVerifyKiStepDefinition = (
         });
       }
 
+      const { workflow, metadata, parent } = context.contextManager.getContext();
+
       const buildVerifiers = async (): Promise<Array<string | KiVerifier> | undefined> => {
         const entries = context.input.verifiers;
         if (entries === undefined) {
           return undefined;
         }
-        const { workflow, metadata, parent } = context.contextManager.getContext();
         const { spaceId } = workflow;
         const builtInIds = entries.filter(
           (entry): entry is Exclude<typeof entry, { workflow_id: string }> =>
@@ -122,6 +123,8 @@ export const createVerifyKiStepDefinition = (
       const summary = await withKiVerificationTelemetry({
         analyticsService,
         logger,
+        workflowId: workflow.id,
+        aiIndexId: context.input.ai_index_id,
         run: async () => {
           const verifiers = await buildVerifiers();
           try {

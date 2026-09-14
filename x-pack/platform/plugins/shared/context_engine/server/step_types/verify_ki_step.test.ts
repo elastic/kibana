@@ -162,6 +162,7 @@ describe('verify_ki workflow step', () => {
       expect(thrown.message).toBe(message);
       expect(telemetry.analyticsService.reportKiVerification).toHaveBeenCalledWith({
         outcome: 'failure',
+        workflowId: 'parent-wf',
         errorType: 'InputValidationError',
       });
     }
@@ -287,6 +288,7 @@ describe('verify_ki workflow step', () => {
       verifiersRun: 1,
       failedVerifierIds: [],
       failedWorkflowVerifierCount: 0,
+      workflowId: 'parent-wf',
     });
     expect(telemetry.logger.debug).toHaveBeenCalledTimes(1);
     expect(telemetry.logger.debug).toHaveBeenCalledWith(
@@ -309,6 +311,7 @@ describe('verify_ki workflow step', () => {
       verifiersRun: 1,
       failedVerifierIds: [ESQL_VALID_SYNTAX_VERIFIER_ID],
       failedWorkflowVerifierCount: 0,
+      workflowId: 'parent-wf',
     });
   });
 
@@ -337,6 +340,7 @@ describe('verify_ki workflow step', () => {
       verifiersRun: 0,
       failedVerifierIds: [],
       failedWorkflowVerifierCount: 0,
+      workflowId: 'parent-wf',
     });
   });
 
@@ -355,6 +359,7 @@ describe('verify_ki workflow step', () => {
 
     expect(telemetry.analyticsService.reportKiVerification).toHaveBeenCalledWith({
       outcome: 'aborted',
+      workflowId: 'parent-wf',
       errorType: undefined,
     });
     expect(telemetry.logger.debug).toHaveBeenCalledWith('KI verification aborted');
@@ -373,6 +378,7 @@ describe('verify_ki workflow step', () => {
 
     expect(telemetry.analyticsService.reportKiVerification).toHaveBeenCalledWith({
       outcome: 'failure',
+      workflowId: 'parent-wf',
       errorType: 'TypeError',
     });
     expect(telemetry.logger.debug).toHaveBeenCalledWith('KI verification errored: TypeError');
@@ -472,6 +478,7 @@ describe('verify_ki workflow step', () => {
       ).rejects.toThrow("Verifier workflow 'missing' not found");
       expect(telemetry.analyticsService.reportKiVerification).toHaveBeenCalledWith({
         outcome: 'failure',
+        workflowId: 'parent-wf',
         errorType: 'NotFoundError',
       });
     });
@@ -493,6 +500,7 @@ describe('verify_ki workflow step', () => {
         verifiersRun: 2,
         failedVerifierIds: [ESQL_VALID_SYNTAX_VERIFIER_ID, 'workflow'],
         failedWorkflowVerifierCount: 1,
+        workflowId: 'parent-wf',
       });
     });
 
@@ -643,6 +651,7 @@ describe('verify_ki workflow step', () => {
       expect(workflowsManagement.runWorkflow).not.toHaveBeenCalled();
       expect(telemetry.analyticsService.reportKiVerification).toHaveBeenCalledWith({
         outcome: 'failure',
+        workflowId: 'parent-wf',
         errorType: 'PermissionError',
       });
     });
@@ -690,6 +699,7 @@ describe('verify_ki workflow step', () => {
       ).rejects.toThrow('workflowsManagement plugin');
       expect(telemetry.analyticsService.reportKiVerification).toHaveBeenCalledWith({
         outcome: 'failure',
+        workflowId: 'parent-wf',
         errorType: 'FeatureDisabledError',
       });
     });
