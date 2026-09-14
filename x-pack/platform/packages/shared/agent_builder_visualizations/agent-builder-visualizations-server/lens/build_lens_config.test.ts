@@ -130,6 +130,23 @@ describe('buildLensConfig', () => {
     expect(mockedCreateGraph).not.toHaveBeenCalled();
   });
 
+  it('rejects an appearance-only edit when the existing config has no ES|QL query', async () => {
+    await expect(
+      buildLensConfig({
+        nlQuery: 'hide the title',
+        parsedExistingConfig: { type: SupportedChartType.XY, layers: [] },
+        appearanceOnly: true,
+        modelProvider,
+        logger,
+        events,
+        esClient,
+      })
+    ).rejects.toThrow(
+      'An appearance-only edit requires an existing ES|QL-backed Lens configuration'
+    );
+    expect(invoke).not.toHaveBeenCalled();
+  });
+
   it('passes a valid provided ES|QL through to the graph verbatim', async () => {
     const result = await run(PROVIDED_ESQL);
 

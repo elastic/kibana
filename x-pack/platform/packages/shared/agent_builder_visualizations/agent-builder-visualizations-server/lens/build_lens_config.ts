@@ -105,6 +105,11 @@ export const buildLensConfig = async ({
   // graph straight to config generation. The graph re-pins every layer's own
   // data_source, so the first query only seeds the prompt.
   const [existingEsql] = appearanceOnly ? getExistingEsqlQueries(parsedExistingConfig) : [];
+  if (appearanceOnly && !existingEsql) {
+    throw new Error(
+      'An appearance-only edit requires an existing ES|QL-backed Lens configuration.'
+    );
+  }
 
   const finalState = await graph.invoke({
     nlQuery,
