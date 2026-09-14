@@ -19,6 +19,20 @@ const extractCausedByChain = (causedBy: any = {}, accumulator: any[] = []): any 
   return accumulator;
 };
 
+// A proxy in front of ES can answer with a non-JSON body (e.g. an HTML error page); treat it as an empty body
+// so the wrapper still returns a response instead of throwing.
+const parseEsBody = (esBody: unknown): any => {
+  if (typeof esBody !== 'string') {
+    return esBody;
+  }
+
+  try {
+    return JSON.parse(esBody);
+  } catch (e) {
+    return {};
+  }
+};
+
 /**
  * Wraps an error thrown by the ES JS client into a Boom error response and returns it
  *
@@ -31,8 +45,7 @@ export const wrapEsError = (err: any, statusCodeToMessageMap: any = {}) => {
   // Errors thrown by the ES client carry the ES response body under `meta.body`, not `response`
   const esBody = response ?? err.meta?.body ?? {};
 
-  const { error: { root_cause = [], caused_by = {} } = {} } =
-    typeof esBody === 'string' ? JSON.parse(esBody) : esBody;
+  const { error: { root_cause = [], caused_by = {} } = {} } = parseEsBody(esBody);
 
   // If no custom message if specified for the error's status code, just
   // wrap the error as a Boom error response, include the additional information from ES, and return it
