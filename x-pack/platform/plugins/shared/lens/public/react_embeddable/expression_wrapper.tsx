@@ -74,6 +74,7 @@ export function ExpressionWrapper({
   abortController,
 }: ExpressionWrapperProps) {
   if (!expression) return null;
+
   return (
     <>
       <Global styles={lnsGlobalChartStyles} />

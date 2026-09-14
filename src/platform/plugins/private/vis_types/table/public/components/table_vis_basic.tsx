@@ -115,7 +115,7 @@ export const TableVisBasic = memo(
       },
       [columns, setColumnsWidth]
     );
-
+    // console.log({ visConfig });
     return (
       <>
         {title && (
