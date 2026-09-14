@@ -33,7 +33,7 @@ import {
   ESQL_CONTROL,
   RANGE_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
-import { ESQLValuesPreview } from '@kbn/esql-utils';
+import { ESQLValuesPreview } from '@kbn/esql-browser';
 import { dataService } from '../../../services/kibana_services';
 import { getESQLSingleColumnValues } from '../../../../common/options_list';
 import { getControlsTimezone } from '../../utils';

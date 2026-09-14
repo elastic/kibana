@@ -110,5 +110,3 @@ export { injectWhereClauseAfterSourceCommand } from './utils/inject_where_after_
 export * from './utils/callbacks';
 
 export { ensureApproximationLicense } from './utils/ensure_approximation_license';
-
-export { ESQLValuesPreview } from './utils/controls/esql_values_preview';

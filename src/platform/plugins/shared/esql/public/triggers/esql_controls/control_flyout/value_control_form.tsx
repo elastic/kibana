@@ -23,10 +23,10 @@ import {
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import {
   appendStatsByToQuery,
-  ESQLValuesPreview,
   getESQLResults,
   getIndexPatternFromESQLQuery,
 } from '@kbn/esql-utils';
+import { ESQLValuesPreview } from '@kbn/esql-browser';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ISearchGeneric } from '@kbn/search-types';

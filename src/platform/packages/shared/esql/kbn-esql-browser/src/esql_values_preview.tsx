@@ -15,7 +15,6 @@ import { isNumericType } from '@kbn/esql-language';
 import { EMPTY_LABEL } from '@kbn/field-formats-common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { ChooseColumnPopover } from './choose_column_popover';
 

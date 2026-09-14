@@ -102,7 +102,6 @@ export {
   isSingleSource,
   type ESQLSourceKind,
   ensureApproximationLicense,
-  ESQLValuesPreview,
 } from './src';
 
 export { ENABLE_ESQL, GROUP_NOT_SET_VALUE } from './constants';
