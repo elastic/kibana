@@ -329,7 +329,7 @@ steps:
       continue: true
 
   # Preview verdicts come from the worker's outputs; a failed or skipped child
-  # leaves both verdicts false so decide_apply routes away from auto-apply.
+  # leaves both verdicts false so apply_query_tuning skips the update.
   - name: record_preview_outcome
     type: data.set
     with:
@@ -439,22 +439,17 @@ steps:
     on-failure:
       continue: true
 
-  - name: decide_apply
-    type: data.set
-    with:
-      eligible: >-
-        ${{ steps.review_tuning.output.response.approved == true
-          and steps.can_preview_query_change.output.supported == true
-          and steps.record_preview_outcome.output.current_succeeded == true
-          and steps.record_preview_outcome.output.current_is_aborted == false
-          and steps.record_preview_outcome.output.proposed_succeeded == true
-          and steps.record_preview_outcome.output.proposed_is_aborted == false
-          and steps.refetch_rule.error == null
-          and steps.refetch_rule.output.updated_at == steps.fetch_rule.output.updated_at }}
-
   - name: apply_query_tuning
     type: security.patchRule
-    if: "${{ steps.decide_apply.output.eligible == true }}"
+    if: >-
+      ${{ steps.review_tuning.output.response.approved == true
+        and steps.can_preview_query_change.output.supported == true
+        and steps.record_preview_outcome.output.current_succeeded == true
+        and steps.record_preview_outcome.output.current_is_aborted == false
+        and steps.record_preview_outcome.output.proposed_succeeded == true
+        and steps.record_preview_outcome.output.proposed_is_aborted == false
+        and steps.refetch_rule.error == null
+        and steps.refetch_rule.output.updated_at == steps.fetch_rule.output.updated_at }}
     with:
       patch:
         id: "{{ steps.refetch_rule.output.id }}"
@@ -488,15 +483,15 @@ steps:
         risk_score: "${{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}"
         severity: "{{ steps.diagnose_rule.output.structured_output.proposed_severity }}"
 
-  # Each error check is paired with the gate that ran its apply step; a skipped
-  # step leaves no execution record. An approved change whose apply failed stays
-  # untagged so a later sweep can retry.
+  # A skipped step leaves no execution record. Query success requires a returned
+  # rule id; the other error checks are paired with their apply gates. Failed
+  # changes stay untagged so a later sweep can retry.
   - name: record_apply_results
     type: data.set
     with:
       query_applied: >-
-        ${{ steps.decide_apply.output.eligible == true
-          and steps.apply_query_tuning.error == null }}
+        ${{ steps.apply_query_tuning.error == null
+          and steps.apply_query_tuning.output.id != null }}
       exception_applied: >-
         ${{ steps.review_tuning.output.response.approved == true
           and steps.diagnose_rule.output.structured_output.change_type == 'exception'

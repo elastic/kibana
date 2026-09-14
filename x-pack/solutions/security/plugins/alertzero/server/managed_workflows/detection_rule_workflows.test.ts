@@ -7,6 +7,7 @@
 
 import { parse } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
+import { createWorkflowLiquidEngine } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
   ALERTZERO_RULE_CREATION_WORKFLOW_ID,
@@ -480,12 +481,11 @@ describe('detection rule workflows', () => {
           ['fetch_rule', 'refetch_rule'].includes(name)
         );
         const apply = reviewSteps.find(({ name }) => name === 'apply_query_tuning')!;
-        const eligibility = reviewSteps.find(({ name }) => name === 'decide_apply')!;
         expect(fetches).toHaveLength(2);
         for (const fetch of fetches) {
           expect(String(fetch.with?.path)).toContain('?id={{ inputs.rule_uuid | url_encode }}');
         }
-        expect(String(eligibility.with?.eligible)).toContain(
+        expect(String(apply.if)).toContain(
           'steps.refetch_rule.output.updated_at == steps.fetch_rule.output.updated_at'
         );
         expect(apply.type).toBe('security.patchRule');
@@ -518,13 +518,107 @@ describe('detection rule workflows', () => {
       });
 
       it('requires both previews before applying a query change', () => {
-        const eligibility = reviewSteps.find(({ name }) => name === 'decide_apply')!;
-        const condition = String(eligibility.with?.eligible);
+        const apply = reviewSteps.find(({ name }) => name === 'apply_query_tuning')!;
+        const condition = String(apply.if);
 
         expect(condition).toContain('current_succeeded == true');
         expect(condition).toContain('current_is_aborted == false');
         expect(condition).toContain('proposed_succeeded == true');
         expect(condition).toContain('proposed_is_aborted == false');
+      });
+
+      it.each([
+        { scenario: 'eligible proposal', overrides: {}, expected: true },
+        { scenario: 'not approved', overrides: { approved: false }, expected: false },
+        { scenario: 'unsupported rule', overrides: { supported: false }, expected: false },
+        {
+          scenario: 'failed current preview',
+          overrides: { currentSucceeded: false },
+          expected: false,
+        },
+        {
+          scenario: 'aborted current preview',
+          overrides: { currentIsAborted: true },
+          expected: false,
+        },
+        {
+          scenario: 'failed proposed preview',
+          overrides: { proposedSucceeded: false },
+          expected: false,
+        },
+        {
+          scenario: 'aborted proposed preview',
+          overrides: { proposedIsAborted: true },
+          expected: false,
+        },
+        {
+          scenario: 'failed refetch',
+          overrides: { refetchError: 'Rule not found' },
+          expected: false,
+        },
+        {
+          scenario: 'rule edited during approval',
+          overrides: { updatedAt: 'newer' },
+          expected: false,
+        },
+      ])('applies a query only when eligible: $scenario', ({ overrides, expected }) => {
+        const {
+          approved,
+          supported,
+          currentSucceeded,
+          currentIsAborted,
+          proposedSucceeded,
+          proposedIsAborted,
+          refetchError,
+          updatedAt,
+        } = {
+          approved: true,
+          supported: true,
+          currentSucceeded: true,
+          currentIsAborted: false,
+          proposedSucceeded: true,
+          proposedIsAborted: false,
+          refetchError: null,
+          updatedAt: 'original',
+          ...overrides,
+        };
+        const apply = reviewSteps.find(({ name }) => name === 'apply_query_tuning');
+        const expression = String(apply?.if).slice(3, -2).trim();
+
+        expect(
+          createWorkflowLiquidEngine().evalValueSync(expression, {
+            steps: {
+              review_tuning: { output: { response: { approved } } },
+              can_preview_query_change: { output: { supported } },
+              record_preview_outcome: {
+                output: {
+                  current_succeeded: currentSucceeded,
+                  current_is_aborted: currentIsAborted,
+                  proposed_succeeded: proposedSucceeded,
+                  proposed_is_aborted: proposedIsAborted,
+                },
+              },
+              fetch_rule: { output: { updated_at: 'original' } },
+              refetch_rule: { error: refetchError, output: { updated_at: updatedAt } },
+            },
+          })
+        ).toBe(expected);
+      });
+
+      it.each([
+        ['skipped', undefined, false],
+        ['failed', { error: 'Patch failed' }, false],
+        ['missing response', {}, false],
+        ['succeeded', { output: { id: 'rule-id' } }, true],
+      ])('records query application only after success: %s', (_scenario, result, expected) => {
+        const applyResults = reviewSteps.find(({ name }) => name === 'record_apply_results');
+        const expression = String(applyResults?.with?.query_applied).slice(3, -2).trim();
+
+        expect(
+          createWorkflowLiquidEngine().evalValueSync(expression, {
+            steps: { apply_query_tuning: result },
+          })
+        ).toBe(expected);
       });
 
       // A partial or timed-out alert count would understate a backtest, so the
@@ -566,10 +660,10 @@ describe('detection rule workflows', () => {
           "steps.fetch_rule.output.type == 'query'"
         );
 
-        const eligibility = reviewSteps.find(({ name }) => name === 'decide_apply')!;
-        expect(String(eligibility.with?.eligible)).toContain(
-          'steps.can_preview_query_change.output.supported == true'
-        );
+        const apply = reviewSteps.find(({ name }) => name === 'apply_query_tuning')!;
+        const condition = String(apply.if);
+
+        expect(condition).toContain('steps.can_preview_query_change.output.supported == true');
       });
 
       it('bounds direct review inputs', () => {
