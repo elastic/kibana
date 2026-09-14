@@ -40,7 +40,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   return (
     <>
       <AppHeader title={PAGE_TITLE} menu={menu} />
-      <SpyRoute pageName={SecurityPageName.entityAnalyticsHome} />
+      <SpyRoute pageName={SecurityPageName.entityAnalyticsHomePage} />
     </>
   );
 };

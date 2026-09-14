@@ -14,7 +14,6 @@ import {
   ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
   ENTITY_ANALYTICS_LANDING_PATH,
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
-  ENTITY_ANALYTICS_HOME_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
   ENTITY_ANALYTICS_OVERVIEW_PATH,
   ENTITY_ANALYTICS_HOME_PAGE_PATH,
@@ -179,19 +178,24 @@ const EntityAnalyticsOverviewContainer: React.FC = React.memo(() => {
 EntityAnalyticsOverviewContainer.displayName = 'EntityAnalyticsOverviewContainer';
 
 // ---- Entity analytics home page routes ----
-const EntityAnalyticsHomePageWrapper = () => (
-  <PluginTemplateWrapper>
-    <EntityAnalyticsHomePage />
-  </PluginTemplateWrapper>
-);
-
 const EntityAnalyticsHomePageContainer: React.FC = React.memo(() => {
+  const {
+    featureFlags: { getBooleanValue },
+  } = useKibana().services;
+  const isNewHomePageEnabled = getBooleanValue(USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG, false);
+
+  const PageComponent = isNewHomePageEnabled ? EntityAnalyticsNewHomePage : EntityAnalyticsHomePage;
+
   return (
     <Routes>
       <Route
         path={ENTITY_ANALYTICS_HOME_PAGE_PATH}
         exact
-        component={EntityAnalyticsHomePageWrapper}
+        render={() => (
+          <PluginTemplateWrapper>
+            <PageComponent />
+          </PluginTemplateWrapper>
+        )}
       />
       <Route component={NotFoundPage} />
     </Routes>
@@ -199,39 +203,6 @@ const EntityAnalyticsHomePageContainer: React.FC = React.memo(() => {
 });
 
 EntityAnalyticsHomePageContainer.displayName = 'EntityAnalyticsHomePageContainer';
-
-// ---- New Entity Analytics home page (gated by securitySolution.useNewEntityAnalyticsPage) ----
-const EntityAnalyticsNewHomePageContainer: React.FC = React.memo(() => {
-  const {
-    featureFlags: { getBooleanValue },
-  } = useKibana().services;
-  const isEnabled = getBooleanValue(USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG, false);
-
-  return (
-    <Routes>
-      <Route
-        path={ENTITY_ANALYTICS_HOME_PATH}
-        exact
-        render={({ location }) =>
-          isEnabled ? (
-            <EntityAnalyticsNewHomePage />
-          ) : (
-            <Redirect
-              to={{
-                ...location,
-                pathname: ENTITY_ANALYTICS_LANDING_PATH,
-                search: location.search,
-              }}
-            />
-          )
-        }
-      />
-      <Route component={NotFoundPage} />
-    </Routes>
-  );
-});
-
-EntityAnalyticsNewHomePageContainer.displayName = 'EntityAnalyticsNewHomePageContainer';
 
 // ---- Route definitions ----
 export const routes = [
@@ -276,13 +247,6 @@ export const routes = [
     component: withSecurityRoutePageWrapper(
       EntityAnalyticsHomePageContainer,
       SecurityPageName.entityAnalyticsHomePage
-    ),
-  },
-  {
-    path: ENTITY_ANALYTICS_HOME_PATH,
-    component: withSecurityRoutePageWrapper(
-      EntityAnalyticsNewHomePageContainer,
-      SecurityPageName.entityAnalyticsHome
     ),
   },
 ];
