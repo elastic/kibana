@@ -107,7 +107,7 @@ describe('rule_details_route', () => {
   it('uses the mount host path prefix for aliasMatch redirects', async () => {
     await setup();
     const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-    // eslint-disable-next-line react-hooks/rules-of-hooks
+
     useKibanaMock().services.host = {
       app: 'observabilityAlerting',
       pathPrefix: '/rules/v1',
