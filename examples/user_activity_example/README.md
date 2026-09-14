@@ -15,7 +15,7 @@ user_activity:
 
 ```bash
 node scripts/build_kibana_platform_plugins --examples --test-plugins
-yarn start --run-examples
+pnpm start --run-examples
 ```
 
 3. Navigate to **Developer Examples** > **User Activity**

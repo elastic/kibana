@@ -4,7 +4,7 @@ Script to build the knowledge base artifacts.
 
 ## How to run
 
-yarn es snapshot --license trial
+pnpm es snapshot --license trial
 
 node scripts/kibana --dev --no-base-path
 

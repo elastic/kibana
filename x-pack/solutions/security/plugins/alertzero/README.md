@@ -114,7 +114,7 @@ OpenAPI → Zod schemas live in `@kbn/alertzero-common`. Regenerate with:
 
 ```bash
 cd x-pack/solutions/security/packages/kbn-alertzero-common
-yarn openapi:generate
+pnpm openapi:generate
 ```
 
 ## Managed workflows

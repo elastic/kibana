@@ -46,7 +46,7 @@ const getKibanaConnection = () => {
   const host = process.env.KIBANA_HOST ?? config.server?.host ?? flat('server.host') ?? '127.0.0.1';
   const resolvedHost = host === '0.0.0.0' ? '127.0.0.1' : host;
   const port = process.env.KIBANA_PORT ?? config.server?.port ?? flat('server.port') ?? 5601;
-  // `server.basePath` is empty when not configured; in dev mode `yarn start`
+  // `server.basePath` is empty when not configured; in dev mode `pnpm start`
   // injects a random 3-letter base path at runtime that we then have to
   // discover from a redirect (see `discoverBasePath`).
   const configBasePath: string =

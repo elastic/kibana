@@ -9,5 +9,5 @@ The plugin provides a way to input an expression on the front-end side. The expr
 To run this example, use the following command:
 
 ```bash
-$ yarn start --run-examples
+$ pnpm start --run-examples
 ```

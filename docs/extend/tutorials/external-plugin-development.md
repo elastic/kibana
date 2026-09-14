@@ -19,7 +19,7 @@ If you are coming from the in-repo plugin docs, note the following:
 
 * **Location.** External plugins live in a `plugins/` directory at the root of your {{kib}} checkout. This directory is gitignored — your plugin is not tracked alongside the {{kib}} sources.
 * **Manifest.** External plugins use a flat `kibana.json` manifest (a different schema than the in-repo `kibana.jsonc`). Use [`node scripts/generate_plugin`](/extend/tutorials/plugin-tooling.md#automatic-plugin-generator) to scaffold one with the correct format.
-* **Build.** Browser bundles for external plugins are not built by the {{kib}} optimizer. Run `yarn dev --watch` from inside the plugin directory in a dedicated terminal while `yarn start` runs in another — see [Plugin tooling](/extend/tutorials/plugin-tooling.md#_run_kib_with_your_plugin_in_dev_mode).
+* **Build.** Browser bundles for external plugins are not built by the {{kib}} optimizer. Run `pnpm dev --watch` from inside the plugin directory in a dedicated terminal while `pnpm start` runs in another — see [Plugin tooling](/extend/tutorials/plugin-tooling.md#_run_kib_with_your_plugin_in_dev_mode).
 
 ## Topics
 

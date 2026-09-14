@@ -49,11 +49,11 @@ main () {
 
   report_main_step "Generate function definitions"
 
-  yarn make:defs
+  pnpm make:defs
 
   report_main_step "Generate inline function docs"
 
-  yarn make:docs
+  pnpm make:docs
 
   report_main_step "Run i18n check"
 
@@ -98,7 +98,7 @@ main () {
 
   git add $GIT_SCOPE
   if [ "$VERSION_BUMPED" == "true" ]; then
-    git add package.json yarn.lock
+    git add package.json pnpm-lock.yaml
   fi
   git commit -m "Update function metadata"
 

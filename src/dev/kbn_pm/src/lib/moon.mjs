@@ -44,7 +44,7 @@ const getMoonExec = (() => {
  * @param {RunOpts & { passAlongArgs?: string[], noCache?: boolean, noActions?: boolean, quiet?: boolean }} opts
  */
 export async function moonRun(commandOrCommands, opts = {}) {
-  // Get moon's exec directly to avoid the yarn wrapping, allow for pass-along args
+  // Get moon's exec directly to avoid package-manager wrapping, allow for pass-along args
   const moonExec = await getMoonExec();
 
   const moonArgs = [];

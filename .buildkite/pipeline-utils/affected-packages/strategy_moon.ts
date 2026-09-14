@@ -14,14 +14,14 @@ import { getKibanaDir } from '../utils';
 
 const REPO_ROOT = getKibanaDir();
 
-/** Resolves `moon`'s absolute path — run via `ts-node`, not yarn, so it's not on `PATH`. */
+/** Resolves `moon`'s absolute path — run via `ts-node`, not a package manager, so it's not on `PATH`. */
 function getMoonBinPath(): string {
   const moonBinPath = path.resolve(REPO_ROOT, 'node_modules/.bin/moon');
   if (existsSync(moonBinPath)) {
     return moonBinPath;
   }
 
-  return execSync('yarn --silent which moon', { cwd: REPO_ROOT, encoding: 'utf8' }).trim();
+  return execSync('pnpm --silent exec which moon', { cwd: REPO_ROOT, encoding: 'utf8' }).trim();
 }
 
 export function getAffectedProjectsMoon(
