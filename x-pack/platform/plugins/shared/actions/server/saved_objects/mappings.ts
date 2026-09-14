@@ -74,6 +74,15 @@ export const actionTaskParamsMappings: SavedObjectsTypeMappingDefinition = {
   },
 };
 
+export const connectorIngressCredentialMappings: SavedObjectsTypeMappingDefinition = {
+  dynamic: false,
+  properties: {
+    connectorId: {
+      type: 'keyword',
+    },
+  },
+};
+
 export const connectorTokenMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
   properties: {

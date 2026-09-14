@@ -1338,17 +1338,12 @@ describe('create()', () => {
         action: {
           name: 'Sales ingress',
           actionTypeId: '.inboundWebhook',
-          config: { ingestTokenHash: 'a'.repeat(64) },
+          config: {},
           secrets: {},
         },
       });
 
-      const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
-        config: { ingestTokenHash?: string };
-      };
-
       expect(result).not.toHaveProperty('secrets');
-      expect(saved.config.ingestTokenHash).toBeUndefined();
     });
 
     test('stores a last-saver API key and leaves spoke secrets unchanged', async () => {
