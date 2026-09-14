@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { AppHeaderTab } from '@kbn/app-header';
+import type { AppHeaderDescription, AppHeaderTab } from '@kbn/app-header';
 import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { SYNTHETICS_SETTINGS_ROUTE } from '../../../../../common/constants';
 import { useSyntheticsSettingsContext } from '../../contexts';
+import { START_ADDING_LOCATIONS_DESCRIPTION } from './private_locations/empty_locations';
 
 export type SettingsTabId =
   | 'data-retention'
@@ -26,6 +27,37 @@ export const SETTINGS_PAGE_TITLE = i18n.translate(
     defaultMessage: 'Settings',
   }
 );
+
+const PRIVATE_LOCATIONS_DOCS_URL =
+  'https://www.elastic.co/guide/en/observability/current/synthetics-private-location.html';
+
+const PARAMS_DOCS_URL =
+  'https://www.elastic.co/guide/en/observability/current/synthetics-params-secrets.html';
+
+const PARAMS_PAGE_DESCRIPTION = i18n.translate('xpack.synthetics.params.description', {
+  defaultMessage:
+    'Define variables and parameters that you can use in the configuration of browser and lightweight monitors, such as credentials or URLs.',
+});
+
+export const getSettingsAppHeaderDescription = (
+  tabId: SettingsTabId | undefined
+): AppHeaderDescription | undefined => {
+  if (tabId === 'private-locations') {
+    return {
+      text: START_ADDING_LOCATIONS_DESCRIPTION,
+      learnMoreUrl: PRIVATE_LOCATIONS_DOCS_URL,
+    };
+  }
+
+  if (tabId === 'params') {
+    return {
+      text: PARAMS_PAGE_DESCRIPTION,
+      learnMoreUrl: PARAMS_DOCS_URL,
+    };
+  }
+
+  return undefined;
+};
 
 export const useSettingsAppHeaderTabs = (syntheticsPath: string): AppHeaderTab[] => {
   const match = useRouteMatch<{ tabId: SettingsTabId }>(SYNTHETICS_SETTINGS_ROUTE);

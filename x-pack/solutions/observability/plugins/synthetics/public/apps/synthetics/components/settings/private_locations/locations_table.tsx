@@ -30,7 +30,6 @@ import { ViewLocationMonitors } from './view_location_monitors';
 import { TableTitle } from '../../common/components/table_title';
 import { TAGS_LABEL } from '../components/tags_field';
 import { useSyntheticsSettingsContext } from '../../../contexts';
-import { PrivateLocationDocsLink, START_ADDING_LOCATIONS_DESCRIPTION } from './empty_locations';
 import type { PrivateLocation } from '../../../../../../common/runtime_types';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
 import { useLocationMonitors } from './hooks/use_location_monitors';
@@ -331,10 +330,6 @@ export const PrivateLocationsTable = ({
 
   return (
     <div>
-      <EuiText>
-        {START_ADDING_LOCATIONS_DESCRIPTION} <PrivateLocationDocsLink label={LEARN_MORE} />
-      </EuiText>
-      <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued" className="eui-textNoWrap">
@@ -466,10 +461,6 @@ const EDIT_LOCATION = i18n.translate('xpack.synthetics.settingsRoute.privateLoca
 
 const ADD_LABEL = i18n.translate('xpack.synthetics.monitorManagement.createLocation', {
   defaultMessage: 'Create location',
-});
-
-export const LEARN_MORE = i18n.translate('xpack.synthetics.privateLocations.learnMore.label', {
-  defaultMessage: 'Learn more.',
 });
 
 const RESET_MONITORS_LABEL = i18n.translate(

@@ -11,14 +11,11 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiText,
-  EuiLink,
   EuiSearchBar,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -224,24 +221,6 @@ export const ParamsList = () => {
 
   return (
     <div>
-      <EuiText>
-        <FormattedMessage
-          id="xpack.synthetics.params.description"
-          defaultMessage="Define variables and parameters that you can use in the configuration of browser and lightweight monitors, such as credentials or URLs. {learnMore}"
-          values={{
-            learnMore: (
-              <EuiLink
-                data-test-subj="syntheticsParamsListLink"
-                href="https://www.elastic.co/guide/en/observability/current/synthetics-params-secrets.html"
-                target="_blank"
-              >
-                {LEARN_MORE}
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiText>
-      <EuiSpacer size="m" />
       <EuiInMemoryTable<ListParamItem>
         data-test-subj={
           isLoading ? 'syntheticsParamsTable-loading' : 'syntheticsParamsTable-loaded'
@@ -312,10 +291,6 @@ const PARAMS_TABLE = i18n.translate('xpack.synthetics.settingsRoute.params.table
 
 const PARAMS_LABEL = i18n.translate('xpack.synthetics.settingsRoute.params.label', {
   defaultMessage: 'Parameters',
-});
-
-const LEARN_MORE = i18n.translate('xpack.synthetics.settingsRoute.params.learnMore', {
-  defaultMessage: 'Learn more.',
 });
 
 const EDIT_PARAM = i18n.translate('xpack.synthetics.settingsRoute.params.editLabel', {

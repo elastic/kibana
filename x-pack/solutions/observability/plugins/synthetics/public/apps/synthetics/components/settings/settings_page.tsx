@@ -15,7 +15,11 @@ import { SyntheticsPage } from '../common/app_header';
 import { AlertDefaultsForm } from './alerting_defaults/alert_defaults_form';
 import { ProjectAPIKeys } from './project_api_keys/project_api_keys';
 import type { SettingsTabId } from './page_header';
-import { SETTINGS_PAGE_TITLE, useSettingsAppHeaderTabs } from './page_header';
+import {
+  getSettingsAppHeaderDescription,
+  SETTINGS_PAGE_TITLE,
+  useSettingsAppHeaderTabs,
+} from './page_header';
 import { ParamsList } from './global_params/params_list';
 import { DataRetentionTab } from './data_retention';
 import { useSettingsBreadcrumbs } from './use_settings_breadcrumbs';
@@ -69,6 +73,7 @@ export const SettingsPage = () => {
     <SyntheticsPage
       title={SETTINGS_PAGE_TITLE}
       tabs={settingsTabs}
+      description={getSettingsAppHeaderDescription(tabId)}
       menu={{ showSettings: false, showDiagnostics: true }}
       paddingSize="m"
     >

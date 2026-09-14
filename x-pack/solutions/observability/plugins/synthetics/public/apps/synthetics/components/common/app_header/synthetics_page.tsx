@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { AppHeader, type AppHeaderBack, type AppHeaderTab } from '@kbn/app-header';
+import {
+  AppHeader,
+  type AppHeaderBack,
+  type AppHeaderDescription,
+  type AppHeaderTab,
+} from '@kbn/app-header';
 import { EuiFlexGroup, EuiFlexItem, EuiPageSection, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -46,6 +51,7 @@ export function SyntheticsPage({
   back,
   toolbar,
   menu,
+  description,
   paddingSize = 'l',
   children,
 }: {
@@ -54,6 +60,7 @@ export function SyntheticsPage({
   back?: AppHeaderBack;
   toolbar?: React.ReactNode;
   menu?: SyntheticsAppHeaderMenuOptions;
+  description?: AppHeaderDescription;
   paddingSize?: 'none' | 's' | 'm' | 'l';
   children: React.ReactNode;
 }): React.ReactElement {
@@ -69,7 +76,14 @@ export function SyntheticsPage({
 
   return (
     <>
-      <AppHeader title={title} tabs={tabs} back={back} menu={headerMenu} spacing="standard" />
+      <AppHeader
+        title={title}
+        tabs={tabs}
+        back={back}
+        menu={headerMenu}
+        description={description}
+        spacing="standard"
+      />
       <EuiSpacer size="l" />
       {flyouts}
       {paddingSize === 'none' ? (
