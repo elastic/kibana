@@ -4596,11 +4596,19 @@
   version "0.0.0"
   uid ""
 
+"@kbn/as-code-dashboard-schema@link:src/platform/packages/shared/as-code/dashboard-schema":
+  version "0.0.0"
+  uid ""
+
 "@kbn/as-code-data-views-schema@link:src/platform/packages/shared/as-code/data-views-schema":
   version "0.0.0"
   uid ""
 
 "@kbn/as-code-data-views-transforms@link:src/platform/packages/shared/as-code/data-views-transforms":
+  version "0.0.0"
+  uid ""
+
+"@kbn/as-code-discover-schema@link:src/platform/packages/shared/as-code/discover-schema":
   version "0.0.0"
   uid ""
 
@@ -6508,6 +6516,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/discover-session-constants@link:src/platform/packages/private/kbn-discover-session-constants":
+  version "0.0.0"
+  uid ""
+
 "@kbn/discover-shared-plugin@link:src/platform/plugins/shared/discover_shared":
   version "0.0.0"
   uid ""
@@ -6905,6 +6917,10 @@
   uid ""
 
 "@kbn/evals-suite-streams@link:x-pack/platform/packages/shared/kbn-evals-suite-streams":
+  version "0.0.0"
+  uid ""
+
+"@kbn/evals-suite-threat-intel-enrichment@link:x-pack/solutions/security/packages/kbn-evals-suite-threat-intel-enrichment":
   version "0.0.0"
   uid ""
 

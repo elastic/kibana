@@ -21,6 +21,7 @@ import {
   fetchFromV2AndSource,
   type EpisodeSourceError,
 } from '../utils/fetch_from_sources';
+import { buildAlertEventsTimeRangeFilter } from '../utils/build_alert_events_time_range_filter';
 import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
 import { mergeKpis } from '../utils/merge_kpis';
 import { queryKeys } from '../query_keys';
@@ -96,6 +97,7 @@ export const useEpisodesKpisQuery = ({
       additionalEpisodesDataSource?.id
     ),
     queryFn: async ({ signal }) => {
+      const timeRangeFilter = buildAlertEventsTimeRangeFilter(timeRange);
       const { v2, additional, errors } = await fetchFromV2AndSource({
         v2: () =>
           executeEsqlQuery<EpisodesKpisRow>({
@@ -104,7 +106,7 @@ export const useEpisodesKpisQuery = ({
             input: {
               type: 'kibana_context' as const,
               esqlVariables: [],
-              ...(timeRange ? { timeRange } : {}),
+              ...(timeRangeFilter ? { filters: [timeRangeFilter] } : {}),
             },
             abortSignal: signal,
           }),

@@ -76,7 +76,9 @@ export async function handlePostExecutionLoop({
     await resumeSyncParentIfNeeded({
       childExecution: finalExecution,
       spaceId,
+      fakeRequest,
       internalResumeWorkflowExecution,
+      workflowTaskManager,
       logger,
     });
   }
