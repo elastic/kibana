@@ -478,9 +478,7 @@ export function generateEsqlQuery(
         return getEsqlQueryFailedResult('terms_not_supported');
       }
 
-      queryParts.push(
-        `SORT ${quoteEsqlSortField(sortField)} ${orderDirection.toUpperCase()}`
-      );
+      queryParts.push(`SORT ${quoteEsqlSortField(sortField)} ${orderDirection.toUpperCase()}`);
       queryParts.push(`LIMIT ${size}`);
     } else {
       // Build sort fields, excluding date fields (date_histogram columns)
