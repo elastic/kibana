@@ -40,7 +40,8 @@ test.describe('Vega sandbox example', { tag: ['@local-stateful-classic'] }, () =
     await page.testSubj.locator('vegaSandboxExampleFilterBtn').click();
     const frame = page.frameLocator('[data-test-subj="vegaSandboxExampleFrame"]');
     await expect(frame.getByText('Click a bar to send applyFilter')).toBeVisible();
-    await frame.getByLabel('A').click();
+    // exact: true — without it, getByLabel('A') substring-matches axis titles that contain "A".
+    await frame.getByLabel('A', { exact: true }).click();
     await expect(page.testSubj.locator('vegaSandboxExampleAppliedFilter')).toContainText(
       'category:A'
     );
