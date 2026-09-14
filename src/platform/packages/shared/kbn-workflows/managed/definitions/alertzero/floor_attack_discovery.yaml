@@ -37,7 +37,8 @@ steps:
   # built-in retries, this worker run remains failed and hands off nothing.
   # `workflow.execute` propagates the child's failure, which `workflow.executeAsync`
   # would not — the run would report success while generation had failed. The cost
-  # is that this run's Task Manager task stays claimed for the whole generation.
+  # is that this worker waits for the child to finish before it continues, and keeps
+  # its single concurrency slot for that whole time.
   #
   # The child carries no schedule of its own; this worker is the single scheduler
   # authority for the space.

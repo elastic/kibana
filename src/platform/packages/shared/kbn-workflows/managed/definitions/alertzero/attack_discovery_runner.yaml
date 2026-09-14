@@ -112,7 +112,9 @@ steps:
   # this call site later, so nothing here is designed around it.
   #
   # `mode: sync` because the fan-out below needs the discoveries inline. Sync mode
-  # awaits the pipeline to completion and applies no soft deadline.
+  # awaits the pipeline to completion and applies no soft deadline, so generation
+  # finishes inside this step and the run occupies its one per-space concurrency
+  # slot for as long as that takes — up to the 35m timeout below.
   #
   # No `on-failure`: the default propagation is what #19276 requires — when
   # generation fails after its own built-in retries, this run fails and hands off
