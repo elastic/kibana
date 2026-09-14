@@ -58,6 +58,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     experimentalFeatures,
     projectRouting,
     conversationTemplates,
+    deductive,
   } = manager.deps;
 
   const spaceId = getCurrentSpaceId({ request, spaces });
@@ -128,6 +129,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     subAgentExecutor: manager.deps.subAgentExecutor,
     agentRegistry,
     conversationClient,
+    ...(deductive ? { deductive } : {}),
     analyticsService,
     trackingService,
     filesystemService,
