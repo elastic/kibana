@@ -221,31 +221,10 @@ describe('Significant Events run quota workflow contracts', () => {
     expect(indexes).toEqual([...indexes].sort((left, right) => left - right));
   });
 
-  it('derives investigation criticality from the resolved event severity', () => {
+  it('sends no severity policy in the investigation quota request', () => {
     const gate = findStep(definitions.discovery, 'consume_investigation_quota');
-    const critical = gate.with?.body?.critical;
 
-    expect(critical).toBe(
-      '${{ steps.resolve_open_event.output.hits.hits[0]._source.severity == "80-critical" }}'
-    );
-    expect(
-      evaluateExpression(critical as string, {
-        steps: {
-          resolve_open_event: {
-            output: { hits: { hits: [{ _source: { severity: '80-critical' } }] } },
-          },
-        },
-      })
-    ).toBe(true);
-    expect(
-      evaluateExpression(critical as string, {
-        steps: {
-          resolve_open_event: {
-            output: { hits: { hits: [{ _source: { severity: '60-high' } }] } },
-          },
-        },
-      })
-    ).toBe(false);
+    expect(gate.with?.body).toEqual({ group: 'investigation' });
   });
 
   it('prevents investigation launch only on explicit denial', () => {

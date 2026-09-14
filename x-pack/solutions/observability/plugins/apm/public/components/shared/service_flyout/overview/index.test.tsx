@@ -20,6 +20,7 @@ let transactionsSectionProps: React.ComponentProps<typeof ServiceFlyoutTransacti
   null;
 
 const mockUseServiceFlyoutContext = jest.fn();
+const mockUseProjectRouting = jest.fn<string | undefined, []>(() => undefined);
 jest.mock('../service_flyout_context', () => ({
   useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
 }));
@@ -30,7 +31,7 @@ jest.mock('../hooks/use_service_has_system_metrics', () => ({
 
 // Avoid pulling the real plugin module (heavy import graph) into this test.
 jest.mock('../hooks/use_project_routing', () => ({
-  useProjectRouting: () => undefined,
+  useProjectRouting: () => mockUseProjectRouting(),
 }));
 
 jest.mock('@kbn/apm-ui-shared', () => ({
@@ -50,13 +51,31 @@ jest.mock('./lens_chart', () => ({
   ServiceFlyoutLensChart: () => <div data-test-subj="lensChartMock" />,
 }));
 
+const mockServiceFlyoutApmCharts = jest.fn((_props: unknown) => (
+  <div data-test-subj="apmChartsMock" />
+));
+jest.mock('./apm_charts', () => ({
+  ServiceFlyoutApmCharts: (props: unknown) => mockServiceFlyoutApmCharts(props as never),
+}));
+
 const service: ServiceFlyoutService = {
   name: 'opbeans-java',
   agentName: 'java',
 };
 
-function buildContextValue({ refreshToken = 0 }: { refreshToken?: number } = {}) {
+function buildContextValue({
+  refreshToken = 0,
+  schema = 'ecs' as const,
+  filters = {},
+  preferDocumentBasedCharts,
+}: {
+  refreshToken?: number;
+  schema?: 'ecs' | 'otel' | 'unknown';
+  filters?: Record<string, unknown>;
+  preferDocumentBasedCharts?: boolean;
+} = {}) {
   return {
+    preferDocumentBasedCharts,
     deps: {
       core: {
         http: {},
@@ -71,7 +90,7 @@ function buildContextValue({ refreshToken = 0 }: { refreshToken?: number } = {})
     capabilities: {
       loading: false,
       error: undefined,
-      schema: 'ecs' as const,
+      schema,
       header: { serviceNameLink: true, badges: true },
       overview: { transactions: true, transactionTypeFilter: true, infraMetrics: true },
       footer: { alerts: true, slos: true },
@@ -86,6 +105,7 @@ function buildContextValue({ refreshToken = 0 }: { refreshToken?: number } = {})
       setTransactionType: jest.fn(),
       refreshToken,
       onRefresh: jest.fn(),
+      ...filters,
     },
   };
 }
@@ -101,6 +121,7 @@ function renderOverview({ refreshToken }: { refreshToken?: number } = {}) {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockUseProjectRouting.mockReturnValue(undefined);
   transactionsSectionProps = null;
 });
 
@@ -157,10 +178,103 @@ describe('ServiceFlyoutOverview capabilities loading and error states', () => {
   });
 });
 
-describe('ServiceFlyoutOverview key metrics indices loading and error states', () => {
+describe('ServiceFlyoutOverview key metrics chart implementation per schema', () => {
+  it('renders the shared APM chart components for ECS services', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    mockUseServiceFlyoutContext.mockReturnValue(buildContextValue({ schema: 'ecs' }));
+
+    render(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    expect(screen.getByTestId('apmChartsMock')).toBeInTheDocument();
+    expect(screen.queryByTestId('lensChartMock')).not.toBeInTheDocument();
+    expect(screen.getByTestId('serviceFlyoutSection-keyMetrics')).toBeInTheDocument();
+  });
+
+  it('renders the shared APM chart components for unknown-schema services', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    mockUseServiceFlyoutContext.mockReturnValue(buildContextValue({ schema: 'unknown' }));
+
+    render(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    expect(screen.getByTestId('apmChartsMock')).toBeInTheDocument();
+  });
+
+  it('keeps the ES|QL Lens charts for ECS services in document-based hosts (Discover)', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    mockUseServiceFlyoutContext.mockReturnValue({
+      ...buildContextValue({ schema: 'ecs', preferDocumentBasedCharts: true }),
+      indices: {
+        transaction: 'traces-apm*',
+        span: 'traces-apm*',
+        error: 'logs-apm*',
+        metric: 'metrics-apm*',
+        onboarding: 'apm-*',
+      },
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    expect(screen.getAllByTestId('lensChartMock').length).toBeGreaterThan(0);
+    expect(screen.queryByTestId('apmChartsMock')).not.toBeInTheDocument();
+  });
+
+  it('keeps the ES|QL Lens charts for OTel services', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    mockUseServiceFlyoutContext.mockReturnValue({
+      ...buildContextValue({ schema: 'otel' }),
+      indices: {
+        transaction: 'traces-apm*',
+        span: 'traces-apm*',
+        error: 'logs-apm*',
+        metric: 'metrics-apm*',
+        onboarding: 'apm-*',
+      },
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    expect(screen.getAllByTestId('lensChartMock').length).toBeGreaterThan(0);
+    expect(screen.queryByTestId('apmChartsMock')).not.toBeInTheDocument();
+  });
+
+  it('seeds the latency aggregation type from the flyout filters', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    mockUseServiceFlyoutContext.mockReturnValue(
+      buildContextValue({ filters: { latencyAggregationType: 'p95' } })
+    );
+
+    render(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    expect(mockServiceFlyoutApmCharts).toHaveBeenCalledWith(
+      expect.objectContaining({ latencyAggregationType: 'p95' })
+    );
+  });
+});
+
+describe('ServiceFlyoutOverview OTel key metrics indices loading and error states', () => {
   it('renders a skeleton for key metrics while indices are loading', () => {
     mockUseServiceFlyoutContext.mockReturnValue({
-      ...buildContextValue(),
+      ...buildContextValue({ schema: 'otel' }),
       indices: undefined,
     });
     mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
@@ -178,7 +292,7 @@ describe('ServiceFlyoutOverview key metrics indices loading and error states', (
 
   it('renders a warning callout for key metrics when indices fail to load', () => {
     mockUseServiceFlyoutContext.mockReturnValue({
-      ...buildContextValue(),
+      ...buildContextValue({ schema: 'otel' }),
       indices: null,
     });
     mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
@@ -198,7 +312,7 @@ describe('ServiceFlyoutOverview key metrics indices loading and error states', (
 
   it('renders key metrics charts when indices are available', () => {
     mockUseServiceFlyoutContext.mockReturnValue({
-      ...buildContextValue(),
+      ...buildContextValue({ schema: 'otel' }),
       indices: {
         transaction: 'traces-apm*',
         span: 'traces-apm*',
@@ -239,6 +353,21 @@ describe('ServiceFlyoutOverview transactions section props', () => {
     renderOverview({ refreshToken: 42 });
 
     expect(transactionsSectionProps?.refreshToken).toBe(42);
+  });
+
+  it('forwards projectRouting to ServiceFlyoutTransactionsSection', () => {
+    mockUseProjectRouting.mockReturnValue('_alias:*');
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    renderOverview();
+
+    expect(transactionsSectionProps?.projectRouting).toBe('_alias:*');
+  });
+
+  it('forwards undefined projectRouting when CPS routing is unset', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    renderOverview();
+
+    expect(transactionsSectionProps?.projectRouting).toBeUndefined();
   });
 });
 

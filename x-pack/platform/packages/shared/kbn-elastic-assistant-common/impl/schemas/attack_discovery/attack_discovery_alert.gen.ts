@@ -38,6 +38,15 @@ export const AttackDiscoveryAlert = lazySchema(() =>
         'The optional kibana.alert.rule.uuid of the rule that generated this attack discovery (not applicable to ad hock runs)'
       ),
     /**
+     * The optional kibana.alert.workflow_reason of this attack discovery, which records why the workflow status was last changed
+     */
+    alertWorkflowReason: z
+      .string()
+      .optional()
+      .describe(
+        'The optional kibana.alert.workflow_reason of this attack discovery, which records why the workflow status was last changed'
+      ),
+    /**
      * The optional kibana.alert.workflow_status of this attack discovery
      */
     alertWorkflowStatus: z
