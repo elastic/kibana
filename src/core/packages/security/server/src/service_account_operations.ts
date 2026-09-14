@@ -64,17 +64,14 @@ export interface ServiceAccountOperationHandle {
   ): Promise<ServiceAccountWorkloadBinding>;
 
   /**
-   * Removes a workload's binding. Succeeds whether or not a binding existed,
-   * and takes effect on a running execution at its next credential mint.
+   * Removes a workload's binding. Succeeds whether or not a binding existed, and takes effect on
+   * a running execution at its next credential mint.
    */
-  unbindWorkload(
-    request: KibanaRequest,
-    params: { workloadType: string; workloadId: string }
-  ): Promise<void>;
+  unbindWorkload(request: KibanaRequest, params: ServiceAccountWorkloadCoordinates): Promise<void>;
 
   /**
    * Returns the workload's binding, or `null` when it has none. Throws if the stored binding fails
-   * its integrity check.
+   * its integrity check, or if bindings are unavailable.
    */
   getBinding(
     params: ServiceAccountWorkloadCoordinates
@@ -86,7 +83,7 @@ export interface ServiceAccountOperationHandle {
    * `fn`: it is re-checked against the binding before every mint, and once `fn` settles the
    * request can never be re-credentialed again.
    *
-   * Rejects when the workload has no binding, rather than running unauthenticated.
+   * Rejects when the workload has no binding (a 404), and whenever bindings are unavailable.
    */
   withScopedRequest<T>(
     params: ServiceAccountWorkloadCoordinates,

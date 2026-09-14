@@ -217,8 +217,8 @@ describe('buildSecurityApi', () => {
 
       await api.serviceAccounts.create(request, params);
 
-      expect(serviceAccounts!.create).toHaveBeenCalledTimes(1);
-      expect(serviceAccounts!.create).toHaveBeenCalledWith(request, params);
+      expect(serviceAccounts!.backend.create).toHaveBeenCalledTimes(1);
+      expect(serviceAccounts!.backend.create).toHaveBeenCalledWith(request, params);
     });
 
     it('returns the result from the service', async () => {
@@ -230,7 +230,7 @@ describe('buildSecurityApi', () => {
         role_assignments: {},
         assumable_by: [],
       };
-      serviceAccounts!.create.mockResolvedValue(created);
+      serviceAccounts!.backend.create.mockResolvedValue(created);
 
       await expect(
         api.serviceAccounts.create(httpServerMock.createKibanaRequest(), params)
@@ -247,7 +247,7 @@ describe('buildSecurityApi', () => {
   });
 
   describe('workload bindings', () => {
-    const WORKLOAD = { workloadType: 'rule', workloadId: 'rule-id' };
+    const WORKLOAD = { workloadType: 'rule', workloadId: 'rule-id', spaceId: 'default' };
 
     it('delegates bindWorkload, forwarding the operation type Core supplied', async () => {
       const request = httpServerMock.createKibanaRequest();

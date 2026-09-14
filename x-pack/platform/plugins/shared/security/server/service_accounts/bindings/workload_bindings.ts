@@ -14,7 +14,6 @@ import type {
   ServiceAccountWorkloadBinding,
   ServiceAccountWorkloadCoordinates,
 } from '@kbn/core-security-server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 
 import type { WorkloadBindingCoordinates } from './binding_saved_object';
@@ -22,6 +21,7 @@ import { resolveWorkloadBinder } from './resolve_workload_binder';
 import type { WorkloadBindingStore } from './workload_binding_store';
 import type { AuthenticatedUser, SecurityLicense } from '../../../common';
 import { getDetailedErrorMessage } from '../../errors';
+import { ensureManageSecurityPrivilege } from '../manage_security_privilege';
 import type { ServiceAccountsBackend } from '../types';
 
 /**
@@ -45,7 +45,7 @@ export interface ServiceAccountWorkloadBindingsApi {
   unbindWorkload(
     operationType: string,
     request: KibanaRequest,
-    params: { workloadType: string; workloadId: string }
+    params: ServiceAccountWorkloadCoordinates
   ): Promise<void>;
 
   getBinding(
@@ -72,7 +72,6 @@ export interface ServiceAccountWorkloadBindingsOptions {
    * bindings traceable to a person; failures are tolerated rather than failing the bind.
    */
   getCurrentProfileId: (request: KibanaRequest) => Promise<string | null>;
-  getSpaceId: (request: KibanaRequest) => string;
   /** Whether saved object encryption is possible at all; without it, bindings cannot be trusted. */
   canEncrypt: boolean;
 }
@@ -85,7 +84,6 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
   private readonly checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
   private readonly getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
   private readonly getCurrentProfileId: (request: KibanaRequest) => Promise<string | null>;
-  private readonly getSpaceId: (request: KibanaRequest) => string;
   private readonly canEncrypt: boolean;
 
   constructor({
@@ -96,7 +94,6 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     checkPrivilegesWithRequest,
     getCurrentUser,
     getCurrentProfileId,
-    getSpaceId,
     canEncrypt,
   }: ServiceAccountWorkloadBindingsOptions) {
     this.logger = logger;
@@ -106,14 +103,13 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     this.checkPrivilegesWithRequest = checkPrivilegesWithRequest;
     this.getCurrentUser = getCurrentUser;
     this.getCurrentProfileId = getCurrentProfileId;
-    this.getSpaceId = getSpaceId;
     this.canEncrypt = canEncrypt;
   }
 
   async bindWorkload(
     operationType: string,
     request: KibanaRequest,
-    { serviceAccountId, workloadType, workloadId }: BindServiceAccountWorkloadParams
+    { serviceAccountId, workloadType, workloadId, spaceId }: BindServiceAccountWorkloadParams
   ): Promise<ServiceAccountWorkloadBinding> {
     this.ensureAvailable();
 
@@ -124,17 +120,7 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
       );
     }
 
-    const { hasAllRequested } = await this.checkPrivilegesWithRequest(request).globally({
-      elasticsearch: { cluster: ['manage_security'], index: {} },
-    });
-
-    if (!hasAllRequested) {
-      throw Boom.forbidden(
-        'Cannot bind a service account to a workload: missing `manage_security` cluster privilege'
-      );
-    }
-
-    const spaceId = this.getSpaceId(request);
+    await this.ensureCanManage(request, 'bind a service account to a workload');
 
     const binding = await this.store.set({
       operationType,
@@ -159,28 +145,16 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
   async unbindWorkload(
     operationType: string,
     request: KibanaRequest,
-    { workloadType, workloadId }: { workloadType: string; workloadId: string }
+    params: ServiceAccountWorkloadCoordinates
   ): Promise<void> {
     this.ensureAvailable();
 
     // Same gate as bindWorkload: unbinding a workload silently drops it to no identity at all, which is
     // as much a privileged change as granting one.
-    const { hasAllRequested } = await this.checkPrivilegesWithRequest(request).globally({
-      elasticsearch: { cluster: ['manage_security'], index: {} },
-    });
+    await this.ensureCanManage(request, 'unbind a service account from a workload');
 
-    if (!hasAllRequested) {
-      throw Boom.forbidden(
-        'Cannot unbind a service account from a workload: missing `manage_security` cluster privilege'
-      );
-    }
-
-    const deleted = await this.store.delete({
-      operationType,
-      workloadType,
-      workloadId,
-      spaceId: this.getSpaceId(request),
-    });
+    const { workloadType, workloadId } = params;
+    const deleted = await this.store.delete(this.toCoordinates(operationType, params));
 
     if (deleted) {
       this.logger.debug(
@@ -206,25 +180,43 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
 
     const coordinates = this.toCoordinates(operationType, params);
     const binding = await this.requireBinding(coordinates);
+    let minted = false;
 
     const request = await this.backend.createFakeRequest({
       serviceAccountId: binding.serviceAccountId,
       spaceId: coordinates.spaceId,
-      // No time-based lease: the binding check below runs before every mint, which is both
-      // stricter and revocable — unbinding the workload kills a running execution's credential
-      // rather than waiting for a lease to lapse.
+      // No time-based lease: the binding check below runs before every re-mint, which is both
+      // stricter and revocable — unbinding the workload denies a running execution its next
+      // credential rather than waiting for a lease to lapse.
       maxLifetimeMs: Number.POSITIVE_INFINITY,
       // Runs for the initial mint and again for every reactive re-mint driven by an
       // Elasticsearch 401. That reactive path lives in the Elasticsearch client's unauthorized
       // error handler, far outside this call stack, so this interceptor is the only place a
-      // binding check can cover both.
+      // binding check can reach it. The initial mint follows the verification just above
+      // immediately, and is let through on its strength rather than paying for the read twice.
       mintInterceptor: async (mint) => {
-        const current = await this.requireBinding(coordinates);
+        if (!minted) {
+          minted = true;
+          return await mint();
+        }
 
-        if (current.serviceAccountId !== binding.serviceAccountId) {
-          throw Boom.forbidden(
-            'The workload was bound to a different service account; refusing to mint a credential for the previous one.'
+        try {
+          const current = await this.requireBinding(coordinates);
+          if (current.serviceAccountId !== binding.serviceAccountId) {
+            throw Boom.forbidden(
+              'The workload was bound to a different service account; refusing to mint a credential for the previous one.'
+            );
+          }
+        } catch (e) {
+          // The registry logs refresh failures without their contents, since those can carry
+          // upstream credentials. Binding checks never do, and the reason is exactly what an
+          // operator needs to tell a revocation from an outage.
+          this.logger.warn(
+            `Refusing to re-mint a credential for workload [${coordinates.workloadType}/${
+              coordinates.workloadId
+            }] of operation [${coordinates.operationType}]: ${getDetailedErrorMessage(e)}`
           );
+          throw e;
         }
 
         return await mint();
@@ -271,16 +263,21 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     return binding;
   }
 
+  private ensureCanManage(request: KibanaRequest, action: string): Promise<void> {
+    return ensureManageSecurityPrivilege({
+      request,
+      checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
+      logger: this.logger,
+      action,
+    });
+  }
+
+  // Picks the coordinates out explicitly, so a caller's extra fields never reach the store.
   private toCoordinates(
     operationType: string,
     { workloadType, workloadId, spaceId }: ServiceAccountWorkloadCoordinates
   ): WorkloadBindingCoordinates {
-    return {
-      operationType,
-      workloadType,
-      workloadId,
-      spaceId: spaceId ?? DEFAULT_SPACE_ID,
-    };
+    return { operationType, workloadType, workloadId, spaceId };
   }
 
   private ensureAvailable(): void {

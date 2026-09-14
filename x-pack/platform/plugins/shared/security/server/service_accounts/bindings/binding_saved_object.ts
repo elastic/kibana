@@ -57,7 +57,8 @@ export interface WorkloadBindingAttributes {
    * Cryptographically random value, encrypted, never read for its content. Its authentication tag
    * is what makes every other attribute tamper-evident: they are all authenticated data, so a
    * direct-to-index edit of, say, `serviceAccountId` makes this attribute undecryptable and the
-   * binding unusable.
+   * binding unusable. Decryption skips an absent attribute rather than failing, so the reader
+   * must also refuse a document whose canary is missing.
    */
   canary: string;
 }

@@ -174,6 +174,37 @@ describe('WorkloadBindingStore', () => {
       });
     });
 
+    it('fails closed when the stored document has no canary to verify', async () => {
+      // Decryption skips an absent encrypted attribute instead of failing, so nothing else would
+      // notice that the remaining attributes were never authenticated.
+      const { canary, ...withoutCanary } = attributes({ serviceAccountId: 'attacker-chosen' });
+      encryptedClient.getDecryptedAsInternalUser.mockResolvedValue({
+        id: getWorkloadBindingId(COORDINATES),
+        type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+        references: [],
+        attributes: withoutCanary as WorkloadBindingAttributes,
+      });
+
+      await expect(store.getVerified(COORDINATES)).rejects.toMatchObject({
+        message: 'The service account binding for this workload failed integrity verification.',
+        output: { statusCode: 403 },
+      });
+    });
+
+    it('fails closed when the stored document has an empty canary', async () => {
+      encryptedClient.getDecryptedAsInternalUser.mockResolvedValue({
+        id: getWorkloadBindingId(COORDINATES),
+        type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+        references: [],
+        attributes: attributes({ canary: '' }),
+      });
+
+      await expect(store.getVerified(COORDINATES)).rejects.toMatchObject({
+        message: 'The service account binding for this workload failed integrity verification.',
+        output: { statusCode: 403 },
+      });
+    });
+
     it('fails closed when the stored document describes different coordinates', async () => {
       encryptedClient.getDecryptedAsInternalUser.mockResolvedValue({
         id: getWorkloadBindingId(COORDINATES),

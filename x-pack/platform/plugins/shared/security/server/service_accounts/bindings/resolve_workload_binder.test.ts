@@ -52,20 +52,17 @@ describe('resolveWorkloadBinder', () => {
     expect(Object.keys(binder)).not.toContain('userProfileId');
   });
 
-  it('records UIAM API keys with the profile of the key creator', async () => {
-    await expect(
-      resolveWorkloadBinder(
-        mockAuthenticatedUser({
-          api_key: { id: 'key-id', name: 'key', managed_by: 'cloud' },
-        }),
-        resolveUserProfileId
-      )
-    ).resolves.toEqual({
-      type: 'api_key',
-      apiKeyId: 'key-id',
-      variant: 'uiam',
-      userProfileId: 'resolved-profile-uid',
-    });
+  it('records UIAM API keys by ID alone, without asking Elasticsearch about the creator', async () => {
+    const binder = await resolveWorkloadBinder(
+      mockAuthenticatedUser({
+        api_key: { id: 'key-id', name: 'key', managed_by: 'cloud' },
+      }),
+      resolveUserProfileId
+    );
+
+    expect(binder).toEqual({ type: 'api_key', apiKeyId: 'key-id', variant: 'uiam' });
+    expect(Object.keys(binder)).not.toContain('userProfileId');
+    expect(resolveUserProfileId).not.toHaveBeenCalled();
   });
 
   it('records stack API keys with the profile of the key creator', async () => {
@@ -88,7 +85,7 @@ describe('resolveWorkloadBinder', () => {
     await resolveWorkloadBinder(
       mockAuthenticatedUser({
         profile_uid: 'the-requests-own-profile',
-        api_key: { id: 'key-id', name: 'key', managed_by: 'cloud' },
+        api_key: { id: 'key-id', name: 'key', managed_by: 'elasticsearch' },
       }),
       resolveUserProfileId
     );
@@ -96,15 +93,17 @@ describe('resolveWorkloadBinder', () => {
     expect(resolveUserProfileId).toHaveBeenCalledTimes(1);
   });
 
-  it('still records an API key whose creator has no resolvable profile', async () => {
+  it('still records a stack API key whose creator has no resolvable profile', async () => {
     resolveUserProfileId.mockResolvedValue(undefined);
 
     const binder = await resolveWorkloadBinder(
-      mockAuthenticatedUser({ api_key: { id: 'key-id', name: 'key', managed_by: 'cloud' } }),
+      mockAuthenticatedUser({
+        api_key: { id: 'key-id', name: 'key', managed_by: 'elasticsearch' },
+      }),
       resolveUserProfileId
     );
 
-    expect(binder).toEqual({ type: 'api_key', apiKeyId: 'key-id', variant: 'uiam' });
+    expect(binder).toEqual({ type: 'api_key', apiKeyId: 'key-id', variant: 'stack' });
     expect(Object.keys(binder)).not.toContain('userProfileId');
   });
 

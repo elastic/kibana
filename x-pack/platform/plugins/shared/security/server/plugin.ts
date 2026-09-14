@@ -19,7 +19,6 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
@@ -546,7 +545,6 @@ export class SecurityPlugin
       getCurrentUser: this.authenticationStart.getCurrentUser,
       getCurrentProfileId: (request) =>
         this.getUserProfileService().getCurrentProfileId({ request }),
-      getSpaceId: (request) => spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
     });
 
     this.authorizationService.start({

@@ -86,28 +86,27 @@ export interface ServiceAccountWorkloadBinding {
 }
 
 /**
- * Parameters for binding a service account to a workload.
- *
- * @public
- */
-export interface BindServiceAccountWorkloadParams {
-  serviceAccountId: string;
-  /** Kind of workload within the operation, e.g. `rule` or `workflow`. */
-  workloadType: string;
-  workloadId: string;
-}
-
-/**
- * Identifies a workload whose binding is being read or executed. Workload IDs are not guaranteed
- * unique across spaces, so the space is part of a binding's identity.
+ * Identifies a workload. Workload IDs are not guaranteed unique across spaces, so the space is
+ * part of a binding's identity and is supplied explicitly on every path: a binding is written,
+ * read, removed and executed under one and the same set of coordinates.
  *
  * @public
  */
 export interface ServiceAccountWorkloadCoordinates {
+  /** Kind of workload within the operation, e.g. `rule` or `workflow`. */
   workloadType: string;
   workloadId: string;
-  /** Defaults to the default space. */
-  spaceId?: string;
+  /** The space the workload lives in. */
+  spaceId: string;
+}
+
+/**
+ * Parameters for binding a service account to a workload.
+ *
+ * @public
+ */
+export interface BindServiceAccountWorkloadParams extends ServiceAccountWorkloadCoordinates {
+  serviceAccountId: string;
 }
 
 /**

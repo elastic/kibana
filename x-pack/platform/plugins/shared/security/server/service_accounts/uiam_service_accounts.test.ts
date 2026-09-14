@@ -200,7 +200,7 @@ describe('UiamServiceAccounts', () => {
 
       expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(
-        'Service account creation denied: missing `manage_security` cluster privilege'
+        'Refused to create a service account: missing `manage_security` cluster privilege'
       );
     });
 

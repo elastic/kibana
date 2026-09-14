@@ -40,12 +40,12 @@ export const buildSecurityApi = ({
 }): CoreSecurityDelegateContract => {
   const enrichment = createFakeRequestEnrichment(logger.get('fake-request-enrichment'));
 
-  const getWorkloads = () => {
+  const requireServiceAccounts = () => {
     const serviceAccounts = getServiceAccounts();
     if (!serviceAccounts) {
       throw new Error('Service accounts are not enabled');
     }
-    return serviceAccounts.workloads;
+    return serviceAccounts;
   };
 
   return {
@@ -102,21 +102,15 @@ export const buildSecurityApi = ({
       isEnabled: () => config.serviceAccounts?.enabled === true,
       // `async` so that a disabled feature surfaces as a rejected promise rather than a
       // synchronous throw, which callers of a promise-returning API would not expect.
-      create: async (request, params) => {
-        const serviceAccounts = getServiceAccounts();
-        if (!serviceAccounts) {
-          throw new Error('Service accounts are not enabled');
-        }
-        return serviceAccounts.create(request, params);
-      },
+      create: async (request, params) => requireServiceAccounts().backend.create(request, params),
       bindWorkload: async (operationType, request, params) =>
-        getWorkloads().bindWorkload(operationType, request, params),
+        requireServiceAccounts().workloads.bindWorkload(operationType, request, params),
       unbindWorkload: async (operationType, request, params) =>
-        getWorkloads().unbindWorkload(operationType, request, params),
+        requireServiceAccounts().workloads.unbindWorkload(operationType, request, params),
       getWorkloadBinding: async (operationType, params) =>
-        getWorkloads().getBinding(operationType, params),
+        requireServiceAccounts().workloads.getBinding(operationType, params),
       withScopedRequestForWorkload: async (operationType, params, fn) =>
-        getWorkloads().withScopedRequest(operationType, params, fn),
+        requireServiceAccounts().workloads.withScopedRequest(operationType, params, fn),
     },
     fakeRequestEnricher: enrichment.enrichRequestWithUserProfile,
   };

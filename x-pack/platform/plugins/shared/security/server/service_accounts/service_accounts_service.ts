@@ -40,7 +40,6 @@ export interface ServiceAccountsServiceStartParams {
   canEncrypt: boolean;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
   getCurrentProfileId: (request: KibanaRequest) => Promise<string | null>;
-  getSpaceId: (request: KibanaRequest) => string;
 }
 
 export class ServiceAccountsService {
@@ -61,7 +60,6 @@ export class ServiceAccountsService {
     canEncrypt,
     getCurrentUser,
     getCurrentProfileId,
-    getSpaceId,
   }: ServiceAccountsServiceStartParams): ServiceAccountsServiceStart | null {
     if (!config.serviceAccounts?.enabled) {
       this.logger.debug('Service accounts are not enabled.');
@@ -74,9 +72,10 @@ export class ServiceAccountsService {
       this.logger.debug(
         'UIAM is not available; falling back to the Elasticsearch service accounts backend.'
       );
-      return Object.assign(new EsServiceAccounts(), {
+      return {
+        backend: new EsServiceAccounts(),
         workloads: createNotImplementedWorkloadBindings(),
-      });
+      };
     }
 
     const backend = new UiamServiceAccounts({
@@ -89,6 +88,7 @@ export class ServiceAccountsService {
       getCurrentUser,
     });
 
+    const bindingsLogger = this.logger.get('workload-bindings');
     const store = new WorkloadBindingStore({
       client: savedObjects.getUnsafeInternalClient({
         includedHiddenTypes: [SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE],
@@ -97,23 +97,21 @@ export class ServiceAccountsService {
         includedHiddenTypes: [SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE],
       }),
       isEncryptionError: encryptedSavedObjects.isEncryptionError,
-      logger: this.logger.get('workload-bindings'),
+      logger: bindingsLogger,
     });
 
-    // `Object.assign` rather than a spread: the backend's methods live on its prototype, which a
-    // spread would silently drop.
-    return Object.assign(backend, {
+    return {
+      backend,
       workloads: new ServiceAccountWorkloadBindings({
-        logger: this.logger.get('workload-bindings'),
+        logger: bindingsLogger,
         license,
         store,
         backend,
         checkPrivilegesWithRequest,
         getCurrentUser,
         getCurrentProfileId,
-        getSpaceId,
         canEncrypt,
       }),
-    });
+    };
   }
 }

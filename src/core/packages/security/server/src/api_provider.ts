@@ -87,7 +87,7 @@ export interface ServiceAccountsServiceContract extends CoreServiceAccountsServi
   unbindWorkload(
     operationType: string,
     request: KibanaRequest,
-    params: { workloadType: string; workloadId: string }
+    params: ServiceAccountWorkloadCoordinates
   ): Promise<void>;
 
   /**

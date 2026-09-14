@@ -8,6 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ServiceAccountWorkloadBinding } from '@kbn/core-security-server';
+import type { MockedLogger } from '@kbn/logging-mocks';
 
 import type { WorkloadBindingStore } from './workload_binding_store';
 import {
@@ -20,8 +21,8 @@ import type { ServiceAccountMintInterceptor } from '../fake_requests';
 import type { ServiceAccountsBackend } from '../types';
 
 const OPERATION_TYPE = 'alerting';
-const WORKLOAD = { workloadType: 'rule', workloadId: 'rule-id' };
-const COORDINATES = { operationType: OPERATION_TYPE, ...WORKLOAD, spaceId: 'default' };
+const WORKLOAD = { workloadType: 'rule', workloadId: 'rule-id', spaceId: 'default' };
+const COORDINATES = { operationType: OPERATION_TYPE, ...WORKLOAD };
 
 const binding = (
   overrides: Partial<ServiceAccountWorkloadBinding> = {}
@@ -40,24 +41,25 @@ describe('ServiceAccountWorkloadBindings', () => {
   let checkPrivileges: jest.Mock;
   let getCurrentUser: jest.Mock;
   let getCurrentProfileId: jest.Mock;
+  let logger: MockedLogger;
   let mintedRequest: KibanaRequest;
   let bindings: ServiceAccountWorkloadBindings;
 
   const build = (overrides: Partial<Record<string, unknown>> = {}) =>
     new ServiceAccountWorkloadBindings({
-      logger: loggingSystemMock.create().get('workload-bindings'),
+      logger,
       license,
       store,
       backend,
       checkPrivilegesWithRequest: jest.fn().mockReturnValue({ globally: checkPrivileges }),
       getCurrentUser,
       getCurrentProfileId,
-      getSpaceId: jest.fn().mockReturnValue('default'),
       canEncrypt: true,
       ...overrides,
     } as never);
 
   beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
     store = {
       set: jest.fn().mockImplementation(async (attributes) => binding(attributes)),
       delete: jest.fn().mockResolvedValue(true),
@@ -88,7 +90,19 @@ describe('ServiceAccountWorkloadBindings', () => {
   });
 
   describe('#bindWorkload', () => {
-    it('records the binding for the acting user in their space', async () => {
+    it('stores the binding under the space it was given', async () => {
+      await bindings.bindWorkload(OPERATION_TYPE, httpServerMock.createKibanaRequest(), {
+        serviceAccountId: 'service-account-id',
+        ...WORKLOAD,
+        spaceId: 'marketing',
+      });
+
+      expect(store.set).toHaveBeenCalledWith(
+        expect.objectContaining({ ...COORDINATES, spaceId: 'marketing' })
+      );
+    });
+
+    it('records the binding for the acting user', async () => {
       const request = httpServerMock.createKibanaRequest();
 
       const result = await bindings.bindWorkload(OPERATION_TYPE, request, {
@@ -135,6 +149,9 @@ describe('ServiceAccountWorkloadBindings', () => {
         elasticsearch: { cluster: ['manage_security'], index: {} },
       });
       expect(store.set).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Refused to bind a service account to a workload: missing `manage_security` cluster privilege'
+      );
     });
 
     it('refuses an unauthenticated request', async () => {
@@ -178,12 +195,12 @@ describe('ServiceAccountWorkloadBindings', () => {
   });
 
   describe('#getBinding', () => {
-    it('scopes the lookup to the handle’s operation type and the default space', async () => {
+    it('scopes the lookup to the handle’s operation type', async () => {
       await expect(bindings.getBinding(OPERATION_TYPE, WORKLOAD)).resolves.toEqual(binding());
       expect(store.getVerified).toHaveBeenCalledWith(COORDINATES);
     });
 
-    it('honors an explicit space', async () => {
+    it('keys the lookup by the space it was given', async () => {
       await bindings.getBinding(OPERATION_TYPE, { ...WORKLOAD, spaceId: 'marketing' });
       expect(store.getVerified).toHaveBeenCalledWith({ ...COORDINATES, spaceId: 'marketing' });
     });
@@ -255,9 +272,26 @@ describe('ServiceAccountWorkloadBindings', () => {
         return params.mintInterceptor!;
       };
 
-      it('re-reads the binding before allowing a mint', async () => {
+      // The registry invokes the interceptor once for the initial mint, before any refresh.
+      const captureRefreshInterceptor = async (): Promise<ServiceAccountMintInterceptor> => {
         const interceptor = await captureInterceptor();
+        await interceptor(jest.fn().mockResolvedValue('essu_initial'));
         store.getVerified.mockClear();
+        return interceptor;
+      };
+
+      it('lets the initial mint through on the strength of the verification just made', async () => {
+        const interceptor = await captureInterceptor();
+        expect(store.getVerified).toHaveBeenCalledTimes(1);
+        const mint = jest.fn().mockResolvedValue('essu_initial');
+
+        await expect(interceptor(mint)).resolves.toBe('essu_initial');
+        expect(store.getVerified).toHaveBeenCalledTimes(1);
+        expect(mint).toHaveBeenCalledTimes(1);
+      });
+
+      it('re-reads the binding before allowing a re-mint', async () => {
+        const interceptor = await captureRefreshInterceptor();
         const mint = jest.fn().mockResolvedValue('essu_fresh');
 
         await expect(interceptor(mint)).resolves.toBe('essu_fresh');
@@ -265,17 +299,22 @@ describe('ServiceAccountWorkloadBindings', () => {
         expect(mint).toHaveBeenCalledTimes(1);
       });
 
-      it('refuses to mint once the workload has been unbound', async () => {
-        const interceptor = await captureInterceptor();
+      it('refuses to re-mint once the workload has been unbound, and says so', async () => {
+        const interceptor = await captureRefreshInterceptor();
         store.getVerified.mockResolvedValue(null);
         const mint = jest.fn();
 
         await expect(interceptor(mint)).rejects.toMatchObject({ output: { statusCode: 404 } });
         expect(mint).not.toHaveBeenCalled();
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringMatching(
+            /^Refusing to re-mint a credential for workload \[rule\/rule-id\] of operation \[alerting\]: .*No service account is bound/
+          )
+        );
       });
 
-      it('refuses to mint when the binding no longer verifies', async () => {
-        const interceptor = await captureInterceptor();
+      it('refuses to re-mint when the binding no longer verifies', async () => {
+        const interceptor = await captureRefreshInterceptor();
         store.getVerified.mockRejectedValue(new Error('failed integrity verification'));
         const mint = jest.fn();
 
@@ -283,8 +322,8 @@ describe('ServiceAccountWorkloadBindings', () => {
         expect(mint).not.toHaveBeenCalled();
       });
 
-      it('refuses to mint when the workload was re-bound to a different service account', async () => {
-        const interceptor = await captureInterceptor();
+      it('refuses to re-mint when the workload was re-bound to a different service account', async () => {
+        const interceptor = await captureRefreshInterceptor();
         store.getVerified.mockResolvedValue(binding({ serviceAccountId: 'a-different-account' }));
         const mint = jest.fn();
 

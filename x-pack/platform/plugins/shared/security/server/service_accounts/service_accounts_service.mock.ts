@@ -11,21 +11,23 @@ import type { ServiceAccountsServiceStart } from './types';
 
 export const serviceAccountsServiceMock = {
   createStart: (): jest.MockedObjectDeep<ServiceAccountsServiceStart> => ({
-    create: jest.fn().mockResolvedValue({
-      id: 'mock-service-account-id',
-      type: 'project' as const,
-      name: 'mock-service-account-name',
-      organization_id: 'mock-organization-id',
-      role_assignments: {},
-      assumable_by: [],
-    }),
-    createFakeRequest: jest.fn().mockImplementation(async () =>
-      httpServerMock.createFakeKibanaRequest({
-        headers: { authorization: 'Bearer essu_mock-service-account-token' },
-      })
-    ),
-    reauthenticateFakeRequest: jest.fn().mockResolvedValue(null),
-    releaseFakeRequest: jest.fn(),
+    backend: {
+      create: jest.fn().mockResolvedValue({
+        id: 'mock-service-account-id',
+        type: 'project' as const,
+        name: 'mock-service-account-name',
+        organization_id: 'mock-organization-id',
+        role_assignments: {},
+        assumable_by: [],
+      }),
+      createFakeRequest: jest.fn().mockImplementation(async () =>
+        httpServerMock.createFakeKibanaRequest({
+          headers: { authorization: 'Bearer essu_mock-service-account-token' },
+        })
+      ),
+      reauthenticateFakeRequest: jest.fn().mockResolvedValue(null),
+      releaseFakeRequest: jest.fn(),
+    },
     workloads: {
       bindWorkload: jest.fn().mockResolvedValue({
         operationType: 'mock-operation-type',

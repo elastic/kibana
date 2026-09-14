@@ -70,7 +70,7 @@ describe('Create service account route', () => {
     return {
       routeConfig: routeConfig as RouteConfig<any, any, any, 'post'>,
       routeHandler: handler as RequestHandler<any, any, any, any>,
-      serviceAccounts: serviceAccountsMock as jest.Mocked<ServiceAccountsServiceStart>,
+      serviceAccounts: serviceAccountsMock as jest.MockedObjectDeep<ServiceAccountsServiceStart>,
     };
   }
 
@@ -118,14 +118,14 @@ describe('Create service account route', () => {
 
   it('creates the service account on behalf of the request and returns it', async () => {
     const { routeHandler, serviceAccounts } = setup();
-    serviceAccounts.create.mockResolvedValue(serviceAccount);
+    serviceAccounts.backend.create.mockResolvedValue(serviceAccount);
 
     const response = await callRoute(routeHandler);
 
     expect(response.status).toBe(200);
     expect(response.payload).toEqual(serviceAccount);
-    expect(serviceAccounts.create).toHaveBeenCalledTimes(1);
-    expect(serviceAccounts.create).toHaveBeenCalledWith(
+    expect(serviceAccounts.backend.create).toHaveBeenCalledTimes(1);
+    expect(serviceAccounts.backend.create).toHaveBeenCalledWith(
       expect.objectContaining({ body: requestBody }),
       requestBody
     );
@@ -142,9 +142,10 @@ describe('Create service account route', () => {
 
   it('reaches the Elasticsearch backend without serverless context', async () => {
     const { routeHandler } = setup({
-      serviceAccounts: Object.assign(new EsServiceAccounts(), {
+      serviceAccounts: {
+        backend: new EsServiceAccounts(),
         workloads: createNotImplementedWorkloadBindings(),
-      }),
+      },
       serverless: false,
     });
     expect((await callRoute(routeHandler)).status).toBe(501);
@@ -152,7 +153,7 @@ describe('Create service account route', () => {
 
   it.each([400, 401, 403, 501])('preserves backend status %s', async (statusCode) => {
     const { routeHandler, serviceAccounts } = setup();
-    serviceAccounts.create.mockRejectedValue(
+    serviceAccounts.backend.create.mockRejectedValue(
       Boom.boomify(new Error('backend error'), { statusCode })
     );
     expect((await callRoute(routeHandler)).status).toBe(statusCode);
@@ -160,7 +161,7 @@ describe('Create service account route', () => {
 
   it('reproduces the upstream status code when creation fails', async () => {
     const { routeHandler, serviceAccounts } = setup();
-    serviceAccounts.create.mockRejectedValue(
+    serviceAccounts.backend.create.mockRejectedValue(
       Boom.conflict('Project has reached its service account limit')
     );
 

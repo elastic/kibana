@@ -36,11 +36,12 @@ export const resolveWorkloadBinder = async (
   }
 
   if (user.api_key) {
+    const variant = user.api_key.managed_by === 'cloud' ? 'uiam' : 'stack';
     return {
       type: 'api_key',
       apiKeyId: user.api_key.id,
-      variant: user.api_key.managed_by === 'cloud' ? 'uiam' : 'stack',
-      ...optionalUserProfileId(await resolveUserProfileId()),
+      variant,
+      ...(variant === 'stack' ? optionalUserProfileId(await resolveUserProfileId()) : {}),
     };
   }
 

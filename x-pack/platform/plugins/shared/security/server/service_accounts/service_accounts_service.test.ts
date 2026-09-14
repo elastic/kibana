@@ -48,7 +48,6 @@ describe('ServiceAccountsService', () => {
       encryptedSavedObjects,
       canEncrypt: true,
       getCurrentProfileId: jest.fn().mockResolvedValue(null),
-      getSpaceId: jest.fn().mockReturnValue('default'),
       ...overrides,
     };
   };
@@ -69,14 +68,15 @@ describe('ServiceAccountsService', () => {
     });
 
     it('selects the UIAM backend when UIAM and project context are available', () => {
-      expect(service.start(startParams({ serviceAccounts: { enabled: true } }))).toBeInstanceOf(
-        UiamServiceAccounts
-      );
+      expect(
+        service.start(startParams({ serviceAccounts: { enabled: true } }))?.backend
+      ).toBeInstanceOf(UiamServiceAccounts);
     });
 
     it('falls back to the Elasticsearch backend when UIAM is unavailable', () => {
       expect(
         service.start(startParams({ serviceAccounts: { enabled: true } }, { uiam: undefined }))
+          ?.backend
       ).toBeInstanceOf(EsServiceAccounts);
     });
 
@@ -84,7 +84,7 @@ describe('ServiceAccountsService', () => {
       expect(
         service.start(
           startParams({ serviceAccounts: { enabled: true } }, { cloudProjectContext: undefined })
-        )
+        )?.backend
       ).toBeInstanceOf(EsServiceAccounts);
     });
 
@@ -93,8 +93,9 @@ describe('ServiceAccountsService', () => {
       try {
         const params = startParams({ serviceAccounts: { enabled: true, requestLifetime: '1s' } });
         params.license.isEnabled.mockReturnValue(true);
-        const backend = service.start(params);
-        if (!backend) throw new Error('Expected UIAM backend');
+        const start = service.start(params);
+        if (!start) throw new Error('Expected UIAM backend');
+        const { backend } = start;
         const request = await backend.createFakeRequest({ serviceAccountId: 'sa-id' });
         jest.advanceTimersByTime(1_000);
         await expect(backend.reauthenticateFakeRequest(request)).resolves.toBeNull();
@@ -111,7 +112,11 @@ describe('ServiceAccountsService', () => {
 
       // A real binding layer reports "no binding" rather than refusing outright.
       await expect(
-        start.workloads.getBinding('operation', { workloadType: 'rule', workloadId: 'rule-id' })
+        start.workloads.getBinding('operation', {
+          workloadType: 'rule',
+          workloadId: 'rule-id',
+          spaceId: 'default',
+        })
       ).resolves.toBeNull();
     });
 
@@ -121,7 +126,11 @@ describe('ServiceAccountsService', () => {
       )!;
 
       await expect(
-        start.workloads.getBinding('operation', { workloadType: 'rule', workloadId: 'rule-id' })
+        start.workloads.getBinding('operation', {
+          workloadType: 'rule',
+          workloadId: 'rule-id',
+          spaceId: 'default',
+        })
       ).rejects.toMatchObject({
         message:
           'Service account workload bindings are not yet implemented for the Elasticsearch backend',

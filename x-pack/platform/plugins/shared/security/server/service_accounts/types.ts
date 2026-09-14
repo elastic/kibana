@@ -57,7 +57,10 @@ export interface ServiceAccountsBackend {
  * Start contract of the service accounts service. `null` when the feature is
  * disabled.
  */
-export interface ServiceAccountsServiceStart extends ServiceAccountsBackend {
+export interface ServiceAccountsServiceStart {
+  /** Service account management and credential minting for this deployment's backend. */
+  backend: ServiceAccountsBackend;
+
   /**
    * Workload binding management and execution. Consumed exclusively by the Core security
    * delegate, which reaches it through operation capability handles — it is deliberately absent

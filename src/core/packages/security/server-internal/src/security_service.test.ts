@@ -189,7 +189,9 @@ describe('SecurityService', function () {
       it('rejects handle calls made before the security delegate is registered', async () => {
         const handle = registerOperation('alerting_rule');
 
-        await expect(handle.getBinding({ workloadType: 'rule', workloadId: 'r' })).rejects.toThrow(
+        await expect(
+          handle.getBinding({ workloadType: 'rule', workloadId: 'r', spaceId: 'default' })
+        ).rejects.toThrow(
           /Cannot use service account operation \[alerting_rule\] before the security delegate has been registered/
         );
       });
@@ -208,7 +210,7 @@ describe('SecurityService', function () {
           serviceAccounts,
         } as unknown as CoreSecurityDelegateContract);
 
-        const params = { workloadType: 'rule', workloadId: 'rule-id' };
+        const params = { workloadType: 'rule', workloadId: 'rule-id', spaceId: 'default' };
         await handle.getBinding(params);
 
         expect(serviceAccounts.getWorkloadBinding).toHaveBeenCalledWith('alerting_rule', params);
@@ -225,7 +227,12 @@ describe('SecurityService', function () {
         } as unknown as CoreSecurityDelegateContract);
 
         const request = {} as any;
-        const params = { serviceAccountId: 'sa', workloadType: 'rule', workloadId: 'rule-id' };
+        const params = {
+          serviceAccountId: 'sa',
+          workloadType: 'rule',
+          workloadId: 'rule-id',
+          spaceId: 'default',
+        };
         await handle.bindWorkload(request, params);
 
         expect(bindWorkload).toHaveBeenCalledWith('alerting_rule', request, params);

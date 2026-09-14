@@ -134,6 +134,18 @@ export class WorkloadBindingStore {
       throw e;
     }
 
+    // Decryption skips an encrypted attribute that is absent rather than failing, so a document
+    // whose canary was stripped would "decrypt" without any of its other attributes having been
+    // authenticated. The canary's presence is what proves the authentication tag was checked.
+    if (typeof attributes.canary !== 'string' || attributes.canary.length === 0) {
+      this.logger.error(
+        `Service account workload binding [${id}] failed integrity verification: the canary is missing.`
+      );
+      throw Boom.forbidden(
+        'The service account binding for this workload failed integrity verification.'
+      );
+    }
+
     // The coordinates are authenticated data, so a mismatch cannot come from tampering — it would
     // mean this ID was derived from different coordinates than the ones stored under it.
     if (
