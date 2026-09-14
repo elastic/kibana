@@ -8,39 +8,39 @@
  */
 
 import type { PropsWithChildren } from 'react';
-import React, { Suspense, useMemo } from 'react';
+import React, { Suspense } from 'react';
+import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import classnames from 'classnames';
 import { css } from '@emotion/react';
 import { useBreadcrumbsAppendExtensions } from './chrome_hooks';
 
-export const BreadcrumbsWithExtensionsWrapper = ({ children }: PropsWithChildren) => {
-  const { euiTheme } = useEuiTheme();
-  const breadcrumbsAppendExtensions = useBreadcrumbsAppendExtensions();
+const styles = {
+  breadcrumbsWithExtensionContainer: ({ euiTheme }: UseEuiTheme) => css`
+    overflow: hidden; // enables text-ellipsis in the last breadcrumb
+    .euiHeaderBreadcrumbs,
+    .euiBreadcrumbs {
+      // stop breadcrumbs from growing.
+      // this makes the extension appear right next to the last breadcrumb
+      flex-grow: 0;
+      margin-right: 0;
 
-  const styles = useMemo(
-    () => css`
       overflow: hidden; // enables text-ellipsis in the last breadcrumb
-      .euiHeaderBreadcrumbs,
-      .euiBreadcrumbs {
-        // stop breadcrumbs from growing.
-        // this makes the extension appear right next to the last breadcrumb
-        flex-grow: 0;
-        margin-right: 0;
+    }
 
-        overflow: hidden; // enables text-ellipsis in the last breadcrumb
-      }
+    .header__breadcrumbsAppendExtension--first {
+      margin-inline-start: ${euiTheme.size.xxs};
+    }
 
-      .header__breadcrumbsAppendExtension--first {
-        margin-inline-start: ${euiTheme.size.xxs};
-      }
+    .header__breadcrumbsAppendExtension--last {
+      flex-grow: 1;
+    }
+  `,
+};
 
-      .header__breadcrumbsAppendExtension--last {
-        flex-grow: 1;
-      }
-    `,
-    [euiTheme]
-  );
+export const BreadcrumbsWithExtensionsWrapper = ({ children }: PropsWithChildren) => {
+  const euiTheme = useEuiTheme();
+  const breadcrumbsAppendExtensions = useBreadcrumbsAppendExtensions();
 
   return breadcrumbsAppendExtensions.length === 0 ? (
     <>{children}</>
@@ -50,7 +50,7 @@ export const BreadcrumbsWithExtensionsWrapper = ({ children }: PropsWithChildren
       wrap={false}
       alignItems={'center'}
       gutterSize={'none'}
-      css={styles}
+      css={styles.breadcrumbsWithExtensionContainer(euiTheme)}
     >
       {children}
       {breadcrumbsAppendExtensions.map((breadcrumbsAppendExtension, index) => {
