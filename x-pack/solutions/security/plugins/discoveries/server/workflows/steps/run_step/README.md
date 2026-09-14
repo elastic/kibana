@@ -50,7 +50,7 @@ The anonymization `replacements` map (which maps anonymized tokens back to real 
 
 In async mode, pipeline errors are logged but do not propagate to the workflow — the step always returns successfully with the `execution_uuid`.
 
-Sync mode also races the pipeline against a soft deadline (`ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS`). If the pipeline does not finish in time, the step returns early with just `execution_uuid` and `status: 'pending'` while the pipeline keeps running in the background (the Agent Builder run tool then resumes via the status tool).
+Sync mode awaits the pipeline to completion and always returns `status: 'completed'` — it never returns early. A caller is bounded only by its own timeout, which must therefore exceed the pipeline's 30m budget. The soft deadline that used to cut sync mode short at 90s now lives in the Agent Builder run tool (`ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS`), which is the only caller that needs to answer inside a fixed window.
 
 ### Alert retrieval modes
 

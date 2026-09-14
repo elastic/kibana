@@ -177,7 +177,9 @@ triggers:
 steps:
   - name: run_attack_discovery
     type: security.attack-discovery.run
-    timeout: '10m'
+    # Sync mode awaits the whole pipeline, so this must sit above the
+    # pipeline's own 30m budget or the step is cut short before it can finish.
+    timeout: '35m'
     with:
       # `alerts` is the primary composability point — when non-empty,
       # alert_retrieval_mode is automatically set to "provided".

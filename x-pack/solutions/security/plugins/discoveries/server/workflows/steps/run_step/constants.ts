@@ -6,7 +6,7 @@
  */
 
 /**
- * Soft deadline for the run step in `sync` mode.
+ * Soft deadline for the Agent Builder run tool in `sync` mode.
  *
  * Why: Agent Builder workflow tools wait up to `WAIT_FOR_COMPLETION_TIMEOUT_SEC`
  * (120s) for a workflow to complete. Real Attack Discovery generations frequently
@@ -14,14 +14,18 @@
  * receives a workflow execution ID without the run step's output, which is not
  * useful for the AD-specific resume path.
  *
- * Instead, the run step itself watches a soft deadline well below the AB ceiling.
- * If the pipeline isn't done by then, the executor returns `{ execution_uuid }`
- * (matching async-mode output) and lets the underlying pipeline keep running in
- * the background. The AB wrapper sees the workflow as completed and forwards the
+ * Instead, the tool watches a soft deadline well below the AB ceiling. If the
+ * pipeline isn't done by then, it returns `{ execution_uuid }` (matching
+ * async-mode output) and lets the underlying pipeline keep running in the
+ * background. The AB wrapper sees the workflow as completed and forwards the
  * clean result. The agent then handles the slow-path handoff via the dedicated
  * AD status tool.
  *
  * The 30s of headroom under 120s covers serialization, network, and workflow
  * engine overhead.
+ *
+ * This bounds the Agent Builder tool only. The workflow run step awaits the
+ * pipeline in sync mode and is bounded by its caller's own step timeout, which
+ * must exceed the pipeline's 30m budget.
  */
 export const ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS = 90_000;
