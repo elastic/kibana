@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ServiceIdentifier } from 'inversify';
+import { createToken } from '@kbn/core-di';
 import type { ExecutionHistoryClientContract } from './types';
 
-export const ExecutionHistoryClientToken = Symbol.for(
+export const ExecutionHistoryClientToken = createToken<ExecutionHistoryClientContract>(
   'alerting_v2.ExecutionHistoryClient'
-) as ServiceIdentifier<ExecutionHistoryClientContract>;
+);

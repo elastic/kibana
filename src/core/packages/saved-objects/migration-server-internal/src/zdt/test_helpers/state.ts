@@ -39,6 +39,7 @@ export const createOutdatedDocumentSearchState = (): OutdatedDocumentsSearchStat
   corruptDocumentIds: [],
   transformErrors: [],
   hasTransformedDocs: false,
+  batchSize: 1000,
   progress: {
     processed: undefined,
     total: undefined,

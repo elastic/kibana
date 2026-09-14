@@ -72,6 +72,12 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({ onSubmit, isLoad
           readModeProps={{
             onClick: () => setEditMode(true),
             'data-test-subj': 'editable-title-header-value',
+            // A bare heading gives no sign it is a control. The pencil trails the text (rather than
+            // leading it) so the title still starts at the page's left edge, and is omitted without
+            // update permission, where the title genuinely is not editable.
+            ...(permissions.update
+              ? { iconType: 'pencil', iconSide: 'right' as const, iconSize: 'm' as const }
+              : {}),
           }}
           editModeProps={{
             formRowProps: { error: errors },

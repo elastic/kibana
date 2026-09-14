@@ -8,6 +8,7 @@
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 import { CaseMetricsFeature } from '../../../../../../common/types/api';
 import { CaseSettingsPopover } from './case_settings_popover';
@@ -17,9 +18,15 @@ describe('CaseSettingsPopover', () => {
   const anchorElement = document.createElement('button');
   document.body.appendChild(anchorElement);
 
+  const platinumLicense = licensingMock.createLicense({
+    license: { type: 'platinum' },
+  });
+
   const defaultProps = {
     syncAlerts: true,
     onSyncAlertsChange: jest.fn(),
+    extractObservables: true,
+    onExtractObservablesChange: jest.fn(),
     showMetrics: true,
     onShowMetricsChange: jest.fn(),
     isOpen: true,
@@ -60,6 +67,58 @@ describe('CaseSettingsPopover', () => {
     expect(screen.queryByTestId('case-settings-show-metrics-switch')).not.toBeInTheDocument();
   });
 
+  it('renders extract observables switch when authorized and enabled', async () => {
+    renderWithTestingProviders(<CaseSettingsPopover {...defaultProps} />, {
+      wrapperProps: {
+        license: platinumLicense,
+      },
+    });
+
+    expect(
+      await screen.findByTestId('case-settings-extract-observables-switch')
+    ).toBeInTheDocument();
+  });
+
+  it('does not render extract observables switch without platinum+ license', async () => {
+    renderWithTestingProviders(<CaseSettingsPopover {...defaultProps} />);
+
+    await screen.findByTestId('case-settings-popover');
+    expect(
+      screen.queryByTestId('case-settings-extract-observables-switch')
+    ).not.toBeInTheDocument();
+  });
+
+  it('does not render extract observables switch when extract observables is disabled', async () => {
+    renderWithTestingProviders(<CaseSettingsPopover {...defaultProps} />, {
+      wrapperProps: {
+        license: platinumLicense,
+        owner: ['cases'],
+      },
+    });
+
+    await screen.findByTestId('case-settings-popover');
+    expect(
+      screen.queryByTestId('case-settings-extract-observables-switch')
+    ).not.toBeInTheDocument();
+  });
+
+  it('calls onExtractObservablesChange when switch is toggled', async () => {
+    renderWithTestingProviders(
+      <CaseSettingsPopover {...defaultProps} extractObservables={false} />,
+      {
+        wrapperProps: {
+          license: platinumLicense,
+        },
+      }
+    );
+
+    await userEvent.click(await screen.findByTestId('case-settings-extract-observables-switch'));
+
+    await waitFor(() => {
+      expect(defaultProps.onExtractObservablesChange).toHaveBeenCalledWith(true);
+    });
+  });
+
   it('calls onSyncAlertsChange when switch is toggled', async () => {
     renderWithTestingProviders(<CaseSettingsPopover {...defaultProps} syncAlerts={false} />);
 
@@ -90,7 +149,7 @@ describe('CaseSettingsPopover', () => {
 
   it('does not render sync alerts switch when alerts sync is disabled', async () => {
     renderWithTestingProviders(<CaseSettingsPopover {...defaultProps} />, {
-      wrapperProps: { features: { alerts: { sync: false } } },
+      wrapperProps: { owner: ['observability'] },
     });
 
     await screen.findByTestId('case-settings-popover');

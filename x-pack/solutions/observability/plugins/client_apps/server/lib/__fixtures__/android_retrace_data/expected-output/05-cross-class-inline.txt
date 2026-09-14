@@ -1,0 +1,3 @@
+java.lang.RuntimeException: Cross-class inline
+	at co.elastic.otel.android.integration.MyApp$Companion.getAgent$app(MyApp.kt:9)
+	at co.elastic.otel.android.integration.MainActivity.onCreate(MainActivity.kt:18)

@@ -26,7 +26,7 @@ export const RulesWithGapsOverviewPanel = () => {
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+            iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
             onClick={handleToggleExpand}
             aria-expanded={isExpanded}
             flush="left"

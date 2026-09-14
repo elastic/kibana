@@ -51,7 +51,7 @@ describe('verifyEsAssetsExist', () => {
       makeRef(ElasticsearchAssetType.indexTemplate, 'present-tmpl'),
     ];
 
-    const missing = await verifyEsAssetsExist(esClient, refs, makeLogger());
+    const missing = await verifyEsAssetsExist(esClient, refs, makeLogger(), { maxAttempts: 1 });
     expect(missing).toEqual([makeRef(ElasticsearchAssetType.ingestPipeline, 'missing-pipe')]);
   });
 
@@ -93,7 +93,7 @@ describe('verifyEsAssetsExist', () => {
       makeRef(ElasticsearchAssetType.dataStreamIlmPolicy, 'ds-ilm'),
     ];
 
-    const missing = await verifyEsAssetsExist(esClient, refs, makeLogger());
+    const missing = await verifyEsAssetsExist(esClient, refs, makeLogger(), { maxAttempts: 1 });
     expect(missing).toEqual(refs);
     expect(esClient.ilm.getLifecycle).toHaveBeenCalledTimes(2);
   });
@@ -116,7 +116,7 @@ describe('verifyEsAssetsExist', () => {
 
     const refs: EsAssetReference[] = [makeRef(ElasticsearchAssetType.transform, 'my-transform')];
 
-    const missing = await verifyEsAssetsExist(esClient, refs, makeLogger());
+    const missing = await verifyEsAssetsExist(esClient, refs, makeLogger(), { maxAttempts: 1 });
     expect(missing).toEqual(refs);
     expect(esClient.transform.getTransform).toHaveBeenCalledWith(
       { transform_id: 'my-transform' },
@@ -131,11 +131,43 @@ describe('verifyEsAssetsExist', () => {
       makeRef(ElasticsearchAssetType.componentTemplate, 'missing-comp'),
     ];
 
-    const missing = await verifyEsAssetsExist(esClient, refs, makeLogger());
+    const missing = await verifyEsAssetsExist(esClient, refs, makeLogger(), { maxAttempts: 1 });
     expect(missing).toEqual(refs);
     expect(esClient.cluster.existsComponentTemplate).toHaveBeenCalledWith({
       name: 'missing-comp',
     });
+  });
+
+  it('retries missing assets and returns empty once they appear', async () => {
+    esClient.ingest.getPipeline
+      .mockResolvedValueOnce({ statusCode: 404, body: {} } as any)
+      .mockResolvedValueOnce({ statusCode: 200, body: {} } as any);
+
+    const refs: EsAssetReference[] = [
+      makeRef(ElasticsearchAssetType.ingestPipeline, 'lagging-pipe'),
+    ];
+
+    const missing = await verifyEsAssetsExist(esClient, refs, makeLogger(), {
+      maxAttempts: 3,
+      retryDelayMs: 0,
+    });
+
+    expect(missing).toEqual([]);
+    expect(esClient.ingest.getPipeline).toHaveBeenCalledTimes(2);
+  });
+
+  it('returns still-missing assets after exhausting retries', async () => {
+    esClient.ingest.getPipeline.mockResolvedValue({ statusCode: 404, body: {} } as any);
+
+    const refs: EsAssetReference[] = [makeRef(ElasticsearchAssetType.ingestPipeline, 'gone-pipe')];
+
+    const missing = await verifyEsAssetsExist(esClient, refs, makeLogger(), {
+      maxAttempts: 2,
+      retryDelayMs: 0,
+    });
+
+    expect(missing).toEqual(refs);
+    expect(esClient.ingest.getPipeline).toHaveBeenCalledTimes(2);
   });
 
   it('treats @custom component templates as always present without calling ES', async () => {

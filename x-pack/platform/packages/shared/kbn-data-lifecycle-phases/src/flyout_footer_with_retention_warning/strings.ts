@@ -8,20 +8,29 @@
 import { i18n } from '@kbn/i18n';
 
 // Keep the existing translation IDs for backwards compatibility.
-const EDIT_FLYOUT_PREFIX = 'xpack.dataLifecyclePhases.editDataLifecycleFlyout';
 
 export const flyoutFooterWithRetentionWarningStrings = {
-  cancelButton: i18n.translate(`${EDIT_FLYOUT_PREFIX}.cancelButton`, { defaultMessage: 'Cancel' }),
-  applyButton: i18n.translate(`${EDIT_FLYOUT_PREFIX}.applyButton`, { defaultMessage: 'Apply' }),
-  downsamplingNotAppliedTitle: i18n.translate(`${EDIT_FLYOUT_PREFIX}.downsamplingNotAppliedTitle`, {
-    defaultMessage: 'Downsampling requires a time series stream',
+  cancelButton: i18n.translate('xpack.dataLifecyclePhases.editDataLifecycleFlyout.cancelButton', {
+    defaultMessage: 'Cancel',
   }),
-  downsamplingNotAppliedBody: i18n.translate(`${EDIT_FLYOUT_PREFIX}.downsamplingNotAppliedBody`, {
-    defaultMessage:
-      'As this stream is not a time series, downsampling steps from the imported lifecycles will be excluded.',
+  applyButton: i18n.translate('xpack.dataLifecyclePhases.editDataLifecycleFlyout.applyButton', {
+    defaultMessage: 'Apply',
   }),
+  downsamplingNotAppliedTitle: i18n.translate(
+    'xpack.dataLifecyclePhases.editDataLifecycleFlyout.downsamplingNotAppliedTitle',
+    {
+      defaultMessage: 'Downsampling requires a time series stream',
+    }
+  ),
+  downsamplingNotAppliedBody: i18n.translate(
+    'xpack.dataLifecyclePhases.editDataLifecycleFlyout.downsamplingNotAppliedBody',
+    {
+      defaultMessage:
+        'As this stream is not a time series, downsampling steps from the imported lifecycles will be excluded.',
+    }
+  ),
   downsamplingNotAppliedBodyIlmPolicy: i18n.translate(
-    `${EDIT_FLYOUT_PREFIX}.downsamplingNotAppliedBodyIlmPolicy`,
+    'xpack.dataLifecyclePhases.editDataLifecycleFlyout.downsamplingNotAppliedBodyIlmPolicy',
     {
       defaultMessage:
         'As this stream is not a time series, downsampling steps from the selected ILM policy will be excluded.',

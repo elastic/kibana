@@ -10,11 +10,10 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
-import { paths } from '../../../constants';
 import { ActionPolicyDetailsFlyoutContainer } from './action_policy_details_flyout_container';
+import { AlertingV2ActionPoliciesLocatorDefinition } from '../../../locators';
 
-const mockNavigateToUrl = jest.fn();
-const mockBasePathPrepend = jest.fn((p: string) => p);
+const mockNavigateSync = jest.fn();
 const mockUseFetchActionPolicy = jest.fn();
 const mockCreateActionPolicy = jest.fn();
 const mockDeleteActionPolicy = jest.fn();
@@ -24,6 +23,12 @@ const mockSnoozePolicy = jest.fn();
 const mockUnsnoozePolicy = jest.fn();
 const mockUpdateApiKey = jest.fn();
 const mockOnClose = jest.fn();
+
+jest.mock('../../../application/locator_context', () => ({
+  useAlertingLocators: () => ({
+    actionPolicyLocators: { navigateSync: mockNavigateSync },
+  }),
+}));
 
 jest.mock('@kbn/core-di-browser', () => {
   const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
@@ -36,8 +41,8 @@ jest.mock('@kbn/core-di-browser', () => {
           capabilities: { alerting_v2_action_policies: { read: true, all: true } },
         });
       }
-      if (token === 'application') return { navigateToUrl: mockNavigateToUrl };
-      if (token === 'http') return { basePath: { prepend: mockBasePathPrepend } };
+      if (token === 'application') return { navigateToUrl: jest.fn() };
+      if (token === 'http') return { basePath: { prepend: jest.fn((p: string) => p) } };
       return {};
     },
     CoreStart: (key: string) => key,
@@ -194,11 +199,11 @@ const buildPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolic
     name: 'My Policy',
     description: 'desc',
     destinations: [{ type: 'connector', id: 'c-1' }],
-    groupingMode: 'per_episode',
+    grouping_mode: 'per_episode',
     enabled: true,
     tags: ['t1'],
     matcher: undefined,
-    groupBy: undefined,
+    group_by: undefined,
     throttle: undefined,
     ...overrides,
   } as ActionPolicyResponse);
@@ -253,9 +258,25 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
 
     await userEvent.click(screen.getByTestId('flyout-edit'));
 
-    expect(mockBasePathPrepend).toHaveBeenCalledWith(paths.actionPolicyEdit('policy-1'));
-    expect(mockNavigateToUrl).toHaveBeenCalledWith(paths.actionPolicyEdit('policy-1'));
+    expect(mockNavigateSync).toHaveBeenCalledWith({
+      page: 'edit',
+      actionPolicyId: 'policy-1',
+    });
     expect(mockOnClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('edit navigateSync params resolve to management action policy edit URL', async () => {
+    mockUseFetchActionPolicy.mockReturnValue({ data: buildPolicy() });
+    renderContainer();
+
+    await userEvent.click(screen.getByTestId('flyout-edit'));
+
+    const [params] = mockNavigateSync.mock.calls[0];
+    const location = await AlertingV2ActionPoliciesLocatorDefinition.getLocation(params);
+    expect(location).toMatchObject({
+      app: 'management',
+      path: '/alertingV2/action_policies/edit/policy-1',
+    });
   });
 
   it('clones the policy with a "[clone]" suffix and closes the flyout', async () => {
@@ -268,7 +289,7 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
       expect.objectContaining({
         name: 'My Policy [clone]',
         description: 'desc',
-        groupingMode: 'per_episode',
+        grouping_mode: 'per_episode',
       })
     );
     expect(mockOnClose).toHaveBeenCalledTimes(1);
@@ -276,7 +297,7 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
 
   it('clones a rule-scoped policy carrying over the matcher', async () => {
     mockUseFetchActionPolicy.mockReturnValue({
-      data: buildPolicy({ matcher: 'rule.id: "rule-1"' }),
+      data: buildPolicy({ matcher: { tags: ['rule-1'] } }),
     });
     renderContainer();
 
@@ -285,7 +306,7 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
     expect(mockCreateActionPolicy).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'My Policy [clone]',
-        matcher: 'rule.id: "rule-1"',
+        matcher: { tags: ['rule-1'] },
       })
     );
     expect(mockOnClose).toHaveBeenCalledTimes(1);

@@ -271,7 +271,8 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
     ]
   );
 
-  const techniques = values[threatIndex].technique ?? [];
+  const threatEntry = values[threatIndex];
+  const techniques = threatEntry?.technique ?? [];
 
   return (
     <TechniqueContainer>

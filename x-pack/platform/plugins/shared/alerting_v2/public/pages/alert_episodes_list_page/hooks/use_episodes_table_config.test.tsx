@@ -25,7 +25,7 @@ const createMockStorage = (initialValue: unknown = null) => ({
 });
 
 describe('useEpisodesTableConfig', () => {
-  it('returns the default row height when no URL or LS state is set', () => {
+  it('returns defaults when no URL or LS state is set', () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
     const mockStorage = createMockStorage(null);
 
@@ -35,12 +35,18 @@ describe('useEpisodesTableConfig', () => {
 
     const { result } = renderHook(() => useEpisodesTableConfig(mockStorage as any), { wrapper });
 
+    expect(result.current.visibleColumns).toEqual(DEFAULT_EPISODES_TABLE_CONFIG.visibleColumns);
+    expect(result.current.sort).toEqual(DEFAULT_EPISODES_TABLE_CONFIG.sort);
     expect(result.current.rowHeight).toBe(DEFAULT_EPISODES_TABLE_CONFIG.rowHeight);
+    expect(result.current.columnSettings).toEqual(DEFAULT_EPISODES_TABLE_CONFIG.columnSettings);
   });
 
   it('seeds state from localStorage', () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
-    const mockStorage = createMockStorage({ rowHeight: -1 });
+    const mockStorage = createMockStorage({
+      ...DEFAULT_EPISODES_TABLE_CONFIG,
+      rowHeight: -1,
+    });
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <Router history={history}>{children}</Router>
@@ -60,8 +66,13 @@ describe('useEpisodesTableConfig', () => {
       useHashQuery: false,
     });
 
-    const mockStorage = createMockStorage({ rowHeight: -1 });
+    // LS says rowHeight = -1 (auto)
+    const mockStorage = createMockStorage({
+      ...DEFAULT_EPISODES_TABLE_CONFIG,
+      rowHeight: -1,
+    });
 
+    // URL says rowHeight = 1 (single)
     await act(async () => {
       await urlStateStorage.set(
         '_a',
@@ -76,6 +87,7 @@ describe('useEpisodesTableConfig', () => {
 
     const { result } = renderHook(() => useEpisodesTableConfig(mockStorage as any), { wrapper });
 
+    // URL value wins
     expect(result.current.rowHeight).toBe(1);
   });
 
@@ -121,6 +133,49 @@ describe('useEpisodesTableConfig', () => {
     expect(result.current.rowHeight).toBe(-1);
   });
 
+  it('setVisibleColumns updates state and writes to both stores', async () => {
+    const history = createMemoryHistory({ initialEntries: ['/'] });
+    const mockStorage = createMockStorage(null);
+
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <Router history={history}>{children}</Router>
+    );
+
+    const { result } = renderHook(() => useEpisodesTableConfig(mockStorage as any), { wrapper });
+
+    await act(async () => {
+      result.current.setVisibleColumns(['episode.status', 'tags']);
+    });
+
+    expect(result.current.visibleColumns).toEqual(['episode.status', 'tags']);
+    expect(mockStorage.set).toHaveBeenCalledWith(
+      EPISODES_TABLE_CONFIG_STORAGE_KEY,
+      expect.objectContaining({ visibleColumns: ['episode.status', 'tags'] })
+    );
+    expect(history.location.search).toContain('_a=');
+  });
+
+  it('setSort updates state and writes to both stores', async () => {
+    const history = createMemoryHistory({ initialEntries: ['/'] });
+    const mockStorage = createMockStorage(null);
+
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <Router history={history}>{children}</Router>
+    );
+
+    const { result } = renderHook(() => useEpisodesTableConfig(mockStorage as any), { wrapper });
+
+    await act(async () => {
+      result.current.setSort({ sortField: 'duration', sortDirection: 'asc' });
+    });
+
+    expect(result.current.sort).toEqual({ sortField: 'duration', sortDirection: 'asc' });
+    expect(mockStorage.set).toHaveBeenCalledWith(
+      EPISODES_TABLE_CONFIG_STORAGE_KEY,
+      expect.objectContaining({ sort: { sortField: 'duration', sortDirection: 'asc' } })
+    );
+  });
+
   it('setRowHeight updates state and writes to both stores', async () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
     const mockStorage = createMockStorage(null);
@@ -136,9 +191,68 @@ describe('useEpisodesTableConfig', () => {
     });
 
     expect(result.current.rowHeight).toBe(-1);
-    expect(mockStorage.set).toHaveBeenCalledWith(EPISODES_TABLE_CONFIG_STORAGE_KEY, {
-      rowHeight: -1,
+    expect(mockStorage.set).toHaveBeenCalledWith(
+      EPISODES_TABLE_CONFIG_STORAGE_KEY,
+      expect.objectContaining({ rowHeight: -1 })
+    );
+  });
+
+  it('onResize merges the new column width into columnSettings', async () => {
+    const history = createMemoryHistory({ initialEntries: ['/'] });
+    const mockStorage = createMockStorage(null);
+
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <Router history={history}>{children}</Router>
+    );
+
+    const { result } = renderHook(() => useEpisodesTableConfig(mockStorage as any), { wrapper });
+
+    await act(async () => {
+      result.current.onResize({ columnId: 'rule.id', width: 300 });
     });
-    expect(history.location.search).toContain('_a=');
+
+    expect(result.current.columnSettings['rule.id']?.width).toBe(300);
+    // Other default column widths are preserved
+    expect(result.current.columnSettings.duration?.width).toBe(110);
+    expect(mockStorage.set).toHaveBeenCalledWith(
+      EPISODES_TABLE_CONFIG_STORAGE_KEY,
+      expect.objectContaining({
+        columnSettings: expect.objectContaining({ 'rule.id': { width: 300 } }),
+      })
+    );
+  });
+
+  it('resetToDefaults restores default config and writes to both stores', async () => {
+    const history = createMemoryHistory({ initialEntries: ['/'] });
+    // Stateful, unlike createMockStorage: the reset triggers a URL write (via history.replace),
+    // which re-triggers the hook's location.search re-sync effect and re-reads storage — a static
+    // mock would then hand back the stale pre-reset value.
+    let stored: unknown = { ...DEFAULT_EPISODES_TABLE_CONFIG, rowHeight: -1 };
+    const mockStorage = {
+      get: jest.fn(() => stored),
+      set: jest.fn((_, v) => {
+        stored = v;
+      }),
+      remove: jest.fn(() => {
+        stored = null;
+      }),
+      clear: jest.fn(),
+    };
+
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <Router history={history}>{children}</Router>
+    );
+
+    const { result } = renderHook(() => useEpisodesTableConfig(mockStorage as any), { wrapper });
+
+    expect(result.current.rowHeight).toBe(-1);
+
+    await act(async () => {
+      result.current.resetToDefaults();
+    });
+
+    expect(result.current.rowHeight).toBe(DEFAULT_EPISODES_TABLE_CONFIG.rowHeight);
+    // Encoding strips fields that equal the default, so an all-default config clears the key.
+    expect(mockStorage.remove).toHaveBeenCalledWith(EPISODES_TABLE_CONFIG_STORAGE_KEY);
   });
 });

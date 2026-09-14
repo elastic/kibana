@@ -94,6 +94,35 @@ describe('useParseYaml', () => {
     expect(output.templates[0].tags).toEqual(['template-tag']);
   });
 
+  it('does not bleed case-default tags/description into template identity when template_* keys exist', async () => {
+    const { result } = renderHook(() => useParseYaml());
+    // A migrated/exported template that has case-default tags/description but NO template tags or
+    // description: `template_name` marks this as the new shape, `template_tags`/`template_description`
+    // are absent, and the top-level `tags`/`description` are case defaults only.
+    const file = makeValidatedFile('case-tags-only.yaml', [
+      {
+        template_name: 'Template identity',
+        name: 'Case default title',
+        description: 'Case-default description',
+        tags: ['case-tag-1', 'case-tag-2'],
+      },
+    ]);
+
+    const output = await result.current.parseFiles([file]);
+
+    expect(output.templates).toHaveLength(1);
+    // Case defaults keep the top-level tags/description.
+    expect(output.templates[0].caseDefaults).toMatchObject({
+      title: 'Case default title',
+      description: 'Case-default description',
+      tags: ['case-tag-1', 'case-tag-2'],
+    });
+    // Template identity does NOT inherit the case-default tags/description.
+    expect(output.templates[0].name).toBe('Template identity');
+    expect(output.templates[0].tags).toBeUndefined();
+    expect(output.templates[0].description).toBeUndefined();
+  });
+
   it('accepts multiple $ref fields without explicit aliases when their refs differ', async () => {
     const { result } = renderHook(() => useParseYaml());
     const file = makeValidatedFile('refs.yaml', [

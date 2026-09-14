@@ -7,26 +7,12 @@
 
 import React, { useMemo } from 'react';
 import { useParams, Redirect } from 'react-router-dom';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  EuiSpacer,
-  EuiSkeletonText,
-  EuiEmptyPrompt,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiSpacer, EuiSkeletonText, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBreadcrumbs } from '../../common/hooks/use_breadcrumbs';
 import { useRouterNavigate } from '../../common/lib/kibana';
 import { pagePathGetters } from '../../common/page_paths';
-import {
-  fullWidthContentCss,
-  WithHeaderLayout,
-  WithoutHeaderLayout,
-} from '../../components/layouts';
-import { useIsExperimentalFeatureEnabled } from '../../common/experimental_features_context';
-import { useGoBack } from '../../common/use_go_back';
+import { fullWidthContentCss, WithoutHeaderLayout } from '../../components/layouts';
 import {
   useScheduledExecutionDetails,
   mapScheduledDetailsToQueryData,
@@ -38,7 +24,6 @@ const tableWrapperCss = {
 };
 
 const ScheduledExecutionDetailsPageComponent = () => {
-  const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const { scheduleId, executionCount: executionCountStr } = useParams<{
     scheduleId: string;
     executionCount: string;
@@ -53,8 +38,7 @@ const ScheduledExecutionDetailsPageComponent = () => {
   });
 
   const historyPath = pagePathGetters.history();
-  const handleGoBack = useGoBack(historyPath);
-  const historyNavProps = useRouterNavigate(historyPath, handleGoBack);
+  const historyNavProps = useRouterNavigate(historyPath);
 
   const { data, isLoading, isError } = useScheduledExecutionDetails({
     scheduleId,
@@ -65,34 +49,6 @@ const ScheduledExecutionDetailsPageComponent = () => {
   const queryData = useMemo(
     () => (data ? mapScheduledDetailsToQueryData(data, scheduleId) : undefined),
     [data, scheduleId]
-  );
-
-  const LeftColumn = useMemo(
-    () => (
-      <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
-        <EuiFlexItem>
-          <EuiButtonEmpty iconType="arrowLeft" {...historyNavProps} flush="left" size="xs">
-            <FormattedMessage
-              id="xpack.osquery.scheduledExecutionDetails.viewHistoryTitle"
-              defaultMessage="View history"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        {!isHistoryEnabled && (
-          <EuiFlexItem>
-            <EuiText>
-              <h1>
-                <FormattedMessage
-                  id="xpack.osquery.scheduledExecutionDetails.pageTitle"
-                  defaultMessage="Scheduled execution details"
-                />
-              </h1>
-            </EuiText>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    ),
-    [historyNavProps, isHistoryEnabled]
   );
 
   if (!isValid) {
@@ -106,6 +62,7 @@ const ScheduledExecutionDetailsPageComponent = () => {
         data={queryData}
         startDate={data?.timestamp}
         showResultsHeader
+        hideResultsTitle
         scheduleId={scheduleId}
         executionCount={executionCount}
         packName={data?.packName}
@@ -131,7 +88,7 @@ const ScheduledExecutionDetailsPageComponent = () => {
         />
       }
       actions={
-        <EuiButtonEmpty {...historyNavProps} iconType="arrowLeft">
+        <EuiButtonEmpty {...historyNavProps} iconType="chevronSingleLeft">
           <FormattedMessage
             id="xpack.osquery.scheduledExecutionDetails.backToHistory"
             defaultMessage="Back to History"
@@ -158,29 +115,10 @@ const ScheduledExecutionDetailsPageComponent = () => {
     </>
   );
 
-  if (isHistoryEnabled) {
-    return (
-      <WithoutHeaderLayout restrictWidth={false}>
-        <div css={fullWidthContentCss}>
-          {LeftColumn}
-          {content}
-        </div>
-      </WithoutHeaderLayout>
-    );
-  }
-
-  if (isLoading || isError) {
-    return (
-      <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
-        {content}
-      </WithHeaderLayout>
-    );
-  }
-
   return (
-    <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
-      {tableBlock}
-    </WithHeaderLayout>
+    <WithoutHeaderLayout restrictWidth={false}>
+      <div css={fullWidthContentCss}>{content}</div>
+    </WithoutHeaderLayout>
   );
 };
 

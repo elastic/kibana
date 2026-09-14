@@ -15,20 +15,21 @@ import {
   type UseEuiTheme,
 } from '@elastic/eui';
 
-import type { IInterpreterRenderHandlers, RenderMode } from '@kbn/expressions-plugin/common';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { createVegaVisualization } from '../vega_visualization';
 import type { VegaVisualizationDependencies } from '../plugin';
 import type { VegaParser } from '../data_model/vega_parser';
+import type { VegaEventHandler } from '../types';
 
 import { GlobalVegaVisStyles } from './vega_vis.styles';
 
 interface VegaVisComponentProps {
   deps: VegaVisualizationDependencies;
-  fireEvent: IInterpreterRenderHandlers['event'];
+  fireEvent: VegaEventHandler;
   renderComplete: () => void;
-  renderMode: RenderMode;
+  /** Whether runtime Vega warnings are surfaced in the panel. Enabled while authoring a spec. */
+  showWarnings: boolean;
   visData: VegaParser;
 }
 
@@ -48,7 +49,7 @@ export const VegaVisComponent = ({
   fireEvent,
   renderComplete,
   deps,
-  renderMode,
+  showWarnings,
 }: VegaVisComponentProps) => {
   const styles = useMemoCss(vegaVisStyles);
   const chartDiv = useRef<HTMLDivElement>(null);
@@ -57,14 +58,14 @@ export const VegaVisComponent = ({
 
   useEffect(() => {
     if (chartDiv.current) {
-      const VegaVis = createVegaVisualization(deps, renderMode);
+      const VegaVis = createVegaVisualization(deps, showWarnings);
       visController.current = new VegaVis(chartDiv.current, fireEvent);
     }
     return () => {
       visController.current?.destroy();
       visController.current = null;
     };
-  }, [deps, fireEvent, renderMode]);
+  }, [deps, fireEvent, showWarnings]);
 
   useEffect(() => {
     const asyncRender = async (visCtrl: VegaVisController) => {

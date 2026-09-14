@@ -49,7 +49,7 @@ const mapHostEntityRecordToHostsEdge = (record: HostEntity): HostsEdges | null =
   }
 
   const lastSeenIso = record.entity?.lifecycle?.last_seen;
-  const riskLevel = record.host?.risk?.calculated_level as RiskSeverity | undefined;
+  const riskLevel = record.entity?.risk?.calculated_level as RiskSeverity | undefined;
 
   const node: HostItem = {
     host: {

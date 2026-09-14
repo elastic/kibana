@@ -30,14 +30,18 @@ describe('createKiIdentificationStartTool', () => {
       managementApi: managementApi as never,
       telemetry: { trackOnboardingScheduled: jest.fn() } as never,
     });
+    const maintenanceService = {
+      getState: jest.fn().mockResolvedValue('enabled'),
+    };
 
     const tool = createKiIdentificationStartTool({
       telemetry: telemetry as never,
       streamsKIsOnboardingClient,
+      maintenanceService: maintenanceService as never,
     });
     const context = createMockToolContext();
 
-    return { tool, context, managementApi };
+    return { tool, context, managementApi, maintenanceService };
   };
 
   it('triggers onboarding workflow and returns immediately by default', async () => {
@@ -64,7 +68,7 @@ describe('createKiIdentificationStartTool', () => {
     if ('results' in result) {
       expect(result.results[0].type).toBe('other');
       expect(result.results[0].data).toEqual({
-        kibanaPath: '/app/streams/logs.nginx/management/significantEvents',
+        kibanaPath: '/app/significant_events/knowledge_indicators?stream=logs.nginx',
       });
     }
   });

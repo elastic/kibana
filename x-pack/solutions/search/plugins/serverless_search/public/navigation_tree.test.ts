@@ -29,7 +29,8 @@ describe('Navigation Tree', () => {
     expect(body.length).toBeGreaterThan(0);
     const homeNode = body[0];
     expect(homeNode).toMatchObject({
-      title: 'Elasticsearch',
+      title: 'Home',
+      icon: 'home',
       link: 'searchHomepage',
     });
   });
@@ -37,6 +38,11 @@ describe('Navigation Tree', () => {
   it('has agent_builder as the first item after home', () => {
     const { body } = createNavigationTree(mockApplication);
     expect(body[1]).toMatchObject({ link: 'agent_builder' });
+  });
+
+  it('has context_engine right after agent_builder', () => {
+    const { body } = createNavigationTree(mockApplication);
+    expect(body[2]).toMatchObject({ link: 'context_engine' });
   });
 
   it('includes Manage jobs link to Stack Management anomaly detection jobs list under ML nav', () => {

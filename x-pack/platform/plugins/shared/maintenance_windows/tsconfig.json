@@ -5,6 +5,7 @@
   },
   "include": ["server/**/*", "public/**/*", "common/**/*"],
   "kbn_references": [
+    "@kbn/app-header",
     "@kbn/core",
     "@kbn/security-plugin",
     "@kbn/licensing-plugin",
@@ -24,7 +25,6 @@
     "@kbn/core-http-router-server-mocks",
     "@kbn/features-plugin",
     "@kbn/lazy-object",
-    "@kbn/datemath",
     "@kbn/task-manager-plugin",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/kibana-react-plugin",
@@ -39,6 +39,7 @@
     "@kbn/core-http-browser",
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/response-ops-recurring-schedule-form",
+    "@kbn/response-ops-schedule-schema",
     "@kbn/react-query",
     "@kbn/shared-ux-router",
     "@kbn/response-ops-rules-apis",

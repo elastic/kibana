@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import type {
   CreateUiamOAuthClientParams,
   UiamOAuthClientResponse,
@@ -21,7 +18,7 @@ import type {
 
 import type { SecurityLicense } from '../../../common';
 import { getDetailedErrorMessage } from '../../errors';
-import type { UiamServicePublic } from '../../uiam';
+import { getUiamCredentialsFromRequest, type UiamServicePublic } from '../../uiam';
 
 export interface UiamOAuthOptions {
   logger: Logger;
@@ -139,10 +136,32 @@ export class UiamOAuth implements UiamOAuthType {
     }
   }
 
+  async deleteClient(request: KibanaRequest, clientId: string): Promise<true | null> {
+    if (!this.license.isEnabled()) {
+      this.logger.debug(
+        'Skipping OAuth client deletion: security features are disabled in Elasticsearch.'
+      );
+      return null;
+    }
+
+    const accessToken = UiamOAuth.getAccessToken(request);
+    this.logger.debug(`Attempting to delete OAuth client ${clientId}`);
+
+    try {
+      await this.uiam.deleteOAuthClient(accessToken, clientId);
+      this.logger.debug(`OAuth client ${clientId} deleted successfully`);
+      return true;
+    } catch (e) {
+      this.logger.error(`Failed to delete OAuth client ${clientId}: ${getDetailedErrorMessage(e)}`);
+      throw e;
+    }
+  }
+
   async listConnections(
     request: KibanaRequest,
     clientId?: string,
-    connectionId?: string
+    connectionId?: string,
+    projectId?: string
   ): Promise<{ connections: UiamOAuthConnectionResponse[] } | null> {
     if (!this.license.isEnabled()) {
       this.logger.debug(
@@ -155,7 +174,12 @@ export class UiamOAuth implements UiamOAuthType {
     this.logger.debug('Attempting to list OAuth connections');
 
     try {
-      const result = await this.uiam.listOAuthConnections(accessToken, clientId, connectionId);
+      const result = await this.uiam.listOAuthConnections(
+        accessToken,
+        clientId,
+        connectionId,
+        projectId
+      );
       this.logger.debug('OAuth connections listed successfully');
       return result;
     } catch (e) {
@@ -230,6 +254,35 @@ export class UiamOAuth implements UiamOAuthType {
     }
   }
 
+  async deleteConnection(
+    request: KibanaRequest,
+    clientId: string,
+    connectionId: string
+  ): Promise<true | null> {
+    if (!this.license.isEnabled()) {
+      this.logger.debug(
+        'Skipping OAuth connection deletion: security features are disabled in Elasticsearch.'
+      );
+      return null;
+    }
+
+    const accessToken = UiamOAuth.getAccessToken(request);
+    this.logger.debug(`Attempting to delete OAuth connection ${connectionId}`);
+
+    try {
+      await this.uiam.deleteOAuthConnection(accessToken, clientId, connectionId);
+      this.logger.debug(`OAuth connection ${connectionId} deleted successfully`);
+      return true;
+    } catch (e) {
+      this.logger.error(
+        `Failed to delete OAuth connection ${connectionId} for client ${clientId}: ${getDetailedErrorMessage(
+          e
+        )}`
+      );
+      throw e;
+    }
+  }
+
   async resolveUsers(
     request: KibanaRequest,
     userIds: string[]
@@ -251,16 +304,6 @@ export class UiamOAuth implements UiamOAuthType {
    * Extracts the Bearer access token from the request. The token must be a UIAM credential.
    */
   static getAccessToken(request: KibanaRequest): string {
-    const authorization = HTTPAuthorizationHeader.parseFromRequest(request);
-
-    if (!authorization) {
-      throw Boom.unauthorized('Request does not contain an authorization header');
-    }
-
-    if (!isUiamCredential(authorization)) {
-      throw Boom.badRequest('Provided credential is not compatible with UIAM');
-    }
-
-    return authorization.credentials;
+    return getUiamCredentialsFromRequest(request);
   }
 }

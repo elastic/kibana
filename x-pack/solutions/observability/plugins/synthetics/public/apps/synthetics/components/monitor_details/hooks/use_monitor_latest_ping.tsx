@@ -6,11 +6,12 @@
  */
 
 import { useCallback, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import {
   ConfigKey,
-  isRemoteSyntheticsMonitor,
+  isExternalSyntheticsMonitor,
   type Ping,
 } from '../../../../../../common/runtime_types';
 import { useGetUrlParams } from '../../../hooks';
@@ -28,12 +29,15 @@ export const useMonitorLatestPing = (params?: UseMonitorLatestPingParams) => {
   const dispatch = useDispatch();
   const { lastRefresh } = useSyntheticsRefreshContext();
   const { remoteName } = useGetUrlParams();
+  const { monitorId: routeMonitorId } = useParams<{ monitorId: string }>();
   const isRemote = Boolean(remoteName);
 
   const { monitor } = useSelectedMonitor();
   const location = useSelectedLocation();
 
-  const monitorId = params?.monitorId ?? monitor?.id;
+  // URL id is enough to query remotes — waiting for the synthesized monitor
+  // left the details page spinning when the ES probe returned empty.
+  const monitorId = params?.monitorId ?? monitor?.id ?? routeMonitorId;
   const locationLabel = location?.label;
 
   const { data: latestPing, loading, loaded } = useSelector(selectLastRunMetadata);
@@ -46,11 +50,12 @@ export const useMonitorLatestPing = (params?: UseMonitorLatestPingParams) => {
 
   const latestPingId = latestPing?.monitor.id;
 
-  // CUSTOM_HEARTBEAT_ID is the project-monitor override on the local SO; remote
-  // monitors don't expose it (their `monitor.id` already equals the ping's
-  // monitor.id), so the equality check above is sufficient for remote.
+  // CUSTOM_HEARTBEAT_ID is the project-monitor override on the local SO; external
+  // monitors (remote CCS and local Heartbeat/Agent) don't expose it — their
+  // `monitor.id` already equals the ping's monitor.id — so the equality check
+  // above is sufficient for them.
   const customHeartbeatId =
-    monitor && !isRemoteSyntheticsMonitor(monitor)
+    monitor && !isExternalSyntheticsMonitor(monitor)
       ? monitor[ConfigKey.CUSTOM_HEARTBEAT_ID]
       : undefined;
   const isIdSame = latestPingId === monitorId || latestPingId === customHeartbeatId;
@@ -93,10 +98,9 @@ export const useMonitorLatestPing = (params?: UseMonitorLatestPingParams) => {
  * {@link useMonitorLatestPing}, and deliberately kept out of Redux so it never
  * depends on state populated by the local route.
  *
- * Loading semantics: while we wait for `useSelectedMonitor` to resolve the
- * remote monitor (and therefore `monitorId`), `loaded` stays `false` so the
- * page wrapper keeps showing the loading spinner instead of flashing the
- * "initial test run pending" empty state.
+ * Loading semantics: `monitorId` comes from the route (or the synthesized
+ * monitor). The probe must not wait on `useSelectedMonitor` — that hook's
+ * remote path also needs pings, and an empty/failing probe would spin forever.
  */
 const useRemoteMonitorLatestPing = ({
   monitorId,

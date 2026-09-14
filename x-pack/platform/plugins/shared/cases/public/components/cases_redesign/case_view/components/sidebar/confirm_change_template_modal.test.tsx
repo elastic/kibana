@@ -14,12 +14,12 @@ import { renderWithTestingProviders } from '../../../../../common/mock';
 
 const oldTemplate = {
   name: 'Security Template',
-  fieldNames: [{ name: 'priority', label: 'Priority' }],
+  fieldDefinitions: [{ name: 'priority', label: 'Priority' }],
 };
 
 const newTemplate = {
   name: 'Observability Template',
-  fieldNames: [{ name: 'severity', label: 'Severity' }],
+  fieldDefinitions: [{ name: 'severity', label: 'Severity' }],
 };
 
 describe('ConfirmChangeTemplateModal', () => {
@@ -66,7 +66,7 @@ describe('ConfirmChangeTemplateModal', () => {
     expect(screen.getByText(/Are you sure you want to change from/)).toBeInTheDocument();
     expect(screen.getByText(oldTemplate.name)).toBeInTheDocument();
     expect(screen.getByText(newTemplate.name)).toBeInTheDocument();
-    expect(screen.getByTestId('confirmModalConfirmButton')).toHaveTextContent('Change');
+    expect(screen.getByTestId('confirm-change-template-modal-confirm')).toHaveTextContent('Change');
   });
 
   it('asks to apply the new template when there is no old template', () => {
@@ -80,7 +80,7 @@ describe('ConfirmChangeTemplateModal', () => {
 
     expect(screen.getByText(/Are you sure you want to apply/)).toBeInTheDocument();
     expect(screen.getByText(newTemplate.name)).toBeInTheDocument();
-    expect(screen.getByTestId('confirmModalConfirmButton')).toHaveTextContent('Apply');
+    expect(screen.getByTestId('confirm-change-template-modal-confirm')).toHaveTextContent('Apply');
   });
 
   it('asks to remove the old template when there is no new template', () => {
@@ -94,7 +94,7 @@ describe('ConfirmChangeTemplateModal', () => {
 
     expect(screen.getByText(/Are you sure you want to remove/)).toBeInTheDocument();
     expect(screen.getByText(oldTemplate.name)).toBeInTheDocument();
-    expect(screen.getByTestId('confirmModalConfirmButton')).toHaveTextContent('Remove');
+    expect(screen.getByTestId('confirm-change-template-modal-confirm')).toHaveTextContent('Remove');
   });
 
   it('shows a tooltip with the template fields when hovering the list icon', async () => {
@@ -115,7 +115,7 @@ describe('ConfirmChangeTemplateModal', () => {
         screen.getByTestId('confirm-change-template-modal-fields-tooltip')
       ).toBeInTheDocument();
     });
-    expect(screen.getByText(newTemplate.fieldNames[0].label)).toBeInTheDocument();
+    expect(screen.getByText(newTemplate.fieldDefinitions[0].label)).toBeInTheDocument();
   });
 
   it('does not render a fields icon when a template has no fields', () => {
@@ -142,7 +142,7 @@ describe('ConfirmChangeTemplateModal', () => {
       />
     );
 
-    await user.click(screen.getByTestId('confirmModalConfirmButton'));
+    await user.click(screen.getByTestId('confirm-change-template-modal-confirm'));
 
     expect(onConfirm).toHaveBeenCalled();
   });
@@ -157,7 +157,7 @@ describe('ConfirmChangeTemplateModal', () => {
       />
     );
 
-    await user.click(screen.getByTestId('confirmModalCancelButton'));
+    await user.click(screen.getByTestId('confirm-change-template-modal-cancel'));
 
     expect(onCancel).toHaveBeenCalled();
   });
@@ -173,6 +173,6 @@ describe('ConfirmChangeTemplateModal', () => {
       />
     );
 
-    expect(screen.getByTestId('confirmModalConfirmButton')).toBeDisabled();
+    expect(screen.getByTestId('confirm-change-template-modal-confirm')).toBeDisabled();
   });
 });

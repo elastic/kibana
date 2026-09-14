@@ -6,14 +6,15 @@
  */
 
 import React from 'react';
+import { useWatch } from 'react-hook-form';
 import { EuiFormRow, EuiHorizontalRule, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   ComposeDiscoverAction,
   ComposeDiscoverState,
   CustomRecoveryRenderProps,
-  RecoveryType,
 } from '../types';
+import type { FormValues, RecoveryStrategy } from '../../../form/types';
 import { RecoveryDelayField } from '../../../form/fields/recovery_delay_field';
 
 const defaultRecoveryLabel = i18n.translate(
@@ -36,13 +37,25 @@ const customRecoveryDescription = i18n.translate(
   { defaultMessage: 'Define a custom recovery condition.' }
 );
 
+const noRecoveryLabel = i18n.translate(
+  'xpack.alertingV2.composeDiscover.recoveryCondition.noRecoveryDropDownOptionLabel',
+  { defaultMessage: 'No recovery' }
+);
+
+const noRecoveryDescription = i18n.translate(
+  'xpack.alertingV2.composeDiscover.recoveryCondition.noRecoveryDescription',
+  {
+    defaultMessage: 'Alerts will stay active even when the alert condition is no longer met.',
+  }
+);
+
 const RECOVERY_TYPE_OPTIONS: Array<{
-  value: RecoveryType;
+  value: RecoveryStrategy;
   inputDisplay: string;
   dropdownDisplay: React.ReactNode;
 }> = [
   {
-    value: 'default',
+    value: 'no_breach',
     inputDisplay: defaultRecoveryLabel,
     dropdownDisplay: (
       <>
@@ -54,7 +67,7 @@ const RECOVERY_TYPE_OPTIONS: Array<{
     ),
   },
   {
-    value: 'custom',
+    value: 'query',
     inputDisplay: customRecoveryLabel,
     dropdownDisplay: (
       <>
@@ -65,15 +78,27 @@ const RECOVERY_TYPE_OPTIONS: Array<{
       </>
     ),
   },
+  {
+    value: 'none',
+    inputDisplay: noRecoveryLabel,
+    dropdownDisplay: (
+      <>
+        <strong>{noRecoveryLabel}</strong>
+        <EuiText size="s" color="subdued">
+          <p>{noRecoveryDescription}</p>
+        </EuiText>
+      </>
+    ),
+  },
 ];
 
 interface RecoveryTypeSelectorProps {
-  recoveryType: RecoveryType;
-  onRecoveryTypeChange: (type: RecoveryType) => void;
+  recoveryStrategy: RecoveryStrategy;
+  onRecoveryTypeChange: (strategy: RecoveryStrategy) => void;
 }
 
 const RecoveryTypeSelector: React.FC<RecoveryTypeSelectorProps> = ({
-  recoveryType,
+  recoveryStrategy,
   onRecoveryTypeChange,
 }) => (
   <EuiFormRow
@@ -85,8 +110,8 @@ const RecoveryTypeSelector: React.FC<RecoveryTypeSelectorProps> = ({
     <EuiSuperSelect
       compressed
       options={RECOVERY_TYPE_OPTIONS}
-      valueOfSelected={recoveryType}
-      onChange={(val) => onRecoveryTypeChange(val as RecoveryType)}
+      valueOfSelected={recoveryStrategy}
+      onChange={(val) => onRecoveryTypeChange(val as RecoveryStrategy)}
       fullWidth
       data-test-subj="composeDiscoverRecoveryType"
     />
@@ -96,7 +121,7 @@ const RecoveryTypeSelector: React.FC<RecoveryTypeSelectorProps> = ({
 interface RecoveryConditionStepProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
-  onRecoveryTypeChange: (type: RecoveryType) => void;
+  onRecoveryTypeChange: (strategy: RecoveryStrategy) => void;
   renderCustomRecovery?: (props: CustomRecoveryRenderProps) => React.ReactNode;
 }
 
@@ -106,24 +131,32 @@ export function RecoveryConditionStep({
   onRecoveryTypeChange,
   renderCustomRecovery,
 }: RecoveryConditionStepProps) {
+  const recoveryStrategy =
+    useWatch<FormValues, 'recoveryStrategy'>({ name: 'recoveryStrategy' }) ?? 'none';
+  const isCustom = recoveryStrategy === 'query';
+
   return (
     <>
       <RecoveryTypeSelector
-        recoveryType={state.recoveryType}
+        recoveryStrategy={recoveryStrategy}
         onRecoveryTypeChange={onRecoveryTypeChange}
       />
 
-      {state.recoveryType === 'custom' && renderCustomRecovery && (
+      {isCustom && renderCustomRecovery && (
         <>
           <EuiSpacer size="l" />
           <EuiHorizontalRule margin="none" />
           <EuiSpacer size="m" />
-          {renderCustomRecovery({ state, dispatch })}
+          {React.createElement(renderCustomRecovery, { state, dispatch })}
         </>
       )}
 
-      <EuiSpacer size="m" />
-      <RecoveryDelayField />
+      {recoveryStrategy !== 'none' && (
+        <>
+          <EuiSpacer size="m" />
+          <RecoveryDelayField />
+        </>
+      )}
     </>
   );
 }

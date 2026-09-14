@@ -47,6 +47,7 @@ interface StorageSettingsBase {
 
 export interface IndexStorageSettings extends StorageSettingsBase {
   name: string;
+  priority?: number;
 }
 
 export type StorageSettings = IndexStorageSettings;

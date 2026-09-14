@@ -1,0 +1,58 @@
+{
+  "10.1.0": [
+    {
+      "name": "test-policy",
+      "description": "A test action policy",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-1"
+        }
+      ],
+      "matcher": null,
+      "groupBy": null,
+      "tags": null,
+      "groupingMode": null,
+      "throttle": null,
+      "snoozedUntil": null,
+      "auth": {
+        "owner": "elastic",
+        "createdByUser": true
+      },
+      "createdBy": "elastic",
+      "updatedBy": "elastic",
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    }
+  ],
+  "10.2.0": [
+    {
+      "name": "test-policy",
+      "description": "A test action policy",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-1"
+        }
+      ],
+      "matcher": null,
+      "groupBy": null,
+      "tags": null,
+      "groupingMode": null,
+      "throttle": null,
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "auth": {
+        "owner": "elastic",
+        "createdByUser": true
+      },
+      "createdBy": "elastic",
+      "updatedBy": "elastic",
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    }
+  ]
+}

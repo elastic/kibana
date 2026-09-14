@@ -163,3 +163,10 @@ export const getInfoTotalItems = (listType: string) =>
 export const NOT_FOUND_ITEMS = i18n.translate('xpack.securitySolution.listItems.notFoundItems', {
   defaultMessage: '0 list items match your search criteria.',
 });
+
+export const LIST_ITEMS_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.listItems.tableCaption',
+  {
+    defaultMessage: 'List items',
+  }
+);

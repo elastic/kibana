@@ -6,9 +6,9 @@ paths:
   /api/detection_engine/attacks/tags:
     post:
       x-labels: [serverless, ess]
-      x-internal: true
       operationId: SetAttacksTags
       x-codegen-enabled: true
+      x-state: added in 9.5.0
       summary: Add and remove attack discovery alert tags
       description: Add tags to attack discovery alerts, and remove them from alerts, by attack IDs in a single request. Optionally cascade tag changes to related detection alerts.
       tags:
@@ -88,12 +88,23 @@ paths:
             application/json:
               schema:
                 $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
         500:
           description: Internal server error response
           content:
             application/json:
               schema:
                 $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
 
 components:
   schemas:

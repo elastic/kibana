@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import {
@@ -72,6 +73,7 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
     detectionRulesClient = createDetectionRulesClient({
       actionsClient,
       rulesClient,
+      userProfile: userProfileServiceMock.createStart(),
       mlAuthz,
       rulesAuthz,
       savedObjectsClient,

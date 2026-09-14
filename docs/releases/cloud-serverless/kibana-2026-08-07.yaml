@@ -1,0 +1,767 @@
+products:
+- product: cloud-serverless
+  target: 2026-08-07
+  lifecycle: ga
+  repo: kibana
+  owner: elastic
+release-date: 2026-08-07
+hide-features:
+- data-federation
+entries:
+- file:
+    name: 281304.yaml
+    checksum: 30cd928b65d5e07f5fe9b5095f7f5fc32e37c458
+  type: bug-fix
+  title: Fix overlapping issue in graph layout
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/281304
+- file:
+    name: 281579.yaml
+    checksum: 78351db06aa69155d8ee6e616f3f12c955c65deb
+  type: enhancement
+  title: Populate assignee username, full name, and email on cases
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  description: When assignee identity is enabled, Cases resolves assignee UIDs to username, full name, and email at write time and stores them on the case. Existing cases are not backfilled.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/281579
+- file:
+    name: 281650.yaml
+    checksum: 5adbeb0fd4ec5f8fbe30af5f9807e5be4eb6c039
+  type: enhancement
+  title: Enforce case template limits and improve field library UI
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  description: Adds limits for live templates, fields per template, and definition size, and improves field library validation, preview, and form layout.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/281650
+- file:
+    name: 281144.yaml
+    checksum: 2bc10c037bff9821053dd6e7093827816b64d270
+  type: feature
+  title: Add New Relic connector
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/281144
+- file:
+    name: 281810.yaml
+    checksum: 1e6acc0594b088793babf898fdbdea187c5b169d
+  type: feature
+  title: Add Datadog connector
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/281810
+- file:
+    name: 281955.yaml
+    checksum: f2fa3337c7e8eb60e1dc954fdaf336f066206c55
+  type: enhancement
+  title: Move vendor endpoints into a "More" popover with per-vendor API keys
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  description: The API endpoints section in Observability onboarding groups vendor endpoints (Supabase and Vercel) into a "More" popover, each with its own API key.
+  prs:
+  - https://github.com/elastic/kibana/pull/281955
+  issues:
+  - '# PRIVATE: https://github.com/elastic/ingest-dev/issues/8967'
+- file:
+    name: 280519.yaml
+    checksum: ed2fd2da8d79d5d60b4153486a02aded8b0152d9
+  type: enhancement
+  title: Show `kill-process` and `suspend-process` action results in console and history
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/280519
+- file:
+    name: 281324.yaml
+    checksum: 18fc5fcbe7b5a2d78cd1b5f33db6b3233950da89
+  type: bug-fix
+  title: Fix enrollment API keys ignoring the expiration parameter
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  description: Optional `expiration` values on `POST /api/fleet/enrollment_api_keys` are validated and forwarded to Elasticsearch. The Fleet UI Create enrollment token modal also includes an Expiration field.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/281324
+  issues:
+  - https://github.com/elastic/kibana/issues/191575
+- file:
+    name: 281261.yaml
+    checksum: 9219eb8b7d0e58fe0fad0dfad8e71c3ecd25a977
+  type: bug-fix
+  title: Fix managed OTLP API keys missing required write privileges
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  description: Managed OTLP API keys created from Fleet now retain `apm/event:write` privileges instead of being privilege-clamped, so OTLP pipelines accept data.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/281261
+  issues:
+  - https://github.com/elastic/kibana/issues/277394
+- file:
+    name: 281558.yaml
+    checksum: fa86a6e476e8d070923a2fcc7ded6ece709b665f
+  type: bug-fix
+  title: Fix stuck loading state after state reset
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/281558
+  issues:
+  - https://github.com/elastic/kibana/issues/281351
+- file:
+    name: 281935.yaml
+    checksum: c09c50d98669fdbafa5450ab4624fc2158b307ac
+  type: feature
+  title: Add Jenkins connector
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/281935
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/18424'
+- file:
+    name: 282026.yaml
+    checksum: 34494b8332785e3bdcd156ed759bd3a51b409c4a
+  type: bug-fix
+  title: Fix tool success rate showing 0% on Agent Builder overview dashboard
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  description: The tool success rate panel on the Agent Builder overview dashboard no longer truncates the rate to 0.0% after a single failure.
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/282026
+- file:
+    name: 281098.yaml
+    checksum: d12c19d69797b4dffccaae1763b184c4bb7132c0
+  type: bug-fix
+  title: Fix highlighting when string formatter has case transforms applied
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  areas:
+  - Discover and ES|QL
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/281098
+  issues:
+  - https://github.com/elastic/kibana/issues/263991
+- file:
+    name: 280518.yaml
+    checksum: 0dcc68cfd831ce34394d8ec88b0340e2d43d649a
+  type: feature
+  title: Add Databricks v2 connector
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  areas:
+  - Alerting and reporting
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/280518
+- file:
+    name: 281407.yaml
+    checksum: 97c56d61ea1fc3738016b114e791dcc9f8264a2f
+  type: bug-fix
+  title: Fix missing "Run Osquery" action in the alert flyout
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  description: The "Run Osquery" menu item is available again in the "Take action" dropdown in the alert flyout.
+  prs:
+  - https://github.com/elastic/kibana/pull/281407
+- file:
+    name: 281295.yaml
+    checksum: f4690b9fa026636d222eba702c0546ef1090fce8
+  type: bug-fix
+  title: Fix Fleet OTel metrics data streams missing time series index mode
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  description: Fleet-managed OpenTelemetry metrics data streams for integration packages now use time series index mode (`time_series`) by default.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/281295
+- file:
+    name: 281411.yaml
+    checksum: 8111f6206f1f07046479a057d5c2fc2226dae10f
+  type: bug-fix
+  title: Fix Observability AI Assistant crashing Kibana on chat errors
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  description: Non-streaming chat/complete failures now return an HTTP error response instead of terminating the Kibana Node.js process.
+  prs:
+  - https://github.com/elastic/kibana/pull/281411
+- file:
+    name: 278510.yaml
+    checksum: fd30d0f810a95784460668ef26e3036b2590400d
+  type: enhancement
+  title: Generate request body autocomplete rules from the Elasticsearch specification
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/278510
+  issues:
+  - https://github.com/elastic/kibana/issues/160533
+- file:
+    name: 275226.yaml
+    checksum: f06924e75525072244cb2ef4ac2b89e7b8bf103e
+  type: feature
+  title: Add Workday connector
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  areas:
+  - Alerting and reporting
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/275226
+  issues:
+  - '# PRIVATE: https://github.com/elastic/search-team/issues/14566'
+- file:
+    name: 272795.yaml
+    checksum: 098d2e67ad5edfedd7133cba5ccb1e3c57eea1fa
+  type: enhancement
+  title: Add issue context to error sample details
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/272795
+- file:
+    name: 281343.yaml
+    checksum: 0c1d21a4acc089d130551e0961914963ef796c9d
+  type: bug-fix
+  title: Fix date nanos formatter ignoring `dateFormat` for numeric values
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/281343
+  issues:
+  - https://github.com/elastic/kibana/issues/281342
+- file:
+    name: 281142.yaml
+    checksum: dd794760ced19dbe3b3806e647396937a3874ca1
+  type: feature
+  title: Add Rootly connector
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/281142
+- file:
+    name: 281816.yaml
+    checksum: b0fd8303e3e5f56b2b4dfdb24dacf466df8fa447
+  type: feature
+  title: Add Dynatrace connector
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/281816
+- file:
+    name: 281786.yaml
+    checksum: 93fd8d5f662b7b08cf4f1f63103817e8ad7d4ccd
+  type: bug-fix
+  title: Fix Lens panels failing after duplicating ad-hoc data views
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  description: Duplicating a Lens panel backed by a form-based ad-hoc data view and then modifying the data view (for example renaming it or adding a runtime field) no longer causes the panel to fail to load from colliding ad-hoc data view IDs.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/281786
+- file:
+    name: 281155.yaml
+    checksum: e31ebc16dce97e6e762fee847c842de975330287
+  type: bug-fix
+  title: Fix `(null)` filter labels when viewing connector logs
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/281155
+- file:
+    name: 280115.yaml
+    checksum: 75156e366ae2b07fb8b2e841f83c8242e41c3b50
+  type: feature
+  title: Add Ansible Control Server connector for AWX/Controller jobs
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/280115
+- file:
+    name: 281092.yaml
+    checksum: 3315e2b70da13d7771cd6ec6a1c1f289bb3c6c43
+  type: bug-fix
+  title: Fix Fleet Agents page showing "Add Fleet Server" for healthy servers
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  description: When Fleet Server agents use versioned policy IDs, setup readiness no longer reports a missing Fleet Server, so the Agents page shows the agent list instead of the onboarding screen.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/281092
+- file:
+    name: 281319.yaml
+    checksum: af095c3a78a6bcc7182ca49d939b35ab0359a33c
+  type: enhancement
+  title: Add `discover:defaultEsqlQuery` advanced setting to override default ES|QL query
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/281319
+  issues:
+  - https://github.com/elastic/kibana/issues/281180
+- file:
+    name: 281437.yaml
+    checksum: c9d6d22c58095ca06705b3925a549616dddd0b15
+  type: bug-fix
+  title: Fix PromQL queries with variables in ES|QL
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/281437
+- file:
+    name: 281336.yaml
+    checksum: 6c5aa4c2eb8dfd5de6ef0080ff6cc963798d1798
+  type: bug-fix
+  title: Fix geo point degrees minutes seconds format for near-zero coordinates
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  description: Near-zero latitude or longitude values no longer format incorrectly in the geo point degrees minutes seconds field format (for example as a full degree off).
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/281336
+  issues:
+  - https://github.com/elastic/kibana/issues/281335
+- file:
+    name: 270769.yaml
+    checksum: 8556e74932f1ab3f15be859284f2275e98dcf14c
+  type: feature
+  title: Add API to ingest external alerts into alerting
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  description: External monitoring systems can push alert events into alerting so they appear in the same episode lifecycle, UI, and action policies as Elastic-produced alerts, without creating a Kibana rule.
+  prs:
+  - https://github.com/elastic/kibana/pull/270769
+- file:
+    name: 280854.yaml
+    checksum: 7ef6ae0f6866c6ed0fa95ae9ebec8a1772da694d
+  type: feature
+  title: Enable Kubernetes connector for workflows
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/280854
+- file:
+    name: 281195.yaml
+    checksum: dbb6a9fe4916429309a56f1106c094b2d3cefced
+  type: bug-fix
+  title: Fix agent policy filter hiding agents on versioned policies
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  description: The Agents list policy filter now matches agents assigned to versioned policy IDs, so filtering by a base policy no longer returns an empty list.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/281195
+  issues:
+  - https://github.com/elastic/kibana/issues/281093
+- file:
+    name: 280546.yaml
+    checksum: 7dd5b9d8ade07845e59cc2c93ed07cbe093f03c9
+  type: bug-fix
+  title: Fix loss of custom names on ad-hoc form-based data views
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  description: Fixes the Lens as-code API path dropping the custom display name of inline (ad-hoc) data views. The name is now preserved end-to-end.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/280546
+- file:
+    name: 281028.yaml
+    checksum: d3592492f5fe71e7d5092ae5dd89839eb22789c6
+  type: bug-fix
+  title: Fix "Add integration" navigation flashing into the Fleet app
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  description: Clicking "Add integration" from the Integrations app now stays under `/app/integrations` instead of switching into Fleet and flashing the layout.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/281028
+  - https://github.com/elastic/kibana/pull/281493
+  issues:
+  - https://github.com/elastic/kibana/issues/279108
+- file:
+    name: 281696.yaml
+    checksum: 1a65b0aad494bf7214af7d63a32c8585f9c8a5a4
+  type: bug-fix
+  title: Fix execution highlight in graph view on branching scenarios
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/281696
+- file:
+    name: 281854.yaml
+    checksum: fe68a0464fa1b121ae22d662caef1689a825299f
+  type: bug-fix
+  title: Fix timestamp selection in the alerting rule query sandbox
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  description: You can change the timestamp field in the alerting rule query sandbox after the first selection.
+  prs:
+  - https://github.com/elastic/kibana/pull/281854
+  issues:
+  - https://github.com/elastic/kibana/issues/281806
+- file:
+    name: 281141.yaml
+    checksum: a78f6b56e93a8679ee287c118ff47acd4700088d
+  type: feature
+  title: Add Grafana connector
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/281141
+- file:
+    name: 281927.yaml
+    checksum: d0c125ec7b6059730fd018cead32ee7c1e744075
+  type: feature
+  title: Add Buildkite connector
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/281927
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/18423'
+- file:
+    name: 281474.yaml
+    checksum: 9fb67b09c91613ede08fc2efb67d55f1c1b7f88a
+  type: bug-fix
+  title: Fix workflow runs failing with org and global UIAM API keys
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  description: Scheduling workflow Task Manager tasks now clones API keys so org/global UIAM credentials (`essu_...`) no longer cause 500 errors when running workflows.
+  prs:
+  - https://github.com/elastic/kibana/pull/281474
+- file:
+    name: 281136.yaml
+    checksum: 1233d5bf69cd4a12539989fe4de87c067bc0d416
+  type: feature
+  title: Add Sentry connector
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/281136
+- file:
+    name: 281279.yaml
+    checksum: ff950205eebc34ff2c0f581eb3c75d754db24875
+  type: enhancement
+  title: Add Supabase and Vercel endpoints to the OpenTelemetry tab
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/281279
+  issues:
+  - '# PRIVATE: https://github.com/elastic/observability-dev/issues/5875'
+  - '# PRIVATE: https://github.com/elastic/observability-dev/issues/5908'
+- file:
+    name: 279558.yaml
+    checksum: 4963e78a0274f9fc09b32f21fd2e268e091ea717
+  type: feature
+  title: Add Monday.com v2 connector
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/279558
+- file:
+    name: 281412.yaml
+    checksum: 5c9d179706d995497e2f955e54567916e1283b12
+  type: enhancement
+  title: Add media sources to content security policy configuration
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  description: You can set `csp.media_src` in `kibana.yml` to control which origins may load media under the content security policy `media-src` directive.
+  areas:
+  - Kibana platform
+  prs:
+  - https://github.com/elastic/kibana/pull/281412
+- file:
+    name: 281486.yaml
+    checksum: 8a267d02dd458c9922f4f818b1cdeaedd6b56019
+  type: enhancement
+  title: Add support for `??params` in PromQL
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/281486
+- file:
+    name: 281367.yaml
+    checksum: 57c23e76dfbef74b2d3eaab99a2bb19d8bf65f02
+  type: bug-fix
+  title: Fix null dates showing `-` instead of `(null)` in server CSV exports
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/281367
+- file:
+    name: 281166.yaml
+    checksum: b2cb5ff6dd30495db6d7addda8d8eeffc308324c
+  type: enhancement
+  title: Add conversation title to traces
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/281166
+- file:
+    name: 276674.yaml
+    checksum: 11b4d7bf6eabd12c9fbadd544847d5d141ac3697
+  type: enhancement
+  title: Add `opentelemetry-javaagent` as a valid OTel Java agent name (3.0+)
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/276674
+- file:
+    name: 281075.yaml
+    checksum: 51b5f6566a6bd1781e3084fd2bd8a8ab66429c2d
+  type: bug-fix
+  title: Fix missing audit events when bulk editing detection rules
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  description: Operations such as attaching or detaching shared exception lists on the "Manage Rules" screen, and other bulk rule edits, now emit per-rule audit write events in the Kibana audit log on success.
+  prs:
+  - https://github.com/elastic/kibana/pull/281075
+  issues:
+  - https://github.com/elastic/kibana/issues/278133
+  - https://github.com/elastic/kibana/issues/280321
+- file:
+    name: 280074.yaml
+    checksum: dfecbe3ce5c391798c42b8576eb79151aac4d48d
+  type: feature
+  title: Add Argo CD connector for GitOps application management
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/280074
+- file:
+    name: 281059.yaml
+    checksum: 19de385395b659de1c40a3cfb648a727efb98901
+  type: bug-fix
+  title: Fix Fleet rewriting unchanged preconfigured proxies on every setup
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  description: Preconfigured Fleet proxies were treated as changed on every setup run, which unnecessarily bumped dependent agent policies. Unchanged proxies are no longer rewritten.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/281059
+  issues:
+  - https://github.com/elastic/kibana/issues/275879
+- file:
+    name: 281079.yaml
+    checksum: fbe22d494bc0837287167444b745e807a5ada22f
+  type: bug-fix
+  title: Fix ad hoc data view resolution for XY annotation layers
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  description: Fixed an issue where Visualizations with annotation layers backed by an ad hoc data view could not be read back through the new Visualization API.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/281079
+  issues:
+  - https://github.com/elastic/kibana/issues/280977
+- file:
+    name: 281468.yaml
+    checksum: 7f4ebcde13625ba31e90bedabcfd44f09a050d21
+  type: bug-fix
+  title: Fix bulk disable leaving executor tasks running
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  description: Fixed a bug where bulk-disabling alerting rules would mark them as disabled in the UI while their background tasks kept running.
+  prs:
+  - https://github.com/elastic/kibana/pull/281468
+  issues:
+  - https://github.com/elastic/kibana/issues/281457
+- file:
+    name: 276710.yaml
+    checksum: c2fd209cc5a2f9ec208a12644b55dc0707fdc999
+  type: bug-fix
+  title: Fix query rules and synonym APIs accepting invalid resource IDs
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  description: Path parameters such as `ruleset_id`, `rule_id`, and synonym set IDs must match `[a-zA-Z0-9_-]+` (maximum 512 characters). Invalid IDs now return HTTP 400 before Elasticsearch is called.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/276710
+- file:
+    name: 282100.yaml
+    checksum: 6db7aabdff563d4fc74cf320d32b40314094cb72
+  type: bug-fix
+  title: Fix dashboards list failing when `savedObjects:listingLimit` exceeds 1000
+  products:
+  - product: cloud-serverless
+    target: 2026-08-07
+  - product: kibana
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/282100
+  issues:
+  - https://github.com/elastic/kibana/issues/281972

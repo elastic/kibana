@@ -60,6 +60,15 @@ export interface RunFullResetDeps {
    * obvious.
    */
   onProgress?: (info: { phase: 'cases' | 'activity' | 'attachments'; processed: number }) => void;
+  /**
+   * Optional cooperative-cancellation signal from Task Manager, threaded
+   * into each surface runner. When aborted, each in-flight walk throws at
+   * its next page boundary; per-surface isolation captures the abort as
+   * that surface's `*Error`, and its cursor is left unseeded so the next
+   * periodic tick re-walks it. A reset cancelled part-way therefore leaves
+   * the indices partially populated and self-heals on the next tick.
+   */
+  signal?: AbortSignal;
   logger: Logger;
 }
 
@@ -130,6 +139,7 @@ export async function runFullReset({
   intervalMinutes,
   pageDelayMs,
   onProgress,
+  signal,
   logger,
 }: RunFullResetDeps): Promise<RunFullResetResult> {
   // Walk the three surfaces CONCURRENTLY. They write to independent indices
@@ -162,6 +172,7 @@ export async function runFullReset({
           logger,
           lastRunAt: undefined,
           pageDelayMs,
+          signal,
           // Wrap the surface-agnostic runner callback to attach a phase tag.
           // Keeps the runners themselves unaware of which surface they're
           // serving.
@@ -185,6 +196,7 @@ export async function runFullReset({
           logger,
           lastRunAt: undefined,
           pageDelayMs,
+          signal,
           onPageComplete: ({ processed }) => onProgress?.({ phase: 'activity', processed }),
         });
         return { result, error: null };
@@ -208,6 +220,7 @@ export async function runFullReset({
           logger,
           lastRunAt: undefined,
           pageDelayMs,
+          signal,
           onPageComplete: ({ processed }) => onProgress?.({ phase: 'attachments', processed }),
         });
         return { result, error: null };

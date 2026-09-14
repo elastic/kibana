@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import { MemoryRouter } from 'react-router-dom';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';

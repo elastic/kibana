@@ -8,6 +8,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
+import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowApi } from './workflows_api';
 
 const VERSION = '2023-10-31';
@@ -309,6 +310,27 @@ describe('WorkflowApi', () => {
     });
   });
 
+  describe('searchExecutions', () => {
+    it('should call GET /api/workflows/workflow/executions with structured params', async () => {
+      const params = {
+        kql: 'status: completed',
+        statuses: [ExecutionStatus.COMPLETED],
+        sortField: 'startedAt',
+        sortOrder: 'desc' as const,
+        startedAfter: 'now-15m',
+        page: 1,
+        size: 25,
+        trackTotalHits: true,
+      };
+      await api.searchExecutions(params);
+
+      expect(http.get).toHaveBeenCalledWith('/api/workflows/workflow/executions', {
+        query: params,
+        version: VERSION,
+      });
+    });
+  });
+
   describe('getWorkflowExecutions', () => {
     it('should call GET /api/workflows/workflow/{id}/executions with query', async () => {
       const params = {
@@ -391,6 +413,15 @@ describe('WorkflowApi', () => {
 
       expect(http.post).toHaveBeenCalledWith('/api/workflows/executions/exec-1/resume', {
         body: JSON.stringify({ input }),
+        version: VERSION,
+      });
+    });
+
+    it('should include stepExecutionId when provided', async () => {
+      await api.resumeExecution('exec-1', { input: { answer: 'yes' }, stepExecutionId: 'step-1' });
+
+      expect(http.post).toHaveBeenCalledWith('/api/workflows/executions/exec-1/resume', {
+        body: JSON.stringify({ input: { answer: 'yes' }, stepExecutionId: 'step-1' }),
         version: VERSION,
       });
     });

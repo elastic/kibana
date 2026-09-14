@@ -11,8 +11,9 @@ import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { act, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import Router from 'react-router-dom';
-import { emptySloDefinitionList, sloDefinitionList } from '../../data/slo/slo';
-import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
+import { useFetchSloTemplates } from '../../hooks/use_fetch_slo_templates';
+import { useFetchSloTemplateTags } from '../../hooks/use_fetch_slo_template_tags';
+import { useHasSlos } from '../../hooks/use_has_slos';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
@@ -31,17 +32,28 @@ jest.mock('react-router-dom', () => ({
 jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../hooks/use_kibana');
 jest.mock('../../hooks/use_license');
-jest.mock('../../hooks/use_fetch_slo_list');
-jest.mock('../../hooks/use_fetch_slo_definitions');
+jest.mock('../../hooks/use_has_slos');
 jest.mock('../../hooks/use_permissions');
+jest.mock('../../hooks/use_fetch_slo_templates');
+jest.mock('../../hooks/use_fetch_slo_template_tags');
+jest.mock('@elastic/eui-illustrations', () => ({
+  monitoringLogs: {
+    id: 'monitoringLogs',
+    title: 'Monitoring logs',
+    light: '<svg></svg>',
+    dark: '<svg></svg>',
+  },
+}));
 
 const HeaderMenuPortalMock = HeaderMenuPortal as jest.Mock;
 HeaderMenuPortalMock.mockReturnValue(<div>Portal node</div>);
 
 const useKibanaMock = useKibana as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
-const useFetchSloDefinitionsMock = useFetchSloDefinitions as jest.Mock;
+const useHasSlosMock = useHasSlos as jest.Mock;
 const usePermissionsMock = usePermissions as jest.Mock;
+const useFetchSloTemplatesMock = useFetchSloTemplates as jest.Mock;
+const useFetchSloTemplateTagsMock = useFetchSloTemplateTags as jest.Mock;
 
 const mockNavigate = jest.fn();
 
@@ -83,6 +95,16 @@ describe('SLOs Welcome Page', () => {
       location: { pathname: '/slos/welcome', search: '', hash: '', state: undefined },
     });
     mockKibana();
+    useFetchSloTemplatesMock.mockReturnValue({
+      data: { total: 0, page: 1, perPage: 20, results: [] },
+      isLoading: false,
+      isError: false,
+    });
+    useFetchSloTemplateTagsMock.mockReturnValue({
+      data: { tags: [] },
+      isLoading: false,
+      isError: false,
+    });
     jest
       .spyOn(Router, 'useLocation')
       .mockReturnValue({ pathname: '/slos/welcome', search: '', state: '', hash: '' });
@@ -90,10 +112,7 @@ describe('SLOs Welcome Page', () => {
 
   describe('when the incorrect license is found', () => {
     it('renders the welcome message with subscription buttons', async () => {
-      useFetchSloDefinitionsMock.mockReturnValue({
-        isLoading: false,
-        data: emptySloDefinitionList,
-      });
+      useHasSlosMock.mockReturnValue({ hasSlos: false, isLoading: false, isError: false });
       useLicenseMock.mockReturnValue({ hasAtLeast: () => false });
       usePermissionsMock.mockReturnValue({
         isLoading: false,
@@ -127,10 +146,7 @@ describe('SLOs Welcome Page', () => {
 
     describe('when loading is done and no results are found', () => {
       beforeEach(() => {
-        useFetchSloDefinitionsMock.mockReturnValue({
-          isLoading: false,
-          data: emptySloDefinitionList,
-        });
+        useHasSlosMock.mockReturnValue({ hasSlos: false, isLoading: false, isError: false });
       });
 
       it('disables the create slo button when no write capabilities', async () => {
@@ -151,6 +167,9 @@ describe('SLOs Welcome Page', () => {
         const createNewSloButton = screen.queryByTestId('o11ySloListWelcomePromptCreateSloButton');
 
         expect(createNewSloButton).toBeDisabled();
+        expect(
+          screen.queryByTestId('o11ySloListWelcomePromptCreateFromTemplateButton')
+        ).toBeDisabled();
       });
 
       it('disables the create slo button when no cluster permissions capabilities', async () => {
@@ -193,14 +212,36 @@ describe('SLOs Welcome Page', () => {
         });
 
         await waitFor(() => {
-          expect(mockNavigate).toBeCalledWith(paths.sloCreate);
+          expect(mockNavigate).toHaveBeenCalledWith(paths.sloCreate);
         });
+      });
+
+      it('should display a Create from template button which should open the templates flyout', async () => {
+        usePermissionsMock.mockReturnValue({
+          isLoading: false,
+          data: {
+            hasAllWriteRequested: true,
+            hasAllReadRequested: true,
+          },
+        });
+
+        await act(async () => {
+          render(<SlosWelcomePage />);
+        });
+
+        expect(screen.queryByTestId('sloTemplatesFlyout')).toBeFalsy();
+
+        await act(async () => {
+          screen.getByTestId('o11ySloListWelcomePromptCreateFromTemplateButton').click();
+        });
+
+        expect(screen.getByTestId('sloTemplatesFlyout')).toBeTruthy();
       });
     });
 
     describe('when loading is done and results are found', () => {
       beforeEach(() => {
-        useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: sloDefinitionList });
+        useHasSlosMock.mockReturnValue({ hasSlos: true, isLoading: false, isError: false });
         usePermissionsMock.mockReturnValue({
           isLoading: false,
           data: {

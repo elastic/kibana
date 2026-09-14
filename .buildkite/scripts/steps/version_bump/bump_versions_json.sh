@@ -38,10 +38,14 @@ update_minor_versions_json() {
     '(.versions[] | select(.branch == "main")).version = $nextVersion' \
     versions.json > versions.json.tmp && mv versions.json.tmp versions.json
 
-  # 2. Insert a new release entry for the new branch (after main)
-  jq --arg version "$NEW_VERSION" --arg branch "$BRANCH" \
-    '.versions |= [.[0]] + [{"version": $version, "branch": $branch, "branchType": "release"}] + .[1:]' \
-    versions.json > versions.json.tmp && mv versions.json.tmp versions.json
+  # 2. Insert a new release entry for the new branch (after main), skipping if already present
+  if jq -e --arg branch "$BRANCH" '.versions[] | select(.branch == $branch)' versions.json > /dev/null 2>&1; then
+    echo "Branch '$BRANCH' already present in versions.json — skipping insert"
+  else
+    jq --arg version "$NEW_VERSION" --arg branch "$BRANCH" \
+      '.versions |= [.[0]] + [{"version": $version, "branch": $branch, "branchType": "release"}] + .[1:]' \
+      versions.json > versions.json.tmp && mv versions.json.tmp versions.json
+  fi
 
   # 3. Prune oldest same-major minor if there are more than 2 release entries for this major
   local same_major_count
@@ -68,10 +72,14 @@ update_minor_versions_json() {
 }
 
 update_backportrc_json() {
-  # 1. Add the new branch to targetBranchChoices right after "main"
-  jq --arg branch "$BRANCH" \
-    '.targetBranchChoices |= [.[0]] + [$branch] + .[1:]' \
-    .backportrc.json > .backportrc.json.tmp && mv .backportrc.json.tmp .backportrc.json
+  # 1. Add the new branch to targetBranchChoices right after "main", skipping if already present
+  if jq -e --arg branch "$BRANCH" '.targetBranchChoices | index($branch)' .backportrc.json > /dev/null 2>&1; then
+    echo "Branch '$BRANCH' already present in targetBranchChoices — skipping insert"
+  else
+    jq --arg branch "$BRANCH" \
+      '.targetBranchChoices |= [.[0]] + [$branch] + .[1:]' \
+      .backportrc.json > .backportrc.json.tmp && mv .backportrc.json.tmp .backportrc.json
+  fi
 
   # 2. Update branchLabelMapping: replace the old main version pattern with the next dev version
   #    Match the key that maps to "main" and looks like "^v9.4.0$" (not the generic regex pattern)

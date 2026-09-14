@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiSelectable, EuiPopoverTitle } from '@elastic/eui';
+import { EuiSelectable, EuiPopoverTitle, EuiIcon } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { css } from '@emotion/react';
 import * as i18n from './translations';
@@ -42,14 +42,29 @@ export function InlineFilterPopover({
 }: InlineFilterPopoverProps) {
   const selectableOptions: EuiSelectableOption[] = useMemo(
     () =>
-      options.map((o) => ({
-        key: o.value,
-        label: o.label,
-        prepend: o.prepend,
-        checked: selectedValues.includes(o.value) ? ('on' as const) : undefined,
-        'data-test-subj': `${dataTestSubj}-option-${o.value}`,
-      })),
-    [options, selectedValues, dataTestSubj]
+      options.map((o) => {
+        const checked = selectedValues.includes(o.value);
+        return {
+          key: o.value,
+          label: o.label,
+          prepend: o.prepend,
+          // Multi-select hides the native checkbox indicator (`showIcons: false` below) in favor of
+          // the highlighted-row style used by the single-select filters, so we surface selection with
+          // a trailing checkmark to match the single-select indicator.
+          append:
+            !singleSelect && checked ? (
+              <EuiIcon
+                type="check"
+                color="primary"
+                data-test-subj={`${dataTestSubj}-option-${o.value}-check`}
+                aria-label={i18n.INLINE_FILTER_POPOVER_ARIA_LABEL}
+              />
+            ) : undefined,
+          checked: checked ? ('on' as const) : undefined,
+          'data-test-subj': `${dataTestSubj}-option-${o.value}`,
+        };
+      }),
+    [options, selectedValues, singleSelect, dataTestSubj]
   );
 
   const handleChange = useCallback(
@@ -84,6 +99,9 @@ export function InlineFilterPopover({
       listProps={{
         onFocusBadge: false,
         paddingSize: 's',
+        // Multi-select relies on the highlighted-row style (and our own checkmark) rather than
+        // native checkbox indicators, matching the single-select filters.
+        showIcons: singleSelect,
       }}
       emptyMessage={emptyMessage}
       aria-label={i18n.INLINE_FILTER_POPOVER_ARIA_LABEL}

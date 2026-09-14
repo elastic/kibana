@@ -9,7 +9,7 @@ import React, { useCallback, useContext, useState } from 'react';
 
 import { EuiButton, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux-v7';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CLIENT_ALERT_TYPES } from '../../../../../common/constants/uptime_alerts';
 import {

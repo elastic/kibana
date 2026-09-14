@@ -20,7 +20,6 @@
   }
 
   .canvasPageManager__pageList {
-    @include euiScrollBar;
     display: flex;
     overflow-x: auto;
     overflow-y: hidden;
@@ -33,8 +32,6 @@
 
   .canvasPageManager__addPage {
     width: $euiSizeXXL + $euiSize;
-    background: $euiColorPrimary;
-    color: $euiColorPlainLight;
     opacity: 0;
     animation: buttonPop $euiAnimSpeedNormal $euiAnimSlightResistance;
     animation-fill-mode: forwards;
@@ -50,49 +47,24 @@
 
     &:focus,
     &-isActive {
-      background-color: transparentize(darken($euiColorLightestShade, 30%), .5);
       outline: none;
       text-decoration: none;
-    }
-
-    &-isActive:focus {
-      .canvasPageManager__pagePreview {
-        outline-color: $euiColorVis0;
-      }
     }
 
     &:hover,
     &:focus {
       text-decoration: none;
 
-      .canvasPageManager__pagePreview {
-        @include euiBottomShadowMedium;
-      }
-
       .canvasPageManager__controls {
         visibility: visible;
         opacity: 1;
       }
     }
-
-    &-isActive {
-      .canvasPageManager__pagePreview {
-        @include euiBottomShadowMedium;
-        outline: $euiBorderThick;
-        outline-color: $euiColorDarkShade;
-      }
-    }
-  }
-
-  .canvasPageManager__pageNumber {
-    color: $euiColorDarkShade;
   }
 
   .canvasPageManager__pagePreview {
-    @include euiBottomShadowSmall;
     position: relative;
     overflow: hidden;
-    color: $euiTextColor;
 
     .canvasPositionable {
       position: absolute;
@@ -107,7 +79,6 @@
     opacity: 0;
     transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance;
     transition-delay: $euiAnimSpeedNormal;
-    background: transparentize($euiColorPlainLight, .5);
     border-radius: $euiBorderRadius;
   }
 }

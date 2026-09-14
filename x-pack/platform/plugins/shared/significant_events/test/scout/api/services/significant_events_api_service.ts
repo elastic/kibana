@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { KbnClient, ScoutLogger } from '@kbn/scout/src/common';
 import { measurePerformanceAsync } from '@kbn/scout/src/common';
 import { COMMON_API_HEADERS } from '../fixtures/constants';
-import { SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from '../../../../common';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '../../../../common';
 
 export interface SignificantEventsTestApiService {
   runSignificantEventsDiscovery: () => Promise<{ executionId: string }>;
@@ -20,8 +19,6 @@ export interface SignificantEventsTestApiService {
   }>;
   enableSignificantEvents: () => Promise<void>;
   disableSignificantEvents: () => Promise<void>;
-  enableMemory: () => Promise<void>;
-  disableMemory: () => Promise<void>;
 }
 
 export function getSignificantEventsTestApiService({
@@ -31,15 +28,30 @@ export function getSignificantEventsTestApiService({
   kbnClient: KbnClient;
   log: ScoutLogger;
 }): SignificantEventsTestApiService {
+  // Suites should rely on global.setup.ts / global.teardown.ts for the default availability
+  // override. These helpers are only for intentional mid-test toggles (e.g. asserting a 403 when
+  // the flag is off) — do not wrap an entire describe in enable/disable, since that races with
+  // sibling suites if Playwright ever runs with workers > 1.
+  const setAvailability = async (enabled: boolean) => {
+    await kbnClient.request({
+      path: '/internal/core/_settings',
+      method: 'PUT',
+      headers: COMMON_API_HEADERS,
+      body: {
+        'feature_flags.overrides': {
+          [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: enabled,
+        },
+      },
+    });
+  };
+
   return {
     async enableSignificantEvents() {
       await measurePerformanceAsync(
         log,
         'significantEventsTestApi.enableSignificantEvents',
         async () => {
-          await kbnClient.uiSettings.update({
-            [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
-          });
+          await setAvailability(true);
         }
       );
     },
@@ -49,41 +61,9 @@ export function getSignificantEventsTestApiService({
         log,
         'significantEventsTestApi.disableSignificantEvents',
         async () => {
-          await kbnClient.uiSettings.update({
-            [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
-          });
+          await setAvailability(false);
         }
       );
-    },
-
-    async enableMemory() {
-      await measurePerformanceAsync(log, 'significantEventsTestApi.enableMemory', async () => {
-        await kbnClient.request({
-          path: '/internal/core/_settings',
-          method: 'PUT',
-          headers: COMMON_API_HEADERS,
-          body: {
-            'feature_flags.overrides': {
-              [SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG]: true,
-            },
-          },
-        });
-      });
-    },
-
-    async disableMemory() {
-      await measurePerformanceAsync(log, 'significantEventsTestApi.disableMemory', async () => {
-        await kbnClient.request({
-          path: '/internal/core/_settings',
-          method: 'PUT',
-          headers: COMMON_API_HEADERS,
-          body: {
-            'feature_flags.overrides': {
-              [SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG]: false,
-            },
-          },
-        });
-      });
     },
 
     async runSignificantEventsDiscovery() {

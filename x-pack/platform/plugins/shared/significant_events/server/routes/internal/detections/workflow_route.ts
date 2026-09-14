@@ -7,38 +7,86 @@
 
 import { z } from '@kbn/zod/v4';
 import type { QueryLink } from '@kbn/significant-events-schema';
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import {
+  MIN_SIG_EVENTS_CHANGE_POINT_BUCKETS,
+  MAX_SIG_EVENTS_CHANGE_POINT_BUCKETS,
+  STREAMS_API_PRIVILEGES,
+} from '../../../../common/constants';
+import { StatusError } from '../../../lib/errors/status_error';
 import { createSignificantEventsTracedEsClient } from '../../../lib/significant_events/create_significant_events_traced_es_client';
 import {
-  CRITICAL_RULE_INTERVAL,
-  DEFAULT_RULE_INTERVAL,
-  getRuleDetectionSchedule,
-  scheduleIntervalForQuery,
-  type RuleDetectionSchedule,
+  CRITICAL_ANALYSIS_PROFILE,
+  DEFAULT_ANALYSIS_PROFILE,
+  analysisProfileForQuery,
+  getAnalysisProfileConfig,
+  getDurationMinutes,
+  getIdleGateLookback,
+  parseLookbackMinutes,
+  type AnalysisProfileConfig,
+  type AnalysisProfileId,
 } from '../../../lib/significant_events/rules/schedule';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 
-interface RuleScheduleGroup {
-  schedule: RuleDetectionSchedule;
+interface AnalysisProfileGroup {
+  config: AnalysisProfileConfig;
   queryLinks: QueryLink[];
 }
 
-const groupQueryLinksByRuleSchedule = (queryLinks: QueryLink[]): RuleScheduleGroup[] => {
-  const groups = new Map<number, RuleScheduleGroup>();
+const groupQueryLinksByAnalysisProfile = (queryLinks: QueryLink[]): AnalysisProfileGroup[] => {
+  const groups = new Map<AnalysisProfileId, AnalysisProfileGroup>();
 
   for (const queryLink of queryLinks) {
-    const schedule = getRuleDetectionSchedule(queryLink.query);
-    const group = groups.get(schedule.interval_minutes) ?? { schedule, queryLinks: [] };
+    const config = getAnalysisProfileConfig(queryLink.query);
+    const group = groups.get(config.profile) ?? { config, queryLinks: [] };
     group.queryLinks.push(queryLink);
-    groups.set(schedule.interval_minutes, group);
+    groups.set(config.profile, group);
   }
 
   return Array.from(groups.values());
 };
 
-const countRulesForInterval = (queryLinks: QueryLink[], interval: string): number =>
-  queryLinks.filter((queryLink) => scheduleIntervalForQuery(queryLink.query) === interval).length;
+const countRulesForProfile = (queryLinks: QueryLink[], profile: AnalysisProfileId): number =>
+  queryLinks.filter((queryLink) => analysisProfileForQuery(queryLink.query) === profile).length;
+
+/** Parse the Detection workflow lookback (`now-<N>m`), surfacing malformed input as 400. */
+function assertDetectionLookback(lookback: string): number {
+  try {
+    return parseLookbackMinutes(lookback);
+  } catch (err) {
+    throw new StatusError(err instanceof Error ? err.message : String(err), 400);
+  }
+}
+
+/**
+ * Validate Detection workflow lookback / bucketInterval: whole positive minutes,
+ * lookback form `now-<N>m`, and enough outer buckets for change_point (≥22).
+ */
+function assertDetectionAnalysisWindow(lookback: string, bucketInterval: string): void {
+  const lookbackMinutes = assertDetectionLookback(lookback);
+  let bucketMinutes: number;
+  try {
+    bucketMinutes = getDurationMinutes(bucketInterval);
+  } catch (err) {
+    throw new StatusError(err instanceof Error ? err.message : String(err), 400);
+  }
+  if (lookbackMinutes % bucketMinutes !== 0) {
+    throw new StatusError(
+      `Detection lookback (${lookback}) must be an exact multiple of bucketInterval (${bucketInterval})`,
+      400
+    );
+  }
+  const bucketCount = lookbackMinutes / bucketMinutes;
+  if (
+    bucketCount < MIN_SIG_EVENTS_CHANGE_POINT_BUCKETS ||
+    bucketCount > MAX_SIG_EVENTS_CHANGE_POINT_BUCKETS
+  ) {
+    throw new StatusError(
+      `Detection lookback (${lookback}) / bucketInterval (${bucketInterval}) must yield between ${MIN_SIG_EVENTS_CHANGE_POINT_BUCKETS} and ${MAX_SIG_EVENTS_CHANGE_POINT_BUCKETS} buckets, got ${bucketCount}`,
+      400
+    );
+  }
+}
 
 const countAlertsRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/detections/workflow/_count_alerts',
@@ -46,7 +94,7 @@ const countAlertsRoute = createServerRoute({
     access: 'internal',
     summary: 'Count alerts for the Detection workflow',
     description:
-      'Counts alert or rule-event documents in a lookback window, resolving v1 vs v2 alerts source from advanced settings.',
+      'Counts Alerting v2 signal events in `.rule-events` for the idle gate. The request lookback is the critical analysis duration; the query is widened to the earliest write-time bound across critical and default analysis profiles.',
   },
   security: {
     authz: {
@@ -61,17 +109,23 @@ const countAlertsRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients, server, getSpaceId, logger }) => {
     const scopedClients = await getScopedClients({ request });
-    const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
+    const { scopedClusterClient, licensing } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
+
+    // Same 400-on-malformed contract as the change_point scan route.
+    assertDetectionLookback(params.body.lookback);
 
     const esClient = createSignificantEventsTracedEsClient({
       client: scopedClusterClient.asCurrentUser,
       logger,
     });
     const { alertsReader } = await scopedClients.getSignificantEventsAlertingContext();
+    // Widen past the critical lookback so default-profile activity in the
+    // longer 125m window still keeps the Detection workflow awake.
+    const idleLookback = getIdleGateLookback(params.body.lookback);
     const count = await alertsReader.countAlerts(esClient, {
-      lookback: params.body.lookback,
+      lookback: idleLookback,
       ruleUuid: params.body.ruleUuid,
       spaceId: await getSpaceId(request),
     });
@@ -86,7 +140,7 @@ const changePointScanRoute = createServerRoute({
     access: 'internal',
     summary: 'Run per-rule change_point scan for the Detection workflow',
     description:
-      'Executes the Detection workflow change_point aggregation against the resolved alerts source.',
+      'Executes the Detection workflow change_point aggregation against Alerting v2 signal events in `.rule-events`.',
   },
   security: {
     authz: {
@@ -101,9 +155,11 @@ const changePointScanRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients, server, getSpaceId, telemetry, logger }) => {
     const scopedClients = await getScopedClients({ request });
-    const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
+    const { scopedClusterClient, licensing } = scopedClients;
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
+
+    assertDetectionAnalysisWindow(params.body.lookback, params.body.bucketInterval);
 
     const esClient = createSignificantEventsTracedEsClient({
       client: scopedClusterClient.asCurrentUser,
@@ -116,15 +172,20 @@ const changePointScanRoute = createServerRoute({
     ]);
     const queryLinks = await kiClient.getRuleBackedQueryLinks();
 
+    const defaultConfig = getAnalysisProfileConfig({ severity_score: 0 });
+    const criticalLookback = params.body.lookback;
+    const criticalBucketInterval = params.body.bucketInterval;
+
     const startedAt = Date.now();
     const scanResults = await Promise.all(
-      groupQueryLinksByRuleSchedule(queryLinks).map(({ schedule, queryLinks: groupedLinks }) => {
-        const criticalCadence = schedule.interval_minutes === 1;
+      groupQueryLinksByAnalysisProfile(queryLinks).map(({ config, queryLinks: groupedLinks }) => {
+        const isCritical = config.profile === CRITICAL_ANALYSIS_PROFILE;
         return sigEventsContext.alertsReader.runChangePointScan(
           esClient,
           {
-            lookback: criticalCadence ? params.body.lookback : schedule.lookback,
-            bucketInterval: criticalCadence ? params.body.bucketInterval : schedule.bucket_interval,
+            // Critical uses workflow inputs; default keeps its fixed profile.
+            lookback: isCritical ? criticalLookback : config.lookback,
+            bucketInterval: isCritical ? criticalBucketInterval : config.bucketInterval,
             ruleIds: groupedLinks.map((queryLink) => queryLink.rule_id),
             spaceId,
           },
@@ -136,19 +197,22 @@ const changePointScanRoute = createServerRoute({
     const took = scanResults.reduce((sum, result) => sum + (result.took ?? 0), 0);
     const buckets = scanResults.flatMap((result) => result.by_rule.buckets);
     const aggregations = { by_rule: { buckets } };
-    const criticalRuleCount = countRulesForInterval(queryLinks, CRITICAL_RULE_INTERVAL);
-    const defaultRuleCount = countRulesForInterval(queryLinks, DEFAULT_RULE_INTERVAL);
+    const criticalRuleCount = countRulesForProfile(queryLinks, CRITICAL_ANALYSIS_PROFILE);
+    const defaultRuleCount = countRulesForProfile(queryLinks, DEFAULT_ANALYSIS_PROFILE);
 
     telemetry.trackSignificantEventsDetectionScan({
       took_ms: took,
       duration_ms: durationMs,
+      rules_requested: queryLinks.length,
       rules_scanned: buckets.length,
       critical_rule_count: criticalRuleCount,
       default_rule_count: defaultRuleCount,
-      alerting_engine: sigEventsContext.alertingV2Active ? 'v2' : 'v1',
+      alerting_engine: 'v2',
       alerts_source_index: sigEventsContext.alertsReader.index,
-      lookback: params.body.lookback,
-      bucket_interval: params.body.bucketInterval,
+      lookback: criticalLookback,
+      bucket_interval: criticalBucketInterval,
+      default_lookback: defaultConfig.lookback,
+      default_bucket_interval: defaultConfig.bucketInterval,
       space_id: spaceId,
     });
 

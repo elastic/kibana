@@ -97,7 +97,7 @@ const TOGGLE_ACTIVE_SHADOW =
 
 // Width (px) of the bar's position: relative container below which we switch
 // to the compact "…" pill. Chosen to give the full bar enough room before it
-// starts overlapping the minimap (bottom-left of the canvas).
+// starts overlapping the zoom controls (bottom-left of the canvas).
 const COMPACT_THRESHOLD_PX = 800;
 
 function ViewToggle({
@@ -116,7 +116,7 @@ function ViewToggle({
     },
     {
       id: 'yaml',
-      iconType: 'editorCodeBlock',
+      iconType: 'code',
       label: i18n.translate('workflowsUi.bottomBar.editorViewYaml', { defaultMessage: 'YAML' }),
     },
   ];

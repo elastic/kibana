@@ -19,6 +19,9 @@ import {
   type IdentityFields,
 } from '../../../document_details/shared/utils';
 import type { AttackEntityListEntry } from '../../../../flyout_v2/attack/tools/entities/hooks/use_attack_entities_lists';
+import type { CspInsightLeftPanelSubTab } from '../../../entity_details/shared/components/left_panel/left_panel_header';
+import type { EntityTableLinkRenderer } from '../../../entity_details/shared/components/entity_table/types';
+import type { EntitySectionOverrides } from '../../../document_details/left/components/entities_details';
 
 const resolveUserDisplayForEntities = (
   identityFields: IdentityFields | undefined,
@@ -44,6 +47,30 @@ export interface AttackInsightsRowBaseProps extends AttackEntityListEntry {
    * child via the new flyout system, instead of the (unavailable) expandable-flyout API.
    */
   renderIpLink?: (ip: string) => React.ReactNode;
+  /**
+   * When provided, opens the entity flyout using the v2 system-flyout pattern instead of
+   * the expandable-flyout preview panel. Wire this from the attack Entities tool.
+   */
+  onPreviewEntity?: () => void;
+  /**
+   * When provided, opens the CSP detail panel (alerts / misconfigurations / vulnerabilities)
+   * using the v2 system-flyout pattern. Wire this from the attack Entities tool.
+   */
+  onShowDetailsPanel?: (subTab: CspInsightLeftPanelSubTab) => void;
+  /**
+   * When provided, wraps related-entity cell values in the Related table using this renderer
+   * instead of the v1 PreviewLink. Wire this from the attack Entities tool.
+   */
+  linkRenderer?: EntityTableLinkRenderer;
+  /**
+   * When provided, the row calls this factory with the entity-store-resolved display name and
+   * entity ID, then uses the resulting overrides for onPreviewEntity / onShowDetailsPanel /
+   * linkRenderer. This ensures the flyout callbacks receive the store-resolved identity (not raw
+   * identity fields), which is required for correct alert and insight queries when Entity Store
+   * v2 is on. Takes priority over individually-provided onPreviewEntity / onShowDetailsPanel /
+   * linkRenderer props.
+   */
+  buildEntityOverrides?: (opts: { name: string; entityId?: string }) => EntitySectionOverrides;
 }
 
 /**
@@ -51,7 +78,17 @@ export interface AttackInsightsRowBaseProps extends AttackEntityListEntry {
  * (document fields + entity store) so headers use host.name, not raw EUID / entity.id.
  */
 export const AttackHostInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
-  ({ identityFields, sampleSource, timestamp, scopeId, renderIpLink }) => {
+  ({
+    identityFields,
+    sampleSource,
+    timestamp,
+    scopeId,
+    renderIpLink,
+    onPreviewEntity,
+    onShowDetailsPanel,
+    linkRenderer,
+    buildEntityOverrides,
+  }) => {
     const euidApi = useEntityStoreEuidApi();
 
     const getFieldsData = useMemo(
@@ -80,6 +117,18 @@ export const AttackHostInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
     );
 
     const hostDisplayName = hostEntityFromStore.entityRecord?.entity?.name ?? resolvedHostName;
+    const hostEntityStoreId = hostEntityFromStore.entityRecord?.entity?.id;
+
+    // Must be called before the early return (rules of hooks). When buildEntityOverrides is
+    // provided it uses the store-resolved name/id so callbacks query the same identity as
+    // AlertCountInsight. When null/undefined, the row falls back to the individual props.
+    const resolvedOverrides = useMemo(
+      () =>
+        buildEntityOverrides != null
+          ? buildEntityOverrides({ name: hostDisplayName ?? '', entityId: hostEntityStoreId })
+          : undefined,
+      [buildEntityOverrides, hostDisplayName, hostEntityStoreId]
+    );
 
     if (hostDisplayName == null) {
       return null;
@@ -88,12 +137,14 @@ export const AttackHostInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
     return (
       <HostDetails
         hostName={hostDisplayName}
-        entityId={hostEntityFromStore?.entityRecord?.entity?.id}
+        entityId={hostEntityStoreId}
         timestamp={timestamp}
         scopeId={scopeId}
-        expandedOnFirstRender={false}
         isAttackDetails={true}
         renderIpLink={renderIpLink}
+        onPreviewEntity={resolvedOverrides?.onPreviewEntity ?? onPreviewEntity}
+        onShowDetailsPanel={resolvedOverrides?.onShowDetailsPanel ?? onShowDetailsPanel}
+        linkRenderer={resolvedOverrides?.linkRenderer ?? linkRenderer}
         hostEntityFromStoreResult={hostEntityFromStore}
       />
     );
@@ -106,7 +157,17 @@ AttackHostInsightsRow.displayName = 'AttackHostInsightsRow';
  * One user row for Attack Details entities tab: mirrors {@link EntitiesDetails} user resolution.
  */
 export const AttackUserInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
-  ({ identityFields, sampleSource, timestamp, scopeId, renderIpLink }) => {
+  ({
+    identityFields,
+    sampleSource,
+    timestamp,
+    scopeId,
+    renderIpLink,
+    onPreviewEntity,
+    onShowDetailsPanel,
+    linkRenderer,
+    buildEntityOverrides,
+  }) => {
     const euidApi = useEntityStoreEuidApi();
 
     const getFieldsData = useMemo(
@@ -131,6 +192,18 @@ export const AttackUserInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
     });
 
     const userDisplayName = userEntityFromStore.entityRecord?.entity?.name ?? resolvedUserName;
+    const userEntityStoreId = userEntityFromStore.entityRecord?.entity?.id;
+
+    // Must be called before the early return (rules of hooks). When buildEntityOverrides is
+    // provided it uses the store-resolved name/id so callbacks query the same identity as
+    // AlertCountInsight.
+    const resolvedOverrides = useMemo(
+      () =>
+        buildEntityOverrides != null
+          ? buildEntityOverrides({ name: userDisplayName ?? '', entityId: userEntityStoreId })
+          : undefined,
+      [buildEntityOverrides, userDisplayName, userEntityStoreId]
+    );
 
     if (userDisplayName == null) {
       return null;
@@ -139,12 +212,14 @@ export const AttackUserInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
     return (
       <UserDetails
         userName={userDisplayName}
-        entityId={userEntityFromStore?.entityRecord?.entity?.id}
+        entityId={userEntityStoreId}
         timestamp={timestamp}
         scopeId={scopeId}
-        expandedOnFirstRender={false}
         isAttackDetails={true}
         renderIpLink={renderIpLink}
+        onPreviewEntity={resolvedOverrides?.onPreviewEntity ?? onPreviewEntity}
+        onShowDetailsPanel={resolvedOverrides?.onShowDetailsPanel ?? onShowDetailsPanel}
+        linkRenderer={resolvedOverrides?.linkRenderer ?? linkRenderer}
       />
     );
   }

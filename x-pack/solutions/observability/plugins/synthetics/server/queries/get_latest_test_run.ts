@@ -8,6 +8,7 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Ping } from '../../common/runtime_types';
 import type { SyntheticsEsClient } from '../lib';
+import { getHeartbeatLocationFilter } from '../../common/lib';
 import { getSyntheticsCcsIndex } from '../../common/get_synthetics_indices';
 import { getRangeFilter, SUMMARY_FILTER } from '../../common/constants/client_defaults';
 
@@ -38,9 +39,14 @@ export async function getLatestTestRun<F>({
         filter: [
           SUMMARY_FILTER,
           getRangeFilter({ from, to }),
-          { term: { 'monitor.id': monitorId } },
-          ...(locationLabel ? [{ term: { 'observer.geo.name': locationLabel } }] : []),
-          ...(locationId ? [{ term: { 'observer.name': locationId } }] : []),
+          {
+            bool: {
+              minimum_should_match: 1,
+              should: [{ term: { 'monitor.id': monitorId } }, { term: { config_id: monitorId } }],
+            },
+          },
+          ...getHeartbeatLocationFilter({ field: 'observer.geo.name', value: locationLabel }),
+          ...getHeartbeatLocationFilter({ field: 'observer.name', value: locationId }),
         ] as QueryDslQueryContainer[],
       },
     },

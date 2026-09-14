@@ -14,19 +14,13 @@ jest.mock('./overview_list_section', () => ({
   AlertEpisodeOverviewListSection: jest.fn(() => <div data-test-subj="overviewListSectionStub" />),
 }));
 
-jest.mock('./lifecycle_heatmap_section', () => ({
-  AlertEpisodeLifecycleHeatmapSection: jest.fn(() => (
-    <div data-test-subj="lifecycleHeatmapSectionStub" />
-  )),
-}));
-
 jest.mock('./trend_chart_section', () => ({
   AlertEpisodeTrendChartSection: jest.fn(() => <div data-test-subj="trendChartSectionStub" />),
 }));
 
-jest.mock('./severity_heatmap_section', () => ({
-  AlertEpisodeSeverityHeatmapSection: jest.fn(() => (
-    <div data-test-subj="severityHeatmapSectionStub" />
+jest.mock('./timeline_heatmaps_section', () => ({
+  AlertEpisodeTimelineHeatmapsSection: jest.fn(() => (
+    <div data-test-subj="timelineHeatmapsSectionStub" />
   )),
 }));
 
@@ -39,33 +33,64 @@ jest.mock('./rule_overview_panel_section', () => ({
 const { AlertEpisodeOverviewListSection } = jest.requireMock('./overview_list_section') as {
   AlertEpisodeOverviewListSection: jest.Mock;
 };
+const { AlertEpisodeRuleOverviewPanelSection } = jest.requireMock(
+  './rule_overview_panel_section'
+) as {
+  AlertEpisodeRuleOverviewPanelSection: jest.Mock;
+};
 
 const mockServices = createMockServices();
+const mockGetRuleDetailsHref = (ruleId: string) => `/host-aware/rules/${ruleId}`;
 
 describe('AlertEpisodeOverviewSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('stacks all four sub-sections', () => {
+  it('stacks all sub-sections', () => {
     render(
-      <AlertEpisodeOverviewSection episodeId="ep-1" groupHash="gh-1" services={mockServices} />
+      <AlertEpisodeOverviewSection
+        episodeId="ep-1"
+        groupHash="gh-1"
+        services={mockServices}
+        getRuleDetailsHref={mockGetRuleDetailsHref}
+      />
     );
 
     expect(screen.getByTestId('overviewListSectionStub')).toBeInTheDocument();
     expect(screen.getByTestId('trendChartSectionStub')).toBeInTheDocument();
-    expect(screen.getByTestId('lifecycleHeatmapSectionStub')).toBeInTheDocument();
-    expect(screen.getByTestId('severityHeatmapSectionStub')).toBeInTheDocument();
+    expect(screen.getByTestId('timelineHeatmapsSectionStub')).toBeInTheDocument();
     expect(screen.getByTestId('ruleOverviewPanelSectionStub')).toBeInTheDocument();
   });
 
   it('forwards groupHash to the overview list section', () => {
     render(
-      <AlertEpisodeOverviewSection episodeId="ep-1" groupHash="gh-1" services={mockServices} />
+      <AlertEpisodeOverviewSection
+        episodeId="ep-1"
+        groupHash="gh-1"
+        services={mockServices}
+        getRuleDetailsHref={mockGetRuleDetailsHref}
+      />
     );
 
     expect(AlertEpisodeOverviewListSection).toHaveBeenCalledWith(
       expect.objectContaining({ episodeId: 'ep-1', groupHash: 'gh-1' }),
+      expect.anything()
+    );
+  });
+
+  it('forwards getRuleDetailsHref to the rule overview panel section', () => {
+    render(
+      <AlertEpisodeOverviewSection
+        episodeId="ep-1"
+        groupHash="gh-1"
+        services={mockServices}
+        getRuleDetailsHref={mockGetRuleDetailsHref}
+      />
+    );
+
+    expect(AlertEpisodeRuleOverviewPanelSection).toHaveBeenCalledWith(
+      expect.objectContaining({ episodeId: 'ep-1', getRuleDetailsHref: mockGetRuleDetailsHref }),
       expect.anything()
     );
   });

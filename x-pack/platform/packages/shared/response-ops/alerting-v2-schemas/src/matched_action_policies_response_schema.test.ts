@@ -5,24 +5,35 @@
  * 2.0.
  */
 
-import { matchActionPoliciesForRuleBodySchema } from './matched_action_policies_response_schema';
+import {
+  matchActionPoliciesForRuleBodySchema,
+  matchActionPoliciesForRuleResponseSchema,
+} from './matched_action_policies_response_schema';
 
 describe('matchActionPoliciesForRuleBodySchema', () => {
   it('accepts a valid rule payload', () => {
     const result = matchActionPoliciesForRuleBodySchema.parse({
-      rule: { id: 'rule-1', name: 'my-rule', tags: ['cpu'] },
+      rule: { tags: ['cpu'] },
     });
 
     expect(result).toEqual({
-      rule: { id: 'rule-1', name: 'my-rule', tags: ['cpu'] },
+      rule: { tags: ['cpu'] },
     });
   });
 
   it('rejects unknown top-level fields (strict)', () => {
     expect(() =>
       matchActionPoliciesForRuleBodySchema.parse({
-        rule: { id: 'rule-1' },
+        rule: { tags: ['cpu'] },
         unknownField: 'x',
+      })
+    ).toThrow();
+  });
+
+  it('rejects rule id and name (strict, no longer supported)', () => {
+    expect(() =>
+      matchActionPoliciesForRuleBodySchema.parse({
+        rule: { id: 'rule-1', name: 'my-rule', tags: ['cpu'] },
       })
     ).toThrow();
   });
@@ -30,8 +41,26 @@ describe('matchActionPoliciesForRuleBodySchema', () => {
   it('rejects unknown keys inside rule (strict)', () => {
     expect(() =>
       matchActionPoliciesForRuleBodySchema.parse({
-        rule: { id: 'rule-1', unknownField: 'x' },
+        rule: { unknownField: 'x' },
       })
+    ).toThrow();
+  });
+});
+
+describe('matchActionPoliciesForRuleResponseSchema', () => {
+  it('accepts a response with an empty item list and a total', () => {
+    const result = matchActionPoliciesForRuleResponseSchema.parse({ items: [], total: 0 });
+
+    expect(result).toEqual({ items: [], total: 0 });
+  });
+
+  it('rejects a response missing total', () => {
+    expect(() => matchActionPoliciesForRuleResponseSchema.parse({ items: [] })).toThrow();
+  });
+
+  it('rejects a negative total', () => {
+    expect(() =>
+      matchActionPoliciesForRuleResponseSchema.parse({ items: [], total: -1 })
     ).toThrow();
   });
 });

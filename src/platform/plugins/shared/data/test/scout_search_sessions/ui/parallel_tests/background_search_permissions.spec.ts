@@ -66,7 +66,10 @@ spaceTest.describe(
         await browserAuth.loginWithCustomRole(roleDashboardWithBackgroundSearch);
         await page.gotoApp('management');
         const searchSessionsLink = page.testSubj.locator('search_sessions');
-        await expect(searchSessionsLink).toContainText('Background Search');
+        // The management app can take longer than the default 10s auto-wait to
+        // cold-boot under parallel load, so wait on the nav item itself with the
+        // readiness timeout the rest of this suite uses.
+        await expect(searchSessionsLink).toContainText('Background Search', { timeout: 30_000 });
       }
     );
   }

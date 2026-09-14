@@ -6,7 +6,7 @@
  */
 
 import { filter, unset } from 'lodash';
-import { produce } from 'immer';
+import { produce } from 'immer-v9';
 import { type IRouter, SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';

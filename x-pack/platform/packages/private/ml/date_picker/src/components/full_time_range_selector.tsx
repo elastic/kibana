@@ -64,6 +64,10 @@ export interface FullTimeRangeSelectorProps {
    */
   query?: QueryDslQueryContainer;
   /**
+   * Optional project routing to use for resolving the full time range.
+   */
+  projectRouting?: string;
+  /**
    * Optional callback.
    * @param value - The time field range response.
    */
@@ -90,6 +94,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
     timefilter,
     dataView,
     query,
+    projectRouting: projectRoutingProp,
     disabled,
     callback,
     apiPath,
@@ -105,7 +110,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
   // wrapper around setFullTimeRange to allow for the calling of the optional callBack prop
   const setRange = useCallback(async () => {
     try {
-      const projectRouting = cps?.cpsManager?.getProjectRouting();
+      const projectRouting = projectRoutingProp ?? cps?.cpsManager?.getProjectRouting();
       const fullTimeRange = await setFullTimeRange(
         timefilter,
         dataView,
@@ -138,6 +143,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
     toasts,
     http,
     query,
+    projectRoutingProp,
     showFrozenDataTierChoice,
     frozenDataPreference,
     apiPath,

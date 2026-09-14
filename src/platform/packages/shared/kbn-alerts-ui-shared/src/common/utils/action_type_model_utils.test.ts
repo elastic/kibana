@@ -30,6 +30,7 @@ function minimalConnectorSpecForForm(): ConnectorSpecResponse {
       supportedFeatureIds: ['alerting'],
     },
     schema: { type: 'object', properties: {} },
+    isTestable: false,
   };
 }
 
@@ -46,6 +47,7 @@ describe('action_type_model_utils', () => {
         supported_feature_ids: ['alerting'],
       },
       schema: { type: 'object', properties: {} },
+      is_testable: true,
     });
 
     const expectedClientSpec = (): ConnectorSpecResponse => ({
@@ -57,6 +59,7 @@ describe('action_type_model_utils', () => {
         supportedFeatureIds: ['alerting'],
       },
       schema: { type: 'object', properties: {} },
+      isTestable: true,
     });
 
     beforeEach(() => {
@@ -91,6 +94,7 @@ describe('action_type_model_utils', () => {
           secrets: { type: 'object', properties: {} },
         },
       },
+      isTestable: false,
     };
 
     it('maps base spec metadata, subtype, and validateParams', async () => {
@@ -100,6 +104,20 @@ describe('action_type_model_utils', () => {
       expect(model.selectMessage).toBe('A test connector description');
       expect(model.subtype).toBeUndefined();
       expect(await model.validateParams({}, null)).toEqual({ errors: {} });
+    });
+
+    it('sets isTestable from the spec response', () => {
+      const testableModel = transformSpecToActionTypeModel(
+        { ...baseSpec, isTestable: true },
+        docLinks
+      );
+      expect(testableModel.isTestable).toBe(true);
+
+      const nonTestableModel = transformSpecToActionTypeModel(
+        { ...baseSpec, isTestable: false },
+        docLinks
+      );
+      expect(nonTestableModel.isTestable).toBe(false);
     });
 
     it('sets isExperimental from is_technical_preview metadata', () => {
@@ -263,6 +281,33 @@ describe('action_type_model_utils', () => {
         secrets: { apiKey: 'secret' },
       };
       expect(deserializer?.(noAuthInConfig)).toEqual(noAuthInConfig);
+    });
+  });
+
+  describe('hideSettingsTitle', () => {
+    it('hides the generic settings heading for inbound-only connectors', () => {
+      const model = transformSpecToActionTypeModel(
+        {
+          metadata: {
+            id: '.inboundWebhook',
+            displayName: 'Inbound Webhook',
+            description: 'Test',
+            minimumLicense: 'gold',
+            supportedFeatureIds: ['workflows'],
+          },
+          schema: { type: 'object', properties: {} },
+          isTestable: false,
+        },
+        docLinks
+      );
+      expect(model.connectorForm?.hideSettingsTitle).toBe(true);
+    });
+
+    it('keeps the settings heading for outbound and dual spec connectors', () => {
+      expect(
+        transformSpecToActionTypeModel(minimalConnectorSpecForForm(), docLinks).connectorForm
+          ?.hideSettingsTitle
+      ).toBe(false);
     });
   });
 });

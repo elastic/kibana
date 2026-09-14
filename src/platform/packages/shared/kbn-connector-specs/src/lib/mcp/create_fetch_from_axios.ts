@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AxiosInstance, AxiosResponse } from 'axios';
+import type {
+  AxiosInstance,
+  AxiosResponse,
+  AxiosResponseHeaders,
+  RawAxiosResponseHeaders,
+} from 'axios';
 import type { FetchLike } from '@kbn/mcp-client';
 
 /**
@@ -23,13 +28,37 @@ import type { FetchLike } from '@kbn/mcp-client';
 // Bounds the sseReady gate against ordering races and servers that never open the channel.
 const SSE_READY_TIMEOUT_MS = 5_000;
 
+const MCP_SESSION_HEADER = 'mcp-session-id';
+
+interface SseChannelGate {
+  open: Promise<void>;
+  markOpen: (() => void) | null;
+}
+
 export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
   // The MCP SDK fires the GET SSE channel as a fire-and-forget side effect of the
   // initialized handshake. Some servers require that channel to be established before
-  // they process tool-call POSTs. Pre-create sseReady when we see the initialized 202
+  // they process tool-call POSTs. Pre-create a gate when we see the initialized 202
   // so subsequent POSTs can await it without adding a fixed delay.
-  let sseReady: Promise<void> | null = null;
-  let resolveSseReady: (() => void) | null = null;
+  //
+  // Keyed by Mcp-Session-Id so concurrent sessions sharing this fetch instance don't
+  // unblock each other (session-less servers fall back to ''). Resolved gates are kept
+  // rather than deleted so a later 202 (e.g. notifications/cancelled) finds an already-
+  // resolved gate and passes through immediately instead of re-creating a stale one.
+  const gates = new Map<string, SseChannelGate>();
+
+  const ensureChannelGate = (sessionId: string): SseChannelGate => {
+    let sseChannelGate = gates.get(sessionId);
+    if (!sseChannelGate) {
+      let markOpen: (() => void) | null = null;
+      const open = new Promise<void>((res) => {
+        markOpen = res;
+      });
+      sseChannelGate = { open, markOpen };
+      gates.set(sessionId, sseChannelGate);
+    }
+    return sseChannelGate;
+  };
 
   // Use responseType:'stream' so the SDK's SSE parser reads events as they arrive
   // rather than buffering the entire (potentially infinite) stream in memory.
@@ -47,9 +76,12 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
       validateStatus: () => true,
     });
 
-    // Signal that the SSE channel is open so waiting POSTs can proceed.
-    resolveSseReady?.();
-    resolveSseReady = null;
+    // Resolve this session's gate so its own waiting POSTs can proceed.
+    const sessionId = getHeaderValue(headers, MCP_SESSION_HEADER);
+    const sseChannelGate = gates.get(sessionId);
+    if (sseChannelGate) {
+      sseChannelGate.markOpen?.();
+    }
 
     return new Response(createWebStream(res), {
       status: res.status,
@@ -65,12 +97,14 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
     headers: Record<string, string>,
     init?: RequestInit
   ): Promise<Response> => {
-    if (sseReady !== null) {
-      // Race sseReady against a timeout and the abort signal so a stuck or
+    const sessionId = getHeaderValue(headers, MCP_SESSION_HEADER);
+    const sseChannelGate = gates.get(sessionId);
+    if (sseChannelGate) {
+      // Race the gate against a timeout and the abort signal so a stuck or
       // out-of-order GET can never cause tool-call POSTs to hang indefinitely.
       // Whichever wins first, execution falls through to the request below.
       const races: Array<Promise<void>> = [
-        sseReady,
+        sseChannelGate.open,
         new Promise<void>((resolve) => setTimeout(resolve, SSE_READY_TIMEOUT_MS)),
       ];
       if (init?.signal) {
@@ -95,12 +129,11 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
     });
 
     // A 202 to a POST means the initialized notification was accepted; the SDK fires
-    // the GET SSE channel immediately after. Pre-create sseReady here so tool-call
-    // POSTs can await it.
-    if (res.status === 202 && sseReady === null) {
-      sseReady = new Promise<void>((resolve) => {
-        resolveSseReady = resolve;
-      });
+    // the GET SSE channel immediately after. Pre-create the gate here so tool-call
+    // POSTs can await it, preferring the session id the server just assigned.
+    if (res.status === 202) {
+      const responseSessionId = getHeaderValue(res.headers, MCP_SESSION_HEADER) || sessionId;
+      ensureChannelGate(responseSessionId);
     }
 
     return new Response(res.data, {
@@ -135,6 +168,20 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
       return callSseWithMethod(method, urlString, headers, init);
     }
   };
+}
+
+// Case-insensitive lookup since header keys may arrive in varying case.
+function getHeaderValue(
+  headers: RawAxiosResponseHeaders | AxiosResponseHeaders,
+  name: string
+): string {
+  const lowerName = name.toLowerCase();
+  for (const [key, value] of Object.entries(headers)) {
+    if (key.toLowerCase() === lowerName) {
+      return Array.isArray(value) ? String(value[0] ?? '') : String(value ?? '');
+    }
+  }
+  return '';
 }
 
 function toWebHeaders(res: AxiosResponse): Headers {

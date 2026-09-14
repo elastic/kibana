@@ -13,9 +13,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFilterButton,
   EuiFlexGroup,
   EuiFlexItem,
@@ -35,6 +33,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { FieldIcon } from '@kbn/react-field';
+import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 
 import type { SchemaField } from '../../../../../common/types/search_applications';
 
@@ -124,18 +123,16 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l" color="transparent">
       <EuiFlexGroup direction="column" gutterSize="l">
         {notInAllIndices && (
-          <EuiCallOut
+          <KbnInfoCallout
             announceOnMount
-            iconType="info"
             title={
               <FormattedMessage
                 id="xpack.enterpriseSearch.searchApplications.searchApplication.schema.fieldIndices.notInAllIndices.title"
                 defaultMessage="This field is not mapped in every index."
               />
             }
-          >
-            <EuiText size="s">
-              <p>
+            text={
+              <>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.searchApplications.searchApplication.schema.fieldIndices.notInAllIndices.description"
                   defaultMessage="Learn more about field mapping in"
@@ -146,9 +143,9 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
                     defaultMessage="our documentation."
                   />
                 </EuiLink>
-              </p>
-            </EuiText>
-          </EuiCallOut>
+              </>
+            }
+          />
         )}
         <EuiBasicTable
           css={{ '& .euiTable': { backgroundColor: 'transparent' } }}
@@ -376,30 +373,34 @@ export const SearchApplicationSchema: React.FC = () => {
     <>
       <EuiFlexGroup direction="column" gutterSize="l">
         {hasSchemaConflicts && (
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
             title={i18n.translate(
               'xpack.enterpriseSearch.searchApplications.searchApplication.schema.conflictsCallOut.title',
               { defaultMessage: 'Potential field mapping issues found' }
             )}
-            iconType="error"
-            color="danger"
-          >
-            <p>
+            text={
               <FormattedMessage
                 id="xpack.enterpriseSearch.searchApplications.searchApplication.schema.conflictsCallOut.description"
                 defaultMessage="Schema field type conflicts can be resolved by navigating to the source index directly and updating the field type of the conflicting field(s) to match that of the other source indices."
               />
-            </p>
-            {!onlyShowConflicts && (
-              <EuiButton color="danger" fill onClick={toggleOnlyShowConflicts}>
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.searchApplications.searchApplication.schema.conflictsCallOut.button"
-                  defaultMessage="View conflicts"
-                />
-              </EuiButton>
-            )}
-          </EuiCallOut>
+            }
+            actionProps={
+              !onlyShowConflicts
+                ? {
+                    primary: {
+                      onClick: toggleOnlyShowConflicts,
+                      children: (
+                        <FormattedMessage
+                          id="xpack.enterpriseSearch.searchApplications.searchApplication.schema.conflictsCallOut.button"
+                          defaultMessage="View conflicts"
+                        />
+                      ),
+                    },
+                  }
+                : undefined
+            }
+          />
         )}
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiSwitch
@@ -490,7 +491,7 @@ export const SearchApplicationSchema: React.FC = () => {
           responsiveBreakpoint={false}
         />
         {totalConflictsHiddenByTypeFilters > 0 && (
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
             title={
               <FormattedMessage
@@ -499,27 +500,25 @@ export const SearchApplicationSchema: React.FC = () => {
                 values={{ totalConflictsHiddenByTypeFilters }}
               />
             }
-            color="danger"
-            iconType="info"
-          >
-            <p>
-              {i18n.translate(
-                'xpack.enterpriseSearch.searchApplications.searchApplication.schema.filters.conflict.callout.subTitle',
-                {
-                  defaultMessage:
-                    'In order to see all field conflicts you must clear your field filters',
-                }
-              )}
-            </p>
-            <EuiButton fill color="danger" onClick={() => setSelectedEsFieldTypes(esFieldTypes)}>
-              {i18n.translate(
-                'xpack.enterpriseSearch.searchApplications.searchApplication.schema.filters.conflict.callout.clearFilters',
-                {
-                  defaultMessage: 'Clear filters ',
-                }
-              )}
-            </EuiButton>
-          </EuiCallOut>
+            text={i18n.translate(
+              'xpack.enterpriseSearch.searchApplications.searchApplication.schema.filters.conflict.callout.subTitle',
+              {
+                defaultMessage:
+                  'In order to see all field conflicts you must clear your field filters',
+              }
+            )}
+            actionProps={{
+              primary: {
+                onClick: () => setSelectedEsFieldTypes(esFieldTypes),
+                children: i18n.translate(
+                  'xpack.enterpriseSearch.searchApplications.searchApplication.schema.filters.conflict.callout.clearFilters',
+                  {
+                    defaultMessage: 'Clear filters ',
+                  }
+                ),
+              },
+            }}
+          />
         )}
       </EuiFlexGroup>
     </>

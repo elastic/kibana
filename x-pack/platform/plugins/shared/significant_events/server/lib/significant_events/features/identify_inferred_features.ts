@@ -5,56 +5,152 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
-import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
-import type { StreamType } from '@kbn/streams-schema';
+import type { ChatCompletionTokenCount } from '@kbn/inference-common';
+import type { StreamType, Streams } from '@kbn/streams-schema';
 import {
   type Feature,
   type FeatureUpsert,
   type BaseFeature,
   type IterationResult,
   isComputedFeature,
-  isFeatureWithFilter,
   normalizeFeatureSlug,
 } from '@kbn/significant-events-schema';
 import {
   EMPTY_TOKENS,
-  identifyFeatures,
+  type InferenceDocument,
   type ExcludedFeatureSummary,
   type IgnoredFeature,
-} from '@kbn/streams-ai';
+} from '@kbn/nightshift-ai';
 import {
   DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   type SignificantEventsTuningConfig,
 } from '@kbn/significant-events-schema';
-import { PromptsConfigService } from '@kbn/streams-plugin/server';
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
-import { fetchSampleDocuments } from './fetch_sample_documents';
-
 import {
   reconcileInferredFeatures,
   toFeatureSummary,
   toFeatureProjection,
 } from './reconcile_features';
+import { executeFeatureIdentificationAgent } from './identify_features_via_agent';
+import { FeatureNotEnabledError } from '../../errors/feature_not_enabled_error';
+
+export { findSimilarFeatures } from './feature_similarity_search';
 
 const DEFAULT_MAX_PREVIOUSLY_IDENTIFIED_FEATURES = 100;
+
+export const selectPreviouslyIdentifiedFeatures = (
+  features: ReadonlyArray<Feature>,
+  limit: number
+): Feature[] => {
+  const featuresByType = new Map<string, Feature[]>();
+  for (const feature of features) {
+    const featuresOfType = featuresByType.get(feature.type);
+    if (featuresOfType) {
+      featuresOfType.push(feature);
+    } else {
+      featuresByType.set(feature.type, [feature]);
+    }
+  }
+
+  const rankedGroups = Array.from(featuresByType.entries())
+    .sort(([typeA], [typeB]) => typeA.localeCompare(typeB))
+    .map(([, featuresOfType]) =>
+      featuresOfType.sort(
+        (featureA, featureB) =>
+          featureB.confidence - featureA.confidence ||
+          normalizeFeatureSlug(featureA.id).localeCompare(normalizeFeatureSlug(featureB.id))
+      )
+    );
+  const selected: Feature[] = [];
+  const normalizedLimit = Math.max(0, Math.floor(limit));
+
+  for (let rank = 0; selected.length < normalizedLimit; rank++) {
+    let addedAtRank = false;
+    for (const group of rankedGroups) {
+      const feature = group[rank];
+      if (feature) {
+        selected.push(feature);
+        addedAtRank = true;
+        if (selected.length === normalizedLimit) {
+          break;
+        }
+      }
+    }
+    if (!addedAtRank) {
+      break;
+    }
+  }
+
+  return selected;
+};
+
+// ~8k tokens. Worst real stream measured ~15k chars; the store allows up to 10k features
+// x 255 chars, which would blow the prompt without a ceiling.
+export const KNOWN_FEATURE_IDS_MAX_CHARS = 32_000;
+
+export const buildKnownFeatureIds = (
+  features: ReadonlyArray<BaseFeature & { updated_at?: string }>,
+  maxChars: number = KNOWN_FEATURE_IDS_MAX_CHARS
+): { text: string; droppedCount: number } => {
+  // Newest first, so a budget cut drops the stalest ids.
+  const byRecency = [...features].sort((a, b) =>
+    (b.updated_at ?? '').localeCompare(a.updated_at ?? '')
+  );
+
+  const idsByType = new Map<string, Set<string>>();
+  const seen = new Set<string>();
+  let usedChars = 0;
+  let budgetExceeded = false;
+  let droppedCount = 0;
+
+  for (const feature of byRecency) {
+    const id = normalizeFeatureSlug(feature.id);
+    if (id.length === 0) {
+      continue;
+    }
+    const seenKey = `${feature.type}:${id}`;
+    if (seen.has(seenKey)) {
+      continue;
+    }
+    seen.add(seenKey);
+
+    const ids = idsByType.get(feature.type);
+    const cost = id.length + (ids ? 2 : feature.type.length + 3);
+    if (budgetExceeded || usedChars + cost > maxChars) {
+      budgetExceeded = true;
+      droppedCount++;
+      continue;
+    }
+    usedChars += cost;
+    if (ids) {
+      ids.add(id);
+    } else {
+      idsByType.set(feature.type, new Set([id]));
+    }
+  }
+
+  const text = Array.from(idsByType.entries())
+    .sort(([typeA], [typeB]) => typeA.localeCompare(typeB))
+    .map(
+      ([type, ids]) =>
+        `${type}: ${Array.from(ids)
+          .sort((idA, idB) => idA.localeCompare(idB))
+          .join(', ')}`
+    )
+    .join('\n');
+
+  return { text, droppedCount };
+};
 
 // ---------------------------------------------------------------------------
 // Tuning params type (subset of SignificantEventsTuningConfig)
 // ---------------------------------------------------------------------------
 
 type IterationTuningParams = Partial<
-  Pick<
-    SignificantEventsTuningConfig,
-    | 'sample_size'
-    | 'entity_filtered_ratio'
-    | 'diverse_ratio'
-    | 'max_excluded_features_in_prompt'
-    | 'max_entity_filters'
-    | 'sampling_timeout_ms'
-  >
+  Pick<SignificantEventsTuningConfig, 'max_excluded_features_in_prompt'>
 > & {
   maxPreviouslyIdentifiedFeatures?: number;
 };
@@ -78,6 +174,7 @@ export interface FeaturesIdentifiedTelemetry {
   state: 'success' | 'failure' | 'canceled';
   features_new: number;
   features_updated: number;
+  features_remapped: number;
   input_tokens_used: number;
   output_tokens_used: number;
   total_tokens_used: number;
@@ -111,6 +208,7 @@ export function buildTelemetry(
         updatedCount: number;
         llmIgnoredCount: number;
         codeIgnoredCount: number;
+        remappedCount: number;
       }
 ): FeaturesIdentifiedTelemetry {
   if (outcome.state !== 'success') {
@@ -120,6 +218,7 @@ export function buildTelemetry(
       state: outcome.state,
       features_new: 0,
       features_updated: 0,
+      features_remapped: 0,
       input_tokens_used: 0,
       output_tokens_used: 0,
       total_tokens_used: 0,
@@ -135,6 +234,7 @@ export function buildTelemetry(
     state: 'success',
     features_new: outcome.newCount,
     features_updated: outcome.updatedCount,
+    features_remapped: outcome.remappedCount,
     input_tokens_used: tokensUsed.prompt,
     output_tokens_used: tokensUsed.completion,
     total_tokens_used: tokensUsed.total,
@@ -145,197 +245,145 @@ export function buildTelemetry(
 }
 
 // ---------------------------------------------------------------------------
-// LLM inference wrapper
-// ---------------------------------------------------------------------------
-
-type InferenceResult =
-  | {
-      success: true;
-      rawFeatures: BaseFeature[];
-      ignoredFeatures: IgnoredFeature[];
-      tokensUsed: ChatCompletionTokenCount;
-    }
-  | { success: false };
-
-async function tryIdentifyFeatures(
-  args: Parameters<typeof identifyFeatures>[0]
-): Promise<InferenceResult> {
-  try {
-    const result = await identifyFeatures(args);
-    return {
-      success: true,
-      rawFeatures: result.features,
-      ignoredFeatures: result.ignoredFeatures,
-      tokensUsed: result.tokensUsed,
-    };
-  } catch (error) {
-    if (args.signal.aborted) {
-      throw error;
-    }
-    const errorMsg = error instanceof Error ? error.message : String(error);
-    args.logger.warn(`LLM inference failed: ${errorMsg}`);
-    return { success: false };
-  }
-}
-
-// ---------------------------------------------------------------------------
 // Single inferred-features iteration (internal)
 // ---------------------------------------------------------------------------
 
 interface RunInferredIterationOptions {
-  esClient: ElasticsearchClient;
+  kiClient: KnowledgeIndicatorClient;
   streamName: string;
-  samplingSource: string;
-  start: number;
-  end: number;
   runId: string;
   allFeatures: Feature[];
   discoveredFeatures: Feature[];
   excludedFeatures: Feature[];
-  inferenceClient: BoundInferenceClient;
-  systemPrompt: string;
+  documents: InferenceDocument[];
+  totalFilters: number;
+  filtersCapped: boolean;
+  hasFilteredDocuments: boolean;
+  agentBuilder: AgentBuilderPluginStart;
+  request: KibanaRequest;
+  connectorId: string;
   logger: Logger;
   signal: AbortSignal;
   tuning: IterationTuningParams;
-  diverseOffset: number;
+  iteration: number;
 }
 
-type InferredIterationResult =
-  | { hasDocuments: false; nextDiverseOffset: number }
-  | {
-      hasDocuments: true;
-      docsCount: number;
-      docIds: string[];
-      totalFilters: number;
-      filtersCapped: boolean;
-      hasFilteredDocuments: boolean;
-      nextDiverseOffset: number;
-      outcome:
-        | { state: 'failure' }
-        | {
-            state: 'success';
-            tokensUsed: ChatCompletionTokenCount;
-            newFeatures: FeatureUpsert[];
-            updatedFeatures: FeatureUpsert[];
-            ignoredFeatures: IgnoredFeature[];
-            codeIgnoredCount: number;
-          };
-    };
+interface InferredIterationResult {
+  docsCount: number;
+  docIds: string[];
+  totalFilters: number;
+  filtersCapped: boolean;
+  hasFilteredDocuments: boolean;
+  outcome:
+    | { state: 'failure' }
+    | {
+        state: 'success';
+        tokensUsed: ChatCompletionTokenCount;
+        newFeatures: FeatureUpsert[];
+        updatedFeatures: FeatureUpsert[];
+        ignoredFeatures: IgnoredFeature[];
+        codeIgnoredCount: number;
+        remappedCount: number;
+      };
+}
 
 async function runInferredIteration({
-  esClient,
+  kiClient,
   streamName,
-  samplingSource,
-  start,
-  end,
   runId,
   allFeatures,
   discoveredFeatures,
   excludedFeatures,
-  inferenceClient,
-  systemPrompt,
+  documents,
+  totalFilters,
+  filtersCapped,
+  hasFilteredDocuments,
+  agentBuilder,
+  request,
+  connectorId,
   logger,
   signal,
   tuning,
-  diverseOffset,
+  iteration,
 }: RunInferredIterationOptions): Promise<InferredIterationResult> {
   const {
-    sample_size: sampleSize = DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.sample_size,
-    entity_filtered_ratio:
-      entityFilteredRatio = DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.entity_filtered_ratio,
-    diverse_ratio: diverseRatio = DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.diverse_ratio,
-    max_entity_filters:
-      maxEntityFilters = DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.max_entity_filters,
     max_excluded_features_in_prompt:
       maxExcludedFeaturesInPrompt = DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.max_excluded_features_in_prompt,
-    sampling_timeout_ms:
-      samplingTimeoutMs = DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.sampling_timeout_ms,
     maxPreviouslyIdentifiedFeatures = DEFAULT_MAX_PREVIOUSLY_IDENTIFIED_FEATURES,
   } = tuning;
 
-  const batchResult = await fetchSampleDocuments({
-    esClient,
-    index: samplingSource,
-    start,
-    end,
-    features: discoveredFeatures.filter(isFeatureWithFilter),
-    logger,
-    size: sampleSize,
-    entityFilteredRatio,
-    diverseRatio,
-    maxEntityFilters,
-    diverseOffset,
-    samplingTimeoutMs,
-  });
-
-  if (batchResult.documents.length === 0) {
-    return { hasDocuments: false, nextDiverseOffset: batchResult.nextOffset };
-  }
-
-  const { totalFilters, filtersCapped, hasFilteredDocuments } = batchResult;
-  const docsCount = batchResult.documents.length;
-  const docIds = batchResult.documents
-    .map((doc) => doc._id)
-    .filter((id): id is string => id != null);
+  const docsCount = documents.length;
+  const docIds = documents.map((doc) => doc._id).filter((id): id is string => id != null);
 
   const allKnownFeatures = allFeatures.filter((f) => !isComputedFeature(f));
-  const topRanked = [...allKnownFeatures]
-    .sort((a, b) => {
-      const aEntity = a.type === 'entity' ? 0 : 1;
-      const bEntity = b.type === 'entity' ? 0 : 1;
-      if (aEntity !== bEntity) return aEntity - bEntity;
-      return b.confidence - a.confidence;
-    })
-    .slice(0, maxPreviouslyIdentifiedFeatures);
-
+  const topRanked = selectPreviouslyIdentifiedFeatures(
+    allKnownFeatures,
+    maxPreviouslyIdentifiedFeatures
+  );
+  const { text: knownFeatureIds, droppedCount: knownFeatureIdsDropped } =
+    buildKnownFeatureIds(allKnownFeatures);
+  if (knownFeatureIdsDropped > 0) {
+    logger.debug(
+      `known_feature_ids inventory for stream "${streamName}" exceeded its budget; dropped the ${knownFeatureIdsDropped} stalest ids`
+    );
+  }
   const excludedSummaries: ExcludedFeatureSummary[] = excludedFeatures
     .slice(0, maxExcludedFeaturesInPrompt)
     .map(toFeatureProjection);
 
-  const inferResult = await tryIdentifyFeatures({
-    streamName,
-    sampleDocuments: batchResult.documents,
-    excludedFeatures: excludedSummaries,
-    inferenceClient,
-    systemPrompt,
-    logger,
-    signal,
-    previouslyIdentifiedFeatures: topRanked.map(toFeatureProjection),
-  });
+  let rawFeatures: BaseFeature[];
+  let ignoredFeatures: IgnoredFeature[];
+  let tokensUsed: ChatCompletionTokenCount;
 
-  if (!inferResult.success) {
+  try {
+    const result = await executeFeatureIdentificationAgent({
+      agentBuilder,
+      request,
+      connectorId,
+      streamName,
+      sampleDocuments: documents,
+      excludedFeatures: excludedSummaries,
+      previouslyIdentifiedFeatures: topRanked.map(toFeatureProjection),
+      knownFeatureIds,
+      signal,
+      logger,
+    });
+    rawFeatures = result.features;
+    ignoredFeatures = result.ignoredFeatures;
+    tokensUsed = result.tokensUsed;
+  } catch (error) {
+    if (signal.aborted) {
+      throw error;
+    }
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    logger.warn(`Feature identification agent failed: ${errorMsg}`);
     return {
-      hasDocuments: true,
       docsCount,
       docIds,
       totalFilters,
       filtersCapped,
       hasFilteredDocuments,
-      nextDiverseOffset: batchResult.nextOffset,
       outcome: { state: 'failure' },
     };
   }
 
-  const { rawFeatures, ignoredFeatures, tokensUsed } = inferResult;
-
-  const { newFeatures, updatedFeatures, codeIgnoredCount } = reconcileInferredFeatures({
-    rawFeatures,
-    allKnownFeatures,
-    discoveredFeatures,
-    ignoredFeatures,
-    excludedFeatures,
-    runId,
-    logger,
-  });
+  const { newFeatures, updatedFeatures, codeIgnoredCount, remappedCount } =
+    reconcileInferredFeatures({
+      rawFeatures,
+      allKnownFeatures,
+      discoveredFeatures,
+      ignoredFeatures,
+      excludedFeatures,
+      runId,
+      logger,
+    });
 
   return {
-    hasDocuments: true,
     docsCount,
     docIds,
     totalFilters,
     filtersCapped,
     hasFilteredDocuments,
-    nextDiverseOffset: batchResult.nextOffset,
     outcome: {
       state: 'success',
       tokensUsed,
@@ -343,6 +391,7 @@ async function runInferredIteration({
       updatedFeatures,
       ignoredFeatures,
       codeIgnoredCount,
+      remappedCount,
     },
   };
 }
@@ -354,20 +403,21 @@ async function runInferredIteration({
 export interface IdentifyInferredFeaturesOptions {
   esClient: ElasticsearchClient;
   kiClient: KnowledgeIndicatorClient;
-  soClient: SavedObjectsClientContract;
-  inferenceClient: BoundInferenceClient;
+  agentBuilder?: AgentBuilderPluginStart;
+  request: KibanaRequest;
   connectorId: string;
   logger: Logger;
   signal: AbortSignal;
   streamName: string;
-  samplingSource: string;
   streamType: StreamType;
-  start: number;
-  end: number;
+  definition: Streams.all.Definition;
   runId: string;
+  documents: InferenceDocument[];
+  totalFilters: number;
+  filtersCapped: boolean;
+  hasFilteredDocuments: boolean;
   iteration?: number;
   tuning?: IterationTuningParams;
-  diverseOffset?: number;
   trackFeaturesIdentified?: (data: FeaturesIdentifiedTelemetry) => void;
 }
 
@@ -377,36 +427,36 @@ export interface IdentifyInferredFeaturesResult {
   docIds: string[];
   discoveredFeatures: FeatureUpsert[];
   iterationResult: IterationResult;
-  nextDiverseOffset: number;
 }
 
 export async function identifyInferredFeatures({
   esClient,
   kiClient,
-  soClient,
-  inferenceClient,
+  agentBuilder,
+  request,
   connectorId,
   logger,
   signal,
   streamName,
-  samplingSource,
   streamType,
-  start,
-  end,
   runId,
+  documents,
+  totalFilters,
+  filtersCapped,
+  hasFilteredDocuments,
   iteration = 1,
   tuning = {},
-  diverseOffset = 0,
   trackFeaturesIdentified,
 }: IdentifyInferredFeaturesOptions): Promise<IdentifyInferredFeaturesResult> {
-  const [
-    { hits: allFeatures },
-    { hits: excludedFeatures },
-    { featurePromptOverride: systemPrompt },
-  ] = await Promise.all([
+  if (!agentBuilder) {
+    throw new FeatureNotEnabledError(
+      'Feature identification requires Agent Builder, which is not available'
+    );
+  }
+
+  const [{ hits: allFeatures }, { hits: excludedFeatures }] = await Promise.all([
     kiClient.getFeatures(streamName),
     kiClient.getExcludedFeatures(streamName),
-    new PromptsConfigService({ soClient, logger }).getPrompt(),
   ]);
 
   const discoveredFeatures = allFeatures.filter((f) => !isComputedFeature(f) && f.run_id === runId);
@@ -414,44 +464,26 @@ export async function identifyInferredFeatures({
   const startedAt = Date.now();
 
   const iterationResult = await runInferredIteration({
-    esClient,
+    kiClient,
     streamName,
-    samplingSource,
-    start,
-    end,
     runId,
     allFeatures,
     discoveredFeatures,
     excludedFeatures,
-    inferenceClient,
-    systemPrompt,
+    documents,
+    totalFilters,
+    filtersCapped,
+    hasFilteredDocuments,
+    agentBuilder,
+    request,
+    connectorId,
     logger,
     signal,
     tuning,
-    diverseOffset,
+    iteration,
   });
 
-  if (!iterationResult.hasDocuments) {
-    return {
-      hasDocuments: false,
-      docsCount: 0,
-      docIds: [],
-      discoveredFeatures,
-      iterationResult: {
-        runId,
-        iteration,
-        durationMs: Date.now() - startedAt,
-        state: 'success',
-        tokensUsed: { ...EMPTY_TOKENS },
-        newFeatures: [],
-        updatedFeatures: [],
-      },
-      nextDiverseOffset: iterationResult.nextDiverseOffset,
-    };
-  }
-
-  const { docsCount, docIds, totalFilters, filtersCapped, hasFilteredDocuments, outcome } =
-    iterationResult;
+  const { docsCount, docIds, outcome } = iterationResult;
 
   const durationMs = Date.now() - startedAt;
 
@@ -487,11 +519,17 @@ export async function identifyInferredFeatures({
       docIds,
       discoveredFeatures,
       iterationResult: failedEntry,
-      nextDiverseOffset: iterationResult.nextDiverseOffset,
     };
   }
 
-  const { tokensUsed, newFeatures, updatedFeatures, ignoredFeatures, codeIgnoredCount } = outcome;
+  const {
+    tokensUsed,
+    newFeatures,
+    updatedFeatures,
+    ignoredFeatures,
+    codeIgnoredCount,
+    remappedCount,
+  } = outcome;
 
   const allChanged = [...newFeatures, ...updatedFeatures];
   if (allChanged.length > 0) {
@@ -529,6 +567,7 @@ export async function identifyInferredFeatures({
       updatedCount: updatedFeatures.length,
       llmIgnoredCount: ignoredFeatures.length,
       codeIgnoredCount,
+      remappedCount,
     })
   );
 
@@ -538,6 +577,5 @@ export async function identifyInferredFeatures({
     docIds,
     discoveredFeatures: Array.from(discoveredMap.values()),
     iterationResult: iterationEntry,
-    nextDiverseOffset: iterationResult.nextDiverseOffset,
   };
 }

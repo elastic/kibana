@@ -10,6 +10,12 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import {
+  decodeFlyoutV2UrlParam,
+  FLYOUT_V2_URL_PARAM,
+} from '../../flyout_v2/shared/url_state/flyout_v2_url_param';
+import { FLYOUT_ORIGIN } from '../../common/lib/telemetry/events/flyout_v2/types';
+import {
+  buildEntityFlyoutV2NavigationState,
   getAgentBuilderLastAgentIdForSecurityOpenChat,
   getHostNameForHostDetailsUrl,
   getServiceNameForServiceDetailsUrl,
@@ -162,6 +168,108 @@ describe('entity_explore_navigation', () => {
     });
   });
 
+  describe('buildEntityFlyoutV2NavigationState', () => {
+    it.each([
+      ['host-panel', 'hostName', 'web-01', 'host'],
+      ['user-panel', 'userName', 'alice', 'user'],
+      ['service-panel', 'serviceName', 'auth-api', 'service'],
+    ] as const)('maps %s to a %s descriptor', (panelId, nameParam, entityName, kind) => {
+      expect(
+        buildEntityFlyoutV2NavigationState({
+          preview: [],
+          right: {
+            id: panelId,
+            params: {
+              [nameParam]: entityName,
+              entityId: `${kind}:entity-id`,
+              scopeId: 'agent-builder-entity-card',
+            },
+          },
+        })
+      ).toEqual([
+        {
+          kind,
+          [`${kind}Name`]: entityName,
+          entityId: `${kind}:entity-id`,
+          scopeId: 'agent-builder-entity-card',
+          origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
+        },
+      ]);
+    });
+
+    it('maps an entity investigation panel to a v2 tool and child entity stack', () => {
+      expect(
+        buildEntityFlyoutV2NavigationState({
+          preview: [],
+          left: {
+            id: 'host_details',
+            params: { path: { tab: 'graph_view' } },
+          },
+          right: {
+            id: 'host-panel',
+            params: {
+              hostName: 'web-01',
+              entityId: 'host:web-01',
+              scopeId: 'agent-builder-entity-card',
+            },
+          },
+        })
+      ).toEqual([
+        {
+          kind: 'entityGraphView',
+          entityId: 'host:web-01',
+          scopeId: 'agent-builder-entity-card',
+          entityName: 'web-01',
+          entityType: 'host',
+          origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
+        },
+        {
+          kind: 'host',
+          hostName: 'web-01',
+          entityId: 'host:web-01',
+          scopeId: 'agent-builder-entity-card',
+          origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
+        },
+      ]);
+    });
+
+    it('forwards the risk_inputs resolution subTab onto the entityRiskInputs descriptor', () => {
+      expect(
+        buildEntityFlyoutV2NavigationState({
+          preview: [],
+          left: {
+            id: 'user_details',
+            params: { path: { tab: 'risk_inputs', subTab: 'resolution' } },
+          },
+          right: {
+            id: 'user-panel',
+            params: {
+              userName: 'alice',
+              entityId: 'user:alice',
+              scopeId: 'agent-builder-risk-history',
+            },
+          },
+        })
+      ).toEqual([
+        {
+          kind: 'entityRiskInputs',
+          entityType: 'user',
+          entityName: 'alice',
+          entityId: 'user:alice',
+          subTab: 'resolution',
+          origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
+        },
+        {
+          kind: 'user',
+          userName: 'alice',
+          entityId: 'user:alice',
+          scopeId: 'agent-builder-risk-history',
+          origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
+        },
+      ]);
+    });
+  });
+
   describe('navigation helpers', () => {
     const EA_HOME_PATH = '/app/security/entity_analytics_home_page';
     const OTHER_PATH = '/app/security/alerts';
@@ -208,7 +316,10 @@ describe('entity_explore_navigation', () => {
         navigateToEntityAnalyticsWithFlyoutInApp({
           application,
           appId: 'securitySolutionUI',
-          flyout: { right: { id: 'service-panel', params: { serviceName: 'svc-a' } } },
+          flyout: {
+            preview: [],
+            right: { id: 'service-panel', params: { serviceName: 'svc-a' } },
+          },
         });
 
         expect(application.navigateToApp).toHaveBeenCalledTimes(1);
@@ -223,6 +334,44 @@ describe('entity_explore_navigation', () => {
         expect(params.get('flyout')).toContain('right');
       });
 
+      it('writes flyoutV2 and removes a stale legacy flyout when the new flyout is enabled', () => {
+        const application = buildApplicationMock();
+        window.history.replaceState({}, '', `${EA_HOME_PATH}?flyout=stale&watchlistId=wl-123`);
+
+        navigateToEntityAnalyticsWithFlyoutInApp({
+          application,
+          appId: 'securitySolutionUI',
+          flyout: {
+            preview: [],
+            right: {
+              id: 'user-panel',
+              params: {
+                userName: 'alice',
+                entityId: 'user:alice@default',
+                scopeId: 'agent-builder-entity-card',
+              },
+            },
+          },
+          isNewFlyoutEnabled: true,
+        });
+
+        const [, options] = application.navigateToApp.mock.calls[0];
+        const path = (options as { path?: string }).path ?? '';
+        const params = new URLSearchParams(path.startsWith('?') ? path.slice(1) : path);
+
+        expect(params.get('flyout')).toBeNull();
+        expect(params.get('watchlistId')).toBe('wl-123');
+        expect(decodeFlyoutV2UrlParam(params.get(FLYOUT_V2_URL_PARAM))).toEqual([
+          {
+            kind: 'user',
+            userName: 'alice',
+            entityId: 'user:alice@default',
+            scopeId: 'agent-builder-entity-card',
+            origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
+          },
+        ]);
+      });
+
       it('clears the search session before navigateToApp is called (cross-app)', () => {
         const application = buildApplicationMock();
         const searchSession = buildSearchSessionMock();
@@ -230,7 +379,11 @@ describe('entity_explore_navigation', () => {
         navigateToEntityAnalyticsWithFlyoutInApp({
           application,
           appId: 'securitySolutionUI',
-          flyout: { left: { id: 'l' }, right: { id: 'r' }, preview: [] },
+          flyout: {
+            preview: [],
+            left: { id: 'host_details', params: {} },
+            right: { id: 'host-panel', params: { hostName: 'web-01' } },
+          },
           searchSession: searchSession as unknown as ISessionService,
         });
 
@@ -248,7 +401,11 @@ describe('entity_explore_navigation', () => {
           navigateToEntityAnalyticsWithFlyoutInApp({
             application,
             appId: 'securitySolutionUI',
-            flyout: { left: { id: 'l' }, right: { id: 'r' }, preview: [] },
+            flyout: {
+              preview: [],
+              left: { id: 'host_details', params: {} },
+              right: { id: 'host-panel', params: { hostName: 'web-01' } },
+            },
           })
         ).not.toThrow();
         expect(application.navigateToApp).toHaveBeenCalledTimes(1);
@@ -265,7 +422,10 @@ describe('entity_explore_navigation', () => {
           navigateToEntityAnalyticsWithFlyoutInApp({
             application,
             appId: 'securitySolutionUI',
-            flyout: { right: { id: 'host-panel', params: { hostName: 'web-01' } } },
+            flyout: {
+              preview: [],
+              right: { id: 'host-panel', params: { hostName: 'web-01' } },
+            },
           });
 
           expect(application.navigateToApp).toHaveBeenCalledTimes(1);
@@ -278,7 +438,10 @@ describe('entity_explore_navigation', () => {
           navigateToEntityAnalyticsWithFlyoutInApp({
             application,
             appId: 'securitySolutionUI',
-            flyout: { right: { id: 'host-panel', params: { hostName: 'web-01' } } },
+            flyout: {
+              preview: [],
+              right: { id: 'host-panel', params: { hostName: 'web-01' } },
+            },
             agentBuilder: agentBuilder as unknown as AgentBuilderPluginStart,
             chrome: buildChromeMock(),
           });
@@ -293,7 +456,10 @@ describe('entity_explore_navigation', () => {
           navigateToEntityAnalyticsWithFlyoutInApp({
             application,
             appId: 'securitySolutionUI',
-            flyout: { right: { id: 'host-panel', params: { hostName: 'web-01' } } },
+            flyout: {
+              preview: [],
+              right: { id: 'host-panel', params: { hostName: 'web-01' } },
+            },
             searchSession: searchSession as unknown as ISessionService,
           });
 

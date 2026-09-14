@@ -67,7 +67,7 @@ describe('POST custom element', () => {
 
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({ ok: true });
-    expect(mockRouteContext.core.savedObjects.client.create).toBeCalledWith(
+    expect(mockRouteContext.core.savedObjects.client.create).toHaveBeenCalledWith(
       CUSTOM_ELEMENT_TYPE,
       {
         ...mockCustomElement,

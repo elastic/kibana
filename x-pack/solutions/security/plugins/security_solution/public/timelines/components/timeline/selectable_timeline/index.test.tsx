@@ -95,7 +95,7 @@ describe('SelectableTimeline', () => {
     });
 
     test('should be called with correct args', () => {
-      expect(mockFetchAllTimeline).toBeCalledWith(args);
+      expect(mockFetchAllTimeline).toHaveBeenCalledWith(args);
     });
   });
 });

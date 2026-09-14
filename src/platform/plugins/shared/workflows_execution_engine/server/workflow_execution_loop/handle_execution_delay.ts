@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflowExecution } from '@kbn/workflows';
+import type { EsWorkflowExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { isEnterStepTimeoutZone } from '@kbn/workflows/graph';
-import { flushState } from './persistence_loop';
 import type { WorkflowExecutionLoopParams } from './types';
 import {
   getHitlIdleDeadlineMsForNode,
@@ -29,6 +28,7 @@ type IdleTimeoutHitlStep =
 function getIdleTimeoutResumeDeadlineMs(
   params: WorkflowExecutionLoopParams,
   workflowExecution: EsWorkflowExecution,
+  scopeStackFrames: StackFrame[],
   hitlStep: IdleTimeoutHitlStep
 ): number | undefined {
   const deadlineMs: number[] = [];
@@ -48,7 +48,6 @@ function getIdleTimeoutResumeDeadlineMs(
     );
   }
 
-  const scopeStackFrames = workflowExecution.scopeStack ?? [];
   for (const frame of scopeStackFrames) {
     for (const scope of frame.nestedScopes) {
       const graphNode = params.workflowExecutionGraph.getNode(scope.nodeId);
@@ -73,7 +72,12 @@ async function scheduleWorkflowGlobalTimeoutResumeTask(
   workflowExecution: EsWorkflowExecution,
   hitlStep: IdleTimeoutHitlStep
 ): Promise<void> {
-  const deadlineMs = getIdleTimeoutResumeDeadlineMs(params, workflowExecution, hitlStep);
+  const deadlineMs = getIdleTimeoutResumeDeadlineMs(
+    params,
+    workflowExecution,
+    params.workflowExecutionCursor.currentStackFrames,
+    hitlStep
+  );
   if (deadlineMs === undefined) {
     return;
   }
@@ -116,10 +120,15 @@ export function getWorkflowIdleTimeoutResumeAtAfterLoop(
   }
 
   const stepExecution = params.workflowExecutionState.getLatestStepExecution(node.stepId);
-  const deadlineMs = getIdleTimeoutResumeDeadlineMs(params, workflowExecution, {
-    node,
-    startedAt: stepExecution?.startedAt,
-  });
+  const deadlineMs = getIdleTimeoutResumeDeadlineMs(
+    params,
+    workflowExecution,
+    params.workflowExecutionCursor.currentStackFrames,
+    {
+      node,
+      startedAt: stepExecution?.startedAt,
+    }
+  );
   if (deadlineMs === undefined) {
     return undefined;
   }
@@ -173,6 +182,7 @@ export async function handleExecutionDelay(
 
     await scheduleWorkflowGlobalTimeoutResumeTask(params, workflowExecution, stepExecutionRuntime);
 
+    params.workflowExecutionCursor.stop();
     return;
   }
 
@@ -194,10 +204,9 @@ export async function handleExecutionDelay(
   const resumeAt = new Date(resumeAtFromState);
   const now = new Date();
   const diff = resumeAt.getTime() - now.getTime();
-  await flushState(params);
-  params.workflowExecutionState.updateWorkflowExecution({
-    status: ExecutionStatus.WAITING,
-  });
+
+  // In-process wait: keep workflow RUNNING. Persistence already flushes while
+  // the cursor is executing; setting WAITING here races cancel/drop occupancy.
   if (!forceTaskScheduleFromState && diff < SHORT_DURATION_THRESHOLD) {
     const timeout = diff > 0 ? diff : 0;
 
@@ -205,22 +214,24 @@ export async function handleExecutionDelay(
       await abortableTimeout(timeout, stepExecutionRuntime.abortController.signal);
     } catch (error) {
       if (error instanceof TimeoutAbortedError) {
-        params.workflowExecutionState.updateWorkflowExecution({
-          status: ExecutionStatus.RUNNING,
-        });
+        // Delay was interrupted (e.g. by a timeout or cancellation).
+        // Leave workflow status as-is: cancel/timeout monitors own CANCELLED / TIMED_OUT.
         return;
       }
 
       throw error;
     }
-    params.workflowExecutionState.updateWorkflowExecution({
-      status: ExecutionStatus.RUNNING,
-    });
-  } else {
-    await params.workflowTaskManager.scheduleResumeTask({
-      workflowExecution: workflowExecution as EsWorkflowExecution,
-      resumeAt,
-      fakeRequest: params.fakeRequest,
-    });
+    return;
   }
+
+  params.workflowExecutionState.updateWorkflowExecution({
+    status: ExecutionStatus.WAITING,
+  });
+  await params.workflowTaskManager.scheduleResumeTask({
+    workflowExecution: workflowExecution as EsWorkflowExecution,
+    resumeAt,
+    fakeRequest: params.fakeRequest,
+  });
+  // Execution loop should stop here so the workflow can be resumed later
+  params.workflowExecutionCursor.stop();
 }

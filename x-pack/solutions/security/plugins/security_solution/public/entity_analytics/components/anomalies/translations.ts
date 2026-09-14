@@ -59,6 +59,11 @@ export const ENTITY_ANOMALIES_SWIMLANE_MAX_SCORE = i18n.translate(
   { defaultMessage: 'Max anomaly score' }
 );
 
+export const ENTITY_ANOMALIES_SWIMLANE_ANOMALY_COUNT = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.overview.swimlane.anomalyCount',
+  { defaultMessage: 'Anomaly count' }
+);
+
 export const ENTITY_ANOMALIES_SWIMLANE_X_AXIS_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entityAnomalies.overview.swimlane.xAxis',
   { defaultMessage: 'Date' }

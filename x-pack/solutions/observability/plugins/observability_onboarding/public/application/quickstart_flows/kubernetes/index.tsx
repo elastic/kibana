@@ -19,10 +19,8 @@ import { FeedbackButtons } from '../shared/feedback_buttons';
 import { useKubernetesFlow } from './use_kubernetes_flow';
 import { usePreExistingDataCheck } from '../shared/use_pre_existing_data_check';
 import { useWindowBlurDataMonitoringTrigger } from '../shared/use_window_blur_data_monitoring_trigger';
-import { type IngestionMode } from '../shared/wired_streams_ingestion_selector';
 import { usePricingFeature } from '../shared/use_pricing_feature';
 import { ObservabilityOnboardingPricingFeature } from '../../../../common/pricing_features';
-import { WIRED_ECS_DATA_VIEW_SPEC } from '../shared/wired_streams_data_view';
 import type { ObservabilityOnboardingContextValue } from '../../../plugin';
 import type { ActionLink } from './data_ingest_status';
 import { KubernetesElasticAgentInstallStep, KubernetesElasticAgentVisualizeStep } from './steps';
@@ -32,7 +30,6 @@ const CLUSTER_OVERVIEW_DASHBOARD_ID = 'kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8
 export const KubernetesPanel: React.FC = () => {
   const { data, status, error, refetch } = useKubernetesFlow();
   const { onPageReady } = usePerformanceContext();
-  const [ingestionMode, setIngestionMode] = useState<IngestionMode>('classic');
   const metricsOnboardingEnabled = usePricingFeature(
     ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
   );
@@ -41,8 +38,6 @@ export const KubernetesPanel: React.FC = () => {
   } = useKibana<ObservabilityOnboardingContextValue>();
   const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
   const logsLocator = share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
-  const useWiredStreams = ingestionMode === 'wired';
-  const logsLocatorParams = useWiredStreams ? { dataViewSpec: WIRED_ECS_DATA_VIEW_SPEC } : {};
 
   const [dataReceived, setDataReceived] = useState(false);
 
@@ -105,7 +100,7 @@ export const KubernetesPanel: React.FC = () => {
         defaultMessage: 'Explore logs',
       }),
       requires: 'logs' as const,
-      href: logsLocator?.getRedirectUrl(logsLocatorParams) ?? '',
+      href: logsLocator?.getRedirectUrl({}) ?? '',
     },
   ];
 
@@ -122,8 +117,6 @@ export const KubernetesPanel: React.FC = () => {
           status={status}
           data={data}
           isMonitoringStepActive={isMonitoringStepActive}
-          ingestionMode={ingestionMode}
-          onIngestionModeChange={setIngestionMode}
         />
       ),
     },

@@ -10,13 +10,11 @@
 import type { ReactNode } from 'react';
 import { useMemo } from 'react';
 import { combineLatest, debounceTime, map } from 'rxjs';
-import type { Observable } from 'rxjs';
 import type {
   ChromeBreadcrumb,
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
   ChromeHelpMenuLink,
-  ChromeNavControl,
   ChromeNavLink,
   GlobalSearchConfig,
 } from '@kbn/core-chrome-browser';
@@ -29,8 +27,6 @@ import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useChromeComponentsDeps } from '../context';
 
-export { useIsNextChrome } from '@kbn/core-chrome-browser-hooks';
-
 /**
  * Returns the current classic breadcrumbs set via `chrome.setBreadcrumbs()`.
  * Used by `ClassicHeader`.
@@ -39,16 +35,6 @@ export function useClassicBreadcrumbs(): ChromeBreadcrumb[] {
   const chrome = useChromeService();
   const breadcrumbs$ = useMemo(() => chrome.getBreadcrumbs$(), [chrome]);
   return useObservable(breadcrumbs$, chrome.getBreadcrumbs());
-}
-
-/**
- * Returns the current project-style breadcrumbs derived from the active
- * navigation tree node. Used by `ProjectHeader`.
- */
-export function useProjectBreadcrumbs(): ChromeBreadcrumb[] {
-  const chrome = useChromeService();
-  const breadcrumbs$ = useMemo(() => chrome.project.getBreadcrumbs$(), [chrome]);
-  return useObservable(breadcrumbs$, []);
 }
 
 /**
@@ -134,27 +120,6 @@ export function useCustomNavLink() {
   const chrome = useChromeService();
   const customNavLink$ = useMemo(() => chrome.getCustomNavLink$(), [chrome]);
   return useObservable(customNavLink$, undefined);
-}
-
-export type NavControlPosition = 'left' | 'center' | 'right';
-
-const navControlGetters: Record<
-  NavControlPosition,
-  (chrome: ReturnType<typeof useChromeService>) => Observable<ChromeNavControl[]>
-> = {
-  left: (chrome) => chrome.navControls.getLeft$(),
-  center: (chrome) => chrome.navControls.getCenter$(),
-  right: (chrome) => chrome.navControls.getRight$(),
-};
-
-/**
- * Returns the nav controls for a given position.
- * Used by `HeaderNavControls` (instantiated in both classic and project headers).
- */
-export function useNavControls(position: NavControlPosition): ChromeNavControl[] {
-  const chrome = useChromeService();
-  const controls$ = useMemo(() => navControlGetters[position](chrome), [chrome, position]);
-  return useObservable(controls$, []);
 }
 
 interface HelpMenuState {
@@ -265,41 +230,40 @@ export function useHasAppMenuConfig(): boolean {
 }
 
 /**
- * Returns `true` when an app menu is currently active — either a legacy action
- * menu mount point (`application.currentActionMenu$`) or a new `AppMenuConfig`
- * registered via `chrome.setAppMenu()`.
- */
-export function useHasAppMenu(): boolean {
-  const hasLegacyActionMenu = useHasLegacyActionMenu();
-  const hasAppMenuConfig = useHasAppMenuConfig();
-  return hasLegacyActionMenu || hasAppMenuConfig;
-}
-
-/**
  * Returns the current global search configuration, or `undefined` if none is set.
  * Used by `SearchButton` (global header).
  */
 export function useGlobalSearch(): GlobalSearchConfig | undefined {
   const chrome = useChromeService();
-  const config$ = useMemo(() => chrome.next.globalSearch.get$(), [chrome]);
+  const config$ = useMemo(() => chrome.controls.globalSearch.get$(), [chrome]);
   return useObservable(config$, undefined);
 }
 
 /**
  * Returns the current context switcher content set via
- * `chrome.next.contextSwitcher.set()`, or null if not set.
+ * `chrome.controls.contextSwitcher.set()`, or null if not set.
  */
 export function useContextSwitcher(): ReactNode {
   const chrome = useChromeService();
-  const content$ = useMemo(() => chrome.next.contextSwitcher.get$(), [chrome]);
+  const content$ = useMemo(() => chrome.controls.contextSwitcher.get$(), [chrome]);
+  return useObservable(content$, null);
+}
+
+/**
+ * Returns the current project picker content set via
+ * `chrome.controls.projectPicker.set()`, or null if not set.
+ */
+export function useProjectPicker(): ReactNode {
+  const chrome = useChromeService();
+  const content$ = useMemo(() => chrome.controls.projectPicker.get$(), [chrome]);
   return useObservable(content$, null);
 }
 
 /** Whether an inline `AppHeader` is currently mounted by the active app. */
 export function useHasInlineAppHeader(): boolean {
   const chrome = useChromeService();
-  const inlineAppHeader$ = useMemo(() => chrome.next.inlineAppHeader.get$(), [chrome]);
-  return useObservable(inlineAppHeader$, false);
+  const inlineAppHeader$ = useMemo(() => chrome.inlineAppHeader.get$(), [chrome]);
+  return useObservable(inlineAppHeader$, undefined) !== undefined;
 }
 
 export function useInternalLegacyActionMenu(): MountPoint | undefined {
@@ -309,10 +273,10 @@ export function useInternalLegacyActionMenu(): MountPoint | undefined {
 
 /**
  * Returns the current user menu content set via
- * `chrome.next.userMenu.set()`, or null if not set.
+ * `chrome.controls.userMenu.set()`, or null if not set.
  */
 export function useUserMenu(): ReactNode {
   const chrome = useChromeService();
-  const content$ = useMemo(() => chrome.next.userMenu.get$(), [chrome]);
+  const content$ = useMemo(() => chrome.controls.userMenu.get$(), [chrome]);
   return useObservable(content$, null);
 }

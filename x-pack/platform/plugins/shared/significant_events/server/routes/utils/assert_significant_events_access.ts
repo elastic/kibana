@@ -5,24 +5,23 @@
  * 2.0.
  */
 
-import type { IUiSettingsClient } from '@kbn/core/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
-import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { SignificantEventsAvailabilityResponse } from '../../../common';
 import {
   SIGNIFICANT_EVENTS_REQUIRED_PLUGINS,
-  STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
+  SIGNIFICANT_EVENTS_TIERED_FEATURE,
   type SignificantEventsRequiredPlugin,
   type SignificantEventsUnavailableReason,
 } from '../../../common';
+import { isSignificantEventsFeatureFlagEnabled } from '../../lib/feature_flags/is_significant_events_feature_flag_enabled';
 import { FeatureNotEnabledError } from '../../lib/errors/feature_not_enabled_error';
 import { MissingDependencyError } from '../../lib/errors/missing_dependency_error';
 
 interface SignificantEventsAccessContext {
   server: StreamsServer;
   licensing: LicensingPluginStart;
-  uiSettingsClient: IUiSettingsClient;
 }
 
 /**
@@ -31,6 +30,20 @@ interface SignificantEventsAccessContext {
  * nothing.
  */
 type RequirementCheck = (context: SignificantEventsAccessContext) => Promise<Error | undefined>;
+
+/**
+ * Observability serverless projects and classic deployments only. The pricing tier cannot express
+ * this: `isFeatureAvailable` returns `true` wherever `pricing.tiers.enabled` is `false`, which is
+ * every project type except Observability. Classic / non-cloud is allowed when
+ * `cloud.isServerlessEnabled` is false or cloud is absent; serverless always lives in cloud, so
+ * that boolean is authoritative for the classic vs serverless split.
+ */
+export const isObservabilityDeployment = ({
+  cloud,
+}: {
+  cloud?: Pick<CloudSetup, 'isServerlessEnabled' | 'serverless'>;
+}): boolean =>
+  !cloud?.isServerlessEnabled ? true : cloud.serverless.projectType === 'observability';
 
 // One "plugin must be present" requirement per entry in the shared list, so
 // adding a required plugin there is the only change needed on the server.
@@ -53,13 +66,24 @@ const pluginRequirements = Object.fromEntries(
  * events to work. Keying by reason makes this exhaustive: TypeScript errors if
  * any `SignificantEventsUnavailableReason` lacks a check here. The declaration
  * order is the evaluation order: it only decides which reason surfaces first
- * when several are unmet, so cheaper / more-likely-to-fail gates (pricing tier,
- * license) come before plugin presence.
+ * when several are unmet, so the Technical Preview feature flag is checked first
+ * as the outermost gate, then the project type, then cheaper / more-likely-to-fail
+ * gates (pricing tier, license) before plugin presence.
  */
 const significantEventsRequirements: Record<SignificantEventsUnavailableReason, RequirementCheck> =
   {
+    feature_flag: async ({ server }) =>
+      (await isSignificantEventsFeatureFlagEnabled(server.core.featureFlags))
+        ? undefined
+        : new FeatureNotEnabledError('Significant events is not available in this environment.'),
+    project_type: async ({ server }) =>
+      isObservabilityDeployment({ cloud: server.cloud })
+        ? undefined
+        : new FeatureNotEnabledError(
+            'Significant events is only available in Observability projects.'
+          ),
     pricing_tier: async ({ server }) =>
-      server.core.pricing.isFeatureAvailable(STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id)
+      server.core.pricing.isFeatureAvailable(SIGNIFICANT_EVENTS_TIERED_FEATURE.id)
         ? undefined
         : new FeatureNotEnabledError(
             'Significant events is not available on the current pricing tier.'
@@ -70,24 +94,6 @@ const significantEventsRequirements: Record<SignificantEventsUnavailableReason, 
         : new FeatureNotEnabledError(
             'An Enterprise license or higher is required to use significant events.'
           ),
-    ui_setting: async ({ uiSettingsClient }) => {
-      let enabled: boolean;
-      try {
-        enabled = await uiSettingsClient.get<boolean>(
-          OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS
-        );
-      } catch {
-        // Setting not registered (e.g. pricing tier check skipped registration).
-        // Treat as disabled so callers get a clean 403 rather than an unhandled
-        // rejection propagating through Promise.all as a 500.
-        enabled = false;
-      }
-      return enabled
-        ? undefined
-        : new FeatureNotEnabledError(
-            `Significant events is disabled. Enable "${OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS}" in Advanced Settings to start using it.`
-          );
-    },
     ...pluginRequirements,
   };
 
@@ -96,7 +102,7 @@ const significantEventsRequirements: Record<SignificantEventsUnavailableReason, 
  * declaration order), or `undefined` when significant events is fully available.
  *
  * Parallel (rather than sequential short-circuit) is deliberate: only the
- * license and UI-setting checks are async, and the common "available" path has
+ * feature-flag and license checks are async, and the common "available" path has
  * to run all checks anyway, so parallel keeps that hot path at the latency of
  * the single slowest check instead of summing them.
  */
@@ -132,6 +138,11 @@ export async function assertSignificantEventsAccess(
     throw unmet.error;
   }
 }
+
+/** Same registry as `assertSignificantEventsAccess`, usable from start (it takes no request). */
+export const isSignificantEventsAvailable = async (
+  context: SignificantEventsAccessContext
+): Promise<boolean> => (await findFirstUnmetRequirement(context)) === undefined;
 
 /**
  * Resolves significant events availability without throwing, returning the id

@@ -7,12 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit } from 'lodash';
-
 import { asCodeSearchRequestSchema } from '@kbn/as-code-shared-schemas';
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { logRequest } from '@kbn/as-code-utils';
-import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -44,9 +41,7 @@ export function registerSearchRoute(
       },
       validate: {
         request: {
-          query: schema.object({
-            ...omit(asCodeSearchRequestSchema.getPropSchemas(), ['tags', 'excluded_tags']),
-          }),
+          query: asCodeSearchRequestSchema.pick({ page: true, per_page: true, query: true }),
         },
         response: {
           200: {
@@ -60,7 +55,7 @@ export function registerSearchRoute(
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter }, async () => {
         let result;
         try {
           result = await search(ctx, req.query);

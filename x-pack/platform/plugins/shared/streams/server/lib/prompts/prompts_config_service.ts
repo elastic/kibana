@@ -11,9 +11,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
 } from '@kbn/core/server';
-import { significantEventsPrompt } from '@kbn/streams-ai/src/significant_events/prompt';
-import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
-import { descriptionPrompt } from '@kbn/streams-ai/src/description/prompt';
+import { featuresPrompt, significantEventsPrompt } from '@kbn/nightshift-ai';
 import { streamsPromptsSOType } from './prompts_config';
 import type { PromptsConfigAttributes } from './prompts_config';
 
@@ -22,7 +20,6 @@ export type { PromptsConfigAttributes };
 const defaultsPrompts = {
   featurePromptOverride: featuresPrompt,
   significantEventsPromptOverride: significantEventsPrompt,
-  descriptionPromptOverride: descriptionPrompt,
 };
 
 const SINGLETON_PROMPTS_ID = 'streams-prompts-config-id';
@@ -69,8 +66,6 @@ export class PromptsConfigService {
         significantEventsPromptOverride:
           data.attributes.significantEventsPromptOverride ||
           defaultsPrompts.significantEventsPromptOverride,
-        descriptionPromptOverride:
-          data.attributes.descriptionPromptOverride || defaultsPrompts.descriptionPromptOverride,
       };
     } catch (err) {
       // saved objects client throws with statusCode 404 for not found

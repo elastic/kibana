@@ -35,6 +35,7 @@ import * as workflowI18n from '../../workflow_configuration/translations';
 import { AlertRetrievalContent } from '../../workflow_settings_view/alert_retrieval_step/alert_retrieval_content';
 import { WorkflowValidationCallouts } from '../../workflow_settings_view/components';
 import { RuleActionsField } from '../../../../../common/components/rule_actions_field';
+import { ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useConnectors } from '../../../../../common/hooks/use_connectors';
 import type { FormHook } from '../../../../../shared_imports';
@@ -74,6 +75,7 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
     featureFlags,
     triggersActionsUi: { actionTypeRegistry },
     http,
+    uiSettings,
   } = useKibana().services;
   const { connectors, setCurrentConnector } = useConnectors({ http });
 
@@ -81,14 +83,16 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
 
   useEffect(() => {
     const loadFeatureFlag = async () => {
-      const enabled = await featureFlags.getBooleanValue(
+      const ffEnabled = await featureFlags.getBooleanValue(
         'securitySolution.attackDiscoveryWorkflowsEnabled',
-        false
+        true
       );
-      setIsWorkflowsEnabledFlag(enabled);
+      setIsWorkflowsEnabledFlag(
+        ffEnabled && uiSettings.get(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING, false)
+      );
     };
     loadFeatureFlag();
-  }, [featureFlags]);
+  }, [featureFlags, uiSettings]);
 
   const isWorkflowsEnabled = isWorkflowsEnabledProp ?? isWorkflowsEnabledFlag;
 
@@ -97,8 +101,16 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
     [actionTypeRegistry, connectors]
   );
 
+  // Always initialize the form's workflowConfig field to a concrete value so
+  // that saving without touching any toggle still sends the correct payload.
+  // Without this, a legacy schedule (no workflowConfig) submitted via the
+  // workflows path would omit workflow_config from the API request, leaving the
+  // schedule in legacy state instead of migrating it.
   const { form } = useForm<AttackDiscoveryScheduleSchema>({
-    defaultValue: initialValue,
+    defaultValue: {
+      ...initialValue,
+      workflowConfig: initialValue.workflowConfig ?? DEFAULT_WORKFLOW_CONFIGURATION,
+    },
     options: { stripEmptyFields: false },
     schema,
   });

@@ -298,6 +298,12 @@ const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
 
   ['xpack.security.operator_privileges.enabled', 'true'],
 
+  // Serverless ES throttles indexing when free disk drops below this reserve (defaults to 20% of total
+  // disk). CI agents share an overlay filesystem that can already sit above 80% full at ES startup, which
+  // trips the throttle immediately and stalls Kibana startup/migrations. Pin to an absolute 1gb for tests.
+  // Note: this must stay above the Lucene indexing buffer (~161mb here) or ES refuses to start; 1gb is safe.
+  ['stateless.indices.disk.reserved_bytes', '1gb'],
+
   ['xpack.security.transport.ssl.enabled', 'true'],
 
   [
@@ -728,7 +734,6 @@ export function resolveEsArgs(
         ].join(',')
       );
 
-      esArgs.set('serverless.organization_id', MOCK_IDP_UIAM_ORGANIZATION_ID);
       esArgs.set('serverless.project_type', esProjectTypeFromKbn.get(options.projectType)!);
       esArgs.set('serverless.project_id', projectIdOverride ?? MOCK_IDP_UIAM_PROJECT_ID);
 
@@ -1036,15 +1041,18 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
         ),
       });
       return node.name;
-    }).concat(
-      options.uiam
-        ? getUiamContainers({ includeOAuth: options.uiamOAuth }).map((container) =>
-            runUiamContainer(log, container)
-          )
-        : []
-    )
+    })
   );
   log.info(`[runServerlessCluster] All ES nodes started (${elapsed()})`);
+
+  // UIAM containers must start sequentially: uiam-cosmosdb first, then uiam.
+  // Starting them in parallel risks uiam connecting to CosmosDB before the
+  // pgcosmos extension is ready, causing a fatal (non-retried) 503 on startup.
+  if (options.uiam) {
+    for (const container of getUiamContainers({ includeOAuth: options.uiamOAuth })) {
+      nodeNames.push(await runUiamContainer(log, container));
+    }
+  }
 
   log.success(`Serverless ES cluster running.
   Login with username ${chalk.bold.cyan(ELASTIC_SERVERLESS_SUPERUSER)} or ${chalk.bold.cyan(
@@ -1280,6 +1288,8 @@ async function registerLinkedProjectInOriginSettings(log: ToolingLog, options: S
       _id: linkedProject.projectId,
       _organization: MOCK_IDP_UIAM_ORGANIZATION_ID,
       _type: esProjectType,
+      _csp: 'aws',
+      _region: 'eu-west-1',
       env: 'local',
     },
   };
@@ -1332,7 +1342,11 @@ export function teardownServerlessClusterSync(log: ToolingLog, options: Serverle
   if (runningNodes.length) {
     log.info('Killing running serverless containers.');
 
-    execa.commandSync(`docker kill ${runningNodes.join(' ')}`);
+    try {
+      execa.commandSync(`docker kill ${runningNodes.join(' ')}`);
+    } catch {
+      log.debug('Some containers had already stopped before kill completed.');
+    }
   }
 }
 
@@ -1417,6 +1431,8 @@ async function getOperatorVolume(
   };
   const projectTags = {
     ...Object.fromEntries(Object.entries(projectInfo).map(([key, value]) => [`_${key}`, value])),
+    _csp: 'aws',
+    _region: 'eu-west-1',
     env: 'local',
   };
 

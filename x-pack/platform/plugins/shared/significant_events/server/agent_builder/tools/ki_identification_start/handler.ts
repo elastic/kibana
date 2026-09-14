@@ -7,11 +7,13 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { KIsOnboardingStep } from '@kbn/significant-events-schema';
-import { getStreamsLocation } from '@kbn/streams-plugin/common/get_streams_location/get_streams_location';
 import type {
   SignificantEventsKIsOnboardingClient,
   SignificantEventsKIsOnboardingInputs,
 } from '../../../lib/workflows/onboarding_workflow_client';
+import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
+import { assertNotPaused } from '../../../routes/utils/assert_not_paused';
+import { SIGNIFICANT_EVENTS_APP_ROUTE } from '../../../../common/constants';
 
 const DEFAULT_LOOKBACK_MS = 24 * 60 * 60 * 1000;
 
@@ -23,6 +25,7 @@ interface StartKiIdentificationHandlerParams {
     queries?: string;
   };
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
+  maintenanceService: SignificantEventsMaintenanceService;
   request: KibanaRequest;
 }
 
@@ -35,8 +38,13 @@ export async function startKiIdentificationToolHandler({
   steps,
   connectors,
   streamsKIsOnboardingClient,
+  maintenanceService,
   request,
 }: StartKiIdentificationHandlerParams): Promise<StartKiIdentificationHandlerResult> {
+  // Agent Builder bypasses the HTTP onboarding route; enforce the same pause
+  // gate so Nightshift cannot start onboarding while activity is paused.
+  await assertNotPaused({ maintenanceService, request });
+
   const now = Date.now();
   const skipFeatures = !steps.includes(KIsOnboardingStep.FeaturesIdentification);
   const skipQueries = !steps.includes(KIsOnboardingStep.QueriesGeneration);
@@ -57,12 +65,9 @@ export async function startKiIdentificationToolHandler({
 
   await streamsKIsOnboardingClient.run({ inputs, request });
 
-  const location = getStreamsLocation({
-    name: streamName,
-    managementTab: 'significantEvents',
-  });
-
   return {
-    kibanaPath: `/app/${location.app}${location.path}`,
+    kibanaPath: `${SIGNIFICANT_EVENTS_APP_ROUTE}/knowledge_indicators?stream=${encodeURIComponent(
+      streamName
+    )}`,
   };
 }

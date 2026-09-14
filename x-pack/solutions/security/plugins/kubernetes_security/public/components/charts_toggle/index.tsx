@@ -21,7 +21,7 @@ export const ChartsToggle = ({
 }: ChartsToggleDeps) => (
   <EuiButtonEmpty
     onClick={handleToggleHideCharts}
-    iconType={shouldHideCharts ? 'eye' : 'eyeClosed'}
+    iconType={shouldHideCharts ? 'eye' : 'eyeSlash'}
     data-test-subj={TOGGLE_TEST_ID}
   >
     {shouldHideCharts ? CHART_TOGGLE_SHOW : CHART_TOGGLE_HIDE}

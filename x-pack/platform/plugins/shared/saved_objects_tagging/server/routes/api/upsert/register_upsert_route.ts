@@ -57,7 +57,7 @@ export const registerUpsertRoute = (router: TagsPluginRouter, usageCounter?: Usa
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter }, async () => {
         const { id } = req.params;
         try {
           const body = await upsert(ctx, id, req.body);

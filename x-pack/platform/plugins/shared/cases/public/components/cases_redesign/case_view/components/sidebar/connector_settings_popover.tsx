@@ -45,6 +45,7 @@ export const ConnectorSettingsPopover: FC<ConnectorSettingsPopoverProps> = ({
 
   return (
     <EuiPopover
+      aria-label={redesignI18n.CONNECTOR_SETTINGS_ARIA_LABEL}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       anchorPosition="downRight"

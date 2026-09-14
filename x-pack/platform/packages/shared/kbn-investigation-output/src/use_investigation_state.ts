@@ -78,13 +78,14 @@ export interface UseInvestigationStateResult {
   status: InvestigationStatus;
   /** Detail message for the `failed` and `unavailable` statuses. */
   error?: string;
+  /** Agent builder conversation id created by the investigation step, if available. */
+  conversationId?: string;
 }
 
 /**
  * Surfaces the current state of an investigation, live or completed, from a single source:
  * `investigationStateSchema` — the same schema the investigation agent streams via
- * `investigation_progress` `tool_ui` events AND the schema of the `investigate` step's final
- * structured output persisted to the workflow execution document.
+ * `investigation_progress` `tool_ui` events and returns from the `investigate` step.
  *
  * - While the investigation runs, the underlying agent execution's id isn't known upfront (it's
  *   auto-generated) — the workflow tags it with `workflowExecutionId` as metadata instead of
@@ -114,6 +115,7 @@ export function useInvestigationState({
   isRunning: boolean;
 }): UseInvestigationStateResult {
   const [state, setState] = useState<InvestigationState | undefined>();
+  const [conversationId, setConversationId] = useState<string | undefined>();
   const [settled, setSettled] = useState<
     { status: 'complete' | 'failed' | 'unavailable'; error?: string } | undefined
   >();
@@ -128,6 +130,7 @@ export function useInvestigationState({
     if (lastExecutionIdRef.current !== workflowExecutionId) {
       lastExecutionIdRef.current = workflowExecutionId;
       setState(undefined);
+      setConversationId(undefined);
     }
     setSettled(undefined);
     setIsFollowing(false);
@@ -185,16 +188,28 @@ export function useInvestigationState({
           return;
         }
 
-        const stepExecution = execution.stepExecutions?.find(
+        const investigateStepExecutions = execution.stepExecutions?.filter(
           (step) => step.stepId === INVESTIGATE_STEP_ID
         );
 
-        if (stepExecution?.error) {
-          applySettled({ status: 'failed', error: stepExecution.error.message });
+        // A timeout is reported on the engine's step_level_timeout wrapper, not on the ai.agent
+        // step execution below, so any matching stepId is checked here regardless of stepType.
+        const stepError = investigateStepExecutions?.find((step) => step.error)?.error;
+        if (stepError) {
+          applySettled({ status: 'failed', error: stepError.message });
           return;
         }
 
-        const output = stepExecution?.output as { structured_output?: unknown } | undefined;
+        const stepExecution = investigateStepExecutions?.find(
+          (step) => step.stepType === 'ai.agent'
+        );
+
+        const output = stepExecution?.output as
+          | { structured_output?: unknown; conversation_id?: string }
+          | undefined;
+        if (output?.conversation_id) {
+          setConversationId(output.conversation_id);
+        }
         const parsed = investigationStateSchema.safeParse(output?.structured_output);
 
         if (parsed.success) {
@@ -300,5 +315,5 @@ export function useInvestigationState({
   const status: InvestigationStatus =
     settled?.status ?? (isFollowing || isRunningInput ? 'running' : 'loading');
 
-  return { state, status, error: settled?.error };
+  return { state, status, error: settled?.error, conversationId };
 }

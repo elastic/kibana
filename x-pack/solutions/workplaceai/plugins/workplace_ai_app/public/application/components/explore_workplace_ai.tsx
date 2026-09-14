@@ -38,7 +38,7 @@ export const ExploreWorkplaceAI: React.FC = () => {
       <EuiFlexGroup gutterSize="l">
         <EuiFlexItem>
           <EuiCard
-            icon={<EuiIcon type={searchAnalyticsSVG} size="xl" />}
+            icon={<EuiIcon type={searchAnalyticsSVG} size="xl" aria-hidden={true} />}
             title={
               <FormattedMessage
                 id="xpack.workplaceai.gettingStarted.exploreSection.createFirstAgentTitle"
@@ -63,7 +63,7 @@ export const ExploreWorkplaceAI: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiCard
-            icon={<EuiIcon type={searchResultsSVG} size="xl" />}
+            icon={<EuiIcon type={searchResultsSVG} size="xl" aria-hidden={true} />}
             title={
               <FormattedMessage
                 id="xpack.workplaceai.gettingStarted.exploreSection.chatWithAgentTitle"

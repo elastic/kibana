@@ -8,6 +8,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getESQLResults, formatESQLColumns, getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { ChartType } from '@kbn/visualization-utils';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { createMockStartDependencies } from '../../../editor_frame_service/mocks';
 import {
@@ -16,6 +17,7 @@ import {
   mockDataViewWithTimefield,
   mockAllSuggestions,
 } from '../../../mocks';
+import { readUserChartTypeFromSessionStorage } from '../../../chart_type_session_storage';
 import type {
   TypedLensSerializedState,
   TextBasedPrivateState,
@@ -36,9 +38,14 @@ const mockSuggestionApi = suggestionsApi as jest.Mock;
 const mockFetchData = getESQLResults as jest.Mock;
 const mockformatESQLColumns = formatESQLColumns as jest.Mock;
 const mockGetESQLAdHocDataview = getESQLAdHocDataview as jest.Mock;
+const mockReadUserChartTypeFromSessionStorage = readUserChartTypeFromSessionStorage as jest.Mock;
 
 jest.mock('../../../lens_suggestions_api', () => ({
   suggestionsApi: jest.fn(() => mockAllSuggestions),
+}));
+
+jest.mock('../../../chart_type_session_storage', () => ({
+  readUserChartTypeFromSessionStorage: jest.fn(),
 }));
 
 const queryResponseColumns = [
@@ -167,6 +174,46 @@ describe('Lens inline editing helpers', () => {
       );
     });
 
+    it('passes a session-stored table preference and existing table attributes to suggestionsApi', async () => {
+      const previousAttributes = {
+        title: '',
+        references: [],
+        visualizationType: 'lnsDatatable',
+        state: {
+          visualization: { columns: [] },
+          datasourceStates: { textBased: { layers: {} } },
+          query: { esql: 'FROM index1 | KEEP bytes' },
+        },
+      } as unknown as TypedLensSerializedState['attributes'];
+      const aggregationQuery = {
+        esql: 'FROM index1 | STATS COUNT(*) BY geo.dest',
+      };
+      mockReadUserChartTypeFromSessionStorage.mockReturnValueOnce('lnsDatatable');
+
+      await getSuggestions(
+        aggregationQuery,
+        startDependencies.data,
+        httpMock,
+        uiSettingsMock,
+        mockDatasourceMap(),
+        mockVisualizationMap(),
+        dataviewSpecArr,
+        jest.fn(),
+        undefined,
+        undefined,
+        [],
+        true,
+        previousAttributes
+      );
+
+      expect(mockSuggestionApi).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          preferredChartType: ChartType.Table,
+          preferredVisAttributes: previousAttributes,
+        })
+      );
+    });
+
     it('does not populate the title from the suggestion', async () => {
       const suggestionsAttributes = await getSuggestions(
         query,
@@ -292,7 +339,6 @@ describe('Lens inline editing helpers', () => {
             },
           },
           filters: [],
-          query: { esql: 'FROM index1 | STATS COUNT(*)' },
         },
       };
 
@@ -517,7 +563,7 @@ describe('Lens inline editing helpers', () => {
         const visualization = result?.state.visualization as Partial<MetricVisualizationState>;
 
         expect(trendlineLayer.query?.esql).toBe(
-          'FROM index1 | KEEP bytes | STATS AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)'
+          'FROM index1 | KEEP bytes, @timestamp | STATS AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)'
         );
         expect(
           trendlineLayer.columns.some((column) => column.columnId === trendlineBreakdownAccessor)
