@@ -141,7 +141,7 @@ apiTest.describe(
         const conversationId = await apiTest.step('create an empty conversation', async () => {
           const created = await apiClient.post(`${API_AGENT_BUILDER}/conversations`, {
             headers,
-            body: {},
+            body: { title: 'Incident 4821' },
             responseType: 'json',
           });
           expect(created).toHaveStatusCode(200);
