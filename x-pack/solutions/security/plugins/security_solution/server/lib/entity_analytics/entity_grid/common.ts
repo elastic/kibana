@@ -31,6 +31,9 @@ export const ML_ANOMALY_INDICES = '.ml-anomalies-*';
 export const ENTITY_ID_COALESCE = `COALESCE(host.name, user.name, service.name)`;
 export const RISK_SCORE_COALESCE = `COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)`;
 
+export type TimeRange = '24h' | '7d' | '30d';
+const TIME_RANGE_DAYS: Record<TimeRange, number> = { '24h': 1, '7d': 7, '30d': 30 };
+
 export const ALERT_LOOKBACK_DAYS = 30;
 export const MAX_PAGE_SIZE = 100;
 export const DEFAULT_PAGE_SIZE = 25;
@@ -81,8 +84,10 @@ export interface PageCursor {
 // Computed once per request so data query and count query use the same window
 // (avoids a midnight race where two independent utcDayStart() calls straddle day boundary).
 export interface RiskDateWindow {
-  yesterdayStart: string;
-  todayStart: string;
+  /** Midnight at now - N days: start of the reference scoring period. */
+  windowStart: string;
+  /** Midnight at now - (N-1) days: end of the reference scoring period (1-day window). */
+  windowEnd: string;
 }
 
 export interface QueryDeps {
@@ -90,8 +95,8 @@ export interface QueryDeps {
   alertsIndex: string;
   riskScoreIndex: string;
   riskWindow: RiskDateWindow;
-  // Computed once per request so all alert queries share the same lookback boundary.
   alertCutoff: string;
+  timeRange: TimeRange;
 }
 
 // ── primitives ───────────────────────────────────────────────────────────────
@@ -123,14 +128,16 @@ export const utcDayStart = (daysAgo = 0): string => {
   return midnight.toISOString();
 };
 
-export const riskDateWindow = (): RiskDateWindow => ({
-  yesterdayStart: utcDayStart(1),
-  todayStart: utcDayStart(0),
-});
+export const riskDateWindow = (range: TimeRange = '24h'): RiskDateWindow => {
+  const days = TIME_RANGE_DAYS[range];
+  return {
+    windowStart: utcDayStart(days),
+    windowEnd: utcDayStart(days - 1),
+  };
+};
 
-/** ISO timestamp of the alert lookback window start (now - ALERT_LOOKBACK_DAYS). */
-export const alertLookbackCutoff = (): string =>
-  new Date(Date.now() - ALERT_LOOKBACK_DAYS * 86_400_000).toISOString();
+export const alertLookbackCutoff = (range: TimeRange = '30d'): string =>
+  new Date(Date.now() - TIME_RANGE_DAYS[range] * 86_400_000).toISOString();
 
 // ── cursors ──────────────────────────────────────────────────────────────────
 
@@ -165,13 +172,12 @@ export const sortSuffix = (field: string, dir: SortDir, pageSize: number): strin
 // ── derived ES|QL fragments ───────────────────────────────────────────────────
 
 // Post-LOOKUP-JOIN guard: verifies the entity matched a row in the entity store.
-export const ENTITY_JOIN_FILTER = `${ENTITY_ID_FIELD} IS NOT NULL AND ${ENTITY_TYPE_FIELD} IN (${toList(ALLOWED_ENTITY_TYPES)})`;
+export const ENTITY_JOIN_FILTER = `${ENTITY_ID_FIELD} IS NOT NULL AND ${ENTITY_TYPE_FIELD} IN (${toList(
+  ALLOWED_ENTITY_TYPES
+)})`;
 
 /** Wraps an array of ES|QL subquery strings into a multi-source FROM (union) expression. */
 export const buildEsqlUnion = (legs: string[]): string => {
   const [first, ...rest] = legs;
-  return [
-    `FROM (\n${indent(first)}\n)`,
-    ...rest.map((leg) => `(\n${indent(leg)}\n)`),
-  ].join(',\n');
+  return [`FROM (\n${indent(first)}\n)`, ...rest.map((leg) => `(\n${indent(leg)}\n)`)].join(',\n');
 };

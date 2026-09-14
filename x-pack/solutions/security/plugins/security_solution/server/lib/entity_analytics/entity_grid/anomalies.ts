@@ -27,22 +27,22 @@ const ANOMALY_BASE_FILTER = `result_type == "record" AND is_interim == false`;
 
 // ── query builders: anomaly_count sort ───────────────────────────────────────
 
-const anomalyCountSortBaseQuery = (): string =>
+const anomalyCountSortBaseQuery = (cutoff: string): string =>
   [
     `FROM ${ML_ANOMALY_INDICES}`,
-    `| WHERE ${ANOMALY_BASE_FILTER}`,
+    `| WHERE ${ANOMALY_BASE_FILTER} AND \`@timestamp\` >= "${cutoff}"`,
     ...buildAnomalyEuidPipeline(),
     `| STATS ${ANOMALY_COUNT_FIELD} = COUNT(*) BY \`entity.id\``,
   ].join('\n');
 
 export const anomalyCountSortDataQuery = (
-  { entityAlias }: QueryDeps,
+  { entityAlias, alertCutoff }: QueryDeps,
   cursor: PageCursor | null,
   pageSize: number,
   dir: SortDir
 ): string => {
   const inner = [
-    anomalyCountSortBaseQuery(),
+    anomalyCountSortBaseQuery(alertCutoff),
     `| LOOKUP JOIN ${entityAlias} ON \`entity.id\``,
     `| WHERE ${ENTITY_JOIN_FILTER}`,
     keepClause(ANOMALY_COUNT_FIELD),
@@ -50,17 +50,17 @@ export const anomalyCountSortDataQuery = (
   ].join('\n');
   // SET must be a top-level statement — it cannot appear inside a FROM ( subquery ).
   return [
-    SET_UNMAPPED_NULLIFY + `FROM (`,
+    `${SET_UNMAPPED_NULLIFY}FROM (`,
     indent(inner),
     `)`,
     sortSuffix(ANOMALY_COUNT_FIELD, dir, pageSize),
   ].join('\n');
 };
 
-export const anomalyCountSortCountQuery = ({ entityAlias }: QueryDeps): string =>
+export const anomalyCountSortCountQuery = ({ entityAlias, alertCutoff }: QueryDeps): string =>
   SET_UNMAPPED_NULLIFY +
   [
-    anomalyCountSortBaseQuery(),
+    anomalyCountSortBaseQuery(alertCutoff),
     `| LOOKUP JOIN ${entityAlias} ON \`entity.id\``,
     `| WHERE ${ENTITY_JOIN_FILTER}`,
     `| KEEP \`${ENTITY_ID_FIELD}\``,
@@ -69,13 +69,16 @@ export const anomalyCountSortCountQuery = ({ entityAlias }: QueryDeps): string =
 
 // ── query builders: anomaly_count enrichment ─────────────────────────────────
 
-export const anomalyCountEnrichQuery = (entityIds: string[]): string => {
+export const anomalyCountEnrichQuery = (
+  { alertCutoff }: QueryDeps,
+  entityIds: string[]
+): string => {
   const ids = toList(entityIds);
   return (
     SET_UNMAPPED_NULLIFY +
     [
       `FROM ${ML_ANOMALY_INDICES}`,
-      `| WHERE ${ANOMALY_BASE_FILTER}`,
+      `| WHERE ${ANOMALY_BASE_FILTER} AND \`@timestamp\` >= "${alertCutoff}"`,
       ...buildAnomalyEuidPipeline(),
       `| WHERE \`entity.id\` IN (${ids})`,
       `| STATS ${ANOMALY_COUNT_FIELD} = COUNT(*) BY \`entity.id\``,

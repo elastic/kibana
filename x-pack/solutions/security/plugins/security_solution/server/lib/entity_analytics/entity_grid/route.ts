@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import fs from 'fs';
-import path from 'path';
 import { schema } from '@kbn/config-schema';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
+import type { ElasticsearchClient, ISavedObjectsRepository } from '@kbn/core/server';
 import { APP_ID } from '../../../../common/constants';
 import { API_VERSIONS } from '../../../../common/entity_analytics/constants';
 import { ENTITY_GRID_INTERNAL_URL } from '../../../../common/entity_analytics/entity_analytics/constants';
-import type { ElasticsearchClient, ISavedObjectsRepository } from '@kbn/core/server';
 import type { EntityAnalyticsRoutesDeps } from '../types';
 import {
   ALERT_COUNT_FIELD,
@@ -45,8 +43,8 @@ import {
   toRows,
   cursorClause,
 } from './common';
+import type { TimeRange, PageCursor, QueryDeps, Row, SortDir } from './common';
 
-import type { PageCursor, QueryDeps, Row, SortDir } from './common';
 import {
   alertCountSortCountQuery,
   alertCountSortDataQuery,
@@ -63,7 +61,7 @@ import {
 import {
   riskScoreChangeCountQuery,
   riskScoreChangeDataQuery,
-  yesterdayScoreEnrichQuery,
+  referenceScoreEnrichQuery,
 } from './risk_score';
 import {
   groupSizeEnrichQuery,
@@ -146,12 +144,13 @@ const SORT_HANDLERS: Partial<Record<string, SortHandler>> = {
 const isValidSortField = (field: string): boolean =>
   COMPUTED_SORT_FIELDS.has(field) || VALID_FIELD_RE.test(field);
 
-const buildQueryDeps = (namespace: string): QueryDeps => ({
+const buildQueryDeps = (namespace: string, timeRange: TimeRange): QueryDeps => ({
   entityAlias: getEntitiesAlias(ENTITY_LATEST, namespace),
   alertsIndex: `.alerts-security.alerts-${namespace}`,
   riskScoreIndex: `risk-score.risk-score-${namespace}`,
-  riskWindow: riskDateWindow(),
-  alertCutoff: alertLookbackCutoff(),
+  riskWindow: riskDateWindow(timeRange),
+  alertCutoff: alertLookbackCutoff(timeRange),
+  timeRange,
 });
 
 const executeSortPage = async (
@@ -214,33 +213,32 @@ const buildNextCursor = (
   });
 };
 
-const writeQuery = (dir: string, name: string, q: string): void => {
-  const slug = name.replace(/\s+/g, '_').replace(/[^a-z0-9_]/gi, '');
-  fs.writeFileSync(path.join(dir, `${slug}.md`), `# ${name}\n\n\`\`\`esql\n${q}\n\`\`\`\n`);
-};
+// const writeQuery = (dir: string, name: string, q: string): void => {
+//   const slug = name.replace(/\s+/g, '_').replace(/[^a-z0-9_]/gi, '');
+//   writeFileSync(path.join(dir, `${slug}.md`), `# ${name}\n\n\`\`\`esql\n${q}\n\`\`\`\n`);
+// };
 
 const makeQuery =
   (
     esClient: ElasticsearchClient,
     logger: EntityAnalyticsRoutesDeps['logger'],
     profileEnabled: boolean,
-    dir: string,
     opts: Record<string, unknown>,
     label: string
   ) =>
   async (q: string, nameOverride?: string): Promise<Row[]> => {
     const name = nameOverride ?? label;
     logger.info(`[entity-grid query] ${name}:\n${q}`);
-    writeQuery(dir, name, q);
+    // writeQuery(dir, name, q);
     const t0 = Date.now();
     const r = await esClient.esql.query({ query: q, drop_null_columns: true, ...opts });
     const wall = Date.now() - t0;
     if (profileEnabled) {
-      const slug = name.replace(/\s+/g, '_').replace(/[^a-z0-9_]/gi, '');
-      fs.writeFileSync(
-        path.join(dir, `${slug}.profile.json`),
-        JSON.stringify({ took: r.took, wall, profile: r.profile }, null, 2)
-      );
+      // const slug = name.replace(/\s+/g, '_').replace(/[^a-z0-9_]/gi, '');
+      // writeFileSync(
+      //   path.join(dir, `${slug}.profile.json`),
+      //   JSON.stringify({ took: r.took, wall, profile: r.profile }, null, 2)
+      // );
       logger.info(`[entity-grid perf] ${name} took=${r.took}ms wall=${wall}ms`);
     } else {
       logger.debug(`[entity-grid perf] ${name} took=${r.took}ms wall=${wall}ms`);
@@ -248,6 +246,13 @@ const makeQuery =
     return toRows(r);
   };
 
+// Two sort modes:
+//   Derived sort  — sort field is not a native entity doc field (e.g. risk_score_change, alert
+//                   counts). A custom query runs against a secondary index (risk scores, alerts…),
+//                   joins the entity store, and returns a pre-ranked page.
+//   Native sort   — sort field lives directly on the entity document. A single ES|QL query against
+//                   the entity store sorts and paginates in one shot.
+// After either mode, enrichPageRows fills in the remaining non-native columns for the page.
 const buildPageQueries = (
   sort: { field: string; direction: SortDir },
   cursor: PageCursor | null,
@@ -256,12 +261,14 @@ const buildPageQueries = (
 ): QueryPair => {
   const handler = SORT_HANDLERS[sort.field];
   if (handler) {
+    // Derived sort: custom query for this field (see SORT_HANDLERS registry above).
     return {
       dataQuery: handler.dataQuery(deps, cursor, pageSize, sort.direction),
       countQuery: handler.countQuery(deps),
     };
   }
 
+  // Native sort: field is on the entity doc — query the entity store directly.
   return {
     dataQuery: nativeEntityDataQuery(
       deps.entityAlias,
@@ -322,7 +329,7 @@ const enrichRiskScoreChange = async (
 
   const entityIds = pageRows.map((r) => r[ENTITY_ID_FIELD] as string).filter(Boolean);
   const rows = await enrichPageQuery(
-    yesterdayScoreEnrichQuery(riskScoreIndex, entityIds, riskWindow),
+    referenceScoreEnrichQuery(riskScoreIndex, entityIds, riskWindow),
     'score enrich'
   ).catch((e: unknown) => {
     logger.warn(`score enrich: ${e}`);
@@ -330,7 +337,7 @@ const enrichRiskScoreChange = async (
   });
   if (!rows) return;
 
-  const byId = new Map(rows.map((r) => [r.entity_id as string, r.yesterday_score as number]));
+  const byId = new Map(rows.map((r) => [r.entity_id as string, r.reference_score as number]));
   for (const row of pageRows) {
     const cur = row[RISK_SCORE_NORM_FIELD] as number | null;
     const yday = byId.get(row[ENTITY_ID_FIELD] as string) ?? null;
@@ -372,7 +379,7 @@ const enrichGroupSize = async (
 
 const enrichAnomalyCount = async (
   pageRows: Row[],
-  _deps: QueryDeps,
+  deps: QueryDeps,
   skip: Set<string>,
   enrichPageQuery: RawQuery,
   logger: EntityAnalyticsRoutesDeps['logger']
@@ -383,7 +390,7 @@ const enrichAnomalyCount = async (
   if (!entityIds.length) return;
 
   const rows = await enrichPageQuery(
-    anomalyCountEnrichQuery(entityIds),
+    anomalyCountEnrichQuery(deps, entityIds),
     'anomaly count enrich'
   ).catch((e: unknown) => {
     logger.warn(`anomaly count enrich: ${e}`);
@@ -453,6 +460,10 @@ export const registerEntityGridRoute = ({
                 max: MAX_PAGE_SIZE,
               }),
               cursor: schema.maybe(schema.string({ maxLength: 500 })),
+              time_range: schema.oneOf(
+                [schema.literal('24h'), schema.literal('7d'), schema.literal('30d')],
+                { defaultValue: '30d' }
+              ),
               profile: schema.maybe(schema.boolean()),
             }),
           },
@@ -471,6 +482,7 @@ export const registerEntityGridRoute = ({
             sort = { field: ENTITY_ID_FIELD, direction: 'asc' as const },
             page_size: pageSize,
             cursor: encodedCursor,
+            time_range: timeRange,
             profile: profileEnabled = false,
           } = request.body;
 
@@ -485,30 +497,30 @@ export const registerEntityGridRoute = ({
           if (cursor && !isValidSortField(cursor.sortField))
             return siemResponse.error({ statusCode: 400, body: 'Invalid cursor' });
 
-          // filter is from the search bar and targets entity store fields — apply it only to
-          // entity queries, not to alert or risk score index queries which have different schemas.
-          const esqlOpts = {
+          // The search bar filter targets entity store field names — include it in sort queries
+          // (which run against the entity store) but not in enrichment queries (which run against
+          // alerts and risk-score indices that have different schemas).
+          const sortQueryOpts = {
             ...(filter ? { filter } : {}),
             ...(profileEnabled ? { profile: true } : {}),
           };
 
-          const rawOpts = profileEnabled ? { profile: true as const } : {};
+          const enrichQueryOpts = profileEnabled ? { profile: true as const } : {};
 
-          const sortSlugForDir = sort.field.replace(/[^a-z0-9_]/gi, '_');
-          const queryDir = `/tmp/entity_queries/${sortSlugForDir}`;
-          fs.mkdirSync(queryDir, { recursive: true });
+          // const sortSlugForDir = sort.field.replace(/[^a-z0-9_]/gi, '_');
+          // const queryDir = `/tmp/entity_queries/${sortSlugForDir}`;
+          // fs.mkdirSync(queryDir, { recursive: true });
 
-          const pageQuery = makeQuery(esClient, logger, profileEnabled, queryDir, esqlOpts, 'page');
+          const pageQuery = makeQuery(esClient, logger, profileEnabled, sortQueryOpts, 'page');
           const enrichPageQuery = makeQuery(
             esClient,
             logger,
             profileEnabled,
-            queryDir,
-            rawOpts,
+            enrichQueryOpts,
             'enrich'
           );
 
-          const deps = buildQueryDeps(namespace);
+          const deps = buildQueryDeps(namespace, timeRange as TimeRange);
           const [coreStart] = await getStartServices();
           const soClient = coreStart.savedObjects.createInternalRepository(['cases-attachments']);
 

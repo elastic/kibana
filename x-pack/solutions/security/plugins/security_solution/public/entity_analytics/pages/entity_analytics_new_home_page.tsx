@@ -10,6 +10,7 @@ import moment from 'moment';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import {
   EuiBadge,
+  EuiButtonGroup,
   EuiDataGrid,
   EuiFlexGroup,
   EuiFlexItem,
@@ -88,6 +89,14 @@ const GRID_COLUMNS: EuiDataGridColumn[] = [
   { id: '@timestamp', displayAsText: 'Last seen', initialWidth: 180 },
 ];
 
+type TimeRange = '24h' | '7d' | '30d';
+
+const TIME_RANGE_OPTIONS: Array<{ id: TimeRange; label: string }> = [
+  { id: '24h', label: '24h' },
+  { id: '7d', label: '7d' },
+  { id: '30d', label: '30d' },
+];
+
 interface EntityGridResponse {
   entities: Array<Record<string, unknown>>;
   next_cursor: string | null;
@@ -111,6 +120,7 @@ const useEntityGridData = ({
   cursors,
   onNextCursor,
   filter,
+  timeRange,
 }: {
   sortField: string;
   sortDirection: 'asc' | 'desc';
@@ -119,6 +129,7 @@ const useEntityGridData = ({
   cursors: Array<string | null>;
   onNextCursor: (pageIndex: number, cursor: string) => void;
   filter?: object;
+  timeRange: TimeRange;
 }) => {
   const { http } = useKibana().services;
   const cursor = cursors[pageIndex] ?? null;
@@ -126,7 +137,7 @@ const useEntityGridData = ({
   const [cachedTotal, setCachedTotal] = useState(0);
 
   const { data, isFetching } = useQuery(
-    ['entity-grid', sortField, sortDirection, pageIndex, pageSize, cursor, filter],
+    ['entity-grid', sortField, sortDirection, pageIndex, pageSize, cursor, filter, timeRange],
     async () => {
       const result = await http.post<EntityGridResponse>(ENTITY_GRID_INTERNAL_URL, {
         version: '1',
@@ -134,6 +145,7 @@ const useEntityGridData = ({
           sort: { field: sortField, direction: sortDirection },
           page_size: pageSize,
           profile: true,
+          time_range: timeRange,
           ...(cursor ? { cursor } : {}),
           ...(filter ? { filter } : {}),
         }),
@@ -199,6 +211,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   }, [dataView, globalQuery, globalFilters]);
 
   const watchlistNames = useWatchlistNames();
+  const [timeRange, setTimeRange] = useState<TimeRange>('30d');
   const [sortField, setSortField] = useState('entity.risk.calculated_score_norm');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [pageIndex, setPageIndex] = useState(0);
@@ -239,6 +252,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     cursors,
     onNextCursor,
     filter: esFilter,
+    timeRange,
   });
 
   // Chain-fetch forward when the user jumped to a page beyond what's been loaded.
@@ -424,7 +438,24 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
               padding-inline: ${euiTheme.size.base};
             `}
           >
-            <SiemSearchBar dataView={dataView} id={InputsModelId.global} hideDatePicker />
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem>
+                <SiemSearchBar dataView={dataView} id={InputsModelId.global} hideDatePicker />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonGroup
+                  legend="Time range"
+                  options={TIME_RANGE_OPTIONS}
+                  idSelected={timeRange}
+                  onChange={(id) => {
+                    setTimeRange(id as TimeRange);
+                    resetPagination();
+                  }}
+                  buttonSize="m"
+                  color="primary"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </div>
 
           <EuiSpacer size="m" />
