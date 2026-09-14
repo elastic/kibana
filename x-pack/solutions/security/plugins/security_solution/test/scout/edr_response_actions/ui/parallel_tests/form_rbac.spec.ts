@@ -6,12 +6,13 @@
  */
 
 import { CUSTOM_QUERY_RULE } from '@kbn/scout-security';
+import type { CustomQueryRuleResponseAction } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 import { spaceTest, tags } from '../fixtures';
 
 const CREATE_RULE_NAME = 'scout-response-actions-create-rbac';
 
-const SEEDED_RESPONSE_ACTIONS = [
+const SEEDED_RESPONSE_ACTIONS: CustomQueryRuleResponseAction[] = [
   {
     params: { command: 'isolate', comment: 'Isolate host' },
     action_type_id: '.endpoint',
