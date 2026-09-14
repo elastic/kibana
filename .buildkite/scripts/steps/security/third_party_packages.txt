@@ -39,6 +39,7 @@ json-stable-stringify
 apache-arrow
 oxlint
 react-element-to-jsx-string
+@babel/plugin-transform-class-static-block
 @swc/core
 lightningcss
 tar-fs
@@ -73,3 +74,4 @@ graphql
 oxlint-tsgolint
 bump-cli
 @oxlint/plugins
+monaco-marker-data-provider

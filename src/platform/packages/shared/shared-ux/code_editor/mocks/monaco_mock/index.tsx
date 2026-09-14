@@ -55,6 +55,7 @@ function createEditorInstance() {
         };
       }
     }),
+    addAction: jest.fn(() => ({ dispose: jest.fn() })),
     addCommand: jest.fn(),
     addContentWidget: jest.fn((widget: monaco.editor.IContentWidget) => {
       placeholderDiv?.appendChild(widget.getDomNode());

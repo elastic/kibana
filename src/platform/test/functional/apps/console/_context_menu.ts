@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('by default it should copy as curl and show toast when copy to language button is clicked', async () => {
         await PageObjects.console.clickContextMenu();
-        await PageObjects.console.clickCopyToLanguageButton();
+        await PageObjects.console.clickCopyAsButton();
 
         await retry.try(async () => {
           const resultToast = await toasts.getElementByIndex(1);
@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.selectAllRequests();
 
         await PageObjects.console.clickContextMenu();
-        await PageObjects.console.clickCopyToLanguageButton();
+        await PageObjects.console.clickCopyAsButton();
 
         await retry.try(async () => {
           const resultToast = await toasts.getElementByIndex(1);
