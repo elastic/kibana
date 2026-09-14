@@ -66,17 +66,13 @@ The graph visualization feature is owned by **@elastic/contextual-security-apps*
 
 - **Unused schema types must be removed** — Schema types that existing schemas do not reuse must not be added or left in place. ([PR #227784](https://github.com/elastic/kibana/pull/227784) · @albertoblaz · `x-pack/solutions/security/packages/kbn-cloud-security-posture/common/schema/graph/v1.ts`)
 
-> **[VERIFY]:** The mining report lists `addEntityFilter` wrapping the user's first chip in OR — corrupting the AND relationship with the rest of the filter bar — as an open, unaddressed defect from [PR #289467](https://github.com/elastic/kibana/pull/289467) (@JordanSh). The suggested fix is to check that `controlledBy` starts with `CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER` before wrapping. Is this now an invariant reviewers should enforce, or is it still an open bug tracked elsewhere?
+- **Graph filters and actions always expand, never narrow** — `addEntityFilter` intentionally wraps graph-generated chips in OR. This is by design: filters and actions performed on the graph always add to and expand the graph view. Intersecting all filters with AND would narrow the results too much and hide valuable investigative information. Do not change this to an AND relationship. (@alexreal1314, [PR #289467](https://github.com/elastic/kibana/pull/289467))
 
 ## Common review patterns (learned from real PRs)
 
-- **Count naming encodes what is counted** — Use `uniqueEventsCount` and `uniqueAlertsCount` for the sub-aggregates and reserve the generic `count` for the combined total that is their sum. A reviewer flagged bare `count` as ambiguous and asked for a rename; the author explained the convention (with a screenshot showing the relationship) and the reviewer did not push back. No code change was made and the thread was left unresolved — so treat the convention as established, not the rename. (@JordanSh, [PR #285449](https://github.com/elastic/kibana/pull/285449) · `x-pack/solutions/security/test/cloud_security_posture_api/routes/graph.ts`)
+- **Count naming encodes what is counted** — `count` is the combined total (`uniqueEventsCount + uniqueAlertsCount`); use `uniqueEventsCount` and `uniqueAlertsCount` for the sub-aggregates. This is the intended convention across the entire graph API — schema, parser, and integration tests — not just test files. (@JordanSh, [PR #285449](https://github.com/elastic/kibana/pull/285449) · `x-pack/solutions/security/test/cloud_security_posture_api/routes/graph.ts`)
 
-  > **[VERIFY]:** Is `count = uniqueEventsCount + uniqueAlertsCount` the intended, documented convention across the graph API (schema, parser, and integration tests), or was it specific to this test file?
-
-- **EUID filter translation needs condition-based namespace fixtures** — Both hard-rule findings in [PR #289467](https://github.com/elastic/kibana/pull/289467) note explicitly that the test suite did not catch the bugs because no fixture exercised condition-based namespaces (`local`, asset-discovery). The test archives cover only `okta`/`gcp` entities, whose `sourceMatchesAny` namespaces produce only `term`/`prefix`/`exists` clauses with array-valued `must_not` — so the single-object `must_not` shape and unmodeled clause types never flow through the translator in any test. (@niros1, [PR #289467](https://github.com/elastic/kibana/pull/289467) · `search_filters.ts`)
-
-  > **[VERIFY]:** Should adding a condition-based-namespace entity fixture (local user and asset-discovery) to the graph test archives be a standing requirement for PRs touching `search_filters.ts`?
+- **EUID filter translation bugs are caught by unit/integration/FTR coverage, not archive fixtures** — The bugs in [PR #289467](https://github.com/elastic/kibana/pull/289467) were not caught because no fixture exercised condition-based namespaces (`local`, asset-discovery). Adding condition-based-namespace fixtures to the graph test archives is not a standing requirement — sufficient unit test, API integration, and FTR coverage is the team's standard. (@niros1, [PR #289467](https://github.com/elastic/kibana/pull/289467) · `search_filters.ts`)
 
 - **ESQL readability vs extraction** — Reviewers push back on over-extracting ES|QL into many variables or leaving entirely inline blobs; agreed balance is minimal splitting without large duplicated chunks. (@kfirpeled, @albertoblaz, [PR #227784](https://github.com/elastic/kibana/pull/227784) · `fetch_graph.ts`)
 
@@ -143,8 +139,6 @@ The graph visualization feature is owned by **@elastic/contextual-security-apps*
 - **Server-side label resolution** — Label logic on the server reduces client CPU during ReactFlow re-renders for large graphs. ([PR #227784](https://github.com/elastic/kibana/pull/227784) · @kfirpeled · `graph/src/components/utils.ts`)
 
 - **`nodesLimit` truncates the graph and emits a message** — `parseRecords` applies `nodesLimit` and emits `REACHED_NODES_LIMIT` when triggered; changes that increase node production per record push graphs into truncation sooner. ([code-architecture.md] · `server/routes/graph/parse_records.ts:74`)
-
-  > **[VERIFY]:** What is the current default `nodesLimit`, and is there a node count above which layout/render performance is known to degrade?
 
 > **[VERIFY]:** Raising ES|QL LIMIT to 50k for entity-ID-level grouping needs documented rationale and truncation handling given ES default max 10k rows. ([PR #269755](https://github.com/elastic/kibana/pull/269755) · @niros1)
 
