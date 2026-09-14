@@ -9,6 +9,8 @@ import { panelGridSchema, timeRangeSchema } from '@kbn/agent-builder-dashboards-
 import { z } from '@kbn/zod/v4';
 import { definePanelType, type ConfigEditValidation } from '../panel_type';
 
+const MAX_STRING_LENGTH = 2048;
+
 /**
  * ML anomaly detection panel logic.
  *
@@ -185,19 +187,22 @@ export const singleMetricViewerConfigSchema = z.object({
       'Zero-based index of the detector within the job whose results are shown. Defaults to 0 when omitted.'
     ),
   selected_entities: z
-    .record(z.string().max(256), z.union([z.string().max(10000), z.number()]).optional())
+    .record(
+      z.string().max(256),
+      z.union([z.string().max(MAX_STRING_LENGTH), z.number()]).optional()
+    )
     .optional()
     .describe(
       'Values of the partition, by, or over fields that identify the single time series to display.'
     ),
   function_description: z
     .string()
-    .max(1000)
+    .max(MAX_STRING_LENGTH)
     .optional()
     .describe('For metric detectors: which value to plot — "min", "max", or "mean".'),
   forecast_id: z
     .string()
-    .max(1000)
+    .max(MAX_STRING_LENGTH)
     .optional()
     .describe('Identifier of a forecast to overlay on the chart.'),
   time_range: timeRangeSchema
