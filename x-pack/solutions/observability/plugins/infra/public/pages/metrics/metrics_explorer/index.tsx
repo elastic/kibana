@@ -104,9 +104,6 @@ const MetricsExplorerContent = () => {
   const prevDataRef = useRef(data);
   const { onPageReady } = usePerformanceContext();
 
-  useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer' });
-  useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer', delay: 15000 });
-
   useEffect(() => {
     if (currentView) {
       onViewStateChange(currentView);

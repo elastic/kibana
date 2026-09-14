@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { MetricsExplorerPage } from '.';
 import { metricsExplorerTitle } from '../../../translations';
 
@@ -145,6 +146,11 @@ jest.mock('../header/use_metrics_app_header_menu', () => ({
   }),
 }));
 
+const trackedPageviews = () =>
+  Array.from(
+    new Set((useTrackPageview as jest.Mock).mock.calls.map(([options]) => JSON.stringify(options)))
+  );
+
 const renderMetricsExplorerPage = () =>
   render(
     <EuiProvider>
@@ -159,6 +165,7 @@ describe('MetricsExplorerPage', () => {
     mockFetcherState.hasData = true;
     mockFetcherState.status = 'success';
     lastInfraPageTemplateProps = {};
+    (useTrackPageview as jest.Mock).mockClear();
   });
 
   it('renders AppHeader with the explorer title and no back control when metrics exist', async () => {
@@ -217,5 +224,25 @@ describe('MetricsExplorerPage', () => {
     expect(screen.getByTestId('metricsExplorerToolbar')).toBeInTheDocument();
     expect(screen.getByTestId('metricsExplorerCharts')).toBeInTheDocument();
     expect(lastInfraPageTemplateProps.hasDataOverride).toBe(true);
+  });
+
+  it('tracks the same pageviews whether charts or onboarding render', async () => {
+    renderMetricsExplorerPage();
+    await screen.findByTestId('metricsExplorerCharts');
+
+    const chartsPageviews = trackedPageviews();
+    expect(chartsPageviews).toEqual([
+      JSON.stringify({ app: 'infra_metrics', path: 'metrics_explorer' }),
+      JSON.stringify({ app: 'infra_metrics', path: 'metrics_explorer', delay: 15000 }),
+    ]);
+
+    cleanup();
+    (useTrackPageview as jest.Mock).mockClear();
+    mockFetcherState.hasData = false;
+
+    renderMetricsExplorerPage();
+    await screen.findByTestId('kbnNoDataPage');
+
+    expect(trackedPageviews()).toEqual(chartsPageviews);
   });
 });
