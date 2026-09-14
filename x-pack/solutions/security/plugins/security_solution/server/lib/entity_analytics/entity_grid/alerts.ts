@@ -57,9 +57,11 @@ export const lastSeenAlertDataQuery = (
   );
 };
 
-export const lastSeenAlertCountQuery = (
-  { alertsIndex, entityAlias, alertCutoff }: QueryDeps
-): string =>
+export const lastSeenAlertCountQuery = ({
+  alertsIndex,
+  entityAlias,
+  alertCutoff,
+}: QueryDeps): string =>
   [
     alertLastSeenBaseQuery(alertsIndex, alertCutoff),
     `| LOOKUP JOIN ${entityAlias} ON \`entity.id\``,
@@ -118,9 +120,11 @@ export const alertCountSortDataQuery = (
   return [`FROM (`, indent(inner), `)`, sortSuffix(ALERT_COUNT_FIELD, dir, pageSize)].join('\n');
 };
 
-export const alertCountSortCountQuery = (
-  { alertsIndex, entityAlias, alertCutoff }: QueryDeps
-): string =>
+export const alertCountSortCountQuery = ({
+  alertsIndex,
+  entityAlias,
+  alertCutoff,
+}: QueryDeps): string =>
   [
     alertCountSortBaseQuery(alertsIndex, alertCutoff),
     `| LOOKUP JOIN ${entityAlias} ON \`entity.id\``,
