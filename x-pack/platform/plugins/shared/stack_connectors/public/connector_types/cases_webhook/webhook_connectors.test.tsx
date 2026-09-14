@@ -312,6 +312,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
     });
 
     it('form submit works with valid headers', async () => {
+      useSecretHeadersMock.mockReturnValue({ isLoading: false, isFetching: false, data: [] });
       const customActionConnector = {
         ...actionConnector,
         secrets: {
@@ -344,6 +345,16 @@ describe('CasesWebhookActionConnectorFields renders', () => {
         { wrapper: customQueryProviderWrapper }
       );
       expect(await screen.findByTestId('horizontalStep1-current')).toBeInTheDocument();
+
+      const keyInputs = await screen.findAllByTestId('webhookHeadersKeyInput');
+      expect(keyInputs).toHaveLength(2);
+      expect(keyInputs[0]).toHaveValue('configKey');
+      expect(keyInputs[1]).toHaveValue('secretKey');
+      expect(await screen.findByTestId('webhookHeadersValueInput')).toHaveValue('configValue');
+      expect(await screen.findByTestId('webhookHeadersSecretValueInput')).toHaveValue(
+        'secretValue'
+      );
+
       await user.click(await screen.findByTestId('casesWebhookNext'));
       expect(await screen.findByTestId('horizontalStep1-complete')).toBeInTheDocument();
     });
