@@ -360,7 +360,9 @@ export class StatusRuleExecutor {
       // reached the threshold isn't silently dropped from the alert once a
       // sibling location has — mirrors how down-alerts gate on an aggregate
       // across all of a monitor's locations and then include all of them.
-      const meetsThreshold = configs.some((config) => (config.pendingCount ?? 1) >= pendingThreshold);
+      const meetsThreshold = configs.some(
+        (config) => (config.pendingCount ?? 1) >= pendingThreshold
+      );
       if (!meetsThreshold) {
         continue;
       }

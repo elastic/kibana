@@ -1358,7 +1358,10 @@ describe('StatusRuleExecutor', () => {
 
       it('should do nothing if pendingConfigs is empty', async () => {
         // Call the method with empty pendingConfigs
-        await statusRule.schedulePendingAlertPerConfigId({ pendingConfigs: {}, pendingThreshold: 1 });
+        await statusRule.schedulePendingAlertPerConfigId({
+          pendingConfigs: {},
+          pendingThreshold: 1,
+        });
 
         // Verify scheduleAlert was not called
         expect(scheduleAlertSpy).not.toHaveBeenCalled();
