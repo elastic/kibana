@@ -54,7 +54,7 @@ export const investigationTemplate: ConversationTemplate = {
       required: false,
       options: ['false_positive', 'benign', 'resolved', 'duplicate', 'other'],
     },
-    investigation_workflow_id: {
+    workflow_execution_id: {
       input_type: 'TEXT',
       required: false,
       description: "Used to indicate ongoing status of the investigation's workflow",

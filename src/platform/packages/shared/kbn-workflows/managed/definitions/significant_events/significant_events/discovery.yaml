@@ -452,7 +452,6 @@ steps:
                               path: '/s/{{ workflow.spaceId }}/internal/significant_events/run_quotas/_consume'
                               body:
                                 group: 'investigation'
-                                critical: '${{ steps.resolve_open_event.output.hits.hits[0]._source.severity == "80-critical" }}'
                               headers:
                                 x-elastic-internal-origin: 'kibana'
                             timeout: '10s'

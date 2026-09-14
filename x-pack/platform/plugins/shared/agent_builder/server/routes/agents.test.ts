@@ -396,20 +396,26 @@ describe('Agent Routes - ai_indices Context Engine gate', () => {
       }
     });
 
-    it('rejects create with ai_indices and never reaches the service', async () => {
+    it('strips ai_indices from create before reaching the service', async () => {
       const result = await callCreate(false, { tools: [], ai_indices: ['my-index'] });
 
-      expect(result.type).toBe('badRequest');
-      expect(result.body.message).toContain('ai_indices');
-      expect(mockCreate).not.toHaveBeenCalled();
+      expect(result.type).toBe('ok');
+      expect(mockCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          configuration: { tools: [] },
+        })
+      );
     });
 
-    it('rejects update with ai_indices and never reaches the service', async () => {
-      const result = await callUpdate(false, { configuration: { ai_indices: ['my-index'] } });
+    it('strips ai_indices from update before reaching the service', async () => {
+      const result = await callUpdate(false, {
+        configuration: { ai_indices: ['my-index'], instructions: 'hi' },
+      });
 
-      expect(result.type).toBe('badRequest');
-      expect(result.body.message).toContain('ai_indices');
-      expect(mockUpdate).not.toHaveBeenCalled();
+      expect(result.type).toBe('ok');
+      expect(mockUpdate).toHaveBeenCalledWith('agent-1', {
+        configuration: { instructions: 'hi' },
+      });
     });
 
     it('allows create and update that leave ai_indices alone', async () => {
