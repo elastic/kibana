@@ -171,6 +171,7 @@ export type {
   AwsTemporaryKeyCredentials,
   CloudSetupForCloudConnector,
 } from './components/cloud_connector';
+export type { RenderIacTemplateIntegration } from '../common/types/rest_spec/iac_provisioner';
 export {
   AWS_AUTH_TYPE_SELECTOR_TEST_SUBJ,
   AWS_AUTH_TYPE_IF_CARD_TEST_SUBJ,

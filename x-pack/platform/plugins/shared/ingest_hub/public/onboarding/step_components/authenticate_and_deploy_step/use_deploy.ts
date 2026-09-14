@@ -37,6 +37,8 @@ export interface UseDeployResult {
   failedInstances: string[];
   handleDeploy: (instanceIds?: string[]) => void;
   isAlreadyDeployed: boolean;
+  /** The reconciled instance groups Deploy will create policies for; drives the Federated Identity template set. */
+  deployGroups: DeployGroup[];
 }
 
 export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeployResult {
@@ -280,5 +282,13 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     ]
   );
 
-  return { namespace, setNamespace, isDeploying, failedInstances, handleDeploy, isAlreadyDeployed };
+  return {
+    namespace,
+    setNamespace,
+    isDeploying,
+    failedInstances,
+    handleDeploy,
+    isAlreadyDeployed,
+    deployGroups,
+  };
 }

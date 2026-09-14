@@ -23,6 +23,7 @@ import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import { DeploymentMethodCard } from './authenticate_and_deploy_step/deployment_method_card';
 import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/managed_integrations_section';
+import { buildIacIntegrations } from './authenticate_and_deploy_step/package_inputs';
 import { useDeploy, toSOServiceVars } from './authenticate_and_deploy_step/use_deploy';
 import { useOnboardingSO } from './authenticate_and_deploy_step/use_onboarding_so';
 import { useEcfDeployment, EcfDeploymentSection } from './ecf_deployment_section';
@@ -84,9 +85,11 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   }, [serviceSettings?.instances, selectedServiceIds, awsServicesMap]);
 
   // ── Managed Integrations ──────────────────────────────────────────────────────
-  const { handleDeploy, isDeploying, failedInstances, isAlreadyDeployed } = useDeploy({
-    onContinue: () => {},
-  });
+  const { handleDeploy, isDeploying, failedInstances, isAlreadyDeployed, deployGroups } = useDeploy(
+    {
+      onContinue: () => {},
+    }
+  );
   const [deployAttempted, setDeployAttempted] = useState(false);
   const isMiDone =
     isAlreadyDeployed || (deployAttempted && !isDeploying && failedInstances.length === 0);
@@ -118,6 +121,17 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       (id) => awsServicesMap?.get(id)?.identityFederationSupported !== false
     );
   }, [miServiceIds, awsServicesMap]);
+
+  // The Federated Identity template must cover exactly the instances Deploy will create as
+  // managed integrations, duplicates included (https://github.com/elastic/ingest-dev/issues/9415).
+  const iacIntegrations = useMemo(
+    () =>
+      buildIacIntegrations(
+        deployGroups.flatMap((group) => group.members),
+        serviceVars
+      ),
+    [deployGroups, serviceVars]
+  );
 
   // ── Elastic Cloud Forwarder ───────────────────────────────────────────────────
   const {
@@ -236,6 +250,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         <ManagedIntegrationsSection
           serviceCount={miServiceIds.length}
           showIdentityFederation={showIdentityFederation}
+          iacIntegrations={iacIntegrations}
           onDeploy={handleDeployClick}
           isDeploying={isDeploying}
           isDone={isMiDone}
