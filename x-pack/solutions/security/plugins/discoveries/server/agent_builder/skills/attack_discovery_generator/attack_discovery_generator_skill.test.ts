@@ -122,6 +122,18 @@ describe('attackDiscoveryGeneratorSkill', () => {
         /security\.attack-discovery\.get_default_esql_query/
       );
     });
+    it('forbids retrieval-builder loading and esql rephrasing on the marker live-retrieval path', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        'Marker/tag live-retrieval is single-shot'
+      );
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        'attack-discovery-alert-retrieval-builder'
+      );
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        'already filters on the marker'
+      );
+    });
+
 
     it('bids a single bounded corroboration pass', () => {
       expect(attackDiscoveryGeneratorSkill.content).toContain(
