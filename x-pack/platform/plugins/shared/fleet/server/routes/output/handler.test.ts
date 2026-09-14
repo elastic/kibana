@@ -291,7 +291,7 @@ describe('Outputs handler', () => {
         .spyOn(appContextService, 'getCloud')
         .mockReturnValue({ isServerlessEnabled: false } as any);
 
-      const res = await putOutputHandlerWithErrorHandler(
+      await putOutputHandlerWithErrorHandler(
         mockContext,
         {
           body: { id: '../../../some-other-output', type: 'elasticsearch' },
