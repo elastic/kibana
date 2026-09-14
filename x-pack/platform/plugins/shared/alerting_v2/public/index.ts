@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ContainerModule } from 'inversify';
+import { Container, ContainerModule } from 'inversify';
 import { OnSetup, PluginSetup, PluginStart, Start } from '@kbn/core-di';
 import { CoreSetup, CoreStart, PluginInitializer } from '@kbn/core-di-browser';
 import type { PluginInitializerContext } from '@kbn/core/public';
@@ -45,7 +45,15 @@ import { setKibanaServices } from './kibana_services';
 import type { AlertingV2UIConfig } from './kibana_services';
 import type { AlertingV2PublicStart } from './types';
 import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
-import { AlertingV2RuleLibraryLocatorDefinition } from './locator';
+import type { AlertingV2PageProps } from './application/composable_pages';
+import {
+  AlertingV2RulesLocatorDefinition,
+  AlertingV2RuleLibraryLocatorDefinition,
+  AlertingV2EpisodesLocatorDefinition,
+  AlertingV2ActionPoliciesLocatorDefinition,
+  AlertingV2ExecutionHistoryLocatorDefinition,
+  createAlertingV2HostApp,
+} from './locators';
 
 const LazyCreateRuleOptionsFlyout = React.lazy(() =>
   import('./create_rule_options_flyout').then((m) => ({ default: m.CreateRuleOptionsFlyout }))
@@ -58,9 +66,51 @@ const CreateRuleOptionsFlyout = (props: CreateRuleOptionsFlyoutProps) =>
     React.createElement(LazyCreateRuleOptionsFlyout, props)
   );
 
-export type { AlertingV2PublicStart, CreateRuleOptionsFlyoutLegacyItem } from './types';
+/**
+ * Injects this plugin's DI container into a composable page.
+ *
+ * Do not use `props.coreStart.injection.getContainer()`: when a host plugin
+ * (e.g. observabilityAlerting) renders these pages, that call returns the
+ * *host* container, which does not bind `PluginStart('share')` or this
+ * plugin's internal services.
+ */
+const lazyPageWithContainer = (
+  loader: () => Promise<{
+    default: React.ComponentType<AlertingV2PageProps & { container: Container }>;
+  }>,
+  container: Container
+): React.ComponentType<AlertingV2PageProps> => {
+  const LazyComponent = React.lazy(loader);
+  return (props: AlertingV2PageProps) =>
+    React.createElement(
+      React.Suspense,
+      { fallback: null },
+      React.createElement(LazyComponent, {
+        ...props,
+        container,
+      })
+    );
+};
+
+export type {
+  AlertingV2PublicStart,
+  CreateRuleOptionsFlyoutLegacyItem,
+  AlertingV2PageProps,
+} from './types';
 export type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
-export type { AlertingV2RuleLibraryLocator, AlertingV2RuleLibraryLocatorParams } from './locator';
+export type {
+  AlertingV2HostApp,
+  AlertingV2LocatorHost,
+  CreateAlertingV2HostApp,
+} from './locator_host';
+export { MANAGEMENT_HOST } from './locator_host';
+export type {
+  AlertingV2RulesLocatorParams,
+  AlertingV2RuleLibraryLocatorParams,
+  AlertingV2EpisodesLocatorParams,
+  AlertingV2ActionPoliciesLocatorParams,
+  AlertingV2ExecutionHistoryLocatorParams,
+} from './locators';
 
 const pluginModule = new ContainerModule(({ bind }) => {
   bind(RulesApi).toSelf().inSingletonScope();
@@ -72,9 +122,50 @@ const pluginModule = new ContainerModule(({ bind }) => {
   bind(WorkflowApi)
     .toDynamicValue(({ get }) => new WorkflowApi(get(CoreStart('http'))))
     .inSingletonScope();
-  bind(Start).toConstantValue({
-    CreateRuleOptionsFlyout,
-  } satisfies AlertingV2PublicStart);
+  bind(Start)
+    .toDynamicValue(({ get }) => {
+      const container = get(Container);
+      return {
+        CreateRuleOptionsFlyout,
+        RulesPage: lazyPageWithContainer(
+          () =>
+            import('./application/composable_pages').then((m) => ({
+              default: m.AlertingV2RulesPage,
+            })),
+          container
+        ),
+        RuleLibraryPage: lazyPageWithContainer(
+          () =>
+            import('./application/composable_pages').then((m) => ({
+              default: m.AlertingV2RuleLibraryPage,
+            })),
+          container
+        ),
+        EpisodesPage: lazyPageWithContainer(
+          () =>
+            import('./application/composable_pages').then((m) => ({
+              default: m.AlertingV2EpisodesPage,
+            })),
+          container
+        ),
+        ActionPoliciesPage: lazyPageWithContainer(
+          () =>
+            import('./application/composable_pages').then((m) => ({
+              default: m.AlertingV2ActionPoliciesPage,
+            })),
+          container
+        ),
+        ExecutionHistoryPage: lazyPageWithContainer(
+          () =>
+            import('./application/composable_pages').then((m) => ({
+              default: m.AlertingV2ExecutionHistoryPage,
+            })),
+          container
+        ),
+        createAlertingV2HostApp,
+      } satisfies AlertingV2PublicStart;
+    })
+    .inSingletonScope();
   bind(OnSetup).toConstantValue((container) => {
     const getStartServices = container.get(CoreSetup('getStartServices'));
     const workflowsExtensionsSetup = container.get(
@@ -97,11 +188,11 @@ const pluginModule = new ContainerModule(({ bind }) => {
 
     const management = container.get(PluginSetup('management')) as ManagementSetup;
     const share = container.get(PluginSetup('share')) as SharePluginSetup;
-    share.url.locators.create(
-      new AlertingV2RuleLibraryLocatorDefinition({
-        managementAppLocator: management.locator,
-      })
-    );
+    share.url.locators.create(AlertingV2RulesLocatorDefinition);
+    share.url.locators.create(AlertingV2RuleLibraryLocatorDefinition);
+    share.url.locators.create(AlertingV2EpisodesLocatorDefinition);
+    share.url.locators.create(AlertingV2ActionPoliciesLocatorDefinition);
+    share.url.locators.create(AlertingV2ExecutionHistoryLocatorDefinition);
     const alertingSection = management.sections.register({
       id: ALERTING_V2_SECTION_ID,
       title: 'Alerting V2 Preview',

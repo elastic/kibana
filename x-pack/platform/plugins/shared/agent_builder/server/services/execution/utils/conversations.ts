@@ -28,7 +28,14 @@ import {
   DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
 import type { ConversationClient } from '../../conversation';
-import { roundToEvents, userMessageEvent } from '../../conversation/client/rounds_to_events';
+import {
+  roundToEvents,
+  userMessageEvent,
+  promptResponseEvent,
+  resumeExecutionToEvents,
+  executionTerminatedEventId,
+  parseExecutionId,
+} from '../../conversation/client/rounds_to_events';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
 
 /**
@@ -276,6 +283,110 @@ export const appendRoundTerminated$ = ({
           : createConversationUpdatedEvent(persistedConversation)
       )
     )
+  );
+};
+
+/**
+ * Append-only resume write. A resumed round is a new execution (`exec_k`) on the same round: this
+ * appends a `prompt_response` event (the human's answer) plus the resume execution's events, and
+ * never rewrites the pause (`exec_0`). `eventsToRounds` folds the executions back into one round on
+ * read.
+ */
+export const appendResumeExecution$ = ({
+  conversation,
+  conversationClient,
+  roundCompletedEvents$,
+  input,
+  author,
+  title$,
+}: {
+  conversation: ConversationWithOperation;
+  conversationClient: ConversationClient;
+  roundCompletedEvents$: Observable<RoundCompleteEvent>;
+  /** The converse input for this resume; `input.prompts` carries the human's responses. */
+  input: ConverseInput;
+  author?: ConversationRoundAuthor;
+  /** When provided, its resolved value is persisted as the title alongside the resume append. */
+  title$?: Observable<string>;
+}): Observable<ChatEvent> => {
+  return roundCompletedEvents$.pipe(
+    switchMap((roundCompletedEvent) =>
+      from(
+        (async () => {
+          const {
+            round,
+            resume_execution: resumeExecution,
+            conversation_state: conversationState,
+            attachments,
+            workspace_id: workspaceId,
+          } = roundCompletedEvent.data;
+
+          if (!resumeExecution) {
+            throw new Error('appendResumeExecution$ requires a resume_execution payload');
+          }
+          const followUpRound = resumeExecution.follow_up_round;
+
+          // Derive the resume index from the executions already stored for this round.
+          const storedEvents = conversation.events ?? [];
+          const roundExecutionIds = new Set(
+            storedEvents
+              .map((event) => event.execution_id)
+              .filter(
+                (id): id is string => id !== undefined && parseExecutionId(id)?.roundId === round.id
+              )
+          );
+          const resumeIndex = roundExecutionIds.size;
+          if (resumeIndex < 1) {
+            throw new Error(
+              `appendResumeExecution$: no prior execution stored for round ${round.id}; cannot resume`
+            );
+          }
+          const promptRequestedEventId = executionTerminatedEventId(round.id, resumeIndex - 1);
+
+          const promptResponse = promptResponseEvent({
+            roundId: round.id,
+            executionIndex: resumeIndex,
+            promptRequestedEventId,
+            responses: input.prompts ?? {},
+            input: followUpRound.input,
+            conversation,
+            author,
+            createdAt: followUpRound.started_at,
+          });
+
+          const executionEvents = resumeExecutionToEvents({
+            followUpRound,
+            roundId: round.id,
+            executionIndex: resumeIndex,
+            triggerEventId: promptResponse.id,
+            conversation,
+          });
+
+          const resolvedTitle = title$ ? await firstValueFrom(title$) : undefined;
+
+          return conversationClient.appendEvents(
+            {
+              id: conversation.id,
+              events: [promptResponse, ...executionEvents],
+              status: round.status,
+              ...(resolvedTitle !== undefined ? { title: resolvedTitle } : {}),
+              ...(conversationState ? { state: conversationState } : {}),
+              ...(attachments
+                ? {
+                    attachments: {
+                      snapshot: conversation.attachments ?? [],
+                      produced: attachments,
+                    },
+                  }
+                : {}),
+              ...(workspaceId ? { workspaceId } : {}),
+            },
+            { access: 'converse' }
+          );
+        })()
+      )
+    ),
+    switchMap((persistedConversation) => of(createConversationUpdatedEvent(persistedConversation)))
   );
 };
 

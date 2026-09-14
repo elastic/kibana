@@ -117,17 +117,15 @@ import { DEFAULT_FROM_DATE, DEFAULT_TO_DATE } from './constants';
 export const resolveCase = async ({
   caseId,
   signal,
-  mode = 'legacy',
 }: {
   caseId: string;
   signal?: AbortSignal;
-  mode?: 'legacy' | 'unified';
 }): Promise<ResolvedCase> => {
   const response = await KibanaServices.get().http.fetch<CaseResolveResponse>(
     `${getCaseDetailsUrl(caseId)}/resolve`,
     {
       method: 'GET',
-      query: { includeComments: true, mode },
+      query: { includeComments: true },
       signal,
     }
   );
