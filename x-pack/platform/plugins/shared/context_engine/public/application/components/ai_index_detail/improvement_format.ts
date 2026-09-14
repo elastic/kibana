@@ -9,8 +9,15 @@ import { i18n } from '@kbn/i18n';
 import type { ImprovementAction } from '../../../../common/http_api/improvement_actions';
 import type { Improvement, ImprovementStatus } from '../../../../common/http_api/improvements';
 
-/** Rationale, KI content and workflow YAML routinely run past a screen; clamp and offer show-more. */
-export const MAX_PREVIEW_LENGTH = 1000;
+/**
+ * Rationale, KI content and workflow YAML routinely run past a screen; clamp and offer show-more.
+ *
+ * Short enough that a list of suggestions stays scannable. A rationale is an argument, and an
+ * analysis run writes the whole of it — the counts, the comparison, the fix — which is worth
+ * reading for the one suggestion you are weighing and is a wall of text for the five you are
+ * scrolling past. This is the opening of that argument, not a summary of it.
+ */
+export const MAX_PREVIEW_LENGTH = 500;
 
 export interface TruncatedText {
   text: string;
