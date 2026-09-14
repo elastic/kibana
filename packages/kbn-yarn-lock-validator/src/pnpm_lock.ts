@@ -109,8 +109,7 @@ export interface ToLockGraphOptions {
   /**
    * Include resolved peer dependencies as graph edges. pnpm materializes each
    * resolved peer as a `dependencies` edge (e.g. `@babel/core` under a babel
-   * plugin), which yarn.lock never did. Following them balloons the transitive
-   * closure, so it is opt-in for now.
+   * plugin). Following them balloons the transitive closure, so it is opt-in.
    */
   includePeerDependencies?: boolean;
 }
