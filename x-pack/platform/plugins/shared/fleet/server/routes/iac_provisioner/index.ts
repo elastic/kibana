@@ -13,11 +13,9 @@ import { genericErrorResponse } from '../schema/errors';
 import {
   RenderIacTemplateRequestSchema,
   RenderIacTemplateResponseSchema,
-  ResolveIacBlueprintsRequestSchema,
-  ResolveIacBlueprintsResponseSchema,
 } from '../../types/rest_spec/iac_provisioner';
 
-import { renderIacTemplateHandler, resolveIacBlueprintsHandler } from './handlers';
+import { renderIacTemplateHandler } from './handlers';
 
 const IAC_PROVISIONER_ROUTE_SECURITY = {
   authz: {
@@ -33,7 +31,7 @@ const IAC_PROVISIONER_ROUTE_SECURITY = {
       },
     ],
   },
-} as const;
+};
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
@@ -63,34 +61,5 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       renderIacTemplateHandler
-    );
-
-  router.versioned
-    .post({
-      path: IAC_PROVISIONER_API_ROUTES.RESOLVE_BLUEPRINTS_PATTERN,
-      summary: 'Resolve IaC blueprints',
-      description:
-        'Resolve which IaC blueprints are deployable for the enabled integrations, without storing an artifact.',
-      access: 'internal',
-      security: IAC_PROVISIONER_ROUTE_SECURITY,
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.internal.v1,
-        validate: {
-          request: ResolveIacBlueprintsRequestSchema,
-          response: {
-            200: {
-              description: 'OK: A successful request.',
-              body: () => ResolveIacBlueprintsResponseSchema,
-            },
-            400: {
-              description: 'A bad request.',
-              body: genericErrorResponse,
-            },
-          },
-        },
-      },
-      resolveIacBlueprintsHandler
     );
 };

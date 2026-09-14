@@ -12,10 +12,7 @@ import type { Logger } from '@kbn/logging';
 import apm from 'elastic-apm-node';
 
 import type { AWS_CLOUD_PROVIDER } from '../../common/types/models/cloud_connector';
-import type {
-  IacBlueprintCoverage,
-  IacPolicyTemplateSelection,
-} from '../../common/types/rest_spec/iac_provisioner';
+import type { IacPolicyTemplateSelection } from '../../common/types/rest_spec/iac_provisioner';
 
 import {
   IacProvisionerConfigError,
@@ -28,7 +25,6 @@ import type { IacProvisionerConfig } from './utils/iac_provisioner';
 import { isIacProvisionerEnabled } from './utils/iac_provisioner';
 
 const RENDER_ENDPOINT = '/api/v1/render';
-const RESOLVE_ENDPOINT = '/api/v1/resolve';
 const REQUEST_TIMEOUT_MS = 30_000;
 
 /** undici reports TLS failures as `TypeError: fetch failed` with the OpenSSL reason on `cause`. */
@@ -60,20 +56,16 @@ export interface IacProvisionerRenderRequest {
 }
 
 export interface IacProvisionerRenderResponse {
-  artifactUrl: string;
-  expiresAt: string;
+  /**
+   * Pre-signed URL of the rendered template. Present only when `render` is
+   * true. Embeds signing credentials — never log or cache.
+   */
+  artifactUrl?: string;
+  /** ISO 8601 UTC timestamp when the pre-signed URL expires. Present with artifactUrl. */
+  expiresAt?: string;
   templateSha: string;
   render: boolean;
   blueprint: { id: string; version: string };
-}
-
-export interface IacProvisionerResolveRequest {
-  provider: typeof AWS_CLOUD_PROVIDER;
-  integrations: IacProvisionerRenderIntegration[];
-}
-
-export interface IacProvisionerResolveResponse {
-  blueprints: IacBlueprintCoverage[];
 }
 
 interface IacProvisionerErrorBody {
@@ -84,7 +76,6 @@ interface IacProvisionerErrorBody {
 
 export interface IacProvisionerService {
   renderTemplate(request: IacProvisionerRenderRequest): Promise<IacProvisionerRenderResponse>;
-  resolveBlueprints(request: IacProvisionerResolveRequest): Promise<IacProvisionerResolveResponse>;
 }
 
 /**
@@ -126,31 +117,13 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
       request,
       logger
     );
-    // artifactUrl embeds signing credentials — only the expiry and blueprint
-    // identity are loggable.
+    // artifactUrl embeds signing credentials — only the expiry (when present)
+    // and blueprint identity are loggable.
+    const expiry = rendered.expiresAt ? `, artifact expires at ${rendered.expiresAt}` : '';
     logger.debug(
-      `[IaC Provisioner] Render response: artifact expires at ${rendered.expiresAt}, blueprint ${rendered.blueprint.id}@${rendered.blueprint.version}`
+      `[IaC Provisioner] Render response: blueprint ${rendered.blueprint.id}@${rendered.blueprint.version}${expiry}`
     );
     return rendered;
-  }
-
-  public async resolveBlueprints(
-    request: IacProvisionerResolveRequest
-  ): Promise<IacProvisionerResolveResponse> {
-    const logger = appContextService.getLogger().get('IacProvisionerService');
-    logger.info(
-      `[IaC Provisioner] Resolving blueprints for provider ${
-        request.provider
-      }, integrations: ${JSON.stringify(request.integrations)}`
-    );
-
-    const resolved = await this.request<IacProvisionerResolveResponse>(
-      RESOLVE_ENDPOINT,
-      request,
-      logger
-    );
-    logger.debug(`[IaC Provisioner] Resolve response: ${JSON.stringify(resolved)}`);
-    return resolved;
   }
 
   /**

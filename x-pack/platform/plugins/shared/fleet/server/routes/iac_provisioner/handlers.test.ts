@@ -19,22 +19,19 @@ import { isIacProvisionerEnabled } from '../../services/utils/iac_provisioner';
 import {
   reportIacProvisionerRenderCompleted,
   reportIacProvisionerRenderRequested,
-  reportIacProvisionerResolveCompleted,
-  reportIacProvisionerResolveRequested,
 } from '../../services/telemetry/iac_provisioner_telemetry';
 
-import { renderIacTemplateHandler, resolveIacBlueprintsHandler } from './handlers';
+import { renderIacTemplateHandler } from './handlers';
 
 jest.mock('../../services/app_context');
 jest.mock('../../services', () => ({
-  iacProvisionerService: { renderTemplate: jest.fn(), resolveBlueprints: jest.fn() },
+  iacProvisionerService: { renderTemplate: jest.fn() },
 }));
 jest.mock('../../services/epm/packages');
 jest.mock('../../services/utils/iac_provisioner');
 jest.mock('../../services/telemetry/iac_provisioner_telemetry');
 
 const mockedRenderTemplate = jest.mocked(iacProvisionerService.renderTemplate);
-const mockedResolveBlueprints = jest.mocked(iacProvisionerService.resolveBlueprints);
 const mockedGetPackageInfo = jest.mocked(getPackageInfo);
 const mockedIsEnabled = jest.mocked(isIacProvisionerEnabled);
 
@@ -493,92 +490,18 @@ describe('renderIacTemplateHandler', () => {
       expect.stringContaining('unexpected boom')
     );
   });
-});
 
-describe('resolveIacBlueprintsHandler', () => {
-  let response: ReturnType<typeof httpServerMock.createResponseFactory>;
-
-  const resolveBody = (overrides: Record<string, unknown> = {}) => ({
-    provider: 'aws',
-    flow: 'cloud_connector',
-    integrations: [cspmSelection],
-    ...overrides,
-  });
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    response = httpServerMock.createResponseFactory();
-    mockedIsEnabled.mockReturnValue(true);
-    const logger = { info: jest.fn(), error: jest.fn(), get: jest.fn() };
-    logger.get.mockReturnValue(logger);
-    jest.spyOn(appContextService, 'getLogger').mockReturnValue(logger as any);
-  });
-
-  it('returns 404 when the IaC Provisioner is not enabled', async () => {
-    mockedIsEnabled.mockReturnValue(false);
-
-    await resolveIacBlueprintsHandler(buildContext(), buildRequest(resolveBody()), response);
-
-    expect(response.notFound).toHaveBeenCalled();
-    expect(mockedResolveBlueprints).not.toHaveBeenCalled();
-  });
-
-  it('forwards caller-supplied inputs and returns blueprint coverage', async () => {
+  it('returns a render:false body without requiring artifactUrl or expiresAt', async () => {
     mockedGetPackageInfo.mockResolvedValue(CSPM_PACKAGE_INFO as any);
-    mockedResolveBlueprints.mockResolvedValue({
-      blueprints: [
-        {
-          id: 'federated-identity',
-          resolvedVersion: 'v1',
-          deployable: true,
-          notCovered: [],
-        },
-      ],
-    });
+    const alreadyCurrent = {
+      templateSha: 'sha256:661cb7def1c7101f',
+      render: false,
+      blueprint: { id: 'federated-identity', version: 'v1' },
+    };
+    mockedRenderTemplate.mockResolvedValue(alreadyCurrent);
 
-    await resolveIacBlueprintsHandler(buildContext(), buildRequest(resolveBody()), response);
+    await renderIacTemplateHandler(buildContext(), buildRequest(renderBody()), response);
 
-    expect(mockedResolveBlueprints).toHaveBeenCalledWith({
-      provider: 'aws',
-      integrations: [
-        {
-          name: 'cloud_security_posture',
-          version: '3.5.0',
-          policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
-        },
-      ],
-    });
-    expect(response.ok).toHaveBeenCalledWith({
-      body: {
-        blueprints: [
-          {
-            id: 'federated-identity',
-            resolvedVersion: 'v1',
-            deployable: true,
-            notCovered: [],
-          },
-        ],
-      },
-    });
-    expect(reportIacProvisionerResolveRequested).toHaveBeenCalledWith(
-      expect.objectContaining({ flow: 'cloud_connector', integrationCount: 1 })
-    );
-    expect(reportIacProvisionerResolveCompleted).toHaveBeenCalledWith(
-      expect.objectContaining({
-        success: true,
-        httpStatus: 200,
-        blueprintCount: 1,
-        deployableCount: 1,
-      })
-    );
-  });
-
-  it('maps provider unavailability to 502', async () => {
-    mockedGetPackageInfo.mockResolvedValue(CSPM_PACKAGE_INFO as any);
-    mockedResolveBlueprints.mockRejectedValue(new IacProvisionerUnavailableError('timeout', 504));
-
-    await resolveIacBlueprintsHandler(buildContext(), buildRequest(resolveBody()), response);
-
-    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 502 }));
+    expect(response.ok).toHaveBeenCalledWith({ body: alreadyCurrent });
   });
 });

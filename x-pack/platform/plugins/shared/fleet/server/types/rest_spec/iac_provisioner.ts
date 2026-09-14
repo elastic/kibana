@@ -88,15 +88,22 @@ export const RenderIacTemplateRequestSchema = {
 };
 
 export const RenderIacTemplateResponseSchema = schema.object({
-  artifactUrl: schema.string({
-    meta: {
-      description:
-        'Pre-signed URL of the rendered template. Embeds signing credentials — never log or cache.',
-    },
-  }),
-  expiresAt: schema.string({
-    meta: { description: 'ISO 8601 UTC timestamp when the pre-signed URL expires.' },
-  }),
+  artifactUrl: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'Pre-signed URL of the rendered template. Present only when render is true. Embeds signing credentials — never log or cache.',
+      },
+    })
+  ),
+  expiresAt: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'ISO 8601 UTC timestamp when the pre-signed URL expires. Present with artifactUrl.',
+      },
+    })
+  ),
   templateSha: schema.string({
     meta: {
       description:
@@ -114,97 +121,7 @@ export const RenderIacTemplateResponseSchema = schema.object({
       meta: { description: 'Blueprint identifier that was rendered.' },
     }),
     version: schema.string({
-      meta: { description: 'Blueprint version that was resolved and rendered.' },
+      meta: { description: 'Blueprint version that was rendered.' },
     }),
   }),
-});
-
-export const ResolveIacBlueprintsRequestSchema = {
-  body: schema.object({
-    provider: schema.oneOf([schema.literal(AWS_CLOUD_PROVIDER)], {
-      meta: {
-        description: 'The cloud provider the integrations run against. Only AWS is supported.',
-      },
-    }),
-    flow: IacProvisionerFlowSchema,
-    integrations: IacIntegrationsSchema,
-  }),
-};
-
-const IacNotCoveredReasonSchema = schema.object({
-  integration: schema.string({
-    minLength: 1,
-    maxLength: 255,
-    meta: { description: 'EPR package name of the integration that is not covered.' },
-  }),
-  reason: schema.oneOf(
-    [
-      schema.literal('unknown_package'),
-      schema.literal('unknown_policy_template'),
-      schema.literal('no_patch_for_input'),
-      schema.literal('below_support_floor'),
-    ],
-    { meta: { description: 'Machine-readable reason code.' } }
-  ),
-  policyTemplate: schema.maybe(
-    schema.string({
-      minLength: 1,
-      maxLength: 255,
-      meta: { description: 'Policy template name, when the reason is template- or input-scoped.' },
-    })
-  ),
-  input: schema.maybe(
-    schema.string({
-      minLength: 1,
-      maxLength: 255,
-      meta: { description: 'Input name, when the reason is no_patch_for_input.' },
-    })
-  ),
-  supportFloor: schema.maybe(
-    schema.string({
-      minLength: 1,
-      maxLength: 64,
-      meta: { description: 'Minimum version required, when the reason is below_support_floor.' },
-    })
-  ),
-  installedVersion: schema.maybe(
-    schema.string({
-      minLength: 1,
-      maxLength: 64,
-      meta: { description: 'Installed package version, when the reason is below_support_floor.' },
-    })
-  ),
-});
-
-export const ResolveIacBlueprintsResponseSchema = schema.object({
-  blueprints: schema.arrayOf(
-    schema.object({
-      id: schema.string({
-        minLength: 1,
-        maxLength: 255,
-        meta: { description: 'Blueprint identifier.' },
-      }),
-      resolvedVersion: schema.nullable(
-        schema.string({
-          minLength: 1,
-          maxLength: 64,
-          meta: {
-            description:
-              'Blueprint version that satisfies the request, or null when not deployable.',
-          },
-        })
-      ),
-      deployable: schema.boolean({
-        meta: { description: 'True when every requested integration is covered.' },
-      }),
-      notCovered: schema.arrayOf(IacNotCoveredReasonSchema, {
-        maxSize: 100,
-        meta: { description: 'Reasons why one or more integrations are not covered.' },
-      }),
-    }),
-    {
-      maxSize: 50,
-      meta: { description: 'Coverage result for every known blueprint.' },
-    }
-  ),
 });

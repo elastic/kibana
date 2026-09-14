@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { renderHook, act } from '@testing-library/react';
 
 import { useIacProvisioner, useStartServices } from '../../../hooks';
-import {
-  sendRenderIacTemplate,
-  sendResolveIacBlueprints,
-} from '../../../hooks/use_request/iac_provisioner';
+import { sendRenderIacTemplate } from '../../../hooks/use_request/iac_provisioner';
 
 import { useCloudConnectorTemplate } from './use_cloud_connector_template';
 
@@ -23,7 +18,6 @@ jest.mock('../../../hooks/use_request/iac_provisioner');
 const mockedUseIacProvisioner = jest.mocked(useIacProvisioner);
 const mockedUseStartServices = jest.mocked(useStartServices);
 const mockedSendRenderIacTemplate = jest.mocked(sendRenderIacTemplate);
-const mockedSendResolveIacBlueprints = jest.mocked(sendResolveIacBlueprints);
 
 // cloudId whose base64 part decodes to `host$es-id$kibana-component-id`
 const CLOUD_ID = `test:${btoa('host$es-component-id$kibana-component-id')}`;
@@ -50,20 +44,6 @@ const HOOK_PARAMS = {
   policyTemplates: POLICY_TEMPLATES,
 };
 
-const DEPLOYABLE_RESOLVE = {
-  data: {
-    blueprints: [
-      {
-        id: 'federated-identity',
-        resolvedVersion: 'v1',
-        deployable: true,
-        notCovered: [],
-      },
-    ],
-  },
-  error: null,
-};
-
 const RENDERED = {
   data: {
     artifactUrl: 'https://s3.example/rendered?sig=SECRET',
@@ -78,7 +58,6 @@ const RENDERED = {
 describe('useCloudConnectorTemplate', () => {
   let reportEvent: jest.Mock;
   let windowOpenSpy: jest.SpyInstance;
-  let queryClient: QueryClient;
   // The tab the hook opens synchronously on click and navigates after the
   // render settles (popup blockers drop window.open calls made after an await).
   let cloudFormationTab: { closed: boolean; close: jest.Mock; location: { href: string } };
@@ -89,18 +68,11 @@ describe('useCloudConnectorTemplate', () => {
     mockedUseStartServices.mockReturnValue({ analytics: { reportEvent } } as any);
     cloudFormationTab = { closed: false, close: jest.fn(), location: { href: '' } };
     windowOpenSpy = jest.spyOn(window, 'open').mockImplementation(() => cloudFormationTab as any);
-    queryClient = new QueryClient({
-      defaultOptions: { queries: { retry: false, gcTime: 0 } },
-    });
   });
 
   afterEach(() => {
     windowOpenSpy.mockRestore();
-    queryClient.clear();
   });
-
-  const wrapper = ({ children }: { children: React.ReactNode }) =>
-    React.createElement(QueryClientProvider, { client: queryClient }, children);
 
   const launch = async (result: { current: ReturnType<typeof useCloudConnectorTemplate> }) => {
     const { launchButtonProps } = result.current;
@@ -118,7 +90,7 @@ describe('useCloudConnectorTemplate', () => {
     });
 
     it('returns href button props with the static template URL', () => {
-      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS), { wrapper });
+      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
 
       const { launchButtonProps } = result.current;
       if (!('href' in launchButtonProps)) {
@@ -131,13 +103,12 @@ describe('useCloudConnectorTemplate', () => {
       expect(launchButtonProps.target).toBe('_blank');
       expect(result.current.isDisabled).toBe(false);
       expect(result.current.isGeneratingTemplate).toBe(false);
-      expect(mockedSendResolveIacBlueprints).not.toHaveBeenCalled();
+      expect(mockedSendRenderIacTemplate).not.toHaveBeenCalled();
     });
 
     it('is disabled when no static template URL can be built', () => {
-      const { result } = renderHook(
-        () => useCloudConnectorTemplate({ ...HOOK_PARAMS, iacTemplateUrl: undefined }),
-        { wrapper }
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({ ...HOOK_PARAMS, iacTemplateUrl: undefined })
       );
 
       expect(result.current.isDisabled).toBe(true);
@@ -147,34 +118,21 @@ describe('useCloudConnectorTemplate', () => {
   describe('when the IaC Provisioner is enabled', () => {
     beforeEach(() => {
       mockedUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
-      mockedSendResolveIacBlueprints.mockResolvedValue(DEPLOYABLE_RESOLVE as any);
       mockedSendRenderIacTemplate.mockResolvedValue(RENDERED as any);
     });
 
-    const waitForResolve = async () => {
-      await waitFor(() => {
-        expect(mockedSendResolveIacBlueprints).toHaveBeenCalled();
-      });
-    };
-
     it('returns onClick button props instead of an href', () => {
-      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS), { wrapper });
+      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
 
       expect(result.current.launchButtonProps).toHaveProperty('onClick');
       expect(result.current.launchButtonProps).not.toHaveProperty('href');
       expect(result.current.isDisabled).toBe(false);
     });
 
-    it('resolves then renders just-in-time and opens the quick-create URL with the artifactUrl', async () => {
-      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS), { wrapper });
-      await waitForResolve();
+    it('renders just-in-time and opens the quick-create URL with the artifactUrl', async () => {
+      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
       await launch(result);
 
-      expect(mockedSendResolveIacBlueprints).toHaveBeenCalledWith({
-        provider: 'aws',
-        flow: 'cloud_connector',
-        integrations: [{ name: 'cloud_security_posture', policyTemplates: POLICY_TEMPLATES }],
-      });
       expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith({
         provider: 'aws',
         workflow: 'federated_identity',
@@ -200,16 +158,13 @@ describe('useCloudConnectorTemplate', () => {
         { name: 'guardduty', enabledInputs: ['aws-s3'] },
         { name: 's3', enabledInputs: ['aws-s3'] },
       ];
-      const { result } = renderHook(
-        () =>
-          useCloudConnectorTemplate({
-            ...HOOK_PARAMS,
-            packageName: 'aws',
-            policyTemplates,
-          }),
-        { wrapper }
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({
+          ...HOOK_PARAMS,
+          packageName: 'aws',
+          policyTemplates,
+        })
       );
-      await waitForResolve();
       await launch(result);
 
       expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith({
@@ -221,13 +176,11 @@ describe('useCloudConnectorTemplate', () => {
     });
 
     it('falls back to the static URL without rendering when no policy template is enabled', async () => {
-      const { result } = renderHook(
-        () => useCloudConnectorTemplate({ ...HOOK_PARAMS, policyTemplates: [] }),
-        { wrapper }
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({ ...HOOK_PARAMS, policyTemplates: [] })
       );
       await launch(result);
 
-      expect(mockedSendResolveIacBlueprints).not.toHaveBeenCalled();
       expect(mockedSendRenderIacTemplate).not.toHaveBeenCalled();
       const openedUrl = windowOpenSpy.mock.calls[0][0] as string;
       expect(openedUrl).toContain('static.example');
@@ -238,9 +191,8 @@ describe('useCloudConnectorTemplate', () => {
     });
 
     it('falls back to the static URL without rendering when the package name is missing', async () => {
-      const { result } = renderHook(
-        () => useCloudConnectorTemplate({ ...HOOK_PARAMS, packageName: undefined }),
-        { wrapper }
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({ ...HOOK_PARAMS, packageName: undefined })
       );
       await launch(result);
 
@@ -255,14 +207,12 @@ describe('useCloudConnectorTemplate', () => {
     });
 
     it('surfaces an error when the package name is missing and no static fallback exists', async () => {
-      const { result } = renderHook(
-        () =>
-          useCloudConnectorTemplate({
-            ...HOOK_PARAMS,
-            packageName: undefined,
-            iacTemplateUrl: undefined,
-          }),
-        { wrapper }
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({
+          ...HOOK_PARAMS,
+          packageName: undefined,
+          iacTemplateUrl: undefined,
+        })
       );
       await launch(result);
 
@@ -271,67 +221,13 @@ describe('useCloudConnectorTemplate', () => {
       expect(result.current.templateGenerationError).toBeDefined();
     });
 
-    it('falls back to the static URL when resolve finds no deployable blueprint', async () => {
-      mockedSendResolveIacBlueprints.mockResolvedValue({
-        data: {
-          blueprints: [
-            {
-              id: 'federated-identity',
-              resolvedVersion: null,
-              deployable: false,
-              notCovered: [
-                { integration: 'cloud_security_posture', reason: 'below_support_floor' },
-              ],
-            },
-          ],
-        },
-        error: null,
-      } as any);
-
-      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS), { wrapper });
-      await waitForResolve();
-      await launch(result);
-
-      expect(mockedSendRenderIacTemplate).not.toHaveBeenCalled();
-      expect(cloudFormationTab.location.href).toContain('static.example');
-      expect(result.current.iacConfirm).toEqual({
-        templateSha: null,
-      });
-      expect(reportEvent).toHaveBeenCalledWith('iac_provisioner_render_fallback', {
-        flow: 'cloud_connector',
-        reason: 'not_deployable',
-      });
-    });
-
-    it('falls back to the static URL when resolve fails', async () => {
-      jest.spyOn(console, 'error').mockImplementation(() => {});
-      mockedSendResolveIacBlueprints.mockResolvedValue({
-        data: null,
-        error: { message: 'unavailable', statusCode: 502 },
-      } as any);
-
-      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS), { wrapper });
-      await waitFor(() => {
-        expect(mockedSendResolveIacBlueprints).toHaveBeenCalled();
-      });
-      await launch(result);
-
-      expect(mockedSendRenderIacTemplate).not.toHaveBeenCalled();
-      expect(cloudFormationTab.location.href).toContain('static.example');
-      expect(reportEvent).toHaveBeenCalledWith('iac_provisioner_render_fallback', {
-        flow: 'cloud_connector',
-        reason: 'resolve_failed',
-      });
-    });
-
     it('navigates the pre-opened tab to the static URL when the render fails', async () => {
       mockedSendRenderIacTemplate.mockResolvedValue({
         data: null,
         error: { message: 'unrenderable', statusCode: 422 },
       } as any);
 
-      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS), { wrapper });
-      await waitForResolve();
+      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
       await launch(result);
 
       expect(cloudFormationTab.location.href).toContain('static.example');
@@ -343,9 +239,8 @@ describe('useCloudConnectorTemplate', () => {
     });
 
     it('does not attempt a render when no static scaffold exists', async () => {
-      const { result } = renderHook(
-        () => useCloudConnectorTemplate({ ...HOOK_PARAMS, iacTemplateUrl: undefined }),
-        { wrapper }
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({ ...HOOK_PARAMS, iacTemplateUrl: undefined })
       );
       await launch(result);
 
@@ -355,13 +250,11 @@ describe('useCloudConnectorTemplate', () => {
     });
 
     it('opens the static URL without rendering when it has no templateURL param to swap', async () => {
-      const { result } = renderHook(
-        () =>
-          useCloudConnectorTemplate({
-            ...HOOK_PARAMS,
-            iacTemplateUrl: 'https://static.example/template.yml',
-          }),
-        { wrapper }
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({
+          ...HOOK_PARAMS,
+          iacTemplateUrl: 'https://static.example/template.yml',
+        })
       );
       await launch(result);
 
@@ -377,8 +270,7 @@ describe('useCloudConnectorTemplate', () => {
     it('closes the pre-opened tab and surfaces an error when the render request throws', async () => {
       mockedSendRenderIacTemplate.mockRejectedValue(new Error('network down'));
 
-      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS), { wrapper });
-      await waitForResolve();
+      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
       await launch(result);
 
       expect(cloudFormationTab.close).toHaveBeenCalled();
@@ -389,8 +281,7 @@ describe('useCloudConnectorTemplate', () => {
     it('falls back to a direct window.open when the pre-opened tab was blocked', async () => {
       windowOpenSpy.mockReturnValueOnce(null);
 
-      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS), { wrapper });
-      await waitForResolve();
+      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
       await launch(result);
 
       expect(windowOpenSpy).toHaveBeenCalledTimes(2);
@@ -400,15 +291,12 @@ describe('useCloudConnectorTemplate', () => {
     });
 
     it('sends templateSha on render when the caller supplies a stored digest', async () => {
-      const { result } = renderHook(
-        () =>
-          useCloudConnectorTemplate({
-            ...HOOK_PARAMS,
-            templateSha: 'sha256:661cb7def1c7101f',
-          }),
-        { wrapper }
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({
+          ...HOOK_PARAMS,
+          templateSha: 'sha256:661cb7def1c7101f',
+        })
       );
-      await waitForResolve();
       await launch(result);
 
       expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith(
@@ -417,8 +305,7 @@ describe('useCloudConnectorTemplate', () => {
     });
 
     it('omits templateSha on first render', async () => {
-      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS), { wrapper });
-      await waitForResolve();
+      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
       await launch(result);
 
       expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith(
@@ -428,12 +315,15 @@ describe('useCloudConnectorTemplate', () => {
 
     it('closes the pre-opened tab and reports the stack is current when render is false', async () => {
       mockedSendRenderIacTemplate.mockResolvedValue({
-        data: { ...RENDERED.data, render: false },
+        data: {
+          templateSha: 'sha256:661cb7def1c7101f',
+          render: false,
+          blueprint: { id: 'federated-identity', version: 'v1' },
+        },
         error: null,
       } as any);
 
-      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS), { wrapper });
-      await waitForResolve();
+      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
       await launch(result);
 
       expect(cloudFormationTab.close).toHaveBeenCalled();
@@ -450,8 +340,7 @@ describe('useCloudConnectorTemplate', () => {
         error: null,
       } as any);
 
-      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS), { wrapper });
-      await waitForResolve();
+      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
       await launch(result);
 
       expect(cloudFormationTab.location.href).toContain('static.example');
@@ -462,62 +351,23 @@ describe('useCloudConnectorTemplate', () => {
       });
     });
 
-    it('renders when resolve reports the namespaced federated-identity blueprint', async () => {
-      mockedSendResolveIacBlueprints.mockResolvedValue({
+    it('falls back to the static URL when render is true but artifactUrl is missing', async () => {
+      mockedSendRenderIacTemplate.mockResolvedValue({
         data: {
-          blueprints: [
-            {
-              id: 'aws/federated-identity',
-              resolvedVersion: '1.0.0',
-              deployable: true,
-              notCovered: [],
-            },
-          ],
+          templateSha: 'sha256:661cb7def1c7101f',
+          render: true,
+          blueprint: { id: 'federated-identity', version: 'v1' },
         },
         error: null,
       } as any);
 
-      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS), { wrapper });
-      await waitForResolve();
+      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
       await launch(result);
 
-      expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ workflow: 'federated_identity' })
-      );
-    });
-
-    it('falls back when a different blueprint is deployable but federated identity is not', async () => {
-      mockedSendResolveIacBlueprints.mockResolvedValue({
-        data: {
-          blueprints: [
-            {
-              id: 'other-lineage',
-              resolvedVersion: '1.0.0',
-              deployable: true,
-              notCovered: [],
-            },
-            {
-              id: 'federated-identity',
-              resolvedVersion: null,
-              deployable: false,
-              notCovered: [
-                { integration: 'cloud_security_posture', reason: 'below_support_floor' },
-              ],
-            },
-          ],
-        },
-        error: null,
-      } as any);
-
-      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS), { wrapper });
-      await waitForResolve();
-      await launch(result);
-
-      expect(mockedSendRenderIacTemplate).not.toHaveBeenCalled();
       expect(cloudFormationTab.location.href).toContain('static.example');
       expect(reportEvent).toHaveBeenCalledWith('iac_provisioner_render_fallback', {
         flow: 'cloud_connector',
-        reason: 'not_deployable',
+        reason: 'render_failed',
       });
     });
   });

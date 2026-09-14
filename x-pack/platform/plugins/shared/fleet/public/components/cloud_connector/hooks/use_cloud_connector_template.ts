@@ -7,19 +7,13 @@
 
 import { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useQuery } from '@kbn/react-query';
 
 import { useIacProvisioner, useStartServices } from '../../../hooks';
-import {
-  sendRenderIacTemplate,
-  sendResolveIacBlueprints,
-} from '../../../hooks/use_request/iac_provisioner';
+import { sendRenderIacTemplate } from '../../../hooks/use_request/iac_provisioner';
 import {
   CLOUD_CONNECTOR_RENDER_FLOW,
   IAC_PROVISIONER_FALLBACK_REASON_MISSING_CONTEXT,
-  IAC_PROVISIONER_FALLBACK_REASON_NOT_DEPLOYABLE,
   IAC_PROVISIONER_FALLBACK_REASON_RENDER_FAILED,
-  IAC_PROVISIONER_FALLBACK_REASON_RESOLVE_FAILED,
   IAC_PROVISIONER_RENDER_FALLBACK_EVENT,
 } from '../../../../common/telemetry/iac_provisioner_events';
 import {
@@ -28,8 +22,6 @@ import {
 } from '../../../../common/types/models/cloud_connector';
 import {
   IAC_FEDERATED_IDENTITY_WORKFLOW,
-  blueprintMatchesWorkflow,
-  type IacBlueprintCoverage,
   type IacPolicyTemplateSelection,
 } from '../../../../common/types/rest_spec/iac_provisioner';
 import type { AccountType } from '../../../types';
@@ -80,12 +72,6 @@ export interface UseCloudConnectorTemplateResult {
   iacConfirm?: CloudConnectorIacState;
 }
 
-const firstDeployableWorkflowBlueprint = (
-  blueprints: IacBlueprintCoverage[] | undefined,
-  workflow: string
-): IacBlueprintCoverage | undefined =>
-  blueprints?.find(({ deployable, id }) => deployable && blueprintMatchesWorkflow(id, workflow));
-
 export const useCloudConnectorTemplate = ({
   cloud,
   accountType,
@@ -111,28 +97,6 @@ export const useCloudConnectorTemplate = ({
   const staticTemplateUrl = cloud
     ? getCloudConnectorRemoteRoleTemplate({ cloud, accountType, iacTemplateUrl })
     : undefined;
-
-  const canResolve =
-    isIacProvisionerEnabled && Boolean(packageName) && Boolean(policyTemplates?.length);
-
-  const resolveQuery = useQuery(
-    ['iac-provisioner-resolve', packageName, policyTemplates],
-    async () => {
-      if (!packageName || !policyTemplates?.length) {
-        throw new Error('Failed to resolve IaC blueprints');
-      }
-      const { data, error } = await sendResolveIacBlueprints({
-        provider: AWS_CLOUD_PROVIDER,
-        flow: CLOUD_CONNECTOR_RENDER_FLOW,
-        integrations: [{ name: packageName, policyTemplates }],
-      });
-      if (error || !data) {
-        throw error ?? new Error('Failed to resolve IaC blueprints');
-      }
-      return data;
-    },
-    { enabled: canResolve, retry: false }
-  );
 
   const launchTemplate = useCallback(async () => {
     setTemplateGenerationError(undefined);
@@ -193,30 +157,6 @@ export const useCloudConnectorTemplate = ({
 
     setIsGeneratingTemplate(true);
     try {
-      if (resolveQuery.isError) {
-        fallbackToStatic(IAC_PROVISIONER_FALLBACK_REASON_RESOLVE_FAILED);
-        return;
-      }
-
-      let resolved = resolveQuery.data;
-      if (!resolved) {
-        const result = await resolveQuery.refetch();
-        if (result.error || !result.data) {
-          fallbackToStatic(IAC_PROVISIONER_FALLBACK_REASON_RESOLVE_FAILED);
-          return;
-        }
-        resolved = result.data;
-      }
-
-      const coverage = firstDeployableWorkflowBlueprint(
-        resolved.blueprints,
-        IAC_FEDERATED_IDENTITY_WORKFLOW
-      );
-      if (!coverage) {
-        fallbackToStatic(IAC_PROVISIONER_FALLBACK_REASON_NOT_DEPLOYABLE);
-        return;
-      }
-
       const { data, error } = await sendRenderIacTemplate({
         provider: AWS_CLOUD_PROVIDER,
         workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
@@ -272,7 +212,7 @@ export const useCloudConnectorTemplate = ({
     } finally {
       setIsGeneratingTemplate(false);
     }
-  }, [analytics, packageName, policyTemplates, resolveQuery, staticTemplateUrl, templateSha]);
+  }, [analytics, packageName, policyTemplates, staticTemplateUrl, templateSha]);
 
   if (!isIacProvisionerEnabled) {
     return {
