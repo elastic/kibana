@@ -160,6 +160,13 @@ steps:
       schema:
         type: object
         properties:
+          title:
+            type: string
+            maxLength: 512
+            description: >
+              Short headline (under ~80 characters) naming the affected entity and the problem,
+              e.g. "Checkout latency spike from Redis connection exhaustion". Start from the
+              trigger's title and sharpen it as the cause becomes clear.
           summary:
             type: string
             maxLength: 10000
@@ -748,6 +755,7 @@ steps:
         x-elastic-internal-origin: 'kibana'
       body:
         status: "completed"
+        title: "${{ steps.investigate.output.structured_output.title }}"
         summary: "${{ steps.investigate.output.structured_output.summary }}"
         conclusion: "${{ steps.investigate.output.structured_output.conclusion }}"
         severity: "${{ steps.investigate.output.structured_output.severity }}"

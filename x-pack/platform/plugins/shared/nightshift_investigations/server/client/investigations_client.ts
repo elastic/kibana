@@ -11,7 +11,7 @@ import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/man
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import { investigationStateSchema } from '@kbn/significant-events-schema';
+import { investigationStateSchema, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import type {
   AlertInvestigationContext,
@@ -82,6 +82,7 @@ const isTriggerType = (value: unknown): value is InvestigationTriggerType =>
 
 interface ExecutionInvestigationMetadata {
   subject?: InvestigationSubject;
+  title?: string;
   triggerType: InvestigationTriggerType;
   concurrencyKey?: string;
 }
@@ -119,6 +120,7 @@ const toSubject = ({
  */
 const LIST_INVESTIGATION_ITEM_FIELDS = {
   investigation_id: [],
+  title: ['title'],
   status: ['status'],
   created_at: ['created_at'],
   started_at: ['started_at'],
@@ -142,6 +144,7 @@ type ListInvestigationRecord = ProjectedInvestigationRecord<
 
 const toListInvestigationItem = (record: ListInvestigationRecord): ListInvestigationItem => ({
   investigation_id: record.id,
+  title: record.title,
   status: record.status,
   created_at: record.created_at,
   started_at: record.started_at,
@@ -191,6 +194,7 @@ const parseExecutionInvestigationMetadata = (
 
   return {
     subject: recoverSubjectFromInput(inputs),
+    title: recoverTitleFromInput(inputs),
     triggerType: recoverTriggerTypeFromInput(inputs) ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
     concurrencyKey,
   };
@@ -226,6 +230,19 @@ function recoverSubjectFromInput(
   }
 
   return undefined;
+}
+
+/**
+ * The headline for a run that reached `ensureOrCreate()` without `start()`. `context.title` when
+ * the caller set one; otherwise the first line of the brief, which `message` (a required workflow
+ * input) always has and which discovery and the chat skill fill with the trigger's title.
+ */
+function recoverTitleFromInput(input: Record<string, unknown> | undefined): string | undefined {
+  const ctx = input?.context;
+  const explicit = isPlainObject(ctx) ? asString(ctx.title) : undefined;
+  // ponytail: first line of the brief as title when a direct workflow run omits context.title
+  const fromMessage = asString(input?.message)?.split('\n')[0]?.trim();
+  return (explicit ?? fromMessage)?.slice(0, MAX_TITLE_LENGTH) || undefined;
 }
 
 function recoverTriggerTypeFromInput(
@@ -316,6 +333,7 @@ export class NightshiftInvestigationsClient {
 
   async start({
     subject,
+    title,
     trigger_type,
     message,
     stream_names,
@@ -364,6 +382,7 @@ export class NightshiftInvestigationsClient {
         ...prepared.context,
         source: subject.type,
         [`${subject.type}_id`]: subject.id,
+        title,
         trigger_type: trigger_type ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
         ...(subject.summary ? { summary: subject.summary } : {}),
       },
@@ -384,6 +403,7 @@ export class NightshiftInvestigationsClient {
     await this.create({
       investigationId: executionId,
       subject,
+      title,
       triggerType: trigger_type ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
       concurrencyKey: concurrency_key,
     }).catch((error) => {
@@ -403,11 +423,13 @@ export class NightshiftInvestigationsClient {
   async create({
     investigationId,
     subject,
+    title,
     triggerType,
     concurrencyKey,
   }: {
     investigationId: string;
     subject: InvestigationSubject;
+    title: string;
     triggerType: InvestigationTriggerType;
     concurrencyKey?: string;
   }): Promise<void> {
@@ -418,6 +440,7 @@ export class NightshiftInvestigationsClient {
     await this.createIgnoringConflict({
       id: investigationId,
       attributes: {
+        title,
         status: 'pending',
         ...toSubjectFields(subject),
         trigger_type: triggerType,
@@ -479,11 +502,11 @@ export class NightshiftInvestigationsClient {
       return;
     }
 
-    const { subject, triggerType, concurrencyKey } = parseExecutionInvestigationMetadata(
+    const { subject, title, triggerType, concurrencyKey } = parseExecutionInvestigationMetadata(
       execution.context
     );
 
-    if (!subject) {
+    if (!subject || !title) {
       throw new InvestigationSubjectMissingError(investigationId);
     }
 
@@ -494,6 +517,7 @@ export class NightshiftInvestigationsClient {
     await this.createIgnoringConflict({
       id: investigationId,
       attributes: {
+        title,
         status: 'running',
         ...toSubjectFields(subject),
         trigger_type: triggerType,

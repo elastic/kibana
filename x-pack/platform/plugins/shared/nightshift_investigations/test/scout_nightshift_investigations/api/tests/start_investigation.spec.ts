@@ -42,6 +42,19 @@ apiTest.describe(
     });
 
     apiTest(
+      'returns 400 for a significant event body without a title',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);
+        const response = await apiClient.post(START_PATH, {
+          headers: { ...COMMON_HEADERS, ...cookieHeader },
+          body: { subject: { type: 'significant_event', id: 'se-1' } },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(400);
+      }
+    );
+
+    apiTest(
       'returns 400 when subject.id exceeds 500 characters',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);

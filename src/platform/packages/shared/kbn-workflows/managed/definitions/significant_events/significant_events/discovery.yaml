@@ -478,6 +478,7 @@ steps:
                                     context:
                                       source: 'significant_event'
                                       trigger_type: 'automatic'
+                                      title: '{{ steps.resolve_open_event.output.hits.hits[0]._source.title }}'
                                       event_uuid: '{{ foreach.item.event_uuid }}'
                                       event_id: '{{ foreach.item.event_id }}'
                                       status: '{{ foreach.item.status }}'

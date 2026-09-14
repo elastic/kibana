@@ -7,7 +7,7 @@
 
 import { serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
-import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
+import { MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
 import { freeFormContextSchema } from '../../common';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { fetchAlertSnapshot } from '../lib/alert_snapshot';
@@ -18,6 +18,42 @@ const subjectIdAndSummary = {
   id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
   summary: z.string().max(MAX_TEXT_LENGTH).optional(),
 };
+
+/** Headline shown in the list and flyout from the moment the record exists. */
+const titleSchema = z.string().min(1).max(MAX_TITLE_LENGTH);
+
+// A union rather than one object with a loose `context`, so that an alert investigation is
+// always backed by alert data: the alert branch accepts no caller context — the handler loads
+// the alert server-side (through the RAC alerts client, which enforces alert-index
+// authorization) and builds the snapshot itself. zod's discriminatedUnion needs the
+// discriminator at the top level, and ours is nested under `subject`, hence a plain union.
+const startInvestigationBodySchema = z.union([
+  z.object({
+    subject: z.object({
+      type: z.literal('alert'),
+      ...subjectIdAndSummary,
+    }),
+    // Optional here only: the handler derives it from the alert's rule name when omitted.
+    title: titleSchema.optional(),
+    concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
+  }),
+  z.object({
+    subject: z.object({
+      type: z.literal('significant_event'),
+      ...subjectIdAndSummary,
+    }),
+    title: titleSchema,
+    concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
+    context: freeFormContextSchema.optional(),
+  }),
+]);
+
+type StartInvestigationBody = z.infer<typeof startInvestigationBodySchema>;
+type AlertInvestigationBody = Extract<StartInvestigationBody, { subject: { type: 'alert' } }>;
+
+/** Narrows the whole body, which a `switch` on the nested `subject.type` cannot do. */
+const isAlertBody = (body: StartInvestigationBody): body is AlertInvestigationBody =>
+  body.subject.type === 'alert';
 
 export const startInvestigationRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'POST /internal/nightshift/investigations',
@@ -38,28 +74,7 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
     },
   },
   params: z.object({
-    // A union rather than one object with a loose `context`, so that an alert investigation is
-    // always backed by alert data: the alert branch accepts no caller context — the handler loads
-    // the alert server-side (through the RAC alerts client, which enforces alert-index
-    // authorization) and builds the snapshot itself. zod's discriminatedUnion needs the
-    // discriminator at the top level, and ours is nested under `subject`, hence a plain union.
-    body: z.union([
-      z.object({
-        subject: z.object({
-          type: z.literal('alert'),
-          ...subjectIdAndSummary,
-        }),
-        concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
-      }),
-      z.object({
-        subject: z.object({
-          type: z.literal('significant_event'),
-          ...subjectIdAndSummary,
-        }),
-        concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
-        context: freeFormContextSchema.optional(),
-      }),
-    ]),
+    body: startInvestigationBodySchema,
   }),
   handler: async ({ request, params, getInvestigationsClient, getAlertsClient }) => {
     const client = getInvestigationsClient(request);
@@ -67,26 +82,24 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
 
     // User-initiated starts are always manual.
     try {
-      switch (body.subject.type) {
-        case 'alert': {
-          const alertsClient = await getAlertsClient(request);
-          if (!alertsClient) {
-            throw serverUnavailable('Alert lookup is unavailable');
-          }
-          const snapshot = await fetchAlertSnapshot(alertsClient, body.subject.id);
-          return await client.start({
-            subject: body.subject,
-            concurrency_key: body.concurrency_key ?? snapshot.id,
-            context: { alerts: [snapshot] },
-            trigger_type: 'manual',
-          });
+      if (isAlertBody(body)) {
+        const alertsClient = await getAlertsClient(request);
+        if (!alertsClient) {
+          throw serverUnavailable('Alert lookup is unavailable');
         }
-        case 'significant_event':
-          return await client.start({
-            ...body,
-            trigger_type: 'manual',
-          });
+        const snapshot = await fetchAlertSnapshot(alertsClient, body.subject.id);
+        return await client.start({
+          subject: body.subject,
+          title: body.title ?? snapshot.rule_name,
+          concurrency_key: body.concurrency_key ?? snapshot.id,
+          context: { alerts: [snapshot] },
+          trigger_type: 'manual',
+        });
       }
+      return await client.start({
+        ...body,
+        trigger_type: 'manual',
+      });
     } catch (error) {
       rethrowInvestigationClientError(error);
     }

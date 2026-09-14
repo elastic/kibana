@@ -33,6 +33,7 @@ describe('updateInvestigation body schema', () => {
     expect(
       parseBody({
         status: 'completed',
+        title: '',
         summary: 'Disk filled up.',
         conclusion: '',
         severity: '',
@@ -40,6 +41,7 @@ describe('updateInvestigation body schema', () => {
       })
     ).toEqual({
       status: 'completed',
+      title: undefined,
       summary: 'Disk filled up.',
       conclusion: undefined,
       severity: undefined,
