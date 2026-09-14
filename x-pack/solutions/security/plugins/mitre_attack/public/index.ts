@@ -12,3 +12,11 @@ export type { MitreAttackPublicSetup, MitreAttackPublicStart } from './types';
 
 export const plugin = (initializerContext: PluginInitializerContext): MitreAttackPublicPlugin =>
   new MitreAttackPublicPlugin(initializerContext);
+
+export { fetchMitreEntities } from './api/fetch_mitre_entities';
+export type { FetchMitreEntitiesParams } from './api/fetch_mitre_entities';
+
+export {
+  useFetchMitreEntitiesQuery,
+  FETCH_MITRE_ENTITIES_QUERY_KEY,
+} from './hooks/use_fetch_mitre_entities_query';

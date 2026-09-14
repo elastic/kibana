@@ -7,6 +7,7 @@
 
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import { convertRulesFilterToKQL } from '../../../../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
   CoverageOverviewRequestBody,
@@ -19,12 +20,18 @@ import {
 import type { RuleParams } from '../../../../rule_schema';
 import { findRules } from '../../../logic/search/find_rules';
 import { iterateMitreThreatEntities } from '../../../../../../../common/detection_engine/mitre/iterate_mitre_threat_entities';
-import { findInvalidMitreIds } from '../../../../../../../common/detection_engine/mitre/find_invalid_mitre_ids';
+import {
+  findInvalidMitreIds,
+  buildValidMitreIdsFromBuckets,
+} from '../../../../../../../common/detection_engine/mitre/find_invalid_mitre_ids';
+import type { ValidMitreIdSets } from '../../../../../../../common/detection_engine/mitre/find_invalid_mitre_ids';
 
 type CoverageOverviewRuleParams = Pick<RuleParams, 'threat'>;
 
 interface CoverageOverviewRouteDependencies {
   rulesClient: RulesClient;
+  /** Resolved managed MITRE data client. Absent when xpack.mitreAttack.managedSourceEnabled is off. */
+  mitreDataClient?: MitreAttackDataClient;
 }
 
 interface HandleCoverageOverviewRequestArgs {
@@ -32,9 +39,30 @@ interface HandleCoverageOverviewRequestArgs {
   deps: CoverageOverviewRouteDependencies;
 }
 
+/** Resolves the set of valid MITRE IDs from the managed client when available, else the static blob. */
+const buildValidMitreIds = async (
+  mitreDataClient: MitreAttackDataClient | undefined
+): Promise<ValidMitreIdSets> => {
+  if (mitreDataClient) {
+    return buildValidMitreIdsFromBuckets(await mitreDataClient.list());
+  }
+
+  // Fallback: serves the bundled legacy blob when xpack.mitreAttack.managedSourceEnabled is off.
+  // Remove once the managed source is the default and the blob is deleted.
+  const { tactics, techniques, subtechniques } = await import(
+    '../../../../../../../common/detection_engine/mitre/mitre_tactics_techniques'
+  );
+  const { transformLegacyMitreData } = await import(
+    '../../../../../../../common/detection_engine/mitre/mitre_data_adapter'
+  );
+  return buildValidMitreIdsFromBuckets(
+    transformLegacyMitreData({ tactics, techniques, subtechniques })
+  );
+};
+
 export async function handleCoverageOverviewRequest({
   params: { filter },
-  deps: { rulesClient },
+  deps: { rulesClient, mitreDataClient },
 }: HandleCoverageOverviewRequestArgs): Promise<CoverageOverviewResponse> {
   const activitySet = new Set(filter?.activity);
   const kqlFilter = convertRulesFilterToKQL({
@@ -58,7 +86,9 @@ export async function handleCoverageOverviewRequest({
     sortOrder: undefined,
   });
 
-  return rules.data.reduce(appendRuleToResponse, {
+  const validIds = await buildValidMitreIds(mitreDataClient);
+
+  return rules.data.reduce((acc, rule) => appendRuleToResponse(acc, rule, validIds), {
     coverage: {},
     unmapped_rule_ids: [],
     rules_data: {},
@@ -81,7 +111,8 @@ function getIsEnabledFilter(activitySet: Set<CoverageOverviewRuleActivity>): boo
 
 function appendRuleToResponse(
   response: CoverageOverviewResponse,
-  rule: SanitizedRule<CoverageOverviewRuleParams>
+  rule: SanitizedRule<CoverageOverviewRuleParams>,
+  validIds: ValidMitreIdSets
 ): CoverageOverviewResponse {
   const categories = extractRuleMitreCategories(rule);
 
@@ -97,7 +128,7 @@ function appendRuleToResponse(
     response.unmapped_rule_ids.push(rule.id);
   }
 
-  const invalidMitreIds = findInvalidMitreIds(rule.params.threat);
+  const invalidMitreIds = findInvalidMitreIds(rule.params.threat, validIds);
   if (invalidMitreIds.length > 0) {
     response.invalid_mitre_ids[rule.id] = invalidMitreIds;
   }

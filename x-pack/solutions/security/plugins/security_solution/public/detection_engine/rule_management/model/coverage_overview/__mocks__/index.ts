@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import type {
+  MitreTacticSummary,
+  MitreTechniqueSummary,
+  MitreSubtechniqueSummary,
+} from '@kbn/security-mitre-attack-common';
 import type { CoverageOverviewDashboard } from '../dashboard';
 import type { CoverageOverviewMitreSubTechnique } from '../mitre_subtechnique';
 import type { CoverageOverviewMitreTactic } from '../mitre_tactic';
@@ -62,59 +67,79 @@ export const getMockCoverageOverviewDashboard = (): CoverageOverviewDashboard =>
   },
 });
 
-export const getMockCoverageOverviewTactics = () => [
+export const getMockCoverageOverviewTactics = (): MitreTacticSummary[] => [
   {
-    name: 'Tactic 1',
+    framework: 'enterprise',
+    framework_version: '16.1',
+    type: 'tactic',
+    revoked: false,
+    deprecated: false,
     id: 'TA001',
+    name: 'Tactic 1',
     reference: 'https://some-link/TA001',
-    label: 'Tactic 1',
-    value: 'tactic1',
+    position: 0,
   },
   {
-    name: 'Tactic 2',
+    framework: 'enterprise',
+    framework_version: '16.1',
+    type: 'tactic',
+    revoked: false,
+    deprecated: false,
     id: 'TA002',
+    name: 'Tactic 2',
     reference: 'https://some-link/TA002',
-    label: 'Tactic 2',
-    value: 'tactic2',
+    position: 1,
   },
 ];
 
-export const getMockCoverageOverviewTechniques = () => [
+export const getMockCoverageOverviewTechniques = (): MitreTechniqueSummary[] => [
   {
-    name: 'Technique 1',
+    framework: 'enterprise',
+    framework_version: '16.1',
+    type: 'technique',
+    revoked: false,
+    deprecated: false,
     id: 'T001',
+    name: 'Technique 1',
     reference: 'https://some-link/T001',
-    tactics: ['tactic-1'],
-    label: 'Technique 1',
-    value: 'technique1',
+    tactic_ids: ['TA001'],
   },
   {
-    name: 'Technique 2',
+    framework: 'enterprise',
+    framework_version: '16.1',
+    type: 'technique',
+    revoked: false,
+    deprecated: false,
     id: 'T002',
+    name: 'Technique 2',
     reference: 'https://some-link/T002',
-    tactics: ['tactic-1', 'tactic-2'],
-    label: 'Technique 2',
-    value: 'technique2',
+    tactic_ids: ['TA001', 'TA002'],
   },
 ];
 
-export const getMockCoverageOverviewSubtechniques = () => [
+export const getMockCoverageOverviewSubtechniques = (): MitreSubtechniqueSummary[] => [
   {
-    name: 'Subtechnique 1',
+    framework: 'enterprise',
+    framework_version: '16.1',
+    type: 'subtechnique',
+    revoked: false,
+    deprecated: false,
     id: 'T001.001',
+    name: 'Subtechnique 1',
     reference: 'https://some-link/T001/001',
-    tactics: ['tactic-1'],
-    techniqueId: 'T001',
-    label: 'Subtechnique 1',
-    value: 'subtechnique1',
+    tactic_ids: ['TA001'],
+    technique_id: 'T001',
   },
   {
-    name: 'Subtechnique 2',
+    framework: 'enterprise',
+    framework_version: '16.1',
+    type: 'subtechnique',
+    revoked: false,
+    deprecated: false,
     id: 'T001.002',
+    name: 'Subtechnique 2',
     reference: 'https://some-link/T001/002',
-    tactics: ['tactic-1'],
-    techniqueId: 'T001',
-    label: 'Subtechnique 2',
-    value: 'subtechnique2',
+    tactic_ids: ['TA001'],
+    technique_id: 'T001',
   },
 ];

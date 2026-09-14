@@ -43,10 +43,15 @@ export const getCoverageOverviewRoute = (router: SecuritySolutionPluginRouter) =
 
         try {
           const ctx = await context.resolve(['alerting']);
+          const securitySolution = await context.securitySolution;
+          const mitreDataClient = securitySolution.getMitreDataClient();
 
           const responseData = await handleCoverageOverviewRequest({
             params: request.body,
-            deps: { rulesClient: await ctx.alerting.getRulesClient() },
+            deps: {
+              rulesClient: await ctx.alerting.getRulesClient(),
+              mitreDataClient,
+            },
           });
 
           return response.ok({

@@ -5,17 +5,34 @@
  * 2.0.
  */
 
-import { getValidThreat } from '../../../../detections/mitre/valid_threat_mock';
+import type { MitreSubtechniqueSummary } from '@kbn/security-mitre-attack-common';
 import { hasSubtechniqueOptions } from './helpers';
 
-const mockTechniques = getValidThreat()[0].technique ?? [];
+const makeSubtechnique = (id: string, technique_id: string): MitreSubtechniqueSummary => ({
+  type: 'subtechnique',
+  framework: 'enterprise',
+  framework_version: '16.1',
+  id,
+  name: `Subtechnique ${id}`,
+  reference: `https://attack.mitre.org/techniques/${id}/`,
+  tactic_ids: [],
+  technique_id,
+  revoked: false,
+  deprecated: false,
+});
 
 describe('helpers', () => {
   describe('hasSubtechniqueOptions', () => {
     describe('when technique has subtechnique options', () => {
-      const technique = mockTechniques[0];
-      it('returns true', async () => {
-        expect(await hasSubtechniqueOptions(technique)).toBe(true);
+      const technique = {
+        reference: 'https://attack.mitre.org/techniques/T1003/',
+        name: 'OS Credential Dumping',
+        id: 'T1003',
+        subtechnique: [],
+      };
+      const subtechniques = [makeSubtechnique('T1003.008', 'T1003')];
+      it('returns true', () => {
+        expect(hasSubtechniqueOptions(technique, subtechniques)).toBe(true);
       });
     });
 
@@ -26,8 +43,21 @@ describe('helpers', () => {
         id: 'T0000',
         subtechnique: [],
       };
-      it('returns false', async () => {
-        expect(await hasSubtechniqueOptions(technique)).toBe(false);
+      const subtechniques = [makeSubtechnique('T1003.008', 'T1003')];
+      it('returns false', () => {
+        expect(hasSubtechniqueOptions(technique, subtechniques)).toBe(false);
+      });
+    });
+
+    describe('when subtechniques array is empty', () => {
+      const technique = {
+        reference: 'https://attack.mitre.org/techniques/T1003/',
+        name: 'OS Credential Dumping',
+        id: 'T1003',
+        subtechnique: [],
+      };
+      it('returns false', () => {
+        expect(hasSubtechniqueOptions(technique, [])).toBe(false);
       });
     });
   });

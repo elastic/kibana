@@ -6,23 +6,12 @@
  */
 
 import type { ThreatTechnique } from '@kbn/securitysolution-io-ts-alerting-types';
-
-const lazyMitreConfiguration = () => {
-  /**
-   * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-   * See https://webpack.js.org/api/module-methods/#magic-comments
-   */
-  return import(
-    /* webpackChunkName: "lazy_mitre_configuration" */
-    '../../../../../common/detection_engine/mitre/mitre_tactics_techniques'
-  );
-};
+import type { MitreSubtechniqueSummary } from '@kbn/security-mitre-attack-common';
 
 /**
- * Returns true if the given mitre technique has any subtechniques
+ * Returns true if the given mitre technique has any subtechniques in the provided dataset.
  */
-export const hasSubtechniqueOptions = async (technique: ThreatTechnique) => {
-  return (await lazyMitreConfiguration()).subtechniques.some(
-    (subtechnique) => subtechnique.techniqueId === technique.id
-  );
-};
+export const hasSubtechniqueOptions = (
+  technique: ThreatTechnique,
+  subtechniques: MitreSubtechniqueSummary[]
+): boolean => subtechniques.some((subtechnique) => subtechnique.technique_id === technique.id);

@@ -5,23 +5,21 @@
  * 2.0.
  */
 
-import { kebabCase } from 'lodash';
-import { tacticOrder } from '../../../../../common/detection_engine/mitre/mitre_tactics_order';
 import type {
-  MitreTactic,
-  MitreTechnique,
-  MitreSubTechnique,
-} from '../../../../../common/detection_engine/mitre/types';
+  MitreTacticSummary,
+  MitreTechniqueSummary,
+  MitreSubtechniqueSummary,
+} from '@kbn/security-mitre-attack-common';
 import type { CoverageOverviewMitreSubTechnique } from '../../model/coverage_overview/mitre_subtechnique';
 import type { CoverageOverviewMitreTactic } from '../../model/coverage_overview/mitre_tactic';
 import type { CoverageOverviewMitreTechnique } from '../../model/coverage_overview/mitre_technique';
 
 export function buildCoverageOverviewMitreGraph(
-  tactics: MitreTactic[],
-  techniques: MitreTechnique[],
-  subtechniques: MitreSubTechnique[]
+  tactics: MitreTacticSummary[],
+  techniques: MitreTechniqueSummary[],
+  subtechniques: MitreSubtechniqueSummary[]
 ): CoverageOverviewMitreTactic[] {
-  const techniqueToSubtechniquesMap = new Map<string, CoverageOverviewMitreSubTechnique[]>(); // Map(TechniqueId -> SubTechniqueId[])
+  const techniqueToSubtechniquesMap = new Map<string, CoverageOverviewMitreSubTechnique[]>(); // Map(TechniqueId -> SubTechnique[])
 
   for (const subtechnique of subtechniques) {
     const coverageOverviewMitreSubTechnique = {
@@ -33,10 +31,10 @@ export function buildCoverageOverviewMitreGraph(
       availableRules: [],
     };
 
-    const techniqueSubtechniques = techniqueToSubtechniquesMap.get(subtechnique.techniqueId);
+    const techniqueSubtechniques = techniqueToSubtechniquesMap.get(subtechnique.technique_id);
 
     if (!techniqueSubtechniques) {
-      techniqueToSubtechniquesMap.set(subtechnique.techniqueId, [
+      techniqueToSubtechniquesMap.set(subtechnique.technique_id, [
         coverageOverviewMitreSubTechnique,
       ]);
     } else {
@@ -44,12 +42,12 @@ export function buildCoverageOverviewMitreGraph(
     }
   }
 
-  const tacticToTechniquesMap = new Map<string, CoverageOverviewMitreTechnique[]>(); // Map(kebabCase(tactic name) -> CoverageOverviewMitreTechnique)
+  const tacticToTechniquesMap = new Map<string, CoverageOverviewMitreTechnique[]>(); // Map(tacticId -> CoverageOverviewMitreTechnique[])
 
   for (const technique of techniques) {
     const relatedSubtechniques = techniqueToSubtechniquesMap.get(technique.id) ?? [];
 
-    for (const kebabCaseTacticName of technique.tactics) {
+    for (const tacticId of technique.tactic_ids) {
       const coverageOverviewMitreTechnique: CoverageOverviewMitreTechnique = {
         id: technique.id,
         name: technique.name,
@@ -59,19 +57,17 @@ export function buildCoverageOverviewMitreGraph(
         disabledRules: [],
         availableRules: [],
       };
-      const tacticTechniques = tacticToTechniquesMap.get(kebabCaseTacticName);
+      const tacticTechniques = tacticToTechniquesMap.get(tacticId);
 
       if (!tacticTechniques) {
-        tacticToTechniquesMap.set(kebabCaseTacticName, [coverageOverviewMitreTechnique]);
+        tacticToTechniquesMap.set(tacticId, [coverageOverviewMitreTechnique]);
       } else {
         tacticTechniques.push(coverageOverviewMitreTechnique);
       }
     }
   }
 
-  const sortedTactics = tactics.sort(
-    (a, b) => tacticOrder.indexOf(a.id) - tacticOrder.indexOf(b.id)
-  );
+  const sortedTactics = [...tactics].sort((a, b) => a.position - b.position);
 
   const result: CoverageOverviewMitreTactic[] = [];
 
@@ -80,7 +76,7 @@ export function buildCoverageOverviewMitreGraph(
       id: tactic.id,
       name: tactic.name,
       reference: tactic.reference,
-      techniques: tacticToTechniquesMap.get(kebabCase(tactic.name)) ?? [],
+      techniques: tacticToTechniquesMap.get(tactic.id) ?? [],
       enabledRules: [],
       disabledRules: [],
       availableRules: [],
