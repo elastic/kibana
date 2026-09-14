@@ -6,6 +6,7 @@
  */
 
 import type { ChromeBreadcrumb, CoreStart, ScopedHistory } from '@kbn/core/public';
+import type { AppHeaderTab } from '@kbn/app-header';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
@@ -18,6 +19,7 @@ export interface ClassicRulesPageProps {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   /** Host app history. Falls back to an isolated memory history when omitted. */
   history?: ScopedHistory;
+  tabs?: AppHeaderTab[];
 }
 
 export type ClassicRulesPagePluginsStart = Pick<
