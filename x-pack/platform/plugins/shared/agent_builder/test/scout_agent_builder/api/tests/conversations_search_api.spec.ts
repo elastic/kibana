@@ -260,6 +260,11 @@ apiTest.describe(
       expect(res).toHaveStatusCode(400);
     });
 
+    apiTest('whitespace-only query returns 400', async ({ asAdmin }) => {
+      const res = await search(asAdmin, { query: '   ', agent_id: agentId });
+      expect(res).toHaveStatusCode(400);
+    });
+
     apiTest('per_page exceeding the search maximum returns 400', async ({ asAdmin }) => {
       const res = await search(asAdmin, {
         query: 'widget',

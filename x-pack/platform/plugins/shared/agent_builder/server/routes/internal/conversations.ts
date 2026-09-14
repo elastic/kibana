@@ -285,6 +285,8 @@ export function registerInternalConversationRoutes({
             query: schema.string({
               minLength: 1,
               maxLength: CONVERSATION_SEARCH_QUERY_MAX_LENGTH,
+              validate: (value) =>
+                value.trim().length === 0 ? 'query must not be blank' : undefined,
             }),
             agent_id: schema.maybe(
               schema.string({
