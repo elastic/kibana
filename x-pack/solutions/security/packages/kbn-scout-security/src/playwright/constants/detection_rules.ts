@@ -28,7 +28,6 @@ export interface CustomQueryRule {
   type: 'query';
   query: string;
   from: string;
-  language?: 'kuery' | 'lucene';
   investigation_fields?: { field_names: string[] };
   response_actions?: CustomQueryRuleResponseAction[];
 }

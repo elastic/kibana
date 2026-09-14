@@ -6,9 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-
-/** First wizard load waits for user-info / lists init and the ad-hoc data view. */
-const APP_LOAD_TIMEOUT_MS = 60_000;
+import { APP_LOAD_TIMEOUT_MS } from '../../../constants/timeouts';
 
 /**
  * Custom query rule create wizard: Define → About → Schedule → Actions.
@@ -21,6 +19,7 @@ export class RuleCreateWizardPage {
   readonly aboutContinue: Locator;
   readonly scheduleContinue: Locator;
   readonly createWithoutEnabling: Locator;
+  readonly queryInput: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.defineStep = this.page.testSubj.locator('stepDefineRule');
@@ -34,6 +33,10 @@ export class RuleCreateWizardPage {
     this.aboutContinue = this.page.testSubj.locator('about-continue');
     this.scheduleContinue = this.page.testSubj.locator('schedule-continue');
     this.createWithoutEnabling = this.page.testSubj.locator('create-enabled-false');
+    this.queryInput = this.page.testSubj
+      .locator('defineRuleFormStepQueryEditor')
+      .locator('[data-test-subj="queryInput"]')
+      .filter({ visible: true });
   }
 
   /**
@@ -43,29 +46,25 @@ export class RuleCreateWizardPage {
   async completeUntilActionsStep({
     name,
     description = name,
-    query = '*:*',
+    query,
   }: {
     name: string;
     description?: string;
-    query?: string;
+    query: string;
   }): Promise<void> {
     // The rules table swaps `create-new-rule` for `create-rule-button` when AI
     // rule creation is available, so open the wizard URL directly.
     await this.page.gotoApp('security/rules/create');
     await this.defineStep.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
 
-    const queryInput = this.page.testSubj
-      .locator('defineRuleFormStepQueryEditor')
-      .locator('[data-test-subj="queryInput"]')
-      .filter({ visible: true });
     // Stays disabled while user-info / lists init and the ad-hoc data view create.
-    await queryInput.and(this.page.locator(':enabled')).waitFor({
+    await this.queryInput.and(this.page.locator(':enabled')).waitFor({
       state: 'visible',
       timeout: APP_LOAD_TIMEOUT_MS,
     });
-    await queryInput.click();
+    await this.queryInput.click();
     // QueryStringInput ignores fill() — it syncs from React props.
-    await queryInput.pressSequentially(query);
+    await this.queryInput.pressSequentially(query);
     await this.page.keyboard.press('Enter');
 
     await this.defineContinue.click();
@@ -78,5 +77,9 @@ export class RuleCreateWizardPage {
     await this.scheduleContinue.click();
 
     await this.createWithoutEnabling.waitFor({ state: 'visible' });
+  }
+
+  async createWithoutEnablingRule(): Promise<void> {
+    await this.createWithoutEnabling.click();
   }
 }

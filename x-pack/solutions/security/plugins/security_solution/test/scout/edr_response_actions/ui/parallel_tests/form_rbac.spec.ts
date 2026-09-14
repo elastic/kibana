@@ -57,7 +57,7 @@ spaceTest.describe(
             name: CREATE_RULE_NAME,
             query: '_id:*',
           });
-          await ruleResponseActionsForm.responseActionsWrapper.waitFor({ state: 'visible' });
+          await expect(ruleResponseActionsForm.responseActionsWrapper).toBeVisible();
         });
 
         await spaceTest.step('Elastic Defend keypad is disabled', async () => {
@@ -79,7 +79,6 @@ spaceTest.describe(
           description: ruleName,
           rule_id: ruleName,
           enabled: false,
-          language: 'kuery',
           response_actions: SEEDED_RESPONSE_ACTIONS,
         });
 

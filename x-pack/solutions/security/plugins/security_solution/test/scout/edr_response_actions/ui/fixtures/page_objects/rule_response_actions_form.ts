@@ -6,9 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout-security';
-
-/** First load of the rule edit page compiles the app bundle in dev. */
-const APP_LOAD_TIMEOUT_MS = 60_000;
+import { APP_LOAD_TIMEOUT_MS } from '@kbn/scout-security';
 
 /**
  * Rule create / edit Actions step: Elastic Defend automated response-action
