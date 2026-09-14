@@ -30,6 +30,8 @@ export {
 export {
   InvestigationDetailsFlyout,
   type InvestigationDetailsFlyoutProps,
+  INVESTIGATION_FLYOUT_TABS,
+  type InvestigationFlyoutTab,
 } from './src/components/details/investigation_details_flyout';
 export {
   InvestigationHeaderBlocks,

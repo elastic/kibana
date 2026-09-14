@@ -8,6 +8,8 @@
 export {
   InvestigationDetailsFlyout,
   type InvestigationDetailsFlyoutProps,
+  INVESTIGATION_FLYOUT_TABS,
+  type InvestigationFlyoutTab,
 } from './investigation_details_flyout';
 export {
   ConversationDetailsFlyoutHeader,

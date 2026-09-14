@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiEmptyPrompt,
@@ -26,11 +26,14 @@ import {
   InvestigationActionModals,
   BlastRadius,
 } from '@kbn/agentic-investigations-common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useProposalsList } from '../../hooks/use_proposals_api';
 import { useOpenInChat } from '../../hooks/use_open_in_chat';
+import { useConversationsUrlParams } from './conversations_url_params';
 import { QUEUE_PAGE_INFO } from './translations';
 import { ProposalsTrendChartRow } from '../../components/proposals_trend_chart';
 import { CLOSED_GROUP_KEY } from '../../../common/proposals/list';
@@ -52,7 +55,8 @@ export const ConversationsPage: React.FC = () => {
     string | undefined
   >(undefined);
 
-  const [selectedIdForDetails, setSelectedIdForDetails] = useState<string | undefined>(undefined);
+  const { selectedConversationId, show, selectConversation, showTab, clearSelectedConversation } =
+    useConversationsUrlParams();
   const [modalState, setModalState] = useState<{
     type: CardActionType | null;
     recordId: Investigation['recordId'] | null;
@@ -99,14 +103,37 @@ export const ConversationsPage: React.FC = () => {
       [setSelectedIdForRecommendedAction]
     );
 
-  const closeDetails = useCallback(() => setSelectedIdForDetails(undefined), []);
   const openInChat = useOpenInChat();
+  const {
+    services: { notifications },
+  } = useKibana<CoreStart>();
+
+  // Both params are required: an id on its own leaves the flyout closed rather than guessing a tab.
+  const isFlyoutRequested = Boolean(selectedConversationId && show);
 
   const selectedDetailsConversation = useMemo(
     () =>
-      selectedIdForDetails ? conversations.find((c) => c.id === selectedIdForDetails) : undefined,
-    [conversations, selectedIdForDetails]
+      isFlyoutRequested ? conversations.find((c) => c.id === selectedConversationId) : undefined,
+    [conversations, isFlyoutRequested, selectedConversationId]
   );
+
+  // A link to a conversation that no longer exists closes the flyout rather than leaving an empty
+  // one open. Gated on `isLoading` so a background refetch cannot close a flyout that is in use.
+  useEffect(() => {
+    if (!selectedConversationId || !show || isLoading || error || selectedDetailsConversation) {
+      return;
+    }
+    notifications?.toasts.addDanger(QUEUE_PAGE_INFO.conversationNotFound(selectedConversationId));
+    clearSelectedConversation();
+  }, [
+    clearSelectedConversation,
+    error,
+    isLoading,
+    notifications,
+    selectedConversationId,
+    selectedDetailsConversation,
+    show,
+  ]);
 
   const actionInvestigation = useMemo(
     () =>
@@ -172,11 +199,14 @@ export const ConversationsPage: React.FC = () => {
         `,
       }}
     >
-      {selectedDetailsConversation && (
+      {selectedConversationId && show && (
         <InvestigationDetailsFlyout
           investigation={selectedDetailsConversation}
-          onClose={closeDetails}
-          onOpenChat={() => openInChat(selectedDetailsConversation.id)}
+          isLoading={isLoading}
+          selectedTab={show}
+          onSelectTab={showTab}
+          onClose={clearSelectedConversation}
+          onOpenChat={() => openInChat(selectedConversationId)}
         />
       )}
 
@@ -246,9 +276,9 @@ export const ConversationsPage: React.FC = () => {
                   isFiltered={filteredQueueItems.length !== sortedConversations.length}
                   onClickRecommendedAction={onClickRecommendedAction}
                   onClickAction={onClickAction}
-                  onClickCard={setSelectedIdForDetails}
+                  onClickCard={selectConversation}
                   onOpenChat={openInChat}
-                  selectedId={selectedIdForDetails}
+                  selectedId={selectedConversationId}
                 />
               </EuiFlexItem>
             ))
