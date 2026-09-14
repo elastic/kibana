@@ -17,3 +17,6 @@ export type {
   ProjectedInvestigationRecord,
 } from './types';
 export { InvestigationAlreadyExistsError, InvestigationStaleWriteError } from './errors';
+export { SavedObjectInvestigationRepository } from './saved_object_investigation_repository';
+export type { InvestigationSavedObjectsClient } from './saved_object_investigation_repository';
+export { buildBaseInvestigationFilter, buildInvestigationFilter } from './build_investigation_filter';
