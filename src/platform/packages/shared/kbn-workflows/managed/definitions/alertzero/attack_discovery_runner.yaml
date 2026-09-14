@@ -145,8 +145,8 @@ steps:
       # Computed on its own because comparison operators cannot follow a filter chain.
       attack_count: "${{ steps.run_generation.output.attack_discoveries | default: consts.no_discoveries | size }}"
       # 100 is DEFAULT_PARALLEL_MAX_FAN_OUT: a single `parallel` foreach throws
-      # above that. `chunk` drains leftovers in later batches. `concurrency.max`
-      # (not this) bounds claimed Task Manager workers.
+      # above that. `chunk` drains leftovers in later batches. How many of those
+      # items are reviewed at once is `concurrency.max` below, not this.
       batches: "${{ steps.run_generation.output.attack_discoveries | default: consts.no_discoveries | chunk: 100 }}"
 
   # A run that generated nothing is a normal outcome, not a failure: there may
