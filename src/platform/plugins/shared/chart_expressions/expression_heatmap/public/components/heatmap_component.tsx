@@ -434,10 +434,11 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       (v) => v[valueAccessor!] === null || typeof v[valueAccessor!] === 'number'
     );
 
-    // A date x-axis is time-based only when it's a form-based date-histogram swimlane
-    // (`dateHistogramMeta.interval`) or an ES|QL date column (which never carries histogram meta but
-    // is inherently chronological). A form-based non-histogram date axis (e.g. top-values of a date
-    // field) is bucketed/ordinal, so it must keep its baked `ordinal` scale and configured sort.
+    // A date x-axis is time-based when it's a date-histogram swimlane (`dateHistogramMeta.interval`,
+    // which covers both a form-based date histogram and an ES|QL `BUCKET` query) or a plain ES|QL
+    // date column, which carries no histogram meta but is still inherently chronological. A
+    // form-based non-histogram date axis (e.g. top-values of a date field) is bucketed/ordinal, so
+    // it must keep its baked `ordinal` scale and configured sort.
     const isTimeBasedX = isTimeBasedSwimLane || (isEsqlMode && isDateX);
 
     // Convert date strings to timestamps for ES|QL time data
