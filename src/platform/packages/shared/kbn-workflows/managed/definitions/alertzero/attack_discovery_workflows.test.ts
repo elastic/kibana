@@ -292,8 +292,16 @@ describe('Attack Discovery worker chain', () => {
       // does not claim Task Manager workers.
       const liquid = createWorkflowLiquidEngine();
       const overflowCount = DEFAULT_PARALLEL_MAX_FAN_OUT + 50;
+      // Strips either delimiter: `data.set` steps author `${{ }}` to preserve type,
+      // while `workflow.output` uses `{{ }}`.
       const evaluate = (expression: string, context: Record<string, unknown>): unknown =>
-        liquid.evalValueSync(expression.slice(3, -2).trim(), context);
+        liquid.evalValueSync(
+          expression
+            .replace(/^\$?\{\{/, '')
+            .replace(/\}\}$/, '')
+            .trim(),
+          context
+        );
       const contextFor = (attackDiscoveries: unknown): Record<string, unknown> => ({
         consts: { no_discoveries: worker.consts?.no_discoveries },
         steps: {
@@ -358,7 +366,7 @@ describe('Attack Discovery worker chain', () => {
         );
 
         expect(
-          evaluate(String(stepIn(workerSteps, 'summarize_run')?.with?.reviews_requested), {
+          evaluate(String(stepIn(workerSteps, 'emit_result')?.with?.reviews_requested), {
             steps: { resolve_fanout: { output: { attack_count: attackCount } } },
           })
         ).toBe(overflowCount);
@@ -442,8 +450,16 @@ describe('Attack Discovery worker chain', () => {
     });
 
     it('requests a review for every generated attack', () => {
-      expect(stepIn(workerSteps, 'summarize_run')?.with?.reviews_requested).toContain(
+      expect(stepIn(workerSteps, 'emit_result')?.with?.reviews_requested).toContain(
         'steps.resolve_fanout.output.attack_count'
+      );
+    });
+
+    // `init_review_counts` seeds the variable and each batch adds to it, so the
+    // output has to read the accumulator rather than a copy of it.
+    it('reports the accumulated failed-review count', () => {
+      expect(stepIn(workerSteps, 'emit_result')?.with?.reviews_failed).toContain(
+        'variables.reviews_failed'
       );
     });
   });

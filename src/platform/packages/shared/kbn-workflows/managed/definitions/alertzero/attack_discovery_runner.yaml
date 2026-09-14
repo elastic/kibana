@@ -231,22 +231,17 @@ steps:
         with:
           reviews_failed: "${{ variables.reviews_failed | plus: steps.batch_failed.output.count }}"
 
-  # Fan-in: every batch has settled. A branch output is the child's
-  # `workflow.output` payload (title, verdict, investigation_opened).
-  - name: summarize_run
-    type: data.set
-    with:
-      attacks_generated: "${{ steps.resolve_fanout.output.attack_count }}"
-      reviews_requested: "${{ steps.resolve_fanout.output.attack_count }}"
-      reviews_failed: "${{ variables.reviews_failed | default: 0 }}"
-
+  # Fan-in: every batch has settled. `variables.reviews_failed` needs no `default`
+  # here because `init_review_counts` runs unconditionally before the loop, so the
+  # key is always set; each `accumulate_failed` iteration is its own entry in
+  # `variables`, so the value read here is the last running total written.
   - name: emit_result
     type: workflow.output
     status: completed
     with:
-      attacks_generated: "{{ steps.summarize_run.output.attacks_generated }}"
-      reviews_requested: "{{ steps.summarize_run.output.reviews_requested }}"
-      reviews_failed: "{{ steps.summarize_run.output.reviews_failed }}"
+      attacks_generated: "{{ steps.resolve_fanout.output.attack_count }}"
+      reviews_requested: "{{ steps.resolve_fanout.output.attack_count }}"
+      reviews_failed: "{{ variables.reviews_failed }}"
       alerts_analyzed: "{{ steps.run_generation.output.alerts_context_count | default: 0 }}"
       schedule_interval: "{{ inputs.schedule_interval }}"
       execution_uuid: "{{ steps.run_generation.output.execution_uuid }}"
