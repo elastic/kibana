@@ -56,6 +56,7 @@ import type { SignificantEventsAlertingContext } from './lib/significant_events/
 import { EbtTelemetryService } from './lib/telemetry/ebt';
 import { significantEventsRouteRepository } from './routes';
 import type { GetScopedClients, RouteHandlerScopedClients } from './routes/types';
+import { createPriceService } from './lib/cost/price_service';
 import type {
   SignificantEventsPluginSetupDependencies,
   SignificantEventsPluginStartDependencies,
@@ -96,6 +97,10 @@ import {
   installDiscoveryAgents,
   registerSignificantEventsDiscoveryAgentTypes,
 } from './agent_builder/agents/discovery';
+import {
+  installFeatureIdentificationAgent,
+  registerSignificantEventsFeatureIdentificationAgentTypes,
+} from './agent_builder/agents/feature_identification';
 import { createSignificantEventsAvailability } from './agent_builder/tools/significant_events_availability';
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '../common/feature_flags';
@@ -293,6 +298,9 @@ export class SignificantEventsPlugin
 
     if (plugins.agentBuilder) {
       registerSignificantEventsDiscoveryAgentTypes({ agentBuilder: plugins.agentBuilder });
+      registerSignificantEventsFeatureIdentificationAgentTypes({
+        agentBuilder: plugins.agentBuilder,
+      });
       void core
         .getStartServices()
         .then(async () => {
@@ -375,6 +383,17 @@ export class SignificantEventsPlugin
       getScopedClients: this.getScopedClients,
     });
 
+    const priceService = createPriceService({
+      fetchFn: fetch,
+      getNow: () => new Date(),
+      logger: this.logger.get('cost'),
+      timeoutMs: 10_000,
+      cacheTtlMs: 6 * 60 * 60 * 1000,
+      maxBodyBytes: 4 * 1024 * 1024,
+      maxScopedRows: 10_000,
+      baseUrl: plugins.cloud?.baseUrl ?? 'https://cloud.elastic.co',
+    });
+
     registerRoutes({
       repository: significantEventsRouteRepository,
       dependencies: {
@@ -387,6 +406,7 @@ export class SignificantEventsPlugin
         significantEventsScheduledWorkflowsService,
         workflowClients,
         maintenanceService: this.maintenanceService,
+        priceService,
         getSpaceId: async (request: KibanaRequest) => {
           const [, pluginsStart] = await core.getStartServices();
           return pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
@@ -515,6 +535,13 @@ export class SignificantEventsPlugin
           this.logManagedResourceError('significant events agents', error);
         }
       );
+      void installFeatureIdentificationAgent({
+        agentBuilder,
+        spaceId: DEFAULT_SPACE_ID,
+        availability,
+      }).catch((error: unknown) => {
+        this.logManagedResourceError('feature identification agent', error);
+      });
     }
 
     if (plugins.agentBuilder && this.server && this.getScopedClients) {

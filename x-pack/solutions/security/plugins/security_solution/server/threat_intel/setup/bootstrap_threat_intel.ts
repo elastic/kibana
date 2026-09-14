@@ -64,11 +64,26 @@ const checkReportSemanticTextEndpoints = async (
   esClient: ElasticsearchClient,
   log: Logger
 ): Promise<void> => {
-  const mappings = await esClient.indices.getFieldMapping({
-    index: THREAT_REPORTS_INDEX,
-    fields: REQUIRED_REPORT_SEMANTIC_FIELDS.map((field) => `content.${field}`),
-    include_defaults: true,
-  });
+  let mappings: Awaited<ReturnType<typeof esClient.indices.getFieldMapping>>;
+  try {
+    mappings = await esClient.indices.getFieldMapping({
+      index: THREAT_REPORTS_INDEX,
+      fields: REQUIRED_REPORT_SEMANTIC_FIELDS.map((field) => `content.${field}`),
+      include_defaults: true,
+    });
+  } catch (err) {
+    const status = err instanceof errors.ResponseError ? err.statusCode : undefined;
+    if (status === 404) {
+      // The index is created lazily on first ingest; the template is already
+      // installed. Skip the check rather than retrying forever on a fresh install.
+      log.debug(
+        `Threat reports index does not exist yet; skipping semantic_text ` +
+          `endpoint check until first report is indexed`
+      );
+      return;
+    }
+    throw err;
+  }
   const fieldMappings = mappings[THREAT_REPORTS_INDEX]?.mappings;
   const endpointIds = new Set<string>();
 

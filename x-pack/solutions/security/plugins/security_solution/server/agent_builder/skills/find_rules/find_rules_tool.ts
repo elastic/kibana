@@ -209,6 +209,13 @@ function summarizeRule(rule: RuleFromFind) {
     id: rule.id,
     ruleId: params.rule_id ?? params.ruleId,
     name: rule.name,
+    description: params.description,
+    query: params.query,
+    // The match rubric requires the same data source, so the index patterns are evidence,
+    // not decoration: without them a Windows-endpoint rule can be judged to cover a Linux
+    // or cloud behaviour that shares its technique.
+    index: params.index,
+    dataViewId: params.data_view_id,
     tags: rule.tags,
     enabled: rule.enabled,
     severity: params.severity,
