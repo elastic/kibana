@@ -14,6 +14,11 @@ import { createPlaywrightConfig } from '@kbn/scout';
  * config set from it, and that set is what starts Kibana with the example context awareness
  * profiles registered via `--discover.experimental.enabledProfiles`. Renaming the directory
  * silently falls back to the `default` set, where none of the example profiles resolve.
+ *
+ * Needing that set also makes this suite local-only. A config set is a set of server args, and a
+ * cloud run attaches to an already-provisioned deployment instead of starting a server, so the
+ * profiles cannot be enabled there — the `@cloud-*` half of the deployment tags the specs carry is
+ * inert whatever CI decides to schedule.
  */
 export default createPlaywrightConfig({
   testDir: './parallel_tests',

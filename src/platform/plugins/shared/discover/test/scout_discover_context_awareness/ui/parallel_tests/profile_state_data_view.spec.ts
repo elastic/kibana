@@ -13,6 +13,7 @@ import {
   setupContextAwareness,
   teardownContextAwareness,
   AUTO_ROW_HEIGHT,
+  CLASSIC_NAV_DEPLOYMENTS,
   CONTEXT_AWARENESS_DATA_VIEWS,
   getProfileUrlState,
   getStoredTabs,
@@ -37,7 +38,7 @@ const BOX_COLOR_SELECT = 'exampleProfileStateBoxColorSelect';
  */
 spaceTest.describe(
   'Discover context awareness - profile state, data view mode',
-  { tag: '@local-stateful-classic' },
+  { tag: CLASSIC_NAV_DEPLOYMENTS },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await setupContextAwareness(scoutSpace);

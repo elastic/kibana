@@ -12,6 +12,7 @@ import {
   spaceTest,
   setupContextAwareness,
   teardownContextAwareness,
+  CLASSIC_NAV_DEPLOYMENTS,
   ROOT_PROFILE_DEFAULT_ESQL_QUERY,
 } from '../fixtures';
 
@@ -22,7 +23,7 @@ import {
  */
 spaceTest.describe(
   'Discover context awareness - extension getDefaultEsqlQuery',
-  { tag: '@local-stateful-classic' },
+  { tag: CLASSIC_NAV_DEPLOYMENTS },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await setupContextAwareness(scoutSpace);
