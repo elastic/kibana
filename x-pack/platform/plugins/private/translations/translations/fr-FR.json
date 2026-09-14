@@ -42071,7 +42071,6 @@
     "xpack.securitySolution.containers.detectionEngine.bootstrapPrebuiltRulesPackageFailure": "Échec de l'installation du package de règles prédéfinies",
     "xpack.securitySolution.containers.detectionEngine.ruleManagementFiltersFetchFailure": "Impossible de récupérer les filtres de règle",
     "xpack.securitySolution.containers.detectionEngine.rulesAndTimelines": "Impossible de récupérer les règles et les chronologies",
-    "xpack.securitySolution.contextMenuItemByRouter.viewDetails": "Afficher les détails",
     "xpack.securitySolution.controlColumns.checkboxForRowAriaLabel": "Case {checked, select, true {checked} other {non cochée}} pour l'alerte ou l'événement de la ligne {ariaRowindex}, avec les colonnes {columnValues}",
     "xpack.securitySolution.coverageOverviewDashboard.collapseCellsButton": "Réduire les cellules",
     "xpack.securitySolution.coverageOverviewDashboard.coveredMitreSubtechniques": "{enabledSubtechniques}/{totalSubtechniques} sous-techniques",

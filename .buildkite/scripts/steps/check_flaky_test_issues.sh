@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Tells, for every flaky test suite in the report produced by scout_report_flaky_tests.sh, which
+# Tells, for every flaky test suite in the report produced by report_flaky_tests.sh, which
 # GitHub failed-test issues are about it, open or closed, via `node scripts/check_flaky_test_issues`.
 # Read-only: nothing is filed or edited.
 # FLAKY_TESTS_GITHUB_REPO names the repository whose issues are checked; every open failed-test
