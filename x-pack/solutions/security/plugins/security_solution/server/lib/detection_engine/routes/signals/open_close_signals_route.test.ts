@@ -8,7 +8,6 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
-import { AlertDefaultClosingReasonValues } from '../../../../../common/types';
 import {
   getSetSignalStatusByIdsRequest,
   getSetSignalStatusByQueryRequest,
@@ -23,7 +22,6 @@ import { RuntimeFieldTypeEnum } from '../../../../../common/api/detection_engine
 import { MAX_RUNTIME_FIELDS_PER_REQUEST } from './bulk_close_runtime_mappings';
 import { setSignalsStatusRoute } from './open_close_signals_route';
 import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
-import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 
 describe('set signal status', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -250,57 +248,6 @@ describe('set signal status', () => {
       expect(response.status).toEqual(200);
       expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalled();
     });
-
-    test('returns 400 when closing reason is invalid', async () => {
-      const response = await server.inject(
-        requestMock.create({
-          method: 'post',
-          path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
-          body: {
-            ...typicalSetStatusSignalByIdsPayload(),
-            reason: 'invalid_reason',
-          },
-        }),
-        requestContextMock.convertContext(context)
-      );
-
-      expect(response.status).toEqual(400);
-      expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).not.toHaveBeenCalled();
-    });
-
-    test('returns 200 when closing reason is in configured custom reasons', async () => {
-      context.core.uiSettings.client.get.mockResolvedValue(['configured_custom_reason']);
-
-      const response = await server.inject(
-        requestMock.create({
-          method: 'post',
-          path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
-          body: {
-            ...typicalSetStatusSignalByIdsPayload(),
-            reason: 'configured_custom_reason',
-          },
-        }),
-        requestContextMock.convertContext(context)
-      );
-
-      expect(response.status).toEqual(200);
-    });
-
-    test('returns 200 when closing reason is in default reasons', async () => {
-      const response = await server.inject(
-        requestMock.create({
-          method: 'post',
-          path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
-          body: {
-            ...typicalSetStatusSignalByQueryPayload(),
-            reason: AlertDefaultClosingReasonValues.true_positive,
-          },
-        }),
-        requestContextMock.convertContext(context)
-      );
-
-      expect(response.status).toEqual(200);
-    });
   });
 
   describe('request validation', () => {
@@ -379,18 +326,15 @@ describe('set signal status', () => {
     });
   });
 
-  describe('workflow trigger emission', () => {
+  xdescribe('workflow trigger emission (9.x only — event bus not available in 8.19)', () => {
     let mockEventBus: { emitAlertStatusChanged: jest.Mock };
 
     beforeEach(() => {
       server = serverMock.create();
       mockEventBus = { emitAlertStatusChanged: jest.fn() };
-      setSignalsStatusRoute(
-        server.router,
-        logger,
-        createMockTelemetryEventsSender(),
-        mockEventBus as unknown as SecuritySolutionEventBus
-      );
+      // NOTE: setSignalsStatusRoute in 8.19 takes 3 args (router, logger, sender).
+      // The event-bus 4th argument was introduced in 9.x and does not exist here.
+      setSignalsStatusRoute(server.router, logger, createMockTelemetryEventsSender());
     });
 
     describe('by-ids path', () => {

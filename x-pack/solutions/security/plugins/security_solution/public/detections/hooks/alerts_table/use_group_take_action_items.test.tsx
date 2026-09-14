@@ -34,7 +34,6 @@ describe('useGroupTakeActionsItems', () => {
     (updateAlertStatus as jest.Mock).mockResolvedValue({ updated: 5, version_conflicts: 0 });
   });
 
-
   it('returns all take actions items if showAlertStatusActions is true and currentStatus is undefined', async () => {
     const { result } = renderHook(
       () =>
@@ -180,7 +179,7 @@ describe('useGroupTakeActionsItems', () => {
       );
 
       const { getByTestId } = render(
-        result.current({ ...paramsWithQuery, runtimeMappings: scriptedMappings })!
+        <>{result.current({ ...paramsWithQuery, runtimeMappings: scriptedMappings })}</>
       );
 
       await act(async () => {
@@ -201,7 +200,7 @@ describe('useGroupTakeActionsItems', () => {
       );
 
       const { getByTestId } = render(
-        result.current({ ...paramsWithQuery, runtimeMappings: scriptedMappings })!
+        <>{result.current({ ...paramsWithQuery, runtimeMappings: scriptedMappings })}</>
       );
 
       await act(async () => {
@@ -221,7 +220,7 @@ describe('useGroupTakeActionsItems', () => {
         { wrapper: wrapperContainer }
       );
 
-      const { getByTestId } = render(result.current(paramsWithQuery)!);
+      const { getByTestId } = render(<>{result.current(paramsWithQuery)}</>);
 
       await act(async () => {
         getByTestId('open-alert-status').click();

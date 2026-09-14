@@ -23,9 +23,6 @@ import * as i18n from '../translations';
 import { buildTimeRangeFilter } from '../../components/alerts_table/helpers';
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 
-// ES-only types not accepted by the server's runtime_fields schema.
-const UNSUPPORTED_RUNTIME_FIELD_TYPES = new Set(['composite', 'lookup']);
-
 export interface UseBulkAlertActionItemsArgs {
   /* Table ID for which this hook is being used */
   tableId: TableId;
