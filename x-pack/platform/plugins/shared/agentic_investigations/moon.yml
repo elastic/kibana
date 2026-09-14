@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/core-http-server-mocks'
   - '@kbn/zod-helpers'
   - '@kbn/std'
+  - '@kbn/security-plugin-types-server'
 tags:
   - plugin
   - prod
