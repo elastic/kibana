@@ -52,7 +52,7 @@ function setAppChrome() {
 }
 
 export async function renderApp(
-  { element, history, onAppLeave, setHeaderActionMenu, theme$ }: AppMountParameters,
+  { element, history, onAppLeave }: AppMountParameters,
   {
     coreStart,
     AppUsageTracker,
@@ -85,7 +85,6 @@ export async function renderApp(
           mapEmbeddableState={mapEmbeddableState}
           embeddableId={embeddableId}
           onAppLeave={onAppLeave}
-          setHeaderActionMenu={setHeaderActionMenu}
           stateTransfer={stateTransfer}
           originatingApp={originatingApp}
           originatingPath={originatingPath}

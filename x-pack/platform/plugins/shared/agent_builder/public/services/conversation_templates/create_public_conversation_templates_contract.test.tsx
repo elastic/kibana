@@ -96,6 +96,7 @@ describe('createPublicConversationTemplatesContract', () => {
     const TabContent = contract.getTab('overview')?.content;
     if (!TabContent) throw new Error('Expected a registered tab');
     const props = {
+      isOpenedFromChat: false,
       conversation: { ...conversation, rounds: [] },
     };
     const { rerender } = render(<TabContent {...props} />);
