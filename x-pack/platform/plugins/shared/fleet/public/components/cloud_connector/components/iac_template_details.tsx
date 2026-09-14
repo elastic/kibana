@@ -13,22 +13,21 @@ import { CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS } from '../../../../commo
 import { getAwsStackConsoleUrl, INVALID_STACK_ARN_MESSAGE } from '../utils';
 
 export interface IacTemplateDetailsProps {
-  iacKey: string;
   iacDeploymentId: string;
   isDeploymentIdInvalid: boolean;
-  onIacKeyChange: (value: string) => void;
   onIacDeploymentIdChange: (value: string) => void;
 }
 
-/** Editable IaC template key and deployment ID fields, plus a read-only stack console link. */
+/**
+ * Editable deployment ID (stack ARN) plus a read-only stack console link. The template key is
+ * not shown: it is written by the render flow and the daily check, never by hand.
+ */
 export const IacTemplateDetails: React.FC<IacTemplateDetailsProps> = ({
-  iacKey,
   iacDeploymentId,
   isDeploymentIdInvalid,
-  onIacKeyChange,
   onIacDeploymentIdChange,
 }) => {
-  const { IAC_SECTION, IAC_KEY_INPUT, IAC_DEPLOYMENT_ID_INPUT, IAC_VIEW_STACK_LINK } =
+  const { IAC_SECTION, IAC_DEPLOYMENT_ID_INPUT, IAC_VIEW_STACK_LINK } =
     CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS;
 
   const stackConsoleUrl = getAwsStackConsoleUrl(iacDeploymentId || undefined);
@@ -43,23 +42,6 @@ export const IacTemplateDetails: React.FC<IacTemplateDetailsProps> = ({
         </h4>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.iacKeyLabel', {
-          defaultMessage: 'Template key',
-        })}
-        helpText={i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.iacKeyHelp', {
-          defaultMessage:
-            'Set automatically when a template is rendered for this identity. Edit only to repair an identity by hand.',
-        })}
-      >
-        <EuiFieldText
-          fullWidth
-          value={iacKey}
-          onChange={(e) => onIacKeyChange(e.target.value.trim())}
-          data-test-subj={IAC_KEY_INPUT}
-        />
-      </EuiFormRow>
       <EuiFormRow
         fullWidth
         label={i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.iacDeploymentIdLabel', {

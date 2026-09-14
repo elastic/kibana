@@ -44,7 +44,6 @@ import type {
   IacUpgradeStatus,
 } from '../../../../common/types';
 import { CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS } from '../../../../common/services/cloud_connectors/test_subjects';
-import { parseAwsRegionFromArn } from '../../../../common/services/cloud_connectors/iac_deployment';
 import { IAC_PROVISIONER_KEY_CHECK_ACTION_EVENT } from '../../../../common/telemetry/iac_provisioner_events';
 import type { CloudProviders } from '../types';
 import { useCloudConnectorUsage } from '../hooks/use_cloud_connector_usage';
@@ -58,6 +57,7 @@ import {
   isAzureCloudConnectorVars,
   isCloudConnectorNameValid,
   isGcpCloudConnectorVars,
+  isStackArnInvalid,
 } from '../utils';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
 import { AccountBadge } from '../components/account_badge';
@@ -100,7 +100,6 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
   const [cloudConnectorName, setCloudConnectorName] = useState(initialName);
   const [editedName, setEditedName] = useState(initialName);
   const [isNameValid, setIsNameValid] = useState(() => isCloudConnectorNameValid(initialName));
-  const [editedIacKey, setEditedIacKey] = useState(iacKey ?? '');
   const [editedIacDeploymentId, setEditedIacDeploymentId] = useState(iacDeploymentId ?? '');
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -108,8 +107,8 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
 
   const showIac = provider === AWS_PROVIDER && isIacProvisionerEnabled;
 
-  const deploymentIdInvalid =
-    editedIacDeploymentId !== '' && parseAwsRegionFromArn(editedIacDeploymentId) === undefined;
+  // IacTemplateDetails trims on input, so the value judged here is the value that gets saved.
+  const deploymentIdInvalid = isStackArnInvalid(editedIacDeploymentId);
   const iacDeploymentIdToSave =
     showIac && editedIacDeploymentId && editedIacDeploymentId !== (iacDeploymentId ?? '')
       ? editedIacDeploymentId
@@ -195,7 +194,6 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
           ...(iacDeploymentIdToSave ? { iac_deployment_id: iacDeploymentIdToSave } : {}),
         })
           .then(() => {
-            setEditedIacKey(key);
             queryClient.invalidateQueries(['get-cloud-connectors']);
             queryClient.invalidateQueries(['cloud-connector-usage', cloudConnectorId]);
           })
@@ -279,17 +277,15 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
     setIsNameValid(valid);
   }, []);
 
-  // The API rejects empty strings (minLength 1): clearing a value is not supported, so only
-  // non-empty, changed values are sent.
-  const iacKeyToSave =
-    showIac && editedIacKey && editedIacKey !== (iacKey ?? '') ? editedIacKey : undefined;
-  const iacChanged = iacKeyToSave !== undefined || iacDeploymentIdToSave !== undefined;
+  // The API rejects empty strings (minLength 1): clearing a value is not supported, so only a
+  // non-empty, changed value is sent. The template key is never edited by hand: it is written
+  // when a template is rendered for this identity (Update click) and by the daily check.
+  const iacChanged = iacDeploymentIdToSave !== undefined;
   const nameChanged = editedName !== cloudConnectorName;
 
   const handleSave = () => {
     updateConnector({
       ...(nameChanged && editedName ? { name: editedName } : {}),
-      ...(iacKeyToSave !== undefined ? { iac_key: iacKeyToSave } : {}),
       ...(iacDeploymentIdToSave !== undefined ? { iac_deployment_id: iacDeploymentIdToSave } : {}),
     });
   };
@@ -496,10 +492,8 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
         {showIac && (
           <>
             <IacTemplateDetails
-              iacKey={editedIacKey}
               iacDeploymentId={editedIacDeploymentId}
               isDeploymentIdInvalid={deploymentIdInvalid}
-              onIacKeyChange={setEditedIacKey}
               onIacDeploymentIdChange={setEditedIacDeploymentId}
             />
             <EuiSpacer size="m" />

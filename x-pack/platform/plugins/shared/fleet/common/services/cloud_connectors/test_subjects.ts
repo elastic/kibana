@@ -71,7 +71,6 @@ export const CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS = {
   DELETE_CONFIRM_MODAL: 'cloudConnectorDeleteConfirmModal',
   DELETE_MODAL_CALLOUT: 'cloudConnectorDeleteModalCallout',
   IAC_SECTION: 'cloudConnectorIacSection',
-  IAC_KEY_INPUT: 'cloudConnectorIacKeyInput',
   IAC_DEPLOYMENT_ID_INPUT: 'cloudConnectorIacDeploymentIdInput',
   IAC_VIEW_STACK_LINK: 'cloudConnectorIacViewStackLink',
   IAC_UPGRADE_CALLOUT: 'cloudConnectorIacUpgradeCallout',

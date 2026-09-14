@@ -770,7 +770,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
   });
 
   describe('IaC section', () => {
-    it('(a) renders IaC section with key and deployment ID and a View stack link when ARN is valid', () => {
+    it('(a) renders IaC section with the deployment ID and a View stack link when ARN is valid, and no key field', () => {
       renderFlyout({
         provider: 'aws',
         iacKey: 'sha256:abc',
@@ -780,9 +780,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
       expect(
         screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_SECTION)
       ).toBeInTheDocument();
-      expect(
-        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_KEY_INPUT)
-      ).toHaveValue('sha256:abc');
+      expect(screen.queryByText('Template key')).not.toBeInTheDocument();
       expect(
         screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_DEPLOYMENT_ID_INPUT)
       ).toHaveValue(VALID_STACK_ARN);
@@ -895,21 +893,6 @@ describe('CloudConnectorPoliciesFlyout', () => {
       await waitFor(() => {
         expect(screen.getByText(/Enter a CloudFormation stack ARN/)).toBeInTheDocument();
       });
-
-      const saveButton = screen.getByTestId(
-        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FOOTER_SAVE_BUTTON
-      );
-      expect(saveButton).toBeDisabled();
-    });
-
-    it('(h) clearing a previously-set key does NOT send iac_key empty and keeps Save disabled if nothing else changed', () => {
-      renderFlyout({ provider: 'aws', iacKey: 'sha256:old' });
-
-      const keyInput = screen.getByTestId(
-        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_KEY_INPUT
-      );
-      // Clearing the field (setting to empty)
-      fireEvent.change(keyInput, { target: { value: '' } });
 
       const saveButton = screen.getByTestId(
         CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FOOTER_SAVE_BUTTON
@@ -1088,7 +1071,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
       expect(invalidateQueries).toHaveBeenCalledWith(['cloud-connector-usage', 'connector-123']);
     });
 
-    it('(j) onTemplateRendered calls updateCloudConnector with iac_key, syncs editedIacKey, and no toast', async () => {
+    it('(j) onTemplateRendered calls updateCloudConnector with iac_key, leaves Save disabled, and no toast', async () => {
       let capturedOnTemplateRendered:
         | ((rendered: { key?: string; integrations: RenderIacTemplateIntegration[] }) => void)
         | undefined;
@@ -1102,8 +1085,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
         };
       });
 
-      // Start with the old key so editedIacKey initialises to 'sha256:old'.
-      const { rerender } = renderFlyout({ provider: 'aws', iacKey: 'sha256:old' });
+      renderFlyout({ provider: 'aws', iacKey: 'sha256:old' });
 
       expect(capturedOnTemplateRendered).toBeDefined();
       capturedOnTemplateRendered!({ key: 'sha256:new', integrations: [] });
@@ -1114,23 +1096,8 @@ describe('CloudConnectorPoliciesFlyout', () => {
         });
       });
 
-      // Simulate the parent refetching with the new iacKey prop.
-      rerender(
-        <I18nProvider>
-          <QueryClientProvider client={queryClient}>
-            <CloudConnectorPoliciesFlyout {...defaultProps} provider="aws" iacKey="sha256:new" />
-          </QueryClientProvider>
-        </I18nProvider>
-      );
-
-      // setEditedIacKey('sha256:new') was called in .then(): input reflects the rendered key.
-      // Without the fix, editedIacKey would still be 'sha256:old' here and this would fail.
-      expect(
-        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_KEY_INPUT)
-      ).toHaveValue('sha256:new');
-
-      // editedIacKey matches iacKey prop — iacKeyToSave is undefined — Save is disabled.
-      // Without the fix, iacKeyToSave would be 'sha256:old' and Save would be enabled.
+      // The key is written by the raw request only; the flyout's Save has nothing of its own to
+      // send (the key is not an editable field), so it stays disabled.
       expect(
         screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FOOTER_SAVE_BUTTON)
       ).toBeDisabled();

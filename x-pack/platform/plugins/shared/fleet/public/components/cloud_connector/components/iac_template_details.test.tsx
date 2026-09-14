@@ -18,10 +18,8 @@ const VALID_STACK_ARN =
 
 describe('IacTemplateDetails', () => {
   const defaultProps = {
-    iacKey: '',
     iacDeploymentId: '',
     isDeploymentIdInvalid: false,
-    onIacKeyChange: jest.fn(),
     onIacDeploymentIdChange: jest.fn(),
   };
 
@@ -36,15 +34,13 @@ describe('IacTemplateDetails', () => {
     jest.clearAllMocks();
   });
 
-  it('renders field values passed via props', () => {
-    renderComponent({ iacKey: 'sha256:abc', iacDeploymentId: VALID_STACK_ARN });
+  it('renders the deployment ID passed via props and no template key field', () => {
+    renderComponent({ iacDeploymentId: VALID_STACK_ARN });
 
-    expect(
-      screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_KEY_INPUT)
-    ).toHaveValue('sha256:abc');
     expect(
       screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_DEPLOYMENT_ID_INPUT)
     ).toHaveValue(VALID_STACK_ARN);
+    expect(screen.queryByText('Template key')).not.toBeInTheDocument();
   });
 
   it('shows the stack console link when deployment ID is a valid ARN', () => {
@@ -77,16 +73,6 @@ describe('IacTemplateDetails', () => {
     renderComponent({ isDeploymentIdInvalid: true });
 
     expect(screen.getByText(/Enter a CloudFormation stack ARN/)).toBeInTheDocument();
-  });
-
-  it('calls onIacKeyChange with trimmed value on input change', () => {
-    const onIacKeyChange = jest.fn();
-    renderComponent({ onIacKeyChange });
-
-    const input = screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_KEY_INPUT);
-    fireEvent.change(input, { target: { value: '  sha256:abc  ' } });
-
-    expect(onIacKeyChange).toHaveBeenCalledWith('sha256:abc');
   });
 
   it('calls onIacDeploymentIdChange with trimmed value on input change', () => {
