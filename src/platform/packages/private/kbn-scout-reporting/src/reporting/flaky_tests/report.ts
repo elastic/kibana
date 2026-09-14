@@ -14,11 +14,15 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { ESQL_ROW_LIMIT } from './esql';
 import {
   fetchBranchStats,
+  fetchDailyTrend,
   fetchFailingFiles,
+  fetchFilePipelineStats,
+  fetchLatestExecutions,
   fetchSampleFailures,
   fetchTestMetadata,
   fetchTestStats,
   type FlakyTestQueryScope,
+  type TestFailureSamples,
   type TestMetadataRow,
   type TestStatsRow,
 } from './queries';
@@ -29,10 +33,13 @@ import {
   type FlakyTestBranchStats,
   type FlakyTestClassification,
   type FlakyTestEntry,
+  type FlakyTestFileStats,
   type FlakyTestLatestRun,
+  type FlakyTestPipelineStats,
   type FlakyTestReport,
   type FlakyTestReportOptions,
   type FlakyTestReportThresholds,
+  type FlakyTestTrend,
   type TestFramework,
 } from './schema';
 
@@ -50,14 +57,18 @@ export const latestRunAcrossBranches = (
 };
 
 /**
- * A test qualifies when it ran and failed in enough builds. It is flaky when it also had at
- * least one clean pass or recovered on an in-run retry; otherwise it is simply broken.
+ * A test qualifies when it ran and failed in enough builds, and in a large enough share of them.
+ * It is flaky when it also had at least one clean pass or recovered on an in-run retry;
+ * otherwise it is simply broken.
  */
 export const classifyTest = (
   stats: Pick<TestStatsRow, 'runs' | 'fails' | 'retryFlakes' | 'builds' | 'failedBuilds'>,
-  thresholds: Pick<FlakyTestReportThresholds, 'minBuilds' | 'minFailedBuilds'>
+  thresholds: Pick<FlakyTestReportThresholds, 'minBuilds' | 'minFailedBuilds' | 'minFailRate'>
 ): FlakyTestClassification | undefined => {
   if (stats.builds < thresholds.minBuilds || stats.failedBuilds < thresholds.minFailedBuilds) {
+    return undefined;
+  }
+  if (stats.failedBuilds / stats.builds < thresholds.minFailRate) {
     return undefined;
   }
 
@@ -114,8 +125,9 @@ const elapsed = (startedAt: number): string =>
 
 /**
  * Failures are rare, so everything starts from them: find files with failures, aggregate
- * per-test execution and build counts scoped to those files, then decorate the tests that clear
- * the thresholds with metadata and recent failure samples.
+ * per-test execution and build counts scoped to those files, drop the qualifying tests that no
+ * longer execute, then decorate the highest ranked ones with metadata, per-branch and
+ * per-pipeline stats, trends and recent failure samples.
  */
 const buildReport = async (
   es: ESClient,
@@ -124,6 +136,9 @@ const buildReport = async (
 ): Promise<FlakyTestReport> => {
   if (!Number.isInteger(options.lookbackDays) || options.lookbackDays < 1) {
     throw new Error(`lookbackDays must be a positive integer, got ${options.lookbackDays}`);
+  }
+  if (!Number.isInteger(options.trendDays) || options.trendDays < 0) {
+    throw new Error(`trendDays must be a non-negative integer, got ${options.trendDays}`);
   }
   if (options.classifications.length === 0) {
     throw new Error(
@@ -173,10 +188,29 @@ const buildReport = async (
 
   const flaky: AggregatedEntry[] = [];
   const consistentlyFailing: AggregatedEntry[] = [];
-  const candidates = stats.flatMap((row) => {
+  let candidates = stats.flatMap((row) => {
     const classification = classifyTest(row, thresholds);
     return classification && classifications.has(classification) ? [{ row, classification }] : [];
   });
+
+  // Tests that no longer execute in the scope (skipped, moved or deleted since) are dropped
+  // before ranking, so the caps are filled with tests that can still be fixed
+  if (candidates.length > 0) {
+    startedAt = performance.now();
+    const latestExecutions = await fetchLatestExecutions(
+      es,
+      scope,
+      candidates.map(({ row }) => row),
+      thresholds.maxInactiveHours
+    );
+    const active = candidates.filter(({ row }) => latestExecutions.has(row.testId));
+    log.info(
+      `Dropped ${candidates.length - active.length} of ${candidates.length} qualifying tests ` +
+        `without an execution in the last ${thresholds.maxInactiveHours}h ` +
+        `(skipped, moved or deleted) in ${elapsed(startedAt)}`
+    );
+    candidates = active;
+  }
 
   let metadata = new Map<string, TestMetadataRow>();
   if (candidates.length > 0) {
@@ -196,29 +230,60 @@ const buildReport = async (
   const rankedConsistentlyFailing = cap(rankTests(consistentlyFailing));
   const admitted = [...rankedFlaky, ...rankedConsistentlyFailing];
 
-  let branchStats = new Map<string, FlakyTestBranchStats[]>();
-  let samples = new Map<string, FlakyTestEntry['sampleFailures']>();
-  if (admitted.length > 0) {
-    startedAt = performance.now();
-    branchStats = await fetchBranchStats(es, scope, admitted);
-    log.info(`Fetched per-branch stats for ${admitted.length} tests in ${elapsed(startedAt)}`);
+  // The per-test lookups are independent, so they run concurrently and each logs its own time
+  const timed = async <T>(label: string, lookup: Promise<T>): Promise<T> => {
+    const lookupStartedAt = performance.now();
+    const result = await lookup;
+    log.info(`Fetched ${label} for ${admitted.length} tests in ${elapsed(lookupStartedAt)}`);
+    return result;
+  };
 
-    startedAt = performance.now();
-    samples = await fetchSampleFailures(
-      es,
-      scope,
-      admitted.map((entry) => entry.testId),
-      options.samplesPerTest
-    );
-    log.info(`Fetched failure samples for ${admitted.length} tests in ${elapsed(startedAt)}`);
+  let branchStats = new Map<string, FlakyTestBranchStats[]>();
+  let samples = new Map<string, TestFailureSamples>();
+  let trends = new Map<string, FlakyTestTrend>();
+  let pipelineStats = new Map<string, FlakyTestPipelineStats[]>();
+  if (admitted.length > 0) {
+    [branchStats, samples, trends, pipelineStats] = await Promise.all([
+      timed('per-branch stats', fetchBranchStats(es, scope, admitted)),
+      timed(
+        'failure samples',
+        fetchSampleFailures(
+          es,
+          scope,
+          admitted.map((entry) => entry.testId),
+          options.samplesPerTest
+        )
+      ),
+      timed(
+        `${options.trendDays}-day trends`,
+        fetchDailyTrend(es, scope, admitted, options.trendDays)
+      ),
+      timed('per-pipeline stats', fetchFilePipelineStats(es, scope, admitted)),
+    ]);
   }
 
   const decorate = (entry: AggregatedEntry): FlakyTestEntry => ({
     ...entry,
+    suiteTitle: samples.get(entry.testId)?.suiteTitle,
     latestRun: latestRunAcrossBranches(branchStats.get(entry.testId)),
     byBranch: branchStats.get(entry.testId) ?? [],
-    sampleFailures: samples.get(entry.testId) ?? [],
+    sampleFailures: samples.get(entry.testId)?.failures ?? [],
+    trend: trends.get(entry.testId),
   });
+
+  // One file entry per (path, framework) over the tests of both lists, in ranking order
+  const files = new Map<string, FlakyTestFileStats>();
+  for (const { filePath, framework, testId } of admitted) {
+    const key = `${framework}\n${filePath}`;
+    const file = files.get(key) ?? {
+      filePath,
+      framework,
+      testIds: [],
+      byPipeline: pipelineStats.get(filePath) ?? [],
+    };
+    file.testIds.push(testId);
+    files.set(key, file);
+  }
 
   const flakyByFramework: Partial<Record<TestFramework, number>> = {};
   for (const entry of rankedFlaky) {
@@ -243,6 +308,7 @@ const buildReport = async (
     },
     flaky: rankedFlaky.map(decorate),
     consistentlyFailing: rankedConsistentlyFailing.map(decorate),
+    files: [...files.values()],
   });
 };
 
