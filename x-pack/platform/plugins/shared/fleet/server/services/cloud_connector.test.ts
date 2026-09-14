@@ -226,9 +226,11 @@ describe('CloudConnectorService', () => {
 
       await service.create(mockSoClient, {
         ...mockCreateRequest,
-        templateSha: 'sha256:661cb7def1c7101f',
-        blueprintId: 'federated-identity',
-        blueprintVersion: '1.0.0',
+        iac: {
+          templateSha: 'sha256:661cb7def1c7101f',
+          blueprintId: 'federated-identity',
+          blueprintVersion: '1.0.0',
+        },
       });
 
       expect(mockSoClient.create).toHaveBeenCalledWith(
@@ -258,7 +260,7 @@ describe('CloudConnectorService', () => {
 
       await service.create(mockSoClient, {
         ...mockCreateRequest,
-        templateSha: null,
+        iac: { templateSha: null },
       });
 
       expect(mockSoClient.create).toHaveBeenCalledWith(
@@ -1150,7 +1152,7 @@ describe('CloudConnectorService', () => {
       mockSoClient.find.mockResolvedValue(mockPackagePoliciesForUpdate);
 
       await service.update(mockSoClient, 'cloud-connector-123', {
-        templateSha: null,
+        iac: { templateSha: null },
       });
 
       expect(mockSoClient.update).toHaveBeenCalledWith(
