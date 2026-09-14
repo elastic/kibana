@@ -107,7 +107,7 @@ describe('bulkCreate', () => {
     });
   });
 
-  it('accepts unified type (v2) attachments without owner and uses case owner', async () => {
+  it('accepts unified comments', async () => {
     registerCommentType();
     userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseId]: 0 });
 
