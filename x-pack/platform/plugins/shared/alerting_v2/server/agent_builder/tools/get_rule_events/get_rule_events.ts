@@ -47,7 +47,14 @@ const getRuleEventsSchema = z
   })
   .refine((value) => (value.start === undefined) === (value.end === undefined), {
     message: 'start and end must both be provided',
-  });
+  })
+  .refine(
+    (value) =>
+      value.start === undefined ||
+      value.end === undefined ||
+      Date.parse(value.start) <= Date.parse(value.end),
+    { message: 'start must be less than or equal to end' }
+  );
 
 const parseEventData = (
   data: EpisodeEventRow['data']
@@ -89,7 +96,7 @@ export const getRuleEventsTool = ({
 }: GetRuleEventsToolParams): BuiltinAttachmentBoundedTool<typeof getRuleEventsSchema> => ({
   id: getRuleEventsToolId(attachmentId),
   type: ToolType.builtin,
-  description: `Fetch .rule-events rows for alert episode "${episodeId}" (attachment "${attachmentId}"), oldest first. Each event includes @timestamp, episode.status (inactive/pending/active/recovering), severity, source, group_hash, and event data. Call with no arguments to fetch this episode's events. Optionally pass start and end together to narrow the @timestamp window, or status to filter lifecycle state. Returns at most ${TOOL_RESULT_LIMIT} rows; if truncated is true, pass a narrower start/end. This tool is read-only.`,
+  description: `Fetch .rule-events rows for alert episode "${episodeId}" (attachment "${attachmentId}"), oldest first. Each event includes @timestamp, episode.status (inactive/pending/active/recovering), severity, source, group_hash, and event data. Call with no arguments to fetch this episode's events. Optionally pass start and end together to narrow the @timestamp window, or status to filter lifecycle state. Returns at most ${TOOL_RESULT_LIMIT} rows. If truncated is true, more events exist after the last returned @timestamp: call again with start set to that timestamp and the same end, and skip the overlapping first row. Do not retry the same window. If truncated is still true for a very small window (the same @timestamp or a sub-second range), stop and use the rows you have; there is no further pagination. This tool is read-only.`,
   schema: getRuleEventsSchema,
   handler: async (args, toolContext) => {
     const unauthorized = await ensureToolPrivilege({
@@ -103,18 +110,6 @@ export const getRuleEventsTool = ({
     }
 
     const { start, end, status } = args;
-    if (start !== undefined && end !== undefined && Date.parse(start) > Date.parse(end)) {
-      return {
-        results: [
-          {
-            type: ToolResultType.error,
-            data: {
-              message: 'start must be less than or equal to end',
-            },
-          },
-        ],
-      };
-    }
 
     const client = getEpisodesClient({
       request: toolContext.request,

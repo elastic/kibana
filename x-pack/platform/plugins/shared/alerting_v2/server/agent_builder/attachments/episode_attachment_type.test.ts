@@ -443,6 +443,7 @@ describe('createEpisodeAttachmentType', () => {
       expect(value).toContain(getRuleEventsToolId('attach-1'));
       expect(value).toContain('Call it with no arguments');
       expect(value).toContain('at most 100 rows');
+      expect(value).toContain('Do not retry the same window');
       expect(value).toContain('rule-management');
     });
 

@@ -93,10 +93,15 @@ describe('getRuleEventsTool', () => {
       expect(tool.description).toContain('no arguments');
       expect(tool.description).toContain('100 rows');
       expect(tool.description).toContain('event data');
+      expect(tool.description).toContain('Do not retry the same window');
+      expect(tool.description).toContain('there is no further pagination');
       expect(tool.schema.safeParse(validArgs).success).toBe(true);
       expect(tool.schema.safeParse({}).success).toBe(true);
       expect(tool.schema.safeParse({ start: validArgs.start }).success).toBe(false);
       expect(tool.schema.safeParse({ end: validArgs.end }).success).toBe(false);
+      expect(tool.schema.safeParse({ start: validArgs.end, end: validArgs.start }).success).toBe(
+        false
+      );
     });
   });
 
@@ -291,22 +296,15 @@ describe('getRuleEventsTool', () => {
       }
     });
 
-    it('returns an error when start is after end', async () => {
-      const result = await createTool().handler(
-        { start: validArgs.end, end: validArgs.start },
-        agentBuilderMocks.tools.createHandlerContext()
-      );
-
-      expect(get).not.toHaveBeenCalled();
-      expect(getEvents).not.toHaveBeenCalled();
-      expect(result).toEqual({
-        results: [
-          {
-            type: ToolResultType.error,
-            data: { message: 'start must be less than or equal to end' },
-          },
-        ],
+    it('rejects a start after end at the schema', () => {
+      const parsed = createTool().schema.safeParse({
+        start: validArgs.end,
+        end: validArgs.start,
       });
+      expect(parsed.success).toBe(false);
+      if (!parsed.success) {
+        expect(parsed.error.issues[0]?.message).toBe('start must be less than or equal to end');
+      }
     });
 
     it('returns an error when the episode is missing', async () => {
