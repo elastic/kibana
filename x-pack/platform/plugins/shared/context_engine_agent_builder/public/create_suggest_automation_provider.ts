@@ -45,6 +45,9 @@ const getAutomationToolAiIndexId = (result: ToolResult): string | undefined => {
   return result.data.aiIndexId;
 };
 
+export const buildSuggestAutomationSessionTag = (spaceId: string, aiIndexId: string): string =>
+  `context-engine-ai-index:${spaceId}:${aiIndexId}`;
+
 export const createSuggestAutomationProvider = ({
   agentBuilder,
   application,
@@ -62,7 +65,7 @@ export const createSuggestAutomationProvider = ({
     application.capabilities[WORKFLOWS_MANAGEMENT_CAPABILITY]?.executeWorkflow === true &&
     agentBuilder?.openChat !== undefined,
 
-  suggestAutomation: ({ aiIndex }) => {
+  suggestAutomation: ({ aiIndex, spaceId }) => {
     if (!agentBuilder?.openChat) {
       return;
     }
@@ -75,10 +78,9 @@ export const createSuggestAutomationProvider = ({
       traces: aiIndex.traces,
     };
     agentBuilder.openChat({
-      newConversation: true,
       autoSendInitialMessage: true,
       initialMessage: SUGGEST_AUTOMATION_INITIAL_MESSAGE,
-      sessionTag: `context-engine-ai-index-${aiIndex.id}`,
+      sessionTag: buildSuggestAutomationSessionTag(spaceId, aiIndex.id),
       agentId: CONTEXT_ENGINE_SETUP_AGENT_ID,
       attachments: [
         {
