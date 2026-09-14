@@ -27,8 +27,7 @@ triggers:
           type: number
           default: 2
           description: Rule executions the preview simulates.
-      required:
-        - technique
+      required: []
       additionalProperties: false
 outputs:
   - name: created
