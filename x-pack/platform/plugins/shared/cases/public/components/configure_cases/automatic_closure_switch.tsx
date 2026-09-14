@@ -9,8 +9,8 @@ import React, { useCallback } from 'react';
 import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiSwitch } from '@elastic/eui';
 
-import type { ClosureType } from '../../../containers/configure/types';
-import * as i18n from '../../configure_cases/translations';
+import type { ClosureType } from '../../containers/configure/types';
+import * as i18n from './translations';
 
 export interface AutomaticClosureSwitchProps {
   closureTypeSelected: ClosureType;

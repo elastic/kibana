@@ -23,29 +23,29 @@ import type {
   TemplateConfiguration,
   CustomFieldTypes,
   ActionConnector,
-} from '../../../../common/types/domain';
-import type { CasesConfigurationUI, CaseUI } from '../../../containers/types';
-import { CustomFields } from '../../custom_fields';
-import { Templates } from '../../templates';
-import { CustomFieldsForm } from '../../custom_fields/form';
-import { TemplateForm } from '../../templates/form';
-import type { TemplateFormProps } from '../../templates/types';
-import { CommonFlyout } from '../../configure_cases/flyout';
-import { addOrReplaceField } from '../../utils';
-import { builderMap as customFieldsBuilderMap } from '../../custom_fields/builder';
-import { useShowLegacyCustomFields } from '../../../common/use_show_old_custom_fields';
+} from '../../../common/types/domain';
+import type { CasesConfigurationUI, CaseUI } from '../../containers/types';
+import { CustomFields } from '../custom_fields';
+import { Templates } from '../templates';
+import { CustomFieldsForm } from '../custom_fields/form';
+import { TemplateForm } from '../templates/form';
+import type { TemplateFormProps } from '../templates/types';
+import { CommonFlyout } from './flyout';
+import { addOrReplaceField } from '../utils';
+import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
+import { useShowLegacyCustomFields } from '../../common/use_show_old_custom_fields';
 import {
   useCasesFieldLibraryNavigation,
   useCasesTemplatesNavigation,
-} from '../../../common/navigation';
-import { useCasesContext } from '../../cases_context/use_cases_context';
-import { useCasesConfig } from '../../../common/lib/kibana';
-import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
-import type { ClosureType } from '../../../containers/configure/types';
+} from '../../common/navigation';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import { useCasesConfig } from '../../common/lib/kibana';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import type { ClosureType } from '../../containers/configure/types';
 import { SettingsSection } from './settings_section';
-import * as i18n from '../../configure_cases/translations';
-import * as customFieldsI18n from '../../custom_fields/translations';
-import * as templatesI18n from '../../templates/translations';
+import * as i18n from './translations';
+import * as customFieldsI18n from '../custom_fields/translations';
+import * as templatesI18n from '../templates/translations';
 
 type LegacyFlyoutType = 'customField' | 'template';
 
