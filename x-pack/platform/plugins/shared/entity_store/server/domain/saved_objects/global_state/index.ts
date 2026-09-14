@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectsClientContract,
+  SavedObjectsFindResponse,
+} from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import {
@@ -152,12 +155,17 @@ export class EntityStoreGlobalStateClient {
   }
 
   async delete(): Promise<void> {
+    const response = await this.findSO();
+    if (response.total === 0) {
+      return;
+    }
+
     try {
-      const id = this.getSavedObjectId();
+      const id = response.saved_objects[0].id;
       this.logger.debug(`Deleting global state with id ${id}`);
       await this.soClient.delete(EntityStoreGlobalStateTypeName, id);
     } catch (error) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(error) || Boom.isBoom(error, 404)) {
+      if (Boom.isBoom(error, 404)) {
         return;
       }
       throw error;
@@ -171,15 +179,30 @@ export class EntityStoreGlobalStateClient {
   private async findRaw(): Promise<
     { attributes: EntityStoreGlobalStateOverrides; version?: string } | undefined
   > {
+    const response = await this.findSO();
+    if (response.total === 0) {
+      return undefined;
+    }
+
+    const { attributes, version } = response.saved_objects[0];
+    return { attributes, version };
+  }
+
+  private async findSO(): Promise<SavedObjectsFindResponse<EntityStoreGlobalStateOverrides>> {
     try {
-      const { attributes, version } = await this.soClient.get<EntityStoreGlobalStateOverrides>(
+      const savedObject = await this.soClient.get<EntityStoreGlobalStateOverrides>(
         EntityStoreGlobalStateTypeName,
         this.getSavedObjectId()
       );
-      return { attributes, version };
+      return {
+        total: 1,
+        saved_objects: [savedObject],
+        per_page: 1,
+        page: 1,
+      };
     } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-        return undefined;
+        return { total: 0, saved_objects: [], per_page: 1, page: 1 };
       }
       throw error;
     }
