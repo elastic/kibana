@@ -149,6 +149,8 @@ const prunePredicate = (
 ): ESQLSingleAstItem | undefined => {
   if (refsAreInScope(node, scope)) return node;
   if (isFunctionExpression(node) && node.name === 'and') {
+    // mutates the AND node in place, consistent with the module's
+    // mutate-in-place style (see removeOutOfScopeReferences)
     const [left, right] = node.args;
     const prunedLeft = Array.isArray(left) ? undefined : prunePredicate(left, scope);
     const prunedRight = Array.isArray(right) ? undefined : prunePredicate(right, scope);
@@ -166,6 +168,7 @@ const getRenamePair = (
   arg: ESQLCommand['args'][number]
 ): { source: string; target: string } | undefined => {
   if (Array.isArray(arg) || !isFunctionExpression(arg)) return undefined;
+  if (arg.name !== 'as' && !isAssignment(arg)) return undefined;
   const [first, second] = arg.args;
   if (Array.isArray(first) || Array.isArray(second) || !isColumn(first) || !isColumn(second)) {
     return undefined;
