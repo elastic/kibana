@@ -46,6 +46,7 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
         actions: { api: { get: (privilege: string) => `api:${privilege}` } },
       },
     };
+
     const list = jest.fn().mockResolvedValue(aiIndices);
     const getSpaceId = jest.fn().mockReturnValue(spaceId);
     const spaces = spacesAvailable ? { spacesService: { getSpaceId } } : undefined;
