@@ -7,6 +7,7 @@
 
 import { isEqual } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import { asyncMapWithLimit } from '@kbn/std';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { JSONSchema7 } from 'json-schema';
 import {
@@ -23,14 +24,16 @@ import type {
   ApproveProposalRequest,
   CreateProposalRequest,
   DismissProposalRequest,
+  ListByWindowQuery,
   ListProposalsQuery,
   ListProposalsResponse,
   Proposal,
+  ProposalsListResponse,
   ProposalStatus,
   ProposalUser,
   ProposalWithMetadata,
 } from '../../../common/proposals/proposal';
-import { isExpired } from '../../../common/proposals/proposal';
+import { isExpired, MAX_PROPOSALS_SIZE } from '../../../common/proposals/proposal';
 import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
 import { toSortRanks } from '../storage/sort_ranks';
 import {
@@ -193,6 +196,55 @@ export class ProposalsService {
           ? response.hits.total
           : response.hits.total?.value ?? proposals.length,
     };
+  }
+
+  /**
+   * Returns all currently-pending proposals (regardless of age) plus proposals
+   * that were decided within the given time window, in queue order.
+   *
+   * "Pending" and "decided in the last N hours" are unrelated conditions, so
+   * this cannot be expressed as a conjunction on top of `list()`'s query; it
+   * needs its own `should` disjunction and is intentionally not given an HTTP
+   * route in this plugin — the shaping is AlertZero-specific and is reachable
+   * only through the in-process start contract.
+   *
+   * Action-metadata resolution is memoised per `actionWorkflowId` across the
+   * entire result set to avoid a `getWorkflow` fetch per proposal.
+   */
+  async listByWindow(query: ListByWindowQuery, spaceId: string): Promise<ProposalsListResponse> {
+    const statusClause =
+      query.includeStatuses.length > 0 ? [{ terms: { status: query.includeStatuses } }] : [];
+
+    const response = await this.deps.storage.search({
+      track_total_hits: true,
+      size: MAX_PROPOSALS_SIZE,
+      query: {
+        bool: {
+          filter: [{ term: { spaceId } }],
+          // TODO(#19258): add `must_not: { exists: { field: 'supersededBy' } }` once the field lands.
+          should: [
+            ...statusClause,
+            { range: { decidedAt: { gte: `now-${query.decidedWithinHours}h` } } },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+      sort: [{ createdAt: { order: 'asc' } }],
+    });
+
+    const hits = response.hits.hits.filter(
+      (hit): hit is typeof hit & { _id: string } => hit._id !== undefined
+    );
+    const rawProposals = hits.map((hit) => toProposal(hit._id, hit._source as ProposalDocument));
+
+    const proposals = await this.withMetadataBatch(rawProposals, spaceId);
+
+    const total =
+      typeof response.hits.total === 'number'
+        ? response.hits.total
+        : response.hits.total?.value ?? proposals.length;
+
+    return { proposals, total, truncated: total > proposals.length };
   }
 
   /**
@@ -534,6 +586,40 @@ export class ProposalsService {
       : undefined;
 
     return { ...proposal, action, expired: isExpired(proposal) };
+  }
+
+  /**
+   * Resolves action metadata for a collection of proposals with a concurrency
+   * cap. Unique workflow IDs are fetched once each (deduplicated up front) and
+   * results are collected into a Map before the proposals are assembled, so a
+   * single failure for one workflow ID never affects proposals backed by a
+   * different one.
+   */
+  private async withMetadataBatch(
+    proposals: Proposal[],
+    spaceId: string
+  ): Promise<ProposalWithMetadata[]> {
+    const uniqueWorkflowIds = [
+      ...new Set(
+        proposals.map((p) => p.actionWorkflowId).filter((id): id is string => id !== undefined)
+      ),
+    ];
+
+    const metaEntries = await asyncMapWithLimit(uniqueWorkflowIds, 10, async (id) => {
+      const meta = await this.resolveActionMetadata(id, spaceId);
+      return [id, meta] as [string, ActionMetadata | undefined];
+    });
+
+    const metaMap = new Map<string, ActionMetadata | undefined>(metaEntries);
+
+    return proposals.map((proposal) => ({
+      ...proposal,
+      action:
+        proposal.actionWorkflowId !== undefined
+          ? metaMap.get(proposal.actionWorkflowId)
+          : undefined,
+      expired: isExpired(proposal),
+    }));
   }
 }
 
