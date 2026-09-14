@@ -361,12 +361,6 @@ export const MappingEditor: FC<MappingEditorProps> = ({
                           typeHelpText={
                             f.type ? getFieldTypeDocsHelpText(f.type, typeInfoByValue) : undefined
                           }
-                          pathHelpText={i18n.translate(
-                            'xpack.dataFederation.mappingEditor.physicalPathHelp',
-                            {
-                              defaultMessage: 'Physical column name, if differs from name.',
-                            }
-                          )}
                           errors={rowErrors}
                           mode="edit"
                           onSubmit={() => {

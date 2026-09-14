@@ -7,6 +7,7 @@
 
 import React from 'react';
 import {
+  EuiCode,
   EuiButton,
   EuiFieldSearch,
   EuiFlexGroup,
@@ -16,6 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface MappingEditorHeaderProps {
   isAddFieldVisible: boolean;
@@ -42,10 +44,11 @@ export const MappingEditorHeader = ({
         </EuiTitle>
         <EuiSpacer size="xs" />
         <EuiText size="xs" color="subdued">
-          {i18n.translate('xpack.dataFederation.mappingEditor.timestampRecommendation', {
-            defaultMessage:
-              'Mapping your timestamp field and renaming it to @timestamp is recommended.',
-          })}
+          <FormattedMessage
+            id="xpack.dataFederation.mappingEditor.timestampRecommendation"
+            defaultMessage="Mapping your timestamp field and renaming it to {timestampField} is recommended."
+            values={{ timestampField: <EuiCode>@timestamp</EuiCode> }}
+          />
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

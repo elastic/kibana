@@ -37,7 +37,6 @@ export interface FieldMappingFormProps {
   value: FieldMappingFormValue;
   onChange: (patch: Partial<FieldMappingFormValue>) => void;
   typeHelpText?: ReactNode;
-  pathHelpText?: ReactNode;
   errors?: FieldMappingFormErrors;
   mode: 'create' | 'edit';
   onSubmit: () => void;
@@ -117,7 +116,6 @@ export function FieldMappingForm({
   value,
   onChange,
   typeHelpText,
-  pathHelpText,
   errors,
   mode,
   onSubmit,
@@ -175,9 +173,11 @@ export function FieldMappingForm({
       <EuiFlexItem>
         <EuiFormRow
           label={i18n.translate('xpack.dataFederation.mappingEditor.physicalPath', {
-            defaultMessage: 'Rename field to',
+            defaultMessage: 'Source file path (optional)',
           })}
-          helpText={pathHelpText}
+          helpText={i18n.translate('xpack.dataFederation.mappingEditor.physicalPathHelp', {
+            defaultMessage: 'Physical column name, if differs from name.',
+          })}
           fullWidth
         >
           <EuiFieldText
