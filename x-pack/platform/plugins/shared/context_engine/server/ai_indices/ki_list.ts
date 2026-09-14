@@ -15,9 +15,10 @@ const LENIENT_INDEX_OPTIONS = {
   allow_no_indices: true,
 } as const;
 
-const KI_LIST_SOURCE_FIELDS = ['type', 'title'] as const;
+const KI_LIST_SOURCE_FIELDS = ['id', 'type', 'title'] as const;
 
 interface KiDocumentSource {
+  id?: string;
   type?: string;
   title?: string;
 }
@@ -38,12 +39,12 @@ export interface GetKisOptions {
 }
 
 const toKiListItemFromHit = (hit: estypes.SearchHit<KiDocumentSource>): KiListItem | undefined => {
-  const { _id: id, _index: index, _source: source } = hit;
-  if (id === undefined) {
+  const { _id, _index: index, _source: source } = hit;
+  if (_id === undefined) {
     return undefined;
   }
 
-  const { type, title } = source ?? {};
+  const { id = _id, type, title } = source ?? {};
   return {
     id,
     index,

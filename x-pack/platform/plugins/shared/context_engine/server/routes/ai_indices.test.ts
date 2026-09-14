@@ -25,6 +25,7 @@ import {
   aiIndexPath,
 } from '../../common/constants';
 import { aiIndicesIndexName } from '../ai_indices/storage';
+import { kiIdQuery } from '../ai_indices/ki_get';
 import { apiPrivileges } from '../../common/features';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import { IMPROVEMENT_ACTIONS } from '../../common/http_api/improvement_actions';
@@ -695,7 +696,8 @@ describe('ai indices routes', () => {
           index: aiIndexItem.dest.value,
           query: {
             bool: {
-              filter: [{ ids: { values: ['ki-1'] } }, { term: { _index: kiBackingIndex } }],
+              // A data stream dest is searched whole, since the latest revision may follow a rollover.
+              filter: [kiIdQuery('ki-1')],
             },
           },
           size: 1,

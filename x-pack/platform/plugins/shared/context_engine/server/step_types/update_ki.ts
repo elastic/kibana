@@ -62,6 +62,9 @@ export const getUpdateKiStepDefinition = ({
           if (isKiDeleted(revision.source) && !force) {
             throw kiDeletedError(aiIndexId, kiId);
           }
+          if (Object.keys(ki).length === 0 && lifecycle === undefined) {
+            return { output: { id: kiId, result: 'noop' as const } };
+          }
 
           const now = new Date().toISOString();
           const writer = kiWriterFromContext(context.contextManager.getContext());
@@ -87,7 +90,7 @@ export const getUpdateKiStepDefinition = ({
             .update(
               {
                 index: revision.index,
-                id: kiId,
+                id: revision.documentId,
                 doc: changes,
                 if_seq_no: revision.seqNo,
                 if_primary_term: revision.primaryTerm,

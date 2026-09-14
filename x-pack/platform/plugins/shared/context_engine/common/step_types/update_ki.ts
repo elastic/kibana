@@ -16,7 +16,9 @@ export const UPDATE_KI_STEP_ID = 'context-engine.updateKi' as const;
 export const updateKiInputSchema = z.object({
   ai_index_id: aiIndexIdSchema,
   ki_id: kiIdSchema,
-  ki: kiPartialFieldsSchema.describe('The knowledge indicator fields to update'),
+  ki: kiPartialFieldsSchema.describe(
+    'The knowledge indicator fields to update. Arrays such as references are replaced whole'
+  ),
   lifecycle: z
     .object({ status: kiLifecycleStatusSchema })
     .optional()
@@ -24,7 +26,9 @@ export const updateKiInputSchema = z.object({
   force: z
     .boolean()
     .optional()
-    .describe('Update the knowledge indicator even when its lifecycle status is deleted'),
+    .describe(
+      'Allow updating a knowledge indicator whose lifecycle status is deleted. The status stays deleted unless lifecycle sets it to active'
+    ),
 });
 
 export const updateKiOutputSchema = z.object({
@@ -54,8 +58,8 @@ export const updateKiStepCommonDefinition: CommonStepDefinition<
       defaultMessage:
         'Applies a partial update to a knowledge indicator document in the backing store of the ' +
         'specified AI index. Only the provided fields are changed. The step fails when the KI does ' +
-        'not exist in the AI index, was modified concurrently, or has lifecycle status deleted ' +
-        '(unless force is true).',
+        'not exist in the AI index or has lifecycle status deleted (unless force is true). On an ' +
+        'index-backed AI index it also fails when the KI was modified concurrently.',
     }),
     examples: [
       `## Update a knowledge indicator

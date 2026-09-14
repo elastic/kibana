@@ -10,10 +10,13 @@ import { isResponseError } from '@kbn/es-errors';
 import { deleteKiStepCommonDefinition } from '../../common/step_types/delete_ki';
 import type { KiStepDependencies } from './helpers';
 import {
+  appendKiRevision,
   assertContextEngineEnabled,
   assertKiWritePrivilege,
   findKiRevision,
+  isKiDeleted,
   kiNotFoundError,
+  kiWriterFromContext,
   resolveAiIndex,
   withKiWriteTelemetry,
 } from './helpers';
@@ -53,6 +56,30 @@ export const getDeleteKiStepDefinition = ({
           });
           if (!revision) {
             throw kiNotFoundError(aiIndexId, kiId);
+          }
+
+          if (dest.type === 'data_stream') {
+            if (isKiDeleted(revision.source)) {
+              throw kiNotFoundError(aiIndexId, kiId);
+            }
+            const now = new Date().toISOString();
+            await appendKiRevision({
+              esClient,
+              destValue: dest.value,
+              kiId,
+              source: revision.source,
+              changes: {
+                updated_at: now,
+                governance: {
+                  provenance: {
+                    updated_by: kiWriterFromContext(context.contextManager.getContext()),
+                  },
+                  lifecycle: { status: 'deleted' },
+                },
+              },
+              abortSignal: context.abortSignal,
+            });
+            return { output: { id: kiId } };
           }
 
           await esClient

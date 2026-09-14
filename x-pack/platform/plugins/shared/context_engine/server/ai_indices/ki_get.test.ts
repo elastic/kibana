@@ -6,11 +6,30 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { getKi } from './ki_get';
+import { getKi, kiIdQuery } from './ki_get';
 import { KiNotFoundError } from './errors';
 
 const DEST_VALUE = 'ai-index-idx-sample*';
 const BACKING_INDEX = 'ai-index-idx-sample';
+
+describe('kiIdQuery', () => {
+  it('matches by _id only for documents without an id field', () => {
+    expect(kiIdQuery('ki-1')).toEqual({
+      bool: {
+        should: [
+          { term: { id: 'ki-1' } },
+          {
+            bool: {
+              filter: [{ ids: { values: ['ki-1'] } }],
+              must_not: [{ exists: { field: 'id' } }],
+            },
+          },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  });
+});
 
 describe('ki_get', () => {
   const search = jest.fn();
@@ -40,7 +59,7 @@ describe('ki_get', () => {
     await expect(
       getKi(esClient, {
         aiIndexId: 'sample',
-        destValue: DEST_VALUE,
+        dest: { type: 'index', value: DEST_VALUE },
         index: BACKING_INDEX,
         kiId: 'ki-1',
       })
@@ -59,11 +78,48 @@ describe('ki_get', () => {
       allow_no_indices: true,
       query: {
         bool: {
-          filter: [{ ids: { values: ['ki-1'] } }, { term: { _index: BACKING_INDEX } }],
+          filter: [kiIdQuery('ki-1'), { term: { _index: BACKING_INDEX } }],
         },
       },
+      sort: [
+        { '@timestamp': { order: 'desc', unmapped_type: 'date' } },
+        { _doc: { order: 'desc' } },
+      ],
       size: 1,
     });
+  });
+
+  it('resolves a data stream KI by its id field and returns that id', async () => {
+    search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _id: 'generated-es-id',
+            _index: '.ds-ai-index-ds-sample-000001',
+            _source: { id: 'ki-1', type: 'playbook', title: 'Latest revision' },
+          },
+        ],
+      },
+    });
+
+    await expect(
+      getKi(esClient, {
+        aiIndexId: 'sample',
+        dest: { type: 'data_stream', value: 'ai-index-ds-sample' },
+        index: '.ds-ai-index-ds-sample-000001',
+        kiId: 'ki-1',
+      })
+    ).resolves.toEqual({
+      id: 'ki-1',
+      document: { id: 'ki-1', type: 'playbook', title: 'Latest revision' },
+    });
+    // The latest revision may sit in a newer backing index after rollover.
+    expect(search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: 'ai-index-ds-sample',
+        query: { bool: { filter: [kiIdQuery('ki-1')] } },
+      })
+    );
   });
 
   it('throws KiNotFoundError when the document is missing', async () => {
@@ -76,7 +132,7 @@ describe('ki_get', () => {
     await expect(
       getKi(esClient, {
         aiIndexId: 'sample',
-        destValue: DEST_VALUE,
+        dest: { type: 'index', value: DEST_VALUE },
         index: BACKING_INDEX,
         kiId: 'missing',
       })
@@ -93,7 +149,7 @@ describe('ki_get', () => {
     await expect(
       getKi(esClient, {
         aiIndexId: 'sample',
-        destValue: DEST_VALUE,
+        dest: { type: 'index', value: DEST_VALUE },
         index: 'other-index',
         kiId: 'ki-1',
       })
@@ -116,7 +172,7 @@ describe('ki_get', () => {
     await expect(
       getKi(esClient, {
         aiIndexId: 'sample',
-        destValue: 'ai-index-idx-*',
+        dest: { type: 'index', value: 'ai-index-idx-*' },
         index: 'idx-b',
         kiId: 'ki-1',
       })
@@ -130,7 +186,7 @@ describe('ki_get', () => {
         index: 'ai-index-idx-*',
         query: {
           bool: {
-            filter: [{ ids: { values: ['ki-1'] } }, { term: { _index: 'idx-b' } }],
+            filter: [kiIdQuery('ki-1'), { term: { _index: 'idx-b' } }],
           },
         },
       })

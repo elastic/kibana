@@ -118,6 +118,7 @@ describe('getUpdateKiStepDefinition', () => {
         query: { ids: { values: ['ki-1'] } },
         size: 2,
         seq_no_primary_term: true,
+        _source: ['id', 'governance'],
       },
       { signal: context.abortSignal }
     );
@@ -174,6 +175,42 @@ describe('getUpdateKiStepDefinition', () => {
       }),
       { signal: context.abortSignal }
     );
+  });
+
+  it('merges nested objects and replaces arrays when appending a revision', async () => {
+    const existing = {
+      ...storedKi,
+      attributes: { owner: 'search', confidence: 0.4 },
+      references: [{ uri: 'index://old-*' }],
+    };
+    const esClient = {
+      search: jest
+        .fn()
+        .mockResolvedValue(searchHit('.ds-ai-index-ds-my-ai-index-000001', existing)),
+      index: jest.fn().mockResolvedValue({ _id: 'new' }),
+      update: jest.fn(),
+    };
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'my-ai-index',
+        ki_id: 'ki-1',
+        ki: { attributes: { confidence: 0.9 }, references: [{ uri: 'index://new-*' }] },
+      },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'data_stream', value: 'ai-index-ds-my-ai-index' });
+
+    const { handler } = getUpdateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...mockKiStepTelemetry(),
+    });
+    await handler(context);
+
+    const [{ document }] = esClient.index.mock.calls[0];
+    expect(document.attributes).toEqual({ owner: 'search', confidence: 0.9 });
+    expect(document.references).toEqual([{ uri: 'index://new-*' }]);
   });
 
   it('throws ConflictError when the KI has lifecycle status deleted', async () => {
@@ -234,6 +271,30 @@ describe('getUpdateKiStepDefinition', () => {
       }),
       { signal: context.abortSignal }
     );
+  });
+
+  it('keeps the deleted status when force is given without a lifecycle', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index', deletedKi)),
+      update: jest.fn().mockResolvedValue({ result: 'updated' }),
+    };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1', ki: { title: 'Kept' }, force: true },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+
+    const { handler } = getUpdateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...mockKiStepTelemetry(),
+    });
+    await handler(context);
+
+    const [{ doc }] = esClient.update.mock.calls[0];
+    expect(doc.title).toBe('Kept');
+    expect(doc.governance).toEqual({ provenance: { updated_by: mockKiWriter } });
   });
 
   it('appends a new revision on a data stream', async () => {
@@ -316,10 +377,10 @@ describe('getUpdateKiStepDefinition', () => {
     expect(thrown.type).toBe('ConflictError');
   });
 
-  it('returns noop when the update did not change the document', async () => {
+  it('returns noop without writing when there is nothing to change', async () => {
     const esClient = {
       search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
-      update: jest.fn().mockResolvedValue({ result: 'noop' }),
+      update: jest.fn(),
     };
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1', ki: {} },
@@ -336,6 +397,7 @@ describe('getUpdateKiStepDefinition', () => {
     const result = await handler(context);
 
     expect(result).toEqual({ output: { id: 'ki-1', result: 'noop' } });
+    expect(esClient.update).not.toHaveBeenCalled();
   });
 
   it('throws ValidationError when the KI id matches documents in multiple backing indices', async () => {

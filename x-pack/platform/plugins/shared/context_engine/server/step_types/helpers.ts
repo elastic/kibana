@@ -16,6 +16,7 @@ import type { KiLifecycleStatus } from '../../common/step_types/ki';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import { AiIndexAlreadyExistsError, AiIndexNotFoundError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
+import { kiIdQuery } from '../ai_indices/ki_get';
 import type { ImprovementsServiceApi } from '../improvements/service';
 import type { KiVerificationSummary } from '../ki_verification';
 import type { ContextEngineAnalyticsService, KiWriteAction } from '../telemetry';
@@ -94,9 +95,26 @@ export interface KiRevisionChanges {
   [key: string]: unknown;
 }
 
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+/** Applies `changes` to `source` the way the update API applies `doc`: objects merge, everything else is replaced. */
+export const mergeKiDoc = (
+  source: Record<string, unknown>,
+  changes: Record<string, unknown>
+): Record<string, unknown> => {
+  const merged = { ...source };
+  for (const [key, value] of Object.entries(changes)) {
+    const current = merged[key];
+    merged[key] =
+      isPlainObject(current) && isPlainObject(value) ? mergeKiDoc(current, value) : value;
+  }
+  return merged;
+};
+
 /**
  * Writes a new revision of a KI to a data stream: the current source with the
- * changes applied, a fresh `@timestamp`, and governance merged rather than replaced.
+ * changes merged in and a fresh `@timestamp`.
  */
 export const appendKiRevision = async ({
   esClient,
@@ -117,15 +135,9 @@ export const appendKiRevision = async ({
     {
       index: destValue,
       document: {
-        ...source,
-        ...changes,
+        ...mergeKiDoc(source, changes),
         '@timestamp': changes.updated_at,
         id: source.id ?? kiId,
-        governance: {
-          ...source.governance,
-          ...changes.governance,
-          provenance: { ...source.governance?.provenance, ...changes.governance.provenance },
-        },
       },
       op_type: 'create',
       refresh: 'wait_for',
@@ -367,8 +379,8 @@ export const kiConflictError = (aiIndexId: string, kiId: string): ExecutionError
 
 /**
  * Finds the current revision of a KI. On an index the KI is the document whose
- * `_id` is the KI id; on a data stream it is the latest document whose `id`
- * field (or `_id`, for KIs written before `id` existed) matches.
+ * `_id` is the KI id; on a data stream it is the latest document matching
+ * {@link kiIdQuery}.
  */
 export const findKiRevision = async ({
   esClient,
@@ -390,20 +402,23 @@ export const findKiRevision = async ({
       index: dest.value,
       ignore_unavailable: true,
       allow_no_indices: true,
-      query: isDataStream
-        ? { bool: { should: [{ term: { id: kiId } }, { ids: { values: [kiId] } }] } }
-        : { ids: { values: [kiId] } },
+      query: isDataStream ? kiIdQuery(kiId) : { ids: { values: [kiId] } },
       ...(isDataStream && {
-        sort: [{ '@timestamp': { order: 'desc' as const, unmapped_type: 'date' as const } }],
+        sort: [
+          { '@timestamp': { order: 'desc' as const, unmapped_type: 'date' as const } },
+          { _doc: { order: 'desc' as const } },
+        ],
       }),
       size: isDataStream ? 1 : 2,
       seq_no_primary_term: true,
+      // An index revision is updated in place, so only the governance fields are read.
+      _source: isDataStream ? true : ['id', 'governance'],
     },
     { signal: abortSignal }
   );
 
   const { hits } = response.hits;
-  // A pattern dest can hold the same _id in multiple indices; refuse to pick one arbitrarily.
+  // An index-pattern dest can hold the same _id in multiple indices; refuse to pick one arbitrarily.
   if (hits.length > 1) {
     const indices = hits.flatMap((hit) => (hit._index ? [hit._index] : []));
     throw new ExecutionError({

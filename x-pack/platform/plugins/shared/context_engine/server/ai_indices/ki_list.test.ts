@@ -169,6 +169,32 @@ describe('ki_list', () => {
     );
   });
 
+  it('returns the logical id when the document carries one', async () => {
+    search.mockResolvedValue({
+      hits: {
+        total: { value: 1 },
+        hits: [
+          {
+            _id: 'generated-es-id',
+            _index: '.ds-ai-index-ds-sample-000001',
+            _source: { id: 'ki-1', type: 'playbook', title: 'Latest revision' },
+          },
+        ],
+      },
+    });
+
+    const { kis } = await getKis(esClient, { destValue: 'ai-index-ds-sample', size: 25 });
+
+    expect(kis).toEqual([
+      {
+        id: 'ki-1',
+        index: '.ds-ai-index-ds-sample-000001',
+        type: 'playbook',
+        title: 'Latest revision',
+      },
+    ]);
+  });
+
   it('includes KIs with missing type or title so total matches the rendered row count', async () => {
     search.mockResolvedValue({
       hits: {

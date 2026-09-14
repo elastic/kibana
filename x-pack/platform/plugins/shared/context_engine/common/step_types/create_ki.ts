@@ -18,7 +18,7 @@ export const createKiInputSchema = z.object({
   ki_id: kiIdSchema
     .optional()
     .describe(
-      'Optional stable id for the knowledge indicator. Re-runs with the same id replace it. Generated when omitted.'
+      'Optional stable id for the knowledge indicator. On an index re-runs with the same id replace it; on a data stream they append a new revision. Generated when omitted.'
     ),
   ki: kiFieldsSchema.describe('The knowledge indicator document to create'),
 });
@@ -48,8 +48,8 @@ export const createKiStepCommonDefinition: CommonStepDefinition<
         'Indexes a knowledge indicator document into the backing store of the specified AI index. ' +
         'When the AI index does not exist yet, it is created automatically with an index backing ' +
         'store derived from its id. Pass ki_id to set a stable id; re-runs with the same id ' +
-        'replace the KI. The step returns the id of the created KI, which can be used by later ' +
-        'steps to update or delete it.',
+        'replace the KI on an index and append a new revision on a data stream. The step returns ' +
+        'the id of the created KI, which can be used by later steps to update or delete it.',
     }),
     examples: [
       `## Create a knowledge indicator
