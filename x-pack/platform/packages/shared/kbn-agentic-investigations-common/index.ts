@@ -64,16 +64,13 @@ export {
 
 export { BlastRadius } from './src/components/filters/blast_radius/blast_radius';
 
-export {
-  BaseActionModal,
-  type BaseActionModalProps,
-  type ActionModalPrimaryAction,
-} from './src/components/modals/base_action_modal';
-export {
-  AssignActionModal,
-  type AssignActionModalProps,
-} from './src/components/modals/assign_action_modal';
+export { BaseActionModal } from './src/components/modals/base_action_modal';
+export { AssignActionModal } from './src/components/modals/assign_action_modal';
 export { MODAL_TRANSLATIONS } from './src/components/modals/translations';
+export {
+  InvestigationActionModals,
+  type InvestigationActionModalsProps,
+} from './src/components/modals/investigation_action_modals';
 export {
   ApprovalModal,
   type ApprovalModalProps,

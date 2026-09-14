@@ -23,18 +23,15 @@ import {
   type Investigation,
   type RecommendedAction,
   InvestigationDetailsFlyout,
+  InvestigationActionModals,
   BlastRadius,
-  AssignActionModal,
-  ApprovalModal,
 } from '@kbn/agentic-investigations-common';
-import { useApproveProposal, useDismissProposal } from '@kbn/agentic-investigations-plugin/public';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useProposalsList } from '../../hooks/use_proposals_api';
 import { QUEUE_PAGE_INFO } from './translations';
 import { ProposalsTrendChartRow } from '../../components/proposals_trend_chart';
-import { DismissProposalModal } from '../../components/pending_proposals/dismiss_proposal_modal';
 import { CLOSED_GROUP_KEY } from '../../../common/proposals/list';
 import type { ProposalItem } from '../../../common/proposals/list';
 import { proposalToInvestigation } from './proposal_to_investigation';
@@ -47,8 +44,6 @@ const isQueueRow = (investigation: Investigation): boolean =>
 export const ConversationsPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const { data, isLoading, error } = useProposalsList();
-  const approve = useApproveProposal();
-  const dismiss = useDismissProposal();
   const [surfaceFilter, setSurfaceFilter] = useState<string | null>(null);
   useAlertZeroDocTitle(QUEUE_PAGE_INFO.pageTitle);
 
@@ -60,8 +55,7 @@ export const ConversationsPage: React.FC = () => {
   const [modalState, setModalState] = useState<{
     type: CardActionType | null;
     recordId: Investigation['recordId'] | null;
-    assignee?: string | null;
-  }>({ type: null, recordId: null, assignee: null });
+  }>({ type: null, recordId: null });
 
   // Raw proposals indexed by id so that approve can submit the original
   // actionInput without it needing a field on Investigation.
@@ -89,12 +83,12 @@ export const ConversationsPage: React.FC = () => {
     [data?.groups]
   );
 
-  const onClickAction: BaseActionsProps['onClickAction'] = useCallback(
-    (action, recordId, assignee = null) => {
-      setModalState({ type: action, recordId, assignee });
-    },
-    [setModalState]
-  );
+  const onClickAction: BaseActionsProps['onClickAction'] = useCallback((action, recordId) => {
+    setModalState({ type: action, recordId });
+  }, []);
+
+  const closeModal = useCallback(() => setModalState({ type: null, recordId: null }), []);
+  const closeApproval = useCallback(() => setSelectedIdForRecommendedAction(undefined), []);
 
   const onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'] =
     useCallback(
@@ -110,6 +104,14 @@ export const ConversationsPage: React.FC = () => {
     () =>
       selectedIdForDetails ? conversations.find((c) => c.id === selectedIdForDetails) : undefined,
     [conversations, selectedIdForDetails]
+  );
+
+  const actionInvestigation = useMemo(
+    () =>
+      modalState.recordId
+        ? conversations.find((c) => c.recordId === modalState.recordId)
+        : undefined,
+    [conversations, modalState.recordId]
   );
 
   const selectedRecommendedActionConversation = useMemo(
@@ -168,20 +170,6 @@ export const ConversationsPage: React.FC = () => {
         `,
       }}
     >
-      {selectedIdForRecommendedAction && selectedRecommendedActionConversation && (
-        <ApprovalModal
-          selectedRecommendedActionConversation={selectedRecommendedActionConversation}
-          onConfirm={() => {
-            const proposal = proposalsById.get(selectedIdForRecommendedAction);
-            approve.mutate(
-              { id: selectedIdForRecommendedAction, body: { actionInput: proposal?.actionInput } },
-              { onSettled: () => setSelectedIdForRecommendedAction(undefined) }
-            );
-          }}
-          onClose={() => setSelectedIdForRecommendedAction(undefined)}
-        />
-      )}
-
       {selectedDetailsConversation && (
         <InvestigationDetailsFlyout
           investigation={selectedDetailsConversation}
@@ -189,30 +177,14 @@ export const ConversationsPage: React.FC = () => {
         />
       )}
 
-      {modalState.type === 'assign' && modalState.recordId && (
-        <AssignActionModal
-          recordId={modalState.recordId}
-          initialAssignee={modalState.assignee}
-          onClose={() => setModalState({ type: null, recordId: null })}
-          onAssign={() => {
-            // TODO: use assign action API call hook
-            setModalState({ type: null, recordId: null });
-          }}
-        />
-      )}
-
-      {modalState.type === 'dismiss' && modalState.recordId && (
-        <DismissProposalModal
-          proposalId={modalState.recordId}
-          onClose={() => setModalState({ type: null, recordId: null })}
-          onConfirm={({ dismissReason, rationale }) =>
-            dismiss.mutate(
-              { id: modalState.recordId!, body: { dismissReason, rationale } },
-              { onSettled: () => setModalState({ type: null, recordId: null }) }
-            )
-          }
-        />
-      )}
+      <InvestigationActionModals
+        action={modalState.type}
+        recordId={modalState.recordId}
+        initialAssignee={actionInvestigation?.assignee}
+        approvalInvestigation={selectedRecommendedActionConversation}
+        onCloseAction={closeModal}
+        onCloseApproval={closeApproval}
+      />
 
       <EuiFlexGroup gutterSize="l" direction="column" wrap>
         <EuiFlexItem grow={false}>

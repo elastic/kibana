@@ -10,10 +10,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';
 import type { Investigation } from '../../types';
 import { BaseActions, type CardActionType } from '../actions';
-import { AssignActionModal } from '../modals/assign_action_modal';
-import { BaseActionModal } from '../modals/base_action_modal';
-import { ApprovalModal } from '../modals/approval_modal/approval_modal';
-import { MODAL_TRANSLATIONS } from '../modals/translations';
+import { InvestigationActionModals } from '../modals/investigation_action_modals';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 
 export interface ConversationDetailsFlyoutFooterProps {
@@ -30,8 +27,8 @@ interface ModalState {
 const CLOSED_MODAL: ModalState = { type: null, recordId: null };
 
 /**
- * Footer slot content. It owns its action modals rather than delegating them upwards: the flyout is
- * mounted through `core.overlays.openFlyout`, so there is no page-level React tree to host them.
+ * Footer slot content. It owns its action modals rather than delegating them upwards: the flyout
+ * can be mounted through `core.overlays.openFlyout`, where there is no page-level React tree.
  */
 export const ConversationDetailsFlyoutFooter = ({
   investigation,
@@ -74,37 +71,14 @@ export const ConversationDetailsFlyoutFooter = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {isApprovalOpen ? (
-        <ApprovalModal
-          selectedRecommendedActionConversation={investigation}
-          onConfirm={closeApproval}
-          onClose={closeApproval}
-        />
-      ) : null}
-
-      {modalState.type === 'assign' && modalState.recordId ? (
-        <AssignActionModal
-          recordId={modalState.recordId}
-          initialAssignee={investigation.assignee}
-          onClose={closeModal}
-          onAssign={closeModal}
-        />
-      ) : null}
-
-      {modalState.type === 'dismiss' && modalState.recordId ? (
-        <BaseActionModal
-          type="dismiss"
-          title={MODAL_TRANSLATIONS.dismiss.title}
-          recordId={modalState.recordId}
-          onClose={closeModal}
-          rationalePlaceholder={MODAL_TRANSLATIONS.dismiss.rationalePlaceholder}
-          primaryAction={{
-            color: 'danger',
-            label: MODAL_TRANSLATIONS.dismiss.actionButtonLabel,
-            onClick: closeModal,
-          }}
-        />
-      ) : null}
+      <InvestigationActionModals
+        action={modalState.type}
+        recordId={modalState.recordId}
+        initialAssignee={investigation.assignee}
+        approvalInvestigation={isApprovalOpen ? investigation : undefined}
+        onCloseAction={closeModal}
+        onCloseApproval={closeApproval}
+      />
     </>
   );
 };
