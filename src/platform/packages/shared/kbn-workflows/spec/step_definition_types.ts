@@ -141,7 +141,8 @@ export interface BaseStepDefinition<
    * that are safe to run inline, and requiring each to opt in would make the field noise
    * rather than signal. The trade-off is that a *new* Task Manager-dependent step is
    * sync-eligible until someone marks it, so add the annotation in the same change that
-   * introduces the step.
+   * introduces the step. `createPollServerStepDefinition` sets `['async']` automatically, so
+   * durable poll steps never need this field set manually.
    */
   supportedExecutionModes?: readonly [StepExecutionMode, ...StepExecutionMode[]];
 }
