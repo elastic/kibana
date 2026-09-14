@@ -11,6 +11,7 @@ import type { NewTermsRuleParams } from '../../rule_schema';
 import type { GetFilterArgs } from '../utils/get_filter';
 import { getFilter } from '../utils/get_filter';
 import { singleSearchAfter } from '../utils/single_search_after';
+import { reportMissingAggregations } from '../utils/no_readable_shards';
 import {
   buildCompositeNewTermsAgg,
   buildCompositeDocFetchAgg,
@@ -183,7 +184,16 @@ const multiTermsCompositeNonRetryable = async ({
 
     const pageSearchResultWithAggs = pageSearchResult as CompositeNewTermsAggResult;
     if (!pageSearchResultWithAggs.aggregations) {
-      throw new Error('Aggregations were missing on new terms search result');
+      reportMissingAggregations({
+        searchResult: pageSearchResult,
+        searchErrors: pageSearchErrors,
+        result,
+        inputIndex,
+        cpsLinkedProjects: sharedParams.cpsData?.linkedProjects,
+        unexpectedErrorMessage: 'Aggregations were missing on new terms search result',
+      });
+
+      return { loggedRequests };
     }
 
     // PHASE 3: For each term that is not in the history window, fetch the oldest document in
@@ -235,7 +245,16 @@ const multiTermsCompositeNonRetryable = async ({
       const docFetchResultWithAggs = docFetchSearchResult as CompositeDocFetchAggResult;
 
       if (!docFetchResultWithAggs.aggregations) {
-        throw new Error('Aggregations were missing on document fetch search result');
+        reportMissingAggregations({
+          searchResult: docFetchSearchResult,
+          searchErrors: docFetchSearchErrors,
+          result,
+          inputIndex,
+          cpsLinkedProjects: sharedParams.cpsData?.linkedProjects,
+          unexpectedErrorMessage: 'Aggregations were missing on document fetch search result',
+        });
+
+        return { loggedRequests };
       }
 
       const bulkCreateResult = await createAlertsHook(docFetchResultWithAggs);

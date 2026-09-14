@@ -9,6 +9,7 @@ import { identity } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import { singleSearchAfter } from './single_search_after';
+import { getNoReadableShardsWarning, hasZeroShards } from './no_readable_shards';
 import { filterEventsAgainstList } from './large_list_filters/filter_events_against_list';
 import { sendAlertTelemetryEvents } from './send_telemetry_events';
 import { buildEventsSearchQuery } from './build_events_query';
@@ -155,6 +156,17 @@ export const searchAfterAndBulkCreateFactory = async ({
           }),
         ]);
         loggedRequests.push(...singleSearchLoggedRequests);
+
+        if (searchErrors.length === 0 && hasZeroShards(searchResult)) {
+          toReturn.warningMessages.push(
+            getNoReadableShardsWarning({
+              inputIndex: inputIndexPattern,
+              cpsLinkedProjects: sharedParams.cpsData?.linkedProjects,
+            })
+          );
+          break;
+        }
+
         // determine if there are any candidate signals to be processed
         const totalHits = getTotalHitsValue(searchResult.hits.total);
         const lastHitSort = searchResult.hits.hits[searchResult.hits.hits.length - 1]?.sort;

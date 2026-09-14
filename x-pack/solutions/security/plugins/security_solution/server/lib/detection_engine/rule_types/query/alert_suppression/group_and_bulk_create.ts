@@ -28,6 +28,7 @@ import { wrapSuppressedAlerts } from './wrap_suppressed_alerts';
 import { buildGroupByFieldAggregation } from './build_group_by_field_aggregation';
 import type { EventGroupingMultiBucketAggregationResult } from './build_group_by_field_aggregation';
 import { singleSearchAfter } from '../../utils/single_search_after';
+import { reportMissingAggregations } from '../../utils/no_readable_shards';
 import { bulkCreateWithSuppression } from '../../utils/bulk_create_with_suppression';
 import type { UnifiedQueryRuleParams } from '../../../rule_schema';
 import type { BuildReasonMessage } from '../../utils/reason_formatters';
@@ -223,7 +224,16 @@ export const groupAndBulkCreate = async ({
       const eventsByGroupResponseWithAggs =
         searchResult as EventGroupingMultiBucketAggregationResult;
       if (!eventsByGroupResponseWithAggs.aggregations) {
-        throw new Error('expected to find aggregations on search result');
+        reportMissingAggregations({
+          searchResult,
+          searchErrors,
+          result: toReturn,
+          inputIndex: sharedParams.inputIndex,
+          cpsLinkedProjects: sharedParams.cpsData?.linkedProjects,
+          unexpectedErrorMessage: 'expected to find aggregations on search result',
+        });
+
+        return toReturn;
       }
 
       const buckets = eventsByGroupResponseWithAggs.aggregations.eventGroups.buckets;

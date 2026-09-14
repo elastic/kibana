@@ -563,6 +563,34 @@ export const createErrorsFromShard = ({ errors }: { errors: ShardError[] }): str
 };
 
 /**
+ * Given the `_clusters` section of a cross-cluster or cross-project search response this will return
+ * an array of strings for failures that are only reported per cluster, e.g. when a linked project is
+ * skipped. Failures already present in `_shards.failures` are omitted.
+ */
+export const createErrorsFromClusters = ({
+  clusters,
+  shardErrors,
+}: {
+  clusters: estypes.ClusterStatistics | undefined;
+  shardErrors: string[];
+}): string[] => {
+  const details = clusters?.details ?? {};
+  const knownShardErrors = new Set(shardErrors);
+
+  return Object.entries(details).flatMap(([alias, detail]) => {
+    const failures = createErrorsFromShard({ errors: detail.failures ?? [] })
+      .filter((failure) => !knownShardErrors.has(failure))
+      .map((failure) => `cluster: "${alias}" ${failure}`);
+
+    if (failures.length === 0 && (detail.status === 'skipped' || detail.status === 'failed')) {
+      return [`cluster: "${alias}" status: "${detail.status}" indices: "${detail.indices}"`];
+    }
+
+    return failures;
+  });
+};
+
+/**
  * Given a search hit this will return a valid last date if it can find one, otherwise it
  * will return undefined. This tries the "fields" first to get a formatted date time if it can, but if
  * it cannot it will resort to using the "_source" fields second which can be problematic if the date time

@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import sinon from 'sinon';
-import type { TransportResult } from '@elastic/elasticsearch';
+import type { TransportResult, estypes } from '@elastic/elasticsearch';
 import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ALERT_REASON, ALERT_RULE_PARAMETERS, ALERT_UUID, TIMESTAMP } from '@kbn/rule-data-utils';
 
@@ -32,6 +32,7 @@ import {
   getExceptions,
   hasTimestampFields,
   createErrorsFromShard,
+  createErrorsFromClusters,
   createSearchAfterReturnTypeFromResponse,
   createSearchAfterReturnType,
   mergeReturns,
@@ -737,6 +738,97 @@ describe('utils', () => {
       expect(warningMessage).toBe(
         'The following indices are missing the timestamp field "@timestamp": ["myfakeindex-1","myfakeindex-2"]'
       );
+    });
+  });
+
+  describe('createErrorsFromClusters', () => {
+    const skippedFailure: estypes.ShardFailure = {
+      shard: -1,
+      index: 'kayak:logs-a-000001',
+      node: 'node-1',
+      reason: {
+        type: 'security_exception',
+        reason: 'action [indices:data/read/search] is unauthorized',
+      },
+    };
+
+    test('returns an empty array without a _clusters section', () => {
+      expect(createErrorsFromClusters({ clusters: undefined, shardErrors: [] })).toEqual([]);
+    });
+
+    test('prefixes per-cluster failures with the cluster alias', () => {
+      const errors = createErrorsFromClusters({
+        clusters: {
+          total: 2,
+          successful: 1,
+          skipped: 1,
+          running: 0,
+          partial: 0,
+          failed: 0,
+          details: {
+            kayak: {
+              status: 'skipped',
+              indices: 'logs-a-*',
+              timed_out: false,
+              failures: [skippedFailure],
+            },
+          },
+        },
+        shardErrors: [],
+      });
+
+      expect(errors).toEqual([
+        'cluster: "kayak" index: "kayak:logs-a-000001" reason: "action [indices:data/read/search] is unauthorized" type: "security_exception"',
+      ]);
+    });
+
+    test('omits failures already reported in _shards.failures', () => {
+      const shardErrors = createErrorsFromShard({ errors: [skippedFailure] });
+      const errors = createErrorsFromClusters({
+        clusters: {
+          total: 1,
+          successful: 1,
+          skipped: 0,
+          running: 0,
+          partial: 0,
+          failed: 0,
+          details: {
+            '(local)': {
+              status: 'successful',
+              indices: 'logs-a-*',
+              timed_out: false,
+              failures: [skippedFailure],
+            },
+          },
+        },
+        shardErrors,
+      });
+
+      expect(errors).toEqual([]);
+    });
+
+    test('reports skipped and failed clusters that carry no failures', () => {
+      const errors = createErrorsFromClusters({
+        clusters: {
+          total: 2,
+          successful: 0,
+          skipped: 1,
+          running: 0,
+          partial: 0,
+          failed: 1,
+          details: {
+            kayak: { status: 'skipped', indices: 'logs-a-*', timed_out: false },
+            booking: { status: 'failed', indices: 'logs-a-*', timed_out: false },
+            opentable: { status: 'successful', indices: 'logs-a-*', timed_out: false },
+          },
+        },
+        shardErrors: [],
+      });
+
+      expect(errors).toEqual([
+        'cluster: "kayak" status: "skipped" indices: "logs-a-*"',
+        'cluster: "booking" status: "failed" indices: "logs-a-*"',
+      ]);
     });
   });
 

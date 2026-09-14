@@ -14,7 +14,7 @@ import type {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type { SignalSource, LoggedRequestsConfig } from '../types';
-import { createErrorsFromShard, makeFloatString } from './utils';
+import { createErrorsFromClusters, createErrorsFromShard, makeFloatString } from './utils';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
@@ -52,9 +52,13 @@ export const singleSearchAfter = async <
 
       const end = performance.now();
 
-      const searchErrors = createErrorsFromShard({
+      const shardErrors = createErrorsFromShard({
         errors: nextSearchAfterResult._shards.failures ?? [],
       });
+      const searchErrors = [
+        ...shardErrors,
+        ...createErrorsFromClusters({ clusters: nextSearchAfterResult._clusters, shardErrors }),
+      ];
 
       if (loggedRequestsConfig) {
         loggedRequests.push({
