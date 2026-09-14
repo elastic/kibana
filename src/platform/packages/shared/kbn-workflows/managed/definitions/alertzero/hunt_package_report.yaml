@@ -50,15 +50,16 @@ steps:
   # Coverage handoff to Detection Watch. Written for every swept report, hit
   # or no hit, reviewable or dismissed — Hunt reports the subject it swept and
   # does not decide whether a rule is warranted. Detection Watch's pickup
-  # sweep must match on type + status:pending alone and must not filter on the
-  # Investigation.
+  # sweep must match on type + attributes.status:pending alone and must not
+  # filter on the Investigation. Status lives only on attributes.status, not
+  # duplicated onto tags.
   #
   # The id is stable per coverage subject so a re-sweep replaces the KI rather
   # than appending a near-duplicate.
   #
-  # TODO(follow-up): a replace also resets status to pending, so a subject
-  # Detection already processed is re-dispatched on the next sweep past the
-  # 4h hunt cooldown. Needs either a read-before-write skip on
+  # TODO(follow-up): a replace also resets attributes.status to pending, so a
+  # subject Detection already processed is re-dispatched on the next sweep
+  # past the 4h hunt cooldown. Needs either a read-before-write skip on
   # status:processed or a terminal state Detection owns outside the KI.
   - name: write_coverage_ki
     type: context-engine.createKi
@@ -74,7 +75,6 @@ steps:
         content: "{{ steps.decide_and_package.output.coverage.gap_description }}"
         tags:
           - consumer:detection
-          - status:pending
           - watch:hunt
         attributes:
           status: pending
