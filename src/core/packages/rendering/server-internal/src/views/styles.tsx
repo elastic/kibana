@@ -46,7 +46,7 @@ const getThemeStyles = (theme: ThemeName): { light: SplashColors; dark: SplashCo
         welcomeText: '#516381', // colors.subduedText
         progress: '#ECF1F9', // colors.lightestShade
         progressBefore: '#0B64DD', // colors.primary
-        errorTitleText: '#07101F', // colors.textPrimary
+        errorTitleText: '#111C2C', // colors.textHeading
         errorButtonText: '#FFFFFF', // colors.textInverse
       },
       dark: {
@@ -54,7 +54,7 @@ const getThemeStyles = (theme: ThemeName): { light: SplashColors; dark: SplashCo
         welcomeText: '#98A8C3',
         progress: '#172336',
         progressBefore: '#61A2FF',
-        errorTitleText: '#EFF3F9', // colors.textPrimary
+        errorTitleText: '#E3E8F2', // colors.textHeading
         errorButtonText: '#07101F', // colors.textInverse
       },
     };
