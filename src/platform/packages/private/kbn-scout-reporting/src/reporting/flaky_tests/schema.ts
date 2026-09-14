@@ -165,9 +165,9 @@ export const FlakyTestReportThresholdsSchema = z.object({
   /** Branches on which the test failed in fewer builds than this cannot qualify it. */
   minFailedBuilds: z.int().min(1),
   /**
-   * Branches on which `failedBuilds / builds` is below this fraction cannot qualify the test.
-   * `0` keeps every test that clears the build counts; raise it for a stricter report (e.g.
-   * `0.01` for 1%). Defaults so that reports written before the field existed still parse.
+   * Branches on which `failedBuilds / builds` is below this fraction cannot qualify the test
+   * (`0.03` for 3%); `0` keeps every test that clears the build counts. The schema default is
+   * `0` only so that reports written before the field existed, without a rate gate, still parse.
    */
   minFailRate: z.number().min(0).max(1).default(0),
   /** Maximum number of tests kept per list. */
@@ -203,7 +203,7 @@ export const DEFAULT_FLAKY_TEST_REPORT_OPTIONS: Omit<FlakyTestReportOptions, 'no
   thresholds: {
     minBuilds: 10,
     minFailedBuilds: 2,
-    minFailRate: 0,
+    minFailRate: 0.03,
     maxTests: 200,
     lastRunWithinHours: 24,
   },
