@@ -11,8 +11,10 @@ import {
   EuiButton,
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiPanel,
   EuiPopover,
@@ -24,12 +26,12 @@ import {
   EuiToolTip,
   EuiSplitPanel,
 } from '@elastic/eui';
+import type { EuiFlexGridProps } from '@elastic/eui';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { i18n } from '@kbn/i18n';
 import type { NewIndexDetails } from '../../common/types';
 import { useNewIndexDismissal } from '../hooks/use_new_index_dismissal';
 import { NewIndexPanel } from './new_index_panel';
-import { newIndexFooter } from './new_index_panel_styles';
 
 export interface HomePageStatPanelMetric {
   key: string;
@@ -163,13 +165,15 @@ export const HomePageStatPanel = ({
           )}
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        <EuiFlexGroup gutterSize="m" responsive={false} wrap justifyContent="spaceBetween">
+        {/* EuiFlexGrid only accepts 1-4 columns, which TS can't infer from `metrics.length`.
+            Every card defines at most 4 metrics so we are safe to cast. If in future a card with more 
+            than 4 metrics was added, the count would need to be clamped. */}
+        <EuiFlexGrid columns={metrics.length as EuiFlexGridProps['columns']} gutterSize="m">
           {metrics.map(({ key, label, value, isLoading }) => (
-            <EuiFlexItem key={key} grow>
+            <EuiFlexItem key={key}>
               <EuiPanel color="plain" paddingSize="m" hasBorder={true}>
                 <EuiStat
                   data-test-subj={`${testSubj}-${key}`}
-                  css={{ whiteSpace: 'nowrap' }}
                   title={
                     isLoading ? (
                       <EuiSkeletonText
@@ -201,13 +205,16 @@ export const HomePageStatPanel = ({
               </EuiPanel>
             </EuiFlexItem>
           ))}
-        </EuiFlexGroup>
+        </EuiFlexGrid>
         <EuiSpacer size="xs" />
       </EuiSplitPanel.Inner>
       {newIndex && !isNewIndexDismissed && (
-        <EuiSplitPanel.Inner paddingSize="s" css={newIndexFooter}>
-          <NewIndexPanel index={newIndex} onDismiss={dismissNewIndex} />
-        </EuiSplitPanel.Inner>
+        <>
+          <EuiHorizontalRule margin="none" />
+          <EuiSplitPanel.Inner paddingSize="s">
+            <NewIndexPanel index={newIndex} onDismiss={dismissNewIndex} />
+          </EuiSplitPanel.Inner>
+        </>
       )}
     </EuiSplitPanel.Outer>
   );

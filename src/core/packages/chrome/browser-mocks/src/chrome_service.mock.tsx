@@ -166,6 +166,7 @@ const createStartContractMock = () => {
     }),
     recentlyAccessed: lazyObject({
       add: jest.fn(),
+      remove: jest.fn(),
       get: jest.fn(),
       get$: jest.fn().mockReturnValue(new BehaviorSubject([])),
     }),
