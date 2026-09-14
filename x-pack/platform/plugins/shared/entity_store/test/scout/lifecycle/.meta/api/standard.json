@@ -1,5 +1,5 @@
 {
-  "sha1": "f4c0069da0fa1b8273cf4b10042d486dec586329",
+  "sha1": "954e4116086682b6bc8e845279c35a67b006e4c4",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -498,6 +498,38 @@
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
         "line": 181,
         "column": 21
+      }
+    },
+    {
+      "id": "46bb8a3a58b1410-b5ad2fd90b66e1d",
+      "title": "Entity Store per entity-type log extraction config reports identical config for every engine when nothing is overridden",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/log_extraction_by_type.spec.ts",
+        "line": 54,
+        "column": 60
+      }
+    },
+    {
+      "id": "46bb8a3a58b1410-cc2c00064485f34",
+      "title": "Entity Store per entity-type log extraction config setting a store-wide field to null falls back to the built-in default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/log_extraction_by_type.spec.ts",
+        "line": 69,
+        "column": 32
       }
     },
     {

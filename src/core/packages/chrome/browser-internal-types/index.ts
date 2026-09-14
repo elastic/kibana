@@ -35,6 +35,7 @@ import type {
   SolutionId,
   ChromeProjectNavigationNode,
   ChromeSetProjectBreadcrumbsParams,
+  ProjectNavigationLinks,
 } from '@kbn/core-chrome-browser';
 
 /** @internal */
@@ -161,6 +162,16 @@ export interface InternalChromeStart extends ChromeStart {
 
     /** Register the handler that opens the navigation customization modal. Called once by the navigation plugin. */
     registerCustomizeNavigationHandler(handler: () => void): void;
+
+    /**
+     * Attach hover lists to an existing project-nav deep link.
+     * Does not require project chrome style; unused until project nav renders.
+     * Primary and footer hover only; not attached in More.
+     */
+    registerNavigationLinks(links: ProjectNavigationLinks): void;
+
+    /** Registered hover lists. Live updates. */
+    getRegisteredNavigationLinks$(): Observable<readonly ProjectNavigationLinks[]>;
   };
 
   /** Persistent chrome controls, including getters for Chrome-owned renderers. */
