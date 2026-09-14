@@ -13,7 +13,9 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiMemoizedStyles } from 
 import {
   buildNodes,
   buildRows,
+  collectDefaultExpansionSeed,
   collectExpandableIds,
+  MAX_RENDERED_NODES,
   rootToJsonString,
   type FormatValue,
   type GetLeafActions,
@@ -58,6 +60,8 @@ export interface JsonTreeViewerProps {
   extraHeaderContent?: ReactNode;
   /** When false, leaf values render on a single truncated line instead of wrapping. Defaults to true. */
   wrapLines?: boolean;
+  /** How many nodes to render by default (≈ one line each); seeds the initial expansion, split breadth-first across the lists. */
+  defaultRenderedNodes?: number;
 }
 
 export const JsonTreeViewer = memo(function JsonTreeViewer({
@@ -69,12 +73,20 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
   getLeafActions,
   extraHeaderContent,
   wrapLines = true,
+  defaultRenderedNodes = 0,
 }: JsonTreeViewerProps) {
   const styles = useEuiMemoizedStyles(treeStyles);
 
   const nodes = useMemo(() => buildNodes(json), [json]);
 
   const expandableIds = useMemo(() => collectExpandableIds(nodes), [nodes]);
+
+  // The initial expand/reveal state for a fresh cell: open collections and lift pagers breadth-first
+  // until about `defaultRenderedNodes` nodes are rendered.
+  const expansionSeed = useMemo(
+    () => collectDefaultExpansionSeed(nodes, Math.min(defaultRenderedNodes, MAX_RENDERED_NODES)),
+    [nodes, defaultRenderedNodes]
+  );
 
   const searchTermLower = expandNodesContainingTerm?.trim().toLowerCase() ?? '';
   const searchMatches = useMemo(
@@ -87,6 +99,8 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
     onStateChange,
     expandedBySearchNodes: searchMatches.containers,
     expandableIds,
+    expansionSeed,
+    defaultRenderedNodes,
   });
 
   const rootType = useMemo(() => (Array.isArray(json) ? 'array' : 'object'), [json]);

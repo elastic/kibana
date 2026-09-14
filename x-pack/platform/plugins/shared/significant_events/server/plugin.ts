@@ -13,13 +13,29 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
-import { combineLatest, distinctUntilChanged, filter, skip, switchMap } from 'rxjs';
+import {
+  catchError,
+  combineLatest,
+  distinctUntilChanged,
+  exhaustMap,
+  filter,
+  from,
+  of,
+  skip,
+  switchMap,
+  timer,
+} from 'rxjs';
 import type { Subscription } from 'rxjs';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
-import { getRelayAppConnectionSavedObjectType } from './lib/slack_app/saved_object';
+import {
+  getRelayAppConnectionSavedObjectType,
+  RELAY_APP_CONNECTION_SO_TYPE,
+} from './lib/slack_app/saved_object';
+import { SlackAppService } from './lib/slack_app/service';
 import { getSignificantEventsMaintenanceStateSavedObjectType } from './lib/maintenance/saved_object';
 import { runQuotaLedgerSavedObjectType, runQuotaSettingsSavedObjectType } from './lib/run_quotas';
 import {
@@ -40,6 +56,7 @@ import type { SignificantEventsAlertingContext } from './lib/significant_events/
 import { EbtTelemetryService } from './lib/telemetry/ebt';
 import { significantEventsRouteRepository } from './routes';
 import type { GetScopedClients, RouteHandlerScopedClients } from './routes/types';
+import { createPriceService } from './lib/cost/price_service';
 import type {
   SignificantEventsPluginSetupDependencies,
   SignificantEventsPluginStartDependencies,
@@ -80,6 +97,10 @@ import {
   installDiscoveryAgents,
   registerSignificantEventsDiscoveryAgentTypes,
 } from './agent_builder/agents/discovery';
+import {
+  installFeatureIdentificationAgent,
+  registerSignificantEventsFeatureIdentificationAgentTypes,
+} from './agent_builder/agents/feature_identification';
 import { createSignificantEventsAvailability } from './agent_builder/tools/significant_events_availability';
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '../common/feature_flags';
@@ -87,6 +108,7 @@ import { isSignificantEventsAvailable } from './routes/utils/assert_significant_
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 
 const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significantEvents';
+const SLACK_CONNECTOR_RECONCILE_INTERVAL_MS = 60_000;
 
 export class SignificantEventsPlugin
   implements
@@ -276,6 +298,9 @@ export class SignificantEventsPlugin
 
     if (plugins.agentBuilder) {
       registerSignificantEventsDiscoveryAgentTypes({ agentBuilder: plugins.agentBuilder });
+      registerSignificantEventsFeatureIdentificationAgentTypes({
+        agentBuilder: plugins.agentBuilder,
+      });
       void core
         .getStartServices()
         .then(async () => {
@@ -358,6 +383,17 @@ export class SignificantEventsPlugin
       getScopedClients: this.getScopedClients,
     });
 
+    const priceService = createPriceService({
+      fetchFn: fetch,
+      getNow: () => new Date(),
+      logger: this.logger.get('cost'),
+      timeoutMs: 10_000,
+      cacheTtlMs: 6 * 60 * 60 * 1000,
+      maxBodyBytes: 4 * 1024 * 1024,
+      maxScopedRows: 10_000,
+      baseUrl: plugins.cloud?.baseUrl ?? 'https://cloud.elastic.co',
+    });
+
     registerRoutes({
       repository: significantEventsRouteRepository,
       dependencies: {
@@ -370,6 +406,7 @@ export class SignificantEventsPlugin
         significantEventsScheduledWorkflowsService,
         workflowClients,
         maintenanceService: this.maintenanceService,
+        priceService,
         getSpaceId: async (request: KibanaRequest) => {
           const [, pluginsStart] = await core.getStartServices();
           return pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
@@ -397,6 +434,38 @@ export class SignificantEventsPlugin
       this.server.nightshiftInvestigations = plugins.nightshiftInvestigations;
 
       this.server.relayClient = plugins.actions.getRelayClient();
+
+      // The Elastic Slack connector is in-memory, so it survives neither a restart nor a connect
+      // handled by another node. The connection document is namespace-agnostic, so one internal
+      // client covers the deployment. Relay config is static at start, so skip the poller when the
+      // client is absent rather than ticking a reconcile loop that can never do anything.
+      if (this.server.relayClient) {
+        const slackAppService = new SlackAppService(this.server);
+        const soClient = new SavedObjectsClient(
+          core.savedObjects.createInternalRepository([RELAY_APP_CONNECTION_SO_TYPE])
+        );
+
+        // `timer(0, …)` makes the first tick the startup restore. `catchError` must stay inside the
+        // inner observable — outside, one failed tick would end the loop for the process's lifetime.
+        this.subscriptions.push(
+          timer(0, SLACK_CONNECTOR_RECONCILE_INTERVAL_MS)
+            .pipe(
+              exhaustMap(() =>
+                from(slackAppService.reconcileConnector(soClient)).pipe(
+                  catchError((error: unknown) => {
+                    this.logger.warn(
+                      `Failed to reconcile the Elastic Slack connector: ${
+                        error instanceof Error ? error.message : String(error)
+                      }`
+                    );
+                    return of(undefined);
+                  })
+                )
+              )
+            )
+            .subscribe()
+        );
+      }
     }
 
     // Availability is the same requirement registry that gates requests, so a deployment never gets
@@ -466,6 +535,13 @@ export class SignificantEventsPlugin
           this.logManagedResourceError('significant events agents', error);
         }
       );
+      void installFeatureIdentificationAgent({
+        agentBuilder,
+        spaceId: DEFAULT_SPACE_ID,
+        availability,
+      }).catch((error: unknown) => {
+        this.logManagedResourceError('feature identification agent', error);
+      });
     }
 
     if (plugins.agentBuilder && this.server && this.getScopedClients) {

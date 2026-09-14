@@ -66,7 +66,7 @@ describe('createVisualizationAttachmentType resolve()', () => {
 
     const result = await createVisualizationAttachmentType().resolve!('viz-1', createContext());
 
-    expect(result?.chart_type).toBeUndefined();
+    expect(result).toHaveProperty('chart_type', undefined);
     expect(result?.renderer).toBe('lens');
   });
 

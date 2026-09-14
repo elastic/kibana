@@ -128,6 +128,11 @@ export interface AgentConfiguration {
   workflow_ids?: string[];
 
   /**
+   * Optional list of workflow IDs. When set, these workflows run after the agent finishes each execution.
+   */
+  post_execution_workflow_ids?: string[];
+
+  /**
    * Optional list of plugin IDs assigned to this agent.
    * Skills contributed by these plugins will be available to the agent during execution.
    */
@@ -147,6 +152,12 @@ export interface AgentConfiguration {
    * the accuracy and token efficiency.
    * */
   ai_indices?: string[];
+
+  /**
+   * Optional list of agent IDs this agent may spawn as sub-agents.
+   * Must use SELF_AGENT_ID (_self) to reference itself.
+   */
+  subagent_ids?: string[];
 }
 
 /**

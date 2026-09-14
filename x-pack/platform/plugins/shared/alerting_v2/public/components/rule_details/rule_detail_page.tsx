@@ -18,12 +18,14 @@ import type { AppHeaderBadge, AppHeaderMetadataItems } from '@kbn/app-header';
 import { RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
-import { useService } from '@kbn/core-di-browser';
+import { PluginStart } from '@kbn/core-di';
+import { CoreStart, useService } from '@kbn/core-di-browser';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { UserCapabilities } from '../../services/user_capabilities';
-import { useRuleAutoAttach } from '../../agent_builder/use_rule_auto_attach';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useRuleAuditMetadata } from '../../hooks/use_rule_audit_metadata';
 import { useDeleteRule } from '../../hooks/use_delete_rule';
@@ -31,7 +33,7 @@ import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyou
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
 import { useBulkUpdateRuleApiKey } from '../../hooks/use_bulk_update_rule_api_key';
 import { useRunRule } from '../../hooks/use_run_rule';
-import { paths } from '../../constants';
+import { useAlertingLocators } from '../../application/locator_context';
 import { DeleteConfirmationModal } from '../rule/modals/delete_confirmation_modal';
 import { useRuleChangeHistoryModal } from '../rule/modals/change_history';
 import { getRuleDetailMenu } from './get_rule_detail_menu';
@@ -72,9 +74,15 @@ export const RuleDetailPage: React.FunctionComponent = () => {
   const rule = useRule();
   useBreadcrumbs('rule_details', { ruleName: rule.metadata?.name });
   const { euiTheme } = useEuiTheme();
+  const { rulesLocators } = useAlertingLocators();
+  const rulesListHref = rulesLocators.useUrl({});
 
   const canWrite = useService(UserCapabilities).canWrite('rules');
-  useRuleAutoAttach(rule);
+  const chrome = useService(CoreStart('chrome'));
+  const agentBuilder = useService(PluginStart('agentBuilder'), { optional: true }) as
+    | AgentBuilderPluginStart
+    | undefined;
+  useRuleAutoAttach(rule, { chrome, agentBuilder });
 
   const smallMediaQuery = useEuiMaxBreakpoint('s');
   const largeMediaQuery = useEuiMinBreakpoint('m');
@@ -217,7 +225,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
       <AppHeader
         title={rule.metadata.name}
         back={{
-          href: paths.ruleList,
+          href: rulesListHref,
           label: i18n.translate('xpack.alertingV2.ruleDetails.header.backToRulesLabel', {
             defaultMessage: 'Rules',
           }),
