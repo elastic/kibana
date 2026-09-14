@@ -11,6 +11,7 @@
     ],
     "xpack.aiAssistant": "platform/packages/shared/kbn-ai-assistant",
     "xpack.alerting": "platform/plugins/shared/alerting",
+    "xpack.alertingV2": "platform/packages/shared/response-ops/alerting-v2-utils",
     "xpack.eventLog": "platform/plugins/shared/event_log",
     "xpack.stackAlerts": "platform/plugins/shared/stack_alerts",
     "xpack.stackConnectors": "platform/plugins/shared/stack_connectors",
@@ -28,6 +29,7 @@
     "xpack.cloudDataMigration": "platform/plugins/private/cloud_integrations/cloud_data_migration",
     "xpack.contentConnectors": "solutions/search/plugins/content_connectors",
     "xpack.contextEngine": "platform/plugins/shared/context_engine",
+    "xpack.agenticInvestigations": "platform/plugins/shared/agentic_investigations",
     "xpack.csp": [
       "solutions/security/plugins/cloud_security_posture",
       "packages/kbn-cloud-security-posture-common",

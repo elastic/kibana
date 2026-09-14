@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DiscoverTabType } from '@kbn/discover-utils';
 import { apiTest, tags, type RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
@@ -206,6 +207,112 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
       },
     ]);
   });
+
+  apiTest(
+    'preserves metrics tab state through a GET and PUT round trip',
+    async ({ apiClient, kbnClient }) => {
+      const id = createId('metrics-tab-state-round-trip');
+      const storedTabTypeState: NonNullable<
+        DiscoverSessionAttributes['tabs'][number]['attributes']['tabTypeState']
+      > = {
+        type: DiscoverTabType.Metrics,
+        dimensions: ['host.name', 'service.name'],
+        searchTerm: 'cpu',
+        counterAggregation: 'max',
+        gaugeAggregation: 'min',
+        histogramPercentile: 'p99',
+      };
+
+      const attributes: DiscoverSessionAttributes = {
+        title: 'Metrics tab state round trip',
+        description: '',
+        tabs: [
+          {
+            id: 'metrics-tab',
+            label: 'Metrics',
+            attributes: {
+              hideChart: false,
+              hideTable: false,
+              columns: [],
+              sort: [],
+              grid: {},
+              kibanaSavedObjectMeta: {
+                searchSourceJSON: JSON.stringify({
+                  query: { esql: 'TS metrics-* | LIMIT 10' },
+                  filter: [],
+                }),
+              },
+              isTextBasedQuery: true,
+              tabTypeState: storedTabTypeState,
+            },
+          },
+        ],
+      };
+
+      await kbnClient.savedObjects.create({
+        type: 'search',
+        id,
+        overwrite: false,
+        attributes,
+        references: [],
+      });
+
+      const getResponse = await apiClient.get(`${DISCOVER_SESSION_API_BASE_PATH}/${id}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...editorCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      });
+
+      expect(getResponse).toHaveStatusCode(200);
+      expect(getResponse.body.data.tabs[0]).toMatchObject({
+        id: 'metrics-tab',
+        type: 'metrics',
+        dimensions: ['host.name', 'service.name'],
+        search_term: 'cpu',
+        counter_aggregation: 'max',
+        gauge_aggregation: 'min',
+        histogram_percentile: 'p99',
+        data_source: {
+          type: 'esql',
+          query: 'TS metrics-* | LIMIT 10',
+        },
+      });
+      expect('tabTypeState' in getResponse.body.data.tabs[0]).toBe(false);
+
+      const putResponse = await apiClient.put(`${DISCOVER_SESSION_API_BASE_PATH}/${id}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...editorCredentials.apiKeyHeader,
+        },
+        body: getResponse.body.data,
+        responseType: 'json',
+      });
+
+      expect(putResponse).toHaveStatusCode(200);
+      expect(putResponse.body.data).toStrictEqual(getResponse.body.data);
+
+      const repeatedGetResponse = await apiClient.get(`${DISCOVER_SESSION_API_BASE_PATH}/${id}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...editorCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      });
+
+      expect(repeatedGetResponse).toHaveStatusCode(200);
+      expect(repeatedGetResponse.body.data).toStrictEqual(getResponse.body.data);
+
+      const storedSession = await kbnClient.savedObjects.get<DiscoverSessionAttributes>({
+        type: 'search',
+        id,
+      });
+      expect(storedSession.attributes.tabs[0].attributes.tabTypeState).toStrictEqual(
+        storedTabTypeState
+      );
+    }
+  );
 
   apiTest(
     'updates an existing session whose ID predates the as-code format',

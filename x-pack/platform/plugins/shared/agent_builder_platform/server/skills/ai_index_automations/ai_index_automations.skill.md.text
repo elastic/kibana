@@ -1,0 +1,500 @@
+## When to Use This Skill
+
+Load this skill to **read, draft or change the workflow automations attached to a Context Engine AI
+index** — the Kibana Workflows that turn its sources into knowledge indicators.
+
+Reach for it when an index needs an automation it does not have, when a proposal names a step that
+has to change, or when you need to know what an existing automation actually does before saying
+anything about it.
+
+Deciding what the index should contain and whether a change is warranted is `analyze-and-improve`.
+Choosing the data an automation draws on is `ai-index-sources`.
+
+## Read the automation before you say anything about it
+
+`platform.workflows.get_workflow` returns a workflow's definition. Read it for a specific step,
+because a useful change names one: what it samples and how much, what it asks the model for, how
+many indicators it can emit, and what it writes into which fields.
+
+A pipeline's *shape* often bounds what it could ever produce, however well its prompts are worded —
+an automation that samples twenty documents cannot describe a corpus of ten thousand, no matter how
+the prompt is phrased. Look for that before looking at wording.
+
+Misquoting what an automation does is the most expensive mistake available here: every claim built
+on it inherits the error, and a reviewer who catches one stops trusting the rest. When several
+automations write to the same index, attribute an indicator to one by reading the definitions and
+seeing which writes to that destination and id pattern. If that does not settle it, say attribution
+was not established rather than guessing.
+
+The syntax these automations need — Liquid templating, `on-failure` handling, `if` conditions — is
+written out below, alongside the `context-engine` step contracts that no other skill or tool
+describes. Between that and the templates, there is nothing here that needs a second skill loaded
+to read or to write.
+
+`workflow-authoring` covers the workflow engine in general and is worth loading for a validation
+error you cannot place from the message alone. Do not load it to author one of these: it teaches a
+generate-first flow that the templates replace, and it is more specific and more recently read than
+this skill, so it wins the argument by default. See "Do not generate a workflow" below.
+
+## What every automation must do
+
+Whatever the strategy, a generated workflow has to:
+
+- **Read its source** through `elasticsearch.esql.query` or a connector step, applying the agreed
+  corpus filter.
+- **Ground the model on real data** before asking it for anything — a sample of documents, and for
+  detections a distribution aggregation whose observed counts every threshold must quote. Sample
+  with `function_score` + `random_score` so repeated runs see different records rather than always
+  the first-ingested ones.
+- **Use `ai.prompt` rather than `ai.agent`** unless tool use is genuinely required, and leave its
+  `connector-id` off. The field is optional, and omitting it resolves the deployment's default AI
+  connector at run time. Naming one pins a saved automation to a connector that can be renamed,
+  removed, or run out of billing quota long after the conversation that wrote it — and the failure
+  lands on a scheduled run with nobody watching.
+- **Write through the `context-engine` steps**, never a raw `elasticsearch.index`, and gate every
+  write on `context-engine.verifyKi` so an indicator whose ES|QL fails to parse is reported rather
+  than persisted.
+- **Set a stable, normalized `ki_id`** derived from the indicator's own identifying data, so a
+  re-run replaces rather than duplicates. This is the whole dedup mechanism; get it wrong and every
+  run grows the index.
+- **Put every ES|QL the indicator carries into `attributes.esql`**, and mirror structured values
+  into both `content` and `attributes`.
+
+Three complete automations are attached to this skill as templates — `index-metadata-template`,
+`entity-profile-template` and `document-template`. Each has been run end to end: grounding steps,
+prompt with its output schema, verified sink. Read whichever is nearest as the reference for what a
+finished automation looks like, whether you are drafting one or judging one.
+
+## The `context-engine` step contracts
+
+These four steps come from the Context Engine plugin rather than the workflow engine's own catalog,
+and no discovery tool can see them: `platform.workflows.get_step_definitions` reads the built-in and
+connector registries only, and the definitions that validation attaches to a failure come from those
+same registries. Nothing will correct a mistake in one of these except a failing run, so they are
+written out here — this skill is the only place they exist.
+
+**`context-engine.createKi`** writes a new indicator and outputs `id`, the document id it wrote.
+
+```yaml
+- name: write_ki
+  type: context-engine.createKi
+  with:
+    ai_index_id: 'my-ai-index' # required
+    ki_id: 'logs-index-profile' # optional, index-backed destinations only
+    ki: # required
+      type: 'index_metadata' # required
+      title: 'logs-* index profile' # required
+      description: '...' # optional, <= 2048 chars
+      content: '...' # optional, <= 65536 chars
+      tags: ['logs'] # optional, <= 100 entries
+      attributes: # optional, <= 100 keys
+        esql: 'FROM logs-* | LIMIT 10'
+```
+
+Passing the same `ki_id` again replaces the indicator, which is the whole of what makes a re-run
+idempotent rather than duplicative. On a data-stream destination `ki_id` is rejected outright and
+Elasticsearch generates the ids.
+
+**`context-engine.updateKi`** takes `ai_index_id` and `ki_id` plus a `ki` carrying only the fields to
+change, and outputs `id` and `result` (`updated` or `noop`). It fails when the indicator does not
+exist, so it belongs to the cumulative strategy that reads before it merges — it is not a substitute
+for `createKi`.
+
+**`context-engine.deleteKi`** takes `ai_index_id` and `ki_id` and outputs `id`. It fails when the
+indicator does not exist. This is what pilot cleanup runs.
+
+**`context-engine.verifyKi`** takes a partial `ki` and a non-empty, duplicate-free `verifiers` list,
+and outputs `passed` plus a per-verifier `results` array of `{ verifier, passed, reason }`. The two
+verifier ids are `esql-valid-syntax`, which parses each query the indicator carries without touching
+the cluster, and `esql-valid-runtime`, which executes it against live data bounded to a single row.
+An unknown id fails the step. Gate every write on this: an indicator carrying ES|QL that does not run
+is worse than a missing one, because retrieval surfaces it as though it worked.
+
+`attributes` values are strings, numbers, booleans or arrays of strings — never nested objects. A
+single value caps at 10,000 characters, which is what bounds the ES|QL an indicator can carry.
+
+## Two shapes that produce the wrong thing without failing
+
+Both of these parse, validate and run. Nothing reports them. They simply write indicators with the
+wrong contents, which is why they are worth knowing before you draft rather than after.
+
+**Anything that is not a string needs `${{ }}`, not `{{ }}`.** A plain `{{ }}` renders its value into
+a string: an object arrives as `[object Object]`, and `false` arrives as the string `"false"`, which
+is truthy and will pass an `if`. `${{ }}` evaluates the expression and preserves the type. Wherever a
+whole object, a number or a boolean is passed — a `foreach.item` handed to a step, a condition, a
+document body — it is `${{ }}`:
+
+```yaml
+- name: write_report
+  type: elasticsearch.index
+  with:
+    document: '${{ foreach.item }}'
+```
+
+**An `ai.prompt` result is nested under `output.content`.** The step outputs `{ content, metadata }`,
+so the model's answer is at `steps.<name>.output.content`, and when the step declares a `schema` every
+field of the structured result is at `steps.<name>.output.content.<field>`. It is never
+`steps.<name>.output.<field>`. Referencing the flat path interpolates nothing, and the run completes
+having written indicators whose fields are empty.
+
+## The rest of the syntax these automations use
+
+Everything an automation of this kind needs is here or in a template. The general workflow-engine
+reference is `workflow-authoring`, and it is worth loading for a validation error you cannot place
+— but not for authoring, for the reason given at the top.
+
+**An `if` condition is KQL, not Liquid.** `condition:` is the one place in a workflow where `{{ }}`
+does not apply. The templates gate their write on `condition: "steps.verify_ki.output.passed :
+true"` — a KQL field match, with the colon, not `==` and not an interpolation. KQL cannot evaluate
+filters, so anything computed goes through a `data.set` first and the condition reads that step's
+output:
+
+```yaml
+- name: set_count
+  type: data.set
+  with:
+    count: '{{ steps.query.output.values | size }}'
+- name: check
+  type: if
+  condition: 'steps.set_count.output.count > 0'
+```
+
+**Every step takes the same optional properties**, whatever its type: `if:` to skip it, `timeout:`,
+and `on-failure:` for error handling. A `foreach` additionally takes `iteration-on-failure`, which
+is what keeps one bad record from ending a batch — worth setting on a loop that writes one
+indicator per document, where the alternative is losing every indicator after the first failure.
+
+```yaml
+- name: loop_documents
+  type: foreach
+  foreach: '{{ steps.discover_documents.output.values | json }}'
+  steps: [] # ...
+  iteration-on-failure:
+    continue: true
+```
+
+```yaml
+on-failure:
+  retry:
+    max-attempts: 3
+    delay: '5s'
+  fallback:
+    - name: handle_error
+      type: console
+      with:
+        message: 'Step failed'
+  continue: true
+```
+
+**Liquid references and the filters the templates rely on.** `{{ steps.<name>.output.<field> }}`
+reads a step's output — only `output` is reachable, never a step's inputs. `{{ consts.<name> }}`,
+`{{ inputs.<name> }}`, `{{ foreach.item }}` and `{{ event }}` reach the rest. `{%- for x in ... -%}`
+loops build the `content` block.
+
+| Filter | Use |
+|---|---|
+| `json` | Serialise a value — how a whole step output reaches a prompt, and how a list reaches `foreach` |
+| `map: 'field'` | Pull one field out of a list of objects; how `attributes.esql` collects the runnable examples |
+| `join: ', '` | Flatten a list into a string |
+| `size` | Length, for a `data.set` a condition can read |
+| `default: 'value'` | Fall back when a field is missing |
+| `replace: '"', '\"'` | Escape a value being interpolated into an ES\|QL string literal |
+| `slugify` | Normalise a value used in a `ki_id` |
+| `times`, `round` | Format a number for a description |
+
+Escaping matters more than it looks: an entity value interpolated raw into
+`WHERE field == "{{ ... }}"` breaks the query the moment a value contains a quote, and the failure
+lands on whichever entity happens to carry one. The entity template runs every value through
+`replace` before it reaches a query.
+
+## Templates and shapes for each strategy
+
+`analyze-and-improve` chooses the strategy. These are what each one becomes as a workflow.
+
+The three that come up most ship as templates. **Start from the nearest template and edit it** —
+never write one of these from nothing. A template is a complete workflow that runs as it stands
+once its `consts` block is filled in, and it already carries the parts a fresh draft gets wrong:
+the grounding, the prompt's output schema, the single `data.set` that builds the indicator so
+verification and the write see the same document, the `verifyKi` gate, the `ki_id` scheme that
+makes a re-run replace rather than duplicate, and the `attributes.esql` wiring the verifiers read.
+
+Each template opens with a comment saying what to change and what to leave, and declares what
+varies in `consts` at the top — the AI index id, the source index, the fields the strategy turns
+on. Editing that block is most of the adaptation; the strategy's own grounding is the rest.
+
+**Index/Table Metadata** (`type: index_metadata`) — template **`index-metadata-template`**. Fetch
+the mapping, sample documents, aggregate the distributions the profile will make claims about, then
+an `ai.prompt` producing purpose, what the index does not contain, key fields, joins, when-to-use,
+and access patterns (each with a question type, an ES|QL template, a runnable example, params and
+returns). Sinks with `ki_id` set to the index name. Adapting it is the `consts` block plus one
+aggregation per field the profile should be grounded on. For several indices, wrap the whole thing
+in a `foreach` over the index names.
+
+**Bottom-Up** (`type: document`) — template **`document-template`**. An ES|QL query pulling id,
+title and body with the body truncated, a `foreach` over the results, an `ai.prompt` per document,
+and a sink keyed on the index and source document id. When the pass yields many
+near-identically-titled entries, emit one indicator per logical cluster and enumerate the members
+inside its `content` instead of one per record.
+
+**Cumulative / Wiki-style** (`type: entity`) — template **`entity-profile-template`**. A `foreach`
+over entity ids discovered from the corpus. Per entity: aggregations over every document
+referencing it, an `ai.prompt` synthesising a profile, and a sink keyed on the entity id. The
+per-entity metrics are the part to extend, because sibling entity indicators are near-identical to
+a retriever unless their descriptions carry numbers that separate them. To accumulate across runs
+rather than replace, read the stored indicator and merge through `context-engine.updateKi`.
+
+**Selective / Outlier** (`type: event`) — start from `document-template`. Filter the ES|QL to
+notable records, have the `ai.prompt` return a significance verdict alongside the indicator, and
+add an `if` around the sink so it only writes when the verdict is positive.
+
+**Atomic Facts** (`type: fact`) — start from `document-template`. The `ai.prompt` extracts a list
+of discrete claims rather than one summary, and a `foreach` inside the loop sinks one indicator per
+claim, with `ki_id` of `<index>-<doc_id>-fact-<n>`.
+
+**Connector** — start from whichever template matches the granularity, and call
+`platform.workflows.get_step_definitions` for the connector type first. The source query becomes a
+connector step listing records plus a second fetching each body; the `ai.prompt` produces access
+patterns in `execute_connector_sub_action` form rather than ES|QL; the sink is keyed on the source
+record id. Any of the strategies above can run over a connector.
+
+**Detection / Feature** (`type: detection`, `feature`) — start from `index-metadata-template`,
+whose grounding-then-prompt-then-verified-sink spine is the same; the work is in replacing its
+single profile prompt with two passes. Two complementary passes in one workflow, over shared
+grounding: an error sample, a `CATEGORIZE` pass clustering messages into templates, and a
+distribution aggregation. One `ai.prompt` emits detections (each a complete runnable query, not a
+template, with a severity score); a separate one emits features (inventory entries with a subtype
+and a stable slug). Every threshold and every evidence string must quote a value from the grounding
+— no invented numbers. Guard ratio detections with a denominator floor so they cannot fire on a
+handful of documents, set thresholds above the observed baseline with margin, and cap detections
+per signal rather than emitting near-duplicate conditions. Derive `query_type` by parsing the ES|QL
+for a `STATS` command rather than asking the model for it.
+
+## Authoring: delegate the build-and-test loop to a subagent
+
+A workflow that has never run is a guess. It can parse, name only step types that exist, resolve
+every reference, and still be built on a query that matches nothing — and you would not know until
+someone enabled it. The loop that settles this (draft it, run it, read the indicators it actually
+wrote, fix what is wrong, run it again) is long, and nearly everything it emits is noise the person
+you are talking to has no reason to read.
+
+Run that loop in a subagent. `run_subagent` takes a `description` and a `prompt` and gives you back
+one message, so the conversation keeps the finished workflow and the evidence for it without the
+dozen turns that produced them.
+
+**The brief is the whole job.** A subagent starts with none of this conversation — no attachments,
+no history, no tool results, not even the index id. Anything you leave out it will invent, and it
+will invent it confidently. Put in the prompt:
+
+- the AI index id, and whether its destination is an index or a data stream
+- the sources and the exact corpus filter the automation should apply
+- the strategy from `analyze-and-improve`, and what the indicators are meant to capture
+- **the template it starts from, by name**, and the values its `consts` block should take. This is
+  the single highest-value line in the brief: a subagent that has been handed a template edits it,
+  and one that has not writes a workflow from nothing and spends its budget rediscovering what the
+  template already encodes
+- an instruction to make its first call `load_skill` on `ai-index-automations`, by id, ahead of
+  every other tool. `load_skill` takes the id directly and returns the skill's content, its tools
+  and the paths of its referenced files, so a subagent that has been handed the id has nothing to
+  search for. That skill is the only one it needs; do not send it to `workflow-authoring`
+- that it must not call `platform.core.generate_workflow`. The tool is in every agent's default
+  toolset, so it is there whether or not any skill offered it, and its own description sells it as
+  the way to author a workflow. Saying nothing leaves that as the only instruction on the subject
+  the subagent has
+- the pilot tag you have chosen for this attempt
+- that the complete final YAML must come back verbatim
+- the three rules below, restated in the prompt rather than left to the skill: start from the named
+  template rather than writing a workflow, never generate one, and never validate a definition you
+  are about to run. A skill read on the second call cannot govern the first, and a subagent that
+  discovers these mid-flight has usually spent half its budget by then
+
+That last point is worth stating bluntly in the prompt, because `run_subagent` tells the model its
+job is to summarize. A summary of a workflow is worthless here: the YAML *is* the deliverable. Ask
+for the entire definition in a single fenced `yaml` block with nothing elided, abbreviated or
+replaced by a comment.
+
+Give it a budget, too. A subagent shares this run's step limit, and "keep going until it works" is
+an unbounded instruction — tell it to make at most five attempts and to come back describing what
+is still wrong rather than burning the budget silently.
+
+## The loop a subagent runs
+
+If you are the subagent, this is the work.
+
+**Load this skill before you touch anything else.** `load_skill` takes a skill id and returns its
+content, its tools and the paths of its referenced files. Make that call first and do not reach for
+`search_relevant_skills`: the brief named the skill, so there is nothing to search for. Everything
+done before it is loaded is done without the rules, and is usually thrown away.
+
+One skill is enough. This one carries the step contracts, the syntax and the templates; nothing
+else here needs a second one.
+
+The templates arrive the same way. `load_skill` returns them among its `referenced_files` with
+absolute paths, and `read_file` on the one the brief named is the whole retrieval — there is
+nothing to go looking for with `list_files`.
+
+**Start from the template. Do not write a workflow.** The template the brief named is a complete
+automation that has been run. Read it, fill in its `consts` block, and add the grounding the
+strategy needs. That is the draft. Authoring one from nothing is a long generate-and-repair loop
+that arrives somewhere worse, because the template already encodes the things a fresh draft gets
+wrong and a run does not catch: the single `data.set` that builds the indicator so verification and
+the write see the same document, the `verifyKi` gate, the `ki_id` scheme that makes a re-run
+replace rather than duplicate, and the `attributes.esql` wiring that decides what the verifiers
+actually check.
+
+Each template opens with a comment saying what to change and what to leave. Take it literally.
+Rewriting the parts it tells you to leave is how a draft acquires faults the template does not
+have, and none of them announce themselves — the workflow still runs, and still writes indicators.
+
+The templates carry no `connector-id` on their `ai.prompt` steps, which is deliberate rather than an
+omission: the field is optional, and leaving it off resolves the deployment's default connector at
+run time. Do not add one.
+
+**Do not generate a workflow.** `platform.core.generate_workflow` is in every agent's default
+toolset, so you have it here whether or not any skill offered it, and both its own description and
+`workflow-authoring` present it as the way to author and to repair a definition. Neither of them
+knows you are holding a workflow that has been run. Generating from a description throws that away
+and returns a draft with the faults the template was written to avoid; generating a *fix* re-rolls
+parts of the definition you had already settled, and every re-roll is a chance to lose something a
+pilot proved. There is no edit it makes that you cannot make yourself in the YAML in front of you.
+
+The same goes for the attachment it produces. An attachment is a handoff, not a workspace: read it
+once and hold the definition as text, and do not try to write back to it with `attachment_update`.
+The generic attachment guidance offers that, and it does not apply here — the automation is created
+from the YAML you hand back, so an edit made to an attachment instead of to your own copy is an
+edit that never reaches what gets saved.
+
+The template is text from the moment you read it. `platform.workflows.validate_workflow`,
+`platform.core.execute_workflow` and `platform.workflows.workflow_execute_step` all take a raw
+`yaml` string, so it can be edited, checked and run in place, with nothing in between and nothing
+to read an edit back out of.
+
+**Do not validate and then run.** Running a definition validates it first: given inline `yaml`,
+`platform.core.execute_workflow` parses and validates before a single step executes, and throws when
+that fails. So does `platform.workflows.workflow_execute_step`. A draft that cannot parse costs you
+the run and nothing else — there are no side effects to guard against, and a validate call ahead of
+each run is two round trips for one answer. If your next call is a run, strike the validate call from
+the plan.
+
+Call `platform.workflows.validate_workflow` when it tells you something the run did not. Its failures
+carry the definitions of every built-in and connector step type the workflow references, and the
+warnings the execution path drops — that path reports errors only, as formatted messages. When a run
+fails on something you cannot place, validating the same YAML is how you get the material to repair
+it.
+
+Validate outright in one place: the last edit. Stripping the pilot tag and widening the corpus filter
+happens after the final run, so the YAML you hand back is never executed in the form you hand it back
+in. Validation is the only check it gets. Validate the whole definition rather than the part you
+touched, because a step in isolation cannot tell you whether its references still resolve.
+
+**Look step types up by exact name, once each.** `platform.workflows.get_step_definitions` returns a
+step type's inputs, config and examples only when the query matches five types or fewer. Match more
+than that and it returns bare ids and labels with no parameters at all — so a keyword search teaches
+you nothing and buys a chain of follow-up calls. Pass `stepType` with an exact id.
+
+The types these automations use are a closed set: `elasticsearch.esql.query`,
+`elasticsearch.search`, `elasticsearch.request`, `ai.prompt`, `foreach`, `if`, `data.set` and
+`console`, alongside the `context-engine` steps written out above, which no lookup can return at
+all. Every one of them appears in the templates already wired up correctly, so a lookup is worth a
+call only for a step type you are adding that no template uses.
+
+`platform.workflows.get_examples` is one call for the example library rather than one per step, and
+`platform.workflows.get_trigger_definitions` gives the event context a trigger provides.
+
+Validation establishes that the workflow parses, that its step types exist and that its references
+resolve. It does **not** establish that a query inside it returns anything, which is why the rest of
+this loop exists.
+
+**Tag every write.** Add a `ce-pilot-<runId>` entry to the indicator's `tags`, where `runId` is
+unique to this attempt. In the templates the indicator is built in a single `data.set` step, so the
+tag goes on that step's `ki.tags` list — the one place all of them read from — not on
+`context-engine.createKi`, which takes the assembled document rather than building it.
+
+That tag is the only handle you will have on what the pilot wrote: on a data-stream destination
+`createKi` refuses `ki_id` and Elasticsearch generates the ids, so there is nothing else to find
+them by.
+
+Bound the run to a handful of documents while you are iterating. The templates put that bound in
+`consts` — `max_entities`, `max_documents`, `corpus_filter` — so it is one edit to narrow and one
+to widen again, rather than a change threaded through the queries.
+
+**Run it without saving.** `platform.core.execute_workflow` accepts a `yaml` argument and runs the
+definition ephemerally — nothing is persisted, nothing needs enabling. It waits for completion and
+returns step outputs and the failure message when a step throws.
+
+**Read what it wrote, not whether it ran.** A workflow completes cleanly and still emits indicators
+with empty `content`, absent `attributes`, or titles too alike to tell apart under retrieval. Query
+the tag back with `platform.core.execute_esql`:
+
+```esql
+FROM <destination> METADATA _id
+| MV_EXPAND tags
+| WHERE tags == "ce-pilot-<runId>"
+| KEEP _id, title, type, content, attributes
+| LIMIT 100
+```
+
+`MV_EXPAND tags` is not optional and is the one part of this worth memorizing. `tags` is a keyword
+array, an indicator carries several, and in ES|QL a scalar comparison like `==` skips multivalued
+rows outright rather than matching any element. Without the expand the query is valid, runs, and
+returns nothing at all — which reads exactly like a pilot that wrote no indicators, and sends you
+looking for a fault in the workflow that isn't there. Expanding first gives one row per tag, so the
+`WHERE` then matches the row carrying the pilot tag.
+
+`<destination>` is the `dest.value` from the brief. `FROM ai-index-*` works too when you are unsure
+of it, at the cost of scanning every AI index.
+
+Judge those against what the brief asked for. When one step is what is wrong,
+`platform.workflows.workflow_execute_step` runs that step alone out of the inline YAML, so you can
+iterate on it without paying for the whole workflow and without writing more indicators to clean up.
+Where a step's ES|QL is the problem, `platform.core.generate_esql` will rewrite it given the failing
+query, the reason and the mapping. Fix and run again, within your attempt budget.
+
+**Clean up before you return.** The pilot wrote into the user's real index, so the tagged indicators
+are yours to remove and cleanup is not optional — a skipped one leaves junk that nobody else will
+know to look for. Run a second inline workflow: an `elasticsearch.esql.query` selecting `_id` for the
+tag as above, then a `foreach` over the results calling `context-engine.deleteKi` with `ki_id` set to
+each `_id`. Query the tag once more afterwards and confirm it returns nothing. Do this for every
+`runId` you used, not only the last.
+
+**Strip the tag, then hand it back.** Remove the `ce-pilot-*` tag from the indicator's `tags` and
+widen the `consts` bounds back to what the brief specified — the pilot's narrow filter is not the
+automation.
+Return the finished YAML in full, a plain-language account of what the workflow does, and what the
+pilot indicators looked like. The last of those is the evidence the reviewer approves on.
+
+## Saving what comes back
+
+Save the YAML exactly as the subagent returned it. Rebuilding it from the description it came back
+with discards the definition the pilot proved and saves a different one — one whose queries nobody
+has run.
+
+Present the subagent's summary and its pilot indicators before you save. The save confirmation names
+the workflow and the index but shows none of its content, so that account is the only thing the user
+has to approve on.
+
+## Running one is a separate decision
+
+Piloting inside the loop above is authorized by the brief that started it, and is bounded to a
+handful of documents that get deleted afterwards. Running the saved automation is not the same act:
+it writes indicators across the whole corpus and costs model calls on every document it touches.
+
+Saving with the save tool's `run` flag is not an exception to that. The run is named in the save
+confirmation, so approving the save approves the run, and no further question is owed — and the save
+tool then starts that run itself, in its own code, under the caller's privileges. It is not asking you
+to run anything afterwards.
+
+So when it reports that the run did not start, that is the answer, not a task. It ran with exactly the
+privileges you have, so starting the same workflow yourself fails the same way; and where the failure
+came after the run began, a second attempt doubles it. Report what it said and stop.
+
+What remains unauthorized is starting a run of your own accord on a workflow already saved: do not
+execute a saved workflow unless the run you are in has told you to.
+`platform.core.execute_workflow` starts one and `platform.core.get_workflow_execution_status` reports
+on it.
+
+## Corpora larger than 10,000 documents
+
+ES|QL caps at 10,000 rows per query. An automation over a larger corpus needs offset-based
+pagination, or a parent workflow dispatching per-item children with `workflow.executeAsync`. Note
+the cap rather than drafting a workflow that silently truncates — this fails quietly, and the index
+looks under-covered for reasons no one will connect back to here.
