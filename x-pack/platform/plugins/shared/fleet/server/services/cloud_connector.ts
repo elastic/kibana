@@ -300,7 +300,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         verification_status: 'pending',
-        ...iacAttributesFromConfirm(cloudConnector),
+        ...iacAttributesFromConfirm(cloudConnector.iac),
       };
 
       const savedObject = await soClient.create<CloudConnectorSOAttributes>(
@@ -467,7 +467,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         updateAttributes.vars = cloudConnectorUpdate.vars;
       }
 
-      Object.assign(updateAttributes, iacAttributesFromConfirm(cloudConnectorUpdate));
+      Object.assign(updateAttributes, iacAttributesFromConfirm(cloudConnectorUpdate.iac));
 
       // Update the saved object
       const updatedSavedObject = await soClient.update<CloudConnectorSOAttributes>(

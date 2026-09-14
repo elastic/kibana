@@ -17,6 +17,15 @@ const IacFieldsSchema = {
   region: schema.maybe(schema.string({ minLength: 1, maxLength: 64 })),
 };
 
+const IacStateSchema = schema.maybe(
+  schema.object(IacFieldsSchema, {
+    meta: {
+      description:
+        'IaC provenance to persist on the cloud connector after the user confirms the template.',
+    },
+  })
+);
+
 export const CreateCloudConnectorRequestSchema = {
   body: schema.object({
     name: schema.string({
@@ -57,7 +66,7 @@ export const CreateCloudConnectorRequestSchema = {
         }),
       ])
     ),
-    ...IacFieldsSchema,
+    iac: IacStateSchema,
   }),
 };
 
@@ -212,7 +221,7 @@ export const UpdateCloudConnectorRequestSchema = {
         ])
       )
     ),
-    ...IacFieldsSchema,
+    iac: IacStateSchema,
   }),
 };
 
