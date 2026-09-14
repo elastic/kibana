@@ -145,10 +145,7 @@ const alignNodeToDefinition = (
     return {
       ...node,
       children: node.children.map((child) => {
-        if (
-          child.stepType !== 'enter-case-branch' &&
-          child.stepType !== 'enter-default-branch'
-        ) {
+        if (child.stepType !== 'enter-case-branch' && child.stepType !== 'enter-default-branch') {
           return child;
         }
         return {
