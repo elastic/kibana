@@ -1,0 +1,8 @@
+prs:
+  - https://github.com/elastic/kibana/pull/290705
+type: feature
+products:
+  - product: cloud-serverless
+  - product: kibana
+title: Add AlertZero action catalog API and agent builder tool
+description: Adds an internal AlertZero API for listing actions and action categories, plus the `security.alertzero.actions.list` agent builder tool that surfaces the catalog to AI agents.
