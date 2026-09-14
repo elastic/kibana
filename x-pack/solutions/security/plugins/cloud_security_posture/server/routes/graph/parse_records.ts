@@ -30,6 +30,8 @@ import {
   type RelationshipEdge,
   type RelationshipEsqlRow,
   type EntityRecord,
+  type RiskScoreRange,
+  type AssetCriticalityCount,
   NON_ENRICHED_ENTITY_TYPE_PLURAL,
   NON_ENRICHED_ENTITY_TYPE_SINGULAR,
 } from './types';
@@ -40,6 +42,8 @@ import {
   addValuesToSet,
   filterDocDataToIds,
   rebuildDocData,
+  aggregateRiskScore,
+  aggregateAssetCriticality,
 } from './utils';
 import type { EntityEnrichmentFields } from './fetch_entity_enrichment';
 
@@ -219,10 +223,22 @@ const createEntityNode = (
     entityName?: string | string[] | null;
     docData?: Array<string | null> | string;
     hostIps?: string[];
+    riskScore?: RiskScoreRange;
+    assetCriticality?: AssetCriticalityCount[];
   },
   logger?: Logger
 ): void => {
-  const { nodeId, idsCount, entityType, entitySubType, entityName, docData, hostIps } = params;
+  const {
+    nodeId,
+    idsCount,
+    entityType,
+    entitySubType,
+    entityName,
+    docData,
+    hostIps,
+    riskScore,
+    assetCriticality,
+  } = params;
   const EXPAND_DOT_NOTATION = false;
 
   if (nodesMap[nodeId] !== undefined) return;
@@ -256,6 +272,8 @@ const createEntityNode = (
     ...deriveEntityAttributesFromType(resolvedType),
     ...(idsCount > 1 ? { count: idsCount } : {}),
     ...(hostIps && hostIps.length > 0 ? { ips: hostIps } : {}),
+    ...(riskScore ? { riskScore } : {}),
+    ...(assetCriticality && assetCriticality.length > 0 ? { assetCriticality } : {}),
   };
 };
 
@@ -275,6 +293,8 @@ const createGroupedActorAndTargetNodes = (
     actorEntitySubType,
     actorEntityName,
     actorHostIps,
+    actorRiskScore,
+    actorAssetCriticality,
     targetNodeId,
     targetIdsCount,
     targetsDocData,
@@ -282,6 +302,8 @@ const createGroupedActorAndTargetNodes = (
     targetEntitySubType,
     targetEntityName,
     targetHostIps,
+    targetRiskScore,
+    targetAssetCriticality,
   } = record;
 
   // Create actor entity node
@@ -295,6 +317,8 @@ const createGroupedActorAndTargetNodes = (
       entityName: actorEntityName,
       docData: actorsDocData,
       hostIps: actorHostIps ? castArray(actorHostIps) : [],
+      riskScore: actorRiskScore,
+      assetCriticality: actorAssetCriticality,
     },
     logger
   );
@@ -313,6 +337,8 @@ const createGroupedActorAndTargetNodes = (
         entityName: targetEntityName,
         docData: targetsDocData,
         hostIps: targetHostIps ? castArray(targetHostIps) : [],
+        riskScore: targetRiskScore,
+        assetCriticality: targetAssetCriticality,
       },
       logger
     );
@@ -464,6 +490,8 @@ const processRelationshipRecord = (record: RelationshipEdge, context: ParseConte
       entityName: record.actorEntityName,
       docData: record.actorsDocData,
       hostIps: record.actorHostIps ? castArray(record.actorHostIps) : [],
+      riskScore: record.actorRiskScore,
+      assetCriticality: record.actorAssetCriticality,
     },
     context.logger
   );
@@ -478,6 +506,8 @@ const processRelationshipRecord = (record: RelationshipEdge, context: ParseConte
       entityName: record.targetEntityName,
       docData: record.targetsDocData,
       hostIps: record.targetHostIps ? castArray(record.targetHostIps) : [],
+      riskScore: record.targetRiskScore,
+      assetCriticality: record.targetAssetCriticality,
     },
     context.logger
   );
@@ -1107,6 +1137,8 @@ export const regroupEvents = (
       actorEntityName:
         actorNames.length === 0 ? null : actorNames.length === 1 ? actorNames[0] : actorNames,
       actorHostIps: actorHostIps.length > 0 ? actorHostIps : undefined,
+      actorRiskScore: aggregateRiskScore(actorEntityIds, enrichmentMap),
+      actorAssetCriticality: aggregateAssetCriticality(actorEntityIds, enrichmentMap),
       actorsDocData: [...group.actorsDocData],
       targetNodeId,
       targetIdsCount: targetEntityIds.length,
@@ -1115,6 +1147,8 @@ export const regroupEvents = (
       targetEntityName:
         targetNames.length === 0 ? null : targetNames.length === 1 ? targetNames[0] : targetNames,
       targetHostIps: targetHostIps.length > 0 ? targetHostIps : undefined,
+      targetRiskScore: aggregateRiskScore(targetEntityIds, enrichmentMap),
+      targetAssetCriticality: aggregateAssetCriticality(targetEntityIds, enrichmentMap),
       targetsDocData: [...group.targetsDocData],
     };
   });
@@ -1336,6 +1370,8 @@ export const regroupRelationships = (
           ? actorNames[0]
           : actorNames,
       actorHostIps: actorHostIps.length > 0 ? actorHostIps : undefined,
+      actorRiskScore: aggregateRiskScore(actorIds, enrichmentMap),
+      actorAssetCriticality: aggregateAssetCriticality(actorIds, enrichmentMap),
       actorsDocData: [...group.actorsDocData],
       targetNodeId,
       targetIdsCount: targetIds.length,
@@ -1344,6 +1380,8 @@ export const regroupRelationships = (
       targetEntityName:
         targetNames.length === 0 ? null : targetNames.length === 1 ? targetNames[0] : targetNames,
       targetHostIps: targetHostIps.length > 0 ? targetHostIps : undefined,
+      targetRiskScore: aggregateRiskScore(targetIds, enrichmentMap),
+      targetAssetCriticality: aggregateAssetCriticality(targetIds, enrichmentMap),
       targetsDocData: [...group.targetsDocData],
       relationship: group.relationship,
       relationshipNodeId,

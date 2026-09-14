@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { rebuildDocData, addValuesToSet } from './enrichment_utils';
+import {
+  rebuildDocData,
+  addValuesToSet,
+  aggregateRiskScore,
+  aggregateAssetCriticality,
+} from './enrichment_utils';
 import type { EntityEnrichmentFields } from '../fetch_entity_enrichment';
 
 describe('addValuesToSet', () => {
@@ -379,5 +384,154 @@ describe('rebuildDocData', () => {
     expect(result[0]).toBe(invalid);
     expect(JSON.parse(result[1]).id).toBe('user:alice');
     expect(result[2]).toBe(noId);
+  });
+
+  it('adds riskScore and assetCriticality when the entity store has them', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['user:alice', { name: 'Alice', riskScore: 78.13, assetCriticality: 'extreme_impact' }],
+    ]);
+    const entry = JSON.stringify({ id: 'user:alice', type: 'entity' });
+
+    const doc = JSON.parse(rebuildDocData([entry], enrichmentMap)[0]);
+
+    expect(doc.entity.riskScore).toBe(78.13);
+    expect(doc.entity.assetCriticality).toBe('extreme_impact');
+  });
+
+  it('omits riskScore and assetCriticality entirely when the entity has neither', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['user:alice', { name: 'Alice', riskScore: null, assetCriticality: null }],
+    ]);
+    const entry = JSON.stringify({ id: 'user:alice', type: 'entity' });
+
+    const doc = JSON.parse(rebuildDocData([entry], enrichmentMap)[0]);
+
+    // Absent rather than null: the client must not have to tell "unscored" from a real value.
+    expect(doc.entity).not.toHaveProperty('riskScore');
+    expect(doc.entity).not.toHaveProperty('assetCriticality');
+  });
+
+  it('keeps a zero risk score, which is a real score rather than a missing one', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['user:alice', { riskScore: 0 }],
+    ]);
+    const entry = JSON.stringify({ id: 'user:alice', type: 'entity' });
+
+    const doc = JSON.parse(rebuildDocData([entry], enrichmentMap)[0]);
+
+    expect(doc.entity.riskScore).toBe(0);
+  });
+});
+
+describe('aggregateRiskScore', () => {
+  it('reports the spread across several entities', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['a', { riskScore: 12.4 }],
+      ['b', { riskScore: 94.1 }],
+      ['c', { riskScore: 50 }],
+    ]);
+
+    expect(aggregateRiskScore(['a', 'b', 'c'], enrichmentMap)).toEqual({ min: 12.4, max: 94.1 });
+  });
+
+  it('reports min === max for a single entity', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([['a', { riskScore: 78.13 }]]);
+
+    expect(aggregateRiskScore(['a'], enrichmentMap)).toEqual({ min: 78.13, max: 78.13 });
+  });
+
+  it('ignores entities without a score but keeps the ones that have it', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['a', { riskScore: null }],
+      ['b', { riskScore: 30 }],
+      ['c', {}],
+    ]);
+
+    expect(aggregateRiskScore(['a', 'b', 'c', 'missing'], enrichmentMap)).toEqual({
+      min: 30,
+      max: 30,
+    });
+  });
+
+  it('returns undefined when no entity has a score', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([['a', { riskScore: null }]]);
+
+    expect(aggregateRiskScore(['a'], enrichmentMap)).toBeUndefined();
+    expect(aggregateRiskScore([], enrichmentMap)).toBeUndefined();
+  });
+
+  it('treats a zero score as a value rather than as missing', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['a', { riskScore: 0 }],
+      ['b', { riskScore: 40 }],
+    ]);
+
+    expect(aggregateRiskScore(['a', 'b'], enrichmentMap)).toEqual({ min: 0, max: 40 });
+  });
+});
+
+describe('aggregateAssetCriticality', () => {
+  it('counts how many entities carry each level', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['a', { assetCriticality: 'low_impact' }],
+      ['b', { assetCriticality: 'extreme_impact' }],
+      ['c', { assetCriticality: 'low_impact' }],
+    ]);
+
+    expect(aggregateAssetCriticality(['a', 'b', 'c'], enrichmentMap)).toEqual([
+      { level: 'extreme_impact', count: 1 },
+      { level: 'low_impact', count: 2 },
+    ]);
+  });
+
+  it('orders entries most to least severe regardless of input order', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['a', { assetCriticality: 'low_impact' }],
+      ['b', { assetCriticality: 'medium_impact' }],
+      ['c', { assetCriticality: 'high_impact' }],
+      ['d', { assetCriticality: 'extreme_impact' }],
+    ]);
+
+    expect(
+      aggregateAssetCriticality(['a', 'b', 'c', 'd'], enrichmentMap)?.map(({ level }) => level)
+    ).toEqual(['extreme_impact', 'high_impact', 'medium_impact', 'low_impact']);
+  });
+
+  it('returns a single entry for a single entity', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['a', { assetCriticality: 'extreme_impact' }],
+    ]);
+
+    expect(aggregateAssetCriticality(['a'], enrichmentMap)).toEqual([
+      { level: 'extreme_impact', count: 1 },
+    ]);
+  });
+
+  it('returns undefined when no entity has a criticality', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['a', { assetCriticality: null }],
+      ['b', {}],
+    ]);
+
+    expect(aggregateAssetCriticality(['a', 'b'], enrichmentMap)).toBeUndefined();
+  });
+
+  it('skips levels the graph does not model', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['a', { assetCriticality: 'some_future_level' }],
+      ['b', { assetCriticality: 'high_impact' }],
+    ]);
+
+    expect(aggregateAssetCriticality(['a', 'b'], enrichmentMap)).toEqual([
+      { level: 'high_impact', count: 1 },
+    ]);
+  });
+
+  it('returns undefined when every value is unmodeled', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['a', { assetCriticality: 'some_future_level' }],
+    ]);
+
+    expect(aggregateAssetCriticality(['a'], enrichmentMap)).toBeUndefined();
   });
 });

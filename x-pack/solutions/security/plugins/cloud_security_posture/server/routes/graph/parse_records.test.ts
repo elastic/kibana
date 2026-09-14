@@ -1103,6 +1103,77 @@ describe('parseRecords', () => {
     });
   });
 
+  describe('risk score and asset criticality on nodes', () => {
+    const buildRecord = (overrides: Partial<EventEdge> = {}): EventEdge => ({
+      action: 'login',
+      actorNodeId: 'actor1',
+      targetNodeId: 'target1',
+      actorEntityType: 'user',
+      targetEntityType: 'host',
+      actorEntityName: 'Actor 1',
+      targetEntityName: 'Target 1',
+      actorIdsCount: 1,
+      targetIdsCount: 1,
+      actorsDocData: ['{"id":"actor1","type":"entity","entity":{"availableInEntityStore":true}}'],
+      targetsDocData: ['{"id":"target1","type":"entity","entity":{"availableInEntityStore":true}}'],
+      badge: 1,
+      uniqueEventsCount: 1,
+      uniqueAlertsCount: 0,
+      docs: ['{"foo":"bar"}'],
+      isOrigin: true,
+      isOriginAlert: false,
+      isAlert: false,
+      actorHostIps: [],
+      targetHostIps: [],
+      sourceIps: [],
+      sourceCountryCodes: [],
+      labelNodeId: 'doc-id-1',
+      ...overrides,
+    });
+
+    it('exposes the aggregates on the entity node', () => {
+      const result = parseRecords(
+        mockLogger,
+        [
+          buildRecord({
+            actorRiskScore: { min: 12.4, max: 94.1 },
+            actorAssetCriticality: [
+              { level: 'extreme_impact', count: 1 },
+              { level: 'low_impact', count: 2 },
+            ],
+          }),
+        ],
+        []
+      );
+
+      const actorNode = result.nodes.find((n) => n.id === 'actor1') as EntityNodeDataModel;
+      expect(actorNode.riskScore).toEqual({ min: 12.4, max: 94.1 });
+      expect(actorNode.assetCriticality).toEqual([
+        { level: 'extreme_impact', count: 1 },
+        { level: 'low_impact', count: 2 },
+      ]);
+    });
+
+    it('omits both keys when the entities behind the node have no values', () => {
+      const result = parseRecords(mockLogger, [buildRecord()], []);
+
+      const actorNode = result.nodes.find((n) => n.id === 'actor1') as EntityNodeDataModel;
+      expect(actorNode).not.toHaveProperty('riskScore');
+      expect(actorNode).not.toHaveProperty('assetCriticality');
+    });
+
+    it('reports min === max for a node backed by a single entity', () => {
+      const result = parseRecords(
+        mockLogger,
+        [buildRecord({ actorRiskScore: { min: 78.13, max: 78.13 } })],
+        []
+      );
+
+      const actorNode = result.nodes.find((n) => n.id === 'actor1') as EntityNodeDataModel;
+      expect(actorNode.riskScore).toEqual({ min: 78.13, max: 78.13 });
+    });
+  });
+
   describe('entities enrichment', () => {
     it('should create single non-enriched entity node with tag "Entity", label as entity.id, and no count', () => {
       const records: EventEdge[] = [

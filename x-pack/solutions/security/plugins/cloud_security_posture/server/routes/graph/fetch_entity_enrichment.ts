@@ -18,6 +18,10 @@ export interface EntityEnrichmentFields {
   subType?: string | null;
   hostIps?: string[];
   engineType?: string | null;
+  /** Normalized 0-100 risk score (`entity.risk.calculated_score_norm`). */
+  riskScore?: number | null;
+  /** Raw asset criticality level (`asset.criticality`), e.g. "extreme_impact". */
+  assetCriticality?: string | null;
   sourceFields?: Record<string, string | string[]>;
 }
 
@@ -32,6 +36,8 @@ const BASE_ENRICHMENT_COLUMNS = new Set([
   'entity.sub_type',
   'entity.EngineMetadata.Type',
   'host.ip',
+  'entity.risk.calculated_score_norm',
+  'asset.criticality',
 ]);
 
 // Additional entity-store columns needed to reconstruct sourceFields, beyond the base set.
@@ -44,6 +50,17 @@ const EXTRA_SOURCE_FIELD_COLUMNS = [
     ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.generic,
   ]),
 ].filter((col) => !BASE_ENRICHMENT_COLUMNS.has(col));
+
+/**
+ * Normalizes a possibly multi-valued ES|QL column to a single value, preserving null.
+ * Entity-store scalars are single-valued in practice, but ES|QL can return an array for
+ * any column; taking the first value keeps a stray multi-value from leaking an array into
+ * a scalar DTO field.
+ */
+const firstValue = <T>(value: T | T[] | null | undefined): T | null => {
+  if (value == null) return null;
+  return Array.isArray(value) ? value[0] ?? null : value;
+};
 
 /**
  * Builds a sourceFields object for an entity from its entity-store record columns.
@@ -125,7 +142,7 @@ export const fetchEntityEnrichment = async ({
       const query = `SET unmapped_fields="nullify";
 FROM ${indexName}
 | WHERE entity.id IN (${paramNames})
-| KEEP entity.id, entity.name, entity.type, entity.sub_type, \`entity.EngineMetadata.Type\`, host.ip${
+| KEEP entity.id, entity.name, entity.type, entity.sub_type, \`entity.EngineMetadata.Type\`, host.ip, \`entity.risk.calculated_score_norm\`, asset.criticality${
         EXTRA_SOURCE_FIELD_COLUMNS.length > 0 ? ', ' + EXTRA_SOURCE_FIELD_COLUMNS.join(', ') : ''
       }`;
 
@@ -145,6 +162,8 @@ FROM ${indexName}
                 'entity.sub_type'?: string | null;
                 'entity.EngineMetadata.Type'?: string | null;
                 'host.ip'?: string | string[] | null;
+                'entity.risk.calculated_score_norm'?: number | null;
+                'asset.criticality'?: string | null;
               } & Record<string, unknown>
             >(),
         {
@@ -187,6 +206,10 @@ FROM ${indexName}
           subType: record['entity.sub_type'] ?? null,
           engineType: record['entity.EngineMetadata.Type'] ?? null,
           hostIps,
+          // `null` is preserved rather than defaulted: an entity with no risk score is
+          // unscored, which is not the same as scoring zero.
+          riskScore: firstValue(record['entity.risk.calculated_score_norm']),
+          assetCriticality: firstValue(record['asset.criticality']),
           ...(Object.keys(sourceFields).length > 0 ? { sourceFields } : {}),
         });
       }

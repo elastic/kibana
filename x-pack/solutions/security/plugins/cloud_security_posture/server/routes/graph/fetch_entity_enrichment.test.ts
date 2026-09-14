@@ -96,6 +96,71 @@ describe('fetchEntityEnrichment', () => {
     expect(enrichment?.hostIps).toEqual([]);
   });
 
+  it('maps risk score and asset criticality from the entity store', async () => {
+    (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
+      toRecords: jest.fn().mockResolvedValue({
+        records: [
+          {
+            'entity.id': 'user:alice',
+            'entity.risk.calculated_score_norm': 78.13,
+            'asset.criticality': 'extreme_impact',
+          },
+        ],
+      }),
+    });
+
+    const result = await fetchEntityEnrichment({
+      esClient,
+      logger,
+      entityIds: ['user:alice'],
+      entityStoreIndexName: '.entities.v2.latest.default-00001',
+    });
+
+    expect(result.get('user:alice')?.riskScore).toBe(78.13);
+    expect(result.get('user:alice')?.assetCriticality).toBe('extreme_impact');
+  });
+
+  it('preserves null risk score and criticality rather than defaulting them', async () => {
+    (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
+      toRecords: jest.fn().mockResolvedValue({
+        records: [
+          {
+            'entity.id': 'user:alice',
+            'entity.risk.calculated_score_norm': null,
+            'asset.criticality': null,
+          },
+        ],
+      }),
+    });
+
+    const result = await fetchEntityEnrichment({
+      esClient,
+      logger,
+      entityIds: ['user:alice'],
+      entityStoreIndexName: '.entities.v2.latest.default-00001',
+    });
+
+    // An unscored entity must not be reported as scoring zero.
+    expect(result.get('user:alice')?.riskScore).toBeNull();
+    expect(result.get('user:alice')?.assetCriticality).toBeNull();
+  });
+
+  it('requests risk score and asset criticality columns', async () => {
+    const esqlMock = esClient.asInternalUser.helpers.esql as unknown as jest.Mock;
+    esqlMock.mockReturnValue({ toRecords: jest.fn().mockResolvedValue({ records: [] }) });
+
+    await fetchEntityEnrichment({
+      esClient,
+      logger,
+      entityIds: ['user:alice'],
+      entityStoreIndexName: '.entities.v2.latest.default-00001',
+    });
+
+    const { query } = esqlMock.mock.calls[0][0];
+    expect(query).toContain('entity.risk.calculated_score_norm');
+    expect(query).toContain('asset.criticality');
+  });
+
   it('builds typed sourceFields for user entities', async () => {
     (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
       toRecords: jest.fn().mockResolvedValue({

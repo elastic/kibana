@@ -37,6 +37,9 @@
       "service": {
         "id": "api-service@your-project-id.iam.gserviceaccount.com",
         "name": "ApiServiceAccount"
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }
@@ -81,6 +84,9 @@
       "host": {
         "id": "host-instance-1",
         "name": "HostInstance1"
+      },
+      "asset": {
+        "criticality": "high_impact"
       }
     }
   }
@@ -125,6 +131,9 @@
       "host": {
         "id": "host-instance-2",
         "name": "HostInstance2"
+      },
+      "asset": {
+        "criticality": "low_impact"
       }
     }
   }
@@ -169,6 +178,9 @@
       "service": {
         "id": "projects/your-project-id/serviceAccounts/target-service-1@your-project-id.iam.gserviceaccount.com",
         "name": "TargetService1"
+      },
+      "asset": {
+        "criticality": "medium_impact"
       }
     }
   }
@@ -213,6 +225,9 @@
       "service": {
         "id": "projects/your-project-id/serviceAccounts/target-service-2@your-project-id.iam.gserviceaccount.com",
         "name": "TargetService2"
+      },
+      "asset": {
+        "criticality": "low_impact"
       }
     }
   }
@@ -297,6 +312,9 @@
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
+      },
+      "asset": {
+        "criticality": "high_impact"
       }
     }
   }
@@ -337,6 +355,9 @@
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
+      },
+      "asset": {
+        "criticality": "low_impact"
       }
     }
   }
@@ -469,6 +490,9 @@
       "user": {
         "id": "multi-actor-1@example.com",
         "name": "MultiActor1"
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }
@@ -513,6 +537,9 @@
       "user": {
         "id": "multi-actor-2@example.com",
         "name": "MultiActor2"
+      },
+      "asset": {
+        "criticality": "medium_impact"
       }
     }
   }
@@ -565,6 +592,9 @@
       "user": {
         "id": "relationships-test-user",
         "name": "Relationships Test User"
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }
@@ -609,6 +639,9 @@
       "host": {
         "id": "relationships-target-host-1",
         "name": "Relationships Target Host 1"
+      },
+      "asset": {
+        "criticality": "high_impact"
       }
     }
   }
@@ -653,6 +686,9 @@
       "host": {
         "id": "relationships-target-host-2",
         "name": "Relationships Target Host 2"
+      },
+      "asset": {
+        "criticality": "medium_impact"
       }
     }
   }
@@ -996,6 +1032,9 @@
       "user": {
         "id": "mv-expand-test-actor@example.com",
         "name": "MvExpandTestActor"
+      },
+      "asset": {
+        "criticality": "medium_impact"
       }
     }
   }
@@ -1040,6 +1079,9 @@
       "user": {
         "id": "mv-expand-target-identity",
         "name": "MvExpandTargetIdentity"
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }
@@ -1085,6 +1127,9 @@
         "bucket": {
           "name": "mv-expand-target-storage"
         }
+      },
+      "asset": {
+        "criticality": "high_impact"
       }
     }
   }
@@ -1138,6 +1183,9 @@
       "user": {
         "id": "rel-hierarchy-root-user",
         "name": "Hierarchy Root User"
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }
@@ -1190,6 +1238,9 @@
       "host": {
         "id": "rel-hierarchy-host-1",
         "name": "Hierarchy Host 1"
+      },
+      "asset": {
+        "criticality": "high_impact"
       }
     }
   }
@@ -1304,6 +1355,9 @@
       "user": {
         "id": "rel-hierarchy-identity-1",
         "name": "Hierarchy Identity 1"
+      },
+      "asset": {
+        "criticality": "medium_impact"
       }
     }
   }
@@ -1588,6 +1642,9 @@
       "user": {
         "id": "rel-hierarchy-delegate-1",
         "name": "Hierarchy Delegate Agent"
+      },
+      "asset": {
+        "criticality": "high_impact"
       }
     }
   }
@@ -1682,6 +1739,9 @@
       },
       "event": {
         "ingested": "2024-09-01T12:00:00.000Z"
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }
@@ -1725,6 +1785,9 @@
       },
       "event": {
         "ingested": "2024-09-01T12:00:00.000Z"
+      },
+      "asset": {
+        "criticality": "low_impact"
       }
     }
   }
@@ -1768,6 +1831,9 @@
       },
       "event": {
         "ingested": "2024-09-01T12:00:00.000Z"
+      },
+      "asset": {
+        "criticality": "low_impact"
       }
     }
   }
@@ -1804,6 +1870,9 @@
       },
       "event": {
         "ingested": "2024-09-01T12:00:00.000Z"
+      },
+      "asset": {
+        "criticality": "medium_impact"
       }
     }
   }
@@ -1847,6 +1916,9 @@
       },
       "event": {
         "ingested": "2024-09-01T12:00:00.000Z"
+      },
+      "asset": {
+        "criticality": "high_impact"
       }
     }
   }
@@ -1962,6 +2034,9 @@
       },
       "event": {
         "ingested": "2024-09-01T12:00:00.000Z"
+      },
+      "asset": {
+        "criticality": "low_impact"
       }
     }
   }
@@ -1995,6 +2070,9 @@
       },
       "event": {
         "ingested": "2024-09-01T12:00:00.000Z"
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }
@@ -2065,7 +2143,12 @@
         },
         "name": "web-1",
         "source": "gcp",
-        "type": "Host"
+        "type": "Host",
+        "risk": {
+          "calculated_level": "High",
+          "calculated_score": 71.0,
+          "calculated_score_norm": 71.0
+        }
       },
       "event": {
         "dataset": "gcp.audit",
@@ -2074,6 +2157,9 @@
       "host": {
         "id": "web-1",
         "name": "web-1"
+      },
+      "asset": {
+        "criticality": "high_impact"
       }
     }
   }
@@ -2101,7 +2187,12 @@
         },
         "name": "deploy-pipeline",
         "source": "gcp",
-        "type": "Service"
+        "type": "Service",
+        "risk": {
+          "calculated_level": "Low",
+          "calculated_score": 22.0,
+          "calculated_score_norm": 22.0
+        }
       },
       "event": {
         "dataset": "gcp.audit",
@@ -2109,6 +2200,9 @@
       },
       "service": {
         "name": "deploy-pipeline"
+      },
+      "asset": {
+        "criticality": "low_impact"
       }
     }
   }
@@ -2142,7 +2236,12 @@
         "namespace": "okta",
         "source": "okta",
         "sub_type": "Okta User",
-        "type": "Identity"
+        "type": "Identity",
+        "risk": {
+          "calculated_level": "Critical",
+          "calculated_score": 91.0,
+          "calculated_score_norm": 91.0
+        }
       },
       "event": {
         "category": "iam",
@@ -2158,6 +2257,9 @@
         "name": "alice@example.com",
         "email": "alice@example.com",
         "id": "00u1alice0000000000"
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }
@@ -2191,7 +2293,12 @@
         "namespace": "okta",
         "source": "okta",
         "sub_type": "Okta User",
-        "type": "Identity"
+        "type": "Identity",
+        "risk": {
+          "calculated_level": "Low",
+          "calculated_score": 18.0,
+          "calculated_score_norm": 18.0
+        }
       },
       "event": {
         "category": "iam",
@@ -2207,6 +2314,9 @@
         "name": "alice@example.com",
         "email": "bob@example.com",
         "id": "00u1bob00000000000"
+      },
+      "asset": {
+        "criticality": "low_impact"
       }
     }
   }
@@ -2239,7 +2349,12 @@
         "name": "okta-demo-host-1",
         "source": "okta",
         "sub_type": "Okta Device",
-        "type": "Host"
+        "type": "Host",
+        "risk": {
+          "calculated_level": "Moderate",
+          "calculated_score": 47.0,
+          "calculated_score_norm": 47.0
+        }
       },
       "event": {
         "category": "iam",
@@ -2254,6 +2369,9 @@
       "host": {
         "id": "okta-demo-host-1",
         "name": "okta-demo-host-1"
+      },
+      "asset": {
+        "criticality": "medium_impact"
       }
     }
   }

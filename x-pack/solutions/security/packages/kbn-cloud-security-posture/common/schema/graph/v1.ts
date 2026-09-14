@@ -53,6 +53,11 @@ export const IPS_MAX_SIZE = ESQL_DEFAULT_ROW_LIMIT;
 // ISO 3166-1 alpha-2 country codes (~249 currently assigned); 250 covers the set.
 export const COUNTRY_CODES_MAX_SIZE = 250;
 
+// Asset criticality distribution entries on a node — one per distinct criticality
+// level. Bounded by the cardinality of the entity-store criticality enum
+// (low/medium/high/extreme_impact).
+export const ASSET_CRITICALITY_LEVELS_MAX_SIZE = 4;
+
 // Documents aggregated onto a single graph node, bounded by the events query limit.
 const DOCUMENTS_DATA_MAX_SIZE = ESQL_DEFAULT_ROW_LIMIT;
 
@@ -212,6 +217,14 @@ export const entitySchema = schema.object({
     })
   ),
   availableInEntityStore: schema.maybe(schema.boolean()),
+  // Normalized 0-100 risk score for this entity. Omitted when the entity has no score
+  // (not in the entity store, or the risk score maintainer has not scored it yet) —
+  // absent is not the same as zero.
+  riskScore: schema.maybe(schema.number()),
+  // Raw asset criticality level for this entity (e.g. "extreme_impact"). Omitted when
+  // unassigned. Node-level `assetCriticality` carries display labels instead; see
+  // `entityNodeDataSchema`.
+  assetCriticality: schema.maybe(schema.string()),
   sourceFields: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
 
@@ -303,6 +316,31 @@ export const entityNodeDataSchema = schema.allOf([
     ips: schema.maybe(schema.arrayOf(schema.string(), { maxSize: IPS_MAX_SIZE })),
     countryCodes: schema.maybe(
       schema.arrayOf(schema.string(), { maxSize: COUNTRY_CODES_MAX_SIZE })
+    ),
+    // Risk score range across the entities this node represents. A node can stand for
+    // several entities (grouped by type/sub-type), so the spread is reported rather than
+    // a single value; for a single-entity node min === max. Omitted when no entity
+    // behind the node has a score.
+    riskScore: schema.maybe(
+      schema.object({
+        min: schema.number(),
+        max: schema.number(),
+      })
+    ),
+    // Asset criticality distribution across the entities this node represents: `level` is
+    // the raw entity-store level (e.g. "extreme_impact"), `count` is how many of the node's
+    // entities carry it. Entries are ordered most to least severe. Raw levels rather than
+    // display labels: criticality labels are i18n'd by the consumer (see
+    // `CRITICALITY_LEVEL_TITLE` in security_solution), so translation stays client-side.
+    // Omitted when no entity behind the node has a criticality.
+    assetCriticality: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          level: schema.string(),
+          count: schema.number(),
+        }),
+        { maxSize: ASSET_CRITICALITY_LEVELS_MAX_SIZE }
+      )
     ),
     documentsData: schema.maybe(
       schema.arrayOf(nodeDocumentDataSchema, { maxSize: DOCUMENTS_DATA_MAX_SIZE })
