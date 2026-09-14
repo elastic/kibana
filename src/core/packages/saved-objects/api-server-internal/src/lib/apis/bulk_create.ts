@@ -368,6 +368,10 @@ export const performBulkCreate = async <T>(
           });
         }
 
+        // Set after-state before the ES write so it is captured even if client.bulk() throws,
+        // matching the create.ts pattern (setAfter immediately after migrateInputDocument).
+        auditRecords[index]?.setAfter((migrated.attributes ?? {}) as Record<string, unknown>);
+
         const expectedResult = {
           esRequestIndex: bulkRequestIndexCounter++,
           requestedId: object.id,
@@ -442,10 +446,7 @@ export const performBulkCreate = async <T>(
       const rawResponse = Object.values(bulkResponse?.items[esRequestIndex] ?? {})[0] as any;
       const type = rawMigratedDoc._source.type;
 
-      // Recorded before the item error check so a failed item still audits the attempt.
       const auditRecord = auditRecords[index];
-      auditRecord?.setAfter((rawMigratedDoc._source[type] ?? {}) as Record<string, unknown>);
-
       const error = getBulkOperationError(type, requestedId, rawResponse);
       if (error) {
         return { type, id: requestedId, error };
