@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import type { RulesClientFactoryOpts } from './rules_client_factory';
 import { RulesClientFactory } from './rules_client_factory';
+import { ApiKeyType } from './task_runner/types';
 import { ruleTypeRegistryMock } from './rule_type_registry.mock';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import {
@@ -123,6 +124,7 @@ describe('RulesClientFactory', () => {
       getAlertIndicesAlias: jest.fn(),
       alertsService: null,
       shouldGrantUiam: false,
+      apiKeyType: ApiKeyType.ES,
       featureFlags: coreFeatureFlagsMock.createStart(),
       isServerless: false,
       analytics: analyticsServiceMock.createAnalyticsServiceStart(),

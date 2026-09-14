@@ -354,6 +354,13 @@ interface SmlIndexerBaseParams {
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
   logger: Logger;
+  /**
+   * Set to `true` when `savedObjectsClient` comes from `getScopedClient` — that
+   * client determines the namespace automatically and throws if one is passed
+   * explicitly. Leave unset for internal repositories, which need an explicit
+   * namespace to access non-default spaces.
+   */
+  clientHasSpacesExtension?: boolean;
 }
 
 export type SmlIndexerOriginParams = SmlIndexerBaseParams & SmlIndexAttachmentOriginMode;

@@ -20,6 +20,7 @@ import { OAuthStateClient } from '../lib/oauth_state_client';
 import { OAuthAuthorizationService } from '../lib/oauth_authorization_service';
 import { actionsConfigMock } from '../actions_config.mock';
 import { OAUTH_API_TAG } from '../feature';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 const MockOAuthStateClient = OAuthStateClient as jest.MockedClass<typeof OAuthStateClient>;
 const MockOAuthAuthorizationService = OAuthAuthorizationService as jest.MockedClass<
@@ -399,7 +400,7 @@ describe('oauthAuthorizeRoute', () => {
     expect(mockOAuthStateClientInstance.create).toHaveBeenCalledWith({
       connectorId: 'connector-1',
       kibanaReturnUrl: 'https://kibana.example.com/app/my-page',
-      spaceId: 'default',
+      spaceId: asSpaceId('default'),
       createdBy: 'test-profile-uid',
     });
 
