@@ -277,21 +277,19 @@ export const displaySummary = (
     ],
     [
       dedent(`\
-        Thresholds
-          Min builds        : ${thresholds.minBuilds} (tests seen in fewer builds are ignored)
-          Min failed builds : ${
-            thresholds.minFailedBuilds
-          } (tests that failed in fewer builds are ignored)
+        Thresholds (per branch: one branch must clear all three on its own)
+          Min builds        : ${thresholds.minBuilds} (builds the branch ran the test in)
+          Min failed builds : ${thresholds.minFailedBuilds} (builds the branch failed the test in)
           Min fail rate     : ${formatRate(
             thresholds.minFailRate
-          )} (tests that failed in a smaller share of their builds are ignored)
+          )} (failed / all builds on the branch)
           Max tests         : ${thresholds.maxTests} per list
           Max inactive      : ${
             thresholds.maxInactiveHours
-          }h (tests that did not execute since are ignored)
+          }h (tests that did not execute since are dropped)
           Flaky                = qualifying test with at least one pass or in-run retry recovery
           Consistently failing = qualifying test that never passed in the window
-          Ranking              = most failed builds, then build failure rate, then most recent failure
+          Ranking              = failed builds, then fail rate on the flakiest branch, then latest failure
         `),
     ],
     [

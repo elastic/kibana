@@ -11,7 +11,15 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
-import { classifyTest, latestRunAcrossBranches, rankTests, ScoutFlakyTests } from './report';
+import {
+  classifyTest,
+  flakiestQualifyingBranch,
+  isActive,
+  latestRunAcrossBranches,
+  mayQualify,
+  rankTests,
+  ScoutFlakyTests,
+} from './report';
 import {
   DEFAULT_FLAKY_TEST_REPORT_OPTIONS,
   FlakyTestReportSchema,
@@ -21,65 +29,130 @@ import * as queries from './queries';
 
 const thresholds = { minBuilds: 10, minFailedBuilds: 2, minFailRate: 0, maxInactiveHours: 24 };
 
+describe('mayQualify', () => {
+  it('needs enough builds and failed builds in total, ignoring the failure rate', () => {
+    expect(mayQualify({ builds: 9, failedBuilds: 5 }, thresholds)).toBe(false);
+    expect(mayQualify({ builds: 50, failedBuilds: 1 }, thresholds)).toBe(false);
+    expect(mayQualify({ builds: 10, failedBuilds: 2 }, thresholds)).toBe(true);
+    // a 0.4% total may still hide a branch above any rate threshold
+    const strict = { ...thresholds, minFailRate: 0.5 };
+    expect(mayQualify({ builds: 500, failedBuilds: 2 }, strict)).toBe(true);
+  });
+});
+
+describe('flakiestQualifyingBranch', () => {
+  const branch = (name: string, builds: number, failedBuilds: number) => ({
+    branch: name,
+    builds,
+    failedBuilds,
+  });
+
+  it('picks the branch with the highest failure rate among those clearing every threshold', () => {
+    expect(
+      flakiestQualifyingBranch(
+        [branch('main', 500, 10), branch('9.5', 100, 8), branch('9.4', 50, 2)],
+        thresholds
+      )
+    ).toEqual({ branch: '9.5', builds: 100, failedBuilds: 8, buildFailRate: 0.08 });
+  });
+
+  it('is not diluted: a branch qualifies on its own numbers even when the total would not', () => {
+    // 10 of 610 in total is 1.6%; 9.5 alone is 8%
+    const byBranch = [branch('main', 500, 2), branch('9.5', 100, 8), branch('9.4', 10, 0)];
+    expect(flakiestQualifyingBranch(byBranch, { ...thresholds, minFailRate: 0.05 })).toEqual({
+      branch: '9.5',
+      builds: 100,
+      failedBuilds: 8,
+      buildFailRate: 0.08,
+    });
+  });
+
+  it('ignores branches with too few builds or failed builds, whatever their rate', () => {
+    expect(
+      flakiestQualifyingBranch(
+        // 9.4 is at 100% but on a single build; 9.5 failed once
+        [branch('main', 500, 5), branch('9.5', 100, 1), branch('9.4', 1, 1)],
+        thresholds
+      )
+    ).toEqual({ branch: 'main', builds: 500, failedBuilds: 5, buildFailRate: 0.01 });
+  });
+
+  it('is undefined when no branch clears the thresholds on its own', () => {
+    // 4 failed builds in total, but 2 per branch on branches of 500 builds: 0.4% < 1%
+    expect(
+      flakiestQualifyingBranch([branch('main', 500, 2), branch('9.5', 500, 2)], {
+        ...thresholds,
+        minFailRate: 0.01,
+      })
+    ).toBeUndefined();
+    expect(flakiestQualifyingBranch([branch('main', 9, 5)], thresholds)).toBeUndefined();
+    expect(flakiestQualifyingBranch([], thresholds)).toBeUndefined();
+  });
+
+  it('breaks rate ties by failed builds', () => {
+    expect(
+      flakiestQualifyingBranch([branch('main', 100, 10), branch('9.5', 20, 2)], thresholds)?.branch
+    ).toBe('main');
+  });
+});
+
 describe('classifyTest', () => {
-  it('ignores tests seen in too few builds', () => {
-    expect(
-      classifyTest({ runs: 9, fails: 5, retryFlakes: 0, builds: 9, failedBuilds: 5 }, thresholds)
-    ).toBeUndefined();
-  });
-
-  it('ignores tests that failed in too few builds', () => {
-    expect(
-      classifyTest({ runs: 50, fails: 1, retryFlakes: 0, builds: 50, failedBuilds: 1 }, thresholds)
-    ).toBeUndefined();
-  });
-
-  it('ignores tests that failed in too small a share of their builds when a rate is required', () => {
-    const stats = { runs: 500, fails: 4, retryFlakes: 0, builds: 500, failedBuilds: 4 };
-    // 0.8% < 1%
-    expect(classifyTest(stats, { ...thresholds, minFailRate: 0.01 })).toBeUndefined();
-    // exactly at the rate qualifies
-    expect(classifyTest(stats, { ...thresholds, minFailRate: 0.008 })).toBe('flaky');
-    // the default rate of 0 keeps every test that clears the build counts
-    expect(classifyTest(stats, thresholds)).toBe('flaky');
-  });
-
   it('is flaky when the test also passed cleanly', () => {
-    expect(
-      classifyTest({ runs: 50, fails: 5, retryFlakes: 0, builds: 50, failedBuilds: 5 }, thresholds)
-    ).toBe('flaky');
+    expect(classifyTest({ runs: 50, fails: 5, retryFlakes: 0 })).toBe('flaky');
   });
 
   it('is flaky when every execution failed but some recovered on an in-run retry', () => {
-    expect(
-      classifyTest(
-        { runs: 20, fails: 20, retryFlakes: 18, builds: 20, failedBuilds: 20 },
-        thresholds
-      )
-    ).toBe('flaky');
+    expect(classifyTest({ runs: 20, fails: 20, retryFlakes: 18 })).toBe('flaky');
   });
 
   it('is consistently failing when it never passed', () => {
+    expect(classifyTest({ runs: 20, fails: 20, retryFlakes: 0 })).toBe('consistently-failing');
+  });
+});
+
+describe('isActive', () => {
+  const to = new Date('2026-09-07T00:00:00.000Z');
+  const executedAt = (iso: string) => ({ latestExecutionAt: new Date(iso) });
+
+  it('is active when any branch executed the test within the inactivity window', () => {
+    expect(isActive([executedAt('2026-09-06T00:00:00.000Z')], to, 24)).toBe(true);
     expect(
-      classifyTest(
-        { runs: 20, fails: 20, retryFlakes: 0, builds: 20, failedBuilds: 20 },
-        thresholds
+      isActive(
+        [executedAt('2026-09-01T00:00:00.000Z'), executedAt('2026-09-06T23:00:00.000Z')],
+        to,
+        24
       )
-    ).toBe('consistently-failing');
+    ).toBe(true);
+    expect(isActive([executedAt('2026-09-05T23:59:59.000Z')], to, 24)).toBe(false);
+    expect(isActive([], to, 24)).toBe(false);
   });
 });
 
 describe('rankTests', () => {
-  it('orders by failed builds, then build failure rate, then most recent failure', () => {
+  it('orders by failed builds, then failure rate on the flakiest branch, then most recent failure', () => {
+    const flakiest = (buildFailRate: number) => ({
+      branch: 'main',
+      builds: 100,
+      failedBuilds: 2,
+      buildFailRate,
+    });
     const entries = [
       { id: 'a', failedBuilds: 2, buildFailRate: 0.5, lastFailedAt: new Date('2026-09-01') },
       { id: 'b', failedBuilds: 5, buildFailRate: 0.1, lastFailedAt: new Date('2026-09-01') },
       { id: 'c', failedBuilds: 2, buildFailRate: 0.5, lastFailedAt: new Date('2026-09-03') },
       { id: 'd', failedBuilds: 2, buildFailRate: 0.9, lastFailedAt: new Date('2026-09-01') },
+      // the flakiest branch rate outranks the diluted total when present
+      {
+        id: 'e',
+        failedBuilds: 2,
+        buildFailRate: 0.01,
+        flakiestBranch: flakiest(0.95),
+        lastFailedAt: new Date('2026-09-01'),
+      },
     ];
 
-    expect(rankTests(entries).map((entry) => entry.id)).toEqual(['b', 'd', 'c', 'a']);
-    expect(entries.map((entry) => entry.id)).toEqual(['a', 'b', 'c', 'd']);
+    expect(rankTests(entries).map((entry) => entry.id)).toEqual(['b', 'e', 'd', 'c', 'a']);
+    expect(entries.map((entry) => entry.id)).toEqual(['a', 'b', 'c', 'd', 'e']);
   });
 });
 
@@ -148,9 +221,26 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
   const activeBranchStats = (testIds: string[]) =>
     new Map(testIds.map((testId) => [testId, [activeBranch()]]));
 
-  /** Latest executions right before the window end, so every test in `testIds` is active. */
-  const activeExecutions = (testIds: string[]) =>
-    new Map(testIds.map((testId) => [testId, new Date('2026-09-06T23:00:00.000Z')]));
+  /** Counts on `main` that clear the thresholds, with an execution right before the window end. */
+  const mainCounts = (
+    overrides: Partial<queries.BranchCountsRow> = {}
+  ): queries.BranchCountsRow => ({
+    branch: 'main',
+    builds: 100,
+    failedBuilds: 10,
+    latestExecutionAt: new Date('2026-09-06T23:00:00.000Z'),
+    ...overrides,
+  });
+  const qualifyingFlakiestBranch = {
+    branch: 'main',
+    builds: 100,
+    failedBuilds: 10,
+    buildFailRate: 0.1,
+  };
+
+  /** Branch counts where every test in `testIds` qualifies on `main` and is active. */
+  const activeCounts = (testIds: string[]) =>
+    new Map(testIds.map((testId) => [testId, [mainCounts()]]));
 
   afterEach(() => {
     jest.restoreAllMocks();
@@ -187,9 +277,9 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
         statsRow({ testId: 'jest-flaky', failedBuilds: 3 }),
         statsRow({ testId: 'jest-broken', runs: 20, fails: 20, builds: 20, failedBuilds: 20 }),
       ]);
-    const fetchLatestExecutions = jest
-      .spyOn(queries, 'fetchLatestExecutions')
-      .mockResolvedValue(activeExecutions(['jest-flaky']));
+    const fetchBranchCounts = jest
+      .spyOn(queries, 'fetchBranchCounts')
+      .mockResolvedValue(activeCounts(['jest-flaky']));
     jest.spyOn(queries, 'fetchTestMetadata').mockResolvedValue(new Map());
     const fetchBranchStats = jest
       .spyOn(queries, 'fetchBranchStats')
@@ -214,13 +304,10 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       totalConsistentlyFailing: 0,
       flakyByFramework: { jest: 1 },
     });
-    // the excluded classification never reaches the activity check either
-    expect(fetchLatestExecutions).toHaveBeenCalledWith(
-      es,
-      expect.anything(),
-      [expect.objectContaining({ testId: 'jest-flaky' })],
-      thresholds.maxInactiveHours
-    );
+    // the excluded classification never reaches the per-branch check either
+    expect(fetchBranchCounts).toHaveBeenCalledWith(es, expect.anything(), [
+      expect.objectContaining({ testId: 'jest-flaky' }),
+    ]);
     expect(fetchBranchStats).toHaveBeenCalledWith(es, expect.anything(), [
       expect.objectContaining({ testId: 'jest-flaky' }),
     ]);
@@ -256,11 +343,24 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
             ]
           : [statsRow({ testId: 'pw-flaky', framework: 'playwright', failedBuilds: 5 })]
       );
-    const fetchLatestExecutions = jest
-      .spyOn(queries, 'fetchLatestExecutions')
-      .mockResolvedValue(
-        activeExecutions(['jest-flaky-low', 'jest-flaky-high', 'jest-broken', 'pw-flaky'])
-      );
+    const fetchBranchCounts = jest.spyOn(queries, 'fetchBranchCounts').mockResolvedValue(
+      new Map([
+        ...activeCounts(['jest-flaky-low', 'jest-broken', 'pw-flaky']),
+        [
+          'jest-flaky-high',
+          [
+            mainCounts({ builds: 90, failedBuilds: 30 }),
+            // 9.5 never failed it, and only ever skipped it lately
+            mainCounts({
+              branch: '9.5',
+              builds: 10,
+              failedBuilds: 0,
+              latestExecutionAt: new Date('2026-09-01T00:00:00.000Z'),
+            }),
+          ],
+        ],
+      ])
+    );
     jest.spyOn(queries, 'fetchTestMetadata').mockResolvedValue(
       new Map([
         [
@@ -370,6 +470,8 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       owners: ['elastic/team'],
       passes: 90,
       buildFailRate: 0.3,
+      // the branch it qualified on, at its own undiluted rate
+      flakiestBranch: { branch: 'main', builds: 90, failedBuilds: 30, buildFailRate: 30 / 90 },
       // the newest run across branches
       latestRun: { status: 'skipped', branch: '9.5' },
       byBranch: [
@@ -385,6 +487,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       title: '(unknown)',
       filePath: '(unknown)',
       owners: [],
+      flakiestBranch: qualifyingFlakiestBranch,
       sampleFailures: [],
     });
     expect(report.consistentlyFailing[0].suiteTitle).toBeUndefined();
@@ -401,14 +504,14 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       { filePath: '(unknown)', framework: 'jest', testIds: ['jest-broken'], byPipeline: [] },
     ]);
 
-    // the activity check runs for every qualifying test, before the cap
-    expect(fetchLatestExecutions).toHaveBeenCalledWith(
+    // the per-branch check runs for every test whose totals may qualify, before the cap;
+    // `jest-rare` failed in a single build and is out already
+    expect(fetchBranchCounts).toHaveBeenCalledWith(
       es,
       expect.anything(),
       ['jest-flaky-low', 'jest-flaky-high', 'jest-broken', 'pw-flaky'].map((testId) =>
         expect.objectContaining({ testId })
-      ),
-      thresholds.maxInactiveHours
+      )
     );
 
     // per-test lookups only run for admitted tests
@@ -427,67 +530,102 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     expect(fetchFilePipelineStats).toHaveBeenCalledWith(es, expect.anything(), admitted);
   });
 
-  it('drops tests without a recent execution before ranking, so the cap is filled with active ones', async () => {
+  it('checks thresholds per branch and activity before ranking, so the cap is filled with tests that qualify', async () => {
     jest.spyOn(queries, 'fetchFailingFiles').mockResolvedValue([
       { framework: 'jest', filePath: 'a.test.ts' },
       { framework: 'jest', filePath: 'b.test.ts' },
     ]);
-    jest
-      .spyOn(queries, 'fetchTestStats')
-      .mockResolvedValue([
-        statsRow({ testId: 'skipped-since', failedBuilds: 30 }),
-        statsRow({ testId: 'still-running', failedBuilds: 20 }),
-      ]);
-    // `skipped-since` has no execution in the inactivity window; it outranks `still-running`
-    // and would have taken the single slot had the check happened after the cap
-    const fetchLatestExecutions = jest
-      .spyOn(queries, 'fetchLatestExecutions')
-      .mockResolvedValue(activeExecutions(['still-running']));
+    jest.spyOn(queries, 'fetchTestStats').mockResolvedValue([
+      statsRow({ testId: 'skipped-since', failedBuilds: 30 }),
+      // 12 of 1000 in total is 1.2%, above the 1% required, but spread thin over two branches
+      statsRow({ testId: 'diluted', builds: 1000, failedBuilds: 12 }),
+      // 6 of 600 in total is 1%; on 9.5 alone it is 5 of 100
+      statsRow({ testId: 'flaky-on-9.5', builds: 600, failedBuilds: 6 }),
+      statsRow({ testId: 'still-running', failedBuilds: 20 }),
+    ]);
+    // `skipped-since` and `diluted` outrank the others and would have taken the slots had the
+    // checks happened after the cap
+    const fetchBranchCounts = jest.spyOn(queries, 'fetchBranchCounts').mockResolvedValue(
+      new Map([
+        [
+          'skipped-since',
+          [
+            mainCounts({
+              failedBuilds: 30,
+              latestExecutionAt: new Date('2026-09-05T00:00:00.000Z'),
+            }),
+          ],
+        ],
+        [
+          'diluted',
+          [
+            mainCounts({ builds: 500, failedBuilds: 4 }),
+            mainCounts({ branch: '9.5', builds: 500, failedBuilds: 8 }),
+          ],
+        ],
+        [
+          'flaky-on-9.5',
+          [
+            mainCounts({ builds: 500, failedBuilds: 1 }),
+            mainCounts({ branch: '9.5', builds: 100, failedBuilds: 5 }),
+          ],
+        ],
+        ...activeCounts(['still-running']),
+      ])
+    );
     const fetchTestMetadata = jest.spyOn(queries, 'fetchTestMetadata').mockResolvedValue(new Map());
     const fetchBranchStats = jest
       .spyOn(queries, 'fetchBranchStats')
-      .mockResolvedValue(activeBranchStats(['still-running']));
+      .mockResolvedValue(activeBranchStats(['flaky-on-9.5', 'still-running']));
     const fetchSampleFailures = jest
       .spyOn(queries, 'fetchSampleFailures')
       .mockResolvedValue(new Map());
     jest.spyOn(queries, 'fetchDailyTrend').mockResolvedValue(new Map());
     jest.spyOn(queries, 'fetchFilePipelineStats').mockResolvedValue(new Map());
 
-    const { data: report } = await ScoutFlakyTests.fromElasticsearch(es, options, log);
+    const { data: report } = await ScoutFlakyTests.fromElasticsearch(
+      es,
+      { ...options, thresholds: { ...thresholds, minFailRate: 0.02, maxTests: 2 } },
+      log
+    );
 
-    expect(fetchLatestExecutions).toHaveBeenCalledWith(
+    expect(fetchBranchCounts).toHaveBeenCalledWith(
       es,
       expect.anything(),
-      [
-        expect.objectContaining({ testId: 'skipped-since' }),
-        expect.objectContaining({ testId: 'still-running' }),
-      ],
-      thresholds.maxInactiveHours
+      ['skipped-since', 'diluted', 'flaky-on-9.5', 'still-running'].map((testId) =>
+        expect.objectContaining({ testId })
+      )
     );
-    expect(report.flaky.map((entry) => entry.testId)).toEqual(['still-running']);
-    expect(report.summary.totalFlaky).toBe(1);
-    expect(report.files.map((file) => file.testIds)).toEqual([['still-running']]);
-    // the inactive test is gone before any further lookup
+    // `still-running` failed in more builds; `flaky-on-9.5` qualifies on 9.5 despite its 1% total
+    expect(report.flaky.map((entry) => entry.testId)).toEqual(['still-running', 'flaky-on-9.5']);
+    expect(report.flaky[1]).toMatchObject({
+      buildFailRate: 0.01,
+      flakiestBranch: { branch: '9.5', builds: 100, failedBuilds: 5, buildFailRate: 0.05 },
+    });
+    expect(report.summary.totalFlaky).toBe(2);
+    expect(report.files.map((file) => file.testIds)).toEqual([['still-running', 'flaky-on-9.5']]);
+    // the dropped tests are gone before any further lookup
     expect(fetchTestMetadata).toHaveBeenCalledTimes(1);
     expect(fetchBranchStats).toHaveBeenCalledWith(es, expect.anything(), [
       expect.objectContaining({ testId: 'still-running' }),
+      expect.objectContaining({ testId: 'flaky-on-9.5' }),
     ]);
     expect(fetchSampleFailures).toHaveBeenCalledWith(
       es,
       expect.anything(),
-      ['still-running'],
+      ['still-running', 'flaky-on-9.5'],
       options.samplesPerTest
     );
   });
 
-  it('skips the remaining lookups once every qualifying test turns out to be inactive', async () => {
+  it('skips the remaining lookups once no test qualifies on a branch of its own', async () => {
     jest
       .spyOn(queries, 'fetchFailingFiles')
       .mockResolvedValue([{ framework: 'jest', filePath: 'a.test.ts' }]);
     jest
       .spyOn(queries, 'fetchTestStats')
       .mockResolvedValue([statsRow({ testId: 'skipped-since', failedBuilds: 30 })]);
-    jest.spyOn(queries, 'fetchLatestExecutions').mockResolvedValue(new Map());
+    jest.spyOn(queries, 'fetchBranchCounts').mockResolvedValue(new Map());
     const fetchTestMetadata = jest.spyOn(queries, 'fetchTestMetadata');
     const fetchBranchStats = jest.spyOn(queries, 'fetchBranchStats');
 
@@ -502,7 +640,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
   it('skips metadata, branch stats and sample queries when nothing qualifies', async () => {
     jest.spyOn(queries, 'fetchFailingFiles').mockResolvedValue([]);
     const fetchTestStats = jest.spyOn(queries, 'fetchTestStats');
-    const fetchLatestExecutions = jest.spyOn(queries, 'fetchLatestExecutions');
+    const fetchBranchCounts = jest.spyOn(queries, 'fetchBranchCounts');
     const fetchTestMetadata = jest.spyOn(queries, 'fetchTestMetadata');
     const fetchBranchStats = jest.spyOn(queries, 'fetchBranchStats');
     const fetchSampleFailures = jest.spyOn(queries, 'fetchSampleFailures');
@@ -515,7 +653,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     expect(report.consistentlyFailing).toEqual([]);
     expect(report.files).toEqual([]);
     expect(fetchTestStats).not.toHaveBeenCalled();
-    expect(fetchLatestExecutions).not.toHaveBeenCalled();
+    expect(fetchBranchCounts).not.toHaveBeenCalled();
     expect(fetchTestMetadata).not.toHaveBeenCalled();
     expect(fetchBranchStats).not.toHaveBeenCalled();
     expect(fetchSampleFailures).not.toHaveBeenCalled();

@@ -90,6 +90,9 @@ export const discoverFlakyTests: Command<void> = {
   Aggregate Scout test events (Jest, FTR, Cypress, Playwright) from Elasticsearch into a
   flaky test report and store it locally under ${SCOUT_FLAKY_TESTS_PATH}. Read-only.
 
+  The build thresholds apply per branch: a test qualifies when one branch clears all of them
+  on its own, so a clean branch cannot dilute a flaky one.
+
   Examples:
     # Last ${DEFAULT_LOOKBACK_DAYS} days of ${DEFAULT_PIPELINES}, all frameworks
     node scripts/scout discover-flaky-tests
@@ -156,9 +159,9 @@ export const discoverFlakyTests: Command<void> = {
     --branches         (optional)  Comma-separated branches; no filter when omitted
     --frameworks       (optional)  Comma-separated subset of ${ALL_FRAMEWORKS} [default: all]
     --classifications  (optional)  Comma-separated subset of ${ALL_CLASSIFICATIONS} [default: all]
-    --minBuilds        (optional)  Ignore tests seen in fewer builds [default: ${DEFAULT_MIN_BUILDS}]
-    --minFailedBuilds  (optional)  Ignore tests that failed in fewer builds [default: ${DEFAULT_MIN_FAILED_BUILDS}]
-    --minFailRate      (optional)  Ignore tests that failed in a smaller fraction (0-1) of their builds, e.g. 0.01 for 1% [default: ${DEFAULT_MIN_FAIL_RATE}]
+    --minBuilds        (optional)  Builds a branch must have run the test in to qualify it [default: ${DEFAULT_MIN_BUILDS}]
+    --minFailedBuilds  (optional)  Builds a branch must have failed the test in to qualify it [default: ${DEFAULT_MIN_FAILED_BUILDS}]
+    --minFailRate      (optional)  Fraction (0-1) of its builds a branch must have failed the test in to qualify it, e.g. 0.01 for 1% [default: ${DEFAULT_MIN_FAIL_RATE}]
     --maxTests         (optional)  Maximum tests per list in the report [default: ${DEFAULT_MAX_TESTS}]
     --maxInactiveHours (optional)  Drop tests that did not execute in this many hours before the window end, i.e. skipped, moved or deleted [default: ${DEFAULT_MAX_INACTIVE_HOURS}]
     --samplesPerTest   (optional)  Recent failure messages per test [default: ${DEFAULT_SAMPLES_PER_TEST}]

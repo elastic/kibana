@@ -82,6 +82,20 @@ export const FlakyTestTrendSchema = z.object({
 export type FlakyTestTrend = z.infer<typeof FlakyTestTrendSchema>;
 
 /**
+ * The branch that qualified a test: the one with the highest build failure rate among the
+ * branches that clear every threshold on their own, so that a clean branch cannot dilute a
+ * flaky one.
+ */
+export const FlakyTestFlakiestBranchSchema = z.object({
+  branch: z.string(),
+  builds: z.int(),
+  failedBuilds: z.int(),
+  /** `failedBuilds / builds` on this branch. */
+  buildFailRate: z.number(),
+});
+export type FlakyTestFlakiestBranch = z.infer<typeof FlakyTestFlakiestBranchSchema>;
+
+/**
  * One test aggregated over the report window. Counts are per execution (one per test run;
  * Playwright in-run retries collapse into a single execution) and per Buildkite build.
  */
@@ -115,6 +129,11 @@ export const FlakyTestEntrySchema = z.object({
   byBranch: z.array(FlakyTestBranchStatsSchema),
   firstFailedAt: z.coerce.date(),
   lastFailedAt: z.coerce.date(),
+  /**
+   * The branch on which the test cleared the thresholds; the top-level rate above is diluted
+   * by the other branches. Absent in reports written before thresholds applied per branch.
+   */
+  flakiestBranch: z.optional(FlakyTestFlakiestBranchSchema),
   /** Absent only if the test emitted no execution events in the window (should not happen). */
   latestRun: z.optional(FlakyTestLatestRunSchema),
   sampleFailures: z.array(FlakyTestSampleFailureSchema),
@@ -152,15 +171,19 @@ export const FlakyTestFileStatsSchema = z.object({
 });
 export type FlakyTestFileStats = z.infer<typeof FlakyTestFileStatsSchema>;
 
+/**
+ * A test qualifies when a single branch clears all three build thresholds on its own: a test
+ * flaky on `9.5` but clean on `main` is judged on its `9.5` numbers, not on the diluted total.
+ */
 export const FlakyTestReportThresholdsSchema = z.object({
-  /** Tests seen in fewer builds than this are ignored. */
+  /** Branches on which the test was seen in fewer builds than this cannot qualify it. */
   minBuilds: z.int().min(1),
-  /** Tests that failed in fewer builds than this are ignored. */
+  /** Branches on which the test failed in fewer builds than this cannot qualify it. */
   minFailedBuilds: z.int().min(1),
   /**
-   * Tests whose `failedBuilds / builds` is below this fraction are ignored. `0` keeps every test
-   * that clears the build counts; raise it for a stricter report (e.g. `0.01` for 1%). Defaults
-   * so that reports written before the field existed still parse.
+   * Branches on which `failedBuilds / builds` is below this fraction cannot qualify the test.
+   * `0` keeps every test that clears the build counts; raise it for a stricter report (e.g.
+   * `0.01` for 1%). Defaults so that reports written before the field existed still parse.
    */
   minFailRate: z.number().min(0).max(1).default(0),
   /** Maximum number of tests kept per list. */
