@@ -53,12 +53,10 @@ export const getThreatReport = async (
   }
 
   const source = hit._source;
-  const revision = typeof source.revision === 'number' ? source.revision : 0;
 
   const result: Record<string, unknown> = {
     ...source,
     reportId: hit._id,
-    revision,
   };
 
   // Nested per-space array (v30). Project the caller's element only (never '*').

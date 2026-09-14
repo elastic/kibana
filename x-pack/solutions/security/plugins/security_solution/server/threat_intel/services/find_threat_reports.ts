@@ -53,7 +53,7 @@ const isSearchContextMissing = (err: unknown): boolean => {
 };
 
 /**
- * Usable bar: title or body text, nested IOCs, severity.level, and revision.
+ * Usable bar: title or body text, nested IOCs, and severity.level.
  * `extracted.iocs` is nested, so exists on the parent path matches nothing.
  */
 export const USABLE_REPORT_FILTER: estypes.QueryDslQueryContainer = {
@@ -77,7 +77,6 @@ export const USABLE_REPORT_FILTER: estypes.QueryDslQueryContainer = {
         },
       },
       { exists: { field: 'severity.level' } },
-      { exists: { field: 'revision' } },
     ],
   },
 };
@@ -168,7 +167,6 @@ const buildSort = (sort: ThreatReportSort): estypes.Sort => {
 };
 
 interface ReportSourceDoc {
-  revision?: number;
   content?: {
     title?: string;
     body_text?: string;
@@ -201,7 +199,6 @@ const mapHitToSummary = (hit: estypes.SearchHit<ReportSourceDoc>): ThreatReportS
   const diamond = source.extracted?.diamond;
   const summary: ThreatReportSummary = {
     reportId: hit._id ?? '',
-    revision: typeof source.revision === 'number' ? source.revision : 0,
     iocs,
   };
 
@@ -320,7 +317,6 @@ export const findThreatReports = async (
     sort: buildSort(sort),
     query,
     _source: [
-      'revision',
       'content.title',
       'content.body_text',
       'severity',

@@ -29,12 +29,11 @@ export interface ThreatReportDiamondSummary {
 }
 
 /**
- * Usable-bar summary for find results: identity, revision, title/body, IOCs,
- * severity, and optional Diamond.
+ * Usable-bar summary for find results: identity, title/body, IOCs, severity,
+ * and optional Diamond.
  */
 export interface ThreatReportSummary {
   reportId: string;
-  revision: number;
   title?: string;
   bodyText?: string;
   severity?: {
@@ -52,7 +51,6 @@ export interface FindThreatReportsResponse {
 
 export interface GetThreatReportResponse {
   reportId: string;
-  revision: number;
   [field: string]: unknown;
 }
 

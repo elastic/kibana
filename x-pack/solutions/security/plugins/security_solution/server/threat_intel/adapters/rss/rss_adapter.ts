@@ -102,7 +102,6 @@ export const rssAdapter: FetchAdapter = {
         '@timestamp': ingestedAt,
         content_fingerprint: fingerprint,
         space_id: spaceId,
-        revision: 1,
         source: {
           type: 'rss',
           // Provenance only. The adapter fetches the configured feed URL and nothing else;

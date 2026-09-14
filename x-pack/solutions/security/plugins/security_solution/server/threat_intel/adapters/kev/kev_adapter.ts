@@ -143,7 +143,6 @@ const buildKevReport = (
       (vuln.cwes ?? []).join(','),
     ]),
     space_id: spaceId,
-    revision: 1,
     source: {
       type: 'kev',
       // The configured source name from the approved catalog entry, matching the

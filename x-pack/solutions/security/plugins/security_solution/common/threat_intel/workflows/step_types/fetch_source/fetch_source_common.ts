@@ -56,7 +56,6 @@ export const normalizedReportSchema = z.object({
   '@timestamp': z.string(),
   content_fingerprint: z.string(),
   space_id: z.string(),
-  revision: z.number().int().positive().default(1),
   source: z.object({
     type: z.enum(REPORT_SOURCE_TYPES),
     name: z.string(),

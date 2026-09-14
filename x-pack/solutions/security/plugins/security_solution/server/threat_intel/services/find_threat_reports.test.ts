@@ -26,7 +26,6 @@ const buildHit = ({
   _index: '.kibana-threat-reports',
   sort,
   _source: {
-    revision: 1,
     content: { title: 'Report', body_text: 'Body text with indicators' },
     severity: { level: 'high', score: 0.8 },
     extracted: {
@@ -126,7 +125,6 @@ describe('findThreatReports', () => {
     expect(result.items).toEqual([
       expect.objectContaining({
         reportId: 'r1',
-        revision: 1,
         title: 'Report',
         severity: { level: 'high', score: 0.8 },
         iocs: [{ type: 'domain', value: 'evil.com' }],

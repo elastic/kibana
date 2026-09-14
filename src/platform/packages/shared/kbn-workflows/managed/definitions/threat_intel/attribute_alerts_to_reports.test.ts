@@ -113,8 +113,6 @@ describe('THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW yaml', () => {
     // Liquid must not consume any of the script source.
     expect(source as string).not.toContain('{{');
     expect(source as string).not.toContain('{%');
-    // The evidence write must not advance the report revision.
-    expect(source as string).not.toContain('revision');
   });
 
   // evidence is shared with Hunt Watch's writer, which sets a disjoint set

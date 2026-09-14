@@ -22,7 +22,7 @@ describe('getThreatReport', () => {
     reportId: 'default:abc',
   };
 
-  it('returns the full source with reportId and revision', async () => {
+  it('returns the full source with reportId', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.search.mockResolvedValue(
       buildSearchResponse([
@@ -30,7 +30,6 @@ describe('getThreatReport', () => {
           _id: 'default:abc',
           _index: '.kibana-threat-reports',
           _source: {
-            revision: 2,
             space_id: 'default',
             content: { title: 'Title', body_text: 'Body' },
             severity: { level: 'medium', score: 0.5 },
@@ -43,7 +42,6 @@ describe('getThreatReport', () => {
 
     expect(result).toEqual({
       reportId: 'default:abc',
-      revision: 2,
       space_id: 'default',
       content: { title: 'Title', body_text: 'Body' },
       severity: { level: 'medium', score: 0.5 },
@@ -80,23 +78,6 @@ describe('getThreatReport', () => {
     );
   });
 
-  it('returns revision 0 when the stored revision field is absent', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.search.mockResolvedValue(
-      buildSearchResponse([
-        {
-          _id: 'default:abc',
-          _index: '.kibana-threat-reports',
-          _source: { space_id: 'default', content: { title: 'Title' } },
-        },
-      ]) as never
-    );
-
-    const result = await getThreatReport(esClient, defaultArgs);
-
-    expect(result.revision).toBe(0);
-  });
-
   it('returns a search using hidden-index wildcard options', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.search.mockResolvedValue(
@@ -104,7 +85,7 @@ describe('getThreatReport', () => {
         {
           _id: 'default:abc',
           _index: '.kibana-threat-reports',
-          _source: { revision: 1, space_id: 'default' },
+          _source: { space_id: 'default' },
         },
       ]) as never
     );
@@ -122,7 +103,6 @@ describe('getThreatReport', () => {
 
   describe('space-keyed evidence projection', () => {
     const twoSpaceSource = {
-      revision: 3,
       space_id: '*',
       content: { title: 'Shared report' },
       evidence: [
@@ -174,7 +154,6 @@ describe('getThreatReport', () => {
       // returning it still distinguishes "hunted here" from "absent" without
       // cross-space leakage.
       const legacy = {
-        revision: 1,
         space_id: 'default',
         evidence: {
           alert_hits: { window: '7d', ioc_match_hits: 5, technique_overlap_hits: 0 },
@@ -189,7 +168,6 @@ describe('getThreatReport', () => {
 
     it('omits legacy flat evidence on a global report rather than leaking another space', async () => {
       const legacyGlobal = {
-        revision: 1,
         space_id: '*',
         evidence: {
           alert_hits: { window: '7d', ioc_match_hits: 5, technique_overlap_hits: 0 },

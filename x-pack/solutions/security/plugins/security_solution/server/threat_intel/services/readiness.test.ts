@@ -123,6 +123,22 @@ describe('getThreatIntelReadiness', () => {
     );
   });
 
+  it('returns blocked with reports_index_check_failed, not reports_index_missing, when the exists probe throws', async () => {
+    // A timeout or 5xx from the probe is an infrastructure failure, not a
+    // missing index; conflating them points the operator at the wrong fix.
+    const deps = buildDefaultDeps();
+    deps.esClient.indices.exists.mockRejectedValue(new Error('es unavailable') as never);
+
+    const result = await getThreatIntelReadiness(deps);
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        status: 'blocked',
+        reasonCodes: ['reports_index_check_failed'],
+      })
+    );
+  });
+
   it('returns ready when dependencies and usable reports are present', async () => {
     const deps = buildDefaultDeps();
 

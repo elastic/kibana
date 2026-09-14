@@ -173,13 +173,14 @@ describe('createThreatReport', () => {
     }
   );
 
-  it('initializes revision to 1 on ingest', async () => {
+  it('keeps title-as-body fallback without storing fallback metadata', async () => {
     const esClient = buildEsClient();
-    await createThreatReport(esClient, logger, 'default', BASE_PARAMS);
+    await createThreatReport(esClient, logger, 'default', { ...BASE_PARAMS, body_text: ' ' });
 
     const document = esClient.create.mock.calls[0][0].document as {
-      revision?: number;
+      content: Record<string, unknown>;
     };
-    expect(document.revision).toBe(1);
+    expect(document.content.body_text).toBe(BASE_PARAMS.title);
+    expect(document.content).not.toHaveProperty('body_is_title_fallback');
   });
 });

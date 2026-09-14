@@ -41,14 +41,26 @@ const maxAggToIso = (
   return null;
 };
 
-const checkReportsIndexExists = async (esClient: ElasticsearchClient): Promise<boolean> => {
+type ReportsIndexState = 'exists' | 'missing' | 'check_failed';
+
+/**
+ * `indices.exists` resolves a missing index to `false` (404), so a throw here is
+ * a real infrastructure failure (timeout, authz, 5xx), not a missing index.
+ * Reporting those as `reports_index_missing` would send an operator to recreate
+ * an index that may be fine, so they surface as a distinct reason code.
+ */
+const checkReportsIndexState = async (
+  esClient: ElasticsearchClient
+): Promise<ReportsIndexState> => {
   try {
-    return await esClient.indices.exists({
+    return (await esClient.indices.exists({
       index: THREAT_REPORTS_INDEX,
       expand_wildcards: ['open', 'hidden'],
-    });
+    }))
+      ? 'exists'
+      : 'missing';
   } catch {
-    return false;
+    return 'check_failed';
   }
 };
 
@@ -194,12 +206,14 @@ export const getThreatIntelReadiness = async ({
     reasonCodes.push('bootstrap_incomplete');
   }
 
-  const reportsIndexExists = await checkReportsIndexExists(esClient);
-  if (!reportsIndexExists) {
+  const reportsIndexState = await checkReportsIndexState(esClient);
+  if (reportsIndexState === 'missing') {
     reasonCodes.push('reports_index_missing');
+  } else if (reportsIndexState === 'check_failed') {
+    reasonCodes.push('reports_index_check_failed');
   }
 
-  if (!bootstrapComplete || !reportsIndexExists) {
+  if (!bootstrapComplete || reportsIndexState !== 'exists') {
     return {
       status: 'blocked',
       reasonCodes,

@@ -66,12 +66,6 @@ const threatReportsTemplate = {
         // scope reads to the current space plus `'*'`. This is not an Elasticsearch
         // authorization boundary on the hidden reports index while supply is disabled.
         space_id: { type: 'keyword' as const },
-        // Enrichment completion marker, not a change feed. Init 1 on
-        // create/ingest; bumped exactly once to 2 by a successful enrichment
-        // (evidence writes never touch it, and an enriched report is never
-        // re-enriched), so it never moves again. Consumers must not build
-        // polling, cache-invalidation, or re-dispatch logic on it.
-        revision: { type: 'integer' as const },
         source: {
           properties: {
             type: { type: 'keyword' as const },
@@ -305,9 +299,10 @@ const threatReportsTemplate = {
               },
             },
             // Hunt Watch's writer (per hunt run; no writer lands in this branch).
-            // A completed hunt (hit or clean no-hit) writes this and the report
-            // leaves the candidate pool for good; there is no cooldown or
-            // revision-triggered re-hunt.
+            // There is no cooldown or re-hunt trigger: a completed hunt
+            // (hit or clean no-hit) writes this and the report leaves the
+            // candidate pool for good; retry of failed runs is the only repeat
+            // path.
             last_hunted_at: { type: 'date' as const },
             // Latest targeted hunt status echo (keyword for mapping stability).
             last_hunt_status: { type: 'keyword' as const },
@@ -835,60 +830,6 @@ const migrateExistingIndicatorSourcesMapping = async (
       }. ` +
         `The sources[] field will be rejected by dynamic: strict until the mapping is updated manually.`
     );
-  }
-};
-
-/** `revision` (v28) for clusters created before read-API revision tracking. */
-const migrateExistingRevisionMapping = async (
-  esClient: ElasticsearchClient,
-  reportIndices: readonly string[],
-  logger: Logger
-): Promise<void> => {
-  const log = logger.get('revision-mapping-migration');
-
-  for (const indexName of reportIndices) {
-    try {
-      const { [indexName]: indexMappings } = await esClient.indices.getMapping({
-        index: indexName,
-      });
-      const props = indexMappings?.mappings?.properties as Record<string, unknown> | undefined;
-
-      if (!props?.revision) {
-        await esClient.indices.putMapping({
-          index: indexName,
-          properties: {
-            revision: { type: 'integer' },
-          },
-        });
-        log.info(`Migrated revision mapping on ${indexName} (v28)`);
-      }
-
-      // Existing reports need revision: 1 so the usable bar and Dark consumers
-      // treat them as first-revision docs rather than missing the field.
-      const updateResult = await esClient.updateByQuery({
-        index: indexName,
-        conflicts: 'proceed',
-        refresh: false,
-        query: {
-          bool: {
-            must_not: [{ exists: { field: 'revision' } }],
-          },
-        },
-        script: {
-          lang: 'painless',
-          source: 'ctx._source.revision = 1',
-        },
-      });
-      const updated = updateResult.updated ?? 0;
-      if (updated > 0) {
-        log.info(`Backfilled revision: 1 on ${updated} report(s) in ${indexName}`);
-      }
-    } catch (err) {
-      log.error(
-        `Failed to migrate revision on ${indexName}: ${(err as Error).message}. ` +
-          `Reports without revision will fail the usable bar until this succeeds.`
-      );
-    }
   }
 };
 
@@ -1604,7 +1545,6 @@ export const installIndexTemplates = async ({
   await migrateExistingReportKeywordBounds(esClient, reportIndices, log);
   await migrateExistingVulnerabilityMappings(esClient, reportIndices, log);
   await migrateExistingContentScrubbedMapping(esClient, reportIndices, log);
-  await migrateExistingRevisionMapping(esClient, reportIndices, log);
   await migrateExistingIndicesToHidden(esClient, reportIndices, log);
 
   // Fails the install (and therefore bootstrap readiness) when a migration left the

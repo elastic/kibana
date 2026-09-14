@@ -119,7 +119,6 @@ export const createThreatReport = async (
         '@timestamp': now,
         content_fingerprint: fp,
         space_id: spaceId,
-        revision: 1,
         source: {
           type: 'manual',
           name: sourceName,
