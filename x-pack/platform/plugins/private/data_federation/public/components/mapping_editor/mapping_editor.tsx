@@ -7,19 +7,7 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { FC, SetStateAction } from 'react';
-import {
-  EuiButton,
-  EuiFieldSearch,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiIconTip,
-  EuiPanel,
-  EuiSpacer,
-  EuiSwitch,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
@@ -28,7 +16,10 @@ import type { DatasetMappingFieldType, DatasetMappings } from '../../../common';
 import { FieldMappingForm, getFieldTypeDocsHelpText } from './field_mapping_form';
 import { FieldMappingDisplayMode } from './field_mapping_display_mode';
 import { MappingJsonPreview } from './mapping_json_preview';
-import { getTypeInfoByValue } from './const';
+import { MappingEditorHeader } from './mapping_editor_header';
+import { getTypeInfoByValue } from './constants';
+import { DynamicFieldsToggle } from './dynamic_fields_toggle';
+import { MappingEditorSectionHeader } from './mapping_editor_section_header';
 
 export interface MappingEditorField {
   id: string;
@@ -67,27 +58,15 @@ export interface MappingEditorProps {
   showJsonPreview?: boolean;
 }
 
-const AddField = ({ isVisible, onAddField }: { isVisible: boolean; onAddField: () => void }) => {
+const NoFieldsMatch = () => {
   return (
-    <div
-      style={{
-        width: 'fit-content',
-        visibility: isVisible ? 'visible' : 'hidden',
-      }}
-      aria-hidden={!isVisible}
-    >
-      <EuiButton
-        iconType="plusCircle"
-        size="s"
-        color="primary"
-        onClick={onAddField}
-        data-test-subj="dataFederationMappingEditorAddField"
-      >
-        {i18n.translate('xpack.dataFederation.mappingEditor.addFieldButton', {
-          defaultMessage: 'Add field',
+    <EuiText size="s" color="subdued">
+      <p>
+        {i18n.translate('xpack.dataFederation.mappingEditor.noSearchResults', {
+          defaultMessage: 'No fields match your search.',
         })}
-      </EuiButton>
-    </div>
+      </p>
+    </EuiText>
   );
 };
 
@@ -367,23 +346,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
 
   return (
     <EuiPanel paddingSize="m" hasBorder data-test-subj="dataFederationMappingEditor">
-      <EuiTitle size="s">
-        <h3>
-          {i18n.translate('xpack.dataFederation.mappingEditor.title', {
-            defaultMessage: 'Dataset mappings',
-          })}
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiText size="s" color="subdued">
-        <p>
-          {i18n.translate('xpack.dataFederation.mappingEditor.description', {
-            defaultMessage:
-              'Declare a schema, rename physical columns using “path”, and optionally add a date “format”.',
-          })}
-        </p>
-      </EuiText>
-      <EuiSpacer size="m" />
+      <MappingEditorSectionHeader />
       {!validation.isValid && shouldShowValidationCallout ? (
         <>
           <KbnDangerCallout
@@ -411,80 +374,19 @@ export const MappingEditor: FC<MappingEditorProps> = ({
       ) : null}
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem>
-          <EuiFormRow
-            helpText={i18n.translate('xpack.dataFederation.mappingEditor.dynamicDescription', {
-              defaultMessage: 'Dynamic fields will be inferred at query time if not mapped.',
-            })}
-            fullWidth
-          >
-            <EuiSwitch
-              name="dataFederationMappingEditorDynamic"
-              label={
-                <>
-                  {i18n.translate('xpack.dataFederation.mappingEditor.dynamicLabel', {
-                    defaultMessage: 'Dynamic fields',
-                  })}{' '}
-                  <EuiIconTip
-                    content={i18n.translate('xpack.dataFederation.mappingEditor.dynamicHelp', {
-                      defaultMessage:
-                        'When enabled, undeclared columns are included (schema inference overlays your declared fields). Disable to treat your declaration as the complete schema.',
-                    })}
-                    position="right"
-                  />
-                </>
-              }
-              checked={value.dynamic}
-              onChange={(e) => onChange((prev) => ({ ...prev, dynamic: e.target.checked }))}
-              data-test-subj="dataFederationMappingEditorDynamic"
-            />
-          </EuiFormRow>
+          <DynamicFieldsToggle
+            checked={value.dynamic}
+            onChange={(nextChecked) => onChange((prev) => ({ ...prev, dynamic: nextChecked }))}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h4>
-              {i18n.translate('xpack.dataFederation.mappingEditor.fieldsTitle', {
-                defaultMessage: 'Mapped fields',
-              })}
-            </h4>
-          </EuiTitle>
-          <EuiSpacer size="xs" />
-          <EuiText size="xs" color="subdued">
-            {i18n.translate('xpack.dataFederation.mappingEditor.timestampRecommendation', {
-              defaultMessage:
-                'Mapping your timestamp field and renaming it to @timestamp is recommended.',
-            })}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
-            <EuiFlexItem grow={false} style={{ alignSelf: 'flex-end' }}>
-              <AddField
-                isVisible={editingFieldId === null && value.fields.length > 0}
-                onAddField={addField}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <div style={{ width: 320 }}>
-                <EuiFieldSearch
-                  placeholder={i18n.translate('xpack.dataFederation.mappingEditor.searchFields', {
-                    defaultMessage: 'Search fields',
-                  })}
-                  aria-label={i18n.translate('xpack.dataFederation.mappingEditor.searchFields', {
-                    defaultMessage: 'Search fields',
-                  })}
-                  value={fieldSearch}
-                  onChange={(event) => setFieldSearch(event.target.value)}
-                  fullWidth
-                  data-test-subj="dataFederationMappingEditorSearchFields"
-                />
-              </div>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <MappingEditorHeader
+        isAddFieldVisible={editingFieldId === null && value.fields.length > 0}
+        onAddField={addField}
+        fieldSearch={fieldSearch}
+        onFieldSearchChange={setFieldSearch}
+      />
       <EuiSpacer size="s" />
       {value.fields.length === 0 ? (
         <EuiPanel paddingSize="s" color="subdued" hasBorder={false}>
@@ -507,13 +409,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
           />
         </EuiPanel>
       ) : filteredFields.length === 0 ? (
-        <EuiText size="s" color="subdued">
-          <p>
-            {i18n.translate('xpack.dataFederation.mappingEditor.noSearchResults', {
-              defaultMessage: 'No fields match your search.',
-            })}
-          </p>
-        </EuiText>
+        <NoFieldsMatch />
       ) : (
         <EuiFlexGroup direction="column" gutterSize="s">
           {filteredFields.map((f) => {
