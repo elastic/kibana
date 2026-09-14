@@ -8,9 +8,9 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
+  createSkillInvocationEvaluator,
   createTrajectoryEvaluator,
   getToolCallSteps,
-  type AgentBuilderClient,
   type DefaultEvaluators,
   type EvaluationDataset,
   type Evaluator,
@@ -18,10 +18,8 @@ import {
   type Example,
   type TaskOutput,
 } from '@kbn/evals';
-import { converseQuestionToTaskOutput } from './converse_task';
+import type { SecurityEvalChatClient } from './chat_client';
 import { createEndpointCriteriaEvaluator } from './evaluate_dataset';
-// Security-owned fork: also scores load_skill spans (platform createSkillInvocationEvaluator is filestore.read only).
-import { createSecuritySkillInvocationEvaluator } from './security_skill_invocation_evaluator';
 
 /** Must match defineSkillType({ name }) in endpoint_forensic_analysis_skill.ts */
 export const ENDPOINT_FORENSIC_ANALYSIS_SKILL_NAME = 'endpoint-forensic-analysis';
@@ -84,36 +82,31 @@ export const createForensicTrajectoryEvaluator = (): Evaluator<
   } as Evaluator<ForensicDatasetExample, TaskOutput>;
 };
 
-export const wrapSkillInvocationForDistractors = (
+/** After OTLP retries exhaust, missing tool spans ⇒ skill not detected (score 0). */
+const wrapSkillInvocationFallback = (
   evaluator: Evaluator<ForensicDatasetExample, TaskOutput>
 ): Evaluator<ForensicDatasetExample, TaskOutput> => ({
   ...evaluator,
   evaluate: async (args) => {
     const result = await evaluator.evaluate(args);
-    if (args.metadata?.row_type !== 'distractor') {
-      return result;
+    if (result.score === null && result.label === 'potentially_incomplete') {
+      return {
+        ...result,
+        score: 0,
+        explanation: `${
+          result.explanation ?? ''
+        } No tool spans in trace after retries — scoring skill not invoked.`,
+      };
     }
-
-    if (
-      result.score === null ||
-      result.label === 'potentially_incomplete' ||
-      result.label === 'error' ||
-      result.label === 'unavailable' ||
-      result.metadata?.incomplete === true
-    ) {
-      return result;
-    }
-
-    return {
-      ...result,
-      score: result.score === 1 ? 0 : 1,
-      explanation: `${
-        result.explanation ?? ''
-      } Distractor example — inverted so skill-not-invoked scores 1.`.trim(),
-    };
+    return result;
   },
 });
 
+/**
+ * Matrix L1–L5 baseline for endpoint-forensic-analysis (C3 Investigation).
+ * Mirrors @kbn/evals-suite-alerts-rag evaluator stack: criteria + skill
+ * invocation + trajectory + trace observability (toolCalls, latency, tokens).
+ */
 export const buildForensicEvaluators = ({
   evaluators,
   traceEsClient,
@@ -136,8 +129,8 @@ export const buildForensicEvaluators = ({
     inputTokens as Evaluator<ForensicDatasetExample, TaskOutput>,
     outputTokens as Evaluator<ForensicDatasetExample, TaskOutput>,
     cachedTokens as Evaluator<ForensicDatasetExample, TaskOutput>,
-    wrapSkillInvocationForDistractors(
-      createSecuritySkillInvocationEvaluator({
+    wrapSkillInvocationFallback(
+      createSkillInvocationEvaluator({
         traceEsClient,
         log,
         skillName: ENDPOINT_FORENSIC_ANALYSIS_SKILL_NAME,
@@ -150,13 +143,13 @@ export const buildForensicEvaluators = ({
 export function createEvaluateForensicDataset({
   evaluators,
   executorClient,
-  agentBuilderClient,
+  chatClient,
   traceEsClient,
   log,
 }: {
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
-  agentBuilderClient: AgentBuilderClient;
+  chatClient: SecurityEvalChatClient;
   traceEsClient: EsClient;
   log: ToolingLog;
 }): EvaluateForensicDataset {
@@ -178,7 +171,16 @@ export function createEvaluateForensicDataset({
     await executorClient.runExperiment(
       {
         datasets: [dataset],
-        task: async ({ input }) => converseQuestionToTaskOutput(agentBuilderClient, input.question),
+        task: async ({ input }) => {
+          const response = await chatClient.converse({ message: input.question });
+
+          return {
+            messages: response.messages,
+            steps: response.steps,
+            errors: response.errors,
+            traceId: response.traceId,
+          };
+        },
       },
       buildForensicEvaluators({ evaluators, traceEsClient, log })
     );

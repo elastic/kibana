@@ -129,6 +129,24 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.workflows}.get_workflow`,
   `${internalNamespaces.workflows}.get_examples`,
   `${internalNamespaces.workflows}.workflow_execute_step`,
+
+  // Osquery
+  `${internalNamespaces.osquery}.check_integration`,
+  `${internalNamespaces.osquery}.list_saved_queries`,
+  `${internalNamespaces.osquery}.get_table_schema`,
+  `${internalNamespaces.osquery}.run_live_query`,
+  `${internalNamespaces.osquery}.get_live_query_results`,
+  `${internalNamespaces.osquery}.list_packs`,
+  `${internalNamespaces.osquery}.resolve_agent_ids`,
+
+  // Endpoint response actions
+  'endpoint-response-actions.isolate_host',
+  'endpoint-response-actions.unisolate_host',
+  'endpoint-response-actions.get_endpoint_status',
+  'endpoint-response-actions.list_endpoints',
+  'endpoint-response-actions.running_processes',
+  'endpoint-response-actions.scan',
+  'endpoint-response-actions.get_response_action_status',
 ] as const;
 
 export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[number];
@@ -251,6 +269,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'attack-discovery-alert-retrieval-builder',
   'attack-discovery-generator',
   'attack-discovery-workflow-troubleshooting',
+  'endpoint-response-actions',
 
   // O11Y
   'observability.rca',

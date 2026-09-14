@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { tags } from '@kbn/scout';
 import { METADATA_UNITED_TRANSFORM } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { evaluate } from '../../src/evaluate';
@@ -15,7 +14,7 @@ import {
   seedScenario,
   SCENARIOS,
 } from '../../src/data_generators/endpoint_data';
-import { cleanupTroubleshootingData } from '../../src/data_generators/cleanup';
+import { cleanupSeededData } from '../../src/data_generators/cleanup';
 
 const SKILL_PATH = 'skills/security/endpoint/elastic-defend-configuration-troubleshooting/SKILL.md';
 const UNITED_TRANSFORM_WILDCARD = `${METADATA_UNITED_TRANSFORM}*`;
@@ -195,7 +194,7 @@ const P0_EVALS = [
 evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, () => {
   let unitedTransformId: string;
 
-  evaluate.beforeAll(async ({ kbnClient, esClient, internalEsClient, agentBuilderClient, log }) => {
+  evaluate.beforeAll(async ({ kbnClient, esClient, internalEsClient, chatClient, log }) => {
     await waitForEndpointPackage(kbnClient, esClient, log);
 
     const { transforms } = await esClient.transform.getTransformStats({
@@ -204,18 +203,15 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
     unitedTransformId = transforms[0].id;
 
     try {
-      await agentBuilderClient.converse({
-        agentId: agentBuilderDefaultAgentId,
-        input: 'hello',
-      });
+      await chatClient.converse({ message: 'hello' });
     } catch (e) {
       log.warning(`Warmup failed: ${e}`);
     }
 
     const clients = { esClient, internalEsClient };
-    await cleanupTroubleshootingData(clients);
+    await cleanupSeededData(clients);
 
-    // Seeding is batched here because transform propagation is slow.
+    // waiting for transforms takes a while so seed all scenarios here
     for (const scenario of Object.values(SCENARIOS)) {
       await seedScenario(clients, scenario);
     }
@@ -361,6 +357,6 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
       ignore_unavailable: true,
     });
 
-    await cleanupTroubleshootingData({ esClient, internalEsClient });
+    await cleanupSeededData({ esClient, internalEsClient });
   });
 });

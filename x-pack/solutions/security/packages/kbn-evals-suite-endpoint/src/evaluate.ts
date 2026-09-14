@@ -8,6 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import { evaluate as base } from '@kbn/evals';
 import { createEsClientForTesting, systemIndicesSuperuser } from '@kbn/test';
+import { SecurityEvalChatClient } from './chat_client';
 import type { EvaluateForensicDataset } from './evaluate_forensic_dataset';
 import { createEvaluateForensicDataset } from './evaluate_forensic_dataset';
 import type { EvaluateSecurityDataset } from './evaluate_dataset';
@@ -16,16 +17,24 @@ import { createEvaluateSecurityDataset } from './evaluate_dataset';
 export const evaluate = base.extend<
   {},
   {
+    chatClient: SecurityEvalChatClient;
     evaluateDataset: EvaluateSecurityDataset;
     evaluateForensicDataset: EvaluateForensicDataset;
     internalEsClient: Client;
   }
 >({
+  chatClient: [
+    async ({ fetch, log, connector }, use) => {
+      const chatClient = new SecurityEvalChatClient(fetch, log, connector.id);
+      await use(chatClient);
+    },
+    { scope: 'worker' },
+  ],
   evaluateDataset: [
-    ({ agentBuilderClient, evaluators, executorClient }, use) => {
+    ({ chatClient, evaluators, executorClient }, use) => {
       use(
         createEvaluateSecurityDataset({
-          agentBuilderClient,
+          chatClient,
           evaluators,
           executorClient,
         })
@@ -34,10 +43,10 @@ export const evaluate = base.extend<
     { scope: 'worker' },
   ],
   evaluateForensicDataset: [
-    ({ agentBuilderClient, evaluators, executorClient, traceEsClient, log }, use) => {
+    ({ chatClient, evaluators, executorClient, traceEsClient, log }, use) => {
       use(
         createEvaluateForensicDataset({
-          agentBuilderClient,
+          chatClient,
           evaluators,
           executorClient,
           traceEsClient,

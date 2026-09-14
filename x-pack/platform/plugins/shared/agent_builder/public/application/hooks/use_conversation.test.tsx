@@ -279,7 +279,7 @@ describe('useConversation polling', () => {
 
   it('does not poll while this conversation is streaming', async () => {
     mockUseStreamingContext.mockReturnValue({
-      activeStreams: new Map([[conversationId, { type: 'send' }]]),
+      activeStreams: new Map([[conversationId, { type: 'send', count: 1 }]]),
       byConversationId: {},
       mutateSendMessage: jest.fn(),
       mutateResumeRound: jest.fn(),

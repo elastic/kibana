@@ -97,6 +97,16 @@ export const allowedExperimentalValues = Object.freeze({
   defendCrossProjectSearch: true,
 
   /**
+   * AI Agent chat-first endpoint response actions skill (isolate, unisolate, etc.)
+   * Release: TBD
+   *
+   * Enabled by default on this branch to support the BlackHat three-phase demo
+   * (forensic → hunt → response). The skill dispatches destructive endpoint
+   * response actions, each gated by Human-in-the-Loop confirmation cards.
+   */
+  endpointResponseActionsSkill: true,
+
+  /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
@@ -269,9 +279,11 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Enables the Endpoint Forensic Analysis Agent Builder skill (DFIR / patient zero / timeline).
-   * Shipped dark by default; enable per environment via config.
+   * Gates skill registration so the feature can ship dark and be enabled per environment.
+   *
+   * Enabled by default on this branch to support the BlackHat three-phase demo.
    */
-  endpointForensicAnalysisSkill: false,
+  endpointForensicAnalysisSkill: true,
 
   /**
    * Enables the investigate-rule Agent Builder skill.
