@@ -480,6 +480,8 @@ export class NightshiftInvestigationsClient {
 
     const now = new Date().toISOString();
     await this.investigationsService.upsert(spaceId, {
+      // Key the SO by the investigation/execution ID so get(spaceId, investigationId) round-trips.
+      conversationId: investigationId,
       spaceId,
       solution: 'observability',
       subjectType: subject.type,
@@ -566,6 +568,8 @@ export class NightshiftInvestigationsClient {
     }
 
     await this.investigationsService.upsert(spaceId, {
+      // Key the SO by investigationId so get(spaceId, investigationId) round-trips.
+      conversationId: investigationId,
       spaceId,
       solution: 'observability',
       subjectType: subject.type,

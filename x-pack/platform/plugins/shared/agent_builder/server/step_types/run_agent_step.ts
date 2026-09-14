@@ -86,6 +86,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           'aggregate-by': aggregateBy,
           'max-step-size': maxStepSize,
           'reasoning-level': reasoningLevel,
+          'conversation-template-id': conversationTemplateId,
         } = context.config;
         const maxContentLength =
           typeof maxStepSize === 'string' ? parseMaxStepSize(maxStepSize) : undefined;
@@ -206,6 +207,20 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
             throw new Error('No conversation_created / conversation_updated event received');
           }
           outputConversationId = conversationEvent.data.conversation_id;
+        }
+
+        if (outputConversationId && conversationTemplateId) {
+          try {
+            const conversationService = serviceManager.internalStart?.conversations;
+            if (conversationService) {
+              const conversationClient = await conversationService.getScopedClient({ request });
+              await conversationClient.applyTemplate(outputConversationId, conversationTemplateId);
+            }
+          } catch (templateErr) {
+            context.logger.warn(
+              `Failed to apply template "${conversationTemplateId}" to conversation "${outputConversationId}": ${templateErr.message}`
+            );
+          }
         }
 
         return {

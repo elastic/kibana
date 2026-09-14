@@ -114,8 +114,13 @@ steps:
     aggregate-by: 'significant_events'
     create-conversation: true
     public-conversation: true
+    conversation-template-id: investigation
     timeout: 1800s
     with:
+      # Pin the conversation to the workflow execution id so the investigation SO and the
+      # conversation share the same id. This lets update_investigation look up the SO via the
+      # agent conversation id without any additional indirection.
+      conversation_id: '{{ execution.id }}'
       # Tag the agent execution with the workflow execution id so callers that already know
       # it (e.g. the UI, or the significant event this investigation is attached to) can look
       # up the agent execution's (auto-generated) id via findExecutions and follow its live
@@ -169,23 +174,6 @@ steps:
         {% elsif inputs.context and inputs.context.size > 0 %}
         Additional context: {{ inputs.context | json }}
         {% endif %}
-    on-failure:
-      continue: true
-
-  # Apply the 'investigation' conversation template to the agent conversation so the UI can
-  # render structured metadata. There is no dedicated ai.conversation.applyTemplate step type
-  # yet, so we call the HTTP endpoint directly. on-failure: continue — a template failure
-  # does not block persisting the investigation results.
-  - name: apply_investigation_template
-    type: kibana.request
-    if: '${{ steps.investigate.error == null }}'
-    with:
-      method: POST
-      path: '/s/{{ workflow.spaceId }}/api/agent_builder/conversations/{{ steps.investigate.output.conversation_id }}/_apply_template'
-      headers:
-        x-elastic-internal-origin: 'kibana'
-      body:
-        templateId: 'investigation'
     on-failure:
       continue: true
 

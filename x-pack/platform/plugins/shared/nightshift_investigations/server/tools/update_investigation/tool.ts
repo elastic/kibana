@@ -107,11 +107,14 @@ export const createUpdateInvestigationTool = ({
 
     // Persist the full state to the investigation SO so the listing page and
     // search/filter remain current throughout the investigation.
-    if (conversationId) {
+    // The SO is keyed by the workflow execution ID (= investigation ID), not the conversation ID.
+    // parentExecutionId is the workflow execution ID when the agent is spawned by a workflow step.
+    const investigationId = context.parentExecutionId ?? conversationId;
+    if (investigationId) {
       const investigationsService = getInvestigationsService();
       if (investigationsService) {
         try {
-          const existing = await investigationsService.get(spaceId, conversationId);
+          const existing = await investigationsService.get(spaceId, investigationId);
           if (existing) {
             await investigationsService.upsert(spaceId, {
               ...existing,
@@ -127,7 +130,7 @@ export const createUpdateInvestigationTool = ({
           }
         } catch (err) {
           logger.warn(
-            `Failed to update investigation SO for conversation "${conversationId}": ${err.message}`
+            `Failed to update investigation SO for id "${investigationId}": ${err.message}`
           );
         }
       }
