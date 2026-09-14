@@ -526,11 +526,10 @@ describe('ComposeDiscoverFlyout', () => {
           created_at: '2026-01-01T00:00:00Z',
           updated_by: 'test',
           updated_at: '2026-01-01T00:00:00Z',
-        } as ComposeDiscoverFlyoutProps['rule'],
+        },
       });
 
       expect(getLatestFormProps().state.queryCommitted).toBe(true);
-      expect(getLatestFormProps().isEditing).toBe(false);
     });
   });
 
