@@ -54,8 +54,11 @@ export const PerOsRansomwareProtectionCard = memo(
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const isProtectionsAllowed = !useGetProtectionsUnavailableComponent();
     const getTestId = useTestIdGenerator(dataTestSubj);
+    // A 9.4 policy whose `mac.ransomware.mode` was cleared via the advanced text field can reach
+    // the form with the field missing. Read it as `off` so the row renders a real option rather
+    // than an empty select, matching the guards in `use_fetch_endpoint_policy` and Fleet.
     const selected = RANSOMWARE_OS_VALUES.some(
-      (os) => policy[os].ransomware.mode !== ProtectionModes.off
+      (os) => (policy[os].ransomware.mode ?? ProtectionModes.off) !== ProtectionModes.off
     );
     const protectionLabel = i18n.translate(
       'xpack.securitySolution.endpoint.policy.protections.ransomware',
@@ -134,17 +137,23 @@ const PerOsRansomwareProtectionRow = <OS extends RansomwareProtectionOSes>({
   'data-test-subj': dataTestSubj,
 }: PerOsRansomwareProtectionRowProps<OS>) => {
   const getTestId = useTestIdGenerator(dataTestSubj);
+  const isPlatinumPlus = useLicense().isPlatinumPlus();
   const osPolicy = accessor.read();
-  const ransomwareMode = osPolicy.ransomware.mode;
+  const ransomwareMode = osPolicy.ransomware.mode ?? ProtectionModes.off;
   const subfeaturesVisible = ransomwareMode !== ProtectionModes.off;
   const handleModeChange = useCallback(
     (nextMode: ProtectionModes) => {
       const updatedPolicy = accessor.update((currentOsPolicy) => {
         currentOsPolicy.ransomware.mode = nextMode;
+        // Legacy parity (detect_prevent_protection_level.tsx): selecting an active mode syncs the
+        // host notification. `off` is left untouched so a Disabled row preserves its stored values.
+        if (isPlatinumPlus && nextMode !== ProtectionModes.off) {
+          currentOsPolicy.popup.ransomware.enabled = nextMode === ProtectionModes.prevent;
+        }
       });
       onChange({ isValid: true, updatedPolicy });
     },
-    [accessor, onChange]
+    [accessor, isPlatinumPlus, onChange]
   );
 
   return (

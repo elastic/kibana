@@ -70,11 +70,19 @@ export const PerOsDeviceControlCard = memo(
     const getTestId = useTestIdGenerator(dataTestSubj);
     const isEnterprise = useLicense().isEnterprise();
     const DeviceControlUpsellingComponent = useGetDeviceControlUpsellComponent();
-    // §5.3: master toggle state is derived as `some(OS enabled)`, matching every other
-    // per-OS card and the legacy `windows?.enabled || mac?.enabled` behaviour. An absent
-    // device_control branch cannot satisfy `=== true`, so it simply does not contribute.
-    const selected = DEVICE_CONTROL_OS_VALUES.some(
-      (os) => createDeviceControlPolicyAccessor(policy, os).read().device_control?.enabled === true
+    // Legacy `deviceControlExists` guard (device_control_card.tsx): both OS branches are
+    // independently optional and may be stripped by `removeDeviceControl`. The master
+    // switch is on only when every supported OS has a defined `device_control` and at
+    // least one of them is enabled.
+    const osDeviceControls = DEVICE_CONTROL_OS_VALUES.map(
+      (os) => createDeviceControlPolicyAccessor(policy, os).read().device_control
+    );
+    const deviceControlExists = osDeviceControls.every(
+      (deviceControl) => deviceControl !== undefined
+    );
+    const selected = Boolean(
+      deviceControlExists &&
+        osDeviceControls.some((deviceControl) => deviceControl?.enabled === true)
     );
 
     if (DeviceControlUpsellingComponent) {

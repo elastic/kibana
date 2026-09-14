@@ -10,6 +10,7 @@ import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoin
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
+import { OS_CONTROL_WIDTH } from './os_control_layout';
 import type { OsProtectionModeSelectProps } from './os_protection_mode_select';
 import { OsProtectionModeSelect } from './os_protection_mode_select';
 
@@ -58,23 +59,21 @@ describe('OsProtectionModeSelect', () => {
   });
 
   it('keeps a constant responsive width for every selected label', () => {
-    // The invariant is that the control does not resize with its selection, so the width is
-    // read from the shortest label and compared against the longest rather than hard-coded —
-    // a design tweak to the value should not fail this test, but a resize still will.
+    // The invariant is that the control does not resize with its selection. Both the shortest
+    // ("Disable") and longest ("Detect & prevent") labels must keep the shared OS_CONTROL_WIDTH
+    // so a design tweak to that constant cannot leave a stale literal behind here.
     render({ mode: ProtectionModes.off });
 
     const fixedWidthWrapper = renderResult.getByTestId(`${testSubj}-fixedWidth`);
-    const widthWithShortestLabel = getComputedStyle(fixedWidthWrapper).inlineSize;
 
-    expect(widthWithShortestLabel).toBeTruthy();
-    expect(fixedWidthWrapper).toHaveStyleRule('inline-size', widthWithShortestLabel);
+    expect(fixedWidthWrapper).toHaveStyleRule('inline-size', OS_CONTROL_WIDTH);
     expect(fixedWidthWrapper).toHaveStyleRule('max-inline-size', '100%');
 
     renderResult.rerender(<OsProtectionModeSelect {...formProps} mode={ProtectionModes.prevent} />);
 
     expect(renderResult.getByTestId(`${testSubj}-fixedWidth`)).toHaveStyleRule(
       'inline-size',
-      widthWithShortestLabel
+      OS_CONTROL_WIDTH
     );
   });
 

@@ -6,15 +6,15 @@
  */
 
 import React, { useCallback, useId } from 'react';
-import type { EuiCheckboxProps, EuiFieldTextProps } from '@elastic/eui';
+import type { EuiCheckboxProps, EuiTextAreaProps } from '@elastic/eui';
 import {
   EuiCheckbox,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
   EuiPanel,
   EuiSpacer,
+  EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -76,7 +76,7 @@ const PerOsDeviceControlNotifyUserOptionComponent = <OS extends DeviceControlOSe
     [accessor, onChange]
   );
 
-  const handleCustomUserNotification = useCallback<NonNullable<EuiFieldTextProps['onChange']>>(
+  const handleCustomUserNotification = useCallback<NonNullable<EuiTextAreaProps['onChange']>>(
     (event) => {
       const updatedPolicy = accessor.update((currentOsPolicy) => {
         currentOsPolicy.popup.device_control ??= {
@@ -93,7 +93,7 @@ const PerOsDeviceControlNotifyUserOptionComponent = <OS extends DeviceControlOSe
   const customNotificationComponent = CustomNotificationUpsellingComponent ? (
     <CustomNotificationUpsellingComponent />
   ) : (
-    <EuiFieldText
+    <EuiTextArea
       placeholder={i18n.translate(
         'xpack.securitySolution.endpoint.policyDetails.customizeMessagePlaceholder',
         { defaultMessage: 'Customize message' }
@@ -106,11 +106,16 @@ const PerOsDeviceControlNotifyUserOptionComponent = <OS extends DeviceControlOSe
       onChange={handleCustomUserNotification}
       disabled={!userNotificationSelected || !deviceControl?.enabled || !isEditMode}
       fullWidth={true}
+      // One line tall by default to keep the OS row compact; the control stays a textarea so
+      // multi-line messages can still be authored and are shown in full when the user resizes.
+      rows={1}
       data-test-subj={getTestId('customMessage')}
     />
   );
 
-  if (!isEnterprise || currentAccessLevel === DeviceControlAccessLevel.deny_all) {
+  // Legacy parity (device_control_notify_user_option.tsx): the notify control is only
+  // shown for Enterprise licences when USB storage is set to Block all (`deny_all`).
+  if (!isEnterprise || currentAccessLevel !== DeviceControlAccessLevel.deny_all) {
     return null;
   }
 

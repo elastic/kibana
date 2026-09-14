@@ -19,7 +19,7 @@ import { createLicenseServiceMock } from '../../../../../../../common/license/mo
 import { licenseService as licenseServiceMocked } from '../../../../../../common/hooks/__mocks__/use_license';
 import { useLicense as _useLicense } from '../../../../../../common/hooks/use_license';
 import { OS_TITLES } from '../../../../../common/translations';
-import { exactMatchText, getPolicySettingsFormTestSubjects } from '../mocks';
+import { exactMatchText, expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../mocks';
 import type { PerOsMemoryProtectionCardProps } from './per_os_memory_protection_card';
 import {
   LOCKED_CARD_MEMORY_TITLE,
@@ -110,17 +110,26 @@ describe('PerOsMemoryProtectionCard', () => {
     ).toBeInTheDocument();
   });
 
-  it('setting a row to Disable and back to Detect preserves notify values in every emitted updatedPolicy', async () => {
+  it('Disable leaves stored notify values; Detect sets popup.enabled false and Prevent sets it true', async () => {
     policy.windows.memory_protection.mode = ProtectionModes.detect;
     policy.windows.popup.memory_protection.enabled = true;
     policy.windows.popup.memory_protection.message = 'keep me';
+    const windowsBefore = cloneDeep(policy.windows);
     render();
 
     await userEvent.click(renderResult.getByTestId(testSubj.windows.modeSelect));
     await userEvent.click(renderResult.getByRole('option', { name: /^Disable$/ }));
     const afterDisable = getUpdatedPolicy();
+    expect(afterDisable.windows.memory_protection.mode).toBe(ProtectionModes.off);
     expect(afterDisable.windows.popup.memory_protection.enabled).toBe(true);
     expect(afterDisable.windows.popup.memory_protection.message).toBe('keep me');
+    expect({
+      ...afterDisable.windows,
+      memory_protection: {
+        ...afterDisable.windows.memory_protection,
+        mode: windowsBefore.memory_protection.mode,
+      },
+    }).toEqual(windowsBefore);
 
     rerender(afterDisable);
     expect(renderResult.queryByTestId(testSubj.windows.notifyUserCheckbox)).not.toBeInTheDocument();
@@ -128,8 +137,17 @@ describe('PerOsMemoryProtectionCard', () => {
     await userEvent.click(renderResult.getByTestId(testSubj.windows.modeSelect));
     await userEvent.click(renderResult.getByRole('option', { name: /^Detect$/ }));
     const afterDetect = getUpdatedPolicy();
-    expect(afterDetect.windows.popup.memory_protection.enabled).toBe(true);
+    expect(afterDetect.windows.memory_protection.mode).toBe(ProtectionModes.detect);
+    expect(afterDetect.windows.popup.memory_protection.enabled).toBe(false);
     expect(afterDetect.windows.popup.memory_protection.message).toBe('keep me');
+
+    rerender(afterDetect);
+    await userEvent.click(renderResult.getByTestId(testSubj.windows.modeSelect));
+    await userEvent.click(renderResult.getByRole('option', { name: /^Detect & prevent$/ }));
+    const afterPrevent = getUpdatedPolicy();
+    expect(afterPrevent.windows.memory_protection.mode).toBe(ProtectionModes.prevent);
+    expect(afterPrevent.windows.popup.memory_protection.enabled).toBe(true);
+    expect(afterPrevent.windows.popup.memory_protection.message).toBe('keep me');
   });
 
   it('changing the macOS mode leaves windows and linux byte-identical on updatedPolicy', async () => {
@@ -189,6 +207,40 @@ describe('PerOsMemoryProtectionCard', () => {
       expect(renderResult.getByTestId(testSubj.lockedCardTitle)).toHaveTextContent(
         exactMatchText(LOCKED_CARD_MEMORY_TITLE)
       );
+    });
+  });
+
+  describe('and displayed in View Mode', () => {
+    beforeEach(() => {
+      props.mode = 'view';
+    });
+
+    it('should render in view mode', () => {
+      render();
+
+      expectIsViewOnly(renderResult.getByTestId(testSubj.card));
+    });
+
+    it('collapses the card body when memory protection is off on every OS', () => {
+      policy.windows.memory_protection.mode = ProtectionModes.off;
+      policy.mac.memory_protection.mode = ProtectionModes.off;
+      policy.linux.memory_protection.mode = ProtectionModes.off;
+      render();
+
+      expect(renderResult.queryByTestId(testSubj.windows.row)).not.toBeInTheDocument();
+      expect(renderResult.queryByTestId(testSubj.mac.row)).not.toBeInTheDocument();
+      expect(renderResult.queryByTestId(testSubj.linux.row)).not.toBeInTheDocument();
+    });
+
+    it('renders OS rows when at least one OS is not off', () => {
+      policy.windows.memory_protection.mode = ProtectionModes.off;
+      policy.mac.memory_protection.mode = ProtectionModes.detect;
+      policy.linux.memory_protection.mode = ProtectionModes.off;
+      render();
+
+      expect(renderResult.getByTestId(testSubj.windows.row)).toBeInTheDocument();
+      expect(renderResult.getByTestId(testSubj.mac.row)).toBeInTheDocument();
+      expect(renderResult.getByTestId(testSubj.linux.row)).toBeInTheDocument();
     });
   });
 });

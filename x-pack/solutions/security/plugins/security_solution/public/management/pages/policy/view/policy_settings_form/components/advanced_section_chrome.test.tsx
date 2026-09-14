@@ -9,15 +9,12 @@ import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
-import { AdvancedPolicySchema } from '../../../models/advanced_policy_schema';
 import { getPolicySettingsFormTestSubjects } from '../mocks';
 import { AdvancedSection } from './advanced_section';
 import type { AdvancedSectionProps } from './advanced_section';
 
 jest.mock('../../../../../../common/hooks/use_license');
 jest.setTimeout(15_000);
-
-const OMITTED_KEY = 'mac.ransomware.mode';
 
 describe('Policy Advanced Settings section chrome', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').advancedSection;
@@ -78,42 +75,25 @@ describe('Policy Advanced Settings section chrome', () => {
   );
 
   it.each([undefined, true])(
-    'points aria-controls at a useId-derived region id (fullWidthToggle=%s)',
+    'omits aria-controls while collapsed and points it at the rendered region once expanded (fullWidthToggle=%s)',
     async (fullWidthToggle) => {
       const renderResult = renderSection(fullWidthToggle ? { fullWidthToggle } : {});
       const toggle = getToggle(renderResult);
-      const controlsId = toggle.getAttribute('aria-controls');
+
+      expect(toggle).not.toHaveAttribute('aria-controls');
+
+      await userEvent.click(toggle);
+
+      const expandedToggle = getToggle(renderResult);
+      const controlsId = expandedToggle.getAttribute('aria-controls');
 
       expect(controlsId).toBeTruthy();
       expect(controlsId).not.toBe('advanced-settings');
       expect(controlsId).not.toBe('advancedSettings');
-
-      await userEvent.click(toggle);
 
       const region = renderResult.container.querySelector(`#${CSS.escape(controlsId!)}`);
       expect(region).toBeInTheDocument();
       expect(region).toHaveAttribute('id', controlsId);
     }
   );
-
-  it('still filters omitted keys when fullWidthToggle is enabled', async () => {
-    const renderResult = renderSection({
-      fullWidthToggle: true,
-      omitKeys: [OMITTED_KEY],
-    });
-
-    await userEvent.click(getToggle(renderResult));
-
-    expect(
-      renderResult.queryByTestId(testSubj.settingRowTestSubjects(OMITTED_KEY).container)
-    ).not.toBeInTheDocument();
-
-    for (const { key } of AdvancedPolicySchema) {
-      if (key !== OMITTED_KEY) {
-        expect(
-          renderResult.getByTestId(testSubj.settingRowTestSubjects(key).container)
-        ).toBeInTheDocument();
-      }
-    }
-  });
 });

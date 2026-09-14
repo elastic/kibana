@@ -122,7 +122,7 @@ describe('PerOsNotifyUserOption', () => {
     const linuxBefore = cloneDeep(policy.linux);
     render();
 
-    fireEvent.change(renderResult.getByTestId('test-customMessage'), {
+    fireEvent.change(renderResult.getByRole('textbox', { name: 'Customize message' }), {
       target: { value: 'new mac message' },
     });
 
@@ -132,7 +132,34 @@ describe('PerOsNotifyUserOption', () => {
     expect(updatedPolicy.linux).toEqual(linuxBefore);
   });
 
-  it('preserves view mode while rendering the fixed-height message field', () => {
+  it('displays and writes a multi-line custom message for the bound OS only', () => {
+    const storedMessage = 'line one\nline two';
+    const nextMessage = 'first\nsecond\nthird';
+    policy.mac.popup.malware.message = storedMessage;
+    const windowsBefore = cloneDeep(policy.windows);
+    const linuxBefore = cloneDeep(policy.linux);
+    render();
+
+    const messageField = renderResult.getByRole('textbox', { name: 'Customize message' });
+    expect(messageField).toHaveValue(storedMessage);
+
+    fireEvent.change(messageField, { target: { value: nextMessage } });
+
+    const updatedPolicy = onChange.mock.calls[0][0].updatedPolicy as PolicyConfig;
+    expect(updatedPolicy.mac.popup.malware.message).toBe(nextMessage);
+    expect(updatedPolicy.windows).toEqual(windowsBefore);
+    expect(updatedPolicy.linux).toEqual(linuxBefore);
+  });
+
+  it('disables the message field when protection mode is off', () => {
+    policy.mac.malware.mode = ProtectionModes.off;
+    render();
+
+    expect(renderResult.getByTestId('test-customMessage')).toBeDisabled();
+    expect(renderResult.getByTestId('test-customMessage')).toHaveValue('mac message');
+  });
+
+  it('disables the message field in view mode', () => {
     render('view');
 
     expectIsViewOnly(renderResult.getByTestId('test'));

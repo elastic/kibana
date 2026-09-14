@@ -150,7 +150,7 @@ export const AdvancedSection = memo<AdvancedSectionProps>(
           data-test-subj={getTestId('showButton')}
           onClick={handleAdvancedSettingsButtonClick}
           aria-expanded={showAdvancedPolicy}
-          aria-controls={advancedSettingsId}
+          aria-controls={showAdvancedPolicy ? advancedSettingsId : undefined}
           {...(fullWidthToggle
             ? {
                 iconType: showAdvancedPolicy ? ('arrowUp' as const) : ('arrowDown' as const),

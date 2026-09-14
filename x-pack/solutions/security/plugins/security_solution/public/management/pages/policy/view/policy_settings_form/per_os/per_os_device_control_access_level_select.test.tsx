@@ -10,6 +10,7 @@ import userEvent from '@testing-library/user-event';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { DeviceControlAccessLevel } from '../../../../../../../common/endpoint/types';
+import { OS_CONTROL_WIDTH } from './os_control_layout';
 import type { PerOsDeviceControlAccessLevelSelectProps } from './per_os_device_control_access_level_select';
 import { PerOsDeviceControlAccessLevelSelect } from './per_os_device_control_access_level_select';
 
@@ -98,7 +99,8 @@ describe('PerOsDeviceControlAccessLevelSelect', () => {
 
   it('keeps a constant width across the shortest and longest access-level labels', () => {
     // "Allow read, write and execute" is much longer than "Block all"; the control must not
-    // resize with the selection, and the popover inherits this width.
+    // resize with the selection, and the popover inherits this width. Both ends of that range
+    // must keep the shared OS_CONTROL_WIDTH so a design tweak cannot leave a stale literal here.
     const renderer = createAppRootMockRenderer();
     const result = renderer.render(
       <PerOsDeviceControlAccessLevelSelect
@@ -109,10 +111,8 @@ describe('PerOsDeviceControlAccessLevelSelect', () => {
     );
 
     const widthSubj = `${testSubj}-fixedWidth`;
-    const narrowest = getComputedStyle(result.getByTestId(widthSubj)).inlineSize;
 
-    expect(narrowest).toBeTruthy();
-    expect(result.getByTestId(widthSubj)).toHaveStyleRule('inline-size', narrowest);
+    expect(result.getByTestId(widthSubj)).toHaveStyleRule('inline-size', OS_CONTROL_WIDTH);
 
     result.rerender(
       <PerOsDeviceControlAccessLevelSelect
@@ -122,7 +122,7 @@ describe('PerOsDeviceControlAccessLevelSelect', () => {
       />
     );
 
-    expect(result.getByTestId(widthSubj)).toHaveStyleRule('inline-size', narrowest);
+    expect(result.getByTestId(widthSubj)).toHaveStyleRule('inline-size', OS_CONTROL_WIDTH);
     expect(result.getByTestId(widthSubj)).toHaveStyleRule('max-inline-size', '100%');
   });
 });

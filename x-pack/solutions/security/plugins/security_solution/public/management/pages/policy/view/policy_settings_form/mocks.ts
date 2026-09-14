@@ -212,6 +212,7 @@ export const getPolicySettingsFormTestSubjects = (
       windows: {
         row: perOsEventCollectionTestSubj('windows'),
         optionsContainer: perOsEventCollectionTestSubj('windows-options'),
+        selectedCount: perOsEventCollectionTestSubj('windows-selectedCount'),
         credentialsCheckbox: perOsEventCollectionTestSubj('windows-credential_access'),
         dllCheckbox: perOsEventCollectionTestSubj('windows-dll_and_driver_load'),
         dnsCheckbox: perOsEventCollectionTestSubj('windows-dns'),
@@ -224,6 +225,7 @@ export const getPolicySettingsFormTestSubjects = (
       mac: {
         row: perOsEventCollectionTestSubj('mac'),
         optionsContainer: perOsEventCollectionTestSubj('mac-options'),
+        selectedCount: perOsEventCollectionTestSubj('mac-selectedCount'),
         dnsCheckbox: perOsEventCollectionTestSubj('mac-dns'),
         fileCheckbox: perOsEventCollectionTestSubj('mac-file'),
         networkCheckbox: perOsEventCollectionTestSubj('mac-network'),
@@ -233,6 +235,7 @@ export const getPolicySettingsFormTestSubjects = (
       linux: {
         row: perOsEventCollectionTestSubj('linux'),
         optionsContainer: perOsEventCollectionTestSubj('linux-options'),
+        selectedCount: perOsEventCollectionTestSubj('linux-selectedCount'),
         dnsCheckbox: perOsEventCollectionTestSubj('linux-dns'),
         fileCheckbox: perOsEventCollectionTestSubj('linux-file'),
         networkCheckbox: perOsEventCollectionTestSubj('linux-network'),
@@ -341,7 +344,10 @@ export const getPolicySettingsFormTestSubjects = (
 export const expectIsViewOnly = (elem: HTMLElement): void => {
   elem
     .querySelectorAll(
-      'button:not(.euiLink, [data-test-subj*="advancedSection-showButton"], [data-test-subj="euiDismissCalloutButton"]),input,select,textarea'
+      // `input[type=hidden]` is excluded because EuiSuperSelect renders one per select to carry the
+      // value for form submission. It is never user-editable and never receives `disabled`, so
+      // asserting on it would say nothing about read-only rendering.
+      'button:not(.euiLink, [data-test-subj*="advancedSection-showButton"], [data-test-subj="euiDismissCalloutButton"]),input:not([type="hidden"]),select,textarea'
     )
     .forEach((inputElement) => {
       expect(inputElement).toHaveAttribute('disabled');

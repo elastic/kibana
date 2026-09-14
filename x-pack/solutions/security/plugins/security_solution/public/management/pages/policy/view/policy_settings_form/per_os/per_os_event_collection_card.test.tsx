@@ -14,7 +14,7 @@ import type { AppContextTestRender } from '../../../../../../common/mock/endpoin
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import type { PolicyConfig } from '../../../../../../../common/endpoint/types';
-import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../mocks';
+import { exactMatchText, expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../mocks';
 import type { PerOsEventCollectionCardProps } from './per_os_event_collection_card';
 import { PerOsEventCollectionCard } from './per_os_event_collection_card';
 
@@ -227,5 +227,54 @@ describe('PerOsEventCollectionCard', () => {
     expect(
       renderResult.queryByText(/Turn this on to capture the extended process data required/)
     ).not.toBeInTheDocument();
+  });
+
+  it('shows the selected / total event collection count on each OS row', () => {
+    render();
+
+    expect(renderResult.getByTestId(`${testSubj.windows.row}-selectedCount`)).toHaveTextContent(
+      exactMatchText('8 / 8 event collections enabled')
+    );
+    expect(renderResult.getByTestId(`${testSubj.mac.row}-selectedCount`)).toHaveTextContent(
+      exactMatchText('5 / 5 event collections enabled')
+    );
+    expect(renderResult.getByTestId(`${testSubj.linux.row}-selectedCount`)).toHaveTextContent(
+      exactMatchText('4 / 4 event collections enabled')
+    );
+  });
+
+  it('updates only the Windows count when a Windows checkbox is toggled', async () => {
+    render();
+
+    await userEvent.click(renderResult.getByTestId(testSubj.windows.fileCheckbox));
+    policy = getUpdatedPolicy();
+    renderResult.rerender(<PerOsEventCollectionCard {...props} policy={policy} />);
+
+    expect(renderResult.getByTestId(`${testSubj.windows.row}-selectedCount`)).toHaveTextContent(
+      exactMatchText('7 / 8 event collections enabled')
+    );
+    expect(renderResult.getByTestId(`${testSubj.mac.row}-selectedCount`)).toHaveTextContent(
+      exactMatchText('5 / 5 event collections enabled')
+    );
+    expect(renderResult.getByTestId(`${testSubj.linux.row}-selectedCount`)).toHaveTextContent(
+      exactMatchText('4 / 4 event collections enabled')
+    );
+  });
+
+  it('does not count Linux session_data or tty_io toward selected or total', () => {
+    policy.linux.events.session_data = true;
+    policy.linux.events.tty_io = true;
+    policy.linux.events.file = false;
+    render();
+
+    expect(renderResult.getByTestId(`${testSubj.linux.row}-selectedCount`)).toHaveTextContent(
+      exactMatchText('3 / 4 event collections enabled')
+    );
+    expect(renderResult.getByTestId(`${testSubj.windows.row}-selectedCount`)).toHaveTextContent(
+      exactMatchText('8 / 8 event collections enabled')
+    );
+    expect(renderResult.getByTestId(`${testSubj.mac.row}-selectedCount`)).toHaveTextContent(
+      exactMatchText('5 / 5 event collections enabled')
+    );
   });
 });

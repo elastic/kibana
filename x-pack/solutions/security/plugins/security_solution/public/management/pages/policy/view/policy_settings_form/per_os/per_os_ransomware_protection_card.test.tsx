@@ -17,7 +17,7 @@ import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoin
 import type { PolicyConfig } from '../../../../../../../common/endpoint/types';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
 import { createLicenseServiceMock } from '../../../../../../../common/license/mocks';
-import { getPolicySettingsFormTestSubjects } from '../mocks';
+import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../mocks';
 import { useGetProtectionsUnavailableComponent as _useGetProtectionsUnavailableComponent } from '../hooks/use_get_protections_unavailable_component';
 import type { PerOsRansomwareProtectionCardProps } from './per_os_ransomware_protection_card';
 import {
@@ -109,17 +109,26 @@ describe('PerOsRansomwareProtectionCard', () => {
     expect(renderResult.getByTestId(testSubj.mac.notifyCustomMessage)).toBeInTheDocument();
   });
 
-  it('setting a row to Disable and back to Detect preserves notify values in every emitted updatedPolicy', async () => {
+  it('Disable leaves stored notify values; Detect sets popup.enabled false and Prevent sets it true', async () => {
     policy.windows.ransomware.mode = ProtectionModes.detect;
     policy.windows.popup.ransomware.enabled = true;
     policy.windows.popup.ransomware.message = 'keep me';
+    const windowsBefore = cloneDeep(policy.windows);
     render();
 
     await userEvent.click(renderResult.getByTestId(testSubj.windows.modeSelect));
     await userEvent.click(renderResult.getByRole('option', { name: /^Disable$/ }));
     const afterDisable = getUpdatedPolicy();
+    expect(afterDisable.windows.ransomware.mode).toBe(ProtectionModes.off);
     expect(afterDisable.windows.popup.ransomware.enabled).toBe(true);
     expect(afterDisable.windows.popup.ransomware.message).toBe('keep me');
+    expect({
+      ...afterDisable.windows,
+      ransomware: {
+        ...afterDisable.windows.ransomware,
+        mode: windowsBefore.ransomware.mode,
+      },
+    }).toEqual(windowsBefore);
 
     rerender(afterDisable);
     expect(renderResult.queryByTestId(testSubj.windows.notifyUserCheckbox)).not.toBeInTheDocument();
@@ -127,8 +136,17 @@ describe('PerOsRansomwareProtectionCard', () => {
     await userEvent.click(renderResult.getByTestId(testSubj.windows.modeSelect));
     await userEvent.click(renderResult.getByRole('option', { name: /^Detect$/ }));
     const afterDetect = getUpdatedPolicy();
-    expect(afterDetect.windows.popup.ransomware.enabled).toBe(true);
+    expect(afterDetect.windows.ransomware.mode).toBe(ProtectionModes.detect);
+    expect(afterDetect.windows.popup.ransomware.enabled).toBe(false);
     expect(afterDetect.windows.popup.ransomware.message).toBe('keep me');
+
+    rerender(afterDetect);
+    await userEvent.click(renderResult.getByTestId(testSubj.windows.modeSelect));
+    await userEvent.click(renderResult.getByRole('option', { name: /^Detect & prevent$/ }));
+    const afterPrevent = getUpdatedPolicy();
+    expect(afterPrevent.windows.ransomware.mode).toBe(ProtectionModes.prevent);
+    expect(afterPrevent.windows.popup.ransomware.enabled).toBe(true);
+    expect(afterPrevent.windows.popup.ransomware.message).toBe('keep me');
   });
 
   it('changing the macOS mode or notification leaves Windows and Linux byte-identical', async () => {
@@ -143,6 +161,7 @@ describe('PerOsRansomwareProtectionCard', () => {
     await userEvent.click(renderResult.getByRole('option', { name: /^Detect$/ }));
     const afterMode = getUpdatedPolicy();
     expect(afterMode.mac.ransomware.mode).toBe(ProtectionModes.detect);
+    expect(afterMode.mac.popup.ransomware.enabled).toBe(false);
     expect(afterMode.mac.ransomware.supported).toBe(supportedBefore);
     expect(afterMode.windows).toEqual(windowsBefore);
     expect(afterMode.linux).toEqual(linuxBefore);
@@ -162,7 +181,7 @@ describe('PerOsRansomwareProtectionCard', () => {
     rerender(afterMessage);
     await userEvent.click(renderResult.getByTestId(testSubj.mac.notifyUserCheckbox));
     const afterNotify = getUpdatedPolicy();
-    expect(afterNotify.mac.popup.ransomware.enabled).toBe(false);
+    expect(afterNotify.mac.popup.ransomware.enabled).toBe(true);
     expect(afterNotify.mac.ransomware.supported).toBe(supportedBefore);
     expect(afterNotify.windows).toEqual(windowsBefore);
     expect(afterNotify.linux).toEqual(linuxBefore);
@@ -194,5 +213,19 @@ describe('PerOsRansomwareProtectionCard', () => {
     useGetProtectionsUnavailableComponentMock.mockReturnValue(() => <div />);
 
     expect(render().container).toBeEmptyDOMElement();
+  });
+
+  describe('and displayed in View Mode', () => {
+    beforeEach(() => {
+      props.mode = 'view';
+    });
+
+    it('should render in view mode', () => {
+      policy.windows.ransomware.mode = ProtectionModes.prevent;
+      policy.mac.ransomware.mode = ProtectionModes.prevent;
+      render();
+
+      expectIsViewOnly(renderResult.getByTestId(testSubj.card));
+    });
   });
 });

@@ -17,7 +17,7 @@ import { createLicenseServiceMock } from '../../../../../../../common/license/mo
 import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import type { PolicyConfig } from '../../../../../../../common/endpoint/types';
 import { PolicyOperatingSystem, ProtectionModes } from '../../../../../../../common/endpoint/types';
-import { getPolicySettingsFormTestSubjects } from '../mocks';
+import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../mocks';
 import type { PerOsBehaviourProtectionCardProps } from './per_os_behaviour_protection_card';
 import { PerOsBehaviourProtectionCard } from './per_os_behaviour_protection_card';
 
@@ -127,7 +127,7 @@ describe('PerOsBehaviourProtectionCard', () => {
     expect(renderResult.getByTestId(testSubj.mac.notifyCustomMessage)).toBeInTheDocument();
   });
 
-  it('setting a row to Disable and back to Detect preserves reputation_service and notify values in every emitted updatedPolicy', async () => {
+  it('Disable leaves stored behaviour values untouched; Detect sets notify off; Prevent sets notify on', async () => {
     policy.windows.behavior_protection.mode = ProtectionModes.detect;
     policy.windows.behavior_protection.reputation_service = true;
     policy.windows.popup.behavior_protection.enabled = true;
@@ -137,6 +137,7 @@ describe('PerOsBehaviourProtectionCard', () => {
     await userEvent.click(renderResult.getByTestId(testSubj.windows.modeSelect));
     await userEvent.click(renderResult.getByRole('option', { name: /^Disable$/ }));
     const afterDisable = getUpdatedPolicy();
+    expect(afterDisable.windows.behavior_protection.mode).toBe(ProtectionModes.off);
     expect(afterDisable.windows.behavior_protection.reputation_service).toBe(true);
     expect(afterDisable.windows.popup.behavior_protection.enabled).toBe(true);
     expect(afterDisable.windows.popup.behavior_protection.message).toBe('keep me');
@@ -150,9 +151,19 @@ describe('PerOsBehaviourProtectionCard', () => {
     await userEvent.click(renderResult.getByTestId(testSubj.windows.modeSelect));
     await userEvent.click(renderResult.getByRole('option', { name: /^Detect$/ }));
     const afterDetect = getUpdatedPolicy();
+    expect(afterDetect.windows.behavior_protection.mode).toBe(ProtectionModes.detect);
     expect(afterDetect.windows.behavior_protection.reputation_service).toBe(true);
-    expect(afterDetect.windows.popup.behavior_protection.enabled).toBe(true);
+    expect(afterDetect.windows.popup.behavior_protection.enabled).toBe(false);
     expect(afterDetect.windows.popup.behavior_protection.message).toBe('keep me');
+
+    rerender(afterDetect);
+    await userEvent.click(renderResult.getByTestId(testSubj.windows.modeSelect));
+    await userEvent.click(renderResult.getByRole('option', { name: /^Detect & prevent$/ }));
+    const afterPrevent = getUpdatedPolicy();
+    expect(afterPrevent.windows.behavior_protection.mode).toBe(ProtectionModes.prevent);
+    expect(afterPrevent.windows.behavior_protection.reputation_service).toBe(true);
+    expect(afterPrevent.windows.popup.behavior_protection.enabled).toBe(true);
+    expect(afterPrevent.windows.popup.behavior_protection.message).toBe('keep me');
   });
 
   it("setting a non-Windows OS's mode, reputation_service, or notify value leaves the other two OS branches byte-identical", async () => {
@@ -167,6 +178,7 @@ describe('PerOsBehaviourProtectionCard', () => {
     await userEvent.click(renderResult.getByRole('option', { name: /^Detect$/ }));
     const afterMode = getUpdatedPolicy();
     expect(afterMode.mac.behavior_protection.mode).toBe(ProtectionModes.detect);
+    expect(afterMode.mac.popup.behavior_protection.enabled).toBe(false);
     expect(afterMode.windows).toEqual(windowsBefore);
     expect(afterMode.linux).toEqual(linuxBefore);
 
@@ -182,7 +194,7 @@ describe('PerOsBehaviourProtectionCard', () => {
     rerender(afterReputation);
     await userEvent.click(renderResult.getByTestId(testSubj.mac.notifyUserCheckbox));
     const afterNotify = getUpdatedPolicy();
-    expect(afterNotify.mac.popup.behavior_protection.enabled).toBe(false);
+    expect(afterNotify.mac.popup.behavior_protection.enabled).toBe(true);
     expect(afterNotify.windows).toEqual(windowsBefore);
     expect(afterNotify.linux).toEqual(linuxBefore);
   });
@@ -229,5 +241,17 @@ describe('PerOsBehaviourProtectionCard', () => {
       'Malicious Behavior'
     );
     expect(renderResult.queryByTestId(testSubj.card)).not.toBeInTheDocument();
+  });
+
+  describe('and displayed in View Mode', () => {
+    beforeEach(() => {
+      props.mode = 'view';
+    });
+
+    it('should render in view mode', () => {
+      render();
+
+      expectIsViewOnly(renderResult.getByTestId(testSubj.card));
+    });
   });
 });

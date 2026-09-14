@@ -108,23 +108,28 @@ describe('per-OS form upgrade compatibility with 9.4 policies', () => {
 
   /*
    * §8.4: clearing the 9.4 advanced text field could delete `mac.ransomware.mode` while
-   * `supported` kept the parent object alive. Two legacy guards restore the missing mode
-   * to `off` on read, but the form must not throw if it ever sees the malformed shape
-   * directly.
+   * `supported` kept the parent object alive. Fetch (`use_fetch_endpoint_policy.ts`) and Fleet
+   * (`fleet_integration.ts`) both restore the missing mode to `off` on read; the row applies the
+   * same fallback so a policy that reaches it unguarded still shows a real option. Asserting the
+   * displayed text — not merely that render did not throw — is what catches the dangerous
+   * direction: falling back to Windows' factory default of Detect & prevent would silently
+   * turn macOS ransomware protection on.
    */
-  it('does not throw on a 9.4 policy whose macOS ransomware mode was cleared', () => {
+  it('shows Disable for a 9.4 policy whose macOS ransomware mode was cleared', () => {
     // @ts-expect-error reproducing the malformed 9.4 shape the legacy guards exist for
     delete policy.mac.ransomware.mode;
 
-    expect(() =>
-      mockedContext.render(
-        <PerOsRansomwareProtectionCard
-          policy={policy}
-          onChange={jest.fn()}
-          mode="edit"
-          data-test-subj={testSubjects.perOsRansomware.card}
-        />
-      )
-    ).not.toThrow();
+    renderResult = mockedContext.render(
+      <PerOsRansomwareProtectionCard
+        policy={policy}
+        onChange={jest.fn()}
+        mode="edit"
+        data-test-subj={testSubjects.perOsRansomware.card}
+      />
+    );
+
+    expect(renderResult.getByTestId(testSubjects.perOsRansomware.mac.modeSelect)).toHaveTextContent(
+      /^Disable$/
+    );
   });
 });

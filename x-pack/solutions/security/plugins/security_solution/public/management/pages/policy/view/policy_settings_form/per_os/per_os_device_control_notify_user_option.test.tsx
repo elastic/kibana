@@ -64,7 +64,7 @@ describe('PerOsDeviceControlNotifyUserOption', () => {
       .config.policy.value;
     policy[PolicyOperatingSystem.mac].device_control = {
       enabled: true,
-      usb_storage: DeviceControlAccessLevel.audit,
+      usb_storage: DeviceControlAccessLevel.deny_all,
     };
     policy[PolicyOperatingSystem.mac].popup.device_control = {
       enabled: true,
@@ -97,9 +97,19 @@ describe('PerOsDeviceControlNotifyUserOption', () => {
     expect(renderResult.getByTestId(`${testSubj}-customMessage`)).toHaveValue('Mac message');
   });
 
-  it('is hidden when the bound OS access level is deny_all', () => {
-    policy[PolicyOperatingSystem.mac].device_control!.usb_storage =
-      DeviceControlAccessLevel.deny_all;
+  it('renders when the bound OS access level is deny_all', () => {
+    renderMacOption();
+
+    expect(renderResult.getByTestId(testSubj)).toBeInTheDocument();
+    expect(renderResult.getByTestId(`${testSubj}-checkbox`)).toBeInTheDocument();
+  });
+
+  it.each([
+    DeviceControlAccessLevel.audit,
+    DeviceControlAccessLevel.read_only,
+    DeviceControlAccessLevel.no_execute,
+  ])('is hidden when the bound OS access level is %s', (accessLevel) => {
+    policy[PolicyOperatingSystem.mac].device_control!.usb_storage = accessLevel;
 
     renderMacOption();
 

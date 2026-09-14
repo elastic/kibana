@@ -136,6 +136,7 @@ const PerOsBehaviourProtectionRow = <OS extends BehaviorProtectionOSes>({
   'data-test-subj': dataTestSubj,
 }: PerOsBehaviourProtectionRowProps<OS>) => {
   const getTestId = useTestIdGenerator(dataTestSubj);
+  const isPlatinumPlus = useLicense().isPlatinumPlus();
   const osPolicy = accessor.read();
   const behaviorMode = osPolicy.behavior_protection.mode;
   const subfeaturesVisible = behaviorMode !== ProtectionModes.off;
@@ -143,10 +144,15 @@ const PerOsBehaviourProtectionRow = <OS extends BehaviorProtectionOSes>({
     (nextMode: ProtectionModes) => {
       const updatedPolicy = accessor.update((currentOsPolicy) => {
         currentOsPolicy.behavior_protection.mode = nextMode;
+        // Legacy parity (detect_prevent_protection_level.tsx): selecting an active mode syncs the
+        // host notification. `off` is left untouched so a Disabled row preserves its stored values.
+        if (isPlatinumPlus && nextMode !== ProtectionModes.off) {
+          currentOsPolicy.popup.behavior_protection.enabled = nextMode === ProtectionModes.prevent;
+        }
       });
       onChange({ isValid: true, updatedPolicy });
     },
-    [accessor, onChange]
+    [accessor, isPlatinumPlus, onChange]
   );
 
   return (

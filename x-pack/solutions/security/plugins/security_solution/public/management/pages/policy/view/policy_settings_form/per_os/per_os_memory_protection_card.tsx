@@ -56,6 +56,9 @@ export const PerOsMemoryProtectionCard = memo(
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const getTestId = useTestIdGenerator(dataTestSubj);
     const isProtectionsAllowed = !useGetProtectionsUnavailableComponent();
+    const selected = MEMORY_PROTECTION_OS_VALUES.some(
+      (os) => policy[os].memory_protection.mode !== ProtectionModes.off
+    );
     const protectionLabel = i18n.translate(
       'xpack.securitySolution.endpoint.policy.protections.memory',
       {
@@ -80,6 +83,7 @@ export const PerOsMemoryProtectionCard = memo(
         })}
         description={POLICY_SETTING_SECTION_DESCRIPTIONS.memoryThreat}
         dataTestSubj={getTestId()}
+        selected={selected}
         mode={mode}
         rightCorner={
           <PerOsProtectionMasterToggle
@@ -131,6 +135,7 @@ const PerOsMemoryProtectionRow = <OS extends MemoryProtectionOSes>({
   isLast,
 }: PerOsMemoryProtectionRowProps<OS>) => {
   const getTestId = useTestIdGenerator(dataTestSubj);
+  const isPlatinumPlus = useLicense().isPlatinumPlus();
   const osPolicy = accessor.read();
   const memoryProtectionMode = osPolicy.memory_protection.mode;
   const subfeaturesVisible = memoryProtectionMode !== ProtectionModes.off;
@@ -138,10 +143,15 @@ const PerOsMemoryProtectionRow = <OS extends MemoryProtectionOSes>({
     (nextMode: ProtectionModes) => {
       const updatedPolicy = accessor.update((currentOsPolicy) => {
         currentOsPolicy.memory_protection.mode = nextMode;
+        // Legacy parity (detect_prevent_protection_level.tsx): selecting an active mode syncs the
+        // host notification. `off` is left untouched so a Disabled row preserves its stored values.
+        if (isPlatinumPlus && nextMode !== ProtectionModes.off) {
+          currentOsPolicy.popup.memory_protection.enabled = nextMode === ProtectionModes.prevent;
+        }
       });
       onChange({ isValid: true, updatedPolicy });
     },
-    [accessor, onChange]
+    [accessor, isPlatinumPlus, onChange]
   );
 
   return (

@@ -15,6 +15,7 @@ import {
   EuiIconTip,
   EuiPanel,
   EuiSwitch,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
@@ -175,6 +176,13 @@ const PerOsEventCollectionRow = <OS extends OperatingSystem>({
   const getTestId = useTestIdGenerator(dataTestSubj);
   const inputIdPrefix = useId();
   const isEditMode = mode === 'edit';
+  const totalOptions = options.length;
+  // Legacy `EventCollectionCard` counts only non-supplemental fields, so Linux
+  // session_data / tty_io never contribute to selected or total.
+  const selectedCount = useMemo(
+    () => countSelectedEvents(selection, supplementalOptions),
+    [selection, supplementalOptions]
+  );
 
   return (
     <OsRow
@@ -202,6 +210,20 @@ const PerOsEventCollectionRow = <OS extends OperatingSystem>({
             ))}
           </EuiFlexGroup>
         </EuiFormFieldset>
+      }
+      inlineControls={
+        <EuiText size="s" color="subdued" data-test-subj={getTestId('selectedCount')}>
+          {i18n.translate(
+            'xpack.securitySolution.endpoint.policy.details.perOs.eventCollectionsEnabled',
+            {
+              defaultMessage: '{selected} / {total} event collections enabled',
+              values: {
+                selected: selectedCount,
+                total: totalOptions,
+              },
+            }
+          )}
+        </EuiText>
       }
       isLast={isLast}
       data-test-subj={getTestId()}
@@ -298,6 +320,18 @@ const hasSelectedEvent = <OS extends OperatingSystem>(
   selection: EventFormSelection<OS>,
   options: ReadonlyArray<EventFormOption<OS>>
 ): boolean => options.some(({ protectionField }) => Boolean(selection[protectionField]));
+
+const countSelectedEvents = <OS extends OperatingSystem>(
+  selection: EventFormSelection<OS>,
+  supplementalOptions?: ReadonlyArray<PerOsSupplementalEventFormOption<OS>>
+): number => {
+  const supplementalSelectionFields: string[] = supplementalOptions
+    ? supplementalOptions.map((value) => value.protectionField as string)
+    : [];
+  return Object.entries(selection).filter(([key, value]) =>
+    !supplementalSelectionFields.includes(key) ? value : false
+  ).length;
+};
 
 const isLinuxSupplementalOptionDisabled = (
   field: ProtectionField<OperatingSystem.LINUX>,

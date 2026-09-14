@@ -19,7 +19,7 @@ import {
   DeviceControlAccessLevel,
   PolicyOperatingSystem,
 } from '../../../../../../../common/endpoint/types';
-import { getPolicySettingsFormTestSubjects } from '../mocks';
+import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../mocks';
 import { useGetDeviceControlUpsellComponent as _useGetDeviceControlUpsellComponent } from '../hooks/use_get_device_control_component';
 import type { PerOsDeviceControlCardProps } from './per_os_device_control_card';
 import {
@@ -89,25 +89,25 @@ describe('PerOsDeviceControlCard', () => {
     expect(renderResult.getByTestId(testSubj.card)).not.toHaveTextContent('Linux');
   });
 
-  it('hides only the macOS notification when Windows is audit and macOS is deny_all', () => {
+  it('shows only the macOS notification when Windows is audit and macOS is deny_all', () => {
     policy[PolicyOperatingSystem.windows].device_control!.usb_storage =
       DeviceControlAccessLevel.audit;
     policy[PolicyOperatingSystem.mac].device_control!.usb_storage =
       DeviceControlAccessLevel.deny_all;
     render();
 
-    expect(renderResult.getByTestId(testSubj.windows.notifyUser)).toBeInTheDocument();
-    expect(renderResult.queryByTestId(testSubj.mac.notifyUser)).not.toBeInTheDocument();
+    expect(renderResult.queryByTestId(testSubj.windows.notifyUser)).not.toBeInTheDocument();
+    expect(renderResult.getByTestId(testSubj.mac.notifyUser)).toBeInTheDocument();
   });
 
-  it('hides only the Windows notification when Windows is deny_all and macOS is audit', () => {
+  it('shows only the Windows notification when Windows is deny_all and macOS is audit', () => {
     policy[PolicyOperatingSystem.windows].device_control!.usb_storage =
       DeviceControlAccessLevel.deny_all;
     policy[PolicyOperatingSystem.mac].device_control!.usb_storage = DeviceControlAccessLevel.audit;
     render();
 
-    expect(renderResult.queryByTestId(testSubj.windows.notifyUser)).not.toBeInTheDocument();
-    expect(renderResult.getByTestId(testSubj.mac.notifyUser)).toBeInTheDocument();
+    expect(renderResult.getByTestId(testSubj.windows.notifyUser)).toBeInTheDocument();
+    expect(renderResult.queryByTestId(testSubj.mac.notifyUser)).not.toBeInTheDocument();
   });
 
   it("shows each row's own USB storage access level", () => {
@@ -147,10 +147,9 @@ describe('PerOsDeviceControlCard', () => {
       'Allow read, write and execute'
     );
     expect(renderResult.getByTestId(testSubj.mac.accessLevelSelect)).toBeDisabled();
+    expect(renderResult.getByTestId(testSubj.enableDisableSwitch)).not.toBeChecked();
   });
 
-  // §5.3: the master toggle is derived as `some(OS enabled)`, which is also the legacy
-  // `windows?.enabled || mac?.enabled` behaviour. One enabled OS means the card reads on.
   it('reports the card enabled when only one OS is enabled', () => {
     policy[PolicyOperatingSystem.windows].device_control!.enabled = true;
     policy[PolicyOperatingSystem.mac].device_control!.enabled = false;
@@ -212,5 +211,21 @@ describe('PerOsDeviceControlCard', () => {
 
     expect(renderResult.getByTestId('deviceControlUpsell')).toBeInTheDocument();
     expect(renderResult.queryByTestId(testSubj.card)).not.toBeInTheDocument();
+  });
+
+  describe('and in view mode', () => {
+    beforeEach(() => {
+      props.mode = 'view';
+    });
+
+    it('should render in view mode', () => {
+      policy[PolicyOperatingSystem.windows].device_control!.usb_storage =
+        DeviceControlAccessLevel.deny_all;
+      policy[PolicyOperatingSystem.mac].device_control!.usb_storage =
+        DeviceControlAccessLevel.deny_all;
+      render();
+
+      expectIsViewOnly(renderResult.getByTestId(testSubj.card));
+    });
   });
 });

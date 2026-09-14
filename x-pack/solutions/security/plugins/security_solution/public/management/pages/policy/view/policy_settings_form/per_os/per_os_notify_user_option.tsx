@@ -6,15 +6,15 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import type { EuiCheckboxProps, EuiFieldTextProps } from '@elastic/eui';
+import type { EuiCheckboxProps, EuiTextAreaProps } from '@elastic/eui';
 import {
   EuiCheckbox,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
   EuiPanel,
   EuiSpacer,
+  EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -107,7 +107,7 @@ const PerOsNotifyUserOptionComponent = <
     [accessor, onChange, protection]
   );
 
-  const handleCustomUserNotification = useCallback<NonNullable<EuiFieldTextProps['onChange']>>(
+  const handleCustomUserNotification = useCallback<NonNullable<EuiTextAreaProps['onChange']>>(
     (event) => {
       const updatedPolicy = accessor.update((currentOsPolicy) => {
         const notificationPolicy = currentOsPolicy as PolicyConfig[OS] &
@@ -152,7 +152,7 @@ const PerOsNotifyUserOptionComponent = <
   const customNotificationComponent = CustomNotificationUpsellingComponent ? (
     <CustomNotificationUpsellingComponent />
   ) : (
-    <EuiFieldText
+    <EuiTextArea
       placeholder={i18n.translate(
         'xpack.securitySolution.endpoint.policyDetails.customizeMessagePlaceholder',
         { defaultMessage: 'Customize message' }
@@ -165,6 +165,9 @@ const PerOsNotifyUserOptionComponent = <
       onChange={handleCustomUserNotification}
       disabled={!isEditMode || !userNotificationSelected || selected === ProtectionModes.off}
       fullWidth={true}
+      // One line tall by default to keep the OS row compact; the control stays a textarea so
+      // multi-line messages can still be authored and are shown in full when the user resizes.
+      rows={1}
       data-test-subj={getTestId('customMessage')}
     />
   );

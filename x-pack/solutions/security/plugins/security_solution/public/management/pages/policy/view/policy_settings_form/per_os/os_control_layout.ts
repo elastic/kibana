@@ -30,11 +30,16 @@ export const OS_LABEL_COLUMN_WIDTH = '5rem';
  * wraps the longest option onto two lines.
  *
  * Sized for the longest option text across every per-OS select, which is the antivirus
- * "Sync with malware protection level" — longer than the protection mode "Detect & prevent" and
- * the device-control "Allow read, write and execute". If a longer option is ever added, widen
- * this rather than overriding a single component.
+ * "Sync with malware protection level" (~14.25rem of Inter at the form-control `s` size of 14px).
+ * Longer than the protection mode "Detect & prevent" and the device-control
+ * "Allow read, write and execute". Add the `EuiHealth` severity dot (1rem) and its `xs` gap
+ * (0.25rem), plus `EuiSuperSelect` padding (`size.m` = 0.75rem each side) and the chevron's
+ * `iconAffordance` (1.5rem). That is ~18.5rem occupied; 18rem clips the selected label under the
+ * chevron. 22rem leaves headroom so the English string and the inherited popover width stay on
+ * one line. If a longer option is ever added, widen this rather than overriding a single
+ * component. Translated strings that still overflow truncate in `os_control_select_options.tsx`.
  */
-export const OS_CONTROL_WIDTH = '18rem';
+export const OS_CONTROL_WIDTH = '22rem';
 
 /**
  * Top margin for the subdued panel that sits below an OS row's controls — the notify-user

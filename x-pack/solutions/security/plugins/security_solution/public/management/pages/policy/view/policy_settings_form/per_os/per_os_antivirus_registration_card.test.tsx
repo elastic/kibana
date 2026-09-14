@@ -14,6 +14,7 @@ import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoin
 import type { PolicyConfig } from '../../../../../../../common/endpoint/types';
 import { AntivirusRegistrationModes } from '../../../../../../../common/endpoint/types';
 import { getPolicySettingsFormTestSubjects } from '../mocks';
+import { OS_CONTROL_WIDTH } from './os_control_layout';
 import type { PerOsAntivirusRegistrationCardProps } from './per_os_antivirus_registration_card';
 import { PerOsAntivirusRegistrationCard } from './per_os_antivirus_registration_card';
 
@@ -73,14 +74,14 @@ describe('PerOsAntivirusRegistrationCard', () => {
   it('keeps the mode select a constant width across the shortest and longest labels', () => {
     // "Sync with malware protection level" is far longer than "Disabled"; the control must not
     // resize with the selection, and the popover inherits this width so it must not wrap either.
+    // Both ends of that range must keep the shared OS_CONTROL_WIDTH so a design tweak cannot
+    // leave a stale literal behind here.
     policy.windows.antivirus_registration.mode = AntivirusRegistrationModes.disabled;
     render();
 
     const widthSubj = `${testSubj.card}-windows-mode-fixedWidth`;
-    const narrowest = getComputedStyle(renderResult.getByTestId(widthSubj)).inlineSize;
 
-    expect(narrowest).toBeTruthy();
-    expect(renderResult.getByTestId(widthSubj)).toHaveStyleRule('inline-size', narrowest);
+    expect(renderResult.getByTestId(widthSubj)).toHaveStyleRule('inline-size', OS_CONTROL_WIDTH);
 
     // Unmount before re-rendering: the helper appends to the same container, so calling it
     // twice would leave two matching elements in the DOM.
@@ -88,7 +89,7 @@ describe('PerOsAntivirusRegistrationCard', () => {
     policy.windows.antivirus_registration.mode = AntivirusRegistrationModes.sync;
     render();
 
-    expect(renderResult.getByTestId(widthSubj)).toHaveStyleRule('inline-size', narrowest);
+    expect(renderResult.getByTestId(widthSubj)).toHaveStyleRule('inline-size', OS_CONTROL_WIDTH);
     expect(renderResult.getByTestId(widthSubj)).toHaveStyleRule('max-inline-size', '100%');
   });
 
