@@ -8,13 +8,13 @@
  */
 
 import { parse as yamlParse } from 'yaml';
-import { DEFAULT_AGENT_IMAGE_CONFIG } from '../../pipeline-utils/agent_images';
+import { DEFAULT_AGENT_IMAGE_CONFIG } from '../../pipeline-utils/agent_images.ts';
 import {
   getEvalPipeline,
   getEvalTriggerStep,
   getForwardablePrLabels,
   shouldRunEvals,
-} from './eval_pipeline';
+} from './eval_pipeline.ts';
 
 // `jest.mock` calls are hoisted above the imports above, so `eval_pipeline` sees
 // the mocked `fs` / `child_process` when it is first evaluated.
