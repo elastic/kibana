@@ -46,7 +46,7 @@ export const createGetConnectorSubActionsTool = ({
       const actionsClient = await actionsStart.getActionsClientWithRequest(context.request);
 
       const allowedIds = context.agentConfiguration?.connector_ids;
-      if (allowedIds && !allowedIds.includes(input.connector_id)) {
+      if (allowedIds !== undefined && !allowedIds.includes(input.connector_id)) {
         return {
           results: [
             createErrorResult({

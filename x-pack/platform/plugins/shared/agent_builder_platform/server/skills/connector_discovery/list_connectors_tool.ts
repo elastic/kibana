@@ -40,7 +40,7 @@ export const createListConnectorsTool = ({
       const connectors = allConnectors.flatMap((connector) => {
         const spec = getConnectorSpec(connector.actionTypeId);
         if (!spec) return [];
-        if (allowedIds && !allowedIds.includes(connector.id)) return [];
+        if (allowedIds !== undefined && !allowedIds.includes(connector.id)) return [];
         return [
           {
             id: connector.id,

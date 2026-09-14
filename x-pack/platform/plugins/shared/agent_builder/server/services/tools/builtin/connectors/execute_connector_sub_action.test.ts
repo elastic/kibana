@@ -208,6 +208,23 @@ describe('createExecuteConnectorSubActionTool', () => {
       expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.other);
     });
 
+    it('blocks all connectors when agentConfiguration.connector_ids is an empty array', async () => {
+      const context = {
+        ...mockContext,
+        agentConfiguration: { connector_ids: [] },
+      } as unknown as ToolHandlerContext;
+
+      const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
+      const result = await tool.handler(
+        { connectorId: 'conn-123', subAction: 'searchMessages', params: {} },
+        context
+      );
+
+      expect(mockGet).not.toHaveBeenCalled();
+      expect(mockExecute).not.toHaveBeenCalled();
+      expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.error);
+    });
+
     it('allows all connectors when agentConfiguration.connector_ids is not set', async () => {
       mockExecute.mockResolvedValue({ status: 'ok', data: { ok: true } });
 

@@ -92,7 +92,7 @@ export const createExecuteConnectorSubActionTool = ({
   },
   handler: async ({ connectorId, subAction, params }, context) => {
     const allowedIds = context.agentConfiguration?.connector_ids;
-    if (allowedIds && !allowedIds.includes(connectorId)) {
+    if (allowedIds !== undefined && !allowedIds.includes(connectorId)) {
       return {
         results: [
           createErrorResult({
