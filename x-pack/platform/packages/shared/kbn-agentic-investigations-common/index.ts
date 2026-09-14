@@ -45,7 +45,6 @@ export { DetailsBlock } from './src/components/details/detail_block';
 
 export { TimelineEventList } from './src/components/timeline/timeline_event_list';
 
-export { useOpenInChat } from './src/hooks/use_open_in_chat';
 export {
   registerAgenticInvestigationTemplateUI,
   type RegisterAgenticInvestigationTemplateUIOptions,
