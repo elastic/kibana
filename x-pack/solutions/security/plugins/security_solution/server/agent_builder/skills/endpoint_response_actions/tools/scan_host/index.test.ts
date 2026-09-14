@@ -80,6 +80,7 @@ describe('scanHostTool', () => {
     expect(tool.confirmation?.askUser).toBe('always');
     const prompt = await tool.confirmation?.getConfirmation?.({
       toolParams: { hostName: 'my-host', path: '/tmp' },
+      context: mockContext,
     });
     expect(prompt?.color).toBe('warning');
     expect(prompt?.message).toContain('my-host');

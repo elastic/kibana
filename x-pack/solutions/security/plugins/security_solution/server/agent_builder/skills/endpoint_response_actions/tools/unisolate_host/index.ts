@@ -43,6 +43,13 @@ export const unisolateHostTool = (
   return {
     id: UNISOLATE_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Unisolate Host',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     description: `Un-isolates a host by its hostname. Re-establishes network connectivity on an endpoint that was previously isolated. The action is dispatched through the Elastic Defend Response Actions service.`,
     schema: unisolateHostSchema,
     tags: ['security', 'endpoint', 'response-actions'],

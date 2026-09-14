@@ -17,16 +17,24 @@ import { createEvaluateSecurityDataset } from './evaluate_dataset';
 export const evaluate = base.extend<
   {},
   {
+    chatClient: SecurityEvalChatClient;
     evaluateDataset: EvaluateSecurityDataset;
     evaluateForensicDataset: EvaluateForensicDataset;
     internalEsClient: Client;
   }
 >({
+  chatClient: [
+    async ({ fetch, log, connector }, use) => {
+      const chatClient = new SecurityEvalChatClient(fetch, log, connector.id);
+      await use(chatClient);
+    },
+    { scope: 'worker' },
+  ],
   evaluateDataset: [
-    ({ agentBuilderClient, evaluators, executorClient }, use) => {
+    ({ chatClient, evaluators, executorClient }, use) => {
       use(
         createEvaluateSecurityDataset({
-          agentBuilderClient,
+          chatClient,
           evaluators,
           executorClient,
         })

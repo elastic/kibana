@@ -36,6 +36,13 @@ export const listEndpointsTool = (
   return {
     id: LIST_ENDPOINTS_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'List Endpoints',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description:
       'Lists endpoints enrolled with Elastic Defend that response actions can be executed on. Returns hostname, status, isolation state, OS, and last seen time for each endpoint.',
     schema: listEndpointsSchema,

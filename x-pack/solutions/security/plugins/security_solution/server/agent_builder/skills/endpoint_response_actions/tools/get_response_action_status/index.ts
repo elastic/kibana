@@ -36,6 +36,13 @@ export const getResponseActionStatusTool = (
   return {
     id: GET_RESPONSE_ACTION_STATUS_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Get Response Action Status',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description:
       'Retrieves the current status and outputs of a previously dispatched endpoint response action by its action ID. Use this read-only lookup when the analyst asks about a prior isolate, release, scan, or running-processes action — especially when the original dispatch returned pending.',
     schema: getResponseActionStatusSchema,

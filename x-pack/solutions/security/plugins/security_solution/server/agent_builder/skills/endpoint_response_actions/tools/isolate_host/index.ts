@@ -43,6 +43,13 @@ export const isolateHostTool = (
   return {
     id: ISOLATE_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Isolate Host',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     description: `Isolates a host by its hostname. Isolation disconnects the endpoint from the network to contain a potential threat. The action is dispatched through the Elastic Defend Response Actions service.`,
     schema: isolateHostSchema,
     tags: ['security', 'endpoint', 'response-actions'],

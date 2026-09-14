@@ -56,6 +56,13 @@ export const scanHostTool = (
   return {
     id: SCAN_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Scan Host',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     description: `Scans a file or folder path on a host for malware using the endpoint's existing Elastic Defend policy. The action is dispatched through the Elastic Defend Response Actions service. Requires explicit analyst confirmation before dispatch.`,
     schema: scanHostSchema,
     tags: ['security', 'endpoint', 'response-actions'],

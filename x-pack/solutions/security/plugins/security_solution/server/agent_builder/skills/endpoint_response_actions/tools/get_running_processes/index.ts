@@ -48,6 +48,13 @@ export const getRunningProcessesTool = (
   return {
     id: RUNNING_PROCESSES_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Get Running Processes',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description: `Retrieves the list of running processes from a host by its hostname. This is a read-only inspection action dispatched through the Elastic Defend Response Actions service; it does not modify the endpoint.`,
     schema: getRunningProcessesSchema,
     tags: ['security', 'endpoint', 'response-actions'],

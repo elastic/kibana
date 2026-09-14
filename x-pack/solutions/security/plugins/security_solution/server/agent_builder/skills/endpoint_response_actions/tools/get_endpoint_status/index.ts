@@ -35,6 +35,13 @@ export const getEndpointStatusTool = (
   return {
     id: GET_ENDPOINT_STATUS_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Get Endpoint Status',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description: `Retrieves the current status of a host by its hostname, including whether it is isolated, its last seen time, and online/offline status.`,
     schema: getEndpointStatusSchema,
     tags: ['security', 'endpoint', 'response-actions'],
