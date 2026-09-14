@@ -16,6 +16,9 @@ import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/clas
  * enabled; the workflow's ai.agent step additionally requires the Workflows UI and
  * agent settings, and the approval-gate tests respond to the review step through the
  * inbox plugin's respond route, which is also disabled by default.
+ *
+ * agenticInvestigations must also be enabled: alertzero declares it as a required plugin,
+ * so Kibana disables alertzero at startup if agenticInvestigations is absent.
  */
 export const servers: ScoutServerConfig = {
   ...evalsTracingConfig,
@@ -23,6 +26,7 @@ export const servers: ScoutServerConfig = {
     ...evalsTracingConfig.kbnTestServer,
     serverArgs: [
       ...evalsTracingConfig.kbnTestServer.serverArgs,
+      '--xpack.agenticInvestigations.enabled=true',
       '--xpack.alertzero.enabled=true',
       '--xpack.inbox.enabled=true',
       '--uiSettings.overrides.workflows:ui:enabled=true',

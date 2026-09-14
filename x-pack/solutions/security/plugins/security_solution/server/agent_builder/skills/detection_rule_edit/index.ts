@@ -23,7 +23,7 @@ export const getDetectionRuleEditSkill = ({
     name: 'detection-rule-edit',
     basePath: 'skills/security/rules',
     description:
-      'Creates and edits ES|QL security detection rules as persistent rule attachments, including query logic, MITRE ATT&CK mappings, severity, and schedule. Use when the user wants to author or modify a detection rule explicitly ("create a rule that...", "update the severity", "add MITRE mappings") or with implied authoring intent ("how would I detect this?", "can we catch lateral movement?", "I want an alert for privilege escalation"). Not for alert triage or investigation (use alert analysis skill), proactive threat hunting without a rule-creation goal (use threat hunting skill), or general security questions with no authoring intent.',
+      'Creates and edits ES|QL security detection rules as persistent rule attachments, including query logic, MITRE ATT&CK mappings, severity, and schedule. Use when the user wants to author or modify a detection rule explicitly ("create a rule that...", "update the severity", "add MITRE mappings") or asks how to write one ("how would I detect this?"). Not for gap statements where the user wants coverage to exist but has not supplied rule logic ("we need to detect X", "can we catch lateral movement?", "I want an alert for privilege escalation") — those belong to detection-coverage, which checks installed and installable rules first. Not for alert triage or investigation (use alert analysis skill), proactive threat hunting without a rule-creation goal (use threat hunting skill), or general security questions with no authoring intent.',
     content: buildSkillContent({ rulePreviewEnabled }),
     getRegistryTools: () => [
       SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
