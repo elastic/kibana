@@ -31,9 +31,12 @@ export const initializeManagedWorkflows = async ({
     AGENTIC_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER_ID
   );
 
-  const install = async (workflowId: string): Promise<boolean> => {
+  // Takes the install call as a thunk so each call site keeps its literal
+  // workflow id type; `client.install` resolves the per-id `values` option
+  // from that literal instead of from a widened union.
+  const runInstall = async (workflowId: string, install: () => Promise<void>): Promise<boolean> => {
     try {
-      await client.install(workflowId, { spaceId: GLOBAL_WORKFLOW_SPACE_ID });
+      await install();
       return true;
     } catch (error) {
       logger.error(
@@ -47,8 +50,16 @@ export const initializeManagedWorkflows = async ({
 
   // The recovery companion must be installed alongside the gate it recovers;
   // a failure to install either is logged and degrades reconciliation.
-  const installedCreate = await install(CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID);
-  const installedRecover = await install(RECOVER_INVESTIGATION_PROPOSAL_WORKFLOW_ID as any);
+  const installedCreate = await runInstall(CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID, () =>
+    client.install(CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID, {
+      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    })
+  );
+  const installedRecover = await runInstall(RECOVER_INVESTIGATION_PROPOSAL_WORKFLOW_ID, () =>
+    client.install(RECOVER_INVESTIGATION_PROPOSAL_WORKFLOW_ID, {
+      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    })
+  );
   const canReconcile = installedCreate && installedRecover;
 
   if (canReconcile) {
