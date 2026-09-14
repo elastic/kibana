@@ -633,12 +633,8 @@ export function transformOutputToFullPolicyOutput(
   redactProxySecrets = false
 ): FullAgentPolicyOutput {
   if (isOtlpOutput(output)) {
-    // otlp_exporter is compiled into the OTel collector block by generateOtelcolExporter.
-    const { type, secrets } = output;
-    return {
-      type,
-      ...(secrets ? { secrets } : {}),
-    };
+    // otlp_exporter config and secrets are compiled into the OTel collector block by generateOtelcolExporter.
+    return { type: output.type };
   }
 
   const {
