@@ -11,12 +11,24 @@ tags:
 settings:
   # The space is in the key only so the group reads clearly in execution history:
   # concurrency is always checked within a single space.
-  # `cancel-in-progress` with max 1: the floor Watch Worker uses the same strategy,
-  # and a new floor dispatch would otherwise be SKIPPED while this slot is still
-  # held by the runner being cancelled. Latest run wins. The in-flight generation
-  # is cancelled as cleanly as the engine allows (the run step does not abort the
-  # LLM pipeline mid-call). Must be an object — unlike a `parallel` step's
-  # `concurrency`, workflow-level `settings.concurrency` does not accept a bare number.
+  #
+  # `cancel-in-progress` with max 1: the newest discoveries are the ones worth
+  # having, and a backlog must never delay a new run. `drop` and `queue` cannot
+  # deliver that — a run that is merely waiting still occupies the single slot, so
+  # a newer run would either wait behind superseded work or be turned away.
+  #
+  # Accepted cost: a run cancelled after generation persisted but before the fan-out
+  # finished leaves those attacks with no AlertZero review. Duplicates are not part
+  # of the cost — the ad-hoc write path ids each attack by a hash of its alert ids,
+  # connector, owner and space, so an identical attack is dropped on write; only a
+  # regrouped alert set hashes differently and lands as a near-duplicate.
+  #
+  # Cancelling does not interrupt an in-flight generation request today: it runs to
+  # completion and its result is discarded (elastic/kibana#290832 adds a cancellation
+  # probe to the run step).
+  #
+  # Must be an object — unlike a `parallel` step's `concurrency`, workflow-level
+  # `settings.concurrency` does not accept a bare number.
   concurrency:
     key: "attack-discovery-worker-{{ workflow.spaceId }}"
     strategy: cancel-in-progress

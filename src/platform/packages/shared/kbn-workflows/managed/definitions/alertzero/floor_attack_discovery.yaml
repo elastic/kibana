@@ -10,12 +10,15 @@ tags:
   - watch-floor
 settings:
   # This worker is installed per space, so the key needs no space component.
-  # `cancel-in-progress` with max 1: a run holds its Task Manager task for as long
-  # as generation takes (up to the child's 35m step timeout). A newer overlapping
-  # scheduled run replaces that work instead of skipping itself. The runner uses
-  # the same strategy so the replacement dispatch is not SKIPPED on the still-held
-  # child slot. Must be an object — unlike a `parallel` step's `concurrency`,
-  # workflow-level `settings.concurrency` does not accept a bare number.
+  #
+  # `cancel-in-progress` with max 1: the newest discoveries are the ones worth
+  # having, and a backlog must never delay a new scheduled run. `drop` and `queue`
+  # cannot deliver that — a run that is merely waiting still occupies the single
+  # slot, so a newer run would either wait behind superseded work or be turned away.
+  # The global runner this worker dispatches to sets the same policy.
+  #
+  # Must be an object — unlike a `parallel` step's `concurrency`, workflow-level
+  # `settings.concurrency` does not accept a bare number.
   concurrency:
     key: floor-attack-discovery
     strategy: cancel-in-progress
