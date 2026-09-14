@@ -13,6 +13,7 @@ import dedent from 'dedent';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   compareByFailedBuilds,
+  formatCounts,
   type FlakyTestBranchStats,
   type FlakyTestClassification,
   type FlakyTestEntry,
@@ -251,9 +252,8 @@ export const displaySummary = (
   width: number = terminalWidth()
 ): void => {
   const { window, scope, thresholds, summary } = report;
-  const flakyByFramework = Object.entries(summary.flakyByFramework)
-    .map(([framework, count]) => `${framework}: ${count}`)
-    .join(', ');
+  const flakyByFramework = formatCounts(summary.flakyByFramework);
+  const flakyByBranch = formatCounts(summary.flakyByBranch);
 
   const panel = new CliTable3();
   panel.push(
@@ -277,12 +277,19 @@ export const displaySummary = (
     ],
     [
       dedent(`\
-        Thresholds
-          Min builds        : ${thresholds.minBuilds} (tests seen in fewer builds are ignored)
-          Min failed builds : ${thresholds.minFailedBuilds} (tests that failed in fewer builds are ignored)
+        Thresholds (per branch: one branch must clear all three on its own)
+          Min builds        : ${thresholds.minBuilds} (builds the branch ran the test in)
+          Min failed builds : ${thresholds.minFailedBuilds} (builds the branch failed the test in)
+          Min fail rate     : ${formatRate(
+            thresholds.minFailRate
+          )} (failed / all builds on the branch)
           Max tests         : ${thresholds.maxTests} per list
+          Last run within   : ${
+            thresholds.lastRunWithinHours
+          }h (tests that did not run since are dropped)
           Flaky                = qualifying test with at least one pass or in-run retry recovery
           Consistently failing = qualifying test that never passed in the window
+          Ranking              = failed builds, then fail rate on the flakiest branch, then latest failure
         `),
     ],
     [
@@ -290,6 +297,10 @@ export const displaySummary = (
         Results
           Flaky                : ${summary.totalFlaky}${
         flakyByFramework ? ` (${flakyByFramework})` : ''
+      }${
+        flakyByBranch
+          ? `\n          Flaky by branch      : ${flakyByBranch} (branch each test qualified on)`
+          : ''
       }
           Consistently failing : ${summary.totalConsistentlyFailing}
         `),
