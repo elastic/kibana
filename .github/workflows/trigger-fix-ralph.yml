@@ -4,8 +4,8 @@ on:
   issue_comment:
     types: [created]
 
-# Shared condition: issue comment (not PR), from org member/collaborator, starting with /ralph-fix.
-# Duplicated across jobs because job-level `if` cannot reference other jobs.
+# Permissions are verified via the GitHub collaborators API in the acknowledge job,
+# which gates the fix job through `needs`.
 
 permissions:
   contents: none
@@ -19,12 +19,22 @@ jobs:
     name: 'Acknowledge /ralph-fix'
     if: >-
       github.event.issue.pull_request == null &&
-      startsWith(github.event.comment.body, '/ralph-fix') &&
-      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
+      startsWith(github.event.comment.body, '/ralph-fix')
     runs-on: ubuntu-latest
     permissions:
       issues: write
     steps:
+      - name: Verify actor is an org member or collaborator
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          STATUS=$(gh api "repos/$REPO/collaborators/$ACTOR" -i 2>/dev/null | head -1 | awk '{print $2}')
+          if [[ "$STATUS" != "204" ]]; then
+            echo "Actor '$ACTOR' is not a repository collaborator; skipping Fix Ralph."
+            exit 1
+          fi
       - name: Post acknowledgment comment
         env:
           GH_TOKEN: ${{ github.token }}
@@ -39,10 +49,10 @@ jobs:
       contents: read
       id-token: write
     name: 'Run Fix Ralph'
+    needs: [acknowledge]
     if: >-
       github.event.issue.pull_request == null &&
-      startsWith(github.event.comment.body, '/ralph-fix') &&
-      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
+      startsWith(github.event.comment.body, '/ralph-fix')
     uses: elastic/kibana-error-sentry/.github/workflows/fix-ralph.yml@main
     with:
       issue_number: '${{ github.event.issue.number }}'
