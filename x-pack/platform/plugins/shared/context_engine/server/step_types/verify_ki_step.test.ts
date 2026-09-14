@@ -37,17 +37,19 @@ const makeHandlerContext = (
     getScopedEsClient,
     metadata,
     parent,
+    total_timeout_sec,
   }: {
     verifiers?: VerifyKiVerifiers;
     getScopedEsClient?: () => unknown;
     metadata?: Record<string, unknown>;
     parent?: { workflowId: string; executionId: string };
+    total_timeout_sec?: number;
   } = {}
 ): VerifyKiHandlerContext =>
   ({
-    input: { ki, verifiers },
+    input: { ki, verifiers, total_timeout_sec },
     config: {},
-    rawInput: { ki, verifiers },
+    rawInput: { ki, verifiers, total_timeout_sec },
     contextManager: {
       getFakeRequest: jest.fn().mockReturnValue({ headers: {} }),
       getScopedEsClient: getScopedEsClient ?? jest.fn().mockReturnValue(esClient),
@@ -117,6 +119,7 @@ describe('verify_ki workflow step', () => {
       verifiers?: VerifyKiVerifiers;
       metadata?: Record<string, unknown>;
       parent?: { workflowId: string; executionId: string };
+      total_timeout_sec?: number;
     } = {}
   ) => {
     const { output } = await makeDefinition().handler(makeHandlerContext(ki, esClient, opts));
@@ -364,6 +367,33 @@ describe('verify_ki workflow step', () => {
     });
     expect(telemetry.logger.debug).toHaveBeenCalledWith('KI verification aborted');
   });
+
+  it('aborts when the total timeout fires before verifiers finish', async () => {
+    setContextEngineEnabled(true);
+    const abortableClient = {
+      esql: {
+        query: jest.fn().mockImplementation(
+          (_params: unknown, opts: { signal?: AbortSignal }) =>
+            new Promise((_, reject) => {
+              opts?.signal?.addEventListener('abort', () => {
+                const err = new Error('Request aborted');
+                err.name = 'AbortError';
+                reject(err);
+              });
+            })
+        ),
+      },
+    };
+    await expect(
+      makeDefinition().handler(
+        makeHandlerContext({ attributes: { esql: 'FROM logs-*' } }, esClient, {
+          verifiers: [ESQL_VALID_RUNTIME_VERIFIER_ID],
+          total_timeout_sec: 1,
+          getScopedEsClient: () => abortableClient,
+        })
+      )
+    ).rejects.toThrow();
+  }, 5000);
 
   it('reports a failure when the run errors', async () => {
     setContextEngineEnabled(true);

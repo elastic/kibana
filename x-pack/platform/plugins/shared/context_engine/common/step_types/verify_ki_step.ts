@@ -29,6 +29,8 @@ export const MAX_KI_VERIFIER_WORKFLOW_ID_LENGTH = 256;
 export const MAX_KI_VERIFIER_APPLIES_TO_VALUES = 20;
 export const DEFAULT_KI_VERIFIER_TIMEOUT_SEC = 60;
 export const MAX_KI_VERIFIER_TIMEOUT_SEC = 300;
+export const DEFAULT_KI_VERIFIER_STEP_TIMEOUT_SEC = 300;
+export const MAX_KI_VERIFIER_STEP_TIMEOUT_SEC = MAX_KI_VERIFIERS * MAX_KI_VERIFIER_TIMEOUT_SEC;
 
 export const kiVerifierWorkflowSchema = z.object({
   workflow_id: z
@@ -77,6 +79,15 @@ export const getKiVerifierEntryKey = (entry: KiVerifierEntry): string =>
 export const VerifyKiInputSchema = z.object({
   ki: kiPartialFieldsSchema,
   ai_index_id: aiIndexIdSchema.optional().describe('AI index the KI belongs to'),
+  total_timeout_sec: z
+    .number()
+    .int()
+    .min(1)
+    .max(MAX_KI_VERIFIER_STEP_TIMEOUT_SEC)
+    .optional()
+    .describe(
+      `Total seconds to wait for all verifiers before aborting the step (default ${DEFAULT_KI_VERIFIER_STEP_TIMEOUT_SEC})`
+    ),
   verifiers: z
     .array(kiVerifierEntrySchema)
     .min(1)

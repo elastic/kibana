@@ -9,7 +9,10 @@ import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
-import { VerifyKiStepCommonDefinition } from '../../common/step_types/verify_ki_step';
+import {
+  DEFAULT_KI_VERIFIER_STEP_TIMEOUT_SEC,
+  VerifyKiStepCommonDefinition,
+} from '../../common/step_types/verify_ki_step';
 import {
   createKiVerifierRegistry,
   createWorkflowVerifier,
@@ -120,32 +123,46 @@ export const createVerifyKiStepDefinition = (
         });
       };
 
-      const summary = await withKiVerificationTelemetry({
-        analyticsService,
-        logger,
-        workflowId: workflow.id,
-        aiIndexId: context.input.ai_index_id,
-        run: async () => {
-          const verifiers = await buildVerifiers();
-          try {
-            return await service.verifyKi(context.input.ki, {
-              isEnabled,
-              esClient: context.contextManager.getScopedEsClient(),
-              logger,
-              abortSignal: context.abortSignal,
-              verifiers,
-            });
-          } catch (error) {
-            if (error instanceof KiVerificationInputError) {
-              throw new ExecutionError({
-                type: 'InputValidationError',
-                message: error.message,
+      const totalTimeoutMs =
+        (context.input.total_timeout_sec ?? DEFAULT_KI_VERIFIER_STEP_TIMEOUT_SEC) * 1000;
+      const totalController = new AbortController();
+      const totalTimer = setTimeout(() => totalController.abort(), totalTimeoutMs);
+      const onStepAbort = () => totalController.abort();
+      context.abortSignal.addEventListener('abort', onStepAbort, { once: true });
+      const abortSignal = totalController.signal;
+
+      let summary;
+      try {
+        summary = await withKiVerificationTelemetry({
+          analyticsService,
+          logger,
+          workflowId: workflow.id,
+          aiIndexId: context.input.ai_index_id,
+          run: async () => {
+            const verifiers = await buildVerifiers();
+            try {
+              return await service.verifyKi(context.input.ki, {
+                isEnabled,
+                esClient: context.contextManager.getScopedEsClient(),
+                logger,
+                abortSignal,
+                verifiers,
               });
+            } catch (error) {
+              if (error instanceof KiVerificationInputError) {
+                throw new ExecutionError({
+                  type: 'InputValidationError',
+                  message: error.message,
+                });
+              }
+              throw error;
             }
-            throw error;
-          }
-        },
-      });
+          },
+        });
+      } finally {
+        clearTimeout(totalTimer);
+        context.abortSignal.removeEventListener('abort', onStepAbort);
+      }
 
       return { output: summary };
     },
