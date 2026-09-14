@@ -8,13 +8,15 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiBadge, EuiBadgeGroup, EuiCallOut, EuiCode, EuiFlexGrid, EuiStat } from '@elastic/eui';
+import { EuiBadge, EuiBadgeGroup, EuiCode, EuiFlexGrid, EuiStat } from '@elastic/eui';
 import { max, min } from 'lodash';
 import type { ESQLColumn } from '@kbn/es-types';
 import { isNumericType } from '@kbn/esql-language';
 import { EMPTY_LABEL } from '@kbn/field-formats-common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { ChooseColumnPopover } from './choose_column_popover';
 
 export const ESQLValuesPreview: React.FC<{
@@ -37,63 +39,55 @@ export const ESQLValuesPreview: React.FC<{
 
   if (error) {
     return (
-      <EuiCallOut
+      <KbnDangerCallout
         announceOnMount
         title={i18n.translate('esqlUtils.valuesPreview.errorTitle', {
           defaultMessage: 'Error getting values preview',
         })}
-        color="danger"
-        iconType="error"
         size="s"
-      >
-        <p>{error.message}</p>
-      </EuiCallOut>
+        text={error.message}
+      />
     );
   }
 
   if (columns.length > 1) {
     return (
-      <EuiCallOut
+      <KbnWarningCallout
         announceOnMount
         title={i18n.translate('esqlUtils.valuesPreview.multiColumnErrorTitle', {
           defaultMessage: 'Query must return a single column',
         })}
-        color="warning"
-        iconType="warning"
         size="s"
         data-test-subj="esqlMoreThanOneColumnCallout"
+        text={
+          <FormattedMessage
+            id="esqlUtils.valuesPreview.multiColumnErrorBody"
+            defaultMessage="Your query is currently returning {totalColumns} columns. Choose a column, or use {statsBy} to narrow your query down."
+            values={{
+              totalColumns: columns.length,
+              statsBy: <EuiCode>STATS BY</EuiCode>,
+            }}
+          />
+        }
       >
-        <FormattedMessage
-          id="esqlUtils.valuesPreview.multiColumnErrorBody"
-          defaultMessage="Your query is currently returning {totalColumns} columns. Choose a column, or use {statsBy} to narrow your query down."
-          values={{
-            totalColumns: columns.length,
-            statsBy: <EuiCode>STATS BY</EuiCode>,
-          }}
-        />
         <ChooseColumnPopover columns={columns} updateQuery={updateQuery} />
-      </EuiCallOut>
+      </KbnWarningCallout>
     );
   }
 
   if (values.length === 0) {
     return (
-      <EuiCallOut
+      <KbnWarningCallout
         announceOnMount
         title={i18n.translate('esqlUtils.valuesPreview.emptyTitle', {
           defaultMessage: 'No values returned',
         })}
-        color="warning"
-        iconType="warning"
         size="s"
         data-test-subj="esqlNoValuesForControlCallout"
-      >
-        <p>
-          {i18n.translate('esqlUtils.valuesPreview.emptyText', {
-            defaultMessage: "This query isn't returning any values. Edit it and run it again.",
-          })}
-        </p>
-      </EuiCallOut>
+        text={i18n.translate('esqlUtils.valuesPreview.emptyText', {
+          defaultMessage: "This query isn't returning any values. Edit it and run it again.",
+        })}
+      />
     );
   }
 
