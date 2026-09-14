@@ -261,7 +261,15 @@ export const userPriorityEntityDefinition: EntityDefinitionWithoutId = {
   extractionGate: idpGate,
 };
 
-/** Non-priority extraction: every log the priority gate rejects. */
+/**
+ * Non-priority extraction: every log the priority gate rejects.
+ *
+ * `postAggFilter` admits a row only when the entity is already stored, resolves to the local
+ * namespace, or carries an asset event. Non-priority rows never satisfy the last of those, so this
+ * variant creates local entities and otherwise enriches entities that already exist. A user first
+ * discovered through the priority variant therefore picks up its non-asset fields on a later run
+ * rather than within the same window.
+ */
 export const userNonPriorityEntityDefinition: EntityDefinitionWithoutId = {
   ...userEntityDefinition,
   extractionGate: nonPriorityExtractionGate,

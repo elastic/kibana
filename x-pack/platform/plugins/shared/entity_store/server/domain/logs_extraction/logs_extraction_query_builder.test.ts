@@ -79,40 +79,58 @@ describe('buildLogsExtractionEsqlQuery', () => {
     await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
   });
 
-  describe('extractionMode guard: query output must not change across flag states until priority logic is added', () => {
+  describe('single variant guard: the process split must not reach the single process', () => {
     it.each(Object.values(EntityType.enum))(
-      '%s: extractionMode=single output is byte-identical to default',
+      '%s: the single variant renders no extraction gate',
       (type) => {
-        const baseParams = {
+        const query = buildLogsExtractionEsqlQuery({
           indexPatterns: ['test-index-*'],
           latestIndex: 'latest-index',
           entityDefinition: getEntityDefinition(type, 'default'),
           docsLimit: 10000,
           fromDateISO: '2022-01-01T00:00:00.000Z',
           toDateISO: '2022-01-01T23:59:59.999Z',
-        };
-        expect(buildLogsExtractionEsqlQuery({ ...baseParams, extractionMode: 'single' })).toBe(
-          buildLogsExtractionEsqlQuery(baseParams)
-        );
+        });
+        // The gate is the only clause the variants add to the source WHERE, so an unchanged
+        // source clause is what keeps the single process byte-identical.
+        const sourceClause = query.split('| EVAL')[0];
+        expect(sourceClause).not.toContain('event.kind');
       }
     );
+  });
 
-    it.each(Object.values(EntityType.enum))(
-      '%s: extractionMode=priority output is byte-identical to single (no priority query logic yet)',
-      (type) => {
-        const baseParams = {
-          indexPatterns: ['test-index-*'],
-          latestIndex: 'latest-index',
-          entityDefinition: getEntityDefinition(type, 'default'),
-          docsLimit: 10000,
-          fromDateISO: '2022-01-01T00:00:00.000Z',
-          toDateISO: '2022-01-01T23:59:59.999Z',
-        };
-        expect(buildLogsExtractionEsqlQuery({ ...baseParams, extractionMode: 'priority' })).toBe(
-          buildLogsExtractionEsqlQuery({ ...baseParams, extractionMode: 'single' })
-        );
-      }
-    );
+  describe('user extraction variants', () => {
+    const buildForMode = (extractionMode: 'single' | 'priority' | 'nonPriority') =>
+      buildLogsExtractionEsqlQuery({
+        indexPatterns: ['test-index-*'],
+        latestIndex: 'latest-index',
+        entityDefinition: getEntityDefinition('user', 'default', extractionMode),
+        docsLimit: 10000,
+        fromDateISO: '2022-01-01T00:00:00.000Z',
+        toDateISO: '2022-01-01T23:59:59.999Z',
+      });
+
+    const sourceClauseOf = (query: string) => query.split('| EVAL')[0];
+
+    it('priority gates on asset documents', () => {
+      expect(sourceClauseOf(buildForMode('priority'))).toContain(
+        'AND (MV_CONTAINS(TO_STRING(event.kind), "asset"))'
+      );
+    });
+
+    it('nonPriority gates on the complement, including documents without event.kind', () => {
+      expect(sourceClauseOf(buildForMode('nonPriority'))).toContain(
+        'AND (TO_STRING(event.kind) IS NULL OR NOT (MV_CONTAINS(TO_STRING(event.kind), "asset")))'
+      );
+    });
+
+    it('both variants differ from single only in the source WHERE clause', () => {
+      const single = buildForMode('single');
+      const afterSourceClause = (query: string) => query.slice(sourceClauseOf(query).length);
+
+      expect(afterSourceClause(buildForMode('priority'))).toBe(afterSourceClause(single));
+      expect(afterSourceClause(buildForMode('nonPriority'))).toBe(afterSourceClause(single));
+    });
   });
 
   it('inserts whenConditionTrueSetFieldsAfterStats EVAL after LOOKUP and before merge EVAL', () => {

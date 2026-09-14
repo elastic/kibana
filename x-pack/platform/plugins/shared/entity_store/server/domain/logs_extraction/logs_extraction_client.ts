@@ -790,7 +790,6 @@ export class LogsExtractionClient {
         pagination,
         logsPageCursorStart,
         logsPageCursorEnd,
-        extractionMode: this.extractionMode,
       });
 
       this.logger.debug(

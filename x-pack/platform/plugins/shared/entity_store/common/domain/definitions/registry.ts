@@ -10,7 +10,11 @@ import assert from 'assert';
 import type { EntityType, ExtractionMode } from './entity_schema';
 import { type EntityDefinitionWithoutId, type ManagedEntityDefinition } from './entity_schema';
 import { hostEntityDefinition } from './host';
-import { userEntityDefinition } from './user';
+import {
+  userEntityDefinition,
+  userNonPriorityEntityDefinition,
+  userPriorityEntityDefinition,
+} from './user';
 import { serviceEntityDefinition } from './service';
 import { genericEntityDefinition } from './generic';
 
@@ -29,7 +33,11 @@ type EntityDefinitionVariants =
 
 const entitiesDefinitionRegistry = {
   host: { single: hostEntityDefinition },
-  user: { single: userEntityDefinition },
+  user: {
+    single: userEntityDefinition,
+    priority: userPriorityEntityDefinition,
+    nonPriority: userNonPriorityEntityDefinition,
+  },
   service: { single: serviceEntityDefinition },
   generic: { single: genericEntityDefinition },
 } as const satisfies Record<EntityType, EntityDefinitionVariants>;
@@ -45,7 +53,14 @@ const getEntityDefinitionVariants = (type: EntityType): EntityDefinitionVariants
 export const hasPriorityVariant = (type: EntityType): boolean =>
   getEntityDefinitionVariants(type).priority !== undefined;
 
-/** 'nonPriority' is excluded: the non-priority task hardcodes its own identity directly. */
+/**
+ * 'nonPriority' is excluded: the non-priority task hardcodes its own identity directly.
+ *
+ * Enabling the flag for a type sends it down the priority variant, which scans only the documents
+ * its gate admits. The complement is reached solely by the non-priority task, so the flag is safe
+ * to enable only once that task is scheduled for the type; a registered priority variant on its own
+ * is not enough.
+ */
 export const resolveExtractionMode = (
   isDualProcessEnabled: boolean,
   entityType: EntityType
