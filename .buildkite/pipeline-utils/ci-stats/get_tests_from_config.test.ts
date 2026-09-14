@@ -19,7 +19,7 @@ jest.mock('#pipeline-utils', () => ({
   getKibanaDir: () => tmpRoot,
 }));
 
-import { filterEmptyJestConfigs } from './get_tests_from_config';
+import { filterEmptyJestConfigs } from './get_tests_from_config.ts';
 
 /** Write a file (and any parent dirs) under the fixture root. */
 const write = (relPath: string, contents: string) => {
