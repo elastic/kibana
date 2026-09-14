@@ -14,6 +14,7 @@
     "@kbn/i18n",
     "@kbn/workflows-management-plugin",
     "@kbn/security-plugin",
+    "@kbn/spaces-plugin",
     "@kbn/zod",
     "@kbn/core-http-server",
     "@kbn/management-settings-ids",
@@ -21,6 +22,7 @@
     "@kbn/core-http-server-mocks",
     "@kbn/workflows",
     "@kbn/workflows-yaml",
-    "@kbn/agent-builder-plugin"
+    "@kbn/agent-builder-plugin",
+    "@kbn/spaces-plugin"
   ]
 }

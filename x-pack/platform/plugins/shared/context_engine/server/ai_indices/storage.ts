@@ -13,14 +13,20 @@ import type {
   AiIndexDest,
   AiIndexFeedbackAnalysis,
   AiIndexSource,
+  AiIndexTrace,
 } from '../../common/http_api/ai_indices';
 
 export const aiIndicesIndexName = '.contextengine-ai-indices';
+
+export const buildAiIndexDocId = (spaceId: string, aiIndexId: string): string =>
+  `${spaceId}:${aiIndexId}`;
 
 const storageSettings = {
   name: aiIndicesIndexName,
   schema: {
     properties: {
+      id: types.keyword({}),
+      space: types.keyword({}),
       description: types.text({}),
       managed: types.boolean({}),
       date_created: types.date({}),
@@ -34,6 +40,7 @@ const storageSettings = {
       sources: types.object({
         properties: { type: types.keyword({}), value: types.keyword({}) },
       }),
+      traces: types.object({ properties: { type: types.keyword({}), value: types.keyword({}) } }),
       feedback_analysis: types.object({
         properties: {
           enabled: types.boolean({}),
@@ -56,6 +63,8 @@ const storageSettings = {
 } satisfies IndexStorageSettings;
 
 export interface AiIndexDocument {
+  id: string;
+  space: string;
   description?: string;
   feedback_analysis?: AiIndexFeedbackAnalysis;
   // Optional for backward compatibility with entries written before managed
@@ -66,6 +75,7 @@ export interface AiIndexDocument {
   dest: AiIndexDest;
   automations: AiIndexAutomation[];
   sources: AiIndexSource[];
+  traces: AiIndexTrace[];
 }
 
 export type AiIndexStorageSettings = typeof storageSettings;
