@@ -6,10 +6,15 @@
  */
 
 import type { AttachmentInput, AttachmentRefActor } from '@kbn/agent-builder-common/attachments';
-import { getLatestVersion, getContentKey } from '@kbn/agent-builder-common/attachments';
+import {
+  getLatestVersion,
+  getContentKey,
+  hashContent,
+} from '@kbn/agent-builder-common/attachments';
 import type {
   AttachmentResolveContext,
   AttachmentStateManager,
+  AttachmentValidateContext,
 } from '@kbn/agent-builder-server/attachments';
 
 /**
@@ -22,12 +27,14 @@ export const mergeAttachmentInputs = async ({
   inputs,
   actor,
   resolveContext,
+  validateContext,
   updateOriginSnapshot,
 }: {
   stateManager: AttachmentStateManager;
   inputs: AttachmentInput[];
   actor: AttachmentRefActor;
   resolveContext: AttachmentResolveContext;
+  validateContext?: AttachmentValidateContext;
   updateOriginSnapshot?: boolean;
 }): Promise<void> => {
   if (inputs.length === 0) {
@@ -47,10 +54,19 @@ export const mergeAttachmentInputs = async ({
     const existing = id ? stateManager.getAttachmentRecord(id) : undefined;
 
     if (id && existing) {
+      // Skip revalidation when the content is unchanged.
+      const dataUnchanged =
+        input.data !== undefined &&
+        getLatestVersion(existing)?.content_hash === hashContent(input.data);
+
       await stateManager.update(
         id,
-        { data: input.data, ...(input.hidden !== undefined ? { hidden: input.hidden } : {}) },
-        actor
+        {
+          ...(dataUnchanged ? {} : { data: input.data }),
+          ...(input.hidden !== undefined ? { hidden: input.hidden } : {}),
+        },
+        actor,
+        validateContext
       );
 
       if (updateOriginSnapshot && existing.origin !== undefined) {
@@ -75,7 +91,8 @@ export const mergeAttachmentInputs = async ({
         ...(input.group_id !== undefined ? { group_id: input.group_id } : {}),
       },
       actor,
-      resolveContext
+      resolveContext,
+      validateContext
     );
 
     const latest = getLatestVersion(created);

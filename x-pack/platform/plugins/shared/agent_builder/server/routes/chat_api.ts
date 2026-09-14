@@ -11,7 +11,6 @@ import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { createBadRequestError } from '@kbn/agent-builder-common';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type {
   ChatRequestBodyPayload,
   ChatConverseResponse,
@@ -22,8 +21,9 @@ import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
-import { getConverseHelpers } from './converse_helpers';
+import { getConverseHelpers, filterEventsNativeApiEvents } from './converse_helpers';
 import { findConversationEvent } from '../services/execution/utils/chat_response';
+import { validateAttachmentInputs } from '../services/attachments/validate_attachment_inputs';
 import { chatPayloadSchema, userMessagePayloadSchema, conversePayloadSchema } from './chat';
 
 /**
@@ -103,12 +103,11 @@ export function registerChatApiRoutes({
             const { attachments: attachmentsService, conversations: conversationsService } =
               getInternalServices();
 
-            let attachments: AttachmentInput[] | undefined;
-            try {
-              attachments = await attachmentsService.validate(attachmentInputs, request);
-            } catch (error) {
-              throw createBadRequestError(error instanceof Error ? error.message : String(error));
-            }
+            const attachments = await validateAttachmentInputs({
+              attachmentsService,
+              attachments: attachmentInputs,
+              request,
+            });
 
             const body = await conversationsService.appendUserMessage({
               request,
@@ -192,10 +191,12 @@ export function registerChatApiRoutes({
             executionService,
           });
 
+          const nativeEvents$ = chatEvents$.pipe(filterEventsNativeApiEvents());
+
           return response.ok({
             headers: getSSEResponseHeaders(),
             body: observableIntoEventSourceStream(
-              chatEvents$ as unknown as Observable<ServerSentEvent>,
+              nativeEvents$ as unknown as Observable<ServerSentEvent>,
               {
                 signal: abortController.signal,
                 flushThrottleMs: 100,

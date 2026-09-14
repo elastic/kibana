@@ -15,16 +15,17 @@ import type {
   AttachmentTypeDefinition,
 } from '@kbn/agent-builder-server/attachments';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ValidateAttachmentResult } from './validate_attachment';
 
 export interface AttachmentServiceSetup {
   registerType(attachmentType: AttachmentTypeDefinition): void;
 }
 
 export interface AttachmentServiceStart {
-  validate(
-    attachments: AttachmentInput[] | undefined,
+  validate<Type extends string, Data>(
+    attachment: AttachmentInput<Type, Data>,
     request: KibanaRequest
-  ): Promise<AttachmentInput[] | undefined>;
+  ): Promise<ValidateAttachmentResult<Type, Data>>;
   getTypeDefinition(type: string): AttachmentTypeDefinition | undefined;
   getRegisteredTypeIds(): string[];
   createStateManager(attachments: VersionedAttachment[]): AttachmentStateManager;

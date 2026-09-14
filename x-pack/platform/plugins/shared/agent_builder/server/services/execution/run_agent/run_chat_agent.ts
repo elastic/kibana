@@ -19,6 +19,7 @@ import type {
   ConversationRound,
   MetadataFieldValue,
   RoundInput,
+  SubagentEntry,
 } from '@kbn/agent-builder-common';
 import { ToolOrigin } from '@kbn/agent-builder-common';
 import {
@@ -285,6 +286,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     parentConversationId: conversation?.id,
     subagentTracker,
     conversationExists: (id: string) => conversationClient.exists(id),
+    agentConfiguration,
   });
 
   // Then add dynamic tools
@@ -501,6 +503,22 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   } catch (err) {
     logger.error(`Failed to flush filesystem state after round: ${err.message ?? err}`);
   }
+
+  // Fire post-round hooks (nonBlocking — round is already streamed, hooks run fire-and-forget).
+  // The try/catch is defensive; nonBlocking hooks should never throw to the runner.
+  try {
+    await context.hooks.run(HookLifecycle.afterExecution, {
+      request,
+      abortSignal,
+      agentId,
+      round,
+      conversationId: conversation?.id,
+      agentConfiguration,
+    });
+  } catch (err) {
+    logger.error(`After-round hooks failed: ${err instanceof Error ? err.message : String(err)}`);
+  }
+
   return {
     round,
   };
@@ -519,7 +537,7 @@ const getConversationState = ({
   backgroundExecutionService: BackgroundExecutionService;
   compactionSummary?: CompactionSummary;
   todoStateManager: TodoStateManager;
-  subagents?: Record<string, string>;
+  subagents?: Record<string, SubagentEntry>;
 }): ConversationInternalState => {
   const bgState = backgroundExecutionService.getPendingState();
   const todos = todoStateManager.get();

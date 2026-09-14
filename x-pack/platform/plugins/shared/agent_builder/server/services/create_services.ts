@@ -123,6 +123,7 @@ export class ServiceManager {
     trackingService,
     analyticsService,
     searchInferenceEndpoints,
+    deductiveRegister,
     conversationEventBus,
   }: ServicesStartDeps & { conversationEventBus?: ConversationEventBus }): InternalStartServices {
     if (!this.services) {
@@ -229,6 +230,7 @@ export class ServiceManager {
       getExecutionService,
       searchInferenceEndpoints,
       conversationTemplates: conversationTemplatesStart,
+      deductiveRegister,
     });
     runner = runnerFactory.getRunner();
 

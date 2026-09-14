@@ -12,6 +12,7 @@ import type {
   ConverseInput,
   RoundInput,
   MetadataFieldValue,
+  SubagentEntry,
   TimelineEvent,
 } from '@kbn/agent-builder-common';
 import { createBadRequestError, TimelineEventType } from '@kbn/agent-builder-common';
@@ -21,6 +22,7 @@ import type { ProcessedAttachmentType, ProcessedRoundInput } from '@kbn/agent-bu
 import type {
   AttachmentResolveContext,
   AttachmentStateManager,
+  AttachmentValidateContext,
 } from '@kbn/agent-builder-server/attachments';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server/agents';
 
@@ -47,7 +49,7 @@ export interface ProcessedConversation {
   /** Compaction summary covering older rounds that were replaced by this summary */
   compactionSummary?: CompactionSummary;
   /** Persistent sub-agent roster */
-  subagentRosterFallback?: Record<string, string>;
+  subagentRosterFallback?: Record<string, SubagentEntry>;
   /**
    * Deserialized metadata from the active conversation template.
    * Populated from `conversation.metadata` at prepare time so prompt factories
@@ -111,6 +113,9 @@ export const prepareConversation = async ({
     spaceId: context.spaceId,
     savedObjectsClient: context.savedObjectsClient,
   };
+  const validateContext: AttachmentValidateContext = {
+    request: context.request,
+  };
 
   // Handle regenerate action: use last round's input and strip it from the timeline
   const { effectiveRounds, effectiveNextInput } = prepareForAction({
@@ -134,6 +139,7 @@ export const prepareConversation = async ({
         inputs: input.attachments,
         actor: ATTACHMENT_REF_ACTOR.user,
         resolveContext,
+        validateContext,
       });
     }
     const attachmentRefs = mergeAttachmentRefs(
@@ -169,6 +175,7 @@ export const prepareConversation = async ({
     inputs: nextInputAttachments,
     actor: ATTACHMENT_REF_ACTOR.user,
     resolveContext,
+    validateContext,
     updateOriginSnapshot: true,
   });
   const nextInputAccessedRefs = attachmentStateManager.getAccessedRefs();

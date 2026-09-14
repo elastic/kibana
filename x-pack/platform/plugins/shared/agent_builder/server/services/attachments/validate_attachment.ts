@@ -5,60 +5,59 @@
  * 2.0.
  */
 
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type {
   AttachmentResolveContext,
   AttachmentTypeDefinition,
+  AttachmentValidateContext,
 } from '@kbn/agent-builder-server/attachments';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { AttachmentTypeRegistry } from './attachment_type_registry';
 
-export const validateAttachments = async ({
-  attachments,
+export type ValidateAttachmentResult<Type extends string, Data> =
+  | { valid: true; attachment: Attachment<Type, Data> }
+  | { valid: false; error: string };
+
+export const validateAttachment = async <Type extends string, Data>({
+  attachment,
   registry,
   resolveContext,
+  validateContext,
 }: {
-  attachments: AttachmentInput[] | undefined;
+  attachment: AttachmentInput<Type, Data>;
   registry: AttachmentTypeRegistry;
   resolveContext: AttachmentResolveContext;
-}): Promise<AttachmentInput[] | undefined> => {
-  if (!attachments || attachments.length === 0) {
-    return undefined;
+  validateContext: AttachmentValidateContext;
+}): Promise<ValidateAttachmentResult<Type, Data>> => {
+  if (!registry.has(attachment.type)) {
+    return { valid: false, error: `Unknown attachment type: ${attachment.type}` };
   }
 
-  const validated: AttachmentInput[] = [];
+  const typeDefinition = registry.get(attachment.type)!;
 
-  for (const attachment of attachments) {
-    if (!registry.has(attachment.type)) {
-      throw new Error(`Attachment validation failed: Unknown attachment type: ${attachment.type}`);
+  try {
+    const resolvedData = await resolveAttachment({ attachment, resolveContext, typeDefinition });
+    const typeValidation = await typeDefinition.validate(resolvedData, validateContext);
+    if (!typeValidation.valid) {
+      return { valid: false, error: typeValidation.error };
     }
 
-    const typeDefinition = registry.get(attachment.type)!;
-
-    try {
-      const resolvedData = await resolveAttachment({ attachment, resolveContext, typeDefinition });
-      const typeValidation = await typeDefinition.validate(resolvedData);
-
-      if (!typeValidation.valid) {
-        throw new Error(typeValidation.error);
-      }
-
-      validated.push({
+    return {
+      valid: true,
+      attachment: {
         id: attachment.id ?? getToolResultId(),
         type: attachment.type,
-        data: typeValidation.data,
+        data: typeValidation.data as Data,
         hidden: attachment.hidden,
         ...(attachment.origin !== undefined ? { origin: attachment.origin } : {}),
         ...(attachment.description !== undefined ? { description: attachment.description } : {}),
-        ...(attachment.group_id !== undefined ? { group_id: attachment.group_id } : {}),
-      });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      throw new Error(`Attachment validation failed: ${message}`);
-    }
+        ...(attachment.group_id !== undefined ? { groupId: attachment.group_id } : {}),
+      },
+    };
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    return { valid: false, error: `Error during attachment validation: ${message}` };
   }
-
-  return validated;
 };
 
 const resolveAttachment = async <Type extends string, Data>({

@@ -17,7 +17,7 @@ import {
   type AttachmentTypeRegistry,
 } from './attachment_type_registry';
 import type { AttachmentServiceSetup, AttachmentServiceStart } from './types';
-import { validateAttachments } from './validate_attachment';
+import { validateAttachment } from './validate_attachment';
 import { mergeAttachmentInputs } from './merge_attachment_inputs';
 
 export interface AttachmentServiceStartDeps {
@@ -63,11 +63,12 @@ export class AttachmentServiceImpl implements AttachmentService {
     });
 
     return {
-      validate: (attachments, request) => {
-        return validateAttachments({
-          attachments,
+      validate: (attachment, request) => {
+        return validateAttachment({
+          attachment,
           registry: this.attachmentTypeRegistry,
           resolveContext: resolveContext(request),
+          validateContext: { request },
         });
       },
       createStateManager: (attachments) =>
@@ -81,6 +82,7 @@ export class AttachmentServiceImpl implements AttachmentService {
           actor,
           updateOriginSnapshot,
           resolveContext: resolveContext(request),
+          validateContext: { request },
         }),
       getTypeDefinition: (attachment) => {
         return this.attachmentTypeRegistry.get(attachment);

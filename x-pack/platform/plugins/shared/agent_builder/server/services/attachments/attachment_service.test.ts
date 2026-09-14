@@ -56,7 +56,7 @@ describe('AttachmentService', () => {
   });
 
   describe('#start', () => {
-    it('validates and normalizes attachment inputs', async () => {
+    it('validates and normalizes an attachment input', async () => {
       isAllowedBuiltinAttachmentMock.mockReturnValue(true);
 
       const serviceSetup = service.setup();
@@ -73,49 +73,38 @@ describe('AttachmentService', () => {
 
       await expect(
         serviceStart.validate(
-          [
-            {
-              type: 'test-attachment',
-              data: { text: 'context' },
-              description: 'Context attachment',
-              hidden: true,
-              origin: 'saved-object:1',
-              group_id: 'group-1',
-            },
-          ],
+          {
+            type: 'test-attachment',
+            data: { text: 'context' },
+            description: 'Context attachment',
+            hidden: true,
+            origin: 'saved-object:1',
+            group_id: 'group-1',
+          },
           request
         )
-      ).resolves.toEqual([
-        {
+      ).resolves.toEqual({
+        valid: true,
+        attachment: {
           id: expect.any(String),
           type: 'test-attachment',
           data: { text: 'validated' },
           description: 'Context attachment',
           hidden: true,
           origin: 'saved-object:1',
-          group_id: 'group-1',
+          groupId: 'group-1',
         },
-      ]);
+      });
     });
 
-    it('returns undefined when there are no attachment inputs', async () => {
+    it('reports unknown attachment types as invalid', async () => {
       const serviceStart = service.start({
         savedObjects: savedObjectsServiceMock.createStartContract(),
       });
-      const request = httpServerMock.createKibanaRequest();
 
-      await expect(serviceStart.validate(undefined, request)).resolves.toBeUndefined();
-    });
-
-    it('throws an error for invalid attachment inputs', async () => {
-      const serviceStart = service.start({
-        savedObjects: savedObjectsServiceMock.createStartContract(),
-      });
-      const request = httpServerMock.createKibanaRequest();
-
-      await expect(serviceStart.validate([{ type: 'bad', data: {} }], request)).rejects.toThrow(
-        'Attachment validation failed: Unknown attachment type: bad'
-      );
+      await expect(
+        serviceStart.validate({ type: 'bad', data: {} }, httpServerMock.createKibanaRequest())
+      ).resolves.toEqual({ valid: false, error: 'Unknown attachment type: bad' });
     });
   });
 });

@@ -6,11 +6,18 @@
  */
 
 import { registerChatRoutes } from './chat';
-import { of, throwError } from 'rxjs';
+import { firstValueFrom, of, Subject, throwError, toArray } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { ChatEventType } from '@kbn/agent-builder-common';
+import { ChatEventType, TimelineEventType } from '@kbn/agent-builder-common';
 import { chatApiPath } from '../../common/constants';
 import { registerChatApiRoutes } from './chat_api';
+
+const mockObservableIntoEventSourceStream = jest.fn();
+jest.mock('@kbn/sse-utils-server', () => ({
+  observableIntoEventSourceStream: (observable: unknown, options: unknown) =>
+    mockObservableIntoEventSourceStream(observable, options),
+  cloudProxyBufferSize: 4096,
+}));
 
 const conversationCreatedEvent = {
   type: ChatEventType.conversationCreated,
@@ -196,6 +203,84 @@ describe('registerChatApiRoutes', () => {
     expect(result.status).toBe(500);
   });
 
+  it('streams the events-native shape: keeps execution_started + execution_terminated, drops round_complete', async () => {
+    const { router, handlers } = captureHandlers();
+    const roundCompleteEvent = { type: ChatEventType.roundComplete, data: {} };
+    const executionStartedEvent = {
+      id: 'r::execution_started',
+      type: TimelineEventType.executionStarted,
+      created_at: '2024-01-01T00:00:00.000Z',
+      actor: { type: 'agent', id: 'a' },
+      execution_id: 'r::execution',
+      trigger_event_id: 'r::user_message',
+      data: { trigger_type: 'user_message' },
+    };
+    const executionTerminatedEvent = {
+      id: 'r::execution_terminated',
+      type: TimelineEventType.executionTerminated,
+      created_at: '2024-01-01T00:00:00.000Z',
+      actor: { type: 'agent', id: 'a' },
+      execution_id: 'r::execution',
+      trigger_event_id: 'r::user_message',
+      data: {},
+    };
+    const conversationUpdated = {
+      type: ChatEventType.conversationUpdated,
+      data: {
+        conversation_id: 'c',
+        title: 't',
+        access_control: { access_mode: 'private', entries: [] },
+      },
+    };
+    const executeAgent = jest.fn().mockResolvedValue({
+      events$: of(
+        roundCompleteEvent,
+        executionStartedEvent,
+        executionTerminatedEvent,
+        conversationUpdated
+      ),
+    });
+    mockObservableIntoEventSourceStream.mockReset();
+    mockObservableIntoEventSourceStream.mockReturnValue('BODY');
+
+    registerChatApiRoutes({
+      router,
+      getInternalServices: jest.fn().mockReturnValue({
+        execution: { executeAgent },
+        conversations: { getScopedClient: jest.fn() },
+      }),
+      coreSetup: {
+        getStartServices: jest.fn().mockResolvedValue([{}, { cloud: { isCloudEnabled: false } }]),
+      },
+      pluginsSetup: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const response = buildResponse();
+    const abortedSubject = new Subject<void>();
+    await handlers[`${chatApiPath}/converse/async`](
+      activeContext(true),
+      {
+        body: { agent_id: 'agent-1', input: 'Hello' },
+        events: { aborted$: abortedSubject.asObservable() },
+      },
+      response
+    );
+
+    expect(mockObservableIntoEventSourceStream).toHaveBeenCalledTimes(1);
+    const [passedObservable] = mockObservableIntoEventSourceStream.mock.calls[0] as [
+      { pipe: (...operators: any[]) => any }
+    ];
+    const emitted = (await firstValueFrom(passedObservable.pipe(toArray()))) as Array<{
+      type: string;
+    }>;
+    expect(emitted.map((event) => event.type)).toEqual([
+      TimelineEventType.executionStarted,
+      TimelineEventType.executionTerminated,
+      ChatEventType.conversationUpdated,
+    ]);
+  });
+
   it('404s the streaming route when the experimental feature flag is disabled', async () => {
     const { router, handlers } = captureHandlers();
     const executeAgent = jest.fn();
@@ -274,7 +359,7 @@ describe('user message acknowledgements', () => {
       response
     );
     expect(result.status).toBe(200);
-    expect(services.attachments.validate).toHaveBeenCalledWith(undefined, expect.any(Object));
+    expect(services.attachments.validate).not.toHaveBeenCalled();
     expect(appendUserMessage).toHaveBeenCalledTimes(1);
     expect(result.payload).toEqual(conversation);
     expect(executeAgent).not.toHaveBeenCalled();
@@ -337,9 +422,7 @@ describe('user message acknowledgements', () => {
         getTypeDefinition: jest.fn(),
         validate: jest
           .fn()
-          .mockRejectedValue(
-            new Error('Attachment validation failed: Unknown attachment type: bad')
-          ),
+          .mockResolvedValue({ valid: false, error: 'Unknown attachment type: bad' }),
       },
     };
 

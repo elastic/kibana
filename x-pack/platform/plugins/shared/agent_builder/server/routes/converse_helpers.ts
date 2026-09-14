@@ -5,8 +5,17 @@
  * 2.0.
  */
 
+import type { MonoTypeOperatorFunction } from 'rxjs';
+import { filter } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { createBadRequestError, AgentExecutionMode } from '@kbn/agent-builder-common';
+import type { ChatEvent } from '@kbn/agent-builder-common';
+import {
+  createBadRequestError,
+  AgentExecutionMode,
+  isExecutionStartedEvent,
+  isExecutionTerminatedEvent,
+  isRoundCompleteEvent,
+} from '@kbn/agent-builder-common';
 import type {
   AgentExecutionService,
   ExecutionConversationOrigin,
@@ -19,6 +28,14 @@ import type { ChatRequestBodyPayload } from '../../common/http_api/chat';
 import { validateToolSelection } from '../services/agents/persisted/client/utils/tools';
 import { validateSkillIds } from '../services/agents/persisted/client/utils/skills';
 import type { RouteDependencies } from './types';
+
+export const filterLegacyApiEvents = (): MonoTypeOperatorFunction<ChatEvent> =>
+  filter(
+    (event: ChatEvent) => !isExecutionStartedEvent(event) && !isExecutionTerminatedEvent(event)
+  );
+
+export const filterEventsNativeApiEvents = (): MonoTypeOperatorFunction<ChatEvent> =>
+  filter((event: ChatEvent) => !isRoundCompleteEvent(event));
 
 export interface ResolvedExecutionOptions {
   useTaskManager: boolean | undefined;
@@ -123,6 +140,7 @@ export const getConverseHelpers = ({
       configuration_overrides: configurationOverrides,
       action,
       project_routing: projectRouting,
+      reasoning_level: reasoningLevel,
     } = payload;
 
     const connectorId = resolveConnectorIdFromPayload(payload);
@@ -148,6 +166,7 @@ export const getConverseHelpers = ({
         configurationOverrides,
         action,
         projectRouting,
+        reasoningLevel,
         nextInput: {
           message: input,
           prompts,
