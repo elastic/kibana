@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
-const SELECT_COLUMN_LABEL = i18n.translate('esqlUtils.valuesPreview.selectAColumnText', {
+const SELECT_COLUMN_LABEL = i18n.translate('esqlBrowser.valuesPreview.selectAColumnText', {
   defaultMessage: 'Select a column',
 });
 
@@ -68,7 +68,7 @@ export const ESQLValuesPreview: React.FC<{
     return (
       <KbnDangerCallout
         announceOnMount
-        title={i18n.translate('esqlUtils.valuesPreview.errorTitle', {
+        title={i18n.translate('esqlBrowser.valuesPreview.errorTitle', {
           defaultMessage: 'Error getting values preview',
         })}
         size="s"
@@ -81,14 +81,14 @@ export const ESQLValuesPreview: React.FC<{
     return (
       <KbnWarningCallout
         announceOnMount
-        title={i18n.translate('esqlUtils.valuesPreview.multiColumnErrorTitle', {
+        title={i18n.translate('esqlBrowser.valuesPreview.multiColumnErrorTitle', {
           defaultMessage: 'Query must return a single column',
         })}
         size="s"
         data-test-subj="esqlMoreThanOneColumnCallout"
         text={
           <FormattedMessage
-            id="esqlUtils.valuesPreview.multiColumnErrorBody"
+            id="esqlBrowser.valuesPreview.multiColumnErrorBody"
             defaultMessage="Your query is currently returning {totalColumns} columns. Choose a column, or use {statsBy} to narrow your query down."
             values={{
               totalColumns: columns.length,
@@ -102,7 +102,7 @@ export const ESQLValuesPreview: React.FC<{
             onClick: () => setIsColumnPopoverOpen((v) => !v),
             'data-test-subj': 'chooseColumnBtn',
             popoverProps: {
-              'aria-label': i18n.translate('esqlUtils.valuesPreview.columnsListLabel', {
+              'aria-label': i18n.translate('esqlBrowser.valuesPreview.columnsListLabel', {
                 defaultMessage: 'Columns',
               }),
               isOpen: isColumnPopoverOpen,
@@ -137,12 +137,12 @@ export const ESQLValuesPreview: React.FC<{
     return (
       <KbnWarningCallout
         announceOnMount
-        title={i18n.translate('esqlUtils.valuesPreview.emptyTitle', {
+        title={i18n.translate('esqlBrowser.valuesPreview.emptyTitle', {
           defaultMessage: 'No values returned',
         })}
         size="s"
         data-test-subj="esqlNoValuesForControlCallout"
-        text={i18n.translate('esqlUtils.valuesPreview.emptyText', {
+        text={i18n.translate('esqlBrowser.valuesPreview.emptyText', {
           defaultMessage: "This query isn't returning any values. Edit it and run it again.",
         })}
       />
@@ -155,14 +155,14 @@ export const ESQLValuesPreview: React.FC<{
         <EuiStat
           titleSize="s"
           title={range.min}
-          description={i18n.translate('esqlUtils.valuesPreview.minText', {
+          description={i18n.translate('esqlBrowser.valuesPreview.minText', {
             defaultMessage: 'Minimum value',
           })}
         />
         <EuiStat
           titleSize="s"
           title={range.max}
-          description={i18n.translate('esqlUtils.valuesPreview.maxText', {
+          description={i18n.translate('esqlBrowser.valuesPreview.maxText', {
             defaultMessage: 'Maximum value',
           })}
         />
@@ -182,7 +182,7 @@ export const ESQLValuesPreview: React.FC<{
       </EuiBadgeGroup>
       {hiddenCount > 0 && (
         <p>
-          {i18n.translate('esqlUtils.valuesPreview.hiddenCount', {
+          {i18n.translate('esqlBrowser.valuesPreview.hiddenCount', {
             defaultMessage: '+{hiddenCount} more',
             values: { hiddenCount },
           })}
