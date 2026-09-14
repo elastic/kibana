@@ -143,7 +143,12 @@ describe('ESQLValuesPreview', () => {
       const updateQuery = jest.fn();
       const { getByTestId, getByText } = render(
         <I18nProvider>
-          <ESQLValuesPreview {...noopProps} updateQuery={updateQuery} values={[]} columns={multiColumns} />
+          <ESQLValuesPreview
+            {...noopProps}
+            updateQuery={updateQuery}
+            values={[]}
+            columns={multiColumns}
+          />
         </I18nProvider>
       );
 
