@@ -60,7 +60,7 @@ const callHandler = async (
 describe('createUpdateCustomContentTool handler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockResolver.mockResolvedValue('<div>generated</div>');
+    mockResolver.mockResolvedValue({ template: '<div>generated</div>', height: 320 });
   });
 
   describe('missing attachment', () => {

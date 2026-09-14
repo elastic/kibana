@@ -16,4 +16,13 @@ export {
 } from './src/utils/get_pvalue_impact';
 export type { PvalueImpactLevel } from './src/utils/get_pvalue_impact';
 export { ChangePointChartForRow } from './src/change_point_chart_for_row';
+export {
+  buildChangePointCards,
+  formatAnnotationTimestamp,
+  getCardForRow,
+  getChangePointRowTimestamp,
+  getEntityKey,
+  isChangePointTableRow,
+} from './src/utils/derive_change_point_cards';
+export type { ChangePointCardModel } from './src/utils/derive_change_point_cards';
 export type { ChangePointChartForRowProps } from './src/change_point_chart_for_row';

@@ -72,7 +72,7 @@ it('provides the live attachment registry at registration without remounting tab
     rounds: [],
     template_id: 'test',
   };
-  const props = { conversationTemplatesService, titleId: 'title' };
+  const props = { conversationTemplatesService, titleId: 'title', isOpenedFromChat: false };
   const { rerender } = render(
     <ConversationDetailsFlyoutContent {...props} conversation={conversation} />,
     { wrapper: EuiProvider }
