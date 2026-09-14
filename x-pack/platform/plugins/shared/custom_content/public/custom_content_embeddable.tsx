@@ -420,6 +420,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
           const sub = agentBuilder.events.ui.activeConversation$
             .pipe(
+              distinctUntilChanged((a, b) => a?.id === b?.id),
               switchMap((conversation) =>
                 conversation?.id
                   ? agentBuilder.events.getChatEvents$(conversation.id).pipe(
