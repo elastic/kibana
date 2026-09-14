@@ -7,7 +7,11 @@
 
 import { Subject } from 'rxjs';
 import type { ChatEvent, ConversationRound } from '@kbn/agent-builder-common';
-import { ChatEventType, ConversationRoundStatus } from '@kbn/agent-builder-common';
+import {
+  ChatEventType,
+  ConversationRoundStatus,
+  ConversationRoundStepType,
+} from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { ConversationActions } from '../conversation/use_conversation_actions';
 import { subscribeToChatEvents } from './use_subscribe_to_chat_events';
@@ -29,6 +33,7 @@ const buildActionsMock = (): jest.Mocked<ConversationActions> =>
     setAskUserQuestionAnswers: jest.fn(),
     onConversationCreated: jest.fn(),
     addBackgroundExecutionCompleteStep: jest.fn(),
+    addSubstitutionStep: jest.fn(),
     addOrUpdateTodosStep: jest.fn(),
     setAttachments: jest.fn(),
     addCompactionStep: jest.fn(),
@@ -123,5 +128,55 @@ describe('subscribeToChatEvents — roundComplete', () => {
     await done;
 
     expect(conversationActions.setAttachments).not.toHaveBeenCalled();
+  });
+});
+
+describe('subscribeToChatEvents — context management', () => {
+  it('appends a substitution step on substitution_applied', async () => {
+    const events$ = new Subject<ChatEvent>();
+    const conversationActions = buildActionsMock();
+
+    const done = subscribeToChatEvents({ events$, conversationActions, isAborted: () => false });
+
+    events$.next({
+      type: ChatEventType.substitutionApplied,
+      data: {
+        substituted_tool_call_ids: ['c1'],
+        trigger: 'intra_round',
+        reason: 'input_tokens_threshold',
+      },
+    });
+    events$.complete();
+    await done;
+
+    expect(conversationActions.addSubstitutionStep).toHaveBeenCalledWith({
+      step: {
+        type: ConversationRoundStepType.substitution,
+        substituted_tool_call_ids: ['c1'],
+        trigger: 'intra_round',
+        reason: 'input_tokens_threshold',
+      },
+    });
+  });
+
+  it('completes the compaction step with the cycle count', async () => {
+    const events$ = new Subject<ChatEvent>();
+    const conversationActions = buildActionsMock();
+
+    const done = subscribeToChatEvents({ events$, conversationActions, isAborted: () => false });
+
+    events$.next({ type: ChatEventType.compactionStarted, data: { token_count_before: 100 } });
+    events$.next({
+      type: ChatEventType.compactionCompleted,
+      data: { token_count_before: 100, token_count_after: 40, summarized_cycle_count: 3 },
+    });
+    events$.complete();
+    await done;
+
+    expect(conversationActions.addCompactionStep).toHaveBeenCalledWith({ tokenCountBefore: 100 });
+    expect(conversationActions.setCompactionStepComplete).toHaveBeenCalledWith({
+      tokenCountAfter: 40,
+      summarizedCycleCount: 3,
+    });
   });
 });

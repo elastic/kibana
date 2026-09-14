@@ -12000,7 +12000,6 @@
     "xpack.agentBuilder.roundEvents.steps.backgroundAgent.completed": "后台代理已完成",
     "xpack.agentBuilder.roundEvents.steps.backgroundAgent.failed": "背景智能体 {status}",
     "xpack.agentBuilder.roundEvents.steps.backgroundAgent.viewJson": "查看 JSON",
-    "xpack.agentBuilder.roundEvents.steps.compaction.complete": "上下文精简： {before} → {after} 词元，{count, plural, one {# round} other {# 轮}}",
     "xpack.agentBuilder.roundEvents.steps.compaction.inProgress": "正在精简语境",
     "xpack.agentBuilder.roundEvents.steps.toolCall.ariaLabel": "工具调用",
     "xpack.agentBuilder.roundEvents.subAgentExecutionFlyout.errorTitle": "执行错误",

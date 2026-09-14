@@ -7,7 +7,7 @@
 
 import { END as _END_, START as _START_, StateGraph } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
-import type { BaseMessage } from '@langchain/core/messages';
+import type { AIMessageChunk, BaseMessage } from '@langchain/core/messages';
 import type { Logger } from '@kbn/core/server';
 import type { ChatCompleteCacheControl } from '@kbn/inference-common';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
@@ -26,10 +26,14 @@ import {
 } from '@kbn/agent-builder-common';
 import type { ResolvedConfiguration } from './types';
 import type { ResearchAgentAction } from './actions';
-import { convertError, isRecoverableError } from './utils/errors';
+import { convertError, isContextLengthError, isRecoverableError } from './utils/errors';
+import {
+  createContextManagementNode,
+  type ContextManagementDeps,
+} from './utils/context_management';
 import type { PromptFactory } from './prompts';
 import { getRandomThinkingMessage } from './i18n';
-import { steps, tags, BACKGROUND_CHECK_CYCLE_INTERVAL } from './constants';
+import { steps, tags, BACKGROUND_CHECK_CYCLE_INTERVAL, MAX_CONTEXT_RETRY_COUNT } from './constants';
 import type { BackgroundExecutionService } from './background_execution_service';
 import type { StateType } from './state';
 import { StateAnnotation } from './state';
@@ -40,7 +44,9 @@ import {
   handoverAction,
   backgroundExecutionCompleteAction,
   subagentRosterUpdatedAction,
+  contextLengthErrorAction,
   isAgentErrorAction,
+  isContextLengthErrorAction,
   isHandoverAction,
   isStructuredAnswerAction,
   isToolCallAction,
@@ -67,6 +73,7 @@ export const createAgentGraph = ({
   roundId,
   sessionId,
   cacheControl,
+  contextManagement,
 }: {
   chatModel: InferenceChatModel;
   toolManager: ToolManager;
@@ -83,10 +90,13 @@ export const createAgentGraph = ({
   /** Optional session ID forwarded to EIS for prompt-cache scoping. Non-EIS endpoints ignore it. */
   sessionId?: string;
   cacheControl?: ChatCompleteCacheControl;
+  contextManagement: ContextManagementDeps;
 }) => {
   const init = async () => {
     return {};
   };
+
+  const contextManagementNode = createContextManagementNode(contextManagement);
 
   const checkBackgroundWork = async (state: StateType) => {
     // Only check at the beginning (cycle 0) and every BACKGROUND_CHECK_CYCLE_INTERVAL cycles
@@ -133,11 +143,14 @@ export const createAgentGraph = ({
         await promptFactory.getMainPrompt({
           cycleLimit: state.cycleLimit,
           actions: state.mainActions,
+          compactionSummary: state.compactionSummary,
+          compactionCoverage: state.compactionCoverage,
         })
       );
 
       const currentCycle = state.currentCycle + 1;
       const action = processResearchResponse(response, { cycle: currentCycle });
+      const inputTokens = extractInputTokens(response);
 
       return {
         mainActions: [action],
@@ -145,9 +158,20 @@ export const createAgentGraph = ({
         // Successful inference calls can still produce recoverable error actions,
         // which must count toward the retry limit.
         errorCount: isAgentErrorAction(action) ? state.errorCount + 1 : 0,
+        contextRetryCount: 0,
+        ...(inputTokens !== undefined ? { lastCallUsage: { inputTokens } } : {}),
       };
     } catch (error) {
       const executionError = convertError(error);
+      if (isContextLengthError(executionError)) {
+        if (state.contextRetryCount >= MAX_CONTEXT_RETRY_COUNT) {
+          throw executionError;
+        }
+        return {
+          mainActions: [contextLengthErrorAction(executionError)],
+          contextRetryCount: state.contextRetryCount + 1,
+        };
+      }
       if (isRecoverableError(executionError)) {
         return {
           mainActions: [errorAction(executionError)],
@@ -162,6 +186,9 @@ export const createAgentGraph = ({
   const researchAgentEdge = async (state: StateType) => {
     const lastAction = state.mainActions[state.mainActions.length - 1];
 
+    if (isContextLengthErrorAction(lastAction)) {
+      return steps.contextManagement;
+    }
     if (isAgentErrorAction(lastAction)) {
       if (state.errorCount <= MAX_ERROR_COUNT) {
         return steps.researchAgent;
@@ -303,13 +330,15 @@ export const createAgentGraph = ({
   const graphBuilder = new StateGraph(StateAnnotation)
     .addNode(steps.init, init)
     .addNode(steps.checkBackgroundWork, checkBackgroundWork)
+    .addNode(steps.contextManagement, contextManagementNode)
     .addNode(steps.researchAgent, researchAgent)
     .addNode(steps.executeTool, executeTool)
     .addNode(steps.handleToolInterrupt, handleToolInterrupt)
     .addNode(steps.finalize, finalize)
     .addEdge(_START_, steps.init)
     .addEdge(steps.init, steps.checkBackgroundWork)
-    .addEdge(steps.checkBackgroundWork, steps.researchAgent)
+    .addEdge(steps.checkBackgroundWork, steps.contextManagement)
+    .addEdge(steps.contextManagement, steps.researchAgent)
     .addConditionalEdges(steps.executeTool, executeToolEdge, {
       [steps.checkBackgroundWork]: steps.checkBackgroundWork,
       [steps.handleToolInterrupt]: steps.handleToolInterrupt,
@@ -323,6 +352,7 @@ export const createAgentGraph = ({
       .addNode(steps.answerAgent, answerAgentStructured)
       .addConditionalEdges(steps.researchAgent, researchAgentEdge, {
         [steps.researchAgent]: steps.researchAgent,
+        [steps.contextManagement]: steps.contextManagement,
         [steps.executeTool]: steps.executeTool,
         [steps.prepareToAnswer]: steps.prepareToAnswer,
       })
@@ -334,6 +364,7 @@ export const createAgentGraph = ({
   } else {
     graphBuilder.addConditionalEdges(steps.researchAgent, researchAgentEdge, {
       [steps.researchAgent]: steps.researchAgent,
+      [steps.contextManagement]: steps.contextManagement,
       [steps.executeTool]: steps.executeTool,
       [steps.finalize]: steps.finalize,
     });
@@ -360,6 +391,11 @@ const getPriorPurposes = (processedConversation: ProcessedConversation): Record<
       .map((e: SubagentRosterEntry) => [e.name, e.purpose as string])
   );
 };
+
+/** Total prompt tokens (incl. cached) of the call, from the LangChain usage metadata. */
+const extractInputTokens = (response: AIMessageChunk): number | undefined =>
+  response.usage_metadata?.input_tokens ??
+  (response.response_metadata as { usage?: { prompt?: number } } | undefined)?.usage?.prompt;
 
 const invalidState = (message: string) => {
   return createAgentExecutionError(message, ErrCodes.invalidState, {});

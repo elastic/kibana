@@ -7,10 +7,12 @@
 
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { getStructuredAnswerPrompt } from './answer_agent';
-import { prepareMessages } from '../utils/to_langchain_messages';
+import { buildVisibleContext } from '../utils/visible_context';
 
-jest.mock('../utils/to_langchain_messages', () => ({
-  prepareMessages: jest.fn().mockResolvedValue([['human', 'history']]),
+jest.mock('../utils/visible_context', () => ({
+  buildVisibleContext: jest
+    .fn()
+    .mockResolvedValue({ history: [['human', 'history']], inFlight: [] }),
 }));
 
 describe('getStructuredAnswerPrompt', () => {
@@ -41,7 +43,7 @@ describe('getStructuredAnswerPrompt', () => {
       answerActions: [],
       cycleLimit: 1,
       experimentalFeatures: { bash: false, skills: false },
-      toolManager: {} as any,
+      toolManager: { getToolIdMapping: () => new Map() } as any,
       resultTransformer: jest.fn(),
     } as any;
 
@@ -49,8 +51,9 @@ describe('getStructuredAnswerPrompt', () => {
 
     const systemMessage = (messages[0] as ['system', string])[1];
     expect(systemMessage).not.toContain('Current date');
-    expect(prepareMessages).toHaveBeenCalledWith(
-      expect.objectContaining({ conversationTimestamp: now })
+    expect(buildVisibleContext).toHaveBeenCalledWith(
+      expect.objectContaining({ conversationTimestamp: now }),
+      expect.anything()
     );
   });
 
@@ -79,7 +82,7 @@ describe('getStructuredAnswerPrompt', () => {
       answerActions: [],
       cycleLimit: 1,
       experimentalFeatures: { bash: false, skills: false },
-      toolManager: {} as any,
+      toolManager: { getToolIdMapping: () => new Map() } as any,
       resultTransformer: jest.fn(),
     } as any;
 
