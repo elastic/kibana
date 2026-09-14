@@ -885,7 +885,7 @@ def provision(model: str, shard: Optional[str] = None) -> str:
                 # model on a tag so teardown/debugging can still identify the box
                 # without leaking the identity into cluster host entities.
                 "--tags", f"model={model_slug(model)}",
-                "--public-ip-sku", "Standard", "--os-disk-size-gb", "128", "--no-wait"]
+                "--public-ip-sku", "Standard", "--os-disk-size-gb", "256", "--no-wait"]
         if priority == "Spot":
             args += ["--eviction-policy", "Deallocate", "--priority", "Spot"]
         az(*args)
@@ -1750,6 +1750,80 @@ def _resolve_from_golden(model: str, ip: str) -> dict:
         return {"error": f"golden fallback failed: {exc}"}
 
 
+def check_args_coverage(execution_id: str, ip: str) -> dict:
+    """gen_ai.tool.call.arguments coverage on this execution's traces.
+
+    Two-step (spans link by top-level trace_id, NOT execution_id, and
+    task.output.traceId is in _source but NOT indexed — exists-query returns
+    0, verified 2026-09-13):
+      1. score docs of this execution -> _source task.output.traceId set
+      2. span agg on terms trace_id: tool spans (either attr shape) and
+         the subset carrying gen_ai.tool.call.arguments
+    Discrimination proven: Sep-7 claude-5-sonnet exec -> 325/346 with args;
+    Sep-1 bulk haiku exec -> 0 tool spans on its traces (the exact gap this
+    rerun wave exists to fill). Errors degrade to -1s and FAIL the unit —
+    never silently pass.
+
+    Runs DRIVER-SIDE (like _golden_count_local): units are parked before
+    this gate, so an ssh probe would land on a deallocated VM or use the
+    VM's stale golden env copy (2026-09-14 canary: security_exception on
+    ssh probe while the driver-side doc count was fine).
+    """
+    if not execution_id:
+        return {"traces": 0, "tool_spans": -1, "with_args": -1,
+                "error": "no execution_id"}
+    url, key = _golden_env_local()
+    if not url or not key:
+        return {"traces": 0, "tool_spans": -1, "with_args": -1,
+                "error": "driver cannot reach golden env"}
+
+    def _es(path, body):
+        out = subprocess.run(
+            ["curl", "-sS", "-m", "60",
+             "-H", f"Authorization: ApiKey {key}",
+             f"{url}{path}",
+             "-H", "Content-Type: application/json",
+             "-d", json.dumps(body)],
+            capture_output=True, text=True, timeout=90,
+        ).stdout
+        return json.loads(out.splitlines()[-1])
+
+    tids = set()
+    try:
+        r = _es("/.ds-.evaluation-scores*/_search", {
+            "size": 200,
+            "query": {"match_phrase": {"metadata.execution_id": execution_id}},
+            "_source": ["task.output.traceId"]})
+        for h in r["hits"]["hits"]:
+            t = (h["_source"].get("task", {}).get("output", {}) or {}).get("traceId")
+            if t:
+                tids.add(t)
+    except Exception:
+        return {"traces": 0, "tool_spans": -1, "with_args": -1,
+                "error": "traceId fetch failed (driver-side)"}
+    if not tids:
+        return {"traces": 0, "tool_spans": 0, "with_args": 0}
+    try:
+        r = _es("/.ds-traces-generic.otel-default*,.ds-traces-agent_builder.otel-default*/_search", {
+            "size": 0,
+            "query": {"terms": {"trace_id": sorted(tids)}},
+            "aggs": {
+                "tools": {"filter": {"bool": {"should": [
+                    {"exists": {"field": "attributes.gen_ai.tool.name"}},
+                    {"exists": {"field": "gen_ai.tool.name"}},
+                ], "minimum_should_match": 1}},
+                    "aggs": {"with_args": {"filter": {"bool": {"should": [
+                        {"exists": {"field": "attributes.gen_ai.tool.call.arguments"}},
+                        {"exists": {"field": "gen_ai.tool.call.arguments"}},
+                    ], "minimum_should_match": 1}}}}}}})
+        return {"traces": len(tids),
+                "tool_spans": r["aggregations"]["tools"]["doc_count"],
+                "with_args": r["aggregations"]["tools"]["with_args"]["doc_count"]}
+    except Exception:
+        return {"traces": len(tids), "tool_spans": -1, "with_args": -1,
+                "error": "span agg failed (driver-side)"}
+
+
 def check_golden(model: str, ip: str, shard: Optional[str] = None) -> dict:
     """Completeness gate: docs on golden for this model's LATEST execution.
 
@@ -2288,6 +2362,13 @@ def main() -> int:
         # count on the VM (21 examples x (evaluators + 1 task doc) x reps).
         expected_docs = result.get("expected", -1)
         count = result.get("count", -1)
+        # Args-coverage probe: the whole POINT of this rerun wave is
+        # gen_ai.tool.call.arguments spans on the new executions. A doc-count
+        # gate alone would pass a run whose tracing regressed to arg-less
+        # spans (exactly the state the old board's 1,946 dark tool steps are
+        # in). Count tool spans carrying the field on this execution's
+        # traces; the canonical golden-side check is span-side.
+        args_probe = check_args_coverage(result.get("execution_id") or "", ip)
         # Never green on unresolved numbers: count == expected == -1 would
         # otherwise PASS a run that produced nothing (observed when the spec
         # overlay missed tool_registration_check.ts and every run died at
@@ -2303,14 +2384,17 @@ def main() -> int:
             and isinstance(count, int)
             and count > 0
             and meets
+            and args_probe.get("with_args", -1) > 0
             else "FAIL"
         )
         json.dump({"ip": ip, "model": model, "shard": shard, "state": state,
                    "docs": result.get("count", -1), "rc": rc,
                    "execution_id": result.get("execution_id"),
+                   "args": args_probe,
                    "error": result.get("error")},
                   open(model_dir(model, shard=shard) / "status.json", "w"), indent=2)
         print(f"[done] {_label(model, shard)}: {state} docs={result.get('count', -1)}/{expected_docs}"
+              + f" args={args_probe.get('with_args', -1)}/{args_probe.get('tool_spans', -1)}"
               + (f" ({result['error']})" if result.get("error") else ""), flush=True)
         # Free the unit's cores as soon as its golden gate is settled, rather
         # than at end-of-sweep. Two quota exhaustions on 2026-09-06 were caused
