@@ -70,6 +70,7 @@
     "@kbn/content-management-table-list-view-common",
     "@kbn/shared-ux-utility",
     "@kbn/shared-ux-ai-components",
+    "@kbn/ui-ai-components",
     "@kbn/core-test-helpers-model-versions",
     "@kbn/deeplinks-analytics",
     "@kbn/react-kibana-context-render",
@@ -87,6 +88,7 @@
     "@kbn/visualization-utils",
     "@kbn/core-rendering-browser",
     "@kbn/grid-layout",
+    "@kbn/rxjs-history",
     "@kbn/ui-actions-browser",
     "@kbn/esql-types",
     "@kbn/saved-objects-tagging-plugin",
@@ -106,7 +108,6 @@
     "@kbn/react-query",
     "@kbn/core-http-server",
     "@kbn/core-chrome-layout-utils",
-    "@kbn/core-chrome-layout-constants",
     "@kbn/cps",
     "@kbn/as-code-filters-schema",
     "@kbn/as-code-filters-transforms",
@@ -133,7 +134,5 @@
     "@kbn/ui-callout",
     "@kbn/zod-helpers",
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

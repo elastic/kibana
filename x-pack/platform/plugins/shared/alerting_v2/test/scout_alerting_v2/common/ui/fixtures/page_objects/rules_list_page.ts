@@ -16,6 +16,10 @@ export class RulesListPage {
   public readonly ruleSummaryFlyout: Locator;
   /** Header "Create rule" split button; hidden for read-only users. */
   public readonly createRuleButton: Locator;
+  /** Heading tab linking to the classic (v1) Rules page; hidden without v1 read access. */
+  public readonly v1RulesTab: Locator;
+  /** Heading tab for this (v2) Rules page; hidden alongside v1RulesTab when only one would show. */
+  public readonly v2RulesTab: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.tagsFilterButton = this.page.testSubj.locator('rulesListTagsFilter');
@@ -25,6 +29,8 @@ export class RulesListPage {
     this.rulesListTable = this.page.testSubj.locator('rulesListTable');
     this.ruleSummaryFlyout = this.page.testSubj.locator('ruleSummaryFlyout');
     this.createRuleButton = this.page.testSubj.locator('createRuleButton');
+    this.v1RulesTab = this.page.testSubj.locator('v1RulesTab');
+    this.v2RulesTab = this.page.testSubj.locator('v2RulesTab');
   }
 
   async goto() {

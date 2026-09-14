@@ -44,7 +44,6 @@ export type {
   YaraCompiledRuleMeta,
   YaraDiagnostic,
   YaraDiagnosticSeverity,
-  YaraMetaKeyOfInterest,
   YaraValidateResult,
 } from './types';
 export { getYaraEngineVersion, setYaraLogger, validateYaraRule } from './validate_yara_rule';

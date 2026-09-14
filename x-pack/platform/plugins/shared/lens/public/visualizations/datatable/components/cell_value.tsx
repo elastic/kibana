@@ -257,23 +257,22 @@ export const createGridCell = (
         );
 
       case 'link': {
-        const backgroundColor =
-          colorMode === 'cell' && !isEmptyValue(rawValue)
-            ? getCellColor(columnId, palette, colorMapping)(rawValue)
-            : null;
         const linkContent =
           formatter && isMissingValue(rawValue)
             ? formatter.convertToReact(rawValue)
             : formatter?.convertToText(rawValue) ?? fallbackText;
-        const baseColor = euiTheme.colors.link;
-        // Only adjust link contrast when the cell background is colored (colorMode: cell).
+        const backgroundColor =
+          colorMode === 'cell' && !isEmptyValue(rawValue)
+            ? getCellColor(columnId, palette, colorMapping)(rawValue)
+            : null;
+        // Only override EuiLink color when the cell background is colored (colorMode: cell).
         const linkColor =
           colorMode === 'cell' && backgroundColor
             ? makeHighContrastColor(
-                isDarkMode ? euiTheme.colors.highlight : baseColor, // preferred foreground
+                isDarkMode ? euiTheme.colors.highlight : euiTheme.colors.textPrimary,
                 4.5 // WCAG AA contrast ratio (default in EUI)
               )(backgroundColor)
-            : baseColor;
+            : undefined;
 
         return (
           <LinkCell

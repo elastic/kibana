@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Artifact } from '../buildkite/types/artifact';
-import type { TestFailure } from './annotate';
-import { getAnnotation, getSlackMessage, getPrComment } from './annotate';
+import type { Artifact } from '../buildkite/types/artifact.ts';
+import type { TestFailure } from './annotate.ts';
+import { getAnnotation, getSlackMessage, getPrComment } from './annotate.ts';
 
 let mockFailure: TestFailure;
 let mockArtifacts: Record<string, Artifact>;
