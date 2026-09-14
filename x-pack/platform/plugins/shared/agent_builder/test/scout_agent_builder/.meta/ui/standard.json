@@ -1,5 +1,5 @@
 {
-  "sha1": "92f7c2f6abfd417cbfdd0db4b3e7d93284342dd5",
+  "sha1": "bc77ee6843450787728c0c0c23c94ff3739755ce",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -519,7 +519,7 @@
     {
       "id": "95554bbabdfb9b7-13af72ec4c5ef00",
       "title": "Agent Builder — sidebar conversation flow embeddable sidebar conversation flow",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -528,7 +528,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/sidebar_conversation_flow.spec.ts",
-        "line": 22,
+        "line": 23,
         "column": 28
       }
     },
