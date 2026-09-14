@@ -324,7 +324,8 @@ describe('createSubagentTool', () => {
       const conversationExists = jest.fn().mockResolvedValue(false);
 
       const tool = createSubagentTool({
-        agentId: 'test-agent',
+        ownerAgentId: 'test-agent',
+        allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
         executionId: 'parent-exec',
         subAgentExecutor: {
           executeSubAgent: jest.fn(),
@@ -386,7 +387,8 @@ describe('createSubagentTool', () => {
       const conversationExists = jest.fn().mockResolvedValue(true);
 
       const tool = createSubagentTool({
-        agentId: 'test-agent',
+        ownerAgentId: 'test-agent',
+        allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
         executionId: 'parent-exec',
         subAgentExecutor: {
           executeSubAgent: jest.fn(),
@@ -438,7 +440,8 @@ describe('createSubagentTool', () => {
       const conversationExists = jest.fn().mockResolvedValue(false);
 
       const tool = createSubagentTool({
-        agentId: 'test-agent',
+        ownerAgentId: 'test-agent',
+        allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
         executionId: 'parent-exec',
         subAgentExecutor: {
           executeSubAgent: jest.fn(),
@@ -485,7 +488,8 @@ describe('createSubagentTool', () => {
       });
 
       const tool = createSubagentTool({
-        agentId: 'test-agent',
+        ownerAgentId: 'test-agent',
+        allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
         executionId: 'parent-exec',
         subAgentExecutor: {
           executeSubAgent: jest.fn(),
@@ -529,7 +533,8 @@ describe('createSubagentTool', () => {
 
     it('returns error when persistent creation is invoked without tracker or parent conversation', async () => {
       const tool = createSubagentTool({
-        agentId: 'test-agent',
+        ownerAgentId: 'test-agent',
+        allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
         executionId: 'parent-exec',
         subAgentExecutor: {
           executeSubAgent: jest.fn(),
