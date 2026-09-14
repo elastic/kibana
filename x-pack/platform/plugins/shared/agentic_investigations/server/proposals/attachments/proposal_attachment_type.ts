@@ -75,25 +75,17 @@ export const proposalAttachmentType: AttachmentTypeDefinition = {
 
   validate: (input) => {
     const result = proposalAttachmentDataSchema.safeParse(input);
-    // eslint-disable-next-line no-console
-    console.log('[proposal_attachment] validate input:', JSON.stringify(input, null, 2));
     if (result.success) {
-      // eslint-disable-next-line no-console
-      console.log('[proposal_attachment] validate OK, id:', result.data.id);
       return { valid: true, data: result.data };
     }
-    // eslint-disable-next-line no-console
-    console.error('[proposal_attachment] validate FAILED:', result.error.message);
     return { valid: false, error: result.error.message };
   },
 
   format: (attachment) => ({
-    getRepresentation: () => {
-      const value = formatProposalForAgent(attachment.data as ProposalAttachmentData);
-      // eslint-disable-next-line no-console
-      console.log('[proposal_attachment] format output:\n', value);
-      return { type: 'text', value };
-    },
+    getRepresentation: () => ({
+      type: 'text',
+      value: formatProposalForAgent(attachment.data as ProposalAttachmentData),
+    }),
   }),
 
   getAgentDescription: () =>
