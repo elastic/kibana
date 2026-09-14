@@ -6,6 +6,7 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
+import type { KibanaAssetReference } from '@kbn/fleet-plugin/common';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
@@ -39,8 +40,10 @@ beforeEach(() => {
 // The canonical package ID for [Metrics AWS] Overview, as shipped in elastic/integrations.
 const OVERVIEW_ID = 'aws-fac28650-7349-11e9-816b-07687310a99a';
 
-const primaryRef = { id: OVERVIEW_ID, type: 'dashboard' as const };
-const otherRef = { id: 'aws-ec2-id', type: 'dashboard' as const };
+// Cast as KibanaAssetReference — avoids assigning the string literal 'dashboard' to the
+// KibanaSavedObjectType enum under CI's tsconfig.type_check.json compiled resolution.
+const primaryRef = { id: OVERVIEW_ID, type: 'dashboard' } as KibanaAssetReference;
+const otherRef = { id: 'aws-ec2-id', type: 'dashboard' } as KibanaAssetReference;
 
 describe('useAwsOverviewDashboardUrl', () => {
   it('returns undefined when installationInfo is undefined', async () => {
@@ -90,7 +93,9 @@ describe('useAwsOverviewDashboardUrl', () => {
         installed_kibana: [primaryRef], // primary space refs (different space)
         installed_kibana_space_id: 'default',
         additional_spaces_installed_kibana: {
-          'my-space': [{ id: SPACE_LOCAL_ID, originId: OVERVIEW_ID, type: 'dashboard' as const }],
+          'my-space': [
+            { id: SPACE_LOCAL_ID, originId: OVERVIEW_ID, type: 'dashboard' } as KibanaAssetReference,
+          ],
         },
       };
       const { result } = renderHook(() => useAwsOverviewDashboardUrl(info));
@@ -114,9 +119,7 @@ describe('useAwsOverviewDashboardUrl', () => {
         installed_kibana: [primaryRef],
         installed_kibana_space_id: 'default',
         additional_spaces_installed_kibana: {
-          'my-space': [
-            { id: 'some-other-uuid', originId: 'aws-ec2-id', type: 'dashboard' as const },
-          ],
+          'my-space': [{ id: 'some-other-uuid', originId: 'aws-ec2-id', type: 'dashboard' } as KibanaAssetReference],
         },
       };
       const { result } = renderHook(() => useAwsOverviewDashboardUrl(info));
