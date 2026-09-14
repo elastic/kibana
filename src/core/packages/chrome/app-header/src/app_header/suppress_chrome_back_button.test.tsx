@@ -17,7 +17,7 @@ describe('SuppressChromeBackButton', () => {
   it('registers back: false when Chrome Next project style is active', () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.getChromeStyle.mockReturnValue('project');
-    chrome.next.appHeader.set.mockReturnValue(jest.fn());
+    chrome.appHeader.set.mockReturnValue(jest.fn());
 
     render(
       <ChromeServiceProvider value={{ chrome }}>
@@ -25,7 +25,7 @@ describe('SuppressChromeBackButton', () => {
       </ChromeServiceProvider>
     );
 
-    expect(chrome.next.appHeader.set).toHaveBeenCalledWith({
+    expect(chrome.appHeader.set).toHaveBeenCalledWith({
       title: undefined,
       back: false,
       tabs: undefined,
@@ -39,7 +39,7 @@ describe('SuppressChromeBackButton', () => {
   it('does not register outside Chrome Next project style', () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.getChromeStyle.mockReturnValue('classic');
-    chrome.next.appHeader.set.mockReturnValue(jest.fn());
+    chrome.appHeader.set.mockReturnValue(jest.fn());
 
     render(
       <ChromeServiceProvider value={{ chrome }}>
@@ -47,6 +47,6 @@ describe('SuppressChromeBackButton', () => {
       </ChromeServiceProvider>
     );
 
-    expect(chrome.next.appHeader.set).not.toHaveBeenCalled();
+    expect(chrome.appHeader.set).not.toHaveBeenCalled();
   });
 });

@@ -31,6 +31,7 @@ export const queryKeys = {
   },
   security: {
     users: ['security', 'users'] as const,
+    currentUser: ['security', 'currentUser'] as const,
     suggestUsers: (query: string) => ['security', 'users', 'suggest', query] as const,
     roles: ['security', 'roles'] as const,
     userProfiles: (uids: string[]) => ['security', 'userProfiles', uids] as const,

@@ -76,11 +76,13 @@ spaceTest.describe('preserve url', { tag: '@local-stateful-classic' }, () => {
       await page.gotoApp('discover');
       await pageObjects.discover.waitUntilTabIsLoaded();
       await pageObjects.discover.saveSearch('Space Search');
+      await expect(page).toHaveURL(/#\/view\//);
 
       // Switch to another space, save a different search there
       await page.goto(kbnUrl.get(`/s/${anotherSpaceId}/app/discover`));
       await pageObjects.discover.waitUntilTabIsLoaded();
       await pageObjects.discover.saveSearch('Another Space Search');
+      await expect(page).toHaveURL(/#\/view\//);
 
       // Navigate to worker space Dashboards, then click Discover nav link — restores URL per space
       await page.goto(kbnUrl.get(`/s/${scoutSpace.id}/app/dashboards`));

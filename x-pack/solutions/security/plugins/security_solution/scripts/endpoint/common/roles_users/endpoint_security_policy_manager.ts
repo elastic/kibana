@@ -6,6 +6,7 @@
  */
 
 import type { Role } from '@kbn/security-plugin/common';
+import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 import { getNoResponseActionsRole } from './without_response_actions_role';
 
 export const getEndpointSecurityPolicyManager: () => Omit<Role, 'name'> = () => {
@@ -35,6 +36,34 @@ export const getEndpointSecurityPolicyManager: () => Omit<Role, 'name'> = () => 
           securitySolutionRulesV2: ['all'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
+        },
+      },
+    ],
+  };
+};
+
+/** Policy manager with one artifact type set to read or removed. */
+export const getEndpointSecurityPolicyManagerArtifactRole = (
+  privilegePrefix: string,
+  access: 'read' | 'none'
+): Omit<Role, 'name'> => {
+  const baseRole = getEndpointSecurityPolicyManager();
+  const featureId =
+    Object.keys(baseRole.kibana[0].feature).find((feature) => feature.startsWith('siem')) ??
+    SECURITY_FEATURE_ID;
+  const siemPrivileges = baseRole.kibana[0].feature[featureId].filter(
+    (privilege) => privilege !== `${privilegePrefix}all`
+  );
+
+  return {
+    ...baseRole,
+    kibana: [
+      {
+        ...baseRole.kibana[0],
+        feature: {
+          ...baseRole.kibana[0].feature,
+          [featureId]:
+            access === 'read' ? [...siemPrivileges, `${privilegePrefix}read`] : siemPrivileges,
         },
       },
     ],

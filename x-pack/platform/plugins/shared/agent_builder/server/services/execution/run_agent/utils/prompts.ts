@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import type { Conversation, ConversationRound } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import type { ConversationRound, TimelineEvent } from '@kbn/agent-builder-common';
+import { eventsToRounds } from '../../../conversation/client/events_to_rounds';
+import { groupTimelineRounds, isAwaitingPrompt } from './context_timeline';
 
-export const getPendingRound = (
-  conversation: Conversation | undefined
-): ConversationRound | undefined => {
-  const lastRound = conversation?.rounds[conversation.rounds.length - 1];
-  if (lastRound?.status === ConversationRoundStatus.awaitingPrompt) {
-    return lastRound;
+/**
+ * The round paused for human input, when the last round is one. Only that round is reconstructed,
+ * as a `ConversationRound`, because resuming (merging the follow-up, replaying pending actions)
+ * operates on the rounds model.
+ */
+export const getPendingRound = (timeline: TimelineEvent[]): ConversationRound | undefined => {
+  const rounds = groupTimelineRounds(timeline);
+  const lastRound = rounds[rounds.length - 1];
+  if (!lastRound || !isAwaitingPrompt(lastRound)) {
+    return undefined;
   }
-  return undefined;
+  return eventsToRounds(lastRound.events)[0];
 };

@@ -158,6 +158,12 @@ const eventsWriteItemsSchema = z
 
 export const eventsWriteSchema = z
   .object({
+    source: z
+      .literal('discovery')
+      .optional()
+      .describe(
+        'Identifies the caller of this write. Discovery calls must set this to "discovery".'
+      ),
     items: eventsWriteItemsSchema,
   })
   .describe(
@@ -276,6 +282,8 @@ export function createEventsWriteTool({
       \`{ "items": [] }\`. If that missing-items argument error occurs, submit the
       already-completed object once. Do not retry a populated payload rejected for
       ownership or field validation.
+
+      Discovery calls must set top-level \`source\` to \`"discovery"\`.
 
       **With event_id**: append a version to an existing event with the supplied status.
       Signals and topology are merged with prior versions. No-op if severity and status are

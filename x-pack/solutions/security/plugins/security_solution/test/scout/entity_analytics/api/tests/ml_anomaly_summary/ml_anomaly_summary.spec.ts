@@ -60,8 +60,7 @@ const buildOverviewUrl = (entityEuid: string, entityType: 'user' | 'host'): stri
     encodeURIComponent(entityEuid)
   );
 
-// Failing: See https://github.com/elastic/kibana/issues/287531
-apiTest.describe.skip(
+apiTest.describe(
   'Entity ML Anomaly Detection APIs',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
@@ -134,38 +133,129 @@ apiTest.describe.skip(
       });
       packagePolicyId = packagePolicyRes.body?.item?.id ?? '';
 
-      // The pad-ml module registers asynchronously after the PAD integration install, so retry
-      // until it is recognized instead of firing a setup that fails silently before it exists.
-      const setupMlModuleWithRetry = async (
-        module: string,
-        body: Record<string, unknown>
-      ): Promise<void> => {
-        const maxAttempts = 10;
+      // The pad-ml module is registered asynchronously by the PAD integration install above, so it
+      // may not exist yet when we reach module setup. Rather than re-posting the setup *action* in a
+      // fixed window — which raced the install and gave up before it finished on real serverless
+      // projects — poll the module-registration read signal (`getModule`, the same module
+      // definitions `getSecurityMlJobIds` reads) until the module is present, then set it up once.
+      // security_auth is a built-in module and resolves on the first poll.
+      // NOTE: job/datafeed *creation* succeeding here is not sufficient — see
+      // `waitForDatafeedReady` below for why we still have to wait after this returns.
+      const waitForModuleRegistered = async (module: string): Promise<void> => {
+        const maxAttempts = 40;
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-          const response = await apiClient.post(`/internal/ml/modules/setup/${module}`, {
+          const response = await apiClient.get(`/internal/ml/modules/get_module/${module}`, {
             headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
             responseType: 'json',
-            body,
           });
-          const jobs: Array<{ success?: boolean; error?: { status?: number } }> =
-            response.body?.jobs ?? [];
-          const succeeded =
-            response.statusCode === 200 &&
-            jobs.length > 0 &&
-            jobs.every((job) => job.success || (job.error?.status ?? 500) < 500);
-          if (succeeded) {
+          if (response.statusCode === 200 && (response.body?.jobs?.length ?? 0) > 0) {
             return;
           }
           if (attempt < maxAttempts) {
             await setTimeoutAsync(3000);
           }
         }
-        throw new Error(`Failed to set up ML module "${module}" after ${maxAttempts} attempts`);
+        throw new Error(`ML module "${module}" was not registered in time`);
+      };
+
+      const setupMlModule = async (
+        module: string,
+        body: Record<string, unknown>
+      ): Promise<{ jobIds: string[]; datafeedIds: string[] }> => {
+        await waitForModuleRegistered(module);
+        const response = await apiClient.post(`/internal/ml/modules/setup/${module}`, {
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+          responseType: 'json',
+          body,
+        });
+        const jobs: Array<{ id?: string; success?: boolean; error?: { status?: number } }> =
+          response.body?.jobs ?? [];
+        const datafeeds: Array<{ id?: string; success?: boolean; error?: { status?: number } }> =
+          response.body?.datafeeds ?? [];
+
+        const jobsCreated =
+          jobs.length > 0 && jobs.every((job) => job.success || (job.error?.status ?? 500) < 500);
+        const datafeedsCreated =
+          datafeeds.length > 0 &&
+          datafeeds.every((df) => df.success || (df.error?.status ?? 500) < 500);
+
+        if (response.statusCode !== 200 || !jobsCreated || !datafeedsCreated) {
+          throw new Error(
+            `Failed to set up ML module "${module}" (status ${
+              response.statusCode
+            }): ${JSON.stringify(response.body)}`
+          );
+        }
+        return {
+          jobIds: jobs.map((job) => job.id).filter((id): id is string => Boolean(id)),
+          datafeedIds: datafeeds.map((df) => df.id).filter((id): id is string => Boolean(id)),
+        };
+      };
+
+      // Job/datafeed *creation* succeeding (checked above) does not mean the datafeed is
+      // actually running. Elasticsearch can accept the start request while ML compute is
+      // still scaling up from zero — normal on a project without a currently-running ML
+      // node, which is exactly the state a serverless project's ML tier starts in (ML node
+      // autoscaling is always-on there; see
+      // https://www.elastic.co/docs/explore-analyze/machine-learning/anomaly-detection/anomaly-detection-scale).
+      // Until the datafeed is actually assigned, the job's live `datafeed_config` (what
+      // get_job_config.ts reads to build `sourceIndex` for baseline enrichment) stays empty,
+      // and enrichment silently returns the anomaly unenriched — no error, just
+      // `baselineValues: []`. Re-posting module setup doesn't help at that point (starting an
+      // already-started datafeed 409s), so poll the live job/datafeed state directly instead
+      // of trusting the setup response alone.
+      const waitForDatafeedReady = async (
+        jobIds: string[],
+        datafeedIds: string[]
+      ): Promise<void> => {
+        const maxAttempts = 30;
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+          const jobsRes = await esClient.ml.getJobs({ job_id: jobIds.join(',') });
+          const jobsById = new Map((jobsRes.jobs ?? []).map((job) => [job.job_id, job]));
+          const notReady = jobIds.filter(
+            (id) => (jobsById.get(id)?.datafeed_config?.indices ?? []).length === 0
+          );
+
+          if (notReady.length === 0) {
+            return;
+          }
+
+          // DIAGNOSTIC: log the live datafeed state/assignment on every attempt, so a future
+          // MKI failure shows exactly what ML is doing instead of a bare
+          // `datafeed_config: undefined`.
+          try {
+            const statsRes = await esClient.ml.getDatafeedStats({
+              datafeed_id: datafeedIds.join(','),
+            });
+            log.info(
+              `Waiting for ML datafeed allocation (attempt ${attempt}/${maxAttempts}, ` +
+                `not ready: ${notReady.join(', ')}): ` +
+                `${JSON.stringify(
+                  (statsRes.datafeeds ?? []).map((df) => ({
+                    datafeed_id: df.datafeed_id,
+                    state: df.state,
+                    // Not populated on Elastic Cloud Serverless, but useful on stateful.
+                    node: df.node?.name,
+                    assignment_explanation: df.assignment_explanation,
+                  }))
+                )}`
+            );
+          } catch (err) {
+            log.debug(`[DIAG] Failed to fetch datafeed stats while waiting: ${err}`);
+          }
+
+          if (attempt < maxAttempts) {
+            await setTimeoutAsync(5000);
+          }
+        }
+        throw new Error(
+          `ML job(s) ${jobIds.join(', ')} did not receive an assigned datafeed_config in time`
+        );
       };
 
       // Create PAD ML jobs
       log.debug(`Setting up PAD ML jobs...`);
-      await setupMlModuleWithRetry('pad-ml', {
+      const padSetup = await setupMlModule('pad-ml', {
         prefix: '',
         groups: ['security', 'ftr'],
         indexPatternName: 'logs-*',
@@ -173,10 +263,12 @@ apiTest.describe.skip(
         startDatafeed: true,
         start: startMs,
       });
+      await waitForDatafeedReady(padSetup.jobIds, padSetup.datafeedIds);
 
       // DIAGNOSTIC (theory 1): verify the PAD ML job was created with a non-empty config.
-      // In MKI the job config has been theorised to be empty, which would cause baseline
-      // enrichment to silently fail.
+      // `waitForDatafeedReady` above already guarantees `datafeed_config` is populated by
+      // this point — if this ever logs "missing entirely" or an empty `indices` again, the
+      // wait itself (not just this one-off check) has a gap worth investigating.
       try {
         const padJobRes = await esClient.ml.getJobs({
           job_id: 'pad_windows_rare_region_name_by_user_ea',
@@ -196,6 +288,13 @@ apiTest.describe.skip(
               `[DIAG] WARNING: PAD job analysis_config.detectors is empty — theory 1 confirmed`
             );
           }
+          // Log the datafeed query so we can see exactly which events it includes.
+          // If the datafeed excludes event codes 4672/4673 (privilege events), the
+          // New York baseline events would not be found, producing baselineValues=[].
+          log.info(
+            `[DIAG] PAD datafeed: indices=${JSON.stringify(padJob.datafeed_config?.indices)}, ` +
+              `query=${JSON.stringify(padJob.datafeed_config?.query)}`
+          );
         }
       } catch (err) {
         log.info(`[DIAG] Failed to fetch PAD job config: ${err}`);
@@ -203,7 +302,7 @@ apiTest.describe.skip(
 
       // Create Security: Authentication ML jobs
       log.debug(`Setting up Security: Authentication ML jobs...`);
-      await setupMlModuleWithRetry('security_auth', {
+      const authSetup = await setupMlModule('security_auth', {
         prefix: '',
         groups: ['security', 'authentication', 'ftr'],
         indexPatternName: 'logs-*',
@@ -211,6 +310,7 @@ apiTest.describe.skip(
         startDatafeed: true,
         start: startMs,
       });
+      await waitForDatafeedReady(authSetup.jobIds, authSetup.datafeedIds);
 
       // Index source events that determine baseline behavior for the rare detector.
       log.debug(`Indexing test source events...`);
@@ -539,7 +639,7 @@ apiTest.describe.skip(
 
     apiTest(
       'Anomaly summary API: enriches anomalies with baseline values from source index',
-      async ({ apiClient }) => {
+      async ({ apiClient, log }) => {
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
@@ -548,6 +648,8 @@ apiTest.describe.skip(
 
         expect(response.statusCode).toBe(200);
         const body = response.body as AnomalySummaryResponse;
+
+        log.info(`anomaly summary response body: ${JSON.stringify(body)}`);
 
         const rareAnomaly = body.anomalies.find(
           (a) => a.jobId === 'pad_windows_rare_region_name_by_user_ea'

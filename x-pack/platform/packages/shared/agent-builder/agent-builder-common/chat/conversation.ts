@@ -496,6 +496,20 @@ export interface ConversationRoundAuthor {
   full_name?: string;
 }
 
+export const getConversationRoundAuthorDisplayName = (
+  author?: ConversationRoundAuthor
+): string | undefined => {
+  if (!author) {
+    return undefined;
+  }
+
+  if (author.full_name) {
+    return author.full_name;
+  }
+
+  return author.username;
+};
+
 /** External system the message comes from, for example Slack or GitHub. */
 export enum ConversationOriginType {
   Slack = 'slack',
@@ -658,9 +672,16 @@ export interface ConversationInternalState {
   /** Active todo list for the current conversation. Replaced wholesale on each write. */
   todos?: TodoItem[];
   /**
-   * Map of persistent sub-agent name → child conversation id.
+   * Map of persistent sub-agent name → sub agent entry describing the sub agent/run.
    */
-  subagents?: Record<string, string>;
+  subagents?: Record<string, SubagentEntry>;
+}
+
+export interface SubagentEntry {
+  /** ID of the child conversation. */
+  conversation_id: string;
+  /** Agent id backing this persistent sub-agent — either a real agent id or `SELF_AGENT_ID`. */
+  agent_id: string;
 }
 
 export interface BackgroundExecutionCompletedAt {

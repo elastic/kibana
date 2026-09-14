@@ -75,7 +75,7 @@ export const LENS_METRIC_STATE_DEFAULTS: MetricStateDefaults = {
   iconAlign: 'right',
   valueFontMode: 'default',
   density: 'default',
-  secondaryLabelPosition: 'before',
+  secondaryNameVisibility: 'hidden',
   applyColorTo: 'background',
 };
 

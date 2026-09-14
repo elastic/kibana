@@ -147,6 +147,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
   actions: {
     searchFiles: {
       isTool: true,
+      scope: 'read',
       description:
         "Search for files in Google Drive using Google's query syntax. Use this to find files by name, content, type, owner, or modification date across the entire Drive.",
       input: lazySchema(() =>
@@ -240,6 +241,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
 
     listFiles: {
       isTool: true,
+      scope: 'read',
       description:
         'List files and subfolders within a specific Google Drive folder. Use this to browse folder contents by folder ID, or start at the root folder.',
       input: lazySchema(() =>
@@ -319,6 +321,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
 
     downloadFile: {
       isTool: true,
+      scope: 'read',
       description:
         'Download a file from Google Drive and return its content. ' +
         'With the default responseType "arraybuffer", content is returned base64-encoded — suitable for PDFs, images, Office documents, and any binary format. ' +
@@ -438,6 +441,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
 
     getFileMetadata: {
       isTool: true,
+      scope: 'read',
       description:
         'Get detailed metadata for one or more specific files, including ownership, sharing status, permissions, labels, and descriptions. Use after searchFiles or listFiles to inspect specific files in depth.',
       input: lazySchema(() =>
