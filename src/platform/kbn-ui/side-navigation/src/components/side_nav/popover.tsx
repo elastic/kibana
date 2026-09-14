@@ -65,7 +65,6 @@ export interface PopoverProps {
     ref?: Ref<HTMLElement>;
     onClick?: (e: MouseEvent) => void;
     onKeyDown?: (e: KeyboardEvent) => void;
-    onMouseDown?: (e: MouseEvent) => void;
     tabIndex?: number;
     'aria-haspopup'?: boolean | 'menu' | 'listbox' | 'tree' | 'grid' | 'dialog';
     'aria-expanded'?: boolean;
@@ -105,9 +104,6 @@ export const Popover = ({
 
   const popoverRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLElement>(null);
-  // Clicking the trigger means navigate, not open the hover menu. Keep hover
-  // closed until mouseleave so the click's focus cannot reopen it.
-  const suppressHoverRef = useRef(false);
 
   const [isOpenedByClick, setIsOpenedByClick] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -140,9 +136,6 @@ export const Popover = ({
   }, [clearHoverTimeout, close]);
 
   const handleMouseEnter = useCallback(() => {
-    if (suppressHoverRef.current) {
-      return;
-    }
     if ((!persistent || !isOpenedByClick) && (!isAnyPopoverLocked || isOpen)) {
       clearHoverTimeout();
       if (!isSidePanelOpen) {
@@ -161,22 +154,12 @@ export const Popover = ({
   ]);
 
   const handleMouseLeave = useCallback(() => {
-    suppressHoverRef.current = false;
     if (!persistent || !isOpenedByClick) {
       setHoverTimeout(handleClose, POPOVER_HOVER_DELAY);
     }
   }, [persistent, isOpenedByClick, setHoverTimeout, handleClose]);
 
   const scrollStyles = useScroll(true);
-
-  const handleTriggerMouseDown = useCallback(() => {
-    if (persistent) {
-      return;
-    }
-    suppressHoverRef.current = true;
-    clearHoverTimeout();
-    close();
-  }, [persistent, clearHoverTimeout, close]);
 
   const handleTriggerClick = useCallback(() => {
     if (persistent) {
@@ -270,10 +253,6 @@ export const Popover = ({
         trigger.props.onClick?.(e);
         handleTriggerClick();
       },
-      onMouseDown: (e: MouseEvent) => {
-        trigger.props.onMouseDown?.(e);
-        handleTriggerMouseDown();
-      },
       onKeyDown: handleTriggerKeyDown,
     });
   }, [
@@ -282,7 +261,6 @@ export const Popover = ({
     isOpen,
     handleTriggerKeyDown,
     handleTriggerClick,
-    handleTriggerMouseDown,
     isSidePanelOpen,
     popoverEnterAndExitInstructionsId,
   ]);
