@@ -55,12 +55,11 @@ export const createEditTagsAction = (
       episodes.length === 1
         ? episodes[0].last_tags ?? []
         : [...new Set(episodes.flatMap((ep) => ep.last_tags ?? []))];
-    const additionalSuggestions = await deps.fetchAdditionalTagSuggestions?.().catch(() => []);
     const tags = await openTagsFlyout(deps.overlays, deps.rendering, currentTags, {
       expressions: deps.expressions,
       spaces: deps.spaces,
       queryClient: deps.queryClient,
-      additionalSuggestions,
+      fetchAdditionalSuggestions: deps.fetchAdditionalTagSuggestions,
     });
     if (tags == null) return;
 
