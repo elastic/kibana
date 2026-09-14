@@ -91,6 +91,6 @@ describe('CustomContentComponent', () => {
     render(<CustomContentComponent {...defaultProps} isGenerating />);
 
     expect(screen.getByTestId('customContentGeneratingPrompt')).toBeInTheDocument();
-    expect(screen.getByText('Generating your panel')).toBeInTheDocument();
+    expect(screen.getByText('Generating your panel...')).toBeInTheDocument();
   });
 });
