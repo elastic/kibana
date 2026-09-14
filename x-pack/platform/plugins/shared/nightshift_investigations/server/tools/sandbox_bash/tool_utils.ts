@@ -21,9 +21,12 @@ export const getConversationId = (context: {
  * Sandbox workspaces are namespaced per space, so the same conversation id in two spaces
  * never shares a workspace. Anything addressing a workspace must go through this, or it
  * reads and writes a different one than the tools do.
+ *
+ * The separator has to stay within [a-zA-Z0-9_.-]: the sandbox service derives a Docker
+ * container name from this id, and Docker rejects anything outside that set.
  */
 export const scopeConversationId = (spaceId: string, conversationId: string): string =>
-  `${spaceId}:${conversationId}`;
+  `${spaceId}__${conversationId}`;
 
 export const getScopedConversationId = (
   context: { runContext: { stack: unknown[] }; request: KibanaRequest },

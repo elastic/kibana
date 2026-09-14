@@ -50,11 +50,11 @@ describe('cortexHydrateStepDefinition', () => {
 
     expect(hydrateCortexWorkspace).toHaveBeenCalledWith({
       apiClient,
-      conversationId: 'default:conv-1',
+      conversationId: 'default__conv-1',
       esClient,
       logger: expect.anything(),
     });
-    expect(result).toEqual({ output: { conversation_id: 'default:conv-1' } });
+    expect(result).toEqual({ output: { conversation_id: 'default__conv-1' } });
   });
 
   // The sandbox tools key the workspace on `<space>:<conversation>`; hydrating the raw id would
@@ -68,9 +68,9 @@ describe('cortexHydrateStepDefinition', () => {
     const result = await definition.handler(createContext('conv-1', 'marketing'));
 
     expect(hydrateCortexWorkspace).toHaveBeenCalledWith(
-      expect.objectContaining({ conversationId: 'marketing:conv-1' })
+      expect.objectContaining({ conversationId: 'marketing__conv-1' })
     );
-    expect(result).toEqual({ output: { conversation_id: 'marketing:conv-1' } });
+    expect(result).toEqual({ output: { conversation_id: 'marketing__conv-1' } });
   });
 
   it('throws when the sandbox is not configured', async () => {
