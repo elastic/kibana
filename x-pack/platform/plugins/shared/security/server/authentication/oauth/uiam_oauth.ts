@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import type {
   CreateUiamOAuthClientParams,
   UiamOAuthClientResponse,
@@ -21,8 +18,7 @@ import type {
 
 import type { SecurityLicense } from '../../../common';
 import { getDetailedErrorMessage } from '../../errors';
-import type { UiamServicePublic } from '../../uiam';
-import { getUiamClientAuthentication } from '../../uiam/get_client_authentication';
+import { getUiamCredentialsFromRequest, type UiamServicePublic } from '../../uiam';
 
 export interface UiamOAuthOptions {
   logger: Logger;
@@ -56,11 +52,7 @@ export class UiamOAuth implements UiamOAuthType {
     this.logger.debug('Attempting to create an OAuth client');
 
     try {
-      const result = await this.uiam.createOAuthClient(
-        accessToken,
-        params,
-        getUiamClientAuthentication(request)
-      );
+      const result = await this.uiam.createOAuthClient(accessToken, params);
       this.logger.debug(`OAuth client created successfully with id ${result.id}`);
       return result;
     } catch (e) {
@@ -85,12 +77,7 @@ export class UiamOAuth implements UiamOAuthType {
     this.logger.debug('Attempting to list OAuth clients');
 
     try {
-      const result = await this.uiam.listOAuthClients(
-        accessToken,
-        clientId,
-        projectId,
-        getUiamClientAuthentication(request)
-      );
+      const result = await this.uiam.listOAuthClients(accessToken, clientId, projectId);
       this.logger.debug('OAuth clients listed successfully');
       return result;
     } catch (e) {
@@ -115,12 +102,7 @@ export class UiamOAuth implements UiamOAuthType {
     this.logger.debug(`Attempting to update OAuth client ${clientId}`);
 
     try {
-      const result = await this.uiam.updateOAuthClient(
-        accessToken,
-        clientId,
-        params,
-        getUiamClientAuthentication(request)
-      );
+      const result = await this.uiam.updateOAuthClient(accessToken, clientId, params);
       this.logger.debug(`OAuth client ${clientId} updated successfully`);
       return result;
     } catch (e) {
@@ -145,12 +127,7 @@ export class UiamOAuth implements UiamOAuthType {
     this.logger.debug(`Attempting to revoke OAuth client ${clientId}`);
 
     try {
-      const result = await this.uiam.revokeOAuthClient(
-        accessToken,
-        clientId,
-        reason,
-        getUiamClientAuthentication(request)
-      );
+      const result = await this.uiam.revokeOAuthClient(accessToken, clientId, reason);
       this.logger.debug(`OAuth client ${clientId} revoked successfully`);
       return result;
     } catch (e) {
@@ -171,11 +148,7 @@ export class UiamOAuth implements UiamOAuthType {
     this.logger.debug(`Attempting to delete OAuth client ${clientId}`);
 
     try {
-      await this.uiam.deleteOAuthClient(
-        accessToken,
-        clientId,
-        getUiamClientAuthentication(request)
-      );
+      await this.uiam.deleteOAuthClient(accessToken, clientId);
       this.logger.debug(`OAuth client ${clientId} deleted successfully`);
       return true;
     } catch (e) {
@@ -205,8 +178,7 @@ export class UiamOAuth implements UiamOAuthType {
         accessToken,
         clientId,
         connectionId,
-        projectId,
-        getUiamClientAuthentication(request)
+        projectId
       );
       this.logger.debug('OAuth connections listed successfully');
       return result;
@@ -237,8 +209,7 @@ export class UiamOAuth implements UiamOAuthType {
         accessToken,
         clientId,
         connectionId,
-        params,
-        getUiamClientAuthentication(request)
+        params
       );
       this.logger.debug(`OAuth connection ${connectionId} updated successfully`);
       return result;
@@ -271,8 +242,7 @@ export class UiamOAuth implements UiamOAuthType {
         accessToken,
         clientId,
         connectionId,
-        reason,
-        getUiamClientAuthentication(request)
+        reason
       );
       this.logger.debug(`OAuth connection ${connectionId} revoked successfully`);
       return result;
@@ -300,12 +270,7 @@ export class UiamOAuth implements UiamOAuthType {
     this.logger.debug(`Attempting to delete OAuth connection ${connectionId}`);
 
     try {
-      await this.uiam.deleteOAuthConnection(
-        accessToken,
-        clientId,
-        connectionId,
-        getUiamClientAuthentication(request)
-      );
+      await this.uiam.deleteOAuthConnection(accessToken, clientId, connectionId);
       this.logger.debug(`OAuth connection ${connectionId} deleted successfully`);
       return true;
     } catch (e) {
@@ -332,23 +297,13 @@ export class UiamOAuth implements UiamOAuthType {
     const accessToken = UiamOAuth.getAccessToken(request);
     this.logger.debug(`Attempting to resolve ${userIds.length} user(s)`);
 
-    return this.uiam.resolveUsers(accessToken, userIds, getUiamClientAuthentication(request));
+    return this.uiam.resolveUsers(accessToken, userIds);
   }
 
   /**
    * Extracts the Bearer access token from the request. The token must be a UIAM credential.
    */
   static getAccessToken(request: KibanaRequest): string {
-    const authorization = HTTPAuthorizationHeader.parseFromRequest(request);
-
-    if (!authorization) {
-      throw Boom.unauthorized('Request does not contain an authorization header');
-    }
-
-    if (!isUiamCredential(authorization)) {
-      throw Boom.badRequest('Provided credential is not compatible with UIAM');
-    }
-
-    return authorization.credentials;
+    return getUiamCredentialsFromRequest(request);
   }
 }

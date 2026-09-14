@@ -18,6 +18,9 @@ import {
 } from '@kbn/core-security-server';
 import type {
   CreateUiamOAuthClientParams,
+  ServiceAccount,
+  ServiceAccountAssumableBy,
+  ServiceAccountRoleAssignments,
   UiamOAuthClientLogo,
   UiamOAuthClientResponse,
   UiamOAuthClientType,
@@ -31,11 +34,24 @@ import type {
   GrantUiamAPIKeyParams,
 } from '@kbn/security-plugin-types-server';
 
-import type { UiamClientAuthentication } from './get_client_authentication';
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 import type { UiamConfigType } from '../config';
 import { getDetailedErrorMessage } from '../errors';
 import { securityTelemetry } from '../otel/instrumentation';
+
+/**
+ * Represents the request body for creating a service account via UIAM.
+ */
+interface CreateServiceAccountRequestBody {
+  /** Organization that owns the service account. */
+  organization_id: string;
+  /** A descriptive name for the service account. */
+  name: string;
+  /** Roles granted to the service account, referenced by name. */
+  role_assignments: ServiceAccountRoleAssignments;
+  /** Principals allowed to exchange the service account's credentials for a token. */
+  assumable_by: ServiceAccountAssumableBy[];
+}
 
 /**
  * Represents the request body for granting an API key via UIAM.
@@ -60,19 +76,17 @@ export interface GrantUiamApiKeyRequestBody {
 }
 
 /**
- * Options that control how the grant request itself is authenticated to UIAM.
+ * Options that control how a request is authenticated to UIAM.
  */
-export interface GrantUiamApiKeyOptions {
-  /** Client authentication to forward instead of Kibana's own shared secret. */
-  clientAuthentication?: UiamClientAuthentication;
+export interface UiamClientAuthenticationOptions {
   /**
-   * Whether to present Kibana's shared secret header alongside the granting credential. UIAM
+   * Whether to present Kibana's shared secret header alongside the caller credential. UIAM
    * authenticates the credential and Kibana independently, and requires the two to agree: an
    * internal API key or a session token must arrive with the shared secret, while an external
    * (organization) API key must arrive without it, so that internal credentials that leak cannot
-   * be replayed through customer-facing code paths. Presenting the wrong combination fails the
-   * grant. The mTLS client certificate is always presented when configured, regardless of this
-   * option.
+   * be replayed through customer-facing code paths. Presenting the wrong combination fails
+   * authentication. The mTLS client certificate is always presented when configured, regardless
+   * of this option.
    *
    * Defaults to `true`, which is correct for everything except an external API key.
    */
@@ -228,7 +242,7 @@ export interface UiamServicePublic {
   grantApiKey(
     authorization: HTTPAuthorizationHeader,
     params: GrantUiamAPIKeyParams,
-    options?: GrantUiamApiKeyOptions
+    options?: UiamClientAuthenticationOptions
   ): Promise<GrantUiamApiKeyResponse>;
 
   /**
@@ -244,11 +258,7 @@ export interface UiamServicePublic {
    * @param apiKeyId The ID of the API key to revoke.
    * @param apiKey The API key to revoke; will be used for authentication on this request.
    */
-  revokeApiKey(
-    apiKeyId: string,
-    apiKey: string,
-    clientAuthentication?: UiamClientAuthentication
-  ): Promise<void>;
+  revokeApiKey(apiKeyId: string, apiKey: string): Promise<void>;
 
   /**
    * Converts Elasticsearch API keys into UIAM API keys. The Elasticsearch endpoint is injected
@@ -259,14 +269,38 @@ export interface UiamServicePublic {
   convertApiKeys(keys: string[]): Promise<ConvertUiamApiKeysResponse>;
 
   /**
+   * Creates a service account via the UIAM service.
+   *
+   * Called with the caller's own credential, so UIAM downscopes the new account
+   * to a subset of that caller's privileges.
+   *
+   * @param authorization The caller's UIAM authorization header.
+   * @param body The request body for creating the service account.
+   * @param options Whether to include Kibana client authentication.
+   */
+  createServiceAccount(
+    authorization: HTTPAuthorizationHeader,
+    body: CreateServiceAccountRequestBody,
+    options?: UiamClientAuthenticationOptions
+  ): Promise<ServiceAccount>;
+
+  /**
+   * Exchanges a service account ID for an ephemeral access token via the UIAM service.
+   *
+   * UIAM authorizes the exchange against the service account's `assumable_by` policy.
+   *
+   * @param serviceAccountId The ID of the service account to exchange a token for.
+   */
+  exchangeServiceAccountToken(serviceAccountId: string): Promise<{ token: string }>;
+
+  /**
    * Creates an OAuth client via the UIAM service.
    * @param accessToken UIAM session access token.
    * @param body The request body for creating the OAuth client.
    */
   createOAuthClient(
     accessToken: string,
-    body: CreateOAuthClientRequestBody,
-    clientAuthentication?: UiamClientAuthentication
+    body: CreateOAuthClientRequestBody
   ): Promise<OAuthClientResponse>;
 
   /**
@@ -278,8 +312,7 @@ export interface UiamServicePublic {
   listOAuthClients(
     accessToken: string,
     clientId?: string,
-    projectId?: string,
-    clientAuthentication?: UiamClientAuthentication
+    projectId?: string
   ): Promise<OAuthClientsResponse>;
 
   /**
@@ -291,8 +324,7 @@ export interface UiamServicePublic {
   updateOAuthClient(
     accessToken: string,
     clientId: string,
-    body: PatchOAuthClientRequestBody,
-    clientAuthentication?: UiamClientAuthentication
+    body: PatchOAuthClientRequestBody
   ): Promise<OAuthClientResponse>;
 
   /**
@@ -304,8 +336,7 @@ export interface UiamServicePublic {
   revokeOAuthClient(
     accessToken: string,
     clientId: string,
-    reason?: string,
-    clientAuthentication?: UiamClientAuthentication
+    reason?: string
   ): Promise<OAuthClientResponse>;
 
   /**
@@ -313,11 +344,7 @@ export interface UiamServicePublic {
    * @param accessToken UIAM session access token.
    * @param clientId The ID of the client to delete.
    */
-  deleteOAuthClient(
-    accessToken: string,
-    clientId: string,
-    clientAuthentication?: UiamClientAuthentication
-  ): Promise<void>;
+  deleteOAuthClient(accessToken: string, clientId: string): Promise<void>;
 
   /**
    * Lists OAuth connections via the UIAM service.
@@ -330,8 +357,7 @@ export interface UiamServicePublic {
     accessToken: string,
     clientId?: string,
     connectionId?: string,
-    projectId?: string,
-    clientAuthentication?: UiamClientAuthentication
+    projectId?: string
   ): Promise<OAuthConnectionsResponse>;
 
   /**
@@ -345,8 +371,7 @@ export interface UiamServicePublic {
     accessToken: string,
     clientId: string,
     connectionId: string,
-    body: PatchOAuthConnectionRequestBody,
-    clientAuthentication?: UiamClientAuthentication
+    body: PatchOAuthConnectionRequestBody
   ): Promise<OAuthConnectionResponse>;
 
   /**
@@ -360,8 +385,7 @@ export interface UiamServicePublic {
     accessToken: string,
     clientId: string,
     connectionId: string,
-    reason?: string,
-    clientAuthentication?: UiamClientAuthentication
+    reason?: string
   ): Promise<OAuthConnectionResponse>;
 
   /**
@@ -370,23 +394,14 @@ export interface UiamServicePublic {
    * @param clientId The ID of the client owning the connection.
    * @param connectionId The ID of the connection to delete.
    */
-  deleteOAuthConnection(
-    accessToken: string,
-    clientId: string,
-    connectionId: string,
-    clientAuthentication?: UiamClientAuthentication
-  ): Promise<void>;
+  deleteOAuthConnection(accessToken: string, clientId: string, connectionId: string): Promise<void>;
 
   /**
    * Resolves one or more user IDs into basic user information via the UIAM service.
    * @param accessToken UIAM session access token.
    * @param userIds The user IDs to resolve.
    */
-  resolveUsers(
-    accessToken: string,
-    userIds: string[],
-    clientAuthentication?: UiamClientAuthentication
-  ): Promise<ResolvedUsersResponse>;
+  resolveUsers(accessToken: string, userIds: string[]): Promise<ResolvedUsersResponse>;
 }
 
 interface UiamServiceOptions {
@@ -431,13 +446,6 @@ export class UiamService implements UiamServicePublic {
 
     this.#config = { enabled, url, sharedSecret, ssl };
     this.#dispatcher = this.#createFetchDispatcher();
-  }
-
-  #getClientAuthenticationHeaders(
-    clientAuthentication: UiamClientAuthentication = { sharedSecret: this.#config.sharedSecret }
-  ): Record<string, string> {
-    const { sharedSecret } = clientAuthentication;
-    return sharedSecret === undefined ? {} : { [ES_CLIENT_AUTHENTICATION_HEADER]: sharedSecret };
   }
 
   /**
@@ -588,7 +596,7 @@ export class UiamService implements UiamServicePublic {
   async grantApiKey(
     authorization: HTTPAuthorizationHeader,
     params: GrantUiamAPIKeyParams,
-    { includeClientAuthentication = true, clientAuthentication }: GrantUiamApiKeyOptions = {}
+    { includeClientAuthentication = true }: UiamClientAuthenticationOptions = {}
   ) {
     this.#logger.debug(
       `Attempting to grant API key using authorization scheme: ${authorization.scheme}`
@@ -615,7 +623,7 @@ export class UiamService implements UiamServicePublic {
           'Content-Type': 'application/json',
           'User-Agent': this.#userAgentHeader,
           ...(includeClientAuthentication
-            ? this.#getClientAuthenticationHeaders(clientAuthentication)
+            ? { [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret }
             : {}),
           Authorization: authorization.toString(),
         },
@@ -639,11 +647,7 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.revokeApiKey}.
    */
-  async revokeApiKey(
-    apiKeyId: string,
-    apiKey: string,
-    clientAuthentication?: UiamClientAuthentication
-  ): Promise<void> {
+  async revokeApiKey(apiKeyId: string, apiKey: string): Promise<void> {
     try {
       this.#logger.debug(`Attempting to revoke API key: ${apiKeyId}`);
 
@@ -653,7 +657,7 @@ export class UiamService implements UiamServicePublic {
           headers: {
             'Content-Type': 'application/json',
             'User-Agent': this.#userAgentHeader,
-            ...this.#getClientAuthenticationHeaders(clientAuthentication),
+            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
             Authorization: `ApiKey ${apiKey}`,
           },
           // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
@@ -714,12 +718,86 @@ export class UiamService implements UiamServicePublic {
   }
 
   /**
+   * See {@link UiamService.createServiceAccount}.
+   */
+  async createServiceAccount(
+    authorization: HTTPAuthorizationHeader,
+    body: CreateServiceAccountRequestBody,
+    { includeClientAuthentication = true }: UiamClientAuthenticationOptions = {}
+  ): Promise<ServiceAccount> {
+    try {
+      this.#logger.debug('Attempting to create service account.');
+
+      const requestOptions: RequestInit & { dispatcher?: Agent } = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': this.#userAgentHeader,
+          ...(includeClientAuthentication
+            ? { [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret }
+            : {}),
+          Authorization: authorization.toString(),
+        },
+        body: JSON.stringify({ ...body, type: 'project' }),
+        dispatcher: this.#dispatcher,
+      };
+      const response = await UiamService.#parseUiamResponse(
+        await fetch(`${this.#config.url}/uiam/api/v1/service-accounts`, requestOptions)
+      );
+
+      this.#logger.debug(`Successfully created service account with id ${response.id}`);
+      return response;
+    } catch (err) {
+      this.#logger.error(() => `Failed to create service account: ${getDetailedErrorMessage(err)}`);
+
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.exchangeServiceAccountToken}.
+   */
+  async exchangeServiceAccountToken(serviceAccountId: string): Promise<{ token: string }> {
+    this.#logger.debug(
+      `Attempting to exchange service account [id=${serviceAccountId}] for an ephemeral token.`
+    );
+    const requestOptions: RequestInit & { dispatcher: Agent | undefined } = {
+      method: 'POST',
+      headers: { 'User-Agent': this.#userAgentHeader },
+      // The certificate identifies Kibana's project for the account's assumable_by policy.
+      dispatcher: this.#dispatcher,
+    };
+    let response: { token: string };
+    try {
+      response = await UiamService.#parseUiamResponse(
+        await fetch(
+          `${this.#config.url}/uiam/api/v1/service-accounts/${encodeURIComponent(
+            serviceAccountId
+          )}/credentials/_exchange`,
+          requestOptions
+        )
+      );
+    } catch (err) {
+      this.#logger.error(
+        `Failed to exchange service account [id=${serviceAccountId}] for a token (HTTP status: ${
+          Boom.isBoom(err) ? err.output.statusCode : 'unavailable'
+        }).`
+      );
+      throw err;
+    }
+
+    this.#logger.debug(
+      `Successfully exchanged service account [id=${serviceAccountId}] for an ephemeral token.`
+    );
+    return response;
+  }
+
+  /**
    * See {@link UiamServicePublic.createOAuthClient}.
    */
   async createOAuthClient(
     accessToken: string,
-    body: CreateOAuthClientRequestBody,
-    clientAuthentication?: UiamClientAuthentication
+    body: CreateOAuthClientRequestBody
   ): Promise<OAuthClientResponse> {
     try {
       this.#logger.debug('Attempting to create OAuth client.');
@@ -730,7 +808,7 @@ export class UiamService implements UiamServicePublic {
           headers: {
             'Content-Type': 'application/json',
             'User-Agent': this.#userAgentHeader,
-            ...this.#getClientAuthenticationHeaders(clientAuthentication),
+            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
             Authorization: `Bearer ${accessToken}`,
           },
           body: JSON.stringify(body),
@@ -753,8 +831,7 @@ export class UiamService implements UiamServicePublic {
   async listOAuthClients(
     accessToken: string,
     clientId?: string,
-    projectId?: string,
-    clientAuthentication?: UiamClientAuthentication
+    projectId?: string
   ): Promise<OAuthClientsResponse> {
     try {
       this.#logger.debug('Attempting to list OAuth clients.');
@@ -772,7 +849,7 @@ export class UiamService implements UiamServicePublic {
           method: 'GET',
           headers: {
             'User-Agent': this.#userAgentHeader,
-            ...this.#getClientAuthenticationHeaders(clientAuthentication),
+            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
             Authorization: `Bearer ${accessToken}`,
           },
           // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
@@ -794,8 +871,7 @@ export class UiamService implements UiamServicePublic {
   async updateOAuthClient(
     accessToken: string,
     clientId: string,
-    body: PatchOAuthClientRequestBody,
-    clientAuthentication?: UiamClientAuthentication
+    body: PatchOAuthClientRequestBody
   ): Promise<OAuthClientResponse> {
     try {
       this.#logger.debug(`Attempting to update OAuth client: ${clientId}`);
@@ -808,7 +884,7 @@ export class UiamService implements UiamServicePublic {
             headers: {
               'Content-Type': 'application/json',
               'User-Agent': this.#userAgentHeader,
-              ...this.#getClientAuthenticationHeaders(clientAuthentication),
+              [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
               Authorization: `Bearer ${accessToken}`,
             },
             body: JSON.stringify(body),
@@ -834,8 +910,7 @@ export class UiamService implements UiamServicePublic {
   async revokeOAuthClient(
     accessToken: string,
     clientId: string,
-    reason?: string,
-    clientAuthentication?: UiamClientAuthentication
+    reason?: string
   ): Promise<OAuthClientResponse> {
     try {
       this.#logger.debug(`Attempting to revoke OAuth client: ${clientId}`);
@@ -848,7 +923,7 @@ export class UiamService implements UiamServicePublic {
             headers: {
               'Content-Type': 'application/json',
               'User-Agent': this.#userAgentHeader,
-              ...this.#getClientAuthenticationHeaders(clientAuthentication),
+              [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
               Authorization: `Bearer ${accessToken}`,
             },
             body: JSON.stringify({ reason }),
@@ -871,11 +946,7 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.deleteOAuthClient}.
    */
-  async deleteOAuthClient(
-    accessToken: string,
-    clientId: string,
-    clientAuthentication?: UiamClientAuthentication
-  ): Promise<void> {
+  async deleteOAuthClient(accessToken: string, clientId: string): Promise<void> {
     try {
       this.#logger.debug(`Attempting to delete OAuth client: ${clientId}`);
 
@@ -886,7 +957,7 @@ export class UiamService implements UiamServicePublic {
             method: 'DELETE',
             headers: {
               'User-Agent': this.#userAgentHeader,
-              ...this.#getClientAuthenticationHeaders(clientAuthentication),
+              [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
               Authorization: `Bearer ${accessToken}`,
             },
             // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
@@ -911,8 +982,7 @@ export class UiamService implements UiamServicePublic {
     accessToken: string,
     clientId?: string,
     connectionId?: string,
-    projectId?: string,
-    clientAuthentication?: UiamClientAuthentication
+    projectId?: string
   ): Promise<OAuthConnectionsResponse> {
     try {
       this.#logger.debug('Attempting to list OAuth connections.');
@@ -933,7 +1003,7 @@ export class UiamService implements UiamServicePublic {
           method: 'GET',
           headers: {
             'User-Agent': this.#userAgentHeader,
-            ...this.#getClientAuthenticationHeaders(clientAuthentication),
+            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
             Authorization: `Bearer ${accessToken}`,
           },
           // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
@@ -956,8 +1026,7 @@ export class UiamService implements UiamServicePublic {
     accessToken: string,
     clientId: string,
     connectionId: string,
-    body: PatchOAuthConnectionRequestBody,
-    clientAuthentication?: UiamClientAuthentication
+    body: PatchOAuthConnectionRequestBody
   ): Promise<OAuthConnectionResponse> {
     try {
       this.#logger.debug(`Attempting to update OAuth connection: ${connectionId}`);
@@ -972,7 +1041,7 @@ export class UiamService implements UiamServicePublic {
             headers: {
               'Content-Type': 'application/json',
               'User-Agent': this.#userAgentHeader,
-              ...this.#getClientAuthenticationHeaders(clientAuthentication),
+              [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
               Authorization: `Bearer ${accessToken}`,
             },
             body: JSON.stringify(body),
@@ -999,8 +1068,7 @@ export class UiamService implements UiamServicePublic {
     accessToken: string,
     clientId: string,
     connectionId: string,
-    reason?: string,
-    clientAuthentication?: UiamClientAuthentication
+    reason?: string
   ): Promise<OAuthConnectionResponse> {
     try {
       this.#logger.debug(`Attempting to revoke OAuth connection: ${connectionId}`);
@@ -1015,7 +1083,7 @@ export class UiamService implements UiamServicePublic {
             headers: {
               'Content-Type': 'application/json',
               'User-Agent': this.#userAgentHeader,
-              ...this.#getClientAuthenticationHeaders(clientAuthentication),
+              [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
               Authorization: `Bearer ${accessToken}`,
             },
             body: JSON.stringify({ reason }),
@@ -1041,8 +1109,7 @@ export class UiamService implements UiamServicePublic {
   async deleteOAuthConnection(
     accessToken: string,
     clientId: string,
-    connectionId: string,
-    clientAuthentication?: UiamClientAuthentication
+    connectionId: string
   ): Promise<void> {
     try {
       this.#logger.debug(`Attempting to delete OAuth connection: ${connectionId}`);
@@ -1056,7 +1123,7 @@ export class UiamService implements UiamServicePublic {
             method: 'DELETE',
             headers: {
               'User-Agent': this.#userAgentHeader,
-              ...this.#getClientAuthenticationHeaders(clientAuthentication),
+              [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
               Authorization: `Bearer ${accessToken}`,
             },
             // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
@@ -1080,11 +1147,7 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.resolveUsers}.
    */
-  async resolveUsers(
-    accessToken: string,
-    userIds: string[],
-    clientAuthentication?: UiamClientAuthentication
-  ): Promise<ResolvedUsersResponse> {
+  async resolveUsers(accessToken: string, userIds: string[]): Promise<ResolvedUsersResponse> {
     const uniqueUserIds = [...new Set(userIds)];
     if (uniqueUserIds.length === 0) {
       return { users: {} };
@@ -1103,7 +1166,7 @@ export class UiamService implements UiamServicePublic {
             method: 'GET',
             headers: {
               'User-Agent': this.#userAgentHeader,
-              ...this.#getClientAuthenticationHeaders(clientAuthentication),
+              [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
               Authorization: `Bearer ${accessToken}`,
             },
             // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
