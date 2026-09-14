@@ -18,7 +18,7 @@ export const CustomContentGeneratingPrompt = () => {
       css={css({
         position: 'absolute',
         inset: 0,
-        zIndex: 1,
+        zIndex: euiTheme.levels.header,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -34,7 +34,7 @@ export const CustomContentGeneratingPrompt = () => {
       <EuiTitle size="xs">
         <h3>
           {i18n.translate('xpack.customContent.generating.title', {
-            defaultMessage: 'Generating your panel',
+            defaultMessage: 'Generating your panel...',
           })}
         </h3>
       </EuiTitle>

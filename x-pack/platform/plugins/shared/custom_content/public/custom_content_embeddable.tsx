@@ -40,6 +40,7 @@ import {
   combineLatest,
   distinctUntilChanged,
   EMPTY,
+  finalize,
   from,
   map,
   merge,
@@ -420,7 +421,17 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           const sub = agentBuilder.events.ui.activeConversation$
             .pipe(
               switchMap((conversation) =>
-                conversation?.id ? agentBuilder.events.getChatEvents$(conversation.id) : EMPTY
+                conversation?.id
+                  ? agentBuilder.events.getChatEvents$(conversation.id).pipe(
+                      catchError(() => {
+                        isGenerating$.next(false);
+                        return EMPTY;
+                      }),
+                      finalize(() => {
+                        if (isGenerating$.getValue()) isGenerating$.next(false);
+                      })
+                    )
+                  : EMPTY
               )
             )
             .subscribe((event) => {
