@@ -1956,26 +1956,25 @@ describe('storedPackagePolicyToAgentInputs - condition handling', () => {
     expect('condition' in (result[0].streams?.[0] ?? {})).toBe(false);
   });
 
-  it('non-string condition value (e.g. boolean true) does not throw', () => {
-    // The Fleet UI can persist condition as boolean `true`; combineConditions must not call
-    // .trim() on a non-string value or it throws "c?.trim is not a function".
-    expect(() =>
-      storedPackagePolicyToAgentInputs({
-        ...basePolicy,
-        inputs: [
-          makeInput({
-            streams: [
-              {
-                id: 'stream-1',
-                enabled: true,
-                data_stream: { dataset: 'foo', type: 'logs' },
-                condition: true as any,
-              },
-            ],
-          }),
-        ],
-      })
-    ).not.toThrow();
+  it('boolean condition is preserved as string in emitted output', () => {
+    // The Fleet UI can persist condition as boolean `true`; combineConditions must coerce
+    // it to the string 'true' rather than dropping it or throwing.
+    const result = storedPackagePolicyToAgentInputs({
+      ...basePolicy,
+      inputs: [
+        makeInput({
+          streams: [
+            {
+              id: 'stream-1',
+              enabled: true,
+              data_stream: { dataset: 'foo', type: 'logs' },
+              condition: true as any,
+            },
+          ],
+        }),
+      ],
+    });
+    expect(result[0].streams?.[0]?.condition).toBe('true');
   });
 
   it('overrides.inputs[id].condition still wins (no regression)', () => {
