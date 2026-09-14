@@ -80,13 +80,7 @@ describe('registerTracingExporter', () => {
   const logger = loggerMock.create();
 
   function createCore() {
-    const core = coreMock.createStart();
-    core.savedObjects.getUnsafeInternalClient.mockReturnValue({
-      asScopedToNamespace: jest.fn((namespace: string) => ({ namespace })),
-    } as never);
-    const scopedUiSettings = jest.mocked(core.uiSettings.asScopedToClient(jest.fn() as never));
-    scopedUiSettings.get.mockResolvedValue(true);
-    return core;
+    return coreMock.createStart();
   }
 
   beforeEach(() => {
@@ -107,7 +101,6 @@ describe('registerTracingExporter', () => {
       logger,
     });
 
-    // Pipeline is always initialized so the uiSetting can toggle tracing without a restart.
     expect(result).toBeDefined();
     expect(MockedEsOtlpExporter).toHaveBeenCalledWith(
       coreStart.elasticsearch.client.asInternalUser
@@ -138,7 +131,6 @@ describe('registerTracingExporter', () => {
       url: 'http://otel-collector:4318/v1/traces',
       headers: { Authorization: 'Bearer token' },
     });
-    // ES exporter is always created alongside external exporters.
     expect(MockedEsOtlpExporter).toHaveBeenCalledWith(
       coreStart.elasticsearch.client.asInternalUser
     );
@@ -179,6 +171,10 @@ describe('registerTracingExporter', () => {
 
     expect(initInferenceTracerProvider).toHaveBeenCalledTimes(1);
     expect(MockedAgentBuilderProcessor).toHaveBeenCalledTimes(1);
+    expect(MockedAgentBuilderProcessor).toHaveBeenCalledWith({
+      exporter: expect.any(Object),
+      scheduledDelayMillis: 250,
+    });
     expect(MockedEvalSpanProcessor).toHaveBeenCalledWith([
       { baggageKey: 'execution.id.baggage.key' },
       { baggageKey: 'experiment.id.baggage.key' },
@@ -189,108 +185,6 @@ describe('registerTracingExporter', () => {
     expect(providerOpts.processors).toHaveLength(3);
     expect(providerOpts.resource).toBe(mockResource);
     expect(mockResource.waitForAsyncAttributes).toHaveBeenCalledTimes(1);
-  });
-
-  it('getSettings reads current uiSettings for the requested space', async () => {
-    const coreStart = createCore();
-    const scopedUiSettings = jest.mocked(coreStart.uiSettings.asScopedToClient(jest.fn() as never));
-    scopedUiSettings.get.mockResolvedValue(true);
-
-    const tracingConfig: TracingConfig = {
-      exporters: [],
-      scheduledDelay: 100,
-      opik_distributed_tracing: false,
-    };
-
-    await registerTracingExporter({
-      core: coreStart,
-      tracingConfig,
-      logger,
-    });
-
-    const { getSettings } = MockedAgentBuilderProcessor.mock.calls[0][0];
-    expect((await getSettings('marketing')).enabled).toBe(true);
-    expect(coreStart.uiSettings.asScopedToClient).toHaveBeenCalledWith({ namespace: 'marketing' });
-
-    scopedUiSettings.get.mockResolvedValue(false);
-    expect((await getSettings('marketing')).enabled).toBe(false);
-  });
-
-  it('getSettings scopes each space independently', async () => {
-    const coreStart = createCore();
-    const scopedUiSettings = jest.mocked(coreStart.uiSettings.asScopedToClient(jest.fn() as never));
-    scopedUiSettings.get.mockResolvedValue(true);
-
-    const tracingConfig: TracingConfig = {
-      exporters: [],
-      scheduledDelay: 100,
-      opik_distributed_tracing: false,
-    };
-
-    await registerTracingExporter({ core: coreStart, tracingConfig, logger });
-
-    const { getSettings } = MockedAgentBuilderProcessor.mock.calls[0][0];
-    await getSettings('space-a');
-    await getSettings('space-b');
-
-    expect(coreStart.uiSettings.asScopedToClient).toHaveBeenCalledWith({ namespace: 'space-a' });
-    expect(coreStart.uiSettings.asScopedToClient).toHaveBeenCalledWith({ namespace: 'space-b' });
-  });
-
-  it('getSettings shares one in-flight lookup per space', async () => {
-    const coreStart = createCore();
-    const scopedUiSettings = jest.mocked(coreStart.uiSettings.asScopedToClient(jest.fn() as never));
-    let release!: () => void;
-    const gate = new Promise<void>((resolve) => {
-      release = resolve;
-    });
-    scopedUiSettings.get.mockImplementation(async () => {
-      await gate;
-      return true;
-    });
-
-    const tracingConfig: TracingConfig = {
-      exporters: [],
-      scheduledDelay: 100,
-      opik_distributed_tracing: false,
-    };
-
-    await registerTracingExporter({ core: coreStart, tracingConfig, logger });
-
-    const { getSettings } = MockedAgentBuilderProcessor.mock.calls[0][0];
-    const first = getSettings('marketing');
-    const second = getSettings('marketing');
-
-    const unsafeClient = coreStart.savedObjects.getUnsafeInternalClient();
-    expect(unsafeClient.asScopedToNamespace).toHaveBeenCalledTimes(1);
-    expect(unsafeClient.asScopedToNamespace).toHaveBeenCalledWith('marketing');
-
-    release();
-    const [firstSettings, secondSettings] = await Promise.all([first, second]);
-    expect(firstSettings.enabled).toBe(true);
-    expect(secondSettings.enabled).toBe(true);
-  });
-
-  it('logs error and fail-closes when settings lookup rejects', async () => {
-    const coreStart = createCore();
-    const scopedUiSettings = jest.mocked(coreStart.uiSettings.asScopedToClient(jest.fn() as never));
-    scopedUiSettings.get.mockRejectedValue(new Error('SO unavailable'));
-
-    const tracingConfig: TracingConfig = {
-      exporters: [],
-      scheduledDelay: 100,
-      opik_distributed_tracing: false,
-    };
-
-    await registerTracingExporter({ core: coreStart, tracingConfig, logger });
-
-    const { getSettings } = MockedAgentBuilderProcessor.mock.calls[0][0];
-    const settings = await getSettings();
-
-    expect(settings.enabled).toBe(false);
-    expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to fetch tracing settings for space [default]')
-    );
   });
 
   it('teardown shuts down processors', async () => {

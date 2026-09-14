@@ -21,119 +21,21 @@ import {
   EVAL_EXPERIMENT_ID_BAGGAGE_KEY,
   EVALUATOR_NAME_BAGGAGE_KEY,
 } from '@kbn/inference-tracing';
-import {
-  AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
-  AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID,
-  AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID,
-  AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID,
-  AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID,
-  AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID,
-  AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID,
-  AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID,
-} from '@kbn/management-settings-ids';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
-import type { TracingPrivacySettings } from './agent_builder_span_processor';
 import type { AgentBuilderConfig } from '../config';
 import { AgentBuilderSpanProcessor } from './agent_builder_span_processor';
 import { GlobalBridgeProcessor } from './global_bridge_processor';
 import { OpikDistributedTracingSpanProcessor } from './opik_distributed_tracing';
 import { DATA_STREAM_NAMESPACE_ATTR, SPACE_ID_BAGGAGE_KEY } from './agent_builder_context';
 
-const DISABLED_TRACING_SETTINGS: TracingPrivacySettings = {
-  enabled: false,
-  includeUserPrompts: false,
-  includeLlmResponses: false,
-  includeToolDetails: false,
-  includeSystemPrompt: false,
-  includeRealNames: false,
-  includeRealIds: false,
-  includeUserData: false,
-};
-
-/**
- * Loads tracing privacy uiSettings for the span's space on demand.
- * Concurrent calls for the same space share one in-flight lookup so each
- * exporter processor does not issue duplicate Saved Objects reads.
- */
-const createTracingSettingsLoader = (
-  core: CoreStart,
-  logger: Logger
-): { getSettings: (spaceId?: string) => Promise<TracingPrivacySettings> } => {
-  const internalClient = core.savedObjects.getUnsafeInternalClient();
-  const inFlight = new Map<string, Promise<TracingPrivacySettings>>();
-
-  const loadSettings = async (namespace: string): Promise<TracingPrivacySettings> => {
-    try {
-      const soClient = internalClient.asScopedToNamespace(namespace);
-      const client = core.uiSettings.asScopedToClient(soClient);
-      const [
-        enabled,
-        includeUserPrompts,
-        includeLlmResponses,
-        includeToolDetails,
-        includeSystemPrompt,
-        includeRealNames,
-        includeRealIds,
-        includeUserData,
-      ] = await Promise.all([
-        client.get<boolean>(AGENT_BUILDER_TRACING_ENABLED_SETTING_ID),
-        client.get<boolean>(AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID),
-        client.get<boolean>(AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID),
-        client.get<boolean>(AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID),
-        client.get<boolean>(AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID),
-        client.get<boolean>(AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID),
-        client.get<boolean>(AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID),
-        client.get<boolean>(AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID),
-      ]);
-      return {
-        enabled,
-        includeUserPrompts,
-        includeLlmResponses,
-        includeToolDetails,
-        includeSystemPrompt,
-        includeRealNames,
-        includeRealIds,
-        includeUserData,
-      };
-    } catch (error) {
-      logger.error(`Failed to fetch tracing settings for space [${namespace}]: ${error.message}`);
-      return DISABLED_TRACING_SETTINGS;
-    }
-  };
-
-  return {
-    getSettings: (spaceId = 'default') => {
-      const namespace = spaceId || 'default';
-      const existing = inFlight.get(namespace);
-      if (existing) {
-        return existing;
-      }
-
-      const pending = loadSettings(namespace);
-      inFlight.set(namespace, pending);
-      void pending.finally(() => {
-        if (inFlight.get(namespace) === pending) {
-          inFlight.delete(namespace);
-        }
-      });
-      return pending;
-    },
-  };
-};
-
 export const registerTracingExporter = async ({
   core,
   tracingConfig,
-  logger,
 }: {
   core: CoreStart;
   tracingConfig: AgentBuilderConfig['tracing'];
   logger: Logger;
 }): Promise<(() => Promise<void>) | undefined> => {
-  const { getSettings } = createTracingSettingsLoader(core, logger);
-
-  // Always include the ES exporter so enabling the uiSetting takes effect on
-  // the next span without a server restart.
   const allExporters: tracing.SpanExporter[] = [
     new ElasticsearchOtlpExporter(core.elasticsearch.client.asInternalUser),
     ...tracingConfig.exporters.map(
@@ -152,7 +54,6 @@ export const registerTracingExporter = async ({
         new AgentBuilderSpanProcessor({
           exporter,
           scheduledDelayMillis: tracingConfig.scheduledDelay,
-          getSettings,
         })
     ),
   ];

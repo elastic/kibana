@@ -77,7 +77,7 @@ import {
 } from './utils';
 import { createConversationIdSetEvent } from './utils/events';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
-import { withConverseSpan } from '../../tracing';
+import { loadTracingPrivacySettings, withConverseSpan } from '../../tracing';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { MeteringService } from '../metering';
 import type { AgentExecutionClient } from './persistence';
@@ -315,6 +315,10 @@ const handleConversationExecution = async ({
       : undefined;
 
   const spaceId = getCurrentSpaceId({ request, spaces: deps.spaces });
+  const privacySettings = await loadTracingPrivacySettings({
+    uiSettingsClient: deps.uiSettings.asScopedToClient(deps.savedObjects.getScopedClient(request)),
+    logger,
+  });
 
   return withConverseSpan(
     {
@@ -323,6 +327,7 @@ const handleConversationExecution = async ({
       providerName: connectorProvider,
       conversationId: conversation.id,
       spaceId,
+      privacySettings,
       opikHeaders,
     },
     (span) => {

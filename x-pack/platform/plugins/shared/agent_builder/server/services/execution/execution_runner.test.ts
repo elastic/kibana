@@ -79,6 +79,16 @@ jest.mock('../../tracing', () => {
       (_opts: unknown, cb: (span: { setAttribute: jest.Mock }) => unknown) =>
         cb({ setAttribute: mockSpanSetAttribute })
     ),
+    loadTracingPrivacySettings: jest.fn().mockResolvedValue({
+      enabled: true,
+      includeUserPrompts: true,
+      includeLlmResponses: true,
+      includeToolDetails: true,
+      includeSystemPrompt: true,
+      includeRealNames: true,
+      includeRealIds: true,
+      includeUserData: true,
+    }),
   };
 });
 
@@ -116,6 +126,12 @@ const createDeps = ({
     },
     conversationService: {
       getConversationRoundAuthor,
+    },
+    uiSettings: {
+      asScopedToClient: jest.fn().mockReturnValue({}),
+    },
+    savedObjects: {
+      getScopedClient: jest.fn().mockReturnValue({}),
     },
   } as never);
 
@@ -261,6 +277,12 @@ describe('handleAgentExecution', () => {
         },
         conversationService: {
           getConversationRoundAuthor: jest.fn().mockResolvedValue(undefined),
+        },
+        uiSettings: {
+          asScopedToClient: jest.fn().mockReturnValue({}),
+        },
+        savedObjects: {
+          getScopedClient: jest.fn().mockReturnValue({}),
         },
       } as never,
       request: { headers: {} } as never,
