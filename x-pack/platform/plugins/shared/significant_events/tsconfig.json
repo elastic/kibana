@@ -39,7 +39,7 @@
     "@kbn/core-security-server",
     "@kbn/logging-mocks",
     "@kbn/agent-builder-plugin",
-    "@kbn/streams-ai",
+    "@kbn/nightshift-ai",
     "@kbn/config-schema",
     "@kbn/management-settings-ids",
     "@kbn/data-streams",

@@ -42,10 +42,13 @@ export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
 
 export * as testData from './constants';
 export {
+  ACTIONS_ONLY_ROLE,
   CONNECTORS_APP_PATH,
   CONNECTORS_LIST_SELECTORS,
   CONNECTORS_ROLE,
   MAINTENANCE_WINDOWS_APP_PATH,
+  RULES_V1_READ_ROLE,
+  RULES_V1_AND_V2_READ_ROLE,
   STACK_ALERTS_INDEX,
   STACK_ALERTS_INDEX_PATTERN,
   STACK_ALERTS_PAGE_PATH,

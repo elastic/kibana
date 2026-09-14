@@ -12,7 +12,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -25,6 +24,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { formatLocation } from '../../../../../../../common/utils/location_formatter';
 import type {
@@ -261,9 +261,7 @@ export const BulkLocationsFlyout = ({
         {hasSelection && emptiedCount > 0 && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut
-              color="warning"
-              iconType="warning"
+            <KbnWarningCallout
               announceOnMount={false}
               size="s"
               title={i18n.translate('xpack.synthetics.bulkLocationsFlyout.emptiedWarning', {
@@ -277,19 +275,15 @@ export const BulkLocationsFlyout = ({
         {skippedMonitors.length > 0 && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut
-              color="warning"
-              iconType="warning"
+            <KbnWarningCallout
               announceOnMount={false}
               title={i18n.translate('xpack.synthetics.bulkLocationsFlyout.skippedWarning.title', {
                 defaultMessage:
                   '{count, plural, one {# monitor} other {# monitors}} will not be updated',
                 values: { count: skippedMonitors.length },
               })}
+              text={SKIPPED_DESCRIPTION}
             >
-              <EuiText size="s">
-                <p>{SKIPPED_DESCRIPTION}</p>
-              </EuiText>
               <EuiAccordion id={skippedAccordionId} buttonContent={SHOW_SKIPPED_LABEL}>
                 <EuiSpacer size="xs" />
                 <EuiText size="s">
@@ -300,7 +294,7 @@ export const BulkLocationsFlyout = ({
                   </ul>
                 </EuiText>
               </EuiAccordion>
-            </EuiCallOut>
+            </KbnWarningCallout>
           </>
         )}
       </EuiFlyoutBody>

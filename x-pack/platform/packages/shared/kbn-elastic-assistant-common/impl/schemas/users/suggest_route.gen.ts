@@ -21,11 +21,11 @@ export const SuggestUsersRequestBody = lazySchema(() =>
     /**
      * Search term to filter users
      */
-    searchTerm: z.string().optional(),
+    searchTerm: z.string().optional().describe('Search term to filter users'),
     /**
      * Number of users to return
      */
-    size: z.number().optional(),
+    size: z.number().optional().describe('Number of users to return'),
   })
 );
 export type SuggestUsersRequestBody = z.infer<typeof SuggestUsersRequestBody>;
@@ -40,32 +40,37 @@ export const SuggestUsersResponse = lazySchema(() =>
       /**
        * A unique identifier for the user profile.
        */
-      uid: z.string(),
+      uid: z.string().describe('A unique identifier for the user profile.'),
       /**
        * Indicates whether user profile is enabled or not.
        */
-      enabled: z.boolean(),
+      enabled: z.boolean().describe('Indicates whether user profile is enabled or not.'),
       /**
        * User specific data associated with the profile.
        */
-      data: z.object({}).catchall(z.unknown()),
+      data: z
+        .object({})
+        .catchall(z.unknown())
+        .describe('User specific data associated with the profile.'),
       /**
        * Information about the user that owns profile.
        */
-      user: z.object({
-        /**
-         * The username of the user.
-         */
-        username: z.string(),
-        /**
-         * The full name of the user.
-         */
-        full_name: z.string().optional(),
-        /**
-         * The email address of the user.
-         */
-        email: z.string().optional(),
-      }),
+      user: z
+        .object({
+          /**
+           * The username of the user.
+           */
+          username: z.string().describe('The username of the user.'),
+          /**
+           * The full name of the user.
+           */
+          full_name: z.string().optional().describe('The full name of the user.'),
+          /**
+           * The email address of the user.
+           */
+          email: z.string().optional().describe('The email address of the user.'),
+        })
+        .describe('Information about the user that owns profile.'),
     })
   )
 );
