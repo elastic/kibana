@@ -18,16 +18,13 @@ import {
   type SerializedSearchSourceFields,
 } from '@kbn/data-plugin/common';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
+import type { DiscoverSessionApiTab } from '@kbn/as-code-discover-schema';
 import { fromStoredTab, toStoredSort, toStoredTab } from '../../common/embeddable/transform_utils';
 import {
   deserializeEsqlControls,
   serializeEsqlControls,
 } from '../../common/session/control_panels';
-import type {
-  DiscoverSessionApiData,
-  DiscoverSessionApiResponse,
-  DiscoverSessionApiTab,
-} from '../../server';
+import type { DiscoverSessionApiData, DiscoverSessionApiResponse } from '../../server';
 import type {
   DiscoverSessionRequestData,
   DiscoverSessionRequestTab,

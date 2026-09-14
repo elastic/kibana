@@ -16,14 +16,11 @@ import type { SaveDiscoverSessionParams } from '@kbn/saved-search-plugin/public'
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import { DiscoverTabType, UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
+import { DiscoverTabType, UnifiedHistogramSuggestionType } from '@kbn/discover-session-constants';
 import { FilterStateStore } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
-import type {
-  DiscoverSessionApiData,
-  DiscoverSessionApiResponse,
-  DiscoverSessionApiTab,
-} from '../../server';
+import type { DiscoverSessionApiTab } from '@kbn/as-code-discover-schema';
+import type { DiscoverSessionApiData, DiscoverSessionApiResponse } from '../../server';
 import type { DiscoverSessionClient, DiscoverSessionGetResult } from './api_client';
 import { createSessionService } from './session_service';
 

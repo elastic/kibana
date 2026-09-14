@@ -16,18 +16,19 @@ import {
   DataGridDensity,
   DiscoverTabType,
   UnifiedHistogramSuggestionType,
-} from '@kbn/discover-utils';
+} from '@kbn/discover-session-constants';
 import { FILTERS, FilterStateStore } from '@kbn/es-query';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { cloneDeep } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import type {
   DiscoverSessionApiClassicTab,
+  DiscoverSessionApiEsqlTab,
   DiscoverSessionApiMetricsTab,
-  DiscoverSessionApiResponse,
   DiscoverSessionApiTab,
-} from '../../server';
-import { discoverSessionApiDataSchema } from '../../server/api/schema';
+} from '@kbn/as-code-discover-schema';
+import { discoverSessionApiDataSchema } from '@kbn/as-code-discover-schema';
+import type { DiscoverSessionApiResponse } from '../../server';
 import { assignSessionDataViewIds } from '../application/main/state_management/utils/assign_session_data_view_ids';
 import {
   fromDiscoverSessionApiResponse,
@@ -82,6 +83,74 @@ const inlineApiTab: DiscoverSessionApiClassicTab = {
   hide_table: false,
 };
 
+// Require every tab field here so new optional API fields cannot silently miss round-trip coverage.
+const esqlApiTab: Required<DiscoverSessionApiEsqlTab> = {
+  id: 'esql',
+  label: 'ES|QL',
+  type: DiscoverTabType.Default,
+  sort: [{ name: '@timestamp', direction: 'asc' }],
+  column_order: ['@timestamp', 'message'],
+  column_settings: { message: { width: 320 } },
+  data_source: { type: 'esql', query: 'FROM logs-* | WHERE status == 500' },
+  hide_chart: false,
+  hide_table: false,
+  hide_aggregated_preview: true,
+  row_height: 2,
+  header_row_height: 'auto',
+  rows_per_page: 25,
+  sample_size: 500,
+  breakdown_field: 'service.name',
+  chart_interval: 'h',
+  time_range: { from: 'now-24h', to: 'now' },
+  refresh_interval: { pause: false, value: 30_000 },
+  density: DataGridDensity.COMPACT,
+  documents_display_mode: 'json',
+  hide_nulls: true,
+  wrap_lines: false,
+  default_rendered_nodes: 50,
+  esql_approximation: true,
+  vis_context: {
+    suggestion_type: UnifiedHistogramSuggestionType.histogramForESQL,
+    attributes: {
+      visualizationType: 'lnsXY',
+      state: {
+        datasourceStates: {
+          textBased: {
+            layers: {
+              'layer-1': { index: 'esql-data-view' },
+            },
+          },
+        },
+        adHocDataViews: {
+          'esql-data-view': {
+            id: 'esql-data-view',
+            title: 'logs-*',
+            type: 'esql',
+            timeFieldName: '@timestamp',
+          },
+        },
+      },
+    },
+  },
+  control_panels: [
+    {
+      id: 'service-control',
+      type: ESQL_CONTROL,
+      width: CONTROL_WIDTH_MEDIUM,
+      grow: DEFAULT_PINNED_CONTROL_STATE.grow,
+      config: {
+        control_type: 'STATIC_VALUES',
+        available_options: ['api', 'web'],
+        selected_options: ['api'],
+        single_select: true,
+        variable_name: 'service',
+        variable_type: 'values',
+        title: 'Service',
+      },
+    },
+  ],
+};
+
 const response: DiscoverSessionApiResponse = {
   id: 'session-id',
   data: {
@@ -103,70 +172,7 @@ const response: DiscoverSessionApiResponse = {
         hide_table: false,
       },
       inlineApiTab,
-      {
-        id: 'esql',
-        label: 'ES|QL',
-        type: DiscoverTabType.Default,
-        sort: [{ name: '@timestamp', direction: 'asc' }],
-        column_order: ['@timestamp', 'message'],
-        column_settings: { message: { width: 320 } },
-        data_source: { type: 'esql', query: 'FROM logs-* | WHERE status == 500' },
-        hide_chart: false,
-        hide_table: false,
-        hide_aggregated_preview: true,
-        row_height: 2,
-        header_row_height: 'auto',
-        rows_per_page: 25,
-        sample_size: 500,
-        breakdown_field: 'service.name',
-        chart_interval: 'h',
-        time_range: { from: 'now-24h', to: 'now' },
-        refresh_interval: { pause: false, value: 30_000 },
-        density: DataGridDensity.COMPACT,
-        documents_display_mode: 'json',
-        json_mode_settings: { hide_nulls: true, wrap_lines: false },
-        esql_approximation: true,
-        vis_context: {
-          suggestion_type: UnifiedHistogramSuggestionType.histogramForESQL,
-          attributes: {
-            visualizationType: 'lnsXY',
-            state: {
-              datasourceStates: {
-                textBased: {
-                  layers: {
-                    'layer-1': { index: 'esql-data-view' },
-                  },
-                },
-              },
-              adHocDataViews: {
-                'esql-data-view': {
-                  id: 'esql-data-view',
-                  title: 'logs-*',
-                  type: 'esql',
-                  timeFieldName: '@timestamp',
-                },
-              },
-            },
-          },
-        },
-        control_panels: [
-          {
-            id: 'service-control',
-            type: ESQL_CONTROL,
-            width: CONTROL_WIDTH_MEDIUM,
-            grow: DEFAULT_PINNED_CONTROL_STATE.grow,
-            config: {
-              control_type: 'STATIC_VALUES',
-              available_options: ['api', 'web'],
-              selected_options: ['api'],
-              single_select: true,
-              variable_name: 'service',
-              variable_type: 'values',
-              title: 'Service',
-            },
-          },
-        ],
-      },
+      esqlApiTab,
     ],
   },
   meta: { managed: true },
@@ -236,6 +242,11 @@ describe('Discover session conversion and UI preparation', () => {
     );
     expect(session.tabs).toHaveLength(3);
     expect(session.tabs[0].serializedSearchSource.index).toBe('logs-data-view');
+    expect(session.tabs[2].jsonModeSettings).toStrictEqual({
+      hideNulls: true,
+      wrapLines: false,
+      defaultRenderedNodes: 50,
+    });
     expect(session.tabs[2].visContext).toEqual(
       expect.objectContaining({
         suggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
@@ -322,12 +333,63 @@ describe('Discover session conversion and UI preparation', () => {
   });
 
   it('round-trips the complete API document', () => {
-    const session = assignSessionDataViewIds(fromDiscoverSessionApiResponse(response), []);
+    const dataView: Required<ApiInlineDataView> = {
+      type: 'data_view_spec',
+      name: 'Inline logs',
+      index_pattern: 'logs-*',
+      time_field: '@timestamp',
+      field_filters: ['secret.*'],
+      allow_hidden_indices: true,
+      field_settings: {
+        event_time: {
+          type: 'date',
+          script: 'emit(doc["@timestamp"].value.toInstant().toEpochMilli())',
+          format: { type: 'date', params: { pattern: 'MM/DD/YYYY' } },
+          custom_label: 'Event time',
+          custom_description: 'Timestamp derived from the event',
+        },
+      },
+    };
+    const inlineTab: Required<DiscoverSessionApiClassicTab> = {
+      ...inlineApiTab,
+      data_source: dataView,
+      query: { language: 'kql', expression: 'service.name: api' },
+      column_order: ['event_time', 'message'],
+      column_settings: { message: { width: 320 } },
+      hide_aggregated_preview: false,
+      row_height: 'auto',
+      header_row_height: 2,
+      rows_per_page: 50,
+      sample_size: 1000,
+      breakdown_field: 'service.name',
+      chart_interval: 'h',
+      time_range: { from: 'now-1h', to: 'now' },
+      refresh_interval: { pause: true, value: 60_000 },
+      density: DataGridDensity.EXPANDED,
+      documents_display_mode: 'json',
+      hide_nulls: false,
+      wrap_lines: true,
+      default_rendered_nodes: 100,
+      vis_context: {
+        suggestion_type: UnifiedHistogramSuggestionType.histogramForDataView,
+        attributes: { visualizationType: 'lnsXY' },
+      },
+      control_panels: esqlApiTab.control_panels,
+    };
+    const apiResponse: DiscoverSessionApiResponse = {
+      ...response,
+      data: {
+        ...response.data,
+        tabs: [response.data.tabs[0], inlineTab, response.data.tabs[2]],
+      },
+    };
+
+    const session = assignSessionDataViewIds(fromDiscoverSessionApiResponse(apiResponse), []);
     const data = toDiscoverSessionApiData(session);
 
     const expectedInlineTab = {
-      ...inlineApiTab,
-      filters: inlineApiTab.filters.map((filter) => ({ ...filter, disabled: false })),
+      ...inlineTab,
+      filters: inlineTab.filters.map((filter) => ({ ...filter, disabled: false })),
     };
 
     expect(data).toEqual({
@@ -338,8 +400,8 @@ describe('Discover session conversion and UI preparation', () => {
   });
 
   it('round-trips Metrics settings through the session conversions', () => {
-    const metricsTab: DiscoverSessionApiMetricsTab = {
-      ...response.data.tabs[2],
+    const metricsTab: Required<DiscoverSessionApiMetricsTab> = {
+      ...esqlApiTab,
       data_source: { type: 'esql', query: 'FROM logs-* | WHERE status == 500' },
       type: DiscoverTabType.Metrics,
       dimensions: ['host.name', 'service.name'],

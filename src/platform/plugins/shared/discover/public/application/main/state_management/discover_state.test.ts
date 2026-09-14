@@ -60,7 +60,7 @@ import {
 import { getConnectedCustomizationService } from '../../../customizations';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import { DiscoverTabType } from '@kbn/discover-utils';
+import { DiscoverTabType } from '@kbn/discover-session-constants';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import { FILTERS } from '@kbn/es-query';
@@ -72,7 +72,8 @@ import {
   ProfileStateType,
   type ProfileStateDefinition,
 } from '../../../../common/context_awareness';
-import type { DiscoverSessionApiClassicTab, DiscoverSessionApiResponse } from '../../../../server';
+import type { DiscoverSessionApiClassicTab } from '@kbn/as-code-discover-schema';
+import type { DiscoverSessionApiResponse } from '../../../../server';
 import { fromDiscoverSessionApiResponse } from '../../../session/session_conversions';
 import { createSessionService } from '../../../session/session_service';
 import type {
