@@ -33,6 +33,5 @@
     "@kbn/rule-registry-plugin",
     "@kbn/actions-plugin",
     "@kbn/investigation-output",
-    "@kbn/utility-types"
   ]
 }
