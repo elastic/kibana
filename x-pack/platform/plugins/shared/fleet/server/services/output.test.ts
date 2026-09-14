@@ -1735,6 +1735,32 @@ describe('Output Service', () => {
           );
         });
       });
+
+      it.each([
+        {
+          flag: 'is_default',
+          input: { is_default: true, is_default_monitoring: false },
+          expectedError: 'An OTLP output cannot be the default data output.',
+        },
+        {
+          flag: 'is_default_monitoring',
+          input: { is_default: false, is_default_monitoring: true },
+          expectedError: 'An OTLP output cannot be the default monitoring output.',
+        },
+      ])(
+        'should throw when creating an OTLP output with $flag: true',
+        async ({ input, expectedError }) => {
+          const soClient = getMockedSoClient();
+          await expect(
+            outputService.create(soClient, esClientMock, {
+              ...input,
+              name: 'Test OTLP',
+              type: 'otlp',
+              otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
+            })
+          ).rejects.toThrow(expectedError);
+        }
+      );
     });
 
     it('should throw FleetError when given an invalid id', async () => {
@@ -2417,6 +2443,7 @@ describe('Output Service', () => {
         defaultOutputId: 'existing-preconfigured-default-output',
       });
       mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
+      mockedAgentPolicyService.list.mockResolvedValue({ items: [] } as any);
 
       await expect(
         outputService.update(soClient, esClientMock, 'output-test', {
@@ -3571,7 +3598,7 @@ describe('Output Service', () => {
         ).rejects.toThrow('9.6.0 or later');
       });
 
-      it('Should throw when updating an OTLP output used by a policy with non-OTel inputs', async () => {
+      it('Should throw when changing an output to OTLP type that is used by a policy with non-OTel inputs', async () => {
         const soClient = getMockedSoClient({});
         mockedAgentPolicyService.list.mockResolvedValue({
           items: [{ id: 'mixed-policy', name: 'Mixed Policy' }],
@@ -3588,10 +3615,10 @@ describe('Output Service', () => {
           })()
         );
 
-        // is_default: true changes is_default, which triggers validateTypeChanges for the OTLP path
         await expect(
-          outputService.update(soClient, esClientMock, 'existing-otlp-output', {
-            is_default: true,
+          outputService.update(soClient, esClientMock, 'existing-es-output', {
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
           })
         ).rejects.toThrow(
           'OTLP output cannot be used with agent policy "Mixed Policy" because it contains non-OTel inputs.'
@@ -3802,7 +3829,7 @@ describe('Output Service', () => {
         );
       });
 
-      it('accepts an OTLP update when the using policy has no package policies', async () => {
+      it('accepts changing type to OTLP when the using policy has no package policies', async () => {
         const soClient = getMockedSoClient({});
         mockedAgentPolicyService.list.mockResolvedValue({
           items: [{ id: 'empty-policy', name: 'Empty Policy' }],
@@ -3812,14 +3839,15 @@ describe('Output Service', () => {
           Promise.resolve((async function* () {})())
         );
 
-        await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
-          is_default: true,
+        await outputService.update(soClient, esClientMock, 'existing-es-output', {
+          type: 'otlp',
+          otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
         });
 
         expect(soClient.update).toBeCalled();
       });
 
-      it('accepts an OTLP update when all using policies have only OTel inputs', async () => {
+      it('accepts changing type to OTLP when all using policies have only OTel inputs', async () => {
         const soClient = getMockedSoClient({});
         mockedAgentPolicyService.list.mockResolvedValue({
           items: [{ id: 'otel-policy', name: 'OTel Policy' }],
@@ -3838,8 +3866,9 @@ describe('Output Service', () => {
           )
         );
 
-        await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
-          is_default: true,
+        await outputService.update(soClient, esClientMock, 'existing-es-output', {
+          type: 'otlp',
+          otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
         });
 
         expect(soClient.update).toBeCalled();
@@ -3904,6 +3933,44 @@ describe('Output Service', () => {
           expect.anything(),
           expect.objectContaining({ otlp_exporter_secrets: expect.anything() })
         );
+      });
+
+      it.each([
+        {
+          flag: 'is_default',
+          update: { is_default: true },
+          expectedError: 'An OTLP output cannot be the default data output.',
+        },
+        {
+          flag: 'is_default_monitoring',
+          update: { is_default_monitoring: true },
+          expectedError: 'An OTLP output cannot be the default monitoring output.',
+        },
+      ])(
+        'should throw when explicitly setting $flag: true on an existing OTLP output',
+        async ({ update, expectedError }) => {
+          const soClient = getMockedSoClient({});
+          await expect(
+            outputService.update(soClient, esClientMock, 'existing-otlp-output', update)
+          ).rejects.toThrow(expectedError);
+        }
+      );
+
+      it('should throw when changing type to OTLP on an output that is is_default_monitoring: true', async () => {
+        const soClient = getMockedSoClient({});
+        esoClientMock.getDecryptedAsInternalUser.mockImplementationOnce(async () =>
+          mockOutputSO('existing-es-monitoring-output', {
+            type: 'elasticsearch',
+            is_default: false,
+            is_default_monitoring: true,
+          })
+        );
+        await expect(
+          outputService.update(soClient, esClientMock, 'existing-es-monitoring-output', {
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
+          })
+        ).rejects.toThrow('An OTLP output cannot be the default monitoring output.');
       });
     });
   });
