@@ -33,6 +33,9 @@ import {
 } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
+import { SurrDocType } from '../../../../../application/context/services/context';
+import { getEsQuerySearchAfter } from '../../../../../application/context/utils/get_es_query_search_after';
+import { SortDirection } from '../../../../../application/context/utils/sorting';
 
 const DOC_COUNT = 10;
 const DEFAULT_VISIBLE_FIELDS = ['@timestamp', 'log.level', 'message'];
@@ -115,17 +118,13 @@ function useSurroundingLogs(
 
       try {
         const filters = instanceFilter ? [instanceFilter] : [];
-        // Use the anchor's ES sort values as the search_after cursor. Discover fetches records
-        // with [@timestamp, _shard_doc] sort, so sort[0] is the timestamp and sort[1] is the
-        // _shard_doc tiebreaker. Falling back to [anchorTime, 0] is safe: worst case it
-        // slightly mispositions at exact timestamp ties, no worse than a plain range query.
-        const anchorSortValues = anchor.raw.sort as [string | number, string | number] | undefined;
-        const searchAfter: [string | number, string | number] = [
-          anchorSortValues?.[0] ?? (anchorTime as string | number),
-          anchorSortValues?.[1] ?? 0,
-        ];
+        const timeRange = services.data.query.timefilter.timefilter.getTime();
+        // Use the anchor's ES sort values as the search_after cursor via the shared context view
+        // utility. Since this is a one-shot fetch (no prior rows), both predecessor and successor
+        // cursors derive from the anchor's sort tuple.
+        const searchAfter = getEsQuerySearchAfter(SurrDocType.SUCCESSORS, [], anchor);
 
-        const fetchBatch = async (sortDir: 'asc' | 'desc') => {
+        const fetchBatch = async (sortDir: SortDirection) => {
           const searchSource = services.data.search.searchSource.createEmpty();
           searchSource
             .setField('index', dataView)
@@ -134,6 +133,13 @@ function useSurroundingLogs(
             .setField('query', {
               query: {
                 bool: {
+                  must: [
+                    {
+                      range: {
+                        [timeField]: { gte: timeRange.from, lte: timeRange.to },
+                      },
+                    },
+                  ],
                   must_not: { ids: { values: [anchor.raw._id!] } },
                 },
               },
@@ -156,8 +162,8 @@ function useSurroundingLogs(
         };
 
         const [predecessors, successors] = await Promise.all([
-          fetchBatch('desc'),
-          fetchBatch('asc'),
+          fetchBatch(SortDirection.desc),
+          fetchBatch(SortDirection.asc),
         ]);
 
         if (!cancelled) {
@@ -261,13 +267,15 @@ export const SurroundingLogsFlyoutContent = ({
     [dataView]
   );
 
+  const visibleFieldsSet = useMemo(() => new Set(visibleFields), [visibleFields]);
+
   const selectableOptions: EuiSelectableOption[] = useMemo(
     () =>
       allDataViewFields.map((name) => ({
         label: name,
-        checked: visibleFields.includes(name) ? ('on' as const) : undefined,
+        checked: visibleFieldsSet.has(name) ? ('on' as const) : undefined,
       })),
-    [allDataViewFields, visibleFields]
+    [allDataViewFields, visibleFieldsSet]
   );
 
   const onFieldsChange = useCallback((options: EuiSelectableOption[]) => {
@@ -310,7 +318,7 @@ export const SurroundingLogsFlyoutContent = ({
             name: openInContextViewLabel,
             description: openInContextViewLabel,
             type: 'icon' as const,
-            icon: 'popout',
+            icon: 'external',
             onClick: onOpenContextView,
           },
         ],
@@ -346,7 +354,7 @@ export const SurroundingLogsFlyoutContent = ({
               button={
                 <EuiButtonEmpty
                   size="xs"
-                  iconType="listAdd"
+                  iconType="tableGear"
                   onClick={() => setIsPickerOpen((open) => !open)}
                 >
                   {columnsButtonLabel}

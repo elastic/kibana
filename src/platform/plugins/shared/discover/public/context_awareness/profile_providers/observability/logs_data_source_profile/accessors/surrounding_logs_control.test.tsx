@@ -35,6 +35,7 @@ const dataViewWithEcsFields = buildDataViewMock({
     makeField('kubernetes.pod.uid'),
     makeField('container.id'),
     makeField('service.node.name'),
+    makeField('service.instance.id'),
     makeField('service.name'),
     makeField('host.name'),
   ] as unknown as DataView['fields'],
@@ -79,6 +80,22 @@ describe('getInstanceFilter', () => {
     expect(filter).toBeDefined();
     expect(filter?.meta.key).toBe('host.name');
     expect(filter?.meta.params).toEqual({ query: 'my-host' });
+  });
+
+  it('uses service.instance.id (OTel) when higher-priority fields are absent', () => {
+    const record = buildDataTableRecord(
+      {
+        _id: 'doc-6',
+        _index: 'logs-test',
+        fields: { 'service.instance.id': ['instance-42'], 'service.name': ['svc'] },
+      },
+      dataViewWithEcsFields
+    );
+
+    const filter = getInstanceFilter(record, dataViewWithEcsFields);
+
+    expect(filter?.meta.key).toBe('service.instance.id');
+    expect(filter?.meta.params).toEqual({ query: 'instance-42' });
   });
 
   it('uses only the first element when the field value is a multi-value array', () => {

@@ -28,6 +28,7 @@ const INSTANCE_IDENTITY_FIELDS = [
   'kubernetes.pod.uid',
   'container.id',
   'service.node.name',
+  'service.instance.id',
   'service.name',
   'host.name',
 ] as const;
@@ -52,17 +53,14 @@ export function getInstanceFilter(record: DataTableRecord, dataView: DataView): 
   return undefined;
 }
 
-const SurroundingLogs = ({
-  Control,
-  rowProps: { record },
-  dataView,
-  services,
-}: {
+interface SurroundingLogsProps {
   Control: RowControlComponent;
   rowProps: RowControlRowProps;
   dataView: DataView;
   services: ProfileProviderServices;
-}) => {
+}
+
+const SurroundingLogs = ({ Control, rowProps: { record }, dataView, services }: SurroundingLogsProps) => {
   const instanceFilter = getInstanceFilter(record, dataView);
 
   return (
@@ -72,6 +70,9 @@ const SurroundingLogs = ({
       label={surroundingLogsLabel}
       tooltipContent={surroundingLogsTooltip}
       onClick={() => {
+        // The flyout is opened imperatively via the overlays service rather than rendered inside
+        // the data grid row, because grid rows are virtualised: they unmount and remount as the
+        // user scrolls, which would destroy any flyout state tied to the row's React subtree.
         // Capture the handle so the flyout content can close itself on row navigation.
         let overlayRef: OverlayRef;
         const onClose = () => overlayRef?.close();
