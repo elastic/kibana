@@ -170,17 +170,24 @@ export const ReviewStepFlow2: FunctionComponent<ReviewStepProps> = ({
     [euiTheme]
   );
 
+  /** Keeps wizard footer actions aligned when switching review tabs. */
   const reviewTabPanelStyles = useMemo(
     () => css`
       display: flex;
       flex-direction: column;
+      min-height: calc(
+        ${euiTheme.size.m} + ${euiTheme.size.m} + ${euiTheme.size.l} +
+          ${reviewTabScrollableMaxHeight}
+      );
       box-sizing: border-box;
     `,
-    []
+    [euiTheme.size.l, euiTheme.size.m, reviewTabScrollableMaxHeight]
   );
 
   const reviewSummaryScrollAreaStyles = useMemo(
     () => css`
+      flex: 1 1 auto;
+      min-height: 0;
       max-height: ${reviewTabScrollableMaxHeight};
       overflow: auto;
       padding-right: ${euiTheme.size.xs};
@@ -197,27 +204,12 @@ export const ReviewStepFlow2: FunctionComponent<ReviewStepProps> = ({
     ? { tone: 'primary', chosenLabel: datasetWizardStrings.reviewCustomBadge() }
     : { tone: 'accent', chosenLabel: datasetWizardStrings.reviewModifiedBadge() };
 
-  const reviewScrollableTabPanelStyles = useMemo(
-    () => css`
-      display: flex;
-      flex-direction: column;
-      max-height: calc(
-        ${euiTheme.size.m} + ${euiTheme.size.m} + ${euiTheme.size.l} +
-          ${reviewTabScrollableMaxHeight}
-      );
-      box-sizing: border-box;
-    `,
-    [euiTheme.size.l, euiTheme.size.m, reviewTabScrollableMaxHeight]
-  );
-
   const reviewTabCodeBlockAreaStyles = useMemo(
     () => css`
-      height: ${reviewTabScrollableMaxHeight};
-      min-height: ${reviewTabScrollableMaxHeight};
+      flex: 0 1 auto;
       max-height: ${reviewTabScrollableMaxHeight};
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
+      min-height: 0;
+      overflow: auto;
       box-sizing: border-box;
     `,
     [reviewTabScrollableMaxHeight]
@@ -289,19 +281,14 @@ export const ReviewStepFlow2: FunctionComponent<ReviewStepProps> = ({
   );
 
   const PreviewTab = () => (
-    <div css={reviewScrollableTabPanelStyles} data-test-subj="datasetWizardReviewPreviewTab">
+    <div css={reviewTabPanelStyles} data-test-subj="datasetWizardReviewPreviewTab">
       <EuiSpacer size="m" />
       <EuiText size="s">
         <p>{datasetWizardStrings.reviewPreviewDescription()}</p>
       </EuiText>
       <EuiSpacer size="m" />
       <div css={reviewTabCodeBlockAreaStyles} data-test-subj="datasetWizardReviewPreviewCodeScroll">
-        <EuiCodeBlock
-          language="json"
-          isCopyable
-          overflowHeight="100%"
-          data-test-subj="datasetWizardReviewPreviewCode"
-        >
+        <EuiCodeBlock language="json" isCopyable data-test-subj="datasetWizardReviewPreviewCode">
           {previewJson}
         </EuiCodeBlock>
       </div>
@@ -323,7 +310,7 @@ export const ReviewStepFlow2: FunctionComponent<ReviewStepProps> = ({
   );
 
   const RequestTab = () => (
-    <div css={reviewScrollableTabPanelStyles} data-test-subj="datasetWizardReviewRequestTab">
+    <div css={reviewTabPanelStyles} data-test-subj="datasetWizardReviewRequestTab">
       <EuiSpacer size="m" />
       <EuiText size="s">
         <p>{datasetWizardStrings.reviewRequestDescription()}</p>
@@ -333,7 +320,6 @@ export const ReviewStepFlow2: FunctionComponent<ReviewStepProps> = ({
         <EuiCodeBlock
           language={requestLanguage}
           isCopyable
-          overflowHeight="100%"
           data-test-subj="datasetWizardReviewRequestCode"
         >
           {requestText}
