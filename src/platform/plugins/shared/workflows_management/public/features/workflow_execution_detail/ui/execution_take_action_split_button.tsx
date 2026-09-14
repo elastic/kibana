@@ -15,14 +15,14 @@ import {
   EuiSplitButton,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { isDangerousStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
-import { useRunWorkflow, useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
-import { buildReplayInputsFromExecutionContext } from '../../../pages/executions/build_replay_inputs_from_execution_context';
 
 interface ExecutionTakeActionSplitButtonProps {
   execution: WorkflowExecutionDto;
@@ -34,8 +34,8 @@ export const ExecutionTakeActionSplitButton = React.memo<ExecutionTakeActionSpli
   ({ execution, failedStepId, onOpenFailedStepInEditor }) => {
     const { notifications, application } = useKibana().services;
     const { canExecuteWorkflow, canUpdateWorkflow } = useWorkflowsCapabilities();
-    const { mutateAsync: runWorkflow, isLoading: isRerunning } = useRunWorkflow();
-    const { setSelectedExecution } = useWorkflowUrlState();
+    const { pathname } = useLocation();
+    const { updateUrlState } = useWorkflowUrlState();
     const { href: executionHref } = useNavigateToExecution({
       workflowId: execution.workflowId ?? '',
       executionId: execution.id,
@@ -44,34 +44,25 @@ export const ExecutionTakeActionSplitButton = React.memo<ExecutionTakeActionSpli
 
     const isFailed = isDangerousStatus(execution.status);
 
-    const handleRerun = useCallback(async () => {
+    const handleRerun = useCallback(() => {
       if (!canExecuteWorkflow || !execution.workflowId) return;
-      try {
-        const { workflowExecutionId } = await runWorkflow({
-          id: execution.workflowId,
-          inputs: buildReplayInputsFromExecutionContext(execution.context),
-        });
-        notifications.toasts.addSuccess(
-          i18n.translate('workflows.executionFlyout.takeAction.reRunSuccess', {
-            defaultMessage: 'Re-ran execution',
-          }),
-          { toastLifeTimeMs: 3000 }
-        );
-        setSelectedExecution(workflowExecutionId);
-      } catch (err) {
-        notifications.toasts.addError(err instanceof Error ? err : new Error(String(err)), {
-          title: i18n.translate('workflows.executionFlyout.takeAction.reRunError', {
-            defaultMessage: 'Failed to re-run execution',
-          }),
-        });
+
+      // Stay on this execution so the flyout does not close behind the modal.
+      if (pathname === `/${execution.workflowId}`) {
+        updateUrlState({ replayExecutionId: execution.id });
+        return;
       }
+
+      application.navigateToApp('workflows', {
+        path: `/${execution.workflowId}?tab=executions&executionId=${execution.id}&replayExecutionId=${execution.id}`,
+      });
     }, [
+      application,
       canExecuteWorkflow,
-      execution.context,
+      execution.id,
       execution.workflowId,
-      notifications.toasts,
-      runWorkflow,
-      setSelectedExecution,
+      pathname,
+      updateUrlState,
     ]);
 
     const handleEditWorkflow = useCallback(() => {
@@ -187,11 +178,7 @@ export const ExecutionTakeActionSplitButton = React.memo<ExecutionTakeActionSpli
         anchorPosition="upRight"
         button={
           <EuiSplitButton size="s" fill data-test-subj="workflowExecutionFlyoutTakeAction">
-            <EuiSplitButton.ActionPrimary
-              onClick={() => void handleRerun()}
-              isLoading={isRerunning}
-              isDisabled={!canExecuteWorkflow}
-            >
+            <EuiSplitButton.ActionPrimary onClick={handleRerun} isDisabled={!canExecuteWorkflow}>
               {i18n.translate('workflows.executionFlyout.takeAction.reRun', {
                 defaultMessage: 'Re-run',
               })}

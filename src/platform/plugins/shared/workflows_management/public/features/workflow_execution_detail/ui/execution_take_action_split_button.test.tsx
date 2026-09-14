@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { ExecutionTakeActionSplitButton } from './execution_take_action_split_button';
 import { createStartServicesMock } from '../../../mocks';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
 import { createMockWorkflowExecutionDto } from '../../../shared/test_utils';
 
-const mockRunWorkflow = jest.fn();
-const mockSetSelectedExecution = jest.fn();
 const mockUseWorkflowsCapabilities = jest.fn(() => ({
   canExecuteWorkflow: true,
   canUpdateWorkflow: true,
@@ -25,26 +24,23 @@ jest.mock('@kbn/workflows-ui', () => {
   const actual = jest.requireActual('@kbn/workflows-ui');
   return {
     ...actual,
-    useRunWorkflow: () => ({ mutateAsync: mockRunWorkflow, isLoading: false }),
     useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
   };
 });
-
-jest.mock('../../../hooks/use_workflow_url_state', () => ({
-  useWorkflowUrlState: () => ({
-    setSelectedExecution: mockSetSelectedExecution,
-  }),
-}));
 
 jest.mock('../../../hooks/navigation/use_navigate_to_execution', () => ({
   useNavigateToExecution: () => ({ href: '/app/workflows/wf-1?executionId=exec-1' }),
 }));
 
+const LocationSearch = () => {
+  const { search } = useLocation();
+  return <div data-test-subj="location-search">{search}</div>;
+};
+
 describe('ExecutionTakeActionSplitButton', () => {
   const execution = createMockWorkflowExecutionDto({
     id: 'exec-1',
     workflowId: 'wf-1',
-    context: { inputs: { foo: 'bar' }, event: { type: 'alert' } },
   });
 
   beforeEach(() => {
@@ -53,43 +49,78 @@ describe('ExecutionTakeActionSplitButton', () => {
       canExecuteWorkflow: true,
       canUpdateWorkflow: true,
     });
-    mockRunWorkflow.mockResolvedValue({ workflowExecutionId: 'new-exec' });
   });
 
-  it('opens the new execution after a successful re-run', async () => {
+  it('opens the replay modal without closing the current execution', () => {
     const services = createStartServicesMock();
+    const navigateToApp = jest.fn();
+    services.application.navigateToApp = navigateToApp;
+
+    render(
+      <>
+        <ExecutionTakeActionSplitButton execution={execution} />
+        <LocationSearch />
+      </>,
+      {
+        wrapper: getTestProvider({
+          services,
+          initialEntries: ['/wf-1?tab=executions&executionId=exec-1'],
+        }),
+      }
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Re-run' }));
+
+    const search = screen.getByTestId('location-search').textContent ?? '';
+    expect(search).toContain('executionId=exec-1');
+    expect(search).toContain('replayExecutionId=exec-1');
+    expect(navigateToApp).not.toHaveBeenCalled();
+  });
+
+  it('navigates to the workflow replay modal from another route', () => {
+    const services = createStartServicesMock();
+    const navigateToApp = jest.fn();
+    services.application.navigateToApp = navigateToApp;
 
     render(<ExecutionTakeActionSplitButton execution={execution} />, {
-      wrapper: getTestProvider({ services }),
+      wrapper: getTestProvider({
+        services,
+        initialEntries: ['/executions?executionId=exec-1'],
+      }),
     });
 
     fireEvent.click(screen.getByRole('button', { name: 'Re-run' }));
 
-    await waitFor(() => {
-      expect(mockRunWorkflow).toHaveBeenCalledWith({
-        id: 'wf-1',
-        inputs: { foo: 'bar', event: { type: 'alert' } },
-      });
+    expect(navigateToApp).toHaveBeenCalledWith('workflows', {
+      path: '/wf-1?tab=executions&executionId=exec-1&replayExecutionId=exec-1',
     });
-
-    expect(mockSetSelectedExecution).toHaveBeenCalledWith('new-exec');
-    expect(services.notifications.toasts.addSuccess).toHaveBeenCalled();
   });
 
-  it('does not change the selected execution when re-run fails', async () => {
+  it('does not open the replay modal without execute privilege', () => {
     const services = createStartServicesMock();
-    mockRunWorkflow.mockRejectedValue(new Error('run failed'));
-
-    render(<ExecutionTakeActionSplitButton execution={execution} />, {
-      wrapper: getTestProvider({ services }),
+    const navigateToApp = jest.fn();
+    services.application.navigateToApp = navigateToApp;
+    mockUseWorkflowsCapabilities.mockReturnValue({
+      canExecuteWorkflow: false,
+      canUpdateWorkflow: true,
     });
+
+    render(
+      <>
+        <ExecutionTakeActionSplitButton execution={execution} />
+        <LocationSearch />
+      </>,
+      {
+        wrapper: getTestProvider({
+          services,
+          initialEntries: ['/wf-1?tab=executions&executionId=exec-1'],
+        }),
+      }
+    );
 
     fireEvent.click(screen.getByRole('button', { name: 'Re-run' }));
 
-    await waitFor(() => {
-      expect(services.notifications.toasts.addError).toHaveBeenCalled();
-    });
-
-    expect(mockSetSelectedExecution).not.toHaveBeenCalled();
+    expect(navigateToApp).not.toHaveBeenCalled();
+    expect(screen.getByTestId('location-search')).not.toHaveTextContent('replayExecutionId');
   });
 });
