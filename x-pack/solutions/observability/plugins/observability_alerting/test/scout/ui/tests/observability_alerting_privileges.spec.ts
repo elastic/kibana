@@ -188,7 +188,9 @@ test.describe(
       await test.step('histogram chart renders successfully', async () => {
         await expect(observabilityAlerting.episodesHistogramPanel).toBeVisible();
         await expect(page.testSubj.locator('unifiedHistogramChart')).toBeVisible();
-        await expect(page.locator('[data-test-subj="episodesHistogramPanel"] .euiCallOut--danger')).toHaveCount(0);
+        await expect(
+          page.locator('[data-test-subj="episodesHistogramPanel"] .euiCallOut--danger')
+        ).toHaveCount(0);
       });
 
       await test.step('episodes list page container renders', async () => {
@@ -220,7 +222,9 @@ test.describe(
       await test.step('histogram chart renders successfully', async () => {
         await expect(observabilityAlerting.episodesHistogramPanel).toBeVisible();
         await expect(page.testSubj.locator('unifiedHistogramChart')).toBeVisible();
-        await expect(page.locator('[data-test-subj="episodesHistogramPanel"] .euiCallOut--danger')).toHaveCount(0);
+        await expect(
+          page.locator('[data-test-subj="episodesHistogramPanel"] .euiCallOut--danger')
+        ).toHaveCount(0);
       });
 
       await test.step('episodes list page container renders', async () => {
@@ -252,7 +256,9 @@ test.describe(
       await test.step('histogram chart renders successfully', async () => {
         await expect(observabilityAlerting.episodesHistogramPanel).toBeVisible();
         await expect(page.testSubj.locator('unifiedHistogramChart')).toBeVisible();
-        await expect(page.locator('[data-test-subj="episodesHistogramPanel"] .euiCallOut--danger')).toHaveCount(0);
+        await expect(
+          page.locator('[data-test-subj="episodesHistogramPanel"] .euiCallOut--danger')
+        ).toHaveCount(0);
       });
 
       await test.step('episodes list page container renders', async () => {

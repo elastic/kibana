@@ -23,4 +23,5 @@ const PrivilegeCheckContext = React.createContext<PrivilegeCheck | undefined>(un
 
 export const PrivilegeCheckProvider = PrivilegeCheckContext.Provider;
 
-export const usePrivilegeCheck = (): PrivilegeCheck | undefined => useContext(PrivilegeCheckContext);
+export const usePrivilegeCheck = (): PrivilegeCheck | undefined =>
+  useContext(PrivilegeCheckContext);

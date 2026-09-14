@@ -108,9 +108,7 @@ export const ObservabilityAlertingApp = ({
       );
 
       const v2CapKey = capability === 'all' ? 'all' : 'read';
-      const hasV2 = _features.every(
-        (f) => caps[ALERTING_V2_FEATURE_IDS[f]]?.[v2CapKey] === true
-      );
+      const hasV2 = _features.every((f) => caps[ALERTING_V2_FEATURE_IDS[f]]?.[v2CapKey] === true);
 
       return hasV1 || hasV2;
     },

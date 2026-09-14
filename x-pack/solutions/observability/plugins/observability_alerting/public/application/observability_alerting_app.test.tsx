@@ -152,15 +152,12 @@ describe('ObservabilityAlertingApp', () => {
     { path: OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH, testId: 'ruleLibraryPage' },
     { path: OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH, testId: 'actionPoliciesPage' },
     { path: OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH, testId: 'executionHistoryPage' },
-  ])(
-    'passes privilegeCheck to $testId at $path',
-    async ({ path, testId }) => {
-      const { getByTestId } = renderAt(path);
+  ])('passes privilegeCheck to $testId at $path', async ({ path, testId }) => {
+    const { getByTestId } = renderAt(path);
 
-      await waitFor(() => {
-        expect(getByTestId(testId)).toBeInTheDocument();
-      });
-      expect(getByTestId(testId)).toHaveAttribute('data-has-privilege-check', 'true');
-    }
-  );
+    await waitFor(() => {
+      expect(getByTestId(testId)).toBeInTheDocument();
+    });
+    expect(getByTestId(testId)).toHaveAttribute('data-has-privilege-check', 'true');
+  });
 });

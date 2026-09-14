@@ -118,9 +118,7 @@ describe('useFetchEpisodeTagOptions', () => {
   it('returns source-only tags when the v2 fetch fails', async () => {
     mockFetchEpisodeTagOptions.mockRejectedValue(new Error('v2 failure'));
 
-    const { result } = renderTagOptions(
-      sourceWithTags(jest.fn().mockResolvedValue(['staging']))
-    );
+    const { result } = renderTagOptions(sourceWithTags(jest.fn().mockResolvedValue(['staging'])));
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 

@@ -27,8 +27,7 @@ const getHttpStatus = (
   seen.add(error);
 
   const candidate = error as HttpStatusCarrier;
-  const status =
-    candidate.response?.status ?? candidate.body?.statusCode ?? candidate.statusCode;
+  const status = candidate.response?.status ?? candidate.body?.statusCode ?? candidate.statusCode;
 
   if (typeof status === 'number') {
     return status;
