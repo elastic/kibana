@@ -61,7 +61,7 @@ export function generateYamlSchemaFromConnectors(
   // Sort both arrays by their type discriminator to make traversal order stable
   // and independent of async loader resolution order or Map insertion order.
   const sortedConnectors = [...connectors].sort((a, b) => a.type.localeCompare(b.type));
-  const sortedTriggers = [...triggers].sort((a, b) => a.localeCompare(b));
+  const sortedTriggers = triggers.toSorted();
 
   const recursiveStepSchema = createRecursiveStepSchema(sortedConnectors, loose);
 
