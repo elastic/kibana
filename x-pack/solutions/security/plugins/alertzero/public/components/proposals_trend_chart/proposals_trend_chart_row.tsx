@@ -38,12 +38,12 @@ export const ProposalsTrendChartRow: React.FC = () => {
       responsive={false}
       data-test-subj="alertZeroProposalsTrendChartRow"
     >
-      {TREND_CHART_PANELS.map(({ id, category, label, color }) => {
+      {TREND_CHART_PANELS.map(({ id, label, color }) => {
         const series = buckets.map((b) => ({
           x: b.timestamp,
-          y: b.counts[category] ?? 0,
+          y: b.counts[id] ?? 0,
         }));
-        const count = lastBucket?.counts[category] ?? 0;
+        const count = lastBucket?.counts[id] ?? 0;
 
         return (
           <EuiFlexItem key={id}>

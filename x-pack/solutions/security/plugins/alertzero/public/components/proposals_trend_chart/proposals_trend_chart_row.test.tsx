@@ -43,8 +43,8 @@ const mockUseProposalChartsSummary = useProposalChartsSummary as jest.Mock;
 
 const summary: ProposalChartsSummaryResponse = {
   buckets: [
-    { timestamp: 1_700_000_000_000, counts: { contain: 1, investigate: 0, tune: 4 } },
-    { timestamp: 1_700_001_800_000, counts: { contain: 5, investigate: 3, tune: 2 } },
+    { timestamp: 1_700_000_000_000, counts: { respond: 1, investigate: 0, configure: 4 } },
+    { timestamp: 1_700_001_800_000, counts: { respond: 5, investigate: 3, configure: 2 } },
   ],
 };
 
@@ -112,7 +112,7 @@ describe('ProposalsTrendChartRow', () => {
   });
 
   it('should count a category absent from the bucket as zero rather than blank', () => {
-    setup({ data: { buckets: [{ timestamp: 1_700_000_000_000, counts: { contain: 2 } }] } });
+    setup({ data: { buckets: [{ timestamp: 1_700_000_000_000, counts: { respond: 2 } }] } });
 
     expect(screen.getByTestId('alertZeroProposalsTrendChartCount-configure')).toHaveTextContent(
       '0'
