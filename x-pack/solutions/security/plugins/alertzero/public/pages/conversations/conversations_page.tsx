@@ -25,11 +25,8 @@ import {
   type BaseActionsProps,
   type CardActionType,
   InvestigationDetailsFlyout,
+  InvestigationActionModals,
   BlastRadius,
-  AssignActionModal,
-  BaseActionModal,
-  MODAL_TRANSLATIONS,
-  ApprovalModal,
 } from '@kbn/agentic-investigations-common';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
@@ -59,8 +56,7 @@ export const ConversationsPage: React.FC = () => {
   const [modalState, setModalState] = useState<{
     type: CardActionType | null;
     recordId: Investigation['recordId'] | null;
-    assignee?: string | null;
-  }>({ type: null, recordId: null, assignee: null });
+  }>({ type: null, recordId: null });
 
   // TODO: update data fetching to use the new conversations API (useConversations) and remove the useInvestigations hook
   const conversations = useMemo(() => data?.investigations ?? [], [data?.investigations]);
@@ -76,12 +72,12 @@ export const ConversationsPage: React.FC = () => {
   } = usePendingProposals();
   const proposalCount = pendingProposalsData?.total ?? 0;
 
-  const onClickAction: BaseActionsProps['onClickAction'] = useCallback(
-    (action, recordId, assignee = null) => {
-      setModalState({ type: action, recordId, assignee });
-    },
-    [setModalState]
-  );
+  const onClickAction: BaseActionsProps['onClickAction'] = useCallback((action, recordId) => {
+    setModalState({ type: action, recordId });
+  }, []);
+
+  const closeModal = useCallback(() => setModalState({ type: null, recordId: null }), []);
+  const closeApproval = useCallback(() => setSelectedIdForRecommendedAction(undefined), []);
 
   const onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'] =
     useCallback(
@@ -97,6 +93,14 @@ export const ConversationsPage: React.FC = () => {
     () =>
       selectedIdForDetails ? conversations.find((c) => c.id === selectedIdForDetails) : undefined,
     [conversations, selectedIdForDetails]
+  );
+
+  const actionInvestigation = useMemo(
+    () =>
+      modalState.recordId
+        ? conversations.find((c) => c.recordId === modalState.recordId)
+        : undefined,
+    [conversations, modalState.recordId]
   );
 
   const selectedRecommendedActionConversation = useMemo(
@@ -155,17 +159,6 @@ export const ConversationsPage: React.FC = () => {
         `,
       }}
     >
-      {selectedIdForRecommendedAction && selectedRecommendedActionConversation && (
-        <ApprovalModal
-          selectedRecommendedActionConversation={selectedRecommendedActionConversation}
-          onConfirm={() =>
-            // TODO: use action API call hook
-            setSelectedIdForRecommendedAction(undefined)
-          }
-          onClose={() => setSelectedIdForRecommendedAction(undefined)}
-        />
-      )}
-
       {selectedDetailsConversation && (
         <InvestigationDetailsFlyout
           investigation={selectedDetailsConversation}
@@ -173,35 +166,14 @@ export const ConversationsPage: React.FC = () => {
         />
       )}
 
-      {modalState.type === 'assign' && modalState.recordId && (
-        <AssignActionModal
-          recordId={modalState.recordId}
-          initialAssignee={modalState.assignee}
-          onClose={() => setModalState({ type: null, recordId: null })}
-          onAssign={() => {
-            // TODO: use assign action API call hook
-            setModalState({ type: null, recordId: null });
-          }}
-        />
-      )}
-
-      {modalState.type === 'dismiss' && modalState.recordId && (
-        <BaseActionModal
-          type="dismiss"
-          title={MODAL_TRANSLATIONS.dismiss.title}
-          recordId={modalState.recordId}
-          onClose={() => setModalState({ type: null, recordId: null })}
-          rationalePlaceholder={MODAL_TRANSLATIONS.dismiss.rationalePlaceholder}
-          primaryAction={{
-            color: 'danger',
-            label: MODAL_TRANSLATIONS.dismiss.actionButtonLabel,
-            onClick: () => {
-              // TODO: use dismiss action API call hook
-              setModalState({ type: null, recordId: null });
-            },
-          }}
-        />
-      )}
+      <InvestigationActionModals
+        action={modalState.type}
+        recordId={modalState.recordId}
+        initialAssignee={actionInvestigation?.assignee}
+        approvalInvestigation={selectedRecommendedActionConversation}
+        onCloseAction={closeModal}
+        onCloseApproval={closeApproval}
+      />
 
       <EuiFlexGroup gutterSize="l" direction="column" wrap>
         <EuiFlexItem grow={false}>
