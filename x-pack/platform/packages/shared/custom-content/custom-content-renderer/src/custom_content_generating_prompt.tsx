@@ -28,6 +28,8 @@ export const CustomContentGeneratingPrompt = () => {
         backgroundColor: euiTheme.colors.emptyShade,
       })}
       data-test-subj="customContentGeneratingPrompt"
+      role="status"
+      aria-live="polite"
     >
       <EuiLoadingElastic size="xxl" />
       <EuiSpacer size="m" />
