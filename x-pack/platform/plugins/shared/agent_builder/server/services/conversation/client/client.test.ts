@@ -34,6 +34,7 @@ import { createRound } from '../../../test_utils';
 import { buildPinnedFilter } from '../access_control/query';
 import { createClient, type ConversationClient } from './client';
 import type { Document } from './converters';
+import type { ConversationEventsServiceStart } from '../../conversation_events';
 
 jest.mock('../templates/registry', () => ({ getTemplate: jest.fn() }));
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -64,6 +65,11 @@ const mockRawEsClient: MockRawEsClient = {
 };
 
 const TEST_CONVERSATION_INDEX = '.kibana_agent_builder_conversations';
+
+const mockConversationEvents: ConversationEventsServiceStart = {
+  getDefinition: jest.fn(),
+  list: jest.fn().mockReturnValue([]),
+};
 
 jest.mock('./storage', () => ({
   createStorage: jest.fn(() => ({
@@ -228,6 +234,7 @@ describe.skip('ConversationClient', () => {
       logger: loggerMock.create(),
       esClient: mockRawEsClient as unknown as ElasticsearchClient,
       agentRegistry: agentRegistry as unknown as AgentRegistry,
+      conversationEvents: mockConversationEvents,
       user: {
         id: 'user-1',
         username: 'test-user',
@@ -812,6 +819,7 @@ describe.skip('ConversationClient', () => {
         logger: loggerMock.create(),
         esClient: mockRawEsClient as unknown as ElasticsearchClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
+        conversationEvents: mockConversationEvents,
         user: { id: 'user-1', username: 'test-user', isAdmin: false },
       });
 
@@ -1234,6 +1242,7 @@ describe.skip('ConversationClient', () => {
         logger: loggerMock.create(),
         esClient: mockRawEsClient as unknown as ElasticsearchClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
+      conversationEvents: mockConversationEvents,
         user: { username: 'no-profile-user', isAdmin: false },
       });
 
@@ -1311,6 +1320,7 @@ describe.skip('ConversationClient', () => {
         logger: loggerMock.create(),
         esClient: mockRawEsClient as unknown as ElasticsearchClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
+      conversationEvents: mockConversationEvents,
         user: { username: 'no-profile-user', isAdmin: false },
       });
 
@@ -2148,6 +2158,7 @@ describe.skip('ConversationClient', () => {
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
+      conversationEvents: mockConversationEvents,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
           onMetadataPatched,
         });
@@ -2176,6 +2187,7 @@ describe.skip('ConversationClient', () => {
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
+      conversationEvents: mockConversationEvents,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
           onMetadataPatched,
         });
@@ -2206,6 +2218,7 @@ describe.skip('ConversationClient', () => {
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
+      conversationEvents: mockConversationEvents,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
           onMetadataPatched,
         });
@@ -2230,6 +2243,7 @@ describe.skip('ConversationClient', () => {
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
+      conversationEvents: mockConversationEvents,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
           onMetadataPatched,
         });
@@ -2668,6 +2682,7 @@ describe.skip('ConversationClient', () => {
         logger: loggerMock.create(),
         esClient: mockRawEsClient as unknown as ElasticsearchClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
+      conversationEvents: mockConversationEvents,
         user: {
           id: 'admin-user-id',
           username: 'admin-user',
@@ -3095,6 +3110,37 @@ describe.skip('ConversationClient', () => {
         'round-1::execution_started',
         'round-1::execution_terminated',
       ]);
+    });
+  });
+
+  describe('addEvents', () => {
+    const noteSchema = { safeParse: jest.fn() };
+    const noteDefinition = {
+      type: 'scratch.note',
+      payloadSchema: noteSchema,
+      internal: false,
+    };
+
+    beforeEach(() => {
+      noteSchema.safeParse.mockReturnValue({ success: true, data: { note: 'hello' } });
+      (mockConversationEvents.getDefinition as jest.Mock).mockReturnValue(noteDefinition);
+    });
+
+    it('calls appendEvents with access converse and returns materialized events', async () => {
+      mockGetDocumentResponse(
+        createConversationDocument({ schemaVersion: 1, events: [] })
+      );
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+
+      const result = await client.addEvents({
+        id: 'conversation-1',
+        events: [{ type: 'scratch.note', data: { note: 'hello' } }],
+      });
+
+      expect(result).toHaveLength(1);
+      expect(result[0].type).toBe('scratch.note');
+      expect(result[0].actor.type).toBe(EventActorType.user);
+      expect(result[0].actor.id).toBe('user-1');
     });
   });
 });

@@ -34,6 +34,7 @@ const createService = ({ agents = {} }: { agents?: object } = {}) => {
       },
     } as never,
     agents: agents as never,
+    conversationEvents: { getDefinition: jest.fn(), list: jest.fn().mockReturnValue([]) },
   });
 };
 
