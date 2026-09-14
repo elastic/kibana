@@ -109,6 +109,15 @@ export class EsqlSource implements DataSourceBase {
     return !!this.timeFieldName;
   }
 
+  public withColumns(resultColumns: readonly DatatableColumn[]): EsqlSource {
+    return new EsqlSource({
+      id: this.id,
+      title: this.title,
+      timeFieldName: this.timeFieldName,
+      resultColumns,
+    });
+  }
+
   public isRollup(): boolean {
     return false;
   }

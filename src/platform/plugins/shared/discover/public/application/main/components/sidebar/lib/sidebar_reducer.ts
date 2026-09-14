@@ -80,12 +80,6 @@ export function discoverSidebarReducer(
       if (state.dataView === action.payload.dataView) {
         return state; // already updated in `DOCUMENTS_LOADED`
       }
-      if (state.dataSource?.kind === 'esql') {
-        // TODO: remove once registerEsqlSourceInDataViewsCache (cache_adapter.ts) is deleted.
-        // The DataView change here is driven by the synthetic ES|QL DataView being registered
-        // after the fetch — don't clear allFields, the field list comes from esqlSource.resultColumns.
-        return { ...state, dataView: action.payload.dataView };
-      }
       return {
         ...state,
         dataView: action.payload.dataView,

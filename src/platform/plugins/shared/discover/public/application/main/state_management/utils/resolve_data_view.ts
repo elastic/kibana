@@ -10,7 +10,6 @@
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { ToastsStart } from '@kbn/core/public';
-import { ESQL_TYPE } from '@kbn/data-view-utils';
 import type { DiscoverServices } from '../../../../build_services';
 import type { RuntimeStateManager } from '../redux';
 
@@ -85,17 +84,7 @@ export async function loadDataView({
   // First try to fetch the data view by ID
   let fetchedDataView: DataView | null = null;
   try {
-    const found = fetchId ? await dataViews.get(fetchId) : null;
-    if (found?.type === ESQL_TYPE) {
-      // TODO: remove once registerEsqlSourceInDataViewsCache (cache_adapter.ts) is deleted.
-      // Synthetic DataViews are registered for DSL compatibility only and must not
-      // be used as the active DataView in DataView mode. Look up the persisted
-      // DataView that matches the index pattern (synthetic DataView title).
-      const matchingId = savedDataViews.find((dv) => dv.title === found.title)?.id;
-      fetchedDataView = matchingId ? await dataViews.get(matchingId) : null;
-    } else {
-      fetchedDataView = found;
-    }
+    fetchedDataView = fetchId ? await dataViews.get(fetchId) : null;
   } catch (e) {
     // Swallow the error and fall back to the default data view
   }

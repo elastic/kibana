@@ -100,6 +100,7 @@ export class CascadedDocumentsFetcher {
         scopedProfilesManager: this.scopedProfilesManager,
         inspectorAdapters: { requests: this.requestAdapter },
         esqlApproximation,
+        http: this.services.http,
         inspectorConfig: {
           title: i18n.translate('discover.dataCascade.inspector.cascadeQueryTitle', {
             defaultMessage: 'Cascade Row Data Query',

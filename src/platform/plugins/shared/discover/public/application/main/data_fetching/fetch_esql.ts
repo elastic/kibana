@@ -29,8 +29,13 @@ import { getDocId, type DataTableRecord } from '@kbn/discover-utils';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import moment from 'moment';
 import type { ESQLColumnsWithHighlights } from '@kbn/esql-utils';
-import { getColumnsWithHighlights } from '@kbn/esql-utils';
+import {
+  getColumnsWithHighlights,
+  getESQLTimeField,
+  getProjectRoutingFromEsqlQuery,
+} from '@kbn/esql-utils';
 import { EsqlSource } from '@kbn/data-source';
+import type { HttpStart } from '@kbn/core/public';
 import type { RecordsFetchResponse } from '../../types';
 import type { ScopedProfilesManager } from '../../../context_awareness';
 
@@ -60,6 +65,7 @@ export interface FetchEsqlParams {
     title: string;
     description: string;
   };
+  http?: HttpStart;
 }
 
 export function fetchEsql({
@@ -78,6 +84,7 @@ export function fetchEsql({
   projectRouting,
   esqlApproximation,
   inspectorConfig,
+  http,
 }: FetchEsqlParams): Promise<RecordsFetchResponse> {
   const props = getTextBasedQueryStateToAstProps({
     query,
@@ -155,14 +162,22 @@ export function fetchEsql({
                 return true; // suppress the default behaviour
               });
             }
-            const esqlSource = esqlQueryColumns
-              ? await EsqlSource.create({
-                  query: isOfAggregateQueryType(query) ? query.esql : '',
-                  resultColumns: esqlQueryColumns,
-                  timeFieldName: dataView.timeFieldName,
-                  projectRouting,
-                })
-              : undefined;
+            let esqlSource: EsqlSource | undefined;
+            if (esqlQueryColumns) {
+              const esql = isOfAggregateQueryType(query) ? query.esql : '';
+              const resolvedProjectRouting =
+                projectRouting ?? getProjectRoutingFromEsqlQuery(esql) ?? undefined;
+              esqlSource = await EsqlSource.create({
+                query: esql,
+                resultColumns: esqlQueryColumns,
+                timeFieldName: await getESQLTimeField({
+                  query: esql,
+                  http,
+                  projectRouting: resolvedProjectRouting,
+                }),
+                projectRouting: resolvedProjectRouting,
+              });
+            }
             return {
               records: finalData || [],
               interceptedWarnings,

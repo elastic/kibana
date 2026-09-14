@@ -41,9 +41,9 @@ import { fetchData } from './tab_state';
  * Set the data view in the tab's runtime state
  */
 export const setDataView: InternalStateThunkActionCreator<
-  [TabActionPayload<{ dataView: DataView }>]
+  [TabActionPayload<{ dataView: DataView; updateDataSource?: boolean }>]
 > =
-  ({ tabId, dataView }) =>
+  ({ tabId, dataView, updateDataSource = true }) =>
   (dispatch, _, { runtimeStateManager }) => {
     const { currentDataView$, currentDataSource$ } = selectTabRuntimeState(
       runtimeStateManager,
@@ -55,7 +55,9 @@ export const setDataView: InternalStateThunkActionCreator<
     }
 
     currentDataView$.next(dataView);
-    currentDataSource$.next(new DataViewSource(dataView));
+    if (updateDataSource) {
+      currentDataSource$.next(new DataViewSource(dataView));
+    }
   };
 
 /**

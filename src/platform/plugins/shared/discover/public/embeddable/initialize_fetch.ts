@@ -228,6 +228,7 @@ export function initializeFetch({
               esqlVariables: getRelevantESQLVariables(savedSearch, fetchContext.esqlVariables),
               projectRouting: fetchContext.projectRouting,
               esqlApproximation: fetchContext.isApproximate,
+              http: discoverServices.http,
             });
             return {
               columnsMeta: result.dataSource

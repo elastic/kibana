@@ -7,14 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { cloneDeep, isEqual, isObject, pick } from 'lodash';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import { DataViewSource, EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
-import { getESQLTimeField, getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
+import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
+import {
+  getESQLTimeField,
+  getIndexPatternFromESQLQuery,
+  getProjectRoutingFromEsqlQuery,
+} from '@kbn/esql-utils';
 import { internalStateSlice, type TabActionPayload } from '../internal_state';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
 import { TabInitializationStatus, type DiscoverAppState } from '..';
@@ -185,13 +189,19 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
 
     let dataView: DataView;
     let esqlSource: EsqlSource | undefined;
+    let updateDataSource = true;
 
     if (isOfAggregateQueryType(initialQuery)) {
-      // Creates a placeholder EsqlSource (empty columns) so DSL consumers can resolve a DataView
-      // by ID before the first fetch. Replaced with real columns by build_esql_fetch_subscribe
-      // once fetch_esql returns results. Remove once DSL consumers migrate to DataSourceService.
-      ({ esqlSource, dataView } = await initializeEsqlDataSource(initialQuery.esql, services));
+      ({ esqlSource, dataView } = await initializeEsqlDataSource(
+        initialQuery.esql,
+        services,
+        getState().savedDataViews,
+        runtimeStateManager.adHocDataViews$.getValue()
+      ));
+      // Set currentDataSource$ to the real EsqlSource before setDataView runs,
+      // and tell setDataView not to overwrite it with DataViewSource(dataView).
       selectTabRuntimeState(runtimeStateManager, tabId).currentDataSource$.next(esqlSource);
+      updateDataSource = false;
     } else {
       // Load the requested data view if one exists, or a fallback otherwise
       const result = await loadAndResolveDataView({
@@ -206,12 +216,9 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       });
 
       dataView = result.dataView;
-      selectTabRuntimeState(runtimeStateManager, tabId).currentDataSource$.next(
-        new DataViewSource(dataView)
-      );
     }
 
-    dispatch(setDataView({ tabId, dataView }));
+    dispatch(setDataView({ tabId, dataView, updateDataSource }));
 
     if (!dataView.isPersisted()) {
       dispatch(appendAdHocDataViews(dataView));
@@ -358,7 +365,9 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
 
 async function initializeEsqlDataSource(
   esql: string,
-  services: DiscoverServices
+  services: DiscoverServices,
+  savedDataViews: DataViewListItem[],
+  adHocDataViews: DataView[]
 ): Promise<{ esqlSource: EsqlSource; dataView: DataView }> {
   const projectRouting =
     getProjectRoutingFromEsqlQuery(esql) ?? services.cps?.cpsManager?.getProjectRouting();
@@ -369,6 +378,40 @@ async function initializeEsqlDataSource(
     projectRouting,
   });
   services.dataSourceService.registerEsqlSource(esqlSource);
-  const dataView = await registerEsqlSourceInDataViewsCache(services.dataViews, esqlSource);
-  return { esqlSource, dataView };
+  // Register in the DataViews cache for filter pill backward compat only — this synthetic DataView
+  // must never flow into currentDataView$ or Redux state.
+  await registerEsqlSourceInDataViewsCache(services.dataViews, esqlSource);
+
+  // Resolve the real DataView for currentDataView$ — look up by index pattern title,
+  // then fall back to the default DataView. currentDataView$ must never hold a synthetic DataView.
+  const indexPattern = getIndexPatternFromESQLQuery(esql);
+  let dataView: DataView | null = null;
+
+  const savedMatch = indexPattern
+    ? savedDataViews.find((dv) => dv.title === indexPattern)
+    : undefined;
+  if (savedMatch?.id) {
+    try {
+      dataView = await services.dataViews.get(savedMatch.id);
+    } catch (e) {
+      // fall through
+    }
+  }
+
+  if (!dataView && indexPattern) {
+    dataView = adHocDataViews.find((dv) => dv.title === indexPattern) ?? null;
+  }
+
+  if (!dataView) {
+    try {
+      dataView = await services.dataViews.getDefaultDataView({
+        displayErrors: false,
+        refreshFields: false,
+      });
+    } catch (e) {
+      // fall through
+    }
+  }
+
+  return { esqlSource, dataView: dataView! };
 }

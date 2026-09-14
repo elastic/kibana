@@ -9,7 +9,6 @@
 
 import { isFunction, isEqual } from 'lodash';
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/common';
-import { ESQL_TYPE } from '@kbn/data-view-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
@@ -462,22 +461,6 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
       false
     );
 
-    // TODO: remove once registerEsqlSourceInDataViewsCache (cache_adapter.ts) is deleted.
-    // currentDataView$ may point to a synthetic ES|QL DataView — resolve the real persisted one.
-    let dataViewId = dataView.id ?? '';
-    if (dataView.type === ESQL_TYPE) {
-      const { savedDataViews } = getState();
-      const savedMatch = savedDataViews.find((dv) => dv.title === dataView.title);
-      if (savedMatch?.id) {
-        dataViewId = savedMatch.id;
-      } else {
-        const adHocMatch = runtimeStateManager.adHocDataViews$
-          .getValue()
-          .find((dv) => dv.title === dataView.title);
-        dataViewId = adHocMatch?.id ?? '';
-      }
-    }
-
     dispatch(
       updateAppState({
         tabId,
@@ -491,7 +474,7 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
           sort,
           dataSource: {
             type: DataSourceType.DataView,
-            dataViewId,
+            dataViewId: dataView.id ?? '',
           },
         },
       })

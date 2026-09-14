@@ -123,6 +123,7 @@ export function fetchAll(
           esqlVariables: currentTab.esqlVariables,
           searchSessionId: params.searchSessionId,
           esqlApproximation: currentTab.appState.esqlApproximation ?? false,
+          http: services.http,
         })
       : fetchDocuments(searchSource, params);
 

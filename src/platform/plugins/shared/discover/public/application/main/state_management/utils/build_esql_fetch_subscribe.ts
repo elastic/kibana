@@ -214,22 +214,16 @@ export const buildEsqlFetchSubscribe = ({
       }
     }
 
+    if (next.dataSource?.kind === 'esql') {
+      dataSourceService.registerEsqlSource(next.dataSource);
+      await registerEsqlSourceInDataViewsCache(dataViews, next.dataSource);
+      registeredEsqlSourceId = next.dataSource.id;
+    }
+
     dataSubjects.documents$.next({
       ...next,
       fetchStatus: FetchStatus.COMPLETE,
     });
-
-    if (next.dataSource?.kind === 'esql') {
-      dataSourceService.registerEsqlSource(next.dataSource);
-      // TODO: remove once DSL code no longer looks up DataViews for ES|QL sources
-      const nextDataView = await registerEsqlSourceInDataViewsCache(dataViews, next.dataSource);
-      registeredEsqlSourceId = next.dataSource.id;
-      if (nextDataView) {
-        await internalState.dispatch(
-          injectCurrentTab(internalStateActions.assignNextDataView)({ dataView: nextDataView })
-        );
-      }
-    }
   };
 
   return { esqlFetchSubscribe, cleanupEsql };
