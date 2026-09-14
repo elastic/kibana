@@ -273,18 +273,47 @@ components:
           description: >-
             Subset of the shared autonomy scale this Worker offers. Same meaning as
             WatchAutonomyLevel everywhere; availability is per-Worker. Omitted means all three.
+        allowedTriggers:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkerTriggerType'
+          minItems: 1
+          maxItems: 2
+          description: >-
+            Which trigger kinds this Worker allows. Manual and scheduled are independent —
+            a Worker may offer one or both. The interval control is shown only when scheduled
+            is present (via scheduleInterval).
         scheduleInterval:
           $ref: '#/components/schemas/WorkerScheduleInterval'
           description: >-
-            Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to
-            render the interval control.
+            Interval for a Worker that allows a scheduled trigger. Omitted when scheduled is
+            not allowed. Independent of whether the Worker also allows manual runs.
+        extras:
+          $ref: '#/components/schemas/WorkerSettingsExtras'
+          description: >-
+            Worker-specific settings bag. Omitted when the Worker has no unique settings. Known
+            properties are typed; additional keys are preserved so a Worker module can add fields
+            without a top-level schema change.
+
+    WorkerTriggerType:
+      type: string
+      enum: [manual, scheduled]
+      description: >-
+        Trigger kinds a Worker may allow. Distinct from WorkflowTriggerType (`schedule` vs
+        `scheduled`) — this matches the workflow YAML trigger `type`.
+
+    WorkerSettingsExtras:
+      type: object
+      additionalProperties: true
+      maxProperties: 32
+      description: >-
+        Nested unique settings. The owning Worker module validates which keys it accepts.
+      properties:
         candidateLimit:
           type: integer
           minimum: 1
           maximum: 1000
-          description: >-
-            Attack Discovery only. Max candidates considered per run. Omitted for other Workers;
-            presence is what tells the extras slot to render the control.
+          description: Attack Discovery only. Max candidates considered per run.
 
     Worker:
       type: object

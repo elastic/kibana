@@ -287,6 +287,38 @@ export const WatchSettings = lazySchema(() =>
 export type WatchSettings = z.infer<typeof WatchSettings>;
 
 /**
+ * Trigger kinds a Worker may allow. Distinct from WorkflowTriggerType (`schedule` vs `scheduled`) — this matches the workflow YAML trigger `type`.
+ */
+export const WorkerTriggerType = lazySchema(() => z.enum(['manual', 'scheduled']));
+export type WorkerTriggerType = z.infer<typeof WorkerTriggerType>;
+export type WorkerTriggerTypeEnum = typeof WorkerTriggerType.enum;
+export const WorkerTriggerTypeEnum = WorkerTriggerType.enum;
+
+/**
+ * Nested unique settings. The owning Worker module validates which keys it accepts.
+ */
+export const WorkerSettingsExtras = lazySchema(() =>
+  z
+    .object({
+      /**
+       * Attack Discovery only. Max candidates considered per run.
+       */
+      candidateLimit: z
+        .number()
+        .int()
+        .min(1)
+        .max(1000)
+        .optional()
+        .describe('Attack Discovery only. Max candidates considered per run.'),
+    })
+    .passthrough()
+    .refine((value) => Object.keys(value).length <= 32, {
+      message: 'Worker settings extras cannot exceed 32 keys',
+    })
+);
+export type WorkerSettingsExtras = z.infer<typeof WorkerSettingsExtras>;
+
+/**
  * Durable per-Worker settings stored as managed template values.
  */
 export const WorkerSettings = lazySchema(() =>
@@ -305,23 +337,28 @@ export const WorkerSettings = lazySchema(() =>
         'Subset of the shared autonomy scale this Worker offers. Same meaning as WatchAutonomyLevel everywhere; availability is per-Worker. Omitted means all three.'
       ),
     /**
-     * Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to render the interval control.
+     * Which trigger kinds this Worker allows. Manual and scheduled are independent — a Worker may offer one or both. The interval control is shown only when scheduled is present (via scheduleInterval).
      */
-    scheduleInterval: WorkerScheduleInterval.optional().describe(
-      'Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to render the interval control.'
-    ),
-    /**
-     * Attack Discovery only. Max candidates considered per run. Omitted for other Workers; presence is what tells the extras slot to render the control.
-     */
-    candidateLimit: z
-      .number()
-      .int()
+    allowedTriggers: z
+      .array(WorkerTriggerType)
       .min(1)
-      .max(1000)
+      .max(2)
       .optional()
       .describe(
-        'Attack Discovery only. Max candidates considered per run. Omitted for other Workers; presence is what tells the extras slot to render the control.'
+        'Which trigger kinds this Worker allows. Manual and scheduled are independent — a Worker may offer one or both. The interval control is shown only when scheduled is present (via scheduleInterval).'
       ),
+    /**
+     * Interval for a Worker that allows a scheduled trigger. Omitted when scheduled is not allowed. Independent of whether the Worker also allows manual runs.
+     */
+    scheduleInterval: WorkerScheduleInterval.optional().describe(
+      'Interval for a Worker that allows a scheduled trigger. Omitted when scheduled is not allowed. Independent of whether the Worker also allows manual runs.'
+    ),
+    /**
+     * Worker-specific settings bag. Omitted when the Worker has no unique settings. Known properties are typed; additional keys are preserved so a Worker module can add fields without a top-level schema change.
+     */
+    extras: WorkerSettingsExtras.optional().describe(
+      'Worker-specific settings bag. Omitted when the Worker has no unique settings. Known properties are typed; additional keys are preserved so a Worker module can add fields without a top-level schema change.'
+    ),
   })
 );
 export type WorkerSettings = z.infer<typeof WorkerSettings>;

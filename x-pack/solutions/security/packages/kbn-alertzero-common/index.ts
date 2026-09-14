@@ -110,6 +110,8 @@ export {
   WorkerRunState,
   WorkerScheduleInterval,
   WorkerSettings,
+  WorkerSettingsExtras,
+  WorkerTriggerType,
   WorkflowTriggerType,
   type TimelineEvent,
 } from './impl/schemas';

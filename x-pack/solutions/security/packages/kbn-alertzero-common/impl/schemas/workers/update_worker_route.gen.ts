@@ -20,6 +20,7 @@ import {
   WatchAutonomyLevel,
   WorkerScheduleInterval,
   Worker,
+  WorkerSettingsExtras,
 } from '../components/watch_settings.gen';
 
 export const UpdateWorkerRequestParams = lazySchema(() =>
@@ -64,17 +65,11 @@ export const UpdateWorkerRequestBody = lazySchema(() =>
       "New interval for a schedule-driven Worker. Rejected with a 400 for a Worker that owns no schedule. Changing it rewrites the Worker's workflow YAML and re-registers its Task Manager schedule."
     ),
     /**
-     * New candidate limit for Attack Discovery. Rejected with a 400 for a Worker that does not own this setting.
+     * Partial unique-settings bag. Rejected with a 400 for a Worker that owns no extras. The Worker module rejects keys it does not own.
      */
-    candidateLimit: z
-      .number()
-      .int()
-      .min(1)
-      .max(1000)
-      .optional()
-      .describe(
-        'New candidate limit for Attack Discovery. Rejected with a 400 for a Worker that does not own this setting.'
-      ),
+    extras: WorkerSettingsExtras.optional().describe(
+      'Partial unique-settings bag. Rejected with a 400 for a Worker that owns no extras. The Worker module rejects keys it does not own.'
+    ),
   })
 );
 export type UpdateWorkerRequestBody = z.infer<typeof UpdateWorkerRequestBody>;

@@ -12,14 +12,14 @@ import type { WorkerSettingsExtrasProps } from './types';
 
 /**
  * Attack Discovery–only extras. Mounted through the extras registry — the common card never
- * switches on worker id. Presence of `candidateLimit` on the projected settings is the opt-in.
+ * switches on worker id. Presence of `extras.candidateLimit` is the opt-in.
  */
 export const AttackDiscoverySettingsExtras: React.FC<WorkerSettingsExtrasProps> = ({
   worker,
   isDisabled,
   onPatch,
 }) => {
-  const current = worker.settings.candidateLimit;
+  const current = worker.settings.extras?.candidateLimit;
   const [draft, setDraft] = useState(current ?? 100);
   const draftRef = useRef(draft);
   const lastPersistedRef = useRef(current);
@@ -41,7 +41,7 @@ export const AttackDiscoverySettingsExtras: React.FC<WorkerSettingsExtrasProps> 
       return;
     }
     lastPersistedRef.current = next;
-    onPatchRef.current({ candidateLimit: next });
+    onPatchRef.current({ extras: { candidateLimit: next } });
   }, [current]);
 
   if (current == null) {
