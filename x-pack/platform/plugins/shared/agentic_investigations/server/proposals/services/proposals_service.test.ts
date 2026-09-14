@@ -761,4 +761,93 @@ describe('ProposalsService', () => {
       expect(proposals[0]).not.toHaveProperty('confidenceRank');
     });
   });
+
+  describe('listByWindow', () => {
+    const activityQuery = (decidedWithinHours = 24) => ({
+      includeStatuses: ['pending' as const],
+      decidedWithinHours,
+    });
+
+    it('includes pending proposals regardless of age', async () => {
+      const storage = createStorage(baseDocument({ status: 'pending' }));
+      const { service } = createService(storage);
+
+      const { proposals } = await service.listByWindow(activityQuery(), SPACE_ID);
+
+      expect(proposals).toHaveLength(1);
+    });
+
+    it('queries with a should disjunction covering pending and decided-within-window', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.listByWindow(activityQuery(48), SPACE_ID);
+
+      const [[searchArgs]] = storage.search.mock.calls;
+      const { bool } = searchArgs.query;
+      expect(bool.filter).toEqual(expect.arrayContaining([{ term: { spaceId: SPACE_ID } }]));
+      expect(bool.minimum_should_match).toBe(1);
+      expect(bool.should).toEqual(
+        expect.arrayContaining([
+          { terms: { status: ['pending'] } },
+          { range: { decidedAt: { gte: 'now-48h' } } },
+        ])
+      );
+    });
+
+    it('returns truncated=true when total exceeds the cap', async () => {
+      const doc = baseDocument();
+      const storage = {
+        ...createStorage(doc),
+        search: jest.fn().mockResolvedValue({
+          hits: { hits: [searchHit(doc)], total: { value: 9999 } },
+        }),
+      } as unknown as ReturnType<typeof createStorage>;
+      const { service } = createService(storage);
+
+      const { truncated, total } = await service.listByWindow(activityQuery(), SPACE_ID);
+
+      expect(truncated).toBe(true);
+      expect(total).toBe(9999);
+    });
+
+    it('returns truncated=false when total is within the cap', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      const { truncated } = await service.listByWindow(activityQuery(), SPACE_ID);
+
+      expect(truncated).toBe(false);
+    });
+
+    it('fetches action metadata only once for proposals sharing an actionWorkflowId', async () => {
+      const doc = baseDocument({ actionWorkflowId: 'shared-action' });
+      const storage = {
+        ...createStorage(doc),
+        search: jest.fn().mockResolvedValue({
+          hits: {
+            hits: [searchHit(doc, 'p1'), searchHit(doc, 'p2'), searchHit(doc, 'p3')],
+            total: { value: 3 },
+          },
+        }),
+      } as unknown as ReturnType<typeof createStorage>;
+      const workflowsApi = createWorkflowsApi();
+      const { service } = createService(storage, workflowsApi);
+
+      await service.listByWindow(activityQuery(), SPACE_ID);
+
+      expect(workflowsApi.getWorkflow).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not leak sort ranks into the response', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      const { proposals } = await service.listByWindow(activityQuery(), SPACE_ID);
+
+      expect(proposals[0]).not.toHaveProperty('categoryRank');
+      expect(proposals[0]).not.toHaveProperty('impactRank');
+      expect(proposals[0]).not.toHaveProperty('confidenceRank');
+    });
+  });
 });

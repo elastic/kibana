@@ -247,7 +247,6 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
                 name={`basePrivilegeButtonGroup`}
                 data-test-subj={`basePrivilegeButtonGroup`}
                 isFullWidth={true}
-                color={'primary'}
                 options={[
                   {
                     id: 'basePrivilege_all',
