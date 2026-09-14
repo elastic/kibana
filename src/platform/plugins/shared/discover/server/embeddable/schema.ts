@@ -234,7 +234,7 @@ const metricsTabSchema = esqlTabSchema.extend(discoverSessionMetricsTabTypeState
   title: 'Metrics tab',
   description:
     'An ES|QL tab with saved metrics grid settings. ' +
-    'The dashboard panel preserves these settings for Discover but does not currently render the metrics grid.',
+    'The dashboard panel persists this configuration for use in Discover and renders the data table, not the metrics grid.',
 });
 
 export const tabSchema = z.union([classicTabSchema, esqlTabSchema]);
