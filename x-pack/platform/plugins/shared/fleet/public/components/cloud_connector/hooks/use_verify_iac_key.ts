@@ -13,8 +13,11 @@ import { sendVerifyCloudConnectorIacKey } from '../../../hooks/use_request/iac_p
 
 export interface UseVerifyIacKeyParams {
   cloudConnectorId: string | undefined;
-  /** The integration being added; omit to check the connector's current set only (flyout). */
-  integration?: RenderIacTemplateIntegration;
+  /**
+   * Integrations being added (wizard/onboarding); omit or pass an empty array to check the
+   * connector's current set only (flyout).
+   */
+  integrations?: RenderIacTemplateIntegration[];
   enabled: boolean;
 }
 
@@ -24,14 +27,14 @@ export const VERIFY_IAC_KEY_STALE_TIME_MS = 30_000;
 
 export const useVerifyIacKey = ({
   cloudConnectorId,
-  integration,
+  integrations,
   enabled,
 }: UseVerifyIacKeyParams) =>
   useQuery<VerifyCloudConnectorIacKeyResponse, Error>(
-    [VERIFY_IAC_KEY_QUERY_KEY, cloudConnectorId, integration],
+    [VERIFY_IAC_KEY_QUERY_KEY, cloudConnectorId, integrations],
     async () => {
       const { data, error } = await sendVerifyCloudConnectorIacKey(cloudConnectorId as string, {
-        integration,
+        integrations,
       });
       if (error || !data) {
         throw error ?? new Error('Empty verify response');

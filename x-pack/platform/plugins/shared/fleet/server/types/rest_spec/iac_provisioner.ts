@@ -11,9 +11,15 @@ import { AWS_CLOUD_PROVIDER } from '../../../common/types/models/cloud_connector
 import { CLOUD_CONNECTOR_RENDER_FLOW } from '../../../common/telemetry/iac_provisioner_events';
 
 /**
+ * Upper bound on integrations per render. Each entry costs a registry fetch, and the connector
+ * verify route shares the limit because the merged set it returns is re-rendered as-is.
+ */
+export const MAX_IAC_RENDER_INTEGRATIONS = 10;
+
+/**
  * One package plus the policy templates the user enabled, each listing only the input
  * types the user enabled under it. Shared with the connector verify route, which sends
- * the same shape for the integration being added.
+ * the same shape for the integrations being added.
  */
 export const RenderIacTemplateIntegrationSchema = schema.object({
   name: schema.string({
@@ -60,9 +66,9 @@ export const RenderIacTemplateRequestSchema = {
     }),
     integrations: schema.arrayOf(RenderIacTemplateIntegrationSchema, {
       minSize: 1,
-      // Each entry costs a registry fetch; known flows send a single
-      // integration, so this cap only exists to bound abuse.
-      maxSize: 10,
+      // Each entry costs a registry fetch; this cap bounds abuse and is shared with the
+      // verify route, whose merged result lands here on the Update-stack click.
+      maxSize: MAX_IAC_RENDER_INTEGRATIONS,
       meta: { description: 'Integrations to render the template for.' },
     }),
   }),

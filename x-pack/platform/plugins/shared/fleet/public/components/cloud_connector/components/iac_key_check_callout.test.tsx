@@ -78,6 +78,23 @@ describe('IacKeyCheckCallout', () => {
     expect(bold.tagName).toBe('STRONG');
   });
 
+  it('falls back to "this integration" in bold when no title is given', () => {
+    // Multi-package surfaces (onboarding) omit the title.
+    renderWithIntl(
+      <IacKeyCheckCallout
+        {...baseProps}
+        result={{
+          matches: false,
+          reason: 'key_mismatch',
+          outcome: 'key_mismatch',
+          integrations: [],
+        }}
+      />
+    );
+    const bold = screen.getByText('this integration');
+    expect(bold.tagName).toBe('STRONG');
+  });
+
   it('shows the no-deployment-id note when deploymentId is absent', () => {
     renderWithIntl(
       <IacKeyCheckCallout

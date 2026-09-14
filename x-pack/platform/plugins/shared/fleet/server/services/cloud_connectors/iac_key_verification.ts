@@ -162,7 +162,10 @@ export const compareIacKey = async (
 ): Promise<IacKeyVerificationOutcome> => {
   // The literal comparison narrows the provider for the render call; the gate adds the
   // "IaCP enabled" half.
-  if (cloudProvider !== AWS_CLOUD_PROVIDER || !(await isIacProvisionerSupportedFor(cloudProvider))) {
+  if (
+    cloudProvider !== AWS_CLOUD_PROVIDER ||
+    !(await isIacProvisionerSupportedFor(cloudProvider))
+  ) {
     return 'unsupported_provider';
   }
   if (integrations.length === 0) {
@@ -257,11 +260,13 @@ const persistUpgradeStatus = async (
 export const verifyCloudConnectorIacKey = async (
   soClient: SavedObjectsClientContract,
   cloudConnectorId: string,
-  newIntegration?: IacIntegrationSelection
+  newIntegrations?: IacIntegrationSelection[]
 ): Promise<IacKeyVerification> => {
   const logger = appContextService.getLogger().get('IacKeyVerification');
   const startTime = Date.now();
-  const surface: IacKeySurface = newIntegration ? 'wizard' : 'flyout';
+  // An empty array is the flyout asking about the connector as it stands, same as omitting it.
+  const isAddingIntegrations = Boolean(newIntegrations?.length);
+  const surface: IacKeySurface = isAddingIntegrations ? 'wizard' : 'flyout';
 
   // SO reads propagate (the route maps them to 404/500); only the render call fails open —
   // answering "up to date" during an SO outage would be the worse lie.
@@ -270,9 +275,7 @@ export const verifyCloudConnectorIacKey = async (
     cloudConnectorId
   );
   const existing = await getCloudConnectorIntegrationSelections(soClient, cloudConnectorId);
-  const integrations = mergeIntegrationSelections(
-    newIntegration ? [...existing, newIntegration] : existing
-  );
+  const integrations = mergeIntegrationSelections([...existing, ...(newIntegrations ?? [])]);
   const deploymentId = attributes.iac_deployment_id || undefined;
   const region = parseAwsRegionFromArn(deploymentId);
   const { cloudProvider } = attributes;
@@ -280,10 +283,13 @@ export const verifyCloudConnectorIacKey = async (
   const finish = (outcome: IacKeyVerificationOutcome): IacKeyVerification => {
     logger.info(
       `IaC key check for connector ${cloudConnectorId} (${surface}, ${cloudProvider}): ${outcome}` +
-        (newIntegration
-          ? ` — adding ${newIntegration.name}[${newIntegration.policyTemplates
-              .map(({ name }) => name)
-              .join(',')}]`
+        (isAddingIntegrations
+          ? ` — adding ${(newIntegrations ?? [])
+              .map(
+                ({ name, policyTemplates }) =>
+                  `${name}[${policyTemplates.map((template) => template.name).join(',')}]`
+              )
+              .join(', ')}`
           : '')
     );
     reportIacProvisionerKeyVerificationCompleted({
@@ -301,9 +307,9 @@ export const verifyCloudConnectorIacKey = async (
     flow: IAC_KEY_CHECK_FLOW,
     contextForLog: `connector ${cloudConnectorId}`,
   });
-  // Only a plain re-check describes the connector as it is stored; a wizard check carries an
-  // integration the user has not saved yet, so its verdict must not be written down.
-  if (!newIntegration) {
+  // Only a plain re-check describes the connector as it is stored; a wizard/onboarding check
+  // carries integrations the user has not saved yet, so its verdict must not be written down.
+  if (!isAddingIntegrations) {
     await persistUpgradeStatus(
       soClient,
       cloudConnectorId,

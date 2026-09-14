@@ -11,7 +11,7 @@ import React from 'react';
 
 import { sendVerifyCloudConnectorIacKey } from '../../../hooks/use_request/iac_provisioner';
 
-import { useVerifyIacKey } from './use_verify_iac_key';
+import { VERIFY_IAC_KEY_QUERY_KEY, useVerifyIacKey } from './use_verify_iac_key';
 
 jest.mock('../../../hooks/use_request/iac_provisioner');
 
@@ -85,22 +85,38 @@ describe('useVerifyIacKey', () => {
     await waitFor(() => expect(result.current.isError).toBe(true));
   });
 
-  it('sends the integration in the request body', async () => {
+  it('sends the integrations in the request body and keys the query on them', async () => {
     mockSendVerify.mockResolvedValue({
       data: { matches: true, outcome: 'matches', integrations: [] },
       error: null,
     } as Awaited<ReturnType<typeof sendVerifyCloudConnectorIacKey>>);
 
-    const integration = {
-      name: 'aws',
-      policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
-    };
+    const integrations = [
+      { name: 'aws', policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }] },
+      { name: 'aws_logs', policyTemplates: [{ name: 'generic', enabledInputs: ['aws-s3'] }] },
+    ];
 
-    renderHook(() => useVerifyIacKey({ cloudConnectorId: 'cc-1', integration, enabled: true }), {
+    renderHook(() => useVerifyIacKey({ cloudConnectorId: 'cc-1', integrations, enabled: true }), {
       wrapper,
     });
 
     await waitFor(() => expect(mockSendVerify).toHaveBeenCalled());
-    expect(mockSendVerify).toHaveBeenCalledWith('cc-1', { integration });
+    expect(mockSendVerify).toHaveBeenCalledWith('cc-1', { integrations });
+    // A changed selection must miss the cache, so the set is part of the key.
+    expect(
+      queryClient.getQueryData([VERIFY_IAC_KEY_QUERY_KEY, 'cc-1', integrations])
+    ).toBeDefined();
+  });
+
+  it('omits integrations from the body when none are passed (flyout)', async () => {
+    mockSendVerify.mockResolvedValue({
+      data: { matches: true, outcome: 'matches', integrations: [] },
+      error: null,
+    } as Awaited<ReturnType<typeof sendVerifyCloudConnectorIacKey>>);
+
+    renderHook(() => useVerifyIacKey({ cloudConnectorId: 'cc-1', enabled: true }), { wrapper });
+
+    await waitFor(() => expect(mockSendVerify).toHaveBeenCalled());
+    expect(mockSendVerify).toHaveBeenCalledWith('cc-1', { integrations: undefined });
   });
 });

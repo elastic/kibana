@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -17,7 +17,6 @@ import {
 } from '../../../../common/services/cloud_connectors/test_subjects';
 
 import type { AwsCloudConnectorCredentials } from '../types';
-import type { RenderIacTemplateIntegration } from '../../../../common/types/rest_spec/iac_provisioner';
 import { useVerifyIacKey } from '../hooks/use_verify_iac_key';
 import { useCloudConnectorTemplate } from '../hooks/use_cloud_connector_template';
 import { getMockPolicyAWS, getMockPackageInfoAWS } from '../test/mock';
@@ -66,10 +65,6 @@ const { useIacProvisioner, useStartServices } = jest.requireMock('../../../hooks
     () => { analytics: { reportEvent: jest.Mock }; http: typeof mockHttp; notifications?: unknown }
   >;
 };
-
-const { updateCloudConnector: mockUpdateCloudConnector } = jest.requireMock(
-  '../hooks/use_update_cloud_connector'
-) as { updateCloudConnector: jest.MockedFunction<(...args: unknown[]) => Promise<unknown>> };
 
 const mockHttp = { put: jest.fn() };
 
@@ -137,8 +132,6 @@ beforeEach(() => {
     isGeneratingTemplate: false,
     isIacProvisionerEnabled: false,
   });
-
-  mockUpdateCloudConnector.mockResolvedValue({});
 });
 
 // ---------- test suite ----------
@@ -300,13 +293,69 @@ describe('AWSReusableConnectorForm', () => {
   });
 
   describe('IaC key check', () => {
+    // Component-level behaviour (callout states, validity reporting, stack update) is covered in
+    // components/iac_key_check.test.tsx; these cases check what the form feeds into it.
     const credentialsWithId: AwsCloudConnectorCredentials = {
       roleArn: undefined,
       externalId: undefined,
       cloudConnectorId: 'connector-1',
     };
+    const expectedIntegrations = [
+      {
+        name: 'cloud_security_posture',
+        policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
+      },
+    ];
 
-    it('(a) key_mismatch: renders callout and calls onValidityChange(false)', async () => {
+    it('derives one integration from the policy inputs and package and checks the selected connector', () => {
+      useIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
+
+      renderWithIntl(
+        <AWSReusableConnectorForm {...defaultProps} credentials={credentialsWithId} />
+      );
+
+      expect(mockUseVerifyIacKey).toHaveBeenCalledWith({
+        cloudConnectorId: 'connector-1',
+        integrations: expectedIntegrations,
+        enabled: true,
+      });
+    });
+
+    it('sends no integrations and disables the check when the policy has no enabled inputs', () => {
+      useIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
+
+      renderWithIntl(
+        <AWSReusableConnectorForm
+          {...defaultProps}
+          credentials={credentialsWithId}
+          newPolicy={{ ...mockPolicy, inputs: [] }}
+        />
+      );
+
+      expect(mockUseVerifyIacKey).toHaveBeenCalledWith({
+        cloudConnectorId: 'connector-1',
+        integrations: [],
+        enabled: false,
+      });
+    });
+
+    it('disables the check when IaCP is off', () => {
+      useIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: false });
+      const onValidityChange = jest.fn();
+
+      renderWithIntl(
+        <AWSReusableConnectorForm
+          {...defaultProps}
+          credentials={credentialsWithId}
+          onValidityChange={onValidityChange}
+        />
+      );
+
+      expect(mockUseVerifyIacKey).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
+      expect(onValidityChange).not.toHaveBeenCalled();
+    });
+
+    it('on key_mismatch renders the callout naming the package and reports invalid', async () => {
       useIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
       mockUseVerifyIacKey.mockReturnValue({
         data: { matches: false, reason: 'key_mismatch', integrations: [] },
@@ -328,120 +377,16 @@ describe('AWSReusableConnectorForm', () => {
           screen.getByTestId(CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.CALLOUT)
         ).toBeInTheDocument();
       });
+      expect(screen.getByText(mockPackageInfo.title)).toBeInTheDocument();
       expect(onValidityChange).toHaveBeenCalledWith(false);
     });
 
-    it('(a2) reports validity only when the blocking state changes, not when the callback identity changes', async () => {
-      // The wizard re-creates updatePolicy (and therefore onValidityChange) after every policy
-      // update; re-firing on identity would loop: report → update → new callback → report …
-      useIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
-      mockUseVerifyIacKey.mockReturnValue({
-        data: { matches: false, reason: 'key_mismatch', integrations: [] },
-        isFetching: false,
-        refetch: mockRefetch,
-      } as unknown as ReturnType<typeof useVerifyIacKey>);
-
-      const first = jest.fn();
-      const { rerender } = renderWithIntl(
-        <AWSReusableConnectorForm
-          {...defaultProps}
-          credentials={credentialsWithId}
-          onValidityChange={first}
-        />
-      );
-      await waitFor(() => expect(first).toHaveBeenCalledWith(false));
-      expect(first).toHaveBeenCalledTimes(1);
-
-      // Same blocking state, new callback identity (what the wizard does after each update).
-      const second = jest.fn();
-      rerender(
-        withProviders(
-          <AWSReusableConnectorForm
-            {...defaultProps}
-            credentials={credentialsWithId}
-            onValidityChange={second}
-          />
-        )
-      );
-      expect(second).not.toHaveBeenCalled();
-      expect(first).toHaveBeenCalledTimes(1);
-
-      // Blocking state clears → the latest callback is told once.
-      mockUseVerifyIacKey.mockReturnValue({
-        data: { matches: true, integrations: [] },
-        isFetching: false,
-        refetch: mockRefetch,
-      } as unknown as ReturnType<typeof useVerifyIacKey>);
-      rerender(
-        withProviders(
-          <AWSReusableConnectorForm
-            {...defaultProps}
-            credentials={credentialsWithId}
-            onValidityChange={second}
-          />
-        )
-      );
-      await waitFor(() => expect(second).toHaveBeenCalledWith(true));
-      expect(second).toHaveBeenCalledTimes(1);
-    });
-
-    it('(b) no_key: renders callout and calls onValidityChange(true)', async () => {
-      useIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
-      mockUseVerifyIacKey.mockReturnValue({
-        data: { matches: false, reason: 'no_key', integrations: [] },
-        isFetching: false,
-        refetch: mockRefetch,
-      } as unknown as ReturnType<typeof useVerifyIacKey>);
-
-      const onValidityChange = jest.fn();
-      renderWithIntl(
-        <AWSReusableConnectorForm
-          {...defaultProps}
-          credentials={credentialsWithId}
-          onValidityChange={onValidityChange}
-        />
-      );
-
-      await waitFor(() => {
-        expect(
-          screen.getByTestId(CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.CALLOUT)
-        ).toBeInTheDocument();
-      });
-      expect(onValidityChange).toHaveBeenCalledWith(true);
-    });
-
-    it('(c) matches: no callout, onValidityChange(true)', async () => {
+    it('on match renders no callout and reports valid', async () => {
       useIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
       mockUseVerifyIacKey.mockReturnValue({
         data: { matches: true, integrations: [] },
         isFetching: false,
         refetch: mockRefetch,
-      } as unknown as ReturnType<typeof useVerifyIacKey>);
-
-      const onValidityChange = jest.fn();
-      renderWithIntl(
-        <AWSReusableConnectorForm
-          {...defaultProps}
-          credentials={credentialsWithId}
-          onValidityChange={onValidityChange}
-        />
-      );
-
-      await waitFor(() => {
-        expect(
-          screen.queryByTestId(CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.CALLOUT)
-        ).not.toBeInTheDocument();
-      });
-      expect(onValidityChange).toHaveBeenCalledWith(true);
-    });
-
-    it('(d) query error: no callout, onValidityChange(true) — fail open', () => {
-      useIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
-      mockUseVerifyIacKey.mockReturnValue({
-        data: undefined,
-        isFetching: false,
-        refetch: mockRefetch,
-        isError: true,
       } as unknown as ReturnType<typeof useVerifyIacKey>);
 
       const onValidityChange = jest.fn();
@@ -456,243 +401,7 @@ describe('AWSReusableConnectorForm', () => {
       expect(
         screen.queryByTestId(CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.CALLOUT)
       ).not.toBeInTheDocument();
-      // data is undefined → isBlocking is false → fail-open → onValidityChange(true)
-      expect(onValidityChange).toHaveBeenCalledWith(true);
-    });
-
-    it('(e) IaCP disabled: useVerifyIacKey called with enabled: false', () => {
-      useIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: false });
-
-      renderWithIntl(
-        <AWSReusableConnectorForm {...defaultProps} credentials={credentialsWithId} />
-      );
-
-      expect(mockUseVerifyIacKey).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
-    });
-
-    it('(e2) IaCP disabled: onValidityChange is NOT called', () => {
-      useIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: false });
-      const onValidityChange = jest.fn();
-
-      renderWithIntl(
-        <AWSReusableConnectorForm
-          {...defaultProps}
-          credentials={credentialsWithId}
-          onValidityChange={onValidityChange}
-        />
-      );
-
-      expect(onValidityChange).not.toHaveBeenCalled();
-    });
-
-    it('(f) clicking Update reports telemetry and invokes launchButtonProps.onClick', async () => {
-      useIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
-      mockUseVerifyIacKey.mockReturnValue({
-        data: {
-          matches: false,
-          reason: 'key_mismatch',
-          integrations: [],
-          deploymentId: undefined,
-        },
-        isFetching: false,
-        refetch: mockRefetch,
-      } as unknown as ReturnType<typeof useVerifyIacKey>);
-
-      renderWithIntl(
-        <AWSReusableConnectorForm {...defaultProps} credentials={credentialsWithId} />
-      );
-
-      await waitFor(() => {
-        expect(
-          screen.getByTestId(CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.UPDATE_STACK_BUTTON)
-        ).toBeInTheDocument();
-      });
-
-      await userEvent.click(
-        screen.getByTestId(CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.UPDATE_STACK_BUTTON)
-      );
-
-      expect(mockReportEvent).toHaveBeenCalledWith(
-        'iac_provisioner_key_check_action',
-        expect.objectContaining({
-          surface: 'wizard',
-          action: 'update_stack_clicked',
-          reason: 'key_mismatch',
-          hasDeploymentId: false,
-        })
-      );
-      expect(mockLaunchOnClick).toHaveBeenCalledTimes(1);
-    });
-
-    it('(g) clicking Verify reports telemetry and calls refetch', async () => {
-      useIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
-      mockUseVerifyIacKey.mockReturnValue({
-        data: { matches: false, reason: 'no_key', integrations: [] },
-        isFetching: false,
-        refetch: mockRefetch,
-      } as unknown as ReturnType<typeof useVerifyIacKey>);
-
-      renderWithIntl(
-        <AWSReusableConnectorForm {...defaultProps} credentials={credentialsWithId} />
-      );
-
-      await waitFor(() => {
-        expect(
-          screen.getByTestId(CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.VERIFY_BUTTON)
-        ).toBeInTheDocument();
-      });
-
-      await userEvent.click(
-        screen.getByTestId(CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.VERIFY_BUTTON)
-      );
-
-      expect(mockReportEvent).toHaveBeenCalledWith(
-        'iac_provisioner_key_check_action',
-        expect.objectContaining({ action: 'verify_clicked' })
-      );
-      expect(mockRefetch).toHaveBeenCalledTimes(1);
-    });
-
-    it('(h) onTemplateRendered calls updateCloudConnector with (http, id, { iac_key }), invalidates both query keys, and does not toast', async () => {
-      useIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
-
-      const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
-
-      let capturedOnTemplateRendered:
-        | ((r: { key?: string; integrations: RenderIacTemplateIntegration[] }) => void)
-        | undefined;
-      mockUseCloudConnectorTemplate.mockImplementation(({ onTemplateRendered }) => {
-        capturedOnTemplateRendered = onTemplateRendered;
-        return {
-          launchButtonProps: { onClick: mockLaunchOnClick },
-          isDisabled: false,
-          isGeneratingTemplate: false,
-          isIacProvisionerEnabled: true,
-        };
-      });
-
-      const mockAddSuccess = jest.fn();
-      useStartServices.mockReturnValue({
-        analytics: { reportEvent: mockReportEvent },
-        http: mockHttp,
-        notifications: { toasts: { addSuccess: mockAddSuccess } },
-      });
-
-      renderWithIntl(
-        <AWSReusableConnectorForm {...defaultProps} credentials={credentialsWithId} />
-      );
-
-      await act(async () => {
-        capturedOnTemplateRendered?.({ key: 'sha256:new', integrations: [] });
-      });
-
-      expect(mockUpdateCloudConnector).toHaveBeenCalledWith(mockHttp, 'connector-1', {
-        iac_key: 'sha256:new',
-      });
-      await waitFor(() => {
-        expect(invalidateQueriesSpy).toHaveBeenCalledWith(['get-cloud-connectors']);
-        expect(invalidateQueriesSpy).toHaveBeenCalledWith(['cloud-connector-usage', 'connector-1']);
-      });
-      // The optimistic write uses the raw request helper — no success toast should fire.
-      expect(mockAddSuccess).not.toHaveBeenCalled();
-    });
-
-    it('(i) useCloudConnectorTemplate receives integrations, deploymentId, and provider aws', () => {
-      useIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
-
-      const integrations = [
-        {
-          name: 'cloud_security_posture',
-          policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
-        },
-      ];
-      const deploymentId = 'arn:aws:cloudformation:us-east-1:123:stack/my-stack/abc';
-
-      mockUseVerifyIacKey.mockReturnValue({
-        data: { matches: true, integrations, deploymentId },
-        isFetching: false,
-        refetch: mockRefetch,
-      } as unknown as ReturnType<typeof useVerifyIacKey>);
-
-      renderWithIntl(
-        <AWSReusableConnectorForm {...defaultProps} credentials={credentialsWithId} />
-      );
-
-      expect(mockUseCloudConnectorTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          provider: 'aws',
-          integrations,
-          deploymentId,
-        })
-      );
-    });
-
-    it('(i2) useCloudConnectorTemplate opts out of the static template fallback', () => {
-      // This identity already has a generated template; the static one would downgrade it.
-      useIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
-
-      renderWithIntl(
-        <AWSReusableConnectorForm {...defaultProps} credentials={credentialsWithId} />
-      );
-
-      expect(mockUseCloudConnectorTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ staticTemplateFallback: false })
-      );
-    });
-
-    it('(i3) renders the template generation error below the check callout', async () => {
-      useIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
-      mockUseVerifyIacKey.mockReturnValue({
-        data: { matches: false, reason: 'key_mismatch', integrations: [] },
-        isFetching: false,
-        refetch: mockRefetch,
-      } as unknown as ReturnType<typeof useVerifyIacKey>);
-      mockUseCloudConnectorTemplate.mockReturnValue({
-        launchButtonProps: { onClick: mockLaunchOnClick },
-        isDisabled: false,
-        isGeneratingTemplate: false,
-        templateGenerationError: 'boom',
-        isIacProvisionerEnabled: true,
-      });
-
-      renderWithIntl(
-        <AWSReusableConnectorForm {...defaultProps} credentials={credentialsWithId} />
-      );
-
-      await waitFor(() => {
-        expect(
-          screen.getByTestId(
-            CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.IAC_CHECK_TEMPLATE_ERROR_CALLOUT
-          )
-        ).toBeInTheDocument();
-      });
-      expect(screen.getByText('boom')).toBeInTheDocument();
-    });
-
-    it('(i4) does not render the template generation error when there is no check callout', () => {
-      useIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
-      mockUseVerifyIacKey.mockReturnValue({
-        data: { matches: true, integrations: [] },
-        isFetching: false,
-        refetch: mockRefetch,
-      } as unknown as ReturnType<typeof useVerifyIacKey>);
-      mockUseCloudConnectorTemplate.mockReturnValue({
-        launchButtonProps: { onClick: mockLaunchOnClick },
-        isDisabled: false,
-        isGeneratingTemplate: false,
-        templateGenerationError: 'boom',
-        isIacProvisionerEnabled: true,
-      });
-
-      renderWithIntl(
-        <AWSReusableConnectorForm {...defaultProps} credentials={credentialsWithId} />
-      );
-
-      expect(
-        screen.queryByTestId(
-          CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.IAC_CHECK_TEMPLATE_ERROR_CALLOUT
-        )
-      ).not.toBeInTheDocument();
+      await waitFor(() => expect(onValidityChange).toHaveBeenCalledWith(true));
     });
   });
 });

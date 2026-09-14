@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from '../../../common/constants';
 
-import { RenderIacTemplateIntegrationSchema } from './iac_provisioner';
+import { MAX_IAC_RENDER_INTEGRATIONS, RenderIacTemplateIntegrationSchema } from './iac_provisioner';
 
 // Upper bounds prevent unbounded-input DoS: the key is a prefixed sha256 digest, the deployment id an ARN.
 const IacRequestFieldsSchema = {
@@ -304,9 +304,13 @@ export const VerifyCloudConnectorIacKeyRequestSchema = {
     }),
   }),
   body: schema.object({
-    // The integration being added carries the same shape the render route takes:
-    // the policy templates the user enabled, with only the inputs they enabled.
-    integration: schema.maybe(RenderIacTemplateIntegrationSchema),
+    // The integrations being added carry the same shape the render route takes: per package,
+    // the policy templates the user enabled, with only the inputs they enabled. Omitted or
+    // empty means "check the connector's current set only" (flyout). The size limit matches
+    // the render route because the merged set this route returns is re-rendered as-is.
+    integrations: schema.maybe(
+      schema.arrayOf(RenderIacTemplateIntegrationSchema, { maxSize: MAX_IAC_RENDER_INTEGRATIONS })
+    ),
   }),
 };
 

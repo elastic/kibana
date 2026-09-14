@@ -223,10 +223,12 @@ describe('verifyCloudConnectorIacKey', () => {
     soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:same' }));
     mockedRender.mockResolvedValueOnce(rendered(false, 'sha256:same'));
 
-    const result = await verifyCloudConnectorIacKey(soClient, 'cc-1', {
-      name: 'aws',
-      policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-cloudwatch'] }],
-    });
+    const result = await verifyCloudConnectorIacKey(soClient, 'cc-1', [
+      {
+        name: 'aws',
+        policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-cloudwatch'] }],
+      },
+    ]);
 
     const merged = [
       {
@@ -247,6 +249,63 @@ describe('verifyCloudConnectorIacKey', () => {
     });
     expect(reportIacProvisionerKeyVerificationCompleted).toHaveBeenCalledWith(
       expect.objectContaining({ surface: 'wizard', outcome: 'matches', integrationCount: 1 })
+    );
+  });
+
+  it('merges several new integrations from different packages into one wizard check', async () => {
+    // The AWS onboarding selects across packages (aws, aws_logs, ...) in a single pass.
+    soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:same' }));
+    mockedRender.mockResolvedValueOnce(rendered(false, 'sha256:same'));
+
+    const result = await verifyCloudConnectorIacKey(soClient, 'cc-1', [
+      {
+        name: 'aws',
+        policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-cloudwatch'] }],
+      },
+      {
+        name: 'aws_logs',
+        policyTemplates: [{ name: 'generic', enabledInputs: ['aws-s3'] }],
+      },
+    ]);
+
+    const merged = [
+      {
+        name: 'aws',
+        policyTemplates: [
+          { name: 'cloudtrail', enabledInputs: ['aws-s3'] },
+          { name: 'guardduty', enabledInputs: ['aws-cloudwatch'] },
+        ],
+      },
+      {
+        name: 'aws_logs',
+        policyTemplates: [{ name: 'generic', enabledInputs: ['aws-s3'] }],
+      },
+    ];
+    expect(mockedResolve).toHaveBeenCalledWith(soClient, 'aws', merged);
+    expect(result.integrations).toEqual(merged);
+    expect(reportIacProvisionerKeyVerificationCompleted).toHaveBeenCalledWith(
+      expect.objectContaining({ surface: 'wizard', outcome: 'matches', integrationCount: 2 })
+    );
+    expect(logger.info).toHaveBeenCalledWith(
+      'IaC key check for connector cc-1 (wizard, aws): matches — adding aws[guardduty], aws_logs[generic]'
+    );
+  });
+
+  it('treats an empty integrations array as a flyout check', async () => {
+    soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:same' }));
+    mockedRender.mockResolvedValueOnce(rendered(false, 'sha256:same'));
+
+    const result = await verifyCloudConnectorIacKey(soClient, 'cc-1', []);
+
+    expect(result.matches).toBe(true);
+    expect(mockedResolve).toHaveBeenCalledWith(soClient, 'aws', [
+      { name: 'aws', policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }] },
+    ]);
+    expect(reportIacProvisionerKeyVerificationCompleted).toHaveBeenCalledWith(
+      expect.objectContaining({ surface: 'flyout', outcome: 'matches' })
+    );
+    expect(logger.info).toHaveBeenCalledWith(
+      'IaC key check for connector cc-1 (flyout, aws): matches'
     );
   });
 
@@ -307,10 +366,9 @@ describe('verifyCloudConnectorIacKey', () => {
     soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:old' }));
     mockedRender.mockRejectedValueOnce(new IacProvisionerUnavailableError('down', 503));
 
-    const result = await verifyCloudConnectorIacKey(soClient, 'cc-1', {
-      name: 'aws',
-      policyTemplates: [{ name: 's3', enabledInputs: ['aws-s3'] }],
-    });
+    const result = await verifyCloudConnectorIacKey(soClient, 'cc-1', [
+      { name: 'aws', policyTemplates: [{ name: 's3', enabledInputs: ['aws-s3'] }] },
+    ]);
 
     expect(result.matches).toBe(true);
     expect(reportIacProvisionerKeyVerificationCompleted).toHaveBeenCalledWith(
@@ -499,17 +557,37 @@ describe('verifyCloudConnectorIacKey', () => {
       expect(soClient.update).not.toHaveBeenCalled();
     });
 
-    it('does not persist a wizard check, whose integration is not saved yet', async () => {
+    it('does not persist a wizard check, whose integrations are not saved yet', async () => {
       soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:old' }));
       mockedRender.mockResolvedValueOnce(rendered(true, 'sha256:new'));
 
-      const result = await verifyCloudConnectorIacKey(soClient, 'cc-1', {
-        name: 'aws',
-        policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-cloudwatch'] }],
-      });
+      const result = await verifyCloudConnectorIacKey(soClient, 'cc-1', [
+        {
+          name: 'aws',
+          policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-cloudwatch'] }],
+        },
+      ]);
 
       expect(result).toMatchObject({ matches: false, reason: 'key_mismatch' });
       expect(soClient.update).not.toHaveBeenCalled();
+    });
+
+    it('persists when the integrations array is empty, as for an omitted one', async () => {
+      soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:old' }));
+      mockedRender.mockResolvedValueOnce(rendered(true, 'sha256:new'));
+
+      await verifyCloudConnectorIacKey(soClient, 'cc-1', []);
+
+      expectStatusWritten('upgrade_available');
+    });
+
+    it('persists when the integrations argument is undefined', async () => {
+      soClient.get.mockResolvedValueOnce(connector({ iac_key: 'sha256:old' }));
+      mockedRender.mockResolvedValueOnce(rendered(true, 'sha256:new'));
+
+      await verifyCloudConnectorIacKey(soClient, 'cc-1', undefined);
+
+      expectStatusWritten('upgrade_available');
     });
 
     it('still returns the verification when the write fails', async () => {

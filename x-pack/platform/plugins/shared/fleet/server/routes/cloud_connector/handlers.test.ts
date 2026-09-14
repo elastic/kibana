@@ -42,28 +42,25 @@ describe('verifyCloudConnectorIacKeyHandler', () => {
       outcome: 'no_key',
       integrations: [],
     });
+    const integrations = [
+      { name: 'aws', policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-s3'] }] },
+      { name: 'aws_logs', policyTemplates: [{ name: 'generic', enabledInputs: ['aws-s3'] }] },
+    ];
     const request = httpServerMock.createKibanaRequest({
       params: { cloudConnectorId: 'cc-1' },
-      body: {
-        integration: {
-          name: 'aws',
-          policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-s3'] }],
-        },
-      },
+      body: { integrations },
     });
 
     await verifyCloudConnectorIacKeyHandler(buildContext(), request, response);
 
-    expect(mockedVerify).toHaveBeenCalledWith({}, 'cc-1', {
-      name: 'aws',
-      policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-s3'] }],
-    });
+    // Forwarded as the array it arrived as, so the service merges every package at once.
+    expect(mockedVerify).toHaveBeenCalledWith({}, 'cc-1', integrations);
     expect(response.ok).toHaveBeenCalledWith({
       body: { matches: false, reason: 'no_key', outcome: 'no_key', integrations: [] },
     });
   });
 
-  it('passes no integration when the body omits it (flyout)', async () => {
+  it('passes no integrations when the body omits them (flyout)', async () => {
     mockedVerify.mockResolvedValueOnce({ matches: true, outcome: 'matches', integrations: [] });
     const request = httpServerMock.createKibanaRequest({
       params: { cloudConnectorId: 'cc-1' },

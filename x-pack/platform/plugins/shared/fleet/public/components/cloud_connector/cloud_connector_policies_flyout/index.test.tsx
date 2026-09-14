@@ -1254,7 +1254,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
       });
 
       expect(mockUseVerifyIacKey).toHaveBeenCalledWith(
-        expect.not.objectContaining({ integration: expect.anything() })
+        expect.not.objectContaining({ integrations: expect.anything() })
       );
       expect(mockUseVerifyIacKey).toHaveBeenCalledWith({
         cloudConnectorId: 'connector-123',

@@ -349,15 +349,18 @@ export const verifyCloudConnectorIacKeyHandler: FleetRequestHandler<
     .get('CloudConnectorService verifyCloudConnectorIacKeyHandler');
 
   try {
+    const newIntegrations = request.body?.integrations;
     logger.info(
       `Verifying IaC key for cloud connector ${cloudConnectorId}${
-        request.body?.integration ? ` with new integration ${request.body.integration.name}` : ''
+        newIntegrations?.length
+          ? ` with new integrations ${newIntegrations.map(({ name }) => name).join(', ')}`
+          : ''
       }`
     );
     const body: VerifyCloudConnectorIacKeyResponse = await verifyCloudConnectorIacKey(
       internalSoClient,
       cloudConnectorId,
-      request.body?.integration
+      newIntegrations
     );
     logger.debug(`IaC key verification result for ${cloudConnectorId}: ${JSON.stringify(body)}`);
     return response.ok({ body });

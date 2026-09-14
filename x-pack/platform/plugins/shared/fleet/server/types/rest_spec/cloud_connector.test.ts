@@ -48,8 +48,22 @@ describe('cloud connector request schemas — IaC fields', () => {
 });
 
 describe('VerifyCloudConnectorIacKeyRequestSchema', () => {
-  it('accepts an empty body (flyout) and a single integration (wizard)', () => {
+  it('accepts an empty body (flyout), an empty array, and several integrations (wizard)', () => {
     expect(() => VerifyCloudConnectorIacKeyRequestSchema.body.validate({})).not.toThrow();
+    expect(() =>
+      VerifyCloudConnectorIacKeyRequestSchema.body.validate({ integrations: [] })
+    ).not.toThrow();
+    expect(() =>
+      VerifyCloudConnectorIacKeyRequestSchema.body.validate({
+        integrations: [
+          { name: 'aws', policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-s3'] }] },
+          { name: 'aws_logs', policyTemplates: [{ name: 'generic', enabledInputs: ['aws-s3'] }] },
+        ],
+      })
+    ).not.toThrow();
+  });
+
+  it('rejects the retired singular integration field', () => {
     expect(() =>
       VerifyCloudConnectorIacKeyRequestSchema.body.validate({
         integration: {
@@ -57,13 +71,13 @@ describe('VerifyCloudConnectorIacKeyRequestSchema', () => {
           policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-s3'] }],
         },
       })
-    ).not.toThrow();
+    ).toThrow();
   });
 
   it('rejects an integration with no policy templates', () => {
     expect(() =>
       VerifyCloudConnectorIacKeyRequestSchema.body.validate({
-        integration: { name: 'aws', policyTemplates: [] },
+        integrations: [{ name: 'aws', policyTemplates: [] }],
       })
     ).toThrow();
   });
@@ -73,7 +87,9 @@ describe('VerifyCloudConnectorIacKeyRequestSchema', () => {
     // nothing in; the render route takes the same shape and must reject it too.
     expect(() =>
       VerifyCloudConnectorIacKeyRequestSchema.body.validate({
-        integration: { name: 'aws', policyTemplates: [{ name: 'guardduty', enabledInputs: [] }] },
+        integrations: [
+          { name: 'aws', policyTemplates: [{ name: 'guardduty', enabledInputs: [] }] },
+        ],
       })
     ).toThrow();
   });

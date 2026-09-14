@@ -81,8 +81,8 @@ export interface GetCloudConnectorUsageResponse {
 }
 
 export interface VerifyCloudConnectorIacKeyRequest {
-  /** The integration being added (wizard). Omit to check the connector's current set (flyout). */
-  integration?: RenderIacTemplateIntegration;
+  /** Integrations being added (wizard/onboarding). Omit or send empty to check the connector's current set only (flyout). */
+  integrations?: RenderIacTemplateIntegration[];
 }
 
 export interface VerifyCloudConnectorIacKeyResponse {
