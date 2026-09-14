@@ -1663,3 +1663,4 @@ packages:
   - 'x-pack/solutions/workplaceai/plugins/serverless_workplace_ai'
   - 'x-pack/solutions/workplaceai/plugins/workplace_ai_app'
   - 'x-pack/solutions/workplaceai/test'
+# END GENERATED PACKAGES
