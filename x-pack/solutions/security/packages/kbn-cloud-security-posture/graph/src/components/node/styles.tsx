@@ -27,23 +27,24 @@ import type { EntityNodeViewModel, LabelNodeViewModel } from '..';
 import { GRAPH_ENTITY_NODE_BUTTON_ID } from '../test_ids';
 
 /**
- * The total height of an entity node including the shape and details below, in pixels.
- * Required to calculate total node's height in layout_graph.ts
+ * The total height of an entity node in pixels. With the card design the node
+ * is self-contained (no details rendered below the card), so this equals NODE_HEIGHT.
+ * Required to calculate total node height in layout_graph.ts
  * Must be a multiple of `GRID_SIZE * 2`.
  */
-export const ENTITY_NODE_TOTAL_HEIGHT = 200;
+export const ENTITY_NODE_TOTAL_HEIGHT = 60;
 
 /**
- * The width of a node in the graph, in pixels.
+ * The width of an entity card node in the graph, in pixels.
  * Must be a multiple of `GRID_SIZE * 2`.
  */
-export const NODE_WIDTH = 100;
+export const NODE_WIDTH = 300;
 
 /**
- * The height of a node in the graph, in pixels.
+ * The height of an entity card node in the graph, in pixels.
  * Must be a multiple of `GRID_SIZE * 2`.
  */
-export const NODE_HEIGHT = 100;
+export const NODE_HEIGHT = 60;
 
 /**
  * The width of a node label in the graph, in pixels.
