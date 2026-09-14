@@ -44,6 +44,41 @@ export interface AiIndexAuditEventParams {
   error?: Error;
 }
 
+export enum ImprovementAuditAction {
+  RECORD = 'context_engine_improvement_record',
+}
+
+export interface ImprovementAuditEventParams {
+  aiIndexId: string;
+  /** How many proposals the run recorded; absent on a failed attempt. */
+  recorded?: number;
+  error?: Error;
+}
+
+/** Audits an analysis run recording what it proposed. */
+export const improvementAuditEvent = ({
+  aiIndexId,
+  recorded,
+  error,
+}: ImprovementAuditEventParams): AuditEvent => ({
+  message: error
+    ? `Failed attempt to record improvements for AI index [id=${aiIndexId}]`
+    : `User has recorded ${recorded ?? 0} improvement(s) for AI index [id=${aiIndexId}]`,
+  event: {
+    action: ImprovementAuditAction.RECORD,
+    category: ['database'],
+    type: ['creation'],
+    outcome: error ? 'failure' : 'success',
+  },
+  kibana: {
+    saved_object: { type: 'ai_index', id: aiIndexId },
+  },
+  error: error && {
+    code: error.name,
+    message: error.message,
+  },
+});
+
 export const aiIndexAuditEvent = ({
   action,
   id,
