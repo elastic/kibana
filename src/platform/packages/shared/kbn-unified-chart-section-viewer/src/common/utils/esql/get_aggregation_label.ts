@@ -20,10 +20,10 @@ import type {
  * constrained (e.g. the chart y-axis title).
  */
 const AGGREGATION_LABELS: Record<SimpleAggregation, string> = {
-  avg: i18n.translate('metricsExperience.aggregationLabel.avg', { defaultMessage: 'Avg' }),
-  sum: i18n.translate('metricsExperience.aggregationLabel.sum', { defaultMessage: 'Sum' }),
-  min: i18n.translate('metricsExperience.aggregationLabel.min', { defaultMessage: 'Min' }),
-  max: i18n.translate('metricsExperience.aggregationLabel.max', { defaultMessage: 'Max' }),
+  avg: i18n.translate('metricsExperience.aggregationLabel.avg', { defaultMessage: 'avg' }),
+  sum: i18n.translate('metricsExperience.aggregationLabel.sum', { defaultMessage: 'sum' }),
+  min: i18n.translate('metricsExperience.aggregationLabel.min', { defaultMessage: 'min' }),
+  max: i18n.translate('metricsExperience.aggregationLabel.max', { defaultMessage: 'max' }),
 };
 
 const PERCENTILE_LABELS: Record<HistogramPercentile, string> = {
