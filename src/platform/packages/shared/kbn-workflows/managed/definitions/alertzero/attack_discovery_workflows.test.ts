@@ -16,7 +16,12 @@ import {
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW,
 } from '.';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
-import { DEFAULT_PARALLEL_MAX_FAN_OUT, WorkflowSchema } from '../../../spec/schema';
+import {
+  type ConcurrencySettings,
+  DEFAULT_PARALLEL_MAX_FAN_OUT,
+  type ParallelConcurrencyObject,
+  WorkflowSchema,
+} from '../../../spec/schema';
 
 /**
  * Verdicts the FP/TP analysis workflow may return. Each one must have a dedicated
@@ -25,6 +30,16 @@ import { DEFAULT_PARALLEL_MAX_FAN_OUT, WorkflowSchema } from '../../../spec/sche
  */
 const VERDICTS = ['false_positive', 'true_positive', 'inconclusive', 'failed'] as const;
 
+// These two interfaces describe the raw `parse(yaml)` tree, not the schema's output.
+// `WorkflowSchema.parse` cannot stand in for them: every construct that nests steps
+// types its children as `z.array(BaseStepSchema)` — `ForEachStepSchema` (schema.ts
+// line 521), `SwitchCaseSchema` (596), `IfStepConfigSchema` (648, 649) and
+// `ParallelStepConfigSchema` (775) — and `BaseStepSchema` (72) declares only `name`,
+// `type`, `if` and `max-step-size`. Zod strips unknown keys, so `with`, `timeout`,
+// `mode`, `foreach`, `expression` and `concurrency` are all dropped from any nested
+// step. Assertions on `run_review`'s `with.inputs`, or on anything inside a `switch`
+// case, would then read `undefined` and the negative ones would pass vacuously.
+// Field shapes that the schema does define are imported rather than redeclared.
 interface YamlStep {
   name: string;
   type: string;
@@ -33,7 +48,7 @@ interface YamlStep {
   mode?: string;
   foreach?: string;
   expression?: string;
-  concurrency?: number | { max?: number; 'count-waiting'?: boolean };
+  concurrency?: ParallelConcurrencyObject;
   with?: Record<string, unknown>;
   steps?: YamlStep[];
   else?: YamlStep[];
@@ -46,20 +61,13 @@ interface YamlWorkflow {
   steps: YamlStep[];
   consts?: Record<string, unknown>;
   outputs?: Array<{ name: string; type?: string }>;
-  settings?: { concurrency?: unknown; timeout?: string };
+  settings?: { concurrency?: ConcurrencySettings; timeout?: string };
   triggers?: Array<{
     type: string;
     inputs?: {
       properties?: Record<string, { type?: string; maxLength?: number; enum?: string[] }>;
-      required?: string[];
     };
   }>;
-}
-
-interface ConcurrencySettings {
-  key?: string;
-  max?: number;
-  strategy?: string;
 }
 
 const flatten = (steps: YamlStep[]): YamlStep[] =>
@@ -91,8 +99,6 @@ const stepIn = (steps: YamlStep[], name: string) => steps.find((step) => step.na
 
 const asInputs = (step: YamlStep | undefined): Record<string, string> =>
   (step?.with?.inputs ?? {}) as Record<string, string>;
-
-const asConcurrency = (value: unknown): ConcurrencySettings => (value ?? {}) as ConcurrencySettings;
 
 describe('Attack Discovery worker chain', () => {
   it.each([
@@ -180,11 +186,11 @@ describe('Attack Discovery worker chain', () => {
     // Workflow-level concurrency must be an object: unlike a `parallel` step's
     // `concurrency`, ConcurrencySettingsSchema does not accept a bare number.
     it('cancels overlapping scheduled floor runs in progress', () => {
-      expect(asConcurrency(floor.settings?.concurrency).strategy).toBe('cancel-in-progress');
+      expect(floor.settings?.concurrency?.strategy).toBe('cancel-in-progress');
     });
 
     it('limits overlapping scheduled floor runs to one', () => {
-      expect(asConcurrency(floor.settings?.concurrency).max).toBe(1);
+      expect(floor.settings?.concurrency?.max).toBe(1);
     });
   });
 
@@ -194,15 +200,15 @@ describe('Attack Discovery worker chain', () => {
   // resolvable in a concurrency key, unlike templated `inputs.*`, which are evaluated
   // after the key.
   it('scopes the global worker concurrency key to the space', () => {
-    expect(asConcurrency(worker.settings?.concurrency).key).toContain('{{ workflow.spaceId }}');
+    expect(worker.settings?.concurrency?.key).toContain('{{ workflow.spaceId }}');
   });
 
   it('cancels overlapping global runner runs in progress', () => {
-    expect(asConcurrency(worker.settings?.concurrency).strategy).toBe('cancel-in-progress');
+    expect(worker.settings?.concurrency?.strategy).toBe('cancel-in-progress');
   });
 
   it('limits overlapping global worker runs to one', () => {
-    expect(asConcurrency(worker.settings?.concurrency).max).toBe(1);
+    expect(worker.settings?.concurrency?.max).toBe(1);
   });
 
   describe('generation step', () => {
@@ -369,11 +375,11 @@ describe('Attack Discovery worker chain', () => {
 
     // DEFAULT_PARALLEL_MAX_CONCURRENCY is 20, enforced by the schema as an error.
     it('sets parallel concurrency above zero', () => {
-      expect(asConcurrency(parallel?.concurrency).max).toBeGreaterThan(0);
+      expect(parallel?.concurrency?.max).toBeGreaterThan(0);
     });
 
     it('sets parallel concurrency within the schema ceiling', () => {
-      expect(asConcurrency(parallel?.concurrency).max).toBeLessThanOrEqual(20);
+      expect(parallel?.concurrency?.max).toBeLessThanOrEqual(20);
     });
 
     it('settles every branch so one failed review does not abandon the rest', () => {
