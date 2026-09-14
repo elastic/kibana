@@ -514,11 +514,19 @@ describe('CasesWebhookActionConnectorFields renders', () => {
     ];
 
     it('connector validation succeeds when connector config is valid', async () => {
+      useSecretHeadersMock.mockReturnValue({ isLoading: false, isFetching: false, data: [] });
+      const connector = {
+        ...actionConnector,
+        __internal__: {
+          headers: [{ key: 'content-type', value: 'text', type: 'config' }],
+        },
+      };
+
       render(
-        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit} isEdit={true}>
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit} isEdit={true}>
           <CasesWebhookActionConnectorFields
             readOnly={false}
-            isEdit={false}
+            isEdit={true}
             registerPreSubmitValidator={() => {}}
           />
         </ConnectorFormTestProvider>
@@ -535,6 +543,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
             __internal__: {
               hasCA: false,
               hasHeaders: true,
+              headers: [{ key: 'content-type', value: 'text', type: 'config' }],
             },
           },
           isValid: true,
@@ -543,11 +552,15 @@ describe('CasesWebhookActionConnectorFields renders', () => {
     });
 
     it('connector validation succeeds when auth=false', async () => {
+      useSecretHeadersMock.mockReturnValue({ isLoading: false, isFetching: false, data: [] });
       const connector = {
         ...actionConnector,
         config: {
           ...actionConnector.config,
           hasAuth: false,
+        },
+        __internal__: {
+          headers: [{ key: 'content-type', value: 'text', type: 'config' }],
         },
       };
 
@@ -555,7 +568,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit} isEdit={true}>
           <CasesWebhookActionConnectorFields
             readOnly={false}
-            isEdit={false}
+            isEdit={true}
             registerPreSubmitValidator={() => {}}
           />
         </ConnectorFormTestProvider>
@@ -577,6 +590,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
             __internal__: {
               hasCA: false,
               hasHeaders: true,
+              headers: [{ key: 'content-type', value: 'text', type: 'config' }],
             },
           },
           isValid: true,
@@ -585,6 +599,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
     });
 
     it('connector validation succeeds without headers', async () => {
+      useSecretHeadersMock.mockReturnValue({ isLoading: false, isFetching: false, data: [] });
       const connector = {
         ...actionConnector,
         config: {
@@ -597,7 +612,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit} isEdit={true}>
           <CasesWebhookActionConnectorFields
             readOnly={false}
-            isEdit={false}
+            isEdit={true}
             registerPreSubmitValidator={() => {}}
           />
         </ConnectorFormTestProvider>
@@ -731,6 +746,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
     });
 
     it('validation succeeds get incident url with post correctly', async () => {
+      useSecretHeadersMock.mockReturnValue({ isLoading: false, isFetching: false, data: [] });
       const connector = {
         ...actionConnector,
         config: {
@@ -739,6 +755,9 @@ describe('CasesWebhookActionConnectorFields renders', () => {
           getIncidentMethod: 'post',
           getIncidentJson: '{"id": {{{external.system.id}}} }',
           headers: [],
+        },
+        __internal__: {
+          headers: [{ key: 'content-type', value: 'text', type: 'config' }],
         },
       };
 
@@ -749,7 +768,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit} isEdit={true}>
           <CasesWebhookActionConnectorFields
             readOnly={false}
-            isEdit={false}
+            isEdit={true}
             registerPreSubmitValidator={() => {}}
           />
         </ConnectorFormTestProvider>
@@ -763,6 +782,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
             __internal__: {
               hasCA: false,
               hasHeaders: true,
+              headers: [{ key: 'content-type', value: 'text', type: 'config' }],
             },
             ...rest,
             config: {
