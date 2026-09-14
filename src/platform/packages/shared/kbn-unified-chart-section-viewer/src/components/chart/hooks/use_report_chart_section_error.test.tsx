@@ -12,6 +12,7 @@ import type { Logger } from '@kbn/logging';
 import { loggerMock } from '@kbn/logging-mocks';
 import { renderHook } from '@testing-library/react';
 import React from 'react';
+import { ERROR_CATEGORY } from '../../../common/errors/classify_chart_section_error';
 import { EsqlResponseError } from '../../../common/errors/esql_response_error';
 import {
   ExternalServicesProvider,
@@ -123,6 +124,7 @@ describe('useReportChartSectionError', () => {
       labels: {
         error_type: ERROR_TYPE.CHART_SECTION_NON_RENDER_ERROR,
         chart_section_source: 'useFetchMetricsData',
+        error_category: ERROR_CATEGORY.UNKNOWN,
         profile_id: PROFILE_ID,
       },
     });
@@ -152,6 +154,7 @@ describe('useReportChartSectionError', () => {
         chart_section_source: 'useLensProps',
         esql_error_type: 'verification_exception',
         esql_status: '400',
+        error_category: ERROR_CATEGORY.USER_INPUT,
         profile_id: PROFILE_ID,
       },
     });
@@ -171,6 +174,7 @@ describe('useReportChartSectionError', () => {
       labels: {
         error_type: ERROR_TYPE.CHART_SECTION_NON_RENDER_ERROR,
         chart_section_source: 'useLensProps',
+        error_category: ERROR_CATEGORY.UNKNOWN,
         profile_id: PROFILE_ID,
       },
     });
@@ -200,12 +204,14 @@ describe('useReportChartSectionError', () => {
     expect(span.addLabels).toHaveBeenCalledWith({
       error_type: ERROR_TYPE.CHART_SECTION_NON_RENDER_ERROR,
       chart_section_source: 'useLensProps',
+      error_category: ERROR_CATEGORY.UNKNOWN,
       profile_id: PROFILE_ID,
     });
     expect(captureErrorMock).toHaveBeenCalledWith(plainError, {
       labels: {
         error_type: ERROR_TYPE.CHART_SECTION_NON_RENDER_ERROR,
         chart_section_source: 'useLensProps',
+        error_category: ERROR_CATEGORY.UNKNOWN,
         profile_id: PROFILE_ID,
       },
     });
@@ -234,6 +240,7 @@ describe('useReportChartSectionError', () => {
       labels: {
         error_type: ERROR_TYPE.CHART_SECTION_NON_RENDER_ERROR,
         chart_section_source: 'useLensProps',
+        error_category: ERROR_CATEGORY.UNKNOWN,
         profile_id: PROFILE_ID,
       },
     });
@@ -300,6 +307,7 @@ describe('useReportChartSectionError', () => {
         labels: {
           error_type: ERROR_TYPE.CHART_SECTION_NON_RENDER_ERROR,
           chart_section_source: 'useLensProps',
+          error_category: ERROR_CATEGORY.UNKNOWN,
           profile_id: 'metrics-experience',
           chart_id: 'system.cpu.total.norm.pct',
         },
@@ -326,6 +334,7 @@ describe('useReportChartSectionError', () => {
       expect(span.addLabels).toHaveBeenCalledWith({
         error_type: ERROR_TYPE.CHART_SECTION_NON_RENDER_ERROR,
         chart_section_source: 'useFetchMetricsData',
+        error_category: ERROR_CATEGORY.UNKNOWN,
         profile_id: 'metrics-experience',
       });
     });
@@ -351,14 +360,15 @@ describe('useReportChartSectionError', () => {
         labels: {
           error_type: ERROR_TYPE.CHART_SECTION_NON_RENDER_ERROR,
           chart_section_source: 'useFetchMetricsData',
+          error_category: ERROR_CATEGORY.UNKNOWN,
         },
       });
     });
 
     it('does not let caller-supplied labels override reserved label keys', () => {
       // The `ChartSectionErrorLabels` type prevents callers from passing
-      // `error_type`, `chart_section_source`, or the `esql_*` keys at compile
-      // time. This test guards the runtime merge order so a caller that
+      // `error_type`, `chart_section_source`, `error_category`, or the
+      // `esql_*` keys at compile time. This test guards the runtime merge order so a caller that
       // bypasses the type (e.g., spreading from `any`) can never overwrite
       // the values the reporter owns.
       const esqlError = new EsqlResponseError(
@@ -376,6 +386,7 @@ describe('useReportChartSectionError', () => {
         chart_section_source: 'spoofed-source',
         esql_error_type: 'spoofed-esql-type',
         esql_status: 'spoofed-esql-status',
+        error_category: 'spoofed-error-category',
       } as unknown as ReportChartSectionErrorArgs['labels'];
 
       const reportError = renderReporter();
@@ -392,6 +403,7 @@ describe('useReportChartSectionError', () => {
           chart_section_source: 'useLensProps',
           esql_error_type: 'verification_exception',
           esql_status: '400',
+          error_category: ERROR_CATEGORY.USER_INPUT,
           profile_id: 'metrics-experience',
         },
       });
@@ -420,7 +432,111 @@ describe('useReportChartSectionError', () => {
           chart_section_source: 'useLensProps',
           esql_error_type: 'verification_exception',
           esql_status: '400',
+          error_category: ERROR_CATEGORY.USER_INPUT,
           profile_id: 'metrics-experience',
+        },
+      });
+    });
+  });
+
+  describe('error_category', () => {
+    it('classifies an invalid KQL literal inside an ES|QL query as user input', () => {
+      // Regression guard for the RCA behind #277585: a stray pipe inside a
+      // `KQL("""...""")` literal makes Elasticsearch reject the query, which
+      // must not be counted as an application failure.
+      const reportError = renderReporter();
+      const kqlParseError = Object.assign(
+        new Error("line 1:42: extraneous input '|' expecting <EOF>"),
+        {
+          attributes: {
+            error: {
+              type: 'parsing_exception',
+              reason: "line 1:42: extraneous input '|' expecting <EOF>",
+            },
+            rawResponse: { status: 400 },
+          },
+        }
+      );
+
+      reportError({
+        error: kqlParseError,
+        source: 'useFetchMetricsData',
+        labels: { profile_id: PROFILE_ID },
+      });
+
+      expect(captureErrorMock).toHaveBeenCalledWith(kqlParseError, {
+        labels: {
+          error_type: ERROR_TYPE.CHART_SECTION_NON_RENDER_ERROR,
+          chart_section_source: 'useFetchMetricsData',
+          esql_error_type: 'parsing_exception',
+          esql_status: '400',
+          error_category: ERROR_CATEGORY.USER_INPUT,
+          profile_id: PROFILE_ID,
+        },
+      });
+    });
+
+    it('classifies a server-side ES failure as an application error', () => {
+      const reportError = renderReporter();
+      const serverError = Object.assign(new Error('all shards failed'), {
+        attributes: {
+          error: {
+            type: 'search_phase_execution_exception',
+            reason: 'all shards failed',
+          },
+          rawResponse: { status: 500 },
+        },
+      });
+
+      reportError({
+        error: serverError,
+        source: 'useFetchMetricsData',
+        labels: { profile_id: PROFILE_ID },
+      });
+
+      expect(captureErrorMock).toHaveBeenCalledWith(serverError, {
+        labels: {
+          error_type: ERROR_TYPE.CHART_SECTION_NON_RENDER_ERROR,
+          chart_section_source: 'useFetchMetricsData',
+          esql_error_type: 'search_phase_execution_exception',
+          esql_status: '500',
+          error_category: ERROR_CATEGORY.APPLICATION,
+          profile_id: PROFILE_ID,
+        },
+      });
+    });
+
+    it('labels an error raised by the search interceptor', () => {
+      // A request that Elasticsearch rejects outright surfaces as `EsError`
+      // rather than `EsqlResponseError`, and `EsError` keeps the cause on
+      // `attributes` while dropping the HTTP `statusCode`. Reading only
+      // `EsqlResponseError` left every live failure without the `esql_*`
+      // labels and categorised as `unknown`.
+      const reportError = renderReporter();
+      const interceptorError = Object.assign(new Error('Unknown column [not_a_real_field]'), {
+        attributes: {
+          error: {
+            type: 'verification_exception',
+            reason: 'Unknown column [not_a_real_field]',
+          },
+          rawResponse: { status: 400 },
+        },
+      });
+
+      reportError({
+        error: interceptorError,
+        source: 'useFetchMetricsData',
+        labels: { profile_id: PROFILE_ID },
+      });
+
+      expect(captureErrorMock).toHaveBeenCalledWith(interceptorError, {
+        labels: {
+          error_type: ERROR_TYPE.CHART_SECTION_NON_RENDER_ERROR,
+          chart_section_source: 'useFetchMetricsData',
+          esql_error_type: 'verification_exception',
+          esql_status: '400',
+          error_category: ERROR_CATEGORY.USER_INPUT,
+          profile_id: PROFILE_ID,
         },
       });
     });
