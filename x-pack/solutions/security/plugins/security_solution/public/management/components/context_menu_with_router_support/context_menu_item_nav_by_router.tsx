@@ -65,6 +65,7 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
     children,
     href,
     isNavigationDisabled = false,
+    css: cssProp,
     ...otherMenuItemProps
   }) => {
     const handleOnClickViaNavigateToApp = useNavigateToAppEventHandler(navigateAppId ?? '', {
@@ -91,7 +92,7 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
     return (
       <EuiContextMenuItem
         {...otherMenuItemProps}
-        css={textTruncate ? truncatedItemCss : undefined}
+        css={[cssProp, textTruncate ? truncatedItemCss : undefined]}
         onClick={handleItemClick}
         href={isNavigationDisabled ? undefined : href}
       >

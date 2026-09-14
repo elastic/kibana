@@ -8,7 +8,8 @@
 import type { ReactElement } from 'react';
 import React, { memo, useMemo } from 'react';
 import type { CommonProps } from '@elastic/eui';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
@@ -106,17 +107,35 @@ export const WithContextMenu = memo<WithContextMenuProps>(
     children,
     'data-test-subj': dataTestSubj,
   }) => {
+    const { euiTheme } = useEuiTheme();
+    const policyLinkCss = useMemo(
+      () => css`
+        &:is(a):not([aria-disabled='true']) {
+          color: ${euiTheme.colors.textPrimary};
+          background-color: transparent;
+
+          &:hover,
+          &:focus {
+            background-color: transparent;
+            text-decoration: underline;
+          }
+        }
+      `,
+      [euiTheme]
+    );
+
     const menuItems: ContextMenuItemNavByRouterProps[] = useMemo(() => {
       return policies.map((policyMenuItem) => {
         const hasHref = Boolean(policyMenuItem.href);
 
         return {
           ...policyMenuItem,
+          css: policyLinkCss,
           disabled: !hasHref,
           toolTipContent: !hasHref ? POLICY_DETAILS_NOT_ACCESSIBLE_IN_ACTIVE_SPACE : undefined,
         };
       });
-    }, [policies]);
+    }, [policies, policyLinkCss]);
 
     return (
       <ContextMenuWithRouterSupport
