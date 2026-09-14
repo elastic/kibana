@@ -827,10 +827,17 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           </h3>
         }
         description={
-          <FormattedMessage
-            id="xpack.fleet.agentPolicyForm.downloadSourceDescription"
-            defaultMessage="When an upgrade action is issued the agents will download the binary from this location."
-          />
+          enableAgentPolicyMultipleDownloadSources ? (
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.downloadSourceDescriptionMultiple"
+              defaultMessage="When an upgrade action is issued, agents download the binary from these locations, in order."
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.downloadSourceDescription"
+              defaultMessage="When an upgrade action is issued the agents will download the binary from this location."
+            />
+          )
         }
       >
         {enableAgentPolicyMultipleDownloadSources ? (

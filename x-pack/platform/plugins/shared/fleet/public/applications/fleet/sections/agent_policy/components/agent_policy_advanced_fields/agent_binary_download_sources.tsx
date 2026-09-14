@@ -102,8 +102,8 @@ export const AgentBinaryDownloadSources: React.FunctionComponent<Props> = ({
 
   const atLimit = rows.length >= MAX_DOWNLOAD_SOURCES;
 
-  const removeLabel = i18n.translate('xpack.fleet.agentPolicyForm.downloadSource.removeServer', {
-    defaultMessage: 'Remove server',
+  const removeLabel = i18n.translate('xpack.fleet.agentPolicyForm.downloadSource.remove', {
+    defaultMessage: 'Remove download source',
   });
 
   return (
@@ -114,7 +114,7 @@ export const AgentBinaryDownloadSources: React.FunctionComponent<Props> = ({
             <strong>
               <FormattedMessage
                 id="xpack.fleet.agentPolicyForm.downloadSource.priorityLabel"
-                defaultMessage="Set server contact priority"
+                defaultMessage="Download source order"
               />
             </strong>
           </EuiText>
@@ -123,7 +123,7 @@ export const AgentBinaryDownloadSources: React.FunctionComponent<Props> = ({
           <EuiIconTip
             content={i18n.translate('xpack.fleet.agentPolicyForm.downloadSource.priorityTooltip', {
               defaultMessage:
-                'Optionally choose the order in which servers are contacted in case of timeouts. Proxy, SSL and authentication settings are taken from the first server and apply to all of them. Agents running versions older than 9.6.0 will only use the first server.',
+                'Optionally, select the order in which download sources are tried if one times out. Proxy, SSL, and authentication settings are taken from the first source and apply to all sources. Agents on versions earlier than 9.6.0 only use the first source.',
             })}
             position="right"
           />
@@ -192,11 +192,11 @@ export const AgentBinaryDownloadSources: React.FunctionComponent<Props> = ({
             flush="left"
             disabled={disabled || atLimit || !nextAvailableValue}
             onClick={addRow}
-            data-test-subj="agentPolicyForm.downloadSource.addServer"
+            data-test-subj="agentPolicyForm.downloadSource.add"
           >
             <FormattedMessage
-              id="xpack.fleet.agentPolicyForm.downloadSource.addServer"
-              defaultMessage="Add server"
+              id="xpack.fleet.agentPolicyForm.downloadSource.add"
+              defaultMessage="Add download source"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -205,7 +205,7 @@ export const AgentBinaryDownloadSources: React.FunctionComponent<Props> = ({
             <EuiText size="s" color="subdued">
               <FormattedMessage
                 id="xpack.fleet.agentPolicyForm.downloadSource.limitReached"
-                defaultMessage="You have reached the limit of selected servers."
+                defaultMessage="You can select up to 3 download sources."
               />
             </EuiText>
           </EuiFlexItem>
