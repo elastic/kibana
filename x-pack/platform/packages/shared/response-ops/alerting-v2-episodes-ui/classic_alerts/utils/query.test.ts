@@ -7,6 +7,7 @@
 
 import { buildClassicAlertsQuery, buildClassicAlertsSort } from './query';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
+import { ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 
 /** Extracts `bool.filter` from a query container, throwing if the shape is unexpected. */
 const getFilters = (query: unknown): unknown[] => {
@@ -120,7 +121,7 @@ describe('buildClassicAlertsSort', () => {
   });
 
   it('maps episode sort fields to classic field names', () => {
-    const sort = buildClassicAlertsSort({ sortField: 'episode.status', sortDirection: 'asc' });
+    const sort = buildClassicAlertsSort({ sortField: ALERT_STATUS_FIELD, sortDirection: 'asc' });
     expect(sort).toEqual([{ 'kibana.alert.status': { order: 'asc', unmapped_type: 'keyword' } }]);
   });
 

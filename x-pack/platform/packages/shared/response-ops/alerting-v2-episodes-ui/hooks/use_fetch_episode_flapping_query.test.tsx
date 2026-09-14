@@ -13,6 +13,7 @@ import { buildEpisodeFlappingEsqlQuery } from '../queries/episode_flapping_query
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
 import { useFetchEpisodeFlappingQuery } from './use_fetch_episode_flapping_query';
+import { ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 
 jest.mock('../utils/run_esql_async_search');
 
@@ -37,7 +38,7 @@ describe('useFetchEpisodeFlappingQuery', () => {
 
   it('runs the dedicated newest-first query bounded to the look-back window', async () => {
     runEsqlAsyncSearchMock.mockResolvedValue({
-      columns: [{ name: 'episode.status', type: 'keyword' }],
+      columns: [{ name: ALERT_STATUS_FIELD, type: 'keyword' }],
       values: [[ACTIVE]],
     });
 

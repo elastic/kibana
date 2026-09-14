@@ -8,10 +8,11 @@
 import { renderHook } from '@testing-library/react';
 import { useEpisodesBulkActions } from './use_episodes_bulk_actions';
 import type { EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
+import { ALERT_ID_FIELD } from '@kbn/alerting-v2-constants';
 
 const stubEpisode = (overrides: Record<string, unknown> = {}) => ({
   '@timestamp': '2026-04-23T00:00:00Z',
-  'episode.id': 'e1',
+  [ALERT_ID_FIELD]: 'e1',
   group_hash: 'g1',
   ...overrides,
 });
@@ -38,7 +39,7 @@ describe('useEpisodesBulkActions', () => {
   });
 
   it('isAvailable proxies to action.isCompatible with episodes resolved from docIds', () => {
-    const episodesData = [stubEpisode({ 'episode.id': 'e1' })];
+    const episodesData = [stubEpisode({ [ALERT_ID_FIELD]: 'e1' })];
     const action = stubAction();
     const { result } = renderHook(() =>
       useEpisodesBulkActions({
@@ -53,7 +54,7 @@ describe('useEpisodesBulkActions', () => {
 
   it('onClick calls action.execute with selected episodes and onSuccess', () => {
     const onSuccess = jest.fn();
-    const episodesData = [stubEpisode({ 'episode.id': 'e1' })];
+    const episodesData = [stubEpisode({ [ALERT_ID_FIELD]: 'e1' })];
     const action = stubAction();
     const { result } = renderHook(() =>
       useEpisodesBulkActions({ actions: [action], episodesData: episodesData as any, onSuccess })
@@ -79,8 +80,8 @@ describe('useEpisodesBulkActions', () => {
   });
 
   it('excludes rows with supports_actions=false from bulk action episode resolution', () => {
-    const v2Episode = stubEpisode({ 'episode.id': 'v2-ep' });
-    const classicEpisode = stubEpisode({ 'episode.id': 'classic-ep', supports_actions: false });
+    const v2Episode = stubEpisode({ [ALERT_ID_FIELD]: 'v2-ep' });
+    const classicEpisode = stubEpisode({ [ALERT_ID_FIELD]: 'classic-ep', supports_actions: false });
     const action = stubAction();
 
     const { result } = renderHook(() =>
@@ -93,13 +94,13 @@ describe('useEpisodesBulkActions', () => {
 
     result.current[0].isAvailable!({ selectedDocIds: ['0', '1'] } as any);
     const compatibleCall = (action.isCompatible as jest.Mock).mock.calls[0][0];
-    const resolvedIds = compatibleCall.episodes.map((ep: any) => ep['episode.id']);
+    const resolvedIds = compatibleCall.episodes.map((ep: any) => ep[ALERT_ID_FIELD]);
     expect(resolvedIds).not.toContain('classic-ep');
   });
 
   it('onClick passes only actionable episodes when mixed rows are selected', () => {
-    const v2Episode = stubEpisode({ 'episode.id': 'v2-ep' });
-    const classicEpisode = stubEpisode({ 'episode.id': 'classic-ep', supports_actions: false });
+    const v2Episode = stubEpisode({ [ALERT_ID_FIELD]: 'v2-ep' });
+    const classicEpisode = stubEpisode({ [ALERT_ID_FIELD]: 'classic-ep', supports_actions: false });
     const onSuccess = jest.fn();
     const action = stubAction();
 
@@ -113,7 +114,7 @@ describe('useEpisodesBulkActions', () => {
 
     result.current[0].onClick!({ selectedDocIds: ['0', '1'] } as any);
     const executeCall = (action.execute as jest.Mock).mock.calls[0][0];
-    const resolvedIds = executeCall.episodes.map((ep: any) => ep['episode.id']);
+    const resolvedIds = executeCall.episodes.map((ep: any) => ep[ALERT_ID_FIELD]);
     expect(resolvedIds).not.toContain('classic-ep');
   });
 });

@@ -7,9 +7,10 @@
 
 import { alertEpisodeToDataTableRecord } from './utils';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
+import { ALERT_ID_FIELD } from '@kbn/alerting-v2-constants';
 describe('alertEpisodeToDataTableRecord', () => {
   const mockEpisode = {
-    'episode.id': 'ep1',
+    [ALERT_ID_FIELD]: 'ep1',
     'rule.id': 'rule1',
     group_hash: 'gh1',
     '@timestamp': '2026-04-13T00:00:00.000Z',
@@ -25,7 +26,7 @@ describe('alertEpisodeToDataTableRecord', () => {
 
   it('flattens all episode fields into the flattened map', () => {
     const record = alertEpisodeToDataTableRecord(mockEpisode);
-    expect(record.flattened['episode.id']).toBe('ep1');
+    expect(record.flattened[ALERT_ID_FIELD]).toBe('ep1');
     expect(record.flattened['rule.id']).toBe('rule1');
     expect(record.flattened.group_hash).toBe('gh1');
   });

@@ -7,12 +7,13 @@
 
 import type { EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import { getEpisodeHeaderMenu } from './get_episode_header_menu';
 
 const mockEpisode = {
   '@timestamp': '2026-05-08T08:00:00.000Z',
-  'episode.id': 'ep-1',
-  'episode.status': 'active' as const,
+  [ALERT_ID_FIELD]: 'ep-1',
+  [ALERT_STATUS_FIELD]: 'active' as const,
   'rule.id': 'rule-1',
   group_hash: 'group-1',
   first_timestamp: '2026-05-08T08:00:00.000Z',

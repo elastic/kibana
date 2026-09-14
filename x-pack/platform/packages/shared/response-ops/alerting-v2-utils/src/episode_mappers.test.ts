@@ -8,11 +8,12 @@
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import { alertEpisodeToEpisodeAttachment } from './episode_mappers';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 
 const baseEpisode = {
   '@timestamp': '2026-04-10T12:00:00.000Z',
-  'episode.id': 'ep-1',
-  'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+  [ALERT_ID_FIELD]: 'ep-1',
+  [ALERT_STATUS_FIELD]: ALERT_EPISODE_STATUS.ACTIVE,
   'rule.id': 'rule-1',
   group_hash: 'gh-1',
   first_timestamp: '2026-04-10T11:00:00.000Z',
@@ -34,7 +35,7 @@ describe('alertEpisodeToEpisodeAttachment', () => {
       })
     ).toEqual(
       expect.objectContaining({
-        'episode.id': 'ep-1',
+        [ALERT_ID_FIELD]: 'ep-1',
         triggered_at: '2026-04-10T11:05:00.000Z',
         last_ack_action: 'ack',
         last_assignee_uid: 'user-1',

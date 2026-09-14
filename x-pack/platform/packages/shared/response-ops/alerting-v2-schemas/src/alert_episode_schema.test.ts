@@ -7,11 +7,12 @@
 
 import { ALERT_EPISODE_STATUS } from './alert_action_schema';
 import { alertEpisodeSchema } from './alert_episode_schema';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 
 const baseEpisode = {
   '@timestamp': '2026-04-10T12:00:00.000Z',
-  'episode.id': 'ep-1',
-  'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+  [ALERT_ID_FIELD]: 'ep-1',
+  [ALERT_STATUS_FIELD]: ALERT_EPISODE_STATUS.ACTIVE,
   'rule.id': 'rule-1',
   group_hash: 'gh-1',
   first_timestamp: '2026-04-10T11:00:00.000Z',

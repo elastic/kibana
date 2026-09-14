@@ -10,9 +10,10 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { createUnackAction } from './unack';
 import * as bulk from './bulk_create_alert_actions';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
+import { ALERT_ID_FIELD } from '@kbn/alerting-v2-constants';
 const makeEpisode = (overrides: Partial<AlertEpisode> = {}): AlertEpisode => ({
   '@timestamp': '2026-04-23T00:00:00Z',
-  'episode.id': 'e1',
+  [ALERT_ID_FIELD]: 'e1',
   'episode.status': 'active' as any,
   'rule.id': 'r1',
   group_hash: 'g1',
@@ -64,8 +65,8 @@ describe('createUnackAction', () => {
     const onSuccess = jest.fn();
     await createUnackAction(deps).execute({
       episodes: [
-        makeEpisode({ 'episode.id': 'e1', group_hash: 'g1', last_ack_action: 'ack' }),
-        makeEpisode({ 'episode.id': 'e2', group_hash: 'g1', last_ack_action: 'ack' }),
+        makeEpisode({ [ALERT_ID_FIELD]: 'e1', group_hash: 'g1', last_ack_action: 'ack' }),
+        makeEpisode({ [ALERT_ID_FIELD]: 'e2', group_hash: 'g1', last_ack_action: 'ack' }),
       ],
       onSuccess,
     });

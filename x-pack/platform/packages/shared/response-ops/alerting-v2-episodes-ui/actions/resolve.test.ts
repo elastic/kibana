@@ -11,10 +11,11 @@ import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import { createResolveAction } from './resolve';
 import * as bulk from './bulk_create_alert_actions';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 const makeEpisode = (overrides: Partial<AlertEpisode> = {}): AlertEpisode => ({
   '@timestamp': '2026-04-23T00:00:00Z',
-  'episode.id': 'e1',
-  'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+  [ALERT_ID_FIELD]: 'e1',
+  [ALERT_STATUS_FIELD]: ALERT_EPISODE_STATUS.ACTIVE,
   'rule.id': 'r1',
   group_hash: 'g1',
   first_timestamp: '2026-04-23T00:00:00Z',
@@ -34,7 +35,7 @@ describe('createResolveAction', () => {
   it('compatible when at least one episode is not already INACTIVE', () => {
     expect(
       createResolveAction(makeDeps()).isCompatible({
-        episodes: [makeEpisode({ 'episode.status': ALERT_EPISODE_STATUS.ACTIVE })],
+        episodes: [makeEpisode({ [ALERT_STATUS_FIELD]: ALERT_EPISODE_STATUS.ACTIVE })],
       })
     ).toBe(true);
   });
@@ -44,7 +45,7 @@ describe('createResolveAction', () => {
     (status) => {
       expect(
         createResolveAction(makeDeps()).isCompatible({
-          episodes: [makeEpisode({ 'episode.status': status })],
+          episodes: [makeEpisode({ [ALERT_STATUS_FIELD]: status })],
         })
       ).toBe(true);
     }
@@ -53,7 +54,7 @@ describe('createResolveAction', () => {
   it('not compatible when every episode is already INACTIVE', () => {
     expect(
       createResolveAction(makeDeps()).isCompatible({
-        episodes: [makeEpisode({ 'episode.status': ALERT_EPISODE_STATUS.INACTIVE })],
+        episodes: [makeEpisode({ [ALERT_STATUS_FIELD]: ALERT_EPISODE_STATUS.INACTIVE })],
       })
     ).toBe(false);
   });
@@ -70,7 +71,7 @@ describe('createResolveAction', () => {
       episodes: [
         makeEpisode({ group_hash: 'g1' }),
         // same group — should be deduped
-        makeEpisode({ 'episode.id': 'e2', group_hash: 'g1' }),
+        makeEpisode({ [ALERT_ID_FIELD]: 'e2', group_hash: 'g1' }),
       ],
       onSuccess,
     });

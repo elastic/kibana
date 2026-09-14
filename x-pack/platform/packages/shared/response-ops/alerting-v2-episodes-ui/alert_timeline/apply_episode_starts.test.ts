@@ -6,14 +6,15 @@
  */
 
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import type { AlertTimelinePhaseRow } from './types';
 import { applyEpisodeStarts, makeEpisodeStartKey } from './apply_episode_starts';
 
 const iso = (s: string) => new Date(Date.parse(s)).toISOString();
 
 const phase = (overrides: Partial<AlertTimelinePhaseRow> = {}): AlertTimelinePhaseRow => ({
-  'episode.id': 'ep-1',
-  'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+  [ALERT_ID_FIELD]: 'ep-1',
+  [ALERT_STATUS_FIELD]: ALERT_EPISODE_STATUS.ACTIVE,
   group_hash: 'gh-1',
   seg_start: iso('2026-04-05T00:00:00Z'),
   seg_end: iso('2026-04-06T00:00:00Z'),
@@ -61,11 +62,11 @@ describe('applyEpisodeStarts', () => {
   it('joins per (episode.id, episode.status), not per episode', () => {
     const rows = [
       phase({
-        'episode.status': ALERT_EPISODE_STATUS.PENDING,
+        [ALERT_STATUS_FIELD]: ALERT_EPISODE_STATUS.PENDING,
         seg_start: iso('2026-04-05T00:00:00Z'),
       }),
       phase({
-        'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+        [ALERT_STATUS_FIELD]: ALERT_EPISODE_STATUS.ACTIVE,
         seg_start: iso('2026-04-05T01:00:00Z'),
       }),
     ];

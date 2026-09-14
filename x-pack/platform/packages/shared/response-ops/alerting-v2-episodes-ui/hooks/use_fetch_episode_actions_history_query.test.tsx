@@ -12,6 +12,7 @@ import { buildEpisodeActionsHistoryQuery } from '../queries/episode_actions_hist
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
 import { useFetchEpisodeActionsHistoryQuery } from './use_fetch_episode_actions_history_query';
+import { ALERT_ACTION_ALERT_ID_FIELD } from '@kbn/alerting-v2-constants';
 
 jest.mock('../utils/run_esql_async_search');
 
@@ -22,7 +23,7 @@ const ACTIONS_COLUMNS = [
   { name: '@timestamp', type: 'date' },
   { name: 'action_type', type: 'keyword' },
   { name: 'actor', type: 'keyword' },
-  { name: 'episode_id', type: 'keyword' },
+  { name: ALERT_ACTION_ALERT_ID_FIELD, type: 'keyword' },
   { name: 'group_hash', type: 'keyword' },
   { name: 'tags', type: 'keyword' },
   { name: 'assignee_uid', type: 'keyword' },

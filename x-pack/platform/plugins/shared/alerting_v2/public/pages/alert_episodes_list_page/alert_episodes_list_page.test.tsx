@@ -26,6 +26,7 @@ import {
   createEpisodeActions,
   type EpisodeActionContext,
 } from '@kbn/alerting-v2-episodes-ui/actions';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 
 const OPEN_IN_DISCOVER_EPISODE_ACTION_ID = 'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER';
 
@@ -201,19 +202,19 @@ const mockDataView = {
 
 const mockEpisodes = [
   {
-    'episode.id': 'ep1',
+    [ALERT_ID_FIELD]: 'ep1',
     'rule.id': 'rule1',
     group_hash: 'gh1',
     '@timestamp': '2026-01-01T00:00:00Z',
   },
   {
-    'episode.id': 'ep2',
+    [ALERT_ID_FIELD]: 'ep2',
     'rule.id': 'rule2',
     group_hash: 'gh2',
     '@timestamp': '2026-01-01T00:00:00Z',
   },
   {
-    'episode.id': 'ep3',
+    [ALERT_ID_FIELD]: 'ep3',
     'rule.id': 'rule3',
     group_hash: 'gh1',
     '@timestamp': '2026-01-01T00:00:00Z',
@@ -301,7 +302,7 @@ describe('AlertEpisodesListPage', () => {
   it('passes severity column and custom renderer to UnifiedDataTable', () => {
     const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
     expect(lastCall?.columns).toEqual([
-      'episode.status',
+      ALERT_STATUS_FIELD,
       'severity',
       '@timestamp',
       'rule.id',
@@ -358,7 +359,7 @@ describe('AlertEpisodesListPage', () => {
     const renderDocumentView = lastCall?.renderDocumentView as (hit: {
       flattened: Record<string, unknown>;
     }) => React.ReactNode;
-    const node = renderDocumentView({ flattened: { 'episode.id': 'ep-1' } });
+    const node = renderDocumentView({ flattened: { [ALERT_ID_FIELD]: 'ep-1' } });
     expect(node).toBeTruthy();
   });
 
@@ -368,7 +369,7 @@ describe('AlertEpisodesListPage', () => {
       flattened: Record<string, unknown>;
     }) => React.ReactElement;
     const node = renderDocumentView({
-      flattened: { 'episode.id': 'classic-alert-id', supports_timeline: false },
+      flattened: { [ALERT_ID_FIELD]: 'classic-alert-id', supports_timeline: false },
     });
     expect(node).toBeTruthy();
     expect(node.type).toBeDefined();
@@ -494,7 +495,7 @@ describe('episode count + reset filters toolbar', () => {
 
   it('renders the capped label and tooltip when the page size limit is reached', async () => {
     const cappedEpisodes = Array.from({ length: ALERT_EPISODES_LIST_PAGE_SIZE }, (_, index) => ({
-      'episode.id': `ep${index}`,
+      [ALERT_ID_FIELD]: `ep${index}`,
       'rule.id': `rule${index}`,
       group_hash: `gh${index}`,
       '@timestamp': '2026-01-01T00:00:00Z',
@@ -642,7 +643,7 @@ describe('rule summary flyout', () => {
   const expandEpisode = async () => {
     const { setExpandedDoc } = mockUnifiedDataTable.mock.calls.at(-1)![0];
     await act(async () => {
-      setExpandedDoc!({ id: 'ep1', raw: {}, flattened: { 'episode.id': 'ep1' } });
+      setExpandedDoc!({ id: 'ep1', raw: {}, flattened: { [ALERT_ID_FIELD]: 'ep1' } });
     });
   };
 

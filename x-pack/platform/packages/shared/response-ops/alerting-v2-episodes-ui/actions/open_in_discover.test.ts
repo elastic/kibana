@@ -8,9 +8,10 @@
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { createOpenInDiscoverAction } from './open_in_discover';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
+import { ALERT_ID_FIELD } from '@kbn/alerting-v2-constants';
 const makeEpisode = (overrides: Partial<AlertEpisode> = {}): AlertEpisode => ({
   '@timestamp': '2026-04-23T00:00:00Z',
-  'episode.id': 'e1',
+  [ALERT_ID_FIELD]: 'e1',
   'episode.status': 'active' as any,
   'rule.id': 'r1',
   group_hash: 'g1',
@@ -44,7 +45,7 @@ describe('createOpenInDiscoverAction', () => {
   it('not compatible on multi-selection', () => {
     expect(
       createOpenInDiscoverAction(makeDeps()).isCompatible({
-        episodes: [makeEpisode(), makeEpisode({ 'episode.id': 'e2' })],
+        episodes: [makeEpisode(), makeEpisode({ [ALERT_ID_FIELD]: 'e2' })],
       })
     ).toBe(false);
   });

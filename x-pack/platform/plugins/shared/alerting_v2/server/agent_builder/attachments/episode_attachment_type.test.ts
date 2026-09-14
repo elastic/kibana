@@ -19,6 +19,7 @@ import {
   type AlertEpisode,
   type EpisodeAttachmentData,
 } from '@kbn/alerting-v2-schemas';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { EpisodesClient } from '../../lib/episodes_client';
 import type { RulesClient } from '../../lib/rules_client';
@@ -36,8 +37,8 @@ const createResolveContext = (spaceId: string = SPACE_ID) => ({
 
 const baseEpisodeData: EpisodeAttachmentData = {
   '@timestamp': '2026-04-10T12:00:00.000Z',
-  'episode.id': 'ep-1',
-  'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+  [ALERT_ID_FIELD]: 'ep-1',
+  [ALERT_STATUS_FIELD]: ALERT_EPISODE_STATUS.ACTIVE,
   'rule.id': 'rule-1',
   group_hash: 'gh-1',
   first_timestamp: '2026-04-10T11:00:00.000Z',
@@ -111,7 +112,7 @@ describe('createEpisodeAttachmentType', () => {
       const result = await definition.validate(baseEpisodeData);
       expect(result).toEqual({
         valid: true,
-        data: expect.objectContaining({ 'episode.id': 'ep-1' }),
+        data: expect.objectContaining({ [ALERT_ID_FIELD]: 'ep-1' }),
       });
     });
 
@@ -131,7 +132,7 @@ describe('createEpisodeAttachmentType', () => {
       const result = await definition.resolve!('ep-1', createResolveContext());
 
       expect(getEpisode).toHaveBeenCalledWith('ep-1');
-      expect(result).toEqual(expect.objectContaining({ 'episode.id': 'ep-1' }));
+      expect(result).toEqual(expect.objectContaining({ [ALERT_ID_FIELD]: 'ep-1' }));
     });
 
     it('includes the episode label when the rule can be loaded', async () => {
@@ -215,7 +216,7 @@ describe('createEpisodeAttachmentType', () => {
 
       expect(result).toEqual(
         expect.objectContaining({
-          'episode.id': 'ep-1',
+          [ALERT_ID_FIELD]: 'ep-1',
           last_ack_action: undefined,
           last_assignee_uid: undefined,
           last_snooze_action: undefined,
@@ -284,7 +285,7 @@ describe('createEpisodeAttachmentType', () => {
 
       const result = await definition.resolve!('ep-1', createResolveContext());
 
-      expect(result).toEqual(expect.objectContaining({ 'episode.id': 'ep-1' }));
+      expect(result).toEqual(expect.objectContaining({ [ALERT_ID_FIELD]: 'ep-1' }));
       expect(getEpisode).toHaveBeenCalledWith('ep-1');
       expect(canRead).toHaveBeenCalledWith('alerts');
     });
@@ -296,7 +297,7 @@ describe('createEpisodeAttachmentType', () => {
         versions: [
           {
             version: 1,
-            data: { ...baseEpisodeData, 'episode.status': status },
+            data: { ...baseEpisodeData, [ALERT_STATUS_FIELD]: status },
             created_at: '2026-04-10T12:00:00.000Z',
           } as never,
         ],
@@ -330,7 +331,7 @@ describe('createEpisodeAttachmentType', () => {
     it('returns true when live status differs from the snapshot', async () => {
       getEpisode.mockResolvedValueOnce({
         ...baseEpisodeData,
-        'episode.status': ALERT_EPISODE_STATUS.INACTIVE,
+        [ALERT_STATUS_FIELD]: ALERT_EPISODE_STATUS.INACTIVE,
       });
 
       const result = await definition.isStale!(buildVersionedAttachment(), createResolveContext());
@@ -341,7 +342,7 @@ describe('createEpisodeAttachmentType', () => {
     it('returns false when both snapshot and live episode are inactive', async () => {
       getEpisode.mockResolvedValueOnce({
         ...baseEpisodeData,
-        'episode.status': ALERT_EPISODE_STATUS.INACTIVE,
+        [ALERT_STATUS_FIELD]: ALERT_EPISODE_STATUS.INACTIVE,
       });
 
       const result = await definition.isStale!(
@@ -394,7 +395,7 @@ describe('createEpisodeAttachmentType', () => {
       id: 'attach-1',
       type: EPISODE_ATTACHMENT_TYPE,
       data,
-      origin: data['episode.id'],
+      origin: data[ALERT_ID_FIELD],
     });
 
     const formatValue = async (data: EpisodeAttachmentData): Promise<string> => {

@@ -8,6 +8,7 @@
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { fetchClassicAlertsHistogram } from './fetch_classic_histogram';
 import { CLASSIC_ALERT_HISTOGRAM_SOURCE_FIELDS } from '../utils/map_alert';
+import { ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 
 const mockHttp = httpServiceMock.createStartContract();
 
@@ -52,7 +53,7 @@ describe('fetchClassicAlertsHistogram', () => {
     expect(rows[0]).toMatchObject({
       first_timestamp: '2024-01-01T00:00:00.000Z',
       last_timestamp: '2024-01-01T01:00:00.000Z',
-      'episode.status': 'active',
+      [ALERT_STATUS_FIELD]: 'active',
     });
   });
 

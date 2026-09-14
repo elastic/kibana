@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import { RuleStateStatus, type LoadedRuleState } from '../../../types/rule_state';
 import { RelatedEpisodesRuleSubsection } from './rule_subsection';
 import { useFetchSameRuleEpisodesQuery } from '../../../hooks/use_fetch_same_rule_episodes_query';
@@ -58,8 +59,8 @@ describe('RelatedEpisodesRuleSubsection', () => {
 
   it('renders as expected when episodes are returned', () => {
     const episode = {
-      'episode.id': 'ep-2',
-      'episode.status': 'active',
+      [ALERT_ID_FIELD]: 'ep-2',
+      [ALERT_STATUS_FIELD]: 'active',
       'rule.id': 'rule-1',
       group_hash: 'gh-2',
     } as AlertEpisode;

@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { runEsqlAsyncSearch } from '../../utils/run_esql_async_search';
+import { ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import {
   createMockServices,
   createQueryClientWrapper,
@@ -48,7 +49,7 @@ describe('AlertEpisodeTimelineHeatmapsSection', () => {
     runEsqlAsyncSearchMock.mockResolvedValue({
       columns: [
         { name: '@timestamp', type: 'date' },
-        { name: 'episode.status', type: 'keyword' },
+        { name: ALERT_STATUS_FIELD, type: 'keyword' },
         { name: 'severity', type: 'keyword' },
       ],
       values: [['2024-01-01T00:00:00.000Z', 'active', 'high']],
@@ -74,7 +75,7 @@ describe('AlertEpisodeTimelineHeatmapsSection', () => {
     runEsqlAsyncSearchMock.mockResolvedValue({
       columns: [
         { name: '@timestamp', type: 'date' },
-        { name: 'episode.status', type: 'keyword' },
+        { name: ALERT_STATUS_FIELD, type: 'keyword' },
         { name: 'severity', type: 'keyword' },
       ],
       values: [['2024-01-01T00:00:00.000Z', 'active', null]],

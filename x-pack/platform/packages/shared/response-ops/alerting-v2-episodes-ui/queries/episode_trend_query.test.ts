@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { ALERT_EVENTS_DATA_STREAM, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import { buildEpisodeTrendQuery, parseEpisodeTrendRows } from './episode_trend_query';
 
 const SPACE_ID = 'default';
@@ -63,7 +63,7 @@ describe('parseEpisodeTrendRows', () => {
       [
         {
           '@timestamp': '2026-06-18T00:00:00.000Z',
-          'episode.status': 'active',
+          [ALERT_STATUS_FIELD]: 'active',
           count: '10',
           error_rate: '1.5',
         },
@@ -74,7 +74,7 @@ describe('parseEpisodeTrendRows', () => {
     expect(rows).toEqual([
       {
         '@timestamp': '2026-06-18T00:00:00.000Z',
-        'episode.status': 'active',
+        [ALERT_STATUS_FIELD]: 'active',
         metrics: { count: 10, error_rate: 1.5 },
       },
     ]);
@@ -85,7 +85,7 @@ describe('parseEpisodeTrendRows', () => {
       [
         {
           '@timestamp': '2026-06-18T00:00:00.000Z',
-          'episode.status': 'recovered',
+          [ALERT_STATUS_FIELD]: 'recovered',
           count: null,
           error_rate: 'oops',
         },

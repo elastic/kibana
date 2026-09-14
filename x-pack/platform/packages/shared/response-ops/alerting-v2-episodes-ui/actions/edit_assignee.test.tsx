@@ -19,6 +19,7 @@ import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { QueryClient } from '@kbn/react-query';
 
 import { createEditAssigneeAction } from './edit_assignee';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import { bulkCreateAlertActions } from './bulk_create_alert_actions';
 import { openAssigneeModal } from '../components/assignee_modal';
 
@@ -51,8 +52,8 @@ const mockOpenModal = jest.mocked(openAssigneeModal);
 
 const makeEpisode = (id: string, assigneeUid?: string): AlertEpisode => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
-  'episode.id': id,
-  'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+  [ALERT_ID_FIELD]: id,
+  [ALERT_STATUS_FIELD]: ALERT_EPISODE_STATUS.ACTIVE,
   'rule.id': 'rule-1',
   group_hash: `hash-${id}`,
   first_timestamp: '2026-01-01T00:00:00.000Z',

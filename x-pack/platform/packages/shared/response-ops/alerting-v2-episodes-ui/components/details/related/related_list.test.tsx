@@ -10,12 +10,13 @@ import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import { RuleStateStatus } from '../../../types/rule_state';
 import { RelatedAlertEpisodesList } from './related_list';
 
 jest.mock('../../related/related_alert_episode', () => ({
   RelatedAlertEpisode: ({ episode, ruleName }: { episode: AlertEpisode; ruleName: string }) => (
-    <div data-test-subj="mockRelatedAlertEpisode">{ruleName || episode['episode.id']}</div>
+    <div data-test-subj="mockRelatedAlertEpisode">{ruleName || episode[ALERT_ID_FIELD]}</div>
   ),
 }));
 
@@ -32,8 +33,8 @@ const loadedRuleState = {
 
 const makeRow = (id: string): AlertEpisode =>
   ({
-    'episode.id': id,
-    'episode.status': 'active',
+    [ALERT_ID_FIELD]: id,
+    [ALERT_STATUS_FIELD]: 'active',
     'rule.id': 'rule-1',
     group_hash: 'gh-1',
     '@timestamp': '2024-01-01T00:00:00Z',

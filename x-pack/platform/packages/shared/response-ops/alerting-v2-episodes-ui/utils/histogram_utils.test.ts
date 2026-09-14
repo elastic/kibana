@@ -14,6 +14,7 @@ import {
   type HistogramEpisodeRow,
   type TimeBucket,
 } from './histogram_utils';
+import { ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 
 const MIN = 60_000;
 const HOUR = 60 * MIN;
@@ -91,13 +92,13 @@ describe('computeOverlapCounts', () => {
   const inactive = (firstMs: number, lastMs: number): HistogramEpisodeRow => ({
     first_timestamp: new Date(firstMs).toISOString(),
     last_timestamp: new Date(lastMs).toISOString(),
-    'episode.status': 'inactive',
+    [ALERT_STATUS_FIELD]: 'inactive',
   });
 
   const active = (firstMs: number): HistogramEpisodeRow => ({
     first_timestamp: new Date(firstMs).toISOString(),
     last_timestamp: new Date(firstMs + HOUR).toISOString(), // ignored for active episodes
-    'episode.status': 'active',
+    [ALERT_STATUS_FIELD]: 'active',
   });
 
   it('counts an episode that spans two buckets in both', () => {
@@ -147,9 +148,9 @@ describe('computeOverlapCounts', () => {
     const inactiveEpisode: HistogramEpisodeRow = {
       first_timestamp: new Date(t0).toISOString(),
       last_timestamp: new Date(t0 + HOUR).toISOString(),
-      'episode.status': 'inactive',
+      [ALERT_STATUS_FIELD]: 'inactive',
     };
-    const counts = computeOverlapCounts([inactiveEpisode], [BUCKET_1], 'episode.status');
+    const counts = computeOverlapCounts([inactiveEpisode], [BUCKET_1], ALERT_STATUS_FIELD);
     expect(counts.find((c) => c.breakdown === 'inactive')?.count).toBe(1);
     expect(counts.find((c) => c.breakdown === 'active')).toBeUndefined();
   });
@@ -166,7 +167,7 @@ describe('computeOverlapCounts', () => {
     // Episode falls entirely outside BUCKET_1 — the bucket is absent from the result.
     // Gap-filling (zero-count rows for the full time range) is handled in useEpisodesHistogramQuery.
     const ep = inactive(t0 + HOUR + MIN, t0 + 2 * HOUR);
-    const counts = computeOverlapCounts([ep], [BUCKET_1], 'episode.status');
+    const counts = computeOverlapCounts([ep], [BUCKET_1], ALERT_STATUS_FIELD);
     expect(counts).toHaveLength(0);
   });
 });
@@ -184,13 +185,13 @@ describe('formatHistogramDatatable', () => {
   it('includes a breakdown column when breakdownField is provided', () => {
     const table = formatHistogramDatatable(
       [{ bucketStart: 0, count: 2, breakdown: 'active' }],
-      'episode.status'
+      ALERT_STATUS_FIELD
     );
-    expect(table.columns.map((c) => c.id)).toEqual(['time_bucket', 'episode.status', 'count']);
-    expect(table.columns[1].name).toBe('episode.status');
+    expect(table.columns.map((c) => c.id)).toEqual(['time_bucket', ALERT_STATUS_FIELD, 'count']);
+    expect(table.columns[1].name).toBe(ALERT_STATUS_FIELD);
     expect(table.rows[0]).toEqual({
       time_bucket: new Date(0).toISOString(),
-      'episode.status': 'active',
+      [ALERT_STATUS_FIELD]: 'active',
       count: 2,
     });
   });
@@ -199,8 +200,8 @@ describe('formatHistogramDatatable', () => {
     // Guards the formatter against callers that pass entries without a breakdown field.
     const table = formatHistogramDatatable(
       [{ bucketStart: 0, count: 1, breakdown: undefined }],
-      'episode.status'
+      ALERT_STATUS_FIELD
     );
-    expect(table.rows[0]['episode.status']).toBeNull();
+    expect(table.rows[0][ALERT_STATUS_FIELD]).toBeNull();
   });
 });

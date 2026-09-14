@@ -8,6 +8,7 @@
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { EpisodeEventRow } from '@kbn/alerting-v2-common-queries';
 import type { EpisodeActionHistoryEntry } from '@kbn/alerting-v2-common-queries';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import {
   deriveSeverityChangeEntries,
   deriveStateChangeEntries,
@@ -16,8 +17,8 @@ import {
 
 const makeRow = (status: string, ts: string): EpisodeEventRow => ({
   '@timestamp': ts,
-  'episode.id': 'ep-1',
-  'episode.status': status as EpisodeEventRow['episode.status'],
+  [ALERT_ID_FIELD]: 'ep-1',
+  [ALERT_STATUS_FIELD]: status as EpisodeEventRow['episode.status'],
   'rule.id': 'rule-1',
   group_hash: 'hash-1',
 });

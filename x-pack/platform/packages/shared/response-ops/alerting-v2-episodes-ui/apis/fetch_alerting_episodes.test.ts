@@ -10,6 +10,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { buildEpisodesQuery } from '@kbn/alerting-v2-common-queries';
 import { fetchAlertingEpisodes } from './fetch_alerting_episodes';
+import { ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 
 jest.mock('../utils/execute_esql_query');
 
@@ -124,7 +125,7 @@ describe('fetchAlertingEpisodes', () => {
   it('should call executeEsqlQuery with custom sort parameters', async () => {
     const pageSize = 25;
     const sortState = {
-      sortField: 'episode.status',
+      sortField: ALERT_STATUS_FIELD,
       sortDirection: 'asc' as const,
     };
     const expectedQuery = buildEpisodesQuery(SPACE_ID, sortState).print('basic');

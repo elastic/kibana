@@ -20,6 +20,7 @@ import { createTestEpisodeSource } from '../types/episode_data_source.mock';
 import type { EpisodeDataSource } from '../types/episode_data_source';
 import { EpisodeDataSourceProvider } from '../context/episode_data_source_context';
 import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 
 jest.mock('../apis/fetch_alerting_episodes');
 
@@ -30,7 +31,7 @@ const sourceWithEpisodes = (fetchEpisodes: EpisodeDataSource['fetchEpisodes']) =
 
 jest.mock('./use_alerting_episodes_data_view');
 const mockDataView = {
-  fields: [{ name: '@timestamp' }, { name: 'episode.id' }],
+  fields: [{ name: '@timestamp' }, { name: ALERT_ID_FIELD }],
   setFieldCustomLabel: jest.fn(),
   setFieldFormat: jest.fn(),
   addRuntimeField: jest.fn(),
@@ -47,8 +48,8 @@ const mockSpaces = createMockSpaces();
 const mockEpisodesData: AlertEpisode[] = [
   {
     '@timestamp': '2024-03-01T10:00:00Z',
-    'episode.id': 'episode-1',
-    'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+    [ALERT_ID_FIELD]: 'episode-1',
+    [ALERT_STATUS_FIELD]: ALERT_EPISODE_STATUS.ACTIVE,
     'rule.id': 'rule-1',
     group_hash: 'gh-1',
     first_timestamp: '2024-03-01T10:00:00Z',
@@ -57,8 +58,8 @@ const mockEpisodesData: AlertEpisode[] = [
   },
   {
     '@timestamp': '2024-03-01T09:00:00Z',
-    'episode.id': 'episode-2',
-    'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+    [ALERT_ID_FIELD]: 'episode-2',
+    [ALERT_STATUS_FIELD]: ALERT_EPISODE_STATUS.ACTIVE,
     'rule.id': 'rule-1',
     group_hash: 'gh-2',
     first_timestamp: '2024-03-01T09:00:00Z',
@@ -212,8 +213,8 @@ describe('useFetchAlertingEpisodesQuery', () => {
     const sourceEpisodes: AlertEpisode[] = [
       {
         '@timestamp': '2024-03-01T11:00:00Z',
-        'episode.id': 'source-episode-1',
-        'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+        [ALERT_ID_FIELD]: 'source-episode-1',
+        [ALERT_STATUS_FIELD]: ALERT_EPISODE_STATUS.ACTIVE,
         'rule.id': 'source-rule-1',
         group_hash: 'source-gh-1',
         first_timestamp: '2024-03-01T11:00:00Z',
@@ -245,7 +246,7 @@ describe('useFetchAlertingEpisodesQuery', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.data).toHaveLength(3);
-    expect(result.current.data![0]['episode.id']).toBe('source-episode-1');
+    expect(result.current.data![0][ALERT_ID_FIELD]).toBe('source-episode-1');
     expect(result.current.data![0].supports_actions).toBe(false);
     expect(result.current.sourceErrors).toEqual([]);
   });
@@ -274,8 +275,8 @@ describe('useFetchAlertingEpisodesQuery', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.data).toHaveLength(mockEpisodesData.length);
-    expect(result.current.data?.map((ep) => ep['episode.id'])).toEqual(
-      mockEpisodesData.map((ep) => ep['episode.id'])
+    expect(result.current.data?.map((ep) => ep[ALERT_ID_FIELD])).toEqual(
+      mockEpisodesData.map((ep) => ep[ALERT_ID_FIELD])
     );
     expect(result.current.sourceErrors).toEqual([
       { sourceId: 'test-source', error: new Error('source failure') },

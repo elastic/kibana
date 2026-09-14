@@ -7,8 +7,9 @@
 
 import { getEpisodesFromDocIds, uniqueGroupEpisodes } from './bulk_selection';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
+import { ALERT_ID_FIELD } from '@kbn/alerting-v2-constants';
 const ep = (id: string, groupHash: string): AlertEpisode =>
-  ({ 'episode.id': id, group_hash: groupHash } as AlertEpisode);
+  ({ [ALERT_ID_FIELD]: id, group_hash: groupHash } as AlertEpisode);
 
 describe('getEpisodesFromDocIds', () => {
   const data = [ep('ep1', 'gh1'), ep('ep2', 'gh2'), ep('ep3', 'gh1')];
@@ -46,7 +47,7 @@ describe('uniqueGroupEpisodes', () => {
   });
 
   it('filters out episodes with a falsy group_hash', () => {
-    const episodes = [{ 'episode.id': 'ep1', group_hash: '' } as AlertEpisode, ep('ep2', 'gh2')];
+    const episodes = [{ [ALERT_ID_FIELD]: 'ep1', group_hash: '' } as AlertEpisode, ep('ep2', 'gh2')];
     expect(uniqueGroupEpisodes(episodes)).toEqual([ep('ep2', 'gh2')]);
   });
 

@@ -6,12 +6,13 @@
  */
 
 import { ALERT_EPISODE_STATUS, type EpisodeAttachmentData } from '@kbn/alerting-v2-schemas';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import { getEpisodeAttachmentLabel } from './get_episode_attachment_label';
 
 const baseData: EpisodeAttachmentData = {
   '@timestamp': '2026-04-10T12:00:00.000Z',
-  'episode.id': '65206401-eb66-43fe-89e9-c712c2f1c0a6',
-  'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+  [ALERT_ID_FIELD]: '65206401-eb66-43fe-89e9-c712c2f1c0a6',
+  [ALERT_STATUS_FIELD]: ALERT_EPISODE_STATUS.ACTIVE,
   'rule.id': 'rule-1',
   group_hash: 'gh-1',
   first_timestamp: '2026-04-10T11:00:00.000Z',

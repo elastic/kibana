@@ -11,6 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import { runEsqlAsyncSearch } from '../../utils/run_esql_async_search';
 import {
   createMockServices,
@@ -44,7 +45,7 @@ const mockRule = {
 const mockEpisodeEventsResponse = {
   columns: [
     { name: '@timestamp', type: 'date' },
-    { name: 'episode.status', type: 'keyword' },
+    { name: ALERT_STATUS_FIELD, type: 'keyword' },
     { name: 'rule.id', type: 'keyword' },
     { name: 'group_hash', type: 'keyword' },
   ],

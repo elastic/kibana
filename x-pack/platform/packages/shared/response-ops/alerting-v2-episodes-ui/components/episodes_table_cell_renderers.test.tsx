@@ -10,6 +10,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import {
   EpisodeStatusCell,
   EpisodeTagsCell,
@@ -29,7 +30,7 @@ const makeRow = (fields: Record<string, unknown>) => ({
 });
 
 const baseCellProps = {
-  columnId: 'episode.status',
+  columnId: ALERT_STATUS_FIELD,
   dataView: {} as never,
   fieldFormats: {} as never,
   closePopover: jest.fn(),
@@ -45,15 +46,15 @@ const baseCellProps = {
 describe('EpisodeStatusCell', () => {
   it('renders the status label plus snooze + ack indicators when the row carries those action fields', () => {
     const row = makeRow({
-      'episode.status': 'active',
-      'episode.id': 'ep1',
+      [ALERT_STATUS_FIELD]: 'active',
+      [ALERT_ID_FIELD]: 'ep1',
       'rule.id': 'r1',
       group_hash: 'gh1',
       last_ack_action: 'ack',
       last_snooze_action: 'snooze',
       snooze_expiry: '3035-01-01T00:00:00Z',
     });
-    renderWithI18n(<EpisodeStatusCell {...baseCellProps} columnId="episode.status" row={row} />);
+    renderWithI18n(<EpisodeStatusCell {...baseCellProps} columnId={ALERT_STATUS_FIELD} row={row} />);
 
     expect(screen.getByText('Active')).toBeInTheDocument();
     expect(screen.getByTestId('alertEpisodeStatusCellSnoozeIndicator')).toBeInTheDocument();
@@ -62,12 +63,12 @@ describe('EpisodeStatusCell', () => {
 
   it('renders only the status label when the row has no action fields', () => {
     const row = makeRow({
-      'episode.status': 'active',
-      'episode.id': 'ep1',
+      [ALERT_STATUS_FIELD]: 'active',
+      [ALERT_ID_FIELD]: 'ep1',
       'rule.id': 'r1',
       group_hash: 'gh1',
     });
-    renderWithI18n(<EpisodeStatusCell {...baseCellProps} columnId="episode.status" row={row} />);
+    renderWithI18n(<EpisodeStatusCell {...baseCellProps} columnId={ALERT_STATUS_FIELD} row={row} />);
 
     expect(screen.getByText('Active')).toBeInTheDocument();
     expect(screen.queryByTestId('alertEpisodeStatusCellSnoozeIndicator')).not.toBeInTheDocument();
@@ -149,7 +150,7 @@ describe('EpisodeRuleTagsCell', () => {
   });
 
   it('renders an empty value when the row has no rule id, without waiting for the rules fetch', () => {
-    const row = makeRow({ 'episode.id': 'ep1' });
+    const row = makeRow({ [ALERT_ID_FIELD]: 'ep1' });
     renderWithI18n(
       <EpisodeRuleTagsCell {...ruleTagsCellProps} row={row} rulesCache={{}} isLoadingRules />
     );

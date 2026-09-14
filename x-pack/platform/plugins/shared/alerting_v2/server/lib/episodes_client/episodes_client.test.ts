@@ -6,6 +6,7 @@
  */
 
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import type { AlertEpisodeEsqlRow, EpisodeGroupHashEsqlRow } from '@kbn/alerting-v2-common-queries';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import { EpisodesClient } from './episodes_client';
@@ -16,8 +17,8 @@ const GROUP_HASH = 'group-1';
 
 const createRow = (overrides: Partial<AlertEpisodeEsqlRow> = {}): AlertEpisodeEsqlRow => ({
   '@timestamp': '2026-08-03T00:00:10.000Z',
-  'episode.id': EPISODE_ID,
-  'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+  [ALERT_ID_FIELD]: EPISODE_ID,
+  [ALERT_STATUS_FIELD]: ALERT_EPISODE_STATUS.ACTIVE,
   'rule.id': 'rule-1',
   group_hash: GROUP_HASH,
   first_timestamp: '2026-08-03T00:00:00.000Z',
@@ -53,8 +54,8 @@ describe('EpisodesClient', () => {
       const { client } = createClient({ episodeRows: [createRow()] });
 
       await expect(client.get(EPISODE_ID)).resolves.toMatchObject({
-        'episode.id': EPISODE_ID,
-        'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+        [ALERT_ID_FIELD]: EPISODE_ID,
+        [ALERT_STATUS_FIELD]: ALERT_EPISODE_STATUS.ACTIVE,
         'rule.id': 'rule-1',
         duration: 10_000,
       });

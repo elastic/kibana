@@ -14,6 +14,7 @@ import {
   EPISODE_ATTACHMENT_TYPE,
   type AlertEpisode,
 } from '@kbn/alerting-v2-schemas';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
@@ -30,8 +31,8 @@ jest.mock('@kbn/alerting-v2-utils', () => ({
 
 const episode: AlertEpisode = {
   '@timestamp': '2026-01-01T00:00:00.000Z',
-  'episode.id': 'ep-1',
-  'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+  [ALERT_ID_FIELD]: 'ep-1',
+  [ALERT_STATUS_FIELD]: ALERT_EPISODE_STATUS.ACTIVE,
   'rule.id': 'rule-1',
   group_hash: 'gh-1',
   first_timestamp: '2026-01-01T00:00:00.000Z',

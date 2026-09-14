@@ -12,6 +12,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { runEsqlAsyncSearch } from '../../utils/run_esql_async_search';
 import { useAlertingEpisodeSourceDataView } from '../../hooks/use_alerting_episode_source_data_view';
@@ -57,7 +58,7 @@ const mockRule = {
 const mockEpisodeEventsResponse = {
   columns: [
     { name: '@timestamp', type: 'date' },
-    { name: 'episode.status', type: 'keyword' },
+    { name: ALERT_STATUS_FIELD, type: 'keyword' },
     { name: 'rule.id', type: 'keyword' },
     { name: 'group_hash', type: 'keyword' },
   ],

@@ -10,9 +10,10 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { createUnsnoozeAction } from './unsnooze';
 import * as bulk from './bulk_create_alert_actions';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
+import { ALERT_ID_FIELD } from '@kbn/alerting-v2-constants';
 const makeEpisode = (overrides: Partial<AlertEpisode> = {}): AlertEpisode => ({
   '@timestamp': '2026-04-23T00:00:00Z',
-  'episode.id': 'e1',
+  [ALERT_ID_FIELD]: 'e1',
   'episode.status': 'active' as any,
   'rule.id': 'r1',
   group_hash: 'g1',
@@ -70,7 +71,7 @@ describe('createUnsnoozeAction', () => {
     await createUnsnoozeAction(deps).execute({
       episodes: [
         makeEpisode({ last_snooze_action: 'snooze' }),
-        makeEpisode({ 'episode.id': 'e2', group_hash: 'g2', last_snooze_action: 'snooze' }),
+        makeEpisode({ [ALERT_ID_FIELD]: 'e2', group_hash: 'g2', last_snooze_action: 'snooze' }),
       ],
       onSuccess,
     });

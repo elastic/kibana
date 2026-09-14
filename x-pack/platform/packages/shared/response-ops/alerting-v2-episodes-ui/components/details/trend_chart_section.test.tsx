@@ -12,6 +12,7 @@ import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { useFetchEpisodeTrendQuery } from '../../hooks/use_fetch_episode_trend_query';
 import { AlertEpisodeTrendChartSection } from './trend_chart_section';
+import { ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 
 jest.mock('../../hooks/use_fetch_episode_query');
 jest.mock('../../hooks/use_fetch_rule');
@@ -53,7 +54,7 @@ const multiMetricRule = {
 const trendRows = [
   {
     '@timestamp': '2026-06-18T00:00:00.000Z',
-    'episode.status': 'active',
+    [ALERT_STATUS_FIELD]: 'active',
     metrics: { count: 150, errors: 20, error_rate: 8 },
   },
 ] as never;

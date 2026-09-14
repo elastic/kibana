@@ -7,6 +7,7 @@
 
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { buildModifiedVisAttributes } from './episodes_color_mapping';
+import { ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 
 const mockColors = {
   danger: '#ff0000',
@@ -85,7 +86,7 @@ describe('buildModifiedVisAttributes', () => {
   });
 
   it('applies per-status colorMapping when breakdown is episode.status', () => {
-    const result = buildModifiedVisAttributes(mockLensAttributes, 'episode.status', {}, mockColors);
+    const result = buildModifiedVisAttributes(mockLensAttributes, ALERT_STATUS_FIELD, {}, mockColors);
     const layer = (result.state?.visualization as any).layers[0];
     expect(layer.colorMapping?.assignments).toHaveLength(4);
     const patterns = layer.colorMapping?.assignments.map(

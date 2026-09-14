@@ -11,6 +11,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
 import { useEpisodeFlapping } from './use_episode_flapping';
+import { ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 
 jest.mock('../utils/run_esql_async_search');
 
@@ -35,7 +36,7 @@ describe('useEpisodeFlapping', () => {
 
   it('returns isFlapping false while events are below the threshold', async () => {
     runEsqlAsyncSearchMock.mockResolvedValue({
-      columns: [{ name: 'episode.status', type: 'keyword' }],
+      columns: [{ name: ALERT_STATUS_FIELD, type: 'keyword' }],
       values: [[ACTIVE], [RECOVERING], [ACTIVE]],
     });
 
@@ -59,7 +60,7 @@ describe('useEpisodeFlapping', () => {
       ...Array.from({ length: 15 }, () => [ACTIVE]),
     ];
     runEsqlAsyncSearchMock.mockResolvedValue({
-      columns: [{ name: 'episode.status', type: 'keyword' }],
+      columns: [{ name: ALERT_STATUS_FIELD, type: 'keyword' }],
       values,
     });
 

@@ -19,6 +19,7 @@ import { EpisodeDataSourceProvider } from '../context/episode_data_source_contex
 import { useSpaceId } from './use_space_id';
 import { HISTOGRAM_EPISODE_LIMIT } from '../constants';
 import type { HistogramEpisodeRow } from '../utils/histogram_utils';
+import { ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 
 jest.mock('../utils/execute_esql_query');
 jest.mock('./use_space_id');
@@ -64,7 +65,7 @@ describe('useEpisodesHistogramQuery', () => {
       {
         first_timestamp: '2024-01-01T00:00:00.000Z',
         last_timestamp: '2024-01-01T00:30:00.000Z',
-        'episode.status': 'inactive',
+        [ALERT_STATUS_FIELD]: 'inactive',
       },
     ]);
 
@@ -92,7 +93,7 @@ describe('useEpisodesHistogramQuery', () => {
       Array.from({ length: HISTOGRAM_EPISODE_LIMIT }, () => ({
         first_timestamp: '2024-01-01T00:00:00.000Z',
         last_timestamp: '2024-01-01T01:00:00.000Z',
-        'episode.status': 'inactive',
+        [ALERT_STATUS_FIELD]: 'inactive',
       }))
     );
 
@@ -159,7 +160,7 @@ describe('useEpisodesHistogramQuery', () => {
       {
         first_timestamp: '2024-01-01T00:00:00.000Z',
         last_timestamp: '2024-01-01T00:30:00.000Z',
-        'episode.status': 'inactive',
+        [ALERT_STATUS_FIELD]: 'inactive',
       },
     ]);
 
@@ -170,7 +171,7 @@ describe('useEpisodesHistogramQuery', () => {
           filterState: {},
           timeRange: mockTimeRange, // covers 00:00–02:00 → two 1h buckets
           bucketInterval: '1h',
-          breakdownField: 'episode.status',
+          breakdownField: ALERT_STATUS_FIELD,
         }),
       { wrapper: createWrapper() }
     );
@@ -179,7 +180,7 @@ describe('useEpisodesHistogramQuery', () => {
 
     const rows = result.current.table?.rows ?? [];
     // Both buckets must be present for the known category 'inactive'
-    const inactiveRows = rows.filter((r) => r['episode.status'] === 'inactive');
+    const inactiveRows = rows.filter((r) => r[ALERT_STATUS_FIELD] === 'inactive');
     expect(inactiveRows.length).toBe(2);
     // The second bucket must be zero-count
     const secondBucket = inactiveRows.find(
@@ -215,12 +216,12 @@ describe('useEpisodesHistogramQuery', () => {
     const v2Row: HistogramEpisodeRow = {
       first_timestamp: '2024-01-01T00:00:00.000Z',
       last_timestamp: '2024-01-01T00:30:00.000Z',
-      'episode.status': 'inactive',
+      [ALERT_STATUS_FIELD]: 'inactive',
     };
     const sourceRow: HistogramEpisodeRow = {
       first_timestamp: '2024-01-01T01:00:00.000Z',
       last_timestamp: '2024-01-01T01:30:00.000Z',
-      'episode.status': 'active',
+      [ALERT_STATUS_FIELD]: 'active',
     };
     mockExecuteEsqlQuery.mockResolvedValue([v2Row]);
 
@@ -251,12 +252,12 @@ describe('useEpisodesHistogramQuery', () => {
     const v2Rows = Array.from({ length: half }, () => ({
       first_timestamp: '2024-01-01T00:00:00.000Z',
       last_timestamp: '2024-01-01T01:00:00.000Z',
-      'episode.status': 'inactive' as const,
+      [ALERT_STATUS_FIELD]: 'inactive' as const,
     }));
     const sourceRows: HistogramEpisodeRow[] = Array.from({ length: half + 1 }, () => ({
       first_timestamp: '2024-01-01T00:00:00.000Z',
       last_timestamp: '2024-01-01T01:00:00.000Z',
-      'episode.status': 'active',
+      [ALERT_STATUS_FIELD]: 'active',
     }));
 
     mockExecuteEsqlQuery.mockResolvedValue(v2Rows);
@@ -309,7 +310,7 @@ describe('useEpisodesHistogramQuery', () => {
       {
         first_timestamp: '2024-01-01T00:00:00.000Z',
         last_timestamp: '2024-01-01T00:30:00.000Z',
-        'episode.status': 'inactive',
+        [ALERT_STATUS_FIELD]: 'inactive',
       },
     ]);
 

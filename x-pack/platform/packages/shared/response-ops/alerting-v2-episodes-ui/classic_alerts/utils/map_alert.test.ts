@@ -7,6 +7,7 @@
 
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import { mapClassicAlertToEpisode, mapClassicStatusToEpisodeStatus } from './map_alert';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 
 describe('mapClassicStatusToEpisodeStatus', () => {
   it('maps "active" to the active episode status', () => {
@@ -45,8 +46,8 @@ describe('mapClassicAlertToEpisode', () => {
 
     expect(episode).toMatchObject({
       '@timestamp': '2024-01-01T01:00:00.000Z',
-      'episode.id': 'alert-uuid-1',
-      'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+      [ALERT_ID_FIELD]: 'alert-uuid-1',
+      [ALERT_STATUS_FIELD]: ALERT_EPISODE_STATUS.ACTIVE,
       'rule.id': 'rule-uuid-1',
       'rule.name': 'My Rule',
       group_hash: 'alert-uuid-1',
@@ -77,8 +78,8 @@ describe('mapClassicAlertToEpisode', () => {
 
     const episode = mapClassicAlertToEpisode(minimalSource);
 
-    expect(episode['episode.id']).toBe('uuid-minimal');
-    expect(episode['episode.status']).toBe(ALERT_EPISODE_STATUS.INACTIVE);
+    expect(episode[ALERT_ID_FIELD]).toBe('uuid-minimal');
+    expect(episode[ALERT_STATUS_FIELD]).toBe(ALERT_EPISODE_STATUS.INACTIVE);
     expect(episode['rule.name']).toBeUndefined();
     expect(episode.severity).toBeNull();
     expect(episode.last_tags).toEqual([]);
@@ -111,7 +112,7 @@ describe('mapClassicAlertToEpisode', () => {
     };
 
     const episode = mapClassicAlertToEpisode(source);
-    expect(episode['episode.id']).toBe('uuid-1');
+    expect(episode[ALERT_ID_FIELD]).toBe('uuid-1');
     expect(episode.duration).toBe(5_000);
   });
 

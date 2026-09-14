@@ -12,6 +12,7 @@ import { getEsqlDataView } from '@kbn/discover-utils';
 import { useAlertingEpisodesDataView } from './use_alerting_episodes_data_view';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createMockSpaces } from './test_utils';
+import { ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 
 jest.mock('@kbn/discover-utils');
 
@@ -32,7 +33,7 @@ jest.mock('@kbn/alerting-v2-common-queries', () => ({
 const mockDataView = {
   fields: [
     { name: 'rule.id' },
-    { name: 'episode.status' },
+    { name: ALERT_STATUS_FIELD },
     { name: '@timestamp' },
     { name: 'other.field' },
   ],
@@ -74,7 +75,7 @@ describe('useAlertingEpisodesDataView', () => {
     });
 
     expect(mockDataView.setFieldCustomLabel).toHaveBeenCalledWith('rule.id', 'Rule');
-    expect(mockDataView.setFieldCustomLabel).toHaveBeenCalledWith('episode.status', 'Status');
+    expect(mockDataView.setFieldCustomLabel).toHaveBeenCalledWith(ALERT_STATUS_FIELD, 'Status');
     expect(mockDataView.setFieldCustomLabel).toHaveBeenCalledTimes(2);
   });
 

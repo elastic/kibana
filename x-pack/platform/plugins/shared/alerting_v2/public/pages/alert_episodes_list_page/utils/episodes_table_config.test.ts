@@ -7,6 +7,7 @@
 
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import { createMemoryHistory } from 'history';
 import {
   DEFAULT_EPISODES_TABLE_CONFIG,
@@ -72,9 +73,9 @@ describe('episodes_table_config', () => {
 
     it('URL fully overrides LS when it specifies the same field', () => {
       const fromStorage = { visibleColumns: ['rule.id', 'severity'] };
-      const fromUrl = { visibleColumns: ['episode.status', 'tags'] };
+      const fromUrl = { visibleColumns: [ALERT_STATUS_FIELD, 'tags'] };
       const result = mergeEpisodesTableConfig(fromStorage, fromUrl);
-      expect(result.visibleColumns).toEqual(['episode.status', 'tags']);
+      expect(result.visibleColumns).toEqual([ALERT_STATUS_FIELD, 'tags']);
     });
 
     it('ignores null/undefined inputs gracefully', () => {
@@ -91,7 +92,7 @@ describe('episodes_table_config', () => {
 
     it('returns decoded config when storage has a valid value', () => {
       const stored = {
-        visibleColumns: ['episode.status', 'severity'],
+        visibleColumns: [ALERT_STATUS_FIELD, 'severity'],
         sort: { sortField: 'duration', sortDirection: 'desc' },
         rowHeight: -1,
         columnSettings: { duration: { width: 200 } },
@@ -175,10 +176,10 @@ describe('episodes_table_config', () => {
 
     it('reads visibleColumns from URL', async () => {
       const urlStorage = await createKbnTestUrlStorage({
-        visibleColumns: ['episode.status', 'tags'],
+        visibleColumns: [ALERT_STATUS_FIELD, 'tags'],
       });
       const result = readEpisodesTableConfigFromUrl(urlStorage);
-      expect(result?.visibleColumns).toEqual(['episode.status', 'tags']);
+      expect(result?.visibleColumns).toEqual([ALERT_STATUS_FIELD, 'tags']);
     });
 
     it('reads sort from URL', async () => {
@@ -260,7 +261,7 @@ describe('episodes_table_config', () => {
       const urlStorage = await createKbnTestUrlStorage();
       const config = {
         ...DEFAULT_EPISODES_TABLE_CONFIG,
-        visibleColumns: ['episode.status', 'tags'],
+        visibleColumns: [ALERT_STATUS_FIELD, 'tags'],
         sort: { sortField: 'duration', sortDirection: 'desc' as const },
         rowHeight: -1,
         columnSettings: { duration: { width: 250 } },
@@ -268,7 +269,7 @@ describe('episodes_table_config', () => {
       await writeEpisodesTableConfigToUrl(urlStorage, config);
       const result = readEpisodesTableConfigFromUrl(urlStorage);
       expect(result).toEqual({
-        visibleColumns: ['episode.status', 'tags'],
+        visibleColumns: [ALERT_STATUS_FIELD, 'tags'],
         sort: { sortField: 'duration', sortDirection: 'desc' },
         rowHeight: -1,
         columnSettings: { duration: { width: 250 } },

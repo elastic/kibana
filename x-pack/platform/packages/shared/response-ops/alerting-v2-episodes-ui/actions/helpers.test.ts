@@ -6,8 +6,9 @@
  */
 
 import { uniqueByGroup, successOrPartialToast } from './helpers';
+import { ALERT_ID_FIELD } from '@kbn/alerting-v2-constants';
 
-const ep = (group_hash: string, id = group_hash) => ({ group_hash, 'episode.id': id } as any);
+const ep = (group_hash: string, id = group_hash) => ({ group_hash, [ALERT_ID_FIELD]: id } as any);
 
 describe('uniqueByGroup', () => {
   it('dedupes by group_hash', () => {

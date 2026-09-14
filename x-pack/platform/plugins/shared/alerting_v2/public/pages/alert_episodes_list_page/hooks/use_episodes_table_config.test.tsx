@@ -15,6 +15,7 @@ import {
   EPISODES_TABLE_APP_STATE_KEY,
   EPISODES_TABLE_CONFIG_STORAGE_KEY,
 } from '../utils/episodes_table_config';
+import { ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import { useEpisodesTableConfig } from './use_episodes_table_config';
 
 const createMockStorage = (initialValue: unknown = null) => ({
@@ -144,13 +145,13 @@ describe('useEpisodesTableConfig', () => {
     const { result } = renderHook(() => useEpisodesTableConfig(mockStorage as any), { wrapper });
 
     await act(async () => {
-      result.current.setVisibleColumns(['episode.status', 'tags']);
+      result.current.setVisibleColumns([ALERT_STATUS_FIELD, 'tags']);
     });
 
-    expect(result.current.visibleColumns).toEqual(['episode.status', 'tags']);
+    expect(result.current.visibleColumns).toEqual([ALERT_STATUS_FIELD, 'tags']);
     expect(mockStorage.set).toHaveBeenCalledWith(
       EPISODES_TABLE_CONFIG_STORAGE_KEY,
-      expect.objectContaining({ visibleColumns: ['episode.status', 'tags'] })
+      expect.objectContaining({ visibleColumns: [ALERT_STATUS_FIELD, 'tags'] })
     );
     expect(history.location.search).toContain('_a=');
   });

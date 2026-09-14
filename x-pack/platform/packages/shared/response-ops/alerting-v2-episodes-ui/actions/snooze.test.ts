@@ -13,9 +13,10 @@ import { createSnoozeAction } from './snooze';
 import * as modal from '../components/snooze_expiry_modal';
 import * as bulk from './bulk_create_alert_actions';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
+import { ALERT_ID_FIELD } from '@kbn/alerting-v2-constants';
 const makeEpisode = (overrides: Partial<AlertEpisode> = {}): AlertEpisode => ({
   '@timestamp': '2026-04-23T00:00:00Z',
-  'episode.id': 'e1',
+  [ALERT_ID_FIELD]: 'e1',
   'episode.status': 'active' as any,
   'rule.id': 'r1',
   group_hash: 'g1',
@@ -74,7 +75,7 @@ describe('createSnoozeAction', () => {
     jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ affected_count: 1, errors: [] });
     const onSuccess = jest.fn();
     await createSnoozeAction(deps).execute({
-      episodes: [makeEpisode(), makeEpisode({ 'episode.id': 'e2' })],
+      episodes: [makeEpisode(), makeEpisode({ [ALERT_ID_FIELD]: 'e2' })],
       onSuccess,
     });
     expect(bulk.bulkCreateAlertActions).toHaveBeenCalledWith(deps.http, [

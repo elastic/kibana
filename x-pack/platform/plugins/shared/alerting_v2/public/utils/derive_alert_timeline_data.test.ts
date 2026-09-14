@@ -6,6 +6,7 @@
  */
 
 import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import {
   deriveAlertTimelineData,
   type AlertTimelineSummary,
@@ -41,8 +42,8 @@ const phase = ({
   startMs,
   endMs,
 }: PhaseSpec): AlertTimelinePhaseRow => ({
-  'episode.id': episodeId,
-  'episode.status': status,
+  [ALERT_ID_FIELD]: episodeId,
+  [ALERT_STATUS_FIELD]: status,
   group_hash: groupHash,
   seg_start: new Date(startMs).toISOString(),
   seg_end: new Date(endMs ?? startMs).toISOString(),

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM, ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import { PAGE_SIZE_ESQL_VARIABLE } from './constants';
 import { buildEpisodesBaseQuery, buildEpisodesQuery } from './episodes_query';
 
@@ -99,7 +99,7 @@ describe('buildEpisodesQuery', () => {
 
   it('should correctly sanitize and apply custom sort', () => {
     const query = buildEpisodesQuery(SPACE_ID, {
-      sortField: 'episode.id',
+      sortField: ALERT_ID_FIELD,
       sortDirection: 'asc',
     });
     const queryString = query.print('basic');
@@ -120,7 +120,7 @@ describe('buildEpisodesQuery', () => {
   });
 
   it('should handle all allowlisted sort fields', () => {
-    const allowlistedFields = ['@timestamp', 'episode.id', 'episode.status', 'rule.id', 'duration'];
+    const allowlistedFields = ['@timestamp', ALERT_ID_FIELD, ALERT_STATUS_FIELD, 'rule.id', 'duration'];
 
     allowlistedFields.forEach((field) => {
       const query = buildEpisodesQuery(SPACE_ID, {

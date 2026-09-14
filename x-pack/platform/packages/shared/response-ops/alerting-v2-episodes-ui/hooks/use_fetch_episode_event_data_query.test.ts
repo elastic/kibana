@@ -12,6 +12,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
 import { useFetchEpisodeEventDataQuery } from './use_fetch_episode_event_data_query';
+import { ALERT_ID_FIELD } from '@kbn/alerting-v2-constants';
 
 jest.mock('../utils/run_esql_async_search');
 
@@ -45,7 +46,7 @@ describe('useFetchEpisodeEventDataQuery', () => {
   });
 
   const COLUMNS = [
-    { name: 'episode.id', type: 'keyword' as const },
+    { name: ALERT_ID_FIELD, type: 'keyword' as const },
     { name: 'last_data', type: 'keyword' as const },
     { name: 'last_data_timestamp', type: 'date' as const },
     { name: 'last_event_timestamp', type: 'date' as const },

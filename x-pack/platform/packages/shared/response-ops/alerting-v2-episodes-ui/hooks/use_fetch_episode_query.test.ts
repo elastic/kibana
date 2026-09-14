@@ -13,6 +13,7 @@ import { buildEpisodeQuery, buildEpisodeGroupHashQuery } from '../queries/episod
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
 import { useFetchEpisodeQuery } from './use_fetch_episode_query';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 
 jest.mock('../utils/run_esql_async_search');
 
@@ -30,8 +31,8 @@ const mockGroupHashResponse = {
 
 const mockEpisodeResponse = (episodeId: string) => ({
   columns: [
-    { name: 'episode.id', type: 'keyword' },
-    { name: 'episode.status', type: 'keyword' },
+    { name: ALERT_ID_FIELD, type: 'keyword' },
+    { name: ALERT_STATUS_FIELD, type: 'keyword' },
     { name: 'rule.id', type: 'keyword' },
     { name: 'group_hash', type: 'keyword' },
     { name: 'last_tags', type: 'keyword' },
@@ -93,8 +94,8 @@ describe('useFetchEpisodeQuery', () => {
     );
 
     expect(result.current.data).toMatchObject({
-      'episode.id': episodeId,
-      'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+      [ALERT_ID_FIELD]: episodeId,
+      [ALERT_STATUS_FIELD]: ALERT_EPISODE_STATUS.ACTIVE,
       'rule.id': 'rule-1',
       group_hash: GROUP_HASH,
       last_tags: ['tag-a'],
@@ -136,7 +137,7 @@ describe('useFetchEpisodeQuery', () => {
       })
     );
 
-    expect(result.current.data).toMatchObject({ 'episode.id': episodeId });
+    expect(result.current.data).toMatchObject({ [ALERT_ID_FIELD]: episodeId });
   });
 
   it('returns undefined data without running the episode query when the group hash lookup finds nothing', async () => {
@@ -159,7 +160,7 @@ describe('useFetchEpisodeQuery', () => {
   it('normalizes last_tags from string to array', async () => {
     runEsqlAsyncSearchMock.mockResolvedValue({
       columns: [
-        { name: 'episode.id', type: 'keyword' },
+        { name: ALERT_ID_FIELD, type: 'keyword' },
         { name: 'last_tags', type: 'keyword' },
       ],
       values: [['ep-1', 'single-tag']],

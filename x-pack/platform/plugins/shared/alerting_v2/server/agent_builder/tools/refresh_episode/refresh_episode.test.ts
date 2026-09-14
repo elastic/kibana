@@ -15,6 +15,7 @@ import {
   type AlertEpisode,
   type EpisodeAttachmentData,
 } from '@kbn/alerting-v2-schemas';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import type { EpisodesClient } from '../../../lib/episodes_client';
 import type { RulesClient } from '../../../lib/rules_client';
 import type { PrivilegeChecker } from '../../../lib/services/privilege_checker/privilege_checker';
@@ -22,8 +23,8 @@ import { refreshEpisodeTool, refreshEpisodeToolId } from './refresh_episode';
 
 const baseEpisodeData: EpisodeAttachmentData = {
   '@timestamp': '2026-04-10T12:00:00.000Z',
-  'episode.id': 'ep-1',
-  'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+  [ALERT_ID_FIELD]: 'ep-1',
+  [ALERT_STATUS_FIELD]: ALERT_EPISODE_STATUS.ACTIVE,
   'rule.id': 'rule-1',
   group_hash: 'gh-1',
   first_timestamp: '2026-04-10T11:00:00.000Z',
@@ -85,7 +86,7 @@ describe('refreshEpisodeTool', () => {
     it('returns the latest episode snapshot', async () => {
       const refreshed: AlertEpisode = {
         ...baseEpisodeData,
-        'episode.status': ALERT_EPISODE_STATUS.INACTIVE,
+        [ALERT_STATUS_FIELD]: ALERT_EPISODE_STATUS.INACTIVE,
         last_timestamp: '2026-04-20T12:00:00.000Z',
         severity: 'low',
       };
@@ -99,8 +100,8 @@ describe('refreshEpisodeTool', () => {
           {
             type: ToolResultType.other,
             data: expect.objectContaining({
-              'episode.id': 'ep-1',
-              'episode.status': ALERT_EPISODE_STATUS.INACTIVE,
+              [ALERT_ID_FIELD]: 'ep-1',
+              [ALERT_STATUS_FIELD]: ALERT_EPISODE_STATUS.INACTIVE,
               last_timestamp: '2026-04-20T12:00:00.000Z',
               severity: 'low',
             }),
@@ -203,7 +204,7 @@ describe('refreshEpisodeTool', () => {
           {
             type: ToolResultType.other,
             data: expect.objectContaining({
-              'episode.id': 'ep-1',
+              [ALERT_ID_FIELD]: 'ep-1',
               last_ack_action: undefined,
               last_assignee_uid: undefined,
               last_snooze_action: undefined,

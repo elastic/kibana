@@ -15,14 +15,15 @@ import {
   EPISODE_ATTACHMENT_TYPE,
   type AlertEpisode,
 } from '@kbn/alerting-v2-schemas';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
 import { registerEpisodeAutoAttach } from './episode_auto_attach';
 import type { FocusedEpisode } from '../../types';
 
 const createEpisode = (overrides?: Partial<AlertEpisode>): AlertEpisode => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
-  'episode.id': 'ep-1',
-  'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+  [ALERT_ID_FIELD]: 'ep-1',
+  [ALERT_STATUS_FIELD]: ALERT_EPISODE_STATUS.ACTIVE,
   'rule.id': 'rule-1',
   group_hash: 'gh-1',
   first_timestamp: '2026-01-01T00:00:00.000Z',
@@ -110,7 +111,7 @@ describe('registerEpisodeAutoAttach', () => {
       type: EPISODE_ATTACHMENT_TYPE,
       origin: 'ep-1',
       data: expect.objectContaining({
-        'episode.id': 'ep-1',
+        [ALERT_ID_FIELD]: 'ep-1',
         last_assignee_uid: undefined,
         episode_data: undefined,
         severity: undefined,
@@ -143,7 +144,7 @@ describe('registerEpisodeAutoAttach', () => {
   it('does not restage after the conversation is persisted', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
-    focusedEpisode$.next({ episode: createEpisode({ 'episode.id': 'ep-1' }) });
+    focusedEpisode$.next({ episode: createEpisode({ [ALERT_ID_FIELD]: 'ep-1' }) });
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
@@ -161,7 +162,7 @@ describe('registerEpisodeAutoAttach', () => {
 
     expect(addAttachment).not.toHaveBeenCalled();
 
-    focusedEpisode$.next({ episode: createEpisode({ 'episode.id': 'ep-1' }) });
+    focusedEpisode$.next({ episode: createEpisode({ [ALERT_ID_FIELD]: 'ep-1' }) });
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledWith(expect.objectContaining({ origin: 'ep-1' }));
@@ -170,7 +171,7 @@ describe('registerEpisodeAutoAttach', () => {
   it('attaches a different focused episode after the conversation has started', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
-    focusedEpisode$.next({ episode: createEpisode({ 'episode.id': 'ep-1' }) });
+    focusedEpisode$.next({ episode: createEpisode({ [ALERT_ID_FIELD]: 'ep-1' }) });
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
@@ -183,7 +184,7 @@ describe('registerEpisodeAutoAttach', () => {
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
 
-    focusedEpisode$.next({ episode: createEpisode({ 'episode.id': 'ep-2' }) });
+    focusedEpisode$.next({ episode: createEpisode({ [ALERT_ID_FIELD]: 'ep-2' }) });
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(2);
@@ -196,9 +197,9 @@ describe('registerEpisodeAutoAttach', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
 
-    focusedEpisode$.next({ episode: createEpisode({ 'episode.id': 'ep-1' }) });
+    focusedEpisode$.next({ episode: createEpisode({ [ALERT_ID_FIELD]: 'ep-1' }) });
     jest.runOnlyPendingTimers();
-    focusedEpisode$.next({ episode: createEpisode({ 'episode.id': 'ep-2' }) });
+    focusedEpisode$.next({ episode: createEpisode({ [ALERT_ID_FIELD]: 'ep-2' }) });
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(2);

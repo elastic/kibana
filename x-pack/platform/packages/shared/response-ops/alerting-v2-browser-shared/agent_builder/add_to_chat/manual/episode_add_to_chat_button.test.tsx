@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { AlertEpisode, RuleResponse } from '@kbn/alerting-v2-schemas';
+import { ALERT_ID_FIELD } from '@kbn/alerting-v2-constants';
 import { EpisodeAddToChatButton } from './episode_add_to_chat_button';
 import { AddToChatButton } from './add_to_chat_button';
 import type { ManualAddToChatServices } from './use_manual_add_to_chat';
@@ -19,7 +20,7 @@ jest.mock('./add_to_chat_button', () => ({
 const mockAddToChatButton = jest.mocked(AddToChatButton);
 
 const mockEpisode = {
-  'episode.id': 'ep-1',
+  [ALERT_ID_FIELD]: 'ep-1',
   'rule.id': 'rule-1',
   episode_data: JSON.stringify({ rule_name: 'Snapshot Rule' }),
 } as AlertEpisode;

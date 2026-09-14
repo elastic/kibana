@@ -13,6 +13,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
 import { useFetchEpisodeEventsQuery } from './use_fetch_episode_events_query';
+import { ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 
 jest.mock('../utils/run_esql_async_search');
 
@@ -49,7 +50,7 @@ describe('useFetchEpisodeEventsQuery', () => {
 
   it('loads object rows from async ES|QL search', async () => {
     runEsqlAsyncSearchMock.mockResolvedValue({
-      columns: [{ name: 'episode.status', type: 'keyword' }],
+      columns: [{ name: ALERT_STATUS_FIELD, type: 'keyword' }],
       values: [[ALERT_EPISODE_STATUS.ACTIVE]],
     });
 
@@ -75,6 +76,6 @@ describe('useFetchEpisodeEventsQuery', () => {
       })
     );
 
-    expect(result.current.data).toEqual([{ 'episode.status': ALERT_EPISODE_STATUS.ACTIVE }]);
+    expect(result.current.data).toEqual([{ [ALERT_STATUS_FIELD]: ALERT_EPISODE_STATUS.ACTIVE }]);
   });
 });

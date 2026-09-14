@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import { RelatedAlertEpisode } from './related_alert_episode';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 
 describe('RelatedAlertEpisode', () => {
   const ruleName = 'CPU spike';
@@ -17,8 +18,8 @@ describe('RelatedAlertEpisode', () => {
 
   const makeEpisode = (overrides: Partial<AlertEpisode> = {}): AlertEpisode => ({
     '@timestamp': '2026-04-06T13:30:00.000Z',
-    'episode.id': 'ep-0',
-    'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+    [ALERT_ID_FIELD]: 'ep-0',
+    [ALERT_STATUS_FIELD]: ALERT_EPISODE_STATUS.ACTIVE,
     'rule.id': 'rule-1',
     group_hash: 'hash-1',
     first_timestamp: '2026-04-06T13:30:00.000Z',
@@ -31,7 +32,7 @@ describe('RelatedAlertEpisode', () => {
   it('renders rule name, status badges, and grouping value tags', () => {
     render(
       <RelatedAlertEpisode
-        episode={makeEpisode({ 'episode.id': 'ep-1' })}
+        episode={makeEpisode({ [ALERT_ID_FIELD]: 'ep-1' })}
         ruleName={ruleName}
         groupingFields={groupingFields}
         href="/app/management/alertingV2/episodes/ep-1"
@@ -49,7 +50,7 @@ describe('RelatedAlertEpisode', () => {
   it('renders the severity badge after the status badge', () => {
     render(
       <RelatedAlertEpisode
-        episode={makeEpisode({ 'episode.id': 'ep-3', severity: 'high' })}
+        episode={makeEpisode({ [ALERT_ID_FIELD]: 'ep-3', severity: 'high' })}
         ruleName={ruleName}
         groupingFields={groupingFields}
         href="/app/management/alertingV2/episodes/ep-3"
@@ -60,8 +61,8 @@ describe('RelatedAlertEpisode', () => {
   });
 
   it('omits status badges when episode status is missing', () => {
-    const { 'episode.status': _status, ...episodeWithoutStatus } = makeEpisode({
-      'episode.id': 'ep-2',
+    const { [ALERT_STATUS_FIELD]: _status, ...episodeWithoutStatus } = makeEpisode({
+      [ALERT_ID_FIELD]: 'ep-2',
     });
 
     render(

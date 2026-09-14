@@ -11,6 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { ElementClickListener } from '@elastic/charts';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { EpisodeEventRow } from '@kbn/alerting-v2-common-queries';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import { EpisodeSeverity } from '../severity/severity_utils';
 import { AlertEpisodeSeverityHeatmap } from './severity_heatmap';
 
@@ -54,8 +55,8 @@ jest.mock('@elastic/charts', () => ({
 
 const createEventRow = (overrides: Partial<EpisodeEventRow> = {}): EpisodeEventRow => ({
   '@timestamp': '2024-01-01T00:00:00.000Z',
-  'episode.id': 'ep-1',
-  'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+  [ALERT_ID_FIELD]: 'ep-1',
+  [ALERT_STATUS_FIELD]: ALERT_EPISODE_STATUS.ACTIVE,
   'rule.id': 'rule-1',
   group_hash: 'hash',
   severity: EpisodeSeverity.High,

@@ -12,6 +12,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { EpisodeEventRow } from '@kbn/alerting-v2-common-queries';
 import type { EpisodeActionHistoryEntry } from '@kbn/alerting-v2-common-queries';
+import { ALERT_ID_FIELD, ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 import { useFetchEpisodeEventsQuery } from '../../hooks/use_fetch_episode_events_query';
 import { useFetchEpisodeActionsHistoryQuery } from '../../hooks/use_fetch_episode_actions_history_query';
 import { useBulkGetProfiles } from '../../hooks/use_bulk_get_profiles';
@@ -33,8 +34,8 @@ const mockServices = {
 
 const makeRow = (status: string, ts: string, severity: string | null = null): EpisodeEventRow => ({
   '@timestamp': ts,
-  'episode.id': 'ep-1',
-  'episode.status': status as EpisodeEventRow['episode.status'],
+  [ALERT_ID_FIELD]: 'ep-1',
+  [ALERT_STATUS_FIELD]: status as EpisodeEventRow['episode.status'],
   'rule.id': 'rule-1',
   group_hash: 'hash-1',
   severity,

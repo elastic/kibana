@@ -12,6 +12,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { useFetchEpisodeTrendQuery } from './use_fetch_episode_trend_query';
+import { ALERT_STATUS_FIELD } from '@kbn/alerting-v2-constants';
 
 jest.mock('../utils/run_esql_async_search');
 jest.mock('./use_space_id', () => ({ useSpaceId: () => 'default' }));
@@ -49,7 +50,7 @@ describe('useFetchEpisodeTrendQuery', () => {
     mockRunEsqlAsyncSearch.mockResolvedValue({
       columns: [
         { name: '@timestamp', type: 'date' },
-        { name: 'episode.status', type: 'keyword' },
+        { name: ALERT_STATUS_FIELD, type: 'keyword' },
         { name: 'count', type: 'keyword' },
       ],
       values: [['2026-06-18T00:00:00.000Z', 'active', '10']],
@@ -69,7 +70,7 @@ describe('useFetchEpisodeTrendQuery', () => {
     expect(result.current.data).toEqual([
       {
         '@timestamp': '2026-06-18T00:00:00.000Z',
-        'episode.status': 'active',
+        [ALERT_STATUS_FIELD]: 'active',
         metrics: { count: 10 },
       },
     ]);

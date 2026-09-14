@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { ALERT_EVENTS_DATA_STREAM, ALERT_ID_FIELD } from '@kbn/alerting-v2-constants';
 import { buildEpisodeEventDataQuery } from './episode_event_data_query';
 
 const SPACE_ID = 'default';
@@ -20,7 +20,7 @@ describe('buildEpisodeEventDataQuery', () => {
   it('filters by episode id', () => {
     const episodeId = 'episode-abc';
     const queryString = buildEpisodeEventDataQuery(SPACE_ID, episodeId).print('basic');
-    expect(queryString).toContain('episode.id');
+    expect(queryString).toContain(ALERT_ID_FIELD);
     expect(queryString).toContain(episodeId);
   });
 
