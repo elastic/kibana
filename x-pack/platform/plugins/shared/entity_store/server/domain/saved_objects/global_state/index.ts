@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  SavedObjectsClientContract,
-  SavedObjectsFindResponse,
-} from '@kbn/core-saved-objects-api-server';
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import {
@@ -155,15 +152,14 @@ export class EntityStoreGlobalStateClient {
   }
 
   async delete(): Promise<void> {
-    const response = await this.findSO();
-    if (response.total === 0) {
+    const so = await this.getSO();
+    if (so === undefined) {
       return;
     }
 
     try {
-      const id = response.saved_objects[0].id;
-      this.logger.debug(`Deleting global state with id ${id}`);
-      await this.soClient.delete(EntityStoreGlobalStateTypeName, id);
+      this.logger.debug(`Deleting global state with id ${so.id}`);
+      await this.soClient.delete(EntityStoreGlobalStateTypeName, so.id);
     } catch (error) {
       if (Boom.isBoom(error, 404)) {
         return;
@@ -179,30 +175,22 @@ export class EntityStoreGlobalStateClient {
   private async findRaw(): Promise<
     { attributes: EntityStoreGlobalStateOverrides; version?: string } | undefined
   > {
-    const response = await this.findSO();
-    if (response.total === 0) {
+    const so = await this.getSO();
+    if (so === undefined) {
       return undefined;
     }
-
-    const { attributes, version } = response.saved_objects[0];
-    return { attributes, version };
+    return { attributes: so.attributes, version: so.version };
   }
 
-  private async findSO(): Promise<SavedObjectsFindResponse<EntityStoreGlobalStateOverrides>> {
+  private async getSO(): Promise<SavedObject<EntityStoreGlobalStateOverrides> | undefined> {
     try {
-      const savedObject = await this.soClient.get<EntityStoreGlobalStateOverrides>(
+      return await this.soClient.get<EntityStoreGlobalStateOverrides>(
         EntityStoreGlobalStateTypeName,
         this.getSavedObjectId()
       );
-      return {
-        total: 1,
-        saved_objects: [savedObject],
-        per_page: 1,
-        page: 1,
-      };
     } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-        return { total: 0, saved_objects: [], per_page: 1, page: 1 };
+        return undefined;
       }
       throw error;
     }
