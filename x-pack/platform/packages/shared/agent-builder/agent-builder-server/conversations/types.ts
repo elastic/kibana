@@ -7,11 +7,24 @@
 
 import type {
   ConversationAccessControlInput,
+  ConversationEvent,
   ConversationListOptions,
   ConversationWithPermissions,
   ConversationListResult,
   MetadataFieldValue,
 } from '@kbn/agent-builder-common';
+
+/** Input event for adding to a conversation. Server assigns id, created_at, and actor. */
+export interface ConversationAddEventInput {
+  type: string;
+  data: Record<string, unknown>;
+}
+
+/** Request for adding events to a conversation. */
+export interface ConversationAddEventsRequest {
+  conversationId: string;
+  events: ConversationAddEventInput[];
+}
 
 /**
  * Input for pre-creating an empty conversation without starting an execution.
@@ -51,4 +64,9 @@ export interface ConversationPublicClient {
    * Create a new empty conversation (without triggering an execution).
    */
   create(request: ConversationCreatePublicRequest): Promise<ConversationWithPermissions>;
+  /**
+   * Append custom events to a conversation timeline. Requires converse access.
+   * Only custom (non-internal) event types are accepted.
+   */
+  addEvents(request: ConversationAddEventsRequest): Promise<ConversationEvent[]>;
 }

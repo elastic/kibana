@@ -28,6 +28,8 @@ export const createConversationPublicClient = ({
   return {
     get: client.get.bind(client),
     list: client.list.bind(client),
+    addEvents: ({ conversationId, events }) =>
+      client.addEvents({ id: conversationId, events }),
     create: async ({ agentId, id, title, accessControl, templateId, metadata }) => {
       const effectiveAgentId = agentId ?? agentBuilderDefaultAgentId;
 
