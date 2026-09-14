@@ -91,6 +91,22 @@ describe('useNavigation', () => {
         path: '/create',
       });
     });
+
+    it('it calls getCreateMaintenanceWindowUrl with correct arguments', () => {
+      const { result } = renderHook(() => useCreateMaintenanceWindowNavigation(), {
+        wrapper: appMockRenderer.AppWrapper,
+      });
+
+      act(() => {
+        result.current.getCreateMaintenanceWindowUrl(false);
+      });
+
+      expect(mockGetAppUrl).toHaveBeenCalledWith(MANAGEMENT_APP_ID, {
+        absolute: false,
+        path: '/create',
+        deepLinkId: MAINTENANCE_WINDOWS_APP_ID,
+      });
+    });
   });
 
   describe('useEditMaintenanceWindowNavigation', () => {

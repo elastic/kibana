@@ -59,6 +59,7 @@ export function DateRangePickerControl() {
     compressed,
     collapsed,
     displayText,
+    isRounded,
     displayFullFormattedText,
     displayShortDuration,
     inputRef,
@@ -82,6 +83,9 @@ export function DateRangePickerControl() {
   const { euiTheme } = useEuiTheme();
   const hintText = useInputHintText(text);
   const hintTextPrefix = inputControlTexts.hintTextPrefix;
+  // Kept out of `displayText` so it neither becomes a clickable part nor a saved preset label
+  const roundedSuffix = isRounded ? inputControlTexts.roundedSuffix : null;
+  const accessibleDisplayText = roundedSuffix ? `${displayText} ${roundedSuffix}` : displayText;
 
   const controlRef = useRef<HTMLDivElement>(null);
   const wasEditingRef = useRef(false);
@@ -218,6 +222,11 @@ export function DateRangePickerControl() {
   const tooltipStyles = css`
     max-inline-size: min(58ch, 90vw);
   `;
+  const roundedSuffixStyles = css`
+    color: ${euiTheme.colors.textSubdued};
+    white-space: nowrap;
+    margin-inline-end: auto;
+  `;
   const inputStyles = css`
     &::selection {
       color: ${euiTheme.colors.textPrimary};
@@ -306,14 +315,14 @@ export function DateRangePickerControl() {
                   flex-grow: 1;
                   align-items: center;
                   justify-content: space-between;
-                  gap: ${euiTheme.size.s};
+                  gap: ${euiTheme.size.xs};
                   max-inline-size: 100%;
                 }
               `}
               data-test-subj="dateRangePickerControlButton"
               data-date-range={`${timeRange.start} to ${timeRange.end}`}
               buttonRef={buttonRef}
-              aria-label={collapsed ? displayText : undefined}
+              aria-label={collapsed ? accessibleDisplayText : undefined}
               onClick={onButtonClick}
               isInvalid={isInvalid}
               disabled={disabled || readOnly}
@@ -326,6 +335,14 @@ export function DateRangePickerControl() {
                   disabled={disabled || readOnly}
                   locale={locale}
                 />
+              )}
+              {!collapsed && roundedSuffix && (
+                <>
+                  {' '}
+                  <span css={roundedSuffixStyles} data-test-subj="dateRangePickerRoundedSuffix">
+                    {roundedSuffix}
+                  </span>
+                </>
               )}
               {!hideBadge && (
                 <EuiBadge data-test-subj="dateRangePickerDurationBadge">
