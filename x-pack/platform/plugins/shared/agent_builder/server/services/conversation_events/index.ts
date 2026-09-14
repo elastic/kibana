@@ -14,3 +14,7 @@ export {
   type ConversationEventsService,
 } from './conversation_events_service';
 export type { ConversationEventsServiceSetup, ConversationEventsServiceStart } from './types';
+export {
+  materializeConversationEvents,
+  type ConversationEventAddInput,
+} from './materialize_events';
