@@ -8,3 +8,6 @@ Use those libraries to construct schemas. This package is independent of both
 validators so it can supply consistent limits and one length histogram without creating a
 circular dependency. It uses only the browser-compatible OpenTelemetry API;
 provider and exporter initialization remains with Kibana telemetry.
+
+Refer to [Bounded string schemas](../../../../../docs/extend/key-concepts/security/bounded-string-schemas.md)
+for when to use which helper, reporting mode, and the telemetry contract.

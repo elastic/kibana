@@ -19,7 +19,12 @@ export type ZodStringOptions = Exclude<NonNullable<Parameters<typeof z.string>[0
   Partial<StringHelperLimits>;
 
 export type ZodStringWarnOptions = ZodStringOptions & {
-  /** Static field identifier, never a value derived from request input. */
+  /**
+   * Static field identifier for the violation metric. Never derive it from request
+   * input — it becomes a metric attribute. Convention only, not enforced.
+   *
+   * @see https://www.elastic.co/docs/extend/kibana/key-concepts/security/bounded-string-schemas
+   */
   label?: string;
 };
 
@@ -41,7 +46,7 @@ const makeHelper = (helper: StringHelperName): ZodStringHelper => {
     return z
       .string(params)
       .min(minLength)
-      .superRefine((value) => {
+      .check(({ value }) => {
         if (value.length > maxLength) {
           reportStringLengthViolation({
             helper,

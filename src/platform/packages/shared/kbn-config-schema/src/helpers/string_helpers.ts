@@ -18,7 +18,12 @@ import { StringType } from '../types/string_type';
 import type { Type } from '../types/type';
 
 export type StringWarnOptions = StringOptions & {
-  /** Static field identifier, never a value derived from request input. */
+  /**
+   * Static field identifier for the violation metric, never derived from request.
+   * Convention only, not enforced.
+   *
+   * @see https://www.elastic.co/docs/extend/kibana/key-concepts/security/bounded-string-schemas
+   */
   label?: string;
 };
 

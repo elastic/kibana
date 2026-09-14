@@ -136,7 +136,7 @@ predicate schemaBuildStep(DataFlow::Node child, DataFlow::Node parent) {
       [
         // structural wrappers
         "optional", "nullable", "nullish", "default", "describe", "catch", "brand", "readonly",
-        "refine", "superRefine", "transform", "pipe", "and", "or", "array",
+        "refine", "superRefine", "check", "with", "transform", "pipe", "and", "or", "array",
         // non-length-bounding string refinements and formats
         "min", "length", "nonempty", "trim", "toLowerCase", "toUpperCase", "lowercase",
         "uppercase", "regex", "includes", "startsWith", "endsWith", "email", "url", "uuid",
