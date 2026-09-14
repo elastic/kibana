@@ -119,14 +119,17 @@ describe('QuerySandbox', () => {
     expect(screen.getByTestId('querySandbox')).toBeInTheDocument();
   });
 
-  it('renders the injected ES|QL menu when provided by the host', () => {
+  it('renders the injected ES|QL menu with a named docs flyout size', () => {
     mockRuleFormServices = {
       ...buildBaseServices(),
       esqlEditorActionsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-      esqlMenu: () => <div data-test-subj="stubEsqlMenu" />,
+      esqlMenu: ({ docsFlyoutSize }: { docsFlyoutSize?: string }) => (
+        <div data-test-subj="stubEsqlMenu" data-docs-flyout-size={docsFlyoutSize} />
+      ),
     };
     renderSandbox();
-    expect(screen.getByTestId('stubEsqlMenu')).toBeInTheDocument();
+    // The docs flyout opens as a child of the rule flyout, so a named size is required.
+    expect(screen.getByTestId('stubEsqlMenu')).toHaveAttribute('data-docs-flyout-size', 's');
   });
 
   it('renders no ES|QL menu when the host does not inject one', () => {
