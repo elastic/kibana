@@ -8,8 +8,8 @@
 import type { Locator, ScoutPage } from '@kbn/scout-oblt';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import { makeEsQueryRule } from '@kbn/triggers-actions-ui-plugin/test/scout/common/ui/fixtures/helpers';
 import {
+  makeEsQueryRule,
   makeV1EsQueryRuleTemplateAttributes,
   RULE_TEMPLATE_SO_TYPE,
 } from '@kbn/triggers-actions-ui-plugin/test/scout/common/ui/fixtures/helpers';
@@ -43,14 +43,15 @@ import {
  * Lives under the default Scout config (`test/scout/`) so
  * `alerting:v2:enabled` stays unpinned and can be flipped at runtime. Flag
  * on/off URL mounts, tab switches, and classic v1 host-aware coverage share
- * this file so they cannot run on parallel workers against the same global
- * setting (Scout `fullyParallel: false`). The dedicated `scout_alerting_v2`
+ * this one describe so they cannot run on parallel workers against the same
+ * global setting (Scout `fullyParallel: false`). Scout allows only one
+ * describe per file and forbids nesting. The dedicated `scout_alerting_v2`
  * config pins the setting on and cannot cover the flag-off case.
  *
  * One test per URL so a redirect or title mismatch is isolated to that path.
+ * Assert v1 page URLs only after in-page clicks (or browser back/forward),
+ * never after a direct goto of the URL under test.
  */
-test.describe.configure({ mode: 'serial' });
-
 const expectObservabilityHost = async (page: ScoutPage, pathRe: RegExp) => {
   await expect(page).toHaveURL(pathRe);
   await expect(page).not.toHaveURL(OBS_V1_NESTED_RULES_URL_RE);
@@ -70,11 +71,43 @@ test.describe(
   'Observability Alerting URLs',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
+    let ruleId: string;
+    let ruleName: string;
+    const templateId = `scout-v1-template-obs-${Date.now()}`;
+    const templateName = `Scout v1 template ${templateId}`;
+
+    test.beforeAll(async ({ apiServices, kbnClient }) => {
+      await setAlertingV2EnabledSetting(kbnClient, true);
+      const response = await apiServices.alerting.rules.create(
+        makeEsQueryRule('scout-obs-v1-host-aware')
+      );
+      ruleId = response.data.id;
+      ruleName = response.data.name as string;
+      await kbnClient.savedObjects.create({
+        type: RULE_TEMPLATE_SO_TYPE,
+        id: templateId,
+        overwrite: true,
+        attributes: makeV1EsQueryRuleTemplateAttributes(templateName),
+      });
     });
 
-    test.afterAll(async ({ kbnClient }) => {
+    test.beforeEach(async ({ browserAuth, kbnClient }) => {
+      await browserAuth.loginAsAdmin();
+      await setAlertingV2EnabledSetting(kbnClient, true);
+    });
+
+    test.afterAll(async ({ apiServices, kbnClient }) => {
+      if (ruleId) {
+        await apiServices.alerting.rules.delete(ruleId);
+      }
+      try {
+        await kbnClient.savedObjects.delete({
+          type: RULE_TEMPLATE_SO_TYPE,
+          id: templateId,
+        });
+      } catch {
+        // beforeAll may have failed before the template was created
+      }
       await unsetAlertingV2EnabledSetting(kbnClient);
     });
 
@@ -98,12 +131,9 @@ test.describe(
       });
 
       test(`loads ${surface.name} (${surface.path}) when alerting v2 is enabled`, async ({
-        kbnClient,
         log,
         pageObjects,
       }) => {
-        await setAlertingV2EnabledSetting(kbnClient, true);
-
         const requested = pageObjects.observabilityAlerting.urlFor(surface.path);
         log.debug(`[observability-alerting] requested ${requested}`);
 
@@ -117,11 +147,9 @@ test.describe(
     }
 
     test('switches between v1 and v2 rules tabs without leaving observability', async ({
-      kbnClient,
       page,
       pageObjects,
     }) => {
-      await setAlertingV2EnabledSetting(kbnClient, true);
       const alerting = pageObjects.observabilityAlerting;
 
       await test.step('start on v2 and switch to v1', async () => {
@@ -152,11 +180,9 @@ test.describe(
     });
 
     test('starts on v1 and keeps host-aware tabs after switching to v2 and back', async ({
-      kbnClient,
       page,
       pageObjects,
     }) => {
-      await setAlertingV2EnabledSetting(kbnClient, true);
       const alerting = pageObjects.observabilityAlerting;
 
       await test.step('start on v1 and switch to v2', async () => {
@@ -177,40 +203,6 @@ test.describe(
         await expect(alerting.v1RulesTab).toHaveAttribute('aria-selected', 'true');
         await expect(alerting.v2RulesTab).toHaveAttribute('aria-selected', 'false');
       });
-    });
-  }
-);
-
-/*
- * Host-aware coverage for classic v1 Rules on Observability Alerting.
- * Assert page URLs only after in-page clicks (or browser back/forward), never
- * after a direct goto of the URL under test.
- */
-test.describe(
-  'Observability classic (v1) Rules host-aware URLs',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
-  () => {
-    let ruleId: string;
-    let ruleName: string;
-
-    test.beforeAll(async ({ apiServices, kbnClient }) => {
-      await setAlertingV2EnabledSetting(kbnClient, true);
-      const response = await apiServices.alerting.rules.create(
-        makeEsQueryRule('scout-obs-v1-host-aware')
-      );
-      ruleId = response.data.id;
-      ruleName = response.data.name as string;
-    });
-
-    test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
-    });
-
-    test.afterAll(async ({ apiServices, kbnClient }) => {
-      if (ruleId) {
-        await apiServices.alerting.rules.delete(ruleId);
-      }
-      await unsetAlertingV2EnabledSetting(kbnClient);
     });
 
     test('clicking a rule name stays on Observability Alerting', async ({ page, pageObjects }) => {
@@ -437,46 +429,13 @@ test.describe(
         await expectObservabilityHost(page, OBS_V1_LOGS_URL_RE);
       });
     });
-  }
-);
-
-test.describe(
-  'Observability classic (v1) create rule from template',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
-  () => {
-    const templateId = `scout-v1-template-obs-${Date.now()}`;
-    const templateName = `Scout v1 template ${templateId}`;
-
-    test.beforeAll(async ({ kbnClient }) => {
-      await setAlertingV2EnabledSetting(kbnClient, true);
-      await kbnClient.savedObjects.create({
-        type: RULE_TEMPLATE_SO_TYPE,
-        id: templateId,
-        overwrite: true,
-        attributes: makeV1EsQueryRuleTemplateAttributes(templateName),
-      });
-    });
-
-    test.afterAll(async ({ kbnClient }) => {
-      try {
-        await kbnClient.savedObjects.delete({
-          type: RULE_TEMPLATE_SO_TYPE,
-          id: templateId,
-        });
-      } catch {
-        // beforeAll may have failed before the template was created
-      }
-      await unsetAlertingV2EnabledSetting(kbnClient);
-    });
 
     test('stays on Observability Alerting when selecting a template', async ({
-      browserAuth,
       page,
       pageObjects,
     }) => {
       const rules = pageObjects.observabilityClassicRules;
 
-      await browserAuth.loginAsAdmin();
       await rules.goto();
       await expect(rules.createButton).toBeVisible({ timeout: 30_000 });
       await rules.openCreateRuleTypeModal();

@@ -913,6 +913,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
     renderPercentileColumnName,
     renderRuleError,
     renderRuleStatusDropdown,
+    ruleDetailsRoute,
     ruleTypesState.data,
     selectedPercentile,
     tagPopoverOpenIndex,
