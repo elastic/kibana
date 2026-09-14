@@ -18,6 +18,7 @@ import { InfoBlocks } from '@kbn/flyout-info-blocks';
 ## Behavior
 
 - Designed for small sets, typically up to 8 blocks.
+- The card is a `dl`, each block a `dt`/`dd` inside a single wrapper element, so the title/value association is programmatic rather than visual. A `dl` accepts only one wrapper element around a pair, which is why that wrapper is also the grid cell — `InfoBlock` renders it, and belongs inside a `dl`.
 - Responsive column collapse: blocks lay out in up to `maxColumns` columns (default 3); when a block would fall below 140 px wide, the column count steps down so blocks never shrink past that width (they wrap to more rows).
 - `maxColumns` can be `2`, `3`, `4`, or `'auto'`. `'auto'` picks the widest column count (3 or 4) that leaves at most one empty cell in the last row, based on how many items there are.
 - Plain text values truncate to a single line in the middle via `EuiTextTruncate`, so both ends stay readable. Node values (badges, links, images) manage their own layout.

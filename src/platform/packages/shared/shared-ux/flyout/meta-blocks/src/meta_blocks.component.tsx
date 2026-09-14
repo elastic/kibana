@@ -26,6 +26,7 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
       flex-wrap: wrap;
       align-items: center;
       gap: ${euiTheme.size.xs} ${euiTheme.size.m};
+      margin: 0;
     `,
     item: css`
       display: flex;
@@ -118,33 +119,36 @@ export const MetaBlocks: FunctionComponent<MetaBlocksProps> = ({ items, ...rest 
   }
 
   return (
-    <div css={memoized.list} data-test-subj={rest['data-test-subj'] ?? 'metablocks-container'}>
+    <dl css={memoized.list} data-test-subj={rest['data-test-subj'] ?? 'metablocks-container'}>
       {items.map((item, index) => {
         const truncatableText = getTruncatableText(item.value);
 
         return (
+          // `EuiText` renders a `div`, the one wrapper `dl` accepts around a `dt`/`dd` pair. It
+          // keeps each pair a single flex item, which is what makes the row wrap pair by pair.
           <EuiText
             key={item.id ?? index}
             size="s"
+            color="subdued"
             css={memoized.item}
             data-test-subj={item['data-test-subj']}
           >
-            <span css={memoized.key}>{item.title}</span>
+            <dt css={memoized.key}>{item.title}</dt>
             {truncatableText !== undefined ? (
-              <span css={memoized.truncatedValue}>
+              <dd css={memoized.truncatedValue}>
                 <span css={memoized.fullTextSizer} aria-hidden>
                   {truncatableText}
                 </span>
                 <span css={memoized.truncationOverlay}>
                   {renderTruncated(item.value, truncatableText)}
                 </span>
-              </span>
+              </dd>
             ) : (
-              <span css={memoized.value}>{item.value}</span>
+              <dd css={memoized.value}>{item.value}</dd>
             )}
           </EuiText>
         );
       })}
-    </div>
+    </dl>
   );
 };
