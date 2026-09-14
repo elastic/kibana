@@ -102,15 +102,18 @@ jest.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => (
     .fn()
     .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
 }));
-jest.mock('react-router-dom', () => ({
-  useHistory: () => ({
+jest.mock('react-router-dom', () => {
+  const history = {
     push: jest.fn(),
     createHref: jest.fn(({ pathname }: { pathname: string }) => pathname),
-  }),
-  useLocation: () => ({
-    pathname: '/triggersActions/rules/',
-  }),
-}));
+  };
+  return {
+    useHistory: () => history,
+    useLocation: () => ({
+      pathname: '/triggersActions/rules/',
+    }),
+  };
+});
 
 jest.mock('@kbn/alerts-ui-shared/src/maintenance_window_callout/api', () => ({
   fetchActiveMaintenanceWindows: jest.fn(() => Promise.resolve([])),
