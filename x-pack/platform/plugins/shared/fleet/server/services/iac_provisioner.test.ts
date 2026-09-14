@@ -415,49 +415,23 @@ describe('IacProvisionerService', () => {
     });
   });
 
-  it('POSTs the resolve request and returns blueprint coverage', async () => {
+  it('accepts a render:false response without artifactUrl or expiresAt', async () => {
     mockConfig();
     const logger = mockLogger();
-    const resolveResponse = {
-      blueprints: [
-        {
-          id: 'federated-identity',
-          resolvedVersion: 'v1',
-          deployable: true,
-          notCovered: [],
-        },
-      ],
+    const alreadyCurrent = {
+      templateSha: 'sha256:661cb7def1c7101f',
+      render: false,
+      blueprint: { id: 'federated-identity', version: 'v1' },
     };
-    mockedFetch.mockResolvedValueOnce(jsonResponse(200, resolveResponse));
+    mockedFetch.mockResolvedValueOnce(jsonResponse(200, alreadyCurrent));
 
-    const result = await iacProvisionerService.resolveBlueprints({
-      provider: 'aws',
-      integrations: RENDER_REQUEST.integrations,
-    });
+    const result = await iacProvisionerService.renderTemplate(RENDER_REQUEST);
 
-    expect(result).toEqual(resolveResponse);
-    expect(mockedFetch).toHaveBeenCalledWith(
-      'https://iac-provisioner.example/api/v1/resolve',
-      expect.objectContaining({ method: 'POST' })
-    );
+    expect(result).toEqual(alreadyCurrent);
     const debugLogged = logger.debug.mock.calls.flat().map(String).join(' ');
-    expect(debugLogged).toContain('federated-identity');
+    expect(debugLogged).toContain('federated-identity@v1');
+    expect(debugLogged).not.toContain('artifact expires at');
     expect(debugLogged).not.toContain('X-Amz-Signature');
-  });
-
-  it('maps a 501 resolve response to IacProvisionerUnavailableError', async () => {
-    mockConfig();
-    mockLogger();
-    mockedFetch.mockResolvedValueOnce(jsonResponse(501, { code: 'resolve.not_implemented' }));
-
-    const promise = iacProvisionerService.resolveBlueprints({
-      provider: 'aws',
-      integrations: RENDER_REQUEST.integrations,
-    });
-    await expect(promise).rejects.toThrow(IacProvisionerUnavailableError);
-    await promise.catch((error: IacProvisionerUnavailableError) => {
-      expect(error.statusCode).toBe(501);
-    });
   });
 });
 

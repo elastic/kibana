@@ -26,8 +26,6 @@ export type IacProvisionerRenderFlow = typeof CLOUD_CONNECTOR_RENDER_FLOW;
  */
 export const IAC_PROVISIONER_FALLBACK_REASON_MISSING_CONTEXT = 'missing_render_context' as const;
 export const IAC_PROVISIONER_FALLBACK_REASON_RENDER_FAILED = 'render_failed' as const;
-export const IAC_PROVISIONER_FALLBACK_REASON_RESOLVE_FAILED = 'resolve_failed' as const;
-export const IAC_PROVISIONER_FALLBACK_REASON_NOT_DEPLOYABLE = 'not_deployable' as const;
 
 export interface IacProvisionerRenderRequestedFields {
   flow: IacProvisionerRenderFlow;
@@ -45,21 +43,6 @@ export interface IacProvisionerRenderCompletedFields {
 export interface IacProvisionerRenderFallbackFields {
   flow: IacProvisionerRenderFlow;
   reason: string;
-}
-
-export interface IacProvisionerResolveRequestedFields {
-  flow: IacProvisionerRenderFlow;
-  integrationCount: number;
-}
-
-export interface IacProvisionerResolveCompletedFields {
-  flow: IacProvisionerRenderFlow;
-  success: boolean;
-  httpStatus: number;
-  blueprintCount: number;
-  deployableCount: number;
-  notCoveredReasons: string[];
-  latencyMs: number;
 }
 
 export const IAC_PROVISIONER_RENDER_REQUESTED_EVENT: EventTypeOpts<IacProvisionerRenderRequestedFields> =
@@ -125,62 +108,6 @@ export const IAC_PROVISIONER_RENDER_FALLBACK_EVENT: EventTypeOpts<IacProvisioner
     },
   };
 
-export const IAC_PROVISIONER_RESOLVE_REQUESTED_EVENT: EventTypeOpts<IacProvisionerResolveRequestedFields> =
-  {
-    eventType: 'iac_provisioner_resolve_requested',
-    schema: {
-      flow: {
-        type: 'keyword',
-        _meta: { description: 'The Kibana flow that requested blueprint resolution.' },
-      },
-      integrationCount: {
-        type: 'integer',
-        _meta: { description: 'Number of integrations included in the resolve request.' },
-      },
-    },
-  };
-
-export const IAC_PROVISIONER_RESOLVE_COMPLETED_EVENT: EventTypeOpts<IacProvisionerResolveCompletedFields> =
-  {
-    eventType: 'iac_provisioner_resolve_completed',
-    schema: {
-      flow: {
-        type: 'keyword',
-        _meta: { description: 'The Kibana flow that requested blueprint resolution.' },
-      },
-      success: {
-        type: 'boolean',
-        _meta: { description: 'Whether the IaC Provisioner returned blueprint coverage.' },
-      },
-      httpStatus: {
-        type: 'integer',
-        _meta: {
-          description: 'HTTP status returned by the IaC Provisioner (0 for network failure).',
-        },
-      },
-      blueprintCount: {
-        type: 'integer',
-        _meta: { description: 'Number of blueprints in the resolve response.' },
-      },
-      deployableCount: {
-        type: 'integer',
-        _meta: { description: 'Number of blueprints marked deployable.' },
-      },
-      notCoveredReasons: {
-        type: 'array',
-        items: {
-          type: 'keyword',
-          _meta: { description: 'notCovered[].reason value from the resolve response.' },
-        },
-        _meta: { description: 'Distinct not-covered reason codes across all blueprints.' },
-      },
-      latencyMs: {
-        type: 'long',
-        _meta: { description: 'Resolve call latency in milliseconds.' },
-      },
-    },
-  };
-
 /**
  * Minimal registrar interface so this file works with both
  * AnalyticsServiceSetup (server) and the browser analytics client without
@@ -196,6 +123,4 @@ export const registerIacProvisionerTelemetryEvents = (
   analytics.registerEventType(IAC_PROVISIONER_RENDER_REQUESTED_EVENT);
   analytics.registerEventType(IAC_PROVISIONER_RENDER_COMPLETED_EVENT);
   analytics.registerEventType(IAC_PROVISIONER_RENDER_FALLBACK_EVENT);
-  analytics.registerEventType(IAC_PROVISIONER_RESOLVE_REQUESTED_EVENT);
-  analytics.registerEventType(IAC_PROVISIONER_RESOLVE_COMPLETED_EVENT);
 };

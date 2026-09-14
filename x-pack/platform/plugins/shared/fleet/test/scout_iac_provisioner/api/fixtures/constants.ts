@@ -10,9 +10,6 @@ import type { KibanaRole } from '@kbn/scout';
 /** Internal, versioned (v1) render route — needs the api-version header. */
 export const RENDER_TEMPLATE_PATH = 'internal/fleet/iac_provisioner/render_template';
 
-/** Internal, versioned (v1) resolve route — needs the api-version header. */
-export const RESOLVE_BLUEPRINTS_PATH = 'internal/fleet/iac_provisioner/resolve';
-
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'scout',
   'x-elastic-internal-origin': 'kibana',

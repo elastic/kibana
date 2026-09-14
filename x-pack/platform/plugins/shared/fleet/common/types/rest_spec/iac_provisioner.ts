@@ -11,17 +11,6 @@ import type { AWS_CLOUD_PROVIDER } from '../models/cloud_connector';
 /** IaCP workflow name for the AWS federated-identity connector. */
 export const IAC_FEDERATED_IDENTITY_WORKFLOW = 'federated_identity' as const;
 
-/**
- * True when a resolve blueprint id belongs to the given IaCP workflow.
- * Resolve rows identify a lineage (`federated-identity` or
- * `aws/federated-identity`); render takes the workflow name
- * (`federated_identity`).
- */
-export const blueprintMatchesWorkflow = (blueprintId: string, workflow: string): boolean => {
-  const leaf = (blueprintId.split('/').pop() ?? blueprintId).replace(/-/g, '_');
-  return leaf === workflow;
-};
-
 export interface IacPolicyTemplateSelection {
   /** Policy template name as declared in the integration's package manifest. */
   name: string;
@@ -68,12 +57,12 @@ export interface RenderedIacBlueprint {
 
 export interface RenderIacTemplateResponse {
   /**
-   * Pre-signed URL of the rendered template. Embeds signing credentials —
-   * never log or cache; fetch just-in-time.
+   * Pre-signed URL of the rendered template. Present only when `render` is
+   * true. Embeds signing credentials — never log or cache.
    */
-  artifactUrl: string;
-  /** ISO 8601 UTC timestamp when the pre-signed URL expires. */
-  expiresAt: string;
+  artifactUrl?: string;
+  /** ISO 8601 UTC timestamp when the pre-signed URL expires. Present with artifactUrl. */
+  expiresAt?: string;
   /**
    * Digest of the canonical CloudFormation template. Persist on the
    * connector at confirmation, then send back as `templateSha` on the
@@ -86,44 +75,6 @@ export interface RenderIacTemplateResponse {
    * static template). False when the stored templateSha still matches.
    */
   render: boolean;
-  /** Blueprint and version that was actually rendered. */
+  /** Blueprint and version that produced this artifact. */
   blueprint: RenderedIacBlueprint;
-}
-
-export const IAC_NOT_COVERED_REASONS = [
-  'unknown_package',
-  'unknown_policy_template',
-  'no_patch_for_input',
-  'below_support_floor',
-] as const;
-
-export type IacNotCoveredReasonCode = (typeof IAC_NOT_COVERED_REASONS)[number];
-
-export interface IacNotCoveredReason {
-  /** EPR package name of the integration that is not covered. */
-  integration: string;
-  reason: IacNotCoveredReasonCode;
-  policyTemplate?: string;
-  input?: string;
-  supportFloor?: string;
-  installedVersion?: string;
-}
-
-export interface IacBlueprintCoverage {
-  id: string;
-  /** Blueprint version that satisfies the request, or null when not deployable. */
-  resolvedVersion: string | null;
-  deployable: boolean;
-  notCovered: IacNotCoveredReason[];
-}
-
-export interface ResolveIacBlueprintsRequest {
-  provider: typeof AWS_CLOUD_PROVIDER;
-  /** The Kibana flow requesting resolve; reported in telemetry. */
-  flow: IacProvisionerRenderFlow;
-  integrations: RenderIacTemplateIntegration[];
-}
-
-export interface ResolveIacBlueprintsResponse {
-  blueprints: IacBlueprintCoverage[];
 }

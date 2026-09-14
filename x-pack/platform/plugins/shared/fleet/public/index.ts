@@ -147,26 +147,15 @@ export type {
   UpdateCloudOnboardingDeploymentRequest,
 } from '../common/types/rest_spec/cloud_onboarding_deployment';
 export { sendGetPackageInfoByKey, sendGetPackageInfoByKeyForRq } from './hooks/use_request/epm';
-export {
-  sendRenderIacTemplate,
-  sendResolveIacBlueprints,
-} from './hooks/use_request/iac_provisioner';
+export { sendRenderIacTemplate } from './hooks/use_request/iac_provisioner';
 export { useIacProvisioner } from './hooks/use_iac_provisioner';
 export type {
-  IacBlueprintCoverage,
-  IacNotCoveredReason,
-  IacNotCoveredReasonCode,
   IacPolicyTemplateSelection,
   RenderIacTemplateIntegration,
   RenderIacTemplateRequest,
   RenderIacTemplateResponse,
-  ResolveIacBlueprintsRequest,
-  ResolveIacBlueprintsResponse,
 } from '../common/types/rest_spec/iac_provisioner';
-export {
-  IAC_FEDERATED_IDENTITY_WORKFLOW,
-  blueprintMatchesWorkflow,
-} from '../common/types/rest_spec/iac_provisioner';
+export { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../common/types/rest_spec/iac_provisioner';
 export { useLink } from './hooks/use_link';
 export { NamespaceComboBox } from './components/namespace_combo_box';
 
