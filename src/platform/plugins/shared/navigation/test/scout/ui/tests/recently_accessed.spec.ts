@@ -93,8 +93,8 @@ test.describe('recently accessed hover list', { tag: tags.stateful.classic }, ()
 
     await test.step('hover Dashboards and open each recent item', async () => {
       await pageObjects.chrome.nav.hoverPrimaryItemById('dashboards');
-      const firstItem = pageObjects.chrome.nav.hoverPopoverItemById(`recentlyViewed:${first.id}`);
-      const secondItem = pageObjects.chrome.nav.hoverPopoverItemById(`recentlyViewed:${second.id}`);
+      const firstItem = pageObjects.chrome.nav.getPopoverItemById(`recentlyViewed:${first.id}`);
+      const secondItem = pageObjects.chrome.nav.getPopoverItemById(`recentlyViewed:${second.id}`);
       await expect(firstItem).toBeVisible();
       await expect(secondItem).toBeVisible();
 

@@ -26,7 +26,7 @@ export class Chrome {
     hoverPrimaryItemById: async (id: string): Promise<void> => {
       await this.navItemInPrimaryById(id).hover();
     },
-    hoverPopoverItemById: (id: string): Locator => {
+    getPopoverItemById: (id: string): Locator => {
       return this.page.testSubj.locator(`kbnChromeNav-popoverItem-${id}`);
     },
   };
