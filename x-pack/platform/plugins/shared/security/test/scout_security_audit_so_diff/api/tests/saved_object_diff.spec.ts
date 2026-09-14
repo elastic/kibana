@@ -9,9 +9,12 @@ import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import {
+  type SavedObjectAuditEvent,
   type SavedObjectDiff,
   scanForDiff,
+  waitForAuditEvent,
   waitForDiffEvent,
+  waitForSavedObjectEvent,
 } from '../../../scout_security_audit/api/helpers/audit_log';
 
 // `index-pattern` is a standard, non-hidden type creatable through the public
@@ -28,6 +31,15 @@ const KBN_HEADERS = { 'kbn-xsrf': 'x', 'x-elastic-internal-origin': 'kibana' };
 
 const opAt = (diff: SavedObjectDiff, path: string) => diff.ops.find((op) => op.path === path);
 const noOpPaths = (diff: SavedObjectDiff) => diff.noOps.map((noOp) => noOp.path);
+
+const requireDiff = (event: SavedObjectAuditEvent): SavedObjectDiff => {
+  const diff = event.kibana?.diff;
+  expect(diff).toBeDefined();
+  if (!diff) {
+    throw new Error('expected kibana.diff on audit event');
+  }
+  return diff;
+};
 
 apiTest.describe(
   'Audit log — saved object diffs (ECS file appender)',
@@ -200,6 +212,146 @@ apiTest.describe(
         const diffB = await waitForDiffEvent('saved_object_delete', idB);
         expect(opAt(diffA, '/title')).toMatchObject({ op: 'remove', oldValue: 'del-a' });
         expect(opAt(diffB, '/title')).toMatchObject({ op: 'remove', oldValue: 'del-b' });
+      }
+    );
+
+    apiTest(
+      'bulk update emits a per-object replace with oldValue',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+        const headers = { ...cookieHeader, ...KBN_HEADERS };
+        const idA = `so-diff-bulkupdate-a-${Date.now()}`;
+        const idB = `so-diff-bulkupdate-b-${Date.now()}`;
+
+        await apiClient.post('api/saved_objects/_bulk_create', {
+          headers,
+          body: [
+            { type: TYPE, id: idA, attributes: { title: 'old-a', timeFieldName: 'ts' } },
+            { type: TYPE, id: idB, attributes: { title: 'old-b', timeFieldName: 'ts' } },
+          ],
+          responseType: 'json',
+        });
+        savedObjectsToCleanUp.push({ type: TYPE, id: idA }, { type: TYPE, id: idB });
+
+        const res = await apiClient.put('api/saved_objects/_bulk_update', {
+          headers,
+          body: [
+            { type: TYPE, id: idA, attributes: { title: 'new-a' } },
+            { type: TYPE, id: idB, attributes: { title: 'new-b' } },
+          ],
+          responseType: 'json',
+        });
+        expect(res).toHaveStatusCode(200);
+
+        const diffA = await waitForDiffEvent('saved_object_update', idA);
+        const diffB = await waitForDiffEvent('saved_object_update', idB);
+        expect(opAt(diffA, '/title')).toMatchObject({
+          op: 'replace',
+          value: 'new-a',
+          oldValue: 'old-a',
+        });
+        expect(opAt(diffB, '/title')).toMatchObject({
+          op: 'replace',
+          value: 'new-b',
+          oldValue: 'old-b',
+        });
+        expect(noOpPaths(diffA)).toContain('/timeFieldName');
+      }
+    );
+
+    apiTest(
+      'overwrite create records the previous state as replace oldValue',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+        const headers = { ...cookieHeader, ...KBN_HEADERS };
+        const id = `so-diff-overwrite-${Date.now()}`;
+
+        const createRes = await apiClient.post(`api/saved_objects/${TYPE}/${id}`, {
+          headers,
+          body: { attributes: { title: 'original', timeFieldName: 'ts' } },
+          responseType: 'json',
+        });
+        expect(createRes).toHaveStatusCode(200);
+        savedObjectsToCleanUp.push({ type: TYPE, id });
+
+        const overwriteRes = await apiClient.post(
+          `api/saved_objects/${TYPE}/${id}?overwrite=true`,
+          {
+            headers,
+            body: { attributes: { title: 'replaced' } },
+            responseType: 'json',
+          }
+        );
+        expect(overwriteRes).toHaveStatusCode(200);
+
+        // Overwrite still uses `saved_object_create`. Wait for the replace op so we do not
+        // match the original create's success event, which is already in the log.
+        const event = (await waitForAuditEvent(
+          (raw) => {
+            const ev = raw as SavedObjectAuditEvent;
+            const titleOp = ev.kibana?.diff?.ops.find((op) => op.path === '/title');
+            return (
+              ev.event?.action === 'saved_object_create' &&
+              ev.kibana?.saved_object?.id === id &&
+              titleOp?.op === 'replace' &&
+              titleOp.oldValue === 'original'
+            );
+          },
+          { description: `overwrite create diff for ${id}` }
+        )) as SavedObjectAuditEvent;
+        expect(opAt(requireDiff(event), '/title')).toMatchObject({
+          op: 'replace',
+          value: 'replaced',
+          oldValue: 'original',
+        });
+      }
+    );
+
+    apiTest(
+      'emits unknown when a write does not complete after authorization',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+        const headers = { ...cookieHeader, ...KBN_HEADERS };
+        const id = `so-diff-unknown-${Date.now()}`;
+
+        const createRes = await apiClient.post(`api/saved_objects/${TYPE}/${id}`, {
+          headers,
+          body: { attributes: { title: 'existing' } },
+          responseType: 'json',
+        });
+        expect(createRes).toHaveStatusCode(200);
+        savedObjectsToCleanUp.push({ type: TYPE, id });
+
+        // A second create without overwrite conflicts after authorization. `index-pattern`
+        // is multi-namespace, so preflight throws before encrypt/migrate/`setAfter`; the
+        // result event is still `unknown` (this write's only audit trail) with empty after.
+        const conflictRes = await apiClient.post(`api/saved_objects/${TYPE}/${id}`, {
+          headers,
+          body: { attributes: { title: 'attempted' } },
+          responseType: 'json',
+        });
+        expect(conflictRes).toHaveStatusCode(409);
+
+        const event = await waitForSavedObjectEvent('saved_object_create', id, 'unknown');
+        expect(event.kibana?.diff).toBeDefined();
+      }
+    );
+
+    apiTest(
+      'authorization failure stays failure and does not carry a diff',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+        const id = `so-diff-forbidden-${Date.now()}`;
+
+        const res = await apiClient.post(`api/saved_objects/${TYPE}/${id}`, {
+          headers: { ...cookieHeader, ...KBN_HEADERS },
+          body: { attributes: { title: 'forbidden' } },
+          responseType: 'json',
+        });
+        expect(res).toHaveStatusCode(403);
+
+        const event = await waitForSavedObjectEvent('saved_object_create', id, 'failure');
+        expect(event.kibana?.diff).toBeUndefined();
       }
     );
 

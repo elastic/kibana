@@ -1185,12 +1185,14 @@ describe('#bulkCreate', () => {
             action: 'saved_object_create',
             savedObject: { type: obj1.type, id: obj1.id, name: 'Test One' },
             outcome: 'unknown',
+            after: expect.objectContaining({ title: 'Test One' }),
           })
         );
         expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
           expect.objectContaining({
             savedObject: { type: obj2.type, id: obj2.id, name: 'Test Two' },
             outcome: 'unknown',
+            after: expect.objectContaining({ title: 'Test Two' }),
           })
         );
       });

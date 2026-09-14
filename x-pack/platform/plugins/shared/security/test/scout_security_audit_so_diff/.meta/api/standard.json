@@ -1,5 +1,5 @@
 {
-  "sha1": "098fecdcbbcda234942549ffe82eb822eae8dc25",
+  "sha1": "a88b681c6686c0ba70eb7586d5ed3bb7adfdf732",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 58,
+        "line": 75,
         "column": 7
       }
     },
@@ -28,7 +28,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 77,
+        "line": 94,
         "column": 7
       }
     },
@@ -42,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 99,
+        "line": 116,
         "column": 9
       }
     },
@@ -56,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 119,
+        "line": 136,
         "column": 58
       }
     },
@@ -70,7 +70,63 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 153,
+        "line": 170,
+        "column": 25
+      }
+    },
+    {
+      "id": "b56ee1f41d6fee2-a0e65afad29a260",
+      "title": "Audit log — saved object diffs (ECS file appender) bulk update emits a per-object replace with oldValue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
+        "line": 198,
+        "column": 25
+      }
+    },
+    {
+      "id": "b56ee1f41d6fee2-09d5e4c16406dbc",
+      "title": "Audit log — saved object diffs (ECS file appender) overwrite create records the previous state as replace oldValue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
+        "line": 240,
+        "column": 13
+      }
+    },
+    {
+      "id": "b56ee1f41d6fee2-ed9b398b43317bf",
+      "title": "Audit log — saved object diffs (ECS file appender) emits unknown when a write does not complete after authorization",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
+        "line": 275,
+        "column": 48
+      }
+    },
+    {
+      "id": "b56ee1f41d6fee2-9395f39aae59881",
+      "title": "Audit log — saved object diffs (ECS file appender) authorization failure stays failure and does not carry a diff",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
+        "line": 311,
         "column": 25
       }
     },
@@ -84,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 181,
-        "column": 25
+        "line": 322,
+        "column": 9
       }
     },
     {
@@ -98,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 214,
-        "column": 17
+        "line": 357,
+        "column": 27
       }
     },
     {
@@ -112,8 +168,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_so_diff/api/tests/saved_object_diff.spec.ts",
-        "line": 240,
-        "column": 9
+        "line": 382,
+        "column": 11
       }
     }
   ]

@@ -60,20 +60,40 @@ export interface SavedObjectDiff {
   noOps: Array<{ path: string }>;
 }
 
-interface SavedObjectAuditEvent {
+export interface SavedObjectAuditEvent {
   event?: { action?: string; outcome?: string };
   kibana?: { saved_object?: { id?: string; type?: string }; diff?: SavedObjectDiff };
 }
+
+/** Matches a saved-object mutation event for `id`, optionally by outcome. */
+export const isSavedObjectEvent =
+  (action: string, id: string, outcome?: string) =>
+  (event: Record<string, unknown>): boolean => {
+    const ev = event as SavedObjectAuditEvent;
+    return (
+      ev.event?.action === action &&
+      ev.kibana?.saved_object?.id === id &&
+      (outcome === undefined || ev.event?.outcome === outcome)
+    );
+  };
 
 /** Matches a mutation's result event for `id`: the only event for the operation, carrying `kibana.diff`. */
 export const isDiffEvent =
   (action: string, id: string) =>
   (event: Record<string, unknown>): boolean => {
     const ev = event as SavedObjectAuditEvent;
-    return (
-      ev.event?.action === action && ev.kibana?.saved_object?.id === id && ev.kibana?.diff != null
-    );
+    return isSavedObjectEvent(action, id)(event) && ev.kibana?.diff != null;
   };
+
+/** Polls until a saved-object mutation event appears, including cases that carry no `kibana.diff`. */
+export const waitForSavedObjectEvent = async (
+  action: string,
+  id: string,
+  outcome?: string
+): Promise<SavedObjectAuditEvent> =>
+  (await waitForAuditEvent(isSavedObjectEvent(action, id, outcome), {
+    description: `${action}${outcome ? ` ${outcome}` : ''} event for ${id}`,
+  })) as SavedObjectAuditEvent;
 
 /** Reads the audit log once and returns the mutation's diff, or `undefined` (to assert its absence). */
 export const scanForDiff = (action: string, id: string): SavedObjectDiff | undefined =>
