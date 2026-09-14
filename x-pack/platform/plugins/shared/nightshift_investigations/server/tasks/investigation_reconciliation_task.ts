@@ -12,7 +12,6 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { createInvestigationSweepRepository } from '../storage';
 import type {
   NightshiftInvestigationsServerStart,
   NightshiftInvestigationsStartDeps,
@@ -62,10 +61,14 @@ export const registerInvestigationReconciliationTask = ({
             return { state: {} };
           }
 
-          const [{ savedObjects }] = await core.getStartServices();
+          const [, startDeps] = await core.getStartServices();
+          const investigationsService =
+            startDeps.agenticInvestigations.getInvestigationsService();
 
           const { scanned, reconciled } = await reconcileInvestigationStatuses({
-            investigationSweepRepository: createInvestigationSweepRepository(savedObjects),
+            investigationsService: investigationsService as Parameters<
+              typeof reconcileInvestigationStatuses
+            >[0]['investigationsService'],
             getExecutionSummaries: async (executionIds, spaceId) => {
               const { results } = await workflowsManagement.management.searchExecutionsView(
                 {

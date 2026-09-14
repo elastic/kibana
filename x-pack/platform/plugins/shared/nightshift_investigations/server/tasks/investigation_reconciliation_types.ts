@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { InvestigationStatus } from '../../common';
-import type {
-  FindInvestigationsAcrossSpacesResult,
-  InvestigationSweepRepository,
-} from '../storage';
 
 /** Statuses an investigation can linger in when no persist step ran. */
 export const NON_TERMINAL_INVESTIGATION_STATUSES: readonly InvestigationStatus[] = [
@@ -51,26 +46,7 @@ export interface ExecutionSummary {
   finishedAt?: string;
 }
 
-export interface ReconcileInvestigationStatusesDeps {
-  investigationSweepRepository: InvestigationSweepRepository;
-  getExecutionSummaries: (
-    executionIds: string[],
-    spaceId: string
-  ) => Promise<ReadonlyMap<string, ExecutionSummary>>;
-  logger: Logger;
-  signal: AbortSignal;
-}
-
 export interface ReconciliationResult {
   scanned: number;
   reconciled: number;
-}
-
-export type ReconciliationCandidate =
-  FindInvestigationsAcrossSpacesResult<'created_at'>['results'][number];
-
-export interface ReconciliationOutcome {
-  reconciledStatus: InvestigationStatus;
-  completedAt: string;
-  errorMessage?: string;
 }

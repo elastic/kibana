@@ -9,248 +9,191 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import {
   apiTest,
-  INVESTIGATIONS_READ_ROLE,
+  AGENTIC_INVESTIGATIONS_READ_ROLE,
+  AGENTIC_INVESTIGATIONS_MANAGE_ROLE,
   NO_AGENT_BUILDER_ROLE,
   listInvestigations,
-  seedInvestigation,
-  deleteInvestigation,
+  upsertInvestigation,
   uniqueId,
-  seedTimeWindow,
 } from '../fixtures';
 
+/**
+ * Tests for GET /internal/investigations/investigations
+ *
+ * The agenticInvestigations plugin exposes this route with versioned access.
+ * Investigations are seeded via the POST (upsert) route; the nightshift-specific
+ * list route at /internal/nightshift/investigations has been removed.
+ */
 apiTest.describe(
-  'GET /internal/nightshift/investigations',
+  'GET /internal/investigations/investigations',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
+    /**
+     * A unique entity name anchors every seeded investigation in this suite so the
+     * list-with-filter queries return only our data, regardless of what other test
+     * runs may have left in the shared index.
+     */
+    const testEntityName = uniqueId('list-test-entity');
+
     const IDS = [
       uniqueId('list-inv-1'),
       uniqueId('list-inv-2'),
       uniqueId('list-inv-3'),
       uniqueId('list-inv-4'),
     ];
-    const times = seedTimeWindow(4);
-    let cookieHeader: Record<string, string>;
 
-    apiTest.beforeAll(async ({ kbnClient, samlAuth }) => {
-      ({ cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_READ_ROLE));
+    let readCookieHeader: Record<string, string>;
+    let manageCookieHeader: Record<string, string>;
 
-      await seedInvestigation(kbnClient, {
+    apiTest.beforeAll(async ({ apiClient, samlAuth }) => {
+      ({ cookieHeader: readCookieHeader } = await samlAuth.asInteractiveUser(
+        AGENTIC_INVESTIGATIONS_READ_ROLE
+      ));
+      ({ cookieHeader: manageCookieHeader } = await samlAuth.asInteractiveUser(
+        AGENTIC_INVESTIGATIONS_MANAGE_ROLE
+      ));
+
+      // Seed four investigations, all sharing the same impacted entity so the
+      // impactedEntityName filter can scope assertions to this suite only.
+      await upsertInvestigation(apiClient, manageCookieHeader, {
         id: IDS[0],
         status: 'completed',
-        subject_type: 'alert',
-        subject_id: 'alert-1',
-        trigger_type: 'automatic',
-        created_at: times.iso({ day: 0, hour: 10 }),
-        started_at: times.iso({ day: 0, hour: 10 }),
-        completed_at: times.iso({ day: 0, hour: 11 }),
+        subjectType: 'alert',
+        subjectId: 'alert-1',
+        severity: '40-medium',
         summary: 'First investigation.',
-        conclusion: 'Resolved.',
+        impactedEntities: [{ name: testEntityName, nameText: testEntityName }],
       });
-      await seedInvestigation(kbnClient, {
+      await upsertInvestigation(apiClient, manageCookieHeader, {
         id: IDS[1],
         status: 'running',
-        subject_type: 'significant_event',
-        subject_id: 'se-1',
-        trigger_type: 'manual',
-        created_at: times.iso({ day: 1, hour: 10 }),
-        started_at: times.iso({ day: 1, hour: 10 }),
+        subjectType: 'significant_event',
+        subjectId: 'se-1',
+        severity: '60-high',
+        impactedEntities: [{ name: testEntityName, nameText: testEntityName }],
       });
-      await seedInvestigation(kbnClient, {
+      await upsertInvestigation(apiClient, manageCookieHeader, {
         id: IDS[2],
         status: 'failed',
-        subject_type: 'alert',
-        subject_id: 'alert-2',
-        trigger_type: 'automatic',
-        created_at: times.iso({ day: 2, hour: 10 }),
-        started_at: times.iso({ day: 2, hour: 10 }),
-        completed_at: times.iso({ day: 2, hour: 10, minute: 30 }),
-        error: 'Agent timed out.',
+        subjectType: 'alert',
+        subjectId: 'alert-2',
+        severity: '80-critical',
+        impactedEntities: [{ name: testEntityName, nameText: testEntityName }],
       });
-      await seedInvestigation(kbnClient, {
+      await upsertInvestigation(apiClient, manageCookieHeader, {
         id: IDS[3],
         status: 'pending',
-        subject_type: 'alert',
-        subject_id: 'alert-3',
-        trigger_type: 'automatic',
-        created_at: times.iso({ day: 3, hour: 10 }),
+        subjectType: 'alert',
+        subjectId: 'alert-3',
+        impactedEntities: [{ name: testEntityName, nameText: testEntityName }],
       });
     });
 
-    apiTest.afterAll(async ({ kbnClient }) => {
-      for (const id of IDS) {
-        await deleteInvestigation(kbnClient, id);
-      }
-    });
-
-    apiTest('returns 200 with a paginated result shape', async ({ apiClient }) => {
-      const response = await listInvestigations(apiClient, cookieHeader);
+    apiTest('returns 200 with the expected response shape', async ({ apiClient }) => {
+      const response = await listInvestigations(apiClient, readCookieHeader);
       expect(response).toHaveStatusCode(200);
-      expect(Array.isArray(response.body.results)).toBe(true);
+      expect(Array.isArray(response.body.items)).toBe(true);
       expect(typeof response.body.total).toBe('number');
-      expect(typeof response.body.page).toBe('number');
-      expect(typeof response.body.size).toBe('number');
+      expect(typeof response.body.severityCounts).toBe('object');
     });
 
-    apiTest('returns seeded investigations', async ({ apiClient }) => {
-      const response = await listInvestigations(apiClient, cookieHeader, {
-        query: times.createdRange,
+    apiTest('returns seeded investigations filtered by entity name', async ({ apiClient }) => {
+      const response = await listInvestigations(apiClient, readCookieHeader, {
+        query: `impactedEntityName=${encodeURIComponent(testEntityName)}`,
       });
       expect(response).toHaveStatusCode(200);
 
-      const ids = response.body.results.map(
-        (r: { investigation_id: string }) => r.investigation_id
-      );
+      const ids = response.body.items.map((r: { id: string }) => r.id);
       for (const id of IDS) {
         expect(ids).toContain(id);
       }
     });
 
-    apiTest('each result includes list fields, not detailed output', async ({ apiClient }) => {
-      const response = await listInvestigations(apiClient, cookieHeader, {
-        query: times.createdRange,
+    apiTest('each result exposes camelCase investigation fields', async ({ apiClient }) => {
+      const response = await listInvestigations(apiClient, readCookieHeader, {
+        query: `impactedEntityName=${encodeURIComponent(testEntityName)}&status=completed`,
       });
       expect(response).toHaveStatusCode(200);
 
-      const inv = response.body.results.find(
-        (r: { investigation_id: string }) => r.investigation_id === IDS[0]
-      );
+      const inv = response.body.items.find((r: { id: string }) => r.id === IDS[0]);
       expect(inv).toBeDefined();
       expect(inv.status).toBe('completed');
-      expect(inv.created_at).toBe(times.iso({ day: 0, hour: 10 }));
-      expect(inv.started_at).toBe(times.iso({ day: 0, hour: 10 }));
-      expect(inv.completed_at).toBe(times.iso({ day: 0, hour: 11 }));
-      expect(inv.subject).toStrictEqual({ type: 'alert', id: 'alert-1' });
-      expect(inv.trigger_type).toBeUndefined();
+      expect(inv.subjectType).toBe('alert');
+      expect(inv.subjectId).toBe('alert-1');
       expect(inv.summary).toBe('First investigation.');
-      expect(inv.conclusion).toBeUndefined();
-      expect(inv.error).toBeUndefined();
+      expect(inv.severity).toBe('40-medium');
+      // Fields not in the agentic list response
+      expect(inv.triggerType).toBeUndefined();
     });
 
     apiTest('filters by status', async ({ apiClient }) => {
-      const response = await listInvestigations(apiClient, cookieHeader, {
-        query: `statuses=running&${times.createdRange}`,
+      const response = await listInvestigations(apiClient, readCookieHeader, {
+        query: `status=running&impactedEntityName=${encodeURIComponent(testEntityName)}`,
       });
       expect(response).toHaveStatusCode(200);
 
-      const results = response.body.results as Array<{
-        investigation_id: string;
-        status: string;
-      }>;
-      expect(results.map((r) => r.investigation_id)).toContain(IDS[1]);
+      const results = response.body.items as Array<{ id: string; status: string }>;
+      expect(results.map((r) => r.id)).toContain(IDS[1]);
       for (const result of results) {
         expect(result.status).toBe('running');
       }
     });
 
-    apiTest('reports a pending investigation as created but not started', async ({ apiClient }) => {
-      const response = await listInvestigations(apiClient, cookieHeader, {
-        query: `statuses=pending&${times.createdRange}`,
+    apiTest('filters by severity', async ({ apiClient }) => {
+      const response = await listInvestigations(apiClient, readCookieHeader, {
+        query: `severity=60-high&impactedEntityName=${encodeURIComponent(testEntityName)}`,
       });
       expect(response).toHaveStatusCode(200);
 
-      const inv = response.body.results.find(
-        (r: { investigation_id: string }) => r.investigation_id === IDS[3]
-      );
-      expect(inv).toBeDefined();
-      expect(inv.created_at).toBe(times.iso({ day: 3, hour: 10 }));
-      expect(inv.started_at).toBeUndefined();
+      const results = response.body.items as Array<{ id: string; severity: string }>;
+      expect(results.map((r) => r.id)).toContain(IDS[1]);
+      for (const result of results) {
+        expect(result.severity).toBe('60-high');
+      }
     });
 
-    apiTest('filters by created_after and created_before', async ({ apiClient }) => {
-      const response = await listInvestigations(apiClient, cookieHeader, {
-        query: `created_after=${times.iso({ day: 1 })}&created_before=${times.iso({ day: 2 })}`,
+    apiTest('supports from/size pagination', async ({ apiClient }) => {
+      const response = await listInvestigations(apiClient, readCookieHeader, {
+        query: `from=0&size=1&impactedEntityName=${encodeURIComponent(testEntityName)}`,
       });
       expect(response).toHaveStatusCode(200);
-
-      const ids = response.body.results.map(
-        (r: { investigation_id: string }) => r.investigation_id
-      );
-      expect(ids).toContain(IDS[1]);
-      expect(ids).not.toContain(IDS[0]);
-      expect(ids).not.toContain(IDS[2]);
+      expect(response.body.items.length).toBeLessThanOrEqual(1);
     });
 
-    apiTest('matches a pending investigation on created_after only', async ({ apiClient }) => {
-      const createdOnly = await listInvestigations(apiClient, cookieHeader, {
-        query: `created_after=${times.iso({ day: 3 })}&created_before=${times.iso({ day: 4 })}`,
-      });
-      expect(createdOnly).toHaveStatusCode(200);
-      expect(
-        createdOnly.body.results.map((r: { investigation_id: string }) => r.investigation_id)
-      ).toContain(IDS[3]);
-
-      const startedOnly = await listInvestigations(apiClient, cookieHeader, {
-        query: `started_after=${times.iso({ day: 0 })}&${times.createdRange}`,
-      });
-      expect(startedOnly).toHaveStatusCode(200);
-      const startedOnlyIds = startedOnly.body.results.map(
-        (r: { investigation_id: string }) => r.investigation_id
-      );
-      expect(startedOnlyIds).toContain(IDS[0]);
-      expect(startedOnlyIds).toContain(IDS[1]);
-      expect(startedOnlyIds).toContain(IDS[2]);
-      expect(startedOnlyIds).not.toContain(IDS[3]);
-    });
-
-    apiTest('filters and sorts by completed_at', async ({ apiClient }) => {
-      const response = await listInvestigations(apiClient, cookieHeader, {
-        query:
-          `completed_after=${times.iso({ day: 0 })}&completed_before=${times.iso({ day: 3 })}` +
-          `&sort_field=completed_at&sort_order=asc&${times.createdRange}`,
-      });
-      expect(response).toHaveStatusCode(200);
-
-      const ids = response.body.results.map(
-        (r: { investigation_id: string }) => r.investigation_id
-      );
-      expect(ids).not.toContain(IDS[1]);
-      expect(ids).not.toContain(IDS[3]);
-      expect(ids.filter((id: string) => id === IDS[0] || id === IDS[2])).toStrictEqual([
-        IDS[0],
-        IDS[2],
-      ]);
-    });
-
-    apiTest('returns 400 for a non-datetime created_after value', async ({ apiClient }) => {
-      const response = await listInvestigations(apiClient, cookieHeader, {
-        query: 'created_after=yesterday',
+    apiTest('returns 400 for a size above the maximum of 100', async ({ apiClient }) => {
+      const response = await listInvestigations(apiClient, readCookieHeader, {
+        query: 'size=101',
       });
       expect(response).toHaveStatusCode(400);
     });
 
-    apiTest('supports pagination with page and size', async ({ apiClient }) => {
-      const response = await listInvestigations(apiClient, cookieHeader, {
-        query: 'page=1&size=1',
+    apiTest('returns 400 for a negative from value', async ({ apiClient }) => {
+      const response = await listInvestigations(apiClient, readCookieHeader, {
+        query: 'from=-1',
+      });
+      expect(response).toHaveStatusCode(400);
+    });
+
+    apiTest(
+      'returns 403 for a user without agenticInvestigations read privilege',
+      async ({ apiClient, samlAuth }) => {
+        const unauthorized = await samlAuth.asInteractiveUser(NO_AGENT_BUILDER_ROLE);
+        const response = await listInvestigations(apiClient, unauthorized.cookieHeader);
+        expect(response).toHaveStatusCode(403);
+      }
+    );
+
+    apiTest('returns severityCounts in the list response', async ({ apiClient }) => {
+      const response = await listInvestigations(apiClient, readCookieHeader, {
+        query: `impactedEntityName=${encodeURIComponent(testEntityName)}`,
       });
       expect(response).toHaveStatusCode(200);
-      expect(response.body.results.length).toBeLessThanOrEqual(1);
-      expect(response.body.page).toBe(1);
-      expect(response.body.size).toBe(1);
-    });
 
-    apiTest('returns 400 when page exceeds the maximum of 100', async ({ apiClient }) => {
-      const response = await listInvestigations(apiClient, cookieHeader, { query: 'page=101' });
-      expect(response).toHaveStatusCode(400);
-    });
-
-    apiTest('returns 400 for an unrecognised status value', async ({ apiClient }) => {
-      const response = await listInvestigations(apiClient, cookieHeader, {
-        query: 'statuses=not_a_status',
-      });
-      expect(response).toHaveStatusCode(400);
-    });
-
-    apiTest('returns 400 for an invalid sort_field value', async ({ apiClient }) => {
-      const response = await listInvestigations(apiClient, cookieHeader, {
-        query: 'sort_field=unknown_field',
-      });
-      expect(response).toHaveStatusCode(400);
-    });
-
-    apiTest('returns 403 for a user without agentBuilder:read', async ({ apiClient, samlAuth }) => {
-      const unauthorized = await samlAuth.asInteractiveUser(NO_AGENT_BUILDER_ROLE);
-      const response = await listInvestigations(apiClient, unauthorized.cookieHeader);
-      expect(response).toHaveStatusCode(403);
+      const { severityCounts } = response.body as { severityCounts: Record<string, number> };
+      // The three investigations with severity set must appear in counts.
+      expect(severityCounts['80-critical']).toBeGreaterThanOrEqual(1);
+      expect(severityCounts['60-high']).toBeGreaterThanOrEqual(1);
+      expect(severityCounts['40-medium']).toBeGreaterThanOrEqual(1);
     });
   }
 );

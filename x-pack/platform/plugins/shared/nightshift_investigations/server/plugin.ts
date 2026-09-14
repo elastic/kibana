@@ -13,14 +13,16 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import type { KibanaRequest } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-server';
 import type { NightshiftInvestigationsConfig } from './config';
-import { NightshiftInvestigationsClient } from './client/investigations_client';
+import {
+  NightshiftInvestigationsClient,
+  type NightshiftInvestigationsService,
+} from './client/investigations_client';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
 import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
 import { installInvestigationAgent } from './lib/install_investigation_agent';
@@ -40,11 +42,6 @@ import { createSandboxWriteFileTool } from './tools/sandbox_bash/write_file_tool
 import { WorkspaceManager } from './tools/sandbox_bash/workspace_manager';
 import { writeConnectorManifest } from './tools/sandbox_bash/connector_manifest';
 import { createConnectorCredentialResolver } from './tools/sandbox_bash/connector_credentials';
-import {
-  nightshiftInvestigationSavedObjectType,
-  NIGHTSHIFT_INVESTIGATION_SO_TYPE,
-} from './saved_objects';
-import { SavedObjectInvestigationRepository } from './storage';
 import {
   registerInvestigationReconciliationTask,
   scheduleInvestigationReconciliationTask,
@@ -72,7 +69,7 @@ export class NightshiftInvestigationsPlugin
   private agentBuilder?: NightshiftInvestigationsStartDeps['agentBuilder'];
   private searchInferenceEndpoints?: NightshiftInvestigationsStartDeps['searchInferenceEndpoints'];
   private ruleRegistry?: NightshiftInvestigationsStartDeps['ruleRegistry'];
-  private savedObjects?: CoreStart['savedObjects'];
+  private investigationsService?: NightshiftInvestigationsService;
   private sandboxConnectionManager?: SandboxConnectionManager;
   private actionsStart?: ActionsPluginStart;
 
@@ -88,7 +85,8 @@ export class NightshiftInvestigationsPlugin
     this.workflowsManagement = plugins.workflowsManagement;
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
 
-    core.savedObjects.registerType(nightshiftInvestigationSavedObjectType);
+    // SO type registration for nightshift-investigation removed: storage is now
+    // owned by agenticInvestigations (InvestigationsService / .kibana-investigations index).
 
     registerInvestigationReconciliationTask({
       core,
@@ -234,8 +232,14 @@ export class NightshiftInvestigationsPlugin
     this.agentBuilder = plugins.agentBuilder;
     this.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
     this.ruleRegistry = plugins.ruleRegistry;
-    this.savedObjects = coreStart.savedObjects;
     this.actionsStart = plugins.actions;
+
+    // Wire the shared investigations service from agenticInvestigations.
+    // The NightshiftInvestigationsClient delegates persistence to it instead of
+    // writing its own SO-backed repository.
+    const sharedInvestigationsService = plugins.agenticInvestigations.getInvestigationsService();
+    this.investigationsService =
+      sharedInvestigationsService as unknown as NightshiftInvestigationsService;
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
     // agent exists wherever an investigation runs. This narrower install exists so the agent is
@@ -289,7 +293,7 @@ export class NightshiftInvestigationsPlugin
       logger: this.logger,
       spaceIdOverride: spaceId,
       agentBuilder: this.agentBuilder,
-      investigationRepository: this.createInvestigationRepository(request, resolvedSpaceId),
+      investigationsService: this.investigationsService!,
       isAvailable: () =>
         isInvestigationAvailable({
           request,
@@ -302,22 +306,6 @@ export class NightshiftInvestigationsPlugin
           workflowsManagement: this.workflowsManagement,
         }),
     });
-  };
-
-  private createInvestigationRepository = (
-    request: KibanaRequest,
-    spaceId: string
-  ): SavedObjectInvestigationRepository => {
-    if (!this.savedObjects) {
-      throw new Error('savedObjects is not available — plugin start() has not been called');
-    }
-    const savedObjectsClient = this.savedObjects
-      .getScopedClient(request, {
-        excludedExtensions: [SECURITY_EXTENSION_ID],
-        includedHiddenTypes: [NIGHTSHIFT_INVESTIGATION_SO_TYPE],
-      })
-      .asScopedToNamespace(spaceId);
-    return new SavedObjectInvestigationRepository({ savedObjectsClient });
   };
 
   /**

@@ -9,65 +9,74 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import {
   apiTest,
-  INVESTIGATIONS_READ_ROLE,
-  INVESTIGATIONS_WRITE_ROLE,
+  AGENTIC_INVESTIGATIONS_READ_ROLE,
+  COMBINED_INVESTIGATIONS_ADMIN_ROLE,
   ensureInvestigation,
-  seedInvestigation,
-  deleteInvestigation,
   getInvestigation,
+  upsertInvestigation,
   uniqueId,
 } from '../fixtures';
 
+/**
+ * Tests for POST /internal/nightshift/investigations/{id}/_ensure
+ *
+ * The _ensure route is nightshift-owned and verifies that a running investigation
+ * is still live. Test data is seeded via the agenticInvestigations upsert route
+ * (nightshift-investigation SO type has been removed).
+ */
 apiTest.describe(
   'POST /internal/nightshift/investigations/{id}/_ensure',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     const TEST_ID = uniqueId('ensure-test-investigation');
-    let cookieHeader: Record<string, string>;
+    let adminCookieHeader: Record<string, string>;
 
     apiTest.beforeAll(async ({ samlAuth }) => {
-      ({ cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE));
-    });
-
-    apiTest.afterEach(async ({ kbnClient }) => {
-      await deleteInvestigation(kbnClient, TEST_ID);
+      ({ cookieHeader: adminCookieHeader } = await samlAuth.asInteractiveUser(
+        COMBINED_INVESTIGATIONS_ADMIN_ROLE
+      ));
     });
 
     apiTest(
       'acknowledges without side effects when the investigation is already running',
-      async ({ apiClient, kbnClient }) => {
-        await seedInvestigation(kbnClient, { id: TEST_ID, status: 'running' });
+      async ({ apiClient }) => {
+        await upsertInvestigation(apiClient, adminCookieHeader, {
+          id: TEST_ID,
+          status: 'running',
+        });
 
-        const response = await ensureInvestigation(apiClient, cookieHeader, TEST_ID);
+        const response = await ensureInvestigation(apiClient, adminCookieHeader, TEST_ID);
         expect(response).toHaveStatusCode(200);
         expect(response.body.acknowledged).toBe(true);
 
-        const investigationRequest = await getInvestigation(apiClient, cookieHeader, TEST_ID);
-        expect(investigationRequest).toHaveStatusCode(200);
-        expect(investigationRequest.body.status).toBe('running');
+        // Verify the investigation record was not mutated.
+        const getResponse = await getInvestigation(apiClient, adminCookieHeader, TEST_ID);
+        expect(getResponse).toHaveStatusCode(200);
+        expect(getResponse.body.status).toBe('running');
       }
     );
 
-    apiTest(
-      'returns 409 when the investigation is already settled',
-      async ({ apiClient, kbnClient }) => {
-        await seedInvestigation(kbnClient, { id: TEST_ID, status: 'completed' });
+    apiTest('returns 409 when the investigation is already settled', async ({ apiClient }) => {
+      await upsertInvestigation(apiClient, adminCookieHeader, {
+        id: TEST_ID,
+        status: 'completed',
+      });
 
-        const response = await ensureInvestigation(apiClient, cookieHeader, TEST_ID);
-        expect(response).toHaveStatusCode(409);
+      const response = await ensureInvestigation(apiClient, adminCookieHeader, TEST_ID);
+      expect(response).toHaveStatusCode(409);
 
-        const investigationRequest = await getInvestigation(apiClient, cookieHeader, TEST_ID);
-        expect(investigationRequest).toHaveStatusCode(200);
-        expect(investigationRequest.body.status).toBe('completed');
-      }
-    );
+      // Verify the investigation record was not mutated.
+      const getResponse = await getInvestigation(apiClient, adminCookieHeader, TEST_ID);
+      expect(getResponse).toHaveStatusCode(200);
+      expect(getResponse.body.status).toBe('completed');
+    });
 
     apiTest(
       'returns 404 when no investigation record and no matching workflow execution exist',
       async ({ apiClient }) => {
         const response = await ensureInvestigation(
           apiClient,
-          cookieHeader,
+          adminCookieHeader,
           uniqueId('missing-ensure-investigation')
         );
         expect(response).toHaveStatusCode(404);
@@ -77,7 +86,7 @@ apiTest.describe(
     apiTest(
       'returns 403 for a user without agentBuilder:write',
       async ({ apiClient, samlAuth }) => {
-        const unauthorized = await samlAuth.asInteractiveUser(INVESTIGATIONS_READ_ROLE);
+        const unauthorized = await samlAuth.asInteractiveUser(AGENTIC_INVESTIGATIONS_READ_ROLE);
         const response = await ensureInvestigation(apiClient, unauthorized.cookieHeader, 'any-id');
         expect(response).toHaveStatusCode(403);
       }

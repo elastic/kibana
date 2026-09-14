@@ -6,9 +6,8 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
+import type { Logger } from '@kbn/core/server';
 import type { InvestigationStatus } from '../../common';
-import { InvestigationStaleWriteError } from '../storage';
-import type { InvestigationPatch } from '../storage';
 import {
   EXECUTION_LOOKUP_BATCH_SIZE,
   FALLBACK_ERRORS,
@@ -18,44 +17,84 @@ import {
   NON_TERMINAL_INVESTIGATION_STATUSES,
   PAGE_SIZE,
 } from './investigation_reconciliation_types';
-import type {
-  ExecutionSummary,
-  ReconcileInvestigationStatusesDeps,
-  ReconciliationCandidate,
-  ReconciliationOutcome,
-  ReconciliationResult,
-} from './investigation_reconciliation_types';
+import type { ExecutionSummary, ReconciliationResult } from './investigation_reconciliation_types';
 
-export type {
-  ExecutionSummary,
-  ReconcileInvestigationStatusesDeps,
-  ReconciliationResult,
-} from './investigation_reconciliation_types';
+export type { ExecutionSummary, ReconciliationResult } from './investigation_reconciliation_types';
+
+/**
+ * Minimal record shape returned by the cross-space sweep query.
+ * The concrete InvestigationsService satisfies this structurally after the spine adds
+ * `findAcrossSpaces` and `updateInSpace` to the shared service (see spine change request).
+ */
+interface SweepRecord {
+  id: string;
+  createdAt: string;
+  spaceId: string;
+}
+
+/**
+ * Cross-space operations needed by the reconciliation sweep. These are additions to
+ * InvestigationsService requested via the spine change for this leaf.
+ */
+interface ReconciliationSweepService {
+  findAcrossSpaces(query: {
+    statuses: readonly InvestigationStatus[];
+    sortField: string;
+    sortOrder: 'asc' | 'desc';
+    page: number;
+    size: number;
+  }): Promise<{ results: SweepRecord[]; total: number }>;
+  updateInSpace(params: {
+    id: string;
+    spaceId: string;
+    patch: {
+      status: InvestigationStatus;
+      completedAt: string;
+      error?: string;
+    };
+  }): Promise<void>;
+}
+
+export interface ReconcileInvestigationStatusesDeps {
+  /** Shared investigation service — must satisfy ReconciliationSweepService structurally. */
+  investigationsService: ReconciliationSweepService;
+  getExecutionSummaries: (
+    executionIds: string[],
+    spaceId: string
+  ) => Promise<ReadonlyMap<string, ExecutionSummary>>;
+  logger: Logger;
+  signal: AbortSignal;
+}
+
+interface ReconciliationOutcome {
+  reconciledStatus: InvestigationStatus;
+  completedAt: string;
+  errorMessage?: string;
+}
 
 /**
  * Reads every candidate before any write: patching removes a row from the non-terminal result set
  * and would shift the offsets of pages still to be read.
  */
 const getCandidatesBySpace = async ({
-  investigationSweepRepository,
+  investigationsService,
   signal,
-}: Pick<ReconcileInvestigationStatusesDeps, 'investigationSweepRepository' | 'signal'>): Promise<{
-  bySpace: Map<string, ReconciliationCandidate[]>;
+}: Pick<ReconcileInvestigationStatusesDeps, 'investigationsService' | 'signal'>): Promise<{
+  bySpace: Map<string, SweepRecord[]>;
   scanned: number;
 }> => {
-  const candidates: ReconciliationCandidate[] = [];
+  const candidates: SweepRecord[] = [];
   for (let page = 1; candidates.length < MAX_CANDIDATES; page++) {
     if (signal.aborted) {
       break;
     }
 
-    const { results } = await investigationSweepRepository.findAcrossSpaces({
+    const { results } = await investigationsService.findAcrossSpaces({
       statuses: [...NON_TERMINAL_INVESTIGATION_STATUSES],
-      fields: ['created_at'],
-      sortField: 'created_at',
+      sortField: 'createdAt',
       sortOrder: 'asc',
       page,
-      perPage: PAGE_SIZE,
+      size: PAGE_SIZE,
     });
 
     candidates.push(...results.slice(0, MAX_CANDIDATES - candidates.length));
@@ -65,7 +104,7 @@ const getCandidatesBySpace = async ({
     }
   }
 
-  const bySpace = new Map<string, ReconciliationCandidate[]>();
+  const bySpace = new Map<string, SweepRecord[]>();
   for (const candidate of candidates) {
     const spaceCandidates = bySpace.get(candidate.spaceId);
     if (spaceCandidates) {
@@ -141,13 +180,13 @@ const toReconciliationOutcome = ({
  * write the outcome. Only the status is corrected; no lifecycle trigger is emitted.
  */
 export const reconcileInvestigationStatuses = async ({
-  investigationSweepRepository,
+  investigationsService,
   getExecutionSummaries,
   logger,
   signal,
 }: ReconcileInvestigationStatusesDeps): Promise<ReconciliationResult> => {
   const { bySpace, scanned } = await getCandidatesBySpace({
-    investigationSweepRepository,
+    investigationsService,
     signal,
   });
 
@@ -164,7 +203,7 @@ export const reconcileInvestigationStatuses = async ({
       let executions: ReadonlyMap<string, ExecutionSummary>;
       try {
         executions = await getExecutionSummaries(
-          batch.map(({ investigation }) => investigation.id),
+          batch.map(({ id }) => id),
           spaceId
         );
       } catch (error) {
@@ -179,7 +218,7 @@ export const reconcileInvestigationStatuses = async ({
           return { scanned, reconciled };
         }
 
-        const { id, version, created_at: investigationCreatedAt } = candidate.investigation;
+        const { id, createdAt: investigationCreatedAt } = candidate;
         const execution = executions.get(id);
         const outcome = toReconciliationOutcome({ execution, investigationCreatedAt });
 
@@ -187,14 +226,16 @@ export const reconcileInvestigationStatuses = async ({
           continue;
         }
 
-        const patch: InvestigationPatch = {
-          status: outcome.reconciledStatus,
-          completed_at: outcome.completedAt,
-          ...(outcome.errorMessage && { error: outcome.errorMessage }),
-        };
-
         try {
-          await investigationSweepRepository.updateInSpace({ id, spaceId, patch, version });
+          await investigationsService.updateInSpace({
+            id,
+            spaceId,
+            patch: {
+              status: outcome.reconciledStatus,
+              completedAt: outcome.completedAt,
+              ...(outcome.errorMessage && { error: outcome.errorMessage }),
+            },
+          });
           reconciled += 1;
           logger.debug(
             `Reconciled investigation "${id}" in space "${spaceId}" to "${
@@ -202,10 +243,6 @@ export const reconcileInvestigationStatuses = async ({
             }" (execution status: ${execution?.status ?? 'not found'})`
           );
         } catch (error) {
-          if (error instanceof InvestigationStaleWriteError) {
-            // Something else settled the investigation between the read and the write.
-            continue;
-          }
           logger.warn(
             `Failed to reconcile investigation "${id}" in space "${spaceId}": ${error.message}`
           );

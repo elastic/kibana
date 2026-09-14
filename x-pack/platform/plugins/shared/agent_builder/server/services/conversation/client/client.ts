@@ -134,6 +134,7 @@ export interface ConversationClient {
     feedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string }
   ): Promise<void>;
   list(options?: ConversationListOptions): Promise<ConversationListResult>;
+  bulkGet(ids: string[]): Promise<ConversationWithPermissions[]>;
   delete(conversationId: string): Promise<boolean>;
   updateAccessControl(
     conversationId: string,
@@ -224,6 +225,9 @@ class ConversationClientImpl implements ConversationClient {
       perPage = MAX_CONVERSATIONS_PER_PAGE,
       sortOrder = 'desc',
       pinned,
+      templateId,
+      metadataKey,
+      metadataValue,
     } = options;
 
     const accessibleAgentIds = await this.agentRegistry.getIds();
@@ -235,6 +239,13 @@ class ConversationClientImpl implements ConversationClient {
     const agentIds = agentId ? [agentId] : accessibleAgentIds;
 
     const pinnedFilter = buildPinnedFilter({ user: this.user, pinned });
+
+    const templateFilter = templateId ? [{ term: { template_id: templateId } }] : [];
+
+    const metadataFilter =
+      metadataKey !== undefined && metadataValue !== undefined
+        ? [{ term: { [`metadata.${metadataKey}`]: metadataValue } }]
+        : [];
 
     const response = await this.storage.getClient().search({
       // Cap at MAX_RESULT_WINDOW: anything beyond is unreachable via offset pagination.
@@ -271,6 +282,8 @@ class ConversationClientImpl implements ConversationClient {
             // Hide sub-agent conversations from the nav list - hardcoded until we need to do better
             { bool: { must_not: [{ exists: { field: 'parent_conversation' } }] } },
             ...pinnedFilter,
+            ...templateFilter,
+            ...metadataFilter,
           ],
         },
       },
@@ -295,6 +308,47 @@ class ConversationClientImpl implements ConversationClient {
     });
 
     return { results, total };
+  }
+
+  async bulkGet(ids: string[]): Promise<ConversationWithPermissions[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const accessibleAgentIds = await this.agentRegistry.getIds();
+
+    if (accessibleAgentIds.length === 0) {
+      return [];
+    }
+
+    const response = await this.storage.getClient().search({
+      track_total_hits: false,
+      size: ids.length,
+      seq_no_primary_term: true,
+      query: {
+        bool: {
+          filter: [
+            { ids: { values: ids } },
+            createSpaceDslFilter(this.space),
+            buildReadAccessFilter({ user: this.user, agentIds: accessibleAgentIds }),
+          ],
+        },
+      },
+    });
+
+    return response.hits.hits.flatMap((hit) => {
+      if (!isConversationDocument(hit)) {
+        return [];
+      }
+
+      return [
+        toResponseConversation({
+          document: hit,
+          user: this.user,
+          resolveTemplate: getTemplate,
+        }),
+      ];
+    });
   }
 
   async get(conversationId: string): Promise<ConversationWithPermissions> {

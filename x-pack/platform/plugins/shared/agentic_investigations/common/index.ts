@@ -61,3 +61,5 @@ export type {
   ProposalStatus,
   ProposalWithMetadata,
 } from './proposals';
+
+export * from './investigations';

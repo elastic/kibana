@@ -30,12 +30,14 @@ import { useKibana } from '../hooks/use_kibana';
 import { isHttpNotFoundError } from '../common/http_error';
 import { useFetchInvestigations } from '../hooks/use_fetch_investigations';
 import { useFetchSeverityCounts } from '../hooks/use_fetch_severity_counts';
+import { useFetchSharedInvestigations } from '../hooks/use_fetch_shared_investigations';
 import {
   INVESTIGATION_LIST_PAGE_SIZE,
   InvestigationList,
 } from '../investigation/investigation_list';
 import { InvestigationDetailFlyout } from '../investigation/investigation_detail_flyout';
 import { InvestigationSeverityTiles } from '../investigation/investigation_severity_tiles';
+import { ImpactedEntityFilter } from '../investigation/impacted_entity_filter';
 import {
   clearNightshiftInvestigationIdParam,
   clearNightshiftSeverityParam,
@@ -73,6 +75,7 @@ export function NightshiftApp(): React.ReactElement {
     [rawSeverity]
   );
   const [page, setPage] = useState(1);
+  const [impactedEntityName, setImpactedEntityName] = useState<string | undefined>(undefined);
 
   const severities = useMemo(
     () => (activeSeverity ? [activeSeverity] : undefined),
@@ -90,6 +93,15 @@ export function NightshiftApp(): React.ReactElement {
   // Separate request: the counts are independent of page, sort and the selected severity, so
   // they resolve on their own and the list does not wait on the aggregation.
   const { data: countsData } = useFetchSeverityCounts({ query: searchQuery });
+
+  // Shared investigation entity: supplements the nightshift-specific list with data from the
+  // cross-solution investigations store, filtered by impacted entity name when provided.
+  useFetchSharedInvestigations({
+    severity: activeSeverity,
+    impactedEntityName,
+    page,
+    perPage: INVESTIGATION_LIST_PAGE_SIZE,
+  });
 
   const investigations = useMemo(() => data?.results ?? [], [data]);
   const severityCounts = useMemo(
@@ -144,6 +156,11 @@ export function NightshiftApp(): React.ReactElement {
     },
     [history, activeSeverity]
   );
+
+  const handleImpactedEntityFilter = useCallback((name: string | undefined) => {
+    setImpactedEntityName(name);
+    setPage(1);
+  }, []);
 
   const handlePageChange = useCallback((nextPage: number) => {
     setPage(nextPage);
@@ -222,6 +239,10 @@ export function NightshiftApp(): React.ReactElement {
         isClearable
         fullWidth
       />
+
+      <EuiSpacer size="s" />
+
+      <ImpactedEntityFilter value={impactedEntityName} onFilter={handleImpactedEntityFilter} />
 
       <EuiSpacer size="m" />
 

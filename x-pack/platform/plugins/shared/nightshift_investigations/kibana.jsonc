@@ -11,6 +11,7 @@
     "server": true,
     "configPath": ["xpack", "nightshift_investigations"],
     "requiredPlugins": [
+      "agenticInvestigations",
       "taskManager"
     ],
     "optionalPlugins": [

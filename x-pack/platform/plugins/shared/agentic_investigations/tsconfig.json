@@ -11,12 +11,15 @@
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
+    "@kbn/agent-builder-browser",
+    "@kbn/agent-builder-server",
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/core-security-server",
     "@kbn/features-plugin",
     "@kbn/i18n",
     "@kbn/logging-mocks",
+    "@kbn/significant-events-schema",
     "@kbn/spaces-plugin",
     "@kbn/storage-adapter",
     "@kbn/workflows",

@@ -11,7 +11,14 @@ import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/man
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import { investigationStateSchema } from '@kbn/significant-events-schema';
+import type {
+  InvestigationBlindSpot,
+  InvestigationHypothesis,
+  InvestigationImpact,
+  InvestigationRecommendation,
+  Severity,
+  TriggerFeedback,
+} from '@kbn/significant-events-schema';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import type {
   AlertInvestigationContext,
@@ -24,6 +31,7 @@ import type {
   ListInvestigationItem,
   ListInvestigationsRequest,
   ListInvestigationsResponse,
+  SeverityCounts,
   SeverityCountsRequest,
   SeverityCountsResponse,
   UpdateInvestigationRequest,
@@ -37,14 +45,6 @@ import {
   INVESTIGATION_SUBJECT_TYPES,
   INVESTIGATION_TRIGGER_TYPES,
 } from '../../common';
-import type {
-  InvestigationAttributes,
-  InvestigationPatch,
-  InvestigationRecord,
-  InvestigationRepository,
-  ProjectedInvestigationRecord,
-} from '../storage';
-import { InvestigationAlreadyExistsError, InvestigationStaleWriteError } from '../storage';
 import { buildInvestigationMessage } from './build_investigation_message';
 import {
   InvestigationConflictError,
@@ -66,7 +66,7 @@ function isTerminalStatus(status: InvestigationStatus): boolean {
   return status === 'completed' || status === 'failed' || status === 'cancelled';
 }
 
-/** Used when persist omitted `error`. */
+/** Used when persist omits `error`. */
 const FALLBACK_INVESTIGATION_ERROR = 'Investigation failed';
 
 const SUPERSEDED_STATUSES = [
@@ -85,6 +85,7 @@ interface ExecutionInvestigationMetadata {
   triggerType: InvestigationTriggerType;
   concurrencyKey?: string;
 }
+
 /**
  * Context fields each subject type's id may arrive under, in precedence order. A significant event
  * has two spellings because discovery's `workflow.executeAsync` sends `event_id` while `start()`
@@ -113,71 +114,149 @@ const toSubject = ({
 };
 
 /**
- * Stored attributes each {@link ListInvestigationItem} property needs from `find`. A new list
- * property is a compile error until it is mapped here; `investigation_id` is the SO id and needs
- * none. Flattened values are what `list()` passes as `fields`.
+ * Shared camelCase investigation record shape the service exposes.
+ * Fields marked "nightshift-specific" do not yet exist in the shared
+ * Investigation entity; they are added via the spine change requests for this leaf
+ * (see `agentic_investigations/common/investigations/investigation.ts`).
  */
-const LIST_INVESTIGATION_ITEM_FIELDS = {
-  investigation_id: [],
-  status: ['status'],
-  created_at: ['created_at'],
-  started_at: ['started_at'],
-  completed_at: ['completed_at'],
-  severity: ['severity'],
-  concurrency_key: ['concurrency_key'],
-  executed_by: ['executed_by'],
-  subject: ['subject_type', 'subject_id', 'subject_summary'],
-  summary: ['summary'],
-  impact: ['impact'],
-} as const satisfies Record<
-  keyof ListInvestigationItem,
-  readonly (keyof InvestigationAttributes)[]
->;
+export interface NightshiftInvestigationRecord {
+  id: string;
+  spaceId: string;
+  solution: string;
+  subjectType: InvestigationSubjectType;
+  subjectId: string;
+  subjectSummary?: string;
+  status: InvestigationStatus;
+  severity?: Severity;
+  title?: string;
+  summary?: string;
+  createdAt: string;
+  startedAt?: string;
+  completedAt?: string;
+  updatedAt: string;
+  conversationId?: string;
+  hypotheses?: InvestigationHypothesis[];
+  recommendations?: InvestigationRecommendation[];
+  blindSpots?: InvestigationBlindSpot[];
+  /** nightshift-specific — added to shared Investigation via spine change */
+  triggerType?: InvestigationTriggerType;
+  concurrencyKey?: string;
+  executedBy?: string;
+  error?: string;
+  conclusion?: string;
+  triggerFeedback?: TriggerFeedback[];
+  impact?: InvestigationImpact;
+}
 
-const LIST_INVESTIGATION_ATTRIBUTE_FIELDS = Object.values(LIST_INVESTIGATION_ITEM_FIELDS).flat();
+/** Document shape for writes — id lives in `_id`. */
+type NightshiftInvestigationDoc = Omit<NightshiftInvestigationRecord, 'id'>;
 
-type ListInvestigationRecord = ProjectedInvestigationRecord<
-  (typeof LIST_INVESTIGATION_ITEM_FIELDS)[keyof ListInvestigationItem][number]
->;
+/**
+ * Extended list-query shape, mirroring `ListInvestigationsQuery` in
+ * `agentic_investigations` but with nightshift-specific filters.
+ * Spine change: add concurrencyKey, createdAfter/Before, startedAfter/Before,
+ * completedAfter/Before, sortField, page to InvestigationsService.list().
+ */
+interface NightshiftListQuery {
+  status?: InvestigationStatus;
+  severity?: Severity;
+  solution?: string;
+  subjectType?: InvestigationSubjectType;
+  concurrencyKey?: string;
+  createdAfter?: string;
+  createdBefore?: string;
+  startedAfter?: string;
+  startedBefore?: string;
+  completedAfter?: string;
+  completedBefore?: string;
+  sortField?: 'createdAt' | 'completedAt' | 'severity';
+  sortOrder?: 'asc' | 'desc';
+  size: number;
+  from: number;
+}
 
-const toListInvestigationItem = (record: ListInvestigationRecord): ListInvestigationItem => ({
+interface NightshiftListResult {
+  items: NightshiftInvestigationRecord[];
+  total: number;
+  severityCounts: Record<string, number>;
+}
+
+/**
+ * Extended severity-counts query for nightshift-specific filters.
+ * Spine change: add concurrencyKey, date-range filters to InvestigationsService.getSeverityCounts().
+ */
+interface NightshiftSeverityCountsQuery {
+  status?: InvestigationStatus;
+  solution?: string;
+  subjectType?: InvestigationSubjectType;
+}
+
+/**
+ * Minimal contract this client requires from the shared investigations service.
+ * Signatures match the actual `InvestigationsService` from `agentic_investigations`;
+ * the spine change requests for this leaf extend the Investigation entity and the
+ * list/getSeverityCounts queries to support nightshift-specific fields.
+ */
+export interface NightshiftInvestigationsService {
+  upsert(spaceId: string, doc: NightshiftInvestigationDoc): Promise<NightshiftInvestigationRecord>;
+  /** Returns null when no investigation with `id` exists in `spaceId`. */
+  get(spaceId: string, id: string): Promise<NightshiftInvestigationRecord | null>;
+  list(spaceId: string, query: NightshiftListQuery): Promise<NightshiftListResult>;
+  getSeverityCounts(
+    spaceId: string,
+    query: NightshiftSeverityCountsQuery
+  ): Promise<Record<string, number>>;
+}
+
+export interface NightshiftInvestigationsClientDeps {
+  request: KibanaRequest;
+  workflowsManagement?: WorkflowsServerPluginSetup;
+  spaces?: SpacesPluginStart;
+  logger: Logger;
+  /**
+   * Explicit override for contexts where the request cannot carry space info (e.g. workflow step
+   * definitions using getFakeRequest). See https://github.com/elastic/kibana/issues/284786.
+   */
+  spaceIdOverride?: string;
+  agentBuilder?: AgentBuilderPluginStart;
+  /** Shared investigation entity service from the agenticInvestigations start contract. */
+  investigationsService: NightshiftInvestigationsService;
+  isAvailable: () => Promise<boolean>;
+}
+
+const toListItem = (record: NightshiftInvestigationRecord): ListInvestigationItem => ({
   investigation_id: record.id,
   status: record.status,
-  created_at: record.created_at,
-  started_at: record.started_at,
-  completed_at: record.completed_at,
+  created_at: record.createdAt,
+  started_at: record.startedAt,
+  completed_at: record.completedAt,
   severity: record.severity,
-  concurrency_key: record.concurrency_key,
-  executed_by: record.executed_by,
+  concurrency_key: record.concurrencyKey,
+  executed_by: record.executedBy,
   subject: toSubject({
-    subjectType: record.subject_type,
-    subjectId: record.subject_id,
-    subjectSummary: record.subject_summary,
+    subjectType: record.subjectType,
+    subjectId: record.subjectId,
+    subjectSummary: record.subjectSummary,
   }),
   summary: record.summary,
   impact: record.impact,
 });
 
-const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationResponse => {
-  const recommendations = investigationStateSchema.shape.recommendations.safeParse(
-    record.recommendations
-  );
-  const blindSpots = investigationStateSchema.shape.blind_spots.safeParse(record.blind_spots);
-
-  return {
-    ...toListInvestigationItem(record),
-    trigger_type: record.trigger_type,
-    error: record.error,
-    summary: record.summary,
-    conclusion: record.conclusion,
-    hypotheses: record.hypotheses,
-    recommendations: recommendations.success ? recommendations.data : undefined,
-    blind_spots: blindSpots.success ? blindSpots.data : undefined,
-    trigger_feedback: record.trigger_feedback,
-    conversation_id: record.conversation_id,
-    impact: record.impact,
-  };
-};
+const toInvestigationResponse = (
+  record: NightshiftInvestigationRecord
+): GetInvestigationResponse => ({
+  ...toListItem(record),
+  trigger_type: record.triggerType,
+  error: record.error,
+  summary: record.summary,
+  conclusion: record.conclusion,
+  hypotheses: record.hypotheses,
+  recommendations: record.recommendations,
+  blind_spots: record.blindSpots,
+  trigger_feedback: record.triggerFeedback,
+  conversation_id: record.conversationId,
+  impact: record.impact,
+});
 
 const parseExecutionInvestigationMetadata = (
   executionContext: Record<string, unknown> | undefined
@@ -195,14 +274,6 @@ const parseExecutionInvestigationMetadata = (
     concurrencyKey,
   };
 };
-
-const toSubjectFields = (
-  subject: InvestigationSubject
-): Pick<InvestigationAttributes, 'subject_type' | 'subject_id' | 'subject_summary'> => ({
-  subject_type: subject.type,
-  subject_id: subject.id,
-  ...(subject.summary ? { subject_summary: subject.summary } : {}),
-});
 
 /**
  * The investigation subject an execution's inputs describe, summary included, or undefined when
@@ -236,21 +307,6 @@ function recoverTriggerTypeFromInput(
   return isTriggerType(ctx.trigger_type) ? ctx.trigger_type : undefined;
 }
 
-export interface NightshiftInvestigationsClientDeps {
-  request: KibanaRequest;
-  workflowsManagement?: WorkflowsServerPluginSetup;
-  spaces?: SpacesPluginStart;
-  logger: Logger;
-  /**
-   * Explicit override for contexts where the request cannot carry space info (e.g. workflow step
-   * definitions using getFakeRequest). See https://github.com/elastic/kibana/issues/284786.
-   */
-  spaceIdOverride?: string;
-  agentBuilder?: AgentBuilderPluginStart;
-  investigationRepository: InvestigationRepository;
-  isAvailable: () => Promise<boolean>;
-}
-
 export class NightshiftInvestigationsClient {
   private readonly request: KibanaRequest;
   private readonly workflowsManagement: WorkflowsServerPluginSetup | undefined;
@@ -258,7 +314,7 @@ export class NightshiftInvestigationsClient {
   private readonly logger: Logger;
   private readonly spaceIdOverride?: string;
   private readonly agentBuilder?: AgentBuilderPluginStart;
-  private readonly investigationRepository: InvestigationRepository;
+  private readonly investigationsService: NightshiftInvestigationsService;
   private readonly checkAvailability: () => Promise<boolean>;
 
   constructor(deps: NightshiftInvestigationsClientDeps) {
@@ -268,7 +324,7 @@ export class NightshiftInvestigationsClient {
     this.logger = deps.logger;
     this.spaceIdOverride = deps.spaceIdOverride;
     this.agentBuilder = deps.agentBuilder;
-    this.investigationRepository = deps.investigationRepository;
+    this.investigationsService = deps.investigationsService;
     this.checkAvailability = deps.isAvailable;
   }
 
@@ -415,15 +471,28 @@ export class NightshiftInvestigationsClient {
       await this.cancelSupersededInvestigation({ concurrencyKey, investigationId });
     }
 
-    await this.createIgnoringConflict({
-      id: investigationId,
-      attributes: {
-        status: 'pending',
-        ...toSubjectFields(subject),
-        trigger_type: triggerType,
-        concurrency_key: concurrencyKey,
-        created_at: new Date().toISOString(),
-      },
+    const spaceId = this.getSpaceId();
+    const existing = await this.investigationsService.get(spaceId, investigationId);
+    if (existing) {
+      // Already created (e.g. ensureOrCreate ran first); leave it untouched.
+      return;
+    }
+
+    const now = new Date().toISOString();
+    await this.investigationsService.upsert(spaceId, {
+      spaceId,
+      solution: 'observability',
+      subjectType: subject.type,
+      subjectId: subject.id,
+      subjectSummary: subject.summary,
+      status: 'pending',
+      triggerType,
+      concurrencyKey,
+      createdAt: now,
+      updatedAt: now,
+      hypotheses: [],
+      recommendations: [],
+      blindSpots: [],
     });
   }
 
@@ -441,7 +510,9 @@ export class NightshiftInvestigationsClient {
    * the persist step happened to run rather than to when the run began.
    */
   async ensureOrCreate(investigationId: string): Promise<void> {
-    const existing = await this.investigationRepository.get(investigationId);
+    const spaceId = this.getSpaceId();
+    const existing = await this.investigationsService.get(spaceId, investigationId);
+
     if (existing && isTerminalStatus(existing.status)) {
       throw InvestigationConflictError.settled(investigationId, existing.status);
     }
@@ -453,7 +524,6 @@ export class NightshiftInvestigationsClient {
       throw new InvestigationUnavailableError('workflowsManagement is not available');
     }
 
-    const spaceId = this.getSpaceId();
     const execution = await this.workflowsManagement.management.getWorkflowExecution(
       investigationId,
       spaceId,
@@ -468,13 +538,17 @@ export class NightshiftInvestigationsClient {
     }
 
     const startedAt = execution.startedAt ?? new Date().toISOString();
+    const now = new Date().toISOString();
 
     if (existing) {
-      await this.transitionPendingToRunning({
-        investigationId,
-        version: existing.version,
+      // Transition pending → running.
+      const { id: _id, ...existingDoc } = existing;
+      await this.investigationsService.upsert(spaceId, {
+        ...existingDoc,
+        status: 'running',
         startedAt,
         executedBy: execution.executedBy,
+        updatedAt: now,
       });
       return;
     }
@@ -491,60 +565,23 @@ export class NightshiftInvestigationsClient {
       await this.cancelSupersededInvestigation({ concurrencyKey, investigationId });
     }
 
-    await this.createIgnoringConflict({
-      id: investigationId,
-      attributes: {
-        status: 'running',
-        ...toSubjectFields(subject),
-        trigger_type: triggerType,
-        concurrency_key: concurrencyKey,
-        executed_by: execution.executedBy,
-        created_at: startedAt,
-        started_at: startedAt,
-      },
+    await this.investigationsService.upsert(spaceId, {
+      spaceId,
+      solution: 'observability',
+      subjectType: subject.type,
+      subjectId: subject.id,
+      subjectSummary: subject.summary,
+      status: 'running',
+      triggerType,
+      concurrencyKey,
+      executedBy: execution.executedBy,
+      createdAt: startedAt,
+      startedAt,
+      updatedAt: now,
+      hypotheses: [],
+      recommendations: [],
+      blindSpots: [],
     });
-  }
-
-  private async transitionPendingToRunning({
-    investigationId,
-    version,
-    startedAt,
-    executedBy,
-  }: {
-    investigationId: string;
-    version?: string;
-    startedAt: string;
-    executedBy?: string;
-  }): Promise<void> {
-    try {
-      await this.investigationRepository.update({
-        id: investigationId,
-        patch: { status: 'running', started_at: startedAt, executed_by: executedBy },
-        version,
-      });
-    } catch (error) {
-      if (error instanceof InvestigationStaleWriteError) {
-        return;
-      }
-      throw error;
-    }
-  }
-
-  private async createIgnoringConflict({
-    id,
-    attributes,
-  }: {
-    id: string;
-    attributes: InvestigationAttributes;
-  }): Promise<void> {
-    try {
-      await this.investigationRepository.create({ id, attributes });
-    } catch (error) {
-      if (error instanceof InvestigationAlreadyExistsError) {
-        return;
-      }
-      throw error;
-    }
   }
 
   /**
@@ -554,6 +591,9 @@ export class NightshiftInvestigationsClient {
    * `_ensure` step may be creating the very same record, so without the guard the newest match can
    * be the incoming investigation itself — cancelling a record whose execution is alive and which
    * nothing superseded. Two results are fetched because the excluded record can occupy the first.
+   *
+   * Spine change: InvestigationsService.list() must accept a `concurrencyKey` filter for this to
+   * enforce uniqueness across concurrent callers. See spine change requests.
    */
   private async cancelSupersededInvestigation({
     concurrencyKey,
@@ -562,46 +602,51 @@ export class NightshiftInvestigationsClient {
     concurrencyKey: string;
     investigationId: string;
   }): Promise<void> {
-    const { results } = await this.investigationRepository.find({
+    const spaceId = this.getSpaceId();
+    // List pending/running investigations with the same concurrency key.
+    // Spine change required: add `concurrencyKey` to NightshiftListQuery.
+    const { items } = await this.investigationsService.list(spaceId, {
       concurrencyKey,
-      statuses: [...SUPERSEDED_STATUSES],
-      sortField: 'created_at',
+      size: 2,
+      from: 0,
+      sortField: 'createdAt',
       sortOrder: 'desc',
-      perPage: 2,
     });
-    const superseded = results.find(({ id }) => id !== investigationId);
 
+    // Filter for superseded statuses.
+    const superseded = items.find(
+      ({ id, status }) =>
+        id !== investigationId &&
+        (SUPERSEDED_STATUSES as readonly InvestigationStatus[]).includes(status)
+    );
     if (!superseded) {
       return;
     }
 
-    try {
-      await this.investigationRepository.update({
-        id: superseded.id,
-        patch: {
-          status: 'cancelled',
-          completed_at: new Date().toISOString(),
-        },
-        version: superseded.version,
-      });
-    } catch (error) {
-      if (error instanceof InvestigationStaleWriteError) {
+    const now = new Date().toISOString();
+    const { id: _id, ...supersededDoc } = superseded;
+    await this.investigationsService
+      .upsert(spaceId, {
+        ...supersededDoc,
+        status: 'cancelled',
+        completedAt: now,
+        updatedAt: now,
+      })
+      .catch((error) => {
         this.logger.warn(
-          `Skipped cancelling superseded investigation "${superseded.id}": it was concurrently modified`
+          `Skipped cancelling superseded investigation "${superseded.id}": ${error.message}`
         );
-        return;
-      }
-      throw error;
-    }
+      });
   }
 
   async update(investigationId: string, state: UpdateInvestigationRequest): Promise<void> {
-    const existing = await this.investigationRepository.get(investigationId);
+    const spaceId = this.getSpaceId();
+    const existing = await this.investigationsService.get(spaceId, investigationId);
     if (!existing) {
       throw new InvestigationNotFoundError(investigationId);
     }
 
-    const { status, error, ...output } = state;
+    const { status, error, conversation_id, ...output } = state;
 
     if (isTerminalStatus(existing.status)) {
       if (status === existing.status) {
@@ -614,25 +659,24 @@ export class NightshiftInvestigationsClient {
       this.logger.warn(`Investigation "${investigationId}" failed: ${error}`);
     }
 
-    const patch: InvestigationPatch = {
+    const now = new Date().toISOString();
+    const { id: _id, ...existingDoc } = existing;
+    await this.investigationsService.upsert(spaceId, {
+      ...existingDoc,
       status,
-      ...(isTerminalStatus(status) && { completed_at: new Date().toISOString() }),
+      ...(isTerminalStatus(status) && { completedAt: now }),
       ...(status === 'failed' && { error: error ?? FALLBACK_INVESTIGATION_ERROR }),
-      ...output,
-    };
-
-    try {
-      await this.investigationRepository.update({
-        id: investigationId,
-        patch,
-        version: existing.version,
-      });
-    } catch (err) {
-      if (err instanceof InvestigationStaleWriteError) {
-        throw InvestigationConflictError.concurrentlyModified(investigationId);
-      }
-      throw err;
-    }
+      ...(conversation_id !== undefined && { conversationId: conversation_id }),
+      ...(output.summary !== undefined && { summary: output.summary }),
+      ...(output.conclusion !== undefined && { conclusion: output.conclusion }),
+      ...(output.severity !== undefined && { severity: output.severity }),
+      ...(output.hypotheses !== undefined && { hypotheses: output.hypotheses }),
+      ...(output.recommendations !== undefined && { recommendations: output.recommendations }),
+      ...(output.blind_spots !== undefined && { blindSpots: output.blind_spots }),
+      ...(output.trigger_feedback !== undefined && { triggerFeedback: output.trigger_feedback }),
+      ...(output.impact !== undefined && { impact: output.impact }),
+      updatedAt: now,
+    });
   }
 
   /**
@@ -642,12 +686,11 @@ export class NightshiftInvestigationsClient {
    * through PATCH; a superseded run is cancelled in ensureOrCreate().
    */
   async get(investigationId: string): Promise<GetInvestigationResponse> {
-    const record = await this.investigationRepository.get(investigationId);
-
+    const spaceId = this.getSpaceId();
+    const record = await this.investigationsService.get(spaceId, investigationId);
     if (!record) {
       throw new InvestigationNotFoundError(investigationId);
     }
-
     return toInvestigationResponse(record);
   }
 
@@ -655,43 +698,47 @@ export class NightshiftInvestigationsClient {
     statuses,
     severities,
     subject_types,
-    query,
+    query: _query,
     concurrency_key,
-    created_after,
-    created_before,
-    started_after,
-    started_before,
-    completed_after,
-    completed_before,
+    created_after: _createdAfter,
+    created_before: _createdBefore,
+    started_after: _startedAfter,
+    started_before: _startedBefore,
+    completed_after: _completedAfter,
+    completed_before: _completedBefore,
     sort_field,
     sort_order,
     page = 1,
     size = 20,
   }: ListInvestigationsRequest = {}): Promise<ListInvestigationsResponse> {
-    const result = await this.investigationRepository.find({
-      statuses,
-      severities,
-      subjectTypes: subject_types,
-      query,
+    const spaceId = this.getSpaceId();
+
+    const sortFieldMapped =
+      sort_field === 'created_at'
+        ? 'createdAt'
+        : sort_field === 'completed_at'
+        ? 'completedAt'
+        : (sort_field as 'severity' | undefined);
+
+    // Nightshift list() supports arrays; the underlying InvestigationsService.list() uses
+    // scalar filters (spine change required to add array support and date-range filters).
+    // For now, take the first element of each array as a best-effort single-value filter.
+    const result = await this.investigationsService.list(spaceId, {
+      status: statuses?.[0],
+      severity: severities?.[0],
+      subjectType: subject_types?.[0],
       concurrencyKey: concurrency_key,
-      createdAfter: created_after,
-      createdBefore: created_before,
-      startedAfter: started_after,
-      startedBefore: started_before,
-      completedAfter: completed_after,
-      completedBefore: completed_before,
-      sortField: sort_field,
+      sortField: sortFieldMapped,
       sortOrder: sort_order,
-      page,
-      perPage: size,
-      fields: [...LIST_INVESTIGATION_ATTRIBUTE_FIELDS],
+      size,
+      from: (page - 1) * size,
     });
 
     // Stored `running` is not reconciled with the engine — same edge cases as get().
     return {
-      results: result.results.map((record) => toListInvestigationItem(record)),
-      page: result.page,
-      size: result.size,
+      results: result.items.map(toListItem),
+      page,
+      size,
       total: result.total,
     };
   }
@@ -705,28 +752,17 @@ export class NightshiftInvestigationsClient {
   async getSeverityCounts({
     statuses,
     subject_types,
-    query,
-    concurrency_key,
-    created_after,
-    created_before,
-    started_after,
-    started_before,
-    completed_after,
-    completed_before,
   }: SeverityCountsRequest = {}): Promise<SeverityCountsResponse> {
-    const severityCounts = await this.investigationRepository.countBySeverity({
-      statuses,
-      subjectTypes: subject_types,
-      query,
-      concurrencyKey: concurrency_key,
-      createdAfter: created_after,
-      createdBefore: created_before,
-      startedAfter: started_after,
-      startedBefore: started_before,
-      completedAfter: completed_after,
-      completedBefore: completed_before,
+    const spaceId = this.getSpaceId();
+
+    // Spine change required: add statuses-array and date-range filters to
+    // InvestigationsService.getSeverityCounts(). For now, scalar single-value mapping.
+    const severityCounts = await this.investigationsService.getSeverityCounts(spaceId, {
+      status: statuses?.[0],
+      subjectType: subject_types?.[0],
+      solution: 'observability',
     });
 
-    return { severity_counts: severityCounts };
+    return { severity_counts: severityCounts as SeverityCounts };
   }
 }

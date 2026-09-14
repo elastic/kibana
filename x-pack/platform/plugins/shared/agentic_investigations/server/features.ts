@@ -18,6 +18,9 @@ import {
   PROPOSALS_API_PRIVILEGE_READ,
 } from './proposals/constants';
 
+const INVESTIGATIONS_API_PRIVILEGE_READ = 'read_investigations' as const;
+const INVESTIGATIONS_API_PRIVILEGE_MANAGE = 'manage_investigations' as const;
+
 export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }) => {
   features.registerKibanaFeature({
     id: AGENTIC_INVESTIGATIONS_PLUGIN_ID,
@@ -48,5 +51,45 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
         ui: [PROPOSALS_UI_CAPABILITY_SHOW],
       },
     },
+    subFeatures: [
+      {
+        name: i18n.translate('xpack.agenticInvestigations.subFeature.investigations', {
+          defaultMessage: 'Investigations',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                id: INVESTIGATIONS_API_PRIVILEGE_READ,
+                name: i18n.translate(
+                  'xpack.agenticInvestigations.subFeature.investigations.read',
+                  { defaultMessage: 'Read investigations' }
+                ),
+                includeIn: 'read',
+                minimumLicense: 'enterprise',
+                api: [INVESTIGATIONS_API_PRIVILEGE_READ],
+                app: [],
+                savedObject: { all: [], read: [] },
+                ui: [],
+              },
+              {
+                id: INVESTIGATIONS_API_PRIVILEGE_MANAGE,
+                name: i18n.translate(
+                  'xpack.agenticInvestigations.subFeature.investigations.manage',
+                  { defaultMessage: 'Manage investigations' }
+                ),
+                includeIn: 'all',
+                minimumLicense: 'enterprise',
+                api: [INVESTIGATIONS_API_PRIVILEGE_MANAGE],
+                app: [],
+                savedObject: { all: [], read: [] },
+                ui: [],
+              },
+            ],
+          },
+        ],
+      },
+    ],
   });
 };

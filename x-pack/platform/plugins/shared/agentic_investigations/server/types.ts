@@ -12,15 +12,19 @@ import type {
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { ProposalsService } from './proposals/services/proposals_service';
+import type { InvestigationsService } from './investigations/services/investigations_service';
 
 export interface AgenticInvestigationsSetupDependencies {
+  agentBuilder: AgentBuilderPluginSetup;
   features: FeaturesPluginSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
 }
 
 export interface AgenticInvestigationsStartDependencies {
+  agentBuilder: AgentBuilderPluginStart;
   spaces?: SpacesPluginStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
 }
@@ -32,6 +36,7 @@ export interface AgenticInvestigationsStartDependencies {
  */
 export interface AgenticInvestigationsPluginStart {
   getProposalsService: () => ProposalsService;
+  getInvestigationsService: () => InvestigationsService;
 }
 
 export type AgenticInvestigationsPluginSetup = Record<string, never>;

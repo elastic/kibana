@@ -23,6 +23,13 @@ import { createProposalUserResolver } from './proposals/services/resolve_proposa
 import type { ResolveProposalUser } from './proposals/services/resolve_proposal_user';
 import { registerStepDefinitions } from './proposals/step_types';
 import { createProposalsStorageClient } from './proposals/storage/proposals_storage';
+import {
+  InvestigationsService,
+  type InvestigationsConversationsClient,
+} from './investigations/services/investigations_service';
+import { createInvestigationsStorageClient } from './investigations/storage/investigations_storage';
+import { registerInvestigationAttachmentTypes } from './investigations/attachments';
+import { registerInvestigationRoutes } from './investigations/routes';
 import type {
   AgenticInvestigationsPluginSetup,
   AgenticInvestigationsPluginStart,
@@ -40,25 +47,39 @@ export class AgenticInvestigationsPlugin
     >
 {
   private readonly logger: Logger;
+  private readonly kibanaVersion: string;
   private workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
   // `workflowsManagement` is a required plugin, so this is set in setup() and
   // read only from start() onwards; the getter asserts that ordering.
   private proposalsService?: ProposalsService;
+  private investigationsService?: InvestigationsService;
   private spaces?: AgenticInvestigationsStartDependencies['spaces'];
   private resolveUser?: ResolveProposalUser;
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
+    this.kibanaVersion = context.env.packageInfo.version;
   }
 
   setup(
     coreSetup: CoreSetup<AgenticInvestigationsStartDependencies>,
-    { features, workflowsExtensions, workflowsManagement }: AgenticInvestigationsSetupDependencies
+    {
+      agentBuilder,
+      features,
+      workflowsExtensions,
+      workflowsManagement,
+    }: AgenticInvestigationsSetupDependencies
   ): AgenticInvestigationsPluginSetup {
     // The workflows management API is only exposed on the setup contract.
     this.workflowsManagementApi = workflowsManagement.management;
 
     registerFeatures({ features });
+
+    // Register all four investigation attachment types with Agent Builder.
+    // Service is resolved lazily at request time (after start()); agentBuilder.attachments is setup-only.
+    registerInvestigationAttachmentTypes(agentBuilder.attachments, () =>
+      this.requireInvestigationsService()
+    );
 
     // Declares ownership of this plugin's managed workflows. Without it the
     // startup orphan sweep treats every workflow we installed as owned by an
@@ -79,6 +100,14 @@ export class AgenticInvestigationsPlugin
       getProposalsService: () => this.requireProposalsService(),
       getSpaceId: (request) => this.getSpaceId(request),
       resolveUser: (request) => this.requireUserResolver()(request),
+    });
+
+    // Register investigation routes; service is resolved lazily after start().
+    registerInvestigationRoutes({
+      router: coreSetup.http.createRouter(),
+      logger: this.logger,
+      getInvestigationsService: () => this.requireInvestigationsService(),
+      getSpaceId: (request) => this.getSpaceId(request),
     });
 
     return {};
@@ -108,6 +137,28 @@ export class AgenticInvestigationsPlugin
       getWorkflowsApi: () => this.requireWorkflowsApi(),
     });
 
+    // Instantiate the shared investigations storage and service.
+    const investigationsStorage = createInvestigationsStorageClient({
+      esClient: coreStart.elasticsearch.client.asInternalUser,
+      kibanaVersion: this.kibanaVersion,
+      logger: this.logger,
+    });
+
+    const investigationsConversationsClient: InvestigationsConversationsClient = {
+      patchMetadata: async (_conversationId, _metadata) => {
+        // TODO: implement via a scoped conversations client when Agent Builder exposes patchMetadata
+      },
+      bulkGet: async (_ids) => {
+        // TODO: implement via a scoped conversations client when Agent Builder exposes bulkGet
+        return [];
+      },
+    };
+
+    this.investigationsService = new InvestigationsService(
+      investigationsStorage,
+      investigationsConversationsClient
+    );
+
     void initializeManagedWorkflows({
       workflowsExtensions: plugins.workflowsExtensions,
       logger: this.logger,
@@ -121,6 +172,7 @@ export class AgenticInvestigationsPlugin
 
     return {
       getProposalsService: () => this.requireProposalsService(),
+      getInvestigationsService: () => this.requireInvestigationsService(),
     };
   }
 
@@ -140,6 +192,15 @@ export class AgenticInvestigationsPlugin
       );
     }
     return this.proposalsService;
+  }
+
+  private requireInvestigationsService(): InvestigationsService {
+    if (!this.investigationsService) {
+      throw new Error(
+        'Investigations service is not available until the agenticInvestigations plugin has started'
+      );
+    }
+    return this.investigationsService;
   }
 
   private getSpaceId(request: KibanaRequest): string {

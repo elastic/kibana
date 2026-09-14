@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export {
-  nightshiftInvestigationSavedObjectType,
-  NIGHTSHIFT_INVESTIGATION_SO_TYPE,
-} from './investigation_saved_object';
+// investigation_saved_object.ts was deleted; this barrel is now empty.
+// Remove this file once all imports are cleaned up.
