@@ -42,6 +42,7 @@ export interface RuleFormServices {
   esqlMenu?: React.ComponentType<{
     hideHistory?: boolean;
     hideVisor?: boolean;
+    hideRecommendedQueries?: boolean;
     onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
     docsFlyoutSize?: EuiFlyoutProps['size'];
   }>;

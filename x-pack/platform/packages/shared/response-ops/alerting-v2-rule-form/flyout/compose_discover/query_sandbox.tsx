@@ -262,17 +262,31 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [run]);
 
-  // Applies a recommended query picked from the ES|QL menu, then runs it. The run is
-  // deferred so the editor content update flushes first and `run()` reads the new query
-  // (its params ref updates on re-render) — mirroring the full editor's submit flow.
-  // Memoized so `esqlEditorActionsRegister` doesn't re-register actions on every render.
+  // A recommended query is a whole `FROM …`, so it can only be applied where the active editor
+  // holds a complete query: the single/unified editor, or the base tab in split mode. On the
+  // split fragment tabs (alert/recovery) there's no valid target, so it stays unwired (and the
+  // menu hides the section). The base tab writes through `onBaseQueryChange`, not `onQueryChange`
+  // (which in split mode targets the breach segment).
+  const recommendedQuerySubmit = (() => {
+    if (isReadOnly) return undefined;
+    if (!hasTabs) return onQueryChange;
+    return tabProps?.activeTab === 'base' ? tabProps.onBaseQueryChange : undefined;
+  })();
+
+  // Applies a recommended query picked from the ES|QL menu, then runs it. The run is deferred so
+  // the editor content update flushes first and `run()` reads the new query (its params ref
+  // updates on re-render) — mirroring the full editor's submit flow.
   const handleSubmitRecommendedQuery = useCallback(
     (nextQuery: string) => {
-      onQueryChange?.(nextQuery);
+      recommendedQuerySubmit?.(nextQuery);
       setTimeout(() => run(), 0);
     },
-    [onQueryChange, run]
+    [recommendedQuerySubmit, run]
   );
+
+  // Kept in sync with the menu's `hideRecommendedQueries` so we never show picks we can't apply.
+  const canWireRecommendedQueries =
+    Boolean(EsqlEditorActionsRegister) && Boolean(recommendedQuerySubmit);
 
   const gridColumns: EuiDataGridColumn[] = useMemo(
     () =>
@@ -440,17 +454,21 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
           {EsqlMenu && EsqlEditorActionsProvider && (
             <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
               <EsqlEditorActionsProvider>
-                {/* Recommended queries replace the whole query, so only wire them for the
-                    single/unified editor — not the split fragment tabs. */}
-                {EsqlEditorActionsRegister && !hasTabs && !isReadOnly && (
+                {canWireRecommendedQueries && EsqlEditorActionsRegister && (
                   <EsqlEditorActionsRegister
                     currentQuery={query}
                     submitEsqlQuery={handleSubmitRecommendedQuery}
                   />
                 )}
                 {/* Visor (KQL / NL search) is owned by the full editor, which the sandbox
-                    doesn't mount — hide the button so it isn't shown enabled but inert. */}
-                <EsqlMenu hideHistory hideVisor docsFlyoutSize="s" />
+                    doesn't mount — hide the button so it isn't shown enabled but inert.
+                    Recommended queries are hidden unless wired, so picks are always applicable. */}
+                <EsqlMenu
+                  hideHistory
+                  hideVisor
+                  hideRecommendedQueries={!canWireRecommendedQueries}
+                  docsFlyoutSize="s"
+                />
               </EsqlEditorActionsProvider>
             </EuiFlexItem>
           )}

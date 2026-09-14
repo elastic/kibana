@@ -12,6 +12,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { QuerySandbox } from './query_sandbox';
 import type { QuerySandboxProps } from './query_sandbox';
 import type { QueryExecutionResult } from './use_query_execution';
+import type { QueryTab } from './types';
 
 const mockRun = jest.fn();
 
@@ -169,28 +170,83 @@ describe('QuerySandbox', () => {
     await waitFor(() => expect(mockRun).toHaveBeenCalledTimes(1));
   });
 
-  it('does not mount the actions register for the split (tabbed) editor', () => {
+  it('shows recommended queries (hideRecommendedQueries=false) for the wired single editor', () => {
     mockRuleFormServices = {
       ...buildBaseServices(),
       esqlEditorActionsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-      esqlMenu: () => <div data-test-subj="stubEsqlMenu" />,
-      esqlEditorActionsRegister: () => <div data-test-subj="stubRegister" />,
+      esqlEditorActionsRegister: () => null,
+      esqlMenu: ({ hideRecommendedQueries }: { hideRecommendedQueries?: boolean }) => (
+        <div
+          data-test-subj="stubEsqlMenu"
+          data-hide-recommended={String(Boolean(hideRecommendedQueries))}
+        />
+      ),
     };
-    renderSandbox({
-      onQueryChange: jest.fn(),
-      tabProps: {
-        tabs: ['base', 'alert'],
-        activeTab: 'alert',
-        onTabChange: jest.fn(),
-        baseQuery: 'FROM logs-*',
-        alertBlock: '| WHERE count > 100',
-        recoveryBlock: '',
-        onBaseQueryChange: jest.fn(),
-        onAlertBlockChange: jest.fn(),
-        onRecoveryBlockChange: jest.fn(),
-      },
-    });
+    renderSandbox({ onQueryChange: jest.fn() });
+    expect(screen.getByTestId('stubEsqlMenu')).toHaveAttribute('data-hide-recommended', 'false');
+  });
+
+  const splitTabProps = (activeTab: QueryTab, onBaseQueryChange = jest.fn()) => ({
+    tabs: ['base', 'alert'] as QueryTab[],
+    activeTab,
+    onTabChange: jest.fn(),
+    baseQuery: 'FROM logs-*',
+    alertBlock: '| WHERE count > 100',
+    recoveryBlock: '',
+    onBaseQueryChange,
+    onAlertBlockChange: jest.fn(),
+    onRecoveryBlockChange: jest.fn(),
+  });
+
+  it('hides recommended queries on a split fragment (alert) tab', () => {
+    mockRuleFormServices = {
+      ...buildBaseServices(),
+      esqlEditorActionsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      esqlEditorActionsRegister: () => <div data-test-subj="stubRegister" />,
+      esqlMenu: ({ hideRecommendedQueries }: { hideRecommendedQueries?: boolean }) => (
+        <div
+          data-test-subj="stubEsqlMenu"
+          data-hide-recommended={String(Boolean(hideRecommendedQueries))}
+        />
+      ),
+    };
+    renderSandbox({ onQueryChange: jest.fn(), tabProps: splitTabProps('alert') });
+    expect(screen.getByTestId('stubEsqlMenu')).toHaveAttribute('data-hide-recommended', 'true');
+    // Not wired on a fragment tab → the register is not mounted.
     expect(screen.queryByTestId('stubRegister')).not.toBeInTheDocument();
+  });
+
+  it('shows and wires recommended queries on the split base tab (via onBaseQueryChange)', async () => {
+    const onBaseQueryChange = jest.fn();
+    mockRuleFormServices = {
+      ...buildBaseServices(),
+      esqlEditorActionsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      esqlMenu: ({ hideRecommendedQueries }: { hideRecommendedQueries?: boolean }) => (
+        <div
+          data-test-subj="stubEsqlMenu"
+          data-hide-recommended={String(Boolean(hideRecommendedQueries))}
+        />
+      ),
+      esqlEditorActionsRegister: ({
+        submitEsqlQuery,
+      }: {
+        submitEsqlQuery?: (q: string) => void;
+      }) => (
+        <button
+          type="button"
+          data-test-subj="stubRegister"
+          onClick={() => submitEsqlQuery?.('FROM logs-* | LIMIT 10')}
+        />
+      ),
+    };
+    renderSandbox({ onQueryChange: jest.fn(), tabProps: splitTabProps('base', onBaseQueryChange) });
+
+    expect(screen.getByTestId('stubEsqlMenu')).toHaveAttribute('data-hide-recommended', 'false');
+
+    fireEvent.click(screen.getByTestId('stubRegister'));
+    // The base tab applies through onBaseQueryChange, not the top-level onQueryChange.
+    expect(onBaseQueryChange).toHaveBeenCalledWith('FROM logs-* | LIMIT 10');
+    await waitFor(() => expect(mockRun).toHaveBeenCalledTimes(1));
   });
 
   it('renders the editor and results panels', () => {

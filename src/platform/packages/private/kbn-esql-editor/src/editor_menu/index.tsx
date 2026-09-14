@@ -34,6 +34,7 @@ const LazyHelpPopover = React.lazy(async () => {
 export function ESQLMenu({
   hideHistory,
   hideVisor,
+  hideRecommendedQueries,
   onESQLDocsFlyoutVisibilityChanged,
   docsFlyoutSize,
 }: {
@@ -43,6 +44,11 @@ export function ESQLMenu({
    * without the full editor, which owns the visor surface the button would toggle.
    */
   hideVisor?: boolean;
+  /**
+   * Hides the recommended-queries section. Use when no `submitEsqlQuery` action is wired,
+   * so picks can't be applied (e.g. the split fragment editors).
+   */
+  hideRecommendedQueries?: boolean;
   onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
   /** Size for the docs flyout. Pass a named size when embedding the menu in another flyout. */
   docsFlyoutSize?: EuiFlyoutProps['size'];
@@ -152,6 +158,7 @@ export function ESQLMenu({
           <LazyHelpPopover
             onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
             docsFlyoutSize={docsFlyoutSize}
+            hideRecommendedQueries={hideRecommendedQueries}
           />
         </Suspense>
       </EuiFlexItem>
