@@ -27,7 +27,12 @@ import { useCountryFlagsPopover } from '../node/country_flags/country_flags';
 import { useEventDetailsPopover } from '../popovers/details/use_event_details_popover';
 import type { DocumentAnalysisOutput } from '../node/label_node/analyze_documents';
 import { analyzeDocuments } from '../node/label_node/analyze_documents';
-import { ENTITY_ID, EVENT_ID, GRAPH_NODES_LIMIT, TOGGLE_SEARCH_BAR_STORAGE_KEY } from '../../common/constants';
+import {
+  ENTITY_ID,
+  EVENT_ID,
+  GRAPH_NODES_LIMIT,
+  TOGGLE_SEARCH_BAR_STORAGE_KEY,
+} from '../../common/constants';
 import { Actions } from '../controls/actions';
 import { AnimatedSearchBarContainer, useBorder } from './styles';
 import {
@@ -312,7 +317,8 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       }
 
       // Entity mode: show origin entity IDs as non-interactive filter pills.
-      const originEntityIds = entityIds?.filter(({ isOrigin }) => isOrigin).map(({ id }) => id) ?? [];
+      const originEntityIds =
+        entityIds?.filter(({ isOrigin }) => isOrigin).map(({ id }) => id) ?? [];
       if (originEntityIds.length === 0) return [];
 
       if (originEntityIds.length === 1) {
