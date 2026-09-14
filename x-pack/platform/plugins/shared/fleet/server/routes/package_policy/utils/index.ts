@@ -15,11 +15,7 @@ import { isAgentlessEnabled } from '../../../services/utils/agentless';
 
 import { getAgentlessAgentPolicyNameFromPackagePolicyName } from '../../../../common/services/agentless_policy_helper';
 
-import type {
-  PackagePolicy,
-  PackagePolicyInput,
-  NewPackagePolicyInput,
-} from '../../../types';
+import type { PackagePolicy, PackagePolicyInput, NewPackagePolicyInput } from '../../../types';
 import { agentPolicyService } from '../../../services';
 import type { SimplifiedPackagePolicy } from '../../../../common/services/simplified_package_policy_helper';
 import { PackagePolicyRequestError } from '../../../errors';

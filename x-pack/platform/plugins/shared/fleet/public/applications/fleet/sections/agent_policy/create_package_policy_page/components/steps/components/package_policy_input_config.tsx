@@ -366,7 +366,11 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                 {isShowingAdvanced && showConditionField ? (
                   <EuiFlexItem>
                     <PackagePolicyConditionField
-                      value={packagePolicyInput.condition != null ? String(packagePolicyInput.condition) : ''}
+                      value={
+                        packagePolicyInput.condition != null
+                          ? String(packagePolicyInput.condition)
+                          : ''
+                      }
                       onChange={(v) => updatePackagePolicyInput({ condition: v })}
                       isInvalid={
                         Boolean(forceShowErrors) && Boolean(inputValidationResults.condition)

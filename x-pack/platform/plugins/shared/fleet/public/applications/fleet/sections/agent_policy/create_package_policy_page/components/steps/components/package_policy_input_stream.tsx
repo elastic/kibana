@@ -602,7 +602,11 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                       {isShowingAdvanced && showConditionField && (
                         <EuiFlexItem>
                           <PackagePolicyConditionField
-                            value={packagePolicyInputStream.condition != null ? String(packagePolicyInputStream.condition) : ''}
+                            value={
+                              packagePolicyInputStream.condition != null
+                                ? String(packagePolicyInputStream.condition)
+                                : ''
+                            }
                             onChange={(v) => updatePackagePolicyInputStream({ condition: v })}
                             isInvalid={
                               Boolean(forceShowErrors) &&
