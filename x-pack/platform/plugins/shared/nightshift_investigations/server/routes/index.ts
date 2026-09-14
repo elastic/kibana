@@ -12,7 +12,6 @@ import { ensureInvestigationRoute } from './ensure_investigation';
 import { listInvestigationsRoute } from './list_investigations';
 import { getSeverityCountsRoute } from './get_severity_counts';
 import { updateInvestigationRoute } from './update_investigation';
-import { followInvestigationRoute } from './follow_investigation';
 import { getInvestigationAvailabilityRoute } from './get_investigation_availability';
 
 export const nightshiftInvestigationsRouteRepository = {
@@ -23,7 +22,6 @@ export const nightshiftInvestigationsRouteRepository = {
   ...listInvestigationsRoute,
   ...getSeverityCountsRoute,
   ...updateInvestigationRoute,
-  ...followInvestigationRoute,
   ...getInvestigationAvailabilityRoute,
 };
 

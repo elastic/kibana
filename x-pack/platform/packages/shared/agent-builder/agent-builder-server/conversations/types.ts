@@ -51,4 +51,21 @@ export interface ConversationPublicClient {
    * Create a new empty conversation (without triggering an execution).
    */
   create(request: ConversationCreatePublicRequest): Promise<ConversationWithPermissions>;
+
+  /**
+   * Applies the named template to the conversation, seeding default metadata
+   * values and bumping template_version. Re-applying the same template migrates
+   * to the latest version; switching templates is rejected.
+   * `version` is reserved for future version-pinned applies and is currently ignored.
+   */
+  applyTemplate(conversationId: string, templateId: string, version?: number): Promise<void>;
+
+  /**
+   * Merges `metadata` into the conversation's stored metadata object. The
+   * conversation must already have a template applied; unknown keys are rejected.
+   */
+  patchMetadata(conversationId: string, metadata: Record<string, unknown>): Promise<void>;
+
+  /** Fetches multiple conversations by id in a single request. */
+  bulkGet(ids: string[]): Promise<ConversationWithPermissions[]>;
 }

@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { InvestigationRunStatusBadge } from '@kbn/nightshift-investigations-plugin/public';
+export * from './constants';
+export * from './investigation';

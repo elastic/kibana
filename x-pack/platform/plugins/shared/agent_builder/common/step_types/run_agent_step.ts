@@ -319,6 +319,16 @@ export const ConfigSchema = z
       .describe(
         "[tech preview] Reasoning effort level forwarded to the LLM for this step's calls. Support depends on the underlying model and provider."
       ),
+    /**
+     * When set, applies this conversation template to the conversation created by this step.
+     * Only takes effect when `create-conversation` is true and the step creates a new conversation.
+     */
+    'conversation-template-id': z
+      .string()
+      .optional()
+      .describe(
+        'When set, applies this conversation template ID to the conversation created by this step.'
+      ),
   })
   .superRefine((cfg, ctx) => {
     const connector = normalizeOptionalConnectorOrInferenceParam(cfg['connector-id']);

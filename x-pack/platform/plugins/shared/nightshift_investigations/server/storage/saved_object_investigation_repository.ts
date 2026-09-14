@@ -148,10 +148,6 @@ export class SavedObjectInvestigationRepository implements InvestigationReposito
    * Uses `buildBaseInvestigationFilter` rather than the full filter: the counts describe how many
    * investigations sit in each tier under the *other* active filters, so narrowing by the selected
    * tier would make them self-referential and zero out the tiles the user did not pick.
-   *
-   * Pagination and sort are irrelevant to a facet and are not read from `query` — which is why
-   * this is its own method (and its own route) rather than riding along with the list, where it
-   * would recompute an identical aggregation on every page change.
    */
   async countBySeverity(query: SeverityCountsQuery): Promise<SeverityCounts> {
     const result = await this.savedObjectsClient.find<
@@ -177,7 +173,6 @@ export class SavedObjectInvestigationRepository implements InvestigationReposito
       (result.aggregations?.severity?.buckets ?? []).map((b) => [b.key, b.doc_count])
     );
 
-    // Explicit per-tier assignment so the type is earned rather than asserted.
     return {
       '80-critical': buckets.get('80-critical') ?? 0,
       '60-high': buckets.get('60-high') ?? 0,

@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import type { InvestigationStatus } from '../../../common';
-
 export class InvestigationConflictError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'InvestigationConflictError';
-  }
-
-  static settled(investigationId: string, status: InvestigationStatus): InvestigationConflictError {
-    return new InvestigationConflictError(
-      `Investigation "${investigationId}" is already ${status} and can no longer be updated`
-    );
   }
 
   static concurrentlyModified(investigationId: string): InvestigationConflictError {

@@ -18,7 +18,5 @@ export type {
 } from './types';
 export { InvestigationAlreadyExistsError, InvestigationStaleWriteError } from './errors';
 export { SavedObjectInvestigationRepository } from './saved_object_investigation_repository';
-export {
-  createInvestigationSweepRepository,
-  SavedObjectInvestigationSweepRepository,
-} from './saved_object_investigation_sweep_repository';
+export type { InvestigationSavedObjectsClient } from './saved_object_investigation_repository';
+export { buildBaseInvestigationFilter, buildInvestigationFilter } from './build_investigation_filter';

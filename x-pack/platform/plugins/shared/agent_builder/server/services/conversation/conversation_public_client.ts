@@ -28,6 +28,11 @@ export const createConversationPublicClient = ({
   return {
     get: client.get.bind(client),
     list: client.list.bind(client),
+    bulkGet: client.bulkGet.bind(client),
+    applyTemplate: (conversationId: string, templateId: string) =>
+      client.applyTemplate(conversationId, templateId).then(() => undefined),
+    patchMetadata: (conversationId: string, metadata: Record<string, unknown>) =>
+      client.patchMetadata(conversationId, metadata).then(() => undefined),
     create: async ({ agentId, id, title, accessControl, templateId, metadata }) => {
       const effectiveAgentId = agentId ?? agentBuilderDefaultAgentId;
 

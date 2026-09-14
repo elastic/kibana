@@ -23,6 +23,13 @@ import { createProposalUserResolver } from './proposals/services/resolve_proposa
 import type { ResolveProposalUser } from './proposals/services/resolve_proposal_user';
 import { registerStepDefinitions } from './proposals/step_types';
 import { createProposalsStorageClient } from './proposals/storage/proposals_storage';
+import { registerInvestigationAttachmentTypes } from './investigations/attachments';
+import { createUpdateInvestigationTool } from './investigations/tools/update_investigation/tool';
+import { investigationDetailsSavedObjectType } from './investigations/saved_objects/investigation_saved_object';
+import {
+  SoInvestigationsService,
+  type InvestigationsService,
+} from './investigations/storage/investigations_service';
 import type {
   AgenticInvestigationsPluginSetup,
   AgenticInvestigationsPluginStart,
@@ -41,9 +48,8 @@ export class AgenticInvestigationsPlugin
 {
   private readonly logger: Logger;
   private workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
-  // `workflowsManagement` is a required plugin, so this is set in setup() and
-  // read only from start() onwards; the getter asserts that ordering.
   private proposalsService?: ProposalsService;
+  private investigationsService?: InvestigationsService;
   private spaces?: AgenticInvestigationsStartDependencies['spaces'];
   private resolveUser?: ResolveProposalUser;
 
@@ -53,16 +59,37 @@ export class AgenticInvestigationsPlugin
 
   setup(
     coreSetup: CoreSetup<AgenticInvestigationsStartDependencies>,
-    { features, workflowsExtensions, workflowsManagement }: AgenticInvestigationsSetupDependencies
+    {
+      agentBuilder,
+      features,
+      workflowsExtensions,
+      workflowsManagement,
+    }: AgenticInvestigationsSetupDependencies
   ): AgenticInvestigationsPluginSetup {
-    // The workflows management API is only exposed on the setup contract.
     this.workflowsManagementApi = workflowsManagement.management;
 
     registerFeatures({ features });
 
-    // Declares ownership of this plugin's managed workflows. Without it the
-    // startup orphan sweep treats every workflow we installed as owned by an
-    // unregistered plugin and force-deletes it.
+    // Own the nightshift-investigation SO type. Registering it here (not in NSI)
+    // means any plugin that depends on agenticInvestigations gets the type registered.
+    coreSetup.savedObjects.registerType(investigationDetailsSavedObjectType);
+
+    // Register all four investigation attachment types. The service is resolved
+    // lazily via requireInvestigationsService() which is safe at request time after start().
+    registerInvestigationAttachmentTypes(
+      agentBuilder.attachments,
+      this.lazyInvestigationsService()
+    );
+
+    // Register the update_investigation tool. Owned here because it writes to the
+    // investigation SO and conversation attachments — both owned by this plugin.
+    agentBuilder.tools.register(
+      createUpdateInvestigationTool({
+        investigationsService: this.lazyInvestigationsService(),
+        logger: this.logger.get('update_investigation_tool'),
+      })
+    );
+
     workflowsExtensions.registerManagedWorkflowOwner(
       AGENTIC_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER_ID
     );
@@ -95,8 +122,6 @@ export class AgenticInvestigationsPlugin
       logger: this.logger,
     });
 
-    // Reads and writes go through the internal user; authorization is enforced
-    // at the API layer.
     const storage = createProposalsStorageClient({
       esClient: coreStart.elasticsearch.client.asInternalUser,
       logger: this.logger,
@@ -106,6 +131,12 @@ export class AgenticInvestigationsPlugin
       storage,
       logger: this.logger,
       getWorkflowsApi: () => this.requireWorkflowsApi(),
+    });
+
+    // Build the SO-backed investigations service. This plugin owns the SO type
+    // (registered in setup()) so no other plugin needs to register it.
+    this.investigationsService = new SoInvestigationsService({
+      savedObjects: coreStart.savedObjects,
     });
 
     void initializeManagedWorkflows({
@@ -121,6 +152,7 @@ export class AgenticInvestigationsPlugin
 
     return {
       getProposalsService: () => this.requireProposalsService(),
+      getInvestigationsService: () => this.requireInvestigationsService(),
     };
   }
 
@@ -142,14 +174,34 @@ export class AgenticInvestigationsPlugin
     return this.proposalsService;
   }
 
+  private requireInvestigationsService(): InvestigationsService {
+    if (!this.investigationsService) {
+      throw new Error(
+        'Investigations service is not available until the agenticInvestigations plugin has started'
+      );
+    }
+    return this.investigationsService;
+  }
+
+  /**
+   * Returns a proxy that defers service resolution to request time (after start()).
+   * Used to wire the attachment types during setup() before the service is created.
+   */
+  private lazyInvestigationsService(): InvestigationsService {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const self = this;
+    return new Proxy({} as InvestigationsService, {
+      get(_target, prop) {
+        const svc = self.requireInvestigationsService();
+        return (svc as unknown as Record<string | symbol, unknown>)[prop];
+      },
+    });
+  }
+
   private getSpaceId(request: KibanaRequest): string {
     return this.spaces?.spacesService.getSpaceId(request) ?? 'default';
   }
 
-  /**
-   * Server-derived so a caller can never attribute a decision to someone else.
-   * Built in `start()`, and only ever called from a request handler or a step.
-   */
   private requireUserResolver(): ResolveProposalUser {
     if (!this.resolveUser) {
       throw new Error(

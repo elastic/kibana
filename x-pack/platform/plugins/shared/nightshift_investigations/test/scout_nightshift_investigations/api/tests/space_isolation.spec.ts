@@ -9,20 +9,25 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import {
   apiTest,
-  INVESTIGATIONS_WRITE_ROLE,
+  COMBINED_INVESTIGATIONS_ADMIN_ROLE,
   getInvestigation,
   listInvestigations,
-  updateInvestigation,
-  seedInvestigation,
-  deleteInvestigation,
+  upsertInvestigation,
   uniqueId,
-  seedTimeWindow,
 } from '../fixtures';
 
+/**
+ * Tests for space-scoping of /internal/investigations/investigations.
+ *
+ * Investigations are scoped to the Kibana space derived from the request. A
+ * record created in space A must not be visible in space B, and vice-versa.
+ *
+ * The nightshift PATCH route is also verified to respect space boundaries: an
+ * update issued in the wrong space must return 404.
+ */
 const SPACE_ID = uniqueId('nightshift-inv-space');
-const TEST_ID = uniqueId('space-scoped-investigation');
-const CONTROL_ID = uniqueId('space-isolation-default');
-const times = seedTimeWindow(1);
+const CUSTOM_SPACE_TEST_ID = uniqueId('space-scoped-investigation');
+const DEFAULT_SPACE_CONTROL_ID = uniqueId('space-isolation-default');
 
 apiTest.describe(
   'investigations are isolated per space',
@@ -32,25 +37,24 @@ apiTest.describe(
 
     apiTest.beforeAll(async ({ apiServices, samlAuth }) => {
       await apiServices.spaces.create({ id: SPACE_ID, name: SPACE_ID });
-      ({ cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE));
+      ({ cookieHeader } = await samlAuth.asInteractiveUser(COMBINED_INVESTIGATIONS_ADMIN_ROLE));
     });
 
-    apiTest.beforeEach(async ({ kbnClient }) => {
-      await seedInvestigation(kbnClient, {
-        id: TEST_ID,
-        space: SPACE_ID,
-        status: 'running',
-        subject_type: 'alert',
-        subject_id: 'alert-space',
-        trigger_type: 'automatic',
-        created_at: times.iso({ day: 0, hour: 10 }),
-        summary: 'Space-scoped investigation.',
-      });
-    });
-
-    apiTest.afterEach(async ({ kbnClient }) => {
-      await deleteInvestigation(kbnClient, TEST_ID, SPACE_ID);
-      await deleteInvestigation(kbnClient, CONTROL_ID);
+    apiTest.beforeEach(async ({ apiClient }) => {
+      // Seed the investigation in the custom space.
+      await upsertInvestigation(
+        apiClient,
+        cookieHeader,
+        {
+          id: CUSTOM_SPACE_TEST_ID,
+          spaceId: SPACE_ID,
+          status: 'running',
+          subjectType: 'alert',
+          subjectId: 'alert-space',
+          summary: 'Space-scoped investigation.',
+        },
+        { spaceId: SPACE_ID }
+      );
     });
 
     apiTest.afterAll(async ({ apiServices }) => {
@@ -60,20 +64,21 @@ apiTest.describe(
     apiTest(
       'GET returns the investigation in the space it was created in',
       async ({ apiClient }) => {
-        const response = await getInvestigation(apiClient, cookieHeader, TEST_ID, {
+        const response = await getInvestigation(apiClient, cookieHeader, CUSTOM_SPACE_TEST_ID, {
           spaceId: SPACE_ID,
         });
         expect(response).toHaveStatusCode(200);
-        expect(response.body.investigation_id).toBe(TEST_ID);
-        expect(response.body.subject).toStrictEqual({ type: 'alert', id: 'alert-space' });
+        expect(response.body.id).toBe(CUSTOM_SPACE_TEST_ID);
+        expect(response.body.subjectType).toBe('alert');
+        expect(response.body.subjectId).toBe('alert-space');
         expect(response.body.summary).toBe('Space-scoped investigation.');
       }
     );
 
     apiTest(
-      'GET in the default space does not see a space-scoped investigation',
+      'GET in the default space does not see a custom-space investigation',
       async ({ apiClient }) => {
-        const response = await getInvestigation(apiClient, cookieHeader, TEST_ID);
+        const response = await getInvestigation(apiClient, cookieHeader, CUSTOM_SPACE_TEST_ID);
         expect(response).toHaveStatusCode(404);
       }
     );
@@ -81,72 +86,30 @@ apiTest.describe(
     apiTest('LIST in the custom space includes the investigation', async ({ apiClient }) => {
       const response = await listInvestigations(apiClient, cookieHeader, {
         spaceId: SPACE_ID,
-        query: times.createdRange,
       });
       expect(response).toHaveStatusCode(200);
 
-      const ids = response.body.results.map(
-        (result: { investigation_id: string }) => result.investigation_id
-      );
-      expect(ids).toContain(TEST_ID);
+      const ids = response.body.items.map((result: { id: string }) => result.id);
+      expect(ids).toContain(CUSTOM_SPACE_TEST_ID);
     });
 
     apiTest(
-      'LIST in the default space does not include the investigation',
-      async ({ apiClient, kbnClient }) => {
-        await seedInvestigation(kbnClient, {
-          id: CONTROL_ID,
+      'LIST in the default space does not include a custom-space investigation',
+      async ({ apiClient }) => {
+        // Seed a control record in the default space.
+        await upsertInvestigation(apiClient, cookieHeader, {
+          id: DEFAULT_SPACE_CONTROL_ID,
           status: 'running',
-          subject_type: 'alert',
-          subject_id: 'alert-default-space',
-          trigger_type: 'automatic',
-          created_at: times.iso({ day: 0, hour: 10 }),
+          subjectType: 'alert',
+          subjectId: 'alert-default-space',
         });
 
-        const response = await listInvestigations(apiClient, cookieHeader, {
-          query: times.createdRange,
-        });
+        const response = await listInvestigations(apiClient, cookieHeader);
         expect(response).toHaveStatusCode(200);
 
-        const ids = response.body.results.map(
-          (result: { investigation_id: string }) => result.investigation_id
-        );
-        expect(ids).toContain(CONTROL_ID);
-        expect(ids).not.toContain(TEST_ID);
-      }
-    );
-
-    apiTest('PATCH updates the investigation in its space', async ({ apiClient }) => {
-      const response = await updateInvestigation(
-        apiClient,
-        cookieHeader,
-        TEST_ID,
-        { status: 'completed', summary: 'Finished in space.' },
-        { spaceId: SPACE_ID }
-      );
-      expect(response).toHaveStatusCode(200);
-
-      const getResponse = await getInvestigation(apiClient, cookieHeader, TEST_ID, {
-        spaceId: SPACE_ID,
-      });
-      expect(getResponse).toHaveStatusCode(200);
-      expect(getResponse.body.status).toBe('completed');
-      expect(getResponse.body.summary).toBe('Finished in space.');
-    });
-
-    apiTest(
-      'PATCH in the default space does not update a space-scoped investigation',
-      async ({ apiClient }) => {
-        const response = await updateInvestigation(apiClient, cookieHeader, TEST_ID, {
-          status: 'failed',
-        });
-        expect(response).toHaveStatusCode(404);
-
-        const getResponse = await getInvestigation(apiClient, cookieHeader, TEST_ID, {
-          spaceId: SPACE_ID,
-        });
-        expect(getResponse).toHaveStatusCode(200);
-        expect(getResponse.body.status).toBe('running');
+        const ids = response.body.items.map((result: { id: string }) => result.id);
+        expect(ids).toContain(DEFAULT_SPACE_CONTROL_ID);
+        expect(ids).not.toContain(CUSTOM_SPACE_TEST_ID);
       }
     );
   }

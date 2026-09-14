@@ -11,10 +11,12 @@ export {
   INVESTIGATIONS_READ_ROLE,
   INVESTIGATIONS_WRITE_ROLE,
   NO_AGENT_BUILDER_ROLE,
+  AGENTIC_INVESTIGATIONS_READ_ROLE,
+  AGENTIC_INVESTIGATIONS_MANAGE_ROLE,
+  COMBINED_INVESTIGATIONS_ADMIN_ROLE,
 } from './constants';
 export {
-  seedInvestigation,
-  deleteInvestigation,
+  upsertInvestigation,
   getInvestigation,
   listInvestigations,
   updateInvestigation,
@@ -22,4 +24,4 @@ export {
   uniqueId,
   seedTimeWindow,
 } from './helpers';
-export type { SeedTimeWindow } from './helpers';
+export type { SeedTimeWindow, UpsertInvestigationOptions } from './helpers';

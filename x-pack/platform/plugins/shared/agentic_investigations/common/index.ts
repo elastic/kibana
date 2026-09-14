@@ -70,3 +70,5 @@ export type {
   ProposalUser,
   ProposalWithMetadata,
 } from './proposals';
+
+export * from './investigations';

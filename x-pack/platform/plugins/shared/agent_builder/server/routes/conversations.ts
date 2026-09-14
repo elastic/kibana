@@ -184,6 +184,33 @@ export function registerConversationRoutes({
                     },
                   })
                 ),
+                template_id: schema.maybe(
+                  schema.string({
+                    maxLength: 1024,
+                    meta: {
+                      description:
+                        'Filter to conversations that have this template applied. Omit to return all.',
+                    },
+                  })
+                ),
+                metadata_key: schema.maybe(
+                  schema.string({
+                    maxLength: 1024,
+                    meta: {
+                      description:
+                        'Metadata field key to filter on. Must be combined with `metadata_value`.',
+                    },
+                  })
+                ),
+                metadata_value: schema.maybe(
+                  schema.string({
+                    maxLength: 1024,
+                    meta: {
+                      description:
+                        'Metadata field value to filter on. Must be combined with `metadata_key`.',
+                    },
+                  })
+                ),
               },
               {
                 validate: ({ page, per_page: perPage }) => {
@@ -207,10 +234,22 @@ export function registerConversationRoutes({
           per_page: perPage,
           sort_order: sortOrder,
           pinned,
+          template_id: templateId,
+          metadata_key: metadataKey,
+          metadata_value: metadataValue,
         } = request.query;
 
         const client = await conversationsService.getScopedClient({ request });
-        const { results, total } = await client.list({ agentId, page, perPage, sortOrder, pinned });
+        const { results, total } = await client.list({
+          agentId,
+          page,
+          perPage,
+          sortOrder,
+          pinned,
+          templateId,
+          metadataKey,
+          metadataValue,
+        });
 
         return response.ok<ListConversationsResponse>({
           body: {
@@ -455,6 +494,60 @@ export function registerConversationRoutes({
         }
 
         return response.ok<CreateConversationResponse>({ body: conversation });
+      })
+    );
+
+  // Apply template to an existing conversation
+  router.versioned
+    .post({
+      path: `${publicApiPath}/conversations/{conversation_id}/_apply_template`,
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+      access: 'internal',
+      summary: 'Apply a template to a conversation',
+      description:
+        'Applies the named template to an existing conversation, seeding default metadata values. Re-applying the same template migrates to the latest version.',
+      options: {
+        tags: ['conversation', 'oas-tag:agent builder'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: schema.object({
+              conversation_id: schema.string({
+                maxLength: CONVERSATION_ID_MAX_LENGTH,
+                meta: { description: 'The unique identifier of the conversation.' },
+              }),
+            }),
+            body: schema.object({
+              templateId: schema.string({
+                minLength: 1,
+                maxLength: CONVERSATION_TEMPLATE_ID_MAX_LENGTH,
+                meta: { description: 'ID of the conversation template to apply.' },
+              }),
+            }),
+          },
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { conversations: conversationsService, agents: agentsService } =
+          getInternalServices();
+        const { conversation_id: conversationId } = request.params;
+        const { templateId } = request.body;
+
+        const [client, agentRegistry] = await Promise.all([
+          conversationsService.getScopedClient({ request }),
+          agentsService.getRegistry({ request }),
+        ]);
+        const publicClient = createConversationPublicClient({ client, agentRegistry });
+
+        await publicClient.applyTemplate(conversationId, templateId);
+
+        return response.ok({ body: { success: true } });
       })
     );
 

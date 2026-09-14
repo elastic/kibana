@@ -375,6 +375,12 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Platform – Custom Content
   'platform.custom_content.panel_context',
+
+  // Investigation output attachments (agenticInvestigations)
+  'investigations.impact',
+  'investigations.hypotheses',
+  'investigations.recommendations',
+  'investigations.blind_spots',
 ] as const;
 
 export type AgentBuilderBuiltinAttachment = (typeof AGENT_BUILDER_BUILTIN_ATTACHMENTS)[number];

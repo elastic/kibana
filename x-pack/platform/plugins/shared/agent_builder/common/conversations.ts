@@ -20,6 +20,9 @@ export interface ConversationListOptions {
   perPage?: number;
   sortOrder?: 'asc' | 'desc';
   pinned?: boolean;
+  templateId?: string;
+  metadataKey?: string;
+  metadataValue?: string;
 }
 
 export interface ConversationGetOptions {

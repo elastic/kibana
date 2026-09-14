@@ -15,3 +15,4 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { AgenticInvestigationsPluginSetup, AgenticInvestigationsPluginStart } from './types';
+export type { InvestigationsService } from './investigations/storage/investigations_service';

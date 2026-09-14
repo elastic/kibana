@@ -28,8 +28,7 @@ import {
 } from '@kbn/investigation-output';
 import type { InvestigationState } from '@kbn/significant-events-schema';
 import type { GetInvestigationResponse } from '../../common';
-import { InvestigationRunStatusBadge } from './investigation_run_status_badge';
-import { formatDate, formatDuration } from './utils';
+import { formatDate } from './utils';
 
 /**
  * Bridges `GetInvestigationResponse` (where `summary` and `hypotheses` are optional —
@@ -200,44 +199,7 @@ export function InvestigationDetailFlyout({
               </EuiText>
             </EuiFlexItem>
           )}
-          {investigation.started_at && (
-            <EuiFlexItem>
-              <EuiText size="s" color="subdued">
-                {investigation.completed_at
-                  ? i18n.translate('xpack.nightshiftInvestigations.flyout.ranFor', {
-                      defaultMessage: '{start} — ran for {duration}',
-                      values: {
-                        start: formatDate(investigation.started_at),
-                        duration: formatDuration(
-                          investigation.started_at,
-                          investigation.completed_at
-                        ),
-                      },
-                    })
-                  : i18n.translate('xpack.nightshiftInvestigations.flyout.startedAt', {
-                      defaultMessage: 'Started {start}',
-                      values: { start: formatDate(investigation.started_at) },
-                    })}
-              </EuiText>
-            </EuiFlexItem>
-          )}
         </EuiFlexGroup>
-
-        {investigation.status === 'failed' && investigation.error && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiCallOut
-              announceOnMount
-              color="danger"
-              size="s"
-              title={i18n.translate('xpack.nightshiftInvestigations.flyout.failedTitle', {
-                defaultMessage: 'Investigation failed',
-              })}
-            >
-              <EuiText size="s">{investigation.error}</EuiText>
-            </EuiCallOut>
-          </>
-        )}
       </>
     );
   };
@@ -259,7 +221,6 @@ export function InvestigationDetailFlyout({
           <h2>{primaryText}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
-        {investigation && <InvestigationRunStatusBadge status={investigation.status} />}
         <EuiSpacer size="s" />
         <EuiText color="subdued" size="xs">
           {investigation ? formatDate(investigation.created_at) : ''}

@@ -12,26 +12,34 @@ import type {
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { ProposalsService } from './proposals/services/proposals_service';
+import type { InvestigationsService } from './investigations/storage/investigations_service';
 
 export interface AgenticInvestigationsSetupDependencies {
+  agentBuilder: AgentBuilderPluginSetup;
   features: FeaturesPluginSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
 }
 
 export interface AgenticInvestigationsStartDependencies {
+  agentBuilder: AgentBuilderPluginStart;
   spaces?: SpacesPluginStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
 }
 
 /**
- * Exposed so a solution plugin can reach an entity in-process rather than over
- * HTTP (Core's self client refuses a self call that is already one). One getter
- * per entity this plugin owns.
+ * Exposed so a solution plugin can reach an entity in-process rather than over HTTP.
+ * One getter per entity this plugin owns.
  */
 export interface AgenticInvestigationsPluginStart {
   getProposalsService: () => ProposalsService;
+  /**
+   * Returns the shared InvestigationsService backed by the nightshift-investigation SO.
+   * NSI and other solution plugins cast this to their concrete service interface.
+   */
+  getInvestigationsService: () => InvestigationsService;
 }
 
 export type AgenticInvestigationsPluginSetup = Record<string, never>;

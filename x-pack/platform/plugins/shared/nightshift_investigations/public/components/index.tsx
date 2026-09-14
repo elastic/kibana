@@ -8,7 +8,6 @@
 import React, { Suspense } from 'react';
 
 import type { InvestigationDetailFlyoutProps } from './investigation_detail_flyout';
-export { InvestigationRunStatusBadge } from './investigation_run_status_badge';
 
 const LazyInvestigationDetailFlyout = React.lazy(async () => {
   const { InvestigationDetailFlyout: InvestigationDetailFlyoutComponent } = await import(

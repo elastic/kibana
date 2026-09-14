@@ -45,7 +45,7 @@ const collectStepsByType = (steps: WorkflowStep[], type: string): WorkflowStep[]
 
 describe('investigation lifecycle contracts', () => {
   it('emits lifecycle events and fails unsuccessful executions', () => {
-    expect(SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW.version).toBe(11);
+    expect(SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW.version).toBe(12);
     expect(investigation.steps[0].name).toBe('ensure_investigation_agent');
 
     const expectedStatuses: Record<string, string> = {
@@ -80,17 +80,17 @@ describe('investigation lifecycle contracts', () => {
     });
   });
 
-  it('persists completed structured output including severity and trigger_feedback', () => {
+  it('persists completed status and structured output to the shared investigation record', () => {
     const persistCompleted = requireStep('persist_investigation_completed');
     expect(persistCompleted.with?.body).toEqual(
       expect.objectContaining({
         status: 'completed',
         severity: '${{ steps.investigate.output.structured_output.severity }}',
-        trigger_feedback: '${{ steps.investigate.output.structured_output.trigger_feedback }}',
+        blindSpots: '${{ steps.investigate.output.structured_output.blind_spots }}',
       })
     );
-    expect(investigation.steps.some((step) => step.name === 'attach_to_significant_event')).toBe(
-      false
+    expect(persistCompleted.with?.path).toBe(
+      '/s/{{ workflow.spaceId }}/internal/investigations/investigations/{{ execution.id }}'
     );
   });
 

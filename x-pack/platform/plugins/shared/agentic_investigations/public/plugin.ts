@@ -7,10 +7,15 @@
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { registerProposalsPublicStepDefinitions } from './proposals/step_types';
+import {
+  registerInvestigationAttachmentUITypes,
+  registerInvestigationTemplateUI,
+} from './investigations';
 import type {
   AgenticInvestigationsPublicPluginSetup,
   AgenticInvestigationsPublicPluginStart,
   AgenticInvestigationsPublicSetupDependencies,
+  AgenticInvestigationsPublicStartDependencies,
 } from './types';
 
 export class AgenticInvestigationsPublicPlugin
@@ -21,10 +26,20 @@ export class AgenticInvestigationsPublicPlugin
     { workflowsExtensions }: AgenticInvestigationsPublicSetupDependencies
   ): AgenticInvestigationsPublicPluginSetup {
     registerProposalsPublicStepDefinitions(workflowsExtensions);
+
     return {};
   }
 
-  start(_core: CoreStart): AgenticInvestigationsPublicPluginStart {
+  start(
+    _core: CoreStart,
+    { agentBuilder }: AgenticInvestigationsPublicStartDependencies
+  ): AgenticInvestigationsPublicPluginStart {
+    // Register UI renderers for each of the four investigation attachment types.
+    registerInvestigationAttachmentUITypes(agentBuilder.attachments);
+
+    // Register the investigation conversation template UI.
+    registerInvestigationTemplateUI(agentBuilder.conversationTemplates);
+
     return {};
   }
 
