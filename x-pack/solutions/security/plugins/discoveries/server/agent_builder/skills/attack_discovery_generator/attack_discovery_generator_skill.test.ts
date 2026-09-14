@@ -119,7 +119,7 @@ describe('attackDiscoveryGeneratorSkill', () => {
         'Do not call `platform.core.generate_esql`'
       );
       expect(attackDiscoveryGeneratorSkill.content).toMatch(
-        /GET_DEFAULT_ESQL_QUERY_TOOL_ID/
+        /security\.attack-discovery\.get_default_esql_query/
       );
     });
 
