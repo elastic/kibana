@@ -44,6 +44,12 @@ const getComponentTemplate = (adapter: IndexAdapter) =>
 describe('SiemRuleMigrationsDataService', () => {
   const kibanaVersion = '8.16.0';
   const logger = loggingSystemMock.createLogger();
+  const createClientParams = {
+    spaceId: 'space1',
+    currentUser: securityServiceMock.createMockAuthenticatedUser(),
+    esScopedClient: elasticsearchServiceMock.createStart().client.asScoped(),
+    dependencies,
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -51,16 +57,37 @@ describe('SiemRuleMigrationsDataService', () => {
   });
 
   describe('constructor', () => {
-    it('should create IndexPatternAdapters', () => {
+    it('should not create any adapter before setup', () => {
       new RuleMigrationsDataService(logger, kibanaVersion);
+      expect(MockedIndexPatternAdapter).not.toHaveBeenCalled();
+      expect(MockedIndexAdapter).not.toHaveBeenCalled();
+    });
+
+    it('should throw when used before setup', () => {
+      const service = new RuleMigrationsDataService(logger, kibanaVersion);
+      expect(() => service.createClient(createClientParams)).toThrow(
+        'Service not initialized, please call setup first'
+      );
+    });
+  });
+
+  describe('setup', () => {
+    it('should create every adapter exactly once', async () => {
+      const service = new RuleMigrationsDataService(logger, kibanaVersion);
+      await service.setup({ esClient, pluginStop$: new Subject() });
       expect(MockedIndexPatternAdapter).toHaveBeenCalledTimes(3);
       expect(MockedIndexAdapter).toHaveBeenCalledTimes(2);
     });
 
-    it('should create component templates', () => {
-      new RuleMigrationsDataService(logger, kibanaVersion);
-      const [rulesAdapter, resourcesAdapter] = MockedIndexPatternAdapter.mock.instances;
+    it('should create component templates', async () => {
+      const service = new RuleMigrationsDataService(logger, kibanaVersion);
+      await service.setup({ esClient, pluginStop$: new Subject() });
+      const [migrationsAdapter, rulesAdapter, resourcesAdapter] =
+        MockedIndexPatternAdapter.mock.instances;
       const [integrationsAdapter, prebuiltRulesAdapter] = MockedIndexAdapter.mock.instances;
+      expect(migrationsAdapter.setComponentTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ name: `${INDEX_PATTERN}-migrations` })
+      );
       expect(rulesAdapter.setComponentTemplate).toHaveBeenCalledWith(
         expect.objectContaining({ name: `${INDEX_PATTERN}-rules` })
       );
@@ -75,8 +102,9 @@ describe('SiemRuleMigrationsDataService', () => {
       );
     });
 
-    it('should create ELSER component templates with the default ELSER inference endpoint', () => {
-      new RuleMigrationsDataService(logger, kibanaVersion);
+    it('should create ELSER component templates with the default ELSER inference endpoint', async () => {
+      const service = new RuleMigrationsDataService(logger, kibanaVersion);
+      await service.setup({ esClient, pluginStop$: new Subject() });
       const [integrationsAdapter, prebuiltRulesAdapter] = MockedIndexAdapter.mock.instances;
 
       expect(getComponentTemplate(integrationsAdapter)).toEqual(
@@ -101,9 +129,10 @@ describe('SiemRuleMigrationsDataService', () => {
       );
     });
 
-    it('should create ELSER component templates with the configured ELSER inference endpoint', () => {
+    it('should create ELSER component templates with the configured ELSER inference endpoint', async () => {
       const elserInferenceId = 'pt_tiny_elser_elasticsearch';
-      new RuleMigrationsDataService(logger, kibanaVersion, elserInferenceId);
+      const service = new RuleMigrationsDataService(logger, kibanaVersion, elserInferenceId);
+      await service.setup({ esClient, pluginStop$: new Subject() });
       const [integrationsAdapter, prebuiltRulesAdapter] = MockedIndexAdapter.mock.instances;
 
       expect(getComponentTemplate(integrationsAdapter)).toEqual(
@@ -128,10 +157,15 @@ describe('SiemRuleMigrationsDataService', () => {
       );
     });
 
-    it('should create index templates', () => {
-      new RuleMigrationsDataService(logger, kibanaVersion);
-      const [rulesAdapter, resourcesAdapter] = MockedIndexPatternAdapter.mock.instances;
+    it('should create index templates', async () => {
+      const service = new RuleMigrationsDataService(logger, kibanaVersion);
+      await service.setup({ esClient, pluginStop$: new Subject() });
+      const [migrationsAdapter, rulesAdapter, resourcesAdapter] =
+        MockedIndexPatternAdapter.mock.instances;
       const [integrationsAdapter, prebuiltRulesAdapter] = MockedIndexAdapter.mock.instances;
+      expect(migrationsAdapter.setIndexTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ name: `${INDEX_PATTERN}-migrations` })
+      );
       expect(rulesAdapter.setIndexTemplate).toHaveBeenCalledWith(
         expect.objectContaining({ name: `${INDEX_PATTERN}-rules` })
       );
@@ -148,22 +182,20 @@ describe('SiemRuleMigrationsDataService', () => {
   });
 
   describe('install', () => {
-    it('should install index pattern and run the migration', async () => {
+    it('should install every adapter and run the migration', async () => {
       const service = new RuleMigrationsDataService(logger, kibanaVersion);
       const params: SetupParams = {
         esClient,
         pluginStop$: new Subject(),
       };
       await service.setup(params);
-      const [indexPatternAdapter] = MockedIndexPatternAdapter.mock.instances;
-      const indexAdapters = MockedIndexAdapter.mock.instances.slice(2);
 
-      expect(indexPatternAdapter.install).toHaveBeenCalledWith(expect.objectContaining(params));
-      for (const adapter of [...MockedIndexPatternAdapter.mock.instances, ...indexAdapters]) {
+      for (const adapter of [
+        ...MockedIndexPatternAdapter.mock.instances,
+        ...MockedIndexAdapter.mock.instances,
+      ]) {
+        expect(adapter.install).toHaveBeenCalledTimes(1);
         expect(adapter.install).toHaveBeenCalledWith(expect.objectContaining(params));
-      }
-      for (const adapter of MockedIndexAdapter.mock.instances.slice(0, 2)) {
-        expect(adapter.install).not.toHaveBeenCalled();
       }
       expect(RuleMigrationIndexMigrator).toHaveBeenCalled();
     });
@@ -187,7 +219,7 @@ describe('SiemRuleMigrationsDataService', () => {
       });
       const service = new RuleMigrationsDataService(logger, kibanaVersion, configuredId);
       await service.setup({ esClient, pluginStop$: new Subject<void>() });
-      const installedAdapters = MockedIndexAdapter.mock.instances.slice(2);
+      const installedAdapters = MockedIndexAdapter.mock.instances;
       expect(installedAdapters).toHaveLength(2);
       for (const adapter of installedAdapters) {
         expect(getComponentTemplate(adapter).fieldMap.elser_embedding.inference_id).toBe(
@@ -207,7 +239,7 @@ describe('SiemRuleMigrationsDataService', () => {
       esClient.inference.get.mockRejectedValue(new Error('Discovery unavailable'));
       const service = new RuleMigrationsDataService(logger, kibanaVersion);
       await service.setup({ esClient, pluginStop$: new Subject<void>() });
-      for (const adapter of MockedIndexAdapter.mock.instances.slice(2)) {
+      for (const adapter of MockedIndexAdapter.mock.instances) {
         expect(getComponentTemplate(adapter).fieldMap.elser_embedding.inference_id).toBe(
           defaultInferenceEndpoints.ELSER
         );
@@ -217,14 +249,6 @@ describe('SiemRuleMigrationsDataService', () => {
   });
 
   describe('createClient', () => {
-    const currentUser = securityServiceMock.createMockAuthenticatedUser();
-    const createClientParams = {
-      spaceId: 'space1',
-      currentUser,
-      esScopedClient: elasticsearchServiceMock.createStart().client.asScoped(),
-      dependencies,
-    };
-
     it('should install space index pattern', async () => {
       const service = new RuleMigrationsDataService(logger, kibanaVersion);
       const params: SetupParams = {
@@ -232,11 +256,12 @@ describe('SiemRuleMigrationsDataService', () => {
         pluginStop$: new Subject(),
       };
 
-      const [rulesIndexPatternAdapter, resourcesIndexPatternAdapter, migrationIndexPatternAdapter] =
-        MockedIndexPatternAdapter.mock.instances;
-      (rulesIndexPatternAdapter.install as jest.Mock).mockResolvedValueOnce(undefined);
-
       await service.setup(params);
+
+      // Adapters only exist once `setup` has resolved
+      const [migrationIndexPatternAdapter, rulesIndexPatternAdapter, resourcesIndexPatternAdapter] =
+        MockedIndexPatternAdapter.mock.instances;
+
       service.createClient(createClientParams);
 
       await mockIndexNameProviders.rules();
