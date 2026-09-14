@@ -1,14 +1,19 @@
 version: "1"
 # Every 4h: fetch enabled sources, skip known fingerprints (90d), write new reports.
-# Scoped to `workflow.spaceId` plus global (`*`) catalog rows via `space_id`.
+# Installed once globally so no space re-fetches the same feed. MVP sources are all
+# global (`space_id: '*'`), but `load_sources` and `check_dedup` are deliberately
+# space-blind rather than pinned to `*`: a future space-owned custom source (the
+# adapters already stamp each report with its own source's `space_id`; see
+# `space_filter.ts`'s `canMutateSourceInSpace`) is picked up by this single global
+# instance with no workflow change. `enabled: true` is the complete gate either way.
 name: Ingest threat feeds
 description: Fetch enabled sources and write new reports to .kibana-threat-reports
 tags:
   - threat-intel
-enabled: true
+enabled: false
 settings:
   concurrency:
-    key: "threat-intel-ingest-{{ workflow.spaceId }}"
+    key: "threat-intel-ingest-global"
     strategy: drop
     max: 1
 triggers:
@@ -16,11 +21,6 @@ triggers:
     with:
       every: "4h"
 steps:
-  - name: set_space_context
-    type: data.set
-    with:
-      spaceId: "{{ workflow.spaceId }}"
-
   - name: load_sources
     type: elasticsearch.search
     with:
@@ -32,10 +32,10 @@ steps:
             - term:
                 enabled:
                   value: true
-            - terms:
-                space_id:
-                  - "{{ variables.spaceId }}"
-                  - "*"
+          # Space-blind on purpose: a space_id filter here would also silently
+          # exclude a future space-owned source from ever being fetched by this
+          # single global instance. `enabled` alone is the complete gate today and
+          # stays correct once per-space sources exist.
 
   - name: dispatch_each_source
     type: foreach
@@ -71,10 +71,9 @@ steps:
                     - range:
                         "@timestamp":
                           gte: "now-90d"
-                    - terms:
-                        space_id:
-                          - "{{ variables.spaceId }}"
-                          - "*"
+                  # Space-blind, same reasoning as load_sources: a space_id filter here
+                  # would miss a duplicate fingerprint already written under a future
+                  # space-owned source's own space_id, and re-ingest the same report.
 
           - name: skip_if_seen
             type: loop.continue

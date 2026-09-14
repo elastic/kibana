@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/*
+ * Test-only XY (`lnsXY`) attribute normalizer for strict SO ↔ API round-trip checks.
+ */
+
 import { orderBy } from 'lodash';
 import type { FormBasedPersistedState } from '@kbn/lens-common';
 import type { LensAttributes } from '../../../../types';
