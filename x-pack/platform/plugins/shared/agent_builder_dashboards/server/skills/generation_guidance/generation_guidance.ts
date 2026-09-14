@@ -47,7 +47,9 @@ For an existing dashboard:
 ## Panel Inputs
 
 - Use \`source: "request"\` to create or edit a Lens or Vega panel from a natural-language / ES|QL query — this is the only correct way to make a **new** visualization, or to change an existing chart's query or chart family. Never hand-build a visualization \`config\` for a new visualization.
-- Use \`source: "attachment"\` with an \`attachment_id\` to place any visualization that already exists in this conversation — anything \`${platformCoreTools.createVisualization}\` returned. Pass only the id and a \`grid\`; the attachment's own renderer decides the panel type. Prefer this over \`source: "config"\` whenever you have an id: it costs far fewer tokens than repeating the payload, and for custom content it is the only way to place the panel that was actually generated — a custom content \`config\` takes a prompt and generates a **new** template, producing a different panel.
+- Use \`source: "attachment"\` with an \`attachment_id\` to place any visualization that already exists in this conversation — anything \`${
+  platformCoreTools.createVisualization
+}\` returned. Pass only the id and a \`grid\`; the attachment's own renderer decides the panel type. Prefer this over \`source: "config"\` whenever you have an id: it costs far fewer tokens than repeating the payload, and for custom content it is the only way to place the panel that was actually generated — a custom content \`config\` takes a prompt and generates a **new** template, producing a different panel.
 - Use \`source: "config"\` for markdown, custom content when you have no attachment id, a visualization you hold by value with no attachment id, or a **presentation patch** on an existing Lens/Vega panel (\`type: "vis"\`, \`panelId\`, partial \`config\`). The generation tool never reads an attachment or saved-object store, so a full new visualization config must be supplied directly — do not invent one.
 
 ## Panel Type Selection
