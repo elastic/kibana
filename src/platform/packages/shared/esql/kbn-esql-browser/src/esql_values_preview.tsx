@@ -7,8 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
-import { EuiBadge, EuiBadgeGroup, EuiCode, EuiFlexGrid, EuiStat } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import {
+  EuiBadge,
+  EuiBadgeGroup,
+  EuiCode,
+  EuiFlexGrid,
+  EuiSelectable,
+  EuiStat,
+} from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
 import { max, min } from 'lodash';
 import type { ESQLColumn } from '@kbn/es-types';
 import { isNumericType } from '@kbn/esql-language';
@@ -16,7 +24,10 @@ import { EMPTY_LABEL } from '@kbn/field-formats-common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
-import { ChooseColumnPopover } from './choose_column_popover';
+
+const SELECT_COLUMN_LABEL = i18n.translate('esqlUtils.valuesPreview.selectAColumnText', {
+  defaultMessage: 'Select a column',
+});
 
 export const ESQLValuesPreview: React.FC<{
   // The raw values returned by the query — shown as badges or a range stat
@@ -29,6 +40,23 @@ export const ESQLValuesPreview: React.FC<{
   // When true and the column is numeric, renders a min/max range stat instead of badges
   isRangeControl?: boolean;
 }> = ({ values, error, columns, updateQuery, isRangeControl }) => {
+  const [isColumnPopoverOpen, setIsColumnPopoverOpen] = useState(false);
+
+  const columnOptions = useMemo<EuiSelectableOption[]>(
+    () => columns.map((column) => ({ label: column.name })),
+    [columns]
+  );
+
+  const onColumnChange = useCallback(
+    (newOptions: EuiSelectableOption[]) => {
+      const selectedColumn = newOptions.find((option) => option.checked === 'on');
+      if (selectedColumn) {
+        updateQuery(selectedColumn.label);
+      }
+    },
+    [updateQuery]
+  );
+
   const range = useMemo(() => {
     if (!isRangeControl || !isNumericType(columns?.[0]?.type)) return;
 
@@ -68,9 +96,40 @@ export const ESQLValuesPreview: React.FC<{
             }}
           />
         }
-      >
-        <ChooseColumnPopover columns={columns} updateQuery={updateQuery} />
-      </KbnWarningCallout>
+        actionProps={{
+          primary: {
+            children: SELECT_COLUMN_LABEL,
+            onClick: () => setIsColumnPopoverOpen((v) => !v),
+            'data-test-subj': 'chooseColumnBtn',
+            popoverProps: {
+              'aria-label': i18n.translate('esqlUtils.valuesPreview.columnsListLabel', {
+                defaultMessage: 'Columns',
+              }),
+              isOpen: isColumnPopoverOpen,
+              closePopover: () => setIsColumnPopoverOpen(false),
+              children: (
+                <EuiSelectable
+                  aria-label={SELECT_COLUMN_LABEL}
+                  searchable
+                  searchProps={{ 'data-test-subj': 'selectableColumnSearch' }}
+                  listProps={{ 'data-test-subj': 'selectableColumnList' }}
+                  singleSelection="always"
+                  options={columnOptions}
+                  onChange={onColumnChange}
+                  data-test-subj="selectableColumnContainer"
+                >
+                  {(list, search) => (
+                    <>
+                      {search}
+                      {list}
+                    </>
+                  )}
+                </EuiSelectable>
+              ),
+            },
+          },
+        }}
+      />
     );
   }
 

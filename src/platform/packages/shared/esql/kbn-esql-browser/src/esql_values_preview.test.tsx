@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { act, fireEvent, render } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ESQLColumn } from '@kbn/es-types';
 import { ESQLValuesPreview } from './esql_values_preview';
@@ -89,14 +90,71 @@ describe('ESQLValuesPreview', () => {
     expect(getByTestId('esqlValuesPreviewStrings')).toBeInTheDocument();
   });
 
-  it('shows the column picker when the query returns multiple columns', () => {
-    const { getByText, getByTestId } = render(
-      <I18nProvider>
-        <ESQLValuesPreview {...noopProps} values={[]} columns={[numericColumn, stringColumn]} />
-      </I18nProvider>
-    );
+  describe('column picker (multiple columns returned)', () => {
+    const multiColumns: ESQLColumn[] = [
+      { name: 'col1', type: 'keyword' },
+      { name: 'col2', type: 'keyword' },
+    ];
 
-    expect(getByText('Query must return a single column')).toBeInTheDocument();
-    expect(getByTestId('chooseColumnBtn')).toBeInTheDocument();
+    it('shows the warning and column picker button', () => {
+      const { getByText, getByTestId } = render(
+        <I18nProvider>
+          <ESQLValuesPreview {...noopProps} values={[]} columns={multiColumns} />
+        </I18nProvider>
+      );
+
+      expect(getByText('Query must return a single column')).toBeInTheDocument();
+      expect(getByTestId('chooseColumnBtn')).toBeInTheDocument();
+    });
+
+    it('should render a search input and a list when the column picker is opened', async () => {
+      const user = userEvent.setup();
+      const { findByTestId } = render(
+        <I18nProvider>
+          <ESQLValuesPreview {...noopProps} values={[]} columns={multiColumns} />
+        </I18nProvider>
+      );
+
+      await user.click(await findByTestId('chooseColumnBtn'));
+
+      expect(await findByTestId('selectableColumnSearch')).toBeInTheDocument();
+      expect(await findByTestId('selectableColumnList')).toBeInTheDocument();
+    });
+
+    it('should update the list when there is text in the search input', async () => {
+      const user = userEvent.setup();
+      const { findByTestId } = render(
+        <I18nProvider>
+          <ESQLValuesPreview {...noopProps} values={[]} columns={multiColumns} />
+        </I18nProvider>
+      );
+
+      await user.click(await findByTestId('chooseColumnBtn'));
+      const input = await findByTestId('selectableColumnSearch');
+
+      fireEvent.change(input, { target: { value: 'col2' } });
+
+      const list = await findByTestId('selectableColumnList');
+      const listItems = list.querySelector('li');
+      expect(listItems).toHaveTextContent('col2');
+    });
+
+    it('should call updateQuery when a column is selected', async () => {
+      const updateQuery = jest.fn();
+      const { getByTestId, getByText } = render(
+        <I18nProvider>
+          <ESQLValuesPreview {...noopProps} updateQuery={updateQuery} values={[]} columns={multiColumns} />
+        </I18nProvider>
+      );
+
+      await act(async () => {
+        fireEvent.click(getByTestId('chooseColumnBtn'));
+      });
+      await act(async () => {
+        fireEvent.click(getByText('col2'));
+      });
+
+      expect(updateQuery).toHaveBeenCalledWith('col2');
+    });
   });
 });

@@ -8,4 +8,3 @@
  */
 
 export { ESQLValuesPreview } from './src/esql_values_preview';
-export { ChooseColumnPopover } from './src/choose_column_popover';
