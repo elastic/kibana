@@ -94,7 +94,7 @@ export function buildLogsExtractionEsqlQuery({
   parts.push(
     buildExtractionSourceClause({
       indexPatterns,
-      type,
+      entityDefinition,
       fromDateISO,
       toDateISO,
       logsPageCursorStart,
