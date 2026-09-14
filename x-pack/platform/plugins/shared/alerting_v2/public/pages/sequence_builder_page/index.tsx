@@ -19,7 +19,7 @@ import type { CPSPluginStart } from '@kbn/cps/public';
 import { RuleFormProvider } from '@kbn/alerting-v2-rule-form';
 import type { RuleFormServices } from '@kbn/alerting-v2-rule-form';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { paths } from '../../constants';
+import { useAlertingLocators } from '../../application/locator_context';
 import { useSequenceBuilderForm, useSequenceBuilderState } from './use_sequence_builder_form';
 import { SequenceBuilderHeader } from './sequence_builder_header';
 import { AlertConditionCanvas } from './alert_condition_canvas';
@@ -70,20 +70,19 @@ const useRuleFormServicesBag = (): RuleFormServices => {
 };
 
 export const SequenceBuilderPage: React.FC = () => {
-  const application = useService(CoreStart('application'));
   const ruleFormServices = useRuleFormServicesBag();
+  const { rulesLocators } = useAlertingLocators();
 
   const { methods } = useSequenceBuilderForm();
   const uiState = useSequenceBuilderState();
   const [isRuleListOpen, setIsRuleListOpen] = useState(true);
   const handleToggleRuleList = useCallback(() => setIsRuleListOpen((prev) => !prev), []);
 
-  const basePath = useService(CoreStart('http')).basePath;
   const handleCancel = useCallback(() => {
-    application.navigateToUrl(basePath.prepend(paths.ruleList));
-  }, [application, basePath]);
+    rulesLocators.navigateSync({});
+  }, [rulesLocators]);
 
-  const rulesListHref = useMemo(() => basePath.prepend(paths.ruleList), [basePath]);
+  const rulesListHref = rulesLocators.useUrl({});
 
   const handleSave = methods.handleSubmit((formValues) => uiState.save(formValues));
 
