@@ -62,7 +62,11 @@ const makeActionsStart = (connectors: ReturnType<typeof makeConnector>[] = []) =
   };
 };
 
-const makeContext = () => ({ request: {} } as unknown as ToolHandlerContext);
+const makeContext = (connectorIds?: string[]) =>
+  ({
+    request: {},
+    agentConfiguration: connectorIds !== undefined ? { connector_ids: connectorIds } : undefined,
+  } as unknown as ToolHandlerContext);
 
 describe('connector-discovery inline tools', () => {
   beforeEach(() => {
@@ -140,6 +144,35 @@ describe('connector-discovery inline tools', () => {
       const result = (await tool.handler({}, makeContext())) as ToolHandlerStandardReturn;
 
       expect(result.results[0].type).toBe(ToolResultType.error);
+    });
+
+    it('filters to connector_ids when agentConfiguration.connector_ids is set', async () => {
+      const { actionsStart } = makeActionsStart([
+        makeConnector({ id: 'c1', actionTypeId: '.github' }),
+        makeConnector({ id: 'c2', actionTypeId: '.github' }),
+      ]);
+      mockGetConnectorSpec.mockReturnValue(makeSpec());
+      const tool = createListConnectorsTool({ getActionsStart: async () => actionsStart });
+
+      const result = (await tool.handler({}, makeContext(['c1']))) as ToolHandlerStandardReturn;
+
+      const data = result.results[0].data as { connectors: Array<{ id: string }> };
+      expect(data.connectors).toHaveLength(1);
+      expect(data.connectors[0].id).toBe('c1');
+    });
+
+    it('returns all spec-eligible connectors when connector_ids is not set', async () => {
+      const { actionsStart } = makeActionsStart([
+        makeConnector({ id: 'c1', actionTypeId: '.github' }),
+        makeConnector({ id: 'c2', actionTypeId: '.github' }),
+      ]);
+      mockGetConnectorSpec.mockReturnValue(makeSpec());
+      const tool = createListConnectorsTool({ getActionsStart: async () => actionsStart });
+
+      const result = (await tool.handler({}, makeContext())) as ToolHandlerStandardReturn;
+
+      const data = result.results[0].data as { connectors: Array<{ id: string }> };
+      expect(data.connectors).toHaveLength(2);
     });
   });
 
@@ -239,6 +272,31 @@ describe('connector-discovery inline tools', () => {
       )) as ToolHandlerStandardReturn;
 
       expect(result.results[0].type).toBe(ToolResultType.error);
+    });
+
+    it('returns an error when connector_id is not in agentConfiguration.connector_ids', async () => {
+      const { actionsStart } = makeActionsStart([makeConnector({ id: 'conn-1' })]);
+      const tool = createGetConnectorSubActionsTool({ getActionsStart: async () => actionsStart });
+
+      const result = (await tool.handler(
+        { connector_id: 'conn-1' },
+        makeContext(['other-id'])
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results[0].type).toBe(ToolResultType.error);
+    });
+
+    it('allows access when connector_id is in agentConfiguration.connector_ids', async () => {
+      const { actionsStart } = makeActionsStart([makeConnector({ id: 'conn-1' })]);
+      mockGetConnectorSpec.mockReturnValue(makeSpec());
+      const tool = createGetConnectorSubActionsTool({ getActionsStart: async () => actionsStart });
+
+      const result = (await tool.handler(
+        { connector_id: 'conn-1' },
+        makeContext(['conn-1'])
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results[0].type).toBe(ToolResultType.other);
     });
   });
 });

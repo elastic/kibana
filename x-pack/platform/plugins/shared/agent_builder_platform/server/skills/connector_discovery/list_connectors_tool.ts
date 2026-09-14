@@ -35,8 +35,11 @@ export const createListConnectorsTool = ({
       const actionsClient = await actionsStart.getActionsClientWithRequest(context.request);
       const allConnectors = await actionsClient.getAll();
 
+      const allowedIds = context.agentConfiguration?.connector_ids;
+
       const connectors = allConnectors
         .filter((connector) => !!getConnectorSpec(connector.actionTypeId))
+        .filter((connector) => !allowedIds || allowedIds.includes(connector.id))
         .map((connector) => {
           const spec = getConnectorSpec(connector.actionTypeId);
           return {
