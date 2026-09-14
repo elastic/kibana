@@ -40,7 +40,7 @@ jobs:
             const selected =
               context.payload.action === 'opened' &&
               Number.isInteger(prNumber) &&
-              prNumber % 10 === 0;
+              prNumber % 2 === 0;
             core.setOutput('selected', String(selected));
       - uses: actions/labeler@8558fd74291d67161a8a78ce36a881fa63b766a9 # v5.0.0
         if: steps.libra_cohort.outputs.selected != 'true'

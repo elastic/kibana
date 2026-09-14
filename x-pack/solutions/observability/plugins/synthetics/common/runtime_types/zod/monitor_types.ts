@@ -323,6 +323,47 @@ export const BrowserFieldsCodec = z.looseObject({
   ...tlsSensitiveFields,
 });
 
+// API monitor — twin of io-ts's API section in
+// ../monitor_management/monitor_types.ts. Shares Browser's simple fields, but
+// omits SCREENSHOTS / THROTTLING_CONFIG (browser/CDP-specific; Heartbeat's
+// api plugin, elastic/beats#50802, never launches a browser).
+const apiEncryptedAdvanced = {
+  [ConfigKey.JOURNEY_FILTERS_MATCH]: z.string(),
+  [ConfigKey.JOURNEY_FILTERS_TAGS]: z.array(z.string()),
+  [ConfigKey.IGNORE_HTTPS_ERRORS]: z.boolean(),
+  [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: z.array(z.string()),
+};
+
+export const EncryptedAPISimpleFieldsCodec = EncryptedBrowserSimpleFieldsCodec;
+export const APISensitiveSimpleFieldsCodec = BrowserSensitiveSimpleFieldsCodec;
+export const APISimpleFieldsCodec = BrowserSimpleFieldsCodec;
+
+export const EncryptedAPIAdvancedFieldsCodec = z.looseObject(apiEncryptedAdvanced);
+export const APISensitiveAdvancedFieldsCodec = BrowserSensitiveAdvancedFieldsCodec;
+export const APIAdvancedFieldsCodec = z.looseObject({
+  ...apiEncryptedAdvanced,
+  ...browserSensitiveAdvanced,
+});
+
+export const EncryptedAPIFieldsCodec = z.looseObject({
+  ...commonRequired,
+  ...commonOptional,
+  ...browserEncryptedSimple,
+  ...apiEncryptedAdvanced,
+  ...tlsFields,
+});
+
+export const APIFieldsCodec = z.looseObject({
+  ...commonRequired,
+  ...commonOptional,
+  ...browserEncryptedSimple,
+  ...browserSensitiveSimple,
+  ...apiEncryptedAdvanced,
+  ...browserSensitiveAdvanced,
+  ...tlsFields,
+  ...tlsSensitiveFields,
+});
+
 export const MonitorFieldsCodec = z.looseObject({
   ...commonRequired,
   ...commonOptional,
@@ -352,6 +393,7 @@ export const SyntheticsMonitorCodec = z.union([
   TCPFieldsCodec,
   ICMPSimpleFieldsCodec,
   BrowserFieldsCodec,
+  APIFieldsCodec,
 ]);
 
 export const EncryptedSyntheticsMonitorCodec = z.union([
@@ -359,6 +401,7 @@ export const EncryptedSyntheticsMonitorCodec = z.union([
   EncryptedTCPFieldsCodec,
   ICMPSimpleFieldsCodec,
   EncryptedBrowserFieldsCodec,
+  EncryptedAPIFieldsCodec,
 ]);
 
 export const SyntheticsMonitorWithIdCodec = SyntheticsMonitorCodec.and(

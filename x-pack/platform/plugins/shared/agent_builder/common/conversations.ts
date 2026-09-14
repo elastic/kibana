@@ -22,6 +22,13 @@ export interface ConversationListOptions {
   pinned?: boolean;
 }
 
+export interface ConversationSearchOptions {
+  query: string;
+  agentId?: string;
+  page?: number;
+  perPage?: number;
+}
+
 export interface ConversationGetOptions {
   conversationId: string;
 }

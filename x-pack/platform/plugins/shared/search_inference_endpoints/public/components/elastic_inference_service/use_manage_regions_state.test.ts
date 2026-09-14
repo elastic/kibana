@@ -274,6 +274,34 @@ describe('useManageRegionsState', () => {
       expect(result.current.common.pendingDelete).toBe(false);
     });
 
+    it('does not seed from cached empty policy until the query has fetched after mount', () => {
+      mockUseRegionPolicy.mockReturnValue({
+        data: null,
+        isLoading: false,
+        isError: false,
+        isFetchedAfterMount: false,
+      } as unknown as ReturnType<typeof useRegionPolicy>);
+
+      const { result, rerender } = renderHook(() => useManageRegionsState(onClose));
+
+      expect(result.current.common.useCustomPolicy).toBe(false);
+      expect(result.current.common.isLoading).toBe(true);
+      expect(result.current.common.hasExistingPolicy).toBe(false);
+
+      mockUseRegionPolicy.mockReturnValue({
+        data: { region_policy: { allowed_geos: ['eu'] }, created_at: '2024-01-01T00:00:00Z' },
+        isLoading: false,
+        isError: false,
+        isFetchedAfterMount: true,
+      } as unknown as ReturnType<typeof useRegionPolicy>);
+      rerender();
+
+      expect(result.current.common.useCustomPolicy).toBe(true);
+      expect(result.current.common.isLoading).toBe(false);
+      expect(result.current.common.hasExistingPolicy).toBe(true);
+      expect(result.current.geoTab.checkedGeos).toEqual(new Set(['eu']));
+    });
+
     it('seeds useCustomPolicy=true when an allowed_geos policy exists', () => {
       mockUseRegionPolicy.mockReturnValue({
         data: { region_policy: { allowed_geos: ['eu'] }, created_at: '2024-01-01T00:00:00Z' },

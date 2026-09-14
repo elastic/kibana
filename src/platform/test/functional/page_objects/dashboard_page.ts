@@ -698,6 +698,9 @@ export class DashboardPageObject extends FtrService {
       await this.selectDashboardTags(saveOptions.tags);
     }
 
+    // Let the async "Permissions" (access control) section render and reflow the footer before clicking Save, so the button isn't hit mid-reflow.
+    await this.testSubjects.exists('accessModeContainer');
+
     await this.clickSave();
     if (saveOptions.waitDialogIsClosed) {
       await this.testSubjects.waitForDeleted(modalDialog);

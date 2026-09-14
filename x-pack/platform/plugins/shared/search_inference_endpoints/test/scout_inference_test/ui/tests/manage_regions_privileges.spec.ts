@@ -10,15 +10,23 @@ import { FEATURE_PRIVILEGED_ROLE, FEATURE_READ_ROLE } from '../../api/constants'
 import { INFERENCE_LOCAL_TAGS } from '../../scout_test_tags';
 import { test } from '../fixtures';
 import { eisEndpointsMockData } from '../fixtures/mock_data/eis_endpoints';
-import { mockInferenceEndpoints, unmockInferenceEndpoints } from '../fixtures/mocks';
+import {
+  mockInferenceEndpoints,
+  mockNoRegionPolicy,
+  mockRegionPolicy,
+  unmockInferenceEndpoints,
+  unmockRegionPolicy,
+} from '../fixtures/mocks';
 
 test.describe('Manage regions privileges', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
   test.beforeEach(async ({ page }) => {
     await mockInferenceEndpoints(page, eisEndpointsMockData);
+    await mockNoRegionPolicy(page);
   });
 
   test.afterEach(async ({ page }) => {
     await unmockInferenceEndpoints(page);
+    await unmockRegionPolicy(page);
   });
 
   test('feature-privileged user can see Manage regions', async ({ browserAuth, pageObjects }) => {
@@ -35,5 +43,39 @@ test.describe('Manage regions privileges', { tag: [...INFERENCE_LOCAL_TAGS] }, (
 
     await expect(pageObjects.eisModels.pageHeader).toBeVisible();
     await expect(pageObjects.eisModels.manageRegionsButton).toBeHidden();
+  });
+
+  test('feature-read user sees a read-only Restricted regions badge when a policy is set', async ({
+    browserAuth,
+    page,
+    pageObjects,
+  }) => {
+    await unmockRegionPolicy(page);
+    await mockRegionPolicy(page, { allowed_geos: ['us'] });
+    await browserAuth.loginWithCustomRole(FEATURE_READ_ROLE);
+    await pageObjects.eisModels.goto();
+
+    await expect(pageObjects.eisModels.restrictedRegionsBadge).toBeVisible();
+    await pageObjects.eisModels.restrictedRegionsBadge.click();
+    await expect(pageObjects.eisModels.restrictedRegionsPopover).toBeVisible();
+    await expect(pageObjects.eisModels.restrictedRegionsEditButton).toBeHidden();
+    await expect(pageObjects.eisModels.manageRegionsButton).toBeHidden();
+  });
+
+  test('feature-privileged user can edit from the Restricted regions popover', async ({
+    browserAuth,
+    page,
+    pageObjects,
+  }) => {
+    await unmockRegionPolicy(page);
+    await mockRegionPolicy(page, { allowed_geos: ['us'] });
+    await browserAuth.loginWithCustomRole(FEATURE_PRIVILEGED_ROLE);
+    await pageObjects.eisModels.goto();
+
+    await expect(pageObjects.eisModels.restrictedRegionsBadge).toBeVisible();
+    await pageObjects.eisModels.restrictedRegionsBadge.click();
+    await expect(pageObjects.eisModels.restrictedRegionsEditButton).toBeVisible();
+    await pageObjects.eisModels.restrictedRegionsEditButton.click();
+    await expect(pageObjects.eisModels.manageRegionsModal).toBeVisible();
   });
 });

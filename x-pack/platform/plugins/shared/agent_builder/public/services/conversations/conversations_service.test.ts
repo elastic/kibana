@@ -9,10 +9,29 @@ import {
   ConversationAccessControlMode,
   ConversationAccessControlRole,
 } from '@kbn/agent-builder-common';
-import { publicApiPath } from '../../../common/constants';
+import { publicApiPath, internalApiPath } from '../../../common/constants';
 import { ConversationsService } from './conversations_service';
 
 describe('ConversationsService', () => {
+  it('requests _search with the snake_case query mapping', async () => {
+    const get = jest.fn().mockResolvedValue({
+      pagination: { total: 0, page: 1, per_page: 25 },
+      results: [],
+    });
+    const service = new ConversationsService({ http: { get } as never });
+
+    await service.search({ query: 'sales', agentId: 'agent-1', page: 2, perPage: 25 });
+
+    expect(get).toHaveBeenCalledWith(`${internalApiPath}/conversations/_search`, {
+      query: {
+        query: 'sales',
+        agent_id: 'agent-1',
+        page: 2,
+        per_page: 25,
+      },
+    });
+  });
+
   it('updates conversation access control', async () => {
     const put = jest.fn().mockResolvedValue({
       access_mode: ConversationAccessControlMode.Private,

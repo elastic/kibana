@@ -110,7 +110,7 @@ describe('useErrorClickHandler', () => {
       query: {
         ...defaultQuery,
         serviceGroup: '',
-        kuery: 'trace.id : "trace-123" and span.id : "span-1"',
+        kuery: 'trace.id : "trace-123" and (span.id : "span-1" or transaction.id : "span-1")',
       },
     });
     expect(mockNavigateToUrl).toHaveBeenCalled();
@@ -130,13 +130,13 @@ describe('useErrorClickHandler', () => {
       query: {
         ...defaultQuery,
         serviceGroup: '',
-        kuery: 'trace.id : "trace-123" and transaction.id : "tx-1"',
+        kuery: 'trace.id : "trace-123" and (span.id : "tx-1" or transaction.id : "tx-1")',
       },
     });
     expect(mockNavigateToUrl).toHaveBeenCalled();
   });
 
-  it('constructs correct kuery with traceId and span.id for spans', () => {
+  it('constructs correct kuery with traceId and both id fields for spans', () => {
     const { result } = renderHook(() => useErrorClickHandler(mockTraceItems));
 
     result.current({
@@ -149,13 +149,13 @@ describe('useErrorClickHandler', () => {
       expect.any(String),
       expect.objectContaining({
         query: expect.objectContaining({
-          kuery: 'trace.id : "my-trace-id" and span.id : "span-1"',
+          kuery: 'trace.id : "my-trace-id" and (span.id : "span-1" or transaction.id : "span-1")',
         }),
       })
     );
   });
 
-  it('constructs correct kuery with traceId and transaction.id for transactions', () => {
+  it('constructs correct kuery with traceId and both id fields for transactions', () => {
     const { result } = renderHook(() => useErrorClickHandler(mockTraceItems));
 
     result.current({
@@ -168,9 +168,46 @@ describe('useErrorClickHandler', () => {
       expect.any(String),
       expect.objectContaining({
         query: expect.objectContaining({
-          kuery: 'trace.id : "my-trace-id" and transaction.id : "tx-1"',
+          kuery: 'trace.id : "my-trace-id" and (span.id : "tx-1" or transaction.id : "tx-1")',
         }),
       })
     );
+  });
+
+  // OTel-native transactions are identified by `span.id` only: the waterfall item id is the
+  // OTel span id and the error documents have no `transaction.id` at all.
+  it('matches span.id for an OTel-native transaction whose id is a span id', () => {
+    const otelTraceItems: TraceItem[] = [
+      {
+        id: 'otel-span-id',
+        name: 'oteldemo.AdServiceSynth/GetAds',
+        timestampUs: 1000000,
+        traceId: 'trace-123',
+        duration: 1000000,
+        errors: [{ errorDocId: 'error-1' }],
+        serviceName: 'otel-service',
+        agentName: 'otlp/nodejs',
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'transaction',
+      },
+    ];
+
+    const { result } = renderHook(() => useErrorClickHandler(otelTraceItems));
+
+    result.current({
+      traceId: 'trace-123',
+      docId: 'otel-span-id',
+      errorCount: 1,
+    });
+
+    expect(mockLink).toHaveBeenCalledWith('/services/{serviceName}/errors', {
+      path: { serviceName: 'otel-service' },
+      query: {
+        ...defaultQuery,
+        serviceGroup: '',
+        kuery:
+          'trace.id : "trace-123" and (span.id : "otel-span-id" or transaction.id : "otel-span-id")',
+      },
+    });
   });
 });

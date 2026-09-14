@@ -6,7 +6,11 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { GetResponse, SortResults } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  GetResponse,
+  SortResults,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import { OccWriter, isElasticsearchWriteConflict } from '@kbn/occ';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type {
@@ -40,6 +44,7 @@ import type {
   ConversationWithPermissions,
   UpdateConversationAccessControlRequestBody,
 } from '../../../../common/http_api/conversations';
+import type { ConversationSearchOptions } from '../../../../common/conversations';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import {
   buildPinnedFilter,
@@ -64,7 +69,11 @@ import type {
   UpsertRoundRequest,
 } from './types';
 import { createSpaceDslFilter, isDefaultSpace } from '../../../utils/spaces';
-import { MAX_CONVERSATIONS_PER_PAGE, MAX_RESULT_WINDOW } from '../../../../common/constants';
+import {
+  MAX_CONVERSATIONS_PER_PAGE,
+  MAX_CONVERSATION_SEARCH_PER_PAGE,
+  MAX_RESULT_WINDOW,
+} from '../../../../common/constants';
 import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
 import type { ConversationProperties, ConversationStorage } from './storage';
 import { conversationIndexName, createStorage } from './storage';
@@ -134,6 +143,7 @@ export interface ConversationClient {
     feedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string }
   ): Promise<void>;
   list(options?: ConversationListOptions): Promise<ConversationListResult>;
+  search(options: ConversationSearchOptions): Promise<ConversationListResult>;
   delete(conversationId: string): Promise<boolean>;
   updateAccessControl(
     conversationId: string,
@@ -154,6 +164,40 @@ const withBoundedTitle = <T extends { title?: string }>(fields: T): T =>
   fields.title === undefined
     ? fields
     : { ...fields, title: fields.title.slice(0, CONVERSATION_TITLE_MAX_LENGTH) };
+
+/** `_source` allowlist shared by every conversation query that returns list rows (no rounds). */
+const CONVERSATION_LIST_SOURCE_FIELDS = [
+  'agent_id',
+  'user_id',
+  'user_name',
+  'title',
+  'created_at',
+  'updated_at',
+  'status',
+  'read',
+  'read_by',
+  'pinned',
+  'pinned_by',
+  'read_only',
+  'access_control',
+  'origin',
+  'workspace_id',
+  'template_id',
+  'template_version',
+  'metadata',
+];
+
+/**
+ * Minimal shape relied on when mapping a list/search response to `ConversationListResult`:
+ * `hits.total` in either its numeric or `{ value }` form, and hits loose enough to satisfy
+ * `isConversationDocument`'s `Partial<Document>` guard.
+ */
+interface ConversationListEsResponse {
+  hits: {
+    total?: number | { value: number };
+    hits: Array<Partial<Document>>;
+  };
+}
 
 export const createClient = ({
   space,
@@ -226,13 +270,10 @@ class ConversationClientImpl implements ConversationClient {
       pinned,
     } = options;
 
-    const accessibleAgentIds = await this.agentRegistry.getIds();
-
-    if (accessibleAgentIds.length === 0 || (agentId && !accessibleAgentIds.includes(agentId))) {
+    const agentIds = await this.resolveAccessibleAgentIds(agentId);
+    if (agentIds.length === 0) {
       return { results: [], total: 0 };
     }
-
-    const agentIds = agentId ? [agentId] : accessibleAgentIds;
 
     const pinnedFilter = buildPinnedFilter({ user: this.user, pinned });
 
@@ -243,39 +284,112 @@ class ConversationClientImpl implements ConversationClient {
       size: perPage,
       sort: [{ updated_at: { order: sortOrder } }, { created_at: { order: sortOrder } }],
       seq_no_primary_term: true,
-      _source: [
-        'agent_id',
-        'user_id',
-        'user_name',
-        'title',
-        'created_at',
-        'updated_at',
-        'status',
-        'read',
-        'read_by',
-        'pinned',
-        'pinned_by',
-        'read_only',
-        'access_control',
-        'origin',
-        'workspace_id',
-        'template_id',
-        'template_version',
-        'metadata',
-      ],
+      _source: CONVERSATION_LIST_SOURCE_FIELDS,
       query: {
         bool: {
-          filter: [
-            createSpaceDslFilter(this.space),
-            buildReadAccessFilter({ user: this.user, agentIds }),
-            // Hide sub-agent conversations from the nav list - hardcoded until we need to do better
-            { bool: { must_not: [{ exists: { field: 'parent_conversation' } }] } },
-            ...pinnedFilter,
-          ],
+          filter: [...this.buildBaseFilters(agentIds), ...pinnedFilter],
         },
       },
     });
 
+    return this.mapListResponse(response);
+  }
+
+  async search(options: ConversationSearchOptions): Promise<ConversationListResult> {
+    const { query, agentId, page = 1, perPage = MAX_CONVERSATION_SEARCH_PER_PAGE } = options;
+
+    const agentIds = await this.resolveAccessibleAgentIds(agentId);
+    if (agentIds.length === 0) {
+      return { results: [], total: 0 };
+    }
+
+    const trimmedQuery = query.trim();
+    const titleMatch = trimmedQuery
+      ? [
+          {
+            bool: {
+              should: [
+                {
+                  match_bool_prefix: {
+                    title: { query: trimmedQuery, operator: 'and' as const },
+                  },
+                },
+                {
+                  prefix: {
+                    'title.keyword': { value: trimmedQuery, boost: 2, case_insensitive: true },
+                  },
+                },
+                // Trailing space asserts a word boundary, boosting clean whole-word prefix matches above partial-token ones.
+                {
+                  prefix: {
+                    'title.keyword': {
+                      value: trimmedQuery + ' ',
+                      boost: 5,
+                      case_insensitive: true,
+                    },
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ]
+      : [];
+
+    const response = await this.storage.getClient().search({
+      // Cap at MAX_RESULT_WINDOW: anything beyond is unreachable via offset pagination.
+      track_total_hits: MAX_RESULT_WINDOW,
+      from: (page - 1) * perPage,
+      size: perPage,
+      // Relevance first; updated_at/created_at break the frequent _score ties so paging is stable.
+      sort: [
+        { _score: { order: 'desc' } },
+        { updated_at: { order: 'desc' } },
+        { created_at: { order: 'desc' } },
+      ],
+      seq_no_primary_term: true,
+      _source: CONVERSATION_LIST_SOURCE_FIELDS,
+      query: {
+        bool: {
+          filter: this.buildBaseFilters(agentIds),
+          must: titleMatch,
+        },
+      },
+    });
+
+    return this.mapListResponse(response);
+  }
+
+  /**
+   * Resolves the agent IDs to scope a list/search query to. Returns an empty array when the
+   * caller has no accessible agents at all, or when a specifically requested `agentId` is not
+   * among them — callers treat `[]` as "return an empty result without querying ES".
+   */
+  private async resolveAccessibleAgentIds(agentId?: string): Promise<string[]> {
+    const accessibleAgentIds = await this.agentRegistry.getIds();
+
+    if (accessibleAgentIds.length === 0 || (agentId && !accessibleAgentIds.includes(agentId))) {
+      return [];
+    }
+
+    return agentId ? [agentId] : accessibleAgentIds;
+  }
+
+  /**
+   * Filter clauses shared by every conversation list/search query: space scoping, read access,
+   * and hiding sub-agent conversations from the nav list - hardcoded until we need to do better.
+   * Query-specific filters (e.g. `pinned`, a title match) are appended by the caller.
+   */
+  private buildBaseFilters(agentIds: string[]): QueryDslQueryContainer[] {
+    return [
+      createSpaceDslFilter(this.space),
+      buildReadAccessFilter({ user: this.user, agentIds }),
+      { bool: { must_not: [{ exists: { field: 'parent_conversation' } }] } },
+    ];
+  }
+
+  /** Maps a list/search ES response to the shared `{ results, total }` shape. */
+  private mapListResponse(response: ConversationListEsResponse): ConversationListResult {
     const hitsTotal = response.hits.total;
     const total = Math.min(
       typeof hitsTotal === 'number' ? hitsTotal : hitsTotal?.value ?? 0,

@@ -135,7 +135,7 @@ export const describeArtifactListPage = (
           // measured flake; the shorter policy-tab ALL path uses 90s.
           spaceTest.setTimeout(120_000);
 
-          await browserAuth.loginAsSecurityRole('endpoint_policy_manager');
+          await browserAuth.loginAsEndpointPolicyManager();
           await pageObjects.artifactListPage.goto(artifact.urlPath);
           await pageObjects.artifactListPage.waitForEmpty(pagePrefix);
 

@@ -42,7 +42,7 @@ engine:
 # Activation rules:
 # - Manual runs always activate.
 # - Non-draft PR events (opened/synchronize/reopened) activate unless reviewer:skip-ai or reviewer:libra is present.
-# - The libra_routing job labels the 10% Libra trial cohort when a PR opens, including drafts; those PRs skip Claude.
+# - The libra_routing job labels the 50% Libra trial cohort when a PR opens, including drafts; those PRs skip Claude.
 # - Draft PR events activate only when the ci:draft-checks label is present.
 # - ready_for_review activates the first review when a draft is marked ready.
 # - Adding the ci:draft-checks label activates a review; other label events are ignored.
@@ -108,7 +108,7 @@ network:
     - github
     - openrouter.ai
 jobs:
-  # Temporary trial: divert every tenth PR to Libra when it opens. A removed
+  # Temporary trial: divert every second PR to Libra when it opens. A removed
   # reviewer:libra label is a permanent opt-out, and failures fall back to Claude.
   libra_routing:
     runs-on: ubuntu-slim
@@ -133,7 +133,7 @@ jobs:
               context.payload.action !== 'opened' ||
               payloadLabels.includes('reviewer:skip-ai') ||
               !Number.isInteger(prNumber) ||
-              prNumber % 10 !== 0
+              prNumber % 2 !== 0
             ) {
               return;
             }
@@ -144,7 +144,7 @@ jobs:
               const selectionCommentBody = [
                 '### Selected for Libra review',
                 '',
-                `This PR was selected for [Libra](https://github.com/elastic/libra) review as part of the temporary 10% trial because PR #${prNumber} is divisible by 10.`,
+                'This PR was selected for [Libra](https://github.com/elastic/libra) review as part of the temporary 50% trial.',
                 '',
                 'To opt out permanently, remove the `reviewer:libra` label. It will not be added again to this PR.',
                 '',

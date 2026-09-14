@@ -32,6 +32,8 @@ export interface ListConversationsResponse {
   results: ListConversationsResponseItem[];
 }
 
+export type SearchConversationsResponse = ListConversationsResponse;
+
 export interface DeleteConversationResponse {
   success: boolean;
 }

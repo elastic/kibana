@@ -5,6 +5,18 @@
  * 2.0.
  */
 
+export interface CustomQueryRuleResponseAction {
+  action_type_id: '.endpoint';
+  params: {
+    command: 'isolate' | 'kill-process' | 'suspend-process' | 'runscript';
+    comment?: string;
+    config?: {
+      field: string;
+      overwrite: boolean;
+    };
+  };
+}
+
 export interface CustomQueryRule {
   index: string[];
   enabled: boolean;
@@ -17,6 +29,7 @@ export interface CustomQueryRule {
   query: string;
   from: string;
   investigation_fields?: { field_names: string[] };
+  response_actions?: CustomQueryRuleResponseAction[];
 }
 
 export const DEFAULT_SECURITY_SOLUTION_INDEXES = [

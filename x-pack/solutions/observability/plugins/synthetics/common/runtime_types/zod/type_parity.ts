@@ -74,8 +74,10 @@ import type * as zodAlerts from './alerts';
 import type * as zodLocations from './locations';
 import type * as zodPing from './ping';
 import type {
+  APIFieldsCodec,
   BrowserFieldsCodec,
   CommonFieldsCodec,
+  EncryptedAPIFieldsCodec,
   EncryptedBrowserFieldsCodec,
   EncryptedHTTPFieldsCodec,
   EncryptedSyntheticsMonitorCodec,
@@ -212,6 +214,11 @@ interface Parity {
   EncryptedBrowserFields: Pair<
     typeof EncryptedBrowserFieldsCodec,
     typeof zodMonitor.EncryptedBrowserFieldsCodec
+  >;
+  APIFields: Pair<typeof APIFieldsCodec, typeof zodMonitor.APIFieldsCodec>;
+  EncryptedAPIFields: Pair<
+    typeof EncryptedAPIFieldsCodec,
+    typeof zodMonitor.EncryptedAPIFieldsCodec
   >;
   // MonitorFieldsCodec is a mega-intersection of every type's fields; io-ts and
   // the flat zod twin drift on a few optional/required merges — covered by the

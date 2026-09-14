@@ -22,7 +22,12 @@ import { useSetSelection } from '../../hooks/use_set_selection';
 import { useRegionTabState } from './use_region_tab_state';
 
 export const useManageRegionsState = (onClose: () => void) => {
-  const { data: policy, isLoading: isPolicyLoading, isError: isPolicyError } = useRegionPolicy();
+  const {
+    data: policy,
+    isLoading: isPolicyLoading,
+    isError: isPolicyError,
+    isFetchedAfterMount,
+  } = useRegionPolicy();
   const {
     data: eisEndpoints,
     isLoading: isEndpointsLoading,
@@ -51,22 +56,22 @@ export const useManageRegionsState = (onClose: () => void) => {
     RegionPolicyConflictArtifact[] | undefined
   >(undefined);
 
-  // Seed state once both queries finish loading.
+  const isPolicyFetchPending = isFetchedAfterMount === false;
+  const isPolicyPending = isPolicyLoading || isPolicyFetchPending;
+  const areQueriesReady = !isPolicyPending && !isEndpointsLoading;
+
   useEffect(() => {
-    const shouldSeed = !isPolicyLoading && !isEndpointsLoading && !syncedFromInitial;
-    if (shouldSeed) {
+    if (areQueriesReady && !syncedFromInitial) {
       const seedState = computeSeedState(policy, availableRegions, availableGeos);
       setActiveTab(seedState.activeTab);
       setIsNewPolicy(seedState.isNewPolicy);
-      // Toggle is ON when a custom policy is already saved; OFF for first-time setup.
       setUseCustomPolicy(!seedState.isNewPolicy);
       seedRegions(seedState.regionKeys);
       seedGeos(seedState.geos);
       setSyncedFromInitial(true);
     }
   }, [
-    isPolicyLoading,
-    isEndpointsLoading,
+    areQueriesReady,
     syncedFromInitial,
     policy,
     availableRegions,
@@ -75,8 +80,7 @@ export const useManageRegionsState = (onClose: () => void) => {
     seedGeos,
   ]);
 
-  // --- Common derived values ---
-  const isLoading = isPolicyLoading || isEndpointsLoading;
+  const isLoading = isPolicyPending || isEndpointsLoading;
   const isError = isPolicyError || isEndpointsError;
   const activeSelectionIsDirty =
     activeTab === 'regions' ? regionTab.regionSelection.isDirty : geoSelection.isDirty;

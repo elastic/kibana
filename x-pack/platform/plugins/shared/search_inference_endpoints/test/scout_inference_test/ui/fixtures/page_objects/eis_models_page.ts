@@ -39,6 +39,11 @@ export class EisModelsPage {
   readonly addEndpointIdField: Locator;
   readonly addEndpointReasoningToggle: Locator;
 
+  // Restricted regions header badge
+  readonly restrictedRegionsBadge: Locator;
+  readonly restrictedRegionsPopover: Locator;
+  readonly restrictedRegionsEditButton: Locator;
+
   // Manage Region Preferences Modal
   readonly manageRegionsButton: Locator;
   readonly manageRegionsModal: Locator;
@@ -107,6 +112,10 @@ export class EisModelsPage {
     this.addEndpointCloseButton = this.page.testSubj.locator('addEndpointModalCloseButton');
     this.addEndpointIdField = this.page.testSubj.locator('addEndpointIdField');
     this.addEndpointReasoningToggle = this.page.testSubj.locator('addEndpointReasoningToggle');
+
+    this.restrictedRegionsBadge = this.page.testSubj.locator('restrictedRegionsBadge');
+    this.restrictedRegionsPopover = this.page.testSubj.locator('restrictedRegionsPopover');
+    this.restrictedRegionsEditButton = this.page.testSubj.locator('restrictedRegionsEditButton');
 
     // Manage Region Preferences Modal
     this.manageRegionsButton = this.page.testSubj.locator('eisManageRegionsButton');
