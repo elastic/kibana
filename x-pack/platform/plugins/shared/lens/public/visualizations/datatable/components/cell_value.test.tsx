@@ -12,7 +12,7 @@ import { createGridCell } from './cell_value';
 import { getTransposeId } from '@kbn/transpose-utils';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { MISSING_TOKEN, NULL_TOKEN } from '@kbn/field-formats-common';
+import { MISSING_TOKEN } from '@kbn/field-formats-common';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { DatatableArgs } from '../../../../common/expressions';
 import type { DataContextType } from './types';
@@ -215,7 +215,7 @@ describe('datatable cell renderer', () => {
         context: { handleFilterClick, table: makeTable([{ a: null }]) },
       });
 
-      expect(screen.getByRole('button')).toHaveTextContent(NULL_TOKEN);
+      expect(screen.getByRole('button')).toHaveTextContent('-');
       expect(screen.queryByText('(null)')).not.toBeInTheDocument();
 
       await userEvent.click(screen.getByRole('button'));
@@ -405,7 +405,7 @@ describe('datatable cell renderer', () => {
           context: { table: makeTable([{ a: null }]) },
         });
 
-        expect(screen.getByText(NULL_TOKEN)).toBeInTheDocument();
+        expect(screen.getByText('-')).toBeInTheDocument();
         expect(setCellProps).not.toHaveBeenCalled();
         expect(screen.queryByTestId('lnsTableCellContentBadge')).not.toBeInTheDocument();
         expect(screen.getByTestId('lnsTableCellContent')).not.toHaveClass('lnsTableCell--colored');
@@ -496,7 +496,7 @@ describe('datatable cell renderer', () => {
             },
             convertToReact: (x: unknown) => {
               if (typeof x === 'number' && Number.isNaN(x)) {
-                return <span>{NULL_TOKEN}</span>;
+                return <span>{'-'}</span>;
               }
               return `formatted ${x}`;
             },
@@ -509,7 +509,7 @@ describe('datatable cell renderer', () => {
         context: { table: makeTable([{ a: Number.NaN }]) },
       });
 
-      expect(screen.getByText(NULL_TOKEN)).toBeInTheDocument();
+      expect(screen.getByText('-')).toBeInTheDocument();
       expect(screen.queryByTestId('lnsTableCellContentBadge')).not.toBeInTheDocument();
     });
 

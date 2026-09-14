@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MISSING_TOKEN, NULL_TOKEN } from '@kbn/field-formats-common';
+import { MISSING_TOKEN } from '@kbn/field-formats-common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { convertValueToString } from './convert_value_to_string';
 import { formatFieldValueText } from './format_value';
@@ -148,7 +148,7 @@ describe('convertValueToString', () => {
         // "-" starts a formula, but the dash is our own constant rather than document content,
         // so it must not come back escaped as "'-" even when the value is CSV compatible.
         expect(result).toEqual({
-          formattedString: NULL_TOKEN,
+          formattedString: '-',
           withFormula: false,
         });
         expect(mockFormatFieldValueText).not.toHaveBeenCalled();
@@ -170,7 +170,7 @@ describe('convertValueToString', () => {
           options: { compatibleWithCSV: true },
         });
 
-        expect(result.formattedString).toBe(`${NULL_TOKEN}, value2`);
+        expect(result.formattedString).toBe('-, value2');
       });
     });
   });

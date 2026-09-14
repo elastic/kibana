@@ -13,7 +13,6 @@ import {
   dataTableContextMock,
   dataTableContextRowsMock,
 } from '../../__mocks__/table_context';
-import { NULL_TOKEN } from '@kbn/field-formats-common';
 import { servicesMock } from '../../__mocks__/services';
 import { convertValueToString, convertNameToString } from './convert_value_to_string';
 
@@ -513,7 +512,7 @@ describe('convertValueToString', () => {
 
     // "-" starts a formula, but the dash is our own constant rather than document content,
     // so it must not come back escaped as "'-" even when the value is CSV compatible.
-    expect(result.formattedString).toBe(NULL_TOKEN);
+    expect(result.formattedString).toBe('-');
     expect(result.withFormula).toBe(false);
   });
 

@@ -19,7 +19,7 @@ import { FieldFormat } from './field_format';
 import { asPrettyString } from './utils';
 import { highlightTags } from './utils/highlight/highlight_tags';
 import type { FieldFormatParams, ReactContextTypeOptions, TextContextTypeOptions } from './types';
-import { MISSING_TOKEN, NULL_LABEL, NULL_TOKEN } from '@kbn/field-formats-common';
+import { MISSING_TOKEN, NULL_LABEL } from '@kbn/field-formats-common';
 import { expectReactElementAsArray, expectReactElementWithNull } from './test_utils';
 
 const hl = (word: string) => `${highlightTags.pre}${word}${highlightTags.post}`;
@@ -192,8 +192,7 @@ describe('FieldFormat class', () => {
       expect(f.convertToText(null)).toBe(NULL_LABEL);
 
       // Tables and Discover consume convertToReact, which pairs the dash with the label.
-      expect(NULL_TOKEN).toBe('-');
-      expect(renderReact(f.convertToReact(null))).toContain(NULL_TOKEN);
+      expect(renderReact(f.convertToReact(null))).toContain('-');
     });
 
     describe('default convertToReact highlight support', () => {

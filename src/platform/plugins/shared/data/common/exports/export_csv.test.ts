@@ -8,7 +8,7 @@
  */
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { MISSING_TOKEN, NULL_TOKEN } from '@kbn/field-formats-common';
+import { MISSING_TOKEN } from '@kbn/field-formats-common';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { datatableToCSV } from './export_csv';
 
@@ -95,9 +95,7 @@ describe('CSV exporter', () => {
     const datatable = getDataTable();
     datatable.rows[0].col1 = value;
 
-    expect(datatableToCSV(datatable, getDefaultOptions())).toMatch(
-      `columnOne\r\n${NULL_TOKEN}\r\n`
-    );
+    expect(datatableToCSV(datatable, getDefaultOptions())).toMatch('columnOne\r\n-\r\n');
   });
 
   test('should not let the formula guard turn the dash into an escaped value', () => {
@@ -107,7 +105,7 @@ describe('CSV exporter', () => {
     // "-" starts a formula, but the dash is our own constant rather than document content.
     expect(
       datatableToCSV(datatable, { ...getDefaultOptions(), escapeFormulaValues: true })
-    ).toMatch(`columnOne\r\n${NULL_TOKEN}\r\n`);
+    ).toMatch('columnOne\r\n-\r\n');
   });
 
   test('should keep raw exports untouched for missing values', () => {
