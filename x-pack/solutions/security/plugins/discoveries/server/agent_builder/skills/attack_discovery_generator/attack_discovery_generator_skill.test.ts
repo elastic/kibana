@@ -118,7 +118,9 @@ describe('attackDiscoveryGeneratorSkill', () => {
       expect(attackDiscoveryGeneratorSkill.content).toContain(
         'Do not call `platform.core.generate_esql`'
       );
-      expect(attackDiscoveryGeneratorSkill.content).toContain('get-default-esql-query');
+      expect(attackDiscoveryGeneratorSkill.content).toMatch(
+        /GET_DEFAULT_ESQL_QUERY_TOOL_ID/
+      );
     });
 
     it('bids a single bounded corroboration pass', () => {
