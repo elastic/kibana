@@ -113,11 +113,28 @@ if (!Object.hasOwn(global, 'MessagePort')) {
 // Required from ts decorators support in tests
 import 'reflect-metadata/lite';
 
-// Monaco's Safari workaround (added in 0.45.0) uses ClipboardItem, which doesn't exist in JSDOM
+// Monaco's Safari workaround (added in 0.45.0) uses ClipboardItem, which doesn't exist in JSDOM.
+// JSDOM's user agent contains "AppleWebKit" without "Chrome" or "Safari", so Monaco treats the
+// test environment as a WebKit web view and installs the workaround in every test.
 if (!Object.hasOwn(global, 'ClipboardItem')) {
   global.ClipboardItem = class ClipboardItem {
     constructor(data) {
       this.data = data;
+
+      // Monaco passes a pending DeferredPromise as the item data and cancels it on the next
+      // click/keydown, rejecting it with a CancellationError. In a real browser the user agent
+      // consumes that promise; here nothing does, so the rejection surfaces as unhandled and fails
+      // whichever test is running. Attaching a catch mirrors browser behavior explicitly targeting the
+      // expected monaco clipboard cancellation.
+      for (const value of Object.values(data ?? {})) {
+        if (typeof value?.catch === 'function') {
+          value.catch((error) => {
+            if (error?.message !== 'Canceled' || error?.name !== 'Canceled') {
+              throw error;
+            }
+          });
+        }
+      }
     }
 
     get types() {
