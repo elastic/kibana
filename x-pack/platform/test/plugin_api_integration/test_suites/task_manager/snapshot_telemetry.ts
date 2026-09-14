@@ -31,15 +31,18 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('snapshot telemetry', () => {
-    let sampleTaskId: string;
+    let sampleTaskId: string | undefined;
 
     after(async () => {
       await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
-      await es.deleteByQuery({
-        index: '.kibana-event-log*',
-        query: { bool: { filter: [{ term: { 'kibana.task.id': sampleTaskId } }] } },
-        conflicts: 'proceed',
-      });
+      if (sampleTaskId) {
+        await es.deleteByQuery({
+          index: '.kibana-event-log*',
+          ignore_unavailable: true,
+          query: { bool: { filter: [{ term: { 'kibana.task.id': sampleTaskId } }] } },
+          conflicts: 'proceed',
+        });
+      }
     });
 
     function runTaskSoon(id: string) {
@@ -66,6 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
     async function countTaskRunStartEvents(taskType: string) {
       const response = await es.search({
         index: '.kibana-event-log*',
+        ignore_unavailable: true,
         size: 0,
         track_total_hits: true,
         query: {
@@ -87,6 +91,9 @@ export default function ({ getService }: FtrProviderContext) {
     it('is scheduled on startup as a daily singleton task', async () => {
       const task = await currentTask(TELEMETRY_TASK_ID);
 
+      // Task Manager schedules this task once, during plugin start, and nothing reschedules it, so
+      // an undefined taskType here means a preceding suite wiped the saved object indices rather than
+      // the task failing to be scheduled.
       expect(task.taskType).to.eql(TELEMETRY_TASK_TYPE);
       expect(task.schedule).to.eql({ interval: '1d' });
     });

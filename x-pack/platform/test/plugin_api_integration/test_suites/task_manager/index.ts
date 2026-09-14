@@ -9,6 +9,7 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('task_manager', function taskManagerSuite() {
+    loadTestFile(require.resolve('./snapshot_telemetry'));
     loadTestFile(require.resolve('./task_priority'));
     loadTestFile(require.resolve('./background_task_utilization_route'));
     loadTestFile(require.resolve('./metrics_route'));
@@ -22,7 +23,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./task_partitions'));
     loadTestFile(require.resolve('./task_cost'));
     loadTestFile(require.resolve('./task_event_log'));
-    loadTestFile(require.resolve('./snapshot_telemetry'));
 
     loadTestFile(require.resolve('./migrations'));
   });
