@@ -113,18 +113,18 @@ export const registerWorkloadBindingSavedObjectType = (
       dynamic: false,
       properties: {
         // Answers "which workloads run as this service account?".
-        serviceAccountId: { type: 'keyword' },
+        serviceAccountId: { type: 'keyword', ignore_above: 1024 },
         // These documents are namespace-agnostic, so they outlive the space their workload lived
         // in. Mapped ahead of the cleanup that will need it, since adding it later would cost a
         // model version.
-        spaceId: { type: 'keyword' },
+        spaceId: { type: 'keyword', ignore_above: 1024 },
         // Mapped now so bindings can later be reported on by age without a migration.
         boundAt: { type: 'date' },
         // The management UI groups a service account's workloads by operation and labels them by
         // workload type, so both have to be filterable and aggregatable. Mapped now for the same
         // reason as `spaceId`: adding them once bindings exist costs a model version.
-        operationType: { type: 'keyword' },
-        workloadType: { type: 'keyword' },
+        operationType: { type: 'keyword', ignore_above: 1024 },
+        workloadType: { type: 'keyword', ignore_above: 1024 },
         // A union of binder variants flattened into one object: `type` selects which of the
         // fields below a given document populates. `userProfileId` is the useful one — it is
         // present on both the `user` and `api_key` variants, so "bound by this person"
@@ -136,12 +136,12 @@ export const registerWorkloadBindingSavedObjectType = (
           // than something that starts indexing on its own.
           dynamic: false,
           properties: {
-            type: { type: 'keyword' },
-            username: { type: 'keyword' },
-            userProfileId: { type: 'keyword' },
-            apiKeyId: { type: 'keyword' },
-            variant: { type: 'keyword' },
-            serviceAccountId: { type: 'keyword' },
+            type: { type: 'keyword', ignore_above: 1024 },
+            username: { type: 'keyword', ignore_above: 1024 },
+            userProfileId: { type: 'keyword', ignore_above: 1024 },
+            apiKeyId: { type: 'keyword', ignore_above: 1024 },
+            variant: { type: 'keyword', ignore_above: 1024 },
+            serviceAccountId: { type: 'keyword', ignore_above: 1024 },
           },
         },
       },
