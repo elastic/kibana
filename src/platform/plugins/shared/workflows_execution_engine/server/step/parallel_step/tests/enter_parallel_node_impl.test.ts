@@ -39,6 +39,11 @@ describe('EnterParallelNodeImpl', () => {
   let branchOutcome: (index: number) => ExecutionStatus;
   let branchRunCalls: number[];
 
+  // Step execution ids the impl asked to rehydrate before reading the branch
+  // results. Branch runtimes whose id is absent stand in for a branch whose
+  // output was deferred by a resume-time `load()` and never brought back.
+  let rehydratedIds: string[];
+
   const makeNode = (
     overrides: Partial<EnterParallelNode['configuration']> = {}
   ): EnterParallelNode =>
@@ -61,6 +66,7 @@ describe('EnterParallelNodeImpl', () => {
   beforeEach(() => {
     persistedState = undefined;
     branchRunCalls = [];
+    rehydratedIds = [];
     branchOutcome = () => ExecutionStatus.COMPLETED;
 
     workflowRuntime = {
@@ -79,6 +85,9 @@ describe('EnterParallelNodeImpl', () => {
       getCurrentStepState: jest.fn(() => persistedState),
       setCurrentStepState: jest.fn((s: ParallelStepState) => {
         persistedState = s;
+      }),
+      rehydrateStepOutputs: jest.fn(async (ids: readonly string[]) => {
+        rehydratedIds.push(...ids);
       }),
       contextManager: {
         evaluateExpressionInContext: jest.fn((x) => x),
@@ -101,6 +110,7 @@ describe('EnterParallelNodeImpl', () => {
         return {
           abortController: new AbortController(),
           contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+          stepExecutionId: `exec_branch_${index}`,
           get stepExecution() {
             return { status: branchOutcome(index), state: {} };
           },
@@ -395,6 +405,60 @@ describe('EnterParallelNodeImpl', () => {
     branchOutcome = () => ExecutionStatus.WAITING;
     await build().run();
     expect(branchRunCalls).toEqual([0, 1]);
+  });
+
+  // Regression: `finish` reads each branch's terminal output directly rather
+  // than through a template, so `StepIoService.prepareForRead` — which targets
+  // outputs by static template analysis — never pre-warms it. Resume-time
+  // `load()` defers every non-pinned step output, and a parallel step advances
+  // at most `concurrency` branches per tick, so without an explicit rehydrate
+  // every wave but the last aggregated as `output: {}`.
+  it('rehydrates branch outputs before aggregating, so earlier waves are not lost', async () => {
+    node = makeNode({
+      foreach: JSON.stringify(['a', 'b', 'c']),
+      concurrency: { max: 2 },
+      mode: 'settled',
+    });
+
+    // Stands in for the deferred state: an output reads as `{}` (mirroring the
+    // real `getStepOutput(...) || {}`) until the impl has named its step
+    // execution id to `rehydrateStepOutputs`.
+    factory.createStepExecutionRuntime = jest.fn(({ stackFrames }) => {
+      const lastFrame = stackFrames[stackFrames.length - 1];
+      const scopeId = lastFrame?.nestedScopes?.[lastFrame.nestedScopes.length - 1]?.scopeId;
+      const index = Number(scopeId ?? 0);
+      const stepExecutionId = `exec_branch_${index}`;
+      return {
+        abortController: new AbortController(),
+        contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+        stepExecutionId,
+        get stepExecution() {
+          return { status: branchOutcome(index), state: {} };
+        },
+        getCurrentStepResult: () => ({
+          output: rehydratedIds.includes(stepExecutionId) ? { branch: index } : {},
+          error: undefined,
+        }),
+        timeoutStep: jest.fn(),
+      } as unknown as StepExecutionRuntime;
+    }) as unknown as typeof factory.createStepExecutionRuntime;
+
+    const impl = build();
+    // Tick 1 fills the window with branches 0 and 1; branch 2 waits for a slot.
+    await impl.run();
+    expect(stepRuntime.finishStep).not.toHaveBeenCalled();
+    // Tick 2 runs branch 2 and aggregates.
+    await impl.run();
+
+    expect(stepRuntime.finishStep).toHaveBeenCalledTimes(1);
+    const output = stepRuntime.finishStep.mock.calls[0][0] as {
+      results: Array<{ output?: { branch?: number } }>;
+    };
+    expect(output.results.map((r) => r.output)).toEqual([
+      { branch: 0 },
+      { branch: 1 },
+      { branch: 2 },
+    ]);
   });
 
   it('count-waiting:true keeps a parked branch holding its slot so `max` still binds', async () => {

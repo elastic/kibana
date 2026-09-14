@@ -136,6 +136,24 @@ export class StepExecutionRuntime {
     };
   }
 
+  /**
+   * Brings the given step executions' outputs back into in-memory state so a
+   * subsequent {@link getCurrentStepResult} can read them.
+   *
+   * Needed by callers that read another step execution's output *directly*
+   * rather than through a template: the template path is pre-warmed by
+   * `StepIoService.prepareForRead`, which targets outputs by static template
+   * analysis and therefore cannot see a direct read. Resume-time `load()` marks
+   * every non-pinned step deferred, so without this a direct read of an output
+   * written in an earlier tick silently yields `{}`.
+   *
+   * Takes a list so a caller reading many outputs pays one ES round trip.
+   * No-op for ids that are already resident.
+   */
+  public async rehydrateStepOutputs(stepExecutionIds: ReadonlyArray<string>): Promise<void> {
+    await this.stepIoService.rehydrateOutputs(stepExecutionIds);
+  }
+
   public getCurrentStepState(): Record<string, unknown> | undefined {
     return this.workflowExecutionState.getStepExecution(this.stepExecutionId)?.state;
   }
