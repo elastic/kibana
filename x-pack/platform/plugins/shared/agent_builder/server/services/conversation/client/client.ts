@@ -19,6 +19,7 @@ import type {
   FeedbackChipId,
 } from '@kbn/agent-builder-common';
 import {
+  type ConversationEvent,
   type CurrentUser,
   type Conversation,
   type ConversationAccessControl,
@@ -28,6 +29,7 @@ import {
   CONVERSATION_SCHEMA_VERSION,
   CONVERSATION_TITLE_MAX_LENGTH,
   ConversationAccessControlMode,
+  EventActorType,
   isConversationAccessControlRole,
   normalizeConversationAccessControl,
   createBadRequestError,
@@ -104,6 +106,11 @@ import {
   type Document,
 } from './converters';
 import type { ConversationMetadataPatchedPayload } from '../../../workflows/triggers/conversation_event_bus';
+import type { ConversationEventsServiceStart } from '../../conversation_events';
+import {
+  materializeConversationEvents,
+  type ConversationEventAddInput,
+} from '../../conversation_events/materialize_events';
 
 // Note: comparison is order-sensitive for arrays — reordering elements counts as a change.
 // This is intentional: metadata arrays (e.g. ordered checklists) preserve insertion order.
@@ -137,6 +144,7 @@ export interface ConversationClient {
     request: AppendEventsRequest,
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
+  addEvents(request: { id: string; events: ConversationEventAddInput[] }): Promise<ConversationEvent[]>;
   replaceRoundEvents(
     request: ReplaceRoundEventsRequest,
     options?: { access: ConversationAccess }
@@ -220,6 +228,7 @@ export const createClient = ({
   esClient,
   user,
   agentRegistry,
+  conversationEvents,
   onMetadataPatched,
 }: {
   space: string;
@@ -227,6 +236,7 @@ export const createClient = ({
   esClient: ElasticsearchClient;
   user: CurrentUser;
   agentRegistry: AgentRegistry;
+  conversationEvents: ConversationEventsServiceStart;
   onMetadataPatched?: (payload: ConversationMetadataPatchedPayload) => void;
 }): ConversationClient => {
   const storage = createStorage({ logger, esClient });
@@ -236,6 +246,7 @@ export const createClient = ({
     user,
     space,
     agentRegistry,
+    conversationEvents,
     logger,
     onMetadataPatched,
   });
@@ -247,6 +258,7 @@ class ConversationClientImpl implements ConversationClient {
   private readonly esClient: ElasticsearchClient;
   private readonly user: CurrentUser;
   private readonly agentRegistry: AgentRegistry;
+  private readonly conversationEvents: ConversationEventsServiceStart;
   private readonly logger: Logger;
   private readonly onMetadataPatched?: (payload: ConversationMetadataPatchedPayload) => void;
 
@@ -256,6 +268,7 @@ class ConversationClientImpl implements ConversationClient {
     user,
     space,
     agentRegistry,
+    conversationEvents,
     logger,
     onMetadataPatched,
   }: {
@@ -264,6 +277,7 @@ class ConversationClientImpl implements ConversationClient {
     user: CurrentUser;
     space: string;
     agentRegistry: AgentRegistry;
+    conversationEvents: ConversationEventsServiceStart;
     logger: Logger;
     onMetadataPatched?: (payload: ConversationMetadataPatchedPayload) => void;
   }) {
@@ -272,6 +286,7 @@ class ConversationClientImpl implements ConversationClient {
     this.user = user;
     this.space = space;
     this.agentRegistry = agentRegistry;
+    this.conversationEvents = conversationEvents;
     this.logger = logger;
     this.onMetadataPatched = onMetadataPatched;
   }
@@ -690,6 +705,28 @@ class ConversationClientImpl implements ConversationClient {
       }),
     });
     return result;
+  }
+
+  async addEvents({
+    id,
+    events: inputs,
+  }: {
+    id: string;
+    events: ConversationEventAddInput[];
+  }): Promise<ConversationEvent[]> {
+    const actor = {
+      type: EventActorType.user,
+      id: this.user.id ?? this.user.username,
+      ...(this.user.username ? { username: this.user.username } : {}),
+    };
+    const materialized = materializeConversationEvents({
+      inputs,
+      registry: this.conversationEvents,
+      actor,
+      now: new Date(),
+    });
+    await this.appendEvents({ id, events: materialized });
+    return materialized;
   }
 
   /** Appends timeline events onto a conversation.*/
