@@ -131,10 +131,11 @@ export const VerifyKiStepCommonDefinition: CommonStepDefinition<
   documentation: {
     details: i18n.translate('xpack.contextEngine.verifyKiStep.documentation.details', {
       defaultMessage:
-        'Runs each verifier against the KI and returns a pass/fail result per verifier. Built-in ids: `{syntaxVerifierId}` (ES|QL parse), `{runtimeVerifierId}` (ES|QL execute). Custom verifiers use `workflow_id`; the workflow receives `inputs.ki` and must emit `passed` and `reason`. Requires the Context Engine advanced setting.',
+        'Runs each verifier against the KI and returns a pass/fail result per verifier. Built-in ids: `{syntaxVerifierId}` (ES|QL parse), `{runtimeVerifierId}` (ES|QL execute). Custom verifiers use `workflow_id`; the workflow receives `inputs.ki` and must emit `passed` and `reason`. Pass `ai_index_id` to include the target index in telemetry. Use `total_timeout_sec` to cap the total time across all verifiers (default {defaultStepTimeoutSec}s). Requires the Context Engine advanced setting.',
       values: {
         syntaxVerifierId: ESQL_VALID_SYNTAX_VERIFIER_ID,
         runtimeVerifierId: ESQL_VALID_RUNTIME_VERIFIER_ID,
+        defaultStepTimeoutSec: DEFAULT_KI_VERIFIER_STEP_TIMEOUT_SEC,
       },
     }),
     examples: [
@@ -158,6 +159,8 @@ export const VerifyKiStepCommonDefinition: CommonStepDefinition<
   type: ${VERIFY_KI_STEP_TYPE_ID}
   with:
     ki: "{{ steps.build_ki.output }}"
+    ai_index_id: "my-ai-index"
+    total_timeout_sec: 120
     verifiers:
       - ${ESQL_VALID_SYNTAX_VERIFIER_ID}
       - workflow_id: no-pii-in-content
