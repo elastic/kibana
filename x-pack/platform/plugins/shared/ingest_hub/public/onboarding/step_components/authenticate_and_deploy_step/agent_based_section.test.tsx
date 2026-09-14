@@ -15,8 +15,8 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
   LazyAgentEnrollmentFlyout: jest.fn(),
   LazyAwsStaticKeysForm: jest.fn(),
   LazyAwsTemporaryKeysForm: jest.fn(),
+  LazyAgentPolicyIntegrationForm: jest.fn(),
   useGetAgentPoliciesQuery: jest.fn(),
-  AgentPolicyIntegrationForm: jest.fn(),
   agentPolicyFormValidation: jest.fn(),
 }));
 
@@ -32,8 +32,8 @@ import {
   LazyAgentEnrollmentFlyout,
   LazyAwsStaticKeysForm,
   LazyAwsTemporaryKeysForm,
+  LazyAgentPolicyIntegrationForm,
   useGetAgentPoliciesQuery,
-  AgentPolicyIntegrationForm,
   agentPolicyFormValidation,
 } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
@@ -41,7 +41,7 @@ import { useOnboardingFlow } from '../../onboarding_flow_context';
 const MockAgentEnrollmentFlyout = LazyAgentEnrollmentFlyout as unknown as jest.Mock;
 const MockStaticKeysForm = LazyAwsStaticKeysForm as unknown as jest.Mock;
 const MockTemporaryKeysForm = LazyAwsTemporaryKeysForm as unknown as jest.Mock;
-const MockAgentPolicyIntegrationForm = AgentPolicyIntegrationForm as unknown as jest.Mock;
+const MockAgentPolicyIntegrationForm = LazyAgentPolicyIntegrationForm as unknown as jest.Mock;
 const mockAgentPolicyFormValidation = agentPolicyFormValidation as jest.Mock;
 const mockUseGetAgentPoliciesQuery = useGetAgentPoliciesQuery as jest.Mock;
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;

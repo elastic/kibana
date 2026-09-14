@@ -144,7 +144,8 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         } else {
           // New Agent Policy path — one-shot transactional call.
           try {
-            const agentPolicyName = await buildAgentPolicyName();
+            const agentPolicyName =
+              agentBasedDeployment.agentPolicyName || (await buildAgentPolicyName());
             const result = await deployNewAgentPolicy(targetsToDeploy, {
               ...baseOpts,
               agentPolicyName,

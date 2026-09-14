@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import {
   EuiButton,
   EuiComboBox,
   EuiFormRow,
+  EuiLoadingSpinner,
   EuiRadioGroup,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AgentPolicyIntegrationForm } from '@kbn/fleet-plugin/public';
+import { LazyAgentPolicyIntegrationForm } from '@kbn/fleet-plugin/public';
 import type { NewAgentPolicy, ValidationResults } from '@kbn/fleet-plugin/public';
 
 // ── AgentPolicyPanel component ────────────────────────────────────────────────
@@ -165,13 +166,15 @@ export function AgentPolicyPanel({
       {/* New-policy mode: pre-create — show policy form + Add agent button */}
       {agentHostsMode === 'new' && !isPolicyCreated && (
         <>
-          <AgentPolicyIntegrationForm
-            agentPolicy={newAgentPolicy}
-            updateAgentPolicy={onAgentPolicyChange}
-            withSysMonitoring={withSysMonitoring}
-            updateSysMonitoring={onSysMonitoringChange}
-            validation={validation}
-          />
+          <Suspense fallback={<EuiLoadingSpinner size="m" />}>
+            <LazyAgentPolicyIntegrationForm
+              agentPolicy={newAgentPolicy}
+              updateAgentPolicy={onAgentPolicyChange}
+              withSysMonitoring={withSysMonitoring}
+              updateSysMonitoring={onSysMonitoringChange}
+              validation={validation}
+            />
+          </Suspense>
           <EuiSpacer size="m" />
           <EuiButton
             fill

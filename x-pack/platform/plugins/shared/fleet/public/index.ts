@@ -236,7 +236,12 @@ export interface AgentEnrollmentFlyoutProps {
 export type { AgentPolicy, NewAgentPolicy } from './types';
 
 // Agent policy integration form and validation — used by ingest_hub to render the policy config step.
-export { AgentPolicyIntegrationForm } from './applications/fleet/sections/agent_policy/components/agent_policy_integration';
+// Lazy-loaded to avoid pulling Fleet's applications/ subtree into the eager page-load bundle.
+export const LazyAgentPolicyIntegrationForm = lazy(() =>
+  import('./applications/fleet/sections/agent_policy/components/agent_policy_integration').then(
+    (m) => ({ default: m.AgentPolicyIntegrationForm })
+  )
+);
 export { agentPolicyFormValidation } from './applications/fleet/sections/agent_policy/components/agent_policy_validation';
 export type { ValidationResults } from './applications/fleet/sections/agent_policy/components/agent_policy_validation';
 
