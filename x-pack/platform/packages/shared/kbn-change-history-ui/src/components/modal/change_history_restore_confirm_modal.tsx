@@ -92,7 +92,7 @@ export function ChangeHistoryRestoreConfirmModal({
       {pendingChange ? (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut announceOnMount color="warning" iconType="alert">
+          <EuiCallOut announceOnMount color="warning" iconType="warning">
             <p>{i18n.RESTORE_UNSAVED_CHANGES_WARNING}</p>
           </EuiCallOut>
         </>
@@ -100,7 +100,7 @@ export function ChangeHistoryRestoreConfirmModal({
       {error ? (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut announceOnMount color="danger" iconType="alert">
+          <EuiCallOut announceOnMount color="danger" iconType="warning">
             <p>{error.message}</p>
           </EuiCallOut>
         </>

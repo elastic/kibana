@@ -80,6 +80,7 @@ import {
 import { ServiceMapLegend } from './service_map_legend';
 import { AddToDashboardButton } from './add_to_dashboard_button';
 import type { Environment } from '../../../../common/environment_rt';
+import { isEnvironmentDefined } from '../../../../common/environment_filter_values';
 import {
   isServiceNode,
   type ServiceMapNode,
@@ -88,7 +89,7 @@ import {
 } from '../../../../common/service_map';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { ServiceFlyout } from '../../shared/service_flyout';
-import { SERVICE_FLYOUT_SOURCES } from '../../shared/service_flyout/constants';
+import { SERVICE_FLYOUT_SOURCE_SERVICE_MAP } from '../../shared/service_flyout/constants';
 import type { ServiceFlyoutOptions } from '../../shared/service_flyout/types';
 import { useServiceMapFlyoutProps } from './use_service_map_flyout_props';
 import { ServiceMapDiagnosticButton } from './service_map_diagnostic_button';
@@ -188,7 +189,12 @@ function GraphInner({
 }: GraphProps) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { telemetry } = services;
-  const { core, share, lens, dataViews, plugins } = useApmPluginContext();
+  const { core, share, lens, dataViews, plugins, observabilityAgentBuilder } =
+    useApmPluginContext();
+  const ServiceMapInvestigateButton = useMemo(
+    () => observabilityAgentBuilder?.getServiceMapInvestigateButton(),
+    [observabilityAgentBuilder]
+  );
   const { euiTheme } = useEuiTheme();
   const { fitView, zoomIn, zoomOut, setCenter, getNodes, getNodesBounds } =
     useReactFlow<ServiceMapNode>();
@@ -487,14 +493,7 @@ function GraphInner({
     setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, null));
   }, [setNodes, setEdges, applyEdgeHighlighting]);
 
-  const flyoutSource = flyoutOptions?.source ?? SERVICE_FLYOUT_SOURCES.serviceMap;
-
-  const handleServiceFlyoutView = useCallback(
-    ({ tabId }: { tabId: string }) => {
-      telemetry.reportServiceFlyoutViewed({ tabId, source: flyoutSource });
-    },
-    [telemetry, flyoutSource]
-  );
+  const flyoutSource = SERVICE_FLYOUT_SOURCE_SERVICE_MAP;
 
   useEffect(() => {
     if (selectedNodeId && nodesAfterFilters.some((n) => n.id === selectedNodeId && n.hidden)) {
@@ -909,6 +908,16 @@ function GraphInner({
             </Panel>
             {!isEmbedded && (
               <Panel position="top-right" css={topLeftToolbarStyles}>
+                {ServiceMapInvestigateButton && (
+                  <ServiceMapInvestigateButton
+                    rangeFrom={rangeFrom ?? start}
+                    rangeTo={rangeTo ?? end}
+                    environment={isEnvironmentDefined(environment) ? environment : undefined}
+                    kuery={kuery || undefined}
+                    serviceGroupId={serviceGroupId}
+                    highlightedServiceNames={highlightedServiceNames}
+                  />
+                )}
                 <EuiPanel
                   hasBorder
                   hasShadow={false}
@@ -955,7 +964,7 @@ function GraphInner({
               service={flyoutProps.service}
               deps={{ core, share, lens, dataViews, alerting: plugins.alerting }}
               filters={flyoutProps.filters}
-              onView={handleServiceFlyoutView}
+              telemetry={{ client: telemetry, source: flyoutSource }}
               onClose={handlePopoverClose}
             />
           )}

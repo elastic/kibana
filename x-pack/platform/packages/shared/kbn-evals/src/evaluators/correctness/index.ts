@@ -120,6 +120,7 @@ export function createCorrectnessAnalysisEvaluator({
       };
     },
     kind: 'LLM',
+    direction: 'maximize',
     name: 'correctness',
   };
 }
@@ -159,6 +160,7 @@ export function createQuantitativeCorrectnessEvaluators(): Evaluator[] {
       };
     },
     kind: 'LLM',
+    direction: 'maximize',
     name,
   });
 

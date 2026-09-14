@@ -19,6 +19,7 @@ export const servers: ScoutServerConfig = {
       '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
       `--xpack.securitySolution.enableExperimental=${JSON.stringify([
         'automaticTroubleshootingSkill',
+        'endpointForensicAnalysisSkill',
       ])}`,
       '--xpack.fleet.packages.0.name=endpoint',
       '--xpack.fleet.packages.0.version=latest',

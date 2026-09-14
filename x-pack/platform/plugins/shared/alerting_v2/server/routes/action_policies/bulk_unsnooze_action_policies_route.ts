@@ -15,6 +15,7 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
+import { bulkUnsnoozeActionPoliciesOasExamples } from './bulk_unsnooze_action_policies_oas_example';
 
 @injectable()
 export class BulkUnsnoozeActionPoliciesRoute extends BaseAlertingRoute {
@@ -27,6 +28,7 @@ export class BulkUnsnoozeActionPoliciesRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     summary: 'Cancel snooze for action policies in bulk by ID',
+    oasOperationObject: bulkUnsnoozeActionPoliciesOasExamples,
   } as const;
   static schemas = {
     request: {

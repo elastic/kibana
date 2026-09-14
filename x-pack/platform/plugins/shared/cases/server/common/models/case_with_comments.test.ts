@@ -46,6 +46,7 @@ describe('CaseCommentModel', () => {
   clientArgs.services.caseService.patchCase.mockResolvedValue(theCase);
   clientArgs.services.attachmentService.create.mockResolvedValue(mockCaseComments[0]);
   clientArgs.services.attachmentService.update.mockResolvedValue(mockCaseComments[0]);
+  clientArgs.services.attachmentService.getter.get.mockResolvedValue(mockCaseComments[0]);
   clientArgs.services.attachmentService.bulkCreate.mockResolvedValue({
     saved_objects: mockCaseComments,
   });
@@ -642,7 +643,9 @@ describe('CaseCommentModel', () => {
       expect(clientArgs.services.attachmentService.bulkCreate).not.toHaveBeenCalled();
     });
 
-    it('preserves scalar metadata.index when a unified (v2) event attachment has array attachmentId', async () => {
+    it('broadcasts a scalar metadata.index to match array attachmentId of a unified (v2) event attachment', async () => {
+      // `attachmentId` is always normalized to an array (see `newIds` above); `metadata.index`
+      // must stay symmetric with it instead of leaking a lone scalar into the persisted shape.
       const unifiedEventWithScalarIndex = {
         type: SECURITY_EVENT_ATTACHMENT_TYPE,
         owner: SECURITY_SOLUTION_OWNER,
@@ -661,14 +664,18 @@ describe('CaseCommentModel', () => {
 
       expect(attachments.length).toBe(1);
       const unifiedCall = attachments[0] as unknown as {
-        attributes: { attachmentId: string[]; metadata: { index: string } };
+        attributes: { attachmentId: string[]; metadata: { index: string[] } };
       };
       expect(unifiedCall.attributes.attachmentId).toEqual([
         'event-id-1',
         'event-id-2',
         'event-id-3',
       ]);
-      expect(unifiedCall.attributes.metadata.index).toBe('test-events-index');
+      expect(unifiedCall.attributes.metadata.index).toEqual([
+        'test-events-index',
+        'test-events-index',
+        'test-events-index',
+      ]);
     });
 
     it('does not remove alerts not attached to the case', async () => {
@@ -1139,6 +1146,127 @@ describe('CaseCommentModel', () => {
 
       expect(args.updatedAttributes.total_alerts).toEqual(2);
       expect(args.updatedAttributes.total_comments).toEqual(1);
+    });
+
+    it('does not treat a legacy actions payload as a comment attachment', async () => {
+      // `actions` has its own `comment` field but is not Lens-reference-eligible
+      await expect(
+        model.updateComment({
+          updateRequest: {
+            id: 'comment-id',
+            version: 'comment-version',
+            type: AttachmentType.actions,
+            comment: 'Isolating this for investigation',
+            actions: {
+              targets: [{ endpointId: '123', hostname: 'windows-host-1' }],
+              type: 'isolate',
+            },
+            owner: SECURITY_SOLUTION_OWNER,
+          },
+          updatedAt: createdDate,
+          owner: SECURITY_SOLUTION_OWNER,
+        })
+      ).resolves.not.toThrow();
+
+      expect(clientArgs.services.attachmentService.getter.get).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('alert/event indexed-reference validation', () => {
+    it('checks alert authorization before persisting the attachment (createComment)', async () => {
+      clientArgs.services.alertsService.ensureAlertsAuthorized.mockRejectedValueOnce(
+        new Error('not authorized')
+      );
+
+      await expect(
+        model.createComment({
+          id: 'comment-1',
+          commentReq: alertComment,
+          createdDate,
+        })
+      ).rejects.toThrow('not authorized');
+
+      expect(clientArgs.services.attachmentService.create).not.toHaveBeenCalled();
+    });
+
+    it('checks alert authorization before persisting the attachment batch (bulkCreate)', async () => {
+      clientArgs.services.alertsService.ensureAlertsAuthorized.mockRejectedValueOnce(
+        new Error('not authorized')
+      );
+
+      await expect(
+        model.bulkCreate({
+          attachments: [
+            { id: 'comment-1', ...comment },
+            { id: 'comment-2', ...alertComment },
+          ],
+        })
+      ).rejects.toThrow('not authorized');
+
+      expect(clientArgs.services.attachmentService.bulkCreate).not.toHaveBeenCalled();
+    });
+
+    it('checks event existence before persisting the attachment (createComment)', async () => {
+      clientArgs.services.alertsService.ensureDocumentsExist.mockRejectedValueOnce(
+        new Error('document not found')
+      );
+
+      await expect(
+        model.createComment({
+          id: 'comment-1',
+          commentReq: eventComment,
+          createdDate,
+        })
+      ).rejects.toThrow('document not found');
+
+      expect(clientArgs.services.alertsService.ensureDocumentsExist).toHaveBeenCalledWith({
+        alerts: [{ id: 'event-id-1', index: 'mock-index' }],
+      });
+      expect(clientArgs.services.attachmentService.create).not.toHaveBeenCalled();
+    });
+
+    it('checks event existence before persisting the attachment batch (bulkCreate)', async () => {
+      clientArgs.services.alertsService.ensureDocumentsExist.mockRejectedValueOnce(
+        new Error('document not found')
+      );
+
+      await expect(
+        model.bulkCreate({
+          attachments: [{ id: 'comment-1', ...eventComment }],
+        })
+      ).rejects.toThrow('document not found');
+
+      expect(clientArgs.services.attachmentService.bulkCreate).not.toHaveBeenCalled();
+    });
+
+    it('does not call ensureDocumentsExist for a batch with no event attachments', async () => {
+      await model.bulkCreate({
+        attachments: [{ id: 'comment-1', ...alertComment }],
+      });
+
+      expect(clientArgs.services.alertsService.ensureDocumentsExist).not.toHaveBeenCalled();
+    });
+
+    it('does not call ensureAlertsAuthorized for a batch with no alert attachments', async () => {
+      await model.bulkCreate({
+        attachments: [{ id: 'comment-1', ...eventComment }],
+      });
+
+      expect(clientArgs.services.alertsService.ensureAlertsAuthorized).not.toHaveBeenCalled();
+    });
+
+    it('validates alert authorization before the saved object is created', async () => {
+      await model.createComment({
+        id: 'comment-1',
+        commentReq: alertComment,
+        createdDate,
+      });
+
+      const authorizeOrder =
+        clientArgs.services.alertsService.ensureAlertsAuthorized.mock.invocationCallOrder[0];
+      const createOrder = clientArgs.services.attachmentService.create.mock.invocationCallOrder[0];
+
+      expect(authorizeOrder).toBeLessThan(createOrder);
     });
   });
 });

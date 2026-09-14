@@ -9,10 +9,10 @@
 
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { writeErrorHandler } from '@kbn/as-code-utils';
-import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { CoreSetup, Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { z } from '@kbn/zod';
 import { getRouteConfig } from './get_route_config';
 import { discoverSessionApiDataSchema, discoverSessionApiResponseSchema } from './schema';
 import { upsertDiscoverSession } from './session_upsert';
@@ -39,13 +39,13 @@ export const registerUpsertRoute = (
         version: routeVersion,
         validate: {
           request: {
-            params: schema.object({
-              id: schema.string({
-                meta: {
+            params: z
+              .object({
+                id: z.string().meta({
                   description: 'The unique ID of the Discover session to create or replace.',
-                },
-              }),
-            }),
+                }),
+              })
+              .strict(),
             body: discoverSessionApiDataSchema,
           },
           response: {

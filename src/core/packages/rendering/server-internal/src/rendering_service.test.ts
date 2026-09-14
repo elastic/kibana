@@ -38,6 +38,7 @@ import type {
 import { RenderingService, DEFAULT_THEME_NAME_FEATURE_FLAG } from './rendering_service';
 import { AuthStatus } from '@kbn/core-http-server';
 import type { ThemeName } from '@kbn/core-ui-settings-common';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { DEFAULT_THEME_NAME } from '@kbn/core-ui-settings-common';
 import { BehaviorSubject } from 'rxjs';
 
@@ -932,11 +933,12 @@ describe('RenderingService', () => {
       expect(asScoped).toHaveBeenCalledTimes(1);
       expect(getForInjection).toHaveBeenCalledTimes(1);
       expect(await renderAndReadUserStorage(content)).toEqual({
+        available: true,
         values: { 'navigation:layout': { hidden: ['discover'] } },
       });
     });
 
-    it('injects empty values when asScoped() returns null (no profile_uid)', async () => {
+    it('injects unavailable/empty values when asScoped() returns null (no profile_uid)', async () => {
       const { render } = await service.setup(mockRenderingSetupDeps);
 
       const asScoped = jest.fn().mockReturnValue(null);
@@ -945,10 +947,10 @@ describe('RenderingService', () => {
       const content = await render(createKibanaRequest(), buildUiSettings());
 
       expect(asScoped).toHaveBeenCalledTimes(1);
-      expect(await renderAndReadUserStorage(content)).toEqual({ values: {} });
+      expect(await renderAndReadUserStorage(content)).toEqual({ available: false, values: {} });
     });
 
-    it('injects empty values for anonymous pages without consulting userStorage', async () => {
+    it('injects unavailable/empty values for anonymous pages without consulting userStorage', async () => {
       const { render } = await service.setup(mockRenderingSetupDeps);
 
       const asScoped = jest.fn();
@@ -959,7 +961,7 @@ describe('RenderingService', () => {
       });
 
       expect(asScoped).not.toHaveBeenCalled();
-      expect(await renderAndReadUserStorage(content)).toEqual({ values: {} });
+      expect(await renderAndReadUserStorage(content)).toEqual({ available: false, values: {} });
     });
 
     it('throws when getForInjection() rejects', async () => {
@@ -970,6 +972,20 @@ describe('RenderingService', () => {
       service.start({ ...mockRenderingStartDeps, userStorage: { asScoped } });
 
       await expect(render(createKibanaRequest(), buildUiSettings())).rejects.toThrow('ES exploded');
+    });
+
+    it('injects unavailable/empty values when getForInjection() rejects with a forbidden error', async () => {
+      const { render } = await service.setup(mockRenderingSetupDeps);
+
+      const getForInjection = jest
+        .fn()
+        .mockRejectedValue(SavedObjectsErrorHelpers.decorateForbiddenError(new Error('forbidden')));
+      const asScoped = jest.fn().mockReturnValue({ getForInjection });
+      service.start({ ...mockRenderingStartDeps, userStorage: { asScoped } });
+
+      const content = await render(createKibanaRequest(), buildUiSettings());
+
+      expect(await renderAndReadUserStorage(content)).toEqual({ available: false, values: {} });
     });
   });
 

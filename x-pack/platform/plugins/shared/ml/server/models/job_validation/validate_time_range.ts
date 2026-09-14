@@ -37,6 +37,9 @@ export async function isValidTimeField({ asCurrentUser }: IScopedClusterClient, 
     {
       index,
       fields: [timeField],
+      ...(job.datafeed_config.project_routing
+        ? { project_routing: job.datafeed_config.project_routing }
+        : {}),
     },
     { maxRetries: 0 }
   );

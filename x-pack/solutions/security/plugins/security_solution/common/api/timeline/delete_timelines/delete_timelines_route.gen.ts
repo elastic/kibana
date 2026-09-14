@@ -21,11 +21,18 @@ export const DeleteTimelinesRequestBody = lazySchema(() =>
     /**
      * The list of IDs of the Timelines or Timeline templates to delete
      */
-    savedObjectIds: z.array(z.string()).max(100),
+    savedObjectIds: z
+      .array(z.string())
+      .max(100)
+      .describe('The list of IDs of the Timelines or Timeline templates to delete'),
     /**
      * Saved search IDs that should be deleted alongside the timelines
      */
-    searchIds: z.array(z.string()).max(100).optional(),
+    searchIds: z
+      .array(z.string())
+      .max(100)
+      .optional()
+      .describe('Saved search IDs that should be deleted alongside the timelines'),
   })
 );
 export type DeleteTimelinesRequestBody = z.infer<typeof DeleteTimelinesRequestBody>;

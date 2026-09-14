@@ -7,11 +7,15 @@
 
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
+import { BehaviorSubject } from 'rxjs';
 import type {
   ControlGroupRuntimeState,
   ControlGroupStateBuilder,
 } from '@kbn/control-group-renderer';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { ProjectRouting } from '@kbn/es-query';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { cpsPluginMock } from '@kbn/cps/public/mocks';
 import { ServiceMapControls } from './service_map_controls';
 
 type GetCreationOptions = (
@@ -19,14 +23,24 @@ type GetCreationOptions = (
   builder: ControlGroupStateBuilder
 ) => Promise<unknown>;
 
-const capturedProps: { getCreationOptions?: GetCreationOptions } = {};
+const capturedProps: {
+  getCreationOptions?: GetCreationOptions;
+  projectRouting?: ProjectRouting;
+} = {};
 
 jest.mock('@kbn/control-group-renderer', () => ({
   ControlGroupRenderer: jest.fn().mockImplementation((props) => {
     capturedProps.getCreationOptions = props.getCreationOptions;
+    capturedProps.projectRouting = props.projectRouting;
     return <div data-testid="control-group-renderer" />;
   }),
 }));
+
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: jest.fn(() => ({ services: {} })),
+}));
+
+const useKibanaMock = useKibana as jest.Mock;
 
 const dataView = { id: 'apm-data-view' } as DataView;
 const baseProps = {
@@ -40,6 +54,8 @@ const baseProps = {
 describe('ServiceMapControls', () => {
   beforeEach(() => {
     capturedProps.getCreationOptions = undefined;
+    capturedProps.projectRouting = undefined;
+    useKibanaMock.mockReturnValue({ services: {} });
   });
 
   it('configures single_select=true for service.environment and leaves the other controls multi-select', async () => {
@@ -103,5 +119,25 @@ describe('ServiceMapControls', () => {
     expect(envCall[1]).toMatchObject({ field_name: 'service.environment', single_select: true });
     expect(regionCall[1]).toMatchObject({ field_name: 'cloud.region' });
     expect(regionCall[1].single_select).toBeUndefined();
+  });
+
+  it('forwards the active CPS project routing to ControlGroupRenderer', () => {
+    const projectRouting$ = new BehaviorSubject<string | undefined>('_alias:*');
+    const cpsManager = {
+      ...cpsPluginMock.createStartContract().cpsManager,
+      getProjectRouting$: jest.fn(() => projectRouting$),
+      getProjectRouting: jest.fn(() => projectRouting$.getValue()),
+    };
+    useKibanaMock.mockReturnValue({ services: { cps: { cpsManager } } });
+
+    render(<ServiceMapControls {...baseProps} />);
+
+    expect(capturedProps.projectRouting).toBe('_alias:*');
+  });
+
+  it('passes undefined projectRouting when the CPS plugin is unavailable', () => {
+    render(<ServiceMapControls {...baseProps} />);
+
+    expect(capturedProps.projectRouting).toBeUndefined();
   });
 });

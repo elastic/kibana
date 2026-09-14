@@ -15,16 +15,18 @@
             }
         ] */
 
-import prConfigs from '../../../pull_requests.json';
-import { runPreBuild } from './pre_build';
-import { getEvalTriggerStep } from '../../../pipelines/evals/eval_pipeline';
+import { runPreBuild } from './pre_build.ts';
+import { getEvalTriggerStep } from '../../../pipelines/evals/eval_pipeline.ts';
+import { loadBuildkiteJson } from '../../../pipeline-utils/load_buildkite_json.ts';
 import {
   areChangesSkippable,
   doAnyChangesMatch,
+  getAffectedPackages,
   getAgentImageConfig,
   emitPipeline,
   getPipeline,
   getPrChangesCached,
+  isScoutTestPath,
   isScoutTestsOnlyDiff,
   registerCancelKeys,
   flushCancelOnGateFailureMetadata,
@@ -33,6 +35,9 @@ import {
   doAllChangesMatch,
   isAutomatedVersionBumpPR,
 } from '#pipeline-utils';
+
+const prConfigs =
+  loadBuildkiteJson<typeof import('../../../pull_requests.json')>('pull_requests.json');
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 const emptyStep = `steps: []`;
@@ -47,6 +52,48 @@ const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
 const ALL_UI_TEST_SUITES = GITHUB_PR_LABELS.includes('ci:all-ui-test-suites');
 const REQUIRED_PATHS = prConfig.always_require_ci_on_changed!.map((r) => new RegExp(r, 'i'));
 const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new RegExp(r, 'i'));
+
+// this covers external dependency changes, which the package graph below cannot see.
+const STORYBOOK_BUILD_CRITICAL_PATHS = [
+  /^yarn\.lock$/,
+  /^pnpm-workspace\.yaml$/,
+  /^\.buildkite\/scripts\/steps\/storybooks\//,
+];
+
+/**
+ * Runs Storybooks when `@kbn/storybook` (or its config package) is in the
+ * downstream closure of the changed packages, so toolchain changes outside
+ * story paths are still covered.
+ */
+const isStorybookBuildAffected = async (): Promise<boolean> => {
+  if (await doAnyChangesMatch(STORYBOOK_BUILD_CRITICAL_PATHS)) {
+    return true;
+  }
+
+  try {
+    // On sparse&shallow checkout, git strategy doesn't work as expected,
+    // we need to manually feed in changed files,
+    // and make sure **/kibana.jsonc and **/tsconfig.json are included in the checkout
+    const prChanges = await getPrChangesCached();
+    const affectedPackages = await getAffectedPackages(undefined, {
+      strategy: 'git',
+      includeDownstream: true,
+      ignoreUncategorizedChanges: true,
+      changedFiles: prChanges.flatMap((change) =>
+        change.previous_filename ? [change.filename, change.previous_filename] : [change.filename]
+      ),
+    });
+    return (
+      affectedPackages.has('@kbn/storybook') || affectedPackages.has('@kbn/ui-storybook-config')
+    );
+  } catch (error) {
+    console.error(
+      'Failed to resolve affected packages for the Storybook gate, running Storybooks to be safe',
+      error
+    );
+    return true;
+  }
+};
 
 (async () => {
   const pipeline: string[] = [];
@@ -77,6 +124,17 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       );
     }
 
+    // The suite matchers below use plugin prefixes, which also match that plugin's Scout tests.
+    // Drop those, so a Scout-only change can't trigger Cypress.
+    const isSuiteIrrelevantChange = (change: (typeof prChanges)[number]): boolean =>
+      isScoutTestPath(change.filename) &&
+      (!change.previous_filename || isScoutTestPath(change.previous_filename));
+
+    const suiteRelevantChanges = prChanges.filter((change) => !isSuiteIrrelevantChange(change));
+
+    const doAnySuiteRelevantChangesMatch = (paths: RegExp[]): Promise<boolean> =>
+      doAnyChangesMatch(paths, suiteRelevantChanges);
+
     pipeline.push(getAgentImageConfig({ returnYaml: true }));
 
     if (await doAllChangesMatch(/^renovate\.json$/)) {
@@ -92,7 +150,9 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     // Gated together: check_api_contracts depends_on check_oas_snapshot.
     if (!scoutTestsOnly) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/check_oas_snapshot.yml'));
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/check_oas_snapshot.yml', cancelable)
+      );
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/api_contracts.yml', cancelable));
     }
 
@@ -102,19 +162,18 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       'pick_test_group_run_order',
       'build_scout_tests',
       'report_package_metrics',
-      'verify_rspack_build',
     ]);
 
     if (prHasFIPSLabel()) {
       pipeline.push(getPipeline('.buildkite/pipelines/fips/verify_fips_enabled.yml', cancelable));
     }
 
-    if (await doAnyChangesMatch([/^renovate\.json$/])) {
+    if (await doAnySuiteRelevantChangesMatch([/^renovate\.json$/])) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/renovate.yml', cancelable));
     }
 
     if (
-      await doAnyChangesMatch([
+      await doAnySuiteRelevantChangesMatch([
         /^src\/platform\/packages\/private\/kbn-handlebars/,
         /^\.buildkite\/pipelines\/pull_request\/kbn_handlebars\.yml/,
       ])
@@ -125,7 +184,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch([
+      (await doAnySuiteRelevantChangesMatch([
         /^src\/platform\/plugins\/shared\/data/,
         /^x-pack\/platform\/plugins\/shared\/actions/,
         /^x-pack\/platform\/plugins\/shared\/alerting/,
@@ -141,7 +200,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch([
+      (await doAnySuiteRelevantChangesMatch([
         /^x-pack\/platform\/plugins\/shared\/cases/,
         /^\.buildkite\/pipelines\/pull_request\/response_ops_cases\.yml/,
       ])) ||
@@ -154,7 +213,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch([
+      (await doAnySuiteRelevantChangesMatch([
         /^x-pack\/platform\/plugins\/shared\/fleet/,
         /^x-pack\/test\/fleet_cypress/,
         /^\.buildkite\/pipelines\/pull_request\/fleet_cypress\.yml/,
@@ -182,7 +241,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     ];
 
     if (
-      (await doAnyChangesMatch([
+      (await doAnySuiteRelevantChangesMatch([
         ...aiInfraPaths,
         ...aiConnectorPaths,
         /^\.buildkite\/pipelines\/pull_request\/ai_infra_gen_ai\.yml/,
@@ -196,6 +255,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
+      // Scout suite: changes to its own Scout tests must still trigger it.
       ((await doAnyChangesMatch([
         ...aiInfraPaths,
         ...aiConnectorPaths,
@@ -271,11 +331,12 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch([
+      (await doAnySuiteRelevantChangesMatch([
         /.*stor(ies|y).*/,
         /^\.buildkite\/pipelines\/pull_request\/storybooks\.yml/,
       ])) ||
-      GITHUB_PR_LABELS.includes('ci:build-storybooks')
+      GITHUB_PR_LABELS.includes('ci:build-storybooks') ||
+      (await isStorybookBuildAffected())
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/storybooks.yml', cancelable));
     }
@@ -287,7 +348,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      ((await doAnyChangesMatch([
+      ((await doAnySuiteRelevantChangesMatch([
         /\.docnav\.json$/,
         /\.apidocs\.json$/,
         /\.devdocs\.json$/,
@@ -304,7 +365,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch([
+      (await doAnySuiteRelevantChangesMatch([
         /^\.buildkite\/pipelines\/pull_request\/security_solution\/cypress_burn\.yml/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:cypress-burn') ||
@@ -320,7 +381,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch([
+      (await doAnySuiteRelevantChangesMatch([
         /^src\/platform\/packages\/shared\/kbn-securitysolution-.*/,
         /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-.*/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
@@ -341,7 +402,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch([
+      (await doAnySuiteRelevantChangesMatch([
         /^package.json/,
         /^src\/platform\/packages\/shared\/kbn-securitysolution-.*/,
         /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-.*/,
@@ -404,7 +465,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch([
+      (await doAnySuiteRelevantChangesMatch([
         /^package.json/,
         /^src\/platform\/packages\/shared\/kbn-discover-utils/,
         /^src\/platform\/packages\/shared\/kbn-doc-links/,
@@ -474,7 +535,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch([
+      (await doAnySuiteRelevantChangesMatch([
         /^package.json/,
         /^src\/platform\/packages\/shared\/kbn-discover-utils/,
         /^src\/platform\/packages\/shared\/kbn-doc-links/,
@@ -544,7 +605,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      ((await doAnyChangesMatch([
+      ((await doAnySuiteRelevantChangesMatch([
         /^x-pack\/platform\/plugins\/shared\/osquery/,
         /^x-pack\/solutions\/security\/test\/osquery_cypress/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
@@ -563,7 +624,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch([
+      (await doAnySuiteRelevantChangesMatch([
         /^x-pack\/packages\/kbn-cloud-security-posture/,
         /^x-pack\/solutions\/security\/plugins\/cloud_security_posture/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
@@ -582,6 +643,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
+      // Scout suite: changes to its own Scout tests must still trigger it.
       (await doAnyChangesMatch([
         /^x-pack\/platform\/plugins\/shared\/fleet/,
         /^x-pack\/packages\/kbn-cloud-security-posture/,
@@ -628,7 +690,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch([
+      (await doAnySuiteRelevantChangesMatch([
         /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/asset_inventory/,
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
         /^\.buildkite\/pipelines\/pull_request\/security_solution\/asset_inventory\.yml/,
@@ -646,7 +708,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     // Check for prompt file changes and conditionally add pipeline step
     if (
-      await doAnyChangesMatch([
+      await doAnySuiteRelevantChangesMatch([
         /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/local_prompt_object\.ts$/,
         /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/tool_prompts\.ts$/,
         /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/defend_insight_prompts\.ts$/,
@@ -669,6 +731,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     // Run Workflow Schema OOM prevention test when schema or connector whitelist changes
     if (
       GITHUB_PR_LABELS.includes('ci:workflow-oom-test') ||
+      // Scout suite: changes to its own Scout tests must still trigger it.
       (await doAnyChangesMatch([
         /^src\/platform\/plugins\/shared\/workflows_management\/common\/schema/,
         /^src\/platform\/plugins\/shared\/workflows_management\/server\/.*internal_actions/,
@@ -696,6 +759,13 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     if (GITHUB_PR_LABELS.includes('ci:bench-page-load')) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/page_load_bench.yml', cancelable)
+      );
+    }
+
+    // Run the warm-start memory check systematically; it is non-blocking.
+    if (!scoutTestsOnly) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/warm_start_memory_bench.yml', cancelable)
       );
     }
 

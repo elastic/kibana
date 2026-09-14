@@ -6,6 +6,8 @@
  */
 
 import {
+  type OsTypeArray,
+  type OsType,
   type ExportExceptionDetails,
   type ExceptionListItemSchema,
   type CreateExceptionListItemSchema,
@@ -17,6 +19,7 @@ import {
 import type { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { ConditionEntryField } from '@kbn/securitysolution-utils';
+import { MetaOsValue, MetaArchValue, MetaScanTypeValue, YaraMetaKeyOfInterest } from '../types';
 import { LIST_ITEM_ENTRY_OPERATOR_TYPES } from './common/artifact_list_item_entry_values';
 import { BaseDataGenerator } from './base_data_generator';
 import {
@@ -421,56 +424,127 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
     };
   }
 
+  generateYaraRuleText(osMeta: MetaOsValue[]): string {
+    const metaArch = this.randomChoice([
+      MetaArchValue.X86,
+      MetaArchValue.ARM64,
+      `${MetaArchValue.X86}, ${MetaArchValue.ARM64}`,
+    ]);
+
+    const condition = this.randomChoice([
+      'condition: true',
+      'condition: false',
+      'strings: $a = "test_string" condition: $a',
+      'strings: $bbb = /00 ae 53 ff/ condition: all of them',
+    ]);
+
+    return `
+      rule Generated_Yara_Rule_${this.randomString(5)} {
+        meta:
+          description = "Generated test YARA rule"
+          ${
+            this.randomBoolean()
+              ? `${YaraMetaKeyOfInterest.SCAN_TYPE} = "${MetaScanTypeValue.MEMORY}"`
+              : ''
+          }
+          ${this.randomBoolean() ? `${YaraMetaKeyOfInterest.ARCH} = "${metaArch}"` : ''}
+          ${this.randomBoolean() ? `${YaraMetaKeyOfInterest.OS} = "${osMeta.join(', ')}"` : ''}
+
+        ${condition}
+      }`;
+  }
+
+  generateMatchingOsTypesAndYaraOsMeta(): {
+    osTypes: OsTypeArray;
+    osMeta: MetaOsValue[];
+  } {
+    const possibleOsMetaVariations: MetaOsValue[][] = [
+      [MetaOsValue.WINDOWS],
+      [MetaOsValue.LINUX],
+      [MetaOsValue.MACOS],
+      [MetaOsValue.WINDOWS, MetaOsValue.LINUX],
+      [MetaOsValue.WINDOWS, MetaOsValue.MACOS],
+      [MetaOsValue.LINUX, MetaOsValue.MACOS],
+      [MetaOsValue.WINDOWS, MetaOsValue.LINUX, MetaOsValue.MACOS],
+    ];
+
+    const osMeta: MetaOsValue[] = this.randomChoice(possibleOsMetaVariations);
+    const osTypes: OsTypeArray = osMeta.map<OsType>((os) => os.toLowerCase() as OsType);
+
+    return { osTypes, osMeta };
+  }
+
+  convertOsTypeToMetaOsValue(osType: OsType): MetaOsValue {
+    switch (osType) {
+      case 'windows':
+        return MetaOsValue.WINDOWS;
+      case 'linux':
+        return MetaOsValue.LINUX;
+      case 'macos':
+        return MetaOsValue.MACOS;
+      default:
+        throw new Error(`Unknown OS type: ${osType}`);
+    }
+  }
+
   generateCustomYaraSignature(
     overrides: Partial<ExceptionListItemSchema> = {}
   ): ExceptionListItemSchema {
-    const os = this.randomChoice(['windows', 'linux', 'macos'] as const);
+    let osTypes: OsTypeArray;
+    let osMeta: MetaOsValue[];
+
+    if (overrides.os_types) {
+      osTypes = overrides.os_types;
+      osMeta = osTypes.map((osType) => this.convertOsTypeToMetaOsValue(osType));
+    } else {
+      ({ osTypes, osMeta } = this.generateMatchingOsTypesAndYaraOsMeta());
+    }
+
+    const numberOfRules = this.randomN(9) + 1;
+    const ruleText = Array.from({ length: numberOfRules }, () =>
+      this.generateYaraRuleText(osMeta)
+    ).join('\n\n');
 
     return this.generate({
       name: `YARA Signature ${this.randomString(5)}`,
       list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
       item_id: `generator_endpoint_yara_signature_${this.seededUUIDv4()}`,
-      tags: [
-        this.randomChoice([
-          `${BY_POLICY_ARTIFACT_TAG_PREFIX}${this.seededUUIDv4()}`,
-          GLOBAL_ARTIFACT_TAG,
-        ]),
-      ],
-      os_types: [os],
       entries: [
         {
           field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
           operator: 'included',
           type: 'match',
-          value: `rule Generated_Yara_Rule_${this.randomString(5)} {
-  meta:
-    description = "Generated test YARA rule"
-  strings:
-    $a = "test_string"
-  condition:
-    $a
-}`,
+          value: ruleText,
         },
       ],
       ...overrides,
+      os_types: osTypes as ExceptionListItemSchema['os_types'],
     });
   }
 
   generateCustomYaraSignatureForCreate(
     overrides: Partial<CreateExceptionListItemSchema> = {}
   ): CreateExceptionListItemSchemaWithNonNullProps {
+    // os_types needs to be passed to `generateCustomYaraSignature` to generate the rule text correctly,
+    // while the rest can be spreaded over so all output fields can be overridden.
+    const { os_types, ...rest } = overrides;
+
     return {
-      ...exceptionItemToCreateExceptionItem(this.generateCustomYaraSignature()),
-      ...overrides,
+      ...exceptionItemToCreateExceptionItem(this.generateCustomYaraSignature({ os_types })),
+      ...rest,
     };
   }
 
   generateCustomYaraSignatureForUpdate(
     overrides: Partial<UpdateExceptionListItemSchema> = {}
   ): UpdateExceptionListItemSchemaWithNonNullProps {
+    // os_types needs to be passed to `generateCustomYaraSignature` to generate the rule text correctly,
+    // while the rest can be spreaded over so all output fields can be overridden.
+    const { os_types, ...rest } = overrides;
+
     return {
-      ...exceptionItemToUpdateExceptionItem(this.generateCustomYaraSignature()),
-      ...overrides,
+      ...exceptionItemToUpdateExceptionItem(this.generateCustomYaraSignature({ os_types })),
+      ...rest,
     };
   }
 

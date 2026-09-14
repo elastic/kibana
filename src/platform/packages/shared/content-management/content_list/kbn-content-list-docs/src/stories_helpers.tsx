@@ -563,7 +563,7 @@ export const StateDiagnosticPanel = ({
               disableScreenReaderOutput
             >
               <EuiButtonIcon
-                iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+                iconType={isOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
                 onClick={() => setIsOpen(!isOpen)}
                 aria-label={isOpen ? 'Collapse diagnostic panel' : 'Expand diagnostic panel'}
                 size="s"

@@ -174,7 +174,7 @@ export const DesignToolsButtonImpl = ({ initiallyOpen }: { initiallyOpen?: boole
             : i18n.translate('kbnDesignTools.layout.popover.layoutShowLabel', {
                 defaultMessage: 'Show layout',
               }),
-          icon: isLayoutVisible ? 'eyeClosed' : 'eye',
+          icon: isLayoutVisible ? 'eyeSlash' : 'eye',
           onClick: handleToggleLayout,
           'data-test-subj': 'designToolsToggleLayout',
         },
@@ -182,7 +182,7 @@ export const DesignToolsButtonImpl = ({ initiallyOpen }: { initiallyOpen?: boole
           name: i18n.translate('kbnDesignTools.layout.popover.layoutSettingsLabel', {
             defaultMessage: 'Layout settings',
           }),
-          icon: 'controlsHorizontal',
+          icon: 'controls',
           onClick: handleOpenSettings,
           'data-test-subj': 'designToolsLayoutSettings',
         },
@@ -219,7 +219,7 @@ export const DesignToolsButtonImpl = ({ initiallyOpen }: { initiallyOpen?: boole
           name: i18n.translate('kbnDesignTools.layout.popover.addEuiLabel', {
             defaultMessage: 'Add from EUI',
           }),
-          icon: 'plusInCircle',
+          icon: 'plusCircle',
           panel: ADD_EUI_PANEL_ID,
         },
         {
@@ -229,7 +229,7 @@ export const DesignToolsButtonImpl = ({ initiallyOpen }: { initiallyOpen?: boole
           name: i18n.translate('kbnDesignTools.layout.popover.exportLabel', {
             defaultMessage: 'Export',
           }),
-          icon: 'exportAction',
+          icon: 'upload',
           onClick: handleExport,
           disabled: moveCount === 0,
         },
@@ -237,7 +237,7 @@ export const DesignToolsButtonImpl = ({ initiallyOpen }: { initiallyOpen?: boole
           name: i18n.translate('kbnDesignTools.layout.popover.importLabel', {
             defaultMessage: 'Import',
           }),
-          icon: 'importAction',
+          icon: 'download',
           onClick: handleImport,
         },
       ],

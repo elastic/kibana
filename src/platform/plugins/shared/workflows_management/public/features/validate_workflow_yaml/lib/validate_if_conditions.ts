@@ -10,6 +10,7 @@
 import type { LineCounter } from 'yaml';
 import { fromKueryExpression } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import type { WorkflowValidationRuleId } from '@kbn/workflows';
 import {
   getValueFromValueNode,
   type StepPropInfo,
@@ -40,6 +41,7 @@ function isExpressionSyntax(condition: string): boolean {
 }
 
 interface OperatorDetectionResult {
+  ruleId: WorkflowValidationRuleId;
   message: string;
   hoverMessage: string;
 }
@@ -55,7 +57,11 @@ function detectInvalidOperator(condition: string): OperatorDetectionResult | nul
       defaultMessage:
         'Invalid condition syntax: "==" is not a valid KQL operator. Use ":" for equality (e.g., "field: value").',
     });
-    return { message, hoverMessage: message + KQL_EXAMPLES_HOVER };
+    return {
+      ruleId: 'invalidEqualityOperator',
+      message,
+      hoverMessage: message + KQL_EXAMPLES_HOVER,
+    };
   }
 
   if (/\S+\s*!=\s*\S+/.test(condition)) {
@@ -63,7 +69,11 @@ function detectInvalidOperator(condition: string): OperatorDetectionResult | nul
       defaultMessage:
         'Invalid condition syntax: "!=" is not a valid KQL operator. Use "NOT field: value" for inequality.',
     });
-    return { message, hoverMessage: message + KQL_EXAMPLES_HOVER };
+    return {
+      ruleId: 'invalidInequalityOperator',
+      message,
+      hoverMessage: message + KQL_EXAMPLES_HOVER,
+    };
   }
 
   if (/\S+\s*(?<![<>!:])=(?!=)\s*\S+/.test(condition) && !condition.includes(':')) {
@@ -71,7 +81,11 @@ function detectInvalidOperator(condition: string): OperatorDetectionResult | nul
       defaultMessage:
         'Invalid condition syntax: "=" is not a valid KQL operator. Use ":" for equality (e.g., "field: value").',
     });
-    return { message, hoverMessage: message + KQL_EXAMPLES_HOVER };
+    return {
+      ruleId: 'invalidAssignmentOperator',
+      message,
+      hoverMessage: message + KQL_EXAMPLES_HOVER,
+    };
   }
 
   return null;
@@ -81,6 +95,7 @@ function makeResult(
   stepId: string,
   propInfo: StepPropInfo,
   lineCounter: LineCounter,
+  ruleId: WorkflowValidationRuleId,
   message: string,
   hoverMessage: string
 ): YamlValidationResult | null {
@@ -91,6 +106,7 @@ function makeResult(
   return {
     id: `if-condition-${stepId}-${startPos.line}-${startPos.col}`,
     owner: CONDITION_VALIDATION_OWNER,
+    ruleId,
     message,
     startLineNumber: startPos.line,
     startColumn: startPos.col,
@@ -120,6 +136,7 @@ function validateCondition(
       stepId,
       propInfo,
       lineCounter,
+      operatorError.ruleId,
       operatorError.message,
       operatorError.hoverMessage
     );
@@ -134,6 +151,7 @@ function validateCondition(
       stepId,
       propInfo,
       lineCounter,
+      'invalidIfConditionSyntax',
       errorMessage,
       errorMessage + KQL_EXAMPLES_HOVER
     );

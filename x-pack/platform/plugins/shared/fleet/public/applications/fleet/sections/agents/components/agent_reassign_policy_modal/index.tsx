@@ -168,6 +168,8 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
             <EuiComboBox
               fullWidth
               isLoading={agentPoliciesRequest.isLoading}
+              // Long agent policy names can otherwise overflow the options list and break the layout
+              truncationProps={{ truncation: 'end' }}
               options={agentPolicies.map((agentPolicy) => ({
                 key: agentPolicy.id,
                 label: agentPolicy.name,

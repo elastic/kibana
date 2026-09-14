@@ -45,6 +45,7 @@ import { setBreadcrumbs } from '../../../../../utils/breadcrumbs';
 import { DEFAULT_TAB_STATE } from '../constants';
 import type { DiscoverAppLocatorParams } from '../../../../../../common';
 import { parseAppLocatorParams } from '../../../../../../common/app_locator_get_location';
+import type { InitialTabState } from '../../../../../plugin_imports/initial_tab_state_service';
 import { fetchData } from './tab_state';
 import { fromSavedObjectTabToTabState } from '../tab_mapping_utils';
 import { initializeAndSync, stopSyncing } from './tab_sync';
@@ -391,7 +392,10 @@ export const initializeTabs = createInternalStateAsyncThunk(
 
     const byValueEmbeddableTab = services.embeddableEditor.getByValueTab();
     const byValueEmbeddableTabState = byValueEmbeddableTab
-      ? fromSavedObjectTabToTabState({ tab: byValueEmbeddableTab })
+      ? fromSavedObjectTabToTabState({
+          tab: byValueEmbeddableTab,
+          profileStateRegistry: services.profileStateRegistry,
+        })
       : undefined;
 
     const initialTabsState = tabsStorageManager.loadLocally({
@@ -402,21 +406,17 @@ export const initializeTabs = createInternalStateAsyncThunk(
       defaultTabState: byValueEmbeddableTabState ?? DEFAULT_TAB_STATE,
     });
 
-    const history = services.getScopedHistory();
-    const locationState = history?.location.state;
+    // Hand the location state over to the tab initialization before updating the URL below, which
+    // discards it, so initial state such as ad hoc data view specs is passed on
+    services.initialTabStateService.capture(
+      services.getScopedHistory<InitialTabState>()?.location.state
+    );
 
     // Replace instead of push the tab ID to the URL on initialization in order to
     // avoid capturing a browser history entry with a potentially empty _tab state
     await tabsStorageManager.pushSelectedTabIdToUrl(initialTabsState.selectedTabId, {
       replace: true,
     });
-
-    // Manually restore the previous location state since pushing the tab ID
-    // to the URL clears it, but initial location state must be passed on,
-    // e.g. ad hoc data views specs
-    if (locationState) {
-      history.replace({ ...history.location, state: locationState });
-    }
 
     dispatch(
       setTabs({
@@ -521,9 +521,9 @@ export const openInNewTab: InternalStateThunkActionCreator<
 export const openInNewTabExtPointAction: InternalStateThunkActionCreator<
   [OpenInNewTabParams],
   Promise<void>
-> = ({ query, tabLabel, timeRange }) =>
+> = ({ query, tabLabel, timeRange, esqlApproximation }) =>
   function openInNewTabExtPointActionThunkFn(dispatch) {
-    const appState: TabState['appState'] = { query };
+    const appState: TabState['appState'] = { query, esqlApproximation };
     const globalState: TabState['globalState'] = { timeRange };
 
     return dispatch(

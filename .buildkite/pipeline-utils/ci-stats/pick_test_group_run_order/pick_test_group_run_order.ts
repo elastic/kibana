@@ -9,27 +9,28 @@
 
 import * as Fs from 'fs';
 
-import { getAffectedPackages, listChangedFiles } from '../../affected-packages';
-import type { BuildkiteStep } from '../../buildkite';
-import { BuildkiteClient } from '../../buildkite';
-import { getTrackedBranch } from '../../utils';
-import { CiStatsClient } from '../client';
+import { minimatch } from 'minimatch';
+import { getAffectedPackages, listChangedFiles } from '../../affected-packages/index.ts';
+import type { BuildkiteStep } from '../../buildkite/index.ts';
+import { BuildkiteClient } from '../../buildkite/index.ts';
+import { getTrackedBranch } from '../../utils.ts';
+import { CiStatsClient } from '../client.ts';
 
-import { buildCiStatsGroups, buildCiStatsSources } from './ci_stats_sources';
-import { AGENT_DISK_GIB, DURATION_PERCENTILE, STEP_KEYS } from './const';
-import { loadRunOrderConfig } from './env_config';
-import { getEnabledFtrConfigs } from './ftr_manifests';
-import { discoverJestIntegrationConfigs, discoverJestUnitConfigs } from './jest_configs';
-import { getRunGroup, getRunGroups, labelJestSubgroups } from './run_groups';
-import { shouldSkipFtrTests } from './selective_ftr';
-import { isScoutPathOnlyDiff } from './selective_scout';
+import { buildCiStatsGroups, buildCiStatsSources } from './ci_stats_sources.ts';
+import { AGENT_DISK_GIB, DURATION_PERCENTILE, STEP_KEYS } from './const.ts';
+import { loadRunOrderConfig } from './env_config.ts';
+import { ftrManifest } from './ftr_manifests.ts';
+import { discoverJestIntegrationConfigs, discoverJestUnitConfigs } from './jest_configs.ts';
+import { getRunGroup, getRunGroups, labelJestSubgroups } from './run_groups.ts';
+import { shouldSkipFtrTests } from './selective_ftr.ts';
+import { isScoutPathOnlyDiff } from './selective_scout.ts';
 import {
   filterJestIntegrationConfigsByAffected,
   filterJestUnitConfigsByAffected,
   resolveSelectiveTestingContext,
-} from './selective_testing';
-import { buildFunctionalStepGroup, buildJestStep, registerCancelKeys } from './steps';
-import type { FtrRunOrder, FunctionalGroup } from './types';
+} from './selective_testing.ts';
+import { buildFunctionalStepGroup, buildJestStep, registerCancelKeys } from './steps.ts';
+import type { FtrRunOrder, FunctionalGroup } from './types.ts';
 
 /**
  * Orchestrates the per-build test group sizing for Buildkite:
@@ -74,11 +75,25 @@ export async function pickTestGroupRunOrder() {
   let jestIntegrationConfigs = integrationIncluded
     ? discoverJestIntegrationConfigs(config.limitSolutions)
     : [];
-  const { defaultQueue, ftrConfigsByQueue } = getEnabledFtrConfigs(
-    config.ftrConfigPatterns,
-    config.limitSolutions
+
+  const ftrManifestEntriesByQueue = Map.groupBy(
+    ftrManifest.entries
+      .enabled()
+      .filter((entry) => {
+        if (config.ftrConfigPatterns === undefined) return true;
+        return config.ftrConfigPatterns.some((pattern) => minimatch(entry.path, pattern));
+      })
+      .filter((entry) => {
+        if (config.limitSolutions === undefined) return true;
+        return ['base', 'platform', ...config.limitSolutions].some(
+          (domain) => entry.domain === domain
+        );
+      })
+      .filter((entry) => entry.testChannels.intersection(config.ftrTestChannels).size > 0),
+    (entry) => entry.queue
   );
-  if (!ftrConfigsIncluded) ftrConfigsByQueue.clear();
+
+  if (!ftrConfigsIncluded) ftrManifestEntriesByQueue.clear();
 
   if (selectiveTestingMergeBase && selectiveChangedFiles) {
     const directlyAffected = await getAffectedPackages(selectiveTestingMergeBase, {
@@ -101,7 +116,7 @@ export async function pickTestGroupRunOrder() {
         'info',
         'Selective testing: FTR configs skipped (excluded modules / irrelevant paths only).'
       );
-      ftrConfigsByQueue.clear();
+      ftrManifestEntriesByQueue.clear();
     }
 
     const selectiveCtx = await resolveSelectiveTestingContext(selectiveTestingMergeBase);
@@ -114,7 +129,11 @@ export async function pickTestGroupRunOrder() {
     }
   }
 
-  if (!ftrConfigsByQueue.size && !jestUnitConfigs.length && !jestIntegrationConfigs.length) {
+  if (
+    !ftrManifestEntriesByQueue.size &&
+    !jestUnitConfigs.length &&
+    !jestIntegrationConfigs.length
+  ) {
     if (config.useSelectiveTesting) {
       console.log('Selective testing: no Jest/FTR configs to run for this diff');
       bk.setAnnotation(
@@ -124,6 +143,14 @@ export async function pickTestGroupRunOrder() {
       );
       return;
     }
+
+    if (config.allowZeroConfigMatches) {
+      const message = "No Jest unit/integration or FTR configs matched this run's criteria.";
+      console.log(message);
+      bk.setAnnotation('no-matching-jest-ftr-test-configs', 'info', message);
+      return;
+    }
+
     throw new Error('unable to find any unit, integration, or FTR configs');
   }
 
@@ -136,11 +163,12 @@ export async function pickTestGroupRunOrder() {
       pipelineSlug: config.pipelineSlug,
       prNumber: config.prNumber,
       prMergeBase: config.prMergeBase,
+      mergeQueueMergeBase: config.mergeQueueMergeBase,
     }),
     groups: buildCiStatsGroups({
       jestUnitConfigs,
       jestIntegrationConfigs,
-      ftrConfigsByQueue,
+      ftrManifestEntriesByQueue,
       config,
     }),
   });
@@ -153,8 +181,11 @@ export async function pickTestGroupRunOrder() {
   labelJestSubgroups(unit, config.unitType);
   labelJestSubgroups(integration, config.integrationType);
 
-  const { functionalGroups, ftrRunOrder } = ftrConfigsByQueue.size
-    ? collectFunctionalGroups(getRunGroups(bk, types, config.functionalType), defaultQueue)
+  const { functionalGroups, ftrRunOrder } = ftrManifestEntriesByQueue.size
+    ? collectFunctionalGroups(
+        getRunGroups(bk, types, config.functionalType),
+        ftrManifest.default.queue
+      )
     : { functionalGroups: [], ftrRunOrder: {} };
 
   Fs.writeFileSync('jest_run_order.json', JSON.stringify({ unit, integration }, null, 2));
@@ -192,7 +223,7 @@ export async function pickTestGroupRunOrder() {
       buildFunctionalStepGroup({
         command: requireVariable(config.ftrConfigsScript, 'FTR_CONFIGS_SCRIPT'),
         functionalGroups,
-        defaultQueue,
+        defaultQueue: ftrManifest.default.queue,
         ftrExtraArgs: config.ftrExtraArgs,
         envFromLabels: config.envFromLabels,
         dependsOn: config.ftrConfigsDeps,

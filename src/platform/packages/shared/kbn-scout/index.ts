@@ -52,6 +52,7 @@ export {
   DataGrid,
   DiscoverApp,
   FilterBar,
+  LensApp,
   QueryBar,
   UnifiedTabs,
   buildContentListSearch,

@@ -9,4 +9,5 @@ export enum AnomalyDetectorType {
   txLatency = 'txLatency',
   txThroughput = 'txThroughput',
   txFailureRate = 'txFailureRate',
+  txLowCount = 'txLowCount',
 }

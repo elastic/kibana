@@ -22,7 +22,7 @@ import { useDataSource } from '../contexts/ml/data_source_context';
 import { useMlKibana } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
 import { MlAppHeader } from '../components/ml_app_header';
-import { useEnabledFeatures } from '../contexts/ml/serverless_context';
+import { useEnabledFeatures } from '../contexts/ml/enabled_features_context';
 
 export const ChangePointDetectionPage: FC = () => {
   const { services } = useMlKibana();

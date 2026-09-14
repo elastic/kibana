@@ -215,7 +215,7 @@ export const DynamicTreeView = ({
               <EuiBadge
                 css={styles.loadMoreBadge}
                 iconSide="right"
-                iconType={isFetchingNextPage ? EuiLoadingSpinner : 'arrowDown'}
+                iconType={isFetchingNextPage ? EuiLoadingSpinner : 'chevronSingleDown'}
               >
                 {isFetchingNextPage
                   ? TREE_NAVIGATION_LOADING

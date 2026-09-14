@@ -47,8 +47,7 @@ import { GLOBAL_SEARCH_BAR_FILTER_ITEM_AT } from '../../../screens/search_bar';
 
 const mockTimeline = getTimeline();
 
-// Failing: See https://github.com/elastic/kibana/issues/259682
-describe.skip('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
+describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteTimelines();
