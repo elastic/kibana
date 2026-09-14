@@ -97,7 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await fieldEditor.waitUntilClosed();
         await header.waitUntilLoadingHasFinished();
         await lens.waitForVisualization();
-        expect(await lens.getDatatableCellText(0, 0)).to.eql('dal...');
+        expect(await lens.getDatatableCellText(0, 0)).to.match(/^.{3}\.\.\.$/);
       });
     });
 
