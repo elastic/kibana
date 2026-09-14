@@ -48,10 +48,8 @@ export const MANAGEMENT_HOST: AlertingV2HostApp = {
   },
 };
 
-export const pageHost = (
-  params: { host?: LocatorHost },
-  fallback: LocatorHost
-): LocatorHost => params.host ?? fallback;
+export const pageHost = (params: { host?: LocatorHost }, fallback: LocatorHost): LocatorHost =>
+  params.host ?? fallback;
 
 export const createAlertingV2HostApp = (
   appId: string,
