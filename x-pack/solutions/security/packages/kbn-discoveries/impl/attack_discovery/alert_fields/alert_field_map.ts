@@ -21,6 +21,7 @@ import {
   ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN,
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS,
+  ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE,
   ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS,
   ALERT_ATTACK_DISCOVERY_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_REPLACEMENTS_UUID,
@@ -150,6 +151,12 @@ export const attackDiscoveryAlertFieldMap: FieldMap = {
   [ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS]: {
     // enables searching on replaced values (like usernames and hostnames) in context
     type: 'text',
+    array: false,
+    required: false,
+  },
+  [ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE]: {
+    // identifies the producer of the attack, and contributes to the attack hash
+    type: 'keyword',
     array: false,
     required: false,
   },

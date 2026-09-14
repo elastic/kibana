@@ -14,6 +14,9 @@ import { useEsqlAutocomplete } from './use_esql_providers';
 const mockDisposeSuggestion = jest.fn();
 const mockDisposeSignature = jest.fn();
 const mockDisposeHover = jest.fn();
+const mockDisposeInlineCompletions = jest.fn();
+const mockDisposeCodeActions = jest.fn();
+const mockDisposeDocumentHighlight = jest.fn();
 
 jest.mock('@kbn/code-editor', () => ({
   ESQL_LANG_ID: 'esql',
@@ -21,13 +24,23 @@ jest.mock('@kbn/code-editor', () => ({
     getSuggestionProvider: jest.fn(),
     getSignatureProvider: jest.fn(),
     getHoverProvider: jest.fn(),
+    getInlineCompletionsProvider: jest.fn(),
+    getCodeActionProvider: jest.fn(),
+    getDocumentHighlightProvider: jest.fn(),
   },
   monaco: {
     languages: {
       registerCompletionItemProvider: jest.fn(),
       registerSignatureHelpProvider: jest.fn(),
       registerHoverProvider: jest.fn(),
+      registerInlineCompletionsProvider: jest.fn(),
+      registerCodeActionProvider: jest.fn(),
+      registerDocumentHighlightProvider: jest.fn(),
     },
+    editor: {
+      addKeybindingRule: jest.fn(),
+    },
+    KeyCode: { Tab: 2 },
   },
 }));
 
@@ -52,6 +65,12 @@ describe('useEsqlAutocomplete', () => {
     })),
   };
   const hoverProvider = { provideHover: jest.fn() };
+  const inlineCompletionsProvider = {
+    provideInlineCompletions: jest.fn(),
+    freeInlineCompletions: jest.fn(),
+  };
+  const codeActionProvider = { provideCodeActions: jest.fn() };
+  const documentHighlightProvider = { provideDocumentHighlights: jest.fn() };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -64,9 +83,21 @@ describe('useEsqlAutocomplete', () => {
     jest
       .mocked(monaco.languages.registerHoverProvider)
       .mockReturnValue({ dispose: mockDisposeHover });
+    jest
+      .mocked(monaco.languages.registerInlineCompletionsProvider)
+      .mockReturnValue({ dispose: mockDisposeInlineCompletions });
+    jest
+      .mocked(monaco.languages.registerCodeActionProvider)
+      .mockReturnValue({ dispose: mockDisposeCodeActions });
+    jest
+      .mocked(monaco.languages.registerDocumentHighlightProvider)
+      .mockReturnValue({ dispose: mockDisposeDocumentHighlight });
     jest.mocked(ESQLLang.getSuggestionProvider).mockReturnValue(suggestionProvider);
     jest.mocked(ESQLLang.getSignatureProvider!).mockReturnValue(signatureProvider);
     jest.mocked(ESQLLang.getHoverProvider!).mockReturnValue(hoverProvider);
+    jest.mocked(ESQLLang.getInlineCompletionsProvider!).mockReturnValue(inlineCompletionsProvider);
+    jest.mocked(ESQLLang.getCodeActionProvider!).mockReturnValue(codeActionProvider);
+    jest.mocked(ESQLLang.getDocumentHighlightProvider!).mockReturnValue(documentHighlightProvider);
     jest.mocked(useEsqlCallbacks).mockReturnValue({ getSources, getColumnsFor });
   });
 
@@ -91,6 +122,32 @@ describe('useEsqlAutocomplete', () => {
       ESQL_LANG_ID,
       hoverProvider
     );
+
+    // Tab keybindings are added once via a module-level guard, so this is asserted
+    // in the first rendering test — later renders in this file don't call it again.
+    expect(monaco.editor.addKeybindingRule).toHaveBeenCalledWith(
+      expect.objectContaining({ command: '-acceptSelectedSuggestion' })
+    );
+    expect(monaco.editor.addKeybindingRule).toHaveBeenCalledWith(
+      expect.objectContaining({ command: 'editor.action.inlineSuggest.commit' })
+    );
+  });
+
+  it('registers ES|QL inline completions, code actions, and document highlight providers', () => {
+    renderHook(() => useEsqlAutocomplete(services));
+
+    expect(monaco.languages.registerInlineCompletionsProvider).toHaveBeenCalledWith(
+      ESQL_LANG_ID,
+      inlineCompletionsProvider
+    );
+    expect(monaco.languages.registerCodeActionProvider).toHaveBeenCalledWith(
+      ESQL_LANG_ID,
+      codeActionProvider
+    );
+    expect(monaco.languages.registerDocumentHighlightProvider).toHaveBeenCalledWith(
+      ESQL_LANG_ID,
+      documentHighlightProvider
+    );
   });
 
   it('disposes registered providers on unmount', () => {
@@ -101,5 +158,8 @@ describe('useEsqlAutocomplete', () => {
     expect(mockDisposeSuggestion).toHaveBeenCalledTimes(1);
     expect(mockDisposeSignature).toHaveBeenCalledTimes(1);
     expect(mockDisposeHover).toHaveBeenCalledTimes(1);
+    expect(mockDisposeInlineCompletions).toHaveBeenCalledTimes(1);
+    expect(mockDisposeCodeActions).toHaveBeenCalledTimes(1);
+    expect(mockDisposeDocumentHighlight).toHaveBeenCalledTimes(1);
   });
 });
