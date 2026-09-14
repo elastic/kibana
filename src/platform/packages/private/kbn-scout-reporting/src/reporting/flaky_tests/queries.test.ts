@@ -11,15 +11,15 @@ import {
   buildBranchStatsQuery,
   buildDailyTrendQuery,
   buildFailingFilesQuery,
+  buildBranchCountsQuery,
   buildFilePipelineStatsQuery,
-  buildLatestExecutionsQuery,
   buildTestMetadataQuery,
   buildTestStatsQuery,
   fetchBranchStats,
   fetchDailyTrend,
   fetchFailingFiles,
+  fetchBranchCounts,
   fetchFilePipelineStats,
-  fetchLatestExecutions,
   fetchSampleFailures,
   fetchTestMetadata,
   fetchTestStats,
@@ -278,59 +278,90 @@ describe('fetchBranchStats', () => {
   });
 });
 
-describe('buildLatestExecutionsQuery', () => {
-  it('takes the latest execution per test for the given tests only, within the scope', () => {
-    const query = buildLatestExecutionsQuery(scope, ['jest', 'ftr'], ['j1', 'f1']);
+describe('buildBranchCountsQuery', () => {
+  it('counts builds and the latest execution per test and branch for the given tests only', () => {
+    const query = buildBranchCountsQuery(scope, ['jest', 'ftr'], ['j1', 'f1']);
 
     expect(query).toContain('@timestamp >= "2026-08-31T00:00:00.000Z"');
     expect(query).toContain('buildkite.pipeline.slug IN ("kibana-on-merge")');
     expect(query).toContain(
       '(event.action == "test-end" AND reporter.type IN ("jest", "ftr") AND test.status IN ("passed", "failed", "timedOut")) AND test.id IN ("j1", "f1")'
     );
-    expect(query).toContain('STATS latest_execution_at = MAX(@timestamp) BY test.id');
-    expect(query).toContain('RENAME test.id AS test_id');
+    expect(query).toContain('EVAL failed = CASE(test.status IN ("failed", "timedOut"), 1, 0)');
+    expect(query).toContain(
+      'STATS builds = COUNT_DISTINCT(buildkite.build.id), ' +
+        'failed_builds = COUNT_DISTINCT(CASE(failed == 1, buildkite.build.id, NULL)), ' +
+        'latest_execution_at = MAX(@timestamp) BY test.id, buildkite.branch'
+    );
+    expect(query).toContain('RENAME test.id AS test_id, buildkite.branch AS branch');
+    // no LAST: the latest run is left to the branch stats query
+    expect(query).not.toContain('LAST(');
   });
 });
 
-describe('fetchLatestExecutions', () => {
+describe('fetchBranchCounts', () => {
   const tests = [
     { testId: 'j1', framework: 'jest' as const },
-    { testId: 'j2', framework: 'jest' as const },
     { testId: 'p1', framework: 'playwright' as const },
   ];
 
   it('returns an empty map without a query when there are no tests', async () => {
     const { client, esql } = mockEs([]);
 
-    expect(await fetchLatestExecutions(client, scope, [], 24)).toEqual(new Map());
+    expect(await fetchBranchCounts(client, scope, [])).toEqual(new Map());
     expect(esql).not.toHaveBeenCalled();
   });
 
-  it('queries the inactivity window before the window end, once per execution model', async () => {
+  it('queries once per execution model and keys the rows by test, most failed builds first', async () => {
     const { client, esql } = mockEs([]);
     esql
       .mockReturnValueOnce({
         toRecords: jest.fn().mockResolvedValue({
           records: [
-            { test_id: 'j1', latest_execution_at: '2026-09-06T23:30:00.000Z' },
-            { test_id: 'j2', latest_execution_at: null },
+            {
+              test_id: 'j1',
+              branch: '9.5',
+              builds: 100,
+              failed_builds: 8,
+              latest_execution_at: '2026-09-06T20:00:00.000Z',
+            },
+            {
+              test_id: 'j1',
+              branch: 'main',
+              builds: 500,
+              failed_builds: 10,
+              latest_execution_at: '2026-09-06T23:30:00.000Z',
+            },
+            // no branch or no execution at all: ignored
+            { test_id: 'j1', branch: null, builds: 1, failed_builds: 1, latest_execution_at: null },
           ],
         }),
       })
       .mockReturnValueOnce({ toRecords: jest.fn().mockResolvedValue({ records: [] }) });
 
-    const executions = await fetchLatestExecutions(client, scope, tests, 24);
+    const counts = await fetchBranchCounts(client, scope, tests);
 
     expect(esql).toHaveBeenCalledTimes(2);
     const queries = esql.mock.calls.map(([{ query }]) => query as string);
-    // 24h before the window end, not the report window start
-    expect(queries[0]).toContain('@timestamp >= "2026-09-06T00:00:00.000Z"');
-    expect(queries[0]).toContain('@timestamp < "2026-09-07T00:00:00.000Z"');
-    expect(queries[0]).toContain('test.id IN ("j1", "j2")');
+    expect(queries[0]).toContain('test.id IN ("j1")');
     expect(queries[1]).toContain('test.id IN ("p1")');
 
-    // only tests with an execution are present; `p1` had no row at all
-    expect(executions).toEqual(new Map([['j1', new Date('2026-09-06T23:30:00.000Z')]]));
+    expect(counts.get('j1')).toEqual([
+      {
+        branch: 'main',
+        builds: 500,
+        failedBuilds: 10,
+        latestExecutionAt: new Date('2026-09-06T23:30:00.000Z'),
+      },
+      {
+        branch: '9.5',
+        builds: 100,
+        failedBuilds: 8,
+        latestExecutionAt: new Date('2026-09-06T20:00:00.000Z'),
+      },
+    ]);
+    // a test without any row is absent
+    expect(counts.has('p1')).toBe(false);
   });
 });
 

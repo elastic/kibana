@@ -178,12 +178,14 @@ export const buildBranchStatsQuery = (
 };
 
 /**
- * Latest execution per test for the given tests of one execution model. Meant to run over a
- * short window (the inactivity threshold before the window end): a test without a row there
- * has been skipped, moved or deleted since and cannot be fixed. A short window, the `test.id`
- * filter and a single `MAX` keep it cheap enough to run for every qualifying test before ranking.
+ * Per-branch execution and build counts, plus the latest execution, for the given tests of one
+ * execution model. This is what the thresholds are checked against, branch by branch, and what
+ * tells active tests from skipped, moved or deleted ones; it runs for every test that clears the
+ * thresholds on its totals, before ranking. Only counts and a `MAX`, so it stays cheap; the
+ * expensive latest-run lookup is left to `buildBranchStatsQuery`, which only runs for the tests
+ * that make the report.
  */
-export const buildLatestExecutionsQuery = (
+export const buildBranchCountsQuery = (
   scope: FlakyTestQueryScope,
   frameworks: readonly TestFramework[],
   testIds: readonly string[]
@@ -197,8 +199,12 @@ export const buildLatestExecutionsQuery = (
       model.executionFilter,
       `test.id IN (${inList(testIds)})`,
     ].join(' AND ')}`,
-    'STATS latest_execution_at = MAX(@timestamp) BY test.id',
-    'RENAME test.id AS test_id',
+    `EVAL failed = ${model.failedExpression}`,
+    'STATS builds = COUNT_DISTINCT(buildkite.build.id),' +
+      ' failed_builds = COUNT_DISTINCT(CASE(failed == 1, buildkite.build.id, NULL)),' +
+      ' latest_execution_at = MAX(@timestamp)' +
+      ' BY test.id, buildkite.branch',
+    'RENAME test.id AS test_id, buildkite.branch AS branch',
     `LIMIT ${ESQL_ROW_LIMIT}`,
   ].join(' | ');
 };
@@ -368,41 +374,56 @@ export const fetchBranchStats = async (
   return byTest;
 };
 
-const MS_PER_HOUR = 60 * 60 * 1000;
-const MS_PER_DAY = 24 * MS_PER_HOUR;
+/** Build counts and latest execution of one test on one branch. */
+export interface BranchCountsRow {
+  branch: string;
+  builds: number;
+  failedBuilds: number;
+  latestExecutionAt: Date;
+}
 
-/**
- * The tests, among the given ones, that executed (ran without being skipped) in the
- * `maxInactiveHours` before the window end, in the pipelines and branches of the scope, with
- * their latest execution. Tests absent from the result are inactive.
- */
-export const fetchLatestExecutions = async (
+/** Per-branch build counts and latest execution keyed by test id, most failed builds first. */
+export const fetchBranchCounts = async (
   es: ESClient,
   scope: FlakyTestQueryScope,
-  tests: ReadonlyArray<{ testId: string; framework: TestFramework }>,
-  maxInactiveHours: number
-): Promise<Map<string, Date>> => {
+  tests: ReadonlyArray<{ testId: string; framework: TestFramework }>
+): Promise<Map<string, BranchCountsRow[]>> => {
   if (tests.length === 0) {
     return new Map();
   }
 
-  const from = new Date(scope.to.getTime() - maxInactiveHours * MS_PER_HOUR);
   const results = await Promise.all(
     groupByExecutionModel(tests).map(({ frameworks, testIds }) =>
-      runEsql<{ test_id: string; latest_execution_at: string | null }>(
-        es,
-        buildLatestExecutionsQuery({ ...scope, from }, frameworks, testIds)
-      )
+      runEsql<{
+        test_id: string;
+        branch: string | null;
+        builds: number;
+        failed_builds: number;
+        latest_execution_at: string | null;
+      }>(es, buildBranchCountsQuery(scope, frameworks, testIds))
     )
   );
 
-  const byTest = new Map<string, Date>();
+  const byTest = new Map<string, BranchCountsRow[]>();
   for (const record of results.flat()) {
-    if (record.latest_execution_at === null) continue;
-    byTest.set(record.test_id, new Date(record.latest_execution_at));
+    if (record.branch === null || record.latest_execution_at === null) continue;
+    const rows = byTest.get(record.test_id) ?? [];
+    rows.push({
+      branch: record.branch,
+      builds: record.builds,
+      failedBuilds: record.failed_builds,
+      latestExecutionAt: new Date(record.latest_execution_at),
+    });
+    byTest.set(record.test_id, rows);
+  }
+  for (const rows of byTest.values()) {
+    rows.sort((a, b) => b.failedBuilds - a.failedBuilds || b.builds - a.builds);
   }
   return byTest;
 };
+
+const MS_PER_HOUR = 60 * 60 * 1000;
+const MS_PER_DAY = 24 * MS_PER_HOUR;
 
 /** Midnight UTC of the day containing `date`. */
 export const startOfUtcDay = (date: Date): Date =>
