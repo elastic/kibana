@@ -90,7 +90,10 @@ export const materializeCortex = async ({
   logger: Logger;
 }): Promise<void> => {
   await store.pruneDuplicates();
-  const { pages } = await store.list();
+  const { pages: allPages } = await store.list();
+  // Archived means the optimizer retired the fact as stale, so materializing it would feed the
+  // model knowledge we already decided not to trust.
+  const pages = allPages.filter((page) => page.status !== 'archived');
   const fullPages = (await Promise.all(pages.map(async (summary) => store.get(summary.id)))).filter(
     (page): page is CortexPage => page !== undefined
   );

@@ -67,4 +67,64 @@ describe('materializeCortex', () => {
       ])
     );
   });
+
+  it('leaves archived pages out of the workspace and the index', async () => {
+    const summaries = [
+      {
+        id: 'cortex_service_checkout',
+        title: 'Checkout',
+        entity_type: 'service',
+        status: 'established',
+        corroborations: 2,
+        updated_at: '2026-09-09T12:00:00.000Z',
+      },
+      {
+        id: 'cortex_service_legacy',
+        title: 'Legacy',
+        entity_type: 'service',
+        status: 'archived',
+        corroborations: 1,
+        updated_at: '2026-09-09T12:00:00.000Z',
+      },
+    ];
+
+    const store: CortexPageStore = {
+      list: jest.fn().mockResolvedValue({
+        pages: summaries,
+        stats: { total: 2, established: 1, total_corroborations: 3 },
+      }),
+      get: jest.fn(async (id: string) => {
+        const summary = summaries.find((page) => page.id === id);
+        return summary
+          ? { ...summary, slug: summary.title.toLowerCase(), content: 'content' }
+          : undefined;
+      }),
+      upsert: jest.fn(),
+      corroborate: jest.fn(),
+      archive: jest.fn(),
+      pruneDuplicates: jest.fn().mockResolvedValue(0),
+    } as never;
+
+    const apiClient = {
+      mkdirs: jest.fn().mockResolvedValue([true]),
+      writeFiles: jest.fn().mockResolvedValue([]),
+    };
+
+    await materializeCortex({
+      apiClient: apiClient as never,
+      conversationId: 'conv-1',
+      store,
+      logger: loggerMock.create(),
+    });
+
+    expect(store.get).not.toHaveBeenCalledWith('cortex_service_legacy');
+
+    const [, files] = apiClient.writeFiles.mock.calls[0];
+    const paths = files.map((file: { path: string }) => file.path);
+    expect(paths).toContain('/workspace/cortex/services/checkout.md');
+    expect(paths).not.toContain('/workspace/cortex/services/legacy.md');
+
+    const index = files.find((file: { path: string }) => file.path.endsWith('INDEX.md'));
+    expect(index.content.toString('utf8')).not.toContain('Legacy');
+  });
 });

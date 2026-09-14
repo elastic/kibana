@@ -11,6 +11,7 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { Logger } from '@kbn/core/server';
 import type { SandboxConnectionManager } from '../tools/sandbox_bash/grpc_client';
 import { hydrateCortexWorkspace } from '../cortex/register_cortex';
+import { scopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { withTimeout } from './with_timeout';
 
 /** Caps beforeAgent so a stuck sandbox allocate cannot stall the investigation. */
@@ -51,10 +52,15 @@ export const cortexHydrateStepDefinition = ({
         );
       }
 
+      // The hook runs this workflow in the caller's space, which is the same space the sandbox
+      // tools resolve from the request, so both address the same workspace.
+      const { spaceId } = context.contextManager.getContext().workflow;
+      const scopedConversationId = scopeConversationId(spaceId, conversationId);
+
       await withTimeout(
         hydrateCortexWorkspace({
           apiClient: manager.apiClient,
-          conversationId,
+          conversationId: scopedConversationId,
           esClient: context.contextManager.getScopedEsClient(),
           logger,
         }),
@@ -62,6 +68,6 @@ export const cortexHydrateStepDefinition = ({
         `Cortex hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`
       );
 
-      return { output: { conversation_id: conversationId } };
+      return { output: { conversation_id: scopedConversationId } };
     },
   });

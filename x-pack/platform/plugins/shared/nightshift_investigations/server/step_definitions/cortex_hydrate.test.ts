@@ -23,12 +23,12 @@ describe('cortexHydrateStepDefinition', () => {
     getScopedEsClient.mockReturnValue(esClient);
   });
 
-  const createContext = (conversationId: string) =>
+  const createContext = (conversationId: string, spaceId = 'default') =>
     ({
       input: { conversation_id: conversationId },
       rawInput: { conversation_id: conversationId },
       contextManager: {
-        getContext: jest.fn(),
+        getContext: jest.fn().mockReturnValue({ workflow: { spaceId } }),
         getFakeRequest: jest.fn(),
         getScopedEsClient,
         renderInputTemplate: jest.fn((val) => val),
@@ -50,11 +50,27 @@ describe('cortexHydrateStepDefinition', () => {
 
     expect(hydrateCortexWorkspace).toHaveBeenCalledWith({
       apiClient,
-      conversationId: 'conv-1',
+      conversationId: 'default:conv-1',
       esClient,
       logger: expect.anything(),
     });
-    expect(result).toEqual({ output: { conversation_id: 'conv-1' } });
+    expect(result).toEqual({ output: { conversation_id: 'default:conv-1' } });
+  });
+
+  // The sandbox tools key the workspace on `<space>:<conversation>`; hydrating the raw id would
+  // write the wiki into a workspace the agent never reads.
+  it('scopes the workspace to the space the workflow runs in', async () => {
+    const definition = cortexHydrateStepDefinition({
+      getConnectionManager: () => ({ apiClient } as never),
+      logger: loggerMock.create(),
+    });
+
+    const result = await definition.handler(createContext('conv-1', 'marketing'));
+
+    expect(hydrateCortexWorkspace).toHaveBeenCalledWith(
+      expect.objectContaining({ conversationId: 'marketing:conv-1' })
+    );
+    expect(result).toEqual({ output: { conversation_id: 'marketing:conv-1' } });
   });
 
   it('throws when the sandbox is not configured', async () => {

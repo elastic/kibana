@@ -23,7 +23,12 @@ interface AgentHookContextBase {
 
 export interface BeforeAgentHookContext extends AgentHookContextBase {
   nextInput: ProcessedRoundInput;
-  /** Id of the conversation this round belongs to. Absent for standalone (sub-agent) runs. */
+  /**
+   * Id of the conversation this round belongs to. Absent for standalone (sub-agent) runs.
+   * Present but ephemeral for `ai.agent` workflow steps that set neither `create-conversation`
+   * nor `conversation_id`: those resolve a placeholder conversation that is never persisted, so
+   * the id is safe to correlate a single round but not to key anything that must outlive it.
+   */
   conversationId?: string;
 }
 
