@@ -93,7 +93,7 @@ export const sendFleetActionResponse = async (
 export const sendEndpointActionResponse = async (
   esClient: Client,
   action: ActionDetails,
-  { state }: { state?: 'success' | 'failure' } = {}
+  { state, responseCode }: { state?: 'success' | 'failure'; responseCode?: string } = {}
 ): Promise<LogsEndpointActionResponse> => {
   let endpointResponse: LogsEndpointActionResponse;
 
@@ -105,7 +105,7 @@ export const sendEndpointActionResponse = async (
         data: {
           command: action.command as EndpointActionData['command'],
           comment: '',
-          ...getOutputDataIfNeeded(action, state),
+          ...getOutputDataIfNeeded(action, state, responseCode),
         },
         started_at: action.startedAt,
         ...(state === 'failure' ? { error: { message: 'Action failed' } } : {}),
@@ -352,7 +352,8 @@ type ResponseOutput<
 
 const getOutputDataIfNeeded = (
   action: ActionDetails,
-  state: 'success' | 'failure' = 'success'
+  state: 'success' | 'failure' = 'success',
+  responseCode?: string
 ): ResponseOutput => {
   const commentUppercase = (action?.comment ?? '').toUpperCase();
 
@@ -459,17 +460,20 @@ const getOutputDataIfNeeded = (
     case 'kill-process':
       return {
         output: endpointActionGenerator.generateKillProcessOutputResponse(
-          state === 'success' &&
-            (action.parameters as ResponseActionParametersWithPid).kill_descendants
-            ? {
-                content: {
-                  descendants: endpointActionGenerator.createProcessDescendants(
-                    (action.parameters as ResponseActionParametersWithPid)?.pid ??
-                      endpointActionGenerator.randomN(50)
-                  ),
-                },
-              }
-            : {},
+          {
+            content: {
+              ...(responseCode ? { code: responseCode } : {}),
+              ...(state === 'success' &&
+              (action.parameters as ResponseActionParametersWithPid).kill_descendants
+                ? {
+                    descendants: endpointActionGenerator.createProcessDescendants(
+                      (action.parameters as ResponseActionParametersWithPid)?.pid ??
+                        endpointActionGenerator.randomN(50)
+                    ),
+                  }
+                : {}),
+            },
+          },
           {
             parameters: action.parameters as ResponseActionParametersWithProcessData,
             atError: state === 'failure',

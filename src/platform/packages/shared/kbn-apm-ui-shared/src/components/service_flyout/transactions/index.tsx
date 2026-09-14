@@ -61,6 +61,7 @@ interface ServiceFlyoutTransactionsSectionProps {
   latencyAggregationType?: LatencyAggregationType;
   locators?: SharePluginStart['url']['locators'];
   refreshToken?: number;
+  projectRouting?: string;
 }
 
 export function ServiceFlyoutTransactionsSection({
@@ -74,6 +75,7 @@ export function ServiceFlyoutTransactionsSection({
   latencyAggregationType,
   locators,
   refreshToken,
+  projectRouting,
 }: ServiceFlyoutTransactionsSectionProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -89,6 +91,7 @@ export function ServiceFlyoutTransactionsSection({
       latencyAggregationType,
       searchQuery,
       refreshToken,
+      projectRouting,
     });
 
   const openInTransactionsLocator = locators?.get<ServiceTransactionsLocatorParams>(

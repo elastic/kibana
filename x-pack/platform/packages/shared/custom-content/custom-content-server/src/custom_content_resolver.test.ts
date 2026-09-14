@@ -80,7 +80,7 @@ describe('createCustomContentTemplateResolver — output validation', () => {
 
     const result = await resolve({ prompt: 'Show a KPI' });
 
-    expect(result).toBe('<div>hello</div>');
+    expect(result.template).toBe('<div>hello</div>');
   });
 
   it('throws when the LLM output contains a <script> tag', async () => {
@@ -119,8 +119,32 @@ describe('createCustomContentTemplateResolver — output validation', () => {
 
     const result = await resolve({ prompt: 'Show a KPI' });
 
-    expect(result).toBe('<div>hello</div>');
-    expect(result).not.toContain('```');
+    expect(result.template).toBe('<div>hello</div>');
+    expect(result.template).not.toContain('```');
+  });
+
+  it('reads and strips the declared height', async () => {
+    mockChatComplete.mockResolvedValue({
+      content: '<!-- cc-height: 480 -->\n<div>hello</div>',
+    });
+
+    const result = await resolve({ prompt: 'Show a KPI' });
+
+    expect(result.height).toBe(480);
+    // The declaration is metadata about the template, not part of what renders.
+    expect(result.template).toBe('<div>hello</div>');
+  });
+
+  // Fences are stripped by the resolver, so the declaration is only reachable through it.
+  it('reads the declared height through a markdown fence', async () => {
+    mockChatComplete.mockResolvedValue({
+      content: '```html\n<!-- cc-height: 400 -->\n<div>hello</div>\n```',
+    });
+
+    const result = await resolve({ prompt: 'Show a KPI' });
+
+    expect(result.height).toBe(400);
+    expect(result.template).toBe('<div>hello</div>');
   });
 });
 
@@ -170,9 +194,9 @@ describe('createCustomContentTemplateResolver — ES|QL sampling failures', () =
   it('still generates a template when a valid query matches no rows', async () => {
     mockEsqlQuery.mockResolvedValue({ columns: [{ name: 'count', type: 'long' }], values: [] });
 
-    await expect(resolve({ prompt: 'Show revenue', esqlQuery: 'FROM logs' })).resolves.toBe(
-      '<div>ok</div>'
-    );
+    await expect(
+      resolve({ prompt: 'Show revenue', esqlQuery: 'FROM logs' })
+    ).resolves.toMatchObject({ template: '<div>ok</div>' });
   });
 
   it('binds ?_tstart and ?_tend when sampling a time-picker query', async () => {
