@@ -14,7 +14,7 @@ import type {
 import { v4 as uuidv4 } from 'uuid';
 import {
   TimelineEventType,
-  createInternalError,
+  createBadRequestError,
   isEventsNativeVersion,
 } from '@kbn/agent-builder-common';
 import type { ConversationRoundAuthor, CurrentUser } from '@kbn/agent-builder-common';
@@ -114,7 +114,7 @@ export class ConversationServiceImpl implements ConversationService {
     const conversation = await client.get(conversationId);
 
     if (!isEventsNativeVersion(conversation.schema_version)) {
-      throw createInternalError('User messages require canonical event storage');
+      throw createBadRequestError('User messages require canonical event storage');
     }
 
     const snapshot = conversation.attachments ?? [];

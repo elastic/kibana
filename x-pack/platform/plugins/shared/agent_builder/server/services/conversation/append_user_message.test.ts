@@ -12,6 +12,7 @@ import {
   ConversationAccessControlMode,
   ConversationRoundStatus,
   createAgentNotFoundError,
+  isBadRequestError,
   TimelineEventType,
 } from '@kbn/agent-builder-common';
 import type { TimelineEvent } from '@kbn/agent-builder-common';
@@ -203,9 +204,11 @@ describe('ConversationService.appendUserMessage', () => {
     expect(messagesOf((await append('m1')).events)).toEqual(['m1']);
   });
 
-  it('rejects a conversation that predates canonical event storage', async () => {
+  it('rejects a conversation that predates canonical event storage as a bad request', async () => {
     stored.schema_version = undefined;
-    await expect(append('m1')).rejects.toThrow('canonical event storage');
+    const error = await append('m1').catch((thrown) => thrown);
+    expect(isBadRequestError(error)).toBe(true);
+    expect(error.message).toContain('canonical event storage');
     expect(mockIndex).not.toHaveBeenCalled();
   });
 
