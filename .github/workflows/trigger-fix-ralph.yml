@@ -1,6 +1,11 @@
 name: 'Trigger Fix Ralph'
 
 on:
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Issue number to fix (for manual testing)'
+        required: true
   issue_comment:
     types: [created]
 
@@ -11,15 +16,16 @@ permissions:
   contents: none
 
 concurrency:
-  group: ralph-fix-${{ github.event.issue.number }}
+  group: ralph-fix-${{ github.event.inputs.issue_number || github.event.issue.number }}
   cancel-in-progress: true
 
 jobs:
   acknowledge:
     name: 'Acknowledge /ralph-fix'
     if: >-
-      github.event.issue.pull_request == null &&
-      startsWith(github.event.comment.body, '/ralph-fix')
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.issue.pull_request == null &&
+      startsWith(github.event.comment.body, '/ralph-fix'))
     runs-on: ubuntu-latest
     permissions:
       issues: write
@@ -38,7 +44,7 @@ jobs:
       - name: Post acknowledgment comment
         env:
           GH_TOKEN: ${{ github.token }}
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_NUMBER: ${{ github.event.inputs.issue_number || github.event.issue.number }}
           REPO: ${{ github.repository }}
         run: |
           gh issue comment "$ISSUE_NUMBER" --repo "$REPO" \
@@ -51,9 +57,10 @@ jobs:
     name: 'Run Fix Ralph'
     needs: [acknowledge]
     if: >-
-      github.event.issue.pull_request == null &&
-      startsWith(github.event.comment.body, '/ralph-fix')
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.issue.pull_request == null &&
+      startsWith(github.event.comment.body, '/ralph-fix'))
     uses: elastic/kibana-error-sentry/.github/workflows/fix-ralph.yml@main
     with:
-      issue_number: '${{ github.event.issue.number }}'
+      issue_number: '${{ github.event.inputs.issue_number || github.event.issue.number }}'
     secrets: inherit
