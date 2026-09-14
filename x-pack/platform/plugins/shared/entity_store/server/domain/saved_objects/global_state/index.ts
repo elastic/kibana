@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  SavedObjectsClientContract,
-  SavedObjectsFindResponse,
-} from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import {
@@ -155,17 +152,12 @@ export class EntityStoreGlobalStateClient {
   }
 
   async delete(): Promise<void> {
-    const response = await this.findSO();
-    if (response.total === 0) {
-      return;
-    }
-
     try {
-      const id = response.saved_objects[0].id;
+      const id = this.getSavedObjectId();
       this.logger.debug(`Deleting global state with id ${id}`);
       await this.soClient.delete(EntityStoreGlobalStateTypeName, id);
     } catch (error) {
-      if (Boom.isBoom(error, 404)) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(error) || Boom.isBoom(error, 404)) {
         return;
       }
       throw error;
@@ -179,20 +171,17 @@ export class EntityStoreGlobalStateClient {
   private async findRaw(): Promise<
     { attributes: EntityStoreGlobalStateOverrides; version?: string } | undefined
   > {
-    const response = await this.findSO();
-    if (response.total === 0) {
-      return undefined;
+    try {
+      const { attributes, version } = await this.soClient.get<EntityStoreGlobalStateOverrides>(
+        EntityStoreGlobalStateTypeName,
+        this.getSavedObjectId()
+      );
+      return { attributes, version };
+    } catch (error) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+        return undefined;
+      }
+      throw error;
     }
-
-    const { attributes, version } = response.saved_objects[0];
-    return { attributes, version };
-  }
-
-  private findSO(): Promise<SavedObjectsFindResponse<EntityStoreGlobalStateOverrides>> {
-    return this.soClient.find<EntityStoreGlobalStateOverrides>({
-      type: EntityStoreGlobalStateTypeName,
-      namespaces: [this.namespace],
-      perPage: 1,
-    });
   }
 }
