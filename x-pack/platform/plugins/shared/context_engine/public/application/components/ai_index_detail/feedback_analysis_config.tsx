@@ -12,7 +12,6 @@ import {
   EuiFormRow,
   EuiPanel,
   EuiSelect,
-  EuiSwitch,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -46,11 +45,8 @@ const DEFAULT_INTERVAL = '24h';
 const DEFAULT_SIGNAL_WINDOW = 'now-30d';
 
 /**
- * The per-index analysis configuration, plus a manual run.
- *
- * "Run now" is only offered while analysis is enabled: turning it off uninstalls the scheduled
- * workflow, so there would be nothing to execute. Offering a button that always failed would be
- * worse than saying why it is unavailable.
+ * How the analysis runs, plus a manual run. Whether it runs at all is the switch above this, which
+ * is also what reveals these: settings for something turned off are noise.
  */
 export const FeedbackAnalysisConfig = ({
   aiIndex,
@@ -60,29 +56,12 @@ export const FeedbackAnalysisConfig = ({
   const runAnalysis = useRunFeedbackAnalysis(aiIndex.id);
 
   const config = aiIndex.feedback_analysis;
-  const isEnabled = config?.enabled ?? false;
   const interval = config?.schedule?.interval ?? DEFAULT_INTERVAL;
   const signalFrom = config?.signal_time_range?.from ?? DEFAULT_SIGNAL_WINDOW;
 
   return (
     <EuiPanel hasBorder={false} hasShadow={false} color="subdued" paddingSize="m">
       <EuiFlexGroup alignItems="flexEnd" gutterSize="m" wrap>
-        <EuiFlexItem grow={false}>
-          <EuiFormRow hasEmptyLabelSpace>
-            <EuiSwitch
-              compressed
-              checked={isEnabled}
-              disabled={updateConfig.isLoading}
-              onChange={(event) => updateConfig.mutate({ enabled: event.target.checked })}
-              label={i18n.translate(
-                'xpack.contextEngine.aiIndexDetail.improvements.config.enabledLabel',
-                { defaultMessage: 'Analyze on a schedule' }
-              )}
-              data-test-subj="contextImprovementsEnabledSwitch"
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-
         {showAgentSelector && (
           <EuiFlexItem grow={false}>
             <FeedbackAgentSelector aiIndex={aiIndex} />
@@ -100,7 +79,7 @@ export const FeedbackAnalysisConfig = ({
               compressed
               options={INTERVAL_OPTIONS}
               value={interval}
-              disabled={!isEnabled || updateConfig.isLoading}
+              disabled={updateConfig.isLoading}
               onChange={(event) =>
                 updateConfig.mutate({ schedule: { interval: event.target.value } })
               }
@@ -120,7 +99,7 @@ export const FeedbackAnalysisConfig = ({
               compressed
               options={SIGNAL_WINDOW_OPTIONS}
               value={signalFrom}
-              disabled={!isEnabled || updateConfig.isLoading}
+              disabled={updateConfig.isLoading}
               onChange={(event) =>
                 updateConfig.mutate({
                   signal_time_range: { type: 'relative', from: event.target.value },
@@ -138,18 +117,6 @@ export const FeedbackAnalysisConfig = ({
               iconType="play"
               onClick={() => runAnalysis.mutate()}
               isLoading={runAnalysis.isLoading}
-              isDisabled={!isEnabled}
-              title={
-                isEnabled
-                  ? undefined
-                  : i18n.translate(
-                      'xpack.contextEngine.aiIndexDetail.improvements.config.runDisabledHelp',
-                      {
-                        defaultMessage:
-                          'Turn on scheduled analysis to run one. With it off there is no analysis workflow to execute.',
-                      }
-                    )
-              }
               data-test-subj="contextImprovementsRunNowButton"
             >
               {i18n.translate(

@@ -21,6 +21,7 @@ import {
   IMPROVEMENTS_INTERNAL_API_VERSION,
   MAX_AI_INDEX_ID_LENGTH,
   MAX_IMPROVEMENT_ID_LENGTH,
+  MAX_IMPROVEMENT_REJECT_REASON_LENGTH,
   MAX_IMPROVEMENTS_PAGE_SIZE,
   MAX_IMPROVEMENTS_RESULT_WINDOW,
   aiIndexFeedbackAnalysisRunPath,
@@ -105,7 +106,7 @@ const listImprovementsQuerySchema = schema.object({
 
 const rejectBodySchema = schema.object({
   /** The reviewer's words, read back to later runs so the same fix is not proposed again. */
-  reason: schema.maybe(schema.string({ maxLength: 2048 })),
+  reason: schema.maybe(schema.string({ maxLength: MAX_IMPROVEMENT_REJECT_REASON_LENGTH })),
 });
 
 /**

@@ -30,8 +30,6 @@ describe('useAiIndexOverviewSections', () => {
     expect(result.current).toEqual({
       hideEditControls: false,
       showAutomationsPanel: false,
-      showSignalsSection: false,
-      showSignalsPanel: false,
     });
   });
 
@@ -44,7 +42,6 @@ describe('useAiIndexOverviewSections', () => {
     );
 
     expect(result.current.showAutomationsPanel).toBe(true);
-    expect(result.current.showSignalsPanel).toBe(false);
   });
 
   it('keeps automations visible when sources are cleared but automations remain', () => {
@@ -60,7 +57,6 @@ describe('useAiIndexOverviewSections', () => {
     );
 
     expect(result.current.showAutomationsPanel).toBe(true);
-    expect(result.current.showSignalsPanel).toBe(false);
   });
 
   it('bypasses setup locks for managed AI indexes', () => {
@@ -74,18 +70,7 @@ describe('useAiIndexOverviewSections', () => {
     expect(result.current).toEqual({
       hideEditControls: true,
       showAutomationsPanel: true,
-      showSignalsSection: false,
-      showSignalsPanel: false,
     });
-  });
-
-  it('signals section is always hidden', () => {
-    const { result } = renderHook(() =>
-      useAiIndexOverviewSections({ aiIndex: baseIndex, isLoading: false })
-    );
-
-    expect(result.current.showSignalsSection).toBe(false);
-    expect(result.current.showSignalsPanel).toBe(false);
   });
 
   it('shows real panels while loading to avoid locked-state flash', () => {
@@ -94,8 +79,6 @@ describe('useAiIndexOverviewSections', () => {
     );
 
     expect(result.current.showAutomationsPanel).toBe(true);
-    expect(result.current.showSignalsPanel).toBe(false);
-    expect(result.current.showSignalsSection).toBe(false);
     expect(result.current.hideEditControls).toBe(true);
   });
 });

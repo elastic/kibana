@@ -10,21 +10,29 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
+  EuiSwitch,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
+import { useFeedbackLoopEnabled } from '../../hooks/use_feedback_loop_enabled';
+import { useKibana } from '../../hooks/use_kibana';
 import { useTracesEditor } from '../../hooks/use_traces_editor';
+import { useUpdateFeedbackAnalysis } from '../../hooks/use_update_feedback_analysis';
 import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
 import { AiIndexDetailPanelEmptyState } from './ai_index_detail_panel_empty_prompt';
 import { TraceDisplay } from '../trace_display';
 import { TraceSelector } from '../trace_selector';
+import { FeedbackAnalysisConfig } from './feedback_analysis_config';
 
 interface TracesPanelProps {
   isLoading: boolean;
@@ -32,6 +40,46 @@ interface TracesPanelProps {
   onSaved: () => void;
   isManaged: boolean;
 }
+
+const AutoImproveControl = ({ aiIndex }: { aiIndex: GetAiIndexResponse }) => {
+  const {
+    services: { getChatOpener },
+  } = useKibana();
+  const chatOpener = getChatOpener?.();
+  const updateConfig = useUpdateFeedbackAnalysis(aiIndex);
+  const isAnalysisEnabled = aiIndex.feedback_analysis?.enabled ?? false;
+
+  return (
+    <>
+      <EuiSwitch
+        checked={isAnalysisEnabled}
+        disabled={updateConfig.isLoading}
+        onChange={(event) => updateConfig.mutate({ enabled: event.target.checked })}
+        label={i18n.translate('xpack.contextEngine.aiIndexDetail.traces.autoImproveLabel', {
+          defaultMessage: 'Suggest improvements automatically',
+        })}
+        data-test-subj="contextTracesAutoImproveSwitch"
+      />
+
+      <EuiSpacer size="s" />
+      <EuiText size="xs" color="subdued">
+        <p>
+          {i18n.translate('xpack.contextEngine.aiIndexDetail.traces.autoImproveHelp', {
+            defaultMessage:
+              'Reviews these traces on a schedule and proposes changes in the panels above. Suggestions are never applied on their own.',
+          })}
+        </p>
+      </EuiText>
+
+      {isAnalysisEnabled && (
+        <>
+          <EuiSpacer size="m" />
+          <FeedbackAnalysisConfig aiIndex={aiIndex} showAgentSelector={Boolean(chatOpener)} />
+        </>
+      )}
+    </>
+  );
+};
 
 export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPanelProps) => {
   const { currentTrace, startEditing, editing } = useTracesEditor({
@@ -41,6 +89,8 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
   const isEditingActive = editing !== undefined && !editing.isSaving;
   const hasTrace = currentTrace !== undefined;
   const isSaving = editing?.isSaving ?? false;
+
+  const feedbackLoopEnabled = useFeedbackLoopEnabled();
 
   return (
     <EuiPanel hasBorder paddingSize="l" data-test-subj="contextTracesPanel">
@@ -173,6 +223,13 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
               )
             }
           />
+        </>
+      )}
+
+      {feedbackLoopEnabled && aiIndex && (
+        <>
+          <EuiHorizontalRule margin="m" />
+          <AutoImproveControl aiIndex={aiIndex} />
         </>
       )}
     </EuiPanel>
