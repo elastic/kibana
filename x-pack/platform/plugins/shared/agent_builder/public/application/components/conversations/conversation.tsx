@@ -28,6 +28,7 @@ import { useConversationId } from '../../context/conversation/use_conversation_i
 import { useStreamingContext } from '../../context/streaming/streaming_context';
 import { useIsAnyConversationStreaming } from '../../hooks/use_is_any_conversation_streaming';
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
+import { useOnRoundFromOtherParticipant } from '../../hooks/use_on_round_from_other_participant';
 import { useAnchoredRoundIndex } from '../../hooks/use_anchored_round';
 import { useConversationStatus } from '../../hooks/use_conversation';
 import { useSendPredefinedInitialMessage } from '../../hooks/use_initial_message';
@@ -82,10 +83,15 @@ export const Conversation: React.FC<{}> = () => {
   });
 
   const [scrollContainer, setScrollContainer] = useState<HTMLDivElement | null>(null);
-  const { showScrollButton, onMessageSent, smoothScrollToBottom, stickToBottom } =
-    useConversationScrollActions({
-      scrollContainer,
-    });
+  const {
+    showScrollButton,
+    onMessageSent,
+    stopFollowingBottom,
+    smoothScrollToBottom,
+    stickToBottom,
+  } = useConversationScrollActions({
+    scrollContainer,
+  });
 
   // Observed, not read during render: a stale height makes the current round taller than the
   // viewport, scrolling its input out of view.
@@ -113,6 +119,8 @@ export const Conversation: React.FC<{}> = () => {
   useEffect(() => {
     setDismissStaleAttachments(false);
   }, [staleAttachments, conversationId]);
+
+  useOnRoundFromOtherParticipant(stopFollowingBottom);
 
   // Stick to bottom when opening a conversation, once its data has loaded
   useEffect(() => {

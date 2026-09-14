@@ -22,6 +22,7 @@ import { useDebouncedValue } from '@kbn/react-hooks';
 import {
   ConversationAccessControlMode,
   ConversationAccessControlRole,
+  isPrivatelySharedConversation,
   normalizeConversationAccessControl,
   type Conversation,
 } from '@kbn/agent-builder-common';
@@ -31,10 +32,7 @@ import {
   useConversationPermissions,
   useIsUnpersistedConversation,
 } from '../../../../hooks/use_conversation';
-import {
-  hasInviteMembersSummary,
-  useUpdateConversationAccessControl,
-} from '../../../../hooks/use_conversation_access_control';
+import { useUpdateConversationAccessControl } from '../../../../hooks/use_conversation_access_control';
 import { useAgentBuilderAgentById } from '../../../../hooks/agents/use_agent_by_id';
 import { useSuggestUsers } from '../../../../hooks/use_suggest_users';
 import { useUserProfiles } from '../../../../hooks/use_user_profiles';
@@ -57,7 +55,8 @@ export const ConversationShareButton: React.FC = () => {
   const { conversation } = useConversation();
   const isUnpersistedConversation = useIsUnpersistedConversation(conversation);
   const accessControl = normalizeConversationAccessControl(conversation?.access_control);
-  const canOpenSharePopover = canUpdateAccessControl || hasInviteMembersSummary(accessControl);
+  const canOpenSharePopover =
+    canUpdateAccessControl || isPrivatelySharedConversation(accessControl);
 
   if (!conversation || isUnpersistedConversation || !canOpenSharePopover) {
     return null;
