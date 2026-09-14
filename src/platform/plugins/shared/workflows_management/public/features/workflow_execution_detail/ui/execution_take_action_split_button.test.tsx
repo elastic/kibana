@@ -10,14 +10,14 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useRunWorkflow, useWorkflowsApi, useWorkflowsCapabilities } from '@kbn/workflows-ui';
-import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
+import { createMockWorkflowApi, createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { ExecutionTakeActionSplitButton } from './execution_take_action_split_button';
 import { createStartServicesMock } from '../../../mocks';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
 import { createMockWorkflowExecutionDto } from '../../../shared/test_utils';
 
 const mockRunWorkflow = jest.fn();
-const mockTestWorkflow = jest.fn();
+const mockWorkflowApi = createMockWorkflowApi();
 
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
@@ -36,14 +36,12 @@ describe('ExecutionTakeActionSplitButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockRunWorkflow.mockResolvedValue({ workflowExecutionId: 'new-exec' });
-    mockTestWorkflow.mockResolvedValue({ workflowExecutionId: 'new-test-exec' });
+    mockWorkflowApi.testWorkflow.mockResolvedValue({ workflowExecutionId: 'new-test-exec' });
     jest.mocked(useRunWorkflow).mockReturnValue({
       mutateAsync: mockRunWorkflow,
       isLoading: false,
-    } as ReturnType<typeof useRunWorkflow>);
-    jest.mocked(useWorkflowsApi).mockReturnValue({
-      testWorkflow: mockTestWorkflow,
-    } as ReturnType<typeof useWorkflowsApi>);
+    } as unknown as ReturnType<typeof useRunWorkflow>);
+    jest.mocked(useWorkflowsApi).mockReturnValue(mockWorkflowApi);
     jest.mocked(useWorkflowsCapabilities).mockReturnValue(createMockWorkflowsCapabilities());
     services.notifications.toasts.addSuccess = jest.fn();
     services.notifications.toasts.addError = jest.fn();
@@ -69,7 +67,7 @@ describe('ExecutionTakeActionSplitButton', () => {
         inputs: { alertId: 'a-1' },
       });
     });
-    expect(mockTestWorkflow).not.toHaveBeenCalled();
+    expect(mockWorkflowApi.testWorkflow).not.toHaveBeenCalled();
   });
 
   it('re-runs a test execution through testWorkflow', async () => {
@@ -81,7 +79,7 @@ describe('ExecutionTakeActionSplitButton', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Re-run' }));
 
     await waitFor(() => {
-      expect(mockTestWorkflow).toHaveBeenCalledWith({
+      expect(mockWorkflowApi.testWorkflow).toHaveBeenCalledWith({
         workflowId: 'wf-1',
         inputs: { alertId: 'a-1' },
       });
