@@ -374,7 +374,7 @@ describe('suggestion_provider', () => {
 
       const mockPosition = new monaco.Position(1, 'FROM index | LIMIT ?'.length + 1);
       const mockContext = {} as monaco.languages.CompletionContext;
-      const mockToken = {} as monaco.CancellationToken;
+      const mockToken = new monaco.CancellationTokenSource().token;
 
       await suggestionProvider.provideCompletionItems(
         mockModel,
