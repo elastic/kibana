@@ -20,20 +20,20 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import { useKibana } from '../../../common/lib/kibana';
-import { CasesPageBody } from '../../app/cases_page_body';
-import { Connectors } from '../../configure_cases/connectors';
-import * as configureCasesI18n from '../../configure_cases/translations';
-import { useConfigureCasesController } from '../../configure_cases/use_configure_cases_controller';
-import { useCasesContext } from '../../cases_context/use_cases_context';
-import { useCasesBreadcrumbs } from '../../use_breadcrumbs';
-import { CasesDeepLinkId } from '../../../common/navigation';
-import { ObservableTypes } from '../../observable_types';
+import { useKibana } from '../../common/lib/kibana';
+import { CasesPageBody } from '../app/cases_page_body';
+import { Connectors } from './connectors';
+import * as configureCasesI18n from './translations';
+import { useConfigureCasesController } from './use_configure_cases_controller';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import { useCasesBreadcrumbs } from '../use_breadcrumbs';
+import { CasesDeepLinkId } from '../../common/navigation';
+import { ObservableTypes } from '../observable_types';
 import { AutomaticClosureSwitch } from './automatic_closure_switch';
 import { SettingsSection } from './settings_section';
 import { ConfigureCasesAppHeader } from './configure_cases_app_header';
 import { OldCustomFieldsAndTemplatesSection } from './old_custom_fields_and_templates_section';
-import * as observableTypesI18n from '../../observable_types/translations';
+import * as observableTypesI18n from '../observable_types/translations';
 
 const contentWrapperCss = css`
   box-sizing: content-box;

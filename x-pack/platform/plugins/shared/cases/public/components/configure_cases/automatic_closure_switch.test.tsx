@@ -11,8 +11,8 @@ import { screen } from '@testing-library/react';
 
 import type { AutomaticClosureSwitchProps } from './automatic_closure_switch';
 import { AutomaticClosureSwitch } from './automatic_closure_switch';
-import { renderWithTestingProviders } from '../../../common/mock';
-import * as i18n from '../../configure_cases/translations';
+import { renderWithTestingProviders } from '../../common/mock';
+import * as i18n from './translations';
 
 describe('AutomaticClosureSwitch', () => {
   const onChangeClosureType = jest.fn();
