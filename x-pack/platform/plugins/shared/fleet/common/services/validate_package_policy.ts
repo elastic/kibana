@@ -161,7 +161,7 @@ const validateCondition = (
   if (!conditionValidator) return null;
   // Handlebars can parse text values like 'true'/'false' as booleans; coerce to string.
   const normalized =
-    typeof (expr as unknown) === 'boolean' ? String(expr as unknown) : (expr ?? undefined);
+    typeof (expr as unknown) === 'boolean' ? String(expr as unknown) : expr ?? undefined;
   const errors = conditionValidator(normalized);
   if (!errors.length) return null;
   return errors.map(({ line, column, message }) =>
