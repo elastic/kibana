@@ -124,12 +124,75 @@ describe('flattenForkCommands', () => {
       ).toBe('FROM index | STATS a = COUNT(*)');
     });
 
-    it('leaves unknown commands referencing _fork untouched', () => {
+    it('drops an EVAL assignment referencing the _fork discriminator', () => {
       expect(
         flatten('FROM index | FORK (STATS a = COUNT(*)) (STATS b = COUNT(*)) | EVAL x = _fork', [
           'a',
         ])
-      ).toBe('FROM index | STATS a = COUNT(*) | EVAL x = _fork');
+      ).toBe('FROM index | STATS a = COUNT(*)');
+    });
+  });
+
+  describe('out-of-scope column cleanup', () => {
+    it('cascades: dropping an EVAL referencing a discarded-branch column removes its result from later KEEP', () => {
+      expect(
+        flatten(
+          'FROM index | FORK (STATS a = COUNT(*)) (STATS b = COUNT(*)) | EVAL diff = a - b | KEEP a, b, diff',
+          ['a']
+        )
+      ).toBe('FROM index | STATS a = COUNT(*) | KEEP a');
+    });
+
+    it('keeps EVAL assignments whose references are all in scope', () => {
+      expect(
+        flatten(
+          'FROM index | FORK (STATS a = COUNT(*)) (STATS b = COUNT(*)) | EVAL x = a + 1, y = b + 1',
+          ['a']
+        )
+      ).toBe('FROM index | STATS a = COUNT(*) | EVAL x = a + 1');
+    });
+
+    it('drops a SORT entry referencing a discarded-branch column', () => {
+      expect(
+        flatten('FROM index | FORK (STATS a = COUNT(*)) (STATS b = COUNT(*)) | SORT b DESC, a', [
+          'a',
+        ])
+      ).toBe('FROM index | STATS a = COUNT(*) | SORT a');
+    });
+
+    it('prunes a WHERE conjunct referencing a discarded-branch column', () => {
+      expect(
+        flatten(
+          'FROM index | FORK (STATS a = COUNT(*)) (STATS b = COUNT(*)) | WHERE a > 100 AND b > 0',
+          ['a']
+        )
+      ).toBe('FROM index | STATS a = COUNT(*) | WHERE a > 100');
+    });
+
+    it('drops a RENAME pair whose source is a discarded-branch column', () => {
+      expect(
+        flatten(
+          'FROM index | FORK (STATS a = COUNT(*)) (STATS b = COUNT(*)) | RENAME b AS other, a AS total',
+          ['a']
+        )
+      ).toBe('FROM index | STATS a = COUNT(*) | RENAME a AS total');
+    });
+
+    it('stops strict pruning after an unknown command that may introduce columns', () => {
+      expect(
+        flatten(
+          'FROM index | FORK (STATS a = COUNT(*) BY message) (STATS b = COUNT(*)) | DISSECT message "%{x}" | KEEP a, x',
+          ['a']
+        )
+      ).toBe('FROM index | STATS a = COUNT(*) BY message | DISSECT message "%{x}" | KEEP a, x');
+    });
+
+    it('does not prune references to source fields when no branch has STATS (open scope)', () => {
+      expect(
+        flatten('FROM index | FORK (WHERE bytes > 0) (WHERE bytes < 0) | EVAL kb = bytes / 1024', [
+          'bytes',
+        ])
+      ).toBe('FROM index | WHERE bytes > 0 | EVAL kb = bytes / 1024');
     });
   });
 });

@@ -237,6 +237,19 @@ export const buildTrendlineQueryCases = ({ index }: { index: string }): Trendlin
       expectedUnavailableMetricFields: [],
     },
     {
+      // post-FORK commands may reference columns that only exist in a discarded
+      // branch (here `m`); flattening must prune those references, otherwise the
+      // generated trendline query fails at ES with `Unknown column [m]`
+      description:
+        'FORK query with post-FORK RENAME/EVAL/KEEP referencing discarded-branch columns',
+      sourceQuery: `FROM ${index} | FORK (STATS a = AVG(bytes)) (STATS m = MEDIAN(bytes)) | RENAME a AS avg_b | EVAL diff = avg_b - m | KEEP avg_b, m, diff, _fork`,
+      expectedQuery: `FROM ${index} | STATS a = AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend) | RENAME a AS avg_b | KEEP avg_b, \`BUCKET(@timestamp, 75, ?_tstart, ?_tend)\``,
+      expectedTimeField: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+      expectedMetricFields: ['avg_b'],
+      metricFields: ['avg_b', 'diff'],
+      expectedUnavailableMetricFields: ['diff'],
+    },
+    {
       description: 'FORK query without metric fields falls back to the first STATS branch',
       // the WHERE branch projects to KEEP bytes: counter-typed fields in the TSDB
       // index otherwise conflict across FORK branch schemas (ES rejects the query)

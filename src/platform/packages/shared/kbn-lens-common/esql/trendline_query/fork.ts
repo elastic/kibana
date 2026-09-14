@@ -129,29 +129,49 @@ const selectForkBranch = (
   return branches.find((branch) => branch.some((c) => c.name === 'stats')) ?? branches[0];
 };
 
-/** Returns true when any expression in the node references `_fork`. */
-const referencesForkDiscriminator = (node: ESQLProperNode): boolean => {
-  let found = false;
+/**
+ * Column scope at a point in the pipeline. A Set enumerates the columns known
+ * to be available; `null` means the scope is open (source fields without a
+ * STATS, or after a command we cannot model) and cannot be enumerated.
+ */
+type ColumnScope = Set<string> | null;
+
+/** Returns the names of all columns referenced anywhere in the node. */
+const collectColumnRefs = (node: ESQLProperNode): string[] => {
+  const names: string[] = [];
   Walker.walk(node, {
     visitColumn: (column) => {
-      if (column.name === FORK_DISCRIMINATOR_COLUMN) found = true;
+      names.push(column.name);
     },
   });
-  return found;
+  return names;
 };
 
 /**
- * Removes `_fork` sub-predicates from a WHERE expression. Conjuncts (AND)
- * referencing `_fork` are dropped while the remaining side is kept; any other
- * expression referencing `_fork` (comparison, OR, NOT, ...) cannot be pruned
- * without changing semantics, so `undefined` is returned to drop it entirely.
+ * Returns true when every column the node references is available. The
+ * synthetic `_fork` discriminator never counts as available after flattening;
+ * in an open scope all other references are assumed valid.
  */
-const pruneForkPredicate = (node: ESQLSingleAstItem): ESQLSingleAstItem | undefined => {
-  if (!referencesForkDiscriminator(node)) return node;
+const refsAreInScope = (node: ESQLProperNode, scope: ColumnScope): boolean =>
+  collectColumnRefs(node).every(
+    (name) => name !== FORK_DISCRIMINATOR_COLUMN && (scope === null || scope.has(name))
+  );
+
+/**
+ * Removes out-of-scope sub-predicates from a WHERE expression. Conjuncts (AND)
+ * with out-of-scope references are dropped while the remaining side is kept;
+ * any other out-of-scope expression (comparison, OR, NOT, ...) cannot be
+ * pruned without changing semantics, so `undefined` is returned to drop it.
+ */
+const prunePredicate = (
+  node: ESQLSingleAstItem,
+  scope: ColumnScope
+): ESQLSingleAstItem | undefined => {
+  if (refsAreInScope(node, scope)) return node;
   if (isFunctionExpression(node) && node.name === 'and') {
     const [left, right] = node.args;
-    const prunedLeft = Array.isArray(left) ? undefined : pruneForkPredicate(left);
-    const prunedRight = Array.isArray(right) ? undefined : pruneForkPredicate(right);
+    const prunedLeft = Array.isArray(left) ? undefined : prunePredicate(left, scope);
+    const prunedRight = Array.isArray(right) ? undefined : prunePredicate(right, scope);
     if (prunedLeft && prunedRight) {
       node.args = [prunedLeft, prunedRight];
       return node;
@@ -161,66 +181,171 @@ const pruneForkPredicate = (node: ESQLSingleAstItem): ESQLSingleAstItem | undefi
   return undefined;
 };
 
+/** RENAME pair as `old AS new` or `new = old`; returns undefined for other shapes. */
+const getRenamePair = (
+  arg: ESQLCommand['args'][number]
+): { source: string; target: string } | undefined => {
+  if (Array.isArray(arg) || !isFunctionExpression(arg)) return undefined;
+  const [first, second] = arg.args;
+  if (Array.isArray(first) || Array.isArray(second) || !isColumn(first) || !isColumn(second)) {
+    return undefined;
+  }
+  return arg.name === 'as'
+    ? { source: first.name, target: second.name }
+    : { source: second.name, target: first.name };
+};
+
+/** Applies a command's effect on the column scope without mutating the command. */
+const transferScope = (command: ESQLCommand, scope: ColumnScope): ColumnScope => {
+  switch (command.name) {
+    case 'stats':
+      return new Set(getStatsOutputColumns(command));
+    case 'keep': {
+      const kept = command.args.filter(isColumn).map((column) => column.name);
+      // wildcard patterns cannot be enumerated → open scope
+      return kept.some((name) => name.includes('*')) ? null : new Set(kept);
+    }
+    case 'drop': {
+      if (scope === null) return null;
+      const next = new Set(scope);
+      for (const arg of command.args) {
+        if (isColumn(arg)) next.delete(arg.name);
+      }
+      return next;
+    }
+    case 'rename': {
+      if (scope === null) return null;
+      const next = new Set(scope);
+      for (const arg of command.args) {
+        const pair = getRenamePair(arg);
+        if (!pair) continue;
+        next.delete(pair.source);
+        next.add(pair.target);
+      }
+      return next;
+    }
+    case 'eval': {
+      if (scope === null) return null;
+      const next = new Set(scope);
+      for (const arg of command.args) {
+        const resultColumn = getExpressionResultColumn(arg);
+        if (resultColumn !== undefined) next.add(resultColumn);
+      }
+      return next;
+    }
+    // commands that neither add nor remove columns
+    case 'where':
+    case 'sort':
+    case 'limit':
+    case 'mv_expand':
+      return scope;
+    default:
+      // unknown commands may introduce columns (DISSECT, GROK, ENRICH, ...);
+      // fall back to an open scope so later references are not falsely pruned
+      return null;
+  }
+};
+
+/** Computes the column scope after the given commands, starting open. */
+const computeScope = (commands: ESQLCommand[]): ColumnScope =>
+  commands.reduce<ColumnScope>((scope, command) => transferScope(command, scope), null);
+
 /**
- * Removes references to the synthetic `_fork` column from commands following
- * an inlined FORK branch; after flattening the column no longer exists.
+ * Removes references to columns that are no longer available after an inlined
+ * FORK branch: the synthetic `_fork` discriminator and any column produced
+ * only by a discarded branch. Walks forward, updating the scope per command:
  *
- * - WHERE `_fork` sub-predicates under AND are pruned; predicates where the
- *   `_fork` reference cannot be isolated (e.g. under OR) drop the whole WHERE
- * - KEEP / DROP / SORT entries naming `_fork` are removed; commands left with
- *   no arguments are dropped
- * - RENAME pairs involving `_fork` are removed; empty RENAMEs are dropped
- * - other commands are left untouched
+ * - WHERE out-of-scope sub-predicates under AND are pruned; predicates where
+ *   the reference cannot be isolated (e.g. under OR) drop the whole WHERE
+ * - KEEP / DROP / SORT entries referencing out-of-scope columns are removed;
+ *   commands left with no arguments are dropped
+ * - RENAME pairs with an out-of-scope source are removed; empty RENAMEs drop
+ * - EVAL assignments referencing out-of-scope columns are removed, so their
+ *   result columns never enter the scope (cascading to later references)
+ * - unknown commands are left untouched and open the scope (no pruning after)
  */
-const removeForkDiscriminatorReferences = (commands: ESQLCommand[], fromIndex: number): void => {
+const removeOutOfScopeReferences = (
+  commands: ESQLCommand[],
+  fromIndex: number,
+  initialScope: ColumnScope
+): void => {
   // Caveat: a `WHERE _fork == "forkN"` conjunct is dropped even when it pinned
   // a different branch than the metric-driven selection; the metric column's
   // lineage wins over the user's discriminator filter for trendline purposes.
-  for (let i = commands.length - 1; i >= fromIndex; i--) {
+  let scope = initialScope;
+  for (let i = fromIndex; i < commands.length; i++) {
     const command = commands[i];
-    if (!referencesForkDiscriminator(command)) continue;
+    let removeCommand = false;
 
     switch (command.name) {
       case 'where': {
         const [predicate] = command.args;
         const pruned = Array.isArray(predicate)
           ? undefined
-          : pruneForkPredicate(predicate as ESQLSingleAstItem);
+          : prunePredicate(predicate as ESQLSingleAstItem, scope);
         if (pruned) {
           command.args = [pruned];
         } else {
-          commands.splice(i, 1);
+          removeCommand = true;
         }
         break;
       }
       case 'keep':
       case 'drop':
-      case 'sort':
+      case 'sort': {
+        const currentScope = scope;
         // SORT entries with a direction or nulls modifier (e.g. `_fork DESC`)
         // are order nodes wrapping the column, not bare columns
         command.args = command.args.filter((arg) => {
-          const column =
-            !Array.isArray(arg) && arg.type === 'order' && isColumn(arg.args[0])
-              ? arg.args[0]
-              : arg;
-          return !(isColumn(column) && column.name === FORK_DISCRIMINATOR_COLUMN);
+          const node = !Array.isArray(arg) && arg.type === 'order' ? arg.args[0] : arg;
+          if (Array.isArray(node)) return true;
+          // wildcard KEEP/DROP patterns are kept as-is
+          if (isColumn(node) && node.name.includes('*')) return true;
+          return refsAreInScope(node, currentScope);
         });
-        if (command.args.length === 0) commands.splice(i, 1);
+        if (command.args.length === 0) removeCommand = true;
         break;
-      case 'rename':
+      }
+      case 'rename': {
+        const currentScope = scope;
         command.args = command.args.filter((arg) => {
-          if (Array.isArray(arg) || !isFunctionExpression(arg)) return true;
-          return !arg.args.some(
-            (side) =>
-              !Array.isArray(side) && isColumn(side) && side.name === FORK_DISCRIMINATOR_COLUMN
+          const pair = getRenamePair(arg);
+          if (!pair) return true;
+          return (
+            pair.source !== FORK_DISCRIMINATOR_COLUMN &&
+            pair.target !== FORK_DISCRIMINATOR_COLUMN &&
+            (currentScope === null || currentScope.has(pair.source))
           );
         });
-        if (command.args.length === 0) commands.splice(i, 1);
+        if (command.args.length === 0) removeCommand = true;
         break;
+      }
+      case 'eval': {
+        const currentScope = scope;
+        // for assignments (`x = expr`) only the right-hand side must be in
+        // scope; the assignment target is the column being introduced
+        command.args = command.args.filter((arg) => {
+          if (Array.isArray(arg)) return true;
+          const nodesToCheck =
+            isAssignment(arg) && isColumn(arg.args[0]) ? arg.args.slice(1) : [arg];
+          return nodesToCheck
+            .flat()
+            .every((node) => Array.isArray(node) || refsAreInScope(node, currentScope));
+        });
+        if (command.args.length === 0) removeCommand = true;
+        break;
+      }
       default:
-        // conservative: leave unknown command shapes untouched
+        // conservative: leave other command shapes untouched
         break;
     }
+
+    if (removeCommand) {
+      commands.splice(i, 1);
+      i--;
+      continue;
+    }
+    scope = transferScope(command, scope);
   }
 };
 
@@ -241,7 +366,12 @@ export const flattenForkCommands = (commands: ESQLCommand[], metricFields?: stri
     if (commands[i].name !== 'fork') continue;
     const branch = selectForkBranch(getForkBranches(commands[i]), metricFields) ?? [];
     commands.splice(i, 1, ...branch);
-    removeForkDiscriminatorReferences(commands, i + branch.length);
+    const afterBranchIndex = i + branch.length;
+    removeOutOfScopeReferences(
+      commands,
+      afterBranchIndex,
+      computeScope(commands.slice(0, afterBranchIndex))
+    );
     i--; // re-check current index: inlined branch may itself start with FORK
   }
 };
