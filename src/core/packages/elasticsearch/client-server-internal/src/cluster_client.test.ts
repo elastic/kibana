@@ -891,7 +891,7 @@ describe('ClusterClient', () => {
       const config = createConfig({
         requestHeadersWhitelist: ['authorization'],
       });
-      authHeaders.get.mockReturnValue({ [AUTHORIZATION_HEADER]: 'ApiKey essu_dev_yes' });
+      authHeaders.get.mockReturnValue({ [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes' });
 
       const clusterClient = new ClusterClient({
         config,
@@ -916,7 +916,7 @@ describe('ClusterClient', () => {
         expect.objectContaining({
           headers: {
             ...defaultHeaders,
-            [AUTHORIZATION_HEADER]: 'ApiKey essu_dev_yes',
+            [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes',
             'x-opaque-id': expect.any(String),
           },
         })
@@ -974,7 +974,7 @@ describe('ClusterClient', () => {
 
     it('does not specify client authentication for UIAM credentials in real requests with an attestation bound to another credential', () => {
       const config = createConfig({ requestHeadersWhitelist: ['authorization'] });
-      authHeaders.get.mockReturnValue({ [AUTHORIZATION_HEADER]: 'ApiKey essu_dev_yes' });
+      authHeaders.get.mockReturnValue({ [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes' });
 
       const clusterClient = new ClusterClient({
         config,
@@ -993,7 +993,7 @@ describe('ClusterClient', () => {
           // here must not authorize the shared secret.
           [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
             'some-shared-secret',
-            new HTTPAuthorizationHeader('ApiKey', 'essu_dev_other')
+            new HTTPAuthorizationHeader('Bearer', 'essu_dev_other')
           ),
         },
       });
@@ -1010,7 +1010,7 @@ describe('ClusterClient', () => {
 
     it('does not specify client authentication for UIAM credentials in real requests with an invalid attestation', () => {
       const config = createConfig({ requestHeadersWhitelist: ['authorization'] });
-      authHeaders.get.mockReturnValue({ [AUTHORIZATION_HEADER]: 'ApiKey essu_dev_yes' });
+      authHeaders.get.mockReturnValue({ [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes' });
 
       const clusterClient = new ClusterClient({
         config,
