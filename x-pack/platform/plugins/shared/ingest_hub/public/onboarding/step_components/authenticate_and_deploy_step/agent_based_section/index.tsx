@@ -177,9 +177,10 @@ export function AgentBasedSection({
   );
   const [isPolicyNameLoading, setIsPolicyNameLoading] = useState(!persistedAgentPolicyName);
 
-  // Seed the name async on mount when no persisted name exists.
+  // Seed the name async on mount when no persisted name exists, or when the persisted name
+  // is stale (policy was created in a previous session but agentPolicyId was cleared).
   useEffect(() => {
-    if (persistedAgentPolicyName) return;
+    if (persistedAgentPolicyName && agentPolicyId) return;
     let cancelled = false;
     buildAgentPolicyName().then((name) => {
       if (!cancelled) {
