@@ -296,6 +296,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       totalFlaky: 1,
       totalConsistentlyFailing: 0,
       flakyByFramework: { jest: 1 },
+      flakyByBranch: { main: 1 },
     });
     // the excluded classification never reaches the per-branch check either
     expect(fetchBranchCounts).toHaveBeenCalledWith(es, expect.anything(), [
@@ -441,6 +442,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       totalFlaky: 1,
       totalConsistentlyFailing: 1,
       flakyByFramework: { jest: 1 },
+      flakyByBranch: { main: 1 },
     });
 
     // maxTests = 1 keeps only the highest ranked flaky test
@@ -702,8 +704,9 @@ describe('ScoutFlakyTests.writeToFile / fromFile', () => {
 
     // reports written before `scope.classifications` existed default to both lists
     expect(report.scope.classifications).toEqual(['flaky', 'consistently-failing']);
-    // likewise for the last-run threshold and the per-file breakdown
+    // likewise for the last-run threshold, the per-branch counts and the per-file breakdown
     expect(report.thresholds.lastRunWithinHours).toBe(24);
+    expect(report.summary.flakyByBranch).toEqual({});
     expect(report.files).toEqual([]);
 
     const outputPath = path.join(tmpDir, 'nested', 'report.json');
