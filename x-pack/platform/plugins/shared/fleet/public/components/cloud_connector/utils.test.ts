@@ -27,6 +27,7 @@ import {
   getAwsStackConsoleUrl,
   hasTemplateUrlParam,
   isSameTemplateSet,
+  isStackArnInvalid,
 } from './utils';
 import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from './constants';
 import type { CloudConnectorCredentials } from './types';
@@ -1149,5 +1150,28 @@ describe('IaC launch URL helpers', () => {
 
   it('hasTemplateUrlParam returns false for undefined', () => {
     expect(hasTemplateUrlParam(undefined)).toBe(false);
+  });
+});
+
+describe('isStackArnInvalid', () => {
+  const STACK_ARN = 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid';
+
+  it('returns false for an empty or undefined value', () => {
+    expect(isStackArnInvalid(undefined)).toBe(false);
+    expect(isStackArnInvalid('')).toBe(false);
+    expect(isStackArnInvalid('   ')).toBe(false);
+  });
+
+  it('returns false for a valid stack ARN', () => {
+    expect(isStackArnInvalid(STACK_ARN)).toBe(false);
+  });
+
+  it('returns true for a value whose region cannot be parsed', () => {
+    expect(isStackArnInvalid('not-an-arn')).toBe(true);
+    expect(isStackArnInvalid('arn:aws:cloudformation::123456789012:stack/x/y')).toBe(true);
+  });
+
+  it('ignores leading and trailing whitespace around a valid ARN', () => {
+    expect(isStackArnInvalid(`  ${STACK_ARN}\n`)).toBe(false);
   });
 });

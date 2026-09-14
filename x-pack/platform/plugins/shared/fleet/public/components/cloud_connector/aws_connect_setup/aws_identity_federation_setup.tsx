@@ -19,13 +19,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import type { CloudSetupForCloudConnector } from '../types';
 
 import type { AccountType } from '../../../types';
 import { useIacProvisioner } from '../../../hooks';
-import { parseAwsRegionFromArn } from '../../../../common/services/cloud_connectors';
 import type { RenderIacTemplateIntegration } from '../../../../common/types/rest_spec/iac_provisioner';
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
 import { useCloudConnectorTemplate } from '../hooks/use_cloud_connector_template';
@@ -34,12 +32,9 @@ import { CloudConnectorSelector } from '../form/cloud_connector_selector';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
 import { CloudFormationCloudCredentialsGuide } from '../aws_cloud_connector/aws_cloud_formation_guide';
 import { IacKeyCheck, type IacKeyCheckProps } from '../components/iac_key_check';
-import {
-  getCloudConnectorNameError,
-  INVALID_STACK_ARN_MESSAGE,
-  STACK_ARN_HELP_TEXT,
-  STACK_ARN_LABEL,
-} from '../utils';
+import { LaunchCloudFormationButton } from '../components/launch_cloud_formation_button';
+import { StackArnField } from '../components/stack_arn_field';
+import { getCloudConnectorNameError, isStackArnInvalid } from '../utils';
 import { TABS } from '../constants';
 import { useCreateCloudConnector } from '../hooks/use_create_cloud_connector';
 
@@ -105,8 +100,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   const [isCheckValid, setIsCheckValid] = useState(initialCheckValidity);
   // Validate what Create will post: a pasted ARN often carries surrounding whitespace.
   const trimmedStackArn = stackArn.trim();
-  const stackArnInvalid =
-    trimmedStackArn !== '' && parseAwsRegionFromArn(trimmedStackArn) === undefined;
+  const stackArnInvalid = isStackArnInvalid(stackArn);
 
   const hasSetInitialTab = useRef(false);
   useEffect(() => {
@@ -254,50 +248,24 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
             <CloudFormationCloudCredentialsGuide accountType={accountType} />
           </EuiAccordion>
           <EuiSpacer size="l" />
-          <EuiButton
-            iconSide="left"
-            iconType="rocket"
+          <LaunchCloudFormationButton
+            launchButtonProps={launchButtonProps}
             isLoading={isGeneratingTemplate}
             // With the provisioner on the hook never disables the button, but a live render still
             // needs the console URL that only `cloud` provides, so keep the old guard.
             isDisabled={isLaunchDisabled || !cloud}
+            templateGenerationError={templateGenerationError}
             data-test-subj="awsIdentityFederationSetup-launchCloudFormation"
-            {...launchButtonProps}
-          >
-            <FormattedMessage
-              id="xpack.fleet.awsIdentityFederationSetup.launchCloudFormation"
-              defaultMessage="Launch CloudFormation"
-            />
-          </EuiButton>
-          {templateGenerationError && (
-            <>
-              <EuiSpacer size="m" />
-              <KbnDangerCallout
-                announceOnMount
-                size="s"
-                title={templateGenerationError}
-                data-test-subj="awsIdentityFederationSetup-templateError"
-              />
-            </>
-          )}
+            errorCalloutTestSubj="awsIdentityFederationSetup-templateError"
+          />
           {isIacProvisionerEnabled && (
             <>
               <EuiSpacer size="m" />
-              <EuiFormRow
-                fullWidth
-                label={STACK_ARN_LABEL}
-                helpText={STACK_ARN_HELP_TEXT}
-                isInvalid={stackArnInvalid}
-                error={stackArnInvalid ? INVALID_STACK_ARN_MESSAGE : undefined}
-              >
-                <EuiFieldText
-                  fullWidth
-                  value={stackArn}
-                  isInvalid={stackArnInvalid}
-                  onChange={(e) => setStackArn(e.target.value)}
-                  data-test-subj="awsIdentityFederationSetup-stackArn"
-                />
-              </EuiFormRow>
+              <StackArnField
+                value={stackArn}
+                onChange={setStackArn}
+                data-test-subj="awsIdentityFederationSetup-stackArn"
+              />
             </>
           )}
           <EuiSpacer size="m" />

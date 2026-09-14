@@ -656,6 +656,12 @@ export const INVALID_STACK_ARN_MESSAGE = i18n.translate(
   }
 );
 
+/** True for a non-empty stack ARN whose region cannot be parsed; whitespace is ignored so a pasted value is judged as it will be saved. */
+export const isStackArnInvalid = (stackArn: string | undefined): boolean => {
+  const trimmed = stackArn?.trim() ?? '';
+  return trimmed !== '' && parseAwsRegionFromArn(trimmed) === undefined;
+};
+
 /** Read-only link to the deployed stack; needs no render. */
 export const getAwsStackConsoleUrl = (deploymentId: string | undefined): string | undefined => {
   const region = parseAwsRegionFromArn(deploymentId);
