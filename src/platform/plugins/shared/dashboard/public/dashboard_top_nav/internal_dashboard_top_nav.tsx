@@ -8,7 +8,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import UseUnmount from 'react-use/lib/useUnmount';
 
 import type { EuiBreadcrumb, UseEuiTheme } from '@elastic/eui';
@@ -394,10 +394,6 @@ export function InternalDashboardTopNav({
     [viewMode, prettifyAction]
   );
 
-  const handleCancel = useCallback(() => {
-    dashboardApi.cancelAllRequests();
-  }, [dashboardApi]);
-
   const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
     redirectTo,
     showResetChange,
@@ -542,7 +538,7 @@ export function InternalDashboardTopNav({
             hasUnpublishedFilters || hasUnpublishedTimeslice || hasUnpublishedVariables
           }
           isLoading={dataLoading ?? false}
-          onCancel={canCancel ? handleCancel : undefined}
+          onCancel={canCancel ? dashboardApi.cancelAllRequests : undefined}
           useBackgroundSearchButton={
             dataService.search.isBackgroundSearchEnabled &&
             getDashboardCapabilities().storeSearchSession
