@@ -23,7 +23,15 @@ export const assignSessionDataViewIds = (
   localTabs: TabState[],
   navigation?: { tabId: string | undefined; dataViewSpec: DataViewSpec | undefined }
 ) => {
-  // An inline API spec describes the view itself, not a saved reference, so its runtime ID stays local.
+  // Inline Data Views are defined by their content, so the API leaves out runtime IDs.
+  // Reconcile them with local tabs and the incoming link: reuse IDs when definitions match,
+  // otherwise create one. Update filter references too, without copying local edits.
+  //
+  // Notes:
+  // - Deterministic IDs (like Lens) need consistent save/load logic and support for existing IDs.
+  //   That's a separate change.
+  // - Fresh UUIDs on every load are simpler, but can cause false "Unsaved changes"
+  //   after a refresh or when opening a shared link.
   const needsInlineIds = session.tabs.some((tab) => {
     const dataView = getInlineDataView(tab.serializedSearchSource);
     return dataView !== undefined && dataView.id === undefined;
