@@ -10,3 +10,5 @@ export const CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID =
 
 export const CONTEXT_ENGINE_RUN_AUTOMATION_TOOL_ID =
   'platform.context_engine.run_automation' as const;
+
+export const CONTEXT_ENGINE_REMEMBER_TOOL_ID = 'platform.context_engine.remember' as const;
