@@ -8,6 +8,7 @@
  */
 
 import { execSync } from 'child_process';
+import path from 'path';
 import { stringify } from 'yaml';
 
 import { FALLBACK_SLACK_CHANNEL, getChannelForStepLabel } from './failed_suite_channels.ts';
@@ -15,6 +16,8 @@ import { BuildkiteClient } from '#pipeline-utils';
 import type { Job } from '#pipeline-utils';
 
 const NOTIFY_STEP_KEY = 'notify_owning_teams';
+/** Slack truncates a message block at 3000 chars, and a fully red build can fail dozens of jobs. */
+const MAX_LISTED_JOBS = 20;
 /** Set after a successful pipeline upload so a retried notify step cannot double-post. */
 export const SLACK_NOTIFY_UPLOADED_META_KEY = 'security_solution_on_merge:slack_notify_uploaded';
 const DRY_RUN = !!process.env.DRY_RUN?.match(/(1|true)/i);
@@ -84,10 +87,16 @@ export function composeChannelMessage(
     }
   }
 
-  const lines = [...unique.entries()].map(([displayName, { job, count }]) => {
+  const entries = [...unique.entries()];
+  const lines = entries.slice(0, MAX_LISTED_JOBS).map(([displayName, { job, count }]) => {
     const suffix = count > 1 ? ` (${count} failed jobs)` : '';
     return `• <${job.webUrl}|[job]> ${displayName}${suffix}`;
   });
+
+  const omitted = entries.length - lines.length;
+  if (omitted > 0) {
+    lines.push(`• …and ${omitted} more failed step${omitted > 1 ? 's' : ''}`);
+  }
 
   return [
     ':alert: *kibana-security-solution-on-merge* failed',
@@ -133,6 +142,11 @@ export function buildNotifyPipelineYaml(
     key: stepKeyFor(channel),
     command: 'true',
     timeout_in_minutes: 10,
+    // The repo pre-command hook otherwise runs node setup + `npm ci` on a step that
+    // only needs to exit 0; a flake there would fail the step and drop the message.
+    env: {
+      SKIP_NODE_SETUP: 'true',
+    },
     // Non-preemptible: these steps only run `true` + notify.slack, and Slack is
     // gated on step.outcome == passed. Preemption would drop the message.
     agents: {
@@ -284,7 +298,7 @@ export async function notifyFailedSuites(
   }
 }
 
-if (require.main === module) {
+if (path.basename(process.argv[1] ?? '') === 'notify_failed_suites.ts') {
   notifyFailedSuites().catch((error) => {
     console.error(error);
     process.exit(1);

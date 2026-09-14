@@ -500,7 +500,7 @@ steps:
   # No automatic retry: a retry after a successful pipeline upload would fan out
   # duplicate Slack messages. Idempotency is also enforced via buildkite meta-data.
   # Non-preemptible so the upload step is less likely to die mid-flight.
-  - command: ts-node .buildkite/scripts/pipelines/security_solution_on_merge/notify_failed_suites.ts
+  - command: node .buildkite/scripts/pipelines/security_solution_on_merge/notify_failed_suites.ts
     label: ':slack: Notify owning teams of Security on-merge failures'
     key: notify_owning_teams
     timeout_in_minutes: 10

@@ -145,6 +145,20 @@ describe('composeChannelMessage', () => {
       '<https://buildkite.com/elastic/kibana-security-solution-on-merge/builds/473|View build #473>'
     );
   });
+
+  it('caps the listed steps so the message stays under the Slack block limit', () => {
+    const jobs = Array.from({ length: 25 }, (_, index) => ({
+      id: `job-${index}`,
+      name: `Suite ${index} - Security Solution Cypress Tests`,
+      webUrl: `https://example.test/${index}`,
+    }));
+
+    const message = composeChannelMessage(jobs, 'https://example.test/build', 473);
+
+    expect(message).toContain('Suite 19 - Security Solution Cypress Tests');
+    expect(message).not.toContain('Suite 20 - Security Solution Cypress Tests');
+    expect(message).toContain('…and 5 more failed steps');
+  });
 });
 
 describe('composeFanOutFailureMessage', () => {
@@ -182,6 +196,7 @@ describe('buildNotifyPipelineYaml', () => {
     const parsed = parseYaml(yaml) as {
       steps: Array<{
         key?: string;
+        env?: Record<string, string>;
         agents?: { preemptible?: boolean };
         retry?: { automatic: Array<{ exit_status: string | number; limit: number }> };
         notify?: Array<{ slack: { channels: string[]; message: string } }>;
@@ -197,6 +212,7 @@ describe('buildNotifyPipelineYaml', () => {
     expect(notifySteps[0].retry).toEqual({
       automatic: [{ exit_status: -1, limit: 3 }],
     });
+    expect(notifySteps[0].env).toEqual({ SKIP_NODE_SETUP: 'true' });
     expect(notifySteps[0].notify?.[0].slack.channels).toEqual(['#security-threat-hunting']);
     expect(notifySteps[0].notify?.[0].slack.message).toBe('threat hunting failed');
     expect(notifySteps[1].notify?.[0].slack.channels).toEqual(['#security-defend-workflows']);
