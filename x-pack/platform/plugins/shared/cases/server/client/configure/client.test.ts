@@ -1644,6 +1644,7 @@ describe('client', () => {
               updated_at: null,
               updated_by: null,
               observableTypes: [],
+              extractObservables: true,
             },
           });
 
@@ -1883,6 +1884,7 @@ describe('client', () => {
           ],
           templates: [],
           observableTypes: [],
+          extractObservables: true,
           created_at: '2019-11-25T21:54:48.952Z',
           created_by: { full_name: 'elastic', email: 'test@test.com', username: 'elastic' },
           updated_at: null,
