@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { QuerySandbox } from './query_sandbox';
@@ -135,6 +135,62 @@ describe('QuerySandbox', () => {
   it('renders no ES|QL menu when the host does not inject one', () => {
     renderSandbox();
     expect(screen.queryByTestId('stubEsqlMenu')).not.toBeInTheDocument();
+  });
+
+  it('wires recommended-query submit to onQueryChange + run in the single editor', async () => {
+    const onQueryChange = jest.fn();
+    mockRuleFormServices = {
+      ...buildBaseServices(),
+      esqlEditorActionsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      esqlMenu: () => <div data-test-subj="stubEsqlMenu" />,
+      esqlEditorActionsRegister: ({
+        currentQuery,
+        submitEsqlQuery,
+      }: {
+        currentQuery?: string;
+        submitEsqlQuery?: (q: string) => void;
+      }) => (
+        <button
+          type="button"
+          data-test-subj="stubRegister"
+          data-current-query={currentQuery}
+          onClick={() => submitEsqlQuery?.('FROM logs-* | LIMIT 10')}
+        />
+      ),
+    };
+    renderSandbox({ onQueryChange });
+
+    const register = screen.getByTestId('stubRegister');
+    expect(register).toHaveAttribute('data-current-query', defaultProps.query);
+
+    fireEvent.click(register);
+    expect(onQueryChange).toHaveBeenCalledWith('FROM logs-* | LIMIT 10');
+    // The run is deferred (setTimeout) so the editor content update flushes first.
+    await waitFor(() => expect(mockRun).toHaveBeenCalledTimes(1));
+  });
+
+  it('does not mount the actions register for the split (tabbed) editor', () => {
+    mockRuleFormServices = {
+      ...buildBaseServices(),
+      esqlEditorActionsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      esqlMenu: () => <div data-test-subj="stubEsqlMenu" />,
+      esqlEditorActionsRegister: () => <div data-test-subj="stubRegister" />,
+    };
+    renderSandbox({
+      onQueryChange: jest.fn(),
+      tabProps: {
+        tabs: ['base', 'alert'],
+        activeTab: 'alert',
+        onTabChange: jest.fn(),
+        baseQuery: 'FROM logs-*',
+        alertBlock: '| WHERE count > 100',
+        recoveryBlock: '',
+        onBaseQueryChange: jest.fn(),
+        onAlertBlockChange: jest.fn(),
+        onRecoveryBlockChange: jest.fn(),
+      },
+    });
+    expect(screen.queryByTestId('stubRegister')).not.toBeInTheDocument();
   });
 
   it('renders the editor and results panels', () => {

@@ -159,7 +159,11 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
   } = useEditorHeightResize();
   const services = useRuleFormServices();
   // Injected by the host plugin (see RuleFormServices); PascalCase for JSX use.
-  const { esqlMenu: EsqlMenu, esqlEditorActionsProvider: EsqlEditorActionsProvider } = services;
+  const {
+    esqlMenu: EsqlMenu,
+    esqlEditorActionsProvider: EsqlEditorActionsProvider,
+    esqlEditorActionsRegister: EsqlEditorActionsRegister,
+  } = services;
   const isReadOnly = !onQueryChange;
   const hasTabs = Boolean(tabProps?.tabs?.length);
   const skipTimeFieldResolution = timeFieldOptionsProp !== undefined;
@@ -257,6 +261,18 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     window.addEventListener('keydown', handleKeyDown, true);
     return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [run]);
+
+  // Applies a recommended query picked from the ES|QL menu, then runs it. The run is
+  // deferred so the editor content update flushes first and `run()` reads the new query
+  // (its params ref updates on re-render) — mirroring the full editor's submit flow.
+  // Memoized so `esqlEditorActionsRegister` doesn't re-register actions on every render.
+  const handleSubmitRecommendedQuery = useCallback(
+    (nextQuery: string) => {
+      onQueryChange?.(nextQuery);
+      setTimeout(() => run(), 0);
+    },
+    [onQueryChange, run]
+  );
 
   const gridColumns: EuiDataGridColumn[] = useMemo(
     () =>
@@ -424,6 +440,14 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
           {EsqlMenu && EsqlEditorActionsProvider && (
             <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
               <EsqlEditorActionsProvider>
+                {/* Recommended queries replace the whole query, so only wire them for the
+                    single/unified editor — not the split fragment tabs. */}
+                {EsqlEditorActionsRegister && !hasTabs && !isReadOnly && (
+                  <EsqlEditorActionsRegister
+                    currentQuery={query}
+                    submitEsqlQuery={handleSubmitRecommendedQuery}
+                  />
+                )}
                 <EsqlMenu hideHistory docsFlyoutSize="s" />
               </EsqlEditorActionsProvider>
             </EuiFlexItem>

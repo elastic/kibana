@@ -46,6 +46,15 @@ export interface RuleFormServices {
   }>;
   /** Context provider the injected {@link esqlMenu} needs; injected alongside it. */
   esqlEditorActionsProvider?: React.ComponentType<{ children: React.ReactNode }>;
+  /**
+   * Registers editor actions into {@link esqlEditorActionsProvider} so the standalone
+   * {@link esqlMenu} can drive them. Accepts any subset; the sandbox wires `currentQuery` +
+   * `submitEsqlQuery` to enable recommended queries for the single/unified editor.
+   */
+  esqlEditorActionsRegister?: React.ComponentType<{
+    currentQuery?: string;
+    submitEsqlQuery?: (query: string) => void;
+  }>;
 }
 
 export type RuleFormLayout = 'page' | 'flyout';
