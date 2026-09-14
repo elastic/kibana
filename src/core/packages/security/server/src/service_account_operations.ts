@@ -82,8 +82,8 @@ export interface ServiceAccountOperationHandle {
   /**
    * Runs `fn` with a request authenticated as the workload's service account, for use with
    * `asScoped(...)` facilities. The credential is minted, replaced, and finally retired around
-   * `fn`: it is re-checked against the binding before every mint, and once `fn` settles the
-   * request can never be re-credentialed again.
+   * `fn`: the binding is verified before the first mint and re-checked before every replacement,
+   * and once `fn` settles the request can never be re-credentialed again.
    *
    * Rejects when the workload has no binding (a 404), and whenever bindings are unavailable.
    */
