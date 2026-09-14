@@ -55,7 +55,9 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
           ignore_above: BUILDER_FIELDS_IGNORE_ABOVE,
           properties: assembleBuilderFieldsMappings(BUILDER_MANIFESTS),
         },
-        // Mirrors the model version '9' mappings_addition verbatim.
+        // Mirrors the squashed model version '6' framework-fields mappings_addition verbatim.
+        // (Originally designed as a standalone model version '9' on this POC branch;
+        // see the commented block in rule_model_versions.ts for the per-version story.)
         // Kibana core validates at startup that every addition declared in
         // a model version is present verbatim in the static mappings.
         // Ref: rule-identity.md "Storage and migration"

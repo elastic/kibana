@@ -9,7 +9,9 @@
  * Maps every managed detection rule builder type id to its ownership record.
  *
  * Imported by:
- *   - Phase 4's ownership backfill (model version '9') to stamp managed rules.
+ *   - Phase 4's ownership backfill (squashed model version '6'; originally
+ *     designed as standalone model version '9' on the POC branch) to stamp
+ *     managed rules.
  *   - Each type's manifest fold in rule_model_versions.ts.
  *   - The security_detections plugin's registerBuilderType calls (Phase 8).
  *

@@ -860,8 +860,9 @@ describe('utils', () => {
 
     it('falls back to the object id when signature_id is absent from stored attributes', () => {
       // Simulates a document created before step 4.1 that has not yet been
-      // migrated. The read-time fallback should match model version 9's backfill
-      // logic (`signature_id ?? doc.id`) so no migration gap is visible to a
+      // migrated. The read-time fallback should match the framework-fields backfill
+      // logic in the squashed model version '6' (`signature_id ?? doc.id`) so no
+      // migration gap is visible to a
       // client reading such a document.
       const attrs = createRuleSoAttributes({ metadata: { name: 'pre-4.1-rule' } });
 
