@@ -33,7 +33,7 @@ const listByCategorySchema = z.object({
  * and the API can never drift.
  */
 export const listActionsByCategoryTool = (
-  getActionsService: () => Pick<ActionsService, list>
+  getActionsService: () => Pick<ActionsService, 'list'>
 ): BuiltinToolDefinition<typeof listByCategorySchema> => ({
   id: ALERTZERO_ACTIONS_LIST_BY_CATEGORY_TOOL_ID,
   type: ToolType.builtin,
