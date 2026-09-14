@@ -89,9 +89,7 @@ describe('getLocators', () => {
       throw new Error(`unexpected locator id: ${id}`);
     });
     return {
-      share: { url: { locators: { get } } } as unknown as Parameters<
-        typeof getLocators
-      >[0],
+      share: { url: { locators: { get } } } as unknown as Parameters<typeof getLocators>[0],
       rules,
       ruleDetails,
     };
