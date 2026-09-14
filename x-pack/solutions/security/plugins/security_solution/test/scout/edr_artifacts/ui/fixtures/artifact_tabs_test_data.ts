@@ -42,8 +42,6 @@ export interface ArtifactTabCase {
     selector: string;
     value: string;
   };
-  formNameInput: string;
-  formDescriptionInput: string;
 }
 
 export const getArtifactTabCase = (kind: PolicyArtifactKind): ArtifactTabCase => {
@@ -91,8 +89,6 @@ export const ARTIFACT_TAB_CASES: ArtifactTabCase[] = [
       selector: 'trustedAppsListPage-card-criteriaConditions',
       value: ` OSIS WindowsAND process.hash.*IS ${TRUSTED_APP_HASH}`,
     },
-    formNameInput: 'trustedApps-form-nameTextField',
-    formDescriptionInput: 'trustedApps-form-descriptionField',
   },
   {
     kind: 'eventFilters',
@@ -118,8 +114,6 @@ export const ARTIFACT_TAB_CASES: ArtifactTabCase[] = [
       selector: 'EventFiltersListPage-card-criteriaConditions-condition',
       value: 'AND @timestampIS 1234',
     },
-    formNameInput: 'eventFilters-form-name-input',
-    formDescriptionInput: 'eventFilters-form-description-input',
   },
   {
     kind: 'blocklists',
@@ -145,8 +139,6 @@ export const ARTIFACT_TAB_CASES: ArtifactTabCase[] = [
       selector: 'blocklistPage-card-criteriaConditions',
       value: ` OSIS WindowsAND file.hash.*is one of ${TRUSTED_APP_HASH}`,
     },
-    formNameInput: 'blocklist-form-name-input',
-    formDescriptionInput: 'blocklist-form-description-input',
   },
   {
     kind: 'hostIsolationExceptions',
@@ -172,8 +164,6 @@ export const ARTIFACT_TAB_CASES: ArtifactTabCase[] = [
       selector: 'hostIsolationExceptionsListPage-card-criteriaConditions',
       value: ' OSIS Windows, Linux, MacAND destination.ipIS 1.1.1.1',
     },
-    formNameInput: 'hostIsolationExceptions-form-name-input',
-    formDescriptionInput: 'hostIsolationExceptions-form-description-input',
   },
   {
     kind: 'trustedDevices',
@@ -199,8 +189,6 @@ export const ARTIFACT_TAB_CASES: ArtifactTabCase[] = [
       selector: 'trustedDevicesList-card-criteriaConditions',
       value: ' OSIS Windows, MacAND host.nameIS test-host',
     },
-    formNameInput: 'trustedDevices-form-nameTextField',
-    formDescriptionInput: 'trustedDevices-form-descriptionField',
   },
   {
     kind: 'endpointExceptions',
@@ -226,7 +214,5 @@ export const ARTIFACT_TAB_CASES: ArtifactTabCase[] = [
       selector: 'endpointExceptionsListPage-card-criteriaConditions-condition',
       value: 'AND agent.versionIS 1234',
     },
-    formNameInput: 'endpointExceptions-form-name-input',
-    formDescriptionInput: 'endpointExceptions-form-description-input',
   },
 ];

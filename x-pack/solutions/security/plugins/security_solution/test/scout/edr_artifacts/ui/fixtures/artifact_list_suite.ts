@@ -15,6 +15,17 @@ export const ARTIFACT_LIST_PAGE_TAGS = [
   ...tags.serverless.security.complete,
 ];
 
+/**
+ * Local only. Same reason as `ARTIFACT_TAB_POLICY_DETAILS_LOCAL_TAGS`: EE
+ * opt-in is an internal route with no MKI-safe revert. The factory uses this
+ * when the caller omits `options.tag` and `artifact.kind` is endpoint
+ * exceptions so the next list-page migration cannot fail open on cloud/MKI.
+ * Blocklists and other types keep `ARTIFACT_LIST_PAGE_TAGS`.
+ */
+export const ARTIFACT_LIST_PAGE_LOCAL_TAGS = ARTIFACT_LIST_PAGE_TAGS.filter((tag) =>
+  tag.startsWith('@local-')
+);
+
 const STATEFUL_ONLY_REASON =
   'There is no serverless role that can read artifacts without write privilege';
 
@@ -37,7 +48,13 @@ export const describeArtifactListPage = (
 
   spaceTest.describe(
     `Artifact list page — ${artifact.title}`,
-    { tag: options?.tag ?? ARTIFACT_LIST_PAGE_TAGS },
+    {
+      tag:
+        options?.tag ??
+        (artifact.kind === 'endpointExceptions'
+          ? ARTIFACT_LIST_PAGE_LOCAL_TAGS
+          : ARTIFACT_LIST_PAGE_TAGS),
+    },
     () => {
       spaceTest.beforeAll(async ({ apiServices }) => {
         if (artifact.kind === 'endpointExceptions') {
@@ -53,6 +70,8 @@ export const describeArtifactListPage = (
       spaceTest(
         `T1 analyst sees no privileges on the list page`,
         async ({ browserAuth, pageObjects }) => {
+          // T1 is Security-read with no artifact sub-privilege. If it ever
+          // gained one, waitForNoPrivileges / noPrivilegesPage would fail.
           await browserAuth.loginAsT1Analyst();
 
           await pageObjects.artifactListPage.goto(artifact.urlPath);
@@ -112,7 +131,8 @@ export const describeArtifactListPage = (
       spaceTest(
         `WRITE user can create, update, and delete`,
         async ({ browserAuth, pageObjects }) => {
-          // Create form + edit + delete; default 60s is tight after a role login.
+          // Create + edit + delete after a role login. Precautionary, not
+          // measured flake; the shorter policy-tab ALL path uses 90s.
           spaceTest.setTimeout(120_000);
 
           await browserAuth.loginAsSecurityRole('endpoint_policy_manager');
@@ -141,9 +161,9 @@ export const describeArtifactListPage = (
 
           await spaceTest.step('update name and description', async () => {
             await pageObjects.artifactListPage.openEdit(pagePrefix);
-            await pageObjects.artifactListPage.fillTextField(artifact.formNameInput, editedName);
-            await pageObjects.artifactListPage.fillTextField(
-              artifact.formDescriptionInput,
+            await pageObjects.policyArtifactsPage.fillNameAndDescription(
+              artifact.kind,
+              editedName,
               editedDescription
             );
             await pageObjects.artifactListPage.submitFlyout(pagePrefix);

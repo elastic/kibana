@@ -107,10 +107,6 @@ export class ArtifactListPage {
     await this.flyoutSubmit(pagePrefix).waitFor({ state: 'visible' });
   }
 
-  async fillTextField(testSubj: string, value: string) {
-    await this.page.testSubj.locator(testSubj).fill(value);
-  }
-
   async submitFlyout(pagePrefix: string) {
     await this.flyoutSubmit(pagePrefix).click();
   }
