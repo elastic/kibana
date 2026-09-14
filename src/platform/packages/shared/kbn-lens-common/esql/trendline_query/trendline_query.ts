@@ -69,8 +69,8 @@ const resolveAfterCommand = (
  * wrapped in `AVG()` (e.g. `STATS AVG(bytes) BY BUCKET(...)`). When no metric
  * fields are given, it falls back to `STATS COUNT(*) BY BUCKET(...)`.
  *
- * Queries with a top-level FORK are first reduced to the branch that produces
- * the metric columns (see `flattenForkCommands`) before the rewrite applies.
+ * Precondition: FORK commands must already be flattened (see
+ * `flattenForkCommands`); both public entry points apply that pre-pass.
  *
  * Because the rewrite and the time-column resolution operate on the same AST
  * in a single pass, the returned column name is correct by construction for
@@ -85,8 +85,6 @@ const rewriteTrendlineAst = (
   if (root.commands.length === 0) {
     throw new Error('Cannot append time bucket to an empty ES|QL query');
   }
-
-  flattenForkCommands(root.commands, metricFields);
 
   const bucketExpr = buildTrendlineBucketExpression(timeField);
   const tsStatsCommand = findFirstStatsAfterTs(root.commands);
@@ -168,6 +166,7 @@ export const appendTimeBucketToEsqlQuery = (
   groupByFields: string[] = []
 ): string => {
   const { root } = Parser.parse(esqlQuery);
+  flattenForkCommands(root.commands, metricFields);
   rewriteTrendlineAst(root, timeField, metricFields, groupByFields);
   return BasicPrettyPrinter.print(root);
 };
@@ -202,10 +201,6 @@ export const buildTrendlineQueryWithMetricFieldMap = (
   groupByFields: string[] = []
 ): TrendlineQueryWithMetricFieldMap => {
   const { root } = Parser.parse(esqlQuery);
-
-  if (root.commands.length === 0) {
-    throw new Error('Cannot append time bucket to an empty ES|QL query');
-  }
 
   flattenForkCommands(root.commands, metricFields);
   const sourceQueryHasStats = commandsHaveStats(root.commands);
