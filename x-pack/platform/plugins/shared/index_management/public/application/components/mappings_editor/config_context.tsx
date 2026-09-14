@@ -13,14 +13,27 @@ import type { FieldSourceNameChange } from '@kbn/index-management-shared-types';
 
 export type FieldEditDisplay = 'flyout' | 'inline';
 
-interface ContextState {
+export interface ContextState {
   indexSettings: IndexSettings;
   docLinks?: DocLinksStart;
   fieldEditDisplay?: FieldEditDisplay;
   allowMultiFields?: boolean;
   showFieldRename?: boolean;
+  sourceNameField?: {
+    label: string;
+    helpText?: string;
+    placeholder?: string;
+    requiredErrorMessage?: string;
+  };
   fieldSourceNames?: Record<string, string>;
   onFieldSourceNameChange?: (change: FieldSourceNameChange) => void;
+  allowedRootFieldTypes?: readonly string[];
+  closeCreateFieldOnOutsideClick?: boolean;
+  inlineOptionalDateFormatField?: {
+    label: string;
+    helpText?: string;
+    placeholder?: string;
+  };
 }
 
 interface Context {
@@ -32,12 +45,14 @@ const ConfigContext = createContext<Context | undefined>(undefined);
 
 interface Props {
   children: React.ReactNode;
+  initialConfig?: ContextState;
 }
 
-export const ConfigProvider = ({ children }: Props) => {
-  const [state, setState] = useState<ContextState>({
+export const ConfigProvider = ({ children, initialConfig }: Props) => {
+  const [state, setState] = useState<ContextState>(() => ({
     indexSettings: {},
-  });
+    ...initialConfig,
+  }));
 
   return (
     <ConfigContext.Provider value={{ value: state, update: setState }}>

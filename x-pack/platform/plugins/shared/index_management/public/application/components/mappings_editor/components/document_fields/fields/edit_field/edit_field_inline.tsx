@@ -17,7 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { TYPE_DEFINITION } from '../../../../constants';
 import { fieldDeserializer, fieldSerializer } from '../../../../lib';
@@ -25,7 +25,17 @@ import { useDispatch } from '../../../../mappings_state_context';
 import { useConfig } from '../../../../config_context';
 import { Form, useForm, useFormData } from '../../../../shared_imports';
 import type { Field, MainType, NormalizedField, NormalizedFields } from '../../../../types';
-import { NameParameter, RenameFieldParameter, SourceNameParameter, SubTypeParameter, TypeParameter } from '../../field_parameters';
+import {
+  applyInlineOptionalDateFormatToField,
+  InlineOptionalDateFormatParameter,
+  isInlineOptionalDateFormatMappingType,
+  readInlineOptionalDateFormatFromField,
+  NameParameter,
+  RenameFieldParameter,
+  SourceNameParameter,
+  SubTypeParameter,
+  TypeParameter,
+} from '../../field_parameters';
 import { ReferenceFieldSelects } from '../../field_parameters/reference_field_selects';
 import { SelectInferenceId } from '../../field_parameters/select_inference_id';
 import { getRequiredParametersFormForType } from '../create_field/required_parameters_forms';
@@ -70,7 +80,7 @@ export const EditFieldInline = React.memo(function EditFieldInlineComponent({
   const { isSemanticTextEnabled } = semanticTextInfo ?? {};
   const dispatch = useDispatch();
   const {
-    value: { showFieldRename, fieldSourceNames },
+    value: { showFieldRename, fieldSourceNames, inlineOptionalDateFormatField },
   } = useConfig();
   const { updateField, modal } = useUpdateField();
   const {
@@ -81,6 +91,9 @@ export const EditFieldInline = React.memo(function EditFieldInlineComponent({
   } = useFieldRenameForm();
   const fieldTypeInputRef = useRef<HTMLInputElement>(null);
   const editFieldFormRef = useRef<HTMLDivElement>(null);
+  const [inlineOptionalDateFormatText, setInlineOptionalDateFormatText] = useState(() =>
+    readInlineOptionalDateFormatFromField(field.source.format)
+  );
   const styles = useStyles();
 
   const formDefaultValue = useMemo(
@@ -138,7 +151,11 @@ export const EditFieldInline = React.memo(function EditFieldInlineComponent({
     const { isValid, data } = await form.submit();
 
     if (isValid && !clickOutside) {
-      const fieldData = stripSourceNameFromField(data);
+      const fieldData = applyInlineOptionalDateFormatToField(
+        stripSourceNameFromField(data),
+        typeof data.type === 'string' ? data.type : selectedMappingType,
+        inlineOptionalDateFormatText
+      );
       updateField({ ...field, source: fieldData });
       notifyFieldSourceNameChange(fieldIdentity, field.source.name);
 
@@ -159,6 +176,17 @@ export const EditFieldInline = React.memo(function EditFieldInlineComponent({
       submitForm(undefined, true, true);
     }
   };
+
+  const selectedMappingType = type?.[0]?.value;
+  const showInlineOptionalDateFormat =
+    inlineOptionalDateFormatField !== undefined &&
+    isInlineOptionalDateFormatMappingType(selectedMappingType);
+
+  useEffect(() => {
+    if (!showInlineOptionalDateFormat) {
+      setInlineOptionalDateFormatText('');
+    }
+  }, [showInlineOptionalDateFormat]);
 
   const renderFormFields = () => (
     <EuiFlexGroup gutterSize="s">
@@ -196,6 +224,15 @@ export const EditFieldInline = React.memo(function EditFieldInlineComponent({
           <EuiFlexItem>
             <RenameFieldParameter />
           </EuiFlexItem>
+          {showInlineOptionalDateFormat ? (
+            <EuiFlexItem>
+              <InlineOptionalDateFormatParameter
+                labels={inlineOptionalDateFormatField}
+                value={inlineOptionalDateFormatText}
+                onChange={setInlineOptionalDateFormatText}
+              />
+            </EuiFlexItem>
+          ) : null}
         </>
       ) : (
         <EuiFlexItem>

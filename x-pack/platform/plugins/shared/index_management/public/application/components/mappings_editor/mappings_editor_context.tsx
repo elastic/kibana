@@ -7,13 +7,17 @@
 
 import React from 'react';
 
+import type { ContextState } from './config_context';
 import { StateProvider } from './mappings_state_context';
 import { ConfigProvider } from './config_context';
 
-export const MappingsEditorProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+export const MappingsEditorProvider: React.FC<{
+  children?: React.ReactNode;
+  initialConfig?: ContextState;
+}> = ({ children, initialConfig }) => {
   return (
     <StateProvider>
-      <ConfigProvider>{children}</ConfigProvider>
+      <ConfigProvider initialConfig={initialConfig}>{children}</ConfigProvider>
     </StateProvider>
   );
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { MappedFieldsEditorProps as SharedMappedFieldsEditorProps } from '@kbn/index-management-shared-types';
 
@@ -22,6 +22,7 @@ import { httpService } from '../../services/http';
 import { NotificationService } from '../../services/notification';
 import { UiMetricService } from '../../services/ui_metric';
 import { MappedFieldsEditor } from './mapped_fields_editor';
+import type { ContextState } from './config_context';
 import { MappingsEditorProvider } from './mappings_editor_context';
 import type { OnUpdateHandler } from './types';
 
@@ -65,8 +66,13 @@ export const MappedFieldsEditorWithContext = React.memo(
     showFieldSearch,
     allowMultiFields,
     showFieldRename,
+    sourceNameField,
     fieldSourceNames,
     onFieldSourceNameChange,
+    autoOpenCreateFieldWhenEmpty,
+    allowedRootFieldTypes,
+    closeCreateFieldOnOutsideClick,
+    inlineOptionalDateFormatField,
   }: MappedFieldsEditorWithContextProps) => {
     const onChangeRef = useRef(onChange);
     onChangeRef.current = onChange;
@@ -113,11 +119,39 @@ export const MappedFieldsEditorWithContext = React.memo(
       });
     }, []);
 
+    const initialConfig = useMemo<ContextState>(
+      () => ({
+        indexSettings: {},
+        docLinks: core.docLinks,
+        fieldEditDisplay,
+        allowMultiFields,
+        showFieldRename,
+        sourceNameField,
+        fieldSourceNames,
+        onFieldSourceNameChange: showFieldRename ? onFieldSourceNameChange : undefined,
+        allowedRootFieldTypes,
+        closeCreateFieldOnOutsideClick,
+        inlineOptionalDateFormatField,
+      }),
+      [
+        allowMultiFields,
+        allowedRootFieldTypes,
+        closeCreateFieldOnOutsideClick,
+        core.docLinks,
+        fieldEditDisplay,
+        fieldSourceNames,
+        inlineOptionalDateFormatField,
+        onFieldSourceNameChange,
+        showFieldRename,
+        sourceNameField,
+      ]
+    );
+
     return (
       <KibanaRenderContextProvider {...core}>
         <KibanaReactContextProvider>
           <AppContextProvider value={{ ...appDependencies, overlays: core.overlays }}>
-            <MappingsEditorProvider>
+            <MappingsEditorProvider initialConfig={initialConfig}>
               <GlobalFlyoutProvider>
                 <MappedFieldsEditor
                   value={value}
@@ -129,8 +163,13 @@ export const MappedFieldsEditorWithContext = React.memo(
                   showFieldSearch={showFieldSearch}
                   allowMultiFields={allowMultiFields}
                   showFieldRename={showFieldRename}
+                  sourceNameField={sourceNameField}
                   fieldSourceNames={fieldSourceNames}
                   onFieldSourceNameChange={onFieldSourceNameChange}
+                  autoOpenCreateFieldWhenEmpty={autoOpenCreateFieldWhenEmpty}
+                  allowedRootFieldTypes={allowedRootFieldTypes}
+                  closeCreateFieldOnOutsideClick={closeCreateFieldOnOutsideClick}
+                  inlineOptionalDateFormatField={inlineOptionalDateFormatField}
                   docLinks={core.docLinks}
                 />
               </GlobalFlyoutProvider>

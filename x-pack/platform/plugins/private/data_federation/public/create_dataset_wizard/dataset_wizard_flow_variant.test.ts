@@ -14,6 +14,7 @@ import {
   DATASET_WIZARD_FLOW_VARIANT_3,
   DATASET_WIZARD_FLOW_VARIANT_3_9_6,
   DATASET_WIZARD_FLOW_VARIANT_4,
+  getDatasetWizardFormMaxWidth,
   hasDatasetWizardPreviewResultsStep,
   isDatasetWizardFlow3,
   isDatasetWizardFlow396,
@@ -21,6 +22,10 @@ import {
   parseWizardFlowVariantFromSearch,
   resolveWizardFlowVariant,
 } from './dataset_wizard_flow_variant';
+import {
+  DATASET_WIZARD_FORM_MAX_WIDTH,
+  DATASET_WIZARD_FORM_MAX_WIDTH_FLOW_3_9_6,
+} from './dataset_wizard_constants';
 
 describe('dataset_wizard_flow_variant', () => {
   it('builds create paths with flow query params', () => {
@@ -100,5 +105,17 @@ describe('dataset_wizard_flow_variant', () => {
     expect(hasDatasetWizardPreviewResultsStep(DATASET_WIZARD_FLOW_VARIANT_3_9_6)).toBe(false);
     expect(hasDatasetWizardPreviewResultsStep(DATASET_WIZARD_FLOW_VARIANT_1)).toBe(false);
     expect(hasDatasetWizardPreviewResultsStep(DATASET_WIZARD_FLOW_VARIANT_2)).toBe(false);
+  });
+
+  it('uses a wider form max width only in flow 3 9.6', () => {
+    expect(DATASET_WIZARD_FORM_MAX_WIDTH_FLOW_3_9_6).toBe(
+      Math.round(DATASET_WIZARD_FORM_MAX_WIDTH * 1.2)
+    );
+    expect(getDatasetWizardFormMaxWidth(DATASET_WIZARD_FLOW_VARIANT_3_9_6)).toBe(
+      DATASET_WIZARD_FORM_MAX_WIDTH_FLOW_3_9_6
+    );
+    expect(getDatasetWizardFormMaxWidth(DATASET_WIZARD_FLOW_VARIANT_3)).toBe(
+      DATASET_WIZARD_FORM_MAX_WIDTH
+    );
   });
 });

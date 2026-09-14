@@ -6,6 +6,7 @@
  */
 
 import {
+  DATASET_WIZARD_FLOW_396_MAPPED_FIELD_TYPES,
   getEffectiveAutomaticFieldType,
   INFERRED_FIELD_TYPE_OPTIONS,
   applyAutomaticFieldTypeOverride,
@@ -70,5 +71,20 @@ describe('inferred_field_type_options', () => {
   it('detects when a field type override is present', () => {
     expect(isAutomaticFieldTypeOverridden({}, '@timestamp')).toBe(false);
     expect(isAutomaticFieldTypeOverridden({ '@timestamp': 'keyword' }, '@timestamp')).toBe(true);
+  });
+
+  it('lists the mapping types allowed in flow 3 9.6 mapped fields', () => {
+    expect(DATASET_WIZARD_FLOW_396_MAPPED_FIELD_TYPES).toEqual([
+      'keyword',
+      'text',
+      'long',
+      'integer',
+      'double',
+      'boolean',
+      'date',
+      'date_nanos',
+      'unsigned_long',
+      'ip',
+    ]);
   });
 });

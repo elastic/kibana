@@ -17,7 +17,8 @@ import {
 } from '../../../lib';
 import { UseField } from '../../../shared_imports';
 import type { ComboBoxOption, DataType } from '../../../types';
-import { FIELD_TYPES_OPTIONS } from '../../../constants';
+import { FIELD_TYPES_OPTIONS, getFieldTypesOptionsForAllowedTypes } from '../../../constants';
+import { useConfig } from '../../../config_context';
 
 interface Props {
   isRootLevelField: boolean;
@@ -34,7 +35,15 @@ export const TypeParameter = ({
   isSemanticTextEnabled = true,
   fieldTypeInputRef,
 }: Props) => {
+  const {
+    value: { allowedRootFieldTypes },
+  } = useConfig();
+
   const fieldTypeOptions = useMemo(() => {
+    if (isRootLevelField && allowedRootFieldTypes?.length) {
+      return getFieldTypesOptionsForAllowedTypes(allowedRootFieldTypes);
+    }
+
     let options = isMultiField
       ? filterTypesForMultiField(FIELD_TYPES_OPTIONS)
       : isRootLevelField
@@ -46,7 +55,7 @@ export const TypeParameter = ({
     }
 
     return options;
-  }, [isMultiField, isRootLevelField, isSemanticTextEnabled]);
+  }, [allowedRootFieldTypes, isMultiField, isRootLevelField, isSemanticTextEnabled]);
 
   return (
     <UseField<ComboBoxOption[]> path="type" config={getFieldConfig<ComboBoxOption[]>('type')}>

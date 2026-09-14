@@ -21,3 +21,6 @@ export const FLOW_3_REVIEW_STEP = 5;
 export const DATA_SOURCE_STEP = 6;
 
 export const DATASET_WIZARD_FORM_MAX_WIDTH = 850;
+export const DATASET_WIZARD_FORM_MAX_WIDTH_FLOW_3_9_6 = Math.round(
+  DATASET_WIZARD_FORM_MAX_WIDTH * 1.2
+);

@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import {
+  DATASET_WIZARD_FORM_MAX_WIDTH,
+  DATASET_WIZARD_FORM_MAX_WIDTH_FLOW_3_9_6,
+} from './dataset_wizard_constants';
+
 export const DATASET_WIZARD_FLOW_VARIANT_SEARCH_PARAM = 'flow';
 
 /** Frozen flow — do not change wizard behavior without explicit approval. */
@@ -44,6 +49,13 @@ export const isDatasetWizardFlow3 = (flowVariant: DatasetWizardFlowVariant): boo
 /** True only for the active Flow 3 9.6 variant (`flow_3_9_6`), not classic Flow 3 or Flow 4. */
 export const isDatasetWizardFlow396 = (flowVariant: DatasetWizardFlowVariant): boolean =>
   flowVariant === DATASET_WIZARD_FLOW_VARIANT_3_9_6;
+
+export const getDatasetWizardFormMaxWidth = (
+  flowVariant: DatasetWizardFlowVariant
+): number =>
+  isDatasetWizardFlow396(flowVariant)
+    ? DATASET_WIZARD_FORM_MAX_WIDTH_FLOW_3_9_6
+    : DATASET_WIZARD_FORM_MAX_WIDTH;
 
 export const isDatasetWizardFlow4 = (flowVariant: DatasetWizardFlowVariant): boolean =>
   flowVariant === DATASET_WIZARD_FLOW_VARIANT_4;

@@ -41,9 +41,15 @@ interface Args {
     runtime: RuntimeFields;
   };
   status?: DocumentFieldsStatus;
+  autoOpenCreateFieldWhenEmpty?: boolean;
 }
 
-export const useMappingsStateListener = ({ onChange, value, status }: Args) => {
+export const useMappingsStateListener = ({
+  onChange,
+  value,
+  status,
+  autoOpenCreateFieldWhenEmpty = true,
+}: Args) => {
   const state = useMappingsState();
   const dispatch = useDispatch();
 
@@ -65,6 +71,10 @@ export const useMappingsStateListener = ({ onChange, value, status }: Args) => {
 
   const calculateStatus = (fieldStatus: string | undefined, rootLevelFields: string | any[]) => {
     if (fieldStatus) return fieldStatus;
+
+    if (!autoOpenCreateFieldWhenEmpty) {
+      return 'idle';
+    }
 
     return rootLevelFields.length === 0 ? 'creatingField' : 'idle';
   };
@@ -183,6 +193,7 @@ export const useMappingsStateListener = ({ onChange, value, status }: Args) => {
         documentFields: {
           status: calculateStatus(status, parsedFieldsDefaultValue.rootLevelFields),
           editor: 'default',
+          autoOpenCreateFieldWhenEmpty,
         },
         runtimeFields: parsedRuntimeFieldsDefaultValue,
         filter: {
@@ -203,6 +214,7 @@ export const useMappingsStateListener = ({ onChange, value, status }: Args) => {
     parsedFieldsDefaultValue,
     dispatch,
     status,
+    autoOpenCreateFieldWhenEmpty,
     parsedRuntimeFieldsDefaultValue,
     fieldTypesOptions,
   ]);

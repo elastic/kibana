@@ -31,7 +31,7 @@ export const DocumentFieldsTreeEditor = ({
   const { isInlineFieldEditEnabled } = useInlineFieldEdit();
   const {
     fields: { byId, rootLevelFields },
-    documentFields: { status, fieldToAddFieldTo },
+    documentFields: { status, fieldToAddFieldTo, autoOpenCreateFieldWhenEmpty = true },
   } = useMappingsState();
   const createFieldFormRef = useRef<HTMLDivElement>(null);
   const getField = useCallback((fieldId: string) => byId[fieldId], [byId]);
@@ -51,7 +51,7 @@ export const DocumentFieldsTreeEditor = ({
 
     return (
       <CreateField
-        isCancelable={fields.length > 0}
+        isCancelable={fields.length > 0 || !autoOpenCreateFieldWhenEmpty}
         allFields={byId}
         isRootLevelField
         onCancelAddingNewFields={onCancelAddingNewFields}

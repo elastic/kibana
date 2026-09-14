@@ -18,7 +18,7 @@ import type {
 import type { FieldOption } from './field_options_i18n';
 import { FIELD_OPTIONS_TEXTS, LANGUAGE_OPTIONS_TEXT } from './field_options_i18n';
 import { INDEX_DEFAULT, STANDARD } from './default_values';
-import { MAIN_DATA_TYPE_DEFINITION } from './data_types_definition';
+import { MAIN_DATA_TYPE_DEFINITION, TYPE_DEFINITION } from './data_types_definition';
 
 export const TYPE_ONLY_ALLOWED_AT_ROOT_LEVEL: DataType[] = ['join'];
 
@@ -36,6 +36,17 @@ export const FIELD_TYPES_OPTIONS = Object.entries(MAIN_DATA_TYPE_DEFINITION).map
     'data-test-subj': `fieldTypesOptions-${dataType}`,
   })
 ) as ComboBoxOption[];
+
+export const getFieldTypesOptionsForAllowedTypes = (
+  allowedTypes: readonly string[]
+): ComboBoxOption[] =>
+  allowedTypes
+    .filter((type): type is DataType => Object.prototype.hasOwnProperty.call(TYPE_DEFINITION, type))
+    .map((type) => ({
+      value: type,
+      label: TYPE_DEFINITION[type].label,
+      'data-test-subj': `fieldTypesOptions-${type}`,
+    }));
 
 interface SuperSelectOptionConfig {
   inputDisplay: string;

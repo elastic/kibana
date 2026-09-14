@@ -659,9 +659,14 @@ export const datasetWizardStrings = {
       defaultMessage: 'e.g. event_time or $.@timestamp',
     }),
 
+  mappedFieldPathRequiredError: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.mappedFieldPathRequiredError', {
+      defaultMessage: 'Enter a path.',
+    }),
+
   timestampMappingFormatLabel: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.timestampMappingFormatLabel', {
-      defaultMessage: 'Format',
+      defaultMessage: 'Format (optional)',
     }),
 
   timestampMappingFormatHelp: () =>

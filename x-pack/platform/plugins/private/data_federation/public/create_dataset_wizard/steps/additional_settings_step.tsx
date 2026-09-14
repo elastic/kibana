@@ -12,7 +12,6 @@ import type { Control, UseFormGetValues, UseFormSetValue } from 'react-hook-form
 
 import { DatasetSettingsAccordions } from '../../create_dataset_flyout/dataset_settings_accordions';
 import { DatasetSettingsCommonPanel } from '../../create_dataset_flyout/dataset_settings_common_panel';
-import { datasetSettingsFieldsWidthCss } from '../../create_dataset_flyout/dataset_settings_fields_layout';
 import { DatasetSettingsFlow3SettingsPanel } from '../../create_dataset_flyout/dataset_settings_flow3_settings_panel';
 import { DatasetSettingDefaultHintsProvider } from '../../create_dataset_flyout/dataset_settings_default_hints';
 import type { DatasetFormatFormValue } from '../../create_dataset_flyout/create_dataset_flyout_form_state';
@@ -139,7 +138,7 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
       <EuiSpacer size="l" />
 
       <EuiForm component="div">
-        <div css={isDatasetWizardFlow3(flowVariant) ? datasetSettingsFieldsWidthCss : undefined}>
+        <div>
           {isDatasetWizardFlow3(flowVariant) && hasDatasetWizardRegionField(flowVariant) ? (
             <WizardRegionField
               control={control}

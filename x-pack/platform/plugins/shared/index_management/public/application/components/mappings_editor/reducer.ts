@@ -365,8 +365,12 @@ export const reducer = (state: State, action: Action): State => {
         fields: updatedFields,
         documentFields: {
           ...state.documentFields,
-          // If we removed the last field, show the "Create field" form
-          status: updatedFields.rootLevelFields.length === 0 ? 'creatingField' : 'idle',
+          // If we removed the last field, show the "Create field" form unless the host opted out.
+          status:
+            updatedFields.rootLevelFields.length === 0 &&
+            state.documentFields.autoOpenCreateFieldWhenEmpty !== false
+              ? 'creatingField'
+              : 'idle',
         },
         // If we have a search in progress, we reexecute the search to update our result array
         search: Boolean(state.search.term)

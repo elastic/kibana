@@ -42,6 +42,8 @@ export * from './coerce_shape_parameter';
 
 export * from './format_parameter';
 
+export * from './inline_optional_date_format_parameter';
+
 export * from './ignore_malformed';
 
 export * from './copy_to_parameter';

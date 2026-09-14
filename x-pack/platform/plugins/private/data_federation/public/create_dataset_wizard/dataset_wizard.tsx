@@ -40,7 +40,6 @@ import type { DataFederationKibanaServices } from '../types';
 import {
   ADDITIONAL_SETTINGS_STEP,
   DATA_SOURCE_STEP,
-  DATASET_WIZARD_FORM_MAX_WIDTH,
   LOGISTICS_STEP,
   PREVIEW_RESULTS_STEP,
   REVIEW_STEP,
@@ -77,6 +76,7 @@ import { ReviewStep } from './steps/review_step';
 import { PreviewResultsStep } from './steps/preview_results_step';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
+  getDatasetWizardFormMaxWidth,
   hasDatasetWizardPreviewResultsStep,
   isDatasetWizardFlow3,
   isDatasetWizardFlow396,
@@ -84,6 +84,11 @@ import {
   type DatasetWizardFlowVariant,
 } from './dataset_wizard_flow_variant';
 import { TestConfigurationPreview } from './test_configuration_preview';
+import {
+  datasetWizardStepsHorizontalFillCss,
+  getDatasetWizardContentColumnCss,
+  getDatasetWizardStepsOuterCss,
+} from './dataset_wizard_layout';
 
 const TEST_CONFIGURATION_LOADING_MS = 600;
 const TEST_CONFIGURATION_STEPS: DatasetWizardStep[] = [SCHEMA_MAPPINGS_STEP, REVIEW_STEP];
@@ -138,6 +143,14 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
     `,
     [euiTheme.colors.backgroundBasePlain]
   );
+  const wizardContentColumnCss = useMemo(
+    () => getDatasetWizardContentColumnCss(flowVariant),
+    [flowVariant]
+  );
+  const wizardStepsOuterCss = useMemo(
+    () => getDatasetWizardStepsOuterCss(flowVariant),
+    [flowVariant]
+  );
   const draftStorageKey = useMemo(
     () => getWizardFormDraftStorageKey(isEditMode, initialDataSet?.name),
     [initialDataSet?.name, isEditMode]
@@ -174,6 +187,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
   const isFlow4 = isDatasetWizardFlow4(flowVariant);
   const hasPreviewResultsStep = hasDatasetWizardPreviewResultsStep(flowVariant);
   const reviewStep = getReviewStep(flowVariant);
+  const formMaxWidth = getDatasetWizardFormMaxWidth(flowVariant);
 
   const { control, getValues, setValue, trigger, watch } = useForm<DatasetWizardFormValues>({
     defaultValues,
@@ -752,39 +766,46 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
 
   return (
     <>
-      <EuiPageSection restrictWidth={DATASET_WIZARD_FORM_MAX_WIDTH} data-test-subj="datasetWizard">
-        <EuiStepsHorizontal steps={stepDefinitions} />
+      <EuiPageSection restrictWidth={formMaxWidth} data-test-subj="datasetWizard">
+        <div css={wizardStepsOuterCss} data-test-subj="datasetWizardStepsOuter">
+          <EuiStepsHorizontal
+            css={datasetWizardStepsHorizontalFillCss}
+            data-test-subj="datasetWizardSteps"
+            steps={stepDefinitions}
+          />
+        </div>
         <EuiSpacer size="xl" />
 
-        <div data-test-subj="datasetWizardStepContent">{renderStepContent()}</div>
+        <div css={wizardContentColumnCss} data-test-subj="datasetWizardLayout">
+          <div data-test-subj="datasetWizardStepContent">{renderStepContent()}</div>
 
-        {showTestConfiguration && isTestConfigPanelOpen ? (
-          <>
-            <EuiSpacer size="l" />
-            <TestConfigurationPreview
-              values={getValues()}
-              isLoading={isTestConfigLoading}
-              onClose={handleCloseTestConfiguration}
-            />
-          </>
-        ) : null}
+          {showTestConfiguration && isTestConfigPanelOpen ? (
+            <>
+              <EuiSpacer size="l" />
+              <TestConfigurationPreview
+                values={getValues()}
+                isLoading={isTestConfigLoading}
+                onClose={handleCloseTestConfiguration}
+              />
+            </>
+          ) : null}
 
-        {saveErrorCallout ? (
-          <>
-            <EuiSpacer size="l" />
-            <EuiCallOut
-              announceOnMount
-              color="danger"
-              size="s"
-              title={saveErrorCallout.title}
-              data-test-subj="datasetWizardSaveError"
-            >
-              <p>{saveErrorCallout.body}</p>
-            </EuiCallOut>
-          </>
-        ) : null}
+          {saveErrorCallout ? (
+            <>
+              <EuiSpacer size="l" />
+              <EuiCallOut
+                announceOnMount
+                color="danger"
+                size="s"
+                title={saveErrorCallout.title}
+                data-test-subj="datasetWizardSaveError"
+              >
+                <p>{saveErrorCallout.body}</p>
+              </EuiCallOut>
+            </>
+          ) : null}
 
-        <div css={footerCss} data-test-subj="datasetWizardFooter">
+          <div css={footerCss} data-test-subj="datasetWizardFooter">
           <EuiSpacer size={isFlow3 ? 'xxl' : 'xl'} />
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
             {isFlow3 ? null : (
@@ -858,6 +879,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
             ) : null}
           </EuiFlexGroup>
           {isFlow3 ? <EuiSpacer size="m" /> : null}
+          </div>
         </div>
       </EuiPageSection>
       {isCreateDataSourceFlyoutOpen ? (

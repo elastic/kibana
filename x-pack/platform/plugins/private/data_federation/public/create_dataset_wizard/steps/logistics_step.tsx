@@ -17,7 +17,6 @@ import type { DatasetFormatFormValue } from '../../create_dataset_flyout/create_
 import { DatasetSettingDefaultHintsProvider } from '../../create_dataset_flyout/dataset_settings_default_hints';
 import {
   DatasetSettingsFieldsLayout,
-  datasetSettingsFieldsWidthCss,
 } from '../../create_dataset_flyout/dataset_settings_fields_layout';
 import { DataSourceSuperSelect } from '../data_source_super_select';
 import { DatasetFormatField } from '../dataset_format_field';
@@ -226,7 +225,6 @@ const LogisticsStepFieldsContent: FunctionComponent<LogisticsStepFieldsContentPr
       <EuiSpacer size="l" />
 
       <EuiForm component="div">
-        <div css={isDatasetWizardFlow3(flowVariant) ? datasetSettingsFieldsWidthCss : undefined}>
           <EuiFormRow
             label={datasetWizardStrings.dataSourceLabel()}
             fullWidth
@@ -339,7 +337,6 @@ const LogisticsStepFieldsContent: FunctionComponent<LogisticsStepFieldsContentPr
               onRegionManualChange={onRegionManualChange}
             />
           ) : null}
-        </div>
       </EuiForm>
     </>
   );

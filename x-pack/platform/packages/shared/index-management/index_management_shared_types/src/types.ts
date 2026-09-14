@@ -200,6 +200,31 @@ export interface MappedFieldsEditorProps {
   allowMultiFields?: boolean;
   /** When enabled, inline add/edit forms show separate source and display name fields. */
   showFieldRename?: boolean;
+  /** Overrides copy for the source name / path field when {@link showFieldRename} is enabled. */
+  sourceNameField?: {
+    label: string;
+    helpText?: string;
+    placeholder?: string;
+    requiredErrorMessage?: string;
+  };
+  /**
+   * When false, the create-field form stays collapsed until the user clicks Add field,
+   * even if there are no mapped fields yet. Defaults to true.
+   */
+  autoOpenCreateFieldWhenEmpty?: boolean;
+  /**
+   * When set, root-level add/edit field forms only offer these Elasticsearch mapping types
+   * (concrete types such as `long` are allowed, not only main types like `numeric`).
+   */
+  allowedRootFieldTypes?: readonly string[];
+  /** When false, clicking outside the create-field form does not cancel or submit it. Defaults to true. */
+  closeCreateFieldOnOutsideClick?: boolean;
+  /** When set, date and date_nanos add/edit forms show an inline optional format field. */
+  inlineOptionalDateFormatField?: {
+    label: string;
+    helpText?: string;
+    placeholder?: string;
+  };
   /** Source names keyed by mapped (display) field name. */
   fieldSourceNames?: Record<string, string>;
   onFieldSourceNameChange?: (change: FieldSourceNameChange) => void;

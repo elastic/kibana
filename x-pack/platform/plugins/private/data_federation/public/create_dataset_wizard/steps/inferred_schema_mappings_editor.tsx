@@ -45,6 +45,7 @@ import {
   type DatasetWizardFlowVariant,
 } from '../dataset_wizard_flow_variant';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
+import { DATASET_WIZARD_FLOW_396_MAPPED_FIELD_TYPES } from '../inferred_field_type_options';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
 import { formatMappedFieldTypeLabel } from '../inferred_field_type_options';
 import type { TestConfigurationPreviewField } from '../test_configuration_preview_utils';
@@ -394,8 +395,12 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
   }, [schemaEditorKey]);
 
   const mappedFieldsAddFieldButtonHiddenCss = css`
-    visibility: hidden;
-    pointer-events: none;
+    display: none;
+  `;
+
+  /** Same inset as the accordion panel's block-end padding in {@link DatasetSettingsSectionAccordion}. */
+  const mappedFieldsAddFieldFooterCss = css`
+    margin-block-start: ${euiTheme.size.m};
   `;
 
   const mappedFieldsAddFieldButton = (
@@ -419,6 +424,19 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
       data-test-subj="datasetWizardInferredSchemaMappingsEditor"
       css={css`
         [data-test-subj='addFieldButton'] {
+          display: none;
+        }
+
+        /* IM keeps a spacer above the hidden add-field control; flow 3 9.6 uses the footer inset instead. */
+        [data-test-subj='documentFields'] .euiSpacer:has(+ [data-test-subj='addFieldButton']) {
+          display: none;
+        }
+
+        [data-test-subj='createFieldForm'] {
+          margin-block-start: ${euiTheme.size.m};
+        }
+
+        [data-test-subj='documentFields'] .euiSpacer--s:has(+ * [data-test-subj='createFieldForm']) {
           display: none;
         }
       `}
@@ -454,7 +472,25 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
           compressed
           fieldEditDisplay="inline"
           {...(isFlow396
-            ? { showFieldSearch: false as const, allowMultiFields: false as const }
+            ? {
+                showFieldSearch: false as const,
+                allowMultiFields: false as const,
+                // Timestamp is always shown above, so keep the add-field form collapsed.
+                autoOpenCreateFieldWhenEmpty: false as const,
+                allowedRootFieldTypes: DATASET_WIZARD_FLOW_396_MAPPED_FIELD_TYPES,
+                closeCreateFieldOnOutsideClick: false,
+                inlineOptionalDateFormatField: {
+                  label: datasetWizardStrings.timestampMappingFormatLabel(),
+                  helpText: datasetWizardStrings.timestampMappingFormatHelp(),
+                  placeholder: datasetWizardStrings.timestampMappingFormatPlaceholder(),
+                },
+                sourceNameField: {
+                  label: datasetWizardStrings.timestampMappingPathLabel(),
+                  helpText: datasetWizardStrings.timestampMappingPathHelp(),
+                  placeholder: datasetWizardStrings.timestampMappingPathPlaceholder(),
+                  requiredErrorMessage: datasetWizardStrings.mappedFieldPathRequiredError(),
+                },
+              }
             : {})}
           fieldsDescription={fieldsDescription}
           afterFieldsDescription={timestampFieldMappingSection}
@@ -463,7 +499,9 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
           onFieldSourceNameChange={isFlow396 ? handleFieldSourceNameChange : undefined}
           onChange={onMappingsChange}
         />
-        {isFlow396 ? mappedFieldsAddFieldButton : null}
+        {isFlow396 ? (
+          <div css={mappedFieldsAddFieldFooterCss}>{mappedFieldsAddFieldButton}</div>
+        ) : null}
       </DatasetSettingsSectionAccordion>
 
       {!isFlow396 ? (

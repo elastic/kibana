@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
 import type { DocLinksStart } from '@kbn/core/public';
@@ -31,8 +31,22 @@ export interface MappedFieldsEditorProps {
   showFieldSearch?: boolean;
   allowMultiFields?: boolean;
   showFieldRename?: boolean;
+  sourceNameField?: {
+    label: string;
+    helpText?: string;
+    placeholder?: string;
+    requiredErrorMessage?: string;
+  };
   fieldSourceNames?: Record<string, string>;
   onFieldSourceNameChange?: (change: FieldSourceNameChange) => void;
+  autoOpenCreateFieldWhenEmpty?: boolean;
+  allowedRootFieldTypes?: readonly string[];
+  closeCreateFieldOnOutsideClick?: boolean;
+  inlineOptionalDateFormatField?: {
+    label: string;
+    helpText?: string;
+    placeholder?: string;
+  };
   indexSettings?: IndexSettings;
   docLinks: DocLinksStart;
 }
@@ -48,15 +62,24 @@ export const MappedFieldsEditor = React.memo(
     showFieldSearch = true,
     allowMultiFields = true,
     showFieldRename,
+    sourceNameField,
     fieldSourceNames,
     onFieldSourceNameChange,
+    autoOpenCreateFieldWhenEmpty,
+    allowedRootFieldTypes,
+    closeCreateFieldOnOutsideClick,
+    inlineOptionalDateFormatField,
     indexSettings,
     docLinks,
   }: MappedFieldsEditorProps) => {
     const { parsedDefaultValue, multipleMappingsDeclared } =
       useMemo<MappingsEditorParsedMetadata>(() => parseMappings(value), [value]);
 
-    useMappingsStateListener({ onChange, value: parsedDefaultValue });
+    useMappingsStateListener({
+      onChange,
+      value: parsedDefaultValue,
+      autoOpenCreateFieldWhenEmpty,
+    });
 
     const { update: updateConfig } = useConfig();
     const state = useMappingsState();
@@ -78,15 +101,19 @@ export const MappedFieldsEditor = React.memo(
       }
     }, [multipleMappingsDeclared, onChange, value]);
 
-    useEffect(() => {
+    const syncConfig = useCallback(() => {
       updateConfig({
         docLinks,
         indexSettings: indexSettings ?? {},
         fieldEditDisplay,
         allowMultiFields,
         showFieldRename,
+        sourceNameField,
         fieldSourceNames,
         onFieldSourceNameChange: showFieldRename ? stableOnFieldSourceNameChange : undefined,
+        allowedRootFieldTypes,
+        closeCreateFieldOnOutsideClick,
+        inlineOptionalDateFormatField,
       });
     }, [
       updateConfig,
@@ -95,9 +122,17 @@ export const MappedFieldsEditor = React.memo(
       fieldEditDisplay,
       allowMultiFields,
       showFieldRename,
+      sourceNameField,
       fieldSourceNames,
       stableOnFieldSourceNameChange,
+      allowedRootFieldTypes,
+      closeCreateFieldOnOutsideClick,
+      inlineOptionalDateFormatField,
     ]);
+
+    useLayoutEffect(() => {
+      syncConfig();
+    }, [syncConfig]);
 
     const onSearchChange = useCallback(
       (searchValue: string) => {

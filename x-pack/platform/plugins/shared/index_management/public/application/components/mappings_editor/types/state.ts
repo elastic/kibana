@@ -68,6 +68,8 @@ export interface DocumentFieldsState {
   editor: FieldsEditor;
   fieldToEdit?: string;
   fieldToAddFieldTo?: string;
+  /** When false, deleting the last field does not reopen the create-field form. Defaults to true. */
+  autoOpenCreateFieldWhenEmpty?: boolean;
 }
 
 interface RuntimeFieldsListState {

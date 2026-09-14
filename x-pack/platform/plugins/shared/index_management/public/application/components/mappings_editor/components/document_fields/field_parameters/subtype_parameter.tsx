@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiFormRow, EuiComboBox } from '@elastic/eui';
 
@@ -17,6 +17,7 @@ import {
   filterTypesForNonRootFields,
 } from '../../../lib';
 import { TYPE_DEFINITION } from '../../../constants';
+import { useConfig } from '../../../config_context';
 import { OtherTypeNameParameter } from './other_type_name_parameter';
 
 interface Props {
@@ -32,6 +33,29 @@ export const SubTypeParameter = ({
   isMultiField,
   isRootLevelField,
 }: Props) => {
+  const {
+    value: { allowedRootFieldTypes },
+  } = useConfig();
+
+  const typeDefinition = TYPE_DEFINITION[type as MainType];
+  const hasSubType = type !== 'other' && typeDefinition?.subTypes !== undefined;
+
+  const subTypeOptions = useMemo(() => {
+    if (!hasSubType || !typeDefinition?.subTypes) {
+      return [];
+    }
+
+    const options = typeDefinition.subTypes.types
+      .map((_subType) => TYPE_DEFINITION[_subType])
+      .map((_subType) => ({ value: _subType.value, label: _subType.label }));
+
+    if (!allowedRootFieldTypes?.length) {
+      return options;
+    }
+
+    return options.filter((option) => allowedRootFieldTypes.includes(option.value));
+  }, [allowedRootFieldTypes, hasSubType, typeDefinition]);
+
   if (type === 'other') {
     return (
       <EuiFlexItem>
@@ -40,17 +64,9 @@ export const SubTypeParameter = ({
     );
   }
 
-  const typeDefinition = TYPE_DEFINITION[type as MainType];
-  const hasSubType = typeDefinition?.subTypes !== undefined;
-
-  if (!hasSubType) {
+  if (!hasSubType || (allowedRootFieldTypes?.length && subTypeOptions.length === 0)) {
     return null;
   }
-
-  // Field sub type (if any)
-  const subTypeOptions = typeDefinition
-    .subTypes!.types.map((_subType) => TYPE_DEFINITION[_subType])
-    .map((_subType) => ({ value: _subType.value, label: _subType.label }));
 
   const defaultValueSubType = typeDefinition.subTypes!.types.includes(defaultValueType as SubType)
     ? defaultValueType // we use the default value provided

@@ -13,6 +13,7 @@ import { fireEvent, render, waitFor } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
 import type { MappedFieldsEditorProps } from '@kbn/index-management-shared-types';
 
+import { DATASET_WIZARD_FLOW_396_MAPPED_FIELD_TYPES } from '../inferred_field_type_options';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
 import { emptyDatasetWizardFormValues } from '../dataset_wizard_form_state';
 import {
@@ -28,9 +29,19 @@ const FakeMappedFieldsEditor: FunctionComponent<MappedFieldsEditorProps> = ({
   onChange,
   fieldsDescription,
   afterFieldsDescription,
+  autoOpenCreateFieldWhenEmpty = true,
+  allowedRootFieldTypes,
+  closeCreateFieldOnOutsideClick,
+  inlineOptionalDateFormatField,
+  sourceNameField,
 }) => {
   const [mappings, setMappings] = useState(value ?? {});
-  const [isCreateFieldFormOpen, setIsCreateFieldFormOpen] = useState(false);
+  const propertiesCount = Object.keys(
+    (value as { properties?: Record<string, unknown> } | undefined)?.properties ?? {}
+  ).length;
+  const [isCreateFieldFormOpen, setIsCreateFieldFormOpen] = useState(
+    autoOpenCreateFieldWhenEmpty && propertiesCount === 0
+  );
 
   const properties =
     (mappings as { properties?: Record<string, { type?: string }> }).properties ?? {};
@@ -65,6 +76,18 @@ const FakeMappedFieldsEditor: FunctionComponent<MappedFieldsEditorProps> = ({
 
   return (
     <div>
+      <div data-test-subj="fakeAllowedRootFieldTypes">
+        {JSON.stringify(allowedRootFieldTypes ?? null)}
+      </div>
+      <div data-test-subj="fakeCloseCreateFieldOnOutsideClick">
+        {String(closeCreateFieldOnOutsideClick ?? 'default')}
+      </div>
+      <div data-test-subj="fakeInlineOptionalDateFormatField">
+        {JSON.stringify(inlineOptionalDateFormatField ?? null)}
+      </div>
+      <div data-test-subj="fakeSourceNameField">
+        {JSON.stringify(sourceNameField ?? null)}
+      </div>
       {fieldsDescription ? (
         <div data-test-subj="fakeMappedFieldsDescription">{fieldsDescription}</div>
       ) : null}
@@ -84,6 +107,13 @@ const FakeMappedFieldsEditor: FunctionComponent<MappedFieldsEditorProps> = ({
         <div data-test-subj="createFieldForm">
           <button type="button" data-test-subj="fakeConfirmAddField" onClick={confirmManualField}>
             Confirm field
+          </button>
+          <button
+            type="button"
+            data-test-subj="cancelButton"
+            onClick={() => setIsCreateFieldFormOpen(false)}
+          >
+            Cancel
           </button>
         </div>
       ) : null}
@@ -333,6 +363,75 @@ describe('InferredSchemaMappingsEditor', () => {
       expect(getByTestId('fakeMappedFieldsDescription')).toHaveTextContent(
         'Only mapped fields will be used. Unmapped fields will not be inferred at query time.'
       );
+    });
+  });
+
+  it('keeps the create field form collapsed until Add field is clicked in flow 3 9.6', async () => {
+    const { getByTestId, queryByTestId } = render(
+      <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />
+    );
+
+    expect(queryByTestId('createFieldForm')).toBeNull();
+    expect(getByTestId('datasetWizardAddField')).not.toHaveAttribute('aria-hidden', 'true');
+    expect(getByTestId('datasetWizardTimestampMappingSection')).toBeInTheDocument();
+
+    fireEvent.click(getByTestId('datasetWizardAddField'));
+
+    await waitFor(() => {
+      expect(getByTestId('createFieldForm')).toBeInTheDocument();
+      expect(getByTestId('datasetWizardAddField')).toHaveAttribute('aria-hidden', 'true');
+    });
+
+    fireEvent.click(getByTestId('cancelButton'));
+
+    await waitFor(() => {
+      expect(queryByTestId('createFieldForm')).toBeNull();
+      expect(getByTestId('datasetWizardAddField')).not.toHaveAttribute('aria-hidden', 'true');
+    });
+  });
+
+  it('restricts mapped field types in flow 3 9.6', () => {
+    const { getByTestId } = render(
+      <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />
+    );
+
+    expect(getByTestId('fakeAllowedRootFieldTypes').textContent).toBe(
+      JSON.stringify(DATASET_WIZARD_FLOW_396_MAPPED_FIELD_TYPES)
+    );
+  });
+
+  it('does not close create field form on outside click in flow 3 9.6', () => {
+    const { getByTestId } = render(
+      <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />
+    );
+
+    expect(getByTestId('fakeCloseCreateFieldOnOutsideClick').textContent).toBe('false');
+  });
+
+  it('passes inline optional date format labels in flow 3 9.6', () => {
+    const { getByTestId } = render(
+      <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />
+    );
+
+    expect(JSON.parse(getByTestId('fakeInlineOptionalDateFormatField').textContent ?? 'null')).toEqual(
+      {
+        label: 'Format (optional)',
+        helpText: 'Pattern for text timestamps.',
+        placeholder: 'e.g. yyyy-MM-dd HH:mm:ss.SSS',
+      }
+    );
+  });
+
+  it('uses path copy for the mapped field source input in flow 3 9.6', () => {
+    const { getByTestId } = render(
+      <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />
+    );
+
+    expect(JSON.parse(getByTestId('fakeSourceNameField').textContent ?? 'null')).toEqual({
+      label: 'Path',
+      helpText: 'Source column or JSON path.',
+      placeholder: 'e.g. event_time or $.@timestamp',
+      requiredErrorMessage: 'Enter a path.',
     });
   });
 });

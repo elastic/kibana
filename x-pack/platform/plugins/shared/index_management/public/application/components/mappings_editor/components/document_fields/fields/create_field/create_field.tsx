@@ -19,14 +19,24 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { TrainedModelStat } from '@kbn/ml-common-types/trained_models';
 import type { MlPluginStart } from '@kbn/ml-plugin/public';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { TYPE_DEFINITION } from '../../../../constants';
 import { fieldSerializer } from '../../../../lib';
 import { getFieldByPathName, isSemanticTextField } from '../../../../lib/utils';
+import { useConfig } from '../../../../config_context';
 import { useDispatch, useMappingsState } from '../../../../mappings_state_context';
 import { Form, useForm, useFormData } from '../../../../shared_imports';
 import type { Field, MainType, NormalizedFields } from '../../../../types';
-import { NameParameter, RenameFieldParameter, SourceNameParameter, SubTypeParameter, TypeParameter } from '../../field_parameters';
+import {
+  applyInlineOptionalDateFormatToField,
+  InlineOptionalDateFormatParameter,
+  isInlineOptionalDateFormatMappingType,
+  NameParameter,
+  RenameFieldParameter,
+  SourceNameParameter,
+  SubTypeParameter,
+  TypeParameter,
+} from '../../field_parameters';
 import { ReferenceFieldSelects } from '../../field_parameters/reference_field_selects';
 import { SelectInferenceId } from '../../field_parameters/select_inference_id';
 import { FieldBetaBadge } from '../field_beta_badge';
@@ -92,6 +102,9 @@ export const CreateField = React.memo(function CreateFieldComponent({
 }: Props) {
   const { isSemanticTextEnabled } = semanticTextInfo ?? {};
   const dispatch = useDispatch();
+  const {
+    value: { closeCreateFieldOnOutsideClick = true, inlineOptionalDateFormatField },
+  } = useConfig();
   const { fields, mappingViewFields } = useMappingsState();
   const {
     showFieldRename,
@@ -101,6 +114,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
     hasRequiredFieldIdentity,
   } = useFieldRenameForm();
   const fieldTypeInputRef = useRef<HTMLInputElement>(null);
+  const [inlineOptionalDateFormatText, setInlineOptionalDateFormatText] = useState('');
   const styles = useStyles();
 
   const { form } = useForm<Field>({
@@ -171,7 +185,11 @@ export const CreateField = React.memo(function CreateFieldComponent({
     const { isValid, data } = await form.submit();
 
     if (isValid && !clickOutside) {
-      const fieldData = stripSourceNameFromField(data);
+      const fieldData = applyInlineOptionalDateFormatToField(
+        stripSourceNameFromField(data),
+        typeof data.type === 'string' ? data.type : selectedMappingType,
+        inlineOptionalDateFormatText
+      );
 
       if (isSemanticTextField(fieldData) && !fieldData.inference_id) {
         const { inference_id: inferenceId, ...rest } = fieldData;
@@ -194,6 +212,10 @@ export const CreateField = React.memo(function CreateFieldComponent({
   };
 
   const onClickOutside = () => {
+    if (!closeCreateFieldOnOutsideClick) {
+      return;
+    }
+
     if (!hasRequiredFieldIdentity(form)) {
       if (isCancelable !== false) {
         cancel();
@@ -202,6 +224,17 @@ export const CreateField = React.memo(function CreateFieldComponent({
       submitForm(undefined, true, true);
     }
   };
+
+  const selectedMappingType = type?.[0]?.value;
+  const showInlineOptionalDateFormat =
+    inlineOptionalDateFormatField !== undefined &&
+    isInlineOptionalDateFormatMappingType(selectedMappingType);
+
+  useEffect(() => {
+    if (!showInlineOptionalDateFormat) {
+      setInlineOptionalDateFormatText('');
+    }
+  }, [showInlineOptionalDateFormat]);
 
   const renderFormFields = () => (
     <EuiFlexGroup gutterSize="s">
@@ -242,6 +275,15 @@ export const CreateField = React.memo(function CreateFieldComponent({
           <EuiFlexItem>
             <RenameFieldParameter />
           </EuiFlexItem>
+          {showInlineOptionalDateFormat ? (
+            <EuiFlexItem>
+              <InlineOptionalDateFormatParameter
+                labels={inlineOptionalDateFormatField}
+                value={inlineOptionalDateFormatText}
+                onChange={setInlineOptionalDateFormatText}
+              />
+            </EuiFlexItem>
+          ) : null}
         </>
       ) : (
         <EuiFlexItem>
