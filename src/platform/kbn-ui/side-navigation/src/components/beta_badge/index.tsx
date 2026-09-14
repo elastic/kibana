@@ -32,7 +32,6 @@ interface BadgeConfig {
  */
 export const BetaBadge = ({ type, isInverted, alignment = 'bottom' }: BetaBadgeProps) => {
   const { euiTheme } = useEuiTheme();
-  const isNew = type === 'new';
   const shrinkStyles = css`
     flex-shrink: 0;
   `;
@@ -59,16 +58,20 @@ export const BetaBadge = ({ type, isInverted, alignment = 'bottom' }: BetaBadgeP
         defaultMessage: 'New',
       }),
     },
+    v1Only: {
+      label: i18n.translate('kbnUI.sideNavigation.v1OnlyBadgeLabel', {
+        defaultMessage: 'v1 only',
+      }),
+    },
   };
+
+  const useTextBadge = type === 'new' || type === 'v1Only';
+  const badgeColor = type === 'v1Only' ? 'hollow' : euiTheme.colors.backgroundFilledPrimary;
 
   return (
     <EuiThemeProvider colorMode={isInverted ? 'dark' : undefined}>
-      {isNew ? (
-        <EuiBadge
-          css={shrinkStyles}
-          children={config[type].label}
-          color={euiTheme.colors.backgroundFilledPrimary}
-        />
+      {useTextBadge ? (
+        <EuiBadge css={shrinkStyles} children={config[type].label} color={badgeColor} />
       ) : (
         <EuiBetaBadge
           css={betaBadgeStyles}

@@ -9,7 +9,7 @@
 
 import type { IconType } from '@elastic/eui';
 
-export type BadgeType = 'beta' | 'techPreview' | 'new';
+export type BadgeType = 'beta' | 'techPreview' | 'new' | 'v1Only';
 
 /**
  * A navigation item within a secondary/nested menu.
