@@ -108,19 +108,36 @@ apiTest.describe(
       'user message sync requests persist context for the next model request',
       async ({ apiClient }) => {
         const requestsBefore = llmProxy.interceptedRequests.length;
+
+        // A user message appends to an existing conversation; it never creates one.
+        const orphan = await apiClient.post(CHAT_CONVERSE, {
+          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+          body: { trigger_mode: 'never', input: 'Pool limit is now 200' },
+          responseType: 'json',
+        });
+        expect(orphan).toHaveStatusCode(400);
+
+        const created = await apiClient.post(`${API_AGENT_BUILDER}/conversations`, {
+          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+          body: {},
+          responseType: 'json',
+        });
+        expect(created).toHaveStatusCode(200);
+        const conversationId = (created.body as GetConversationResponse).id;
+        conversationIds.push(conversationId);
+
         const first = await apiClient.post(CHAT_CONVERSE, {
           headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
           body: {
             trigger_mode: 'never',
+            conversation_id: conversationId,
             input: 'Pool limit is now 200',
           },
           responseType: 'json',
         });
         expect(first).toHaveStatusCode(200);
         const firstBody = first.body as GetConversationResponse;
-        const conversationId = firstBody.id;
         const firstMessageId = firstBody.events?.[0].id;
-        conversationIds.push(conversationId);
         const second = await apiClient.post(CHAT_CONVERSE, {
           headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
           body: {
