@@ -93,6 +93,7 @@ export class SecurityUsersPage {
   }
 
   async clickUserByName(username: string) {
+    await this.searchUsersInput.fill(username);
     await this.page.getByRole('link', { name: username }).click();
   }
 
@@ -155,8 +156,8 @@ export class SecurityUsersPage {
   }
 
   async getUserRows(): Promise<Locator[]> {
-    await this.page.components.comboBox('tablePaginationPopoverButton');
     const paginationButton = this.page.testSubj.locator('tablePaginationPopoverButton');
+    await paginationButton.waitFor({ state: 'visible' });
     await paginationButton.click();
     await this.page.testSubj.locator('tablePagination-100-rows').click();
     return this.page.testSubj.locator('userRow').all();
@@ -179,6 +180,7 @@ export class SecurityUsersPage {
 
   async getAllUsers(): Promise<UserRowData[]> {
     const paginationButton = this.page.testSubj.locator('tablePaginationPopoverButton');
+    await paginationButton.waitFor({ state: 'visible' });
     await paginationButton.click();
     await this.page.testSubj.locator('tablePagination-100-rows').click();
     const rows = await this.page.testSubj.locator('userRow').all();

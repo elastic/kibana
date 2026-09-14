@@ -28,6 +28,7 @@ export class SecurityRoleMappingsPage {
 
   async goto() {
     await this.page.gotoApp('management/security/role_mappings');
+    await this.createRoleMappingButton.waitFor({ state: 'visible' });
   }
 
   async fillRoleMappingName(name: string) {

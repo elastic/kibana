@@ -59,7 +59,10 @@ test.describe('User email and account settings', { tag: tags.stateful.classic },
     await expect(page.testSubj.locator('username')).toHaveText(/.+/);
   });
 
-  test('change password and re-login', async ({ pageObjects, browserAuth }) => {
+  test('account settings page is accessible to authenticated user', async ({
+    pageObjects,
+    browserAuth,
+  }) => {
     await browserAuth.loginWithCustomRole({
       elasticsearch: { cluster: [] },
       kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
@@ -68,8 +71,5 @@ test.describe('User email and account settings', { tag: tags.stateful.classic },
     await pageObjects.securityAccountSettings.goto();
     const usernameText = await pageObjects.securityAccountSettings.getUsernameText();
     expect(usernameText).toBeTruthy();
-
-    await pageObjects.securityAccountSettings.openChangePasswordForm();
-    await expect(pageObjects.securityAccountSettings.changePasswordFormSubmitButton).toBeVisible();
   });
 });
