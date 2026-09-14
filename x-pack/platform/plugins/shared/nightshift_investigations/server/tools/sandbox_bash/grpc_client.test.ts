@@ -31,7 +31,14 @@ describe('grpc_client', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    client = new SandboxApiClient({ host: 'sandbox-api', port: 50051, apiKey: 'secret-key' });
+    client = new SandboxApiClient({
+      host: 'sandbox-api',
+      port: 50051,
+      apiKey: 'secret-key',
+      rootCertPem: Buffer.from('mock-ca'),
+      clientCertPem: Buffer.from('mock-cert'),
+      clientKeyPem: Buffer.from('mock-key'),
+    });
   });
 
   describe('close', () => {
