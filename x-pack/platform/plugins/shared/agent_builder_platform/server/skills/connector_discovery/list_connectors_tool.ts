@@ -8,10 +8,9 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
-import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
+import { getToolResultId, createErrorResult, listAgentConnectors } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { getConnectorSpec } from '@kbn/connector-specs';
 
 const listConnectorsSchema = z.object({}).describe('No parameters.');
 
@@ -33,23 +32,9 @@ export const createListConnectorsTool = ({
     try {
       const actionsStart = await getActionsStart();
       const actionsClient = await actionsStart.getActionsClientWithRequest(context.request);
-      const allConnectors = await actionsClient.getAll();
 
       const allowedIds = context.agentConfiguration?.connector_ids;
-
-      const connectors = allConnectors.flatMap((connector) => {
-        const spec = getConnectorSpec(connector.actionTypeId);
-        if (!spec) return [];
-        if (allowedIds !== undefined && !allowedIds.includes(connector.id)) return [];
-        return [
-          {
-            id: connector.id,
-            name: connector.name,
-            type: connector.actionTypeId,
-            description: spec.metadata.description ?? connector.name,
-          },
-        ];
-      });
+      const connectors = await listAgentConnectors(actionsClient, { allowedIds });
 
       return {
         results: [

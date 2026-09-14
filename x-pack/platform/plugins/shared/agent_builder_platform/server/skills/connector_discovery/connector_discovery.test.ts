@@ -20,20 +20,26 @@ jest.mock('@kbn/connector-specs', () => ({
   isToolAction: jest.fn(),
 }));
 
-jest.mock('@kbn/agent-builder-server', () => ({
-  getToolResultId: jest.fn().mockReturnValue('test-id'),
-  createErrorResult: jest.fn((opts: { message: string }) => ({
-    tool_result_id: 'err-id',
-    type: 'error',
-    data: { message: opts.message },
-  })),
-  formatSchemaForLlm: jest.fn(() => '{ title: string }'),
-}));
+jest.mock('@kbn/agent-builder-server', () => {
+  const actual = jest.requireActual('@kbn/agent-builder-server');
+  return {
+    ...actual,
+    getToolResultId: jest.fn().mockReturnValue('test-id'),
+    createErrorResult: jest.fn((opts: { message: string }) => ({
+      tool_result_id: 'err-id',
+      type: 'error',
+      data: { message: opts.message },
+    })),
+    formatSchemaForLlm: jest.fn(() => '{ title: string }'),
+  };
+});
 
 const mockGetConnectorSpec = getConnectorSpec as jest.Mock;
 const mockIsToolAction = isToolAction as jest.Mock;
 
-const makeConnector = (overrides: Partial<{ id: string; name: string; actionTypeId: string }>) => ({
+const makeConnector = (
+  overrides: Partial<{ id: string; name: string; actionTypeId: string }> = {}
+) => ({
   id: 'conn-1',
   name: 'My GitHub',
   actionTypeId: '.github',

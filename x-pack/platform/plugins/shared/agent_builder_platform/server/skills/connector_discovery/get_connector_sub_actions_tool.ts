@@ -8,10 +8,13 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
-import { getToolResultId, createErrorResult, formatSchemaForLlm } from '@kbn/agent-builder-server';
+import {
+  getToolResultId,
+  createErrorResult,
+  getAgentConnectorDetail,
+} from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { getConnectorSpec, isToolAction } from '@kbn/connector-specs';
 
 const getConnectorSubActionsSchema = z.object({
   connector_id: z
@@ -56,41 +59,26 @@ export const createGetConnectorSubActionsTool = ({
         };
       }
 
-      const connector = await actionsClient.get({ id: input.connector_id });
-      const spec = getConnectorSpec(connector.actionTypeId);
+      const detail = await getAgentConnectorDetail(actionsClient, input.connector_id);
 
-      if (!spec) {
+      if (!detail) {
         return {
           results: [
             createErrorResult({
               message:
-                `Connector type '${connector.actionTypeId}' does not have a spec and cannot be called as an agent tool. ` +
+                `Connector '${input.connector_id}' does not have a spec and cannot be called as an agent tool. ` +
                 'Use list_connectors to find connectors with callable sub-actions.',
             }),
           ],
         };
       }
 
-      const subActions = Object.entries(spec.actions)
-        .filter(([name]) => isToolAction(spec, name))
-        .map(([name, action]) => ({
-          name,
-          description: action.description ?? name,
-          params: action.input ? formatSchemaForLlm(action.input) : 'No parameters',
-        }));
-
       return {
         results: [
           {
             tool_result_id: getToolResultId(),
             type: ToolResultType.other,
-            data: {
-              id: connector.id,
-              name: connector.name,
-              type: connector.actionTypeId,
-              description: spec.metadata.description ?? connector.name,
-              subActions,
-            },
+            data: detail,
           },
         ],
       };
