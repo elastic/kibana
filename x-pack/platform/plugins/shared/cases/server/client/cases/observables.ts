@@ -6,7 +6,6 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { v4 } from 'uuid';
 import Boom from '@hapi/boom';
 
 import { MAX_OBSERVABLES_PER_CASE } from '../../../common/constants';
@@ -155,9 +154,8 @@ export const addObservable = async (
   casesClient: CasesClient
 ) => {
   const {
-    services: { caseService, licensingService, userActionService },
+    services: { caseService, licensingService },
     authorization,
-    user,
   } = clientArgs;
 
   const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
@@ -178,7 +176,7 @@ export const addObservable = async (
   const {
     result: decodedCase,
     caseForEmit,
-    observableForEmit,
+    observablesForEmit,
   } = await (async () => {
     const paramArgs = decodeWithExcessOrThrow(AddObservableRequestRt)(params);
     const retrievedCase = await caseService.getCase({ id: caseId });
@@ -197,59 +195,32 @@ export const addObservable = async (
       throw Boom.forbidden(`Max ${MAX_OBSERVABLES_PER_CASE} observables per case is allowed.`);
     }
 
-    const newObservable = {
-      ...paramArgs.observable,
-      id: v4(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    const applied = await applyObservablesToCase(
+      caseId,
+      [paramArgs.observable],
+      clientArgs,
+      retrievedCase
+    );
+    if (!applied) {
+      throw Boom.badRequest('Invalid duplicated observables in request.');
+    }
 
-    const updatedObservables = [...currentObservables, newObservable];
-
-    validateDuplicatedObservablesInRequest({
-      requestFields: updatedObservables,
-    });
-
-    const updatedCase = await caseService.patchCase({
-      caseId: retrievedCase.id,
-      originalCase: retrievedCase,
-      updatedAttributes: {
-        observables: updatedObservables,
-        total_observables: updatedObservables.length,
-      },
-    });
-
-    await userActionService.creator.createUserAction({
-      userAction: {
-        type: UserActionTypes.observables,
-        caseId: retrievedCase.id,
-        owner: retrievedCase.attributes.owner,
-        user,
-        payload: {
-          observables: { count: 1, actionType: 'add' },
-        },
-      },
-    });
-
-    const res = flattenCaseSavedObject({
-      savedObject: {
-        ...retrievedCase,
-        ...updatedCase,
-        attributes: { ...retrievedCase.attributes, ...updatedCase?.attributes },
-        references: retrievedCase.references,
-      },
-    });
+    const res = flattenCaseSavedObject({ savedObject: applied.caseWithPatch });
 
     // Decode before emitting — if the SO fails CaseRt validation, we must not fire
     // the trigger for a request the API will report as failed. Matches the precedent
     // in create.ts where decodeOrThrow runs before the emit.
     const result = decodeOrThrow(CaseRt)(res);
-    return { result, caseForEmit: retrievedCase, observableForEmit: newObservable };
+    return {
+      result,
+      caseForEmit: applied.caseWithPatch,
+      observablesForEmit: applied.newlyAddedObservables,
+    };
   })().catch((error) => {
     throw Boom.badRequest(`Failed to add observable: ${error}`);
   });
 
-  emitObservablesAddedEvent(clientArgs, caseForEmit, [observableForEmit]);
+  emitObservablesAddedEvent(clientArgs, caseForEmit, observablesForEmit);
   return decodedCase;
 };
 

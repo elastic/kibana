@@ -457,7 +457,7 @@ export const ADD_OBSERVABLES_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.addObservables.documentation.details',
   {
     defaultMessage:
-      'This step adds observables to an existing case using `typeKey`, `value`, and optional description fields.',
+      'This step adds observables to an existing case using `typeKey`, `value`, and optional description fields. If this step is used by a workflow triggered by `cases.observablesAdded`, set `on.workflowEvents: ignore` on the trigger to prevent self-triggered loops.',
   }
 );
 

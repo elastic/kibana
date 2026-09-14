@@ -141,6 +141,47 @@ describe('addObservable', () => {
     );
   });
 
+  it('adds a new observable when stored observables contain duplicates', async () => {
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
+    const duplicateStoredObservable = { ...mockObservable, id: 'duplicate-observable-id' };
+    mockCaseService.getCase.mockResolvedValue({
+      ...caseSO,
+      attributes: {
+        ...caseSO.attributes,
+        observables: [mockObservable, duplicateStoredObservable],
+      },
+    });
+
+    await addObservable(
+      caseSO.id,
+      {
+        observable: {
+          typeKey: OBSERVABLE_TYPE_IPV4.key,
+          value: '192.168.0.1',
+          description: '',
+        },
+      },
+      mockClientArgs,
+      mockCasesClient
+    );
+
+    expect(mockCaseService.patchCase).toHaveBeenCalledWith(
+      expect.objectContaining({
+        updatedAttributes: {
+          observables: expect.arrayContaining([
+            mockObservable,
+            duplicateStoredObservable,
+            expect.objectContaining({
+              typeKey: OBSERVABLE_TYPE_IPV4.key,
+              value: '192.168.0.1',
+            }),
+          ]),
+          total_observables: 3,
+        },
+      })
+    );
+  });
+
   it('should handle errors and throw boom', async () => {
     mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
     mockCaseService.getCase.mockRejectedValue(new Error('Case not found'));
