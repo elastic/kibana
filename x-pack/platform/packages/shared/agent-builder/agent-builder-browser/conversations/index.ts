@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { ConversationsService } from './conversations_service';
-export { createPublicConversationsContract } from './create_public_conversations_contract';
+export type {
+  AddConversationEventsParams,
+  AddConversationEventsResult,
+  ConversationsServiceStartContract,
+} from './contract';
