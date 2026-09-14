@@ -19,6 +19,7 @@ export interface StartWorkflowExecutionParams {
 }
 
 export interface ResumeWorkflowExecutionParams {
+  resumeRequest?: boolean;
   workflowRunId: string;
   spaceId: string;
 }

@@ -8,7 +8,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { isTerminalStatus } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { handlePostExecutionLoop } from './handle_post_execution_loop';
 import { setupDependencies } from './setup_dependencies';
 import { isWorkflowGraphSetupError } from './workflow_graph_setup_error';
@@ -25,6 +25,7 @@ import type { ContextDependencies } from '../workflow_context_manager/types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 import {
   ensureWorkflowIdleTimeoutResumeAfterLoop,
+  getIdleTimeoutResumeDeadlineMs,
   getWorkflowIdleTimeoutResumeAtAfterLoop,
 } from '../workflow_execution_loop/handle_execution_delay';
 
@@ -54,7 +55,7 @@ export async function resumeWorkflow({
   internalResumeWorkflowExecution?: InternalResumeWorkflowExecution;
   workflowExecutionRepository: WorkflowExecutionRepository;
   stepExecutionRepository: StepExecutionRepository;
-}): Promise<{ idleTimeoutResumeAt?: Date }> {
+}): Promise<{ idleTimeoutResumeAt?: Date; retryAt?: Date }> {
   let setupResult: Awaited<ReturnType<typeof setupDependencies>>;
   try {
     setupResult = await setupDependencies(
@@ -100,6 +101,30 @@ export async function resumeWorkflow({
       `Resume skipped for ${workflowRunId}: already in terminal status ${loadedExecution.status}`
     );
     return {};
+  }
+
+  const node = loadedExecution.currentNodeId ? workflowRuntime.getCurrentNode() : undefined;
+  if (
+    loadedExecution.status === ExecutionStatus.WAITING &&
+    !loadedExecution.cancelRequested &&
+    node?.type !== 'enter-parallel' &&
+    node?.stepId
+  ) {
+    const stepExecution = workflowExecutionState.getLatestStepExecution(node.stepId);
+    const resumeAt = stepExecution?.state?.resumeAt;
+    if (typeof resumeAt === 'string') {
+      const deadline = getIdleTimeoutResumeDeadlineMs(
+        { workflowExecutionGraph, workflowExecutionState },
+        loadedExecution,
+        workflowExecutionCursor.currentStackFrames,
+        { node, startedAt: stepExecution?.startedAt }
+      );
+      const nextRunAt = Math.min(new Date(resumeAt).getTime(), deadline ?? Infinity);
+      if (nextRunAt > Date.now()) {
+        // Late notifications preserve wait durations without postponing enclosing timeouts.
+        return { retryAt: new Date(nextRunAt) };
+      }
+    }
   }
 
   await workflowRuntime.resume();

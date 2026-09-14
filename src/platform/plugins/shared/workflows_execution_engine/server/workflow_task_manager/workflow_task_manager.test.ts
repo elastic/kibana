@@ -10,7 +10,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { TaskAlreadyRunningError, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { type EsWorkflowExecution, ExecutionStatus } from '@kbn/workflows';
 import { WORKFLOW_RESUME_TASK_TYPE } from './types';
 import type { ResumeWorkflowExecutionParams } from './types';
@@ -69,6 +69,7 @@ describe('WorkflowTaskManager', () => {
   beforeEach(() => {
     mockTaskManager = {
       schedule: jest.fn(),
+      ensureScheduled: jest.fn(),
       fetch: jest.fn(),
       runSoon: jest.fn(),
       removeIfExists: jest.fn().mockResolvedValue(undefined),
@@ -109,6 +110,7 @@ describe('WorkflowTaskManager', () => {
           params: {
             workflowRunId: 'test-execution-id',
             spaceId: 'default',
+            resumeRequest: true,
           } as ResumeWorkflowExecutionParams,
           state: {},
           runAt: resumeAt,
@@ -211,6 +213,7 @@ describe('WorkflowTaskManager', () => {
           params: {
             workflowRunId: 'test-execution-id',
             spaceId: 'default',
+            resumeRequest: true,
           } as ResumeWorkflowExecutionParams,
           state: {},
           runAt: resumeAt,
@@ -246,7 +249,7 @@ describe('WorkflowTaskManager', () => {
       expect(mockTaskManager.schedule).not.toHaveBeenCalled();
     });
 
-    it('skips remove and schedule when the global-timeout task is currently running', async () => {
+    it('preserves a claimed notification and schedules the next deadline separately', async () => {
       const workflowExecution = createMockWorkflowExecution();
       const resumeAt = new Date('2025-11-17T12:00:00.000Z');
       const stableId = getWorkflowGlobalTimeoutResumeTaskId(workflowExecution.id);
@@ -262,15 +265,19 @@ describe('WorkflowTaskManager', () => {
         },
       } as any);
 
+      mockTaskManager.schedule.mockResolvedValue({ id: 'next-deadline' } as never);
       const result = await workflowTaskManager.scheduleWorkflowGlobalTimeoutResumeTask({
         workflowExecution,
         resumeAt,
         fakeRequest,
       });
 
-      expect(result).toEqual({ taskId: stableId });
+      expect(result).toEqual({ taskId: 'next-deadline' });
       expect(mockTaskManager.removeIfExists).not.toHaveBeenCalled();
-      expect(mockTaskManager.schedule).not.toHaveBeenCalled();
+      expect(mockTaskManager.schedule).toHaveBeenCalledWith(
+        expect.objectContaining({ runAt: resumeAt }),
+        { request: fakeRequest, cloneApiKey: true }
+      );
     });
 
     it('removes and reschedules when existing task has a different runAt', async () => {
@@ -315,10 +322,10 @@ describe('WorkflowTaskManager', () => {
   });
 
   describe('scheduleImmediateResume', () => {
-    it('uses the stable immediate-resume task id and calls removeIfExists before scheduling', async () => {
+    it('preserves the stable immediate-resume claim when ensuring the task', async () => {
       const executionId = 'exec-789';
       const stableId = getWorkflowImmediateResumeTaskId(executionId);
-      mockTaskManager.schedule.mockResolvedValue({ id: stableId } as any);
+      mockTaskManager.ensureScheduled.mockResolvedValue({ id: stableId } as any);
 
       const result = await workflowTaskManager.scheduleImmediateResume({
         executionId,
@@ -327,8 +334,8 @@ describe('WorkflowTaskManager', () => {
       });
 
       expect(result).toEqual({ taskId: stableId });
-      expect(mockTaskManager.removeIfExists).toHaveBeenCalledWith(stableId);
-      expect(mockTaskManager.schedule).toHaveBeenCalledWith(
+      expect(mockTaskManager.removeIfExists).not.toHaveBeenCalled();
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(
         {
           id: stableId,
           taskType: WORKFLOW_RESUME_TASK_TYPE,
@@ -342,11 +349,11 @@ describe('WorkflowTaskManager', () => {
         { request: fakeRequest, cloneApiKey: true }
       );
       // runAt must not be set — task runs at the next available slot
-      const scheduledTask = (mockTaskManager.schedule as jest.Mock).mock.calls[0][0];
+      const scheduledTask = (mockTaskManager.ensureScheduled as jest.Mock).mock.calls[0][0];
       expect(scheduledTask.runAt).toBeUndefined();
     });
 
-    it('removeIfExists is called before schedule to prevent double-resume', async () => {
+    it('does not remove an existing claim before scheduling', async () => {
       const executionId = 'exec-order-check';
       const stableId = getWorkflowImmediateResumeTaskId(executionId);
       const callOrder: string[] = [];
@@ -354,7 +361,7 @@ describe('WorkflowTaskManager', () => {
       mockTaskManager.removeIfExists.mockImplementation(async () => {
         callOrder.push('removeIfExists');
       });
-      mockTaskManager.schedule.mockImplementation(async () => {
+      mockTaskManager.ensureScheduled.mockImplementation(async () => {
         callOrder.push('schedule');
         return { id: stableId } as any;
       });
@@ -365,13 +372,13 @@ describe('WorkflowTaskManager', () => {
         fakeRequest,
       });
 
-      expect(callOrder).toEqual(['removeIfExists', 'schedule']);
+      expect(callOrder).toEqual(['schedule']);
     });
 
     it('uses executionId-scoped scope string and correct spaceId', async () => {
       const executionId = 'exec-abc';
       const stableId = getWorkflowImmediateResumeTaskId(executionId);
-      mockTaskManager.schedule.mockResolvedValue({ id: stableId } as any);
+      mockTaskManager.ensureScheduled.mockResolvedValue({ id: stableId } as any);
 
       await workflowTaskManager.scheduleImmediateResume({
         executionId,
@@ -379,13 +386,13 @@ describe('WorkflowTaskManager', () => {
         fakeRequest,
       });
 
-      const scheduledTask = (mockTaskManager.schedule as jest.Mock).mock.calls[0][0];
+      const scheduledTask = (mockTaskManager.ensureScheduled as jest.Mock).mock.calls[0][0];
       expect(scheduledTask.scope).toEqual([`workflow:execution:${executionId}`]);
       expect(scheduledTask.params.spaceId).toBe('space-x');
     });
 
     it('propagates scheduling errors', async () => {
-      mockTaskManager.schedule.mockRejectedValue(new Error('Task manager unavailable'));
+      mockTaskManager.ensureScheduled.mockRejectedValue(new Error('Task manager unavailable'));
 
       await expect(
         workflowTaskManager.scheduleImmediateResume({
@@ -399,14 +406,14 @@ describe('WorkflowTaskManager', () => {
     it('schedules without request when fakeRequest is omitted', async () => {
       const executionId = 'exec-no-req';
       const stableId = getWorkflowImmediateResumeTaskId(executionId);
-      mockTaskManager.schedule.mockResolvedValue({ id: stableId } as any);
+      mockTaskManager.ensureScheduled.mockResolvedValue({ id: stableId } as any);
 
       await workflowTaskManager.scheduleImmediateResume({
         executionId,
         spaceId: 'default',
       });
 
-      expect(mockTaskManager.schedule).toHaveBeenCalledWith(
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(
         expect.objectContaining({
           params: { workflowRunId: executionId, spaceId: 'default' },
         }),
@@ -414,14 +421,11 @@ describe('WorkflowTaskManager', () => {
       );
     });
 
-    it('regression: concurrent calls both target the same stable id (last writer wins via removeIfExists)', async () => {
-      // Verify that two concurrent scheduleImmediateResume calls for the same execution
-      // both target the same stable task id — the idempotent removeIfExists + schedule
-      // pattern means the second call replaces the first, never creating two tasks.
+    it('concurrent callers ensure the same task without replacing its claim', async () => {
       const executionId = 'exec-concurrent';
       const stableId = getWorkflowImmediateResumeTaskId(executionId);
 
-      mockTaskManager.schedule.mockResolvedValue({ id: stableId } as any);
+      mockTaskManager.ensureScheduled.mockResolvedValue({ id: stableId } as any);
 
       await Promise.all([
         workflowTaskManager.scheduleImmediateResume({
@@ -436,7 +440,7 @@ describe('WorkflowTaskManager', () => {
         }),
       ]);
 
-      const scheduledIds = (mockTaskManager.schedule as jest.Mock).mock.calls.map(
+      const scheduledIds = (mockTaskManager.ensureScheduled as jest.Mock).mock.calls.map(
         ([taskDef]) => taskDef.id
       );
       // Both calls must target the same stable id — never a random uuid
@@ -448,7 +452,7 @@ describe('WorkflowTaskManager', () => {
     it('should call scheduleImmediateResume and then runSoon on the returned taskId', async () => {
       const executionId = 'exec-and-run';
       const stableId = getWorkflowImmediateResumeTaskId(executionId);
-      mockTaskManager.schedule.mockResolvedValue({ id: stableId } as any);
+      mockTaskManager.ensureScheduled.mockResolvedValue({ id: stableId } as any);
 
       await workflowTaskManager.scheduleAndRunImmediateResume({
         executionId,
@@ -456,13 +460,13 @@ describe('WorkflowTaskManager', () => {
         fakeRequest,
       });
 
-      expect(mockTaskManager.removeIfExists).toHaveBeenCalledWith(stableId);
-      expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.removeIfExists).not.toHaveBeenCalled();
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(1);
       expect(mockTaskManager.runSoon).toHaveBeenCalledWith(stableId);
     });
 
     it('should propagate errors from scheduleImmediateResume', async () => {
-      mockTaskManager.schedule.mockRejectedValue(new Error('TM unavailable'));
+      mockTaskManager.ensureScheduled.mockRejectedValue(new Error('TM unavailable'));
 
       await expect(
         workflowTaskManager.scheduleAndRunImmediateResume({
@@ -478,7 +482,7 @@ describe('WorkflowTaskManager', () => {
     it('should propagate errors from runSoon', async () => {
       const executionId = 'exec-runsoon-fail';
       const stableId = getWorkflowImmediateResumeTaskId(executionId);
-      mockTaskManager.schedule.mockResolvedValue({ id: stableId } as any);
+      mockTaskManager.ensureScheduled.mockResolvedValue({ id: stableId } as any);
       mockTaskManager.runSoon.mockRejectedValue(new Error('runSoon failed'));
 
       await expect(
@@ -488,6 +492,59 @@ describe('WorkflowTaskManager', () => {
           fakeRequest,
         })
       ).rejects.toThrow('runSoon failed');
+    });
+  });
+
+  describe('busy resume wake-ups', () => {
+    const params = { executionId: 'exec-busy', spaceId: 'default' };
+
+    it.each([
+      new TaskAlreadyRunningError('runner'),
+      SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'runner'),
+    ])('persists a request when runSoon cannot consume the wake-up: %s', async (error) => {
+      mockTaskManager.runSoon.mockRejectedValue(error);
+      await workflowTaskManager.scheduleAndRunImmediateResume({ ...params, fakeRequest });
+      expect(mockTaskManager.removeIfExists).not.toHaveBeenCalled();
+      expect(mockTaskManager.schedule).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: { workflowRunId: params.executionId, spaceId: 'default', resumeRequest: true },
+          runAt: expect.any(Date),
+        }),
+        { request: fakeRequest, cloneApiKey: true }
+      );
+    });
+
+    it('retains a notification when runSoon loses an optimistic-concurrency race', async () => {
+      mockTaskManager.runSoon.mockResolvedValue({ id: 'runner', forced: false, conflict: true });
+      await workflowTaskManager.scheduleAndRunImmediateResume(params);
+      expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
+    });
+
+    it('allows the persisted request to wake the runner after its previous claim finishes', async () => {
+      mockTaskManager.runSoon.mockRejectedValueOnce(new TaskAlreadyRunningError('runner'));
+      expect(await workflowTaskManager.tryRunImmediateResume(params)).toBe(false);
+      mockTaskManager.runSoon.mockResolvedValue({ id: 'runner', forced: false });
+      expect(await workflowTaskManager.tryRunImmediateResume(params)).toBe(true);
+      expect(mockTaskManager.removeIfExists).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('external resumes after timer hand-off', () => {
+    it('wakes the remaining authenticated timer when the global notification has completed', async () => {
+      mockTaskManager.runSoon.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'global')
+      );
+      mockTaskManager.fetch.mockResolvedValue({ docs: [{ id: 'next-deadline' }] } as never);
+      await workflowTaskManager.runExistingResumeTask('exec');
+      expect(mockTaskManager.runSoon).toHaveBeenLastCalledWith('next-deadline');
+      expect(mockTaskManager.schedule).not.toHaveBeenCalled();
+    });
+
+    it('does not report a successful wake-up when no authenticated task remains', async () => {
+      const error = SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'global');
+      mockTaskManager.runSoon.mockRejectedValueOnce(error);
+      mockTaskManager.fetch.mockResolvedValue({ docs: [] } as never);
+      await expect(workflowTaskManager.runExistingResumeTask('exec')).rejects.toThrow(error);
     });
   });
 
@@ -594,8 +651,10 @@ describe('WorkflowTaskManager', () => {
       });
 
       expect(mockTaskManager.fetch).toHaveBeenCalledTimes(2);
-      expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
-      expect(mockTaskManager.runSoon).toHaveBeenCalledWith('new-resume-task');
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.runSoon).toHaveBeenCalledWith(
+        getWorkflowImmediateResumeTaskId('test-execution-id')
+      );
     });
 
     it('should remove and reschedule idle tasks when found', async () => {
@@ -696,8 +755,10 @@ describe('WorkflowTaskManager', () => {
       });
 
       expect(mockTaskManager.runSoon).not.toHaveBeenCalledWith(globalTimeoutTaskId);
-      expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
-      expect(mockTaskManager.runSoon).toHaveBeenCalledWith('new-resume-task');
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.runSoon).toHaveBeenCalledWith(
+        getWorkflowImmediateResumeTaskId('test-execution-id')
+      );
     });
   });
 
