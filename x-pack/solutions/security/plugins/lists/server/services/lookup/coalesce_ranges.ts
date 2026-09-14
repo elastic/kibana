@@ -9,10 +9,10 @@ import type { Type } from '@kbn/securitysolution-io-ts-list-types';
 
 /**
  * POC range coalescing. Parses authored range items into numeric bounds, merges
- * overlapping intervals into disjoint ones, and formats the bounds back to
- * strings for storage. Overlap-only merge (adjacent-interval merge is a later
- * optimization); the result is disjoint, which is what guarantees one match per
- * value in the join.
+ * them into disjoint intervals, and formats the bounds back to strings for storage.
+ * Overlapping intervals always merge. For the discrete types (ip, date, integer,
+ * long) exactly adjacent intervals merge too, which compacts the coalesced set. The
+ * result is disjoint, which is what guarantees one match per value in the join.
  */
 
 export interface CoalescedBound {
@@ -147,12 +147,30 @@ const codecForType = (type: Type): RangeCodec => {
   return numericCodec; // integer_range, long_range, float_range, double_range
 };
 
-const coalesceIntervals = (intervals: Interval[]): Interval[] => {
+// The next representable value after a discrete bound, so adjacent intervals can be
+// detected (bigint for ip, number for integer/long/date in ms).
+const nextValue = (end: Num): Num => (typeof end === 'bigint' ? end + 1n : end + 1);
+
+// ip, date, integer, and long ranges are discrete, so intervals that are exactly
+// adjacent merge as well as those that overlap. Float and double ranges are
+// continuous, so only overlaps merge.
+const DISCRETE_RANGE_TYPES: ReadonlySet<Type> = new Set([
+  'date_range',
+  'integer_range',
+  'ip_range',
+  'long_range',
+]);
+const isDiscreteRangeType = (type: Type): boolean => DISCRETE_RANGE_TYPES.has(type);
+
+const coalesceIntervals = (intervals: Interval[], mergeAdjacent: boolean): Interval[] => {
   const sorted = [...intervals].sort((x, y) => cmp(x.start, y.start));
   const out: Interval[] = [];
   for (const iv of sorted) {
     const last = out[out.length - 1];
-    if (last != null && cmp(iv.start, last.end) <= 0) {
+    // Merge when the next interval overlaps the current one, and for discrete types
+    // also when it is exactly adjacent (starts one step past the current end).
+    const mergeUpTo = last != null && mergeAdjacent ? nextValue(last.end) : last?.end;
+    if (last != null && mergeUpTo != null && cmp(iv.start, mergeUpTo) <= 0) {
       if (cmp(iv.end, last.end) > 0) last.end = iv.end;
     } else {
       out.push({ ...iv });
@@ -176,7 +194,7 @@ export const coalesceRangeValues = (type: Type, values: string[]): CoalescedBoun
       }
     })
     .filter((iv): iv is Interval => iv != null && iv.start != null && iv.end != null);
-  return coalesceIntervals(intervals).map((iv) => codec.format(iv));
+  return coalesceIntervals(intervals, isDiscreteRangeType(type)).map((iv) => codec.format(iv));
 };
 
 // Parse the two endpoints of an already stored bound (plain values, never CIDR or
@@ -227,5 +245,26 @@ export const coalesceBounds = (type: Type, bounds: CoalescedBound[]): CoalescedB
       }
     })
     .filter((iv): iv is Interval => iv != null && iv.start != null && iv.end != null);
-  return coalesceIntervals(intervals).map((iv) => codec.format(iv));
+  return coalesceIntervals(intervals, isDiscreteRangeType(type)).map((iv) => codec.format(iv));
+};
+
+/**
+ * Widen a bound by one representable step on each side for the discrete types, so a
+ * region search built from it also captures exactly adjacent intervals (which do not
+ * overlap and would otherwise land in a separate coalesce pass). Continuous types and
+ * unparseable bounds are returned unchanged. The lower edge is clamped at zero for ip.
+ */
+export const widenForAdjacency = (type: Type, bound: CoalescedBound): CoalescedBound => {
+  if (!isDiscreteRangeType(type)) return bound;
+  const codec = codecForType(type);
+  let iv: Interval;
+  try {
+    iv = boundToInterval(type, bound);
+  } catch {
+    return bound;
+  }
+  const start =
+    typeof iv.start === 'bigint' ? (iv.start > 0n ? iv.start - 1n : iv.start) : iv.start - 1;
+  const end = typeof iv.end === 'bigint' ? iv.end + 1n : iv.end + 1;
+  return codec.format({ ...iv, end, start });
 };

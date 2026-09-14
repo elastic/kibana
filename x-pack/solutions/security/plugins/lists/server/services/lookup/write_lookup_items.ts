@@ -15,7 +15,12 @@ import { transformListItemToElasticQuery } from '../utils';
 
 import { isRangeType } from './build_lookup_mappings';
 import type { CoalescedBound } from './coalesce_ranges';
-import { coalesceBounds, coalesceRangeValues, parseValueToBound } from './coalesce_ranges';
+import {
+  coalesceBounds,
+  coalesceRangeValues,
+  parseValueToBound,
+  widenForAdjacency,
+} from './coalesce_ranges';
 import { collectHits } from './paginate_hits';
 
 const hashId = (value: string): string => createHash('sha256').update(value).digest('hex');
@@ -169,7 +174,9 @@ const overlaps = (
  * so the coalesced set is disjoint when it reads it, which keeps the affected region
  * closed: the sources of an overlapping coalesced interval all overlap that interval,
  * so pulling "sources overlapping the window or any overlapping coalesced interval"
- * captures the whole connected component.
+ * captures the whole connected component. For the discrete types the search bounds are
+ * widened by one representable step, so exactly adjacent intervals are pulled in and
+ * merged too (adjacency coalescing), matching the merge rule in `coalesceBounds`.
  */
 const processWindow = async (
   esClient: ElasticsearchClient,
@@ -183,7 +190,10 @@ const processWindow = async (
     index,
     query: {
       bool: {
-        filter: [{ term: { kind: 'coalesced' } }, overlaps('range_start', 'range_end', window)],
+        filter: [
+          { term: { kind: 'coalesced' } },
+          overlaps('range_start', 'range_end', widenForAdjacency(type, window)),
+        ],
       },
     },
   });
@@ -203,7 +213,9 @@ const processWindow = async (
       bool: {
         filter: [{ term: { kind: 'source' } }],
         minimum_should_match: 1,
-        should: regions.map((region) => overlaps('src_start', 'src_end', region)),
+        should: regions.map((region) =>
+          overlaps('src_start', 'src_end', widenForAdjacency(type, region))
+        ),
       },
     },
   });
