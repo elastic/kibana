@@ -173,11 +173,11 @@ export const FlakyTestReportThresholdsSchema = z.object({
   /** Maximum number of tests kept per list. */
   maxTests: z.int().min(1),
   /**
-   * Tests without an execution (a run that was not skipped) in this many hours before the
-   * window end are dropped: they were skipped, moved or deleted since, so there is nothing left
-   * to fix. Defaults so that reports written before the field existed still parse.
+   * Tests must have run (executed without being skipped) in the last this many hours of the
+   * window; the others were skipped, moved or deleted since, so there is nothing left to fix.
+   * Defaults so that reports written before the field existed still parse.
    */
-  maxInactiveHours: z.int().min(1).default(24),
+  lastRunWithinHours: z.int().min(1).default(24),
 });
 export type FlakyTestReportThresholds = z.infer<typeof FlakyTestReportThresholdsSchema>;
 
@@ -205,7 +205,7 @@ export const DEFAULT_FLAKY_TEST_REPORT_OPTIONS: Omit<FlakyTestReportOptions, 'no
     minFailedBuilds: 2,
     minFailRate: 0,
     maxTests: 200,
-    maxInactiveHours: 24,
+    lastRunWithinHours: 24,
   },
   samplesPerTest: 3,
 };

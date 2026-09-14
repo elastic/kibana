@@ -152,15 +152,15 @@ const toEntry = (
 
 const MS_PER_HOUR = 60 * 60 * 1000;
 
-/** Whether the test executed on any branch within `maxInactiveHours` of the window end. */
+/** Whether the test ran on any branch in the last `lastRunWithinHours` of the window. */
 export const isActive = (
   byBranch: ReadonlyArray<Pick<BranchCountsRow, 'latestExecutionAt'>>,
   to: Date,
-  maxInactiveHours: number
+  lastRunWithinHours: number
 ): boolean =>
   byBranch.some(
     ({ latestExecutionAt }) =>
-      to.getTime() - latestExecutionAt.getTime() <= maxInactiveHours * MS_PER_HOUR
+      to.getTime() - latestExecutionAt.getTime() <= lastRunWithinHours * MS_PER_HOUR
   );
 
 const groupByFramework = <T extends { framework: TestFramework }>(
@@ -250,14 +250,14 @@ const buildReport = async (
     startedAt = performance.now();
     const branchCounts = await fetchBranchCounts(es, scope, candidates);
     let belowThresholds = 0;
-    let inactive = 0;
+    let notRunLately = 0;
     for (const row of candidates) {
       const byBranch = branchCounts.get(row.testId) ?? [];
       const flakiestBranch = flakiestQualifyingBranch(byBranch, thresholds);
       if (!flakiestBranch) {
         belowThresholds += 1;
-      } else if (!isActive(byBranch, to, thresholds.maxInactiveHours)) {
-        inactive += 1;
+      } else if (!isActive(byBranch, to, thresholds.lastRunWithinHours)) {
+        notRunLately += 1;
       } else {
         qualified.push({ row, flakiestBranch });
       }
@@ -265,7 +265,7 @@ const buildReport = async (
     log.info(
       `Checked ${candidates.length} tests branch by branch in ${elapsed(startedAt)}: ` +
         `${qualified.length} qualify, ${belowThresholds} clear the thresholds on no single ` +
-        `branch, ${inactive} did not execute in the last ${thresholds.maxInactiveHours}h ` +
+        `branch, ${notRunLately} did not run in the last ${thresholds.lastRunWithinHours}h ` +
         `(skipped, moved or deleted)`
     );
   }

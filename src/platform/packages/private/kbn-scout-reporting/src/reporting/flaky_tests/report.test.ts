@@ -27,7 +27,7 @@ import {
 } from './schema';
 import * as queries from './queries';
 
-const thresholds = { minBuilds: 10, minFailedBuilds: 2, minFailRate: 0, maxInactiveHours: 24 };
+const thresholds = { minBuilds: 10, minFailedBuilds: 2, minFailRate: 0, lastRunWithinHours: 24 };
 
 describe('mayQualify', () => {
   it('needs enough builds and failed builds in total, ignoring the failure rate', () => {
@@ -114,7 +114,7 @@ describe('isActive', () => {
   const to = new Date('2026-09-07T00:00:00.000Z');
   const executedAt = (iso: string) => ({ latestExecutionAt: new Date(iso) });
 
-  it('is active when any branch executed the test within the inactivity window', () => {
+  it('is active when any branch ran the test within the last hours of the window', () => {
     expect(isActive([executedAt('2026-09-06T00:00:00.000Z')], to, 24)).toBe(true);
     expect(
       isActive(
@@ -702,8 +702,8 @@ describe('ScoutFlakyTests.writeToFile / fromFile', () => {
 
     // reports written before `scope.classifications` existed default to both lists
     expect(report.scope.classifications).toEqual(['flaky', 'consistently-failing']);
-    // likewise for the inactivity threshold and the per-file breakdown
-    expect(report.thresholds.maxInactiveHours).toBe(24);
+    // likewise for the last-run threshold and the per-file breakdown
+    expect(report.thresholds.lastRunWithinHours).toBe(24);
     expect(report.files).toEqual([]);
 
     const outputPath = path.join(tmpDir, 'nested', 'report.json');
