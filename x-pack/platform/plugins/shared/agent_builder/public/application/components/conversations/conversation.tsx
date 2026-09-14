@@ -22,7 +22,7 @@ import {
   useHasActiveConversation,
 } from '../../hooks/use_conversation';
 import { ConversationInput } from './conversation_input/conversation_input';
-import { ConversationRounds } from './conversation_rounds/conversation_rounds';
+import { TimelineConnector } from './timeline/timeline_connector';
 import { NewConversationPrompt } from './new_conversation_prompt';
 import { useConversationId } from '../../context/conversation/use_conversation_id';
 import { useStreamingContext } from '../../context/streaming/streaming_context';
@@ -196,10 +196,7 @@ export const Conversation: React.FC<{}> = () => {
             css={scrollableStyles}
           >
             <EuiFlexItem css={[conversationElementWidthStyles, conversationElementPaddingStyles]}>
-              <ConversationRounds
-                scrollContainerHeight={scrollContainerHeight}
-                anchoredRoundIndex={anchoredRoundIndex}
-              />
+              <TimelineConnector />
             </EuiFlexItem>
           </EuiFlexGroup>
           {showScrollButton && <ScrollButton onClick={smoothScrollToBottom} />}
