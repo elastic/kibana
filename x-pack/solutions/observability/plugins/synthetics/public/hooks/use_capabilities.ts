@@ -15,6 +15,15 @@ export const useCanEditSynthetics = () => {
   return !!useKibana().services?.application?.capabilities.uptime.save;
 };
 
+/**
+ * Whether the current user can trigger manual test runs. True when they can edit
+ * Synthetics (write) OR have been granted the run-only `canRunTestManually` sub-feature.
+ */
+export const useCanRunTestManually = () => {
+  const capabilities = useKibana().services?.application?.capabilities.uptime;
+  return !!(capabilities?.save || capabilities?.canRunTestManually);
+};
+
 export const useCanUsePublicLocations = (monLocations?: MonitorLocations) => {
   const canUsePublicLocations =
     useKibana().services?.application?.capabilities.uptime.elasticManagedLocationsEnabled ?? true;

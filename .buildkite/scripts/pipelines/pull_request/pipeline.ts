@@ -67,10 +67,17 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
   }
 
   try {
-    const affectedPackages = await getAffectedPackages(process.env.GITHUB_PR_MERGE_BASE, {
+    // On sparse&shallow checkout, git strategy doesn't work as expected,
+    // we need to manually feed in changed files,
+    // and make sure **/kibana.jsonc and **/tsconfig.json are included in the checkout
+    const prChanges = await getPrChangesCached();
+    const affectedPackages = await getAffectedPackages(undefined, {
       strategy: 'git',
       includeDownstream: true,
       ignoreUncategorizedChanges: true,
+      changedFiles: prChanges.flatMap((change) =>
+        change.previous_filename ? [change.filename, change.previous_filename] : [change.filename]
+      ),
     });
     return (
       affectedPackages.has('@kbn/storybook') || affectedPackages.has('@kbn/ui-storybook-config')

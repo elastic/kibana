@@ -31,10 +31,12 @@ resolveCurrentServerlessReleaseSha() {
 echo --- Check changes in Saved Objects
 
 if is_pr; then
+  set_git_stack_merge_base
+
   # We are on the 'pull_request' pipeline. Pass the merge-base SHA to the CLI;
   # snapshot resolution (retries + limited ancestor walk) happens in JavaScript.
   SERVERLESS_BASELINE_FLAG=()
-  if [[ "$GITHUB_PR_TARGET_BRANCH" == "main" ]]; then
+  if [[ "$GITHUB_PR_STACK_TARGET_BRANCH" == "main" ]]; then
     GITHUB_SERVERLESS_RELEASE_SHA="$(resolveCurrentServerlessReleaseSha)"
     SERVERLESS_BASELINE_FLAG=(--serverless-baseline "$GITHUB_SERVERLESS_RELEASE_SHA")
   fi
@@ -46,10 +48,10 @@ if is_pr; then
     # The step might update files like removed_types.json and/or SO fixtures.
     # `check_for_changed_files` runs unconditionally so that any files produced by --fix
     # are auto-committed even when the check also reports non-fixable violations.
-    node scripts/check_saved_objects --baseline "$GITHUB_PR_MERGE_BASE" "${SERVERLESS_BASELINE_FLAG[@]}" --algorithm both --report-path "$SO_REPORT_PATH" --fix || CHECK_EXIT=$?
+    node scripts/check_saved_objects --baseline "$GITHUB_PR_STACK_MERGE_BASE" "${SERVERLESS_BASELINE_FLAG[@]}" --algorithm both --report-path "$SO_REPORT_PATH" --fix || CHECK_EXIT=$?
     check_for_changed_files "node scripts/check_saved_objects" true
   else
-    node scripts/check_saved_objects --baseline "$GITHUB_PR_MERGE_BASE" "${SERVERLESS_BASELINE_FLAG[@]}" --algorithm both --report-path "$SO_REPORT_PATH" || CHECK_EXIT=$?
+    node scripts/check_saved_objects --baseline "$GITHUB_PR_STACK_MERGE_BASE" "${SERVERLESS_BASELINE_FLAG[@]}" --algorithm both --report-path "$SO_REPORT_PATH" || CHECK_EXIT=$?
   fi
 
   echo --- Post Saved Objects PR comment

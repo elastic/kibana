@@ -1,5 +1,5 @@
 {
-  "sha1": "c9f765ba1e780391fafe8a925c9aa98841516dee",
+  "sha1": "fa8fb7e2c3a86eab1abcee15b692e9f9375954de",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -471,7 +471,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_row_height.spec.ts",
-        "line": 68,
+        "line": 67,
         "column": 12
       }
     },
@@ -484,7 +484,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_row_height.spec.ts",
-        "line": 88,
+        "line": 87,
         "column": 12
       }
     },
@@ -497,7 +497,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_row_height.spec.ts",
-        "line": 95,
+        "line": 94,
         "column": 12
       }
     },
@@ -510,7 +510,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_row_height.spec.ts",
-        "line": 115,
+        "line": 113,
         "column": 12
       }
     },

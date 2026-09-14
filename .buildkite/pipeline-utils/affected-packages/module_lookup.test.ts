@@ -329,6 +329,32 @@ describe('module_lookup', () => {
     });
   });
 
+  describe('getAffectedModulesGit – changedFiles', () => {
+    it('classifies an explicit file list without git merge-base', () => {
+      const affected = getAffectedModulesGit({
+        changedFiles: ['packages/core/src/index.ts'],
+        includeDownstream: false,
+      });
+      expect(affected).toEqual(new Set(['@kbn/core']));
+    });
+
+    it('includes downstream for an explicit file list', () => {
+      const affected = getAffectedModulesGit({
+        changedFiles: ['packages/core/src/index.ts'],
+        includeDownstream: true,
+      });
+      expect(affected).toEqual(
+        new Set(['@kbn/core', '@kbn/utils', '@kbn/my-plugin', '@kbn/analytics'])
+      );
+    });
+
+    it('throws when neither changedFiles nor mergeBase is provided', () => {
+      expect(() => getAffectedModulesGit({ includeDownstream: false })).toThrow(
+        'No merge base found'
+      );
+    });
+  });
+
   describe('getAffectedModulesGit – file mutations', () => {
     it('detects an added file in a single module', () => {
       addFileInModule(tmpDir, 'packages/core', 'new_feature.ts');
