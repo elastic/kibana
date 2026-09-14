@@ -91,17 +91,39 @@ steps:
   # inside a branch compiles to a timeout-zone node the parallel executor cannot
   # drive, and graph-build rejects it. Each branch holds one step, so the branch
   # deadline is that run's deadline.
+  #
+  # The fan-out is over batch *offsets* (`[0, 100, 200, ...]`), not over the
+  # alert chunks themselves, and each branch slices its own window out of
+  # `retrieve_alerts`. Fanning out over the chunks makes each branch's `key` a
+  # ~300 KB slab of anonymized alerts, which the engine snapshots into the
+  # parallel step's persisted branch state AND copies into `results[].key` in
+  # the aggregate — roughly 2 MB of payload duplicated twice, per run, for a
+  # field that exists only for correlation. The engine's own contract says as
+  # much: in dynamic mode the execution view "should fall back to the fan-out
+  # index" because `key` "may be arbitrary/long data". Offsets are integers, so
+  # branch state and the aggregate both stay in the KB range.
+  #
+  # `divided_by` returns a float, so the batch count is floored explicitly and
+  # incremented — the naive `(total + size - 1) / size` ceil yields one extra,
+  # empty batch whenever the alert count is an exact multiple of `batch_size`.
+  # The `total > 0` guard keeps a zero-alert run at zero branches.
   - name: generate_batches
     type: parallel
     mode: settled
     concurrency: 5
     branch-timeout: "30m"
-    foreach: "${{ steps.retrieve_alerts.output.alerts | chunk: inputs.batch_size }}"
+    foreach: |-
+      [{%- assign total = steps.retrieve_alerts.output.alerts | size -%}
+      {%- if total > 0 -%}
+      {%- assign n = total | minus: 1 | divided_by: inputs.batch_size | floor | plus: 1 -%}
+      {%- for i in (1..n) -%}{%- unless forloop.first -%},{%- endunless -%}
+      {{ forloop.index0 | times: inputs.batch_size }}{%- endfor -%}
+      {%- endif -%}]
     steps:
       - name: run_batch
         type: security.attack-discovery.run
         with:
-          alerts: "${{ foreach.item }}"
+          alerts: "${{ steps.retrieve_alerts.output.alerts | slice: foreach.item, inputs.batch_size }}"
           connector_id: "{{ inputs.connector_id }}"
           # The discoveries are read back from the index below instead. They
           # dominate this step's output, and an output above the engine's

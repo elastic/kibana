@@ -191,10 +191,15 @@ describe('ALERTZERO_BATCHED_ATTACK_DISCOVERY_WORKFLOW', () => {
       expect(fanOut().mode).toBe('settled');
     });
 
-    it('chunks the retrieved alerts by batch_size', () => {
-      expect(fanOut().foreach).toBe(
-        '${{ steps.retrieve_alerts.output.alerts | chunk: inputs.batch_size }}'
-      );
+    // Fans out over batch offsets, not over the alert chunks themselves: a
+    // chunk becomes the branch `key`, which the engine both persists in the
+    // parallel step's branch state and copies into `results[].key`. At 100
+    // anonymized alerts per batch that is ~300 KB duplicated twice per branch,
+    // for a field used only for correlation.
+    it('fans out over batch offsets rather than the alert payload', () => {
+      const expr = String(fanOut().foreach);
+      expect(expr).toContain('inputs.batch_size');
+      expect(expr).not.toContain('chunk:');
     });
 
     it('bounds concurrency, which is the per-run rate-limit exposure', () => {
@@ -215,8 +220,61 @@ describe('ALERTZERO_BATCHED_ATTACK_DISCOVERY_WORKFLOW', () => {
       expect(fanOut().steps?.[0].type).toBe('security.attack-discovery.run');
     });
 
-    it('hands each branch its own batch', () => {
-      expect(fanOut().steps?.[0].with?.alerts).toBe('${{ foreach.item }}');
+    // The offsets and the per-branch slice are a matched pair — an off-by-one
+    // in either silently drops or double-counts alerts — so they are evaluated
+    // together against the engine rather than asserted as strings.
+    describe('batch coverage', () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+
+      const cover = async (count: number, batchSize: number) => {
+        const context = {
+          inputs: { batch_size: batchSize },
+          steps: {
+            retrieve_alerts: {
+              output: { alerts: Array.from({ length: count }, (_, i) => `alert-${i}`) },
+            },
+          },
+        };
+        const offsets: number[] = JSON.parse(
+          await engine.parseAndRender(String(fanOut().foreach), context)
+        );
+        // `${{ ... }}` returns a typed value at runtime; render it as JSON here
+        // so the same expression can be evaluated through the string engine.
+        const sliceExpr = String(fanOut().steps?.[0].with?.alerts)
+          .replace(/^\$\{\{/, '{{')
+          .replace(/\}\}$/, '| json }}');
+        const seen: string[] = [];
+        for (const item of offsets) {
+          seen.push(
+            ...JSON.parse(await engine.parseAndRender(sliceExpr, { ...context, foreach: { item } }))
+          );
+        }
+        return { offsets, seen };
+      };
+
+      it.each([
+        [700, 100],
+        [665, 100],
+        [113, 100],
+        [50, 50],
+      ])('covers every one of %s alerts at batch_size %s', async (count, batchSize) => {
+        const { offsets, seen } = await cover(count, batchSize);
+        expect(seen).toEqual(Array.from({ length: count }, (_, i) => `alert-${i}`));
+        expect(offsets).toHaveLength(Math.ceil(count / batchSize));
+      });
+
+      // `divided_by` is float division, so the naive `(total + size - 1) / size`
+      // ceil emits one extra, empty batch on exact multiples — a wasted LLM run.
+      it('emits no empty trailing batch on an exact multiple', async () => {
+        const { offsets } = await cover(700, 100);
+        expect(offsets).toEqual([0, 100, 200, 300, 400, 500, 600]);
+      });
+
+      it('fans out to nothing when no alerts were retrieved', async () => {
+        const { offsets, seen } = await cover(0, 100);
+        expect(offsets).toEqual([]);
+        expect(seen).toEqual([]);
+      });
     });
 
     // A branch output above the engine's eviction threshold is dropped from
