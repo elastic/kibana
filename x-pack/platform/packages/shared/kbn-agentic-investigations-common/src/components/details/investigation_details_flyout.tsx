@@ -17,9 +17,11 @@ import {
   EuiTab,
   EuiTabs,
   useGeneratedHtmlId,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { Investigation } from '../../types';
 import { ConversationDetailsFlyoutHeader } from './flyout_header';
+import { ConversationDetailsFlyoutMenuBar } from './flyout_menu_bar';
 import { ConversationDetailsFlyoutFooter } from './flyout_footer';
 import { OverviewTab, TimelineTab } from './details_flyout_tab_contents';
 import { DETAILS_FLYOUT_LABELS } from './translations';
@@ -68,6 +70,7 @@ export const InvestigationDetailsFlyout = ({
   onClose,
   onOpenChat,
 }: InvestigationDetailsFlyoutProps) => {
+  const { euiTheme } = useEuiTheme();
   const titleId = useGeneratedHtmlId({ prefix: 'investigationDetailsFlyoutTitle' });
   // TODO: A tab this host cannot render (`attachments`) falls back rather than showing an empty body.
   // update this in case attachments/timeline come back in MVP
@@ -80,10 +83,15 @@ export const InvestigationDetailsFlyout = ({
       paddingSize="m"
       onClose={onClose}
       ownFocus={false}
+      hideCloseButton
       aria-labelledby={titleId}
       data-test-subj="investigationDetailsFlyout"
     >
-      <EuiFlyoutHeader hasBorder css={{ borderBlockEnd: 'none' }}>
+      <EuiFlyoutHeader hasBorder css={{ paddingBlock: `${euiTheme.size.m} !important` }}>
+        <ConversationDetailsFlyoutMenuBar onClose={onClose} />
+      </EuiFlyoutHeader>
+
+      <EuiFlyoutBody>
         <div id={titleId}>
           {investigation ? (
             <ConversationDetailsFlyoutHeader investigation={investigation} />
@@ -108,9 +116,7 @@ export const InvestigationDetailsFlyout = ({
             </EuiTab>
           ))}
         </EuiTabs>
-      </EuiFlyoutHeader>
-
-      <EuiFlyoutBody>
+        <EuiSpacer size="m" />
         {!investigation ? (
           <EuiSkeletonText
             lines={6}

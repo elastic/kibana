@@ -50,6 +50,23 @@ describe('InvestigationDetailsFlyout', () => {
     expect(screen.queryByTestId('investigationFlyoutOpenChat')).not.toBeInTheDocument();
   });
 
+  it('offers close and share along the top of the flyout', () => {
+    const { onClose } = renderFlyout();
+
+    expect(screen.getByTestId('investigationDetailsFlyoutShare')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('investigationDetailsFlyoutClose'));
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps close reachable while the investigation is still loading', () => {
+    const { onClose } = renderFlyout({ investigation: undefined, isLoading: true });
+
+    fireEvent.click(screen.getByTestId('investigationDetailsFlyoutClose'));
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
   it('renders the investigation once loaded', () => {
     renderFlyout();
 
