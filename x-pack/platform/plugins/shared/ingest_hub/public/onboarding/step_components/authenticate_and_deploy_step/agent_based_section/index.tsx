@@ -184,7 +184,7 @@ export function AgentBasedSection({
     let cancelled = false;
     buildAgentPolicyName().then((name) => {
       if (!cancelled) {
-        setNewAgentPolicy((prev) => ({ ...prev, name }));
+        setNewAgentPolicy((prev: Partial<NewAgentPolicy>) => ({ ...prev, name }));
         setIsPolicyNameLoading(false);
       }
     });
@@ -203,7 +203,7 @@ export function AgentBasedSection({
   // ── Policy created callback ───────────────────────────────────────────────
   const handleAgentPolicyCreated = useCallback(
     (policy: AgentPolicy) => {
-      setNewAgentPolicy((prev) => ({ ...prev, name: policy.name }));
+      setNewAgentPolicy((prev: Partial<NewAgentPolicy>) => ({ ...prev, name: policy.name }));
       setAgentBasedDeployment({
         agentPolicyId: policy.id,
         agentPolicyName: policy.name,
