@@ -8,6 +8,7 @@
  */
 import React, { Suspense, useRef, useState } from 'react';
 import { EuiButtonGroup, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
 import { StardustWrapper } from '@kbn/content-management-favorites-public';
@@ -33,9 +34,12 @@ const LazyHelpPopover = React.lazy(async () => {
 export function ESQLMenu({
   hideHistory,
   onESQLDocsFlyoutVisibilityChanged,
+  docsFlyoutSize,
 }: {
   hideHistory?: boolean;
   onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
+  /** Size for the docs flyout. Pass a named size when embedding the menu in another flyout. */
+  docsFlyoutSize?: EuiFlyoutProps['size'];
 } = {}) {
   const editorActions = useEsqlEditorActions();
   const isNlToEsqlEnabled = useNlToEsqlCheck();
@@ -111,14 +115,19 @@ export function ESQLMenu({
           <EuiToolTip position="top" content={helpLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               iconType="question"
+              size="xs"
               aria-label={helpLabel}
               data-test-subj="esql-help-popover-button"
+              color="text"
               isDisabled
             />
           </EuiToolTip>
         }
       >
-        <LazyHelpPopover onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged} />
+        <LazyHelpPopover
+          onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
+          docsFlyoutSize={docsFlyoutSize}
+        />
       </Suspense>
     </EuiButtonGroup>
   );
