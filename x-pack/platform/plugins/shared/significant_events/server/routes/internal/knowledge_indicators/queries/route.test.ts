@@ -233,6 +233,18 @@ describe('pause guard on rule-touching query routes', () => {
       body: null,
     });
   });
+
+  it('rejects upsert with 409 while paused', async () => {
+    await expectPausedBeforeRuleWork(upsertQueryRoute.handler, {
+      path: { queryId: 'q1' },
+      body: {
+        title: 'Error count',
+        description: '',
+        esql: { query: 'FROM logs.test | WHERE log.level == "error"' },
+        target_name: 'logs.test',
+      },
+    });
+  });
 });
 
 describe('bulkDeleteQueriesRoute', () => {
@@ -532,6 +544,7 @@ describe('upsertQueryRoute', () => {
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ upsertQuery, getQueryLinks }),
       }),
       server: makeServer(),
+      maintenanceService: makeMaintenanceService(),
     } as unknown as Parameters<typeof upsertQueryRoute.handler>[0];
 
     await expect(upsertQueryRoute.handler(handlerParams)).resolves.toEqual({ acknowledged: true });
@@ -561,6 +574,7 @@ describe('upsertQueryRoute', () => {
         }),
       }),
       server: makeServer(),
+      maintenanceService: makeMaintenanceService(),
     } as unknown as Parameters<typeof upsertQueryRoute.handler>[0];
 
     await expect(upsertQueryRoute.handler(handlerParams)).resolves.toEqual({ acknowledged: true });
@@ -581,6 +595,7 @@ describe('upsertQueryRoute', () => {
         }),
       }),
       server: makeServer(),
+      maintenanceService: makeMaintenanceService(),
     } as unknown as Parameters<typeof upsertQueryRoute.handler>[0];
 
     await expect(upsertQueryRoute.handler(handlerParams)).rejects.toMatchObject({
@@ -603,6 +618,7 @@ describe('upsertQueryRoute', () => {
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ upsertQuery }),
       }),
       server: makeServer(),
+      maintenanceService: makeMaintenanceService(),
     } as unknown as Parameters<typeof upsertQueryRoute.handler>[0];
 
     await expect(upsertQueryRoute.handler(handlerParams)).rejects.toMatchObject({

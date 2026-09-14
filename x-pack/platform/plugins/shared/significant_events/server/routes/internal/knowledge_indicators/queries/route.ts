@@ -798,6 +798,7 @@ const upsertQueryRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    maintenanceService,
   }): Promise<{ acknowledged: boolean }> => {
     const authUser = server.core.security.authc.getCurrentUser(request);
     const cloneApiKeysOnCreate = authUser?.authentication_type === 'api_key';
@@ -812,6 +813,7 @@ const upsertQueryRoute = createServerRoute({
     } = params;
 
     await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const streamName = targetName ?? (await resolveExistingQueryStreamName(kiClient, queryId));
