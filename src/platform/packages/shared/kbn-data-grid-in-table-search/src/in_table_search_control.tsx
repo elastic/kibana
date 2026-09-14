@@ -132,6 +132,7 @@ export const useInTableSearchControl = ({
   const handleGlobalKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (
+        enabled &&
         (event.metaKey || event.ctrlKey) &&
         event.key === 'f' &&
         shouldOverrideCmdF(event.target as HTMLElement)
@@ -147,7 +148,7 @@ export const useInTableSearchControl = ({
         )?.focus();
       }
     },
-    [showInput, shouldOverrideCmdF]
+    [enabled, showInput, shouldOverrideCmdF]
   );
 
   useEvent('keydown', handleGlobalKeyDown);
