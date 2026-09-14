@@ -5,28 +5,13 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0"; you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import { listActionsByCategoryTool } from './list_actions_by_category_tool';
 import type { ActionsService } from '../services/actions/actions_service';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
 const logger = () => ({ error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() });
 
-const serviceWith = (list: jest.Mock) => ({ list } as unknown as ActionsService);
+const serviceWith = (list: jest.Mock) => ({ list } as Pick<ActionsService, list>);
 
 const run = async (service: ActionsService, input: { categories?: string[] } = {}) => {
   const tool = listActionsByCategoryTool(() => service);
