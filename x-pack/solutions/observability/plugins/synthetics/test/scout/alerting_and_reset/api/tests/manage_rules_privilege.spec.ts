@@ -219,6 +219,32 @@ apiTest.describe(
       }
     );
 
+    apiTest('does not let a read-only user inspect status or TLS rules', async ({ apiClient }) => {
+      for (const path of [
+        SYNTHETICS_API_URLS.INSPECT_STATUS_RULE,
+        SYNTHETICS_API_URLS.INSPECT_TLS_RULE,
+      ]) {
+        const response = await postJson(apiClient, path, readHeaders);
+        expect(response).toHaveStatusCode(403);
+        expect(decodeURIComponent((response.body as { message?: string }).message ?? '')).toContain(
+          DEFAULT_RULES_FORBIDDEN
+        );
+      }
+    });
+
+    apiTest(
+      'lets a read user with can_manage_rules inspect status and TLS rules',
+      async ({ apiClient }) => {
+        for (const path of [
+          SYNTHETICS_API_URLS.INSPECT_STATUS_RULE,
+          SYNTHETICS_API_URLS.INSPECT_TLS_RULE,
+        ]) {
+          const response = await postJson(apiClient, path, readWithManageRulesHeaders);
+          expect(response).toHaveStatusCode(200);
+        }
+      }
+    );
+
     apiTest('keeps rule management available to all users', async ({ apiClient }) => {
       const createResponse = await createRule(apiClient, allHeaders, `all-${uuidv4()}`);
       expect(createResponse).toHaveStatusCode(200);
