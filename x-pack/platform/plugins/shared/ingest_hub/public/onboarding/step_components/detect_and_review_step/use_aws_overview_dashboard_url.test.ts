@@ -12,7 +12,10 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 }));
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useAwsOverviewDashboardUrl, type InstallationSnapshot } from './use_aws_overview_dashboard_url';
+import {
+  useAwsOverviewDashboardUrl,
+  type InstallationSnapshot,
+} from './use_aws_overview_dashboard_url';
 
 const mockUseKibana = useKibana as jest.Mock;
 const mockPrepend = jest.fn((path: string) => `/base${path}`);
@@ -87,9 +90,7 @@ describe('useAwsOverviewDashboardUrl', () => {
         installed_kibana: [primaryRef], // primary space refs (different space)
         installed_kibana_space_id: 'default',
         additional_spaces_installed_kibana: {
-          'my-space': [
-            { id: SPACE_LOCAL_ID, originId: OVERVIEW_ID, type: 'dashboard' as const },
-          ],
+          'my-space': [{ id: SPACE_LOCAL_ID, originId: OVERVIEW_ID, type: 'dashboard' as const }],
         },
       };
       const { result } = renderHook(() => useAwsOverviewDashboardUrl(info));
@@ -113,7 +114,9 @@ describe('useAwsOverviewDashboardUrl', () => {
         installed_kibana: [primaryRef],
         installed_kibana_space_id: 'default',
         additional_spaces_installed_kibana: {
-          'my-space': [{ id: 'some-other-uuid', originId: 'aws-ec2-id', type: 'dashboard' as const }],
+          'my-space': [
+            { id: 'some-other-uuid', originId: 'aws-ec2-id', type: 'dashboard' as const },
+          ],
         },
       };
       const { result } = renderHook(() => useAwsOverviewDashboardUrl(info));
