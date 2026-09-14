@@ -43,7 +43,7 @@ describe('CasesConnector', () => {
     ruleUrl: 'https://example.com/rules/rule-test-id',
   };
   const groupedAlerts = null;
-  const internallyManagedAlerts = false;
+  const source = 'rule' as const;
 
   const owner = 'cases';
   const timeWindow = '7d';
@@ -119,7 +119,7 @@ describe('CasesConnector', () => {
       owner,
       rule,
       timeWindow,
-      internallyManagedAlerts,
+      source,
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
@@ -152,7 +152,7 @@ describe('CasesConnector', () => {
       owner,
       rule,
       timeWindow,
-      internallyManagedAlerts,
+      source,
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
@@ -179,7 +179,7 @@ describe('CasesConnector', () => {
       owner,
       rule,
       timeWindow,
-      internallyManagedAlerts,
+      source,
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
@@ -200,7 +200,7 @@ describe('CasesConnector', () => {
       owner,
       rule,
       timeWindow,
-      internallyManagedAlerts,
+      source,
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
@@ -215,7 +215,7 @@ describe('CasesConnector', () => {
       owner,
       rule,
       timeWindow,
-      internallyManagedAlerts,
+      source,
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
@@ -232,7 +232,7 @@ describe('CasesConnector', () => {
       owner,
       rule,
       timeWindow,
-      internallyManagedAlerts,
+      source,
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
@@ -254,7 +254,7 @@ describe('CasesConnector', () => {
         owner,
         rule,
         timeWindow,
-        internallyManagedAlerts,
+        source,
         reopenClosedCases,
         maximumCasesToOpen: 11,
         templateId,
@@ -281,7 +281,7 @@ describe('CasesConnector', () => {
       owner,
       rule,
       timeWindow,
-      internallyManagedAlerts: true,
+      source: 'attack',
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
@@ -291,7 +291,7 @@ describe('CasesConnector', () => {
 
     expect(mockExecute).toHaveBeenCalledWith(
       expect.objectContaining({
-        internallyManagedAlerts: true,
+        source: 'attack',
         maximumCasesToOpen: MAX_OPEN_CASES_DEFAULT_MAXIMUM,
       })
     );
@@ -308,7 +308,7 @@ describe('CasesConnector', () => {
         owner,
         rule,
         timeWindow,
-        internallyManagedAlerts,
+        source,
         reopenClosedCases,
         maximumCasesToOpen: 10,
         templateId,
@@ -328,7 +328,7 @@ describe('CasesConnector', () => {
       owner,
       rule,
       timeWindow,
-      internallyManagedAlerts,
+      source,
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
@@ -336,7 +336,51 @@ describe('CasesConnector', () => {
       autoPushCase,
     });
 
-    expect(getCasesClient).toHaveBeenCalled();
+    expect(getCasesClient).toHaveBeenCalledWith(expect.anything(), {
+      actionSource: { type: 'rule', id: rule.id, name: rule.name },
+    });
+  });
+
+  it('creates the cases client with an attack source for internally managed alerts', async () => {
+    await connector.run({
+      alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+      groupedAlerts,
+      groupingBy,
+      owner,
+      rule,
+      timeWindow,
+      source: 'attack',
+      reopenClosedCases,
+      maximumCasesToOpen,
+      templateId,
+      templateVersion,
+      autoPushCase,
+    });
+
+    expect(getCasesClient).toHaveBeenCalledWith(expect.anything(), {
+      actionSource: { type: 'attack', id: rule.id, name: rule.name },
+    });
+  });
+
+  it('maps a pre-upgrade internallyManagedAlerts payload to an attack source', async () => {
+    await connector.run({
+      alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+      groupedAlerts,
+      groupingBy,
+      owner,
+      rule,
+      timeWindow,
+      internallyManagedAlerts: true,
+      reopenClosedCases,
+      maximumCasesToOpen,
+      templateId,
+      templateVersion,
+      autoPushCase,
+    });
+
+    expect(getCasesClient).toHaveBeenCalledWith(expect.anything(), {
+      actionSource: { type: 'attack', id: rule.id, name: rule.name },
+    });
   });
 
   it('throws the same error if the executor throws a CasesConnectorError error', async () => {
@@ -349,7 +393,7 @@ describe('CasesConnector', () => {
         owner,
         rule,
         timeWindow,
-        internallyManagedAlerts,
+        source,
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
@@ -378,7 +422,7 @@ describe('CasesConnector', () => {
         owner,
         rule,
         timeWindow,
-        internallyManagedAlerts,
+        source,
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
@@ -407,7 +451,7 @@ describe('CasesConnector', () => {
         owner,
         rule,
         timeWindow,
-        internallyManagedAlerts,
+        source,
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
@@ -434,7 +478,7 @@ describe('CasesConnector', () => {
         owner,
         rule,
         timeWindow,
-        internallyManagedAlerts,
+        source,
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
@@ -466,7 +510,7 @@ describe('CasesConnector', () => {
       owner,
       rule,
       timeWindow,
-      internallyManagedAlerts,
+      source,
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
@@ -491,7 +535,7 @@ describe('CasesConnector', () => {
         owner,
         rule,
         timeWindow,
-        internallyManagedAlerts,
+        source,
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
@@ -521,7 +565,7 @@ describe('CasesConnector', () => {
       owner,
       rule,
       timeWindow,
-      internallyManagedAlerts,
+      source,
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
