@@ -23,6 +23,8 @@ import { EntityStoreTaskType } from './constants';
 import type * as types from '../types';
 import type { EntityType } from '../../common/domain/definitions/entity_schema';
 import { createLogsExtractionClient } from './factories';
+import { isDualProcessEnabled } from '../infra/feature_flags';
+import { resolveExtractionMode } from '../../common/domain/definitions/registry';
 import { wrapTaskRun } from '../telemetry/traces';
 import { entityStoreMetrics } from '../monitor/metrics';
 import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
@@ -71,6 +73,9 @@ async function runTask({
   const namespace = currentState.namespace;
 
   const [coreStart] = await core.getStartServices();
+  const dualProcessEnabled = await isDualProcessEnabled(coreStart.featureFlags);
+  const extractionMode = resolveExtractionMode(dualProcessEnabled, entityType);
+
   if (
     await shouldDeleteOrphanedEntityStoreTask({
       coreStart,
@@ -102,6 +107,7 @@ async function runTask({
       logger,
       namespace,
       isServerless,
+      extractionMode,
     });
 
     const extractionStart = Date.now();
@@ -143,8 +149,8 @@ async function runTask({
 
     let schedule: { schedule: IntervalSchedule } | undefined;
     try {
-      const config = await logsExtractionClient.globalStateClient.findOrThrow();
-      schedule = getNewSchedule(config.logsExtraction.frequency, taskInstance);
+      const config = await logsExtractionClient.getMergedConfigForType(entityType);
+      schedule = getNewSchedule(config.frequency, taskInstance);
     } catch (e) {
       logger.warn(`Error getting new schedule, received ${e.message}`);
     }
