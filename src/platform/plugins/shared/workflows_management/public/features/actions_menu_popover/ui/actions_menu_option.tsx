@@ -272,7 +272,12 @@ function renderStepActionOption({
           </span>
         </EuiFlexItem>
         <EuiFlexItem css={styles.optionInfo} grow>
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s" responsive={false}>
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="spaceBetween"
+            gutterSize="s"
+            responsive={false}
+          >
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xxxs">

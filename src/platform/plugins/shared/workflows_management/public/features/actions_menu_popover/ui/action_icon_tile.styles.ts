@@ -62,13 +62,13 @@ export const actionIconTileStyles = {
     }),
 };
 
-type ActionIconTileVariantStyles = {
+interface ActionIconTileVariantStyles {
   platform: CSSInterpolation;
   trigger: CSSInterpolation;
   appLogo: CSSInterpolation;
   flowControl: CSSInterpolation;
   dataTransformation: CSSInterpolation;
-};
+}
 
 export function getActionIconTileVariantStyle(
   variant: IconVariant | undefined,
