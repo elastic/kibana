@@ -79,6 +79,7 @@ export const connectorIngressCredentialMappings: SavedObjectsTypeMappingDefiniti
   properties: {
     connectorId: {
       type: 'keyword',
+      ignore_above: 1024,
     },
   },
 };
