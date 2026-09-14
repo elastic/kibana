@@ -17,6 +17,7 @@ jest.mock('../../../lib/is_workflows_enabled_for_space', () => ({
   isWorkflowsEnabledForSpace: (...args: unknown[]) => mockIsWorkflowsEnabledForSpace(...args),
 }));
 
+import { ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS } from './constants';
 import { getRunStepDefinition } from './get_run_step_definition';
 
 const mockExecuteGenerationWorkflow = jest.fn();
@@ -438,28 +439,51 @@ describe('getRunStepDefinition', () => {
   });
 
   describe('sync mode has no soft deadline', () => {
-    /** Resolves after `delayMs`, standing in for a generation slower than the old 90s cap. */
-    const slowPipeline = (delayMs: number) =>
+    // These tests drive fake time past ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS, so a
+    // handler that still raced the pipeline against that deadline would resolve
+    // early with `{ execution_uuid, status: 'pending' }` and fail all three. A delay
+    // shorter than the deadline would pass either way.
+    const pipelineResolvingAfter = (delayMs: number) =>
       new Promise((resolve) => setTimeout(() => resolve(mockSuccessOutcome), delayMs));
 
-    it('waits for a slow pipeline instead of returning early', async () => {
-      mockExecuteGenerationWorkflow.mockReturnValue(slowPipeline(50));
+    const pastTheSoftDeadline = ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS + 1_000;
 
-      const stepDefinition = getStepDefinition();
-
-      const result = await stepDefinition.handler(syncMockContext as never);
-
-      expect(result.output?.attack_discoveries).toEqual(handoverDiscoveries);
+    beforeEach(() => {
+      jest.useFakeTimers();
     });
 
-    it('reports completed rather than pending for a slow pipeline', async () => {
-      mockExecuteGenerationWorkflow.mockReturnValue(slowPipeline(50));
+    afterEach(() => {
+      jest.useRealTimers();
+    });
 
-      const stepDefinition = getStepDefinition();
+    it('does not resolve while the pipeline is still running past the soft deadline', async () => {
+      mockExecuteGenerationWorkflow.mockReturnValue(new Promise(() => {}));
+      const settled = jest.fn();
 
-      const result = await stepDefinition.handler(syncMockContext as never);
+      void getStepDefinition()
+        .handler(syncMockContext as never)
+        .then(settled);
+      await jest.advanceTimersByTimeAsync(ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS * 2);
 
-      expect(result.output?.status).toBe('completed');
+      expect(settled).not.toHaveBeenCalled();
+    });
+
+    it('returns the discoveries when the pipeline finishes after the soft deadline', async () => {
+      mockExecuteGenerationWorkflow.mockReturnValue(pipelineResolvingAfter(pastTheSoftDeadline));
+
+      const handled = getStepDefinition().handler(syncMockContext as never);
+      await jest.advanceTimersByTimeAsync(pastTheSoftDeadline);
+
+      expect((await handled).output?.attack_discoveries).toEqual(handoverDiscoveries);
+    });
+
+    it('reports completed when the pipeline finishes after the soft deadline', async () => {
+      mockExecuteGenerationWorkflow.mockReturnValue(pipelineResolvingAfter(pastTheSoftDeadline));
+
+      const handled = getStepDefinition().handler(syncMockContext as never);
+      await jest.advanceTimersByTimeAsync(pastTheSoftDeadline);
+
+      expect((await handled).output?.status).toBe('completed');
     });
   });
 
