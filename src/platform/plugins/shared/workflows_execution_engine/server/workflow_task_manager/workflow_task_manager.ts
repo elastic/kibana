@@ -34,6 +34,12 @@ export const getWorkflowGlobalTimeoutResumeTaskId = (workflowExecutionId: string
 export const getWorkflowImmediateResumeTaskId = (workflowExecutionId: string): string =>
   `workflow-immediate-resume-${workflowExecutionId}`;
 
+/** Stable authenticated wake-up retained until its workflow execution is terminal. */
+export const getWorkflowWakeTaskId = (executionId: string): string =>
+  `workflow-wake-${executionId}`;
+
+export const WORKFLOW_WAKE_POLL_INTERVAL_MS = 30_000;
+
 export class WorkflowTaskManager {
   constructor(private taskManager: TaskManagerStartContract) {}
 
@@ -56,6 +62,12 @@ export class WorkflowTaskManager {
   }): Promise<{ taskId: string }> {
     const taskId = getWorkflowGlobalTimeoutResumeTaskId(workflowExecution.id);
     const desiredRunAtMs = resumeAt.getTime();
+    await this.ensureWakeTask({
+      executionId: workflowExecution.id,
+      spaceId: workflowExecution.spaceId,
+      fakeRequest,
+      runAt: resumeAt,
+    });
 
     try {
       const existing = await this.taskManager.get(taskId);
@@ -89,6 +101,7 @@ export class WorkflowTaskManager {
       {
         id: taskId,
         taskType: WORKFLOW_RESUME_TASK_TYPE,
+        timeoutOverride: '1m',
         params: {
           workflowRunId: workflowExecution.id,
           spaceId: workflowExecution.spaceId,
@@ -118,6 +131,7 @@ export class WorkflowTaskManager {
       {
         id: v4(),
         taskType: WORKFLOW_RESUME_TASK_TYPE,
+        timeoutOverride: '1m',
         params: {
           workflowRunId: workflowExecution.id,
           spaceId: workflowExecution.spaceId,
@@ -283,16 +297,30 @@ export class WorkflowTaskManager {
     fakeRequest?: KibanaRequest;
   }): Promise<void> {
     if (await this.tryRunImmediateResume(params)) return;
-    await this.taskManager.schedule(
+    await this.ensureWakeTask(params);
+    try {
+      await this.runSoonWithConflictRetry(getWorkflowWakeTaskId(params.executionId));
+    } catch (error) {
+      // A claimed wake task is retained and polls again; it cannot delete this request on success.
+      if (!(error instanceof TaskAlreadyRunningError)) throw error;
+    }
+  }
+
+  /** Ensures a retained wake task with cloned execution credentials exists before handoff. */
+  async ensureWakeTask(params: {
+    executionId: string;
+    spaceId: string;
+    fakeRequest?: KibanaRequest;
+    runAt?: Date;
+  }): Promise<void> {
+    await this.taskManager.ensureScheduled(
       {
-        id: v4(),
+        id: getWorkflowWakeTaskId(params.executionId),
         taskType: WORKFLOW_RESUME_TASK_TYPE,
-        params: {
-          workflowRunId: params.executionId,
-          spaceId: params.spaceId,
-        } satisfies ResumeWorkflowExecutionParams,
+        timeoutOverride: '1m',
+        params: { workflowRunId: params.executionId, spaceId: params.spaceId },
         state: {},
-        runAt: new Date(Date.now() + 1000),
+        runAt: params.runAt ?? new Date(Date.now() + 1000),
         scope: [`workflow:execution:${params.executionId}`],
       },
       params.fakeRequest ? { request: params.fakeRequest, cloneApiKey: true } : undefined
@@ -302,8 +330,18 @@ export class WorkflowTaskManager {
   /** Wakes an existing authenticated timer without creating a task lacking execution credentials. */
   async runExistingResumeTask(executionId: string): Promise<void> {
     try {
+      await this.runSoonWithConflictRetry(getWorkflowWakeTaskId(executionId));
+      return;
+    } catch (error) {
+      if (error instanceof TaskAlreadyRunningError) return;
+      if (!SavedObjectsErrorHelpers.isNotFoundError(error)) throw error;
+    }
+    // Older executions may only have the original authenticated timeout task.
+    try {
       await this.runSoonWithConflictRetry(getWorkflowGlobalTimeoutResumeTaskId(executionId));
     } catch (error) {
+      // Every claimed resume task installs the retained wake before it dispatches or exits.
+      if (error instanceof TaskAlreadyRunningError) return;
       if (!SavedObjectsErrorHelpers.isNotFoundError(error)) throw error;
       // A claimed global notification can hand its next deadline to a separate
       // timer. That timer retains the identity needed for an external HITL resume.
@@ -320,7 +358,11 @@ export class WorkflowTaskManager {
         },
       });
       if (!docs.length) throw error;
-      await this.runSoonWithConflictRetry(docs[0].id);
+      try {
+        await this.runSoonWithConflictRetry(docs[0].id);
+      } catch (wakeError) {
+        if (!(wakeError instanceof TaskAlreadyRunningError)) throw wakeError;
+      }
     }
   }
 

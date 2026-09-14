@@ -73,6 +73,7 @@ import { WORKFLOW_RESUME_TASK_TYPE } from './workflow_task_manager/types';
 import {
   getWorkflowGlobalTimeoutResumeTaskId,
   getWorkflowImmediateResumeTaskId,
+  getWorkflowWakeTaskId,
 } from './workflow_task_manager/workflow_task_manager';
 
 describe('workflow:resume task runner event fields', () => {
@@ -160,6 +161,28 @@ describe('workflow:resume task runner event fields', () => {
     );
   });
 
+  it('retains the stable wake task after dispatch and deletes it only after terminal state', async () => {
+    setupPlugin();
+    mockGetWorkflowExecutionById.mockResolvedValue({ status: 'waiting_for_input' });
+    const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: {
+          ...taskManagerMock.createTask(),
+          id: getWorkflowWakeTaskId('retained'),
+          params: { workflowRunId: 'retained', spaceId: 'default' },
+        },
+        fakeRequest: {} as KibanaRequest,
+      })
+    );
+    // A new caller may ensure this same task while the current dispatch finishes.
+    expect(await runner.run()).toEqual({ runAt: expect.any(Date), state: {} });
+    expect(mockResumeWorkflow).not.toHaveBeenCalled();
+    taskManagerStart.runSoon.mockRejectedValueOnce(new TaskAlreadyRunningError('runner'));
+    expect(await runner.run()).toEqual({ runAt: expect.any(Date), state: {} });
+    mockGetWorkflowExecutionById.mockResolvedValue({ status: 'completed' });
+    expect(await runner.run()).toBeUndefined();
+  });
+
   it('dispatches a timeout task through the same immediate runner', async () => {
     setupPlugin();
     const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].createTaskRunner(
@@ -175,6 +198,13 @@ describe('workflow:resume task runner event fields', () => {
     await runner.run();
     expect(taskManagerStart.runSoon).toHaveBeenCalledWith(
       getWorkflowImmediateResumeTaskId('exec-timer')
+    );
+    expect(taskManagerStart.ensureScheduled).toHaveBeenCalledWith(
+      expect.objectContaining({ id: getWorkflowWakeTaskId('exec-timer') }),
+      expect.objectContaining({ cloneApiKey: true })
+    );
+    expect(taskManagerStart.ensureScheduled.mock.invocationCallOrder[0]).toBeLessThan(
+      taskManagerStart.runSoon.mock.invocationCallOrder[0]
     );
     expect(mockResumeWorkflow).not.toHaveBeenCalled();
   });

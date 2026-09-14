@@ -17,6 +17,7 @@ import type { ResumeWorkflowExecutionParams } from './types';
 import {
   getWorkflowGlobalTimeoutResumeTaskId,
   getWorkflowImmediateResumeTaskId,
+  getWorkflowWakeTaskId,
   WorkflowTaskManager,
 } from './workflow_task_manager';
 import { generateExecutionTaskScope } from '../utils';
@@ -107,6 +108,7 @@ describe('WorkflowTaskManager', () => {
         {
           id: 'mocked-uuid',
           taskType: 'workflow:resume',
+          timeoutOverride: '1m',
           params: {
             workflowRunId: 'test-execution-id',
             spaceId: 'default',
@@ -209,6 +211,7 @@ describe('WorkflowTaskManager', () => {
         {
           id: stableId,
           taskType: WORKFLOW_RESUME_TASK_TYPE,
+          timeoutOverride: '1m',
           params: {
             workflowRunId: 'test-execution-id',
             spaceId: 'default',
@@ -500,10 +503,10 @@ describe('WorkflowTaskManager', () => {
       new TaskAlreadyRunningError('runner'),
       SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'runner'),
     ])('persists a request when runSoon cannot consume the wake-up: %s', async (error) => {
-      mockTaskManager.runSoon.mockRejectedValue(error);
+      mockTaskManager.runSoon.mockRejectedValueOnce(error);
       await workflowTaskManager.scheduleAndRunImmediateResume({ ...params, fakeRequest });
       expect(mockTaskManager.removeIfExists).not.toHaveBeenCalled();
-      expect(mockTaskManager.schedule).toHaveBeenCalledWith(
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(
         expect.objectContaining({
           params: { workflowRunId: params.executionId, spaceId: 'default' },
           runAt: expect.any(Date),
@@ -513,9 +516,16 @@ describe('WorkflowTaskManager', () => {
     });
 
     it('retains a notification when runSoon loses an optimistic-concurrency race', async () => {
-      mockTaskManager.runSoon.mockResolvedValue({ id: 'runner', forced: false, conflict: true });
+      mockTaskManager.runSoon.mockResolvedValueOnce({
+        id: 'runner',
+        forced: false,
+        conflict: true,
+      });
       await workflowTaskManager.scheduleAndRunImmediateResume(params);
-      expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({ id: getWorkflowWakeTaskId(params.executionId) }),
+        undefined
+      );
     });
 
     it('allows the persisted request to wake the runner after its previous claim finishes', async () => {
@@ -527,13 +537,77 @@ describe('WorkflowTaskManager', () => {
     });
   });
 
+  it('coalesces concurrent busy callbacks into one retained wake task', async () => {
+    const ids = new Set<string>();
+    mockTaskManager.ensureScheduled.mockImplementation(async (task) => {
+      ids.add(task.id);
+      return task;
+    });
+    mockTaskManager.runSoon.mockRejectedValue(new TaskAlreadyRunningError('claimed'));
+    await Promise.all(
+      Array.from({ length: 20 }, () =>
+        workflowTaskManager.scheduleAndRunImmediateResume({
+          executionId: 'parent',
+          spaceId: 'default',
+          fakeRequest,
+        })
+      )
+    );
+    expect(ids).toEqual(
+      new Set([getWorkflowImmediateResumeTaskId('parent'), getWorkflowWakeTaskId('parent')])
+    );
+    expect(mockTaskManager.schedule).not.toHaveBeenCalled();
+    expect(mockTaskManager.removeIfExists).not.toHaveBeenCalled();
+  });
+
   describe('external resumes after timer hand-off', () => {
+    it('accepts an approval during an older timer claim that will install the retained wake', async () => {
+      mockTaskManager.runSoon
+        .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'wake'))
+        .mockRejectedValueOnce(new TaskAlreadyRunningError('global'));
+      await expect(workflowTaskManager.runExistingResumeTask('exec')).resolves.toBeUndefined();
+      expect(mockTaskManager.runSoon).toHaveBeenLastCalledWith(
+        getWorkflowGlobalTimeoutResumeTaskId('exec')
+      );
+    });
+
+    it('retains workflow credentials on a stable wake task before installing the HITL timer', async () => {
+      mockTaskManager.schedule.mockResolvedValue({ id: 'global' } as never);
+      await workflowTaskManager.scheduleWorkflowGlobalTimeoutResumeTask({
+        workflowExecution: createMockWorkflowExecution(),
+        resumeAt: new Date(Date.now() + 60_000),
+        fakeRequest,
+      });
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({ id: getWorkflowWakeTaskId('test-execution-id') }),
+        { request: fakeRequest, cloneApiKey: true }
+      );
+      expect(mockTaskManager.ensureScheduled.mock.invocationCallOrder[0]).toBeLessThan(
+        mockTaskManager.schedule.mock.invocationCallOrder[0]
+      );
+    });
+
+    it('wakes approval through the retained task even when the global timer is claimed', async () => {
+      mockTaskManager.runSoon.mockImplementation(async (taskId) => {
+        if (taskId === getWorkflowGlobalTimeoutResumeTaskId('exec')) {
+          throw new TaskAlreadyRunningError(taskId);
+        }
+        return { id: taskId, forced: false };
+      });
+      await workflowTaskManager.runExistingResumeTask('exec');
+      expect(mockTaskManager.runSoon).toHaveBeenCalledWith(getWorkflowWakeTaskId('exec'));
+      expect(mockTaskManager.schedule).not.toHaveBeenCalled();
+    });
+
     it.each([false, true])(
       'retries a conflicting external wake-up (fallback=%s)',
       async (fallback) => {
         if (fallback) {
           mockTaskManager.runSoon.mockRejectedValueOnce(
             SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'global')
+          );
+          mockTaskManager.runSoon.mockRejectedValueOnce(
+            SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'wake')
           );
           mockTaskManager.fetch.mockResolvedValue({ docs: [{ id: 'next-deadline' }] } as never);
         }
@@ -543,9 +617,9 @@ describe('WorkflowTaskManager', () => {
           conflict: true,
         });
         await workflowTaskManager.runExistingResumeTask('exec');
-        expect(mockTaskManager.runSoon).toHaveBeenCalledTimes(fallback ? 3 : 2);
+        expect(mockTaskManager.runSoon).toHaveBeenCalledTimes(fallback ? 4 : 2);
         expect(mockTaskManager.runSoon).toHaveBeenLastCalledWith(
-          fallback ? 'next-deadline' : getWorkflowGlobalTimeoutResumeTaskId('exec')
+          fallback ? 'next-deadline' : getWorkflowWakeTaskId('exec')
         );
       }
     );
@@ -562,16 +636,18 @@ describe('WorkflowTaskManager', () => {
       expect(mockTaskManager.runSoon).toHaveBeenCalledTimes(3);
     });
 
-    it('does not replace a claimed external timer', async () => {
+    it('accepts an approval while the retained authenticated wake task is claimed', async () => {
       mockTaskManager.runSoon.mockRejectedValue(new TaskAlreadyRunningError('active'));
-      await expect(workflowTaskManager.runExistingResumeTask('exec')).rejects.toThrow(
-        TaskAlreadyRunningError
-      );
+      await expect(workflowTaskManager.runExistingResumeTask('exec')).resolves.toBeUndefined();
+      expect(mockTaskManager.runSoon).toHaveBeenCalledWith(getWorkflowWakeTaskId('exec'));
       expect(mockTaskManager.removeIfExists).not.toHaveBeenCalled();
       expect(mockTaskManager.schedule).not.toHaveBeenCalled();
     });
 
     it('wakes the remaining authenticated timer when the global notification has completed', async () => {
+      mockTaskManager.runSoon.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'wake')
+      );
       mockTaskManager.runSoon.mockRejectedValueOnce(
         SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'global')
       );
@@ -583,7 +659,7 @@ describe('WorkflowTaskManager', () => {
 
     it('does not report a successful wake-up when no authenticated task remains', async () => {
       const error = SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'global');
-      mockTaskManager.runSoon.mockRejectedValueOnce(error);
+      mockTaskManager.runSoon.mockRejectedValueOnce(error).mockRejectedValueOnce(error);
       mockTaskManager.fetch.mockResolvedValue({ docs: [] } as never);
       await expect(workflowTaskManager.runExistingResumeTask('exec')).rejects.toThrow(error);
     });

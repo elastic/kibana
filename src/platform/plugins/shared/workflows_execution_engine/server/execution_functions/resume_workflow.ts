@@ -102,29 +102,31 @@ export async function resumeWorkflow({
     return {};
   }
 
+  const waitingForInput = loadedExecution.status === ExecutionStatus.WAITING_FOR_INPUT;
+  const hasResumeInput = loadedExecution.context?.resumeInput != null;
   const node = loadedExecution.currentNodeId ? workflowRuntime.getCurrentNode() : undefined;
   if (
-    loadedExecution.status === ExecutionStatus.WAITING &&
     !loadedExecution.cancelRequested &&
+    (loadedExecution.status === ExecutionStatus.WAITING || (waitingForInput && !hasResumeInput)) &&
     node?.type !== 'enter-parallel' &&
     node?.stepId
   ) {
-    // Deadline checks need persisted step metadata before resume changes the execution status.
+    // Read persisted metadata before deciding whether this notification may advance the workflow.
     await stepIoService.load();
     const stepExecution = workflowExecutionState.getLatestStepExecution(node.stepId);
+    const deadline = getIdleTimeoutResumeDeadlineMs(
+      { workflowExecutionGraph, workflowExecutionState },
+      loadedExecution,
+      workflowExecutionCursor.currentStackFrames,
+      { node, startedAt: stepExecution?.startedAt }
+    );
     const resumeAt = stepExecution?.state?.resumeAt;
-    if (typeof resumeAt === 'string') {
-      const deadline = getIdleTimeoutResumeDeadlineMs(
-        { workflowExecutionGraph, workflowExecutionState },
-        loadedExecution,
-        workflowExecutionCursor.currentStackFrames,
-        { node, startedAt: stepExecution?.startedAt }
-      );
-      const nextRunAt = Math.min(new Date(resumeAt).getTime(), deadline ?? Infinity);
-      if (nextRunAt > Date.now()) {
-        // Late notifications preserve wait durations without postponing enclosing timeouts.
-        return { retryAt: new Date(nextRunAt) };
-      }
+    const waitDeadline = typeof resumeAt === 'string' ? new Date(resumeAt).getTime() : Infinity;
+    const nextRunAt = Math.min(waitingForInput ? Infinity : waitDeadline, deadline ?? Infinity);
+    if ((waitingForInput || typeof resumeAt === 'string') && nextRunAt > Date.now()) {
+      // A notification is not approval. Keep HITL parked until input, cancellation, or a deadline.
+      if (!Number.isFinite(nextRunAt)) return {};
+      return { retryAt: new Date(nextRunAt) };
     }
   }
 

@@ -19,6 +19,7 @@ import type {
 } from '@kbn/core/server';
 import {
   ExecutionStatus,
+  isTerminalStatus,
   toWorkflowExecutionEngineModel,
   WorkflowRepository,
 } from '@kbn/workflows';
@@ -108,6 +109,8 @@ import {
 } from './workflow_task_manager/types';
 import {
   getWorkflowImmediateResumeTaskId,
+  getWorkflowWakeTaskId,
+  WORKFLOW_WAKE_POLL_INTERVAL_MS,
   WorkflowTaskManager,
 } from './workflow_task_manager/workflow_task_manager';
 import { createWorkflowTaskAbortController } from './workflow_task_shutdown';
@@ -547,7 +550,24 @@ export class WorkflowsExecutionEnginePlugin
               const { workflowExecutionRepository, stepExecutionRepository } =
                 this.createScopedRepositories();
 
+              if (taskInstance.id !== getWorkflowWakeTaskId(workflowRunId)) {
+                await new WorkflowTaskManager(pluginsStart.taskManager).ensureWakeTask({
+                  executionId: workflowRunId,
+                  spaceId,
+                  fakeRequest,
+                  runAt: new Date(Date.now() + WORKFLOW_WAKE_POLL_INTERVAL_MS),
+                });
+              }
+
               if (taskInstance.id !== getWorkflowImmediateResumeTaskId(workflowRunId)) {
+                const retainedWake = taskInstance.id === getWorkflowWakeTaskId(workflowRunId);
+                if (retainedWake) {
+                  const execution = await workflowExecutionRepository.getWorkflowExecutionById(
+                    workflowRunId,
+                    spaceId
+                  );
+                  if (!execution || isTerminalStatus(execution.status)) return;
+                }
                 const accepted = await new WorkflowTaskManager(
                   pluginsStart.taskManager
                 ).tryRunImmediateResume({
@@ -557,6 +577,15 @@ export class WorkflowsExecutionEnginePlugin
                 });
                 // A request never loads workflow checkpoints or invokes steps. Busy
                 // runners keep their claim; this notification retries durably in TM.
+                if (retainedWake) {
+                  // Retention closes the ensure-vs-delete race, including approvals written mid-claim.
+                  return {
+                    runAt: new Date(
+                      Date.now() + (accepted ? WORKFLOW_WAKE_POLL_INTERVAL_MS : 1000)
+                    ),
+                    state: {},
+                  };
+                }
                 return accepted ? undefined : { runAt: new Date(Date.now() + 1000), state: {} };
               }
 
