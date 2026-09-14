@@ -28,19 +28,19 @@ const AGGREGATION_LABELS: Record<SimpleAggregation, string> = {
 
 const PERCENTILE_LABELS: Record<HistogramPercentile, string> = {
   p50: i18n.translate('metricsExperience.aggregationLabel.p50', {
-    defaultMessage: '50th percentile',
+    defaultMessage: 'p50',
   }),
   p75: i18n.translate('metricsExperience.aggregationLabel.p75', {
-    defaultMessage: '75th percentile',
+    defaultMessage: 'p75',
   }),
   p90: i18n.translate('metricsExperience.aggregationLabel.p90', {
-    defaultMessage: '90th percentile',
+    defaultMessage: 'p90',
   }),
   p95: i18n.translate('metricsExperience.aggregationLabel.p95', {
-    defaultMessage: '95th percentile',
+    defaultMessage: 'p95',
   }),
   p99: i18n.translate('metricsExperience.aggregationLabel.p99', {
-    defaultMessage: '99th percentile',
+    defaultMessage: 'p99',
   }),
 };
 
