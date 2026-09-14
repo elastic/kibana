@@ -51,7 +51,7 @@ const ADD_AUTOMATION_CONFLICT_RETRIES = 2;
 export interface AiIndexManagedBootstrap {
   isManaged: (id: string) => boolean;
   getManagedIds: () => string[];
-  ensure: (id: string, spaceId: string) => Promise<void>;
+  ensure: (id: string, spaceId: string) => Promise<boolean>;
 }
 
 type AiIndexAutomationTarget = Pick<AiIndexDocument, 'managed' | 'automations'>;

@@ -193,14 +193,14 @@ export class ContextEnginePlugin
 
     this.esClient = coreStart.elasticsearch.client.asInternalUser;
 
-    const ensureAiIndex = async (id: string, spaceId: string): Promise<void> => {
+    const ensureAiIndex = async (id: string, spaceId: string): Promise<boolean> => {
       const enabled = await isContextEngineEnabledInSpace({
         savedObjects: coreStart.savedObjects,
         uiSettings: coreStart.uiSettings,
         spaceId,
       });
       if (!enabled) {
-        return;
+        return false;
       }
       if (!this.aiIndexService) {
         throw new Error('AI index service not available — plugin has not started');
@@ -211,6 +211,7 @@ export class ContextEnginePlugin
         aiIndexService: this.aiIndexService,
         logger: aiIndexLogger,
       });
+      return true;
     };
 
     this.aiIndexService = new AiIndexService({

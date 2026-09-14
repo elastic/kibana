@@ -834,7 +834,7 @@ describe('createSmlIndexer', () => {
         );
         const logger = createMockLogger();
         const esClient = createMockEsClient();
-        const ensureDefaultAiIndex = jest.fn().mockResolvedValue(undefined);
+        const ensureDefaultAiIndex = jest.fn().mockResolvedValue(true);
         const indexer = createSmlIndexer({ registry, logger, ensureDefaultAiIndex });
 
         await indexer.indexAttachment(
@@ -902,7 +902,7 @@ describe('createSmlIndexer', () => {
         );
         const logger = createMockLogger();
         const esClient = createMockEsClient();
-        const ensureDefaultAiIndex = jest.fn().mockResolvedValue(undefined);
+        const ensureDefaultAiIndex = jest.fn().mockResolvedValue(true);
         const indexer = createSmlIndexer({ registry, logger, ensureDefaultAiIndex });
 
         await indexer.indexAttachment(
@@ -928,6 +928,45 @@ describe('createSmlIndexer', () => {
         expect(ensureDefaultAiIndex).toHaveBeenCalledWith('default');
       });
 
+      it('calls ensureDefaultAiIndex again for a space it reported as not ensured', async () => {
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const smlEntry = { type: 'lens', title: 'T', content: 'c' };
+        const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getSmlEntry })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const ensureDefaultAiIndex = jest.fn().mockResolvedValue(false);
+        const indexer = createSmlIndexer({ registry, logger, ensureDefaultAiIndex });
+
+        await indexer.indexAttachment(
+          createIndexerParams({
+            originId: 'att-not-ensured-1',
+            attachmentType: 'lens',
+            action: 'create',
+            spaces: ['default'],
+            esClient,
+          })
+        );
+        await indexer.indexAttachment(
+          createIndexerParams({
+            originId: 'att-not-ensured-2',
+            attachmentType: 'lens',
+            action: 'create',
+            spaces: ['default'],
+            esClient,
+          })
+        );
+
+        expect(ensureDefaultAiIndex).toHaveBeenCalledTimes(2);
+        expect(ensureDefaultAiIndex).toHaveBeenNthCalledWith(1, 'default');
+        expect(ensureDefaultAiIndex).toHaveBeenNthCalledWith(2, 'default');
+      });
+
       it('does not call ensureDefaultAiIndex for * or empty space ids', async () => {
         const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
         const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
@@ -940,7 +979,7 @@ describe('createSmlIndexer', () => {
         );
         const logger = createMockLogger();
         const esClient = createMockEsClient();
-        const ensureDefaultAiIndex = jest.fn().mockResolvedValue(undefined);
+        const ensureDefaultAiIndex = jest.fn().mockResolvedValue(true);
         const indexer = createSmlIndexer({ registry, logger, ensureDefaultAiIndex });
 
         await indexer.indexAttachment(

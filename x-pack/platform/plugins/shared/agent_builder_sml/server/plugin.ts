@@ -115,7 +115,8 @@ export class AgentBuilderSmlPlugin
       logger: this.logger.get('sml'),
       securityAuthz: security?.authz,
       ensureDefaultAiIndex: (spaceId: string) =>
-        contextEngine?.ensureAiIndex?.(agentBuilderDefaultAiIndexId, spaceId) ?? Promise.resolve(),
+        contextEngine?.ensureAiIndex?.(agentBuilderDefaultAiIndexId, spaceId) ??
+        Promise.resolve(false),
     });
 
     const smlService = this.smlService;

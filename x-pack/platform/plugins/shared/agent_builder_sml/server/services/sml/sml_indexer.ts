@@ -29,7 +29,7 @@ import { SmlUnregisteredTypeError } from './sml_errors';
 interface SmlIndexerDeps {
   registry: SmlTypeRegistry;
   logger: Logger;
-  ensureDefaultAiIndex?: (spaceId: string) => Promise<void>;
+  ensureDefaultAiIndex?: (spaceId: string) => Promise<boolean>;
 }
 
 export interface SmlIndexer {
@@ -130,7 +130,7 @@ export const createSmlIndexer = ({
 class SmlIndexerImpl implements SmlIndexer {
   private readonly registry: SmlTypeRegistry;
   private readonly logger: Logger;
-  private readonly ensureDefaultAiIndex?: (spaceId: string) => Promise<void>;
+  private readonly ensureDefaultAiIndex?: (spaceId: string) => Promise<boolean>;
   private readonly ensuredSpaces = new Set<string>();
 
   constructor({ registry, logger, ensureDefaultAiIndex }: SmlIndexerDeps) {
@@ -261,8 +261,10 @@ class SmlIndexerImpl implements SmlIndexer {
       await Promise.all(
         spacesToEnsure.map(async (space) => {
           try {
-            await this.ensureDefaultAiIndex!(space);
-            this.ensuredSpaces.add(space);
+            const ensured = await this.ensureDefaultAiIndex?.(space);
+            if (ensured) {
+              this.ensuredSpaces.add(space);
+            }
           } catch (err) {
             this.logger.warn(
               `SML indexer: failed to ensure the default AI index in space '${space}': ${

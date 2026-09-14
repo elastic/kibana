@@ -33,6 +33,8 @@ const createMockEsClient = (): jest.Mocked<ElasticsearchClient> =>
     },
   } as unknown as jest.Mocked<ElasticsearchClient>);
 
+const ensureDefaultAiIndex = async () => true;
+
 const PRIVILEGES_PATH = 'permissions.kibana.privileges';
 const PERM_NAME_FIELD = `${PRIVILEGES_PATH}.name`;
 const PERM_SPACE_FIELD = `${PRIVILEGES_PATH}.space`;
@@ -338,7 +340,7 @@ describe('createSmlService', () => {
       const def = createMockSmlTypeDefinition({ id: 'dashboard' });
       setup.registerType(def);
 
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       expect(smlService.search).toBeDefined();
       expect(smlService.autocomplete).toBeDefined();
@@ -413,7 +415,7 @@ describe('SmlService', () => {
     it('issues an ES|QL FORK+FUSE hybrid query with MV_CONTAINS space filter', async () => {
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       esqlQueryMock.mockResolvedValue({
         columns: makeEsqlColumns(),
@@ -463,7 +465,7 @@ describe('SmlService', () => {
     it('uses plain sorted scan for query "*" (no FORK/FUSE)', async () => {
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       esqlQueryMock.mockResolvedValue({
         columns: makeEsqlColumns(),
@@ -487,7 +489,7 @@ describe('SmlService', () => {
     it('uses plain sorted scan for empty query after trim (no FORK/FUSE)', async () => {
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       esqlQueryMock.mockResolvedValue({
         columns: makeEsqlColumns(),
@@ -510,7 +512,7 @@ describe('SmlService', () => {
     it('threads constraints and agent filters as WHERE clauses with positional params', async () => {
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       esqlQueryMock.mockResolvedValue({
         columns: makeEsqlColumns(),
@@ -552,7 +554,7 @@ describe('SmlService', () => {
     it('passes query to MATCH branches for all BM25 and semantic fields', async () => {
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       esqlQueryMock.mockResolvedValue({
         columns: makeEsqlColumns(),
@@ -586,7 +588,7 @@ describe('SmlService', () => {
     it('returns baseline fields only when no fields param is provided', async () => {
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       esqlQueryMock.mockResolvedValue({
         columns: makeEsqlColumns(false),
@@ -627,7 +629,7 @@ describe('SmlService', () => {
     it('returns requested optional fields when fields param is provided', async () => {
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       esqlQueryMock.mockResolvedValue({
         columns: makeEsqlColumns(true),
@@ -665,7 +667,7 @@ describe('SmlService', () => {
     it('returns only the requested fields when fields param is provided', async () => {
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       esqlQueryMock.mockResolvedValue({
         columns: makeEsqlColumns(false),
@@ -695,7 +697,7 @@ describe('SmlService', () => {
     it('surfaces description, tags, and references on hits (compact LLM shape)', async () => {
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       esqlQueryMock.mockResolvedValue({
         columns: makeEsqlColumns(true),
@@ -743,7 +745,7 @@ describe('SmlService', () => {
     it('returns multiple results from ES|QL tabular response', async () => {
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       esqlQueryMock.mockResolvedValue({
         columns: makeEsqlColumns(true),
@@ -767,7 +769,7 @@ describe('SmlService', () => {
     it('returns empty results when index does not exist (404)', async () => {
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       esqlQueryMock.mockRejectedValue(createNotFoundError());
 
@@ -788,7 +790,7 @@ describe('SmlService', () => {
     it('throws on non-404 errors', async () => {
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       esqlQueryMock.mockRejectedValue(new Error('Connection refused'));
 
@@ -808,7 +810,7 @@ describe('SmlService', () => {
     it('emits no authz clause and skips enumeration when securityAuthz is absent', async () => {
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       esqlQueryMock.mockResolvedValue({
         columns: makeEsqlColumns(true),
@@ -842,7 +844,7 @@ describe('SmlService', () => {
       // security-disabled multi-space deployment must still only see the requested space.
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       esqlQueryMock.mockResolvedValue({
         columns: makeEsqlColumns(true),
@@ -869,7 +871,7 @@ describe('SmlService', () => {
       // aggResponse defaults to an empty universe.
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger, securityAuthz });
+      const smlService = service.start({ logger, securityAuthz, ensureDefaultAiIndex });
 
       esqlQueryMock.mockResolvedValue({
         columns: makeEsqlColumns(true),
@@ -893,7 +895,7 @@ describe('SmlService', () => {
     it('uses default size of 10 when not specified (outer LIMIT = size)', async () => {
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       esqlQueryMock.mockResolvedValue({
         columns: makeEsqlColumns(),
@@ -928,13 +930,13 @@ describe('SmlService', () => {
       for (const id of typeIds) {
         registerType(createMockSmlTypeDefinition({ id }));
       }
-      return service.start({ logger });
+      return service.start({ logger, ensureDefaultAiIndex });
     };
 
     it('builds a single nested discovery_labels query (with inner_hits) and a space-only filter when securityAuthz is absent', async () => {
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       hitsResponse = {
         hits: { total: 0, hits: [] },
@@ -992,7 +994,7 @@ describe('SmlService', () => {
     it('requires every typed token to match, trailing one as a prefix', async () => {
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
 
@@ -1014,7 +1016,7 @@ describe('SmlService', () => {
     it('uses match_all for query "*"', async () => {
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       hitsResponse = { hits: { total: 0, hits: [] } };
 
@@ -1172,7 +1174,7 @@ describe('SmlService', () => {
       it('matches everything for a lone slash', async () => {
         const service = createSmlService();
         service.setup({ logger });
-        const smlService = service.start({ logger });
+        const smlService = service.start({ logger, ensureDefaultAiIndex });
 
         hitsResponse = { hits: { total: 0, hits: [] } };
 
@@ -1191,7 +1193,7 @@ describe('SmlService', () => {
       it('searches only by name when the query starts with a slash', async () => {
         const service = createSmlService();
         service.setup({ logger });
-        const smlService = service.start({ logger });
+        const smlService = service.start({ logger, ensureDefaultAiIndex });
 
         hitsResponse = { hits: { total: 0, hits: [] } };
 
@@ -1211,7 +1213,7 @@ describe('SmlService', () => {
     it('threads per-type constraints through buildConstraintsFilter into the ES filter clauses', async () => {
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       hitsResponse = { hits: { total: 0, hits: [] } };
 
@@ -1245,7 +1247,7 @@ describe('SmlService', () => {
     it('preserves the score order Elasticsearch returned', async () => {
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       hitsResponse = {
         hits: {
@@ -1290,7 +1292,7 @@ describe('SmlService', () => {
     it('projects a hit as an autocomplete result', async () => {
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       hitsResponse = {
         hits: {
@@ -1329,7 +1331,7 @@ describe('SmlService', () => {
     it('returns empty results when the index does not exist (404)', async () => {
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       esClient.search.mockRejectedValue(createNotFoundError());
 
@@ -1353,7 +1355,7 @@ describe('SmlService', () => {
       );
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger, securityAuthz });
+      const smlService = service.start({ logger, securityAuthz, ensureDefaultAiIndex });
 
       // aggResponse defaults to an empty universe.
       hitsResponse = {
@@ -1385,7 +1387,7 @@ describe('SmlService', () => {
       aggResponse = universeAgg(['saved_object:dashboard/get', 'saved_object:lens/get']);
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger, securityAuthz });
+      const smlService = service.start({ logger, securityAuthz, ensureDefaultAiIndex });
 
       hitsResponse = { hits: { total: 0, hits: [] } };
 
@@ -1413,7 +1415,7 @@ describe('SmlService', () => {
       aggResponse = universeAgg(['saved_object:dashboard/get']);
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger, securityAuthz });
+      const smlService = service.start({ logger, securityAuthz, ensureDefaultAiIndex });
 
       hitsResponse = { hits: { total: 0, hits: [] } };
 
@@ -1448,7 +1450,7 @@ describe('SmlService', () => {
       aggResponse = universeAgg(['saved_object:dashboard/get']);
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger, securityAuthz });
+      const smlService = service.start({ logger, securityAuthz, ensureDefaultAiIndex });
 
       hitsResponse = { hits: { total: 0, hits: [] } };
 
@@ -1487,7 +1489,7 @@ describe('SmlService', () => {
       // plugin, because Spaces are available on Basic with security disabled.
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       hitsResponse = { hits: { total: 0, hits: [] } };
 
@@ -1515,7 +1517,7 @@ describe('SmlService', () => {
         aggResponse = universeAgg(['saved_object:lens/get'], { failedShards: 1 });
         const service = createSmlService();
         service.setup({ logger });
-        const smlService = service.start({ logger, securityAuthz });
+        const smlService = service.start({ logger, securityAuthz, ensureDefaultAiIndex });
 
         await expect(
           smlService.search({
@@ -1536,7 +1538,7 @@ describe('SmlService', () => {
         aggResponse = fullUniversePage();
         const service = createSmlService();
         service.setup({ logger });
-        const smlService = service.start({ logger, securityAuthz });
+        const smlService = service.start({ logger, securityAuthz, ensureDefaultAiIndex });
 
         await expect(
           smlService.search({
@@ -1554,7 +1556,7 @@ describe('SmlService', () => {
         esClient.search.mockRejectedValue(createNotFoundError());
         const service = createSmlService();
         service.setup({ logger });
-        const smlService = service.start({ logger, securityAuthz });
+        const smlService = service.start({ logger, securityAuthz, ensureDefaultAiIndex });
         esqlQueryMock.mockResolvedValue({ columns: makeEsqlColumns(true), values: [] } as any);
 
         await smlService.search({
@@ -1577,7 +1579,7 @@ describe('SmlService', () => {
     it('grants all access when securityAuthz is absent', async () => {
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       const result = await smlService.checkItemsAccess({
         ids: ['item-1', 'item-2'],
@@ -1595,7 +1597,7 @@ describe('SmlService', () => {
       const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger, securityAuthz });
+      const smlService = service.start({ logger, securityAuthz, ensureDefaultAiIndex });
 
       hitsResponse = {
         hits: {
@@ -1618,7 +1620,7 @@ describe('SmlService', () => {
       const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger, securityAuthz });
+      const smlService = service.start({ logger, securityAuthz, ensureDefaultAiIndex });
 
       // Documents store composite `space|action` tokens.
       hitsResponse = {
@@ -1651,7 +1653,7 @@ describe('SmlService', () => {
       const securityAuthz = createMockSecurityAuthzPartial([], ['saved_object:dashboard/get']);
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger, securityAuthz });
+      const smlService = service.start({ logger, securityAuthz, ensureDefaultAiIndex });
 
       // Documents store composite `space|action` tokens.
       hitsResponse = {
@@ -1684,7 +1686,7 @@ describe('SmlService', () => {
       const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger, securityAuthz });
+      const smlService = service.start({ logger, securityAuthz, ensureDefaultAiIndex });
 
       hitsResponse = {
         hits: {
@@ -1714,7 +1716,7 @@ describe('SmlService', () => {
       const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger, securityAuthz });
+      const smlService = service.start({ logger, securityAuthz, ensureDefaultAiIndex });
 
       hitsResponse = {
         hits: {
@@ -1752,7 +1754,7 @@ describe('SmlService', () => {
       const securityAuthz = createMockSecurityAuthz([]);
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger, securityAuthz });
+      const smlService = service.start({ logger, securityAuthz, ensureDefaultAiIndex });
 
       hitsResponse = {
         hits: {
@@ -1784,7 +1786,7 @@ describe('SmlService', () => {
       const securityAuthz = createMockSecurityAuthz([]);
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger, securityAuthz });
+      const smlService = service.start({ logger, securityAuthz, ensureDefaultAiIndex });
 
       hitsResponse = {
         hits: {
@@ -1816,7 +1818,7 @@ describe('SmlService', () => {
       const securityAuthz = createMockSecurityAuthz([]);
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger, securityAuthz });
+      const smlService = service.start({ logger, securityAuthz, ensureDefaultAiIndex });
 
       hitsResponse = {
         hits: {
@@ -1854,7 +1856,7 @@ describe('SmlService', () => {
       const securityAuthz = createMockSecurityAuthz(['saved_object:dashboard/get']);
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger, securityAuthz });
+      const smlService = service.start({ logger, securityAuthz, ensureDefaultAiIndex });
 
       hitsResponse = {
         hits: {
@@ -1891,7 +1893,7 @@ describe('SmlService', () => {
       const securityAuthz = createMockSecurityAuthz(['saved_object:dashboard/get']);
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger, securityAuthz });
+      const smlService = service.start({ logger, securityAuthz, ensureDefaultAiIndex });
 
       hitsResponse = {
         hits: {
@@ -1928,7 +1930,7 @@ describe('SmlService', () => {
       const securityAuthz = createMockSecurityAuthz(['saved_object:dashboard/get']);
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger, securityAuthz });
+      const smlService = service.start({ logger, securityAuthz, ensureDefaultAiIndex });
 
       hitsResponse = {
         hits: {
@@ -1964,7 +1966,7 @@ describe('SmlService', () => {
       const securityAuthz = createMockSecurityAuthz(['saved_object:dashboard/get']);
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger, securityAuthz });
+      const smlService = service.start({ logger, securityAuthz, ensureDefaultAiIndex });
 
       hitsResponse = {
         hits: {
@@ -2004,7 +2006,7 @@ describe('SmlService', () => {
       const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger, securityAuthz });
+      const smlService = service.start({ logger, securityAuthz, ensureDefaultAiIndex });
 
       esClient.search.mockRejectedValue(createNotFoundError());
 
@@ -2023,7 +2025,7 @@ describe('SmlService', () => {
       const securityAuthz = createMockSecurityAuthz([]);
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger, securityAuthz });
+      const smlService = service.start({ logger, securityAuthz, ensureDefaultAiIndex });
 
       hitsResponse = {
         hits: { total: 0, hits: [] },
@@ -2059,7 +2061,7 @@ describe('SmlService', () => {
       const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger, securityAuthz });
+      const smlService = service.start({ logger, securityAuthz, ensureDefaultAiIndex });
 
       esClient.search.mockResolvedValueOnce({
         hits: {
@@ -2107,7 +2109,7 @@ describe('SmlService', () => {
     it('fetches documents from ES and returns Map', async () => {
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       hitsResponse = {
         hits: {
@@ -2183,7 +2185,7 @@ describe('SmlService', () => {
     it('round-trips all new schema fields (origin, tags, extended_attrs)', async () => {
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       hitsResponse = {
         hits: {
@@ -2240,7 +2242,7 @@ describe('SmlService', () => {
     it('returns empty map for empty ids', async () => {
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       const result = await smlService.getDocuments({
         ids: [],
@@ -2255,7 +2257,7 @@ describe('SmlService', () => {
     it('handles 404 error gracefully', async () => {
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       esClient.search.mockRejectedValue(createNotFoundError());
 
@@ -2271,7 +2273,7 @@ describe('SmlService', () => {
     it('handles other errors gracefully', async () => {
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       esClient.search.mockRejectedValue(new Error('Connection timeout'));
 
@@ -2288,7 +2290,7 @@ describe('SmlService', () => {
     it('calls ES search with correct query', async () => {
       const service = createSmlService();
       service.setup({ logger });
-      const smlService = service.start({ logger });
+      const smlService = service.start({ logger, ensureDefaultAiIndex });
 
       hitsResponse = {
         hits: { total: 0, hits: [] },
