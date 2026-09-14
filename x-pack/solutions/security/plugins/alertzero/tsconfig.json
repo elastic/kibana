@@ -38,5 +38,6 @@
     "@kbn/std",
     "@kbn/core-security-server",
     "@kbn/charts-theme",
+    "@kbn/i18n-react",
   ]
 }

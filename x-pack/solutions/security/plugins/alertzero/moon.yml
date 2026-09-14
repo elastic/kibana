@@ -49,6 +49,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/core-security-server'
   - '@kbn/charts-theme'
+  - '@kbn/i18n-react'
 tags:
   - plugin
   - prod

@@ -6,9 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import type { ApplicationStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ALERTZERO_APP_ID } from '@kbn/alertzero-common';
+import { useHistory } from 'react-router-dom';
 import { CHATS_PATH, buildChatsPath } from '../pages/chats/path';
 
 /**
@@ -16,17 +14,17 @@ import { CHATS_PATH, buildChatsPath } from '../pages/chats/path';
  *
  * Lives here rather than in `@kbn/agentic-investigations-common` because the route belongs to this
  * solution, and that package is shared across solutions.
+ *
+ * Navigates through the app's own history rather than `navigateToApp`, so Back returns to the
+ * queue with its URL intact and reopens whichever flyout was showing.
  */
 export const useOpenInChat = (): ((chatId?: string) => void) => {
-  const { services } = useKibana<{ application: ApplicationStart }>();
-  const { application } = services;
+  const history = useHistory();
 
   return useCallback(
     (chatId?: string) => {
-      application.navigateToApp(ALERTZERO_APP_ID, {
-        path: chatId ? buildChatsPath(chatId) : CHATS_PATH,
-      });
+      history.push(chatId ? buildChatsPath(chatId) : CHATS_PATH);
     },
-    [application]
+    [history]
   );
 };
