@@ -8,6 +8,8 @@
  */
 
 import { ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID } from './actions/action_create_detection_rule';
+import { ALERTZERO_ACTION_ENABLE_RULE_WORKFLOW_ID } from './actions/action_enable_detection_rule';
+import { ALERTZERO_ACTION_INSTALL_PREBUILT_RULE_WORKFLOW_ID } from './actions/action_install_prebuilt_rule';
 import { ALERTZERO_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID } from './dark_continuous_threat_hunt';
 import { ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID } from './detection_rule_creation';
 import { ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID } from './detection_rule_tuning';
@@ -37,6 +39,14 @@ export {
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW,
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID,
 } from './actions/action_create_detection_rule';
+export {
+  ALERTZERO_ACTION_ENABLE_RULE_WORKFLOW,
+  ALERTZERO_ACTION_ENABLE_RULE_WORKFLOW_ID,
+} from './actions/action_enable_detection_rule';
+export {
+  ALERTZERO_ACTION_INSTALL_PREBUILT_RULE_WORKFLOW,
+  ALERTZERO_ACTION_INSTALL_PREBUILT_RULE_WORKFLOW_ID,
+} from './actions/action_install_prebuilt_rule';
 export {
   ALERTZERO_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW,
   ALERTZERO_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
@@ -78,4 +88,8 @@ export const ALERTZERO_RULE_WORKFLOW_IDS = [
  * Action workflows AlertZero may propose. Discovery is normally by the generic
  * `action` tag; this list is the install set and the fallback.
  */
-export const ALERTZERO_ACTION_WORKFLOW_IDS = [ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID] as const;
+export const ALERTZERO_ACTION_WORKFLOW_IDS = [
+  ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID,
+  ALERTZERO_ACTION_ENABLE_RULE_WORKFLOW_ID,
+  ALERTZERO_ACTION_INSTALL_PREBUILT_RULE_WORKFLOW_ID,
+] as const;
