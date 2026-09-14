@@ -162,9 +162,13 @@ export const dataMapStepDefinition = createServerStepDefinition({
         `Mapping ${itemsArray.length} item(s) with ${Object.keys(rawFields).length} fields`
       );
 
+      const renderTemplate =
+        context.contextManager.createTemplateRenderer?.() ??
+        ((value, additionalContext) =>
+          context.contextManager.renderInputTemplate(value, additionalContext));
       const mappedItems = itemsArray.map((currentItem, currentIndex) =>
         processFields(rawFields, {
-          renderTemplate: (value, ctx) => context.contextManager.renderInputTemplate(value, ctx),
+          renderTemplate,
           bindings: {
             [DEFAULT_ITEM_BINDING]: currentItem,
             [DEFAULT_INDEX_BINDING]: currentIndex,
