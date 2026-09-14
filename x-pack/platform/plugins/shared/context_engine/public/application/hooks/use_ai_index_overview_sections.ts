@@ -15,8 +15,6 @@ interface UseAiIndexOverviewSectionsParams {
 export interface AiIndexOverviewSections {
   hideEditControls: boolean;
   showAutomationsPanel: boolean;
-  showSignalsSection: boolean;
-  showSignalsPanel: boolean;
 }
 
 /** Progressive disclosure for Overview tab sections on the AI index detail page. */
@@ -31,7 +29,5 @@ export const useAiIndexOverviewSections = ({
   return {
     hideEditControls: isLoading || isManaged,
     showAutomationsPanel: isManaged || isLoading || hasSources || hasAutomations,
-    showSignalsSection: false,
-    showSignalsPanel: false,
   };
 };

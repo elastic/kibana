@@ -23,10 +23,9 @@ import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
 import {
   AutomationsPanel,
   DescriptionPanel,
-  TracesPanel,
   LockedSectionPanel,
-  SignalsPanel,
   SourcesPanel,
+  TracesPanel,
 } from '../components/ai_index_detail';
 import { KiListPanel } from '../components/ki';
 import { EditSourcesFlyout } from '../components/edit_sources_flyout';
@@ -58,13 +57,6 @@ const automationsLockedAriaLabel = i18n.translate(
   }
 );
 
-const signalsLockedAriaLabel = i18n.translate(
-  'xpack.contextEngine.aiIndexDetail.signals.lockedAriaLabel',
-  {
-    defaultMessage: 'Signals locked. Create an automation above to start collecting signals.',
-  }
-);
-
 export const AiIndexDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const { aiIndex, isLoading, error, refetch } = useAiIndex(id);
@@ -78,11 +70,10 @@ export const AiIndexDetailPage = () => {
     enabled: aiIndex !== undefined,
   });
 
-  const { hideEditControls, showAutomationsPanel, showSignalsSection, showSignalsPanel } =
-    useAiIndexOverviewSections({
-      aiIndex,
-      isLoading,
-    });
+  const { hideEditControls, showAutomationsPanel } = useAiIndexOverviewSections({
+    aiIndex,
+    isLoading,
+  });
   const pageTitle = aiIndex?.id ?? id ?? '';
   const backHref = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
 
@@ -160,19 +151,13 @@ export const AiIndexDetailPage = () => {
             isManaged={!!aiIndex?.managed}
           />
           <EuiSpacer size="m" />
-          <TracesPanel
-            isLoading={isLoading}
-            aiIndex={aiIndex}
-            onSaved={refetch}
-            isManaged={!!aiIndex?.managed}
-          />
-          <EuiSpacer size="m" />
           <SourcesPanel
             isLoading={isLoading}
             sources={aiIndex?.sources ?? []}
             canEdit={aiIndex !== undefined}
             onEditSources={() => setIsEditingSources(true)}
             isManaged={hideEditControls}
+            aiIndex={aiIndex}
           />
           <EuiSpacer size="m" />
           {showAutomationsPanel ? (
@@ -201,27 +186,12 @@ export const AiIndexDetailPage = () => {
             />
           )}
           <EuiSpacer size="m" />
-          {showSignalsSection &&
-            (showSignalsPanel ? (
-              <SignalsPanel isLoading={isLoading} aiIndex={aiIndex} />
-            ) : (
-              <LockedSectionPanel
-                data-test-subj="contextSignalsLocked"
-                ariaLabel={signalsLockedAriaLabel}
-                title={
-                  <FormattedMessage
-                    id="xpack.contextEngine.aiIndexDetail.signals.title"
-                    defaultMessage="Signals"
-                  />
-                }
-                description={
-                  <FormattedMessage
-                    id="xpack.contextEngine.aiIndexDetail.signals.lockedBody"
-                    defaultMessage="Create an automation above to start collecting signals."
-                  />
-                }
-              />
-            ))}
+          <TracesPanel
+            isLoading={isLoading}
+            aiIndex={aiIndex}
+            onSaved={refetch}
+            isManaged={!!aiIndex?.managed}
+          />
         </>
       )}
 
