@@ -43,7 +43,7 @@ export const IndexDocuments: React.FC<IndexDocumentsProps> = ({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup direction="row" justifyContent="flexStart" alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiTitle size="xxs">
+              <EuiTitle size="xs">
                 <h2>
                   <FormattedMessage
                     id="xpack.idxMgmt.indexDetails.data.preview.title"

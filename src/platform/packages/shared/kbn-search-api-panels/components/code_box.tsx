@@ -68,136 +68,134 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
 
   const selectLanguageDescription = consoleTitle
     ? i18n.translate('searchApiPanels.welcomeBanner.codeBox.selectAriaLabel', {
-        defaultMessage: '{context}',
-        values: { context: consoleTitle },
-      })
+      defaultMessage: '{context}',
+      values: { context: consoleTitle },
+    })
     : i18n.translate('searchApiPanels.welcomeBanner.codeBox.selectLabel', {
-        defaultMessage: 'Select a programming language for the code snippet',
-      });
+      defaultMessage: 'Select a programming language for the code snippet',
+    });
 
   const getCopyButtonAriaLabel = consoleTitle
     ? i18n.translate('searchApiPanels.welcomeBanner.codeBox.copyAriaLabel', {
-        defaultMessage: 'Copy the {context} code snippet',
-        values: { context: consoleTitle },
-      })
+      defaultMessage: 'Copy the {context} code snippet',
+      values: { context: consoleTitle },
+    })
     : i18n.translate('searchApiPanels.welcomeBanner.codeBox.copyLabel', {
-        defaultMessage: 'Copy the code snippet',
-      });
+      defaultMessage: 'Copy the code snippet',
+    });
 
   const items = languages
     ? languages.map((language) => (
-        <EuiContextMenuItem
-          key={language.id}
-          icon={`${assetBasePath}/${language.iconType}`}
-          aria-label={i18n.translate(
-            'searchApiPanels.welcomeBanner.codeBox.selectChangeAriaLabel',
-            {
-              defaultMessage: 'Change language to {languageName} for every instance on this page',
-              values: { languageName: language.name },
-            }
-          )}
-          onClick={() => {
-            if (setSelectedLanguage) {
-              setSelectedLanguage(language);
-              setIsPopoverOpen(false);
-            }
-          }}
-        >
-          {language.name}
-        </EuiContextMenuItem>
-      ))
+      <EuiContextMenuItem
+        key={language.id}
+        icon={`${assetBasePath}/${language.iconType}`}
+        aria-label={i18n.translate(
+          'searchApiPanels.welcomeBanner.codeBox.selectChangeAriaLabel',
+          {
+            defaultMessage: 'Change language to {languageName} for every instance on this page',
+            values: { languageName: language.name },
+          }
+        )}
+        onClick={() => {
+          if (setSelectedLanguage) {
+            setSelectedLanguage(language);
+            setIsPopoverOpen(false);
+          }
+        }}
+      >
+        {language.name}
+      </EuiContextMenuItem>
+    ))
     : [];
 
   const button = selectedLanguage ? (
-    <EuiThemeProvider colorMode="dark">
+    <>
       <span id={selectLangDescriptionId} className="euiScreenReaderOnly" aria-hidden="true">
         {selectLanguageDescription}
       </span>
       <EuiButtonEmpty
         color="text"
         iconType="chevronSingleDown"
-        iconSide="left"
+        iconSide="right"
+        size="s"
         aria-describedby={selectLangDescriptionId}
         onClick={() => setIsPopoverOpen(!isPopoverOpen)}
       >
         {selectedLanguage.name}
       </EuiButtonEmpty>
-    </EuiThemeProvider>
+    </>
   ) : null;
 
   return (
-    <EuiThemeProvider colorMode="dark">
-      <EuiPanel
-        paddingSize="xs"
-        css={Styles.codeBoxPanel(euiTheme)}
-        data-test-subj="codeBlockControlsPanel"
-      >
-        {showTopBar && (
-          <>
-            <EuiFlexGroup
-              alignItems="center"
-              responsive={false}
-              gutterSize="s"
-              justifyContent={languages && languages.length !== 0 ? 'spaceBetween' : 'flexEnd'}
-            >
-              {languages && button && (
-                <EuiFlexItem>
-                  <EuiThemeProvider colorMode="light">
-                    <EuiPopover
-                      aria-label={selectLanguageDescription}
-                      button={button}
-                      isOpen={isPopoverOpen}
-                      closePopover={() => setIsPopoverOpen(false)}
-                      panelPaddingSize="none"
-                      anchorPosition="downLeft"
-                    >
-                      <EuiContextMenuPanel items={items} />
-                    </EuiPopover>
-                  </EuiThemeProvider>
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>
-                <EuiCopy textToCopy={codeSnippet}>
-                  {(copy) => (
-                    <EuiButtonEmpty
-                      color="text"
-                      iconType="copy"
-                      size="s"
-                      onClick={copy}
-                      aria-label={getCopyButtonAriaLabel}
-                    >
-                      {i18n.translate('searchApiPanels.welcomeBanner.codeBox.copyButtonLabel', {
-                        defaultMessage: 'Copy',
-                      })}
-                    </EuiButtonEmpty>
-                  )}
-                </EuiCopy>
+
+    <EuiPanel
+      paddingSize="xs"
+      data-test-subj="codeBlockControlsPanel"
+      hasBorder={true}
+    >
+      {showTopBar && (
+        <>
+          <EuiFlexGroup
+            alignItems="center"
+            responsive={false}
+            gutterSize="s"
+            justifyContent={languages && languages.length !== 0 ? 'spaceBetween' : 'flexEnd'}
+          >
+            {languages && button && (
+              <EuiFlexItem>
+                <EuiPopover
+                  aria-label={selectLanguageDescription}
+                  button={button}
+                  isOpen={isPopoverOpen}
+                  closePopover={() => setIsPopoverOpen(false)}
+                  panelPaddingSize="none"
+                  anchorPosition="downLeft"
+                >
+                  <EuiContextMenuPanel items={items} />
+                </EuiPopover>
               </EuiFlexItem>
-              {consoleRequest !== undefined && sharePlugin && (
-                <EuiFlexItem grow={false}>
-                  <TryInConsoleButton
-                    request={consoleRequest}
-                    application={application}
-                    consolePlugin={consolePlugin}
-                    sharePlugin={sharePlugin}
-                  />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-            <EuiHorizontalRule margin="none" />
-          </>
-        )}
-        <EuiCodeBlock
-          isCopyable={!showTopBar}
-          transparentBackground
-          fontSize="m"
-          language={languageType || selectedLanguage?.languageStyling || selectedLanguage?.id}
-          overflowHeight={500}
-          css={Styles.codeBoxCodeBlock}
-        >
-          {codeSnippet}
-        </EuiCodeBlock>
-      </EuiPanel>
-    </EuiThemeProvider>
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiCopy textToCopy={codeSnippet}>
+                {(copy) => (
+                  <EuiButtonEmpty
+                    color="text"
+                    iconType="copy"
+                    size="s"
+                    onClick={copy}
+                    aria-label={getCopyButtonAriaLabel}
+                  >
+                    {i18n.translate('searchApiPanels.welcomeBanner.codeBox.copyButtonLabel', {
+                      defaultMessage: 'Copy',
+                    })}
+                  </EuiButtonEmpty>
+                )}
+              </EuiCopy>
+            </EuiFlexItem>
+            {consoleRequest !== undefined && sharePlugin && (
+              <EuiFlexItem grow={false}>
+                <TryInConsoleButton
+                  request={consoleRequest}
+                  application={application}
+                  consolePlugin={consolePlugin}
+                  sharePlugin={sharePlugin}
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+          {/* <EuiHorizontalRule margin="none" /> */}
+        </>
+      )}
+      <EuiCodeBlock
+        isCopyable={!showTopBar}
+        transparentBackground
+        fontSize="s"
+        paddingSize="m"
+        language={languageType || selectedLanguage?.languageStyling || selectedLanguage?.id}
+        overflowHeight={500}
+      >
+        {codeSnippet}
+      </EuiCodeBlock>
+    </EuiPanel>
   );
 };

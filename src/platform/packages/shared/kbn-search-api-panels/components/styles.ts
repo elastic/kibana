@@ -10,11 +10,6 @@
 import { css } from '@emotion/react';
 import { type EuiThemeComputed } from '@elastic/eui';
 
-export const codeBoxPanel = (euiTheme: EuiThemeComputed<{}>) =>
-  css({
-    borderTop: `${euiTheme.border.thin} ${euiTheme.colors.lightestShade}`,
-  });
-
 export const codeBoxCodeBlock = css({
   wordBreak: 'break-all',
 });
