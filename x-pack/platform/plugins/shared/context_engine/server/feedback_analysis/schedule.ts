@@ -17,17 +17,37 @@ import type { AiIndexFeedbackAnalysis } from '../../common/http_api/ai_indices';
 import { parseIntervalMinutes } from '../../common/validation';
 
 /**
- * The one workflows management call this plugin makes, declared structurally rather than imported:
+ * The workflows management calls this plugin makes, declared structurally rather than imported:
  * workflows management reaches back here through Agent Builder, so depending on its contract would
- * close a project reference cycle.
+ * close a project reference cycle. Only the fields that are read are named.
  */
-export interface WorkflowEnablementApi {
+export interface WorkflowsManagementPort {
   updateWorkflow(
     workflowId: string,
     workflow: { enabled: boolean },
     spaceId: string,
     request: KibanaRequest
   ): Promise<unknown>;
+
+  getWorkflowExecution(
+    workflowExecutionId: string,
+    spaceId: string
+  ): Promise<{ status: string } | null>;
+}
+
+/**
+ * Raised when a requested run collided with one already in flight for the same AI index.
+ *
+ * Not a failure of the request so much as an answer to it: the analysis the caller wanted is
+ * happening, just not because of them.
+ */
+export class FeedbackAnalysisAlreadyRunningError extends Error {
+  constructor(aiIndexId: string) {
+    super(
+      `Feedback analysis is already running for AI index [${aiIndexId}]. Its improvements appear when that run finishes.`
+    );
+    this.name = 'FeedbackAnalysisAlreadyRunningError';
+  }
 }
 
 export interface ReconcileScheduleParams {
@@ -52,6 +72,9 @@ export interface FeedbackAnalysisScheduleService {
    * it off there is no instance to execute. The caller checks the configuration and explains that,
    * rather than offering an action that would fail here.
    *
+   * Throws {@link FeedbackAnalysisAlreadyRunningError} when a run for this index is already in
+   * flight, which the workflow's own concurrency settings decide rather than this code.
+   *
    * Takes no space: the instance lives where it was installed, not where the request came from.
    */
   run(params: { aiIndexId: string; request: KibanaRequest }): Promise<string>;
@@ -68,6 +91,13 @@ export interface FeedbackAnalysisScheduleService {
  */
 const SCHEDULE_SPACE_ID = DEFAULT_SPACE_ID;
 
+/**
+ * What the execution engine marks a run it refused to start. Compared as a string rather than
+ * imported as `ExecutionStatus.SKIPPED`, for the same reason the workflows calls above are
+ * structural: importing the contract would close a project reference cycle.
+ */
+const DROPPED_EXECUTION_STATUS = 'skipped';
+
 export const createFeedbackAnalysisScheduleService = ({
   logger,
   getManagedWorkflowsClient,
@@ -76,7 +106,7 @@ export const createFeedbackAnalysisScheduleService = ({
   logger: Logger;
   getManagedWorkflowsClient: () => Promise<PluginScopedManagedWorkflowsApi>;
   /** Optional at the plugin boundary, so a deployment without it cannot schedule analysis. */
-  workflowsManagement?: WorkflowEnablementApi;
+  workflowsManagement?: WorkflowsManagementPort;
 }): FeedbackAnalysisScheduleService => {
   const log = logger.get('feedback_analysis_schedule');
 
@@ -86,6 +116,42 @@ export const createFeedbackAnalysisScheduleService = ({
    */
   const workflowDocumentIdFor = (aiIndexId: string) =>
     `${CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID}-${aiIndexId}`;
+
+  /**
+   * Whether the run that was just started was refused for colliding with one already in flight.
+   *
+   * The workflow declares `concurrency: { max: 1, strategy: drop }` per AI index, so the engine
+   * already prevents two analyses of the same index from overlapping. It just does not say so:
+   * a dropped run still gets an execution document, still gets its id returned, and is marked
+   * `skipped` on the way out — so starting a run and being ignored looks exactly like starting one.
+   * Reading the execution back is what tells the two apart. Nothing else skips a run at admission,
+   * so the status alone is the signal, without matching on a human-readable reason.
+   *
+   * The read is an mget by id, which is realtime in Elasticsearch, so the skip is visible even
+   * though it is written without waiting for a refresh.
+   *
+   * Fails open. Without workflows management there is nothing to ask, and a read that errors says
+   * nothing about the run; reporting "already running" on that basis would replace a run the user
+   * can retry with a message telling them not to.
+   */
+  const wasDropped = async (executionId: string): Promise<boolean> => {
+    if (!workflowsManagement) {
+      return false;
+    }
+
+    try {
+      const execution = await workflowsManagement.getWorkflowExecution(
+        executionId,
+        SCHEDULE_SPACE_ID
+      );
+      return execution?.status === DROPPED_EXECUTION_STATUS;
+    } catch (error) {
+      log.warn(
+        `Could not tell whether feedback analysis run '${executionId}' started: ${error.message}`
+      );
+      return false;
+    }
+  };
 
   const intervalMinutesFor = (feedbackAnalysis: AiIndexFeedbackAnalysis): number => {
     const interval = feedbackAnalysis.schedule?.interval ?? DEFAULT_FEEDBACK_ANALYSIS_INTERVAL;
@@ -155,6 +221,15 @@ export const createFeedbackAnalysisScheduleService = ({
           triggeredBy: 'manual',
         }
       );
+
+      if (await wasDropped(executionId)) {
+        log.debug(
+          () =>
+            `Dropped an off-schedule feedback analysis run for AI index '${aiIndexId}': one is already running`
+        );
+        throw new FeedbackAnalysisAlreadyRunningError(aiIndexId);
+      }
+
       log.info(`Started an off-schedule feedback analysis run for AI index '${aiIndexId}'`);
       return executionId;
     },

@@ -204,6 +204,14 @@ The panels are backed by four internal routes, all gated by the
 | `POST` | `/internal/context_engine/ai_index/{id}/improvements/{impId}/reject`    | Record it as rejected, with an optional `reason`   |
 | `POST` | `/internal/context_engine/ai_index/{id}/feedback_analysis/_run`         | Start one analysis run off-schedule                |
 
+One run analyzes an index at a time. The workflow declares
+`concurrency: { key: <per index>, strategy: drop, max: 1 }`, so the engine
+refuses an overlapping run whether it came from the schedule or from this route.
+It refuses quietly: a dropped run is still given an execution document and its
+id is still returned, only marked `skipped`. `_run` therefore reads the
+execution back — an mget by id, so the skip is visible immediately — and answers
+`409` rather than reporting a run that was thrown away.
+
 KI proposals (`add_ki`, `edit_ki`, `remove_ki`) currently have no panel. The
 loop is not expected to propose them, and the apply path for them exists either
 way.
