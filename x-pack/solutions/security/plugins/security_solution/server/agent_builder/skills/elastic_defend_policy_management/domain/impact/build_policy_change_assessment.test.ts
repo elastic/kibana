@@ -123,7 +123,7 @@ describe('buildPolicyChangeAssessment', () => {
 
   it('adds one generic blocker when an unrelated eligible change retains an invalid Device Control state', () => {
     const stored = policyFactory();
-    stored.windows.device_control.usb_storage = DeviceControlAccessLevel.audit;
+    stored.windows.device_control!.usb_storage = DeviceControlAccessLevel.audit;
 
     const assessment = buildPolicyChangeAssessment(
       createPolicy(stored),
