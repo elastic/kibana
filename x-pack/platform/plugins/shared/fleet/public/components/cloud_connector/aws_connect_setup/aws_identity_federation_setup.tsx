@@ -33,8 +33,13 @@ import { CloudConnectorTabs, type CloudConnectorTab } from '../cloud_connector_t
 import { CloudConnectorSelector } from '../form/cloud_connector_selector';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
 import { CloudFormationCloudCredentialsGuide } from '../aws_cloud_connector/aws_cloud_formation_guide';
-import { IacKeyCheck } from '../components/iac_key_check';
-import { getCloudConnectorNameError, INVALID_STACK_ARN_MESSAGE } from '../utils';
+import { IacKeyCheck, type IacKeyCheckProps } from '../components/iac_key_check';
+import {
+  getCloudConnectorNameError,
+  INVALID_STACK_ARN_MESSAGE,
+  STACK_ARN_HELP_TEXT,
+  STACK_ARN_LABEL,
+} from '../utils';
 import { TABS } from '../constants';
 import { useCreateCloudConnector } from '../hooks/use_create_cloud_connector';
 
@@ -56,6 +61,8 @@ export interface AwsIdentityFederationSetupProps {
    * new set (unlike the wizard form, which guards against edits after Launch).
    */
   integrations?: RenderIacTemplateIntegration[];
+  /** Which surface the Existing Identity check reports telemetry as; defaults to the wizard. */
+  iacCheckSurface?: IacKeyCheckProps['surface'];
   onReadyChange?: (isReady: boolean) => void;
   onConnectorIdChange?: (connectorId: string | undefined, connectorName?: string) => void;
 }
@@ -69,6 +76,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   isEditPage = false,
   initialConnectorId,
   integrations,
+  iacCheckSurface,
   onReadyChange,
   onConnectorIdChange,
 }) => {
@@ -87,8 +95,14 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   );
   const [iacKey, setIacKey] = useState<string | undefined>(undefined);
   const [stackArn, setStackArn] = useState('');
-  // IacKeyCheck reports false while the selected identity's deployed template is out of date.
-  const [isCheckValid, setIsCheckValid] = useState(true);
+  // IacKeyCheck reports false while the selected identity's deployed template is out of date,
+  // and while its first verdict is pending. Readiness therefore starts pessimistic exactly when
+  // a check will run (same condition IacKeyCheck uses), so Deploy cannot be pressed during the
+  // verify round-trip; with no check coming, nothing would ever flip it back to true
+  // (https://github.com/elastic/ingest-dev/issues/9415).
+  const willRunIacCheck = isIacProvisionerEnabled && (integrations?.length ?? 0) > 0;
+  const initialCheckValidity = !willRunIacCheck;
+  const [isCheckValid, setIsCheckValid] = useState(initialCheckValidity);
   // Validate what Create will post: a pasted ARN often carries surrounding whitespace.
   const trimmedStackArn = stackArn.trim();
   const stackArnInvalid =
@@ -119,14 +133,18 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   // until it lands, otherwise consumers persist an id with no name and render an empty summary.
   const isAwaitingInitialName = !!selected?.id && !selected.name && isLoadingConnectors;
 
-  // A verdict belongs to the identity it was computed for. Clear it in the same update as the
-  // selection change (not in an effect: the remounted IacKeyCheck reports its fresh verdict in a
-  // mount effect that runs before any parent effect, and a parent-effect reset would erase it) so
-  // a stale false from the previous identity cannot block the new one before its check reports.
-  const selectConnector = useCallback((next: { id: string; name?: string } | undefined) => {
-    setSelected(next);
-    setIsCheckValid(true);
-  }, []);
+  // A verdict belongs to the identity it was computed for. Clear it back to the initial value in
+  // the same update as the selection change (not in an effect: the remounted IacKeyCheck reports
+  // its fresh verdict in a mount effect that runs before any parent effect, and a parent-effect
+  // reset would erase it) so the previous identity's verdict neither blocks nor releases the new
+  // one before its own check reports.
+  const selectConnector = useCallback(
+    (next: { id: string; name?: string } | undefined) => {
+      setSelected(next);
+      setIsCheckValid(initialCheckValidity);
+    },
+    [initialCheckValidity]
+  );
 
   useEffect(() => {
     onReadyChange?.(!!selected?.id && isCheckValid);
@@ -267,13 +285,8 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
               <EuiSpacer size="m" />
               <EuiFormRow
                 fullWidth
-                label={i18n.translate('xpack.fleet.awsIdentityFederationSetup.stackArnLabel', {
-                  defaultMessage: 'CloudFormation stack ARN',
-                })}
-                helpText={i18n.translate('xpack.fleet.awsIdentityFederationSetup.stackArnHelp', {
-                  defaultMessage:
-                    'Copy the StackId output of the stack you just created so Kibana can link straight to it when its template needs an update.',
-                })}
+                label={STACK_ARN_LABEL}
+                helpText={STACK_ARN_HELP_TEXT}
                 isInvalid={stackArnInvalid}
                 error={stackArnInvalid ? INVALID_STACK_ARN_MESSAGE : undefined}
               >
@@ -363,6 +376,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
                 cloud={cloud}
                 accountType={accountType}
                 iacTemplateUrl={iacTemplateUrl}
+                surface={iacCheckSurface}
                 onValidityChange={setIsCheckValid}
               />
             </>

@@ -104,7 +104,35 @@ describe('useVerifyIacKey', () => {
     expect(mockSendVerify).toHaveBeenCalledWith('cc-1', { integrations });
     // A changed selection must miss the cache, so the set is part of the key.
     expect(
-      queryClient.getQueryData([VERIFY_IAC_KEY_QUERY_KEY, 'cc-1', integrations])
+      queryClient.getQueryData([VERIFY_IAC_KEY_QUERY_KEY, 'cc-1', integrations, undefined])
+    ).toBeDefined();
+  });
+
+  it('sends the surface in the request body and keys the query on it', async () => {
+    mockSendVerify.mockResolvedValue({
+      data: { matches: true, outcome: 'matches', integrations: [] },
+      error: null,
+    } as Awaited<ReturnType<typeof sendVerifyCloudConnectorIacKey>>);
+
+    const integrations = [
+      { name: 'aws', policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-s3'] }] },
+    ];
+
+    renderHook(
+      () =>
+        useVerifyIacKey({
+          cloudConnectorId: 'cc-1',
+          integrations,
+          surface: 'onboarding',
+          enabled: true,
+        }),
+      { wrapper }
+    );
+
+    await waitFor(() => expect(mockSendVerify).toHaveBeenCalled());
+    expect(mockSendVerify).toHaveBeenCalledWith('cc-1', { integrations, surface: 'onboarding' });
+    expect(
+      queryClient.getQueryData([VERIFY_IAC_KEY_QUERY_KEY, 'cc-1', integrations, 'onboarding'])
     ).toBeDefined();
   });
 

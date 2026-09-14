@@ -311,6 +311,10 @@ export const VerifyCloudConnectorIacKeyRequestSchema = {
     integrations: schema.maybe(
       schema.arrayOf(RenderIacTemplateIntegrationSchema, { maxSize: MAX_IAC_RENDER_INTEGRATIONS })
     ),
+    // Telemetry label for the UI asking. The wizard and the AWS onboarding both add
+    // integrations, so only the browser can tell them apart; 'flyout' is derived from an
+    // empty/omitted set and is not accepted here.
+    surface: schema.maybe(schema.oneOf([schema.literal('wizard'), schema.literal('onboarding')])),
   }),
 };
 

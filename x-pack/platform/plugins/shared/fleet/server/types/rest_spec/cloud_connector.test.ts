@@ -63,6 +63,22 @@ describe('VerifyCloudConnectorIacKeyRequestSchema', () => {
     ).not.toThrow();
   });
 
+  it.each(['wizard', 'onboarding'])('accepts the %s surface', (surface) => {
+    expect(() => VerifyCloudConnectorIacKeyRequestSchema.body.validate({ surface })).not.toThrow();
+  });
+
+  it('rejects the flyout surface: the flyout never sends one, the server derives it', () => {
+    expect(() =>
+      VerifyCloudConnectorIacKeyRequestSchema.body.validate({ surface: 'flyout' })
+    ).toThrow();
+  });
+
+  it('rejects an unknown surface', () => {
+    expect(() =>
+      VerifyCloudConnectorIacKeyRequestSchema.body.validate({ surface: 'cli' })
+    ).toThrow();
+  });
+
   it('rejects the retired singular integration field', () => {
     expect(() =>
       VerifyCloudConnectorIacKeyRequestSchema.body.validate({

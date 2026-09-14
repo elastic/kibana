@@ -489,33 +489,63 @@ describe('AwsIdentityFederationSetup', () => {
         })
       );
       expect(props?.integrationTitle).toBeUndefined();
+      expect(props?.surface).toBeUndefined();
       expect(props?.onValidityChange).toEqual(expect.any(Function));
     });
 
-    it('blocks readiness while the check reports invalid and releases it once valid', async () => {
-      renderSetup({ cloud, integrations, initialConnectorId: 'connector-1' });
-      await waitFor(() => expect(onReadyChange).toHaveBeenCalledWith(true));
-
-      act(() => {
-        lastIacKeyCheckProps()?.onValidityChange?.(false);
+    it('forwards iacCheckSurface to IacKeyCheck as its telemetry surface', () => {
+      renderSetup({
+        cloud,
+        integrations,
+        initialConnectorId: 'connector-1',
+        iacCheckSurface: 'onboarding',
       });
+
+      expect(lastIacKeyCheckProps()?.surface).toBe('onboarding');
+    });
+
+    it('starts not ready while the check is pending and follows the verdicts it reports', async () => {
+      // Readiness starts pessimistic exactly when a check will run, so Deploy/Save cannot be
+      // pressed during the verify round-trip (https://github.com/elastic/ingest-dev/issues/9415).
+      renderSetup({ cloud, integrations, initialConnectorId: 'connector-1' });
+      await waitFor(() => expect(onReadyChange).toHaveBeenCalled());
+      expect(onReadyChange).not.toHaveBeenCalledWith(true);
       expect(lastReadyValue(onReadyChange)).toBe(false);
 
       act(() => {
         lastIacKeyCheckProps()?.onValidityChange?.(true);
       });
       expect(lastReadyValue(onReadyChange)).toBe(true);
-    });
-
-    it('resets readiness when a different connector is selected, before its own check reports', async () => {
-      const user = userEvent.setup();
-      renderSetup({ cloud, integrations, initialConnectorId: 'connector-1' });
-      await waitFor(() => expect(onReadyChange).toHaveBeenCalledWith(true));
 
       act(() => {
         lastIacKeyCheckProps()?.onValidityChange?.(false);
       });
       expect(lastReadyValue(onReadyChange)).toBe(false);
+    });
+
+    it('starts ready when integrations are given but the provisioner is off (no check runs)', () => {
+      mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: false });
+
+      renderSetup({ cloud, integrations, initialConnectorId: 'connector-1' });
+
+      expect(onReadyChange).toHaveBeenCalledWith(true);
+    });
+
+    it('starts ready when the provisioner is on but there are no integrations (no check runs)', () => {
+      renderSetup({ cloud, initialConnectorId: 'connector-1' });
+
+      expect(onReadyChange).toHaveBeenCalledWith(true);
+    });
+
+    it('goes back to not ready when a different connector is selected, until its own check reports', async () => {
+      const user = userEvent.setup();
+      renderSetup({ cloud, integrations, initialConnectorId: 'connector-1' });
+      await waitFor(() => expect(onReadyChange).toHaveBeenCalled());
+
+      act(() => {
+        lastIacKeyCheckProps()?.onValidityChange?.(true);
+      });
+      expect(lastReadyValue(onReadyChange)).toBe(true);
 
       await user.click(screen.getByTestId(AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ));
       await user.click(await screen.findByText('AWS Connector 2'));
@@ -523,7 +553,13 @@ describe('AwsIdentityFederationSetup', () => {
       await waitFor(() => {
         expect(lastIacKeyCheckProps()?.cloudConnectorId).toBe('connector-2');
       });
-      // The stale verdict for connector-1 must not block connector-2 until its check has run.
+      // connector-1's verdict says nothing about connector-2: not ready until its check reports,
+      // rather than re-enabling Deploy for the round-trip.
+      expect(lastReadyValue(onReadyChange)).toBe(false);
+
+      act(() => {
+        lastIacKeyCheckProps()?.onValidityChange?.(true);
+      });
       expect(lastReadyValue(onReadyChange)).toBe(true);
     });
 

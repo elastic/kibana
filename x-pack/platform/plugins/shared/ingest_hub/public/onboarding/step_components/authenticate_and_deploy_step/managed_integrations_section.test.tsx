@@ -317,6 +317,14 @@ describe('ManagedIntegrationsSection', () => {
         expect.anything()
       );
     });
+
+    it('labels the Existing Identity check as the onboarding telemetry surface', () => {
+      renderSection({ showIdentityFederation: true });
+      expect(MockIdentityFederation).toHaveBeenCalledWith(
+        expect.objectContaining({ iacCheckSurface: 'onboarding' }),
+        expect.anything()
+      );
+    });
   });
 
   describe('initialConnectorId restoration', () => {

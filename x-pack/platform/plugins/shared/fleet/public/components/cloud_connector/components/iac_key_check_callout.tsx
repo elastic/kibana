@@ -17,6 +17,8 @@ import { CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS } from '../../../../common/serv
 export interface IacKeyCheckCalloutProps {
   result: VerifyCloudConnectorIacKeyResponse;
   integrationTitle?: string;
+  /** How many integrations the check covers; pluralises the copy when no title is given. */
+  integrationCount?: number;
   onUpdateStack: () => void;
   isUpdating: boolean;
   onVerify: () => void;
@@ -27,6 +29,7 @@ export interface IacKeyCheckCalloutProps {
 export const IacKeyCheckCallout: React.FC<IacKeyCheckCalloutProps> = ({
   result,
   integrationTitle,
+  integrationCount = 1,
   onUpdateStack,
   isUpdating,
   onVerify,
@@ -50,23 +53,28 @@ export const IacKeyCheckCallout: React.FC<IacKeyCheckCalloutProps> = ({
     />
   );
 
+  // Multi-package surfaces (onboarding) have no single title to name, so the copy falls back to
+  // a count-aware placeholder.
   const fallbackIntegrationTitle = i18n.translate(
     'xpack.fleet.cloudConnector.iacCheck.integrationFallback',
-    { defaultMessage: 'this integration' }
+    {
+      defaultMessage: '{count, plural, one {this integration} other {these integrations}}',
+      values: { count: integrationCount },
+    }
   );
+  const integration = <strong>{integrationTitle ?? fallbackIntegrationTitle}</strong>;
 
   const bodyText = isNoKey ? (
     <FormattedMessage
       id="xpack.fleet.cloudConnector.iacCheck.noKeyBody"
-      defaultMessage="This identity was set up with the static template, either because it predates generated templates or because template generation was unavailable at the time. Update the stack to switch to a template scoped to your integrations' permissions. You can continue without updating."
+      defaultMessage="This identity was set up with the static template, either because it predates generated templates or because template generation was unavailable at the time. Update the stack to switch to a template scoped to the permissions required by {integration}. You can continue without updating."
+      values={{ integration }}
     />
   ) : (
     <FormattedMessage
       id="xpack.fleet.cloudConnector.iacCheck.mismatchBody"
       defaultMessage="This identity's IAM role was generated without the permissions needed for {integration}. Update the CloudFormation stack to grant the required permissions before completing setup."
-      values={{
-        integration: <strong>{integrationTitle ?? fallbackIntegrationTitle}</strong>,
-      }}
+      values={{ integration }}
     />
   );
 

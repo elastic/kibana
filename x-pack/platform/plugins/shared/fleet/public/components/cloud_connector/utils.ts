@@ -637,6 +637,16 @@ export const getIacLaunchUrl = ({
   return staticUrl.replace(TEMPLATE_URL_PARAM_REGEX, `templateURL=${encodedArtifact}`);
 };
 
+/** Stack ARN field copy shared by the wizard's connector form and the AWS onboarding setup. */
+export const STACK_ARN_LABEL = i18n.translate('xpack.fleet.cloudConnector.aws.stackArnLabel', {
+  defaultMessage: 'CloudFormation stack ARN',
+});
+
+export const STACK_ARN_HELP_TEXT = i18n.translate('xpack.fleet.cloudConnector.aws.stackArnHelp', {
+  defaultMessage:
+    'Copy the StackId output of the stack you just created so Kibana can link straight to it when its template needs an update.',
+});
+
 /** Shared by the wizard's stack ARN field and the flyout's Deployment ID field. */
 export const INVALID_STACK_ARN_MESSAGE = i18n.translate(
   'xpack.fleet.cloudConnector.aws.stackArnInvalid',

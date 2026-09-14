@@ -314,9 +314,11 @@ describe('AWSReusableConnectorForm', () => {
         <AWSReusableConnectorForm {...defaultProps} credentials={credentialsWithId} />
       );
 
+      // The wizard leaves IacKeyCheck's surface at its default.
       expect(mockUseVerifyIacKey).toHaveBeenCalledWith({
         cloudConnectorId: 'connector-1',
         integrations: expectedIntegrations,
+        surface: 'wizard',
         enabled: true,
       });
     });
@@ -335,6 +337,7 @@ describe('AWSReusableConnectorForm', () => {
       expect(mockUseVerifyIacKey).toHaveBeenCalledWith({
         cloudConnectorId: 'connector-1',
         integrations: [],
+        surface: 'wizard',
         enabled: false,
       });
     });

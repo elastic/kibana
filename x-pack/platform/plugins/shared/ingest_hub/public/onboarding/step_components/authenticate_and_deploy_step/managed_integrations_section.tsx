@@ -255,6 +255,7 @@ export function ManagedIntegrationsSection({
                   cloud={cloud}
                   iacTemplateUrl={iacTemplateUrl}
                   integrations={iacIntegrations}
+                  iacCheckSurface="onboarding"
                   onReadyChange={setIsDeployReady}
                   onConnectorIdChange={setConnectorId}
                   initialConnectorId={initialConnectorId}

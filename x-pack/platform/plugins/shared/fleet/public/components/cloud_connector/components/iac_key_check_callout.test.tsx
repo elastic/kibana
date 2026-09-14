@@ -79,7 +79,7 @@ describe('IacKeyCheckCallout', () => {
   });
 
   it('falls back to "this integration" in bold when no title is given', () => {
-    // Multi-package surfaces (onboarding) omit the title.
+    // Multi-package surfaces (onboarding) omit the title; one integration by default.
     renderWithIntl(
       <IacKeyCheckCallout
         {...baseProps}
@@ -93,6 +93,47 @@ describe('IacKeyCheckCallout', () => {
     );
     const bold = screen.getByText('this integration');
     expect(bold.tagName).toBe('STRONG');
+  });
+
+  it('falls back to "these integrations" when the check covers several and no title is given', () => {
+    renderWithIntl(
+      <IacKeyCheckCallout
+        {...baseProps}
+        integrationCount={3}
+        result={{
+          matches: false,
+          reason: 'key_mismatch',
+          outcome: 'key_mismatch',
+          integrations: [],
+        }}
+      />
+    );
+    const bold = screen.getByText('these integrations');
+    expect(bold.tagName).toBe('STRONG');
+    expect(screen.queryByText('this integration')).not.toBeInTheDocument();
+  });
+
+  it('names the integration in bold in the no_key body when a title is given', () => {
+    renderWithIntl(
+      <IacKeyCheckCallout
+        {...baseProps}
+        integrationTitle="Cloud Security Posture"
+        result={{ matches: false, reason: 'no_key', outcome: 'no_key', integrations: [] }}
+      />
+    );
+    const bold = screen.getByText('Cloud Security Posture');
+    expect(bold.tagName).toBe('STRONG');
+  });
+
+  it('pluralises the no_key body fallback from the integration count', () => {
+    renderWithIntl(
+      <IacKeyCheckCallout
+        {...baseProps}
+        integrationCount={2}
+        result={{ matches: false, reason: 'no_key', outcome: 'no_key', integrations: [] }}
+      />
+    );
+    expect(screen.getByText('these integrations').tagName).toBe('STRONG');
   });
 
   it('shows the no-deployment-id note when deploymentId is absent', () => {

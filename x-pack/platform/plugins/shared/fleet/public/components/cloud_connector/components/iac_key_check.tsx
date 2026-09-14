@@ -14,6 +14,7 @@ import { CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS } from '../../../../common/serv
 import {
   IAC_PROVISIONER_KEY_CHECK_ACTION_EVENT,
   type IacKeyCheckAction,
+  type IacKeySurface,
 } from '../../../../common/telemetry/iac_provisioner_events';
 import type { RenderIacTemplateIntegration } from '../../../../common/types/rest_spec/iac_provisioner';
 import type { AccountType } from '../../../types';
@@ -35,6 +36,8 @@ export interface IacKeyCheckProps {
   cloud?: CloudSetupForCloudConnector;
   accountType?: AccountType;
   iacTemplateUrl?: string;
+  /** Telemetry surface this check and its callout actions report as. */
+  surface?: Extract<IacKeySurface, 'wizard' | 'onboarding'>;
   onValidityChange?: (isValid: boolean) => void;
 }
 
@@ -49,6 +52,7 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
   cloud,
   accountType,
   iacTemplateUrl,
+  surface = 'wizard',
   onValidityChange,
 }) => {
   const { isIacProvisionerEnabled } = useIacProvisioner();
@@ -56,9 +60,10 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
 
   const isCheckEnabled = isIacProvisionerEnabled && integrations.length > 0;
 
-  const { data, isFetching, refetch } = useVerifyIacKey({
+  const { data, isFetching, isInitialLoading, refetch } = useVerifyIacKey({
     cloudConnectorId,
     integrations,
+    surface,
     enabled: isCheckEnabled,
   });
 
@@ -99,6 +104,10 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
     });
 
   const isBlocking = data?.matches === false && data.reason === 'key_mismatch';
+  // No verdict yet and one is on its way. Not the same as "no data": a failed check (fail open)
+  // and a check waiting for a connector to be selected both leave `data` undefined without
+  // being pending.
+  const isAwaitingFirstVerdict = isInitialLoading;
 
   // Report validity only when the blocking state itself changes. Callers (e.g. the wizard's
   // updatePolicy) re-create the callback on every update, so depending on its identity here
@@ -111,26 +120,35 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
     if (!isCheckEnabled) {
       return;
     }
+    // Say nothing until the first verdict lands. Reporting "valid" on mount would let a host
+    // enable Save/Deploy for the whole verify round-trip; reporting "invalid" would hand hosts
+    // that only forward a block (extension forms via cloud_connector_setup.tsx) a false that no
+    // verdict backs and that they cannot clear. Hosts that must block during the round-trip start
+    // pessimistic themselves, as AwsIdentityFederationSetup does
+    // (https://github.com/elastic/ingest-dev/issues/9415).
+    if (isAwaitingFirstVerdict) {
+      return;
+    }
     const isValid = !isBlocking;
     if (lastReportedValidityRef.current === isValid) {
       return;
     }
     lastReportedValidityRef.current = isValid;
     onValidityChangeRef.current?.(isValid);
-  }, [isBlocking, isCheckEnabled]);
+  }, [isAwaitingFirstVerdict, isBlocking, isCheckEnabled]);
 
   const reportAction = useCallback(
     (action: IacKeyCheckAction) => {
       if (data?.reason) {
         analytics.reportEvent(IAC_PROVISIONER_KEY_CHECK_ACTION_EVENT.eventType, {
-          surface: 'wizard',
+          surface,
           action,
           reason: data.reason,
           hasDeploymentId: Boolean(data.deploymentId),
         });
       }
     },
-    [analytics, data]
+    [analytics, data, surface]
   );
 
   if (!data || data.matches) {
@@ -142,6 +160,7 @@ export const IacKeyCheck: React.FC<IacKeyCheckProps> = ({
       <IacKeyCheckCallout
         result={data}
         integrationTitle={integrationTitle}
+        integrationCount={integrations.length}
         onUpdateStack={() => {
           reportAction('update_stack_clicked');
           if ('onClick' in launchButtonProps) {

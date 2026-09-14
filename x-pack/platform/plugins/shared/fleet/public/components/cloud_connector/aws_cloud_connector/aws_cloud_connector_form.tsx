@@ -38,6 +38,8 @@ import {
   isAwsCredentials,
   isSameTemplateSet,
   INVALID_STACK_ARN_MESSAGE,
+  STACK_ARN_HELP_TEXT,
+  STACK_ARN_LABEL,
 } from '../utils';
 import { AWS_PROVIDER, ORGANIZATION_ACCOUNT } from '../constants';
 
@@ -228,13 +230,8 @@ export const AWSCloudConnectorForm: React.FC<AWSCloudConnectorFormProps> = ({
           <EuiSpacer size="m" />
           <EuiFormRow
             fullWidth
-            label={i18n.translate('xpack.fleet.cloudConnector.aws.stackArnLabel', {
-              defaultMessage: 'CloudFormation stack ARN',
-            })}
-            helpText={i18n.translate('xpack.fleet.cloudConnector.aws.stackArnHelp', {
-              defaultMessage:
-                'Copy the StackId output of the stack you just created so Kibana can link straight to it when its template needs an update.',
-            })}
+            label={STACK_ARN_LABEL}
+            helpText={STACK_ARN_HELP_TEXT}
             isInvalid={stackArnInvalid}
             error={stackArnInvalid ? INVALID_STACK_ARN_MESSAGE : undefined}
           >

@@ -121,8 +121,17 @@ describe('IacKeyCheck', () => {
       expect(mockUseVerifyIacKey).toHaveBeenCalledWith({
         cloudConnectorId: 'connector-1',
         integrations,
+        surface: 'wizard',
         enabled: true,
       });
+    });
+
+    it('passes the given surface to the hook', () => {
+      renderWithIntl(<IacKeyCheck {...defaultProps} surface="onboarding" />);
+
+      expect(mockUseVerifyIacKey).toHaveBeenCalledWith(
+        expect.objectContaining({ surface: 'onboarding' })
+      );
     });
 
     it('is disabled when there are no integrations, so no request is made', () => {
@@ -206,6 +215,23 @@ describe('IacKeyCheck', () => {
       await waitFor(() => expect(screen.getByText('AWS CloudTrail')).toBeInTheDocument());
     });
 
+    it('pluralises the fallback copy from the number of integrations the check covers', async () => {
+      // Multi-package surfaces (onboarding) omit the title: two integrations → "these integrations".
+      mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
+
+      renderWithIntl(<IacKeyCheck {...defaultProps} />);
+
+      await waitFor(() => expect(screen.getByText('these integrations')).toBeInTheDocument());
+    });
+
+    it('keeps the singular fallback copy for a single integration', async () => {
+      mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
+
+      renderWithIntl(<IacKeyCheck {...defaultProps} integrations={[integrations[0]]} />);
+
+      await waitFor(() => expect(screen.getByText('this integration')).toBeInTheDocument());
+    });
+
     it('fails open on a query error: no callout, reports valid', () => {
       mockUseVerifyIacKey.mockReturnValue({
         data: undefined,
@@ -226,6 +252,79 @@ describe('IacKeyCheck', () => {
   });
 
   describe('reporting validity', () => {
+    const pendingFirstCheck = () =>
+      mockUseVerifyIacKey.mockReturnValue({
+        data: undefined,
+        isFetching: true,
+        isInitialLoading: true,
+        refetch: mockRefetch,
+      } as unknown as ReturnType<typeof useVerifyIacKey>);
+
+    it('says nothing while the first check is pending, then reports valid once the template matches', async () => {
+      // Neither verdict is backed yet: "valid" would enable Save/Deploy for the round-trip, and
+      // "invalid" would hand extension hosts (which only forward a block) a false they cannot
+      // clear (https://github.com/elastic/ingest-dev/issues/9415).
+      pendingFirstCheck();
+      const onValidityChange = jest.fn();
+
+      const { rerender } = renderWithIntl(
+        <IacKeyCheck {...defaultProps} onValidityChange={onValidityChange} />
+      );
+      expect(onValidityChange).not.toHaveBeenCalled();
+
+      mockVerifyResult({ matches: true, outcome: 'matches', integrations: [] });
+      rerender(
+        withProviders(<IacKeyCheck {...defaultProps} onValidityChange={onValidityChange} />)
+      );
+      await waitFor(() => expect(onValidityChange).toHaveBeenCalledWith(true));
+      expect(onValidityChange).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports invalid once, when the pending check resolves to key_mismatch', async () => {
+      pendingFirstCheck();
+      const onValidityChange = jest.fn();
+
+      const { rerender } = renderWithIntl(
+        <IacKeyCheck {...defaultProps} onValidityChange={onValidityChange} />
+      );
+      expect(onValidityChange).not.toHaveBeenCalled();
+
+      mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
+      rerender(
+        withProviders(<IacKeyCheck {...defaultProps} onValidityChange={onValidityChange} />)
+      );
+      await screen.findByTestId(CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.CALLOUT);
+      expect(onValidityChange).toHaveBeenCalledTimes(1);
+      expect(onValidityChange).toHaveBeenCalledWith(false);
+    });
+
+    it('reports valid once a pending check fails open', async () => {
+      pendingFirstCheck();
+      const onValidityChange = jest.fn();
+
+      const { rerender } = renderWithIntl(
+        <IacKeyCheck {...defaultProps} onValidityChange={onValidityChange} />
+      );
+      expect(onValidityChange).not.toHaveBeenCalled();
+
+      mockVerifyResult({ matches: true, outcome: 'key_unavailable', integrations: [] });
+      rerender(
+        withProviders(<IacKeyCheck {...defaultProps} onValidityChange={onValidityChange} />)
+      );
+      await waitFor(() => expect(onValidityChange).toHaveBeenCalledWith(true));
+      expect(onValidityChange).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports nothing while pending even when the check is disabled', () => {
+      useIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: false });
+      pendingFirstCheck();
+      const onValidityChange = jest.fn();
+
+      renderWithIntl(<IacKeyCheck {...defaultProps} onValidityChange={onValidityChange} />);
+
+      expect(onValidityChange).not.toHaveBeenCalled();
+    });
+
     it('reports only when the blocking state changes, not when the callback identity changes', async () => {
       // The wizard re-creates updatePolicy (and therefore onValidityChange) after every policy
       // update; re-firing on identity would loop: report → update → new callback → report …
@@ -277,6 +376,21 @@ describe('IacKeyCheck', () => {
         })
       );
       expect(mockLaunchOnClick).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports the given surface in the action event', async () => {
+      mockVerifyResult({ matches: false, reason: 'key_mismatch', integrations: [] });
+
+      renderWithIntl(<IacKeyCheck {...defaultProps} surface="onboarding" />);
+
+      await userEvent.click(
+        await screen.findByTestId(CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS.UPDATE_STACK_BUTTON)
+      );
+
+      expect(mockReportEvent).toHaveBeenCalledWith(
+        'iac_provisioner_key_check_action',
+        expect.objectContaining({ surface: 'onboarding', action: 'update_stack_clicked' })
+      );
     });
 
     it('clicking Verify reports telemetry and refetches', async () => {

@@ -8,7 +8,10 @@
 import { useQuery } from '@kbn/react-query';
 
 import type { RenderIacTemplateIntegration } from '../../../../common/types/rest_spec/iac_provisioner';
-import type { VerifyCloudConnectorIacKeyResponse } from '../../../../common/types/rest_spec/cloud_connector';
+import type {
+  VerifyCloudConnectorIacKeyRequest,
+  VerifyCloudConnectorIacKeyResponse,
+} from '../../../../common/types/rest_spec/cloud_connector';
 import { sendVerifyCloudConnectorIacKey } from '../../../hooks/use_request/iac_provisioner';
 
 export interface UseVerifyIacKeyParams {
@@ -18,6 +21,8 @@ export interface UseVerifyIacKeyParams {
    * connector's current set only (flyout).
    */
   integrations?: RenderIacTemplateIntegration[];
+  /** Telemetry label for the UI asking; the flyout sends none and the server derives it. */
+  surface?: VerifyCloudConnectorIacKeyRequest['surface'];
   enabled: boolean;
 }
 
@@ -28,13 +33,15 @@ export const VERIFY_IAC_KEY_STALE_TIME_MS = 30_000;
 export const useVerifyIacKey = ({
   cloudConnectorId,
   integrations,
+  surface,
   enabled,
 }: UseVerifyIacKeyParams) =>
   useQuery<VerifyCloudConnectorIacKeyResponse, Error>(
-    [VERIFY_IAC_KEY_QUERY_KEY, cloudConnectorId, integrations],
+    [VERIFY_IAC_KEY_QUERY_KEY, cloudConnectorId, integrations, surface],
     async () => {
       const { data, error } = await sendVerifyCloudConnectorIacKey(cloudConnectorId as string, {
         integrations,
+        surface,
       });
       if (error || !data) {
         throw error ?? new Error('Empty verify response');
