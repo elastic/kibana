@@ -128,7 +128,7 @@ export const createVerifyKiStepDefinition = (
       const totalController = new AbortController();
       const totalTimer = setTimeout(() => totalController.abort(), totalTimeoutMs);
       const onStepAbort = () => totalController.abort();
-      // The abort event only fires once, so a signal aborted before this point must be mirrored explicitly.
+      // An already-aborted signal never fires 'abort' again.
       if (context.abortSignal.aborted) {
         onStepAbort();
       } else {
@@ -136,38 +136,35 @@ export const createVerifyKiStepDefinition = (
       }
       const abortSignal = totalController.signal;
 
-      let summary;
-      try {
-        summary = await withKiVerificationTelemetry({
-          analyticsService,
-          logger,
-          workflowId: workflow.id,
-          aiIndexId: context.input.ai_index_id,
-          run: async () => {
-            const verifiers = await buildVerifiers();
-            try {
-              return await service.verifyKi(context.input.ki, {
-                isEnabled,
-                esClient: context.contextManager.getScopedEsClient(),
-                logger,
-                abortSignal,
-                verifiers,
+      const summary = await withKiVerificationTelemetry({
+        analyticsService,
+        logger,
+        workflowId: workflow.id,
+        aiIndexId: context.input.ai_index_id,
+        run: async () => {
+          const verifiers = await buildVerifiers();
+          try {
+            return await service.verifyKi(context.input.ki, {
+              isEnabled,
+              esClient: context.contextManager.getScopedEsClient(),
+              logger,
+              abortSignal,
+              verifiers,
+            });
+          } catch (error) {
+            if (error instanceof KiVerificationInputError) {
+              throw new ExecutionError({
+                type: 'InputValidationError',
+                message: error.message,
               });
-            } catch (error) {
-              if (error instanceof KiVerificationInputError) {
-                throw new ExecutionError({
-                  type: 'InputValidationError',
-                  message: error.message,
-                });
-              }
-              throw error;
             }
-          },
-        });
-      } finally {
+            throw error;
+          }
+        },
+      }).finally(() => {
         clearTimeout(totalTimer);
         context.abortSignal.removeEventListener('abort', onStepAbort);
-      }
+      });
 
       return { output: summary };
     },

@@ -399,7 +399,7 @@ describe('verify_ki workflow step', () => {
         query: jest.fn().mockImplementation(
           (_params: unknown, opts: { signal?: AbortSignal }) =>
             new Promise((_, reject) => {
-              opts?.signal?.addEventListener('abort', () => {
+              opts.signal?.addEventListener('abort', () => {
                 const err = new Error('Request aborted');
                 err.name = 'AbortError';
                 reject(err);

@@ -54,7 +54,6 @@ export class KiVerificationService {
     for (const verifier of selectedVerifiers) {
       const { id } = verifier;
       try {
-        // Stop before dispatching the next verifier; a workflow verifier only checks the signal once running.
         verifierContext.abortSignal?.throwIfAborted();
         if (!verifier.applies(ki, verifierContext)) {
           continue;

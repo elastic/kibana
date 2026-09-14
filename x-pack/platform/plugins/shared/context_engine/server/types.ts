@@ -56,7 +56,7 @@ export interface ContextEngineSetupDependencies {
   features: FeaturesPluginSetup;
   taskManager: TaskManagerSetupContract;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
-  /** Structurally typed to avoid a project cycle with the workflows management plugin. */
+  /** Optional in the manifest; without it feedback analysis schedules and custom KI verifiers are unavailable. */
   workflowsManagement?: { management: KiVerifierWorkflowRunner & WorkflowEnablementApi };
 }
 
