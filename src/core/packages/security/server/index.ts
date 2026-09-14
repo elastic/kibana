@@ -26,8 +26,6 @@ export {
 } from './src/service_account_operations';
 export type {
   ServiceAccount,
-  ServiceAccountAssumableBy,
-  ServiceAccountRoleAssignments,
   CreateServiceAccountParams,
   ServiceAccountWorkloadBinder,
   ServiceAccountWorkloadBinding,

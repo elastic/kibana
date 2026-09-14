@@ -59,7 +59,11 @@ import { FipsService } from './fips';
 import { defineRoutes } from './routes';
 import { setupSavedObjects } from './saved_objects';
 import type { CloudProjectContext, ServiceAccountsServiceStart } from './service_accounts';
-import { registerWorkloadBindingSavedObjectType, ServiceAccountsService } from './service_accounts';
+import {
+  registerServiceAccountCredentialSavedObjectType,
+  registerWorkloadBindingSavedObjectType,
+  ServiceAccountsService,
+} from './service_accounts';
 import type { Session } from './session_management';
 import { SessionManagementService } from './session_management';
 import { setupSpacesClient } from './spaces';
@@ -264,6 +268,7 @@ export class SecurityPlugin
     // that comes and goes with a feature flag leaves its documents unreadable on any deployment
     // that once had the feature on.
     registerWorkloadBindingSavedObjectType(core.savedObjects, encryptedSavedObjects);
+    registerServiceAccountCredentialSavedObjectType(core.savedObjects, encryptedSavedObjects);
     const config$ = this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
       map((rawConfig) =>
         createConfig(rawConfig, this.initializerContext.logger.get('config'), {
@@ -539,6 +544,7 @@ export class SecurityPlugin
       uiam,
       checkPrivilegesWithRequest: this.authorizationSetup!.checkPrivilegesWithRequest,
       cloudProjectContext: this.cloudProjectContext,
+      clusterClient,
       savedObjects: core.savedObjects,
       encryptedSavedObjects,
       canEncrypt: this.canEncryptSavedObjects,

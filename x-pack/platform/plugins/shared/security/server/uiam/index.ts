@@ -11,6 +11,11 @@ export {
 } from './get_uiam_credentials';
 export { KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE } from './project_type';
 export { isExternalApiKey } from './is_external_api_key';
+export type {
+  ServiceAccountAssumableBy,
+  ServiceAccountRoleAssignments,
+  UiamServiceAccount,
+} from './service_account_types';
 export {
   UiamService,
   type UiamServicePublic,
