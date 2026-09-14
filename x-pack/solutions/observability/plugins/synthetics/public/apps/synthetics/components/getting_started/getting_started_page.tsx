@@ -16,7 +16,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux-v7';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
@@ -37,6 +37,7 @@ import { selectPrivateLocationFlyoutVisible } from '../../state/private_location
 export const GettingStartedPage = () => {
   const dispatch = useDispatch();
   const history = useHistory();
+  const { search } = useLocation();
 
   const { observabilityAIAssistant } = useKibana<ClientPluginsStart>().services;
   const setScreenContext = observabilityAIAssistant?.service.setScreenContext;
@@ -102,6 +103,7 @@ export const GettingStartedPage = () => {
                   data-test-subj="syntheticsGettingStartedPageLink"
                   href={history.createHref({
                     pathname: MONITOR_ADD_ROUTE,
+                    search,
                   })}
                 >
                   {SELECT_DIFFERENT_MONITOR}

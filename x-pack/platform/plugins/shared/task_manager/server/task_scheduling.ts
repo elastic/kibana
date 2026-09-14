@@ -376,33 +376,50 @@ export class TaskScheduling {
     taskInstance: TaskInstanceWithId,
     options?: ScheduleOptions
   ): Promise<TaskInstanceWithId> {
+    // Scheduling grants the API keys before it writes the task, so scheduling an id that already
+    // exists mints a key pair that the version conflict below then throws away. Callers treat this
+    // as an idempotent "make sure this exists" and call it on a loop, so check first rather than
+    // leaking a key pair per call. Racing callers still land on the conflict path. The store's
+    // predicate keeps this guard aligned with the actual grant condition (and skips the lookup
+    // when no key would be granted anyway, e.g. security disabled).
+    if (this.store.willGrantApiKeys(options) && (await this.store.taskExists(taskInstance.id))) {
+      return this.updateScheduleOfExistingTask(taskInstance, options);
+    }
+
     try {
       return await this.schedule(taskInstance, options);
     } catch (err) {
       if (err.statusCode === VERSION_CONFLICT_STATUS) {
-        // check if task specifies a schedule interval
-        // if so,try to update the just the schedule
-        // only works for interval schedule
-        if (taskInstance.schedule && taskInstance.schedule.interval) {
-          const result = await this.bulkUpdateSchedules(
-            [taskInstance.id],
-            taskInstance.schedule,
-            options
-          );
-          if (
-            result.errors.length &&
-            result.errors[0].error.statusCode !== VERSION_CONFLICT_STATUS &&
-            result.errors[0].error.statusCode !== NOT_FOUND_STATUS
-          ) {
-            throw new Error(
-              `Tried to update schedule for existing task "${taskInstance.id}" but failed with error: ${result.errors[0].error.message}`
-            );
-          }
-        }
-        return taskInstance;
+        return this.updateScheduleOfExistingTask(taskInstance, options);
       }
       throw err;
     }
+  }
+
+  private async updateScheduleOfExistingTask(
+    taskInstance: TaskInstanceWithId,
+    options?: ScheduleOptions
+  ): Promise<TaskInstanceWithId> {
+    // check if task specifies a schedule interval
+    // if so,try to update the just the schedule
+    // only works for interval schedule
+    if (taskInstance.schedule && taskInstance.schedule.interval) {
+      const result = await this.bulkUpdateSchedules(
+        [taskInstance.id],
+        taskInstance.schedule,
+        options
+      );
+      if (
+        result.errors.length &&
+        result.errors[0].error.statusCode !== VERSION_CONFLICT_STATUS &&
+        result.errors[0].error.statusCode !== NOT_FOUND_STATUS
+      ) {
+        throw new Error(
+          `Tried to update schedule for existing task "${taskInstance.id}" but failed with error: ${result.errors[0].error.message}`
+        );
+      }
+    }
+    return taskInstance;
   }
 }
 

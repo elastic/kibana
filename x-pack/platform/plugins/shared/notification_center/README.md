@@ -106,7 +106,13 @@ The structure of the notification document is defined in [`common/`](./common):
 ### Severity
 
 `severity` is one of `info | warning | error | critical`. It is **optional on submit and
-defaults to `info`**. Severity drives the per-document retention TTL applied by the cleanup task.
+defaults to `info`**. Severity drives retention in the daily cleanup task.
+A notification can remain visible for up to one cleanup interval after its TTL expires.
+In the case of duplicate "state" notification IDs with different severity values,
+cleanup expires a notification as a group, deleting every copy through its newest expired copy so
+an older, longer-lived severity cannot resurface.
+Unknown future severity values are normalized to `info` on read, but the cleanup task does not
+match them; those documents remain until the data stream's 180-day retention removes them.
 
 ### Call-to-action (CTA)
 
@@ -156,6 +162,21 @@ The server annotates per-user read state, it does not filter or order by it.
 
 An older high-severity notification can now fall outside the cap; server-side pagination and/or a higher cap will address this.
 
+### Read state
+
+Read state is per user, lives in `userStorage`, and never touches the notification document. The
+list route **annotates** each item with `isRead` and returns the same order to every caller.
+
+- `readAllBefore` is a single timestamp marker for a user ("mark all as read")
+  any notifications whose timestamp is at or before this show up as read.
+  It is stamped on the user's first read, so a new user doesn't get a giant unread backlog.
+- `_mark_all_read` advances the marker to now and clears the individual overrides
+- `_mark_read` adds an override for a specific notification id with a timestamp.
+  a later re-push of the same `notification_id` postdates the override and shows as unread again.
+  marking it read again updates the override timestamp (i.e. this is not "mute")
+- Callers with no user profile (API keys, headless consumers) get the list with `isRead` absent
+  rather than a 403. The mark routes reject them, since there is no read state to write.
+
 ## Submitting notifications (`forType`)
 
 The server **setup** contract exposes `forType(ref)`, which binds a submitter to a registered
@@ -166,7 +187,8 @@ notification type.
 - NC supplies `namespace`, `type`, the `notification_id` (built from the type's `kind`), and `@timestamp`.
 
 Re-pushing a `state` notification with the same parts appends another document; at query time
-duplicates are collapsed and a separate cleanup-task keeps the index size under control. Invalid
+duplicates are collapsed and a daily cleanup task enforces severity retention while keeping the
+index size under control. Invalid
 content throws `NotificationValidationError` and nothing is written.
 
 `submit` returns a promise with value: `{ status: 'submitted' | 'skipped_disabled' }`.

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -27,7 +27,6 @@ export interface RoundResponseProps {
   steps: ConversationRoundStep[];
   isLoading: boolean;
   hasError: boolean;
-  isLastRound: boolean;
   conversationAttachments?: VersionedAttachment[];
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
@@ -39,7 +38,6 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   response,
   steps,
   isLoading,
-  isLastRound,
   conversationAttachments,
   attachmentRefs,
   conversationId,
@@ -81,19 +79,9 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
           />
         ) : null}
       </EuiFlexItem>
-      {isLoading && (
-        <EuiFlexItem grow={false}>
-          <EuiLoadingElastic size="l" aria-label="Streaming response" />
-        </EuiFlexItem>
-      )}
       {!isLoading && !hasError && (
         <EuiFlexItem grow={false}>
-          <RoundResponseActions
-            content={response.message}
-            isVisible
-            isLastRound={isLastRound}
-            rawRound={rawRound}
-          />
+          <RoundResponseActions content={response.message} isVisible rawRound={rawRound} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

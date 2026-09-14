@@ -15,6 +15,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/app-header",
     "@kbn/maps-ems-plugin",
     "@kbn/inspector-plugin",
     "@kbn/data-plugin",

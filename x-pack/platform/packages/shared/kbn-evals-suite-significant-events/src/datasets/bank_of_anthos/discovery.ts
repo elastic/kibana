@@ -8,10 +8,18 @@
 import type { Detection, SignificantEvent } from '@kbn/significant-events-schema';
 import type { DatasetConfig } from '../types';
 
+/**
+ * Incident onset in snapshot-time coordinates — the change point the detection rules fired on.
+ * The eval harness maps it onto the replayed timeline (see `canonicalDetectionsFromGroundTruth`)
+ * so the grounding skill's pre/post rate windows frame the actual incident neighborhood.
+ */
+const SNAPSHOT_CHANGE_POINT = '2026-06-25T14:30:00Z';
+
 const toInputDetections = (events: Array<Partial<SignificantEvent>>): Array<Partial<Detection>> =>
   events
     .flatMap((event) => event.signals ?? [])
     .map((signal) => ({
+      '@timestamp': SNAPSHOT_CHANGE_POINT,
       detection_id: signal.metadata?.detection_id,
       rule_name: signal.metadata?.rule_name,
       rule_uuid: signal.metadata?.rule_uuid,
@@ -383,6 +391,34 @@ const BALANCE_READER_WEAK_DETECTION_EVENT: Partial<SignificantEvent> = {
   ],
 };
 
+/**
+ * Same confirmed impact as the isolated balancereader failure, but a seeded memory page documents
+ * the exact mechanism as known/transient background
+ */
+const BALANCE_READER_KNOWN_CHRONIC_EVENT: Partial<SignificantEvent> = {
+  ...BALANCE_READER_ISOLATED_EVENT,
+  event_id: 'frontend__balancereader-connection-refused-known-chronic',
+  severity: '40-medium',
+  confidence: 0.6,
+  signals: [
+    {
+      type: 'detection',
+      stream_name: 'logs',
+      verdict: 'confirms',
+      description:
+        'Found: connection refused to balancereader:8080 on /balances. Impact: users cannot view account balances. Verdict: confirms.',
+      evidence: BALANCE_READER_ISOLATED_EVENT.signals?.[0]?.evidence,
+      metadata: {
+        detection_id: '3c4bf4f9-9ed9-567f-be35-332eb79ee76a-det-chronic',
+        rule_name: 'Frontend → Balance Reader Connection Failures',
+        rule_uuid: '3c4bf4f9-9ed9-567f-be35-332eb79ee76a',
+        change_point_type: 'spike',
+        p_value: 0.0001,
+      },
+    },
+  ],
+};
+
 export const discovery: DatasetConfig['discovery'] = [
   {
     input: {
@@ -506,6 +542,166 @@ export const discovery: DatasetConfig['discovery'] = [
       difficulty: 'hard',
       failure_domain: 'balancereader',
       failure_mode: 'weak_detection_strong_evidence',
+    },
+    snapshot_source: { snapshot_name: 'ledger-db-disconnect' },
+  },
+  {
+    input: {
+      scenario_id: 'ledger-balancereader-known-chronic',
+      stream_name: 'logs',
+      detections: toInputDetections([BALANCE_READER_KNOWN_CHRONIC_EVENT]),
+    },
+    memoryPages: [
+      {
+        name: 'frontend-balancereader-connection-refused',
+        title: 'Frontend → Balance Reader connection refused — known transient background',
+        content: [
+          '## Failure Pattern',
+          'Connection refused from frontend to balancereader:8080 on /balances ("Error getting balance"). This is a long-running, already-tracked background condition on the balance-lookup path; operators are aware of it and it recovers without intervention.',
+          '',
+          '## Normal transient behavior',
+          'Connection-refused bursts recur at a steady background rate without representing a new failure state. This is known ongoing background, not a dismissal or false-positive. When the exact rule fires again and current evidence confirms the failure, keep the event open and cap severity at 40-medium. The balancereader service recovers on its own.',
+          '',
+          '## Detection history',
+          '- rule_uuid: 3c4bf4f9-9ed9-567f-be35-332eb79ee76a (Frontend → Balance Reader Connection Failures)',
+          '- 2026-06-25: rule_uuid 3c4bf4f9-9ed9-567f-be35-332eb79ee76a → status ongoing (known background; current confirmed occurrences remain open at 40-medium)',
+        ].join('\n'),
+        categories: ['services'],
+      },
+    ],
+    output: {
+      expected_ground_truth:
+        'open 40-medium event — grounding confirms the balance-lookup connection refused, but memory documents this exact mechanism as known/transient background, so the known-chronic cap applies',
+      expected_confirmed_rule_uuids: {
+        [BALANCE_READER_KNOWN_CHRONIC_EVENT.event_id!]: ['3c4bf4f9-9ed9-567f-be35-332eb79ee76a'],
+      },
+      expected_significant_events: [BALANCE_READER_KNOWN_CHRONIC_EVENT],
+      criteria: [
+        {
+          id: 'known-chronic-cap',
+          text: 'Sets status=open with severity=40-medium because memory documents this exact frontend→balancereader connection-refused mechanism as already-known/transient background. Does not emit 60-high or 80-critical despite confirmed failure rows.',
+          score: 3,
+        },
+        {
+          id: 'chronic-current-state-verification',
+          text: 'Still runs a current-state ES|QL verification for the detection and stamps the signal verdict from its own query result — memory alone never decides status or verdict.',
+          score: 2,
+        },
+        {
+          id: 'chronic-assessment-note',
+          text: 'States the known/ongoing context in summary and records in assessment_note that the event is a candidate for operator muting or dismissal, without citing memory page names.',
+          score: 2,
+        },
+        {
+          id: 'chronic-not-dismissed',
+          text: 'Keeps the event open rather than dismissing or closing it — failure rows are confirmed, so the known-chronic cap lowers severity, not the lifecycle.',
+          score: 1,
+        },
+      ],
+    },
+    metadata: {
+      difficulty: 'hard',
+      failure_domain: 'balancereader',
+      failure_mode: 'known_chronic',
+    },
+    snapshot_source: { snapshot_name: 'ledger-db-disconnect' },
+  },
+  {
+    // Positive fixture for the grounding skill's rate gate: a chronic failure pattern seeded at a
+    // steady rate before and after the change point. Mechanism is present (rows found, on-topic)
+    // but not newly elevated, so the correct verdict is inconclusive and the event must not be
+    // promoted as a fresh high-severity incident.
+    input: {
+      scenario_id: 'ledger-chronic-background-noise',
+      stream_name: 'logs',
+      detections: [
+        {
+          detection_id: 'e7c1a2d0-4f3b-5a86-9d21-6b0f5c9e8a44-det',
+          rule_name: 'User Service Payment Token Cache Refresh Errors',
+          rule_uuid: 'e7c1a2d0-4f3b-5a86-9d21-6b0f5c9e8a44',
+          stream_name: 'logs',
+          change_point_type: 'non_stationary',
+          p_value: 0.004,
+        },
+      ],
+      chronic_seed: {
+        phrase: 'PaymentTokenCacheRefreshError',
+        service: 'userservice',
+        rate_per_minute: 4,
+        duration_minutes: 240,
+        detection_offset_minutes: 30,
+        ki_title: 'User Service Payment Token Cache Refresh Errors',
+        ki_description:
+          'Detects payment token cache refresh failures in userservice (PaymentTokenCacheRefreshError with connection reset). Failed refreshes are retried; sustained elevation would indicate token distribution degradation.',
+      },
+    },
+    output: {
+      expected_ground_truth:
+        'The matching failure logs run at the same steady rate (~4/min) for hours before and after the change point — a chronic background pattern, not a new incident. Correct outcome: the rate aggregate runs after the on-topic sample, the verdict is inconclusive (rate-flat), and the event is dismissed at 20-low with the background rate noted in assessment_note — a rate-flat background pattern is verified-not-new, never "plausibly unverified", so it must not stay open at any severity; no topology is attached.',
+      expected_significant_events: [
+        {
+          status: 'dismissed',
+          event_id: 'userservice__payment-token-cache-refresh-background',
+          title: 'User service — payment token cache refresh errors at background rate',
+          symptom_hypothesis:
+            'Payment token cache refresh errors occur at a steady background rate, indicating a chronic condition rather than a newly elevated failure.',
+          summary:
+            'Matching failure logs appear at similar pre/post rates around the change point; the mechanism is present but not newly elevated.',
+          severity: '20-low',
+          confidence: 0.4,
+          stream_names: ['logs'],
+          signals: [
+            {
+              type: 'detection',
+              stream_name: 'logs',
+              verdict: 'inconclusive',
+              description:
+                'Found: matching failure logs at similar pre/post rates (~4/min). Impact: not a newly elevated failure.',
+              metadata: {
+                detection_id: 'e7c1a2d0-4f3b-5a86-9d21-6b0f5c9e8a44-det',
+                rule_name: 'User Service Payment Token Cache Refresh Errors',
+                rule_uuid: 'e7c1a2d0-4f3b-5a86-9d21-6b0f5c9e8a44',
+                change_point_type: 'non_stationary',
+                p_value: 0.004,
+              },
+            },
+          ],
+          causal_features: [],
+          blast_radius: [],
+        },
+      ],
+      criteria: [
+        {
+          id: 'chronic-rate-aggregate-ran',
+          text: 'Runs the pre/post rate aggregate after the on-topic failure sample (two execute_esql calls for the rule: a bounded row sample, then a STATS aggregate splitting counts at the detection timestamp with time_range from t-60m to now).',
+          score: 3,
+        },
+        {
+          id: 'chronic-rate-flat-inconclusive',
+          text: 'Sets verdict=inconclusive for the rule because pre and post rates are similar (~4/min on both sides of the change point); does not set confirms on mere row presence.',
+          score: 3,
+        },
+        {
+          id: 'chronic-not-promoted-high',
+          text: 'Writes the event as dismissed at 20-low (never open at any severity) with a description and assessment_note stating the rate is not newly elevated.',
+          score: 3,
+        },
+        {
+          id: 'chronic-no-topology-on-inconclusive',
+          text: 'Emits empty causal_features and blast_radius because no signal has verdict=confirms.',
+          score: 2,
+        },
+        {
+          id: 'chronic-description-template',
+          text: 'The signal description follows the background-rate form — names the found failure signature and states the rate is similar pre/post (not a newly elevated failure) — instead of an outage-style Impact.',
+          score: 1,
+        },
+      ],
+    },
+    metadata: {
+      difficulty: 'medium',
+      failure_domain: 'userservice',
+      failure_mode: 'chronic_background_rate',
     },
     snapshot_source: { snapshot_name: 'ledger-db-disconnect' },
   },

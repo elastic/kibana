@@ -69,6 +69,24 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
     PACKAGE_QUERY_OPTIONS,
     CACHE_OPTS
   );
+  const { data: cloudwatchOtelData, refetch: cloudwatchOtelRefetch } = useGetPackageInfoByKeyQuery(
+    'aws_cloudwatch_input_otel',
+    undefined,
+    PACKAGE_QUERY_OPTIONS,
+    CACHE_OPTS
+  );
+  const { data: securityHubData, refetch: securityHubRefetch } = useGetPackageInfoByKeyQuery(
+    'aws_securityhub',
+    undefined,
+    PACKAGE_QUERY_OPTIONS,
+    CACHE_OPTS
+  );
+  const { data: firehoseData, refetch: firehoseRefetch } = useGetPackageInfoByKeyQuery(
+    'awsfirehose',
+    undefined,
+    PACKAGE_QUERY_OPTIONS,
+    CACHE_OPTS
+  );
 
   const matrix = useMemo(() => {
     if (!awsData?.item) {
@@ -81,9 +99,24 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
       ...(fargateData?.item && { awsfargate: fargateData.item }),
       ...(mqData?.item && { aws_mq: mqData.item }),
       ...(logsData?.item && { aws_logs: logsData.item }),
+      ...(cloudwatchOtelData?.item && {
+        aws_cloudwatch_input_otel: cloudwatchOtelData.item,
+      }),
+      ...(securityHubData?.item && { aws_securityhub: securityHubData.item }),
+      ...(firehoseData?.item && { awsfirehose: firehoseData.item }),
     };
     return buildAwsServiceMatrix(packages, AWS_SERVICES_STATIC);
-  }, [awsData, bedrockData, bedrockAgentcoreData, fargateData, mqData, logsData]);
+  }, [
+    awsData,
+    bedrockData,
+    bedrockAgentcoreData,
+    fargateData,
+    mqData,
+    logsData,
+    cloudwatchOtelData,
+    securityHubData,
+    firehoseData,
+  ]);
 
   const refetch = useCallback(() => {
     awsRefetch();
@@ -92,7 +125,20 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
     fargateRefetch();
     mqRefetch();
     logsRefetch();
-  }, [awsRefetch, bedrockRefetch, bedrockAgentcoreRefetch, fargateRefetch, mqRefetch, logsRefetch]);
+    cloudwatchOtelRefetch();
+    securityHubRefetch();
+    firehoseRefetch();
+  }, [
+    awsRefetch,
+    bedrockRefetch,
+    bedrockAgentcoreRefetch,
+    fargateRefetch,
+    mqRefetch,
+    logsRefetch,
+    cloudwatchOtelRefetch,
+    securityHubRefetch,
+    firehoseRefetch,
+  ]);
 
   return { matrix, isError: awsIsError, refetch };
 }

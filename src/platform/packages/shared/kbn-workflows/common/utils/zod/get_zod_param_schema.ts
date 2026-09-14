@@ -12,8 +12,8 @@ import { z } from '@kbn/zod/v4';
 // Helper function to get a parameter schema from different schema types
 export const getZodParamSchema = (schema: z.ZodType, paramName: string): z.ZodType | undefined => {
   if (schema instanceof z.ZodObject) {
-    // ZodObject
-    return schema.shape[paramName];
+    // ZodObject. Own-property check so `__proto__` cannot resolve to Object.prototype.
+    return Object.hasOwn(schema.shape, paramName) ? schema.shape[paramName] : undefined;
   } else if (schema instanceof z.ZodIntersection) {
     // ZodIntersection - check both sides
     const leftParam = getZodParamSchema(schema.def.left as z.ZodType, paramName);
