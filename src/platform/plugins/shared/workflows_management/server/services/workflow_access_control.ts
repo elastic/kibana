@@ -19,7 +19,6 @@ import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import {
   getWorkflowPermissions,
   WORKFLOW_ACCESS_CONTROL_ROLES,
-  workflowAccessControlSchema,
   WorkflowsManagementApiActions,
 } from '@kbn/workflows';
 import type {
@@ -49,16 +48,17 @@ export const assertWorkflowOperation = (
   operation: WorkflowAccessOperation,
   profileId: string | undefined
 ): void => {
-  if (
-    operation !== 'manage' &&
-    (!workflow.access_control || workflow.access_control.access_mode === 'public')
-  )
-    return;
   if (!getWorkflowPermissions(workflow, profileId)[operation])
     throw new WorkflowAccessDeniedError();
 };
 
 export class WorkflowAccessControlService {
+  private readonly profileIds = new WeakMap<KibanaRequest, Promise<string | undefined>>();
+  private readonly executionFilters = new WeakMap<
+    KibanaRequest,
+    Map<string, Promise<estypes.QueryDslQueryContainer>>
+  >();
+
   constructor(
     private readonly core: CoreStart,
     private readonly crud: Pick<WorkflowCrudService, 'readModifyWriteWorkflowDocument'>,
@@ -66,7 +66,14 @@ export class WorkflowAccessControlService {
   ) {}
 
   async getProfileId(request: KibanaRequest): Promise<string | undefined> {
-    return (await this.core.userProfile.getCurrentProfileId({ request })) ?? undefined;
+    let profileId = this.profileIds.get(request);
+    if (!profileId) {
+      profileId = this.core.userProfile
+        .getCurrentProfileId({ request })
+        .then((id) => id ?? undefined);
+      this.profileIds.set(request, profileId);
+    }
+    return profileId;
   }
 
   async permissions(
@@ -87,7 +94,6 @@ export class WorkflowAccessControlService {
     operation: WorkflowAccessOperation,
     request?: KibanaRequest
   ): Promise<void> {
-    if (operation !== 'manage' && workflow.access_control?.access_mode === 'public') return;
     if (!(await this.permissions(workflow, request))[operation]) {
       throw new WorkflowAccessDeniedError();
     }
@@ -106,6 +112,24 @@ export class WorkflowAccessControlService {
     spaceId: string,
     request?: KibanaRequest
   ): Promise<estypes.QueryDslQueryContainer> {
+    if (!request) return this.buildExecutionFilter(spaceId);
+    let filters = this.executionFilters.get(request);
+    if (!filters) {
+      filters = new Map();
+      this.executionFilters.set(request, filters);
+    }
+    let filter = filters.get(spaceId);
+    if (!filter) {
+      filter = this.buildExecutionFilter(spaceId, request);
+      filters.set(spaceId, filter);
+    }
+    return filter;
+  }
+
+  private async buildExecutionFilter(
+    spaceId: string,
+    request?: KibanaRequest
+  ): Promise<estypes.QueryDslQueryContainer> {
     const readFilter = await this.readFilter(request);
     const client = this.core.elasticsearch.client.asInternalUser;
     let pitId: string;
@@ -114,6 +138,7 @@ export class WorkflowAccessControlService {
         index: `${workflowIndexName}-*`,
         keep_alive: '1m',
         ignore_unavailable: true,
+        allow_partial_search_results: false,
       });
       pitId = snapshot.id;
     } catch (error) {
@@ -126,6 +151,7 @@ export class WorkflowAccessControlService {
       while (true) {
         const response = await client.search({
           pit: { id: pitId, keep_alive: '1m' },
+          allow_partial_search_results: false,
           size: 1000,
           _source: false,
           sort: ['_shard_doc'],
@@ -133,6 +159,9 @@ export class WorkflowAccessControlService {
           query: { bool: { filter: [{ term: { spaceId } }], must_not: [readFilter] } },
         });
         if (response.pit_id) pitId = response.pit_id;
+        if (response.timed_out || response._shards.failed > 0) {
+          throw new Error('Could not determine workflow execution access from incomplete results.');
+        }
         for (const { _id: id } of response.hits.hits) {
           if (id) hiddenIds.push(id);
         }
@@ -158,28 +187,30 @@ export class WorkflowAccessControlService {
   ): Promise<WorkflowAccessControl> {
     const profileId = await this.getProfileId(request);
     if (!profileId) throw new WorkflowAccessDeniedError();
-    const { access_mode, entries } = workflowAccessControlSchema.parse(input);
+    const { access_mode, entries = [] } = input;
     const { authz } = this;
     if (access_mode === 'private') {
-      for (const role of WORKFLOW_ACCESS_CONTROL_ROLES) {
-        const uids = new Set(
-          entries
-            .filter((entry) => entry.role === role && entry.id !== profileId)
-            .map(({ id: uid }) => uid)
-        );
-        if (uids.size > 0) {
-          const result = authz
-            ? await authz.checkUserProfilesPrivileges(uids).atSpace(spaceId, {
-                kibana: rolePrivileges[role].map((privilege) => authz.actions.api.get(privilege)),
-              })
-            : undefined;
-          if (!result || [...uids].some((uid) => !result.hasPrivilegeUids.includes(uid))) {
-            throw new InvalidAccessControlError(
-              `Selected users must have the Workflows privileges required for ${role} access in this space.`
-            );
+      await Promise.all(
+        WORKFLOW_ACCESS_CONTROL_ROLES.map(async (role) => {
+          const uids = new Set(
+            entries
+              .filter((entry) => entry.role === role && entry.id !== profileId)
+              .map(({ id: uid }) => uid)
+          );
+          if (uids.size > 0) {
+            const result = authz
+              ? await authz.checkUserProfilesPrivileges(uids).atSpace(spaceId, {
+                  kibana: rolePrivileges[role].map((privilege) => authz.actions.api.get(privilege)),
+                })
+              : undefined;
+            if (!result || [...uids].some((uid) => !result.hasPrivilegeUids.includes(uid))) {
+              throw new InvalidAccessControlError(
+                `Selected users must have the Workflows privileges required for ${role} access in this space.`
+              );
+            }
           }
-        }
-      }
+        })
+      );
     }
     const document = await this.crud.readModifyWriteWorkflowDocument(id, spaceId, {
       mutate: (existing) => {
@@ -206,6 +237,7 @@ export class WorkflowAccessControlService {
         };
       },
     });
+    this.executionFilters.delete(request);
     if (!document.access_control) throw new Error('Access control was not saved.');
     return document.access_control;
   }

@@ -43,7 +43,7 @@ export class WorkflowRepository {
   async getWorkflow(
     workflowId: string,
     spaceId: string,
-    options?: WorkflowLookupOptions
+    options?: WorkflowLookupOptions & { includeDeleted?: boolean }
   ): Promise<EsWorkflow | null> {
     try {
       const { must, must_not } = buildWorkflowFilters({
@@ -52,12 +52,13 @@ export class WorkflowRepository {
           id: spaceId,
           includeGlobal: options?.includeGlobal ?? false,
         },
-        deleted: 'not_deleted',
+        deleted: options?.includeDeleted ? 'all' : 'not_deleted',
         managed: options?.managedFilter,
       });
 
       const response = await this.options.esClient.search({
         index: this.options.indexName,
+        allow_partial_search_results: false,
         query: {
           bool: {
             must,

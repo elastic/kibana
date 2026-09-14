@@ -11,7 +11,6 @@ import apm from 'elastic-apm-node';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import {
   ExecutionStatus,
-  getWorkflowPermissions,
   isEventDrivenWorkflowTriggerSource,
   isTerminalStatus,
   WorkflowRepository,
@@ -22,6 +21,7 @@ import { isWorkflowGraphSetupError } from './workflow_graph_setup_error';
 import { handleQueuedWorkflowRunAtTaskStart } from '../concurrency/handle_queued_workflow_run_at_task_start';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
+import { hasWorkflowAccess } from '../lib/has_workflow_access';
 import type { WorkflowsMeteringService } from '../metering';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
@@ -123,16 +123,19 @@ export async function runWorkflow({
   const currentWorkflow = await new WorkflowRepository({
     esClient: dependencies.coreStart.elasticsearch.client.asInternalUser,
     logger,
-  }).getWorkflow(execution.workflowId, spaceId, { includeGlobal: true });
-  const profileId =
-    currentWorkflow?.access_control?.access_mode === 'private'
-      ? (await dependencies.coreStart.userProfile.getCurrentProfileId({ request: fakeRequest })) ??
-        undefined
-      : undefined;
+  }).getWorkflow(execution.workflowId, spaceId, { includeGlobal: true, includeDeleted: true });
   // Older test executions have no isEphemeral flag and still require edit access.
   const requiredPermission =
     execution.isTestRun && execution.isEphemeral !== false ? 'edit' : 'execute';
-  if (currentWorkflow && !getWorkflowPermissions(currentWorkflow, profileId)[requiredPermission]) {
+  if (
+    currentWorkflow &&
+    !(await hasWorkflowAccess(
+      currentWorkflow,
+      fakeRequest,
+      dependencies.coreStart,
+      requiredPermission
+    ))
+  ) {
     await workflowExecutionRepository.updateWorkflowExecution({
       id: workflowRunId,
       status: ExecutionStatus.FAILED,
@@ -141,6 +144,17 @@ export async function runWorkflow({
         type: 'WorkflowAccessDeniedError',
         message: 'Workflow execution access was removed.',
       },
+    });
+    await handlePostExecutionLoop({
+      workflowRunId,
+      spaceId,
+      logger,
+      fakeRequest,
+      workflowExecutionRepository,
+      internalResumeWorkflowExecution,
+      workflowTaskManager,
+      meteringService,
+      cloudSetup: dependencies.cloudSetup,
     });
     return;
   }

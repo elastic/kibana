@@ -18,7 +18,6 @@ import type {
 } from '@kbn/core/server';
 import {
   ExecutionStatus,
-  getWorkflowPermissions,
   toWorkflowExecutionEngineModel,
   WorkflowRepository,
 } from '@kbn/workflows';
@@ -51,6 +50,7 @@ import {
   UNKNOWN_EXECUTION_IDENTITY,
 } from './lib/execution_identity';
 import { getAuthenticatedUser } from './lib/get_user';
+import { hasWorkflowAccess } from './lib/has_workflow_access';
 import {
   failExecutionMissingIdentity,
   markScheduledExecutionFailedAfterTaskError,
@@ -792,12 +792,7 @@ export class WorkflowsExecutionEnginePlugin
                     state: taskInstance.state,
                   };
                 }
-                const profileId =
-                  workflow.access_control?.access_mode === 'private'
-                    ? (await coreStart.userProfile.getCurrentProfileId({ request: fakeRequest })) ??
-                      undefined
-                    : undefined;
-                if (!getWorkflowPermissions(workflow, profileId).execute) {
+                if (!(await hasWorkflowAccess(workflow, fakeRequest, coreStart))) {
                   logger.warn(
                     `Skipping scheduled workflow ${workflow.id}: execution access was removed.`
                   );
@@ -1145,12 +1140,9 @@ export class WorkflowsExecutionEnginePlugin
       if (workflow.isEphemeral) return;
       const current = await workflowRepository.getWorkflow(workflow.id, spaceId, {
         includeGlobal: true,
+        includeDeleted: true,
       });
-      const profileId =
-        current?.access_control?.access_mode === 'private'
-          ? (await coreStart.userProfile.getCurrentProfileId({ request })) ?? undefined
-          : undefined;
-      if (current && !getWorkflowPermissions(current, profileId).execute) {
+      if (current && !(await hasWorkflowAccess(current, request, coreStart))) {
         throw new Error('You do not have permission to execute this workflow.');
       }
     };

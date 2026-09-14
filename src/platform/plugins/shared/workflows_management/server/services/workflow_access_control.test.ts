@@ -209,8 +209,8 @@ describe('WorkflowAccessControlService', () => {
     'does not require an ACL profile for public %s',
     async (operation) => {
       document.access_control = { access_mode: 'public', entries: [] };
+      core.userProfile.getCurrentProfileId.mockResolvedValue(null);
       await expect(service.assertAccess(document, operation, request)).resolves.toBeUndefined();
-      expect(core.userProfile.getCurrentProfileId).not.toHaveBeenCalled();
       expect(() => assertWorkflowOperation(document, operation, undefined)).not.toThrow();
     }
   );
@@ -262,4 +262,67 @@ describe('WorkflowAccessControlService', () => {
     await expect(service.executionFilter('default', request)).rejects.toThrow('Search failed');
     expect(client.closePointInTime).toHaveBeenCalledWith({ id: 'pit' });
   });
+
+  it('shares one execution filter and profile lookup within a request and space', async () => {
+    const client = core.elasticsearch.client.asInternalUser;
+    jest.mocked(client.openPointInTime).mockResolvedValue({
+      id: 'pit',
+      _shards: { total: 1, successful: 1, failed: 0 },
+    });
+    jest.mocked(client.search).mockResolvedValue({
+      took: 1,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, failed: 0 },
+      hits: { hits: [{ _index: 'workflows', _id: 'hidden-workflow' }] },
+    });
+
+    const [first, second] = await Promise.all([
+      service.executionFilter('default', request),
+      service.executionFilter('default', request),
+    ]);
+    await service.permissions(document, request);
+
+    expect(first).toEqual({ bool: { must_not: [{ terms: { workflowId: ['hidden-workflow'] } }] } });
+    expect(second).toBe(first);
+    expect(client.openPointInTime).toHaveBeenCalledTimes(1);
+    expect(client.search).toHaveBeenCalledTimes(1);
+    expect(core.userProfile.getCurrentProfileId).toHaveBeenCalledTimes(1);
+
+    await service.executionFilter('another-space', request);
+    await service.executionFilter('default', httpServerMock.createKibanaRequest());
+    expect(client.search).toHaveBeenCalledTimes(3);
+    expect(core.userProfile.getCurrentProfileId).toHaveBeenCalledTimes(2);
+  });
+
+  it.each([
+    { timedOut: true, failedShards: 0 },
+    { timedOut: false, failedShards: 1 },
+  ])(
+    'rejects incomplete execution access results: timeout=$timedOut, failed shards=$failedShards',
+    async ({ timedOut, failedShards }) => {
+      const client = core.elasticsearch.client.asInternalUser;
+      jest.mocked(client.openPointInTime).mockResolvedValue({
+        id: 'pit',
+        _shards: { total: 1, successful: 1, failed: 0 },
+      });
+      jest.mocked(client.search).mockResolvedValue({
+        pit_id: 'new-pit',
+        took: 1,
+        timed_out: timedOut,
+        _shards: { total: 1, successful: 1 - failedShards, failed: failedShards },
+        hits: { hits: [] },
+      });
+
+      await expect(service.executionFilter('default', request)).rejects.toThrow(
+        'Could not determine workflow execution access from incomplete results.'
+      );
+      expect(client.openPointInTime).toHaveBeenCalledWith(
+        expect.objectContaining({ allow_partial_search_results: false })
+      );
+      expect(client.search).toHaveBeenCalledWith(
+        expect.objectContaining({ allow_partial_search_results: false })
+      );
+      expect(client.closePointInTime).toHaveBeenCalledWith({ id: 'new-pit' });
+    }
+  );
 });

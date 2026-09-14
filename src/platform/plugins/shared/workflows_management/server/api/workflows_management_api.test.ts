@@ -12,6 +12,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import {
+  ExecutionStatus,
   type WorkflowDetailDto,
   type WorkflowExecutionEngineModel,
   WorkflowsManagementApiActions,
@@ -80,6 +81,7 @@ describe('WorkflowsManagementApi', () => {
           .mockResolvedValue({ read: true, execute: true, edit: true, manage: false }),
         assertAccess: jest.fn(),
         readFilter: jest.fn().mockResolvedValue({ match_all: {} }),
+        getProfileId: jest.fn().mockResolvedValue('test-profile'),
         executionFilter: jest.fn().mockResolvedValue({ match_all: {} }),
       }),
       getWorkflow: jest.fn().mockResolvedValue({
@@ -95,6 +97,8 @@ describe('WorkflowsManagementApi', () => {
         definition: null,
       }),
       getWorkflowsByIds: jest.fn(),
+      getWorkflows: jest.fn(),
+      getChildWorkflowExecutions: jest.fn(),
       getWorkflowZodSchema: jest.fn(),
       createWorkflow: jest.fn(),
       updateWorkflow: jest.fn(),
@@ -118,6 +122,56 @@ describe('WorkflowsManagementApi', () => {
     mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([]);
 
     mockRequest = httpServerMock.createKibanaRequest();
+  });
+
+  it('includes ACL permissions in workflow list results', async () => {
+    const workflow = await mockWorkflowsService.getWorkflow('workflow-123', 'default');
+    if (!workflow) throw new Error('Missing workflow fixture');
+    const permissions = { read: true, execute: false, edit: false, manage: false };
+    const listItem = { ...workflow, description: '' };
+    const access = await mockWorkflowsService.getAccessControl();
+    jest.mocked(access.permissions).mockResolvedValue(permissions);
+    mockWorkflowsService.getWorkflows.mockResolvedValue({
+      results: [listItem],
+      total: 1,
+      page: 1,
+      size: 10,
+    });
+
+    const result = await api.getWorkflows({ page: 1, size: 10 }, 'default', {
+      request: mockRequest,
+    });
+
+    expect(result.results).toEqual([{ ...listItem, permissions }]);
+    expect(access.permissions).toHaveBeenCalledWith(listItem, mockRequest);
+  });
+
+  it('checks child workflow visibility in one batch', async () => {
+    const workflow = await mockWorkflowsService.getWorkflow('workflow-123', 'default');
+    if (!workflow) throw new Error('Missing workflow fixture');
+    mockWorkflowsService.getWorkflow.mockClear();
+    const children = ['workflow-123', 'private-hidden', 'workflow-123'].map(
+      (workflowId, index) => ({
+        workflowId,
+        executionId: `child-${index}`,
+        parentStepExecutionId: 'parent-step',
+        workflowName: workflowId,
+        status: ExecutionStatus.COMPLETED,
+        stepExecutions: [],
+      })
+    );
+    mockWorkflowsService.getChildWorkflowExecutions.mockResolvedValue(children);
+    mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([{ ...workflow, id: 'workflow-123' }]);
+
+    const result = await api.getChildWorkflowExecutions('parent', 'default', mockRequest);
+
+    expect(mockWorkflowsService.getWorkflowsByIds).toHaveBeenCalledTimes(1);
+    expect(mockWorkflowsService.getWorkflowsByIds).toHaveBeenCalledWith(
+      ['workflow-123', 'private-hidden'],
+      'default'
+    );
+    expect(mockWorkflowsService.getWorkflow).toHaveBeenCalledTimes(1);
+    expect(result.map(({ executionId }) => executionId)).toEqual(['child-0', 'child-2']);
   });
 
   const createMockZodSchema = () => {

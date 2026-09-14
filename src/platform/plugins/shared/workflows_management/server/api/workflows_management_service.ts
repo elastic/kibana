@@ -168,6 +168,7 @@ export class WorkflowsService {
   private executionQueryService!: WorkflowExecutionQueryService;
   private searchService!: WorkflowSearchService;
   private crudService!: WorkflowCrudService;
+  private accessControlService?: WorkflowAccessControlService;
   private managedWorkflowsService!: ManagedWorkflowsService;
   private readonly changeHistoryService: WorkflowChangeHistoryService;
   private getActionsClient!: () => Promise<IUnsecuredActionsClient>;
@@ -326,11 +327,11 @@ export class WorkflowsService {
 
   public async getAccessControl(): Promise<WorkflowAccessControlService> {
     await this.ensureInitialized();
-    return new WorkflowAccessControlService(
+    return (this.accessControlService ??= new WorkflowAccessControlService(
       this.coreStart,
       this.crudService,
       this.pluginsStart.security?.authz
-    );
+    ));
   }
 
   public async getWorkflow(

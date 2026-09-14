@@ -58,6 +58,9 @@ const peopleLabel = i18n.translate('entityAccessControl.peopleLabel', {
 const searchLabel = i18n.translate('entityAccessControl.searchPlaceholder', {
   defaultMessage: 'Find users',
 });
+const privateDescription = i18n.translate('entityAccessControl.privateDescription', {
+  defaultMessage: 'Only the owner and the selected users have access.',
+});
 
 const getRemoveLabel = (name: string): string =>
   i18n.translate('entityAccessControl.removeAriaLabel', {
@@ -107,9 +110,6 @@ export const AccessControlForm = <Role extends string>({
     );
   };
 
-  const privateDescription = i18n.translate('entityAccessControl.privateDescription', {
-    defaultMessage: 'Only the owner and the selected users have access.',
-  });
   const visibilityOptions = [
     {
       value: 'public' as const,

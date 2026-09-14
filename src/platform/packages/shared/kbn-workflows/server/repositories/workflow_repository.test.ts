@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { WorkflowRepository } from './workflow_repository';
 import { WORKFLOW_INDEX_NAME } from '../constants';
 
@@ -202,6 +202,37 @@ describe('WorkflowRepository.getWorkflow', () => {
     yaml: 'name: My workflow',
     tags: ['a'],
   };
+
+  it.each([false, true])(
+    'keeps deletion filtering explicit with includeDeleted=%s',
+    async (includeDeleted) => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, failed: 0 },
+        hits: { hits: [] },
+      });
+      const repository = new WorkflowRepository({
+        esClient,
+        logger: loggingSystemMock.create().get(),
+      });
+
+      await repository.getWorkflow('wf-1', 'default', { includeDeleted });
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          allow_partial_search_results: false,
+          query: {
+            bool: {
+              must: [{ ids: { values: ['wf-1'] } }, { term: { spaceId: 'default' } }],
+              must_not: includeDeleted ? [] : [{ exists: { field: 'deleted_at' } }],
+            },
+          },
+        })
+      );
+    }
+  );
 
   it('maps snake_case timestamps from the workflow index to EsWorkflow dates', async () => {
     const esClient = {

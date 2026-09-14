@@ -348,7 +348,6 @@ export class WorkflowsManagementApi {
   ): Promise<void> {
     const workflow = await this.workflowsService.getWorkflow(id, spaceId);
     if (!workflow) throw new WorkflowNotFoundError(id);
-    if (!workflow.access_control) return;
     const access = await this.workflowsService.getAccessControl();
     await access.assertAccess(workflow, operation, request);
   }
@@ -378,10 +377,19 @@ export class WorkflowsManagementApi {
     }
   ): Promise<WorkflowListDto> {
     const access = await this.workflowsService.getAccessControl();
-    return this.workflowsService.getWorkflows(params, spaceId, {
+    const workflows = await this.workflowsService.getWorkflows(params, spaceId, {
       ...options,
       accessControlFilter: await access.readFilter(options?.request),
     });
+    return {
+      ...workflows,
+      results: await Promise.all(
+        workflows.results.map(async (workflow) => ({
+          ...workflow,
+          permissions: await access.permissions(workflow, options?.request),
+        }))
+      ),
+    };
   }
 
   /**
@@ -402,7 +410,6 @@ export class WorkflowsManagementApi {
   ): Promise<WorkflowDetailDto | null> {
     const workflow = await this.workflowsService.getWorkflow(id, spaceId);
     if (!workflow) return null;
-    if (!request && !workflow.access_control && !workflow.owner_id) return workflow;
     const access = await this.workflowsService.getAccessControl();
     const permissions = await access.permissions(workflow, request);
     if (!permissions.read) return null;
@@ -424,9 +431,6 @@ export class WorkflowsManagementApi {
     request?: KibanaRequest
   ): Promise<WorkflowDetailDto[]> {
     const workflows = await this.workflowsService.getWorkflowsByIds(ids, spaceId);
-    if (!workflows.some(({ access_control }) => access_control?.access_mode === 'private')) {
-      return workflows;
-    }
     const access = await this.workflowsService.getAccessControl();
     const profileId = request ? await access.getProfileId(request) : undefined;
     return workflows.filter((workflow) => getWorkflowPermissions(workflow, profileId).read);
@@ -1009,7 +1013,7 @@ export class WorkflowsManagementApi {
     const workflow = await this.workflowsService.getWorkflow(execution.workflowId, spaceId, {
       includeDeleted: true,
     });
-    if (workflow?.access_control) {
+    if (workflow) {
       const access = await this.workflowsService.getAccessControl();
       if (!(await access.permissions(workflow, options?.request)).read) return null;
     }
@@ -1026,11 +1030,13 @@ export class WorkflowsManagementApi {
       parentExecutionId,
       spaceId
     );
-    const visible: ChildWorkflowExecutionItem[] = [];
-    for (const child of children) {
-      if (await this.getWorkflow(child.workflowId, spaceId, request)) visible.push(child);
-    }
-    return visible;
+    const workflows = await this.getWorkflowsByIds(
+      [...new Set(children.map(({ workflowId }) => workflowId))],
+      spaceId,
+      request
+    );
+    const visibleIds = new Set(workflows.map(({ id }) => id));
+    return children.filter(({ workflowId }) => visibleIds.has(workflowId));
   }
 
   public async getWorkflowExecutionLogs(params: {
@@ -1115,7 +1121,7 @@ export class WorkflowsManagementApi {
     const workflow = await this.workflowsService.getWorkflow(execution.workflowId, spaceId, {
       includeDeleted: true,
     });
-    if (workflow?.access_control) {
+    if (workflow) {
       const access = await this.workflowsService.getAccessControl();
       await access.assertAccess(workflow, operation, request);
     }

@@ -30,7 +30,11 @@ import { useDebouncedValue } from '@kbn/react-hooks';
 import { useQuery } from '@kbn/react-query';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import type { WorkflowAccessControlRole, WorkflowDetailDto } from '@kbn/workflows';
+import type {
+  WorkflowAccessControl,
+  WorkflowAccessControlRole,
+  WorkflowDetailDto,
+} from '@kbn/workflows';
 import { setWorkflow } from '../../../entities/workflows/store/workflow_detail/slice';
 import { useKibana } from '../../../hooks/use_kibana';
 
@@ -103,14 +107,11 @@ export const WorkflowAccessControlModal = ({
     setHasError(false);
     setIsInvalidAccess(false);
     try {
-      await http.put(`/internal/workflows/${encodeURIComponent(workflow.id)}/access_control`, {
-        body: JSON.stringify(value),
-      });
-      const updated = await http.get<WorkflowDetailDto>(
-        `/api/workflows/workflow/${encodeURIComponent(workflow.id)}`,
-        { version: '2023-10-31' }
+      const accessControl = await http.put<WorkflowAccessControl>(
+        `/internal/workflows/${encodeURIComponent(workflow.id)}/access_control`,
+        { body: JSON.stringify(value) }
       );
-      dispatch(setWorkflow(updated));
+      dispatch(setWorkflow({ ...workflow, owner_id: ownerId, access_control: accessControl }));
       onClose();
     } catch (error) {
       setHasError(true);
@@ -127,7 +128,7 @@ export const WorkflowAccessControlModal = ({
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle id="workflowAccessTitle">
-          {i18n.translate('workflows.access.titleTitle', { defaultMessage: 'Workflow access' })}
+          {i18n.translate('workflows.access.modalTitle', { defaultMessage: 'Workflow access' })}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
@@ -181,7 +182,13 @@ export const WorkflowAccessControlModal = ({
         <EuiButtonEmpty onClick={onClose} isDisabled={isSaving}>
           {i18n.translate('workflows.access.cancelButtonLabel', { defaultMessage: 'Cancel' })}
         </EuiButtonEmpty>
-        <EuiButton onClick={save} fill isLoading={isSaving} data-test-subj="workflowAccessSave">
+        <EuiButton
+          onClick={save}
+          fill
+          isLoading={isSaving}
+          isDisabled={!ownerId}
+          data-test-subj="workflowAccessSave"
+        >
           {i18n.translate('workflows.access.saveButtonLabel', { defaultMessage: 'Save' })}
         </EuiButton>
       </EuiModalFooter>

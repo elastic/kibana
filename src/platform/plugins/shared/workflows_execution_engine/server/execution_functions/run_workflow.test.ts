@@ -29,7 +29,10 @@ import { setupDependencies } from './setup_dependencies';
 import { handleQueuedWorkflowRunAtTaskStart } from '../concurrency/handle_queued_workflow_run_at_task_start';
 import type { WorkflowsMeteringService } from '../metering';
 import { workflowsExecutionEngineMock } from '../mocks';
-import type { WorkflowsExecutionEnginePluginStart } from '../types';
+import type {
+  InternalResumeWorkflowExecution,
+  WorkflowsExecutionEnginePluginStart,
+} from '../types';
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 
@@ -95,6 +98,7 @@ describe('runWorkflow', () => {
     const runWorkflowWithDefaults = (overrides?: {
       meteringService?: WorkflowsMeteringService;
       workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart;
+      internalResumeWorkflowExecution?: InternalResumeWorkflowExecution;
     }) =>
       runWorkflow({
         workflowRunId,
@@ -107,6 +111,7 @@ describe('runWorkflow', () => {
         workflowsExecutionEngine:
           overrides?.workflowsExecutionEngine ?? mockWorkflowExecutionEngine,
         meteringService: overrides?.meteringService,
+        internalResumeWorkflowExecution: overrides?.internalResumeWorkflowExecution,
         workflowExecutionRepository: workflowExecutionRepository as any,
         stepExecutionRepository,
       });
@@ -145,18 +150,59 @@ describe('runWorkflow', () => {
     });
 
     describe('current workflow access', () => {
-      it('stops a queued run after execution access is removed', async () => {
+      it.each([null, '2026-09-14T00:00:00.000Z'])(
+        'stops a run after access is removed with deleted_at=%s',
+        async (deletedAt) => {
+          mockGetCurrentWorkflow.mockResolvedValueOnce({
+            owner_id: 'owner',
+            access_control: { access_mode: 'private', entries: [] },
+            deleted_at: deletedAt,
+          });
+          dependencies.coreStart.userProfile.getCurrentProfileId.mockResolvedValue(
+            'former-executor'
+          );
+          await runWorkflowWithDefaults();
+          expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+            expect.objectContaining({
+              status: ExecutionStatus.FAILED,
+              error: expect.objectContaining({ type: 'WorkflowAccessDeniedError' }),
+            })
+          );
+          expect(workflowRuntime.start).not.toHaveBeenCalled();
+          expect(mockGetCurrentWorkflow).toHaveBeenCalledWith('wf', spaceId, {
+            includeGlobal: true,
+            includeDeleted: true,
+          });
+        }
+      );
+
+      it('resumes the waiting parent after child execution access is removed', async () => {
         mockGetCurrentWorkflow.mockResolvedValueOnce({
           owner_id: 'owner',
           access_control: { access_mode: 'private', entries: [] },
         });
         dependencies.coreStart.userProfile.getCurrentProfileId.mockResolvedValue('former-executor');
-        await runWorkflowWithDefaults();
-        expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
-          expect.objectContaining({
-            status: ExecutionStatus.FAILED,
-            error: expect.objectContaining({ type: 'WorkflowAccessDeniedError' }),
-          })
+        const childExecution = {
+          ...defaultRunningExecution(),
+          context: {
+            parentWorkflowInvocation: 'sync',
+            parentWorkflowExecutionId: 'parent-execution',
+          },
+        };
+        mockGetWorkflowExecutionFromState.mockReturnValue(childExecution);
+        workflowExecutionRepository.getWorkflowExecutionById.mockResolvedValue({
+          ...childExecution,
+          status: ExecutionStatus.FAILED,
+        });
+        const internalResumeWorkflowExecution = jest.fn().mockResolvedValue(undefined);
+
+        await runWorkflowWithDefaults({ internalResumeWorkflowExecution });
+
+        expect(internalResumeWorkflowExecution).toHaveBeenCalledWith(
+          'parent-execution',
+          spaceId,
+          undefined,
+          fakeRequest
         );
         expect(workflowRuntime.start).not.toHaveBeenCalled();
       });
