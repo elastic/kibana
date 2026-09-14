@@ -48,23 +48,7 @@ export const selectCurrentDiscoverEsqlQuery = (
 };
 
 export const addDiscoverEsqlQuery = (esqlQuery: string) => {
-  recurse(
-    () => {
-      // ESQL input uses the monaco editor which doesn't allow for traditional input updates
-      selectCurrentDiscoverEsqlQuery();
-      fillEsqlQueryBar(esqlQuery);
-      return getEsqlQueryBarValue();
-    },
-    (val) =>
-      val === esqlQuery || val.replaceAll(/\s/, '\u00b7') === esqlQuery.replaceAll(/\s/, '\u00b7'),
-    {
-      delay: 1000,
-      limit: 5,
-      log: (k) => {
-        cy.log(`query found-${k}.`);
-      },
-    }
-  );
+  fillEsqlQueryBar(esqlQuery);
   cy.get(GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON(DISCOVER_CONTAINER)).click();
 };
 

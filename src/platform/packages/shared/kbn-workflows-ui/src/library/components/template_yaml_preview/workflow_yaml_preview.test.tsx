@@ -20,7 +20,10 @@ jest.mock('../../../hooks/use_workflows_monaco_theme', () => ({
 
 jest.mock('@kbn/monaco', () => ({
   monaco: {
-    editor: { TrackedRangeStickiness: { NeverGrowsWhenTypingAtEdges: 0 } },
+    editor: {
+      TrackedRangeStickiness: { NeverGrowsWhenTypingAtEdges: 0 },
+      ShowLightbulbIconMode: { Off: 0 },
+    },
   },
 }));
 

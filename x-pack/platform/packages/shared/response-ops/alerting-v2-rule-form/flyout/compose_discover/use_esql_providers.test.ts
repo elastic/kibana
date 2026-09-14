@@ -68,6 +68,7 @@ describe('useEsqlAutocomplete', () => {
   const inlineCompletionsProvider = {
     provideInlineCompletions: jest.fn(),
     freeInlineCompletions: jest.fn(),
+    disposeInlineCompletions: jest.fn(),
   };
   const codeActionProvider = { provideCodeActions: jest.fn() };
   const documentHighlightProvider = { provideDocumentHighlights: jest.fn() };

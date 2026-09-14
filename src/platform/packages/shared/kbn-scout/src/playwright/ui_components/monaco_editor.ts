@@ -42,21 +42,6 @@ interface MonacoEditorInstance {
 export class KibanaCodeEditorWrapper {
   constructor(private readonly page: ScoutPage) {}
 
-  private async getEditorModelUriByTestSubj(testSubjId: string): Promise<string> {
-    // `data-uri` is an internal Monaco DOM attribute — not part of the public API.
-    // No public alternative exists in Monaco 0.54; re-check on future Monaco upgrades.
-    const modelUri = await this.page.evaluate((id) => {
-      const container = document.querySelector(`[data-test-subj="${id}"]`);
-      return container?.querySelector('.monaco-editor[data-uri]')?.getAttribute('data-uri') ?? null;
-    }, testSubjId);
-
-    if (!modelUri) {
-      throw new Error(`Editor model URI not found for data-test-subj="${testSubjId}"`);
-    }
-
-    return modelUri;
-  }
-
   /**
    * Waits until the editor inside the given container is ready to accept interactions.
    * Safe to call before reading or writing editor content.
@@ -190,6 +175,12 @@ export class KibanaCodeEditorWrapper {
         }
 
         model.setValue(editorValue);
+
+        const editor = monacoEnv.monaco.editor
+          .getEditors?.()
+          ?.find((instance: any) => instance.getModel()?.uri?.toString() === modelUri);
+
+        editor?.focus();
       },
       { modelUri: uri, editorValue: value }
     );
@@ -232,43 +223,6 @@ export class KibanaCodeEditorWrapper {
 
     // Return the new value for later assertions
     return await this.getCodeEditorValue(nthIndex ?? 0);
-  }
-
-  /**
-   * Replaces the entire content of the editor inside the given container with `value`.
-   * Waits for the editor to be ready before writing.
-   */
-  async setCodeEditorValueByTestSubj(testSubjId: string, value: string): Promise<void> {
-    await this.waitCodeEditorReady(testSubjId);
-    const modelUri = await this.getEditorModelUriByTestSubj(testSubjId);
-
-    await this.page.evaluate(
-      ({ uri, text }) => {
-        const monacoEditorApi = (window as Window & { MonacoEnvironment?: any }).MonacoEnvironment
-          ?.monaco?.editor;
-        if (!monacoEditorApi) {
-          throw new Error('MonacoEnvironment.monaco.editor is not available');
-        }
-
-        const monacoUri = (
-          window as Window & { MonacoEnvironment?: any }
-        ).MonacoEnvironment?.monaco?.Uri?.parse(uri);
-        if (!monacoUri) {
-          throw new Error('Monaco Uri is not available');
-        }
-        const model = monacoEditorApi.getModel(monacoUri);
-        if (!model) {
-          throw new Error(`Editor model not found for URI "${uri}"`);
-        }
-        model.setValue(text);
-
-        const editor = monacoEditorApi
-          .getEditors?.()
-          ?.find((instance: any) => instance.getModel()?.uri?.toString() === uri);
-        editor?.focus();
-      },
-      { uri: modelUri, text: value }
-    );
   }
 
   /**
