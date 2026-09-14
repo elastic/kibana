@@ -9,6 +9,7 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ZodObject } from '@kbn/zod/v4';
@@ -74,7 +75,7 @@ export const createMockGetScopedClients = () => {
 export const createMockRequest = () => httpServerMock.createKibanaRequest();
 
 export const invokeHandler = async <TSchema extends ZodObject<any>>(
-  tool: BuiltinToolDefinition<TSchema>,
+  tool: BuiltinSkillBoundedTool<TSchema> | BuiltinToolDefinition<TSchema>,
   input: z.infer<TSchema>,
   context: ToolHandlerContext
 ) => {

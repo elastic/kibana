@@ -43,7 +43,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         name: 'original-policy',
         description: 'original-policy-description',
         destinations: [{ type: 'workflow', id: 'original-workflow-id' }],
-        matcher: "env == 'production' && region == 'us-east-1'",
+        matcher: { expression: "env == 'production' && region == 'us-east-1'" },
         group_by: ['service.name'],
         throttle: { interval: '1m' },
       })
@@ -55,7 +55,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         name: 'updated-policy',
         description: 'updated-policy-description',
         destinations: [{ type: 'workflow', id: 'updated-workflow-id' }],
-        matcher: "env == 'production' && region == 'us-west-2'",
+        matcher: { expression: "env == 'production' && region == 'us-west-2'" },
         group_by: ['service.name', 'environment'],
         throttle: { interval: '5m' },
         version: created.version,
@@ -70,7 +70,9 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
     expect(response.body.destinations).toStrictEqual([
       { type: 'workflow', id: 'updated-workflow-id' },
     ]);
-    expect(response.body.matcher).toBe("env == 'production' && region == 'us-west-2'");
+    expect(response.body.matcher).toMatchObject({
+      expression: "env == 'production' && region == 'us-west-2'",
+    });
     expect(response.body.group_by).toStrictEqual(['service.name', 'environment']);
     expect(response.body.throttle).toStrictEqual({ interval: '5m' });
     expect(new Date(response.body.updated_at).toISOString()).toBe(response.body.updated_at);
@@ -86,7 +88,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
           name: 'original-policy',
           description: 'original-policy-description',
           destinations: [{ type: 'workflow', id: 'original-workflow-id' }],
-          matcher: "env == 'production' && region == 'us-east-1'",
+          matcher: { expression: "env == 'production' && region == 'us-east-1'" },
           group_by: ['service.name'],
           throttle: { interval: '1m' },
         })
@@ -103,7 +105,9 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       expect(response.body.destinations).toStrictEqual([
         { type: 'workflow', id: 'original-workflow-id' },
       ]);
-      expect(response.body.matcher).toBe("env == 'production' && region == 'us-east-1'");
+      expect(response.body.matcher).toMatchObject({
+        expression: "env == 'production' && region == 'us-east-1'",
+      });
       expect(response.body.group_by).toStrictEqual(['service.name']);
       expect(response.body.throttle).toStrictEqual({ interval: '1m' });
     }
@@ -117,7 +121,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
           name: 'original-policy',
           description: 'original-policy-description',
           destinations: [{ type: 'workflow', id: 'original-workflow-id' }],
-          matcher: "env == 'production'",
+          matcher: { expression: "env == 'production'" },
           group_by: ['service.name'],
           throttle: { interval: '1m' },
         })
@@ -134,7 +138,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       expect(response.body.destinations).toStrictEqual([
         { type: 'workflow', id: 'original-workflow-id' },
       ]);
-      expect(response.body.matcher).toBe("env == 'production'");
+      expect(response.body.matcher).toMatchObject({ expression: "env == 'production'" });
       expect(response.body.group_by).toStrictEqual(['service.name']);
       expect(response.body.throttle).toStrictEqual({ interval: '1m' });
     }
@@ -148,7 +152,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
           name: 'original-policy',
           description: 'original-policy-description',
           destinations: [{ type: 'workflow', id: 'original-workflow-id' }],
-          matcher: "env == 'production' && region == 'us-east-1'",
+          matcher: { expression: "env == 'production' && region == 'us-east-1'" },
           group_by: ['service.name'],
           throttle: { interval: '1m' },
         })
@@ -157,7 +161,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       const response = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: {
-          matcher: "env == 'staging' && region == 'eu-central-1'",
+          matcher: { expression: "env == 'staging' && region == 'eu-central-1'" },
           group_by: ['service.name', 'host.name'],
           throttle: { interval: '15m' },
           version: created.version,
@@ -170,7 +174,9 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       expect(response.body.destinations).toStrictEqual([
         { type: 'workflow', id: 'original-workflow-id' },
       ]);
-      expect(response.body.matcher).toBe("env == 'staging' && region == 'eu-central-1'");
+      expect(response.body.matcher).toMatchObject({
+        expression: "env == 'staging' && region == 'eu-central-1'",
+      });
       expect(response.body.group_by).toStrictEqual(['service.name', 'host.name']);
       expect(response.body.throttle).toStrictEqual({ interval: '15m' });
     }
@@ -184,7 +190,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
           name: 'dest-policy',
           description: 'dest-policy description',
           destinations: [{ type: 'workflow', id: 'original-dest-workflow' }],
-          matcher: "env == 'staging'",
+          matcher: { expression: "env == 'staging'" },
           group_by: ['host.name'],
           throttle: { interval: '2m' },
         })
@@ -204,7 +210,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       ]);
       expect(response.body.name).toBe('dest-policy');
       expect(response.body.description).toBe('dest-policy description');
-      expect(response.body.matcher).toBe("env == 'staging'");
+      expect(response.body.matcher).toMatchObject({ expression: "env == 'staging'" });
       expect(response.body.group_by).toStrictEqual(['host.name']);
       expect(response.body.throttle).toStrictEqual({ interval: '2m' });
     }
@@ -314,7 +320,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
           name: 'nullable-policy',
           description: 'nullable-policy description',
           destinations: [{ type: 'workflow', id: 'nullable-workflow-id' }],
-          matcher: "env == 'production'",
+          matcher: { expression: "env == 'production'" },
           group_by: ['service.name'],
           throttle: { interval: '5m' },
         })
