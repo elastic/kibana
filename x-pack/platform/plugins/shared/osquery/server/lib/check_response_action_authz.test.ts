@@ -604,5 +604,36 @@ describe('isOsqueryResponseActionAuthorized', () => {
       expect(soClient.find).toHaveBeenCalledTimes(1);
       expect(soClient.resolve).toHaveBeenCalledTimes(1);
     });
+
+    // Ids are unconstrained strings. A separator-joined cache key lets two distinct references
+    // share one entry, so one would be authorized against the other's resolved object. Rule
+    // import and bulk duplicate check many actions under a single request.
+    it('should not share a cache entry between references that differ only by separator placement', async () => {
+      const coreStart = createMockCoreStart(
+        { writeLiveQueries: false, runSavedQueries: true },
+        { [PACK_ID]: { queries: [{ query: STORED_PACK_QUERY }] } }
+      );
+
+      // Resolves the pack `::${PACK_ID}`, which does not exist.
+      await expect(
+        isOsqueryResponseActionAuthorized(coreStart, request, {
+          saved_query_id: SAVED_QUERY_ID,
+          pack_id: `::${PACK_ID}`,
+        })
+      ).resolves.toBe(false);
+
+      // Same `spaceId::saved_query_id::pack_id` join as above, but resolves the pack that exists.
+      await expect(
+        isOsqueryResponseActionAuthorized(coreStart, request, {
+          saved_query_id: `${SAVED_QUERY_ID}::`,
+          pack_id: PACK_ID,
+          queries: [{ query: STORED_PACK_QUERY }],
+        })
+      ).resolves.toBe(true);
+
+      const soClient = (coreStart.savedObjects.getScopedClient as jest.Mock).mock.results[0].value;
+      expect(soClient.get).toHaveBeenCalledWith(packSavedObjectType, `::${PACK_ID}`);
+      expect(soClient.get).toHaveBeenCalledWith(packSavedObjectType, PACK_ID);
+    });
   });
 });

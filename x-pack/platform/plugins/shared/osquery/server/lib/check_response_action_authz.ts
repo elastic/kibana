@@ -31,9 +31,10 @@ const resolveCachedQueryReference = (
   spaceId: string | undefined,
   reference: { saved_query_id?: string; pack_id?: string }
 ): Promise<ResolvedQueryReference | undefined> => {
-  const cacheKey = `${spaceId ?? ''}::${reference.saved_query_id ?? ''}::${
-    reference.pack_id ?? ''
-  }`;
+  // Ids are unconstrained strings, so a separator-joined key collides: `saved_query_id: 'q'` with
+  // `pack_id: '::'` and `saved_query_id: 'q::'` with no pack id would share one entry and resolve
+  // each other's object. Rule import and bulk duplicate check many actions under one request.
+  const cacheKey = JSON.stringify([spaceId, reference.saved_query_id, reference.pack_id]);
   let perRequest = referenceCache.get(request);
 
   if (!perRequest) {
