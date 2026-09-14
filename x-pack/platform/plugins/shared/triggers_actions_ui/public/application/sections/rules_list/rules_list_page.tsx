@@ -6,7 +6,7 @@
  */
 
 import React, { lazy, useEffect, useMemo } from 'react';
-import { rulesAppDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
+import { rulesAppDetailsRoute } from '@kbn/rule-data-utils';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
@@ -21,6 +21,7 @@ import { getV1RulesPageTabs } from '../rules_page/get_v1_rules_page_tabs';
 import { getRulesPageMenu } from '../rules_page/get_rules_page_menu';
 import { useRulesPageActions } from '../rules_page/rules_page_actions';
 import { RULES_PAGE_MODE, useRulesPageMode } from '../rules_page/use_rules_page_mode';
+import { useLocators } from '../../locator_context';
 
 const RulesList = lazy(() => import('./components/rules_list'));
 
@@ -37,9 +38,9 @@ export const RulesListContainer = () => {
     docLinks,
     setBreadcrumbs,
     hideListBackButton,
-    host,
     tabs: hostTabs,
   } = useKibana().services;
+  const { rules } = useLocators();
   const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
     http,
     toasts,
@@ -65,9 +66,7 @@ export const RulesListContainer = () => {
     docTitle.change(getCurrentDocTitle('rules'));
   }, [docTitle, setBreadcrumbs]);
 
-  const v1ListHref = host
-    ? getUrlForApp(host.app, { path: host.pathPrefix })
-    : http.basePath.prepend(triggersActionsRoute);
+  const v1ListHref = rules.useUrl({});
 
   const rulesListTabs = useMemo(() => {
     if (hostTabs) {
