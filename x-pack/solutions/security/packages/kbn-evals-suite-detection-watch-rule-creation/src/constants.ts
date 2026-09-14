@@ -16,6 +16,8 @@
  * ALERTZERO_WATCH_WORKFLOW_IDS. The eval asserts this exact document is present — it does not create or
  * carry its own copy, so eval and production cannot drift.
  */
+import { platformCoreTools } from '@kbn/agent-builder-common/tools';
+
 export { ALERTZERO_RULE_CREATION_WORKFLOW_ID as RULE_CREATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 
 /**
@@ -42,21 +44,43 @@ export const RULE_CREATION_TOOL_ID = 'security.create_detection_rule';
 export const RULE_CREATION_SKILL_ID = 'detection-rule-edit';
 
 /**
- * ES|QL generation tool called by the detection-rule-edit skill. Consumed by the Trajectory
- * evaluator to verify call ordering (generate_esql → security.create_detection_rule).
- * Full namespaced form matches what Agent Builder exports on gen_ai.tool.name spans.
+ * Security tools the detection-rule-edit skill registers alongside RULE_CREATION_TOOL_ID.
+ * Inlined for the same reason as RULE_CREATION_TOOL_ID: the source constants live in the
+ * security_solution plugin, which a package cannot import. Values are pinned by
+ * AGENT_BUILDER_BUILTIN_TOOLS in @kbn/agent-builder-server/allow_lists.
  */
-export const GENERATE_ESQL_TOOL_ID = 'platform.core.generate_esql';
+export const SECURITY_LABS_SEARCH_TOOL_ID = 'security.security_labs_search';
+export const RULE_PREVIEW_TOOL_ID = 'security.run_rule_preview';
 
 /**
- * Complete set of tool IDs the Rule Creation Worker is permitted to call. Any span with a
- * tool name outside this set is counted as hallucinated by the Trajectory evaluator.
+ * Every registry tool the detection-rule-edit skill exposes to the agent (mirrors
+ * `getRegistryTools` in security_solution/server/agent_builder/skills/detection_rule_edit).
+ * A TOOL span naming anything outside this set — and outside Agent Builder's internal tools —
+ * is a hallucinated call. Keep in sync with the skill when its tool list changes.
  */
-export const KNOWN_TOOL_IDS = new Set([GENERATE_ESQL_TOOL_ID, RULE_CREATION_TOOL_ID]);
+export const SKILL_REGISTRY_TOOL_IDS: ReadonlySet<string> = new Set([
+  RULE_CREATION_TOOL_ID,
+  SECURITY_LABS_SEARCH_TOOL_ID,
+  platformCoreTools.generateEsql,
+  platformCoreTools.productDocumentation,
+  RULE_PREVIEW_TOOL_ID,
+]);
 
 /**
- * Reasonable bounds on total tool-call count for a single draft_creation run.
- * Too few = agent skipped steps; too many = agent is hallucinating extra calls.
+ * Ordering constraints the skill prescribes, as [earlier, later] pairs. Checked only when both
+ * tools appear in a run: the skill says to preview *after* creating, and it does not require
+ * either tool to be called. (`generate_esql` before `create_detection_rule` is deliberately NOT
+ * here — create_detection_rule generates its own ES|QL internally, and the skill only offers
+ * generate_esql as a post-preview debugging fallback.)
  */
-export const TRAJECTORY_MIN_TOOL_CALLS = 2;
-export const TRAJECTORY_MAX_TOOL_CALLS = 10;
+export const TRAJECTORY_PRECEDENCE: ReadonlyArray<readonly [string, string]> = [
+  [RULE_CREATION_TOOL_ID, RULE_PREVIEW_TOOL_ID],
+];
+
+/**
+ * Upper bound on tool calls in one draft_creation run before the agent is judged to be
+ * looping or hallucinating extra work. PROVISIONAL: chosen from the skill's prescribed path
+ * (research → create → preview → optional generate_esql, plus attachment reads/renders), not
+ * from sampled traces. Re-derive from `FROM traces-*` on the eval cluster once runs accumulate.
+ */
+export const TRAJECTORY_MAX_TOOL_CALLS = 8;
