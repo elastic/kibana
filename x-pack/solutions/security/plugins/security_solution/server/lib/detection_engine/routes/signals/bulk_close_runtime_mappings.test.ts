@@ -13,7 +13,8 @@ import {
 } from './bulk_close_runtime_mappings';
 
 /** Narrow the runtime field value for test assertions. */
-const asField = (v: unknown) => v as estypes.MappingRuntimeField & { format?: string };
+const asField = (v: unknown) =>
+  v as estypes.MappingRuntimeField & { format?: string; on_script_error?: 'fail' | 'continue' };
 
 describe('buildSourceReadingRuntimeField', () => {
   // Snapshot the script body so any change to it surfaces in review. The
