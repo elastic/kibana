@@ -72,6 +72,17 @@ const enclosingLoops = (steps: unknown[], name: string): Step[] => {
   return (ancestors ?? []).filter((step) => step.type === 'foreach');
 };
 
+/**
+ * The chain of looping/fan-out containers (foreach OR parallel) enclosing `name`,
+ * outermost first. Parallel branches replaced the outer foreach; apply-loop assertions
+ * need to see both container kinds.
+ */
+const enclosingContainers = (steps: unknown[], name: string): Step[] => {
+  const ancestors = findStepAncestors(steps, name);
+  expect(ancestors).not.toBeNull();
+  return (ancestors ?? []).filter((step) => step.type === 'foreach' || step.type === 'parallel');
+};
+
 const collectStepsByType = (steps: unknown[], type: string): Array<Record<string, unknown>> => {
   const matches: Array<Record<string, unknown>> = [];
   for (const step of steps) {
@@ -194,8 +205,8 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
       'log_batch_plan',
       'get_global_prevalence_stats',
       'classify_alert_batches',
-      'apply_verdicts',
-      'check_auto_close_conditions',
+      'apply_batch_verdicts',
+      'close_alerts_as_false_positive',
     ]) {
       const ancestors = findStepAncestors(workflow.steps, stepName) ?? [];
       expect(ancestors.map((step) => step.name)).toContain('analysis_enabled');
@@ -217,14 +228,20 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(workflow.consts.override_previous).toBe(false);
   });
 
-  it('classifies a batch of alerts per AI agent call, chunked by consts.batch_size', () => {
-    const agentStep = findStepByType(workflow.steps, 'ai.agent') as { name: string };
-    const loops = enclosingLoops(workflow.steps, agentStep.name);
-
-    // Exactly one loop around the agent call, and it iterates batches (not single alerts): this is
-    // what amortises the ~28k-token agent framework prompt across the whole batch.
-    expect(loops).toHaveLength(1);
-    expect(loops[0].foreach).toBe(
+  it('fan-outs one parallel branch per batch, settled, concurrency 5, chunked by consts.batch_size', () => {
+    const parallelStep = findStepByName(workflow.steps, 'classify_alert_batches') as {
+      type: string;
+      mode?: string;
+      concurrency?: number | Record<string, unknown>;
+      foreach: string;
+    };
+    expect(parallelStep).toBeDefined();
+    expect(parallelStep.type).toBe('parallel');
+    // settled: a failed batch is absorbed, its siblings still run; matches the
+    // agent call's existing continue-on-failure contract.
+    expect(parallelStep.mode).toBe('settled');
+    expect(parallelStep.concurrency).toBe(5);
+    expect(parallelStep.foreach).toBe(
       "{{ event.alerts | reject_exp: 'a', variables.pending_filter_expr | chunk: consts.batch_size | json }}"
     );
     expect(workflow.consts.batch_size).toEqual(expect.any(Number));
@@ -350,10 +367,15 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
 
     expect(graphStep.type).toBe('security.buildAlertEntityGraph');
     expect(graphStep.with.alertId).toBe('{{foreach.item._id}}');
-    // Per alert, inside the batch loop: the outer foreach is classify_alert_batches (over
-    // batches) and the inner foreach is collect_related_alerts (over the batch's alerts).
-    // Two enclosing loops keep the related_summaries accumulator bounded to batch_size entries.
-    expect(enclosingLoops(workflow.steps, 'get_related_alerts')).toHaveLength(2);
+    // Per alert, inside the batch branch: the outer container is classify_alert_batches
+    // (parallel, over batches) and the inner foreach is collect_related_alerts (over the
+    // batch's alerts). Two enclosing containers keep the related_summaries accumulator
+    // bounded to batch_size entries, one branch scope per batch.
+    const containers = enclosingContainers(workflow.steps, 'get_related_alerts');
+    expect(containers).toHaveLength(2);
+    expect(containers[0].name).toBe('classify_alert_batches');
+    expect(containers[0].type).toBe('parallel');
+    expect(containers[1].name).toBe('collect_related_alerts');
     expect(graphStep.with.max_alerts).toBe('${{ consts.max_related_alerts }}');
     expect(workflow.consts.include_related_alerts).toBe(true);
   });
@@ -366,10 +388,11 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(resetStep).toBeDefined();
     expect(resetStep.type).toBe('data.set');
     expect(resetStep.with.related_summaries).toEqual([]);
-    // Must be inside classify_alert_batches so it runs once per batch, not once per execution.
-    const loops = enclosingLoops(workflow.steps, 'reset_related_summaries');
-    expect(loops).toHaveLength(1);
-    expect(loops[0].name).toBe('classify_alert_batches');
+    // Must be inside the parallel branch body so it runs once per batch, not once per execution.
+    const containers = enclosingContainers(workflow.steps, 'reset_related_summaries');
+    expect(containers).toHaveLength(1);
+    expect(containers[0].name).toBe('classify_alert_batches');
+    expect(containers[0].type).toBe('parallel');
   });
 
   it('pairs each verdict back to its alert by the id the model echoed', () => {
@@ -377,14 +400,15 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
       with: { alert_verdict: string; alert_verdict_count: string };
     };
 
+    // The verdicts now come from this batch's agent step output (branch-local read, same
+    // branch scope), not a parent accumulator. The count is what the branch below reads;
+    // when the agent output is missing (failed batch), liquidjs `where` maps undefined to
+    // [] so the count is 0 and every alert takes the no-verdict path.
     expect(selectStep.with.alert_verdict).toBe(
-      "${{ variables.all_verdicts | where: 'id', foreach.item._id | first }}"
+      "${{ steps.runAgent_step.output.structured_output.verdicts | where: 'id', foreach.item._id | first }}"
     );
-    // `variables` is the merge of every data.set output in execution order, so an empty value does
-    // not reliably shadow the previous iteration's. The count is what the branch below reads, so an
-    // alert with no verdict can never inherit the previous alert's verdict.
     expect(selectStep.with.alert_verdict_count).toBe(
-      "${{ variables.all_verdicts | where: 'id', foreach.item._id | size }}"
+      "${{ steps.runAgent_step.output.structured_output.verdicts | where: 'id', foreach.item._id | size }}"
     );
   });
 
@@ -407,31 +431,19 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(findStepByName(check.steps, 'add_result_tags')).toBeUndefined();
   });
 
-  it('reports the batch token usage on the verdict note', () => {
+  it('reports this batch token usage on the verdict note', () => {
     const verdictNoteStep = findStepByName(workflow.steps, 'add_verdict_note_to_alert') as {
       with: { body: { note: { note: string } } };
     };
     const note = verdictNoteStep.with.body.note.note;
 
-    // Usage is per model call, and one call now covers many alerts, so the note reports the
-    // execution totals and how many alerts shared them rather than a per-alert figure.
-    expect(note).toContain('variables.batch_input_tokens');
-    expect(note).toContain('variables.batch_output_tokens');
-    expect(note).toContain('variables.batch_llm_calls');
-    expect(note).toContain('variables.pending_alert_count');
-
-    const collectStep = findStepByName(workflow.steps, 'collect_batch_verdicts') as {
-      with: Record<string, string>;
-    };
-    expect(collectStep.with.all_verdicts).toBe(
-      '${{ variables.all_verdicts | concat: steps.runAgent_step.output.structured_output.verdicts }}'
-    );
-    expect(collectStep.with.batch_input_tokens).toContain(
-      'steps.runAgent_step.output.metadata.usage.inputTokens'
-    );
-    expect(collectStep.with.batch_output_tokens).toContain(
-      'steps.runAgent_step.output.metadata.usage.outputTokens'
-    );
+    // One agent call covers this batch (up to batch_size alerts); the note reports that
+    // call's usage directly from the branch's agent step output, not execution-wide totals
+    // (which no longer exist: tokens accumulate nowhere now that batches run in parallel).
+    expect(note).toContain('steps.runAgent_step.output.metadata.usage.inputTokens');
+    expect(note).toContain('steps.runAgent_step.output.metadata.usage.outputTokens');
+    expect(note).not.toContain('variables.batch_input_tokens');
+    expect(note).not.toContain('variables.batch_llm_calls');
   });
 
   it('formats the verdict note timestamp with a human-readable date filter', () => {
@@ -534,12 +546,15 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     // Uses foreach.item._id (the real alert id), not the model's echoed id.
     expect(pushStep.with.auto_close_ids).toContain('foreach.item._id');
 
-    // Must run inside apply_verdicts so it is constrained to pending alerts.
-    const loops = enclosingLoops(workflow.steps, 'push_auto_close_id');
-    expect(loops.some((l) => l.name === 'apply_verdicts')).toBe(true);
+    // Must run inside the branch-local apply loop (apply_batch_verdicts, inside the
+    // classify_alert_batches parallel step), so it is constrained to this batch's pending
+    // alerts. auto_close_ids is branch-local; each batch closes only its own alerts.
+    const containers = enclosingContainers(workflow.steps, 'push_auto_close_id');
+    expect(containers.some((c) => c.name === 'apply_batch_verdicts')).toBe(true);
+    expect(containers.some((c) => c.name === 'classify_alert_batches' && c.type === 'parallel')).toBe(true);
   });
 
-  it('auto-closes every qualifying alert of the execution in one bulk call', () => {
+  it('auto-closes each batch qualifying alerts in one bulk call per batch, inside the branch', () => {
     const autoCloseStep = findStepByName(workflow.steps, 'check_auto_close_conditions') as {
       condition: string;
     };
@@ -547,7 +562,8 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
       '${{ variables.auto_close_enabled and variables.auto_close_ids.size > 0 }}'
     );
 
-    // The whole execution closes in two calls instead of two per alert, outside the per-alert loop.
+    // One bulk tag + one bulk close per batch (inside the parallel branch), not one per
+    // alert and not one global call: auto_close_ids is branch-local now.
     const tagStep = findStepByName(workflow.steps, 'set_close_tags') as {
       type: string;
       with: { ids: string };
@@ -567,13 +583,14 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(closeStep.type).toBe('kibana.SetAlertsStatus');
     expect(closeStep.with.status).toBe('closed');
     expect(closeStep.with.reason).toBe('false_positive');
-    // The ids are only known at run time, and the step's `signal_ids` is a static list in the
-    // document, so the close is addressed by the query form the route treats identically
-    // (`_update_by_query` filtered on `terms._id`). `proceed` keeps one conflicting alert from
-    // aborting the close for the whole batch.
+    // Addressed by query rather than `signal_ids` (static list in the document): the
+    // detection-engine route treats it as the same `_update_by_query` on `terms._id`.
+    // `proceed` keeps one conflicting alert from aborting the close for the whole batch.
     expect(closeStep.with.query.bool.filter.terms._id).toBe('${{ variables.auto_close_ids }}');
     expect(closeStep.with.conflicts).toBe('proceed');
-    expect(enclosingLoops(workflow.steps, 'close_alerts_as_false_positive')).toHaveLength(0);
+
+    const containers = enclosingContainers(workflow.steps, 'close_alerts_as_false_positive');
+    expect(containers.some((c) => c.name === 'classify_alert_batches' && c.type === 'parallel')).toBe(true);
   });
 
   // ------------------------------- structural escaping / truncation checks -------------------
