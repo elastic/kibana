@@ -84,9 +84,11 @@ export function registerInternalConnectorRoutes({
 
       const { connectorId } = request.params;
 
+      const allowedIds = await resolveAllowedConnectorIds(request, getInternalServices());
+
       let detail: Awaited<ReturnType<typeof getAgentConnectorDetail>>;
       try {
-        detail = await getAgentConnectorDetail(actionsClient, connectorId);
+        detail = await getAgentConnectorDetail(actionsClient, connectorId, { allowedIds });
       } catch (e) {
         const statusCode = (e as { output?: { statusCode?: number } }).output?.statusCode;
         if (statusCode === 404) {

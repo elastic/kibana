@@ -62,12 +62,16 @@ export const listAgentConnectors = async (
 
 /**
  * Returns the full detail (sub-actions + param schemas) for a connector, or null
- * if the connector type has no ConnectorSpec.
+ * if the connector type has no ConnectorSpec or is not in allowedIds.
+ * Pass undefined to allow all connectors; pass [] to block all.
  */
 export const getAgentConnectorDetail = async (
   actionsClient: MinimalActionsClient,
-  connectorId: string
+  connectorId: string,
+  { allowedIds }: { allowedIds?: string[] } = {}
 ): Promise<ConnectorDetail | null> => {
+  if (allowedIds !== undefined && !allowedIds.includes(connectorId)) return null;
+
   const connector = await actionsClient.get({ id: connectorId });
   const spec = getConnectorSpec(connector.actionTypeId);
   if (!spec) return null;

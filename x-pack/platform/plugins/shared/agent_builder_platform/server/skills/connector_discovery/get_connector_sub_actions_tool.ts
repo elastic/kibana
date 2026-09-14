@@ -49,17 +49,9 @@ export const createGetConnectorSubActionsTool = ({
       const actionsClient = await actionsStart.getActionsClientWithRequest(context.request);
 
       const allowedIds = context.agentConfiguration?.connector_ids;
-      if (allowedIds !== undefined && !allowedIds.includes(input.connector_id)) {
-        return {
-          results: [
-            createErrorResult({
-              message: `Connector '${input.connector_id}' is not available to this agent. Use list_connectors to see available connectors.`,
-            }),
-          ],
-        };
-      }
-
-      const detail = await getAgentConnectorDetail(actionsClient, input.connector_id);
+      const detail = await getAgentConnectorDetail(actionsClient, input.connector_id, {
+        allowedIds,
+      });
 
       if (!detail) {
         return {
