@@ -43,6 +43,7 @@ describe('ki_queries_validate tool', () => {
   const getStream = jest.fn().mockResolvedValue(stream);
   const getFeatures = jest.fn();
   const getStreamToQueryLinksMap = jest.fn();
+  const setValidatedQueries = jest.fn();
   const getScopedClients = jest.fn(async () => {
     return {
       streamsClient: { getStream },
@@ -111,6 +112,7 @@ describe('ki_queries_validate tool', () => {
     createValidateQueriesTool({
       getScopedClients,
       logger,
+      setValidatedQueries,
     });
 
   it('bounds its input', () => {
@@ -160,6 +162,17 @@ describe('ki_queries_validate tool', () => {
         queryValidationTimeoutMs: 12_000,
       })
     );
+    expect(setValidatedQueries).toHaveBeenLastCalledWith([
+      {
+        type: 'match',
+        esql: { query: 'FROM logs.test | WHERE message:"failure"' },
+        title: 'Failures',
+        description: 'Detects failures',
+        category: 'error',
+        severity_score: 60,
+        features: [{ id: 'feature-1', run_id: 'run-1' }],
+      },
+    ]);
     expect(result.results).toEqual([
       {
         type: 'other',
@@ -196,5 +209,6 @@ describe('ki_queries_validate tool', () => {
     expect(result.results).toEqual([
       { type: 'error', data: { message: 'KI storage unavailable' } },
     ]);
+    expect(setValidatedQueries).toHaveBeenLastCalledWith(undefined);
   });
 });

@@ -21,7 +21,6 @@ import { streamToAnalysisTarget } from '../../../../lib/significant_events/strea
 
 export const SIGNIFICANT_EVENTS_GET_FEATURES_TOOL_ID = 'platform.sig_events.ki_features_get';
 
-/** Bounds the description of each existing query surfaced to the LLM. */
 const MAX_EXISTING_QUERY_DESCRIPTION_LENGTH = 200;
 
 const getFeaturesSchema = z.object({

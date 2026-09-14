@@ -19,6 +19,7 @@ import { z } from '@kbn/zod/v4';
 import type { GetScopedClients } from '../../../../routes/types';
 import { getRequestAbortSignal } from '../../../../routes/utils/get_request_abort_signal';
 import { streamToAnalysisTarget } from '../../../../lib/significant_events/stream_to_analysis_target';
+import type { AcceptedQuery } from '../write_queries/tool';
 
 export const SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID =
   'platform.sig_events.ki_queries_validate';
@@ -90,9 +91,11 @@ const validateQueriesSchema = z.object({
 export const createValidateQueriesTool = ({
   getScopedClients,
   logger,
+  setValidatedQueries,
 }: {
   getScopedClients: GetScopedClients;
   logger: Logger;
+  setValidatedQueries: (queries: AcceptedQuery[] | undefined) => void;
 }): BuiltinSkillBoundedTool<typeof validateQueriesSchema> => {
   return {
     id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
@@ -101,6 +104,8 @@ export const createValidateQueriesTool = ({
       'Validate candidate KI queries against a target. Rewrites sources, verifies feature links, rejects duplicates and over-broad predicates, and executes ES|QL with LIMIT 0. Use the returned errors to repair rejected queries before finalizing.',
     schema: validateQueriesSchema,
     handler: async ({ target_id: targetId, queries }, context) => {
+      setValidatedQueries(undefined);
+
       try {
         const scopedClients = await getScopedClients({ request: context.request });
         const stream = await scopedClients.streamsClient.getStream(targetId);
@@ -143,18 +148,21 @@ export const createValidateQueriesTool = ({
           queryValidationTimeoutMs: scopedClients.tuningConfig.query_validation_timeout_ms,
         });
 
+        const validatedQueries: AcceptedQuery[] = acceptedQueries.map(
+          ({ expects_matches: _expectsMatches, esql, ...query }) => ({
+            ...query,
+            esql: { query: esql },
+          })
+        );
+        setValidatedQueries(validatedQueries);
+
         return {
           results: [
             {
               type: ToolResultType.other,
               data: {
                 queries: results,
-                accepted_queries: acceptedQueries.map(
-                  ({ expects_matches: _expectsMatches, esql, ...query }) => ({
-                    ...query,
-                    esql: { query: esql },
-                  })
-                ),
+                accepted_queries: validatedQueries,
               },
             },
           ],

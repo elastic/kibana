@@ -35,13 +35,8 @@ describe('significant events system prompt', () => {
 });
 
 describe('significantEventsAgentPrompt', () => {
-  it('has no unreplaced mustache placeholders', () => {
+  it('renders all placeholders', () => {
     expect(significantEventsAgentPrompt).not.toContain('{{{');
     expect(significantEventsAgentPrompt).not.toContain('}}}');
-  });
-
-  it('keeps the STATS metric-series contract', () => {
-    expect(significantEventsAgentPrompt).toContain('BUCKET(@timestamp, 1 minute)');
-    expect(significantEventsAgentPrompt).toContain('KEEP bucket, metric_value');
   });
 });

@@ -7,6 +7,7 @@
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+import { platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
 import {
   createMemoryListTool,
   createMemoryReadTool,
@@ -15,7 +16,7 @@ import {
 } from '../../../memory_and_investigation/tools/memory';
 import { createGetFeaturesTool } from './get_features/tool';
 import { createValidateQueriesTool } from './validate_queries/tool';
-import { writeQueriesTool } from './write_queries/tool';
+import { createWriteQueriesTool, type AcceptedQuery } from './write_queries/tool';
 import description from './description.text';
 import content from './skill.md.text';
 
@@ -35,19 +36,29 @@ export const createKIQueryGenerationSkill = (options: MemoryToolsOptions) => {
     excludeFromElasticCapabilities: true,
     description,
     content,
-    getInlineTools: (): BuiltinSkillBoundedTool[] => [
-      createMemorySearchTool(options),
-      createMemoryReadTool(options),
-      createMemoryListTool(options),
-      createGetFeaturesTool({
-        getScopedClients,
-        logger: logger.get('ki_features_get_tool'),
-      }),
-      createValidateQueriesTool({
-        getScopedClients,
-        logger: logger.get('ki_queries_validate_tool'),
-      }),
-      writeQueriesTool,
-    ],
+    getRegistryTools: () => [platformSignificantEventsTools.searchEvent],
+    getInlineTools: (): BuiltinSkillBoundedTool[] => {
+      let validatedQueries: AcceptedQuery[] | undefined;
+
+      return [
+        createMemorySearchTool(options),
+        createMemoryReadTool(options),
+        createMemoryListTool(options),
+        createGetFeaturesTool({
+          getScopedClients,
+          logger: logger.get('ki_features_get_tool'),
+        }),
+        createValidateQueriesTool({
+          getScopedClients,
+          logger: logger.get('ki_queries_validate_tool'),
+          setValidatedQueries: (queries) => {
+            validatedQueries = queries;
+          },
+        }),
+        createWriteQueriesTool({
+          getValidatedQueries: () => validatedQueries,
+        }),
+      ];
+    },
   });
 };

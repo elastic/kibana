@@ -11,6 +11,7 @@ import { registerKIQueryGenerationAgentType } from './ki_query_generation_agent'
 export {
   KI_QUERY_GENERATION_AGENT_ID,
   KI_QUERY_GENERATION_AGENT_TYPE_ID,
+  createKIQueryGenerationAgentType,
   kiQueryGenerationAgentType,
   registerKIQueryGenerationAgentType,
 } from './ki_query_generation_agent';
@@ -18,8 +19,10 @@ export { installKIQueryGenerationAgent } from './install_ki_query_generation_age
 
 export const registerSignificantEventsKIQueryGenerationAgentTypes = ({
   agentBuilder,
+  isSemanticCodeSearchGroundingEnabled,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
+  isSemanticCodeSearchGroundingEnabled: () => Promise<boolean>;
 }): void => {
-  registerKIQueryGenerationAgentType(agentBuilder);
+  registerKIQueryGenerationAgentType(agentBuilder, isSemanticCodeSearchGroundingEnabled);
 };

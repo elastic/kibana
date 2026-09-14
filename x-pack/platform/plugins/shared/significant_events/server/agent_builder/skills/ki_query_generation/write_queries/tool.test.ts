@@ -6,7 +6,7 @@
  */
 
 import { invokeHandler, createMockToolContext } from '../../../utils/test_helpers';
-import { writeQueriesTool } from './tool';
+import { createWriteQueriesTool } from './tool';
 
 const validQuery = {
   type: 'match' as const,
@@ -19,29 +19,60 @@ const validQuery = {
 };
 
 describe('ki_queries_write tool', () => {
+  const createTool = (validatedQueries: (typeof validQuery)[] | undefined) =>
+    createWriteQueriesTool({
+      getValidatedQueries: () => validatedQueries,
+    });
+
   it('bounds its input', () => {
-    expect(writeQueriesTool.schema.safeParse({ queries: [validQuery] }).success).toBe(true);
-    // An empty batch is valid: it reports that no queries are justified.
-    expect(writeQueriesTool.schema.safeParse({ queries: [] }).success).toBe(true);
+    const tool = createTool([validQuery]);
+    expect(tool.schema.safeParse({ queries: [validQuery] }).success).toBe(true);
+    expect(tool.schema.safeParse({ queries: [] }).success).toBe(true);
+    expect(tool.schema.safeParse({ queries: Array(101).fill(validQuery) }).success).toBe(false);
     expect(
-      writeQueriesTool.schema.safeParse({ queries: Array(101).fill(validQuery) }).success
-    ).toBe(false);
-    // run_id is optional — validate_queries omits it for features without one.
-    expect(
-      writeQueriesTool.schema.safeParse({
+      tool.schema.safeParse({
         queries: [{ ...validQuery, features: [{ id: 'feature-1' }] }],
       }).success
     ).toBe(true);
   });
 
   it('acknowledges the written batch', async () => {
+    const queries = [validQuery, { ...validQuery, title: 'Errors' }];
+    const result = await invokeHandler(createTool(queries), { queries }, createMockToolContext());
+    if (!('results' in result)) throw new Error('Expected standard tool result');
+
+    expect(result.results).toEqual([{ type: 'other', data: { written: true, count: 2, queries } }]);
+  });
+
+  it('rejects a batch that differs from the last validated queries', async () => {
     const result = await invokeHandler(
-      writeQueriesTool,
-      { queries: [validQuery, { ...validQuery, title: 'Errors' }] },
+      createTool([validQuery]),
+      { queries: [{ ...validQuery, esql: { query: 'FROM other-stream' } }] },
       createMockToolContext()
     );
     if (!('results' in result)) throw new Error('Expected standard tool result');
 
-    expect(result.results).toEqual([{ type: 'other', data: { written: true, count: 2 } }]);
+    expect(result.results).toEqual([
+      {
+        type: 'error',
+        data: {
+          message:
+            'queries must exactly match accepted_queries from the last successful validate_queries call',
+        },
+      },
+    ]);
+  });
+
+  it('allows an empty batch without a validation call', async () => {
+    const result = await invokeHandler(
+      createTool(undefined),
+      { queries: [] },
+      createMockToolContext()
+    );
+    if (!('results' in result)) throw new Error('Expected standard tool result');
+
+    expect(result.results).toEqual([
+      { type: 'other', data: { written: true, count: 0, queries: [] } },
+    ]);
   });
 });

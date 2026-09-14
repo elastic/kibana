@@ -11,6 +11,7 @@ import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import {
   EMPTY_TOKENS,
   type AnalysisTarget,
+  type QueryAttempt,
   type SignificantEventsToolUsage,
 } from '@kbn/nightshift-ai';
 import { createAgentBuilderClient, type ConverseStep } from '@kbn/evals';
@@ -26,23 +27,34 @@ export interface RunKIQueryGenerationAgentParams {
   log: ToolingLog;
   target: AnalysisTarget;
   connectorId: string;
+  groundingContext?: string;
 }
 
 export interface RunKIQueryGenerationAgentResult {
   queries: AcceptedQuery[];
+  queryAttempts: QueryAttempt[];
   tokensUsed: ChatCompletionTokenCount;
   toolUsage: SignificantEventsToolUsage;
 }
 
-// Underscored form of the skill's features-get tool id (the skill maps `.` -> `_`
-// in getInlineTools); `platform_sig_events_ki_queries_write` already has no dots.
 const GET_FEATURES_STEP_TOOL_ID = 'platform_sig_events_ki_features_get';
+const VALIDATE_QUERIES_STEP_TOOL_ID = 'platform_sig_events_ki_queries_validate';
+const normalizedToolId = (toolId: string): string => toolId.replaceAll('.', '_');
 
-// Maps the agent's pipeline endpoints onto the legacy {get_stream_features, add_queries}
-// tool-usage shape the evaluators read: feature retrieval and the terminal query write.
-const computeToolUsage = (steps: ConverseStep[]): SignificantEventsToolUsage => {
-  const usageFor = (toolId: string, isSuccess: (data: Record<string, unknown>) => boolean) => {
-    const calls = steps.filter((step) => step.type === 'tool_call' && step.tool_id === toolId);
+/** Adapts Agent Builder tool events to the legacy evaluator telemetry shape. */
+export const computeToolUsage = (steps: ConverseStep[]): SignificantEventsToolUsage => {
+  const usageFor = (
+    toolId: string,
+    isSuccess: (data: Record<string, unknown>) => boolean,
+    shouldCount: (step: ConverseStep) => boolean = () => true
+  ) => {
+    const calls = steps.filter(
+      (step) =>
+        step.type === 'tool_call' &&
+        typeof step.tool_id === 'string' &&
+        normalizedToolId(step.tool_id) === normalizedToolId(toolId) &&
+        shouldCount(step)
+    );
     const failures = calls.filter(
       (step) =>
         !step.results?.some(
@@ -62,9 +74,117 @@ const computeToolUsage = (steps: ConverseStep[]): SignificantEventsToolUsage => 
     get_stream_features: usageFor(GET_FEATURES_STEP_TOOL_ID, (data) =>
       Array.isArray(data.features)
     ),
-    add_queries: usageFor(WRITE_QUERIES_TOOL_ID, (data) => data.written === true),
+    add_queries: usageFor(
+      WRITE_QUERIES_TOOL_ID,
+      (data) => data.written === true && Array.isArray(data.queries) && data.queries.length > 0,
+      (step) =>
+        (typeof step.params === 'object' &&
+          step.params !== null &&
+          'queries' in step.params &&
+          Array.isArray(step.params.queries) &&
+          step.params.queries.length > 0) ||
+        Boolean(
+          step.results?.some(
+            (result) =>
+              typeof result === 'object' &&
+              result !== null &&
+              'data' in result &&
+              typeof result.data === 'object' &&
+              result.data !== null &&
+              'queries' in result.data &&
+              Array.isArray(result.data.queries) &&
+              result.data.queries.length > 0
+          )
+        )
+    ),
   };
 };
+
+const isQueryAttemptStatus = (status: unknown): status is QueryAttempt['status'] =>
+  status === 'Added' || status === 'Duplicate' || status === 'Failed to add';
+
+export const collectQueryAttempts = (steps: ConverseStep[]): QueryAttempt[] =>
+  steps
+    .filter(
+      (step) =>
+        step.type === 'tool_call' &&
+        typeof step.tool_id === 'string' &&
+        normalizedToolId(step.tool_id) === normalizedToolId(VALIDATE_QUERIES_STEP_TOOL_ID)
+    )
+    .flatMap((step) => step.results ?? [])
+    .flatMap((result) => {
+      if (
+        typeof result !== 'object' ||
+        result === null ||
+        !('data' in result) ||
+        typeof result.data !== 'object' ||
+        result.data === null ||
+        !('queries' in result.data) ||
+        !Array.isArray(result.data.queries)
+      ) {
+        return [];
+      }
+
+      return result.data.queries.flatMap((validationResult): QueryAttempt[] => {
+        if (
+          typeof validationResult !== 'object' ||
+          validationResult === null ||
+          !('query' in validationResult) ||
+          typeof validationResult.query !== 'object' ||
+          validationResult.query === null ||
+          !('title' in validationResult.query) ||
+          typeof validationResult.query.title !== 'string' ||
+          !('esql' in validationResult.query) ||
+          typeof validationResult.query.esql !== 'string' ||
+          !('status' in validationResult) ||
+          !isQueryAttemptStatus(validationResult.status)
+        ) {
+          return [];
+        }
+
+        const query = validationResult.query as {
+          title: string;
+          esql: string;
+          replaces?: string;
+        };
+        const attempt: QueryAttempt = {
+          title: query.title,
+          esql: query.esql,
+          status: validationResult.status,
+        };
+        if (typeof query.replaces === 'string') {
+          attempt.replaces = query.replaces;
+        }
+        if (
+          'exactDuplicate' in validationResult &&
+          typeof validationResult.exactDuplicate === 'boolean'
+        ) {
+          attempt.exactDuplicate = validationResult.exactDuplicate;
+        }
+        if (
+          'failureReason' in validationResult &&
+          (validationResult.failureReason === 'missing_intent' ||
+            validationResult.failureReason === 'unknown_features' ||
+            validationResult.failureReason === 'validation_error')
+        ) {
+          attempt.failureReason = validationResult.failureReason;
+        }
+        return [attempt];
+      });
+    });
+
+const isSuccessfulWriteResult = (
+  result: unknown
+): result is { data: { written: true; queries: AcceptedQuery[] } } =>
+  typeof result === 'object' &&
+  result !== null &&
+  'data' in result &&
+  typeof result.data === 'object' &&
+  result.data !== null &&
+  'written' in result.data &&
+  result.data.written === true &&
+  'queries' in result.data &&
+  Array.isArray(result.data.queries);
 
 export const getSuccessfulWriteQueriesParams = (
   steps: ConverseStep[]
@@ -73,25 +193,13 @@ export const getSuccessfulWriteQueriesParams = (
     (step) =>
       step.type === 'tool_call' &&
       step.tool_id === WRITE_QUERIES_TOOL_ID &&
-      step.results?.some(
-        (toolResult) =>
-          typeof toolResult === 'object' &&
-          toolResult !== null &&
-          'data' in toolResult &&
-          typeof toolResult.data === 'object' &&
-          toolResult.data !== null &&
-          'written' in toolResult.data &&
-          toolResult.data.written === true
-      )
+      step.results?.some(isSuccessfulWriteResult)
   );
-  if (!writeStep?.params) {
+  const writeResult = writeStep?.results?.find(isSuccessfulWriteResult);
+  if (!writeResult) {
     throw new Error('KI query generation agent did not successfully call write_queries');
   }
-  const rawParams = writeStep.params as { queries: AcceptedQuery[] };
-  if (!Array.isArray(rawParams.queries)) {
-    throw new Error('KI query generation agent returned invalid write_queries output');
-  }
-  return rawParams;
+  return { queries: writeResult.data.queries };
 };
 
 export async function runKIQueryGenerationAgent({
@@ -99,13 +207,16 @@ export async function runKIQueryGenerationAgent({
   log,
   target,
   connectorId,
+  groundingContext,
 }: RunKIQueryGenerationAgentParams): Promise<RunKIQueryGenerationAgentResult> {
   const agentBuilderClient = createAgentBuilderClient({ fetch, log, connectorId });
   const conversation = await agentBuilderClient.createConversation({
     agentId: KI_QUERY_GENERATION_AGENT_ID,
     title: `KI query generation: ${target.name}`,
   });
-  const userMessage = buildKIQueryGenerationUserMessage(target);
+  const userMessage = [buildKIQueryGenerationUserMessage(target), groundingContext]
+    .filter((part): part is string => Boolean(part))
+    .join('\n\n');
   const result = await agentBuilderClient.converse({
     agentId: KI_QUERY_GENERATION_AGENT_ID,
     conversationId: conversation.id,
@@ -114,6 +225,7 @@ export async function runKIQueryGenerationAgent({
   const { queries } = getSuccessfulWriteQueriesParams(result.steps);
   return {
     queries,
+    queryAttempts: collectQueryAttempts(result.steps),
     tokensUsed: result.tokensUsed ?? { ...EMPTY_TOKENS },
     toolUsage: computeToolUsage(result.steps),
   };

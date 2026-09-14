@@ -10,6 +10,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { MAX_ID_LENGTH, MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
+import { isEqual } from 'lodash';
 
 export const WRITE_QUERIES_TOOL_ID = 'platform_sig_events_ki_queries_write';
 
@@ -47,13 +48,41 @@ const writeQueriesSchema = z.object({
     ),
 });
 
-export const writeQueriesTool: BuiltinSkillBoundedTool<typeof writeQueriesSchema> = {
+export const createWriteQueriesTool = ({
+  getValidatedQueries,
+}: {
+  getValidatedQueries: () => AcceptedQuery[] | undefined;
+}): BuiltinSkillBoundedTool<typeof writeQueriesSchema> => ({
   id: WRITE_QUERIES_TOOL_ID,
   type: ToolType.builtin,
   description:
     'Submit the final validated query batch exactly once after all self-correction rounds are complete. Pass the accepted_queries returned by the last successful validate_queries call, or an empty array when no queries are justified by the evidence.',
   schema: writeQueriesSchema,
-  handler: ({ queries }) => ({
-    results: [{ type: ToolResultType.other, data: { written: true, count: queries.length } }],
-  }),
-};
+  handler: ({ queries }) => {
+    const validatedQueries = getValidatedQueries();
+    const writtenQueries = queries.length === 0 ? [] : validatedQueries;
+
+    if (!writtenQueries || !isEqual(queries, writtenQueries)) {
+      return {
+        results: [
+          {
+            type: ToolResultType.error,
+            data: {
+              message:
+                'queries must exactly match accepted_queries from the last successful validate_queries call',
+            },
+          },
+        ],
+      };
+    }
+
+    return {
+      results: [
+        {
+          type: ToolResultType.other,
+          data: { written: true, count: writtenQueries.length, queries: writtenQueries },
+        },
+      ],
+    };
+  },
+});

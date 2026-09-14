@@ -84,42 +84,50 @@ export async function executeKIQueryGenerationAgent({
 
   const events = await firstValueFrom(events$.pipe(toArray()));
 
-  const successfulWriteCallIds = new Set(
-    events
-      .filter(isToolResultEvent)
-      .filter(
-        (event) =>
-          event.data.tool_id === WRITE_QUERIES_TOOL_ID &&
-          event.data.results.some(
-            (result) =>
-              typeof result.data === 'object' &&
-              result.data !== null &&
-              'written' in result.data &&
-              result.data.written === true
-          )
-      )
-      .map((event) => event.data.tool_call_id)
-  );
+  const writeResultEvent = events
+    .filter(isToolResultEvent)
+    .findLast(
+      (event) =>
+        event.data.tool_id === WRITE_QUERIES_TOOL_ID &&
+        event.data.results.some(
+          (result) =>
+            typeof result.data === 'object' &&
+            result.data !== null &&
+            'written' in result.data &&
+            result.data.written === true &&
+            'queries' in result.data &&
+            Array.isArray(result.data.queries)
+        )
+    );
 
+  const writeResult = writeResultEvent?.data.results.find(
+    (result) =>
+      typeof result.data === 'object' &&
+      result.data !== null &&
+      'written' in result.data &&
+      result.data.written === true &&
+      'queries' in result.data &&
+      Array.isArray(result.data.queries)
+  );
   const writeEvent = events.findLast(
     (event) =>
       isToolCallEvent(event) &&
       event.data.tool_id === WRITE_QUERIES_TOOL_ID &&
-      successfulWriteCallIds.has(event.data.tool_call_id)
+      event.data.tool_call_id === writeResultEvent?.data.tool_call_id
   );
 
-  if (!writeEvent || !isToolCallEvent(writeEvent)) {
+  if (!writeEvent || !isToolCallEvent(writeEvent) || !writeResult) {
     throw new Error('KI query generation agent did not successfully call write_queries');
   }
 
   const roundEvent = events.find(isRoundCompleteEvent);
-  const rawParams = writeEvent.data.params as { queries: AcceptedQuery[] };
+  const rawQueries = (writeResult.data as { queries: AcceptedQuery[] }).queries;
 
-  if (!Array.isArray(rawParams.queries)) {
+  if (!Array.isArray(rawQueries)) {
     throw new Error('KI query generation agent returned invalid write_queries output');
   }
 
-  const queries: GeneratedSignificantEventQuery[] = rawParams.queries.map((q) => ({
+  const queries: GeneratedSignificantEventQuery[] = rawQueries.map((q) => ({
     type: q.type,
     title: q.title,
     description: q.description,

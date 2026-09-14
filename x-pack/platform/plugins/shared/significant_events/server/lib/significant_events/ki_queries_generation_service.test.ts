@@ -65,27 +65,7 @@ describe('generateKIQueries', () => {
     });
   });
 
-  it('reports telemetry with count, connector_id, and token usage', async () => {
-    const telemetry = {
-      trackSignificantEventsQueriesGenerated: jest.fn(),
-    } as unknown as EbtTelemetryClient;
-
-    await generateKIQueries(
-      { streamName: 'logs.test', connectorId: 'test-connector' },
-      makeDeps({ telemetry, logger })
-    );
-
-    expect(telemetry.trackSignificantEventsQueriesGenerated).toHaveBeenCalledWith(
-      expect.objectContaining({
-        count: 1,
-        connector_id: 'test-connector',
-        input_tokens_used: 10,
-        output_tokens_used: 20,
-      })
-    );
-  });
-
-  it('returns only queries, tokensUsed, and connectorId', async () => {
+  it('returns generated queries and reports telemetry', async () => {
     const telemetry = {
       trackSignificantEventsQueriesGenerated: jest.fn(),
     } as unknown as EbtTelemetryClient;
@@ -110,5 +90,13 @@ describe('generateKIQueries', () => {
       tokensUsed: { prompt: 10, completion: 20, total: 30, cached: 0 },
       connectorId: 'test-connector',
     });
+    expect(telemetry.trackSignificantEventsQueriesGenerated).toHaveBeenCalledWith(
+      expect.objectContaining({
+        count: 1,
+        connector_id: 'test-connector',
+        input_tokens_used: 10,
+        output_tokens_used: 20,
+      })
+    );
   });
 });

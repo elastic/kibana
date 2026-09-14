@@ -38,6 +38,20 @@ export const SCS_SEARCH_COMMIT_MESSAGES_TOOL_ID = 'scs.search_commit_messages';
 export const SCS_COCHANGES_TOOL_ID = 'scs.get_cochanges';
 export const SCS_FILE_AUTHORS_TOOL_ID = 'scs.get_file_authors';
 
+export const SCS_AGENT_BUILDER_TOOL_IDS = [
+  SCS_LIST_REPOS_TOOL_ID,
+  SCS_LIST_INDICES_TOOL_ID,
+  SCS_SEMANTIC_SEARCH_TOOL_ID,
+  SCS_READ_FILE_TOOL_ID,
+  SCS_SYMBOL_ANALYSIS_TOOL_ID,
+  SCS_SEARCH_COMMIT_MESSAGES_TOOL_ID,
+  SCS_FIND_INTRODUCING_COMMIT_TOOL_ID,
+  SCS_FILE_HISTORY_TOOL_ID,
+  SCS_GET_COMMIT_TOOL_ID,
+  SCS_COCHANGES_TOOL_ID,
+  SCS_FILE_AUTHORS_TOOL_ID,
+] as const;
+
 export interface SemanticCodeSearchTools {
   tools: Record<string, ToolDefinition>;
   callbacks: Record<string, ToolCallback>;
