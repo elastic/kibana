@@ -28542,7 +28542,7 @@ snapshots:
   '@types/eslint-scope@3.7.7':
     dependencies:
       '@types/eslint': 8.44.2
-      '@types/estree': 1.0.9
+      '@types/estree': 0.0.50
 
   '@types/eslint@7.29.0':
     dependencies:
