@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEffect, useCallback, type MutableRefObject } from 'react';
+import { useEffect, useCallback } from 'react';
 import { type AggregateQuery, isOfAggregateQueryType, type Query } from '@kbn/es-query';
 import type { TypedLensSerializedState } from '@kbn/lens-common';
 import { type ESQLDataGridAttrs } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
@@ -33,15 +33,12 @@ export interface InitializeChartLogicArgs {
    */
   currentAttributes: LensAttributes | undefined;
   /**
-   * Reference to the previous query.
-   */
-  prevQueryRef: MutableRefObject<AggregateQuery | Query>;
-  /**
    * Function to set errors that occur during initialization.
    */
   setErrors: (errors: Error[]) => void;
   /**
-   * Function to set the initialization state.
+   * Claims the initialization: must be called before the initial run is awaited
+   * so that a re-render cannot start a second one while it is still in flight.
    */
   setIsInitialized: (isInitialized: boolean) => void;
   /**
@@ -65,7 +62,6 @@ export const createInitializeChartFunction = ({
   isInitialized,
   currentAttributes,
   runQuery,
-  prevQueryRef,
   setErrors,
   setIsInitialized,
 }: InitializeChartLogicArgs) => {
@@ -74,6 +70,11 @@ export const createInitializeChartFunction = ({
       // If already initialized, do nothing
       return;
     }
+    // Claimed up front, not once the run below settles: the effect re-runs on
+    // every re-render (a chart type switch, a keystroke in the editor) and must
+    // not start a second run against the query of that later render.
+    setIsInitialized(true);
+
     if (isTextBasedLanguage && isOfAggregateQueryType(query) && !dataGridAttrs) {
       try {
         const shouldUpdateAttrs = Boolean(currentAttributes?.state.needsRefresh);
@@ -81,9 +82,7 @@ export const createInitializeChartFunction = ({
       } catch (e) {
         setErrors([e]);
       }
-      prevQueryRef.current = query;
     }
-    setIsInitialized(true);
   };
 };
 
@@ -94,7 +93,6 @@ export function useInitializeChart({
   isInitialized,
   currentAttributes,
   runQuery,
-  prevQueryRef,
   setErrors,
   setIsInitialized,
 }: InitializeChartLogicArgs) {
@@ -108,7 +106,6 @@ export function useInitializeChart({
       isInitialized,
       currentAttributes,
       runQuery,
-      prevQueryRef,
       setErrors,
       setIsInitialized,
     });
@@ -120,7 +117,6 @@ export function useInitializeChart({
     isInitialized,
     currentAttributes,
     runQuery,
-    prevQueryRef,
     setErrors,
     setIsInitialized,
   ]);

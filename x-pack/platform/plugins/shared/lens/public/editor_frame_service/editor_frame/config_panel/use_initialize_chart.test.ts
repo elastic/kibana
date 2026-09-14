@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { AggregateQuery } from '@kbn/es-query';
 import {
   createInitializeChartFunction,
   type InitializeChartLogicArgs,
@@ -15,7 +15,6 @@ describe('createInitializeChartFunction', () => {
   let mockSetErrors: jest.Mock;
   let mockSetIsInitialized: jest.Mock;
   let mockRunQuery: jest.Mock;
-  let mockPrevQueryRef: { current: AggregateQuery | Query };
   let defaultArgs: Parameters<typeof createInitializeChartFunction>[0];
 
   beforeEach(() => {
@@ -23,7 +22,6 @@ describe('createInitializeChartFunction', () => {
     mockSetErrors = jest.fn();
     mockSetIsInitialized = jest.fn();
     mockRunQuery = jest.fn();
-    mockPrevQueryRef = { current: { esql: '' } as AggregateQuery };
 
     defaultArgs = {
       isTextBasedLanguage: true,
@@ -33,7 +31,6 @@ describe('createInitializeChartFunction', () => {
       currentAttributes: {
         state: { needsRefresh: false },
       } as TypedLensSerializedState['attributes'], // Minimal mock
-      prevQueryRef: mockPrevQueryRef,
       setErrors: mockSetErrors,
       setIsInitialized: mockSetIsInitialized,
       runQuery: mockRunQuery,
@@ -50,7 +47,6 @@ describe('createInitializeChartFunction', () => {
       expect.any(AbortController),
       false // needsRefresh is false by default in defaultArgs
     );
-    expect(mockPrevQueryRef.current).toEqual(defaultArgs.query);
     expect(mockSetIsInitialized).toHaveBeenCalledTimes(1);
     expect(mockSetIsInitialized).toHaveBeenCalledWith(true);
   });
@@ -62,6 +58,25 @@ describe('createInitializeChartFunction', () => {
 
     expect(mockRunQuery).not.toHaveBeenCalled();
     expect(mockSetIsInitialized).toHaveBeenCalledTimes(0);
+  });
+
+  it('should set initialized before waiting for the first run to finish', async () => {
+    let resolveRun: () => void = () => {};
+    (mockRunQuery as jest.Mock).mockImplementation(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveRun = resolve;
+        })
+    );
+
+    const firstRun = createInitializeChartFunction(defaultArgs)(new AbortController());
+
+    expect(mockSetIsInitialized).toHaveBeenCalledWith(true);
+    expect(mockRunQuery).toHaveBeenCalledTimes(1);
+
+    resolveRun();
+    await firstRun;
+    expect(mockSetIsInitialized).toHaveBeenCalledWith(true);
   });
 
   it('should NOT call mockRunQuery if isTextBasedLanguage is false', async () => {
@@ -97,7 +112,7 @@ describe('createInitializeChartFunction', () => {
     expect(mockSetIsInitialized).toHaveBeenCalledWith(true);
   });
 
-  it('should set errors and update prevQueryRef if runQuery throws an error', async () => {
+  it('should set errors if runQuery throws an error', async () => {
     const simulatedError = new Error('Failed to fetch data');
     (mockRunQuery as jest.Mock).mockRejectedValue(simulatedError);
 
@@ -106,7 +121,6 @@ describe('createInitializeChartFunction', () => {
 
     expect(mockRunQuery).toHaveBeenCalledTimes(1);
     expect(mockSetErrors).toHaveBeenCalledWith([simulatedError]);
-    expect(mockPrevQueryRef.current).toEqual(defaultArgs.query);
     expect(mockSetIsInitialized).toHaveBeenCalledTimes(1);
     expect(mockSetIsInitialized).toHaveBeenCalledWith(true);
   });

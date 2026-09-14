@@ -85,9 +85,9 @@ export function ESQLEditor({
   updateSuggestion,
   onTextBasedQueryStateChange,
 }: ESQLEditorProps) {
-  // recomputed every render but only read by the useRef/useState initializers
-  // below — do not hoist into a memo, later renders intentionally ignore it
-  const initialQuery = getRepresentativeQuery(attributes) || { esql: '' };
+  const [initialQuery] = useState<AggregateQuery | Query>(
+    () => getRepresentativeQuery(attributes) || { esql: '' }
+  );
   const prevQuery = useRef<AggregateQuery | Query>(initialQuery);
   const [query, setQuery] = useState<AggregateQuery | Query>(initialQuery);
 
@@ -131,6 +131,8 @@ export function ESQLEditor({
   // Avoids duplicating the first grid load
   const isInitialRenderRef = useRef(true);
 
+  const latestRunIdRef = useRef(0);
+
   const submittedQueryRef = useRef(submittedQuery);
   submittedQueryRef.current = submittedQuery;
 
@@ -150,8 +152,12 @@ export function ESQLEditor({
   }, [isDataLoading, layerId]);
 
   const runQuery = useCallback(
-    async (q: AggregateQuery, abortController?: AbortController, shouldUpdateAttrs?: boolean) => {
+    async (q: AggregateQuery, abortController?: AbortController, shouldUpdateAttrs = true) => {
       setErrors([]);
+      const runId = ++latestRunIdRef.current;
+      // Results of a run that a later one has already superseded are dropped,
+      // so a slow response can never revert the editor to an older query
+      const isLatestRun = () => runId === latestRunIdRef.current;
       const attrs = await getSuggestions(
         q,
         data,
@@ -160,14 +166,27 @@ export function ESQLEditor({
         datasourceMap,
         visualizationMap,
         adHocDataViews,
-        setErrors,
+        (runErrors) => {
+          if (isLatestRun()) {
+            setErrors(runErrors);
+          }
+        },
         abortController,
-        setDataGridAttrs,
+        (gridAttrs) => {
+          if (isLatestRun()) {
+            setDataGridAttrs(gridAttrs);
+          }
+        },
         esqlVariables,
         shouldUpdateAttrs,
         currentAttributesRef.current,
         isApproximate
       );
+      // A superseded run has nothing to publish: a newer run owns the chart,
+      // the results grid and the loading indicator, and may still be in flight.
+      if (!isLatestRun()) {
+        return;
+      }
       // An aborted run (e.g. the user clicked "Cancel", or a re-render tore
       // down the request) produced no result. Bail out *without* recording the
       // query as submitted: `onTextLangQuerySubmit` skips queries equal to
@@ -181,8 +200,14 @@ export function ESQLEditor({
         setCurrentAttributes?.(attrs);
         updateSuggestion?.(attrs);
       }
-      prevQuery.current = q;
-      setSubmittedQuery(q);
+      // A run that only refreshes the ES|QL results grid leaves the chart on the
+      // previous query, so it must not count as submitted either — otherwise the
+      // guard in `onTextLangQuerySubmit` would swallow the user's own submission
+      // of the same query and the chart would never be rebuilt.
+      if (shouldUpdateAttrs) {
+        prevQuery.current = q;
+        setSubmittedQuery(q);
+      }
       setIsVisualizationLoading(false);
     },
     [
@@ -201,12 +226,11 @@ export function ESQLEditor({
 
   useInitializeChart({
     isTextBasedLanguage,
-    query,
+    query: initialQuery,
     dataGridAttrs,
     isInitialized,
     currentAttributes,
     runQuery,
-    prevQueryRef: prevQuery,
     setErrors,
     setIsInitialized,
   });
