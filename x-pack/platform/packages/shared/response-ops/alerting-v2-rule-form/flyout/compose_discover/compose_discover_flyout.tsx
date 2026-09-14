@@ -81,9 +81,10 @@ import {
   resolveUnifiedAlertApplyQuery,
   splitResultToRuleQuery,
 } from './use_heuristic_split';
-import { useSplitQueryCompletion } from './use_split_query_completion';
+import { useSandboxEditorMounts } from './use_sandbox_editor_mounts';
 import { getTimeFieldResolutionQuery } from './get_time_field_resolution_query';
 import { useResolveTimeField } from './use_resolve_time_field';
+import { buildRuleNotificationTag } from '../../actions_form/helpers/rule_scoped_action_policies';
 
 const LazyYamlRuleForm = React.lazy(() =>
   import('../../form/yaml_rule_form').then((m) => ({ default: m.YamlRuleForm }))
@@ -108,6 +109,11 @@ const QUERY_SANDBOX_LABEL = i18n.translate(
   {
     defaultMessage: 'Query sandbox',
   }
+);
+
+const PREVIEW_BUTTON_LABEL = i18n.translate(
+  'xpack.alertingV2.composeDiscover.builderMode.previewButtonLabel',
+  { defaultMessage: 'Preview' }
 );
 
 const EDIT_MODE_LEGEND = i18n.translate('xpack.alertingV2.composeDiscover.editMode.legend', {
@@ -355,7 +361,7 @@ export function ComposeDiscoverFlyout({
   );
 
   const [uiState, rawDispatch] = useComposeDiscoverState({
-    mode: mode === 'clone' ? 'edit' : mode,
+    mode,
     initialKind,
     isQueryPrePopulated: isDiscoverQueryPopulated || (mode === 'create' && isRuleQueryPopulated),
     forceYamlMode,
@@ -646,14 +652,8 @@ export function ComposeDiscoverFlyout({
    * are immune to React Strict Mode double-mount disposal.
    */
   const sandboxBase = sandboxQuery.format === 'composed' ? sandboxQuery.base : '';
-  const { onEditorMount: onAlertEditorMount } = useSplitQueryCompletion({
-    baseQuery: sandboxBase,
-    search: services.data.search.search,
-  });
-  const { onEditorMount: onRecoveryEditorMount } = useSplitQueryCompletion({
-    baseQuery: sandboxBase,
-    search: services.data.search.search,
-  });
+  const { onAlertEditorMount, onRecoveryEditorMount, onBaseEditorMount, onSingleEditorMount } =
+    useSandboxEditorMounts({ baseQuery: sandboxBase, services: baseServices });
 
   const isAlertRef = useRef(isAlert);
   isAlertRef.current = isAlert;
@@ -972,10 +972,22 @@ export function ComposeDiscoverFlyout({
         return;
       }
     }
+
+    let submitted = values;
+    if (values.notifications?.workflows?.length && !values.metadata.tags?.length) {
+      const tags = [buildRuleNotificationTag(values.metadata.name)];
+      methods.setValue('metadata.tags', tags, { shouldDirty: true });
+      submitted = { ...values, metadata: { ...values.metadata, tags } };
+    }
+
     if (isCreate) {
-      onCreateRule(composeFormToCreateRequest(values, builderType), values.notifications);
+      onCreateRule(composeFormToCreateRequest(submitted, builderType), submitted.notifications);
     } else if (ruleId && onUpdateRule) {
-      onUpdateRule(ruleId, composeFormToUpdateRequest(values, builderType), values.notifications);
+      onUpdateRule(
+        ruleId,
+        composeFormToUpdateRequest(submitted, builderType),
+        submitted.notifications
+      );
     }
   });
 
@@ -1279,19 +1291,49 @@ export function ComposeDiscoverFlyout({
                     />
                   </EuiFlexItem>
                 )}
-                {isBuilderMode && isEditing && onSwitchToEsql && (
+                {isBuilderMode && (
                   <EuiFlexItem grow={false}>
-                    <EuiButtonGroup
-                      legend={BUILDER_MODE_LEGEND}
-                      options={BUILDER_MODE_OPTIONS}
-                      idSelected="builder"
-                      onChange={(id) => {
-                        if (id === 'esql') onSwitchToEsql();
-                      }}
-                      isIconOnly
-                      buttonSize="compressed"
-                      data-test-subj="composeDiscoverSwitchToEsql"
-                    />
+                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          size="s"
+                          color="text"
+                          iconType="chevronLimitLeft"
+                          isDisabled={uiState.childOpen}
+                          onClick={() =>
+                            dispatch({
+                              type: 'OPEN_CHILD_FOR_STEP',
+                              step: uiState.step,
+                              isAlert,
+                              focusedTab: getDefaultOpenTab(
+                                isAlert,
+                                uiState.step,
+                                hasCustomRecovery,
+                                uiState.manualSplitEnabled
+                              ),
+                            })
+                          }
+                          data-test-subj="ruleBuilderOpenPreview"
+                        >
+                          {PREVIEW_BUTTON_LABEL}
+                        </EuiButton>
+                      </EuiFlexItem>
+                      {isEditing && onSwitchToEsql ? (
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonGroup
+                            legend={BUILDER_MODE_LEGEND}
+                            options={BUILDER_MODE_OPTIONS}
+                            idSelected="builder"
+                            onChange={(id) => {
+                              if (id === 'esql') onSwitchToEsql();
+                            }}
+                            isIconOnly
+                            buttonSize="compressed"
+                            data-test-subj="composeDiscoverSwitchToEsql"
+                          />
+                        </EuiFlexItem>
+                      ) : null}
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                 )}
                 {!isBuilderMode && (
@@ -1372,7 +1414,6 @@ export function ComposeDiscoverFlyout({
                       onRecoveryTypeChange={handleRecoveryTypeChange}
                       onKindChange={handleKindChange}
                       isEditing={isEditing}
-                      ruleId={ruleId}
                       builderType={builderType}
                     />
                   </BuilderStateProvider>
@@ -1411,6 +1452,8 @@ export function ComposeDiscoverFlyout({
                 onTabChange={handleSandboxTabChange}
                 onAlertEditorMount={onAlertEditorMount}
                 onRecoveryEditorMount={onRecoveryEditorMount}
+                onBaseEditorMount={onBaseEditorMount}
+                onSingleEditorMount={onSingleEditorMount}
                 onClose={handleSandboxClose}
                 helpText={sandboxHelpText}
                 headerActions={sandboxHeaderActions}

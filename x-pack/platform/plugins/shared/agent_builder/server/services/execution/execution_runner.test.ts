@@ -24,6 +24,7 @@ import {
   ConversationAccessControlMode,
   ConversationOriginType,
   createBadRequestError,
+  TimelineEventType,
   type ChatAgentEvent,
   type ChatEvent,
   type RoundCompleteEvent,
@@ -571,6 +572,85 @@ describe('handleAgentExecution', () => {
 
       expect(conversationClient.upsertRound).toHaveBeenCalledTimes(1);
       expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('SSE execution_started projection', () => {
+    it('emits execution_started at round start (before execution_terminated) on the normal path', async () => {
+      const conversation = createEmptyConversation({
+        id: 'conversation-1',
+        agent_id: 'test-agent',
+      });
+      const conversationClient = createConversationClientMock();
+      conversationClient.get.mockResolvedValue(conversation);
+      conversationClient.appendEvents.mockResolvedValue(conversation);
+      conversationClient.replaceRoundEvents.mockResolvedValue(conversation);
+
+      mockAgentStream(
+        [
+          makeRoundStartedEvent('round-1', { started_at: '2024-01-01T00:00:00.000Z' }),
+          {
+            type: ChatEventType.roundComplete,
+            data: {
+              round: createRound({
+                id: 'round-1',
+                status: ConversationRoundStatus.completed,
+              }),
+            },
+          } as RoundCompleteEvent,
+        ],
+        'asyncShared'
+      );
+      stubResolveServices(conversationClient);
+
+      const events$ = await runHandle({
+        agentParams: {
+          agentId: 'test-agent',
+          conversationId: 'conversation-1',
+          nextInput: { message: 'Hello' },
+        },
+        conversationClient,
+      });
+
+      const emitted = (await lastValueFrom(events$.pipe(toArray()))) as ChatEvent[];
+      const startedIndex = emitted.findIndex(
+        (event) => event.type === TimelineEventType.executionStarted
+      );
+      const terminatedIndex = emitted.findIndex(
+        (event) => event.type === TimelineEventType.executionTerminated
+      );
+
+      expect(startedIndex).toBeGreaterThanOrEqual(0);
+      expect(terminatedIndex).toBeGreaterThan(startedIndex);
+      expect(emitted[startedIndex]).toMatchObject({
+        id: 'round-1::execution_started',
+        created_at: '2024-01-01T00:00:00.000Z',
+        execution_id: 'round-1::execution',
+        trigger_event_id: 'round-1::user_message',
+      });
+    });
+
+    it('skips the SSE projection when storeConversation is false (async path only)', async () => {
+      const conversationClient = createConversationClientMock();
+      mockAgentStream(
+        [makeRoundStartedEvent('round-1'), makeRoundCompleteEvent('round-1')],
+        'asyncShared'
+      );
+      stubResolveServices(conversationClient);
+
+      const events$ = await runHandle({
+        agentParams: {
+          agentId: 'test-agent',
+          nextInput: { message: 'Hello' },
+          storeConversation: false,
+        },
+        conversationClient,
+      });
+
+      const emitted = (await lastValueFrom(events$.pipe(toArray()))) as ChatEvent[];
+      expect(emitted.some((event) => event.type === TimelineEventType.executionStarted)).toBe(
+        false
+      );
     });
   });
 
