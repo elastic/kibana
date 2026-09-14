@@ -28,7 +28,7 @@ significant-events-datasets/
       <scenario-snapshot>
 ```
 
-Archived incident scenarios use fixed paths such as
+Customer-0 incident snapshots use fixed paths such as
 `significant-events-datasets/customer0-incidents/incident-3048`, so
 `SIGEVENTS_SNAPSHOT_RUN` does not affect them.
 
@@ -133,8 +133,8 @@ SIGEVENTS_DATASET=all node scripts/evals run \
 
 ### Run a specific dataset
 
-Before running archived customer-0 datasets, confirm data-governance approval for the data sent to
-the selected task model and judges.
+Before running evaluations against customer-0 incident data, confirm data-governance approval for
+the data sent to the selected task model and judges.
 
 ```bash
 SIGEVENTS_DATASET=otel-demo node scripts/evals run \
