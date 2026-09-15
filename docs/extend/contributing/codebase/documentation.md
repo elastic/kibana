@@ -31,6 +31,8 @@ Start a live-preview server at [http://localhost:3000](http://localhost:3000):
 docs-builder serve
 ```
 
+When you add, change, deprecate, or remove a `kibana.yml` setting or an Advanced Settings (`uiSettings`) entry, document it in the `{settings}` YAML under `docs/reference/`. Follow [`.agents/skills/kibana-settings-docs/SKILL.md`](../../../../.agents/skills/kibana-settings-docs/SKILL.md) for file choice and Kibana lookups. YAML syntax and `applies_to` live in the docs-builder [automated settings](https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md) page.
+
 ## REST APIs
 
 REST APIs are documented via OpenAPI Spec (OAS) generated directly from the route registration code. Define your route schemas with `@kbn/config-schema` or `@kbn/zod`, and the generated OAS will flow through `scripts/capture_oas_snapshot.js` into the published bundles at [elastic.co/docs/api/doc/kibana](https://www.elastic.co/docs/api/doc/kibana/) (ESS) and [elastic.co/docs/api/doc/serverless](https://www.elastic.co/docs/api/doc/serverless/) (Serverless).
