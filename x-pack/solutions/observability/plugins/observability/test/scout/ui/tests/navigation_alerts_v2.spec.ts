@@ -15,10 +15,12 @@
  * so locators go through `revealBodyNavItem*` / `anyPanel`.
  *
  * Page-load titles match `observability_alerting` URL Scout coverage, but this
- * suite reaches each surface by clicking the solution-nav link.
+ * suite reaches each surface by clicking the solution-nav link. Privilege cases
+ * login as custom roles and assert which panel children render.
  */
 
-import { ALERTING_V2_SHOW_CLASSIC_ALERTS_TABLE_SETTING_ID } from '@kbn/alerting-v2-constants';
+import { ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID } from '@kbn/alerting-v2-constants';
+import type { KibanaRole } from '@kbn/scout-oblt';
 import {
   OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
   spaceTest as test,
@@ -31,6 +33,7 @@ import {
   setAlertingV2EnabledSetting,
   unsetAlertingV2EnabledSetting,
 } from '../fixtures/alerting_v2_setting';
+import { observabilityAlertingNavRole } from '../fixtures/roles';
 
 const ALERTS_PANEL_ID = 'alerting';
 const ALERTS_DEEP_LINK = 'observability-overview:alerts';
@@ -81,8 +84,92 @@ const expectPlainAlertsLink = async (nav: ObservabilityNavigation) => {
   await expect(nav.navItemInBodyById(ALERTS_PANEL_ID)).not.toBeVisible();
 };
 
+const ALL_PANEL_LINKS = [
+  PANEL_LINKS.inbox,
+  ALERTS_DEEP_LINK,
+  PANEL_LINKS.rulesV2,
+  PANEL_LINKS.rulesV1,
+  PANEL_LINKS.ruleLibrary,
+  PANEL_LINKS.actionPolicies,
+  PANEL_LINKS.maintenanceWindows,
+  PANEL_LINKS.executionHistory,
+] as const;
+
+const PRIVILEGE_CASES = [
+  {
+    name: 'no alerting privileges',
+    role: observabilityAlertingNavRole(),
+    visible: [],
+  },
+  {
+    name: 'v2 alerts read',
+    role: observabilityAlertingNavRole({ alerting_v2_alerts: ['read'] }),
+    visible: [PANEL_LINKS.inbox],
+  },
+  {
+    name: 'v2 rules read',
+    role: observabilityAlertingNavRole({ alerting_v2_rules: ['read'] }),
+    visible: [PANEL_LINKS.rulesV2],
+  },
+  {
+    name: 'v2 rules write',
+    role: observabilityAlertingNavRole({ alerting_v2_rules: ['all'] }),
+    visible: [PANEL_LINKS.rulesV2, PANEL_LINKS.ruleLibrary],
+  },
+  {
+    name: 'v2 action policies read',
+    role: observabilityAlertingNavRole({ alerting_v2_action_policies: ['read'] }),
+    visible: [PANEL_LINKS.actionPolicies],
+  },
+  {
+    name: 'v2 execution history read',
+    role: observabilityAlertingNavRole({ alerting_v2_execution_history: ['read'] }),
+    visible: [PANEL_LINKS.executionHistory],
+  },
+  {
+    name: 'v1 observability alerts read',
+    role: observabilityAlertingNavRole({ observabilityAlerts: ['read'] }),
+    visible: [PANEL_LINKS.inbox],
+  },
+  {
+    name: 'v1 logs alerts and rules read',
+    role: observabilityAlertingNavRole({ logs: ['read'] }),
+    visible: [PANEL_LINKS.inbox, PANEL_LINKS.rulesV1],
+  },
+] as const;
+
+const loadNavAsRole = async (
+  browserAuth: { loginWithCustomRole: (role: KibanaRole) => Promise<void> },
+  nav: ObservabilityNavigation,
+  role: KibanaRole
+): Promise<ObservabilityNavigation> => {
+  await browserAuth.loginWithCustomRole(role);
+  await nav.gotoApp('discover');
+  await nav.waitForLoad();
+  return nav;
+};
+
+const expectPanelLinks = async (nav: ObservabilityNavigation, visible: readonly string[]) => {
+  if (visible.length === 0) {
+    await expect(nav.navItemInBodyById(ALERTS_PANEL_ID)).not.toBeVisible();
+    await expect(nav.navItemInBodyByDeepLinkId(ALERTS_DEEP_LINK)).not.toBeVisible();
+    return;
+  }
+
+  await nav.openPanelById(ALERTS_PANEL_ID);
+
+  for (const deepLinkId of ALL_PANEL_LINKS) {
+    const item = nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, deepLinkId);
+    if (visible.includes(deepLinkId)) {
+      await expect(item).toBeVisible({ timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS });
+    } else {
+      await expect(item).not.toBeVisible();
+    }
+  }
+};
+
 test.describe(
-  'Observability Alerts nav — alerting v2 feature flag',
+  'Observability Alerts nav — alerting v2',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ scoutSpace, kbnClient, config }) => {
@@ -93,13 +180,13 @@ test.describe(
       }
       await unsetAlertingV2EnabledSetting(kbnClient);
       await scoutSpace.uiSettings.set({
-        [ALERTING_V2_SHOW_CLASSIC_ALERTS_TABLE_SETTING_ID]: false,
+        [ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID]: false,
       });
     });
 
     test.afterAll(async ({ scoutSpace, kbnClient }) => {
       await unsetAlertingV2EnabledSetting(kbnClient);
-      await scoutSpace.uiSettings.unset(ALERTING_V2_SHOW_CLASSIC_ALERTS_TABLE_SETTING_ID);
+      await scoutSpace.uiSettings.unset(ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID);
     });
 
     test('shows a plain Alerts link that loads the classic alerts page when v2 is disabled', async ({
@@ -124,7 +211,7 @@ test.describe(
     }) => {
       await setAlertingV2EnabledSetting(kbnClient, true);
       await scoutSpace.uiSettings.set({
-        [ALERTING_V2_SHOW_CLASSIC_ALERTS_TABLE_SETTING_ID]: false,
+        [ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID]: false,
       });
 
       await browserAuth.loginAsAdmin();
@@ -179,7 +266,7 @@ test.describe(
       }) => {
         await setAlertingV2EnabledSetting(kbnClient, true);
         await scoutSpace.uiSettings.set({
-          [ALERTING_V2_SHOW_CLASSIC_ALERTS_TABLE_SETTING_ID]: false,
+          [ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID]: false,
         });
 
         await browserAuth.loginAsAdmin();
@@ -202,7 +289,7 @@ test.describe(
     }) => {
       await setAlertingV2EnabledSetting(kbnClient, true);
       await scoutSpace.uiSettings.set({
-        [ALERTING_V2_SHOW_CLASSIC_ALERTS_TABLE_SETTING_ID]: true,
+        [ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID]: true,
       });
 
       await browserAuth.loginAsAdmin();
@@ -231,7 +318,7 @@ test.describe(
     }) => {
       await setAlertingV2EnabledSetting(kbnClient, false);
       await scoutSpace.uiSettings.set({
-        [ALERTING_V2_SHOW_CLASSIC_ALERTS_TABLE_SETTING_ID]: false,
+        [ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID]: false,
       });
 
       await browserAuth.loginAsAdmin();
@@ -242,6 +329,45 @@ test.describe(
       await expectPlainAlertsLink(nav);
       await nav.clickBodyNavItemByDeepLinkId(ALERTS_DEEP_LINK);
       await expectPageTitle(pageObjects.chrome.pageTitle, CLASSIC_ALERTS_TITLE);
+    });
+
+    test('filters Alerting panel links by the signed-in user privileges', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await setAlertingV2EnabledSetting(kbnClient, true);
+      await scoutSpace.uiSettings.set({
+        [ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID]: false,
+      });
+
+      const nav = pageObjects.observabilityNavigation;
+
+      for (const privilegeCase of PRIVILEGE_CASES) {
+        await test.step(privilegeCase.name, async () => {
+          await loadNavAsRole(browserAuth, nav, privilegeCase.role);
+          await expectPanelLinks(nav, privilegeCase.visible);
+        });
+      }
+
+      await test.step('v1 observability alerts read and classic table on', async () => {
+        await scoutSpace.uiSettings.set({
+          [ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID]: true,
+        });
+        try {
+          await loadNavAsRole(
+            browserAuth,
+            nav,
+            observabilityAlertingNavRole({ observabilityAlerts: ['read'] })
+          );
+          await expectPanelLinks(nav, [PANEL_LINKS.inbox, ALERTS_DEEP_LINK]);
+        } finally {
+          await scoutSpace.uiSettings.set({
+            [ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID]: false,
+          });
+        }
+      });
     });
   }
 );

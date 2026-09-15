@@ -8,7 +8,7 @@
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import {
   ALERTING_V2_ENABLED_SETTING_ID,
-  ALERTING_V2_SHOW_CLASSIC_ALERTS_TABLE_SETTING_ID,
+  ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID,
 } from '@kbn/alerting-v2-constants';
 
 /**
@@ -46,13 +46,6 @@ export const hasAlertingV2Capability = (
 };
 
 /**
- * Returns whether the current user has read (or write, since `all` implies `read`) access to
- * Alerting v2 rules.
- */
-export const hasAlertingV2RulesReadCapability = (core: CoreStart): boolean =>
-  hasAlertingV2Capability(core, 'rules');
-
-/**
  * Returns whether Alerting v2 UI surfaces should be shown based on the
  * `alerting:v2:enabled` advanced setting.
  *
@@ -62,7 +55,7 @@ export const hasAlertingV2RulesReadCapability = (core: CoreStart): boolean =>
  * checks, etc.) can be added inside this helper without changing its
  * signature or touching any of the consumer files again.
  */
-export const isAlertingV2Enabled = (core: CoreStart): boolean => {
+export const isAlertingV2Enabled: (core: CoreStart) => boolean = (core) => {
   return core.settings.globalClient.get<boolean>(ALERTING_V2_ENABLED_SETTING_ID, false) === true;
 };
 
@@ -90,15 +83,15 @@ export const shouldShowClassicObservabilityAlertsTable = (core: CoreStart): bool
   }
 
   return (
-    core.settings.client.get<boolean>(ALERTING_V2_SHOW_CLASSIC_ALERTS_TABLE_SETTING_ID, false) ===
+    core.settings.client.get<boolean>(ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID, false) ===
     true
   );
 };
 
 /**
  * Returns whether the current user can reach Alerting v2 rules at all: the advanced-setting
- * gate ({@link isAlertingV2Enabled}) plus read access ({@link hasAlertingV2RulesReadCapability}).
+ * gate ({@link isAlertingV2Enabled}) plus rules read access ({@link hasAlertingV2Capability}).
  */
 export const canAccessAlertingV2Rules = (core: CoreStart): boolean => {
-  return isAlertingV2Enabled(core) && hasAlertingV2RulesReadCapability(core);
+  return isAlertingV2Enabled(core) && hasAlertingV2Capability(core, 'rules');
 };

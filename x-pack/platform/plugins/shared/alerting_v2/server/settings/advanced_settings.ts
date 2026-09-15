@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { UiSettingsParams } from '@kbn/core/types';
 import {
   ALERTING_V2_ENABLED_SETTING_ID,
-  ALERTING_V2_SHOW_CLASSIC_ALERTS_TABLE_SETTING_ID,
+  ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID,
   type AlertingAdvancedSettingId,
   type AlertingAdvancedSettingValueMap,
 } from '@kbn/alerting-v2-constants';
@@ -50,7 +50,7 @@ export const alertingAdvancedSettings = {
  * `registerGlobal`) so each Kibana space can opt in independently.
  */
 export const alertingSpaceAdvancedSettings: Record<string, UiSettingsParams<boolean>> = {
-  [ALERTING_V2_SHOW_CLASSIC_ALERTS_TABLE_SETTING_ID]: {
+  [ALERTING_V2_SHOW_CLASSIC_ALERTS_PAGE_SETTING_ID]: {
     category: [ALERTING_V2_CATEGORY],
     name: i18n.translate('xpack.alertingVTwo.showClassicAlertsTableSettingName', {
       defaultMessage: 'Show classic alerts table',

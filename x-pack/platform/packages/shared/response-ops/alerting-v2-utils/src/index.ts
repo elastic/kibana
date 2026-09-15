@@ -11,7 +11,6 @@ export {
   isAlertingV2Enabled,
   shouldShowAlertingV2CreateRuleFlyout,
   shouldShowClassicObservabilityAlertsTable,
-  hasAlertingV2RulesReadCapability,
   canAccessAlertingV2Rules,
   type AlertingV2CapabilityFeature,
   type AlertingV2CapabilityLevel,
