@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { Redirect, Route, Routes } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
+import { Route, Routes } from '@kbn/shared-ux-router';
 import { useQueryClient } from '@kbn/react-query';
 import type { ListWatchesResponse } from '@kbn/alertzero-common';
 import { queryKeys } from '../../query_keys';
