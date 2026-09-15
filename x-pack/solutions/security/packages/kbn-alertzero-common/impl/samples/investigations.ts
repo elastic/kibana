@@ -6,7 +6,7 @@
  */
 
 import {
-  SYSTEM_SECURITY_WATCH_DARK_ID,
+  SYSTEM_SECURITY_WATCH_HUNT_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
   TEMPLATE_ID_INVESTIGATION,
@@ -219,14 +219,14 @@ const escalateInvestigations: Investigation[] = [
 
 const investigateInvestigations: Investigation[] = [
   {
-    id: 'inv-dark-beacon-corroborated-001',
+    id: 'inv-hunt-beacon-corroborated-001',
     template_id: TEMPLATE_ID_INVESTIGATION,
     title: 'Corroborated C2 beacon · host-srv-db02 + host-srv-app01',
     createdAt: new Date(Date.now() - 16.5 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 12 * 60 * 1000).toISOString(),
-    watch_id: SYSTEM_SECURITY_WATCH_DARK_ID,
-    watch_execution_id: 'exec-dark-20260720-0300',
-    watch_tier: 'dark',
+    watch_id: SYSTEM_SECURITY_WATCH_HUNT_ID,
+    watch_execution_id: 'exec-hunt-20260720-0300',
+    watch_tier: 'hunt',
     severity: 'critical',
     assignee: 'oncall.sec-team',
     status: 'in-progress',
@@ -234,7 +234,7 @@ const investigateInvestigations: Investigation[] = [
     recommendedAction: 'investigate',
     affectedSurface: 'host-srv-db02',
     summary:
-      'Dark Watch sweep corroborated a Floor beacon alert. Both hosts beaconing to the same C2 with a shared persistence mechanism — take over to deepen scope.',
+      'Hunt Watch sweep corroborated a Floor beacon alert. Both hosts beaconing to the same C2 with a shared persistence mechanism — take over to deepen scope.',
     priorityScore: 71,
     recordId: 'CASE-2054',
     primaryActionLabel: 'Take over',
@@ -243,15 +243,15 @@ const investigateInvestigations: Investigation[] = [
         id: 'evt-200',
         timestamp: new Date(Date.now() - 16.5 * 60 * 1000).toISOString(),
         type: 'sweep',
-        summary: 'Scheduled Dark Watch sweep started',
-        actor: SYSTEM_SECURITY_WATCH_DARK_ID,
+        summary: 'Scheduled Hunt Watch sweep started',
+        actor: SYSTEM_SECURITY_WATCH_HUNT_ID,
       },
       {
         id: 'evt-201',
         timestamp: new Date(Date.now() - 16.25 * 60 * 1000).toISOString(),
         type: 'corroboration',
         summary: 'Linked beacon hosts · confidence raised to 0.94',
-        actor: SYSTEM_SECURITY_WATCH_DARK_ID,
+        actor: SYSTEM_SECURITY_WATCH_HUNT_ID,
       },
     ],
   },
@@ -284,21 +284,21 @@ const tuneInvestigations: Investigation[] = [
 /** Auto-resolved receipts — leave the Brief queue (closed) but keep fixtures for history demos. */
 const resolvedInvestigations: Investigation[] = [
   {
-    id: 'inv-dark-mailbox-auto-008',
+    id: 'inv-hunt-mailbox-auto-008',
     template_id: TEMPLATE_ID_INVESTIGATION,
     title: 'Mailbox forwarding rule removed — j.reyes',
     createdAt: new Date(Date.now() - 44 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 23 * 60 * 1000).toISOString(),
-    watch_id: SYSTEM_SECURITY_WATCH_DARK_ID,
-    watch_execution_id: 'exec-dark-20260720-0110',
-    watch_tier: 'dark',
+    watch_id: SYSTEM_SECURITY_WATCH_HUNT_ID,
+    watch_execution_id: 'exec-hunt-20260720-0110',
+    watch_tier: 'hunt',
     severity: 'medium',
     status: 'auto-resolved',
     pendingProposalCount: 0,
     recommendedAction: 'contain',
     affectedSurface: 'j.reyes@corp',
     summary:
-      'Dark Watch removed a mailbox exfil rule on j.reyes and closed the case — resolved autonomously, full evidence trail in the record.',
+      'Hunt Watch removed a mailbox exfil rule on j.reyes and closed the case — resolved autonomously, full evidence trail in the record.',
     priorityScore: 0,
     recordId: 'CASE-2043',
     primaryActionLabel: 'Reviewed — file it',
@@ -308,7 +308,7 @@ const resolvedInvestigations: Investigation[] = [
         timestamp: new Date(Date.now() - 44 * 60 * 60 * 1000).toISOString(),
         type: 'resolution',
         summary: 'Resolved autonomously · 0 messages forwarded',
-        actor: SYSTEM_SECURITY_WATCH_DARK_ID,
+        actor: SYSTEM_SECURITY_WATCH_HUNT_ID,
       },
     ],
   },

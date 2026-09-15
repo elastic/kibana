@@ -60,14 +60,14 @@ export const ALERTZERO_THIN_AGENT_ID = 'alertzero-thin-agent' as const;
 /** Managed catalog workflow ids — owned by Security. */
 export const SYSTEM_SECURITY_WATCH_FLOOR_ID = 'system-security-watch-floor' as const;
 export const SYSTEM_SECURITY_WATCH_OFFICER_ID = 'system-security-watch-officer' as const;
-export const SYSTEM_SECURITY_WATCH_DARK_ID = 'system-security-watch-dark' as const;
+export const SYSTEM_SECURITY_WATCH_HUNT_ID = 'system-security-watch-hunt' as const;
 export const SYSTEM_SECURITY_WATCH_DEEP_ID = 'system-security-watch-deep' as const;
 export const SYSTEM_SECURITY_WATCH_DETECTION_ID = 'system-security-watch-detection' as const;
 
 export const SYSTEM_SECURITY_WATCH_IDS = [
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
-  SYSTEM_SECURITY_WATCH_DARK_ID,
+  SYSTEM_SECURITY_WATCH_HUNT_ID,
   SYSTEM_SECURITY_WATCH_DEEP_ID,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
 ] as const;
@@ -108,9 +108,9 @@ export const SYSTEM_SECURITY_WATCH_CATALOG = [
     color: '#3b82f6',
   },
   {
-    id: SYSTEM_SECURITY_WATCH_DARK_ID,
-    deepLinkId: SecurityPageName.alertZeroWatchDark,
-    name: 'Dark Watch',
+    id: SYSTEM_SECURITY_WATCH_HUNT_ID,
+    deepLinkId: SecurityPageName.alertZeroWatchHunt,
+    name: 'Hunt Watch',
     color: '#f59e0b',
     isBeta: true,
   },
@@ -135,25 +135,25 @@ export type SystemSecurityWatchCatalogEntry = (typeof SYSTEM_SECURITY_WATCH_CATA
 export const WATCH_TAG = 'watch' as const;
 export const WATCH_FLOOR_TAG = 'watch-floor' as const;
 export const WATCH_OFFICER_TAG = 'watch-officer' as const;
-export const WATCH_DARK_TAG = 'watch-dark' as const;
+export const WATCH_HUNT_TAG = 'watch-hunt' as const;
 export const WATCH_DEEP_TAG = 'watch-deep' as const;
 export const WATCH_DETECTION_TAG = 'watch-detection' as const;
 
 export const WATCH_TIER_TAGS = [
   WATCH_FLOOR_TAG,
   WATCH_OFFICER_TAG,
-  WATCH_DARK_TAG,
+  WATCH_HUNT_TAG,
   WATCH_DEEP_TAG,
   WATCH_DETECTION_TAG,
 ] as const;
 
-/** Managed Worker workflow ids — tagged Watch members. Dark CTH is the externally settled id. */
+/** Managed Worker workflow ids — tagged Watch members. Hunt CTH is the externally settled id. */
 export const SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID =
   'system-security-floor-alert-triage' as const;
 export const SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID =
   'system-security-floor-attack-discovery' as const;
-export const SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID =
-  'system-security-dark-continuous-threat-hunt' as const;
+export const SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID =
+  'system-security-hunt-continuous-threat-hunt' as const;
 export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID =
   'system-security-detection-rule-tuning' as const;
 export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID =
@@ -162,7 +162,7 @@ export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID =
 export const SYSTEM_SECURITY_WORKER_IDS = [
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
-  SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
 ] as const;
@@ -185,10 +185,10 @@ export const SYSTEM_SECURITY_WORKER_CATALOG = [
     watchTag: WATCH_FLOOR_TAG,
   },
   {
-    id: SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
+    id: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
     name: 'Continuous Threat Hunt',
-    watchId: SYSTEM_SECURITY_WATCH_DARK_ID,
-    watchTag: WATCH_DARK_TAG,
+    watchId: SYSTEM_SECURITY_WATCH_HUNT_ID,
+    watchTag: WATCH_HUNT_TAG,
   },
   {
     id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
