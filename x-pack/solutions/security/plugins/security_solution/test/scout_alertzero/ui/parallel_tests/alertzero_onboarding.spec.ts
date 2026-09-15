@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { spaceTest, expect, tags } from '../fixtures';
 import { FULL_KIBANA_SECURITY_ROLE } from '@kbn/scout-security';
+import { spaceTest, expect, tags } from '../fixtures';
 
 const INTERNAL_HEADERS = {
   'x-elastic-internal-origin': 'alertzero',
