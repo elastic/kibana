@@ -45,7 +45,12 @@ describe('KibanaActionStepImpl', () => {
     contextManager = {
       renderValueAccordingToContext: jest.fn((value) => value),
       getWorkflowSpaceId: jest.fn().mockReturnValue('default'),
-      callKibanaApi: jest.fn().mockResolvedValue({ status: 200, headers: {}, body: { ok: true } }),
+      callKibanaApi: jest.fn().mockResolvedValue({
+        status: 200,
+        headers: {},
+        body: { ok: true },
+        url: 'http://localhost:5601/api/test',
+      }),
     };
     runtime = { contextManager } as unknown as StepExecutionRuntime;
   });
@@ -145,5 +150,32 @@ describe('KibanaActionStepImpl', () => {
       expect.objectContaining({ tags: expect.arrayContaining(['deprecated']) })
     );
     expect(contextManager.callKibanaApi).toHaveBeenCalled();
+  });
+
+  it('includes the outbound URL in debug output', async () => {
+    step = createStep({
+      request: { method: 'GET', path: '/api/test' },
+      debug: true,
+    });
+    const result = await (step as any)._run();
+    expect(result.output._debug).toEqual({
+      method: 'GET',
+      fullUrl: 'http://localhost:5601/api/test',
+    });
+  });
+
+  it('warns that use_localhost uses the listener, not hardcoded localhost:5601', async () => {
+    step = createStep({
+      request: { method: 'GET', path: '/api/test' },
+      use_localhost: true,
+    });
+    await (step as any)._run();
+    expect(workflowLogger.logWarn).toHaveBeenCalledWith(
+      expect.stringContaining('use_localhost'),
+      expect.objectContaining({ tags: expect.arrayContaining(['kibana']) })
+    );
+    expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
+      expect.objectContaining({ target: 'local' })
+    );
   });
 });

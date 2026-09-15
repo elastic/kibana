@@ -71,7 +71,10 @@ function createMockResponse({
 }
 
 /** Mirrors what the self client returns for `{ asResponse: true, rawResponse: true }`. */
-const mockSelfResponse = (response: Response) => ({ response });
+const mockSelfResponse = (response: Response, url = 'http://localhost:5601/api/status') => ({
+  request: { url },
+  response,
+});
 
 function createFakeRequest({
   headers = {},
@@ -638,7 +641,7 @@ describe('callKibanaApi', () => {
     response.headers.set('x-trace-id', 'trace-err');
     mockSelfFetch.mockResolvedValue(mockSelfResponse(response));
 
-    expect.assertions(5);
+    expect.assertions(6);
     try {
       await callKibanaApi(
         { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
@@ -649,6 +652,7 @@ describe('callKibanaApi', () => {
       const error = err as KibanaApiCallError;
       expect(error.status).toBe(500);
       expect(error.headers['x-trace-id']).toBe('trace-err');
+      expect(error.url).toBe('http://localhost:5601/api/status');
       expect(error.body).toEqual({
         attributes: { summary: { failed: 1 }, results: { updated: [{ id: 'r1' }] } },
       });
@@ -847,5 +851,6 @@ describe('callKibanaApi', () => {
     expect(result.status).toBe(200);
     expect(result.headers['content-type']).toBe('application/json');
     expect(result.headers['x-trace-id']).toBe('trace-xyz');
+    expect(result.url).toBe('http://localhost:5601/api/status');
   });
 });

@@ -90,6 +90,8 @@ export interface CallKibanaApiResult<T = unknown> {
   status: number;
   headers: Record<string, string>;
   body: T;
+  /** Absolute URL the self client actually requested. */
+  url: string;
 }
 
 /**
@@ -289,7 +291,7 @@ export async function callKibanaApi<T = unknown>(
   // server base path stays outermost.
   validateSpaceRelativePath(params.path);
   const path = coreStart.http.basePath.prepend(applySpacePrefix(params.path, spaceId));
-  const { response } = await coreStart.http.selfClient.asScoped(fakeRequest).fetch(path, {
+  const { request, response } = await coreStart.http.selfClient.asScoped(fakeRequest).fetch(path, {
     method: params.method,
     target: params.target,
     headers: outboundHeaders,
@@ -317,6 +319,7 @@ export async function callKibanaApi<T = unknown>(
       headers: headersToRecord(response.headers),
       body: errorBody,
       message: `HTTP ${response.status}: ${stringifyErrorBodyForMessage(errorBody)}`,
+      url: request.url,
     });
   }
 
@@ -326,5 +329,6 @@ export async function callKibanaApi<T = unknown>(
     status: response.status,
     headers: headersToRecord(response.headers),
     body,
+    url: request.url,
   };
 }

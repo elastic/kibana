@@ -19,7 +19,12 @@ import type { KibanaGraphNode } from '@kbn/workflows/graph/types';
 import { ResponseSizeLimitError } from './errors';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
-import { type BufferedRawBody, CallKibanaApiResponseTooLargeError } from '../lib/call_kibana_api';
+import {
+  type BufferedRawBody,
+  type CallKibanaApiResult,
+  CallKibanaApiResponseTooLargeError,
+  KibanaApiCallError,
+} from '../lib/call_kibana_api';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
@@ -74,6 +79,16 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
         'Cannot set both use_server_info and use_localhost — they are mutually exclusive.'
       );
     }
+    if (use_localhost) {
+      this.workflowLogger.logWarn(
+        'The "use_localhost" setting now routes through the Kibana listener via server.selfHttp (local target), not a hardcoded http://localhost:5601.',
+        {
+          event: { action: 'kibana-action' },
+          tags: ['kibana'],
+          labels: { step_type: stepType },
+        }
+      );
+    }
 
     try {
       this.workflowLogger.logInfo(`Executing Kibana action: ${stepType}`, {
@@ -90,6 +105,8 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
         stepType,
         httpParams,
         debug,
+        // Both flags opt into Core's local self HTTP target (the configured listener).
+        // Hardcoded localhost:5601 is not preserved; the listener may use another bind address or port.
         use_server_info || use_localhost ? 'local' : undefined
       );
 
@@ -117,10 +134,14 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
 
       const failure = this.handleFailure(stepWith, error);
       if (debug && failure.error) {
+        const kibanaUrl = error instanceof KibanaApiCallError ? error.url : undefined;
         failure.error = {
           type: failure.error.type,
           message: failure.error.message,
-          details: { ...failure.error.details, _debug: { selfClient: true } },
+          details: {
+            ...failure.error.details,
+            _debug: kibanaUrl ? { kibanaUrl } : { selfClient: true },
+          },
         };
       }
       return failure;
@@ -195,7 +216,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     }
 
     const contextManager = this.stepExecutionRuntime.contextManager;
-    let result: { body: any };
+    let result: CallKibanaApiResult;
     try {
       result = await contextManager.callKibanaApi({
         method: normalizedMethod as 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
@@ -221,7 +242,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
       !Buffer.isBuffer(result.body) &&
       !Array.isArray(result.body)
     ) {
-      return { ...result.body, _debug: { method: normalizedMethod } };
+      return { ...result.body, _debug: { method: normalizedMethod, fullUrl: result.url } };
     }
     return result.body;
   }
