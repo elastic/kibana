@@ -7,7 +7,13 @@
 
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { registerAttachmentUiDefinitions } from '.';
+
+const makeExperimentalFeatures = (
+  overrides: Partial<ExperimentalFeatures> = {}
+): ExperimentalFeatures =>
+  ({ endpointForensicAnalysisSkill: false, ...overrides } as unknown as ExperimentalFeatures);
 
 describe('registerAttachmentUiDefinitions', () => {
   const mockAddAttachmentType = jest.fn();
@@ -20,7 +26,7 @@ describe('registerAttachmentUiDefinitions', () => {
   });
 
   it('returns attachmentLabel when provided in alert attachment data', () => {
-    registerAttachmentUiDefinitions(mockAttachments);
+    registerAttachmentUiDefinitions(mockAttachments, makeExperimentalFeatures());
 
     const ruleCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alert
@@ -36,7 +42,7 @@ describe('registerAttachmentUiDefinitions', () => {
   });
 
   it('returns default label when attachmentLabel is not provided', () => {
-    registerAttachmentUiDefinitions(mockAttachments);
+    registerAttachmentUiDefinitions(mockAttachments, makeExperimentalFeatures());
 
     const ruleCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alert
@@ -51,64 +57,97 @@ describe('registerAttachmentUiDefinitions', () => {
     expect(config.getLabel(attachment)).toBe('Security Alert');
   });
 
-  it('registers the investigation IoCs type with its default label, icon, and label override', () => {
-    const type = SecurityAgentBuilderAttachments.investigationIocs;
-    registerAttachmentUiDefinitions(mockAttachments);
+  describe('when endpointForensicAnalysisSkill is disabled', () => {
+    it('does not register the investigation IoCs type', () => {
+      registerAttachmentUiDefinitions(mockAttachments, makeExperimentalFeatures());
 
-    const registered = mockAddAttachmentType.mock.calls.find((call: unknown[]) => call[0] === type);
-    const config = registered![1];
+      const registered = mockAddAttachmentType.mock.calls.find(
+        (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.investigationIocs
+      );
+      expect(registered).toBeUndefined();
+    });
 
-    expect(config.getIcon()).toBe('flag');
-    expect(config.getLabel({ id: 'test', type, data: {} })).toBe('Indicators of compromise');
-    expect(config.getLabel({ id: 'test', type, data: { attachmentLabel: 'Custom' } })).toBe(
-      'Custom'
-    );
-    expect(typeof config.renderInlineContent).toBe('function');
+    it('does not register the investigation timeline type', () => {
+      registerAttachmentUiDefinitions(mockAttachments, makeExperimentalFeatures());
+
+      const registered = mockAddAttachmentType.mock.calls.find(
+        (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.investigationTimeline
+      );
+      expect(registered).toBeUndefined();
+    });
   });
 
-  // The timeline payload is the bare event array, so there is nowhere in `data` for an
-  // `attachmentLabel` — the attachment's own `description` carries the override instead.
-  describe('investigation timeline label', () => {
-    const type = SecurityAgentBuilderAttachments.investigationTimeline;
-    const data = [{ timestamp: '2026-09-10T12:00:00.000Z', host: 'h', description: 'd' }];
-
-    const getConfig = () => {
-      registerAttachmentUiDefinitions(mockAttachments);
-      return mockAddAttachmentType.mock.calls.find((call: unknown[]) => call[0] === type)![1];
-    };
-
-    it('uses the timeline icon', () => {
-      expect(getConfig().getIcon()).toBe('timeline');
-    });
-
-    it('prefers the attachment description over the default label', () => {
-      expect(
-        getConfig().getLabel({
-          id: 'test',
-          type,
-          data,
-          description: 'Attack timeline: WKSTN-RECV01',
-        })
-      ).toBe('Attack timeline: WKSTN-RECV01');
-    });
-
-    it('falls back to the default label when there is no description', () => {
-      expect(getConfig().getLabel({ id: 'test', type, data })).toBe('Attack timeline');
-    });
-
-    it('falls back to the default label for an empty description', () => {
-      expect(getConfig().getLabel({ id: 'test', type, data, description: '' })).toBe(
-        'Attack timeline'
+  describe('when endpointForensicAnalysisSkill is enabled', () => {
+    it('registers the investigation IoCs type with its default label, icon, and label override', () => {
+      const type = SecurityAgentBuilderAttachments.investigationIocs;
+      registerAttachmentUiDefinitions(
+        mockAttachments,
+        makeExperimentalFeatures({ endpointForensicAnalysisSkill: true })
       );
+
+      const registered = mockAddAttachmentType.mock.calls.find(
+        (call: unknown[]) => call[0] === type
+      );
+      const config = registered![1];
+
+      expect(config.getIcon()).toBe('flag');
+      expect(config.getLabel({ id: 'test', type, data: {} })).toBe('Indicators of compromise');
+      expect(config.getLabel({ id: 'test', type, data: { attachmentLabel: 'Custom' } })).toBe(
+        'Custom'
+      );
+      expect(typeof config.renderInlineContent).toBe('function');
     });
 
-    it('registers an inline renderer', () => {
-      expect(typeof getConfig().renderInlineContent).toBe('function');
+    // The timeline payload is the bare event array, so there is nowhere in `data` for an
+    // `attachmentLabel` — the attachment's own `description` carries the override instead.
+    describe('investigation timeline label', () => {
+      const type = SecurityAgentBuilderAttachments.investigationTimeline;
+      const data = [{ timestamp: '2026-09-10T12:00:00.000Z', host: 'h', description: 'd' }];
+
+      const getConfig = () => {
+        registerAttachmentUiDefinitions(
+          mockAttachments,
+          makeExperimentalFeatures({ endpointForensicAnalysisSkill: true })
+        );
+        return mockAddAttachmentType.mock.calls.find((call: unknown[]) => call[0] === type)![1];
+      };
+
+      it('uses the timeline icon', () => {
+        expect(getConfig().getIcon()).toBe('timeline');
+      });
+
+      it('prefers the attachment description over the default label', () => {
+        expect(
+          getConfig().getLabel({
+            id: 'test',
+            type,
+            data,
+            description: 'Attack timeline: WKSTN-RECV01',
+          })
+        ).toBe('Attack timeline: WKSTN-RECV01');
+      });
+
+      it('falls back to the default label when there is no description', () => {
+        expect(getConfig().getLabel({ id: 'test', type, data })).toBe('Attack timeline');
+      });
+
+      it('falls back to the default label for an empty description', () => {
+        expect(getConfig().getLabel({ id: 'test', type, data, description: '' })).toBe(
+          'Attack timeline'
+        );
+      });
+
+      it('registers an inline renderer', () => {
+        expect(typeof getConfig().renderInlineContent).toBe('function');
+      });
     });
   });
 
   it('does not register the security.entity attachment type (owned by registerEntityAttachment)', () => {
-    registerAttachmentUiDefinitions(mockAttachments);
+    registerAttachmentUiDefinitions(
+      mockAttachments,
+      makeExperimentalFeatures({ endpointForensicAnalysisSkill: true })
+    );
 
     const entityCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.entity

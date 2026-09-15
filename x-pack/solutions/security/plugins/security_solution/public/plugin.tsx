@@ -358,7 +358,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         throw new Error('Security Solution setup contract is required to register attachments');
       }
 
-      registerAttachmentUiDefinitions(plugins.agentBuilder.attachments);
+      registerAttachmentUiDefinitions(plugins.agentBuilder.attachments, this.experimentalFeatures);
       if (this.experimentalFeatures.aiRuleCreationEnabled) {
         registerRuleAttachment({
           attachments: plugins.agentBuilder.attachments,
