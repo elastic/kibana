@@ -328,7 +328,9 @@ describe('rule_details', () => {
       const rule = mockRule({ createdBy: 'jdoe', updatedBy: 'asmith' });
       renderPage(rule);
       expect(screen.getByTestId('ruleCreatedMetadata')).toHaveTextContent('Created by jdoe on');
-      expect(screen.getByTestId('ruleUpdatedMetadata')).toHaveTextContent('Last updated by asmith on');
+      expect(screen.getByTestId('ruleUpdatedMetadata')).toHaveTextContent(
+        'Last updated by asmith on'
+      );
     });
 
     it('renders the created/updated metadata using the resolved user profile when createdByProfileUid/updatedByProfileUid are set', async () => {
