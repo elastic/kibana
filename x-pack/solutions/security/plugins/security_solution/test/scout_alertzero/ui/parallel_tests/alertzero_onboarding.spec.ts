@@ -53,9 +53,7 @@ spaceTest.describe(
         // it auto-dismisses after a few seconds, unlike the stable page below it.
         await expect(page.getByText('AlertZero is enabled', { exact: true })).toBeVisible();
         await expect(page.testSubj.locator('alertZeroPageHeader')).toBeVisible();
-        await expect(
-          page.testSubj.locator('alertZeroOnboardingAwaitingRunPage')
-        ).not.toBeVisible();
+        await expect(page.testSubj.locator('alertZeroOnboardingAwaitingRunPage')).not.toBeVisible();
 
         // Real install path evidence: managed watch workflows now exist in this space.
         const workers = await kbnClient.request({
