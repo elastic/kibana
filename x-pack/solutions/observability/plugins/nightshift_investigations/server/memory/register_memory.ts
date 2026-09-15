@@ -1,0 +1,126 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
+import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
+import { SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID } from '@kbn/significant-events-schema';
+import { i18n } from '@kbn/i18n';
+import { MEMORY_AI_INDEX_DEST, MEMORY_AI_INDEX_ID } from '../../common/memory';
+import { NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID } from '../agents/deductive_investigation';
+import type { SandboxApiClient } from '../tools/sandbox_bash/grpc_client';
+import { materializeMemory } from './materialize';
+import { createLlmProposeMemoryEdits, optimizeMemory } from './optimize';
+import { createMemoryPageStore, type MemoryPageStore } from './page_store';
+
+export const createMemoryStore = ({
+  esClient,
+  logger,
+  spaceId,
+  signal,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  spaceId: string;
+  signal?: AbortSignal;
+}): MemoryPageStore => createMemoryPageStore({ esClient, logger, spaceId, signal });
+
+export const registerMemoryAiIndex = (
+  contextEngine: ContextEnginePluginSetup | undefined,
+  logger: Logger
+): void => {
+  if (!contextEngine) {
+    logger.debug('contextEngine is not available — Semantic Memory AI index will not be registered');
+    return;
+  }
+
+  contextEngine.registerAiIndex(MEMORY_AI_INDEX_ID, {
+    description: i18n.translate('xpack.nightshiftInvestigations.memory.aiIndexDescription', {
+      defaultMessage:
+        'Nightshift Semantic Memory - prior incidents, failure modes, and operational learnings.',
+    }),
+    dest: { type: 'index', value: MEMORY_AI_INDEX_DEST },
+    automations: [],
+    sources: [],
+  });
+};
+
+export const hydrateMemoryWorkspace = async ({
+  apiClient,
+  conversationId,
+  esClient,
+  spaceId,
+  signal,
+  logger,
+}: {
+  apiClient: SandboxApiClient;
+  conversationId: string;
+  esClient: ElasticsearchClient;
+  spaceId: string;
+  signal?: AbortSignal;
+  logger: Logger;
+}): Promise<void> => {
+  const store = createMemoryStore({ esClient, logger, spaceId, signal });
+  await materializeMemory({ apiClient, conversationId, store, logger });
+};
+
+export const runMemoryOptimize = async ({
+  request,
+  agentId,
+  userMessage,
+  assistantMessage,
+  esClient,
+  spaceId,
+  signal,
+  getInference,
+  getSearchInferenceEndpoints,
+  logger,
+}: {
+  request: KibanaRequest;
+  agentId?: string;
+  userMessage: string;
+  assistantMessage: string;
+  esClient: ElasticsearchClient;
+  spaceId: string;
+  signal?: AbortSignal;
+  getInference: () => InferenceServerStart | undefined;
+  getSearchInferenceEndpoints: () => SearchInferenceEndpointsPluginStart | undefined;
+  logger: Logger;
+}): Promise<void> => {
+  if (agentId !== NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID) {
+    logger.debug('Memory optimizer skipped — round was not produced by the deductive investigator');
+    return;
+  }
+
+  const inference = getInference();
+  const searchInferenceEndpoints = getSearchInferenceEndpoints();
+  if (!inference || !searchInferenceEndpoints) {
+    logger.debug('Memory optimizer skipped — inference or connectors unavailable');
+    return;
+  }
+
+  const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
+    SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
+    request
+  );
+  const connectorId = endpoints[0]?.connectorId;
+  if (!connectorId) {
+    logger.debug('Memory optimizer skipped — no investigation inference connector');
+    return;
+  }
+
+  const store = createMemoryStore({ esClient, logger, spaceId, signal });
+  const inferenceClient = inference.getClient({ request });
+  await optimizeMemory({
+    store,
+    proposeEdits: createLlmProposeMemoryEdits({ inferenceClient, connectorId }),
+    userMessage,
+    assistantMessage,
+    logger,
+  });
+};
