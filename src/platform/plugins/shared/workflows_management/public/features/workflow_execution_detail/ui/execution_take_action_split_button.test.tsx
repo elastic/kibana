@@ -42,7 +42,9 @@ describe('ExecutionTakeActionSplitButton', () => {
       mutateAsync: mockRunWorkflow,
       isLoading: false,
     } as unknown as ReturnType<typeof useRunWorkflow>);
-    jest.mocked(useWorkflowsApi).mockReturnValue(mockWorkflowApi);
+    jest
+      .mocked(useWorkflowsApi)
+      .mockReturnValue(mockWorkflowApi as unknown as ReturnType<typeof useWorkflowsApi>);
     jest.mocked(useWorkflowsCapabilities).mockReturnValue(createMockWorkflowsCapabilities());
     services.notifications.toasts.addSuccess = jest.fn();
     services.notifications.toasts.addError = jest.fn();
@@ -72,6 +74,27 @@ describe('ExecutionTakeActionSplitButton', () => {
     await waitFor(() => {
       expect(mockWorkflowApi.cancelExecution).toHaveBeenCalledWith('exec-1');
     });
+  });
+
+  it('disables Cancel execution when finishedAt is set even if status is still RUNNING', () => {
+    renderButton({
+      status: ExecutionStatus.RUNNING,
+      finishedAt: '2025-08-05T20:01:00.000Z',
+    });
+
+    openTakeActionMenu();
+    expect(screen.getByTestId('workflowExecutionFlyoutCancelExecution')).toBeDisabled();
+  });
+
+  it('does not cancel a finished run if the disabled item is activated', () => {
+    renderButton({
+      status: ExecutionStatus.RUNNING,
+      finishedAt: '2025-08-05T20:01:00.000Z',
+    });
+
+    openTakeActionMenu();
+    fireEvent.click(screen.getByTestId('workflowExecutionFlyoutCancelExecution'));
+    expect(mockWorkflowApi.cancelExecution).not.toHaveBeenCalled();
   });
 
   it('disables Cancel execution when the run is terminal', () => {

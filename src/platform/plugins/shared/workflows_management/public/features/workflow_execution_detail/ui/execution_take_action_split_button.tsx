@@ -46,7 +46,8 @@ export const ExecutionTakeActionSplitButton = React.memo<ExecutionTakeActionSpli
 
     const isFailed = isDangerousStatus(execution.status);
     const isTerminal = isTerminalStatus(execution.status);
-    const isCancelDisabled = isTerminal || !canCancelWorkflowExecution;
+    const isCancelDisabled =
+      isTerminal || Boolean(execution.finishedAt) || !canCancelWorkflowExecution;
 
     const handleRerun = useCallback(async () => {
       if (!canExecuteWorkflow || !execution.workflowId) return;
@@ -78,7 +79,7 @@ export const ExecutionTakeActionSplitButton = React.memo<ExecutionTakeActionSpli
 
     const handleCancel = useCallback(async () => {
       setIsMenuOpen(false);
-      if (isTerminalStatus(execution.status) || !canCancelWorkflowExecution) {
+      if (isCancelDisabled) {
         return;
       }
 
@@ -118,11 +119,10 @@ export const ExecutionTakeActionSplitButton = React.memo<ExecutionTakeActionSpli
       }
     }, [
       api,
-      canCancelWorkflowExecution,
       execution.id,
       execution.startedAt,
-      execution.status,
       execution.workflowId,
+      isCancelDisabled,
       notifications.toasts,
       telemetry,
     ]);
