@@ -153,19 +153,17 @@ export const setupSuperUserProfile = async (getService: CommonFtrProviderContext
     Cookie: cookies[0].cookieString(),
   };
 
-  const profiles = await suggestUserProfiles({
-    supertest: supertestWithoutAuth,
-    req: {
-      name: 'superUser',
-      owners: ['securitySolutionFixture'],
-      size: 1,
-    },
-    auth: { user: superUser, space: null },
-  });
+  // Get the profile UID from the session-based /me endpoint to avoid needing the
+  // casesSuggestUserProfiles privilege, which may not be available in all test configs.
+  const { body: userWithProfileId } = await supertestWithoutAuth
+    .get('/internal/security/me')
+    .set('kbn-xsrf', 'true')
+    .set(headers)
+    .expect(200);
 
   const superUserWithProfile = {
     ...getUserInfo(superUser),
-    profile_uid: profiles[0].uid,
+    profile_uid: userWithProfileId.profile_uid as string,
   };
 
   return {
