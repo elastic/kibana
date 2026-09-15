@@ -519,7 +519,8 @@ export class WorkflowsManagementApi {
     inputs: Record<string, any>,
     request: KibanaRequest,
     triggeredBy?: string,
-    metadata?: Record<string, unknown>
+    metadata?: Record<string, unknown>,
+    isUserInteractive?: boolean
   ): Promise<string> {
     const { event, ...manualInputs } = inputs;
     const context: Record<string, unknown> = {
@@ -530,6 +531,9 @@ export class WorkflowsManagementApi {
     };
     if (metadata) {
       context.metadata = metadata;
+    }
+    if (isUserInteractive === true) {
+      context.isUserInteractive = true;
     }
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(
@@ -584,7 +588,8 @@ export class WorkflowsManagementApi {
       finalInputs,
       request,
       undefined,
-      metadata
+      metadata,
+      true
     );
 
     return { workflowExecutionId };
@@ -806,6 +811,7 @@ export class WorkflowsManagementApi {
       event,
       spaceId,
       inputs: manualInputs,
+      isUserInteractive: true,
     };
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(

@@ -108,6 +108,7 @@ import {
   WORKFLOW_SCHEDULED_TASK_TYPE,
 } from './workflow_task_manager/types';
 import {
+  getTaskPriority,
   getWorkflowImmediateResumeTaskId,
   getWorkflowWakeTaskId,
   WORKFLOW_WAKE_POLL_INTERVAL_MS,
@@ -1262,6 +1263,7 @@ export class WorkflowsExecutionEnginePlugin
       workflowExecution: Partial<EsWorkflowExecution>,
       scope: string[]
     ) => {
+      const priority = getTaskPriority(workflowExecution.context);
       return {
         id: `workflow:${workflowExecution.id}:${workflowExecution.triggeredBy}`,
         taskType: WORKFLOW_RUN_TASK_TYPE,
@@ -1276,6 +1278,7 @@ export class WorkflowsExecutionEnginePlugin
         },
         scope,
         enabled: true,
+        priority,
       };
     };
 
@@ -1651,6 +1654,7 @@ export class WorkflowsExecutionEnginePlugin
         spaceId,
         ...(executionContext ?? {}),
         contextOverride,
+        isUserInteractive: true,
       };
 
       const executedBy = await getAuthenticatedUser(
@@ -1675,21 +1679,10 @@ export class WorkflowsExecutionEnginePlugin
         };
       }
 
-      const taskInstance = {
-        id: `workflow:${workflowExecution.id}:${workflowExecution.triggeredBy}`,
-        taskType: WORKFLOW_RUN_TASK_TYPE,
-        params: {
-          workflowRunId: workflowExecution.id,
-          spaceId: workflowExecution.spaceId,
-        },
-        state: {
-          lastRunAt: null,
-          lastRunStatus: null,
-          lastRunError: null,
-        },
-        scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
-        enabled: true,
-      };
+      const taskInstance = createTaskInstance(
+        workflowExecution,
+        generateExecutionTaskScope(workflowExecution as EsWorkflowExecution)
+      );
 
       // Use Task Manager's first-class API key support by passing the request.
       // Clone so org/global UIAM keys are granted as TM-managed internal keys.
@@ -1822,7 +1815,9 @@ export class WorkflowsExecutionEnginePlugin
         resumedAt,
       };
 
-      await internalResumeWorkflowExecution(executionId, spaceId, resumeContext, request);
+      await internalResumeWorkflowExecution(executionId, spaceId, resumeContext, request, {
+        isUserInteractive: true,
+      });
 
       return { resumedBy };
     };
@@ -1831,7 +1826,8 @@ export class WorkflowsExecutionEnginePlugin
       executionId,
       spaceId,
       context,
-      request
+      request,
+      options
     ) => {
       if (context) {
         await workflowExecutionRepository.updateWorkflowExecution({
@@ -1854,6 +1850,7 @@ export class WorkflowsExecutionEnginePlugin
         executionId,
         spaceId,
         fakeRequest: request,
+        isUserInteractive: options?.isUserInteractive,
       });
     };
 
