@@ -45,7 +45,6 @@ jest.mock('../../services/download_source', () => ({
   },
 }));
 
-
 describe('schema validation', () => {
   let context: FleetRequestHandlerContext;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
