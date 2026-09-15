@@ -9,11 +9,16 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
-import { preprocessAlertInputs } from './preprocess_alert_inputs';
+import { preprocessTriggerInputs } from './preprocess_alert_inputs';
 import type { WorkflowsRequestHandlerContext } from '../../../../types';
 
-describe('preprocessAlertInputs', () => {
-  let mockEsClient: { mget: jest.Mock };
+describe('preprocessTriggerInputs', () => {
+  let mockEsClient: {
+    mget: jest.Mock;
+    openPointInTime: jest.Mock;
+    search: jest.Mock;
+    closePointInTime: jest.Mock;
+  };
   let mockLogger: ReturnType<typeof loggerMock.create>;
   let mockContext: WorkflowsRequestHandlerContext;
 
@@ -35,6 +40,9 @@ describe('preprocessAlertInputs', () => {
   beforeEach(() => {
     mockEsClient = {
       mget: jest.fn(),
+      openPointInTime: jest.fn().mockResolvedValue({ id: 'test-pit-id' }),
+      search: jest.fn(),
+      closePointInTime: jest.fn().mockResolvedValue({ succeeded: true }),
     };
 
     mockLogger = loggerMock.create();
@@ -66,7 +74,7 @@ describe('preprocessAlertInputs', () => {
         },
       };
 
-      const result = await preprocessAlertInputs(inputs, mockContext, 'default', mockLogger);
+      const result = await preprocessTriggerInputs(inputs, mockContext, 'default', mockLogger);
 
       expect(result).toEqual(inputs);
       expect(mockEsClient.mget).not.toHaveBeenCalled();
@@ -77,7 +85,7 @@ describe('preprocessAlertInputs', () => {
         otherField: 'value',
       };
 
-      const result = await preprocessAlertInputs(inputs, mockContext, 'default', mockLogger);
+      const result = await preprocessTriggerInputs(inputs, mockContext, 'default', mockLogger);
 
       expect(result).toEqual(inputs);
       expect(mockEsClient.mget).not.toHaveBeenCalled();
@@ -91,7 +99,7 @@ describe('preprocessAlertInputs', () => {
         },
       };
 
-      const result = await preprocessAlertInputs(inputs, mockContext, 'default', mockLogger);
+      const result = await preprocessTriggerInputs(inputs, mockContext, 'default', mockLogger);
 
       expect(result).toEqual(inputs);
       expect(mockEsClient.mget).not.toHaveBeenCalled();
@@ -145,7 +153,7 @@ describe('preprocessAlertInputs', () => {
         },
       };
 
-      const result = await preprocessAlertInputs(inputs, mockContext, 'default', mockLogger);
+      const result = await preprocessTriggerInputs(inputs, mockContext, 'default', mockLogger);
 
       expect(mockEsClient.mget).toHaveBeenCalledWith({
         docs: [
@@ -207,7 +215,7 @@ describe('preprocessAlertInputs', () => {
         },
       };
 
-      const result = await preprocessAlertInputs(inputs, mockContext, 'default', mockLogger);
+      const result = await preprocessTriggerInputs(inputs, mockContext, 'default', mockLogger);
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Multiple rules detected')
@@ -249,7 +257,7 @@ describe('preprocessAlertInputs', () => {
       };
 
       await expect(
-        preprocessAlertInputs(inputs, mockContext, 'default', mockLogger)
+        preprocessTriggerInputs(inputs, mockContext, 'default', mockLogger)
       ).rejects.toThrow('No alerts found with the provided IDs');
 
       expect(mockLogger.warn).toHaveBeenCalledTimes(2);
@@ -281,7 +289,7 @@ describe('preprocessAlertInputs', () => {
       };
 
       await expect(
-        preprocessAlertInputs(inputs, mockContext, 'default', mockLogger)
+        preprocessTriggerInputs(inputs, mockContext, 'default', mockLogger)
       ).rejects.toThrow('Could not extract rule information from alerts');
     });
 
@@ -297,11 +305,11 @@ describe('preprocessAlertInputs', () => {
       };
 
       await expect(
-        preprocessAlertInputs(inputs, mockContext, 'default', mockLogger)
+        preprocessTriggerInputs(inputs, mockContext, 'default', mockLogger)
       ).rejects.toThrow('Elasticsearch connection failed');
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to fetch alerts')
+        expect.stringContaining('Failed to fetch documents by ids')
       );
     });
 
@@ -328,7 +336,7 @@ describe('preprocessAlertInputs', () => {
         anotherField: { nested: 'value' },
       };
 
-      const result = await preprocessAlertInputs(inputs, mockContext, 'default', mockLogger);
+      const result = await preprocessTriggerInputs(inputs, mockContext, 'default', mockLogger);
 
       expect(result.otherField).toBe('should be preserved');
       expect(result.anotherField).toEqual({ nested: 'value' });
@@ -359,7 +367,7 @@ describe('preprocessAlertInputs', () => {
         },
       };
 
-      const result = await preprocessAlertInputs(inputs, mockContext, 'default', mockLogger);
+      const result = await preprocessTriggerInputs(inputs, mockContext, 'default', mockLogger);
 
       const event = result.event as { rule: { tags: string[] } };
       expect(event.rule.tags).toEqual([]);
@@ -413,7 +421,7 @@ describe('preprocessAlertInputs', () => {
           };
 
           await expect(
-            preprocessAlertInputs(inputs, mockContext, 'default', mockLogger)
+            preprocessTriggerInputs(inputs, mockContext, 'default', mockLogger)
           ).rejects.toThrow('Could not extract rule information from alerts');
         }
       });
@@ -457,7 +465,7 @@ describe('preprocessAlertInputs', () => {
           },
         };
 
-        const result = await preprocessAlertInputs(inputs, mockContext, 'default', mockLogger);
+        const result = await preprocessTriggerInputs(inputs, mockContext, 'default', mockLogger);
 
         // Should only have one rule (deduplicated)
         const event = result.event as { rule: { id: string; name: string }; alerts: unknown[] };
@@ -502,7 +510,7 @@ describe('preprocessAlertInputs', () => {
         };
 
         // Should still succeed with the valid alert
-        const result = await preprocessAlertInputs(inputs, mockContext, 'default', mockLogger);
+        const result = await preprocessTriggerInputs(inputs, mockContext, 'default', mockLogger);
 
         const event = result.event as { rule: { id: string }; alerts: unknown[] };
         expect(event.rule.id).toBe('rule-uuid-123');
@@ -536,7 +544,7 @@ describe('preprocessAlertInputs', () => {
           },
         };
 
-        const result = await preprocessAlertInputs(inputs, mockContext, 'default', mockLogger);
+        const result = await preprocessTriggerInputs(inputs, mockContext, 'default', mockLogger);
 
         const event = result.event as { alerts: Array<{ signal?: unknown }> };
         expect(event.alerts[0]).toHaveProperty('signal');
@@ -596,7 +604,7 @@ describe('preprocessAlertInputs', () => {
           },
         };
 
-        const result = await preprocessAlertInputs(
+        const result = await preprocessTriggerInputs(
           inputs,
           contextWithoutFormat,
           'default',
@@ -644,14 +652,173 @@ describe('preprocessAlertInputs', () => {
           },
         };
 
-        const result = await preprocessAlertInputs(inputs, mockContext, 'default', mockLogger);
+        const result = await preprocessTriggerInputs(inputs, mockContext, 'default', mockLogger);
 
         const event = result.event as { alerts: unknown[] };
         expect(event.alerts.length).toBe(1);
         expect(mockLogger.warn).toHaveBeenCalledWith(
-          'Alert not found: alert-2 in index .alerts-test-default'
+          'Document not found: alert-2 in index .alerts-test-default'
         );
       });
+    });
+
+    describe('when using a query selection', () => {
+      const buildSearchResponse = (
+        hits: Array<{ _id: string; _index: string; _source: Record<string, unknown> }>,
+        total: number
+      ) => ({
+        pit_id: 'test-pit-id',
+        hits: {
+          total: { value: total, relation: 'eq' },
+          hits: hits.map((hit) => ({ ...hit, sort: [hit._id] })),
+        },
+      });
+
+      it('should expand alerts from a query via PIT + search_after', async () => {
+        const alertSource = createMockAlertSource();
+        mockEsClient.search
+          .mockResolvedValueOnce(
+            buildSearchResponse(
+              [{ _id: 'alert-1', _index: '.alerts-test-default', _source: alertSource }],
+              1
+            )
+          )
+          .mockResolvedValueOnce(buildSearchResponse([], 1));
+
+        const inputs = {
+          event: {
+            triggerType: 'alert',
+            querySelection: {
+              query: { bool: { must: [] } },
+              index: '.alerts-security.alerts-default',
+            },
+          },
+        };
+
+        const result = await preprocessTriggerInputs(inputs, mockContext, 'default', mockLogger);
+
+        expect(mockEsClient.openPointInTime).toHaveBeenCalledWith(
+          expect.objectContaining({ index: '.alerts-security.alerts-default' })
+        );
+        expect(mockEsClient.mget).not.toHaveBeenCalled();
+        expect(mockEsClient.closePointInTime).toHaveBeenCalledWith({ id: 'test-pit-id' });
+
+        const event = result.event as { alerts: unknown[]; rule: { id: string } };
+        expect(event.alerts.length).toBe(1);
+        expect(event.rule.id).toBe('rule-uuid-123');
+      });
+
+      it('should throw when the query matches no alerts', async () => {
+        mockEsClient.search.mockResolvedValueOnce(buildSearchResponse([], 0));
+
+        const inputs = {
+          event: {
+            triggerType: 'alert',
+            querySelection: {
+              query: { bool: { must: [] } },
+              index: '.alerts-security.alerts-default',
+            },
+          },
+        };
+
+        await expect(
+          preprocessTriggerInputs(inputs, mockContext, 'default', mockLogger)
+        ).rejects.toThrow('No alerts found with the provided IDs');
+        expect(mockEsClient.closePointInTime).toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('when inputs are document trigger type', () => {
+    const createMockDocSource = (overrides = {}) => ({
+      '@timestamp': '2024-01-01T00:00:00Z',
+      'host.name': 'test-host',
+      ...overrides,
+    });
+
+    it('should pass through pre-expanded documents unchanged', async () => {
+      const inputs = {
+        event: {
+          triggerType: 'document',
+          documents: [{ id: 'doc-1', index: 'logs-default', timestamp: 'now', data: {} }],
+        },
+      };
+
+      const result = await preprocessTriggerInputs(inputs, mockContext, 'default', mockLogger);
+
+      expect(result).toEqual(inputs);
+      expect(mockEsClient.mget).not.toHaveBeenCalled();
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
+
+    it('should expand documents from ids via mget', async () => {
+      const docSource = createMockDocSource();
+      mockEsClient.mget = jest.fn().mockResolvedValue({
+        docs: [{ found: true, _id: 'doc-1', _index: 'logs-default', _source: docSource }],
+      });
+
+      const inputs = {
+        event: {
+          triggerType: 'document',
+          documentIds: [{ _id: 'doc-1', _index: 'logs-default' }],
+          dataView: 'logs-*',
+        },
+      };
+
+      const result = await preprocessTriggerInputs(inputs, mockContext, 'default', mockLogger);
+
+      const event = result.event as {
+        triggerType: string;
+        documents: Array<{ id: string; index: string; timestamp: unknown; data: unknown }>;
+        dataView: string;
+      };
+      expect(event.triggerType).toBe('document');
+      expect(event.documents).toHaveLength(1);
+      expect(event.documents[0]).toEqual({
+        id: 'doc-1',
+        index: 'logs-default',
+        timestamp: '2024-01-01T00:00:00Z',
+        data: docSource,
+      });
+      expect(event.dataView).toBe('logs-*');
+    });
+
+    it('should expand documents from a query and pass through the query string', async () => {
+      const docSource = createMockDocSource();
+      mockEsClient.search
+        .mockResolvedValueOnce({
+          pit_id: 'test-pit-id',
+          hits: {
+            total: { value: 1, relation: 'eq' },
+            hits: [{ _id: 'doc-1', _index: 'logs-default', _source: docSource, sort: ['doc-1'] }],
+          },
+        })
+        .mockResolvedValueOnce({
+          pit_id: 'test-pit-id',
+          hits: { total: { value: 1, relation: 'eq' }, hits: [] },
+        });
+
+      const inputs = {
+        event: {
+          triggerType: 'document',
+          querySelection: { query: { bool: { must: [] } }, index: 'logs-*' },
+          query: 'host.name: "test-host"',
+        },
+      };
+
+      const result = await preprocessTriggerInputs(inputs, mockContext, 'default', mockLogger);
+
+      const event = result.event as {
+        documents: Array<{ id: string }>;
+        query: string;
+      };
+      expect(mockEsClient.openPointInTime).toHaveBeenCalledWith(
+        expect.objectContaining({ index: 'logs-*' })
+      );
+      expect(event.documents).toHaveLength(1);
+      expect(event.documents[0].id).toBe('doc-1');
+      expect(event.query).toBe('host.name: "test-host"');
+      expect(mockEsClient.closePointInTime).toHaveBeenCalled();
     });
   });
 });
