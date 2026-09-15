@@ -708,8 +708,14 @@ describe('API Keys', () => {
     });
 
     describe('with UIAM', () => {
-      it('preserves supplied client authentication in an ES API key grant', async () => {
+      it('resolves client authentication from the request in an ES API key grant', async () => {
         const mockUiam = uiamServiceMock.create();
+        // The UIAM service preserves the client authentication supplied with the request; see the
+        // `getClientAuthentication` tests in `uiam_service.test.ts`.
+        mockUiam.getClientAuthentication.mockReturnValue({
+          scheme: 'SharedSecret',
+          value: 'upstream-shared-secret',
+        });
         const apiKeysWithUiam = new APIKeys({
           clusterClient: mockClusterClient,
           logger,
@@ -736,7 +742,7 @@ describe('API Keys', () => {
           role_descriptors: {},
         });
 
-        expect(mockUiam.getClientAuthentication).not.toHaveBeenCalled();
+        expect(mockUiam.getClientAuthentication).toHaveBeenCalledWith(request);
         expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
           api_key: { name: 'test-key', role_descriptors: {} },
           grant_type: 'access_token',

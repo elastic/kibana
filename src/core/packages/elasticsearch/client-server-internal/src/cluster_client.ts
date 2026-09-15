@@ -27,7 +27,7 @@ import type {
 import {
   HTTPAuthorizationHeader,
   isExternalUiamCredential,
-  isUiamCredential,
+  isUiamBearerCredential,
 } from '@kbn/core-security-server';
 import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
 import { configureClient } from './configure_client';
@@ -245,9 +245,7 @@ export class ClusterClient implements ICustomClusterClient {
     if (this.security?.uiam) {
       const credential = HTTPAuthorizationHeader.parseFromRequest({ headers: scopedHeaders });
       const isUiamInboundToken =
-        requestHeaders !== undefined &&
-        credential?.scheme.toLowerCase() === 'bearer' &&
-        isUiamCredential(credential);
+        requestHeaders !== undefined && credential !== null && isUiamBearerCredential(credential);
       if (credential && !isUiamInboundToken) {
         clientAuthentication = this.security.uiam.getElasticsearchClientAuthentication(
           requestHeaders
@@ -294,9 +292,7 @@ export class ClusterClient implements ICustomClusterClient {
     // exception is a fake request explicitly marked as carrying a user-created (external) UIAM
     // credential, which UIAM rejects when presented with client authentication.
     const isUiamInboundToken =
-      isRealRequest(request) &&
-      authorizationHeader.scheme.toLowerCase() === 'bearer' &&
-      isUiamCredential(authorizationHeader);
+      isRealRequest(request) && isUiamBearerCredential(authorizationHeader);
     const isExternalCredential =
       !isRealRequest(request) && isKibanaRequest(request) && isExternalUiamCredential(request);
     const clientAuthentication = isUiamInboundToken

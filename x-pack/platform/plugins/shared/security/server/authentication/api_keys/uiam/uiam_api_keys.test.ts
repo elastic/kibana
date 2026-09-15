@@ -158,7 +158,7 @@ describe('UiamAPIKeys', () => {
           name: 'test-key',
           expiration: '7d',
         },
-        { includeClientAuthentication: true, clientAuthentication: undefined }
+        undefined
       );
 
       expect(logger.debug).toHaveBeenCalledWith('Trying to grant an API key');
@@ -191,7 +191,7 @@ describe('UiamAPIKeys', () => {
         {
           name: 'test-key',
         },
-        { includeClientAuthentication: true, clientAuthentication: undefined }
+        undefined
       );
     });
 
@@ -218,48 +218,37 @@ describe('UiamAPIKeys', () => {
           },
         });
 
-        expect(await grantWith(request)).toEqual({
-          includeClientAuthentication: true,
-          clientAuthentication: { sharedSecret: 'upstream-shared-secret' },
-        });
+        expect(await grantWith(request)).toEqual({ sharedSecret: 'upstream-shared-secret' });
       });
 
       it('is omitted for an external API key', async () => {
         authenticatedWithApiKey(false);
 
         expect(await grantWith(createMockRequest('ApiKey essu_external_credential_123'))).toEqual({
-          includeClientAuthentication: false,
-          clientAuthentication: undefined,
+          sharedSecret: undefined,
         });
       });
 
-      it('is included for an internal API key', async () => {
+      it('defers to Kibana client authentication for an internal API key', async () => {
         authenticatedWithApiKey(true);
 
-        expect(await grantWith(createMockRequest('ApiKey essu_internal_credential_123'))).toEqual({
-          includeClientAuthentication: true,
-          clientAuthentication: undefined,
-        });
+        expect(
+          await grantWith(createMockRequest('ApiKey essu_internal_credential_123'))
+        ).toBeUndefined();
       });
 
       it('defers to Kibana client authentication for an inbound access token carrying none', async () => {
-        expect(await grantWith(createMockRequest('Bearer essu_access_token_123'))).toEqual({
-          includeClientAuthentication: true,
-          clientAuthentication: undefined,
-        });
+        expect(await grantWith(createMockRequest('Bearer essu_access_token_123'))).toBeUndefined();
       });
 
-      it('is included for a fake request, which carries an internal API key', async () => {
+      it('defers to Kibana client authentication for a fake request, which carries an internal API key', async () => {
         mockGetCurrentUser.mockReturnValue(null);
 
         const request = httpServerMock.createFakeKibanaRequest({
           headers: { authorization: 'ApiKey essu_internal_credential_123' },
         });
 
-        expect(await grantWith(request)).toEqual({
-          includeClientAuthentication: true,
-          clientAuthentication: undefined,
-        });
+        expect(await grantWith(request)).toBeUndefined();
       });
     });
 
@@ -315,7 +304,7 @@ describe('UiamAPIKeys', () => {
           name: 'test-bearer-key',
           expiration: '30d',
         },
-        { includeClientAuthentication: true, clientAuthentication: undefined }
+        undefined
       );
       expect(logger.debug).toHaveBeenCalledWith('Using authorization scheme: Bearer');
     });
@@ -369,11 +358,7 @@ describe('UiamAPIKeys', () => {
         previously_invalidated_api_keys: [],
         error_count: 0,
       });
-      expect(mockUiam.revokeApiKey).toHaveBeenCalledWith(
-        'key_id_123',
-        'essu_uiam_credential_123',
-        undefined
-      );
+      expect(mockUiam.revokeApiKey).toHaveBeenCalledWith(request, 'key_id_123');
       expect(logger.debug).toHaveBeenCalledWith('Trying to invalidate API key key_id_123');
       expect(logger.debug).toHaveBeenCalledWith('API key key_id_123 was invalidated successfully');
     });

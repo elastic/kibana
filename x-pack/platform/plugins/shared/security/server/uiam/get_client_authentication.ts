@@ -6,11 +6,16 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
+import { HTTPAuthorizationHeader, isUiamBearerCredential } from '@kbn/core-security-server';
 
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 
-/** Client authentication supplied by the caller. */
+/**
+ * Client authentication composed by the caller: a shared secret to present verbatim, or - when
+ * `sharedSecret` is absent - deliberately none at all, which UIAM requires for external
+ * (organization) API keys. Passing `undefined` where this type is accepted means the caller
+ * supplied nothing and Kibana's own shared secret is presented instead.
+ */
 export interface UiamClientAuthentication {
   readonly sharedSecret?: string;
 }
@@ -23,7 +28,7 @@ export const getUiamClientAuthentication = (
   request: KibanaRequest
 ): UiamClientAuthentication | undefined => {
   const authorization = HTTPAuthorizationHeader.parseFromRequest(request);
-  if (authorization?.scheme.toLowerCase() !== 'bearer' || !isUiamCredential(authorization)) {
+  if (!authorization || !isUiamBearerCredential(authorization)) {
     return undefined;
   }
 

@@ -10,7 +10,7 @@ import { timingSafeEqual } from 'crypto';
 import type { AuthHeaders, KibanaRequest } from '@kbn/core/server';
 import {
   HTTPAuthorizationHeader,
-  isUiamCredential,
+  isUiamBearerCredential,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
 
@@ -100,11 +100,7 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
 
     const authHeaders: AuthHeaders = { authorization: authorizationHeader.toString() };
 
-    if (
-      this.options.uiam &&
-      authorizationHeader.scheme.toLowerCase() === 'bearer' &&
-      isUiamCredential(authorizationHeader)
-    ) {
+    if (this.options.uiam && isUiamBearerCredential(authorizationHeader)) {
       if (
         request.route.options.tags.includes(ROUTE_TAG_ACCEPT_UIAM_OAUTH) &&
         !this.hasVerifiedInternalCallerAttestation(request, authorizationHeader)

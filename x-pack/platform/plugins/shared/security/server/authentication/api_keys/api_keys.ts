@@ -33,7 +33,6 @@ import type { SecurityLicense } from '../../../common';
 import { transformPrivilegesToElasticsearchPrivileges, validateKibanaPrivileges } from '../../lib';
 import type { UpdateAPIKeyParams, UpdateAPIKeyResult } from '../../routes/api_keys';
 import { type UiamServicePublic } from '../../uiam';
-import { getUiamClientAuthentication } from '../../uiam/get_client_authentication';
 import { BasicHTTPAuthorizationHeaderCredentials } from '../http_authentication';
 
 export type { UpdateAPIKeyParams, UpdateAPIKeyResult };
@@ -296,11 +295,7 @@ export class APIKeys implements NativeAPIKeysType {
     let clientAuthentication: ClientAuthentication | undefined;
 
     if (this.uiam && isUiamCredential(authorizationHeader)) {
-      const suppliedSharedSecret = getUiamClientAuthentication(request)?.sharedSecret;
-      clientAuthentication =
-        suppliedSharedSecret !== undefined
-          ? { scheme: 'SharedSecret', value: suppliedSharedSecret }
-          : this.uiam.getClientAuthentication();
+      clientAuthentication = this.uiam.getClientAuthentication(request);
     } else {
       const clientAuthorizationHeader = HTTPAuthorizationHeader.parseFromRequest(
         request,

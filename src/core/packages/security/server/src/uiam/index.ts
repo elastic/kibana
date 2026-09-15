@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { isUiamCredential } from './utils';
+export { isUiamCredential, isUiamBearerCredential } from './utils';
 export { isMissingApiKey, isRevokedApiKey } from './errors';
 export {
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
