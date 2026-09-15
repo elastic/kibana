@@ -21,6 +21,7 @@ export interface NumberInputProps {
   step?: number;
   prepend?: string | React.ReactElement | Array<string | React.ReactElement>;
   compressed?: boolean;
+  disabled?: boolean;
   'data-test-subj'?: string;
   id?: string;
   name?: string;

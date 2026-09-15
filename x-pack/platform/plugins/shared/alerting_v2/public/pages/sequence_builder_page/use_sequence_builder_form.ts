@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useQueryClient } from '@kbn/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import type { FormValues } from '@kbn/alerting-v2-rule-form';
 import {
+  mapRuleToComposeFormValues,
+  parseSequenceEsql,
   DEFAULT_SEQUENCE_FORM_VALUES,
   buildSequenceRuleQueryData,
   composeFormToCreateRequest,
@@ -45,28 +47,142 @@ const getDefaultFormValues = (): FormValues => ({
 
 export type SequenceBuilderStep = 'alert' | 'recovery';
 
-const DEFAULT_FORM_VALUES = getDefaultFormValues();
+const EDIT_RULE_QUERY_KEY = 'sequence-builder-edit-rule';
 
-export const useSequenceBuilderForm = () => {
-  const methods = useForm<FormValues>({ mode: 'onBlur', defaultValues: DEFAULT_FORM_VALUES });
-  return { methods, isLoading: false };
+export const useSequenceBuilderForm = (
+  ruleId: string | undefined,
+  options?: { isClone?: boolean }
+) => {
+  const isClone = options?.isClone ?? false;
+  const rulesApi = useService(RulesApi);
+
+  const { data: editData, isLoading } = useQuery({
+    queryKey: [EDIT_RULE_QUERY_KEY, ruleId],
+    enabled: Boolean(ruleId),
+    refetchOnWindowFocus: false,
+    cacheTime: 0,
+    staleTime: Infinity,
+    queryFn: ({ signal }) => rulesApi.getRule(ruleId!, signal),
+  });
+
+  const initialFormValues = useMemo<FormValues>(() => {
+    if (!editData) return getDefaultFormValues();
+    const mapped = mapRuleToComposeFormValues(editData);
+    if (isClone) {
+      return {
+        ...mapped,
+        metadata: {
+          ...mapped.metadata,
+          name: i18n.translate('xpack.alertingV2.sequenceBuilder.clonedRuleName', {
+            defaultMessage: '{name} (clone)',
+            values: { name: mapped.metadata.name },
+          }),
+        },
+      };
+    }
+    return mapped;
+  }, [editData, isClone]);
+  const methods = useForm<FormValues>({ mode: 'onBlur', values: initialFormValues });
+
+  const rawParsedSeqValues = useMemo<SequenceFormValues | undefined>(() => {
+    if (!editData) return undefined;
+    if (editData.query.format === 'composed') return undefined;
+    const breachQuery = editData.query.breach?.query;
+    if (!breachQuery) return undefined;
+    const recoveryQuery = editData.query.recovery?.query;
+    try {
+      return parseSequenceEsql(breachQuery, recoveryQuery) ?? undefined;
+    } catch {
+      return undefined;
+    }
+  }, [editData]);
+
+  const parsedRuleIds = useMemo<string[]>(
+    () =>
+      rawParsedSeqValues
+        ? [...new Set(rawParsedSeqValues.steps.flatMap((s) => s.rules.map((r) => r.ruleId)))]
+        : [],
+    [rawParsedSeqValues]
+  );
+
+  const { data: enrichedRules, isLoading: isEnrichingRules } = useQuery<
+    Record<string, { name: string; groupingFields: string[]; kind: 'alert' | 'signal' }>
+  >({
+    queryKey: ['sequence-builder-rule-enrichment', ...parsedRuleIds],
+    enabled: parsedRuleIds.length > 0,
+    refetchOnWindowFocus: false,
+    cacheTime: 0,
+    staleTime: Infinity,
+    queryFn: async ({ signal }) => {
+      const results = await Promise.all(parsedRuleIds.map((id) => rulesApi.getRule(id, signal)));
+      return Object.fromEntries(
+        results.map((r) => [
+          r.id,
+          { name: r.metadata.name, groupingFields: r.grouping?.fields ?? [], kind: r.kind },
+        ])
+      );
+    },
+  });
+
+  const isEnrichmentPending = parsedRuleIds.length > 0 && isEnrichingRules;
+
+  const parsedSeqValues = useMemo<SequenceFormValues | undefined>(() => {
+    if (!rawParsedSeqValues) return undefined;
+    if (isEnrichmentPending) return undefined;
+    if (!enrichedRules) return rawParsedSeqValues;
+
+    return {
+      ...rawParsedSeqValues,
+      steps: rawParsedSeqValues.steps.map((step) => ({
+        ...step,
+        rules: step.rules.map((r) => {
+          const enriched = enrichedRules[r.ruleId];
+          return {
+            ...r,
+            ruleName: enriched?.name ?? r.ruleName,
+            groupingFields: enriched?.groupingFields ?? r.groupingFields,
+            kind: enriched?.kind ?? r.kind,
+          };
+        }),
+      })),
+    };
+  }, [rawParsedSeqValues, isEnrichmentPending, enrichedRules]);
+
+  return {
+    methods,
+    isLoading: (Boolean(ruleId) && isLoading) || isEnrichmentPending,
+    parsedSeqValues,
+    savedRecoveryStepIndices: rawParsedSeqValues?.recoveryStepIndices,
+    savedStepsCount: rawParsedSeqValues?.steps.length,
+  };
 };
 
-export const useSequenceBuilderState = () => {
+export const useSequenceBuilderState = (initialSeqValues?: SequenceFormValues) => {
   const rulesApi = useService(RulesApi);
   const notifications = useService(CoreStart('notifications'));
   const { rulesLocators } = useAlertingLocators();
   const queryClient = useQueryClient();
 
-  const [seqValues, setSeqValues] = useState<SequenceFormValues>(DEFAULT_SEQUENCE_FORM_VALUES);
+  const [seqValues, setSeqValues] = useState<SequenceFormValues>(
+    initialSeqValues ?? DEFAULT_SEQUENCE_FORM_VALUES
+  );
   const [step, setStep] = useState<SequenceBuilderStep>('alert');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  const hasSyncedSeqRef = useRef(false);
+  useEffect(() => {
+    if (initialSeqValues && !hasSyncedSeqRef.current) {
+      hasSyncedSeqRef.current = true;
+      setSeqValues(initialSeqValues);
+    }
+  }, [initialSeqValues]);
 
   const seqValuesRef = useRef(seqValues);
   seqValuesRef.current = seqValues;
 
   const save = useCallback(
-    async (formValues: FormValues) => {
+    async (formValues: FormValues, ruleId?: string) => {
       setIsSaving(true);
       try {
         const queryData = buildSequenceRuleQueryData(seqValuesRef.current);
@@ -97,10 +213,19 @@ export const useSequenceBuilderState = () => {
         };
 
         const payload = composeFormToCreateRequest(merged, 'sequence');
-        await rulesApi.createRule(payload);
+
+        if (ruleId) {
+          await rulesApi.upsertRule(ruleId, payload);
+        } else {
+          await rulesApi.createRule(payload);
+        }
 
         queryClient.invalidateQueries(ruleKeys.lists());
-        queryClient.invalidateQueries(ruleKeys.tags());
+        queryClient.invalidateQueries(ruleKeys.allTags());
+        if (ruleId) {
+          queryClient.invalidateQueries(ruleKeys.detail(ruleId));
+          queryClient.removeQueries([EDIT_RULE_QUERY_KEY, ruleId]);
+        }
 
         notifications.toasts.addSuccess(
           i18n.translate('xpack.alertingV2.sequenceBuilder.saveSuccess', {
@@ -127,6 +252,8 @@ export const useSequenceBuilderState = () => {
     setSeqValues,
     step,
     setStep,
+    sidebarOpen,
+    setSidebarOpen,
     isSaving,
     save,
   };
