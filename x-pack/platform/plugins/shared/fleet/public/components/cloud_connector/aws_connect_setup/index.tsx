@@ -85,8 +85,8 @@ export const AwsConnectSetup: React.FC<AwsConnectSetupProps> = ({
   );
   const [isFormReady, setIsFormReady] = useState(false);
 
-  const handleAuthTypeChange = useCallback((next: AwsAuthType) => {
-    setAuthType(next);
+  const handleAuthTypeChange = useCallback((next: string) => {
+    setAuthType(next as AwsAuthType);
     setIsFormReady(false);
   }, []);
 

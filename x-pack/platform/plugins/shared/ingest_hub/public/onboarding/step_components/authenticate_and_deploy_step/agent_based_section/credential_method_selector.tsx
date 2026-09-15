@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AwsAuthTypeSelector } from '@kbn/fleet-plugin/public';
 
 // ── Credential method type ────────────────────────────────────────────────────
 
@@ -18,30 +19,30 @@ export type AgentCredentialMethod =
   | 'shared_credentials'
   | 'assume_role';
 
-export const CREDENTIAL_OPTIONS = [
+const CREDENTIAL_OPTIONS = [
   {
-    value: 'direct_access_keys' as AgentCredentialMethod,
+    value: 'direct_access_keys',
     text: i18n.translate(
       'xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.credentialMethod.directAccessKeys',
       { defaultMessage: 'Direct access keys' }
     ),
   },
   {
-    value: 'temporary_keys' as AgentCredentialMethod,
+    value: 'temporary_keys',
     text: i18n.translate(
       'xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.credentialMethod.temporaryKeys',
       { defaultMessage: 'Temporary security credentials' }
     ),
   },
   {
-    value: 'shared_credentials' as AgentCredentialMethod,
+    value: 'shared_credentials',
     text: i18n.translate(
       'xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.credentialMethod.sharedCredentials',
       { defaultMessage: 'Shared credentials file' }
     ),
   },
   {
-    value: 'assume_role' as AgentCredentialMethod,
+    value: 'assume_role',
     text: i18n.translate(
       'xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.credentialMethod.assumeRole',
       { defaultMessage: 'Assume role' }
@@ -66,10 +67,10 @@ export function CredentialMethodSelector({ value, onChange }: CredentialMethodSe
         />
       }
     >
-      <EuiSelect
+      <AwsAuthTypeSelector
+        selectedAuthType={value}
         options={CREDENTIAL_OPTIONS}
-        value={value}
-        onChange={(e) => onChange(e.target.value as AgentCredentialMethod)}
+        onChange={(method) => onChange(method as AgentCredentialMethod)}
         data-test-subj="agentBasedSection-credentialMethodSelect"
       />
     </EuiFormRow>

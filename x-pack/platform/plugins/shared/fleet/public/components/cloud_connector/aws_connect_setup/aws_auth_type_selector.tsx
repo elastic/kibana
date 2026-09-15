@@ -25,21 +25,26 @@ export {
   AWS_AUTH_TYPE_TEMPORARY_KEYS_CARD_TEST_SUBJ,
 };
 
-const OPTIONS = [
+export interface AwsAuthTypeSelectorOption {
+  value: string;
+  text: string;
+}
+
+const DEFAULT_OPTIONS: AwsAuthTypeSelectorOption[] = [
   {
-    value: 'identity_federation' as AwsAuthType,
+    value: 'identity_federation',
     text: i18n.translate('xpack.fleet.awsConnectSetup.authType.identityFederationLabel', {
       defaultMessage: 'Federated Identity (Recommended)',
     }),
   },
   {
-    value: 'static_keys' as AwsAuthType,
+    value: 'static_keys',
     text: i18n.translate('xpack.fleet.awsConnectSetup.authType.staticKeysLabel', {
       defaultMessage: 'Static keys',
     }),
   },
   {
-    value: 'temporary_keys' as AwsAuthType,
+    value: 'temporary_keys',
     text: i18n.translate('xpack.fleet.awsConnectSetup.authType.temporaryKeysLabel', {
       defaultMessage: 'Temporary keys',
     }),
@@ -47,28 +52,35 @@ const OPTIONS = [
 ];
 
 interface AwsAuthTypeSelectorProps {
-  selectedAuthType: AwsAuthType;
+  selectedAuthType: string;
   showIdentityFederation?: boolean;
-  onChange: (authType: AwsAuthType) => void;
+  /** Override the full option list. When provided, `showIdentityFederation` is ignored. */
+  options?: AwsAuthTypeSelectorOption[];
+  onChange: (authType: string) => void;
+  'data-test-subj'?: string;
 }
 
 export const AwsAuthTypeSelector: React.FC<AwsAuthTypeSelectorProps> = ({
   selectedAuthType,
   showIdentityFederation = true,
+  options,
   onChange,
+  'data-test-subj': dataTestSubj = AWS_AUTH_TYPE_SELECTOR_TEST_SUBJ,
 }) => {
-  const options = showIdentityFederation
-    ? OPTIONS
-    : OPTIONS.filter((o) => o.value !== 'identity_federation');
+  const resolvedOptions =
+    options ??
+    (showIdentityFederation
+      ? DEFAULT_OPTIONS
+      : DEFAULT_OPTIONS.filter((o) => o.value !== 'identity_federation'));
   return (
     <EuiSelect
-      options={options}
+      options={resolvedOptions}
       value={selectedAuthType}
-      onChange={(e) => onChange(e.target.value as AwsAuthType)}
+      onChange={(e) => onChange(e.target.value)}
       aria-label={i18n.translate('xpack.fleet.awsConnectSetup.authType.selectorAriaLabel', {
         defaultMessage: 'Authentication method',
       })}
-      data-test-subj={AWS_AUTH_TYPE_SELECTOR_TEST_SUBJ}
+      data-test-subj={dataTestSubj}
     />
   );
 };
