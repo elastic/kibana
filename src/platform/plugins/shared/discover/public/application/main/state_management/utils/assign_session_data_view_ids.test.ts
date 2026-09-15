@@ -11,13 +11,9 @@ import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { cloneDeep } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
+import { generateInlineDataViewId } from '../../../../../common/session/inline_data_view';
 import { getTabStateMock } from '../redux/__mocks__/internal_state.mocks';
 import { assignSessionDataViewIds } from './assign_session_data_view_ids';
-
-jest.mock('uuid', () => ({ v4: jest.fn(() => 'runtime-inline-id') }));
-
-const mockedUuidv4 = jest.mocked<() => string>(uuidv4);
 
 const inlineDataView: DataViewSpec = {
   title: 'logs-*',
@@ -52,11 +48,6 @@ const createInlineTab = (
 });
 
 describe('assignSessionDataViewIds', () => {
-  beforeEach(() => {
-    mockedUuidv4.mockReset();
-    mockedUuidv4.mockReturnValue('runtime-inline-id');
-  });
-
   it('returns the same session when no classic inline view needs an ID', () => {
     const referencedTab = createInlineTab('referenced');
     referencedTab.usesAdHocDataView = false;
@@ -76,11 +67,9 @@ describe('assignSessionDataViewIds', () => {
 
     expect(assignSessionDataViewIds(session, [])).toBe(session);
     expect(session).toStrictEqual(originalSession);
-    expect(mockedUuidv4).not.toHaveBeenCalled();
   });
 
-  it('reuses one runtime ID for identical inline data views without mutating the session', () => {
-    mockedUuidv4.mockReturnValueOnce('runtime-inline-a');
+  it('uses the embeddable ID for identical specs across loads without mutating the session', () => {
     const existingTab = createInlineTab('existing', {
       ...inlineDataView,
       id: 'existing-inline-id',
@@ -92,37 +81,35 @@ describe('assignSessionDataViewIds', () => {
     const originalSession = cloneDeep(session);
 
     const updatedSession = assignSessionDataViewIds(session, []);
+    const reloadedSession = assignSessionDataViewIds(cloneDeep(session), []);
+    const dataViewId = generateInlineDataViewId(inlineDataView);
 
     expect(updatedSession.tabs.slice(0, 2)).toMatchObject([
-      { serializedSearchSource: { index: { id: 'runtime-inline-a' } } },
-      { serializedSearchSource: { index: { id: 'runtime-inline-a' } } },
+      { serializedSearchSource: { index: { id: dataViewId } } },
+      { serializedSearchSource: { index: { id: dataViewId } } },
     ]);
+    expect(reloadedSession).toStrictEqual(updatedSession);
     expect(updatedSession.tabs[2]).toBe(existingTab);
     expect(updatedSession).not.toBe(session);
     expect(session).toStrictEqual(originalSession);
-    expect(mockedUuidv4).toHaveBeenCalledTimes(1);
   });
 
   it('uses different runtime IDs for different inline data view specs', () => {
-    mockedUuidv4.mockReturnValueOnce('runtime-inline-a').mockReturnValueOnce('runtime-inline-b');
+    const otherDataView = { ...inlineDataView, sourceFilters: [{ value: 'private.*' }] };
     const session = createDiscoverSessionMock({
       id: 'session-id',
-      tabs: [
-        createInlineTab('inline-a'),
-        createInlineTab('inline-b', {
-          ...inlineDataView,
-          sourceFilters: [{ value: 'private.*' }],
-        }),
-      ],
+      tabs: [createInlineTab('inline-a'), createInlineTab('inline-b', otherDataView)],
     });
 
     const updatedSession = assignSessionDataViewIds(session, []);
+    const firstId = generateInlineDataViewId(inlineDataView);
+    const secondId = generateInlineDataViewId(otherDataView);
 
     expect(updatedSession.tabs).toMatchObject([
-      { serializedSearchSource: { index: { id: 'runtime-inline-a' } } },
-      { serializedSearchSource: { index: { id: 'runtime-inline-b' } } },
+      { serializedSearchSource: { index: { id: firstId } } },
+      { serializedSearchSource: { index: { id: secondId } } },
     ]);
-    expect(mockedUuidv4).toHaveBeenCalledTimes(2);
+    expect(firstId).not.toBe(secondId);
   });
 
   it('does not reuse the ID of a locally edited inline data view', () => {
@@ -143,11 +130,10 @@ describe('assignSessionDataViewIds', () => {
     const updatedSession = assignSessionDataViewIds(session, [restoredTab]);
 
     expect(updatedSession.tabs[0].serializedSearchSource.index).toMatchObject({
-      id: 'runtime-inline-id',
+      id: generateInlineDataViewId(inlineDataView),
       title: 'logs-*',
     });
     expect(restoredTab).toStrictEqual(originalTab);
-    expect(mockedUuidv4).toHaveBeenCalledTimes(1);
   });
 
   it('prefers the link ID for its tab without replacing another restored tab ID', () => {
@@ -180,7 +166,6 @@ describe('assignSessionDataViewIds', () => {
       }))
     );
     expect(localTabs).toStrictEqual(originalTabs);
-    expect(mockedUuidv4).not.toHaveBeenCalled();
   });
 
   it('does not reuse the link ID when its data view differs from the saved view', () => {
@@ -193,16 +178,45 @@ describe('assignSessionDataViewIds', () => {
       tabId: 'inline-a',
       dataViewSpec: { id: 'link-data-view', title: 'other-logs-*' },
     });
+    const dataViewId = generateInlineDataViewId(inlineDataView);
 
     expect(updatedSession.tabs[0].serializedSearchSource.index).toMatchObject({
-      id: 'runtime-inline-id',
+      id: dataViewId,
     });
-    expect(updatedSession.tabs[0].serializedSearchSource.filter?.[0].meta.index).toBe(
-      'runtime-inline-id'
-    );
+    expect(updatedSession.tabs[0].serializedSearchSource.filter?.[0].meta.index).toBe(dataViewId);
     expect(updatedSession.tabs[0].serializedSearchSource.filter?.[1].meta.index).toBe(
       'foreign-data-view-id'
     );
+  });
+
+  it.each([undefined, ''])('reuses local and link IDs when the saved name is %s', (name) => {
+    const storedView = { ...inlineDataView, name };
+    const localView = { ...storedView, name: storedView.title, id: 'local-inline-id' };
+    const localTabs = [
+      getTabStateMock({
+        id: 'inline-a',
+        initialInternalState: { serializedSearchSource: { index: localView } },
+      }),
+    ];
+    const session = createDiscoverSessionMock({
+      id: 'session-id',
+      tabs: [createInlineTab('inline-a', storedView)],
+    });
+
+    const restoredSession = assignSessionDataViewIds(session, localTabs);
+
+    expect(restoredSession.tabs[0].serializedSearchSource.index).toMatchObject({
+      id: 'local-inline-id',
+    });
+
+    const linkedSession = assignSessionDataViewIds(session, localTabs, {
+      tabId: 'inline-a',
+      dataViewSpec: { ...localView, id: 'link-inline-id' },
+    });
+
+    expect(linkedSession.tabs[0].serializedSearchSource.index).toMatchObject({
+      id: 'link-inline-id',
+    });
   });
 
   it('collects usable local views before assigning IDs to earlier tabs', () => {
@@ -240,7 +254,6 @@ describe('assignSessionDataViewIds', () => {
       { serializedSearchSource: { index: { id: 'local-inline-id' } } },
       { serializedSearchSource: { index: { id: 'local-inline-id' } } },
     ]);
-    expect(mockedUuidv4).not.toHaveBeenCalled();
   });
 
   it('makes the link ID available to matching tabs before its target tab', () => {
@@ -258,6 +271,5 @@ describe('assignSessionDataViewIds', () => {
       { serializedSearchSource: { index: { id: 'link-data-view' } } },
       { serializedSearchSource: { index: { id: 'link-data-view' } } },
     ]);
-    expect(mockedUuidv4).not.toHaveBeenCalled();
   });
 });

@@ -38,16 +38,30 @@ import {
   type Query,
 } from '@kbn/es-query';
 import { getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 import type { PublishesWritableTimeRange } from '@kbn/presentation-publishing/interfaces/fetch/publishes_unified_search';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { getEsqlDataView } from '@kbn/discover-utils';
 import type { DiscoverServices } from '../build_services';
 import { EDITABLE_SAVED_SEARCH_KEYS } from '../../common/embeddable/constants';
+import { generateInlineDataViewId, getInlineDataView } from '../../common/session/inline_data_view';
 import type {
   PublishesWritableSavedSearch,
   SearchEmbeddableSerializedAttributes,
   SearchEmbeddableStateManager,
 } from './types';
+
+const assignInlineDataViewId = (searchSource?: SerializedSearchSourceFields) => {
+  const index = getInlineDataView(searchSource);
+  if (!index || index.id !== undefined || index.type === ESQL_TYPE) {
+    return searchSource;
+  }
+
+  return {
+    ...searchSource,
+    index: { ...index, id: generateInlineDataViewId(index) },
+  };
+};
 
 const initializeSearchSource = async (
   discoverServices: DiscoverServices,
@@ -58,7 +72,9 @@ const initializeSearchSource = async (
 
   try {
     [searchSource, parentSearchSource] = await Promise.all([
-      discoverServices.data.search.searchSource.create(serializedSearchSource),
+      discoverServices.data.search.searchSource.create(
+        assignInlineDataViewId(serializedSearchSource)
+      ),
       discoverServices.data.search.searchSource.create(),
     ]);
   } catch (error) {
