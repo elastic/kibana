@@ -24,7 +24,7 @@ import {
   InvestigationConflictError,
   InvalidInvestigationContextError,
   InvestigationNotFoundError,
-  InvestigationSubjectMissingError,
+  InvestigationMetadataMissingError,
   InvestigationUnavailableError,
 } from './errors';
 import { NightshiftInvestigationsClient } from './investigations_client';
@@ -991,7 +991,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     });
   });
 
-  it('throws InvestigationSubjectMissingError when the execution inputs carry no title', async () => {
+  it('throws InvestigationMetadataMissingError when the execution inputs carry no title', async () => {
     mockManagement.getWorkflowExecution.mockResolvedValue(
       makeEnsureExecution({
         context: {
@@ -1004,7 +1004,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     );
 
     await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
-      InvestigationSubjectMissingError
+      InvestigationMetadataMissingError
     );
     expect(repository.create).not.toHaveBeenCalled();
   });
@@ -1116,13 +1116,13 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     expect(repository.create).not.toHaveBeenCalled();
   });
 
-  it('throws InvestigationSubjectMissingError for executions without an investigation subject', async () => {
+  it('throws InvestigationMetadataMissingError for executions without an investigation subject', async () => {
     mockManagement.getWorkflowExecution.mockResolvedValue(
       makeEnsureExecution({ context: { inputs: { message: 'bare run' } } })
     );
 
     await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
-      InvestigationSubjectMissingError
+      InvestigationMetadataMissingError
     );
     expect(repository.create).not.toHaveBeenCalled();
   });
@@ -1213,7 +1213,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       expect(attrs.subject_id).toBe('se-fallback');
     });
 
-    it('throws InvestigationSubjectMissingError when all significant_event id fields are empty', async () => {
+    it('throws InvestigationMetadataMissingError when all significant_event id fields are empty', async () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(
         makeEnsureExecution({
           context: {
@@ -1225,12 +1225,12 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
         })
       );
       await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
-        InvestigationSubjectMissingError
+        InvestigationMetadataMissingError
       );
       expect(repository.create).not.toHaveBeenCalled();
     });
 
-    it('throws InvestigationSubjectMissingError when the source is unrecognized', async () => {
+    it('throws InvestigationMetadataMissingError when the source is unrecognized', async () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(
         makeEnsureExecution({
           context: {
@@ -1239,7 +1239,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
         })
       );
       await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
-        InvestigationSubjectMissingError
+        InvestigationMetadataMissingError
       );
       expect(repository.create).not.toHaveBeenCalled();
     });

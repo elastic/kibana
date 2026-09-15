@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export class InvestigationSubjectMissingError extends Error {
+export class InvestigationMetadataMissingError extends Error {
   constructor(investigationId: string) {
     super(
       `Workflow execution "${investigationId}" has no investigation subject or title ` +
@@ -13,6 +13,6 @@ export class InvestigationSubjectMissingError extends Error {
         'significant_event_id for significant_event, or alert_id for alert). ' +
         'Investigations require both; pass them when triggering the workflow.'
     );
-    this.name = 'InvestigationSubjectMissingError';
+    this.name = 'InvestigationMetadataMissingError';
   }
 }

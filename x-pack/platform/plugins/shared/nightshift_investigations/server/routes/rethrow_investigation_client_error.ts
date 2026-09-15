@@ -9,7 +9,7 @@ import { badRequest, conflict, notFound, serverUnavailable } from '@hapi/boom';
 import {
   InvestigationConflictError,
   InvestigationNotFoundError,
-  InvestigationSubjectMissingError,
+  InvestigationMetadataMissingError,
   InvestigationUnavailableError,
   InvalidInvestigationContextError,
 } from '../client/errors';
@@ -18,7 +18,7 @@ export function rethrowInvestigationClientError(error: unknown): never {
   if (error instanceof InvestigationNotFoundError) {
     throw notFound(error.message);
   }
-  if (error instanceof InvestigationSubjectMissingError) {
+  if (error instanceof InvestigationMetadataMissingError) {
     throw badRequest(error.message);
   }
   if (error instanceof InvestigationConflictError) {

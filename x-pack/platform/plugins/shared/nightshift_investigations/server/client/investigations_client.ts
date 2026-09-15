@@ -50,7 +50,7 @@ import {
   InvestigationConflictError,
   InvestigationNotFoundError,
   InvalidInvestigationContextError,
-  InvestigationSubjectMissingError,
+  InvestigationMetadataMissingError,
   InvestigationUnavailableError,
 } from './errors';
 
@@ -495,7 +495,7 @@ export class NightshiftInvestigationsClient {
     );
 
     if (!subject || !title) {
-      throw new InvestigationSubjectMissingError(investigationId);
+      throw new InvestigationMetadataMissingError(investigationId);
     }
 
     if (concurrencyKey) {

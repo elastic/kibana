@@ -10,7 +10,7 @@ import { nightshiftInvestigationsRouteRepository } from '.';
 import {
   InvestigationConflictError,
   InvestigationNotFoundError,
-  InvestigationSubjectMissingError,
+  InvestigationMetadataMissingError,
 } from '../client/errors';
 
 const endpoint = 'PATCH /internal/nightshift/investigations/{id}' as const;
@@ -139,7 +139,11 @@ describe('updateInvestigation handler', () => {
 
   it.each([
     ['a missing investigation', 404, () => new InvestigationNotFoundError('exec-1')],
-    ['an execution without a subject', 400, () => new InvestigationSubjectMissingError('exec-1')],
+    [
+      'an execution without a subject or title',
+      400,
+      () => new InvestigationMetadataMissingError('exec-1'),
+    ],
     [
       'a settled investigation',
       409,
