@@ -3055,7 +3055,6 @@ module.exports = {
         '@kbn/eslint/scout_no_cross_boundary_imports': 'error',
         '@kbn/eslint/scout_expect_import': 'error',
         '@kbn/eslint/scout_no_deprecated_tags': 'error',
-        '@kbn/eslint/scout_prefer_both_arch_tags': 'warn',
         '@kbn/eslint/scout_no_at_in_test_titles': 'warn',
         '@kbn/eslint/scout_no_locators': ['error', { restricted: ['globalLoadingIndicator'] }],
         '@kbn/eslint/scout_no_promise_all_with_playwright_apis': 'error',
@@ -3063,10 +3062,11 @@ module.exports = {
       },
     },
     {
-      // Profiling is stateful-only (not available in serverless) — suppress the arch-coverage warning
-      files: ['x-pack/solutions/observability/plugins/profiling/test/{scout,scout_*}/**/*.ts'],
+      // Observability Scout tests (excludes profiling, which is stateful-only by design)
+      files: ['x-pack/solutions/observability/{packages,plugins}/*/test/{scout,scout_*}/**/*.ts'],
+      excludedFiles: ['x-pack/solutions/observability/plugins/profiling/test/**'],
       rules: {
-        '@kbn/eslint/scout_prefer_both_arch_tags': 'off',
+        '@kbn/eslint/scout_prefer_both_arch_tags': 'warn',
       },
     },
     {
