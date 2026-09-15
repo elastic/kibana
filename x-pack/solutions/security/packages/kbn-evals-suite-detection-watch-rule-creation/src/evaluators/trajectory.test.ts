@@ -7,14 +7,13 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { internalTools } from '@kbn/agent-builder-common/tools';
 import type { RuleCreationResult } from '../rule_creation_client';
 import { DRAFT_STEP_ID, RULE_CREATION_TOOL_ID } from '../constants';
 import {
   createTrajectoryEvaluators,
   createTrajectoryFetcher,
   scoreCallCount,
-  scoreKnownTools,
+  scoreCallOrder,
 } from './trajectory';
 
 const log = {
@@ -24,12 +23,12 @@ const log = {
   error: jest.fn(),
 } as unknown as ToolingLog;
 
+const SKILL = 'load_skill';
 const CREATE = RULE_CREATION_TOOL_ID;
 const PREVIEW = 'security.run_rule_preview';
 const LABS = 'security.security_labs_search';
-const INTERNAL = internalTools.loadSkill;
-// Stand-in for the ids GET /api/agent_builder/tools returns on the stack under test.
-const KNOWN = new Set([CREATE, PREVIEW, LABS]);
+const LIST_INDICES = 'platform.core.list_indices';
+const ATTACH_READ = 'attachments.read';
 
 const AGENT_TRACE = 'agent-trace-1';
 const COLS = [
@@ -42,6 +41,7 @@ const rows = (names: Array<string | null>, spanIds?: string[]) => ({
   columns: COLS,
   values: names.map((n, i) => [spanIds?.[i] ?? `span-${i}`, AGENT_TRACE, n]),
 });
+
 const esWith = (handler: (query: string, call: number) => unknown) => {
   let calls = 0;
   const query = jest.fn(async ({ query: q }: { query: string }) => handler(q, ++calls));
@@ -66,13 +66,7 @@ const fetcher = (client: EsClient, opts: { maxPolls?: number } = {}) =>
   createTrajectoryFetcher({ traceEsClient: client, log, ...noWait, ...opts });
 
 const evaluators = (client: EsClient, maxPolls?: number) =>
-  createTrajectoryEvaluators({
-    traceEsClient: client,
-    log,
-    knownToolIds: KNOWN,
-    ...noWait,
-    maxPolls,
-  });
+  createTrajectoryEvaluators({ traceEsClient: client, log, ...noWait, maxPolls });
 
 const evaluateAll = async (client: EsClient, output: RuleCreationResult, maxPolls?: number) =>
   Promise.all(
@@ -108,11 +102,7 @@ describe('createTrajectoryFetcher', () => {
 
   it('counts a span once even when it is indexed into two data streams', async () => {
     const twice = [CREATE, CREATE, PREVIEW, PREVIEW];
-    const { client } = esReturning(twice);
-    // Same span ids repeated = the agent_builder.otel and generic.otel copies of one call.
-    (client.esql.query as jest.Mock).mockImplementation(async () =>
-      rows(twice, ['a', 'a', 'b', 'b'])
-    );
+    const { client } = esWith(() => rows(twice, ['a', 'a', 'b', 'b']));
     const t = await fetcher(client)(result());
     expect(t).toMatchObject({ available: true, toolNames: [CREATE, PREVIEW] });
   });
@@ -143,10 +133,10 @@ describe('createTrajectoryFetcher', () => {
   });
 
   it('keeps polling until two consecutive reads agree, so a mid-flush export is not scored short', async () => {
-    const byPoll: Record<number, string[]> = { 1: [CREATE], 2: [LABS, CREATE, PREVIEW] };
-    const { client, query } = esWith((_q, call) => rows(byPoll[call] ?? [LABS, CREATE, PREVIEW]));
+    const byPoll: Record<number, string[]> = { 1: [SKILL], 2: [SKILL, LABS, CREATE] };
+    const { client, query } = esWith((_q, call) => rows(byPoll[call] ?? [SKILL, LABS, CREATE]));
     const t = await fetcher(client)(result());
-    expect(t).toMatchObject({ available: true, settled: true, toolNames: [LABS, CREATE, PREVIEW] });
+    expect(t).toMatchObject({ available: true, settled: true, toolNames: [SKILL, LABS, CREATE] });
     expect(query).toHaveBeenCalledTimes(3);
   });
 
@@ -157,7 +147,7 @@ describe('createTrajectoryFetcher', () => {
   });
 
   it('resolves each run once and shares it across evaluators', async () => {
-    const { client, query } = esReturning([CREATE]);
+    const { client, query } = esReturning([SKILL, CREATE]);
     await evaluateAll(client, result());
     // One settled read is two polls; two evaluators must not double that.
     expect(query).toHaveBeenCalledTimes(2);
@@ -166,10 +156,10 @@ describe('createTrajectoryFetcher', () => {
 
 describe('createTrajectoryEvaluators', () => {
   it('scores a skill-conformant run 1 on each named series and names the agent trace', async () => {
-    const { client } = esReturning([LABS, INTERNAL, CREATE, PREVIEW]);
+    const { client } = esReturning([SKILL, LABS, CREATE, PREVIEW, ATTACH_READ]);
     expect(evaluators(client).map((e) => e.name)).toEqual([
       'Trajectory: Call Count',
-      'Trajectory: Known Tools',
+      'Trajectory: Call Order',
     ]);
     const results = await evaluateAll(client, result());
     expect(results.map((r) => r.score)).toEqual([1, 1]);
@@ -203,25 +193,44 @@ describe('scoreCallCount', () => {
   });
 });
 
-describe('scoreKnownTools', () => {
-  const score = scoreKnownTools(KNOWN);
-
-  it('accepts the registered tools it was given and Agent Builder internal tools', () => {
-    const r = score(settled([LABS, INTERNAL, CREATE, PREVIEW]));
+describe('scoreCallOrder', () => {
+  it('accepts skill → research → one draft → preview/attachments', () => {
+    const r = scoreCallOrder(settled([SKILL, LABS, CREATE, PREVIEW, ATTACH_READ]));
     expect(r.score).toBe(1);
-    expect(r.metadata).toMatchObject({ internal: [INTERNAL], unknown: [] });
+    expect(r.metadata).toMatchObject({ drafts: 1, violations: [] });
   });
 
-  it('does not treat privacy-anonymized "custom" spans as hallucinated', () => {
-    const r = score(settled([CREATE, 'custom']));
-    expect(r.score).toBe(1);
-    expect(r.metadata.anonymized).toEqual(['custom']);
+  it('accepts the minimal path: skill then draft', () => {
+    expect(scoreCallOrder(settled([SKILL, CREATE])).score).toBe(1);
   });
 
-  it('penalizes proportionally and names the unreachable tools', () => {
-    const r = score(settled([CREATE, 'made_up_tool', 'made_up_tool', PREVIEW]));
-    expect(r.score).toBe(0.5);
-    expect(r.metadata.unknown).toEqual(['made_up_tool', 'made_up_tool']);
-    expect(r.explanation).toContain('made_up_tool');
+  it('fails a draft made without loading the skill first', () => {
+    expect(scoreCallOrder(settled([CREATE])).metadata.violations).toEqual([
+      'drafted without loading the skill first',
+    ]);
+    expect(scoreCallOrder(settled([CREATE, SKILL])).score).toBe(0);
+  });
+
+  it('fails a run that drafted more than once', () => {
+    const r = scoreCallOrder(settled([SKILL, CREATE, CREATE]));
+    expect(r.score).toBe(0);
+    expect(r.metadata.drafts).toBe(2);
+  });
+
+  it('fails research after the draft, and names what was explored', () => {
+    // Draft, go look at indices, draft again.
+    const r = scoreCallOrder(
+      settled([SKILL, CREATE, LIST_INDICES, LIST_INDICES, CREATE, ATTACH_READ])
+    );
+    expect(r.score).toBe(0);
+    expect(r.metadata.exploredAfterDraft).toEqual([LIST_INDICES, LIST_INDICES]);
+    expect(r.explanation).toContain('drafted 2 times');
+    expect(r.explanation).toContain(LIST_INDICES);
+  });
+
+  it('fails a run that never drafted', () => {
+    const r = scoreCallOrder(settled([SKILL, LABS]));
+    expect(r.score).toBe(0);
+    expect(r.metadata.violations).toEqual(['never drafted a rule']);
   });
 });

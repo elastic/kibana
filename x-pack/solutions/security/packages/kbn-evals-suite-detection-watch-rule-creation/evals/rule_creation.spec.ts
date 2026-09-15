@@ -84,7 +84,6 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
       ruleCreationClient,
       esClient,
       traceEsClient,
-      registeredToolIds,
       log,
       connector,
     }) => {
@@ -94,7 +93,6 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
         executorClient,
         esClient,
         traceEsClient,
-        registeredToolIds,
         log,
         // Judge provenance: stamped into every Gap Addressed score document so a
         // self-judging model (judge connector == subject connector) is visible
@@ -121,7 +119,6 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
       ruleCreationClient,
       esClient,
       traceEsClient,
-      registeredToolIds,
       log,
       connector,
     }) => {
@@ -131,7 +128,6 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
         executorClient,
         esClient,
         traceEsClient,
-        registeredToolIds,
         log,
         // Judge provenance: stamped into every Gap Addressed score document so a
         // self-judging model (judge connector == subject connector) is visible
@@ -159,7 +155,6 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
       ruleCreationClient,
       esClient,
       traceEsClient,
-      registeredToolIds,
       log,
       connector,
     }) => {
@@ -169,7 +164,6 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
         executorClient,
         esClient,
         traceEsClient,
-        registeredToolIds,
         log,
         // Judge provenance: stamped into every Gap Addressed score document so a
         // self-judging model (judge connector == subject connector) is visible

@@ -303,7 +303,6 @@ export const createEvaluateDataset =
     executorClient,
     esClient,
     traceEsClient,
-    registeredToolIds,
     log,
     judgeProvenance,
   }: {
@@ -312,7 +311,6 @@ export const createEvaluateDataset =
     executorClient: EvalsExecutorClient;
     esClient: EsClient;
     traceEsClient: TraceEsClient;
-    registeredToolIds: ReadonlySet<string>;
     log: ToolingLog;
     judgeProvenance?: { judgeConnectorId: string; judgeConnectorName?: string };
   }) =>
@@ -335,7 +333,7 @@ export const createEvaluateDataset =
       createLookbackGapEvaluator(),
       createQueryExecutabilityEvaluator(esClient),
       createToolRoutingEvaluator({ traceEsClient, log }),
-      ...createTrajectoryEvaluators({ traceEsClient, log, knownToolIds: registeredToolIds }),
+      ...createTrajectoryEvaluators({ traceEsClient, log }),
       createGapAddressedEvaluator(evaluators, judgeProvenance),
     ];
 

@@ -21,44 +21,6 @@ import {
   REVIEW_STEP_ID,
 } from './constants';
 
-const AGENT_BUILDER_API_VERSION = '2023-10-31';
-
-/**
- * Every tool id registered in Agent Builder on the stack under test. Read live: the registry
- * varies by enabled plugins and feature flags, so a pinned list would penalize legitimate calls.
- */
-export const fetchRegisteredToolIds = async ({
-  fetch,
-  log,
-}: {
-  fetch: HttpHandler;
-  log: ToolingLog;
-}): Promise<ReadonlySet<string>> => {
-  let response: { results?: Array<{ id: string }> };
-  try {
-    response = await fetch<{ results?: Array<{ id: string }> }>('/api/agent_builder/tools', {
-      method: 'GET',
-      version: AGENT_BUILDER_API_VERSION,
-      headers: { 'elastic-api-version': AGENT_BUILDER_API_VERSION },
-    });
-  } catch (err) {
-    throw new Error(
-      `Could not list Agent Builder tools. Trajectory: Known Tools scores against the registry, ` +
-        `so without it every call would be judged unknown. Original error: ${
-          err instanceof Error ? err.message : String(err)
-        }`
-    );
-  }
-  const toolIds = (response.results ?? []).map((t) => t.id);
-  if (toolIds.length === 0) {
-    throw new Error(
-      'Agent Builder reports no registered tools on this stack — the draft agent has nothing to call.'
-    );
-  }
-  log.info(`Agent Builder registers ${toolIds.length} tool(s)`);
-  return new Set(toolIds);
-};
-
 // The model connector (used by the workflow's ai.agent step) is not checked here — if it is
 // misconfigured the workflow execution will fail loudly on its own. Only the judge connector
 // can fail silently: a missing judge causes LLM evaluators to return N/A with no obvious error.

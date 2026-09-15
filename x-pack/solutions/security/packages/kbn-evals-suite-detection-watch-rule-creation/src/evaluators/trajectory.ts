@@ -8,15 +8,14 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator } from '@kbn/evals';
-import { isInternalTool } from '@kbn/agent-builder-common/tools';
+import { internalTools, isInternalTool } from '@kbn/agent-builder-common/tools';
+import { RULE_CREATION_TOOL_ID, RULE_PREVIEW_TOOL_ID } from '../constants';
 import type { RuleCreationResult } from '../rule_creation_client';
 import { extractConversationId, toolSpanJoinClauses } from './tool_routing';
 
-// Provisional: sized from the skill's prescribed path, not from sampled traces.
 const MAX_TOOL_CALLS = 8;
 
 interface EsqlResponse {
-  columns: Array<{ name: string }>;
   values: Array<Array<string | null>>;
 }
 
@@ -28,7 +27,7 @@ export interface TrajectoryFetchOptions {
 
 interface ToolCalls {
   toolNames: string[];
-  /** Trace the agent's spans live in — not the workflow's trace id, which the eval client owns. */
+  /** The agent's own trace; the workflow's trace id points at the eval client. */
   agentTraceId: string | undefined;
 }
 
@@ -41,16 +40,14 @@ const fetchToolCalls = async (
   where: string
 ): Promise<ToolCalls | undefined> => {
   const response = (await traceEsClient.esql.query({
-    // tool.call.id is set only on calls the LLM issued; helper spans tools open internally
-    // (e.g. search's natural_language_search) have none and are not part of the trajectory.
+    // Only calls the LLM issued carry a tool.call.id; tools' internal helper spans do not.
     query: `FROM traces-*\n| WHERE ${where} AND attributes.elastic.inference.span.kind == "TOOL" AND attributes.gen_ai.tool.call.id IS NOT NULL\n| SORT @timestamp ASC\n| KEEP span_id, trace_id, attributes.gen_ai.tool.name`,
   })) as unknown as EsqlResponse;
 
   const seen = new Set<string>();
   const toolNames: string[] = [];
   let agentTraceId: string | undefined;
-  // Rows arrive in KEEP order. Spans are indexed into two data streams, so the same span_id
-  // can appear twice; it is one call.
+  // Rows arrive in KEEP order. Spans are indexed into two data streams, so dedupe by span_id.
   for (const [spanId, traceId, toolName] of response.values) {
     const isNewSpan = spanId != null && !seen.has(spanId);
     if (isNewSpan && toolName) {
@@ -119,7 +116,6 @@ export const createTrajectoryFetcher = ({
       );
       return { available: true, ...last, settled: false };
     }
-    // Tool Routing scores the same run and logs the cluster-level diagnosis; not repeated here.
     log.warning('Trajectory unavailable — no TOOL spans reachable via any join key');
     return {
       available: false,
@@ -186,53 +182,47 @@ export const scoreCallCount: ScoreFn = ({ toolNames }) => {
   };
 };
 
-// Anonymized spans are unnameable, not invented, so they are reported but not penalized.
-export const scoreKnownTools =
-  (knownToolIds: ReadonlySet<string>): ScoreFn =>
-  ({ toolNames }) => {
-    const registered: string[] = [];
-    const internal: string[] = [];
-    const anonymized: string[] = [];
-    const unknown: string[] = [];
-    for (const name of toolNames) {
-      if (knownToolIds.has(name)) registered.push(name);
-      else if (isInternalTool(name)) internal.push(name);
-      // AgentBuilderSpanProcessor writes "custom" for non-builtin tools when includeRealNames is off.
-      else if (name === 'custom') anonymized.push(name);
-      else unknown.push(name);
-    }
-    const score = 1 - unknown.length / toolNames.length;
-    return {
-      score,
-      explanation:
-        unknown.length === 0
-          ? `all ${toolNames.length} call(s) name registered tools${
-              anonymized.length > 0
-                ? `; ${anonymized.length} anonymized by tracing privacy settings`
-                : ''
-            }`
-          : `${unknown.length} call(s) name tools not registered on this stack: ${[
-              ...new Set(unknown),
-            ].join(', ')}`,
-      metadata: { registered, internal, anonymized, unknown },
-    };
-  };
-
 /**
- * Separate series rather than one average, so a failing dimension cannot hide behind a passing one.
- * `knownToolIds` is Agent Builder's tool registry as read from the stack under test.
+ * The detection-rule-edit skill prescribes: load the skill → research → draft the rule once →
+ * preview / render the attachment. Checks the run against that shape.
  */
-export const createTrajectoryEvaluators = ({
-  knownToolIds,
-  ...deps
-}: {
-  traceEsClient: EsClient;
-  log: ToolingLog;
-  knownToolIds: ReadonlySet<string>;
-} & TrajectoryFetchOptions): Evaluator[] => {
+export const scoreCallOrder: ScoreFn = ({ toolNames }) => {
+  const firstDraft = toolNames.indexOf(RULE_CREATION_TOOL_ID);
+  const skillLoaded = toolNames.indexOf(internalTools.loadSkill);
+  const drafts = toolNames.filter((name) => name === RULE_CREATION_TOOL_ID).length;
+  // After drafting, only previewing, redrafting, and Agent Builder's own tools (attachment
+  // reads/renders) are expected; anything else is research the skill says comes before.
+  const expectedAfterDraft = (name: string) =>
+    name === RULE_CREATION_TOOL_ID || name === RULE_PREVIEW_TOOL_ID || isInternalTool(name);
+  const exploredAfterDraft =
+    firstDraft === -1 ? [] : toolNames.slice(firstDraft + 1).filter((n) => !expectedAfterDraft(n));
+
+  const violations: string[] = [];
+  if (firstDraft === -1) violations.push('never drafted a rule');
+  else if (skillLoaded === -1 || skillLoaded > firstDraft) {
+    violations.push('drafted without loading the skill first');
+  }
+  if (drafts > 1) violations.push(`drafted ${drafts} times`);
+  if (exploredAfterDraft.length > 0) {
+    violations.push(`explored after drafting: ${[...new Set(exploredAfterDraft)].join(', ')}`);
+  }
+
+  return {
+    score: violations.length === 0 ? 1 : 0,
+    explanation:
+      violations.length === 0
+        ? 'skill → research → one draft → preview/attachments'
+        : violations.join('; '),
+    metadata: { drafts, exploredAfterDraft, violations },
+  };
+};
+
+export const createTrajectoryEvaluators = (
+  deps: { traceEsClient: EsClient; log: ToolingLog } & TrajectoryFetchOptions
+): Evaluator[] => {
   const fetchTrajectory = createTrajectoryFetcher(deps);
   return [
     trajectoryEvaluator('Trajectory: Call Count', fetchTrajectory, scoreCallCount),
-    trajectoryEvaluator('Trajectory: Known Tools', fetchTrajectory, scoreKnownTools(knownToolIds)),
+    trajectoryEvaluator('Trajectory: Call Order', fetchTrajectory, scoreCallOrder),
   ];
 };
