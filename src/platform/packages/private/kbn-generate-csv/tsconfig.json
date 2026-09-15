@@ -35,5 +35,6 @@
     "@kbn/esql-utils",
     "@kbn/safer-lodash-set",
     "@kbn/datemath",
+    "@kbn/search-errors",
   ]
 }

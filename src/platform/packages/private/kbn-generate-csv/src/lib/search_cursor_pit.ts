@@ -12,7 +12,6 @@ import type { Logger } from '@kbn/core/server';
 import { lastValueFrom } from 'rxjs';
 import { ES_SEARCH_STRATEGY, type ISearchSource } from '@kbn/data-plugin/common';
 import { INTERNAL_ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/server';
-import { createEsError } from '@kbn/search-errors';
 import { SearchCursor, type SearchCursorClients, type SearchCursorSettings } from './search_cursor';
 import { i18nTexts } from './i18n_texts';
 

@@ -35,6 +35,7 @@ dependsOn:
   - '@kbn/esql-utils'
   - '@kbn/safer-lodash-set'
   - '@kbn/datemath'
+  - '@kbn/search-errors'
 tags:
   - shared-server
   - package
