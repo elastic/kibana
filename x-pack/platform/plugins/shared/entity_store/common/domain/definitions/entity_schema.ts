@@ -187,6 +187,10 @@ export const entitySchema = z.object({
   // Optional filter (Condition from @kbn/streamlang) applied in ESQL only, right after the
   // LOOKUP JOIN, to filter rows (e.g. keep already-stored entities or IDP-like events). No DSL equivalent.
   postAggFilter: z.optional(streamlangConditionSchema),
+  // Optional document-level predicate (Condition from @kbn/streamlang) selecting which logs this
+  // extraction variant handles, applied pre-aggregation in the log extraction probe and query.
+  // Omission scans every document passing `identityField.documentsFilter`.
+  extractionGate: z.optional(streamlangConditionSchema),
   // Optional: when conditions are true on source docs, set the given fields (EVAL after field evals, before STATS).
   whenConditionTrueSetFieldsPreAgg: z.optional(z.array(setFieldsByConditionSchema)),
   // Post-STATS EVAL in logs ESQL (recent.* vs plain). Single-doc paths re-apply entries after pre-agg for parity.

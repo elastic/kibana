@@ -188,7 +188,7 @@ export class LogsExtractionClient {
 
     try {
       const { config, engineState } = await this.getLogExtractionConfigAndState(type);
-      const entityDefinition = getEntityDefinition(type, this.namespace);
+      const entityDefinition = getEntityDefinition(type, this.namespace, this.extractionMode);
       const {
         isRemote: resolvedIsRemote,
         count,
@@ -592,6 +592,7 @@ export class LogsExtractionClient {
           const probe = await this.runLogPaginationCursorProbeForNextPage({
             indexPatterns,
             type,
+            entityDefinition,
             fromDateISO,
             toDateISO,
             logsPageCursorStart,
@@ -696,6 +697,7 @@ export class LogsExtractionClient {
   private async runLogPaginationCursorProbeForNextPage({
     indexPatterns,
     type,
+    entityDefinition,
     fromDateISO,
     toDateISO,
     logsPageCursorStart,
@@ -705,6 +707,7 @@ export class LogsExtractionClient {
   }: {
     indexPatterns: string[];
     type: EntityType;
+    entityDefinition: ManagedEntityDefinition;
     fromDateISO: string;
     toDateISO: string;
     logsPageCursorStart: LogSlicePaginationParams | undefined;
@@ -721,7 +724,7 @@ export class LogsExtractionClient {
           esClient: this.esClient,
           query: buildLogPaginationCursorProbeEsql({
             indexPatterns: patterns,
-            type,
+            entityDefinition,
             fromDateISO,
             toDateISO,
             logsPageCursorStart,
@@ -810,7 +813,6 @@ export class LogsExtractionClient {
         pagination,
         logsPageCursorStart,
         logsPageCursorEnd,
-        extractionMode: this.extractionMode,
       });
 
       this.logger.debug(
