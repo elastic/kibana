@@ -8,22 +8,30 @@
 import React from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import {
-  ANALYSIS_WINDOW_DAYS_DEFAULT,
-  SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+  RULE_TUNING_DEFAULT_EXTRAS,
+  RuleTuningWorkerExtras,
+  type WorkerSettings,
 } from '@kbn/alertzero-common';
-import { AnalysisWindowDaysField } from '../components/analysis_window_days_field';
-import * as i18n from '../settings_translations';
-import type { WatchCustomSettingsComponent } from './types';
+import { AnalysisWindowDaysField } from './analysis_window_days_field';
+import * as i18n from './detection_translations';
+import type { WorkerCustomSettingsComponent } from './types';
 
-export const DetectionWatchSettings: WatchCustomSettingsComponent = ({
-  worker,
+/** The server projects complete extras; fall back to the defaults rather than crash a render. */
+const readRuleTuningExtras = (settings: WorkerSettings): RuleTuningWorkerExtras => {
+  const parsed = RuleTuningWorkerExtras.safeParse(settings.extras);
+  return parsed.success ? parsed.data : RULE_TUNING_DEFAULT_EXTRAS;
+};
+
+/**
+ * Detection Watch controls for the Rule Tuning Worker. Every change hands the complete `extras`
+ * object back to the page draft; adding a field means adding its control and spreading it here.
+ */
+export const RuleTuningSettings: WorkerCustomSettingsComponent = ({
   settings,
   isDisabled,
-  onSettingsChange,
+  onExtrasChange,
 }) => {
-  if (worker.id !== SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID) {
-    return null;
-  }
+  const extras = readRuleTuningExtras(settings);
 
   return (
     <>
@@ -33,14 +41,10 @@ export const DetectionWatchSettings: WatchCustomSettingsComponent = ({
       </EuiTitle>
       <EuiSpacer size="s" />
       <AnalysisWindowDaysField
-        current={settings.analysisWindowDays ?? ANALYSIS_WINDOW_DAYS_DEFAULT}
+        current={extras.analysisWindowDays}
         isDisabled={isDisabled}
-        onChange={(analysisWindowDays) => onSettingsChange({ analysisWindowDays })}
+        onChange={(analysisWindowDays) => onExtrasChange({ ...extras, analysisWindowDays })}
       />
     </>
   );
-};
-
-DetectionWatchSettings.coveredFields = {
-  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: ['analysisWindowDays'],
 };
