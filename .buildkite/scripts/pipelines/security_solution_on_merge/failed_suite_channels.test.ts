@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { execFileSync } from 'child_process';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -55,20 +56,81 @@ const cypressStepsInPipeline = (): PipelineStep[] => {
   );
 };
 
-/**
- * CODEOWNERS entries at or below `specDir`, plus the nearest ancestor entry.
- *
- * Deliberately ignores wildcard patterns: this is here to catch ownership drift
- * inside a suite tree, not to reimplement GitHub's matcher.
- */
-const expectedOwnersFor = (specDir: string): string[] => {
-  const entries = readFileSync(CODEOWNERS, 'utf8')
+interface CodeownersEntry {
+  path: string;
+  owners: string[];
+}
+
+const trackedFileCache = new Map<string, string[]>();
+
+const trackedFilesUnder = (specDir: string): string[] => {
+  const cached = trackedFileCache.get(specDir);
+  if (cached) {
+    return cached;
+  }
+
+  const files = execFileSync('git', ['ls-files', '-z', '--', specDir], {
+    cwd: REPO_ROOT,
+    encoding: 'utf8',
+    maxBuffer: 32 * 1024 * 1024,
+  })
+    .split('\0')
+    .filter(Boolean);
+
+  trackedFileCache.set(specDir, files);
+  return files;
+};
+
+const codeownersEntries = (): CodeownersEntry[] =>
+  readFileSync(CODEOWNERS, 'utf8')
     .split('\n')
     .map((line) => line.trim())
     .filter((line) => line.length > 0 && !line.startsWith('#'))
     .map((line) => line.split(/\s+/))
-    .filter(([pattern]) => !pattern.includes('*'))
     .map(([pattern, ...owners]) => ({ path: pattern.replace(/^\/|\/$/g, ''), owners }));
+
+/**
+ * Whether a wildcard pattern can reach files inside `specDir`.
+ *
+ * `*` does not cross `/` in CODEOWNERS, and a `dir/*` rule covers files directly
+ * in that directory rather than cascading into subdirectories. So a pattern is
+ * only in scope when it can match `specDir` itself or something beneath it.
+ */
+const patternRegex = (pattern: string): RegExp =>
+  new RegExp(
+    `^${pattern
+      .split('/')
+      .map((segment) =>
+        segment === '**'
+          ? '\u0000'
+          : segment.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '[^/]*')
+      )
+      .join('/')
+      .replace(/\u0000\//g, '(?:.*/)?')
+      .replace(/\u0000/g, '.*')}$`
+  );
+
+/**
+ * Whether a wildcard rule owns files that actually exist inside `specDir`.
+ *
+ * Matching tracked paths rather than hypothetical ones keeps this honest in both
+ * directions: `*` not crossing `/` falls out for free, and a pattern is only
+ * flagged when it really does claim a file in the suite.
+ */
+const wildcardReaches = (pattern: string, specDir: string): boolean => {
+  const regex = patternRegex(pattern);
+  return trackedFilesUnder(specDir).some((file) => regex.test(file));
+};
+
+/**
+ * CODEOWNERS entries at or below `specDir`, plus the nearest ancestor entry.
+ *
+ * Only handles literal paths. Wildcard rules that could reach a suite are
+ * rejected by their own test rather than silently skipped here, so this stays a
+ * drift check instead of a partial reimplementation of GitHub's matcher.
+ */
+const expectedOwnersFor = (specDir: string): string[] => {
+  const entries = codeownersEntries().filter((entry) => !entry.path.includes('*'));
 
   const nested = entries.filter(
     (entry) => entry.path === specDir || entry.path.startsWith(`${specDir}/`)
@@ -234,6 +296,45 @@ describe('CODEOWNERS agreement', () => {
         bySpecDir.set(suite.specDir, suite);
       }
     }
+  });
+});
+
+describe('CODEOWNERS wildcard rules', () => {
+  it('has no wildcard rule reaching into a suite tree', () => {
+    // expectedOwnersFor only understands literal paths. Rather than let a
+    // wildcard rule be skipped and the drift check pass green, fail here so
+    // whoever adds it reconciles the mapping by hand.
+    const offenders = codeownersEntries()
+      .filter((entry) => entry.path.includes('*'))
+      .flatMap((entry) =>
+        getSuitesConfig()
+          .suites.filter((suite) => wildcardReaches(entry.path, suite.specDir))
+          .map((suite) => `${entry.path} -> ${suite.label}`)
+      );
+
+    expect(offenders).toEqual([]);
+  });
+
+  it('scopes wildcards the way CODEOWNERS does', () => {
+    const specDir = 'x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore';
+    const cypressRoot = 'x-pack/solutions/security/test/security_solution_cypress/cypress';
+
+    expect(trackedFilesUnder(specDir).length).toBeGreaterThan(0);
+
+    // `dir/*` owns files directly in dir, so it cannot reach two levels down.
+    expect(wildcardReaches(`${cypressRoot}/*`, specDir)).toBe(false);
+    expect(wildcardReaches(`${cypressRoot}/e2e/*`, specDir)).toBe(false);
+
+    // `**` spans directories, and a `*` standing in for the suite directory reaches it.
+    expect(wildcardReaches(`${cypressRoot}/**`, specDir)).toBe(true);
+    expect(wildcardReaches(`${cypressRoot}/e2e/*/**`, specDir)).toBe(true);
+    // Every spec sits in a subdirectory of the suite, so a rule for files
+    // directly inside it owns nothing, while one a level deeper owns them all.
+    expect(wildcardReaches(`${specDir}/*`, specDir)).toBe(false);
+    expect(wildcardReaches(`${specDir}/*/*`, specDir)).toBe(true);
+
+    // Only claims paths that exist, so an unrelated tree is not flagged.
+    expect(wildcardReaches('x-pack/solutions/**/test/serverless/**/fleet', specDir)).toBe(false);
   });
 });
 
