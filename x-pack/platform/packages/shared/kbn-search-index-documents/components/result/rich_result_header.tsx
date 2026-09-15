@@ -141,7 +141,7 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
       button={metaDataIcon}
       isOpen={popoverIsOpen}
       closePopover={closePopover}
-      aria-labelledby={popoverTitleId}
+      aria-label={metaDataLabel}
     >
       <EuiFlexGroup
         gutterSize="s"
