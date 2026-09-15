@@ -1,6 +1,6 @@
 responses:
   200:
-    description: 'Indicates a successful response'
+    description: 'Indicates a successful response. If the page exceeds Kibana''s response buffer, the handler still returns 200 with results: [] and the page total.'
     content:
       application/json:
         examples:

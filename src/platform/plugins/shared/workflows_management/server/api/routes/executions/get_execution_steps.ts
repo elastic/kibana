@@ -47,7 +47,7 @@ export function registerGetExecutionStepsRoute({ router, api, spaces }: RouteDep
       security: WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
       summary: 'Get execution step executions',
       description:
-        'Retrieve a paginated list of step executions for a specific workflow execution. Does not include step input or output; fetch those with GET /api/workflows/executions/{executionId}/step/{stepExecutionId}.',
+        "Retrieve a paginated list of step executions for a specific workflow execution. Does not include step input or output; fetch those with GET /api/workflows/executions/{executionId}/step/{stepExecutionId}. If a page exceeds Kibana's response buffer, the handler still returns 200 with `results: []` and the page `total`.",
       options: {
         tags: [OAS_TAG],
         availability: AVAILABILITY,

@@ -11,6 +11,7 @@ import path from 'path';
 import { schema } from '@kbn/config-schema';
 import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import { i18n } from '@kbn/i18n';
+import { WORKFLOW_EXECUTION_EMBEDDED_STEPS_MAX_COUNT } from '../../../../common';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
@@ -54,7 +55,10 @@ export function registerGetExecutionRoute({ router, api, spaces }: RouteDependen
               }),
               omitStepExecutions: schema.boolean({
                 defaultValue: false,
-                meta: { description: 'Omit embedded step executions from the response.' },
+                meta: {
+                  description:
+                    `When \`true\`, omit the embedded \`stepExecutions\` array. Defaults to \`false\`. When this is \`false\`, the embed is capped at ${WORKFLOW_EXECUTION_EMBEDDED_STEPS_MAX_COUNT} steps.`,
+                },
               }),
             }),
           },
