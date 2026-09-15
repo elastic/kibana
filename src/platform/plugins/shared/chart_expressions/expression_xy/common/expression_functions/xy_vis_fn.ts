@@ -12,7 +12,14 @@ import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import { LayerTypes, XY_VIS_RENDERER, DATA_LAYER } from '../constants';
 import { appendLayerIds, getAccessors, getShowLines, normalizeTable } from '../helpers';
-import type { DataLayerConfigResult, XYLayerConfig, XyVisFn, XYArgs, XYRender } from '../types';
+import type {
+  DataLayerConfig,
+  DataLayerConfigResult,
+  XYLayerConfig,
+  XyVisFn,
+  XYArgs,
+  XYRender,
+} from '../types';
 import {
   hasAreaLayer,
   hasBarLayer,
@@ -32,6 +39,7 @@ import {
   validateMinBarHeight,
 } from './validate';
 import { logDatatable } from '../utils';
+import { applyAxisFormatPolicies, resolveAxisFormatPolicies } from '../axis_format_policy';
 
 const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult => {
   const accessors = getAccessors<string | ExpressionValueVisDimension, XYArgs>(args, table);
@@ -105,14 +113,19 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   ];
 
   logDatatable(data, layers, handlers, args.splitColumnAccessor, args.splitRowAccessor);
+  const axisFormatPolicies = resolveAxisFormatPolicies(layers, args.yAxisConfigs);
+  const chartLayers = applyAxisFormatPolicies(layers, axisFormatPolicies);
+  const chartDataLayers = chartLayers.filter(
+    (layer): layer is DataLayerConfig => layer.layerType === LayerTypes.DATA
+  );
 
-  const hasBar = hasBarLayer(dataLayers);
-  const hasArea = hasAreaLayer(dataLayers);
+  const hasBar = hasBarLayer(chartDataLayers);
+  const hasArea = hasAreaLayer(chartDataLayers);
 
-  validateExtents(dataLayers, hasBar || hasArea, args.yAxisConfigs, args.xAxisConfig);
+  validateExtents(chartDataLayers, hasBar || hasArea, args.yAxisConfigs, args.xAxisConfig);
   validateFillOpacity(args.fillOpacity, hasArea);
-  validateAddTimeMarker(dataLayers, args.addTimeMarker);
-  validateMinTimeBarInterval(dataLayers, hasBar, args.minTimeBarInterval);
+  validateAddTimeMarker(chartDataLayers, args.addTimeMarker);
+  validateMinTimeBarInterval(chartDataLayers, hasBar, args.minTimeBarInterval);
   validateMinBarHeight(args.minBarHeight);
 
   validateValueLabels(args.valueLabels, hasBar);
@@ -121,7 +134,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   validateLineWidthForChartType(lineWidth, args.seriesType);
   validateShowPointsForChartType(showPoints, args.seriesType);
   validatePointsRadiusForChartType(pointsRadius, args.seriesType);
-  validateAxes(dataLayers, args.yAxisConfigs);
+  validateAxes(chartDataLayers, args.yAxisConfigs);
 
   return {
     type: 'render',
@@ -129,7 +142,8 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
     value: {
       args: {
         ...restArgs,
-        layers,
+        layers: chartLayers,
+        axisFormatPolicies,
         minBarHeight: args.minBarHeight ?? 1,
         markSizeRatio:
           dataLayers[0].markSizeAccessor && !args.markSizeRatio ? 10 : args.markSizeRatio,

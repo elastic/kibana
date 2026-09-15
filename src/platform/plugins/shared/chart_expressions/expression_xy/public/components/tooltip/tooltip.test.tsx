@@ -16,6 +16,7 @@ import type { XYChartSeriesIdentifier } from '@elastic/charts';
 import { sampleArgs, sampleLayer } from '../../../common/test_utils';
 import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
 import type { RawValue } from '@kbn/data-plugin/common';
+import { TooltipRow } from './tooltip_row';
 
 const getSeriesIdentifier = ({
   layerId,
@@ -126,6 +127,39 @@ describe('Tooltip', () => {
     );
 
     expect(tooltip).toMatchSnapshot();
+  });
+
+  it('uses the shared axis formatter for y values', () => {
+    const tooltip = shallow(
+      <Tooltip
+        header={header}
+        values={[header]}
+        fieldFormats={fieldFormats}
+        titles={titles}
+        formatFactory={formatFactory}
+        formattedDatatables={{
+          [layerId]: { table: data, invertedRawValueMap, formattedColumns: {} },
+        }}
+        layers={[sampleLayer]}
+        axesConfiguration={[
+          {
+            groupId: 'left',
+            position: 'left',
+            series: [{ layer: layerId, accessor }],
+            formatter: {
+              convertToText: (value) => `axis-${value}`,
+            } as FieldFormat,
+          },
+        ]}
+      />
+    );
+
+    expect(
+      tooltip
+        .find(TooltipRow)
+        .filterWhere((row) => row.prop('label') === 'y-title')
+        .prop('value')
+    ).toBe('axis-some value');
   });
 
   it('should render tooltip with xDomain', () => {

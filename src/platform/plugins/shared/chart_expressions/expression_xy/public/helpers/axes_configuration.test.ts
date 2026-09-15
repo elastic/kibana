@@ -468,4 +468,30 @@ describe('axes_configuration', () => {
     expect(formatFactory).toHaveBeenCalledWith({ id: 'number', params: {} });
     expect(formatFactory).toHaveBeenCalledWith({ id: 'currency', params: {} });
   });
+
+  it('uses the resolved axis policy formatter', () => {
+    const formatFactory = jest.fn();
+    const formatter = { id: 'duration', params: { inputFormat: 'seconds' } };
+
+    getAxesConfiguration(
+      [sampleLayer],
+      false,
+      formatFactory,
+      fieldFormats,
+      [],
+      [
+        {
+          groupId: 'left',
+          position: 'left',
+          anchor: { layerId: 'first', accessor: 'yAccessorId' },
+          formatter,
+          members: [],
+          mismatches: [],
+          source: 'inferred',
+        },
+      ]
+    );
+
+    expect(formatFactory).toHaveBeenCalledWith(formatter);
+  });
 });

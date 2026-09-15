@@ -10,6 +10,15 @@
 export const PLUGIN_ID = 'expressionXy';
 export const PLUGIN_NAME = 'expressionXy';
 
+export { groupAxisSeries, LEFT_AXIS_GROUP_ID, RIGHT_AXIS_GROUP_ID } from './axis_grouping';
+export type { AxisSeriesDescriptor, GroupedAxisSeries } from './axis_grouping';
+export { applyAxisFormatPolicies, resolveAxisFormatPolicies } from './axis_format_policy';
+export type {
+  AxisFormatMismatch,
+  AxisFormatPolicy,
+  AxisPolicyMember,
+} from './axis_format_policy_types';
+
 export {
   LayerTypes,
   XYCurveTypes,
