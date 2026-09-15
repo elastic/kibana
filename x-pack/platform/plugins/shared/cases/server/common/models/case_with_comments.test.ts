@@ -435,6 +435,27 @@ describe('CaseCommentModel', () => {
           })
         ).rejects.toThrow();
       });
+
+      it('throws if trying to add a unified (v2) event to a closed case', async () => {
+        clientArgs.services.caseService.getCase.mockResolvedValue(closedCase);
+
+        const modelForClosedCase = await CaseCommentModel.create(closedCase.id, clientArgs);
+
+        const unifiedEventComment = {
+          type: SECURITY_EVENT_ATTACHMENT_TYPE,
+          owner: SECURITY_SOLUTION_OWNER,
+          attachmentId: 'event-id-1',
+          metadata: { index: 'idx-1' },
+        };
+
+        await expect(
+          modelForClosedCase.createComment({
+            id: 'comment-1',
+            commentReq: unifiedEventComment as never,
+            createdDate,
+          })
+        ).rejects.toThrow('Event cannot be attached to a closed case');
+      });
     });
   });
 
