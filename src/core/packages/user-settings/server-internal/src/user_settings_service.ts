@@ -35,8 +35,6 @@ export interface UserSettings {
 export interface InternalUserSettingsServiceSetup {
   getUserSettings: (request: KibanaRequest) => Promise<UserSettings>;
   getUserSettingDarkMode: (request: KibanaRequest) => Promise<DarkModeValue | undefined>;
-  getUserSettingLocale: (request: KibanaRequest) => Promise<string | undefined>;
-  getUserSettingRememberSelectedSpace: (request: KibanaRequest) => Promise<boolean>;
 }
 
 /**
@@ -64,10 +62,6 @@ export class UserSettingsService {
       getUserSettings,
       getUserSettingDarkMode: async (request: KibanaRequest) =>
         (await getUserSettings(request)).darkMode,
-      getUserSettingLocale: async (request: KibanaRequest) =>
-        (await getUserSettings(request)).locale,
-      getUserSettingRememberSelectedSpace: async (request: KibanaRequest) =>
-        (await getUserSettings(request)).rememberSelectedSpace,
     };
   }
 

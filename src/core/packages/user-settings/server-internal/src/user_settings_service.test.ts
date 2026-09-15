@@ -123,63 +123,6 @@ describe('#setup', () => {
     });
   });
 
-  it('fetches userSettings when client is set and returns `true` when `rememberSelectedSpace` is set to `true`', async () => {
-    startDeps.userProfile.getCurrent.mockResolvedValue(
-      createUserProfile({ rememberSelectedSpace: true })
-    );
-
-    const { getUserSettingRememberSelectedSpace } = service.setup();
-    service.start(startDeps);
-
-    const kibanaRequest = httpServerMock.createKibanaRequest();
-    const rememberSelectedSpace = await getUserSettingRememberSelectedSpace(kibanaRequest);
-
-    expect(rememberSelectedSpace).toEqual(true);
-    expect(startDeps.userProfile.getCurrent).toHaveBeenCalledTimes(1);
-    expect(startDeps.userProfile.getCurrent).toHaveBeenCalledWith({
-      request: kibanaRequest,
-      dataPath: 'userSettings',
-    });
-  });
-
-  it('fetches userSettings when client is set and returns `false` when `rememberSelectedSpace` is set to `false`', async () => {
-    startDeps.userProfile.getCurrent.mockResolvedValue(
-      createUserProfile({ rememberSelectedSpace: false })
-    );
-
-    const { getUserSettingRememberSelectedSpace } = service.setup();
-    service.start(startDeps);
-
-    const kibanaRequest = httpServerMock.createKibanaRequest();
-    const rememberSelectedSpace = await getUserSettingRememberSelectedSpace(kibanaRequest);
-
-    expect(rememberSelectedSpace).toEqual(false);
-    expect(startDeps.userProfile.getCurrent).toHaveBeenCalledTimes(1);
-    expect(startDeps.userProfile.getCurrent).toHaveBeenCalledWith({
-      request: kibanaRequest,
-      dataPath: 'userSettings',
-    });
-  });
-
-  it('fetches userSettings when client is set and returns `true` when `rememberSelectedSpace` is not set', async () => {
-    startDeps.userProfile.getCurrent.mockResolvedValue(
-      createUserProfile({ rememberSelectedSpace: undefined })
-    );
-
-    const { getUserSettingRememberSelectedSpace } = service.setup();
-    service.start(startDeps);
-
-    const kibanaRequest = httpServerMock.createKibanaRequest();
-    const rememberSelectedSpace = await getUserSettingRememberSelectedSpace(kibanaRequest);
-
-    expect(rememberSelectedSpace).toEqual(true);
-    expect(startDeps.userProfile.getCurrent).toHaveBeenCalledTimes(1);
-    expect(startDeps.userProfile.getCurrent).toHaveBeenCalledWith({
-      request: kibanaRequest,
-      dataPath: 'userSettings',
-    });
-  });
-
   it('fetches userSettings once when resolving all settings together', async () => {
     startDeps.userProfile.getCurrent.mockResolvedValue(
       createUserProfile({ darkMode: 'dark', locale: 'fr-FR', rememberSelectedSpace: false })

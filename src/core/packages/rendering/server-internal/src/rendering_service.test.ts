@@ -684,6 +684,41 @@ describe('RenderingService', () => {
       return [(await service.setup(mockRenderingSetupDeps)).render, mockRenderingSetupDeps];
     });
 
+    describe('getUserSettings call-site invariants', () => {
+      let uiSettings: {
+        client: ReturnType<typeof uiSettingsServiceMock.createClient>;
+        globalClient: ReturnType<typeof uiSettingsServiceMock.createClient>;
+      };
+
+      beforeEach(() => {
+        uiSettings = {
+          client: uiSettingsServiceMock.createClient(),
+          globalClient: uiSettingsServiceMock.createClient(),
+        };
+        uiSettings.client.getRegistered.mockReturnValue({});
+      });
+
+      it('calls getUserSettings exactly once per authenticated render', async () => {
+        await service.preboot(mockRenderingPrebootDeps);
+        const { render } = await service.setup(mockRenderingSetupDeps);
+
+        const request = createKibanaRequest();
+        await render(request, uiSettings);
+
+        expect(mockRenderingSetupDeps.userSettings.getUserSettings).toHaveBeenCalledTimes(1);
+        expect(mockRenderingSetupDeps.userSettings.getUserSettings).toHaveBeenCalledWith(request);
+      });
+
+      it('does not call getUserSettings for anonymous renders', async () => {
+        await service.preboot(mockRenderingPrebootDeps);
+        const { render } = await service.setup(mockRenderingSetupDeps);
+
+        await render(createKibanaRequest(), uiSettings, { isAnonymousPage: true });
+
+        expect(mockRenderingSetupDeps.userSettings.getUserSettings).not.toHaveBeenCalled();
+      });
+    });
+
     describe('translationsUrl for non-English locales', () => {
       let uiSettings: {
         client: ReturnType<typeof uiSettingsServiceMock.createClient>;
