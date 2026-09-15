@@ -12,6 +12,7 @@ import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser'
 import { useKibana } from '../../hooks/use_kibana';
 import { callObservabilityOnboardingApi } from '../../services/rest/create_call_api';
 import { ApiEndpointId } from '../../../common/api_endpoints';
+import { IS_INGEST_RECEIPTS_ENABLED } from '../../../common/feature_flags';
 import { API_ENDPOINTS } from './endpoints_config';
 
 const POLL_INTERVAL_MS = 5_000;
@@ -33,17 +34,20 @@ const ENDPOINT_LABELS: Partial<Record<ApiEndpointId, string>> = Object.fromEntri
 
 export function useIngestReceiptToast(apiKeyIds: Partial<Record<ApiEndpointId, string>>): void {
   const {
-    services: { notifications },
+    services: { notifications, featureFlags },
   } = useKibana();
+  const isEnabled = featureFlags.getBooleanValue(IS_INGEST_RECEIPTS_ENABLED, false);
   const startedAtRef = useRef<Partial<Record<VerifiableEndpointId, number>>>({});
   const inFlightRef = useRef<Partial<Record<VerifiableEndpointId, boolean>>>({});
   const [settledEndpointIds, setSettledEndpointIds] = useState<
     Partial<Record<VerifiableEndpointId, boolean>>
   >({});
 
-  const pendingEndpointIds = VERIFIABLE_ENDPOINT_IDS.filter(
-    (endpointId) => Boolean(apiKeyIds[endpointId]) && !settledEndpointIds[endpointId]
-  );
+  const pendingEndpointIds = isEnabled
+    ? VERIFIABLE_ENDPOINT_IDS.filter(
+        (endpointId) => Boolean(apiKeyIds[endpointId]) && !settledEndpointIds[endpointId]
+      )
+    : [];
 
   const settle = (endpointId: VerifiableEndpointId) =>
     setSettledEndpointIds((previous) => ({ ...previous, [endpointId]: true }));

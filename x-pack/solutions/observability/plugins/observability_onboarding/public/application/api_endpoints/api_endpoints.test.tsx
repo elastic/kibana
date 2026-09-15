@@ -85,6 +85,7 @@ describe('ApiEndpoints', () => {
     });
     mockUseKibana.mockReturnValue({
       services: {
+        featureFlags: { getBooleanValue: jest.fn().mockReturnValue(false) },
         application: {
           capabilities: {
             api_keys: {

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { ApiEndpointId } from './api_endpoints';
-
 export const INGEST_RECEIPTS_DATA_STREAM = '.kibana-observability-onboarding-receipts';
 export const INGEST_RECEIPTS_INDEX_TEMPLATE = 'kibana-observability-onboarding-receipts';
 export const INGEST_RECEIPTS_RETENTION = '2d';
@@ -24,23 +22,3 @@ export const INGEST_RECEIPT_FIELDS = {
   ingestPath: 'ingestPath',
   signal: 'signal',
 } as const;
-
-export type ReceiptSignal = 'logs' | 'metrics' | 'traces';
-
-export interface ReceiptSelector {
-  endpointId: string;
-  ingestPath: string;
-  signal?: ReceiptSignal;
-}
-
-// TODO(contract): collector classifier values are not pinned yet (HOC#3528). Nothing reads this map.
-export const INGEST_RECEIPT_SELECTORS: Partial<Record<ApiEndpointId, readonly ReceiptSelector[]>> =
-  {
-    [ApiEndpointId.Elasticsearch]: [{ endpointId: 'TODO(contract)', ingestPath: 'TODO(contract)' }],
-    [ApiEndpointId.Prometheus]: [{ endpointId: 'TODO(contract)', ingestPath: 'TODO(contract)' }],
-    [ApiEndpointId.OpenTelemetry]: [
-      { endpointId: 'TODO(contract)', ingestPath: 'TODO(contract)' },
-      { endpointId: 'TODO(contract)', ingestPath: 'TODO(contract)' },
-      { endpointId: 'TODO(contract)', ingestPath: 'TODO(contract)' },
-    ],
-  };

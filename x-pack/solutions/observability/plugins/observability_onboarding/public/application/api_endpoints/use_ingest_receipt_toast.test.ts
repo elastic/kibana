@@ -9,6 +9,7 @@ import { act, renderHook } from '@testing-library/react';
 import { useKibana } from '../../hooks/use_kibana';
 import { callObservabilityOnboardingApi } from '../../services/rest/create_call_api';
 import { ApiEndpointId } from '../../../common/api_endpoints';
+import { IS_INGEST_RECEIPTS_ENABLED } from '../../../common/feature_flags';
 import { useIngestReceiptToast } from './use_ingest_receipt_toast';
 
 jest.mock('../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
@@ -30,15 +31,41 @@ const advanceBy = async (milliseconds: number) => {
   });
 };
 
+const mockServices = (ingestReceiptsEnabled: boolean) => {
+  mockUseKibana.mockReturnValue({
+    services: {
+      notifications: { toasts: { addSuccess } },
+      featureFlags: {
+        getBooleanValue: jest
+          .fn()
+          .mockImplementation((key: string) =>
+            key === IS_INGEST_RECEIPTS_ENABLED ? ingestReceiptsEnabled : false
+          ),
+      },
+    },
+  });
+};
+
 describe('useIngestReceiptToast', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     jest.clearAllMocks();
-    mockUseKibana.mockReturnValue({ services: { notifications: { toasts: { addSuccess } } } });
+    mockServices(true);
   });
 
   afterEach(() => {
     jest.useRealTimers();
+  });
+
+  it('does not poll when the ingest receipts flag is off', async () => {
+    mockServices(false);
+    mockCallApi.mockResolvedValue({ received: true });
+
+    renderHook(() => useIngestReceiptToast({ [ApiEndpointId.OpenTelemetry]: 'key-id' }));
+    await advanceBy(POLL_INTERVAL_MS * 3);
+
+    expect(mockCallApi).not.toHaveBeenCalled();
+    expect(addSuccess).not.toHaveBeenCalled();
   });
 
   it('polls the verification route with the created key and endpoint', async () => {

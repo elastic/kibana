@@ -10,6 +10,7 @@ import { errors } from '@elastic/elasticsearch';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { ApiEndpointId } from '../../../common/api_endpoints';
 import { INGEST_RECEIPTS_DATA_STREAM } from '../../../common/ingest_receipts';
+import { IS_INGEST_RECEIPTS_ENABLED } from '../../../common/feature_flags';
 import { apiEndpointsRouteRepository } from './route';
 
 const verificationEndpoint =
@@ -52,7 +53,12 @@ describe('verification handler', () => {
   const createResources = ({
     apiKeyId = 'key-id',
     endpointId = ApiEndpointId.OpenTelemetry,
-  }: { apiKeyId?: string; endpointId?: ApiEndpointId } = {}) =>
+    ingestReceiptsEnabled = true,
+  }: {
+    apiKeyId?: string;
+    endpointId?: ApiEndpointId;
+    ingestReceiptsEnabled?: boolean;
+  } = {}) =>
     ({
       context: {
         core: Promise.resolve({
@@ -61,6 +67,13 @@ describe('verification handler', () => {
               asCurrentUser: { security: { getApiKey } },
               asInternalUser: { search },
             },
+          },
+          featureFlags: {
+            getBooleanValue: jest
+              .fn()
+              .mockImplementation((key: string) =>
+                Promise.resolve(key === IS_INGEST_RECEIPTS_ENABLED ? ingestReceiptsEnabled : false)
+              ),
           },
         }),
       },
@@ -71,6 +84,14 @@ describe('verification handler', () => {
     jest.clearAllMocks();
     getApiKey.mockResolvedValue({ api_keys: [{ id: 'key-id' }] });
     search.mockResolvedValue({ hits: { hits: [] } });
+  });
+
+  it('returns 404 when the ingest receipts flag is off', async () => {
+    await expect(handler(createResources({ ingestReceiptsEnabled: false }))).rejects.toMatchObject({
+      output: { statusCode: 404 },
+    });
+    expect(getApiKey).not.toHaveBeenCalled();
+    expect(search).not.toHaveBeenCalled();
   });
 
   it('returns 404 without searching when the caller owns no active key with that id', async () => {

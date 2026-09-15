@@ -30,6 +30,7 @@ import {
   INGEST_RECEIPT_FIELDS,
 } from '../../../common/ingest_receipts';
 import {
+  IS_INGEST_RECEIPTS_ENABLED,
   IS_MANAGED_OTLP_SERVICE_ENABLED,
   IS_MANAGED_OTLP_SERVICE_PRW_ENDPOINT_ENABLED,
   IS_VENDOR_ENDPOINTS_ENABLED,
@@ -254,7 +255,13 @@ const verificationRoute = createObservabilityOnboardingServerRoute({
 
     const {
       elasticsearch: { client },
+      featureFlags,
     } = await context.core;
+
+    // Same 404 as an unknown key, so the flag state is not observable from the browser either.
+    if (!(await featureFlags.getBooleanValue(IS_INGEST_RECEIPTS_ENABLED, false))) {
+      throw Boom.notFound();
+    }
 
     // Receipts are readable by the internal user only, so ownership has to be established first.
     // An id the caller does not own is reported as missing so the route cannot be used to probe ids.
