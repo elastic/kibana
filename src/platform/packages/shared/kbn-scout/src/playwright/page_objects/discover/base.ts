@@ -27,6 +27,8 @@ export interface DataViewOptions {
   name: string;
   /** Create a temporary ("ad hoc") data view via "Explore" instead of saving. */
   adHoc?: boolean;
+  /** Wait for the tab to finish loading. Skip on uninitialized tabs (no grid yet). */
+  waitUntilLoaded?: boolean;
 }
 
 export interface TimeoutOptions {

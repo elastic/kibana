@@ -50,9 +50,9 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
       'tab 1: create a new tab, create another data view from search bar, set query and filter',
       async () => {
         await unifiedTabs.createNewTab();
-        expect(await discover.isUninitialized()).toBe(true);
+        await expect(discover.getUninitializedPrompt()).toBeVisible();
 
-        await discover.createDataViewFromSearchBar({ name: 'logsta' });
+        await discover.createDataViewFromSearchBar({ name: 'logsta', waitUntilLoaded: false });
 
         await filterBar.addFilter({ field: 'extension', operator: 'is', value: 'jpeg' });
         await discover.writeAndSubmitKqlQuery(KQL_QUERY);
@@ -62,7 +62,7 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
 
     await spaceTest.step('tab 2: create another new tab in ES|QL mode', async () => {
       await unifiedTabs.createNewTab();
-      expect(await discover.isUninitialized()).toBe(true);
+      await expect(discover.getUninitializedPrompt()).toBeVisible();
       await discover.selectTextBaseLang();
       expect(await discover.getEsqlQueryValue()).toBe('');
     });
@@ -88,7 +88,7 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
       'a new tab inherits the active data view with an empty query and no filters',
       async () => {
         await unifiedTabs.createNewTab();
-        expect(await discover.isUninitialized()).toBe(true);
+        await expect(discover.getUninitializedPrompt()).toBeVisible();
         expect(await discover.getSelectedDataViewName()).toBe('logsta*');
         expect(await queryBar.getQuery()).toBe('');
         expect(await filterBar.getFilterCount()).toBe(0);
@@ -111,7 +111,7 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
       'tab 1: new ES|QL tab starts empty and accepts an edited query',
       async () => {
         await unifiedTabs.createNewTab();
-        expect(await discover.isUninitialized()).toBe(true);
+        await expect(discover.getUninitializedPrompt()).toBeVisible();
         await discover.selectTextBaseLang();
         expect(await discover.getEsqlQueryValue()).toBe('');
 
@@ -124,7 +124,7 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
 
     await spaceTest.step('tab 2: another new tab starts with an empty ES|QL query', async () => {
       await unifiedTabs.createNewTab();
-      expect(await discover.isUninitialized()).toBe(true);
+      await expect(discover.getUninitializedPrompt()).toBeVisible();
       expect(await discover.getEsqlQueryValue()).toBe('');
     });
   });

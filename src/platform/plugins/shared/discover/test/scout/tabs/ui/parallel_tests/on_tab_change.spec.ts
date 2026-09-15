@@ -163,7 +163,7 @@ spaceTest.describe('Discover tabs - on tab change', { tag: '@local-stateful-clas
       await expect(discover.getLensEditFlyout()).toBeVisible();
 
       await unifiedTabs.createNewTab();
-      expect(await discover.isUninitialized()).toBe(true);
+      await expect(discover.getUninitializedPrompt()).toBeVisible();
       await expect(discover.getLensEditFlyout()).toBeHidden();
     });
   });
@@ -184,7 +184,7 @@ spaceTest.describe('Discover tabs - on tab change', { tag: '@local-stateful-clas
 
     await spaceTest.step('tab 1: run a flights query with explicit time-field params', async () => {
       await unifiedTabs.createNewTab();
-      expect(await discover.isUninitialized()).toBe(true);
+      await expect(discover.getUninitializedPrompt()).toBeVisible();
 
       await discover.codeEditor.setCodeEditorValue(QUERY_WITH_TIME_FIELD);
       await datePicker.setAbsoluteRange(FLIGHTS_TIME_RANGE_DISPLAY);
@@ -199,7 +199,7 @@ spaceTest.describe('Discover tabs - on tab change', { tag: '@local-stateful-clas
 
     await spaceTest.step('tab 2: run a flights query without a time field', async () => {
       await unifiedTabs.createNewTab();
-      expect(await discover.isUninitialized()).toBe(true);
+      await expect(discover.getUninitializedPrompt()).toBeVisible();
 
       await discover.writeAndSubmitEsqlQuery(QUERY_WITHOUT_TIME_FIELD);
       await expectCurrentEsqlTabState(pageObjects, {

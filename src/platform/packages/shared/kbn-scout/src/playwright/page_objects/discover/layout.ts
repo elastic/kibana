@@ -97,7 +97,11 @@ export abstract class LayoutMixin extends SaveMixin {
     return (await this.getSelectedDataView().innerText()).trim();
   }
 
-  private async fillAndSubmitDataViewEditor({ name, adHoc = false }: DataViewOptions) {
+  private async fillAndSubmitDataViewEditor({
+    name,
+    adHoc = false,
+    waitUntilLoaded = true,
+  }: DataViewOptions) {
     // Minimal inline interaction with the data view editor flyout. The full
     // `DataViewEditorPage` object lives in the `data_view_editor` plugin, but
     // `kbn-scout` is a base package and must not depend on a plugin, so the few
@@ -150,7 +154,9 @@ export abstract class LayoutMixin extends SaveMixin {
       await expect(this.getSelectedDataView()).toHaveText(title, { timeout: 20_000 });
     }).toPass({ timeout: 45_000, intervals: [0] });
 
-    if (!(await this.isUninitialized())) {
+    // New empty tabs stay uninitialized after a data-view change; the caller knows
+    // that and should pass `waitUntilLoaded: false` instead of probing the prompt.
+    if (waitUntilLoaded) {
       await this.waitUntilTabIsLoaded();
     }
   }

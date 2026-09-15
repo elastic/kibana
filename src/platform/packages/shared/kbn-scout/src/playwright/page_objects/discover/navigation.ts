@@ -47,12 +47,12 @@ export abstract class NavigationMixin extends DiscoverAppBase {
     return this.page.testSubj.locator('refreshDataButton');
   }
 
-  getUninitializedKeyboardShortcuts(): Locator {
-    return this.page.testSubj.locator('discoverUninitializedKeyboardShortcuts');
+  getUninitializedPrompt(): Locator {
+    return this.page.testSubj.locator('discoverUninitialized');
   }
 
-  async isUninitialized(): Promise<boolean> {
-    return this.page.testSubj.locator('discoverUninitialized').isVisible();
+  getUninitializedKeyboardShortcuts(): Locator {
+    return this.page.testSubj.locator('discoverUninitializedKeyboardShortcuts');
   }
 
   // Waits for a Discover tab to finish loading.
