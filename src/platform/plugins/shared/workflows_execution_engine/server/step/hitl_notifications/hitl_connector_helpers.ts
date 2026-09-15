@@ -29,3 +29,14 @@ export function slackApiChannelTarget(channel: string): SlackApiChannelTarget {
 
   return { channelIds: [channel] };
 }
+
+/** Builds Actions params for a Slack v2 `sendMessage` call. */
+export function buildSlack2SendMessageInput(channel: string, text: string) {
+  return {
+    subAction: 'sendMessage' as const,
+    subActionParams: {
+      channel,
+      text,
+    },
+  };
+}

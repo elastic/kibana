@@ -178,6 +178,8 @@ export class WaitForApprovalStepImpl implements NodeImplementation, CancellableN
       approveLabel,
       rejectLabel,
       resumeLinks,
+      spaceId,
+      executionId: execution.id,
       connectorExecutor: this.connectorExecutor,
       abortController: this.stepExecutionRuntime.abortController,
     });
