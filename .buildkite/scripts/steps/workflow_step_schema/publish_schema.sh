@@ -21,30 +21,44 @@
 # env.sh) with package.json fallbacks, so the script is safe to call from either
 # the release (DRA) or serverless (image promotion) pipeline.
 #
-# Prerequisites (confirmed with @elastic/kibana-operations):
-#   - GCS_SA_CDN_KEY, GCS_SA_CDN_EMAIL, GCS_SA_CDN_BUCKET must be exported by
-#     setup_job_env.sh before this script runs. The pattern mirrors docker_image.sh.
-#   - The workflows-cdn service account must have write access to
-#     elastic-workflows-library-prod (separate from the main CDN bucket).
+# Prerequisites:
+#   - Repo-scoped CI Vault access to kv/ci-shared/workflows-library/gcs-publish
+#     (provisioned via a KV2Path resource in Terrazzo, see elastic/terrazzo#1483).
+#     The Buildkite agent env hook exports VAULT_TOKEN; no explicit vault login needed.
 
 set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
 CHANNEL="${1:-}"
+STAGE=""
+GCS_SA_EMAIL=""
 
-# Emit a Buildkite warning annotation if this script exits non-zero in CI,
-# so a soft-failed CDN publish is visible on the build page without trawling
-# step logs. No-ops outside CI (when BUILDKITE_AGENT_ACCESS_TOKEN is unset).
-_annotate_on_failure() {
+# Bash replaces EXIT traps rather than stacking them, so cleanup and failure
+# reporting must share one handler. Use `if` blocks (not `&&`) — a false guard
+# in `&&` returns 1, which under `set -euo pipefail` aborts the handler and
+# silently skips every step below it.
+_on_exit() {
   local exit_code=$?
+  trap - EXIT
+
+  if [[ -n "$STAGE" ]]; then
+    rm -rf "$STAGE"
+  fi
+
+  if [[ -n "$GCS_SA_EMAIL" ]]; then
+    gcloud auth revoke "$GCS_SA_EMAIL" 2>/dev/null || true
+  fi
+
   if [[ $exit_code -ne 0 && -n "${BUILDKITE_AGENT_ACCESS_TOKEN:-}" ]]; then
     buildkite-agent annotate \
       "**Workflow step schema CDN publish (${CHANNEL:-unknown} channel) failed** with exit code ${exit_code}. The schema at https://workflows.elastic.co may be stale. Check the job log for details." \
       --style warning --context workflow-schema-cdn 2>/dev/null || true
   fi
+
+  exit "$exit_code"
 }
-trap _annotate_on_failure EXIT
+trap _on_exit EXIT
 
 CDN_HOST="https://workflows.elastic.co"
 GENERATED_DIR="src/platform/packages/private/kbn-workflow-step-schema-cli/generated"
@@ -93,23 +107,24 @@ done < <(jq -r '.variants[] | [.path, .sha256] | @tsv' "$SRC/index.json")
 
 echo "--- Stage artifact (stamp kibanaVersion, buildHash, channel)"
 STAGE="$(mktemp -d)"
-# Narrow the revoke to the service account we activate, not every account on the machine.
-trap 'rm -rf "$STAGE"; gcloud auth revoke "${GCS_SA_CDN_EMAIL:-}" 2>/dev/null || true' EXIT
 cp -r "$SRC/." "$STAGE/"
 # `jq -S` sorts keys to preserve the key-sorted invariant of the published bytes.
 jq -S --arg v "$STAMP_VERSION" --arg h "$BUILD_HASH" --arg c "$CHANNEL" \
   '.kibanaVersion = $v | .buildHash = $h | .channel = $c' "$SRC/index.json" > "$STAGE/index.json"
 
-echo "--- Authenticate to GCP"
-# GCS_SA_CDN_KEY and GCS_SA_CDN_EMAIL are exported by setup_job_env.sh.
-gcloud auth activate-service-account --key-file <(echo "$GCS_SA_CDN_KEY")
+echo "--- Fetch GCS credentials from Vault"
+GCS_SA_KEY="$(retry 5 5 vault kv get -field=credentials kv/ci-shared/workflows-library/gcs-publish)"
+GCS_SA_EMAIL="$(jq -r '.client_email // empty' <<<"$GCS_SA_KEY")"
 
-echo "--- Publish ${SRC} -> gs://${GCS_SA_CDN_BUCKET:-elastic-workflows-library-prod}/${DEST}"
+echo "--- Authenticate to GCP"
+gcloud auth activate-service-account --key-file <(echo "$GCS_SA_KEY")
+
+echo "--- Publish ${SRC} -> gs://elastic-workflows-library-prod/${DEST}"
 # `gcloud storage rsync` is the recommended CLI (gsutil rsync is deprecated).
 # --delete-unmatched-destination-objects prunes files removed from the artifact;
 # it is scoped to the destination prefix, so sibling prefixes are untouched.
 # Short TTL: schema URLs are stable but republishable, so not immutable.
-gcloud storage rsync "$STAGE" "gs://${GCS_SA_CDN_BUCKET:-elastic-workflows-library-prod}/${DEST}" \
+gcloud storage rsync "$STAGE" "gs://elastic-workflows-library-prod/${DEST}" \
   --recursive \
   --delete-unmatched-destination-objects \
   --cache-control="public, max-age=300"
