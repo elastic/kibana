@@ -17,6 +17,7 @@ import type { LiveQueryDetailsItem } from '../../../actions/use_live_query_detai
 
 const mockExportResultsButton = jest.fn();
 const mockAddToCaseWrapper = jest.fn();
+const mockViewInDropdown = jest.fn();
 
 jest.mock('../../../common/experimental_features_context', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
@@ -42,7 +43,11 @@ jest.mock('../../../timelines/add_to_timeline_button', () => ({
   AddToTimelineButton: () => null,
 }));
 jest.mock('./view_in_dropdown', () => ({
-  ViewInDropdown: () => null,
+  ViewInDropdown: (props: Record<string, unknown>) => {
+    mockViewInDropdown(props);
+
+    return null;
+  },
 }));
 jest.mock('../../../actions/use_user_profiles');
 
@@ -113,6 +118,59 @@ describe('HeaderActions', () => {
 
       expect(mockAddToCaseWrapper).toHaveBeenCalledWith(
         expect.objectContaining({ agentIds: undefined })
+      );
+    });
+
+    it('should scope the attachment with scheduleId and executionCount on a scheduled execution', () => {
+      renderActions({ scheduleId: 'schedule-789', executionCount: 1152 });
+
+      expect(mockAddToCaseWrapper).toHaveBeenCalledWith(
+        expect.objectContaining({ scheduleId: 'schedule-789', executionCount: 1152 })
+      );
+    });
+
+    it('should not send scheduled identifiers on a live query', () => {
+      renderActions();
+
+      expect(mockAddToCaseWrapper).toHaveBeenCalledWith(
+        expect.objectContaining({ scheduleId: undefined, executionCount: undefined })
+      );
+    });
+  });
+
+  describe('ViewInDropdown time window', () => {
+    it('should keep the live end bound open instead of using the two-week action expiration', () => {
+      renderActions({
+        data: { ...baseData, expiration: '2025-06-29T10:00:00.000Z' },
+      });
+
+      expect(mockViewInDropdown).toHaveBeenCalledWith(
+        expect.objectContaining({
+          startDate: '2025-06-15T10:00:00.000Z',
+          endDate: 'now',
+          mode: 'relative',
+        })
+      );
+      expect(mockViewInDropdown).not.toHaveBeenCalledWith(
+        expect.objectContaining({ endDate: '2025-06-29T10:00:00.000Z' })
+      );
+    });
+
+    it('should prefer an explicitly supplied window (scheduled executions)', () => {
+      renderActions({
+        scheduleId: 'schedule-789',
+        executionCount: 1152,
+        viewInStartDate: '2026-09-01T11:40:03.000Z',
+        viewInEndDate: '2026-09-01T13:40:03.000Z',
+        viewInMode: 'absolute',
+      });
+
+      expect(mockViewInDropdown).toHaveBeenCalledWith(
+        expect.objectContaining({
+          startDate: '2026-09-01T11:40:03.000Z',
+          endDate: '2026-09-01T13:40:03.000Z',
+          mode: 'absolute',
+        })
       );
     });
   });

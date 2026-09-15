@@ -118,6 +118,7 @@ const ScheduledExecutionDetailsPageComponent = () => {
           packName={data?.packName}
           viewInStartDate={viewInWindow.startDate}
           viewInEndDate={viewInWindow.endDate}
+          viewInMode={viewInWindow.mode}
         />
         <ResultTabs
           actionId={queryData[0].action_id}

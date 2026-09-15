@@ -32,9 +32,10 @@ const QueryTitleComponent: React.FC<QueryTitleProps> = ({ query }) => {
 
   return (
     <EuiText>
-      <h1 css={titleCss} title={oneLine} data-test-subj="query-details-title">
+      {/* `h2` because `AppHeader` already renders the page `h1` ("Query results"). */}
+      <h2 css={titleCss} title={oneLine} data-test-subj="query-details-title">
         {displayed}
-      </h1>
+      </h2>
     </EuiText>
   );
 };

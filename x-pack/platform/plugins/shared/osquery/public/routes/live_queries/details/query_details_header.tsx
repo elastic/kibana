@@ -25,6 +25,7 @@ interface QueryDetailsHeaderProps {
   packName?: string;
   viewInStartDate?: string;
   viewInEndDate?: string;
+  viewInMode?: string;
 }
 
 const QueryDetailsHeaderComponent: React.FC<QueryDetailsHeaderProps> = ({
@@ -36,6 +37,7 @@ const QueryDetailsHeaderComponent: React.FC<QueryDetailsHeaderProps> = ({
   packName,
   viewInStartDate,
   viewInEndDate,
+  viewInMode,
 }) => {
   const query = data.queries?.[0]?.query ?? '';
   // Scheduled executions have no triggering user, so `Run by` would always say `Elastic`.
@@ -65,6 +67,7 @@ const QueryDetailsHeaderComponent: React.FC<QueryDetailsHeaderProps> = ({
             executionCount={executionCount}
             viewInStartDate={viewInStartDate}
             viewInEndDate={viewInEndDate}
+            viewInMode={viewInMode}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

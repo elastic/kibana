@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiText, formatDate } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -25,21 +25,28 @@ const ScheduledRunSubtitleComponent: React.FC<ScheduledRunSubtitleProps> = ({
   // "#1152", not "#1,152".
   const execution = executionCount != null ? String(executionCount) : '';
 
+  const withPackValues = useMemo(
+    () => ({ packName, executionCount: execution, timestamp: formattedTimestamp }),
+    [packName, execution, formattedTimestamp]
+  );
+  const withoutPackValues = useMemo(
+    () => ({ executionCount: execution, timestamp: formattedTimestamp }),
+    [execution, formattedTimestamp]
+  );
+
   return (
     <EuiText size="s" color="subdued" data-test-subj="query-details-scheduled-run">
       {packName ? (
         <FormattedMessage
           id="xpack.osquery.queryDetailsHeader.scheduledRunWithPack"
           defaultMessage="Scheduled run of {packName} · Execution #{executionCount} on {timestamp}"
-          // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-          values={{ packName, executionCount: execution, timestamp: formattedTimestamp }}
+          values={withPackValues}
         />
       ) : (
         <FormattedMessage
           id="xpack.osquery.queryDetailsHeader.scheduledRun"
           defaultMessage="Scheduled run · Execution #{executionCount} on {timestamp}"
-          // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-          values={{ executionCount: execution, timestamp: formattedTimestamp }}
+          values={withoutPackValues}
         />
       )}
     </EuiText>

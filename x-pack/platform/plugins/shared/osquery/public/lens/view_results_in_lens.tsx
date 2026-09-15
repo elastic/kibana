@@ -47,7 +47,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
   const { data: logsDataView } = useLogsDataView({ skip: !actionId, checkOnly: true });
 
   const handleClick = useCallback(
-    (event: any) => {
+    (event: React.MouseEvent) => {
       event.preventDefault();
 
       if (logsDataView) {
@@ -76,7 +76,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
   );
 
   const handleMenuItemClick = useCallback(
-    (event: any) => {
+    (event: React.MouseEvent) => {
       handleClick(event);
       onMenuItemClick?.();
     },

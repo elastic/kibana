@@ -9,7 +9,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { AddToTimelineButton } from '../../../timelines/add_to_timeline_button';
 import { AddToCaseWrapper } from '../../../cases/add_to_cases';
 import { AddTagsFlyout } from '../../../actions/components/add_tags_flyout';
 import { useKibana } from '../../../common/lib/kibana';
@@ -17,6 +16,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_fe
 import { ExportResultsButton } from '../../../results/export_results_button';
 import { useExportFilters } from '../../../results/export_filters_context';
 import { ViewInDropdown } from './view_in_dropdown';
+import { getPackViewDateWindow } from '../../../common/pack_view_date_window';
 import type { LiveQueryDetailsItem } from '../../../actions/use_live_query_details';
 
 const ADD_TAGS_LABEL = i18n.translate('xpack.osquery.packResultsHeader.addTagsLabel', {
@@ -38,6 +38,7 @@ interface HeaderActionsProps {
   executionCount?: number;
   viewInStartDate?: string;
   viewInEndDate?: string;
+  viewInMode?: string;
 }
 
 const HeaderActionsComponent: React.FC<HeaderActionsProps> = ({
@@ -48,6 +49,7 @@ const HeaderActionsComponent: React.FC<HeaderActionsProps> = ({
   executionCount,
   viewInStartDate,
   viewInEndDate,
+  viewInMode,
 }) => {
   const isScheduled = !!scheduleId && executionCount != null;
   const isExportEnabled = useIsExperimentalFeatureEnabled('exportResults');
@@ -56,10 +58,17 @@ const HeaderActionsComponent: React.FC<HeaderActionsProps> = ({
 
   const query = data.queries?.[0];
   const queryActionId = query?.action_id;
-  const timelineValue = useMemo(() => (queryActionId ? [queryActionId] : []), [queryActionId]);
+  const createdAt = data['@timestamp'];
   const agentIds = data.agents;
 
   const exportFilters = useExportFilters(queryActionId);
+
+  // Not `data.expiration` — that is `@timestamp + 2 weeks`, which would end the
+  // Discover/Lens time picker two weeks in the future.
+  const liveWindow = useMemo(
+    () => getPackViewDateWindow({ isScheduled: false, timestamp: createdAt }),
+    [createdAt]
+  );
 
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const handleOpenFlyout = useCallback(() => setIsFlyoutOpen(true), []);
@@ -91,21 +100,24 @@ const HeaderActionsComponent: React.FC<HeaderActionsProps> = ({
           <EuiFlexItem grow={false}>
             <ViewInDropdown
               actionId={queryActionId}
-              startDate={viewInStartDate ?? data['@timestamp']}
-              endDate={viewInEndDate ?? data.expiration}
+              startDate={viewInStartDate ?? liveWindow.startDate}
+              endDate={viewInEndDate ?? liveWindow.endDate}
+              mode={viewInMode ?? liveWindow.mode}
               scheduleId={scheduleId}
               executionCount={executionCount}
             />
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>
-          <AddToCaseWrapper actionId={actionId} agentIds={agentIds} isIcon={false} size="m" />
+          <AddToCaseWrapper
+            actionId={actionId}
+            agentIds={agentIds}
+            isIcon={false}
+            size="m"
+            scheduleId={scheduleId}
+            executionCount={executionCount}
+          />
         </EuiFlexItem>
-        {queryActionId && (
-          <EuiFlexItem grow={false}>
-            <AddToTimelineButton field="action_id" value={timelineValue} size="m" />
-          </EuiFlexItem>
-        )}
         {canEditTags && (
           <EuiFlexItem grow={false}>
             <EuiToolTip content={isScheduled ? SCHEDULED_TAGS_DISABLED_LABEL : ADD_TAGS_LABEL}>

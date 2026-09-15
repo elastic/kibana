@@ -52,37 +52,37 @@ const LiveQueryDetailsPageComponent = () => {
     <>
       <WithoutHeaderLayout restrictWidth={false}>
         <div css={fullWidthContentCss}>
-          <ExportFiltersProvider>
-            {isSingleQuery && data ? (
-              <>
-                <QueryDetailsHeader actionId={actionId} data={data} onSaveQuery={onSaveQuery} />
-                <ResultTabs
-                  actionId={data.queries![0].action_id}
-                  liveQueryActionId={actionId}
-                  agentIds={data.agents}
-                  startDate={data['@timestamp']}
-                  endDate={data.expiration}
-                  ecsMapping={data.queries![0].ecs_mapping}
-                  failedAgentsCount={data.queries![0].failed ?? 0}
-                  error={data.queries![0].error}
-                />
-              </>
-            ) : (
-              <div css={tableWrapperCss}>
-                <PackQueriesStatusTable
-                  actionId={actionId}
-                  data={data?.queries}
-                  startDate={data?.['@timestamp']}
-                  expirationDate={data?.expiration}
-                  agentIds={data?.agents}
-                  showResultsHeader
-                  hideResultsTitle
-                  tags={data?.tags}
-                  onSaveQuery={onSaveQuery}
-                />
-              </div>
-            )}
-          </ExportFiltersProvider>
+          {isSingleQuery && data ? (
+            // Only this branch needs the provider; the pack path below gets one from
+            // `PackQueriesStatusTable`, which self-wraps.
+            <ExportFiltersProvider>
+              <QueryDetailsHeader actionId={actionId} data={data} onSaveQuery={onSaveQuery} />
+              <ResultTabs
+                actionId={data.queries![0].action_id}
+                liveQueryActionId={actionId}
+                agentIds={data.agents}
+                startDate={data['@timestamp']}
+                endDate={data.expiration}
+                ecsMapping={data.queries![0].ecs_mapping}
+                failedAgentsCount={data.queries![0].failed ?? 0}
+                error={data.queries![0].error}
+              />
+            </ExportFiltersProvider>
+          ) : (
+            <div css={tableWrapperCss}>
+              <PackQueriesStatusTable
+                actionId={actionId}
+                data={data?.queries}
+                startDate={data?.['@timestamp']}
+                expirationDate={data?.expiration}
+                agentIds={data?.agents}
+                showResultsHeader
+                hideResultsTitle
+                tags={data?.tags}
+                onSaveQuery={onSaveQuery}
+              />
+            </div>
+          )}
         </div>
       </WithoutHeaderLayout>
       {savedQueryFlyout}

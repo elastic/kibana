@@ -48,6 +48,7 @@ const RunBySubtitleComponent: React.FC<RunBySubtitleProps> = ({ data }) => {
   const { profilesMap, isLoading } = useBulkGetUserProfiles(profileItems);
 
   const timestamp = formatDate(createdAt);
+  const timestampValues = useMemo(() => ({ timestamp }), [timestamp]);
 
   if (!userId && !userProfileUid) {
     return (
@@ -55,8 +56,7 @@ const RunBySubtitleComponent: React.FC<RunBySubtitleProps> = ({ data }) => {
         <FormattedMessage
           id="xpack.osquery.queryDetailsHeader.runByElastic"
           defaultMessage="Run by: Elastic on {timestamp}"
-          // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-          values={{ timestamp }}
+          values={timestampValues}
         />
       </EuiText>
     );
@@ -80,8 +80,7 @@ const RunBySubtitleComponent: React.FC<RunBySubtitleProps> = ({ data }) => {
           <FormattedMessage
             id="xpack.osquery.queryDetailsHeader.runByOn"
             defaultMessage="on {timestamp}"
-            // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-            values={{ timestamp }}
+            values={timestampValues}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -8,14 +8,20 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { ViewResultsInDiscoverAction } from '../../../discover/view_results_in_discover';
 import { ViewResultsInLensAction } from '../../../lens/view_results_in_lens';
 import { ViewResultsActionButtonType } from '../../../live_queries/form/pack_queries_status_table';
+
+const VIEW_IN_ARIA_LABEL = i18n.translate('xpack.osquery.queryDetailsHeader.viewInAriaLabel', {
+  defaultMessage: 'View results in',
+});
 
 interface ViewInDropdownProps {
   actionId: string;
   startDate?: string;
   endDate?: string;
+  mode?: string;
   scheduleId?: string;
   executionCount?: number;
 }
@@ -24,6 +30,7 @@ const ViewInDropdownComponent: React.FC<ViewInDropdownProps> = ({
   actionId,
   startDate,
   endDate,
+  mode,
   scheduleId,
   executionCount,
 }) => {
@@ -50,6 +57,7 @@ const ViewInDropdownComponent: React.FC<ViewInDropdownProps> = ({
         buttonType={ViewResultsActionButtonType.menuItem}
         startDate={startDate}
         endDate={endDate}
+        mode={mode}
         scheduleId={scheduleId}
         executionCount={executionCount}
         onMenuItemClick={handleClose}
@@ -60,12 +68,13 @@ const ViewInDropdownComponent: React.FC<ViewInDropdownProps> = ({
         buttonType={ViewResultsActionButtonType.menuItem}
         startDate={startDate}
         endDate={endDate}
+        mode={mode}
         scheduleId={scheduleId}
         executionCount={executionCount}
         onMenuItemClick={handleClose}
       />,
     ],
-    [actionId, startDate, endDate, scheduleId, executionCount, handleClose]
+    [actionId, startDate, endDate, mode, scheduleId, executionCount, handleClose]
   );
 
   return (
@@ -74,7 +83,7 @@ const ViewInDropdownComponent: React.FC<ViewInDropdownProps> = ({
       isOpen={isOpen}
       closePopover={handleClose}
       panelPaddingSize="none"
-      aria-label="View results in"
+      aria-label={VIEW_IN_ARIA_LABEL}
     >
       <EuiContextMenuPanel items={items} />
     </EuiPopover>
