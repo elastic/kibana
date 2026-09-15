@@ -11,7 +11,8 @@ import { EndpointAuthorizationError } from '../../../../endpoint/errors';
 import {
   ENDPOINT_METADATA_LIST_REQUIRED_AUTHZ,
   ENDPOINT_POLICY_READ_REQUIRED_AUTHZ,
-  satisfiesEndpointAuthzRequirement,
+  ENDPOINT_POLICY_AND_METADATA_READ_REQUIRED_AUTHZ,
+  type EndpointAuthzRequirement,
 } from '../../../../../common/endpoint/service/authz';
 import type { PolicyDiffEntry } from '../domain/diff_policy_config';
 import type { AssessPolicyChangeParams } from '../domain/impact';
@@ -124,9 +125,7 @@ export const createEndpointPolicyManagementService = ({
   spaceId,
 }: EndpointPolicyManagementServiceDependencies): EndpointPolicyManagementService => {
   const requireAccess = async (
-    requiredAuthz:
-      | typeof ENDPOINT_POLICY_READ_REQUIRED_AUTHZ
-      | typeof ENDPOINT_METADATA_LIST_REQUIRED_AUTHZ
+    requiredAuthz: EndpointAuthzRequirement
   ): Promise<PolicyAccessContext> =>
     createPolicyAccessContext(
       endpointAppContextService,
@@ -184,20 +183,12 @@ export const createEndpointPolicyManagementService = ({
     },
 
     assessPolicyChange: async (input) => {
-      const authz = await endpointAppContextService.getEndpointAuthz(request);
-      if (
-        !satisfiesEndpointAuthzRequirement(authz, ENDPOINT_POLICY_READ_REQUIRED_AUTHZ) ||
-        !satisfiesEndpointAuthzRequirement(authz, ENDPOINT_METADATA_LIST_REQUIRED_AUTHZ)
-      ) {
-        throw new EndpointAuthorizationError();
-      }
-
-      const access = await requireAccess(ENDPOINT_POLICY_READ_REQUIRED_AUTHZ);
+      const access = await requireAccess(ENDPOINT_POLICY_AND_METADATA_READ_REQUIRED_AUTHZ);
       return assessChange(access, endpointAppContextService, input);
     },
 
     getPolicyRolloutStatus: async ({ idOrName }) => {
-      const access = await requireAccess(ENDPOINT_METADATA_LIST_REQUIRED_AUTHZ);
+      const access = await requireAccess(ENDPOINT_POLICY_AND_METADATA_READ_REQUIRED_AUTHZ);
       const packagePolicy = await resolvePackagePolicy(access, idOrName);
       await ensureResolvedInCurrentSpace(access, packagePolicy.id);
 

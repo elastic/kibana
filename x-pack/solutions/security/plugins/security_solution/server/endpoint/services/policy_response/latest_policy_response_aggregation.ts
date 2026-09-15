@@ -219,9 +219,9 @@ export const buildLatestPolicyResponseAggregation = ({
   },
 });
 
-export const parseLatestPolicyResponseAggregation = (
+const parseLatestPolicyResponseAggregation = (
   aggregations: LatestPolicyResponseAggregation | undefined
-): LatestPolicyResponseAggregationResult => {
+): Pick<LatestPolicyResponseAggregationResult, 'hits' | 'overflowAgents'> => {
   const latestActions = aggregations?.latest_actions;
   const buckets = Array.isArray(latestActions?.buckets) ? latestActions.buckets : [];
   const overflowAgents =
@@ -236,7 +236,7 @@ export const parseLatestPolicyResponseAggregation = (
     return [{ _id: latestHit._id, _source: latestHit._source }];
   });
 
-  return { hits, overflowAgents, coverageIncomplete: false };
+  return { hits, overflowAgents };
 };
 
 export const searchLatestPolicyResponses = async (

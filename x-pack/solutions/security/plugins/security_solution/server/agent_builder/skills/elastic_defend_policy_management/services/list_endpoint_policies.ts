@@ -16,6 +16,7 @@ import type { PolicyAccessContext } from './access_context';
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 20;
 const MAX_PER_PAGE = 50;
+const MAX_PAGE = 200;
 const LIST_STRING_CAP = 512;
 
 export type PolicyPosture = EndpointPolicySummary;
@@ -51,7 +52,11 @@ export type ListEndpointPoliciesPage = Readonly<{
 
 const toBoundedPage = (value: number): number => {
   const page = Math.trunc(value);
-  return Number.isInteger(page) && page >= 1 ? page : DEFAULT_PAGE;
+  if (!Number.isInteger(page) || page < 1) {
+    return DEFAULT_PAGE;
+  }
+
+  return Math.min(page, MAX_PAGE);
 };
 
 const toBoundedPerPage = (value: number): number => {

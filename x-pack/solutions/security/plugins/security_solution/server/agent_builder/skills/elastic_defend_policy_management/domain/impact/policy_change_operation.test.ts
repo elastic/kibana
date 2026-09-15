@@ -71,14 +71,20 @@ describe('policy change operation schema', () => {
     ).toThrow();
   });
 
-  it('trims identifier and path input, rejects trimmed-empty values, and keeps no identifier maximum', () => {
+  it('trims identifier and path input, rejects trimmed-empty values, and caps identifiers at 512', () => {
     const setField = { op: 'set_field' as const, path: 'windows.malware.mode', value: 1 };
     expect(
       parseAssessPolicyChangeParams({
-        idOrName: 'a'.repeat(257),
+        idOrName: 'a'.repeat(512),
         changes: [setField],
       }).idOrName
-    ).toHaveLength(257);
+    ).toHaveLength(512);
+    expect(
+      assessPolicyChangeParamsSchema.safeParse({
+        idOrName: 'a'.repeat(513),
+        changes: [setField],
+      }).success
+    ).toBe(false);
     expect(
       policyChangeOperationSchema.parse({
         op: 'set_field',

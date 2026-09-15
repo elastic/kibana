@@ -32,13 +32,13 @@ import {
   PolicyAmbiguousNameError,
   PolicyNotFoundError,
 } from '../services/policy_errors';
+import { presentBoundedIdentityStrings, type PresentedPolicyIdentity } from './trim_policy_result';
 
 export type PolicyToolErrorClass =
   | 'not_authorized'
   | 'not_found'
   | 'ambiguous_name'
   | 'invalid_policy'
-  | 'conflict'
   | 'non_writable_path'
   | 'unsupported_operation'
   | 'invalid_input'
@@ -110,9 +110,6 @@ export const classifyPolicyError = (error: unknown): PolicyToolErrorClass => {
     if (error.statusCode === 404) {
       return 'not_found';
     }
-    if (error.statusCode === 409) {
-      return 'conflict';
-    }
   }
 
   return 'unknown_error';
@@ -125,9 +122,11 @@ type PolicyToolOrdinaryErrorMetadata = Record<string, unknown> & {
   candidates_total?: never;
 };
 
+type PresentedCandidate = PresentedPolicyIdentity<{ id: string; name: string }>;
+
 type PolicyToolAmbiguousNameErrorMetadata = Record<string, unknown> & {
   error: PolicyToolErrorClass;
-  candidates: PolicyAmbiguousNameError['candidates'];
+  candidates: readonly PresentedCandidate[];
   candidates_truncated: PolicyAmbiguousNameError['candidatesTruncated'];
   candidates_total: PolicyAmbiguousNameError['candidatesTotal'];
 };
@@ -143,7 +142,9 @@ const buildErrorMetadata = (
   if (error instanceof PolicyAmbiguousNameError) {
     return {
       error: errorClass,
-      candidates: error.candidates,
+      candidates: error.candidates.map(({ id, name }) =>
+        presentBoundedIdentityStrings({ id, name })
+      ),
       candidates_truncated: error.candidatesTruncated,
       candidates_total: error.candidatesTotal,
     };

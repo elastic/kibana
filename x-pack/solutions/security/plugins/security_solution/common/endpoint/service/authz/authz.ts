@@ -289,6 +289,10 @@ export const ENDPOINT_POLICY_READ_REQUIRED_AUTHZ: EndpointAuthzRequirement = {
   all: ['canReadPolicyManagement'],
 };
 
+export const ENDPOINT_POLICY_AND_METADATA_READ_REQUIRED_AUTHZ: EndpointAuthzRequirement = {
+  all: ['canReadPolicyManagement', 'canReadSecuritySolution'],
+};
+
 export const satisfiesEndpointAuthzRequirement = (
   authz: EndpointAuthz,
   requirement: EndpointAuthzRequirement

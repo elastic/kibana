@@ -128,10 +128,9 @@ describe('classifyPolicyError', () => {
     expect(classifyPolicyError(new EndpointNotFoundError('missing'))).toBe('not_found');
   });
 
-  it('classifies HTTP 403, 404, and 409 as not_authorized, not_found, and conflict', () => {
+  it('classifies HTTP 403 and 404 as not_authorized and not_found', () => {
     expect(classifyPolicyError(new EndpointHttpError('forbidden', 403))).toBe('not_authorized');
     expect(classifyPolicyError(new EndpointHttpError('missing', 404))).toBe('not_found');
-    expect(classifyPolicyError(new EndpointHttpError('conflict', 409))).toBe('conflict');
   });
 
   it('classifies expected PolicyChangePreparationError codes and ignores raw messages', () => {
@@ -237,7 +236,6 @@ describe('createPolicyTool', () => {
     ['not_authorized', new EndpointAuthorizationError()],
     ['not_found', new PolicyNotFoundError()],
     ['invalid_policy', new InvalidEndpointPolicyError()],
-    ['conflict', new EndpointHttpError('conflict', 409)],
     ['not_found', new EndpointNotFoundError('missing')],
   ] as const)(
     'returns a stable %s error result without internals and debug-logs expected faults',
@@ -262,10 +260,14 @@ describe('createPolicyTool', () => {
 
   it('includes bounded ambiguous-name candidates in error metadata', async () => {
     const logger = createLogger();
-    const candidates = Array.from({ length: 12 }, (_, index) => ({
-      id: `id-${index}`,
-      name: `name-${index}`,
-    }));
+    const overlongName = 'N'.repeat(600);
+    const candidates = [
+      { id: 'id-0', name: overlongName },
+      ...Array.from({ length: 11 }, (_, index) => ({
+        id: `id-${index + 1}`,
+        name: `name-${index + 1}`,
+      })),
+    ];
     const run = jest.fn(async () => {
       throw new PolicyAmbiguousNameError(candidates, 12);
     });
@@ -276,7 +278,10 @@ describe('createPolicyTool', () => {
       message: POLICY_TOOL_ERROR_MESSAGES.ambiguous_name,
       metadata: {
         error: 'ambiguous_name',
-        candidates: candidates.slice(0, 10).map(({ id, name }) => ({ id, name })),
+        candidates: [
+          { id: 'id-0', name: 'N'.repeat(512), name_string_truncated: true },
+          ...candidates.slice(1, 10).map(({ id, name }) => ({ id, name })),
+        ],
         candidates_truncated: true,
         candidates_total: 12,
       },

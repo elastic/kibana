@@ -105,7 +105,8 @@ export const createGetPolicyRolloutStatusTool = ({
       'agent-policy ids on the request-scoped CPS/CCS surface and reports out_of_date_hosts at an older revision. current_revision_responses counts latest policy ' +
       'responses for the bounded assignment-matched agents at the current package revision and reports needs_attention_hosts whose actions have failure or warning status. ' +
       'classified_hosts contains only hosts whose result can be decided. ' +
-      'undetermined_hosts counts hosts whose required evidence is missing or invalid and must be copied as returned, including zero; ' +
+      'For current_revision_responses, undetermined_hosts counts returned latest-response hits with missing or invalid required fields; assignment-matched agents with no response document are not included. ' +
+      'For either population, copy undetermined_hosts as returned, including zero; ' +
       'do not convert undetermined_hosts to healthy, out-of-date, failing, or needs-attention counts. ' +
       'response_coverage_incomplete is true when the latest policy-response search did not cover every cluster that contributed United hosts; zero needs_attention_hosts applies only to the assignment-matched agents and available response evidence; ' +
       'copy it as returned, including false. Do not treat zero needs_attention_hosts as complete when response_coverage_incomplete is true. ' +

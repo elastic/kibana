@@ -14,69 +14,60 @@ import {
 export const MAX_SERIALIZED_BYTES = 65536;
 export const MAX_NESTING_DEPTH = 16;
 
+const throwInvalidInput = (): never => {
+  throw new PolicyChangePreparationError(
+    POLICY_CHANGE_PREPARATION_ERROR_CODE.invalid_input,
+    POLICY_CHANGE_BOUNDS_MESSAGE
+  );
+};
+
 const isWalkable = (value: unknown): value is object =>
   value !== null && Object.prototype.toString.call(value) === '[object Object]';
 
-const nestingDepth = (value: unknown, depth: number, seen: WeakSet<object>): number => {
+const assertNestingDepth = (value: unknown, depth: number, seen: WeakSet<object>): void => {
+  if (depth > MAX_NESTING_DEPTH) {
+    throwInvalidInput();
+  }
+
   if (Array.isArray(value)) {
     if (seen.has(value)) {
-      throw new PolicyChangePreparationError(
-        POLICY_CHANGE_PREPARATION_ERROR_CODE.invalid_input,
-        POLICY_CHANGE_BOUNDS_MESSAGE
-      );
+      throwInvalidInput();
     }
     seen.add(value);
-    const childDepth = value.reduce(
-      (max, child) => Math.max(max, nestingDepth(child, depth + 1, seen)),
-      depth
-    );
+    for (const child of value) {
+      assertNestingDepth(child, depth + 1, seen);
+    }
     seen.delete(value);
-    return childDepth;
+    return;
   }
 
   if (!isWalkable(value)) {
-    return depth;
+    return;
   }
 
   if (seen.has(value)) {
-    throw new PolicyChangePreparationError(
-      POLICY_CHANGE_PREPARATION_ERROR_CODE.invalid_input,
-      POLICY_CHANGE_BOUNDS_MESSAGE
-    );
+    throwInvalidInput();
   }
 
   seen.add(value);
-  const childDepth = Object.values(value).reduce(
-    (max, child) => Math.max(max, nestingDepth(child, depth + 1, seen)),
-    depth
-  );
+  for (const child of Object.values(value)) {
+    assertNestingDepth(child, depth + 1, seen);
+  }
   seen.delete(value);
-  return childDepth;
 };
 
 const serializedByteLength = (value: unknown): number => {
   try {
     return Buffer.byteLength(JSON.stringify(value), 'utf8');
   } catch {
-    throw new PolicyChangePreparationError(
-      POLICY_CHANGE_PREPARATION_ERROR_CODE.invalid_input,
-      POLICY_CHANGE_BOUNDS_MESSAGE
-    );
+    return throwInvalidInput();
   }
 };
 
 export const assertParameterBounds = (value: unknown): void => {
-  if (nestingDepth(value, 1, new WeakSet()) > MAX_NESTING_DEPTH) {
-    throw new PolicyChangePreparationError(
-      POLICY_CHANGE_PREPARATION_ERROR_CODE.invalid_input,
-      POLICY_CHANGE_BOUNDS_MESSAGE
-    );
+  if (serializedByteLength(value) > MAX_SERIALIZED_BYTES) {
+    throwInvalidInput();
   }
 
-  if (serializedByteLength(value) > MAX_SERIALIZED_BYTES) {
-    throw new PolicyChangePreparationError(
-      POLICY_CHANGE_PREPARATION_ERROR_CODE.invalid_input,
-      POLICY_CHANGE_BOUNDS_MESSAGE
-    );
-  }
+  assertNestingDepth(value, 1, new WeakSet());
 };

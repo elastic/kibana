@@ -139,6 +139,8 @@ describe('createListPoliciesTool', () => {
       includeEndpointUsage: true,
     });
     expect(listPoliciesSchema.safeParse({ page: 0, perPage: 20 }).success).toBe(false);
+    expect(listPoliciesSchema.safeParse({ page: 200, perPage: 50 }).success).toBe(true);
+    expect(listPoliciesSchema.safeParse({ page: 201, perPage: 50 }).success).toBe(false);
     expect(listPoliciesSchema.safeParse({ page: 1, perPage: 51 }).success).toBe(false);
   });
 

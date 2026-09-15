@@ -45,4 +45,8 @@ describe('parameter bounds', () => {
     expect(() => assertParameterBounds(stringWhoseJsonBytes(MAX_SERIALIZED_BYTES))).not.toThrow();
     expectBoundsError(stringWhoseJsonBytes(MAX_SERIALIZED_BYTES + 1));
   });
+
+  it('rejects a very deep JSON-compatible value as invalid_input', () => {
+    expectBoundsError(objectOfDepth(8_000));
+  });
 });

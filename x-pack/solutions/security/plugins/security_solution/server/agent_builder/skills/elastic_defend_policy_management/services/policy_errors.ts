@@ -14,7 +14,6 @@ export const POLICY_ERROR_MESSAGES = {
   not_found: 'Endpoint policy not found',
   ambiguous_name: 'Multiple endpoint policies match the given name',
   invalid_policy: 'Selected policy is not a valid endpoint policy',
-  conflict: 'Endpoint policy was modified concurrently',
 } as const;
 
 export class PolicyNotFoundError extends Error {

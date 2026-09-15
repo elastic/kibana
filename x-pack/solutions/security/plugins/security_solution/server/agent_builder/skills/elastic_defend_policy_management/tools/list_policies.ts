@@ -19,7 +19,7 @@ import { omitTrailingToFit, toPresentationHash } from './trim_policy_result';
 export const LIST_POLICIES_TOOL_ID = 'security.policy_management.list_policies';
 
 const LIST_PAGE_MIN = 1;
-const LIST_PAGE_MAX = 10_000;
+const LIST_PAGE_MAX = 200;
 const LIST_PER_PAGE_MIN = 1;
 const LIST_PER_PAGE_MAX = 50;
 const LIST_PER_PAGE_DEFAULT = 20;
@@ -32,9 +32,7 @@ export const listPoliciesSchema = z.object({
     .min(LIST_PAGE_MIN)
     .max(LIST_PAGE_MAX)
     .default(LIST_PAGE_MIN)
-    .describe(
-      '1-based page of endpoint package policies in the current space (1–10000, default 1).'
-    ),
+    .describe('1-based page of endpoint package policies in the current space (1–200, default 1).'),
   perPage: z
     .number()
     .int()
@@ -97,5 +95,12 @@ export const createListPoliciesTool = ({
     run: async (
       { page, perPage, includeEndpointUsage }: z.infer<typeof listPoliciesSchema>,
       service
-    ) => presentListPolicies(await service.listPolicies({ page, perPage, includeEndpointUsage })),
+    ) =>
+      presentListPolicies(
+        await service.listPolicies({
+          page,
+          perPage,
+          includeEndpointUsage,
+        })
+      ),
   });

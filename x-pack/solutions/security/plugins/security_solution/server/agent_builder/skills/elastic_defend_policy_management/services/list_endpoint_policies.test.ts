@@ -116,6 +116,21 @@ describe('listEndpointPolicies', () => {
     expect(result.dto.items).toHaveLength(20);
   });
 
+  it('clamps page to 200 and forwards that bound to Fleet', async () => {
+    const { access, soClient, listPolicies } = await createReadAccess();
+    listPolicies.mockResolvedValue(createPage([], 0, 200, 20));
+
+    const result = await listEndpointPolicies(access, { page: 201, perPage: 20 });
+
+    expect(listPolicies).toHaveBeenCalledWith(
+      soClient,
+      expect.objectContaining({
+        page: 200,
+      })
+    );
+    expect(result.dto.page).toBe(200);
+  });
+
   it('clamps perPage to 50 and forwards that bound to Fleet', async () => {
     const { access, soClient, listPolicies } = await createReadAccess();
     const items = Array.from({ length: 50 }, (_, index) =>

@@ -153,6 +153,12 @@ describe('createEndpointPolicyManagementService', () => {
         call: (service: ReturnType<typeof createServiceDeps>['service']) =>
           service.getPolicyRolloutStatus({ idOrName: POLICY_ID }),
       },
+      {
+        name: 'getPolicyRolloutStatus requires policy-read',
+        grants: { canReadSecuritySolution: true, canReadPolicyManagement: false },
+        call: (service: ReturnType<typeof createServiceDeps>['service']) =>
+          service.getPolicyRolloutStatus({ idOrName: POLICY_ID }),
+      },
     ])('$name and refuses before any protected read', async ({ grants, call }) => {
       const deps = createServiceDeps(grants);
 
