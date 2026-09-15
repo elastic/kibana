@@ -95,17 +95,18 @@ spaceTest.describe('Lens ESQL dashboard inline editing', { tag: '@local-stateful
       const codeEditor = new KibanaCodeEditorWrapper(page);
 
       await spaceTest.step('create a line chart panel with a red Y-axis color', async () => {
-        // Wait for flyout to be ready before switching to line chart
-        await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
-        await lens.switchToVisualization('line', { search: 'Line' });
-        await dashboard.waitForPanelsToLoad(1);
-
         await setEsqlQueryAndRun(
           dashboard,
           page,
           codeEditor,
           'from logstash-* | stats maxB = max(bytes) by geo.dest'
         );
+        await dashboard.waitForPanelsToLoad(1);
+
+        // Wait for flyout to be ready before switching to line chart
+        await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
+        await lens.switchToVisualization('line', { search: 'Line' });
+        await dashboard.waitForPanelsToLoad(1);
 
         // Anchor on the Y dimension first so the config panel is known to have
         // rendered the new suggestion before checking the split state.
