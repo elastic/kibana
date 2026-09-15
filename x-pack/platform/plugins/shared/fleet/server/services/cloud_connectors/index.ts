@@ -14,3 +14,18 @@ export {
   createAndIntegrateCloudConnector,
   type CloudConnectorIntegrationResult,
 } from './agentless_policy_integration';
+
+export {
+  mergeIntegrationSelections,
+  getCloudConnectorIntegrationSelections,
+  type IacIntegrationSelection,
+} from './iac_integrations';
+
+export {
+  checkIacTemplate,
+  compareIacKey,
+  toUpgradeStatus,
+  verifyCloudConnectorIacKey,
+  type CheckIacTemplateOptions,
+  type IacKeyVerification,
+} from './iac_key_verification';

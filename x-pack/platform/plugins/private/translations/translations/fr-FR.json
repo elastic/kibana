@@ -21815,7 +21815,6 @@
     "xpack.fleet.awsConnectSetup.continueButton": "Continuer",
     "xpack.fleet.awsIdentityFederationSetup.createButton": "Créer une identité",
     "xpack.fleet.awsIdentityFederationSetup.existingIdentityTab": "Identité existante",
-    "xpack.fleet.awsIdentityFederationSetup.launchCloudFormation": "Lancer CloudFormation",
     "xpack.fleet.awsIdentityFederationSetup.newIdentityTab": "Nouvelle identité",
     "xpack.fleet.awsIdentityFederationSetup.roleArnLabel": "Nom ARN de rôle",
     "xpack.fleet.awsIdentityFederationSetup.roleArnRequired": "L'ARN du rôle est requis",

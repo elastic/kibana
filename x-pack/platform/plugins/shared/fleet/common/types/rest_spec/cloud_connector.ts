@@ -6,14 +6,23 @@
  */
 
 import type {
+  IacKeyCheckReason,
+  IacKeySurface,
+  IacKeyVerificationOutcome,
+} from '../../telemetry/iac_provisioner_events';
+
+import type {
   CloudConnector,
+  CloudConnectorIacState,
   CloudProvider,
   CloudConnectorVars,
   AccountType,
 } from '../models/cloud_connector';
 
+import type { RenderIacTemplateIntegration } from './iac_provisioner';
+
 // Request interfaces
-export interface CreateCloudConnectorRequest {
+export interface CreateCloudConnectorRequest extends CloudConnectorIacState {
   name: string;
   namespace?: string;
   vars: CloudConnectorVars;
@@ -21,7 +30,7 @@ export interface CreateCloudConnectorRequest {
   accountType?: AccountType;
 }
 
-export interface UpdateCloudConnectorRequest {
+export interface UpdateCloudConnectorRequest extends CloudConnectorIacState {
   name?: string;
   vars?: CloudConnectorVars;
   cloudProvider?: CloudProvider;
@@ -67,4 +76,25 @@ export interface GetCloudConnectorUsageResponse {
   total: number;
   page: number;
   perPage: number;
+}
+
+export interface VerifyCloudConnectorIacKeyRequest {
+  /** Integrations being added (wizard/onboarding). Omit or send empty to check the connector's current set only (flyout). */
+  integrations?: RenderIacTemplateIntegration[];
+  /** Telemetry label for the UI asking. The flyout sends none; the server derives its surface. */
+  surface?: Extract<IacKeySurface, 'wizard' | 'onboarding'>;
+}
+
+export interface VerifyCloudConnectorIacKeyResponse {
+  /** False only when the deployed template must be updated; true also covers "could not check" (fail open). */
+  matches: boolean;
+  reason?: IacKeyCheckReason;
+  /** The full verdict, so callers can tell a definite match from a check that could not run. */
+  outcome: IacKeyVerificationOutcome;
+  /** Provider deployment identity from the connector (AWS: stack ARN); absent for legacy connectors. */
+  deploymentId?: string;
+  /** Parsed from deploymentId; absent when it is absent or malformed. */
+  region?: string;
+  /** The merged integration set that was compared — render exactly this on update. */
+  integrations: RenderIacTemplateIntegration[];
 }

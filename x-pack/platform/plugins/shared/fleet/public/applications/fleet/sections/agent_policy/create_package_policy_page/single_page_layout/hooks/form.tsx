@@ -18,6 +18,8 @@ import { validateAgentConditionExpression } from '@kbn/elastic-agent-condition-l
 import { toNewAgentlessPolicy } from '../../../../../../../../common/services';
 
 import { sendCreateAgentlessPolicy } from '../../../../../../../hooks/use_request/agentless_policy';
+import type { CloudConnectorIacPersistOptions } from '../../../../../../../hooks/use_request/pending_cloud_connector_iac';
+import { IAC_PROVENANCE_WRITE_FAILED_TOAST } from '../../../../../../../components/cloud_connector/constants';
 
 import {
   AgentlessAgentCreateFleetUnreachableError,
@@ -152,7 +154,8 @@ export const createAgentPolicyIfNeeded = async ({
 async function savePackagePolicy(
   pkgPolicy: CreatePackagePolicyRequest['body'],
   varGroups?: RegistryVarGroup[],
-  packageInfo?: PackageInfo
+  packageInfo?: PackageInfo,
+  iacPersistOptions?: CloudConnectorIacPersistOptions
 ): Promise<SavedPolicyResult> {
   const { policy, forceCreateNeeded } = await prepareInputPackagePolicyDataset(pkgPolicy);
 
@@ -165,14 +168,17 @@ async function savePackagePolicy(
       varGroups,
       packageInfo
     );
-    const { item } = await sendCreateAgentlessPolicy(agentlessRequestBody);
+    const { item } = await sendCreateAgentlessPolicy(agentlessRequestBody, iacPersistOptions);
     return { type: 'agentless', policy: item };
   }
 
-  const { item } = await sendCreatePackagePolicyForRq({
-    ...policy,
-    ...(forceCreateNeeded && { force: true }),
-  });
+  const { item } = await sendCreatePackagePolicyForRq(
+    {
+      ...policy,
+      ...(forceCreateNeeded && { force: true }),
+    },
+    iacPersistOptions
+  );
 
   return { type: 'packagePolicy', policy: item };
 }
@@ -731,7 +737,13 @@ export function useOnSubmit({
             create_dataset_templates: createDatasetTemplates,
           },
           varGroups,
-          packageInfo
+          packageInfo,
+          {
+            // The policy is saved either way; only the identity's template provenance is missing
+            // (https://github.com/elastic/ingest-dev/issues/9415).
+            onIacPersistError: () =>
+              notifications.toasts.addWarning(IAC_PROVENANCE_WRITE_FAILED_TOAST),
+          }
         );
 
         if (savedPolicyResult.policy.package) {

@@ -20,16 +20,47 @@ import {
 } from '../../../../common/services/cloud_connectors/test_subjects';
 
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
+import { useIacProvisioner, useStartServices } from '../../../hooks';
 
 import { CloudConnectorSelector } from './cloud_connector_selector';
 
 jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('../hooks/use_get_cloud_connectors');
+// The flyout rendered by the selector calls these hooks; mock them to avoid requiring Fleet providers.
+jest.mock('../../../hooks', () => ({
+  useIacProvisioner: jest.fn(),
+  useStartServices: jest.fn(),
+}));
+jest.mock('../hooks/use_verify_iac_key', () => ({
+  useVerifyIacKey: jest.fn().mockReturnValue({ data: undefined }),
+}));
+jest.mock('../hooks/use_cloud_connector_template', () => ({
+  useCloudConnectorTemplate: jest.fn().mockReturnValue({
+    launchButtonProps: { href: undefined, target: '_blank' },
+    isDisabled: true,
+    isGeneratingTemplate: false,
+    isIacProvisionerEnabled: false,
+  }),
+}));
+jest.mock('../hooks/use_update_cloud_connector', () => ({
+  useUpdateCloudConnector: jest.fn().mockReturnValue({ mutate: jest.fn(), isLoading: false }),
+  updateCloudConnector: jest.fn(() => Promise.resolve({})),
+}));
+jest.mock('../hooks/use_delete_cloud_connector', () => ({
+  useDeleteCloudConnector: jest.fn().mockReturnValue({ mutate: jest.fn(), isLoading: false }),
+}));
+jest.mock('../hooks/use_cloud_connector_usage', () => ({
+  useCloudConnectorUsage: jest
+    .fn()
+    .mockReturnValue({ data: undefined, isLoading: false, error: null }),
+}));
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseGetCloudConnectors = useGetCloudConnectors as jest.MockedFunction<
   typeof useGetCloudConnectors
 >;
+const mockUseIacProvisioner = useIacProvisioner as jest.MockedFunction<typeof useIacProvisioner>;
+const mockUseStartServices = useStartServices as jest.MockedFunction<typeof useStartServices>;
 
 describe('CloudConnectorSelector', () => {
   let queryClient: QueryClient;
@@ -84,6 +115,12 @@ describe('CloudConnectorSelector', () => {
       isLoading: false,
       error: null,
     } as unknown as ReturnType<typeof useGetCloudConnectors>);
+
+    mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: false });
+    mockUseStartServices.mockReturnValue({
+      analytics: { reportEvent: jest.fn() },
+      http: {},
+    } as unknown as ReturnType<typeof useStartServices>);
 
     mockSetCredentials.mockClear();
   });

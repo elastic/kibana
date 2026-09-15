@@ -13,6 +13,10 @@ export const CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ = 'cloudConnectorNameInput';
 export const CLOUD_CONNECTOR_EDIT_ICON_TEST_SUBJ = 'cloudConnectorEditIcon';
 export const CLOUD_CONNECTOR_TEMPLATE_GENERATION_ERROR_CALLOUT_TEST_SUBJ =
   'cloudConnectorTemplateGenerationErrorCallout';
+export const CLOUD_CONNECTOR_TEMPLATE_UP_TO_DATE_CALLOUT_TEST_SUBJ =
+  'cloudConnectorTemplateUpToDateCallout';
+export const CLOUD_CONNECTOR_STALE_TEMPLATE_CALLOUT_TEST_SUBJ =
+  'cloudConnectorStaleTemplateCallout';
 export const getCloudConnectorEditIconTestSubj = (connectorId: string) =>
   `${CLOUD_CONNECTOR_EDIT_ICON_TEST_SUBJ}-${connectorId}`;
 
@@ -42,6 +46,15 @@ export const GCP_INPUT_FIELDS_TEST_SUBJECTS = {
   CLOUD_CONNECTOR_ID: 'gcpCredentialsCloudConnectorIdInput',
 };
 
+export const CLOUD_CONNECTOR_STACK_ARN_INPUT_TEST_SUBJ = 'cloudConnectorStackArnInput';
+
+export const CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS = {
+  CALLOUT: 'cloudConnectorIacCheckCallout',
+  UPDATE_STACK_BUTTON: 'cloudConnectorIacCheckUpdateStackButton',
+  VERIFY_BUTTON: 'cloudConnectorIacCheckVerifyButton',
+  IAC_CHECK_TEMPLATE_ERROR_CALLOUT: 'cloudConnectorIacCheckTemplateErrorCallout',
+};
+
 export const CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS = {
   FLYOUT: 'cloudConnectorPoliciesFlyout',
   CLOSE_BUTTON: 'cloudConnectorPoliciesFlyoutCloseButton',
@@ -59,4 +72,11 @@ export const CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS = {
   FOOTER_SAVE_BUTTON: 'cloudConnectorFooterSaveButton',
   DELETE_CONFIRM_MODAL: 'cloudConnectorDeleteConfirmModal',
   DELETE_MODAL_CALLOUT: 'cloudConnectorDeleteModalCallout',
+  IAC_SECTION: 'cloudConnectorIacSection',
+  IAC_DEPLOYMENT_ID_INPUT: 'cloudConnectorIacDeploymentIdInput',
+  IAC_VIEW_STACK_LINK: 'cloudConnectorIacViewStackLink',
+  IAC_UPGRADE_CALLOUT: 'cloudConnectorIacUpgradeCallout',
+  IAC_UPDATE_STACK_BUTTON: 'cloudConnectorIacUpdateStackButton',
+  IAC_VERIFY_BUTTON: 'cloudConnectorIacVerifyButton',
+  IAC_TEMPLATE_ERROR_CALLOUT: 'cloudConnectorIacTemplateErrorCallout',
 };

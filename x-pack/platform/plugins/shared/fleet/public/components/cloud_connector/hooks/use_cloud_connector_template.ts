@@ -16,23 +16,98 @@ import {
   IAC_PROVISIONER_FALLBACK_REASON_RENDER_FAILED,
   IAC_PROVISIONER_RENDER_FALLBACK_EVENT,
 } from '../../../../common/telemetry/iac_provisioner_events';
-import { AWS_CLOUD_PROVIDER } from '../../../../common/types/models/cloud_connector';
+import type { CloudConnectorIacState } from '../../../../common/types/models/cloud_connector';
+import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../../common/types/rest_spec/iac_provisioner';
 import type { AccountType } from '../../../types';
+import type {
+  IacPolicyTemplateSelection,
+  RenderIacTemplateIntegration,
+  RenderIacTemplateRequest,
+} from '../../../../common/types/rest_spec/iac_provisioner';
 import type { CloudSetupForCloudConnector } from '../types';
-import { getCloudConnectorRemoteRoleTemplate } from '../utils';
+import {
+  getCloudConnectorRemoteRoleTemplate,
+  getIacLaunchUrl,
+  hasTemplateUrlParam,
+} from '../utils';
 
-const TEMPLATE_URL_PARAM_REGEX = /templateURL=[^&]+/;
+const MISSING_CONTEXT_ERROR = i18n.translate(
+  'xpack.fleet.cloudConnector.iacProvisioner.missingContextError',
+  { defaultMessage: 'CloudFormation template is not available for this integration.' }
+);
+
+const TEMPLATE_GENERATION_ERROR = i18n.translate(
+  'xpack.fleet.cloudConnector.iacProvisioner.templateGenerationError',
+  {
+    defaultMessage:
+      'Failed to generate the CloudFormation template. Try again, or contact your administrator if the problem persists.',
+  }
+);
+
+const TEMPLATE_ALREADY_CURRENT = i18n.translate(
+  'xpack.fleet.cloudConnector.iacProvisioner.templateAlreadyCurrent',
+  {
+    defaultMessage:
+      'The CloudFormation stack is already up to date. No template update is required.',
+  }
+);
+
+/** Confirm payload for a static-template fallback: clears any digest so the connector reads as static. */
+const STATIC_FALLBACK_IAC: CloudConnectorIacState = {
+  iac_key: null,
+  iac_blueprint_id: null,
+  iac_blueprint_version: null,
+};
+
+export interface TemplateRendered {
+  /** IaCP's `templateSha` for the rendered template; stored on the connector as `iac_key`. */
+  key: string;
+  /** The integration set the template was rendered for; lets callers detect a later edit. */
+  integrations: RenderIacTemplateIntegration[];
+  /** Blueprint provenance to store alongside the key. */
+  blueprintId: string;
+  blueprintVersion: string;
+}
 
 export interface UseCloudConnectorTemplateParams {
+  /**
+   * Provider whose form is calling. Typed from the render request so it widens
+   * automatically when the IaC Provisioner gains Azure/GCP blueprints.
+   */
+  provider: RenderIacTemplateRequest['provider'];
   cloud?: CloudSetupForCloudConnector;
   accountType: AccountType;
   iacTemplateUrl?: string;
   packageName?: string;
   /**
-   * Policy templates the user has enabled in the policy being configured.
-   * The rendered template grants permissions for exactly these — no more.
+   * Policy templates the user has enabled in the policy being configured, each with
+   * the input types they enabled. The rendered template grants permissions for exactly
+   * these — no more.
    */
-  policyTemplates?: string[];
+  policyTemplates?: IacPolicyTemplateSelection[];
+  /**
+   * Stored template digest from this connector. When provided, IaCP compares it with what it
+   * would render now and answers `render: false` when the stack is already current, in which
+   * case no console is opened. Omit on first render, after a static-template fallback, and
+   * from update flows that always want an artifact.
+   */
+  templateSha?: string;
+  /** Full integration set to render (union). When set, overrides packageName + policyTemplates. */
+  integrations?: RenderIacTemplateIntegration[];
+  /** Existing stack to update; makes the launch URL a stack-update deep link. */
+  deploymentId?: string;
+  /**
+   * Open the package's static template when the render fails or cannot run. First-time
+   * onboarding wants this; update flows must not downgrade an identity that already has a
+   * generated template.
+   */
+  staticTemplateFallback?: boolean;
+  /**
+   * Called right before the console opens with the key IaCP returned for the rendered template,
+   * its blueprint provenance and the integration set it was rendered for. Callers that write the
+   * connector at click time store all of it (https://github.com/elastic/ingest-dev/issues/9415).
+   */
+  onTemplateRendered?: (rendered: TemplateRendered) => void;
 }
 
 export type CloudConnectorLaunchButtonProps =
@@ -53,14 +128,30 @@ export interface UseCloudConnectorTemplateResult {
   isDisabled: boolean;
   isGeneratingTemplate: boolean;
   templateGenerationError?: string;
+  /** Shown when IaCP reports the stored templateSha still matches. */
+  templateAlreadyCurrent?: string;
+  /** Persisted on the cloud connector when the package policy is saved. */
+  iacConfirm?: CloudConnectorIacState;
+  /**
+   * Drops `iacConfirm` once a consumer has stored it, so a later save without a new Launch
+   * cannot re-post the previous render's provenance.
+   */
+  clearIacConfirm: () => void;
+  isIacProvisionerEnabled: boolean;
 }
 
 export const useCloudConnectorTemplate = ({
+  provider,
   cloud,
   accountType,
   iacTemplateUrl,
   packageName,
   policyTemplates,
+  templateSha,
+  integrations,
+  deploymentId,
+  staticTemplateFallback = true,
+  onTemplateRendered,
 }: UseCloudConnectorTemplateParams): UseCloudConnectorTemplateResult => {
   const { isIacProvisionerEnabled } = useIacProvisioner();
   const { analytics } = useStartServices();
@@ -68,6 +159,11 @@ export const useCloudConnectorTemplate = ({
   const [templateGenerationError, setTemplateGenerationError] = useState<string | undefined>(
     undefined
   );
+  const [templateAlreadyCurrent, setTemplateAlreadyCurrent] = useState<string | undefined>(
+    undefined
+  );
+  const [iacConfirm, setIacConfirm] = useState<CloudConnectorIacState | undefined>(undefined);
+  const clearIacConfirm = useCallback(() => setIacConfirm(undefined), []);
 
   // The static URL doubles as the quick-create scaffold for the rendered
   // artifact (console host plus any quick-create params the package's URL
@@ -78,6 +174,10 @@ export const useCloudConnectorTemplate = ({
 
   const launchTemplate = useCallback(async () => {
     setTemplateGenerationError(undefined);
+    setTemplateAlreadyCurrent(undefined);
+    // Drop any previous confirm so a failed later launch cannot persist
+    // a checksum from an earlier successful render.
+    setIacConfirm(undefined);
 
     const reportFallback = (reason: string) => {
       analytics.reportEvent(IAC_PROVISIONER_RENDER_FALLBACK_EVENT.eventType, {
@@ -86,27 +186,24 @@ export const useCloudConnectorTemplate = ({
       });
     };
 
-    // All render preconditions are checked synchronously, while the click's
-    // user activation is still live and window.open is allowed. The static
-    // URL must contain a templateURL param: it is the quick-create scaffold
-    // the rendered artifact gets swapped into, and String.replace on a
-    // non-matching URL would silently discard the render.
-    if (
-      !packageName ||
-      !policyTemplates?.length ||
-      !staticTemplateUrl ||
-      !TEMPLATE_URL_PARAM_REGEX.test(staticTemplateUrl)
-    ) {
+    // A package with no policy templates cannot contribute to the template, so it is
+    // dropped from a multi-package payload rather than sent to the provisioner.
+    const renderIntegrations =
+      integrations?.filter((integration) => integration.policyTemplates.length > 0) ??
+      (packageName && policyTemplates?.length ? [{ name: packageName, policyTemplates }] : []);
+    // With a deployment id the update deep link needs no scaffold; otherwise the static URL
+    // must carry templateURL= or String.replace would silently discard the render.
+    const hasScaffold = Boolean(deploymentId) || hasTemplateUrlParam(staticTemplateUrl);
+    if (renderIntegrations.length === 0 || !hasScaffold) {
       if (staticTemplateUrl) {
         reportFallback(IAC_PROVISIONER_FALLBACK_REASON_MISSING_CONTEXT);
-        window.open(staticTemplateUrl, '_blank');
-      } else {
-        setTemplateGenerationError(
-          i18n.translate('xpack.fleet.cloudConnector.iacProvisioner.missingContextError', {
-            defaultMessage: 'CloudFormation template is not available for this integration.',
-          })
-        );
+        if (staticTemplateFallback) {
+          setIacConfirm(STATIC_FALLBACK_IAC);
+          window.open(staticTemplateUrl, '_blank');
+          return;
+        }
       }
+      setTemplateGenerationError(MISSING_CONTEXT_ERROR);
       return;
     }
 
@@ -125,47 +222,101 @@ export const useCloudConnectorTemplate = ({
       }
     };
 
-    setIsGeneratingTemplate(true);
-    try {
-      const { data, error } = await sendRenderIacTemplate({
-        provider: AWS_CLOUD_PROVIDER,
-        flow: CLOUD_CONNECTOR_RENDER_FLOW,
-        integrations: [{ name: packageName, policyTemplates }],
-      });
-
-      if (error || !data) {
-        reportFallback(IAC_PROVISIONER_FALLBACK_REASON_RENDER_FAILED);
+    const fallbackToStatic = (reason: string) => {
+      reportFallback(reason);
+      if (staticTemplateUrl && staticTemplateFallback) {
+        setIacConfirm(STATIC_FALLBACK_IAC);
         navigateTo(staticTemplateUrl);
         return;
       }
+      cloudFormationTab?.close();
+      setTemplateGenerationError(TEMPLATE_GENERATION_ERROR);
+    };
 
-      // Only the template source changes: swap the templateURL query param on
-      // the existing quick-create URL. artifactUrl embeds signing credentials
-      // — never cache it and never write it anywhere other than the URL.
-      navigateTo(
-        staticTemplateUrl.replace(
-          TEMPLATE_URL_PARAM_REGEX,
-          `templateURL=${encodeURIComponent(data.artifactUrl)}`
-        )
-      );
+    setIsGeneratingTemplate(true);
+    try {
+      const { data, error } = await sendRenderIacTemplate({
+        provider,
+        workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
+        flow: CLOUD_CONNECTOR_RENDER_FLOW,
+        integrations: renderIntegrations,
+        ...(templateSha ? { templateSha } : {}),
+      });
+
+      if (error || !data) {
+        fallbackToStatic(IAC_PROVISIONER_FALLBACK_REASON_RENDER_FAILED);
+        return;
+      }
+
+      // Only reachable when a stored templateSha was sent: the deployed stack already
+      // matches what IaCP would render, so there is nothing to apply.
+      if (data.render === false) {
+        cloudFormationTab?.close();
+        setIacConfirm(undefined);
+        setTemplateAlreadyCurrent(TEMPLATE_ALREADY_CURRENT);
+        return;
+      }
+
+      if (data.render !== true || !data.artifactUrl) {
+        fallbackToStatic(IAC_PROVISIONER_FALLBACK_REASON_RENDER_FAILED);
+        return;
+      }
+
+      // Compute the launch URL before recording provenance so iacConfirm and
+      // onTemplateRendered only reflect renders that actually open the console.
+      // artifactUrl embeds signing credentials — never cache it and never write
+      // it anywhere other than the URL.
+      const launchUrl = getIacLaunchUrl({
+        provider,
+        staticUrl: staticTemplateUrl,
+        artifactUrl: data.artifactUrl,
+        deploymentId,
+      });
+      if (!launchUrl) {
+        cloudFormationTab?.close();
+        setTemplateGenerationError(MISSING_CONTEXT_ERROR);
+        return;
+      }
+
+      setIacConfirm({
+        iac_key: data.templateSha,
+        iac_blueprint_id: data.blueprint.id,
+        iac_blueprint_version: data.blueprint.version,
+      });
+      onTemplateRendered?.({
+        key: data.templateSha,
+        integrations: renderIntegrations,
+        blueprintId: data.blueprint.id,
+        blueprintVersion: data.blueprint.version,
+      });
+      navigateTo(launchUrl);
     } catch (e) {
       cloudFormationTab?.close();
-      setTemplateGenerationError(
-        i18n.translate('xpack.fleet.cloudConnector.iacProvisioner.templateGenerationError', {
-          defaultMessage:
-            'Failed to generate the CloudFormation template. Try again, or contact your administrator if the problem persists.',
-        })
-      );
+      setIacConfirm(undefined);
+      setTemplateGenerationError(TEMPLATE_GENERATION_ERROR);
     } finally {
       setIsGeneratingTemplate(false);
     }
-  }, [analytics, packageName, policyTemplates, staticTemplateUrl]);
+  }, [
+    analytics,
+    deploymentId,
+    integrations,
+    onTemplateRendered,
+    packageName,
+    policyTemplates,
+    provider,
+    staticTemplateFallback,
+    staticTemplateUrl,
+    templateSha,
+  ]);
 
   if (!isIacProvisionerEnabled) {
     return {
       launchButtonProps: { href: staticTemplateUrl, target: '_blank' },
       isDisabled: !staticTemplateUrl,
       isGeneratingTemplate: false,
+      clearIacConfirm,
+      isIacProvisionerEnabled,
     };
   }
 
@@ -174,5 +325,9 @@ export const useCloudConnectorTemplate = ({
     isDisabled: false,
     isGeneratingTemplate,
     templateGenerationError,
+    templateAlreadyCurrent,
+    iacConfirm,
+    clearIacConfirm,
+    isIacProvisionerEnabled,
   };
 };

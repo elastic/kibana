@@ -19,15 +19,30 @@ import { CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS } from '../../../../commo
 
 import type { CloudConnectorUsageItem } from '../hooks/use_cloud_connector_usage';
 import { useCloudConnectorUsage } from '../hooks/use_cloud_connector_usage';
-import { useUpdateCloudConnector } from '../hooks/use_update_cloud_connector';
+import { useUpdateCloudConnector, updateCloudConnector } from '../hooks/use_update_cloud_connector';
 import { useDeleteCloudConnector } from '../hooks/use_delete_cloud_connector';
+import { useVerifyIacKey } from '../hooks/use_verify_iac_key';
+import {
+  useCloudConnectorTemplate,
+  type TemplateRendered,
+} from '../hooks/use_cloud_connector_template';
+import { useIacProvisioner, useStartServices } from '../../../hooks';
 
 import { CloudConnectorPoliciesFlyout } from '.';
 
 jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('../hooks/use_cloud_connector_usage');
-jest.mock('../hooks/use_update_cloud_connector');
+jest.mock('../hooks/use_update_cloud_connector', () => ({
+  useUpdateCloudConnector: jest.fn(),
+  updateCloudConnector: jest.fn(() => Promise.resolve({})),
+}));
 jest.mock('../hooks/use_delete_cloud_connector');
+jest.mock('../hooks/use_verify_iac_key');
+jest.mock('../hooks/use_cloud_connector_template');
+jest.mock('../../../hooks', () => ({
+  useIacProvisioner: jest.fn(),
+  useStartServices: jest.fn(),
+}));
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseCloudConnectorUsage = useCloudConnectorUsage as jest.MockedFunction<
@@ -36,14 +51,31 @@ const mockUseCloudConnectorUsage = useCloudConnectorUsage as jest.MockedFunction
 const mockUseUpdateCloudConnector = useUpdateCloudConnector as jest.MockedFunction<
   typeof useUpdateCloudConnector
 >;
+const mockUpdateCloudConnector = updateCloudConnector as jest.MockedFunction<
+  typeof updateCloudConnector
+>;
 const mockUseDeleteCloudConnector = useDeleteCloudConnector as jest.MockedFunction<
   typeof useDeleteCloudConnector
 >;
+const mockUseVerifyIacKey = useVerifyIacKey as jest.MockedFunction<typeof useVerifyIacKey>;
+const mockUseCloudConnectorTemplate = useCloudConnectorTemplate as jest.MockedFunction<
+  typeof useCloudConnectorTemplate
+>;
+const mockUseIacProvisioner = useIacProvisioner as jest.MockedFunction<typeof useIacProvisioner>;
+const mockUseStartServices = useStartServices as jest.MockedFunction<typeof useStartServices>;
+
+const VALID_STACK_ARN =
+  'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/guid-guid-guid';
+// Blueprint provenance the hook reports with every rendered key.
+const RENDERED_BLUEPRINT = { blueprintId: 'federated-identity', blueprintVersion: '1.0.0' };
 
 describe('CloudConnectorPoliciesFlyout', () => {
   let queryClient: QueryClient;
   const mockOnClose = jest.fn();
   const mockNavigateToApp = jest.fn();
+  const mockReportEvent = jest.fn();
+  const mockHttp = {} as ReturnType<typeof useStartServices>['http'];
+  const mockLaunchOnClick = jest.fn(() => Promise.resolve());
 
   const defaultProps = {
     cloudConnectorId: 'connector-123',
@@ -89,6 +121,13 @@ describe('CloudConnectorPoliciesFlyout', () => {
       },
     } as unknown as ReturnType<typeof useKibana>);
 
+    mockUseStartServices.mockReturnValue({
+      analytics: { reportEvent: mockReportEvent },
+      http: mockHttp,
+    } as unknown as ReturnType<typeof useStartServices>);
+
+    mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
+
     mockUseCloudConnectorUsage.mockReturnValue({
       data: { items: mockUsageData, total: mockUsageData.length, page: 1, perPage: 10 },
       isLoading: false,
@@ -107,8 +146,23 @@ describe('CloudConnectorPoliciesFlyout', () => {
       isLoading: false,
     } as unknown as ReturnType<typeof useDeleteCloudConnector>);
 
+    mockUseVerifyIacKey.mockReturnValue({
+      data: undefined,
+    } as unknown as ReturnType<typeof useVerifyIacKey>);
+
+    mockUseCloudConnectorTemplate.mockReturnValue({
+      launchButtonProps: { onClick: mockLaunchOnClick },
+      isDisabled: false,
+      isGeneratingTemplate: false,
+      clearIacConfirm: jest.fn(),
+      isIacProvisionerEnabled: true,
+    });
+
     mockOnClose.mockClear();
     mockNavigateToApp.mockClear();
+    mockReportEvent.mockClear();
+    mockLaunchOnClick.mockClear();
+    mockUpdateCloudConnector.mockClear();
   });
 
   afterEach(() => {
@@ -717,6 +771,493 @@ describe('CloudConnectorPoliciesFlyout', () => {
       // Check for loading spinner on the button
       const loadingSpinner = deleteButton.querySelector('.euiLoadingSpinner');
       expect(loadingSpinner).toBeInTheDocument();
+    });
+  });
+
+  describe('IaC section', () => {
+    it('(a) renders IaC section with the deployment ID and a View stack link when ARN is valid, and no key field', () => {
+      renderFlyout({
+        provider: 'aws',
+        iacKey: 'sha256:abc',
+        iacDeploymentId: VALID_STACK_ARN,
+      });
+
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_SECTION)
+      ).toBeInTheDocument();
+      expect(screen.queryByText('Template key')).not.toBeInTheDocument();
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_DEPLOYMENT_ID_INPUT)
+      ).toHaveValue(VALID_STACK_ARN);
+
+      const viewStackLink = screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_VIEW_STACK_LINK
+      );
+      expect(viewStackLink).toBeInTheDocument();
+      expect(viewStackLink).toHaveAttribute(
+        'href',
+        expect.stringContaining('stacks/stackinfo?stackId=')
+      );
+    });
+
+    it('(b) hides IaC section for Azure provider', () => {
+      renderFlyout({
+        provider: 'azure',
+        cloudConnectorVars: {
+          tenant_id: { value: 'tenant-123' },
+          azure_credentials_cloud_connector_id: { value: 'subscription-123' },
+        },
+      });
+
+      expect(
+        screen.queryByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_SECTION)
+      ).not.toBeInTheDocument();
+    });
+
+    it('(c) hides IaC section when isIacProvisionerEnabled is false', () => {
+      mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: false });
+
+      renderFlyout({ provider: 'aws' });
+
+      expect(
+        screen.queryByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_SECTION)
+      ).not.toBeInTheDocument();
+    });
+
+    it('(d) shows upgrade callout with updated-template body and disabled button when upgrade_available and iacKey set but no deployment id', () => {
+      const checkedAt = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(); // 2 hours ago
+      renderFlyout({
+        provider: 'aws',
+        iacKey: 'sha256:old',
+        iacUpgradeStatus: 'upgrade_available',
+        iacUpgradeCheckedAt: checkedAt,
+      });
+
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_UPGRADE_CALLOUT)
+      ).toBeInTheDocument();
+      expect(screen.getByText(/The IAM role template has been updated/)).toBeInTheDocument();
+      expect(screen.getByText(/Checked/)).toBeInTheDocument();
+
+      const updateButton = screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_UPDATE_STACK_BUTTON
+      );
+      expect(updateButton).toBeDisabled();
+    });
+
+    it('(e) shows upgrade callout with static-template body when upgrade_available and no iacKey', () => {
+      renderFlyout({
+        provider: 'aws',
+        iacUpgradeStatus: 'upgrade_available',
+      });
+
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_UPGRADE_CALLOUT)
+      ).toBeInTheDocument();
+      expect(screen.getByText(/static CloudFormation template/)).toBeInTheDocument();
+    });
+
+    it('(f) editing deployment ID to a valid ARN enables Save; Save calls updateConnector with iac_deployment_id only', async () => {
+      const user = userEvent.setup();
+      const mockMutate = jest.fn();
+      mockUseUpdateCloudConnector.mockReturnValue({
+        mutate: mockMutate,
+        isLoading: false,
+      } as unknown as ReturnType<typeof useUpdateCloudConnector>);
+
+      renderFlyout({ provider: 'aws' });
+
+      const deploymentIdInput = screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_DEPLOYMENT_ID_INPUT
+      );
+      fireEvent.change(deploymentIdInput, { target: { value: VALID_STACK_ARN } });
+
+      const saveButton = screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FOOTER_SAVE_BUTTON
+      );
+      await waitFor(() => expect(saveButton).toBeEnabled());
+      await user.click(saveButton);
+
+      expect(mockMutate).toHaveBeenCalledWith({ iac_deployment_id: VALID_STACK_ARN });
+      expect(mockMutate).not.toHaveBeenCalledWith(
+        expect.objectContaining({ name: expect.anything() })
+      );
+      expect(mockMutate).not.toHaveBeenCalledWith(
+        expect.objectContaining({ iac_key: expect.anything() })
+      );
+    });
+
+    it('(g) an invalid deployment ID shows the field invalid and keeps Save disabled', async () => {
+      renderFlyout({ provider: 'aws' });
+
+      const deploymentIdInput = screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_DEPLOYMENT_ID_INPUT
+      );
+      fireEvent.change(deploymentIdInput, { target: { value: 'not-an-arn' } });
+
+      await waitFor(() => {
+        expect(screen.getByText(/Enter a CloudFormation stack ARN/)).toBeInTheDocument();
+      });
+
+      const saveButton = screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FOOTER_SAVE_BUTTON
+      );
+      expect(saveButton).toBeDisabled();
+    });
+
+    it('(i) Update click reports telemetry and calls launchButtonProps.onClick', async () => {
+      const user = userEvent.setup();
+      mockUseVerifyIacKey.mockReturnValue({
+        data: {
+          matches: false,
+          integrations: [
+            {
+              name: 'aws',
+              policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
+            },
+          ],
+        },
+      } as unknown as ReturnType<typeof useVerifyIacKey>);
+
+      renderFlyout({
+        provider: 'aws',
+        iacKey: 'sha256:old',
+        iacDeploymentId: VALID_STACK_ARN,
+        iacUpgradeStatus: 'upgrade_available',
+      });
+
+      const updateButton = screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_UPDATE_STACK_BUTTON
+      );
+      await user.click(updateButton);
+
+      expect(mockReportEvent).toHaveBeenCalledWith(
+        'iac_provisioner_key_check_action',
+        expect.objectContaining({
+          surface: 'flyout',
+          action: 'update_stack_clicked',
+          reason: 'key_mismatch',
+          hasDeploymentId: true,
+        })
+      );
+      expect(mockLaunchOnClick).toHaveBeenCalled();
+    });
+
+    it('(i-verify) Verify click reports telemetry, re-checks, and invalidates the connector queries', async () => {
+      const user = userEvent.setup();
+      const mockRefetch = jest.fn(() => Promise.resolve({}));
+      mockUseVerifyIacKey.mockReturnValue({
+        data: {
+          matches: false,
+          reason: 'key_mismatch',
+          integrations: [
+            {
+              name: 'aws',
+              policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
+            },
+          ],
+        },
+        isFetching: false,
+        refetch: mockRefetch,
+      } as unknown as ReturnType<typeof useVerifyIacKey>);
+      const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+
+      renderFlyout({
+        provider: 'aws',
+        iacKey: 'sha256:old',
+        iacDeploymentId: VALID_STACK_ARN,
+        iacUpgradeStatus: 'upgrade_available',
+      });
+      // Drop the invalidations the on-open verdict already triggered: this test is about the click.
+      invalidateQueries.mockClear();
+
+      await user.click(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_VERIFY_BUTTON)
+      );
+
+      expect(mockReportEvent).toHaveBeenCalledWith(
+        'iac_provisioner_key_check_action',
+        expect.objectContaining({
+          surface: 'flyout',
+          action: 'verify_clicked',
+          reason: 'key_mismatch',
+          hasDeploymentId: true,
+        })
+      );
+      expect(mockRefetch).toHaveBeenCalledTimes(1);
+      // The server stores the outcome of a re-check, so the lists carrying iac_upgrade_status
+      // have to be re-read before the callout can hide.
+      await waitFor(() => {
+        expect(invalidateQueries).toHaveBeenCalledWith(['get-cloud-connectors']);
+      });
+      expect(invalidateQueries).toHaveBeenCalledWith(['cloud-connector-usage', 'connector-123']);
+    });
+
+    it('(i-verify-no-key) Verify reports reason no_key when the connector has no stored key', async () => {
+      const user = userEvent.setup();
+      mockUseVerifyIacKey.mockReturnValue({
+        data: { matches: false, reason: 'no_key', integrations: [] },
+        isFetching: false,
+        refetch: jest.fn(() => Promise.resolve({})),
+      } as unknown as ReturnType<typeof useVerifyIacKey>);
+
+      renderFlyout({ provider: 'aws', iacUpgradeStatus: 'upgrade_available' });
+
+      await user.click(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_VERIFY_BUTTON)
+      );
+
+      expect(mockReportEvent).toHaveBeenCalledWith(
+        'iac_provisioner_key_check_action',
+        expect.objectContaining({
+          action: 'verify_clicked',
+          reason: 'no_key',
+          hasDeploymentId: false,
+        })
+      );
+    });
+
+    it('(i-verify-loading) the verify button shows loading while the check is in flight', () => {
+      mockUseVerifyIacKey.mockReturnValue({
+        data: { matches: false, reason: 'key_mismatch', integrations: [] },
+        isFetching: true,
+        refetch: jest.fn(() => Promise.resolve({})),
+      } as unknown as ReturnType<typeof useVerifyIacKey>);
+
+      renderFlyout({ provider: 'aws', iacUpgradeStatus: 'upgrade_available' });
+
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_VERIFY_BUTTON)
+      ).toBeDisabled();
+    });
+
+    it('(i-verify-failopen) keeps the callout when the check could not run, even though matches is true', () => {
+      mockUseVerifyIacKey.mockReturnValue({
+        data: { matches: true, outcome: 'key_unavailable', integrations: [] },
+        isFetching: false,
+        refetch: jest.fn(() => Promise.resolve({})),
+      } as unknown as ReturnType<typeof useVerifyIacKey>);
+
+      renderFlyout({ provider: 'aws', iacUpgradeStatus: 'upgrade_available' });
+
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_UPGRADE_CALLOUT)
+      ).toBeInTheDocument();
+    });
+
+    it('(i-verify-current) hides the callout when the live verdict says the stack is current', () => {
+      mockUseVerifyIacKey.mockReturnValue({
+        data: { matches: true, outcome: 'matches', integrations: [] },
+        isFetching: false,
+        refetch: jest.fn(() => Promise.resolve({})),
+      } as unknown as ReturnType<typeof useVerifyIacKey>);
+
+      // The stored status is still the stale one the daily task wrote.
+      renderFlyout({ provider: 'aws', iacUpgradeStatus: 'upgrade_available' });
+
+      expect(
+        screen.queryByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_UPGRADE_CALLOUT)
+      ).not.toBeInTheDocument();
+    });
+
+    it('(i-verify-onopen) invalidates the connector queries when a verdict arrives without a click', async () => {
+      mockUseVerifyIacKey.mockReturnValue({
+        data: { matches: false, reason: 'key_mismatch', integrations: [] },
+        isFetching: false,
+        refetch: jest.fn(() => Promise.resolve({})),
+      } as unknown as ReturnType<typeof useVerifyIacKey>);
+      const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+
+      renderFlyout({ provider: 'aws', iacUpgradeStatus: 'upgrade_available' });
+
+      await waitFor(() => {
+        expect(invalidateQueries).toHaveBeenCalledWith(['get-cloud-connectors']);
+      });
+      expect(invalidateQueries).toHaveBeenCalledWith(['cloud-connector-usage', 'connector-123']);
+    });
+
+    it('(j) onTemplateRendered calls updateCloudConnector with iac_key, leaves Save disabled, and no toast', async () => {
+      let capturedOnTemplateRendered: ((rendered: TemplateRendered) => void) | undefined;
+      mockUseCloudConnectorTemplate.mockImplementation((params) => {
+        capturedOnTemplateRendered = params.onTemplateRendered;
+        return {
+          launchButtonProps: { onClick: mockLaunchOnClick },
+          isDisabled: false,
+          isGeneratingTemplate: false,
+          clearIacConfirm: jest.fn(),
+          isIacProvisionerEnabled: true,
+        };
+      });
+
+      renderFlyout({ provider: 'aws', iacKey: 'sha256:old' });
+
+      expect(capturedOnTemplateRendered).toBeDefined();
+      capturedOnTemplateRendered!({ key: 'sha256:new', integrations: [], ...RENDERED_BLUEPRINT });
+
+      await waitFor(() => {
+        expect(mockUpdateCloudConnector).toHaveBeenCalledWith(mockHttp, 'connector-123', {
+          iac_key: 'sha256:new',
+          iac_blueprint_id: 'federated-identity',
+          iac_blueprint_version: '1.0.0',
+        });
+      });
+
+      // The key is written by the raw request only; the flyout's Save has nothing of its own to
+      // send (the key is not an editable field), so it stays disabled.
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FOOTER_SAVE_BUTTON)
+      ).toBeDisabled();
+
+      // Raw request only — no toast: useUpdateCloudConnector's mutate must NOT have been called.
+      const { mutate: toastingMutate } = mockUseUpdateCloudConnector.mock.results[0].value;
+      expect(toastingMutate).not.toHaveBeenCalled();
+    });
+
+    it('(j-arn) onTemplateRendered includes iac_deployment_id in write body when a valid ARN is edited', async () => {
+      let capturedOnTemplateRendered: ((rendered: TemplateRendered) => void) | undefined;
+      mockUseCloudConnectorTemplate.mockImplementation((params) => {
+        capturedOnTemplateRendered = params.onTemplateRendered;
+        return {
+          launchButtonProps: { onClick: mockLaunchOnClick },
+          isDisabled: false,
+          isGeneratingTemplate: false,
+          clearIacConfirm: jest.fn(),
+          isIacProvisionerEnabled: true,
+        };
+      });
+
+      renderFlyout({ provider: 'aws', iacKey: 'sha256:new' });
+
+      // User edits the deployment ID to a valid stack ARN.
+      const deploymentIdInput = screen.getByTestId(
+        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_DEPLOYMENT_ID_INPUT
+      );
+      fireEvent.change(deploymentIdInput, { target: { value: VALID_STACK_ARN } });
+
+      capturedOnTemplateRendered!({ key: 'sha256:new', integrations: [], ...RENDERED_BLUEPRINT });
+
+      await waitFor(() => {
+        expect(mockUpdateCloudConnector).toHaveBeenCalledWith(mockHttp, 'connector-123', {
+          iac_key: 'sha256:new',
+          iac_blueprint_id: 'federated-identity',
+          iac_blueprint_version: '1.0.0',
+          iac_deployment_id: VALID_STACK_ARN,
+        });
+      });
+    });
+
+    it('(k) useCloudConnectorTemplate receives provider aws, integrations from verification, and edited deploymentId', () => {
+      const mockIntegrations = [
+        { name: 'aws', policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }] },
+      ];
+      mockUseVerifyIacKey.mockReturnValue({
+        data: {
+          matches: false,
+          integrations: mockIntegrations,
+        },
+      } as unknown as ReturnType<typeof useVerifyIacKey>);
+
+      renderFlyout({
+        provider: 'aws',
+        iacDeploymentId: VALID_STACK_ARN,
+        iacUpgradeStatus: 'upgrade_available',
+      });
+
+      expect(mockUseCloudConnectorTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          provider: 'aws',
+          integrations: mockIntegrations,
+          deploymentId: VALID_STACK_ARN,
+        })
+      );
+    });
+
+    it('(k2) useCloudConnectorTemplate opts out of the static template fallback', () => {
+      // This identity already has a generated template; the static one would downgrade it.
+      renderFlyout({ provider: 'aws', iacUpgradeStatus: 'upgrade_available' });
+
+      expect(mockUseCloudConnectorTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ staticTemplateFallback: false })
+      );
+    });
+
+    it('(k3) renders the template generation error below the upgrade callout', () => {
+      mockUseVerifyIacKey.mockReturnValue({
+        data: { matches: false, reason: 'key_mismatch', integrations: [] },
+        isFetching: false,
+        refetch: jest.fn(() => Promise.resolve({})),
+      } as unknown as ReturnType<typeof useVerifyIacKey>);
+      mockUseCloudConnectorTemplate.mockReturnValue({
+        launchButtonProps: { onClick: mockLaunchOnClick },
+        isDisabled: false,
+        isGeneratingTemplate: false,
+        clearIacConfirm: jest.fn(),
+        templateGenerationError: 'boom',
+        isIacProvisionerEnabled: true,
+      });
+
+      renderFlyout({ provider: 'aws', iacUpgradeStatus: 'upgrade_available' });
+
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_TEMPLATE_ERROR_CALLOUT)
+      ).toBeInTheDocument();
+      expect(screen.getByText('boom')).toBeInTheDocument();
+    });
+
+    it('(k4) does not render the template generation error when there is no upgrade callout', () => {
+      mockUseCloudConnectorTemplate.mockReturnValue({
+        launchButtonProps: { onClick: mockLaunchOnClick },
+        isDisabled: false,
+        isGeneratingTemplate: false,
+        clearIacConfirm: jest.fn(),
+        templateGenerationError: 'boom',
+        isIacProvisionerEnabled: true,
+      });
+
+      renderFlyout({ provider: 'aws', iacUpgradeStatus: 'up_to_date' });
+
+      expect(
+        screen.queryByTestId(
+          CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IAC_TEMPLATE_ERROR_CALLOUT
+        )
+      ).not.toBeInTheDocument();
+    });
+
+    it('(l) useVerifyIacKey is enabled only when upgrade_available and IaC section is shown', () => {
+      renderFlyout({
+        provider: 'aws',
+        iacUpgradeStatus: 'upgrade_available',
+      });
+
+      expect(mockUseVerifyIacKey).toHaveBeenCalledWith(
+        expect.not.objectContaining({ integrations: expect.anything() })
+      );
+      expect(mockUseVerifyIacKey).toHaveBeenCalledWith({
+        cloudConnectorId: 'connector-123',
+        enabled: true,
+      });
+    });
+
+    it('(l-disabled) useVerifyIacKey is disabled when iacUpgradeStatus is up_to_date', () => {
+      renderFlyout({
+        provider: 'aws',
+        iacUpgradeStatus: 'up_to_date',
+      });
+
+      expect(mockUseVerifyIacKey).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
+    });
+
+    it('(l-disabled-azure) useVerifyIacKey is disabled for non-AWS provider', () => {
+      renderFlyout({
+        provider: 'azure',
+        cloudConnectorVars: {
+          tenant_id: { value: 'tenant-123' },
+          azure_credentials_cloud_connector_id: { value: 'subscription-123' },
+        },
+        iacUpgradeStatus: 'upgrade_available',
+      });
+
+      expect(mockUseVerifyIacKey).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
     });
   });
 });

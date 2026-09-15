@@ -1,0 +1,498 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { render, screen, act, fireEvent } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+
+import type { NewPackagePolicy, PackageInfo } from '../../../../common';
+import {
+  CLOUD_CONNECTOR_STACK_ARN_INPUT_TEST_SUBJ,
+  CLOUD_CONNECTOR_STALE_TEMPLATE_CALLOUT_TEST_SUBJ,
+  CLOUD_CONNECTOR_TEMPLATE_UP_TO_DATE_CALLOUT_TEST_SUBJ,
+} from '../../../../common/services/cloud_connectors/test_subjects';
+
+import type { AwsCloudConnectorCredentials } from '../types';
+import type {
+  UseCloudConnectorTemplateParams,
+  UseCloudConnectorTemplateResult,
+} from '../hooks/use_cloud_connector_template';
+
+import { AWSCloudConnectorForm } from './aws_cloud_connector_form';
+
+// Mock the template hook so we control isIacProvisionerEnabled and onTemplateRendered
+jest.mock('../hooks/use_cloud_connector_template');
+jest.mock('../../../hooks/use_request/pending_cloud_connector_iac', () => ({
+  setPendingCloudConnectorIac: jest.fn(),
+}));
+jest.mock('../../../../common/services/cloud_connectors', () => ({
+  extractRawCredentialVars: jest.fn().mockReturnValue({}),
+  getCredentialKeyFromVarName: jest.fn().mockReturnValue(undefined),
+  // Use the real implementation so ARN validation works correctly in tests
+  parseAwsRegionFromArn: jest.requireActual('../../../../common/services/cloud_connectors')
+    .parseAwsRegionFromArn,
+}));
+jest.mock('../../../../common/services/policy_template', () => ({
+  getEnabledInputsByPolicyTemplate: jest.fn().mockReturnValue([]),
+}));
+jest.mock('../form/cloud_connector_input_fields', () => ({
+  CloudConnectorInputFields: () => null,
+}));
+jest.mock('../form/cloud_connector_name_field', () => ({
+  CloudConnectorNameField: () => null,
+}));
+jest.mock('./aws_cloud_formation_guide', () => ({
+  CloudFormationCloudCredentialsGuide: () => null,
+}));
+jest.mock('./aws_cloud_connector_options', () => ({
+  getAwsCloudConnectorsCredentialsFormOptions: jest.fn().mockReturnValue(null),
+}));
+
+const { getEnabledInputsByPolicyTemplate } = jest.requireMock(
+  '../../../../common/services/policy_template'
+) as { getEnabledInputsByPolicyTemplate: jest.Mock };
+
+const { setPendingCloudConnectorIac } = jest.requireMock(
+  '../../../hooks/use_request/pending_cloud_connector_iac'
+) as { setPendingCloudConnectorIac: jest.Mock };
+
+const { useCloudConnectorTemplate } = jest.requireMock('../hooks/use_cloud_connector_template') as {
+  useCloudConnectorTemplate: jest.MockedFunction<
+    (
+      params: Parameters<
+        typeof import('../hooks/use_cloud_connector_template').useCloudConnectorTemplate
+      >[0]
+    ) => UseCloudConnectorTemplateResult
+  >;
+};
+
+const iacEnabledResult: UseCloudConnectorTemplateResult = {
+  launchButtonProps: { onClick: jest.fn() },
+  isDisabled: false,
+  isGeneratingTemplate: false,
+  templateGenerationError: undefined,
+  clearIacConfirm: jest.fn(),
+  isIacProvisionerEnabled: true,
+};
+
+const iacDisabledResult: UseCloudConnectorTemplateResult = {
+  launchButtonProps: { href: undefined, target: '_blank' },
+  isDisabled: true,
+  isGeneratingTemplate: false,
+  templateGenerationError: undefined,
+  clearIacConfirm: jest.fn(),
+  isIacProvisionerEnabled: false,
+};
+
+type OnTemplateRendered = NonNullable<UseCloudConnectorTemplateParams['onTemplateRendered']>;
+
+// Blueprint provenance the hook reports with every rendered key.
+const RENDERED_BLUEPRINT = { blueprintId: 'federated-identity', blueprintVersion: '1.0.0' };
+const VALID_STACK_ARN = 'arn:aws:cloudformation:us-east-1:123456789012:stack/s/u';
+
+const TWO_TEMPLATES = [
+  { name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] },
+  { name: 's3', enabledInputs: ['aws-s3'] },
+];
+const ONE_TEMPLATE = [TWO_TEMPLATES[0]];
+
+const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
+
+const makePolicy = (): NewPackagePolicy =>
+  ({
+    id: 'p1',
+    name: 'test',
+    namespace: 'default',
+    enabled: true,
+    policy_ids: [],
+    inputs: [],
+    supports_cloud_connector: true,
+  } as unknown as NewPackagePolicy);
+
+const makePackageInfo = (): PackageInfo =>
+  ({
+    name: 'cloud_security_posture',
+    title: 'CSP',
+    version: '1.0.0',
+    release: 'ga',
+    description: '',
+    type: 'integration',
+    owner: { github: 'elastic/security-service-integrations' },
+    format_version: '1.0.0',
+    policy_templates: [],
+  } as unknown as PackageInfo);
+
+describe('AWSCloudConnectorForm', () => {
+  const mockSetCredentials = jest.fn();
+
+  const defaultCredentials: AwsCloudConnectorCredentials = {
+    name: 'My connector',
+    roleArn: 'arn:aws:iam::123456789012:role/TestRole',
+  };
+
+  const defaultProps = {
+    newPolicy: makePolicy(),
+    packageInfo: makePackageInfo(),
+    updatePolicy: jest.fn(),
+    hasInvalidRequiredVars: false,
+    credentials: defaultCredentials,
+    setCredentials: mockSetCredentials,
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useCloudConnectorTemplate.mockReturnValue(iacEnabledResult);
+    getEnabledInputsByPolicyTemplate.mockReturnValue([]);
+  });
+
+  describe('stack ARN field visibility', () => {
+    it('renders the stack ARN input when IaCP is enabled', () => {
+      useCloudConnectorTemplate.mockReturnValue(iacEnabledResult);
+      renderWithIntl(<AWSCloudConnectorForm {...defaultProps} />);
+      expect(screen.getByTestId(CLOUD_CONNECTOR_STACK_ARN_INPUT_TEST_SUBJ)).toBeInTheDocument();
+    });
+
+    it('does not render the stack ARN input when IaCP is disabled', () => {
+      useCloudConnectorTemplate.mockReturnValue(iacDisabledResult);
+      renderWithIntl(<AWSCloudConnectorForm {...defaultProps} />);
+      expect(
+        screen.queryByTestId(CLOUD_CONNECTOR_STACK_ARN_INPUT_TEST_SUBJ)
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('stack ARN field interaction', () => {
+    it('calls setCredentials with iacDeploymentId set to the trimmed value when a valid ARN is entered', () => {
+      useCloudConnectorTemplate.mockReturnValue(iacEnabledResult);
+      renderWithIntl(<AWSCloudConnectorForm {...defaultProps} />);
+
+      const input = screen.getByTestId(CLOUD_CONNECTOR_STACK_ARN_INPUT_TEST_SUBJ);
+      // Use fireEvent.change to set the full value in a single event, avoiding
+      // the controlled-input reset that happens character-by-character with userEvent.type.
+      fireEvent.change(input, {
+        target: { value: 'arn:aws:cloudformation:us-east-1:123456789012:stack/s/u' },
+      });
+
+      expect(mockSetCredentials).toHaveBeenCalledWith(
+        expect.objectContaining({
+          iacDeploymentId: 'arn:aws:cloudformation:us-east-1:123456789012:stack/s/u',
+        })
+      );
+    });
+
+    it('marks the form row invalid with error text when an invalid ARN is present', () => {
+      const credentialsWithBadArn: AwsCloudConnectorCredentials = {
+        ...defaultCredentials,
+        iacDeploymentId: 'not-a-valid-arn',
+      };
+
+      useCloudConnectorTemplate.mockReturnValue(iacEnabledResult);
+      renderWithIntl(
+        <AWSCloudConnectorForm {...defaultProps} credentials={credentialsWithBadArn} />
+      );
+
+      // The EuiFormRow should show an error message about the ARN
+      expect(screen.getByText(/Enter a CloudFormation stack ARN/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('onTemplateRendered callback', () => {
+    it('calls setCredentials with iacKey when the template hook calls onTemplateRendered', () => {
+      let capturedOnTemplateRendered: OnTemplateRendered | undefined;
+
+      useCloudConnectorTemplate.mockImplementation((params) => {
+        capturedOnTemplateRendered = params.onTemplateRendered;
+        return iacEnabledResult;
+      });
+
+      renderWithIntl(<AWSCloudConnectorForm {...defaultProps} />);
+
+      act(() => {
+        capturedOnTemplateRendered?.({
+          key: 'sha256:abc',
+          integrations: [],
+          ...RENDERED_BLUEPRINT,
+        });
+      });
+
+      expect(mockSetCredentials).toHaveBeenCalledWith(
+        expect.objectContaining({ iacKey: 'sha256:abc' })
+      );
+    });
+
+    it('stores the policy templates of the rendered package alongside the key', () => {
+      let capturedOnTemplateRendered: OnTemplateRendered | undefined;
+
+      useCloudConnectorTemplate.mockImplementation((params) => {
+        capturedOnTemplateRendered = params.onTemplateRendered;
+        return iacEnabledResult;
+      });
+
+      renderWithIntl(<AWSCloudConnectorForm {...defaultProps} />);
+
+      act(() => {
+        capturedOnTemplateRendered?.({
+          key: 'sha256:abc',
+          integrations: [
+            // Only the package being configured is relevant; any other entry is ignored.
+            { name: 'aws', policyTemplates: [{ name: 's3', enabledInputs: ['aws-s3'] }] },
+            { name: 'cloud_security_posture', policyTemplates: TWO_TEMPLATES },
+          ],
+          ...RENDERED_BLUEPRINT,
+        });
+      });
+
+      expect(mockSetCredentials).toHaveBeenCalledWith(
+        expect.objectContaining({
+          iacKey: 'sha256:abc',
+          iacRenderedPolicyTemplates: TWO_TEMPLATES,
+        })
+      );
+    });
+
+    it('uses the latest credentials when onTemplateRendered fires after a prop update', () => {
+      // Regression: onTemplateRendered is called after an async render. Without the
+      // latest-value ref, a name edit made while the render runs would be overwritten
+      // by the stale credentials snapshot captured when the callback was created.
+      //
+      // The test intentionally fires the callback captured from the FIRST render (not
+      // the one captured after rerender) so it would fail against the old
+      // useCallback([credentials, setCredentials]) implementation, which would have
+      // closed over the stale first-render credentials.
+      let capturedOnTemplateRendered: OnTemplateRendered | undefined;
+
+      useCloudConnectorTemplate.mockImplementation((params) => {
+        capturedOnTemplateRendered = params.onTemplateRendered;
+        return iacEnabledResult;
+      });
+
+      const { rerender } = renderWithIntl(<AWSCloudConnectorForm {...defaultProps} />);
+
+      // Save the callback reference from the initial render before the rerender updates it.
+      const callbackFromFirstRender = capturedOnTemplateRendered;
+
+      // Simulate a name edit that arrives while the async render is in flight.
+      const editedCredentials: AwsCloudConnectorCredentials = {
+        ...defaultCredentials,
+        name: 'Edited',
+      };
+      rerender(
+        <I18nProvider>
+          <AWSCloudConnectorForm {...defaultProps} credentials={editedCredentials} />
+        </I18nProvider>
+      );
+
+      // The callback must be the same reference across renders (stable identity from empty deps).
+      // With the old useCallback([credentials, setCredentials]), a changed credentials prop would
+      // produce a new function reference and this assertion would fail.
+      expect(capturedOnTemplateRendered).toBe(callbackFromFirstRender);
+
+      // Invoke the callback captured from the FIRST render — it must see the edited name
+      // because the latest-value ref (not the closure) is read at call time.
+      act(() => {
+        callbackFromFirstRender?.({ key: 'sha256:abc', integrations: [], ...RENDERED_BLUEPRINT });
+      });
+
+      expect(mockSetCredentials).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'Edited', iacKey: 'sha256:abc' })
+      );
+    });
+  });
+
+  describe('enabled inputs edited after the template was rendered', () => {
+    // The Launch button renders from the inputs enabled at click time, but the service selection
+    // sits below it, so the user can still change it afterwards.
+    const renderedCredentials = (
+      renderedSet: Array<{ name: string; enabledInputs: string[] }>
+    ): AwsCloudConnectorCredentials => ({
+      ...defaultCredentials,
+      iacKey: 'sha256:abc',
+      iacRenderedPolicyTemplates: renderedSet,
+    });
+
+    const rerenderWith = (
+      rerender: (ui: React.ReactElement) => void,
+      credentials: AwsCloudConnectorCredentials,
+      onValidityChange: (isValid: boolean) => void
+    ) =>
+      rerender(
+        <I18nProvider>
+          <AWSCloudConnectorForm
+            {...defaultProps}
+            // A fresh policy object so the enabled-inputs memo recomputes.
+            newPolicy={makePolicy()}
+            credentials={credentials}
+            onValidityChange={onValidityChange}
+          />
+        </I18nProvider>
+      );
+
+    it('warns and reports invalid once a service is disabled after the render', () => {
+      const onValidityChange = jest.fn();
+      let capturedOnTemplateRendered: OnTemplateRendered | undefined;
+      useCloudConnectorTemplate.mockImplementation((params) => {
+        capturedOnTemplateRendered = params.onTemplateRendered;
+        return iacEnabledResult;
+      });
+      getEnabledInputsByPolicyTemplate.mockReturnValue(TWO_TEMPLATES);
+
+      const { rerender } = renderWithIntl(
+        <AWSCloudConnectorForm {...defaultProps} onValidityChange={onValidityChange} />
+      );
+
+      expect(
+        screen.queryByTestId(CLOUD_CONNECTOR_STALE_TEMPLATE_CALLOUT_TEST_SUBJ)
+      ).not.toBeInTheDocument();
+      expect(onValidityChange).toHaveBeenLastCalledWith(true);
+
+      act(() => {
+        capturedOnTemplateRendered?.({
+          key: 'sha256:abc',
+          integrations: [{ name: 'cloud_security_posture', policyTemplates: TWO_TEMPLATES }],
+          ...RENDERED_BLUEPRINT,
+        });
+      });
+
+      getEnabledInputsByPolicyTemplate.mockReturnValue(ONE_TEMPLATE);
+      rerenderWith(rerender, renderedCredentials(TWO_TEMPLATES), onValidityChange);
+
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_STALE_TEMPLATE_CALLOUT_TEST_SUBJ)
+      ).toBeInTheDocument();
+      expect(onValidityChange).toHaveBeenLastCalledWith(false);
+    });
+
+    it('clears the warning and reports valid after the template is rendered again', () => {
+      const onValidityChange = jest.fn();
+      let capturedOnTemplateRendered: OnTemplateRendered | undefined;
+      useCloudConnectorTemplate.mockImplementation((params) => {
+        capturedOnTemplateRendered = params.onTemplateRendered;
+        return iacEnabledResult;
+      });
+      getEnabledInputsByPolicyTemplate.mockReturnValue(ONE_TEMPLATE);
+
+      const { rerender } = renderWithIntl(
+        <AWSCloudConnectorForm
+          {...defaultProps}
+          credentials={renderedCredentials(TWO_TEMPLATES)}
+          onValidityChange={onValidityChange}
+        />
+      );
+
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_STALE_TEMPLATE_CALLOUT_TEST_SUBJ)
+      ).toBeInTheDocument();
+      expect(onValidityChange).toHaveBeenLastCalledWith(false);
+
+      // A fresh Launch renders the currently enabled set and records it.
+      act(() => {
+        capturedOnTemplateRendered?.({
+          key: 'sha256:def',
+          integrations: [{ name: 'cloud_security_posture', policyTemplates: ONE_TEMPLATE }],
+          ...RENDERED_BLUEPRINT,
+        });
+      });
+
+      expect(mockSetCredentials).toHaveBeenCalledWith(
+        expect.objectContaining({
+          iacKey: 'sha256:def',
+          iacRenderedPolicyTemplates: ONE_TEMPLATE,
+        })
+      );
+
+      rerenderWith(rerender, renderedCredentials(ONE_TEMPLATE), onValidityChange);
+
+      expect(
+        screen.queryByTestId(CLOUD_CONNECTOR_STALE_TEMPLATE_CALLOUT_TEST_SUBJ)
+      ).not.toBeInTheDocument();
+      expect(onValidityChange).toHaveBeenLastCalledWith(true);
+    });
+
+    it('never warns without both a key and a recorded rendered set', () => {
+      const onValidityChange = jest.fn();
+      getEnabledInputsByPolicyTemplate.mockReturnValue(ONE_TEMPLATE);
+
+      // The static template path stores no key, so nothing is known to be out of date.
+      const { rerender } = renderWithIntl(
+        <AWSCloudConnectorForm
+          {...defaultProps}
+          credentials={{ ...defaultCredentials, iacRenderedPolicyTemplates: TWO_TEMPLATES }}
+          onValidityChange={onValidityChange}
+        />
+      );
+
+      expect(
+        screen.queryByTestId(CLOUD_CONNECTOR_STALE_TEMPLATE_CALLOUT_TEST_SUBJ)
+      ).not.toBeInTheDocument();
+
+      // A key with no recorded set (e.g. restored from an earlier session) is not actionable.
+      rerenderWith(rerender, { ...defaultCredentials, iacKey: 'sha256:abc' }, onValidityChange);
+
+      expect(
+        screen.queryByTestId(CLOUD_CONNECTOR_STALE_TEMPLATE_CALLOUT_TEST_SUBJ)
+      ).not.toBeInTheDocument();
+      expect(onValidityChange).toHaveBeenLastCalledWith(true);
+      expect(onValidityChange).not.toHaveBeenCalledWith(false);
+    });
+
+    it('does not warn when the same services are listed in a different order', () => {
+      const onValidityChange = jest.fn();
+      getEnabledInputsByPolicyTemplate.mockReturnValue(TWO_TEMPLATES);
+
+      renderWithIntl(
+        <AWSCloudConnectorForm
+          {...defaultProps}
+          credentials={renderedCredentials([TWO_TEMPLATES[1], TWO_TEMPLATES[0]])}
+          onValidityChange={onValidityChange}
+        />
+      );
+
+      expect(
+        screen.queryByTestId(CLOUD_CONNECTOR_STALE_TEMPLATE_CALLOUT_TEST_SUBJ)
+      ).not.toBeInTheDocument();
+      expect(onValidityChange).toHaveBeenLastCalledWith(true);
+    });
+  });
+
+  describe('pending IaC state', () => {
+    const iacConfirm = {
+      iac_key: 'sha256:abc',
+      iac_blueprint_id: 'federated-identity',
+      iac_blueprint_version: '1.0.0',
+    };
+
+    it('holds the render provenance and the stack ARN under the policy name until save', () => {
+      useCloudConnectorTemplate.mockReturnValue({ ...iacEnabledResult, iacConfirm });
+
+      renderWithIntl(
+        <AWSCloudConnectorForm
+          {...defaultProps}
+          credentials={{ ...defaultCredentials, iacDeploymentId: VALID_STACK_ARN }}
+        />
+      );
+
+      expect(setPendingCloudConnectorIac).toHaveBeenLastCalledWith(defaultProps.newPolicy.name, {
+        ...iacConfirm,
+        iac_deployment_id: VALID_STACK_ARN,
+      });
+    });
+
+    it('renders the up-to-date callout when the hook reports the template is already current', () => {
+      useCloudConnectorTemplate.mockReturnValue({
+        ...iacEnabledResult,
+        templateAlreadyCurrent: 'Up to date',
+      });
+
+      renderWithIntl(<AWSCloudConnectorForm {...defaultProps} />);
+
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_TEMPLATE_UP_TO_DATE_CALLOUT_TEST_SUBJ)
+      ).toBeInTheDocument();
+      expect(screen.getByText('Up to date')).toBeInTheDocument();
+    });
+  });
+});

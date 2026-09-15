@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useMemo } from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { NewPackagePolicy, PackageInfo } from '../../../../common';
+import { getEnabledInputsByPolicyTemplate } from '../../../../common/services/policy_template';
 import type { AccountType } from '../../../types';
-import type { AwsCloudConnectorCredentials } from '../types';
+import type { AwsCloudConnectorCredentials, CloudSetupForCloudConnector } from '../types';
 import { AWS_PROVIDER } from '../constants';
 import { CloudConnectorSelector } from '../form/cloud_connector_selector';
+import { IacKeyCheck } from '../components/iac_key_check';
 
 export const AWSReusableConnectorForm: React.FC<{
   cloudConnectorId: string | undefined;
@@ -21,7 +24,35 @@ export const AWSReusableConnectorForm: React.FC<{
   setCredentials: (credentials: AwsCloudConnectorCredentials) => void;
   accountType?: AccountType;
   packageName?: string;
-}> = ({ credentials, setCredentials, isEditPage, cloudConnectorId, accountType, packageName }) => {
+  newPolicy: NewPackagePolicy;
+  cloud?: CloudSetupForCloudConnector;
+  iacTemplateUrl?: string;
+  packageInfo?: PackageInfo;
+  onValidityChange?: (isValid: boolean) => void;
+}> = ({
+  credentials,
+  setCredentials,
+  isEditPage,
+  cloudConnectorId,
+  accountType,
+  packageName,
+  newPolicy,
+  cloud,
+  iacTemplateUrl,
+  packageInfo,
+  onValidityChange,
+}) => {
+  const inputs = newPolicy.inputs;
+  // The rendered template must cover every input the user enabled — no more.
+  const policyTemplates = useMemo(() => getEnabledInputsByPolicyTemplate({ inputs }), [inputs]);
+  const integrations = useMemo(
+    () =>
+      packageInfo?.name && policyTemplates.length
+        ? [{ name: packageInfo.name, policyTemplates }]
+        : [],
+    [packageInfo?.name, policyTemplates]
+  );
+
   return (
     <>
       <EuiSpacer size="m" />
@@ -41,6 +72,15 @@ export const AWSReusableConnectorForm: React.FC<{
         packageName={packageName}
       />
       <EuiSpacer size="m" />
+      <IacKeyCheck
+        cloudConnectorId={credentials.cloudConnectorId}
+        integrations={integrations}
+        integrationTitle={packageInfo?.title}
+        cloud={cloud}
+        accountType={accountType}
+        iacTemplateUrl={iacTemplateUrl}
+        onValidityChange={onValidityChange}
+      />
     </>
   );
 };

@@ -42,6 +42,7 @@ import {
   LazyAwsIdentityFederationSetup,
   LazyAwsStaticKeysForm,
 } from '@kbn/fleet-plugin/public';
+import type { RenderIacTemplateIntegration } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useLocation } from 'react-router-dom';
 import { StaticKeysReplaceView } from './static_keys_replace_view';
@@ -59,6 +60,10 @@ const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 import { ManagedIntegrationsSection } from './managed_integrations_section';
+
+const IAC_INTEGRATIONS: RenderIacTemplateIntegration[] = [
+  { name: 'aws', policyTemplates: [{ name: 'guardduty', enabledInputs: ['httpjson'] }] },
+];
 
 function setupMocks({
   cloud = undefined,
@@ -83,6 +88,18 @@ function setupMocks({
     setConnectorId,
     setStaticKeys,
     authenticateAndDeployStep: { connectorId, authMethod },
+    awsServicesMap: new Map([
+      [
+        'guardduty',
+        {
+          id: 'guardduty',
+          packageName: 'aws',
+          dataStreams: ['guardduty'],
+          inputs: ['aws-s3', 'httpjson'],
+          identityFederationSupported: true,
+        },
+      ],
+    ]),
   });
 
   MockIdentityFederation.mockImplementation(
@@ -147,6 +164,7 @@ function renderSection(
   props: {
     serviceCount?: number;
     showIdentityFederation?: boolean;
+    iacIntegrations?: RenderIacTemplateIntegration[];
     onDeploy?: () => void;
     isDeploying?: boolean;
     isDone?: boolean;
@@ -159,6 +177,7 @@ function renderSection(
         <ManagedIntegrationsSection
           serviceCount={props.serviceCount ?? 3}
           showIdentityFederation={props.showIdentityFederation ?? true}
+          iacIntegrations={props.iacIntegrations ?? IAC_INTEGRATIONS}
           onDeploy={props.onDeploy ?? jest.fn()}
           isDeploying={props.isDeploying ?? false}
           isDone={props.isDone ?? false}
@@ -293,6 +312,33 @@ describe('ManagedIntegrationsSection', () => {
     });
   });
 
+  describe('Federated Identity integration set', () => {
+    it('passes iacIntegrations through as the integrations prop of AwsIdentityFederationSetup', () => {
+      const iacIntegrations: RenderIacTemplateIntegration[] = [
+        {
+          name: 'aws',
+          policyTemplates: [
+            { name: 'cloudtrail', enabledInputs: ['aws-s3'] },
+            { name: 'guardduty', enabledInputs: ['aws-s3', 'httpjson'] },
+          ],
+        },
+      ];
+      renderSection({ showIdentityFederation: true, iacIntegrations });
+      expect(MockIdentityFederation).toHaveBeenCalledWith(
+        expect.objectContaining({ integrations: iacIntegrations }),
+        expect.anything()
+      );
+    });
+
+    it('labels the Existing Identity check as the onboarding telemetry surface', () => {
+      renderSection({ showIdentityFederation: true });
+      expect(MockIdentityFederation).toHaveBeenCalledWith(
+        expect.objectContaining({ iacCheckSurface: 'onboarding' }),
+        expect.anything()
+      );
+    });
+  });
+
   describe('initialConnectorId restoration', () => {
     it('passes persisted connectorId as initialConnectorId to AwsIdentityFederationSetup', () => {
       setupMocks({ connectorId: 'persisted-connector' });
@@ -380,6 +426,7 @@ describe('ManagedIntegrationsSection', () => {
               <ManagedIntegrationsSection
                 serviceCount={3}
                 showIdentityFederation={true}
+                iacIntegrations={IAC_INTEGRATIONS}
                 onDeploy={jest.fn()}
                 isDeploying={false}
                 isDone={true}

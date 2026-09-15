@@ -1879,7 +1879,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         savedObjectType,
         id,
         {
-          ...restOfPackagePolicy,
+          ...omit(restOfPackagePolicy, 'cloud_connector_name'),
           ...(restOfPackagePolicy.package
             ? { package: omit(restOfPackagePolicy.package, 'experimental_data_stream_features') }
             : {}),
@@ -2333,7 +2333,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           type: savedObjectType,
           id,
           attributes: {
-            ...restOfPackagePolicy,
+            ...omit(restOfPackagePolicy, 'cloud_connector_name'),
             ...(restOfPackagePolicy.package
               ? { package: omit(restOfPackagePolicy.package, 'experimental_data_stream_features') }
               : {}),
@@ -3682,13 +3682,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         // Extract account type from package policy vars
         const accountType = extractAccountType(cloudProvider, enrichedPackagePolicy, packageInfo);
         try {
-          // Extract cloud connector name from package policy
-          const cloudConnectorName = enrichedPackagePolicy.cloud_connector_name;
-
+          const cloudConnectorName =
+            enrichedPackagePolicy.cloud_connector_name ||
+            `${cloudProvider}-cloud-connector: ${enrichedPackagePolicy.name}`;
           const cloudConnector = await cloudConnectorService.create(soClient, {
-            name:
-              cloudConnectorName ||
-              `${cloudProvider}-cloud-connector: ${enrichedPackagePolicy.name}`,
+            name: cloudConnectorName,
             vars: cloudConnectorVars,
             cloudProvider,
             accountType,

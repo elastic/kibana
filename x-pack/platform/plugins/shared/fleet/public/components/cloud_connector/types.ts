@@ -9,6 +9,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/public';
 
 import type { NewPackagePolicy, PackageInfo } from '../../../common';
 import type { CloudConnectorVar, CloudConnectorSecretVar } from '../../../common/types';
+import type { IacPolicyTemplateSelection } from '../../../common/types/rest_spec/iac_provisioner';
 import type { AccountType, CloudConnectorSecretReference, CloudProvider } from '../../types';
 
 import type { AWS_PROVIDER, AZURE_PROVIDER, GCP_PROVIDER } from './constants';
@@ -35,6 +36,15 @@ interface BaseCloudConnectorCredentials {
 export interface AwsCloudConnectorCredentials extends BaseCloudConnectorCredentials {
   roleArn?: string;
   externalId?: string | CloudConnectorSecretReference;
+  /**
+   * IaC key returned by the JIT render. Browser-only: it drives the stale-render guard, while the
+   * value written to the connector travels through the pending IaC state after the policy is saved.
+   */
+  iacKey?: string;
+  /** CloudFormation stack ARN pasted by the user; browser-only, fed into the pending IaC state. */
+  iacDeploymentId?: string;
+  /** Policy templates + inputs the stored iacKey was rendered for; browser-only, used to detect edits after Launch. */
+  iacRenderedPolicyTemplates?: IacPolicyTemplateSelection[];
 }
 
 export interface AzureCloudConnectorCredentials extends BaseCloudConnectorCredentials {
@@ -68,6 +78,10 @@ export interface NewCloudConnectorFormProps {
   accountType?: AccountType;
   /** IaC template URL from var_group selection for generating cloud connector setup instructions. */
   iacTemplateUrl?: string;
+  /** Stored template digest from the linked cloud connector. */
+  templateSha?: string;
+  /** Reports whether the provider form allows submission. Only the AWS form reports today. */
+  onValidityChange?: (isValid: boolean) => void;
 }
 
 // Define the interface for connector options
@@ -111,6 +125,8 @@ export interface CloudConnectorFormProps {
   accountType?: AccountType;
   /** IaC template URL from var_group selection for generating cloud connector setup instructions. */
   iacTemplateUrl?: string;
+  /** Stored template digest from the linked cloud connector. */
+  templateSha?: string;
 }
 
 export type CloudSetupForCloudConnector = Pick<

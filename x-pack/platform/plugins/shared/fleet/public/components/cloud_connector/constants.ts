@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
+
 export const TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR = 'ACCOUNT_TYPE';
 export const TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR = 'RESOURCE_ID';
 export const CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS =
@@ -68,3 +70,18 @@ export const CLOUD_CONNECTOR_AZURE_ASSET_INVENTORY_REUSABLE_MIN_VERSION = '1.2.2
 //
 export const CLOUD_CONNECTOR_GCP_CSPM_REUSABLE_MIN_VERSION = '3.3.0-preview06';
 export const CLOUD_CONNECTOR_GCP_ASSET_INVENTORY_REUSABLE_MIN_VERSION = '1.5.0-preview04';
+
+/**
+ * Warning toast for a failed template-provenance write after a successful policy save. The
+ * pending payload lives in memory only, so the retry happens on a later save in this same tab
+ * (https://github.com/elastic/ingest-dev/issues/9415).
+ */
+export const IAC_PROVENANCE_WRITE_FAILED_TOAST = {
+  title: i18n.translate('xpack.fleet.cloudConnector.iacProvenanceWriteFailed.title', {
+    defaultMessage: 'Template details were not saved on the identity',
+  }),
+  text: i18n.translate('xpack.fleet.cloudConnector.iacProvenanceWriteFailed.text', {
+    defaultMessage:
+      'The integration was saved, but Kibana could not record which CloudFormation template this identity uses, so it will be reported as using the static template. Kibana will retry if you edit and save this integration again.',
+  }),
+};

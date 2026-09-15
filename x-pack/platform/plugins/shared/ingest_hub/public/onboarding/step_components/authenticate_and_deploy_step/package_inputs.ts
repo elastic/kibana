@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RenderIacTemplateIntegration } from '@kbn/fleet-plugin/public';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { makeDsView } from '../../aws_service_matrix';
 import type { AuthenticateAndDeployStepState } from '../../onboarding_flow_context';
@@ -12,6 +13,7 @@ import { resolveFieldMeta, toTyped } from '../service_settings_step/field_config
 import type {
   ServiceVars,
   ServiceDataStreamVars,
+  ServiceInstance,
 } from '../service_settings_step/use_service_settings';
 
 export interface PackageInputEntry {
@@ -79,6 +81,49 @@ export function buildStreamVars(
   return result;
 }
 
+/** Input types active for one data stream: the user's choice, else the manifest defaults (single-DS → all inputs ON). */
+function resolveActiveInputs(
+  service: AwsServiceMatrixEntry,
+  dsId: string,
+  dsVars: ServiceDataStreamVars
+): string[] {
+  const dsInfo = service.varDefsByDataStream?.[dsId];
+  const isSingleDs = service.dataStreams.length === 1;
+  return dsVars.enabledInputs.length
+    ? dsVars.enabledInputs
+    : isSingleDs
+    ? dsInfo?.inputs ?? service.inputs ?? []
+    : dsInfo?.defaultEnabledInputs?.length
+    ? dsInfo.defaultEnabledInputs
+    : dsInfo?.inputs?.length
+    ? dsInfo.inputs.slice(0, 1)
+    : service.defaultEnabledInputs?.length
+    ? service.defaultEnabledInputs.slice(0, 1)
+    : (service.inputs ?? []).slice(0, 1);
+}
+
+/**
+ * Distinguish "never configured" (key absent → default to all DS) from "explicitly emptied"
+ * (key present with enabledDataStreams: [] → user turned everything off → skip).
+ * Vars are keyed by instance id since duplicates exist; `instanceId` falls back to the service id
+ * for sessions predating instance keying — the same chain deployGroup applies.
+ */
+function resolveServiceVars(
+  storedServiceVars: Record<string, ServiceVars>,
+  service: AwsServiceMatrixEntry,
+  instanceId: string = service.id
+): ServiceVars {
+  return (
+    storedServiceVars[instanceId] ??
+    storedServiceVars[service.id] ?? {
+      enabledDataStreams: service.dataStreams,
+      varsByDataStream: {},
+    }
+  );
+}
+
+const EMPTY_DS_VARS: Readonly<ServiceDataStreamVars> = { enabledInputs: [], varsByInput: {} };
+
 export function buildPackageInputs(
   services: AwsServiceMatrixEntry[],
   storedServiceVars: Record<string, ServiceVars>,
@@ -87,33 +132,11 @@ export function buildPackageInputs(
   const inputs: Record<string, PackageInputEntry> = {};
 
   for (const service of services) {
-    // Distinguish "never configured" (key absent → default to all DS) from "explicitly emptied"
-    // (key present with enabledDataStreams: [] → user turned everything off → skip).
-    const serviceVars: ServiceVars = storedServiceVars[service.id] ?? {
-      enabledDataStreams: service.dataStreams,
-      varsByDataStream: {},
-    };
+    const serviceVars = resolveServiceVars(storedServiceVars, service);
 
-    const activeDataStreams = serviceVars.enabledDataStreams;
-
-    for (const dsId of activeDataStreams) {
-      const dsInfo = service.varDefsByDataStream?.[dsId];
-      const dsVars = serviceVars.varsByDataStream[dsId] ?? { enabledInputs: [], varsByInput: {} };
-
-      // Determine which inputs are active for this data stream.
-      // Single-DS: default all inputs ON (matches the "all ON" display in the flyout).
-      const isSingleDs = service.dataStreams.length === 1;
-      const activeInputs = dsVars.enabledInputs.length
-        ? dsVars.enabledInputs
-        : isSingleDs
-        ? dsInfo?.inputs ?? service.inputs ?? []
-        : dsInfo?.defaultEnabledInputs?.length
-        ? dsInfo.defaultEnabledInputs
-        : dsInfo?.inputs?.length
-        ? dsInfo.inputs.slice(0, 1)
-        : service.defaultEnabledInputs?.length
-        ? service.defaultEnabledInputs.slice(0, 1)
-        : (service.inputs ?? []).slice(0, 1);
+    for (const dsId of serviceVars.enabledDataStreams) {
+      const dsVars = serviceVars.varsByDataStream[dsId] ?? EMPTY_DS_VARS;
+      const activeInputs = resolveActiveInputs(service, dsId, dsVars);
 
       // Fleet input key: <policyTemplateName>-<inputType>
       // Use policyTemplate when present (e.g. aws_cloudwatch_input_otel entries where id !== PT name).
@@ -143,6 +166,60 @@ export function buildPackageInputs(
   }
 
   return inputs;
+}
+
+/**
+ * The integration set a Federated Identity must cover for the instances Deploy will create: one
+ * entry per package, one policy template (`policyTemplate ?? id`) per template — members sharing
+ * a template (original + duplicate, or two services aliasing one manifest template) merge into
+ * one entry with the union of the input types active across their enabled data streams. Takes
+ * deploy-group members and resolves vars per instance exactly like deployGroup, so the template
+ * the user launches grants exactly what Deploy creates
+ * (https://github.com/elastic/ingest-dev/issues/9415).
+ * Sorted by package, template and input so the result is a stable react-query key.
+ */
+export function buildIacIntegrations(
+  members: Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }>,
+  storedServiceVars: Record<string, ServiceVars>
+): RenderIacTemplateIntegration[] {
+  const inputsByPackageAndTemplate = new Map<string, Map<string, Set<string>>>();
+
+  for (const { instance, service } of members) {
+    const serviceVars = resolveServiceVars(storedServiceVars, service, instance.instanceId);
+    const activeInputs = new Set<string>();
+    for (const dsId of serviceVars.enabledDataStreams) {
+      const dsVars = serviceVars.varsByDataStream[dsId] ?? EMPTY_DS_VARS;
+      for (const inputType of resolveActiveInputs(service, dsId, dsVars)) {
+        activeInputs.add(inputType);
+      }
+    }
+    if (activeInputs.size === 0) continue;
+
+    const templates =
+      inputsByPackageAndTemplate.get(service.packageName) ?? new Map<string, Set<string>>();
+    inputsByPackageAndTemplate.set(service.packageName, templates);
+    const ptName = service.policyTemplate ?? service.id;
+    const mergedInputs = templates.get(ptName) ?? new Set<string>();
+    templates.set(ptName, mergedInputs);
+    for (const inputType of activeInputs) {
+      mergedInputs.add(inputType);
+    }
+  }
+
+  return [...inputsByPackageAndTemplate.entries()].sort(byKey).map(([name, templates]) => ({
+    name,
+    policyTemplates: [...templates.entries()].sort(byKey).map(([ptName, inputTypes]) => ({
+      name: ptName,
+      enabledInputs: [...inputTypes].sort(),
+    })),
+  }));
+}
+
+/** Code-unit ordering on map-entry keys, so the result never depends on locale collation. */
+function byKey<T>([a]: [string, T], [b]: [string, T]): number {
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
 }
 
 export interface AgentCredentialVars {

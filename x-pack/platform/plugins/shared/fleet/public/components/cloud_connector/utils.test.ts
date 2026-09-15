@@ -23,6 +23,11 @@ import {
   isCloudConnectorNameValid,
   CLOUD_CONNECTOR_NAME_MAX_LENGTH,
   getAnyCloudConnectorIacTemplateUrl,
+  getIacLaunchUrl,
+  getAwsStackConsoleUrl,
+  hasTemplateUrlParam,
+  isSameTemplateSet,
+  isStackArnInvalid,
 } from './utils';
 import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from './constants';
 import type { CloudConnectorCredentials } from './types';
@@ -1027,5 +1032,146 @@ describe('getAnyCloudConnectorIacTemplateUrl', () => {
       ],
     } as any;
     expect(getAnyCloudConnectorIacTemplateUrl(packageInfo)).toBeUndefined();
+  });
+});
+
+describe('isSameTemplateSet', () => {
+  const CSPM = { name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] };
+  const S3 = { name: 's3', enabledInputs: ['aws-s3', 'aws/metrics'] };
+
+  it('treats two empty sets as the same', () => {
+    expect(isSameTemplateSet([], [])).toBe(true);
+  });
+
+  it('ignores the order of policy templates and of their enabled inputs', () => {
+    expect(
+      isSameTemplateSet(
+        [CSPM, S3],
+        [{ name: 's3', enabledInputs: ['aws/metrics', 'aws-s3'] }, CSPM]
+      )
+    ).toBe(true);
+  });
+
+  it('detects a policy template that was added', () => {
+    expect(isSameTemplateSet([CSPM], [CSPM, S3])).toBe(false);
+  });
+
+  it('detects a policy template that was removed', () => {
+    expect(isSameTemplateSet([CSPM, S3], [CSPM])).toBe(false);
+  });
+
+  it('detects a changed input type within the same policy template', () => {
+    expect(isSameTemplateSet([S3], [{ name: 's3', enabledInputs: ['aws-s3'] }])).toBe(false);
+  });
+
+  it('detects a renamed policy template that keeps the same inputs', () => {
+    expect(
+      isSameTemplateSet([CSPM], [{ name: 'asset_inventory', enabledInputs: CSPM.enabledInputs }])
+    ).toBe(false);
+  });
+
+  it('does not mutate the arrays it compares', () => {
+    const left = [{ name: 's3', enabledInputs: ['aws/metrics', 'aws-s3'] }, CSPM];
+    const right = [CSPM, S3];
+
+    isSameTemplateSet(left, right);
+
+    expect(left[0]).toEqual({ name: 's3', enabledInputs: ['aws/metrics', 'aws-s3'] });
+    expect(left[1]).toBe(CSPM);
+    expect(right[0]).toBe(CSPM);
+  });
+});
+
+describe('IaC launch URL helpers', () => {
+  const STATIC_URL =
+    'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https%3A%2F%2Fstatic.example%2Ft.yml&param_X=1';
+  const ARTIFACT = 'https://s3.example/rendered?X-Amz-Signature=abc';
+  const STACK_ARN = 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid';
+
+  it('getIacLaunchUrl swaps templateURL on the quick-create scaffold when no deployment id', () => {
+    expect(getIacLaunchUrl({ provider: 'aws', staticUrl: STATIC_URL, artifactUrl: ARTIFACT })).toBe(
+      `https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=${encodeURIComponent(
+        ARTIFACT
+      )}&param_X=1`
+    );
+  });
+
+  it('getIacLaunchUrl builds the stack-update deep link when a deployment id is known', () => {
+    expect(
+      getIacLaunchUrl({
+        provider: 'aws',
+        staticUrl: STATIC_URL,
+        artifactUrl: ARTIFACT,
+        deploymentId: STACK_ARN,
+      })
+    ).toBe(
+      `https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/update/template?stackId=${encodeURIComponent(
+        STACK_ARN
+      )}&templateURL=${encodeURIComponent(ARTIFACT)}`
+    );
+  });
+
+  it('getIacLaunchUrl returns undefined for non-AWS providers and scaffolds without templateURL', () => {
+    expect(
+      getIacLaunchUrl({ provider: 'azure', staticUrl: STATIC_URL, artifactUrl: ARTIFACT })
+    ).toBeUndefined();
+    expect(
+      getIacLaunchUrl({
+        provider: 'aws',
+        staticUrl: 'https://x.example/no-param',
+        artifactUrl: ARTIFACT,
+      })
+    ).toBeUndefined();
+  });
+
+  it('getIacLaunchUrl returns undefined for a malformed deploymentId that has no parseable region', () => {
+    expect(
+      getIacLaunchUrl({
+        provider: 'aws',
+        staticUrl: STATIC_URL,
+        artifactUrl: ARTIFACT,
+        deploymentId: 'not-an-arn',
+      })
+    ).toBeUndefined();
+  });
+
+  it('getAwsStackConsoleUrl links to the stack info page', () => {
+    expect(getAwsStackConsoleUrl(STACK_ARN)).toBe(
+      `https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/stackinfo?stackId=${encodeURIComponent(
+        STACK_ARN
+      )}`
+    );
+    expect(getAwsStackConsoleUrl(undefined)).toBeUndefined();
+  });
+
+  it('getAwsStackConsoleUrl returns undefined for a malformed ARN', () => {
+    expect(getAwsStackConsoleUrl('not-an-arn')).toBeUndefined();
+  });
+
+  it('hasTemplateUrlParam returns false for undefined', () => {
+    expect(hasTemplateUrlParam(undefined)).toBe(false);
+  });
+});
+
+describe('isStackArnInvalid', () => {
+  const STACK_ARN = 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid';
+
+  it('returns false for an empty or undefined value', () => {
+    expect(isStackArnInvalid(undefined)).toBe(false);
+    expect(isStackArnInvalid('')).toBe(false);
+    expect(isStackArnInvalid('   ')).toBe(false);
+  });
+
+  it('returns false for a valid stack ARN', () => {
+    expect(isStackArnInvalid(STACK_ARN)).toBe(false);
+  });
+
+  it('returns true for a value whose region cannot be parsed', () => {
+    expect(isStackArnInvalid('not-an-arn')).toBe(true);
+    expect(isStackArnInvalid('arn:aws:cloudformation::123456789012:stack/x/y')).toBe(true);
+  });
+
+  it('ignores leading and trailing whitespace around a valid ARN', () => {
+    expect(isStackArnInvalid(`  ${STACK_ARN}\n`)).toBe(false);
   });
 });
