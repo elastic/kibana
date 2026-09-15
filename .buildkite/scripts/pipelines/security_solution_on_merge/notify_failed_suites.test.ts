@@ -20,6 +20,7 @@ import {
   displayNameForJob,
   groupJobsByChannel,
   notifyFailedSuites,
+  summarizeErrorDetail,
 } from './notify_failed_suites.ts';
 
 import { DEFAULT_FALLBACK_SLACK_CHANNEL } from './failed_suite_channels.ts';
@@ -238,7 +239,37 @@ describe('composeChannelMessage', () => {
   });
 });
 
+describe('summarizeErrorDetail', () => {
+  it('flattens stack traces onto one line', () => {
+    const error = new Error('Buildkite API 500\n    at fetch (node:internal/foo:1:1)\n    at run');
+
+    const detail = summarizeErrorDetail(error);
+
+    expect(detail).not.toContain('\n');
+    expect(detail).toBe('Buildkite API 500 at fetch (node:internal/foo:1:1) at run');
+  });
+
+  it('caps long error bodies with an ellipsis', () => {
+    const detail = summarizeErrorDetail(new Error('x'.repeat(5000)));
+
+    expect(detail).toHaveLength(500);
+    expect(detail.endsWith('…')).toBe(true);
+  });
+
+  it('handles non-Error throws and empty messages', () => {
+    expect(summarizeErrorDetail('plain string')).toBe('plain string');
+    expect(summarizeErrorDetail(new Error('   '))).toBe('unknown error');
+  });
+});
+
 describe('composeFanOutFailureMessage', () => {
+  it('keeps a huge error from blowing the Slack block limit', () => {
+    const message = composeFanOutFailureMessage(new Error('boom\n'.repeat(2000)), BUILD_URL, 473);
+
+    expect(message.length).toBeLessThanOrEqual(3000);
+    expect(message).toContain(`<${BUILD_URL}|View build #473>`);
+  });
+
   it('asks SDH to page teams manually and links the build', () => {
     const message = composeFanOutFailureMessage(
       new Error('Buildkite API 401'),

@@ -23,6 +23,8 @@ import type { Job } from '#pipeline-utils';
 const NOTIFY_STEP_KEY = 'notify_owning_teams';
 /** Slack truncates a message block at 3000 chars; stay under it with headroom for mrkdwn expansion. */
 const SLACK_MESSAGE_CHAR_BUDGET = 2800;
+/** Keeps a stack trace or API error body from crowding out the rest of the fallback message. */
+const MAX_ERROR_DETAIL_CHARS = 500;
 /** Set after a successful pipeline upload so a retried notify step cannot double-post. */
 export const SLACK_NOTIFY_UPLOADED_META_KEY = 'security_solution_on_merge:slack_notify_uploaded';
 const DRY_RUN = !!process.env.DRY_RUN?.match(/(1|true)/i);
@@ -162,12 +164,30 @@ export function composeChannelMessage(
   return render(omitted > 0 ? [...listed, omissionLine(omitted)] : listed);
 }
 
+/**
+ * Flatten an error for embedding in Slack and Buildkite annotations.
+ *
+ * Stack traces and multi-line API error bodies are unbounded, and this runs on
+ * the path where everything else has already failed, so it must not be the
+ * reason the message is truncated or rejected.
+ */
+export function summarizeErrorDetail(error: unknown, maxLength = MAX_ERROR_DETAIL_CHARS): string {
+  const raw = error instanceof Error ? error.message : String(error);
+  const flattened = raw.replace(/\s+/g, ' ').trim();
+
+  if (flattened.length === 0) {
+    return 'unknown error';
+  }
+
+  return flattened.length > maxLength ? `${flattened.slice(0, maxLength - 1)}…` : flattened;
+}
+
 export function composeFanOutFailureMessage(
   error: unknown,
   buildUrl = process.env.BUILDKITE_BUILD_URL,
   buildNumber: string | number | undefined = process.env.BUILDKITE_BUILD_NUMBER
 ): string {
-  const detail = error instanceof Error ? error.message : String(error);
+  const detail = summarizeErrorDetail(error);
   const lines = [
     ':warning: *kibana-security-solution-on-merge* owning-team Slack fan-out failed',
     '',
@@ -288,7 +308,7 @@ function notifyFanOutFailure(
   buildkite: BuildkiteClient,
   upload: (yaml: string) => void
 ): void {
-  const detail = error instanceof Error ? error.message : String(error);
+  const detail = summarizeErrorDetail(error);
   // Reading the suites config can itself be what failed, so never let the fallback
   // lookup throw inside the fallback path.
   let fallbackChannel: string;

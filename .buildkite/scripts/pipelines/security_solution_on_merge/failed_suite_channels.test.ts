@@ -10,6 +10,8 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
+import { parse as parseYaml } from 'yaml';
+
 import {
   DEFAULT_FALLBACK_SLACK_CHANNEL,
   FALLBACK_SLACK_CHANNEL_ENV_VAR,
@@ -30,10 +32,27 @@ const RESOURCE_YML = join(
 );
 const CODEOWNERS = join(REPO_ROOT, '.github/CODEOWNERS');
 
-const cypressLabelsInPipeline = (): string[] => {
-  const yaml = readFileSync(PIPELINE_YML, 'utf8');
-  const labels = [...yaml.matchAll(/^\s+label: '([^']+)'/gm)].map((match) => match[1]);
-  return labels.filter((label) => !label.includes('Notify owning teams'));
+const NOTIFY_STEP_KEY = 'notify_owning_teams';
+
+interface PipelineStep {
+  label?: string;
+  key?: string;
+  command?: string;
+}
+
+/**
+ * Suite steps from the pipeline, selected by shape rather than by scraping text,
+ * so quoting style or formatting changes cannot silently shrink coverage.
+ */
+const cypressStepsInPipeline = (): PipelineStep[] => {
+  const pipeline = parseYaml(readFileSync(PIPELINE_YML, 'utf8')) as { steps: PipelineStep[] };
+
+  return pipeline.steps.filter(
+    (step) =>
+      typeof step.label === 'string' &&
+      typeof step.command === 'string' &&
+      step.key !== NOTIFY_STEP_KEY
+  );
 };
 
 /**
@@ -101,13 +120,22 @@ describe('suites config', () => {
 
 describe('getChannelForStepLabel', () => {
   it('maps every Cypress step label in the pipeline YAML', () => {
-    const labels = cypressLabelsInPipeline();
+    const steps = cypressStepsInPipeline();
 
-    expect(labels.length).toBeGreaterThan(0);
-    for (const label of labels) {
-      expect(findSuiteForStepLabel(label)).toBeDefined();
-      expect(getChannelForStepLabel(label)).not.toBe(getFallbackSlackChannel());
+    // Guards against the selector silently matching nothing if the pipeline is restructured.
+    expect(steps.length).toBeGreaterThanOrEqual(26);
+    for (const { label } of steps) {
+      expect(findSuiteForStepLabel(label!)).toBeDefined();
+      expect(getChannelForStepLabel(label!)).not.toBe(getFallbackSlackChannel());
     }
+  });
+
+  it('selects the suite steps and excludes the notifier', () => {
+    const labels = cypressStepsInPipeline().map((step) => step.label);
+
+    expect(labels).toContain('Defend Workflows Cypress Tests');
+    expect(labels.every((label) => label?.includes('Cypress Tests'))).toBe(true);
+    expect(labels).not.toContain(':slack: Notify owning teams of Security on-merge failures');
   });
 
   it('matches jobs whose names carry Buildkite shard suffixes', () => {
