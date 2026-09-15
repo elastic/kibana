@@ -72,18 +72,8 @@ describe('useHasPendingMwChanges', () => {
     expect(result.current.hasPendingChanges).toBe(true);
   });
 
-  it('detects recently modified inactive MW as pending change', () => {
-    const recentlyUpdated = new Date(Date.now() - 60 * 1000).toISOString(); // 1 min ago
-    setMWs([mockMW('mw-1', recentlyUpdated)]);
-
-    const { result } = renderHook(() => useHasPendingMwChanges(['mw-1']));
-
-    expect(result.current.hasPendingChanges).toBe(true);
-  });
-
-  it('returns no pending changes for MW updated longer ago than the pending window', () => {
-    const oldUpdate = new Date(Date.now() - 10 * 60 * 1000).toISOString(); // 10 min ago
-    setMWs([mockMW('mw-1', oldUpdate)]);
+  it('does not treat an existing inactive MW as pending after an edit', () => {
+    setMWs([mockMW('mw-1', new Date().toISOString())]);
 
     const { result } = renderHook(() => useHasPendingMwChanges(['mw-1']));
 
