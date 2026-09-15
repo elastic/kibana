@@ -62,10 +62,12 @@ export const createEditTagsAction = (
         nativeExecute: (eps, http) =>
           bulkTagEpisodeActions(
             http,
-            eps.map((ep): BulkTagEpisodeActionItem => ({
-              episode_id: ep['episode.id'],
-              tags,
-            }))
+            eps.map(
+              (ep): BulkTagEpisodeActionItem => ({
+                episode_id: ep['episode.id'],
+                tags,
+              })
+            )
           ),
         extension,
         extensionContext: { tags },

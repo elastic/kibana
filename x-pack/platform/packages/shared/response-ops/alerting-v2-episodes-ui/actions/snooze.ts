@@ -50,10 +50,12 @@ export const createSnoozeAction = (
         nativeExecute: (eps, http) =>
           bulkSnoozeSeriesActions(
             http,
-            uniqueByGroup(eps).map((ep): BulkSnoozeSeriesActionItem => ({
-              group_hash: ep.group_hash,
-              ...(expiry === null ? {} : { expiry }),
-            }))
+            uniqueByGroup(eps).map(
+              (ep): BulkSnoozeSeriesActionItem => ({
+                group_hash: ep.group_hash,
+                ...(expiry === null ? {} : { expiry }),
+              })
+            )
           ),
         extension,
         extensionContext: { expiry },

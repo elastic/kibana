@@ -91,15 +91,15 @@ describe('createUnackAction', () => {
 
   it('execute: POSTs per-episode UNACK items with distinct episode_ids, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
-    jest.spyOn(bulk, 'bulkUnackEpisodeActions').mockResolvedValue({ affected_count: 1, errors: [] });
+    jest
+      .spyOn(bulk, 'bulkUnackEpisodeActions')
+      .mockResolvedValue({ affected_count: 1, errors: [] });
     const onSuccess = jest.fn();
     await createUnackAction(deps).execute({
       episodes: [makeEpisode({ 'episode.id': 'e1', group_hash: 'g1', last_ack_action: 'ack' })],
       onSuccess,
     });
-    expect(bulk.bulkUnackEpisodeActions).toHaveBeenCalledWith(deps.http, [
-      { episode_id: 'e1' },
-    ]);
+    expect(bulk.bulkUnackEpisodeActions).toHaveBeenCalledWith(deps.http, [{ episode_id: 'e1' }]);
     expect(deps.notifications.toasts.add).toHaveBeenCalled();
     expect(onSuccess).toHaveBeenCalled();
   });
@@ -113,7 +113,9 @@ describe('createUnackAction', () => {
       execute: extensionExecute,
     };
 
-    jest.spyOn(bulk, 'bulkUnackEpisodeActions').mockResolvedValue({ affected_count: 1, errors: [] });
+    jest
+      .spyOn(bulk, 'bulkUnackEpisodeActions')
+      .mockResolvedValue({ affected_count: 1, errors: [] });
     const onSuccess = jest.fn();
 
     await createUnackAction(deps, extension).execute({
