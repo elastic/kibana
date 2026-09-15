@@ -25,10 +25,10 @@ import { BaseDataGenerator } from './base_data_generator';
 import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
   GLOBAL_ARTIFACT_TAG,
-  DISABLED_ARTIFACT_TAG,
   CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
 } from '../service/artifacts/constants';
 import { ENDPOINT_EVENTS_LOG_INDEX_FIELDS } from './common/alerts_ecs_fields';
+import { addDisabledArtifactTag } from '../service/artifacts/utils';
 
 /** Utility that removes null and undefined from a Type's property value */
 type NonNullableTypeProperties<T> = {
@@ -522,8 +522,11 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
       os_types: osTypes as ExceptionListItemSchema['os_types'],
     });
 
-    if (this.randomBoolean(1 / 3) && !item.tags.includes(DISABLED_ARTIFACT_TAG)) {
-      item.tags = [...item.tags, DISABLED_ARTIFACT_TAG];
+    if (!overrides.tags) {
+      // Add it only if caller does not override the tags
+      if (this.randomBoolean(1 / 3)) {
+        item.tags = addDisabledArtifactTag(item.tags);
+      }
     }
 
     return item;
