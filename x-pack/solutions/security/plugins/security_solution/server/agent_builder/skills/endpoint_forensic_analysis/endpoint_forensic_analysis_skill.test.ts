@@ -42,6 +42,16 @@ describe('endpointForensicAnalysisSkill', () => {
     ]);
   });
 
+  it('presents IoCs as a markdown table to the analyst and as structured categories otherwise', () => {
+    expect(endpointForensicAnalysisSkill.content).toContain(
+      '| Indicator type | Value | First seen | Source event |'
+    );
+    expect(endpointForensicAnalysisSkill.content).toContain(
+      'Answering with a structured output schema that has an indicators field'
+    );
+    expect(endpointForensicAnalysisSkill.content).toContain('Do not also render the indicators');
+  });
+
   it('routes conflicting antivirus / configuration issues to elastic-defend-configuration-troubleshooting', () => {
     expect(endpointForensicAnalysisSkill.description).toContain('antivirus');
     expect(endpointForensicAnalysisSkill.description).toContain(
