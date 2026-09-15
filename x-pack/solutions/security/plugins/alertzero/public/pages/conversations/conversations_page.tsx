@@ -31,13 +31,13 @@ import {
   MODAL_TRANSLATIONS,
   ApprovalModal,
 } from '@kbn/agentic-investigations-common';
+import { usePendingProposals } from '@kbn/agentic-investigations-plugin/public';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useInvestigations } from '../../hooks/use_investigations_api';
 import { QUEUE_PAGE_INFO } from './translations';
 import { PendingProposalsPanel } from '../../components/pending_proposals';
-import { usePendingProposals } from '../../hooks/use_proposals_api';
 import { ProposalsTrendChartRow } from '../../components/proposals_trend_chart';
 
 const QUEUE_STATUSES = new Set(['open', 'investigating', 'in-progress', 'escalated']);
