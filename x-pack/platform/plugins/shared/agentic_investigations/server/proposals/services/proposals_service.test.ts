@@ -411,7 +411,11 @@ describe('ProposalsService', () => {
       const storage = createStorage(baseDocument());
       const { service, workflowsApi } = createService(storage);
 
-      await service.approve('proposal-1', {}, decisionContext());
+      const context = decisionContext();
+      await service.approve('proposal-1', {}, context);
+      expect(workflowsApi.getWorkflowExecution).toHaveBeenCalledWith(EXECUTION_ID, SPACE_ID, {
+        request: context.request,
+      });
 
       expect(workflowsApi.resumeWorkflowExecution).toHaveBeenCalledWith(
         EXECUTION_ID,

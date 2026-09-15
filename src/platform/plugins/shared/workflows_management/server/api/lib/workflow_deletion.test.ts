@@ -96,7 +96,7 @@ describe('deleteWorkflows', () => {
     expect(client.delete).not.toHaveBeenCalled();
   });
 
-  it('retains the ACL record when force deletion could leave private executions behind', async () => {
+  it('requires confirmation before force deletion removes access controls', async () => {
     const { client, storage } = makeStorageClient([
       {
         _id: 'private-workflow',
@@ -114,9 +114,31 @@ describe('deleteWorkflows', () => {
         logger,
         getWorkflowExecutions: noopExecutions,
       })
-    ).rejects.toThrow('Delete private workflows without force');
+    ).rejects.toThrow('Set acknowledgeAclLoss=true');
     expect(client.delete).not.toHaveBeenCalled();
     expect(client.bulk).not.toHaveBeenCalled();
+  });
+
+  it('force-deletes an ACL workflow after explicit confirmation', async () => {
+    const { client, storage } = makeStorageClient([
+      {
+        _id: 'private-workflow',
+        _source: makeWorkflowSource({ access_control: { access_mode: 'private', entries: [] } }),
+      },
+    ]);
+    const result = await deleteWorkflows({
+      ids: ['private-workflow'],
+      spaceId: 'default',
+      force: true,
+      acknowledgeAclLoss: true,
+      storage,
+      ...makeExecutionsDataAccess(),
+      taskScheduler: null,
+      logger,
+      getWorkflowExecutions: noopExecutions,
+    });
+    expect(result.deleted).toBe(1);
+    expect(client.delete).toHaveBeenCalledWith(expect.objectContaining({ id: 'private-workflow' }));
   });
 
   it('does not force-delete after a concurrent access change', async () => {

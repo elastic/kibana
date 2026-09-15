@@ -134,7 +134,7 @@ describe('OccWriter', () => {
       expect(result.occ).toEqual({ seqNo: 5, primaryTerm: 2 });
     });
 
-    it('retries after a version conflict and re-reads the document', async () => {
+    it('retries an async mutation after a version conflict and re-reads the document', async () => {
       const firstExisting: OccDocument<TestDoc> = {
         id: 'doc-1',
         source: { value: 1 },
@@ -158,7 +158,7 @@ describe('OccWriter', () => {
 
       const result = await writer.readModifyWrite({
         id: 'doc-1',
-        mutate: (doc) => ({ value: doc.value + 1 }),
+        mutate: async (doc) => ({ value: doc.value + 1 }),
       });
 
       expect(get).toHaveBeenCalledTimes(2);

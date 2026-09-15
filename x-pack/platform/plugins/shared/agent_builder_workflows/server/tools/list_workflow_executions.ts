@@ -93,6 +93,7 @@ export const listWorkflowExecutionsTool = ({
             page: page ?? 1,
             size: limit ?? 10,
             omitStepRuns: true,
+            request,
           },
           spaceId
         );

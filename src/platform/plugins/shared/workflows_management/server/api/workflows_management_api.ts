@@ -590,7 +590,7 @@ export class WorkflowsManagementApi {
     workflowIds: string[],
     spaceId: string,
     request: KibanaRequest,
-    options?: { force?: boolean }
+    options?: { force?: boolean; acknowledgeAclLoss?: boolean }
   ): Promise<DeleteWorkflowsResponse> {
     for (const id of workflowIds) {
       const workflow = await this.workflowsService.getWorkflow(id, spaceId, {
@@ -598,7 +598,7 @@ export class WorkflowsManagementApi {
       });
       if (workflow?.access_control) {
         const access = await this.workflowsService.getAccessControl();
-        await access.assertAccess(workflow, 'edit', request);
+        await access.assertAccess(workflow, options?.force ? 'manage' : 'edit', request);
       }
     }
     const workflows = await this.workflowsService.getWorkflowsByIds(workflowIds, spaceId);

@@ -47,9 +47,10 @@ export const registerWorkflowAccessControlRoutes = ({
 
   router.post(
     {
-      path: '/internal/workflows/_suggest_user_profiles',
+      path: '/internal/workflows/{id}/_suggest_user_profiles',
       security: WORKFLOW_UPDATE_SECURITY,
       validate: {
+        params: idParamSchema,
         body: schema.object({
           name: schema.string({ maxLength: 1024 }),
           size: schema.number({ min: 1, max: 100, defaultValue: 20 }),
@@ -59,6 +60,12 @@ export const registerWorkflowAccessControlRoutes = ({
     },
     withAvailabilityCheck(async (context, request, response) => {
       try {
+        await api.assertWorkflowAccess(
+          request.params.id,
+          spaces.getSpaceId(request),
+          'manage',
+          request
+        );
         const { userProfile } = await workflowsService.getCoreStart();
         const { security } = await workflowsService.getPluginsStart();
         if (!security) return response.ok({ body: [] });

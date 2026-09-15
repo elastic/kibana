@@ -55,6 +55,11 @@ export class WorkflowEditorPage {
     await this.accessMode.waitFor({ state: 'visible' });
   }
 
+  async hoverDisabledAccessButton(): Promise<void> {
+    await this.page.testSubj.click('app-menu-overflow-button');
+    await this.page.testSubj.locator('workflowAccessButton').hover({ force: true });
+  }
+
   async setAccessMode(mode: 'private' | 'public'): Promise<void> {
     await this.page.components.superSelect('entityAccessControlMode').selectOptionByValue(mode);
   }

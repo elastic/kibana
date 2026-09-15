@@ -464,7 +464,7 @@ export class WorkflowsService {
   public async deleteWorkflows(
     ids: string[],
     spaceId: string,
-    options?: { force?: boolean; request?: KibanaRequest }
+    options?: { force?: boolean; acknowledgeAclLoss?: boolean; request?: KibanaRequest }
   ): Promise<DeleteWorkflowsResponse> {
     await this.ensureInitialized();
     return this.crudService.deleteWorkflows(ids, spaceId, options);

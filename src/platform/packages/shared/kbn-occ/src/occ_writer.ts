@@ -89,7 +89,7 @@ export class OccWriter<TSource extends object> {
         throw new Error(`Document with id "${id}" not found`);
       }
 
-      const document = mutate(existing.source);
+      const document = await mutate(existing.source);
 
       try {
         const occ = await this.index({

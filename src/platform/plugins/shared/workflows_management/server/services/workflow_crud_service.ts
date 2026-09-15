@@ -325,7 +325,7 @@ export class WorkflowCrudService {
       );
       const { document } = await writer.readModifyWrite({
         id,
-        mutate: (existing) => applyWorkflowVersion(params.mutate(existing), existing),
+        mutate: async (existing) => applyWorkflowVersion(await params.mutate(existing), existing),
       });
       return document;
     });
@@ -983,7 +983,7 @@ export class WorkflowCrudService {
   async deleteWorkflows(
     ids: string[],
     spaceId: string,
-    options?: { force?: boolean; request?: KibanaRequest }
+    options?: { force?: boolean; acknowledgeAclLoss?: boolean; request?: KibanaRequest }
   ): Promise<DeleteWorkflowsResponse> {
     const profileId = options?.request
       ? (await this.deps
@@ -994,7 +994,13 @@ export class WorkflowCrudService {
       ids,
       spaceId,
       force: options?.force ?? false,
-      assertCanDelete: (workflow) => assertWorkflowOperation(workflow, 'edit', profileId),
+      acknowledgeAclLoss: options?.acknowledgeAclLoss ?? false,
+      assertCanDelete: (workflow) =>
+        assertWorkflowOperation(
+          workflow,
+          options?.force && workflow.access_control ? 'manage' : 'edit',
+          profileId
+        ),
       storage: this.deps.workflowStorage,
       workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
       stepExecutionsDataClient: this.deps.stepExecutionsDataClient,

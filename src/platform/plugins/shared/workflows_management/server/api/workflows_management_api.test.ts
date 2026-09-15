@@ -245,6 +245,14 @@ describe('WorkflowsManagementApi', () => {
     });
   };
 
+  it('returns remaining execution data when hard deletion removed the workflow ACL', async () => {
+    const execution = await mockWorkflowsService.getWorkflowExecution('run-1', 'default');
+    mockWorkflowsService.getWorkflow.mockResolvedValue(null);
+    await expect(
+      api.getWorkflowExecution('run-1', 'default', { request: mockRequest })
+    ).resolves.toBe(execution);
+  });
+
   describe('cloneWorkflow', () => {
     const createMockWorkflow = (overrides: Partial<WorkflowDetailDto> = {}): WorkflowDetailDto => ({
       id: 'workflow-123',

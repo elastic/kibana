@@ -728,7 +728,9 @@ export class ProposalsService {
     }
 
     const api = this.deps.getWorkflowsApi();
-    const execution = await api.getWorkflowExecution(proposal.workflowExecutionId, spaceId);
+    const execution = await api.getWorkflowExecution(proposal.workflowExecutionId, spaceId, {
+      request,
+    });
     if (!execution) {
       throw new ProposalConflictError(
         `Execution [${proposal.workflowExecutionId}] for proposal [${proposal.id}] not found`

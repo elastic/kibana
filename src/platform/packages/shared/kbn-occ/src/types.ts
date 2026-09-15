@@ -53,7 +53,7 @@ export interface OccWriteParams<TSource extends object> {
 
 export interface OccReadModifyWriteParams<TSource extends object> {
   id: string;
-  mutate: (existing: TSource) => TSource;
+  mutate: (existing: TSource) => TSource | Promise<TSource>;
 }
 
 export interface OccWriteResult<TSource> {

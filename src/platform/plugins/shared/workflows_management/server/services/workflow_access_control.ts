@@ -203,37 +203,50 @@ export class WorkflowAccessControlService {
     if (!profileId) throw new WorkflowAccessDeniedError();
     const { access_mode, entries = [] } = input;
     const { authz } = this;
-    if (access_mode === 'private') {
-      await Promise.all(
-        WORKFLOW_ACCESS_CONTROL_ROLES.map(async (role) => {
-          const uids = new Set(
-            entries
-              .filter((entry) => entry.role === role && entry.id !== profileId)
-              .map(({ id: uid }) => uid)
-          );
-          if (uids.size > 0) {
-            const result = authz
-              ? await authz.checkUserProfilesPrivileges(uids).atSpace(spaceId, {
-                  kibana: rolePrivileges[role].map((privilege) => authz.actions.api.get(privilege)),
-                })
-              : undefined;
-            if (!result || [...uids].some((uid) => !result.hasPrivilegeUids.includes(uid))) {
-              throw new InvalidAccessControlError(
-                `Selected users must have the Workflows privileges required for ${role} access in this space.`
-              );
-            }
-          }
-        })
-      );
-    }
     const document = await this.crud.readModifyWriteWorkflowDocument(id, spaceId, {
-      mutate: (existing) => {
+      mutate: async (existing) => {
         const legacyOwner =
           !existing.owner_id &&
           !existing.access_control &&
           this.core.security.authc.getCurrentUser(request)?.username === existing.createdBy;
         if (existing.managed || (!legacyOwner && existing.owner_id !== profileId)) {
           throw new WorkflowAccessDeniedError();
+        }
+        if (access_mode === 'private') {
+          await Promise.all(
+            WORKFLOW_ACCESS_CONTROL_ROLES.map(async (role) => {
+              const uids = new Set(
+                entries
+                  .filter((entry) => {
+                    if (entry.role !== role || entry.id === profileId) return false;
+                    const previous =
+                      existing.access_control?.access_mode === 'private'
+                        ? existing.access_control.entries.find(({ id: uid }) => uid === entry.id)
+                        : undefined;
+                    return (
+                      !previous ||
+                      WORKFLOW_ACCESS_CONTROL_ROLES.indexOf(role) >
+                        WORKFLOW_ACCESS_CONTROL_ROLES.indexOf(previous.role)
+                    );
+                  })
+                  .map(({ id: uid }) => uid)
+              );
+              if (uids.size > 0) {
+                const result = authz
+                  ? await authz.checkUserProfilesPrivileges(uids).atSpace(spaceId, {
+                      kibana: rolePrivileges[role].map((privilege) =>
+                        authz.actions.api.get(privilege)
+                      ),
+                    })
+                  : undefined;
+                if (!result || [...uids].some((uid) => !result.hasPrivilegeUids.includes(uid))) {
+                  throw new InvalidAccessControlError(
+                    `Selected users must have the Workflows privileges required for ${role} access in this space.`
+                  );
+                }
+              }
+            })
+          );
         }
         const accessControl = prepareAccessControl({
           input,

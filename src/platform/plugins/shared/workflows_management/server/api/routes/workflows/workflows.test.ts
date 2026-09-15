@@ -531,7 +531,7 @@ describe('Workflow routes', () => {
       mockApi.deleteWorkflows.mockResolvedValue({ total: 1, deleted: 1, failures: [] });
       const request = httpServerMock.createKibanaRequest({
         params: { id: 'wf-1' },
-        query: { force: false },
+        query: { force: false, acknowledgeAclLoss: false },
       });
       const response = mockResponse();
       const context = createLicensingContext() as any;
@@ -540,6 +540,7 @@ describe('Workflow routes', () => {
 
       expect(mockApi.deleteWorkflows).toHaveBeenCalledWith(['wf-1'], 'default-space', request, {
         force: false,
+        acknowledgeAclLoss: false,
       });
       expect(response.ok).toHaveBeenCalledWith();
     });
@@ -548,7 +549,7 @@ describe('Workflow routes', () => {
       mockApi.deleteWorkflows.mockResolvedValue({ total: 1, deleted: 1, failures: [] });
       const request = httpServerMock.createKibanaRequest({
         params: { id: 'wf-1' },
-        query: { force: true },
+        query: { force: true, acknowledgeAclLoss: true },
       });
       const response = mockResponse();
       const context = createLicensingContext() as any;
@@ -557,6 +558,7 @@ describe('Workflow routes', () => {
 
       expect(mockApi.deleteWorkflows).toHaveBeenCalledWith(['wf-1'], 'default-space', request, {
         force: true,
+        acknowledgeAclLoss: true,
       });
       expect(response.ok).toHaveBeenCalledWith();
     });
@@ -705,7 +707,7 @@ describe('Workflow routes', () => {
       mockApi.deleteWorkflows.mockResolvedValue(apiResult);
       const request = httpServerMock.createKibanaRequest({
         body: { ids: ['a', 'b'] },
-        query: { force: false },
+        query: { force: false, acknowledgeAclLoss: false },
       });
       const response = mockResponse();
       const context = createLicensingContext() as any;
@@ -714,6 +716,7 @@ describe('Workflow routes', () => {
 
       expect(mockApi.deleteWorkflows).toHaveBeenCalledWith(['a', 'b'], 'default-space', request, {
         force: false,
+        acknowledgeAclLoss: false,
       });
       expect(response.ok).toHaveBeenCalledWith({
         body: { total: 2, deleted: 2, failures: [] },
@@ -730,7 +733,7 @@ describe('Workflow routes', () => {
       mockApi.deleteWorkflows.mockResolvedValue(apiResult);
       const request = httpServerMock.createKibanaRequest({
         body: { ids: ['a', 'b'] },
-        query: { force: true },
+        query: { force: true, acknowledgeAclLoss: true },
       });
       const response = mockResponse();
       const context = createLicensingContext() as any;
@@ -739,6 +742,7 @@ describe('Workflow routes', () => {
 
       expect(mockApi.deleteWorkflows).toHaveBeenCalledWith(['a', 'b'], 'default-space', request, {
         force: true,
+        acknowledgeAclLoss: true,
       });
       expect(response.ok).toHaveBeenCalledWith({
         body: { total: 2, deleted: 2, failures: [] },

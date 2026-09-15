@@ -326,7 +326,7 @@ const executeAndPollStep = async ({
     request
   );
 
-  const result = await pollExecution(api, executionId, stepName, spaceId);
+  const result = await pollExecution(api, executionId, stepName, spaceId, request);
 
   return { executionId, result };
 };
@@ -492,7 +492,8 @@ const pollExecution = async (
   api: WorkflowsManagementApi,
   executionId: string,
   stepName: string,
-  spaceId: string
+  spaceId: string,
+  request: ToolHandlerContext['request']
 ): Promise<{
   status: string;
   output?: unknown;
@@ -506,6 +507,7 @@ const pollExecution = async (
 
     const execution = await api.getWorkflowExecution(executionId, spaceId, {
       includeOutput: true,
+      request,
     });
 
     if (!execution) {

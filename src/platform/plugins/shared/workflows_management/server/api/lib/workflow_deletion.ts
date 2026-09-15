@@ -162,6 +162,7 @@ const hardDeleteWorkflows = async (
   spaceId: string,
   failures: Array<{ id: string; error: string }>,
   deps: {
+    acknowledgeAclLoss?: boolean;
     workflowExecutionsDataClient: WorkflowExecutionsDataClient;
     stepExecutionsDataClient: StepExecutionsDataClient;
     taskScheduler: WorkflowTaskScheduler | null;
@@ -181,13 +182,11 @@ const hardDeleteWorkflows = async (
   } = deps;
   const foundIds = hits.map((hit) => hit._id).filter(Boolean) as string[];
 
-  const privateWorkflow = hits.find(
-    (hit) => hit._source?.access_control?.access_mode === 'private'
-  );
-  if (privateWorkflow?._id) {
+  const workflowWithAcl = hits.find((hit) => hit._source?.access_control);
+  if (workflowWithAcl?._id && !deps.acknowledgeAclLoss) {
     throw new WorkflowConflictError(
-      'Delete private workflows without force to retain access controls for their executions.',
-      privateWorkflow._id
+      'Hard deletion removes workflow access controls. Any remaining execution data will use Workflows feature privileges. Set acknowledgeAclLoss=true to confirm.',
+      workflowWithAcl._id
     );
   }
 
@@ -321,6 +320,7 @@ export const deleteWorkflows = async (params: {
   ids: string[];
   spaceId: string;
   force: boolean;
+  acknowledgeAclLoss?: boolean;
   assertCanDelete?: (workflow: WorkflowProperties) => void;
   storage: WorkflowStorage;
   workflowExecutionsDataClient: WorkflowExecutionsDataClient;
@@ -364,6 +364,7 @@ export const deleteWorkflows = async (params: {
 
   if (force) {
     return hardDeleteWorkflows(ids, hits, client, spaceId, failures, {
+      acknowledgeAclLoss: params.acknowledgeAclLoss,
       workflowExecutionsDataClient,
       stepExecutionsDataClient,
       taskScheduler,

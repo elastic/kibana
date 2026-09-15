@@ -9,10 +9,10 @@
 
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { InvalidAccessControlError } from '@kbn/entity-access-control';
+import { OccWriter } from '@kbn/occ';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { assertWorkflowOperation, WorkflowAccessControlService } from './workflow_access_control';
 import { WorkflowAccessDeniedError } from './workflow_access_denied_error';
-import type { ReadModifyWriteWorkflowDocumentParams } from './workflow_occ_types';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
 const makeDocument = (): WorkflowProperties => ({
@@ -38,6 +38,7 @@ describe('WorkflowAccessControlService', () => {
   let core: ReturnType<typeof coreMock.createStart>;
   let document: WorkflowProperties;
   let service: WorkflowAccessControlService;
+  let crud: ConstructorParameters<typeof WorkflowAccessControlService>[1];
   let authz: ReturnType<typeof securityMock.createStart>['authz'];
   const atSpace = jest.fn();
 
@@ -49,22 +50,18 @@ describe('WorkflowAccessControlService', () => {
     jest.spyOn(authz.actions.api, 'get').mockImplementation((subject: string) => `api:${subject}`);
     atSpace.mockReset().mockResolvedValue({ hasPrivilegeUids: ['reader'] });
     authz.checkUserProfilesPrivileges.mockReturnValue({ atSpace });
-    service = new WorkflowAccessControlService(
-      core,
-      {
-        readModifyWriteWorkflowDocument: jest.fn(
-          async (
-            _id: string,
-            _spaceId: string,
-            { mutate }: ReadModifyWriteWorkflowDocumentParams
-          ) => {
-            document = mutate(document);
-            return document;
-          }
-        ),
+    const writer = new OccWriter<WorkflowProperties>({
+      get: async (id) => ({ id, source: document, occ: { seqNo: 1, primaryTerm: 1 } }),
+      index: async ({ document: updated }) => {
+        document = updated;
+        return { seqNo: 2, primaryTerm: 1 };
       },
-      authz
-    );
+    });
+    crud = {
+      readModifyWriteWorkflowDocument: async (id, _spaceId, { mutate }) =>
+        (await writer.readModifyWrite({ id, mutate })).document,
+    };
+    service = new WorkflowAccessControlService(core, crud, authz);
   });
 
   it.each(['public', 'private'] as const)(
@@ -182,6 +179,117 @@ describe('WorkflowAccessControlService', () => {
     }
   );
 
+  it.each(['viewer', 'executor', 'editor'] as const)(
+    'removes another recipient while an unchanged %s lacks RBAC',
+    async (role) => {
+      document.access_control = {
+        access_mode: 'private',
+        entries: [
+          { type: 'user', id: 'reader', role, added_at: '2026-09-10' },
+          { type: 'user', id: 'removed', role: 'viewer', added_at: '2026-09-10' },
+        ],
+      };
+      atSpace.mockResolvedValue({ hasPrivilegeUids: [] });
+      const result = await service.update(
+        'id',
+        'default',
+        {
+          access_mode: 'private',
+          entries: [{ type: 'user', id: 'reader', role }],
+        },
+        request
+      );
+      expect(result.access_control?.entries.map(({ id }) => id)).toEqual(['reader']);
+      expect(authz.checkUserProfilesPrivileges).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each([
+    ['editor', 'executor'],
+    ['editor', 'viewer'],
+    ['executor', 'viewer'],
+  ] as const)('allows a decrease from %s to %s without RBAC', async (previous, role) => {
+    document.access_control = {
+      access_mode: 'private',
+      entries: [{ type: 'user', id: 'reader', role: previous, added_at: '2026-09-10' }],
+    };
+    atSpace.mockResolvedValue({ hasPrivilegeUids: [] });
+    const result = await service.update(
+      'id',
+      'default',
+      {
+        access_mode: 'private',
+        entries: [{ type: 'user', id: 'reader', role }],
+      },
+      request
+    );
+    expect(result.access_control?.entries[0].role).toBe(role);
+    expect(authz.checkUserProfilesPrivileges).not.toHaveBeenCalled();
+  });
+
+  it.each(['executor', 'editor'] as const)(
+    'rejects an increase to %s without RBAC',
+    async (role) => {
+      document.access_control = {
+        access_mode: 'private',
+        entries: [{ type: 'user', id: 'reader', role: 'viewer', added_at: '2026-09-10' }],
+      };
+      atSpace.mockResolvedValue({ hasPrivilegeUids: [] });
+      await expect(
+        service.update(
+          'id',
+          'default',
+          {
+            access_mode: 'private',
+            entries: [{ type: 'user', id: 'reader', role }],
+          },
+          request
+        )
+      ).rejects.toBeInstanceOf(InvalidAccessControlError);
+      expect(document.access_control.entries[0].role).toBe('viewer');
+    }
+  );
+
+  it('checks a previously unchanged grant again after a concurrent removal', async () => {
+    document.access_control = {
+      access_mode: 'private',
+      entries: [{ type: 'user', id: 'reader', role: 'viewer', added_at: '2026-09-10' }],
+    };
+    const index = jest.fn().mockImplementation(async () => {
+      document = makeDocument();
+      throw Object.assign(new Error('conflict'), { statusCode: 409 });
+    });
+    const writer = new OccWriter<WorkflowProperties>({
+      get: async (id) => ({ id, source: document, occ: { seqNo: 1, primaryTerm: 1 } }),
+      index,
+      maxRetries: 1,
+      retryDelayMs: 0,
+    });
+    service = new WorkflowAccessControlService(
+      core,
+      {
+        readModifyWriteWorkflowDocument: async (id, _spaceId, { mutate }) =>
+          (await writer.readModifyWrite({ id, mutate })).document,
+      },
+      authz
+    );
+    atSpace.mockResolvedValue({ hasPrivilegeUids: [] });
+    await expect(
+      service.update(
+        'id',
+        'default',
+        {
+          access_mode: 'private',
+          entries: [{ type: 'user', id: 'reader', role: 'viewer' }],
+        },
+        request
+      )
+    ).rejects.toBeInstanceOf(InvalidAccessControlError);
+    expect(index).toHaveBeenCalledTimes(1);
+    expect(atSpace).toHaveBeenCalledTimes(1);
+    expect(document.access_control?.entries).toEqual([]);
+  });
+
   it('does not save a grant when the privilege check fails', async () => {
     atSpace.mockRejectedValue(new Error('Privilege check failed'));
     await expect(
@@ -217,8 +325,7 @@ describe('WorkflowAccessControlService', () => {
   });
 
   it('refuses grants when the Security privilege service is unavailable', async () => {
-    const write = jest.fn();
-    service = new WorkflowAccessControlService(core, { readModifyWriteWorkflowDocument: write });
+    service = new WorkflowAccessControlService(core, crud);
     await expect(
       service.update(
         'id',
@@ -230,7 +337,7 @@ describe('WorkflowAccessControlService', () => {
         request
       )
     ).rejects.toBeInstanceOf(InvalidAccessControlError);
-    expect(write).not.toHaveBeenCalled();
+    expect(document.access_control?.entries).toEqual([]);
   });
 
   it('allows making a workflow public after a recipient loses RBAC', async () => {

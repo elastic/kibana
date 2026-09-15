@@ -389,9 +389,13 @@ Builder conversations: `access_mode` and `entries` with `type`, profile `id`,
 | Viewer | Yes | No | No | No |
 
 These permissions also require the corresponding feature privileges in the space.
-User suggestions require Workflows Read in that space. Saving private access checks
-each recipient's RBAC: Viewer requires Read, Executor also requires Execute, and
-Editor also requires Update. A rejected grant leaves the access settings unchanged.
+Only the owner can request user suggestions, which require Workflows Read in that
+space. New grants and permission increases require the recipient's current RBAC:
+Viewer requires Read, Executor also requires Execute, and Editor also requires
+Update. Removals, unchanged entries, and permission decreases can be saved even
+if a recipient has lost RBAC. A write conflict repeats validation against the
+latest ACL. Runtime access still requires RBAC. A rejected grant leaves the
+access settings unchanged.
 Public workflows use the existing RBAC permissions for viewing, running, editing,
 and deletion. ACL entries apply only to private workflows. The owner controls
 visibility and sharing. Managed workflows keep their existing plugin access rules.
@@ -410,7 +414,10 @@ workflows. This requires a search of inaccessible workflows in the space before
 querying execution data. Writes retain the ACL during YAML updates and imports.
 Execution checks use the current ACL and the execution identity.
 
-Private workflows support regular deletion. Force deletion is rejected because
-execution cleanup can fail; the deleted workflow must retain its ACL to protect
-remaining execution data. Private workflows are excluded from Agent Builder's
+Soft deletion retains the workflow document and its ACL for execution reads.
+Hard deletion removes the ACL. When an ACL is present, only its owner can hard
+delete it, and the delete API returns a warning unless the request includes
+`force=true&acknowledgeAclLoss=true`. Hard deletion attempts to remove execution
+data; any data left after cleanup loses the workflow ACL and uses feature RBAC.
+Direct Elasticsearch document deletion bypasses this API confirmation. Private workflows are excluded from Agent Builder's
 search index, which currently supports feature privileges only.
