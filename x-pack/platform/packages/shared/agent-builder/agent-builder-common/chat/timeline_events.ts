@@ -12,7 +12,6 @@ import type {
   AssistantResponse,
   ConversationRoundStep,
   ConversationRoundOrigin,
-  FeedbackChipId,
   RoundInput,
   RoundModelUsageStats,
 } from './conversation';
@@ -91,8 +90,6 @@ export enum TimelineEventType {
   executionTerminated = 'execution_terminated',
   executionFailed = 'execution_failed',
   executionAborted = 'execution_aborted',
-  // User feedback
-  roundFeedback = 'round_feedback',
 }
 
 /**
@@ -228,28 +225,6 @@ export type ExecutionAbortedEvent = BaseTimelineEvent<
   ExecutionAbortedEventData
 >;
 
-/** User feedback submitted for a specific round. Each new submission replaces the previous one. */
-export interface RoundFeedbackEventData {
-  /** The round this feedback applies to. */
-  round_id: string;
-  /** Thumbs up or thumbs down. */
-  vote: 'up' | 'down';
-  /** Stable chip IDs selected by the user (locale-independent). */
-  chips?: FeedbackChipId[];
-  /** Optional free-text comment. */
-  comment?: string;
-  /** ISO timestamp when the feedback was submitted. */
-  submitted_at: string;
-  /** Connector ID from the round's model_usage at submission time, when available. */
-  connector_id?: string;
-  /** Model identifier at submission time, when available. */
-  model?: string;
-}
-export type RoundFeedbackEvent = BaseTimelineEvent<
-  TimelineEventType.roundFeedback,
-  RoundFeedbackEventData
->;
-
 /** The discriminated union of all stored timeline events. */
 export type TimelineEvent =
   | UserMessageEvent
@@ -258,8 +233,7 @@ export type TimelineEvent =
   | ExecutionStepEvent
   | ExecutionTerminatedEvent
   | ExecutionFailedEvent
-  | ExecutionAbortedEvent
-  | RoundFeedbackEvent;
+  | ExecutionAbortedEvent;
 
 /** A timeline event as supplied by a caller, before the server assigns id/created_at/actor. */
 export type TimelineEventInput =
@@ -269,8 +243,7 @@ export type TimelineEventInput =
   | BaseTimelineEventInput<TimelineEventType.executionStep, ExecutionStepEventData>
   | BaseTimelineEventInput<TimelineEventType.executionTerminated, ExecutionTerminatedEventData>
   | BaseTimelineEventInput<TimelineEventType.executionFailed, ExecutionFailedEventData>
-  | BaseTimelineEventInput<TimelineEventType.executionAborted, ExecutionAbortedEventData>
-  | BaseTimelineEventInput<TimelineEventType.roundFeedback, RoundFeedbackEventData>;
+  | BaseTimelineEventInput<TimelineEventType.executionAborted, ExecutionAbortedEventData>;
 
 /**
  * The run lock held on a conversation while an execution is active.

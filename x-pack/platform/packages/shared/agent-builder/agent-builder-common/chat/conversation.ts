@@ -641,6 +641,11 @@ export interface Conversation {
   events?: TimelineEvent[];
   /** Schema version of the stored events. */
   schema_version?: number;
+  /**
+   * Current feedback state, keyed by round id. Stores the most recent vote per round.
+   * Managed separately from the event timeline so the timeline remains append-only.
+   */
+  feedback?: Record<string, ConversationRoundFeedback>;
 }
 
 export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';

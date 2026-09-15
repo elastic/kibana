@@ -62,6 +62,7 @@ export type ConversationUpdatableFields = Pick<Conversation, 'id'> &
       | 'metadata'
       | 'template_id'
       | 'template_version'
+      | 'feedback'
     >
   > & { read_by?: ConversationReadByEntry[]; pinned_by?: ConversationPinnedByEntry[] };
 

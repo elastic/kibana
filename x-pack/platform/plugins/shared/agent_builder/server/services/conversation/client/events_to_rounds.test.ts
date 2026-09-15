@@ -19,7 +19,7 @@ import {
   TimelineTriggerType,
 } from '@kbn/agent-builder-common';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
-import { eventsToRounds } from './events_to_rounds';
+import { applyFeedbackMap, eventsToRounds } from './events_to_rounds';
 
 const usage: RoundModelUsageStats = {
   connector_id: 'c1',
@@ -510,26 +510,16 @@ const singleRoundEvents = (roundId: string): TimelineEvent[] => [
   }),
 ];
 
-describe('eventsToRounds — feedback projection', () => {
+describe('applyFeedbackMap', () => {
   it('attaches feedback to the matching round', () => {
-    const events: TimelineEvent[] = [
-      ...singleRoundEvents('r1'),
-      {
-        id: 'r1::feedback',
-        type: TimelineEventType.roundFeedback,
-        created_at: '2024-01-01T00:01:00.000Z',
-        actor: userActor,
-        data: {
-          round_id: 'r1',
-          vote: 'up',
-          chips: ['accurate'],
-          comment: 'great',
-          submitted_at: '2024-01-01T00:01:00.000Z',
-        },
+    const [round] = applyFeedbackMap(eventsToRounds(singleRoundEvents('r1')), {
+      r1: {
+        vote: 'up',
+        chips: ['accurate'],
+        comment: 'great',
+        submitted_at: '2024-01-01T00:01:00.000Z',
       },
-    ];
-
-    const [round] = eventsToRounds(events);
+    });
     expect(round.feedback).toEqual({
       vote: 'up',
       chips: ['accurate'],
@@ -538,65 +528,38 @@ describe('eventsToRounds — feedback projection', () => {
     });
   });
 
-  it('last feedback event wins when multiple exist for the same round', () => {
-    const events: TimelineEvent[] = [
-      ...singleRoundEvents('r1'),
-      {
-        id: 'r1::feedback::1',
-        type: TimelineEventType.roundFeedback,
-        created_at: '2024-01-01T00:01:00.000Z',
-        actor: userActor,
-        data: {
-          round_id: 'r1',
-          vote: 'up',
-          chips: [],
-          comment: '',
-          submitted_at: '2024-01-01T00:01:00.000Z',
-        },
-      },
-      {
-        id: 'r1::feedback::2',
-        type: TimelineEventType.roundFeedback,
-        created_at: '2024-01-01T00:02:00.000Z',
-        actor: userActor,
-        data: {
-          round_id: 'r1',
-          vote: 'down',
-          chips: ['inaccurate'],
-          comment: '',
-          submitted_at: '2024-01-01T00:02:00.000Z',
-        },
-      },
-    ];
-
-    const [round] = eventsToRounds(events);
-    expect(round.feedback?.vote).toBe('down');
-  });
-
-  it('leaves rounds without a feedback event untouched', () => {
-    const [round] = eventsToRounds(singleRoundEvents('r1'));
+  it('leaves rounds untouched when feedback map is undefined', () => {
+    const [round] = applyFeedbackMap(eventsToRounds(singleRoundEvents('r1')));
     expect(round.feedback).toBeUndefined();
   });
 
-  it('ignores feedback events for unknown round ids', () => {
-    const events: TimelineEvent[] = [
-      ...singleRoundEvents('r1'),
-      {
-        id: 'unknown::feedback',
-        type: TimelineEventType.roundFeedback,
-        created_at: '2024-01-01T00:01:00.000Z',
-        actor: userActor,
-        data: {
-          round_id: 'unknown',
-          vote: 'up',
-          chips: [],
-          comment: '',
-          submitted_at: '2024-01-01T00:01:00.000Z',
-        },
-      },
-    ];
+  it('leaves rounds untouched when their id is not in the map', () => {
+    const [round] = applyFeedbackMap(eventsToRounds(singleRoundEvents('r1')), {
+      other: { vote: 'up', chips: [], comment: '', submitted_at: '2024-01-01T00:00:00.000Z' },
+    });
+    expect(round.feedback).toBeUndefined();
+  });
 
-    const [round] = eventsToRounds(events);
+  it('applies feedback to the correct round when multiple rounds exist', () => {
+    const events: TimelineEvent[] = [...singleRoundEvents('r1'), ...singleRoundEvents('r2')];
+    const [r1, r2] = applyFeedbackMap(eventsToRounds(events), {
+      r2: { vote: 'down', chips: [], comment: '', submitted_at: '2024-01-01T00:00:00.000Z' },
+    });
+    expect(r1.feedback).toBeUndefined();
+    expect(r2.feedback?.vote).toBe('down');
+  });
+
+  it('clears stale round.feedback when the map entry is removed (vote retraction)', () => {
+    const roundsWithFeedback = eventsToRounds(singleRoundEvents('r1')).map((r) => ({
+      ...r,
+      feedback: {
+        vote: 'up' as const,
+        chips: [],
+        comment: '',
+        submitted_at: '2024-01-01T00:00:00.000Z',
+      },
+    }));
+    const [round] = applyFeedbackMap(roundsWithFeedback, {});
     expect(round.feedback).toBeUndefined();
   });
 });

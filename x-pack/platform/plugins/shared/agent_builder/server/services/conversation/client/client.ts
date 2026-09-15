@@ -9,11 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { GetResponse, SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { OccWriter, isElasticsearchWriteConflict } from '@kbn/occ';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type {
-  ConversationOrigin,
-  FeedbackChipId,
-  RoundFeedbackEvent,
-} from '@kbn/agent-builder-common';
+import type { ConversationOrigin, FeedbackChipId } from '@kbn/agent-builder-common';
 import {
   type CurrentUser,
   type Conversation,
@@ -24,8 +20,6 @@ import {
   CONVERSATION_SCHEMA_VERSION,
   CONVERSATION_TITLE_MAX_LENGTH,
   ConversationAccessControlMode,
-  EventActorType,
-  TimelineEventType,
   isConversationAccessControlRole,
   normalizeConversationAccessControl,
   createBadRequestError,
@@ -90,7 +84,7 @@ import {
   updateConversation,
   type Document,
 } from './converters';
-import { ROUND_DERIVED_EVENT_ID_SUFFIXES } from './rounds_to_events';
+
 import type { ConversationMetadataPatchedPayload } from '../../../workflows/triggers/conversation_event_bus';
 
 // Note: comparison is order-sensitive for arrays — reordering elements counts as a change.
@@ -587,10 +581,8 @@ class ConversationClientImpl implements ConversationClient {
       access,
       fields: (current) => {
         const currentEvents = current.events ?? [];
-        const feedbackEventId = `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.feedback}`;
-        const feedbackEvent = currentEvents.find((e) => e.id === feedbackEventId);
         const nonRoundEvents = currentEvents.filter((event) => !event.id.startsWith(roundPrefix));
-        const replaced = [...nonRoundEvents, ...(feedbackEvent ? [feedbackEvent] : []), ...events];
+        const replaced = [...nonRoundEvents, ...events];
         return {
           events: replaced,
           schema_version: CONVERSATION_SCHEMA_VERSION,
@@ -653,40 +645,31 @@ class ConversationClientImpl implements ConversationClient {
       fields: (current) => {
         const round = current.rounds.find((r) => r.id === roundId);
         if (!round) {
-          throw createConversationNotFoundError({ conversationId });
+          throw createBadRequestError(`round not found: ${roundId}`);
         }
 
-        const feedbackEventId = `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.feedback}`;
-        const otherEvents = (current.events ?? []).filter((e) => e.id !== feedbackEventId);
+        const { [roundId]: _removed, ...otherFeedback } = current.feedback ?? {};
 
         if (feedback.vote === null) {
-          return { events: otherEvents };
+          return { feedback: otherFeedback };
         }
 
         const now = new Date().toISOString();
-        const feedbackEvent: RoundFeedbackEvent = {
-          id: feedbackEventId,
-          type: TimelineEventType.roundFeedback,
-          created_at: now,
-          actor: {
-            type: EventActorType.user,
-            id: this.user.id ?? this.user.username,
-            username: this.user.username,
-          },
-          data: {
-            round_id: roundId,
-            vote: feedback.vote,
-            chips: feedback.chips ?? [],
-            comment: feedback.comment ?? '',
-            submitted_at: now,
-            ...(round.model_usage?.connector_id
-              ? { connector_id: round.model_usage.connector_id }
-              : {}),
-            ...(round.model_usage?.model ? { model: round.model_usage.model } : {}),
+        return {
+          feedback: {
+            ...otherFeedback,
+            [roundId]: {
+              vote: feedback.vote,
+              ...(feedback.chips !== undefined ? { chips: feedback.chips } : {}),
+              ...(feedback.comment !== undefined ? { comment: feedback.comment } : {}),
+              submitted_at: now,
+              ...(round.model_usage?.connector_id
+                ? { connector_id: round.model_usage.connector_id }
+                : {}),
+              ...(round.model_usage?.model ? { model: round.model_usage.model } : {}),
+            },
           },
         };
-
-        return { events: [...otherEvents, feedbackEvent] };
       },
     });
   }

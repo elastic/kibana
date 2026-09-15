@@ -33,7 +33,6 @@ export const ROUND_DERIVED_EVENT_ID_SUFFIXES = {
   execution: '::execution',
   stepPrefix: '::step::',
   promptResponse: '::prompt_response',
-  feedback: '::feedback',
 } as const;
 
 const ROUND_DERIVED_EVENT_ID_SUFFIX_VALUES: readonly string[] = [

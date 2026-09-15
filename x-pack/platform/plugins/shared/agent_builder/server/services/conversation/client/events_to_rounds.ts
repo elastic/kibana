@@ -13,7 +13,6 @@ import type {
   ExecutionStepEvent,
   ExecutionTerminatedEvent,
   PromptResponseEvent,
-  RoundFeedbackEvent,
   RoundInput,
   TimelineEvent,
   UserMessageEvent,
@@ -140,17 +139,20 @@ export const eventsToRounds = (events: TimelineEvent[]): ConversationRound[] => 
     rounds.push(round);
   }
 
-  const feedbackByRound = new Map<string, ConversationRoundFeedback>();
-  for (const event of events) {
-    if (event.type === TimelineEventType.roundFeedback) {
-      const { round_id, ...feedbackFields } = (event as RoundFeedbackEvent).data;
-      feedbackByRound.set(round_id, feedbackFields);
-    }
-  }
+  return rounds;
+};
 
+/**
+ * Projects the conversation-level feedback map onto the matching rounds, clearing any stale feedback.
+ */
+export const applyFeedbackMap = (
+  rounds: ConversationRound[],
+  feedback?: Record<string, ConversationRoundFeedback>
+): ConversationRound[] => {
+  if (!feedback) return rounds;
   return rounds.map((round) => {
-    const feedback = feedbackByRound.get(round.id);
-    return feedback ? { ...round, feedback } : round;
+    const roundFeedback = feedback[round.id];
+    return { ...round, feedback: roundFeedback };
   });
 };
 

@@ -349,8 +349,6 @@ export {
   type ExecutionFailedEvent,
   type ExecutionAbortedEventData,
   type ExecutionAbortedEvent,
-  type RoundFeedbackEventData,
-  type RoundFeedbackEvent,
   type TimelineEvent,
   type TimelineEventInput,
   type ActiveExecution,
