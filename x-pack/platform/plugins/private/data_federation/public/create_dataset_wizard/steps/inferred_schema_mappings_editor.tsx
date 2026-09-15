@@ -52,7 +52,6 @@ export interface InferredSchemaMappingsEditorProps {
   control: Control<DatasetWizardFormValues>;
   flowVariant: DatasetWizardFlowVariant;
   inferredFields: readonly TestConfigurationPreviewField[];
-  isTimestampMappingRequired?: boolean;
 }
 
 interface DynamicFieldRow {
@@ -140,7 +139,6 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
   control,
   flowVariant,
   inferredFields,
-  isTimestampMappingRequired = false,
 }) => {
   const isFlow396 = isDatasetWizardFlow396(flowVariant);
   const { euiTheme } = useEuiTheme();
@@ -332,9 +330,9 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
   const timestampFieldMappingSection = useMemo(
     () =>
       isFlow396 ? (
-        <TimestampFieldMappingSection isRequired={isTimestampMappingRequired} />
+        <TimestampFieldMappingSection isRequired={false} />
       ) : undefined,
-    [isFlow396, isTimestampMappingRequired]
+    [isFlow396]
   );
 
   useEffect(() => {

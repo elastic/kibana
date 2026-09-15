@@ -86,8 +86,6 @@ export const SchemaMappingsStepFlow2: FunctionComponent<SchemaMappingsStepProps>
   const isFlow396 = isDatasetWizardFlow396(flowVariant);
   const format = useWatch({ control, name: 'settings.format' }) as DatasetFormatFormValue;
   const errorMode = useWatch({ control, name: 'settings.error_mode' });
-  const dynamicFieldsEnabled = useWatch({ control, name: 'dynamic_fields_enabled' });
-  const isTimestampMappingRequired = dynamicFieldsEnabled === false;
   const hasFormatSelected = isKnownFormat(format);
   const schemaMappingSettingsFields = useMemo(
     () =>
@@ -202,7 +200,6 @@ export const SchemaMappingsStepFlow2: FunctionComponent<SchemaMappingsStepProps>
             control={control}
             flowVariant={flowVariant}
             inferredFields={automaticSchemaSampleFields}
-            isTimestampMappingRequired={isTimestampMappingRequired}
           />
         </div>
       ) : (
