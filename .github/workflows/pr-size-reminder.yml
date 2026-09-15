@@ -36,6 +36,7 @@ jobs:
             // Machine-written lines shouldn't count against a human review budget.
             const GENERATED_PATHS = [
               /(^|\/)yarn\.lock$/,
+              /(^|\/)pnpm-lock\.yaml$/,
               /(^|\/)package-lock\.json$/,
               /(^|\/)__snapshots__\//,
               /(^|\/)bundled\.(yaml|json)$/,
