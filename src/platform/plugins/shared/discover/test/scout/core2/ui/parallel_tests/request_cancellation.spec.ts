@@ -66,7 +66,7 @@ spaceTest.describe('Discover request cancellation', { tag: '@local-stateful-clas
 
   spaceTest(
     'recovers when a newer time range aborts an active request',
-    async ({ pageObjects }) => {
+    async ({ page, pageObjects }) => {
       const { datePicker, discover, filterBar } = pageObjects;
       const reducedRange = {
         from: 'Sep 20, 2015 @ 00:00:00.000',
@@ -75,6 +75,7 @@ spaceTest.describe('Discover request cancellation', { tag: '@local-stateful-clas
 
       await filterBar.addDslFilter(STALLED_LOGSTASH_WARNING_QUERY);
       await expect(discover.getQueryCancelButton()).toBeVisible();
+      await expect(page.testSubj.locator('discoverDataGridUpdating')).toBeVisible();
 
       await datePicker.setAbsoluteRange(reducedRange);
       await discover.waitUntilSearchingHasFinished();

@@ -68,19 +68,23 @@ spaceTest.describe('histogram', { tag: tags.deploymentAgnostic }, () => {
     async ({ discoverScoutSpace, pageObjects }) => {
       const { discover } = pageObjects;
 
-      await discoverScoutSpace.uiSettings.set({
-        'timepicker:timeDefaults': '{  "from": "2015-09-18T19:37:13.000Z",  "to": "now"}',
-      });
-      await discover.goto({ queryMode: 'classic' });
-      await discover.waitUntilTabIsLoaded();
+      try {
+        await discoverScoutSpace.uiSettings.set({
+          'timepicker:timeDefaults': '{  "from": "2015-09-18T19:37:13.000Z",  "to": "now"}',
+        });
+        await discover.goto({ queryMode: 'classic' });
+        await discover.waitUntilTabIsLoaded();
 
-      const initialTimeString = await discover.getChartTimespan();
-      await discover.submitQuery();
-      await discover.waitUntilSearchingHasFinished();
-      await expect(discover.getHistogramChart()).not.toHaveAttribute(
-        'data-time-range',
-        initialTimeString
-      );
+        const initialTimeString = await discover.getChartTimespan();
+        await discover.submitQuery();
+        await discover.waitUntilSearchingHasFinished();
+        await expect(discover.getHistogramChart()).not.toHaveAttribute(
+          'data-time-range',
+          initialTimeString
+        );
+      } finally {
+        await discoverScoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
+      }
     }
   );
 
@@ -153,7 +157,6 @@ spaceTest.describe('histogram', { tag: tags.deploymentAgnostic }, () => {
 
   spaceTest(
     'recovers the histogram after an empty time range',
-    { tag: '@local-stateful-classic' },
     async ({ page, pageObjects, discoverScoutSpace }) => {
       const { datePicker, discover } = pageObjects;
 
@@ -188,32 +191,29 @@ spaceTest.describe('histogram', { tag: tags.deploymentAgnostic }, () => {
 
   spaceTest(
     'persists a narrowed histogram time range on a saved session',
-    { tag: '@local-stateful-classic' },
     async ({ page, pageObjects, scoutSpace, discoverScoutSpace }) => {
-      const { datePicker, discover } = pageObjects;
-      const sessionName = `narrowed histogram ${scoutSpace.id}`;
-
-      await discoverScoutSpace.uiSettings.set({ 'dateFormat:tz': 'UTC' });
-      await page.reload();
-      await discover.waitUntilTabIsLoaded();
+      const { discover, datePicker } = pageObjects;
 
       try {
-        await discover.selectDataView(testData.DEFAULT_DATA_VIEW);
-        await discover.waitUntilSearchingHasFinished();
+        await discoverScoutSpace.uiSettings.set({ 'dateFormat:tz': 'UTC' });
+        await page.reload();
+        await discover.waitUntilTabIsLoaded();
         await datePicker.setAbsoluteRange({
-          from: 'Sep 20, 2015 @ 00:00:00.000',
-          to: 'Sep 20, 2015 @ 23:50:13.253',
+          from: '2015-09-20T00:00:00.000Z',
+          to: '2015-09-20T23:50:13.253Z',
         });
+        await discover.selectDataView(testData.DEFAULT_DATA_VIEW);
         await discover.waitUntilSearchingHasFinished();
         await expect(discover.getHitCountLocator()).toHaveText('4,756');
 
-        await discover.saveSearch(sessionName);
+        await discover.saveSearch(`test-search-${scoutSpace.id}`, { storeTimeRange: true });
         await page.reload();
         await discover.waitUntilTabIsLoaded();
         await expect(discover.getHistogramChart()).toBeVisible();
         await expect(discover.getHitCountLocator()).toHaveText('4,756');
       } finally {
         await discoverScoutSpace.uiSettings.set({ 'dateFormat:tz': 'Europe/Berlin' });
+        await discoverScoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
       }
     }
   );
