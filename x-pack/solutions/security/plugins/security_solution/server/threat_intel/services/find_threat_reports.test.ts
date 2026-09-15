@@ -6,11 +6,8 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import {
-  buildFindReportFilters,
-  findThreatReports,
-  USABLE_REPORT_FILTER,
-} from './find_threat_reports';
+import { buildFindReportFilters, findThreatReports } from './find_threat_reports';
+import { USABLE_REPORT_FILTER } from '../lib/usable_report_filter';
 import { encodeCursor, InvalidCursorError } from '../lib/report_cursor';
 
 const buildHit = ({
@@ -287,8 +284,11 @@ describe('findThreatReports', () => {
         keep_alive: '2m',
         expand_wildcards: ['open', 'hidden'],
         ignore_unavailable: true,
-        allow_no_indices: true,
       })
+    );
+    // `allow_no_indices` is search-only; ES rejects it on PIT open.
+    expect(esClient.openPointInTime).toHaveBeenCalledWith(
+      expect.not.objectContaining({ allow_no_indices: expect.anything() })
     );
   });
 

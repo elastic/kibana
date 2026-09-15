@@ -18,6 +18,7 @@ import {
 } from '../../../common/threat_intel';
 import { truncate } from './report_content';
 import { HIDDEN_INDEX_SEARCH_OPTIONS } from '../lib/es_options';
+import { USABLE_REPORT_FILTER } from '../lib/usable_report_filter';
 import { buildSpaceFilterTerms } from '../lib/space_filter';
 import { decodeCursor, encodeCursor, InvalidCursorError } from '../lib/report_cursor';
 
@@ -50,35 +51,6 @@ const isSearchContextMissing = (err: unknown): boolean => {
     ...(error.failed_shards ?? []).map((shard) => shard?.reason?.type),
   ];
   return types.includes('search_context_missing_exception');
-};
-
-/**
- * Usable bar: title or body text, nested IOCs, and severity.level.
- * `extracted.iocs` is nested, so exists on the parent path matches nothing.
- */
-export const USABLE_REPORT_FILTER: estypes.QueryDslQueryContainer = {
-  bool: {
-    filter: [
-      {
-        bool: {
-          should: [
-            { exists: { field: 'content.title' } },
-            { exists: { field: 'content.body_text' } },
-          ],
-          minimum_should_match: 1,
-        },
-      },
-      {
-        nested: {
-          path: 'extracted.iocs',
-          query: {
-            exists: { field: 'extracted.iocs.value' },
-          },
-        },
-      },
-      { exists: { field: 'severity.level' } },
-    ],
-  },
 };
 
 const toStringArray = (value: string | string[] | undefined): string[] => {
@@ -294,7 +266,11 @@ export const findThreatReports = async (
         index: THREAT_REPORTS_INDEX_PATTERN,
         keep_alive: PIT_KEEP_ALIVE,
         // Reports live in a hidden index, which a wildcard skips by default.
-        ...HIDDEN_INDEX_SEARCH_OPTIONS,
+        // Only PIT-valid fields go here: `allow_no_indices` (from
+        // HIDDEN_INDEX_SEARCH_OPTIONS) is a search-only parameter ES rejects
+        // on PIT open with x_content_parse_exception.
+        expand_wildcards: HIDDEN_INDEX_SEARCH_OPTIONS.expand_wildcards,
+        ignore_unavailable: HIDDEN_INDEX_SEARCH_OPTIONS.ignore_unavailable,
       });
       pitId = pit.id;
       openedPit = true;

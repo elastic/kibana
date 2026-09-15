@@ -19,7 +19,7 @@ import {
 } from '../../../common/threat_intel';
 import { HIDDEN_INDEX_SEARCH_OPTIONS } from '../lib/es_options';
 import { buildSpaceFilterTerms } from '../lib/space_filter';
-import { USABLE_REPORT_FILTER } from './find_threat_reports';
+import { USABLE_REPORT_FILTER } from '../lib/usable_report_filter';
 
 const REQUIRED_REPORT_SEMANTIC_FIELDS = ['title', 'body_text'] as const;
 
