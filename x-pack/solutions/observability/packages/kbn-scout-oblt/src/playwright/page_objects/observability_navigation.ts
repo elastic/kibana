@@ -139,6 +139,10 @@ export class ObservabilityNavigation {
     return this.anyPanel(panelId).locator(`[data-test-subj~="nav-item-deepLinkId-${deepLinkId}"]`);
   }
 
+  navItemInPanelById(panelId: string, id: string): Locator {
+    return this.anyPanel(panelId).locator(`[data-test-subj~="nav-item-id-${id}"]`);
+  }
+
   /**
    * Resolve a body nav item wherever it renders. It lives in the primary nav on some
    * deployments but overflows into the "More" menu on others (e.g. cloud-serverless);

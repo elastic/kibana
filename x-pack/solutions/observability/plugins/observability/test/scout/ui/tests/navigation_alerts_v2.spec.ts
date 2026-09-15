@@ -203,6 +203,31 @@ test.describe(
       await expectPageTitle(pageObjects.chrome.pageTitle, CLASSIC_ALERTS_TITLE);
     });
 
+    test('hides Alerting V2 Preview from project settings when v2 is enabled', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      config,
+    }) => {
+      await setAlertingV2EnabledSetting(kbnClient, true);
+
+      await browserAuth.loginAsAdmin();
+      await pageObjects.observabilityNavigation.goto();
+      await pageObjects.observabilityNavigation.waitForLoad();
+
+      const nav = pageObjects.observabilityNavigation;
+      const settingsPanelId = config.serverless ? 'admin_and_settings' : 'stack_management';
+
+      await nav.navItemInFooterById(settingsPanelId).click();
+      await expect(nav.sidePanel(settingsPanelId)).toBeVisible({
+        timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+      });
+      await expect(nav.navItemInPanelById(settingsPanelId, 'alerting_v2_panel')).not.toBeVisible();
+      await expect(
+        nav.sidePanel(settingsPanelId).getByText('Alerting V2 Preview', { exact: true })
+      ).not.toBeVisible();
+    });
+
     test('opens an Alerts panel without Alerts V1 when v2 is on and the classic table is off', async ({
       browserAuth,
       pageObjects,

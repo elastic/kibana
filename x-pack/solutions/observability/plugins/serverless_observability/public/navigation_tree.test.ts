@@ -177,7 +177,7 @@ describe('Navigation Tree', () => {
     core.application.capabilities = {
       ...core.application.capabilities,
       alerting_v2_alerts: { read: true },
-      alerting_v2_rules: { read: true },
+      alerting_v2_rules: { all: true },
       alerting_v2_action_policies: { read: true },
       alerting_v2_execution_history: { read: true },
       observabilityAlerts: { show: true },
@@ -238,6 +238,19 @@ describe('Navigation Tree', () => {
           ]),
         }),
       ])
+    );
+  });
+
+  it('omits Alerting V2 Preview from Admin and Settings when alerting v2 is enabled', () => {
+    core.settings.globalClient.get = <T>(_key: string) => true as T;
+
+    const adminSettingsNode = getAdminSettingsNode({ core });
+
+    expect(adminSettingsNode.children).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ id: 'alerting_v2_panel' })])
+    );
+    expect(adminSettingsNode.children).toEqual(
+      expect.arrayContaining([expect.objectContaining({ id: 'alerts_and_insights' })])
     );
   });
 
