@@ -14,7 +14,14 @@ interface WorkflowStep {
   name: string;
   type?: string;
   if?: string;
-  with?: { method?: string; path?: string; body?: { status?: string } };
+  with?: {
+    method?: string;
+    path?: string;
+    body?: { status?: string; title?: string };
+    conversation_id?: string;
+    title?: string;
+    access_control?: { access_mode?: string };
+  };
   'on-failure'?: unknown;
   steps?: WorkflowStep[];
   else?: WorkflowStep[];
@@ -92,6 +99,39 @@ describe('investigation lifecycle contracts', () => {
     expect(investigation.steps.some((step) => step.name === 'attach_to_significant_event')).toBe(
       false
     );
+  });
+
+  it('seeds the agent conversation with the investigation title before the agent runs', () => {
+    const stepNames = investigation.steps.map((step) => step.name);
+    expect(stepNames.indexOf('create_investigation_conversation')).toBeLessThan(
+      stepNames.indexOf('investigate')
+    );
+
+    const createConversation = requireStep('create_investigation_conversation');
+    expect(createConversation.type).toBe('ai.conversation.create');
+    expect(createConversation.with).toMatchObject({
+      conversation_id: '{{ execution.id }}',
+      title: '{{ inputs.title }}',
+      access_control: { access_mode: 'public' },
+    });
+    expect(createConversation['on-failure']).toEqual({ continue: true });
+
+    expect(requireStep('investigate').with?.conversation_id).toBe('{{ execution.id }}');
+  });
+
+  it('renames the conversation to the refined title after a successful run, without failing the run', () => {
+    const rename = requireStep('rename_investigation_conversation');
+    expect(rename.type).toBe('kibana.request');
+    expect(rename.if).toContain('steps.investigate.error == null');
+    expect(rename.if).toContain("steps.investigate.output.structured_output.title != ''");
+    expect(rename.with?.method).toBe('POST');
+    expect(rename.with?.path).toBe(
+      '/s/{{ workflow.spaceId }}/internal/agent_builder/conversations/{{ execution.id }}/_rename'
+    );
+    expect(rename.with?.body).toEqual({
+      title: '${{ steps.investigate.output.structured_output.title }}',
+    });
+    expect(rename['on-failure']).toEqual({ continue: true });
   });
 
   it('space-scopes the path of every kibana.request step', () => {

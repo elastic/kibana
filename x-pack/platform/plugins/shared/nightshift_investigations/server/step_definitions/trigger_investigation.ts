@@ -21,7 +21,7 @@ const inputSchema = z.object({
     .string()
     .min(1)
     .max(MAX_TITLE_LENGTH)
-    .describe('Human-readable headline shown in the investigations list and flyout'),
+    .describe('Human-readable headline for the investigation, e.g. the event title or rule name'),
   trigger_type: z
     .enum(INVESTIGATION_TRIGGER_TYPES)
     .optional()
