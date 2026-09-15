@@ -1,5 +1,5 @@
 {
-  "sha1": "627e75f7a5b272d661966e4c519820ce9988765c",
+  "sha1": "4f06e2684f3fd7375d81ad546a1b6f61dfe14d89",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -680,8 +680,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/chat_api_converse_api.spec.ts",
-        "line": 99,
-        "column": 40
+        "line": 118,
+        "column": 13
       }
     },
     {
@@ -696,8 +696,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/chat_api_converse_api.spec.ts",
-        "line": 123,
-        "column": 22
+        "line": 140,
+        "column": 55
       }
     },
     {
@@ -712,8 +712,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/chat_api_converse_api.spec.ts",
-        "line": 156,
-        "column": 19
+        "line": 173,
+        "column": 24
       }
     },
     {
@@ -728,8 +728,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/chat_api_converse_api.spec.ts",
-        "line": 182,
-        "column": 55
+        "line": 219,
+        "column": 27
       }
     },
     {
@@ -1276,8 +1276,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_pagination_api.spec.ts",
-        "line": 76,
-        "column": 33
+        "line": 86,
+        "column": 22
       }
     },
     {
@@ -1292,8 +1292,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_pagination_api.spec.ts",
-        "line": 88,
-        "column": 94
+        "line": 99,
+        "column": 28
       }
     },
     {
@@ -1308,8 +1308,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_pagination_api.spec.ts",
-        "line": 110,
-        "column": 27
+        "line": 121,
+        "column": 21
       }
     },
     {
@@ -1324,8 +1324,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_pagination_api.spec.ts",
-        "line": 121,
-        "column": 21
+        "line": 132,
+        "column": 6
       }
     },
     {
@@ -1340,8 +1340,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_pagination_api.spec.ts",
-        "line": 131,
-        "column": 25
+        "line": 142,
+        "column": 28
       }
     },
     {
@@ -1356,8 +1356,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_pagination_api.spec.ts",
-        "line": 148,
-        "column": 9
+        "line": 157,
+        "column": 8
       }
     },
     {
@@ -1372,8 +1372,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_pagination_api.spec.ts",
-        "line": 184,
-        "column": 27
+        "line": 194,
+        "column": 26
       }
     },
     {
@@ -1388,8 +1388,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_pagination_api.spec.ts",
-        "line": 201,
-        "column": 30
+        "line": 202,
+        "column": 27
       }
     },
     {
@@ -1404,8 +1404,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_pagination_api.spec.ts",
-        "line": 251,
-        "column": 21
+        "line": 261,
+        "column": 27
       }
     },
     {
@@ -1420,8 +1420,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_pagination_api.spec.ts",
-        "line": 291,
-        "column": 9
+        "line": 301,
+        "column": 30
       }
     },
     {
@@ -1436,8 +1436,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
-        "line": 98,
-        "column": 27
+        "line": 123,
+        "column": 30
       }
     },
     {
@@ -1452,8 +1452,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
-        "line": 124,
-        "column": 21
+        "line": 136,
+        "column": 7
       }
     },
     {
@@ -1468,8 +1468,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
-        "line": 135,
-        "column": 63
+        "line": 144,
+        "column": 21
       }
     },
     {
@@ -1484,8 +1484,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
-        "line": 143,
-        "column": 83
+        "line": 153,
+        "column": 19
       }
     },
     {
@@ -1500,8 +1500,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
-        "line": 152,
-        "column": 68
+        "line": 159,
+        "column": 70
       }
     },
     {
@@ -1516,8 +1516,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
-        "line": 161,
-        "column": 25
+        "line": 167,
+        "column": 78
       }
     },
     {
@@ -1532,8 +1532,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
-        "line": 170,
-        "column": 5
+        "line": 178,
+        "column": 68
       }
     },
     {
@@ -1548,8 +1548,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
-        "line": 180,
-        "column": 7
+        "line": 190,
+        "column": 30
       }
     },
     {
@@ -1564,7 +1564,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
-        "line": 224,
+        "line": 233,
         "column": 21
       }
     },
@@ -1580,8 +1580,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
-        "line": 231,
-        "column": 30
+        "line": 240,
+        "column": 9
+      }
+    },
+    {
+      "id": "6c038a293723f6d-71b6896dfee7952",
+      "title": "Agent Builder — conversations search API whitespace-only query returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
+        "line": 249,
+        "column": 5
       }
     },
     {
@@ -1596,8 +1612,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
-        "line": 239,
-        "column": 9
+        "line": 254,
+        "column": 25
       }
     },
     {
@@ -1612,8 +1628,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
-        "line": 247,
-        "column": 13
+        "line": 258,
+        "column": 63
       }
     },
     {
