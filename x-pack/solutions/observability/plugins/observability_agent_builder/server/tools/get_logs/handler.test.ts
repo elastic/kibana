@@ -245,6 +245,39 @@ describe('getLogsHandler', () => {
       expect(hasSemanticFilter).toBe(false);
     });
 
+    it('should handle unavailable semantic search gracefully', async () => {
+      const { kqlFilter } = jest.requireMock('../../utils/dsl_filters');
+
+      const mockSemanticLogSearch: SemanticLogSearchService = {
+        search: jest.fn().mockResolvedValue({
+          patterns: [],
+          unavailable: true,
+        }),
+        expand: jest.fn(),
+      };
+
+      await getLogsHandler({
+        esClient: mockEsClient,
+        params: {
+          ...baseParams,
+          kqlFilter: 'service.name: "my-service"',
+          semanticFilter: 'some query',
+        },
+        semanticLogSearch: mockSemanticLogSearch,
+      });
+
+      // Should use original kqlFilter when semantic search is unavailable
+      expect(kqlFilter).toHaveBeenCalledWith('service.name: "my-service"');
+
+      // baseFilter should NOT contain semantic pattern filter
+      const searchCall = mockSearchFn.mock.calls[0][0];
+      const hasSemanticFilter = searchCall.query.bool.filter.some(
+        (f: Record<string, unknown>) =>
+          f.bool && (f.bool as Record<string, unknown>).should !== undefined
+      );
+      expect(hasSemanticFilter).toBe(false);
+    });
+
     it('should handle multiple patterns with match_phrase for each', async () => {
       const mockSemanticLogSearch: SemanticLogSearchService = {
         search: jest.fn().mockResolvedValue({

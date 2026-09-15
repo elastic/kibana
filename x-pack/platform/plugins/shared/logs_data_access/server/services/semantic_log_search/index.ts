@@ -6,6 +6,10 @@
  */
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { Logger } from '@kbn/logging';
+import type { ESQLSearchResponse } from '@kbn/es-types';
+import { formatEsqlIdentifier } from '@kbn/esql-utils';
+import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
 import type {
   SemanticLogSearchService,
   SemanticLogSearchParams,
@@ -15,7 +19,11 @@ import type {
   LogPattern,
 } from '../../../common/services/semantic_log_search/types';
 import type { RegisterServicesParams } from '../register_services';
-import { detectCapabilities, type TargetCapabilities } from './capabilities';
+import {
+  detectCapabilities,
+  detectRerankCapability,
+  type TargetCapabilities,
+} from './capabilities';
 import {
   buildSemanticSearchQuery,
   buildSemanticSearchQueryNoCollapse,
@@ -233,67 +241,130 @@ async function searchWithSemanticOnly(
 }
 
 /**
- * Execute pattern search without semantic, using categorize_text only.
- *
- * This is the fallback path when no semantic_text field is available.
- * Uses lexical-based categorize_text aggregation.
- *
- * Note: @kbn/ai-tools provides `getLogPatterns` which does similar categorization
- * with additional features (change detection, sampling optimization). However, it
- * requires a TracedElasticsearchClient. For the PoC we use direct categorize_text
- * to avoid the additional dependency. Consider migrating to getLogPatterns for
- * production if tracing and advanced features are needed.
+ * Row structure from the ES|QL CATEGORIZE + RERANK query.
  */
-async function searchWithCategorizeText(
-  params: SemanticLogSearchParams,
-  capabilities: TargetCapabilities
-): Promise<SemanticLogSearchResult> {
-  const { esClient, target, timeRange, maxPatterns = DEFAULT_MAX_PATTERNS } = params;
+interface EsqlPatternRow {
+  pattern: string;
+  count: number;
+  first_seen: string;
+  last_seen: string;
+  sample: string;
+}
 
-  // Use 'message' as the categorization field if available
-  const categorizationField =
-    capabilities.fields.find((f) => f.path === 'message' && f.type === 'text')?.path ??
-    capabilities.fields.find((f) => f.type === 'text')?.path ??
-    'message';
-
-  const categorizeQuery = buildCategorizeTextQuery({
-    target,
-    field: categorizationField,
-    timeRange,
-    maxPatterns,
-  });
-
-  const categorizeResponse = await esClient.search(categorizeQuery);
-  const patternBuckets =
-    (
-      categorizeResponse.aggregations?.patterns as {
-        buckets: Array<{
-          key: string;
-          doc_count: number;
-          first_seen: { value: number };
-          last_seen: { value: number };
-          sample: { hits: { hits: SearchHit[] } };
-        }>;
+/**
+ * Convert ES|QL columnar response to an array of typed objects.
+ * This is the standard pattern used across Kibana (context_engine, entity_store, etc.).
+ */
+function esqlRowsToObjects<T>(response: ESQLSearchResponse): T[] {
+  const columns = response.columns ?? [];
+  return (response.values ?? []).map((row) => {
+    const record: Record<string, unknown> = {};
+    row.forEach((value, index) => {
+      const name = columns[index]?.name;
+      if (name) {
+        record[name] = value;
       }
-    )?.buckets ?? [];
-
-  const patterns: LogPattern[] = patternBuckets.map((bucket) => {
-    const sampleHit = bucket.sample.hits.hits[0];
-    return {
-      field: categorizationField,
-      pattern: bucket.key,
-      count: bucket.doc_count,
-      firstSeen: new Date(bucket.first_seen.value).toISOString(),
-      lastSeen: new Date(bucket.last_seen.value).toISOString(),
-      sample: {
-        _id: sampleHit?._id,
-        _index: sampleHit?._index,
-        ...(sampleHit?._source as Record<string, unknown>),
-      },
-    };
+    });
+    return record as T;
   });
+}
 
-  return { patterns };
+/**
+ * Parse ES|QL response into LogPattern array.
+ *
+ * Expected columns from the ES|QL query:
+ * - pattern: keyword (the categorized pattern)
+ * - count: long
+ * - first_seen: date
+ * - last_seen: date
+ * - sample: keyword (sample message)
+ * - _score: double (rerank score, not mapped to LogPattern)
+ *
+ * Note: ES|QL CATEGORIZE does not provide _id/_index for the sample,
+ * so sample only contains the message field.
+ */
+function parseEsqlPatternResponse(
+  response: ESQLSearchResponse,
+  field: string = 'message'
+): LogPattern[] {
+  const rows = esqlRowsToObjects<EsqlPatternRow>(response);
+
+  return rows
+    .filter((row) => row.pattern != null && row.count != null)
+    .map((row) => ({
+      field,
+      pattern: String(row.pattern),
+      count: Number(row.count),
+      firstSeen: row.first_seen ? new Date(row.first_seen).toISOString() : new Date().toISOString(),
+      lastSeen: row.last_seen ? new Date(row.last_seen).toISOString() : new Date().toISOString(),
+      // ES|QL CATEGORIZE doesn't provide _id/_index, only the sample message
+      sample: {
+        message: row.sample ? String(row.sample) : '',
+      },
+    }));
+}
+
+/**
+ * Execute semantic search using ES|QL RERANK + CATEGORIZE.
+ *
+ * This is the fallback path when no semantic_text field is available but
+ * the cluster has the RERANK inference endpoint configured.
+ *
+ * Flow:
+ * 1. CATEGORIZE extracts patterns from log messages
+ * 2. RERANK scores patterns by semantic relevance to the query
+ */
+async function searchWithEsqlRerank(
+  params: SemanticLogSearchParams,
+  logger: Logger
+): Promise<SemanticLogSearchResult> {
+  const { esClient, target, nlQuery, timeRange, maxPatterns = DEFAULT_MAX_PATTERNS } = params;
+
+  // Convert epoch ms to ISO strings for ES|QL standard time params
+  const startIso = new Date(timeRange.start).toISOString();
+  const endIso = new Date(timeRange.end).toISOString();
+
+  // Build ES|QL query with CATEGORIZE + RERANK
+  // Using standard ?_tstart/?_tend named parameters for time range
+  const query = `
+    FROM ${formatEsqlIdentifier(target)}
+    | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
+    | STATS 
+        count = COUNT(*),
+        first_seen = MIN(@timestamp),
+        last_seen = MAX(@timestamp),
+        sample = SAMPLE(message, 1)
+      BY pattern = CATEGORIZE(message)
+    | RERANK ?query ON pattern
+    | SORT _score DESC
+    | LIMIT ?limit
+  `;
+
+  try {
+    const response = await esClient.esql.query({
+      query,
+      params: [
+        { _tstart: startIso },
+        { _tend: endIso },
+        { query: nlQuery },
+        { limit: maxPatterns },
+      ],
+    });
+
+    return {
+      patterns: parseEsqlPatternResponse(response as ESQLSearchResponse, 'message'),
+    };
+  } catch (error) {
+    // Handle missing index gracefully (lazy initialization before first write)
+    if (isEsqlUnknownIndexError(error)) {
+      logger.debug(`ES|QL RERANK: index not found for target "${target}"`);
+      return { patterns: [], unavailable: true };
+    }
+    // Log other errors (license, ES version, RERANK/CATEGORIZE failures)
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.warn(`ES|QL RERANK query failed for target "${target}": ${errorMessage}`);
+    return { patterns: [], unavailable: true };
+  }
 }
 
 /**
@@ -303,6 +374,14 @@ async function searchWithCategorizeText(
  * - `search`: finds log patterns matching a natural language query
  * - `expand`: retrieves raw documents for a specific pattern
  *
+ * The capability ladder (from best to fallback):
+ * 1. semantic_text + pattern_text: pre-indexed embeddings with exact template resolution
+ * 2. semantic_text only: pre-indexed embeddings with runtime pattern extraction
+ * 3. RERANK + CATEGORIZE: runtime semantic ranking via ES|QL (no pre-indexed embeddings)
+ *
+ * If none of these capabilities are available, `search` returns
+ * `{ patterns: [], unavailable: true }`.
+ *
  * Resolution strategy is hidden from callers. When `pattern_text` is mapped,
  * expand uses an exact term filter on the `.template_id` subfield (a hash).
  * Otherwise it uses approximate match query with `operator: 'and'`.
@@ -311,8 +390,10 @@ async function searchWithCategorizeText(
  * The pattern in LogPattern is this hash when pattern_text is available.
  */
 export function createSemanticLogSearchService(
-  _params: RegisterServicesParams
+  params: RegisterServicesParams
 ): SemanticLogSearchService {
+  const { logger } = params;
+
   return {
     async search(searchParams: SemanticLogSearchParams): Promise<SemanticLogSearchResult> {
       const { esClient, target } = searchParams;
@@ -320,17 +401,24 @@ export function createSemanticLogSearchService(
       // Detect target capabilities
       const capabilities = await detectCapabilities(esClient, target);
 
-      // Choose search strategy based on capabilities
+      // Level 1: semantic_text + pattern_text (best)
       if (capabilities.hasSemanticCapability && capabilities.hasPatternCapability) {
-        // Best case: semantic ranking with exact template resolution
         return searchWithSemanticAndPattern(searchParams, capabilities);
-      } else if (capabilities.hasSemanticCapability) {
-        // Semantic ranking, approximate resolution
-        return searchWithSemanticOnly(searchParams, capabilities);
-      } else {
-        // Fallback: categorize_text only (no semantic ranking)
-        return searchWithCategorizeText(searchParams, capabilities);
       }
+
+      // Level 2: semantic_text only
+      if (capabilities.hasSemanticCapability) {
+        return searchWithSemanticOnly(searchParams, capabilities);
+      }
+
+      // Level 3: Check for RERANK capability as fallback
+      const hasRerank = await detectRerankCapability(esClient);
+      if (hasRerank) {
+        return searchWithEsqlRerank(searchParams, logger);
+      }
+
+      // No capability available
+      return { patterns: [], unavailable: true };
     },
 
     async expand(expandParams: ExpandPatternParams): Promise<ExpandPatternResult> {

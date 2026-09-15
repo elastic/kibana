@@ -52,6 +52,11 @@ export interface SemanticLogSearchParams {
 
 export interface SemanticLogSearchResult {
   patterns: LogPattern[];
+  /**
+   * True when the service cannot operate because the target lacks semantic_text fields.
+   * Callers should fall back to existing lexical search capabilities.
+   */
+  unavailable?: boolean;
 }
 
 export interface ExpandPatternParams {
