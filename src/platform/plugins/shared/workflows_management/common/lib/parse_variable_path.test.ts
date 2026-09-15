@@ -83,6 +83,14 @@ describe('parseVariablePath', () => {
     });
   });
 
+  it('should parse a Liquid dynamic map key', () => {
+    const result = parseVariablePath('inputs.payload.rules[ep.rule_id].name');
+    expect(result).toEqual({
+      propertyPath: 'inputs.payload.rules[ep.rule_id].name',
+      filters: [],
+    });
+  });
+
   it('should return errors for invalid paths', () => {
     const result = parseVariablePath('steps.data.kebab-case[0] | capitalize');
     expect(result).toEqual({
