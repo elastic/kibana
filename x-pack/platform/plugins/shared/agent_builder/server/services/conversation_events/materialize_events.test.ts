@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { EventActorType } from '@kbn/agent-builder-common';
-import type { ConversationEventType } from '@kbn/agent-builder-server/conversation_events';
+import type { ConversationEventTypeDefinition } from '@kbn/agent-builder-server/conversation_events';
 import { CONVERSATION_EVENT_ID_DELIMITER } from '@kbn/agent-builder-common';
 import { materializeConversationEvents } from './materialize_events';
 import type { ConversationEventsServiceStart } from './types';
@@ -22,20 +22,13 @@ const callerActor = {
 
 const noteSchema = z.object({ note: z.string().max(100) });
 
-const noteDefinition: ConversationEventType = {
+const noteDefinition: ConversationEventTypeDefinition = {
   type: 'scratch.note',
   payloadSchema: noteSchema,
-  internal: false,
-};
-
-const internalDefinition: ConversationEventType = {
-  type: 'user_message',
-  payloadSchema: z.object({}),
-  internal: true,
 };
 
 const makeRegistry = (
-  types: ConversationEventType[]
+  types: ConversationEventTypeDefinition[]
 ): Pick<ConversationEventsServiceStart, 'getDefinition'> => ({
   getDefinition: (type) => types.find((d) => d.type === type),
 });
@@ -85,8 +78,9 @@ describe('materializeConversationEvents', () => {
     ).toThrow('Unknown conversation event type "not.registered"');
   });
 
-  it('throws 400 for an internal type with a distinct message', () => {
-    const registry = makeRegistry([internalDefinition]);
+  it('throws 400 for a built-in timeline event type with a distinct message', () => {
+    // The check fires before the registry is consulted, so the registry can be empty.
+    const registry = makeRegistry([]);
     expect(() =>
       materializeConversationEvents({
         inputs: [{ type: 'user_message', data: {} }],

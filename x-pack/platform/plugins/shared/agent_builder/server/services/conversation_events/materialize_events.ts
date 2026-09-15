@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { ConversationEvent, EventActor } from '@kbn/agent-builder-common';
-import { createBadRequestError } from '@kbn/agent-builder-common';
+import { createBadRequestError, isBuiltInConversationEventType } from '@kbn/agent-builder-common';
 import type { ConversationEventsServiceStart } from './types';
 
 export interface ConversationEventAddInput {
@@ -31,15 +31,16 @@ export const materializeConversationEvents = ({
 
   // Validate every input before returning any, so a bad event rejects the whole batch.
   for (const { type, data } of inputs) {
+    if (isBuiltInConversationEventType(type)) {
+      throw createBadRequestError(
+        `Conversation event type "${type}" is internal and cannot be added directly`
+      );
+    }
+
     const definition = registry.getDefinition(type);
 
     if (!definition) {
       throw createBadRequestError(`Unknown conversation event type "${type}"`);
-    }
-    if (definition.internal) {
-      throw createBadRequestError(
-        `Conversation event type "${type}" is internal and cannot be added directly`
-      );
     }
 
     const result = definition.payloadSchema.safeParse(data);
