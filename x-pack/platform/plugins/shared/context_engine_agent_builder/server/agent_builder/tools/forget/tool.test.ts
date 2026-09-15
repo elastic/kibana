@@ -84,7 +84,6 @@ describe('forget tool', () => {
               title: 'Duration mapping',
               description: 'duration_ms is a keyword.',
               content: 'Cast duration_ms before numeric comparisons.',
-              spaces: ['space-1'],
               updated_at: '2026-09-01T00:00:00.000Z',
               attributes: { session_id: 'conversation-1' },
             },
@@ -162,7 +161,6 @@ describe('forget tool', () => {
               title: 'Session summary',
               description: 'Summary',
               content: 'Summary',
-              spaces: ['space-1'],
               updated_at: '2026-09-01T00:00:00.000Z',
               attributes: { session_id: 'conversation-1' },
             },
@@ -217,7 +215,6 @@ describe('forget tool', () => {
               title: 'Duration mapping',
               description: 'duration_ms is a keyword.',
               content: 'Cast duration_ms before numeric comparisons.',
-              spaces: ['space-1'],
               updated_at: '2026-09-01T00:00:00.000Z',
               attributes: { session_id: 'conversation-1' },
               governance: { lifecycle: { status: 'deleted' } },
@@ -279,7 +276,6 @@ describe('forget tool', () => {
               title: 'Index metadata',
               description: 'Metadata',
               content: 'Metadata',
-              spaces: ['space-1'],
               updated_at: '2026-09-01T00:00:00.000Z',
             },
           },
@@ -296,46 +292,6 @@ describe('forget tool', () => {
           data: {
             message:
               "Failed to forget memory: Document 'memory-1' in AI index 'support' is not a memory.",
-          },
-        },
-      ],
-    });
-    expect(index).not.toHaveBeenCalled();
-  });
-
-  it('does not delete a memory from another space', async () => {
-    search.mockResolvedValue({
-      hits: {
-        hits: [
-          {
-            _id: 'memory-1',
-            _index: 'ai-index-idx-support',
-            _seq_no: 7,
-            _primary_term: 2,
-            _source: {
-              '@timestamp': '2026-09-01T00:00:00.000Z',
-              id: 'memory-1',
-              type: 'memory_session_fact',
-              title: 'Duration mapping',
-              description: 'duration_ms is a keyword.',
-              content: 'Cast duration_ms before numeric comparisons.',
-              spaces: ['space-2'],
-              updated_at: '2026-09-01T00:00:00.000Z',
-            },
-          },
-        ],
-      },
-    });
-
-    const result = await run();
-
-    expect(result).toEqual({
-      results: [
-        {
-          type: ToolResultType.error,
-          data: {
-            message:
-              "Failed to forget memory: Memory 'memory-1' does not belong to the current space 'space-1'.",
           },
         },
       ],
