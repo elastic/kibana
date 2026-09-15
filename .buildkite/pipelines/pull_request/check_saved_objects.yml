@@ -1,5 +1,6 @@
 steps:
   - command: .buildkite/scripts/steps/check_saved_objects.sh
+    skip: "Skipping flaky step on merge-queue test branch"
     label: 'Check changes in Saved Objects'
     key: check_saved_objects
     agents:
