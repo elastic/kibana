@@ -149,9 +149,7 @@ export function ChangeDataView({
           css={{ maxWidth: '100%' }}
         >
           {/* we don't want to display the adHoc icon on text based mode */}
-          {isAdHocSelected && (
-            <EuiIcon type="tableTime"  size="m" aria-hidden={true} />
-          )}
+          {isAdHocSelected && <EuiIcon type="tableTime" size="m" aria-hidden={true} />}
           <span className="eui-textTruncate">{trigger.label}</span>
         </EuiFlexGroup>
       </EuiFormControlButton>
