@@ -28,10 +28,9 @@ export const GROUP_BY_LABEL = i18n.translate('xpack.alertingV2.actionPolicyDefin
   defaultMessage: 'Group by',
 });
 
-export const FREQUENCY_LABEL = i18n.translate(
-  'xpack.alertingV2.actionPolicyDefinition.frequency',
-  { defaultMessage: 'Frequency' }
-);
+export const FREQUENCY_LABEL = i18n.translate('xpack.alertingV2.actionPolicyDefinition.frequency', {
+  defaultMessage: 'Frequency',
+});
 
 export const getGroupingModeLabel = (mode: GroupingMode | null | undefined): string => {
   if (mode == null) return NOT_CONFIGURED_LABEL;

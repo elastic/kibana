@@ -77,8 +77,8 @@ export const ActionPolicyDetailsFlyout = ({
   const dateTimeFormat = settings.client.get<string>('dateFormat');
   const formatDate = (value: string) => moment(value).format(dateTimeFormat);
 
-  const metadataUids = [policy.created_by, policy.updated_by].filter(
-    (uid): uid is string => Boolean(uid)
+  const metadataUids = [policy.created_by, policy.updated_by].filter((uid): uid is string =>
+    Boolean(uid)
   );
 
   const { data: profileByUid } = useBulkGetUserProfiles({ uids: metadataUids });
