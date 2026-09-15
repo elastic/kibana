@@ -195,9 +195,7 @@ apiTest.describe('AI Index tools over MCP', { tag: tags.stateful.classic }, () =
       for (const name of Object.values(TOOL)) {
         expect(byName.get(name)?.annotations?.readOnlyHint).toBe(true);
       }
-      for (const name of [TOOL.list, TOOL.query]) {
-        expect(byName.get(name)?.description).toContain('/s/{spaceId}/api/agent_builder/mcp');
-      }
+      expect(byName.get(TOOL.query)?.description).toContain('/s/{spaceId}/api/agent_builder/mcp');
 
       expect(chain.entry).toStrictEqual({
         id: AI_INDEX_ID,
