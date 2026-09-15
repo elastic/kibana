@@ -35,7 +35,7 @@ export const useProposalDecision = (http: HttpSetup) => {
       if (error.response?.status === 409) {
         return {
           status: 'conflict',
-          message: 'This proposal has already been decided — refresh the card to see its status.',
+          message: 'This proposal has already been decided. Refresh the page to see its status.',
         };
       }
       if (error.response?.status === 410) {

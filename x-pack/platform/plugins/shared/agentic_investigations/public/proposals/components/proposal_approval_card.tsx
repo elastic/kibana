@@ -113,7 +113,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
     let primaryAction: ApprovalAction | undefined;
     let secondaryActions: ApprovalAction[] | undefined;
 
-    if (isPending && !isAlreadyDecided) {
+    if (isPending) {
       if (mode === 'view') {
         primaryAction = {
           label: i18n.translate('xpack.agenticInvestigations.proposalCard.approve', {
@@ -123,7 +123,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
           onClick: handleApprove,
           isDisabled: isExpired || isLoading,
           isLoading,
-          'data-test-subj': `alertZeroProposalApprove-${proposalId}`,
+          'data-test-subj': `agenticInvestigationsProposalApprove-${proposalId}`,
         };
         secondaryActions = [
           {
@@ -133,7 +133,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
             color: 'danger',
             onClick: handleDismissClick,
             isDisabled: isExpired || isLoading,
-            'data-test-subj': `alertZeroProposalDismiss-${proposalId}`,
+            'data-test-subj': `agenticInvestigationsProposalDismiss-${proposalId}`,
           },
         ];
       } else {
@@ -146,7 +146,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
           onClick: handleDismissConfirm,
           isDisabled: isLoading,
           isLoading,
-          'data-test-subj': `alertZeroProposalDismissConfirm-${proposalId}`,
+          'data-test-subj': `agenticInvestigationsProposalDismissConfirm-${proposalId}`,
         };
         secondaryActions = [
           {
@@ -156,17 +156,16 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
             color: 'text',
             onClick: handleDismissCancel,
             isDisabled: isLoading,
-            'data-test-subj': `alertZeroProposalDismissCancel-${proposalId}`,
+            'data-test-subj': `agenticInvestigationsProposalDismissCancel-${proposalId}`,
           },
         ];
       }
     }
-    // decided/expired → no footer (omitted entirely)
 
     return (
       <div
         css={css({ padding: `${euiTheme.size.m}` })}
-        data-test-subj={`alertZeroProposalCard-${proposalId}`}
+        data-test-subj={`agenticInvestigationsProposalCard-${proposalId}`}
       >
         <ApprovalContent
           showHeader={false}
@@ -194,7 +193,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
               </div>
             </>
           )}
-          {isAlreadyDecided && !isExpired && (
+          {isAlreadyDecided && (
             <>
               <EuiSpacer size="m" />
               <div css={css({ padding: `0 ${euiTheme.size.m}` })}>
@@ -220,7 +219,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
                 rationale={rationale}
                 onDismissReasonChange={setDismissReason}
                 onRationaleChange={setRationale}
-                data-test-subj={`alertZeroProposalDismissForm-${proposalId}`}
+                data-test-subj={`agenticInvestigationsProposalDismissForm-${proposalId}`}
               />
             </>
           )}

@@ -42,7 +42,7 @@ const DISMISS_REASON_LABELS: Record<DismissReason, string> = {
 
 const DISMISS_REASON_OPTIONS = dismissReasonSchema.options.map((value) => ({
   value,
-  text: DISMISS_REASON_LABELS[value as DismissReason],
+  text: DISMISS_REASON_LABELS[value],
 }));
 
 export interface ProposalDismissFormProps {

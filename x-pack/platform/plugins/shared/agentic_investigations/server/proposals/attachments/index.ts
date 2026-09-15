@@ -9,7 +9,5 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import { proposalAttachmentType } from './proposal_attachment_type';
 
 export const registerProposalAttachment = (agentBuilder: AgentBuilderPluginSetup): void => {
-  agentBuilder.attachments.registerType(
-    proposalAttachmentType as Parameters<typeof agentBuilder.attachments.registerType>[0]
-  );
+  agentBuilder.attachments.registerType(proposalAttachmentType);
 };
