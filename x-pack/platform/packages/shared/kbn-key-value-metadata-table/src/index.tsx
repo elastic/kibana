@@ -45,8 +45,8 @@ export function KeyValueTable({
               />
             ) : (
               <ul>
-                {asArray.map((val) => (
-                  <li key={`${key}-${String(val)}`}>
+                {asArray.map((val, index) => (
+                  <li key={`${key}-${String(val)}-${index}`}>
                     <FormattedValue
                       value={val}
                       dateFormat={dateFormat}
