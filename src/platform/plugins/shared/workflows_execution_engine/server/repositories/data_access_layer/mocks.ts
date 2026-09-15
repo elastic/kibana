@@ -33,7 +33,7 @@ export const createMockWorkflowDataClient = (
   ({
     search: jest.fn(),
     count: jest.fn(),
-    getByIds: jest.fn(),
+    getByIds: jest.fn().mockResolvedValue(createMockGetExecutionsByIdsResponse([])),
     bulk: jest.fn(),
     scriptUpdate: jest.fn(),
     deleteByQuery: jest.fn(),
@@ -46,7 +46,7 @@ export const createMockStepDataClient = (
   ({
     search: jest.fn(),
     count: jest.fn(),
-    getByIds: jest.fn(),
+    getByIds: jest.fn().mockResolvedValue(createMockGetExecutionsByIdsResponse([])),
     bulk: jest.fn(),
     scriptUpdate: jest.fn(),
     deleteByQuery: jest.fn(),

@@ -14,6 +14,7 @@ import {
 } from '@kbn/human-readable-id';
 import type { DotKeysOf, DotObject, JsonValue, RecursivePartial } from '@kbn/utility-types';
 import { z } from '@kbn/zod/v4';
+import type { SerializedWorkflowGraph } from '../graph/types/graph';
 import type { StepDeprecationInfo } from '../spec/deprecated_step_metadata';
 import type {
   SerializedError,
@@ -199,6 +200,23 @@ export interface EsWorkflowExecution {
    * created.
    */
   version?: number;
+  /**
+   * Graph this execution runs, when it is not the whole workflow definition.
+   *
+   * Written for parallel branch children: the branch body is sliced out of the
+   * parent's graph at fan-out and stored here, so the child keeps running the
+   * graph it was handed even if the workflow definition changes mid-run. Absent
+   * for ordinary executions, which compile their graph from `workflowDefinition`.
+   * Not searchable.
+   */
+  executionGraph?: SerializedWorkflowGraph;
+  /**
+   * Execution that spawned this one, for executions that are a fragment of
+   * their parent rather than an independent sub-workflow run (today: parallel
+   * branches). Drives the engine's upward step-context load and keeps branch
+   * children out of the top-level executions list.
+   */
+  parentExecutionId?: string;
 }
 
 export interface ProviderInput {
@@ -265,6 +283,24 @@ export interface EsWorkflowStepExecution {
 
   /** Per-step normalized LLM token usage. See {@link WorkflowTokenUsage}. */
   usage?: WorkflowTokenUsage;
+
+  /**
+   * Marks a step whose real work happened in a separate workflow execution whose
+   * id equals this step execution's id (today: one per parallel branch).
+   *
+   * The execution detail read path walks these markers to pull the child's step
+   * executions into the parent's view, so the whole run reads as one execution
+   * without any search.
+   */
+  hasChildExecution?: boolean;
+
+  /**
+   * Marks a record that stands in for one branch of a parallel step rather than
+   * for a run of that step. It borrows the parallel step's id so the UI nests
+   * the branch under it, so `steps.<parallelStep>` must skip these and resolve
+   * the step's own execution instead.
+   */
+  isBranchWrapper?: boolean;
 }
 
 export type WorkflowStepExecutionDto = Omit<EsWorkflowStepExecution, 'spaceId'>;

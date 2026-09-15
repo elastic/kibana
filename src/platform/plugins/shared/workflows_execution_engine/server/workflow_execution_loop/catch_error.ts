@@ -116,6 +116,13 @@ export async function catchError(
         throw new Error('No current node ID in workflow execution state. This should not happen.');
       }
 
+      // A parallel branch child inherits the frames it would have had inline, but
+      // only owns the ones in its own graph. An inherited frame's handler belongs
+      // to the parent, so stop unwinding and let the error leave this execution.
+      if (!workflowExecutionCursor.hasNode(scopeEntry.nodeId)) {
+        break;
+      }
+
       workflowExecutionCursor.navigateToNode(scopeEntry.nodeId);
 
       const stepExecutionRuntime = stepExecutionRuntimeFactory.createStepExecutionRuntime({

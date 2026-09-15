@@ -32,6 +32,13 @@ export interface SearchLogsParams {
   // fields
   level?: string;
   executionId?: string;
+  /**
+   * Several executions at once, for a run whose work is spread across more than
+   * one (a parallel step's branches each log under their own execution id).
+   * Combined with `executionId` as an additional AND clause, so pass one or the
+   * other.
+   */
+  executionIds?: string[];
   stepExecutionId?: string;
   stepId?: string;
 }
@@ -72,6 +79,12 @@ export class LogsRepository {
     if (typeof params.executionId === 'string') {
       mustQueries.push({
         term: { 'workflow.execution_id': params.executionId },
+      });
+    }
+
+    if (params.executionIds?.length) {
+      mustQueries.push({
+        terms: { 'workflow.execution_id': params.executionIds },
       });
     }
 

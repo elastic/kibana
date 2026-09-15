@@ -14,3 +14,16 @@ import type { GraphNodeUnion } from './nodes/union';
 // SECOND generic (the first is the graph label). `GraphNodeUnion` must go in the second
 // slot so `graph.node()` stays typed; a single-generic form silently returns `any`.
 export type WorkflowGraphType = graphlib.Graph<unknown, GraphNodeUnion>;
+
+/**
+ * Wire format for a persisted execution graph.
+ *
+ * This is a persisted format: a branch child execution stores the graph it was
+ * handed and keeps running it even if the workflow definition is edited
+ * mid-run. It lives next to {@link GraphNodeUnion} so a change to the node types
+ * is visibly a change to what is already on disk.
+ */
+export interface SerializedWorkflowGraph {
+  nodes: GraphNodeUnion[];
+  edges: Array<{ v: string; w: string }>;
+}

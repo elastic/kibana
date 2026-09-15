@@ -35,42 +35,37 @@ export interface ParallelBranchState extends Record<string, unknown> {
    */
   key?: unknown;
   status: ParallelBranchStatus;
-  /** True once the branch body has been started at least once. */
-  started: boolean;
   /**
-   * Cursor into the branch body subgraph: the next node to run for this branch.
-   * Advances through the body's nodes across ticks so a branch may contain more
-   * than one step. Undefined until the branch first starts; set to the body's
-   * start node on first run, then to each successor as nodes complete.
+   * The execution running this branch's body, set once the branch is launched.
+   * Equals the branch's wrapper step execution id in the parent, so it is
+   * re-derivable rather than allocated — a fan-out retried after a crash finds
+   * the children it already created instead of duplicating them.
    */
-  currentNodeId?: string;
-  /** Epoch ms when the branch first started; used for per-branch timeout. */
+  executionId?: string;
+  /** Epoch ms when the branch was launched. */
   startedAt?: number;
   /** Epoch ms when the branch reached a terminal state. */
   finishedAt?: number;
   /** Set when the branch was terminated by a timeout (overall or per-branch). */
   timedOut?: boolean;
   /**
-   * True while the branch is parked in a durable wait/poll across ticks (its
-   * body yielded on a `wait` step rather than actively running). Distinguishes a
-   * branch that is holding a worker (`running`, `waiting: false`) from one that
-   * merely re-ticks later (`running`, `waiting: true`). Used by concurrency
-   * accounting: with `count-waiting: false`, parked branches free their slot so
-   * a not-yet-started branch can begin, while actively-running branches still
-   * count against `max`.
+   * True while the branch execution is parked in a wait rather than actively
+   * running. Used by concurrency accounting: with `count-waiting: false`, parked
+   * branches free their slot so a queued branch can begin, while actively
+   * running branches still count against `max`.
    */
   waiting?: boolean;
 }
 
 /**
- * State persisted on the parallel step execution between durable ticks.
- * Mirrors the durable poll pattern: every non-terminal tick re-enters a wait,
- * every terminal tick finishes the step and writes results.
+ * State persisted on the parallel step execution. Written by the enter node at
+ * fan-out and updated by the exit node on every join pass; both nodes resolve to
+ * the same step execution, so they read and write the same record.
  */
 export interface ParallelStepState extends Record<string, unknown> {
   total: number;
   branches: ParallelBranchState[];
-  /** Epoch ms when the parallel step began fanning out; used for overall timeout. */
+  /** Epoch ms when the parallel step began fanning out. */
   startedAt: number;
   /**
    * True for static scatter-gather (`branches`) mode, where each branch `key` is

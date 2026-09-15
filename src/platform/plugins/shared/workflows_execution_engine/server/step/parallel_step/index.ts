@@ -9,3 +9,4 @@
 
 export { EnterParallelNodeImpl } from './enter_parallel_node_impl';
 export { ExitParallelNodeImpl } from './exit_parallel_node_impl';
+export { ParallelBranchCoordinator } from './parallel_branch_coordinator';

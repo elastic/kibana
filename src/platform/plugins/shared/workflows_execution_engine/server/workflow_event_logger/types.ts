@@ -31,6 +31,12 @@ export interface SearchLogsParams extends BaseLogsParams {
 
 export interface ExecutionLogsParams extends BaseLogsParams {
   executionId: string;
+  /**
+   * Executions to read instead of `executionId` alone, for a run whose work is
+   * spread across more than one (a parallel step's branches). When set,
+   * `executionId` identifies the run being viewed and this is what is queried.
+   */
+  executionIds?: string[];
 }
 
 export interface StepLogsParams extends BaseLogsParams {

@@ -94,23 +94,26 @@ export async function setupDependencies(
   });
 
   // Compiling the definition into its execution graph can throw a GraphBuildError
-  // for a structurally-unsupported workflow (currently only the parallel-branch
-  // constraints: nested flow-control / unsupported step types inside a branch
-  // body). This same rule is validated in the editor (see the client-side
-  // `validateGraphBuild`, which squiggles the offending step), so authored-in-UI
-  // workflows are rejected before they ever run. This block is the defense-in-depth
-  // runtime net for the paths that bypass the editor — API/programmatic creation,
-  // imports, or workflows authored before the constraint existed. It is a permanent
-  // author error, not a transient fault, so we mark the execution FAILED with the
-  // actionable message and rethrow a typed, non-retryable error — otherwise the raw
-  // throw escapes the task runner and the run is force-recovered into an opaque
-  // "Execution abandoned" TaskRecoveryError with no failure reason and no step records.
+  // for a structurally-unsupported workflow. This same rule is validated in the
+  // editor (see the client-side `validateGraphBuild`, which squiggles the offending
+  // step), so authored-in-UI workflows are rejected before they ever run. This block
+  // is the defense-in-depth runtime net for the paths that bypass the editor —
+  // API/programmatic creation, imports, or workflows authored before the constraint
+  // existed. It is a permanent author error, not a transient fault, so we mark the
+  // execution FAILED with the actionable message and rethrow a typed, non-retryable
+  // error — otherwise the raw throw escapes the task runner and the run is
+  // force-recovered into an opaque "Execution abandoned" TaskRecoveryError with no
+  // failure reason and no step records.
   let compiledGraph: WorkflowGraph;
   try {
-    compiledGraph = WorkflowGraph.fromWorkflowDefinition(
-      workflowExecution.workflowDefinition,
-      defaultWorkflowSettings
-    );
+    // A branch child carries the graph it was handed at fan-out, so it keeps running
+    // that slice even if the workflow definition is edited mid-run.
+    compiledGraph = workflowExecution.executionGraph
+      ? WorkflowGraph.fromJSON(workflowExecution.executionGraph)
+      : WorkflowGraph.fromWorkflowDefinition(
+          workflowExecution.workflowDefinition,
+          defaultWorkflowSettings
+        );
   } catch (error) {
     if (isGraphBuildError(error)) {
       const finishedAt = new Date();
@@ -163,6 +166,7 @@ export async function setupDependencies(
   const stepIoService = new StepIoService({
     stepRepository: stepExecutionRepository,
     state: workflowExecutionState,
+    workflowExecutionRepository,
     evictionMinBytes: config.eviction.minPayloadSize.getValueInBytes(),
     logger,
   });

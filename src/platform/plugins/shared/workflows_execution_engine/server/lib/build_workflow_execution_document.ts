@@ -14,6 +14,7 @@ import {
   pickManagedWorkflowFields,
   pickWorkflowDocumentVersion,
 } from '@kbn/workflows';
+import type { SerializedWorkflowGraph } from '@kbn/workflows/graph';
 import {
   MISSING_EXECUTION_IDENTITY_ERROR_TYPE,
   MISSING_EXECUTION_IDENTITY_MESSAGE,
@@ -30,6 +31,12 @@ export interface BuildWorkflowExecutionDocumentParams {
   now: Date;
   maxEventChainDepth: number;
   getConcurrencyGroupKey: (workflowExecution: WorkflowExecutionForInputRendering) => string | null;
+  /** Caller-supplied id, for executions whose id must be derivable (parallel branches). */
+  executionId?: string;
+  /** Graph to run instead of compiling `workflow.definition`. */
+  executionGraph?: SerializedWorkflowGraph;
+  /** Execution this one is a fragment of. */
+  parentExecutionId?: string;
 }
 
 const stampExecutionWorkflowVersion = (
@@ -53,6 +60,9 @@ export const buildWorkflowExecutionDocument = (
     now,
     maxEventChainDepth,
     getConcurrencyGroupKey,
+    executionId,
+    executionGraph,
+    parentExecutionId,
   } = params;
   const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
   const spaceId = (context.spaceId as string | undefined) || 'default';
@@ -78,7 +88,7 @@ export const buildWorkflowExecutionDocument = (
     typeof metadata?.eventId === 'string' ? metadata.eventId.trim() || undefined : undefined;
   const missingIdentity = authenticatedUser == null;
   const workflowExecution: WorkflowExecutionForInputRendering = {
-    id: generateUuid(),
+    id: executionId ?? generateUuid(),
     spaceId,
     workflowId: workflow.id,
     ...pickManagedWorkflowFields(workflow),
@@ -103,6 +113,8 @@ export const buildWorkflowExecutionDocument = (
     ...(rootEventChainDepth !== undefined ? { eventChainDepth: rootEventChainDepth } : {}),
     ...(rootVisited.length > 0 ? { eventChainVisitedWorkflowIds: rootVisited } : {}),
     ...(dispatchEventId ? { dispatchEventId } : {}),
+    ...(executionGraph ? { executionGraph } : {}),
+    ...(parentExecutionId ? { parentExecutionId } : {}),
   };
 
   stampExecutionWorkflowVersion(workflowExecution, workflow);

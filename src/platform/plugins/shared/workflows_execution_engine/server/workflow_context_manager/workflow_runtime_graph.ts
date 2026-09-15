@@ -26,6 +26,7 @@ export type RuntimeGraphView = Pick<
   | 'getDirectSuccessors'
   | 'getInnerStepIds'
   | 'getAllPredecessors'
+  | 'getNodeRangeGraph'
   | 'getWorkflowLevelTimeout'
   | 'topologicalOrder'
 >;
@@ -173,6 +174,23 @@ export class WorkflowRuntimeGraph {
   /** Workflow-level timeout step, if the workflow defines one. */
   public getWorkflowLevelTimeout(): string | undefined {
     return this.compiledGraph.getWorkflowLevelTimeout();
+  }
+
+  /**
+   * The compiled subgraph between `startNodeId` and `exitNodeId`, optionally
+   * enclosed in its own workflow timeout zone.
+   *
+   * Reads the compiled graph rather than the runtime view: the result is handed
+   * to another execution to run from scratch, so it must not carry this run's
+   * synthetic-node rewiring.
+   */
+  public getNodeRangeGraph(
+    startNodeId: string,
+    exitNodeId: string,
+    timeout?: string
+  ): WorkflowGraph {
+    const rangeGraph = this.compiledGraph.getNodeRangeGraph(startNodeId, exitNodeId);
+    return timeout ? rangeGraph.wrapInWorkflowTimeout(timeout) : rangeGraph;
   }
 
   /**
