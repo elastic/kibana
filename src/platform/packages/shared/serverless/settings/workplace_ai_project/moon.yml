@@ -16,8 +16,7 @@ project:
   channel: ''
   owner: '@elastic/search-ml-ux'
   sourceRoot: src/platform/packages/shared/serverless/settings/workplace_ai_project
-dependsOn:
-  - '@kbn/management-settings-ids'
+dependsOn: []
 tags:
   - shared-common
   - package
