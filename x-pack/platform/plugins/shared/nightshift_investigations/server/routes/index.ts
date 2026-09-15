@@ -14,6 +14,13 @@ import { getSeverityCountsRoute } from './get_severity_counts';
 import { updateInvestigationRoute } from './update_investigation';
 import { followInvestigationRoute } from './follow_investigation';
 import { getInvestigationAvailabilityRoute } from './get_investigation_availability';
+import {
+  createAutomationRoute,
+  listAutomationsRoute,
+  getAutomationRoute,
+  updateAutomationRoute,
+  deleteAutomationRoute,
+} from './automations';
 
 export const nightshiftInvestigationsRouteRepository = {
   ...startInvestigationRoute,
@@ -25,6 +32,11 @@ export const nightshiftInvestigationsRouteRepository = {
   ...updateInvestigationRoute,
   ...followInvestigationRoute,
   ...getInvestigationAvailabilityRoute,
+  ...createAutomationRoute,
+  ...listAutomationsRoute,
+  ...getAutomationRoute,
+  ...updateAutomationRoute,
+  ...deleteAutomationRoute,
 };
 
 export type NightshiftInvestigationsRouteRepository =

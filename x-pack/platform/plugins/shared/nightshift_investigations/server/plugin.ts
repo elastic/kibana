@@ -43,7 +43,11 @@ import { createConnectorCredentialResolver } from './tools/sandbox_bash/connecto
 import {
   nightshiftInvestigationSavedObjectType,
   NIGHTSHIFT_INVESTIGATION_SO_TYPE,
+  nightshiftAutomationSavedObjectType,
+  NIGHTSHIFT_AUTOMATION_SO_TYPE,
+  nightshiftAutomationBudgetSavedObjectType,
 } from './saved_objects';
+import { checkBudgetStepDefinition } from './step_definitions/check_budget';
 import { SavedObjectInvestigationRepository } from './storage';
 import {
   registerInvestigationReconciliationTask,
@@ -73,6 +77,7 @@ export class NightshiftInvestigationsPlugin
   private searchInferenceEndpoints?: NightshiftInvestigationsStartDeps['searchInferenceEndpoints'];
   private ruleRegistry?: NightshiftInvestigationsStartDeps['ruleRegistry'];
   private savedObjects?: CoreStart['savedObjects'];
+  private coreStart?: CoreStart;
   private sandboxConnectionManager?: SandboxConnectionManager;
   private actionsStart?: ActionsPluginStart;
 
@@ -89,6 +94,8 @@ export class NightshiftInvestigationsPlugin
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
 
     core.savedObjects.registerType(nightshiftInvestigationSavedObjectType);
+    core.savedObjects.registerType(nightshiftAutomationSavedObjectType);
+    core.savedObjects.registerType(nightshiftAutomationBudgetSavedObjectType);
 
     registerInvestigationReconciliationTask({
       core,
@@ -204,6 +211,9 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           ensureInvestigationAgentStepDefinition(() => this.agentBuilder)
         );
+        plugins.workflowsExtensions.registerStepDefinition(
+          checkBudgetStepDefinition(() => this.coreStart)
+        );
       }
 
       registerRoutes({
@@ -213,6 +223,8 @@ export class NightshiftInvestigationsPlugin
           getTriggerEmitter,
           getAlertsClient: (request: KibanaRequest) =>
             this.ruleRegistry?.getRacClientWithRequest(request),
+          getAutomationsSoClient: this.getAutomationsSoClient,
+          getWorkflowsManagement: () => this.workflowsManagement,
         },
         core,
         logger: this.logger,
@@ -235,6 +247,7 @@ export class NightshiftInvestigationsPlugin
     this.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
     this.ruleRegistry = plugins.ruleRegistry;
     this.savedObjects = coreStart.savedObjects;
+    this.coreStart = coreStart;
     this.actionsStart = plugins.actions;
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
@@ -302,6 +315,18 @@ export class NightshiftInvestigationsPlugin
           workflowsManagement: this.workflowsManagement,
         }),
     });
+  };
+
+  private getAutomationsSoClient = (request: KibanaRequest, spaceId: string) => {
+    if (!this.savedObjects) {
+      throw new Error('savedObjects is not available — plugin start() has not been called');
+    }
+    return this.savedObjects
+      .getScopedClient(request, {
+        excludedExtensions: [SECURITY_EXTENSION_ID],
+        includedHiddenTypes: [NIGHTSHIFT_AUTOMATION_SO_TYPE],
+      })
+      .asScopedToNamespace(spaceId);
   };
 
   private createInvestigationRepository = (
