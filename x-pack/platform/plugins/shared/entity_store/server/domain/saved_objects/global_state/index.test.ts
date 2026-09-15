@@ -312,8 +312,8 @@ describe('EntityStoreGlobalStateClient', () => {
     });
   });
 
-  describe('namespace scoping', () => {
-    it('reads and creates against the saved object id for the client namespace', async () => {
+  describe('saved object id derivation', () => {
+    it('uses the namespace to derive the saved object id for get and create calls', async () => {
       const space = 'team-a';
       const spaceSoId = `${EntityStoreGlobalStateTypeName}-${space}`;
       soClient.get.mockRejectedValue(

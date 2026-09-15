@@ -71,6 +71,12 @@ const getWithLatestDefaults = (state: EntityStoreGlobalStateOverrides): EntitySt
   });
 
 export class EntityStoreGlobalStateClient {
+  /**
+   * @param soClient Must be a namespace-scoped client (e.g. from `getScopedClient`
+   * or `getUnsafeInternalClient().asScopedToNamespace(namespace)`). SO operations
+   * do not pass an explicit `namespace` option — correctness relies on the client being pre-scoped
+   * to the target space. Do not pass an internal/unscoped repository here.
+   */
   constructor(
     private readonly soClient: SavedObjectsClientContract,
     private readonly namespace: string,
