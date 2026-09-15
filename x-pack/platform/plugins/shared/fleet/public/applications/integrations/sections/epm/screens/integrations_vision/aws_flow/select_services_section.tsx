@@ -52,7 +52,8 @@ const ServiceCard = ({
         align-items: center;
         gap: ${euiTheme.size.s};
         padding: ${euiTheme.size.s} ${euiTheme.size.s}; /* 8px vertical — matches Step 2 card row height (09-15) */
-        border: 1px solid ${isSelected ? euiTheme.colors.borderBasePrimary : '#D6DDEA'};
+        /* 09-15 late: subdued resting border (her call) — was the #D6DDEA midpoint */
+        border: 1px solid ${isSelected ? euiTheme.colors.borderBasePrimary : euiTheme.colors.borderBaseSubdued};
         border-radius: ${euiTheme.border.radius.small};
         background: ${isSelected ? euiTheme.colors.backgroundBasePrimary : euiTheme.colors.backgroundBasePlain};
         cursor: pointer;
