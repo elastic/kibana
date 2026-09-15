@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getConnectorAuthType } from '@kbn/connector-specs';
 import type { ActionTypeRegistry } from '../../../action_type_registry';
 import type { InMemoryConnector } from '../../../types';
 import type { Connector } from '../types';
@@ -20,6 +21,7 @@ export function connectorFromInMemoryConnector({
   inMemoryConnector: InMemoryConnector;
   actionTypeRegistry: ActionTypeRegistry;
 }): Connector {
+  const authType = getConnectorAuthType(inMemoryConnector);
   const connector: Connector = {
     id,
     actionTypeId: inMemoryConnector.actionTypeId,
@@ -29,6 +31,7 @@ export function connectorFromInMemoryConnector({
     isDeprecated: isConnectorDeprecated(inMemoryConnector),
     isConnectorTypeDeprecated: actionTypeRegistry.isDeprecated(inMemoryConnector.actionTypeId),
     authMode: getAuthMode(inMemoryConnector.authMode),
+    ...(authType !== undefined ? { authType } : {}),
   };
 
   if (inMemoryConnector.exposeConfig) {

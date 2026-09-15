@@ -10,8 +10,11 @@ import {
   authTypeUsesRelay,
   getAuthModeForAuthTypeId,
   getConnectorActionErrorMeta,
+  getConnectorAuthType,
   getFinitePositiveNumber,
   getHeaderValue,
+  isActionSupportedForAuthType,
+  TEST_CONNECTOR_SUB_ACTION,
   clientTypes as defaultClientTypes,
 } from '@kbn/connector-specs';
 import type {
@@ -121,6 +124,35 @@ export const generateExecutorFunction = ({
       fetchOptions?: FetchOptions;
     };
 
+    if (!actions[subAction]) {
+      const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;
+      logger.error(errorMessage);
+      throw new Error(errorMessage);
+    }
+    const action = actions[subAction];
+    const authType = getConnectorAuthType({ secrets, config });
+    if (!isActionSupportedForAuthType(action, authType)) {
+      const customMessage =
+        authType === undefined ? undefined : action.unsupportedAuthTypeMessages?.[authType];
+      const availableSubActions = Object.entries(actions)
+        .filter(
+          ([name, candidate]) =>
+            name !== TEST_CONNECTOR_SUB_ACTION && isActionSupportedForAuthType(candidate, authType)
+        )
+        .map(([name]) => `"${name}"`);
+      const availableSubActionsMessage =
+        availableSubActions.length > 0
+          ? ` Available sub-actions: ${availableSubActions.join(', ')}.`
+          : '';
+      const errorMessage =
+        customMessage ??
+        `Sub-action "${subAction}" is not supported by authentication type "${
+          authType ?? 'unknown'
+        }".${availableSubActionsMessage}`;
+      logger.error(`error on ${connectorId} event: ${errorMessage}`);
+      return { status: 'error', message: errorMessage, actionId: connectorId };
+    }
+
     const axiosInstance = await getAxiosInstanceWithAuth({
       connectorId,
       connectorTokenClient,
@@ -133,12 +165,6 @@ export const generateExecutorFunction = ({
         ? { maxContentLength: fetchOptions.max_content_length }
         : {}),
     });
-
-    if (!actions[subAction]) {
-      const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;
-      logger.error(errorMessage);
-      throw new Error(errorMessage);
-    }
 
     const pool = getClientLeasePool();
     // Shared by getClient (authMode) and the Relay gate. Specs that route through the Relay
@@ -221,7 +247,7 @@ export const generateExecutorFunction = ({
 
     try {
       let data = {};
-      const res = await actions[subAction].handler(actionContext, subActionParams);
+      const res = await action.handler(actionContext, subActionParams);
 
       if (res != null) {
         data = res as Record<string, unknown>;
@@ -234,7 +260,7 @@ export const generateExecutorFunction = ({
       const errorMessage = error instanceof Error ? error.message : String(error);
       const contentLengthBytes = getResponseSizeHeaderBytes({
         error,
-        headerName: actions[subAction].responseSizeHeader ?? DEFAULT_RESPONSE_SIZE_HEADER,
+        headerName: action.responseSizeHeader ?? DEFAULT_RESPONSE_SIZE_HEADER,
       });
       const errorMeta = getErrorMeta({ error, contentLengthBytes });
       logger.error(`error on ${connectorId} event: ${errorMessage}`);

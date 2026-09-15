@@ -1375,6 +1375,9 @@ describe('getAllUnsecured()', () => {
           config: {
             foo: 'bar',
           },
+          secrets: {
+            authType: 'webhook',
+          },
           exposeConfig: true,
         }),
         /**
@@ -1412,6 +1415,7 @@ describe('getAllUnsecured()', () => {
         referencedByCount: 2,
         config: { foo: 'bar' },
         authMode: 'shared',
+        authType: 'webhook',
       },
     ]);
 

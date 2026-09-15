@@ -43,6 +43,7 @@ describe('workflow validation rules registry', () => {
         "unboundedParallelFanOut",
         "unknownInputKey",
         "unknownVariableType",
+        "unsupportedConnectorAction",
         "variablePathParseError",
         "yamlSyntaxError",
       ]

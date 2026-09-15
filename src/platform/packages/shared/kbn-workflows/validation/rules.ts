@@ -102,6 +102,11 @@ export interface WorkflowValidationRules {
     defaultSeverity: 'error';
     values: { displayName: string; id: string };
   };
+  unsupportedConnectorAction: {
+    owner: 'connector-capability-validation';
+    defaultSeverity: 'warning';
+    values: { action: string; connectorName: string };
+  };
   // -- step properties ----------------------------------------------------------
   invalidStepProperty: {
     owner: 'step-property-validation';
@@ -256,6 +261,10 @@ export const WORKFLOW_VALIDATION_RULES: {
   liquidSyntaxError: { owner: 'liquid-template-validation', defaultSeverity: 'error' },
 
   connectorNotFound: { owner: 'connector-id-validation', defaultSeverity: 'error' },
+  unsupportedConnectorAction: {
+    owner: 'connector-capability-validation',
+    defaultSeverity: 'warning',
+  },
 
   invalidStepProperty: { owner: 'step-property-validation', defaultSeverity: 'error' },
 

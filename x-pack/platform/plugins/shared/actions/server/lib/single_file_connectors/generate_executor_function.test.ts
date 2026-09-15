@@ -7,6 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
+import { z as z4 } from '@kbn/zod/v4';
 import { generateExecutorFunction } from './generate_executor_function';
 import { setConnectorActionErrorMeta, TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
 import type {
@@ -83,14 +84,17 @@ describe('generateExecutorFunction', () => {
     },
   });
 
-  const makeExecutor = (handler: jest.Mock = mockHandler) =>
+  const makeExecutorForActions = (actions: ConnectorSpec['actions']) =>
     generateExecutorFunction({
-      actions: makeActions(handler),
+      actions,
       getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
       getCredential: mockGetCredential,
       getClientLeasePool: () => fakeLeasePool,
       networkSettings: mockNetwork,
     });
+
+  const makeExecutor = (handler: jest.Mock = mockHandler) =>
+    makeExecutorForActions(makeActions(handler));
 
   describe('successful execution', () => {
     it('returns status ok with handler result as data', async () => {
@@ -1037,6 +1041,96 @@ describe('generateExecutorFunction', () => {
         executor(makeExecOptions({ subAction: 'notRegistered', subActionParams: {} }))
       ).rejects.toThrow();
 
+      expect(mockHandler).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('authentication constraints', () => {
+    const emptyInputSchema = z4.object({});
+    const makeConstrainedActions = (
+      unsupportedAuthTypeMessages?: Readonly<Record<string, string>>
+    ): ConnectorSpec['actions'] => ({
+      constrainedAction: {
+        supportedAuthTypes: ['oauth'],
+        ...(unsupportedAuthTypeMessages ? { unsupportedAuthTypeMessages } : {}),
+        input: emptyInputSchema,
+        handler: mockHandler,
+        scope: 'read',
+      },
+      availableAction: {
+        supportedAuthTypes: ['bearer'],
+        input: emptyInputSchema,
+        handler: mockHandler,
+        scope: 'read',
+      },
+      [TEST_CONNECTOR_SUB_ACTION]: {
+        input: emptyInputSchema,
+        handler: mockHandler,
+        scope: 'read',
+      },
+    });
+
+    it('executes when the configured auth type is supported', async () => {
+      const executor = makeExecutorForActions(makeConstrainedActions());
+
+      const result = await executor({
+        ...makeExecOptions({ subAction: 'constrainedAction', subActionParams: {} }),
+        secrets: { authType: 'oauth' },
+      });
+
+      expect(result.status).toBe('ok');
+      expect(mockHandler).toHaveBeenCalled();
+    });
+
+    it('rejects unsupported auth types before calling the handler', async () => {
+      const executor = makeExecutorForActions(makeConstrainedActions());
+
+      const result = await executor({
+        ...makeExecOptions({ subAction: 'constrainedAction', subActionParams: {} }),
+        secrets: { authType: 'bearer' },
+      });
+
+      expect(result).toEqual({
+        status: 'error',
+        message:
+          'Sub-action "constrainedAction" is not supported by authentication type "bearer". Available sub-actions: "availableAction".',
+        actionId: connectorId,
+      });
+      expect(mockHandler).not.toHaveBeenCalled();
+      expect(mockGetAxiosInstanceWithAuth).not.toHaveBeenCalled();
+    });
+
+    it('uses the custom message for an unsupported auth type when provided', async () => {
+      const executor = makeExecutorForActions(
+        makeConstrainedActions({
+          bearer: 'Use OAuth to run this action.',
+        })
+      );
+
+      const result = await executor({
+        ...makeExecOptions({ subAction: 'constrainedAction', subActionParams: {} }),
+        secrets: { authType: 'bearer' },
+      });
+
+      expect(result).toEqual({
+        status: 'error',
+        message: 'Use OAuth to run this action.',
+        actionId: connectorId,
+      });
+      expect(mockHandler).not.toHaveBeenCalled();
+      expect(mockGetAxiosInstanceWithAuth).not.toHaveBeenCalled();
+    });
+
+    it('fails closed when a constrained action has no auth type', async () => {
+      const executor = makeExecutorForActions(makeConstrainedActions());
+
+      const result = await executor({
+        ...makeExecOptions({ subAction: 'constrainedAction', subActionParams: {} }),
+        config: {},
+        secrets: {},
+      });
+
+      expect(result.status).toBe('error');
       expect(mockHandler).not.toHaveBeenCalled();
     });
   });

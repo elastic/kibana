@@ -9,6 +9,7 @@
 
 export {
   buildStabilityBadgeHtml,
+  getHollowBadgeHtml,
   getStabilityBadgeHtml,
   STABILITY_BADGE_HEIGHT_PX,
 } from './stability/get_stability_badge_html';

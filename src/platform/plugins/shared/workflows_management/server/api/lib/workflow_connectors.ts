@@ -10,7 +10,13 @@
 import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
 import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { FindActionResult } from '@kbn/actions-plugin/server/types';
-import { connectorSpecHasEvents, connectorsSpecs } from '@kbn/connector-specs';
+import {
+  connectorSpecHasEvents,
+  connectorsSpecs,
+  getConnectorAuthType,
+  getConnectorSpec,
+  getSupportedActionNames,
+} from '@kbn/connector-specs';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
@@ -39,7 +45,7 @@ const toConnectorTypeInfo = (actionType: ListedActionType): ConnectorTypeInfo =>
     enabledInConfig: actionType.enabledInConfig,
     enabledInLicense: actionType.enabledInLicense,
     minimumLicenseRequired: actionType.minimumLicenseRequired,
-    ...(subActions && { subActions }),
+    subActions: subActions ?? [],
   };
 };
 
@@ -50,6 +56,15 @@ const getConnectorInstanceConfig = (
     return { config: { taskType: connector.config?.taskType } };
   }
   return undefined;
+};
+
+const getSupportedSubActions = (connector: FindActionResult): string[] | undefined => {
+  const connectorSpec = getConnectorSpec(connector.actionTypeId);
+  if (!connectorSpec) {
+    return undefined;
+  }
+  const authType = connector.authType ?? getConnectorAuthType({ config: connector.config });
+  return getSupportedActionNames(connectorSpec, authType);
 };
 
 /**
@@ -98,6 +113,7 @@ export const getAvailableConnectors = async (params: {
         name: connector.name,
         isPreconfigured: connector.isPreconfigured,
         isDeprecated: connector.isDeprecated,
+        supportedSubActions: getSupportedSubActions(connector),
         ...getConnectorInstanceConfig(connector),
       });
     }
