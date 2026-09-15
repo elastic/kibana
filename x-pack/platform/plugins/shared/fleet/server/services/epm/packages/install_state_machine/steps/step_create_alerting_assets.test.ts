@@ -141,6 +141,7 @@ describe('createAlertingRuleFromTemplate', () => {
       }),
       get: jest.fn().mockResolvedValue({ id: 'existing-rule-id' }),
       create: jest.fn().mockResolvedValue({ id: 'new-rule-id' }),
+      update: jest.fn().mockResolvedValue({ id: 'existing-rule-id' }),
     } as unknown as RulesClientApi;
 
     const result = await createAlertingRuleFromTemplate(
@@ -160,6 +161,95 @@ describe('createAlertingRuleFromTemplate', () => {
       deferred: false,
       type: 'alert',
     });
+  });
+
+  it('should reconcile a still-disabled existing rule back to the shipped template params', async () => {
+    const rulesClient = {
+      getTemplate: jest.fn().mockResolvedValue({
+        id: 'template-id',
+        ruleTypeId: '.index-threshold',
+        name: 'Template Rule',
+        consumer: 'alerts',
+        params: { threshold: [0], index: ['.workflows-executions'] },
+        schedule: { interval: '1h' },
+        actions: [],
+        tags: ['tmpl'],
+      }),
+      // Rule exists, was never enabled, and has drifted from the template (threshold 999).
+      get: jest.fn().mockResolvedValue({
+        id: 'existing-rule-id',
+        enabled: false,
+        name: 'Drifted Rule',
+        tags: ['drifted'],
+        schedule: { interval: '5m' },
+        params: { threshold: [999], index: ['.workflows-executions'] },
+      }),
+      create: jest.fn().mockResolvedValue({ id: 'new-rule-id' }),
+      update: jest.fn().mockResolvedValue({ id: 'existing-rule-id' }),
+    } as unknown as RulesClientApi;
+
+    const result = await createAlertingRuleFromTemplate(
+      { rulesClient, logger },
+      {
+        alertTemplateArchiveAsset: { id: 'template-id' } as ArchiveAsset,
+        pkgName: 'test-package',
+        spaceId: 'default',
+      }
+    );
+
+    expect(rulesClient.create).not.toHaveBeenCalled();
+    expect(rulesClient.update).toHaveBeenCalledWith({
+      id: 'fleet-default-test-package-template-id',
+      data: {
+        name: 'Template Rule',
+        tags: ['tmpl'],
+        schedule: { interval: '1h' },
+        params: { threshold: [0], index: ['.workflows-executions'] },
+        actions: [],
+      },
+    });
+    expect(result).toEqual({
+      id: 'fleet-default-test-package-template-id',
+      deferred: false,
+      type: 'alert',
+    });
+  });
+
+  it('should NOT reconcile an enabled existing rule (may be deliberately tuned by an admin)', async () => {
+    const rulesClient = {
+      getTemplate: jest.fn().mockResolvedValue({
+        id: 'template-id',
+        ruleTypeId: '.index-threshold',
+        name: 'Template Rule',
+        consumer: 'alerts',
+        params: { threshold: [0] },
+        schedule: { interval: '1h' },
+        actions: [],
+        tags: [],
+      }),
+      get: jest.fn().mockResolvedValue({
+        id: 'existing-rule-id',
+        enabled: true,
+        name: 'Admin Tuned',
+        tags: ['admin'],
+        schedule: { interval: '5m' },
+        params: { threshold: [999] },
+      }),
+      create: jest.fn().mockResolvedValue({ id: 'new-rule-id' }),
+      update: jest.fn().mockResolvedValue({ id: 'existing-rule-id' }),
+    } as unknown as RulesClientApi;
+
+    await createAlertingRuleFromTemplate(
+      { rulesClient, logger },
+      {
+        alertTemplateArchiveAsset: { id: 'template-id' } as ArchiveAsset,
+        pkgName: 'test-package',
+        spaceId: 'default',
+      }
+    );
+
+    expect(rulesClient.create).not.toHaveBeenCalled();
+    expect(rulesClient.update).not.toHaveBeenCalled();
   });
 
   it('should look up template by hashed space-scoped ID when installAsAdditionalSpace is true', async () => {
