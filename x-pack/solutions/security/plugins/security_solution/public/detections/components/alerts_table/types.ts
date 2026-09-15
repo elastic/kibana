@@ -11,6 +11,7 @@ import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { AlertsTablePropsWithRef } from '@kbn/response-ops-alerts-table/types';
 import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { TableId } from '@kbn/securitysolution-data-table';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { SourcererScopeName } from '../../../sourcerer/store/model';
 import type { AlertsUserProfilesData } from '../../configurations/security_solution_detections/fetch_page_context';
 import type { Status } from '../../../../common/api/detection_engine';
@@ -99,4 +100,10 @@ export type GroupTakeActionItems = (props: {
    * Selected group to know which group is extended/visible. This is coming from the getLevel function in the detections alert grouping code.
    */
   selectedGroup: string;
+  /**
+   * Runtime mappings from the active data view, forwarded to the status-update
+   * request so the close query can reference fields not natively mapped on the
+   * alerts index (e.g. scripted data view runtime fields).
+   */
+  runtimeMappings?: MappingRuntimeFields;
 }) => JSX.Element[];
