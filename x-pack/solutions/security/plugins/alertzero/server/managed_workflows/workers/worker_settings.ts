@@ -154,6 +154,15 @@ export const createWorkerSettingsRegistration = (
     if (rejected) {
       return { rejected };
     }
+    // The route schema constrains autonomy to the global enum, but each Worker's allowed set is
+    // a subset of it (schema-derived). Validate the patch against the Worker's own allowed
+    // levels so a narrowed schema rejects at the service layer too, not only in the UI.
+    if (
+      patch.autonomy !== undefined &&
+      !getAllowedAutonomyLevels(workerId).includes(patch.autonomy)
+    ) {
+      return { rejected: 'an autonomy level' };
+    }
     // extras replaces the whole stored object (worker-settings-page-decisions-3,
     // item 12): a partial extras patch is not merged field-by-field.
     const nextExtras =

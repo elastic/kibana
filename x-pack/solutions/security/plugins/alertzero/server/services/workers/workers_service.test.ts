@@ -392,6 +392,31 @@ describe('WorkersService', () => {
     ).resolves.toEqual({ outcome: 'conflict' });
   });
 
+  it('rejects a PATCH whose autonomy level the Worker does not allow', async () => {
+    const harness = createPersistentHarness();
+    const service = harness.createService();
+    const enabled = await service.update(RULE_TUNING, { enabled: true }, SPACE, request);
+    if (enabled.outcome !== 'updated') throw new Error('Expected enable to succeed');
+
+    // The route schema bounds autonomy to the global enum; the service must ALSO enforce the
+    // per-Worker allowed set (schema-derived) so a narrowed schema cannot be bypassed by a
+    // direct PATCH. 'bogus' stands in for any level outside the Worker's allowed set.
+    const result = await service.update(
+      RULE_TUNING,
+      {
+        settings: { autonomy: 'bogus' as never },
+        settingsRevision: enabled.response.worker.settingsRevision,
+      },
+      SPACE,
+      request
+    );
+
+    expect(result).toEqual({
+      outcome: 'rejected',
+      what: "autonomy level 'bogus' (this Worker allows manual, assisted, supervised)",
+    });
+  });
+
   it('installs defaults when disabling a Worker that has no document yet', async () => {
     const harness = createPersistentHarness();
     const result = await harness.createService().update(TRIAGE, { enabled: false }, SPACE, request);
