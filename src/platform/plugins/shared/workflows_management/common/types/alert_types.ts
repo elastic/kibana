@@ -8,16 +8,17 @@
  */
 
 import type { AlertHit } from '@kbn/alerting-plugin/server/types';
-
-export interface AlertSelection {
-  _id: string;
-  _index: string;
-}
+import type { DocumentSelection, EventQuerySelection } from './document_types';
 
 export interface AlertTriggerInput {
   event: {
-    alertIds: AlertSelection[];
     triggerType: 'alert';
+    /** Explicit id selection, expanded server-side via mget. */
+    alertIds?: DocumentSelection[];
+    /** Query-based selection expanded server-side. Mutually exclusive with `alertIds`. */
+    querySelection?: EventQuerySelection;
+    /** Optional rule type ids, carried for context/telemetry. */
+    ruleTypeIds?: string[];
   };
 }
 

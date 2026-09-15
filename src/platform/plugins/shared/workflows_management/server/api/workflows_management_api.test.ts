@@ -29,10 +29,10 @@ import {
 } from './external_resume/external_resume_service';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
-import { preprocessAlertInputs } from './routes/executions/utils/preprocess_alert_inputs';
+import { preprocessTriggerInputs } from './routes/executions/utils/preprocess_trigger_inputs';
 import {
-  type AlertPreprocessingContext,
   type SmlIndexAttachmentFn,
+  type TriggerInputPreprocessingContext,
   WorkflowsManagementApi,
 } from './workflows_management_api';
 import type { WorkflowsService } from './workflows_management_service';
@@ -51,7 +51,7 @@ const mockResumeExternallyWithInput =
     typeof resumeWorkflowExecutionExternallyWithInput
   >;
 
-jest.mock('./routes/executions/utils/preprocess_alert_inputs');
+jest.mock('./routes/executions/utils/preprocess_trigger_inputs');
 
 describe('WorkflowsManagementApi', () => {
   let api: WorkflowsManagementApi;
@@ -59,7 +59,7 @@ describe('WorkflowsManagementApi', () => {
   let mockRequest: KibanaRequest;
   let mockWorkflowsExecutionEngine: jest.Mocked<WorkflowsExecutionEnginePluginStart>;
   const logger = loggingSystemMock.createLogger();
-  const mockPreprocessAlertInputs = jest.mocked(preprocessAlertInputs);
+  const mockPreprocessAlertInputs = jest.mocked(preprocessTriggerInputs);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -710,7 +710,7 @@ steps:
     });
   });
 
-  describe('runWorkflowWithAlertPreprocessing', () => {
+  describe('runWorkflowWithPreprocessing', () => {
     it('preprocesses alert inputs with the request context before starting the workflow', async () => {
       const workflow = {
         id: 'workflow-123',
@@ -735,12 +735,12 @@ steps:
         event: { triggerType: 'alert', alerts: [{ id: 'alert-1' }] },
         investigation: 'case-1',
       };
-      const context = {} as AlertPreprocessingContext;
+      const context = {} as TriggerInputPreprocessingContext;
       const metadata = { caseIds: ['case-1'] };
       mockPreprocessAlertInputs.mockResolvedValue(processedInputs);
 
       await expect(
-        api.runWorkflowWithAlertPreprocessing({
+        api.runWorkflowWithPreprocessing({
           workflow,
           spaceId: 'default',
           inputs,
@@ -786,15 +786,15 @@ steps:
           alertIds: [{ _id: 'alert-1', _index: '.alerts' }],
         },
       };
-      // preprocessAlertInputs replaces the whole event — caseIds would be lost without overrides.
+      // preprocessTriggerInputs replaces the whole event — caseIds would be lost without overrides.
       const processedInputs = {
         event: { triggerType: 'alert', alerts: [{ id: 'alert-1' }] },
       };
-      const context = {} as AlertPreprocessingContext;
+      const context = {} as TriggerInputPreprocessingContext;
       const eventOverrides = { caseIds: ['case-1'] };
       mockPreprocessAlertInputs.mockResolvedValue(processedInputs);
 
-      const result = await api.runWorkflowWithAlertPreprocessing({
+      const result = await api.runWorkflowWithPreprocessing({
         workflow,
         spaceId: 'default',
         inputs,

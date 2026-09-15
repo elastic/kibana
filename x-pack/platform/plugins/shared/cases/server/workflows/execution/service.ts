@@ -186,10 +186,10 @@ export class CasesWorkflowRunService {
     // document to appear even when waitForCompletion=false, which adds measurable latency to
     // every interactive "run workflow from a case" click.
     //
-    // eventOverrides injects the server-owned caseIds into `event` *after* alert preprocessing
-    // runs. preprocessAlertInputs replaces the whole `event` object with the alert-event shape,
-    // so pre-merging caseIds into event (before the call) would silently drop them on alert runs.
-    const { workflowExecutionId } = await this.management.runWorkflowWithAlertPreprocessing({
+    // eventOverrides injects the server-owned caseIds into `event` *after* trigger-input
+    // preprocessing runs. For alerts, preprocessTriggerInputs replaces the whole `event` object,
+    // so pre-merging caseIds into event (before the call) would silently drop them.
+    const { workflowExecutionId } = await this.management.runWorkflowWithPreprocessing({
       workflow: toWorkflowExecutionEngineModel(workflow),
       spaceId,
       inputs: sanitizedInputs,
