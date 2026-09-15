@@ -54,16 +54,19 @@ export const cortexOptimizeStepDefinition = ({
     }),
     handler: async (context) => {
       await withTimeout(
-        runCortexOptimize({
-          request: context.contextManager.getFakeRequest(),
-          agentId: context.input.agent_id,
-          userMessage: context.input.prompt,
-          assistantMessage: context.input.response,
-          esClient: context.contextManager.getScopedEsClient(),
-          getInference,
-          getSearchInferenceEndpoints,
-          logger,
-        }),
+        (signal) =>
+          runCortexOptimize({
+            request: context.contextManager.getFakeRequest(),
+            agentId: context.input.agent_id,
+            userMessage: context.input.prompt,
+            assistantMessage: context.input.response,
+            esClient: context.contextManager.getScopedEsClient(),
+            spaceId: context.contextManager.getContext().workflow.spaceId,
+            signal,
+            logger,
+            getInference,
+            getSearchInferenceEndpoints,
+          }),
         OPTIMIZE_TIMEOUT_MS,
         `Cortex optimize timed out after ${OPTIMIZE_TIMEOUT_MS}ms`
       );

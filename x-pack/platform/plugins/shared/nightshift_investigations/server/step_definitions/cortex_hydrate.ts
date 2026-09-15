@@ -58,12 +58,15 @@ export const cortexHydrateStepDefinition = ({
       const scopedConversationId = scopeConversationId(spaceId, conversationId);
 
       await withTimeout(
-        hydrateCortexWorkspace({
-          apiClient: manager.apiClient,
-          conversationId: scopedConversationId,
-          esClient: context.contextManager.getScopedEsClient(),
-          logger,
-        }),
+        (signal) =>
+          hydrateCortexWorkspace({
+            apiClient: manager.apiClient,
+            conversationId: scopedConversationId,
+            esClient: context.contextManager.getScopedEsClient(),
+            spaceId,
+            signal,
+            logger,
+          }),
         HYDRATE_TIMEOUT_MS,
         `Cortex hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`
       );

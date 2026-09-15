@@ -276,6 +276,7 @@ export class NightshiftInvestigationsPlugin
             return createCortexStore({
               esClient: this.elasticsearch.client.asScoped(request).asCurrentUser,
               logger: this.logger.get('cortex'),
+              spaceId: this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
             });
           },
         },

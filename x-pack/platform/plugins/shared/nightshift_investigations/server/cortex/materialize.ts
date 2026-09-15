@@ -98,22 +98,27 @@ export const materializeCortex = async ({
     (page): page is CortexPage => page !== undefined
   );
 
-  const files = [
-    { path: `${CORTEX_WORKSPACE_ROOT}/README.md`, content: Buffer.from(README_CONTENT, 'utf8') },
-    { path: `${CORTEX_WORKSPACE_ROOT}/INDEX.md`, content: Buffer.from(renderIndex(pages), 'utf8') },
-    ...fullPages.map((page) => ({
-      path: pagePath(page.entity_type, page.slug),
-      content: Buffer.from(renderPage(page), 'utf8'),
-    })),
-  ];
-
   await apiClient.mkdirs(conversationId, [
     CORTEX_WORKSPACE_ROOT,
     ...CORTEX_ENTITY_TYPES.map(
       (entityType) => `${CORTEX_WORKSPACE_ROOT}/${CORTEX_ENTITY_TYPE_BUCKETS[entityType]}`
     ),
   ]);
-  await apiClient.writeFiles(conversationId, files);
+
+  // The sandbox has no rename, so this cannot be an atomic swap. Writing the pages first means a
+  // failure part-way leaves the index missing rather than listing pages that were never written —
+  // the agent then reads nothing instead of following links into empty files.
+  await apiClient.writeFiles(
+    conversationId,
+    fullPages.map((page) => ({
+      path: pagePath(page.entity_type, page.slug),
+      content: Buffer.from(renderPage(page), 'utf8'),
+    }))
+  );
+  await apiClient.writeFiles(conversationId, [
+    { path: `${CORTEX_WORKSPACE_ROOT}/README.md`, content: Buffer.from(README_CONTENT, 'utf8') },
+    { path: `${CORTEX_WORKSPACE_ROOT}/INDEX.md`, content: Buffer.from(renderIndex(pages), 'utf8') },
+  ]);
 
   logger.info(
     `Materialized ${fullPages.length} Cortex page(s) into sandbox conversation ${conversationId}`

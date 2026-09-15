@@ -21,10 +21,14 @@ import { createCortexPageStore, type CortexPageStore } from './page_store';
 export const createCortexStore = ({
   esClient,
   logger,
+  spaceId,
+  signal,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
-}): CortexPageStore => createCortexPageStore({ esClient, logger });
+  spaceId: string;
+  signal?: AbortSignal;
+}): CortexPageStore => createCortexPageStore({ esClient, logger, spaceId, signal });
 
 export const registerCortexAiIndex = (
   contextEngine: ContextEnginePluginSetup | undefined,
@@ -50,14 +54,18 @@ export const hydrateCortexWorkspace = async ({
   apiClient,
   conversationId,
   esClient,
+  spaceId,
+  signal,
   logger,
 }: {
   apiClient: SandboxApiClient;
   conversationId: string;
   esClient: ElasticsearchClient;
+  spaceId: string;
+  signal?: AbortSignal;
   logger: Logger;
 }): Promise<void> => {
-  const store = createCortexStore({ esClient, logger });
+  const store = createCortexStore({ esClient, logger, spaceId, signal });
   await materializeCortex({ apiClient, conversationId, store, logger });
 };
 
@@ -67,6 +75,8 @@ export const runCortexOptimize = async ({
   userMessage,
   assistantMessage,
   esClient,
+  spaceId,
+  signal,
   getInference,
   getSearchInferenceEndpoints,
   logger,
@@ -76,6 +86,8 @@ export const runCortexOptimize = async ({
   userMessage: string;
   assistantMessage: string;
   esClient: ElasticsearchClient;
+  spaceId: string;
+  signal?: AbortSignal;
   getInference: () => InferenceServerStart | undefined;
   getSearchInferenceEndpoints: () => SearchInferenceEndpointsPluginStart | undefined;
   logger: Logger;
@@ -106,7 +118,7 @@ export const runCortexOptimize = async ({
     return;
   }
 
-  const store = createCortexStore({ esClient, logger });
+  const store = createCortexStore({ esClient, logger, spaceId, signal });
   const inferenceClient = inference.getClient({ request });
   await optimizeCortex({
     store,

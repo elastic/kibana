@@ -41,6 +41,7 @@ describe('runCortexOptimize', () => {
       userMessage: 'why?',
       assistantMessage: 'redis',
       esClient,
+      spaceId: 'default',
       getInference,
       getSearchInferenceEndpoints,
       logger: loggerMock.create(),

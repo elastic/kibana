@@ -26,7 +26,7 @@ describe('cortexOptimizeStepDefinition', () => {
       input,
       rawInput: input,
       contextManager: {
-        getContext: jest.fn(),
+        getContext: jest.fn().mockReturnValue({ workflow: { spaceId: 'default' } }),
         getFakeRequest,
         getScopedEsClient,
         renderInputTemplate: jest.fn((val) => val),
@@ -59,9 +59,11 @@ describe('cortexOptimizeStepDefinition', () => {
       userMessage: 'why is checkout slow?',
       assistantMessage: 'Redis evictions.',
       esClient,
+      spaceId: 'default',
+      signal: expect.any(AbortSignal),
+      logger: expect.anything(),
       getInference,
       getSearchInferenceEndpoints,
-      logger: expect.anything(),
     });
     expect(result).toEqual({ output: { status: 'ok' } });
   });

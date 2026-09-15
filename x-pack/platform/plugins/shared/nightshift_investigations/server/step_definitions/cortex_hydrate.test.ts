@@ -52,6 +52,8 @@ describe('cortexHydrateStepDefinition', () => {
       apiClient,
       conversationId: 'default__conv-1',
       esClient,
+      spaceId: 'default',
+      signal: expect.any(AbortSignal),
       logger: expect.anything(),
     });
     expect(result).toEqual({ output: { conversation_id: 'default__conv-1' } });

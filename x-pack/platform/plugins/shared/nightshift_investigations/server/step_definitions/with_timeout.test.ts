@@ -9,13 +9,44 @@ import { withTimeout } from './with_timeout';
 
 describe('withTimeout', () => {
   it('resolves when the work finishes first', async () => {
-    await expect(withTimeout(Promise.resolve('ok'), 50, 'timed out')).resolves.toBe('ok');
+    await expect(withTimeout(async () => 'ok', 50, 'timed out')).resolves.toBe('ok');
   });
 
   it('rejects with the timeout message when the work is slow', async () => {
-    await expect(withTimeout(new Promise(() => undefined), 20, 'timed out')).rejects.toThrow(
+    await expect(withTimeout(() => new Promise(() => undefined), 20, 'timed out')).rejects.toThrow(
       'timed out'
     );
+  });
+
+  it('aborts the signal it hands the work when the timeout fires', async () => {
+    let observed: AbortSignal | undefined;
+
+    await expect(
+      withTimeout(
+        (signal) => {
+          observed = signal;
+          return new Promise(() => undefined);
+        },
+        20,
+        'timed out'
+      )
+    ).rejects.toThrow('timed out');
+
+    expect(observed?.aborted).toBe(true);
+  });
+
+  it('leaves the signal unaborted when the work finishes in time', async () => {
+    let observed: AbortSignal | undefined;
+
+    await withTimeout(
+      async (signal) => {
+        observed = signal;
+      },
+      50,
+      'timed out'
+    );
+
+    expect(observed?.aborted).toBe(false);
   });
 
   it('does not emit an unhandled rejection when the work fails after the timeout', async () => {
@@ -30,7 +61,7 @@ describe('withTimeout', () => {
       rejectWork = reject;
     });
 
-    await expect(withTimeout(work, 20, 'timed out')).rejects.toThrow('timed out');
+    await expect(withTimeout(() => work, 20, 'timed out')).rejects.toThrow('timed out');
     rejectWork(new Error('late gRPC failure'));
     await new Promise((resolve) => setImmediate(resolve));
     await new Promise((resolve) => setImmediate(resolve));
