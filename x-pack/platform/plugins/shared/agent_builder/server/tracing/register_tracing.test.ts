@@ -15,14 +15,6 @@ import { registerTracingExporter } from './register_tracing';
 import { AgentBuilderSpanProcessor } from './agent_builder_span_processor';
 import { DATA_STREAM_NAMESPACE_ATTR } from './agent_builder_context';
 
-jest.mock('@kbn/core/server', () => {
-  const actual = jest.requireActual('@kbn/core/server');
-  return {
-    ...actual,
-    SavedObjectsClient: jest.fn(() => ({})),
-  };
-});
-
 jest.mock('@kbn/inference-tracing', () => ({
   initInferenceTracerProvider: jest.fn(),
   shutdownInferenceTracerProvider: jest.fn().mockResolvedValue(undefined),
@@ -87,8 +79,32 @@ const MockedEvalSpanProcessor = EvalSpanProcessor as jest.MockedClass<typeof Eva
 describe('registerTracingExporter', () => {
   const logger = loggerMock.create();
 
-  function createCore() {
+  function mockSpaceFind(
+    core: ReturnType<typeof coreMock.createStart>,
+    spaceIds: string[] = ['default']
+  ) {
+    const soClient = core.savedObjects.getUnsafeInternalClient();
+    soClient.find.mockResolvedValue({
+      saved_objects: spaceIds.map((id) => ({
+        id,
+        type: 'space',
+        attributes: {},
+        references: [],
+      })),
+      total: spaceIds.length,
+      per_page: 10_000,
+      page: 1,
+    });
+    soClient.asScopedToNamespace.mockImplementation((namespace: string) => {
+      return {
+        getCurrentNamespace: () => (namespace === 'default' ? undefined : namespace),
+      } as ReturnType<typeof soClient.asScopedToNamespace>;
+    });
+  }
+
+  function createCore(spaceIds: string[] = ['default']) {
     const core = coreMock.createStart();
+    mockSpaceFind(core, spaceIds);
     const scopedUiSettings = jest.mocked(core.uiSettings.asScopedToClient(jest.fn() as never));
     scopedUiSettings.get.mockResolvedValue(true);
     return core;
@@ -287,5 +303,37 @@ describe('registerTracingExporter', () => {
 
     const { getSettings } = MockedAgentBuilderProcessor.mock.calls[0][0];
     expect(getSettings().enabled).toBe(true);
+  });
+
+  it('polls uiSettings per space and returns space-specific cached values', async () => {
+    const coreStart = coreMock.createStart();
+    mockSpaceFind(coreStart, ['default', 'team-a']);
+
+    coreStart.uiSettings.asScopedToClient.mockImplementation((soClient) => {
+      const spaceId = soClient.getCurrentNamespace() ?? 'default';
+      return {
+        get: jest.fn(async () => spaceId === 'team-a'),
+      } as ReturnType<typeof coreStart.uiSettings.asScopedToClient>;
+    });
+
+    const tracingConfig: TracingConfig = {
+      exporters: [],
+      scheduledDelay: 100,
+      opik_distributed_tracing: false,
+    };
+
+    await registerTracingExporter({ core: coreStart, tracingConfig, logger });
+
+    expect(coreStart.savedObjects.getUnsafeInternalClient).toHaveBeenCalledWith({
+      includedHiddenTypes: ['space'],
+    });
+    const soClient = coreStart.savedObjects.getUnsafeInternalClient();
+    expect(soClient.asScopedToNamespace).toHaveBeenCalledWith('default');
+    expect(soClient.asScopedToNamespace).toHaveBeenCalledWith('team-a');
+
+    const { getSettings } = MockedAgentBuilderProcessor.mock.calls[0][0];
+    expect(getSettings('default').enabled).toBe(false);
+    expect(getSettings('team-a').enabled).toBe(true);
+    expect(getSettings().enabled).toBe(false);
   });
 });

@@ -30,6 +30,7 @@ import {
   AGENT_BUILDER_OWNER_BAGGAGE_KEY,
   AGENT_BUILDER_OWNER_BAGGAGE_VALUE,
   DATA_STREAM_NAMESPACE_ATTR,
+  SPACE_ID_BAGGAGE_KEY,
 } from './agent_builder_context';
 
 const SHOULD_TRACK_ATTR = '_agent_builder_should_track';
@@ -67,10 +68,11 @@ describe('AgentBuilderSpanProcessor', () => {
     contextManager.disable();
   });
 
-  function agentBuilderParentContext(): ReturnType<typeof context.active> {
+  function agentBuilderParentContext(spaceId?: string): ReturnType<typeof context.active> {
     const baggage = propagation.createBaggage({
       [BAGGAGE_TRACKING_BEACON_KEY]: { value: BAGGAGE_TRACKING_BEACON_VALUE },
       [AGENT_BUILDER_OWNER_BAGGAGE_KEY]: { value: AGENT_BUILDER_OWNER_BAGGAGE_VALUE },
+      ...(spaceId ? { [SPACE_ID_BAGGAGE_KEY]: { value: spaceId } } : {}),
     });
     return propagation.setBaggage(context.active(), baggage);
   }
@@ -211,6 +213,58 @@ describe('AgentBuilderSpanProcessor', () => {
 
     expect(span.setAttribute).not.toHaveBeenCalled();
     expect(mockBatch.onStart).not.toHaveBeenCalled();
+  });
+
+  it('onStart looks up settings for the space in baggage', async () => {
+    const getSettings = jest.fn((spaceId?: string) =>
+      createSettings({ enabled: spaceId === 'team-a' })
+    );
+
+    const processor = new AgentBuilderSpanProcessor({
+      exporter: createExporter(),
+      scheduledDelayMillis: 1,
+      getSettings,
+    });
+
+    const skipped = createMockSpan('inference');
+    await processor.onStart(skipped, agentBuilderParentContext('default'));
+    expect(getSettings).toHaveBeenCalledWith('default');
+    expect(skipped.setAttribute).not.toHaveBeenCalled();
+
+    const tracked = createMockSpan('inference');
+    await processor.onStart(tracked, agentBuilderParentContext('team-a'));
+    expect(getSettings).toHaveBeenCalledWith('team-a');
+    expect(tracked.setAttribute).toHaveBeenCalledWith(SHOULD_TRACK_ATTR, true);
+  });
+
+  it('onEnd looks up settings for the span namespace', () => {
+    const getSettings = jest.fn((spaceId?: string) =>
+      createSettings({ enabled: spaceId === 'team-a' })
+    );
+
+    const processor = new AgentBuilderSpanProcessor({
+      exporter: createExporter(),
+      scheduledDelayMillis: 1,
+      getSettings,
+    });
+
+    processor.onEnd(
+      createMockReadableSpan({
+        [SHOULD_TRACK_ATTR]: true,
+        [DATA_STREAM_NAMESPACE_ATTR]: 'default',
+      })
+    );
+    expect(getSettings).toHaveBeenCalledWith('default');
+    expect(mockBatch.onEnd).not.toHaveBeenCalled();
+
+    processor.onEnd(
+      createMockReadableSpan({
+        [SHOULD_TRACK_ATTR]: true,
+        [DATA_STREAM_NAMESPACE_ATTR]: 'team-a',
+      })
+    );
+    expect(getSettings).toHaveBeenCalledWith('team-a');
+    expect(mockBatch.onEnd).toHaveBeenCalledTimes(1);
   });
 
   it('onStart skips when enabled is false', async () => {

@@ -23,7 +23,11 @@ import {
   AGENT_BUILDER_BUILTIN_TOOLS,
 } from '@kbn/agent-builder-server/allow_lists';
 import { toHashedId } from '@kbn/agent-builder-server/telemetry';
-import { DATA_STREAM_NAMESPACE_ATTR, isAgentBuilderSpan } from './agent_builder_context';
+import {
+  DATA_STREAM_NAMESPACE_ATTR,
+  getSpaceIdFromContext,
+  isAgentBuilderSpan,
+} from './agent_builder_context';
 import { normalizeAgentIdForTelemetry } from '../telemetry/utils';
 
 const BUILTIN_TOOL_IDS: Set<string> = new Set(AGENT_BUILDER_BUILTIN_TOOLS);
@@ -48,7 +52,7 @@ export interface TracingPrivacySettings {
 interface AgentBuilderSpanProcessorOpts {
   exporter: tracing.SpanExporter;
   scheduledDelayMillis: number;
-  getSettings: () => TracingPrivacySettings;
+  getSettings: (spaceId?: string) => TracingPrivacySettings;
 }
 
 /**
@@ -277,7 +281,7 @@ function applyMessageAttributePrivacy(
  */
 export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
   private readonly batchProcessor: tracing.SpanProcessor;
-  private readonly getSettings: () => TracingPrivacySettings;
+  private readonly getSettings: (spaceId?: string) => TracingPrivacySettings;
 
   constructor(opts: AgentBuilderSpanProcessorOpts) {
     this.batchProcessor = new tracing.BatchSpanProcessor(opts.exporter, {
@@ -287,7 +291,7 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
   }
 
   async onStart(span: tracing.Span, parentContext: api.Context): Promise<void> {
-    const settings = this.getSettings();
+    const settings = this.getSettings(getSpaceIdFromContext(parentContext));
     if (!settings.enabled) {
       return;
     }
@@ -302,17 +306,17 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
       return;
     }
 
-    const settings = this.getSettings();
-    if (!settings.enabled) {
-      return;
-    }
-
     const {
       [SHOULD_TRACK_ATTR]: _,
       _should_track: __,
       [DATA_STREAM_NAMESPACE_ATTR]: namespace,
       ...cleanAttributes
     } = span.attributes;
+
+    const settings = this.getSettings(typeof namespace === 'string' ? namespace : undefined);
+    if (!settings.enabled) {
+      return;
+    }
 
     let processedAttributes: Record<string, unknown> = settings.includeRealIds
       ? cleanAttributes

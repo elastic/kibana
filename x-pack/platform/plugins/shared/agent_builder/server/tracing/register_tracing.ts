@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/server';
+import type { CoreStart, IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { tracing } from '@elastic/opentelemetry-node/sdk';
-import { SavedObjectsClient } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { buildOtelResources } from '@kbn/telemetry';
 import {
   ElasticsearchOtlpExporter,
@@ -41,61 +41,96 @@ import { OpikDistributedTracingSpanProcessor } from './opik_distributed_tracing'
 import { DATA_STREAM_NAMESPACE_ATTR, SPACE_ID_BAGGAGE_KEY } from './agent_builder_context';
 
 const SETTING_CACHE_TTL_MS = 30_000;
+const SPACE_FIND_PAGE_SIZE = 10_000;
+
+const SCHEMA_DEFAULT_SETTINGS: TracingPrivacySettings = {
+  enabled: true,
+  includeUserPrompts: false,
+  includeLlmResponses: false,
+  includeToolDetails: false,
+  includeSystemPrompt: false,
+  includeRealNames: false,
+  includeRealIds: false,
+  includeUserData: false,
+};
+
+const fetchSettingsForClient = async (
+  client: IUiSettingsClient
+): Promise<TracingPrivacySettings> => {
+  const [
+    enabled,
+    includeUserPrompts,
+    includeLlmResponses,
+    includeToolDetails,
+    includeSystemPrompt,
+    includeRealNames,
+    includeRealIds,
+    includeUserData,
+  ] = await Promise.all([
+    client.get<boolean>(AGENT_BUILDER_TRACING_ENABLED_SETTING_ID),
+    client.get<boolean>(AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID),
+    client.get<boolean>(AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID),
+    client.get<boolean>(AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID),
+    client.get<boolean>(AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID),
+    client.get<boolean>(AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID),
+    client.get<boolean>(AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID),
+    client.get<boolean>(AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID),
+  ]);
+  return {
+    enabled,
+    includeUserPrompts,
+    includeLlmResponses,
+    includeToolDetails,
+    includeSystemPrompt,
+    includeRealNames,
+    includeRealIds,
+    includeUserData,
+  };
+};
 
 /**
- * Returns a synchronous `getSettings()` function that polls all tracing privacy
- * uiSettings on a fixed interval. The span processor hot-path requires synchronous
- * access, so we refresh in the background every {@link SETTING_CACHE_TTL_MS} ms.
+ * Returns a synchronous `getSettings(spaceId)` function that polls tracing privacy
+ * uiSettings for every space on a fixed interval. The span processor hot-path
+ * requires synchronous access, so we refresh in the background every
+ * {@link SETTING_CACHE_TTL_MS} ms.
  */
 const createCachedTracingSettings = async (
   core: CoreStart,
   logger: Logger
-): Promise<{ getSettings: () => TracingPrivacySettings; stopPolling: () => void }> => {
-  let settings: TracingPrivacySettings = {
-    enabled: false,
-    includeUserPrompts: false,
-    includeLlmResponses: false,
-    includeToolDetails: false,
-    includeSystemPrompt: false,
-    includeRealNames: false,
-    includeRealIds: false,
-    includeUserData: false,
-  };
+): Promise<{
+  getSettings: (spaceId?: string) => TracingPrivacySettings;
+  stopPolling: () => void;
+}> => {
+  let settingsBySpace = new Map<string, TracingPrivacySettings>();
+
+  const internalSoClient = core.savedObjects.getUnsafeInternalClient({
+    includedHiddenTypes: ['space'],
+  });
 
   const refresh = async () => {
     try {
-      const internalRepo = core.savedObjects.createInternalRepository();
-      const internalClient = new SavedObjectsClient(internalRepo);
-      const client = core.uiSettings.asScopedToClient(internalClient);
-      const [
-        enabled,
-        includeUserPrompts,
-        includeLlmResponses,
-        includeToolDetails,
-        includeSystemPrompt,
-        includeRealNames,
-        includeRealIds,
-        includeUserData,
-      ] = await Promise.all([
-        client.get<boolean>(AGENT_BUILDER_TRACING_ENABLED_SETTING_ID),
-        client.get<boolean>(AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID),
-        client.get<boolean>(AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID),
-        client.get<boolean>(AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID),
-        client.get<boolean>(AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID),
-        client.get<boolean>(AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID),
-        client.get<boolean>(AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID),
-        client.get<boolean>(AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID),
-      ]);
-      settings = {
-        enabled,
-        includeUserPrompts,
-        includeLlmResponses,
-        includeToolDetails,
-        includeSystemPrompt,
-        includeRealNames,
-        includeRealIds,
-        includeUserData,
-      };
+      const { saved_objects: spaces } = await internalSoClient.find({
+        type: 'space',
+        page: 1,
+        perPage: SPACE_FIND_PAGE_SIZE,
+      });
+      const spaceIds = [...new Set([DEFAULT_SPACE_ID, ...spaces.map((space) => space.id)])];
+
+      const entries = await Promise.all(
+        spaceIds.map(async (spaceId) => {
+          try {
+            const scopedSoClient = internalSoClient.asScopedToNamespace(spaceId);
+            const client = core.uiSettings.asScopedToClient(scopedSoClient);
+            return [spaceId, await fetchSettingsForClient(client)] as const;
+          } catch (error) {
+            logger.error(
+              `Failed to fetch tracing settings for space [${spaceId}]: ${error.message}`
+            );
+            return [spaceId, settingsBySpace.get(spaceId) ?? SCHEMA_DEFAULT_SETTINGS] as const;
+          }
+        })
+      );
+      settingsBySpace = new Map(entries);
     } catch (error) {
       logger.error(`Failed to fetch tracing settings: ${error.message}`);
     }
@@ -105,7 +140,8 @@ const createCachedTracingSettings = async (
   const intervalId = setInterval(refresh, SETTING_CACHE_TTL_MS);
 
   return {
-    getSettings: () => settings,
+    getSettings: (spaceId?: string) =>
+      settingsBySpace.get(spaceId ?? DEFAULT_SPACE_ID) ?? SCHEMA_DEFAULT_SETTINGS,
     stopPolling: () => clearInterval(intervalId),
   };
 };

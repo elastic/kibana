@@ -51,3 +51,10 @@ export const isAgentBuilderSpan = (span: tracing.Span, parentContext: api.Contex
     baggage?.getEntry(AGENT_BUILDER_OWNER_BAGGAGE_KEY)?.value === AGENT_BUILDER_OWNER_BAGGAGE_VALUE;
   return isFromAgentBuilder && isInferenceSpan(span, parentContext);
 };
+
+/**
+ * Reads the Agent Builder space ID from OTel baggage on the parent context.
+ */
+export const getSpaceIdFromContext = (parentContext: api.Context): string | undefined => {
+  return propagation.getBaggage(parentContext)?.getEntry(SPACE_ID_BAGGAGE_KEY)?.value;
+};
