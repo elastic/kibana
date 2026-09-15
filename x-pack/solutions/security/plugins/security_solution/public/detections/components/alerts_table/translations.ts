@@ -366,3 +366,24 @@ export const SELECT_WORKFLOW_PANEL_TITLE = i18n.translate(
     defaultMessage: 'Select workflow',
   }
 );
+
+export const RUN_WORKFLOW_SELECT_ALL_CAP_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.workflow.selectAllCap.title',
+  {
+    defaultMessage: 'Large selection',
+  }
+);
+
+export const RUN_WORKFLOW_SELECT_ALL_CAP_ALERTS = (maxDocs: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.alerts.workflow.selectAllCap.alerts', {
+    defaultMessage:
+      'You selected all alerts. The workflow will run on the most recent {maxDocs} matching alerts.',
+    values: { maxDocs },
+  });
+
+export const RUN_WORKFLOW_SELECT_ALL_CAP_DOCUMENTS = (maxDocs: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.alerts.workflow.selectAllCap.documents', {
+    defaultMessage:
+      'You selected all events. The workflow will run on the most recent {maxDocs} matching events.',
+    values: { maxDocs },
+  });
