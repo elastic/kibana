@@ -19,6 +19,7 @@ import {
   ENABLE_SUCCESS_TOAST_BODY,
   ENABLE_SUCCESS_TOAST_TITLE,
 } from '../pages/onboarding/translations';
+import { fireConfetti } from '../components/confetti';
 
 /**
  * Derived onboarding state. There is no stored step — the state is recomputed from the
@@ -119,6 +120,8 @@ export const useEnableOnboarding = () => {
         title: ENABLE_SUCCESS_TOAST_TITLE,
         text: ENABLE_SUCCESS_TOAST_BODY,
       });
+      // Celebration burst — imperative overlay, survives the gate's route transition.
+      fireConfetti();
       void queryClient.invalidateQueries({ queryKey: queryKeys.watches.all });
       void queryClient.invalidateQueries({ queryKey: queryKeys.proposals.all });
     },
