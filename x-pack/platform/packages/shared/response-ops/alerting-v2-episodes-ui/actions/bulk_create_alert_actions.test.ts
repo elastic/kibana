@@ -12,7 +12,7 @@ import {
   bulkAssignEpisodeActions,
   bulkDeactivateEpisodeActions,
   bulkSnoozeSeriesActions,
-  bulkTagSeriesActions,
+  bulkTagEpisodeActions,
   bulkUnackEpisodeActions,
   bulkUnsnoozeSeriesActions,
 } from './bulk_create_alert_actions';
@@ -25,16 +25,6 @@ describe('series bulk actions', () => {
   const mockHttp = httpServiceMock.createStartContract();
 
   beforeEach(() => jest.clearAllMocks());
-
-  it('bulkTagSeriesActions POSTs the items envelope to _bulk_tag and returns the bulk response', async () => {
-    mockHttp.post.mockResolvedValue({ affected_count: 2, errors: [] });
-    const items = [{ group_hash: 'g1', tags: ['t1'] }];
-    const result = await bulkTagSeriesActions(mockHttp, items);
-    expect(mockHttp.post).toHaveBeenCalledWith(`${ALERTING_V2_SERIES_API_PATH}/_bulk_tag`, {
-      body: JSON.stringify({ items }),
-    });
-    expect(result).toEqual({ affected_count: 2, errors: [] });
-  });
 
   it('bulkSnoozeSeriesActions POSTs the items envelope to _bulk_snooze and returns the bulk response', async () => {
     mockHttp.post.mockResolvedValue({ affected_count: 1, errors: [] });
@@ -61,6 +51,16 @@ describe('episode bulk actions', () => {
   const mockHttp = httpServiceMock.createStartContract();
 
   beforeEach(() => jest.clearAllMocks());
+
+  it('bulkTagEpisodeActions POSTs the items envelope to _bulk_tag and returns the bulk response', async () => {
+    mockHttp.post.mockResolvedValue({ affected_count: 2, errors: [] });
+    const items = [{ episode_id: 'e1', tags: ['t1'] }];
+    const result = await bulkTagEpisodeActions(mockHttp, items);
+    expect(mockHttp.post).toHaveBeenCalledWith(`${ALERTING_V2_EPISODES_API_PATH}/_bulk_tag`, {
+      body: JSON.stringify({ items }),
+    });
+    expect(result).toEqual({ affected_count: 2, errors: [] });
+  });
 
   it('bulkAckEpisodeActions POSTs the items envelope to _bulk_ack and returns the bulk response', async () => {
     mockHttp.post.mockResolvedValue({ affected_count: 1, errors: [] });

@@ -56,9 +56,9 @@ export {
 } from '../../builders';
 export {
   getActionPolicyUrl,
-  getTagSeriesActionUrl,
   getSnoozeSeriesActionUrl,
   getUnsnoozeSeriesActionUrl,
+  getTagEpisodeActionUrl,
   getAckEpisodeActionUrl,
   getUnackEpisodeActionUrl,
   getAssignEpisodeActionUrl,
@@ -69,9 +69,9 @@ export {
   getEnableRuleUrl,
   getDisableRuleUrl,
   getBulkRulesUrl,
-  BULK_TAG_SERIES_ACTION_URL,
   BULK_SNOOZE_SERIES_ACTION_URL,
   BULK_UNSNOOZE_SERIES_ACTION_URL,
+  BULK_TAG_EPISODE_ACTION_URL,
   BULK_ACK_EPISODE_ACTION_URL,
   BULK_UNACK_EPISODE_ACTION_URL,
   BULK_ASSIGN_EPISODE_ACTION_URL,

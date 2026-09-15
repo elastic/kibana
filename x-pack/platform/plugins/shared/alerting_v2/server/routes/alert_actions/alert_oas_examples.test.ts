@@ -12,7 +12,7 @@ import {
   bulkDeactivateEpisodeActionBodySchema,
   bulkResponseSchema,
   bulkSnoozeSeriesActionBodySchema,
-  bulkTagSeriesActionBodySchema,
+  bulkTagEpisodeActionBodySchema,
   bulkUnackEpisodeActionBodySchema,
   bulkUnsnoozeSeriesActionBodySchema,
   createAckEpisodeActionBodySchema,
@@ -20,17 +20,17 @@ import {
   createAssignEpisodeActionBodySchema,
   createDeactivateEpisodeActionBodySchema,
   createSnoozeSeriesActionBodySchema,
-  createTagSeriesActionBodySchema,
+  createTagEpisodeActionBodySchema,
   createUnackEpisodeActionBodySchema,
   createUnsnoozeSeriesActionBodySchema,
 } from '@kbn/alerting-v2-schemas';
 import {
-  BULK_TAG_SERIES_ACTION_REQUEST,
-  BULK_TAG_SERIES_ACTION_RESPONSE,
-} from './series/bulk_tag_series_action_oas_example';
+  BULK_TAG_EPISODE_ACTION_REQUEST,
+  BULK_TAG_EPISODE_ACTION_RESPONSE,
+} from './episodes/bulk_tag_episode_action_oas_example';
 import { BULK_SNOOZE_SERIES_ACTION_REQUEST } from './series/bulk_snooze_series_action_oas_example';
 import { BULK_UNSNOOZE_SERIES_ACTION_REQUEST } from './series/bulk_unsnooze_series_action_oas_example';
-import { CREATE_TAG_SERIES_ACTION_REQUEST } from './series/create_tag_series_action_oas_example';
+import { CREATE_TAG_EPISODE_ACTION_REQUEST } from './episodes/create_tag_episode_action_oas_example';
 import { CREATE_SNOOZE_SERIES_ACTION_REQUEST } from './series/create_snooze_series_action_oas_example';
 import { CREATE_UNSNOOZE_SERIES_ACTION_REQUEST } from './series/create_unsnooze_series_action_oas_example';
 import {
@@ -48,9 +48,9 @@ import { CREATE_ACTIVATE_EPISODE_ACTION_REQUEST } from './episodes/create_activa
 import { CREATE_DEACTIVATE_EPISODE_ACTION_REQUEST } from './episodes/create_deactivate_episode_action_oas_example';
 
 describe('alert action OAS example payloads', () => {
-  it('keeps tag request example valid against createTagSeriesActionBodySchema', () => {
+  it('keeps tag request example valid against createTagEpisodeActionBodySchema', () => {
     expect(
-      createTagSeriesActionBodySchema.safeParse(CREATE_TAG_SERIES_ACTION_REQUEST).success
+      createTagEpisodeActionBodySchema.safeParse(CREATE_TAG_EPISODE_ACTION_REQUEST).success
     ).toBe(true);
   });
 
@@ -100,7 +100,7 @@ describe('alert action OAS example payloads', () => {
 
   it('keeps every bulk request example valid against its body schema', () => {
     const cases: Array<[{ safeParse: (v: unknown) => { success: boolean } }, unknown]> = [
-      [bulkTagSeriesActionBodySchema, BULK_TAG_SERIES_ACTION_REQUEST],
+      [bulkTagEpisodeActionBodySchema, BULK_TAG_EPISODE_ACTION_REQUEST],
       [bulkSnoozeSeriesActionBodySchema, BULK_SNOOZE_SERIES_ACTION_REQUEST],
       [bulkUnsnoozeSeriesActionBodySchema, BULK_UNSNOOZE_SERIES_ACTION_REQUEST],
       [bulkAckEpisodeActionBodySchema, BULK_ACK_EPISODE_ACTION_REQUEST],
@@ -116,7 +116,7 @@ describe('alert action OAS example payloads', () => {
   });
 
   it('keeps the bulk response examples valid against bulkResponseSchema', () => {
-    expect(bulkResponseSchema.safeParse(BULK_TAG_SERIES_ACTION_RESPONSE).success).toBe(true);
+    expect(bulkResponseSchema.safeParse(BULK_TAG_EPISODE_ACTION_RESPONSE).success).toBe(true);
     expect(bulkResponseSchema.safeParse(BULK_ACK_EPISODE_ACTION_RESPONSE).success).toBe(true);
   });
 });

@@ -13,7 +13,7 @@ export {
   bulkAssignEpisodeActions,
   bulkDeactivateEpisodeActions,
   bulkSnoozeSeriesActions,
-  bulkTagSeriesActions,
+  bulkTagEpisodeActions,
   bulkUnackEpisodeActions,
   bulkUnsnoozeSeriesActions,
 } from './bulk_create_alert_actions';

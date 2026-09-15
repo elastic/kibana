@@ -98,19 +98,18 @@ export const getFindRuleTemplatesUrl = (
 const getSeriesActionUrl = (groupHash: string, suffix: string) =>
   `${SERIES_API_PATH}/${encodeURIComponent(groupHash)}/${suffix}`;
 
-export const getTagSeriesActionUrl = (groupHash: string) => getSeriesActionUrl(groupHash, '_tag');
 export const getSnoozeSeriesActionUrl = (groupHash: string) =>
   getSeriesActionUrl(groupHash, '_snooze');
 export const getUnsnoozeSeriesActionUrl = (groupHash: string) =>
   getSeriesActionUrl(groupHash, '_unsnooze');
 
-export const BULK_TAG_SERIES_ACTION_URL = `${SERIES_API_PATH}/_bulk_tag`;
 export const BULK_SNOOZE_SERIES_ACTION_URL = `${SERIES_API_PATH}/_bulk_snooze`;
 export const BULK_UNSNOOZE_SERIES_ACTION_URL = `${SERIES_API_PATH}/_bulk_unsnooze`;
 
 const getEpisodeActionUrl = (episodeId: string, suffix: string) =>
   `${EPISODES_API_PATH}/${encodeURIComponent(episodeId)}/${suffix}`;
 
+export const getTagEpisodeActionUrl = (episodeId: string) => getEpisodeActionUrl(episodeId, '_tag');
 export const getAckEpisodeActionUrl = (episodeId: string) => getEpisodeActionUrl(episodeId, '_ack');
 export const getUnackEpisodeActionUrl = (episodeId: string) =>
   getEpisodeActionUrl(episodeId, '_unack');
@@ -121,6 +120,7 @@ export const getActivateEpisodeActionUrl = (episodeId: string) =>
 export const getDeactivateEpisodeActionUrl = (episodeId: string) =>
   getEpisodeActionUrl(episodeId, '_deactivate');
 
+export const BULK_TAG_EPISODE_ACTION_URL = `${EPISODES_API_PATH}/_bulk_tag`;
 export const BULK_ACK_EPISODE_ACTION_URL = `${EPISODES_API_PATH}/_bulk_ack`;
 export const BULK_UNACK_EPISODE_ACTION_URL = `${EPISODES_API_PATH}/_bulk_unack`;
 export const BULK_ASSIGN_EPISODE_ACTION_URL = `${EPISODES_API_PATH}/_bulk_assign`;

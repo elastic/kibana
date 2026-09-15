@@ -16,6 +16,7 @@ import {
   BULK_ACTIVATE_EPISODE_ACTION_URL,
   BULK_ASSIGN_EPISODE_ACTION_URL,
   BULK_DEACTIVATE_EPISODE_ACTION_URL,
+  BULK_TAG_EPISODE_ACTION_URL,
   BULK_UNACK_EPISODE_ACTION_URL,
   NO_ACCESS_ROLE,
   testData,
@@ -91,6 +92,68 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
         group_hash: groupHashTwo,
         episode_id: episodeIdTwo,
         rule_id: ruleId,
+      });
+    }
+  );
+
+  apiTest(
+    'bulk tag: processes valid items and persists one doc per episode',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'bulk-episode-tag-rule';
+      const groupHashOne = 'bulk-episode-tag-group-one';
+      const groupHashTwo = 'bulk-episode-tag-group-two';
+      const episodeIdOne = 'bulk-episode-tag-episode-one';
+      const episodeIdTwo = 'bulk-episode-tag-episode-two';
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHashOne,
+          episode: { id: episodeIdOne, status: 'active' },
+        }),
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHashTwo,
+          episode: { id: episodeIdTwo, status: 'active' },
+        }),
+      ]);
+
+      const response = await apiClient.post(BULK_TAG_EPISODE_ACTION_URL, {
+        headers: writerHeaders,
+        body: {
+          items: [
+            { episode_id: episodeIdOne, tags: ['production'] },
+            { episode_id: episodeIdTwo, tags: ['important', 'reviewed'] },
+          ],
+        },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body).toStrictEqual({ affected_count: 2, errors: [] });
+
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId,
+        actionTypes: ['tag'],
+      });
+      expect(actions).toHaveLength(2);
+
+      const firstAction = actions.find((doc) => doc.episode_id === episodeIdOne);
+      const secondAction = actions.find((doc) => doc.episode_id === episodeIdTwo);
+
+      // The group_hash is resolved server-side from the episode's events.
+      expect(firstAction).toMatchObject({
+        action_type: 'tag',
+        group_hash: groupHashOne,
+        episode_id: episodeIdOne,
+        rule_id: ruleId,
+        tags: ['production'],
+      });
+      expect(secondAction).toMatchObject({
+        action_type: 'tag',
+        group_hash: groupHashTwo,
+        episode_id: episodeIdTwo,
+        rule_id: ruleId,
+        tags: ['important', 'reviewed'],
       });
     }
   );
@@ -207,6 +270,51 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
         action_type: 'ack',
         group_hash: knownGroup,
         episode_id: knownEpisode,
+      });
+    }
+  );
+
+  apiTest(
+    'partial success: bulk tag reports ALERT_EPISODE_NOT_FOUND keyed by the unknown episode_id',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'bulk-tag-partial-rule';
+      const knownGroup = 'bulk-tag-partial-known-group';
+      const knownEpisode = 'bulk-tag-partial-known-episode';
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: knownGroup,
+          episode: { id: knownEpisode, status: 'active' },
+        }),
+      ]);
+
+      const response = await apiClient.post(BULK_TAG_EPISODE_ACTION_URL, {
+        headers: writerHeaders,
+        body: {
+          items: [
+            { episode_id: knownEpisode, tags: ['production'] },
+            { episode_id: 'bulk-tag-partial-unknown-episode', tags: ['x'] },
+          ],
+        },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.affected_count).toBe(1);
+      expect(response.body.errors).toHaveLength(1);
+      expect(response.body.errors[0].id).toBe('bulk-tag-partial-unknown-episode');
+      expect(response.body.errors[0].error.code).toBe('ALERT_EPISODE_NOT_FOUND');
+
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId,
+        actionTypes: ['tag'],
+      });
+      expect(actions).toHaveLength(1);
+      expect(actions[0]).toMatchObject({
+        action_type: 'tag',
+        group_hash: knownGroup,
+        episode_id: knownEpisode,
+        tags: ['production'],
       });
     }
   );
@@ -612,6 +720,18 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
     const response = await apiClient.post(BULK_ACK_EPISODE_ACTION_URL, {
       headers: writerHeaders,
       body: { items: [{ episode_id: 'any-episode', group_hash: 'any-group' }] },
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
+
+  apiTest('schema: rejects a bulk tag item keyed by group_hash with 400', async ({ apiClient }) => {
+    // Tag moved to the episode routes: items are `{ episode_id, tags }`,
+    // so a series-style group_hash key is rejected by the strict schema.
+    const response = await apiClient.post(BULK_TAG_EPISODE_ACTION_URL, {
+      headers: writerHeaders,
+      body: { items: [{ group_hash: 'any-group', tags: ['x'] }] },
     });
 
     expect(response).toHaveStatusCode(400);

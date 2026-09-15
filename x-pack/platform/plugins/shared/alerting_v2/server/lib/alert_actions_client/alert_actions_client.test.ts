@@ -54,15 +54,18 @@ describe('AlertActionsClient', () => {
 
       await client.createSeriesAction({
         groupHash: 'test-group-hash',
-        action: { action_type: ALERT_EPISODE_ACTION_TYPE.TAG, tags: ['critical'] },
+        action: {
+          action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+          expiry: '2026-08-12T00:00:00.000Z',
+        },
       });
 
       expect(queryServiceEsClient.esql.query).toHaveBeenCalledTimes(1);
       const docs = getDocs();
       expect(docs).toHaveLength(1);
       expect(docs[0]).toMatchObject({
-        action_type: ALERT_EPISODE_ACTION_TYPE.TAG,
-        tags: ['critical'],
+        action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+        expiry: '2026-08-12T00:00:00.000Z',
         group_hash: 'test-group-hash',
         episode_id: null,
         rule_id: 'test-rule-id',
@@ -320,7 +323,11 @@ describe('AlertActionsClient', () => {
 
     it('persists every action and emits every event with episode_id null', async () => {
       const items: BulkCreateSeriesAlertActionItemBody[] = [
-        { group_hash: 'group-1', action_type: ALERT_EPISODE_ACTION_TYPE.TAG, tags: ['t1'] },
+        {
+          group_hash: 'group-1',
+          action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+          expiry: '2026-08-12T00:00:00.000Z',
+        },
         { group_hash: 'group-2', action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE },
       ];
 
@@ -337,7 +344,11 @@ describe('AlertActionsClient', () => {
       expect(queryServiceEsClient.esql.query).toHaveBeenCalledTimes(1);
       const docs = getDocs();
       expect(docs).toHaveLength(2);
-      expect(docs[0]).toMatchObject({ group_hash: 'group-1', episode_id: null, tags: ['t1'] });
+      expect(docs[0]).toMatchObject({
+        group_hash: 'group-1',
+        episode_id: null,
+        expiry: '2026-08-12T00:00:00.000Z',
+      });
       expect(docs[1]).toMatchObject({ group_hash: 'group-2', episode_id: null });
       expect(emitEpisodeActionsSpy.mock.calls[0][1]).toEqual([
         expect.objectContaining({ group_hash: 'group-1', episode_id: null }),

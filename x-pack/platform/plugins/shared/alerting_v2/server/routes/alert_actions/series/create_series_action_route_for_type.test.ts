@@ -8,7 +8,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import {
   ALERT_EPISODE_ACTION_TYPE,
-  createTagSeriesActionBodySchema,
+  createSnoozeSeriesActionBodySchema,
 } from '@kbn/alerting-v2-schemas';
 import type { AlertActionsClient } from '../../../lib/alert_actions_client';
 import { createAlertActionsClientMock } from '../../../lib/alert_actions_client/alert_actions_client.mock';
@@ -17,13 +17,13 @@ import { createRouteDependencies } from '../../test_utils';
 
 describe('createSeriesActionRouteForType', () => {
   it('creates a route class with expected static metadata', () => {
-    const suffix = '_tag';
-    const summary = 'Tag an alert series';
+    const suffix = '_snooze';
+    const summary = 'Snooze an alert series';
     const RouteClass = createSeriesActionRouteForType({
-      actionType: ALERT_EPISODE_ACTION_TYPE.TAG,
+      actionType: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
       pathSuffix: suffix,
       summary,
-      bodySchema: createTagSeriesActionBodySchema,
+      bodySchema: createSnoozeSeriesActionBodySchema,
     });
 
     expect(RouteClass.method).toBe('post');
@@ -39,15 +39,15 @@ describe('createSeriesActionRouteForType', () => {
 
   it('injects inferred action_type into createSeriesAction payload', async () => {
     const RouteClass = createSeriesActionRouteForType({
-      actionType: ALERT_EPISODE_ACTION_TYPE.TAG,
-      pathSuffix: '_tag',
-      summary: 'Tag an alert series',
-      bodySchema: createTagSeriesActionBodySchema,
+      actionType: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+      pathSuffix: '_snooze',
+      summary: 'Snooze an alert series',
+      bodySchema: createSnoozeSeriesActionBodySchema,
     });
     const { ctx } = createRouteDependencies();
     const request = {
       params: { group_hash: 'group-1' },
-      body: { tags: ['p1'] },
+      body: { expiry: '2026-08-12T00:00:00.000Z' },
     } as unknown as KibanaRequest;
     const alertActionsClient = createAlertActionsClientMock();
     const route = new RouteClass(ctx, request, alertActionsClient as unknown as AlertActionsClient);
@@ -57,8 +57,8 @@ describe('createSeriesActionRouteForType', () => {
     expect(alertActionsClient.createSeriesAction).toHaveBeenCalledWith({
       groupHash: 'group-1',
       action: {
-        action_type: 'tag',
-        tags: ['p1'],
+        action_type: 'snooze',
+        expiry: '2026-08-12T00:00:00.000Z',
       },
     });
     expect(ctx.response.noContent).toHaveBeenCalled();
@@ -66,15 +66,15 @@ describe('createSeriesActionRouteForType', () => {
 
   it('maps thrown error to customError response', async () => {
     const RouteClass = createSeriesActionRouteForType({
-      actionType: ALERT_EPISODE_ACTION_TYPE.TAG,
-      pathSuffix: '_tag',
-      summary: 'Tag an alert series',
-      bodySchema: createTagSeriesActionBodySchema,
+      actionType: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+      pathSuffix: '_snooze',
+      summary: 'Snooze an alert series',
+      bodySchema: createSnoozeSeriesActionBodySchema,
     });
     const { ctx } = createRouteDependencies();
     const request = {
       params: { group_hash: 'group-1' },
-      body: { tags: ['p1'] },
+      body: { expiry: '2026-08-12T00:00:00.000Z' },
     } as unknown as KibanaRequest;
     const alertActionsClient = createAlertActionsClientMock();
     alertActionsClient.createSeriesAction.mockRejectedValueOnce(new Error('boom'));

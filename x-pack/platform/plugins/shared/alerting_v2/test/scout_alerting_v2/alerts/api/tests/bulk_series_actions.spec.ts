@@ -13,7 +13,6 @@ import {
   apiTest,
   buildAlertEvent,
   BULK_SNOOZE_SERIES_ACTION_URL,
-  BULK_TAG_SERIES_ACTION_URL,
   BULK_UNSNOOZE_SERIES_ACTION_URL,
   NO_ACCESS_ROLE,
   testData,
@@ -39,31 +38,31 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
   });
 
   apiTest(
-    'bulk tag: processes valid items and persists one doc per series',
+    'bulk snooze: processes valid items and persists one doc per series',
     async ({ apiClient, apiServices }) => {
-      const ruleId = 'bulk-series-tag-rule';
-      const groupHashOne = 'bulk-series-tag-group-one';
-      const groupHashTwo = 'bulk-series-tag-group-two';
+      const ruleId = 'bulk-series-snooze-rule';
+      const groupHashOne = 'bulk-series-snooze-group-one';
+      const groupHashTwo = 'bulk-series-snooze-group-two';
 
       await apiServices.alertingV2.ruleEvents.seed([
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHashOne,
-          episode: { id: 'bulk-series-tag-episode-one', status: 'active' },
+          episode: { id: 'bulk-series-snooze-episode-one', status: 'active' },
         }),
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHashTwo,
-          episode: { id: 'bulk-series-tag-episode-two', status: 'active' },
+          episode: { id: 'bulk-series-snooze-episode-two', status: 'active' },
         }),
       ]);
 
-      const response = await apiClient.post(BULK_TAG_SERIES_ACTION_URL, {
+      const response = await apiClient.post(BULK_SNOOZE_SERIES_ACTION_URL, {
         headers: writerHeaders,
         body: {
           items: [
-            { group_hash: groupHashOne, tags: ['production'] },
-            { group_hash: groupHashTwo, tags: ['important', 'reviewed'] },
+            { group_hash: groupHashOne, expiry: '2099-01-01T00:00:00Z' },
+            { group_hash: groupHashTwo, expiry: '2099-06-01T00:00:00Z' },
           ],
         },
       });
@@ -73,7 +72,7 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
 
       const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,
-        actionTypes: ['tag'],
+        actionTypes: ['snooze'],
       });
       expect(actions).toHaveLength(2);
 
@@ -83,55 +82,18 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
       // Series actions target the series as a whole, so the persisted doc
       // carries `episode_id: null` even though an episode exists.
       expect(firstAction).toMatchObject({
-        action_type: 'tag',
+        action_type: 'snooze',
         group_hash: groupHashOne,
         episode_id: null,
         rule_id: ruleId,
-        tags: ['production'],
+        expiry: '2099-01-01T00:00:00Z',
       });
       expect(secondAction).toMatchObject({
-        action_type: 'tag',
+        action_type: 'snooze',
         group_hash: groupHashTwo,
         episode_id: null,
         rule_id: ruleId,
-        tags: ['important', 'reviewed'],
-      });
-    }
-  );
-
-  apiTest(
-    'bulk snooze: persists the snooze doc with its expiry',
-    async ({ apiClient, apiServices }) => {
-      const ruleId = 'bulk-series-snooze-rule';
-      const groupHash = 'bulk-series-snooze-group';
-
-      await apiServices.alertingV2.ruleEvents.seed([
-        buildAlertEvent({
-          rule: { id: ruleId, version: 1 },
-          group_hash: groupHash,
-          episode: { id: 'bulk-series-snooze-episode', status: 'active' },
-        }),
-      ]);
-
-      const response = await apiClient.post(BULK_SNOOZE_SERIES_ACTION_URL, {
-        headers: writerHeaders,
-        body: { items: [{ group_hash: groupHash, expiry: '2099-01-01T00:00:00Z' }] },
-      });
-
-      expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual({ affected_count: 1, errors: [] });
-
-      const actions = await apiServices.alertingV2.alertActionsEvents.find({
-        ruleId,
-        actionTypes: ['snooze'],
-      });
-      expect(actions).toHaveLength(1);
-      expect(actions[0]).toMatchObject({
-        action_type: 'snooze',
-        group_hash: groupHash,
-        episode_id: null,
-        rule_id: ruleId,
-        expiry: '2099-01-01T00:00:00Z',
+        expiry: '2099-06-01T00:00:00Z',
       });
     }
   );
@@ -183,12 +145,12 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
         }),
       ]);
 
-      const response = await apiClient.post(BULK_TAG_SERIES_ACTION_URL, {
+      const response = await apiClient.post(BULK_SNOOZE_SERIES_ACTION_URL, {
         headers: writerHeaders,
         body: {
           items: [
-            { group_hash: knownGroup, tags: ['production'] },
-            { group_hash: 'bulk-series-partial-unknown-group', tags: ['x'] },
+            { group_hash: knownGroup, expiry: '2099-01-01T00:00:00Z' },
+            { group_hash: 'bulk-series-partial-unknown-group', expiry: '2099-01-01T00:00:00Z' },
           ],
         },
       });
@@ -204,11 +166,11 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
 
       const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,
-        actionTypes: ['tag'],
+        actionTypes: ['snooze'],
       });
       expect(actions).toHaveLength(1);
       expect(actions[0]).toMatchObject({
-        action_type: 'tag',
+        action_type: 'snooze',
         group_hash: knownGroup,
         episode_id: null,
       });
@@ -244,9 +206,9 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
 
   apiTest('schema: rejects a bare array body with 400', async ({ apiClient }) => {
     // The body must be an `{ items: [...] }` envelope, not a bare array.
-    const response = await apiClient.post(BULK_TAG_SERIES_ACTION_URL, {
+    const response = await apiClient.post(BULK_SNOOZE_SERIES_ACTION_URL, {
       headers: writerHeaders,
-      body: [{ group_hash: 'any-group', tags: ['x'] }],
+      body: [{ group_hash: 'any-group' }],
     });
 
     expect(response).toHaveStatusCode(400);
@@ -254,7 +216,7 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
   });
 
   apiTest('schema: rejects empty items with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(BULK_TAG_SERIES_ACTION_URL, {
+    const response = await apiClient.post(BULK_SNOOZE_SERIES_ACTION_URL, {
       headers: writerHeaders,
       body: { items: [] },
     });
@@ -266,10 +228,9 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
   apiTest('schema: rejects more than 100 items with 400', async ({ apiClient }) => {
     const items = Array.from({ length: 101 }, (_v, i) => ({
       group_hash: `bulk-series-too-many-${i}`,
-      tags: ['x'],
     }));
 
-    const response = await apiClient.post(BULK_TAG_SERIES_ACTION_URL, {
+    const response = await apiClient.post(BULK_SNOOZE_SERIES_ACTION_URL, {
       headers: writerHeaders,
       body: { items },
     });
@@ -280,9 +241,9 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
 
   apiTest('schema: rejects an unknown envelope key with 400', async ({ apiClient }) => {
     // The envelope is strict: only `items` is accepted.
-    const response = await apiClient.post(BULK_TAG_SERIES_ACTION_URL, {
+    const response = await apiClient.post(BULK_SNOOZE_SERIES_ACTION_URL, {
       headers: writerHeaders,
-      body: { items: [{ group_hash: 'any-group', tags: ['x'] }], dry_run: true },
+      body: { items: [{ group_hash: 'any-group' }], dry_run: true },
     });
 
     expect(response).toHaveStatusCode(400);
@@ -290,9 +251,9 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
   });
 
   apiTest('schema: rejects an item missing group_hash with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(BULK_TAG_SERIES_ACTION_URL, {
+    const response = await apiClient.post(BULK_SNOOZE_SERIES_ACTION_URL, {
       headers: writerHeaders,
-      body: { items: [{ tags: ['x'] }] },
+      body: { items: [{ expiry: '2099-01-01T00:00:00Z' }] },
     });
 
     expect(response).toHaveStatusCode(400);
@@ -302,9 +263,9 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
   apiTest('schema: rejects an item carrying action_type with 400', async ({ apiClient }) => {
     // The verb is in the path now, so action_type is an unrecognized key
     // for the strict item schema.
-    const response = await apiClient.post(BULK_TAG_SERIES_ACTION_URL, {
+    const response = await apiClient.post(BULK_SNOOZE_SERIES_ACTION_URL, {
       headers: writerHeaders,
-      body: { items: [{ group_hash: 'any-group', action_type: 'tag', tags: ['x'] }] },
+      body: { items: [{ group_hash: 'any-group', action_type: 'snooze' }] },
     });
 
     expect(response).toHaveStatusCode(400);
@@ -314,9 +275,9 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
   apiTest('schema: rejects an item carrying episode_id with 400', async ({ apiClient }) => {
     // Series items are identified by group_hash only, so episode_id is an
     // unrecognized key for the strict item schema.
-    const response = await apiClient.post(BULK_TAG_SERIES_ACTION_URL, {
+    const response = await apiClient.post(BULK_SNOOZE_SERIES_ACTION_URL, {
       headers: writerHeaders,
-      body: { items: [{ group_hash: 'any-group', tags: ['x'], episode_id: 'some-episode' }] },
+      body: { items: [{ group_hash: 'any-group', episode_id: 'some-episode' }] },
     });
 
     expect(response).toHaveStatusCode(400);
@@ -326,11 +287,11 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
   apiTest(
     'schema: rejects an item with an invalid per-action body with 400',
     async ({ apiClient }) => {
-      // Tag items require a `tags` array; sending `tags: 'string'` should
-      // fail validation.
-      const response = await apiClient.post(BULK_TAG_SERIES_ACTION_URL, {
+      // Snooze items accept an ISO `expiry` date; sending a non-date string
+      // should fail validation.
+      const response = await apiClient.post(BULK_SNOOZE_SERIES_ACTION_URL, {
         headers: writerHeaders,
-        body: { items: [{ group_hash: 'any-group', tags: 'not-an-array' }] },
+        body: { items: [{ group_hash: 'any-group', expiry: 'not-a-date' }] },
       });
 
       expect(response).toHaveStatusCode(400);
@@ -339,9 +300,9 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
   );
 
   apiTest('schema: rejects an item with empty group_hash with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(BULK_TAG_SERIES_ACTION_URL, {
+    const response = await apiClient.post(BULK_SNOOZE_SERIES_ACTION_URL, {
       headers: writerHeaders,
-      body: { items: [{ group_hash: '', tags: ['x'] }] },
+      body: { items: [{ group_hash: '' }] },
     });
 
     expect(response).toHaveStatusCode(400);
@@ -351,9 +312,9 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
   apiTest(
     'schema: rejects an item with group_hash over 256 chars with 400',
     async ({ apiClient }) => {
-      const response = await apiClient.post(BULK_TAG_SERIES_ACTION_URL, {
+      const response = await apiClient.post(BULK_SNOOZE_SERIES_ACTION_URL, {
         headers: writerHeaders,
-        body: { items: [{ group_hash: 'a'.repeat(257), tags: ['x'] }] },
+        body: { items: [{ group_hash: 'a'.repeat(257) }] },
       });
 
       expect(response).toHaveStatusCode(400);
@@ -364,9 +325,9 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
   apiTest(
     'schema: rejects an item with unknown body fields (strict mode) with 400',
     async ({ apiClient }) => {
-      const response = await apiClient.post(BULK_TAG_SERIES_ACTION_URL, {
+      const response = await apiClient.post(BULK_SNOOZE_SERIES_ACTION_URL, {
         headers: writerHeaders,
-        body: { items: [{ group_hash: 'any-group', tags: ['x'], unknownField: 'x' }] },
+        body: { items: [{ group_hash: 'any-group', unknownField: 'x' }] },
       });
 
       expect(response).toHaveStatusCode(400);
@@ -381,9 +342,9 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
         ALERTING_V2_ALERTS_READ_ROLE
       );
 
-      const response = await apiClient.post(BULK_TAG_SERIES_ACTION_URL, {
+      const response = await apiClient.post(BULK_SNOOZE_SERIES_ACTION_URL, {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
-        body: { items: [{ group_hash: 'bulk-series-authz-read-group', tags: ['x'] }] },
+        body: { items: [{ group_hash: 'bulk-series-authz-read-group' }] },
       });
 
       expect(response).toHaveStatusCode(403);
@@ -395,9 +356,9 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
     async ({ apiClient, requestAuth }) => {
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
 
-      const response = await apiClient.post(BULK_TAG_SERIES_ACTION_URL, {
+      const response = await apiClient.post(BULK_SNOOZE_SERIES_ACTION_URL, {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
-        body: { items: [{ group_hash: 'bulk-series-authz-none-group', tags: ['x'] }] },
+        body: { items: [{ group_hash: 'bulk-series-authz-none-group' }] },
       });
 
       expect(response).toHaveStatusCode(403);

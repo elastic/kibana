@@ -13,7 +13,7 @@ import type {
   BulkDeactivateEpisodeActionItem,
   BulkResponse,
   BulkSnoozeSeriesActionItem,
-  BulkTagSeriesActionItem,
+  BulkTagEpisodeActionItem,
   BulkUnackEpisodeActionItem,
   BulkUnsnoozeSeriesActionItem,
 } from '@kbn/alerting-v2-schemas';
@@ -28,11 +28,6 @@ const postBulkAction = <TItem>(
   items: TItem[]
 ): Promise<BulkResponse> => http.post<BulkResponse>(path, { body: JSON.stringify({ items }) });
 
-export const bulkTagSeriesActions = (
-  http: HttpStart,
-  items: BulkTagSeriesActionItem[]
-): Promise<BulkResponse> => postBulkAction(http, `${ALERTING_V2_SERIES_API_PATH}/_bulk_tag`, items);
-
 export const bulkSnoozeSeriesActions = (
   http: HttpStart,
   items: BulkSnoozeSeriesActionItem[]
@@ -44,6 +39,12 @@ export const bulkUnsnoozeSeriesActions = (
   items: BulkUnsnoozeSeriesActionItem[]
 ): Promise<BulkResponse> =>
   postBulkAction(http, `${ALERTING_V2_SERIES_API_PATH}/_bulk_unsnooze`, items);
+
+export const bulkTagEpisodeActions = (
+  http: HttpStart,
+  items: BulkTagEpisodeActionItem[]
+): Promise<BulkResponse> =>
+  postBulkAction(http, `${ALERTING_V2_EPISODES_API_PATH}/_bulk_tag`, items);
 
 export const bulkAckEpisodeActions = (
   http: HttpStart,

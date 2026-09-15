@@ -12,12 +12,18 @@ import {
   ALERTING_V2_ALERTS_READ_ROLE,
   apiTest,
   buildAlertEvent,
-  getTagSeriesActionUrl,
+  getTagEpisodeActionUrl,
   NO_ACCESS_ROLE,
   testData,
 } from '../fixtures';
 
-apiTest.describe('Create tag series action API', { tag: '@local-stateful-classic' }, () => {
+/*
+ * Authorization tests below use `requestAuth.getApiKeyForCustomRole`, which
+ * is not yet supported on Elastic Cloud Hosted (custom roles fall back to
+ * `viewer`). Restrict the suite to local stateful (classic) until ECH lands.
+ */
+
+apiTest.describe('Create tag episode action API', { tag: '@local-stateful-classic' }, () => {
   let writerCredentials: RoleApiCredentials;
   let writerHeaders: Record<string, string>;
 
@@ -39,15 +45,16 @@ apiTest.describe('Create tag series action API', { tag: '@local-stateful-classic
   apiTest('tag: writes a tag action and returns 204', async ({ apiClient, apiServices }) => {
     const ruleId = 'tag-happy-rule';
     const groupHash = 'tag-happy-group';
+    const episodeId = 'tag-happy-episode';
     const tags = ['production', 'reviewed'];
     await apiServices.alertingV2.ruleEvents.seed([
       buildAlertEvent({
         rule: { id: ruleId, version: 1 },
         group_hash: groupHash,
-        episode: { id: 'tag-happy-episode', status: 'active' },
+        episode: { id: episodeId, status: 'active' },
       }),
     ]);
-    const response = await apiClient.post(getTagSeriesActionUrl(groupHash), {
+    const response = await apiClient.post(getTagEpisodeActionUrl(episodeId), {
       headers: writerHeaders,
       body: { tags },
     });
@@ -57,12 +64,11 @@ apiTest.describe('Create tag series action API', { tag: '@local-stateful-classic
       actionTypes: ['tag'],
     });
     expect(actions).toHaveLength(1);
-    // Series actions target the series as a whole, so the persisted doc
-    // carries `episode_id: null` even though an episode exists.
+    // The group_hash is resolved server-side from the episode's events.
     expect(actions[0]).toMatchObject({
       action_type: 'tag',
       group_hash: groupHash,
-      episode_id: null,
+      episode_id: episodeId,
       rule_id: ruleId,
       space_id: 'default',
       tags,
@@ -77,14 +83,15 @@ apiTest.describe('Create tag series action API', { tag: '@local-stateful-classic
       // to record "tags were touched" without listing any.
       const ruleId = 'tag-empty-rule';
       const groupHash = 'tag-empty-group';
+      const episodeId = 'tag-empty-episode';
       await apiServices.alertingV2.ruleEvents.seed([
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
-          episode: { id: 'tag-empty-episode', status: 'active' },
+          episode: { id: episodeId, status: 'active' },
         }),
       ]);
-      const response = await apiClient.post(getTagSeriesActionUrl(groupHash), {
+      const response = await apiClient.post(getTagEpisodeActionUrl(episodeId), {
         headers: writerHeaders,
         body: { tags: [] },
       });
@@ -97,14 +104,62 @@ apiTest.describe('Create tag series action API', { tag: '@local-stateful-classic
       expect(actions[0]).toMatchObject({
         action_type: 'tag',
         group_hash: groupHash,
-        episode_id: null,
+        episode_id: episodeId,
         rule_id: ruleId,
       });
     }
   );
 
+  apiTest(
+    'tag: audit actions work on old (superseded) episodes',
+    async ({ apiClient, apiServices }) => {
+      // Two episodes for the same series: the older one closed, a newer one
+      // is active. Tag is a pure audit record, so tagging the OLDER episode
+      // must succeed and the persisted doc must carry the older episode id.
+      const ruleId = 'tag-old-episode-rule';
+      const groupHash = 'tag-old-episode-group';
+      const olderEpisodeId = 'tag-old-episode-older';
+      const newerEpisodeId = 'tag-old-episode-newer';
+      const now = Date.now();
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          '@timestamp': new Date(now - 60_000).toISOString(),
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash,
+          status: 'recovered',
+          episode: { id: olderEpisodeId, status: 'inactive' },
+        }),
+        buildAlertEvent({
+          '@timestamp': new Date(now).toISOString(),
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash,
+          episode: { id: newerEpisodeId, status: 'active' },
+        }),
+      ]);
+
+      const response = await apiClient.post(getTagEpisodeActionUrl(olderEpisodeId), {
+        headers: writerHeaders,
+        body: { tags: ['archived'] },
+      });
+      expect(response).toHaveStatusCode(204);
+
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId,
+        actionTypes: ['tag'],
+      });
+      expect(actions).toHaveLength(1);
+      expect(actions[0]).toMatchObject({
+        action_type: 'tag',
+        group_hash: groupHash,
+        episode_id: olderEpisodeId,
+        tags: ['archived'],
+      });
+    }
+  );
+
   apiTest('schema: rejects body missing tags with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(getTagSeriesActionUrl('any-group'), {
+    const response = await apiClient.post(getTagEpisodeActionUrl('any-episode'), {
       headers: writerHeaders,
       body: {},
     });
@@ -113,7 +168,7 @@ apiTest.describe('Create tag series action API', { tag: '@local-stateful-classic
   });
 
   apiTest('schema: rejects more than 20 tags with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(getTagSeriesActionUrl('any-group'), {
+    const response = await apiClient.post(getTagEpisodeActionUrl('any-episode'), {
       headers: writerHeaders,
       body: { tags: Array.from({ length: 21 }, (_v, i) => `tag-${i}`) },
     });
@@ -122,7 +177,7 @@ apiTest.describe('Create tag series action API', { tag: '@local-stateful-classic
   });
 
   apiTest('schema: rejects an empty tag string with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(getTagSeriesActionUrl('any-group'), {
+    const response = await apiClient.post(getTagEpisodeActionUrl('any-episode'), {
       headers: writerHeaders,
       body: { tags: ['valid', ''] },
     });
@@ -131,7 +186,7 @@ apiTest.describe('Create tag series action API', { tag: '@local-stateful-classic
   });
 
   apiTest('schema: rejects a tag over 128 chars with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(getTagSeriesActionUrl('any-group'), {
+    const response = await apiClient.post(getTagEpisodeActionUrl('any-episode'), {
       headers: writerHeaders,
       body: { tags: ['a'.repeat(129)] },
     });
@@ -140,7 +195,7 @@ apiTest.describe('Create tag series action API', { tag: '@local-stateful-classic
   });
 
   apiTest('schema: rejects non-string tag elements with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(getTagSeriesActionUrl('any-group'), {
+    const response = await apiClient.post(getTagEpisodeActionUrl('any-episode'), {
       headers: writerHeaders,
       body: { tags: ['valid', 42] },
     });
@@ -149,7 +204,7 @@ apiTest.describe('Create tag series action API', { tag: '@local-stateful-classic
   });
 
   apiTest('schema: rejects unknown body fields (strict mode) with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(getTagSeriesActionUrl('any-group'), {
+    const response = await apiClient.post(getTagEpisodeActionUrl('any-episode'), {
       headers: writerHeaders,
       body: { tags: ['valid'], extra: 'nope' },
     });
@@ -157,8 +212,8 @@ apiTest.describe('Create tag series action API', { tag: '@local-stateful-classic
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('schema: rejects group_hash over 256 chars with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(getTagSeriesActionUrl('a'.repeat(257)), {
+  apiTest('schema: rejects episode_id over 150 chars with 400', async ({ apiClient }) => {
+    const response = await apiClient.post(getTagEpisodeActionUrl('a'.repeat(151)), {
       headers: writerHeaders,
       body: { tags: ['production'] },
     });
@@ -166,14 +221,14 @@ apiTest.describe('Create tag series action API', { tag: '@local-stateful-classic
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('returns 404 when group_hash matches no events', async ({ apiClient }) => {
-    const response = await apiClient.post(getTagSeriesActionUrl('unknown-group'), {
+  apiTest('returns 404 when episode_id matches no events', async ({ apiClient }) => {
+    const response = await apiClient.post(getTagEpisodeActionUrl('unknown-episode'), {
       headers: writerHeaders,
       body: { tags: ['production'] },
     });
     expect(response).toHaveStatusCode(404);
-    expect(response.body.code).toBe('ALERT_EVENT_NOT_FOUND');
-    expect(response.body.details).toMatchObject({ group_hash: 'unknown-group' });
+    expect(response.body.code).toBe('ALERT_EPISODE_NOT_FOUND');
+    expect(response.body.details).toMatchObject({ episode_id: 'unknown-episode' });
   });
 
   apiTest(
@@ -182,7 +237,7 @@ apiTest.describe('Create tag series action API', { tag: '@local-stateful-classic
       const readerCredentials = await requestAuth.getApiKeyForCustomRole(
         ALERTING_V2_ALERTS_READ_ROLE
       );
-      const response = await apiClient.post(getTagSeriesActionUrl('tag-authz-read-group'), {
+      const response = await apiClient.post(getTagEpisodeActionUrl('tag-authz-read-episode'), {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
         body: { tags: ['production'] },
       });
@@ -194,7 +249,7 @@ apiTest.describe('Create tag series action API', { tag: '@local-stateful-classic
     'authorization: returns 403 for a user without alerting_v2 privileges',
     async ({ apiClient, requestAuth }) => {
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
-      const response = await apiClient.post(getTagSeriesActionUrl('tag-authz-none-group'), {
+      const response = await apiClient.post(getTagEpisodeActionUrl('tag-authz-none-episode'), {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
         body: { tags: ['production'] },
       });

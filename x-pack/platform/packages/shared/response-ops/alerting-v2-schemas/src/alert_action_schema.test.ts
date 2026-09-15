@@ -10,7 +10,7 @@ import {
   bulkActivateEpisodeActionBodySchema,
   bulkAssignEpisodeActionBodySchema,
   bulkSnoozeSeriesActionBodySchema,
-  bulkTagSeriesActionBodySchema,
+  bulkTagEpisodeActionBodySchema,
   createAckEpisodeActionBodySchema,
   createEpisodeAlertActionBodySchema,
   createSeriesAlertActionBodySchema,
@@ -21,7 +21,6 @@ import {
 describe('createSeriesAlertActionBodySchema', () => {
   it('accepts every series-level action variant', () => {
     const variants = [
-      { action_type: ALERT_EPISODE_ACTION_TYPE.TAG, tags: ['p1'] },
       { action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE, expiry: '2026-08-12T00:00:00.000Z' },
       { action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE },
       { action_type: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE },
@@ -40,6 +39,12 @@ describe('createSeriesAlertActionBodySchema', () => {
     ).toThrow();
     expect(() =>
       createSeriesAlertActionBodySchema.parse({
+        action_type: ALERT_EPISODE_ACTION_TYPE.TAG,
+        tags: ['p1'],
+      })
+    ).toThrow();
+    expect(() =>
+      createSeriesAlertActionBodySchema.parse({
         action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
         reason: 'reason',
       })
@@ -50,6 +55,7 @@ describe('createSeriesAlertActionBodySchema', () => {
 describe('createEpisodeAlertActionBodySchema', () => {
   it('accepts every episode-level action variant', () => {
     const variants = [
+      { action_type: ALERT_EPISODE_ACTION_TYPE.TAG, tags: ['p1'] },
       { action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
       { action_type: ALERT_EPISODE_ACTION_TYPE.UNACK },
       { action_type: ALERT_EPISODE_ACTION_TYPE.ASSIGN, assignee_uid: 'u1' },
@@ -66,8 +72,7 @@ describe('createEpisodeAlertActionBodySchema', () => {
   it('rejects series-level action types', () => {
     expect(() =>
       createEpisodeAlertActionBodySchema.parse({
-        action_type: ALERT_EPISODE_ACTION_TYPE.TAG,
-        tags: ['p1'],
+        action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
       })
     ).toThrow();
   });
@@ -109,7 +114,7 @@ describe('episodeAlertActionParamsSchema', () => {
 describe('verb-specific bulk action body schemas', () => {
   it('accepts an items envelope with valid items', () => {
     expect(() =>
-      bulkTagSeriesActionBodySchema.parse({ items: [{ group_hash: 'g1', tags: ['p1'] }] })
+      bulkTagEpisodeActionBodySchema.parse({ items: [{ episode_id: 'e1', tags: ['p1'] }] })
     ).not.toThrow();
     expect(() =>
       bulkSnoozeSeriesActionBodySchema.parse({
@@ -130,31 +135,31 @@ describe('verb-specific bulk action body schemas', () => {
 
   it('rejects a bare array body (items envelope is required)', () => {
     expect(() =>
-      bulkTagSeriesActionBodySchema.parse([{ group_hash: 'g1', tags: ['p1'] }])
+      bulkTagEpisodeActionBodySchema.parse([{ episode_id: 'e1', tags: ['p1'] }])
     ).toThrow();
   });
 
   it('rejects an empty items list', () => {
-    expect(() => bulkTagSeriesActionBodySchema.parse({ items: [] })).toThrow();
+    expect(() => bulkTagEpisodeActionBodySchema.parse({ items: [] })).toThrow();
   });
 
   it('rejects unknown envelope and item fields (strict mode)', () => {
     expect(() =>
-      bulkTagSeriesActionBodySchema.parse({
-        items: [{ group_hash: 'g1', tags: ['p1'] }],
+      bulkTagEpisodeActionBodySchema.parse({
+        items: [{ episode_id: 'e1', tags: ['p1'] }],
         force: true,
       })
     ).toThrow();
     expect(() =>
-      bulkTagSeriesActionBodySchema.parse({
-        items: [{ group_hash: 'g1', tags: ['p1'], action_type: ALERT_EPISODE_ACTION_TYPE.TAG }],
+      bulkTagEpisodeActionBodySchema.parse({
+        items: [{ episode_id: 'e1', tags: ['p1'], action_type: ALERT_EPISODE_ACTION_TYPE.TAG }],
       })
     ).toThrow();
   });
 
   it('rejects items keyed by the wrong identifier for the scope', () => {
     expect(() =>
-      bulkTagSeriesActionBodySchema.parse({ items: [{ episode_id: 'e1', tags: ['p1'] }] })
+      bulkTagEpisodeActionBodySchema.parse({ items: [{ group_hash: 'g1', tags: ['p1'] }] })
     ).toThrow();
     expect(() =>
       bulkAssignEpisodeActionBodySchema.parse({
