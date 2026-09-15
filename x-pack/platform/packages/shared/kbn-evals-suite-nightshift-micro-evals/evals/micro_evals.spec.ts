@@ -8,7 +8,7 @@
 import { join } from 'path';
 import { expect } from '@playwright/test';
 import { tags, type EvaluationDataset, type Evaluator, type Example } from '@kbn/evals';
-import { getConnectorModel } from '@kbn/inference-common';
+import { getJudgeModel } from '../src/get_judge_model';
 import { evaluate } from '../src/evaluate';
 import type { PassingRule } from '../src/rules';
 import {
@@ -50,8 +50,7 @@ evaluate.describe('Nightshift Micro Evals', { tag: tags.stateful.classic }, () =
     }) => {
       const target = inferenceClient.bindTo({ connectorId: connector.id });
       const judge = inferenceClient.bindTo({ connectorId: evaluationConnector.id });
-      const judgeConnector = await inferenceClient.getConnectorById(evaluationConnector.id);
-      const judgeModel = getConnectorModel(judgeConnector) ?? evaluationConnector.name;
+      const judgeModel = await getJudgeModel(inferenceClient, evaluationConnector);
 
       const run = async <TExample extends Example, TOutput>({
         taskType,

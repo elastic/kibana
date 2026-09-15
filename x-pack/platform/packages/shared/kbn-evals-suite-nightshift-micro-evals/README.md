@@ -50,6 +50,8 @@ For this port's local acceptance, the approved judge override is
 unavailable Vault sign-in. Set `EVAL_CONNECTOR_ID` to that ID **before** regenerating the
 OpenRouter payload, and pass the same ID with `--judge`. The profile remains unchanged;
 experiment metadata records the actual model and the PR evidence records the connector.
+For EIS, judge metadata is read from the underlying inference endpoint because REST
+discovery exposes endpoint IDs in place of stack connector aliases.
 
 The repo skill [/run-micro-evals](../../../../../.agents/skills/run-micro-evals/SKILL.md)
 resolves the profile and connector, runs this command, and returns all three experiment links
