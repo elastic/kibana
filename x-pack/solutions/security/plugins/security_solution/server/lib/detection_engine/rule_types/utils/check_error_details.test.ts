@@ -134,7 +134,7 @@ line 1:45: invalid [test_not_lookup] resolution in lookup mode to an index in [s
     });
   });
 
-  describe('illegal_argument_exception with known user-driven reason substrings', () => {
+  describe('user-driven query errors matched by reason substring', () => {
     it('should mark as user error when reason contains "is not an IP string literal"', () => {
       const errorMessage = `index: ".ds-logs-fortinet_fortigate.log-default-2026.05.29-000027" reason: "failed to create query: ' 115.77.100.113' is not an IP string literal." type: "query_shard_exception" caused by reason: "' 115.77.100.113' is not an IP string literal." caused by type: "illegal_argument_exception"`;
       expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
@@ -147,6 +147,37 @@ line 1:45: invalid [test_not_lookup] resolution in lookup mode to an index in [s
 
     it('should not mark as user error when illegal_argument_exception has no known user-driven reason', () => {
       const errorMessage = `index: "logs-*" reason: "failed to execute query" type: "query_shard_exception" caused by reason: "some unexpected framework error" caused by type: "illegal_argument_exception"`;
+      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', false);
+    });
+
+    it('should mark prefix-on-ip shard failure as user error', () => {
+      const errorMessage = `index: ".ds-logs-fortinet_fortigate.log-default-2026.05.29-000027" reason: "Can only use prefix queries on keyword, text and wildcard fields - not on [source.ip] which is of type [ip]" type: "query_shard_exception"`;
+      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
+    });
+
+    it('should mark IP string literal error as user error when wrapped in search_phase_execution_exception without illegal_argument_exception', () => {
+      const errorMessage = `search_phase_execution_exception
+	Root causes:
+		query_shard_exception: failed to create query: 'exists' is not an IP string literal.`;
+      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
+    });
+
+    it('should mark prefix-on-ip error as user error when wrapped in search_phase_execution_exception', () => {
+      const errorMessage = `search_phase_execution_exception
+	Root causes:
+		query_shard_exception: Can only use prefix queries on keyword, text and wildcard fields - not on [destination.ip] which is of type [ip]`;
+      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
+    });
+
+    it('should mark IP string literal error string as user error', () => {
+      const errorMessage = `search_phase_execution_exception
+	Root causes:
+		query_shard_exception: failed to create query: 'exists' is not an IP string literal.`;
+      expect(checkErrorDetails(errorMessage)).toHaveProperty('isUserError', true);
+    });
+
+    it('should not mark query_shard_exception with an unrecognized reason as user error', () => {
+      const errorMessage = `index: "logs-*" reason: "failed to create query: For input string: \\"16 \\"" type: "query_shard_exception" caused by reason: "For input string: \\"16 \\"" caused by type: "number_format_exception"`;
       expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', false);
     });
   });
