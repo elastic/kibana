@@ -36,15 +36,15 @@ describe('chart type guidance', () => {
     expect(metricConfig).not.toContain('bar_horizontal');
   });
 
-  it('defaults metric panels to a trend background', () => {
+  it('leaves pie legends to the Lens default', () => {
     const design = getChartDesignPromptContent();
+    const pieConfig = getChartTypeConfigPromptContent(SupportedChartType.Pie);
     const metricConfig = getChartTypeConfigPromptContent(SupportedChartType.Metric);
 
-    expect(design).toContain('Default to a trend background');
-    expect(design).not.toContain('A single number is fine');
-    expect(metricConfig).toContain('Default to `background_chart: { type: "trend" }`');
-    expect(metricConfig).toContain('including during enhancement');
-    expect(metricConfig).not.toContain('A single number is fine');
+    expect(design).toContain('Keep the Lens default legend');
+    expect(pieConfig).toContain('Omit `legend` entirely so Lens applies its defaults');
+    expect(pieConfig).toContain('drop any existing `legend` block');
+    expect(metricConfig).not.toContain('Omit `legend` entirely');
   });
 
   it('warns both authors that percent formatting multiplies already-scaled columns', () => {

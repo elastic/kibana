@@ -121,9 +121,9 @@ export const chartTypeRegistry: ChartTypeRegistry = {
         noPanelTitleRule('the primary metric label already names the panel'),
         {
           design:
-            'Default to a trend background so the number carries its recent history instead of sitting alone on white. Add a secondary metric when the query returns a useful companion value. Leave a lone number only when the user asked for one or a progress bar is used instead.',
+            'A single number is fine. When the query results support it and the value benefits from context, add a trend background or a secondary metric instead of leaving a lone number on white.',
           config:
-            'Default to `background_chart: { type: "trend" }` on the primary metric, including during enhancement; Lens derives the trendline from the same ES|QL query, so no extra columns are needed. Add a secondary metric (a second `metrics[]` entry with `type: "secondary"`) only when the query returns a useful companion column; never invent another index or field. Omit the trend only when the user asked for a plain number or a progress bar (`type: "bar"`) is used instead, since a metric has one background chart.',
+            'A single number is fine. When the value benefits from context, add a trend background (`background_chart: { type: "trend" }`) or a secondary metric (a second `metrics[]` entry with `type: "secondary"`) bound to columns the same ES|QL query returns; never invent another index or field.',
         },
         {
           design: 'Show a progress bar only when the value has a meaningful maximum.',
@@ -274,7 +274,16 @@ export const chartTypeRegistry: ChartTypeRegistry = {
     prompt: {
       selection:
         'Pie or donut showing part-to-whole proportions as slices. Choose for percentage breakdowns with a limited number of categories, ideally fewer than 7 (e.g. "traffic distribution by browser as a donut").',
-      rules: [panelTitleRule, defaultPaletteRule],
+      rules: [
+        panelTitleRule,
+        defaultPaletteRule,
+        {
+          design:
+            'Keep the Lens default legend. Do not prescribe legend placement, size, or visibility unless the user asks for a specific legend change.',
+          config:
+            'Omit `legend` entirely so Lens applies its defaults, including during enhancement; drop any existing `legend` block rather than carrying it over. Set `legend` only when the user explicitly asks for a legend change, and then set only the requested property.',
+        },
+      ],
     },
   },
   [SupportedChartType.Treemap]: {
