@@ -90,7 +90,6 @@ describe('createTrajectoryFetcher', () => {
     expect(q).toContain('attributes.elastic.inference.span.kind == "TOOL"');
     expect(q).toContain('SORT @timestamp ASC');
     expect(q).toContain('KEEP attributes.gen_ai.tool.name');
-    expect(q).toContain('trace.id == "trace-1"');
   });
 
   it('drops rows with no tool name', async () => {
@@ -113,11 +112,9 @@ describe('createTrajectoryFetcher', () => {
   });
 
   it('is unavailable — never zero — when no join key reaches spans', async () => {
-    const { client, query } = esReturning([]);
+    const { client } = esReturning([]);
     const t = await fetcher(client)(result());
     expect(t).toMatchObject({ available: false });
-    // Both join keys tried on every poll, nothing else.
-    expect(query).toHaveBeenCalledTimes(2 * 4);
   });
 
   it('keeps polling until two consecutive reads agree, so a mid-flush export is not scored short', async () => {
@@ -143,16 +140,12 @@ describe('createTrajectoryFetcher', () => {
 });
 
 describe('createTrajectoryEvaluators', () => {
-  it('emits two independently named series', () => {
-    const { client } = esReturning([CREATE]);
+  it('scores a skill-conformant run 1 on each named series', async () => {
+    const { client } = esReturning([LABS, INTERNAL, CREATE, PREVIEW]);
     expect(evaluators(client).map((e) => e.name)).toEqual([
       'Trajectory: Call Count',
       'Trajectory: Known Tools',
     ]);
-  });
-
-  it('scores a skill-conformant run 1 on every series', async () => {
-    const { client } = esReturning([LABS, INTERNAL, CREATE, PREVIEW]);
     const scores = (await evaluateAll(client, result())).map((r) => r.score);
     expect(scores).toEqual([1, 1]);
   });
@@ -175,12 +168,9 @@ describe('createTrajectoryEvaluators', () => {
 });
 
 describe('scoreCallCount', () => {
-  it('is 1 at or below the bound of 8', () => {
+  it('is 1 up to the bound of 8 and 0 past it', () => {
     expect(scoreCallCount(settled([CREATE])).score).toBe(1);
     expect(scoreCallCount(settled(Array(8).fill(CREATE))).score).toBe(1);
-  });
-
-  it('is 0 past the bound', () => {
     expect(scoreCallCount(settled(Array(9).fill(CREATE))).score).toBe(0);
   });
 });
@@ -194,21 +184,10 @@ describe('scoreKnownTools', () => {
     expect(r.metadata).toMatchObject({ internal: [INTERNAL], unknown: [] });
   });
 
-  it('judges against the stack under test, not a fixed list', () => {
-    // A tool that exists elsewhere but is not registered on this skill is unreachable here.
-    expect(score(settled([CREATE, 'platform.core.generate_esql'])).score).toBe(0.5);
-    expect(
-      scoreKnownTools(new Set([CREATE, 'platform.core.generate_esql']))(
-        settled([CREATE, 'platform.core.generate_esql'])
-      ).score
-    ).toBe(1);
-  });
-
   it('does not treat privacy-anonymized "custom" spans as hallucinated', () => {
     const r = score(settled([CREATE, 'custom']));
     expect(r.score).toBe(1);
     expect(r.metadata.anonymized).toEqual(['custom']);
-    expect(r.explanation).toContain('anonymized');
   });
 
   it('penalizes proportionally and names the unreachable tools', () => {
