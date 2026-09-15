@@ -476,6 +476,73 @@ describe('EnterParallelNodeImpl', () => {
     expect(branchRunCalls).toEqual([0, 0]);
   });
 
+  // Upgrade compatibility: a state object written by a version that did not
+  // capture branch results carries status/currentNodeId and nothing else. Those
+  // branches are already terminal, so they are never advanced again and any
+  // approach that reads a per-branch captured result would emit nothing for
+  // them -- the data loss would survive the upgrade for exactly the in-flight
+  // executions the fix exists to rescue. Rehydrating from the branches' step
+  // executions does not depend on anything in persisted state, so it recovers
+  // them.
+  it('aggregates a resumed pre-upgrade state whose branches carry no captured result', async () => {
+    node = makeNode({
+      foreach: JSON.stringify(['a', 'b', 'c']),
+      concurrency: { max: 2 },
+      mode: 'settled',
+    });
+
+    // Exactly the old persisted shape: no `result` anywhere, every branch
+    // already terminal from before the upgrade.
+    persistedState = {
+      total: 3,
+      startedAt: Date.now() - 1_000,
+      static: false,
+      branches: [0, 1, 2].map((index) => ({
+        index,
+        key: ['a', 'b', 'c'][index],
+        status: 'completed' as const,
+        started: true,
+        currentNodeId: `branch_node_${index}`,
+        startedAt: Date.now() - 1_000,
+        finishedAt: Date.now() - 500,
+      })),
+    };
+
+    factory.createStepExecutionRuntime = jest.fn(({ stackFrames }) => {
+      const lastFrame = stackFrames[stackFrames.length - 1];
+      const scopeId = lastFrame?.nestedScopes?.[lastFrame.nestedScopes.length - 1]?.scopeId;
+      const index = Number(scopeId ?? 0);
+      const stepExecutionId = `exec_branch_${index}`;
+      return {
+        abortController: new AbortController(),
+        contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+        stepExecutionId,
+        get stepExecution() {
+          return { status: branchOutcome(index), state: {} };
+        },
+        getCurrentStepResult: () => ({
+          output: rehydratedIds.includes(stepExecutionId) ? { branch: index } : {},
+          error: undefined,
+        }),
+        timeoutStep: jest.fn(),
+      } as unknown as StepExecutionRuntime;
+    }) as unknown as typeof factory.createStepExecutionRuntime;
+
+    // One tick: everything is already terminal, so this resume goes straight to
+    // aggregation without advancing a single branch.
+    await build().run();
+
+    expect(stepRuntime.finishStep).toHaveBeenCalledTimes(1);
+    const output = stepRuntime.finishStep.mock.calls[0][0] as {
+      results: Array<{ output?: { branch?: number } }>;
+    };
+    expect(output.results.map((r) => r.output)).toEqual([
+      { branch: 0 },
+      { branch: 1 },
+      { branch: 2 },
+    ]);
+  });
+
   it('count-waiting:false frees a parked branch\u2019s slot so a queued branch can start', async () => {
     // max: 1, two branches; branch 0 parks in a durable wait. With
     // count-waiting:false the parked branch frees its slot, so branch 1 starts on
