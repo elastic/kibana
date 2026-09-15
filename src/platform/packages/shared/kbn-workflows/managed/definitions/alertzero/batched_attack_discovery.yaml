@@ -183,6 +183,17 @@ steps:
         {%- endif -%}
         {%- endfor -%}
         {{ delivered }}
+      # Summed across batches rather than taken from one, because each batch runs
+      # its own retrieval and reports its own count. Accumulated via a local
+      # because a filter argument cannot itself be a filter chain, so
+      # `plus: result.output.alerts_context_count | default: 0` would not parse.
+      alerts_analyzed: |-
+        {%- assign analyzed = 0 -%}
+        {%- for result in steps.generate_batches.output.results -%}
+        {%- assign batch_count = result.output.alerts_context_count | default: 0 -%}
+        {%- assign analyzed = analyzed | plus: batch_count -%}
+        {%- endfor -%}
+        {{ analyzed }}
 
   # `| plus: 0` coerces the counted strings above back to numbers.
   - name: emit_result
@@ -194,3 +205,10 @@ steps:
       batches_failed: "${{ steps.generate_batches.output.total | minus: steps.aggregate.output.delivered }}"
       batches_succeeded: "${{ steps.aggregate.output.delivered | plus: 0 }}"
       batches_total: "${{ steps.generate_batches.output.total }}"
+      # One generation id per delivered batch, not one per run: batching turns the
+      # run step's single `execution_uuid` into 1:N. Each is a
+      # `kibana.alert.rule.execution.uuid` on that batch's persisted discoveries,
+      # so a caller can still trace a run to everything it produced. Same
+      # expression `fetch_discoveries` queries by, so the two cannot drift.
+      execution_uuids: "${{ steps.generate_batches.output.results | map: 'output' | map: 'execution_uuid' | compact }}"
+      alerts_analyzed: "${{ steps.aggregate.output.alerts_analyzed | plus: 0 }}"

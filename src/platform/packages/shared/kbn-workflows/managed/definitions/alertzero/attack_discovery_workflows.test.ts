@@ -214,19 +214,21 @@ describe('Attack Discovery worker chain', () => {
   describe('generation step', () => {
     const run = stepIn(workerSteps, 'run_generation');
 
-    it('reuses the existing generation engine through the run step', () => {
-      expect(run?.type).toBe('security.attack-discovery.run');
+    it('delegates generation to the batched sub-workflow', () => {
+      expect(run?.type).toBe('workflow.execute');
+      expect(run?.with?.['workflow-id']).toBe('system-security-batched-attack-discovery');
     });
 
-    it('runs generation in sync mode', () => {
-      expect(run?.with?.mode).toBe('sync');
+    // `workflow.execute`, not `executeAsync`: the fan-out below needs the
+    // discoveries inline, and a child failure must fail this run.
+    it('waits for the child rather than firing it off', () => {
+      expect(run?.type).not.toBe('workflow.executeAsync');
     });
 
-    // The pipeline enforces its own 30m budget internally. A step timeout at or below
-    // it would win the race and produce an opaque engine kill that does NOT cancel the
-    // background pipeline, instead of an attributed PipelineStepError.
-    it('sets a step timeout above the 30m pipeline budget', () => {
-      expect(run?.timeout).toBe('35m');
+    // The child runs N pipelines, each with its own 30m branch-timeout, so this
+    // bounds the whole batched run rather than a single pipeline's 30m budget.
+    it('sets a step timeout that bounds the whole batched child', () => {
+      expect(run?.timeout).toBe('4h');
     });
 
     it('leaves failure propagation alone so a failed generation fails the run', () => {
@@ -591,15 +593,16 @@ describe('Attack Discovery worker chain', () => {
       );
     });
 
-    it('reports the generation execution_uuid so a run can be traced to its discoveries', () => {
-      expect((worker.outputs ?? []).map((output) => output.name)).toContain('execution_uuid');
+    it('reports the generation execution_uuids so a run can be traced to its discoveries', () => {
+      expect((worker.outputs ?? []).map((output) => output.name)).toContain('execution_uuids');
     });
 
-    // The Attack Discovery generation id from the run step, not this workflow's
-    // execution id: it keys the AD generations API and every persisted discovery.
-    it('takes execution_uuid from the run step rather than the workflow execution', () => {
-      expect(stepIn(workerSteps, 'emit_result')?.with?.execution_uuid).toContain(
-        'steps.run_generation.output.execution_uuid'
+    // The Attack Discovery generation ids from the generation step, not this
+    // workflow's execution id: each keys the AD generations API and the persisted
+    // discoveries of its batch. Plural because generation is batched 1:N.
+    it('takes execution_uuids from the generation step rather than the workflow execution', () => {
+      expect(stepIn(workerSteps, 'emit_result')?.with?.execution_uuids).toContain(
+        'steps.run_generation.output.execution_uuids'
       );
     });
 

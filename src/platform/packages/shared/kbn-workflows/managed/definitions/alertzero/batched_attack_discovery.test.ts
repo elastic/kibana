@@ -12,7 +12,6 @@ import { parse } from 'yaml';
 import {
   ALERTZERO_BATCHED_ATTACK_DISCOVERY_WORKFLOW,
   ALERTZERO_BATCHED_ATTACK_DISCOVERY_WORKFLOW_ID,
-  ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW,
 } from '.';
 import { getManagedWorkflowDefinition, managedWorkflowDefinitions } from '../..';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
@@ -327,11 +326,13 @@ describe('ALERTZERO_BATCHED_ATTACK_DISCOVERY_WORKFLOW', () => {
   describe('output', () => {
     it('emits the aggregate contract the parent reads', () => {
       expect(Object.keys(step('emit_result').with ?? {}).sort()).toEqual([
+        'alerts_analyzed',
         'attack_discoveries',
         'batch_errors',
         'batches_failed',
         'batches_succeeded',
         'batches_total',
+        'execution_uuids',
       ]);
     });
 
@@ -356,9 +357,25 @@ describe('ALERTZERO_BATCHED_ATTACK_DISCOVERY_WORKFLOW', () => {
       );
     });
 
-    // `results[].key` is the branch's entire batch of alerts.
+    // `results[].key` is the branch's entire batch of alerts, so the array must
+    // never be emitted whole. `execution_uuids` does read `results`, but projects
+    // a single scalar out of each entry -- hence checking for an UNPROJECTED
+    // reference rather than any mention of `results` at all.
     it('never emits the raw branch results', () => {
-      expect(JSON.stringify(step('emit_result').with)).not.toContain('output.results');
+      const unprojected = Object.values(step('emit_result').with ?? {})
+        .map(String)
+        .filter((value) => value.includes('output.results') && !value.includes('map:'));
+
+      expect(unprojected).toEqual([]);
+    });
+
+    // 1:N with batching. Same expression `fetch_discoveries` queries by, so the
+    // ids a caller is handed cannot drift from the ones the discoveries were
+    // fetched with.
+    it('emits one execution uuid per delivered batch', () => {
+      expect(step('emit_result').with?.execution_uuids).toBe(
+        "${{ steps.generate_batches.output.results | map: 'output' | map: 'execution_uuid' | compact }}"
+      );
     });
   });
 
@@ -434,29 +451,5 @@ describe('ALERTZERO_BATCHED_ATTACK_DISCOVERY_WORKFLOW', () => {
 
       expect(JSON.parse(rendered)).toEqual([]);
     });
-  });
-});
-
-describe('ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW', () => {
-  const floor = parse(
-    ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW.yamlTemplate({
-      autonomyLevel: 'manual',
-      scheduleInterval: '1h',
-      settingsVersion: 1,
-    })
-  ) as ParsedWorkflow;
-
-  it('delegates generation to the batched sub-workflow', () => {
-    const execute = floor.steps?.find(({ type }) => type === 'workflow.execute');
-
-    expect(execute?.with?.['workflow-id']).toBe(ALERTZERO_BATCHED_ATTACK_DISCOVERY_WORKFLOW_ID);
-  });
-
-  it('no longer runs the console stub', () => {
-    expect(floor.steps?.map(({ type }) => type)).not.toContain('console');
-  });
-
-  it('keeps its scheduled trigger', () => {
-    expect(floor.triggers?.map(({ type }) => type)).toEqual(['scheduled']);
   });
 });
