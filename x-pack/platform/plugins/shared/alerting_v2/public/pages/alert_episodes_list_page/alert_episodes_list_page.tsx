@@ -469,7 +469,7 @@ const AlertEpisodesListPageContent = () => {
           if (disabled && action.disabledTooltip) {
             return (
               <EuiToolTip content={action.disabledTooltip}>
-                <span css={{ cursor: 'not-allowed' }}>
+                <span tabIndex={0} css={{ display: 'contents' }}>
                   {control}
                 </span>
               </EuiToolTip>
