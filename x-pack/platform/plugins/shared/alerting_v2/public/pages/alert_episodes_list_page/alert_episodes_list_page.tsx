@@ -620,7 +620,7 @@ const AlertEpisodesListPageContent = () => {
                   </span>
                 </EuiScreenReaderOnly>
                 {!dataView ? (
-                  <EuiLoadingSpinner />
+                  <EuiLoadingSpinner data-test-subj="alertingV2EpisodesListTable-loading" />
                 ) : (
                   <UnifiedDataTable
                     ariaLabelledBy="alertingEpisodesTableAriaLabel"
