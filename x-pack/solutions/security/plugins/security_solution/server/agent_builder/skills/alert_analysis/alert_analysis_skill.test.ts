@@ -59,7 +59,11 @@ describe('alertAnalysisSkill', () => {
     });
 
     it('forbids speculative platform.core and workflow tools for steps with a dedicated security tool', () => {
-      expect(alertAnalysisSkill.content).toContain('Do NOT use platform.core.search');
+      expect(alertAnalysisSkill.content).toContain('platform.core.search');
+      expect(alertAnalysisSkill.content).toContain('platform.core.generate_esql');
+      expect(alertAnalysisSkill.content).toContain('platform.core.execute_esql');
+      expect(alertAnalysisSkill.content).toContain('workflow tools');
+      expect(alertAnalysisSkill.content).toMatch(/Do NOT use[^\n]*platform\.core/);
       expect(alertAnalysisSkill.content).toContain('no speculative index discovery');
     });
 
