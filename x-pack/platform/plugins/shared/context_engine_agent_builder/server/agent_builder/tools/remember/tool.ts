@@ -27,6 +27,12 @@ import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import { CONTEXT_ENGINE_REMEMBER_TOOL_ID } from '../../../../common/agent_builder_tools';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
+import {
+  addConversationReference,
+  createMemoryWriter,
+  type StoredMemoryDocument,
+  updateMemoryProvenance,
+} from '../memory_document';
 
 const memoryTypeSchema = z.enum(['memory.session', 'memory.session_fact']);
 
@@ -65,28 +71,6 @@ const rememberSchema = z.object({
     .describe('Optional timestamp after which the memory must not be recalled'),
 });
 
-interface StoredMemoryDocument {
-  '@timestamp': string;
-  id: string;
-  type: string;
-  title: string;
-  description: string;
-  content: string;
-  tags?: string[];
-  expires_at?: string;
-  updated_at: string;
-  attributes?: {
-    memory?: {
-      session_id?: string;
-    };
-  };
-  governance?: {
-    lifecycle?: {
-      status?: string;
-    };
-  };
-}
-
 export const createRememberTool = ({
   getAiIndexService,
   getCoreStart,
@@ -113,12 +97,14 @@ export const createRememberTool = ({
     Use memory.session_fact for a granular fact discovered during a session.
     Use memory.session for a synthesis of what was tried, what worked, and what should be done
     differently. Omit id to create a memory; provide an id returned by an earlier call only when
-    deliberately revising that memory. This tool handles session metadata server-side.
+    deliberately revising that memory. This tool handles session metadata, conversation references,
+    and provenance server-side.
   `,
   schema: rememberSchema,
   handler: async (params, context) => {
     const { request, spaceId, esClient, runContext, logger } = context;
-    const conversationId = getAgentFromRunContext(runContext)?.conversationId;
+    const agent = getAgentFromRunContext(runContext);
+    const conversationId = agent?.conversationId;
 
     if (!conversationId) {
       return {
@@ -152,6 +138,11 @@ export const createRememberTool = ({
       const currentUserClient = esClient.asCurrentUser;
       const now = new Date().toISOString();
       const logicalId = params.id ?? generateId();
+      const writer = createMemoryWriter({
+        toolId: CONTEXT_ENGINE_REMEMBER_TOOL_ID,
+        runId: runContext.runId,
+        agentId: agent?.agentId,
+      });
       let existingBackingIndex: string | undefined;
       let existingSeqNo: number | undefined;
       let existingPrimaryTerm: number | undefined;
@@ -227,13 +218,16 @@ export const createRememberTool = ({
           ? { expires_at: existingDocument.expires_at }
           : {}),
         updated_at: now,
+        references: addConversationReference(existingDocument?.references, conversationId),
         attributes: {
           ...existingDocument?.attributes,
-          memory: {
-            ...existingDocument?.attributes?.memory,
-            session_id: conversationId,
-          },
+          'memory.session_id': conversationId,
         },
+        governance: updateMemoryProvenance(
+          existingDocument?.governance,
+          writer,
+          existingDocument === undefined
+        ),
       };
 
       if (
