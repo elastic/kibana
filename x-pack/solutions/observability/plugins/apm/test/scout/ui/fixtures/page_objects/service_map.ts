@@ -149,19 +149,18 @@ export class ServiceMapPage {
   }
 
   async selectServiceMapEditorServiceName(serviceName: string) {
-    // Commit via the rendered custom-option row, not a blind type + Enter: the `async`
-    // combo box re-fetches on input and can drop focus mid-refetch, landing the value in
-    // the adjacent KQL box.
+    // fill() replaces the text (raw keyboard.type would drop focus mid-refetch on this
+    // `async` combo box, landing the value in the adjacent KQL box), then click the option
+    // by name: this waits for the async list to filter to the exact service before
+    // committing by mouse, avoiding a blind Enter on a control that may have lost focus.
     const searchInput = this.page.testSubj
       .locator('apmServiceMapEditorServiceNameComboBox')
       .locator('[data-test-subj="comboBoxSearchInput"]');
     await searchInput.click();
     await searchInput.fill(serviceName);
-    const customOption = this.page.getByRole('option', {
-      name: `Filter by service name '${serviceName}'`,
-    });
-    await customOption.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
-    await customOption.click();
+    const serviceNameOption = this.page.getByRole('option', { name: serviceName });
+    await serviceNameOption.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await serviceNameOption.click();
   }
 
   /**
