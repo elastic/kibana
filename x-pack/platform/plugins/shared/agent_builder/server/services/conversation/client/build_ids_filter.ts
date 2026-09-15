@@ -10,13 +10,13 @@ import { createBadRequestError } from '@kbn/agent-builder-common';
 import { CONVERSATION_BULK_GET_MAX_IDS } from '../../../../common/constants';
 
 /**
- * Compiles a caller-supplied conversation id list into Elasticsearch query DSL.
+ * Builds the filter clause matching a caller-supplied list of conversation ids.
  *
- * @param ids - Conversation ids to look up. An empty array compiles to a clause matching nothing.
- * @returns The compiled query.
+ * @param ids - Conversation ids to look up. An empty array yields a clause matching nothing.
+ * @returns The `ids` filter clause.
  * @throws A bad request error when more than {@link CONVERSATION_BULK_GET_MAX_IDS} ids are given.
  */
-export const compileConversationIds = (ids: string[]): QueryDslQueryContainer => {
+export const buildConversationIdsFilter = (ids: string[]): QueryDslQueryContainer => {
   if (ids.length > CONVERSATION_BULK_GET_MAX_IDS) {
     throw createBadRequestError(
       `Too many conversation ids: ${ids.length} were requested, but at most ${CONVERSATION_BULK_GET_MAX_IDS} may be looked up at once.`

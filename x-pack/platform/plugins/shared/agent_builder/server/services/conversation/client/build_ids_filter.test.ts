@@ -7,17 +7,17 @@
 
 import { AgentBuilderErrorCode } from '@kbn/agent-builder-common';
 import { CONVERSATION_BULK_GET_MAX_IDS } from '../../../../common/constants';
-import { compileConversationIds } from './compile_ids';
+import { buildConversationIdsFilter } from './build_ids_filter';
 
-describe('compileConversationIds', () => {
-  it('compiles ids to a single ids clause rather than a term disjunction', () => {
-    expect(compileConversationIds(['conv-1', 'conv-2'])).toEqual({
+describe('buildConversationIdsFilter', () => {
+  it('builds a single ids clause rather than a term disjunction', () => {
+    expect(buildConversationIdsFilter(['conv-1', 'conv-2'])).toEqual({
       ids: { values: ['conv-1', 'conv-2'] },
     });
   });
 
-  it('compiles an empty array to a clause matching nothing, never a missing filter', () => {
-    expect(compileConversationIds([])).toEqual({ ids: { values: [] } });
+  it('builds a clause matching nothing for an empty array, never a missing filter', () => {
+    expect(buildConversationIdsFilter([])).toEqual({ ids: { values: [] } });
   });
 
   it('accepts exactly the maximum number of ids', () => {
@@ -26,7 +26,7 @@ describe('compileConversationIds', () => {
       (_, index) => `conv-${index}`
     );
 
-    expect(compileConversationIds(ids)).toEqual({ ids: { values: ids } });
+    expect(buildConversationIdsFilter(ids)).toEqual({ ids: { values: ids } });
   });
 
   it('rejects more than the maximum number of ids', () => {
@@ -35,7 +35,7 @@ describe('compileConversationIds', () => {
       (_, index) => `conv-${index}`
     );
 
-    expect(() => compileConversationIds(ids)).toThrow(
+    expect(() => buildConversationIdsFilter(ids)).toThrow(
       expect.objectContaining({
         code: AgentBuilderErrorCode.badRequest,
         message: expect.stringContaining(`at most ${CONVERSATION_BULK_GET_MAX_IDS}`),

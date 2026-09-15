@@ -37,6 +37,7 @@ import { eventsToRounds } from './events_to_rounds';
 import {
   fromEs,
   fromEsWithoutRounds,
+  toAttachmentSummaries,
   toEs,
   toConversationResponse,
   toConversationResponseFromDocument,
@@ -805,7 +806,7 @@ describe('conversation model converters', () => {
     };
   };
 
-  describe('fromEsWithoutRounds attachment summaries', () => {
+  describe('attachment summaries', () => {
     const documentWithAttachments = (attachments: VersionedAttachment[]): ConversationDocument => ({
       _id: 'conv_id',
       _seq_no: 1,
@@ -840,51 +841,39 @@ describe('conversation model converters', () => {
     });
 
     it('reduces attachments to id and type, dropping version content', () => {
-      const deserialized = fromEsWithoutRounds(
-        documentWithAttachments([textAttachment('att-1'), textAttachment('att-2')]),
-        requestingUser
-      );
-
-      expect(deserialized.attachments).toEqual([
+      expect(toAttachmentSummaries([textAttachment('att-1'), textAttachment('att-2')])).toEqual([
         { id: 'att-1', type: 'text' },
         { id: 'att-2', type: 'text' },
       ]);
     });
 
     it('treats an attachment with no active field as active', () => {
+      expect(toAttachmentSummaries([textAttachment('att-1')])).toEqual([
+        { id: 'att-1', type: 'text' },
+      ]);
+    });
+
+    it('omits soft-deleted attachments', () => {
+      expect(
+        toAttachmentSummaries([textAttachment('att-1', true), textAttachment('att-2', false)])
+      ).toEqual([{ id: 'att-1', type: 'text' }]);
+    });
+
+    it('summarizes a conversation with no attachments to nothing', () => {
+      expect(toAttachmentSummaries([])).toEqual([]);
+      expect(toAttachmentSummaries(undefined)).toEqual([]);
+    });
+
+    it('leaves the rounds-less row itself free of attachments', () => {
       const deserialized = fromEsWithoutRounds(
         documentWithAttachments([textAttachment('att-1')]),
         requestingUser
       );
 
-      expect(deserialized.attachments).toEqual([{ id: 'att-1', type: 'text' }]);
+      expect(deserialized).not.toHaveProperty('attachments');
     });
 
-    it('omits soft-deleted attachments', () => {
-      const deserialized = fromEsWithoutRounds(
-        documentWithAttachments([textAttachment('att-1', true), textAttachment('att-2', false)]),
-        requestingUser
-      );
-
-      expect(deserialized.attachments).toEqual([{ id: 'att-1', type: 'text' }]);
-    });
-
-    it('omits the field entirely when every attachment is soft-deleted', () => {
-      const deserialized = fromEsWithoutRounds(
-        documentWithAttachments([textAttachment('att-1', false)]),
-        requestingUser
-      );
-
-      expect(deserialized.attachments).toBeUndefined();
-    });
-
-    it('omits the field entirely for a conversation with no attachments', () => {
-      const deserialized = fromEsWithoutRounds(documentWithAttachments([]), requestingUser);
-
-      expect(deserialized.attachments).toBeUndefined();
-    });
-
-    it('does not leak summaries into the full conversation, which keeps soft-deleted attachments', () => {
+    it('keeps soft-deleted attachments on the full conversation', () => {
       const deserialized = fromEs(
         documentWithAttachments([textAttachment('att-1'), textAttachment('att-2', false)]),
         requestingUser

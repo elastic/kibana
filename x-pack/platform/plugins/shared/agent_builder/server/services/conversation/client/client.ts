@@ -75,7 +75,7 @@ import {
   MAX_CONVERSATION_SEARCH_PER_PAGE,
   MAX_RESULT_WINDOW,
 } from '../../../../common/constants';
-import { compileConversationIds } from './compile_ids';
+import { buildConversationIdsFilter } from './build_ids_filter';
 import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
 import type { ConversationProperties, ConversationStorage } from './storage';
 import { conversationIndexName, createStorage } from './storage';
@@ -302,11 +302,11 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   async bulkGet(ids: string[]): Promise<Map<string, ConversationWithoutRoundsWithPermissions>> {
-    const idsFilter = compileConversationIds(ids);
-
     if (ids.length === 0) {
       return new Map();
     }
+
+    const idsFilter = buildConversationIdsFilter(ids);
 
     const agentIds = await this.resolveAccessibleAgentIds();
     if (agentIds.length === 0) {
