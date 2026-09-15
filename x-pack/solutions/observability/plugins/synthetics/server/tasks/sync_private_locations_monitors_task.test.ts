@@ -120,9 +120,9 @@ describe('SyncPrivateLocationMonitorsTask', () => {
   });
 
   describe('start', () => {
-    it('always schedules the safety-net interval', async () => {
+    it('uses the existing task schedule when task already exists', async () => {
       mockTaskManagerStart.get.mockResolvedValue({
-        schedule: { interval: DEFAULT_TASK_SCHEDULE },
+        schedule: { interval: '10m' },
       } as any);
 
       await task.start();
@@ -131,12 +131,11 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         'Synthetics:Sync-Private-Location-Monitors-single-instance'
       );
       expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalledWith(
-        expect.objectContaining({ schedule: { interval: DEFAULT_TASK_SCHEDULE } })
+        expect.objectContaining({ schedule: { interval: '10m' } })
       );
-      expect(mockTaskManagerStart.runSoon).not.toHaveBeenCalled();
     });
 
-    it('schedules DEFAULT_TASK_SCHEDULE when the task does not exist yet', async () => {
+    it('falls back to DEFAULT_TASK_SCHEDULE when task does not exist yet', async () => {
       mockTaskManagerStart.get.mockRejectedValue({ statusCode: 404 });
 
       await task.start();
@@ -144,20 +143,15 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalledWith(
         expect.objectContaining({ schedule: { interval: DEFAULT_TASK_SCHEDULE } })
       );
-      expect(mockTaskManagerStart.runSoon).not.toHaveBeenCalled();
     });
 
-    it('overwrites a leftover 5m interval and runs the task soon', async () => {
-      mockTaskManagerStart.get.mockResolvedValue({ schedule: { interval: '5m' } } as any);
-      mockTaskManagerStart.runSoon.mockResolvedValue({} as any);
+    it('uses DEFAULT_TASK_SCHEDULE when existing task has no schedule', async () => {
+      mockTaskManagerStart.get.mockResolvedValue({ schedule: undefined } as any);
 
       await task.start();
 
       expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalledWith(
         expect.objectContaining({ schedule: { interval: DEFAULT_TASK_SCHEDULE } })
-      );
-      expect(mockTaskManagerStart.runSoon).toHaveBeenCalledWith(
-        'Synthetics:Sync-Private-Location-Monitors-single-instance'
       );
     });
   });
@@ -1147,10 +1141,10 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         .mockResolvedValue(mockPrivateLocations as any);
     });
 
-    it('returns the safety-net interval even when the instance still has a 5m schedule', async () => {
-      const taskInstance = { ...getMockTaskInstance(), schedule: { interval: '5m' } };
+    it('uses the task schedule interval when present', async () => {
+      const taskInstance = { ...getMockTaskInstance(), schedule: { interval: '15m' } };
       const result = await task.runTask({ taskInstance });
-      expect(scheduleOf(result)).toEqual({ interval: DEFAULT_TASK_SCHEDULE });
+      expect(scheduleOf(result)).toEqual({ interval: '15m' });
     });
 
     it('returns DEFAULT_TASK_SCHEDULE when the instance has no schedule', async () => {
