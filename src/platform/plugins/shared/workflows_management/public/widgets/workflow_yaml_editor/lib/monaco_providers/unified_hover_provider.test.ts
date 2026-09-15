@@ -49,7 +49,8 @@ jest.mock('../../../../entities/workflows/store/workflow_detail/utils/computatio
   performComputation: (...args: unknown[]) => mockPerformComputation(...args),
 }));
 
-jest.mock('../../../../features/validate_workflow_yaml/model/types', () => ({
+jest.mock('@kbn/workflows-yaml', () => ({
+  ...jest.requireActual('@kbn/workflows-yaml'),
   isYamlValidationMarkerOwner: jest.fn().mockReturnValue(false),
 }));
 
@@ -66,6 +67,7 @@ jest.mock('./provider_registry', () => ({
 }));
 
 jest.mock('@kbn/workflows', () => ({
+  ...jest.requireActual('@kbn/workflows'),
   resolveKibanaStepTypeAlias: (type: string) =>
     type === 'kibana.createCaseDefaultSpace' ? 'kibana.createCase' : type,
 }));

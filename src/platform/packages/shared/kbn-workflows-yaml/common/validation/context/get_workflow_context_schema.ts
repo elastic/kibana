@@ -17,9 +17,9 @@ import {
 } from '@kbn/workflows/spec/lib/field_conversion';
 import { BaseEventSchema } from '@kbn/workflows/spec/schema/common/base_event';
 import { AlertEventSchema } from '@kbn/workflows/spec/schema/triggers/alert_trigger_schema';
-import { inferZodType } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
-import { triggerSchemas } from '../../../trigger_schemas';
+import { inferZodType } from '../../zod/infer_zod_type';
+import { getWorkflowContextRegistry } from './registry';
 
 function isZodObject(schema: z.ZodType): schema is z.ZodObject<z.ZodRawShape> {
   return schema instanceof z.ZodObject;
@@ -27,7 +27,8 @@ function isZodObject(schema: z.ZodType): schema is z.ZodObject<z.ZodRawShape> {
 
 /**
  * Build event schema from workflow triggers: base (spaceId) + alert props when present + custom trigger event schemas.
- * Custom trigger event schemas are resolved via the triggerSchemas singleton (same pattern as stepSchemas for steps).
+ * Custom trigger event schemas are resolved through the workflow context registry, which the
+ * consuming plugin populates from `workflows_extensions` at start.
  * Uses shape spread instead of deprecated Zod v4 .merge().
  */
 function buildEventSchemaFromTriggers(triggers: Array<{ type?: string }>): z.ZodType {
@@ -40,7 +41,7 @@ function buildEventSchemaFromTriggers(triggers: Array<{ type?: string }>): z.Zod
   for (const trigger of triggers) {
     const type = trigger?.type;
     if (typeof type === 'string' && !isTriggerType(type)) {
-      const def = triggerSchemas.getTriggerDefinition(type);
+      const def = getWorkflowContextRegistry().getTriggerDefinition(type);
       if (def?.eventSchema && isZodObject(eventSchema) && isZodObject(def.eventSchema)) {
         eventSchema = z.object({
           ...eventSchema.shape,

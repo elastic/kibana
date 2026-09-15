@@ -10,15 +10,15 @@
 import { type Document, parseDocument } from 'yaml';
 import { DynamicStepContextSchema } from '@kbn/workflows';
 import { getShape } from '@kbn/workflows/common/utils/zod';
+import { getScalarValueAtOffset } from '../../yaml/get_scalar_value_at_offset';
 import { z } from '@kbn/zod/v4';
 import {
   extendContextWithTemplateLocals,
   getContextSchemaWithTemplateLocals,
   mapBlockScalarSourceToValueOffset,
 } from './extend_context_with_template_locals';
-import { getScalarValueAtOffset } from '../../../../common/lib/yaml/get_scalar_value_at_offset';
 
-jest.mock('../../../../common/lib/yaml/get_scalar_value_at_offset');
+jest.mock('../../yaml/get_scalar_value_at_offset');
 
 describe('extendContextWithTemplateLocals', () => {
   it('extends schema with assign variable name', () => {
@@ -110,8 +110,8 @@ describe('getContextSchemaWithTemplateLocals', () => {
     typeof getScalarValueAtOffset
   >;
   const realGetScalarValueAtOffset = jest.requireActual<
-    typeof import('../../../../common/lib/yaml/get_scalar_value_at_offset')
-  >('../../../../common/lib/yaml/get_scalar_value_at_offset').getScalarValueAtOffset;
+    typeof import('../../yaml/get_scalar_value_at_offset')
+  >('../../yaml/get_scalar_value_at_offset').getScalarValueAtOffset;
 
   it('returns base schema when scalar at offset is null', () => {
     mockGetScalarValueAtOffset.mockReturnValue(null);

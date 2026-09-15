@@ -20,7 +20,7 @@ import { performComputation } from '../../../../../entities/workflows/store/work
 import { findStepByLine } from '../../../../../entities/workflows/store/workflow_detail/utils/step_finder';
 import { triggerSchemas } from '../../../../../trigger_schemas';
 
-jest.mock('../../../../../features/workflow_context/lib/get_output_schema_for_step_type');
+jest.mock('@kbn/workflows-yaml/common/validation/context/get_output_schema_for_step_type');
 
 export function getFakeAutocompleteContextParams(
   yamlContent: string,

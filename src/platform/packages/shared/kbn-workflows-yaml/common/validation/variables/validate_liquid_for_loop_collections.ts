@@ -10,8 +10,8 @@
 import type { Document, LineCounter } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
+import type { YamlValidationResult } from '../types';
 import { validateLiquidYamlScalars } from './validate_liquid_yaml_scalars';
-import type { YamlValidationResult } from '../model/types';
 
 export function validateLiquidForLoopCollections(
   yamlString: string,

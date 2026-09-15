@@ -8,8 +8,8 @@
  */
 
 import type { Document, LineCounter } from 'yaml';
-import { validateLiquidYamlScalars } from './validate_liquid_yaml_scalars';
-import type { YamlValidationResult } from '../model/types';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
+import { validateLiquidYamlScalars } from '@kbn/workflows-yaml';
 
 export function validateLiquidTemplate(
   yamlString: string,

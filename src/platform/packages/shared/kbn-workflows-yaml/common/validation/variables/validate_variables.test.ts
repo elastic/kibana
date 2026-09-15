@@ -12,22 +12,22 @@ import type { WorkflowYaml } from '@kbn/workflows';
 import { DynamicWorkflowContextSchema } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 
-jest.mock('../../workflow_context/lib/get_context_for_path');
-jest.mock('../../workflow_context/lib/get_workflow_context_schema');
-jest.mock('../../workflow_context/lib/extend_context_with_template_locals');
+jest.mock('../context/get_context_for_path');
+jest.mock('../context/get_workflow_context_schema');
+jest.mock('../context/extend_context_with_template_locals');
 jest.mock('./validate_variable');
-jest.mock('../../../../common/lib/yaml/get_scalar_value_at_offset');
+jest.mock('../../yaml/get_scalar_value_at_offset');
 
+import type { VariableItem, YamlValidationResult } from '../types';
+import { getScalarValueAtOffset } from '../../yaml/get_scalar_value_at_offset';
 import { validateVariable } from './validate_variable';
 import { validateVariables } from './validate_variables';
-import { getScalarValueAtOffset } from '../../../../common/lib/yaml/get_scalar_value_at_offset';
-import { getContextSchemaWithTemplateLocals } from '../../workflow_context/lib/extend_context_with_template_locals';
+import { getContextSchemaWithTemplateLocals } from '../context/extend_context_with_template_locals';
 import {
   extendWithPathSpecificContext,
   getContextSchemaForStep,
-} from '../../workflow_context/lib/get_context_for_path';
-import { getWorkflowContextSchema } from '../../workflow_context/lib/get_workflow_context_schema';
-import type { VariableItem, YamlValidationResult } from '../model/types';
+} from '../context/get_context_for_path';
+import { getWorkflowContextSchema } from '../context/get_workflow_context_schema';
 
 const mockGetScalarValueAtOffset = getScalarValueAtOffset as jest.MockedFunction<
   typeof getScalarValueAtOffset
@@ -395,13 +395,13 @@ describe('validateVariables', () => {
     } as any);
     // Use real implementations so template locals are applied
     const { getContextSchemaForStep: realGetContextSchemaForStep } = jest.requireActual<
-      typeof import('../../workflow_context/lib/get_context_for_path')
-    >('../../workflow_context/lib/get_context_for_path');
+      typeof import('../context/get_context_for_path')
+    >('../context/get_context_for_path');
     mockGetContextSchemaForStep.mockImplementation(realGetContextSchemaForStep);
     const { getContextSchemaWithTemplateLocals: realGetContextSchemaWithTemplateLocals } =
-      jest.requireActual<
-        typeof import('../../workflow_context/lib/extend_context_with_template_locals')
-      >('../../workflow_context/lib/extend_context_with_template_locals');
+      jest.requireActual<typeof import('../context/extend_context_with_template_locals')>(
+        '../context/extend_context_with_template_locals'
+      );
     mockGetContextSchemaWithTemplateLocals.mockImplementation(
       realGetContextSchemaWithTemplateLocals
     );

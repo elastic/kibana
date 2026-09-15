@@ -12,8 +12,8 @@ import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { isAtomic } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod/v4';
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
+import { getWorkflowContextRegistry } from './registry';
 import { structuralStepOutputSchemas } from './structural_step_output_schemas';
-import { stepSchemas } from '../../../../common/step_schemas';
 
 const waitForInputFallbackSchema: z.ZodSchema = z.record(z.string(), z.unknown());
 
@@ -57,13 +57,15 @@ export const getOutputSchemaForStepType = (node: GraphNodeUnion): z.ZodSchema =>
     }
   }
 
-  if (isAtomic(node)) {
-    const stepDefinition = stepSchemas.getStepDefinition(node.stepType);
+  const registry = getWorkflowContextRegistry();
 
-    if (stepDefinition && stepSchemas.isPublicStepDefinition(stepDefinition)) {
+  if (isAtomic(node)) {
+    const stepOutput = registry.getStepOutput(node.stepType);
+
+    if (stepOutput) {
       try {
-        if (stepDefinition?.editorHandlers?.dynamicSchema?.getOutputSchema) {
-          return stepDefinition.editorHandlers.dynamicSchema.getOutputSchema({
+        if (stepOutput.getDynamicOutputSchema) {
+          return stepOutput.getDynamicOutputSchema({
             input: node.configuration.with,
             config: node.configuration,
           });
@@ -72,12 +74,11 @@ export const getOutputSchemaForStepType = (node: GraphNodeUnion): z.ZodSchema =>
         // If dynamic schema generation fails, fallback to static output schema
       }
 
-      return stepDefinition.outputSchema;
+      return stepOutput.outputSchema ?? z.unknown();
     }
   }
 
-  const allConnectorsMap = stepSchemas.getAllConnectorsMapCache();
-  const connector = allConnectorsMap?.get(node.stepType);
+  const connector = registry.getConnector(node.stepType);
 
   if (connector) {
     if (!connector.outputSchema) {

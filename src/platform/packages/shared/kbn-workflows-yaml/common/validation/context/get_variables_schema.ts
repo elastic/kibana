@@ -8,10 +8,9 @@
  */
 
 import { getStepId } from '@kbn/workflows';
-import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
-import { isDataSet } from '@kbn/workflows/graph';
-import { inferZodType } from '@kbn/workflows-yaml';
+import { isDataSet, type GraphNodeUnion, type WorkflowGraph } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod/v4';
+import { inferZodType } from '../../zod/infer_zod_type';
 
 const EMPTY_VARIABLES_SCHEMA = z.object({}).optional();
 

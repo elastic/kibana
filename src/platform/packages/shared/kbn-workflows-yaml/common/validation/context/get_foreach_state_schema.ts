@@ -14,15 +14,13 @@ import type {
   EnterForeachNodeConfiguration,
   EnterParallelNodeConfiguration,
 } from '@kbn/workflows/graph';
-import {
-  getDetailedTypeDescription,
-  getZodTypeName,
-  inferZodType,
-  matchVariable,
-} from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
+import { matchVariable } from '../../regex';
+import { getZodTypeName } from '../../zod/get_zod_type_name';
+import { inferZodType } from '../../zod/infer_zod_type';
+import { getDetailedTypeDescription } from '../../zod/zod_type_description';
+import { parseVariablePath } from '../parse_variable_path';
 import { InvalidForeachParameterError, InvalidForeachParameterErrorCodes } from './errors';
-import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
 
 export function getForeachStateSchema(
   stepContextSchema: typeof DynamicStepContextSchema,
