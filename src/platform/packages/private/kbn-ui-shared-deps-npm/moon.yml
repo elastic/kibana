@@ -40,7 +40,7 @@ tasks:
       - ^:build-webpack
     checks:
       - check: fingerprint
-        script: cd "${MOON_WORKSPACE_ROOT:-$(git rev-parse --show-toplevel)}" && node scripts/shared_deps_fingerprint.js --moon-project src/platform/packages/private/kbn-ui-shared-deps-npm --webpack-config src/platform/packages/private/kbn-ui-shared-deps-npm/webpack.config.js
+        script: cd "${MOON_WORKSPACE_ROOT:-$(git rev-parse --show-toplevel)}" && node scripts/shared_deps_fingerprint.js --moon-project src/platform/packages/private/kbn-ui-shared-deps-npm --webpack-config src/platform/packages/private/kbn-ui-shared-deps-npm/webpack.config.js --package node-stdlib-browser
         hash: stdout
     inputs:
       - '@group(src)'
