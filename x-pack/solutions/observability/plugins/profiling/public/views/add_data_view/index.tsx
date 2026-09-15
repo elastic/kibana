@@ -575,6 +575,7 @@ EOF`}
           {sectionTabs}
           <EuiSpacer />
           <EuiEmptyPrompt
+            iconType="logoObservability"
             title={
               <h2>
                 {i18n.translate('xpack.profiling.addData.openTelemetry.title', {
@@ -582,9 +583,25 @@ EOF`}
                 })}
               </h2>
             }
-            body={i18n.translate('xpack.profiling.addData.openTelemetry.todo', {
-              defaultMessage: 'Instructions for ingesting OpenTelemetry profiles are coming soon.',
+            body={i18n.translate('xpack.profiling.addData.openTelemetry.description', {
+              defaultMessage:
+                'The easiest way to start ingesting profiles is by installing the OpenTelemetry Profiling integration. It walks you through deploying the profiler with Elastic Agent and sending the profiles to this deployment.',
             })}
+            actions={
+              <EuiButton
+                data-test-subj="profilingAddDataViewOtelIntegrationButton"
+                fill
+                iconType="plusInCircle"
+                // No version in the package key: Fleet resolves the installed version or the latest one
+                href={core.http.basePath.prepend(
+                  '/app/integrations/detail/profiling_otel/overview'
+                )}
+              >
+                {i18n.translate('xpack.profiling.addData.openTelemetry.integrationButton', {
+                  defaultMessage: 'Add OpenTelemetry Profiling integration',
+                })}
+              </EuiButton>
+            }
           />
         </>
       </ProfilingAppPageTemplate>

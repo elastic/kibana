@@ -16,7 +16,13 @@ import { useProfilingDependencies } from '../contexts/profiling_dependencies/use
 import { useProfilingSetupStatus } from '../contexts/profiling_setup_status/use_profiling_setup_status';
 import { ProfilingSearchBar } from './profiling_search_bar';
 
-export function PrimaryProfilingSearchBar({ showSubmitButton }: { showSubmitButton?: boolean }) {
+export function PrimaryProfilingSearchBar({
+  showSubmitButton,
+  hideSchemaSelector = false,
+}: {
+  showSubmitButton?: boolean;
+  hideSchemaSelector?: boolean;
+}) {
   const {
     start: { data },
   } = useProfilingDependencies();
@@ -83,7 +89,7 @@ export function PrimaryProfilingSearchBar({ showSubmitButton }: { showSubmitButt
           showSubmitButton={showSubmitButton}
         />
       </EuiFlexItem>
-      {!isServerless && (
+      {!isServerless && !hideSchemaSelector && (
         <EuiFlexItem grow={false}>
           <SchemaSelector
             value={schema}
