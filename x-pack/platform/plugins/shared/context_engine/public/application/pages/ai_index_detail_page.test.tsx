@@ -122,7 +122,10 @@ const createServices = () => {
   return services;
 };
 
-const renderWithProviders = (services: ReturnType<typeof createServices>) => {
+const renderWithProviders = (
+  services: ReturnType<typeof createServices>,
+  queryClient: QueryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+) => {
   const discoverLocator = sharePluginMock.createLocator();
   discoverLocator.getRedirectUrl.mockReturnValue('/app/discover');
 
@@ -140,7 +143,6 @@ const renderWithProviders = (services: ReturnType<typeof createServices>) => {
     }
     return undefined;
   });
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <ChromeServiceProvider value={{ chrome: services.chrome }}>
       <I18nProvider>
@@ -543,6 +545,35 @@ describe('AiIndexDetailPage', () => {
     expect(services.application.navigateToApp).toHaveBeenCalledWith('workflows', {
       path: '/wf-created?returnApp=context_engine&returnPath=%2Fai_index%2Fmy-ai-index',
     });
+  });
+
+  it('refetches the AI index on remount even when the cached data is not yet stale', async () => {
+    // Mirrors the shared app query client's staleTime, which otherwise hides a
+    // freshly created automation when the page remounts after a quick round trip
+    // to the Workflows app.
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false, staleTime: 30_000 } },
+    });
+    const services = createServices();
+    services.http.get.mockResolvedValueOnce(aiIndex).mockResolvedValueOnce({
+      ...aiIndex,
+      automations: [{ type: 'workflow', value: 'wf-created' }],
+    });
+    mockMgetWorkflows.mockResolvedValue([
+      { id: 'wf-created', name: 'New workflow', enabled: true },
+    ]);
+
+    const { unmount } = renderWithProviders(services, queryClient);
+    await waitForAiIndexDetailLoaded();
+    expect(services.http.get).toHaveBeenCalledTimes(1);
+
+    unmount();
+    renderWithProviders(services, queryClient);
+
+    await waitFor(() => expect(services.http.get).toHaveBeenCalledTimes(2));
+    expect(await screen.findByTestId('contextAiIndexAutomationRow')).toHaveTextContent(
+      'New workflow'
+    );
   });
 
   it('hides edit controls and shows the managed badge for managed AI indexes', async () => {
