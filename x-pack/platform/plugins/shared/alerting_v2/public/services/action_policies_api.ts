@@ -53,7 +53,6 @@ export class ActionPoliciesApi {
         page: params.page,
         per_page: params.per_page,
         search: params.search || undefined,
-        tags: params.tags && params.tags.length > 0 ? params.tags : undefined,
         enabled: params.enabled,
         sort_field: params.sort_field,
         sort_order: params.sort_order,
@@ -150,14 +149,4 @@ export class ActionPoliciesApi {
     );
   }
 
-  public async fetchTags(params?: { search?: string }) {
-    return this.http.get<{ tags: string[] }>(
-      `${ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH}/tags`,
-      {
-        query: {
-          search: params?.search || undefined,
-        },
-      }
-    );
-  }
 }

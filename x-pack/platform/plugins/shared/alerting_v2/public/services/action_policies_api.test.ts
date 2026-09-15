@@ -119,26 +119,5 @@ describe('ActionPoliciesApi', () => {
     });
   });
 
-  describe('fetchTags', () => {
-    it('GET /action_policies/tags with wrapped response', async () => {
-      http.get.mockResolvedValue({ tags: ['production', 'staging'] });
-
-      const result = await api.fetchTags();
-
-      expect(http.get).toHaveBeenCalledWith(`${'/internal/alerting/v2/action_policies'}/tags`, {
-        query: { search: undefined },
-      });
-      expect(result).toEqual({ tags: ['production', 'staging'] });
-    });
-
-    it('forwards search param in the query', async () => {
-      http.get.mockResolvedValue({ tags: ['production'] });
-
-      await api.fetchTags({ search: 'prod' });
-
-      expect(http.get).toHaveBeenCalledWith(`${'/internal/alerting/v2/action_policies'}/tags`, {
-        query: { search: 'prod' },
-      });
-    });
-  });
 });
+
