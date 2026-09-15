@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-jest.mock('./send_email', () => ({
-  sendEmail: jest.fn(),
-}));
+jest.mock('./send_email', () => {
+  const actual = jest.requireActual('./send_email');
+  return {
+    ...actual,
+    sendEmail: jest.fn(),
+  };
+});
 
 import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -1202,11 +1206,35 @@ describe('execute()', () => {
     `);
   });
 
+  test('ensure subject and message pass through using HTTP_REQUEST and __json service', async () => {
+    sendEmailMock.mockReset();
+
+    const executorOptionsWithHTTP = {
+      ...executorOptions,
+      source: { type: ActionExecutionSourceType.HTTP_REQUEST, source: null },
+    };
+
+    await connectorType.executor(executorOptionsWithHTTP);
+    const emailSent = sendEmailMock.mock.calls[0][1];
+    expect(emailSent.content.subject).toBe('the subject');
+    expect(emailSent.content.message).toBe(
+      'a message to you\n\n---\n\nThis message was sent by Elastic.'
+    );
+    expect(emailSent.content.messageHTML).toBe(null);
+  });
+
   test('ensure fixed subject and message and no footer using HTTP_REQUEST', async () => {
     sendEmailMock.mockReset();
 
     const executorOptionsWithHTTP = {
       ...executorOptions,
+      params: {
+        ...executorOptions.params,
+        kibanaFooterLink: {
+          path: '/some-url',
+          text: 'Click this link',
+        },
+      },
       config: { ...executorOptions.config, service: 'gmail' },
       source: { type: ActionExecutionSourceType.HTTP_REQUEST, source: null },
     };
@@ -1227,14 +1255,11 @@ describe('execute()', () => {
       ActionParamsType
     > = {
       ...executorOptions,
-      params: { ...executorOptions.params, messageHTML: 'this should not be displayed' },
-      config: { ...executorOptions.config, service: '__json', allowHtml: true },
+      params: { ...executorOptions.params, messageHTML: 'this html should be replaced' },
+      config: { ...executorOptions.config, service: 'gmail', allowHtml: true },
       source: { type: ActionExecutionSourceType.HTTP_REQUEST, source: null },
     };
 
-    // Currently messageHTML can only be used for notifications; this test
-    // is future-proofing that; if ever allowed for HTTP, it should be the
-    // fixed message.
     const result = await connectorType.executor(executorOptionsWithHTTP);
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -1269,7 +1294,7 @@ describe('execute()', () => {
         },
         "transport": Object {
           "password": "supersecret",
-          "service": "__json",
+          "service": "gmail",
           "user": "bob",
         },
       }
