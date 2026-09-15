@@ -6,6 +6,7 @@
  */
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { syntheticsMonitorSOTypes } from '../../common/types/saved_objects';
 import type { EncryptedSyntheticsMonitorAttributes } from '../../common/runtime_types';
 import { SyntheticsPrivateLocation } from '../synthetics_service/private_location/synthetics_private_location';
@@ -15,6 +16,70 @@ import {
   type SyncTaskState,
 } from './sync_private_locations_monitors_task';
 import type { SyntheticsServerSetup } from '../types';
+
+/** Fleet SO bulk-delete allows 10k; keep well under that and getByIDs payload size. */
+export const DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE = 500;
+
+/** Pre-9.4 package policy id: `{configId}-{locationId}-{spaceId}`. */
+export const isLegacySpaceSuffixedPackagePolicyId = (
+  packagePolicyId: string,
+  spaceIds: readonly string[]
+): boolean => {
+  const sortedSpaceIds = [...spaceIds].filter(Boolean).sort((a, b) => b.length - a.length);
+  for (const spaceId of sortedSpaceIds) {
+    const suffix = `-${spaceId}`;
+    if (!packagePolicyId.endsWith(suffix)) {
+      continue;
+    }
+    const withoutSpace = packagePolicyId.slice(0, -suffix.length);
+    // New format is `{configId}-{locationId}` and always contains a hyphen.
+    if (withoutSpace.includes('-')) {
+      return true;
+    }
+  }
+  return false;
+};
+
+const fetchManagedSyntheticsPackagePolicyIds = async (
+  serverSetup: SyntheticsServerSetup,
+  soClient: SavedObjectsClientContract
+): Promise<string[]> => {
+  const { fleet } = serverSetup.pluginsStart;
+  const ids: string[] = [];
+  const policiesIterator = await fleet.packagePolicyService.fetchAllItemIds(soClient, {
+    kuery: getFilterForTestNowRun(true),
+    spaceIds: ['*'],
+    perPage: DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE,
+  });
+  for await (const packagePolicyIds of policiesIterator) {
+    ids.push(...packagePolicyIds);
+  }
+  return ids;
+};
+
+const SPACE_PAGE_SIZE = 1000;
+
+const getKibanaSpaceIds = async (serverSetup: SyntheticsServerSetup): Promise<string[]> => {
+  // `space` is a hidden type; find() is empty without it in includedHiddenTypes.
+  const soClient = serverSetup.coreStart.savedObjects.createInternalRepository(['space']);
+  const ids = new Set<string>([DEFAULT_SPACE_ID]);
+  let page = 1;
+  let fetched = 0;
+  do {
+    const result = await soClient.find({
+      type: 'space',
+      perPage: SPACE_PAGE_SIZE,
+      page,
+    });
+    const savedObjects = result?.saved_objects ?? [];
+    for (const space of savedObjects) {
+      ids.add(space.id);
+    }
+    fetched = savedObjects.length;
+    page += 1;
+  } while (fetched === SPACE_PAGE_SIZE);
+  return [...ids];
+};
 
 export async function cleanUpDuplicatedPackagePolicies(
   serverSetup: SyntheticsServerSetup,
@@ -30,8 +95,34 @@ export async function cleanUpDuplicatedPackagePolicies(
   };
 
   if (taskState.hasAlreadyDoneCleanup) {
-    debugLog('Skipping cleanup of duplicated package policies as it has already been done once');
-    return { performCleanupSync };
+    // 9.4 space-agnostic ids (#251018) created `{config}-{loc}` beside leftover
+    // `{config}-{loc}-{space}`. Cleanup can latch success without deleting
+    // those leftovers; 9.5 Fleet then upgrades each leftover in place and
+    // storms the agent policy. Re-open the latch if any remain.
+    try {
+      const spaceIds = await getKibanaSpaceIds(serverSetup);
+      const packagePolicyIds = await fetchManagedSyntheticsPackagePolicyIds(serverSetup, soClient);
+      const leftoverIds = packagePolicyIds.filter((id) =>
+        isLegacySpaceSuffixedPackagePolicyId(id, spaceIds)
+      );
+      if (leftoverIds.length === 0) {
+        debugLog(
+          'Skipping cleanup of duplicated package policies as it has already been done once'
+        );
+        return { performCleanupSync };
+      }
+      logger.info(
+        `[PrivateLocationCleanUpTask] Found ${leftoverIds.length} leftover space-suffixed package policies; re-running cleanup`
+      );
+      taskState.hasAlreadyDoneCleanup = false;
+      taskState.maxCleanUpRetries = DEFAULT_MAX_CLEANUP_RETRIES;
+    } catch (error) {
+      logger.info(
+        `[PrivateLocationCleanUpTask] Could not check for leftover space-suffixed package policies; re-running cleanup`
+      );
+      taskState.hasAlreadyDoneCleanup = false;
+      taskState.maxCleanUpRetries = DEFAULT_MAX_CLEANUP_RETRIES;
+    }
   } else if (taskState.maxCleanUpRetries <= 0) {
     // `warn`, not `debug`: this is cleanup giving up, and the caller still gets a
     // success response. Leave the spent budget on the state so the exhaustion is
@@ -82,7 +173,7 @@ export async function cleanUpDuplicatedPackagePolicies(
     const policiesIterator = await fleet.packagePolicyService.fetchAllItemIds(soClient, {
       kuery: packagePoliciesKuery,
       spaceIds: ['*'],
-      perPage: 100,
+      perPage: DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE,
     });
     const packagePoliciesToDelete: string[] = [];
 
@@ -156,9 +247,6 @@ export async function cleanUpDuplicatedPackagePolicies(
     return { performCleanupSync };
   }
 }
-
-/** Fleet SO bulk-delete allows 10k; keep well under that and getByIDs payload size. */
-export const DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE = 500;
 
 export async function deleteDuplicatePackagePolicies(
   packagePoliciesToDelete: string[],

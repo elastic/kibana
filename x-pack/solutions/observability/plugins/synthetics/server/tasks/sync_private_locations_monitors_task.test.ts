@@ -850,6 +850,18 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         }),
       };
       mockSoClient.createPointInTimeFinder = jest.fn().mockReturnValue(mockFinder);
+      (
+        mockServerSetup.coreStart.savedObjects.createInternalRepository as jest.Mock
+      ).mockReturnValue({
+        find: jest.fn().mockResolvedValue({
+          saved_objects: [{ id: 'default' }, { id: 'stores' }],
+        }),
+      });
+      mockFleet.packagePolicyService.fetchAllItemIds.mockImplementation(async () =>
+        (async function* () {
+          yield ['monitor1-loc1'];
+        })()
+      );
       task = new SyncPrivateLocationMonitorsTask(
         mockServerSetup as any,
         mockSyntheticsMonitorClient as unknown as SyntheticsMonitorClient
@@ -880,7 +892,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         mockSoClient,
         expect.anything(),
         ['unexpected-policy'],
-        { force: true, ignoreMissing: true, spaceIds: ['*'] }
+        { force: true, ignoreMissing: true, spaceIds: ['*'], bumpRevision: false }
       );
       expect(result.performCleanupSync).toBe(true);
     });
@@ -985,13 +997,37 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(result).toHaveProperty('performCleanupSync');
     });
 
-    it('should skip cleanup if hasAlreadyDoneCleanup is true', async () => {
+    it('should skip cleanup if hasAlreadyDoneCleanup is true and no leftover space-suffixed policies exist', async () => {
       const state = { hasAlreadyDoneCleanup: true, maxCleanUpRetries: 3 };
       const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, state as any);
       expect(result.performCleanupSync).toBe(false);
+      expect(mockFleet.packagePolicyService.delete).not.toHaveBeenCalled();
       expect(mockLogger.debug).toHaveBeenCalledWith(
         '[PrivateLocationCleanUpTask] Skipping cleanup of duplicated package policies as it has already been done once'
       );
+    });
+
+    it('should re-run cleanup when leftover space-suffixed policies remain after hasAlreadyDoneCleanup', async () => {
+      mockFleet.packagePolicyService.fetchAllItemIds.mockImplementation(async () =>
+        (async function* () {
+          yield ['monitor1-loc1', 'monitor1-loc1-stores'];
+        })()
+      );
+      const state = { hasAlreadyDoneCleanup: true, maxCleanUpRetries: 0 };
+      const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, state as any);
+
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        expect.stringContaining('leftover space-suffixed package policies; re-running cleanup')
+      );
+      expect(mockFleet.packagePolicyService.delete).toHaveBeenCalledWith(
+        mockSoClient,
+        expect.anything(),
+        ['monitor1-loc1-stores'],
+        { force: true, ignoreMissing: true, spaceIds: ['*'], bumpRevision: false }
+      );
+      expect(result.performCleanupSync).toBe(true);
+      expect(state.hasAlreadyDoneCleanup).toBe(false);
+      expect(state.maxCleanUpRetries).toBe(DEFAULT_MAX_CLEANUP_RETRIES);
     });
 
     it('should skip cleanup if maxCleanUpRetries is 0 or less', async () => {

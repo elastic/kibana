@@ -8,10 +8,36 @@
 import {
   DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE,
   deleteDuplicatePackagePolicies,
+  isLegacySpaceSuffixedPackagePolicyId,
 } from './clean_up_duplicate_policies';
 import type { SyntheticsServerSetup } from '../types';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+
+describe('isLegacySpaceSuffixedPackagePolicyId', () => {
+  const spaces = ['default', 'stores', 'team-stores'];
+
+  test('matches pre-9.4 `{config}-{location}-{space}` ids', () => {
+    expect(isLegacySpaceSuffixedPackagePolicyId('monitor-uuid-loc-uuid-stores', spaces)).toBe(true);
+    expect(isLegacySpaceSuffixedPackagePolicyId('monitor-uuid-loc-uuid-default', spaces)).toBe(
+      true
+    );
+  });
+
+  test('does not match space-agnostic `{config}-{location}` ids', () => {
+    expect(isLegacySpaceSuffixedPackagePolicyId('monitor-uuid-loc-uuid', spaces)).toBe(false);
+  });
+
+  test('prefers the longest space suffix when one space id is a suffix of another', () => {
+    expect(isLegacySpaceSuffixedPackagePolicyId('monitor-uuid-loc-uuid-team-stores', spaces)).toBe(
+      true
+    );
+  });
+
+  test('does not treat `{config}-{space}` as leftover (location id is required)', () => {
+    expect(isLegacySpaceSuffixedPackagePolicyId('monitoruuid-stores', spaces)).toBe(false);
+  });
+});
 
 describe('deleteDuplicatePackagePolicies', () => {
   const makeServerSetup = ({
