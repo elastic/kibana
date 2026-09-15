@@ -11952,7 +11952,6 @@
     "xpack.agentBuilder.roundEvents.steps.backgroundAgent.completed": "Agent d'arrière-plan terminé",
     "xpack.agentBuilder.roundEvents.steps.backgroundAgent.failed": "{status} de l'agent d'arrière-plan",
     "xpack.agentBuilder.roundEvents.steps.backgroundAgent.viewJson": "Afficher le JSON",
-    "xpack.agentBuilder.roundEvents.steps.compaction.complete": "Contexte condensé : {before} → {after} jetons, {count, plural, one {# round} other {# rounds}}",
     "xpack.agentBuilder.roundEvents.steps.compaction.inProgress": "Compression du contexte",
     "xpack.agentBuilder.roundEvents.steps.toolCall.ariaLabel": "Appel d'outil",
     "xpack.agentBuilder.roundEvents.subAgentExecutionFlyout.errorTitle": "Erreur d'exécution",

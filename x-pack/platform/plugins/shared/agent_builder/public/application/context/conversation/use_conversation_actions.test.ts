@@ -10,6 +10,7 @@ import type { Conversation } from '@kbn/agent-builder-common';
 import {
   isAskUserQuestionStep,
   createAskUserQuestionStep,
+  isCompactionStep,
 } from '@kbn/agent-builder-common/chat/conversation';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents';
@@ -170,5 +171,31 @@ describe('createConversationActions.setAttachments', () => {
     actions.setAttachments({ attachments: attachmentFixture(2) });
 
     expect(queryClient.getQueryData<Conversation>(queryKey)).toBeUndefined();
+  });
+});
+
+describe('createConversationActions compaction steps', () => {
+  it('completes the last in-progress compaction step when several exist in one round', () => {
+    const { queryClient, actions } = buildActions();
+    const queryKey = queryKeys.conversations.byId(conversationId);
+    const conversation = createNewConversation({ id: conversationId, agentId: 'agent-1' });
+    conversation.rounds.push(createNewRound({ userMessage: 'hello', steps: [] }));
+    queryClient.setQueryData<Conversation>(queryKey, conversation);
+
+    actions.addCompactionStep({ tokenCountBefore: 100 });
+    actions.setCompactionStepComplete({ tokenCountAfter: 40, summarizedCycleCount: 2 });
+    actions.addCompactionStep({ tokenCountBefore: 200 });
+    actions.setCompactionStepComplete({ tokenCountAfter: 90, summarizedCycleCount: 3 });
+
+    const steps = queryClient
+      .getQueryData<Conversation>(queryKey)!
+      .rounds.at(-1)!
+      .steps.filter(isCompactionStep);
+    expect(
+      steps.map((s) => [s.token_count_before, s.token_count_after, s.summarized_cycle_count])
+    ).toEqual([
+      [100, 40, 2],
+      [200, 90, 3],
+    ]);
   });
 });

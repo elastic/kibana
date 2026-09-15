@@ -12,6 +12,7 @@ import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/
 
 import { createAgentHandlerContextMock } from '../../../test_utils/runner';
 import { createEmptyConversation, createRound } from '../../../test_utils/conversations';
+import { timelineFromRounds } from '../../../test_utils/timeline';
 import { createMockedExecutableTool } from '../../../test_utils/tools';
 
 import { runDefaultAgentMode } from './run_chat_agent';
@@ -35,15 +36,14 @@ jest.mock('./utils', () => ({
   getPendingRound: jest.fn(),
   addRoundCompleteEvent: jest.fn(() => (source$: any) => source$),
   evictInternalEvents: jest.fn(() => (source$: any) => source$),
-  estimatePerRoundTokens: jest.fn().mockResolvedValue([]),
 }));
 
 jest.mock('./tools/register_internal_tools', () => ({
   registerInternalTools: jest.fn(),
 }));
 
-jest.mock('./utils/create_result_transformer', () => ({
-  createResultTransformer: jest.fn(() => ({})),
+jest.mock('./utils/tool_summarization', () => ({
+  createSummarizationTransformer: jest.fn(() => ({})),
 }));
 
 jest.mock('./utils/image_resolver', () => ({
@@ -422,5 +422,108 @@ describe('runDefaultAgentMode', () => {
     expect(createPromptFactoryMock.mock.calls[0][0].imageResolver).toBe(
       createImageResolverMock.mock.results[0].value
     );
+  });
+
+  describe('context management wiring', () => {
+    const setup = () => {
+      const context = createAgentHandlerContextMock();
+      jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+        connector: { name: 'test-connector', connectorId: 'conn-1' },
+        chatModel: {} as any,
+      } as any);
+      context.toolManager.getToolIdMapping.mockReturnValue(new Map());
+      context.toolManager.getDynamicToolIds.mockReturnValue([]);
+      selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
+      extractRoundMock.mockResolvedValue(createRound({ id: 'round-1' }));
+      const streamEvents = jest.fn((..._args: unknown[]) => []);
+      createAgentGraphMock.mockReturnValue({ streamEvents } as any);
+      return { context, streamEvents };
+    };
+
+    it('passes the previous round last-call usage and connector to the context management node', async () => {
+      const { context } = setup();
+      const previous = createRound({
+        id: 'r1',
+        status: ConversationRoundStatus.completed,
+        model_usage: {
+          connector_id: 'conn-1',
+          llm_calls: 3,
+          input_tokens: 900,
+          output_tokens: 10,
+          last_call_input_tokens: 777,
+        },
+      });
+      prepareConversationMock.mockResolvedValue({
+        timeline: timelineFromRounds([previous]),
+        nextInput: { message: 'hello', attachments: [] },
+        attachments: [],
+        attachmentTypes: [],
+        attachmentStateManager: context.attachmentStateManager,
+      } as any);
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'hello' },
+          agentConfiguration: { tools: [] } as any,
+          conversation: createEmptyConversation({ rounds: [previous] }) as any,
+        },
+        context
+      );
+
+      expect(createAgentGraphMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          contextManagement: expect.objectContaining({
+            connector: expect.objectContaining({ connectorId: 'conn-1' }),
+            previousRound: expect.objectContaining({
+              connectorId: 'conn-1',
+              lastCallInputTokens: 777,
+            }),
+          }),
+        })
+      );
+    });
+
+    it('seeds the graph with a legacy compaction summary translated to an event cursor', async () => {
+      const { context, streamEvents } = setup();
+      prepareConversationMock.mockResolvedValue({
+        timeline: [],
+        nextInput: { message: 'hello', attachments: [] },
+        attachments: [],
+        attachmentTypes: [],
+        attachmentStateManager: context.attachmentStateManager,
+      } as any);
+      const rounds = [
+        createRound({ id: 'r1', status: ConversationRoundStatus.completed }),
+        createRound({ id: 'r2', status: ConversationRoundStatus.completed }),
+      ];
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'hello' },
+          agentConfiguration: { tools: [] } as any,
+          conversation: createEmptyConversation({
+            rounds,
+            state: {
+              compaction_summary: {
+                summarized_round_count: 1,
+                created_at: 't',
+                token_count: 12,
+                structured_data: {},
+              },
+            },
+          } as any) as any,
+        },
+        context
+      );
+
+      const command = streamEvents.mock.calls[0][0] as any;
+      expect(command.update).toEqual(
+        expect.objectContaining({
+          compactionSummary: expect.objectContaining({ token_count: 12 }),
+          compactionCoverage: { eventId: expect.stringMatching(/^r1::/) },
+        })
+      );
+      expect(command.update.compactionSummary).not.toHaveProperty('summarized_round_count');
+    });
   });
 });

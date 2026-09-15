@@ -6,7 +6,8 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
-import type { ToolManager } from '@kbn/agent-builder-server/runner';
+import type { Logger } from '@kbn/core/server';
+import type { ToolManager, ToolResultStore } from '@kbn/agent-builder-server/runner';
 import type { ConversationTemplatesService } from '@kbn/agent-builder-server/runner/conversation_templates_service';
 import type { ExperimentalFeatures } from '@kbn/agent-builder-server';
 import type { RendererTypeDefinition } from '@kbn/agent-builder-server/renderers';
@@ -15,6 +16,7 @@ import type { ResolvedConfiguration } from '../types';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
 import type { ToolCallResultTransformer } from '../utils/tool_summarization';
 import type { ResearchAgentAction, AnswerAgentAction } from '../actions';
+import type { CompactionCoverage, CompactionSummaryData } from '../state';
 import type { RelevantSkillSelection } from '../utils/relevant_skills/select_relevant_skills';
 
 /** Never call from the tool-result path — image bytes must not enter tool results. */
@@ -37,10 +39,13 @@ export interface PromptFactoryParams {
    */
   toolManager: ToolManager;
   /**
-   * Transformer for tool call results in conversation history.
-   * Used to summarize/substitute large results to optimize context.
+   * Base transformer for tool call results (tool-specific summarization). Substitution marks
+   * are layered on top by the visible-context builder.
    */
   resultTransformer: ToolCallResultTransformer;
+  /** Filestore lookups for substituted tool results. */
+  resultStore: ToolResultStore;
+  logger: Logger;
   outputSchema?: Record<string, unknown>;
   conversationTimestamp: string;
   experimentalFeatures: ExperimentalFeatures;
@@ -60,12 +65,16 @@ export interface PromptFactoryParams {
 export interface ResearchAgentPromptRuntimeParams {
   cycleLimit: number;
   actions: ResearchAgentAction[];
+  compactionSummary?: CompactionSummaryData;
+  compactionCoverage?: CompactionCoverage;
 }
 
 export interface AnswerAgentPromptRuntimeParams {
   cycleLimit: number;
   actions: ResearchAgentAction[];
   answerActions: AnswerAgentAction[];
+  compactionSummary?: CompactionSummaryData;
+  compactionCoverage?: CompactionCoverage;
 }
 
 export interface PromptFactory {

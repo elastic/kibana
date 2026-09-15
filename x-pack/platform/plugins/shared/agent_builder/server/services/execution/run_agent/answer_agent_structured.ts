@@ -76,6 +76,8 @@ export const createAnswerAgentStructured = ({
         actions: state.mainActions,
         answerActions: state.answerActions,
         cycleLimit: state.cycleLimit,
+        compactionSummary: state.compactionSummary,
+        compactionCoverage: state.compactionCoverage,
       });
 
       let response = await structuredModel.invoke(prompt);

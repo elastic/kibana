@@ -36,7 +36,7 @@ const transientReasoningStep = () =>
 
 const compactionStep = (): CompactionStep => ({
   type: ConversationRoundStepType.compaction,
-  summarized_round_count: 2,
+  summarized_cycle_count: 2,
   token_count_before: 4000,
   token_count_after: 1200,
 });

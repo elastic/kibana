@@ -175,6 +175,7 @@ describe('chat_message_text', () => {
         clearPendingPrompts: jest.fn(),
         setAskUserQuestionAnswers: jest.fn(),
         addBackgroundExecutionCompleteStep: jest.fn(),
+        addSubstitutionStep: jest.fn(),
         addCompactionStep: jest.fn(),
         setCompactionStepComplete: jest.fn(),
         addOrUpdateTodosStep: jest.fn(),

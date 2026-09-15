@@ -20,8 +20,10 @@ import {
   isCompactionStartedEvent,
   isCompactionCompletedEvent,
   isBackgroundAgentCompleteEvent,
+  isSubstitutionAppliedEvent,
   isTodosUpdatedEvent,
   ConversationRoundStepType,
+  createSubstitutionStep,
 } from '@kbn/agent-builder-common';
 import {
   createReasoningStep,
@@ -148,7 +150,7 @@ export const subscribeToChatEvents = ({
     } else if (isCompactionCompletedEvent(event)) {
       conversationActions.setCompactionStepComplete({
         tokenCountAfter: event.data.token_count_after,
-        summarizedRoundCount: event.data.summarized_round_count,
+        summarizedCycleCount: event.data.summarized_cycle_count,
       });
     } else if (isBackgroundAgentCompleteEvent(event)) {
       conversationActions.addBackgroundExecutionCompleteStep({
@@ -157,6 +159,8 @@ export const subscribeToChatEvents = ({
           ...event.data.execution,
         },
       });
+    } else if (isSubstitutionAppliedEvent(event)) {
+      conversationActions.addSubstitutionStep({ step: createSubstitutionStep(event.data) });
     } else if (isTodosUpdatedEvent(event)) {
       conversationActions.addOrUpdateTodosStep({ todos: event.data.data.todos });
     }

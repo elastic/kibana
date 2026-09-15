@@ -33,7 +33,8 @@ import { HookLifecycle } from '@kbn/agent-builder-server';
 import type { ConversationInternalState, CompactionSummary } from '@kbn/agent-builder-common/chat';
 import type { ToolManager, TodoStateManager } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType, type PromptManager } from '@kbn/agent-builder-server/runner';
-import { createResultTransformer } from './utils/create_result_transformer';
+import { createSummarizationTransformer } from './utils/tool_summarization';
+import { toCursorSummary } from './utils/compaction_summary_compat';
 import {
   addRoundCompleteEvent,
   extractRound,
@@ -42,7 +43,6 @@ import {
   selectTools,
   getPendingRound,
   evictInternalEvents,
-  estimatePerRoundTokens,
 } from './utils';
 import { registerInternalTools } from './tools/register_internal_tools';
 import {
@@ -53,9 +53,7 @@ import {
 import { resolveConfiguration } from './utils/configuration';
 import { ensureValidInput } from './utils/preflight_checks';
 import { buildPendingRoundActions } from './utils/build_pending_round_actions';
-import { computeContextBudget } from './utils/context_budget';
 import { DEFAULT_MAX_TOOL_RESULT_TOKENS } from './utils/tool_result_guardrail';
-import { compactConversation } from './utils/conversation_compactor';
 import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from './run_agent';
@@ -64,8 +62,13 @@ import { createPromptFactory } from './prompts';
 import { createImageResolver } from './utils/image_resolver';
 import { BackgroundExecutionService } from './background_execution_service';
 import { SubagentTracker } from './subagent_tracker';
-import type { StateType } from './state';
-import { eventsForContext, groupTimelineRounds, roundResponse } from './utils/context_timeline';
+import type { CompactionCoverage, CompactionSummaryData, StateType } from './state';
+import {
+  eventsForContext,
+  groupTimelineRounds,
+  lastExecutionTerminated,
+  roundResponse,
+} from './utils/context_timeline';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
 
@@ -193,7 +196,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   toolManager.setMaxToolResultTokens(DEFAULT_MAX_TOOL_RESULT_TOKENS);
 
   // Pass action so regenerate uses the last round's original input instead of request input
-  let processedConversation = await prepareConversation({
+  const processedConversation = await prepareConversation({
     nextInput,
     timeline,
     nextInputAuthor: pendingRound?.author ?? author,
@@ -297,44 +300,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const graphRecursionLimit = getRecursionLimit(CYCLE_LIMIT);
 
-  const perRoundTokenCounts = await estimatePerRoundTokens(processedConversation.timeline, {
-    toolManager,
-    toolRegistry,
-  });
-  const conversationTokenEstimate = perRoundTokenCounts.reduce((sum, count) => sum + count, 0);
+  const resultTransformer = createSummarizationTransformer({ toolManager, toolRegistry });
 
-  // Create unified result transformer for tool result optimization
-  const resultTransformer = createResultTransformer({
-    toolRegistry,
-    toolManager,
-    resultStore: context.resultStore,
-    conversationTokenEstimate,
-  });
-
-  // Context-aware compaction: check if conversation history exceeds the
-  // model's context window budget and apply hybrid compaction if needed.
-  // We pass events.emit directly (not the manualEvents$-based eventEmitter)
-  // so compaction events reach the SSE stream immediately during the await,
-  // rather than being buffered in the ReplaySubject and replayed after.
-  const contextBudget = computeContextBudget(model.connector);
-  const compactionResult = await compactConversation({
-    processedConversation,
-    chatModel: model.chatModel,
-    contextBudget,
-    perRoundTokenCounts,
-    existingSummary: conversation?.state?.compaction_summary,
-    logger,
-    abortSignal,
-    eventEmitter: events.emit,
-  });
-
-  // Reassign to the (possibly compacted) conversation for prompt construction.
-  // Re-propagate conversation-level fields that compaction does not touch.
-  processedConversation = {
-    ...compactionResult.processedConversation,
-    metadata: conversation?.metadata,
-    template_id: conversation?.template_id,
-  };
   processedConversation.subagentRosterFallback = subagentTracker.snapshot();
 
   let relevantSkillsSelection: RelevantSkillSelection | undefined;
@@ -362,6 +329,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     processedConversation,
     toolManager,
     resultTransformer,
+    resultStore: context.resultStore,
+    logger,
     outputSchema,
     conversationTimestamp,
     experimentalFeatures,
@@ -371,6 +340,16 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     imageResolver,
     conversationTemplates: context.conversationTemplates,
   });
+
+  const cacheControl = { type: 'ephemeral', ttl: '5m' } as const;
+  const lastTerminated = lastExecutionTerminated(processedConversation.timeline);
+  const previousRound = lastTerminated
+    ? {
+        terminatedAt: lastTerminated.created_at,
+        connectorId: lastTerminated.data.model_usage.connector_id,
+        lastCallInputTokens: lastTerminated.data.model_usage.last_call_input_tokens,
+      }
+    : undefined;
 
   const agentGraph = createAgentGraph({
     logger,
@@ -386,7 +365,21 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     subagentTracker,
     roundId,
     sessionId: conversation?.id ?? executionId,
-    cacheControl: { type: 'ephemeral', ttl: '5m' },
+    cacheControl,
+    contextManagement: {
+      conversation: processedConversation,
+      cycleLimit: CYCLE_LIMIT,
+      chatModel: model.chatModel,
+      connector: model.connector,
+      cacheControl,
+      events: { emit: eventEmitter },
+      abortSignal,
+      previousRound,
+      resultStore: context.resultStore,
+      toolManager,
+      resultTransformer,
+      logger,
+    },
   });
 
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
@@ -398,6 +391,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       cycleLimit: CYCLE_LIMIT,
       promptManager,
       eventEmitter,
+      compaction: seedCompactionState(
+        toCursorSummary(conversation?.state?.compaction_summary, timeline)
+      ),
     }),
     {
       version: 'v2',
@@ -456,11 +452,11 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       userInput: processedInput,
       origin,
       author,
-      getConversationState: () =>
+      getConversationState: ({ compactionSummary }) =>
         getConversationState({
           promptManager,
           toolManager,
-          compactionSummary: compactionResult.summary,
+          compactionSummary,
           backgroundExecutionService,
           todoStateManager,
           subagents: subagentTracker.snapshot(),
@@ -472,7 +468,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       stateManager,
       attachmentStateManager: context.attachmentStateManager,
       configurationOverrides: effectiveOverrides,
-      compactionResult,
       roundId,
       initialTodos,
       relevantSkillsSelection,
@@ -545,20 +540,36 @@ const getConversationState = ({
   };
 };
 
+interface SeededCompactionState {
+  compactionSummary: CompactionSummaryData;
+  compactionCoverage: CompactionCoverage;
+}
+
+/** Splits the persisted summary into the graph's summary data + coverage cursor. */
+const seedCompactionState = (
+  summary: CompactionSummary | undefined
+): SeededCompactionState | undefined => {
+  if (!summary) return undefined;
+  const { summarized_up_to_event_id: eventId, ...compactionSummary } = summary;
+  return { compactionSummary, compactionCoverage: { eventId } };
+};
+
 const createInitializerCommand = ({
   pendingRound,
   cycleLimit,
   agentBuilderToLangchainIdMap,
   promptManager,
   eventEmitter,
+  compaction,
 }: {
   pendingRound?: ConversationRound;
   cycleLimit: number;
   agentBuilderToLangchainIdMap: ToolIdMapping;
   promptManager: PromptManager;
   eventEmitter: AgentEventEmitterFn;
+  compaction?: SeededCompactionState;
 }): Command => {
-  const initialState: Partial<StateType> = { cycleLimit };
+  const initialState: Partial<StateType> = { cycleLimit, ...compaction };
   let startAt = steps.init;
 
   if (pendingRound) {

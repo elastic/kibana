@@ -8,7 +8,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
-import type { BackgroundExecutionState, SubagentRosterEntry } from '@kbn/agent-builder-common/chat';
+import type {
+  BackgroundExecutionState,
+  SubagentRosterEntry,
+  SubstitutionStepData,
+} from '@kbn/agent-builder-common/chat';
 import type { ToolCallWithReasoning } from '@kbn/agent-builder-genai-utils/langchain';
 
 export enum AgentActionType {
@@ -20,6 +24,8 @@ export enum AgentActionType {
   StructuredAnswer = 'structured_answer',
   BackgroundExecutionComplete = 'background_execution_complete',
   SubagentRosterUpdated = 'subagent_roster_updated',
+  Substitution = 'substitution',
+  ContextLengthError = 'context_length_error',
 }
 
 export interface ToolCallResult {
@@ -77,6 +83,14 @@ export interface SubagentRosterUpdatedAction {
   roster: SubagentRosterEntry[];
 }
 
+export type SubstitutionAction = SubstitutionStepData & { type: AgentActionType.Substitution };
+
+/** Deliberately not an `AgentErrorAction`: it must never be rendered to the model. */
+export interface ContextLengthErrorAction {
+  type: AgentActionType.ContextLengthError;
+  error: AgentBuilderAgentExecutionError;
+}
+
 export type ResearchAgentAction =
   | ToolCallAction
   | ExecuteToolAction
@@ -84,7 +98,9 @@ export type ResearchAgentAction =
   | HandoverAction
   | AgentErrorAction
   | BackgroundExecutionCompleteAction
-  | SubagentRosterUpdatedAction;
+  | SubagentRosterUpdatedAction
+  | SubstitutionAction
+  | ContextLengthErrorAction;
 
 // answer phase actions
 
@@ -135,6 +151,16 @@ export function isSubagentRosterUpdatedAction(
   action: AgentAction
 ): action is SubagentRosterUpdatedAction {
   return action.type === AgentActionType.SubagentRosterUpdated;
+}
+
+export function isSubstitutionAction(action: AgentAction): action is SubstitutionAction {
+  return action.type === AgentActionType.Substitution;
+}
+
+export function isContextLengthErrorAction(
+  action: AgentAction
+): action is ContextLengthErrorAction {
+  return action.type === AgentActionType.ContextLengthError;
 }
 
 // creation helpers
@@ -215,5 +241,21 @@ export function subagentRosterUpdatedAction(
   return {
     type: AgentActionType.SubagentRosterUpdated,
     roster,
+  };
+}
+
+export function substitutionAction(data: SubstitutionStepData): SubstitutionAction {
+  return {
+    type: AgentActionType.Substitution,
+    ...data,
+  };
+}
+
+export function contextLengthErrorAction(
+  error: AgentBuilderAgentExecutionError
+): ContextLengthErrorAction {
+  return {
+    type: AgentActionType.ContextLengthError,
+    error,
   };
 }

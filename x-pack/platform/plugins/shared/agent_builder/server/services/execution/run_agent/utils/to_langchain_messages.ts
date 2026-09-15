@@ -36,7 +36,7 @@ import type {
   ProcessedAttachmentType,
   ProcessedRoundInput,
 } from '@kbn/agent-builder-server';
-import type { CompactionSummary } from '@kbn/agent-builder-common';
+import type { CompactionCoverage, CompactionSummaryData } from '../state';
 import { formatSystemNotice, formatSubagentRosterNotice } from '../prompts/utils/actions';
 import { createRelevantSkillsNoticeMessage } from '../prompts/utils/skills';
 import { formatDate } from '../prompts/utils/helpers';
@@ -45,6 +45,7 @@ import {
   groupTimelineRounds,
   isAwaitingPrompt,
   roundResponse,
+  sliceTimelineAfterEvent,
   type ProcessedTimelineEvent,
   type TimelineRound,
 } from './context_timeline';
@@ -70,7 +71,12 @@ export interface ConversationToLangchainOptions {
    * When provided, the summary is serialized and prepended as a
    * user/assistant message pair representing the compacted history.
    */
-  compactionSummary?: CompactionSummary;
+  compactionSummary?: CompactionSummaryData;
+  /**
+   * What the summary already covers. `{ eventId }` hides the timeline up to and including that
+   * event; `{ actionIndex }` (coverage inside the in-flight round) hides the whole timeline.
+   */
+  compactionCoverage?: CompactionCoverage;
   /**
    * Timestamp of the current (in-progress) round. When provided, it is
    * prefixed onto the next-input user message. Previous rounds always use
@@ -84,18 +90,35 @@ export interface ConversationToLangchainOptions {
  * Builds the LangChain message history from the processed timeline, one round group at a time.
  * When `resultTransformer` is provided, previous rounds' tool results are passed through it.
  */
+/** The user/assistant exchange standing in for the compacted history. */
+export const compactionSummaryMessages = (summary: CompactionSummaryData): BaseMessage[] => [
+  createUserMessage('[Previous conversation context was compacted]'),
+  createAIMessage(serializeCompactionSummary(summary.structured_data)),
+];
+
+const visibleTimeline = (
+  timeline: ProcessedTimelineEvent[],
+  coverage?: CompactionCoverage
+): ProcessedTimelineEvent[] => {
+  if (coverage === undefined) return timeline;
+  return 'eventId' in coverage ? sliceTimelineAfterEvent(timeline, coverage.eventId) : [];
+};
+
 export const prepareMessages = async ({
   conversation,
   resultTransformer,
   ignoreSteps = false,
   compactionSummary,
+  compactionCoverage,
   conversationTimestamp,
 }: ConversationToLangchainOptions): Promise<BaseMessage[]> => {
   const subagentRosterFallback = conversation.subagentRosterFallback;
   const messages: BaseMessage[] = [];
   const attachmentTypeInstructionsProvided = new Set<string>();
 
-  const previousRounds = groupTimelineRounds(conversation.timeline);
+  const previousRounds = groupTimelineRounds(
+    visibleTimeline(conversation.timeline, compactionCoverage)
+  );
   let rounds = previousRounds;
   let input = conversation.nextInput;
   let inputTimestamp = conversationTimestamp;
@@ -111,9 +134,7 @@ export const prepareMessages = async ({
 
   // Inject compaction summary as a user/assistant exchange before remaining rounds
   if (compactionSummary) {
-    const summaryText = serializeCompactionSummary(compactionSummary.structured_data);
-    messages.push(createUserMessage('[Previous conversation context was compacted]'));
-    messages.push(createAIMessage(summaryText));
+    messages.push(...compactionSummaryMessages(compactionSummary));
 
     // Inject back subagent roaster notice after compaction
     if (subagentRosterFallback && Object.keys(subagentRosterFallback).length > 0) {
@@ -178,50 +199,60 @@ export const roundToLangchain = async (
 
   // steps
   if (!ignoreSteps) {
-    const groups = groupToolCallSteps(round.steps);
-    const reasoningSteps = round.steps.filter(isReasoningStep);
-
-    let groupIndex = 0;
-    for (const step of round.steps) {
-      if (isBackgroundAgentCompleteStep(step)) {
-        messages.push(createUserMessage(formatSystemNotice(step)));
-      } else if (isSubagentRosterUpdatedStep(step)) {
-        messages.push(createUserMessage(formatSubagentRosterNotice(step.roster)));
-      } else if (isRelevantSkillsStep(step)) {
-        if (step.skills.length > 0) {
-          messages.push(createRelevantSkillsNoticeMessage(step.skills));
-        }
-      } else if (isToolCallStep(step)) {
-        // Only process when we hit the first tool call of a group
-        // Other tool calls in the same group are handled by createGroupedToolCallMessages
-        const group = groups[groupIndex];
-        if (group && group[0] === step) {
-          messages.push(
-            ...(await createGroupedToolCallMessages(group, { resultTransformer, reasoningSteps }))
-          );
-          groupIndex++;
-        }
-      } else if (isAskUserQuestionStep(step) && step.answers !== undefined) {
-        // Render answered ask_user_question steps as a tool-call / tool-response pair.
-        const { toolCallId, toolName, args, content } = materializeAskUserQuestionToolCall({
-          questions: step.questions,
-          answers: step.answers,
-        });
-        messages.push(
-          new AIMessage({
-            content: '',
-            tool_calls: [{ id: toolCallId, name: toolName, args }],
-          })
-        );
-        messages.push(new ToolMessage({ tool_call_id: toolCallId, content }));
-      }
-      // Reasoning steps are handled inside createGroupedToolCallMessages via reasoningSteps param
-    }
+    messages.push(...(await stepsToMessages(round.steps, { resultTransformer })));
   }
 
   // assistant response
   messages.push(formatAssistantResponse({ response: roundResponse(round) }));
 
+  return messages;
+};
+
+/** Renders a sequence of steps; usable for a whole round or for a single cycle's steps. */
+export const stepsToMessages = async (
+  steps: ConversationRoundStep[],
+  { resultTransformer }: { resultTransformer?: ToolCallResultTransformer } = {}
+): Promise<BaseMessage[]> => {
+  const messages: BaseMessage[] = [];
+  const groups = groupToolCallSteps(steps);
+  const reasoningSteps = steps.filter(isReasoningStep);
+
+  let groupIndex = 0;
+  for (const step of steps) {
+    if (isBackgroundAgentCompleteStep(step)) {
+      messages.push(createUserMessage(formatSystemNotice(step)));
+    } else if (isSubagentRosterUpdatedStep(step)) {
+      messages.push(createUserMessage(formatSubagentRosterNotice(step.roster)));
+    } else if (isRelevantSkillsStep(step)) {
+      if (step.skills.length > 0) {
+        messages.push(createRelevantSkillsNoticeMessage(step.skills));
+      }
+    } else if (isToolCallStep(step)) {
+      // Only process when we hit the first tool call of a group
+      // Other tool calls in the same group are handled by createGroupedToolCallMessages
+      const group = groups[groupIndex];
+      if (group && group[0] === step) {
+        messages.push(
+          ...(await createGroupedToolCallMessages(group, { resultTransformer, reasoningSteps }))
+        );
+        groupIndex++;
+      }
+    } else if (isAskUserQuestionStep(step) && step.answers !== undefined) {
+      // Render answered ask_user_question steps as a tool-call / tool-response pair.
+      const { toolCallId, toolName, args, content } = materializeAskUserQuestionToolCall({
+        questions: step.questions,
+        answers: step.answers,
+      });
+      messages.push(
+        new AIMessage({
+          content: '',
+          tool_calls: [{ id: toolCallId, name: toolName, args }],
+        })
+      );
+      messages.push(new ToolMessage({ tool_call_id: toolCallId, content }));
+    }
+    // Reasoning steps are handled inside createGroupedToolCallMessages via reasoningSteps param
+  }
   return messages;
 };
 

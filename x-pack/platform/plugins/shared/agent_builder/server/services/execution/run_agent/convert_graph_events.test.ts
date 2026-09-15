@@ -43,6 +43,7 @@ jest.mock('@kbn/agent-builder-genai-utils/langchain', () => ({
 }));
 
 jest.mock('./actions', () => ({
+  isSubstitutionAction: jest.fn((action: any) => action?.type === 'substitution'),
   isBackgroundExecutionCompleteAction: jest.fn(() => false),
   isExecuteToolAction: jest.fn(() => false),
   isToolPromptAction: jest.fn(() => false),
@@ -53,6 +54,51 @@ jest.mock('./actions', () => ({
 }));
 
 describe('convertGraphEvents', () => {
+  it('emits substitution_applied for substitution actions produced by contextManagement', async () => {
+    const streamEvent = {
+      event: 'on_chain_end',
+      name: steps.contextManagement,
+      metadata: { graphName: 'test-graph' },
+      data: {
+        output: {
+          mainActions: [
+            {
+              type: 'substitution',
+              substituted_tool_call_ids: ['c1'],
+              trigger: 'intra_round',
+              reason: 'input_tokens_threshold',
+            },
+          ],
+        },
+      },
+    } as any;
+
+    const events = await lastValueFrom(
+      of(streamEvent).pipe(
+        convertGraphEvents({
+          graphName: 'test-graph',
+          toolManager: {} as any,
+          pendingRound: undefined,
+          logger: {} as any,
+          startTime: new Date(),
+          structuredOutput: false,
+        }),
+        toArray()
+      )
+    );
+
+    expect(events).toEqual([
+      {
+        type: 'substitution_applied',
+        data: {
+          substituted_tool_call_ids: ['c1'],
+          trigger: 'intra_round',
+          reason: 'input_tokens_threshold',
+        },
+      },
+    ]);
+  });
+
   it('adds tool origin metadata to emitted tool-call events', async () => {
     const streamEvent = {
       event: 'on_chain_end',
