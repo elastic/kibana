@@ -192,6 +192,7 @@ Read the `scout-ui-testing` or `scout-api-testing` skill for implementation deta
 Key rules:
 - **Tags are required** — Scout validates UI test tags at runtime
 - **One suite per file** — single top-level `test.describe()` or `spaceTest.describe()`
+- **Keep spec files small** — one role + one flow; roughly 4–5 short tests (2–3 if scenarios are long). Do not port a large Cypress spec 1:1 into one Scout file. `@kbn/eslint/scout_max_tests_per_file` warns above 8 UI / 15 API tests.
 - **UI actions in page objects**, assertions in specs
 - **API-based setup/teardown** via `apiServices` / `kbnClient`
 - **Use `test.step()`** for multi-step flows to reuse browser context
@@ -238,6 +239,7 @@ After the Scout test is verified:
 - Putting assertions in page objects (keep in specs)
 - Skipping the "make sure your test fails" verification
 - Batching multiple spec migrations into a single PR
+- Porting a large Cypress spec 1:1 into one Scout file instead of splitting by role and user flow
 - Merging without running the Flaky Test Runner
 - Using `fill()` on Kibana query bars — `QueryStringInput` submits React props, not DOM value; use `pressSequentially()` (see best practices)
 - Asserting `.euiTableRow` count as 0 — `EuiBasicTable` always renders an empty-state row; assert on the message text instead (see best practices)

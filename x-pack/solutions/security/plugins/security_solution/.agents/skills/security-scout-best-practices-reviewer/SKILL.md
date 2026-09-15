@@ -94,6 +94,7 @@ Security Solution Scout tests use a namespace sub-directory structure. Each feat
 - Sequential specs go in `test/scout/<namespace>/ui/tests/`
 - There is no root-level `test/scout/ui/` or `test/scout/api/` in `security_solution` — all test specs live under namespace sub-dirs
 - If a test is placed in a namespace that doesn't match its source scope (e.g., a flyout test landed in `entity_analytics/`), flag it — see the **Namespace selection** section of `security-cypress-to-scout-migration` for the source-scope table and creation criteria
+- When suggesting a split of an oversized spec, keep the new files in the same `test/scout/<namespace>/` directory as the original. Apply the general suite-size check (one role + one flow; UI roughly 4–5 tests) from `scout-best-practices-reviewer`.
 
 ## Migration parity (Security-specific additions)
 
