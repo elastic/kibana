@@ -71,7 +71,7 @@ export const createAiIndexAttachmentType = (): AttachmentTypeDefinition<
       `ask which strategy in the same question. Use \`${internalTools.askUserQuestion}\` for it rather than`,
       'paraphrasing the options as chat text.',
       'Then always ask again before handing anything to a subagent, whether it would create an',
-      'automation or replace one. Put the whole plan in that question: the strategy, the sources and',
+      'automation or replace one. Lay the plan out in chat before it: the strategy, the sources and',
       'the corpus filter you propose, and which it is — naming the automation being replaced. Propose',
       'values rather than asking for them. A filter you chose and stated can be corrected in a word,',
       'where an open question about what to filter on cannot be answered without the user doing the',

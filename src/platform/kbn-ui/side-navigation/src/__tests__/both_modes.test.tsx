@@ -1187,6 +1187,56 @@ describe('Both modes', () => {
         expect(instructions).toHaveTextContent(longTitle);
       });
     });
+
+    describe('Hover-only lists in More', () => {
+      /**
+       * GIVEN an overflow item has hover `popoverSections` but no tree `sections`
+       * WHEN I open More
+       * THEN it stays a normal link — recents do not become a nested submenu
+       */
+      it('should keep hover-only lists as a flat link in More', async () => {
+        const overflowNav = {
+          primaryItems: [
+            {
+              id: 'home',
+              label: 'Home',
+              iconType: 'home',
+              href: '/home',
+            },
+          ],
+          footerItems: [],
+          overflowItems: [
+            {
+              id: 'dashboards',
+              label: 'Dashboards',
+              iconType: 'dashboardApp',
+              href: '/dashboards',
+              popoverSections: [
+                {
+                  id: 'recentlyViewed',
+                  label: 'Recently viewed',
+                  items: [{ id: 'dash-1', label: 'One', href: '/dashboards/1' }],
+                },
+              ],
+            },
+          ],
+        };
+
+        render(<TestComponent items={overflowNav} />);
+
+        const moreButton = await screen.findByTestId(moreMenuId);
+
+        await user.click(moreButton);
+        flushPopoverTimers();
+
+        const popover = await screen.findByTestId(morePopoverId);
+        const dashboardsLink = within(popover).getByTestId(secondaryItemId('dashboards'));
+
+        expect(dashboardsLink).toHaveAttribute('href', '/dashboards');
+        expect(within(popover).queryByText('Recently viewed')).not.toBeInTheDocument();
+        expect(within(popover).queryByText('One')).not.toBeInTheDocument();
+      });
+    });
   });
 
   describe('Keyboard navigation', () => {
