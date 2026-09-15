@@ -93,8 +93,7 @@ And you should **not**:
 ## Usage notes
 
 — If all you need is to generate a workflow, you do *NOT* need to read the "workflow-authoring" skill first, you can call this tool directly.
-— The tool creates (or updates) a workflow attachment and emits a diff card in chat.
-— Render the diff with "<render_attachment id="{diffAttachmentId}"/>" and the workflow with "<render_attachment id="{attachmentId}" version="{attachmentVersion}"/>".
+— The tool returns the generated workflow YAML. Any presentation instructions are returned with the result, not assumed here.
 
 ## Alert-triggered workflows
 
@@ -198,15 +197,27 @@ When the workflow is alert-triggered (\`type: alert\`), runtime alert data is ex
           isCreation: !sourceAttachment,
         });
 
+        // Only the in-conversation agent loop can resolve attachment IDs and render
+        // attachment tags. Every other caller (MCP clients, the public
+        // `tools/_execute` API, the CLI) gets the YAML itself.
+        const isChatCall = toolContext.callContext.callSource === 'agent';
+
         return {
           results: [
             otherResult({
-              attachment_id: workflowAttachmentId,
-              attachment_version: attachmentVersion,
-              proposal_id: proposalId,
-              diff_attachment_id: diffAttachmentId,
               comment: generationComment,
               success: true,
+              ...(isChatCall
+                ? {
+                    // In chat the YAML lives in the attachment, so keep it out of the
+                    // model context — only the IDs needed to reference it are returned.
+                    attachment_id: workflowAttachmentId,
+                    attachment_version: attachmentVersion,
+                    proposal_id: proposalId,
+                    diff_attachment_id: diffAttachmentId,
+                    presentation: `Render the diff with "<render_attachment id="${diffAttachmentId}"/>" and the workflow with "<render_attachment id="${workflowAttachmentId}" version="${attachmentVersion}"/>".`,
+                  }
+                : { yaml: afterYaml }),
               ...(sourceAttachment ? { updated: true } : { created: true }),
             }),
           ],
