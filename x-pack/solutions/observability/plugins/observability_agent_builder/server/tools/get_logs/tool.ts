@@ -45,20 +45,21 @@ const getLogsSchema = z.object({
     .max(MAX_KQL_FILTER_LENGTH)
     .optional()
     .describe(
-      dedent(`KQL filter to narrow results. Build this iteratively by adding NOT clauses to exclude noise.
+      dedent(`KQL filter to narrow results. When using WITHOUT semanticFilter, build iteratively by adding NOT clauses to exclude noise.
         Examples:
-         - "service.name: checkout",
-         - "NOT message: \\"GET /health\\" AND NOT kubernetes.namespace: \\"kube-system\\"",
-         - "error.message: * AND NOT message: \\"Known benign warning\\"".`)
+         - "service.name: checkout"
+         - "log.level: error"
+         - "NOT message: \\"GET /health\\"" (exclude noise)
+         - "error.message: * AND service.name: payment"`)
     ),
   semanticFilter: z
     .string()
     .max(MAX_SHORT_STRING_LENGTH)
     .optional()
     .describe(
-      dedent(`Natural language filter for logs. Use this when you know WHAT you're looking for but not the exact log message format.
+      dedent(`Natural language filter for logs. Finds and ranks log patterns by semantic relevance to your query.
         Examples: "connection failures", "authentication errors", "timeout issues", "database connection problems".
-        Internally converts to pattern-based filtering. Can be combined with kqlFilter for additional refinement.`)
+        Combine with kqlFilter for scoped searches (e.g., semanticFilter: "timeout errors" + kqlFilter: "service.name: payment").`)
     ),
   limit: z
     .number()
@@ -107,27 +108,34 @@ export function createGetLogsTool({
       openWorldHint: false,
     },
     description: dedent(
-      `Searches and filters logs, returning a histogram trend, total count, compact log samples, and message pattern categories in a single query.
+      `Searches and filters logs, returning a histogram trend, total count, log samples, and message pattern categories.
 
       When to use:
-      - Investigating log spikes, errors, or anomalies by iteratively narrowing down with KQL filters
+      - Investigating log errors, anomalies, or specific issues
       - Getting an overview of log volume and trends for a time window
-      - Drilling into specific services, hosts, or containers during incident investigation
-      - Using natural language to find relevant log patterns (via semanticFilter)
+      - Finding relevant log patterns using natural language (semanticFilter)
 
-      How to use (the "funnel" workflow):
-      1. Start with a broad filter (or no kqlFilter) to see the landscape. Alternatively, use semanticFilter with a natural language description like "connection failures" or "authentication errors".
-      2. Review the totalCount, categories, and samples — identify noise (health checks, cron jobs, verbose info logs)
-      3. Call again with NOT clauses added to kqlFilter to exclude noise
-      4. Repeat until categories shows fewer than 20 distinct patterns or samples show the root cause
-      5. Use groupBy (e.g. "log.level") to slice the histogram for richer trend analysis
+      Two search modes:
+
+      **With semanticFilter (recommended for known issues):**
+      - Semantic search ranks patterns by relevance to your natural language query
+      - Combine with kqlFilter to scope (e.g., semanticFilter: "timeout errors" + kqlFilter: "service.name: payment")
+      - Do NOT iterate - the ranking already surfaces the most relevant patterns
+      - One call is enough when you know what you're looking for
+
+      **With kqlFilter only (for exploration):**
+      - Use the funnel workflow: start broad, identify noise, add NOT clauses
+      - Review categories and samples to identify noise (health checks, cron jobs, verbose info logs)
+      - Call again with NOT clauses to exclude noise
+      - Repeat until categories shows <20 patterns or you find the root cause
+      - Use groupBy (e.g., "log.level") for richer trend analysis
 
       Response structure:
-      - histogram: time-series buckets [{bucket, count, group?}]. Controlled by bucketSize (bucket width) and groupBy (adds a "group" field to each bucket).
-      - totalCount: total number of matching logs.
-      - samples: the most recent log documents, controlled by limit (max count) and fields (which fields to include).
-      - categories: top message patterns by frequency. This provides a quick overview of the most common log patterns.
-      - topValues: top 10 values for fixed key fields: log.level, service.name, service.environment, host.name, agent.name, error.exception.type, kubernetes.namespace, kubernetes.node.name, kubernetes.pod.name, kubernetes.container.name. Not affected by groupBy or fields. Use these exact values when building kqlFilter or choosing a groupBy field — do not guess field values.
+      - histogram: time-series buckets [{bucket, count, group?}]
+      - totalCount: total matching logs
+      - samples: recent log documents
+      - categories: top message patterns by frequency
+      - topValues: top 10 values for key fields (log.level, service.name, host.name, etc.). Use these values in kqlFilter.
 
       When NOT to use:
       - For log rate spike/dip correlation analysis, use run_log_rate_analysis

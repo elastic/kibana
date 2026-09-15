@@ -48,6 +48,8 @@ export interface SemanticLogSearchParams {
   timeRange: TimeRange;
   /** Maximum number of patterns to return (default: 10) */
   maxPatterns?: number;
+  /** Optional KQL filter to scope the search corpus */
+  kqlFilter?: string;
 }
 
 export interface SemanticLogSearchResult {

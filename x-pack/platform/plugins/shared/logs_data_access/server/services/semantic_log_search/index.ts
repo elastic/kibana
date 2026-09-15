@@ -8,7 +8,6 @@
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { formatEsqlIdentifier } from '@kbn/esql-utils';
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
 import type {
   SemanticLogSearchService,
@@ -35,6 +34,7 @@ import {
 
 const DEFAULT_MAX_PATTERNS = 10;
 const DEFAULT_PAGE_SIZE = 50;
+const DEFAULT_RANK_WINDOW = 200;
 
 interface TemplateStats {
   pattern: string;
@@ -312,43 +312,75 @@ function parseEsqlPatternResponse(
  *
  * Flow:
  * 1. CATEGORIZE extracts patterns from log messages
- * 2. RERANK scores patterns by semantic relevance to the query
+ * 2. Sort by count and limit to rank window (focus on prevalent patterns)
+ * 3. RERANK scores patterns by semantic relevance to the query using both pattern and sample
  */
 async function searchWithEsqlRerank(
   params: SemanticLogSearchParams,
   logger: Logger
 ): Promise<SemanticLogSearchResult> {
-  const { esClient, target, nlQuery, timeRange, maxPatterns = DEFAULT_MAX_PATTERNS } = params;
+  const {
+    esClient,
+    target,
+    nlQuery,
+    timeRange,
+    maxPatterns = DEFAULT_MAX_PATTERNS,
+    kqlFilter,
+  } = params;
 
   // Convert epoch ms to ISO strings for ES|QL standard time params
   const startIso = new Date(timeRange.start).toISOString();
   const endIso = new Date(timeRange.end).toISOString();
 
-  // Build ES|QL query with CATEGORIZE + RERANK
+  // Build WHERE clause: time range + optional KQL filter
+  // KQL is largely compatible with Lucene for simple queries, so we use QSTR()
+  const whereClause = kqlFilter
+    ? `WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND QSTR(?kql)`
+    : `WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend`;
+
+  // Build ES|QL query with CATEGORIZE + rank window + RERANK
   // Using standard ?_tstart/?_tend named parameters for time range
+  // Note: Index patterns don't need escaping in ES|QL FROM clauses
+  // Rank window (SORT count DESC | LIMIT 200) focuses on prevalent patterns before RERANK
+  // RERANK on pattern + sample gives the model more context
   const query = `
-    FROM ${formatEsqlIdentifier(target)}
-    | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
+    FROM ${target}
+    | ${whereClause}
     | STATS 
         count = COUNT(*),
         first_seen = MIN(@timestamp),
         last_seen = MAX(@timestamp),
         sample = SAMPLE(message, 1)
       BY pattern = CATEGORIZE(message)
-    | RERANK ?query ON pattern
+    | SORT count DESC
+    | LIMIT ?rankWindow
+    | RERANK ?query ON pattern, sample
     | SORT _score DESC
     | LIMIT ?limit
   `;
 
+  // Build params array based on whether kqlFilter is present
+  const queryParams = kqlFilter
+    ? [
+        { _tstart: startIso },
+        { _tend: endIso },
+        { kql: kqlFilter },
+        { rankWindow: DEFAULT_RANK_WINDOW },
+        { query: nlQuery },
+        { limit: maxPatterns },
+      ]
+    : [
+        { _tstart: startIso },
+        { _tend: endIso },
+        { rankWindow: DEFAULT_RANK_WINDOW },
+        { query: nlQuery },
+        { limit: maxPatterns },
+      ];
+
   try {
     const response = await esClient.esql.query({
       query,
-      params: [
-        { _tstart: startIso },
-        { _tend: endIso },
-        { query: nlQuery },
-        { limit: maxPatterns },
-      ],
+      params: queryParams,
     });
 
     return {
