@@ -156,6 +156,56 @@ describe('createEisFindItems', () => {
     expect(getItemModelId(noId)).toBeUndefined();
     expect(noId.id).toBe('elastic::No Model Id');
   });
+
+  it('hides preview, deprecated, and region-blocked models by default', async () => {
+    const catalog = [
+      models[0],
+      model('Preview Model', 'Elastic', { modelStatus: EisModelStatus.Preview }),
+      model('Deprecated Model', 'Elastic', { modelStatus: EisModelStatus.Deprecated }),
+      model('Blocked Model', 'Elastic', {
+        endpoints: [
+          {
+            inference_id: 'blocked-endpoint',
+            task_type: 'chat_completion',
+            service: 'elastic',
+            service_settings: { model_id: 'blocked-id' },
+            metadata: { denied_by_region_policy: true },
+          },
+        ],
+      }),
+    ];
+    const { items } = await createEisFindItems(catalog)(findParams());
+
+    expect(items.map(({ title }) => title)).toEqual(['Claude Sonnet']);
+  });
+
+  it('returns hidden models when the matching display option is shown', async () => {
+    const catalog = [
+      models[0],
+      model('Preview Model', 'Elastic', { modelStatus: EisModelStatus.Preview }),
+    ];
+    const { items } = await createEisFindItems(catalog, {
+      showOutsideRegionPreferences: false,
+      showDeprecatedModels: false,
+      showPreviewModels: true,
+    })(findParams());
+
+    expect(items.map(({ title }) => title)).toEqual(['Claude Sonnet', 'Preview Model']);
+  });
+
+  it('applies search together with display options', async () => {
+    const catalog = [
+      models[0],
+      model('Preview Model', 'Elastic', { modelStatus: EisModelStatus.Preview }),
+    ];
+    const { items } = await createEisFindItems(catalog, {
+      showOutsideRegionPreferences: false,
+      showDeprecatedModels: false,
+      showPreviewModels: true,
+    })(findParams({ searchQuery: 'preview' }));
+
+    expect(items.map(({ title }) => title)).toEqual(['Preview Model']);
+  });
 });
 
 describe('createEisFieldDefinitions', () => {

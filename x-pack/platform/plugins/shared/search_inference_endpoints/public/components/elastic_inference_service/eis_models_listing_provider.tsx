@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { ContentListProvider } from '@kbn/content-list-provider';
-import { getProviderOptions, type GroupedModel } from '../../utils/eis_utils';
+import {
+  DEFAULT_EIS_DISPLAY_OPTIONS,
+  getProviderOptions,
+  type GroupedModel,
+} from '../../utils/eis_utils';
 import {
   createEisFieldDefinitions,
   createEisFindItems,
@@ -59,9 +63,23 @@ export const EisModelsListingProvider = ({
   canManage,
   onViewModelDetails,
 }: EisModelsListingProviderProps) => {
-  const dataSource = useMemo(() => ({ findItems: createEisFindItems(models) }), [models]);
+  const [displayOptions, setDisplayOptions] = useState(DEFAULT_EIS_DISPLAY_OPTIONS);
+  const dataSource = useMemo(
+    () => ({ findItems: createEisFindItems(models, displayOptions) }),
+    [models, displayOptions]
+  );
   const fields = useMemo(() => createEisFieldDefinitions(models), [models]);
   const modelFamilyOptions = useMemo(() => getProviderOptions(models), [models]);
+  const queryKeyScope = `eis-models-listing-${Number(
+    displayOptions.showOutsideRegionPreferences
+  )}-${Number(displayOptions.showDeprecatedModels)}-${Number(displayOptions.showPreviewModels)}`;
+  const hasBlockedModels = useMemo(
+    () =>
+      models.some((model) =>
+        model.endpoints.some((endpoint) => endpoint.metadata?.denied_by_region_policy === true)
+      ),
+    [models]
+  );
 
   const features = useMemo(
     () => ({
@@ -82,12 +100,16 @@ export const EisModelsListingProvider = ({
   return (
     <ContentListProvider
       id="eis-models"
+      queryKeyScope={queryKeyScope}
       labels={LABELS}
       isReadOnly={!canManage}
       {...{ dataSource, features }}
     >
       <ModelFamilyOptionsProvider value={modelFamilyOptions}>
-        <EisModelsListing {...{ onViewModelDetails }} />
+        <EisModelsListing
+          {...{ onViewModelDetails, displayOptions, hasBlockedModels }}
+          onApplyDisplayOptions={setDisplayOptions}
+        />
       </ModelFamilyOptionsProvider>
     </ContentListProvider>
   );

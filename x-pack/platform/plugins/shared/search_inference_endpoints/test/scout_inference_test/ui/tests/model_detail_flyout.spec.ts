@@ -130,6 +130,7 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
     const { eisModels } = pageObjects;
 
     await test.step('open flyout for the deprecated model', async () => {
+      await eisModels.showDeprecatedModels();
       await eisModels.modelCard('OpenAI GPT-3.5').click();
       await expect(eisModels.flyout).toBeVisible();
     });
@@ -149,6 +150,7 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
     const { eisModels } = pageObjects;
 
     await test.step('open flyout for the EOL model', async () => {
+      await eisModels.showDeprecatedModels();
       await eisModels.modelCard('OpenAI Davinci').click();
       await expect(eisModels.flyout).toBeVisible();
     });
@@ -270,6 +272,7 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
     });
 
     await test.step('open flyout for a denied model', async () => {
+      await eisModels.showModelsOutsideRegionPreferences();
       await eisModels.modelCard('Anthropic Claude Sonnet 3.7').click();
       await expect(eisModels.flyout).toBeVisible();
     });
