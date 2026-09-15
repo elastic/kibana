@@ -93,7 +93,9 @@ spaceTest.describe('Discover field visualization', { tag: tags.deploymentAgnosti
       await discover.createDataViewFromSearchBar({ name: 'logst', adHoc: true });
       await discover.navigateToLensEditor();
 
-      await expect(page.testSubj.locator('lns-dataView-switch-link')).toHaveText('logst*');
+      await expect(
+        page.testSubj.locator('lns-dataView-switch-link').getByTestId('fullText')
+      ).toHaveText('logst*');
     }
   );
 });
