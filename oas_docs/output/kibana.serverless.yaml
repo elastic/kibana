@@ -8366,15 +8366,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: List action policies
       tags:
         - alerting-v2
@@ -8521,15 +8521,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Create an action policy
       tags:
         - alerting-v2
@@ -8644,15 +8644,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Delete action policies in bulk by ID
       tags:
         - alerting-v2
@@ -8767,15 +8767,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Disable action policies in bulk by ID
       tags:
         - alerting-v2
@@ -8890,15 +8890,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Enable action policies in bulk by ID
       tags:
         - alerting-v2
@@ -9014,15 +9014,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Snooze action policies in bulk by ID
       tags:
         - alerting-v2
@@ -9137,15 +9137,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Cancel snooze for action policies in bulk by ID
       tags:
         - alerting-v2
@@ -9260,15 +9260,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Rotate API keys for action policies in bulk by ID
       tags:
         - alerting-v2
@@ -9384,15 +9384,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Delete an action policy
       tags:
         - alerting-v2
@@ -9533,15 +9533,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Get an action policy
       tags:
         - alerting-v2
@@ -9717,15 +9717,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Partially update an action policy.
       tags:
         - alerting-v2
@@ -9945,15 +9945,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Create or replace an action policy
       tags:
         - alerting-v2
@@ -10117,15 +10117,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Disable an action policy
       tags:
         - alerting-v2
@@ -10289,15 +10289,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Enable an action policy
       tags:
         - alerting-v2
@@ -10471,15 +10471,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Snooze an action policy
       tags:
         - alerting-v2
@@ -10643,15 +10643,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Unsnooze an action policy
       tags:
         - alerting-v2
@@ -10782,15 +10782,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Update an action policy API key
       tags:
         - alerting-v2
@@ -10906,15 +10906,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Bulk create alert actions
       tags:
         - alerting-v2
@@ -11038,15 +11038,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Acknowledge an alert
       tags:
         - alerting-v2
@@ -11171,15 +11171,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Activate an alert
       tags:
         - alerting-v2
@@ -11304,15 +11304,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Assign an alert to a user
       tags:
         - alerting-v2
@@ -11437,15 +11437,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Deactivate an alert
       tags:
         - alerting-v2
@@ -11569,15 +11569,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Snooze an alert
       tags:
         - alerting-v2
@@ -11703,15 +11703,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Add tags to an alert
       tags:
         - alerting-v2
@@ -11835,15 +11835,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Unacknowledge an alert
       tags:
         - alerting-v2
@@ -11966,15 +11966,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Unsnooze an alert
       tags:
         - alerting-v2
@@ -12156,15 +12156,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: List action policy executions
       tags:
         - alerting-v2
@@ -12351,15 +12351,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: List rule executions
       tags:
         - alerting-v2
@@ -12536,15 +12536,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: List rules
       tags:
         - alerting-v2
@@ -12702,15 +12702,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Create a rule
       tags:
         - alerting-v2
@@ -12926,15 +12926,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Create rules in bulk
       tags:
         - alerting-v2
@@ -13046,15 +13046,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Delete rules in bulk by ID
       tags:
         - alerting-v2
@@ -13166,15 +13166,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Disable rules in bulk by ID
       tags:
         - alerting-v2
@@ -13286,15 +13286,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Enable rules in bulk by ID
       tags:
         - alerting-v2
@@ -13448,15 +13448,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Get rules in bulk
       tags:
         - alerting-v2
@@ -13568,15 +13568,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Update the API key of rules in bulk by ID
       tags:
         - alerting-v2
@@ -13690,15 +13690,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Delete rules matching a query (dry-run by default)
       tags:
         - alerting-v2
@@ -13812,15 +13812,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Disable rules matching a query (dry-run by default)
       tags:
         - alerting-v2
@@ -13934,15 +13934,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Enable rules matching a query (dry-run by default)
       tags:
         - alerting-v2
@@ -14056,15 +14056,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Update the API key of rules matching a query (dry-run by default)
       tags:
         - alerting-v2
@@ -14180,15 +14180,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Delete a rule
       tags:
         - alerting-v2
@@ -14334,15 +14334,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Get a rule
       tags:
         - alerting-v2
@@ -14520,15 +14520,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Update a rule
       tags:
         - alerting-v2
@@ -14764,15 +14764,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Create or replace a rule
       tags:
         - alerting-v2
@@ -14941,15 +14941,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Disable a rule
       tags:
         - alerting-v2
@@ -15114,15 +15114,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Enable a rule
       tags:
         - alerting-v2
@@ -15248,15 +15248,15 @@ paths:
           content:
             application/json:
               examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
+                serviceUnavailable:
+                  summary: Infrastructure-level failure
                   value:
-                    code: ALERTING_DISABLED
+                    code: SERVICE_UNAVAILABLE
                     error: Service Unavailable
-                    message: Alerting is disabled.
+                    message: A dependency required to complete this request is unavailable.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+          description: Indicates an infrastructure-level failure (for example Elasticsearch or Saved Objects unavailable).
       summary: Run a rule now
       tags:
         - alerting-v2
