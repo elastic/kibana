@@ -8286,7 +8286,8 @@ paths:
                         grouping_mode: per_episode
                         id: action-policy-1
                         matcher:
-                          expression: 'rule.tags: "production"'
+                          tags:
+                            - production
                         name: Notify on production alerts
                         snoozed_until: null
                         tags:
@@ -8413,7 +8414,8 @@ paths:
                       type: workflow
                   grouping_mode: per_episode
                   matcher:
-                    expression: 'rule.tags: "production"'
+                    tags:
+                      - production
                   name: Notify on production alerts
                   tags:
                     - production
@@ -8443,7 +8445,8 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'rule.tags: "production"'
+                      tags:
+                        - production
                     name: Notify on production alerts
                     snoozed_until: null
                     tags:
@@ -9441,7 +9444,8 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'rule.tags: "production"'
+                      tags:
+                        - production
                     name: Notify on production alerts
                     snoozed_until: null
                     tags:
@@ -9609,7 +9613,8 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'rule.tags: "production"'
+                      tags:
+                        - production
                     name: Notify on production alerts (updated)
                     snoozed_until: null
                     tags:
@@ -9772,7 +9777,8 @@ paths:
                       type: workflow
                   grouping_mode: per_episode
                   matcher:
-                    expression: 'rule.tags: "production"'
+                    tags:
+                      - production
                   name: Notify on production alerts
                   tags:
                     - production
@@ -9802,7 +9808,8 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'rule.tags: "production"'
+                      tags:
+                        - production
                     name: Notify on production alerts
                     snoozed_until: null
                     tags:
@@ -9837,7 +9844,8 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'rule.tags: "production"'
+                      tags:
+                        - production
                     name: Notify on production alerts
                     snoozed_until: null
                     tags:
@@ -10010,7 +10018,8 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'rule.tags: "production"'
+                      tags:
+                        - production
                     name: Notify on production alerts
                     snoozed_until: null
                     tags:
@@ -10182,7 +10191,8 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'rule.tags: "production"'
+                      tags:
+                        - production
                     name: Notify on production alerts
                     snoozed_until: null
                     tags:
@@ -10364,7 +10374,8 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'rule.tags: "production"'
+                      tags:
+                        - production
                     name: Notify on production alerts
                     snoozed_until: '2026-01-16T12:00:00.000Z'
                     tags:
@@ -10536,7 +10547,8 @@ paths:
                     grouping_mode: per_episode
                     id: action-policy-1
                     matcher:
-                      expression: 'rule.tags: "production"'
+                      tags:
+                        - production
                     name: Notify on production alerts
                     snoozed_until: null
                     tags:
@@ -90397,7 +90409,7 @@ components:
           type: object
           properties:
             expression:
-              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, `rule.id`, `rule.name`, `rule.tags`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
+              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
               maxLength: 4096
               nullable: true
               type: string
@@ -91146,7 +91158,7 @@ components:
           type: object
           properties:
             expression:
-              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, `rule.id`, `rule.name`, `rule.tags`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
+              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
               maxLength: 4096
               nullable: true
               type: string
@@ -91972,7 +91984,7 @@ components:
           type: object
           properties:
             expression:
-              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, `rule.id`, `rule.name`, `rule.tags`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
+              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
               maxLength: 4096
               nullable: true
               type: string

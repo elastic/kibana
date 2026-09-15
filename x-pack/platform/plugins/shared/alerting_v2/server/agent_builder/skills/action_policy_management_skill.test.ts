@@ -105,7 +105,7 @@ describe('createActionPolicyManagementSkill', () => {
 
     expect(byName['action-policy-matchers']).toContain('# Matcher Context Fields');
     expect(byName['action-policy-matchers']).toContain('`episode_status`');
-    expect(byName['action-policy-matchers']).toContain('`rule.id`');
+    expect(byName['action-policy-matchers']).not.toContain('`rule.id`');
 
     expect(byName['action-policy-grouping-modes']).toContain('`per_episode`');
     expect(byName['action-policy-throttle-strategies']).toContain('`on_status_change`');
