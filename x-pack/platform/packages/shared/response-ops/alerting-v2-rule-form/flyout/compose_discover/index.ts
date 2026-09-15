@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-export { ComposeDiscoverFlyout } from './compose_discover_flyout';
+export {
+  ComposeDiscoverFlyout,
+  STACKED_FLYOUT_SIZE,
+  STACKED_FLYOUT_MIN_WIDTH,
+} from './compose_discover_flyout';
 export type { ComposeDiscoverFlyoutProps } from './compose_discover_flyout';
+export { useEuiFlyoutReregister } from './use_eui_flyout_reregister';
 
 export { QuerySandboxFlyout } from './query_sandbox_flyout';
 export type { QuerySandboxFlyoutProps } from './query_sandbox_flyout';

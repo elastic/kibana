@@ -8,6 +8,7 @@
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen, act, waitFor } from '@testing-library/react';
+import type { RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import type { RuleApiResponse } from '../services/rules_api';
 
 const mockCreateMutate = jest.fn();
@@ -380,6 +381,18 @@ describe('useComposeDiscoverFlyout — edit submission wiring', () => {
     expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
   });
 
+  it('keeps the flyout open when notification setup fails so the user can retry', async () => {
+    mockSetupMutate.mockImplementation((_vars, opts) => opts?.onError?.(new Error('setup failed')));
+
+    await renderAndOpenEdit();
+    callOnUpdateRule({ workflows: [existingAction] });
+
+    await waitFor(() => {
+      expect(mockSetupMutate).toHaveBeenCalledTimes(1);
+    });
+    expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+  });
+
   it('closes without setting up notifications when there are no actions', async () => {
     await renderAndOpenEdit();
     callOnUpdateRule(undefined);
@@ -531,6 +544,34 @@ describe('useComposeDiscoverFlyout — stacked create session', () => {
     expect(capturedFlyoutProps.historyKey).not.toBe(sharedHistoryKey);
   });
 
+  it('does not use the shared historyKey in clone mode', async () => {
+    render(<Harness historyKey={sharedHistoryKey} />);
+    act(() => {
+      hookApi!.openCloneFlyout(editRule);
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+
+    expect(capturedFlyoutProps.historyKey).not.toBe(sharedHistoryKey);
+    expect(capturedFlyoutProps.mode).toBe('clone');
+  });
+
+  it('uses the shared historyKey for a template-seeded create', async () => {
+    render(<Harness historyKey={sharedHistoryKey} />);
+    act(() => {
+      hookApi!.openCreateFromTemplateFlyout({
+        rule: { metadata: { name: 'From template' } },
+      } as RuleTemplateResponse);
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+
+    expect(capturedFlyoutProps.historyKey).toBe(sharedHistoryKey);
+    expect(capturedFlyoutProps.mode).toBe('create');
+  });
+
   it('calls onCreateSuccess after a successful create', async () => {
     const onCreateSuccess = jest.fn();
     render(<Harness historyKey={sharedHistoryKey} onCreateSuccess={onCreateSuccess} />);
@@ -645,5 +686,43 @@ describe('useComposeDiscoverFlyout — stacked create session', () => {
     await waitFor(() => {
       expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
     });
+  });
+});
+
+describe('useComposeDiscoverFlyout — builder fallback and close request', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    capturedFlyoutProps = {};
+    hookApi = undefined;
+  });
+
+  it('falls back to ES|QL create when the builder type is unknown', async () => {
+    render(<Harness />);
+
+    act(() => {
+      hookApi!.openCreateBuilderFlyout('not-a-builder');
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+
+    expect(capturedFlyoutProps.builderType).toBeUndefined();
+    expect(capturedFlyoutProps.mode).toBe('create');
+    expect(mockAddWarning).toHaveBeenCalledWith(
+      expect.objectContaining({ title: expect.any(String) })
+    );
+  });
+
+  it('increments closeGeneration when requestClose is called', async () => {
+    await renderAndOpenCreate();
+
+    expect(capturedFlyoutProps.closeGeneration).toBe(0);
+
+    act(() => {
+      hookApi!.requestClose();
+    });
+
+    expect(capturedFlyoutProps.closeGeneration).toBe(1);
   });
 });

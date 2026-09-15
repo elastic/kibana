@@ -102,6 +102,7 @@ const Wrapper: React.FC<{
             <BuilderStateProvider
               builderState={builderState}
               setBuilderState={onBuilderStateChange as (s: unknown) => void}
+              initBuilderState={onBuilderStateChange as (s: unknown) => void}
             >
               {children}
             </BuilderStateProvider>

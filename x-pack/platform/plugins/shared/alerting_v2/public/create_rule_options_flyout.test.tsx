@@ -232,6 +232,7 @@ describe('CreateRuleOptionsFlyout', () => {
       expect(capturedComposeProps.mode).toBe('create');
       expect(capturedComposeProps.builderType).toBe('threshold');
       expect(capturedComposeProps.onClose).toBe(onClose);
+      expect(capturedComposeProps.onHistoryBack).toEqual(expect.any(Function));
     });
   });
 

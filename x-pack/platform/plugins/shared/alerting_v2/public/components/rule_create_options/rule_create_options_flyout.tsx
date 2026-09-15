@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -17,6 +17,11 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import type { EuiFlyoutProps } from '@elastic/eui';
+import {
+  STACKED_FLYOUT_SIZE,
+  STACKED_FLYOUT_MIN_WIDTH,
+  useEuiFlyoutReregister,
+} from '@kbn/alerting-v2-rule-form';
 import { i18n } from '@kbn/i18n';
 import { RuleCreateOptionsPanel, type LegacyRuleTypeItem } from './rule_create_options_panel';
 
@@ -27,10 +32,6 @@ const CLOSE_LABEL = i18n.translate('xpack.alertingV2.ruleCreateOptionsFlyout.clo
 const CREATE_RULE_TITLE = i18n.translate('xpack.alertingV2.ruleCreateOptionsFlyout.title', {
   defaultMessage: 'Create rule',
 });
-
-/** Matches ComposeDiscoverFlyout so stacking the form on top does not resize the panel. */
-const STACKED_FLYOUT_SIZE = 540;
-const STACKED_FLYOUT_MIN_WIDTH = 480;
 
 export interface RuleCreateOptionsFlyoutProps {
   onClose: () => void;
@@ -52,7 +53,7 @@ export interface RuleCreateOptionsFlyoutProps {
    * Shared EUI flyout history key. When set, this flyout is the first entry of a stacked
    * create session (`overlay` + `session="start"`) so Back from the authoring flyout returns here.
    */
-  historyKey?: symbol;
+  historyKey?: EuiFlyoutProps['historyKey'];
 }
 
 export const RuleCreateOptionsFlyout = ({
@@ -66,7 +67,7 @@ export const RuleCreateOptionsFlyout = ({
   historyKey,
 }: RuleCreateOptionsFlyoutProps) => {
   const isStacked = historyKey !== undefined;
-  const [flyoutKey, setFlyoutKey] = useState(0);
+  const { flyoutKey, reregister } = useEuiFlyoutReregister();
 
   const handleFlyoutClose: EuiFlyoutProps['onClose'] = useCallback(
     (_event, meta) => {
@@ -76,12 +77,12 @@ export const RuleCreateOptionsFlyout = ({
          * closeAllFlyouts() unregisters the picker too. Stay mounted and re-register
          * so the form can stack on top again while it confirms unsaved changes.
          */
-        setFlyoutKey((key) => key + 1);
+        reregister();
         return;
       }
       onClose();
     },
-    [isStacked, onClose]
+    [isStacked, onClose, reregister]
   );
 
   return (

@@ -43,8 +43,9 @@ const createState = (overrides: Partial<ComposeDiscoverState> = {}): ComposeDisc
 const Wrapper: React.FC<{
   builderState: ThresholdFormValues;
   onBuilderStateChange: (s: ThresholdFormValues) => void;
+  initBuilderState?: (s: ThresholdFormValues) => void;
   children: React.ReactNode;
-}> = ({ builderState, onBuilderStateChange, children }) => {
+}> = ({ builderState, onBuilderStateChange, initBuilderState = onBuilderStateChange, children }) => {
   const form = useForm<FormValues>({ defaultValues: BASE_COMPOSE_VALUES });
 
   return (
@@ -53,6 +54,7 @@ const Wrapper: React.FC<{
         <BuilderStateProvider
           builderState={builderState}
           setBuilderState={onBuilderStateChange as (s: unknown) => void}
+          initBuilderState={initBuilderState as (s: unknown) => void}
         >
           {children}
         </BuilderStateProvider>
@@ -70,19 +72,25 @@ describe('BuilderRecoveryForm', () => {
 
   it('returns null when recovery config is not set and no valid alert conditions exist', () => {
     const setBuilderState = jest.fn();
+    const initBuilderState = jest.fn();
     const builderState = makeBuilderState({
       alertConditions: [{ id: '1', metric: '', comparator: Comparator.GT, threshold: [] }],
       recovery: undefined,
     });
 
     render(
-      <Wrapper builderState={builderState} onBuilderStateChange={setBuilderState}>
+      <Wrapper
+        builderState={builderState}
+        onBuilderStateChange={setBuilderState}
+        initBuilderState={initBuilderState}
+      >
         <BuilderRecoveryForm state={createState()} dispatch={dispatch} />
       </Wrapper>
     );
 
-    expect(setBuilderState).toHaveBeenCalled();
-    const call = setBuilderState.mock.calls[0][0] as ThresholdFormValues;
+    expect(initBuilderState).toHaveBeenCalled();
+    expect(setBuilderState).not.toHaveBeenCalled();
+    const call = initBuilderState.mock.calls[0][0] as ThresholdFormValues;
     expect(call.recovery).toBeDefined();
     expect(call.recovery!.conditions.length).toBe(1);
   });
@@ -196,19 +204,25 @@ describe('BuilderRecoveryForm', () => {
 
   it('derives recovery conditions from alert conditions on init', () => {
     const setBuilderState = jest.fn();
+    const initBuilderState = jest.fn();
     const builderState = makeBuilderState({
       alertConditions: [{ id: '1', metric: 'count', comparator: Comparator.GT, threshold: [100] }],
       recovery: undefined,
     });
 
     render(
-      <Wrapper builderState={builderState} onBuilderStateChange={setBuilderState}>
+      <Wrapper
+        builderState={builderState}
+        onBuilderStateChange={setBuilderState}
+        initBuilderState={initBuilderState}
+      >
         <BuilderRecoveryForm state={createState()} dispatch={dispatch} />
       </Wrapper>
     );
 
-    expect(setBuilderState).toHaveBeenCalled();
-    const call = setBuilderState.mock.calls[0][0] as ThresholdFormValues;
+    expect(initBuilderState).toHaveBeenCalled();
+    expect(setBuilderState).not.toHaveBeenCalled();
+    const call = initBuilderState.mock.calls[0][0] as ThresholdFormValues;
     expect(call.recovery!.conditions[0].metric).toBe('count');
     expect(call.recovery!.conditions[0].comparator).toBe(Comparator.LTE);
     expect(call.recovery!.conditions[0].threshold).toEqual([100]);

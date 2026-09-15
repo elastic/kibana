@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { useStableCallback } from '@kbn/react-hooks';
 import {
   EuiButtonEmpty,
   EuiButtonGroup,
@@ -37,29 +38,52 @@ import { COMPARATOR_OPTIONS, CONDITION_OPERATOR_OPTIONS } from './translations';
 import { buildRecoveryBlock } from './build_esql';
 
 export const BuilderRecoveryForm: React.FC<CustomRecoveryRenderProps> = ({ state, dispatch }) => {
-  const { state: builderState, setState: onBuilderStateChange } =
-    useBuilderState<ThresholdFormValues>();
+  const {
+    state: builderState,
+    setState: onBuilderStateChange,
+    initStateOnMount,
+  } = useBuilderState<ThresholdFormValues>();
   const { setValue, getValues } = useFormContext<FormValues>();
   const initializedRef = useRef(false);
+
+  const seedRecoveryOnMount = useStableCallback(() => {
+    const currentBuilderState = builderState;
+    let recovery = currentBuilderState.recovery;
+    if (!recovery) {
+      const validAlert = currentBuilderState.alertConditions.filter(
+        (c) => c.metric.trim() && c.threshold.length > 0
+      );
+      const conditions =
+        validAlert.length > 0
+          ? deriveRecoveryConditions(validAlert)
+          : [{ id: generateId(), ...DEFAULT_RECOVERY_CONDITION }];
+      recovery = { conditions, conditionOperator: currentBuilderState.conditionOperator };
+      initStateOnMount({
+        ...currentBuilderState,
+        recovery,
+      });
+    }
+
+    const generatedBlock = buildRecoveryBlock({ recovery } as ThresholdFormValues);
+    if (!generatedBlock) return;
+    const current = getValues('query');
+    if (current.format !== 'composed') return;
+    if (current.recovery?.segment === generatedBlock) return;
+    setValue(
+      'query',
+      {
+        ...current,
+        recovery: { segment: generatedBlock },
+      },
+      { shouldDirty: false }
+    );
+  });
 
   useEffect(() => {
     if (initializedRef.current) return;
     initializedRef.current = true;
-    if (builderState.recovery) return;
-
-    const validAlert = builderState.alertConditions.filter(
-      (c) => c.metric.trim() && c.threshold.length > 0
-    );
-    const conditions =
-      validAlert.length > 0
-        ? deriveRecoveryConditions(validAlert)
-        : [{ id: generateId(), ...DEFAULT_RECOVERY_CONDITION }];
-
-    onBuilderStateChange({
-      ...builderState,
-      recovery: { conditions, conditionOperator: builderState.conditionOperator },
-    });
-  }, [builderState, onBuilderStateChange]);
+    seedRecoveryOnMount();
+  }, [seedRecoveryOnMount]);
 
   const recoveryConfig = builderState.recovery;
 
@@ -76,10 +100,14 @@ export const BuilderRecoveryForm: React.FC<CustomRecoveryRenderProps> = ({ state
     const current = getValues('query');
     if (current.format !== 'composed') return;
     if (current.recovery?.segment === generatedRecoveryBlock) return;
-    setValue('query', {
-      ...current,
-      recovery: { segment: generatedRecoveryBlock },
-    });
+    setValue(
+      'query',
+      {
+        ...current,
+        recovery: { segment: generatedRecoveryBlock },
+      },
+      { shouldDirty: true }
+    );
   }, [recoveryConfig, generatedRecoveryBlock, getValues, setValue]);
 
   const hasValidRecoveryBlock = Boolean(generatedRecoveryBlock);

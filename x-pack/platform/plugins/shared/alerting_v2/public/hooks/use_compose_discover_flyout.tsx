@@ -97,10 +97,17 @@ export const useComposeDiscoverFlyout = ({
   const [builderType, setBuilderType] = useState<string | null>(null);
   const [initialBuilderState, setInitialBuilderState] = useState<BuilderState>(undefined);
   const [flyoutGeneration, setFlyoutGeneration] = useState(0);
+  const [closeGeneration, setCloseGeneration] = useState(0);
   const generatedHistoryKey = useMemo(() => Symbol('ruleAuthoring'), []);
-  const isFreshCreate = flyoutMode === 'create' && targetRule == null;
+  /*
+   * All create-mode flyouts join the picker session when a shared key is provided,
+   * including template-seeded creates that carry a synthetic `targetRule`.
+   * Edit/clone keep a private key so they do not stack on the picker.
+   */
   const historyKey =
-    isFreshCreate && sharedHistoryKey !== undefined ? sharedHistoryKey : generatedHistoryKey;
+    flyoutMode === 'create' && sharedHistoryKey !== undefined
+      ? sharedHistoryKey
+      : generatedHistoryKey;
 
   const showFlyout = useCallback(() => {
     setFlyoutGeneration((generation) => generation + 1);
@@ -112,6 +119,11 @@ export const useComposeDiscoverFlyout = ({
     setTargetRule(null);
     setBuilderType(null);
     setInitialBuilderState(undefined);
+    setCloseGeneration(0);
+  }, []);
+
+  const requestClose = useCallback(() => {
+    setCloseGeneration((generation) => generation + 1);
   }, []);
 
   const closeFlyout = useCallback(
@@ -160,7 +172,8 @@ export const useComposeDiscoverFlyout = ({
 
   const rulesApi = useService(RulesApi);
   const createRuleMutation = useCreateRule();
-  const setupNotificationsMutation = useSetupRuleNotifications();
+  const setupCreateNotifications = useSetupRuleNotifications({ mode: 'create' });
+  const setupUpdateNotifications = useSetupRuleNotifications({ mode: 'update' });
   const updateRuleMutation = useUpdateRule();
   const ruleFormServices = useMemo<RuleFormServices>(
     () => ({
@@ -243,10 +256,7 @@ export const useComposeDiscoverFlyout = ({
             values: { type },
           }),
         });
-        setTargetRule(null);
-        setFlyoutMode('create');
-        setBuilderType(null);
-        showFlyout();
+        openCreateFlyout();
         return;
       }
       setTargetRule(null);
@@ -255,7 +265,7 @@ export const useComposeDiscoverFlyout = ({
       setInitialBuilderState(undefined);
       showFlyout();
     },
-    [notifications.toasts, showFlyout]
+    [notifications.toasts, openCreateFlyout, showFlyout]
   );
 
   const openRuleFlyout = useCallback(
@@ -312,6 +322,7 @@ export const useComposeDiscoverFlyout = ({
       ruleId={flyoutMode === 'edit' ? targetRule?.id : undefined}
       onClose={dismissFlyout}
       onHistoryBack={hideFlyout}
+      closeGeneration={closeGeneration}
       services={ruleFormServices}
       builderType={builderType ?? undefined}
       initialBuilderState={initialBuilderState}
@@ -331,7 +342,7 @@ export const useComposeDiscoverFlyout = ({
                 closeAndRedirect();
                 return;
               }
-              setupNotificationsMutation.mutate(
+              setupCreateNotifications.mutate(
                 { rule: ruleForNotifications, actions },
                 { onSuccess: closeAndRedirect, onError: closeAndRedirect }
               );
@@ -354,8 +365,8 @@ export const useComposeDiscoverFlyout = ({
                 closeFlyout();
                 return;
               }
-              // Only close the flyout once notification setup also succeeds
-              setupNotificationsMutation.mutate(
+              // Stay open on failure so the user can fix connectors and re-submit.
+              setupUpdateNotifications.mutate(
                 { rule: ruleForNotifications, actions },
                 { onSuccess: () => closeFlyout() }
               );
@@ -365,7 +376,8 @@ export const useComposeDiscoverFlyout = ({
       }
       isSaving={
         createRuleMutation.isLoading ||
-        setupNotificationsMutation.isLoading ||
+        setupCreateNotifications.isLoading ||
+        setupUpdateNotifications.isLoading ||
         updateRuleMutation.isLoading
       }
     />
@@ -380,5 +392,7 @@ export const useComposeDiscoverFlyout = ({
     openCreateFromTemplateFlyout,
     openEditFlyout,
     openCloneFlyout,
+    isOpen: flyoutOpen,
+    requestClose,
   };
 };

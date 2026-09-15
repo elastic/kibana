@@ -103,7 +103,7 @@ describe('useSetupRuleNotifications', () => {
 
   describe('empty list', () => {
     it('does nothing and shows no toast when actions is empty', async () => {
-      const { result } = renderHook(() => useSetupRuleNotifications(), {
+      const { result } = renderHook(() => useSetupRuleNotifications({ mode: 'create' }), {
         wrapper: createWrapper(),
       });
 
@@ -125,7 +125,7 @@ describe('useSetupRuleNotifications', () => {
       mockCreateWorkflowFn.mockResolvedValue({ id: 'workflow-new-1' });
       mockCreateActionPolicy.mockResolvedValue({});
 
-      const { result } = renderHook(() => useSetupRuleNotifications(), {
+      const { result } = renderHook(() => useSetupRuleNotifications({ mode: 'create' }), {
         wrapper: createWrapper(),
       });
 
@@ -148,7 +148,7 @@ describe('useSetupRuleNotifications', () => {
       mockCreateWorkflowFn.mockResolvedValue({ id: 'workflow-new-2' });
       mockCreateActionPolicy.mockResolvedValue({});
 
-      const { result } = renderHook(() => useSetupRuleNotifications(), {
+      const { result } = renderHook(() => useSetupRuleNotifications({ mode: 'create' }), {
         wrapper: createWrapper(),
       });
 
@@ -167,7 +167,7 @@ describe('useSetupRuleNotifications', () => {
       mockCreateActionPolicy.mockRejectedValue(new Error('action policy failed'));
       mockDeleteWorkflowFn.mockResolvedValue(undefined);
 
-      const { result } = renderHook(() => useSetupRuleNotifications(), {
+      const { result } = renderHook(() => useSetupRuleNotifications({ mode: 'create' }), {
         wrapper: createWrapper(),
       });
 
@@ -185,7 +185,7 @@ describe('useSetupRuleNotifications', () => {
       mockCreateActionPolicy.mockRejectedValue(new Error('action policy failed'));
       mockDeleteWorkflowFn.mockRejectedValue(new Error('delete also failed'));
 
-      const { result } = renderHook(() => useSetupRuleNotifications(), {
+      const { result } = renderHook(() => useSetupRuleNotifications({ mode: 'create' }), {
         wrapper: createWrapper(),
       });
 
@@ -203,7 +203,7 @@ describe('useSetupRuleNotifications', () => {
     it('uses the existing workflow id and creates action policy, shows success toast', async () => {
       mockCreateActionPolicy.mockResolvedValue({});
 
-      const { result } = renderHook(() => useSetupRuleNotifications(), {
+      const { result } = renderHook(() => useSetupRuleNotifications({ mode: 'create' }), {
         wrapper: createWrapper(),
       });
 
@@ -221,7 +221,7 @@ describe('useSetupRuleNotifications', () => {
     });
 
     it('throws and shows error toast when workflowId is null', async () => {
-      const { result } = renderHook(() => useSetupRuleNotifications(), {
+      const { result } = renderHook(() => useSetupRuleNotifications({ mode: 'create' }), {
         wrapper: createWrapper(),
       });
 
@@ -246,7 +246,7 @@ describe('useSetupRuleNotifications', () => {
         .mockResolvedValueOnce({ id: 'wf-b' });
       mockCreateActionPolicy.mockResolvedValue({});
 
-      const { result } = renderHook(() => useSetupRuleNotifications(), {
+      const { result } = renderHook(() => useSetupRuleNotifications({ mode: 'create' }), {
         wrapper: createWrapper(),
       });
 
@@ -265,7 +265,7 @@ describe('useSetupRuleNotifications', () => {
         .mockRejectedValueOnce(new Error('slack connector unreachable'));
       mockCreateActionPolicy.mockResolvedValue({});
 
-      const { result } = renderHook(() => useSetupRuleNotifications(), {
+      const { result } = renderHook(() => useSetupRuleNotifications({ mode: 'create' }), {
         wrapper: createWrapper(),
       });
 
@@ -282,7 +282,7 @@ describe('useSetupRuleNotifications', () => {
       mockCreateWorkflowFn.mockResolvedValue({ id: 'wf-new' });
       mockCreateActionPolicy.mockResolvedValue({});
 
-      const { result } = renderHook(() => useSetupRuleNotifications(), {
+      const { result } = renderHook(() => useSetupRuleNotifications({ mode: 'create' }), {
         wrapper: createWrapper(),
       });
 
@@ -305,7 +305,7 @@ describe('useSetupRuleNotifications', () => {
       mockCreateWorkflowFn.mockResolvedValue({ id: 'wf-1' });
       mockCreateActionPolicy.mockResolvedValue({});
 
-      const { result } = renderHook(() => useSetupRuleNotifications(), {
+      const { result } = renderHook(() => useSetupRuleNotifications({ mode: 'create' }), {
         wrapper: createWrapper(),
       });
 
@@ -328,7 +328,7 @@ describe('useSetupRuleNotifications', () => {
         .mockResolvedValueOnce({ id: 'wf-b' });
       mockCreateActionPolicy.mockResolvedValue({});
 
-      const { result } = renderHook(() => useSetupRuleNotifications(), {
+      const { result } = renderHook(() => useSetupRuleNotifications({ mode: 'create' }), {
         wrapper: createWrapper(),
       });
 
@@ -349,7 +349,7 @@ describe('useSetupRuleNotifications', () => {
       mockCreateActionPolicy.mockRejectedValue(new Error('generic failure'));
       mockDeleteWorkflowFn.mockResolvedValue(undefined);
 
-      const { result } = renderHook(() => useSetupRuleNotifications(), {
+      const { result } = renderHook(() => useSetupRuleNotifications({ mode: 'create' }), {
         wrapper: createWrapper(),
       });
 
@@ -358,7 +358,30 @@ describe('useSetupRuleNotifications', () => {
       await waitFor(() => {
         expect(mockAddError).toHaveBeenCalledWith(
           expect.any(Error),
-          expect.objectContaining({ title: expect.any(String) })
+          expect.objectContaining({
+            title: expect.stringContaining('The rule was created'),
+          })
+        );
+      });
+    });
+
+    it('says the rule was updated when notification setup fails on the edit path', async () => {
+      mockCreateWorkflowFn.mockResolvedValue({ id: 'workflow-new-1' });
+      mockCreateActionPolicy.mockRejectedValue(new Error('generic failure'));
+      mockDeleteWorkflowFn.mockResolvedValue(undefined);
+
+      const { result } = renderHook(() => useSetupRuleNotifications({ mode: 'update' }), {
+        wrapper: createWrapper(),
+      });
+
+      result.current.mutate({ rule: mockRule, actions: [emailAction] });
+
+      await waitFor(() => {
+        expect(mockAddError).toHaveBeenCalledWith(
+          expect.any(Error),
+          expect.objectContaining({
+            title: expect.stringContaining('The rule was updated'),
+          })
         );
       });
     });

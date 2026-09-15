@@ -401,7 +401,11 @@ describe('shell shared fields', () => {
     const services = { ...createMockServices(), dashboard: mockDashboard };
     const builderState = DEFAULT_THRESHOLD_FORM_VALUES;
     render(
-      <BuilderStateProvider builderState={builderState} setBuilderState={jest.fn()}>
+      <BuilderStateProvider
+        builderState={builderState}
+        setBuilderState={jest.fn()}
+        initBuilderState={jest.fn()}
+      >
         <ComposeDiscoverForm
           state={createState({ queryCommitted: true, step: 0 })}
           dispatch={jest.fn()}

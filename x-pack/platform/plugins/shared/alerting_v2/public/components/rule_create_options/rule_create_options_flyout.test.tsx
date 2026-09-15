@@ -36,6 +36,10 @@ const onCreateEsqlRule = jest.fn();
 const onCreateWithAgent = jest.fn();
 const onCreateThresholdRule = jest.fn();
 
+beforeEach(() => {
+  latestFlyoutOnClose = undefined;
+});
+
 const renderFlyout = () =>
   render(
     <I18nProvider>

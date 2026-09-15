@@ -21,7 +21,7 @@ import {
   euiFullHeight,
   EuiToolTip,
 } from '@elastic/eui';
-import type { EuiFlyoutProps } from '@elastic/eui';
+import type { EuiFlyoutCloseEvent, EuiFlyoutProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -65,6 +65,7 @@ import {
   parseDiscoverQueryForBuilder,
   type BuilderState,
 } from './rule_builder';
+import { useEuiFlyoutReregister } from './use_eui_flyout_reregister';
 import type { ComposeDiscoverAction, ComposeDiscoverMode, QueryTab } from './types';
 import { isBuilderConditionStepId } from './types';
 import { validateStep, evaluateStepValidation } from './validate_step';
@@ -208,6 +209,10 @@ const getFlyoutTitle = ({
   return CREATE_ESQL_TITLE;
 };
 
+/** Shared with the create-options picker so stacking the form on top does not resize the panel. */
+export const STACKED_FLYOUT_SIZE = 540;
+export const STACKED_FLYOUT_MIN_WIDTH = 480;
+
 /*
  * These hooks live in the plugin, not the package — imported via the plugin's hook layer
  * when this flyout is rendered in the rules list page.
@@ -258,6 +263,11 @@ export interface ComposeDiscoverFlyoutProps {
   esqlVariables?: ESQLControlVariable[];
   /** Callback to switch from builder mode to ES|QL mode. */
   onSwitchToEsql?: () => void;
+  /**
+   * Incremented by a stacked picker to request the same close path as X/ESC
+   * (`handleRequestClose` with `close-button`), including unsaved-changes confirm.
+   */
+  closeGeneration?: number;
 }
 
 const FLYOUT_TITLE_ID = 'composeDiscoverFlyoutTitle';
@@ -328,6 +338,7 @@ export function ComposeDiscoverFlyout({
   initialQuery,
   esqlVariables,
   onSwitchToEsql,
+  closeGeneration,
 }: ComposeDiscoverFlyoutProps): React.ReactElement | null {
   const isBuilderMode = Boolean(builderType);
   /*
@@ -448,7 +459,7 @@ export function ComposeDiscoverFlyout({
    * top of a stacked picker while the unsaved-changes modal is open. Form state
    * is preserved because FormProvider sits above the flyout.
    */
-  const [flyoutKey, setFlyoutKey] = useState(0);
+  const { flyoutKey, reregister } = useEuiFlyoutReregister();
   const isDirtyRef = useRef(false);
   isDirtyRef.current = methods.formState.isDirty;
 
@@ -495,10 +506,15 @@ export function ComposeDiscoverFlyout({
    */
   const pendingHistoryBackRef = useRef(false);
 
+  const yamlModeRef = useRef(uiState.yamlMode);
+  yamlModeRef.current = uiState.yamlMode;
+  const childOpenRef = useRef(uiState.childOpen);
+  childOpenRef.current = uiState.childOpen;
+
   const restoreFlyoutAfterEuiClose = useCallback(() => {
-    reopenChildRef.current = uiState.yamlMode || uiState.childOpen;
-    setFlyoutKey((k) => k + 1);
-  }, [uiState.yamlMode, uiState.childOpen]);
+    reopenChildRef.current = yamlModeRef.current || childOpenRef.current;
+    reregister();
+  }, [reregister]);
 
   const handleRequestClose: EuiFlyoutProps['onClose'] = useCallback(
     (_event, meta) => {
@@ -508,9 +524,12 @@ export function ComposeDiscoverFlyout({
       const hasUnsavedChanges = isDirtyRef.current || yamlDirty || hasBeenEditedRef.current;
 
       /*
-       * Cascade must run before the confirm-visible remount. If the parent session
-       * is tearing down while the modal is open, restoring this flyout would leave
-       * it mounted with no picker behind it.
+       * Cascade must run before the confirm-visible remount. This is intentional:
+       * when the parent session tears down, EUI fires `navigation-cascade` on this
+       * flyout. Waiting for the confirm modal would remount the form with no picker
+       * behind it (a zombie). Unsaved changes are discarded without a second prompt
+       * in that case. Picker X with this flyout open uses `closeGeneration` instead,
+       * so it goes through the unsaved-changes guard.
        */
       if (meta?.reason === 'navigation-cascade') {
         pendingHistoryBackRef.current = false;
@@ -538,6 +557,15 @@ export function ComposeDiscoverFlyout({
     },
     [isConfirmCloseVisible, onClose, onHistoryBack, restoreFlyoutAfterEuiClose]
   );
+
+  const processedCloseGenerationRef = useRef(closeGeneration);
+  useEffect(() => {
+    if (closeGeneration == null || closeGeneration === processedCloseGenerationRef.current) {
+      return;
+    }
+    processedCloseGenerationRef.current = closeGeneration;
+    handleRequestClose(new MouseEvent('click') as EuiFlyoutCloseEvent, { reason: 'close-button' });
+  }, [closeGeneration, handleRequestClose]);
 
   const handleConfirmDiscard = useCallback(() => {
     reopenChildRef.current = false;
@@ -818,8 +846,14 @@ export function ComposeDiscoverFlyout({
           }
         }
         if (isBuilderMode && builderState) {
+          /*
+           * Clearing recovery is a structural reset of builder state, not a user
+           * content edit. Using setBuilderState (not handleBuilderStateChange)
+           * keeps hasBeenEditedRef unset so toggling recovery and reverting it
+           * does not sticky-dirty the flyout.
+           */
           const { recovery: _, ...rest } = builderState as Record<string, unknown>;
-          handleBuilderStateChange(rest);
+          setBuilderState(rest);
         }
         /*
          * (b) Close sandbox in non-YAML mode — prevents a pending Apply from
@@ -841,7 +875,6 @@ export function ComposeDiscoverFlyout({
       uiState.childOpen,
       uiState.yamlMode,
       builderState,
-      handleBuilderStateChange,
     ]
   );
 
@@ -1304,8 +1337,8 @@ export function ComposeDiscoverFlyout({
             flyoutMenuProps={{ title }}
             onClose={handleRequestClose}
             aria-labelledby={FLYOUT_TITLE_ID}
-            size={540}
-            minWidth={480}
+            size={STACKED_FLYOUT_SIZE}
+            minWidth={STACKED_FLYOUT_MIN_WIDTH}
             resizable
           >
             <EuiFlyoutHeader hasBorder>
@@ -1424,6 +1457,7 @@ export function ComposeDiscoverFlyout({
                   <BuilderStateProvider
                     builderState={builderState}
                     setBuilderState={handleBuilderStateChange}
+                    initBuilderState={setBuilderState}
                   >
                     <ComposeDiscoverForm
                       state={uiState}

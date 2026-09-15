@@ -59,6 +59,8 @@ export const RulesListPage = () => {
     openCreateFromTemplateFlyout,
     openEditFlyout,
     openCloneFlyout,
+    isOpen: isAuthoringFlyoutOpen,
+    requestClose: requestAuthoringClose,
   } = useComposeDiscoverFlyout({
     historyKey: createSessionHistoryKey,
     onCreateSuccess: closeCreateOptionsFlyout,
@@ -80,6 +82,14 @@ export const RulesListPage = () => {
   const closeCreateSession = useCallback(() => {
     closeFlyout({ callOnDismiss: true });
   }, [closeFlyout]);
+
+  const handlePickerClose = useCallback(() => {
+    if (isAuthoringFlyoutOpen) {
+      requestAuthoringClose();
+      return;
+    }
+    closeCreateSession();
+  }, [isAuthoringFlyoutOpen, requestAuthoringClose, closeCreateSession]);
 
   const onCreateWithAgentFromOptionsFlyout = () => {
     closeCreateSession();
@@ -196,7 +206,7 @@ export const RulesListPage = () => {
       {isCreateOptionsFlyoutOpen ? (
         <RuleCreateOptionsFlyout
           historyKey={createSessionHistoryKey}
-          onClose={closeCreateSession}
+          onClose={handlePickerClose}
           onCreateEsqlRule={openCreateFlyout}
           onCreateWithAgent={onCreateWithAgentFromOptionsFlyout}
           createWithAgentDisabled={!areAgentBuilderSkillsAvailable}

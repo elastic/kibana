@@ -113,6 +113,22 @@ jest.mock('./compose_discover_form', () => {
     );
   };
 
+  const MockInitBuilderButton = () => {
+    const { state, initStateOnMount } = useBuilderState<Record<string, unknown> | undefined>();
+    if (state == null || typeof state !== 'object') {
+      return null;
+    }
+    return (
+      <button
+        data-test-subj="mockInitBuilder"
+        onClick={() => initStateOnMount({ ...state, recovery: { seeded: true } })}
+        type="button"
+      >
+        Init builder
+      </button>
+    );
+  };
+
   return {
     getSteps,
     ComposeDiscoverForm: (props: FormProps) => {
@@ -133,6 +149,7 @@ jest.mock('./compose_discover_form', () => {
             Make dirty
           </button>
           <MockMakeBuilderDirtyButton />
+          <MockInitBuilderButton />
           <button
             data-test-subj="mockSetFormTimeField"
             onClick={() => setValue('timeField', 'event.ingested', { shouldDirty: true })}
@@ -375,6 +392,7 @@ const clickSplitBaseAndAlert = () => {
 
 describe('ComposeDiscoverFlyout', () => {
   beforeEach(() => {
+    latestFlyoutOnClose = undefined;
     sandboxFlyoutProps = undefined;
     yamlRuleFormProps = undefined;
     readCommittedQuery = undefined;
@@ -616,6 +634,49 @@ describe('ComposeDiscoverFlyout', () => {
       expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
     });
 
+    it('closes immediately when closeGeneration increments and the form is pristine', () => {
+      const onClose = jest.fn();
+      const onHistoryBack = jest.fn();
+      const view = renderFlyout({ onClose, onHistoryBack, closeGeneration: 0 });
+
+      view.rerender(
+        <TestWrapper>
+          <ComposeDiscoverFlyout
+            {...defaultProps}
+            onClose={onClose}
+            onHistoryBack={onHistoryBack}
+            closeGeneration={1}
+          />
+        </TestWrapper>
+      );
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(onHistoryBack).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
+    });
+
+    it('shows the confirmation modal when closeGeneration increments and the form is dirty', () => {
+      const onClose = jest.fn();
+      const onHistoryBack = jest.fn();
+      const view = renderFlyout({ onClose, onHistoryBack, closeGeneration: 0 });
+
+      fireEvent.click(screen.getByTestId('mockMakeDirty'));
+      view.rerender(
+        <TestWrapper>
+          <ComposeDiscoverFlyout
+            {...defaultProps}
+            onClose={onClose}
+            onHistoryBack={onHistoryBack}
+            closeGeneration={1}
+          />
+        </TestWrapper>
+      );
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(onHistoryBack).not.toHaveBeenCalled();
+      expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
+    });
+
     it('does not render a Cancel button in the footer', () => {
       renderFlyout({});
 
@@ -785,6 +846,17 @@ describe('ComposeDiscoverFlyout', () => {
 
       expect(onClose).not.toHaveBeenCalled();
       expect(onHistoryBack).toHaveBeenCalledTimes(1);
+      expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
+    });
+
+    it('does not treat builder mount-time initialization as unsaved changes', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose, builderType: 'threshold' });
+
+      fireEvent.click(screen.getByTestId('mockInitBuilder'));
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+
+      expect(onClose).toHaveBeenCalledTimes(1);
       expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
     });
 

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within, act } from '@testing-library/react';
 import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
 import { contentListQueryClient } from '@kbn/content-list-provider';
 import { ListPageTestProviders } from '../../test_utils/test_providers';
@@ -91,14 +91,40 @@ jest.mock('@kbn/core-di', () => ({
   PluginStart: (key: string) => key,
 }));
 
-jest.mock('@kbn/alerting-v2-rule-form', () => ({
-  ComposeDiscoverFlyout: ({ onCreateRule }: { onCreateRule: (payload: unknown) => void }) => (
-    <button data-test-subj="composeDiscoverFlyout" onClick={() => onCreateRule({})}>
-      Compose Discover flyout
-    </button>
-  ),
-  RULE_BUILDER_REGISTRY: { threshold: {} },
-}));
+let latestComposeHistoryBack: (() => void) | undefined;
+
+jest.mock('@kbn/alerting-v2-rule-form', () => {
+  const ReactActual = jest.requireActual('react') as typeof import('react');
+  return {
+    ComposeDiscoverFlyout: ({
+      onCreateRule,
+      onClose,
+      onHistoryBack,
+      closeGeneration,
+    }: {
+      onCreateRule: (payload: unknown) => void;
+      onClose: () => void;
+      onHistoryBack: () => void;
+      closeGeneration?: number;
+    }) => {
+      latestComposeHistoryBack = onHistoryBack;
+      ReactActual.useEffect(() => {
+        if (closeGeneration) {
+          onClose();
+        }
+      }, [closeGeneration, onClose]);
+      return ReactActual.createElement(
+        'button',
+        { 'data-test-subj': 'composeDiscoverFlyout', onClick: () => onCreateRule({}) },
+        'Compose Discover flyout'
+      );
+    },
+    RULE_BUILDER_REGISTRY: { threshold: {} },
+    STACKED_FLYOUT_SIZE: 540,
+    STACKED_FLYOUT_MIN_WIDTH: 480,
+    useEuiFlyoutReregister: () => ({ flyoutKey: 0, reregister: jest.fn() }),
+  };
+});
 
 jest.mock('./rules_data_source', () => ({
   ...jest.requireActual('./rules_data_source'),
@@ -233,6 +259,7 @@ describe('RulesListPage', () => {
     mockCanWriteRules = true;
     mockCanWriteActionPolicies = true;
     mockToursEnabled = true;
+    latestComposeHistoryBack = undefined;
     mockUseDeleteRule.mockReturnValue({
       mutate: mockDeleteMutate,
       isLoading: false,
@@ -628,6 +655,13 @@ describe('RulesListPage', () => {
     fireEvent.click(screen.getByTestId('createRuleButton'));
     fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
     expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
+
+    act(() => {
+      latestComposeHistoryBack?.();
+    });
+
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
+    expect(screen.queryByTestId('composeDiscoverFlyout')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
 

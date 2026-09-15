@@ -24,7 +24,7 @@ export interface SetupRuleNotificationsParams {
   actions: ActionDraft[];
 }
 
-export const useSetupRuleNotifications = () => {
+export const useSetupRuleNotifications = ({ mode }: { mode: 'create' | 'update' }) => {
   const workflowApi = useService(WorkflowApi);
   const actionPoliciesApi = useService(ActionPoliciesApi);
   const { toasts } = useService(CoreStart('notifications'));
@@ -118,7 +118,17 @@ export const useSetupRuleNotifications = () => {
       toasts.addError(err instanceof Error ? err : new Error(String(err)), {
         title: i18n.translate('xpack.alertingV2.useSetupRuleNotifications.errorTitle', {
           defaultMessage:
-            'Notifications could not be fully configured. The rule was created but some action policies may not have been linked.',
+            'Notifications could not be fully configured. The rule was {verb} but some action policies may not have been linked.',
+          values: {
+            verb:
+              mode === 'update'
+                ? i18n.translate('xpack.alertingV2.useSetupRuleNotifications.updatedDetail', {
+                    defaultMessage: 'updated',
+                  })
+                : i18n.translate('xpack.alertingV2.useSetupRuleNotifications.createdDetail', {
+                    defaultMessage: 'created',
+                  }),
+          },
         }),
       });
     },

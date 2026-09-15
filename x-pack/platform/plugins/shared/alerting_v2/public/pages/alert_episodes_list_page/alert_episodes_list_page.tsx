@@ -211,7 +211,7 @@ const AlertEpisodesListPageContent = () => {
     onResize,
   } = useEpisodesTableConfig(services.storage);
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
-  const closeFlyout = useCallback(() => setExpandedDoc(undefined), []);
+  const closeExpandedDoc = useCallback(() => setExpandedDoc(undefined), []);
   const [ruleIdToView, setRuleIdToView] = useState<string | null>(null);
   const closeRuleFlyout = useCallback(() => setRuleIdToView(null), []);
   const {
@@ -413,7 +413,7 @@ const AlertEpisodesListPageContent = () => {
         return (
           <ClassicAlertDetailsFlyout
             alertId={hit.flattened['episode.id'] as string}
-            onClose={closeFlyout}
+            onClose={closeExpandedDoc}
             services={{ http: services.http }}
           />
         );
@@ -422,7 +422,7 @@ const AlertEpisodesListPageContent = () => {
         <AlertEpisodeDetailsFlyout
           episodeId={hit.flattened['episode.id'] as string}
           groupHash={hit.flattened.group_hash as string | undefined}
-          onClose={closeFlyout}
+          onClose={closeExpandedDoc}
           actions={episodeActions}
           getRuleDetailsHref={getRuleDetailsHref}
           getEpisodeDetailsHref={getEpisodeDetailsHref}
@@ -439,7 +439,7 @@ const AlertEpisodesListPageContent = () => {
         />
       );
     },
-    [closeFlyout, episodeActions, getEpisodeDetailsHref, getRuleDetailsHref, services]
+    [closeExpandedDoc, episodeActions, getEpisodeDetailsHref, getRuleDetailsHref, services]
   );
 
   const rowAdditionalLeadingControls: RowControlColumn[] = useMemo(
