@@ -62,15 +62,21 @@ export const NotificationControlsSection = () => {
         control={control}
         render={({ field }) => (
           <EuiFormRow
-            label={i18n.translate('xpack.alertingV2.actionPolicy.form.notificationControls.dispatchPer', {
-              defaultMessage: 'Notify per',
-            })}
+            label={i18n.translate(
+              'xpack.alertingV2.actionPolicy.form.notificationControls.dispatchPer',
+              {
+                defaultMessage: 'Notify per',
+              }
+            )}
             fullWidth
           >
             <EuiButtonGroup
-              legend={i18n.translate('xpack.alertingV2.actionPolicy.form.notificationControls.modeLegend', {
-                defaultMessage: 'Notify per',
-              })}
+              legend={i18n.translate(
+                'xpack.alertingV2.actionPolicy.form.notificationControls.modeLegend',
+                {
+                  defaultMessage: 'Notify per',
+                }
+              )}
               options={GROUPING_MODE_OPTIONS}
               idSelected={field.value}
               onChange={(id) => {
@@ -147,9 +153,12 @@ export const NotificationControlsSection = () => {
             label={
               <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  {i18n.translate('xpack.alertingV2.actionPolicy.form.notificationControls.frequency', {
-                    defaultMessage: 'Frequency',
-                  })}
+                  {i18n.translate(
+                    'xpack.alertingV2.actionPolicy.form.notificationControls.frequency',
+                    {
+                      defaultMessage: 'Frequency',
+                    }
+                  )}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <FrequencyHelpTip groupingMode={groupingMode} />
@@ -193,9 +202,12 @@ export const NotificationControlsSection = () => {
           }}
           render={({ field, fieldState: { error } }) => (
             <EuiFormRow
-              label={i18n.translate('xpack.alertingV2.actionPolicy.form.notificationControls.repeatInterval', {
-                defaultMessage: 'Repeat interval',
-              })}
+              label={i18n.translate(
+                'xpack.alertingV2.actionPolicy.form.notificationControls.repeatInterval',
+                {
+                  defaultMessage: 'Repeat interval',
+                }
+              )}
               fullWidth
               isInvalid={!!error}
               error={error?.message}

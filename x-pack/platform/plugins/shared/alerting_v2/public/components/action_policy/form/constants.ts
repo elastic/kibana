@@ -12,9 +12,12 @@ import type { ActionPolicyFormState } from './types';
 export const GROUPING_MODE_OPTIONS: Array<{ id: GroupingMode; label: string }> = [
   {
     id: 'per_episode',
-    label: i18n.translate('xpack.alertingV2.actionPolicy.form.notificationControls.mode.perEpisode', {
-      defaultMessage: 'Episode',
-    }),
+    label: i18n.translate(
+      'xpack.alertingV2.actionPolicy.form.notificationControls.mode.perEpisode',
+      {
+        defaultMessage: 'Episode',
+      }
+    ),
   },
   {
     id: 'per_field',
@@ -31,14 +34,20 @@ export const GROUPING_MODE_OPTIONS: Array<{ id: GroupingMode; label: string }> =
 ];
 
 export const GROUPING_MODE_HELP_TEXT: Record<GroupingMode, string> = {
-  per_episode: i18n.translate('xpack.alertingV2.actionPolicy.form.notificationControls.mode.perEpisode.help', {
-    defaultMessage:
-      'Each matching episode triggers its own notification. Best for when you need individual visibility into each issue.',
-  }),
-  per_field: i18n.translate('xpack.alertingV2.actionPolicy.form.notificationControls.mode.perGroup.help', {
-    defaultMessage:
-      'Bundles episodes that share the same field value into one notification per unique value. Best for reducing noise when a rule produces many related episodes, such as one per service or host.',
-  }),
+  per_episode: i18n.translate(
+    'xpack.alertingV2.actionPolicy.form.notificationControls.mode.perEpisode.help',
+    {
+      defaultMessage:
+        'Each matching episode triggers its own notification. Best for when you need individual visibility into each issue.',
+    }
+  ),
+  per_field: i18n.translate(
+    'xpack.alertingV2.actionPolicy.form.notificationControls.mode.perGroup.help',
+    {
+      defaultMessage:
+        'Bundles episodes that share the same field value into one notification per unique value. Best for reducing noise when a rule produces many related episodes, such as one per service or host.',
+    }
+  ),
   all: i18n.translate('xpack.alertingV2.actionPolicy.form.notificationControls.mode.digest.help', {
     defaultMessage:
       "Combines all matching episodes into one notification on a set schedule. Best for periodic summaries when individual alerts aren't necessary.",
@@ -48,30 +57,42 @@ export const GROUPING_MODE_HELP_TEXT: Record<GroupingMode, string> = {
 export const PER_EPISODE_STRATEGY_OPTIONS: Array<{ value: ThrottleStrategy; text: string }> = [
   {
     value: 'on_status_change',
-    text: i18n.translate('xpack.alertingV2.actionPolicy.form.notificationControls.strategy.onStatusChange', {
-      defaultMessage: 'On status change',
-    }),
+    text: i18n.translate(
+      'xpack.alertingV2.actionPolicy.form.notificationControls.strategy.onStatusChange',
+      {
+        defaultMessage: 'On status change',
+      }
+    ),
   },
   {
     value: 'per_status_interval',
-    text: i18n.translate('xpack.alertingV2.actionPolicy.form.notificationControls.strategy.perStatusInterval', {
-      defaultMessage: 'On status change + repeat at interval',
-    }),
+    text: i18n.translate(
+      'xpack.alertingV2.actionPolicy.form.notificationControls.strategy.perStatusInterval',
+      {
+        defaultMessage: 'On status change + repeat at interval',
+      }
+    ),
   },
   {
     value: 'every_time',
-    text: i18n.translate('xpack.alertingV2.actionPolicy.form.notificationControls.strategy.everyTime', {
-      defaultMessage: 'Every evaluation',
-    }),
+    text: i18n.translate(
+      'xpack.alertingV2.actionPolicy.form.notificationControls.strategy.everyTime',
+      {
+        defaultMessage: 'Every evaluation',
+      }
+    ),
   },
 ];
 
 export const AGGREGATE_STRATEGY_OPTIONS: Array<{ value: ThrottleStrategy; text: string }> = [
   {
     value: 'time_interval',
-    text: i18n.translate('xpack.alertingV2.actionPolicy.form.notificationControls.strategy.timeInterval', {
-      defaultMessage: 'At most once every...',
-    }),
+    text: i18n.translate(
+      'xpack.alertingV2.actionPolicy.form.notificationControls.strategy.timeInterval',
+      {
+        defaultMessage: 'At most once every...',
+      }
+    ),
   },
   {
     value: 'every_time',

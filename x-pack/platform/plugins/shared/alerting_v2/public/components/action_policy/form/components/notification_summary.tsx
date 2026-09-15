@@ -31,25 +31,37 @@ const formatInterval = (raw: string): string => {
   if (Number.isNaN(value) || !isDurationUnit(unit)) return raw;
   switch (unit) {
     case 's':
-      return i18n.translate('xpack.alertingV2.actionPolicy.form.notificationSummary.duration.seconds', {
-        defaultMessage: '{value, plural, one {# second} other {# seconds}}',
-        values: { value },
-      });
+      return i18n.translate(
+        'xpack.alertingV2.actionPolicy.form.notificationSummary.duration.seconds',
+        {
+          defaultMessage: '{value, plural, one {# second} other {# seconds}}',
+          values: { value },
+        }
+      );
     case 'm':
-      return i18n.translate('xpack.alertingV2.actionPolicy.form.notificationSummary.duration.minutes', {
-        defaultMessage: '{value, plural, one {# minute} other {# minutes}}',
-        values: { value },
-      });
+      return i18n.translate(
+        'xpack.alertingV2.actionPolicy.form.notificationSummary.duration.minutes',
+        {
+          defaultMessage: '{value, plural, one {# minute} other {# minutes}}',
+          values: { value },
+        }
+      );
     case 'h':
-      return i18n.translate('xpack.alertingV2.actionPolicy.form.notificationSummary.duration.hours', {
-        defaultMessage: '{value, plural, one {# hour} other {# hours}}',
-        values: { value },
-      });
+      return i18n.translate(
+        'xpack.alertingV2.actionPolicy.form.notificationSummary.duration.hours',
+        {
+          defaultMessage: '{value, plural, one {# hour} other {# hours}}',
+          values: { value },
+        }
+      );
     case 'd':
-      return i18n.translate('xpack.alertingV2.actionPolicy.form.notificationSummary.duration.days', {
-        defaultMessage: '{value, plural, one {# day} other {# days}}',
-        values: { value },
-      });
+      return i18n.translate(
+        'xpack.alertingV2.actionPolicy.form.notificationSummary.duration.days',
+        {
+          defaultMessage: '{value, plural, one {# day} other {# days}}',
+          values: { value },
+        }
+      );
   }
 };
 
@@ -107,9 +119,12 @@ export const getDispatchSummary = ({
 
   if (groupingMode === 'per_field') {
     if (groupBy.length === 0) {
-      return i18n.translate('xpack.alertingV2.actionPolicy.form.notificationSummary.group.noFields', {
-        defaultMessage: 'Select a field in Group by to configure group notifications.',
-      });
+      return i18n.translate(
+        'xpack.alertingV2.actionPolicy.form.notificationSummary.group.noFields',
+        {
+          defaultMessage: 'Select a field in Group by to configure group notifications.',
+        }
+      );
     }
 
     switch (throttleStrategy) {
@@ -123,11 +138,14 @@ export const getDispatchSummary = ({
             }
           );
         }
-        return i18n.translate('xpack.alertingV2.actionPolicy.form.notificationSummary.group.throttle', {
-          defaultMessage:
-            'Sends at most one notification every {interval} for each group sharing values in {fields}.',
-          values: { fields, interval },
-        });
+        return i18n.translate(
+          'xpack.alertingV2.actionPolicy.form.notificationSummary.group.throttle',
+          {
+            defaultMessage:
+              'Sends at most one notification every {interval} for each group sharing values in {fields}.',
+            values: { fields, interval },
+          }
+        );
       case 'every_time':
         return i18n.translate(
           'xpack.alertingV2.actionPolicy.form.notificationSummary.group.everyEvaluation',
