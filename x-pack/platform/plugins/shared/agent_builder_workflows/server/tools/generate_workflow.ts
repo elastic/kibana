@@ -106,6 +106,7 @@ When the workflow is alert-triggered (\`type: alert\`), runtime alert data is ex
 
     `),
     schema: generateWorkflowSchema,
+    excludeFromMcp: true,
     annotations: {
       title: 'Generate Workflow',
       readOnlyHint: true,
