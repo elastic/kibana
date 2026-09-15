@@ -15,6 +15,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 interface Props {
   onClick: () => void;
+  previewMode: boolean;
   formatDate: (epoch: number) => string;
   from: number;
   to: number;
@@ -27,13 +28,13 @@ const timeSliderStyles = {
     box-shadow: none;
     overflow: hidden;
 
-    .euiText {
+    :disabled {
+      cursor: default;
+    }
+
+    :not(:disabled) .euiText {
       &:hover {
         text-decoration: underline;
-      }
-
-      &:not(.euiFormControlLayoutDelimited__delimiter) {
-        cursor: pointer !important;
       }
     }
 
@@ -65,6 +66,7 @@ export function TimeSliderPopoverButton(props: Props) {
       onClick={props.onClick}
       data-test-subj="timeSlider-popoverToggleButton"
       css={styles.anchor}
+      disabled={props.previewMode}
     >
       <EuiText className="timeSlider__anchorText eui-textTruncate" size="s">
         <span>{props.formatDate(props.from)}</span>
