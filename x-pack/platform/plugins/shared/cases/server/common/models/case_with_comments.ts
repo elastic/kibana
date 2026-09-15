@@ -438,6 +438,8 @@ export class CaseCommentModel {
         throw Boom.badRequest('Alert cannot be attached to a closed case');
       }
 
+      // `isEventAttachmentType` matches both the legacy `event` type and the unified
+      // `security.event` type — a type-only match here would miss unified events.
       const hasEventsInRequest = req.some((a) => isEventAttachmentType(a.type));
 
       if (hasEventsInRequest) {

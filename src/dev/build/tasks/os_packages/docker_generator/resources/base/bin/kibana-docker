@@ -180,6 +180,9 @@ kibana_vars=(
     server.securityResponseHeaders.strictTransportSecurity
     server.securityResponseHeaders.xContentTypeOptions
     server.securityResponseHeaders.crossOriginOpenerPolicy
+    server.selfHttp.target
+    server.selfHttp.ssl.verificationMode
+    server.selfHttp.ssl.certificateAuthorities
     server.shutdownTimeout
     server.socketTimeout
     server.ssl.cert
