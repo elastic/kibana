@@ -41,7 +41,7 @@ import {
   sendTelemetryEvents,
   formatTelemetryUpdateEvent,
 } from '../telemetry/monitor_upgrade_sender';
-import { formatSecrets } from '../../synthetics_service/utils/secrets';
+import { assertSecretsEncapsulated, formatSecrets } from '../../synthetics_service/utils/secrets';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
 import { getBrowserTimeoutWarningForMonitor } from './monitor_warnings';
 
@@ -273,6 +273,12 @@ const rollbackUpdate = async ({
 }) => {
   const { savedObjectsClient, server } = routeContext;
   try {
+    // The previous document is restored as-is, so guard against a plaintext secret on it.
+    assertSecretsEncapsulated(attributes, configId);
+
+    // TODO: the monitor may be the legacy `synthetics-monitor` type, in which case this targets a
+    // document that does not exist and the rollback silently does not happen. Pass
+    // `decryptedPreviousMonitor.type` through from the callers instead.
     await savedObjectsClient.update<MonitorFields>(
       syntheticsMonitorSavedObjectType,
       configId,
