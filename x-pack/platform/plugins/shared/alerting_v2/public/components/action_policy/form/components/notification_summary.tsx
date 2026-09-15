@@ -31,22 +31,22 @@ const formatInterval = (raw: string): string => {
   if (Number.isNaN(value) || !isDurationUnit(unit)) return raw;
   switch (unit) {
     case 's':
-      return i18n.translate('xpack.alertingV2.actionPolicy.form.dispatchSummary.duration.seconds', {
+      return i18n.translate('xpack.alertingV2.actionPolicy.form.notificationSummary.duration.seconds', {
         defaultMessage: '{value, plural, one {# second} other {# seconds}}',
         values: { value },
       });
     case 'm':
-      return i18n.translate('xpack.alertingV2.actionPolicy.form.dispatchSummary.duration.minutes', {
+      return i18n.translate('xpack.alertingV2.actionPolicy.form.notificationSummary.duration.minutes', {
         defaultMessage: '{value, plural, one {# minute} other {# minutes}}',
         values: { value },
       });
     case 'h':
-      return i18n.translate('xpack.alertingV2.actionPolicy.form.dispatchSummary.duration.hours', {
+      return i18n.translate('xpack.alertingV2.actionPolicy.form.notificationSummary.duration.hours', {
         defaultMessage: '{value, plural, one {# hour} other {# hours}}',
         values: { value },
       });
     case 'd':
-      return i18n.translate('xpack.alertingV2.actionPolicy.form.dispatchSummary.duration.days', {
+      return i18n.translate('xpack.alertingV2.actionPolicy.form.notificationSummary.duration.days', {
         defaultMessage: '{value, plural, one {# day} other {# days}}',
         values: { value },
       });
@@ -71,7 +71,7 @@ export const getDispatchSummary = ({
     switch (throttleStrategy) {
       case 'on_status_change':
         return i18n.translate(
-          'xpack.alertingV2.actionPolicy.form.dispatchSummary.episode.statusChange',
+          'xpack.alertingV2.actionPolicy.form.notificationSummary.episode.statusChange',
           {
             defaultMessage:
               'Sends one notification when an episode opens and one when it recovers.',
@@ -80,14 +80,14 @@ export const getDispatchSummary = ({
       case 'per_status_interval':
         if (!interval) {
           return i18n.translate(
-            'xpack.alertingV2.actionPolicy.form.dispatchSummary.episode.statusChangeNoInterval',
+            'xpack.alertingV2.actionPolicy.form.notificationSummary.episode.statusChangeNoInterval',
             {
               defaultMessage: 'Sends a notification on status change.',
             }
           );
         }
         return i18n.translate(
-          'xpack.alertingV2.actionPolicy.form.dispatchSummary.episode.statusChangeRepeat',
+          'xpack.alertingV2.actionPolicy.form.notificationSummary.episode.statusChangeRepeat',
           {
             defaultMessage:
               'Sends a notification on status change and repeats every {interval} while the episode remains active.',
@@ -96,7 +96,7 @@ export const getDispatchSummary = ({
         );
       case 'every_time':
         return i18n.translate(
-          'xpack.alertingV2.actionPolicy.form.dispatchSummary.episode.everyEvaluation',
+          'xpack.alertingV2.actionPolicy.form.notificationSummary.episode.everyEvaluation',
           {
             defaultMessage:
               'Sends a notification for every rule evaluation. No limit on notification frequency.',
@@ -107,7 +107,7 @@ export const getDispatchSummary = ({
 
   if (groupingMode === 'per_field') {
     if (groupBy.length === 0) {
-      return i18n.translate('xpack.alertingV2.actionPolicy.form.dispatchSummary.group.noFields', {
+      return i18n.translate('xpack.alertingV2.actionPolicy.form.notificationSummary.group.noFields', {
         defaultMessage: 'Select a field in Group by to configure group notifications.',
       });
     }
@@ -116,21 +116,21 @@ export const getDispatchSummary = ({
       case 'time_interval':
         if (!interval) {
           return i18n.translate(
-            'xpack.alertingV2.actionPolicy.form.dispatchSummary.group.throttleNoInterval',
+            'xpack.alertingV2.actionPolicy.form.notificationSummary.group.throttleNoInterval',
             {
               defaultMessage: 'Sends a notification for each group sharing values in {fields}.',
               values: { fields },
             }
           );
         }
-        return i18n.translate('xpack.alertingV2.actionPolicy.form.dispatchSummary.group.throttle', {
+        return i18n.translate('xpack.alertingV2.actionPolicy.form.notificationSummary.group.throttle', {
           defaultMessage:
             'Sends at most one notification every {interval} for each group sharing values in {fields}.',
           values: { fields, interval },
         });
       case 'every_time':
         return i18n.translate(
-          'xpack.alertingV2.actionPolicy.form.dispatchSummary.group.everyEvaluation',
+          'xpack.alertingV2.actionPolicy.form.notificationSummary.group.everyEvaluation',
           {
             defaultMessage:
               'Sends a notification for each group on every rule evaluation. No limit on notification frequency.',
@@ -144,14 +144,14 @@ export const getDispatchSummary = ({
       case 'time_interval':
         if (!interval) {
           return i18n.translate(
-            'xpack.alertingV2.actionPolicy.form.dispatchSummary.digest.throttleNoInterval',
+            'xpack.alertingV2.actionPolicy.form.notificationSummary.digest.throttleNoInterval',
             {
               defaultMessage: 'Combines all matching episodes into one notification.',
             }
           );
         }
         return i18n.translate(
-          'xpack.alertingV2.actionPolicy.form.dispatchSummary.digest.throttle',
+          'xpack.alertingV2.actionPolicy.form.notificationSummary.digest.throttle',
           {
             defaultMessage:
               'Combines all matching episodes into one notification at most every {interval}.',
@@ -160,7 +160,7 @@ export const getDispatchSummary = ({
         );
       case 'every_time':
         return i18n.translate(
-          'xpack.alertingV2.actionPolicy.form.dispatchSummary.digest.everyEvaluation',
+          'xpack.alertingV2.actionPolicy.form.notificationSummary.digest.everyEvaluation',
           {
             defaultMessage:
               'Combines all matching episodes into one notification on every rule evaluation. No limit on notification frequency.',
@@ -196,7 +196,7 @@ export const NotificationSummary = () => {
     >
       <EuiTitle size="xxs">
         <h4>
-          {i18n.translate('xpack.alertingV2.actionPolicy.form.dispatchSummary.title', {
+          {i18n.translate('xpack.alertingV2.actionPolicy.form.notificationSummary.title', {
             defaultMessage: 'Notification summary',
           })}
         </h4>

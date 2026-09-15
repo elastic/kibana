@@ -12,7 +12,7 @@ import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { DEFAULT_FORM_STATE } from '../constants';
-import { DispatchSection } from './dispatch_section';
+import { NotificationControlsSection } from './notification_controls_section';
 import type { ActionPolicyFormState } from '../types';
 
 const mockUseFetchRuleEventFields = jest.fn();
@@ -31,7 +31,7 @@ const renderSection = (defaultValues: ActionPolicyFormState = DEFAULT_FORM_STATE
     return (
       <I18nProvider>
         <FormProvider {...methods}>
-          <DispatchSection />
+          <NotificationControlsSection />
         </FormProvider>
       </I18nProvider>
     );
@@ -47,7 +47,7 @@ const TEST_SUBJ = {
   groupByInput: 'groupByInput',
 } as const;
 
-describe('DispatchSection', () => {
+describe('NotificationControlsSection', () => {
   beforeEach(() => {
     mockUseFetchRuleEventFields.mockReset();
     mockUseFetchRuleEventFields.mockReturnValue({ data: undefined, isLoading: false });

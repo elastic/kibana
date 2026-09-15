@@ -31,7 +31,7 @@ import type { ActionPolicyFormState } from '../types';
 import { DurationInput } from './duration_input/duration_input';
 import { FrequencyHelpTip } from './frequency_help_tip';
 
-export const DispatchSection = () => {
+export const NotificationControlsSection = () => {
   const { control, setValue, getValues } = useFormContext<ActionPolicyFormState>();
   const [groupingMode, throttleStrategy, matcher] = useWatch({
     control,
@@ -62,13 +62,13 @@ export const DispatchSection = () => {
         control={control}
         render={({ field }) => (
           <EuiFormRow
-            label={i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.dispatchPer', {
+            label={i18n.translate('xpack.alertingV2.actionPolicy.form.notificationControls.dispatchPer', {
               defaultMessage: 'Notify per',
             })}
             fullWidth
           >
             <EuiButtonGroup
-              legend={i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.modeLegend', {
+              legend={i18n.translate('xpack.alertingV2.actionPolicy.form.notificationControls.modeLegend', {
                 defaultMessage: 'Notify per',
               })}
               options={GROUPING_MODE_OPTIONS}
@@ -147,7 +147,7 @@ export const DispatchSection = () => {
             label={
               <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  {i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.frequency', {
+                  {i18n.translate('xpack.alertingV2.actionPolicy.form.notificationControls.frequency', {
                     defaultMessage: 'Frequency',
                   })}
                 </EuiFlexItem>
@@ -193,7 +193,7 @@ export const DispatchSection = () => {
           }}
           render={({ field, fieldState: { error } }) => (
             <EuiFormRow
-              label={i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.repeatInterval', {
+              label={i18n.translate('xpack.alertingV2.actionPolicy.form.notificationControls.repeatInterval', {
                 defaultMessage: 'Repeat interval',
               })}
               fullWidth

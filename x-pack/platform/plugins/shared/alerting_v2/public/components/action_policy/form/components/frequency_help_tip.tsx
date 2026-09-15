@@ -39,7 +39,7 @@ export const FrequencyHelpTip = ({ groupingMode }: FrequencyHelpTipProps) => {
     groupingMode === 'per_episode' ? PER_EPISODE_STRATEGY_HELP_TEXT : AGGREGATE_STRATEGY_HELP_TEXT;
 
   const ariaLabel = i18n.translate(
-    'xpack.alertingV2.actionPolicy.form.dispatch.frequency.helpAriaLabel',
+    'xpack.alertingV2.actionPolicy.form.notificationControls.frequency.helpAriaLabel',
     { defaultMessage: 'Frequency options explained' }
   );
 
