@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { Pagination } from '@elastic/eui';
 import {
@@ -25,6 +25,7 @@ import {
   GLOBAL_ARTIFACT_TAG,
 } from '../../../../../common/endpoint/service/artifacts';
 import { buildPerPolicyTag } from '../../../../../common/endpoint/service/artifacts/utils';
+import { NO_PRIVILEGE_FOR_MANAGEMENT_OF_GLOBAL_ARTIFACT_MESSAGE } from '../../../common/translations';
 import type { MenuItemPropsByPolicyId } from '../../artifact_entry_card';
 import { useArtifactAssignedPolicies as _useArtifactAssignedPolicies } from '../hooks/use_artifact_assigned_policies';
 
@@ -251,6 +252,25 @@ describe('ArtifactSimpleTable', () => {
       'Updated by',
       'Last updated',
     ]);
+  });
+
+  it('shows the missing global privilege hint on hover when the actions menu is disabled', async () => {
+    useUserPrivilegesMock.mockReturnValue({
+      endpointPrivileges: getEndpointAuthzInitialStateMock({ canManageGlobalArtifacts: false }),
+    });
+    render({
+      items: [generator.generate({ ...item, tags: [GLOBAL_ARTIFACT_TAG] })],
+    });
+
+    fireEvent.mouseOver(
+      renderResult.getByTestId('testTable-rowActions-button').parentElement as HTMLElement
+    );
+
+    await waitFor(() => {
+      expect(renderResult.getByRole('tooltip')).toHaveTextContent(
+        NO_PRIVILEGE_FOR_MANAGEMENT_OF_GLOBAL_ARTIFACT_MESSAGE
+      );
+    });
   });
 
   it('invokes onChange when pagination changes', () => {
