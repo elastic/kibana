@@ -13,11 +13,17 @@ import type { AlertHit, CombinedSummarizedAlerts } from '@kbn/alerting-plugin/se
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import type { Logger } from '@kbn/core/server';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import {
+  fetchDocumentsByIds,
+  fetchDocumentsByQuery,
+  MAX_TRIGGER_EVENT_DOCS,
+  type RawDocumentHit,
+} from './fetch_event_documents';
+import type { AlertEventRule, AlertTriggerInput } from '../../../../../common/types/alert_types';
 import type {
-  AlertEventRule,
-  AlertSelection,
-  AlertTriggerInput,
-} from '../../../../../common/types/alert_types';
+  DocumentEventEntry,
+  DocumentTriggerInput,
+} from '../../../../../common/types/document_types';
 import { buildAlertEvent } from '../../../../../common/utils/build_alert_event';
 import type { AlertPreprocessingContext } from '../../../workflows_management_api';
 
@@ -90,80 +96,70 @@ function selectPrimaryRule(
 }
 
 /**
- * Fetches full alert documents from Elasticsearch using alert IDs and indices
+ * Formats raw document hits into the alert-as-data shape, applying the registered
+ * rule type's `formatAlert` when available and expanding flattened fields.
  */
-async function fetchAlerts(
-  alertIds: AlertSelection[],
-  context: AlertPreprocessingContext,
-  logger: Logger
-): Promise<AlertHit[]> {
-  const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-  const ruleTypeRegistryMap = (await context.alerting).listTypes();
+function formatAlertHits(
+  rawHits: RawDocumentHit[],
+  ruleTypeRegistryMap: ReturnType<Awaited<AlertPreprocessingContext['alerting']>['listTypes']>
+): AlertHit[] {
+  return rawHits.map(({ _id, _index, _source }) => {
+    let alert = _source as Alert;
 
-  if (alertIds.length === 0) {
-    return [];
-  }
-
-  try {
-    const body: Record<string, unknown> = {
-      docs: alertIds.map(({ _id, _index }) => ({ _id, _index })),
-    };
-
-    const response = await esClient.mget<Alert>(body);
-
-    const alerts: AlertHit[] = [];
-    for (let i = 0; i < response.docs.length; i++) {
-      const doc = response.docs[i];
-      if ('found' in doc && doc.found && '_source' in doc && doc._source) {
-        let alert = doc._source;
-
-        const ruleTypeId = get(alert, 'kibana.alert.rule.rule_type_id') as string;
-
-        const registeredRuleType = ruleTypeRegistryMap.get(ruleTypeId || QUERY_RULE_TYPE_ID); // Default to 'siem.queryRule' if undefined
-        // Format alert using the registered rule type's formatAlert function if available,
-        if (registeredRuleType?.alerts?.formatAlert) {
-          alert = registeredRuleType.alerts.formatAlert(alert) as Alert;
-        }
-
-        const expandedAlert = expandFlattenedAlert(alert) as Alert;
-
-        alerts.push({ _id: doc._id, _index: doc._index, ...expandedAlert });
-      } else {
-        logger.warn(`Alert not found: ${alertIds[i]._id} in index ${alertIds[i]._index}`);
-      }
+    const ruleTypeId = get(alert, 'kibana.alert.rule.rule_type_id') as string;
+    // Default to 'siem.queryRule' if the rule type is undefined.
+    const registeredRuleType = ruleTypeRegistryMap.get(ruleTypeId || QUERY_RULE_TYPE_ID);
+    if (registeredRuleType?.alerts?.formatAlert) {
+      alert = registeredRuleType.alerts.formatAlert(alert) as Alert;
     }
 
-    return alerts;
-  } catch (error) {
-    logger.error(
-      `Failed to fetch alerts: ${error instanceof Error ? error.message : String(error)}`
-    );
-    throw error;
-  }
+    const expandedAlert = expandFlattenedAlert(alert) as Alert;
+    return { _id, _index, ...expandedAlert };
+  });
 }
 
 /**
- * Preprocesses alert inputs by fetching full alert documents and transforming them
- * into the standardized alert event format using buildAlertEvent
+ * Expands an `alert` trigger event (from either explicit ids or a query) into the
+ * standardized alert event format using `buildAlertEvent`.
  */
-export async function preprocessAlertInputs(
+async function preprocessAlertEvent(
   inputs: Record<string, unknown>,
+  event: AlertTriggerInput['event'],
   context: AlertPreprocessingContext,
   spaceId: string,
   logger: Logger
 ): Promise<Record<string, unknown>> {
-  const event = inputs.event as AlertTriggerInput['event'] | undefined;
-  if (!event || event.triggerType !== 'alert' || !event.alertIds || event.alertIds.length === 0) {
+  const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+  const ruleTypeRegistryMap = (await context.alerting).listTypes();
+
+  let rawHits: RawDocumentHit[];
+  if (event.querySelection) {
+    const { query, index } = event.querySelection;
+    logger.debug(`Preprocessing alerts for workflow execution from a query selection`);
+    const { hits, total, truncated } = await fetchDocumentsByQuery(
+      { query, index },
+      esClient,
+      logger
+    );
+    if (truncated) {
+      logger.warn(
+        `Alert selection truncated to ${hits.length} of ${total} matching alerts (maxDocs=${MAX_TRIGGER_EVENT_DOCS}).`
+      );
+    }
+    rawHits = hits;
+  } else if (event.alertIds && event.alertIds.length > 0) {
+    logger.debug(`Preprocessing ${event.alertIds.length} alert(s) for workflow execution`);
+    rawHits = await fetchDocumentsByIds(event.alertIds, esClient, logger);
+  } else {
+    // Nothing to expand (e.g. empty explicit selection) — leave inputs untouched.
     return inputs;
   }
 
-  logger.debug(`Preprocessing ${event.alertIds.length} alert(s) for workflow execution`);
-
-  const alertHits = await fetchAlerts(event.alertIds, context, logger);
-
-  if (alertHits.length === 0) {
+  if (rawHits.length === 0) {
     throw new Error('No alerts found with the provided IDs');
   }
+
+  const alertHits = formatAlertHits(rawHits, ruleTypeRegistryMap);
 
   const rulesByUuid = extractRulesFromAlerts(alertHits);
   const primaryRule = selectPrimaryRule(rulesByUuid, logger);
@@ -198,4 +194,97 @@ export async function preprocessAlertInputs(
     ...inputs,
     event: alertEvent,
   };
+}
+
+/**
+ * Expands a `document` trigger event (from either explicit ids or a query) into the
+ * `event.documents` shape consumed by workflows. Pre-expanded `documents` are passed
+ * through unchanged for backward compatibility with clients that embed the source.
+ */
+async function preprocessDocumentEvent(
+  inputs: Record<string, unknown>,
+  event: DocumentTriggerInput['event'],
+  context: AlertPreprocessingContext,
+  logger: Logger
+): Promise<Record<string, unknown>> {
+  // Pre-expanded documents: nothing to fetch.
+  if (event.documents && event.documents.length > 0) {
+    return inputs;
+  }
+
+  const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+
+  let rawHits: RawDocumentHit[];
+  if (event.querySelection) {
+    const { query, index } = event.querySelection;
+    logger.debug(`Preprocessing documents for workflow execution from a query selection`);
+    const { hits, total, truncated } = await fetchDocumentsByQuery(
+      { query, index },
+      esClient,
+      logger
+    );
+    if (truncated) {
+      logger.warn(
+        `Document selection truncated to ${hits.length} of ${total} matching documents (maxDocs=${MAX_TRIGGER_EVENT_DOCS}).`
+      );
+    }
+    rawHits = hits;
+  } else if (event.documentIds && event.documentIds.length > 0) {
+    logger.debug(`Preprocessing ${event.documentIds.length} document(s) for workflow execution`);
+    rawHits = await fetchDocumentsByIds(event.documentIds, esClient, logger);
+  } else {
+    // Nothing to expand — leave inputs untouched.
+    return inputs;
+  }
+
+  const documents: DocumentEventEntry[] = rawHits.map(({ _id, _index, _source }) => ({
+    id: _id,
+    index: _index,
+    timestamp: _source['@timestamp'],
+    data: _source,
+  }));
+
+  return {
+    ...inputs,
+    event: {
+      triggerType: 'document',
+      documents,
+      ...(event.query ? { query: event.query } : {}),
+      ...(event.dataView ? { dataView: event.dataView } : {}),
+    },
+  };
+}
+
+/**
+ * Preprocesses trigger inputs by expanding an `alert` or `document` trigger event from
+ * either an explicit id selection (mget) or a query selection (PIT + search_after), then
+ * shaping the fetched documents into the event format that workflows consume. Inputs for
+ * any other trigger type (or an already-expanded event) are returned unchanged.
+ */
+export async function preprocessTriggerInputs(
+  inputs: Record<string, unknown>,
+  context: AlertPreprocessingContext,
+  spaceId: string,
+  logger: Logger
+): Promise<Record<string, unknown>> {
+  const event = inputs.event as { triggerType?: string } | undefined;
+  if (!event || typeof event !== 'object') {
+    return inputs;
+  }
+
+  if (event.triggerType === 'alert') {
+    return preprocessAlertEvent(
+      inputs,
+      event as AlertTriggerInput['event'],
+      context,
+      spaceId,
+      logger
+    );
+  }
+
+  if (event.triggerType === 'document') {
+    return preprocessDocumentEvent(inputs, event as DocumentTriggerInput['event'], context, logger);
+  }
+
+  return inputs;
 }

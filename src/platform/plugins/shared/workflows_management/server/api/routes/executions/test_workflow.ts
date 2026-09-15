@@ -9,7 +9,7 @@
 
 import path from 'path';
 import { schema } from '@kbn/config-schema';
-import { preprocessAlertInputs } from './utils/preprocess_alert_inputs';
+import { preprocessTriggerInputs } from './utils/preprocess_alert_inputs';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
@@ -67,15 +67,9 @@ export function registerTestWorkflowRoute(deps: RouteDependencies) {
 
           const spaceId = spaces.getSpaceId(request);
 
-          let inputs = rawInputs;
-          const event = rawInputs.event as
-            | { triggerType?: string; alertIds?: unknown[] }
-            | undefined;
-          const hasAlertTrigger =
-            event?.triggerType === 'alert' && event?.alertIds && event.alertIds.length > 0;
-          if (hasAlertTrigger) {
-            inputs = await preprocessAlertInputs(inputs, context, spaceId, logger);
-          }
+          // Safe to call for any trigger type: it expands alert/document events (from ids or a
+          // query) and returns the inputs unchanged for anything it cannot expand.
+          const inputs = await preprocessTriggerInputs(rawInputs, context, spaceId, logger);
 
           const workflowExecutionId = await api.testWorkflow({
             workflowId,

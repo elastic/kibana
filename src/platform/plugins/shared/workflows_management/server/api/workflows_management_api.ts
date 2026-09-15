@@ -70,7 +70,7 @@ import type { GetExecutionStepExecutionsResult } from './lib/get_execution_step_
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
-import { preprocessAlertInputs } from './routes/executions/utils/preprocess_alert_inputs';
+import { preprocessTriggerInputs } from './routes/executions/utils/preprocess_alert_inputs';
 import type { WorkflowManagementAuditLog } from './routes/utils/workflow_audit_logging';
 import type {
   SearchExecutionsViewParams,
@@ -548,11 +548,11 @@ export class WorkflowsManagementApi {
   }
 
   /**
-   * Preprocesses alert inputs and starts a workflow without waiting for its execution document.
+   * Preprocesses trigger inputs and starts a workflow without waiting for its execution document.
    *
    * When `eventOverrides` is supplied, its keys are merged into `event` *after* preprocessing.
-   * This is needed because `preprocessAlertInputs` replaces the whole `event` object with the
-   * expanded alert-event shape, so any caller-owned event fields must be re-applied afterwards.
+   * This is needed because `preprocessTriggerInputs` replaces the whole `event` object with the
+   * expanded event shape, so any caller-owned event fields must be re-applied afterwards.
    */
   public async runWorkflowWithAlertPreprocessing({
     workflow,
@@ -563,7 +563,7 @@ export class WorkflowsManagementApi {
     metadata,
     eventOverrides,
   }: RunWorkflowWithAlertPreprocessingParams): Promise<RunWorkflowWithAlertPreprocessingResult> {
-    const processedInputs = await preprocessAlertInputs(
+    const processedInputs = await preprocessTriggerInputs(
       inputs,
       preprocessingContext,
       spaceId,
