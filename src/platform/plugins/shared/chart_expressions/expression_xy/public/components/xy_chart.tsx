@@ -244,7 +244,6 @@ export function XYChart({
     annotations,
     pointVisibility,
   } = args;
-
   const chartRef = useRef<Chart>(null);
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const darkMode = useKibanaIsDarkMode();
@@ -842,7 +841,7 @@ export function XYChart({
     <>
       <GlobalXYChartStyles />
       <div css={chartContainerStyle}>
-        {showLegend !== undefined && uiState && (
+        {interactive && showLegend !== undefined && uiState && (
           <LegendToggle
             onClick={toggleLegend}
             showLegend={showLegend}
