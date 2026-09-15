@@ -71,7 +71,12 @@ describe('SignificantEventsPageProvider', () => {
     jest.clearAllMocks();
     jest.useRealTimers();
     mockUseKibana.mockReturnValue({
-      core: { notifications: { toasts: { addSuccess, addDanger, addError } } },
+      core: {
+        application: {
+          capabilities: { nightshift: { show: true } },
+        },
+        notifications: { toasts: { addSuccess, addDanger, addError } },
+      },
     } as unknown as ReturnType<typeof useKibana>);
     mockUseApi.mockReturnValue({
       triggerSignificantEventsDiscovery: trigger,
