@@ -328,7 +328,7 @@ describe('classicActionExtensions', () => {
     ) =>
       makeClassicEpisode(id, 'open', {
         last_snooze_action: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-        snooze_expiry: opts.snooze_expiry ?? '2099-01-01T00:00:00.000Z',
+        snooze_expiry: 'snooze_expiry' in opts ? opts.snooze_expiry : '2099-01-01T00:00:00.000Z',
         is_muted: opts.is_muted,
         instanceId: opts.instanceId ?? 'inst-1',
         ruleId: opts.ruleId ?? 'r1',
