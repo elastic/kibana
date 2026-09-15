@@ -19,7 +19,8 @@ const IacStateSchema = schema.maybe(
   schema.object(IacFieldsSchema, {
     meta: {
       description:
-        'IaC provenance to persist on the cloud connector after the user confirms the template.',
+        'Optional CloudFormation template identifiers to store on this connector. Omit this object to leave stored values unchanged.',
+      availability: { stability: 'experimental', since: '9.6.0' }, 
     },
   })
 );
