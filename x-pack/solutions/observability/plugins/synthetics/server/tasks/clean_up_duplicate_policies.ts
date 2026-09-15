@@ -12,6 +12,7 @@ import { SyntheticsPrivateLocation } from '../synthetics_service/private_locatio
 import { getFilterForTestNowRun } from '../synthetics_service/private_location/clean_up_task';
 import {
   DEFAULT_MAX_CLEANUP_RETRIES,
+  LEFTOVER_CLEANUP_SCAN_VERSION,
   type SyncTaskState,
 } from './sync_private_locations_monitors_task';
 import type { SyntheticsServerSetup } from '../types';
@@ -31,6 +32,19 @@ export async function cleanUpDuplicatedPackagePolicies(
   const debugLog = (msg: string) => {
     logger.debug(`[PrivateLocationCleanUpTask] ${msg}`);
   };
+
+  if ((taskState.cleanupScanVersion ?? 0) < LEFTOVER_CLEANUP_SCAN_VERSION) {
+    if (taskState.hasAlreadyDoneCleanup) {
+      taskState.hasAlreadyDoneCleanup = false;
+      taskState.maxCleanUpRetries = DEFAULT_MAX_CLEANUP_RETRIES;
+    }
+    taskState.cleanupScanVersion = LEFTOVER_CLEANUP_SCAN_VERSION;
+  }
+
+  if (taskState.hasAlreadyDoneCleanup) {
+    debugLog('Skipping cleanup of duplicated package policies as it has already been done once');
+    return { performCleanupSync };
+  }
 
   // Same budget for leftover deletes and recreate. Clearing it on every
   // extras pass would retry a failing delete forever.
