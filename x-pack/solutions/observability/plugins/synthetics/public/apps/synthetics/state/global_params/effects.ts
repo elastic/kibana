@@ -40,15 +40,18 @@ export function* addGlobalParamEffect() {
       addGlobalParam,
       addNewGlobalParamAction.success,
       addNewGlobalParamAction.fail,
-      successMessage,
+      ADD_PARAM_SUCCESS_MESSAGE,
       failureMessage
     )
   );
 }
 
-const successMessage = i18n.translate('xpack.synthetics.settings.addParams.success', {
-  defaultMessage: 'Successfully added global parameter.',
-});
+export const ADD_PARAM_SUCCESS_MESSAGE = i18n.translate(
+  'xpack.synthetics.settings.addParams.success',
+  {
+    defaultMessage: 'Successfully added global parameter.',
+  }
+);
 
 const failureMessage = i18n.translate('xpack.synthetics.settings.addParams.fail', {
   defaultMessage: 'Failed to add global parameter.',
@@ -61,15 +64,18 @@ export function* editGlobalParamEffect() {
       editGlobalParam,
       editGlobalParamAction.success,
       editGlobalParamAction.fail,
-      editSuccessMessage,
+      EDIT_PARAM_SUCCESS_MESSAGE,
       editFailureMessage
     )
   );
 }
 
-const editSuccessMessage = i18n.translate('xpack.synthetics.settings.editParams.success', {
-  defaultMessage: 'Successfully edited global parameter.',
-});
+export const EDIT_PARAM_SUCCESS_MESSAGE = i18n.translate(
+  'xpack.synthetics.settings.editParams.success',
+  {
+    defaultMessage: 'Successfully edited global parameter.',
+  }
+);
 
 const editFailureMessage = i18n.translate('xpack.synthetics.settings.editParams.fail', {
   defaultMessage: 'Failed to edit global parameter.',

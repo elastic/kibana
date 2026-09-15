@@ -44,6 +44,7 @@ lightningcss
 tar-fs
 browserslist
 react-day-picker
+mysql2
 jszip
 @rsdoctor/rspack-plugin
 @rspack/core
@@ -53,6 +54,7 @@ jszip
 @opentelemetry/exporter-logs-otlp-proto
 @opentelemetry/otlp-transformer
 just-bash
+jsondiffpatch
 typescript-7
 immer-v9
 react-redux-v7

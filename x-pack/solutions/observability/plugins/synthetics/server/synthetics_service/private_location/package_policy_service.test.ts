@@ -15,6 +15,8 @@ import {
   flushPendingAgentPolicyRevisionBumps,
 } from './package_policy_service';
 import { AGENT_POLICY_REVISION_BATCH_WINDOW_MS } from './agent_policy_revision_batcher';
+import type { ConditionUpdate } from './rebalance_writes';
+import { SHARDED_PACKAGE_POLICY_FIELDS } from './rebalance_writes';
 import type { SyntheticsServerSetup } from '../../types';
 
 beforeEach(() => {
@@ -477,6 +479,28 @@ describe('PackagePolicyService.listByAgentPolicy', () => {
     );
   });
 
+  it('source-filters to the fields the rebalance path reads', async () => {
+    const { server, list } = makeListServer([[{ id: 'm1-loc' }]]);
+
+    await new PackagePolicyService(server).listByAgentPolicy({ agentPolicyId: 'ap-1' });
+
+    // Not just any projection: dropping one of these silently yields
+    // `undefined` downstream, and keeping the policy body loads every browser
+    // monitor's inline script for a write that never sends it.
+    expect(list).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ fields: SHARDED_PACKAGE_POLICY_FIELDS })
+    );
+    expect(SHARDED_PACKAGE_POLICY_FIELDS).toEqual([
+      'name',
+      'condition',
+      'revision',
+      'policy_ids',
+      'inputs.type',
+      'inputs.enabled',
+    ]);
+  });
+
   it('paginates until a short page and concatenates the results', async () => {
     const fullPage = Array.from({ length: 1000 }, (_, i) => ({ id: `m${i}-loc` }));
     const { server, list } = makeListServer([fullPage, [{ id: 'last-loc' }]]);
@@ -497,13 +521,15 @@ describe('PackagePolicyService.bulkUpdateInSpace', () => {
       Object.defineProperty(client, 'getCurrentNamespace', { value: () => space });
       return client;
     });
-    const bulkUpdate = jest.fn().mockResolvedValue({ failedPolicies: [], updatedPolicies: [] });
+    const bulkUpdatePartial = jest
+      .fn()
+      .mockResolvedValue({ failedPolicies: [], updatedPolicies: [] });
     const getByIds = jest.fn().mockResolvedValue([]);
     const bumpRevision = jest.fn().mockResolvedValue(undefined);
     const server = {
       logger: loggerMock.create(),
       fleet: {
-        packagePolicyService: { bulkUpdate },
+        packagePolicyService: { bulkUpdatePartial },
         agentPolicyService: { getByIds, bumpRevision },
       },
       coreStart: {
@@ -514,14 +540,16 @@ describe('PackagePolicyService.bulkUpdateInSpace', () => {
         elasticsearch: { client: { asInternalUser: { __es: true } } },
       },
     } as unknown as SyntheticsServerSetup;
-    return { server, bulkUpdate, getByIds, bumpRevision, asScopedToNamespace };
+    return { server, bulkUpdatePartial, getByIds, bumpRevision, asScopedToNamespace };
   };
 
-  const update = (id: string): UpdatePackagePolicyWithId =>
-    ({ id, policy_ids: ['ap-1'] } as UpdatePackagePolicyWithId);
+  const update = (id: string, agentPolicyIds = ['ap-1']): ConditionUpdate => ({
+    update: { id, version: 'WzAsMV0=', attributes: { condition: `'agent.id' == '${id}'` } },
+    agentPolicyIds,
+  });
 
   it('writes directly to the policy own space without deriving routing from the agent policy', async () => {
-    const { server, bulkUpdate, getByIds } = makeUpdateServer();
+    const { server, bulkUpdatePartial, getByIds } = makeUpdateServer();
 
     await new PackagePolicyService(server).bulkUpdateInSpace({
       policiesToUpdate: [update('m1-loc')],
@@ -531,23 +559,23 @@ describe('PackagePolicyService.bulkUpdateInSpace', () => {
     // No agent-policy lookup (the create/edit routing is bypassed).
     expect(getByIds).not.toHaveBeenCalled();
     // Client scoped straight to the policy's own space.
-    expect(bulkUpdate.mock.calls[0][0]).toEqual({ __space: 'team-x' });
-    expect(bulkUpdate.mock.calls[0][2]).toEqual([update('m1-loc')]);
+    expect(bulkUpdatePartial.mock.calls[0][0]).toEqual({ __space: 'team-x' });
+    expect(bulkUpdatePartial.mock.calls[0][1]).toEqual([update('m1-loc').update]);
   });
 
   it('maps ALL_SPACES to the default space (a valid namespace for an all-spaces policy)', async () => {
-    const { server, bulkUpdate } = makeUpdateServer();
+    const { server, bulkUpdatePartial } = makeUpdateServer();
 
     await new PackagePolicyService(server).bulkUpdateInSpace({
       policiesToUpdate: [update('m1-loc')],
       spaceId: ALL_SPACES_ID,
     });
 
-    expect(bulkUpdate.mock.calls[0][0]).toEqual({ __space: DEFAULT_SPACE_ID });
+    expect(bulkUpdatePartial.mock.calls[0][0]).toEqual({ __space: DEFAULT_SPACE_ID });
   });
 
   it('is a no-op for an empty update list', async () => {
-    const { server, bulkUpdate } = makeUpdateServer();
+    const { server, bulkUpdatePartial } = makeUpdateServer();
 
     const failed = await new PackagePolicyService(server).bulkUpdateInSpace({
       policiesToUpdate: [],
@@ -555,14 +583,16 @@ describe('PackagePolicyService.bulkUpdateInSpace', () => {
     });
 
     expect(failed).toEqual([]);
-    expect(bulkUpdate).not.toHaveBeenCalled();
+    expect(bulkUpdatePartial).not.toHaveBeenCalled();
   });
 
   it('routes through the batched revision bump used by the shard-rebalance task', async () => {
-    const { server, bulkUpdate, bumpRevision } = makeUpdateServer();
-    bulkUpdate.mockResolvedValue({
+    const { server, bulkUpdatePartial, bumpRevision } = makeUpdateServer();
+    // `bulkUpdatePartial` echoes back only what was sent — notably NOT
+    // `policy_ids` — so the bump targets must come from the request side.
+    bulkUpdatePartial.mockResolvedValue({
       failedPolicies: [],
-      updatedPolicies: [update('m1-loc'), update('m2-loc')],
+      updatedPolicies: [{ id: 'm1-loc' }, { id: 'm2-loc' }],
     });
 
     const request = new PackagePolicyService(server).bulkUpdateInSpace({
@@ -572,13 +602,33 @@ describe('PackagePolicyService.bulkUpdateInSpace', () => {
     await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
     await request;
 
-    // Opts out of Fleet's own immediate bump so the rebalance task's write
-    // shares the same coalesced/retried bump as concurrent monitor CRUD,
-    // instead of racing it with no retry.
-    expect(bulkUpdate.mock.calls[0][3]).toEqual(expect.objectContaining({ bumpRevision: false }));
     expect(bumpRevision).toHaveBeenCalledTimes(1);
     expect(bumpRevision).toHaveBeenCalledWith(expect.anything(), expect.anything(), 'ap-1', {
       asyncDeploy: true,
     });
+  });
+
+  it('bumps only the agent policies whose writes actually landed', async () => {
+    const { server, bulkUpdatePartial, bumpRevision } = makeUpdateServer();
+    bulkUpdatePartial.mockResolvedValue({
+      updatedPolicies: [{ id: 'm1-loc' }],
+      failedPolicies: [{ update: update('m2-loc').update, error: { statusCode: 409 } }],
+    });
+
+    const request = new PackagePolicyService(server).bulkUpdateInSpace({
+      policiesToUpdate: [update('m1-loc', ['ap-ok']), update('m2-loc', ['ap-conflicted'])],
+      spaceId: 'team-x',
+    });
+    await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
+    const failed = await request;
+
+    expect(failed).toHaveLength(1);
+    expect(bumpRevision).toHaveBeenCalledTimes(1);
+    expect(bumpRevision).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      'ap-ok',
+      expect.anything()
+    );
   });
 });

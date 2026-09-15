@@ -270,7 +270,7 @@ describe('Per-Alert Action Scheduler', () => {
       // 2 per-alert actions * 2 alerts = 4 actions to schedule
       const scheduler = new PerAlertActionScheduler({
         ...getSchedulerContext(),
-        priority: TaskPriority.Low,
+        priority: TaskPriority.Maintenance,
       });
       const results = await scheduler.getActionsToSchedule({
         activeAlerts: alerts,

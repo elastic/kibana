@@ -28,6 +28,8 @@ import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { useDatasets } from '../../hooks/use_evals_api';
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import { DeleteDatasetModal } from '../../components/delete_dataset_modal';
+import { CopyDatasetFlyout } from '../../components/copy_dataset_flyout';
+import { ImportDatasetFlyout } from '../../components/import_dataset_flyout';
 import {
   DatasetMaturityBadge,
   DatasetTagBadges,
@@ -56,6 +58,17 @@ export const DatasetsListPage: React.FC = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedMaturity, setSelectedMaturity] = useState<DatasetMaturity[]>([]);
   const [datasetPendingDelete, setDatasetPendingDelete] = useState<DatasetSummary | null>(null);
+  const [datasetPendingCopy, setDatasetPendingCopy] = useState<DatasetSummary | null>(null);
+  const [isCreateFlyoutOpen, setIsCreateFlyoutOpen] = useState(false);
+  const [isImportFlyoutOpen, setIsImportFlyoutOpen] = useState(false);
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  const [maturity, setMaturity] = useState<DatasetMaturity | null>(null);
+  const [spaceIds, setSpaceIds] = useState<string[]>([]);
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [spacesError, setSpacesError] = useState<string | null>(null);
+  const [createError, setCreateError] = useState<string | null>(null);
 
   const { isEnabled: spacesEnabled } = useAccessibleSpaces();
 
@@ -149,21 +162,38 @@ export const DatasetsListPage: React.FC = () => {
     if (canManage) {
       baseColumns.push({
         name: i18n.COLUMN_ACTIONS,
-        width: '60px',
+        width: '96px',
         align: 'right',
         render: (item: DatasetSummary) => (
-          <EuiToolTip content={i18n.DELETE_DATASET_ACTION} disableScreenReaderOutput>
-            <EuiButtonIcon
-              aria-label={i18n.getDeleteDatasetAriaLabel(item.name)}
-              iconType="trash"
-              color="danger"
-              onClick={(e: React.MouseEvent) => {
-                e.stopPropagation();
-                setDatasetPendingDelete(item);
-              }}
-              data-test-subj="deleteDatasetButton"
-            />
-          </EuiToolTip>
+          <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={i18n.COPY_DATASET_ACTION} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  aria-label={i18n.getCopyDatasetAriaLabel(item.name)}
+                  iconType="copy"
+                  onClick={(e: React.MouseEvent) => {
+                    e.stopPropagation();
+                    setDatasetPendingCopy(item);
+                  }}
+                  data-test-subj="copyDatasetButton"
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={i18n.DELETE_DATASET_ACTION} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  aria-label={i18n.getDeleteDatasetAriaLabel(item.name)}
+                  iconType="trash"
+                  color="danger"
+                  onClick={(e: React.MouseEvent) => {
+                    e.stopPropagation();
+                    setDatasetPendingDelete(item);
+                  }}
+                  data-test-subj="deleteDatasetButton"
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
       });
     }
@@ -266,6 +296,7 @@ export const DatasetsListPage: React.FC = () => {
               </EuiFlexItem>
               {canManage ? (
                 <EuiFlexItem grow={false}>
+<<<<<<< HEAD
                   <EuiButton
                     onClick={openCreatePage}
                     fill
@@ -274,6 +305,24 @@ export const DatasetsListPage: React.FC = () => {
                   >
                     {i18n.CREATE_DATASET_BUTTON}
                   </EuiButton>
+=======
+                  <EuiFlexGroup responsive={false} gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        onClick={() => setIsImportFlyoutOpen(true)}
+                        iconType="upload"
+                        data-test-subj="importDatasetFileButton"
+                      >
+                        {i18n.IMPORT_FILE_BUTTON}
+                      </EuiButton>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton onClick={openCreateFlyout} fill iconType="plusCircle">
+                        {i18n.CREATE_DATASET_BUTTON}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+>>>>>>> 344a4f4b36cbd8dfd69e6de31e22b4533dfd4bef
                 </EuiFlexItem>
               ) : null}
             </EuiFlexGroup>
@@ -301,11 +350,21 @@ export const DatasetsListPage: React.FC = () => {
               canManage
                 ? [
                     <EuiButton
+<<<<<<< HEAD
                       onClick={openCreatePage}
                       fill
                       iconType="plusCircle"
                       data-test-subj="createDatasetButton"
                     >
+=======
+                      onClick={() => setIsImportFlyoutOpen(true)}
+                      iconType="upload"
+                      data-test-subj="importDatasetFileButton"
+                    >
+                      {i18n.IMPORT_FILE_BUTTON}
+                    </EuiButton>,
+                    <EuiButton onClick={openCreateFlyout} fill iconType="plusCircle">
+>>>>>>> 344a4f4b36cbd8dfd69e6de31e22b4533dfd4bef
                       {i18n.CREATE_DATASET_BUTTON}
                     </EuiButton>,
                   ]
@@ -354,6 +413,99 @@ export const DatasetsListPage: React.FC = () => {
           onClose={() => setDatasetPendingDelete(null)}
         />
       ) : null}
+<<<<<<< HEAD
+=======
+      {datasetPendingCopy ? (
+        <CopyDatasetFlyout
+          datasetId={datasetPendingCopy.id}
+          datasetName={datasetPendingCopy.name}
+          datasetDescription={datasetPendingCopy.description}
+          onClose={() => setDatasetPendingCopy(null)}
+          onCopied={(newDatasetId) => history.push(`/datasets/${newDatasetId}`)}
+        />
+      ) : null}
+      {isImportFlyoutOpen ? (
+        <ImportDatasetFlyout onClose={() => setIsImportFlyoutOpen(false)} />
+      ) : null}
+      {isCreateFlyoutOpen ? (
+        <EuiFlyout onClose={closeCreateFlyout} size="s" aria-labelledby="createDatasetFlyoutTitle">
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="m">
+              <h2 id="createDatasetFlyoutTitle">{i18n.CREATE_DATASET_FLYOUT_TITLE}</h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            {createError ? (
+              <>
+                <KbnDangerCallout
+                  announceOnMount
+                  size="s"
+                  title={i18n.CREATE_DATASET_FAILED_TITLE}
+                  text={<p>{createError}</p>}
+                />
+                <EuiSpacer size="m" />
+              </>
+            ) : null}
+            <EuiForm component="form">
+              <EuiFormRow
+                label={i18n.CREATE_DATASET_NAME_LABEL}
+                isInvalid={Boolean(nameError)}
+                error={nameError ?? undefined}
+                fullWidth
+              >
+                <EuiFieldText
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  isInvalid={Boolean(nameError)}
+                  maxLength={MAX_DATASET_NAME_LENGTH}
+                  fullWidth
+                />
+              </EuiFormRow>
+              <EuiFormRow label={i18n.CREATE_DATASET_DESCRIPTION_LABEL} fullWidth>
+                <EuiTextArea
+                  value={description}
+                  onChange={(event) => setDescription(event.target.value)}
+                  rows={3}
+                  maxLength={MAX_DATASET_DESCRIPTION_LENGTH}
+                  fullWidth
+                />
+              </EuiFormRow>
+              <DatasetTagsFields
+                tags={tags}
+                maturity={maturity}
+                onTagsChange={setTags}
+                onMaturityChange={setMaturity}
+                suggestedTags={suggestedTags}
+              />
+              <DatasetSpacesPicker
+                value={spaceIds}
+                onChange={setSpaceIds}
+                error={spacesError ?? undefined}
+              />
+            </EuiForm>
+          </EuiFlyoutBody>
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={closeCreateFlyout}>
+                  {i18n.CREATE_DATASET_CANCEL_BUTTON}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  onClick={onCreateDataset}
+                  fill
+                  isLoading={createDataset.isLoading}
+                  disabled={createDataset.isLoading}
+                >
+                  {i18n.CREATE_DATASET_SUBMIT_BUTTON}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
+        </EuiFlyout>
+      ) : null}
+>>>>>>> 344a4f4b36cbd8dfd69e6de31e22b4533dfd4bef
     </>
   );
 };

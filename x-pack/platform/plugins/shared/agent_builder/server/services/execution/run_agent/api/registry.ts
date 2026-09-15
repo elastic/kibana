@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ApiRegistry, ApiTarget } from './types';
+import type { ApiTarget } from '@kbn/agent-builder-common';
+import type { ApiRegistry } from './types';
 
 let registriesPromise: Promise<Record<ApiTarget, ApiRegistry>> | undefined;
 
