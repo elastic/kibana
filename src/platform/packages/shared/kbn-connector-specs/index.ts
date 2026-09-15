@@ -72,6 +72,15 @@ export {
   type ValidateEmittedEventsResult,
 } from './src/validate_emitted_events';
 export {
+  filterActionsBySelection,
+  formatConnectorActionLine,
+  getEffectiveScope,
+  isSelectedActionEnabled,
+  isSpecificActionsSelection,
+  resolveActionScope,
+  type SelectedActions,
+} from './src/selected_actions';
+export {
   getConnectorActionErrorMeta,
   setConnectorActionErrorMeta,
   getFinitePositiveNumber,
@@ -94,6 +103,9 @@ export {
 } from './src/auth_mode_by_auth_type_id';
 export { getMeta, setMeta, addMeta } from './src/connector_spec_ui';
 export type { BaseMetadata } from './src/connector_spec_ui';
+export { fromConnectorSpecSchema } from './src/lib/deserialize_connector_spec';
+export type { ConnectorZodSchema } from './src/lib/deserialize_connector_spec';
+export { narrowSecretsSchemaForAuthMode } from './src/lib/narrow_secrets_schema_for_auth_mode';
 export { clientTypes } from './src/lib/clients';
 export type {
   ClientTypeSpec,
