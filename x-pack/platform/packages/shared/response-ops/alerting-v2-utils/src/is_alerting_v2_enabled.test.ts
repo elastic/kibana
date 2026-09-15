@@ -8,6 +8,7 @@
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
+  hasAlertingV2Capability,
   isAlertingV2Enabled,
   shouldShowAlertingV2CreateRuleFlyout,
   shouldShowClassicObservabilityAlertsTable,
@@ -86,6 +87,63 @@ describe('shouldShowAlertingV2CreateRuleFlyout', () => {
     core.settings.globalClient.get = <T>(_key: string) => false as T;
 
     expect(shouldShowAlertingV2CreateRuleFlyout(core)).toBe(false);
+  });
+});
+
+describe('hasAlertingV2Capability', () => {
+  let core: CoreStart;
+
+  beforeEach(() => {
+    core = coreMock.createStart();
+  });
+
+  it('returns true for read when the feature has the read capability', () => {
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      alerting_v2_alerts: { read: true },
+    };
+
+    expect(hasAlertingV2Capability(core, 'alerts')).toBe(true);
+  });
+
+  it('returns true for read when the feature has the all capability', () => {
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      alerting_v2_rules: { all: true },
+    };
+
+    expect(hasAlertingV2Capability(core, 'rules')).toBe(true);
+  });
+
+  it('returns true for all when the feature has the all capability', () => {
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      alerting_v2_rules: { all: true },
+    };
+
+    expect(hasAlertingV2Capability(core, 'rules', 'all')).toBe(true);
+  });
+
+  it('returns false for all when the feature only has the read capability', () => {
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      alerting_v2_rules: { read: true },
+    };
+
+    expect(hasAlertingV2Capability(core, 'rules', 'all')).toBe(false);
+  });
+
+  it('returns false when the feature capability is missing', () => {
+    expect(hasAlertingV2Capability(core, 'actionPolicies')).toBe(false);
+  });
+
+  it('returns false when the feature capability is not granted', () => {
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      alerting_v2_execution_history: { read: false, all: false },
+    };
+
+    expect(hasAlertingV2Capability(core, 'executionHistory')).toBe(false);
   });
 });
 

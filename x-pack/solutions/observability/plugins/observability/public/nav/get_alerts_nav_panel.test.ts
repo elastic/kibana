@@ -5,24 +5,53 @@
  * 2.0.
  */
 
-import type { Location } from 'history';
-import type { CoreStart } from '@kbn/core/public';
+import type { Capabilities, CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { getAlertsNavPanel } from './get_alerts_nav_panel';
 
-const location = {} as Location;
-const prepend = (path: string) => path;
-
-const isActive = (
-  node: ReturnType<typeof getAlertsNavPanel>[number],
-  pathNameSerialized: string
-): boolean => {
-  if (!node.getIsActive) {
-    throw new Error('expected getIsActive');
-  }
-
-  return node.getIsActive({ pathNameSerialized, prepend, location });
+const FULL_V2_CAPABILITIES = {
+  alerting_v2_alerts: { read: true },
+  alerting_v2_rules: { read: true },
+  alerting_v2_action_policies: { read: true },
+  alerting_v2_execution_history: { read: true },
+  observabilityAlerts: { show: true },
+  management: {
+    insightsAndAlerting: {
+      triggersActionsAlerts: true,
+      triggersActionsRules: true,
+      maintenanceWindows: true,
+    },
+  },
 };
+
+const enableV2 = (core: CoreStart) => {
+  core.settings.globalClient.get = <T>(_key: string) => true as T;
+  core.settings.client.get = <T>(_key: string) => false as T;
+};
+
+const setCapabilities = (core: CoreStart, capabilities: Record<string, unknown>) => {
+  const management = capabilities.management as
+    | { insightsAndAlerting?: Record<string, boolean> }
+    | undefined;
+
+  core.application.capabilities = {
+    ...core.application.capabilities,
+    ...capabilities,
+    management: {
+      ...core.application.capabilities.management,
+      ...management,
+      insightsAndAlerting: {
+        ...core.application.capabilities.management?.insightsAndAlerting,
+        ...management?.insightsAndAlerting,
+      },
+    },
+  } as Capabilities;
+};
+
+const getPanelChildren = (core: CoreStart) => getAlertsNavPanel(core)[0]?.children ?? [];
+
+const getSectionByTitle = (core: CoreStart, title?: string) =>
+  getPanelChildren(core).find((section) => section.title === title);
 
 describe('getAlertsNavPanel', () => {
   let core: CoreStart;
@@ -30,9 +59,10 @@ describe('getAlertsNavPanel', () => {
   beforeEach(() => {
     core = coreMock.createStart();
     core.settings.globalClient.get = <T>(_key: string) => false as T;
+    core.settings.client.get = <T>(_key: string) => false as T;
   });
 
-  it('returns a flat Alerts link when alerting v2 is disabled', () => {
+  it('returns the classic Alerts link when alerting v2 is disabled', () => {
     const result = getAlertsNavPanel(core);
 
     expect(result).toHaveLength(1);
@@ -43,11 +73,11 @@ describe('getAlertsNavPanel', () => {
       })
     );
     expect(result[0]).not.toHaveProperty('renderAs');
-    expect(result[0]).not.toHaveProperty('children');
   });
 
-  it('returns a panel opener with the four groups when alerting v2 is enabled', () => {
-    core.settings.globalClient.get = <T>(_key: string) => true as T;
+  it('returns a full Alerting panel when the user has v1 and v2 read capabilities', () => {
+    enableV2(core);
+    setCapabilities(core, FULL_V2_CAPABILITIES);
 
     const result = getAlertsNavPanel(core);
 
@@ -61,8 +91,7 @@ describe('getAlertsNavPanel', () => {
         renderAs: 'panelOpener',
       })
     );
-    expect(result[0].children).toHaveLength(4);
-    expect(result[0].children?.[0]).toEqual(
+    expect(result[0].children).toEqual([
       expect.objectContaining({
         breadcrumbStatus: 'hidden',
         children: [
@@ -72,89 +101,190 @@ describe('getAlertsNavPanel', () => {
             badgeType: 'new',
           }),
         ],
-      })
-    );
-    expect(result[0].children?.[1]).toEqual(
+      }),
       expect.objectContaining({
         title: 'Rule Management',
-        breadcrumbStatus: 'hidden',
         children: [
           { link: 'observabilityAlerting:rules-v2' },
           { link: 'observabilityAlerting:rules-v1', sideNavStatus: 'hidden' },
-          { link: 'observabilityAlerting:rule-library', badgeType: 'new' },
+          expect.objectContaining({
+            link: 'observabilityAlerting:rule-library',
+            badgeType: 'new',
+          }),
         ],
-      })
-    );
-    expect(result[0].children?.[2]).toEqual(
+      }),
       expect.objectContaining({
         title: 'Notifications and Suppressions',
-        breadcrumbStatus: 'hidden',
         children: [
-          { link: 'observabilityAlerting:action-policies', badgeType: 'new' },
+          expect.objectContaining({
+            link: 'observabilityAlerting:action-policies',
+            badgeType: 'new',
+          }),
           { link: 'management:maintenanceWindows' },
         ],
-      })
-    );
-    expect(result[0].children?.[3]).toEqual(
+      }),
       expect.objectContaining({
         title: 'Operations',
-        breadcrumbStatus: 'hidden',
-        children: [{ link: 'observabilityAlerting:execution-history', badgeType: 'new' }],
-      })
-    );
-  });
-
-  it('omits Alerts V1 when alerting v2 is enabled and the classic table setting is off', () => {
-    core.settings.globalClient.get = <T>(_key: string) => true as T;
-    core.settings.client.get = <T>(_key: string) => false as T;
-
-    const alertsGroup = getAlertsNavPanel(core)[0].children?.[0];
-
-    expect(alertsGroup?.children).toEqual([
-      expect.objectContaining({
-        link: 'observabilityAlerting:inbox',
-        title: 'Inbox',
+        children: [
+          expect.objectContaining({
+            link: 'observabilityAlerting:execution-history',
+            badgeType: 'new',
+          }),
+        ],
       }),
     ]);
   });
 
-  it('includes Alerts V1 when alerting v2 is enabled and the classic table setting is on', () => {
-    core.settings.globalClient.get = <T>(_key: string) => true as T;
-    core.settings.client.get = <T>(_key: string) => true as T;
+  it('returns an empty array when alerting v2 is enabled but the user has no capabilities', () => {
+    enableV2(core);
 
-    const alertsGroup = getAlertsNavPanel(core)[0].children?.[0];
-
-    expect(alertsGroup?.children).toEqual([
-      expect.objectContaining({
-        link: 'observabilityAlerting:inbox',
-        title: 'Inbox',
-      }),
-      expect.objectContaining({
-        link: 'observability-overview:alerts',
-        title: 'Alerts V1',
-      }),
-    ]);
+    expect(getAlertsNavPanel(core)).toEqual([]);
   });
 
-  it('keeps rules-v1 in the tree with a hidden side-nav status', () => {
-    core.settings.globalClient.get = <T>(_key: string) => true as T;
+  describe('inbox section', () => {
+    beforeEach(() => {
+      enableV2(core);
+    });
 
-    const ruleManagement = getAlertsNavPanel(core)[0].children?.[1];
-    const rulesV1 = ruleManagement?.children?.find(
-      (child) => child.link === 'observabilityAlerting:rules-v1'
-    );
+    it('shows Inbox when the user has v2 alerts read', () => {
+      setCapabilities(core, { alerting_v2_alerts: { read: true } });
 
-    expect(rulesV1).toEqual({
-      link: 'observabilityAlerting:rules-v1',
-      sideNavStatus: 'hidden',
+      expect(getSectionByTitle(core)?.children).toEqual([
+        expect.objectContaining({ link: 'observabilityAlerting:inbox' }),
+      ]);
+    });
+
+    it('shows Inbox when the user has v2 alerts all', () => {
+      setCapabilities(core, { alerting_v2_alerts: { all: true } });
+
+      expect(getSectionByTitle(core)?.children).toEqual([
+        expect.objectContaining({ link: 'observabilityAlerting:inbox' }),
+      ]);
+    });
+
+    it('shows Inbox when the user has v1 alerts read', () => {
+      setCapabilities(core, { observabilityAlerts: { show: true } });
+
+      expect(getSectionByTitle(core)?.children).toEqual([
+        expect.objectContaining({ link: 'observabilityAlerting:inbox' }),
+      ]);
+    });
+
+    it('shows Inbox and Alerts V1 when the user has v1 alerts read and the classic table setting is on', () => {
+      core.settings.client.get = <T>(_key: string) => true as T;
+      setCapabilities(core, { observabilityAlerts: { show: true } });
+
+      expect(getSectionByTitle(core)?.children).toEqual([
+        expect.objectContaining({ link: 'observabilityAlerting:inbox' }),
+        expect.objectContaining({
+          link: 'observability-overview:alerts',
+          title: 'Alerts V1',
+        }),
+      ]);
+    });
+
+    it('shows Inbox and Alerts V1 when the user has the v1 alerts management capability', () => {
+      core.settings.client.get = <T>(_key: string) => true as T;
+      setCapabilities(core, {
+        management: { insightsAndAlerting: { triggersActionsAlerts: true } },
+      });
+
+      expect(getSectionByTitle(core)?.children).toEqual([
+        expect.objectContaining({ link: 'observabilityAlerting:inbox' }),
+        expect.objectContaining({ link: 'observability-overview:alerts' }),
+      ]);
+    });
+
+    it('does not show Alerts V1 when the classic table setting is off', () => {
+      setCapabilities(core, { observabilityAlerts: { show: true } });
+
+      expect(getSectionByTitle(core)?.children).toEqual([
+        expect.objectContaining({ link: 'observabilityAlerting:inbox' }),
+      ]);
+    });
+
+    it('shows Inbox and Alerts V1 when the user has both v1 and v2 alerts read', () => {
+      core.settings.client.get = <T>(_key: string) => true as T;
+      setCapabilities(core, {
+        alerting_v2_alerts: { read: true },
+        observabilityAlerts: { show: true },
+      });
+
+      expect(getSectionByTitle(core)?.children).toEqual([
+        expect.objectContaining({ link: 'observabilityAlerting:inbox' }),
+        expect.objectContaining({ link: 'observability-overview:alerts' }),
+      ]);
     });
   });
 
-  it('marks both alerting and alerts URL prefixes as active', () => {
-    const [node] = getAlertsNavPanel(core);
+  describe('rule management section', () => {
+    beforeEach(() => {
+      enableV2(core);
+    });
 
-    expect(isActive(node, '/app/observability/alerting/inbox')).toBe(true);
-    expect(isActive(node, '/app/observability/alerts')).toBe(true);
-    expect(isActive(node, '/app/observability/overview')).toBe(false);
+    it('shows the v2 Rules link and library when the user has v2 rules read', () => {
+      setCapabilities(core, { alerting_v2_rules: { read: true } });
+
+      expect(getSectionByTitle(core, 'Rule Management')?.children).toEqual([
+        { link: 'observabilityAlerting:rules-v2' },
+        { link: 'observabilityAlerting:rules-v1', sideNavStatus: 'hidden' },
+        expect.objectContaining({ link: 'observabilityAlerting:rule-library' }),
+      ]);
+    });
+
+    it('shows a visible v1 Rules link when the user only has v1 rules read', () => {
+      setCapabilities(core, {
+        management: { insightsAndAlerting: { triggersActionsRules: true } },
+      });
+
+      expect(getSectionByTitle(core, 'Rule Management')?.children).toEqual([
+        { link: 'observabilityAlerting:rules-v1' },
+      ]);
+    });
+
+    it('prefers the v2 Rules link when the user has both v1 and v2 rules read', () => {
+      setCapabilities(core, {
+        alerting_v2_rules: { read: true },
+        management: { insightsAndAlerting: { triggersActionsRules: true } },
+      });
+
+      expect(getSectionByTitle(core, 'Rule Management')?.children).toEqual([
+        { link: 'observabilityAlerting:rules-v2' },
+        { link: 'observabilityAlerting:rules-v1', sideNavStatus: 'hidden' },
+        expect.objectContaining({ link: 'observabilityAlerting:rule-library' }),
+      ]);
+    });
+  });
+
+  describe('other sections', () => {
+    beforeEach(() => {
+      enableV2(core);
+    });
+
+    it('shows action policies when the user has v2 action policies read', () => {
+      setCapabilities(core, { alerting_v2_action_policies: { read: true } });
+
+      expect(getSectionByTitle(core, 'Notifications and Suppressions')?.children).toEqual([
+        expect.objectContaining({ link: 'observabilityAlerting:action-policies' }),
+      ]);
+    });
+
+    it('shows maintenance windows when the user has that management capability', () => {
+      setCapabilities(core, {
+        management: { insightsAndAlerting: { maintenanceWindows: true } },
+      });
+
+      expect(getSectionByTitle(core, 'Notifications and Suppressions')?.children).toEqual([
+        { link: 'management:maintenanceWindows' },
+      ]);
+    });
+
+    it('shows execution history when the user has v2 execution history read', () => {
+      setCapabilities(core, { alerting_v2_execution_history: { read: true } });
+
+      expect(getSectionByTitle(core, 'Operations')?.children).toEqual([
+        expect.objectContaining({ link: 'observabilityAlerting:execution-history' }),
+      ]);
+    });
   });
 });

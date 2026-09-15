@@ -174,6 +174,23 @@ describe('Navigation Tree', () => {
 
   it('opens an Alerts panel pointing at observability alerting deep links when alerting v2 is enabled', () => {
     core.settings.globalClient.get = <T>(_key: string) => true as T;
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      alerting_v2_alerts: { read: true },
+      alerting_v2_rules: { read: true },
+      alerting_v2_action_policies: { read: true },
+      alerting_v2_execution_history: { read: true },
+      observabilityAlerts: { show: true },
+      management: {
+        ...core.application.capabilities.management,
+        insightsAndAlerting: {
+          ...core.application.capabilities.management?.insightsAndAlerting,
+          triggersActionsAlerts: true,
+          triggersActionsRules: true,
+          maintenanceWindows: true,
+        },
+      },
+    };
 
     const { body } = createNavigationTree({ core }) as NavigationTreeDefinition;
     const alertsPanel = body.find(
