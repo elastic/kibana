@@ -8,6 +8,9 @@
 export {
   isArtifactGlobal,
   isArtifactByPolicy,
+  isArtifactDisabled,
+  addDisabledArtifactTag,
+  removeDisabledArtifactTag,
   getPolicyIdsFromArtifact,
   getEffectedPolicySelectionByTags,
   getArtifactTagsByPolicySelection,

@@ -329,6 +329,12 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       setSelectedItemForEdit(undefined);
     }, []);
 
+    const handleEnabledChangeSuccess = useCallback(() => {
+      if (isMounted()) {
+        refetchListData();
+      }
+    }, [isMounted, refetchListData]);
+
     const handleExport = useCallback(
       () =>
         exportExceptionList({
@@ -566,6 +572,8 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
                 allowCardEditAction={allowCardEditAction}
                 allowCardDeleteAction={allowCardDeleteAction}
                 allowEnableDisableArtifacts={allowEnableDisableArtifacts}
+                apiClient={apiClient}
+                onEnabledChangeSuccess={handleEnabledChangeSuccess}
                 sortField={sortField}
                 sortOrder={sortOrder}
                 sortableFields={SORTABLE_FIELDS}
