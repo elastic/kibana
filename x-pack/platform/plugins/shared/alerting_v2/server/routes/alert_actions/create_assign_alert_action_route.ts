@@ -18,4 +18,5 @@ export const CreateAssignAlertActionRoute = createAlertActionRouteForType({
   summary: 'Assign an alert to a user',
   bodySchema: createAssignAlertActionBodySchema,
   oasOperationObject: createAssignAlertActionOasExamples,
+  access: 'public' as const,
 });
