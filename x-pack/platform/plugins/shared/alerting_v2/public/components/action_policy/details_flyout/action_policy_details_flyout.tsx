@@ -24,7 +24,7 @@ import { FlyoutTemplate } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useBulkGetUserProfiles } from '../../../hooks/use_bulk_get_user_profiles';
 import { resolveDisplayName } from '../../../utils/resolve_display_name';
 import { ActionPolicyActionsMenu } from '../action_policy_actions_menu';
@@ -77,9 +77,8 @@ export const ActionPolicyDetailsFlyout = ({
   const dateTimeFormat = settings.client.get<string>('dateFormat');
   const formatDate = (value: string) => moment(value).format(dateTimeFormat);
 
-  const metadataUids = useMemo(
-    () => [policy.created_by, policy.updated_by].filter((uid): uid is string => Boolean(uid)),
-    [policy.created_by, policy.updated_by]
+  const metadataUids = [policy.created_by, policy.updated_by].filter(
+    (uid): uid is string => Boolean(uid)
   );
 
   const { data: profileByUid } = useBulkGetUserProfiles({ uids: metadataUids });

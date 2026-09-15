@@ -43,30 +43,22 @@ export const getWorkflowConnectorTypes = (
   // Malformed nesting can make collectAllSteps throw, so guard the whole extraction.
   try {
     const allSteps = collectAllSteps(definition.steps);
-    const seen = new Set<string>();
-    const types: string[] = [];
-    for (const step of allSteps) {
-      if (!step?.type) continue;
-      const base = getBaseConnectorType(step.type);
-      if (STRUCTURAL_BASE_TYPES.has(base)) continue;
-      if (!seen.has(base)) {
-        seen.add(base);
-        types.push(base);
-      }
-    }
-    return types;
+    const bases = allSteps
+      .filter((step) => step?.type)
+      .map((step) => getBaseConnectorType(step.type))
+      .filter((base) => !STRUCTURAL_BASE_TYPES.has(base));
+    return [...new Set(bases)];
   } catch {
     return [];
   }
 };
 
 interface WorkflowConnectorIconsProps {
-  definition: WorkflowYaml | null | undefined;
+  types: string[];
 }
 
 /** Renders a deduplicated row of connector-type icons for a workflow definition. */
-export const WorkflowConnectorIcons = ({ definition }: WorkflowConnectorIconsProps) => {
-  const types = getWorkflowConnectorTypes(definition);
+export const WorkflowConnectorIcons = ({ types }: WorkflowConnectorIconsProps) => {
   if (types.length === 0) {
     return null;
   }

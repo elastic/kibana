@@ -9,6 +9,9 @@ import React from 'react';
 import { getNotificationInfoBlocks } from './notification_info_blocks';
 
 jest.mock('../labels', () => ({
+  DISPATCH_PER_LABEL: 'Dispatch per',
+  GROUP_BY_LABEL: 'Group by',
+  FREQUENCY_LABEL: 'Frequency',
   getGroupingModeLabel: (mode: string | undefined) => mode ?? 'Not configured',
   getFrequencyLabel: (throttle: { strategy?: string } | null | undefined) =>
     throttle?.strategy ?? 'Not configured',

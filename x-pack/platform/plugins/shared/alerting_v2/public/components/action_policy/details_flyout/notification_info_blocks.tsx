@@ -8,8 +8,13 @@
 import React from 'react';
 import type { InfoBlockItem } from '@kbn/flyout-info-blocks';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
-import { i18n } from '@kbn/i18n';
-import { getFrequencyLabel, getGroupingModeLabel } from '../labels';
+import {
+  DISPATCH_PER_LABEL,
+  FREQUENCY_LABEL,
+  GROUP_BY_LABEL,
+  getFrequencyLabel,
+  getGroupingModeLabel,
+} from '../labels';
 import { BadgeList } from '../badge_list';
 
 /** Builds the `InfoBlockItem[]` array for the Notification section of the action policy details flyout. */
@@ -18,36 +23,26 @@ export const getNotificationInfoBlocks = (
 ): InfoBlockItem[] => {
   const { grouping_mode: groupingMode, group_by: groupBy, throttle } = policy;
 
-  const blocks: InfoBlockItem[] = [
+  return [
     {
       id: 'dispatchMode',
-      title: i18n.translate('xpack.alertingV2.actionPolicyDefinition.dispatchMode', {
-        defaultMessage: 'Dispatch per',
-      }),
+      title: DISPATCH_PER_LABEL,
       value: getGroupingModeLabel(groupingMode),
       'data-test-subj': 'actionPolicyDetailsFlyoutDispatchModeBlock',
     },
-  ];
-
-  if (groupingMode === 'per_field' && groupBy && groupBy.length > 0) {
-    blocks.push({
-      id: 'groupBy',
-      title: i18n.translate('xpack.alertingV2.actionPolicyDefinition.groupBy', {
-        defaultMessage: 'Group by',
-      }),
-      value: <BadgeList items={groupBy} />,
-      'data-test-subj': 'actionPolicyDetailsFlyoutGroupByBlock',
-    });
-  }
-
-  blocks.push({
-    id: 'frequency',
-    title: i18n.translate('xpack.alertingV2.actionPolicyDefinition.frequency', {
-      defaultMessage: 'Frequency',
-    }),
-    value: getFrequencyLabel(throttle, groupingMode),
-    'data-test-subj': 'actionPolicyDetailsFlyoutFrequencyBlock',
-  });
-
-  return blocks;
+    groupingMode === 'per_field' && groupBy?.length
+      ? {
+          id: 'groupBy',
+          title: GROUP_BY_LABEL,
+          value: <BadgeList items={groupBy} />,
+          'data-test-subj': 'actionPolicyDetailsFlyoutGroupByBlock',
+        }
+      : null,
+    {
+      id: 'frequency',
+      title: FREQUENCY_LABEL,
+      value: getFrequencyLabel(throttle, groupingMode),
+      'data-test-subj': 'actionPolicyDetailsFlyoutFrequencyBlock',
+    },
+  ].filter((b): b is InfoBlockItem => b !== null);
 };

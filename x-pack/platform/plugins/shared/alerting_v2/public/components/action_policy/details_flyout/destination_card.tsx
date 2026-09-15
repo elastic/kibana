@@ -41,7 +41,8 @@ const WorkflowDestinationCard = ({ id }: { id: string }) => {
 
   const name = workflow?.name ?? id;
   const href = application.getUrlForApp(WORKFLOWS_APP_ID, { path: `/${id}` });
-  const hasConnectorIcons = getWorkflowConnectorTypes(workflow?.definition).length > 0;
+  const connectorTypes = getWorkflowConnectorTypes(workflow?.definition);
+  const hasConnectorIcons = connectorTypes.length > 0;
 
   const openLabel = i18n.translate('xpack.alertingV2.actionPolicy.destinationCard.openWorkflow', {
     defaultMessage: 'Open workflow in a new tab',
@@ -86,7 +87,7 @@ const WorkflowDestinationCard = ({ id }: { id: string }) => {
               }}
             />
             <EuiFlexItem grow={false}>
-              <WorkflowConnectorIcons definition={workflow?.definition} />
+              <WorkflowConnectorIcons types={connectorTypes} />
             </EuiFlexItem>
           </>
         )}

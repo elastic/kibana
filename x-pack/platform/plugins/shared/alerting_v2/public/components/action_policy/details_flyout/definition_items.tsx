@@ -9,7 +9,13 @@ import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, type EuiDescriptionListProps } from '@elastic/eui';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
-import { getFrequencyLabel, getGroupingModeLabel } from '../labels';
+import {
+  DISPATCH_PER_LABEL,
+  FREQUENCY_LABEL,
+  GROUP_BY_LABEL,
+  getFrequencyLabel,
+  getGroupingModeLabel,
+} from '../labels';
 import { BadgeList } from '../badge_list';
 import { PopoverItems } from '../../popover_items';
 import { DestinationRow } from './destination_row';
@@ -80,9 +86,7 @@ export const getMatcherItem = (policy: Partial<ActionPolicyResponse>): ListItem 
 export const getDispatchModeItem = (policy: Partial<ActionPolicyResponse>): ListItem => {
   const { grouping_mode: groupingMode } = policy;
   return {
-    title: i18n.translate('xpack.alertingV2.actionPolicyDefinition.dispatchMode', {
-      defaultMessage: 'Dispatch per',
-    }),
+    title: DISPATCH_PER_LABEL,
     description: getGroupingModeLabel(groupingMode),
   };
 };
@@ -93,9 +97,7 @@ export const getGroupByItem = (policy: Partial<ActionPolicyResponse>): ListItem 
     return null;
   }
   return {
-    title: i18n.translate('xpack.alertingV2.actionPolicyDefinition.groupBy', {
-      defaultMessage: 'Group by',
-    }),
+    title: GROUP_BY_LABEL,
     description: <BadgeList items={groupBy} />,
   };
 };
@@ -103,9 +105,7 @@ export const getGroupByItem = (policy: Partial<ActionPolicyResponse>): ListItem 
 export const getFrequencyItem = (policy: Partial<ActionPolicyResponse>): ListItem => {
   const { throttle, grouping_mode: groupingMode } = policy;
   return {
-    title: i18n.translate('xpack.alertingV2.actionPolicyDefinition.frequency', {
-      defaultMessage: 'Frequency',
-    }),
+    title: FREQUENCY_LABEL,
     description: getFrequencyLabel(throttle, groupingMode),
   };
 };

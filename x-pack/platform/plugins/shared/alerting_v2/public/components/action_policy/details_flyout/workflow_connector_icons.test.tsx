@@ -13,10 +13,10 @@ import { getWorkflowConnectorTypes, WorkflowConnectorIcons } from './workflow_co
 
 // Step helpers are pure functions — no mocking needed.
 
-const renderIcons = (definition: WorkflowYaml | null | undefined) =>
+const renderIcons = (types: string[]) =>
   render(
     <I18nProvider>
-      <WorkflowConnectorIcons definition={definition} />
+      <WorkflowConnectorIcons types={types} />
     </I18nProvider>
   );
 
@@ -115,15 +115,7 @@ describe('getWorkflowConnectorTypes', () => {
 
 describe('WorkflowConnectorIcons', () => {
   it('renders a group with one flex item per distinct connector type', () => {
-    const definition = {
-      steps: [
-        { type: '.email', name: 'email' },
-        { type: '.slack', name: 'slack' },
-        { type: 'elasticsearch.index', name: 'es' },
-      ],
-    } as unknown as WorkflowYaml;
-
-    renderIcons(definition);
+    renderIcons(['email', 'slack', 'elasticsearch']);
 
     const group = screen.getByTestId('actionPolicyDestinationConnectorIcons');
     expect(group).toBeInTheDocument();
@@ -132,20 +124,7 @@ describe('WorkflowConnectorIcons', () => {
   });
 
   it('caps at 4 visible icons and shows +N for the rest', () => {
-    // 6 distinct connector types — console and foreach are structural and filtered out,
-    // so all 6 here are real connectors and produce 4 visible + 1 overflow (+2).
-    const definition = {
-      steps: [
-        { type: 'elasticsearch.index', name: 'es' },
-        { type: '.email', name: 'email' },
-        { type: '.slack', name: 'slack' },
-        { type: 'kibana.action', name: 'kibana' },
-        { type: '.http', name: 'http' },
-        { type: '.pagerduty', name: 'pagerduty' },
-      ],
-    } as unknown as WorkflowYaml;
-
-    renderIcons(definition);
+    renderIcons(['elasticsearch', 'email', 'slack', 'kibana', 'http', 'pagerduty']);
 
     // 4 visible + 1 overflow flex item
     const group = screen.getByTestId('actionPolicyDestinationConnectorIcons');
@@ -153,8 +132,8 @@ describe('WorkflowConnectorIcons', () => {
     expect(screen.getByText('+2')).toBeInTheDocument();
   });
 
-  it('renders null (empty DOM) when definition has no steps', () => {
-    const { container } = renderIcons(null);
+  it('renders null (empty DOM) when types is empty', () => {
+    const { container } = renderIcons([]);
     expect(container).toBeEmptyDOMElement();
   });
 });

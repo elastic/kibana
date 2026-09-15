@@ -19,6 +19,20 @@ const NOT_CONFIGURED_LABEL = i18n.translate('xpack.alertingV2.actionPolicy.label
   defaultMessage: 'Not configured',
 });
 
+export const DISPATCH_PER_LABEL = i18n.translate(
+  'xpack.alertingV2.actionPolicyDefinition.dispatchMode',
+  { defaultMessage: 'Dispatch per' }
+);
+
+export const GROUP_BY_LABEL = i18n.translate('xpack.alertingV2.actionPolicyDefinition.groupBy', {
+  defaultMessage: 'Group by',
+});
+
+export const FREQUENCY_LABEL = i18n.translate(
+  'xpack.alertingV2.actionPolicyDefinition.frequency',
+  { defaultMessage: 'Frequency' }
+);
+
 export const getGroupingModeLabel = (mode: GroupingMode | null | undefined): string => {
   if (mode == null) return NOT_CONFIGURED_LABEL;
   const match = GROUPING_MODE_OPTIONS.find((option) => option.id === mode);
