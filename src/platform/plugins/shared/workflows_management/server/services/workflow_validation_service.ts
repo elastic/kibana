@@ -44,7 +44,12 @@ export class WorkflowValidationService {
   ): Promise<ValidateWorkflowResponseDto> {
     const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
     const triggerDefinitions = this.getRegisteredCustomTriggerDefinitions();
-    return validateWorkflowYaml(yaml, zodSchema, { triggerDefinitions });
+    // `/validate` reports diagnostics, it does not gate storage, so it asks for
+    // the full rule set the editor runs — including the variable rules.
+    return validateWorkflowYaml(yaml, zodSchema, {
+      triggerDefinitions,
+      includeVariableValidation: true,
+    });
   }
 
   async getWorkflowZodSchema(

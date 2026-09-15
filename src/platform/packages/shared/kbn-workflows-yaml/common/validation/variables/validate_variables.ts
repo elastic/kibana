@@ -12,20 +12,13 @@ import type { DynamicStepContextSchema } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { VariableItem, YamlValidationResult } from '../types';
+import type { VariableValidationOptions } from './validate_variable';
 import { validateVariable } from './validate_variable';
 import { getContextSchemaWithTemplateLocals } from '../context/extend_context_with_template_locals';
 import { extendWithPathSpecificContext } from '../context/get_context_for_path';
 import { getNearestStepPath } from '../context/get_nearest_step_path';
-import {
-  createStepContextResolver,
-  type StepContextResolver,
-} from '../context/step_context_resolver';
+import { createStepContextResolver } from '../context/step_context_resolver';
 import { getValueAtYamlPath } from '../context/get_value_at_yaml_path';
-
-export interface VariableValidationOptions {
-  /** Shared across validators of one document so each step context is built once. */
-  stepContextResolver?: StepContextResolver;
-}
 
 export function validateVariables(
   variableItems: VariableItem[],
@@ -95,7 +88,7 @@ export function validateVariables(
     }
 
     if (context !== null) {
-      const error = validateVariable(variableItem, context);
+      const error = validateVariable(variableItem, context, options);
       if (error) {
         errors.push(error);
       }
