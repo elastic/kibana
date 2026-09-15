@@ -48,6 +48,15 @@ describe('CoverageOverviewDashboard', () => {
     expect(useFetchCoverageOverviewQuery).toHaveBeenCalled();
   });
 
+  test('renders ATT&CK filters and not ATLAS platform filters by default', () => {
+    renderCoverageOverviewDashboard();
+
+    expect(screen.getByTestId('coverageOverviewFilterSearchBar')).toBeInTheDocument();
+    expect(screen.getByTestId('coverageOverviewRuleActivityFilterButton')).toBeInTheDocument();
+    expect(screen.getByTestId('coverageOverviewRuleSourceFilterButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('atlasCoveragePlatformFilter')).not.toBeInTheDocument();
+  });
+
   test('does NOT render the invalid MITRE rules callout when there are no invalidly mapped rules', () => {
     renderCoverageOverviewDashboard();
 

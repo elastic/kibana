@@ -285,6 +285,9 @@ export const getDescriptionItem = (
   } else if (field === 'threat') {
     const threats: Threats = get(field, data);
     return buildThreatDescription({ label, threat: filterEmptyThreats(threats) });
+  } else if (field === 'atlasThreat') {
+    // Prototype UI-only field; not shown in rule description lists yet.
+    return [];
   } else if (field === 'threshold') {
     const threshold = get(field, data);
     return buildThresholdDescription(THRESHOLD_VALUE_LABEL, threshold);

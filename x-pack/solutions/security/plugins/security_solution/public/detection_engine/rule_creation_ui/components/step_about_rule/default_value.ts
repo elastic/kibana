@@ -17,6 +17,14 @@ export const threatDefault = [
   },
 ];
 
+export const atlasThreatDefault = [
+  {
+    framework: 'MITRE ATLAS',
+    tactic: { id: 'none', name: 'none', reference: 'none' },
+    technique: [],
+  },
+];
+
 export const stepAboutDefaultValue: AboutStepRule = {
   author: [],
   name: '',
@@ -37,6 +45,7 @@ export const stepAboutDefaultValue: AboutStepRule = {
   tags: [],
   timestampOverride: '',
   threat: threatDefault,
+  atlasThreat: atlasThreatDefault,
   note: '',
   maxSignals: DEFAULT_MAX_SIGNALS,
   setup: '',

@@ -6,22 +6,12 @@
  */
 
 import type { EuiSelectableOption } from '@elastic/eui';
-import type {
-  CoverageOverviewRuleActivity,
-  CoverageOverviewRuleSource,
-} from '../../../../../common/api/detection_engine';
 
-export const extractSelected = <
-  T extends CoverageOverviewRuleSource | CoverageOverviewRuleActivity
->(
-  options: EuiSelectableOption[]
-): T[] => {
+export const extractSelected = <T extends string>(options: EuiSelectableOption[]): T[] => {
   return options.filter((option) => option.checked === 'on').map((option) => option.label as T);
 };
 
-export const populateSelected = <
-  T extends CoverageOverviewRuleSource | CoverageOverviewRuleActivity
->(
+export const populateSelected = <T extends string>(
   allOptions: Array<EuiSelectableOption<{ label: T }>>,
   selected: string[]
 ): Array<EuiSelectableOption<{ label: T }>> =>

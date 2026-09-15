@@ -39,6 +39,14 @@ export const threatDefault = [
   },
 ];
 
+export const atlasThreatDefault = [
+  {
+    framework: 'MITRE ATLAS',
+    tactic: { id: 'none', name: 'none', reference: 'none' },
+    technique: [],
+  },
+];
+
 export const stepDefineDefaultValue: DefineStepRule = {
   anomalyThreshold: 50,
   index: [],
@@ -99,6 +107,7 @@ export const stepAboutDefaultValue: AboutStepRule = {
   tags: [],
   timestampOverride: '',
   threat: threatDefault,
+  atlasThreat: atlasThreatDefault,
   note: '',
   setup: '',
   threatIndicatorPath: undefined,

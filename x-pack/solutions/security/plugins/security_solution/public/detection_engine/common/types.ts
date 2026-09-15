@@ -111,6 +111,8 @@ export interface AboutStepRule {
   timestampOverrideFallbackDisabled?: boolean;
   threatIndicatorPath?: string;
   threat: Threats;
+  /** Prototype-only ATLAS mapping UI state; not persisted to the rule API yet. */
+  atlasThreat: Threats;
   note: string;
   maxSignals?: number;
   setup: SetupGuide;
