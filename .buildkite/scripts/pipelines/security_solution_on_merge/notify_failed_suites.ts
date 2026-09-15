@@ -289,9 +289,11 @@ function markSlackNotifyUploaded(buildkite: BuildkiteClient): void {
   } catch (error) {
     // Upload already succeeded; do not treat metadata failure as a fan-out miss
     // (that would false-alarm #sdh-security-team while team notifies are queued).
+    // Log a summary only — Axios errors embed Authorization: Bearer BUILDKITE_TOKEN.
     console.error(
-      `Failed to set ${SLACK_NOTIFY_UPLOADED_META_KEY} after Slack notify upload; continuing`,
-      error
+      `Failed to set ${SLACK_NOTIFY_UPLOADED_META_KEY} after Slack notify upload; continuing: ${summarizeErrorDetail(
+        error
+      )}`
     );
   }
 }
@@ -314,7 +316,7 @@ export function annotateUnmappedSteps(buildkite: BuildkiteClient, unmappedLabels
     buildkite.setAnnotation('security-solution-on-merge-unmapped-steps', 'warning', body);
   } catch (error) {
     // Best effort: the Slack messages already carry the same warning.
-    console.error('Failed to annotate unmapped steps', error);
+    console.error(`Failed to annotate unmapped steps: ${summarizeErrorDetail(error)}`);
   }
 }
 
@@ -342,7 +344,7 @@ function notifyFanOutFailure(
       `Owning-team Slack fan-out failed; alerting ${fallbackChannel}. ${detail}`
     );
   } catch (annotationError) {
-    console.error('Failed to annotate fan-out failure', annotationError);
+    console.error(`Failed to annotate fan-out failure: ${summarizeErrorDetail(annotationError)}`);
   }
 
   const message = composeFanOutFailureMessage(error);
@@ -416,13 +418,17 @@ export async function notifyFailedSuites(
   try {
     await runNotifyFailedSuites(buildkite, upload);
   } catch (error) {
-    console.error('Failed to fan out Security on-merge Slack alerts', error);
+    // Never log the raw error: Axios failures embed Authorization headers.
+    console.error(
+      `Failed to fan out Security on-merge Slack alerts: ${summarizeErrorDetail(error)}`
+    );
     try {
       notifyFanOutFailure(error, buildkite, upload);
     } catch (fallbackError) {
       console.error(
-        'Also failed to notify the fallback channel about the fan-out failure',
-        fallbackError
+        `Also failed to notify the fallback channel about the fan-out failure: ${summarizeErrorDetail(
+          fallbackError
+        )}`
       );
     }
     throw error;
@@ -431,7 +437,7 @@ export async function notifyFailedSuites(
 
 if (path.basename(process.argv[1] ?? '') === 'notify_failed_suites.ts') {
   notifyFailedSuites().catch((error) => {
-    console.error(error);
+    console.error(summarizeErrorDetail(error));
     process.exit(1);
   });
 }

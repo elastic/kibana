@@ -8,7 +8,8 @@
  */
 
 import { execFileSync } from 'child_process';
-import { readFileSync } from 'fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
 import { join } from 'path';
 
 import { parse as parseYaml } from 'yaml';
@@ -122,10 +123,13 @@ const matchesFile = (pattern: string, file: string): boolean =>
     : file === pattern || file.startsWith(`${pattern}/`);
 
 /** CODEOWNERS precedence is last match wins, not most specific match wins. */
-const effectiveOwnersFor = (file: string): string[] => {
+const effectiveOwnersFor = (
+  file: string,
+  entries: CodeownersEntry[] = codeownersEntries()
+): string[] => {
   let owners: string[] = [];
 
-  for (const entry of codeownersEntries()) {
+  for (const entry of entries) {
     if (matchesFile(entry.path, file)) {
       owners = entry.owners;
     }
@@ -163,7 +167,21 @@ describe('suites config', () => {
   });
 
   it('rejects a config without a fallback channel', () => {
-    expect(() => readSuitesConfig(PIPELINE_YML)).toThrow();
+    const dir = mkdtempSync(join(tmpdir(), 'suites-config-'));
+    const filePath = join(dir, 'suites.json');
+
+    try {
+      writeFileSync(filePath, JSON.stringify({ suites: [] }));
+      expect(() => readSuitesConfig(filePath)).toThrow(/fallbackSlackChannel/);
+
+      writeFileSync(
+        filePath,
+        JSON.stringify({ fallbackSlackChannel: '#sdh-security-team', suites: 'not-an-array' })
+      );
+      expect(() => readSuitesConfig(filePath)).toThrow(/suites/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   it('routes every suite to a real channel', () => {
@@ -224,7 +242,7 @@ describe('getChannelForStepLabel', () => {
     );
   });
 
-  it('prefers the longest matching label so prefixes do not collide', () => {
+  it('matches exact labels after de-sharding without prefix inheritance', () => {
     expect(findSuiteForStepLabel('Osquery Cypress Tests on Serverless')?.label).toBe(
       'Osquery Cypress Tests on Serverless'
     );
@@ -301,13 +319,13 @@ describe('CODEOWNERS agreement', () => {
 
 describe('CODEOWNERS matching', () => {
   it('applies last match wins rather than most specific wins', () => {
-    const entries = [
-      { path: 'a/b', owners: ['@specific'] },
-      { path: 'a', owners: ['@broad-but-later'] },
-    ];
-    const lastMatch = entries.filter((entry) => matchesFile(entry.path, 'a/b/c.ts')).pop();
-
-    expect(lastMatch?.owners).toEqual(['@broad-but-later']);
+    // Drive the resolver itself: a later broad rule must beat an earlier specific one.
+    expect(
+      effectiveOwnersFor('a/b/c.ts', [
+        { path: 'a/b', owners: ['@specific'] },
+        { path: 'a', owners: ['@broad-but-later'] },
+      ])
+    ).toEqual(['@broad-but-later']);
   });
 
   it('resolves the split ownership of the explore suite per file', () => {
