@@ -40,6 +40,23 @@ const queryStringInputStyles = {
         },
         '> .euiFormControlLayoutIcons': {
           maxHeight: euiTheme.size.xxl,
+          // Icons are siblings of EuiTextArea's FormControlLayout wrapper, not of the
+          // <textarea> itself — keep them above the field so the clear gutter can cover
+          // glyphs that paint into the padding box (elastic/kibana#106963).
+          zIndex: euiTheme.levels.flyout,
+        },
+        // Opaque gutter behind the clear control. EuiTextArea wraps the <textarea> in
+        // EuiFormControlLayout, so a direct-child :has(> .kbnQueryBar__textarea--) never
+        // matches; target the icons group that actually contains the clear button instead.
+        // paddingRight alone cannot keep unbroken / nowrap glyphs from painting under the ×
+        // because textarea overflow clips at the padding edge.
+        '> .euiFormControlLayoutIcons:has(.euiFormControlLayoutClearButton)': {
+          backgroundColor: euiTheme.components.forms.background,
+          // Match the clearable paddingRight affordance (xxl) and sit flush to the
+          // field edge so the scrim covers the full gutter EUI insets from `right`.
+          width: euiTheme.size.xxl,
+          justifyContent: 'center',
+          insetInlineEnd: 0,
         },
       },
       '.kbnQueryBar__textarea': {
@@ -55,7 +72,9 @@ const queryStringInputStyles = {
         margin: 0,
 
         '&.kbnQueryBar__textarea--isClearable': {
-          paddingRight: euiTheme.size.xxl, // Account for clear button
+          // Keeps the caret/selection out of the clear control; does NOT by itself
+          // stop glyph paint under the × (padding-box overflow clip — see wrap scrim).
+          paddingRight: euiTheme.size.xxl,
         },
 
         '&:not(.kbnQueryBar__textarea--autoHeight)': {
@@ -71,15 +90,6 @@ const queryStringInputStyles = {
           whiteSpace: `pre-wrap`,
           maxHeight: `calc(35vh - 100px)`,
           minHeight: euiTheme.size.xl,
-        },
-
-        '~.euiFormControlLayoutIcons': {
-          // By default form control layout icon is vertically centered, but our textarea
-          // can expand to be multi-line, so we position it with padding that matches
-          // the parent textarea padding
-          zIndex: euiTheme.levels.flyout,
-          top: euiTheme.size.m,
-          bottom: 'unset',
         },
 
         '&.kbnQueryBar__textarea--withPrepend': {
