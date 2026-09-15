@@ -65,8 +65,7 @@ const formatProposalForAgent = (data: ProposalAttachmentData): string => {
  *
  * `isReadonly: true` prevents the agent from creating or updating proposal
  * attachments with `attachment_add` / `attachment_update` — they are created
- * exclusively by the proposals API. The HTTP create route is unaffected, so
- * the seed script can still add by-value attachments directly.
+ * exclusively by the proposals API.
  */
 export const proposalAttachmentType: AttachmentTypeDefinition = {
   id: PROPOSAL_ATTACHMENT_TYPE,
