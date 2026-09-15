@@ -6,6 +6,7 @@
  */
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { CoreRequestHandlerContext, ElasticsearchClient } from '@kbn/core/server';
+import type { ProfilingSchema } from '@kbn/profiling-utils';
 import {
   profilingAWSCostDiscountRate,
   profilingCo2PerKWH,
@@ -25,6 +26,7 @@ export interface FetchFlamechartParams {
   stacktraceIdsField?: string;
   query: QueryDslQueryContainer;
   totalSeconds: number;
+  schema?: ProfilingSchema;
 }
 
 const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
@@ -37,6 +39,7 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
     stacktraceIdsField,
     query,
     totalSeconds,
+    schema,
   }: FetchFlamechartParams) => {
     const [
       co2PerKWH,
@@ -71,6 +74,7 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
       azureCostDiscountRate: percentToFactor(azureCostDiscountRate),
       indices,
       stacktraceIdsField,
+      schema,
     });
     return { ...flamegraph, TotalSeconds: totalSeconds };
   };

@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -103,12 +104,22 @@ export function StorageExplorerView() {
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
           <EuiPanel hasShadow={false} color="subdued">
-            <PrimaryProfilingSearchBar />
+            <PrimaryProfilingSearchBar hideSchemaSelector />
             <EuiHorizontalRule />
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <IndexLifecyclePhaseSelect />
             </div>
           </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiCallOut
+            color="warning"
+            iconType="warning"
+            title={i18n.translate('xpack.profiling.storageExplorer.ecsOnly', {
+              defaultMessage:
+                'Storage explorer only reports Elastic (ECS) data. OpenTelemetry profiles are not included yet.',
+            })}
+          />
         </EuiFlexItem>
         {hasDistinctProbabilisticValues && (
           <EuiFlexItem grow={false}>

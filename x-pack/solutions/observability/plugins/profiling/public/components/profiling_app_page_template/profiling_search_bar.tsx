@@ -6,10 +6,11 @@
  */
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Query, TimeRange } from '@kbn/es-query';
+import type { ProfilingSchema } from '@kbn/profiling-utils';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { compact } from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { INDEX_EVENTS } from '../../../common';
+import { getEventsIndex } from '../../../common';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 
 interface Props {
@@ -29,6 +30,7 @@ interface Props {
   dataTestSubj?: string;
   showDatePicker?: boolean;
   showQueryMenu?: boolean;
+  schema?: ProfilingSchema;
 }
 
 export function ProfilingSearchBar({
@@ -42,6 +44,7 @@ export function ProfilingSearchBar({
   dataTestSubj = 'profilingUnifiedSearchBar',
   showDatePicker = true,
   showQueryMenu = true,
+  schema = 'ecs',
 }: Props) {
   const {
     start: { dataViews },
@@ -52,10 +55,10 @@ export function ProfilingSearchBar({
   useEffect(() => {
     dataViews
       .create({
-        title: INDEX_EVENTS,
+        title: getEventsIndex(schema),
       })
       .then((nextDataView) => setDataView(nextDataView));
-  }, [dataViews]);
+  }, [dataViews, schema]);
 
   const searchBarQuery: Required<React.ComponentProps<typeof SearchBar>>['query'] = {
     language: 'kuery',

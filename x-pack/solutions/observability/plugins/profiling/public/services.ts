@@ -6,7 +6,7 @@
  */
 
 import type { HttpFetchQuery } from '@kbn/core/public';
-import type { TopNFunctions } from '@kbn/profiling-utils';
+import type { ProfilingSchema, TopNFunctions } from '@kbn/profiling-utils';
 import {
   createFlameGraph,
   type BaseFlameGraph,
@@ -47,6 +47,7 @@ export interface Services {
     timeFrom: number;
     timeTo: number;
     kuery: string;
+    schema: ProfilingSchema;
   }) => Promise<TopNResponse>;
   fetchTopNFunctions: (params: {
     http: AutoAbortedHttpService;
@@ -55,6 +56,7 @@ export interface Services {
     startIndex: number;
     endIndex: number;
     kuery: string;
+    schema: ProfilingSchema;
   }) => Promise<TopNFunctions>;
   fetchElasticFlamechart: (params: {
     http: AutoAbortedHttpService;
@@ -62,6 +64,7 @@ export interface Services {
     timeTo: number;
     kuery: string;
     showErrorFrames: boolean;
+    schema: ProfilingSchema;
   }) => Promise<ElasticFlameGraph>;
   fetchHasSetup: (params: { http: AutoAbortedHttpService }) => Promise<ProfilingSetupStatus>;
   postSetupResources: (params: { http: AutoAbortedHttpService }) => Promise<void>;
@@ -99,31 +102,34 @@ export function getServices(): Services {
   const paths = getRoutePaths();
 
   return {
-    fetchTopN: async ({ http, type, timeFrom, timeTo, kuery }) => {
+    fetchTopN: async ({ http, type, timeFrom, timeTo, kuery, schema }) => {
       const query: HttpFetchQuery = {
         timeFrom,
         timeTo,
         kuery,
+        schema,
       };
       return (await http.get(`${paths.TopN}/${type}`, { query })) as Promise<TopNResponse>;
     },
 
-    fetchTopNFunctions: async ({ http, timeFrom, timeTo, startIndex, endIndex, kuery }) => {
+    fetchTopNFunctions: async ({ http, timeFrom, timeTo, startIndex, endIndex, kuery, schema }) => {
       const query: HttpFetchQuery = {
         timeFrom,
         timeTo,
         startIndex,
         endIndex,
         kuery,
+        schema,
       };
       return (await http.get(paths.TopNFunctions, { query })) as Promise<TopNFunctions>;
     },
 
-    fetchElasticFlamechart: async ({ http, timeFrom, timeTo, kuery, showErrorFrames }) => {
+    fetchElasticFlamechart: async ({ http, timeFrom, timeTo, kuery, showErrorFrames, schema }) => {
       const query: HttpFetchQuery = {
         timeFrom,
         timeTo,
         kuery,
+        schema,
       };
 
       const baseFlamegraph = (await http.get(paths.Flamechart, { query })) as BaseFlameGraph;

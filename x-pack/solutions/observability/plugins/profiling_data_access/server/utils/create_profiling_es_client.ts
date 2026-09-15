@@ -53,6 +53,7 @@ export function createProfilingEsClient({
       azureCostDiscountRate,
       indices,
       stacktraceIdsField,
+      schema,
     }) {
       const controller = new AbortController();
       const promise = withProfilingSpan('_profiling/stacktraces', () => {
@@ -73,6 +74,7 @@ export function createProfilingEsClient({
               azure_cost_factor: azureCostDiscountRate,
               indices,
               stacktrace_ids_field: stacktraceIdsField,
+              schema,
             },
           },
           {
@@ -120,6 +122,7 @@ export function createProfilingEsClient({
       azureCostDiscountRate,
       indices,
       stacktraceIdsField,
+      schema,
     }) {
       const controller = new AbortController();
 
@@ -141,6 +144,7 @@ export function createProfilingEsClient({
               azure_cost_factor: azureCostDiscountRate,
               indices,
               stacktrace_ids_field: stacktraceIdsField,
+              schema,
             },
           },
           {
@@ -166,6 +170,7 @@ export function createProfilingEsClient({
       sampleSize,
       limit,
       durationSeconds,
+      schema,
     }) {
       const controller = new AbortController();
 
@@ -189,6 +194,7 @@ export function createProfilingEsClient({
               cost_per_core_hour: costPervCPUPerHour,
               azure_cost_factor: azureCostDiscountRate,
               requested_duration: durationSeconds,
+              schema,
             },
           },
           {

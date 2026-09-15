@@ -18,6 +18,7 @@ describe('stack traces view utils', () => {
             displayAs: StackTracesDisplayOption.StackTraces,
             kuery: '',
             limit: 10,
+            schema: 'ecs',
           },
           topNType: TopNType.Traces,
           category: 'Foo',
@@ -30,6 +31,7 @@ describe('stack traces view utils', () => {
           displayAs: 'stackTraces',
           kuery: 'Stacktrace.id:"Foo"',
           limit: 10,
+          schema: 'ecs',
         },
       });
     });
@@ -43,6 +45,7 @@ describe('stack traces view utils', () => {
             displayAs: StackTracesDisplayOption.StackTraces,
             kuery: 'container.name:"bar"',
             limit: 10,
+            schema: 'ecs',
           },
           topNType: TopNType.Traces,
           category: 'Foo',
@@ -55,6 +58,7 @@ describe('stack traces view utils', () => {
           displayAs: 'stackTraces',
           kuery: '(container.name:"bar") AND Stacktrace.id:"Foo"',
           limit: 10,
+          schema: 'ecs',
         },
       });
     });
