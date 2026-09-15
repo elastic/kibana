@@ -284,7 +284,7 @@ describe('ConversationShareButton', () => {
     const trigger = screen.getByTestId('agentBuilderConversationInviteButton');
 
     expect(trigger).toHaveTextContent('1');
-    expect(trigger).toHaveAccessibleName('Sharing, 1 person has access');
+    expect(trigger).toHaveAccessibleName('Sharing, 1 user has access');
   });
 
   it('counts the author and every invited member in the trigger', () => {
@@ -320,7 +320,7 @@ describe('ConversationShareButton', () => {
     const trigger = screen.getByTestId('agentBuilderConversationInviteButton');
 
     expect(trigger).toHaveTextContent('4');
-    expect(trigger).toHaveAccessibleName('Sharing, 4 people have access');
+    expect(trigger).toHaveAccessibleName('Sharing, 4 users have access');
   });
 
   it('shows the public label instead of a count while the conversation is public', () => {

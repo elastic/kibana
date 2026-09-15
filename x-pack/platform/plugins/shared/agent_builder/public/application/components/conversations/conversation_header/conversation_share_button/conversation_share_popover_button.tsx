@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import {
   AGENT_BUILDER_UI_EBT,
-  ConversationAccessControlMode,
+  isPublicConversation,
   normalizeConversationAccessControl,
 } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -28,12 +28,9 @@ export const ConversationSharePopoverButton: React.FC<ConversationSharePopoverBu
   onClick,
 }) => {
   const { conversation } = useConversation();
-  const { access_mode: accessMode, entries } = normalizeConversationAccessControl(
-    conversation?.access_control
-  );
+  const { entries } = normalizeConversationAccessControl(conversation?.access_control);
 
-  const isPublic = accessMode === ConversationAccessControlMode.Public;
-  // Access-control entries only hold invited members, so the author accounts for the extra one.
+  const isPublic = isPublicConversation(conversation?.access_control);
   const participantCount = entries.length + 1;
 
   return (

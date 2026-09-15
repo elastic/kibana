@@ -89,8 +89,7 @@ export const removeMemberLabel = i18n.translate(
 
 export const participantsCountAriaLabel = (count: number) =>
   i18n.translate('xpack.agentBuilder.conversationSharing.participantsCountAriaLabel', {
-    defaultMessage:
-      'Sharing, {count, plural, one {# person has access} other {# people have access}}',
+    defaultMessage: 'Sharing, {count, plural, one {# user has access} other {# users have access}}',
     values: { count },
   });
 
