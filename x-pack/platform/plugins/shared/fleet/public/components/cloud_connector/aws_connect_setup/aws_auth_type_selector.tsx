@@ -16,6 +16,9 @@ import {
   AWS_AUTH_TYPE_TEMPORARY_KEYS_CARD_TEST_SUBJ,
 } from './test_subjects';
 
+// TODO: consolidate with ingest_hub's CredentialMethodSelector — both are AWS auth-type selectors.
+// AwsAuthTypeSelector is only used by LazyAwsConnectSetup (currently unused externally).
+// Track: https://github.com/elastic/ingest-dev/issues/9576
 export type AwsAuthType = 'identity_federation' | 'static_keys' | 'temporary_keys';
 
 export {
@@ -25,26 +28,21 @@ export {
   AWS_AUTH_TYPE_TEMPORARY_KEYS_CARD_TEST_SUBJ,
 };
 
-export interface AwsAuthTypeSelectorOption {
-  value: string;
-  text: string;
-}
-
-const DEFAULT_OPTIONS: AwsAuthTypeSelectorOption[] = [
+const OPTIONS = [
   {
-    value: 'identity_federation',
+    value: 'identity_federation' as AwsAuthType,
     text: i18n.translate('xpack.fleet.awsConnectSetup.authType.identityFederationLabel', {
       defaultMessage: 'Federated Identity (Recommended)',
     }),
   },
   {
-    value: 'static_keys',
+    value: 'static_keys' as AwsAuthType,
     text: i18n.translate('xpack.fleet.awsConnectSetup.authType.staticKeysLabel', {
       defaultMessage: 'Static keys',
     }),
   },
   {
-    value: 'temporary_keys',
+    value: 'temporary_keys' as AwsAuthType,
     text: i18n.translate('xpack.fleet.awsConnectSetup.authType.temporaryKeysLabel', {
       defaultMessage: 'Temporary keys',
     }),
@@ -52,35 +50,28 @@ const DEFAULT_OPTIONS: AwsAuthTypeSelectorOption[] = [
 ];
 
 interface AwsAuthTypeSelectorProps {
-  selectedAuthType: string;
+  selectedAuthType: AwsAuthType;
   showIdentityFederation?: boolean;
-  /** Override the full option list. When provided, `showIdentityFederation` is ignored. */
-  options?: AwsAuthTypeSelectorOption[];
-  onChange: (authType: string) => void;
-  'data-test-subj'?: string;
+  onChange: (authType: AwsAuthType) => void;
 }
 
 export const AwsAuthTypeSelector: React.FC<AwsAuthTypeSelectorProps> = ({
   selectedAuthType,
   showIdentityFederation = true,
-  options,
   onChange,
-  'data-test-subj': dataTestSubj = AWS_AUTH_TYPE_SELECTOR_TEST_SUBJ,
 }) => {
-  const resolvedOptions =
-    options ??
-    (showIdentityFederation
-      ? DEFAULT_OPTIONS
-      : DEFAULT_OPTIONS.filter((o) => o.value !== 'identity_federation'));
+  const options = showIdentityFederation
+    ? OPTIONS
+    : OPTIONS.filter((o) => o.value !== 'identity_federation');
   return (
     <EuiSelect
-      options={resolvedOptions}
+      options={options}
       value={selectedAuthType}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={(e) => onChange(e.target.value as AwsAuthType)}
       aria-label={i18n.translate('xpack.fleet.awsConnectSetup.authType.selectorAriaLabel', {
         defaultMessage: 'Authentication method',
       })}
-      data-test-subj={dataTestSubj}
+      data-test-subj={AWS_AUTH_TYPE_SELECTOR_TEST_SUBJ}
     />
   );
 };

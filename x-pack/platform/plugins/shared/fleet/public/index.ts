@@ -159,6 +159,9 @@ export type { CloudConnectorSetupProps } from './components/cloud_connector';
 export { CLOUD_CONNECTOR_GCP_ASSET_INVENTORY_REUSABLE_MIN_VERSION } from './components/cloud_connector/constants';
 
 // AWS Connect Setup - auth method picker (Identity Federation + Static keys + Temporary keys) for external plugins
+// TODO: LazyAwsConnectSetup appears to have no active external callers. Consider consolidating
+// AwsAuthTypeSelector with ingest_hub's CredentialMethodSelector in a follow-up cleanup.
+// Track: https://github.com/elastic/ingest-dev/issues/9576
 export const LazyAwsConnectSetup = lazy(() =>
   import('./components/cloud_connector').then((module) => ({
     default: module.AwsConnectSetup,
@@ -244,10 +247,6 @@ export const LazyAgentPolicyIntegrationForm = lazy(() =>
 );
 export { agentPolicyFormValidation } from './applications/fleet/sections/agent_policy/components/agent_policy_validation';
 export type { ValidationResults } from './applications/fleet/sections/agent_policy/components/agent_policy_validation';
-
-// AWS credential method selector — extended to accept custom options for cross-plugin use
-export { AwsAuthTypeSelector } from './components/cloud_connector/aws_connect_setup/aws_auth_type_selector';
-export type { AwsAuthTypeSelectorOption } from './components/cloud_connector/aws_connect_setup/aws_auth_type_selector';
 
 // AWS Temporary Keys Form — standalone for cross-plugin use (parallel to LazyAwsStaticKeysForm)
 export const LazyAwsTemporaryKeysForm = lazy(() =>

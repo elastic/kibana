@@ -18,7 +18,6 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
   LazyAgentPolicyIntegrationForm: jest.fn(),
   useGetAgentPoliciesQuery: jest.fn(),
   agentPolicyFormValidation: jest.fn(),
-  AwsAuthTypeSelector: jest.fn(),
 }));
 
 jest.mock('../../onboarding_flow_context', () => ({
@@ -36,7 +35,6 @@ import {
   LazyAgentPolicyIntegrationForm,
   useGetAgentPoliciesQuery,
   agentPolicyFormValidation,
-  AwsAuthTypeSelector,
 } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 
@@ -47,7 +45,6 @@ const MockAgentPolicyIntegrationForm = LazyAgentPolicyIntegrationForm as unknown
 const mockAgentPolicyFormValidation = agentPolicyFormValidation as jest.Mock;
 const mockUseGetAgentPoliciesQuery = useGetAgentPoliciesQuery as jest.Mock;
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
-const MockAwsAuthTypeSelector = AwsAuthTypeSelector as unknown as jest.Mock;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -110,23 +107,6 @@ function setupMocks({
   MockAgentPolicyIntegrationForm.mockImplementation(() => (
     <div data-test-subj="agent-policy-integration-form" />
   ));
-
-  MockAwsAuthTypeSelector.mockImplementation(
-    ({ selectedAuthType, onChange, options, 'data-test-subj': testSubj }: any) => (
-      <select
-        data-test-subj={testSubj ?? 'awsAuthTypeSelector'}
-        value={selectedAuthType}
-        onChange={(e) => onChange(e.target.value)}
-        aria-label="Authentication method"
-      >
-        {(options ?? []).map((o: any) => (
-          <option key={o.value} value={o.value}>
-            {o.text}
-          </option>
-        ))}
-      </select>
-    )
-  );
 
   // By default, validation returns no errors (form valid).
   mockAgentPolicyFormValidation.mockReturnValue({});
