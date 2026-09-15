@@ -605,6 +605,13 @@ export class EndpointAppContextService {
      * confirmation). `RESPONSE_ACTIONS_SUPPORT_MAP` gates several actions (isolate, unisolate,
      * running-processes, scan) as unsupported for `automated` on some agent types, so callers
      * representing user-initiated actions MUST pass `false`.
+     *
+     * NOTE: when `false`, the client skips the Enterprise license check in
+     * `validateRequest()` (manual actions are not Enterprise-gated — the UI isolate path
+     * is legal on Platinum). The internal client also never applies route-level authz
+     * (no `KibanaRequest`), so callers MUST enforce endpoint privileges themselves via
+     * `getEndpointAuthz(request)` with the same privilege the equivalent HTTP route
+     * requires (`withEndpointAuthz(...)`), which carries the license floor.
      */
     isAutomated?: boolean;
   }): ResponseActionsClient {
