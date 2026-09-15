@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiButtonGroup } from '@elastic/eui';
 import { act } from '@testing-library/react';
 import React from 'react';
 
@@ -14,7 +13,11 @@ import {
   createKibanaPrivileges,
   kibanaFeatures,
 } from '@kbn/security-role-management-model/src/__fixtures__';
-import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
+import {
+  findTestSubject,
+  mountWithIntl,
+  renderWithKibanaRenderContext,
+} from '@kbn/test-jest-helpers';
 
 import { FeatureTableExpandedRow } from './feature_table_expanded_row';
 import { NO_PRIVILEGE_VALUE } from '../constants';
@@ -413,7 +416,10 @@ describe('FeatureTableExpandedRow', () => {
     expect(customizeToggle.props()['aria-checked']).toBe(true);
   });
 
-  it('selects None in every mutually exclusive sub-feature group when the role grants no privileges', () => {
+  // `FeatureTable` asserts that an empty role grants no sub-feature privileges, but its helper
+  // skips any group whose selection is `none`, so it cannot tell "None is selected" apart from
+  // "nothing is selected". This asserts the None button is the one actually pressed.
+  it('presses None in every mutually exclusive sub-feature group when the role grants no privileges', () => {
     const role = createRole([
       {
         base: [],
@@ -426,7 +432,7 @@ describe('FeatureTableExpandedRow', () => {
     const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
     const feature = kibanaPrivileges.getSecuredFeature('with_sub_features');
 
-    const wrapper = mountWithIntl(
+    const { container } = renderWithKibanaRenderContext(
       <FeatureTableExpandedRow
         feature={feature}
         privilegeIndex={0}
@@ -438,11 +444,15 @@ describe('FeatureTableExpandedRow', () => {
       />
     );
 
-    const buttonGroups = wrapper.find(EuiButtonGroup);
+    const mutexGroups = container.querySelectorAll(
+      '[data-test-subj~="mutexSubFeaturePrivilegeControl"]'
+    );
 
-    expect(buttonGroups.length).toBeGreaterThan(0);
-    buttonGroups.forEach((buttonGroup) => {
-      expect(buttonGroup.props().idSelected).toBe(NO_PRIVILEGE_VALUE);
+    expect(mutexGroups.length).toBeGreaterThan(0);
+    mutexGroups.forEach((group) => {
+      const pressed = group.querySelector('[aria-pressed="true"]');
+
+      expect(pressed?.getAttribute('data-test-subj')).toBe(NO_PRIVILEGE_VALUE);
     });
   });
 });
