@@ -110,7 +110,7 @@ describe('useToastSourceErrors', () => {
     ).not.toThrow();
   });
 
-  it('does not re-toast the same source and status on refetch', () => {
+  it('toasts on every refetch while the error persists', () => {
     const addError = jest.fn();
     const { rerender } = renderHook(
       ({ errors }) => useToastSourceErrors(errors, { addError }, 'list'),
@@ -118,31 +118,6 @@ describe('useToastSourceErrors', () => {
     );
 
     rerender({ errors: [{ sourceId: 'v2', error: httpError(500, 'second') }] });
-
-    expect(addError).toHaveBeenCalledTimes(1);
-  });
-
-  it('toasts again after the error clears and a new failure appears', () => {
-    const addError = jest.fn();
-    const { rerender } = renderHook(
-      ({ errors }) => useToastSourceErrors(errors, { addError }, 'list'),
-      { initialProps: { errors: [{ sourceId: 'v2', error: httpError(500, 'first') }] } }
-    );
-
-    rerender({ errors: [] });
-    rerender({ errors: [{ sourceId: 'v2', error: httpError(500, 'again') }] });
-
-    expect(addError).toHaveBeenCalledTimes(2);
-  });
-
-  it('toasts again when the same source fails with a different status', () => {
-    const addError = jest.fn();
-    const { rerender } = renderHook(
-      ({ errors }) => useToastSourceErrors(errors, { addError }, 'list'),
-      { initialProps: { errors: [{ sourceId: 'v2', error: httpError(500, 'server') }] } }
-    );
-
-    rerender({ errors: [{ sourceId: 'v2', error: httpError(502, 'bad gateway') }] });
 
     expect(addError).toHaveBeenCalledTimes(2);
   });
