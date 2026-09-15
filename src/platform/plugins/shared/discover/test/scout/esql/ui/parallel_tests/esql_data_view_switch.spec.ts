@@ -77,10 +77,9 @@ spaceTest.describe(
         expect(dataViews).toContain('kibana_sample_data_flights');
 
         await discover.selectDataView('kibana_sample_data_flights');
-        // Assert on the locator rather than reading the label once: the switch
-        // button's text lags the selection, so a single read can still return the
-        // previous data view.
-        await expect(discover.getSelectedDataView()).toHaveText('kibana_sample_data_flights');
+        await expect
+          .poll(() => discover.getSelectedDataViewName())
+          .toBe('kibana_sample_data_flights');
       }
     );
   }
