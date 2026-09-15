@@ -67,7 +67,8 @@ export async function importRules({
   // Outer batching caps find/validate/KQL. Inner `bulkCreateRules` uses the
   // same size so each outer batch is one alerting bulk request.
   for (const batch of chunk(batchSize, rules)) {
-    // Contain any throw so one batch can't reject and abort the multi-batch loop mid-import.
+    // Note that "outer batching" should be moved out of this DRC method into `route.ts` if we want to chunk at
+    // the file level and stream its contents. To avoid loading all imported rules before processing (memory footgun).
     try {
       // Step 1: Fetch data
       const [existingExceptionLists, prebuiltContext, existingRules] = await Promise.all([
