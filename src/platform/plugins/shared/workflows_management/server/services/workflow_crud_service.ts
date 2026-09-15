@@ -362,6 +362,7 @@ export class WorkflowCrudService {
       now: params.now,
       spaceId: params.spaceId,
       triggerDefinitions,
+      logger: this.deps.logger,
     });
   }
 
@@ -527,6 +528,7 @@ export class WorkflowCrudService {
       spaceId,
       triggerDefinitions,
       nameFallback: options?.nameFallback,
+      logger: this.deps.logger,
     });
 
     let id = baseId;
@@ -612,6 +614,7 @@ export class WorkflowCrudService {
           now,
           spaceId,
           triggerDefinitions,
+          logger: this.deps.logger,
         });
 
         validWorkflows.push({

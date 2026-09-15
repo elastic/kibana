@@ -43,17 +43,21 @@ export class KibanaApiCallError extends Error {
   public readonly status: number;
   public readonly headers: Record<string, string>;
   public readonly body: unknown;
+  /** Absolute URL the self client requested, when known. */
+  public readonly url?: string;
 
   constructor(args: {
     status: number;
     headers: Record<string, string>;
     body: unknown;
     message: string;
+    url?: string;
   }) {
     super(args.message);
     this.name = 'KibanaApiCallError';
     this.status = args.status;
     this.headers = args.headers;
     this.body = args.body;
+    this.url = args.url;
   }
 }

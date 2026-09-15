@@ -21,6 +21,7 @@ describe('workflow validation rules registry', () => {
         "esqlDiagnostic",
         "foreachItemRuntimeType",
         "graphBuildError",
+        "ignoredFetcherSetting",
         "invalidAssignmentOperator",
         "invalidCollectionPath",
         "invalidDefaultValue",

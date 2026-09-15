@@ -968,6 +968,17 @@ groups:
           ech: unavailable
           self: ga
 
+      - setting: server.selfHttp.maxRedirects
+        id: server-selfhttp-maxredirects
+        description: |
+          Maximum number of same-origin HTTP redirects the Kibana self HTTP client will follow. The default of `0` rejects redirects. Values from `1` to `20` allow same-origin hops only (scheme, host, and port must match). Cross-origin redirects are always rejected. Workflow YAML `fetcher` redirect settings are ignored; configure redirects here instead.
+        datatype: int
+        default: 0
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
       - setting: server.host
         id: server-host
         description: |

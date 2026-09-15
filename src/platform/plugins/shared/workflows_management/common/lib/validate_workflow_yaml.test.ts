@@ -618,4 +618,55 @@ steps:
       expect(result.diagnostics.map((diag) => diag.ruleId)).toContain('duplicateStepName');
     });
   });
+
+  describe('ignored kibana fetcher setting', () => {
+    it('warns without invalidating kibana.request workflows that still set fetcher', () => {
+      const yaml = `
+version: '1'
+name: kibana-fetcher
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: status
+    type: kibana.request
+    with:
+      method: GET
+      path: /api/status
+      fetcher:
+        skip_ssl_verification: true
+`;
+      const result = validateWorkflowYaml(yaml, schema);
+
+      expect(result.valid).toBe(true);
+      expect(result.diagnostics).toEqual([
+        expect.objectContaining({
+          severity: 'warning',
+          ruleId: 'ignoredFetcherSetting',
+          message: expect.stringContaining('fetcher'),
+        }),
+      ]);
+    });
+
+    it('does not warn on http connector fetcher settings', () => {
+      const yaml = `
+version: '1'
+name: http-fetcher
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: ping
+    type: http
+    with:
+      url: https://example.com
+      fetcher:
+        skip_ssl_verification: true
+`;
+      const result = validateWorkflowYaml(yaml, schema);
+      expect(result.diagnostics.some((diag) => diag.ruleId === 'ignoredFetcherSetting')).toBe(
+        false
+      );
+    });
+  });
 });
