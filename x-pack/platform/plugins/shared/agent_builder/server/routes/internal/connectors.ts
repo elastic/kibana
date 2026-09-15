@@ -20,7 +20,12 @@ import type { InternalStartServices } from '../../services';
 
 const AGENT_ID_HEADER = 'x-agent-builder-agent-id';
 
-/** Resolves the connector_ids configured for the agent in the request header, if present. */
+/**
+ * Resolves the effective connector_ids for the agent named in the request header.
+ * Returns undefined (allow all) when no agent header is present.
+ * Returns [] (block all) when the header is present but the agent is not found.
+ * Uses the resolved effective configuration so inherited connector restrictions are honoured.
+ */
 const resolveAllowedConnectorIds = async (
   request: KibanaRequest,
   internalServices: InternalStartServices
@@ -31,10 +36,15 @@ const resolveAllowedConnectorIds = async (
   const registry = await internalServices.agents.getRegistry({ request });
   try {
     const agent = await registry.get(agentId);
-    return agent.configuration.connector_ids;
+    const configuration = await internalServices.agents.resolveAgentConfiguration({
+      agent,
+      request,
+    });
+    return configuration.connector_ids;
   } catch (e) {
     const statusCode = (e as { output?: { statusCode?: number } }).output?.statusCode;
-    if (statusCode === 404) return undefined;
+    // Unknown agent — fail closed (block all) rather than exposing unscoped connectors.
+    if (statusCode === 404) return [];
     throw e;
   }
 };
