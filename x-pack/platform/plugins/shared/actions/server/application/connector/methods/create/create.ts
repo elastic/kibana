@@ -21,7 +21,6 @@ import { ensureConfigAuthType } from '../../../../lib/ensure_config_auth_type';
 import { ensureNotKibanaManagedAuthType } from '../../../../lib/ensure_not_kibana_managed_auth_type';
 import { inferAuthMode } from '../../../../lib/infer_auth_mode';
 import { validateConnectorId } from '../../../../../common/validate_connector_id';
-import { preserveInboundIngressHashIfNeeded } from '../../../../inbound/ensure_connector_ingress_credentials';
 import {
   invalidateStoredConnectorEventIdentity,
   mintInboundEventIdentityAttributes,
@@ -147,11 +146,6 @@ export async function create({
         )
       : validatedActionTypeConfig;
 
-  const configWithIngress = preserveInboundIngressHashIfNeeded({
-    actionTypeId,
-    config: configForSave as Record<string, unknown>,
-  });
-
   const identityAttributes = await mintInboundEventIdentityAttributes(context, {
     connectorId: id,
     actionTypeId,
@@ -165,7 +159,7 @@ export async function create({
           actionTypeId,
           name,
           isMissingSecrets: false,
-          config: configWithIngress,
+          config: configForSave,
           secrets: validatedActionTypeSecrets,
           ...(authMode !== undefined ? { authMode } : {}),
           ...(identityAttributes ? toRawActionIdentityAttributes(identityAttributes) : {}),

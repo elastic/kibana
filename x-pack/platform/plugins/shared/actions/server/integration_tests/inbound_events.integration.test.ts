@@ -17,7 +17,6 @@ import { setupTestServers } from './lib';
 interface ConnectorHttpBody {
   id: string;
   connector_type_id: string;
-  config?: { ingestTokenHash?: string };
   secrets?: { ingest_token?: string };
 }
 
@@ -97,7 +96,6 @@ describe('Inbound events HTTP API', () => {
     expect(created.id).toEqual(expect.any(String));
     expect(created.connector_type_id).toBe(INBOUND_WEBHOOK_CONNECTOR_TYPE_ID);
     expect(created.secrets).toBeUndefined();
-    expect(created.config?.ingestTokenHash).toBeUndefined();
 
     const mintRes = await getSupertest(
       kibanaServer.root,
@@ -122,6 +120,17 @@ describe('Inbound events HTTP API', () => {
 
     await postHub(created.id, ingestToken!).expect(202, { ok: true });
 
+    await getSupertest(kibanaServer.root, 'put', `/api/actions/connector/${created.id}`)
+      .set('kbn-xsrf', 'kibana')
+      .send({
+        name: 'sales-ingress-renamed',
+        config: {},
+        secrets: { authType: 'none' },
+      })
+      .expect(200);
+
+    await postHub(created.id, ingestToken!).expect(202, { ok: true });
+
     const getRes = await getSupertest(
       kibanaServer.root,
       'get',
@@ -130,7 +139,6 @@ describe('Inbound events HTTP API', () => {
       .set('kbn-xsrf', 'kibana')
       .expect(200);
     expect((getRes.body as ConnectorHttpBody).secrets?.ingest_token).toBeUndefined();
-    expect((getRes.body as ConnectorHttpBody).config?.ingestTokenHash).toBeUndefined();
 
     const rotateRes = await getSupertest(
       kibanaServer.root,
