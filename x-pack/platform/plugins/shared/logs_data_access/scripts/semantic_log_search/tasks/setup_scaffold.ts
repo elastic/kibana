@@ -6,8 +6,18 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ConnectionConfig } from '../lib/connection_config';
+
+/**
+ * `pattern_text` is served by Elasticsearch but is not part of the JS client's
+ * `MappingProperty` union yet, so the field has to be described separately.
+ */
+const PATTERN_TEXT_MESSAGE_MAPPING = {
+  type: 'pattern_text',
+  copy_to: ['message_semantic'],
+} as unknown as MappingProperty;
 
 interface SetupScaffoldParams {
   esClient: Client;
@@ -100,10 +110,7 @@ export async function setupScaffold({ esClient, config, log }: SetupScaffoldPara
       mappings: {
         properties: {
           '@timestamp': { type: 'date' },
-          message: {
-            type: 'pattern_text',
-            copy_to: ['message_semantic'],
-          },
+          message: PATTERN_TEXT_MESSAGE_MAPPING,
           message_semantic: {
             type: 'semantic_text',
             inference_id: inferenceId,

@@ -17,10 +17,10 @@ export interface ConnectionConfig {
 
 export function getConnectionConfig(flags: FlagsReader): ConnectionConfig {
   return {
-    esUrl: String(flags.es || 'http://localhost:9200'),
-    user: String(flags.user || 'elastic'),
-    password: String(flags.password || 'changeme'),
-    sourceIndex: String(flags.source || 'logs-synth-default'),
-    targetDataStream: String(flags.target || 'logs-poc.a-default'),
+    esUrl: flags.requiredString('es'),
+    user: flags.requiredString('user'),
+    password: flags.requiredString('password'),
+    sourceIndex: flags.requiredString('source'),
+    targetDataStream: flags.requiredString('target'),
   };
 }
