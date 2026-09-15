@@ -29,16 +29,16 @@ const TIEBREAKER_FIELD: ConversationSearchSortField = 'created_at';
  * @returns Sort clauses, always ending in a tiebreaker so paging is deterministic.
  */
 export const buildSearchSort = ({
-  sort = DEFAULT_SORT,
+  sort,
   hasQuery,
 }: {
   sort?: ConversationSearchSort;
   hasQuery: boolean;
 }): SortCombinations[] => {
-  const { field, order } = sort;
+  const { field, order } = sort ?? DEFAULT_SORT;
 
   return [
-    ...(hasQuery ? [{ _score: { order: 'desc' as const } }] : []),
+    ...(hasQuery && !sort ? [{ _score: { order: 'desc' as const } }] : []),
     { [SORT_FIELD_PATHS[field]]: { order } },
     ...(field === TIEBREAKER_FIELD ? [] : [{ [SORT_FIELD_PATHS[TIEBREAKER_FIELD]]: { order } }]),
   ];

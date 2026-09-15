@@ -23,12 +23,17 @@ describe('buildSearchSort', () => {
     ]);
   });
 
-  it('demotes an explicit sort below relevance when a query is present', () => {
+  it('honors an explicit sort over relevance when a query is present', () => {
     expect(buildSearchSort({ sort: { field: 'title', order: 'asc' }, hasQuery: true })).toEqual([
-      { _score: { order: 'desc' } },
       { 'title.caseless': { order: 'asc' } },
       { created_at: { order: 'asc' } },
     ]);
+  });
+
+  it('drops relevance even when the explicit sort matches the default', () => {
+    expect(
+      buildSearchSort({ sort: { field: 'updated_at', order: 'desc' }, hasQuery: true })
+    ).toEqual([{ updated_at: { order: 'desc' } }, { created_at: { order: 'desc' } }]);
   });
 
   it('sorts title on its normalized sub-field rather than the byte-ordered keyword', () => {
