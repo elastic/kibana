@@ -64,6 +64,8 @@ export interface LogRateAnalysisContentProps {
   onAnalysisCompleted?: (d: LogRateAnalysisResultsData) => void;
   /** Optional callback that exposes current window parameters */
   onWindowParametersChange?: (wp?: WindowParameters, replace?: boolean) => void;
+
+  parentApi?: unknown;
 }
 
 export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
@@ -72,6 +74,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   barHighlightColorOverride,
   onAnalysisCompleted,
   onWindowParametersChange,
+  parentApi,
 }) => {
   const { embeddingOrigin } = useAiopsAppContext();
 
@@ -233,6 +236,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           searchQuery={searchQuery}
           barColorOverride={barColorOverride}
           barHighlightColorOverride={barHighlightColorOverride}
+          parentApi={parentApi}
         />
       )}
       {showNoAutoRunEmptyPrompt && (

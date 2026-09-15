@@ -77,7 +77,6 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
   filtersApi,
   parentApi,
 }) => {
-  console.log({ parentApi });
   const deps = useMemo(() => {
     const {
       lens,
@@ -180,7 +179,7 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
               >
                 <FilterQueryContextProvider timeRange={timeRange} filtersApi={filtersApi}>
                   <LogRateAnalysisReduxProvider initialAnalysisStart={windowParameters}>
-                    <LogRateAnalysisForEmbeddable timeRange={timeRange} />
+                    <LogRateAnalysisForEmbeddable timeRange={timeRange} parentApi={parentApi} />
                   </LogRateAnalysisReduxProvider>
                 </FilterQueryContextProvider>
               </DataSourceContextProvider>
