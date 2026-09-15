@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { InferenceClient } from '@kbn/inference-common';
 import type { Streams } from '@kbn/streams-schema';
@@ -40,9 +40,6 @@ const makeDeps = (
     getStream: jest.fn().mockResolvedValue(definition),
   } as unknown as GenerateKIQueriesDependencies['streamsClient'],
   inferenceClient: {} as InferenceClient,
-  soClient: {
-    get: jest.fn().mockRejectedValue({ statusCode: 404 }),
-  } as unknown as SavedObjectsClientContract,
   kiClient: {} as never,
   esClient: {} as never,
   streamDataEsClient: {} as never,

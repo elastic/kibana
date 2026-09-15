@@ -54,7 +54,6 @@ import { registerFieldsMetadataExtractors } from './register_fields_metadata_ext
 import { createStreamsSettingsStorageClient } from './lib/streams/storage/streams_settings_storage_client';
 import { registerSuggestionsInferenceFeatures } from './register_suggestions_inference_features';
 import type { AttachmentClient } from './lib/streams/attachments/attachment_client';
-import { getStreamsPromptsSavedObject } from './lib/prompts/prompts_config';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
 
@@ -118,8 +117,6 @@ export class StreamsPlugin
       this.config.workers.patternExtraction,
       this.logger.get('patternExtraction')
     );
-
-    core.savedObjects.registerType(getStreamsPromptsSavedObject());
 
     this.ebtTelemetryService.setup(core.analytics);
     this.statsTelemetryService.setup(
