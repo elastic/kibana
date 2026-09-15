@@ -321,6 +321,6 @@ describe('useFetchAlertingEpisodesQuery', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.data).toEqual(sourceEpisodes);
-    expect(result.current.sourceErrors).toEqual([{ sourceId: 'alerting-v2', error: v2Error }]);
+    expect(result.current.sourceErrors).toEqual([{ sourceId: 'v2', error: v2Error }]);
   });
 });

@@ -118,7 +118,7 @@ describe('useEpisodesKpisQuery', () => {
 
     expect(result.current.isError).toBe(false);
     expect(result.current.data).toBeUndefined();
-    expect(result.current.sourceErrors).toEqual([{ sourceId: 'alerting-v2', error: v2Error }]);
+    expect(result.current.sourceErrors).toEqual([{ sourceId: 'v2', error: v2Error }]);
   });
 
   it('returns undefined data when ES|QL returns no rows', async () => {
@@ -326,7 +326,7 @@ describe('useEpisodesKpisQuery', () => {
       acknowledged: 2,
       snoozed: 1,
     });
-    expect(result.current.sourceErrors).toEqual([{ sourceId: 'alerting-v2', error: v2Error }]);
+    expect(result.current.sourceErrors).toEqual([{ sourceId: 'v2', error: v2Error }]);
   });
 
   it('returns v2-only KPIs when a source does not implement KPIs', async () => {

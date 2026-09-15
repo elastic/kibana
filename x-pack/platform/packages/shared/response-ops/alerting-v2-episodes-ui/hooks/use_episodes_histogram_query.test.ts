@@ -16,9 +16,9 @@ import { useEpisodesHistogramQuery } from './use_episodes_histogram_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { createTestEpisodeSource } from '../types/episode_data_source.mock';
 import type { EpisodeSourceHistogram } from '../types/episode_data_source';
+import { HISTOGRAM_EPISODE_LIMIT } from '../constants';
 import { EpisodeDataSourceProvider } from '../context/episode_data_source_context';
 import { useSpaceId } from './use_space_id';
-import { HISTOGRAM_EPISODE_LIMIT } from '../constants';
 import type { HistogramEpisodeRow } from '../utils/histogram_utils';
 
 jest.mock('../utils/execute_esql_query');
@@ -131,7 +131,7 @@ describe('useEpisodesHistogramQuery', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.error).toBeUndefined();
     expect(result.current.table).toBeDefined();
-    expect(result.current.sourceErrors).toEqual([{ sourceId: 'alerting-v2', error: mockError }]);
+    expect(result.current.sourceErrors).toEqual([{ sourceId: 'v2', error: mockError }]);
   });
 
   it('passes breakdownField to the query builder', async () => {

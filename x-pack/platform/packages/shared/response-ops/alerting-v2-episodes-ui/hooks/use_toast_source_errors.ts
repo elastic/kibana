@@ -7,15 +7,16 @@
 
 import { useEffect } from 'react';
 import type { IToasts } from '@kbn/core-notifications-browser';
+import type { EpisodeFetchErrorSurface } from '../types/episode_data_source';
 import type { EpisodeSourceError } from '../utils/fetch_from_sources';
 import { shouldSwallowFetchError } from '../utils/should_swallow_fetch_error';
-import {
-  getEpisodesFetchErrorToastTitle,
-  type EpisodeFetchErrorSurface,
-} from './get_episodes_fetch_error_toast_title';
+import { EPISODES_FETCH_ERROR_TOAST_TITLE } from './translations';
+
+export type { EpisodeFetchErrorSurface };
 
 /**
- * Toasts dual-source fetch errors, swallowing 401/403/503/AbortError.
+ * Toasts dual-source fetch errors, naming the failing source and swallowing
+ * 401/403/503/AbortError.
  */
 export const useToastSourceErrors = (
   sourceErrors: EpisodeSourceError[],
@@ -28,7 +29,7 @@ export const useToastSourceErrors = (
     }
     for (const { sourceId, error } of sourceErrors) {
       if (!shouldSwallowFetchError(error)) {
-        toasts.addError(error, { title: getEpisodesFetchErrorToastTitle(surface, sourceId) });
+        toasts.addError(error, { title: EPISODES_FETCH_ERROR_TOAST_TITLE[surface](sourceId) });
       }
     }
   }, [sourceErrors, toasts, surface]);

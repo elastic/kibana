@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { EpisodeFetchErrorSurface } from '../types/episode_data_source';
 
 export const RELATED_EPISODES_LOAD_ERROR = i18n.translate(
   'xpack.alertingV2EpisodesUi.relatedEpisodes.loadError',
@@ -14,68 +15,27 @@ export const RELATED_EPISODES_LOAD_ERROR = i18n.translate(
   }
 );
 
-export const EPISODES_LIST_V1_FETCH_ERROR_TOAST_TITLE = i18n.translate(
-  'xpack.alertingV2EpisodesUi.episodes.list.v1FetchErrorToastTitle',
-  {
-    defaultMessage: 'Failed to fetch alert episodes for v1 alerts',
-  }
-);
-
-export const EPISODES_LIST_V2_FETCH_ERROR_TOAST_TITLE = i18n.translate(
-  'xpack.alertingV2EpisodesUi.episodes.list.v2FetchErrorToastTitle',
-  {
-    defaultMessage: 'Failed to fetch alert episodes for v2 alerts',
-  }
-);
-
-export const EPISODES_LIST_FETCH_ERROR_TOAST_TITLE = i18n.translate(
-  'xpack.alertingV2EpisodesUi.episodes.list.fetchErrorToastTitle',
-  {
-    defaultMessage: 'Failed to fetch alert episodes',
-  }
-);
-
-export const EPISODES_KPIS_V1_FETCH_ERROR_TOAST_TITLE = i18n.translate(
-  'xpack.alertingV2EpisodesUi.episodes.kpis.v1FetchErrorToastTitle',
-  {
-    defaultMessage: 'Failed to fetch KPIs for v1 alerts',
-  }
-);
-
-export const EPISODES_KPIS_V2_FETCH_ERROR_TOAST_TITLE = i18n.translate(
-  'xpack.alertingV2EpisodesUi.episodes.kpis.v2FetchErrorToastTitle',
-  {
-    defaultMessage: 'Failed to fetch KPIs for v2 alerts',
-  }
-);
-
-export const EPISODES_KPIS_FETCH_ERROR_TOAST_TITLE = i18n.translate(
-  'xpack.alertingV2EpisodesUi.episodes.kpis.fetchErrorToastTitle',
-  {
-    defaultMessage: 'Failed to fetch KPIs for alerts',
-  }
-);
-
-export const EPISODES_HISTOGRAM_V1_FETCH_ERROR_TOAST_TITLE = i18n.translate(
-  'xpack.alertingV2EpisodesUi.episodes.histogram.v1FetchErrorToastTitle',
-  {
-    defaultMessage: 'Failed to fetch histogram data for v1 alerts',
-  }
-);
-
-export const EPISODES_HISTOGRAM_V2_FETCH_ERROR_TOAST_TITLE = i18n.translate(
-  'xpack.alertingV2EpisodesUi.episodes.histogram.v2FetchErrorToastTitle',
-  {
-    defaultMessage: 'Failed to fetch histogram data for v2 alerts',
-  }
-);
-
-export const EPISODES_HISTOGRAM_FETCH_ERROR_TOAST_TITLE = i18n.translate(
-  'xpack.alertingV2EpisodesUi.episodes.histogram.fetchErrorToastTitle',
-  {
-    defaultMessage: 'Failed to fetch histogram data for alerts',
-  }
-);
+/** Fetch error toast title per surface, naming the failing source (e.g. `v1`). */
+export const EPISODES_FETCH_ERROR_TOAST_TITLE: Record<
+  EpisodeFetchErrorSurface,
+  (sourceId: string) => string
+> = {
+  list: (sourceId) =>
+    i18n.translate('xpack.alertingV2EpisodesUi.episodes.list.fetchErrorToastTitle', {
+      defaultMessage: 'Failed to fetch alert episodes for {sourceId} alerts',
+      values: { sourceId },
+    }),
+  kpis: (sourceId) =>
+    i18n.translate('xpack.alertingV2EpisodesUi.episodes.kpis.fetchErrorToastTitle', {
+      defaultMessage: 'Failed to fetch KPIs for {sourceId} alerts',
+      values: { sourceId },
+    }),
+  histogram: (sourceId) =>
+    i18n.translate('xpack.alertingV2EpisodesUi.episodes.histogram.fetchErrorToastTitle', {
+      defaultMessage: 'Failed to fetch histogram data for {sourceId} alerts',
+      values: { sourceId },
+    }),
+};
 
 export const RULE_FIELD_LABEL = i18n.translate('xpack.alertingV2EpisodesUi.ruleFieldLabel', {
   defaultMessage: 'Rule',

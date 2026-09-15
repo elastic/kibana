@@ -10,7 +10,7 @@ import { createTestEpisodeSource } from '../types/episode_data_source.mock';
 
 describe('settleFetch', () => {
   it('returns the result in results when the fetch succeeds', async () => {
-    await expect(settleFetch('alerting-v2', async () => ['row'])).resolves.toEqual({
+    await expect(settleFetch('v2', async () => ['row'])).resolves.toEqual({
       results: [['row']],
       errors: [],
     });
@@ -18,14 +18,14 @@ describe('settleFetch', () => {
 
   it('returns the error without throwing when the fetch fails', async () => {
     const error = new Error('boom');
-    await expect(settleFetch('alerting-v2', async () => Promise.reject(error))).resolves.toEqual({
+    await expect(settleFetch('v2', async () => Promise.reject(error))).resolves.toEqual({
       results: [],
-      errors: [{ sourceId: 'alerting-v2', error }],
+      errors: [{ sourceId: 'v2', error }],
     });
   });
 
   it('wraps non-Error rejections', async () => {
-    const result = await settleFetch('alerting-v2', async () => Promise.reject('nope'));
+    const result = await settleFetch('v2', async () => Promise.reject('nope'));
     expect(result.results).toEqual([]);
     expect(result.errors).toHaveLength(1);
     expect(result.errors[0].error).toEqual(new Error('nope'));
@@ -95,7 +95,7 @@ describe('fetchFromV2AndSource', () => {
     ).resolves.toEqual({
       v2: undefined,
       additional: [{ alerts_count: 10 }],
-      errors: [{ sourceId: 'alerting-v2', error: v2Error }],
+      errors: [{ sourceId: 'v2', error: v2Error }],
     });
   });
 

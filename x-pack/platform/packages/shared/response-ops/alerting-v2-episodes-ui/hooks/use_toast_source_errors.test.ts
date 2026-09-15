@@ -6,50 +6,37 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import type { EpisodeFetchErrorSurface } from '../types/episode_data_source';
 import { useToastSourceErrors } from './use_toast_source_errors';
-import {
-  EPISODES_HISTOGRAM_FETCH_ERROR_TOAST_TITLE,
-  EPISODES_HISTOGRAM_V1_FETCH_ERROR_TOAST_TITLE,
-  EPISODES_KPIS_FETCH_ERROR_TOAST_TITLE,
-  EPISODES_KPIS_V1_FETCH_ERROR_TOAST_TITLE,
-  EPISODES_KPIS_V2_FETCH_ERROR_TOAST_TITLE,
-  EPISODES_LIST_FETCH_ERROR_TOAST_TITLE,
-  EPISODES_LIST_V1_FETCH_ERROR_TOAST_TITLE,
-  EPISODES_LIST_V2_FETCH_ERROR_TOAST_TITLE,
-} from './translations';
 
 const httpError = (status: number, message: string) =>
   Object.assign(new Error(message), { response: { status } });
 
 describe('useToastSourceErrors', () => {
-  it('toasts a v2 list 500 with a v2 list title', () => {
+  it('names the v2 source in the list toast title', () => {
     const addError = jest.fn();
     const error = new Error('v2 failed');
 
-    renderHook(() =>
-      useToastSourceErrors([{ sourceId: 'alerting-v2', error }], { addError }, 'list')
-    );
+    renderHook(() => useToastSourceErrors([{ sourceId: 'v2', error }], { addError }, 'list'));
 
     expect(addError).toHaveBeenCalledTimes(1);
     expect(addError).toHaveBeenCalledWith(error, {
-      title: EPISODES_LIST_V2_FETCH_ERROR_TOAST_TITLE,
+      title: 'Failed to fetch alert episodes for v2 alerts',
     });
   });
 
-  it('toasts a classic list 500 with a v1 list title', () => {
+  it('names the v1 source in the list toast title', () => {
     const addError = jest.fn();
     const error = new Error('classic failed');
 
-    renderHook(() =>
-      useToastSourceErrors([{ sourceId: 'classic-alerts', error }], { addError }, 'list')
-    );
+    renderHook(() => useToastSourceErrors([{ sourceId: 'v1', error }], { addError }, 'list'));
 
     expect(addError).toHaveBeenCalledWith(error, {
-      title: EPISODES_LIST_V1_FETCH_ERROR_TOAST_TITLE,
+      title: 'Failed to fetch alert episodes for v1 alerts',
     });
   });
 
-  it('toasts KPI errors with source-specific titles', () => {
+  it('names each failing source on the KPIs surface', () => {
     const addError = jest.fn();
     const classicError = new Error('classic kpis failed');
     const v2Error = new Error('v2 kpis failed');
@@ -57,8 +44,8 @@ describe('useToastSourceErrors', () => {
     renderHook(() =>
       useToastSourceErrors(
         [
-          { sourceId: 'classic-alerts', error: classicError },
-          { sourceId: 'alerting-v2', error: v2Error },
+          { sourceId: 'v1', error: classicError },
+          { sourceId: 'v2', error: v2Error },
         ],
         { addError },
         'kpis'
@@ -67,55 +54,35 @@ describe('useToastSourceErrors', () => {
 
     expect(addError).toHaveBeenCalledTimes(2);
     expect(addError).toHaveBeenNthCalledWith(1, classicError, {
-      title: EPISODES_KPIS_V1_FETCH_ERROR_TOAST_TITLE,
+      title: 'Failed to fetch KPIs for v1 alerts',
     });
     expect(addError).toHaveBeenNthCalledWith(2, v2Error, {
-      title: EPISODES_KPIS_V2_FETCH_ERROR_TOAST_TITLE,
+      title: 'Failed to fetch KPIs for v2 alerts',
     });
   });
 
-  it('toasts histogram errors with a v1 histogram title', () => {
+  it('names the failing source on the histogram surface', () => {
     const addError = jest.fn();
     const error = new Error('classic histogram failed');
 
-    renderHook(() =>
-      useToastSourceErrors([{ sourceId: 'classic-alerts', error }], { addError }, 'histogram')
-    );
+    renderHook(() => useToastSourceErrors([{ sourceId: 'v1', error }], { addError }, 'histogram'));
 
     expect(addError).toHaveBeenCalledWith(error, {
-      title: EPISODES_HISTOGRAM_V1_FETCH_ERROR_TOAST_TITLE,
+      title: 'Failed to fetch histogram data for v1 alerts',
     });
   });
 
-  it('falls back to a surface-named title for unknown source ids', () => {
+  it.each<[EpisodeFetchErrorSurface, string]>([
+    ['list', 'Failed to fetch alert episodes for custom alerts'],
+    ['kpis', 'Failed to fetch KPIs for custom alerts'],
+    ['histogram', 'Failed to fetch histogram data for custom alerts'],
+  ])('names a custom source on the %s surface', (surface, expectedTitle) => {
     const addError = jest.fn();
-    const listError = new Error('unknown list failed');
-    const kpisError = new Error('unknown kpis failed');
-    const histogramError = new Error('unknown histogram failed');
+    const error = new Error(`custom ${surface} failed`);
 
-    renderHook(() =>
-      useToastSourceErrors([{ sourceId: 'custom-source', error: listError }], { addError }, 'list')
-    );
-    renderHook(() =>
-      useToastSourceErrors([{ sourceId: 'custom-source', error: kpisError }], { addError }, 'kpis')
-    );
-    renderHook(() =>
-      useToastSourceErrors(
-        [{ sourceId: 'custom-source', error: histogramError }],
-        { addError },
-        'histogram'
-      )
-    );
+    renderHook(() => useToastSourceErrors([{ sourceId: 'custom', error }], { addError }, surface));
 
-    expect(addError).toHaveBeenNthCalledWith(1, listError, {
-      title: EPISODES_LIST_FETCH_ERROR_TOAST_TITLE,
-    });
-    expect(addError).toHaveBeenNthCalledWith(2, kpisError, {
-      title: EPISODES_KPIS_FETCH_ERROR_TOAST_TITLE,
-    });
-    expect(addError).toHaveBeenNthCalledWith(3, histogramError, {
-      title: EPISODES_HISTOGRAM_FETCH_ERROR_TOAST_TITLE,
-    });
+    expect(addError).toHaveBeenCalledWith(error, { title: expectedTitle });
   });
 
   it('does not toast 403 or 503 errors', () => {
@@ -124,8 +91,8 @@ describe('useToastSourceErrors', () => {
     renderHook(() =>
       useToastSourceErrors(
         [
-          { sourceId: 'classic-alerts', error: httpError(403, 'Forbidden') },
-          { sourceId: 'alerting-v2', error: httpError(503, 'Unavailable') },
+          { sourceId: 'v1', error: httpError(403, 'Forbidden') },
+          { sourceId: 'v2', error: httpError(503, 'Unavailable') },
         ],
         { addError },
         'list'
@@ -138,11 +105,7 @@ describe('useToastSourceErrors', () => {
   it('no-ops when toasts are omitted', () => {
     expect(() =>
       renderHook(() =>
-        useToastSourceErrors(
-          [{ sourceId: 'alerting-v2', error: new Error('v2 failed') }],
-          undefined,
-          'list'
-        )
+        useToastSourceErrors([{ sourceId: 'v2', error: new Error('v2 failed') }], undefined, 'list')
       )
     ).not.toThrow();
   });
