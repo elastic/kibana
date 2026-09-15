@@ -21,35 +21,28 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('v1 legacy attachment', () => {
-      it('creates a comment attachment with v1 payload (type, comment, owner) and returns case with comment', async () => {
+      it('rejects a v1 payload (type, comment, owner) with 400 now that the route is unified-only', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         const v1CommentPayload = {
           type: postCommentUserReq.type,
           comment: 'v1 legacy comment',
           owner: 'securitySolutionFixture',
         };
-        const updatedCase = await bulkCreateAttachments({
+
+        await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
+          // @ts-expect-error: legacy v1 shape, no longer a valid unified attachment
           params: [v1CommentPayload],
+          expectedHttpCode: 400,
         });
-
-        expect(updatedCase.comments?.length).to.be(1);
-        const comment = updatedCase.comments![0];
-        // Response may be unified (type: 'comment') or legacy (type: 'user') depending on feature flag
-        expect(['comment', 'user']).to.contain(comment.type);
-        const content =
-          (comment as { data?: { content?: string } }).data?.content ??
-          (comment as { comment?: string }).comment;
-        expect(content).to.eql('v1 legacy comment');
-        expect(updatedCase.owner).to.eql('securitySolutionFixture');
       });
     });
 
-    describe('v2 unified attachment', () => {
-      it('creates a comment attachmentwith v2 payload (no owner) and resolves owner from case', async () => {
+    describe('unified attachment', () => {
+      it('creates a comment attachment with a unified payload and resolves owner from case', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        const v2CommentPayload = {
+        const unifiedCommentPayload = {
           type: 'comment' as const,
           data: { content: 'v2 unified comment' },
           owner: 'securitySolutionFixture',
@@ -57,17 +50,16 @@ export default ({ getService }: FtrProviderContext): void => {
         const updatedCase = await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
-          params: [v2CommentPayload],
+          params: [unifiedCommentPayload],
         });
 
         expect(updatedCase.comments?.length).to.be(1);
-        const comment = updatedCase.comments![0];
-        // Response may be unified (type: 'comment') or legacy (type: 'user') depending on feature flag
-        expect(['comment', 'user']).to.contain(comment.type);
-        const content =
-          (comment as { data?: { content?: string } }).data?.content ??
-          (comment as { comment?: string }).comment;
-        expect(content).to.eql('v2 unified comment');
+        const comment = updatedCase.comments![0] as unknown as {
+          type: string;
+          data?: { content?: string };
+        };
+        expect(comment.type).to.eql('comment');
+        expect(comment.data?.content).to.eql('v2 unified comment');
         expect(updatedCase.owner).to.eql('securitySolutionFixture');
       });
     });

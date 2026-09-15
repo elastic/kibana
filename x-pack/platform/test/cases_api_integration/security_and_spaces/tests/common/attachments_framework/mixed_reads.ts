@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import type { Case } from '@kbn/cases-plugin/common/types/domain';
-import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   COMMENT_ATTACHMENT_TYPE,
@@ -277,15 +276,15 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(osqueryAttachment.attachmentId).to.be('mixed-osquery-1');
       });
 
-      it('handles mixed legacy v1 and unified v2 payloads in bulk create', async () => {
+      it('handles a batch of mixed unified attachment types in bulk create', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         const updatedCase = await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
           params: [
             {
-              type: AttachmentType.user,
-              comment: 'legacy v1 style comment',
+              type: 'comment' as const,
+              data: { content: 'first unified comment' },
               owner: 'securitySolutionFixture',
             },
             {

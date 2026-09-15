@@ -13,11 +13,12 @@ import {
 } from '@kbn/cases-plugin/common/constants';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 import type {
-  BulkCreateAttachmentsRequestV2,
+  BulkCreateUnifiedAttachmentsRequest,
   AttachmentRequestV2,
 } from '@kbn/cases-plugin/common/types/api';
+import { COMMENT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
+import { postCaseReq } from '../../../../common/lib/mock';
 import {
   bulkCreateAttachments,
   createCase,
@@ -38,6 +39,14 @@ export default ({ getService }: FtrProviderContext): void => {
     owner: 'securitySolutionFixture',
     attachmentId: 'timeline-1',
     metadata: { title: 'My timeline' },
+  };
+
+  // Unified equivalent of the legacy `postCommentUserReq` mock, used to pair
+  // with a unified-only attachment in the same bulk-create batch.
+  const unifiedCommentReq = {
+    type: COMMENT_ATTACHMENT_TYPE,
+    data: { content: 'This is a cool comment' },
+    owner: 'securitySolutionFixture',
   };
 
   const searchSO = (id: string, soType: string) =>
@@ -94,9 +103,9 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: postedCase.id,
           params: [
-            postCommentUserReq,
+            unifiedCommentReq,
             timelinePayload,
-          ] as unknown as BulkCreateAttachmentsRequestV2,
+          ] as unknown as BulkCreateUnifiedAttachmentsRequest,
         });
 
         expect(updatedCase.comments?.length).to.be(2);

@@ -58,7 +58,7 @@ export const findUserActionsRoute = createCasesRoute({
       }
       const commentIds = Array.from(uniqueCommentIds);
 
-      let attachmentRes: attachmentApiV2.BulkGetAttachmentsResponseV2 = {
+      let attachmentRes: attachmentApiV2.BulkGetUnifiedAttachmentsResponse = {
         attachments: [],
         errors: [],
       };
