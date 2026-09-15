@@ -23,6 +23,10 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
 import { getFetch$Mock, getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
+import {
+  EXEMPLARS_PROBE_FAILED_USER_MESSAGES,
+  LEGACY_HISTOGRAM_USER_MESSAGES,
+} from '../../../common/utils/user_messages';
 
 jest.mock('./context/metrics_experience_state_provider');
 jest.mock('./hooks');
@@ -112,6 +116,7 @@ describe('MetricsExperienceGridContent', () => {
       },
       histogramCss: { name: '', styles: '' },
       isTabSelected: true,
+      exemplarsAvailability: { availableMetrics: new Set<string>(), hasProbeFailed: false },
     };
 
     useMetricsExperienceStateMock.mockReturnValue({
@@ -252,5 +257,75 @@ describe('MetricsExperienceGridContent', () => {
       (MetricsGrid as jest.Mock).mock.calls.length - 1
     ][0];
     expect(lastCall.dimensions).toEqual([dimensions[0]]);
+  });
+
+  describe('getUserMessages', () => {
+    const legacyHistogramItem: ParsedMetricItem = {
+      metricName: 'latency',
+      indexName: 'metrics-*',
+      units: ['ms'],
+      metricTypes: ['histogram'],
+      fieldTypes: [ES_FIELD_TYPES.HISTOGRAM],
+      dimensionFields: [],
+    };
+
+    const renderAndGetUserMessages = (
+      exemplarsAvailability: MetricsExperienceGridContentProps['exemplarsAvailability']
+    ) => {
+      const { MetricsGrid } = jest.requireMock('./metrics_grid');
+      render(
+        <MetricsExperienceGridContent
+          {...defaultProps}
+          exemplarsAvailability={exemplarsAvailability}
+        />,
+        { wrapper: IntlProvider }
+      );
+      const lastCall = (MetricsGrid as jest.Mock).mock.calls[
+        (MetricsGrid as jest.Mock).mock.calls.length - 1
+      ][0];
+      return lastCall.getUserMessages as (item: ParsedMetricItem) => unknown;
+    };
+
+    it('returns no messages for a plain metric when the probe succeeded', () => {
+      const getUserMessages = renderAndGetUserMessages({
+        availableMetrics: new Set<string>(),
+        hasProbeFailed: false,
+      });
+
+      expect(getUserMessages(metricItems[0])).toBeUndefined();
+    });
+
+    it('surfaces the probe-failed warning on every chart when the probe failed', () => {
+      const getUserMessages = renderAndGetUserMessages({
+        availableMetrics: new Set<string>(),
+        hasProbeFailed: true,
+      });
+
+      expect(getUserMessages(metricItems[0])).toBe(EXEMPLARS_PROBE_FAILED_USER_MESSAGES);
+      expect(getUserMessages(metricItems[1])).toBe(EXEMPLARS_PROBE_FAILED_USER_MESSAGES);
+    });
+
+    it('combines the legacy histogram and probe-failed warnings with a stable identity', () => {
+      const getUserMessages = renderAndGetUserMessages({
+        availableMetrics: new Set<string>(),
+        hasProbeFailed: true,
+      });
+
+      const first = getUserMessages(legacyHistogramItem);
+      expect(first).toEqual([
+        ...LEGACY_HISTOGRAM_USER_MESSAGES,
+        ...EXEMPLARS_PROBE_FAILED_USER_MESSAGES,
+      ]);
+      expect(getUserMessages(legacyHistogramItem)).toBe(first);
+    });
+
+    it('returns only the legacy histogram warning when the probe succeeded', () => {
+      const getUserMessages = renderAndGetUserMessages({
+        availableMetrics: new Set<string>(),
+        hasProbeFailed: false,
+      });
+
+      expect(getUserMessages(legacyHistogramItem)).toBe(LEGACY_HISTOGRAM_USER_MESSAGES);
+    });
   });
 });
