@@ -265,7 +265,11 @@ describe('saved search embeddable', () => {
       // the platform panel reads blockingError$ and renders the error itself,
       // so the embeddable hands the error over and renders nothing of its own
       expect(api.blockingError$.getValue()).toBe(searchError);
-      expect(discoverComponent.container).toBeEmptyDOMElement();
+      // useBatchedPublishingSubjects debounces React state updates by one tick,
+      // so the component re-render needs waitFor rather than a bare assertion
+      await waitFor(() => {
+        expect(discoverComponent.container).toBeEmptyDOMElement();
+      });
     });
 
     it('should keep a query failure non-blocking while inline editing so apply/discard stay reachable', async () => {
