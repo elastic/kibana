@@ -14,11 +14,11 @@ import {
   ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
 } from '../constants';
 
-export const ALERT_ZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID = 'system-alertzero-action-isolate-host';
+export const ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID = 'system-alertzero-action-isolate-host';
 
-export const ALERT_ZERO_ACTION_ISOLATE_HOST_WORKFLOW = {
+export const ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW = {
   billable: false,
-  id: ALERT_ZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
+  id: ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 1,
