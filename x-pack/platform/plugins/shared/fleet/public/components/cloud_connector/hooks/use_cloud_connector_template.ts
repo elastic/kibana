@@ -32,9 +32,9 @@ import { getCloudConnectorRemoteRoleTemplate } from '../utils';
 const TEMPLATE_URL_PARAM_REGEX = /templateURL=[^&]+/;
 
 const STATIC_FALLBACK_IAC: CloudConnectorIacState = {
-  templateSha: null,
-  blueprintId: null,
-  blueprintVersion: null,
+  iac_key: null,
+  iac_blueprint_id: null,
+  iac_blueprint_version: null,
 };
 
 export interface UseCloudConnectorTemplateParams {
@@ -227,9 +227,9 @@ export const useCloudConnectorTemplate = ({
       }
 
       setIacConfirm({
-        templateSha: data.templateSha,
-        blueprintId: data.blueprint.id,
-        blueprintVersion: data.blueprint.version,
+        iac_key: data.templateSha,
+        iac_blueprint_id: data.blueprint.id,
+        iac_blueprint_version: data.blueprint.version,
       });
 
       // Only the template source changes: swap the templateURL query param on

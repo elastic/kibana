@@ -16,6 +16,6 @@ export function sendUpdateCloudConnector(cloudConnectorId: string, iac: CloudCon
     method: 'put',
     path: CLOUD_CONNECTOR_API_ROUTES.UPDATE_PATTERN.replace('{cloudConnectorId}', cloudConnectorId),
     version: API_VERSIONS.public.v1,
-    body: JSON.stringify({ iac }),
+    body: JSON.stringify(iac),
   });
 }

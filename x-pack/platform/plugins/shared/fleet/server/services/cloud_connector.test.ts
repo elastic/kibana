@@ -207,7 +207,7 @@ describe('CloudConnectorService', () => {
       expect(result.accountType).toEqual(SINGLE_ACCOUNT);
     });
 
-    it('persists templateSha and blueprint on confirm', async () => {
+    it('persists iac_key and blueprint on confirm', async () => {
       mockSoClient.find.mockResolvedValue({
         saved_objects: [],
         total: 0,
@@ -218,32 +218,30 @@ describe('CloudConnectorService', () => {
         ...mockSavedObject,
         attributes: {
           ...mockSavedObject.attributes,
-          templateSha: 'sha256:661cb7def1c7101f',
-          blueprintId: 'federated-identity',
-          blueprintVersion: '1.0.0',
+          iac_key: 'sha256:661cb7def1c7101f',
+          iac_blueprint_id: 'federated-identity',
+          iac_blueprint_version: '1.0.0',
         },
       });
 
       await service.create(mockSoClient, {
         ...mockCreateRequest,
-        iac: {
-          templateSha: 'sha256:661cb7def1c7101f',
-          blueprintId: 'federated-identity',
-          blueprintVersion: '1.0.0',
-        },
+        iac_key: 'sha256:661cb7def1c7101f',
+        iac_blueprint_id: 'federated-identity',
+        iac_blueprint_version: '1.0.0',
       });
 
       expect(mockSoClient.create).toHaveBeenCalledWith(
         CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
         expect.objectContaining({
-          templateSha: 'sha256:661cb7def1c7101f',
-          blueprintId: 'federated-identity',
-          blueprintVersion: '1.0.0',
+          iac_key: 'sha256:661cb7def1c7101f',
+          iac_blueprint_id: 'federated-identity',
+          iac_blueprint_version: '1.0.0',
         })
       );
     });
 
-    it('stores no templateSha when confirm clears the digest', async () => {
+    it('stores no iac_key when confirm clears the digest', async () => {
       mockSoClient.find.mockResolvedValue({
         saved_objects: [],
         total: 0,
@@ -254,19 +252,19 @@ describe('CloudConnectorService', () => {
         ...mockSavedObject,
         attributes: {
           ...mockSavedObject.attributes,
-          templateSha: null,
+          iac_key: null,
         },
       });
 
       await service.create(mockSoClient, {
         ...mockCreateRequest,
-        iac: { templateSha: null },
+        iac_key: null,
       });
 
       expect(mockSoClient.create).toHaveBeenCalledWith(
         CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
         expect.objectContaining({
-          templateSha: null,
+          iac_key: null,
         })
       );
     });
@@ -1134,32 +1132,32 @@ describe('CloudConnectorService', () => {
       );
     });
 
-    it('clears templateSha when confirm sends a null digest', async () => {
+    it('clears iac_key when confirm sends a null digest', async () => {
       mockSoClient.get.mockResolvedValue({
         ...mockExistingSavedObject,
         attributes: {
           ...mockExistingSavedObject.attributes,
-          templateSha: 'sha256:old',
+          iac_key: 'sha256:old',
         },
       });
       mockSoClient.update.mockResolvedValue({
         ...mockExistingSavedObject,
         attributes: {
           ...mockExistingSavedObject.attributes,
-          templateSha: null,
+          iac_key: null,
         },
       });
       mockSoClient.find.mockResolvedValue(mockPackagePoliciesForUpdate);
 
       await service.update(mockSoClient, 'cloud-connector-123', {
-        iac: { templateSha: null },
+        iac_key: null,
       });
 
       expect(mockSoClient.update).toHaveBeenCalledWith(
         CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
         'cloud-connector-123',
         expect.objectContaining({
-          templateSha: null,
+          iac_key: null,
         })
       );
     });

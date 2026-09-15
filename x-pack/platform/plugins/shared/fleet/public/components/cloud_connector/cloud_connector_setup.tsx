@@ -69,8 +69,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
   });
   const cloudConnectorsCount = cloudConnectors?.length;
   const templateSha =
-    cloudConnectors?.find(({ id }) => id === newPolicy.cloud_connector_id)?.templateSha ??
-    undefined;
+    cloudConnectors?.find(({ id }) => id === newPolicy.cloud_connector_id)?.iac_key ?? undefined;
   const [selectedTabId, setSelectedTabId] = useState<string>(TABS.NEW_CONNECTION);
 
   useEffect(() => {

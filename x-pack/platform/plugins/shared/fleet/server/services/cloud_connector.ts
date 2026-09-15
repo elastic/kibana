@@ -8,15 +8,16 @@
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
-import { isCloudConnectorSecretReference } from '../../common/types/models/cloud_connector';
-import type {
-  CloudConnector,
-  CloudConnectorIacState,
-  CloudConnectorListOptions,
-  CloudConnectorSecretReference,
-  AwsCloudConnectorVars,
-  AzureCloudConnectorVars,
-  GcpCloudConnectorVars,
+import {
+  CLOUD_CONNECTOR_IAC_REQUEST_KEYS,
+  isCloudConnectorSecretReference,
+  type CloudConnector,
+  type CloudConnectorIacState,
+  type CloudConnectorListOptions,
+  type CloudConnectorSecretReference,
+  type AwsCloudConnectorVars,
+  type AzureCloudConnectorVars,
+  type GcpCloudConnectorVars,
 } from '../../common/types/models/cloud_connector';
 import type { CloudConnectorSOAttributes } from '../types/so_attributes';
 import type {
@@ -53,18 +54,12 @@ import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { extractSecretIdsFromCloudConnectorVars } from './secrets/cloud_connector';
 import { deleteSecrets } from './secrets/common';
 
-const IAC_CONFIRM_KEYS: Array<keyof CloudConnectorIacState> = [
-  'templateSha',
-  'blueprintId',
-  'blueprintVersion',
-];
-
 export const hasIacConfirm = (iac: CloudConnectorIacState | undefined): boolean =>
-  Boolean(iac && IAC_CONFIRM_KEYS.some((key) => iac[key] !== undefined));
+  Boolean(iac && CLOUD_CONNECTOR_IAC_REQUEST_KEYS.some((key) => iac[key] !== undefined));
 
 /**
- * Maps a confirm-time IaC payload onto connector SO attributes.
- * A static-template fallback sends templateSha: null so no digest is stored.
+ * Maps confirm-time IaC fields onto connector SO attributes.
+ * A static-template fallback sends iac_key: null so no digest is stored.
  */
 export const iacAttributesFromConfirm = (
   iac: CloudConnectorIacState | undefined
@@ -75,14 +70,17 @@ export const iacAttributesFromConfirm = (
 
   const attrs: Partial<CloudConnectorSOAttributes> = {};
 
-  if (iac.templateSha !== undefined) {
-    attrs.templateSha = iac.templateSha;
+  if (iac.iac_key !== undefined) {
+    attrs.iac_key = iac.iac_key;
   }
-  if (iac.blueprintId !== undefined) {
-    attrs.blueprintId = iac.blueprintId;
+  if (iac.iac_blueprint_id !== undefined) {
+    attrs.iac_blueprint_id = iac.iac_blueprint_id;
   }
-  if (iac.blueprintVersion !== undefined) {
-    attrs.blueprintVersion = iac.blueprintVersion;
+  if (iac.iac_blueprint_version !== undefined) {
+    attrs.iac_blueprint_version = iac.iac_blueprint_version;
+  }
+  if (iac.iac_deployment_id !== undefined) {
+    attrs.iac_deployment_id = iac.iac_deployment_id;
   }
 
   return attrs;
@@ -292,7 +290,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         verification_status: 'pending',
-        ...iacAttributesFromConfirm(cloudConnector.iac),
+        ...iacAttributesFromConfirm(cloudConnector),
       };
 
       const savedObject = await soClient.create<CloudConnectorSOAttributes>(
@@ -459,7 +457,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         updateAttributes.vars = cloudConnectorUpdate.vars;
       }
 
-      Object.assign(updateAttributes, iacAttributesFromConfirm(cloudConnectorUpdate.iac));
+      Object.assign(updateAttributes, iacAttributesFromConfirm(cloudConnectorUpdate));
 
       // Update the saved object
       const updatedSavedObject = await soClient.update<CloudConnectorSOAttributes>(

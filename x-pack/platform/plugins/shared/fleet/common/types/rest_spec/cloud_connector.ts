@@ -14,21 +14,19 @@ import type {
 } from '../models/cloud_connector';
 
 // Request interfaces
-export interface CreateCloudConnectorRequest {
+export interface CreateCloudConnectorRequest extends CloudConnectorIacState {
   name: string;
   namespace?: string;
   vars: CloudConnectorVars;
   cloudProvider: CloudProvider;
   accountType?: AccountType;
-  iac?: CloudConnectorIacState;
 }
 
-export interface UpdateCloudConnectorRequest {
+export interface UpdateCloudConnectorRequest extends CloudConnectorIacState {
   name?: string;
   vars?: CloudConnectorVars;
   cloudProvider?: CloudProvider;
   accountType?: AccountType;
-  iac?: CloudConnectorIacState;
 }
 
 // Response interfaces following Fleet conventions

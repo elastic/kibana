@@ -148,7 +148,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
       vars: {
         role_arn: { value: roleArn, type: 'text' },
       },
-      ...(hasPendingIacConfirm(iacConfirm) ? { iac: iacConfirm } : {}),
+      ...(hasPendingIacConfirm(iacConfirm) ? iacConfirm : {}),
     });
   }, [createConnector, connectorName, accountType, roleArn, iacConfirm]);
 

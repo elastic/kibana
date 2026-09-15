@@ -180,9 +180,9 @@ describe('AwsIdentityFederationSetup', () => {
         isDisabled: false,
         isGeneratingTemplate: false,
         iacConfirm: {
-          templateSha: 'sha256:abc',
-          blueprintId: 'federated-identity',
-          blueprintVersion: 'v1',
+          iac_key: 'sha256:abc',
+          iac_blueprint_id: 'federated-identity',
+          iac_blueprint_version: 'v1',
         },
       });
 
@@ -198,11 +198,9 @@ describe('AwsIdentityFederationSetup', () => {
       expect(mutate).toHaveBeenCalledWith(
         expect.objectContaining({
           name: 'guardduty-connector',
-          iac: {
-            templateSha: 'sha256:abc',
-            blueprintId: 'federated-identity',
-            blueprintVersion: 'v1',
-          },
+          iac_key: 'sha256:abc',
+          iac_blueprint_id: 'federated-identity',
+          iac_blueprint_version: 'v1',
         })
       );
     });

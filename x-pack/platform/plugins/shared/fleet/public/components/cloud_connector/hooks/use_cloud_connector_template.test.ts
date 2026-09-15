@@ -147,9 +147,9 @@ describe('useCloudConnectorTemplate', () => {
       expect(openedUrl).not.toContain('static.example');
       expect(openedUrl).toContain('param_ElasticResourceId=kibana-component-id');
       expect(result.current.iacConfirm).toEqual({
-        templateSha: 'sha256:661cb7def1c7101f',
-        blueprintId: 'federated-identity',
-        blueprintVersion: 'v1',
+        iac_key: 'sha256:661cb7def1c7101f',
+        iac_blueprint_id: 'federated-identity',
+        iac_blueprint_version: 'v1',
       });
     });
 
@@ -214,9 +214,9 @@ describe('useCloudConnectorTemplate', () => {
       const openedUrl = windowOpenSpy.mock.calls[0][0] as string;
       expect(openedUrl).toContain('static.example');
       expect(result.current.iacConfirm).toEqual({
-        templateSha: null,
-        blueprintId: null,
-        blueprintVersion: null,
+        iac_key: null,
+        iac_blueprint_id: null,
+        iac_blueprint_version: null,
       });
       expect(reportEvent).toHaveBeenCalledWith('iac_provisioner_render_fallback', {
         flow: 'cloud_connector',
@@ -266,9 +266,9 @@ describe('useCloudConnectorTemplate', () => {
 
       expect(cloudFormationTab.location.href).toContain('static.example');
       expect(result.current.iacConfirm).toEqual({
-        templateSha: null,
-        blueprintId: null,
-        blueprintVersion: null,
+        iac_key: null,
+        iac_blueprint_id: null,
+        iac_blueprint_version: null,
       });
       expect(reportEvent).toHaveBeenCalledWith('iac_provisioner_render_fallback', {
         flow: 'cloud_connector',
@@ -326,9 +326,9 @@ describe('useCloudConnectorTemplate', () => {
       const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
       await launch(result);
       expect(result.current.iacConfirm).toEqual({
-        templateSha: 'sha256:661cb7def1c7101f',
-        blueprintId: 'federated-identity',
-        blueprintVersion: 'v1',
+        iac_key: 'sha256:661cb7def1c7101f',
+        iac_blueprint_id: 'federated-identity',
+        iac_blueprint_version: 'v1',
       });
 
       await launch(result);
@@ -389,9 +389,9 @@ describe('useCloudConnectorTemplate', () => {
       const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
       await launch(result);
       expect(result.current.iacConfirm).toEqual({
-        templateSha: null,
-        blueprintId: null,
-        blueprintVersion: null,
+        iac_key: null,
+        iac_blueprint_id: null,
+        iac_blueprint_version: null,
       });
 
       await launch(result);
