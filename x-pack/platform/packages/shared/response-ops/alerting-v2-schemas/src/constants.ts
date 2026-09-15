@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RUNBOOK_CONTENT_LIMIT } from '@kbn/alerting-v2-constants';
+import { MAX_ARTIFACT_DATA_BYTES } from '@kbn/alerting-v2-constants';
 
 /** Maximum number of consecutive breaches before transition */
 export const MAX_CONSECUTIVE_BREACHES = 1000;
@@ -98,9 +98,9 @@ export const MAX_ARTIFACT_DATA_FIELDS = 32;
  * the envelope ceiling for every artifact type, registered or not; registered
  * types apply their own, tighter `dataSchema` on top. It must stay above the
  * largest bound any registered type allows so a rollback of the owning plugin
- * cannot fail writes — the built-in runbook is currently the largest.
+ * cannot fail writes.
  */
-export const MAX_ARTIFACT_DATA_LENGTH = RUNBOOK_CONTENT_LIMIT * 2;
+export const MAX_ARTIFACT_DATA_LENGTH = MAX_ARTIFACT_DATA_BYTES;
 
 /** Maximum number of destinations per action policy. */
 export const ACTION_POLICY_MAX_DESTINATIONS = 10;
