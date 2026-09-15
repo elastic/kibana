@@ -21,8 +21,6 @@ export const API_HEADERS = {
 export const AI_INDEX_COLLECTION_PATH = 'api/context_engine/ai_index';
 export const AI_INDEX_QUERY_PATH = `${AI_INDEX_COLLECTION_PATH}/_query`;
 
-export const CONTEXT_ENGINE_ENABLED_SETTING = 'contextEngine:enabled';
-
 /** Kibana grant for the Context Engine `read` privilege in every space. */
 export const CONTEXT_ENGINE_READ: KibanaRole['kibana'][number] = {
   base: [],
