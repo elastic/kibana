@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { SandboxConnectionManager } from './grpc_client';
 import { presignS3Url } from './s3_presigner';
 import type { NightshiftInvestigationsConfig } from '../../config';
+import { scopeConversationId } from './tool_utils';
 
 type SandboxConfig = NonNullable<NightshiftInvestigationsConfig['sandbox']>;
 
@@ -17,6 +18,27 @@ interface WorkspaceManagerParams {
   connectionManager: SandboxConnectionManager;
   logger: Logger;
 }
+
+/** Backs up the conversation's existing sandbox without allowing backup failure to fail its answer. */
+export const backupConversationWorkspace = async ({
+  conversationId,
+  spaceId,
+  workspaceManager,
+  logger,
+}: {
+  conversationId?: string;
+  spaceId: string;
+  workspaceManager: Pick<WorkspaceManager, 'backupWorkspace'>;
+  logger: Logger;
+}): Promise<void> => {
+  if (!conversationId) return;
+  const scopedConversationId = scopeConversationId(spaceId, conversationId);
+  try {
+    await workspaceManager.backupWorkspace(scopedConversationId);
+  } catch (error) {
+    logger.warn(`Workspace backup failed for conversation ${scopedConversationId}: ${error}`);
+  }
+};
 
 export class WorkspaceManager {
   private readonly config: SandboxConfig;

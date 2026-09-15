@@ -43,7 +43,10 @@ import { createSandboxBashTool } from './tools/sandbox_bash/tool';
 import { createSandboxViewFileTool } from './tools/sandbox_bash/view_file_tool';
 import { createSandboxStrReplaceTool } from './tools/sandbox_bash/str_replace_tool';
 import { createSandboxWriteFileTool } from './tools/sandbox_bash/write_file_tool';
-import { WorkspaceManager } from './tools/sandbox_bash/workspace_manager';
+import {
+  WorkspaceManager,
+  backupConversationWorkspace,
+} from './tools/sandbox_bash/workspace_manager';
 import { writeConnectorManifest } from './tools/sandbox_bash/connector_manifest';
 import { writeElasticManifest } from './tools/sandbox_bash/elastic_manifest';
 import { createConnectorCredentialResolver } from './tools/sandbox_bash/connector_credentials';
@@ -145,6 +148,11 @@ export class NightshiftInvestigationsPlugin
         const getSpaceId = (req: KibanaRequest) =>
           this.spaces?.spacesService.getSpaceId(req) ?? DEFAULT_SPACE_ID;
 
+        const resolveConnectorCredentials = createConnectorCredentialResolver({
+          getDeps: () => ({ actions: this.actionsStart }),
+          logger: sandboxLogger.get('connector_credentials'),
+        });
+
         const connectionManager = new SandboxConnectionManager({
           config: config.sandbox,
           logger: sandboxLogger,
@@ -161,22 +169,26 @@ export class NightshiftInvestigationsPlugin
               logger: sandboxLogger,
             });
             if (telemetryConnectorId) {
+              const credentials = await resolveConnectorCredentials(
+                telemetryConnectorId,
+                callContext
+              );
+              const usesBasicAuth =
+                !('errorMessage' in credentials) &&
+                Boolean(
+                  credentials.env.CONNECTOR_SECRET_USER && credentials.env.CONNECTOR_SECRET_PASSWORD
+                );
               await writeElasticManifest({
                 conversationId,
                 apiClient: connectionManager.apiClient,
                 connectorId: telemetryConnectorId,
+                auth: usesBasicAuth ? 'basic' : 'apiKey',
                 logger: sandboxLogger,
               });
             }
           },
         });
         this.sandboxConnectionManager = connectionManager;
-
-        // Start deps are read lazily: tools are registered in setup() but only run after start().
-        const resolveConnectorCredentials = createConnectorCredentialResolver({
-          getDeps: () => ({ actions: this.actionsStart }),
-          logger: sandboxLogger.get('connector_credentials'),
-        });
 
         const workspaceManager = new WorkspaceManager({
           config: config.sandbox,
@@ -211,18 +223,13 @@ export class NightshiftInvestigationsPlugin
           hooks: {
             [HookLifecycle.afterExecution]: {
               mode: HookExecutionMode.nonBlocking,
-              handler: (context) => {
-                const { conversationId, request } = context;
-                if (!conversationId) return;
-                const scopedConversationId = `${getSpaceId(request)}:${conversationId}`;
-                workspaceManager.backupWorkspace(scopedConversationId).catch((err) => {
-                  sandboxLogger
-                    .get('workspace')
-                    .warn(
-                      `Workspace backup failed for conversation ${scopedConversationId}: ${err}`
-                    );
-                });
-              },
+              handler: ({ conversationId, request }) =>
+                backupConversationWorkspace({
+                  conversationId,
+                  spaceId: getSpaceId(request),
+                  workspaceManager,
+                  logger: sandboxLogger.get('workspace'),
+                }),
             },
           },
         });
