@@ -17,13 +17,22 @@ project:
   owner: '@elastic/nightshift-context-and-research-team'
   sourceRoot: x-pack/platform/packages/shared/kbn-evals-suite-nightshift-investigations
 dependsOn:
+  - '@kbn/agent-builder-common'
   - '@kbn/dev-cli-errors'
   - '@kbn/dev-cli-runner'
   - '@kbn/es-snapshot-loader'
   - '@kbn/evals'
+  - '@kbn/inference-common'
   - '@kbn/kibana-api-cli'
+  - '@kbn/kbn-client'
+  - '@kbn/nightshift-investigations-plugin'
   - '@kbn/scout'
   - '@kbn/tooling-log'
+  - '@kbn/workflows'
+  - '@kbn/zod'
+  - '@kbn/core'
+  - '@kbn/significant-events-schema'
+  - '@kbn/evals-common'
 tags:
   - functional-tests
   - package
