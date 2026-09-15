@@ -13,6 +13,9 @@ import {
 import {
   groupTimelineEvents,
   toTimelineItems,
+  buildSavedItems,
+  buildLiveItems,
+  assembleTimelineItems,
   activeExecutionToItem,
   ACTIVE_EXECUTION_ITEM_KEY,
 } from './to_timeline_items';
@@ -491,5 +494,32 @@ describe('toTimelineItems - dedupe', () => {
     if (items[0].kind === 'agentTurn') {
       expect(items[0].key).toBe(ACTIVE_EXECUTION_ITEM_KEY);
     }
+  });
+});
+
+describe('assembleTimelineItems', () => {
+  it('reuses saved items without modifying them as live content changes', () => {
+    const savedItems = buildSavedItems([createUserMessageEvent({ id: 'saved-user' })]);
+    const draft: ActiveExecutionDraft = {
+      status: 'running',
+      steps: [],
+      message: 'Hello',
+      executionId: 'live-execution',
+    };
+    const firstLiveItems = buildLiveItems({ activeExecution: draft });
+    const firstItems = assembleTimelineItems(savedItems, firstLiveItems);
+    const nextLiveItems = buildLiveItems({
+      activeExecution: { ...draft, message: 'Hello again' },
+    });
+    const nextItems = assembleTimelineItems(savedItems, nextLiveItems);
+
+    expect(savedItems).toHaveLength(1);
+    expect(firstLiveItems).toHaveLength(1);
+    expect(firstItems[0]).toBe(savedItems[0]);
+    expect(nextItems[0]).toBe(savedItems[0]);
+    expect(firstItems[1]).toBe(firstLiveItems[0]);
+    expect(nextItems[1]).toBe(nextLiveItems[0]);
+    expect(firstItems[1]).toMatchObject({ response: { message: 'Hello' } });
+    expect(nextItems[1]).toMatchObject({ response: { message: 'Hello again' } });
   });
 });

@@ -203,22 +203,16 @@ interface ToTimelineItemsParams {
   activeExecution?: ActiveExecutionDraft | null;
 }
 
-const appendDraftItem = (items: TimelineItem[], activeExecution: ActiveExecutionDraft): void => {
-  const draftItem = activeExecutionToItem(activeExecution);
-  const alreadyPersisted =
-    draftItem.key !== ACTIVE_EXECUTION_ITEM_KEY && items.some((it) => it.key === draftItem.key);
-  if (!alreadyPersisted) {
-    items.push(draftItem);
-  }
+export const buildSavedItems = (events: TimelineEvent[]): TimelineItem[] => {
+  const eventsById = new Map(events.map((event) => [event.id, event]));
+  return groupTimelineEvents(events, eventsById);
 };
 
-export const toTimelineItems = ({
-  events,
+export const buildLiveItems = ({
   pendingUserMessage,
   activeExecution,
-}: ToTimelineItemsParams): TimelineItem[] => {
-  const eventsById = new Map(events.map((event) => [event.id, event]));
-  const items: TimelineItem[] = groupTimelineEvents(events, eventsById);
+}: Omit<ToTimelineItemsParams, 'events'>): TimelineItem[] => {
+  const items: TimelineItem[] = [];
 
   if (pendingUserMessage) {
     items.push({
@@ -227,21 +221,52 @@ export const toTimelineItems = ({
       event: pendingUserMessage,
       isPending: true,
     });
+  }
 
-    if (activeExecution) {
-      appendDraftItem(items, activeExecution);
-    } else {
-      items.push({
-        kind: 'agentTurn',
-        key: ACTIVE_EXECUTION_ITEM_KEY,
-        status: 'running',
-        startedAt: new Date().toISOString(),
-        steps: [],
-      });
-    }
-  } else if (activeExecution) {
-    appendDraftItem(items, activeExecution);
+  if (activeExecution) {
+    items.push(activeExecutionToItem(activeExecution));
+  } else if (pendingUserMessage) {
+    items.push({
+      kind: 'agentTurn',
+      key: ACTIVE_EXECUTION_ITEM_KEY,
+      status: 'running',
+      startedAt: new Date().toISOString(),
+      steps: [],
+    });
   }
 
   return items;
 };
+
+const appendDraftItem = (items: TimelineItem[], draftItem: AgentTurnItem): void => {
+  const alreadyPersisted =
+    draftItem.key !== ACTIVE_EXECUTION_ITEM_KEY && items.some((item) => item.key === draftItem.key);
+  if (!alreadyPersisted) {
+    items.push(draftItem);
+  }
+};
+
+export const assembleTimelineItems = (
+  savedItems: TimelineItem[],
+  liveItems: TimelineItem[]
+): TimelineItem[] => {
+  const items = [...savedItems];
+  for (const item of liveItems) {
+    if (item.kind === 'agentTurn') {
+      appendDraftItem(items, item);
+    } else {
+      items.push(item);
+    }
+  }
+  return items;
+};
+
+export const toTimelineItems = ({
+  events,
+  pendingUserMessage,
+  activeExecution,
+}: ToTimelineItemsParams): TimelineItem[] =>
+  assembleTimelineItems(
+    buildSavedItems(events),
+    buildLiveItems({ pendingUserMessage, activeExecution })
+  );

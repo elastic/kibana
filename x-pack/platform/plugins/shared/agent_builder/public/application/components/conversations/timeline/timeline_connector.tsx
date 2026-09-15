@@ -18,7 +18,7 @@ import {
   useStreamRecord,
   useConversationStreamService,
 } from '../../../context/streaming/streaming_context';
-import { toTimelineItems } from './to_timeline_items';
+import { buildSavedItems, buildLiveItems, assembleTimelineItems } from './to_timeline_items';
 import { Timeline } from './timeline';
 
 const PENDING_USER_MESSAGE_ID = 'pending::user_message';
@@ -58,14 +58,14 @@ export const TimelineConnector: React.FC = () => {
   const persistedEvents = conversation?.events;
   const conversationAttachments = conversation?.attachments;
 
+  const savedItems = useMemo(() => buildSavedItems(persistedEvents ?? []), [persistedEvents]);
+  const liveItems = useMemo(
+    () => buildLiveItems({ pendingUserMessage, activeExecution }),
+    [pendingUserMessage, activeExecution]
+  );
   const items = useMemo(
-    () =>
-      toTimelineItems({
-        events: persistedEvents ?? [],
-        pendingUserMessage,
-        activeExecution,
-      }),
-    [persistedEvents, pendingUserMessage, activeExecution]
+    () => assembleTimelineItems(savedItems, liveItems),
+    [savedItems, liveItems]
   );
 
   return <Timeline items={items} agent={agent} conversationAttachments={conversationAttachments} />;
