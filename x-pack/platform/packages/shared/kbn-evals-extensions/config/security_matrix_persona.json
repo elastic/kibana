@@ -441,6 +441,21 @@
       "id": "z-ai/glm-5.3-flash",
       "label": "Glm 5.3 flash",
       "openSource": true
+    },
+    {
+      "id": "eis-google-gemini-2-5-flash-lite",
+      "label": "Google Gemini 2.5 Flash Lite (EIS)",
+      "openSource": false
+    },
+    {
+      "id": "eis-openai-gpt-oss-20b",
+      "label": "OpenAI GPT-OSS 20B (EIS)",
+      "openSource": true
+    },
+    {
+      "id": "eis-gp-llm-v2",
+      "label": "GP LLM v2 (EIS)",
+      "openSource": false
     }
   ]
 }
