@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   CONVERSATION_SCHEMA_VERSION,
+  ConversationParentRelation,
   ConversationRoundStatus,
   EventActorType,
   TimelineEventType,
@@ -25,6 +26,7 @@ import {
   ConversationAccessControlRole,
 } from '@kbn/agent-builder-common/chat/access_control';
 import type {
+  ConversationParentLink,
   ConversationTemplate,
   SerializedMetadataValue,
   TimelineEvent,
@@ -93,6 +95,7 @@ describe.skip('ConversationClient', () => {
     rounds = [],
     attachments,
     workspaceId,
+    parentConversation,
     read = false,
     readBy = [{ userId: 'unrelated-reader-id' }],
     hasReadBy = true,
@@ -115,6 +118,7 @@ describe.skip('ConversationClient', () => {
     rounds?: unknown[];
     attachments?: unknown[];
     workspaceId?: string;
+    parentConversation?: ConversationParentLink;
     read?: boolean;
     readBy?: Array<{ userId: string }>;
     hasReadBy?: boolean;
@@ -141,6 +145,7 @@ describe.skip('ConversationClient', () => {
         conversation_rounds: rounds,
         ...(attachments ? { attachments } : {}),
         ...(workspaceId ? { workspace_id: workspaceId } : {}),
+        ...(parentConversation ? { parent_conversation: parentConversation } : {}),
         ...(schemaVersion !== undefined ? { schema_version: schemaVersion } : {}),
         ...(events !== undefined ? { events } : {}),
         access_control: {
@@ -738,8 +743,45 @@ describe.skip('ConversationClient', () => {
       expect(query.bool.filter).toContainEqual({
         ids: { values: ['conversation-1', 'conversation-2'] },
       });
-      // Space scoping, read access, and the sub-agent exclusion still apply.
-      expect(query.bool.filter).toHaveLength(4);
+      // Space scoping and read access still apply, on top of the ids clause.
+      expect(query.bool.filter).toHaveLength(3);
+    });
+
+    it('resolves sub-agent conversations, unlike the list surfaces', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.bulkGet(['conversation-1']);
+
+      const { query } = mockEsClient.search.mock.calls[0][0];
+      expect(query.bool.filter).not.toContainEqual({
+        bool: { must_not: [{ exists: { field: 'parent_conversation' } }] },
+      });
+    });
+
+    it('returns the parent link so callers can tell sub-agent conversations apart', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({ id: 'conversation-parent' }),
+            createConversationDocument({
+              id: 'conversation-child',
+              parentConversation: {
+                id: 'conversation-parent',
+                relation: ConversationParentRelation.subagent,
+              },
+            }),
+          ],
+        },
+      });
+
+      const result = await client.bulkGet(['conversation-parent', 'conversation-child']);
+
+      expect(mockEsClient.search.mock.calls[0][0]._source).toContain('parent_conversation');
+      expect(result.get('conversation-child')?.parent_conversation).toEqual({
+        id: 'conversation-parent',
+        relation: ConversationParentRelation.subagent,
+      });
+      expect(result.get('conversation-parent')?.parent_conversation).toBeUndefined();
     });
 
     it('sizes the query to the id count and does not track totals', async () => {

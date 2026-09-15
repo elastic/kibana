@@ -193,6 +193,11 @@ const CONVERSATION_LIST_SOURCE_FIELDS = [
   'attachments.active',
 ];
 
+const CONVERSATION_BULK_GET_SOURCE_FIELDS = [
+  ...CONVERSATION_LIST_SOURCE_FIELDS,
+  'parent_conversation',
+];
+
 /**
  * Minimal shape relied on when mapping a list/search response to `ConversationListResult`:
  * `hits.total` in either its numeric or `{ value }` form, and hits loose enough to satisfy
@@ -317,10 +322,13 @@ class ConversationClientImpl implements ConversationClient {
       size: ids.length,
       track_total_hits: false,
       seq_no_primary_term: true,
-      _source: CONVERSATION_LIST_SOURCE_FIELDS,
+      _source: CONVERSATION_BULK_GET_SOURCE_FIELDS,
       query: {
         bool: {
-          filter: [...this.buildBaseFilters(agentIds), idsFilter],
+          filter: [
+            ...this.buildBaseFilters(agentIds, { includeSubAgentConversations: true }),
+            idsFilter,
+          ],
         },
       },
     });
@@ -411,15 +419,19 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   /**
-   * Filter clauses shared by every conversation list/search query: space scoping, read access,
-   * and hiding sub-agent conversations from the nav list - hardcoded until we need to do better.
+   * Filter clauses shared by every conversation list/search query: space scoping and read access.
    * Query-specific filters (e.g. `pinned`, a title match) are appended by the caller.
    */
-  private buildBaseFilters(agentIds: string[]): QueryDslQueryContainer[] {
+  private buildBaseFilters(
+    agentIds: string[],
+    { includeSubAgentConversations = false }: { includeSubAgentConversations?: boolean } = {}
+  ): QueryDslQueryContainer[] {
     return [
       createSpaceDslFilter(this.space),
       buildReadAccessFilter({ user: this.user, agentIds }),
-      { bool: { must_not: [{ exists: { field: 'parent_conversation' } }] } },
+      ...(includeSubAgentConversations
+        ? []
+        : [{ bool: { must_not: [{ exists: { field: 'parent_conversation' } }] } }]),
     ];
   }
 
