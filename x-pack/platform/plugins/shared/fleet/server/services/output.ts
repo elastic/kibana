@@ -1011,7 +1011,9 @@ class OutputService {
     }
 
     // id is stripped to prevent poisoning the saved object's identity field.
-    const updateData: Nullable<Partial<OutputSOAttributes>> = { ...omit(data, ['ssl', 'secrets', 'id']) };
+    const updateData: Nullable<Partial<OutputSOAttributes>> = {
+      ...omit(data, ['ssl', 'secrets', 'id']),
+    };
 
     if (updateData.type && outputTypeSupportPresets(updateData.type)) {
       if (
