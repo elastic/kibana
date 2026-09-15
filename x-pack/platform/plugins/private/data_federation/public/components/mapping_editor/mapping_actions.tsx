@@ -7,33 +7,18 @@
 
 import React from 'react';
 import type { MouseEvent } from 'react';
-import { EuiBadge, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { MappingEditorField } from './mapping_editor';
-
 export interface MappingActionsProps {
-  field: MappingEditorField;
-  typeLabel?: string;
   onEdit: () => void;
   onRemove: () => void;
 }
 
-export const MappingActions = ({ field, typeLabel, onEdit, onRemove }: MappingActionsProps) => {
+export const MappingActions = ({ onEdit, onRemove }: MappingActionsProps) => {
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="s" direction="row" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="none" direction="row" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              {field.type ? (
-                <EuiBadge color="hollow">{typeLabel ?? field.type}</EuiBadge>
-              ) : (
-                <span aria-hidden="true">&nbsp;</span>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" direction="row" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>

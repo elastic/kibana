@@ -25,57 +25,20 @@ describe('MappingActions', () => {
   };
 
   it('renders the provided type label', () => {
-    const field = {
-      id: '1',
-      name: 'status_code',
-      path: '',
-      type: 'integer' as const,
-      format: '',
-    };
-
-    const { getByText } = renderComponent({
-      field,
-      typeLabel: 'Integer',
+    const { getByTestId } = renderComponent({
       onEdit: jest.fn(),
       onRemove: jest.fn(),
     });
 
-    expect(getByText('Integer')).toBeInTheDocument();
-  });
-
-  it('falls back to the raw type when no type label is provided', () => {
-    const field = {
-      id: '1',
-      name: 'status_code',
-      path: '',
-      type: 'integer' as const,
-      format: '',
-    };
-
-    const { getByText } = renderComponent({
-      field,
-      onEdit: jest.fn(),
-      onRemove: jest.fn(),
-    });
-
-    expect(getByText('integer')).toBeInTheDocument();
+    expect(getByTestId('dataFederationMappingEditorEditField')).toBeInTheDocument();
+    expect(getByTestId('dataFederationMappingEditorRemoveField')).toBeInTheDocument();
   });
 
   it('calls onEdit and onRemove when the corresponding buttons are clicked', () => {
-    const field = {
-      id: '1',
-      name: 'status_code',
-      path: '',
-      type: 'integer' as const,
-      format: '',
-    };
-
     const onEdit = jest.fn();
     const onRemove = jest.fn();
 
     const { getByTestId } = renderComponent({
-      field,
-      typeLabel: 'Integer',
       onEdit,
       onRemove,
     });

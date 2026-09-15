@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { MappingEditorField } from './mapping_editor';
@@ -36,7 +36,14 @@ export const FieldMappingDisplayMode = ({
           })}
         </EuiText>
       </EuiFlexItem>
-      <MappingActions field={field} typeLabel={typeLabel} onEdit={onEdit} onRemove={onRemove} />
+      <EuiFlexItem>
+        {field.type ? (
+          <EuiBadge color="hollow">{typeLabel ?? field.type}</EuiBadge>
+        ) : (
+          <span aria-hidden="true">&nbsp;</span>
+        )}
+      </EuiFlexItem>
+      <MappingActions onEdit={onEdit} onRemove={onRemove} />
     </>
   );
 };
