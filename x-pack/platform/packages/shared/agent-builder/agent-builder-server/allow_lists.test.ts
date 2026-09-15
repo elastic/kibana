@@ -5,8 +5,19 @@
  * 2.0.
  */
 
-import { isAllowedBuiltinAttachment, isAllowedSkillRegistration } from './allow_lists';
+import {
+  isAllowedBuiltinAttachment,
+  isAllowedBuiltinTool,
+  isAllowedSkillRegistration,
+} from './allow_lists';
 import { ELASTIC_SKILLS_BASE_PATH } from './skills/type_definition';
+
+describe('isAllowedBuiltinTool', () => {
+  it('allows the Context Engine memory tools', () => {
+    expect(isAllowedBuiltinTool('platform.context_engine.remember')).toBe(true);
+    expect(isAllowedBuiltinTool('platform.context_engine.forget')).toBe(true);
+  });
+});
 
 describe('isAllowedBuiltinAttachment', () => {
   it('returns true for listed attachment type ids', () => {
