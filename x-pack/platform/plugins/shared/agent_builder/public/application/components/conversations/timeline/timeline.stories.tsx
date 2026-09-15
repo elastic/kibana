@@ -16,14 +16,11 @@ import {
 } from '@elastic/eui';
 import type { Meta, StoryObj } from '@storybook/react';
 import type { ChatEvent, TimelineEvent } from '@kbn/agent-builder-common';
-import { isRoundCompleteEvent, ConversationRoundStepType } from '@kbn/agent-builder-common';
+import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { AgentBuilderStorybookProvider } from '../../../__storybook__/agent_builder_storybook_provider';
 import { Timeline } from './timeline';
 import { DevSseEmitter } from './dev_sse_emitter';
-import {
-  activeExecutionReducer,
-  type ActiveExecutionDraft,
-} from '../../../../services/events/active_execution_reducer';
+import { activeExecutionReducer } from '../../../../services/events/active_execution_reducer';
 import { toTimelineItems } from './to_timeline_items';
 import { createUserMessageEvent } from './items/user_message_event.factory';
 import { createExecutionStartedEvent } from './items/execution_started.factory';
@@ -36,12 +33,6 @@ import {
   createAbortedTurnItem,
   createStreamingTurnItem,
 } from './items/timeline_item.factory';
-
-const storyReducer = (
-  state: ActiveExecutionDraft | null,
-  event: ChatEvent
-): ActiveExecutionDraft | null =>
-  isRoundCompleteEvent(event) ? null : activeExecutionReducer(state, event);
 
 const seedEvents: TimelineEvent[] = [
   createUserMessageEvent({ id: 'seed-1' }),
@@ -137,7 +128,6 @@ export const Default: Story = {
           execution_id: 'execution-2',
           trigger_event_id: 'event-3',
           data: {
-            steps: [],
             model_usage: {
               connector_id: '.anthropic-claude-4.6-sonnet-chat_completion',
               llm_calls: 1,
@@ -188,7 +178,7 @@ export const AbortedExecution: Story = {
 };
 
 const InteractiveInner: React.FC<{ onReset: () => void }> = ({ onReset }) => {
-  const [activeExecution, dispatch] = useReducer(storyReducer, null);
+  const [activeExecution, dispatch] = useReducer(activeExecutionReducer, null);
   const emit = useCallback((event: ChatEvent) => dispatch(event), []);
 
   const toTimelineItemsInput = { events: seedEvents, activeExecution };

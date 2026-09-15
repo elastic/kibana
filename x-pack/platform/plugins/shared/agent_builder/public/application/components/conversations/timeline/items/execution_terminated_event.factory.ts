@@ -21,7 +21,6 @@ export const createExecutionTerminatedEvent = (
   execution_id: 'execution-1',
   trigger_event_id: 'event-1',
   data: {
-    steps: [],
     model_usage: {
       connector_id: '.anthropic-claude-4.6-sonnet-chat_completion',
       llm_calls: 1,

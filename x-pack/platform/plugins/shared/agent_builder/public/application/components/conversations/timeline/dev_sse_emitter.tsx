@@ -15,10 +15,9 @@ import {
   EuiPanel,
   EuiText,
 } from '@elastic/eui';
-import type { ChatEvent, ConversationRound } from '@kbn/agent-builder-common';
+import type { ChatEvent } from '@kbn/agent-builder-common';
 import {
   ChatEventType,
-  ConversationRoundStatus,
   ToolResultType,
   TimelineEventType,
   EventActorType,
@@ -37,18 +36,6 @@ interface DevSseEmitterProps {
 const MESSAGE_ID = 'dev-message';
 const TOOL_CALL_ID = 'dev-tool-call';
 const DEV_EXECUTION_ID = 'dev-execution';
-
-const fakeRound = (): ConversationRound => ({
-  id: `dev-round-${Date.now()}`,
-  status: ConversationRoundStatus.completed,
-  input: { message: 'dev message' },
-  steps: [],
-  response: { message: '' },
-  started_at: new Date().toISOString(),
-  time_to_first_token: 0,
-  time_to_last_token: 0,
-  model_usage: { connector_id: '', llm_calls: 0, input_tokens: 0, output_tokens: 0, model: '' },
-});
 
 type Phase = 'Init' | 'Reasoning' | 'Tool' | 'Message' | 'Seal';
 
@@ -71,15 +58,6 @@ const BUTTONS: EventButton[] = [
       actor: { type: EventActorType.agent, id: 'dev-agent' },
       execution_id: DEV_EXECUTION_ID,
       data: { trigger_type: TimelineTriggerType.userMessage },
-    }),
-  },
-  {
-    id: 'reasoning-transient',
-    label: 'reasoning (transient)',
-    phase: 'Reasoning',
-    build: () => ({
-      type: ChatEventType.reasoning,
-      data: { transient: true, reasoning: 'Planning my next step' },
     }),
   },
   {
@@ -180,15 +158,6 @@ const BUTTONS: EventButton[] = [
       },
     }),
   },
-  {
-    id: 'round-complete',
-    label: 'round_complete (end stream)',
-    phase: 'Seal',
-    build: () => ({
-      type: ChatEventType.roundComplete,
-      data: { round: fakeRound() },
-    }),
-  },
 ];
 
 const PHASES: Phase[] = ['Init', 'Reasoning', 'Tool', 'Message', 'Seal'];
@@ -196,7 +165,6 @@ const PHASES: Phase[] = ['Init', 'Reasoning', 'Tool', 'Message', 'Seal'];
 // A realistic run, in order, for the "Next" button to walk through.
 const HAPPY_PATH: string[] = [
   'execution-started',
-  'reasoning-transient',
   'tool-call',
   'tool-progress',
   'tool-result',
@@ -206,7 +174,6 @@ const HAPPY_PATH: string[] = [
   'thinking-complete',
   'message-complete',
   'execution-terminated',
-  'round-complete',
 ];
 
 const byId = (id: string) => BUTTONS.find((button) => button.id === id);
