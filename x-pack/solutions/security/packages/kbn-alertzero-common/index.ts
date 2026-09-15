@@ -82,7 +82,6 @@ export { CONVERSATION_QUEUE_CATEGORIES, CONVERSATION_QUEUE_LABELS } from './tran
 
 export {
   ApprovalRequirement,
-  DetectionConfig,
   GetInvestigationResponse,
   GetWatchResponse,
   Investigation,
@@ -161,7 +160,9 @@ export {
   getMockProposalsByInvestigationId,
 } from './impl/samples';
 export {
+  getAllowedAutonomyLevels,
   getCompleteWorkerSettingsSchema,
+  getWorkerExtrasFields,
   parseCompleteWorkerSettings,
   rejectUnsupportedWorkerSettingsWrite,
   touchesWorkerSettings,

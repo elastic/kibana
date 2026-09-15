@@ -25,7 +25,6 @@ export {
 
 export {
   ApprovalRequirement,
-  DetectionConfig,
   WatchApprovalGate,
   WatchAutonomyLevel,
   WatchLedgerEntry,

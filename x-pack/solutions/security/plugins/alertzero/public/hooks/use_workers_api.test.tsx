@@ -11,7 +11,9 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
+  SYSTEM_SECURITY_WATCH_DETECTION_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   type Worker,
 } from '@kbn/alertzero-common';
@@ -35,6 +37,7 @@ const createWorker = (overrides: Partial<Worker> = {}): Worker => ({
   lastRun: null,
   state: 'paused',
   settingsRevision: 1,
+  allowedAutonomyLevels: ['manual', 'assisted', 'supervised'],
   settings: {
     workerId: TRIAGE,
     autonomy: 'manual',
@@ -178,43 +181,53 @@ describe('useUpdateWorker', () => {
     });
   });
 
-  const detectionWorker = createWorker({
+  const RULE_TUNING = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
+
+  const tuningWorker = createWorker({
+    id: RULE_TUNING,
+    name: 'Rule Tuning',
+    watchIds: [SYSTEM_SECURITY_WATCH_DETECTION_ID],
     settingsRevision: 6,
     settings: {
-      workerId: TRIAGE,
+      workerId: RULE_TUNING,
       autonomy: 'manual',
-      detectionConfig: { confidenceThreshold: 0.85, fpCountThreshold: 10 },
+      scheduleInterval: '2h',
+      extras: { analysisWindowDays: 14 },
     },
   });
 
-  it('treats a detectionConfig-only patch as a settings write and sends the revision', async () => {
+  it('treats an extras-only patch as a settings write and sends the revision', async () => {
     const patch = jest.fn().mockResolvedValue({
       worker: createWorker({
+        id: RULE_TUNING,
         settingsRevision: 7,
         settings: {
-          workerId: TRIAGE,
+          workerId: RULE_TUNING,
           autonomy: 'manual',
-          detectionConfig: { confidenceThreshold: 0.7, fpCountThreshold: 10 },
+          scheduleInterval: '2h',
+          extras: { analysisWindowDays: 21 },
         },
       }),
     });
-    const { result } = renderUpdateWorker(detectionWorker, patch);
+    const { result } = renderUpdateWorker(tuningWorker, patch);
 
     await act(async () => {
       result.current.mutate({
-        workerId: TRIAGE,
-        patch: { settings: { detectionConfig: { confidenceThreshold: 0.7 } } },
+        workerId: RULE_TUNING,
+        patch: { settings: { extras: { analysisWindowDays: 21 } } },
       });
     });
 
     await waitFor(() => expect(patch).toHaveBeenCalledTimes(1));
     expect(JSON.parse(patch.mock.calls[0][1].body)).toEqual({
-      settings: { detectionConfig: { confidenceThreshold: 0.7 } },
+      settings: { extras: { analysisWindowDays: 21 } },
       settingsRevision: 6,
     });
   });
 
-  it('merges a detectionConfig patch field-by-field into the optimistic cache entry', async () => {
+  it('REPLACES extras in the optimistic cache entry rather than merging field-by-field', async () => {
+    // decisions item 12: extras is written whole. A partial extras patch must not be deep-merged
+    // into the cached object, or the UI would show a value the server will not persist.
     let resolvePatch: ((worker: Worker) => void) | undefined;
     const patch = jest.fn(
       () =>
@@ -222,12 +235,12 @@ describe('useUpdateWorker', () => {
           resolvePatch = (worker) => resolve({ worker });
         })
     );
-    const { result, queryClient } = renderUpdateWorker(detectionWorker, patch);
+    const { result, queryClient } = renderUpdateWorker(tuningWorker, patch);
 
     act(() => {
       result.current.mutate({
-        workerId: TRIAGE,
-        patch: { settings: { detectionConfig: { confidenceThreshold: 0.7 } } },
+        workerId: RULE_TUNING,
+        patch: { settings: { extras: { analysisWindowDays: 7 } } },
       });
     });
 
@@ -235,19 +248,17 @@ describe('useUpdateWorker', () => {
 
     const cached = queryClient
       .getQueryData<{ workers: Worker[] }>(queryKeys.workers.list())
-      ?.workers.find((worker) => worker.id === TRIAGE);
-    expect(cached?.settings.detectionConfig).toEqual({
-      confidenceThreshold: 0.7,
-      fpCountThreshold: 10,
-    });
+      ?.workers.find((worker) => worker.id === RULE_TUNING);
+    expect(cached?.settings.extras).toEqual({ analysisWindowDays: 7 });
 
     resolvePatch!(
       createWorker({
         settingsRevision: 7,
         settings: {
-          workerId: TRIAGE,
+          workerId: RULE_TUNING,
           autonomy: 'manual',
-          detectionConfig: { confidenceThreshold: 0.7, fpCountThreshold: 10 },
+          scheduleInterval: '2h',
+          extras: { analysisWindowDays: 7 },
         },
       })
     );

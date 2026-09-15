@@ -17,6 +17,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 import { WorkerSettingsWrite, Worker } from '../components/watch_settings.gen';
+
 export const UpdateWorkerRequestParams = lazySchema(() =>
   z.object({
     /**

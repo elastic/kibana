@@ -77,17 +77,7 @@ const applyWorkerPatch = (worker: Worker, patch: UpdateWorkerRequestBody): Worke
         ...(patch.settings.scheduleInterval === undefined
           ? {}
           : { scheduleInterval: patch.settings.scheduleInterval }),
-        ...(patch.settings.analysisWindowDays === undefined
-          ? {}
-          : { analysisWindowDays: patch.settings.analysisWindowDays }),
-        ...(patch.settings.detectionConfig == null
-          ? {}
-          : {
-              detectionConfig: {
-                ...worker.settings.detectionConfig,
-                ...patch.settings.detectionConfig,
-              },
-            }),
+        ...(patch.settings.extras == null ? {} : { extras: patch.settings.extras }),
       }
     : worker.settings;
   return {
@@ -134,9 +124,10 @@ export const useUpdateWorker = () => {
         const current = queryClient
           .getQueryData<ListWorkersResponse>(queryKey)
           ?.workers.find((worker) => worker.id === workerId);
-        const body = touchesWorkerSettings(patch)
-          ? { ...patch, settingsRevision: current?.settingsRevision ?? null }
-          : patch;
+        const body =
+          touchesWorkerSettings(patch) || patch.enabled !== undefined
+            ? { ...patch, settingsRevision: current?.settingsRevision ?? null }
+            : patch;
         const response = await services.http!.patch<UpdateWorkerResponse>(
           buildWorkerUrl(workerId),
           {

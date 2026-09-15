@@ -14,6 +14,18 @@ components:
         There is deliberately no mapping from the legacy 1–5 AutonomyLevel scale — see
         https://github.com/elastic/security-team/issues/18718.
 
+    AllowedAutonomyLevels:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/components/schemas/WatchAutonomyLevel'
+      description: >-
+        Autonomy levels this Worker actually supports, derived from its complete settings schema
+        rather than a hand-maintained list (worker-settings-page-decisions-3, item 3). A Worker
+        whose gate cannot run unattended narrows this to the levels it can honour; the UI renders
+        a selector only when more than one level is allowed, and the server rejects a PATCH
+        naming a level outside the set.
+
     WorkerScheduleInterval:
       type: string
       pattern: '^[1-9][0-9]*[mhd]$'
@@ -261,23 +273,6 @@ components:
         autonomy:
           $ref: '#/components/schemas/WatchAutonomyLevel'
 
-    DetectionConfig:
-      type: object
-      description: >-
-        Per-Worker numeric tuning for detection-oriented Workers, e.g. Alert Triage's auto-close
-        threshold. Optional and per-Worker opt-in — only meaningful for Workers whose autonomy
-        cards reference these fields.
-      properties:
-        confidenceThreshold:
-          type: number
-          minimum: 0
-          maximum: 1
-          description: Minimum confidence score, 0–1, for the auto-close/proposal decision.
-        fpCountThreshold:
-          type: integer
-          minimum: 1
-          description: Minimum qualifying false-positive count, a positive integer.
-
     SharedOnlyWorkerSettings:
       type: object
       additionalProperties: false
@@ -319,7 +314,7 @@ components:
         - workerId
         - autonomy
         - scheduleInterval
-        - analysisWindowDays
+        - extras
       properties:
         workerId:
           type: string
@@ -328,27 +323,39 @@ components:
           $ref: '#/components/schemas/WatchAutonomyLevel'
         scheduleInterval:
           $ref: '#/components/schemas/WorkerScheduleInterval'
-        analysisWindowDays:
-          $ref: '#/components/schemas/AnalysisWindowDays'
+        extras:
+          $ref: '#/components/schemas/RuleTuningWorkerExtras'
 
     AlertTriageWorkerSettings:
       type: object
       additionalProperties: false
       description: >-
-        Complete Alert Triage settings: shared autonomy dial plus its detection tuning fields
-        (confidence / false-positive-count thresholds).
+        Complete Alert Triage settings. Detection tuning thresholds were removed from the
+        contract: the Alert Triage workflow is a classification stub with no auto-close step
+        to consume them, so exposing thresholds would be settings storage without a consumer
+        (worker-settings-page-decisions-3, item 9).
       required:
         - workerId
         - autonomy
-        - detectionConfig
       properties:
         workerId:
           type: string
           enum: [system-security-floor-alert-triage]
         autonomy:
           $ref: '#/components/schemas/WatchAutonomyLevel'
-        detectionConfig:
-          $ref: '#/components/schemas/DetectionConfig'
+
+    RuleTuningWorkerExtras:
+      type: object
+      additionalProperties: false
+      description: >-
+        Watch-owned custom fields for Detection Rule Tuning. Closed per-Worker schema; unknown
+        keys are rejected with the field name so a misspelled custom setting cannot silently
+        persist. Replaces whole-object on write (worker-settings-page-decisions-3, items 5+12).
+      required:
+        - analysisWindowDays
+      properties:
+        analysisWindowDays:
+          $ref: '#/components/schemas/AnalysisWindowDays'
 
     WorkerSettings:
       type: object
@@ -366,53 +373,47 @@ components:
           type: string
         autonomy:
           $ref: '#/components/schemas/WatchAutonomyLevel'
-        allowedAutonomyLevels:
-          type: array
-          items:
-            $ref: '#/components/schemas/WatchAutonomyLevel'
-          minItems: 1
-          maxItems: 3
-          description: >-
-            Subset of the shared autonomy scale this Worker offers. Same meaning as
-            WatchAutonomyLevel everywhere; availability is per-Worker. Omitted means all three.
-        allowedTriggers:
-          type: array
-          items:
-            $ref: '#/components/schemas/WorkerTriggerType'
-          minItems: 1
-          maxItems: 2
-          description: >-
-            Which trigger kinds this Worker allows. Manual and scheduled are independent —
-            a Worker may offer one or both. The interval control is shown only when scheduled
-            is present (via scheduleInterval).
         scheduleInterval:
           $ref: '#/components/schemas/WorkerScheduleInterval'
           description: >-
             Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to
             render the interval control.
-        detectionConfig:
-          $ref: '#/components/schemas/DetectionConfig'
+        extras:
+          type: object
+          additionalProperties: false
           description: >-
-            Omitted for Workers that own no detection tuning fields. Its presence is what tells
-            the UI to render the confidence/false-positive controls.
-        analysisWindowDays:
-          $ref: '#/components/schemas/AnalysisWindowDays'
+            Watch-owned custom fields this Worker declares. Which keys exist is decided by the
+            Worker's complete schema (e.g. RuleTuningWorkerExtras); the shape here is the union
+            for API read. Replaces whole-object on write. Omitted when the Worker owns none.
+          properties:
+            analysisWindowDays:
+              $ref: '#/components/schemas/AnalysisWindowDays'
 
     WorkerSettingsWrite:
       type: object
       additionalProperties: false
       description: >-
         Partial settings patch. Field names match WorkerSettings. Omitted fields keep their stored
-        values; unknown keys and wrong-Worker fields are rejected.
+        values; unknown keys and wrong-Worker fields are rejected. extras replaces the whole
+        stored object when present.
       properties:
         autonomy:
           $ref: '#/components/schemas/WatchAutonomyLevel'
         scheduleInterval:
           $ref: '#/components/schemas/WorkerScheduleInterval'
+        extras:
+          $ref: '#/components/schemas/WorkerSettingsWriteExtras'
+
+    WorkerSettingsWriteExtras:
+      type: object
+      additionalProperties: false
+      description: >-
+        Watch-owned custom fields a Client may write. Union of all Workers' custom fields;
+        the server validates against the target Worker's complete schema, so a field another
+        Worker owns is rejected here.
+      properties:
         analysisWindowDays:
           $ref: '#/components/schemas/AnalysisWindowDays'
-        detectionConfig:
-          $ref: '#/components/schemas/DetectionConfig'
     Worker:
       type: object
       description: A live registered Worker with Watch membership and durable settings.
@@ -425,6 +426,7 @@ components:
         - state
         - settings
         - settingsRevision
+        - allowedAutonomyLevels
       properties:
         id:
           type: string
@@ -448,6 +450,8 @@ components:
           $ref: './watch.schema.yaml#/components/schemas/Lifecycle'
         settings:
           $ref: '#/components/schemas/WorkerSettings'
+        allowedAutonomyLevels:
+          $ref: '#/components/schemas/AllowedAutonomyLevels'
         settingsRevision:
           type: integer
           format: int64

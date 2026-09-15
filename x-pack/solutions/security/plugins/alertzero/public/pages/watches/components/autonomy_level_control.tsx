@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -28,6 +28,15 @@ import * as i18n from '../settings_translations';
 interface AutonomyLevelControlProps {
   workerId: string;
   current: WatchAutonomyLevel;
+  /**
+   * Levels this Worker supports, projected by the server from its complete settings schema
+   * (worker-settings-page-decisions-3, item 3). The control renders only these, so a Worker
+   * that narrows its schema narrows the UI with no client-side list to keep in sync.
+   *
+   * Optional only so a caller rendering a Worker fetched before this field existed degrades to
+   * "every level offered" instead of an empty control; the server always projects it.
+   */
+  allowedAutonomyLevels?: readonly WatchAutonomyLevel[];
   isDisabled?: boolean;
   onChange: (level: WatchAutonomyLevel) => void;
 }
@@ -126,12 +135,20 @@ function LevelCardBody({ card }: { card: AutonomyLevelCard }) {
 export const AutonomyLevelControl: React.FC<AutonomyLevelControlProps> = ({
   workerId,
   current,
+  allowedAutonomyLevels,
   isDisabled,
   onChange,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const cards = getAutonomyLevelCards(workerId);
+  const allCards = getAutonomyLevelCards(workerId);
   const groupName = useGeneratedHtmlId({ prefix: 'alertZeroAutonomyLevel' });
+  // Card copy exists for every level; which ones are offered is the server's call.
+  const cards = useMemo(() => {
+    if (!allCards) return null;
+    if (!allowedAutonomyLevels) return allCards;
+    const levels = allCards.levels.filter((card) => allowedAutonomyLevels.includes(card.level));
+    return levels.length > 0 ? { ...allCards, levels } : null;
+  }, [allCards, allowedAutonomyLevels]);
 
   if (!cards) {
     return (
@@ -143,6 +160,20 @@ export const AutonomyLevelControl: React.FC<AutonomyLevelControlProps> = ({
 
   const levels = cards.levels.map((card) => card.level);
   const selectedLevel = levels.includes(current) ? current : levels[0];
+
+  // Item 3: one allowed level is a fact about the Worker, not a choice — render it as a fixed
+  // value rather than a single radio the analyst can click but never change.
+  if (levels.length === 1) {
+    return (
+      <EuiText size="s" color="subdued">
+        <p data-test-subj="alertZeroAutonomyLevelControl">
+          <span data-test-subj="alertZeroAutonomyFixedLevel">
+            {i18n.autonomyLevelName(selectedLevel)}
+          </span>
+        </p>
+      </EuiText>
+    );
+  }
   const isHighest =
     levels.length > 1 &&
     selectedLevel === levels[levels.length - 1] &&
@@ -185,7 +216,7 @@ export const AutonomyLevelControl: React.FC<AutonomyLevelControlProps> = ({
               checkableType="radio"
               label={i18n.autonomyLevelName(card.level)}
               checked={card.level === selectedLevel}
-              disabled={isDisabled || levels.length === 1}
+              disabled={isDisabled}
               onChange={() => onChange(card.level)}
               data-test-subj={`alertZeroAutonomyCard-${card.level}`}
             >

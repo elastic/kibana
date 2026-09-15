@@ -5,11 +5,22 @@
  * 2.0.
  */
 
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ */
+
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiAccordion,
   EuiBadge,
+  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -20,14 +31,14 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { Worker } from '@kbn/alertzero-common';
-import { useUpdateWorker } from '../../../hooks/use_workers_api';
+import type { WorkerSettingsWrite } from '@kbn/alertzero-common';
 import { AutonomyLevelControl } from './autonomy_level_control';
-import { DetectionConfigFields } from './detection_config_fields';
 import { ScheduleIntervalField } from './schedule_interval_field';
 import { WorkerSkillsTable } from './worker_skills_table';
 import { getWatchCustomSettingsComponent } from '../custom_settings/registry';
 import * as settingsI18n from '../settings_translations';
 import { workerName } from '../workers/translations';
+import type { WorkerSettingsDraft } from '../../../hooks/use_worker_settings_drafts';
 
 interface WorkerSettingsPanelProps {
   worker: Worker;
@@ -35,6 +46,15 @@ interface WorkerSettingsPanelProps {
   isAccordion: boolean;
   isExpanded: boolean;
   onToggle: (workerId: string, isOpen: boolean) => void;
+  /** Draft state (worker-settings-page-decisions-3, item 1): controls edit the draft;
+   *  nothing is written until Save. Undefined disables editing (no draft owner). */
+  draft: WorkerSettingsDraft | undefined;
+  isDirty: boolean;
+  isSaving: boolean;
+  onDraftSettingsChange: (patch: WorkerSettingsWrite) => void;
+  onDraftEnabledChange: (enabled: boolean) => void;
+  onSave: () => void;
+  onDiscard: () => void;
 }
 
 /**
@@ -42,17 +62,29 @@ interface WorkerSettingsPanelProps {
  * enabled switch) doubles as the accordion button when a Watch has several Workers, so collapsed
  * panels still summarise their state. Memoized: scroll-spy updates in the parent must not
  * re-render every Worker's settings.
+ *
+ * Draft semantics: control onChange handlers only update the parent-held draft. Save and Discard
+ * are the only paths that touch the API. Disabled Workers' settings still render (read-only) with
+ * the toggle drafting the next enabled state.
  */
 export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
   worker,
   isAccordion,
   isExpanded,
   onToggle,
+  draft,
+  isDirty,
+  isSaving,
+  onDraftSettingsChange,
+  onDraftEnabledChange,
+  onSave,
+  onDiscard,
 }: WorkerSettingsPanelProps) {
-  const { mutate: updateWorker } = useUpdateWorker();
   const { euiTheme } = useEuiTheme();
   const settingsLocked = worker.state === 'unavailable';
   const name = workerName(worker.id, worker.name);
+  const editable = draft !== undefined && !settingsLocked;
+  const draftEnabled = draft?.enabled ?? worker.enabled;
 
   const accordionCss = useMemo(
     () => css`
@@ -72,11 +104,9 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
   const enabledSwitch = (
     <EuiSwitch
       label={settingsI18n.ENABLED_SWITCH_LABEL}
-      checked={worker.enabled}
-      disabled={settingsLocked}
-      onChange={(event) =>
-        updateWorker({ workerId: worker.id, patch: { enabled: event.target.checked } })
-      }
+      checked={draftEnabled}
+      disabled={!editable}
+      onChange={(event) => onDraftEnabledChange(event.target.checked)}
       data-test-subj={`alertZeroWorkerEnabledSwitch-${worker.id}`}
     />
   );
@@ -91,44 +121,26 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
       <EuiSpacer size="m" />
       <AutonomyLevelControl
         workerId={worker.id}
-        current={worker.settings.autonomy}
-        isDisabled={settingsLocked}
-        onChange={(autonomyLevel) =>
-          updateWorker({ workerId: worker.id, patch: { settings: { autonomy: autonomyLevel } } })
-        }
+        current={draft?.settings.autonomy ?? worker.settings.autonomy}
+        allowedAutonomyLevels={worker.allowedAutonomyLevels}
+        isDisabled={!editable}
+        onChange={(autonomyLevel) => onDraftSettingsChange({ autonomy: autonomyLevel })}
       />
       {/* Only schedule-driven Workers project an interval; the others are alert- or
           event-triggered and own no schedule to configure. */}
-      {worker.settings.scheduleInterval != null ? (
+      {(draft?.settings.scheduleInterval ?? worker.settings.scheduleInterval) != null ? (
         <>
           <EuiSpacer size="m" />
           <ScheduleIntervalField
             workerId={worker.id}
-            current={worker.settings.scheduleInterval}
-            isDisabled={settingsLocked}
-            onChange={(scheduleInterval) =>
-              updateWorker({ workerId: worker.id, patch: { settings: { scheduleInterval } } })
-            }
+            current={(draft?.settings.scheduleInterval ?? worker.settings.scheduleInterval)!}
+            isDisabled={!editable}
+            onChange={(scheduleInterval) => onDraftSettingsChange({ scheduleInterval })}
           />
         </>
       ) : null}
-      {/* Only Workers whose autonomy cards reference detectionConfig carry it in their settings —
-          its presence is what tells this panel to render the confidence/false-positive controls. */}
-      {worker.settings.detectionConfig != null ? (
-        <>
-          <EuiSpacer size="m" />
-          <DetectionConfigFields
-            workerId={worker.id}
-            current={worker.settings.detectionConfig}
-            autonomy={worker.settings.autonomy}
-            isDisabled={settingsLocked}
-            onChange={(detectionConfig) =>
-              updateWorker({ workerId: worker.id, patch: { settings: { detectionConfig } } })
-            }
-          />
-        </>
-      ) : null}
-      {/* Watch-owned custom settings (e.g. analysisWindowDays) registered per Watch. */}
+      {/* Watch-owned custom settings (e.g. analysisWindowDays under extras) registered per
+          Watch. The draft supplies the edited values; extras replaces whole-object on save. */}
       {(() => {
         const CustomSettings = worker.watchIds
           .map((watchId) => getWatchCustomSettingsComponent(watchId))
@@ -138,11 +150,13 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
             <EuiSpacer size="m" />
             <CustomSettings
               worker={worker}
-              settings={worker.settings}
-              isDisabled={settingsLocked}
-              onSettingsChange={(patch) =>
-                updateWorker({ workerId: worker.id, patch: { settings: patch } })
+              settings={
+                draft?.settings.extras != null
+                  ? { ...worker.settings, extras: draft.settings.extras }
+                  : worker.settings
               }
+              isDisabled={!editable}
+              onSettingsChange={(patch) => onDraftSettingsChange(patch)}
             />
           </>
         ) : null;
@@ -156,17 +170,49 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
       <EuiFlexItem grow={false}>
         <EuiBadge color="hollow">
-          {settingsI18n.autonomyLevelName(worker.settings.autonomy)}
+          {settingsI18n.autonomyLevelName(draft?.settings.autonomy ?? worker.settings.autonomy)}
         </EuiBadge>
       </EuiFlexItem>
-      {worker.settings.scheduleInterval != null ? (
+      {(draft?.settings.scheduleInterval ?? worker.settings.scheduleInterval) != null ? (
         <EuiFlexItem grow={false}>
           <EuiBadge color="hollow">
-            {settingsI18n.SCHEDULE_INTERVAL_LABEL} {worker.settings.scheduleInterval}
+            {settingsI18n.SCHEDULE_INTERVAL_LABEL}{' '}
+            {draft?.settings.scheduleInterval ?? worker.settings.scheduleInterval}
           </EuiBadge>
         </EuiFlexItem>
       ) : null}
     </EuiFlexGroup>
+  ) : null;
+
+  const saveBar = editable ? (
+    <>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            size="s"
+            fill
+            iconType="check"
+            isLoading={isSaving}
+            isDisabled={!isDirty || isSaving}
+            onClick={onSave}
+            data-test-subj={`alertZeroWorkerSettingsSave-${worker.id}`}
+          >
+            {settingsI18n.SAVE_WATCH_SETTINGS}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            isDisabled={!isDirty || isSaving}
+            onClick={onDiscard}
+            data-test-subj={`alertZeroWorkerSettingsDiscard-${worker.id}`}
+          >
+            {settingsI18n.DISCARD_WATCH_SETTINGS}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   ) : null;
 
   if (isAccordion) {
@@ -193,6 +239,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
           css={accordionCss}
         >
           {settingsBody}
+          {saveBar}
         </EuiAccordion>
       </EuiPanel>
     );
@@ -214,6 +261,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
         <EuiFlexItem grow={false}>{enabledSwitch}</EuiFlexItem>
       </EuiFlexGroup>
       {settingsBody}
+      {saveBar}
     </EuiPanel>
   );
 });

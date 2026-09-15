@@ -6,30 +6,29 @@
  */
 
 import {
-  SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_IDS,
   WorkerScheduleInterval,
   WorkerSettings,
+  getWorkerExtrasFields,
+  workerOwnsSchedule,
 } from '@kbn/alertzero-common';
 import { SCHEDULED_INTERVAL_PATTERN } from '@kbn/workflows';
 import { createWorkerSettingsRegistration } from './worker_settings';
 
 const AD_WORKER_ID = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
-const TRIAGE_WORKER_ID = SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
 const RULE_TUNING_WORKER_ID = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
 
-const SCHEDULED_WORKER_IDS: string[] = [AD_WORKER_ID, RULE_TUNING_WORKER_ID];
+/**
+ * Capability membership is READ OFF THE SCHEMA rather than restated here
+ * (worker-settings-page-decisions-3, item 14). A parallel list in the test would
+ * re-introduce exactly the drift the contract consistency check exists to prevent.
+ */
+const UNSCHEDULED_WORKER_IDS = SYSTEM_SECURITY_WORKER_IDS.filter((id) => !workerOwnsSchedule(id));
 
-/** Every other Worker is alert- or event-triggered and owns no schedule. */
-const UNSCHEDULED_WORKER_IDS = SYSTEM_SECURITY_WORKER_IDS.filter(
-  (id) => !SCHEDULED_WORKER_IDS.includes(id)
-);
-
-/** Only Alert Triage's autonomy cards reference detectionConfig at present. */
-const NO_DETECTION_CONFIG_WORKER_IDS = SYSTEM_SECURITY_WORKER_IDS.filter(
-  (id) => id !== TRIAGE_WORKER_ID
+const NO_ANALYSIS_WINDOW_WORKER_IDS = SYSTEM_SECURITY_WORKER_IDS.filter(
+  (id) => !getWorkerExtrasFields(id).includes('analysisWindowDays')
 );
 
 describe('createWorkerSettingsRegistration', () => {
@@ -154,11 +153,13 @@ describe('createWorkerSettingsRegistration', () => {
         scheduleInterval: '2h',
         analysisWindowDays: 14,
       });
+      // The public projection nests worker-owned fields under settings.extras (item 5);
+      // internal template values stay flat because the workflow engine reads them that way.
       expect(registration.toSettings(registration.createDefaultValues())).toEqual({
         workerId: RULE_TUNING_WORKER_ID,
         autonomy: 'manual',
         scheduleInterval: '2h',
-        analysisWindowDays: 14,
+        extras: { analysisWindowDays: 14 },
       });
     });
 
@@ -200,7 +201,7 @@ describe('createWorkerSettingsRegistration', () => {
           scheduleInterval: '6h',
           analysisWindowDays: 14,
         },
-        { analysisWindowDays: 7 }
+        { extras: { analysisWindowDays: 7 } }
       );
 
       expect(applied).toEqual({
@@ -226,11 +227,13 @@ describe('createWorkerSettingsRegistration', () => {
   });
 
   describe('analysis window — Workers that do not own it', () => {
-    it.each(UNSCHEDULED_WORKER_IDS)('%s rejects an analysis window patch', (workerId) => {
+    it.each(NO_ANALYSIS_WINDOW_WORKER_IDS)('%s rejects an analysis window patch', (workerId) => {
       const registration = createWorkerSettingsRegistration(workerId);
 
       expect(
-        registration.applyPatch(registration.createDefaultValues(), { analysisWindowDays: 7 })
+        registration.applyPatch(registration.createDefaultValues(), {
+          extras: { analysisWindowDays: 7 },
+        })
       ).toEqual({ rejected: 'an analysis window' });
     });
 
@@ -238,7 +241,9 @@ describe('createWorkerSettingsRegistration', () => {
       const registration = createWorkerSettingsRegistration(AD_WORKER_ID);
 
       expect(
-        registration.applyPatch(registration.createDefaultValues(), { analysisWindowDays: 7 })
+        registration.applyPatch(registration.createDefaultValues(), {
+          extras: { analysisWindowDays: 7 },
+        })
       ).toEqual({ rejected: 'an analysis window' });
     });
   });
@@ -266,173 +271,6 @@ describe('createWorkerSettingsRegistration', () => {
     });
 
     it.each(UNSCHEDULED_WORKER_IDS)('%s still accepts an autonomy patch', (workerId) => {
-      const registration = createWorkerSettingsRegistration(workerId);
-      const defaults = registration.createDefaultValues();
-
-      expect(registration.applyPatch(defaults, { autonomy: 'assisted' })).toEqual({
-        values: { ...defaults, autonomyLevel: 'assisted' },
-      });
-    });
-  });
-
-  describe('detection config — alert triage (opted in)', () => {
-    const registration = createWorkerSettingsRegistration(TRIAGE_WORKER_ID);
-
-    it('defaults to confidence 0.85 / fpCount 10 and projects it', () => {
-      expect(registration.createDefaultValues()).toEqual({
-        settingsVersion: 1,
-        autonomyLevel: 'manual',
-        detectionConfig: { confidenceThreshold: 0.85, fpCountThreshold: 10 },
-      });
-      expect(registration.toSettings(registration.createDefaultValues())).toEqual({
-        workerId: TRIAGE_WORKER_ID,
-        autonomy: 'manual',
-        detectionConfig: { confidenceThreshold: 0.85, fpCountThreshold: 10 },
-      });
-    });
-
-    it('defaults the detection config for an install that predates the setting', () => {
-      const { values } = registration.migrate({
-        settingsVersion: 1,
-        autonomyLevel: 'assisted',
-      });
-
-      expect(values).toEqual({
-        settingsVersion: 1,
-        autonomyLevel: 'assisted',
-        detectionConfig: { confidenceThreshold: 0.85, fpCountThreshold: 10 },
-      });
-    });
-
-    it('preserves a persisted detection config', () => {
-      expect(
-        registration.migrate({
-          settingsVersion: 1,
-          autonomyLevel: 'manual',
-          detectionConfig: { confidenceThreshold: 0.5, fpCountThreshold: 20 },
-        }).values
-      ).toEqual({
-        settingsVersion: 1,
-        autonomyLevel: 'manual',
-        detectionConfig: { confidenceThreshold: 0.5, fpCountThreshold: 20 },
-      });
-    });
-
-    it.each([
-      [{ confidenceThreshold: 0 }, 'confidenceThreshold at the lower boundary'],
-      [{ confidenceThreshold: 1 }, 'confidenceThreshold at the upper boundary'],
-      [{ fpCountThreshold: 1 }, 'fpCountThreshold at the lower boundary'],
-    ])('accepts %j (%s)', (partial, _description) => {
-      expect(
-        registration.migrate({
-          settingsVersion: 1,
-          autonomyLevel: 'manual',
-          detectionConfig: { confidenceThreshold: 0.5, fpCountThreshold: 10, ...partial },
-        }).values
-      ).toEqual(
-        expect.objectContaining({
-          detectionConfig: { confidenceThreshold: 0.5, fpCountThreshold: 10, ...partial },
-        })
-      );
-    });
-
-    it.each([
-      [{ confidenceThreshold: -0.01 }, 'confidenceThreshold below 0'],
-      [{ confidenceThreshold: 1.01 }, 'confidenceThreshold above 1'],
-      [{ fpCountThreshold: 0 }, 'fpCountThreshold below 1'],
-      [{ fpCountThreshold: 1.5 }, 'fpCountThreshold not an integer'],
-      [{ fpCountThreshold: -5 }, 'fpCountThreshold negative'],
-    ])('rejects %j (%s)', (partial, _description) => {
-      expect(() =>
-        registration.migrate({
-          settingsVersion: 1,
-          autonomyLevel: 'manual',
-          detectionConfig: { confidenceThreshold: 0.5, fpCountThreshold: 10, ...partial },
-        })
-      ).toThrow(/invalid detection config/);
-    });
-
-    it.each([
-      [{ confidenceThreshold: 0.9 }, 'confidenceThreshold only'],
-      [{ fpCountThreshold: 25 }, 'fpCountThreshold only'],
-    ])('applies a %j patch, merging with the existing detection config', (patch, _description) => {
-      const applied = registration.applyPatch(registration.createDefaultValues(), {
-        detectionConfig: patch,
-      });
-
-      expect(applied).toEqual({
-        values: {
-          settingsVersion: 1,
-          autonomyLevel: 'manual',
-          detectionConfig: { confidenceThreshold: 0.85, fpCountThreshold: 10, ...patch },
-        },
-      });
-    });
-
-    it('leaves autonomy untouched when only the detection config is patched', () => {
-      const applied = registration.applyPatch(
-        {
-          settingsVersion: 1,
-          autonomyLevel: 'supervised',
-          detectionConfig: { confidenceThreshold: 0.85, fpCountThreshold: 10 },
-        },
-        { detectionConfig: { confidenceThreshold: 0.6 } }
-      );
-
-      expect(applied).toEqual({
-        values: {
-          settingsVersion: 1,
-          autonomyLevel: 'supervised',
-          detectionConfig: { confidenceThreshold: 0.6, fpCountThreshold: 10 },
-        },
-      });
-    });
-
-    it('leaves the detection config untouched when only autonomy is patched', () => {
-      const applied = registration.applyPatch(
-        {
-          settingsVersion: 1,
-          autonomyLevel: 'manual',
-          detectionConfig: { confidenceThreshold: 0.6, fpCountThreshold: 15 },
-        },
-        { autonomy: 'assisted' }
-      );
-
-      expect(applied).toEqual({
-        values: {
-          settingsVersion: 1,
-          autonomyLevel: 'assisted',
-          detectionConfig: { confidenceThreshold: 0.6, fpCountThreshold: 15 },
-        },
-      });
-    });
-  });
-
-  describe('detection config — the Workers that own no detection config', () => {
-    it.each(NO_DETECTION_CONFIG_WORKER_IDS)('%s default values omit it', (workerId) => {
-      expect(createWorkerSettingsRegistration(workerId).createDefaultValues()).not.toHaveProperty(
-        'detectionConfig'
-      );
-    });
-
-    it.each(NO_DETECTION_CONFIG_WORKER_IDS)('%s omits it from public settings', (workerId) => {
-      const registration = createWorkerSettingsRegistration(workerId);
-      const projected = registration.toSettings(registration.createDefaultValues());
-
-      expect(projected).not.toHaveProperty('detectionConfig');
-    });
-
-    it.each(NO_DETECTION_CONFIG_WORKER_IDS)('%s rejects a detection config patch', (workerId) => {
-      const registration = createWorkerSettingsRegistration(workerId);
-
-      expect(
-        registration.applyPatch(registration.createDefaultValues(), {
-          detectionConfig: { confidenceThreshold: 0.5 },
-        })
-      ).toEqual({ rejected: 'a detection config' });
-    });
-
-    it.each(NO_DETECTION_CONFIG_WORKER_IDS)('%s still accepts an autonomy patch', (workerId) => {
       const registration = createWorkerSettingsRegistration(workerId);
       const defaults = registration.createDefaultValues();
 

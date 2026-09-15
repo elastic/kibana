@@ -337,19 +337,19 @@ describe('WorkersService', () => {
     ).resolves.toEqual({ outcome: 'conflict' });
   });
 
-  it('treats a detectionConfig-only patch as a settings write that persists', async () => {
+  it('treats an extras-only patch as a settings write that persists', async () => {
     const harness = createPersistentHarness();
     const service = harness.createService();
-    const enabled = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+    const enabled = await service.update(RULE_TUNING, { enabled: true }, SPACE, request);
     if (enabled.outcome !== 'updated') throw new Error('Expected enable to succeed');
 
-    // Without treating detectionConfig as a settings-touching field, this patch would be silently
-    // dropped: touchesSettings would stay false and update() would fall straight through to the
-    // enabled-only branch, never calling applyPatch/install for the detectionConfig value.
+    // Without treating extras as a settings-touching field, this patch would be silently dropped:
+    // touchesSettings would stay false and update() would fall straight through to the enabled-only
+    // branch, never calling applyPatch/install for the extras value.
     const result = await service.update(
-      TRIAGE,
+      RULE_TUNING,
       {
-        settings: { detectionConfig: { confidenceThreshold: 0.9, fpCountThreshold: 3 } },
+        settings: { extras: { analysisWindowDays: 21 } },
         settingsRevision: enabled.response.worker.settingsRevision,
       },
       SPACE,
@@ -357,16 +357,13 @@ describe('WorkersService', () => {
     );
 
     expect(result.outcome).toBe('updated');
-    if (result.outcome !== 'updated') throw new Error('Expected detectionConfig save to succeed');
-    expect(result.response.worker.settings.detectionConfig).toEqual({
-      confidenceThreshold: 0.9,
-      fpCountThreshold: 3,
-    });
+    if (result.outcome !== 'updated') throw new Error('Expected extras save to succeed');
+    expect(result.response.worker.settings.extras).toEqual({ analysisWindowDays: 21 });
 
     await expect(
       service.update(
-        TRIAGE,
-        { settings: { detectionConfig: { confidenceThreshold: 0.5 } } },
+        RULE_TUNING,
+        { settings: { extras: { analysisWindowDays: 7 } } },
         SPACE,
         request
       )
@@ -374,6 +371,25 @@ describe('WorkersService', () => {
       outcome: 'rejected',
       what: 'a settings update without its revision',
     });
+  });
+
+  it('rejects an enabled-only patch without its revision once the Worker is installed', async () => {
+    // decisions item 15: the enabled toggle is a concurrent-write surface too. Once the document
+    // exists, toggling enabled without settingsRevision must be rejected; a stale revision must
+    // conflict. The first enable (no document) is exempt — see the install-defaults test below.
+    const harness = createPersistentHarness();
+    const service = harness.createService();
+    const enabled = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+    if (enabled.outcome !== 'updated') throw new Error('Expected first enable to succeed');
+
+    await expect(service.update(TRIAGE, { enabled: false }, SPACE, request)).resolves.toEqual({
+      outcome: 'rejected',
+      what: 'a settings update without its revision',
+    });
+
+    await expect(
+      service.update(TRIAGE, { enabled: false, settingsRevision: 999 }, SPACE, request)
+    ).resolves.toEqual({ outcome: 'conflict' });
   });
 
   it('installs defaults when disabling a Worker that has no document yet', async () => {
@@ -430,8 +446,14 @@ describe('WorkersService', () => {
     const harness = createPersistentHarness();
     const service = harness.createService();
 
-    await service.update(TRIAGE, { enabled: true }, 'space-a', request);
-    const disabled = await service.update(TRIAGE, { enabled: false }, 'space-a', request);
+    const enableResult = await service.update(TRIAGE, { enabled: true }, 'space-a', request);
+    if (enableResult.outcome !== 'updated') throw new Error('Expected enable to succeed');
+    const disabled = await service.update(
+      TRIAGE,
+      { enabled: false, settingsRevision: enableResult.response.worker.settingsRevision },
+      'space-a',
+      request
+    );
 
     expect(harness.install).toHaveBeenCalledWith(
       TRIAGE,
@@ -488,7 +510,7 @@ describe('WorkersService', () => {
     const result = await service.update(
       RULE_TUNING,
       {
-        settings: { analysisWindowDays: 7 },
+        settings: { extras: { analysisWindowDays: 7 } },
         settingsRevision: enabled.response.worker.settingsRevision,
       },
       SPACE,
@@ -501,7 +523,7 @@ describe('WorkersService', () => {
       workerId: RULE_TUNING,
       autonomy: 'manual',
       scheduleInterval: '2h',
-      analysisWindowDays: 7,
+      extras: { analysisWindowDays: 7 },
     });
     expect(harness.documents.get(`${RULE_TUNING}-${SPACE}`)?.yaml).toContain(
       'analysis_window_days: 7'
@@ -518,7 +540,7 @@ describe('WorkersService', () => {
     await expect(
       service.update(
         TRIAGE,
-        { settings: { analysisWindowDays: 7 }, settingsRevision: null },
+        { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: null },
         SPACE,
         request
       )

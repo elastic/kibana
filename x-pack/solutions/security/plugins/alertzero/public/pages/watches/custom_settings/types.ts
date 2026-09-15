@@ -6,13 +6,13 @@
  */
 
 import type { FC } from 'react';
-import type { Worker, WorkerSettings, WorkerSettingsWrite } from '@kbn/alertzero-common';
+import type { Worker, WorkerSettings } from '@kbn/alertzero-common';
 
 export interface WatchCustomSettingsProps {
   worker: Worker;
   settings: WorkerSettings;
   isDisabled?: boolean;
-  onSettingsChange: (patch: WorkerSettingsWrite) => void;
+  onSettingsChange: (patch: { extras: WorkerSettings['extras'] }) => void;
 }
 
 export type WatchCustomSettingsComponent = FC<WatchCustomSettingsProps> & {

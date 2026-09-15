@@ -63,6 +63,7 @@ const createWorker = (
   lastRun: null,
   state: 'paused',
   settingsRevision: null,
+  allowedAutonomyLevels: ['manual', 'assisted', 'supervised'],
   settings: {
     workerId: overrides.id,
     autonomy: 'manual',
@@ -78,7 +79,6 @@ const floorWorkers: Worker[] = [
     settings: {
       workerId: SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
       autonomy: 'manual',
-      detectionConfig: { confidenceThreshold: 0.85, fpCountThreshold: 10 },
     },
   }),
   createWorker({
@@ -109,7 +109,7 @@ const detectionWorkers: Worker[] = [
       workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
       autonomy: 'manual',
       scheduleInterval: '2h',
-      analysisWindowDays: 14,
+      extras: { analysisWindowDays: 14 },
     },
   }),
   createWorker({
@@ -211,7 +211,9 @@ describe('WatchDetailPage', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('shows the Auto-close detectionConfig fields only for Alert Triage', () => {
+  it('renders no detectionConfig controls for any Worker (decisions item 9)', () => {
+    // detectionConfig was removed rather than wired: the triage workflow it claimed to drive is a
+    // stub, so the UI carried settings no run consumed. Asserting ABSENCE keeps it from creeping back.
     renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
 
     const alertTriage = screen.getByTestId(
@@ -221,21 +223,17 @@ describe('WatchDetailPage', () => {
       `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
     );
 
-    expect(
-      within(alertTriage).getByTestId(
-        `alertZeroAutoCloseRow-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
-      )
-    ).toBeInTheDocument();
-    expect(
-      within(alertTriage).getByTestId(
-        `alertZeroMinConfidence-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
-      )
-    ).toHaveValue(0.85);
-    expect(
-      within(attackDiscovery).queryByTestId(
-        `alertZeroAutoCloseRow-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
-      )
-    ).not.toBeInTheDocument();
+    for (const [section, workerId] of [
+      [alertTriage, SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID],
+      [attackDiscovery, SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID],
+    ] as const) {
+      expect(
+        within(section).queryByTestId(`alertZeroAutoCloseRow-${workerId}`)
+      ).not.toBeInTheDocument();
+      expect(
+        within(section).queryByTestId(`alertZeroMinConfidence-${workerId}`)
+      ).not.toBeInTheDocument();
+    }
   });
 
   it('shows Dark Watch with one Worker that has enablement and autonomy', () => {

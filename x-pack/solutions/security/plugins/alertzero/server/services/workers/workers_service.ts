@@ -9,6 +9,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { UpdateWorkerResponse } from '@kbn/alertzero-common';
 import {
   ListWorkersResponse,
+  getAllowedAutonomyLevels,
   touchesWorkerSettings,
   type UpdateWorkerRequestBody,
   type Worker,
@@ -164,7 +165,17 @@ export class WorkersService {
       workflowIdSuffix: spaceId,
     });
 
-    if (touchesSettings) {
+    // worker-settings-page-decisions-3, item 15: the revision guard covers ALL user-visible
+    // state that can race — settings AND the enabled toggle. An enabled-only patch on an already
+    // installed Worker must carry settingsRevision, because toggling enabled is a concurrent-write
+    // surface too. The exception is the FIRST enable of a Worker that has no document yet: there is
+    // no persisted revision to conflict with, so the guard is vacuous and would only force callers
+    // to send a meaningless `settingsRevision: null`. Settings writes always require the revision
+    // regardless of install state. This is the explicit decision the doc asks to record at the check.
+    const revisionGuardApplies =
+      touchesSettings || (patch.enabled !== undefined && status.installed);
+
+    if (revisionGuardApplies) {
       if (patch.settingsRevision === undefined) {
         return { outcome: 'rejected', what: 'a settings update without its revision' };
       }
@@ -314,6 +325,7 @@ export class WorkersService {
         ? { stateReason: 'Worker settings could not be read from durable storage' }
         : {}),
       settings: registration.settings.toSettings(values),
+      allowedAutonomyLevels: [...getAllowedAutonomyLevels(registration.id)],
       settingsRevision,
       skills: projectSkillsFromDefinition(definition, agentLookupCallback),
     };

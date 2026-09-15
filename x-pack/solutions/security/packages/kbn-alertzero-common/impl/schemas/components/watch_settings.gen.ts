@@ -27,6 +27,12 @@ export type WatchAutonomyLevelEnum = typeof WatchAutonomyLevel.enum;
 export const WatchAutonomyLevelEnum = WatchAutonomyLevel.enum;
 
 /**
+ * Autonomy levels this Worker actually supports, derived from its complete settings schema rather than a hand-maintained list (worker-settings-page-decisions-3, item 3). A Worker whose gate cannot run unattended narrows this to the levels it can honour; the UI renders a selector only when more than one level is allowed, and the server rejects a PATCH naming a level outside the set.
+ */
+export const AllowedAutonomyLevels = lazySchema(() => z.array(WatchAutonomyLevel).min(1));
+export type AllowedAutonomyLevels = z.infer<typeof AllowedAutonomyLevels>;
+
+/**
  * Interval between runs for a schedule-driven Worker, as a positive count and a unit of minutes, hours or days (e.g. "24h"). Rendered verbatim into the Worker's `scheduled` trigger. Seconds are not supported.
  */
 export const WorkerScheduleInterval = lazySchema(() =>
@@ -293,65 +299,6 @@ export const WatchSettings = lazySchema(() =>
 export type WatchSettings = z.infer<typeof WatchSettings>;
 
 /**
- * Trigger kinds a Worker may allow. Distinct from WorkflowTriggerType (`schedule` vs `scheduled`) — this matches the workflow YAML trigger `type`.
- */
-export const WorkerTriggerType = lazySchema(() => z.enum(['manual', 'scheduled']));
-export type WorkerTriggerType = z.infer<typeof WorkerTriggerType>;
-export type WorkerTriggerTypeEnum = typeof WorkerTriggerType.enum;
-export const WorkerTriggerTypeEnum = WorkerTriggerType.enum;
-
-/**
- * Nested unique settings (POC #290871). The owning Worker module validates which keys it accepts.
- */
-export const WorkerSettingsExtras = lazySchema(() =>
-  z
-    .object({
-      /**
-       * Attack Discovery only. Max candidates considered per run.
-       */
-      candidateLimit: z
-        .number()
-        .int()
-        .min(1)
-        .max(1000)
-        .optional()
-        .describe('Attack Discovery only. Max candidates considered per run.'),
-    })
-    .passthrough()
-    .refine((value) => Object.keys(value).length <= 32, {
-      message: 'Worker settings extras cannot exceed 32 keys',
-    })
-);
-export type WorkerSettingsExtras = z.infer<typeof WorkerSettingsExtras>;
-
-/**
- * Per-Worker numeric tuning for detection-oriented Workers, e.g. Alert Triage's auto-close threshold. Optional and per-Worker opt-in — only meaningful for Workers whose autonomy cards reference these fields.
- */
-export const DetectionConfig = lazySchema(() =>
-  z.object({
-    /**
-     * Minimum confidence score, 0–1, for the auto-close/proposal decision.
-     */
-    confidenceThreshold: z
-      .number()
-      .min(0)
-      .max(1)
-      .optional()
-      .describe('Minimum confidence score, 0–1, for the auto-close/proposal decision.'),
-    /**
-     * Minimum qualifying false-positive count, a positive integer.
-     */
-    fpCountThreshold: z
-      .number()
-      .int()
-      .min(1)
-      .optional()
-      .describe('Minimum qualifying false-positive count, a positive integer.'),
-  })
-);
-export type DetectionConfig = z.infer<typeof DetectionConfig>;
-
-/**
  * Complete settings for a Worker that only carries the shared autonomy dial. Watch-owned custom fields are absent by construction.
  */
 export const SharedOnlyWorkerSettings = lazySchema(() =>
@@ -379,6 +326,18 @@ export const ScheduledWorkerSettings = lazySchema(() =>
 export type ScheduledWorkerSettings = z.infer<typeof ScheduledWorkerSettings>;
 
 /**
+ * Watch-owned custom fields for Detection Rule Tuning. Closed per-Worker schema; unknown keys are rejected with the field name so a misspelled custom setting cannot silently persist. Replaces whole-object on write (worker-settings-page-decisions-3, items 5+12).
+ */
+export const RuleTuningWorkerExtras = lazySchema(() =>
+  z
+    .object({
+      analysisWindowDays: AnalysisWindowDays,
+    })
+    .strict()
+);
+export type RuleTuningWorkerExtras = z.infer<typeof RuleTuningWorkerExtras>;
+
+/**
  * Complete Detection Watch / Rule Tuning settings. Owned by Detection Watch; CWL reviews the field list and UI, the Watch team owns the values.
  */
 export const RuleTuningWorkerSettings = lazySchema(() =>
@@ -387,22 +346,20 @@ export const RuleTuningWorkerSettings = lazySchema(() =>
       workerId: z.literal('system-security-detection-rule-tuning'),
       autonomy: WatchAutonomyLevel,
       scheduleInterval: WorkerScheduleInterval,
-      analysisWindowDays: AnalysisWindowDays,
+      extras: RuleTuningWorkerExtras,
     })
     .strict()
 );
 export type RuleTuningWorkerSettings = z.infer<typeof RuleTuningWorkerSettings>;
 
 /**
- * Complete Alert Triage settings: shared autonomy dial plus its detection tuning fields
- * (confidence / false-positive-count thresholds).
+ * Complete Alert Triage settings. Detection tuning thresholds were removed from the contract: the Alert Triage workflow is a classification stub with no auto-close step to consume them, so exposing thresholds would be settings storage without a consumer (worker-settings-page-decisions-3, item 9).
  */
 export const AlertTriageWorkerSettings = lazySchema(() =>
   z
     .object({
       workerId: z.literal('system-security-floor-alert-triage'),
       autonomy: WatchAutonomyLevel,
-      detectionConfig: DetectionConfig,
     })
     .strict()
 );
@@ -422,28 +379,44 @@ export const WorkerSettings = lazySchema(() =>
       scheduleInterval: WorkerScheduleInterval.optional().describe(
         'Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to render the interval control.'
       ),
-      analysisWindowDays: AnalysisWindowDays.optional(),
       /**
-       * Omitted for Workers that own no detection tuning fields. Its presence is what tells the UI to render the confidence/false-positive controls.
+       * Watch-owned custom fields this Worker declares. Which keys exist is decided by the Worker's complete schema (e.g. RuleTuningWorkerExtras); the shape here is the union for API read. Replaces whole-object on write. Omitted when the Worker owns none.
        */
-      detectionConfig: DetectionConfig.optional().describe(
-        'Omitted for Workers that own no detection tuning fields. Its presence is what tells the UI to render the confidence/false-positive controls.'
-      ),
+      extras: z
+        .object({
+          analysisWindowDays: AnalysisWindowDays.optional(),
+        })
+        .strict()
+        .optional()
+        .describe(
+          "Watch-owned custom fields this Worker declares. Which keys exist is decided by the Worker's complete schema (e.g. RuleTuningWorkerExtras); the shape here is the union for API read. Replaces whole-object on write. Omitted when the Worker owns none."
+        ),
     })
     .strict()
 );
 export type WorkerSettings = z.infer<typeof WorkerSettings>;
 
 /**
- * Partial settings patch. Field names match WorkerSettings. Omitted fields keep their stored values; unknown keys and wrong-Worker fields are rejected.
+ * Watch-owned custom fields a Client may write. Union of all Workers' custom fields; the server validates against the target Worker's complete schema, so a field another Worker owns is rejected here.
+ */
+export const WorkerSettingsWriteExtras = lazySchema(() =>
+  z
+    .object({
+      analysisWindowDays: AnalysisWindowDays.optional(),
+    })
+    .strict()
+);
+export type WorkerSettingsWriteExtras = z.infer<typeof WorkerSettingsWriteExtras>;
+
+/**
+ * Partial settings patch. Field names match WorkerSettings. Omitted fields keep their stored values; unknown keys and wrong-Worker fields are rejected. extras replaces the whole stored object when present.
  */
 export const WorkerSettingsWrite = lazySchema(() =>
   z
     .object({
       autonomy: WatchAutonomyLevel.optional(),
       scheduleInterval: WorkerScheduleInterval.optional(),
-      analysisWindowDays: AnalysisWindowDays.optional(),
-      detectionConfig: DetectionConfig.optional(),
+      extras: WorkerSettingsWriteExtras.optional(),
     })
     .strict()
 );
@@ -468,6 +441,7 @@ export const Worker = lazySchema(() =>
     stateReason: z.string().optional(),
     lifecycle: Lifecycle.optional(),
     settings: WorkerSettings,
+    allowedAutonomyLevels: AllowedAutonomyLevels,
     /**
      * Logical workflow version for best-effort stale settings detection. Null when the per-space managed Worker has not been installed yet.
      */

@@ -6,7 +6,6 @@
  */
 
 import type { WorkerSettings, WorkerSettingsWrite } from '@kbn/alertzero-common';
-import type { DetectionConfig } from '@kbn/alertzero-common';
 import type { ManagedWorkflowTemplateValues } from '@kbn/workflows/managed';
 
 export type WorkerSettingsPatch = WorkerSettingsWrite;
@@ -23,5 +22,3 @@ export interface WorkerSettingsRegistration {
   /** Return the raw projection; the registry test guards against API schema stripping. */
   toSettings(values: ManagedWorkflowTemplateValues): WorkerSettings;
 }
-
-export type { DetectionConfig };

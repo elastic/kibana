@@ -33,9 +33,9 @@ export const DetectionWatchSettings: WatchCustomSettingsComponent = ({
       </EuiTitle>
       <EuiSpacer size="s" />
       <AnalysisWindowDaysField
-        current={settings.analysisWindowDays ?? ANALYSIS_WINDOW_DAYS_DEFAULT}
+        current={settings.extras?.analysisWindowDays ?? ANALYSIS_WINDOW_DAYS_DEFAULT}
         isDisabled={isDisabled}
-        onChange={(analysisWindowDays) => onSettingsChange({ analysisWindowDays })}
+        onChange={(analysisWindowDays) => onSettingsChange({ extras: { analysisWindowDays } })}
       />
     </>
   );

@@ -854,19 +854,6 @@ export const RUN_OUTCOME_LABELS: Record<string, string> = {
 /* Detection config (confidence / false-positive thresholds)                  */
 /* -------------------------------------------------------------------------- */
 
-export const DETECTION_CONFIG_SECTION_TITLE = i18n.translate(
-  'xpack.alertzero.watches.settings.detectionConfig.sectionTitle',
-  { defaultMessage: 'Auto-close' }
-);
-
-export const DETECTION_CONFIG_SECTION_TITLE_HELP = i18n.translate(
-  'xpack.alertzero.watches.settings.detectionConfig.sectionTitleHelp',
-  {
-    defaultMessage:
-      'When the analysis classifies an alert as a false positive at or above the confidence score, it is closed — automatically or as a proposal, depending on the autonomy level.',
-  }
-);
-
 export const AUTO_CLOSE_GROUP_TITLE = i18n.translate(
   'xpack.alertzero.watches.settings.autoClose.title',
   { defaultMessage: 'Auto-close' }
@@ -884,24 +871,6 @@ export const MIN_CONFIDENCE_ARIA_LABEL = i18n.translate(
   'xpack.alertzero.watches.settings.autoClose.minConfidenceAriaLabel',
   { defaultMessage: 'Minimum confidence score' }
 );
-
-export const funnelAlertsPerDay = (count: number) =>
-  i18n.translate('xpack.alertzero.watches.settings.detectionConfig.funnel.alertsPerDay', {
-    defaultMessage: '~{count}',
-    values: { count },
-  });
-
-export const funnelFpVerdictsPerDay = (count: number) =>
-  i18n.translate('xpack.alertzero.watches.settings.detectionConfig.funnel.fpVerdictsPerDay', {
-    defaultMessage: '~{count}',
-    values: { count },
-  });
-
-export const funnelQualifyingLabel = (score: string) =>
-  i18n.translate('xpack.alertzero.watches.settings.detectionConfig.funnel.qualifyingLabel', {
-    defaultMessage: 'at or above {score}',
-    values: { score },
-  });
 
 /* -------------------------------------------------------------------------- */
 /* Per-watch intro                                                            */

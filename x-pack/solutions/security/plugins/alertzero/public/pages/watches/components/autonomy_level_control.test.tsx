@@ -4,15 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- */
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
 import { AutonomyLevelControl } from './autonomy_level_control';
@@ -61,5 +52,44 @@ describe('AutonomyLevelControl (Sep 14 radios)', () => {
       <AutonomyLevelControl workerId={TRIAGE_WORKER_ID} current="manual" onChange={onChange} />
     );
     expect(screen.queryByTestId('alertZeroAutonomyWarn')).not.toBeInTheDocument();
+  });
+
+  describe('allowedAutonomyLevels (decisions item 3)', () => {
+    it('renders only the levels the server allows', () => {
+      render(
+        <AutonomyLevelControl
+          workerId={TRIAGE_WORKER_ID}
+          current="manual"
+          allowedAutonomyLevels={['manual', 'assisted']}
+          onChange={onChange}
+        />
+      );
+      const group = screen.getByTestId('alertZeroAutonomyLevelControl');
+      expect(within(group).getByRole('radio', { name: /Manual/ })).toBeInTheDocument();
+      expect(within(group).getByRole('radio', { name: /Assisted/ })).toBeInTheDocument();
+      expect(within(group).queryByRole('radio', { name: /Supervised/ })).not.toBeInTheDocument();
+    });
+
+    it('renders a single allowed level as a fixed value rather than a selector', () => {
+      render(
+        <AutonomyLevelControl
+          workerId={TRIAGE_WORKER_ID}
+          current="manual"
+          allowedAutonomyLevels={['manual']}
+          onChange={onChange}
+        />
+      );
+
+      expect(screen.getByTestId('alertZeroAutonomyFixedLevel')).toBeInTheDocument();
+      expect(screen.queryByRole('radio')).not.toBeInTheDocument();
+    });
+
+    it('offers every level when the server projects none (pre-field Worker)', () => {
+      render(
+        <AutonomyLevelControl workerId={TRIAGE_WORKER_ID} current="manual" onChange={onChange} />
+      );
+      const group = screen.getByTestId('alertZeroAutonomyLevelControl');
+      expect(within(group).getAllByRole('radio').length).toBeGreaterThan(1);
+    });
   });
 });

@@ -14,7 +14,6 @@ import {
 } from '../samples';
 import type { Investigation, Proposal, Watch } from '.';
 import {
-  DetectionConfig,
   GetInvestigationResponse,
   GetWatchResponse,
   ListInvestigationProposalsResponse,
@@ -64,6 +63,7 @@ describe('AlertZero schema smoke tests', () => {
       enabled: false,
       lastRun: null,
       state: 'paused',
+      allowedAutonomyLevels: ['manual', 'assisted', 'supervised'],
       settings: {
         workerId: 'system-security-dark-continuous-threat-hunt',
         autonomy: 'manual',
@@ -100,17 +100,32 @@ describe('AlertZero schema smoke tests', () => {
         workerId: 'system-security-detection-rule-tuning',
         autonomy: 'manual',
         scheduleInterval: '2h',
-        analysisWindowDays: 14,
+        extras: { analysisWindowDays: 14 },
       }).success
     ).toBe(true);
+
+    // The pre-extras flat shape must no longer validate — a stored value at the old path
+    // would silently never reach the workflow input.
+    expect(
+      RuleTuningWorkerSettings.safeParse({
+        workerId: 'system-security-detection-rule-tuning',
+        autonomy: 'manual',
+        scheduleInterval: '2h',
+        analysisWindowDays: 14,
+      }).success
+    ).toBe(false);
   });
 
   it.each([7.5, 0, 31])(
-    'rejects analysisWindowDays %s on the write schema',
+    'rejects extras analysisWindowDays %s on the write schema',
     (analysisWindowDays) => {
-      expect(WorkerSettingsWrite.safeParse({ analysisWindowDays }).success).toBe(false);
+      expect(WorkerSettingsWrite.safeParse({ extras: { analysisWindowDays } }).success).toBe(false);
     }
   );
+
+  it('rejects analysisWindowDays at the old top level on the write schema', () => {
+    expect(WorkerSettingsWrite.safeParse({ analysisWindowDays: 14 }).success).toBe(false);
+  });
 
   it('rejects leftover top-level settings fields on the update body', () => {
     expect(
@@ -185,51 +200,110 @@ describe('AlertZero schema smoke tests', () => {
     expect(result.investigation.id).toBe(investigation.id);
   });
 
-  it('parses a live Worker settings object carrying a detectionConfig', () => {
+  it('parses a live Worker settings object carrying Worker-owned extras', () => {
     const worker = Worker.parse({
-      id: 'system-security-floor-alert-triage',
-      name: 'Alert Triage',
-      watchIds: ['system-security-watch-floor'],
+      id: 'system-security-detection-rule-tuning',
+      name: 'Rule Tuning',
+      watchIds: ['system-security-watch-detection'],
       enabled: true,
       lastRun: null,
       state: 'ok',
+      allowedAutonomyLevels: ['manual', 'assisted', 'supervised'],
       settings: {
-        workerId: 'system-security-floor-alert-triage',
+        workerId: 'system-security-detection-rule-tuning',
         autonomy: 'manual',
-        detectionConfig: { confidenceThreshold: 0.85, fpCountThreshold: 10 },
+        scheduleInterval: '24h',
+        extras: { analysisWindowDays: 7 },
       },
       settingsRevision: 0,
     });
 
     expect(WorkerSettings.parse(worker.settings)).toEqual(worker.settings);
     expect(worker.settings).toEqual({
-      workerId: 'system-security-floor-alert-triage',
+      workerId: 'system-security-detection-rule-tuning',
       autonomy: 'manual',
-      detectionConfig: { confidenceThreshold: 0.85, fpCountThreshold: 10 },
+      scheduleInterval: '24h',
+      extras: { analysisWindowDays: 7 },
     });
   });
 
-  describe('DetectionConfig', () => {
-    it.each([
-      [{}, 'empty object — both fields optional'],
-      [{ confidenceThreshold: 0 }, 'confidenceThreshold at the lower boundary'],
-      [{ confidenceThreshold: 1 }, 'confidenceThreshold at the upper boundary'],
-      [{ confidenceThreshold: 0.5 }, 'confidenceThreshold mid-range'],
-      [{ fpCountThreshold: 1 }, 'fpCountThreshold at the lower boundary'],
-      [{ confidenceThreshold: 0.85, fpCountThreshold: 10 }, 'both fields'],
-    ])('accepts %j (%s)', (value, _description) => {
-      expect(DetectionConfig.safeParse(value).success).toBe(true);
+  describe('WorkerSettings extras (decisions-3 item 5)', () => {
+    const base = {
+      workerId: 'system-security-detection-rule-tuning',
+      autonomy: 'manual' as const,
+    };
+
+    it('accepts a Worker settings object with no extras at all', () => {
+      expect(WorkerSettings.safeParse(base).success).toBe(true);
     });
 
     it.each([
-      [{ confidenceThreshold: -0.01 }, 'confidenceThreshold below 0'],
-      [{ confidenceThreshold: 1.01 }, 'confidenceThreshold above 1'],
-      [{ fpCountThreshold: 0 }, 'fpCountThreshold below 1'],
-      [{ fpCountThreshold: 1.5 }, 'fpCountThreshold not an integer'],
-      [{ fpCountThreshold: -5 }, 'fpCountThreshold negative'],
-      [{ confidenceThreshold: 'high' }, 'confidenceThreshold wrong type'],
-    ])('rejects %j (%s)', (value, _description) => {
-      expect(DetectionConfig.safeParse(value).success).toBe(false);
+      [1, 'analysisWindowDays at the lower boundary'],
+      [30, 'analysisWindowDays at the upper boundary'],
+      [7, 'analysisWindowDays mid-range'],
+    ])('accepts extras %p — %s', (analysisWindowDays) => {
+      expect(WorkerSettings.safeParse({ ...base, extras: { analysisWindowDays } }).success).toBe(
+        true
+      );
+    });
+
+    it.each([0, 31, 1.5, '7'])(
+      'rejects extras analysisWindowDays %p (out of range or wrong type)',
+      (analysisWindowDays) => {
+        expect(WorkerSettings.safeParse({ ...base, extras: { analysisWindowDays } }).success).toBe(
+          false
+        );
+      }
+    );
+
+    it('rejects an unknown extras key and names the offending field', () => {
+      const result = WorkerSettings.safeParse({
+        ...base,
+        extras: { analysisWindowDayz: 7 },
+      });
+
+      expect(result.success).toBe(false);
+      if (result.success) throw new Error('Expected a misspelled extras key to be rejected');
+      // The error must name the field so a client can report which key was wrong, rather
+      // than failing with an opaque "invalid settings".
+      expect(JSON.stringify(result.error.issues)).toContain('analysisWindowDayz');
+    });
+
+    it('rejects an unknown top-level settings key', () => {
+      expect(
+        WorkerSettings.safeParse({ ...base, detectionConfig: { confidenceThreshold: 0.5 } }).success
+      ).toBe(false);
+    });
+  });
+
+  describe('Worker.allowedAutonomyLevels (decisions-3 item 3)', () => {
+    const worker = {
+      id: 'system-security-floor-alert-triage',
+      name: 'Alert Triage',
+      watchIds: ['system-security-watch-floor'],
+      enabled: true,
+      lastRun: null,
+      state: 'ok' as const,
+      settings: { workerId: 'system-security-floor-alert-triage', autonomy: 'manual' as const },
+      settingsRevision: 0,
+    };
+
+    it('requires the allowed set on every projected Worker', () => {
+      expect(Worker.safeParse(worker).success).toBe(false);
+    });
+
+    it('accepts a narrowed single-level set', () => {
+      expect(Worker.safeParse({ ...worker, allowedAutonomyLevels: ['manual'] }).success).toBe(true);
+    });
+
+    it('rejects an empty allowed set — a Worker always supports at least one level', () => {
+      expect(Worker.safeParse({ ...worker, allowedAutonomyLevels: [] }).success).toBe(false);
+    });
+
+    it('rejects an unknown autonomy level in the allowed set', () => {
+      expect(Worker.safeParse({ ...worker, allowedAutonomyLevels: ['autopilot'] }).success).toBe(
+        false
+      );
     });
   });
 });
