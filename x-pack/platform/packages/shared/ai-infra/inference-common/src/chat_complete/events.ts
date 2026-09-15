@@ -119,7 +119,7 @@ export type ChatCompletionChunkEvent = InferenceTaskEventBase<
  */
 export interface ChatCompletionTokenCount {
   /**
-   * Total input token count, including tokens served from or written to the prompt cache.
+   * Input token count
    */
   prompt: number;
   /**
@@ -135,7 +135,7 @@ export interface ChatCompletionTokenCount {
    */
   total: number;
   /**
-   * Input tokens served from the prompt cache. Subset of `prompt`, not additive.
+   * Cached prompt tokens
    */
   cached?: number;
 }

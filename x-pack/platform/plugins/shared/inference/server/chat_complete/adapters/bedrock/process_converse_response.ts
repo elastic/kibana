@@ -47,20 +47,12 @@ export function processConverseResponse(model?: string) {
         });
 
         if (converseRes.usage) {
-          const {
-            inputTokens = 0,
-            outputTokens = 0,
-            cacheReadInputTokens,
-            cacheWriteInputTokens,
-          } = converseRes.usage;
-          const prompt = inputTokens + (cacheReadInputTokens ?? 0) + (cacheWriteInputTokens ?? 0);
           subscriber.next({
             type: ChatCompletionEventType.ChatCompletionTokenCount,
             tokens: {
-              completion: outputTokens,
-              prompt,
-              total: prompt + outputTokens,
-              ...(cacheReadInputTokens !== undefined ? { cached: cacheReadInputTokens } : {}),
+              completion: converseRes.usage.outputTokens ?? 0,
+              prompt: converseRes.usage.inputTokens ?? 0,
+              total: converseRes.usage.totalTokens ?? 0,
             },
             ...(model ? { model } : {}),
           });

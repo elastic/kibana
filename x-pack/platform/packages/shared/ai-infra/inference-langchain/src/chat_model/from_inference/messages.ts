@@ -5,22 +5,14 @@
  * 2.0.
  */
 
-import type { ChatCompleteResponse, ChatCompletionTokenCount } from '@kbn/inference-common';
-import { AIMessage, type UsageMetadata } from '@langchain/core/messages';
-
-export const tokenCountToUsageMetadata = (tokens: ChatCompletionTokenCount): UsageMetadata => ({
-  input_tokens: tokens.prompt,
-  output_tokens: tokens.completion,
-  total_tokens: tokens.total,
-  ...(tokens.cached !== undefined ? { input_token_details: { cache_read: tokens.cached } } : {}),
-});
+import type { ChatCompleteResponse } from '@kbn/inference-common';
+import { AIMessage } from '@langchain/core/messages';
 
 export const responseToLangchainMessage = (response: ChatCompleteResponse): AIMessage => {
   const additionalKwargs = response.refusal ? { refusal: response.refusal } : undefined;
   return new AIMessage({
     content: response.content,
     ...(additionalKwargs ? { additional_kwargs: additionalKwargs } : {}),
-    ...(response.tokens ? { usage_metadata: tokenCountToUsageMetadata(response.tokens) } : {}),
     tool_calls: response.toolCalls.map((toolCall) => {
       return {
         id: toolCall.toolCallId,

@@ -236,7 +236,6 @@ function emitTokenCountEvent(
 ) {
   let inputTokenCount = 0;
   let outputTokenCount = 0;
-  let cachedTokenCount: number | undefined;
   // Response from BedRock Invoke API
   if (isMessageStopChunk(chunk)) {
     inputTokenCount = chunk['amazon-bedrock-invocationMetrics'].inputTokenCount;
@@ -244,15 +243,8 @@ function emitTokenCountEvent(
   }
   // Response from BedRock Converse API
   if (isConverseStreamMetadataEvent(chunk)) {
-    const {
-      inputTokens = 0,
-      outputTokens = 0,
-      cacheReadInputTokens,
-      cacheWriteInputTokens,
-    } = chunk.usage;
-    inputTokenCount = inputTokens + (cacheReadInputTokens ?? 0) + (cacheWriteInputTokens ?? 0);
-    outputTokenCount = outputTokens;
-    cachedTokenCount = cacheReadInputTokens;
+    inputTokenCount = chunk.usage.inputTokens ?? 0;
+    outputTokenCount = chunk.usage.outputTokens ?? 0;
   }
 
   subscriber.next({
@@ -261,7 +253,6 @@ function emitTokenCountEvent(
       completion: outputTokenCount,
       prompt: inputTokenCount,
       total: inputTokenCount + outputTokenCount,
-      ...(cachedTokenCount !== undefined ? { cached: cachedTokenCount } : {}),
     },
     ...(model ? { model } : {}),
   });
