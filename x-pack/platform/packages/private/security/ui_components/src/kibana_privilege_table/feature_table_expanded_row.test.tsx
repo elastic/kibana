@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiButtonGroup } from '@elastic/eui';
 import { act } from '@testing-library/react';
 import React from 'react';
 
@@ -16,6 +17,7 @@ import {
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { FeatureTableExpandedRow } from './feature_table_expanded_row';
+import { NO_PRIVILEGE_VALUE } from '../constants';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 
 const createRole = (kibana: Role['kibana'] = []): Role => {
@@ -409,5 +411,38 @@ describe('FeatureTableExpandedRow', () => {
     // Make sure sub-feature customization toggle retained its checked state.
     customizeToggle = findTestSubject(wrapper, 'customizeSubFeaturePrivileges');
     expect(customizeToggle.props()['aria-checked']).toBe(true);
+  });
+
+  it('selects None in every mutually exclusive sub-feature group when the role grants no privileges', () => {
+    const role = createRole([
+      {
+        base: [],
+        feature: {},
+        spaces: ['foo'],
+      },
+    ]);
+
+    const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
+    const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
+    const feature = kibanaPrivileges.getSecuredFeature('with_sub_features');
+
+    const wrapper = mountWithIntl(
+      <FeatureTableExpandedRow
+        feature={feature}
+        privilegeIndex={0}
+        privilegeCalculator={calculator}
+        selectedFeaturePrivileges={[]}
+        onChange={jest.fn()}
+        licenseAllowsSubFeatPrivCustomization={true}
+        allSpacesSelected={false}
+      />
+    );
+
+    const buttonGroups = wrapper.find(EuiButtonGroup);
+
+    expect(buttonGroups.length).toBeGreaterThan(0);
+    buttonGroups.forEach((buttonGroup) => {
+      expect(buttonGroup.props().idSelected).toBe(NO_PRIVILEGE_VALUE);
+    });
   });
 });
