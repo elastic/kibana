@@ -15,7 +15,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
  * Canonical saved-object ID of the `[Metrics AWS] Overview` dashboard shipped with
  * the `aws` integration package (elastic/integrations). Stable across renames.
  *
- * Source: packages/aws/kibana/dashboard/aws-fac28650-7349-11e9-816b-07687310a99a.json
+ * Source: https://github.com/elastic/integrations/blob/main/packages/aws/kibana/dashboard/aws-fac28650-7349-11e9-816b-07687310a99a.json
  */
 const AWS_METRICS_OVERVIEW_DASHBOARD_ID = 'aws-fac28650-7349-11e9-816b-07687310a99a';
 
