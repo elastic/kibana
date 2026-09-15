@@ -14,7 +14,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { MAX_RUN_WORKFLOW_DOCS } from '@kbn/workflows';
-import type { AlertSelection } from '../../../../../common/types/alert_types';
+import type { DocumentSelection } from '../../../../../common/types/document_types';
 
 /** A raw document hit shared by both the id-based and query-based fetch paths. */
 export interface RawDocumentHit {
@@ -55,7 +55,7 @@ const PIT_KEEP_ALIVE = '1m';
  * Not-found ids are skipped (and logged); the caller decides how to handle an empty result.
  */
 export async function fetchDocumentsByIds(
-  ids: AlertSelection[],
+  ids: DocumentSelection[],
   esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<RawDocumentHit[]> {
