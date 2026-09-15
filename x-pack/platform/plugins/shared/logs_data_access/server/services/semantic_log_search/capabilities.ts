@@ -28,8 +28,6 @@ export interface SemanticTextField {
  */
 export interface PatternTextField {
   field: string;
-  /** The subfield containing the template text, e.g. "message.template" */
-  templateField: string;
   /** The subfield containing the template hash, e.g. "message.template_id" */
   templateIdField: string;
 }
@@ -37,23 +35,24 @@ export interface PatternTextField {
 /**
  * Target capabilities for semantic log search.
  *
- * The capability ladder (from best to degraded):
+ * The capability ladder (from best to fallback):
  * 1. semantic_text + pattern_text: semantic ranking with exact template resolution
- * 2. semantic_text only: semantic ranking with approximate resolution via getCategoryQuery
- * 3. pattern_text only: lexical search with exact template resolution
- * 4. neither: lexical search with approximate resolution (categorize_text at query time)
+ * 2. semantic_text only: semantic ranking with approximate resolution via categorize_text
+ * 3. RERANK + CATEGORIZE: runtime semantic ranking via ES|QL (no pre-indexed embeddings)
+ *
+ * Without any semantic capability, the service returns unavailable.
  */
 export interface TargetCapabilities {
   /** All fields from the flattened mapping */
   fields: MappingField[];
-  /** Semantic text fields with their inference endpoints */
-  semanticFields: SemanticTextField[];
   /** Pattern text fields with their template subfields */
   patternFields: PatternTextField[];
-  /** Whether the target has semantic search capability */
+  /** Whether the target has semantic search capability (pre-indexed embeddings) */
   hasSemanticCapability: boolean;
   /** Whether the target has exact template resolution (pattern_text) */
   hasPatternCapability: boolean;
+  /** Whether the cluster has RERANK capability (runtime semantic ranking) */
+  hasRerankCapability: boolean;
   /** The primary semantic field for the message (typically 'message_semantic' or 'message') */
   primarySemanticField?: SemanticTextField;
   /** The primary pattern field for the message (typically 'message') */
@@ -86,7 +85,6 @@ function extractPatternTextField(
   if (property.type === 'pattern_text') {
     return {
       field: fieldName,
-      templateField: `${fieldName}.template`,
       templateIdField: `${fieldName}.template_id`,
     };
   }
@@ -163,10 +161,10 @@ export async function detectCapabilities(
   if (concreteIndices.length === 0) {
     return {
       fields: [],
-      semanticFields: [],
       patternFields: [],
       hasSemanticCapability: false,
       hasPatternCapability: false,
+      hasRerankCapability: false,
     };
   }
 
@@ -228,13 +226,33 @@ export async function detectCapabilities(
 
   return {
     fields: allFields,
-    semanticFields: allSemanticFields,
     patternFields: allPatternFields,
     hasSemanticCapability: allSemanticFields.length > 0,
     hasPatternCapability: allPatternFields.length > 0,
+    hasRerankCapability: false, // Set by detectRerankCapability separately
     primarySemanticField,
     primaryPatternField,
   };
+}
+
+/** The default rerank inference endpoint available in ES 9.3+ */
+const RERANK_ENDPOINT = '.rerank-v1-elasticsearch';
+
+/**
+ * Detect if the cluster has RERANK capability.
+ *
+ * Checks if the default rerank endpoint (.rerank-v1-elasticsearch) is available.
+ * This endpoint is preconfigured in ES 9.3+ and enables runtime semantic ranking
+ * via ES|QL RERANK command.
+ */
+export async function detectRerankCapability(esClient: ElasticsearchClient): Promise<boolean> {
+  try {
+    const response = await esClient.inference.get({ inference_id: RERANK_ENDPOINT });
+    return (response.endpoints?.length ?? 0) > 0;
+  } catch {
+    // Endpoint doesn't exist or inference API not available
+    return false;
+  }
 }
 
 /**
