@@ -7,8 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MouseEventHandler, ReactNode } from 'react';
-import type { EuiBadgeProps, EuiButtonProps, EuiFlyoutProps, EuiIconProps } from '@elastic/eui';
+import type { CSSProperties, MouseEventHandler, ReactNode } from 'react';
+import type {
+  EuiBadgeProps,
+  EuiButtonProps,
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+  EuiContextMenuProps,
+  EuiFlyoutProps,
+  EuiIconProps,
+} from '@elastic/eui';
 import type { InfoBlockItem } from '@kbn/flyout-info-blocks';
 import type {
   FlyoutSectionAction,
@@ -131,7 +139,7 @@ export interface FlyoutFooterActionBaseProps {
   /** HTML id forwarded to the button element. */
   id?: string;
   /** Button label. */
-  label: ReactNode;
+  label: string;
   onClick: MouseEventHandler<HTMLButtonElement>;
   iconType?: EuiButtonProps['iconType'];
   isLoading?: boolean;
@@ -145,10 +153,91 @@ export type FlyoutFooterPrimaryActionProps = FlyoutFooterActionBaseProps;
 /** Props for the declarative `FlyoutTemplate.Footer.SecondaryAction` part. */
 export type FlyoutFooterSecondaryActionProps = FlyoutFooterActionBaseProps;
 
+/**
+ * A single item in a footer action menu (either a clickable action or a separator).
+ */
+type WithStringName<T> = T extends { name: ReactNode } ? Omit<T, 'name'> & { name: string } : T;
+
+export type FlyoutFooterMenuItem = WithStringName<
+  Extract<EuiContextMenuPanelItemDescriptor, { renderItem?: never }>
+>;
+
+/**
+ * A sub-menu panel inside a footer action menu.
+ */
+export type FlyoutFooterMenuPanel = Omit<
+  EuiContextMenuPanelDescriptor,
+  'content' | 'items' | 'title'
+> & {
+  items: FlyoutFooterMenuItem[];
+  /**
+   * The title of this sub-menu. This is required if users navigate into this panel,
+   * as it's used to generate the "Back" button and its screen reader text.
+   */
+  title?: string;
+  content?: never;
+};
+
+/**
+ * Arbitrary `data-*` attributes. Equivalent to EUI's own `DataAttributeProps`, which is
+ * not exported from `@elastic/eui`.
+ */
+interface DataAttributeProps {
+  [key: `data-${string}`]: string | undefined;
+}
+
+/**
+ * Trigger button props the template sets itself, so a consumer value would be discarded.
+ *
+ * `isSelected` is excluded for a different reason: it applies `aria-pressed`, which
+ * describes a toggle button. A popover trigger is described by `aria-expanded`, which
+ * EUI already sets.
+ */
+type MenuTriggerOwnedProps =
+  | 'children'
+  | 'fill'
+  | 'iconType'
+  | 'iconSide'
+  | 'element'
+  | 'isSelected';
+
+/**
+ * Props for the <FlyoutTemplate.Footer.PrimaryActionMenu> component.
+ *
+ * Anything `EuiButton` accepts is forwarded to the trigger button, apart from the props
+ * the template owns. The props declared below configure the menu itself.
+ */
+export type FlyoutFooterPrimaryActionMenuProps = Omit<
+  EuiButtonProps,
+  MenuTriggerOwnedProps | 'aria-label' | 'data-test-subj'
+> &
+  Pick<EuiContextMenuProps, 'onPanelChange'> &
+  DataAttributeProps & {
+    /** The HTML ID of the button that opens the menu. */
+    id?: string;
+    /** The text on the button that opens the menu (e.g. "Take action"). */
+    label: string;
+    /** The panels and items inside the menu. For performance and to keep keyboard navigation working, you should wrap this array in a useMemo hook. */
+    panels: FlyoutFooterMenuPanel[];
+    /** The ID of the menu panel to show first. If omitted, it defaults to the first panel in the array. */
+    initialPanelId?: string | number;
+    /**
+     * If true, the menu will automatically close when a user clicks an item. Defaults to true.
+     * (Navigating to sub-menus will never auto-close the menu).
+     */
+    closeOnItemClick?: boolean;
+    /** Custom accessible name for the popover. If omitted, it falls back to the button's label. */
+    'aria-label'?: string;
+    /** Used for testing. The button gets this exact value, and the popover panel gets this value with "Panel" appended. */
+    'data-test-subj'?: string;
+    /** Sets a fixed height for the menu, allowing the inside to scroll if it gets too long. */
+    height?: CSSProperties['height'];
+  };
+
 /** Props for the declarative `FlyoutTemplate.Footer` zone. */
 export interface FlyoutFooterProps {
   'data-test-subj'?: string;
-  /** `Footer.PrimaryAction` / `Footer.SecondaryAction` parts. */
+  /** `Footer.PrimaryAction`, `Footer.PrimaryActionMenu`, and `Footer.SecondaryAction` parts. */
   children?: ReactNode;
 }
 
