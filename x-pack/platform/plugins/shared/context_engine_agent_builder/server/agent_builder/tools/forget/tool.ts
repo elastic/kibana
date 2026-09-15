@@ -8,6 +8,7 @@
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { getAgentFromRunContext } from '@kbn/agent-builder-server';
 import { aiIndexIdFieldSchema } from '@kbn/context-engine-plugin/common/ai_index_schemas';
 import { isIndexPattern } from '@kbn/context-engine-plugin/common/ai_index_dest';
 import { MAX_KI_ID_LENGTH } from '@kbn/context-engine-plugin/common/step_types/ki';
@@ -18,33 +19,16 @@ import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import { CONTEXT_ENGINE_FORGET_TOOL_ID } from '../../../../common/agent_builder_tools';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
+import {
+  createMemoryWriter,
+  type StoredMemoryDocument,
+  updateMemoryProvenance,
+} from '../memory_document';
 
 const forgetSchema = z.object({
   aiIndexId: aiIndexIdFieldSchema.describe('The Context Engine AI index containing the memory'),
   id: z.string().min(1).max(MAX_KI_ID_LENGTH).describe('The id of the memory to remove'),
 });
-
-interface StoredMemoryDocument {
-  '@timestamp': string;
-  id: string;
-  type: string;
-  title: string;
-  description: string;
-  content: string;
-  tags?: string[];
-  expires_at?: string;
-  updated_at: string;
-  attributes?: {
-    memory?: {
-      session_id?: string;
-    };
-  };
-  governance?: {
-    lifecycle?: {
-      status?: string;
-    };
-  };
-}
 
 export const createForgetTool = ({
   getAiIndexService,
@@ -73,7 +57,7 @@ export const createForgetTool = ({
   `,
   schema: forgetSchema,
   handler: async (params, context) => {
-    const { request, spaceId, esClient, logger } = context;
+    const { request, spaceId, esClient, runContext, logger } = context;
 
     try {
       await assertContextEngineWriteAccess({
@@ -142,12 +126,18 @@ export const createForgetTool = ({
       }
 
       const now = new Date().toISOString();
+      const agent = getAgentFromRunContext(runContext);
+      const writer = createMemoryWriter({
+        toolId: CONTEXT_ENGINE_FORGET_TOOL_ID,
+        runId: runContext.runId,
+        agentId: agent?.agentId,
+      });
       const tombstoneDocument: StoredMemoryDocument = {
         ...existingHit._source,
         '@timestamp': aiIndex.dest.type === 'data_stream' ? now : existingHit._source['@timestamp'],
         updated_at: now,
         governance: {
-          ...existingHit._source.governance,
+          ...updateMemoryProvenance(existingHit._source.governance, writer, false),
           lifecycle: {
             ...existingHit._source.governance?.lifecycle,
             status: 'deleted',

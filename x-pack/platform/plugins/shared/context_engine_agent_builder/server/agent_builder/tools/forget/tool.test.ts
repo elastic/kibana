@@ -45,6 +45,17 @@ describe('forget tool', () => {
           index,
         },
       },
+      runContext: {
+        runId: 'run-1',
+        stack: [
+          {
+            type: 'agent' as const,
+            agentId: 'agent-1',
+            conversationId: 'conversation-1',
+          },
+          { type: 'tool' as const, toolId: CONTEXT_ENGINE_FORGET_TOOL_ID },
+        ],
+      },
     } as unknown as ToolHandlerContext;
   };
 
@@ -85,7 +96,19 @@ describe('forget tool', () => {
               description: 'duration_ms is a keyword.',
               content: 'Cast duration_ms before numeric comparisons.',
               updated_at: '2026-09-01T00:00:00.000Z',
-              attributes: { memory: { session_id: 'conversation-1' } },
+              attributes: { 'memory.session_id': 'conversation-1' },
+              governance: {
+                provenance: {
+                  created_by: {
+                    uri: 'tool://platform.context_engine.remember',
+                    metadata: { run_id: 'run-0', agent_id: 'agent-1' },
+                  },
+                  updated_by: {
+                    uri: 'tool://platform.context_engine.remember',
+                    metadata: { run_id: 'run-0', agent_id: 'agent-1' },
+                  },
+                },
+              },
             },
           },
         ],
@@ -123,8 +146,18 @@ describe('forget tool', () => {
         '@timestamp': '2026-09-01T00:00:00.000Z',
         id: 'memory-1',
         updated_at: expect.any(String),
-        attributes: { memory: { session_id: 'conversation-1' } },
+        attributes: { 'memory.session_id': 'conversation-1' },
         governance: {
+          provenance: {
+            created_by: {
+              uri: 'tool://platform.context_engine.remember',
+              metadata: { run_id: 'run-0', agent_id: 'agent-1' },
+            },
+            updated_by: {
+              uri: 'tool://platform.context_engine.forget',
+              metadata: { run_id: 'run-1', agent_id: 'agent-1' },
+            },
+          },
           lifecycle: {
             status: 'deleted',
           },
@@ -162,7 +195,15 @@ describe('forget tool', () => {
               description: 'Summary',
               content: 'Summary',
               updated_at: '2026-09-01T00:00:00.000Z',
-              attributes: { memory: { session_id: 'conversation-1' } },
+              attributes: { 'memory.session_id': 'conversation-1' },
+              governance: {
+                provenance: {
+                  created_by: {
+                    uri: 'tool://platform.context_engine.remember',
+                    metadata: { run_id: 'run-0', agent_id: 'agent-1' },
+                  },
+                },
+              },
             },
           },
         ],
@@ -185,8 +226,18 @@ describe('forget tool', () => {
         '@timestamp': expect.any(String),
         id: 'memory-1',
         updated_at: expect.any(String),
-        attributes: { memory: { session_id: 'conversation-1' } },
+        attributes: { 'memory.session_id': 'conversation-1' },
         governance: {
+          provenance: {
+            created_by: {
+              uri: 'tool://platform.context_engine.remember',
+              metadata: { run_id: 'run-0', agent_id: 'agent-1' },
+            },
+            updated_by: {
+              uri: 'tool://platform.context_engine.forget',
+              metadata: { run_id: 'run-1', agent_id: 'agent-1' },
+            },
+          },
           lifecycle: {
             status: 'deleted',
           },
@@ -216,7 +267,7 @@ describe('forget tool', () => {
               description: 'duration_ms is a keyword.',
               content: 'Cast duration_ms before numeric comparisons.',
               updated_at: '2026-09-01T00:00:00.000Z',
-              attributes: { memory: { session_id: 'conversation-1' } },
+              attributes: { 'memory.session_id': 'conversation-1' },
               governance: { lifecycle: { status: 'deleted' } },
             },
           },
