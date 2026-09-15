@@ -75,7 +75,7 @@ if [[ "${FTR_PREEMPTION_WATCH:-}" =~ ^(1|true)$ ]]; then
     fi
   fi
   simulateAfter=""
-  if [[ "${FTR_PREEMPTION_SIMULATE_GROUP:-}" == "$FTR_CONFIG_GROUP_KEY" && "${BUILDKITE_RETRY_COUNT:-0}" == "0" ]]; then
+  if [[ -n "${FTR_PREEMPTION_SIMULATE_GROUP:-}" && "$FTR_PREEMPTION_SIMULATE_GROUP" == "$FTR_CONFIG_GROUP_KEY" && "${BUILDKITE_RETRY_COUNT:-0}" == "0" ]]; then
     simulateAfter="${FTR_PREEMPTION_SIMULATE_AFTER:-60}"
   fi
   mkdir -p target/preemption
