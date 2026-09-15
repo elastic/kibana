@@ -185,36 +185,103 @@ describe('useWatchSettingsDraft', () => {
     expect(result.current.isDirty).toBe(true);
   });
 
-  it('validates all dirty drafts before writing and retries only failures', async () => {
-    mutateAsync
-      .mockResolvedValueOnce({ worker: { ...ruleTuning, settingsRevision: 2 } })
-      .mockRejectedValueOnce(new Error('conflict'));
+  describe('partial success', () => {
+    /** What the server persists for Rule Tuning; what the refreshed Worker list then carries. */
+    const persistedRuleTuning: Worker = {
+      ...ruleTuning,
+      settingsRevision: 2,
+      settings: { ...ruleTuning.settings, extras: { analysisWindowDays: 7 } },
+    };
+    const SAVE_FAILURE = 'Worker settings are temporarily unavailable; try again';
 
-    const { result } = renderHook(() => useWatchSettingsDraft([ruleTuning, ruleCreation]));
+    /**
+     * Edits two Workers, saves once so Rule Tuning succeeds and Rule Creation fails, then hands
+     * the hook the refreshed list the page would receive after the successful write.
+     */
+    const saveWithOneFailure = async () => {
+      mutateAsync
+        .mockResolvedValueOnce({ worker: persistedRuleTuning })
+        .mockRejectedValueOnce(new Error(SAVE_FAILURE));
+      const rendered = renderHook(
+        ({ workers }: { workers: Worker[] }) => useWatchSettingsDraft(workers),
+        { initialProps: { workers: [ruleTuning, ruleCreation] } }
+      );
 
-    act(() => {
-      result.current.updateSettings(ruleTuning, { extras: { analysisWindowDays: 7 } });
-      result.current.updateEnabled(ruleCreation, true);
+      act(() => {
+        rendered.result.current.updateSettings(ruleTuning, { extras: { analysisWindowDays: 7 } });
+        rendered.result.current.updateEnabled(ruleCreation, true);
+      });
+      await act(async () => {
+        await rendered.result.current.save();
+      });
+
+      expect(mutateAsync).toHaveBeenCalledTimes(2);
+      expect(mutateAsync).toHaveBeenNthCalledWith(1, {
+        workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+        patch: { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: 1 },
+      });
+      expect(mutateAsync).toHaveBeenNthCalledWith(2, {
+        workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+        patch: { enabled: true },
+      });
+
+      rendered.rerender({ workers: [persistedRuleTuning, ruleCreation] });
+      return rendered;
+    };
+
+    it('shows the saved value for the Worker that succeeded and retries only the one that failed', async () => {
+      const { result, rerender } = await saveWithOneFailure();
+
+      expect(result.current.resolve(persistedRuleTuning)).toMatchObject({
+        settings: { extras: { analysisWindowDays: 7 } },
+        dirty: false,
+        error: undefined,
+      });
+      expect(result.current.resolve(ruleCreation)).toMatchObject({
+        enabled: true,
+        dirty: true,
+        error: SAVE_FAILURE,
+      });
+      expect(result.current.dirtyWorkers.map(({ id }) => id)).toEqual([ruleCreation.id]);
+
+      const persistedRuleCreation: Worker = { ...ruleCreation, enabled: true };
+      mutateAsync.mockResolvedValueOnce({ worker: persistedRuleCreation });
+      await act(async () => {
+        await result.current.save();
+      });
+
+      expect(mutateAsync).toHaveBeenCalledTimes(3);
+      expect(mutateAsync).toHaveBeenLastCalledWith({
+        workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+        patch: { enabled: true },
+      });
+
+      rerender({ workers: [persistedRuleTuning, persistedRuleCreation] });
+      expect(result.current.isDirty).toBe(false);
+      expect(result.current.resolve(persistedRuleCreation)).toMatchObject({
+        enabled: true,
+        dirty: false,
+        error: undefined,
+      });
     });
 
-    await act(async () => {
-      await result.current.save();
-    });
+    it("discards the failed Worker's edits without undoing the successful write", async () => {
+      const { result } = await saveWithOneFailure();
 
-    expect(mutateAsync).toHaveBeenCalledTimes(2);
-    expect(mutateAsync).toHaveBeenNthCalledWith(1, {
-      workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-      patch: { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: 1 },
-    });
-    expect(mutateAsync).toHaveBeenNthCalledWith(2, {
-      workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
-      patch: { enabled: true },
-    });
-    expect(result.current.resolve(ruleTuning).dirty).toBe(false);
-    expect(result.current.resolve(ruleCreation)).toMatchObject({
-      dirty: true,
-      enabled: true,
-      error: 'conflict',
+      act(() => {
+        result.current.discard();
+      });
+
+      expect(result.current.isDirty).toBe(false);
+      expect(result.current.resolve(ruleCreation)).toMatchObject({
+        enabled: false,
+        dirty: false,
+        error: undefined,
+      });
+      expect(result.current.resolve(persistedRuleTuning).settings.extras).toEqual({
+        analysisWindowDays: 7,
+      });
+      expect(mutateAsync).toHaveBeenCalledTimes(2);
     });
   });
 });
