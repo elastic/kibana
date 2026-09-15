@@ -22,4 +22,5 @@ export {
   type RawInferenceConnector,
 } from './connectors';
 export { getModelDefinition } from './known_models';
+export { getModelFamilyFromName } from './model_family_from_name';
 export { getContextWindowSize, contextWindowFromModelName } from './connector_capabilities';
