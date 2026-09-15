@@ -15,6 +15,7 @@ import type {
   ProposalWithMetadata,
   ProposalsQuery,
 } from '@kbn/agentic-investigations-plugin/common';
+import { isDecided } from '@kbn/agentic-investigations-plugin/common';
 import {
   CLOSED_GROUP_KEY,
   type ProposalGroups,
@@ -39,7 +40,13 @@ export class ConversationProposalsService {
     spaceId: string
   ): Promise<GetProposalsListResponse> {
     const { proposals, truncated } = await this.proposalsService.listByWindow(
-      { includeStatuses: ['pending'], decidedWithinHours: query.windowHours },
+      {
+        decidedWithinHours: query.windowHours,
+        // One live proposal per subject: a retried action leaves the failed
+        // attempt behind pointing at its replacement.
+        excludeSuperseded: true,
+        excludeExpired: false,
+      },
       spaceId
     );
 
@@ -67,7 +74,10 @@ export class ConversationProposalsService {
           : {}),
       };
 
-      if (proposal.decidedAt) {
+      // The decision, not `decidedAt`: a decided proposal is closed even while
+      // its action is still executing, and the decision is the axis that says
+      // so regardless of which surface recorded it.
+      if (isDecided(proposal)) {
         groups[CLOSED_GROUP_KEY].push(item);
       } else if (proposal.category) {
         if (!groups[proposal.category]) {

@@ -8,7 +8,10 @@
 import React from 'react';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import { checkDecidePrivilegesStepCommonDefinition } from '../../../common/proposals/step_types/check_decide_privileges_step';
+import { cloneProposalStepCommonDefinition } from '../../../common/proposals/step_types/clone_proposal_step';
 import { createProposalStepCommonDefinition } from '../../../common/proposals/step_types/create_proposal_step';
+import { getProposalStepCommonDefinition } from '../../../common/proposals/step_types/get_proposal_step';
 import { updateProposalStepCommonDefinition } from '../../../common/proposals/step_types/update_proposal_step';
 
 /**
@@ -33,9 +36,39 @@ export const updateProposalPublicStepDefinition = createPublicStepDefinition({
   ),
 });
 
+export const checkDecidePrivilegesPublicStepDefinition = createPublicStepDefinition({
+  ...checkDecidePrivilegesStepCommonDefinition,
+  icon: React.lazy(() =>
+    import('@elastic/eui/es/components/icon/assets/lock').then(({ icon }) => ({
+      default: icon,
+    }))
+  ),
+});
+
+export const getProposalPublicStepDefinition = createPublicStepDefinition({
+  ...getProposalStepCommonDefinition,
+  icon: React.lazy(() =>
+    import('@elastic/eui/es/components/icon/assets/inspect').then(({ icon }) => ({
+      default: icon,
+    }))
+  ),
+});
+
+export const cloneProposalPublicStepDefinition = createPublicStepDefinition({
+  ...cloneProposalStepCommonDefinition,
+  icon: React.lazy(() =>
+    import('@elastic/eui/es/components/icon/assets/copy').then(({ icon }) => ({
+      default: icon,
+    }))
+  ),
+});
+
 export const registerProposalsPublicStepDefinitions = (
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
 ) => {
   workflowsExtensions.registerStepDefinition(createProposalPublicStepDefinition);
   workflowsExtensions.registerStepDefinition(updateProposalPublicStepDefinition);
+  workflowsExtensions.registerStepDefinition(checkDecidePrivilegesPublicStepDefinition);
+  workflowsExtensions.registerStepDefinition(getProposalPublicStepDefinition);
+  workflowsExtensions.registerStepDefinition(cloneProposalPublicStepDefinition);
 };

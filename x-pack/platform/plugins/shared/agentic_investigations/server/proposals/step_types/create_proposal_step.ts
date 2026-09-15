@@ -10,6 +10,8 @@ import { createProposalStepCommonDefinition } from '../../../common/proposals/st
 import { resolveExpiresAt } from './resolve_expires_at';
 import type { ProposalsService } from '../services/proposals_service';
 import type { ResolveProposalUser } from '../services/resolve_proposal_user';
+import type { ProposalPrivilegesChecker } from '../services/check_proposal_privileges';
+import { toStepError } from './to_step_error';
 
 /**
  * Calls the proposals service in-process. The workflow execution id comes from
@@ -19,9 +21,11 @@ import type { ResolveProposalUser } from '../services/resolve_proposal_user';
 export const getCreateProposalStepDefinition = ({
   getProposalsService,
   resolveUser,
+  privileges,
 }: {
   getProposalsService: () => ProposalsService;
   resolveUser: ResolveProposalUser;
+  privileges: ProposalPrivilegesChecker;
 }) =>
   createServerStepDefinition({
     ...createProposalStepCommonDefinition,
@@ -32,7 +36,14 @@ export const getCreateProposalStepDefinition = ({
         const workflowExecutionId = workflowContext.execution.id;
         // The step runs under the execution's own credentials, so the fake
         // request is what identifies the Worker that is proposing.
-        const user = await resolveUser(context.contextManager.getFakeRequest());
+        const request = context.contextManager.getFakeRequest();
+
+        // Throws rather than degrading: a Worker without the privilege to write
+        // proposals is a misconfiguration, and there is no recovery path worth
+        // retrying.
+        await privileges.assertCanManage(request);
+
+        const user = await resolveUser(request);
 
         const proposal = await getProposalsService().create(
           {
@@ -40,7 +51,7 @@ export const getCreateProposalStepDefinition = ({
             comment: context.input.comment,
             actionWorkflowId: context.input.actionWorkflowId,
             actionInput: context.input.actionInput,
-            impact: context.input.impact ?? 'low',
+            impact: context.input.impact,
             confidence: context.input.confidence ?? 'medium',
             origin: context.input.origin ?? 'worker',
             expiresAt: resolveExpiresAt(context.input.expiresIn),
@@ -67,13 +78,12 @@ export const getCreateProposalStepDefinition = ({
             proposalId: proposal.id,
             status: proposal.status,
             category: proposal.category,
-            requiresDecision: proposal.status === 'pending',
+            requiresDecision: proposal.decision == null,
+            expiresAt: proposal.expiresAt,
           },
         };
       } catch (error) {
-        return {
-          error: error instanceof Error ? error : new Error('Failed to create proposal'),
-        };
+        throw toStepError(error, 'Failed to create proposal');
       }
     },
   });

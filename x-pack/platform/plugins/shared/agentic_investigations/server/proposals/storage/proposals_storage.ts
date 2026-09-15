@@ -26,6 +26,9 @@ const storageSettings = {
       actionInput: types.flattened({}),
 
       status: types.keyword({}),
+      // Absent while awaiting, which is what `must_not exists` filters on.
+      decision: types.keyword({}),
+      supersededBy: types.keyword({}),
       impact: types.keyword({}),
       confidence: types.keyword({}),
       category: types.keyword({}),

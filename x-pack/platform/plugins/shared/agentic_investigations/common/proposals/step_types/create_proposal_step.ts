@@ -27,7 +27,9 @@ export const createProposalStepInputSchema = z.object({
   actionInput: optionalStepInput(z.record(z.string(), z.unknown())).describe(
     'Inputs passed to the action workflow.'
   ),
-  impact: optionalStepInput(proposalImpactSchema).describe('Impact snapshotted at creation.'),
+  impact: optionalStepInput(proposalImpactSchema).describe(
+    'Impact snapshotted at creation. Takes precedence over the action workflow\u2019s own declared impact, since the caller knows the situation the proposal came out of.'
+  ),
   confidence: optionalStepInput(proposalConfidenceSchema).describe(
     'Confidence in the recommendation.'
   ),
@@ -44,8 +46,14 @@ export const createProposalStepOutputSchema = z.object({
   status: z.string(),
   /** Comes from the action's metadata, so absent on a proposal with no action. */
   category: z.string().optional(),
-  /** True when the proposal still needs a human decision. */
+  /** True when no human has decided yet. */
   requiresDecision: z.boolean(),
+  /**
+   * The absolute deadline the caller's `expiresIn` resolved to. Emitted so a
+   * gating workflow can derive each attempt's remaining time from one fixed
+   * point rather than restarting the clock on every retry.
+   */
+  expiresAt: z.string().optional(),
 });
 
 export const createProposalStepCommonDefinition: BaseStepDefinition<
