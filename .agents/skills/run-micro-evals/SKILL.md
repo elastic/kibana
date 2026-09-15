@@ -53,13 +53,22 @@ payload cannot define an EIS connector.
 For an EIS judge, the standard runner enables Cloud Connected Mode using the existing
 Elastic credentials/cache. If authentication requires user input, ask them to complete
 `node scripts/evals init` locally. Otherwise use
-`node scripts/evals init` to configure a supported model connector. Keep the profile's default
+`node scripts/evals init` to configure a supported model connector. Capture initializer output
+privately too: it can print connector payloads. Keep the profile's default
 judge unless the caller supplied `--judge`. Report connector IDs, never secrets.
 
 ## 3. Run the complete suite
 
+Capture the runner's stdout and stderr in an owner-only temporary log. Its startup command
+can contain tracing credentials, and task errors can contain source examples. Never stream
+or print the raw log. Read only the experiment URLs, rule lines, final verdicts, and sanitized
+errors needed to diagnose a failure; redact credential values using the local profile before
+showing any other excerpt.
+
 ```bash
-node scripts/evals start --suite nightshift-micro-evals --profile <profile> --model <connector>
+micro_eval_log="$(mktemp)"
+node scripts/evals start --suite nightshift-micro-evals --profile <profile> --model <connector> \
+  >"$micro_eval_log" 2>&1
 ```
 
 Use `node scripts/evals run` with the same suite/profile/model when the caller says the

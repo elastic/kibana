@@ -25,8 +25,9 @@ source x-pack/platform/packages/shared/kbn-evals/scripts/ci/local_ci_env.sh \
 KIBANA_TESTING_AI_CONNECTORS="$(node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_openrouter_connectors.js \
   --models openrouter-anthropic-claude-sonnet-4-6)"
 export KIBANA_TESTING_AI_CONNECTORS
+micro_eval_log="$(mktemp)"
 node scripts/evals start --suite nightshift-micro-evals --profile golden \
-  --model openrouter-anthropic-claude-sonnet-4-6
+  --model openrouter-anthropic-claude-sonnet-4-6 >"$micro_eval_log" 2>&1
 ```
 
 The helper reads the profile's OpenRouter block and default `evaluationConnectorId` into the
@@ -40,6 +41,16 @@ using the usual Elastic credentials. Never print connector payloads: they contai
 Use `node scripts/evals run` with the same arguments when the stack is already up, or pass
 `--skip-server` to `start`. `--judge` overrides the profile judge.
 
+The temporary log is owner-only. Startup commands can contain tracing credentials and task
+errors can contain source examples: share only the experiment URLs, rule summaries, and
+sanitized diagnostics from it, never the raw log.
+
+For this port's local acceptance, the approved judge override is
+`openrouter-google-gemini-3-1-pro-preview` because the profile's EIS Gemini judge required an
+unavailable Vault sign-in. Set `EVAL_CONNECTOR_ID` to that ID **before** regenerating the
+OpenRouter payload, and pass the same ID with `--judge`. The profile remains unchanged;
+experiment metadata records the actual model and the PR evidence records the connector.
+
 The repo skill [/run-micro-evals](../../../../../.agents/skills/run-micro-evals/SKILL.md)
 resolves the profile and connector, runs this command, and returns all three experiment links
 and rule verdicts. The suite has one spec and no task/example subset switch.
@@ -48,6 +59,8 @@ and rule verdicts. The suite has one spec and no task/example subset switch.
 
 The `evals:nightshift-micro-evals` label selects this suite on any Kibana PR. Changes within
 this package automatically request the label through `.github/paths-labeller.yml`.
+Start the PR's CI using the bot comment's `kibana-pull-request` checkbox; that pipeline
+triggers the label-selected eval pipeline after the Kibana build.
 The suite also participates in the standard weekly pipeline. Its registered default model
 group is `eis/anthropic-claude-4.6-sonnet`; PR `models:` and `models:judge:` labels use the
 normal eval pipeline overrides. The step reports through `kibana-evals`.
