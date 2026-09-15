@@ -21,6 +21,11 @@ export async function untarBuffer(
 ) {
   const deflatedStream = bufferToStream(buffer);
   const entryPromises: Array<Promise<void>> = [];
+  // Serialize onEntry calls: tar.list() Parser has no pause() API, so streamToBuffer
+  // reads for adjacent entries can overlap when the archive is memory-backed, but we
+  // chain onEntry invocations so at most one is running at a time.
+  let onEntryChain = Promise.resolve<void>(undefined);
+  const settleChain = () => {};
 
   // use tar.list vs .extract to avoid writing to disk
   const inflateStream = tar.list().on('entry', (entry) => {
@@ -28,17 +33,20 @@ export async function untarBuffer(
     if (!filter({ path })) return;
 
     if (shouldReadBuffer && !shouldReadBuffer(path)) {
-      entryPromises.push(onEntry({ path }));
+      const p = onEntryChain.then(() => onEntry({ path }));
+      onEntryChain = p.then(settleChain, settleChain);
+      entryPromises.push(p);
       return;
     }
 
     // streamToBuffer must be called synchronously here to consume the entry stream
     // before tar advances to the next entry; the resulting promise is awaited below.
-    entryPromises.push(
-      streamToBuffer(entry as unknown as NodeJS.ReadableStream).then((entryBuffer) =>
-        onEntry({ buffer: entryBuffer, path })
-      )
-    );
+    const bufferPromise = streamToBuffer(entry as unknown as NodeJS.ReadableStream);
+    const p = onEntryChain
+      .then(() => bufferPromise)
+      .then((entryBuffer) => onEntry({ buffer: entryBuffer, path }));
+    onEntryChain = p.then(settleChain, settleChain);
+    entryPromises.push(p);
   });
 
   deflatedStream.pipe(inflateStream);
