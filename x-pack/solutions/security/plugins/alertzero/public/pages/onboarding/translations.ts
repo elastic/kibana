@@ -72,7 +72,8 @@ export const ENABLE_SUCCESS_TOAST_TITLE = i18n.translate(
 export const ENABLE_SUCCESS_TOAST_BODY = i18n.translate(
   'xpack.alertzero.onboarding.enable.successToastBody',
   {
-    defaultMessage: 'AlertZero will start running your watches and surface proposals after the next run.',
+    defaultMessage:
+      'AlertZero will start running your watches and surface proposals after the next run.',
   }
 );
 

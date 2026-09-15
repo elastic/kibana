@@ -15,14 +15,16 @@ jest.mock('../../hooks/use_onboarding_state', () => ({
 }));
 
 // Keep this spec focused on the gate decision; every routed page renders a trivial marker.
-jest.mock('../../pages/conversations', () => ({ ConversationsPage: () => <div>conversations</div> }));
-jest.mock('../../pages/chats', () => ({ ChatsPage: () => <div>chats</div> }));
-jest.mock('../../pages/settings', () => ({ SettingsPage: () => <div>settings</div> }));
-jest.mock('../../pages/watches/routes', () => ({ WatchesRoutes: () => <div>watches</div> }));
-jest.mock('../../pages/investigations/investigation_detail', () => ({
+jest.mock('../conversations', () => ({
+  ConversationsPage: () => <div>conversations</div>,
+}));
+jest.mock('../chats', () => ({ ChatsPage: () => <div>chats</div> }));
+jest.mock('../settings', () => ({ SettingsPage: () => <div>settings</div> }));
+jest.mock('../watches/routes', () => ({ WatchesRoutes: () => <div>watches</div> }));
+jest.mock('../investigations/investigation_detail', () => ({
   InvestigationDetailPage: () => <div>investigation</div>,
 }));
-jest.mock('../../pages/onboarding', () => ({ OnboardingPage: () => <div>onboarding</div> }));
+jest.mock('.', () => ({ OnboardingPage: () => <div>onboarding</div> }));
 jest.mock('../../components/placeholder_page', () => ({
   PlaceholderPage: ({ title }: { title: string }) => <div>placeholder:{title}</div>,
 }));

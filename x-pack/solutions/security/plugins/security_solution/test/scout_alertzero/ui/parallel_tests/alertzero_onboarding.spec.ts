@@ -52,9 +52,7 @@ spaceTest.describe(
         await expect(page.testSubj.locator('alertZeroWatchWorkersSection')).toBeVisible();
 
         // The enable confirmation is a transient success toast on top of that surface.
-        await expect(
-          page.getByText('AlertZero is enabled', { exact: true })
-        ).toBeVisible();
+        await expect(page.getByText('AlertZero is enabled', { exact: true })).toBeVisible();
 
         // Real install path evidence: managed watch workflows now exist in this space.
         const workers = await kbnClient.request({
@@ -83,9 +81,7 @@ spaceTest.describe(
         await page.gotoApp('alertzero');
         // S2 renders the real watch detail page (workers section), not the onboarding prompt.
         await expect(page.testSubj.locator('alertZeroWatchWorkersSection')).toBeVisible();
-        await expect(
-          page.testSubj.locator('alertZeroOnboardingAwaitingRunPage')
-        ).not.toBeVisible();
+        await expect(page.testSubj.locator('alertZeroOnboardingAwaitingRunPage')).not.toBeVisible();
       }
     );
   }

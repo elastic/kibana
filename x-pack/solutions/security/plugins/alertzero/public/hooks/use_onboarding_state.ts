@@ -15,7 +15,10 @@ import {
 import { queryKeys } from '../query_keys';
 import { usePendingProposals } from './use_proposals_api';
 import { useWatches } from './use_watches_api';
-import { ENABLE_SUCCESS_TOAST_BODY, ENABLE_SUCCESS_TOAST_TITLE } from '../pages/onboarding/translations';
+import {
+  ENABLE_SUCCESS_TOAST_BODY,
+  ENABLE_SUCCESS_TOAST_TITLE,
+} from '../pages/onboarding/translations';
 
 /**
  * Derived onboarding state. There is no stored step — the state is recomputed from the
