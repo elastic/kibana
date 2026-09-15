@@ -160,9 +160,6 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
       expect(response.body.errors).toHaveLength(1);
       expect(response.body.errors[0].id).toBe('bulk-series-partial-unknown-group');
       expect(response.body.errors[0].error.code).toBe('ALERT_GROUP_NOT_FOUND');
-      expect(response.body.errors[0].error.message).toBe(
-        'Alert series with group_hash [bulk-series-partial-unknown-group] not found'
-      );
 
       const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,

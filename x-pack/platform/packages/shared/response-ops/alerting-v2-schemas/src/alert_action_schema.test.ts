@@ -112,20 +112,29 @@ describe('episodeAlertActionParamsSchema', () => {
 });
 
 describe('verb-specific bulk action body schemas', () => {
-  it('accepts an items envelope with valid items', () => {
+  it('accepts a valid bulk tag episode envelope', () => {
     expect(() =>
       bulkTagEpisodeActionBodySchema.parse({ items: [{ episode_id: 'e1', tags: ['p1'] }] })
     ).not.toThrow();
+  });
+
+  it('accepts a valid bulk snooze series envelope', () => {
     expect(() =>
       bulkSnoozeSeriesActionBodySchema.parse({
         items: [{ group_hash: 'g1', expiry: '2026-08-12T00:00:00.000Z' }, { group_hash: 'g2' }],
       })
     ).not.toThrow();
+  });
+
+  it('accepts a valid bulk assign episode envelope', () => {
     expect(() =>
       bulkAssignEpisodeActionBodySchema.parse({
         items: [{ episode_id: 'e1', assignee_uid: null }],
       })
     ).not.toThrow();
+  });
+
+  it('accepts a valid bulk activate episode envelope', () => {
     expect(() =>
       bulkActivateEpisodeActionBodySchema.parse({
         items: [{ episode_id: 'e1', reason: 'reopen' }],
@@ -143,13 +152,16 @@ describe('verb-specific bulk action body schemas', () => {
     expect(() => bulkTagEpisodeActionBodySchema.parse({ items: [] })).toThrow();
   });
 
-  it('rejects unknown envelope and item fields (strict mode)', () => {
+  it('rejects an unknown envelope field (strict mode)', () => {
     expect(() =>
       bulkTagEpisodeActionBodySchema.parse({
         items: [{ episode_id: 'e1', tags: ['p1'] }],
         force: true,
       })
     ).toThrow();
+  });
+
+  it('rejects an item carrying action_type (strict mode, the verb is in the path)', () => {
     expect(() =>
       bulkTagEpisodeActionBodySchema.parse({
         items: [{ episode_id: 'e1', tags: ['p1'], action_type: ALERT_EPISODE_ACTION_TYPE.TAG }],
@@ -157,7 +169,7 @@ describe('verb-specific bulk action body schemas', () => {
     ).toThrow();
   });
 
-  it('rejects items keyed by the wrong identifier for the scope', () => {
+  it('rejects an episode item keyed by group_hash', () => {
     expect(() =>
       bulkTagEpisodeActionBodySchema.parse({ items: [{ group_hash: 'g1', tags: ['p1'] }] })
     ).toThrow();

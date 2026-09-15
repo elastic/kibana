@@ -18,6 +18,4 @@ export const CreateActivateEpisodeActionRoute = createEpisodeActionRouteForType(
   summary: 'Activate an alert episode',
   bodySchema: createActivateEpisodeActionBodySchema,
   oasOperationObject: createActivateEpisodeActionOasExamples,
-  notFoundDescription:
-    'Indicates the alert episode was not found or is not the latest episode of its series.',
 });

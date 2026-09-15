@@ -24,6 +24,7 @@ import {
   createUnackEpisodeActionBodySchema,
   createUnsnoozeSeriesActionBodySchema,
 } from '@kbn/alerting-v2-schemas';
+import type { z } from '@kbn/zod/v4';
 import {
   BULK_TAG_EPISODE_ACTION_REQUEST,
   BULK_TAG_EPISODE_ACTION_RESPONSE,
@@ -99,7 +100,7 @@ describe('alert action OAS example payloads', () => {
   });
 
   it('keeps every bulk request example valid against its body schema', () => {
-    const cases: Array<[{ safeParse: (v: unknown) => { success: boolean } }, unknown]> = [
+    const cases: ReadonlyArray<readonly [z.ZodType, unknown]> = [
       [bulkTagEpisodeActionBodySchema, BULK_TAG_EPISODE_ACTION_REQUEST],
       [bulkSnoozeSeriesActionBodySchema, BULK_SNOOZE_SERIES_ACTION_REQUEST],
       [bulkUnsnoozeSeriesActionBodySchema, BULK_UNSNOOZE_SERIES_ACTION_REQUEST],

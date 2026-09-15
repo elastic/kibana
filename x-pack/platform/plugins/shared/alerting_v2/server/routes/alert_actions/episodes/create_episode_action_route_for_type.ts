@@ -37,12 +37,6 @@ interface CreateEpisodeActionRouteForTypeOptions<
     Omit<Extract<CreateEpisodeAlertActionBody, { action_type: TAction }>, 'action_type'>
   >;
   oasOperationObject?: RouteConfigOptions<RouteMethod>['oasOperationObject'];
-  /**
-   * Extra context for the 404 description: lifecycle actions (activate /
-   * deactivate) also return 404 when the episode is not the latest of its
-   * series.
-   */
-  notFoundDescription?: string;
 }
 
 export const createEpisodeActionRouteForType = <
@@ -53,7 +47,6 @@ export const createEpisodeActionRouteForType = <
   summary,
   bodySchema,
   oasOperationObject,
-  notFoundDescription,
 }: CreateEpisodeActionRouteForTypeOptions<TAction>): RouteDefinition<
   EpisodeAlertActionParams,
   unknown,
@@ -94,7 +87,8 @@ export const createEpisodeActionRouteForType = <
         },
         404: {
           body: () => errorResponseSchema,
-          description: notFoundDescription ?? 'Indicates the alert episode was not found.',
+          description:
+            'Indicates the alert episode was not found, or is not the latest episode of its series (activate and deactivate only).',
         },
       },
     };

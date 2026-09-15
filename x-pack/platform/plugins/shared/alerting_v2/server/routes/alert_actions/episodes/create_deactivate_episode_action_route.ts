@@ -18,6 +18,4 @@ export const CreateDeactivateEpisodeActionRoute = createEpisodeActionRouteForTyp
   summary: 'Deactivate an alert episode',
   bodySchema: createDeactivateEpisodeActionBodySchema,
   oasOperationObject: createDeactivateEpisodeActionOasExamples,
-  notFoundDescription:
-    'Indicates the alert episode was not found or is not the latest episode of its series.',
 });

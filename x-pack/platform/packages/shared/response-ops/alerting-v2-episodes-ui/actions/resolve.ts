@@ -9,6 +9,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import {
   ALERT_EPISODE_STATUS,
+  type AlertEpisode,
   type BulkDeactivateEpisodeActionItem,
 } from '@kbn/alerting-v2-schemas';
 import type { EpisodeAction, EpisodeActionContext } from './types';
@@ -21,23 +22,22 @@ export interface ResolveActionDeps {
   notifications: NotificationsStart;
 }
 
+const isResolvable = (episode: AlertEpisode) =>
+  episode['episode.status'] !== ALERT_EPISODE_STATUS.INACTIVE;
+
 export const createResolveAction = (deps: ResolveActionDeps): EpisodeAction => ({
   id: 'ALERTING_V2_RESOLVE_EPISODE',
   order: 30,
   displayName: i18n.RESOLVE,
   iconType: 'check',
   isCompatible: ({ episodes }: EpisodeActionContext) =>
-    episodes.length > 0 &&
-    episodes.some((ep) => ep['episode.status'] !== ALERT_EPISODE_STATUS.INACTIVE),
+    episodes.length > 0 && episodes.some(isResolvable),
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
-    // Mirror isCompatible: on a mixed selection, only resolve the episodes
-    // that are not already inactive.
-    const items: BulkDeactivateEpisodeActionItem[] = episodes
-      .filter((ep) => ep['episode.status'] !== ALERT_EPISODE_STATUS.INACTIVE)
-      .map((ep) => ({
-        episode_id: ep['episode.id'],
-        reason: i18n.RESOLVE_ACTION_REASON,
-      }));
+    // On a mixed selection, only resolve the episodes that are not already inactive.
+    const items: BulkDeactivateEpisodeActionItem[] = episodes.filter(isResolvable).map((ep) => ({
+      episode_id: ep['episode.id'],
+      reason: i18n.RESOLVE_ACTION_REASON,
+    }));
     if (!items.length) return;
 
     try {
