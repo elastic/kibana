@@ -17,11 +17,15 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
-import type { AiIndexSource } from '../../../../common/http_api/ai_indices';
+import type { AiIndexSource, GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { useDataConnectors } from '../../hooks/use_data_connectors';
 import { toSourceType } from '../../utils/sources';
 import { getSourceDisplay } from '../source_display';
 import { SourceRow } from '../source_row';
+import { ScopedImprovements } from './scoped_improvements';
+
+/** The improvements that would change this panel's part of the AI index. */
+const SOURCE_ACTIONS = ['add_source', 'edit_source', 'remove_source'] as const;
 
 interface SourcesPanelProps {
   isLoading: boolean;
@@ -29,6 +33,8 @@ interface SourcesPanelProps {
   canEdit: boolean;
   onEditSources: () => void;
   isManaged: boolean;
+  /** Only the suggestions below need the whole index, and they wait for it. */
+  aiIndex?: GetAiIndexResponse;
 }
 
 export const SourcesPanel = ({
@@ -37,6 +43,7 @@ export const SourcesPanel = ({
   canEdit,
   onEditSources,
   isManaged,
+  aiIndex,
 }: SourcesPanelProps) => {
   const hasConnectorSources = useMemo(
     () => sources.some((source) => source.type === 'connector'),
@@ -127,6 +134,12 @@ export const SourcesPanel = ({
           })}
         </EuiFlexGroup>
       )}
+
+      <ScopedImprovements
+        aiIndex={aiIndex}
+        actions={SOURCE_ACTIONS}
+        data-test-subj="contextAiIndexSourceImprovements"
+      />
     </EuiPanel>
   );
 };

@@ -21,6 +21,16 @@ import type { WorkflowSummary } from '../../hooks/use_workflow_summaries';
 import { useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
 import { AutomationsPanel } from './automations_panel';
 
+const mockScopedImprovements = jest.fn();
+
+// Covered on its own; here it only needs to show which suggestions this panel claims.
+jest.mock('./scoped_improvements', () => ({
+  ScopedImprovements: (props: unknown) => {
+    mockScopedImprovements(props);
+    return null;
+  },
+}));
+
 jest.mock('../../hooks/use_automations_editor', () => ({
   useAutomationsEditor: jest.fn(),
 }));
@@ -125,6 +135,16 @@ describe('AutomationsPanel', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('is where suggestions about automations are reviewed', () => {
+    renderPanel({});
+
+    expect(mockScopedImprovements).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actions: ['add_workflow', 'edit_workflow', 'remove_workflow'],
+      })
+    );
   });
 
   it('shows the loading skeleton and nothing else while the AI index loads', () => {

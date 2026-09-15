@@ -179,6 +179,7 @@ describe('ai indices routes', () => {
     improvementsClients = [];
     scheduleService = {
       reconcile: jest.fn().mockResolvedValue(undefined),
+      run: jest.fn().mockResolvedValue('execution-1'),
       remove: jest.fn().mockResolvedValue(undefined),
     };
 

@@ -14,6 +14,7 @@ import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-action
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { AiIndexHttpItem, GetAiIndexResponse } from '../common/http_api/ai_indices';
+import type { Improvement } from '../common/http_api/improvements';
 import type { ContextEngineAppChromeAdapter } from './app_chrome_adapter';
 
 /**
@@ -26,6 +27,12 @@ export interface AnalyzeAndImproveContext {
   aiIndex: AiIndexHttpItem;
   /** The tag/group the action is scoped to, when drilled into a single group. */
   tag?: string;
+  /**
+   * One improvement to discuss, when the hand-off came from a row's "Talk with agent" rather than
+   * from the panel. Its proposed change and provenance are attached so the conversation starts with
+   * the same evidence the reviewer is looking at.
+   */
+  improvement?: Improvement;
 }
 
 /** Opens Agent Builder to analyze the given signals. */
@@ -41,6 +48,11 @@ export interface AnalyzeChatOptions {
   sessionTag: string;
   /** Attachments passed to Agent Builder. */
   attachments: AttachmentInput[];
+  /**
+   * Prefilled but unsent, so the reviewer opens on a readable question rather than a wall of
+   * briefing. The detail lives in the attachments.
+   */
+  initialMessage?: string;
 }
 
 export type { ContextEngineAppChromeAdapter } from './app_chrome_adapter';

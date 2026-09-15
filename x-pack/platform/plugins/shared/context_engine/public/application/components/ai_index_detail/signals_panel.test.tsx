@@ -168,13 +168,14 @@ describe('SignalsPanel', () => {
     expect(opener.mock.calls[0][0]).not.toHaveProperty('signals');
   });
 
-  it('renders the agent selector and disables Analyze with a prompt when no agent is configured', () => {
+  it('disables Analyze and says where to pick an agent when none is configured', () => {
     const opener = jest.fn();
     renderPanel({ chatOpener: opener });
 
-    expect(screen.getByTestId('contextSignalsFeedbackAgentSelect')).toBeInTheDocument();
     expect(screen.getByTestId('contextSignalsAnalyzeButton')).toBeDisabled();
-    expect(screen.getByTestId('contextSignalsFeedbackAgentPrompt')).toBeInTheDocument();
+    expect(screen.getByTestId('contextSignalsFeedbackAgentPrompt')).toHaveTextContent(
+      'Improvements panel'
+    );
 
     fireEvent.click(screen.getByTestId('contextSignalsAnalyzeButton'));
     expect(opener).not.toHaveBeenCalled();
@@ -187,15 +188,14 @@ describe('SignalsPanel', () => {
     expect(screen.queryByTestId('contextSignalsFeedbackAgentPrompt')).not.toBeInTheDocument();
   });
 
-  it('does not render the agent selector when no chat opener is registered', () => {
-    renderPanel();
+  /** The selector itself now lives in the Improvements panel, which owns the analysis config. */
+  it('does not render the agent selector', () => {
+    renderPanel({ chatOpener: jest.fn() });
     expect(screen.queryByTestId('contextSignalsFeedbackAgentSelect')).not.toBeInTheDocument();
   });
 
-  it('does not render the agent selector or prompt for a managed index', () => {
-    renderPanel({ chatOpener: jest.fn(), index: { ...aiIndex, managed: true } });
-
-    expect(screen.queryByTestId('contextSignalsFeedbackAgentSelect')).not.toBeInTheDocument();
+  it('says nothing about agents when there is no chat to open', () => {
+    renderPanel();
     expect(screen.queryByTestId('contextSignalsFeedbackAgentPrompt')).not.toBeInTheDocument();
   });
 

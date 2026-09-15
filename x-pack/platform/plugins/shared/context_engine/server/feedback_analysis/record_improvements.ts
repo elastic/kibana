@@ -146,10 +146,12 @@ export const recordImprovements = async ({
         payload: proposal.payload ?? {},
         provenance: {
           agent_run_id: agentRunId,
-          signal_ids: proposal.signal_ids,
+          // Absent when the proposal came from reading the index rather than an observed
+          // retrieval, which is the only evidence a run over a signal-less window has.
+          signal_ids: proposal.signal_ids ?? [],
           signal_spaces: signalSpaces,
           signal_window: signalWindow,
-          signal_count: proposal.signal_ids.length,
+          signal_count: proposal.signal_ids?.length ?? 0,
           ...(proposal.signal_tags ? { tags: proposal.signal_tags } : {}),
         },
       },
