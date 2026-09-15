@@ -97,10 +97,15 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
   const handleDeploy = useCallback(
     async (instanceIds?: string[]): Promise<{ failed: boolean }> => {
       const isRetry = instanceIds !== undefined && instanceIds.length > 0;
+      const alreadyDeployedIds = new Set(
+        Object.keys(detectAndReviewStep.policyIdsByInstance ?? {})
+      );
       // For retries, keep only groups that have at least one instanceId to retry.
+      // For fresh deploys, skip groups where every instance already has a package policy —
+      // this handles incremental service additions (deploy A, add B, Next should only deploy B).
       const targetsToDeploy = isRetry
         ? targets.filter((g) => g.instanceIds.some((id) => instanceIds.includes(id)))
-        : targets;
+        : targets.filter((g) => g.instanceIds.some((id) => !alreadyDeployedIds.has(id)));
 
       if (targetsToDeploy.length === 0) return { failed: false };
 
@@ -205,6 +210,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       authenticateAndDeployStep,
       agentBasedDeployment,
       setAgentBasedDeployment,
+      detectAndReviewStep,
       updateDetectAndReviewStep,
       getLatestFailedInstances,
     ]
