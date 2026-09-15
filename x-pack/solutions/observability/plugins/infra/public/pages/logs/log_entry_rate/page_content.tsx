@@ -15,7 +15,7 @@ import {
   logEntryCategoriesJobType,
   logEntryRateJobType,
 } from '../../../../common/log_analysis';
-import { LoadingPage } from '../../../components/loading_page';
+import { LoadingPrompt } from '../../../components/loading_page';
 import {
   LogAnalysisSetupStatusUnknownPrompt,
   MissingSetupPrivilegesPrompt,
@@ -27,16 +27,13 @@ import {
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis';
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { useLogEntryRateModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_rate';
+import { LogsAppHeader, logsAnomaliesPageTitle } from '../header';
 import { LogsPageTemplate } from '../shared/page_template';
 import { LogEntryRateResultsContent } from './page_results_content';
 import { LogEntryRateSetupContent } from './page_setup_content';
 import { useLogMlJobIdFormatsShimContext } from '../shared/use_log_ml_job_id_formats_shim';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
-
-const logsAnomaliesTitle = i18n.translate('xpack.infra.logs.anomaliesPageTitle', {
-  defaultMessage: 'Anomalies',
-});
 
 export const LogEntryRatePageContent = memo(() => {
   const { hasLogAnalysisReadCapabilities, hasLogAnalysisSetupCapabilities } =
@@ -96,11 +93,13 @@ export const LogEntryRatePageContent = memo(() => {
     logEntryRateSetupStatus.type === 'initializing'
   ) {
     return (
-      <LoadingPage
-        message={i18n.translate('xpack.infra.logs.analysisPage.loadingMessage', {
-          defaultMessage: 'Checking status of analysis jobs...',
-        })}
-      />
+      <AnomaliesPageTemplate isEmptyState={true}>
+        <LoadingPrompt
+          message={i18n.translate('xpack.infra.logs.analysisPage.loadingMessage', {
+            defaultMessage: 'Checking status of analysis jobs...',
+          })}
+        />
+      </AnomaliesPageTemplate>
     );
   } else if (
     logEntryCategoriesSetupStatus.type === 'unknown' ||
@@ -117,7 +116,7 @@ export const LogEntryRatePageContent = memo(() => {
   ) {
     return (
       <>
-        <LogEntryRateResultsContent idFormats={idFormats} pageTitle={logsAnomaliesTitle} />
+        <LogEntryRateResultsContent idFormats={idFormats} pageTitle={logsAnomaliesPageTitle} />
         <LogAnalysisSetupFlyout />
       </>
     );
@@ -148,13 +147,7 @@ export const AnomaliesPageTemplate: React.FC<LazyObservabilityPageTemplateProps>
     <LogsPageTemplate
       hasData={logViewStatus?.index !== 'missing'}
       data-test-subj="logsLogEntryRatePage"
-      pageHeader={
-        rest.isEmptyState
-          ? undefined
-          : {
-              pageTitle: logsAnomaliesTitle,
-            }
-      }
+      header={<LogsAppHeader title={logsAnomaliesPageTitle} />}
       {...rest}
     >
       {children}
