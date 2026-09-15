@@ -5,19 +5,33 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
+
+import { EuiProvider } from '@elastic/eui';
+import { KibanaStyledComponentsThemeProvider } from '@kbn/react-kibana-context-styled';
 
 import type { PopoverItemsProps } from '.';
 import { PopoverItems } from '.';
-import { TestProviders } from '../../mock';
 import { render, screen, within } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 const mockTags = ['Elastic', 'Endpoint', 'Data Protection', 'ML', 'Continuous Monitoring'];
 
+/**
+ * Only the two contexts `PopoverItems` actually consumes. The shared `TestProviders` pulls the
+ * redux store, query client and Kibana provider graph into this file, and whichever test runs
+ * first pays the cold-mount cost of that graph inside its own timeout.
+ */
+const TestWrapper = ({ children }: PropsWithChildren) => (
+  <EuiProvider highContrastMode={false}>
+    <KibanaStyledComponentsThemeProvider>{children}</KibanaStyledComponentsThemeProvider>
+  </EuiProvider>
+);
+
 const renderHelper = (props: Partial<PopoverItemsProps<string>> = {}) =>
   render(
-    <TestProviders>
+    <TestWrapper>
       <PopoverItems
         dataTestPrefix="tags"
         items={mockTags}
@@ -25,7 +39,7 @@ const renderHelper = (props: Partial<PopoverItemsProps<string>> = {}) =>
         renderItem={(item: string, index: number) => <span key={`${item}-${index}`}>{item}</span>}
         {...props}
       />
-    </TestProviders>
+    </TestWrapper>
   );
 
 const getButton = () => screen.getByRole('button', { name: 'show mocks' });
