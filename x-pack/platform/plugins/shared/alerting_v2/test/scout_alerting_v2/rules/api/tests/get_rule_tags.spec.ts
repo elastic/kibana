@@ -250,15 +250,43 @@ apiTest.describe('Get rule tags API', { tag: '@local-stateful-classic' }, () => 
   });
 
   apiTest(
-    'validation: should return 400 when the removed filter param is sent',
+    'filter: should return only tags from rules matching the KQL filter',
+    async ({ apiClient, apiServices }) => {
+      await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          kind: 'alert',
+          metadata: { name: 'alert-rule-filter', tags: ['alert-only-tag'] },
+        })
+      );
+      await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          kind: 'signal',
+          state_transition: undefined,
+          recovery_strategy: undefined,
+          metadata: { name: 'signal-rule-filter', tags: ['signal-only-tag'] },
+        })
+      );
+
+      const response = await apiClient.get(tagsUrl({ filter: 'kind:alert' }), {
+        headers: readerHeaders,
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.tags).toContain('alert-only-tag');
+      expect(response.body.tags).not.toContain('signal-only-tag');
+    }
+  );
+
+  apiTest(
+    'filter: should return 400 for a filter naming a disallowed field',
     async ({ apiClient }) => {
-      const url = `${TAGS_URL}?filter=kind%3Aalert`;
+      const url = `${TAGS_URL}?filter=metadata.updated_at%3A%22something%22`;
       const response = await apiClient.get(url, {
         headers: readerHeaders,
       });
 
       expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
+      expect(response.body.code).toBe('INVALID_FILTER_FIELD');
     }
   );
 

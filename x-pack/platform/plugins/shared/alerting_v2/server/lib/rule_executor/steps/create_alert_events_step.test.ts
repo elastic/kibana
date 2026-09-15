@@ -7,7 +7,11 @@
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { ByteSizeValue } from '@kbn/config-schema';
+import { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import type { RegisteredBuilderType } from '@kbn/alerting-v2-rule-builders';
 import { CreateAlertEventsStep } from './create_alert_events_step';
 import {
   collectStreamResults,
@@ -15,18 +19,57 @@ import {
   createRuleExecutionInput,
   createRuleResponse,
   createRulePipelineState,
+  getStepError,
 } from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
-import { buildGroupHash } from '../build_alert_events';
+import * as buildAlertEventsModule from '../build_alert_events';
 import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
-import { ALERTING_LOG_CODES } from '../../errors/error_codes';
+import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../../errors/error_codes';
+import { BuilderTypeRegistry } from '../../builder_types';
+import { FoldedVersionsSet } from '../../builder_types/folded_versions';
 import type { PluginConfig } from '../../../config';
+
+// ---------------------------------------------------------------------------
+// Registry fixtures
+// ---------------------------------------------------------------------------
+
+const simpleSchema = z.object({ severity: z.string().max(50) }).strict();
+
+function makeEnrichmentDefinition(
+  overrides: Partial<RegisteredBuilderType> = {}
+): RegisteredBuilderType {
+  return {
+    type: 'test.enrichment',
+    name: 'Test Enrichment Type',
+    compilation: 'execution_time',
+    builderFieldsSchema: simpleSchema as unknown as RegisteredBuilderType['builderFieldsSchema'],
+    generateQuery: jest.fn(() => ({
+      query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+    })),
+    ...overrides,
+  };
+}
+
+function makeRegistry(...definitions: RegisteredBuilderType[]): BuilderTypeRegistry {
+  const registry = new BuilderTypeRegistry().withFoldedVersions(new FoldedVersionsSet());
+  for (const def of definitions) {
+    registry.register(def);
+  }
+  return registry;
+}
+
+// ---------------------------------------------------------------------------
+// Step factory
+// ---------------------------------------------------------------------------
 
 describe('CreateAlertEventsStep', () => {
   let step: CreateAlertEventsStep;
   let mockLogger: jest.Mocked<Logger>;
 
-  function createStep(rulesConfigOverrides?: Partial<PluginConfig['rules']>) {
+  function createStep(
+    rulesConfigOverrides?: Partial<PluginConfig['rules']>,
+    registry?: BuilderTypeRegistry
+  ) {
     const config: PluginConfig = {
       enabled: true,
       invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' },
@@ -49,7 +92,11 @@ describe('CreateAlertEventsStep', () => {
     const logger = createLoggerService();
     mockLogger = logger.mockLogger;
 
-    return new CreateAlertEventsStep(logger.loggerService, pluginConfigAccessor);
+    return new CreateAlertEventsStep(
+      logger.loggerService,
+      pluginConfigAccessor,
+      registry ?? makeRegistry()
+    );
   }
 
   beforeEach(() => {
@@ -330,7 +377,7 @@ describe('CreateAlertEventsStep', () => {
 
   describe('active group protection', () => {
     const hashFor = (host: string) =>
-      buildGroupHash({
+      buildAlertEventsModule.buildGroupHash({
         rowDoc: { 'host.name': host },
         groupKeyFields: ['host.name'],
         fallbackSeed: 'unused',
@@ -368,6 +415,318 @@ describe('CreateAlertEventsStep', () => {
         [RULE_EXECUTION_COUNTERS.groupsDroppedByLimit]: 1,
       });
       expect(result.state.activeGroups).toEqual(activeGroups);
+    });
+  });
+
+  describe('enrichRuleEvent hook', () => {
+    // A rule with builder_type 'test.enrichment' and builder_fields { severity: 'high' }.
+    // The simpleSchema accepts { severity: string } so parse succeeds.
+    function makeEnrichedRule(hookOverrides: Partial<RegisteredBuilderType> = {}) {
+      const definition = makeEnrichmentDefinition(hookOverrides);
+      const registry = makeRegistry(definition);
+      const localStep = createStep(undefined, registry);
+
+      const rule = createRuleResponse({
+        kind: 'signal',
+        metadata: {
+          builder_type: 'test.enrichment',
+          builder_fields: { severity: 'high' },
+          signature_id: 'sig-001',
+        },
+      });
+
+      return { localStep, rule };
+    }
+
+    it('no-hook case: a type with no enrichRuleEvent hook leaves events unchanged', async () => {
+      // Register a type that has no hook. The registry is consulted once, but
+      // per-event cost is zero because enrichRuleEvent is absent.
+      const definition = makeEnrichmentDefinition(); // no enrichRuleEvent
+      const registry = makeRegistry(definition);
+      step = createStep(undefined, registry);
+
+      const rule = createRuleResponse({
+        kind: 'signal',
+        metadata: { builder_type: 'test.enrichment', builder_fields: { severity: 'high' } },
+      });
+      const esqlRowBatch = [{ 'host.name': 'host-a', severity: 'low' }];
+      const state = createRulePipelineState({
+        input: createRuleExecutionInput(),
+        rule,
+        esqlRowBatch,
+      });
+
+      const [result] = await collectStreamResults(
+        step.executeStream(createPipelineStream([state]))
+      );
+
+      expect(result.type).toBe('continue');
+      if (result.type !== 'continue') throw new Error('expected continue');
+      // Severity comes from the row column (unchanged path).
+      expect(result.state.alertEventsBatch?.[0].severity).toBe('low');
+      expect(result.state.alertEventsBatch?.[0].data).toEqual({
+        'host.name': 'host-a',
+        severity: 'low',
+      });
+    });
+
+    it('precedence rule 1: hook severity wins over the row severity column', async () => {
+      const { localStep, rule } = makeEnrichedRule({
+        enrichRuleEvent: () => ({ severity: 'critical' }),
+      });
+
+      const esqlRowBatch = [{ 'host.name': 'host-a', severity: 'low' }];
+      const state = createRulePipelineState({
+        input: createRuleExecutionInput(),
+        rule,
+        esqlRowBatch,
+      });
+
+      const [result] = await collectStreamResults(
+        localStep.executeStream(createPipelineStream([state]))
+      );
+
+      expect(result.type).toBe('continue');
+      if (result.type !== 'continue') throw new Error('expected continue');
+      expect(result.state.alertEventsBatch?.[0].severity).toBe('critical');
+    });
+
+    it('precedence rule 1: row column severity applies when hook returns no severity', async () => {
+      const { localStep, rule } = makeEnrichedRule({
+        enrichRuleEvent: () => ({ data: { 'kibana.alert.risk_score': 75 } }),
+      });
+
+      const esqlRowBatch = [{ 'host.name': 'host-a', severity: 'high' }];
+      const state = createRulePipelineState({
+        input: createRuleExecutionInput(),
+        rule,
+        esqlRowBatch,
+      });
+
+      const [result] = await collectStreamResults(
+        localStep.executeStream(createPipelineStream([state]))
+      );
+
+      expect(result.type).toBe('continue');
+      if (result.type !== 'continue') throw new Error('expected continue');
+      expect(result.state.alertEventsBatch?.[0].severity).toBe('high');
+    });
+
+    it('precedence rule 2: hook data additions merge over the row', async () => {
+      const { localStep, rule } = makeEnrichedRule({
+        enrichRuleEvent: () => ({
+          data: { 'kibana.alert.risk_score': 75, 'kibana.alert.rule.rule_id': 'sig-001' },
+        }),
+      });
+
+      const esqlRowBatch = [{ 'host.name': 'host-a' }];
+      const state = createRulePipelineState({
+        input: createRuleExecutionInput(),
+        rule,
+        esqlRowBatch,
+      });
+
+      const [result] = await collectStreamResults(
+        localStep.executeStream(createPipelineStream([state]))
+      );
+
+      expect(result.type).toBe('continue');
+      if (result.type !== 'continue') throw new Error('expected continue');
+      expect(result.state.alertEventsBatch?.[0].data).toEqual({
+        'host.name': 'host-a',
+        'kibana.alert.risk_score': 75,
+        'kibana.alert.rule.rule_id': 'sig-001',
+      });
+    });
+
+    it('precedence rule 2: hook wins key collisions with the row', async () => {
+      const { localStep, rule } = makeEnrichedRule({
+        enrichRuleEvent: () => ({ data: { region: 'hook-region' } }),
+      });
+
+      const esqlRowBatch = [{ 'host.name': 'host-a', region: 'row-region' }];
+      const state = createRulePipelineState({
+        input: createRuleExecutionInput(),
+        rule,
+        esqlRowBatch,
+      });
+
+      const [result] = await collectStreamResults(
+        localStep.executeStream(createPipelineStream([state]))
+      );
+
+      expect(result.type).toBe('continue');
+      if (result.type !== 'continue') throw new Error('expected continue');
+      const data = result.state.alertEventsBatch?.[0].data as Record<string, unknown>;
+      expect(data.region).toBe('hook-region');
+    });
+
+    it('throw case: a throwing hook fails the run as a user-source error', async () => {
+      const { localStep, rule } = makeEnrichedRule({
+        enrichRuleEvent: () => {
+          throw new Error('enrichment failed');
+        },
+      });
+
+      const esqlRowBatch = [{ 'host.name': 'host-a' }];
+      const state = createRulePipelineState({
+        input: createRuleExecutionInput(),
+        rule,
+        esqlRowBatch,
+      });
+
+      const error = await getStepError(localStep, state);
+
+      expect(error).toBeDefined();
+      expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
+      expect(error?.message).toContain('enrichment failed');
+      // The wrapped Boom error carries the right error code in its `.data` field.
+      expect((error as any).data?.code).toBe(ALERTING_ERROR_CODES.RULE_EVENT_ENRICHMENT_FAILED);
+    });
+
+    it('passes the rule identity to the hook input', async () => {
+      const capturedInputs: Array<{ id: string; signature_id: string; kind: string }> = [];
+      const { localStep, rule } = makeEnrichedRule({
+        enrichRuleEvent: ({ rule: ruleId }) => {
+          capturedInputs.push(ruleId);
+          return {};
+        },
+      });
+
+      const esqlRowBatch = [{ 'host.name': 'host-a' }];
+      const state = createRulePipelineState({
+        input: createRuleExecutionInput(),
+        rule,
+        esqlRowBatch,
+      });
+      await collectStreamResults(localStep.executeStream(createPipelineStream([state])));
+
+      expect(capturedInputs).toHaveLength(1);
+      expect(capturedInputs[0].id).toBe(rule.id);
+      expect(capturedInputs[0].signature_id).toBe('sig-001');
+      expect(capturedInputs[0].kind).toBe('signal');
+    });
+
+    it('passes the unmerged row to the hook', async () => {
+      const capturedRows: Array<Readonly<Record<string, unknown>>> = [];
+      const { localStep, rule } = makeEnrichedRule({
+        enrichRuleEvent: ({ row }) => {
+          capturedRows.push(row);
+          return {};
+        },
+      });
+
+      const esqlRowBatch = [{ 'host.name': 'host-a', score: 99 }];
+      const state = createRulePipelineState({
+        input: createRuleExecutionInput(),
+        rule,
+        esqlRowBatch,
+      });
+      await collectStreamResults(localStep.executeStream(createPipelineStream([state])));
+
+      expect(capturedRows).toHaveLength(1);
+      expect(capturedRows[0]).toEqual({ 'host.name': 'host-a', score: 99 });
+    });
+
+    it('hook is not called when the rule has no builder_type (plain ES|QL rule)', async () => {
+      // A rule with no builder_type: no registry lookup happens, hook is never called.
+      const hookSpy = jest.fn().mockReturnValue({});
+      const definition = makeEnrichmentDefinition({ enrichRuleEvent: hookSpy });
+      const registry = makeRegistry(definition);
+      step = createStep(undefined, registry);
+
+      // No builder_type on this rule
+      const rule = createRuleResponse({ kind: 'signal' });
+      const esqlRowBatch = [{ 'host.name': 'host-a' }];
+      const state = createRulePipelineState({
+        input: createRuleExecutionInput(),
+        rule,
+        esqlRowBatch,
+      });
+
+      await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+      expect(hookSpy).not.toHaveBeenCalled();
+    });
+
+    it('a framework fault in buildBatch (not the hook) propagates without RULE_EVENT_ENRICHMENT_FAILED', async () => {
+      // The try/catch must be scoped to the hook call only. A throw from group
+      // hashing, document building, or any other part of buildBatch must keep
+      // its own error and default (framework) source classification, not be
+      // mislabelled as a hook failure.
+      //
+      // We test this by intercepting createAlertEventsBatchBuilder to return a
+      // builder whose buildBatch throws directly (simulating a framework fault
+      // that has nothing to do with the enrichRuleEvent hook).
+      //
+      // Ref: rule-event-generation-logic.md "Failure handling"
+      const { localStep, rule } = makeEnrichedRule({
+        // Hook does not throw.
+        enrichRuleEvent: () => ({ severity: 'critical' }),
+      });
+
+      const frameworkError = new TypeError('Framework error inside buildBatch');
+      const spy = jest
+        .spyOn(buildAlertEventsModule, 'createAlertEventsBatchBuilder')
+        .mockReturnValueOnce({
+          buildBatch: () => {
+            throw frameworkError;
+          },
+          get droppedGroupCount() {
+            return 0;
+          },
+        });
+
+      try {
+        const esqlRowBatch = [{ 'host.name': 'host-a' }];
+        const state = createRulePipelineState({
+          input: createRuleExecutionInput(),
+          rule,
+          esqlRowBatch,
+        });
+
+        const error = await getStepError(localStep, state);
+
+        // An error must have occurred.
+        expect(error).toBeDefined();
+        // It must NOT carry RULE_EVENT_ENRICHMENT_FAILED — that code is for hook throws only.
+        expect((error as any).data?.code).not.toBe(
+          ALERTING_ERROR_CODES.RULE_EVENT_ENRICHMENT_FAILED
+        );
+      } finally {
+        spy.mockRestore();
+      }
+    });
+
+    it('uses parsedBuilderFields from compile-step state instead of re-parsing builder_fields', async () => {
+      // For execution-time rules, CompileRuleQueryStep already parses builder_fields
+      // and threads the result as state.parsedBuilderFields. The step must pass those
+      // to the hook without re-parsing. This avoids a double schema parse and, more
+      // importantly, avoids adding a new failure mode for write-time rules whose
+      // stored fields may have drifted from the current schema.
+      //
+      // Ref: RulePipelineState.parsedBuilderFields (types.ts)
+      const capturedFields: unknown[] = [];
+      const { localStep, rule } = makeEnrichedRule({
+        enrichRuleEvent: ({ fields }) => {
+          capturedFields.push(fields);
+          return {};
+        },
+      });
+
+      const esqlRowBatch = [{ 'host.name': 'host-a' }];
+      // Inject parsedBuilderFields onto the state — simulating what CompileRuleQueryStep sets.
+      const parsedBuilderFields = { severity: 'critical', _parsed: true };
+      const state = {
+        ...createRulePipelineState({ input: createRuleExecutionInput(), rule, esqlRowBatch }),
+        parsedBuilderFields,
+      };
+
+      await collectStreamResults(localStep.executeStream(createPipelineStream([state])));
+
+      // The hook must receive parsedBuilderFields, not rule.metadata.builder_fields.
+      expect(capturedFields).toHaveLength(1);
+      expect(capturedFields[0]).toBe(parsedBuilderFields);
     });
   });
 });

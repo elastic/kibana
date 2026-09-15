@@ -332,7 +332,7 @@ test.describe(
           .poll(
             async () => {
               const rule = await apiServices.alertingV2.rules.get(ruleId!);
-              return rule.query.format === 'composed' ? rule.query.recovery?.segment : undefined;
+              return rule.query?.format === 'composed' ? rule.query.recovery?.segment : undefined;
             },
             { timeout: 30_000 }
           )

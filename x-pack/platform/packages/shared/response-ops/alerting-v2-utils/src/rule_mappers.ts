@@ -17,7 +17,7 @@ export const buildRulePayload = (data: Partial<RuleAttachmentData>): CreateRuleD
   kind: data.kind!,
   metadata: data.metadata!,
   schedule: data.schedule!,
-  query: data.query!,
+  ...(data.query !== undefined ? { query: data.query } : {}),
   state_transition: data.state_transition ?? null,
   time_field: data.time_field ?? DEFAULT_TIME_FIELD,
   ...(data.recovery_strategy !== undefined ? { recovery_strategy: data.recovery_strategy } : {}),

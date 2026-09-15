@@ -63,6 +63,16 @@ const descriptionTextStyle = css`
 
 export type RulesListTableSortField = 'kind' | 'enabled' | 'metadata';
 
+/**
+ * Returns true when the rule's stored ownership marks it as managed. Managed
+ * rules are read-only in the generic Alerting v2 UI: their lifecycle belongs
+ * to the owning solution (e.g. Security / Detection Engine).
+ *
+ * Ref: rule-ownership.md "Reads stay open"
+ */
+const isRuleManaged = (rule: RuleApiResponse): boolean =>
+  rule.metadata?.ownership?.managed === true;
+
 export interface RulesListTableProps {
   items: RuleApiResponse[];
   totalItemCount: number;
@@ -195,17 +205,26 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
                 />
               ),
               width: '32px',
-              render: (id: string) => (
-                <EuiCheckbox
-                  id={`select-rule-${id}`}
-                  checked={isRowSelected(id)}
-                  onChange={() => onSelectRow(id)}
-                  aria-label={i18n.translate('xpack.alertingV2.rulesList.selectRule', {
-                    defaultMessage: 'Select rule',
-                  })}
-                  data-test-subj={`checkboxSelectRow-${id}`}
-                />
-              ),
+              render: (id: string, rule: RuleApiResponse) => {
+                // Managed rules have no selection affordance: their lifecycle
+                // belongs to the owning solution, and bulk enable/disable/delete
+                // should not be reachable for them through the generic UI.
+                // Ref: rule-ownership.md "Reads stay open"
+                if (isRuleManaged(rule)) {
+                  return null;
+                }
+                return (
+                  <EuiCheckbox
+                    id={`select-rule-${id}`}
+                    checked={isRowSelected(id)}
+                    onChange={() => onSelectRow(id)}
+                    aria-label={i18n.translate('xpack.alertingV2.rulesList.selectRule', {
+                      defaultMessage: 'Select rule',
+                    })}
+                    data-test-subj={`checkboxSelectRow-${id}`}
+                  />
+                );
+              },
             },
           ] as Array<EuiBasicTableColumn<RuleApiResponse>>)
         : []),
@@ -238,21 +257,52 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         ),
         truncateText: true,
         sortable: true,
-        render: (metadata: RuleApiResponse['metadata'], rule: RuleApiResponse) => (
-          <div>
-            <EuiLink
-              onClick={() => onNavigateToDetails(rule)}
-              data-test-subj={`ruleNameLink-${rule.id}`}
-            >
-              {metadata?.name ?? rule.id}
-            </EuiLink>
-            {metadata?.description && (
-              <EuiText size="xs" color="subdued" css={descriptionTextStyle}>
-                {metadata.description}
-              </EuiText>
-            )}
-          </div>
-        ),
+        render: (metadata: RuleApiResponse['metadata'], rule: RuleApiResponse) => {
+          // The browser does not have the server-side builder type registry, so
+          // display name is not available. Fall back to the raw builder_type id.
+          // Ref: rule-ownership.md "Reads stay open"; step 5.5 orchestrator notes.
+          const managedTypeLabel = metadata?.builder_type ?? undefined;
+          return (
+            <div>
+              <EuiLink
+                onClick={() => onNavigateToDetails(rule)}
+                data-test-subj={`ruleNameLink-${rule.id}`}
+              >
+                {metadata?.name ?? rule.id}
+              </EuiLink>
+              {isRuleManaged(rule) && (
+                <EuiBadge
+                  color="hollow"
+                  data-test-subj={`managedRuleTypeBadge-${rule.id}`}
+                  aria-label={i18n.translate(
+                    'xpack.alertingV2.rulesList.managedRuleTypeBadge.ariaLabel',
+                    {
+                      defaultMessage: 'Managed rule type: {type}',
+                      values: {
+                        type:
+                          managedTypeLabel ??
+                          i18n.translate(
+                            'xpack.alertingV2.rulesList.managedRuleTypeBadge.defaultLabel',
+                            { defaultMessage: 'Managed' }
+                          ),
+                      },
+                    }
+                  )}
+                >
+                  {managedTypeLabel ??
+                    i18n.translate('xpack.alertingV2.rulesList.managedRuleTypeBadge.defaultLabel', {
+                      defaultMessage: 'Managed',
+                    })}
+                </EuiBadge>
+              )}
+              {metadata?.description && (
+                <EuiText size="xs" color="subdued" css={descriptionTextStyle}>
+                  {metadata.description}
+                </EuiText>
+              )}
+            </div>
+          );
+        },
       },
       {
         field: 'query',
@@ -337,7 +387,11 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         width: '8%',
         sortable: true,
         render: (enabled: boolean, rule: RuleApiResponse) => {
-          if (!canWrite) {
+          // Managed rules have no enable/disable affordance: their lifecycle is
+          // owned by the registering solution. Show the same read-only badge as
+          // the no-write-privilege path.
+          // Ref: rule-ownership.md "Reads stay open"
+          if (!canWrite || isRuleManaged(rule)) {
             return (
               <EuiBadge
                 color={enabled ? 'success' : 'default'}
@@ -387,50 +441,59 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
               ),
               width: '8%',
               align: 'right',
-              render: (rule: RuleApiResponse) => (
-                <EuiFlexGroup
-                  gutterSize="xs"
-                  alignItems="center"
-                  responsive={false}
-                  justifyContent="flexEnd"
-                >
-                  {canWrite ? (
+              render: (rule: RuleApiResponse) => {
+                // Managed rules have no write affordances in the generic UI.
+                // Their lifecycle is owned by the registering solution and the
+                // server-side write gate enforces it. The per-row flag is used
+                // instead of the global canWrite so read-only users already
+                // affected by canWrite=false are not double-checked.
+                // Ref: rule-ownership.md "Reads stay open"
+                const rowCanWrite = canWrite && !isRuleManaged(rule);
+                return (
+                  <EuiFlexGroup
+                    gutterSize="xs"
+                    alignItems="center"
+                    responsive={false}
+                    justifyContent="flexEnd"
+                  >
+                    {rowCanWrite ? (
+                      <EuiFlexItem grow={false}>
+                        <EuiToolTip
+                          content={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
+                            defaultMessage: 'Edit rule',
+                          })}
+                          disableScreenReaderOutput
+                        >
+                          <EuiButtonIcon
+                            iconType="pencil"
+                            color="text"
+                            onClick={() => onQuickEdit(rule)}
+                            aria-label={i18n.translate(
+                              'xpack.alertingV2.rulesList.action.quickEdit',
+                              {
+                                defaultMessage: 'Edit rule',
+                              }
+                            )}
+                            data-test-subj={`quickEditRule-${rule.id}`}
+                          />
+                        </EuiToolTip>
+                      </EuiFlexItem>
+                    ) : null}
                     <EuiFlexItem grow={false}>
-                      <EuiToolTip
-                        content={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
-                          defaultMessage: 'Edit rule',
-                        })}
-                        disableScreenReaderOutput
-                      >
-                        <EuiButtonIcon
-                          iconType="pencil"
-                          color="text"
-                          onClick={() => onQuickEdit(rule)}
-                          aria-label={i18n.translate(
-                            'xpack.alertingV2.rulesList.action.quickEdit',
-                            {
-                              defaultMessage: 'Edit rule',
-                            }
-                          )}
-                          data-test-subj={`quickEditRule-${rule.id}`}
-                        />
-                      </EuiToolTip>
+                      <RuleActionsMenu
+                        rule={rule}
+                        canWrite={rowCanWrite}
+                        onEdit={onEdit}
+                        onClone={onClone}
+                        onDelete={onDelete}
+                        onUpdateApiKey={onUpdateApiKey}
+                        onRun={onRun}
+                        onViewChangeHistory={onViewChangeHistory}
+                      />
                     </EuiFlexItem>
-                  ) : null}
-                  <EuiFlexItem grow={false}>
-                    <RuleActionsMenu
-                      rule={rule}
-                      canWrite={canWrite}
-                      onEdit={onEdit}
-                      onClone={onClone}
-                      onDelete={onDelete}
-                      onUpdateApiKey={onUpdateApiKey}
-                      onRun={onRun}
-                      onViewChangeHistory={onViewChangeHistory}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              ),
+                  </EuiFlexGroup>
+                );
+              },
             },
           ] as Array<EuiBasicTableColumn<RuleApiResponse>>)
         : []),
