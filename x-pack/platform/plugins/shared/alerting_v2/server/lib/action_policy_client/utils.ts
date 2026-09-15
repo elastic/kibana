@@ -124,6 +124,8 @@ export const buildUpdateActionPolicyAttributes = ({
     destinations: update.destinations ?? existing.destinations,
     matcher: resolveNextNullableField(update.matcher, existing.matcher),
     groupBy: resolveNextNullableField(update.group_by, existing.groupBy),
+    // Tags are excluded from the PATCH schema; always carry the stored value through.
+    // If tags is re-added to updateActionPolicyDataSchema, switch to resolveNextNullableField.
     tags: normalizeNullableField(existing.tags),
     groupingMode: resolveNextNullableField(update.grouping_mode, existing.groupingMode),
     throttle: normalizeThrottle(resolveNextNullableField(update.throttle, existing.throttle)),
