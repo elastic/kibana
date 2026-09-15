@@ -12,7 +12,10 @@ import { createManagedOtlpServiceApiKey } from './create_managed_otlp_service_ap
 import { createPrometheusApiKey } from './create_prometheus_api_key';
 import { createEsOtlpApiKey } from './create_es_otlp_api_key';
 
-type ApiKeyFactory = (esClient: ElasticsearchClient, name: string) => Promise<{ encoded: string }>;
+type ApiKeyFactory = (
+  esClient: ElasticsearchClient,
+  name: string
+) => Promise<{ id: string; encoded: string }>;
 
 export interface ApiKeyFactoryContext {
   isManagedOtlpServiceAvailable: boolean;
