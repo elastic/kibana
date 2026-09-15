@@ -11,12 +11,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, testData, spaceScoped, columnValues, type EsqlResponse } from '../fixtures';
 
-const {
-  AI_INDEX_QUERY_PATH: QUERY_PATH,
-  API_HEADERS,
-  CONTEXT_ENGINE_ENABLED_SETTING,
-  CONTEXT_ENGINE_READ,
-} = testData;
+const { AI_INDEX_QUERY_PATH: QUERY_PATH, API_HEADERS, CONTEXT_ENGINE_READ } = testData;
 // Unique per run: a retried `beforeAll` runs against the same stack, where fixed names would 409.
 const RUN_ID = randomUUID().slice(0, 8);
 const SPACE_AWARE_INDEX = `ai-index-idx-scout-query-spaced-${RUN_ID}`;
@@ -54,6 +49,8 @@ const idsOf = (body: EsqlResponse): string[] => columnValues(body, 'id').map(Str
 
 const messageOf = (body: { message: string }): string => body.message;
 
+// The `agent_builder` Scout config set pins `contextEngine:enabled=true` through `uiSettings.overrides`,
+// which is read-only and applies to every space, so the tests never toggle it.
 apiTest.describe('context engine AI index query API', { tag: tags.stateful.classic }, () => {
   let queryCredentials: RoleApiCredentials;
   let noIndexReadCredentials: RoleApiCredentials;
@@ -63,13 +60,6 @@ apiTest.describe('context engine AI index query API', { tag: tags.stateful.class
     noIndexReadCredentials = await requestAuth.getApiKeyForCustomRole(NO_INDEX_READ_ROLE);
 
     await kbnClient.spaces.create({ id: OTHER_SPACE_ID, name: 'CE query other space' });
-    // The gate is a per-space setting; each space under test has to enable it.
-    await kbnClient.uiSettings.update({ [CONTEXT_ENGINE_ENABLED_SETTING]: true });
-    await kbnClient.uiSettings.update(
-      { [CONTEXT_ENGINE_ENABLED_SETTING]: true },
-      { space: OTHER_SPACE_ID }
-    );
-    await kbnClient.uiSettings.waitForEventualCacheRefresh();
 
     await esClient.indices.create({
       index: SPACE_AWARE_INDEX,
@@ -111,7 +101,6 @@ apiTest.describe('context engine AI index query API', { tag: tags.stateful.class
   apiTest.afterAll(async ({ kbnClient, esClient }) => {
     await esClient.indices.delete({ index: [SPACE_AWARE_INDEX, PLAIN_INDEX] }, { ignore: [404] });
     await kbnClient.spaces.delete(OTHER_SPACE_ID);
-    await kbnClient.uiSettings.unset(CONTEXT_ENGINE_ENABLED_SETTING);
   });
 
   apiTest('scopes reads to the request space', async ({ apiClient }) => {

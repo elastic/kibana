@@ -11,13 +11,8 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, testData, spaceScoped, columnValues, type EsqlResponse } from '../fixtures';
 
-const {
-  AI_INDEX_COLLECTION_PATH,
-  AI_INDEX_QUERY_PATH,
-  API_HEADERS,
-  CONTEXT_ENGINE_ENABLED_SETTING,
-  CONTEXT_ENGINE_READ,
-} = testData;
+const { AI_INDEX_COLLECTION_PATH, AI_INDEX_QUERY_PATH, API_HEADERS, CONTEXT_ENGINE_READ } =
+  testData;
 // Unique per run: a retried `beforeAll` runs against the same stack, where fixed names would 409.
 const RUN_ID = randomUUID().slice(0, 8);
 const INDEX_A = `ai-index-idx-scout-describe-${RUN_ID}-a`;
@@ -117,20 +112,19 @@ const registerAiIndex = (id: string, dest: { type: 'index' | 'data_stream'; valu
   sources: [],
 });
 
+// The `agent_builder` Scout config set pins `contextEngine:enabled=true` through `uiSettings.overrides`,
+// which is read-only and applies to every space, so the tests never toggle it.
 apiTest.describe('context engine AI index describe API', { tag: tags.stateful.classic }, () => {
   let adminCredentials: RoleApiCredentials;
   let describeCredentials: RoleApiCredentials;
   let readOnlyCredentials: RoleApiCredentials;
   let metadataOnlyCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ requestAuth, kbnClient, esClient, apiClient }) => {
+  apiTest.beforeAll(async ({ requestAuth, esClient, apiClient }) => {
     adminCredentials = await requestAuth.getApiKey('admin');
     describeCredentials = await requestAuth.getApiKeyForCustomRole(DESCRIBE_ROLE);
     readOnlyCredentials = await requestAuth.getApiKeyForCustomRole(READ_ONLY_ROLE);
     metadataOnlyCredentials = await requestAuth.getApiKeyForCustomRole(METADATA_ONLY_ROLE);
-
-    await kbnClient.uiSettings.update({ [CONTEXT_ENGINE_ENABLED_SETTING]: true });
-    await kbnClient.uiSettings.waitForEventualCacheRefresh();
 
     await esClient.indices.create({
       index: INDEX_A,
@@ -182,7 +176,7 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     }
   });
 
-  apiTest.afterAll(async ({ apiClient, kbnClient, esClient }) => {
+  apiTest.afterAll(async ({ apiClient, esClient }) => {
     for (const id of [PATTERN_AI_INDEX_ID, SINGLE_AI_INDEX_ID, DATA_STREAM_AI_INDEX_ID]) {
       await apiClient.delete(`${AI_INDEX_COLLECTION_PATH}/${id}`, {
         headers: { ...adminCredentials.apiKeyHeader, ...API_HEADERS },
@@ -191,7 +185,6 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     }
     await esClient.indices.delete({ index: [INDEX_A, INDEX_B] }, { ignore: [404] });
     await esClient.indices.deleteDataStream({ name: DATA_STREAM }, { ignore: [404] });
-    await kbnClient.uiSettings.unset(CONTEXT_ENGINE_ENABLED_SETTING);
   });
 
   apiTest('merges mapping types with field caps across a pattern', async ({ apiClient }) => {
