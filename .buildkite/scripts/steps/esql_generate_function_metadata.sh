@@ -22,7 +22,7 @@ main () {
 
   cd "$KIBANA_DIR"
 
-  .buildkite/scripts/bootstrap.sh
+  pnpm kbn bootstrap --force-install --no-frozen-lockfile --no-prebuilt
 
   cd "$KIBANA_DIR/$SCRIPTS_PACKAGE_DIR"
 
