@@ -1,0 +1,25 @@
+{
+  "@timestamp": "2026-07-13T12:00:00.000Z",
+  "labels": {
+    "ad_fp_tp_twin": "encoded-powershell",
+    "ad_portable_seed": "ad-fp-tp-twins-2026-09"
+  },
+  "kibana.space_ids": ["default"],
+  "kibana.alert.uuid": "ad-fp-tp-encoded-powershell-attack",
+  "kibana.alert.attack_discovery.alert_ids": [
+    "ad-scenario-encoded-powershell-alert-1",
+    "ad-scenario-encoded-powershell-alert-2",
+    "ad-scenario-encoded-powershell-alert-3",
+    "ad-scenario-encoded-powershell-alert-4"
+  ],
+  "kibana.alert.attack_discovery.title": "Encoded PowerShell download cradle with C2 and lateral movement",
+  "kibana.alert.attack_discovery.entity_summary_markdown": "{{ host.name wks-alice-01 }} / {{ user.name alice.chen }}",
+  "kibana.alert.attack_discovery.summary_markdown": "Office spawned hidden encoded PowerShell, which reached a malicious C2 domain, wrote a Run key, and copied a payload to an administrative SMB share.",
+  "kibana.alert.attack_discovery.details_markdown": "On {{ host.name wks-alice-01 }}, {{ user.name alice.chen }} opened Word, which spawned powershell.exe with -EncodedCommand. The same PowerShell process connected to malicious-c2.example.com, created HKCU Run persistence for update.ps1, then copied payload.exe to \\\\srv-files-02\\ADMIN$. This is a multi-stage intrusion spanning execution, command-and-control, persistence, and lateral movement.",
+  "kibana.alert.attack_discovery.mitre_attack_tactics": [
+    "Execution",
+    "Command and Control",
+    "Persistence",
+    "Lateral Movement"
+  ]
+}
