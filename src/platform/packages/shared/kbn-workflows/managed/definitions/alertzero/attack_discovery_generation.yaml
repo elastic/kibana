@@ -1,5 +1,5 @@
 version: "1"
-name: Security - AlertZero - Batched attack discovery
+name: Attack Discovery Generation
 description: |
   Runs Attack Discovery over the whole open alert population for a lookback
   window instead of a single truncated slice: retrieve once sorted by
@@ -110,7 +110,16 @@ steps:
   - name: generate_batches
     type: parallel
     mode: settled
-    concurrency: 5
+    concurrency:
+      # 2 to match the review fan-out in the AD Worker runner. Each branch here is
+      # a full generation pipeline making inference calls, so this width is the
+      # per-run rate-limit exposure against the connector, not just a throughput
+      # lever. Widen it with evidence, not before.
+      #
+      # `count-waiting` is left at its default (true), so a branch parked mid-run
+      # still holds its slot — these branches are long-running inference work, and
+      # at `false` the width would not restrain concurrent LLM load at all.
+      max: 2
     branch-timeout: "30m"
     foreach: |-
       [{%- assign total = steps.retrieve_alerts.output.alerts | size -%}

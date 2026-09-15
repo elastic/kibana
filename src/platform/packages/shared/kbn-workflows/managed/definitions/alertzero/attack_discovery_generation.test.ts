@@ -10,8 +10,8 @@
 import { parse } from 'yaml';
 
 import {
-  ALERTZERO_BATCHED_ATTACK_DISCOVERY_WORKFLOW,
-  ALERTZERO_BATCHED_ATTACK_DISCOVERY_WORKFLOW_ID,
+  ALERTZERO_ATTACK_DISCOVERY_GENERATION_WORKFLOW,
+  ALERTZERO_ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
 } from '.';
 import { getManagedWorkflowDefinition, managedWorkflowDefinitions } from '../..';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
@@ -37,7 +37,7 @@ interface ParsedWorkflow {
   triggers?: Array<{ type?: string; inputs?: { properties?: Record<string, unknown> } }>;
 }
 
-const parsed = parse(ALERTZERO_BATCHED_ATTACK_DISCOVERY_WORKFLOW.yaml) as ParsedWorkflow;
+const parsed = parse(ALERTZERO_ATTACK_DISCOVERY_GENERATION_WORKFLOW.yaml) as ParsedWorkflow;
 
 const inputs = (): Record<string, Record<string, unknown>> =>
   (parsed.triggers?.find((trigger) => trigger.type === 'manual')?.inputs?.properties ??
@@ -51,25 +51,25 @@ const step = (name: string): ParsedStep => {
   return found;
 };
 
-describe('ALERTZERO_BATCHED_ATTACK_DISCOVERY_WORKFLOW', () => {
+describe('ALERTZERO_ATTACK_DISCOVERY_GENERATION_WORKFLOW', () => {
   it('uses the expected workflow id', () => {
-    expect(ALERTZERO_BATCHED_ATTACK_DISCOVERY_WORKFLOW.id).toBe(
-      ALERTZERO_BATCHED_ATTACK_DISCOVERY_WORKFLOW_ID
+    expect(ALERTZERO_ATTACK_DISCOVERY_GENERATION_WORKFLOW.id).toBe(
+      ALERTZERO_ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID
     );
   });
 
   it('is registered with the alertzero pluginId', () => {
-    expect(ALERTZERO_BATCHED_ATTACK_DISCOVERY_WORKFLOW.pluginId).toBe('alertzero');
+    expect(ALERTZERO_ATTACK_DISCOVERY_GENERATION_WORKFLOW.pluginId).toBe('alertzero');
   });
 
   it('is discoverable from the managed registry by id', () => {
-    expect(getManagedWorkflowDefinition(ALERTZERO_BATCHED_ATTACK_DISCOVERY_WORKFLOW_ID)).toBe(
-      ALERTZERO_BATCHED_ATTACK_DISCOVERY_WORKFLOW
+    expect(getManagedWorkflowDefinition(ALERTZERO_ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID)).toBe(
+      ALERTZERO_ATTACK_DISCOVERY_GENERATION_WORKFLOW
     );
   });
 
   it('is a member of the managed registry', () => {
-    expect(managedWorkflowDefinitions).toContain(ALERTZERO_BATCHED_ATTACK_DISCOVERY_WORKFLOW);
+    expect(managedWorkflowDefinitions).toContain(ALERTZERO_ATTACK_DISCOVERY_GENERATION_WORKFLOW);
   });
 
   // A child with no trigger of its own must be enabled to be invokable at all;
@@ -83,7 +83,7 @@ describe('ALERTZERO_BATCHED_ATTACK_DISCOVERY_WORKFLOW', () => {
   // document already had, so a workflow installed while disabled could never be
   // re-enabled by a new version. `enforced` reapplies the value from the YAML.
   it('enforces its enablement rather than preserving the installed value', () => {
-    expect(ALERTZERO_BATCHED_ATTACK_DISCOVERY_WORKFLOW.management.enablement).toBe('enforced');
+    expect(ALERTZERO_ATTACK_DISCOVERY_GENERATION_WORKFLOW.management.enablement).toBe('enforced');
   });
 
   it('declares no trigger of its own, so only the parent can run it', () => {
@@ -201,8 +201,11 @@ describe('ALERTZERO_BATCHED_ATTACK_DISCOVERY_WORKFLOW', () => {
       expect(expr).not.toContain('chunk:');
     });
 
+    // Matches the review fan-out width in the runner. Each branch here is a full
+    // generation pipeline making inference calls, so this is the per-run
+    // rate-limit exposure against the connector, not just a throughput lever.
     it('bounds concurrency, which is the per-run rate-limit exposure', () => {
-      expect(fanOut().concurrency).toBe(5);
+      expect(fanOut().concurrency).toEqual({ max: 2 });
     });
 
     it('bounds each branch at 30m', () => {

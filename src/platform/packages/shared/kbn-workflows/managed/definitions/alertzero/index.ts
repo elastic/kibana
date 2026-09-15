@@ -9,10 +9,10 @@
 
 import { ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID } from './actions/action_create_detection_rule';
 import {
+  ALERTZERO_ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
 } from './attack_discovery_workflows';
-import { ALERTZERO_BATCHED_ATTACK_DISCOVERY_WORKFLOW_ID } from './batched_attack_discovery';
 import { ALERTZERO_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID } from './dark_continuous_threat_hunt';
 import { ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID } from './detection_rule_creation';
 import { ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID } from './detection_rule_tuning';
@@ -47,6 +47,8 @@ export {
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
+  ALERTZERO_ATTACK_DISCOVERY_GENERATION_WORKFLOW,
+  ALERTZERO_ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
 } from './attack_discovery_workflows';
 export {
   ALERTZERO_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW,
@@ -68,10 +70,6 @@ export {
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW,
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
 } from './floor_attack_discovery';
-export {
-  ALERTZERO_BATCHED_ATTACK_DISCOVERY_WORKFLOW,
-  ALERTZERO_BATCHED_ATTACK_DISCOVERY_WORKFLOW_ID,
-} from './batched_attack_discovery';
 
 export const ALERTZERO_MANAGED_WORKER_WORKFLOW_IDS = [
   ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
@@ -82,7 +80,6 @@ export const ALERTZERO_MANAGED_WORKER_WORKFLOW_IDS = [
 ] as const;
 
 export const ALERTZERO_RULE_WORKFLOW_IDS = [
-  ALERTZERO_BATCHED_ATTACK_DISCOVERY_WORKFLOW_ID,
   ALERTZERO_RULE_PREVIEW_WORKFLOW_ID,
   ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID,
   ALERTZERO_RULE_CREATION_WORKFLOW_ID,
@@ -92,11 +89,13 @@ export const ALERTZERO_RULE_WORKFLOW_IDS = [
 
 /**
  * Attack Discovery worker chain: the global workflow that runs generation and fans
- * out per attack, plus the per-attack review workflow it launches. Installed
- * globally so the per-space Watch Floor worker can dispatch to them.
+ * out per attack, the batched generation workflow it delegates generation to, and
+ * the per-attack review workflow it launches. Installed globally so the per-space
+ * Watch Floor worker can dispatch to them.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS = [
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
+  ALERTZERO_ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
 ] as const;
 

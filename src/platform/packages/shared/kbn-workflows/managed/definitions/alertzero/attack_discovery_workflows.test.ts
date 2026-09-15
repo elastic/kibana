@@ -216,7 +216,7 @@ describe('Attack Discovery worker chain', () => {
 
     it('delegates generation to the batched sub-workflow', () => {
       expect(run?.type).toBe('workflow.execute');
-      expect(run?.with?.['workflow-id']).toBe('system-security-batched-attack-discovery');
+      expect(run?.with?.['workflow-id']).toBe('system-security-attack-discovery-generation');
     });
 
     // `workflow.execute`, not `executeAsync`: the fan-out below needs the

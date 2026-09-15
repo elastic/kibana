@@ -136,7 +136,7 @@ steps:
     # unrendered (elastic/kibana#290258).
     timeout: '4h'
     with:
-      workflow-id: system-security-batched-attack-discovery
+      workflow-id: system-security-attack-discovery-generation
       inputs:
         # `batch_size` and `lookback` are left at the child's defaults. Surfacing
         # them as Worker settings means threading new values through the Worker
