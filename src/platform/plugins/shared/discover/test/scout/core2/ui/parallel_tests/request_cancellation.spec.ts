@@ -22,6 +22,19 @@ const STALLED_LOGSTASH_QUERY = JSON.stringify({
   },
 });
 
+const STALLED_LOGSTASH_WARNING_QUERY = JSON.stringify({
+  error_query: {
+    indices: [
+      {
+        error_type: 'warning',
+        message: "'Fake slow request'",
+        name: '*',
+        stall_time_seconds: 15,
+      },
+    ],
+  },
+});
+
 spaceTest.describe('Discover request cancellation', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeEach(async ({ browserAuth, discoverScoutSpace, pageObjects }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
@@ -50,4 +63,26 @@ spaceTest.describe('Discover request cancellation', { tag: '@local-stateful-clas
     await expect(discover.getQuerySubmitButton()).toBeVisible();
     await expect(discover.getQueryCancelButton()).toBeHidden();
   });
+
+  spaceTest(
+    'recovers when a newer time range aborts an active request',
+    async ({ page, pageObjects }) => {
+      const { datePicker, discover, filterBar } = pageObjects;
+      const reducedRange = {
+        from: 'Sep 20, 2015 @ 00:00:00.000',
+        to: 'Sep 20, 2015 @ 23:50:13.253',
+      };
+
+      await filterBar.addDslFilter(STALLED_LOGSTASH_WARNING_QUERY);
+      await expect(discover.getQueryCancelButton()).toBeVisible();
+      await expect(page.testSubj.locator('discoverDataGridUpdating')).toBeVisible();
+
+      await datePicker.setAbsoluteRange(reducedRange);
+      await discover.waitUntilSearchingHasFinished();
+
+      await expect(discover.getHistogramChart()).toBeVisible();
+      await expect(discover.getHitCountLocator()).toHaveText('4,756');
+      await expect(discover.getQueryCancelButton()).toBeHidden();
+    }
+  );
 });

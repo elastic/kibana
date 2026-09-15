@@ -68,19 +68,23 @@ spaceTest.describe('histogram', { tag: tags.deploymentAgnostic }, () => {
     async ({ discoverScoutSpace, pageObjects }) => {
       const { discover } = pageObjects;
 
-      await discoverScoutSpace.uiSettings.set({
-        'timepicker:timeDefaults': '{  "from": "2015-09-18T19:37:13.000Z",  "to": "now"}',
-      });
-      await discover.goto({ queryMode: 'classic' });
-      await discover.waitUntilTabIsLoaded();
+      try {
+        await discoverScoutSpace.uiSettings.set({
+          'timepicker:timeDefaults': '{  "from": "2015-09-18T19:37:13.000Z",  "to": "now"}',
+        });
+        await discover.goto({ queryMode: 'classic' });
+        await discover.waitUntilTabIsLoaded();
 
-      const initialTimeString = await discover.getChartTimespan();
-      await discover.submitQuery();
-      await discover.waitUntilSearchingHasFinished();
-      await expect(discover.getHistogramChart()).not.toHaveAttribute(
-        'data-time-range',
-        initialTimeString
-      );
+        const initialTimeString = await discover.getChartTimespan();
+        await discover.submitQuery();
+        await discover.waitUntilSearchingHasFinished();
+        await expect(discover.getHistogramChart()).not.toHaveAttribute(
+          'data-time-range',
+          initialTimeString
+        );
+      } finally {
+        await discoverScoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
+      }
     }
   );
 
@@ -148,6 +152,69 @@ spaceTest.describe('histogram', { tag: tags.deploymentAgnostic }, () => {
       await discover.submitQuery();
       await discover.waitUntilSearchingHasFinished();
       await expect(discover.getHistogramChart()).toBeVisible();
+    }
+  );
+
+  spaceTest(
+    'recovers the histogram after an empty time range',
+    async ({ page, pageObjects, discoverScoutSpace }) => {
+      const { datePicker, discover } = pageObjects;
+
+      await discoverScoutSpace.uiSettings.set({ 'dateFormat:tz': 'UTC' });
+      await page.reload();
+      await discover.waitUntilTabIsLoaded();
+
+      try {
+        await discover.selectDataView(testData.DEFAULT_DATA_VIEW);
+        await discover.waitUntilSearchingHasFinished();
+        await datePicker.setAbsoluteRange({
+          from: 'Sep 19, 2015 @ 00:00:00.000',
+          to: 'Sep 19, 2015 @ 00:00:00.000',
+        });
+        await discover.waitUntilSearchingHasFinished();
+        await expect(discover.getHistogramChart()).toBeHidden();
+
+        await datePicker.setAbsoluteRange({
+          from: 'Sep 20, 2015 @ 00:00:00.000',
+          to: 'Sep 20, 2015 @ 00:00:00.000',
+        });
+        await discover.waitUntilSearchingHasFinished();
+
+        await expect(discover.getHistogramChart()).toBeVisible();
+        await expect(discover.getHitCountLocator()).toHaveText('1');
+        expect(await discover.getHistogramSuggestionType()).toBe('histogramForDataView');
+      } finally {
+        await discoverScoutSpace.uiSettings.set({ 'dateFormat:tz': 'Europe/Berlin' });
+      }
+    }
+  );
+
+  spaceTest(
+    'persists a narrowed histogram time range on a saved session',
+    async ({ page, pageObjects, scoutSpace, discoverScoutSpace }) => {
+      const { discover, datePicker } = pageObjects;
+
+      try {
+        await discoverScoutSpace.uiSettings.set({ 'dateFormat:tz': 'UTC' });
+        await page.reload();
+        await discover.waitUntilTabIsLoaded();
+        await datePicker.setAbsoluteRange({
+          from: '2015-09-20T00:00:00.000Z',
+          to: '2015-09-20T23:50:13.253Z',
+        });
+        await discover.selectDataView(testData.DEFAULT_DATA_VIEW);
+        await discover.waitUntilSearchingHasFinished();
+        await expect(discover.getHitCountLocator()).toHaveText('4,756');
+
+        await discover.saveSearch(`test-search-${scoutSpace.id}`, { storeTimeRange: true });
+        await page.reload();
+        await discover.waitUntilTabIsLoaded();
+        await expect(discover.getHistogramChart()).toBeVisible();
+        await expect(discover.getHitCountLocator()).toHaveText('4,756');
+      } finally {
+        await discoverScoutSpace.uiSettings.set({ 'dateFormat:tz': 'Europe/Berlin' });
+        await discoverScoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
+      }
     }
   );
 });
