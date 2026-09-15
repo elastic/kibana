@@ -133,7 +133,7 @@ describe('remember tool', () => {
     expect(index).not.toHaveBeenCalled();
   });
 
-  it('creates a space-scoped memory with server-derived session metadata', async () => {
+  it('creates a memory with server-derived session metadata', async () => {
     const result = await run(params, 'conversation-1');
 
     expect(assertContextEngineWriteAccessMock).toHaveBeenCalled();
@@ -148,7 +148,6 @@ describe('remember tool', () => {
         title: params.title,
         description: params.description,
         content: params.content,
-        spaces: ['space-1'],
         attributes: {
           session_id: 'conversation-1',
           session_kind: 'conversation',
@@ -197,7 +196,6 @@ describe('remember tool', () => {
               title: 'Index metadata',
               description: 'Metadata',
               content: 'Metadata',
-              spaces: ['space-1'],
               updated_at: '2026-09-01T00:00:00.000Z',
               attributes: {},
             },
@@ -234,7 +232,6 @@ describe('remember tool', () => {
               title: 'Session summary',
               description: 'Summary',
               content: 'Summary',
-              spaces: ['space-1'],
               updated_at: '2026-09-01T00:00:00.000Z',
               attributes: {},
             },
@@ -274,7 +271,6 @@ describe('remember tool', () => {
               title: 'Old title',
               description: 'Old description',
               content: 'Old content',
-              spaces: ['space-1'],
               updated_at: '2026-09-01T00:00:00.000Z',
               attributes: {},
               governance: { lifecycle: { status: 'deleted' } },
@@ -313,7 +309,6 @@ describe('remember tool', () => {
               description: 'Old description',
               content: 'Old content',
               tags: ['existing'],
-              spaces: ['space-1'],
               expires_at: '2027-01-01T00:00:00.000Z',
               updated_at: '2026-09-01T00:00:00.000Z',
               attributes: {
@@ -386,7 +381,6 @@ describe('remember tool', () => {
               title: 'Old title',
               description: 'Old description',
               content: 'Old content',
-              spaces: ['space-1'],
               updated_at: '2026-09-01T00:00:00.000Z',
               attributes: {},
             },
