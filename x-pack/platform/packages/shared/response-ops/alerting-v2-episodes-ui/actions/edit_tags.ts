@@ -15,14 +15,10 @@ import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { QueryClient } from '@kbn/react-query';
-import {
-  ALERT_EPISODE_ACTION_TYPE,
-  type BulkCreateAlertActionBody,
-} from '@kbn/alerting-v2-schemas';
+import type { BulkTagEpisodeActionItem } from '@kbn/alerting-v2-schemas';
 import type { EpisodeActionExtension } from '../types/episode_data_source';
 import type { EpisodeAction, EpisodeActionContext } from './types';
-import { bulkCreateAlertActions } from './bulk_create_alert_actions';
-import { uniqueByGroup } from './helpers';
+import { bulkTagEpisodeActions } from './bulk_create_alert_actions';
 import { executeCompositeAction } from './execute_composite_action';
 import * as i18n from './translations';
 import { openTagsFlyout } from '../components/tags_flyout';
@@ -64,11 +60,10 @@ export const createEditTagsAction = (
       await executeCompositeAction<{ tags: string[] }>({
         episodes,
         nativeExecute: (eps, http) =>
-          bulkCreateAlertActions(
+          bulkTagEpisodeActions(
             http,
-            uniqueByGroup(eps).map((ep): BulkCreateAlertActionBody[number] => ({
-              group_hash: ep.group_hash,
-              action_type: ALERT_EPISODE_ACTION_TYPE.TAG,
+            eps.map((ep): BulkTagEpisodeActionItem => ({
+              episode_id: ep['episode.id'],
               tags,
             }))
           ),

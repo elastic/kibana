@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import {
-  ALERT_EPISODE_ACTION_TYPE,
-  type BulkCreateAlertActionBody,
-} from '@kbn/alerting-v2-schemas';
+import type { BulkUnackEpisodeActionItem } from '@kbn/alerting-v2-schemas';
 import type { EpisodeActionExtension } from '../types/episode_data_source';
 import type { EpisodeAction } from './types';
-import { bulkCreateAlertActions } from './bulk_create_alert_actions';
+import { bulkUnackEpisodeActions } from './bulk_create_alert_actions';
 import {
   createCompositeEpisodeAction,
   type CompositeActionDeps,
@@ -30,11 +27,9 @@ export const createUnackAction = (
       iconType: 'crossCircle',
       isCompatible: (ep) => ep.last_ack_action === 'ack',
       execute: (eps, http) =>
-        bulkCreateAlertActions(
+        bulkUnackEpisodeActions(
           http,
-          eps.map((ep): BulkCreateAlertActionBody[number] => ({
-            group_hash: ep.group_hash,
-            action_type: ALERT_EPISODE_ACTION_TYPE.UNACK,
+          eps.map((ep): BulkUnackEpisodeActionItem => ({
             episode_id: ep['episode.id'],
           }))
         ),

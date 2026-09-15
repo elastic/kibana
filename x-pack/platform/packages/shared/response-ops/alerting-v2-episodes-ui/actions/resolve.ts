@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { ALERT_EPISODE_ACTION_TYPE, ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
+import { ALERT_EPISODE_STATUS, type BulkDeactivateEpisodeActionItem } from '@kbn/alerting-v2-schemas';
 import type { EpisodeActionExtension } from '../types/episode_data_source';
 import type { EpisodeAction } from './types';
-import { bulkCreateAlertActions } from './bulk_create_alert_actions';
-import { uniqueByGroup } from './helpers';
+import { bulkDeactivateEpisodeActions } from './bulk_create_alert_actions';
 import {
   createCompositeEpisodeAction,
   type CompositeActionDeps,
@@ -28,11 +27,10 @@ export const createResolveAction = (
       iconType: 'check',
       isCompatible: (ep) => ep['episode.status'] !== ALERT_EPISODE_STATUS.INACTIVE,
       execute: (episodes, http) =>
-        bulkCreateAlertActions(
+        bulkDeactivateEpisodeActions(
           http,
-          uniqueByGroup(episodes).map((ep) => ({
-            group_hash: ep.group_hash,
-            action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+          episodes.map((ep): BulkDeactivateEpisodeActionItem => ({
+            episode_id: ep['episode.id'],
             reason: i18n.RESOLVE_ACTION_REASON,
           }))
         ),

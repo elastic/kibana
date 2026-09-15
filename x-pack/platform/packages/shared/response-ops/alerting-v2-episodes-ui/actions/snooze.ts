@@ -9,13 +9,10 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
-import {
-  ALERT_EPISODE_ACTION_TYPE,
-  type BulkCreateAlertActionBody,
-} from '@kbn/alerting-v2-schemas';
+import type { BulkSnoozeSeriesActionItem } from '@kbn/alerting-v2-schemas';
 import type { EpisodeActionExtension } from '../types/episode_data_source';
 import type { EpisodeAction, EpisodeActionContext } from './types';
-import { bulkCreateAlertActions } from './bulk_create_alert_actions';
+import { bulkSnoozeSeriesActions } from './bulk_create_alert_actions';
 import { uniqueByGroup } from './helpers';
 import { isEpisodeSnoozed } from '../utils/is_episode_snoozed';
 import { executeCompositeAction } from './execute_composite_action';
@@ -51,11 +48,10 @@ export const createSnoozeAction = (
       await executeCompositeAction<{ expiry: string | null }>({
         episodes,
         nativeExecute: (eps, http) =>
-          bulkCreateAlertActions(
+          bulkSnoozeSeriesActions(
             http,
-            uniqueByGroup(eps).map((ep): BulkCreateAlertActionBody[number] => ({
+            uniqueByGroup(eps).map((ep): BulkSnoozeSeriesActionItem => ({
               group_hash: ep.group_hash,
-              action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
               ...(expiry === null ? {} : { expiry }),
             }))
           ),

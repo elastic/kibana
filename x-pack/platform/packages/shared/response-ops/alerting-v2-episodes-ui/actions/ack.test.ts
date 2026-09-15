@@ -134,7 +134,7 @@ describe('createAckAction', () => {
       execute: extensionExecute,
     };
 
-    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ affected_count: 1, errors: [] });
+    jest.spyOn(bulk, 'bulkAckEpisodeActions').mockResolvedValue({ affected_count: 1, errors: [] });
     const onSuccess = jest.fn();
 
     await createAckAction(deps, extension).execute({
@@ -142,7 +142,7 @@ describe('createAckAction', () => {
       onSuccess,
     });
 
-    expect(bulk.bulkCreateAlertActions).toHaveBeenCalled();
+    expect(bulk.bulkAckEpisodeActions).toHaveBeenCalled();
     expect(extensionExecute).toHaveBeenCalled();
     expect(onSuccess).toHaveBeenCalled();
   });
