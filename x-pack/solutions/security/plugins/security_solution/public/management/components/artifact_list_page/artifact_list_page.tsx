@@ -109,7 +109,15 @@ interface ArtifactListPageWithSimpleTableProps {
    *
    * Cannot be used in combination with `CardDecorator`.
    */
-  showAsSimpleTable?: boolean;
+  showAsSimpleTable: true;
+  /**
+   * When true, the simple table shows an Enabled column for toggling artifacts.
+   * Only applicable when `showAsSimpleTable` is true.
+   *
+   * Important: this just a UI flag - ManifestManager must also support enabling/disabling
+   * the given artifact type.
+   */
+  allowEnableDisableArtifacts?: boolean;
 }
 
 export type ArtifactListPageProps = ArtifactListPageBaseProps &
@@ -138,6 +146,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     CardDecorator,
     additionalActions,
     showAsSimpleTable = false,
+    allowEnableDisableArtifacts = false,
   }) => {
     const areEndpointExceptionsMovedUnderManagementFFEnabled = useIsExperimentalFeatureEnabled(
       'endpointExceptionsMovedUnderManagement'
@@ -556,6 +565,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
                 error={(error?.body as ServerApiError)?.message || error?.message}
                 allowCardEditAction={allowCardEditAction}
                 allowCardDeleteAction={allowCardDeleteAction}
+                allowEnableDisableArtifacts={allowEnableDisableArtifacts}
                 sortField={sortField}
                 sortOrder={sortOrder}
                 sortableFields={SORTABLE_FIELDS}
