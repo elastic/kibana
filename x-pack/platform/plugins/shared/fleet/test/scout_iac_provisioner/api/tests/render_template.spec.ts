@@ -11,17 +11,7 @@ import { expect } from '@kbn/scout/api';
 import { ENABLE_IAC_PROVISIONER_FLAG } from '../../../../common/constants';
 import { apiTest, testData } from '../fixtures';
 
-const VALID_INTEGRATION = {
-  name: 'this_package_does_not_exist',
-  policyTemplates: [{ name: 'whatever', enabledInputs: ['input'] }],
-};
-
-const VALID_BODY = {
-  provider: 'aws',
-  flow: 'cloud_connector',
-  workflow: 'federated_identity',
-  integrations: [VALID_INTEGRATION],
-};
+const { VALID_RENDER_BODY } = testData;
 
 /**
  * API coverage for the internal IaC Provisioner render route.
@@ -59,7 +49,7 @@ apiTest.describe(
 
         const response = await apiClient.post(testData.RENDER_TEMPLATE_PATH, {
           headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
-          body: VALID_BODY,
+          body: VALID_RENDER_BODY,
           responseType: 'json',
         });
 
@@ -75,7 +65,7 @@ apiTest.describe(
         body: {
           provider: 'aws',
           workflow: 'federated_identity',
-          integrations: [VALID_INTEGRATION],
+          integrations: VALID_RENDER_BODY.integrations,
         },
         responseType: 'json',
       });
@@ -91,7 +81,7 @@ apiTest.describe(
         body: {
           provider: 'aws',
           flow: 'cloud_connector',
-          integrations: [VALID_INTEGRATION],
+          integrations: VALID_RENDER_BODY.integrations,
         },
         responseType: 'json',
       });
@@ -105,7 +95,7 @@ apiTest.describe(
       const response = await apiClient.post(testData.RENDER_TEMPLATE_PATH, {
         headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
         body: {
-          ...VALID_BODY,
+          ...VALID_RENDER_BODY,
           integrations: [],
         },
         responseType: 'json',
@@ -122,7 +112,7 @@ apiTest.describe(
         const response = await apiClient.post(testData.RENDER_TEMPLATE_PATH, {
           headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
           body: {
-            ...VALID_BODY,
+            ...VALID_RENDER_BODY,
             integrations: Array.from({ length: 11 }, (_, i) => ({
               name: `pkg_${i}`,
               policyTemplates: [{ name: 'tpl', enabledInputs: ['input'] }],
@@ -142,7 +132,7 @@ apiTest.describe(
 
         const response = await apiClient.post(testData.RENDER_TEMPLATE_PATH, {
           headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
-          body: VALID_BODY,
+          body: VALID_RENDER_BODY,
           responseType: 'json',
         });
 
