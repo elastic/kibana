@@ -31,7 +31,7 @@ Start a live-preview server at [http://localhost:3000](http://localhost:3000):
 docs-builder serve
 ```
 
-When you add, change, deprecate, or remove a `kibana.yml` setting or an Advanced Settings (`uiSettings`) entry, document it in the `{settings}` YAML under `docs/reference/`. Follow [`.agents/skills/kibana-settings-docs/SKILL.md`](../../../../.agents/skills/kibana-settings-docs/SKILL.md) for file choice, YAML syntax, and `applies_to` checks.
+When you add, change, deprecate, or remove a `kibana.yml` setting or an Advanced Settings (`uiSettings`) entry, document it in the `{settings}` YAML under `docs/reference/`. Follow [`.agents/skills/kibana-settings-docs/SKILL.md`](../../../../.agents/skills/kibana-settings-docs/SKILL.md) for file choice and Kibana lookups. YAML syntax and `applies_to` live in the docs-builder [automated settings](https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md) page.
 
 ## REST APIs
 
