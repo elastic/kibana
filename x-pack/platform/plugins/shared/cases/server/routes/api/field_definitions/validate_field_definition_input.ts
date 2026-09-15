@@ -43,7 +43,7 @@ export const validateFieldDefinitionYaml = (
     return {
       valid: false,
       message:
-        'The definition YAML must contain a valid field schema with at least a "name" and "type".',
+        'Invalid field definition: the YAML must contain a valid field schema with at least a "name" and "type".',
     };
   }
 
