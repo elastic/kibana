@@ -10,7 +10,15 @@ import { SearchBar, FilterItems } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { buildEsQuery, isCombinedFilter, FilterStateStore } from '@kbn/es-query';
+import {
+  buildEsQuery,
+  escapeQuotes,
+  isCombinedFilter,
+  FilterStateStore,
+  BooleanRelation,
+  buildCombinedFilter,
+  buildCustomFilter,
+} from '@kbn/es-query';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ProjectRouting } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { css } from '@emotion/react';
@@ -46,6 +54,7 @@ import type { NodeViewModel } from '../types';
 import { isLabelNode, isRelationshipNode, showErrorToast } from '../utils';
 import { GRAPH_SCOPE_ID } from '../constants';
 import { useGraphFilters } from '../filters/use_graph_filters';
+import { getEntityTimelineFilter } from './entity_timeline_filters';
 
 const useGraphPopovers = ({
   scopeId,
@@ -366,29 +375,6 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     const lastValidEsQuery = useRef<EsQuery | undefined>();
     const [kquery, setKQuery] = useState<Query>(EMPTY_QUERY);
 
-    const onInvestigateInTimelineCallback = useCallback(() => {
-      const query = { ...kquery };
-
-      let filters = [...searchFilters];
-
-      const hasKqlQuery = query.query.trim() !== '';
-
-      if (originEventIds && originEventIds.length > 0) {
-        if (!hasKqlQuery || searchFilters.length > 0) {
-          filters = originEventIds.reduce<Filter[]>((acc, { id }) => {
-            return addFilter(dataView?.id ?? '', acc, EVENT_ID, id);
-          }, searchFilters);
-        }
-
-        if (hasKqlQuery) {
-          query.query = `(${query.query})${originEventIds
-            .map(({ id }) => ` OR ${EVENT_ID}: "${id}"`)
-            .join('')}`;
-        }
-      }
-      onInvestigateInTimeline?.(query, filters, timeRange);
-    }, [dataView?.id, onInvestigateInTimeline, originEventIds, kquery, searchFilters, timeRange]);
-
     const {
       services: { uiSettings, notifications },
     } = useKibana();
@@ -432,6 +418,79 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         keepPreviousData: true,
       },
     });
+
+    const euidApi = useEntityStoreEuidApi()?.euid;
+    const entityTimelineFilters = useMemo(() => {
+      if (originEventIds?.length) return [];
+      const filters: Filter[] = [];
+      for (const { id } of entityIds?.filter(({ isOrigin }) => isOrigin) ?? []) {
+        const node = data?.nodes.find((candidate) => candidate.id === id);
+        if (!node || !isEntityNode(node)) return undefined;
+        const filter = getEntityTimelineFilter(node, dataView.id ?? '', euidApi);
+        if (!filter) return undefined;
+        filters.push(filter);
+      }
+      return filters;
+    }, [data?.nodes, dataView.id, entityIds, euidApi, originEventIds]);
+
+    const onInvestigateInTimelineCallback = useCallback(() => {
+      const query = { ...kquery };
+
+      let filters = [...searchFilters];
+
+      const hasKqlQuery = query.query.trim() !== '';
+      const originIds = originEventIds?.map(({ id }) => id) ?? [];
+
+      // Timeline cannot recover the origin constraints passed separately to the Graph API.
+      if (originIds.length > 0) {
+        if (!hasKqlQuery || searchFilters.length > 0) {
+          filters = originIds.reduce<Filter[]>((acc, id) => {
+            return addFilter(dataView?.id ?? '', acc, EVENT_ID, id);
+          }, searchFilters);
+        }
+
+        if (hasKqlQuery) {
+          query.query = `(${query.query})${originIds
+            .map((id) => ` OR ${EVENT_ID}: "${escapeQuotes(id)}"`)
+            .join('')}`;
+        }
+      }
+      if (entityTimelineFilters === undefined) return;
+      if (entityTimelineFilters.length > 0) {
+        const alternatives = [...entityTimelineFilters];
+        const activeFilters = searchFilters.filter((filter) => !filter.meta.disabled);
+        if (hasKqlQuery && esQuery) {
+          alternatives.push(
+            buildCustomFilter(
+              dataView.id ?? '',
+              esQuery,
+              false,
+              false,
+              typeof query.query === 'string' ? query.query : null,
+              FilterStateStore.APP_STATE
+            )
+          );
+        } else if (activeFilters.length > 0) {
+          alternatives.push(buildCombinedFilter(BooleanRelation.AND, activeFilters, dataView));
+        }
+        // Entity origins and the event search are separate branches of the graph request.
+        query.query = '';
+        filters = [
+          buildCombinedFilter(BooleanRelation.OR, alternatives, dataView),
+          ...searchFilters.filter((filter) => filter.meta.disabled),
+        ];
+      }
+      onInvestigateInTimeline?.(query, filters, timeRange);
+    }, [
+      dataView,
+      onInvestigateInTimeline,
+      originEventIds,
+      entityTimelineFilters,
+      esQuery,
+      kquery,
+      searchFilters,
+      timeRange,
+    ]);
 
     useEffect(() => {
       const toasts = notifications?.toasts;
@@ -738,6 +797,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               <Panel position="top-right">
                 <Actions
                   showInvestigateInTimeline={showInvestigateInTimeline}
+                  investigateInTimelineDisabled={entityTimelineFilters === undefined}
                   showToggleSearch={showToggleSearch}
                   onInvestigateInTimeline={onInvestigateInTimelineCallback}
                   onSearchToggle={(isSearchToggle) => setSearchToggled(isSearchToggle)}

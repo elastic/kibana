@@ -19,6 +19,7 @@ import {
   isFilterActiveForScope,
   isEntityFilterActiveForScope,
 } from '../../filters/filter_store';
+import type { FilterToggleEvent, EntityFilterToggleEvent } from '../../filters/filter_store';
 import type { NamespaceSourcePrefixResolver } from '../../filters/search_filters';
 import { isEuidDslTranslatable, buildFieldsDsl } from '../../filters/search_filters';
 import {
@@ -302,10 +303,45 @@ const rewriteDslFieldsForTargetRole = (dsl: object): object => {
   return rewriteKeys(dsl) as object;
 };
 
-/**
- * Emits (or removes) the filter for an entity role, handling both the KQL and fallback forms.
- * Shared by the graph node popover and the grouped-entities flyout so they stay in step.
- */
+type EntityFilterClause =
+  | Pick<FilterToggleEvent, 'type' | 'field' | 'value'>
+  | Pick<
+      EntityFilterToggleEvent,
+      'type' | 'dsl' | 'namespaceSourceValues' | 'getNamespaceSourcePrefix'
+    >;
+
+/** Converts a resolved entity filter spec into clauses shared by node actions and Timeline. */
+export const getEntityFilterSpecClauses = (
+  spec: EntityFilterSpec,
+  role: 'actor' | 'target'
+): EntityFilterClause[] => {
+  if (spec.kind === 'dsl') {
+    return [
+      {
+        type: 'entityDsl',
+        dsl: spec.dsl,
+        namespaceSourceValues: spec.namespaceSourceValues,
+        getNamespaceSourcePrefix: spec.getNamespaceSourcePrefix,
+      },
+    ];
+  }
+  if (spec.kind === 'resolvedIdentity') {
+    // Keep a compound identity together: ORing its fields would match other entities.
+    const roleFields = Object.fromEntries(
+      Object.entries(spec.fields).map(([field, value]) => [fieldForRole(field, role), value])
+    );
+    return [{ type: 'entityDsl', dsl: buildFieldsDsl(roleFields) }];
+  }
+  return Object.entries(spec.fields).flatMap(([field, values]) =>
+    ([] as string[]).concat(values).map((value) => ({
+      type: 'equals' as const,
+      field: fieldForRole(field, role),
+      value,
+    }))
+  );
+};
+
+/** Emits or removes the shared filter clauses for an entity role. */
 export const toggleEntityFilterSpec = (
   scopeId: string,
   filterKey: string,
@@ -313,32 +349,18 @@ export const toggleEntityFilterSpec = (
   role: 'actor' | 'target',
   action: 'show' | 'hide'
 ): void => {
-  if (spec.kind === 'dsl') {
-    emitEntityFilterToggle(
-      scopeId,
-      filterKey,
-      spec.dsl,
-      action,
-      spec.namespaceSourceValues,
-      spec.getNamespaceSourcePrefix
-    );
-    return;
-  }
-  if (spec.kind === 'resolvedIdentity') {
-    // Every field is required, so emit one entity filter ANDing them. Calling `emitFilterToggle`
-    // per field instead would OR them (`addFilter` combines with the first filter), giving a
-    // filter broader than the entity — `user.name` alone matches the same user on other hosts.
-    const roleFields = Object.fromEntries(
-      Object.entries(spec.fields).map(([field, value]) => [fieldForRole(field, role), value])
-    );
-    emitEntityFilterToggle(scopeId, filterKey, buildFieldsDsl(roleFields), action);
-    return;
-  }
-
-  for (const [field, value] of Object.entries(spec.fields)) {
-    // Flatten string | string[] so each value gets its own OR'd phrase filter
-    for (const one of ([] as string[]).concat(value)) {
-      emitFilterToggle(scopeId, fieldForRole(field, role), one, action);
+  for (const clause of getEntityFilterSpecClauses(spec, role)) {
+    if (clause.type === 'entityDsl') {
+      emitEntityFilterToggle(
+        scopeId,
+        filterKey,
+        clause.dsl,
+        action,
+        clause.namespaceSourceValues,
+        clause.getNamespaceSourcePrefix
+      );
+    } else {
+      emitFilterToggle(scopeId, clause.field, clause.value, action);
     }
   }
 };
