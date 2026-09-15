@@ -16,6 +16,7 @@ export {
   seedInvestigation,
   deleteInvestigation,
   getInvestigation,
+  getImpactEntities,
   listInvestigations,
   updateInvestigation,
   ensureInvestigation,

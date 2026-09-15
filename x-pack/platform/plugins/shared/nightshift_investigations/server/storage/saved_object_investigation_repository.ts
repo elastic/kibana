@@ -194,6 +194,7 @@ export class SavedObjectInvestigationRepository implements InvestigationReposito
       filter: buildBaseInvestigationFilter(query),
       sortField: 'created_at',
       sortOrder: 'desc',
+      // The 1,000 latest investigations are sufficient for the expected entity-filter volume.
       perPage: 1000,
       fields: ['impact'],
     });

@@ -72,6 +72,24 @@ export const listInvestigations = (
     }
   );
 
+export const getImpactEntities = (
+  apiClient: ApiClientFixture,
+  cookieHeader: Record<string, string>,
+  { query = '', spaceId }: InvestigationRequestOptions & { query?: string } = {}
+): Promise<ApiClientResponse> =>
+  apiClient.get(
+    spacePath(
+      query
+        ? `${INVESTIGATIONS_PATH}/_impact_entities?${query}`
+        : `${INVESTIGATIONS_PATH}/_impact_entities`,
+      spaceId
+    ),
+    {
+      headers: { ...COMMON_HEADERS, ...cookieHeader },
+      responseType: 'json',
+    }
+  );
+
 export const updateInvestigation = (
   apiClient: ApiClientFixture,
   cookieHeader: Record<string, string>,
