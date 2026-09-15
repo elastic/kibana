@@ -674,7 +674,7 @@ describe('preprocessTriggerInputs', () => {
         },
       });
 
-      it('should expand alerts from a query via PIT + search_after', async () => {
+      it('should expand alerts from a query using a point in time and search_after', async () => {
         const alertSource = createMockAlertSource();
         mockEsClient.search
           .mockResolvedValueOnce(

@@ -257,9 +257,10 @@ async function preprocessDocumentEvent(
 
 /**
  * Preprocesses trigger inputs by expanding an `alert` or `document` trigger event from
- * either an explicit id selection (mget) or a query selection (PIT + search_after), then
- * shaping the fetched documents into the event format that workflows consume. Inputs for
- * any other trigger type (or an already-expanded event) are returned unchanged.
+ * either an explicit id selection (mget) or a query selection (using a point in time and
+ * `search_after`), then shaping the fetched documents into the event format that workflows
+ * consume. Inputs for any other trigger type (or an already-expanded event) are returned
+ * unchanged.
  */
 export async function preprocessTriggerInputs(
   inputs: Record<string, unknown>,

@@ -91,7 +91,7 @@ export async function fetchDocumentsByIds(
 }
 
 /**
- * Expands a query-based selection into document sources using a Point-In-Time plus
+ * Expands a query-based selection into document sources using a point in time and a
  * `search_after` loop, stopping once `maxDocs` is reached. This lets a caller select
  * thousands of documents by sending only the query, avoiding the request payload and
  * result-window limits that a client-side id enumeration would hit.
@@ -125,7 +125,7 @@ export async function fetchDocumentsByQuery(
         size: pageSize,
         track_total_hits: true,
         // Newest first, so a capped selection keeps the most recent docs. `_shard_doc` is a
-        // stable tiebreaker only available with a PIT.
+        // stable tiebreaker only available with a point in time.
         sort: [{ '@timestamp': 'desc' }, { _shard_doc: 'asc' }],
         pit: { id: pitId, keep_alive: PIT_KEEP_ALIVE },
         ...(searchAfter ? { search_after: searchAfter } : {}),
@@ -149,7 +149,7 @@ export async function fetchDocumentsByQuery(
         }
       }
 
-      // A PIT id may change between requests; use the freshest one.
+      // A point-in-time ID may change between requests; use the freshest one.
       if (response.pit_id) {
         pitId = response.pit_id;
       }
