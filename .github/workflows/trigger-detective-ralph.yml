@@ -1,11 +1,6 @@
 name: 'Trigger Detective Ralph'
 
 on:
-  workflow_dispatch:
-    inputs:
-      issue_number:
-        description: 'Issue number to investigate (for manual testing)'
-        required: true
   issues:
     types: [labeled]
 
@@ -17,16 +12,15 @@ permissions:
   contents: none
 
 concurrency:
-  group: ralph-detect-${{ github.event.inputs.issue_number || github.event.issue.number }}
+  group: ralph-detect-${{ github.event.issue.number }}
   cancel-in-progress: true
 
 jobs:
   acknowledge:
     name: 'Acknowledge ralph-investigate'
     if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.issue.pull_request == null &&
-      github.event.label.name == 'ralph-investigate')
+      github.event.issue.pull_request == null &&
+      github.event.label.name == 'ralph-investigate'
     runs-on: ubuntu-latest
     permissions:
       issues: write
@@ -45,7 +39,7 @@ jobs:
       - name: Post acknowledgment comment
         env:
           GH_TOKEN: ${{ github.token }}
-          ISSUE_NUMBER: ${{ github.event.inputs.issue_number || github.event.issue.number }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
           REPO: ${{ github.repository }}
         run: |
           gh issue comment "$ISSUE_NUMBER" --repo "$REPO" \
@@ -58,10 +52,9 @@ jobs:
     name: 'Run Detective Ralph'
     needs: [acknowledge]
     if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.issue.pull_request == null &&
-      github.event.label.name == 'ralph-investigate')
+      github.event.issue.pull_request == null &&
+      github.event.label.name == 'ralph-investigate'
     uses: elastic/kibana-error-sentry/.github/workflows/detective-ralph.yml@main
     with:
-      issue_number: '${{ github.event.inputs.issue_number || github.event.issue.number }}'
+      issue_number: '${{ github.event.issue.number }}'
     secrets: inherit
