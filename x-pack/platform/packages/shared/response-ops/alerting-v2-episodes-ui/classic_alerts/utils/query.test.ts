@@ -135,4 +135,14 @@ describe('buildClassicAlertsSort', () => {
     const sort = buildClassicAlertsSort({ sortField: 'unknown_field', sortDirection: 'asc' });
     expect(sort).toEqual([{ '@timestamp': { order: 'asc', unmapped_type: 'keyword' } }]);
   });
+
+  it('generates a Painless script sort that includes severity extensions', () => {
+    const sort = buildClassicAlertsSort({ sortField: 'severity', sortDirection: 'desc' }, [
+      { value: 'warning', label: 'Warning', color: 'warning', sortRank: 1 },
+    ]);
+    expect(sort).toHaveLength(1);
+    const scriptSort = sort[0] as { _script: { script: { source: string } } };
+    expect(scriptSort._script.script.source).toContain("if (v == 'warning') { return 1; }");
+    expect(scriptSort._script.script.source).toContain("if (v == 'critical') { return 4; }");
+  });
 });

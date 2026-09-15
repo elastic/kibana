@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EpisodeDataSource } from '../types/episode_data_source';
+import type { EpisodeDataSource, SeverityExtension } from '../types/episode_data_source';
 import { classicActionExtensions } from './action_extensions';
 import { fetchClassicAlertsAsEpisodes } from './apis/fetch_classic_episodes';
 import { fetchClassicAlertsHistogram } from './apis/fetch_classic_histogram';
@@ -17,6 +17,18 @@ import { classicAlertQueryKeys } from './query_keys';
 
 export const CLASSIC_EPISODE_SOURCE_ID = 'classic-alerts';
 
+export const CLASSIC_SEVERITY_EXTENSIONS: SeverityExtension[] = [
+  {
+    value: 'warning',
+    label: 'Warning',
+    color: 'warning',
+    sortRank: 1,
+    filterDotColor: 'textWarning',
+  },
+  { value: 'minor', label: 'Minor', color: '#94D8EB', sortRank: 2, filterDotColor: 'textPrimary' },
+  { value: 'major', label: 'Major', color: 'risk', sortRank: 3, filterDotColor: 'textRisk' },
+];
+
 export interface CreateClassicEpisodeSourceOptions {
   ruleTypeIds: string[];
 }
@@ -27,6 +39,8 @@ export const createClassicEpisodeSource = ({
   id: CLASSIC_EPISODE_SOURCE_ID,
   queryKeyPrefix: classicAlertQueryKeys.all(),
 
+  severityExtensions: CLASSIC_SEVERITY_EXTENSIONS,
+
   fetchEpisodes: ({ services, pageSize, filterState, sortState, timeRange, abortSignal }) =>
     fetchClassicAlertsAsEpisodes({
       ruleTypeIds,
@@ -34,6 +48,7 @@ export const createClassicEpisodeSource = ({
       pageSize,
       filterState,
       sortState,
+      severityExtensions: CLASSIC_SEVERITY_EXTENSIONS,
       timeRange,
       abortSignal,
     }),
