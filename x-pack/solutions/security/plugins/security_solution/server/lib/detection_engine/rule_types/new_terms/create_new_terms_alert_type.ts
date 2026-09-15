@@ -14,6 +14,7 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import { NewTermsRuleParams } from '../../rule_schema';
 import type { SecurityAlertType } from '../types';
 import { singleSearchAfter } from '../utils/single_search_after';
+import { reportMissingAggregations } from '../utils/no_readable_shards';
 import { buildEventsSearchQuery } from '../utils/build_events_query';
 import { getFilter } from '../utils/get_filter';
 import { wrapNewTermsAlerts } from './wrap_new_terms_alerts';
@@ -187,6 +188,7 @@ export const createNewTermsAlertType = (): SecurityAlertType<
           searchResult,
           searchDuration,
           searchErrors,
+          searchWarnings,
           loggedRequests: firstPhaseLoggedRequests = [],
         } = await singleSearchAfter({
           searchRequest,
@@ -203,13 +205,23 @@ export const createNewTermsAlertType = (): SecurityAlertType<
             : undefined,
         });
         loggedRequests.push(...firstPhaseLoggedRequests);
-        if (!searchResult.aggregations) {
-          throw new Error('Aggregations were missing on recent terms search result');
-        }
         logger.debug(`Time spent on composite agg: ${searchDuration}`);
 
         result.searchAfterTimes.push(searchDuration);
         result.errors.push(...searchErrors);
+        result.warningMessages.push(...searchWarnings);
+
+        if (!searchResult.aggregations) {
+          reportMissingAggregations({
+            searchResult,
+            searchErrors,
+            searchWarnings,
+            result,
+            inputIndex,
+            unexpectedErrorMessage: 'Aggregations were missing on recent terms search result',
+          });
+          break;
+        }
 
         // If the aggregation returns no after_key it signals that we've paged through all results
         // and the current page is empty so we can immediately break.
@@ -333,6 +345,7 @@ export const createNewTermsAlertType = (): SecurityAlertType<
             searchResult: pageSearchResult,
             searchDuration: pageSearchDuration,
             searchErrors: pageSearchErrors,
+            searchWarnings: pageSearchWarnings,
             loggedRequests: pageSearchLoggedRequests = [],
           } = await singleSearchAfter({
             searchRequest: pageSearchRequest,
@@ -348,12 +361,21 @@ export const createNewTermsAlertType = (): SecurityAlertType<
           });
           result.searchAfterTimes.push(pageSearchDuration);
           result.errors.push(...pageSearchErrors);
+          result.warningMessages.push(...pageSearchWarnings);
           loggedRequests.push(...pageSearchLoggedRequests);
 
           logger.debug(`Time spent on phase 2 terms agg: ${pageSearchDuration}`);
 
           if (!pageSearchResult.aggregations) {
-            throw new Error('Aggregations were missing on new terms search result');
+            reportMissingAggregations({
+              searchResult: pageSearchResult,
+              searchErrors: pageSearchErrors,
+              searchWarnings: pageSearchWarnings,
+              result,
+              inputIndex,
+              unexpectedErrorMessage: 'Aggregations were missing on new terms search result',
+            });
+            break;
           }
 
           // PHASE 3: For each term that is not in the history window, fetch the oldest document in
@@ -386,6 +408,7 @@ export const createNewTermsAlertType = (): SecurityAlertType<
               searchResult: docFetchSearchResult,
               searchDuration: docFetchSearchDuration,
               searchErrors: docFetchSearchErrors,
+              searchWarnings: docFetchSearchWarnings,
               loggedRequests: docFetchLoggedRequests = [],
             } = await singleSearchAfter({
               searchRequest: docFetchSearchRequest,
@@ -403,10 +426,19 @@ export const createNewTermsAlertType = (): SecurityAlertType<
             });
             result.searchAfterTimes.push(docFetchSearchDuration);
             result.errors.push(...docFetchSearchErrors);
+            result.warningMessages.push(...docFetchSearchWarnings);
             loggedRequests.push(...docFetchLoggedRequests);
 
             if (!docFetchSearchResult.aggregations) {
-              throw new Error('Aggregations were missing on document fetch search result');
+              reportMissingAggregations({
+                searchResult: docFetchSearchResult,
+                searchErrors: docFetchSearchErrors,
+                searchWarnings: docFetchSearchWarnings,
+                result,
+                inputIndex,
+                unexpectedErrorMessage: 'Aggregations were missing on document fetch search result',
+              });
+              break;
             }
 
             const bulkCreateResult = await createAlertsHook(docFetchSearchResult);

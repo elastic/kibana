@@ -43,6 +43,7 @@ export type { EsArchiverFixture } from './fixtures/scope/worker';
 // API services (can be extended with solution specific API services)
 export { apiServicesFixture } from './fixtures/scope/worker/apis';
 export type { ApiServicesFixture } from './fixtures/scope/worker/apis';
+export type { ApiClientFixture } from './fixtures/scope/worker/api_client';
 
 // Other worker types
 export type { SamlAuth, RequestAuthFixture } from './fixtures/scope/worker';
