@@ -24,9 +24,5 @@
  *
  * The 30s of headroom under 120s covers serialization, network, and workflow
  * engine overhead.
- *
- * This bounds the Agent Builder tool only. The workflow run step awaits the
- * pipeline in sync mode and is bounded by its caller's own step timeout, which
- * must exceed the pipeline's 30m budget.
  */
 export const ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS = 90_000;

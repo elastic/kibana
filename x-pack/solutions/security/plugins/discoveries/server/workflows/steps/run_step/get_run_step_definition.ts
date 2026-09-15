@@ -26,9 +26,8 @@ import { checkManagedWorkflowIntegrity } from '../../../managed_workflows/check_
  * Server-side implementation of the Attack Discovery run step.
  *
  * Orchestrates the full pipeline (alert retrieval → generation → validation)
- * in a single workflow step. Sync mode awaits the pipeline to completion and
- * returns discoveries inline (bounded by the step's own `timeout`); async mode
- * is fire-and-forget and returns execution_uuid only.
+ * in a single workflow step. Supports sync mode (returns discoveries inline)
+ * and async mode (fire-and-forget, returns execution_uuid only).
  *
  * The `replacements` map is explicitly excluded from the output for security.
  */
