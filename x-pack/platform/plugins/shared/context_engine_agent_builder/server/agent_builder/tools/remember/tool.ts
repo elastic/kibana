@@ -73,7 +73,6 @@ interface StoredMemoryDocument {
   description: string;
   content: string;
   tags?: string[];
-  spaces?: string[];
   expires_at?: string;
   updated_at: string;
   attributes?: Record<string, string | number | boolean | string[]>;
@@ -110,7 +109,7 @@ export const createRememberTool = ({
     Use memory_session_fact for a granular fact discovered during a session.
     Use memory_session for a synthesis of what was tried, what worked, and what should be done
     differently. Omit id to create a memory; provide an id returned by an earlier call only when
-    deliberately revising that memory. This tool handles session and space metadata server-side.
+    deliberately revising that memory. This tool handles session metadata server-side.
   `,
   schema: rememberSchema,
   handler: async (params, context) => {
@@ -195,11 +194,6 @@ export const createRememberTool = ({
             `Memory '${params.id}' has type '${existingHit._source.type}' and cannot be revised as '${params.type}'.`
           );
         }
-        if (!existingHit._source.spaces?.includes(spaceId)) {
-          throw new Error(
-            `Memory '${params.id}' does not belong to the current space '${spaceId}'.`
-          );
-        }
         if (existingHit._source.governance?.lifecycle?.status === 'deleted') {
           throw new Error(`Memory '${params.id}' was deleted and cannot be revised.`);
         }
@@ -223,7 +217,6 @@ export const createRememberTool = ({
           : existingDocument?.tags !== undefined
           ? { tags: existingDocument.tags }
           : {}),
-        spaces: [spaceId],
         ...(params.expires_at !== undefined
           ? { expires_at: params.expires_at }
           : existingDocument?.expires_at !== undefined

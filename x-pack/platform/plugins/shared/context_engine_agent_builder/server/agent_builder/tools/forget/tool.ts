@@ -32,7 +32,6 @@ interface StoredMemoryDocument {
   description: string;
   content: string;
   tags?: string[];
-  spaces?: string[];
   expires_at?: string;
   updated_at: string;
   attributes?: Record<string, string | number | boolean | string[]>;
@@ -125,9 +124,6 @@ export const createForgetTool = ({
         throw new Error(
           `Document '${params.id}' in AI index '${params.aiIndexId}' is not a memory.`
         );
-      }
-      if (!existingHit._source.spaces?.includes(spaceId)) {
-        throw new Error(`Memory '${params.id}' does not belong to the current space '${spaceId}'.`);
       }
 
       if (existingHit._source.governance?.lifecycle?.status === 'deleted') {
