@@ -43,15 +43,7 @@ export const assignSessionDataViewIds = (
   }
 
   // Collect all local candidates first, so a tab can reuse an ID from a later tab too.
-  const localViewsByTab = new Map<string, DataViewSpec>();
-  const idsBySpec = new Map<string, string>();
-  for (const tab of localTabs) {
-    const dataView = getInlineDataView(tab.initialInternalState?.serializedSearchSource);
-    if (dataView?.id) {
-      localViewsByTab.set(tab.id, dataView);
-      idsBySpec.set(getDataViewSpecKey(dataView), dataView.id);
-    }
-  }
+  const { localViewsByTab, idsBySpec } = collectLocalDataViews(localTabs);
 
   const locationDataView = getInlineDataView({ index: navigation?.dataViewSpec });
   const targetTab = session.tabs.find((tab) => tab.id === navigation?.tabId);
@@ -97,6 +89,21 @@ export const assignSessionDataViewIds = (
     ...session,
     tabs: sessionTabs,
   };
+};
+
+/** Collects local inline views by tab and IDs by spec so restored tabs can reuse them. */
+const collectLocalDataViews = (localTabs: TabState[]) => {
+  const localViewsByTab = new Map<string, DataViewSpec>();
+  const idsBySpec = new Map<string, string>();
+  for (const tab of localTabs) {
+    const dataView = getInlineDataView(tab.initialInternalState?.serializedSearchSource);
+    if (dataView?.id) {
+      localViewsByTab.set(tab.id, dataView);
+      idsBySpec.set(getDataViewSpecKey(dataView), dataView.id);
+    }
+  }
+
+  return { localViewsByTab, idsBySpec };
 };
 
 const getMatchingDataViewId = (dataView: DataViewSpec | undefined, specKey: string) => {

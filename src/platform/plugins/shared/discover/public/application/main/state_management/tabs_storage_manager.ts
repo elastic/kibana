@@ -453,20 +453,21 @@ export const createTabsStorageManager = ({
       toTabState(tab, defaultTabState)
     );
     let openTabs = shouldClearAllTabs ? [] : previousOpenTabs;
+    let updatedDiscoverSession = persistedDiscoverSession;
 
     // Prepare before mapping tabs so inline views can reuse matching local IDs. Return the same
     // prepared session below so restored tabs and the unsaved-changes baseline use consistent IDs.
     if (persistedDiscoverSession && prepareSession) {
       const localTabs =
         persistedDiscoverSession.id === storedTabsState.discoverSessionId ? openTabs : [];
-      persistedDiscoverSession = prepareSession(persistedDiscoverSession, localTabs, selectedTabId);
+      updatedDiscoverSession = prepareSession(persistedDiscoverSession, localTabs, selectedTabId);
     }
 
-    const persistedTabs = persistedDiscoverSession?.tabs.map((tab) =>
+    const persistedTabs = updatedDiscoverSession?.tabs.map((tab) =>
       fromSavedObjectTabToTabState({ tab, profileStateRegistry })
     );
 
-    if (persistedDiscoverSession?.id !== storedTabsState.discoverSessionId) {
+    if (updatedDiscoverSession?.id !== storedTabsState.discoverSessionId) {
       // if the discover session has changed, use the tabs from the session
       openTabs = persistedTabs ?? [];
     }
@@ -485,7 +486,7 @@ export const createTabsStorageManager = ({
         return {
           allTabs: openTabs,
           selectedTabId,
-          updatedDiscoverSession: persistedDiscoverSession,
+          updatedDiscoverSession,
           recentlyClosedTabs: getNRecentlyClosedTabs({
             previousOpenTabs,
             previousRecentlyClosedTabs: closedTabs,
@@ -498,7 +499,7 @@ export const createTabsStorageManager = ({
         // append a new tab if requested via URL
         selectedTabId === NEW_TAB_ID ||
         // or append a new tab to the persisted session if could not find it by the selected tab id above
-        (selectedTabId && tabsStateFromURL?.tabLabel && persistedDiscoverSession)
+        (selectedTabId && tabsStateFromURL?.tabLabel && updatedDiscoverSession)
       ) {
         const newTab = {
           ...defaultTabState,
@@ -513,7 +514,7 @@ export const createTabsStorageManager = ({
         return {
           allTabs: allTabsWithNewTab,
           selectedTabId: newTab.id,
-          updatedDiscoverSession: persistedDiscoverSession,
+          updatedDiscoverSession,
           recentlyClosedTabs: getNRecentlyClosedTabs({
             previousOpenTabs,
             previousRecentlyClosedTabs: closedTabs,
@@ -523,7 +524,7 @@ export const createTabsStorageManager = ({
       }
 
       // otherwise try to reopen some of the previously closed tabs
-      if (selectedTabId && !persistedDiscoverSession && !tabsStateFromURL?.tabLabel) {
+      if (selectedTabId && !updatedDiscoverSession && !tabsStateFromURL?.tabLabel) {
         const storedClosedTab = storedTabsState.closedTabs.find((tab) => tab.id === selectedTabId);
 
         if (storedClosedTab) {
@@ -534,7 +535,7 @@ export const createTabsStorageManager = ({
           return {
             allTabs: restoredTabs,
             selectedTabId,
-            updatedDiscoverSession: persistedDiscoverSession,
+            updatedDiscoverSession,
             recentlyClosedTabs: getNRecentlyClosedTabs({
               previousOpenTabs,
               previousRecentlyClosedTabs: closedTabs,
@@ -566,7 +567,7 @@ export const createTabsStorageManager = ({
     return {
       allTabs,
       selectedTabId: selectedTab.id,
-      updatedDiscoverSession: persistedDiscoverSession,
+      updatedDiscoverSession,
       recentlyClosedTabs: getNRecentlyClosedTabs({
         previousOpenTabs,
         previousRecentlyClosedTabs: closedTabs,
