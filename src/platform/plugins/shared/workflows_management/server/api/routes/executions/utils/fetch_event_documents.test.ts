@@ -90,7 +90,7 @@ describe('fetch_event_documents', () => {
       },
     });
 
-    it('pages through results with search_after and closes the PIT', async () => {
+    it('pages through results with search_after and closes the point in time', async () => {
       mockEsClient.search
         .mockResolvedValueOnce(page(['a', 'b'], 3))
         .mockResolvedValueOnce(page(['c'], 3))
@@ -141,7 +141,7 @@ describe('fetch_event_documents', () => {
       );
     });
 
-    it('closes the PIT even when search throws', async () => {
+    it('closes the point in time even when search throws', async () => {
       mockEsClient.search.mockRejectedValue(new Error('search failed'));
 
       await expect(
