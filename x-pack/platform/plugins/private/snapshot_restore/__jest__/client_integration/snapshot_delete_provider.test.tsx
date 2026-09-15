@@ -97,7 +97,9 @@ describe('WHEN deleting snapshots', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Delete snapshot' }));
     expect(screen.getByText('Deleting snapshot')).toBeVisible();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    const cancel = screen.getByRole('button', { name: 'Cancel' });
+    expect(cancel).toBeDisabled();
+    fireEvent.click(cancel);
     fireEvent.keyDown(screen.getByTestId('srdeleteSnapshotConfirmationModal'), { key: 'Escape' });
     fireEvent.click(screen.getByRole('button', { name: 'Open other dialog' }));
 

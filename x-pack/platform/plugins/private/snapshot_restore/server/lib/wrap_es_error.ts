@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
+
 const extractCausedByChain = (causedBy: any = {}, accumulator: any[] = []): any => {
   const { reason, caused_by } = causedBy;
 
@@ -21,13 +23,14 @@ const extractCausedByChain = (causedBy: any = {}, accumulator: any[] = []): any 
 
 // A proxy in front of ES can answer with a non-JSON body (e.g. an HTML error page); treat it as an empty body
 // so the wrapper still returns a response instead of throwing.
-const parseEsBody = (esBody: unknown): any => {
+const parseEsBody = (esBody: unknown): Partial<estypes.ErrorResponseBase> => {
   if (typeof esBody !== 'string') {
-    return esBody;
+    return typeof esBody === 'object' && esBody !== null ? esBody : {};
   }
 
   try {
-    return JSON.parse(esBody);
+    const parsed: unknown = JSON.parse(esBody);
+    return typeof parsed === 'object' && parsed !== null ? parsed : {};
   } catch (e) {
     return {};
   }

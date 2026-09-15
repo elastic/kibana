@@ -63,6 +63,8 @@ const isSnapshotMissingError = (e: unknown): boolean =>
   e instanceof errors.ResponseError && e.body?.error?.type === 'snapshot_missing_exception';
 
 const chunkSnapshotNames = (repository: string, snapshotNames: string[]): string[][] => {
+  // An un-encodable repository name makes this -Infinity, so every snapshot gets a chunk of its own
+  // (the first name always starts a chunk) and a rejected request costs at most one snapshot.
   const maxSnapshotNamesLength = MAX_DELETE_PATH_LENGTH - getEncodedLength(repository);
   const chunks: string[][] = [];
   let currentChunk: string[] = [];

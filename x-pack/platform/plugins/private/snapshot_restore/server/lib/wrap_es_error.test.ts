@@ -45,6 +45,17 @@ describe('wrapEsError', () => {
     expect(error).toEqual({ statusCode: 502, cause: 'Bad Gateway' });
   });
 
+  it.each([
+    ['a JSON primitive', '"gateway timeout"'],
+    ['a JSON array', '["a", "b"]'],
+    ['a JSON null', 'null'],
+    ['a non-string, non-object body', 42],
+  ])('falls back to the error message when the body is %s', (_label, body) => {
+    const error = wrapEsError({ statusCode: 504, message: 'Gateway Timeout', meta: { body } });
+
+    expect(error).toEqual({ statusCode: 504, cause: 'Gateway Timeout' });
+  });
+
   it('uses the custom message for a mapped status code', () => {
     const error = wrapEsError(
       { statusCode: 404, meta: { body: esErrorBody } },
