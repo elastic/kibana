@@ -10,7 +10,7 @@ import CasesWebhookActionConnectorFields from './webhook_connectors';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { render, screen, waitFor } from '@testing-library/react';
 import { AuthType } from '@kbn/connector-schemas/common/auth/constants';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import * as i18n from './translations';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useSecretHeaders } from '../../common/auth/use_secret_headers';
@@ -21,6 +21,10 @@ const useSecretHeadersMock = useSecretHeaders as jest.Mock;
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
   const originalModule = jest.requireActual('@kbn/triggers-actions-ui-plugin/public');
+  const notFoundError = Object.assign(new Error('Not Found'), {
+    request: {},
+    response: { status: 404 },
+  });
   return {
     ...originalModule,
     useKibana: () => ({
@@ -33,6 +37,9 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
           toasts: {
             addError: jest.fn(),
           },
+        },
+        http: {
+          head: jest.fn().mockRejectedValue(notFoundError),
         },
       },
     }),
@@ -208,8 +215,13 @@ describe('CasesWebhookActionConnectorFields renders', () => {
     expect(screen.queryByTestId('webhookHeadersValueInput')).not.toBeInTheDocument();
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/237095
-  describe.skip('Step Validation', () => {
+  describe('Step Validation', () => {
+    let user: UserEvent;
+
+    beforeEach(() => {
+      user = userEvent.setup();
+    });
+
     it('Steps work correctly when all fields valid', async () => {
       render(
         <ConnectorFormTestProvider connector={actionConnector}>
@@ -231,7 +243,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       expect(await screen.findByTestId('updateStep')).toHaveAttribute('style', 'display: none;');
       expect(screen.queryByTestId('casesWebhookBack')).not.toBeInTheDocument();
 
-      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
+      await user.click(await screen.findByTestId('casesWebhookNext'));
 
       expect(await screen.findByTestId('horizontalStep1-complete')).toBeInTheDocument();
       expect(await screen.findByTestId('horizontalStep2-current')).toBeInTheDocument();
@@ -242,7 +254,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       expect(await screen.findByTestId('getStep')).toHaveAttribute('style', 'display: none;');
       expect(await screen.findByTestId('updateStep')).toHaveAttribute('style', 'display: none;');
 
-      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
+      await user.click(await screen.findByTestId('casesWebhookNext'));
 
       expect(await screen.findByTestId('horizontalStep1-complete')).toBeInTheDocument();
       expect(await screen.findByTestId('horizontalStep2-complete')).toBeInTheDocument();
@@ -253,7 +265,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       expect(await screen.findByTestId('getStep')).toHaveAttribute('style', 'display: block;');
       expect(await screen.findByTestId('updateStep')).toHaveAttribute('style', 'display: none;');
 
-      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
+      await user.click(await screen.findByTestId('casesWebhookNext'));
 
       expect(await screen.findByTestId('horizontalStep1-complete')).toBeInTheDocument();
       expect(await screen.findByTestId('horizontalStep2-complete')).toBeInTheDocument();
@@ -287,19 +299,20 @@ describe('CasesWebhookActionConnectorFields renders', () => {
 
       expect(await screen.findByTestId('horizontalStep1-current')).toBeInTheDocument();
 
-      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
+      await user.click(await screen.findByTestId('casesWebhookNext'));
 
       expect(await screen.findByTestId('horizontalStep1-danger')).toBeInTheDocument();
 
-      await userEvent.click(await screen.findByTestId('authNone'));
-      await userEvent.click(await screen.findByTestId('webhookViewHeadersSwitch'));
-      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
+      await user.click(await screen.findByTestId('authNone'));
+      await user.click(await screen.findByTestId('webhookViewHeadersSwitch'));
+      await user.click(await screen.findByTestId('casesWebhookNext'));
 
       expect(await screen.findByTestId('horizontalStep1-complete')).toBeInTheDocument();
       expect(await screen.findByTestId('horizontalStep2-current')).toBeInTheDocument();
     });
 
     it('form submit works with valid headers', async () => {
+      useSecretHeadersMock.mockReturnValue({ isLoading: false, isFetching: false, data: [] });
       const customActionConnector = {
         ...actionConnector,
         secrets: {
@@ -332,7 +345,17 @@ describe('CasesWebhookActionConnectorFields renders', () => {
         { wrapper: customQueryProviderWrapper }
       );
       expect(await screen.findByTestId('horizontalStep1-current')).toBeInTheDocument();
-      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
+
+      const keyInputs = await screen.findAllByTestId('webhookHeadersKeyInput');
+      expect(keyInputs).toHaveLength(2);
+      expect(keyInputs[0]).toHaveValue('configKey');
+      expect(keyInputs[1]).toHaveValue('secretKey');
+      expect(await screen.findByTestId('webhookHeadersValueInput')).toHaveValue('configValue');
+      expect(await screen.findByTestId('webhookHeadersSecretValueInput')).toHaveValue(
+        'secretValue'
+      );
+
+      await user.click(await screen.findByTestId('casesWebhookNext'));
       expect(await screen.findByTestId('horizontalStep1-complete')).toBeInTheDocument();
     });
 
@@ -373,14 +396,13 @@ describe('CasesWebhookActionConnectorFields renders', () => {
 
       const keyInput = await screen.findByTestId('webhookHeadersKeyInput');
       expect(keyInput).toHaveValue('configKey');
-      await userEvent.clear(keyInput);
+      await user.clear(keyInput);
 
-      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
+      await user.click(await screen.findByTestId('casesWebhookNext'));
       expect(await screen.findByTestId('horizontalStep1-danger')).toBeInTheDocument();
     });
 
-    // Flaky - https://github.com/elastic/kibana/issues/205708
-    it.skip('Step 2 is properly validated', async () => {
+    it('Step 2 is properly validated', async () => {
       const incompleteActionConnector = {
         ...actionConnector,
         config: {
@@ -399,25 +421,19 @@ describe('CasesWebhookActionConnectorFields renders', () => {
         { wrapper: customQueryProviderWrapper }
       );
       expect(await screen.findByTestId('horizontalStep2-incomplete')).toBeInTheDocument();
-      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
-      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
+      await user.click(await screen.findByTestId('casesWebhookNext'));
+      await user.click(await screen.findByTestId('casesWebhookNext'));
       expect(await screen.findByText(i18n.CREATE_URL_REQUIRED)).toBeInTheDocument();
       expect(await screen.findByTestId('horizontalStep2-danger')).toBeInTheDocument();
-      await userEvent.clear(await screen.findByTestId('webhookCreateUrlText'));
-      await userEvent.type(
-        await screen.findByTestId('webhookCreateUrlText'),
-        config.createIncidentUrl,
-        {
-          delay: 10,
-        }
-      );
+      await user.clear(await screen.findByTestId('webhookCreateUrlText'));
+      await user.type(await screen.findByTestId('webhookCreateUrlText'), config.createIncidentUrl);
 
-      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
+      await user.click(await screen.findByTestId('casesWebhookNext'));
 
       expect(await screen.findByTestId('horizontalStep2-complete')).toBeInTheDocument();
       expect(await screen.findByTestId('horizontalStep3-current')).toBeInTheDocument();
 
-      await userEvent.click(await screen.findByTestId('horizontalStep2-complete'));
+      await user.click(await screen.findByTestId('horizontalStep2-complete'));
 
       expect(await screen.findByTestId('horizontalStep2-current')).toBeInTheDocument();
       expect(await screen.findByTestId('horizontalStep3-incomplete')).toBeInTheDocument();
@@ -443,30 +459,27 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       );
       expect(await screen.findByTestId('horizontalStep2-incomplete')).toBeInTheDocument();
 
-      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
-      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
-      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
+      await user.click(await screen.findByTestId('casesWebhookNext'));
+      await user.click(await screen.findByTestId('casesWebhookNext'));
+      await user.click(await screen.findByTestId('casesWebhookNext'));
 
       expect(
         await screen.findByText(i18n.GET_RESPONSE_EXTERNAL_TITLE_KEY_REQUIRED)
       ).toBeInTheDocument();
       expect(await screen.findByTestId('horizontalStep3-danger')).toBeInTheDocument();
 
-      await userEvent.clear(await screen.findByTestId('getIncidentResponseExternalTitleKeyText'));
-      await userEvent.type(
+      await user.clear(await screen.findByTestId('getIncidentResponseExternalTitleKeyText'));
+      await user.type(
         await screen.findByTestId('getIncidentResponseExternalTitleKeyText'),
-        config.getIncidentResponseExternalTitleKey,
-        {
-          delay: 10,
-        }
+        config.getIncidentResponseExternalTitleKey
       );
 
-      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
+      await user.click(await screen.findByTestId('casesWebhookNext'));
 
       expect(await screen.findByTestId('horizontalStep3-complete')).toBeInTheDocument();
       expect(await screen.findByTestId('horizontalStep4-current')).toBeInTheDocument();
 
-      await userEvent.click(await screen.findByTestId('horizontalStep3-complete'));
+      await user.click(await screen.findByTestId('horizontalStep3-complete'));
 
       expect(await screen.findByTestId('horizontalStep3-current')).toBeInTheDocument();
       expect(await screen.findByTestId('horizontalStep4-incomplete')).toBeInTheDocument();
@@ -476,12 +489,13 @@ describe('CasesWebhookActionConnectorFields renders', () => {
     // this validation is tested in the main validation section
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/205731
-  describe.skip('Validation', () => {
+  describe('Validation', () => {
+    let user: UserEvent;
     const onSubmit = jest.fn();
 
     beforeEach(() => {
       jest.clearAllMocks();
+      user = userEvent.setup();
     });
 
     const tests: Array<[string, string]> = [
@@ -511,25 +525,36 @@ describe('CasesWebhookActionConnectorFields renders', () => {
     ];
 
     it('connector validation succeeds when connector config is valid', async () => {
+      useSecretHeadersMock.mockReturnValue({ isLoading: false, isFetching: false, data: [] });
+      const connector = {
+        ...actionConnector,
+        __internal__: {
+          headers: [{ key: 'content-type', value: 'text', type: 'config' }],
+        },
+      };
+
       render(
-        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit} isEdit={true}>
           <CasesWebhookActionConnectorFields
             readOnly={false}
-            isEdit={false}
+            isEdit={true}
             registerPreSubmitValidator={() => {}}
           />
         </ConnectorFormTestProvider>
       );
 
-      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await user.click(await screen.findByTestId('form-test-provide-submit'));
       const { isPreconfigured, ...rest } = actionConnector;
+      const { headers, ...configWithoutHeaders } = actionConnector.config;
       await waitFor(() =>
         expect(onSubmit).toHaveBeenCalledWith({
           data: {
             ...rest,
+            config: configWithoutHeaders,
             __internal__: {
               hasCA: false,
               hasHeaders: true,
+              headers: [{ key: 'content-type', value: 'text', type: 'config' }],
             },
           },
           isValid: true,
@@ -538,39 +563,45 @@ describe('CasesWebhookActionConnectorFields renders', () => {
     });
 
     it('connector validation succeeds when auth=false', async () => {
+      useSecretHeadersMock.mockReturnValue({ isLoading: false, isFetching: false, data: [] });
       const connector = {
         ...actionConnector,
         config: {
           ...actionConnector.config,
           hasAuth: false,
         },
+        __internal__: {
+          headers: [{ key: 'content-type', value: 'text', type: 'config' }],
+        },
       };
 
       render(
-        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit} isEdit={true}>
           <CasesWebhookActionConnectorFields
             readOnly={false}
-            isEdit={false}
+            isEdit={true}
             registerPreSubmitValidator={() => {}}
           />
         </ConnectorFormTestProvider>
       );
 
-      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await user.click(await screen.findByTestId('form-test-provide-submit'));
 
       const { isPreconfigured, secrets, ...rest } = actionConnector;
+      const { headers, ...configWithoutHeaders } = actionConnector.config;
       await waitFor(() =>
         expect(onSubmit).toHaveBeenCalledWith({
           data: {
             ...rest,
             config: {
-              ...actionConnector.config,
+              ...configWithoutHeaders,
               hasAuth: false,
               authType: null,
             },
             __internal__: {
               hasCA: false,
               hasHeaders: true,
+              headers: [{ key: 'content-type', value: 'text', type: 'config' }],
             },
           },
           isValid: true,
@@ -579,6 +610,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
     });
 
     it('connector validation succeeds without headers', async () => {
+      useSecretHeadersMock.mockReturnValue({ isLoading: false, isFetching: false, data: [] });
       const connector = {
         ...actionConnector,
         config: {
@@ -588,16 +620,16 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       };
 
       render(
-        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit} isEdit={true}>
           <CasesWebhookActionConnectorFields
             readOnly={false}
-            isEdit={false}
+            isEdit={true}
             registerPreSubmitValidator={() => {}}
           />
         </ConnectorFormTestProvider>
       );
 
-      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await user.click(await screen.findByTestId('form-test-provide-submit'));
 
       const { isPreconfigured, ...rest } = actionConnector;
       const { headers, ...rest2 } = actionConnector.config;
@@ -635,7 +667,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await user.click(await screen.findByTestId('form-test-provide-submit'));
       await waitFor(() => expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false }));
     });
 
@@ -658,14 +690,12 @@ describe('CasesWebhookActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await userEvent.clear(await screen.findByTestId(field));
+      await user.clear(await screen.findByTestId(field));
       if (value !== '') {
-        await userEvent.type(await screen.findByTestId(field), value, {
-          delay: 10,
-        });
+        await user.type(await screen.findByTestId(field), value);
       }
 
-      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await user.click(await screen.findByTestId('form-test-provide-submit'));
 
       await waitFor(() => expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false }));
     });
@@ -692,7 +722,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
           </ConnectorFormTestProvider>
         );
 
-        await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+        await user.click(await screen.findByTestId('form-test-provide-submit'));
         await waitFor(() => expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false }));
         expect(
           await screen.findByText(i18n.MISSING_VARIABLES(missingVariables))
@@ -721,12 +751,13 @@ describe('CasesWebhookActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await user.click(await screen.findByTestId('form-test-provide-submit'));
       await waitFor(() => expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false }));
       expect(await screen.findByText(i18n.GET_INCIDENT_REQUIRED)).toBeInTheDocument();
     });
 
     it('validation succeeds get incident url with post correctly', async () => {
+      useSecretHeadersMock.mockReturnValue({ isLoading: false, isFetching: false, data: [] });
       const connector = {
         ...actionConnector,
         config: {
@@ -736,22 +767,25 @@ describe('CasesWebhookActionConnectorFields renders', () => {
           getIncidentJson: '{"id": {{{external.system.id}}} }',
           headers: [],
         },
+        __internal__: {
+          headers: [{ key: 'content-type', value: 'text', type: 'config' }],
+        },
       };
 
       const { isPreconfigured, ...rest } = actionConnector;
       const { headers, ...rest2 } = actionConnector.config;
 
       render(
-        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit} isEdit={true}>
           <CasesWebhookActionConnectorFields
             readOnly={false}
-            isEdit={false}
+            isEdit={true}
             registerPreSubmitValidator={() => {}}
           />
         </ConnectorFormTestProvider>
       );
 
-      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await user.click(await screen.findByTestId('form-test-provide-submit'));
 
       await waitFor(() =>
         expect(onSubmit).toHaveBeenCalledWith({
@@ -759,6 +793,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
             __internal__: {
               hasCA: false,
               hasHeaders: true,
+              headers: [{ key: 'content-type', value: 'text', type: 'config' }],
             },
             ...rest,
             config: {

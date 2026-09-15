@@ -51,7 +51,7 @@ import type {
 } from './types';
 import { ASSISTANT_MANAGEMENT_TITLE, SOLUTION_NAME } from './common/translations';
 
-import { APP_ICON_SOLUTION, APP_ID, APP_PATH, APP_UI_ID } from '../common/constants';
+import { AI_VALUE_PATH, APP_ICON_SOLUTION, APP_ID, APP_PATH, APP_UI_ID } from '../common/constants';
 
 import type { AppLinkItems } from './common/links';
 import {
@@ -95,6 +95,7 @@ import {
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 import { registerWorkflowSteps } from './workflows/step_types';
 import { registerSecurityWorkflowTriggers } from './workflows/triggers';
+import { registerThreatIntelWorkflowSteps } from './threat_intel/workflows/step_types';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -154,6 +155,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (workflowsExtensions) {
       registerWorkflowSteps(workflowsExtensions);
       registerSecurityWorkflowTriggers(workflowsExtensions);
+      if (this.experimentalFeatures.threatIntelSupplyEnabled) {
+        registerThreatIntelWorkflowSteps(workflowsExtensions);
+      }
     }
 
     // Lazily instantiate subPlugins and initialize services
@@ -415,8 +419,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }
     }
 
-    // Enable CPS picker in READ_ONLY mode for all Security Solution pages
-    plugins.cps?.cpsManager?.registerAppAccess(APP_UI_ID, () => ProjectRoutingAccess.READONLY);
+    // Enable CPS picker in READ_ONLY mode for all Security Solution pages except for Value Report
+    plugins.cps?.cpsManager?.registerAppAccess(APP_UI_ID, (location: string) =>
+      location.includes(AI_VALUE_PATH)
+        ? ProjectRoutingAccess.DISABLED
+        : ProjectRoutingAccess.READONLY
+    );
 
     return this.contract.getStartContract(core);
   }
