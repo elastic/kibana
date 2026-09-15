@@ -122,6 +122,7 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
         css={wrapperStyles}
         data-test-subj={`${sidePanelClassName} ${sidePanelClassName}_${openerNode.id}`}
         hasShadow={false}
+        hasBorder={false}
         role="region"
         color="transparent"
       >
