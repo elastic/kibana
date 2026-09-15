@@ -260,7 +260,7 @@ export { useGetAgentPoliciesQuery } from './hooks/use_request/agent_policy';
 export { sendGetAgentPolicies } from './hooks/use_request/agent_policy';
 
 // Agent status — used by step 4 agent count summary field
-export { useGetAgentStatus } from './hooks/use_request/agents';
+export { useGetAgentStatus, useGetAgentStatusQuery } from './hooks/use_request/agents';
 
 // Enrollment API keys query — used by step 4 enrollment token summary field
 export { useGetEnrollmentAPIKeysQuery } from './hooks/use_request/enrollment_api_keys';

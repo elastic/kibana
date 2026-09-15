@@ -19,7 +19,7 @@
 
 import { useMemo } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
-import { useGetEnrollmentAPIKeysQuery, useGetAgentStatus } from '@kbn/fleet-plugin/public';
+import { useGetEnrollmentAPIKeysQuery, useGetAgentStatusQuery } from '@kbn/fleet-plugin/public';
 import { getOnboardingSessionKey } from '../../../onboarding_session_storage';
 
 interface PersistedAuthStep {
@@ -48,7 +48,7 @@ export function useAgentPolicySummary(): AgentPolicySummaryData {
   // once any agent appears, returns ids not a count, and isn't barrel-exported.
   const { data: enrollmentKeysData } = useGetEnrollmentAPIKeysQuery(
     { kuery: agentPolicyId ? `policy_id:"${agentPolicyId}"` : '' },
-    { refetchInterval: agentPolicyId ? false : undefined }
+    { enabled: !!agentPolicyId }
   );
 
   const enrollmentToken = useMemo(() => {
@@ -58,9 +58,9 @@ export function useAgentPolicySummary(): AgentPolicySummaryData {
   }, [agentPolicyId, enrollmentKeysData]);
 
   // Agent count — polled on the same 10s cadence used by use_service_data_detection.ts.
-  const { data: agentStatusData } = useGetAgentStatus(
+  const { data: agentStatusData } = useGetAgentStatusQuery(
     { policyId: agentPolicyId ?? '' },
-    { pollIntervalMs: agentPolicyId ? 10_000 : undefined }
+    { enabled: !!agentPolicyId, refetchInterval: agentPolicyId ? 10_000 : false }
   );
 
   // `results.all` is the total enrolled count across all statuses.
