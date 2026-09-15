@@ -11,10 +11,13 @@ import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  WATCH_AUTONOMY_LEVELS,
   WatchAutonomyLevel,
   type WorkerSettings,
+  type WorkerSettingsExtras,
 } from '@kbn/alertzero-common';
 import type { ManagedWorkflowTemplateValuesForId } from '@kbn/workflows/managed';
+import { isPlainObject, workerExtrasById } from './extras';
 import type { WorkerSettingsRegistration } from './types';
 
 type RegisteredWorkerId =
@@ -25,24 +28,67 @@ type RegisteredWorkerId =
   | typeof SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID;
 type WorkerTemplateValues = ManagedWorkflowTemplateValuesForId<RegisteredWorkerId>;
 
-const WORKER_SETTINGS_VERSIONS: Record<RegisteredWorkerId, number> = {
-  [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: 1,
-  [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: 1,
-  [SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID]: 1,
-  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: 1,
-  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID]: 1,
-};
+type AutonomyLevel = (typeof WATCH_AUTONOMY_LEVELS)[number];
+
+interface WorkerTriggers {
+  /** On-demand / manual runs. Independent of whether a schedule is also allowed. */
+  manual?: boolean;
+  /** Presence means a scheduled trigger is allowed and the interval is a user setting. */
+  scheduled?: {
+    defaultInterval: string;
+  };
+}
+
+interface WorkerSettingsProfile {
+  settingsVersion: number;
+  autonomy: {
+    allowed: readonly AutonomyLevel[];
+    default: AutonomyLevel;
+  };
+  triggers: WorkerTriggers;
+}
+
+const ALL_AUTONOMY_LEVELS = WATCH_AUTONOMY_LEVELS;
 
 /**
- * Default interval per schedule-driven Worker. Presence in this map is what opts a Worker into the
- * schedule setting — the other Workers are alert- or event-triggered and own no schedule, so the
- * setting is absent from their template values and from their projected settings entirely.
+ * Per-Worker settings profile for shared capabilities only. Unique settings live in
+ * `workerExtrasById` — presence there is the extras opt-in.
  */
-const WORKER_SCHEDULE_DEFAULTS: Partial<Record<RegisteredWorkerId, string>> = {
-  // Matches the Attack Discovery schedule form default.
-  [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: '24h',
-  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: '2h',
+const WORKER_SETTINGS_PROFILES: Record<RegisteredWorkerId, WorkerSettingsProfile> = {
+  [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: {
+    settingsVersion: 1,
+    autonomy: { allowed: ALL_AUTONOMY_LEVELS, default: 'manual' },
+    triggers: { manual: true },
+  },
+  [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: {
+    settingsVersion: 1,
+    autonomy: { allowed: ['manual', 'supervised'], default: 'manual' },
+    triggers: { scheduled: { defaultInterval: '24h' } },
+  },
+  [SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID]: {
+    settingsVersion: 1,
+    autonomy: { allowed: ALL_AUTONOMY_LEVELS, default: 'manual' },
+    triggers: { manual: true },
+  },
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: {
+    settingsVersion: 1,
+    autonomy: { allowed: ALL_AUTONOMY_LEVELS, default: 'manual' },
+    triggers: { manual: true, scheduled: { defaultInterval: '2h' } },
+  },
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID]: {
+    settingsVersion: 1,
+    autonomy: { allowed: ALL_AUTONOMY_LEVELS, default: 'manual' },
+    triggers: { manual: true },
+  },
 };
+
+const isAllowedAutonomy = (level: AutonomyLevel, allowed: readonly AutonomyLevel[]): boolean =>
+  allowed.includes(level);
+
+const allowedTriggersFrom = (triggers: WorkerTriggers): Array<'manual' | 'scheduled'> => [
+  ...(triggers.manual ? (['manual'] as const) : []),
+  ...(triggers.scheduled ? (['scheduled'] as const) : []),
+];
 
 /**
  * Reads the interval back off parsed template values. Needed because the values type is a union
@@ -51,13 +97,17 @@ const WORKER_SCHEDULE_DEFAULTS: Partial<Record<RegisteredWorkerId, string>> = {
 const readScheduleInterval = (values: WorkerTemplateValues): string | undefined =>
   typeof values.scheduleInterval === 'string' ? values.scheduleInterval : undefined;
 
+const readExtras = (values: WorkerTemplateValues): Record<string, unknown> | undefined =>
+  isPlainObject(values.extras) ? values.extras : undefined;
+
 const parseWorkerValues = (
   workerId: RegisteredWorkerId,
   raw: Record<string, unknown>
-): WorkerTemplateValues => {
-  const currentVersion = WORKER_SETTINGS_VERSIONS[workerId];
+): { values: WorkerTemplateValues; autonomyClamped: boolean } => {
+  const profile = WORKER_SETTINGS_PROFILES[workerId];
+  const extrasModule = workerExtrasById[workerId];
   const { settingsVersion, autonomyLevel, scheduleInterval } = raw;
-  if (settingsVersion !== undefined && settingsVersion !== currentVersion) {
+  if (settingsVersion !== undefined && settingsVersion !== profile.settingsVersion) {
     throw new Error(
       `Unsupported settings version for AlertZero worker "${workerId}": ${String(settingsVersion)}`
     );
@@ -67,64 +117,98 @@ const parseWorkerValues = (
     throw new Error(`AlertZero worker "${workerId}" settings contain an invalid autonomy level`);
   }
 
-  const scheduleDefault = WORKER_SCHEDULE_DEFAULTS[workerId];
-  if (scheduleDefault === undefined) {
-    return {
-      settingsVersion: currentVersion,
-      autonomyLevel: parsedAutonomyLevel.data,
-    };
-  }
+  const autonomyClamped = !isAllowedAutonomy(parsedAutonomyLevel.data, profile.autonomy.allowed);
+  const resolvedAutonomy = autonomyClamped ? profile.autonomy.default : parsedAutonomyLevel.data;
 
-  // Absent means the install predates the setting, so it takes the default.
-  return {
-    settingsVersion: currentVersion,
-    autonomyLevel: parsedAutonomyLevel.data,
-    scheduleInterval: scheduleInterval ?? scheduleDefault,
+  const values: WorkerTemplateValues = {
+    settingsVersion: profile.settingsVersion,
+    autonomyLevel: resolvedAutonomy,
+    ...(profile.triggers.scheduled === undefined
+      ? {}
+      : {
+          scheduleInterval: scheduleInterval ?? profile.triggers.scheduled.defaultInterval,
+        }),
+    ...(extrasModule === undefined ? {} : { extras: extrasModule.parse(raw.extras) }),
   };
+
+  return { values, autonomyClamped };
 };
 
 export const createWorkerSettingsRegistration = (
   workerId: RegisteredWorkerId
-): WorkerSettingsRegistration => ({
-  createDefaultValues: (): WorkerTemplateValues => {
-    const scheduleDefault = WORKER_SCHEDULE_DEFAULTS[workerId];
-    return {
-      settingsVersion: WORKER_SETTINGS_VERSIONS[workerId],
-      autonomyLevel: 'manual',
-      ...(scheduleDefault === undefined ? {} : { scheduleInterval: scheduleDefault }),
-    };
-  },
-  migrate: (raw: Record<string, unknown>) => {
-    const values = parseWorkerValues(workerId, raw);
-    return {
-      values,
-      migrated:
-        raw.settingsVersion !== WORKER_SETTINGS_VERSIONS[workerId] ||
-        Object.keys(raw).some((key) => !Object.hasOwn(values, key)),
-    };
-  },
-  applyPatch: (raw, patch) => {
-    const values = parseWorkerValues(workerId, raw);
-    if (patch.scheduleInterval != null && WORKER_SCHEDULE_DEFAULTS[workerId] === undefined) {
-      return { rejected: 'a schedule interval' };
-    }
-    return {
-      values: {
-        ...values,
-        autonomyLevel: patch.autonomyLevel ?? values.autonomyLevel,
-        ...(patch.scheduleInterval == null ? {} : { scheduleInterval: patch.scheduleInterval }),
-      },
-    };
-  },
-  toSettings: (raw): WorkerSettings => {
-    const values = parseWorkerValues(workerId, raw);
-    const scheduleInterval = readScheduleInterval(values);
-    return {
-      workerId,
-      autonomy: values.autonomyLevel,
-      // Spread rather than assign undefined: the registry test asserts the projection's keys
-      // survive WorkerSettings.parse unchanged.
-      ...(scheduleInterval === undefined ? {} : { scheduleInterval }),
-    };
-  },
-});
+): WorkerSettingsRegistration => {
+  const profile = WORKER_SETTINGS_PROFILES[workerId];
+  const extrasModule = workerExtrasById[workerId];
+
+  return {
+    createDefaultValues: (): WorkerTemplateValues => ({
+      settingsVersion: profile.settingsVersion,
+      autonomyLevel: profile.autonomy.default,
+      ...(profile.triggers.scheduled === undefined
+        ? {}
+        : { scheduleInterval: profile.triggers.scheduled.defaultInterval }),
+      ...(extrasModule === undefined ? {} : { extras: extrasModule.createDefaults() }),
+    }),
+    migrate: (raw: Record<string, unknown>) => {
+      const { values, autonomyClamped } = parseWorkerValues(workerId, raw);
+      return {
+        values,
+        migrated:
+          autonomyClamped ||
+          raw.settingsVersion !== profile.settingsVersion ||
+          Object.keys(raw).some((key) => !Object.hasOwn(values, key)),
+      };
+    },
+    applyPatch: (raw, patch) => {
+      const { values } = parseWorkerValues(workerId, raw);
+      if (patch.scheduleInterval != null && profile.triggers.scheduled === undefined) {
+        return { rejected: 'a schedule interval' };
+      }
+      if (patch.extras != null && extrasModule === undefined) {
+        return { rejected: 'worker-specific extras' };
+      }
+      if (
+        patch.autonomyLevel != null &&
+        !isAllowedAutonomy(patch.autonomyLevel, profile.autonomy.allowed)
+      ) {
+        return { rejected: 'an autonomy level this Worker does not offer' };
+      }
+
+      let extras = readExtras(values);
+      if (patch.extras != null && extrasModule !== undefined) {
+        const applied = extrasModule.applyPatch(
+          extras ?? extrasModule.createDefaults(),
+          patch.extras
+        );
+        if ('rejected' in applied) {
+          return applied;
+        }
+        extras = applied.extras;
+      }
+
+      return {
+        values: {
+          ...values,
+          autonomyLevel: patch.autonomyLevel ?? values.autonomyLevel,
+          ...(patch.scheduleInterval == null ? {} : { scheduleInterval: patch.scheduleInterval }),
+          ...(extras === undefined ? {} : { extras }),
+        },
+      };
+    },
+    toSettings: (raw): WorkerSettings => {
+      const { values } = parseWorkerValues(workerId, raw);
+      const scheduleInterval = readScheduleInterval(values);
+      const extras = readExtras(values);
+      return {
+        workerId,
+        autonomy: values.autonomyLevel,
+        allowedAutonomyLevels: [...profile.autonomy.allowed],
+        allowedTriggers: allowedTriggersFrom(profile.triggers),
+        // Spread rather than assign undefined: the registry test asserts the projection's keys
+        // survive WorkerSettings.parse unchanged.
+        ...(scheduleInterval === undefined ? {} : { scheduleInterval }),
+        ...(extras === undefined ? {} : { extras: extras as WorkerSettingsExtras }),
+      };
+    },
+  };
+};

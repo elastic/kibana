@@ -13,75 +13,18 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiSpacer,
-  EuiSwitch,
   EuiText,
 } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
-import type { Worker } from '@kbn/alertzero-common';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useWatch } from '../../hooks/use_watches_api';
-import { useUpdateWorker, useWorkers } from '../../hooks/use_workers_api';
-import { AutonomySlider } from './components/autonomy_slider';
-import { ScheduleIntervalField } from './components/schedule_interval_field';
+import { useWorkers } from '../../hooks/use_workers_api';
 import { SettingsSection } from './components/settings_section';
-import { WorkerSkillsTable } from './components/worker_skills_table';
 import { WatchesSectionLayout } from './components/watches_section_layout';
+import { WorkerSettingsCard } from './components/worker_settings_card';
 import * as i18n from './translations';
 import * as settingsI18n from './settings_translations';
-import { workerName } from './workers/translations';
-
-const WorkerSettingsCard: React.FC<{ worker: Worker }> = ({ worker }) => {
-  const { mutate: updateWorker } = useUpdateWorker();
-  const settingsLocked = worker.state === 'unavailable';
-
-  return (
-    <SettingsSection
-      title={workerName(worker.id, worker.name)}
-      subtitle={
-        settingsLocked
-          ? settingsI18n.WORKER_SETTINGS_UNAVAILABLE
-          : settingsI18n.WORKER_SECTION_SUBTITLE
-      }
-      data-test-subj={`alertZeroWatchWorkerSection-${worker.id}`}
-    >
-      <EuiSwitch
-        label={settingsI18n.ENABLED_SWITCH_LABEL}
-        checked={worker.enabled}
-        disabled={settingsLocked}
-        onChange={(event) =>
-          updateWorker({ workerId: worker.id, patch: { enabled: event.target.checked } })
-        }
-        data-test-subj={`alertZeroWorkerEnabledSwitch-${worker.id}`}
-      />
-      <EuiSpacer size="m" />
-      <AutonomySlider
-        current={worker.settings.autonomy}
-        isDisabled={settingsLocked}
-        onChange={(autonomyLevel) =>
-          updateWorker({ workerId: worker.id, patch: { autonomyLevel } })
-        }
-      />
-      {/* Only schedule-driven Workers project an interval; the others are alert- or
-          event-triggered and own no schedule to configure. */}
-      {worker.settings.scheduleInterval != null ? (
-        <>
-          <EuiSpacer size="m" />
-          <ScheduleIntervalField
-            current={worker.settings.scheduleInterval}
-            isDisabled={settingsLocked}
-            onChange={(scheduleInterval) =>
-              updateWorker({ workerId: worker.id, patch: { scheduleInterval } })
-            }
-          />
-        </>
-      ) : null}
-      <EuiSpacer size="m" />
-      <WorkerSkillsTable skills={worker.skills} />
-    </SettingsSection>
-  );
-};
 
 export const WatchDetailPage: React.FC = () => {
   const history = useHistory();

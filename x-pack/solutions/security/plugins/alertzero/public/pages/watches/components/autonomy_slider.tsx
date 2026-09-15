@@ -13,22 +13,22 @@ import * as i18n from '../settings_translations';
 
 interface AutonomySliderProps {
   current: WatchAutonomyLevel;
+  /** Subset of the shared scale this Worker offers. Defaults to all three levels. */
+  levels?: readonly WatchAutonomyLevel[];
   isDisabled?: boolean;
   onChange: (level: WatchAutonomyLevel) => void;
 }
 
-const levelFromRangeValue = (raw: string): WatchAutonomyLevel | undefined =>
-  WATCH_AUTONOMY_LEVELS[Number(raw)];
-
 /**
- * Slider over the shared autonomy scale. One scale for every watch by design — only the selected
- * level is per-watch. See https://github.com/elastic/security-team/issues/18718.
+ * Slider over the shared autonomy scale. Meaning is global (D15); availability is per-Worker
+ * via `levels`. See https://github.com/elastic/security-team/issues/18718.
  *
  * EuiRange fires onChange per step while dragging. Persist on pointer release (and immediately for
  * keyboard / tick clicks) so a drag from manual to supervised is one workflow rewrite, not two.
  */
 export const AutonomySlider: React.FC<AutonomySliderProps> = ({
   current,
+  levels = WATCH_AUTONOMY_LEVELS,
   isDisabled,
   onChange,
 }) => {
@@ -70,9 +70,8 @@ export const AutonomySlider: React.FC<AutonomySliderProps> = ({
 
   const onRangeChange = useCallback<NonNullable<EuiRangeProps['onChange']>>(
     (event) => {
-      const nextLevel = levelFromRangeValue(
-        (event.currentTarget as HTMLInputElement | HTMLButtonElement).value
-      );
+      const nextLevel =
+        levels[Number((event.currentTarget as HTMLInputElement | HTMLButtonElement).value)];
       if (!nextLevel) {
         return;
       }
@@ -82,7 +81,7 @@ export const AutonomySlider: React.FC<AutonomySliderProps> = ({
         persist(nextLevel);
       }
     },
-    [persist]
+    [levels, persist]
   );
 
   const onPointerDown = useCallback(() => {
@@ -91,21 +90,21 @@ export const AutonomySlider: React.FC<AutonomySliderProps> = ({
 
   const ticks = useMemo(
     () =>
-      WATCH_AUTONOMY_LEVELS.map((level, index) => ({
+      levels.map((level, index) => ({
         value: index,
         label: i18n.autonomyLevelName(level),
       })),
-    []
+    [levels]
   );
 
-  const currentIndex = Math.max(0, WATCH_AUTONOMY_LEVELS.indexOf(draft));
+  const currentIndex = Math.max(0, levels.indexOf(draft));
   const description = i18n.AUTONOMY_LEVEL_DESCRIPTIONS[draft];
 
   return (
     <>
       <EuiRange
         min={0}
-        max={WATCH_AUTONOMY_LEVELS.length - 1}
+        max={levels.length - 1}
         step={1}
         value={currentIndex}
         onChange={onRangeChange}
