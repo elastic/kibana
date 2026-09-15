@@ -49,12 +49,14 @@ interface GetTestRunTooltipContentProps {
   canRunWorkflow: boolean;
   isExecutionsTab: boolean;
   isSaving?: boolean;
+  hasWorkflowAccess?: boolean;
 }
 export function getTestRunTooltipContent({
   isValid,
   canRunWorkflow,
   isExecutionsTab,
   isSaving = false,
+  hasWorkflowAccess = true,
 }: GetTestRunTooltipContentProps) {
   if (isExecutionsTab) {
     return i18n.translate('workflows.actionButtons.runWorkflow.executionsTab', {
@@ -73,6 +75,11 @@ export function getTestRunTooltipContent({
   }
   if (!canRunWorkflow) {
     return runWorkflowExecutePrivilegeRequiredTooltip;
+  }
+  if (!hasWorkflowAccess) {
+    return i18n.translate('workflows.actionButtons.runWorkflow.accessRequired', {
+      defaultMessage: 'You need Executor or Editor access to run this workflow.',
+    });
   }
   return null;
 }

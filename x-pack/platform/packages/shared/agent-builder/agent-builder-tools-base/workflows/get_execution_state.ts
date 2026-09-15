@@ -6,6 +6,7 @@
  */
 
 import type { JsonValue } from '@kbn/utility-types';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { WaitForApprovalStep, WaitForInputStep, WorkflowExecutionDto } from '@kbn/workflows';
 import {
@@ -106,13 +107,16 @@ export const getExecutionState = async ({
   executionId,
   spaceId,
   workflowApi,
+  request,
 }: {
   executionId: string;
   spaceId: string;
   workflowApi: WorkflowApi;
+  request: KibanaRequest;
 }): Promise<WorkflowExecutionState | null> => {
   const execution = await workflowApi.getWorkflowExecution(executionId, spaceId, {
     includeOutput: true,
+    request,
   });
   if (!execution) {
     return null;

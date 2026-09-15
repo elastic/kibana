@@ -73,7 +73,7 @@ export const resumeWorkflowExecutionTool = ({
       // Failure here is non-fatal & the resume already happened so the LLM must not retry it
       let execution: Awaited<ReturnType<typeof getExecutionState>>;
       try {
-        execution = await getExecutionState({ executionId, spaceId, workflowApi });
+        execution = await getExecutionState({ executionId, spaceId, workflowApi, request });
       } catch {
         execution = null;
       }

@@ -95,6 +95,7 @@ export interface SmlIndexer {
     esClient: ElasticsearchClient;
     ingestionMethod?: SmlIngestionMethod;
     spaces?: string[];
+    strict?: boolean;
   }) => Promise<void>;
 }
 
@@ -278,6 +279,7 @@ class SmlIndexerImpl implements SmlIndexer {
       esClient,
       ...(spaces && spaces.length > 0 ? { spaces } : {}),
       ...(scope !== 'all' ? { ingestionMethod: scope } : {}),
+      ...(params.strict !== undefined ? { strict: params.strict } : {}),
     });
   }
 
@@ -481,11 +483,13 @@ class SmlIndexerImpl implements SmlIndexer {
     esClient,
     ingestionMethod,
     spaces,
+    strict = false,
   }: {
     originUri: string;
     esClient: ElasticsearchClient;
     ingestionMethod?: SmlIngestionMethod;
     spaces?: string[];
+    strict?: boolean;
   }): Promise<void> {
     const filter: Array<Record<string, unknown>> = [
       { term: { 'attributes.origin.uri': originUri } },
@@ -515,8 +519,11 @@ class SmlIndexerImpl implements SmlIndexer {
         ignore_unavailable: true,
         allow_no_indices: true,
         query: { bool: { filter } },
-        refresh: false,
+        refresh: strict,
       });
+      if (strict && (result.timed_out || result.failures?.length || result.version_conflicts)) {
+        throw new Error(`SML deletion was incomplete for origin '${originUri}'`);
+      }
       if (result.deleted && result.deleted > 0) {
         this.logger.info(
           `SML indexer: deleted ${result.deleted} existing ${label} for origin '${originUri}'`
@@ -529,6 +536,7 @@ class SmlIndexerImpl implements SmlIndexer {
         );
         return;
       }
+      if (strict) throw error;
       this.logger.warn(
         `SML indexer: failed to delete ${label} for origin '${originUri}': ${
           (error as Error).message

@@ -17,6 +17,10 @@ project:
   owner: '@elastic/workflows-eng'
   sourceRoot: src/platform/plugins/shared/workflows_management
 dependsOn:
+  - '@kbn/security-plugin'
+  - '@kbn/ui-callout'
+  - '@kbn/entity-access-control-ui'
+  - '@kbn/entity-access-control'
   - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/core'
   - '@kbn/esql-language'
@@ -84,6 +88,7 @@ dependsOn:
   - '@kbn/core-http-router-server-mocks'
   - '@kbn/connector-schemas'
   - '@kbn/react-query'
+  - '@kbn/react-hooks'
   - '@kbn/core-http-browser'
   - '@kbn/core-http-server'
   - '@kbn/test-jest-helpers'

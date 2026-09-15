@@ -10,13 +10,13 @@
 import { schema } from '@kbn/config-schema';
 
 export const idParamSchema = schema.object({
-  id: schema.string({ meta: { description: 'Workflow ID' } }),
+  id: schema.string({ maxLength: 512, meta: { description: 'Workflow ID' } }),
 });
 
 export const executionIdParamSchema = schema.object({
-  executionId: schema.string({ meta: { description: 'Workflow execution ID' } }),
+  executionId: schema.string({ maxLength: 512, meta: { description: 'Workflow execution ID' } }),
 });
 
 export const workflowIdParamSchema = schema.object({
-  workflowId: schema.string({ meta: { description: 'Workflow ID' } }),
+  workflowId: schema.string({ maxLength: 512, meta: { description: 'Workflow ID' } }),
 });

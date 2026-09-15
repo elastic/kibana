@@ -583,6 +583,67 @@ describe('createSmlIndexer', () => {
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
+    it('strict deletion removes every ingestion method and waits for refresh', async () => {
+      const esClient = createMockEsClient();
+      const indexer = createSmlIndexer({
+        registry: createMockRegistry(),
+        logger: createMockLogger(),
+      });
+      await indexer.deleteAttachment({
+        ...createIndexerParams({ esClient }),
+        ingestionMethod: 'all',
+        strict: true,
+      });
+      expect(esClient.deleteByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({ refresh: true })
+      );
+      expect(JSON.stringify(esClient.deleteByQuery.mock.calls[0][0])).not.toContain(
+        'ingestion_method'
+      );
+    });
+
+    it('strict deletion surfaces Elasticsearch errors', async () => {
+      const esClient = createMockEsClient();
+      esClient.deleteByQuery.mockRejectedValue(new Error('delete failed'));
+      const indexer = createSmlIndexer({
+        registry: createMockRegistry(),
+        logger: createMockLogger(),
+      });
+      await expect(
+        indexer.deleteAttachment({ ...createIndexerParams({ esClient }), strict: true })
+      ).rejects.toThrow('delete failed');
+    });
+
+    it.each([
+      { timed_out: true },
+      { version_conflicts: 1 },
+      { failures: [{ cause: { type: 'error' }, id: 'entry', index: 'sml', status: 500 }] },
+    ])('strict deletion rejects incomplete results: %j', async (failure) => {
+      const esClient = createMockEsClient();
+      esClient.deleteByQuery.mockResolvedValue({
+        took: 0,
+        timed_out: false,
+        total: 1,
+        deleted: 0,
+        batches: 1,
+        version_conflicts: 0,
+        noops: 0,
+        retries: { bulk: 0, search: 0 },
+        throttled_millis: 0,
+        requests_per_second: -1,
+        throttled_until_millis: 0,
+        failures: [],
+        ...failure,
+      });
+      const indexer = createSmlIndexer({
+        registry: createMockRegistry(),
+        logger: createMockLogger(),
+      });
+      await expect(
+        indexer.deleteAttachment({ ...createIndexerParams({ esClient }), strict: true })
+      ).rejects.toThrow('SML deletion was incomplete');
+    });
+
     it('deleteEntry warns on non-404 errors', async () => {
       const error500 = Object.assign(new Error('internal error'), { statusCode: 500 });
       const esClient = createMockEsClient();
