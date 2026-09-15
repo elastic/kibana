@@ -1,5 +1,7 @@
 env:
   KBN_ES_SNAPSHOT_USE_CACHED: 'true'
+  # POC: in-VM spot preemption detection for FTR jobs (see preemption_watcher.sh)
+  FTR_PREEMPTION_WATCH: 'true'
 
 steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
