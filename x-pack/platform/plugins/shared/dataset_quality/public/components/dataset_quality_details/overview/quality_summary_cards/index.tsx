@@ -43,10 +43,8 @@ const failedDocTooltip = (
 // eslint-disable-next-line import/no-default-export
 export default function QualitySummaryCards({
   selectedCard,
-  setSelectedCard,
 }: {
   selectedCard: 'degraded' | 'failed';
-  setSelectedCard: React.Dispatch<React.SetStateAction<'degraded' | 'failed'>>;
 }) {
   const {
     totalDocsCount,
@@ -105,7 +103,6 @@ export default function QualitySummaryCards({
           }
           onClick={() => {
             handleDocsTrendChartChange('degraded');
-            setSelectedCard('degraded');
           }}
           isLoading={dataStreamSettingsLoading || dataStreamDetailsLoading}
         />
@@ -147,7 +144,6 @@ export default function QualitySummaryCards({
             }
             onClick={() => {
               handleDocsTrendChartChange('failed');
-              setSelectedCard('failed');
             }}
           />
         ) : (
