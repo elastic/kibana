@@ -90,7 +90,9 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataItemClient<
   }
 
   /** Retrieves the stats for the integrations of all the migration rules */
-  public async getAllIntegrationsStats(): Promise<RuleMigrationAllIntegrationsStats> {
+  public async getAllIntegrationsStats(
+    query?: QueryDslQueryContainer
+  ): Promise<RuleMigrationAllIntegrationsStats> {
     const index = await this.getIndexName();
     const aggregations: { integrationIds: AggregationsAggregationContainer } = {
       integrationIds: {
@@ -102,7 +104,7 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataItemClient<
       },
     };
     const result = await this.esClient
-      .search({ index, aggregations, _source: false })
+      .search({ index, size: 0, ...(query ? { query } : {}), aggregations, _source: false })
       .catch((error) => {
         this.logger.error(`Error getting all integrations stats: ${error.message}`);
         throw error;
@@ -114,6 +116,14 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataItemClient<
       id: `${bucket.key}`,
       total_rules: bucket.doc_count,
     }));
+  }
+
+  /** Retrieves the integrations stats for the installable rules of a single migration */
+  public async getIntegrationStats(
+    migrationId: string,
+    filters: RuleMigrationFilters = {}
+  ): Promise<RuleMigrationAllIntegrationsStats> {
+    return this.getAllIntegrationsStats(this.getFilterQuery(migrationId, filters));
   }
 
   protected getFilterQuery(

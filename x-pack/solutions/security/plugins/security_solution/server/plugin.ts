@@ -30,6 +30,7 @@ import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library'
 import { registerCustomYaraSignaturesRoutes } from './endpoint/routes/custom_yara_signatures';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
 import { registerTools } from './agent_builder/tools/register_tools';
+import { createSiemMigrationContextFactory } from './lib/siem_migrations/get_siem_migration_context';
 import { registerSkills } from './agent_builder/skills/register_skills';
 import { migrateEndpointDataToSupportSpaces } from './endpoint/migrations/space_awareness_migration';
 import { SavedObjectsClientFactory } from './endpoint/services/saved_objects';
@@ -299,6 +300,12 @@ export class Plugin implements ISecuritySolutionPlugin {
     const experimentalFeatures = this.config.experimentalFeatures;
     const endpointAppContextService = this.endpointAppContextService;
 
+    const getSiemMigrationContext = createSiemMigrationContextFactory({
+      core,
+      siemMigrationsService: this.siemMigrationsService,
+      experimentalFeatures,
+    });
+
     registerTools(
       agentBuilder,
       core,
@@ -316,9 +323,12 @@ export class Plugin implements ISecuritySolutionPlugin {
         logger,
         isServerless: this.isServerless,
       },
-      this.isServerless,
-      this.pluginContext.env.packageInfo.version,
-      plugins.encryptedSavedObjects?.canEncrypt === true
+      getSiemMigrationContext,
+      {
+        isServerless: this.isServerless,
+        kibanaVersion: this.pluginContext.env.packageInfo.version,
+        hasEncryptionKey: plugins.encryptedSavedObjects?.canEncrypt === true,
+      }
     );
     registerAttachments(agentBuilder, core, logger, experimentalFeatures).catch((error) => {
       this.logger.error(`Error registering security attachments: ${error}`);
