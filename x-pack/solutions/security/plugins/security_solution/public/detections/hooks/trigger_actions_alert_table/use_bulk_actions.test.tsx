@@ -15,6 +15,7 @@ import * as useBulkAlertTagsItemsModule from '../../../common/components/toolbar
 import * as useAddBulkToTimelineActionModule from '../../components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 import * as useBulkAlertActionItemsModule from './use_alert_actions';
 import * as useBulkRunAlertWorkflowPanelModule from './use_bulk_run_alert_workflow_panel';
+import { useSignalIndex } from '../../containers/detection_engine/alerts/use_signal_index';
 import type { TableId } from '@kbn/securitysolution-data-table';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
@@ -27,6 +28,7 @@ jest.mock('../../../common/components/toolbar/bulk_actions/use_bulk_alert_tags_i
 jest.mock('../../components/alerts_table/timeline_actions/use_add_bulk_to_timeline');
 jest.mock('./use_alert_actions');
 jest.mock('./use_bulk_run_alert_workflow_panel');
+jest.mock('../../containers/detection_engine/alerts/use_signal_index');
 
 describe('useBulkActionsByTableType', () => {
   const mockRefresh = jest.fn();
@@ -71,6 +73,10 @@ describe('useBulkActionsByTableType', () => {
     (useBulkRunAlertWorkflowPanelModule.useBulkRunAlertWorkflowPanel as jest.Mock).mockReturnValue({
       runWorkflowItems: [{ key: 'bulk-run-alert-workflow' }],
       runWorkflowPanels: [{ id: 'run-workflow-panel' }],
+    });
+
+    (useSignalIndex as jest.Mock).mockReturnValue({
+      signalIndexName: '.alerts-security.alerts-default',
     });
   });
 
