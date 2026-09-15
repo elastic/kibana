@@ -55,9 +55,12 @@ const getArchInfo = (node) => {
     const chain = getMemberChain(node);
     if (chain[0] === 'tags') {
       // Known tags.* shapes — none are unknown
-      if (chain[1] === 'deploymentAgnostic') return { hasStateful: true, hasServerless: true, hasUnknown: false };
-      if (chain[1] === 'stateful') return { hasStateful: true, hasServerless: false, hasUnknown: false };
-      if (chain[1] === 'serverless') return { hasStateful: false, hasServerless: true, hasUnknown: false };
+      if (chain[1] === 'deploymentAgnostic')
+        return { hasStateful: true, hasServerless: true, hasUnknown: false };
+      if (chain[1] === 'stateful')
+        return { hasStateful: true, hasServerless: false, hasUnknown: false };
+      if (chain[1] === 'serverless')
+        return { hasStateful: false, hasServerless: true, hasUnknown: false };
       // tags.performance and future keys → known neutral
       return { hasStateful: false, hasServerless: false, hasUnknown: false };
     }
