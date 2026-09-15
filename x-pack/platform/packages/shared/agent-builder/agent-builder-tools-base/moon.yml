@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/workflows'
   - '@kbn/workflows-management-plugin'
   - '@kbn/core-http-server-mocks'
+  - '@kbn/core'
 tags:
   - shared-server
   - package
