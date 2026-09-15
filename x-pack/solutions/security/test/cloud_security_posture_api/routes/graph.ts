@@ -774,6 +774,21 @@ export default function (providerContext: FtrProviderContext) {
               })
             );
           }
+
+          // Entities absent from the entity store have no risk score or criticality to
+          // report, so neither key is emitted at all — on the node or under documentsData.
+          // These runs are in the default space, where the entity store archive is not
+          // loaded, so every entity node here is unenriched.
+          if (!isLabelNode(node)) {
+            expect(node).to.not.have.property('riskScore');
+            expect(node).to.not.have.property('assetCriticality');
+            (node.documentsData ?? []).forEach((doc) => {
+              if (doc.type === 'entity') {
+                expect(doc.entity).to.not.have.property('riskScore');
+                expect(doc.entity).to.not.have.property('assetCriticality');
+              }
+            });
+          }
         });
 
         response.body.edges.forEach((edge: EdgeDataModel) => {
@@ -1967,6 +1982,8 @@ export default function (providerContext: FtrProviderContext) {
                     sub_type: 'GCP Compute Instance',
                     availableInEntityStore: true,
                     engine_type: 'host',
+                    riskScore: 82,
+                    assetCriticality: 'high_impact',
                     sourceFields: expectExpect.objectContaining({
                       'host.id': 'host-instance-1',
                     }),
@@ -1983,12 +2000,27 @@ export default function (providerContext: FtrProviderContext) {
                     sub_type: 'GCP Compute Instance',
                     availableInEntityStore: true,
                     engine_type: 'host',
+                    riskScore: 34,
+                    assetCriticality: 'low_impact',
                     sourceFields: expectExpect.objectContaining({
                       'host.id': 'host-instance-2',
                     }),
                   }),
                 })
               );
+
+              // Grouped node: the two hosts merge, so the node reports the spread across both
+              // (82 and 34) and a distribution with one entry per level, most severe first —
+              // not either host's own value.
+              expect(targetNode.riskScore).to.eql({ min: 34, max: 82 });
+              expect(targetNode.assetCriticality).to.eql([
+                { level: 'high_impact', count: 1 },
+                { level: 'low_impact', count: 1 },
+              ]);
+
+              // The single-entity actor still collapses to one value.
+              expect(actorNode.riskScore).to.eql({ min: 78, max: 78 });
+              expect(actorNode.assetCriticality).to.eql([{ level: 'high_impact', count: 1 }]);
             });
           });
 
@@ -2031,12 +2063,18 @@ export default function (providerContext: FtrProviderContext) {
                     sub_type: 'GCP IAM User',
                     availableInEntityStore: true,
                     engine_type: 'user',
+                    riskScore: 91,
+                    assetCriticality: 'extreme_impact',
                     sourceFields: expectExpect.objectContaining({
                       'user.id': 'entity-user@example.com',
                     }),
                   }),
                 })
               );
+              // Single-entity node: the range collapses to one value and the criticality
+              // distribution to one entry.
+              expect(actorNode.riskScore).to.eql({ min: 91, max: 91 });
+              expect(actorNode.assetCriticality).to.eql([{ level: 'extreme_impact', count: 1 }]);
 
               const serviceTargetNode = response.body.nodes.find(
                 (node: NodeDataModel) => node.id === 'entity-service-target-1'
@@ -2057,12 +2095,18 @@ export default function (providerContext: FtrProviderContext) {
                     sub_type: 'GCP Compute Instance',
                     availableInEntityStore: true,
                     engine_type: 'generic',
+                    riskScore: 47,
+                    assetCriticality: 'medium_impact',
                     sourceFields: expectExpect.objectContaining({
                       'entity.id': 'entity-service-target-1',
                     }),
                   }),
                 })
               );
+              expect(serviceTargetNode.riskScore).to.eql({ min: 47, max: 47 });
+              expect(serviceTargetNode.assetCriticality).to.eql([
+                { level: 'medium_impact', count: 1 },
+              ]);
 
               const labelNode = response.body.nodes.find(
                 (node: NodeDataModel) => node.shape === 'label'
