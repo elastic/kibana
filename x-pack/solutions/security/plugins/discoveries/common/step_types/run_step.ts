@@ -37,6 +37,17 @@ export const RunStepInputSchema = z.object({
   end: z.string().optional(),
   esql_query: z.string().optional(),
   filter: z.record(z.string(), z.unknown()).optional(),
+  /**
+   * Whether the generated discoveries are returned inline. Defaults to `true`.
+   *
+   * Set `false` when the caller will read the persisted discoveries back from
+   * the Attack Discovery index instead (they are queryable by
+   * `kibana.alert.rule.execution.uuid`, which is this step's `execution_uuid`).
+   * The discoveries dominate this step's output, so omitting them keeps it small
+   * enough to stay in the workflow engine's in-memory step state, which matters
+   * for callers that read the output from a `parallel` branch.
+   */
+  include_attack_discoveries: z.boolean().optional().default(true),
   mode: z.enum(['async', 'sync']).optional().default('sync'),
   size: z.number().int().optional().default(100),
   start: z.string().optional(),
