@@ -14,6 +14,7 @@ import type { StepIoService } from '../../../workflow_context_manager/step_io_se
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
 import { EnterForeachNodeImpl } from '../enter_foreach_node_impl';
+import { ITERATION_STEP_TYPE, iterationStepIdFromIndex } from '../utils';
 
 describe('EnterForeachNodeImpl', () => {
   let node: EnterForeachNode;
@@ -37,7 +38,7 @@ describe('EnterForeachNodeImpl', () => {
     workflowExecutionRuntimeManager = {} as unknown as WorkflowExecutionRuntimeManager;
     workflowExecutionRuntimeManager.navigateToNextNode = jest.fn();
     workflowExecutionRuntimeManager.navigateToNode = jest.fn();
-    workflowExecutionRuntimeManager.enterScope = jest.fn();
+    workflowExecutionRuntimeManager.navigateToSynthetic = jest.fn();
 
     stepExecutionRuntime = {} as unknown as StepExecutionRuntime;
     stepExecutionRuntime.startStep = jest.fn();
@@ -73,7 +74,10 @@ describe('EnterForeachNodeImpl', () => {
     it('should enter the iteration scope', async () => {
       await underTest.run();
 
-      expect(workflowExecutionRuntimeManager.enterScope).toHaveBeenCalledWith('0');
+      expect(workflowExecutionRuntimeManager.navigateToSynthetic).toHaveBeenCalledWith({
+        stepId: iterationStepIdFromIndex(0),
+        stepType: ITERATION_STEP_TYPE,
+      });
     });
 
     describe('when foreach configuration is an array with items', () => {
@@ -93,6 +97,7 @@ describe('EnterForeachNodeImpl', () => {
         await underTest.run();
         expect(stepExecutionRuntime.setInput).toHaveBeenCalledWith({
           foreach: JSON.stringify(['item1', 'item2', 'item3']),
+          items: ['item1', 'item2', 'item3'],
         });
       });
 
@@ -137,6 +142,7 @@ describe('EnterForeachNodeImpl', () => {
 
         expect(stepExecutionRuntime.setInput).toHaveBeenCalledWith({
           foreach: '{{steps.testStep.array}}',
+          items: ['item1', 'item2', 'item3'],
         });
       });
 
@@ -288,6 +294,7 @@ describe('EnterForeachNodeImpl', () => {
         await underTest.run();
         expect(stepExecutionRuntime.setInput).toHaveBeenCalledWith({
           foreach: JSON.stringify(['a', 'b', 'c']),
+          items: ['a', 'b', 'c'],
         });
       });
 
@@ -301,12 +308,12 @@ describe('EnterForeachNodeImpl', () => {
         });
       });
 
-      it('should not call renderValueAccordingToContext or evaluateExpressionInContext', async () => {
+      it('should render templates inside the native array', async () => {
         await underTest.run();
 
         expect(
           stepExecutionRuntime.contextManager.renderValueAccordingToContext
-        ).not.toHaveBeenCalled();
+        ).toHaveBeenCalledWith(['a', 'b', 'c']);
         expect(
           stepExecutionRuntime.contextManager.evaluateExpressionInContext
         ).not.toHaveBeenCalled();
@@ -315,7 +322,10 @@ describe('EnterForeachNodeImpl', () => {
       it('should enter the first iteration scope', async () => {
         await underTest.run();
 
-        expect(workflowExecutionRuntimeManager.enterScope).toHaveBeenCalledWith('0');
+        expect(workflowExecutionRuntimeManager.navigateToSynthetic).toHaveBeenCalledWith({
+          stepId: iterationStepIdFromIndex(0),
+          stepType: ITERATION_STEP_TYPE,
+        });
         expect(workflowExecutionRuntimeManager.navigateToNextNode).toHaveBeenCalled();
       });
     });
@@ -329,6 +339,7 @@ describe('EnterForeachNodeImpl', () => {
         await underTest.run();
         expect(stepExecutionRuntime.setInput).toHaveBeenCalledWith({
           foreach: JSON.stringify([]),
+          items: [],
         });
       });
 
@@ -380,13 +391,16 @@ describe('EnterForeachNodeImpl', () => {
     it('should enter iteration scope', async () => {
       await underTest.run();
 
-      expect(workflowExecutionRuntimeManager.enterScope).toHaveBeenCalledWith('1');
+      expect(workflowExecutionRuntimeManager.navigateToSynthetic).toHaveBeenCalledWith({
+        stepId: iterationStepIdFromIndex(1),
+        stepType: ITERATION_STEP_TYPE,
+      });
     });
 
     it('should enter scope only once', async () => {
       await underTest.run();
 
-      expect(workflowExecutionRuntimeManager.enterScope).toHaveBeenCalledTimes(1);
+      expect(workflowExecutionRuntimeManager.navigateToSynthetic).toHaveBeenCalledTimes(1);
     });
 
     it('should not start step', async () => {

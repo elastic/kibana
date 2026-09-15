@@ -175,12 +175,13 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   private readonly evictedOutputIds = new Set<string>();
   /**
    * Step execution ids that must not be evicted while a loop that references
-   * them is active. A `foreach`/`while` re-evaluates its source expression on
-   * every iteration (see `WorkflowContextManager.buildForeachContext`), so the
-   * referenced output must stay resident for the loop's whole lifetime.
+   * them is active. A `foreach`/`while` evaluates its source expression at
+   * loop entry (and older foreach executions without `input.items` re-evaluate
+   * it in `WorkflowContextManager.buildForeachContext`), so the referenced
+   * output must stay resident for the loop's whole lifetime.
    * Without this, the concurrent persistence/eviction loop can evict the
    * source between an inner step's `prepareForRead` (which saw nothing evicted)
-   * and the synchronous context re-evaluation, producing a blank loop item and
+   * and that read, producing a blank loop item and
    * a corrupt downstream step input. Populated by {@link pinForeachSource} at
    * loop entry (and re-pinned on resume from the scope-walk in
    * {@link computeRehydrationTargets}); cleared by {@link unpinForeachScope}

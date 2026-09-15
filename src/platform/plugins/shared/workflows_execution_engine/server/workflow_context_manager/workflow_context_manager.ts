@@ -632,9 +632,10 @@ export class WorkflowContextManager {
   }
 
   /**
-   * Builds the foreach context by combining the persisted state (index, total)
-   * with items derived by re-evaluating the foreach expression at resolution time.
-   * This avoids storing the entire items array in the step execution state on every iteration.
+   * Builds the foreach context from persisted step state (index, total) and the
+   * list snapshotted on `input.items` at loop entry. Older executions that only
+   * stored the foreach expression re-evaluate it so {{foreach.item}} still
+   * resolves.
    */
   private parseScopeIndex(scopeId: string | undefined): number | undefined {
     if (scopeId == null) return undefined;
@@ -652,17 +653,13 @@ export class WorkflowContextManager {
       indexOverride ?? (typeof foreachState.index === 'number' ? foreachState.index : 0);
     const total = typeof foreachState.total === 'number' ? foreachState.total : 0;
 
-    // Re-evaluate the foreach expression (stored in the step input at entry
-    // time) to derive the full items array and current item without
-    // persisting them in state. Input lives in `StepIoService` (lifecycle
-    // metadata vs IO data are owned separately); a foreach is non-terminal
-    // while iterating, so its input is never evicted by post-flush input
-    // eviction — the service read is safe here.
+    // Prefer the list snapshotted onto input at enter. Re-evaluate the
+    // expression only for older executions that never stored `items`.
     const foreachInput = this.stepIoService.getStepInput(stepExecution.id);
     const foreachExpression = this.extractForeachExpression(foreachInput);
-    const items = foreachExpression
-      ? this.resolveForeachItems(foreachExpression, stepContext)
-      : undefined;
+    const items =
+      this.extractPersistedForeachItems(foreachInput) ??
+      (foreachExpression ? this.resolveForeachItems(foreachExpression, stepContext) : undefined);
 
     const availableItems = items ?? [];
 
@@ -690,6 +687,21 @@ export class WorkflowContextManager {
       return typeof expression === 'string' ? expression : undefined;
     }
     return undefined;
+  }
+
+  /**
+   * Evaluated list snapshotted onto foreach `input.items` at loop entry.
+   * Missing on older executions that only stored the foreach expression.
+   */
+  private extractPersistedForeachItems(
+    input: EsWorkflowStepExecution['input']
+  ): unknown[] | undefined {
+    if (input === null || typeof input !== 'object' || Array.isArray(input)) {
+      return undefined;
+    }
+
+    const { items } = input as { items?: unknown };
+    return Array.isArray(items) ? items : undefined;
   }
 
   /**
