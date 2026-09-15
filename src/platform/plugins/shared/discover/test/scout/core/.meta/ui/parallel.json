@@ -1,5 +1,5 @@
 {
-  "sha1": "6d5807ea403e79f61ac8ac7e4b403dc0a0fd4d7b",
+  "sha1": "57364ec5e6d1d0c5c894fefeab8fe5f8a0fe637f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -496,7 +496,7 @@
     {
       "id": "fe34af9a42f72c8-ee5129ba3bf4fb8",
       "title": "histogram session persists hide/show of the histogram on a saved session",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -510,13 +510,13 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/histogram_session.spec.ts",
         "line": 57,
-        "column": 25
+        "column": 5
       }
     },
     {
       "id": "fe34af9a42f72c8-0f924eaa59f134e",
       "title": "histogram session does not keep a hidden histogram after visiting Dashboard",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -529,14 +529,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/histogram_session.spec.ts",
-        "line": 74,
-        "column": 18
+        "line": 75,
+        "column": 24
       }
     },
     {
       "id": "fe34af9a42f72c8-c22337a0b174568",
       "title": "histogram session reverts breakdown, interval, and visibility on a saved session",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -550,13 +550,13 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/histogram_session.spec.ts",
         "line": 96,
-        "column": 5
+        "column": 25
       }
     },
     {
       "id": "fe34af9a42f72c8-699c0239120cd5d",
       "title": "histogram session persists the chart interval on a saved session",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -570,13 +570,13 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/histogram_session.spec.ts",
         "line": 120,
-        "column": 5
+        "column": 25
       }
     },
     {
       "id": "fe34af9a42f72c8-a45ff8bdeb8c9d0",
       "title": "histogram session clears the chart interval on a saved session",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -590,7 +590,7 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/histogram_session.spec.ts",
         "line": 127,
-        "column": 9
+        "column": 22
       }
     },
     {

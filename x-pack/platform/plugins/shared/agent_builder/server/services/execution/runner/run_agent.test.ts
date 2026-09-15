@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScopedRunnerRunAgentParams } from '@kbn/agent-builder-server';
+import { getAgentFromRunContext, type ScopedRunnerRunAgentParams } from '@kbn/agent-builder-server';
 
 import { RunnerManager } from './runner';
 import { runAgent } from './run_agent';
@@ -71,6 +71,26 @@ describe('runAgent', () => {
 
     expect(agentClient.get).toHaveBeenCalledTimes(1);
     expect(agentClient.get).toHaveBeenCalledWith(params.agentId, { access: 'use' });
+  });
+
+  it('records the agent name on the run context stack', async () => {
+    const createChild = jest.spyOn(runnerManager, 'createChild');
+
+    await runAgent({
+      agentExecutionParams: {
+        agentId: 'test-agent',
+        agentParams: { nextInput: { message: 'bar' } },
+      },
+      parentManager: runnerManager,
+    });
+
+    const childManager = createChild.mock.results[0].value as RunnerManager;
+    expect(getAgentFromRunContext(childManager.context)).toEqual(
+      expect.objectContaining({
+        agentId: 'test-agent',
+        agentName: agent.name,
+      })
+    );
   });
 
   it('calls the agent handler with the expected parameters', async () => {
