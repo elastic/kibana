@@ -133,6 +133,17 @@ export class WorkflowRunFixture {
     });
   }
 
+  public async resumeWorkflowAtScheduledTime() {
+    const resumeTask = this.taskManagerMock.schedule.mock.calls.at(-1)?.[0];
+    if (!resumeTask?.runAt) throw new Error('Expected a scheduled wait deadline');
+    jest.useFakeTimers({ now: new Date(resumeTask.runAt) });
+    try {
+      return await this.resumeWorkflow();
+    } finally {
+      jest.useRealTimers();
+    }
+  }
+
   public resumeWorkflow() {
     return resumeWorkflow({
       workflowRunId: 'fake_workflow_execution_id',
