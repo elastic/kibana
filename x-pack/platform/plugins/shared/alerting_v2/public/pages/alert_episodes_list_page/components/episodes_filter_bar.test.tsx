@@ -16,6 +16,16 @@ import { fetchRulesSearch } from '@kbn/alerting-v2-episodes-ui/apis/fetch_rules_
 import { TestProviders } from '../../../test_utils/test_providers';
 import { EpisodesFilterBar } from './episodes_filter_bar';
 
+jest.mock('./episodes_kql_input', () => ({
+  EpisodesKqlInput: ({
+    value,
+    'data-test-subj': dataTestSubj,
+  }: {
+    value: string;
+    'data-test-subj'?: string;
+  }) => <input data-test-subj={dataTestSubj} defaultValue={value} />,
+}));
+
 jest.mock('react-use/lib/useDebounce', () => jest.fn());
 
 const mockUseEuiContainerQuery = jest.fn();

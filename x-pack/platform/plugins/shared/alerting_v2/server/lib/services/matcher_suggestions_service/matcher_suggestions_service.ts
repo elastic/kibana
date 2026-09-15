@@ -9,7 +9,10 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import { flattenObject } from '@kbn/object-utils';
 import { inject, injectable } from 'inversify';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
-import { alertEpisodeStatus } from '../../../resources/datastreams/alert_events';
+import {
+  alertEpisodeStatus,
+  alertEventSeverity,
+} from '../../../resources/datastreams/alert_events';
 import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../../saved_objects';
 import { EsServiceScopedToken } from '../es_service/tokens';
 import { RuleSavedObjectsClientToken } from '../rules_saved_object_service/tokens';
@@ -21,6 +24,14 @@ const DATA_FIELD_SAMPLE_SIZE = 1000;
 const ALERT_EVENTS_LOOKBACK = 'now-24h';
 
 const EPISODE_STATUS_VALUES = Object.values(alertEpisodeStatus);
+const SEVERITY_VALUES = Object.values(alertEventSeverity);
+
+// Actual ES index field names used by KQL() in the episodes query. These differ
+// from the matcher context field names (e.g. `episode_status` vs `episode.status`).
+const EPISODE_INDEX_FIELD_STATIC_VALUES: Readonly<Record<string, readonly string[]>> = {
+  'episode.status': EPISODE_STATUS_VALUES,
+  severity: SEVERITY_VALUES,
+};
 
 enum MatcherField {
   EpisodeStatus = 'episode_status',
@@ -69,6 +80,11 @@ export class MatcherSuggestionsService {
   ) {}
 
   async getSuggestions(field: string, query: string): Promise<string[]> {
+    const episodeIndexStaticValues = EPISODE_INDEX_FIELD_STATIC_VALUES[field];
+    if (episodeIndexStaticValues) {
+      return this.getStaticSuggestions(episodeIndexStaticValues as string[], query);
+    }
+
     const soFieldConfig = RULE_SO_FIELD_CONFIG[field as MatcherField];
     if (soFieldConfig) {
       return this.getRuleSoFieldSuggestions(
