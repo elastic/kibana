@@ -245,6 +245,7 @@ export async function get(
         return {
           ...caseConfigureWithoutConnector,
           connector,
+          extractObservables: caseConfigureWithoutConnector.extractObservables ?? true,
           mappings: mappings != null ? mappings.mappings : [],
           version: configuration.version ?? '',
           error,
@@ -420,10 +421,15 @@ export async function update(
       originalConfiguration: configuration,
     });
 
-    const res = {
+    const merged = {
       ...configuration.attributes,
       ...patch.attributes,
+    };
+
+    const res = {
+      ...merged,
       connector: patch.attributes.connector ?? configuration.attributes.connector,
+      extractObservables: merged.extractObservables ?? true,
       mappings,
       version: patch.version ?? '',
       error,
@@ -567,6 +573,7 @@ export async function create(
         updated_at: null,
         updated_by: null,
         observableTypes: validatedConfigurationRequest.observableTypes ?? [],
+        extractObservables: validatedConfigurationRequest.extractObservables ?? true,
       },
       id: savedObjectID,
     });
