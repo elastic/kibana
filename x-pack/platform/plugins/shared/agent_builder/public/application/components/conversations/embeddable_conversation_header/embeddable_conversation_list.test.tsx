@@ -81,6 +81,8 @@ describe('EmbeddableConversationList', () => {
       removeAllErrors,
     } as unknown as ReturnType<typeof useStreamingContext>);
 
+    // `searchValue` defaults to '' in these tests, so `isSearching` is false and the
+    // list conversations below are what gets rendered.
     mockUseConversationList.mockReturnValue({
       conversations: [
         {
@@ -97,6 +99,10 @@ describe('EmbeddableConversationList', () => {
         },
       ],
       isLoading: false,
+      isSearching: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      isFetchingNextPage: false,
     } as unknown as ReturnType<typeof useConversationList>);
   });
 

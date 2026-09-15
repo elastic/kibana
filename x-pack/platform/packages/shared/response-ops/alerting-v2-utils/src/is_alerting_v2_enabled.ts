@@ -46,6 +46,13 @@ export const hasAlertingV2Capability = (
 };
 
 /**
+ * Returns whether the current user has read (or write, since `all` implies `read`) access to
+ * Alerting v2 rules.
+ */
+export const hasAlertingV2RulesReadCapability = (core: CoreStart): boolean =>
+  hasAlertingV2Capability(core, 'rules');
+
+/**
  * Returns whether Alerting v2 UI surfaces should be shown based on the
  * `alerting:v2:enabled` advanced setting.
  *
@@ -86,4 +93,12 @@ export const shouldShowClassicObservabilityAlertsTable = (core: CoreStart): bool
     core.settings.client.get<boolean>(ALERTING_V2_SHOW_CLASSIC_ALERTS_TABLE_SETTING_ID, false) ===
     true
   );
+};
+
+/**
+ * Returns whether the current user can reach Alerting v2 rules at all: the advanced-setting
+ * gate ({@link isAlertingV2Enabled}) plus read access ({@link hasAlertingV2RulesReadCapability}).
+ */
+export const canAccessAlertingV2Rules = (core: CoreStart): boolean => {
+  return isAlertingV2Enabled(core) && hasAlertingV2RulesReadCapability(core);
 };

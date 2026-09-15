@@ -8,7 +8,9 @@
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
+  canAccessAlertingV2Rules,
   hasAlertingV2Capability,
+  hasAlertingV2RulesReadCapability,
   isAlertingV2Enabled,
   shouldShowAlertingV2CreateRuleFlyout,
   shouldShowClassicObservabilityAlertsTable,
@@ -42,6 +44,54 @@ describe('isAlertingV2Enabled', () => {
     core.settings.globalClient.get = <T>(_key: string) => 'true' as T;
 
     expect(isAlertingV2Enabled(core)).toBe(false);
+  });
+});
+
+describe('hasAlertingV2RulesReadCapability', () => {
+  let core: CoreStart;
+
+  beforeEach(() => {
+    core = coreMock.createStart();
+  });
+
+  it('returns true when the user has the read capability', () => {
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      alerting_v2_rules: {
+        read: true,
+      },
+    };
+
+    expect(hasAlertingV2RulesReadCapability(core)).toBe(true);
+  });
+
+  it('returns true when the user has the write capability without read', () => {
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      alerting_v2_rules: {
+        all: true,
+      },
+    };
+
+    expect(hasAlertingV2RulesReadCapability(core)).toBe(true);
+  });
+
+  it('returns false when alerting v2 rules capabilities are unavailable', () => {
+    const { alerting_v2_rules: _alertingV2Rules, ...capabilitiesWithoutRules } =
+      core.application.capabilities;
+
+    core.application.capabilities = capabilitiesWithoutRules;
+
+    expect(hasAlertingV2RulesReadCapability(core)).toBe(false);
+  });
+
+  it('returns false when the capability object is present but empty', () => {
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      alerting_v2_rules: {},
+    };
+
+    expect(hasAlertingV2RulesReadCapability(core)).toBe(false);
   });
 });
 
@@ -178,5 +228,50 @@ describe('shouldShowClassicObservabilityAlertsTable', () => {
     core.settings.client.get = <T>(_key: string) => undefined as T;
 
     expect(shouldShowClassicObservabilityAlertsTable(core)).toBe(false);
+  });
+});
+
+describe('canAccessAlertingV2Rules', () => {
+  let core: CoreStart;
+
+  beforeEach(() => {
+    core = coreMock.createStart();
+    core.settings.globalClient.get = <T>(_key: string) => true as T;
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      alerting_v2_rules: {
+        read: true,
+      },
+    };
+  });
+
+  it('returns true when alerting v2 is enabled and the user can read rules', () => {
+    expect(canAccessAlertingV2Rules(core)).toBe(true);
+  });
+
+  it('returns true when the user has the write capability without read', () => {
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      alerting_v2_rules: {
+        all: true,
+      },
+    };
+
+    expect(canAccessAlertingV2Rules(core)).toBe(true);
+  });
+
+  it('returns false when alerting v2 rules capabilities are unavailable', () => {
+    const { alerting_v2_rules: _alertingV2Rules, ...capabilitiesWithoutRules } =
+      core.application.capabilities;
+
+    core.application.capabilities = capabilitiesWithoutRules;
+
+    expect(canAccessAlertingV2Rules(core)).toBe(false);
+  });
+
+  it('returns false when alerting v2 is disabled by the advanced setting', () => {
+    core.settings.globalClient.get = <T>(_key: string) => false as T;
+
+    expect(canAccessAlertingV2Rules(core)).toBe(false);
   });
 });
