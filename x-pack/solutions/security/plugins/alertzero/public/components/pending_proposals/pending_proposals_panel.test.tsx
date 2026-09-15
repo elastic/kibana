@@ -16,7 +16,12 @@ import {
 } from '@kbn/agentic-investigations-plugin/public';
 import { PendingProposalsPanel } from './pending_proposals_panel';
 
-jest.mock('@kbn/agentic-investigations-plugin/public');
+jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
+  ...jest.requireActual('@kbn/agentic-investigations-plugin/public'),
+  useApproveProposal: jest.fn(),
+  useDismissProposal: jest.fn(),
+  usePendingProposals: jest.fn(),
+}));
 
 const mockUsePendingProposals = usePendingProposals as jest.Mock;
 const mockUseApproveProposal = useApproveProposal as jest.Mock;

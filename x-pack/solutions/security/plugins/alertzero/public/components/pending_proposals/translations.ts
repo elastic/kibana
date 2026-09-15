@@ -81,4 +81,3 @@ export const CANCEL = i18n.translate('xpack.alertzero.pendingProposals.cancel', 
 export const DECISION_FAILED = i18n.translate('xpack.alertzero.pendingProposals.decisionFailed', {
   defaultMessage: 'The decision could not be recorded. Reload the queue and try again.',
 });
-
