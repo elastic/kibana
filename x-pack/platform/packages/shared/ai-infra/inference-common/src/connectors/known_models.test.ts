@@ -132,6 +132,112 @@ describe('getModelDefinition', () => {
     });
   });
 
+  describe('contextWindow', () => {
+    // Corrections landed in this PR — regressing any of these would silently break the compaction
+    // trigger downstream, so pin the exact values.
+    it('resolves corrected windows', () => {
+      // Sonnet 4 and 4.5: 200k default (1M is beta-header only, which we don't send).
+      expect(getModelDefinition('us.anthropic.claude-sonnet-4-20250514-v1:0')).toMatchObject({
+        id: 'claude-sonnet-4',
+        contextWindow: 200000,
+      });
+      expect(getModelDefinition('us.anthropic.claude-sonnet-4-5-20250929-v1:0')).toMatchObject({
+        id: 'claude-sonnet-4-5',
+        contextWindow: 200000,
+      });
+      expect(getModelDefinition('anthropic-claude-4.5-sonnet')).toMatchObject({
+        id: 'claude-sonnet-4-5',
+        contextWindow: 200000,
+      });
+      // Opus 4.6: 1M native (correction from a pre-PR 200k).
+      expect(getModelDefinition('anthropic-claude-4.6-opus')).toMatchObject({
+        id: 'claude-opus-4-6',
+        contextWindow: 1000000,
+      });
+      expect(getModelDefinition('anthropic.claude-opus-4-6-v1')).toMatchObject({
+        id: 'claude-opus-4-6',
+        contextWindow: 1000000,
+      });
+    });
+
+    it('resolves newly-added Claude models to the right window', () => {
+      // Sonnet 4.6 / Opus 4.7 / Opus 4.8 / Claude 5 family: 1M native.
+      expect(getModelDefinition('anthropic-claude-4.6-sonnet')).toMatchObject({
+        id: 'claude-sonnet-4-6',
+        contextWindow: 1000000,
+      });
+      expect(getModelDefinition('anthropic-claude-4.7-opus')).toMatchObject({
+        id: 'claude-opus-4-7',
+        contextWindow: 1000000,
+      });
+      expect(getModelDefinition('anthropic.claude-opus-4-8')).toMatchObject({
+        id: 'claude-opus-4-8',
+        contextWindow: 1000000,
+      });
+      expect(getModelDefinition('anthropic-claude-5-sonnet')).toMatchObject({
+        id: 'claude-sonnet-5',
+        contextWindow: 1000000,
+      });
+      expect(getModelDefinition('anthropic-claude-5.1-fable')).toMatchObject({
+        id: 'claude-fable-5-1',
+        contextWindow: 1000000,
+      });
+      // Opus 4.1 and Haiku 4.5: 200k (Opus and Haiku family defaults, no beta).
+      expect(getModelDefinition('anthropic.claude-opus-4-1-20250805-v1:0')).toMatchObject({
+        id: 'claude-opus-4-1',
+        contextWindow: 200000,
+      });
+      expect(getModelDefinition('anthropic-claude-4.5-haiku')).toMatchObject({
+        id: 'claude-haiku-4-5',
+        contextWindow: 200000,
+      });
+    });
+
+    it('resolves newly-added OpenAI models to the right window', () => {
+      // GPT-5 family: 400k. GPT-5.5 / 5.6: 1.05M. GPT-OSS: 128k.
+      expect(getModelDefinition('gpt-5')).toMatchObject({ id: 'gpt-5', contextWindow: 400000 });
+      expect(getModelDefinition('gpt-5-mini')).toMatchObject({
+        id: 'gpt-5-mini',
+        contextWindow: 400000,
+      });
+      expect(getModelDefinition('gpt-5.4-nano')).toMatchObject({
+        id: 'gpt-5.4-nano',
+        contextWindow: 400000,
+      });
+      expect(getModelDefinition('gpt-5.5-2026-04-23')).toMatchObject({
+        id: 'gpt-5.5',
+        contextWindow: 1050000,
+      });
+      expect(getModelDefinition('gpt-5.6-sol')).toMatchObject({
+        id: 'gpt-5.6-sol',
+        contextWindow: 1050000,
+      });
+      expect(getModelDefinition('openai-gpt-oss-120b')).toMatchObject({
+        id: 'gpt-oss-120b',
+        contextWindow: 128000,
+      });
+    });
+
+    it('resolves newly-added Gemini models to the right window', () => {
+      expect(getModelDefinition('google-gemini-3.0-flash')).toMatchObject({
+        id: 'gemini-3.0-flash',
+        contextWindow: 1000000,
+      });
+      expect(getModelDefinition('google-gemini-3.7-flash')).toMatchObject({
+        id: 'gemini-3.7-flash',
+        contextWindow: 1000000,
+      });
+      expect(getModelDefinition('gemini-3-pro-preview')).toMatchObject({
+        id: 'gemini-3-pro',
+        contextWindow: 1000000,
+      });
+      expect(getModelDefinition('gemini-2.5-flash-lite')).toMatchObject({
+        id: 'gemini-2.5-flash-lite',
+        contextWindow: 1000000,
+      });
+    });
+  });
+
   it('returns undefined for an unknown model id', () => {
     expect(getModelDefinition('unknown-model-id')).toBeUndefined();
   });
