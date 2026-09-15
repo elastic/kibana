@@ -6,7 +6,7 @@
  */
 
 import { AttachmentType } from '../../domain/attachment/v1';
-import { AttachmentRequestRtV2, BulkCreateAttachmentsRequestRtV2 } from './v2';
+import { AttachmentRequestRtV2, BulkCreateAttachmentsRequestRtV2 } from './v2_union';
 import {
   AttachmentRequestSchemaV2,
   BulkCreateAttachmentsRequestSchemaV2,
