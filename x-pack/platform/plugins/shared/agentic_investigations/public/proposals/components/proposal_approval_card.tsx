@@ -151,10 +151,9 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
   const isExpired = liveProposal.expired;
   const isAlreadyDecided = isDecided(liveProposal.status);
 
+  const impact = liveProposal.action?.impact ?? liveProposal.impact;
   const tone =
-    liveProposal.action?.impact === 'high' || liveProposal.action?.impact === 'critical'
-      ? ('danger' as const)
-      : ('primary' as const);
+    impact === 'high' || impact === 'critical' ? ('danger' as const) : ('primary' as const);
 
   let primaryAction: ApprovalAction | undefined;
   let secondaryActions: ApprovalAction[] | undefined;

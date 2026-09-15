@@ -9,7 +9,9 @@ import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import {
+  retryOnTransientError,
   usePendingProposals,
   useProposal,
   useApproveProposal,
@@ -36,6 +38,44 @@ const createWrapper = () => {
 const makeHttp = () => ({
   get: jest.fn(),
   post: jest.fn(),
+});
+
+const makeHttpFetchError = (status: number): IHttpFetchError => {
+  const err = Object.assign(new Error(`HTTP ${status}`), {
+    request: {} as Request,
+    response: { status } as Response,
+  });
+  return err as unknown as IHttpFetchError;
+};
+
+describe('retryOnTransientError', () => {
+  it('retries non-HTTP errors (e.g. network failure)', () => {
+    expect(retryOnTransientError(0, new Error('Network error'))).toBe(true);
+  });
+
+  it('retries 5xx responses', () => {
+    expect(retryOnTransientError(0, makeHttpFetchError(500))).toBe(true);
+    expect(retryOnTransientError(0, makeHttpFetchError(503))).toBe(true);
+  });
+
+  it('does not retry 4xx responses', () => {
+    expect(retryOnTransientError(0, makeHttpFetchError(400))).toBe(false);
+    expect(retryOnTransientError(0, makeHttpFetchError(404))).toBe(false);
+    expect(retryOnTransientError(0, makeHttpFetchError(409))).toBe(false);
+  });
+
+  it('does not retry 501 (feature unavailable on this deployment)', () => {
+    expect(retryOnTransientError(0, makeHttpFetchError(501))).toBe(false);
+  });
+
+  it('stops retrying after 3 failures', () => {
+    expect(retryOnTransientError(3, new Error('Network error'))).toBe(false);
+    expect(retryOnTransientError(3, makeHttpFetchError(500))).toBe(false);
+  });
+
+  it('still retries on the third attempt (failureCount === 2)', () => {
+    expect(retryOnTransientError(2, new Error('Network error'))).toBe(true);
+  });
 });
 
 describe('usePendingProposals', () => {
@@ -126,9 +166,10 @@ describe('useProposal', () => {
     expect(http.get).not.toHaveBeenCalled();
   });
 
-  it('enters error state when the API call rejects', async () => {
+  it('enters error state when the API call rejects with a 404', async () => {
     const http = makeHttp();
-    http.get.mockRejectedValue(new Error('Not found'));
+    // Use a 404 so retryOnTransientError returns false immediately (no retries).
+    http.get.mockRejectedValue(makeHttpFetchError(404));
     useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
       typeof useKibana
     >);
