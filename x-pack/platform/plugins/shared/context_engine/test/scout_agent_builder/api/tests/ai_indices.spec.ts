@@ -10,7 +10,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, testData } from '../fixtures';
 
-const COLLECTION = 'api/context_engine/ai_index';
+const COLLECTION = testData.AI_INDEX_COLLECTION_PATH;
 const MANAGED_ID = 'elastic';
 const aiIndexPath = (id: string) => `${COLLECTION}/${id}`;
 
@@ -33,10 +33,7 @@ const AI_INDEX = {
 
 const DATA_STREAMS = [DEST.dataStream, DEST.last, DEST.shared];
 
-const API_HEADERS = {
-  ...testData.COMMON_HEADERS,
-  'elastic-api-version': '2023-10-31',
-};
+const API_HEADERS = testData.API_HEADERS;
 
 const dataStreamDest = (value: string) => ({ type: 'data_stream', value });
 
