@@ -99,19 +99,26 @@ export function getFallbackSlackChannel(): string {
   return override || getSuitesConfig().fallbackSlackChannel;
 }
 
+/** Strip the suffixes Buildkite appends to parallel jobs (`Label / 3 / 5`, `Label (3/5)`). */
+export function stripShardSuffix(name: string): string {
+  return name
+    .trim()
+    .replace(/ \/\s*\d+\s*\/\s*\d+\s*$/, '')
+    .replace(/ \(\d+\/\d+\)$/, '');
+}
+
 /**
  * Resolve the suite owning a Buildkite step label.
  *
- * Buildkite decorates parallel jobs (`Label / 3 / 5`), and some labels prefix
- * others (`Osquery Cypress Tests` vs `… on Serverless`), so match the longest
- * label the name starts with rather than the first one that fits.
+ * Matches exactly after de-sharding. Prefix matching would let a new suite
+ * (`Osquery Cypress Tests - New Variant`) silently inherit an existing suite's
+ * channel instead of surfacing as unmapped, and would let the pipeline coverage
+ * test pass without anyone adding the mapping.
  */
 export function findSuiteForStepLabel(label: string): SuiteChannel | undefined {
-  const normalized = label.trim();
+  const normalized = stripShardSuffix(label);
 
-  return getSuitesConfig()
-    .suites.filter((suite) => normalized.startsWith(suite.label))
-    .sort((a, b) => b.label.length - a.label.length)[0];
+  return getSuitesConfig().suites.find((suite) => normalized === suite.label);
 }
 
 export function getChannelForStepLabel(label: string): string {

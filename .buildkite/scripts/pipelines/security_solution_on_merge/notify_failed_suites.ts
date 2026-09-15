@@ -16,6 +16,7 @@ import {
   SUITES_CONFIG_RELATIVE_PATH,
   findSuiteForStepLabel,
   getFallbackSlackChannel,
+  stripShardSuffix,
 } from './failed_suite_channels.ts';
 import { BuildkiteClient } from '#pipeline-utils';
 import type { Job } from '#pipeline-utils';
@@ -40,7 +41,7 @@ export interface FailedJob {
 }
 
 export function displayNameForJob(name: string): string {
-  return name.replace(/ \/\s*\d+\s*\/\s*\d+\s*$/, '').replace(/ \(\d+\/\d+\)$/, '');
+  return stripShardSuffix(name);
 }
 
 export function collectFailedScriptJobs(

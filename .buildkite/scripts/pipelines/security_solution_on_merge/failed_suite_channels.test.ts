@@ -130,6 +130,24 @@ describe('getChannelForStepLabel', () => {
     }
   });
 
+  it('does not let a new suite inherit a channel by prefix', () => {
+    // A variant label must surface as unmapped so someone adds the mapping,
+    // rather than quietly paging the wrong team.
+    expect(findSuiteForStepLabel('Osquery Cypress Tests - New Variant')).toBeUndefined();
+    expect(getChannelForStepLabel('Osquery Cypress Tests - New Variant')).toBe(
+      getFallbackSlackChannel()
+    );
+  });
+
+  it('still matches sharded job names', () => {
+    expect(findSuiteForStepLabel('Osquery Cypress Tests / 3 / 5')?.label).toBe(
+      'Osquery Cypress Tests'
+    );
+    expect(findSuiteForStepLabel('Osquery Cypress Tests (3/5)')?.label).toBe(
+      'Osquery Cypress Tests'
+    );
+  });
+
   it('selects the suite steps and excludes the notifier', () => {
     const labels = cypressStepsInPipeline().map((step) => step.label);
 
