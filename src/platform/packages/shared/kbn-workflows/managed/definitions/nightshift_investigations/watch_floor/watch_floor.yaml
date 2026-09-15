@@ -1,0 +1,38 @@
+version: '1'
+name: Watch Floor
+description: >
+  Default system automation: automatically starts an investigation when a significant event is
+  created. Acts as the always-on baseline — no user configuration needed. User automations with
+  more specific trigger criteria fire alongside this one and are not blocked by it.
+enabled: true
+tags:
+  - observability
+  - streams
+  - significant-events
+  - nightshift
+  - automation
+  - watch-floor
+
+settings:
+  # One active investigation per significant event. If a second trigger fires for the same
+  # event_id while an investigation is already running, the new execution is dropped — it would
+  # investigate the same event and reach the same conclusions. The existing run continues.
+  concurrency:
+    key: 'nightshift-watch-floor-{{ event.event_id }}'
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: significant-events.eventCreated
+
+steps:
+  - name: trigger_investigation
+    type: nightshift.triggerInvestigation
+    with:
+      subject_type: significant_event
+      subject_id: '{{ event.event_id }}'
+      summary: '{{ event.title }}'
+      trigger_type: automatic
+      concurrency_key: '{{ event.event_id }}'
+    on-failure:
+      continue: true
