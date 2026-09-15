@@ -10,7 +10,7 @@ import { runCortexOptimize } from '../cortex/register_cortex';
 import { cortexOptimizeStepDefinition } from './cortex_optimize';
 
 jest.mock('../cortex/register_cortex', () => ({
-  runCortexOptimize: jest.fn(),
+  runCortexOptimize: jest.fn().mockResolvedValue(undefined),
 }));
 
 describe('cortexOptimizeStepDefinition', () => {

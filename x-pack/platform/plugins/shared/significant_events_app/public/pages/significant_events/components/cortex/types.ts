@@ -5,53 +5,19 @@
  * 2.0.
  */
 
-export const CORTEX_ENTITY_TYPES = [
-  'integration',
-  'service',
-  'alert',
-  'runbook',
-  'query',
-  'dashboard',
-  'postmortem',
-  'topic',
-  'glossary',
-] as const;
+export {
+  CORTEX_ENTITY_TYPES,
+  CORTEX_PAGE_STATUSES,
+  type CortexEntityType,
+  type CortexPageStatus,
+  type CortexPageSummary,
+  type CortexPage,
+  type CortexStats,
+  type ListCortexPagesResponse,
+  type GetCortexPageResponse,
+} from '@kbn/nightshift-investigations-plugin/common';
 
-export type CortexEntityType = (typeof CORTEX_ENTITY_TYPES)[number];
+import type { CortexPageStatus } from '@kbn/nightshift-investigations-plugin/common';
 
-export const CORTEX_PAGE_STATUSES = ['established', 'tentative', 'archived'] as const;
-
-export type CortexPageStatus = (typeof CORTEX_PAGE_STATUSES)[number];
-
+/** UI-only filter state: the page statuses plus an "all" option for the sidebar. */
 export type CortexStatusFilter = 'all' | CortexPageStatus;
-
-export interface CortexPageSummary {
-  id: string;
-  title: string;
-  entity_type: CortexEntityType;
-  status: CortexPageStatus;
-  corroborations: number;
-  updated_at: string;
-  description?: string;
-}
-
-export interface CortexPage extends CortexPageSummary {
-  content: string;
-  slug: string;
-}
-
-export interface CortexStats {
-  total: number;
-  established: number;
-  total_corroborations: number;
-  last_updated?: string;
-}
-
-export interface ListCortexPagesResponse {
-  pages: CortexPageSummary[];
-  stats: CortexStats;
-}
-
-export interface GetCortexPageResponse {
-  page: CortexPage;
-}

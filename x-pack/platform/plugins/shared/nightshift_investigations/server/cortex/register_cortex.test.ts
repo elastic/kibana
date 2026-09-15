@@ -60,10 +60,12 @@ describe('runCortexOptimize', () => {
     expect(optimizeCortex).not.toHaveBeenCalled();
   });
 
-  it('runs when agent_id is omitted or empty', async () => {
+  // The optimize workflow has a manual trigger, so it can be invoked without an agent id. Writing
+  // to the wiki on behalf of an unidentified caller is worse than not writing at all.
+  it('skips a round with no agent_id rather than trusting it', async () => {
     await run(undefined);
     await run('');
-    expect(optimizeCortex).toHaveBeenCalledTimes(2);
+    expect(optimizeCortex).not.toHaveBeenCalled();
   });
 
   it('skips a different agent', async () => {

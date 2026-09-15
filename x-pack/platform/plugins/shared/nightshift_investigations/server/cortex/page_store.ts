@@ -347,7 +347,9 @@ export const createCortexPageStore = ({
         title: page.title,
         description: page.description,
         content: page.content,
-        status: page.status === 'archived' ? 'established' : page.status,
+        // Corroborating a retired fact brings it back, but only as tentative: one mention should
+        // not restore something to established that the optimizer deliberately archived.
+        status: page.status === 'archived' ? 'tentative' : page.status,
         corroborations: page.corroborations + 1,
       });
     },

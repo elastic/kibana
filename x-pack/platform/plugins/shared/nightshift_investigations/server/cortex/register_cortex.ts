@@ -81,12 +81,11 @@ export const runCortexOptimize = async ({
   logger: Logger;
 }): Promise<void> => {
   // Only the deductive investigator writes to Cortex: it is the one agent whose post-execution
-  // hook runs this workflow, and other agents' rounds must not edit the wiki.
-  const resolvedAgentId = agentId !== undefined && agentId.length > 0 ? agentId : undefined;
-  if (
-    resolvedAgentId !== undefined &&
-    resolvedAgentId !== NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID
-  ) {
+  // hook runs this workflow, and other agents' rounds must not edit the wiki. An unidentified
+  // caller is refused rather than trusted — the optimize workflow has a manual trigger, so it can
+  // be run without an agent id.
+  if (agentId !== NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID) {
+    logger.debug('Cortex optimizer skipped — round was not produced by the deductive investigator');
     return;
   }
 

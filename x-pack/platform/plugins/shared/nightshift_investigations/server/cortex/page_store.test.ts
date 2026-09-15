@@ -185,6 +185,31 @@ describe('createCortexPageStore', () => {
     );
   });
 
+  // Corroborating revives an archived page, but it has to earn its way back rather than jumping
+  // straight to the status the optimizer retired it from.
+  it('revives an archived page as tentative, not established', async () => {
+    const esClient = {
+      get: jest.fn().mockResolvedValue({
+        found: true,
+        _id: 'cortex_service_checkout',
+        _source: {
+          ...source,
+          attributes: { ...source.attributes, status: 'archived' },
+        },
+      }),
+      index: jest.fn().mockResolvedValue({ _id: 'cortex_service_checkout' }),
+    };
+
+    const store = createCortexPageStore({
+      esClient: esClient as never,
+      logger,
+    });
+
+    const page = await store.corroborate('cortex_service_checkout');
+
+    expect(page?.status).toBe('tentative');
+  });
+
   it('prunes prefixed duplicate ids onto the canonical document', async () => {
     const prefixed = {
       ...source,
