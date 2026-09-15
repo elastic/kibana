@@ -47,12 +47,15 @@ spaceTest.describe(
         await expect(page.testSubj.locator('alertZeroOnboardingDisabledPage')).toBeVisible();
         await page.testSubj.click('alertZeroOnboardingEnableToggle');
 
-        // S2 is no longer a full-page prompt: enable lands on the real watch detail surface
-        // (the gate passes awaiting-first-run + active straight through).
-        await expect(page.testSubj.locator('alertZeroWatchWorkersSection')).toBeVisible();
-
-        // The enable confirmation is a transient success toast on top of that surface.
+        // S2 is no longer a full-page prompt: the gate passes awaiting-first-run
+        // and active straight through to the app root (conversations), with the
+        // confirmation carried by a transient global toast. Assert the toast first —
+        // it auto-dismisses after a few seconds, unlike the stable page below it.
         await expect(page.getByText('AlertZero is enabled', { exact: true })).toBeVisible();
+        await expect(page.testSubj.locator('alertZeroPageHeader')).toBeVisible();
+        await expect(
+          page.testSubj.locator('alertZeroOnboardingAwaitingRunPage')
+        ).not.toBeVisible();
 
         // Real install path evidence: managed watch workflows now exist in this space.
         const workers = await kbnClient.request({
@@ -67,7 +70,7 @@ spaceTest.describe(
       }
     );
     spaceTest(
-      'S2: after enable the app lands on the watch detail surface',
+      'S2: after enable the app lands on the real surface, not an onboarding prompt',
       async ({ page, kbnClient, scoutSpace }) => {
         // Self-contained: enable in this space first (idempotent) so the assertion
         // does not depend on a previous test's side effect surviving a retry or a
@@ -79,9 +82,11 @@ spaceTest.describe(
           body: {},
         });
         await page.gotoApp('alertzero');
-        // S2 renders the real watch detail page (workers section), not the onboarding prompt.
-        await expect(page.testSubj.locator('alertZeroWatchWorkersSection')).toBeVisible();
+        // The gate opens onto the app root (conversations) — its page header renders,
+        // and no onboarding prompt is in the way.
+        await expect(page.testSubj.locator('alertZeroPageHeader')).toBeVisible();
         await expect(page.testSubj.locator('alertZeroOnboardingAwaitingRunPage')).not.toBeVisible();
+        await expect(page.testSubj.locator('alertZeroOnboardingDisabledPage')).not.toBeVisible();
       }
     );
   }
