@@ -18,7 +18,6 @@ import {
 } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { catchError, from, map, of, switchMap } from 'rxjs';
-import { dynamic } from '@kbn/shared-ux-utility';
 import { SIGNIFICANT_EVENTS_APP_ROUTE } from '../common/constants';
 import { SignificantEventsAppLocatorDefinition } from '../common/locators';
 import { FocusedSignificantEventService } from './services/focused_significant_event_service';
@@ -29,7 +28,6 @@ import type {
   SignificantEventsAppStartDependencies,
 } from './types';
 import type { SignificantEventsAppServices } from './services/types';
-import type { KnowledgeIndicatorsPanelComponent } from './types';
 
 export class SignificantEventsAppPlugin
   implements
@@ -45,7 +43,6 @@ export class SignificantEventsAppPlugin
   private focusedSignificantEventService!: FocusedSignificantEventService;
   private cleanupSignificantEventAttachment?: () => void;
   private stopped = false;
-  private knowledgeIndicatorsPanel?: KnowledgeIndicatorsPanelComponent;
 
   setup(
     coreSetup: CoreSetup<SignificantEventsAppStartDependencies>,
@@ -189,28 +186,7 @@ export class SignificantEventsAppPlugin
       );
     }
 
-    const services: SignificantEventsAppServices = {
-      focusedSignificantEventService: this.focusedSignificantEventService,
-    };
-
-    return {
-      getKnowledgeIndicatorsPanel: () => {
-        if (!this.knowledgeIndicatorsPanel) {
-          this.knowledgeIndicatorsPanel = dynamic(() =>
-            import(
-              './components/knowledge_indicators_panel/create_knowledge_indicators_panel'
-            ).then(({ createKnowledgeIndicatorsPanel }) => ({
-              default: createKnowledgeIndicatorsPanel({
-                coreStart,
-                pluginsStart,
-                services,
-              }),
-            }))
-          );
-        }
-        return this.knowledgeIndicatorsPanel;
-      },
-    };
+    return {};
   }
 
   stop() {

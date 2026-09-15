@@ -17,7 +17,10 @@ import {
   AttachmentsAddedTriggerId,
   CommentsAddedTriggerId,
   CaseStatusUpdatedTriggerId,
+  ExtendedFieldsUpdatedTriggerId,
+  ObservablesAddedTriggerId,
 } from '../../../common/workflows/triggers';
+import { buildExtendedFieldsUpdatedPayload } from './extended_fields_updated_payload';
 
 /**
  * Registers bridge listeners that forward Cases domain events to workflows_extensions.
@@ -53,6 +56,26 @@ export function registerCasesWorkflowEventBridge(
         );
       }
     }
+
+    // Do NOT gate this on `updatedFields.includes('extended_fields')`. A patch to `customFields`
+    // on a field linked to a global field definition mirrors into `extended_fields` server-side,
+    // but `updatedFields` only contains `['customFields']` in that case (computed before the
+    // adapter runs). Derive from a value diff instead.
+    if (previousCase && updatedCase) {
+      const extendedFieldsPayload = buildExtendedFieldsUpdatedPayload({
+        ...reducedPayload,
+        previousExtendedFields: previousCase.attributes.extended_fields,
+        extendedFields: updatedCase.extended_fields,
+      });
+
+      if (extendedFieldsPayload) {
+        void forward(ExtendedFieldsUpdatedTriggerId, extendedFieldsPayload, event.request);
+      }
+    }
+  });
+
+  casesEventBus.onObservablesAdded((event) => {
+    void forward(ObservablesAddedTriggerId, event.payload, event.request);
   });
 
   casesEventBus.onAttachmentsAdded((event) => {

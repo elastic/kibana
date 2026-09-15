@@ -19,6 +19,7 @@ export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
   previousAppState: {},
   forceFetchOnSelect: false,
   isDataViewLoading: false,
+  isWarningCalloutDismissed: false,
   dataRequestParams: {
     timeRangeAbsolute: undefined,
     timeRangeRelative: undefined,

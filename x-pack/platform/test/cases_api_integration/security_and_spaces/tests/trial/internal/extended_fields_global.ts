@@ -12,6 +12,7 @@ import { CASES_URL, CASE_EXTENDED_FIELDS } from '@kbn/cases-plugin/common/consta
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   deleteAllCaseItems,
+  deleteConfiguration,
   createCase,
   createConfiguration,
   getConfigurationRequest,
@@ -199,20 +200,24 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(createdCase[CASE_EXTENDED_FIELDS]).to.eql({ risk_score_as_keyword: '' });
       });
 
-      it('creates the case when a required global field has no default and no caller value', async () => {
-        // Backward compatibility: defaults injection must be invisible to callers that never
-        // engaged with extended_fields — `required` stays a UI submit-time gate here.
+      it('rejects when a required global field has no default and no caller value', async () => {
+        // With templates enabled, required global fields are enforced at create time against
+        // effective values (request + injected defaults + legacy customFields mirror) — the
+        // same contract as required v1 custom fields, not a UI-only submit gate.
         await supertest
           .post(`${FIELD_DEFINITIONS_URL}`)
           .set('kbn-xsrf', 'true')
           .send(buildFieldDef('risk_score', { required: true }))
           .expect(200);
 
-        const createdCase = await createCase(supertest, {
-          ...getPostCaseRequest({ owner: 'securitySolutionFixture' }),
-        });
+        const { body } = await supertest
+          .post(`${CASES_URL}`)
+          .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'foo')
+          .send(getPostCaseRequest({ owner: 'securitySolutionFixture' }))
+          .expect(400);
 
-        expect(createdCase[CASE_EXTENDED_FIELDS]).to.be(undefined);
+        expect(body.message).to.contain('Field "risk_score" is required');
       });
 
       it('rejects when the caller sends extended_fields but omits a required global field', async () => {
@@ -241,7 +246,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('legacy customFields-only creates keep succeeding when a required custom field is mirrored into a required global definition', async () => {
         // Posting a configuration mirrors its custom fields into global field definitions,
         // preserving `required`. A create that satisfies the field through the legacy
-        // customFields array (or omits it entirely) must not be rejected by the v2 surface.
+        // customFields array must not be rejected by the v2 surface.
         await createConfiguration(
           supertest,
           getConfigurationRequest({
@@ -273,6 +278,57 @@ export default ({ getService }: FtrProviderContext): void => {
         // label-derived friendly name ("text"), not the raw v1 custom-field key.
         expect(createdCase[CASE_EXTENDED_FIELDS]).to.eql({
           text_as_keyword: 'legacy value',
+        });
+      });
+
+      describe('a mirrored global definition outlives its configuration', () => {
+        // Deleting a configuration leaves its mirrored global definitions behind, each still
+        // carrying the v1 `required` flag. Nothing can satisfy that flag afterwards: the custom
+        // field is no longer configured, so neither validateRequiredCustomFields nor the
+        // customFields mirror runs. Enforcing it would reject every create in the space.
+        beforeEach(async () => {
+          await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: {
+                customFields: [
+                  {
+                    key: 'test_custom_field',
+                    label: 'text',
+                    type: CustomFieldTypes.TEXT,
+                    required: true,
+                  },
+                ],
+              },
+            })
+          );
+          await deleteConfiguration(es);
+        });
+
+        it('creates a case with no extended_fields', async () => {
+          const createdCase = await createCase(
+            supertest,
+            getPostCaseRequest({ owner: 'securitySolutionFixture' })
+          );
+
+          expect(createdCase[CASE_EXTENDED_FIELDS]).to.be(undefined);
+        });
+
+        it('creates a case when the caller sends an unrelated global field', async () => {
+          // A caller-sent map switches extended_fields validation to full create semantics, so
+          // the stale flag must be inert there too.
+          await supertest
+            .post(`${FIELD_DEFINITIONS_URL}`)
+            .set('kbn-xsrf', 'true')
+            .send(buildFieldDef('notes'))
+            .expect(200);
+
+          const createdCase = await createCase(supertest, {
+            ...getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            [CASE_EXTENDED_FIELDS]: { notes_as_keyword: 'some notes' },
+          });
+
+          expect(createdCase[CASE_EXTENDED_FIELDS]).to.eql({ notes_as_keyword: 'some notes' });
         });
       });
     });

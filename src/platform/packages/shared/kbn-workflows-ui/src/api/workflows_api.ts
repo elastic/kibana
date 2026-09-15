@@ -298,9 +298,15 @@ export class WorkflowApi {
     );
   }
 
-  async resumeExecution(executionId: string, { input }: ResumeExecutionParams): Promise<void> {
+  async resumeExecution(
+    executionId: string,
+    { input, stepExecutionId }: ResumeExecutionParams
+  ): Promise<void> {
     return this.http.post(`${BASE}/executions/${encodeURIComponent(executionId)}/resume`, {
-      body: JSON.stringify({ input }),
+      body: JSON.stringify({
+        input,
+        ...(stepExecutionId ? { stepExecutionId } : {}),
+      }),
       version: API_VERSION,
     });
   }

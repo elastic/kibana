@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { DistributiveOmit } from '@elastic/eui';
+
 import type { SimplifiedPackagePolicy } from '../../services/simplified_package_policy_helper';
 
 import type {
@@ -59,10 +61,10 @@ export interface PreconfiguredPackage extends Omit<PackagePolicyPackage, 'title'
   skipDataStreamRollover?: boolean;
 }
 
-export interface PreconfiguredOutput extends Omit<Output, 'config_yaml'> {
+export type PreconfiguredOutput = DistributiveOmit<Output, 'config_yaml'> & {
   config?: Record<string, unknown>;
   allow_edit?: string[];
-}
+};
 
 export interface PreconfiguredDownloadSource extends DownloadSourceBase {
   id: string;

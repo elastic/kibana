@@ -55,6 +55,7 @@ import { scheduleBumpAgentPoliciesByIdTask } from './agent_policies/bump_agent_p
 import { createAgentPolicyWithPackages } from './agent_policy_create';
 import { reassignAgentsFromVersionSpecificPolicies } from './utils/version_specific_policies';
 import { agentlessAgentService } from './agents/agentless_agent';
+import { unenrollForAgentPolicyId } from './agents';
 import { getPackageInfo } from './epm/packages';
 import { ensureInstalledPackage } from './epm/packages/install';
 
@@ -322,7 +323,7 @@ describe('Agent policy', () => {
         },
         { id: 'test-agent-policy' }
       );
-      expect(soClient.create).toBeCalledWith(
+      expect(soClient.create).toHaveBeenCalledWith(
         AGENT_POLICY_SAVED_OBJECT_TYPE,
         expect.anything(),
         expect.anything()
@@ -347,9 +348,7 @@ describe('Agent policy', () => {
           namespace: 'default',
           is_protected: true,
         })
-      ).rejects.toThrowError(
-        new FleetUnauthorizedError('Tamper protection requires Platinum license')
-      );
+      ).rejects.toThrow(new FleetUnauthorizedError('Tamper protection requires Platinum license'));
     });
 
     it('should not throw FleetUnauthorizedError if is_protected=false with insufficient license', async () => {
@@ -363,7 +362,7 @@ describe('Agent policy', () => {
           name: 'test',
           namespace: 'default',
         })
-      ).resolves.not.toThrowError(
+      ).resolves.not.toThrow(
         new FleetUnauthorizedError('Tamper protection requires Platinum license')
       );
     });
@@ -382,7 +381,7 @@ describe('Agent policy', () => {
           namespace: 'default',
           supports_agentless: true,
         })
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         new AgentPolicyInvalidError(
           'supports_agentless is only allowed in serverless and cloud environments that support the agentless feature'
         )
@@ -403,7 +402,7 @@ describe('Agent policy', () => {
           namespace: 'default',
           supports_agentless: true,
         })
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         new AgentPolicyInvalidError(
           'supports_agentless is only allowed in serverless and cloud environments that support the agentless feature'
         )
@@ -549,7 +548,7 @@ describe('Agent policy', () => {
           namespace: 'default',
           supports_agentless: true,
         })
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         new AgentPolicyInvalidError(
           'supports_agentless is only allowed in serverless and cloud environments that support the agentless feature'
         )
@@ -588,7 +587,7 @@ describe('Agent policy', () => {
           namespace: 'default',
           supports_agentless: true,
         })
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         new AgentPolicyInvalidError(
           'supports_agentless is only allowed in serverless and cloud environments that support the agentless feature'
         )
@@ -790,7 +789,7 @@ describe('Agent policy', () => {
 
       await agentPolicyService.get(soClient, 'test-agent-policy', false);
 
-      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toBeCalledWith({
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'get',
         id: 'test-agent-policy',
         name: 'Test',
@@ -954,7 +953,7 @@ describe('Agent policy', () => {
 
     it('should throw error if active agents are assigned to the policy', async () => {
       esClient.count.mockResolvedValueOnce({ count: 2 } as any);
-      await expect(agentPolicyService.delete(soClient, esClient, 'mocked')).rejects.toThrowError(
+      await expect(agentPolicyService.delete(soClient, esClient, 'mocked')).rejects.toThrow(
         'Cannot delete an agent policy that is assigned to any active or inactive agents'
       );
     });
@@ -1054,13 +1053,13 @@ describe('Agent policy', () => {
         },
       ] as any);
       await agentPolicyService.delete(soClient, esClient, 'policy_1');
-      expect(mockedPackagePolicyService.delete).toBeCalledWith(
+      expect(mockedPackagePolicyService.delete).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         ['package-2', 'package-3'],
         expect.anything()
       );
-      expect(mockedPackagePolicyService.bulkUpdate).toBeCalledWith(
+      expect(mockedPackagePolicyService.bulkUpdate).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         [
@@ -1071,6 +1070,66 @@ describe('Agent policy', () => {
           },
         ]
       );
+    });
+
+    it('should force-revoke agents before deleting an agentless policy', async () => {
+      const agentlessSoClient = getSavedObjectMock({
+        revision: 1,
+        name: 'Test agentless',
+        package_policies: ['package-1'],
+        supports_agentless: true,
+      });
+      // agentless policies are allowed to have active agents; the count check is bypassed
+      esClient.count.mockResolvedValue({ count: 1 } as any);
+      const deleteAgentlessAgentSpy = jest
+        .spyOn(agentlessAgentService, 'deleteAgentlessAgent')
+        .mockResolvedValue(undefined as any);
+
+      try {
+        await agentPolicyService.delete(agentlessSoClient, esClient, 'mocked');
+
+        expect(jest.mocked(unenrollForAgentPolicyId)).toHaveBeenCalledWith(
+          agentlessSoClient,
+          esClient,
+          'mocked',
+          { revoke: true }
+        );
+      } finally {
+        deleteAgentlessAgentSpy.mockRestore();
+      }
+    });
+
+    it('should force-revoke agents before calling deleteAgentlessAgent', async () => {
+      const agentlessSoClient = getSavedObjectMock({
+        revision: 1,
+        name: 'Test agentless',
+        package_policies: ['package-1'],
+        supports_agentless: true,
+      });
+      esClient.count.mockResolvedValue({ count: 1 } as any);
+      const callOrder: string[] = [];
+
+      jest.mocked(unenrollForAgentPolicyId).mockImplementationOnce(async () => {
+        callOrder.push('unenrollForAgentPolicyId');
+      });
+      const deleteAgentlessAgentSpy = jest
+        .spyOn(agentlessAgentService, 'deleteAgentlessAgent')
+        .mockImplementationOnce(async () => {
+          callOrder.push('deleteAgentlessAgent');
+          return undefined as any;
+        });
+
+      try {
+        await agentPolicyService.delete(agentlessSoClient, esClient, 'mocked');
+
+        const unenrollIdx = callOrder.indexOf('unenrollForAgentPolicyId');
+        const deleteIdx = callOrder.indexOf('deleteAgentlessAgent');
+        expect(unenrollIdx).toBeGreaterThanOrEqual(0);
+        expect(deleteIdx).toBeGreaterThanOrEqual(0);
+        expect(unenrollIdx).toBeLessThan(deleteIdx);
+      } finally {
+        deleteAgentlessAgentSpy.mockRestore();
+      }
     });
   });
 
@@ -1826,9 +1885,7 @@ describe('Agent policy', () => {
         agentPolicyService.update(soClient, esClient, 'test-id', {
           is_protected: true,
         })
-      ).rejects.toThrowError(
-        new HostedAgentPolicyRestrictionRelatedError('Cannot update is_protected')
-      );
+      ).rejects.toThrow(new HostedAgentPolicyRestrictionRelatedError('Cannot update is_protected'));
     });
 
     it('should throw a HostedAgentPolicyRestrictionRelatedError if user tries to update namespace for a managed policy', async () => {
@@ -1850,9 +1907,7 @@ describe('Agent policy', () => {
         agentPolicyService.update(soClient, esClient, 'test-id', {
           namespace: 'test-namespace',
         })
-      ).rejects.toThrowError(
-        new HostedAgentPolicyRestrictionRelatedError('Cannot update namespace')
-      );
+      ).rejects.toThrow(new HostedAgentPolicyRestrictionRelatedError('Cannot update namespace'));
     });
     it('should not throw if user tries to update namespace for a managed policy with option force', async () => {
       const soClient = createSavedObjectClientMock();
@@ -1879,7 +1934,7 @@ describe('Agent policy', () => {
           },
           { force: true }
         )
-      ).resolves.not.toThrowError(
+      ).resolves.not.toThrow(
         new HostedAgentPolicyRestrictionRelatedError('Cannot update namespace')
       );
     });
@@ -1938,9 +1993,7 @@ describe('Agent policy', () => {
           namespace: 'default',
           is_protected: true,
         })
-      ).rejects.toThrowError(
-        new FleetUnauthorizedError('Tamper protection requires Platinum license')
-      );
+      ).rejects.toThrow(new FleetUnauthorizedError('Tamper protection requires Platinum license'));
     });
 
     it('should not throw FleetUnauthorizedError if is_protected=false with insufficient license', async () => {
@@ -1965,7 +2018,7 @@ describe('Agent policy', () => {
           name: 'test',
           namespace: 'default',
         })
-      ).resolves.not.toThrowError(
+      ).resolves.not.toThrow(
         new FleetUnauthorizedError('Tamper protection requires Platinum license')
       );
     });
@@ -1999,7 +2052,7 @@ describe('Agent policy', () => {
           namespace: 'default',
           is_protected: true,
         })
-      ).rejects.toThrowError(new Error('Cannot enable Agent Tamper Protection: reason'));
+      ).rejects.toThrow(new Error('Cannot enable Agent Tamper Protection: reason'));
     });
 
     it('should not throw AgentPolicyInvalidError if support_agentless is defined in stateful', async () => {
@@ -2398,7 +2451,7 @@ describe('Agent policy', () => {
       await agentPolicyService.copy(soClient, esClient, 'mocked', {
         name: 'copy mocked',
       });
-      expect(mockedPackagePolicyService.bulkCreate).toBeCalledWith(
+      expect(mockedPackagePolicyService.bulkCreate).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         [
@@ -2410,7 +2463,7 @@ describe('Agent policy', () => {
         ],
         expect.anything()
       );
-      expect(mockedPackagePolicyService.bulkUpdate).toBeCalledWith(
+      expect(mockedPackagePolicyService.bulkUpdate).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         [
@@ -2552,7 +2605,7 @@ describe('Agent policy', () => {
       });
       await agentPolicyService.deployPolicy(soClient, 'policy123');
 
-      expect(esClient.create).not.toBeCalled();
+      expect(esClient.create).not.toHaveBeenCalled();
     });
 
     it('should create a .fleet-policy document if we can get the full policy', async () => {
@@ -2610,7 +2663,7 @@ describe('Agent policy', () => {
       } as any);
       await agentPolicyService.deployPolicy(soClient, 'policy123');
 
-      expect(esClient.bulk).toBeCalledWith(
+      expect(esClient.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
           index: AGENT_POLICY_INDEX,
           operations: [
@@ -2731,8 +2784,8 @@ describe('Agent policy', () => {
       jest.spyOn(agentlessAgentService, 'createAgentlessAgent');
 
       await agentPolicyService.deployPolicy(soClient, 'test-agentless-policy');
-      expect(esClient.bulk).toBeCalled();
-      expect(jest.mocked(agentlessAgentService.createAgentlessAgent)).toBeCalledWith(
+      expect(esClient.bulk).toHaveBeenCalled();
+      expect(jest.mocked(agentlessAgentService.createAgentlessAgent)).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.objectContaining({
@@ -3310,7 +3363,7 @@ describe('Agent policy', () => {
 
       await agentPolicyService.deleteFleetServerPoliciesForPolicyId(esClient, 'test-agent-policy');
 
-      expect(esClient.deleteByQuery).toBeCalledTimes(2);
+      expect(esClient.deleteByQuery).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -3844,23 +3897,28 @@ describe('Agent policy', () => {
     });
 
     it('should roll back the verifier policy and re-throw when deployPolicy fails', async () => {
-      jest
+      const deploySpy = jest
         .spyOn(agentPolicyService, 'deployPolicy')
         .mockRejectedValueOnce(new Error('agentless provisioning limit'));
       const deleteSpy = jest
         .spyOn(agentPolicyService, 'deleteVerifierPolicy')
         .mockResolvedValue(undefined);
 
-      await expect(
-        agentPolicyService.createVerifierPolicy(
-          soClient,
-          esClient,
-          baseConnector as any,
-          baseVerificationInfo
-        )
-      ).rejects.toThrow('agentless provisioning limit');
+      try {
+        await expect(
+          agentPolicyService.createVerifierPolicy(
+            soClient,
+            esClient,
+            baseConnector as any,
+            baseVerificationInfo
+          )
+        ).rejects.toThrow('agentless provisioning limit');
 
-      expect(deleteSpy).toHaveBeenCalledWith(soClient, esClient, 'mocked');
+        expect(deleteSpy).toHaveBeenCalledWith(soClient, esClient, 'mocked');
+      } finally {
+        deleteSpy.mockRestore();
+        deploySpy.mockRestore();
+      }
     });
 
     it('should propagate secret_references from created package policy', async () => {
@@ -3972,6 +4030,36 @@ describe('Agent policy', () => {
       expect(vars.namespace).toBeUndefined();
       expect(vars.cloud_connector_id).toBeUndefined();
       expect(vars.cloud_connector_name).toBeUndefined();
+    });
+  });
+
+  describe('deleteVerifierPolicy', () => {
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const soClient = createSavedObjectClientMock();
+
+    it('should delegate to delete with force: true', async () => {
+      const deleteSpy = jest.spyOn(agentPolicyService, 'delete').mockResolvedValue({} as any);
+      try {
+        await agentPolicyService.deleteVerifierPolicy(soClient, esClient, 'verifier-policy-1');
+        expect(deleteSpy).toHaveBeenCalledWith(soClient, esClient, 'verifier-policy-1', {
+          force: true,
+        });
+      } finally {
+        deleteSpy.mockRestore();
+      }
+    });
+
+    it('should catch and log errors without re-throwing', async () => {
+      const deleteSpy = jest
+        .spyOn(agentPolicyService, 'delete')
+        .mockRejectedValue(new Error('delete failed'));
+      try {
+        await expect(
+          agentPolicyService.deleteVerifierPolicy(soClient, esClient, 'verifier-policy-1')
+        ).resolves.toBeUndefined();
+      } finally {
+        deleteSpy.mockRestore();
+      }
     });
   });
 

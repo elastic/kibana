@@ -16,6 +16,7 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -38,6 +39,8 @@ import { ConvertConnectorLogic } from '../search_index/connector/native_connecto
 import { ConvertConnectorModal } from '../shared/convert_connector_modal/convert_connector_modal';
 import { docLinks } from '../shared/doc_links';
 import { useAppContext } from '../../app_context';
+import { ConnectorDescription } from './connector_description';
+import { DESCRIPTION_LABEL } from '../connectors/translations';
 
 export const ConnectorDetailOverview: React.FC = () => {
   const {
@@ -54,6 +57,16 @@ export const ConnectorDetailOverview: React.FC = () => {
 
   return (
     <>
+      {connector && (
+        <>
+          <EuiTitle size="xs">
+            <h2>{DESCRIPTION_LABEL}</h2>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <ConnectorDescription connector={connector} />
+          <EuiSpacer />
+        </>
+      )}
       {isWaitingOnAgentlessDeployment && (
         <>
           <KbnWarningCallout
