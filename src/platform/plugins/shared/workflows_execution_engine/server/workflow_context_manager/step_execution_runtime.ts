@@ -149,9 +149,30 @@ export class StepExecutionRuntime {
    *
    * Takes a list so a caller reading many outputs pays one ES round trip.
    * No-op for ids that are already resident.
+   *
+   * Read-pins the whole requested set for `consumerId` before awaiting, and the
+   * caller MUST {@link releaseReadOutputPins} once its synchronous reads are
+   * done. Pinning is not bookkeeping: `rehydrateOutputs` snapshots only the ids
+   * that are evicted when it starts, so without a pin a *resident* id in the
+   * set can be flushed and evicted by the concurrent persistence loop during
+   * the ES round trip — after which it was neither fetched by that call nor
+   * still in memory, and reads back as `{}`. `prepareForRead` pins before its
+   * own await for exactly this reason.
    */
-  public async rehydrateStepOutputs(stepExecutionIds: ReadonlyArray<string>): Promise<void> {
+  public async rehydrateStepOutputs(
+    stepExecutionIds: ReadonlyArray<string>,
+    consumerId: string = this.stepExecutionId
+  ): Promise<void> {
+    this.stepIoService.pinOutputsForRead(consumerId, stepExecutionIds);
     await this.stepIoService.rehydrateOutputs(stepExecutionIds);
+  }
+
+  /**
+   * Releases the pins taken by {@link rehydrateStepOutputs}. Idempotent, so it
+   * is safe in a `finally`.
+   */
+  public releaseReadOutputPins(consumerId: string = this.stepExecutionId): void {
+    this.stepIoService.releaseReadPins(consumerId);
   }
 
   public getCurrentStepState(): Record<string, unknown> | undefined {

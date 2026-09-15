@@ -817,46 +817,56 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
       Array.from(branchRuntimes.values(), (runtime) => runtime.stepExecutionId)
     );
 
-    const results: ParallelBranchResult[] = branches.map((branch) => {
-      const timing = {
-        ...(branch.startedAt !== undefined && { startedAt: branch.startedAt }),
-        ...(branch.finishedAt !== undefined && { finishedAt: branch.finishedAt }),
-        ...(branch.startedAt !== undefined &&
-          branch.finishedAt !== undefined && {
-            durationMs: branch.finishedAt - branch.startedAt,
-          }),
-      };
-      // `key` is the item snapshotted at init (per #17835), so correlation is
-      // stable regardless of whether `foreach` would re-resolve identically.
-      const correlation = {
-        index: branch.index,
-        ...(branch.key !== undefined && { key: branch.key }),
-      };
+    // The rehydrate pins stay held across the reads below and are released once
+    // every branch result has been copied out. Releasing earlier would reopen
+    // the window the pins exist to close: an output that was resident at
+    // rehydrate time is not in that call's fetch set, so the concurrent
+    // eviction cycle could drop it before it is read here.
+    let results: ParallelBranchResult[];
+    try {
+      results = branches.map((branch) => {
+        const timing = {
+          ...(branch.startedAt !== undefined && { startedAt: branch.startedAt }),
+          ...(branch.finishedAt !== undefined && { finishedAt: branch.finishedAt }),
+          ...(branch.startedAt !== undefined &&
+            branch.finishedAt !== undefined && {
+              durationMs: branch.finishedAt - branch.startedAt,
+            }),
+        };
+        // `key` is the item snapshotted at init (per #17835), so correlation is
+        // stable regardless of whether `foreach` would re-resolve identically.
+        const correlation = {
+          index: branch.index,
+          ...(branch.key !== undefined && { key: branch.key }),
+        };
 
-      // Branches that never started (fail-fast short-circuit) carry no result.
-      if (branch.status === 'skipped') {
-        return { ...correlation, ...timing, status: 'skipped' };
-      }
-      if (branch.status === 'timed_out') {
+        // Branches that never started (fail-fast short-circuit) carry no result.
+        if (branch.status === 'skipped') {
+          return { ...correlation, ...timing, status: 'skipped' };
+        }
+        if (branch.status === 'timed_out') {
+          return {
+            ...correlation,
+            ...timing,
+            status: 'timed_out',
+            error: {
+              type: 'TimeoutError',
+              message: `Parallel branch ${branch.index} was terminated by a timeout.`,
+            },
+          };
+        }
+        const branchResult = branchRuntimes.get(branch.index)?.getCurrentStepResult();
         return {
           ...correlation,
           ...timing,
-          status: 'timed_out',
-          error: {
-            type: 'TimeoutError',
-            message: `Parallel branch ${branch.index} was terminated by a timeout.`,
-          },
+          status: branch.status === 'failed' ? 'failed' : 'completed',
+          output: branchResult?.output,
+          error: branchResult?.error,
         };
-      }
-      const branchResult = branchRuntimes.get(branch.index)?.getCurrentStepResult();
-      return {
-        ...correlation,
-        ...timing,
-        status: branch.status === 'failed' ? 'failed' : 'completed',
-        output: branchResult?.output,
-        error: branchResult?.error,
-      };
-    });
+      });
+    } finally {
+      this.stepExecutionRuntime.releaseReadOutputPins();
+    }
 
     const succeeded = results.filter((r) => r.status === 'completed').length;
     // Timed-out branches count as failures for the aggregate status.

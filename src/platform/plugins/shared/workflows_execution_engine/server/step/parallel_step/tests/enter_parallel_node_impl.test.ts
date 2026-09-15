@@ -89,6 +89,7 @@ describe('EnterParallelNodeImpl', () => {
       rehydrateStepOutputs: jest.fn(async (ids: readonly string[]) => {
         rehydratedIds.push(...ids);
       }),
+      releaseReadOutputPins: jest.fn(),
       contextManager: {
         evaluateExpressionInContext: jest.fn((x) => x),
         renderValueAccordingToContext: jest.fn((x) => x),
@@ -541,6 +542,85 @@ describe('EnterParallelNodeImpl', () => {
       { branch: 1 },
       { branch: 2 },
     ]);
+  });
+
+  // The pin is not bookkeeping. `StepIoService.rehydrateOutputs` snapshots only
+  // the ids that are evicted when it starts, so an id that is RESIDENT at that
+  // moment is not in the fetch set -- and the persistence/eviction loop can run
+  // during the ES round trip. Without a read-pin held across the await and the
+  // subsequent synchronous reads, such an output is evicted mid-flight, never
+  // fetched, and aggregates as `{}`: the very data loss this fix exists to stop.
+  it('pins resident branch outputs so a concurrent eviction cycle cannot drop them mid-rehydrate', async () => {
+    node = makeNode({
+      foreach: JSON.stringify(['a', 'b', 'c']),
+      concurrency: { max: 2 },
+      mode: 'settled',
+    });
+
+    // Branches 0 and 1 settled in an earlier tick and were deferred by `load()`.
+    // Branch 2 settled in this tick, so its output is still resident -- and is
+    // therefore exactly the one `rehydrateOutputs` will not fetch.
+    const evicted = new Set(['exec_branch_0', 'exec_branch_1']);
+    const resident = new Set(['exec_branch_2']);
+    let pinned = new Set<string>();
+
+    stepRuntime.rehydrateStepOutputs = jest.fn(async (ids: readonly string[]) => {
+      pinned = new Set(ids);
+      const toFetch = ids.filter((id) => evicted.has(id));
+      // The await gap: the eviction cycle fires and takes anything resident and
+      // unpinned. With the pin in place it must take nothing.
+      await Promise.resolve();
+      for (const id of [...resident]) {
+        if (!pinned.has(id)) {
+          resident.delete(id);
+          evicted.add(id);
+        }
+      }
+      for (const id of toFetch) {
+        evicted.delete(id);
+        resident.add(id);
+      }
+    });
+    stepRuntime.releaseReadOutputPins = jest.fn(() => {
+      pinned = new Set();
+    });
+
+    factory.createStepExecutionRuntime = jest.fn(({ stackFrames }) => {
+      const lastFrame = stackFrames[stackFrames.length - 1];
+      const scopeId = lastFrame?.nestedScopes?.[lastFrame.nestedScopes.length - 1]?.scopeId;
+      const index = Number(scopeId ?? 0);
+      const stepExecutionId = `exec_branch_${index}`;
+      return {
+        abortController: new AbortController(),
+        contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+        stepExecutionId,
+        get stepExecution() {
+          return { status: branchOutcome(index), state: {} };
+        },
+        // Mirrors the real `getStepOutput(...) || {}`: evicted reads as `{}`.
+        getCurrentStepResult: () => ({
+          output: resident.has(stepExecutionId) ? { branch: index } : {},
+          error: undefined,
+        }),
+        timeoutStep: jest.fn(),
+      } as unknown as StepExecutionRuntime;
+    }) as unknown as typeof factory.createStepExecutionRuntime;
+
+    const impl = build();
+    await impl.run();
+    await impl.run();
+
+    expect(stepRuntime.finishStep).toHaveBeenCalledTimes(1);
+    const output = stepRuntime.finishStep.mock.calls[0][0] as {
+      results: Array<{ output?: { branch?: number } }>;
+    };
+    expect(output.results.map((r) => r.output)).toEqual([
+      { branch: 0 },
+      { branch: 1 },
+      { branch: 2 },
+    ]);
+    // Pins must not outlive the read.
+    expect(stepRuntime.releaseReadOutputPins).toHaveBeenCalled();
   });
 
   it('count-waiting:false frees a parked branch\u2019s slot so a queued branch can start', async () => {
