@@ -26,6 +26,7 @@ export type EntityCategoryId =
   | 'databases'
   | 'services'
   | 'cloud'
+  | 'networking'
   | 'middlewares'
   | 'llms'
   // Catch-all bucket for entity types whose `category` field doesn't
@@ -64,12 +65,13 @@ export interface EntityCategoryDescriptor {
  */
 export const ENTITY_CATEGORIES: readonly EntityCategoryDescriptor[] = [
   { id: 'hosts', label: 'Hosts', icon: 'storage' },
+  { id: 'cloud', label: 'Cloud', icon: 'cloudSunny' },
   { id: 'kubernetes', label: 'Kubernetes', icon: 'logoKubernetes' },
   { id: 'databases', label: 'Databases', icon: 'database' },
+  { id: 'networking', label: 'Networking', icon: 'globe' },
   { id: 'services', label: 'Services', icon: 'apmApp' },
-  { id: 'cloud', label: 'Cloud', icon: 'cloudSunny' },
-  { id: 'middlewares', label: 'Middlewares', icon: 'logstashIf' },
-  { id: 'llms', label: 'LLMs', icon: 'sparkles' },
+  { id: 'middlewares', label: 'Messaging', icon: 'logstashIf' },
+  { id: 'llms', label: 'AI/ML', icon: 'sparkles' },
   // Catch-all bucket — rendered as a nav section so user-typed
   // categories aren't invisible, but never offered as a dropdown
   // option in the wizard (the wizard exposes the 7 canonical
@@ -538,6 +540,12 @@ const SERVICE_SEED_ROWS: readonly SeedRow[] = [
   { name: 'pricing-service', type: 'APM Service', health: 'healthy' },
 ];
 
+const NETWORKING_SEED_ROWS: readonly SeedRow[] = [
+  { name: 'nginx-frontend', type: 'Nginx', health: 'healthy' },
+  { name: 'haproxy-api-gw', type: 'HAProxy', health: 'healthy' },
+  { name: 'envoy-mesh', type: 'Envoy', health: 'atRisk' },
+];
+
 const MIDDLEWARE_SEED_ROWS: readonly SeedRow[] = [
   { name: 'kafka-payments', type: 'Kafka', health: 'healthy' },
   { name: 'rabbitmq-checkout', type: 'RabbitMQ', health: 'healthy' },
@@ -569,6 +577,13 @@ const NON_KUBERNETES_SPECS: readonly CategorySpec[] = [
     typeCycle: ['APM Service'],
     seedRows: SERVICE_SEED_ROWS,
     fallbackName: (index) => `svc-${padIndex(index, 2)}`,
+  },
+  {
+    category: 'networking',
+    total: 5,
+    typeCycle: ['Nginx', 'HAProxy', 'Envoy'],
+    seedRows: NETWORKING_SEED_ROWS,
+    fallbackName: (index) => `net-${padIndex(index, 2)}`,
   },
   {
     category: 'middlewares',
@@ -873,6 +888,12 @@ export const buildFakeEntities = (
       healthFn
     ),
     ...buildCloudEntities(),
+    ...buildCategoryEntitiesWithScenario(
+      multiplier > 1
+        ? scaleSpec(findSpec('networking'), multiplier)
+        : findSpec('networking'),
+      healthFn
+    ),
     ...buildCategoryEntitiesWithScenario(
       multiplier > 1
         ? scaleSpec(findSpec('middlewares'), multiplier)

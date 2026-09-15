@@ -650,7 +650,7 @@ export const EntitiesListView = ({
       }
       // Non-K8s: group by `.type` so categories with more than one
       // entity type (Hosts → Bare-metal + VM, Cloud → region + EC2 +
-      // Lambda + S3, Middlewares → Kafka + RabbitMQ, LLMs → OpenAI +
+      // Lambda + S3, Messaging → Kafka + RabbitMQ, AI/ML → OpenAI +
       // Anthropic) render with a top-level category header and one
       // panel per type — mirroring the Kubernetes layout without its
       // cluster filter.

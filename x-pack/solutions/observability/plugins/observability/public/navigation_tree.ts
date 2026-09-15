@@ -396,6 +396,10 @@ function createNavTree({
     id: 'entityCentricLab-entitiesServices',
     link: 'streams:entitiesServices' as const,
   };
+  const networkingCategoryNode = {
+    id: 'entityCentricLab-entitiesNetworking',
+    link: 'streams:entitiesNetworking' as const,
+  };
   const middlewaresCategoryNode = {
     id: 'entityCentricLab-entitiesMiddlewares',
     link: 'streams:entitiesMiddlewares' as const,
@@ -422,10 +426,11 @@ function createNavTree({
   // Cloud link renders; providers surface via Cloud's own flyout panel).
   const entityCentricCategoryChildren = [
     hostsCategoryNode,
+    cloudCategoryNode,
     kubernetesCategoryNode,
     databasesCategoryNode,
+    networkingCategoryNode,
     servicesCategoryNode,
-    cloudCategoryNode,
     middlewaresCategoryNode,
     llmsCategoryNode,
     otherCategoryNode,
@@ -469,7 +474,7 @@ function createNavTree({
     window.localStorage.getItem('elasticOn_v_phase') !== 'phase3';
 
   const savedViewsSection =
-    latestEnabled && orderedSavedViews.length > 0 && !isPhase1Nav
+    latestEnabled && orderedSavedViews.length > 0
       ? {
           id: 'entityCentricLab-savedViews',
           title: i18n.translate('xpack.observability.obltNav.savedViews', {
@@ -645,12 +650,23 @@ function createNavTree({
         ]),
   ].filter((child) => matchesLatestSearch(child.title));
 
+  const latestCategoryChildrenMiddle = [
+    {
+      id: 'entityCentricLab-entitiesNetworking',
+      link: 'streams:entitiesNetworking' as const,
+      title: i18n.translate('xpack.observability.obltNav.latest.networking', {
+        defaultMessage: 'Networking',
+      }),
+      getIsActive: categoryGetIsActive('/app/streams/entities/networking'),
+    },
+  ].filter((child) => matchesLatestSearch(child.title));
+
   const latestCategoryChildrenBottom = [
     {
       id: 'entityCentricLab-entitiesMiddlewares',
       link: 'streams:entitiesMiddlewares' as const,
       title: i18n.translate('xpack.observability.obltNav.latest.middlewares', {
-        defaultMessage: 'Middlewares',
+        defaultMessage: 'Messaging',
       }),
       getIsActive: categoryGetIsActive('/app/streams/entities/middlewares'),
     },
@@ -658,7 +674,7 @@ function createNavTree({
       id: 'entityCentricLab-entitiesLlms',
       link: 'streams:entitiesLlms' as const,
       title: i18n.translate('xpack.observability.obltNav.latest.llms', {
-        defaultMessage: 'LLMs',
+        defaultMessage: 'AI/ML',
       }),
       getIsActive: categoryGetIsActive('/app/streams/entities/llms'),
     },
@@ -812,15 +828,23 @@ function createNavTree({
   // mapper renders flat links first and collapsible sub-groups last within a
   // section, so the providers land at the bottom of the category list with no
   // dividers bracketing them.
+  // ElasticOn is infra-first: APM Services is omitted; drop "Other" catch-all.
+  // Cloud is a single flat link (provider filter lives on the page).
+  // Explicit order: Hosts, Cloud, Kubernetes, Databases, Networking, Messaging, AI/ML.
   const elasticOnCategoryChildren = [
-    // ElasticOn is infra-first: APM Services is omitted from
-    // `latestCategoryChildrenTop` above; also drop the "Other" catch-all.
-    // Cloud is a single flat link (provider filter lives on the page).
-    ...latestCategoryChildrenTop,
+    ...latestCategoryChildrenTop.filter(
+      (child) => child.id === 'entityCentricLab-entitiesHosts'
+    ),
+    cloudCategoryNodeFlat,
+    ...latestCategoryChildrenTop.filter(
+      (child) =>
+        child.id !== 'entityCentricLab-entitiesHosts' &&
+        child.id !== 'entityCentricLab-entitiesServices'
+    ),
+    ...latestCategoryChildrenMiddle,
     ...latestCategoryChildrenBottom.filter(
       (child) => child.id !== 'entityCentricLab-entitiesOther'
     ),
-    cloudCategoryNodeFlat,
   ];
 
   const entitiesPanelChildren = superShortTermMode
@@ -856,6 +880,9 @@ function createNavTree({
         ...(latestEntitiesAllSection.children.length > 0 ? [latestEntitiesAllSection] : []),
         ...(latestCategoryChildrenTop.length > 0 ? [{ children: latestCategoryChildrenTop }] : []),
         ...(latestCloudSection ? [latestCloudSection] : []),
+        ...(latestCategoryChildrenMiddle.length > 0
+          ? [{ children: latestCategoryChildrenMiddle }]
+          : []),
         ...(latestCategoryChildrenBottom.length > 0
           ? [{ children: latestCategoryChildrenBottom }]
           : []),

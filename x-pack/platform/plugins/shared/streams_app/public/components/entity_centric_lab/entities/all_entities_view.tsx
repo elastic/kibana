@@ -421,8 +421,8 @@ const computeAlertsBadge = (
   if (!entity) return undefined;
   if (!entity.alerts) return { label: 'N/A', color: 'hollow' };
   const { total, active } = entity.alerts;
-  if (active > 0) return { label: `Alerting (${active}/${total})`, color: 'danger' };
-  return { label: `OK (${total}/${total})`, color: 'success' };
+  if (active > 0) return { label: `${active} active alert${active > 1 ? 's' : ''}`, color: 'danger' };
+  return { label: '0 active alerts', color: 'success' };
 };
 
 const AllEntitiesViewInner = ({
@@ -1375,7 +1375,7 @@ const AllEntitiesViewInner = ({
                 color="hollow"
               />
             </EuiFlexItem>
-            {!isPhase1 && loadedView && isLoadedViewModified ? (
+            {loadedView && isLoadedViewModified ? (
               <EuiFlexItem grow={false}>
                 <EuiBadge color="warning" data-test-subj="entityCentricLabUnsavedBadgeHeader">
                   {i18n.translate(
@@ -1445,7 +1445,7 @@ const AllEntitiesViewInner = ({
                         })}
                       </EuiButton>,
                     ]),
-                ...(isElasticOn && !isPhase1
+                ...(isElasticOn
                   ? [
                       <SaveViewButton
                         key="save-view"
@@ -1721,7 +1721,7 @@ const AllEntitiesViewInner = ({
               section), so it renders only the compact "Save view" button in
               the filters row below instead of this full bar.
             */}
-                {isLatest || isPhase1 ? null : (
+                {isLatest ? null : (
                   <>
                     <SavedViewsBar
                       currentState={currentViewState}
@@ -1770,7 +1770,7 @@ const AllEntitiesViewInner = ({
                       data-test-subj="entityCentricLabEntitiesTimePicker"
                     />
                   </EuiFlexItem>
-                  {isLatest && !isPhase1 ? (
+                  {isLatest ? (
                     <EuiFlexItem grow={false}>
                       {/*
                         Latest: the saved-views list lives in the left nav, so

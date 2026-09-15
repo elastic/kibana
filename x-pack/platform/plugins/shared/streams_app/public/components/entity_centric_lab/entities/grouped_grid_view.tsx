@@ -36,8 +36,10 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiIcon,
+  EuiListGroup,
+  EuiListGroupItem,
   EuiPanel,
-
+  EuiPopover,
   EuiRange,
   EuiSelect,
   EuiSpacer,
@@ -77,17 +79,26 @@ import {
   bucketKeyFor,
   effectiveStatForMetric,
   ENTITY_ALERTS_METRIC,
+  AGGREGATION_TYPES,
+  CUSTOM_METRIC_PREFIX,
   ENTITY_ALERTS_METRIC_ID,
+  customMetricDisplayLabel,
   findMetric,
   getBucketMetrics,
   getMetricLegend,
+  getPlausibleFields,
   getStatLabel,
+  isCustomMetricId,
+  loadCustomMetrics,
   resolveMetricReading,
+  saveCustomMetrics,
   resolveMetricSparkline,
   setMetricRefreshSalt,
   TONE_LABEL,
   toneColor,
+  type AggregationType,
   type BucketKey,
+  type CustomMetricDefinition,
   type MetricDescriptor,
   type MetricReading,
   type MetricTone,
@@ -1355,7 +1366,369 @@ interface BucketMetricControlsProps {
   readonly enablePaletteColoring: boolean;
   readonly onApply: (next: BucketSelection) => void;
   readonly onMetricChange: (metricId: string) => void;
+  readonly onCustomMetricsChange?: () => void;
 }
+
+// ---------------------------------------------------------------------------
+// Color by popover (with custom metric support)
+// ---------------------------------------------------------------------------
+
+type ColorByPopoverMode = 'select' | 'add' | 'edit';
+
+const ColorByPopover = ({
+  bucketKey,
+  metrics,
+  activeMetricId,
+  onMetricChange,
+  onCustomMetricsChange,
+}: {
+  bucketKey: BucketKey;
+  metrics: readonly MetricDescriptor[];
+  activeMetricId: string;
+  onMetricChange: (metricId: string) => void;
+  onCustomMetricsChange?: () => void;
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const [isOpen, setIsOpen] = useState(false);
+  const [mode, setMode] = useState<ColorByPopoverMode>('select');
+  const [draftAggregation, setDraftAggregation] = useState<AggregationType>('avg');
+  const [draftField, setDraftField] = useState('');
+  const [draftLabel, setDraftLabel] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  const builtInMetrics = useMemo(
+    () => metrics.filter((m) => !isCustomMetricId(m.id)),
+    [metrics]
+  );
+  const customMetrics = useMemo(
+    () => loadCustomMetrics(bucketKey),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [bucketKey, isOpen]
+  );
+
+  const plausibleFields = useMemo(() => getPlausibleFields(bucketKey), [bucketKey]);
+  const fieldOptions = useMemo(
+    () => plausibleFields.map((f) => ({ value: f, text: f })),
+    [plausibleFields]
+  );
+
+  const resetDraft = useCallback(() => {
+    setDraftAggregation('avg');
+    setDraftField('');
+    setDraftLabel('');
+    setEditingId(null);
+  }, []);
+
+  const closePopover = useCallback(() => {
+    setIsOpen(false);
+    setMode('select');
+    resetDraft();
+  }, [resetDraft]);
+
+  const handleSelect = useCallback(
+    (metricId: string) => {
+      onMetricChange(metricId);
+      closePopover();
+    },
+    [onMetricChange, closePopover]
+  );
+
+  const handleSaveCustom = useCallback(() => {
+    const existing = loadCustomMetrics(bucketKey);
+    const id = editingId ?? `${CUSTOM_METRIC_PREFIX}${Date.now()}`;
+    const def: CustomMetricDefinition = {
+      id,
+      aggregation: draftAggregation,
+      field: draftField,
+      label: draftLabel || undefined,
+    };
+    const updated = editingId
+      ? existing.map((m) => (m.id === editingId ? def : m))
+      : [...existing, def];
+    saveCustomMetrics(bucketKey, updated);
+    onMetricChange(id);
+    onCustomMetricsChange?.();
+    setMode('select');
+    resetDraft();
+  }, [bucketKey, draftAggregation, draftField, draftLabel, editingId, onMetricChange, onCustomMetricsChange, resetDraft]);
+
+  const handleDeleteCustom = useCallback(
+    (metricId: string) => {
+      const existing = loadCustomMetrics(bucketKey);
+      saveCustomMetrics(bucketKey, existing.filter((m) => m.id !== metricId));
+      if (activeMetricId === metricId) {
+        onMetricChange(builtInMetrics[0]?.id ?? 'status');
+      }
+      onCustomMetricsChange?.();
+    },
+    [bucketKey, activeMetricId, builtInMetrics, onMetricChange, onCustomMetricsChange]
+  );
+
+  const handleEditCustom = useCallback(
+    (def: CustomMetricDefinition) => {
+      setDraftAggregation(def.aggregation);
+      setDraftField(def.field);
+      setDraftLabel(def.label ?? '');
+      setEditingId(def.id);
+      setMode('add');
+    },
+    []
+  );
+
+  const canSave = draftField.length > 0;
+
+  const activeLabel = metrics.find((m) => m.id === activeMetricId)?.label ?? 'Color by';
+
+  const popoverButton = (
+    <EuiSelect
+      compressed
+      options={metrics.map((m) => ({ value: m.id, text: m.label }))}
+      value={activeMetricId}
+      onChange={() => {}}
+      onMouseDown={(e) => {
+        e.preventDefault();
+        setIsOpen(!isOpen);
+      }}
+      aria-label={i18n.translate(
+        'xpack.streams.entityCentricLab.entities.bucket.controls.colorByAriaLabel',
+        { defaultMessage: 'Color by' }
+      )}
+      data-test-subj={`entityCentricLabBucketColorByInline-${bucketKey}`}
+    />
+  );
+
+  return (
+    <EuiPopover
+      button={popoverButton}
+      isOpen={isOpen}
+      closePopover={closePopover}
+      anchorPosition="downLeft"
+      panelPaddingSize="none"
+      data-test-subj={`entityCentricLabColorByPopover-${bucketKey}`}
+    >
+      <div style={{ width: 320 }}>
+        {mode === 'select' ? (
+          <>
+            <EuiListGroup flush maxWidth={false} gutterSize="none">
+              {builtInMetrics.map((m) => (
+                <EuiListGroupItem
+                  key={m.id}
+                  label={m.label}
+                  size="s"
+                  onClick={() => handleSelect(m.id)}
+                  isActive={m.id === activeMetricId}
+                  iconType={m.id === activeMetricId ? 'check' : 'empty'}
+                  data-test-subj={`entityCentricLabColorByOption-${m.id}`}
+                />
+              ))}
+            </EuiListGroup>
+            {customMetrics.length > 0 ? (
+              <>
+                <EuiHorizontalRule margin="none" />
+                <EuiListGroup flush maxWidth={false} gutterSize="none">
+                  {customMetrics.map((def) => (
+                    <EuiListGroupItem
+                      key={def.id}
+                      label={customMetricDisplayLabel(def)}
+                      size="s"
+                      onClick={() => handleSelect(def.id)}
+                      isActive={def.id === activeMetricId}
+                      iconType={def.id === activeMetricId ? 'check' : 'empty'}
+                      extraAction={{
+                        iconType: 'pencil',
+                        iconSize: 's',
+                        'aria-label': 'Edit',
+                        onClick: () => handleEditCustom(def),
+                      }}
+                    />
+                  ))}
+                </EuiListGroup>
+              </>
+            ) : null}
+            <EuiHorizontalRule margin="none" />
+            <div style={{ padding: `${euiTheme.size.s} ${euiTheme.size.m}` }}>
+              <EuiFlexGroup alignItems="center" responsive={false}>
+                {customMetrics.length > 0 ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      size="xs"
+                      onClick={() => setMode('edit')}
+                      data-test-subj="entityCentricLabColorByEdit"
+                    >
+                      Edit
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                ) : null}
+                <EuiFlexItem />
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="xs"
+                    iconType="plusInCircle"
+                    onClick={() => {
+                      resetDraft();
+                      setMode('add');
+                    }}
+                    data-test-subj="entityCentricLabColorByAddMetric"
+                  >
+                    Add metric
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </div>
+          </>
+        ) : mode === 'add' ? (
+          <div style={{ padding: euiTheme.size.m }}>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="arrowLeft"
+                  aria-label="Back"
+                  size="xs"
+                  onClick={() => {
+                    setMode('select');
+                    resetDraft();
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText size="xs">
+                  <strong>{editingId ? 'EDIT CUSTOM METRIC' : 'ADD CUSTOM METRIC'}</strong>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="m" />
+            <EuiText size="xs"><strong>Metric</strong></EuiText>
+            <EuiSpacer size="xs" />
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiSelect
+                  compressed
+                  options={AGGREGATION_TYPES.map((a) => ({ value: a.id, text: a.label }))}
+                  value={draftAggregation}
+                  onChange={(e) => setDraftAggregation(e.target.value as AggregationType)}
+                  data-test-subj="entityCentricLabColorByAggregation"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">of</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiSelect
+                  compressed
+                  options={[{ value: '', text: 'Select a field' }, ...fieldOptions]}
+                  value={draftField}
+                  onChange={(e) => setDraftField(e.target.value)}
+                  data-test-subj="entityCentricLabColorByField"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="m" />
+            <EuiText size="xs"><strong>Label (optional)</strong></EuiText>
+            <EuiSpacer size="xs" />
+            <EuiFieldText
+              compressed
+              placeholder="Choose a name to appear in the &quot;Metric&quot; dropdown"
+              value={draftLabel}
+              onChange={(e) => setDraftLabel(e.target.value)}
+              data-test-subj="entityCentricLabColorByLabel"
+            />
+            <EuiSpacer size="m" />
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="s"
+                  onClick={() => {
+                    setMode('select');
+                    resetDraft();
+                  }}
+                >
+                  Cancel
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  size="s"
+                  fill
+                  disabled={!canSave}
+                  onClick={handleSaveCustom}
+                  data-test-subj="entityCentricLabColorBySave"
+                >
+                  Save
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+        ) : (
+          /* edit mode */
+          <div>
+            <EuiListGroup flush maxWidth={false} gutterSize="none">
+              {builtInMetrics.map((m) => (
+                <EuiListGroupItem
+                  key={m.id}
+                  label={<EuiText size="s" color="subdued">{m.label}</EuiText>}
+                  size="s"
+                  isDisabled
+                />
+              ))}
+            </EuiListGroup>
+            {customMetrics.length > 0 ? (
+              <>
+                <EuiHorizontalRule margin="none" />
+                <EuiListGroup flush maxWidth={false} gutterSize="none">
+                  {customMetrics.map((def) => (
+                    <EuiListGroupItem
+                      key={def.id}
+                      label={
+                        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonIcon
+                              iconType="pencil"
+                              size="xs"
+                              aria-label="Edit"
+                              onClick={() => handleEditCustom(def)}
+                            />
+                          </EuiFlexItem>
+                          <EuiFlexItem>
+                            <EuiText size="s">{customMetricDisplayLabel(def)}</EuiText>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonIcon
+                              iconType="trash"
+                              size="xs"
+                              color="danger"
+                              aria-label="Delete"
+                              onClick={() => handleDeleteCustom(def.id)}
+                            />
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      }
+                      size="s"
+                    />
+                  ))}
+                </EuiListGroup>
+              </>
+            ) : null}
+            <EuiHorizontalRule margin="none" />
+            <div style={{ padding: `${euiTheme.size.s} ${euiTheme.size.m}` }}>
+              <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty size="xs" onClick={() => setMode('select')}>
+                    Cancel
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton size="s" fill onClick={() => setMode('select')}>
+                    Save
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </div>
+          </div>
+        )}
+      </div>
+    </EuiPopover>
+  );
+};
 
 /**
  * Compact edit affordance rendered next to a bucket header. When
@@ -1374,6 +1747,7 @@ const BucketMetricControls = ({
   enablePaletteColoring,
   onApply,
   onMetricChange,
+  onCustomMetricsChange,
 }: BucketMetricControlsProps) => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
@@ -1386,11 +1760,6 @@ const BucketMetricControls = ({
         'xpack.streams.entityCentricLab.entities.bucket.controls.editDisplay',
         { defaultMessage: 'Edit display' }
       );
-
-  const metricOptions = useMemo(
-    () => metrics.map((descriptor) => ({ value: descriptor.id, text: descriptor.label })),
-    [metrics]
-  );
 
   const iconButton = (
     <EuiToolTip content={editLabel} disableScreenReaderOutput>
@@ -1411,16 +1780,12 @@ const BucketMetricControls = ({
       {enablePaletteColoring ? (
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiSelect
-              compressed
-              options={metricOptions}
-              value={metric.id}
-              onChange={(event) => onMetricChange(event.target.value)}
-              aria-label={i18n.translate(
-                'xpack.streams.entityCentricLab.entities.bucket.controls.colorByAriaLabel',
-                { defaultMessage: 'Color by' }
-              )}
-              data-test-subj={`entityCentricLabBucketColorByInline-${bucketKey}`}
+            <ColorByPopover
+              bucketKey={bucketKey}
+              metrics={metrics}
+              activeMetricId={metric.id}
+              onMetricChange={onMetricChange}
+              onCustomMetricsChange={onCustomMetricsChange}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{iconButton}</EuiFlexItem>
@@ -2065,10 +2430,12 @@ interface SubTypeRowProps {
 const SubTypeRow = ({ bucketKey, label, entities, onSelectEntity }: SubTypeRowProps) => {
   const paletteEnabled = useContext(PaletteColoringEnabledContext);
   const { selection, setSelection } = useBucketMetricSelection(bucketKey);
+  const [customMetricsVersion, setCustomMetricsVersion] = useState(0);
+  const bumpCustomMetrics = useCallback(() => setCustomMetricsVersion((v) => v + 1), []);
   // Validate metric against the current catalog; if a persisted id is
   // unknown (catalog drift) the hook returns the bucket default — fall
   // back gracefully so the row still renders.
-  const metrics = getBucketMetrics(bucketKey);
+  const metrics = getBucketMetrics(bucketKey, customMetricsVersion);
   const metric = findMetric(bucketKey, selection.metricId) ?? metrics[0];
 
   // Inline Color-by change (ElasticOn): apply immediately and clear
@@ -2131,6 +2498,7 @@ const SubTypeRow = ({ bucketKey, label, entities, onSelectEntity }: SubTypeRowPr
             enablePaletteColoring={paletteEnabled}
             onApply={setSelection}
             onMetricChange={handleInlineMetricChange}
+            onCustomMetricsChange={bumpCustomMetrics}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -2314,8 +2682,8 @@ const KubernetesCard = ({
 };
 
 // ---------------------------------------------------------------------------
-// Multi-type category card (Hosts, Cloud, Middlewares, LLMs when they
-// have entities of more than one `.type`)
+// Multi-type category card (Hosts, Cloud, Networking, Messaging, AI/ML
+// when they have entities of more than one `.type`)
 // ---------------------------------------------------------------------------
 
 /**
@@ -2508,8 +2876,8 @@ const CloudGroupedCards = ({
   );
 
   const nestedContentClass = css`
-    margin-left: 12px;
-    padding-left: 12px;
+    margin-left: ${euiTheme.size.xl};
+    padding-left: ${euiTheme.size.l};
   `;
 
   // Flatten all provider groups into a single ordered list of service rows.
@@ -2529,20 +2897,58 @@ const CloudGroupedCards = ({
   }, [providerGroups]);
 
   // On a category-scoped page, render each service type in its own panel
-  // (matches the Kubernetes sub-type layout).
+  // (matches the Kubernetes sub-type layout). When showing all providers,
+  // add light provider sub-headers so users can tell which services
+  // belong to which provider at a glance.
   if (hideHeader) {
     return (
       <>
-        {allServiceRows.map((service) => (
-          <EuiPanel key={service.entityType} hasBorder hasShadow={false} paddingSize="m">
-              <SubTypeRow
-                bucketKey={bucketKeyFor('cloud', service.entityType)}
-                label={service.label}
-                entities={service.rows}
-                onSelectEntity={onSelectEntity}
-              />
-            </EuiPanel>
-        ))}
+        {providerGroups.map((group, index) => {
+          const services = group.provider.services.filter((service) =>
+            group.rows.some((entity) => entity.type === service.entityType)
+          );
+          if (services.length === 0) return null;
+          return (
+            <React.Fragment key={group.provider.id}>
+              {providerFilter === CLOUD_PROVIDER_FILTER_ALL ? (
+                <>
+                  {index > 0 ? <EuiSpacer size="m" /> : null}
+                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type={group.provider.icon} size="m" />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued">
+                        <strong>{group.provider.label}</strong>
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer size="s" />
+                </>
+              ) : null}
+              {services.map((service) => {
+                const serviceRows = group.rows.filter(
+                  (entity) => entity.type === service.entityType
+                );
+                return (
+                  <EuiPanel
+                    key={service.entityType}
+                    hasBorder
+                    hasShadow={false}
+                    paddingSize="m"
+                  >
+                    <SubTypeRow
+                      bucketKey={bucketKeyFor('cloud', service.entityType)}
+                      label={service.label}
+                      entities={serviceRows}
+                      onSelectEntity={onSelectEntity}
+                    />
+                  </EuiPanel>
+                );
+              })}
+            </React.Fragment>
+          );
+        })}
       </>
     );
   }
@@ -2562,29 +2968,48 @@ const CloudGroupedCards = ({
         <div className={nestedContentClass}>
           {providerGroups.map((group, index) => (
             <React.Fragment key={group.provider.id}>
-              {index > 0 ? (
-                <div
-                  style={{
-                    padding: `${euiTheme.size.m} 0`,
-                  }}
-                />
+              {index > 0 && providerFilter === CLOUD_PROVIDER_FILTER_ALL ? (
+                <>
+                  <EuiSpacer size="m" />
+                  <EuiHorizontalRule margin="none" />
+                  <EuiSpacer size="m" />
+                </>
+              ) : index > 0 ? (
+                <div style={{ padding: `${euiTheme.size.m} 0` }} />
+              ) : null}
+              {providerFilter === CLOUD_PROVIDER_FILTER_ALL ? (
+                <>
+                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type={group.provider.icon} size="m" />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued">
+                        <strong>{group.provider.label}</strong>
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer size="s" />
+                </>
               ) : null}
               {group.provider.services
                 .filter((service) =>
                   group.rows.some((entity) => entity.type === service.entityType)
                 )
-                .map((service) => {
+                .map((service, serviceIndex) => {
                   const serviceRows = group.rows.filter(
                     (entity) => entity.type === service.entityType
                   );
                   return (
-                    <SubTypeRow
-                      key={service.entityType}
-                      bucketKey={bucketKeyFor('cloud', service.entityType)}
-                      label={service.label}
-                      entities={serviceRows}
-                      onSelectEntity={onSelectEntity}
-                    />
+                    <React.Fragment key={service.entityType}>
+                      {serviceIndex > 0 ? <EuiSpacer size="m" /> : null}
+                      <SubTypeRow
+                        bucketKey={bucketKeyFor('cloud', service.entityType)}
+                        label={service.label}
+                        entities={serviceRows}
+                        onSelectEntity={onSelectEntity}
+                      />
+                    </React.Fragment>
                   );
                 })}
             </React.Fragment>
@@ -2685,7 +3110,9 @@ const CategoryCardInner = ({
   const paletteEnabled = useContext(PaletteColoringEnabledContext);
   const hideHeader = useContext(HideCategoryHeaderContext);
   const { selection, setSelection } = useBucketMetricSelection(bucketKey);
-  const metrics = getBucketMetrics(bucketKey);
+  const [customMetricsVersion, setCustomMetricsVersion] = useState(0);
+  const bumpCustomMetrics = useCallback(() => setCustomMetricsVersion((v) => v + 1), []);
+  const metrics = getBucketMetrics(bucketKey, customMetricsVersion);
   const metric = findMetric(bucketKey, selection.metricId) ?? metrics[0];
   const categoryLabel = labelOverride ?? getCategoryDescriptor(category)?.label ?? category;
 
@@ -2724,41 +3151,44 @@ const CategoryCardInner = ({
   // category in the header row (e.g. "Postgres 3" instead of "Databases 3").
   const typeLabel = hideHeader ? (entities[0]?.type ?? categoryLabel) : undefined;
 
-  const controlsAndTiles = (
-    <>
-      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
-        {hideHeader ? (
-          <>
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xxs">
-                <h5>{typeLabel}</h5>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{entities.length}</EuiBadge>
-            </EuiFlexItem>
-          </>
-        ) : (
+  const headerRow = (
+    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
+      {hideHeader ? (
+        <>
           <EuiFlexItem grow={false}>
-            <CategoryHeader category={category} total={entities.length} label={labelOverride} />
+            <EuiTitle size="xxs">
+              <h5>{typeLabel}</h5>
+            </EuiTitle>
           </EuiFlexItem>
-        )}
-        <EuiFlexItem />
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">{entities.length}</EuiBadge>
+          </EuiFlexItem>
+        </>
+      ) : (
         <EuiFlexItem grow={false}>
-          <BucketMetricControls
-            bucketKey={bucketKey}
-            label={categoryLabel}
-            metric={metric}
-            metrics={metrics}
-            statId={selection.statId}
-            coloring={selection.coloring}
-            enablePaletteColoring={paletteEnabled}
-            onApply={setSelection}
-            onMetricChange={handleInlineMetricChange}
-          />
+          <CategoryHeader category={category} total={entities.length} label={labelOverride} />
         </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="xs" />
+      )}
+      <EuiFlexItem />
+      <EuiFlexItem grow={false}>
+        <BucketMetricControls
+          bucketKey={bucketKey}
+          label={categoryLabel}
+          metric={metric}
+          metrics={metrics}
+          statId={selection.statId}
+          coloring={selection.coloring}
+          enablePaletteColoring={paletteEnabled}
+          onApply={setSelection}
+          onMetricChange={handleInlineMetricChange}
+          onCustomMetricsChange={bumpCustomMetrics}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  const legendAndTiles = (
+    <>
       <BucketMetricLegend
         metric={metric}
         coloring={coloringForRender}
@@ -2785,7 +3215,9 @@ const CategoryCardInner = ({
         paddingSize="m"
         data-test-subj={`entityCentricLabBucket-${bucketKey}`}
       >
-        {controlsAndTiles}
+        {headerRow}
+        <EuiSpacer size="xs" />
+        {legendAndTiles}
       </EuiPanel>
     );
   }
@@ -2797,7 +3229,9 @@ const CategoryCardInner = ({
       paddingSize="m"
       data-test-subj={`entityCentricLabBucket-${bucketKey}`}
     >
-      {controlsAndTiles}
+      {headerRow}
+      <EuiSpacer size="xs" />
+      {legendAndTiles}
     </EuiPanel>
   );
 };
@@ -2953,7 +3387,9 @@ const CustomGroupBucketWithControls = ({
 }) => {
   const paletteEnabled = useContext(PaletteColoringEnabledContext);
   const { selection, setSelection } = useBucketMetricSelection(bucketKey);
-  const metrics = getBucketMetrics(bucketKey);
+  const [customMetricsVersion, setCustomMetricsVersion] = useState(0);
+  const bumpCustomMetrics = useCallback(() => setCustomMetricsVersion((v) => v + 1), []);
+  const metrics = getBucketMetrics(bucketKey, customMetricsVersion);
   const metric = findMetric(bucketKey, selection.metricId) ?? metrics[0];
   const { coloring } = selection;
 
@@ -3011,6 +3447,7 @@ const CustomGroupBucketWithControls = ({
             enablePaletteColoring={paletteEnabled}
             onApply={setSelection}
             onMetricChange={handleInlineMetricChange}
+            onCustomMetricsChange={bumpCustomMetrics}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

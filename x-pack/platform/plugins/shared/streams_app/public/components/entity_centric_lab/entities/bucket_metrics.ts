@@ -751,6 +751,50 @@ const CLOUD_AWS_S3_METRICS: readonly MetricDescriptor[] = [
   },
 ];
 
+const NETWORKING_METRICS: readonly MetricDescriptor[] = [
+  {
+    id: 'status',
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.metric.status', {
+      defaultMessage: 'Status',
+    }),
+    kind: 'categorical',
+    values: STATUS_VALUES_RUNNING,
+  },
+  {
+    id: 'active-connections',
+    label: i18n.translate(
+      'xpack.streams.entityCentricLab.entities.bucket.metric.activeConnections',
+      { defaultMessage: 'Active connections' }
+    ),
+    kind: 'numeric',
+    range: { min: 0, max: 10000 },
+    thresholds: { warn: 3000, crit: 7000, direction: 'asc' },
+  },
+  {
+    id: 'request-rate',
+    label: i18n.translate(
+      'xpack.streams.entityCentricLab.entities.bucket.metric.requestRate',
+      { defaultMessage: 'Request rate' }
+    ),
+    kind: 'numeric',
+    unit: ' req/s',
+    range: { min: 0, max: 50000 },
+    thresholds: { warn: 20000, crit: 40000, direction: 'asc' },
+  },
+  {
+    id: 'error-rate',
+    label: i18n.translate(
+      'xpack.streams.entityCentricLab.entities.bucket.metric.errorRate',
+      { defaultMessage: 'Error rate' }
+    ),
+    kind: 'numeric',
+    unit: '%',
+    precision: 1,
+    range: { min: 0, max: 10 },
+    thresholds: { warn: 1, crit: 5, direction: 'asc' },
+  },
+];
+
 const MIDDLEWARES_METRICS: readonly MetricDescriptor[] = [
   {
     id: 'status',
@@ -1056,6 +1100,7 @@ const CATALOG: Readonly<Record<BucketKey, readonly MetricDescriptor[]>> = {
   services: SERVICES_METRICS,
   databases: DATABASES_METRICS,
   cloud: CLOUD_METRICS,
+  networking: NETWORKING_METRICS,
   middlewares: MIDDLEWARES_METRICS,
   llms: LLMS_METRICS,
   // Cloud sub-types — distinct resources (region / compute / function
@@ -1116,7 +1161,15 @@ const withSharedMetrics = (metrics: readonly MetricDescriptor[]): readonly Metri
   return result;
 };
 
-export const getBucketMetrics = (bucketKey: BucketKey): readonly MetricDescriptor[] => {
+export const getBucketMetrics = (
+  bucketKey: BucketKey,
+  customMetricsVersion?: number
+): readonly MetricDescriptor[] => {
+  // `customMetricsVersion` is unused at runtime — it exists so callers
+  // can list it in a useMemo dependency array to re-derive the list
+  // when the user adds / edits / deletes a custom metric.
+  void customMetricsVersion;
+
   let metrics: readonly MetricDescriptor[];
   if (CATALOG[bucketKey]) {
     metrics = withSharedMetrics(CATALOG[bucketKey]);
@@ -1140,10 +1193,16 @@ export const getBucketMetrics = (bucketKey: BucketKey): readonly MetricDescripto
     // Import would create a circular dep, so inline the default id.
     const phase = raw ?? 'phase1'; // must match PHASE_DIMENSION.defaultOption
     if (phase === 'phase1') {
-      return metrics.filter((m) => m.id !== ENTITY_HEALTH_METRIC_ID);
+      metrics = metrics.filter((m) => m.id !== ENTITY_HEALTH_METRIC_ID);
     }
   } catch {
     // localStorage blocked — keep all metrics
+  }
+
+  // Append user-defined custom metrics from localStorage.
+  const custom = loadCustomMetrics(bucketKey);
+  if (custom.length > 0) {
+    return [...metrics, ...custom.map(customMetricToDescriptor)];
   }
   return metrics;
 };
@@ -1172,6 +1231,174 @@ export const getDefaultMetricId = (bucketKey: BucketKey): string => {
 
 export const findMetric = (bucketKey: BucketKey, metricId: string): MetricDescriptor | undefined =>
   getBucketMetrics(bucketKey).find((metric) => metric.id === metricId);
+
+// ---------------------------------------------------------------------------
+// Custom metrics (user-defined)
+// ---------------------------------------------------------------------------
+
+export const AGGREGATION_TYPES = [
+  { id: 'avg', label: 'Average' },
+  { id: 'max', label: 'Max' },
+  { id: 'min', label: 'Min' },
+  { id: 'rate', label: 'Rate' },
+  { id: 'last', label: 'Last value' },
+] as const;
+
+export type AggregationType = (typeof AGGREGATION_TYPES)[number]['id'];
+
+export interface CustomMetricDefinition {
+  readonly id: string;
+  readonly aggregation: AggregationType;
+  readonly field: string;
+  readonly label?: string;
+}
+
+const PLAUSIBLE_FIELDS_BY_CATEGORY: Readonly<Record<string, readonly string[]>> = {
+  kubernetes: [
+    'k8s.node.cpu.usage',
+    'k8s.node.memory.working_set',
+    'k8s.node.memory.rss',
+    'k8s.node.filesystem.usage',
+    'k8s.node.network.io',
+    'k8s.pod.cpu.usage',
+    'k8s.pod.memory.working_set',
+    'k8s.pod.memory.rss',
+    'k8s.pod.memory_limit_utilization',
+    'k8s.pod.cpu_limit_utilization',
+    'k8s.pod.network.io',
+    'k8s.container.restarts',
+    'k8s.deployment.desired',
+    'k8s.deployment.available',
+    'k8s.volume.available',
+    'k8s.volume.capacity',
+  ],
+  hosts: [
+    'system.cpu.total.pct',
+    'system.memory.used.pct',
+    'system.memory.actual.used.bytes',
+    'system.load.1',
+    'system.load.5',
+    'system.load.15',
+    'system.filesystem.used.pct',
+    'system.network.in.bytes',
+    'system.network.out.bytes',
+    'system.process.count',
+    'system.uptime.duration.ms',
+  ],
+  cloud: [
+    'aws.ec2.cpu.total.pct',
+    'aws.ec2.network.in.bytes',
+    'aws.ec2.network.out.bytes',
+    'aws.ec2.diskio.read.bytes',
+    'aws.ec2.diskio.write.bytes',
+    'aws.lambda.duration.avg',
+    'aws.lambda.invocations',
+    'aws.lambda.errors',
+    'aws.lambda.throttles',
+    'aws.s3.bucket.size.bytes',
+    'aws.s3.number_of_objects',
+    'gcp.compute.cpu.utilization',
+    'gcp.compute.disk.read_bytes_count',
+    'gcp.compute.network.received_bytes_count',
+    'azure.compute.percentage_cpu',
+  ],
+  databases: [
+    'db.connections.active',
+    'db.connections.idle',
+    'db.queries.rate',
+    'db.query.duration.avg',
+    'db.cache.hit_ratio',
+    'db.replication.lag.ms',
+    'db.disk.usage.bytes',
+  ],
+  services: [
+    'service.request.rate',
+    'service.latency.p50',
+    'service.latency.p95',
+    'service.latency.p99',
+    'service.error.rate',
+    'service.throughput',
+    'service.cpu.usage',
+    'service.memory.heap.used',
+  ],
+  networking: [
+    'network.connections.active',
+    'network.request.rate',
+    'network.response.time.avg',
+    'network.bytes.in',
+    'network.bytes.out',
+    'network.error.rate',
+    'network.ssl.handshake.duration',
+  ],
+  middlewares: [
+    'middleware.connections.active',
+    'middleware.request.rate',
+    'middleware.response.time.avg',
+    'middleware.queue.depth',
+    'middleware.cache.hit_ratio',
+    'middleware.error.rate',
+  ],
+};
+
+const GENERIC_FIELDS: readonly string[] = [
+  'app.request.rate',
+  'app.error.count',
+  'app.latency.avg',
+  'app.cpu.usage',
+  'app.memory.usage',
+  'app.disk.usage',
+];
+
+export const getPlausibleFields = (bucketKey: BucketKey): readonly string[] => {
+  const colonIdx = bucketKey.indexOf(':');
+  const category = colonIdx > 0 ? bucketKey.slice(0, colonIdx) : bucketKey;
+  return PLAUSIBLE_FIELDS_BY_CATEGORY[category] ?? GENERIC_FIELDS;
+};
+
+const customMetricsStorageKey = (bucketKey: BucketKey): string =>
+  `elasticOn_customMetrics_${bucketKey}`;
+
+export const loadCustomMetrics = (bucketKey: BucketKey): readonly CustomMetricDefinition[] => {
+  try {
+    const raw = window.localStorage.getItem(customMetricsStorageKey(bucketKey));
+    if (!raw) return [];
+    return JSON.parse(raw) as CustomMetricDefinition[];
+  } catch {
+    return [];
+  }
+};
+
+export const saveCustomMetrics = (
+  bucketKey: BucketKey,
+  metrics: readonly CustomMetricDefinition[]
+): void => {
+  try {
+    window.localStorage.setItem(customMetricsStorageKey(bucketKey), JSON.stringify(metrics));
+  } catch {
+    // localStorage full or blocked
+  }
+};
+
+const aggLabel = (aggregation: AggregationType): string =>
+  AGGREGATION_TYPES.find((a) => a.id === aggregation)?.label ?? aggregation;
+
+export const customMetricDisplayLabel = (def: CustomMetricDefinition): string =>
+  def.label || `${aggLabel(def.aggregation)} of ${def.field}`;
+
+export const CUSTOM_METRIC_PREFIX = 'custom-';
+
+export const isCustomMetricId = (metricId: string): boolean =>
+  metricId.startsWith(CUSTOM_METRIC_PREFIX);
+
+export const customMetricToDescriptor = (def: CustomMetricDefinition): MetricDescriptor => ({
+  id: def.id,
+  label: customMetricDisplayLabel(def),
+  kind: 'numeric',
+  unit: '',
+  precision: 1,
+  range: { min: 0, max: 100 },
+  thresholds: { warn: 60, crit: 85, direction: 'asc' },
+});
 
 // ---------------------------------------------------------------------------
 // Deterministic value generation

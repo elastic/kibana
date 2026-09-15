@@ -235,9 +235,17 @@ export class StreamsAppPlugin
         },
         ...cloudEntityDeepLinks,
         {
+          id: 'entitiesNetworking',
+          title: i18n.translate('xpack.streams.deepLinks.entitiesNetworkingTitle', {
+            defaultMessage: 'Networking',
+          }),
+          path: '/entities/networking',
+          visibleIn: [],
+        },
+        {
           id: 'entitiesMiddlewares',
           title: i18n.translate('xpack.streams.deepLinks.entitiesMiddlewaresTitle', {
-            defaultMessage: 'Middlewares',
+            defaultMessage: 'Messaging',
           }),
           path: '/entities/middlewares',
           visibleIn: [],
@@ -245,7 +253,7 @@ export class StreamsAppPlugin
         {
           id: 'entitiesLlms',
           title: i18n.translate('xpack.streams.deepLinks.entitiesLlmsTitle', {
-            defaultMessage: 'LLMs',
+            defaultMessage: 'AI/ML',
           }),
           path: '/entities/llms',
           visibleIn: [],

@@ -216,8 +216,8 @@ const computeChildAlertsBadge = (
   if (!entity) return undefined;
   if (!entity.alerts) return { label: 'N/A', color: 'hollow' };
   const { total, active } = entity.alerts;
-  if (active > 0) return { label: `Alerting (${active}/${total})`, color: 'danger' };
-  return { label: `OK (${total}/${total})`, color: 'success' };
+  if (active > 0) return { label: `${active} active alert${active > 1 ? 's' : ''}`, color: 'danger' };
+  return { label: '0 active alerts', color: 'success' };
 };
 
 // ---------------------------------------------------------------------------
@@ -282,8 +282,8 @@ const EntityDetailPageInner = () => {
       if (entity?.alerts) {
         const { total, active } = entity.alerts;
         const alertTag = active > 0
-          ? { label: `Alerting (${active}/${total})`, color: 'danger' }
-          : { label: `OK (${total}/${total})`, color: 'success' };
+          ? { label: `${active} active alert${active > 1 ? 's' : ''}`, color: 'danger' }
+          : { label: '0 active alerts', color: 'success' };
         return [alertTag, ...withoutHealth];
       }
       return [{ label: 'N/A', color: 'hollow' }, ...withoutHealth];

@@ -94,12 +94,7 @@ export const LatestInventoryNavHeader = ({ coreStart }: { coreStart: CoreStart }
   const isLatest = useLabModeIsLatest(coreStart);
   const query = useIntegrationsSearch();
 
-  // Phase 1 hides saved views so the nav search has nothing to filter.
-  const isPhase1 =
-    typeof window !== 'undefined' &&
-    window.localStorage.getItem('elasticOn_v_phase') !== 'phase3';
-
-  if (!isLatest || isPhase1) return null;
+  if (!isLatest) return null;
 
   const wrapperStyles = css`
     padding: ${euiTheme.size.s} ${euiTheme.size.m} 0;
@@ -151,12 +146,7 @@ export const SavedViewsSectionAction = ({
   const isElasticOn = useLabModeIsElasticOn(coreStart);
   const [isManageOpen, setIsManageOpen] = useState(false);
 
-  // Phase 1 hides the entire saved views mechanism.
-  const isPhase1 =
-    typeof window !== 'undefined' &&
-    window.localStorage.getItem('elasticOn_v_phase') !== 'phase3';
-
-  if (!isLatest || isPhase1) return null;
+  if (!isLatest) return null;
 
   const manageLabel = i18n.translate('xpack.streams.entityCentricLab.savedViews.nav.manage', {
     defaultMessage: 'Manage saved views',
