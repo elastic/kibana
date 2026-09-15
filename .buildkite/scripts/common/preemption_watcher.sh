@@ -4,7 +4,8 @@
 #
 # Long-polls the GCE metadata server for `instance/preempted` and, when it flips
 # to TRUE, records what was running so the retry attempt can attribute the loss.
-# Observational only: never affects the exit status of the step.
+# Optionally stops the agent so the job fails fast instead of waiting for
+# Buildkite's lost-agent detection. Never fails the step on its own.
 #
 # Usage (from a step script):
 #   .buildkite/scripts/common/preemption_watcher.sh &
@@ -23,7 +24,6 @@ METADATA_HOST="${PREEMPTION_METADATA_HOST:-metadata.google.internal}"
 METADATA_URL="http://${METADATA_HOST}/computeMetadata/v1/instance"
 STATE_DIR="${PREEMPTION_STATE_DIR:-target/preemption}"
 CURRENT_CONFIG_FILE="$STATE_DIR/current_config"
-MARKER_FILE="$STATE_DIR/preempted.json"
 META_KEY="${BUILDKITE_STEP_ID:-local}${FTR_CONFIG_GROUP_KEY:-}_preempted"
 
 log() {
@@ -31,7 +31,7 @@ log() {
 }
 
 metadata_get() {
-  curl -sf --connect-timeout 2 --max-time "${2:-5}" -H 'Metadata-Flavor: Google' "$METADATA_URL/$1"
+  curl -sf --connect-timeout 2 --max-time 5 -H 'Metadata-Flavor: Google' "$METADATA_URL/$1"
 }
 
 mkdir -p "$STATE_DIR"
@@ -85,21 +85,15 @@ echo "^^^ +++"
 # thing the retry attempt can read.
 buildkite-agent meta-data set "$META_KEY" "${detected_at} ${current_config}" || true
 
-printf '{"detected_at":"%s","job_id":"%s","retry_count":"%s","config":"%s"}\n' \
-  "$detected_at" "${BUILDKITE_JOB_ID:-}" "${BUILDKITE_RETRY_COUNT:-0}" "$current_config" > "$MARKER_FILE" || true
-
 buildkite-agent annotate --style warning --context "preemption-${BUILDKITE_JOB_ID:-local}" \
   "Spot preemption detected at ${detected_at} in job \`${BUILDKITE_LABEL:-$META_KEY}\` (attempt $((${BUILDKITE_RETRY_COUNT:-0} + 1))) while running \`${current_config:-<none>}\`" || true
 
-# Optional: stop the agent now instead of letting Buildkite discover it as lost.
-# A lost agent costs ~3 min heartbeat timeout + up to 60s reaper tick before the
-# job fails with exit -1 and becomes retryable. SIGQUIT makes the agent cancel
-# the job (cancel-signal, then SIGKILL after cancel-signal-timeout), upload what
-# it has within cancel-cleanup-timeout, and report signal_reason=agent_stop,
-# which the step's retry rules match immediately. Ordered last: the writes above
-# must land before the job's process tree (including this watcher) is killed.
-# The agent tears the job down within ~1s of SIGQUIT, so anything that must
-# survive is written before the signal; the kill result only goes to the log.
+# Optional: stop the agent now instead of letting Buildkite discover it as lost
+# (~3 min heartbeat timeout + up to 60s reaper tick before the job becomes
+# retryable). SIGQUIT makes the agent cancel the job, run post-command/artifact
+# upload, and report exit -1 with signal_reason=agent_stop. The agent tears the
+# job down (including this watcher) within ~1s, so everything that must survive
+# is written before the signal; the kill result only goes to the log.
 if [[ "${PREEMPTION_STOP_AGENT:-}" =~ ^(1|true)$ ]]; then
   agent_pid="${BUILDKITE_AGENT_PID:-}"
   if [[ -z "$agent_pid" ]]; then
@@ -107,12 +101,17 @@ if [[ "${PREEMPTION_STOP_AGENT:-}" =~ ^(1|true)$ ]]; then
     # child is an ancestor of this watcher and must not be the target.
     agent_pid=$(pgrep -f 'buildkite-agent start' || true)
   fi
+
+  skip_reason=""
   if [[ -z "$agent_pid" ]]; then
-    log "stop agent: no agent pid found; leaving job to lost-agent detection"
-    buildkite-agent meta-data set "${META_KEY}_stop" "no agent pid found" || true
+    skip_reason="no agent pid found"
   elif [[ "$(echo "$agent_pid" | wc -l)" -ne 1 ]]; then
-    log "stop agent: ambiguous agent pids ($(echo "$agent_pid" | paste -sd, -)); leaving job to lost-agent detection"
-    buildkite-agent meta-data set "${META_KEY}_stop" "ambiguous agent pids" || true
+    skip_reason="ambiguous agent pids: $(echo "$agent_pid" | paste -sd, -)"
+  fi
+
+  if [[ "$skip_reason" ]]; then
+    log "stop agent: $skip_reason; leaving job to lost-agent detection"
+    buildkite-agent meta-data set "${META_KEY}_stop" "$skip_reason" || true
   else
     buildkite-agent meta-data set "${META_KEY}_stop" "$(date -u +%Y-%m-%dT%H:%M:%SZ) SIGQUIT pid=$agent_pid" || true
     kill_err=$(kill -QUIT "$agent_pid" 2>&1); kill_rc=$?
