@@ -8,9 +8,6 @@
 import { useMemo } from 'react';
 import { getActiveMaintenanceWindows, useFetchMaintenanceWindows } from '../../../hooks';
 
-/** How long after an MW write we still show the pending callout while Fleet/agents catch up. */
-const MW_PENDING_SYNC_WINDOW_MS = 5 * 60 * 1000;
-
 export const useHasPendingMwChanges = (monitorMWIds: string[]) => {
   const { data } = useFetchMaintenanceWindows();
 
@@ -30,20 +27,10 @@ export const useHasPendingMwChanges = (monitorMWIds: string[]) => {
     // list is a valid state where every referenced MW would be treated as missing/pending.
     if (!needsPendingCheck || data == null) return false;
 
-    const allMWsById = new Map(allMWs.map((mw) => [mw.id, mw]));
-    const now = Date.now();
-
-    return monitorMWIds.some((id) => {
-      const mw = allMWsById.get(id);
-      if (!mw) return true;
-
-      if (mw.updatedAt) {
-        const updatedAt = new Date(mw.updatedAt).getTime();
-        return now - updatedAt < MW_PENDING_SYNC_WINDOW_MS;
-      }
-
-      return false;
-    });
+    const knownIds = new Set(allMWs.map((mw) => mw.id));
+    // Edits runSoon the sync task; the callout is only for IDs the monitor still
+    // references after the MW was deleted.
+    return monitorMWIds.some((id) => !knownIds.has(id));
   })();
 
   return { activeMWs, hasPendingChanges };
