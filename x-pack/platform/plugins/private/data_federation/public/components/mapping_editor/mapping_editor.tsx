@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { FC, SetStateAction } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
@@ -283,10 +283,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <MappingEditorHeader
-        isAddFieldVisible={editingFieldId === null && value.fields.length > 0}
-        onAddField={addField}
-      />
+      <MappingEditorHeader />
       <EuiSpacer size="s" />
       {value.fields.length === 0 ? (
         <EuiPanel paddingSize="s" color="subdued" hasBorder={false}>
@@ -309,22 +306,22 @@ export const MappingEditor: FC<MappingEditorProps> = ({
           />
         </EuiPanel>
       ) : (
-        <EuiFlexGroup direction="column" gutterSize="s">
-          {value.fields.map((f) => {
-            const typeInfo = (
-              typeInfoByValue as Record<string, { label: string; docs: string } | undefined>
-            )[f.type];
-            const isEditing = editingFieldId === f.id;
-            const shouldShowRowValidation = validatedFieldIds.includes(f.id);
-            const rowErrors = shouldShowRowValidation
-              ? validation.fieldErrorsById[f.id]
-              : undefined;
-            return (
-              <EuiFlexItem key={f.id}>
-                <EuiPanel paddingSize="s" color="subdued" hasBorder={false}>
-                  <EuiFlexGroup gutterSize="m" alignItems="flexStart">
-                    {isEditing ? (
-                      <>
+        <>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {value.fields.map((f) => {
+              const typeInfo = (
+                typeInfoByValue as Record<string, { label: string; docs: string } | undefined>
+              )[f.type];
+              const isEditing = editingFieldId === f.id;
+              const shouldShowRowValidation = validatedFieldIds.includes(f.id);
+              const rowErrors = shouldShowRowValidation
+                ? validation.fieldErrorsById[f.id]
+                : undefined;
+              return (
+                <EuiFlexItem key={f.id}>
+                  <EuiPanel paddingSize="s" color="subdued" hasBorder={false}>
+                    <EuiFlexGroup gutterSize="m" alignItems="flexStart">
+                      {isEditing ? (
                         <FieldMappingForm
                           value={f}
                           onChange={(patch) => {
@@ -343,21 +340,45 @@ export const MappingEditor: FC<MappingEditorProps> = ({
                             setEditingFieldId(null);
                           }}
                         />
-                      </>
-                    ) : (
-                      <FieldMappingDisplayMode
-                        field={f}
-                        typeLabel={typeInfo?.label}
-                        onEdit={() => setEditingFieldId(f.id)}
-                        onRemove={() => removeField(f.id)}
-                      />
-                    )}
-                  </EuiFlexGroup>
-                </EuiPanel>
-              </EuiFlexItem>
-            );
-          })}
-        </EuiFlexGroup>
+                      ) : (
+                        <FieldMappingDisplayMode
+                          field={f}
+                          typeLabel={typeInfo?.label}
+                          onEdit={() => setEditingFieldId(f.id)}
+                          onRemove={() => removeField(f.id)}
+                        />
+                      )}
+                    </EuiFlexGroup>
+                  </EuiPanel>
+                </EuiFlexItem>
+              );
+            })}
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <div
+                style={{
+                  width: 'fit-content',
+                  visibility: editingFieldId === null ? 'visible' : 'hidden',
+                }}
+                aria-hidden={editingFieldId !== null}
+              >
+                <EuiButton
+                  size="s"
+                  color="primary"
+                  fill
+                  onClick={addField}
+                  data-test-subj="dataFederationMappingEditorAddField"
+                >
+                  {i18n.translate('xpack.dataFederation.mappingEditor.addFieldButton', {
+                    defaultMessage: 'Add field',
+                  })}
+                </EuiButton>
+              </div>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
       )}
       // todo remove
       {showJsonPreview ? <MappingJsonPreview json={previewJson} /> : null}

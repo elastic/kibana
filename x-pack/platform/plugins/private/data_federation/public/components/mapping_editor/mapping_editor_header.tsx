@@ -6,27 +6,11 @@
  */
 
 import React from 'react';
-import {
-  EuiCode,
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export interface MappingEditorHeaderProps {
-  isAddFieldVisible: boolean;
-  onAddField: () => void;
-}
-
-export const MappingEditorHeader = ({
-  isAddFieldVisible,
-  onAddField,
-}: MappingEditorHeaderProps) => {
+export const MappingEditorHeader = () => {
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
@@ -45,31 +29,6 @@ export const MappingEditorHeader = ({
             values={{ timestampField: <EuiCode>@timestamp</EuiCode> }}
           />
         </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
-          <EuiFlexItem grow={false} style={{ alignSelf: 'flex-end' }}>
-            <div
-              style={{
-                width: 'fit-content',
-                visibility: isAddFieldVisible ? 'visible' : 'hidden',
-              }}
-              aria-hidden={!isAddFieldVisible}
-            >
-              <EuiButton
-                size="s"
-                color="primary"
-                fill
-                onClick={onAddField}
-                data-test-subj="dataFederationMappingEditorAddField"
-              >
-                {i18n.translate('xpack.dataFederation.mappingEditor.addFieldButton', {
-                  defaultMessage: 'Add field',
-                })}
-              </EuiButton>
-            </div>
-          </EuiFlexItem>
-        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
