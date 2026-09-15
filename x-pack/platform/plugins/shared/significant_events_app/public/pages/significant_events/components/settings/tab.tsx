@@ -49,6 +49,7 @@ import {
   MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
   MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
 } from '@kbn/significant-events-plugin/common';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useModelSettingsUrl } from '../../../../hooks/use_model_settings_url';
 import { getFormattedError } from '../../../../util/errors';
@@ -64,6 +65,8 @@ import {
 import { AppsSection } from './apps_section';
 import { MaintenanceSection } from './maintenance_section';
 import { StaleEventCleanupSection } from './stale_event_cleanup_section';
+import { RunLimitsSection } from './run_limits_section';
+import { CostEstimate } from './cost_estimate';
 
 const clampNumber = (value: string, min: number, max: number) => {
   const parsed = Number(value);
@@ -77,14 +80,19 @@ export function SettingsTab() {
   const { core } = useKibana();
   const modelSettingsUrl = useModelSettingsUrl();
 
-  // Saving these settings hits two routes with different privileges: the streams
-  // settings route (requires the streams `manage` privilege) and core's UI
-  // settings routes used by `core.settings.client`/`globalClient` (require
-  // `advancedSettings.save`). Gate the whole form on both so the user never
-  // triggers a partial save that 403s halfway through.
-  const canManageStreams = core.application.capabilities.streams?.manage === true;
+  // Saving these settings hits Nightshift engine routes and core's UI settings
+  // routes used by `core.settings.client` / `globalClient` (require
+  // `advancedSettings.save`). Gate each section on the engine that owns it so
+  // the user never triggers a partial save that 403s halfway through.
+  const nightshiftCapabilities = getNightshiftCapabilities(
+    core.application.capabilities.nightshift
+  );
+  const { canManage, canConfigure } = nightshiftCapabilities;
   const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
-  const canEditSettings = canManageStreams && canSaveAdvancedSettings;
+  const canConfigureEngines = canManage && canConfigure;
+  const canEditSettings = canConfigureEngines && canSaveAdvancedSettings;
+  // Slack app routes are gated on the Streams feature privilege, not Nightshift.
+  const canManageSlack = core.application.capabilities.streams?.manage === true;
 
   // Pause turns these Settings toggles off (and Resume restores only those that
   // were previously on). While paused, the toggles are not editable.
@@ -144,7 +152,8 @@ export function SettingsTab() {
   });
 
   // Dirty continuous/scheduled changes are blocked while paused (server 409).
-  const activitySettingsDirty = scheduledDiscovery.hasChanged || continuousExtraction.hasChanged;
+  const activitySettingsDirty =
+    canEditSettings && (scheduledDiscovery.hasChanged || continuousExtraction.hasChanged);
   const saveBlockedByPause = blocksActivity && activitySettingsDirty;
 
   const savedConfigYaml = useMemo(() => {
@@ -175,10 +184,11 @@ export function SettingsTab() {
 
   const hasTuningConfigChanges = draftConfigYaml !== savedConfigYamlState;
   const hasChanges =
-    indexPatterns !== savedIndexPatterns ||
-    continuousExtraction.hasChanged ||
-    scheduledDiscovery.hasChanged ||
-    hasTuningConfigChanges;
+    canEditSettings &&
+    (indexPatterns !== savedIndexPatterns ||
+      continuousExtraction.hasChanged ||
+      hasTuningConfigChanges ||
+      scheduledDiscovery.hasChanged);
 
   const handleCancel = useCallback(() => {
     setIndexPatterns(savedIndexPatterns);
@@ -193,7 +203,7 @@ export function SettingsTab() {
     try {
       const normalizedIndexPatterns = parseIndexPatterns(indexPatterns).join(', ');
       setIndexPatterns(normalizedIndexPatterns);
-      if (normalizedIndexPatterns !== savedIndexPatterns) {
+      if (canEditSettings && normalizedIndexPatterns !== savedIndexPatterns) {
         await core.settings.client.set(
           OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS,
           normalizedIndexPatterns
@@ -201,15 +211,15 @@ export function SettingsTab() {
         setSavedIndexPatterns(normalizedIndexPatterns);
       }
 
-      if (continuousExtraction.hasChanged) {
+      if (canEditSettings && continuousExtraction.hasChanged) {
         await continuousExtraction.save();
       }
 
-      if (scheduledDiscovery.hasChanged) {
+      if (canEditSettings && scheduledDiscovery.hasChanged) {
         await scheduledDiscovery.save();
       }
 
-      if (hasTuningConfigChanges && parsedTuningConfig) {
+      if (canEditSettings && hasTuningConfigChanges && parsedTuningConfig) {
         const fullConfig = { ...DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG, ...parsedTuningConfig };
         await core.settings.globalClient.set(
           OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG,
@@ -240,6 +250,7 @@ export function SettingsTab() {
     scheduledDiscovery,
     hasTuningConfigChanges,
     parsedTuningConfig,
+    canEditSettings,
   ]);
 
   const handleSave = useCallback(() => {
@@ -287,7 +298,7 @@ export function SettingsTab() {
                 'xpack.significantEventsApp.settings.noPermissionCalloutDescription',
                 {
                   defaultMessage:
-                    'Editing these settings requires both the Streams "Manage" privilege and the Advanced Settings "All" privilege. Contact your administrator if you need to make changes.',
+                    'Editing these settings requires the Nightshift "Manage engines" privilege and the Advanced Settings "All" privilege. Contact your administrator if you need to make changes.',
                 }
               )}
             </p>
@@ -295,11 +306,17 @@ export function SettingsTab() {
           <EuiSpacer />
         </>
       )}
-      <MaintenanceSection canManage={canManageStreams} />
+      <MaintenanceSection canManage={canConfigureEngines} />
 
       <EuiSpacer />
 
-      <StaleEventCleanupSection canManage={canManageStreams} />
+      <StaleEventCleanupSection canManage={canManage} />
+
+      <CostEstimate />
+
+      <EuiSpacer />
+
+      <RunLimitsSection />
 
       <EuiSpacer />
 
@@ -838,7 +855,7 @@ export function SettingsTab() {
         </EuiPanel>
       </EuiPanel>
 
-      {isAppsEnabled && <AppsSection canEdit={canEditSettings} />}
+      {isAppsEnabled && <AppsSection canEdit={canManageSlack} />}
 
       {isConfirmingZeroMatch && (
         <EuiConfirmModal

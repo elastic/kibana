@@ -18,6 +18,7 @@ import {
 import { createMockGetScopedClients } from '../utils/test_helpers';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
+import { platformStreamsMemoryTools } from '../../memory_and_investigation/tools/memory/tool_ids';
 
 const createMockServer = (): Pick<StreamsServer, 'isServerless' | 'core'> => ({
   isServerless: false,
@@ -51,6 +52,9 @@ describe('registerAgentBuilderTools', () => {
     expect(registeredIds).toContain(SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID);
     expect(registeredIds).toContain(SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID);
     expect(registeredIds).toContain(SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID);
+    expect(registeredIds).not.toContain(platformStreamsMemoryTools.memorySearch);
+    expect(registeredIds).not.toContain(platformStreamsMemoryTools.memoryRead);
+    expect(registeredIds).not.toContain(platformStreamsMemoryTools.memoryList);
   });
 
   it('registers tools with non-empty descriptions and schemas', () => {

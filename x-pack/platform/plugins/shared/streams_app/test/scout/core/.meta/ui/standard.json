@@ -1,5 +1,5 @@
 {
-  "sha1": "e2ac40622afe8251b08430c0eb8c94c2785bd4da",
+  "sha1": "861b847024c9e87c7dbe2650465ce37310f835de",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -107,8 +107,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 82,
-        "column": 30
+        "line": 83,
+        "column": 11
       }
     },
     {
@@ -123,7 +123,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 90,
+        "line": 91,
         "column": 13
       }
     },
@@ -139,7 +139,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 101,
+        "line": 102,
         "column": 21
       }
     },
@@ -155,7 +155,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 108,
+        "line": 109,
         "column": 7
       }
     },
@@ -171,7 +171,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 131,
+        "line": 132,
         "column": 24
       }
     },
@@ -187,7 +187,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 140,
+        "line": 141,
         "column": 13
       }
     },
@@ -203,7 +203,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 146,
+        "line": 147,
         "column": 26
       }
     },
@@ -219,7 +219,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 153,
+        "line": 154,
         "column": 21
       }
     },
@@ -235,7 +235,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 168,
+        "line": 169,
         "column": 7
       }
     },
@@ -411,8 +411,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_layout.spec.ts",
-        "line": 33,
-        "column": 7
+        "line": 32,
+        "column": 9
       }
     },
     {
@@ -427,13 +427,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_layout.spec.ts",
-        "line": 38,
-        "column": 25
+        "line": 36,
+        "column": 21
       }
     },
     {
-      "id": "6697d27925b9def-7203c017ee5c2ad",
-      "title": "Streams layout renders Sources and placeholders for tabs without content",
+      "id": "6697d27925b9def-2d929861841bf1e",
+      "title": "Streams layout renders the sources table",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -443,8 +443,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_layout.spec.ts",
-        "line": 43,
-        "column": 7
+        "line": 42,
+        "column": 13
       }
     },
     {
@@ -459,8 +459,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_layout.spec.ts",
-        "line": 51,
-        "column": 7
+        "line": 47,
+        "column": 11
       }
     },
     {

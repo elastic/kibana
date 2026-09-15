@@ -59,9 +59,9 @@ describe('alerting_v2 config schema', () => {
   });
 
   describe('rules.maxScheduledPerMinute', () => {
-    it('defaults to 400', () => {
+    it('defaults to 32000 (the v1 hosted budget; serverless overrides to 400)', () => {
       const config = configSchema.validate({});
-      expect(config.rules.maxScheduledPerMinute).toBe(400);
+      expect(config.rules.maxScheduledPerMinute).toBe(32000);
     });
 
     it('rejects negative values', () => {
@@ -149,21 +149,36 @@ describe('alerting_v2 config schema', () => {
   });
 
   describe('rules.run.query.maxResponseSize', () => {
-    it('defaults to 50 MB', () => {
+    it('defaults to 50mb', () => {
       const config = configSchema.validate({});
-      expect(config.rules.run.query.maxResponseSize).toBe(50 * 1024 * 1024);
+      expect(config.rules.run.query.maxResponseSize.getValueInBytes()).toBe(50 * 1024 * 1024);
     });
 
-    it('accepts a configured value', () => {
+    it('accepts a byte-size string', () => {
       expect(
-        configSchema.validate({ rules: { run: { query: { maxResponseSize: 1024 } } } }).rules.run
-          .query.maxResponseSize
+        configSchema
+          .validate({ rules: { run: { query: { maxResponseSize: '10mb' } } } })
+          .rules.run.query.maxResponseSize.getValueInBytes()
+      ).toBe(10 * 1024 * 1024);
+    });
+
+    it('accepts a plain number of bytes', () => {
+      expect(
+        configSchema
+          .validate({ rules: { run: { query: { maxResponseSize: 1024 } } } })
+          .rules.run.query.maxResponseSize.getValueInBytes()
       ).toBe(1024);
     });
 
-    it('rejects values below 1024 bytes', () => {
+    it('rejects values below 1kb', () => {
       expect(() =>
-        configSchema.validate({ rules: { run: { query: { maxResponseSize: 1023 } } } })
+        configSchema.validate({ rules: { run: { query: { maxResponseSize: '1023b' } } } })
+      ).toThrow();
+    });
+
+    it('rejects malformed sizes', () => {
+      expect(() =>
+        configSchema.validate({ rules: { run: { query: { maxResponseSize: 'ten megs' } } } })
       ).toThrow();
     });
   });

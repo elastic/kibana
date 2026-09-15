@@ -8,11 +8,9 @@
 import React from 'react';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderProps } from '@kbn/app-header';
-import { useCasesPageLayout } from './cases_page_layout';
 
 export const CasesAppHeader = (props: AppHeaderProps) => {
-  const { variant } = useCasesPageLayout();
-  const spacing = props.spacing ?? (variant === 'legacy' ? 'flush' : 'standard');
+  const spacing = props.spacing ?? 'standard';
 
   return <AppHeader {...props} spacing={spacing} />;
 };

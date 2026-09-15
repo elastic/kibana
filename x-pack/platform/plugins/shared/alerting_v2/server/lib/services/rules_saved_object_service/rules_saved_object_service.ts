@@ -79,6 +79,13 @@ export type BulkUpdateResultItem =
   | { id: string; success: true }
   | { id: string; success: false; error: SavedObjectError };
 
+export type BulkCreateResultItem =
+  | (RuleSavedObjectDoc & { error?: undefined })
+  | {
+      id: string;
+      error: SavedObjectError;
+    };
+
 export interface RulesFindAllResultItem {
   id: string;
   attributes: RuleSavedObjectAttributes;
@@ -128,6 +135,13 @@ export interface RulesSavedObjectServiceContract {
       references?: SavedObjectReference[];
     }>
   ): Promise<BulkUpdateResultItem[]>;
+  bulkCreate(
+    items: Array<{
+      id: string;
+      attrs: RuleSavedObjectAttributes;
+      references?: SavedObjectReference[];
+    }>
+  ): Promise<BulkCreateResultItem[]>;
   delete(params: { id: string }): Promise<void>;
   bulkDelete(ids: string[]): Promise<BulkDeleteResult>;
   find(params: {
@@ -181,6 +195,41 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     );
     return { id: result.id, version: result.version };
   }
+
+  public async bulkCreate(
+    items: Array<{
+      id: string;
+      attrs: RuleSavedObjectAttributes;
+      references?: SavedObjectReference[];
+    }>
+  ): Promise<BulkCreateResultItem[]> {
+    if (items.length === 0) {
+      return [];
+    }
+
+    const result = await this.client.bulkCreate<RuleSavedObjectAttributes>(
+      items.map((item) => ({
+        type: RULE_SAVED_OBJECT_TYPE,
+        id: item.id,
+        attributes: item.attrs,
+        ...(item.references ? { references: item.references } : {}),
+      })),
+      { overwrite: false }
+    );
+
+    return result.saved_objects.map((doc) => {
+      if (isSavedObjectErrorResult(doc)) {
+        return { id: doc.id, error: doc.error };
+      }
+      return {
+        id: doc.id,
+        attributes: doc.attributes,
+        version: doc.version,
+        references: doc.references ?? [],
+      };
+    });
+  }
+
   public async get(id: string, spaceId?: string): Promise<RuleSavedObjectDoc> {
     const namespace = spaceIdToNamespace(this.spaces, spaceId);
     const doc = await this.client.get<RuleSavedObjectAttributes>(

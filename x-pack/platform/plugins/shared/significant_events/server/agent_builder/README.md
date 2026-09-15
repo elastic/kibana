@@ -26,9 +26,11 @@ Registered from `register.ts`. Tool ids live in `tools/tool_ids.ts` under the
 
 ### Skills (`skills/`)
 
-`knowledge_indicators_management`, `ki_identification_management`, `significant_events_management`,
-`significant_events_ki_grounding`. Memory and investigation skills live separately, under
-`server/memory_and_investigation/skills/`.
+`knowledge_indicators_management`, `ki_identification_management`, `ki_query_generation`,
+`significant_events_management`, `significant_events_ki_grounding`. Memory and investigation skills
+live separately, under `server/memory_and_investigation/skills/`. The `ki_query_generation` skill
+provides its feature retrieval and query validation tools inline rather than registering them
+globally.
 
 ### Agents (`agents/discovery/`)
 

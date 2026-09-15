@@ -95,7 +95,7 @@ export function ChatMessageText({
   const stepsFromPrevRounds = useStepsFromPrevRounds();
   const { isEmbeddedContext: isSidebar } = useConversationContext();
   const {
-    services: { http, application },
+    services: { http, application, uiSettings },
   } = useKibana();
 
   const [pendingExternalUrl, setPendingExternalUrl] = useState<string | null>(null);
@@ -121,11 +121,13 @@ export function ChatMessageText({
     () =>
       createVisualizationRenderer({
         application,
+        http,
+        uiSettings,
         startDependencies,
         stepsFromCurrentRound,
         stepsFromPrevRounds,
       }),
-    [application, startDependencies, stepsFromCurrentRound, stepsFromPrevRounds]
+    [application, http, uiSettings, startDependencies, stepsFromCurrentRound, stepsFromPrevRounds]
   );
 
   const renderAttachmentRenderer = useMemo(
