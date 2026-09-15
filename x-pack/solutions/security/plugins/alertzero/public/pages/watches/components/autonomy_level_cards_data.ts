@@ -57,7 +57,6 @@ const actorLabel = (actor: LevelCardActor): string =>
 export const factPartsToText = (parts: LevelCardFactPart[]): string =>
   parts.map((part) => (part.kind === 'pill' ? actorLabel(part.actor) : part.text)).join('');
 
-/** Supervised-only warning shown under the cards at the highest level. */
 const supervisedWarn = (workerName: string): string =>
   i18n.translate('xpack.alertzero.watches.settings.autonomyCards.supervisedWarn', {
     defaultMessage:
@@ -65,15 +64,42 @@ const supervisedWarn = (workerName: string): string =>
     values: { workerName },
   });
 
+/** Worker display names used in the supervised warning copy. */
+export const workerNameForCards = (workerId: string): string => {
+  switch (workerId) {
+    case SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID:
+      return i18n.translate(
+        'xpack.alertzero.watches.settings.autonomyCards.names.attackDiscovery',
+        { defaultMessage: 'Attack discovery' }
+      );
+    case SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID:
+      return i18n.translate('xpack.alertzero.watches.settings.autonomyCards.names.alertAnalysis', {
+        defaultMessage: 'Alert analysis',
+      });
+    case SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID:
+      return i18n.translate('xpack.alertzero.watches.settings.autonomyCards.names.threatHunt', {
+        defaultMessage: 'Continuous threat hunt',
+      });
+    default:
+      return i18n.translate('xpack.alertzero.watches.settings.autonomyCards.names.worker', {
+        defaultMessage: 'this Worker',
+      });
+  }
+};
+
+/** Supervised-only warning shown under the cards at the highest level. */
+export const supervisedWarnForWorker = (workerName: string): string => supervisedWarn(workerName);
+
 /**
- * Consequence-forward level cards per Worker, ported from the Sep 11 prototype
+ * Consequence-forward level cards per Worker, ported from the Sep 14 prototype
  * (notdaybreak_mvp workerAutonomyLevelCards.ts). Copy describes what each
  * level does for THIS Worker — not a generic autonomy definition.
  */
 const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
   [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: {
     intro: i18n.translate('xpack.alertzero.watches.settings.autonomyCards.attackDiscovery.intro', {
-      defaultMessage: 'This Worker supports Manual and Supervised.',
+      defaultMessage:
+        'Decides whether escalating an Investigation to an incident waits for your approval.',
     }),
     levels: [
       {
@@ -82,30 +108,16 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
           'xpack.alertzero.watches.settings.autonomyCards.attackDiscovery.manual.who',
           {
             defaultMessage:
-              'Runs only when a person starts it. Investigations are drafted for review.',
+              'Runs on its schedule and opens Investigations; escalating to an incident waits for you.',
           }
         ),
         facts: [
           {
             label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.attackDiscovery.manual.runs',
-              { defaultMessage: 'Runs' }
+              'xpack.alertzero.watches.settings.autonomyCards.attackDiscovery.manual.incidents',
+              { defaultMessage: 'Incidents' }
             ),
-            parts: [pill('you'), text(' click Run')],
-          },
-          {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.attackDiscovery.manual.investigations',
-              { defaultMessage: 'Investigations' }
-            ),
-            parts: [text('drafted for your review')],
-          },
-          {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.attackDiscovery.manual.youHear',
-              { defaultMessage: 'You hear' }
-            ),
-            parts: [text('when you open the run')],
+            parts: [pill('you'), text(' approve each escalation')],
           },
         ],
       },
@@ -114,30 +126,17 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
         who: i18n.translate(
           'xpack.alertzero.watches.settings.autonomyCards.attackDiscovery.supervised.who',
           {
-            defaultMessage: 'Handles the attack lifecycle within policy. You review afterwards.',
+            defaultMessage:
+              'Runs on its schedule, opens Investigations, and escalates to incidents on its own.',
           }
         ),
         facts: [
           {
             label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.attackDiscovery.supervised.runs',
-              { defaultMessage: 'Runs' }
+              'xpack.alertzero.watches.settings.autonomyCards.attackDiscovery.supervised.incidents',
+              { defaultMessage: 'Incidents' }
             ),
-            parts: [pill('worker'), text(' on schedule')],
-          },
-          {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.attackDiscovery.supervised.investigations',
-              { defaultMessage: 'Investigations' }
-            ),
-            parts: [pill('worker'), text(' opens & progresses')],
-          },
-          {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.attackDiscovery.supervised.youHear',
-              { defaultMessage: 'You hear' }
-            ),
-            parts: [text('after, in the queue')],
+            parts: [pill('worker'), text(' escalates Investigations automatically')],
           },
         ],
       },
@@ -146,7 +145,7 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
   [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: {
     intro: i18n.translate('xpack.alertzero.watches.settings.autonomyCards.alertTriage.intro', {
       defaultMessage:
-        'It always analyzes and classifies alert batches; the level decides who closes false positives.',
+        'It analyzes, tags, and writes notes, then responds to new alerts. The level determines whether closures require your approval.',
     }),
     levels: [
       {
@@ -154,7 +153,7 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
         who: i18n.translate(
           'xpack.alertzero.watches.settings.autonomyCards.alertTriage.manual.who',
           {
-            defaultMessage: 'Analyzes every batch; every closure waits for you.',
+            defaultMessage: 'Analyzes and classifies every alert batch; closures wait for you.',
           }
         ),
         facts: [
@@ -167,17 +166,13 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
           },
           {
             label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.manual.closes',
-              { defaultMessage: 'Closes false positives' }
+              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.manual.closures',
+              { defaultMessage: 'Closures' }
             ),
-            parts: [pill('you'), text(' approve each')],
-          },
-          {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.manual.youHear',
-              { defaultMessage: 'You hear' }
-            ),
-            parts: [text('when a closure awaits you')],
+            parts: [
+              pill('you'),
+              text(' answer each Proposal — accept to close, or reject and re-tag'),
+            ],
           },
         ],
       },
@@ -187,7 +182,7 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
           'xpack.alertzero.watches.settings.autonomyCards.alertTriage.assisted.who',
           {
             defaultMessage:
-              'Closes false positives automatically at or above the confidence score.',
+              'Analyzes and classifies every batch; closes false positives automatically at or above the confidence score.',
           }
         ),
         facts: [
@@ -200,17 +195,10 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
           },
           {
             label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.assisted.closes',
-              { defaultMessage: 'Closes false positives' }
+              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.assisted.closures',
+              { defaultMessage: 'Closures' }
             ),
-            parts: [pill('worker'), text(' above the confidence score')],
-          },
-          {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.assisted.youHear',
-              { defaultMessage: 'You hear' }
-            ),
-            parts: [text('after closing, in the queue')],
+            parts: [pill('worker'), text(' close automatically at the confidence score')],
           },
         ],
       },
@@ -220,7 +208,7 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
           'xpack.alertzero.watches.settings.autonomyCards.alertTriage.supervised.who',
           {
             defaultMessage:
-              'Closes false positives automatically — same as Assisted for this Worker.',
+              'Closures behave the same as Assisted for this Worker — the level future-proofs later write actions.',
           }
         ),
         facts: [
@@ -233,17 +221,10 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
           },
           {
             label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.supervised.closes',
-              { defaultMessage: 'Closes false positives' }
+              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.supervised.closures',
+              { defaultMessage: 'Closures' }
             ),
-            parts: [pill('worker'), text(' above the confidence score')],
-          },
-          {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.supervised.youHear',
-              { defaultMessage: 'You hear' }
-            ),
-            parts: [text('after closing, in the queue')],
+            parts: [pill('worker'), text(' close automatically at the confidence score')],
           },
         ],
       },
@@ -252,7 +233,7 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
   [SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID]: {
     intro: i18n.translate('xpack.alertzero.watches.settings.autonomyCards.threatHunt.intro', {
       defaultMessage:
-        'It always hunts and gathers evidence; the level decides who drafts actions and who runs them.',
+        'It always hunts and gathers evidence; the level decides who turns findings into Proposals and who runs them.',
     }),
     levels: [
       {
@@ -260,30 +241,16 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
         who: i18n.translate(
           'xpack.alertzero.watches.settings.autonomyCards.threatHunt.manual.who',
           {
-            defaultMessage: 'Hunts only when a person starts it. Proposals are drafted for review.',
+            defaultMessage: 'Hunts on its schedule and drafts Proposals; you decide what runs.',
           }
         ),
         facts: [
           {
             label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.threatHunt.manual.runs',
-              { defaultMessage: 'Runs' }
-            ),
-            parts: [pill('you'), text(' click Run')],
-          },
-          {
-            label: i18n.translate(
               'xpack.alertzero.watches.settings.autonomyCards.threatHunt.manual.proposals',
               { defaultMessage: 'Proposals' }
             ),
-            parts: [text('drafted for your review')],
-          },
-          {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.threatHunt.manual.youHear',
-              { defaultMessage: 'You hear' }
-            ),
-            parts: [text('when you open the run')],
+            parts: [pill('you'), text(' approve each before it runs')],
           },
         ],
       },
@@ -292,30 +259,17 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
         who: i18n.translate(
           'xpack.alertzero.watches.settings.autonomyCards.threatHunt.assisted.who',
           {
-            defaultMessage: 'Hunts on schedule; Proposals wait for you.',
+            defaultMessage:
+              'Hunts on its schedule and drafts Proposals; reversible actions run after your approval.',
           }
         ),
         facts: [
           {
             label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.threatHunt.assisted.runs',
-              { defaultMessage: 'Runs' }
-            ),
-            parts: [pill('worker'), text(' on schedule')],
-          },
-          {
-            label: i18n.translate(
               'xpack.alertzero.watches.settings.autonomyCards.threatHunt.assisted.proposals',
               { defaultMessage: 'Proposals' }
             ),
-            parts: [pill('you'), text(' approve each')],
-          },
-          {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.threatHunt.assisted.youHear',
-              { defaultMessage: 'You hear' }
-            ),
-            parts: [text('when a Proposal awaits you')],
+            parts: [pill('worker'), text(' drafts; '), pill('you'), text(' approve each')],
           },
         ],
       },
@@ -324,30 +278,17 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
         who: i18n.translate(
           'xpack.alertzero.watches.settings.autonomyCards.threatHunt.supervised.who',
           {
-            defaultMessage: 'Handles the hunt lifecycle within policy. You review afterwards.',
+            defaultMessage:
+              'Hunts and runs reversible actions on its own within policy; you review afterwards.',
           }
         ),
         facts: [
           {
             label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.threatHunt.supervised.runs',
-              { defaultMessage: 'Runs' }
-            ),
-            parts: [pill('worker'), text(' on schedule')],
-          },
-          {
-            label: i18n.translate(
               'xpack.alertzero.watches.settings.autonomyCards.threatHunt.supervised.proposals',
               { defaultMessage: 'Proposals' }
             ),
-            parts: [pill('worker'), text(' progresses them')],
-          },
-          {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.threatHunt.supervised.youHear',
-              { defaultMessage: 'You hear' }
-            ),
-            parts: [text('after, in the queue')],
+            parts: [pill('worker'), text(' runs reversible actions automatically')],
           },
         ],
       },
@@ -355,7 +296,8 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
   },
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: {
     intro: i18n.translate('xpack.alertzero.watches.settings.autonomyCards.ruleTuning.intro', {
-      defaultMessage: 'This Worker supports Manual and Assisted.',
+      defaultMessage:
+        'It always diagnoses rules and drafts tuning Proposals; the level decides who reviews them.',
     }),
     levels: [
       {
@@ -363,31 +305,16 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
         who: i18n.translate(
           'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.manual.who',
           {
-            defaultMessage:
-              'Analyzes only when a person starts it. Proposals wait for your review.',
+            defaultMessage: 'Diagnoses rules and drafts tuning Proposals for your review.',
           }
         ),
         facts: [
           {
             label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.manual.runs',
-              { defaultMessage: 'Runs' }
+              'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.manual.proposals',
+              { defaultMessage: 'Proposals' }
             ),
-            parts: [pill('you'), text(' click Run')],
-          },
-          {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.manual.ruleChanges',
-              { defaultMessage: 'Rule changes' }
-            ),
-            parts: [pill('you'), text(' apply them')],
-          },
-          {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.manual.youHear',
-              { defaultMessage: 'You hear' }
-            ),
-            parts: [text('when a proposal is ready')],
+            parts: [pill('you'), text(' review each before it applies')],
           },
         ],
       },
@@ -396,101 +323,63 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
         who: i18n.translate(
           'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.assisted.who',
           {
-            defaultMessage: 'Analyzes on schedule; every change waits for you.',
+            defaultMessage:
+              'Diagnoses rules and applies reversible tuning automatically; changes beyond policy still wait for you.',
           }
         ),
         facts: [
           {
             label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.assisted.runs',
-              { defaultMessage: 'Runs' }
+              'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.assisted.proposals',
+              { defaultMessage: 'Proposals' }
             ),
-            parts: [pill('worker'), text(' on schedule')],
-          },
-          {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.assisted.ruleChanges',
-              { defaultMessage: 'Rule changes' }
-            ),
-            parts: [pill('you'), text(' approve each')],
-          },
-          {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.assisted.youHear',
-              { defaultMessage: 'You hear' }
-            ),
-            parts: [text('when a proposal awaits you')],
+            parts: [pill('worker'), text(' applies reversible tuning automatically')],
           },
         ],
       },
     ],
   },
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID]: {
-    intro: i18n.translate('xpack.alertzero.watches.settings.autonomyCards.ruleCreation.intro', {
-      defaultMessage: 'This Worker supports Manual and Assisted.',
+    intro: i18n.translate('xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.intro', {
+      defaultMessage:
+        'It always drafts rule logic for coverage gaps; the level decides who reviews before anything is installed.',
     }),
     levels: [
       {
         level: 'manual',
         who: i18n.translate(
-          'xpack.alertzero.watches.settings.autonomyCards.ruleCreation.manual.who',
+          'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.manual.who',
           {
-            defaultMessage: 'Drafts only when a person starts it.',
+            defaultMessage:
+              'Drafts new rule logic for coverage gaps; you review each before install.',
           }
         ),
         facts: [
           {
             label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.ruleCreation.manual.runs',
-              { defaultMessage: 'Runs' }
+              'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.manual.proposals',
+              { defaultMessage: 'Proposals' }
             ),
-            parts: [pill('you'), text(' click Run')],
-          },
-          {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.ruleCreation.manual.newRules',
-              { defaultMessage: 'New rules' }
-            ),
-            parts: [pill('you'), text(' install or enable')],
-          },
-          {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.ruleCreation.manual.youHear',
-              { defaultMessage: 'You hear' }
-            ),
-            parts: [text('when drafts are ready')],
+            parts: [pill('you'), text(' review each before install')],
           },
         ],
       },
       {
         level: 'assisted',
         who: i18n.translate(
-          'xpack.alertzero.watches.settings.autonomyCards.ruleCreation.assisted.who',
+          'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.assisted.who',
           {
-            defaultMessage: 'Drafts on schedule; every rule waits for you.',
+            defaultMessage:
+              'Drafts and installs prebuilt rules automatically; new rule logic still waits for your review.',
           }
         ),
         facts: [
           {
             label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.ruleCreation.assisted.runs',
-              { defaultMessage: 'Runs' }
+              'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.assisted.proposals',
+              { defaultMessage: 'Proposals' }
             ),
-            parts: [pill('worker'), text(' on schedule')],
-          },
-          {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.ruleCreation.assisted.newRules',
-              { defaultMessage: 'New rules' }
-            ),
-            parts: [pill('you'), text(' approve each')],
-          },
-          {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.ruleCreation.assisted.youHear',
-              { defaultMessage: 'You hear' }
-            ),
-            parts: [text('when a draft awaits you')],
+            parts: [pill('worker'), text(' installs prebuilt rules automatically')],
           },
         ],
       },
@@ -499,67 +388,12 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
 };
 
 /**
- * Autonomy levels a Worker's control offers, in ascending order. A Worker whose
- * persisted level is not in its list renders clamped to its highest level.
+ * Resolves the ported level cards for a Worker, filtered to the levels that
+ * Worker offers. Returns null for Workers without card copy (the control
+ * renders the plain level name).
  */
-export const AUTONOMY_OPTIONS_BY_WORKER: Record<string, readonly WatchAutonomyLevel[]> = {
-  [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: ['manual', 'supervised'],
-  [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: ['manual', 'assisted', 'supervised'],
-  [SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID]: ['manual', 'assisted', 'supervised'],
-  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: ['manual', 'assisted'],
-  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID]: ['manual', 'assisted'],
-};
-
-const AUTONOMY_LEVEL_ORDER: readonly WatchAutonomyLevel[] = ['manual', 'assisted', 'supervised'];
-
-/** Generic one-line "who" for Workers without card copy — mirrors the descriptions in the slider. */
-const AUTONOMY_LEVEL_WHO: Record<WatchAutonomyLevel, string> = {
-  manual: i18n.translate('xpack.alertzero.watches.settings.autonomyCards.genericManual', {
-    defaultMessage: 'Nothing runs on its own; every proposal waits for your review.',
-  }),
-  assisted: i18n.translate('xpack.alertzero.watches.settings.autonomyCards.genericAssisted', {
-    defaultMessage: 'Routine, reversible steps run on their own; consequential changes wait.',
-  }),
-  supervised: i18n.translate('xpack.alertzero.watches.settings.autonomyCards.genericSupervised', {
-    defaultMessage: 'Acts within its allow-list and tells you afterwards.',
-  }),
-};
-
-export const autonomyOptionsForWorker = (workerId: string): readonly WatchAutonomyLevel[] =>
-  AUTONOMY_OPTIONS_BY_WORKER[workerId] ?? AUTONOMY_LEVEL_ORDER;
-
-/**
- * Clamps a persisted level onto a Worker's offered levels: unknown or withheld
- * levels fall back to the Worker's highest offered level (the conservative
- * reading of a stored out-of-list value is the closest offered neighbour, and
- * the highest offered level is what the old three-tick control wrote last).
- */
-export const clampAutonomyToOptions = (
-  workerId: string,
-  level: WatchAutonomyLevel
-): WatchAutonomyLevel => {
-  const options = autonomyOptionsForWorker(workerId);
-  return options.includes(level) ? level : options[options.length - 1];
-};
-
-export const getAutonomyLevelCards = (workerId: string): AutonomyLevelCardsCopy => {
-  const allowed = autonomyOptionsForWorker(workerId);
+export const getAutonomyLevelCards = (workerId: string): AutonomyLevelCardsCopy | null => {
   const copy = AUTONOMY_LEVEL_CARDS[workerId];
-  if (copy) {
-    return {
-      intro: copy.intro,
-      levels: copy.levels.filter((card) => allowed.includes(card.level)),
-    };
-  }
-  // Unknown Worker: generic card set restricted to its allowed levels.
-  return {
-    levels: allowed.map((level) => ({
-      level,
-      who: AUTONOMY_LEVEL_WHO[level],
-      facts: [],
-    })),
-  };
+  if (!copy) return null;
+  return copy;
 };
-
-/** Supervised warning copy for a Worker, shown only when supervised is the selected level. */
-export const supervisedWarnForWorker = (workerName: string): string => supervisedWarn(workerName);

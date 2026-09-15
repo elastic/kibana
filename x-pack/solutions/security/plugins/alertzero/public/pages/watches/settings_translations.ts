@@ -208,6 +208,11 @@ export const AUTONOMY_LEVEL_DESCRIPTIONS: Record<string, string> = {
   }),
 };
 
+export const AUTONOMY_RADIOGROUP_ARIA_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.autonomy.radiogroupAriaLabel',
+  { defaultMessage: 'Autonomy level' }
+);
+
 export const autonomyLevelName = (levelId: string): string =>
   AUTONOMY_LEVEL_NAMES[levelId] ?? levelId;
 
@@ -246,11 +251,6 @@ export const AUTONOMY_SCALE_RIGHT = i18n.translate(
   { defaultMessage: 'Worker does more' }
 );
 
-export const SCHEDULE_PRESETS_LEGEND = i18n.translate(
-  'xpack.alertzero.watches.settings.scheduleInterval.presetsLegend',
-  { defaultMessage: 'Interval presets' }
-);
-
 /* -------------------------------------------------------------------------- */
 /* Schedule interval                                                          */
 /* -------------------------------------------------------------------------- */
@@ -260,19 +260,46 @@ export const SCHEDULE_INTERVAL_LABEL = i18n.translate(
   { defaultMessage: 'Run every' }
 );
 
-export const SCHEDULE_INTERVAL_HELP_TEXT = i18n.translate(
-  'xpack.alertzero.watches.settings.scheduleInterval.helpText',
+/* -------------------------------------------------------------------------- */
+/* Trigger (Sep 14 prototype: plain "Every N unit")                            */
+/* -------------------------------------------------------------------------- */
+
+export const TRIGGER_LABEL = i18n.translate('xpack.alertzero.watches.settings.trigger.label', {
+  defaultMessage: 'Trigger',
+});
+
+export const TRIGGER_HELP_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.trigger.helpText',
   { defaultMessage: 'How often this Worker runs. Applies to this Worker only.' }
 );
 
-export const SCHEDULE_INTERVAL_NUMBER_ARIA_LABEL = i18n.translate(
-  'xpack.alertzero.watches.settings.scheduleInterval.numberAriaLabel',
-  { defaultMessage: 'Schedule interval' }
+export const TRIGGER_EVERY = i18n.translate('xpack.alertzero.watches.settings.trigger.every', {
+  defaultMessage: 'Every',
+});
+
+export const SCHEDULE_UNIT_MINUTES = i18n.translate(
+  'xpack.alertzero.watches.settings.trigger.unit.minutes',
+  { defaultMessage: 'minutes' }
 );
 
-export const SCHEDULE_INTERVAL_UNIT_ARIA_LABEL = i18n.translate(
-  'xpack.alertzero.watches.settings.scheduleInterval.unitAriaLabel',
-  { defaultMessage: 'Schedule interval unit' }
+export const SCHEDULE_UNIT_HOURS = i18n.translate(
+  'xpack.alertzero.watches.settings.trigger.unit.hours',
+  { defaultMessage: 'hours' }
+);
+
+export const SCHEDULE_UNIT_DAYS = i18n.translate(
+  'xpack.alertzero.watches.settings.trigger.unit.days',
+  { defaultMessage: 'days' }
+);
+
+export const TRIGGER_AMOUNT_ARIA_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.trigger.amountAriaLabel',
+  { defaultMessage: 'Interval amount' }
+);
+
+export const TRIGGER_UNIT_ARIA_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.trigger.unitAriaLabel',
+  { defaultMessage: 'Interval unit' }
 );
 
 const SCHEDULE_UNIT_MINUTE = (intervalValue: string) =>
@@ -840,35 +867,22 @@ export const DETECTION_CONFIG_SECTION_TITLE_HELP = i18n.translate(
   }
 );
 
-export const CONFIDENCE_THRESHOLD_LABEL = i18n.translate(
-  'xpack.alertzero.watches.settings.detectionConfig.confidenceThreshold.label',
-  { defaultMessage: 'Minimum confidence score' }
+export const AUTO_CLOSE_GROUP_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.autoClose.title',
+  { defaultMessage: 'Auto-close' }
 );
 
-export const CONFIDENCE_THRESHOLD_ARIA_LABEL = CONFIDENCE_THRESHOLD_LABEL;
-
-export const CONFIDENCE_THRESHOLD_ERROR = i18n.translate(
-  'xpack.alertzero.watches.settings.detectionConfig.confidenceThreshold.error',
-  { defaultMessage: 'Must be between 0 and 1.' }
-);
-
-export const FP_COUNT_THRESHOLD_LABEL = i18n.translate(
-  'xpack.alertzero.watches.settings.detectionConfig.fpCountThreshold.label',
-  { defaultMessage: 'False positive count threshold' }
-);
-
-export const FP_COUNT_THRESHOLD_HELP_TEXT = i18n.translate(
-  'xpack.alertzero.watches.settings.detectionConfig.fpCountThreshold.helpText',
+export const MIN_CONFIDENCE_HELP_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.autoClose.minConfidenceHelp',
   {
-    defaultMessage: 'Minimum alerts closed as false positives to trigger analysis on a rule.',
+    defaultMessage:
+      'When the analysis classifies an alert as a false positive at or above the confidence score, it is closed — automatically or as a proposal, depending on the autonomy level.',
   }
 );
 
-export const FP_COUNT_THRESHOLD_ARIA_LABEL = FP_COUNT_THRESHOLD_LABEL;
-
-export const FP_COUNT_THRESHOLD_ERROR = i18n.translate(
-  'xpack.alertzero.watches.settings.detectionConfig.fpCountThreshold.error',
-  { defaultMessage: 'Must be a whole number of at least 1.' }
+export const MIN_CONFIDENCE_ARIA_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.autoClose.minConfidenceAriaLabel',
+  { defaultMessage: 'Minimum confidence score' }
 );
 
 export const funnelAlertsPerDay = (count: number) =>
@@ -877,37 +891,17 @@ export const funnelAlertsPerDay = (count: number) =>
     values: { count },
   });
 
-export const FUNNEL_ALERTS_PER_DAY_LABEL = i18n.translate(
-  'xpack.alertzero.watches.settings.detectionConfig.funnel.alertsPerDayLabel',
-  { defaultMessage: 'alerts / day' }
-);
-
 export const funnelFpVerdictsPerDay = (count: number) =>
   i18n.translate('xpack.alertzero.watches.settings.detectionConfig.funnel.fpVerdictsPerDay', {
     defaultMessage: '~{count}',
     values: { count },
   });
 
-export const FUNNEL_FP_VERDICTS_LABEL = i18n.translate(
-  'xpack.alertzero.watches.settings.detectionConfig.funnel.fpVerdictsLabel',
-  { defaultMessage: 'false-positive verdicts' }
-);
-
 export const funnelQualifyingLabel = (score: string) =>
   i18n.translate('xpack.alertzero.watches.settings.detectionConfig.funnel.qualifyingLabel', {
     defaultMessage: 'at or above {score}',
     values: { score },
   });
-
-export const FUNNEL_OUTCOME_PROPOSED_LABEL = i18n.translate(
-  'xpack.alertzero.watches.settings.detectionConfig.funnel.outcomeProposed',
-  { defaultMessage: 'proposed for approval' }
-);
-
-export const FUNNEL_OUTCOME_AUTO_CLOSED_LABEL = i18n.translate(
-  'xpack.alertzero.watches.settings.detectionConfig.funnel.outcomeAutoClosed',
-  { defaultMessage: 'closed automatically' }
-);
 
 /* -------------------------------------------------------------------------- */
 /* Per-watch intro                                                            */

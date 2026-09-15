@@ -194,14 +194,24 @@ describe('WatchDetailPage', () => {
       `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
     );
 
-    expect(within(attackDiscovery).getByTestId('alertZeroScheduleIntervalValue')).toHaveValue(24);
-    expect(within(attackDiscovery).getByTestId('alertZeroScheduleIntervalUnit')).toHaveValue('h');
     expect(
-      within(alertTriage).queryByTestId('alertZeroScheduleIntervalField')
+      within(attackDiscovery).getByTestId(
+        `alertZeroTriggerAmount-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
+      )
+    ).toHaveValue(24);
+    expect(
+      within(attackDiscovery).getByTestId(
+        `alertZeroTriggerUnit-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
+      )
+    ).toHaveTextContent(/hours/i);
+    expect(
+      within(alertTriage).queryByTestId(
+        `alertZeroTriggerAmount-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
+      )
     ).not.toBeInTheDocument();
   });
 
-  it('shows the ConsequenceFunnel and detectionConfig fields only for Alert Triage', () => {
+  it('shows the Auto-close detectionConfig fields only for Alert Triage', () => {
     renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
 
     const alertTriage = screen.getByTestId(
@@ -211,11 +221,20 @@ describe('WatchDetailPage', () => {
       `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
     );
 
-    expect(within(alertTriage).getByTestId('alertZeroConsequenceFunnel')).toBeInTheDocument();
-    expect(within(alertTriage).getByTestId('alertZeroConfidenceThresholdValue')).toHaveValue(0.85);
-    expect(within(alertTriage).getByTestId('alertZeroFpCountThresholdValue')).toHaveValue(10);
     expect(
-      within(attackDiscovery).queryByTestId('alertZeroDetectionConfigFields')
+      within(alertTriage).getByTestId(
+        `alertZeroAutoCloseRow-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
+      )
+    ).toBeInTheDocument();
+    expect(
+      within(alertTriage).getByTestId(
+        `alertZeroMinConfidence-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
+      )
+    ).toHaveValue(0.85);
+    expect(
+      within(attackDiscovery).queryByTestId(
+        `alertZeroAutoCloseRow-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
+      )
     ).not.toBeInTheDocument();
   });
 
