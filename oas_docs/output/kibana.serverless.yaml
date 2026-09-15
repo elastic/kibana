@@ -41506,6 +41506,16 @@ paths:
                       properties:
                         accountType:
                           type: string
+                        blueprintId:
+                          maxLength: 255
+                          minLength: 1
+                          nullable: true
+                          type: string
+                        blueprintVersion:
+                          maxLength: 64
+                          minLength: 1
+                          nullable: true
+                          type: string
                         cloudProvider:
                           type: string
                         created_at:
@@ -41518,6 +41528,11 @@ paths:
                           type: string
                         packagePolicyCount:
                           type: number
+                        templateSha:
+                          maxLength: 255
+                          minLength: 1
+                          nullable: true
+                          type: string
                         updated_at:
                           type: string
                         vars:
@@ -41625,6 +41640,26 @@ paths:
                     - azure
                     - gcp
                   type: string
+                iac:
+                  additionalProperties: false
+                  description: IaC provenance to persist on the cloud connector after the user confirms the template.
+                  type: object
+                  properties:
+                    blueprintId:
+                      maxLength: 255
+                      minLength: 1
+                      nullable: true
+                      type: string
+                    blueprintVersion:
+                      maxLength: 64
+                      minLength: 1
+                      nullable: true
+                      type: string
+                    templateSha:
+                      maxLength: 255
+                      minLength: 1
+                      nullable: true
+                      type: string
                 name:
                   description: The name of the cloud connector.
                   maxLength: 255
@@ -41695,6 +41730,16 @@ paths:
                     properties:
                       accountType:
                         type: string
+                      blueprintId:
+                        maxLength: 255
+                        minLength: 1
+                        nullable: true
+                        type: string
+                      blueprintVersion:
+                        maxLength: 64
+                        minLength: 1
+                        nullable: true
+                        type: string
                       cloudProvider:
                         type: string
                       created_at:
@@ -41707,6 +41752,11 @@ paths:
                         type: string
                       packagePolicyCount:
                         type: number
+                      templateSha:
+                        maxLength: 255
+                        minLength: 1
+                        nullable: true
+                        type: string
                       updated_at:
                         type: string
                       vars:
@@ -41895,6 +41945,16 @@ paths:
                     properties:
                       accountType:
                         type: string
+                      blueprintId:
+                        maxLength: 255
+                        minLength: 1
+                        nullable: true
+                        type: string
+                      blueprintVersion:
+                        maxLength: 64
+                        minLength: 1
+                        nullable: true
+                        type: string
                       cloudProvider:
                         type: string
                       created_at:
@@ -41907,6 +41967,11 @@ paths:
                         type: string
                       packagePolicyCount:
                         type: number
+                      templateSha:
+                        maxLength: 255
+                        minLength: 1
+                        nullable: true
+                        type: string
                       updated_at:
                         type: string
                       vars:
@@ -42009,6 +42074,26 @@ paths:
                     - single-account
                     - organization-account
                   type: string
+                iac:
+                  additionalProperties: false
+                  description: IaC provenance to persist on the cloud connector after the user confirms the template.
+                  type: object
+                  properties:
+                    blueprintId:
+                      maxLength: 255
+                      minLength: 1
+                      nullable: true
+                      type: string
+                    blueprintVersion:
+                      maxLength: 64
+                      minLength: 1
+                      nullable: true
+                      type: string
+                    templateSha:
+                      maxLength: 255
+                      minLength: 1
+                      nullable: true
+                      type: string
                 name:
                   description: The name of the cloud connector.
                   maxLength: 255
@@ -42075,6 +42160,16 @@ paths:
                     properties:
                       accountType:
                         type: string
+                      blueprintId:
+                        maxLength: 255
+                        minLength: 1
+                        nullable: true
+                        type: string
+                      blueprintVersion:
+                        maxLength: 64
+                        minLength: 1
+                        nullable: true
+                        type: string
                       cloudProvider:
                         type: string
                       created_at:
@@ -42087,6 +42182,11 @@ paths:
                         type: string
                       packagePolicyCount:
                         type: number
+                      templateSha:
+                        maxLength: 255
+                        minLength: 1
+                        nullable: true
+                        type: string
                       updated_at:
                         type: string
                       vars:
