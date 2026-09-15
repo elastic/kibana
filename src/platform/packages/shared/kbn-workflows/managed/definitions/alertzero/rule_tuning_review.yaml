@@ -273,15 +273,36 @@ steps:
         they would re-fetch alerts already in hand. Base the volume and entity
         breakdown on the retrieved alerts and say the counts cover only them.
 
-        This pipeline backtests and applies query changes directly, so prefer
-        change_type "query": narrow the KQL to exclude the confirmed benign
-        pattern while keeping detection coverage. Pick exception, suppression, or
-        threshold only when narrowing the query is genuinely unsafe for this rule,
-        since those stay manual analyst actions. This rule has type
-        "{{ steps.fetch_rule.output.type }}", so propose a query change only when
-        that type is "query".
+        Choose exactly one change_type, in this order of preference. Exception,
+        query, and risk_score changes are applied by the pipeline once an analyst
+        approves; everything else is left to the analyst.
 
-        Write proposed_query in this rule's language,
+        exception: the rule logic is correct but fires on a known-good entity. Use
+        the entity breakdown to identify the tightest conditions and populate
+        exception_entries; each entry is one field condition the step ANDs together.
+        Operators and their operands: is / is_not / matches / does_not_match take
+        `value` (string); is_one_of / is_not_one_of take `values` (array); exists /
+        does_not_exist take none. In matches / does_not_match, * matches any
+        sequence and ? one character. Also fill exception_condition with a one-line
+        human-readable summary of the entries.
+
+        query: the query is too broad and the false positives share a pattern not
+        worth excepting individually. Narrow it while keeping detection coverage.
+        This rule has type "{{ steps.fetch_rule.output.type }}", so propose a query
+        change only when that type is "query".
+
+        risk_score: the rule has real detection value but these alerts are
+        low-priority noise. Populate proposed_risk_score (0-100) and
+        proposed_severity (low / medium / high / critical).
+
+        suppression or threshold: only when none of the above is safe; these stay
+        manual analyst actions.
+
+        manual: none of the above applies. Use summary to describe the pattern, which
+        automated paths you considered and why each is unsafe here, and what the
+        analyst should change in the Detection Rules UI.
+
+        For a query change, write proposed_query in this rule's language,
         "{{ steps.fetch_rule.output.language }}". In KQL a quoted value is a phrase
         and a * inside quotes is a literal asterisk, so every substring match must
         be unquoted: process.command_line: *create shadow* excludes nothing when
@@ -302,7 +323,7 @@ steps:
         properties:
           change_type:
             type: string
-            enum: [exception, suppression, query, threshold]
+            enum: [exception, suppression, query, threshold, risk_score, manual]
           title:
             type: string
           summary:
@@ -320,6 +341,31 @@ steps:
             type: string
           exception_condition:
             type: string
+          # Structured form of the exception, consumed by the create-exception action.
+          exception_entries:
+            type: array
+            items:
+              type: object
+              properties:
+                field:
+                  type: string
+                operator:
+                  type: string
+                  enum: [is, is_not, matches, does_not_match, is_one_of, is_not_one_of, exists, does_not_exist]
+                value:
+                  type: string
+                values:
+                  type: array
+                  items:
+                    type: string
+              required: [field, operator]
+          proposed_risk_score:
+            type: integer
+            minimum: 0
+            maximum: 100
+          proposed_severity:
+            type: string
+            enum: [low, medium, high, critical]
           rekey_required:
             type: boolean
         required: [change_type, title, summary, fp_pattern, reasoning, confidence, current_query, proposed_query, exception_condition, rekey_required]
@@ -346,21 +392,38 @@ steps:
           and steps.fetch_rule.output.timestamp_override == null
           and steps.fetch_rule.output.alert_suppression == null }}
 
-  # Every recommendation goes through the proposal gate. "auto" only says who
-  # makes the change once the analyst approves: on this path the gate runs the
-  # edit-rule action, which is possible only for a query change on a plain query
-  # rule the preview can backtest. Anything else (exception,
-  # suppression, threshold, or a query change on a rule mode the preview cannot
-  # model) is left to the analyst to apply in the Rules UI, so approving it just
-  # acknowledges the follow-up.
+  # Every recommendation goes through the proposal gate. These flags only say
+  # which action the gate runs once the analyst approves: a query edit is possible
+  # only on a plain query rule the preview can backtest; an exception needs
+  # structured entries; a risk score change needs both new values. Anything else
+  # (suppression, threshold, manual, or a query change on a rule mode the preview
+  # cannot model) is left to the analyst to apply in the Rules UI, so approving it
+  # just acknowledges the follow-up.
   - name: rule_tune_supported
     type: data.set
     with:
-      auto: >-
+      query: >-
         ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
           and steps.diagnose_rule.output.structured_output.proposed_query != ''
           and steps.fetch_rule.output.type == 'query'
           and steps.record_auto_apply_support.output.supported == true }}
+      exception: >-
+        ${{ steps.diagnose_rule.output.structured_output.change_type == 'exception'
+          and steps.diagnose_rule.output.structured_output.exception_entries != null }}
+      risk_score: >-
+        ${{ steps.diagnose_rule.output.structured_output.change_type == 'risk_score'
+          and steps.diagnose_rule.output.structured_output.proposed_risk_score != null
+          and steps.diagnose_rule.output.structured_output.proposed_severity != null }}
+
+  # Liquid has no parentheses, so the aggregate lives in its own step instead of
+  # mixing and/or in one expression.
+  - name: rule_tune_auto
+    type: data.set
+    with:
+      auto: >-
+        ${{ steps.rule_tune_supported.output.query == true
+          or steps.rule_tune_supported.output.exception == true
+          or steps.rule_tune_supported.output.risk_score == true }}
 
   # One preview worker run backtests both queries. A single synchronous child per
   # wake-up cycle is safe; two consecutive child calls share one immediate-resume
@@ -369,7 +432,7 @@ steps:
   # events analysts judged; anchoring at now can miss those events.
   - name: run_previews
     type: workflow.execute
-    if: "${{ steps.rule_tune_supported.output.auto == true }}"
+    if: "${{ steps.rule_tune_supported.output.query == true }}"
     with:
       workflow-id: system-security-rule-preview
       inputs:
@@ -451,7 +514,7 @@ steps:
         **{{ steps.diagnose_rule.output.structured_output.title | default: "Rule tuning review" }}**
 
         {{ steps.compose_evidence.output.rule_line }}
-        **Recommended action:** {% case steps.diagnose_rule.output.structured_output.change_type %}{% when "query" %}Edit rule query{% when "exception" %}Create exception{% when "suppression" %}Edit rule settings (alert suppression){% when "threshold" %}Edit rule settings (threshold){% else %}{{ steps.diagnose_rule.output.structured_output.change_type }}{% endcase %}
+        **Recommended action:** {% case steps.diagnose_rule.output.structured_output.change_type %}{% when "query" %}Edit rule query{% when "exception" %}Create exception{% when "risk_score" %}Edit rule risk score{% when "manual" %}Manual change{% when "suppression" %}Edit rule settings (alert suppression){% when "threshold" %}Edit rule settings (threshold){% else %}{{ steps.diagnose_rule.output.structured_output.change_type }}{% endcase %}
         {{ steps.compose_evidence.output.investigation_line }}
 
         **Why this rule needs tuning**
@@ -487,8 +550,15 @@ steps:
         ```
         {{ steps.diagnose_rule.output.structured_output.exception_condition }}
         ```
+        {% for entry in steps.diagnose_rule.output.structured_output.exception_entries %}
+        - `{{ entry.field }}` {{ entry.operator }}{% if entry.values %} {{ entry.values | join: ", " }}{% elsif entry.value %} {{ entry.value }}{% endif %}
+        {% endfor %}
         {% endif %}
-        {% if steps.rule_tune_supported.output.auto %}
+        {% if steps.diagnose_rule.output.structured_output.change_type == "risk_score" %}
+        Current risk score: {{ steps.fetch_rule.output.risk_score }} ({{ steps.fetch_rule.output.severity }})
+        Proposed risk score: {{ steps.diagnose_rule.output.structured_output.proposed_risk_score }} ({{ steps.diagnose_rule.output.structured_output.proposed_severity }})
+        {% endif %}
+        {% if steps.rule_tune_supported.output.query %}
 
         **Backtest**
         {{ inputs.preview_invocation_count | default: consts.preview_invocation_count }} simulated executions of interval {{ steps.fetch_rule.output.interval }}, lookback {{ steps.fetch_rule.output.from }}, ending at the newest false positive {{ inputs.last_fp_at }} (usually a much shorter span than the false positives cover). Alerts before: {% if steps.record_preview_outcome.output.current_succeeded and steps.record_preview_outcome.output.current_is_aborted == false %}{{ steps.record_preview_outcome.output.current_alert_count }}{% else %}inconclusive{% endif %}. Alerts after: {% if steps.record_preview_outcome.output.proposed_succeeded and steps.record_preview_outcome.output.proposed_is_aborted == false %}{{ steps.record_preview_outcome.output.proposed_alert_count }}{% else %}inconclusive{% endif %}.
@@ -508,10 +578,16 @@ steps:
         {% else %}
 
         **On approval**
+        {% if steps.rule_tune_supported.output.exception %}
+        The exception is added to the rule's own exception list. It can be removed in the Detection Rules UI.
+        {% elsif steps.rule_tune_supported.output.risk_score %}
+        The rule's risk score and severity are patched. They can be changed back in the Detection Rules UI.
+        {% else %}
         {% if steps.diagnose_rule.output.structured_output.change_type == "query" %}
         This rule uses a data view, timestamp override, or alert suppression, so the query is not previewed or applied automatically.
         {% endif %}
         Nothing is applied automatically; make the change in the Detection Rules UI if appropriate. Approving marks these alerts acknowledged, so sweeps revisit the rule only once new false positives accumulate.
+        {% endif %}
         {% endif %}
 
   # The proposal gate records the recommendation on the investigation, parks on
@@ -523,7 +599,7 @@ steps:
     type: workflow.execute
     if: >-
       ${{ steps.create_investigation.output.conversation_id != null
-        and steps.rule_tune_supported.output.auto == true }}
+        and steps.rule_tune_supported.output.query == true }}
     with:
       workflow-id: system-create-investigation-proposal
       inputs:
@@ -538,6 +614,47 @@ steps:
         # Query edits always wait for an analyst; matches the action's approvalPolicy.
         autoApprove: false
 
+  # The gates below are mutually exclusive with propose_action by change_type, so a
+  # run still opens at most one proposal and one child per wake-up cycle.
+  - name: propose_exception
+    type: workflow.execute
+    if: >-
+      ${{ steps.create_investigation.output.conversation_id != null
+        and steps.rule_tune_supported.output.exception == true }}
+    with:
+      workflow-id: system-create-investigation-proposal
+      inputs:
+        conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+        comment: "{{ steps.compose_proposal.output.comment }}"
+        actionWorkflowId: system-alertzero-action-create-rule-exception
+        actionInput:
+          rule_id: "{{ inputs.rule_uuid }}"
+          name: "Tuning: {{ steps.fetch_rule.output.name }}"
+          description: "Added by the rule tuning workflow."
+          entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
+        impact: medium
+        confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
+        autoApprove: false
+
+  - name: propose_risk_score
+    type: workflow.execute
+    if: >-
+      ${{ steps.create_investigation.output.conversation_id != null
+        and steps.rule_tune_supported.output.risk_score == true }}
+    with:
+      workflow-id: system-create-investigation-proposal
+      inputs:
+        conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+        comment: "{{ steps.compose_proposal.output.comment }}"
+        actionWorkflowId: system-alertzero-action-edit-rule-risk-score
+        actionInput:
+          id: "{{ inputs.rule_uuid }}"
+          risk_score: "${{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}"
+          severity: "{{ steps.diagnose_rule.output.structured_output.proposed_severity }}"
+        impact: low
+        confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
+        autoApprove: false
+
   # Same gate without an action: the analyst carries the change out themselves, so
   # approval is the whole lifecycle. Needs a diagnosis, since the investigation now
   # exists before one.
@@ -546,7 +663,7 @@ steps:
     if: >-
       ${{ steps.create_investigation.output.conversation_id != null
         and steps.diagnose_rule.output.structured_output.summary != null
-        and steps.rule_tune_supported.output.auto == false }}
+        and steps.rule_tune_auto.output.auto == false }}
     with:
       workflow-id: system-create-investigation-proposal
       inputs:
@@ -562,12 +679,19 @@ steps:
   - name: record_decision
     type: data.set
     with:
-      applied: "${{ steps.propose_action.output.status == 'succeeded' }}"
+      applied: >-
+        ${{ steps.propose_action.output.status == 'succeeded'
+          or steps.propose_exception.output.status == 'succeeded'
+          or steps.propose_risk_score.output.status == 'succeeded' }}
       approved: >-
         ${{ steps.propose_action.output.status == 'succeeded'
+          or steps.propose_exception.output.status == 'succeeded'
+          or steps.propose_risk_score.output.status == 'succeeded'
           or steps.propose_manual.output.status == 'approved' }}
       dismissed: >-
         ${{ steps.propose_action.output.status == 'dismissed'
+          or steps.propose_exception.output.status == 'dismissed'
+          or steps.propose_risk_score.output.status == 'dismissed'
           or steps.propose_manual.output.status == 'dismissed' }}
 
   # The action ran inside the gate, so its result is not visible here; re-read the
@@ -631,7 +755,7 @@ steps:
     type: security.setAlertTags
     if: >-
       ${{ steps.record_decision.output.approved == true
-        and steps.rule_tune_supported.output.auto == false }}
+        and steps.rule_tune_auto.output.auto == false }}
     with:
       alert_ids: "${{ inputs.alert_ids }}"
       tags_to_add:

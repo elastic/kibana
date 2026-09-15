@@ -9,6 +9,8 @@ import { parse } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
+  ALERTZERO_ACTION_CREATE_RULE_EXCEPTION_WORKFLOW_ID,
+  ALERTZERO_ACTION_EDIT_RULE_RISK_SCORE_WORKFLOW_ID,
   ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID,
   ALERTZERO_RULE_CREATION_WORKFLOW_ID,
   ALERTZERO_RULE_PREVIEW_WORKFLOW_ID,
@@ -190,12 +192,16 @@ describe('detection rule workflows', () => {
       expect(proposals.map(({ name }) => name)).toEqual([
         'propose_entry',
         'propose_action',
+        'propose_exception',
+        'propose_risk_score',
         'propose_manual',
       ]);
 
-      const [entry, action, manual] = proposals;
+      const [entry, action, exception, riskScore, manual] = proposals;
       const entryInputs = entry.with?.inputs as Record<string, unknown>;
       const actionInputs = action.with?.inputs as Record<string, unknown>;
+      const exceptionInputs = exception.with?.inputs as Record<string, unknown>;
+      const riskScoreInputs = riskScore.with?.inputs as Record<string, unknown>;
       const manualInputs = manual.with?.inputs as Record<string, unknown>;
 
       // Manual autonomy stops once for permission to do the work; the entry gate
@@ -215,17 +221,38 @@ describe('detection rule workflows', () => {
         id: '{{ inputs.rule_uuid }}',
         query: '{{ steps.diagnose_rule.output.structured_output.proposed_query }}',
       });
-      expect(action.if).toContain('steps.rule_tune_supported.output.auto == true');
+      expect(action.if).toContain('steps.rule_tune_supported.output.query == true');
+
+      expect(exceptionInputs.actionWorkflowId).toBe(
+        ALERTZERO_ACTION_CREATE_RULE_EXCEPTION_WORKFLOW_ID
+      );
+      expect(exceptionInputs.actionInput).toEqual({
+        rule_id: '{{ inputs.rule_uuid }}',
+        name: 'Tuning: {{ steps.fetch_rule.output.name }}',
+        description: 'Added by the rule tuning workflow.',
+        entries: '${{ steps.diagnose_rule.output.structured_output.exception_entries }}',
+      });
+      expect(exception.if).toContain('steps.rule_tune_supported.output.exception == true');
+
+      expect(riskScoreInputs.actionWorkflowId).toBe(
+        ALERTZERO_ACTION_EDIT_RULE_RISK_SCORE_WORKFLOW_ID
+      );
+      expect(riskScoreInputs.actionInput).toEqual({
+        id: '{{ inputs.rule_uuid }}',
+        risk_score: '${{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}',
+        severity: '{{ steps.diagnose_rule.output.structured_output.proposed_severity }}',
+      });
+      expect(riskScore.if).toContain('steps.rule_tune_supported.output.risk_score == true');
 
       expect(manualInputs).not.toHaveProperty('actionWorkflowId');
       expect(manualInputs).not.toHaveProperty('actionInput');
-      expect(manual.if).toContain('steps.rule_tune_supported.output.auto == false');
+      expect(manual.if).toContain('steps.rule_tune_auto.output.auto == false');
 
       for (const proposal of proposals) {
         expect(proposal.if).toContain('steps.create_investigation.output.conversation_id != null');
         expect(proposal).not.toHaveProperty('on-failure');
       }
-      for (const proposal of [action, manual]) {
+      for (const proposal of [action, exception, riskScore, manual]) {
         expect((proposal.with?.inputs as Record<string, unknown>).comment).toBe(
           '{{ steps.compose_proposal.output.comment }}'
         );
@@ -469,7 +496,7 @@ describe('detection rule workflows', () => {
         // the manual follow-up and retires the alerts; the auto-apply path keeps
         // its alerts untagged on failure so a later sweep can retry.
         expect(acknowledged.if).toContain('steps.record_decision.output.approved == true');
-        expect(acknowledged.if).toContain('steps.rule_tune_supported.output.auto == false');
+        expect(acknowledged.if).toContain('steps.rule_tune_auto.output.auto == false');
         expect(acknowledged.with?.tags_to_add).toEqual([
           '{{ consts.reviewed_tag }}',
           '{{ consts.acknowledged_tag }}',
@@ -502,7 +529,14 @@ describe('detection rule workflows', () => {
         expect(String(flags.dismissed)).toContain(
           "steps.propose_manual.output.status == 'dismissed'"
         );
+        for (const gate of ['propose_exception', 'propose_risk_score']) {
+          expect(String(flags.applied)).toContain(`steps.${gate}.output.status == 'succeeded'`);
+          expect(String(flags.approved)).toContain(`steps.${gate}.output.status == 'succeeded'`);
+          expect(String(flags.dismissed)).toContain(`steps.${gate}.output.status == 'dismissed'`);
+        }
+        // Every change lands through an action inside the gate, never in the review.
         expect(reviewSteps.map(({ type }) => type)).not.toContain('security.patchRule');
+        expect(reviewSteps.map(({ type }) => type)).not.toContain('security.createRuleException');
       });
 
       // The action ran inside the gate, so the patched rule is not visible here; the
@@ -536,6 +570,8 @@ describe('detection rule workflows', () => {
           'propose_entry',
           'run_previews',
           'propose_action',
+          'propose_exception',
+          'propose_risk_score',
           'propose_manual',
         ]);
         const [, previews] = children;
@@ -589,7 +625,7 @@ describe('detection rule workflows', () => {
       it('excludes rule modes with omitted preview fields from auto-apply', () => {
         const support = reviewSteps.find(({ name }) => name === 'record_auto_apply_support')!;
         const supported = reviewSteps.find(({ name }) => name === 'rule_tune_supported')!;
-        const condition = String(supported.with?.auto);
+        const condition = String(supported.with?.query);
 
         expect(String(support.with?.supported)).toContain(
           'steps.fetch_rule.output.data_view_id == null'
@@ -601,6 +637,48 @@ describe('detection rule workflows', () => {
           'steps.fetch_rule.output.alert_suppression == null'
         );
         expect(condition).toContain('steps.record_auto_apply_support.output.supported == true');
+      });
+
+      // Exceptions and risk score changes need their structured fields; the aggregate
+      // is a plain or-chain because Liquid cannot group with parentheses.
+      it('offers the exception and risk score actions only with structured fields', () => {
+        const supported = reviewSteps.find(({ name }) => name === 'rule_tune_supported')!;
+        const auto = reviewSteps.find(({ name }) => name === 'rule_tune_auto')!;
+
+        expect(String(supported.with?.exception)).toContain("change_type == 'exception'");
+        expect(String(supported.with?.exception)).toContain('exception_entries != null');
+        expect(String(supported.with?.risk_score)).toContain("change_type == 'risk_score'");
+        expect(String(supported.with?.risk_score)).toContain('proposed_risk_score != null');
+        expect(String(supported.with?.risk_score)).toContain('proposed_severity != null');
+        for (const flag of ['query', 'exception', 'risk_score']) {
+          expect(String(auto.with?.auto)).toContain(
+            `steps.rule_tune_supported.output.${flag} == true`
+          );
+        }
+        expect(String(auto.with?.auto)).not.toContain(' and ');
+      });
+
+      // The action workflows carry the change; each takes one actionInput object and
+      // touches only the fields the review proposed.
+      it('applies exception and risk score changes through their action workflows', () => {
+        const exception = parse(
+          getManagedYaml(ALERTZERO_ACTION_CREATE_RULE_EXCEPTION_WORKFLOW_ID)
+        ) as WorkflowYaml;
+        const exceptionSteps = flattenSteps(exception.steps as unknown as NestedStep[]);
+        const create = exceptionSteps.find(({ type }) => type === 'security.createRuleException')!;
+        expect(create.with?.rule_id).toBe('{{ inputs.actionInput.rule_id }}');
+        expect(create.with?.entries).toBe('${{ inputs.actionInput.entries }}');
+
+        const riskScore = parse(
+          getManagedYaml(ALERTZERO_ACTION_EDIT_RULE_RISK_SCORE_WORKFLOW_ID)
+        ) as WorkflowYaml;
+        const riskScoreSteps = flattenSteps(riskScore.steps as unknown as NestedStep[]);
+        const patch = riskScoreSteps.find(({ type }) => type === 'security.patchRule')!;
+        expect(patch.with?.patch).toEqual({
+          id: '{{ inputs.actionInput.id }}',
+          risk_score: '${{ inputs.actionInput.risk_score }}',
+          severity: '{{ inputs.actionInput.severity }}',
+        });
       });
 
       it('bounds direct review inputs', () => {

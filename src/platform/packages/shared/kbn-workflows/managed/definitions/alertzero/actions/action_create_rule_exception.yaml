@@ -1,0 +1,110 @@
+version: "1"
+name: Create detection rule exception
+description: >
+  AlertZero action: adds an exception item to an existing detection rule's own
+  exception list. Executed by the investigation proposal gate once an analyst
+  approves, so the change is attributed to the approver.
+enabled: true
+tags:
+  # Generic tag every action workflow carries, so the catalog can be
+  # discovered by tag rather than a hardcoded list.
+  - action
+  - alertzero
+consts:
+  # Self-describing catalog metadata, read back by the proposals service when a
+  # proposal referencing this workflow is created or rendered. Metadata has to
+  # live under `consts`: unknown top-level keys are stripped by the schema.
+  actionMetadata:
+    name: Create detection rule exception
+    description: Adds an exception to a detection rule so it stops alerting on events matching every entry.
+    category: configure
+    impact: medium
+    reversible: true
+    approvalPolicy: always-gate
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        actionInput:
+          type: object
+          description: >
+            Rule identity and the exception item. Every entry must match for the
+            exception to apply; alternatives need separate proposals.
+          properties:
+            rule_id:
+              type: string
+              maxLength: 36
+              description: >-
+                Saved-object id of the rule, so the exception lands on the exact rule
+                incarnation the proposal was built against.
+            name:
+              type: string
+              maxLength: 256
+            description:
+              type: string
+              maxLength: 1024
+            entries:
+              type: array
+              minItems: 1
+              maxItems: 20
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                    maxLength: 1024
+                  operator:
+                    type: string
+                    enum:
+                      - is
+                      - is_not
+                      - matches
+                      - does_not_match
+                      - is_one_of
+                      - is_not_one_of
+                      - exists
+                      - does_not_exist
+                  value:
+                    type: string
+                    maxLength: 4096
+                  values:
+                    type: array
+                    maxItems: 100
+                    items:
+                      type: string
+                      maxLength: 4096
+                required:
+                  - field
+                  - operator
+          required:
+            - rule_id
+            - name
+            - entries
+      required:
+        - actionInput
+      additionalProperties: false
+outputs:
+  - name: id
+    type: string
+  - name: item_id
+    type: string
+  - name: outcome
+    type: string
+steps:
+  - name: create_exception
+    type: security.createRuleException
+    with:
+      rule_id: "{{ inputs.actionInput.rule_id }}"
+      name: "{{ inputs.actionInput.name }}"
+      description: "{{ inputs.actionInput.description | default: 'Added by the rule tuning workflow.' }}"
+      entries: "${{ inputs.actionInput.entries }}"
+
+  # `workflow.execute` declares its output as unknown, so the parent falls back
+  # to a heuristic read of the last step unless the child emits explicitly.
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      id: "{{ steps.create_exception.output.id }}"
+      item_id: "{{ steps.create_exception.output.item_id }}"
+      outcome: "{{ steps.create_exception.output.outcome }}"
