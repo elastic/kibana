@@ -11,12 +11,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, testData, spaceScoped } from '../fixtures';
 
-const {
-  AI_INDEX_COLLECTION_PATH,
-  API_HEADERS,
-  CONTEXT_ENGINE_ENABLED_SETTING,
-  CONTEXT_ENGINE_READ,
-} = testData;
+const { AI_INDEX_COLLECTION_PATH, API_HEADERS, CONTEXT_ENGINE_READ } = testData;
 // Unique per run so a retried `beforeAll` does not 409 on fixed names.
 const RUN_ID = randomUUID().slice(0, 8);
 const OTHER_SPACE_ID = `ce-list-other-${RUN_ID}`;
@@ -75,6 +70,8 @@ const registerAiIndex = (id: string, index: string) => ({
 const listedIds = (body: { ai_indices: Array<{ id: string }> }): string[] =>
   body.ai_indices.map(({ id }) => id).filter((id) => id.endsWith(RUN_ID));
 
+// The `agent_builder` Scout config set pins `contextEngine:enabled=true` through `uiSettings.overrides`,
+// which is read-only and applies to every space, so the tests never toggle it.
 apiTest.describe('context engine AI Index list visibility', { tag: tags.stateful.classic }, () => {
   let adminCredentials: RoleApiCredentials;
   let listCredentials: RoleApiCredentials;
@@ -84,13 +81,6 @@ apiTest.describe('context engine AI Index list visibility', { tag: tags.stateful
     listCredentials = await requestAuth.getApiKeyForCustomRole(LIST_ROLE);
 
     await kbnClient.spaces.create({ id: OTHER_SPACE_ID, name: 'CE list other space' });
-    // The gate is a per-space setting; each space under test has to enable it.
-    await kbnClient.uiSettings.update({ [CONTEXT_ENGINE_ENABLED_SETTING]: true });
-    await kbnClient.uiSettings.update(
-      { [CONTEXT_ENGINE_ENABLED_SETTING]: true },
-      { space: OTHER_SPACE_ID }
-    );
-    await kbnClient.uiSettings.waitForEventualCacheRefresh();
 
     await esClient.indices.create({ index: VISIBLE_INDEX });
     await esClient.indices.create({ index: EMPTY_INDEX });
@@ -137,7 +127,6 @@ apiTest.describe('context engine AI Index list visibility', { tag: tags.stateful
       { ignore: [404] }
     );
     await kbnClient.spaces.delete(OTHER_SPACE_ID);
-    await kbnClient.uiSettings.unset(CONTEXT_ENGINE_ENABLED_SETTING);
   });
 
   apiTest(
