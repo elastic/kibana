@@ -83,13 +83,22 @@ export const createContextManagementNode = (deps: ContextManagementDeps) => {
     INTRA_ROUND_SUBSTITUTION_MAX_TOKENS
   );
 
+  deps.logger.debug(
+    `[contextManagement] configured contextWindow=${contextWindow} compactionThreshold=${compactionThreshold} substitutionThreshold=${substitutionThreshold}`
+  );
+
   const compact = async (
     state: StateType,
-    tailCapTokens: number
+    tailCapTokens: number,
+    trigger: 'forced' | 'roundStart' | 'proactive'
   ): Promise<Partial<StateType> | undefined> => {
+    const tokensBefore = state.lastCallUsage?.inputTokens ?? 0;
+    deps.logger.info(
+      `[contextManagement] compaction starting cycle=${state.currentCycle} trigger=${trigger} inputTokens=${tokensBefore} tailCap=${tailCapTokens}`
+    );
     deps.events.emit({
       type: ChatEventType.compactionStarted,
-      data: { token_count_before: state.lastCallUsage?.inputTokens ?? 0 },
+      data: { token_count_before: tokensBefore },
     });
     const result = await compactContext(
       {
@@ -103,8 +112,14 @@ export const createContextManagementNode = (deps: ContextManagementDeps) => {
       deps
     );
     if (!result) {
+      deps.logger.info(
+        `[contextManagement] compaction skipped cycle=${state.currentCycle} reason=nothing_to_compact`
+      );
       return undefined;
     }
+    deps.logger.info(
+      `[contextManagement] compaction completed cycle=${state.currentCycle} covered=${result.summarizedCycleCount} tokensBefore=${result.tokensBefore} tokensAfter=${result.tokensAfter}`
+    );
     deps.events.emit({
       type: ChatEventType.compactionCompleted,
       data: {
@@ -137,8 +152,14 @@ export const createContextManagementNode = (deps: ContextManagementDeps) => {
       alreadyMarked,
     });
     if (ids.length === 0) {
+      deps.logger.debug(
+        `[contextManagement] substitution skipped cycle=${state.currentCycle} trigger=${data.trigger} reason=no_candidates candidates_considered=${toolCalls.length} already_marked=${alreadyMarked.size}`
+      );
       return {};
     }
+    deps.logger.info(
+      `[contextManagement] substitution applied cycle=${state.currentCycle} trigger=${data.trigger} reason=${data.reason} threshold=${thresholdTokens} substituted=${ids.length}`
+    );
     return {
       mainActions: [substitutionAction({ ...data, substituted_tool_call_ids: ids })],
       lastContextActionCycle: state.currentCycle,
@@ -149,8 +170,14 @@ export const createContextManagementNode = (deps: ContextManagementDeps) => {
     const lastAction = state.mainActions[state.mainActions.length - 1];
 
     if (lastAction && isContextLengthErrorAction(lastAction)) {
-      const update = await compact(state, COMPACTION_TAIL_HARD_CAP_TOKENS_REACTIVE);
+      deps.logger.info(
+        `[contextManagement] cycle=${state.currentCycle} mode=forced reason=contextLengthError`
+      );
+      const update = await compact(state, COMPACTION_TAIL_HARD_CAP_TOKENS_REACTIVE, 'forced');
       if (!update) {
+        deps.logger.error(
+          `[contextManagement] cycle=${state.currentCycle} mode=forced abort=nothing_to_compact`
+        );
         throw createAgentExecutionError(
           'Context length exceeded and no history is left to compact',
           ErrCodes.contextLengthExceeded,
@@ -163,7 +190,10 @@ export const createContextManagementNode = (deps: ContextManagementDeps) => {
     if (state.currentCycle === 0) {
       const hint = deps.previousRound?.lastCallInputTokens;
       if (hint !== undefined && hint > compactionThreshold) {
-        return (await compact(state, COMPACTION_TAIL_HARD_CAP_TOKENS)) ?? {};
+        deps.logger.debug(
+          `[contextManagement] cycle=0 mode=roundStart decision=compact previousLastCall=${hint} threshold=${compactionThreshold}`
+        );
+        return (await compact(state, COMPACTION_TAIL_HARD_CAP_TOKENS, 'roundStart')) ?? {};
       }
       const cacheState = computeCacheState({
         lastTerminatedAt: deps.previousRound?.terminatedAt,
@@ -171,6 +201,11 @@ export const createContextManagementNode = (deps: ContextManagementDeps) => {
         connectorId: deps.connector.connectorId,
         cacheControl: deps.cacheControl,
       });
+      deps.logger.debug(
+        `[contextManagement] cycle=0 mode=roundStart cacheState=${cacheState} previousLastCall=${
+          hint ?? 'unknown'
+        } decision=maybe_substitute`
+      );
       return substitute(
         state,
         visibleTimelineToolCalls(deps.conversation.timeline, state.compactionCoverage),
@@ -180,16 +215,28 @@ export const createContextManagementNode = (deps: ContextManagementDeps) => {
     }
 
     if (state.currentCycle - state.lastContextActionCycle < CONTEXT_MANAGEMENT_COOLDOWN_CYCLES) {
+      deps.logger.debug(
+        `[contextManagement] cycle=${state.currentCycle} mode=proactive skipped=cooldown lastActionCycle=${state.lastContextActionCycle}`
+      );
       return {};
     }
     const inputTokens = state.lastCallUsage?.inputTokens;
     if (inputTokens === undefined) {
+      deps.logger.debug(
+        `[contextManagement] cycle=${state.currentCycle} mode=proactive skipped=no_usage`
+      );
       return {};
     }
     if (inputTokens > compactionThreshold) {
-      return (await compact(state, COMPACTION_TAIL_HARD_CAP_TOKENS)) ?? {};
+      deps.logger.debug(
+        `[contextManagement] cycle=${state.currentCycle} mode=proactive inputTokens=${inputTokens} decision=compact reason=inputTokens_over_compactionThreshold(${compactionThreshold})`
+      );
+      return (await compact(state, COMPACTION_TAIL_HARD_CAP_TOKENS, 'proactive')) ?? {};
     }
     if (inputTokens > substitutionThreshold) {
+      deps.logger.debug(
+        `[contextManagement] cycle=${state.currentCycle} mode=proactive inputTokens=${inputTokens} decision=substitute reason=inputTokens_over_substitutionThreshold(${substitutionThreshold})`
+      );
       return substitute(
         state,
         reconstructInFlightToolCalls(state.mainActions, deps.toolManager.getToolIdMapping()),
@@ -197,6 +244,9 @@ export const createContextManagementNode = (deps: ContextManagementDeps) => {
         { trigger: 'intra_round', reason: 'input_tokens_threshold' }
       );
     }
+    deps.logger.debug(
+      `[contextManagement] cycle=${state.currentCycle} mode=proactive inputTokens=${inputTokens} decision=none thresholds={compact:${compactionThreshold},substitute:${substitutionThreshold}}`
+    );
     return {};
   };
 };

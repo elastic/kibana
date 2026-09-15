@@ -160,6 +160,9 @@ export const compactContext = async (
 
   // Only the current cycle is left: nothing can be covered.
   if (units.length <= 1) {
+    deps.logger.debug(
+      `[compactor] no-op: ${units.length} visible unit(s), not enough to compact`
+    );
     return undefined;
   }
 
@@ -176,8 +179,16 @@ export const compactContext = async (
   const tokensBefore =
     units.reduce((sum, unit) => sum + unit.tokens, 0) + (existingSummary?.token_count ?? 0);
   if (covered.length === 0 || tokensBefore < COMPACTION_TAIL_FLOOR_TOKENS) {
+    deps.logger.debug(
+      `[compactor] no-op: units=${units.length} covered=${covered.length} tokensBefore=${tokensBefore} tailCap=${tailCapTokens} floor=${COMPACTION_TAIL_FLOOR_TOKENS}`
+    );
     return undefined;
   }
+  deps.logger.debug(
+    `[compactor] covering ${covered.length}/${units.length} cycle(s) tailTokens=${tailTokens} tokensBefore=${tokensBefore} existingSummaryTokens=${
+      existingSummary?.token_count ?? 0
+    }`
+  );
 
   const coveredMessages: BaseMessageLike[] = [];
   for (const unit of covered) {
