@@ -95,7 +95,11 @@ export type BulkByQueryParams = z.input<typeof bulkByQuerySchema>;
  * surface without having to parse `message`.
  */
 export const bulkErrorSchema = z.object({
-  id: z.string().describe('The identifier of the resource that failed.'),
+  id: z
+    .string()
+    .describe(
+      'ID of the item that failed. If the request omitted `id` for that item, this is the ID Kibana generated for the failed attempt.'
+    ),
   error: errorResponseSchema.pick({ code: true, message: true, details: true }),
 });
 

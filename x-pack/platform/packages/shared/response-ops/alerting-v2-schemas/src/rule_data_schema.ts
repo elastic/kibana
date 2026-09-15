@@ -46,15 +46,15 @@ export const ruleKindSchema = z
     z
       .literal('alert')
       .describe(
-        'Default. Tracks each problem as an alert episode and its lifecycle, link it to workflows to notify your team. Use when the user wants to detect and respond.'
+        'Creates an alert for each matching group and tracks it until it recovers. Use this when you want to detect a problem and notify or automate a response.'
       ),
     z
       .literal('signal')
       .describe(
-        'Matches are stored as queryable events. No alerts, no notifications - just data. Use when the user wants to collect evidence.'
+        'Stores each match as a rule event you can query. Alerts are not created and notifications are not sent.'
       ),
   ])
-  .describe('The kind of the rule.');
+  .describe('Whether the rule creates alerts (`alert`) or only stores matching events (`signal`).');
 
 export type RuleKind = z.infer<typeof ruleKindSchema>;
 
@@ -118,9 +118,19 @@ export type QueryFormat = z.infer<typeof queryFormatSchema>;
 
 /** Recovery strategy. */
 export const recoveryStrategySchema = z.union([
-  z.literal('no_breach').describe('recovers groups that stop breaching (default).'),
-  z.literal('query').describe('uses a custom recovery query to detect recovery.'),
-  z.literal('none').describe('disables recovery entirely.'),
+  z
+    .literal('no_breach')
+    .describe('Recovers an alert when the breach query no longer returns matches.'),
+  z
+    .literal('query')
+    .describe(
+      'Recovers an alert when a separate recovery query matches. Requires `query.recovery`.'
+    ),
+  z
+    .literal('none')
+    .describe(
+      'The rule never marks an alert as `recovered`, even after the breach query stops returning matches.'
+    ),
 ]);
 export const recoveryStrategy = {
   no_breach: 'no_breach',
@@ -138,14 +148,14 @@ export type RecoveryStrategy = z.infer<typeof recoveryStrategySchema>;
 export const noDataStrategySchema = z.union([
   z
     .literal('last_known_status')
-    .describe('Holds the last known episode status when no data is present.'),
+    .describe("Keeps the alert's last status when the rule finds no data."),
   z
     .literal('emit')
-    .describe(
-      'Emits a `no_data` alert event when no_data query returns no rows for the group. "emit" is not currently accepted by the create/update API.'
-    ),
-  z.literal('recover').describe('Resolves the alert episode to inactive on the first no-data run.'),
-  z.literal('none').describe('No-data situations are ignored (default).'),
+    .describe('Not accepted when creating or updating rules. Do not send this value.'),
+  z
+    .literal('recover')
+    .describe('Marks the alert `inactive` the first time the rule finds no data for the alert.'),
+  z.literal('none').describe('Ignores runs where the rule finds no data.'),
 ]);
 export const noDataStrategy = {
   last_known_status: 'last_known_status',
@@ -342,33 +352,39 @@ export const stateTransitionSchema = z
   .object({
     pending_operator: stateTransitionOperatorSchema
       .optional()
-      .describe('How to combine count and timeframe for pending.'),
+      .describe(
+        'The operator that combines `pending_count` and `pending_timeframe`. `AND` requires both. `OR` requires either.'
+      ),
     pending_count: z
       .number()
       .int()
       .min(0)
       .max(MAX_CONSECUTIVE_BREACHES)
       .optional()
-      .describe('Consecutive breaches before transitioning to active.'),
+      .describe('Number of consecutive matches required before the alert becomes `active`.'),
     pending_timeframe: durationSchema
       .optional()
-      .describe('Time window for pending evaluation, e.g. 5m, 15m.'),
+      .describe('Time window used with `pending_count`, for example `5m` or `15m`.'),
     recovering_operator: stateTransitionOperatorSchema
       .optional()
-      .describe('How to combine count and timeframe for recovering.'),
+      .describe(
+        'The operator that combines `recovering_count` and `recovering_timeframe`. `AND` requires both. `OR` requires either.'
+      ),
     recovering_count: z
       .number()
       .int()
       .min(0)
       .max(MAX_CONSECUTIVE_BREACHES)
       .optional()
-      .describe('Consecutive recoveries before transitioning to inactive.'),
+      .describe('Number of consecutive recoveries required before the alert becomes `inactive`.'),
     recovering_timeframe: durationSchema
       .optional()
-      .describe('Time window for recovering evaluation, e.g. 5m, 15m.'),
+      .describe('Time window used with `recovering_count`, for example `5m` or `15m`.'),
   })
   .strict()
-  .describe('Episode state transition thresholds (alert-only).')
+  .describe(
+    'Consecutive-match or time requirements before an alert becomes `active` or `inactive`. Applies only when `kind` is `alert`.'
+  )
   .optional()
   .nullable();
 
@@ -434,7 +450,7 @@ const artifactsSchema = z
     }
   })
   .describe(
-    'Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboard_id`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.'
+    'Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present.'
   );
 
 /** Create rule API schema */
@@ -453,18 +469,20 @@ export const createRuleDataBaseSchema = z
       .min(1)
       .max(128)
       .default(DEFAULT_TIME_FIELD)
-      .describe('Time field used for the lookback window range filter.'),
+      .describe(
+        'Document field used as the event time when applying the lookback window. Defaults to `@timestamp`.'
+      ),
     schedule: scheduleSchema,
     query: querySchema,
     recovery_strategy: recoveryStrategySchema
       .optional()
       .describe(
-        'How recovery is detected. "no_breach" recovers groups that stop breaching; "query" uses a custom recovery query; "none" disables recovery.'
+        'The condition that marks an alert recovered. If omitted or set to `no_breach`, the alert recovers when the breach query stops returning matches. Set to `query` only when you also provide `query.recovery`. With `none`, the alert stays `active`, even after the breach query stops returning matches.'
       ),
     no_data_strategy: noDataStrategySchema
       .optional()
       .describe(
-        'How to handle no-data situations. "last_known_status" holds the last known status; "recover" forces recovery; "none" disables no-data detection. "emit" is not currently accepted by the create/update API. Standalone-format rules must provide a `no_data` query block when this is not "none"; composed-format rules use `base` as the data-presence query.'
+        'How the rule behaves when it finds no data for a group. If you omit this field or set it to `none`, those runs are ignored. If you set `last_known_status` or `recover`, a standalone query (`query.format: standalone`) must include `query.no_data`. A composed query (`query.format: composed`) uses `query.base` to detect whether data is present. The `emit` value is not accepted when creating or updating rules.'
       ),
     state_transition: stateTransitionSchema,
     grouping: groupingSchema.optional(),
@@ -832,17 +850,21 @@ export type BulkGetRulesResponse = z.infer<typeof bulkGetRulesResponseSchema>;
 
 /**
  * A single item in a bulk-create request: the create-rule body plus optional
- * client-supplied `id` and `enabled` (default true). Disabled rules are
- * persisted with no executor task.
+ * client-supplied `id` and `enabled` (default true). Disabled rules are saved
+ * and do not run until enabled.
  */
 export const bulkCreateRuleItemSchema = applyCreateRuleRefinements(
   createRuleDataBaseSchema.extend({
-    id: ruleIdSchema.optional().describe('Client-supplied identifier. Generated when omitted.'),
+    id: ruleIdSchema
+      .optional()
+      .describe(
+        'Optional rule ID. If omitted, Kibana generates one. IDs in the request must be unique.'
+      ),
     enabled: z
       .boolean()
       .default(true)
       .describe(
-        'Whether the rule is enabled after creation. Disabled rules are persisted with no executor task. Defaults to true.'
+        'If `true` (default), the rule runs on its schedule after creation. If `false`, the rule is saved but does not run until you enable it.'
       ),
   })
 ).meta({ id: 'alerting_bulk_create_rule_item' });
@@ -858,7 +880,7 @@ export const bulkCreateRulesRequestSchema = z
       .array(bulkCreateRuleItemSchema)
       .min(1)
       .max(MAX_BULK_ITEMS)
-      .describe(`Rule definitions to create. Between 1 and ${MAX_BULK_ITEMS} items.`),
+      .describe(`The rules to create. Must contain between 1 and ${MAX_BULK_ITEMS} rules.`),
   })
   .strict()
   .refine(
@@ -881,8 +903,14 @@ export type BulkCreateRulesParams = z.input<typeof bulkCreateRulesRequestSchema>
  */
 export const bulkCreateRulesResponseSchema = z
   .object({
-    rules: z.array(ruleResponseSchema).describe('Rules that were created successfully.'),
-    errors: z.array(bulkErrorSchema).describe('Per-item errors for rules that were not created.'),
+    rules: z
+      .array(ruleResponseSchema)
+      .describe('Rules that were created. Rules listed in `errors` are not included.'),
+    errors: z
+      .array(bulkErrorSchema)
+      .describe(
+        'Errors for rules that could not be created. Each entry includes the rule `id` and the error. Empty when every requested rule was created.'
+      ),
   })
   .meta({ id: 'alerting_bulk_create_rules_response' });
 
