@@ -6,6 +6,8 @@
  */
 
 export { InvestigationOutput } from './src/investigation_output';
+export { HypothesisRow } from './src/hypothesis_row';
+export { FinalResults } from './src/final_results';
 export {
   useInvestigationState,
   type UseInvestigationStateResult,
@@ -14,5 +16,8 @@ export type { InvestigationOutputProps, InvestigationStatus } from './src/types'
 export { EvidenceList, type EvidenceListProps } from './src/evidence_list';
 export {
   buildEvidenceDiscoverParams,
+  buildCodeReferenceUrl,
+  formatCodeReferenceDetail,
+  formatCodeReferenceLabel,
   type InvestigationDiscoverParams,
 } from './src/evidence_links';

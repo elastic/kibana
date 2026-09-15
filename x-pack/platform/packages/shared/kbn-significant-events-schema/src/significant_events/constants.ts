@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export const MAX_SHORT_STRING_LENGTH = 255;
+export const MAX_MEDIUM_STRING_LENGTH = 512;
 export const MAX_ID_LENGTH = 255;
 export const MAX_RULE_NAME_LENGTH = 255;
 export const MAX_TITLE_LENGTH = 512;
@@ -14,6 +16,7 @@ export const MAX_SIGNAL_DESCRIPTION_LENGTH = 350;
 export const MAX_SYMPTOM_HYPOTHESIS_LENGTH = 300;
 export const MAX_SUMMARY_LENGTH = 600;
 export const MAX_ASSESSMENT_NOTE_LENGTH = 400;
+export const MAX_TIMESTAMP_LENGTH = 64;
 
 export const SYMPTOM_HYPOTHESIS_ROLE_RULE =
   'This is the causal explanation, not the observed-state report. Use current evidence and selected causal_features to support the mechanism; use blast_radius only to explain evidenced propagation. When verification is healthy, empty, or off-topic, state that no failure mechanism is confirmed; do not infer traffic, throughput, instability, or another mechanism from the detection alone.';

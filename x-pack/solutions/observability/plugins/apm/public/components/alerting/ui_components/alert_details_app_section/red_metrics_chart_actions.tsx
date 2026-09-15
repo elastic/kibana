@@ -179,7 +179,7 @@ function RedMetricsChartActionsPopover({
         <EuiButtonEmpty
           data-test-subj="apmAlertDetailsOpenActionsDropdown"
           onClick={() => setIsActionsOpen(!isActionsOpen)}
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           size="s"
         >

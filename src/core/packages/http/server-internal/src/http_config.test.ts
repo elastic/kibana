@@ -246,18 +246,101 @@ describe('publicBaseUrl', () => {
 });
 
 describe('selfHttp', () => {
-  test('defaults target to auto', () => {
-    expect(config.schema.validate({}).selfHttp.target).toBe('auto');
+  test('defaults to automatic targeting', () => {
+    expect(config.schema.validate({}).selfHttp).toEqual({
+      target: 'auto',
+      ssl: { verificationMode: 'full' },
+    });
   });
 
   test('accepts local target', () => {
     expect(config.schema.validate({ selfHttp: { target: 'local' } }).selfHttp.target).toBe('local');
   });
 
+  test('accepts outbound certificate authorities for an automatic HTTPS public target', () => {
+    expect(
+      config.schema.validate({
+        publicBaseUrl: 'https://kibana.example.com',
+        selfHttp: {
+          ssl: { certificateAuthorities: ['/path/to/ca.pem'] },
+        },
+      }).selfHttp
+    ).toEqual({
+      target: 'auto',
+      ssl: { verificationMode: 'full', certificateAuthorities: ['/path/to/ca.pem'] },
+    });
+  });
+
+  test.each([
+    {
+      name: 'local target',
+      value: {
+        publicBaseUrl: 'https://kibana.example.com',
+        selfHttp: {
+          target: 'local' as const,
+          ssl: { certificateAuthorities: '/path/to/ca.pem' },
+        },
+      },
+    },
+    {
+      name: 'missing public base URL',
+      value: {
+        selfHttp: { ssl: { certificateAuthorities: '/path/to/ca.pem' } },
+      },
+    },
+    {
+      name: 'HTTP public target',
+      value: {
+        publicBaseUrl: 'http://kibana.example.com',
+        selfHttp: { ssl: { certificateAuthorities: '/path/to/ca.pem' } },
+      },
+    },
+  ])('rejects outbound certificate authorities with $name', ({ value }) => {
+    expect(() => config.schema.validate(value)).toThrow(
+      '[selfHttp.ssl.certificateAuthorities] can only be used when [selfHttp.target] is [auto] and [publicBaseUrl] uses HTTPS'
+    );
+  });
+
   test('rejects unsupported targets', () => {
     expect(() => config.schema.validate({ selfHttp: { target: 'inject' } })).toThrow(
       '[selfHttp.target]'
     );
+  });
+
+  test.each(['none', 'certificate', 'full'] as const)(
+    'accepts outbound verification mode %s',
+    (verificationMode) => {
+      expect(
+        config.schema.validate({ selfHttp: { ssl: { verificationMode } } }).selfHttp.ssl
+          .verificationMode
+      ).toBe(verificationMode);
+    }
+  );
+
+  test('rejects unsupported verification modes', () => {
+    expect(() =>
+      config.schema.validate({ selfHttp: { ssl: { verificationMode: 'partial' } } })
+    ).toThrow('[selfHttp.ssl.verificationMode]');
+  });
+
+  test.each([
+    {
+      name: 'local target',
+      value: { selfHttp: { target: 'local' as const, ssl: { verificationMode: 'none' as const } } },
+    },
+    {
+      name: 'missing public base URL',
+      value: { selfHttp: { ssl: { verificationMode: 'none' as const } } },
+    },
+    {
+      name: 'HTTPS public target',
+      value: {
+        publicBaseUrl: 'https://kibana.example.com',
+        selfHttp: { ssl: { verificationMode: 'none' as const } },
+      },
+    },
+  ])('accepts an outbound verification mode with $name', ({ value }) => {
+    expect(() => config.schema.validate(value)).not.toThrow();
   });
 });
 
@@ -867,7 +950,7 @@ describe('HttpConfig', () => {
     expect(httpConfig.restrictInternalApis).toBe(true);
   });
 
-  it('keeps self HTTP target config', () => {
+  it('builds the self HTTP runtime config', () => {
     const rawConfig = config.schema.validate({ selfHttp: { target: 'local' } }, {});
     const rawCspConfig = cspConfig.schema.validate({});
     const rawPermissionsPolicyConfig = permissionsPolicyConfig.schema.validate({});
@@ -878,6 +961,9 @@ describe('HttpConfig', () => {
       rawPermissionsPolicyConfig
     );
 
-    expect(httpConfig.selfHttp).toEqual({ target: 'local' });
+    expect(httpConfig.selfHttp).toEqual({
+      target: 'local',
+      ssl: { verificationMode: 'full', certificateAuthorities: undefined },
+    });
   });
 });

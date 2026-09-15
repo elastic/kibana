@@ -131,7 +131,7 @@ export function EventFlyoutChatFooter({
       <EuiContextMenuItem
         data-test-subj="nightshiftEventFlyoutOpenInvestigationChatItem"
         disabled={!conversationId}
-        icon="discuss"
+        icon="comment"
         onClick={openInvestigationChat}
         toolTipContent={conversationId ? undefined : investigationChatUnavailableLabel}
         {...getEbtProps({
@@ -184,7 +184,7 @@ export function EventFlyoutChatFooter({
               css={css`
                 margin-left: ${euiTheme.size.m};
               `}
-              type="arrowDown"
+              type="chevronSingleDown"
               size="s"
               aria-hidden="true"
             />

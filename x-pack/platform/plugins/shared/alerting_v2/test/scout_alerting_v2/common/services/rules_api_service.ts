@@ -22,7 +22,13 @@ import type {
   RuleChangeHistoryDetail,
   RuleResponse,
 } from '@kbn/alerting-v2-schemas';
-import { COMMON_HEADERS, POLL_INTERVAL_MS, POLL_TIMEOUT_MS, RULE_API_PATH } from '../constants';
+import {
+  COMMON_HEADERS,
+  INTERNAL_RULE_API_PATH,
+  POLL_INTERVAL_MS,
+  POLL_TIMEOUT_MS,
+  RULE_API_PATH,
+} from '../constants';
 
 export interface WaitForEnabledStateParams {
   id: string;
@@ -44,6 +50,7 @@ export interface RulesApiService {
   bulkDelete: (params: BulkByIdsParams) => Promise<BulkResponse>;
   bulkDisable: (params: BulkByIdsParams) => Promise<BulkResponse>;
   bulkEnable: (params: BulkByIdsParams) => Promise<BulkResponse>;
+  bulkUpdateApiKey: (params: BulkByIdsParams) => Promise<BulkResponse>;
   deleteByQuery: (params: BulkByQueryParams) => Promise<BulkByQueryResult>;
   enableByQuery: (params: BulkByQueryParams) => Promise<BulkByQueryResult>;
   disableByQuery: (params: BulkByQueryParams) => Promise<BulkByQueryResult>;
@@ -187,6 +194,16 @@ export const getRulesApiService = ({
         });
         return response.data;
       }),
+    bulkUpdateApiKey: (params: BulkByIdsParams) =>
+      measurePerformanceAsync(log, 'rules.bulkUpdateApiKey', async () => {
+        const response = await kbnClient.request<BulkResponse>({
+          method: 'POST',
+          path: `${RULE_API_PATH}/_bulk_update_api_key`,
+          headers: COMMON_HEADERS,
+          body: params,
+        });
+        return response.data;
+      }),
     deleteByQuery,
     enableByQuery: (params: BulkByQueryParams) =>
       measurePerformanceAsync(log, 'rules.enableByQuery', async () => {
@@ -231,7 +248,7 @@ export const getRulesApiService = ({
       measurePerformanceAsync(log, 'rules.listChangeHistory', async () => {
         const response = await kbnClient.request<ListRuleChangeHistoryResponse>({
           method: 'GET',
-          path: `${RULE_API_PATH}/${encodeURIComponent(id)}/history`,
+          path: `${INTERNAL_RULE_API_PATH}/${encodeURIComponent(id)}/history`,
           query: stripUndefined(query),
         });
         return response.data;
@@ -240,7 +257,9 @@ export const getRulesApiService = ({
       measurePerformanceAsync(log, 'rules.getChangeHistoryEvent', async () => {
         const response = await kbnClient.request<RuleChangeHistoryDetail>({
           method: 'GET',
-          path: `${RULE_API_PATH}/${encodeURIComponent(id)}/history/${encodeURIComponent(eventId)}`,
+          path: `${INTERNAL_RULE_API_PATH}/${encodeURIComponent(id)}/history/${encodeURIComponent(
+            eventId
+          )}`,
         });
         return response.data;
       }),

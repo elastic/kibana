@@ -12,6 +12,10 @@ export interface BuildScoreDocumentsParams {
   experimentId: string;
   experimentName?: string;
   taskModel: Model;
+  /**
+   * Default judge model, applied only to scores whose evaluator reports neither a
+   * model nor `kind: 'code'`.
+   */
   evaluatorModel: Model;
   metadata: ScoreDocumentMetadata;
   example: {
@@ -63,11 +67,15 @@ export const buildScoreDocuments = (params: BuildScoreDocumentsParams): IngestSc
       },
       evaluator: {
         name: composeScoreName(result.evaluator.name, score.name),
+        ...(result.evaluator.version ? { version: result.evaluator.version } : {}),
         ...(score.score !== undefined ? { score: score.score } : {}),
         ...(score.label !== undefined ? { label: score.label } : {}),
         ...(score.explanation !== undefined ? { explanation: score.explanation } : {}),
         ...(score.metadata ? { metadata: score.metadata } : {}),
         ...(score.traceId !== undefined ? { trace_id: score.traceId } : {}),
+        ...(result.evaluator.kind ? { kind: result.evaluator.kind } : {}),
+        ...(result.evaluator.model ? { model: result.evaluator.model } : {}),
+        ...(result.evaluator.direction ? { direction: result.evaluator.direction } : {}),
       },
     }))
   );

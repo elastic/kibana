@@ -9,7 +9,8 @@ export * from './rule_data_schema';
 export * from './rule_attachment_schema';
 export * from './error_response_schema';
 export * from './constants';
-export { durationSchema, tagsSchema } from './common';
+export { durationSchema, tagsResponseSchema, tagsSchema } from './common';
+export type { TagsResponse } from './common';
 export {
   validateDuration,
   validateMaxDuration,
@@ -17,6 +18,7 @@ export {
   validateEsqlQuery,
   parseDurationToMs,
 } from './validation';
+export * from './policy_matcher_schema';
 export * from './action_policy_data_schema';
 export * from './action_policy_response_schema';
 export * from './action_policy_attachment_schema';
@@ -32,5 +34,6 @@ export * from './matcher_data_fields_schema';
 export * from './action_policy_tags_schema';
 export * from './create_alert_event_data_schema';
 export * from './rule_template_schema';
+export * from './suggest_user_profile_response_schema';
 export type { MatcherContext, MatcherContextFieldDescriptor } from './matcher_context';
 export { MATCHER_CONTEXT_FIELDS } from './matcher_context';

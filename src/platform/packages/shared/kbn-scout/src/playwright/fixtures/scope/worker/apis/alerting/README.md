@@ -7,7 +7,7 @@ This service provides a comprehensive interface to interact with Kibana's Alerti
 - **Space-aware**: All endpoints support Kibana spaces
 - **Built-in retry logic**: Uses kbnClient's internal retry mechanism with exponential backoff
 - **Performance monitoring**: Automatic performance measurement for all operations
-- **Comprehensive coverage**: Includes rules, connectors, waiting helpers, and cleanup utilities
+- **Comprehensive coverage**: Includes rules, connectors, settings, waiting helpers, and cleanup utilities
 - **Robust error handling**: Automatic retry on network errors, timeouts, and HTTP error status codes
 
 ## Usage Example
@@ -109,7 +109,8 @@ spaceTest('use alerting in custom space', async ({ apiServices, scoutSpace }) =>
 - `unmuteAll(ruleId, spaceId?)` - Unmute all alerts for a rule
 - `muteAlert(ruleId, alertId, spaceId?)` - Mute a specific alert
 - `unmuteAlert(ruleId, alertId, spaceId?)` - Unmute a specific alert
-- `snooze(ruleId, duration, spaceId?)` - Snooze a rule
+- `snooze(ruleId, duration, spaceId?)` - Snooze a rule immediately for the given duration
+- `scheduleSnooze(ruleId, params?, spaceId?)` - Add a future snooze schedule (defaults: duration `0`, start in 3 hours)
 - `unsnooze(ruleId, scheduleIds?, spaceId?)` - Unsnooze a rule
 - `runSoon(ruleId, spaceId?)` - Trigger immediate rule execution
 - `getRuleTypes(spaceId?)` - Get available rule types
@@ -138,6 +139,23 @@ const rule = await alerting.rules.get(ruleId, spaceId, { ignoreErrors: [404] });
 - `getAll(spaceId?)` - Get all connectors
 - `getTypes(spaceId?)` - Get available connector types
 - `execute(connectorId, params, spaceId?)` - Execute a connector
+
+### Settings
+
+- `updateFlapping(params, spaceId?)` - Update space-level flapping detection settings
+- `updateQueryDelay(params, spaceId?)` - Update space-level query delay settings
+- `reset(spaceId?)` - Reset flapping and query-delay settings to a known seed (`lookBackWindow: 10`, `statusChangeThreshold: 10`, `delay: 10`, flapping enabled)
+
+```typescript
+await alerting.settings.reset();
+
+await alerting.settings.updateFlapping({
+  enabled: true,
+  lookBackWindow: 10,
+  statusChangeThreshold: 10,
+});
+await alerting.settings.updateQueryDelay({ delay: 10 });
+```
 
 ### Waiting Helpers
 

@@ -11,15 +11,15 @@ import { checkAllowedPackages } from './check_allowed_packages';
 
 describe('#checkAllowedPackages', () => {
   it('does not throw if no packages', () => {
-    expect(() => checkAllowedPackages([], [])).not.toThrowError(FleetUnauthorizedError);
+    expect(() => checkAllowedPackages([], [])).not.toThrow(FleetUnauthorizedError);
   });
 
   it('does not throw if allowedPackages is undefined', () => {
-    expect(() => checkAllowedPackages([])).not.toThrowError(FleetUnauthorizedError);
+    expect(() => checkAllowedPackages([])).not.toThrow(FleetUnauthorizedError);
   });
 
   it('throws if allowedPackages is empty array', () => {
-    expect(() => checkAllowedPackages([{ name: 'packageA' }], [], 'name')).toThrowError(
+    expect(() => checkAllowedPackages([{ name: 'packageA' }], [], 'name')).toThrow(
       new FleetUnauthorizedError(
         'Authorization denied due to lack of integration package privileges'
       )
@@ -29,7 +29,7 @@ describe('#checkAllowedPackages', () => {
   it('does not throw if all packages allowed', () => {
     const packages = ['packageA', 'packageB', 'packageC'];
     const allowedPackages = ['packageA', 'packageB', 'packageC'];
-    expect(() => checkAllowedPackages(packages, allowedPackages)).not.toThrowError(
+    expect(() => checkAllowedPackages(packages, allowedPackages)).not.toThrow(
       FleetUnauthorizedError
     );
   });
@@ -37,7 +37,7 @@ describe('#checkAllowedPackages', () => {
   it('throws if contains unresolved package', () => {
     const packages = [{ name: 'packageA' }, { name: 'packageB' }, { name: undefined }];
     const allowedPackages = ['packageA', 'packageB', 'packageC'];
-    expect(() => checkAllowedPackages(packages, allowedPackages, 'name')).toThrowError(
+    expect(() => checkAllowedPackages(packages, allowedPackages, 'name')).toThrow(
       new FleetUnauthorizedError(
         'Authorization denied. Allowed package(s): packageA, packageB, packageC.'
       )
@@ -47,7 +47,7 @@ describe('#checkAllowedPackages', () => {
   it('throws if contains restricted packages', () => {
     const packages = [{ name: 'packageA' }, { name: 'packageB' }, { name: 'packageC' }];
     const allowedPackages = ['packageA', 'packageB'];
-    expect(() => checkAllowedPackages(packages, allowedPackages, 'name')).toThrowError(
+    expect(() => checkAllowedPackages(packages, allowedPackages, 'name')).toThrow(
       new FleetUnauthorizedError(
         'Authorization denied to package: packageC. Allowed package(s): packageA, packageB'
       )

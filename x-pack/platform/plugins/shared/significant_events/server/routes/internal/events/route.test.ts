@@ -8,6 +8,12 @@
 import type { SignificantEventsMaintenanceState } from '../../../../common/maintenance/state_machine';
 import { internalEventsRoutes } from './route';
 
+const mockCleanupStaleEvents = jest.fn();
+
+jest.mock('../../../lib/significant_events/events/cleanup_stale_events', () => ({
+  cleanupStaleEvents: (...args: unknown[]) => mockCleanupStaleEvents(...args),
+}));
+
 jest.mock('../../utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
 }));
@@ -17,11 +23,38 @@ const investigateRoute =
 const eventsSearchRoute = internalEventsRoutes['GET /internal/significant_events/events'];
 const lifecycleRoute =
   internalEventsRoutes['GET /internal/significant_events/events/{id}/lifecycle'];
+const cleanupRoute = internalEventsRoutes['POST /internal/significant_events/events/_cleanup'];
 
 type HandlerParams = Parameters<typeof investigateRoute.handler>[0];
 
 const makeMaintenanceService = (state: SignificantEventsMaintenanceState = 'enabled') => ({
   getState: jest.fn().mockResolvedValue(state),
+});
+
+describe('POST /internal/significant_events/events/_cleanup', () => {
+  it('runs cleanup with manage-scoped event and rule clients', async () => {
+    mockCleanupStaleEvents.mockResolvedValue({ scanned: 1, closed: 1, kept: 0, skipped: 0 });
+    const eventClient = {};
+    const rulesClient = {};
+
+    const result = await cleanupRoute.handler({
+      params: { body: { candidateRuleIds: ['rule-1'] } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        getEventClient: () => eventClient,
+        getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({ rulesClient }),
+      }),
+      server: {},
+    } as never);
+
+    expect(mockCleanupStaleEvents).toHaveBeenCalledWith({
+      eventClient,
+      rulesClient,
+      candidateRuleIds: ['rule-1'],
+    });
+    expect(result).toEqual({ scanned: 1, closed: 1, kept: 0, skipped: 0 });
+  });
 });
 
 describe('POST /internal/significant_events/events/{id}/investigate', () => {
@@ -34,7 +67,7 @@ describe('POST /internal/significant_events/events/{id}/investigate', () => {
         licensing: {},
         getEventClient: () => ({ findByEventUuid }),
       }),
-      server: { workflowsManagement: {}, agentBuilder: {}, spaces: {} },
+      server: { nightshiftInvestigations: {} },
       logger: { warn: jest.fn(), get: jest.fn().mockReturnValue({ warn: jest.fn() }) },
       maintenanceService: makeMaintenanceService('paused'),
     } as unknown as HandlerParams;
@@ -82,6 +115,49 @@ describe('GET /internal/significant_events/events', () => {
       page: 1,
       perPage: 25,
       total: 1,
+    });
+  });
+
+  it('maps event_id to eventIds and still forwards time range and other filters', async () => {
+    const findLatestByCurrentStatePaginated = jest.fn().mockResolvedValue({
+      hits: [],
+      page: 1,
+      perPage: 25,
+      total: 0,
+    });
+
+    await eventsSearchRoute.handler({
+      params: {
+        query: {
+          event_id: 'event-1',
+          from: '2026-01-01T00:00:00.000Z',
+          to: '2026-01-02T00:00:00.000Z',
+          status: 'open',
+          severity: '40-medium',
+          stream: 'logs.test',
+          search: 'noise',
+          page: 2,
+          perPage: 10,
+        },
+      },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        getEventClient: () => ({ findLatestByCurrentStatePaginated }),
+      }),
+      server: {},
+    } as never);
+
+    expect(findLatestByCurrentStatePaginated).toHaveBeenCalledWith({
+      eventIds: ['event-1'],
+      from: '2026-01-01T00:00:00.000Z',
+      to: '2026-01-02T00:00:00.000Z',
+      status: ['open'],
+      severity: ['40-medium'],
+      stream: ['logs.test'],
+      search: 'noise',
+      page: 2,
+      perPage: 10,
     });
   });
 });

@@ -71,7 +71,7 @@ spaceTest.describe('Lens ES|QL metric trendline toggle', { tag: '@local-stateful
     'can enable and disable trendline via dimension editor with persistence',
     async ({ browserAuth, page, pageObjects }) => {
       const { dashboard, lens } = pageObjects;
-      const sparkline = page.locator('.echSingleMetricSparkline');
+      const sparkline = lens.metric.trendline;
 
       await spaceTest.step('open dashboard and verify no trendline initially', async () => {
         await browserAuth.loginAsPrivilegedUser();
@@ -93,7 +93,7 @@ spaceTest.describe('Lens ES|QL metric trendline toggle', { tag: '@local-stateful
           'true'
         );
 
-        await lens.secondaryFlyoutBackButton.click();
+        await lens.workspace.secondaryFlyoutBackButton.click();
         await applyLensInlineEditorAndWaitClosed({ lens });
         await dashboard.waitForRenderComplete();
         // Trendline query finishes after the metric tile render that apply settles on.
@@ -129,7 +129,7 @@ spaceTest.describe('Lens ES|QL metric trendline toggle', { tag: '@local-stateful
           'true'
         );
 
-        await lens.secondaryFlyoutBackButton.click();
+        await lens.workspace.secondaryFlyoutBackButton.click();
         await applyLensInlineEditorAndWaitClosed({ lens });
         await dashboard.waitForRenderComplete();
         // Sparkline can linger through the first post-apply render while the trendline layer tears down.

@@ -23,7 +23,7 @@ const ruleCreatedEvent: RuleCreatedEvent = {
 };
 
 // Workflows only ever see the projected rule reference, never the full payload.
-const projectedWorkflowPayload = { rule: { ruleId: 'rule-1', spaceId: 'my-space' } };
+const projectedWorkflowPayload = { rule: { ruleId: 'rule-1', spaceId: 'my-space', tags: [] } };
 
 describe('RuleWorkflowSubscriber', () => {
   let bus: jest.Mocked<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;
@@ -96,7 +96,7 @@ describe('RuleWorkflowSubscriber', () => {
           event_type: RULE_CREATED_EVENT_TYPE,
           rule_id: ruleCreatedEvent.payload.ruleId,
           space_id: ruleCreatedEvent.payload.spaceId,
-          code: ALERTING_LOG_CODES.RULE_WORKFLOW_SUBSCRIBER_FAILURE,
+          code: ALERTING_LOG_CODES.EVENTS_RULE_WORKFLOW_SUBSCRIBER_FAILED,
         },
         error: expect.objectContaining({ message: 'workflows unreachable' }),
       });

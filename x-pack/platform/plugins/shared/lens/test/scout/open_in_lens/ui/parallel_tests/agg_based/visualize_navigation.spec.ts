@@ -51,22 +51,22 @@ spaceTest.describe(
         const openInLens = async () => {
           await visualize.clickEditInLensButton();
           await lens.waitForVisualization('xyVisChart');
-          expect(await lens.getLayerCount()).toBe(1);
+          expect(await lens.layers.getLayerCount()).toBe(1);
         };
 
         await spaceTest.step('return with no changes and no modal', async () => {
           await openInLens();
-          await lens.goBackToPreviousApp();
-          await expect(visualize.getEditInLensButton()).toBeVisible();
+          await lens.workspace.goBackToPreviousApp();
+          await visualize.expectEditInLensButtonVisible();
         });
 
         await spaceTest.step('warn and discard after unsaved Lens changes', async () => {
           await openInLens();
           await lens.configureDimension(TIMESTAMP_X_AXIS_DIMENSION);
-          await lens.goBackToPreviousApp();
-          await expect(lens.discardChangesModal).toBeVisible();
-          await lens.confirmDiscardChangesModal();
-          await expect(visualize.getEditInLensButton()).toBeVisible();
+          await lens.workspace.goBackToPreviousApp();
+          await expect(lens.workspace.discardChangesModal).toBeVisible();
+          await lens.workspace.confirmDiscardChangesModal();
+          await visualize.expectEditInLensButtonVisible();
         });
 
         await spaceTest.step('return with no modal after saving in Lens', async () => {
@@ -75,9 +75,9 @@ spaceTest.describe(
           await lens.save(`Migrated Viz saved in Lens ${scoutSpace.id}`, {
             addToDashboard: 'none',
           });
-          await lens.goBackToPreviousApp();
-          await expect(lens.discardChangesModal).toBeHidden();
-          await expect(visualize.getEditInLensButton()).toBeVisible();
+          await lens.workspace.goBackToPreviousApp();
+          await expect(lens.workspace.discardChangesModal).toBeHidden();
+          await visualize.expectEditInLensButtonVisible();
         });
       }
     );

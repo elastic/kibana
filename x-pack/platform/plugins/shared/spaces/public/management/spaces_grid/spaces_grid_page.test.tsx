@@ -8,11 +8,13 @@
 import { act } from '@testing-library/react';
 import React from 'react';
 
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import {
   httpServiceMock,
   notificationServiceMock,
   scopedHistoryMock,
 } from '@kbn/core/public/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
@@ -23,18 +25,18 @@ import { spacesManagerMock } from '../../spaces_manager/mocks';
 
 const spaces = [
   {
-    id: 'default',
+    id: asSpaceId('default'),
     name: 'Default',
     disabledFeatures: [],
     _reserved: true,
   },
   {
-    id: 'custom-1',
+    id: asSpaceId('custom-1'),
     name: 'Custom 1',
     disabledFeatures: [],
   },
   {
-    id: 'custom-2',
+    id: asSpaceId('custom-2'),
     name: 'Custom 2',
     initials: 'LG',
     color: '#ABCDEF',
@@ -49,10 +51,10 @@ spacesManager.getSpaces = jest.fn().mockResolvedValue(spaces);
 const featuresStart = featuresPluginMock.createStart();
 featuresStart.getFeatures.mockResolvedValue([
   new KibanaFeature({
-    id: 'feature-1',
+    id: asSpaceId('feature-1'),
     name: 'feature 1',
     app: [],
-    category: { id: 'foo', label: 'foo' },
+    category: { id: asSpaceId('foo'), label: 'foo' },
     privileges: null,
   }),
 ]);
@@ -63,9 +65,16 @@ const spacesGridCommonProps = {
   isServerless: false,
 };
 
+const mountGrid = (ui: React.ReactElement) =>
+  mountWithIntl(<MockAppHeaderProvider>{ui}</MockAppHeaderProvider>);
+
 describe('SpacesGridPage', () => {
   const getUrlForApp = (appId: string) => appId;
   const history = scopedHistoryMock.create();
+
+  beforeEach(() => {
+    history.createHref.mockImplementation(({ pathname } = { pathname: '/' }) => pathname ?? '/');
+  });
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -116,19 +125,19 @@ describe('SpacesGridPage', () => {
     httpStart.get.mockResolvedValue([]);
     const spacesWithSolution = [
       {
-        id: 'default',
+        id: asSpaceId('default'),
         name: 'Default',
         disabledFeatures: [],
         _reserved: true,
       },
       {
-        id: 'custom-1',
+        id: asSpaceId('custom-1'),
         name: 'Custom 1',
         disabledFeatures: [],
         solution: 'es',
       },
       {
-        id: 'custom-2',
+        id: asSpaceId('custom-2'),
         name: 'Custom 2',
         initials: 'LG',
         color: '#ABCDEF',
@@ -184,7 +193,7 @@ describe('SpacesGridPage', () => {
     const httpStart = httpServiceMock.createStartContract();
     httpStart.get.mockResolvedValue([]);
 
-    const wrapper = mountWithIntl(
+    const wrapper = mountGrid(
       <SpacesGridPage
         spacesManager={spacesManager}
         getFeatures={featuresStart.getFeatures}
@@ -220,7 +229,7 @@ describe('SpacesGridPage', () => {
 
     expect(filteredItems).toEqual([
       {
-        id: 'custom-1',
+        id: asSpaceId('custom-1'),
         name: 'Custom 1',
         disabledFeatures: [],
         solution: 'es',
@@ -272,7 +281,7 @@ describe('SpacesGridPage', () => {
 
     expect(wrapper.find('EuiInMemoryTable').prop('items')).toEqual([
       {
-        id: 'custom-1',
+        id: asSpaceId('custom-1'),
         name: 'Custom 1',
         disabledFeatures: [],
       },
@@ -281,9 +290,9 @@ describe('SpacesGridPage', () => {
 
   it('renders a "current" badge for the current space', async () => {
     const spacesWithCurrent = [
-      { id: 'default', name: 'Default', disabledFeatures: [], _reserved: true },
-      { id: 'test-1', name: 'Test', disabledFeatures: [] },
-      { id: 'test-2', name: 'Test', disabledFeatures: [] },
+      { id: asSpaceId('default'), name: 'Default', disabledFeatures: [], _reserved: true },
+      { id: asSpaceId('test-1'), name: 'Test', disabledFeatures: [] },
+      { id: asSpaceId('test-2'), name: 'Test', disabledFeatures: [] },
     ];
     const spacesManagerWithCurrent = spacesManagerMock.create();
     spacesManagerWithCurrent.getSpaces = jest.fn().mockResolvedValue(spacesWithCurrent);
@@ -292,7 +301,7 @@ describe('SpacesGridPage', () => {
     const current = await spacesManagerWithCurrent.getActiveSpace();
     expect(current.id).toBe('test-2');
 
-    const wrapper = mountWithIntl(
+    const wrapper = mountGrid(
       <SpacesGridPage
         spacesManager={spacesManagerWithCurrent}
         getFeatures={featuresStart.getFeatures}
@@ -335,7 +344,7 @@ describe('SpacesGridPage', () => {
     const current = await spacesManager.getActiveSpace();
     expect(current.id).toBe('custom-2');
 
-    const wrapper = mountWithIntl(
+    const wrapper = mountGrid(
       <SpacesGridPage
         spacesManager={spacesManager}
         getFeatures={featuresStart.getFeatures}
@@ -367,7 +376,7 @@ describe('SpacesGridPage', () => {
     const current = await spacesManager.getActiveSpace();
     expect(current.id).toBe('custom-2');
 
-    const wrapper = mountWithIntl(
+    const wrapper = mountGrid(
       <SpacesGridPage
         spacesManager={spacesManager}
         getFeatures={featuresStart.getFeatures}
@@ -398,7 +407,7 @@ describe('SpacesGridPage', () => {
     const httpStart = httpServiceMock.createStartContract();
     httpStart.get.mockResolvedValue([]);
 
-    const wrapper = mountWithIntl(
+    const wrapper = mountGrid(
       <SpacesGridPage
         spacesManager={spacesManager}
         getFeatures={featuresStart.getFeatures}
@@ -428,7 +437,7 @@ describe('SpacesGridPage', () => {
     const httpStart = httpServiceMock.createStartContract();
     httpStart.get.mockResolvedValue([]);
 
-    const wrapper = mountWithIntl(
+    const wrapper = mountGrid(
       <SpacesGridPage
         spacesManager={spacesManager}
         getFeatures={featuresStart.getFeatures}

@@ -111,7 +111,7 @@ const CustomFieldsComponent: React.FC<Props> = ({
             size="s"
             color="primary"
             fill={false}
-            iconType="editorUndo"
+            iconType="undo"
             onClick={() => onRevertField(customFieldConf.key)}
             css={revertButtonStyles}
             data-test-subj={`case-custom-field-revert-${customFieldConf.key}`}

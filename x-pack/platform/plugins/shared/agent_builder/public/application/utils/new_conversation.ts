@@ -26,11 +26,19 @@ export const createNewConversation = ({
     created_at: now,
     updated_at: now,
     rounds: [],
-    permissions: { rename: true, delete: true },
+    permissions: { rename: true, delete: true, update_access_control: true },
   };
 };
 
 export const pendingRoundId = '__pending__';
+
+export const isPendingCurrentRound = ({
+  isCurrentRound,
+  roundId,
+}: {
+  isCurrentRound: boolean;
+  roundId: string;
+}): boolean => isCurrentRound && roundId === pendingRoundId;
 
 export const createNewRound = ({
   userMessage,

@@ -18,6 +18,7 @@ export const streamsInvestigationManagementSkill = defineSkillType({
     'Streams investigation management: trigger a root-cause analysis workflow for an observability issue, significant event, or alert; check the status of a running investigation; and summarise the structured findings once complete. Load when the user asks to investigate an incident, error, or anomaly — including a significant event attached to the conversation or a fired alert — optionally scoped to specific data streams.',
   content,
   experimental: true,
+  excludeFromElasticCapabilities: true,
   getRegistryTools: () => [
     platformCoreTools.executeWorkflow,
     // Used when execute_workflow returns before completion: the tool waits up to ~120s and

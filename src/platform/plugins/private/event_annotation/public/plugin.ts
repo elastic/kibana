@@ -8,7 +8,6 @@
  */
 
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import type {
@@ -32,7 +31,6 @@ import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 export interface EventAnnotationStartDependencies {
   data: DataPublicPluginStart;
   savedObjectsTagging: SavedObjectTaggingPluginStart;
-  presentationUtil: PresentationUtilPluginStart;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   contentManagement: ContentManagementPublicStart;

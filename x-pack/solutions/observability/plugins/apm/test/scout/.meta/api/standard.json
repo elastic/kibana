@@ -1,22 +1,9 @@
 {
   "sha1": "e45dd918de5f5532dac755d2d2d5e111b2521aa4",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
-    {
-      "id": "4aa0fa1863b7bab-2c29b166fb7b8bd",
-      "title": "Clean up APM data after API tests",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/global.teardown.ts",
-        "line": 14,
-        "column": 1
-      }
-    },
     {
       "id": "888be2654773a9b-f0ea416820b0dce",
       "title": "Ingest APM metrics data for Scout API tests",
@@ -29,7 +16,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/global.setup.ts",
-        "line": 14,
+        "line": 6,
         "column": 1
       }
     },
@@ -45,8 +32,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_overview/metrics.spec.ts",
-        "line": 41,
-        "column": 12
+        "line": 38,
+        "column": 42
       }
     },
     {
@@ -61,8 +48,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_overview/metrics.spec.ts",
-        "line": 76,
-        "column": 12
+        "line": 69,
+        "column": 7
       }
     },
     {
@@ -77,8 +64,24 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_overview/metrics.spec.ts",
-        "line": 110,
-        "column": 12
+        "line": 99,
+        "column": 14
+      }
+    },
+    {
+      "id": "4aa0fa1863b7bab-2c29b166fb7b8bd",
+      "title": "Clean up APM data after API tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/global.teardown.ts",
+        "line": 6,
+        "column": 1
       }
     }
   ]

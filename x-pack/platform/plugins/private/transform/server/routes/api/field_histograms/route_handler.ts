@@ -19,7 +19,7 @@ export const routeHandler: RequestHandler<
   FieldHistogramsRequestSchema
 > = async (ctx, req, res) => {
   const { dataViewTitle } = req.params;
-  const { query, fields, runtimeMappings, samplerShardSize } = req.body;
+  const { query, fields, runtimeMappings, projectRouting, samplerShardSize } = req.body;
 
   try {
     const esClient = (await ctx.core).elasticsearch.client;
@@ -31,6 +31,7 @@ export const routeHandler: RequestHandler<
         fields,
         samplerShardSize,
         runtimeMappings,
+        projectRouting,
       },
     });
 

@@ -31,7 +31,7 @@ Before starting, verify these are in place:
   ln -s "$(pwd)/$SKILL" ~/.claude/skills/exploratory-tester
   ```
   Enables the short invocation form `exploratory-tester/SKILL.md` in Claude Code. Not required — the full repo path works everywhere without this step.
-- **Scout** (agent-managed environments only) — `node scripts/scout.js` available. Run `yarn kbn bootstrap` if not.
+- **Scout** (agent-managed environments only) — `node scripts/scout` available. Run `yarn kbn bootstrap` if not.
 
 ---
 

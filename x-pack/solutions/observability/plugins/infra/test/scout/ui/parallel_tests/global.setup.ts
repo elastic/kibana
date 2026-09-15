@@ -37,12 +37,28 @@ import { generateAddServicesToExistingHost } from '../fixtures/synthtrace/add_se
 import { generateDockerContainersData } from '../fixtures/synthtrace/docker_containers_data';
 import { generateSemconvHostData } from '../fixtures/synthtrace/semconv_host_data';
 import { globalSetupHook } from '../fixtures';
+import { ensureNonTsdsSystemTemplate } from '../fixtures/sequential_hosts_synthtrace';
 import { loadMetricsAnomaliesMlData } from '../fixtures/metrics_anomalies_ml';
 
 globalSetupHook(
   'Ingest data to Elasticsearch',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
-  async ({ infraSynthtraceEsClient, logsSynthtraceEsClient, apmSynthtraceEsClient, log }) => {
+  async ({
+    esClient,
+    infraSynthtraceEsClient,
+    logsSynthtraceEsClient,
+    apmSynthtraceEsClient,
+    log,
+  }) => {
+    // Shared CI clusters may already have Fleet TSDS templates on metrics-system.*
+    // from other suites; those reject fixed historical @timestamp values.
+    // Clean stale synthtrace streams first so re-ingest is deterministic on shared CI.
+    await ensureNonTsdsSystemTemplate(esClient, log);
+    await infraSynthtraceEsClient.clean();
+    await logsSynthtraceEsClient.clean();
+    await apmSynthtraceEsClient.clean();
+    log.info('Existing synthtrace data cleaned before ingest');
+
     await infraSynthtraceEsClient.index(
       generateHostData({
         from: DATE_WITH_HOSTS_DATA_FROM,

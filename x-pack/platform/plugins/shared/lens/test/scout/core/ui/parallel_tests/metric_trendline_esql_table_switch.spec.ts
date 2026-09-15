@@ -125,21 +125,21 @@ spaceTest.describe(
         await spaceTest.step(
           'remove timestamp breakdown and keep a single metric trendline',
           async () => {
-            await lens.secondaryFlyoutBackButton.click();
-            await expect(lens.secondaryFlyoutBackButton).toBeHidden();
+            await lens.workspace.secondaryFlyoutBackButton.click();
+            await expect(lens.workspace.secondaryFlyoutBackButton).toBeHidden();
 
             const breakdownPanel = page.getByTestId('lnsMetric_breakdownByDimensionPanel');
             await breakdownPanel.hover();
             await breakdownPanel.getByTestId('indexPattern-dimension-remove').click();
 
             await expectMetricPanelHasNotCrashed(page);
-            await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
+            await expect(lens.metric.trendline).toBeVisible();
             await waitForMetricTileCount(page, 1);
 
             await applyLensInlineEditorAndWaitClosed({ lens });
             await dashboard.waitForPanelsToLoad(1);
             await expectMetricPanelHasNotCrashed(page);
-            await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
+            await expect(lens.metric.trendline).toBeVisible();
             await waitForMetricTileCount(page, 1);
           }
         );

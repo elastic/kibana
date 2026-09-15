@@ -70,7 +70,7 @@ const buildColumns = (
   rulesCache: Record<string, { metadata: { name: string } }>
 ): Array<EuiBasicTableColumn<RuleExecutionView>> => [
   {
-    field: 'startedAt',
+    field: 'started_at',
     name: i18n.translate('xpack.alertingV2.executionHistory.rulesTab.columns.timestamp', {
       defaultMessage: 'Timestamp',
     }),

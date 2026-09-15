@@ -6,8 +6,10 @@
  */
 
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { stableStringify } from '@kbn/std';
+import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import { isEsqlUserError } from '../errors/esql_user_error';
+import { toQueryResponseSizeExceededError } from '../errors/query_response_size_exceeded_error';
+import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import type { RuleExecutionInput } from './types';
 import { buildQueryRecoveryAlertEvents, resolveAlertEventType } from './build_alert_events';
 import { getQueryPayload } from './get_query_payload';
@@ -33,6 +35,7 @@ export const executeRecoveryQuery = async ({
   input,
   activeGroupHashes,
   breachedGroupHashes,
+  maxResponseSize,
 }: {
   queryService: QueryServiceContract;
   logger: LoggerServiceContract;
@@ -41,6 +44,7 @@ export const executeRecoveryQuery = async ({
   input: RuleExecutionInput;
   activeGroupHashes: ActiveAlertGroupHash[];
   breachedGroupHashes: ReadonlySet<string>;
+  maxResponseSize?: number;
 }): Promise<AlertEvent[]> => {
   const lookbackWindow = rule.schedule.lookback ?? rule.schedule.every;
 
@@ -51,14 +55,8 @@ export const executeRecoveryQuery = async ({
   });
 
   logger.debug({
-    message: () =>
-      `[execute_recovery_query] Executing recovery query for rule ${
-        input.ruleId
-      } - ${stableStringify({
-        query: effectiveQuery,
-        filter: queryPayload.filter,
-        params: queryPayload.params,
-      })}`,
+    message: 'Executing recovery query',
+    labels: { rule_id: input.ruleId },
   });
 
   try {
@@ -67,6 +65,7 @@ export const executeRecoveryQuery = async ({
       filter: queryPayload.filter,
       params: queryPayload.params,
       abortSignal: input.executionContext.signal,
+      maxResponseSize,
     });
 
     return buildQueryRecoveryAlertEvents({
@@ -81,6 +80,15 @@ export const executeRecoveryQuery = async ({
       type: resolveAlertEventType(rule),
     });
   } catch (error) {
+    if (isMaximumResponseSizeExceededError(error)) {
+      const sizeError = toQueryResponseSizeExceededError(error, 'recovery', maxResponseSize);
+      logger.warn({
+        message: `Recovery query: ${sizeError.message}`,
+        code: ALERTING_LOG_CODES.RULE_EXECUTION_QUERY_RESPONSE_SIZE_EXCEEDED,
+        labels: { rule_id: input.ruleId, space_id: input.spaceId },
+      });
+      throw createTaskRunError(sizeError, TaskErrorSource.USER);
+    }
     if (isEsqlUserError(error)) {
       throw createTaskRunError(error as Error, TaskErrorSource.USER);
     }

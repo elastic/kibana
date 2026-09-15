@@ -67,7 +67,7 @@ export function EntityChip({
       `}
     >
       <EuiText size="xs">{label}</EuiText>
-      <EuiIcon type="arrowRight" size="s" color="subdued" aria-hidden={true} />
+      <EuiIcon type="chevronSingleRight" size="s" color="subdued" aria-hidden={true} />
     </button>
   );
 }

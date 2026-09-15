@@ -114,6 +114,7 @@ jest.mock('../../../../hooks', () => ({
     resendRequest: jest.fn(),
   } as any),
   sendGetAgentTagsForRq: jest.fn().mockReturnValue({ items: ['tag1', 'tag2'] }),
+  sendGetActionStatus: jest.fn().mockResolvedValue({ data: { items: [] } }),
   useStartServices: jest.fn().mockReturnValue({
     notifications: {
       toasts: {
@@ -136,9 +137,9 @@ describe('useFetchAgentsData', () => {
   beforeEach(() => {
     mockErrorToast.mockReset();
     mockErrorToast.mockResolvedValue({});
-    // Reset sendGetAgentTagsForRq to default value
-    const { sendGetAgentTagsForRq } = jest.requireMock('../../../../hooks');
+    const { sendGetAgentTagsForRq, sendGetActionStatus } = jest.requireMock('../../../../hooks');
     sendGetAgentTagsForRq.mockReturnValue({ items: ['tag1', 'tag2'] });
+    sendGetActionStatus.mockResolvedValue({ data: { items: [] } });
   });
 
   it('should fetch agents and agent policies data', async () => {
@@ -291,6 +292,138 @@ describe('useFetchAgentsData', () => {
       await waitFor(() => {
         // Tags should still be the same reference (no unnecessary state update)
         expect(result.current.allTags).toEqual(['tag1', 'tag2']);
+      });
+    });
+  });
+
+  describe('error action ids', () => {
+    it('calls sendGetActionStatus with latest window and accumulates error action ids', async () => {
+      const { sendGetActionStatus } = jest.requireMock('../../../../hooks');
+      sendGetActionStatus.mockImplementation((opts: { scheduledOnly?: boolean }) => {
+        if (opts.scheduledOnly) return Promise.resolve({ data: { items: [] } });
+        return Promise.resolve({
+          data: {
+            items: [
+              { actionId: 'action-err-1', latestErrors: [{ error: 'oops' }] },
+              { actionId: 'action-ok-1', latestErrors: [] },
+            ],
+          },
+        });
+      });
+
+      const renderer = createFleetTestRendererMock();
+      const { result } = renderer.renderHook(() => useFetchAgentsData());
+
+      await waitFor(() => {
+        expect(result.current.latestAgentActionErrors).toContain('action-err-1');
+      });
+      expect(result.current.latestAgentActionErrors).not.toContain('action-ok-1');
+
+      const calls = sendGetActionStatus.mock.calls.filter(
+        ([opts]: [{ scheduledOnly?: boolean }]) => !opts.scheduledOnly
+      );
+      expect(calls[0][0]).toMatchObject({ latest: expect.any(Number) });
+    });
+  });
+
+  describe('scheduledActionsCount', () => {
+    it('returns 0 when there are no scheduled UNENROLL actions', async () => {
+      const { sendGetActionStatus } = jest.requireMock('../../../../hooks');
+      sendGetActionStatus.mockResolvedValue({ data: { items: [] } });
+
+      const renderer = createFleetTestRendererMock();
+      const { result } = renderer.renderHook(() => useFetchAgentsData());
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.scheduledActionsCount).toBe(0);
+    });
+
+    it('sums nbAgentsActioned for future UNENROLL actions', async () => {
+      const futureTime = new Date(Date.now() + 3600_000).toISOString();
+      const { sendGetActionStatus } = jest.requireMock('../../../../hooks');
+      sendGetActionStatus.mockImplementation(({ scheduledOnly }: { scheduledOnly?: boolean }) => {
+        if (!scheduledOnly) return Promise.resolve({ data: { items: [] } });
+        return Promise.resolve({
+          data: {
+            items: [
+              {
+                actionId: 'sched-1',
+                type: 'UNENROLL',
+                status: 'IN_PROGRESS',
+                startTime: futureTime,
+                nbAgentsActioned: 5,
+              },
+              {
+                actionId: 'sched-2',
+                type: 'UNENROLL',
+                status: 'IN_PROGRESS',
+                startTime: futureTime,
+                nbAgentsActioned: 3,
+              },
+            ],
+          },
+        });
+      });
+
+      const renderer = createFleetTestRendererMock();
+      const { result } = renderer.renderHook(() => useFetchAgentsData());
+
+      await waitFor(() => {
+        expect(result.current.scheduledActionsCount).toBe(8);
+      });
+    });
+
+    it('excludes non-UNENROLL scheduled actions', async () => {
+      const futureTime = new Date(Date.now() + 3600_000).toISOString();
+      const { sendGetActionStatus } = jest.requireMock('../../../../hooks');
+      sendGetActionStatus.mockImplementation(({ scheduledOnly }: { scheduledOnly?: boolean }) => {
+        if (!scheduledOnly) return Promise.resolve({ data: { items: [] } });
+        return Promise.resolve({
+          data: {
+            items: [
+              {
+                actionId: 'sched-upgrade',
+                type: 'UPGRADE',
+                status: 'IN_PROGRESS',
+                startTime: futureTime,
+                nbAgentsActioned: 10,
+              },
+              {
+                actionId: 'sched-unenroll',
+                type: 'UNENROLL',
+                status: 'IN_PROGRESS',
+                startTime: futureTime,
+                nbAgentsActioned: 4,
+              },
+            ],
+          },
+        });
+      });
+
+      const renderer = createFleetTestRendererMock();
+      const { result } = renderer.renderHook(() => useFetchAgentsData());
+
+      await waitFor(() => {
+        expect(result.current.scheduledActionsCount).toBe(4);
+      });
+    });
+
+    it('calls sendGetActionStatus with scheduledOnly: true', async () => {
+      const { sendGetActionStatus } = jest.requireMock('../../../../hooks');
+      sendGetActionStatus.mockResolvedValue({ data: { items: [] } });
+
+      const renderer = createFleetTestRendererMock();
+      renderer.renderHook(() => useFetchAgentsData());
+
+      await waitFor(() => {
+        const scheduledCall = sendGetActionStatus.mock.calls.find(
+          ([opts]: [{ scheduledOnly?: boolean }]) => opts.scheduledOnly === true
+        );
+        expect(scheduledCall).toBeDefined();
+        expect(scheduledCall[0]).not.toHaveProperty('latest');
       });
     });
   });

@@ -13,6 +13,43 @@ import type {
 } from '../../../../common/maintenance/types';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
+import { bootstrapCleanupWorkflow } from '../../../lib/workflows/cleanup_workflow';
+
+const bootstrapCleanupRoute = createServerRoute({
+  endpoint: 'POST /internal/significant_events/maintenance/cleanup/_bootstrap',
+  options: {
+    access: 'internal',
+    summary: 'Bootstrap stale Significant Events cleanup for the current space',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({}),
+  handler: async ({
+    request,
+    server,
+    getScopedClients,
+    getSpaceId,
+    cleanupWorkflowService,
+    maintenanceService,
+    logger,
+  }): Promise<{ success: true }> => {
+    const { licensing } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing });
+
+    await bootstrapCleanupWorkflow({
+      cleanupWorkflowService,
+      maintenanceService,
+      request,
+      spaceId: await getSpaceId(request),
+      logger,
+    });
+
+    return { success: true };
+  },
+});
 
 const pauseRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/maintenance/_pause',
@@ -100,6 +137,7 @@ const statusRoute = createServerRoute({
 });
 
 export const internalMaintenanceRoutes = {
+  ...bootstrapCleanupRoute,
   ...pauseRoute,
   ...resumeRoute,
   ...statusRoute,

@@ -40,7 +40,8 @@
       "usageCollection",
       "spaces",
       "serverless",
-      "savedObjectsTaggingOss"
+      "savedObjectsTaggingOss",
+      "workflowsManagement"
     ],
     "requiredBundles": [
       "dashboard",

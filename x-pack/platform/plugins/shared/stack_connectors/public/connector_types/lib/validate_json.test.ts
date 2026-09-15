@@ -45,4 +45,23 @@ describe('validateJSON', () => {
   it('does not return an error for an object', () => {
     expect(validateJSON({ value: { foo: 'test' } })).toBeUndefined();
   });
+
+  it('does not return an error when the value contains a mustache template', () => {
+    expect(
+      validateJSON({ value: '{ "u_raw_json": {{#context}}{{.}}{{/context}} }' })
+    ).toBeUndefined();
+  });
+
+  it('does not return an error when the value contains a mustache template inside a JSON string', () => {
+    expect(
+      validateJSON({ value: '{ "correlation": "{{rule.id}}:{{alert.id}}" }' })
+    ).toBeUndefined();
+  });
+
+  it('does not validate max properties when the value contains a mustache template', () => {
+    // Values with mustache templates are validated on the server after rendering
+    expect(
+      validateJSON({ value: '{ "foo": "{{rule.id}}", "bar": "test" }', maxProperties: 1 })
+    ).toBeUndefined();
+  });
 });

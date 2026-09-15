@@ -57,7 +57,7 @@ export const AgentDetailsFlyout = ({
 }: {
   agent: AgentStat;
   agentPolicyId: string;
-  /** Monitors this agent runs (all of the location's monitors in the single-agent model). */
+  /** Monitors this agent runs (assigned count on a sharded location, else the location total). */
   monitorsRun: number;
   onClose: () => void;
 }) => {
@@ -187,7 +187,7 @@ export const AgentDetailsFlyout = ({
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
-                iconType="popout"
+                iconType="external"
                 href={fleetAgentHref}
                 target="_blank"
                 data-test-subj="syntheticsAgentFlyoutFleetLink"

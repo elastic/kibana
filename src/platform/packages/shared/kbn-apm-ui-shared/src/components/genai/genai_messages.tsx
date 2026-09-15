@@ -124,7 +124,7 @@ export function GenAiMessages({ inputMessages, outputMessages, systemInstruction
                   })}
                 >
                   <EuiButtonIcon
-                    iconType="copyClipboard"
+                    iconType="copy"
                     color="text"
                     data-test-subj={`genAiMessageCopy-${i}`}
                     {...(ebt
