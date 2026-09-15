@@ -77,7 +77,7 @@ const TypeLine: React.FC<{ iconType: IconType; label: string; fieldTypeLabel?: s
       responsive={false}
     >
       <EuiFlexItem grow={false}>
-        <EuiToken iconType={iconType} size="s" />
+        <EuiToken iconType={iconType} size="s" title={fieldTypeLabel} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="xs" color="default">
