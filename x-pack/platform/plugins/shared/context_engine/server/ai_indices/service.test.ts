@@ -174,13 +174,11 @@ describe('AiIndexService', () => {
       });
     });
 
-    it('logs a warning and still succeeds when the view cannot be created', async () => {
+    it('fails when the view cannot be created', async () => {
       esClient.esql.putView.mockRejectedValue(new Error('views are disabled'));
 
-      await expect(service.create('customer_support', properties)).resolves.toBeUndefined();
-
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining("Failed to create ES|QL view 'ai-view-customer_support'")
+      await expect(service.create('customer_support', properties)).rejects.toThrow(
+        'views are disabled'
       );
     });
 

@@ -14,6 +14,9 @@ const COLLECTION = 'api/context_engine/ai_index';
 const AI_INDEX_ID = 'scout_view_ai_index';
 const VIEW_NAME = `ai-view-${AI_INDEX_ID}`;
 const DEST = 'ai-index-idx-scout-view';
+const DS_AI_INDEX_ID = 'scout_view_ai_index_ds';
+const DS_VIEW_NAME = `ai-view-${DS_AI_INDEX_ID}`;
+const DS_DEST = 'ai-index-ds-scout-view';
 
 const API_HEADERS = {
   ...testData.COMMON_HEADERS,
@@ -53,15 +56,20 @@ apiTest.describe('context engine KI retrieval view', { tag: tags.stateful.classi
   apiTest.beforeAll(async ({ requestAuth, esClient }) => {
     adminApiCredentials = await requestAuth.getApiKey('admin');
     await esClient.indices.create({ index: DEST, mappings: MAPPINGS }, { ignore: [400] });
+    await esClient.indices.createDataStream({ name: DS_DEST }, { ignore: [400] });
   });
 
   apiTest.afterAll(async ({ apiClient, esClient }) => {
-    await apiClient.delete(`${COLLECTION}/${AI_INDEX_ID}`, {
-      headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
-      responseType: 'json',
-    });
+    for (const id of [AI_INDEX_ID, DS_AI_INDEX_ID]) {
+      await apiClient.delete(`${COLLECTION}/${id}`, {
+        headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
+        responseType: 'json',
+      });
+    }
     await esClient.esql.deleteView({ name: VIEW_NAME }, { ignore: [404] });
+    await esClient.esql.deleteView({ name: DS_VIEW_NAME }, { ignore: [404] });
     await esClient.indices.delete({ index: DEST }, { ignore: [404] });
+    await esClient.indices.deleteDataStream({ name: DS_DEST }, { ignore: [404] });
   });
 
   apiTest(
@@ -124,6 +132,61 @@ apiTest.describe('context engine KI retrieval view', { tag: tags.stateful.classi
 
         const lookup = await esClient.esql.getView({ name: VIEW_NAME }, { ignore: [404] });
         expect(lookup.views ?? []).toHaveLength(0);
+      });
+    }
+  );
+
+  apiTest(
+    'exposes only the latest revision of each KI through a data stream view',
+    async ({ apiClient, esClient }) => {
+      await apiTest.step('creates the AI index and its view', async () => {
+        const response = await apiClient.post(COLLECTION, {
+          headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
+          responseType: 'json',
+          body: {
+            id: DS_AI_INDEX_ID,
+            dest: { type: 'data_stream', value: DS_DEST },
+            automations: [],
+            sources: [],
+          },
+        });
+        expect(response).toHaveStatusCode(201);
+
+        const { views } = await esClient.esql.getView({ name: DS_VIEW_NAME });
+        expect(views).toHaveLength(1);
+        expect(views[0].query).toContain('INLINE STATS latest = MAX(@timestamp) BY id');
+      });
+
+      await apiTest.step('writes multiple revisions per KI', async () => {
+        await esClient.bulk({
+          index: DS_DEST,
+          refresh: true,
+          operations: [
+            { create: {} },
+            ki('revised', { '@timestamp': '2026-09-01T00:00:00Z', title: 'revised-v1' }),
+            { create: {} },
+            ki('revised', { '@timestamp': '2026-09-02T00:00:00Z', title: 'revised-v2' }),
+            { create: {} },
+            ki('retired', { '@timestamp': '2026-09-01T00:00:00Z' }),
+            { create: {} },
+            ki('retired', {
+              '@timestamp': '2026-09-02T00:00:00Z',
+              governance: { lifecycle: { status: 'deleted' } },
+            }),
+            { create: {} },
+            ki('single'),
+          ],
+        });
+      });
+
+      await apiTest.step('the view returns one row per KI from its latest revision', async () => {
+        const response = await esClient.esql.query({
+          query: `FROM ${DS_VIEW_NAME} | KEEP id, title | SORT id`,
+        });
+        expect(response.values).toStrictEqual([
+          ['revised', 'revised-v2'],
+          ['single', 'single'],
+        ]);
       });
     }
   );

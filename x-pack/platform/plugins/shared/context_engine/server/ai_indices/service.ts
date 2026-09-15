@@ -324,7 +324,7 @@ export class AiIndexService {
   }
 
   private putView(aiIndexId: string, dest: AiIndexDest): Promise<void> {
-    return putKiView({ esClient: this.esClient, logger: this.logger, aiIndexId, dest });
+    return putKiView({ esClient: this.esClient, aiIndexId, dest });
   }
 
   private async findDocument(aiIndexId: string): Promise<

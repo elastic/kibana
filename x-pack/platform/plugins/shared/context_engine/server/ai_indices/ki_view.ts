@@ -38,19 +38,13 @@ interface KiViewOptions {
   aiIndexId: string;
 }
 
-/** Creates or replaces the view for an AI index. Failure is logged and does not fail the caller. */
+/** Creates or replaces the view for an AI index. */
 export const putKiView = async ({
   esClient,
-  logger,
   aiIndexId,
   dest,
-}: KiViewOptions & { dest: AiIndexDest }): Promise<void> => {
-  const name = kiViewName(aiIndexId);
-  try {
-    await esClient.esql.putView({ name, query: kiViewQuery(dest) });
-  } catch (error) {
-    logger.warn(`Failed to create ES|QL view '${name}' for AI index '${aiIndexId}': ${error}`);
-  }
+}: Omit<KiViewOptions, 'logger'> & { dest: AiIndexDest }): Promise<void> => {
+  await esClient.esql.putView({ name: kiViewName(aiIndexId), query: kiViewQuery(dest) });
 };
 
 /** Deletes the view for an AI index. A missing view is not an error. */
