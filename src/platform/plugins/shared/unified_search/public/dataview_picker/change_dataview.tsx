@@ -23,6 +23,7 @@ import {
   EuiIcon,
   EuiPopover,
   EuiText,
+  EuiTextTruncate,
   useEuiTheme,
   useGeneratedHtmlId,
   useIsWithinBreakpoints,
@@ -49,6 +50,39 @@ const shrinkableContainerCss = css`
   min-width: 0;
   flex-direction: row;
 `;
+
+const dataViewLabelWrapperCss = css`
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+`;
+
+const dataViewLabelGhostCss = css`
+  visibility: hidden;
+  white-space: nowrap;
+`;
+
+const dataViewLabelVisibleCss = css`
+  position: absolute;
+  inset: 0;
+`;
+
+/**
+ * A hidden "ghost" copy of the data view label sizes the wrapper via normal flow,
+ * giving EuiTextTruncate a real, non-circular width to truncate against.
+ */
+const DataViewLabelTruncate = ({ text }: { text: string }) => (
+  <span css={dataViewLabelWrapperCss}>
+    <span aria-hidden="true" css={dataViewLabelGhostCss}>
+      {text}
+    </span>
+    <span css={dataViewLabelVisibleCss}>
+      <EuiTextTruncate text={text} truncation="middle" />
+    </span>
+  </span>
+);
 
 export function ChangeDataView({
   isMissingCurrent,
@@ -131,7 +165,6 @@ export function ChangeDataView({
         compressed={compressed}
         css={styles.trigger}
         isInvalid={isMissingCurrent}
-        title={trigger.label}
         disabled={isDisabled}
         data-test-subj={dataTestSubj}
         aria-expanded={isPopoverOpen}
@@ -149,10 +182,8 @@ export function ChangeDataView({
           css={{ maxWidth: '100%' }}
         >
           {/* we don't want to display the adHoc icon on text based mode */}
-          {isAdHocSelected && (
-            <EuiIcon type="tableTime"  size="m" aria-hidden={true} />
-          )}
-          <span className="eui-textTruncate">{trigger.label}</span>
+          {isAdHocSelected && <EuiIcon type="tableTime" size="m" aria-hidden={true} />}
+          <DataViewLabelTruncate text={label} />
         </EuiFlexGroup>
       </EuiFormControlButton>
     );
