@@ -76,7 +76,7 @@ const flushMicrotasks = async () => {
 
 describe('IndicesSelector', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   it('keeps only the latest async search results when an older request resolves later', async () => {
@@ -125,7 +125,8 @@ describe('IndicesSelector', () => {
   });
 
   it('clears the loading state when the latest async search fails', async () => {
-    mockGetMatchingIndices.mockRejectedValue(new Error('request failed'));
+    mockGetMatchingIndices.mockResolvedValue({ data: { indices: [] } });
+    mockGetMatchingDataStreams.mockRejectedValue(new Error('request failed'));
 
     render(
       <IndicesSelector
