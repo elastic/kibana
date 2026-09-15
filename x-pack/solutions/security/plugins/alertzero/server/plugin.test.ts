@@ -103,6 +103,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
           features,
           workflowsExtensions,
           workflowsManagement: { management: {} },
+          agentBuilder: { tools: { register: jest.fn() } },
         } as never
       );
 
@@ -130,7 +131,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       const coreSetup = coreMock.createSetup();
       const features = { registerKibanaFeature: jest.fn() };
       const workflowsExtensions = { registerManagedWorkflowOwner: jest.fn() };
-      const agentBuilder = { agents: { registerType: jest.fn() } };
+      const agentBuilder = { agents: { registerType: jest.fn() }, tools: { register: jest.fn() } };
 
       plugin.setup(
         coreSetup as never,
