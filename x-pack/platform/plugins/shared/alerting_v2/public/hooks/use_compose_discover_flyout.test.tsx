@@ -549,7 +549,25 @@ describe('useComposeDiscoverFlyout — stacked create session', () => {
     });
   });
 
-  it('calls onDismiss when the authoring flyout is closed', async () => {
+  it('calls onDismiss when the authoring flyout is dismissed', async () => {
+    const onDismiss = jest.fn();
+    render(<Harness historyKey={sharedHistoryKey} onDismiss={onDismiss} />);
+    act(() => {
+      hookApi!.openCreateFlyout();
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+
+    act(() => {
+      (capturedFlyoutProps.onClose as () => void)();
+    });
+
+    expect(onDismiss).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
+  });
+
+  it('does not call onDismiss when closeFlyout runs without callOnDismiss', async () => {
     const onDismiss = jest.fn();
     render(<Harness historyKey={sharedHistoryKey} onDismiss={onDismiss} />);
     act(() => {
@@ -561,6 +579,43 @@ describe('useComposeDiscoverFlyout — stacked create session', () => {
 
     act(() => {
       hookApi!.closeFlyout();
+    });
+
+    expect(onDismiss).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
+  });
+
+  it('does not call onDismiss after a successful rule update', async () => {
+    const onDismiss = jest.fn();
+    mockUpdateMutate.mockImplementation((_vars, opts) => opts?.onSuccess?.(updatedRule));
+    render(<Harness historyKey={sharedHistoryKey} onDismiss={onDismiss} />);
+    act(() => {
+      hookApi!.openEditFlyout(editRule);
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+
+    callOnUpdateRule(undefined);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
+    });
+    expect(onDismiss).not.toHaveBeenCalled();
+  });
+
+  it('calls onDismiss when closeFlyout is given callOnDismiss', async () => {
+    const onDismiss = jest.fn();
+    render(<Harness historyKey={sharedHistoryKey} onDismiss={onDismiss} />);
+    act(() => {
+      hookApi!.openCreateFlyout();
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+
+    act(() => {
+      hookApi!.closeFlyout({ callOnDismiss: true });
     });
 
     expect(onDismiss).toHaveBeenCalledTimes(1);

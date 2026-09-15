@@ -313,6 +313,7 @@ const defaultProps: ComposeDiscoverFlyoutProps = {
   historyKey: Symbol('test'),
   mode: 'create',
   onClose: jest.fn(),
+  onHistoryBack: jest.fn(),
   services: createMockServices(),
   onCreateRule: jest.fn(),
 };
@@ -754,6 +755,25 @@ describe('ComposeDiscoverFlyout', () => {
       expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
     });
 
+    it('closes the session when cascade arrives while the confirm modal is open', () => {
+      const onClose = jest.fn();
+      const onHistoryBack = jest.fn();
+      renderFlyout({ onClose, onHistoryBack });
+
+      fireEvent.click(screen.getByTestId('mockMakeDirty'));
+      act(() => {
+        latestFlyoutOnClose?.(new MouseEvent('click'), { reason: 'navigation-back' });
+      });
+      expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
+
+      act(() => {
+        latestFlyoutOnClose?.(new MouseEvent('click'), { reason: 'navigation-cascade' });
+      });
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(onHistoryBack).not.toHaveBeenCalled();
+    });
+
     it('returns to the picker without confirm when EUI navigates back and the threshold builder is pristine', () => {
       const onClose = jest.fn();
       const onHistoryBack = jest.fn();
@@ -849,6 +869,20 @@ describe('ComposeDiscoverFlyout', () => {
 
       expect(onClose).toHaveBeenCalledTimes(1);
       expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
+    });
+
+    it('does not reopen the sandbox while the confirm modal is open', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+
+      clickEditMode('yaml');
+      expect(screen.getByTestId('composeDiscoverChildMock')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('mockMakeYamlDirty'));
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+
+      expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
+      expect(screen.queryByTestId('composeDiscoverChildMock')).not.toBeInTheDocument();
     });
 
     it('"Continue editing" does not open sandbox when it was closed before close attempt', () => {

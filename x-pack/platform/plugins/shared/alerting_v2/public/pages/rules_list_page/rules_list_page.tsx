@@ -78,9 +78,8 @@ export const RulesListPage = () => {
   const createWithAgentTooltipText = getCreateWithAgentTooltipText(abSkillRequirements);
 
   const closeCreateSession = useCallback(() => {
-    closeFlyout();
-    closeCreateOptionsFlyout();
-  }, [closeFlyout, closeCreateOptionsFlyout]);
+    closeFlyout({ callOnDismiss: true });
+  }, [closeFlyout]);
 
   const onCreateWithAgentFromOptionsFlyout = () => {
     closeCreateSession();

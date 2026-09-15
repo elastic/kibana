@@ -57,8 +57,16 @@ interface UseComposeDiscoverFlyoutOptions {
   historyKey?: symbol;
   /** Called after a successful create so a stacked option picker can close too. */
   onCreateSuccess?: () => void;
-  /** Called when the authoring flyout is dismissed (X / ESC), not on Back. */
+  /** Called when the authoring flyout is dismissed (X / ESC), not on Back or save. */
   onDismiss?: () => void;
+}
+
+interface CloseFlyoutOptions {
+  /**
+   * When true, also run `onDismiss` so a stacked picker closes. User X / ESC /
+   * picker dismiss pass this; create/update success must not.
+   */
+  callOnDismiss?: boolean;
 }
 
 export const useComposeDiscoverFlyout = ({
@@ -106,10 +114,19 @@ export const useComposeDiscoverFlyout = ({
     setInitialBuilderState(undefined);
   }, []);
 
-  const closeFlyout = useCallback(() => {
-    hideFlyout();
-    onDismiss?.();
-  }, [hideFlyout, onDismiss]);
+  const closeFlyout = useCallback(
+    (options?: CloseFlyoutOptions) => {
+      hideFlyout();
+      if (options?.callOnDismiss) {
+        onDismiss?.();
+      }
+    },
+    [hideFlyout, onDismiss]
+  );
+
+  const dismissFlyout = useCallback(() => {
+    closeFlyout({ callOnDismiss: true });
+  }, [closeFlyout]);
 
   const closeAndRedirect = useCallback(() => {
     hideFlyout();
@@ -293,7 +310,7 @@ export const useComposeDiscoverFlyout = ({
       mode={flyoutMode}
       rule={targetRule ?? undefined}
       ruleId={flyoutMode === 'edit' ? targetRule?.id : undefined}
-      onClose={closeFlyout}
+      onClose={dismissFlyout}
       onHistoryBack={hideFlyout}
       services={ruleFormServices}
       builderType={builderType ?? undefined}
@@ -340,7 +357,7 @@ export const useComposeDiscoverFlyout = ({
               // Only close the flyout once notification setup also succeeds
               setupNotificationsMutation.mutate(
                 { rule: ruleForNotifications, actions },
-                { onSuccess: closeFlyout }
+                { onSuccess: () => closeFlyout() }
               );
             },
           }

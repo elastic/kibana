@@ -224,9 +224,10 @@ export interface ComposeDiscoverFlyoutProps {
   /**
    * Called when EUI navigates Back in a stacked session (or after the user confirms
    * discard on that path). Must unmount this flyout without dismissing the parent
-   * picker, so the same create path can be opened again.
+   * picker, so the same create path can be opened again. Required because this
+   * flyout always joins an EUI history session via `historyKey`.
    */
-  onHistoryBack?: () => void;
+  onHistoryBack: () => void;
   services: RuleFormServices;
   /**
    * Called with the create payload when the user submits in create mode. When the user
@@ -506,20 +507,25 @@ export function ComposeDiscoverFlyout({
         yamlBaselineRef.current !== null && yamlTextRef.current !== yamlBaselineRef.current;
       const hasUnsavedChanges = isDirtyRef.current || yamlDirty || hasBeenEditedRef.current;
 
-      if (isConfirmCloseVisible) {
-        restoreFlyoutAfterEuiClose();
-        return;
-      }
-
+      /*
+       * Cascade must run before the confirm-visible remount. If the parent session
+       * is tearing down while the modal is open, restoring this flyout would leave
+       * it mounted with no picker behind it.
+       */
       if (meta?.reason === 'navigation-cascade') {
         pendingHistoryBackRef.current = false;
         onClose();
         return;
       }
 
+      if (isConfirmCloseVisible) {
+        restoreFlyoutAfterEuiClose();
+        return;
+      }
+
       if (!hasUnsavedChanges) {
         if (leaveToPicker) {
-          onHistoryBack?.();
+          onHistoryBack();
         } else {
           onClose();
         }
@@ -534,10 +540,11 @@ export function ComposeDiscoverFlyout({
   );
 
   const handleConfirmDiscard = useCallback(() => {
+    reopenChildRef.current = false;
     setIsConfirmCloseVisible(false);
     if (pendingHistoryBackRef.current) {
       pendingHistoryBackRef.current = false;
-      (onHistoryBack ?? onClose)();
+      onHistoryBack();
       return;
     }
     onClose();
@@ -690,25 +697,35 @@ export function ComposeDiscoverFlyout({
    * After unsaved-changes confirm remounts the EuiFlyout (EUI already
    * unregistered it), the sandbox (cascade-closed by closeAllFlyouts()) needs
    * reopening on the tab it would default to for the current step/recovery/
-   * manual-split state. isAlert is read via ref so this effect doesn't fire on
-   * kind toggles; the body is gated by reopenChildRef, so extra runs from other
+   * manual-split state. Wait until the confirm modal is gone so the sandbox
+   * does not flash open behind it; Continue editing clears the flag and this
+   * effect runs. isAlert is read via ref so this effect doesn't fire on kind
+   * toggles; the body is gated by reopenChildRef, so extra runs from other
    * deps are no-ops.
    */
   useEffect(() => {
-    if (reopenChildRef.current) {
-      reopenChildRef.current = false;
-      dispatch({
-        type: 'OPEN_CHILD',
-        isAlert: isAlertRef.current,
-        focusedTab: getDefaultOpenTab(
-          isAlertRef.current,
-          uiState.step,
-          hasCustomRecovery,
-          uiState.manualSplitEnabled
-        ),
-      });
+    if (isConfirmCloseVisible || !reopenChildRef.current) {
+      return;
     }
-  }, [flyoutKey, dispatch, hasCustomRecovery, uiState.step, uiState.manualSplitEnabled]);
+    reopenChildRef.current = false;
+    dispatch({
+      type: 'OPEN_CHILD',
+      isAlert: isAlertRef.current,
+      focusedTab: getDefaultOpenTab(
+        isAlertRef.current,
+        uiState.step,
+        hasCustomRecovery,
+        uiState.manualSplitEnabled
+      ),
+    });
+  }, [
+    flyoutKey,
+    isConfirmCloseVisible,
+    dispatch,
+    hasCustomRecovery,
+    uiState.step,
+    uiState.manualSplitEnabled,
+  ]);
 
   const handleKindChange = useCallback(
     (kind: 'signal' | 'alert') => {
@@ -1438,7 +1455,7 @@ export function ComposeDiscoverFlyout({
               onYamlSave={handleYamlSave}
             />
 
-            {uiState.childOpen && (
+            {uiState.childOpen && !isConfirmCloseVisible && (
               <QuerySandboxFlyout
                 query={sandboxQuery}
                 onQueryChange={isBuilderMode ? undefined : setSandboxQuery}
