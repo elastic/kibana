@@ -6,7 +6,7 @@
  */
 
 import { ACTION_WORKFLOW_TAG, actionMetadataSchema } from '@kbn/workflows/managed';
-import type { WorkflowListDto } from '@kbn/workflows';
+import type { JsonSchema, WorkflowListDto } from '@kbn/workflows';
 import type { Logger } from '@kbn/logging';
 import type { ActionCatalogEntry, ListActionsResponse } from '@kbn/alertzero-common';
 import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
@@ -14,6 +14,10 @@ import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_
 /** Structural subset of WorkflowListItemDto.definition the catalog reads. */
 interface ActionWorkflowDefinition {
   consts?: { actionMetadata?: unknown };
+  triggers?: Array<{
+    type?: string;
+    inputs?: unknown;
+  }>;
 }
 
 const PAGE_SIZE = 100;
@@ -98,6 +102,7 @@ export class ActionsService {
       return undefined;
     }
     const { name, description, category, impact, approvalPolicy } = parsed.data;
+    const inputSchema = this.readInputSchema(definition);
     return {
       workflowId,
       name,
@@ -105,6 +110,23 @@ export class ActionsService {
       ...(category !== undefined && { category }),
       ...(impact !== undefined && { impact }),
       ...(approvalPolicy !== undefined && { approvalPolicy }),
+      ...(inputSchema !== undefined && { inputSchema }),
     };
+  }
+
+  /**
+   * Reads the JSON Schema the workflow declares on its manual trigger
+   * (`triggers[type=manual].inputs`). Definitions come back already validated
+   * and normalized by the workflow schema, so this only checks that the
+   * trigger's inputs are schema-shaped (`properties` at the root) — a legacy
+   * array-format input or anything unexpected simply yields `undefined` and
+   * the entry is returned without `inputSchema`.
+   */
+  private readInputSchema(definition: ActionWorkflowDefinition | null): JsonSchema | undefined {
+    const inputs = definition?.triggers?.find((trigger) => trigger.type === 'manual')?.inputs;
+    if (typeof inputs !== 'object' || inputs === null || Array.isArray(inputs)) {
+      return undefined;
+    }
+    return 'properties' in inputs ? (inputs as JsonSchema) : undefined;
   }
 }
