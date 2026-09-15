@@ -14,6 +14,7 @@ import { getHandlerWrapper } from '../wrap_handler';
 import { internalApiPath } from '../../../common/constants';
 import { apiPrivileges } from '../../../common/features';
 import { getSSEResponseHeaders } from '../utils';
+import { filterLegacyApiEvents } from '../converse_helpers';
 
 export function registerInternalExecutionRoutes({
   router,
@@ -79,7 +80,9 @@ export function registerInternalExecutionRoutes({
         abortController.abort();
       });
 
-      const events$ = executionService.followExecution(executionId, { since });
+      const events$ = executionService
+        .followExecution(executionId, { since })
+        .pipe(filterLegacyApiEvents());
       return response.ok({
         headers: getSSEResponseHeaders(),
         body: observableIntoEventSourceStream(events$ as unknown as Observable<ServerSentEvent>, {
