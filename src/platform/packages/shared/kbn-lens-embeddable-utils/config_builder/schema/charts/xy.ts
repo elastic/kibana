@@ -898,14 +898,13 @@ const annotationLayerESQLSchema = z
       .array(z.union([annotationManualEvent, annotationManualRange]))
       .min(1)
       .max(100)
-      .meta({ description: 'Array of manual annotation configurations' }),
+      .meta({ description: 'Array of static annotation configurations' }),
   })
   .strict()
   .meta({
     id: 'visXyAnnotationLayerESQL',
     title: 'Annotation Layer (ES|QL)',
-    description:
-      'Layer containing manual (point and range) annotations. Query-based annotations are not supported on ES|QL charts yet.',
+    description: 'Layer containing annotations (points and ranges)',
   });
 
 /**
@@ -937,8 +936,7 @@ const xyLayerUnionESQL = z
   .union([xyDataLayerSchemaESQL, referenceLineLayerESQLStaticSchema, annotationLayerESQLSchema])
   .meta({
     id: 'visXyLayersESQL',
-    description:
-      'XY chart layer types for ES|QL queries. Annotation layers (manual annotations only) and reference line layers (static values only) may accompany ES|QL data layers; neither uses the ES|QL datasource.',
+    description: 'XY chart layer types for ES|QL queries.',
   });
 
 /**
