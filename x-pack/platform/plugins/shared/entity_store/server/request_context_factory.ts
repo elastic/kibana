@@ -102,6 +102,7 @@ export async function createRequestHandlerContext({
     esClient,
     namespace,
     globalStateClient,
+    taskManager: taskManagerStart,
   });
 
   return {
