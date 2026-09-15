@@ -73,7 +73,7 @@ export function HostBreakdown({ hasDistinctProbabilisticValues, onReady }: Props
           <EuiIconTip
             content={i18n.translate('xpack.profiling.storageExplorer.hostBreakdown.title.hint', {
               defaultMessage:
-                'This graph shows the combined values of Universal Profiling samples and metrics. host.name[host.id].',
+                'This graph shows the combined values of Profiling samples and metrics. host.name[host.id].',
             })}
             type="question"
             iconProps={{

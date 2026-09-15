@@ -36,7 +36,7 @@ const sorting = {
 
 export function HostsTable({ data = [], hasDistinctProbabilisticValues }: Props) {
   const { query } = useProfilingParams('/storage-explorer');
-  const { rangeFrom, rangeTo } = query;
+  const { rangeFrom, rangeTo, schema } = query;
   const profilingRouter = useProfilingRouter();
   const [pagination, setPagination] = useState({ pageIndex: 0 });
 
@@ -105,7 +105,7 @@ export function HostsTable({ data = [], hasDistinctProbabilisticValues }: Props)
               data-test-subj={`hostId_${item.hostId}`}
               className="eui-textTruncate"
               href={profilingRouter.link('/flamegraphs/flamegraph', {
-                query: { rangeFrom, rangeTo, kuery: `${'host.id'}: "${item.hostId}"` },
+                query: { rangeFrom, rangeTo, schema, kuery: `${'host.id'}: "${item.hostId}"` },
               })}
             >{`${item.hostName} [${item.hostId}]`}</EuiLink>
           );
@@ -174,7 +174,7 @@ export function HostsTable({ data = [], hasDistinctProbabilisticValues }: Props)
         }),
         nameTooltip: {
           content: i18n.translate('xpack.profiling.storageExplorer.hostsTable.totalData.hint', {
-            defaultMessage: 'The combined value of Universal Profiling metrics and samples.',
+            defaultMessage: 'The combined value of Profiling metrics and samples.',
           }),
         },
         sortable: true,
@@ -188,6 +188,7 @@ export function HostsTable({ data = [], hasDistinctProbabilisticValues }: Props)
       profilingRouter,
       rangeFrom,
       rangeTo,
+      schema,
     ]
   );
 

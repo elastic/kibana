@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/** Index schema the profiling data is stored in; mirrors the `schema` field of the ES `_profiling/*` APIs. */
+export type ProfilingSchema = 'ecs' | 'otel';
+
 export interface ProfilingStatus {
   type?: 'cloud' | 'self-managed' | 'serverless';
   profiling_enabled: boolean;

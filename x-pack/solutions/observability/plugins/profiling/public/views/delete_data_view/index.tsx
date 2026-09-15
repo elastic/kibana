@@ -29,7 +29,7 @@ export function DeleteDataView() {
           })}
           description={i18n.translate('xpack.profiling.deleteDataView.card.description', {
             defaultMessage:
-              'To proceed with the Universal Profiling setup, please delete existing profiling data following the steps described in the link below.',
+              'To proceed with the Profiling setup, please delete existing profiling data following the steps described in the link below.',
           })}
           footer={
             <div>

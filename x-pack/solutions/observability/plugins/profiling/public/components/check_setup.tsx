@@ -90,25 +90,24 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
           action: {
             elasticAgent: {
               title: i18n.translate('xpack.profiling.noDataConfig.pageTitle', {
-                defaultMessage: 'Universal Profiling',
+                defaultMessage: 'Profiling',
               }),
               description: i18n.translate('xpack.profiling.noDataConfig.action.description', {
                 defaultMessage:
-                  'Universal Profiling provides fleet-wide, whole-system, continuous profiling with zero instrumentation. Understand what lines of code are consuming compute resources, at all times, and across your entire infrastructure.',
+                  'Profiling provides fleet-wide, whole-system, continuous profiling with zero instrumentation. Understand what lines of code are consuming compute resources, at all times, and across your entire infrastructure.',
               }),
               buttonText: postSetupLoading
                 ? i18n.translate('xpack.profiling.noDataConfig.action.buttonLoadingLabel', {
-                    defaultMessage: 'Setting up Universal Profiling...',
+                    defaultMessage: 'Setting up Profiling...',
                   })
                 : i18n.translate('xpack.profiling.noDataConfig.action.buttonLabel', {
-                    defaultMessage: 'Set up Universal Profiling',
+                    defaultMessage: 'Set up Profiling',
                   }),
               buttonIsDisabled: postSetupLoading || data?.has_required_role === false,
               disabledButtonTooltipText:
                 data?.has_required_role === false
                   ? i18n.translate('xpack.profiling.noDataConfig.action.permissionsTooltip', {
-                      defaultMessage:
-                        'You need superuser permissions to set up Universal Profiling.',
+                      defaultMessage: 'You need superuser permissions to set up Profiling.',
                     })
                   : undefined,
               onClick: (event: React.MouseEvent<HTMLElement, MouseEvent>) => {

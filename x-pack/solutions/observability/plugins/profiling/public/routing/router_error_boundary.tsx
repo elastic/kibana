@@ -60,7 +60,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
 
 const pageHeader = {
   pageTitle: i18n.translate('xpack.profiling.universalProfiling', {
-    defaultMessage: 'Universal Profiling',
+    defaultMessage: 'Profiling',
   }),
 };
 

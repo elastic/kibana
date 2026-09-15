@@ -43,7 +43,7 @@ const routes = {
     element: (
       <RouteBreadcrumb
         title={i18n.translate('xpack.profiling.breadcrumb.profiling', {
-          defaultMessage: 'Universal Profiling',
+          defaultMessage: 'Profiling',
         })}
         href="/"
       >
@@ -346,11 +346,13 @@ const routes = {
             rangeFrom: t.string,
             rangeTo: t.string,
             kuery: t.string,
+            schema: t.union([t.literal('ecs'), t.literal('otel')]),
           }),
         }),
         defaults: {
           query: {
             kuery: '',
+            schema: 'ecs',
           },
         },
       },
