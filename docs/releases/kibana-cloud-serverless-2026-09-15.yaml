@@ -77,7 +77,7 @@ entries:
     name: 289342.yaml
     checksum: f953260725698a594570dcb03d4cc75813ee7d4d
   type: bug-fix
-  title: fix Fake modal appear when Saving a dashboard for the first time
+  title: Fix fake modal appearing when saving a dashboard for the first time
   products:
   - product: cloud-serverless
   - product: kibana
@@ -105,7 +105,7 @@ entries:
     name: 290314.yaml
     checksum: 5c0ad235ab57834002cadf549d5caccd85cbfe25
   type: bug-fix
-  title: increase expression length limit
+  title: Increase expression length limit
   products:
   - product: cloud-serverless
   - product: kibana
@@ -292,7 +292,7 @@ entries:
     name: 289506.yaml
     checksum: 9936e2308681bb05af41cd0f12db64d705f70b6a
   type: feature
-  title: Render custom panels insidex the AI Assistant conversation
+  title: Render custom panels inside the AI Assistant conversation
   products:
   - product: cloud-serverless
   - product: kibana
@@ -379,7 +379,7 @@ entries:
     name: 290259.yaml
     checksum: eed0946b32639a562311bfb38259fe5578843abe
   type: bug-fix
-  title: 'fix: stats by previous aggregated field'
+  title: Fix `STATS BY` when grouping by a previously aggregated field
   products:
   - product: cloud-serverless
   - product: kibana
