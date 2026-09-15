@@ -80,7 +80,6 @@ export {
   type KnowledgeIndicator,
   type SignificantEvent,
   type SignificantEventResponse,
-  type SignificantEventGetResponse,
   type SignificantEventStatus,
   type SignificantEventsTuningConfig,
   type TuningConfigFieldBounds,

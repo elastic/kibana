@@ -19,7 +19,6 @@ import {
   type InvestigationRunStatus,
   type SignificantEvent,
   type SignificantEventResponse,
-  type SignificantEventGetResponse,
   type LifecycleDetection,
   type EventLifecycleResponse,
 } from '@kbn/significant-events-schema';
@@ -344,7 +343,7 @@ const eventsGetRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-  }): Promise<SignificantEventGetResponse> => {
+  }): Promise<SignificantEventResponse> => {
     const { getEventClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
@@ -361,15 +360,8 @@ const eventsGetRoute = createServerRoute({
     }
 
     const event = versionHits.at(-1)!;
-    const signalRuleUuids = [
-      ...new Set(
-        (event.signals ?? [])
-          .map((s) => s.metadata?.rule_uuid)
-          .filter((uuid): uuid is string => Boolean(uuid))
-      ),
-    ];
 
-    return { ...event, signal_rule_uuids: signalRuleUuids };
+    return event;
   },
 });
 

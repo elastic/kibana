@@ -236,19 +236,13 @@ describe('GET /internal/significant_events/events/{id}', () => {
     ).rejects.toMatchObject({ output: { statusCode: 404 } });
   });
 
-  it('returns the latest version with unique signal_rule_uuids', async () => {
+  it('returns the latest version in the event lineage', async () => {
     const older = { ...baseEvent };
     const latest = {
       ...baseEvent,
       event_uuid: 'version-2',
       previous_event_uuid: 'version-1',
       assessment_note: 'Known noise',
-      signals: [
-        { metadata: { rule_uuid: 'rule-a' } },
-        { metadata: { rule_uuid: 'rule-a' } },
-        { metadata: { rule_uuid: 'rule-b' } },
-        { metadata: {} },
-      ],
     };
 
     const response = await eventsGetRoute.handler({
@@ -266,7 +260,38 @@ describe('GET /internal/significant_events/events/{id}', () => {
 
     expect(response.event_uuid).toBe('version-2');
     expect(response.assessment_note).toBe('Known noise');
-    expect(response.signal_rule_uuids).toEqual(['rule-a', 'rule-b']);
+  });
+
+  it('passes signals through to the response unchanged', async () => {
+    const signals = [
+      {
+        type: 'detection' as const,
+        stream_name: 'logs.test',
+        verdict: 'false_positive',
+        metadata: {
+          rule_uuid: 'rule-uuid-1',
+          rule_name: 'Test Rule',
+          detection_id: 'det-1',
+          change_point_type: 'dip',
+        },
+      },
+    ];
+    const eventWithSignals = { ...baseEvent, signals };
+
+    const response = await eventsGetRoute.handler({
+      params: { path: { id: baseEvent.event_uuid } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        getEventClient: () => ({
+          findByEventUuid: jest.fn().mockResolvedValue({ hits: [eventWithSignals] }),
+          findByEventId: jest.fn().mockResolvedValue({ hits: [eventWithSignals] }),
+        }),
+      }),
+      server: {},
+    } as never);
+
+    expect(response.signals).toEqual(signals);
   });
 });
 

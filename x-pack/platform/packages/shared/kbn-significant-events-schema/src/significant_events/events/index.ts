@@ -92,11 +92,3 @@ export type SignificantEvent = z.infer<typeof significantEventSchema>;
 export interface SignificantEventResponse extends SignificantEvent {
   created_at: string;
 }
-
-/**
- * Response type for the single-event GET endpoint. Extends `SignificantEventResponse` with
- * `signal_rule_uuids`, a computed (not stored) field derived from `signals[].metadata.rule_uuid`.
- */
-export interface SignificantEventGetResponse extends SignificantEventResponse {
-  signal_rule_uuids: string[];
-}
