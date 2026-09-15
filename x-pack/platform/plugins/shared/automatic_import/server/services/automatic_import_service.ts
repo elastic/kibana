@@ -266,6 +266,19 @@ export class AutomaticImportService {
     return integrationResponse;
   }
 
+  public async getAllIntegrationNames(): Promise<
+    Array<{ integrationId: string; title: string }>
+  > {
+    if (!this.savedObjectService) {
+      throw new Error('Saved Objects service not initialized.');
+    }
+    const integrations = await this.savedObjectService.getAllIntegrations();
+    return integrations.map((integration) => ({
+      integrationId: integration.integration_id,
+      title: integration.metadata.title,
+    }));
+  }
+
   public async getAllIntegrations(): Promise<IntegrationResponse[]> {
     if (!this.savedObjectService) {
       throw new Error('Saved Objects service not initialized.');

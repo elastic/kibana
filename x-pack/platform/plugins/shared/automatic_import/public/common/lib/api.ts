@@ -119,6 +119,20 @@ export const getAllIntegrations = async ({
     signal: abortSignal,
   });
 
+export interface AutoImportIntegrationName {
+  integrationId: string;
+  title: string;
+}
+
+export const getAllIntegrationNames = async ({
+  http,
+  abortSignal,
+}: RequestDeps): Promise<AutoImportIntegrationName[]> =>
+  http.get<AutoImportIntegrationName[]>(`${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/names`, {
+    version: '1',
+    signal: abortSignal,
+  });
+
 export interface DeleteIntegrationRequest {
   integrationId: string;
 }

@@ -37,6 +37,7 @@ export const registerIntegrationRoutes = (
   logger: Logger
 ) => {
   getAllIntegrationsRoute(router, logger);
+  getAllIntegrationNamesRoute(router, logger);
   getIntegrationByIdRoute(router, logger);
   createIntegrationRoute(router, logger);
   approveIntegrationRoute(router, logger);
@@ -87,6 +88,41 @@ const getAllIntegrationsRoute = (
           return response.ok({ body });
         } catch (err) {
           logger.error(`registerIntegrationRoutes: Caught error:`, err);
+          const automaticImportResponse = buildAutomaticImportResponse(response);
+          return automaticImportResponse.error({
+            statusCode: 500,
+          });
+        }
+      })
+    );
+
+const getAllIntegrationNamesRoute = (
+  router: IRouter<AutomaticImportPluginRequestHandlerContext>,
+  logger: Logger
+) =>
+  router.versioned
+    .get({
+      access: 'internal',
+      path: '/api/automatic_import/integrations/names',
+      security: {
+        authz: {
+          requiredPrivileges: [`${AUTOMATIC_IMPORT_API_PRIVILEGES.READ}`],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: false,
+      },
+      withAvailability(async (context, _, response) => {
+        try {
+          const automaticImport = await context.automaticImport;
+          const automaticImportService = automaticImport.automaticImportService;
+          const body = await automaticImportService.getAllIntegrationNames();
+          return response.ok({ body });
+        } catch (err) {
+          logger.error(`getAllIntegrationNamesRoute: Caught error:`, err);
           const automaticImportResponse = buildAutomaticImportResponse(response);
           return automaticImportResponse.error({
             statusCode: 500,
