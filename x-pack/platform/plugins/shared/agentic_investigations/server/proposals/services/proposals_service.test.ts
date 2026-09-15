@@ -339,6 +339,51 @@ describe('ProposalsService', () => {
       expect(indexArgs.document.impactRank).toBe(3);
     });
 
+    it('should prefer the caller category over the action metadata', async () => {
+      const storage = createStorage();
+      const workflowsApi = createWorkflowsApi();
+      workflowsApi.getWorkflow.mockResolvedValue({
+        definition: { consts: { actionMetadata: { name: 'Create rule', category: 'tune' } } },
+      });
+      const { service } = createService(storage, workflowsApi);
+
+      const proposal = await service.create(
+        {
+          conversationId: 'conv-1',
+          comment: 'Tune the noisy rule',
+          actionWorkflowId: 'system-alertzero-action-create-rule',
+          category: 'contain',
+          confidence: 'medium',
+          origin: 'worker',
+        },
+        { spaceId: SPACE_ID }
+      );
+
+      expect(proposal.category).toBe('contain');
+    });
+
+    it('should give a proposal with no action the category its caller supplied', async () => {
+      const storage = createStorage();
+      const { service, workflowsApi } = createService(storage);
+
+      // The only way such a proposal gets one: there is no action metadata to
+      // resolve it from, and consumers group the queue by category — so
+      // without this it would have nowhere to appear.
+      const proposal = await service.create(
+        {
+          conversationId: 'conv-1',
+          comment: 'Rotate the credentials by hand, then approve',
+          category: 'contain',
+          confidence: 'high',
+          origin: 'worker',
+        },
+        { spaceId: SPACE_ID }
+      );
+
+      expect(proposal.category).toBe('contain');
+      expect(workflowsApi.getWorkflow).not.toHaveBeenCalled();
+    });
+
     it('should leave the category unset when the action declares no metadata', async () => {
       const storage = createStorage();
       const workflowsApi = createWorkflowsApi();
@@ -1257,16 +1302,22 @@ describe('ProposalsService', () => {
       );
     });
 
-    it('needs no expiry filter, since an expired proposal matches neither leg', async () => {
-      // The awaiting leg matches on `status: pending`, and the decided leg
-      // needs a `decidedAt` that a proposal nobody answered never got.
+    it('reaches a recently expired proposal through the decided leg, not the awaiting one', async () => {
+      // `update` stamps `decidedAt` when it settles a proposal nobody decided,
+      // so an expired one does match the decided-recently leg — deliberately,
+      // because "you missed this" is activity worth surfacing. It carries no
+      // decision, so a consumer has to classify on the status rather than the
+      // decision or it lands back in the open queue.
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
 
       await service.listByWindow(activityQuery(), SPACE_ID);
 
       const [[searchArgs]] = storage.search.mock.calls;
-      expect(JSON.stringify(searchArgs.query.bool.should)).not.toContain('expiresAt');
+      expect(searchArgs.query.bool.should).toEqual([
+        { term: { status: 'pending' } },
+        { range: { decidedAt: { gte: 'now-24h' } } },
+      ]);
     });
 
     it('returns truncated=true when total exceeds the cap', async () => {

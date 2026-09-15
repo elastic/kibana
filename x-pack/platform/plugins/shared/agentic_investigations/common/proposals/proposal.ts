@@ -174,6 +174,12 @@ export const createProposalRequestSchema = z.object({
    * precedence over the action's own, and only a genuine omission falls back.
    */
   impact: proposalImpactSchema.optional(),
+  /**
+   * Overrides the action's own declared category, and is the only way a
+   * proposal carrying no action gets one at all — consumers group the queue by
+   * category, so without it a non-action proposal has nowhere to appear.
+   */
+  category: proposalCategorySchema.optional(),
   confidence: proposalConfidenceSchema.default('medium'),
   origin: proposalOriginSchema.default('worker'),
   expiresAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
@@ -303,11 +309,16 @@ export interface ProposalChartsSummaryResponse {
 }
 
 /**
- * Whether a human has answered. Reads the decision rather than the status,
- * which is what makes it correct no matter which surface recorded it.
+ * Whether a human can still act on this proposal.
+ *
+ * Reads the status, not the decision: `pending` is the only status valid while
+ * undecided *and* unsettled, so it is the whole condition. The decision is the
+ * wrong axis here because an `expired` proposal has none either — it was
+ * settled by a deadline rather than a person — and treating that as "still
+ * open" puts a decision nobody can make back in the queue.
  */
-export const isDecided = (proposal: Pick<Proposal, 'decision'>): boolean =>
-  proposal.decision != null;
+export const isAwaitingDecision = (proposal: Pick<Proposal, 'status'>): boolean =>
+  proposal.status === 'pending';
 
 export const isExpired = (proposal: Pick<Proposal, 'expiresAt'>, now = Date.now()): boolean => {
   if (!proposal.expiresAt) {

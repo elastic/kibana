@@ -52,6 +52,7 @@ export const getCreateProposalStepDefinition = ({
             actionWorkflowId: context.input.actionWorkflowId,
             actionInput: context.input.actionInput,
             impact: context.input.impact,
+            category: context.input.category,
             confidence: context.input.confidence ?? 'medium',
             origin: context.input.origin ?? 'worker',
             expiresAt: resolveExpiresAt(context.input.expiresIn),

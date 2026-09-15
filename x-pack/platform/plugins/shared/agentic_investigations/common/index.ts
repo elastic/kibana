@@ -32,7 +32,7 @@ export {
   createProposalRequestSchema,
   dismissProposalRequestSchema,
   dismissReasonSchema,
-  isDecided,
+  isAwaitingDecision,
   isExpired,
   listProposalsQuerySchema,
   MAX_PROPOSALS_SIZE,

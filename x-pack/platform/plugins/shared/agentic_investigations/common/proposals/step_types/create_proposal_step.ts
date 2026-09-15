@@ -9,7 +9,12 @@ import { i18n } from '@kbn/i18n';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
-import { proposalConfidenceSchema, proposalImpactSchema, proposalOriginSchema } from '../proposal';
+import {
+  proposalCategorySchema,
+  proposalConfidenceSchema,
+  proposalImpactSchema,
+  proposalOriginSchema,
+} from '../proposal';
 import { optionalStepInput } from './optional_step_input';
 
 export const CreateProposalStepId = 'investigations.createProposal' as const;
@@ -29,6 +34,9 @@ export const createProposalStepInputSchema = z.object({
   ),
   impact: optionalStepInput(proposalImpactSchema).describe(
     'Impact snapshotted at creation. Takes precedence over the action workflow\u2019s own declared impact, since the caller knows the situation the proposal came out of.'
+  ),
+  category: optionalStepInput(proposalCategorySchema).describe(
+    'Grouping axis for the decision queue. Overrides the action workflow\u2019s own declared category, and is the only way a proposal with no action gets one \u2014 consumers group by it, so without it such a proposal has nowhere to appear.'
   ),
   confidence: optionalStepInput(proposalConfidenceSchema).describe(
     'Confidence in the recommendation.'

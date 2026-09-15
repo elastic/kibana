@@ -15,7 +15,7 @@ import type {
   ProposalWithMetadata,
   ProposalsQuery,
 } from '@kbn/agentic-investigations-plugin/common';
-import { isDecided } from '@kbn/agentic-investigations-plugin/common';
+import { isAwaitingDecision } from '@kbn/agentic-investigations-plugin/common';
 import {
   CLOSED_GROUP_KEY,
   type ProposalGroups,
@@ -74,10 +74,11 @@ export class ConversationProposalsService {
           : {}),
       };
 
-      // The decision, not `decidedAt`: a decided proposal is closed even while
-      // its action is still executing, and the decision is the axis that says
-      // so regardless of which surface recorded it.
-      if (isDecided(proposal)) {
+      // Anything not awaiting is closed, including a proposal that expired
+      // unanswered — it carries no decision but nobody can act on it either.
+      // `executing` counts as closed too: the human already approved and the
+      // action is running, so re-offering it would invite a second decision.
+      if (!isAwaitingDecision(proposal)) {
         groups[CLOSED_GROUP_KEY].push(item);
       } else if (proposal.category) {
         if (!groups[proposal.category]) {

@@ -254,7 +254,8 @@ The input contract:
 | `comment` | yes | Markdown explaining what is being proposed. A proposal a human cannot read is not reviewable. |
 | `actionWorkflowId` | no | Omit for a proposal the analyst carries out themselves. |
 | `actionInput` | no | Passed to the action workflow as its single `actionInput` object. |
-| `impact`, `confidence` | no | Snapshotted at creation; used for queue ordering. |
+| `impact`, `confidence` | no | Snapshotted at creation; used for queue ordering. `impact` overrides the action's own. |
+| `category` | no | Overrides the action's own. Pass it for a proposal with no action, or it cannot be grouped and consumers will drop it. |
 | `autoApprove` | no | See below. Defaults to `false`, so the gate is fail-closed. |
 
 You get back `proposalId` and `status`.
@@ -301,7 +302,7 @@ Reads need `read_proposals`; both decisions need `manage_proposals`. There is de
 
 A decision queue filters on `status: 'pending'`, which is the whole "awaiting" condition. `excludeExpired` is still worth passing alongside it, because it filters on the deadline *date* rather than the status: between the deadline passing and the gate workflow settling the record there is task lag during which it still reads `pending`.
 
-Expired proposals need no filtering out of `listByWindow` at all — the awaiting half matches on `status: 'pending'` and the decided half needs a `decidedAt` that a proposal nobody answered never got, so they match neither.
+A recently expired proposal *does* reach `listByWindow`, through the decided half: `update` stamps `decidedAt` whenever it settles a proposal, including one nobody decided, so "you missed this" surfaces as activity. It carries no `decision`, though — which is why a consumer must classify on the status. `isAwaitingDecision()` exists for exactly that, and classifying on the decision instead puts an unanswerable proposal back in the open queue.
 
 **The two decision routes are privilege-checked bridges to the gate, not writers.** Each loads the proposal, asserts no decision exists yet, asserts the deadline has not passed, compares the submitted `actionInput` against the record on an approval, and resumes. The workflow behind the gate records the decision.
 
@@ -335,7 +336,7 @@ The service surface follows from that: `releaseGate()` makes at most that one an
 - **Action metadata is resolved on read** from the action workflow's `consts.actionMetadata`, never copied onto the proposal, so a catalog change is picked up rather than going stale. `impact` is the exception: it is snapshotted at creation, as `params.impact ?? metadata.impact ?? 'low'`. The caller wins because it knows the situation the proposal came out of, which the action's own metadata cannot; the `low` floor exists because `impactRank` is the queue's primary sort key and must always have a value.
 - **`actionInput` is validated at creation**, against the schema the action declares on its manual trigger, so a proposal that could never run never reaches a human. Best-effort: the JSON Schema to zod conversion does not cover every keyword.
 - **The queue's order lives in Elasticsearch.** `impact` and `confidence` are keywords, which sort alphabetically, so each is mirrored by a numeric rank written at creation. That is what makes the list pageable rather than capped at one fetch; the ranks are stripped before a proposal leaves the service.
-- **`category` is an arbitrary keyword this plugin does not own.** Each solution defines the vocabulary its own actions declare and its own queries group by — AlertZero's set is not NightShift's — so there is no shared enum and no default to fall back on. It is absent on a proposal that carries no action. Consumers group and aggregate on it; nothing sorts on it, and which category is displayed first is a UI decision rather than a stored rank.
+- **`category` is an arbitrary keyword this plugin does not own.** Each solution defines the vocabulary its own actions declare and its own queries group by — AlertZero's set is not NightShift's — so there is no shared enum and no default to fall back on. Resolved as `params.category ?? metadata.category`, the same precedence as `impact` and for the same reason; a caller-supplied value is also the *only* way a proposal carrying no action gets one, since there is no action metadata to read it from. That matters because consumers group the queue by category and drop what has none, so an uncategorised non-action proposal would have nowhere to appear. Nothing sorts on it, and which category leads is a UI decision rather than a stored rank.
 
 ## Managed workflows
 

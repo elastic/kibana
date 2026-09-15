@@ -112,9 +112,19 @@ describe('create-investigation-proposal workflow', () => {
           actionWorkflowId: expect.anything(),
           actionInput: expect.anything(),
           impact: expect.anything(),
+          category: expect.anything(),
           autoApprove: expect.anything(),
         })
       );
+    });
+
+    it('forwards the grouping overrides, or a non-action proposal cannot be grouped', () => {
+      // `category` is the only way a proposal with no action gets one, and
+      // consumers drop what they cannot group.
+      const create = findStep(workflow.steps, 'create_proposal');
+
+      expect(String(create?.with?.category)).toContain('inputs.category');
+      expect(String(create?.with?.impact)).toContain('inputs.impact');
     });
 
     it('types actionInput as a free-form object so any action shape can pass through', () => {
