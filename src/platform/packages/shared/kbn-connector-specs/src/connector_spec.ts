@@ -313,8 +313,10 @@ export interface ActionContext {
 
 export interface TemplateRendering {
   enabled: boolean;
-  format?: 'mustache' | 'handlebars' | 'custom';
-  escaping?: 'html' | 'json' | 'markdown' | 'none';
+  format?: 'mustache';
+  escaping?: 'html' | 'json' | 'markdown' | 'slack' | 'none';
+  /** When set, escaping applies only to values with one of these field names. */
+  escapingFields?: readonly string[];
 }
 
 export interface Transformations {

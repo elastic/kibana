@@ -631,23 +631,38 @@ export interface SlackFilesInfoResponse extends SlackErrorFields {
 }
 
 export const SlackSendMessageInputSchema = lazySchema(() =>
-  z.object({
-    channel: z
-      .string()
-      .min(1)
-      .describe(
-        'Conversation ID to send the message to (e.g. C... for channels, G... for private channels, D... for DMs). Use listChannels to browse available channels, or resolveChannelId when you know the channel name and need its ID.'
-      ),
-    text: z.string().min(1).describe('The message text to send'),
-    threadTs: z
-      .string()
-      .optional()
-      .describe('Timestamp of another message to reply to (creates a threaded reply)'),
-    unfurlLinks: z
-      .boolean()
-      .optional()
-      .describe('Whether to enable unfurling of primarily text-based content'),
-    unfurlMedia: z.boolean().optional().describe('Whether to enable unfurling of media content'),
-  })
+  z
+    .object({
+      channel: z
+        .string()
+        .min(1)
+        .optional()
+        .describe(
+          'Conversation ID to send the message to. Required for OAuth and bot token authentication; ignored for incoming webhooks, whose channel is fixed by the webhook URL.'
+        ),
+      text: z
+        .string()
+        .min(1)
+        .optional()
+        .describe('The message text or accessibility fallback for a Block Kit message'),
+      blocks: z
+        .array(z.record(z.string(), z.unknown()))
+        .min(1)
+        .max(50)
+        .optional()
+        .describe('Slack Block Kit blocks to include in the message'),
+      threadTs: z
+        .string()
+        .optional()
+        .describe('Timestamp of another message to reply to (creates a threaded reply)'),
+      unfurlLinks: z
+        .boolean()
+        .optional()
+        .describe('Whether to enable unfurling of primarily text-based content'),
+      unfurlMedia: z.boolean().optional().describe('Whether to enable unfurling of media content'),
+    })
+    .refine(({ text, blocks }) => text !== undefined || blocks !== undefined, {
+      message: 'Either text or blocks is required',
+    })
 );
 export type SlackSendMessageInput = z.infer<typeof SlackSendMessageInputSchema>;

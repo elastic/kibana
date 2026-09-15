@@ -8,6 +8,7 @@
 import type { ConnectorSpec } from '@kbn/connector-specs';
 import { TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { z as z4 } from '@kbn/zod/v4';
 import { createConnectorTypeFromSpec } from './create_connector_from_spec';
 import * as createConnectorNetworkSettingsModule from './create_connector_network_settings';
@@ -118,6 +119,41 @@ describe('createConnectorTypeFromSpec', () => {
     });
     const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
     expect(connectorType.description).toBe('Connector description');
+  });
+
+  it('applies Slack escaping only to configured fields', () => {
+    const spec = createMockSpec({
+      transformations: {
+        templates: {
+          enabled: true,
+          format: 'mustache',
+          escaping: 'slack',
+          escapingFields: ['text'],
+        },
+      },
+    });
+    const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+
+    expect(
+      connectorType.renderParameterTemplates?.(
+        loggingSystemMock.createLogger(),
+        {
+          subAction: 'testAction',
+          subActionParams: {
+            text: '{{bold}} -- {{html}}',
+            url: 'https://example.com/?label={{bold}}&value={{html}}',
+          },
+        },
+        { bold: '*bold*', html: '<&>' },
+        'connector-id'
+      )
+    ).toEqual({
+      subAction: 'testAction',
+      subActionParams: {
+        text: '`*bold*` -- &lt;&amp;&gt;',
+        url: 'https://example.com/?label=*bold*&value=<&>',
+      },
+    });
   });
 
   it('creates connector type with executor and params for workflows connectors with multiple feature IDs', () => {
