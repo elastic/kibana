@@ -8,214 +8,139 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getKis } from './ki_list';
 
-const allKisAggregation = {
-  doc_count: 6,
-  counts_by_type: {
-    buckets: [
-      { key: 'playbook', doc_count: 1 },
-      { key: 'policy', doc_count: 1 },
-      { key: 'faq', doc_count: 4 },
-    ],
-  },
-};
-
 const BACKING_INDEX = 'ai-index-idx-sample';
 
+const fieldCapsFor = (fields: string[]) => ({
+  indices: [BACKING_INDEX],
+  fields: Object.fromEntries(fields.map((f) => [f, { keyword: { type: 'keyword' } }])),
+});
+const ALL_FIELDS = ['id', '@timestamp', 'type', 'title', 'governance.lifecycle.status'];
+
+const rowsResponse = (rows: Array<[string, string, string | null, string | null]>) => ({
+  columns: [{ name: '_index' }, { name: 'id' }, { name: 'type' }, { name: 'title' }],
+  values: rows,
+});
+const countsResponse = (rows: Array<[number, string | null]>) => ({
+  columns: [{ name: 'count' }, { name: 'type' }],
+  values: rows,
+});
+
 describe('ki_list', () => {
-  const search = jest.fn();
-  const esClient = { search } as unknown as ElasticsearchClient;
+  const fieldCaps = jest.fn();
+  const query = jest.fn();
+  const esClient = { fieldCaps, esql: { query } } as unknown as ElasticsearchClient;
+
+  const queryText = (call: number) => query.mock.calls[call][0].query as string;
 
   beforeEach(() => {
-    search.mockReset();
+    fieldCaps.mockReset();
+    query.mockReset();
+    fieldCaps.mockResolvedValue(fieldCapsFor(ALL_FIELDS));
   });
 
-  it('returns paginated KIs sorted by timestamp', async () => {
-    search.mockResolvedValue({
-      hits: {
-        total: { value: 2 },
-        hits: [
-          {
-            _id: 'ki-1',
-            _index: BACKING_INDEX,
-            _source: {
-              type: 'playbook',
-              title: 'Refund playbook',
-            },
-          },
-          {
-            _id: 'ki-2',
-            _index: BACKING_INDEX,
-            _source: {
-              type: 'policy',
-              title: 'Refund policy',
-              description: 'Do not issue refunds outside the SLA window.',
-            },
-          },
-        ],
-      },
-      aggregations: {
-        all_kis: allKisAggregation,
-      },
-    });
+  it('returns the current revision of each KI with unfiltered type counts', async () => {
+    query
+      .mockResolvedValueOnce(
+        rowsResponse([
+          [BACKING_INDEX, 'ki-1', 'playbook', 'Refund playbook'],
+          [BACKING_INDEX, 'ki-2', 'policy', 'Refund policy'],
+        ])
+      )
+      .mockResolvedValueOnce(
+        countsResponse([
+          [4, 'faq'],
+          [1, 'playbook'],
+          [1, 'policy'],
+        ])
+      );
 
-    await expect(
-      getKis(esClient, {
-        destValue: 'ai-index-idx-sample',
-        size: 25,
-      })
-    ).resolves.toEqual({
-      total: 2,
+    await expect(getKis(esClient, { destValue: BACKING_INDEX, size: 25 })).resolves.toEqual({
+      total: 6,
       summary: {
         total: 6,
         counts_by_type: [
+          { type: 'faq', count: 4 },
           { type: 'playbook', count: 1 },
           { type: 'policy', count: 1 },
-          { type: 'faq', count: 4 },
         ],
       },
       kis: [
-        {
-          id: 'ki-1',
-          index: BACKING_INDEX,
-          type: 'playbook',
-          title: 'Refund playbook',
-        },
-        {
-          id: 'ki-2',
-          index: BACKING_INDEX,
-          type: 'policy',
-          title: 'Refund policy',
-        },
+        { id: 'ki-1', index: BACKING_INDEX, type: 'playbook', title: 'Refund playbook' },
+        { id: 'ki-2', index: BACKING_INDEX, type: 'policy', title: 'Refund policy' },
       ],
     });
 
-    expect(search).toHaveBeenCalledWith(
-      expect.objectContaining({
-        index: 'ai-index-idx-sample',
-        from: 0,
-        size: 25,
-        query: { match_all: {} },
-        sort: [
-          { '@timestamp': { order: 'desc', unmapped_type: 'date' } },
-          { _doc: { order: 'desc' } },
-        ],
-        aggs: {
-          all_kis: {
-            global: {},
-            aggs: {
-              counts_by_type: {
-                terms: {
-                  field: 'type',
-                  size: 5,
-                  order: { _count: 'desc' },
-                },
-              },
-            },
-          },
-        },
-      })
+    expect(queryText(0)).toBe(
+      [
+        `FROM "${BACKING_INDEX}" METADATA _id, _index`,
+        'EVAL id = COALESCE(id, _id)',
+        'INLINE STATS latest = MAX(@timestamp) BY id',
+        'WHERE @timestamp == latest',
+        'WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status != "deleted"',
+        'SORT @timestamp DESC, id ASC',
+        'KEEP _index, id, type, title',
+        'LIMIT 25',
+      ].join('\n| ')
     );
+    expect(queryText(1)).toContain('| STATS count = COUNT(*) BY type');
   });
 
-  it('filters list hits by type but keeps unfiltered type counts', async () => {
-    search.mockResolvedValue({
-      hits: {
-        total: { value: 1 },
-        hits: [
-          {
-            _id: 'ki-1',
-            _index: BACKING_INDEX,
-            _source: {
-              type: 'playbook',
-              title: 'Refund playbook',
-              description: 'Verify the order first.',
-            },
-          },
-        ],
-      },
-      aggregations: {
-        all_kis: allKisAggregation,
-      },
-    });
+  it('filters rows by type but keeps unfiltered type counts', async () => {
+    query
+      .mockResolvedValueOnce(rowsResponse([[BACKING_INDEX, 'ki-1', 'playbook', 'Refund playbook']]))
+      .mockResolvedValueOnce(
+        countsResponse([
+          [4, 'faq'],
+          [1, 'playbook'],
+        ])
+      );
 
     await expect(
-      getKis(esClient, {
-        destValue: 'ai-index-idx-sample',
-        size: 10,
-        type: 'playbook',
-      })
+      getKis(esClient, { destValue: BACKING_INDEX, size: 10, type: 'playbook' })
     ).resolves.toEqual(
       expect.objectContaining({
         total: 1,
         summary: {
-          total: 6,
+          total: 5,
           counts_by_type: [
-            { type: 'playbook', count: 1 },
-            { type: 'policy', count: 1 },
             { type: 'faq', count: 4 },
+            { type: 'playbook', count: 1 },
           ],
         },
       })
     );
 
-    expect(search).toHaveBeenCalledWith(
-      expect.objectContaining({
-        query: {
-          bool: {
-            filter: [{ term: { type: 'playbook' } }],
-          },
-        },
-      })
-    );
+    expect(query.mock.calls[0][0]).toEqual({
+      query: expect.stringContaining('| WHERE type == ?type'),
+      params: [{ type: 'playbook' }],
+    });
+    expect(queryText(1)).not.toContain('?type');
   });
 
   it('includes KIs with missing type or title so total matches the rendered row count', async () => {
-    search.mockResolvedValue({
-      hits: {
-        total: { value: 3 },
-        hits: [
-          {
-            _id: 'ki-complete',
-            _index: BACKING_INDEX,
-            _source: {
-              type: 'playbook',
-              title: 'Complete KI',
-            },
-          },
-          {
-            _id: 'ki-missing-type',
-            _index: BACKING_INDEX,
-            _source: {
-              title: 'Missing type',
-            },
-          },
-          {
-            _id: 'ki-missing-title',
-            _index: BACKING_INDEX,
-            _source: {
-              type: 'policy',
-            },
-          },
-        ],
-      },
-      aggregations: {
-        all_kis: allKisAggregation,
-      },
-    });
+    query
+      .mockResolvedValueOnce(
+        rowsResponse([
+          [BACKING_INDEX, 'ki-complete', 'playbook', 'Complete KI'],
+          [BACKING_INDEX, 'ki-missing-type', null, 'Missing type'],
+          [BACKING_INDEX, 'ki-missing-title', 'policy', null],
+        ])
+      )
+      .mockResolvedValueOnce(
+        countsResponse([
+          [1, 'playbook'],
+          [1, 'policy'],
+          [1, null],
+        ])
+      );
 
-    await expect(
-      getKis(esClient, {
-        destValue: 'ai-index-idx-sample',
-        size: 25,
-      })
-    ).resolves.toEqual({
+    await expect(getKis(esClient, { destValue: BACKING_INDEX, size: 25 })).resolves.toEqual({
       total: 3,
       summary: {
-        total: 6,
+        total: 3,
         counts_by_type: [
           { type: 'playbook', count: 1 },
           { type: 'policy', count: 1 },
-          { type: 'faq', count: 4 },
         ],
       },
       kis: [
@@ -227,75 +152,50 @@ describe('ki_list', () => {
   });
 
   it('returns summary stats without fetching rows when size is 0', async () => {
-    search.mockResolvedValue({
-      hits: {
-        total: { value: 6 },
-        hits: [],
-      },
-      aggregations: {
-        all_kis: allKisAggregation,
-      },
-    });
+    query.mockResolvedValueOnce(countsResponse([[6, 'faq']]));
 
-    await expect(
-      getKis(esClient, {
-        destValue: 'ai-index-idx-sample',
-        size: 0,
-      })
-    ).resolves.toEqual({
+    await expect(getKis(esClient, { destValue: BACKING_INDEX, size: 0 })).resolves.toEqual({
       kis: [],
       total: 6,
-      summary: {
-        total: 6,
-        counts_by_type: [
-          { type: 'playbook', count: 1 },
-          { type: 'policy', count: 1 },
-          { type: 'faq', count: 4 },
-        ],
-      },
+      summary: { total: 6, counts_by_type: [{ type: 'faq', count: 6 }] },
     });
 
-    expect(search).toHaveBeenCalledWith(
-      expect.objectContaining({
-        size: 0,
-      })
+    expect(query).toHaveBeenCalledTimes(1);
+    expect(queryText(0)).toContain('| STATS count = COUNT(*) BY type');
+  });
+
+  it('omits the revision collapse and lifecycle filter for indices without those fields', async () => {
+    fieldCaps.mockResolvedValue(fieldCapsFor(['type', 'title']));
+    query
+      .mockResolvedValueOnce(rowsResponse([[BACKING_INDEX, 'ki-1', 'dashboard', 'Sales']]))
+      .mockResolvedValueOnce(countsResponse([[1, 'dashboard']]));
+
+    await getKis(esClient, { destValue: BACKING_INDEX, size: 25 });
+
+    expect(queryText(0)).toBe(
+      [
+        `FROM "${BACKING_INDEX}" METADATA _id, _index`,
+        'EVAL id = _id',
+        'SORT id ASC',
+        'KEEP _index, id, type, title',
+        'LIMIT 25',
+      ].join('\n| ')
     );
   });
 
-  it('returns an empty list when the backing store has no documents', async () => {
-    search.mockResolvedValue({
-      hits: {
-        total: { value: 0 },
-        hits: [],
-      },
-      aggregations: {
-        all_kis: {
-          doc_count: 0,
-          counts_by_type: { buckets: [] },
-        },
-      },
-    });
+  it('returns an empty list when the backing store does not exist', async () => {
+    fieldCaps.mockResolvedValue({ indices: [], fields: {} });
 
     await expect(
-      getKis(esClient, {
-        destValue: 'ai-index-idx-missing',
-        size: 25,
-      })
-    ).resolves.toEqual({
-      kis: [],
-      total: 0,
-      summary: {
-        total: 0,
-        counts_by_type: [],
-      },
-    });
+      getKis(esClient, { destValue: 'ai-index-idx-missing', size: 25 })
+    ).resolves.toEqual({ kis: [], total: 0, summary: { total: 0, counts_by_type: [] } });
 
-    expect(search).toHaveBeenCalledWith(
-      expect.objectContaining({
-        index: 'ai-index-idx-missing',
-        ignore_unavailable: true,
-        allow_no_indices: true,
-      })
-    );
+    expect(fieldCaps).toHaveBeenCalledWith({
+      index: 'ai-index-idx-missing',
+      fields: ['id', '@timestamp', 'type', 'title', 'governance.lifecycle.status'],
+      ignore_unavailable: true,
+      allow_no_indices: true,
+    });
+    expect(query).not.toHaveBeenCalled();
   });
 });

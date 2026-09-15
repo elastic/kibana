@@ -5,31 +5,20 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import { MAX_KI_TYPE_FILTER_COUNT, takeTopKiTypeCounts } from '../../common/ki_type_counts';
 import type { KiListItem, ListKisResponse } from '../../common/http_api/knowledge_indicators';
 
-const LENIENT_INDEX_OPTIONS = {
-  ignore_unavailable: true,
-  allow_no_indices: true,
-} as const;
-
-const KI_LIST_SOURCE_FIELDS = ['type', 'title'] as const;
-
-interface KiDocumentSource {
-  type?: string;
-  title?: string;
-}
-
-interface KiSearchAggregations {
-  all_kis: {
-    doc_count: number;
-    counts_by_type: {
-      buckets: Array<{ key: string; doc_count: number }>;
-    };
-  };
-}
+/** Columns the list reads. Each is guarded by field caps since AI indices vary in shape. */
+const KI_LIST_FIELDS = [
+  'id',
+  '@timestamp',
+  'type',
+  'title',
+  'governance.lifecycle.status',
+] as const;
+type KiListField = (typeof KI_LIST_FIELDS)[number];
 
 export interface GetKisOptions {
   destValue: string;
@@ -37,80 +26,93 @@ export interface GetKisOptions {
   type?: string;
 }
 
-const toKiListItemFromHit = (hit: estypes.SearchHit<KiDocumentSource>): KiListItem | undefined => {
-  const { _id: id, _index: index, _source: source } = hit;
-  if (id === undefined) {
-    return undefined;
-  }
+const EMPTY: ListKisResponse = { kis: [], total: 0, summary: { total: 0, counts_by_type: [] } };
 
-  const { type, title } = source ?? {};
+const toRecords = (response: ESQLSearchResponse): Array<Record<string, unknown>> =>
+  response.values.map((row) =>
+    Object.fromEntries(response.columns.map((column, i) => [column.name, row[i]]))
+  );
+
+const toKiListItem = (row: Record<string, unknown>): KiListItem => {
+  const { _index: index, id, type, title } = row;
   return {
-    id,
-    index,
-    ...(type !== undefined ? { type } : {}),
-    ...(title !== undefined ? { title } : {}),
+    id: String(id),
+    index: String(index),
+    ...(typeof type === 'string' ? { type } : {}),
+    ...(typeof title === 'string' ? { title } : {}),
   };
 };
 
-const buildKiListQuery = ({ type }: Pick<GetKisOptions, 'type'>) => {
-  if (type === undefined) {
-    return { match_all: {} };
-  }
-
-  return { bool: { filter: [{ term: { type } }] } };
-};
+/**
+ * One row per KI: the latest revision by `@timestamp` for each logical id,
+ * excluding KIs whose lifecycle status is deleted.
+ */
+const currentKisQuery = (destValue: string, has: (field: KiListField) => boolean): string =>
+  [
+    `FROM ${JSON.stringify(destValue)} METADATA _id, _index`,
+    has('id') ? 'EVAL id = COALESCE(id, _id)' : 'EVAL id = _id',
+    ...(has('@timestamp')
+      ? ['INLINE STATS latest = MAX(@timestamp) BY id', 'WHERE @timestamp == latest']
+      : []),
+    ...(has('governance.lifecycle.status')
+      ? ['WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status != "deleted"']
+      : []),
+    ...(has('type') ? [] : ['EVAL type = TO_STRING(NULL)']),
+    ...(has('title') ? [] : ['EVAL title = TO_STRING(NULL)']),
+  ].join('\n| ');
 
 export const getKis = async (
   esClient: ElasticsearchClient,
   { destValue, size, type }: GetKisOptions
 ): Promise<ListKisResponse> => {
-  const response = await esClient.search<KiDocumentSource, KiSearchAggregations>({
+  const caps = await esClient.fieldCaps({
     index: destValue,
-    ...LENIENT_INDEX_OPTIONS,
-    from: 0,
-    size,
-    track_total_hits: true,
-    _source: [...KI_LIST_SOURCE_FIELDS],
-    query: buildKiListQuery({ type }),
-    sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }, { _doc: { order: 'desc' } }],
-    aggs: {
-      all_kis: {
-        global: {},
-        aggs: {
-          counts_by_type: {
-            terms: {
-              field: 'type',
-              size: MAX_KI_TYPE_FILTER_COUNT,
-              order: { _count: 'desc' },
-            },
-          },
-        },
-      },
-    },
+    fields: [...KI_LIST_FIELDS],
+    ignore_unavailable: true,
+    allow_no_indices: true,
   });
+  if (caps.indices.length === 0) {
+    return EMPTY;
+  }
+  const has = (field: KiListField) => Object.keys(caps.fields[field] ?? {}).length > 0;
+  const base = currentKisQuery(destValue, has);
 
-  const kis = response.hits.hits
-    .map(toKiListItemFromHit)
-    .filter((item): item is KiListItem => item !== undefined);
+  const rowsQuery = [
+    base,
+    ...(type !== undefined ? ['WHERE type == ?type'] : []),
+    has('@timestamp') ? 'SORT @timestamp DESC, id ASC' : 'SORT id ASC',
+    'KEEP _index, id, type, title',
+    `LIMIT ${size}`,
+  ].join('\n| ');
+  const countsQuery = `${base}\n| STATS count = COUNT(*) BY type`;
 
+  const [rows, counts] = await Promise.all([
+    size > 0
+      ? esClient.esql.query({
+          query: rowsQuery,
+          ...(type !== undefined ? { params: [{ type }] } : {}),
+        })
+      : undefined,
+    esClient.esql.query({ query: countsQuery }),
+  ]);
+
+  const countRows = toRecords(counts as unknown as ESQLSearchResponse).map((row) => ({
+    type: typeof row.type === 'string' ? row.type : undefined,
+    count: Number(row.count),
+  }));
+  const totalAll = countRows.reduce((sum, { count }) => sum + count, 0);
   const total =
-    typeof response.hits.total === 'number'
-      ? response.hits.total
-      : response.hits.total?.value ?? kis.length;
-
-  const allKisAgg = response.aggregations?.all_kis;
-  const buckets = allKisAgg?.counts_by_type?.buckets ?? [];
+    type === undefined ? totalAll : countRows.find((row) => row.type === type)?.count ?? 0;
   const countsByType = takeTopKiTypeCounts(
-    buckets.map(({ key, doc_count }) => ({ type: key, count: doc_count }))
+    countRows
+      .filter((row): row is { type: string; count: number } => row.type !== undefined)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, MAX_KI_TYPE_FILTER_COUNT)
   );
-  const totalAll = allKisAgg?.doc_count ?? 0;
 
   return {
-    kis,
+    kis: rows ? toRecords(rows as unknown as ESQLSearchResponse).map(toKiListItem) : [],
     total,
-    summary: {
-      total: totalAll > 0 ? totalAll : total,
-      counts_by_type: countsByType,
-    },
+    summary: { total: totalAll, counts_by_type: countsByType },
   };
 };
