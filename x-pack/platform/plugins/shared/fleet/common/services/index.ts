@@ -69,6 +69,8 @@ export {
   getNormalizedDataStreams,
   getPolicyTemplateDataStreamPaths,
   filterPolicyTemplatesTiles,
+  getEnabledPolicyTemplates,
+  getEnabledInputsByPolicyTemplate,
   hasMultipleEnabledPolicyTemplates,
   getPolicyTemplateInputDefinition,
   registryInputAllowsDynamicSignalTypes,

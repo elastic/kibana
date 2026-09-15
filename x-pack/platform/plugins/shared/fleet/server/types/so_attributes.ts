@@ -47,6 +47,7 @@ import type {
   CloudConnectorVars,
   AccountType,
   VerificationStatus,
+  CloudConnectorIacFields,
 } from '../../common/types/models/cloud_connector';
 import type {
   CloudOnboardingDeploymentAuthMethod,
@@ -359,7 +360,7 @@ export interface DownloadSourceSOAttributes {
 }
 export type SimpleSOAssetAttributes = SimpleSOAssetType['attributes'];
 
-export interface CloudConnectorSOAttributes {
+export interface CloudConnectorSOAttributes extends CloudConnectorIacFields {
   name: string;
   namespace?: string;
   cloudProvider: CloudProvider;
@@ -370,9 +371,6 @@ export interface CloudConnectorSOAttributes {
   verification_status?: VerificationStatus;
   verification_started_at?: string;
   verification_failed_at?: string;
-  templateSha?: string | null;
-  blueprintId?: string | null;
-  blueprintVersion?: string | null;
 }
 
 export interface CloudOnboardingDeploymentSOAttributes {

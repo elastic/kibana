@@ -54,17 +54,19 @@ import { extractSecretIdsFromCloudConnectorVars } from './secrets/cloud_connecto
 import { deleteSecrets } from './secrets/common';
 
 const IAC_CONFIRM_KEYS: Array<keyof CloudConnectorIacState> = [
-  'templateSha',
-  'blueprintId',
-  'blueprintVersion',
+  'iac_key',
+  'iac_blueprint_id',
+  'iac_blueprint_version',
+  'iac_deployment_id',
 ];
 
 export const hasIacConfirm = (iac: CloudConnectorIacState | undefined): boolean =>
   Boolean(iac && IAC_CONFIRM_KEYS.some((key) => iac[key] !== undefined));
 
 /**
- * Maps a confirm-time IaC payload onto connector SO attributes.
- * A static-template fallback sends templateSha: null so no digest is stored.
+ * Maps the confirm-time IaC fields of a create/update request onto connector SO attributes.
+ * Only the fields the caller supplied are written; a static-template fallback sends
+ * `iac_key: null`, which the upgrade check treats like absent.
  */
 export const iacAttributesFromConfirm = (
   iac: CloudConnectorIacState | undefined
@@ -75,14 +77,17 @@ export const iacAttributesFromConfirm = (
 
   const attrs: Partial<CloudConnectorSOAttributes> = {};
 
-  if (iac.templateSha !== undefined) {
-    attrs.templateSha = iac.templateSha;
+  if (iac.iac_key !== undefined) {
+    attrs.iac_key = iac.iac_key;
   }
-  if (iac.blueprintId !== undefined) {
-    attrs.blueprintId = iac.blueprintId;
+  if (iac.iac_blueprint_id !== undefined) {
+    attrs.iac_blueprint_id = iac.iac_blueprint_id;
   }
-  if (iac.blueprintVersion !== undefined) {
-    attrs.blueprintVersion = iac.blueprintVersion;
+  if (iac.iac_blueprint_version !== undefined) {
+    attrs.iac_blueprint_version = iac.iac_blueprint_version;
+  }
+  if (iac.iac_deployment_id !== undefined) {
+    attrs.iac_deployment_id = iac.iac_deployment_id;
   }
 
   return attrs;
@@ -292,7 +297,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         verification_status: 'pending',
-        ...iacAttributesFromConfirm(cloudConnector.iac),
+        ...iacAttributesFromConfirm(cloudConnector),
       };
 
       const savedObject = await soClient.create<CloudConnectorSOAttributes>(
@@ -459,7 +464,9 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         updateAttributes.vars = cloudConnectorUpdate.vars;
       }
 
-      Object.assign(updateAttributes, iacAttributesFromConfirm(cloudConnectorUpdate.iac));
+      // IaC provenance is written only for the fields the caller supplied (the schema rejects
+      // empty strings; null records a static-template fallback).
+      Object.assign(updateAttributes, iacAttributesFromConfirm(cloudConnectorUpdate));
 
       // Update the saved object
       const updatedSavedObject = await soClient.update<CloudConnectorSOAttributes>(

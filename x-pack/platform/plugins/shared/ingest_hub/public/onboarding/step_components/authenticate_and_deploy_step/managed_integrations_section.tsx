@@ -39,6 +39,7 @@ import {
 import type {
   AwsStaticKeyCredentials,
   CloudSetupForCloudConnector,
+  RenderIacTemplateIntegration,
 } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { StaticKeysReplaceView } from './static_keys_replace_view';
@@ -48,6 +49,12 @@ type PreferredMethod = 'identity_federation' | 'access_keys';
 interface ManagedIntegrationsSectionProps {
   serviceCount: number;
   showIdentityFederation: boolean;
+  /**
+   * Integration set the Federated Identity must cover (built by buildIacIntegrations). Fleet renders
+   * the CloudFormation template for exactly this set and gates readiness on it
+   * (https://github.com/elastic/ingest-dev/issues/9415).
+   */
+  iacIntegrations: RenderIacTemplateIntegration[];
   onDeploy: () => void;
   isDeploying: boolean;
   isDone: boolean;
@@ -57,6 +64,7 @@ interface ManagedIntegrationsSectionProps {
 export function ManagedIntegrationsSection({
   serviceCount,
   showIdentityFederation,
+  iacIntegrations,
   onDeploy,
   isDeploying,
   isDone,
@@ -246,6 +254,8 @@ export function ManagedIntegrationsSection({
                 <LazyAwsIdentityFederationSetup
                   cloud={cloud}
                   iacTemplateUrl={iacTemplateUrl}
+                  integrations={iacIntegrations}
+                  iacCheckSurface="onboarding"
                   onReadyChange={setIsDeployReady}
                   onConnectorIdChange={setConnectorId}
                   initialConnectorId={initialConnectorId}

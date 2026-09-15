@@ -42,7 +42,7 @@ const ARTIFACT_URL = 'https://s3.example/rendered/xyz?X-Amz-Signature=SECRET';
 
 const RENDER_REQUEST = {
   provider: 'aws' as const,
-  workflow: 'federated_identity',
+  workflow: 'federated_identity' as const,
   integrations: [
     {
       name: 'cloud_security_posture',

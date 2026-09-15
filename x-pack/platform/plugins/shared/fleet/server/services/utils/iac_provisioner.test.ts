@@ -8,7 +8,7 @@
 import { ENABLE_IAC_PROVISIONER_FLAG } from '../../../common/constants';
 import { appContextService } from '../app_context';
 
-import { isIacProvisionerEnabled } from './iac_provisioner';
+import { isIacProvisionerEnabled, isIacProvisionerSupportedFor } from './iac_provisioner';
 
 jest.mock('../app_context');
 
@@ -88,5 +88,38 @@ describe('isIacProvisionerEnabled', () => {
       ENABLE_IAC_PROVISIONER_FLAG,
       false
     );
+  });
+});
+
+describe('isIacProvisionerSupportedFor', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('is true for aws when IaCP is enabled', async () => {
+    mockEnvironment({ isCloudEnabled: true, agentlessEnabled: true, iacProvisionerEnabled: true });
+    await expect(isIacProvisionerSupportedFor('aws')).resolves.toBe(true);
+  });
+
+  it.each(['azure', 'gcp'] as const)(
+    'is false for %s even when IaCP is enabled',
+    async (provider) => {
+      mockEnvironment({
+        isCloudEnabled: true,
+        agentlessEnabled: true,
+        iacProvisionerEnabled: true,
+      });
+      await expect(isIacProvisionerSupportedFor(provider)).resolves.toBe(false);
+    }
+  );
+
+  it('is false for aws when IaCP is disabled', async () => {
+    mockEnvironment({ isCloudEnabled: true, agentlessEnabled: true, iacProvisionerEnabled: false });
+    await expect(isIacProvisionerSupportedFor('aws')).resolves.toBe(false);
+  });
+
+  it('is false for aws when self-managed', async () => {
+    mockEnvironment({ agentlessEnabled: true, iacProvisionerEnabled: true });
+    await expect(isIacProvisionerSupportedFor('aws')).resolves.toBe(false);
   });
 });

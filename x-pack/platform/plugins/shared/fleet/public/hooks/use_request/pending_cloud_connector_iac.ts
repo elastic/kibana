@@ -10,9 +10,10 @@ import type { CloudConnectorIacState } from '../../../common/types/models/cloud_
 import { sendUpdateCloudConnector } from './cloud_connector';
 
 const IAC_CONFIRM_KEYS: Array<keyof CloudConnectorIacState> = [
-  'templateSha',
-  'blueprintId',
-  'blueprintVersion',
+  'iac_key',
+  'iac_blueprint_id',
+  'iac_blueprint_version',
+  'iac_deployment_id',
 ];
 
 const pendingByPolicyName = new Map<string, CloudConnectorIacState>();

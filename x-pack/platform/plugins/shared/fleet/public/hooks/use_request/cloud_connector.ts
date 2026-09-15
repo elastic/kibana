@@ -11,11 +11,12 @@ import { API_VERSIONS, CLOUD_CONNECTOR_API_ROUTES } from '../../../common/consta
 
 import { sendRequest } from './use_request';
 
+/** Writes IaC provenance onto a connector; the fields are flat on the update body. */
 export function sendUpdateCloudConnector(cloudConnectorId: string, iac: CloudConnectorIacState) {
   return sendRequest<UpdateCloudConnectorResponse>({
     method: 'put',
     path: CLOUD_CONNECTOR_API_ROUTES.UPDATE_PATTERN.replace('{cloudConnectorId}', cloudConnectorId),
     version: API_VERSIONS.public.v1,
-    body: JSON.stringify({ iac }),
+    body: JSON.stringify(iac),
   });
 }
