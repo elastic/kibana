@@ -175,8 +175,10 @@ Scout configs share servers. Anything your suite creates or changes can affect t
 
 Clean up in the right place:
 
-- **Per-test data**: clean up in `afterEach`/`afterAll`.
-- **Suite-wide state** (feature flags, global settings, shared archives): reset it in a [global teardown hook](./global-setup-hook.md#global-teardown-hook), which runs once after all workers have finished running the config's tests.
+- **Data your suite creates**: remove it in `afterEach`/`afterAll`.
+- **Config-wide state** (data ingested by the [global setup hook](./global-setup-hook.md), feature flags, global settings): reset it only in the [global teardown hook](./global-setup-hook.md#global-teardown-hook), which runs once after all workers have finished. A suite must never delete it; the other suites in the config depend on it.
+- **`cleanStandardList()` is safe.** It deletes through a saved-objects client scoped to the space it's called in, so it only removes the standard-type objects (dashboards, visualizations, data views, and so on) that exist in that space: `kbnClient.savedObjects.cleanStandardList()` cleans the default space ([sequential suites](./parallelism.md#scout-parallelism-differences)), `scoutSpace.savedObjects.cleanStandardList()` cleans the worker's space (parallel suites). Use it in `afterAll` as a catch-all after your domain-specific cleanup.
+- **Delete non-space-scoped resources precisely.** Elasticsearch indices and documents, ingest pipelines, index and component templates, API keys, and cluster or global settings are visible to every suite and every parallel worker on the servers. Delete them by the unique names or ids your suite created, never by type, tag, or a fixed field value. This applies to shared helpers too: a helper written for a sequential suite may later be called from a parallel one.
 
 :::::{dropdown} Examples
 ❌ **Don't:** use a fixed literal resource name. Every spec, parallel worker, and leftover from an earlier suite shares it — one teardown deletes everyone's data:
