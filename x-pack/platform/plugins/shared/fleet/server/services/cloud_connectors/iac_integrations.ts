@@ -11,11 +11,8 @@ import { escapeQuotes } from '@kbn/es-query';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../common/constants';
 import { buildPackagePolicyFilterExcludingHiddenPackages } from '../../../common/constants/cloud_connector';
 import { getEnabledInputsByPolicyTemplate } from '../../../common/services/policy_template';
-import type { CloudProvider } from '../../../common/types/models/cloud_connector';
 import type { RenderIacTemplateIntegration } from '../../../common/types/rest_spec/iac_provisioner';
 import { appContextService } from '../app_context';
-import { getPackageInfo } from '../epm/packages';
-import type { IacProvisionerRenderIntegration } from '../iac_provisioner';
 
 /** A package plus the policy templates the user enabled — the browser-facing render shape. */
 export type IacIntegrationSelection = RenderIacTemplateIntegration;
@@ -97,78 +94,4 @@ export const getCloudConnectorIntegrationSelections = async (
     } package policies → integration set ${JSON.stringify(merged)}`
   );
   return merged;
-};
-
-export interface ResolvedIacRenderIntegrations {
-  integrations: IacProvisionerRenderIntegration[];
-  /** Packages none of whose requested policy templates exist in the package manifest. */
-  skipped: string[];
-}
-
-/**
- * Turns browser-shaped selections into the IaCP wire shape: resolves the installed (or latest)
- * package version and lists the input types the user enabled per policy template. The caller's
- * `enabledInputs` are passed through untouched — IaCP builds a blueprint patch from every input
- * listed, so anything the user did not enable would over-grant permissions, and IaCP validates
- * the names itself (render.no_matching_inputs_for_policy_template). `provider` is log context
- * only. Shared by the render route handler, the Existing FI check and the upgrade task.
- */
-export const resolveIacRenderIntegrations = async (
-  soClient: SavedObjectsClientContract,
-  provider: CloudProvider,
-  selections: IacIntegrationSelection[]
-): Promise<ResolvedIacRenderIntegrations> => {
-  const logger = appContextService.getLogger().get('IacIntegrations');
-  const resolved = await Promise.all(
-    mergeIntegrationSelections(selections).map(async ({ name: pkgName, policyTemplates }) => {
-      // Empty pkgVersion resolves to the installed version, falling back to the latest
-      // available: at connector-creation time the package may not be installed yet.
-      const packageInfo = await getPackageInfo({
-        savedObjectsClient: soClient,
-        pkgName,
-        pkgVersion: '',
-        skipArchive: true,
-      });
-      const manifestTemplates = new Set(
-        (packageInfo.policy_templates ?? []).map(({ name }) => name)
-      );
-      const resolvedPolicyTemplates = policyTemplates.filter(({ name }) =>
-        manifestTemplates.has(name)
-      );
-      const unknownTemplates = policyTemplates
-        .filter(({ name }) => !manifestTemplates.has(name))
-        .map(({ name }) => name);
-      if (unknownTemplates.length > 0) {
-        // The rendered template then covers less than the user enabled; warn so the
-        // package/version mismatch is visible in the logs.
-        logger.warn(
-          `Dropped policy templates not declared by ${pkgName}@${
-            packageInfo.version
-          }: ${unknownTemplates.join(', ')}`
-        );
-      }
-
-      return {
-        name: pkgName,
-        version: packageInfo.version,
-        policyTemplates: resolvedPolicyTemplates,
-      };
-    })
-  );
-
-  const result = {
-    integrations: resolved.filter(({ policyTemplates }) => policyTemplates.length > 0),
-    skipped: resolved
-      .filter(({ policyTemplates }) => policyTemplates.length === 0)
-      .map(({ name }) => name),
-  };
-  logger.debug(`Resolved ${provider} render integrations: ${JSON.stringify(result.integrations)}`);
-  if (result.skipped.length > 0) {
-    logger.debug(
-      `Skipped packages whose manifest declares none of the requested policy templates: ${result.skipped.join(
-        ', '
-      )}`
-    );
-  }
-  return result;
 };

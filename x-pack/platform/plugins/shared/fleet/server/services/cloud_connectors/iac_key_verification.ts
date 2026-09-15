@@ -20,14 +20,11 @@ import { AWS_CLOUD_PROVIDER } from '../../../common/types/models/cloud_connector
 import type { IacUpgradeStatus } from '../../../common/types/models/cloud_connector';
 import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../common/types/rest_spec/iac_provisioner';
 import type { CloudConnectorSOAttributes } from '../../types/so_attributes';
-import {
-  IacProvisionerRequestError,
-  IacProvisionerUnavailableError,
-  PackageNotFoundError,
-} from '../../errors';
+import { IacProvisionerRequestError, IacProvisionerUnavailableError } from '../../errors';
 import { getErrorMessage } from '../../errors/utils';
 import { appContextService } from '../app_context';
 import { iacProvisionerService } from '../iac_provisioner';
+import { buildIacProvisionerIntegrations } from '../iac_provisioner_integrations';
 import {
   reportIacProvisionerKeyVerificationCompleted,
   reportIacProvisionerRenderCompleted,
@@ -38,7 +35,6 @@ import { isIacProvisionerSupportedFor } from '../utils/iac_provisioner';
 import {
   getCloudConnectorIntegrationSelections,
   mergeIntegrationSelections,
-  resolveIacRenderIntegrations,
   type IacIntegrationSelection,
 } from './iac_integrations';
 
@@ -81,19 +77,29 @@ export const checkIacTemplate = async (
   const logger = appContextService.getLogger().get('IacKeyVerification');
   const startTime = Date.now();
   try {
-    const { integrations, skipped } = await resolveIacRenderIntegrations(
-      soClient,
-      provider,
-      selections
-    );
-    // The render route rejects any set with skipped packages, so a digest computed over the
-    // survivors could never describe what the user deployed. Cannot compare → fail open.
-    if (integrations.length === 0 || skipped.length > 0) {
-      logger.debug(
-        `No comparable ${provider} integration set for ${contextForLog} (renderable: ${
-          integrations.length
-        }, skipped: ${skipped.join(',') || 'none'}); nothing to compare`
-      );
+    // Lenient mode returns a package that no longer exists in `skipped` instead of throwing.
+    const { integrations, skipped, dropped } = await buildIacProvisionerIntegrations({
+      savedObjectsClient: soClient,
+      requestedIntegrations: selections,
+      mode: 'lenient',
+    });
+    // The render route (strict) rejects any set with a skipped package or a dropped template or
+    // input, so a digest computed over the survivors could never describe what the user deployed
+    // — and an "upgrade available" verdict would send the browser into a render that 400s.
+    // Cannot compare → fail open.
+    if (integrations.length === 0 || skipped.length > 0 || dropped.length > 0) {
+      const detail = `renderable: ${integrations.length}, skipped: ${
+        skipped.join(',') || 'none'
+      }, dropped: ${dropped.join(',') || 'none'}`;
+      if (dropped.length > 0) {
+        logger.warn(
+          `IaC template check skipped for ${contextForLog} (fail open): the connector's policies enable entries its packages no longer declare (${detail})`
+        );
+      } else {
+        logger.debug(
+          `No comparable ${provider} integration set for ${contextForLog} (${detail}); nothing to compare`
+        );
+      }
       return undefined;
     }
     reportIacProvisionerRenderRequested({ flow, integrationCount: integrations.length });
@@ -117,13 +123,11 @@ export const checkIacTemplate = async (
     );
     return { render, templateSha };
   } catch (error) {
-    // Mirror the render route's telemetry mapping: provider status when we have one, 404 for a
-    // package that no longer exists, 500 for anything else; 0 is reserved for "no response".
+    // Mirror the render route's telemetry mapping: provider status when we have one, 500 for
+    // anything else; 0 is reserved for "no response".
     const httpStatus =
       error instanceof IacProvisionerRequestError || error instanceof IacProvisionerUnavailableError
         ? error.statusCode ?? 0
-        : error instanceof PackageNotFoundError
-        ? 404
         : 500;
     const errorCodes = error instanceof IacProvisionerRequestError ? error.errorCodes : [];
     reportIacProvisionerRenderCompleted({

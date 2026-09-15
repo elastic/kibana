@@ -18,9 +18,7 @@ export {
 export {
   mergeIntegrationSelections,
   getCloudConnectorIntegrationSelections,
-  resolveIacRenderIntegrations,
   type IacIntegrationSelection,
-  type ResolvedIacRenderIntegrations,
 } from './iac_integrations';
 
 export {

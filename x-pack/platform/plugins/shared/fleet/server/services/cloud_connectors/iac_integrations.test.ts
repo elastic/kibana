@@ -10,18 +10,13 @@ import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mock
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../common/constants';
 import { VERIFIER_PKG_NAME } from '../../../common/constants/cloud_connector';
 import { appContextService } from '../app_context';
-import { getPackageInfo } from '../epm/packages';
 
 import {
   getCloudConnectorIntegrationSelections,
   mergeIntegrationSelections,
-  resolveIacRenderIntegrations,
 } from './iac_integrations';
 
 jest.mock('../app_context');
-jest.mock('../epm/packages');
-
-const mockedGetPackageInfo = jest.mocked(getPackageInfo);
 
 const soClient = savedObjectsClientMock.create();
 
@@ -156,146 +151,5 @@ describe('getCloudConnectorIntegrationSelections', () => {
       ],
     } as any);
     expect(await getCloudConnectorIntegrationSelections(soClient, 'cc-1')).toEqual([]);
-  });
-});
-
-describe('resolveIacRenderIntegrations', () => {
-  beforeEach(() => mockedGetPackageInfo.mockReset());
-
-  it('resolves the package version and sends only the inputs the caller enabled', async () => {
-    mockedGetPackageInfo.mockResolvedValueOnce({
-      name: 'cloud_security_posture',
-      version: '3.5.0',
-      policy_templates: [
-        {
-          name: 'cspm',
-          inputs: [
-            { type: 'cloudbeat/cis_aws', title: '', description: '' },
-            { type: 'cloudbeat/cis_gcp', title: '', description: '' },
-          ],
-        },
-      ],
-    } as any);
-
-    const result = await resolveIacRenderIntegrations(soClient, 'aws', [
-      {
-        name: 'cloud_security_posture',
-        policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
-      },
-    ]);
-
-    // cis_gcp is declared by the manifest but the user did not enable it, so IaCP must
-    // never see it — every input listed becomes a blueprint patch, i.e. a granted permission.
-    expect(result).toEqual({
-      integrations: [
-        {
-          name: 'cloud_security_posture',
-          version: '3.5.0',
-          policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
-        },
-      ],
-      skipped: [],
-    });
-    expect(mockedGetPackageInfo).toHaveBeenCalledWith(
-      expect.objectContaining({
-        pkgName: 'cloud_security_posture',
-        pkgVersion: '',
-        skipArchive: true,
-      })
-    );
-  });
-
-  it('sends input types that name no cloud provider (cel/httpjson)', async () => {
-    // The user enabled both, so both go out. IaCP validates the names itself and rejects
-    // unknown ones with render.no_matching_inputs_for_policy_template.
-    mockedGetPackageInfo.mockResolvedValueOnce({
-      name: 'some_saas',
-      version: '1.0.0',
-      policy_templates: [
-        {
-          name: 'logs',
-          inputs: [
-            { type: 'cel', title: '', description: '' },
-            { type: 'httpjson', title: '', description: '' },
-          ],
-        },
-      ],
-    } as any);
-
-    const result = await resolveIacRenderIntegrations(soClient, 'aws', [
-      {
-        name: 'some_saas',
-        policyTemplates: [{ name: 'logs', enabledInputs: ['cel', 'httpjson'] }],
-      },
-    ]);
-
-    expect(result).toEqual({
-      integrations: [
-        {
-          name: 'some_saas',
-          version: '1.0.0',
-          policyTemplates: [{ name: 'logs', enabledInputs: ['cel', 'httpjson'] }],
-        },
-      ],
-      skipped: [],
-    });
-  });
-
-  it('drops a requested policy template the package manifest does not declare', async () => {
-    mockedGetPackageInfo.mockResolvedValueOnce({
-      name: 'aws',
-      version: '7.0.0',
-      policy_templates: [
-        { name: 'cloudtrail', inputs: [{ type: 'aws-s3', title: '', description: '' }] },
-      ],
-    } as any);
-
-    const result = await resolveIacRenderIntegrations(soClient, 'aws', [
-      {
-        name: 'aws',
-        policyTemplates: [
-          { name: 'cloudtrail', enabledInputs: ['aws-s3'] },
-          { name: 'removed_in_this_version', enabledInputs: ['aws-s3'] },
-        ],
-      },
-    ]);
-
-    expect(result).toEqual({
-      integrations: [
-        {
-          name: 'aws',
-          version: '7.0.0',
-          policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }],
-        },
-      ],
-      skipped: [],
-    });
-  });
-
-  it('reports a package as skipped when the manifest declares none of the requested templates', async () => {
-    mockedGetPackageInfo.mockResolvedValueOnce({
-      name: 'inputless',
-      version: '1.0.0',
-      policy_templates: [{ name: 'other', inputs: [] }],
-    } as any);
-
-    const result = await resolveIacRenderIntegrations(soClient, 'aws', [
-      { name: 'inputless', policyTemplates: [{ name: 'logs', enabledInputs: ['cel'] }] },
-    ]);
-
-    expect(result).toEqual({ integrations: [], skipped: ['inputless'] });
-  });
-
-  it('tolerates package info with no policy_templates', async () => {
-    mockedGetPackageInfo.mockResolvedValueOnce({
-      name: 'pkg',
-      version: '1.0.0',
-    } as any);
-
-    const result = await resolveIacRenderIntegrations(soClient, 'aws', [
-      { name: 'pkg', policyTemplates: [{ name: 'tpl', enabledInputs: ['aws-s3'] }] },
-    ]);
-
-    expect(result).toEqual({ integrations: [], skipped: ['pkg'] });
   });
 });
