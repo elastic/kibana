@@ -42,10 +42,7 @@ interface PipelineStep {
   command?: string;
 }
 
-/**
- * Suite steps from the pipeline, selected by shape rather than by scraping text,
- * so quoting style or formatting changes cannot silently shrink coverage.
- */
+/** Suite steps by shape (label + command), excluding the notifier. */
 const cypressStepsInPipeline = (): PipelineStep[] => {
   const pipeline = parseYaml(readFileSync(PIPELINE_YML, 'utf8')) as { steps: PipelineStep[] };
 
@@ -84,7 +81,7 @@ const trackedFilesUnder = (specDir: string): string[] => {
 
 let entryCache: CodeownersEntry[] | undefined;
 
-/** Entries in file order, which is what decides precedence. */
+/** CODEOWNERS entries in file order. */
 const codeownersEntries = (): CodeownersEntry[] => {
   entryCache ??= readFileSync(CODEOWNERS, 'utf8')
     .split('\n')
@@ -110,19 +107,13 @@ const patternRegex = (pattern: string): RegExp =>
       .replace(/\u0000/g, '.*')}$`
   );
 
-/**
- * Whether a CODEOWNERS rule claims `file`.
- *
- * A pattern with no wildcard names a directory and covers everything beneath it.
- * `dir/*` instead covers only files directly in `dir`, because `*` does not
- * cross `/`; `**` does.
- */
+/** Literal paths cover descendants; `*` does not cross `/`; `**` does. */
 const matchesFile = (pattern: string, file: string): boolean =>
   pattern.includes('*')
     ? patternRegex(pattern).test(file)
     : file === pattern || file.startsWith(`${pattern}/`);
 
-/** CODEOWNERS precedence is last match wins, not most specific match wins. */
+/** Last matching CODEOWNERS rule wins. */
 const effectiveOwnersFor = (
   file: string,
   entries: CodeownersEntry[] = codeownersEntries()
@@ -138,14 +129,7 @@ const effectiveOwnersFor = (
   return owners;
 };
 
-/**
- * Everyone GitHub would actually notify for a change anywhere in the suite.
- *
- * Resolved per tracked file so precedence and wildcards behave as they do on
- * GitHub, then unioned. Path specificity is not a substitute for last-match
- * ordering: `explore/cases` and `explore/hosts` are owned by different teams,
- * and which rule wins depends on where it sits in the file.
- */
+/** Union of effective owners across tracked files under `specDir`. */
 const expectedOwnersFor = (specDir: string): string[] => {
   const owners = new Set<string>();
 
@@ -202,7 +186,6 @@ describe('getChannelForStepLabel', () => {
   it('maps every Cypress step label in the pipeline YAML', () => {
     const steps = cypressStepsInPipeline();
 
-    // Guards against the selector silently matching nothing if the pipeline is restructured.
     expect(steps.length).toBeGreaterThanOrEqual(26);
     for (const { label } of steps) {
       expect(findSuiteForStepLabel(label!)).toBeDefined();
@@ -211,8 +194,6 @@ describe('getChannelForStepLabel', () => {
   });
 
   it('does not let a new suite inherit a channel by prefix', () => {
-    // A variant label must surface as unmapped so someone adds the mapping,
-    // rather than quietly paging the wrong team.
     expect(findSuiteForStepLabel('Osquery Cypress Tests - New Variant')).toBeUndefined();
     expect(getChannelForStepLabel('Osquery Cypress Tests - New Variant')).toBe(
       getFallbackSlackChannel()
@@ -319,7 +300,6 @@ describe('CODEOWNERS agreement', () => {
 
 describe('CODEOWNERS matching', () => {
   it('applies last match wins rather than most specific wins', () => {
-    // Drive the resolver itself: a later broad rule must beat an earlier specific one.
     expect(
       effectiveOwnersFor('a/b/c.ts', [
         { path: 'a/b', owners: ['@specific'] },
@@ -331,7 +311,6 @@ describe('CODEOWNERS matching', () => {
   it('resolves the split ownership of the explore suite per file', () => {
     const explore = 'x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore';
 
-    // Different subtrees, different teams, decided by file order.
     expect(effectiveOwnersFor(`${explore}/hosts/hosts_risk_column.cy.ts`)).toEqual([
       '@elastic/security-entity-analytics',
     ]);
@@ -348,19 +327,13 @@ describe('CODEOWNERS matching', () => {
 
     expect(trackedFilesUnder(specDir).length).toBeGreaterThan(0);
 
-    // `dir/*` owns files directly in dir, so it cannot reach two levels down.
+    // `*` does not cross `/`; `**` does.
     expect(wildcardReaches(`${cypressRoot}/*`, specDir)).toBe(false);
     expect(wildcardReaches(`${cypressRoot}/e2e/*`, specDir)).toBe(false);
-
-    // `**` spans directories, and a `*` standing in for the suite directory reaches it.
     expect(wildcardReaches(`${cypressRoot}/**`, specDir)).toBe(true);
     expect(wildcardReaches(`${cypressRoot}/e2e/*/**`, specDir)).toBe(true);
-    // Every spec sits in a subdirectory of the suite, so a rule for files
-    // directly inside it owns nothing, while one a level deeper owns them all.
     expect(wildcardReaches(`${specDir}/*`, specDir)).toBe(false);
     expect(wildcardReaches(`${specDir}/*/*`, specDir)).toBe(true);
-
-    // Only claims paths that exist, so an unrelated tree is not flagged.
     expect(wildcardReaches('x-pack/solutions/**/test/serverless/**/fleet', specDir)).toBe(false);
   });
 });
@@ -379,8 +352,6 @@ describe('notifier step', () => {
   };
 
   it('retries only on agent loss', () => {
-    // Re-running the script on an ordinary failure could fan out duplicate Slack
-    // messages; -1 means the agent died, usually before the pipeline upload.
     expect(notifierStep()?.retry).toEqual({ automatic: [{ exit_status: '-1', limit: 2 }] });
   });
 

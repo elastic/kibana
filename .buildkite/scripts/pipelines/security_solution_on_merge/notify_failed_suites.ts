@@ -22,11 +22,10 @@ import { BuildkiteClient } from '#pipeline-utils';
 import type { Job } from '#pipeline-utils';
 
 const NOTIFY_STEP_KEY = 'notify_owning_teams';
-/** Slack truncates a message block at 3000 chars; stay under it with headroom for mrkdwn expansion. */
+/** Under Slack's 3000-char block limit, with headroom for mrkdwn. */
 const SLACK_MESSAGE_CHAR_BUDGET = 2800;
-/** Keeps a stack trace or API error body from crowding out the rest of the fallback message. */
 const MAX_ERROR_DETAIL_CHARS = 500;
-/** Set after a successful pipeline upload so a retried notify step cannot double-post. */
+/** Set after a successful upload so retries do not double-post. */
 export const SLACK_NOTIFY_UPLOADED_META_KEY = 'security_solution_on_merge:slack_notify_uploaded';
 const DRY_RUN = !!process.env.DRY_RUN?.match(/(1|true)/i);
 
@@ -36,14 +35,7 @@ export function slackNotifyStepKey(channel: string): string {
   return `${NOTIFY_STEP_KEY_PREFIX}${channel.replace(/^#/, '').replace(/[^a-zA-Z0-9_-]+/g, '-')}`;
 }
 
-/**
- * Whether a previous attempt already queued notify steps into this build.
- *
- * The meta-data marker is written after the upload, so an agent lost in between
- * leaves no marker behind. Re-uploading the same deterministic keys would either
- * duplicate the messages or be rejected as duplicates and raise a false SDH
- * alarm, so treat the build's own steps as the source of truth.
- */
+/** True if a prior attempt already queued notify steps (covers the upload→metadata agent-loss window). */
 export function hasUploadedNotifySteps(jobs: Job[]): boolean {
   return jobs.some((job) => job.step_key?.startsWith(NOTIFY_STEP_KEY_PREFIX));
 }
@@ -84,7 +76,7 @@ export function collectFailedScriptJobs(
 
 export interface ChannelGroup {
   jobs: FailedJob[];
-  /** Step labels with no entry in the suites config; these landed here via fallback. */
+  /** Labels with no suites-config entry (routed via fallback). */
   unmappedLabels: string[];
 }
 
@@ -134,8 +126,6 @@ export function composeChannelMessage(
 
   const omissionLine = (count: number) => `• …and ${count} more failed step${count > 1 ? 's' : ''}`;
 
-  // Unmapped steps reach this channel via fallback, so say so. Otherwise the message
-  // is indistinguishable from a real alert for this channel and the gap goes unnoticed.
   const unmappedNotice =
     unmappedLabels.length > 0
       ? [
@@ -159,9 +149,7 @@ export function composeChannelMessage(
       `<${buildUrl}|View build #${buildNumber}>`,
     ].join('\n');
 
-  // Job URLs and suite labels are unbounded, so budget by rendered length rather than
-  // by entry count. Reserve room for the omission line whenever anything is dropped,
-  // sized against the total so its digit count can never push the message over.
+  // Budget by rendered length; reserve room for the omission line while projecting.
   const listed: string[] = [];
   for (const [index, candidate] of candidates.entries()) {
     const isLast = index === candidates.length - 1;
@@ -179,13 +167,7 @@ export function composeChannelMessage(
   return render(omitted > 0 ? [...listed, omissionLine(omitted)] : listed);
 }
 
-/**
- * Flatten an error for embedding in Slack and Buildkite annotations.
- *
- * Stack traces and multi-line API error bodies are unbounded, and this runs on
- * the path where everything else has already failed, so it must not be the
- * reason the message is truncated or rejected.
- */
+/** Flatten and cap error text for Slack / annotations (never log raw Axios errors). */
 export function summarizeErrorDetail(error: unknown, maxLength = MAX_ERROR_DETAIL_CHARS): string {
   const raw = error instanceof Error ? error.message : String(error);
   const flattened = raw.replace(/\s+/g, ' ').trim();
@@ -230,13 +212,11 @@ export function buildNotifyPipelineYaml(
     key: stepKeyFor(channel),
     command: 'true',
     timeout_in_minutes: 10,
-    // The repo pre-command hook otherwise runs node setup + `npm ci` on a step that
-    // only needs to exit 0; a flake there would fail the step and drop the message.
+    // Avoid pre-command node/`npm ci` flakes on a step that only needs to exit 0.
     env: {
       SKIP_NODE_SETUP: 'true',
     },
-    // Non-preemptible: these steps only run `true` + notify.slack, and Slack is
-    // gated on step.outcome == passed. Preemption would drop the message.
+    // Slack fires only when the step passes; preemption would drop the message.
     agents: {
       image: 'family/kibana-ubuntu-2404',
       imageProject: 'elastic-images-prod',
@@ -244,8 +224,6 @@ export function buildNotifyPipelineYaml(
       machineType: 'n2-standard-2',
       preemptible: false,
     },
-    // Safe to retry leaf notify steps: Slack only fires when the attempt passes.
-    // Meta-data is already set after fan-out upload, so a flake here won't SDH-fallback.
     retry: {
       automatic: [{ exit_status: -1, limit: 3 }],
     },
@@ -260,8 +238,7 @@ export function buildNotifyPipelineYaml(
     ],
   }));
 
-  // These steps are appended to a build that is already failing. Without a
-  // continue_on_failure boundary Buildkite skips them and nothing reaches Slack.
+  // Required so Buildkite does not skip these steps on an already-failing build.
   const steps: unknown[] = [{ wait: null, continue_on_failure: true }, ...notifySteps];
 
   return stringify({ steps }, { lineWidth: 0 });
@@ -287,9 +264,7 @@ function markSlackNotifyUploaded(buildkite: BuildkiteClient): void {
   try {
     buildkite.setMetadata(SLACK_NOTIFY_UPLOADED_META_KEY, 'true');
   } catch (error) {
-    // Upload already succeeded; do not treat metadata failure as a fan-out miss
-    // (that would false-alarm #sdh-security-team while team notifies are queued).
-    // Log a summary only — Axios errors embed Authorization: Bearer BUILDKITE_TOKEN.
+    // Upload already succeeded — do not escalate a metadata miss into an SDH false alarm.
     console.error(
       `Failed to set ${SLACK_NOTIFY_UPLOADED_META_KEY} after Slack notify upload; continuing: ${summarizeErrorDetail(
         error
@@ -315,7 +290,6 @@ export function annotateUnmappedSteps(buildkite: BuildkiteClient, unmappedLabels
   try {
     buildkite.setAnnotation('security-solution-on-merge-unmapped-steps', 'warning', body);
   } catch (error) {
-    // Best effort: the Slack messages already carry the same warning.
     console.error(`Failed to annotate unmapped steps: ${summarizeErrorDetail(error)}`);
   }
 }
@@ -326,8 +300,6 @@ function notifyFanOutFailure(
   upload: (yaml: string) => void
 ): void {
   const detail = summarizeErrorDetail(error);
-  // Reading the suites config can itself be what failed, so never let the fallback
-  // lookup throw inside the fallback path.
   let fallbackChannel: string;
   try {
     fallbackChannel = getFallbackSlackChannel();
@@ -335,8 +307,7 @@ function notifyFanOutFailure(
     fallbackChannel = DEFAULT_FALLBACK_SLACK_CHANNEL;
   }
 
-  // Annotate before the Slack upload so Buildkite still surfaces the miss when
-  // pipeline upload itself is broken.
+  // Annotate before upload so the miss is visible even if pipeline upload fails.
   try {
     buildkite.setAnnotation(
       'security-solution-on-merge-slack-fanout',
@@ -349,7 +320,6 @@ function notifyFanOutFailure(
 
   const message = composeFanOutFailureMessage(error);
   const yaml = buildNotifyPipelineYaml(new Map([[fallbackChannel, message]]), {
-    // Distinct from a successful unmatched-step notify to the same channel.
     stepKey: () => 'notify-owning-team-fanout-failure',
   });
 
@@ -369,8 +339,6 @@ async function runNotifyFailedSuites(
 
   const build = await buildkite.getCurrentBuild();
 
-  // Covers the agent-loss window the `-1` retry exists for: upload succeeded,
-  // then the agent died before the marker was written.
   if (hasUploadedNotifySteps(build.jobs)) {
     console.log('Notify steps are already present in this build; skipping');
     markSlackNotifyUploaded(buildkite);
@@ -403,9 +371,6 @@ async function runNotifyFailedSuites(
   const yaml = buildNotifyPipelineYaml(channelToMessage);
   console.log(`Uploading Slack notify steps for: ${[...channelToMessage.keys()].join(', ')}`);
   upload(yaml);
-
-  // Mark after a successful upload so a retried notify step cannot double-post.
-  // Metadata failures must not invert success into an SDH false alarm.
   markSlackNotifyUploaded(buildkite);
 }
 
@@ -418,7 +383,6 @@ export async function notifyFailedSuites(
   try {
     await runNotifyFailedSuites(buildkite, upload);
   } catch (error) {
-    // Never log the raw error: Axios failures embed Authorization headers.
     console.error(
       `Failed to fan out Security on-merge Slack alerts: ${summarizeErrorDetail(error)}`
     );

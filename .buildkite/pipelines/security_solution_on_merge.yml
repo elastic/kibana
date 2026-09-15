@@ -492,21 +492,12 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  # Build-bot Slack posts one build-level message to SLACK_NOTIFICATIONS_CHANNEL
-  # and ignores step env. Fan out to owning team channels after the suites finish.
+  # Fan out owning-team Slack after suites. Build-bot stays disabled (step env ignored).
   - wait: ~
     continue_on_failure: true
 
-  # Retry on -1 (agent loss) only. A lost agent usually dies before the pipeline
-  # upload, and the buildkite meta-data guard makes the retry a no-op when it did
-  # not. Retrying other exit statuses is not safe: the script already handles its
-  # own errors and re-running it could fan out duplicate Slack messages.
-  # Non-preemptible so the upload step is less likely to die mid-flight.
-  #
-  # Known gap: a failure before this script starts (pre-command setup, node
-  # startup) or a timeout produces no Slack message at all, because the build-bot
-  # notifier is disabled and this step is soft_fail. Closing that needs an
-  # independent watchdog step; tracked as follow-up.
+  # Retry -1 only (agent loss). Other exits can double-post. soft_fail: setup/timeout
+  # before the script starts still produce no Slack — watchdog is a follow-up.
   - command: node .buildkite/scripts/pipelines/security_solution_on_merge/notify_failed_suites.ts
     label: ':slack: Notify owning teams of Security on-merge failures'
     key: notify_owning_teams

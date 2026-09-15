@@ -20,13 +20,9 @@ spec:
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#sdh-security-team'
-        # Keep the build-bot notifier off. It posts one build-level message to
-        # SLACK_NOTIFICATIONS_CHANNEL and ignores step env. Owning-team routing
-        # is the post-build notify_owning_teams step in security_solution_on_merge.yml.
+        # Build-bot only reads pipeline env; owning-team routing is notify_owning_teams.
         KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'false'
-        # Where notify_owning_teams sends failures for steps with no owning-team
-        # mapping, and where it reports its own failures. Overrides
-        # `fallbackSlackChannel` in security_solution_on_merge.suites.json.
+        # Unmapped steps + fan-out failures; overrides suites.json fallbackSlackChannel.
         SECURITY_ONMERGE_FALLBACK_SLACK_CHANNEL: '#sdh-security-team'
         SLACK_NOTIFICATIONS_SKIP_FOR_RETRIES: 'true'
         REPORT_FAILED_TESTS_TO_GITHUB: 'true'

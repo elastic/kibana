@@ -42,7 +42,7 @@ const job = (overrides: Partial<Job>): Job =>
 
 const BUILD_URL = 'https://buildkite.com/elastic/kibana-security-solution-on-merge/builds/473';
 
-/** Real-world label and job-URL lengths, which is what the Slack budget has to survive. */
+/** Realistic label / URL lengths for Slack budget tests. */
 const realisticJobs = (count: number) =>
   Array.from({ length: count }, (_, index) => ({
     id: `0199e2bb-6f4c-4a1b-9d3e-${String(index).padStart(12, '0')}`,
@@ -118,7 +118,6 @@ describe('groupJobsByChannel', () => {
 
     const group = grouped.get(DEFAULT_FALLBACK_SLACK_CHANNEL);
     expect(group?.jobs).toHaveLength(2);
-    // De-sharded, so the same suite is reported once rather than per parallel job.
     expect(group?.unmappedLabels).toEqual(['Brand New Suite - Security Solution Cypress Tests']);
   });
 
@@ -360,9 +359,6 @@ describe('notifyFailedSuites', () => {
   });
 
   it('does not re-upload when the agent died between upload and meta-data', async () => {
-    // The window the `-1` retry exists for: the previous attempt queued the
-    // notify steps, then died before writing the marker. Re-uploading would
-    // duplicate messages or be rejected for duplicate step keys.
     const upload = jest.fn();
     const buildkite = {
       getMetadata: jest.fn().mockReturnValue(null),
@@ -385,7 +381,6 @@ describe('notifyFailedSuites', () => {
     await notifyFailedSuites(buildkite as any, { upload });
 
     expect(upload).not.toHaveBeenCalled();
-    // Heal the missing marker so later attempts short-circuit on meta-data.
     expect(buildkite.setMetadata).toHaveBeenCalledWith(SLACK_NOTIFY_UPLOADED_META_KEY, 'true');
   });
 
@@ -513,7 +508,6 @@ describe('notifyFailedSuites', () => {
     await expect(notifyFailedSuites(buildkite as any, { upload })).rejects.toThrow(
       'pipeline upload failed'
     );
-    // Main upload fails, annotate runs, then fallback upload is attempted (and also fails).
     expect(upload).toHaveBeenCalledTimes(2);
     expect(buildkite.setAnnotation).toHaveBeenCalledWith(
       'security-solution-on-merge-slack-fanout',
