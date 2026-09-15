@@ -135,7 +135,7 @@ describe('createWorkerSettingsRegistration', () => {
     it('leaves the interval untouched when only autonomy is patched', () => {
       const applied = registration.applyPatch(
         { settingsVersion: 1, autonomyLevel: 'manual', scheduleInterval: '15m' },
-        { autonomyLevel: 'assisted' }
+        { autonomy: 'assisted' }
       );
 
       expect(applied).toEqual({
@@ -152,11 +152,13 @@ describe('createWorkerSettingsRegistration', () => {
         settingsVersion: 1,
         autonomyLevel: 'manual',
         scheduleInterval: '2h',
+        analysisWindowDays: 14,
       });
       expect(registration.toSettings(registration.createDefaultValues())).toEqual({
         workerId: RULE_TUNING_WORKER_ID,
         autonomy: 'manual',
         scheduleInterval: '2h',
+        analysisWindowDays: 14,
       });
     });
 
@@ -166,8 +168,78 @@ describe('createWorkerSettingsRegistration', () => {
       });
 
       expect(applied).toEqual({
-        values: { settingsVersion: 1, autonomyLevel: 'manual', scheduleInterval: '6h' },
+        values: {
+          settingsVersion: 1,
+          autonomyLevel: 'manual',
+          scheduleInterval: '6h',
+          analysisWindowDays: 14,
+        },
       });
+    });
+
+    it('defaults a missing analysis window and projects it', () => {
+      const { values } = registration.migrate({
+        settingsVersion: 1,
+        autonomyLevel: 'assisted',
+        scheduleInterval: '2h',
+      });
+
+      expect(values).toEqual({
+        settingsVersion: 1,
+        autonomyLevel: 'assisted',
+        scheduleInterval: '2h',
+        analysisWindowDays: 14,
+      });
+    });
+
+    it('preserves omitted fields on a custom-only patch', () => {
+      const applied = registration.applyPatch(
+        {
+          settingsVersion: 1,
+          autonomyLevel: 'supervised',
+          scheduleInterval: '6h',
+          analysisWindowDays: 14,
+        },
+        { analysisWindowDays: 7 }
+      );
+
+      expect(applied).toEqual({
+        values: {
+          settingsVersion: 1,
+          autonomyLevel: 'supervised',
+          scheduleInterval: '6h',
+          analysisWindowDays: 7,
+        },
+      });
+    });
+
+    it.each([7.5, 0, 31])('rejects analysis window %s', (analysisWindowDays) => {
+      expect(() =>
+        registration.migrate({
+          settingsVersion: 1,
+          autonomyLevel: 'manual',
+          scheduleInterval: '2h',
+          analysisWindowDays,
+        })
+      ).toThrow(/invalid analysis window/);
+    });
+  });
+
+  describe('analysis window — Workers that do not own it', () => {
+    it.each(UNSCHEDULED_WORKER_IDS)('%s rejects an analysis window patch', (workerId) => {
+      const registration = createWorkerSettingsRegistration(workerId);
+
+      expect(
+        registration.applyPatch(registration.createDefaultValues(), { analysisWindowDays: 7 })
+      ).toEqual({ rejected: 'an analysis window' });
+    });
+
+    it('rejects an analysis window on Attack Discovery', () => {
+      const registration = createWorkerSettingsRegistration(AD_WORKER_ID);
+
+      expect(
+        registration.applyPatch(registration.createDefaultValues(), { analysisWindowDays: 7 })
+      ).toEqual({ rejected: 'an analysis window' });
     });
   });
 
@@ -197,7 +269,7 @@ describe('createWorkerSettingsRegistration', () => {
       const registration = createWorkerSettingsRegistration(workerId);
       const defaults = registration.createDefaultValues();
 
-      expect(registration.applyPatch(defaults, { autonomyLevel: 'assisted' })).toEqual({
+      expect(registration.applyPatch(defaults, { autonomy: 'assisted' })).toEqual({
         values: { ...defaults, autonomyLevel: 'assisted' },
       });
     });
@@ -323,7 +395,7 @@ describe('createWorkerSettingsRegistration', () => {
           autonomyLevel: 'manual',
           detectionConfig: { confidenceThreshold: 0.6, fpCountThreshold: 15 },
         },
-        { autonomyLevel: 'assisted' }
+        { autonomy: 'assisted' }
       );
 
       expect(applied).toEqual({
@@ -364,7 +436,7 @@ describe('createWorkerSettingsRegistration', () => {
       const registration = createWorkerSettingsRegistration(workerId);
       const defaults = registration.createDefaultValues();
 
-      expect(registration.applyPatch(defaults, { autonomyLevel: 'assisted' })).toEqual({
+      expect(registration.applyPatch(defaults, { autonomy: 'assisted' })).toEqual({
         values: { ...defaults, autonomyLevel: 'assisted' },
       });
     });

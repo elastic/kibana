@@ -23,6 +23,7 @@ interface ExpectedWorkerSettings {
   settingsVersion: number;
   /** Present only for schedule-driven Workers. */
   scheduleInterval?: string;
+  analysisWindowDays?: number;
   triggerTypes: string[];
 }
 
@@ -43,6 +44,7 @@ const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSetting
   'system-security-detection-rule-tuning': {
     settingsVersion: 1,
     scheduleInterval: '2h',
+    analysisWindowDays: 14,
     triggerTypes: ['scheduled', 'manual'],
   },
   'system-security-detection-rule-creation': { settingsVersion: 1, triggerTypes: ['manual'] },
@@ -87,6 +89,9 @@ describe('workerRegistry', () => {
           ...(expected.scheduleInterval === undefined
             ? {}
             : { scheduleInterval: expected.scheduleInterval }),
+          ...(expected.analysisWindowDays === undefined
+            ? {}
+            : { analysisWindowDays: expected.analysisWindowDays }),
         })
       );
 

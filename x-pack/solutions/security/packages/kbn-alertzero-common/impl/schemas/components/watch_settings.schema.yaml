@@ -23,6 +23,14 @@ components:
         minutes, hours or days (e.g. "24h"). Rendered verbatim into the Worker's `scheduled`
         trigger. Seconds are not supported.
 
+    AnalysisWindowDays:
+      type: integer
+      minimum: 1
+      maximum: 30
+      description: >-
+        How many days of alerts feed Rule Tuning analysis. Matches the tuning sweep's
+        analysis_window_days input. Omitted for every Worker except Rule Tuning.
+
     WorkerRunState:
       type: string
       enum: [ok, paused, degraded, unavailable]
@@ -270,9 +278,86 @@ components:
           minimum: 1
           description: Minimum qualifying false-positive count, a positive integer.
 
+    SharedOnlyWorkerSettings:
+      type: object
+      additionalProperties: false
+      description: >-
+        Complete settings for a Worker that only carries the shared autonomy dial. Watch-owned
+        custom fields are absent by construction.
+      required:
+        - workerId
+        - autonomy
+      properties:
+        workerId:
+          type: string
+        autonomy:
+          $ref: '#/components/schemas/WatchAutonomyLevel'
+
+    ScheduledWorkerSettings:
+      type: object
+      additionalProperties: false
+      description: Complete settings for a schedule-driven Worker with no Watch-owned custom fields.
+      required:
+        - workerId
+        - autonomy
+        - scheduleInterval
+      properties:
+        workerId:
+          type: string
+        autonomy:
+          $ref: '#/components/schemas/WatchAutonomyLevel'
+        scheduleInterval:
+          $ref: '#/components/schemas/WorkerScheduleInterval'
+
+    RuleTuningWorkerSettings:
+      type: object
+      additionalProperties: false
+      description: >-
+        Complete Detection Watch / Rule Tuning settings. Owned by Detection Watch; CWL reviews
+        the field list and UI, the Watch team owns the values.
+      required:
+        - workerId
+        - autonomy
+        - scheduleInterval
+        - analysisWindowDays
+      properties:
+        workerId:
+          type: string
+          enum: [system-security-detection-rule-tuning]
+        autonomy:
+          $ref: '#/components/schemas/WatchAutonomyLevel'
+        scheduleInterval:
+          $ref: '#/components/schemas/WorkerScheduleInterval'
+        analysisWindowDays:
+          $ref: '#/components/schemas/AnalysisWindowDays'
+
+    AlertTriageWorkerSettings:
+      type: object
+      additionalProperties: false
+      description: >-
+        Complete Alert Triage settings: shared autonomy dial plus its detection tuning fields
+        (confidence / false-positive-count thresholds).
+      required:
+        - workerId
+        - autonomy
+        - detectionConfig
+      properties:
+        workerId:
+          type: string
+          enum: [system-security-floor-alert-triage]
+        autonomy:
+          $ref: '#/components/schemas/WatchAutonomyLevel'
+        detectionConfig:
+          $ref: '#/components/schemas/DetectionConfig'
+
     WorkerSettings:
       type: object
-      description: Durable per-Worker settings stored as managed template values.
+      additionalProperties: false
+      description: >-
+        Durable per-Worker settings stored as managed template values. Shared fields plus any
+        Watch-owned custom fields that Worker declares. Unknown keys are rejected. Completeness
+        for a given Worker is the matching SharedOnlyWorkerSettings, ScheduledWorkerSettings,
+        RuleTuningWorkerSettings, or AlertTriageWorkerSettings schema.
       required:
         - workerId
         - autonomy
@@ -291,6 +376,24 @@ components:
           description: >-
             Omitted for Workers that own no detection tuning fields. Its presence is what tells
             the UI to render the confidence/false-positive controls.
+        analysisWindowDays:
+          $ref: '#/components/schemas/AnalysisWindowDays'
+
+    WorkerSettingsWrite:
+      type: object
+      additionalProperties: false
+      description: >-
+        Partial settings patch. Field names match WorkerSettings. Omitted fields keep their stored
+        values; unknown keys and wrong-Worker fields are rejected.
+      properties:
+        autonomy:
+          $ref: '#/components/schemas/WatchAutonomyLevel'
+        scheduleInterval:
+          $ref: '#/components/schemas/WorkerScheduleInterval'
+        analysisWindowDays:
+          $ref: '#/components/schemas/AnalysisWindowDays'
+        detectionConfig:
+          $ref: '#/components/schemas/DetectionConfig'
 
     Worker:
       type: object

@@ -116,7 +116,7 @@ describe('useUpdateWorker', () => {
 
     act(() => {
       result.current.mutate({ workerId: TRIAGE, patch: { enabled: true } });
-      result.current.mutate({ workerId: TRIAGE, patch: { autonomyLevel: 'assisted' } });
+      result.current.mutate({ workerId: TRIAGE, patch: { settings: { autonomy: 'assisted' } } });
     });
 
     await waitFor(() => expect(resolveEnable).toBeDefined());
@@ -134,7 +134,7 @@ describe('useUpdateWorker', () => {
 
     const autonomyBody = JSON.parse(patch.mock.calls[1][1].body);
     expect(autonomyBody).toEqual({
-      autonomyLevel: 'assisted',
+      settings: { autonomy: 'assisted' },
       settingsRevision: 2,
     });
   });
@@ -168,12 +168,12 @@ describe('useUpdateWorker', () => {
     const { result } = renderUpdateWorker(scheduledWorker, patch);
 
     await act(async () => {
-      result.current.mutate({ workerId: TRIAGE, patch: { scheduleInterval: '15m' } });
+      result.current.mutate({ workerId: TRIAGE, patch: { settings: { scheduleInterval: '15m' } } });
     });
 
     await waitFor(() => expect(patch).toHaveBeenCalledTimes(1));
     expect(JSON.parse(patch.mock.calls[0][1].body)).toEqual({
-      scheduleInterval: '15m',
+      settings: { scheduleInterval: '15m' },
       settingsRevision: 4,
     });
   });
@@ -203,13 +203,13 @@ describe('useUpdateWorker', () => {
     await act(async () => {
       result.current.mutate({
         workerId: TRIAGE,
-        patch: { detectionConfig: { confidenceThreshold: 0.7 } },
+        patch: { settings: { detectionConfig: { confidenceThreshold: 0.7 } } },
       });
     });
 
     await waitFor(() => expect(patch).toHaveBeenCalledTimes(1));
     expect(JSON.parse(patch.mock.calls[0][1].body)).toEqual({
-      detectionConfig: { confidenceThreshold: 0.7 },
+      settings: { detectionConfig: { confidenceThreshold: 0.7 } },
       settingsRevision: 6,
     });
   });
@@ -227,7 +227,7 @@ describe('useUpdateWorker', () => {
     act(() => {
       result.current.mutate({
         workerId: TRIAGE,
-        patch: { detectionConfig: { confidenceThreshold: 0.7 } },
+        patch: { settings: { detectionConfig: { confidenceThreshold: 0.7 } } },
       });
     });
 

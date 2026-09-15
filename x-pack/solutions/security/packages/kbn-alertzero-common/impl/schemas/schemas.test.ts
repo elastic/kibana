@@ -22,8 +22,11 @@ import {
   ListWatchesResponse,
   WatchSkill,
   WatchWorker,
+  RuleTuningWorkerSettings,
+  UpdateWorkerRequestBody,
   Worker,
   WorkerSettings,
+  WorkerSettingsWrite,
 } from '.';
 
 describe('AlertZero schema smoke tests', () => {
@@ -73,6 +76,55 @@ describe('AlertZero schema smoke tests', () => {
       workerId: 'system-security-dark-continuous-threat-hunt',
       autonomy: 'manual',
     });
+  });
+
+  it('rejects unknown settings keys and incomplete Rule Tuning settings', () => {
+    expect(
+      WorkerSettings.safeParse({
+        workerId: 'system-security-dark-continuous-threat-hunt',
+        autonomy: 'manual',
+        unknownField: true,
+      }).success
+    ).toBe(false);
+
+    expect(
+      RuleTuningWorkerSettings.safeParse({
+        workerId: 'system-security-detection-rule-tuning',
+        autonomy: 'manual',
+        scheduleInterval: '2h',
+      }).success
+    ).toBe(false);
+
+    expect(
+      RuleTuningWorkerSettings.safeParse({
+        workerId: 'system-security-detection-rule-tuning',
+        autonomy: 'manual',
+        scheduleInterval: '2h',
+        analysisWindowDays: 14,
+      }).success
+    ).toBe(true);
+  });
+
+  it.each([7.5, 0, 31])(
+    'rejects analysisWindowDays %s on the write schema',
+    (analysisWindowDays) => {
+      expect(WorkerSettingsWrite.safeParse({ analysisWindowDays }).success).toBe(false);
+    }
+  );
+
+  it('rejects leftover top-level settings fields on the update body', () => {
+    expect(
+      UpdateWorkerRequestBody.safeParse({
+        settingsRevision: 1,
+        autonomyLevel: 'assisted',
+      }).success
+    ).toBe(false);
+    expect(
+      UpdateWorkerRequestBody.safeParse({
+        settingsRevision: 1,
+        settings: { autonomy: 'assisted' },
+      }).success
+    ).toBe(true);
   });
 
   it('parses seed skills through WatchSkill', () => {

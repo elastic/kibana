@@ -25,6 +25,7 @@ import { AutonomyLevelControl } from './autonomy_level_control';
 import { DetectionConfigFields } from './detection_config_fields';
 import { ScheduleIntervalField } from './schedule_interval_field';
 import { WorkerSkillsTable } from './worker_skills_table';
+import { getWatchCustomSettingsComponent } from '../custom_settings/registry';
 import * as settingsI18n from '../settings_translations';
 import { workerName } from '../workers/translations';
 
@@ -93,7 +94,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
         current={worker.settings.autonomy}
         isDisabled={settingsLocked}
         onChange={(autonomyLevel) =>
-          updateWorker({ workerId: worker.id, patch: { autonomyLevel } })
+          updateWorker({ workerId: worker.id, patch: { settings: { autonomy: autonomyLevel } } })
         }
       />
       {/* Only schedule-driven Workers project an interval; the others are alert- or
@@ -106,7 +107,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
             current={worker.settings.scheduleInterval}
             isDisabled={settingsLocked}
             onChange={(scheduleInterval) =>
-              updateWorker({ workerId: worker.id, patch: { scheduleInterval } })
+              updateWorker({ workerId: worker.id, patch: { settings: { scheduleInterval } } })
             }
           />
         </>
@@ -122,11 +123,30 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
             autonomy={worker.settings.autonomy}
             isDisabled={settingsLocked}
             onChange={(detectionConfig) =>
-              updateWorker({ workerId: worker.id, patch: { detectionConfig } })
+              updateWorker({ workerId: worker.id, patch: { settings: { detectionConfig } } })
             }
           />
         </>
       ) : null}
+      {/* Watch-owned custom settings (e.g. analysisWindowDays) registered per Watch. */}
+      {(() => {
+        const CustomSettings = worker.watchIds
+          .map((watchId) => getWatchCustomSettingsComponent(watchId))
+          .find((component) => component != null);
+        return CustomSettings ? (
+          <>
+            <EuiSpacer size="m" />
+            <CustomSettings
+              worker={worker}
+              settings={worker.settings}
+              isDisabled={settingsLocked}
+              onSettingsChange={(patch) =>
+                updateWorker({ workerId: worker.id, patch: { settings: patch } })
+              }
+            />
+          </>
+        ) : null;
+      })()}
       <EuiSpacer size="m" />
       <WorkerSkillsTable skills={worker.skills} />
     </>

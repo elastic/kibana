@@ -105,6 +105,12 @@ const detectionWorkers: Worker[] = [
     id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
     name: 'Rule Tuning',
     watchIds: [SYSTEM_SECURITY_WATCH_DETECTION_ID],
+    settings: {
+      workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+      autonomy: 'manual',
+      scheduleInterval: '2h',
+      analysisWindowDays: 14,
+    },
   }),
   createWorker({
     id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
@@ -127,7 +133,8 @@ const renderWatch = (watchId: string, workers: Worker[]) => {
     refetch: jest.fn(),
   } as never);
   const mutate = jest.fn();
-  mockUseUpdateWorker.mockReturnValue({ mutate } as never);
+  const mutateAsync = jest.fn().mockResolvedValue({ worker: workers[0] });
+  mockUseUpdateWorker.mockReturnValue({ mutate, mutateAsync } as never);
 
   render(
     <MemoryRouter initialEntries={[`/watches/${watchId}`]}>
@@ -137,7 +144,7 @@ const renderWatch = (watchId: string, workers: Worker[]) => {
     </MemoryRouter>
   );
 
-  return { mutate };
+  return { mutate, mutateAsync };
 };
 
 describe('WatchDetailPage', () => {
@@ -246,7 +253,7 @@ describe('WatchDetailPage', () => {
       error: new Error('workers unavailable'),
       refetch: jest.fn(),
     } as never);
-    mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn() } as never);
+    mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync: jest.fn() } as never);
 
     render(
       <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
@@ -336,5 +343,20 @@ describe('WatchDetailPage', () => {
     expect(screen.getByTestId(`alertZeroWatchWorkerSummary-${second.id}`)).not.toHaveAttribute(
       'aria-current'
     );
+  });
+
+  it('renders the analysis window control only on Rule Tuning', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+    const ruleTuning = screen.getByTestId(
+      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+    );
+    const ruleCreation = screen.getByTestId(
+      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID}`
+    );
+
+    expect(within(ruleTuning).getByTestId('alertZeroAnalysisWindowDays')).toHaveValue(14);
+    expect(
+      within(ruleCreation).queryByTestId('alertZeroAnalysisWindowDays')
+    ).not.toBeInTheDocument();
   });
 });

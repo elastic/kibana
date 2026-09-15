@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import type {
-  DetectionConfig,
-  UpdateWorkerRequestBody,
-  WorkerSettings,
-} from '@kbn/alertzero-common';
+import type { WorkerSettings, WorkerSettingsWrite } from '@kbn/alertzero-common';
+import type { DetectionConfig } from '@kbn/alertzero-common';
 import type { ManagedWorkflowTemplateValues } from '@kbn/workflows/managed';
 
-export type WorkerSettingsPatch = Pick<
-  UpdateWorkerRequestBody,
-  'autonomyLevel' | 'scheduleInterval' | 'detectionConfig'
->;
+export type WorkerSettingsPatch = WorkerSettingsWrite;
 
 export interface WorkerSettingsRegistration {
   createDefaultValues(): ManagedWorkflowTemplateValues;

@@ -8,6 +8,7 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_IDS,
@@ -19,6 +20,7 @@ import { WorkersService } from './workers_service';
 
 const TRIAGE = SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
 const ATTACK_DISCOVERY = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
+const RULE_TUNING = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
 const SPACE = 'default';
 const request = {} as KibanaRequest;
 
@@ -161,7 +163,12 @@ describe('WorkersService', () => {
     const harness = createPersistentHarness();
     const result = await harness
       .createService()
-      .update(TRIAGE, { autonomyLevel: 'assisted', settingsRevision: null }, SPACE, request);
+      .update(
+        TRIAGE,
+        { settings: { autonomy: 'assisted' }, settingsRevision: null },
+        SPACE,
+        request
+      );
 
     expect(result.outcome).toBe('updated');
     if (result.outcome !== 'updated')
@@ -176,10 +183,20 @@ describe('WorkersService', () => {
 
     await harness
       .createService()
-      .update(TRIAGE, { autonomyLevel: 'supervised', settingsRevision: null }, 'space-a', request);
+      .update(
+        TRIAGE,
+        { settings: { autonomy: 'supervised' }, settingsRevision: null },
+        'space-a',
+        request
+      );
     await harness
       .createService()
-      .update(TRIAGE, { autonomyLevel: 'assisted', settingsRevision: null }, 'space-b', request);
+      .update(
+        TRIAGE,
+        { settings: { autonomy: 'assisted' }, settingsRevision: null },
+        'space-b',
+        request
+      );
 
     expect((await harness.createService().get(TRIAGE, request, 'space-a'))?.settings.autonomy).toBe(
       'supervised'
@@ -194,7 +211,7 @@ describe('WorkersService', () => {
     const service = harness.createService();
     await service.update(
       TRIAGE,
-      { autonomyLevel: 'assisted', settingsRevision: null },
+      { settings: { autonomy: 'assisted' }, settingsRevision: null },
       SPACE,
       request
     );
@@ -202,7 +219,7 @@ describe('WorkersService', () => {
     await expect(
       service.update(
         TRIAGE,
-        { autonomyLevel: 'supervised', settingsRevision: null },
+        { settings: { autonomy: 'supervised' }, settingsRevision: null },
         SPACE,
         request
       )
@@ -214,7 +231,7 @@ describe('WorkersService', () => {
     const service = harness.createService();
     const first = await service.update(
       TRIAGE,
-      { autonomyLevel: 'assisted', settingsRevision: null },
+      { settings: { autonomy: 'assisted' }, settingsRevision: null },
       SPACE,
       request
     );
@@ -224,7 +241,10 @@ describe('WorkersService', () => {
     await expect(
       service.update(
         TRIAGE,
-        { autonomyLevel: 'supervised', settingsRevision: first.response.worker.settingsRevision },
+        {
+          settings: { autonomy: 'supervised' },
+          settingsRevision: first.response.worker.settingsRevision,
+        },
         SPACE,
         request
       )
@@ -242,7 +262,7 @@ describe('WorkersService', () => {
     const result = await service.update(
       TRIAGE,
       {
-        autonomyLevel: 'assisted',
+        settings: { autonomy: 'assisted' },
         settingsRevision: enabled.response.worker.settingsRevision,
       },
       SPACE,
@@ -273,7 +293,7 @@ describe('WorkersService', () => {
     const result = await service.update(
       ATTACK_DISCOVERY,
       {
-        scheduleInterval: '15m',
+        settings: { scheduleInterval: '15m' },
         settingsRevision: enabled.response.worker.settingsRevision,
       },
       SPACE,
@@ -302,7 +322,7 @@ describe('WorkersService', () => {
     if (enabled.outcome !== 'updated') throw new Error('Expected enable to succeed');
 
     await expect(
-      service.update(ATTACK_DISCOVERY, { scheduleInterval: '15m' }, SPACE, request)
+      service.update(ATTACK_DISCOVERY, { settings: { scheduleInterval: '15m' } }, SPACE, request)
     ).resolves.toEqual({
       outcome: 'rejected',
       what: 'a settings update without its revision',
@@ -310,7 +330,7 @@ describe('WorkersService', () => {
     await expect(
       service.update(
         ATTACK_DISCOVERY,
-        { scheduleInterval: '15m', settingsRevision: 999 },
+        { settings: { scheduleInterval: '15m' }, settingsRevision: 999 },
         SPACE,
         request
       )
@@ -329,7 +349,7 @@ describe('WorkersService', () => {
     const result = await service.update(
       TRIAGE,
       {
-        detectionConfig: { confidenceThreshold: 0.9, fpCountThreshold: 3 },
+        settings: { detectionConfig: { confidenceThreshold: 0.9, fpCountThreshold: 3 } },
         settingsRevision: enabled.response.worker.settingsRevision,
       },
       SPACE,
@@ -344,7 +364,12 @@ describe('WorkersService', () => {
     });
 
     await expect(
-      service.update(TRIAGE, { detectionConfig: { confidenceThreshold: 0.5 } }, SPACE, request)
+      service.update(
+        TRIAGE,
+        { settings: { detectionConfig: { confidenceThreshold: 0.5 } } },
+        SPACE,
+        request
+      )
     ).resolves.toEqual({
       outcome: 'rejected',
       what: 'a settings update without its revision',
@@ -452,5 +477,51 @@ describe('WorkersService', () => {
 
     expect(harness.management.getWorkflow).not.toHaveBeenCalled();
     expect(Array.isArray(triage?.skills)).toBe(true);
+  });
+
+  it('persists a custom-only analysis window and forwards it into rendered YAML', async () => {
+    const harness = createPersistentHarness();
+    const service = harness.createService();
+    const enabled = await service.update(RULE_TUNING, { enabled: true }, SPACE, request);
+    if (enabled.outcome !== 'updated') throw new Error('Expected enable to succeed');
+
+    const result = await service.update(
+      RULE_TUNING,
+      {
+        settings: { analysisWindowDays: 7 },
+        settingsRevision: enabled.response.worker.settingsRevision,
+      },
+      SPACE,
+      request
+    );
+
+    expect(result.outcome).toBe('updated');
+    if (result.outcome !== 'updated') throw new Error('Expected analysis window save to succeed');
+    expect(result.response.worker.settings).toEqual({
+      workerId: RULE_TUNING,
+      autonomy: 'manual',
+      scheduleInterval: '2h',
+      analysisWindowDays: 7,
+    });
+    expect(harness.documents.get(`${RULE_TUNING}-${SPACE}`)?.yaml).toContain(
+      'analysis_window_days: 7'
+    );
+    expect(harness.documents.get(`${RULE_TUNING}-${SPACE}`)?.yaml).not.toContain(
+      '__WORKER_ANALYSIS_WINDOW_DAYS__'
+    );
+  });
+
+  it('rejects an unknown settings field and a wrong-Worker analysis window', async () => {
+    const harness = createPersistentHarness();
+    const service = harness.createService();
+
+    await expect(
+      service.update(
+        TRIAGE,
+        { settings: { analysisWindowDays: 7 }, settingsRevision: null },
+        SPACE,
+        request
+      )
+    ).resolves.toEqual({ outcome: 'rejected', what: 'an analysis window' });
   });
 });

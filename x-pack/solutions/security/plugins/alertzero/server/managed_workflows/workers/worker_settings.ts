@@ -7,12 +7,16 @@
 
 import {
   DetectionConfig,
+  ANALYSIS_WINDOW_DAYS_DEFAULT,
   SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   WatchAutonomyLevel,
+  AnalysisWindowDays,
+  parseCompleteWorkerSettings,
+  rejectUnsupportedWorkerSettingsWrite,
   type WorkerSettings,
 } from '@kbn/alertzero-common';
 import type { ManagedWorkflowTemplateValuesForId } from '@kbn/workflows/managed';
@@ -45,6 +49,10 @@ const WORKER_SCHEDULE_DEFAULTS: Partial<Record<RegisteredWorkerId, string>> = {
   // Matches the Attack Discovery schedule form default.
   [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: '24h',
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: '2h',
+};
+
+const WORKER_ANALYSIS_WINDOW_DEFAULTS: Partial<Record<RegisteredWorkerId, number>> = {
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: ANALYSIS_WINDOW_DAYS_DEFAULT,
 };
 
 /**
@@ -108,12 +116,23 @@ const parseDetectionConfig = (
   };
 };
 
+const readAnalysisWindowDays = (values: WorkerTemplateValues): number | undefined =>
+  'analysisWindowDays' in values && typeof values.analysisWindowDays === 'number'
+    ? values.analysisWindowDays
+    : undefined;
+
 const parseWorkerValues = (
   workerId: RegisteredWorkerId,
   raw: Record<string, unknown>
 ): WorkerTemplateValues => {
   const currentVersion = WORKER_SETTINGS_VERSIONS[workerId];
-  const { settingsVersion, autonomyLevel, scheduleInterval, detectionConfig } = raw;
+  const {
+    settingsVersion,
+    autonomyLevel,
+    scheduleInterval,
+    detectionConfig,
+    analysisWindowDays,
+  } = raw;
   if (settingsVersion !== undefined && settingsVersion !== currentVersion) {
     throw new Error(
       `Unsupported settings version for AlertZero worker "${workerId}": ${String(settingsVersion)}`
@@ -126,19 +145,26 @@ const parseWorkerValues = (
   const parsedDetectionConfig = parseDetectionConfig(workerId, detectionConfig);
 
   const scheduleDefault = WORKER_SCHEDULE_DEFAULTS[workerId];
-  if (scheduleDefault === undefined) {
-    return {
-      settingsVersion: currentVersion,
-      autonomyLevel: parsedAutonomyLevel.data,
-      ...(parsedDetectionConfig === undefined ? {} : { detectionConfig: parsedDetectionConfig }),
-    };
+  const analysisWindowDefault = WORKER_ANALYSIS_WINDOW_DEFAULTS[workerId];
+  const parsedAnalysisWindow =
+    analysisWindowDefault === undefined
+      ? undefined
+      : AnalysisWindowDays.safeParse(
+          analysisWindowDays === undefined ? analysisWindowDefault : analysisWindowDays
+        );
+  if (parsedAnalysisWindow && !parsedAnalysisWindow.success) {
+    throw new Error(`AlertZero worker "${workerId}" settings contain an invalid analysis window`);
   }
 
-  // Absent means the install predates the setting, so it takes the default.
   return {
     settingsVersion: currentVersion,
     autonomyLevel: parsedAutonomyLevel.data,
-    scheduleInterval: scheduleInterval ?? scheduleDefault,
+    ...(scheduleDefault === undefined
+      ? {}
+      : { scheduleInterval: scheduleInterval ?? scheduleDefault }),
+    ...(parsedAnalysisWindow === undefined
+      ? {}
+      : { analysisWindowDays: parsedAnalysisWindow.data }),
     ...(parsedDetectionConfig === undefined ? {} : { detectionConfig: parsedDetectionConfig }),
   };
 };
@@ -149,11 +175,13 @@ export const createWorkerSettingsRegistration = (
   createDefaultValues: (): WorkerTemplateValues => {
     const scheduleDefault = WORKER_SCHEDULE_DEFAULTS[workerId];
     const detectionConfigDefault = WORKER_DETECTION_CONFIG_DEFAULTS[workerId];
+    const analysisWindowDefault = WORKER_ANALYSIS_WINDOW_DEFAULTS[workerId];
     return {
       settingsVersion: WORKER_SETTINGS_VERSIONS[workerId],
       autonomyLevel: 'manual',
       ...(scheduleDefault === undefined ? {} : { scheduleInterval: scheduleDefault }),
       ...(detectionConfigDefault === undefined ? {} : { detectionConfig: detectionConfigDefault }),
+      ...(analysisWindowDefault === undefined ? {} : { analysisWindowDays: analysisWindowDefault }),
     };
   },
   migrate: (raw: Record<string, unknown>) => {
@@ -167,8 +195,9 @@ export const createWorkerSettingsRegistration = (
   },
   applyPatch: (raw, patch) => {
     const values = parseWorkerValues(workerId, raw);
-    if (patch.scheduleInterval != null && WORKER_SCHEDULE_DEFAULTS[workerId] === undefined) {
-      return { rejected: 'a schedule interval' };
+    const rejected = rejectUnsupportedWorkerSettingsWrite(workerId, patch);
+    if (rejected) {
+      return { rejected };
     }
     if (patch.detectionConfig != null && WORKER_DETECTION_CONFIG_DEFAULTS[workerId] === undefined) {
       return { rejected: 'a detection config' };
@@ -176,7 +205,7 @@ export const createWorkerSettingsRegistration = (
     return {
       values: {
         ...values,
-        autonomyLevel: patch.autonomyLevel ?? values.autonomyLevel,
+        autonomyLevel: patch.autonomy ?? values.autonomyLevel,
         ...(patch.scheduleInterval == null ? {} : { scheduleInterval: patch.scheduleInterval }),
         ...(patch.detectionConfig == null
           ? {}
@@ -186,6 +215,9 @@ export const createWorkerSettingsRegistration = (
                 ...patch.detectionConfig,
               },
             }),
+        ...(patch.analysisWindowDays == null
+          ? {}
+          : { analysisWindowDays: patch.analysisWindowDays }),
       },
     };
   },
@@ -193,13 +225,15 @@ export const createWorkerSettingsRegistration = (
     const values = parseWorkerValues(workerId, raw);
     const scheduleInterval = readScheduleInterval(values);
     const detectionConfig = readDetectionConfig(values);
-    return {
+    const analysisWindowDays = readAnalysisWindowDays(values);
+    return parseCompleteWorkerSettings({
       workerId,
       autonomy: values.autonomyLevel,
       // Spread rather than assign undefined: the registry test asserts the projection's keys
       // survive WorkerSettings.parse unchanged.
       ...(scheduleInterval === undefined ? {} : { scheduleInterval }),
       ...(detectionConfig === undefined ? {} : { detectionConfig }),
-    };
+      ...(analysisWindowDays === undefined ? {} : { analysisWindowDays }),
+    });
   },
 });
