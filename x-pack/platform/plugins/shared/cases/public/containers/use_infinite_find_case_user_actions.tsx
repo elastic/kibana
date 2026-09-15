@@ -22,6 +22,7 @@ export const useInfiniteFindCaseUserActions = (
     perPage: number;
     search?: string;
     authors?: string[];
+    sources?: string[];
   },
   isEnabled: boolean
 ) => {

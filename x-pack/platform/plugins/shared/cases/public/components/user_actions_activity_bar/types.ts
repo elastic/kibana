@@ -16,15 +16,13 @@ export interface UserActivityParams {
   perPage: number;
   search?: string;
   authors?: string[];
+  sources?: string[];
 }
 
-/**
- * Subset of {@link UserActivityParams} persisted to local storage so a user's
- * filter selection is restored across page reloads. The free-text `search`
- * term is intentionally excluded.
- */
+/** Filters persisted to local storage. Excludes free-text search. */
 export interface UserActivityFilters {
   type: UserActivityFilter;
   sortOrder: UserActivitySortOrder;
   authors?: string[];
+  sources?: string[];
 }
