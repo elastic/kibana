@@ -35,7 +35,7 @@ import {
 import { InputPopoverButton } from '../input_popover_button';
 import { OptionText } from '../option_text';
 import { ConnectorIcon } from './connector_icon';
-import { ModelRetirementIcon } from './model_badges';
+import { isNearingEndOfLife, ModelRetirementIcon } from './model_badges';
 
 const selectableAriaLabel = i18n.translate(
   'xpack.agentBuilder.conversationInput.connectorSelector.selectableAriaLabel',
@@ -294,8 +294,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
   });
 
   const selectedConnector = connectors.find((c) => c.id === selectedConnectorId);
-  const eolDate = selectedConnector?.metadata?.heuristics?.end_of_life_date;
-  const isRetiring = !!eolDate && Date.parse(eolDate) - Date.now() <= 60 * 24 * 60 * 60 * 1000;
+  const isRetiring = isNearingEndOfLife(selectedConnector?.metadata);
 
   // Track the previously-observed default so we can detect admin-initiated changes.
   // Seeded with the current value on first render and updated on every effect run
