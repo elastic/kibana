@@ -9,12 +9,12 @@ import { schema } from '@kbn/config-schema';
 import type { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
 import type { ProfilingSchema } from '@kbn/profiling-utils';
 
-// `schema` query param shared by the topN/functions/flamechart routes.
 export const schemaQueryParam = schema.oneOf([schema.literal('ecs'), schema.literal('otel')], {
   defaultValue: 'ecs',
 });
 
-// Serverless only has OTel data streams, so the requested schema is ignored there.
+// Serverless only supports the OTel schema (no ECS resources are ever created there),
+// so the requested schema is ignored.
 export function resolveSchema(
   requested: ProfilingSchema,
   esCapabilities: ElasticsearchCapabilities

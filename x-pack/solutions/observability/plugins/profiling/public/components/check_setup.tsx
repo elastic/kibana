@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { AsyncStatus } from '../hooks/use_async';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
 import { useLicenseContext } from './contexts/license/use_license_context';
@@ -19,7 +19,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
   const { profilingSetupStatus, status } = useProfilingSetupStatus();
   const license = useLicenseContext();
   const router = useProfilingRouter();
-  const { pathname } = useHistory().location;
+  const { pathname } = useLocation();
 
   if (!license?.hasAtLeast('enterprise')) {
     return (

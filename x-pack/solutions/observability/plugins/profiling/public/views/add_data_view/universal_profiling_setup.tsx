@@ -42,7 +42,7 @@ export function UniversalProfilingSetup() {
 
   const button = (
     <EuiButton
-      data-test-subj="profilingCheckSetupCard"
+      data-test-subj="profilingUniversalProfilingSetupButton"
       fill
       isLoading={isLoading}
       isDisabled={!hasRequiredRole}

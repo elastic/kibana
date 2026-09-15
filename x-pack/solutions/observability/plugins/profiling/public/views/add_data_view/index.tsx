@@ -65,6 +65,21 @@ interface Tab {
 
 const supportedCPUArchitectures = ['x86_64', 'arm64'];
 
+const sections = [
+  {
+    key: AddDataSection.UniversalProfiling,
+    title: i18n.translate('xpack.profiling.addData.section.universalProfiling', {
+      defaultMessage: 'Universal Profiling',
+    }),
+  },
+  {
+    key: AddDataSection.OpenTelemetry,
+    title: i18n.translate('xpack.profiling.addData.section.openTelemetry', {
+      defaultMessage: 'OpenTelemetry Profiles',
+    }),
+  },
+];
+
 export function AddDataView() {
   const { query } = useProfilingParams('/add-data-instructions');
   const { section, selectedTab } = query;
@@ -536,234 +551,210 @@ EOF`}
     </EuiFlexGroup>
   );
 
-  const sections = [
-    {
-      key: AddDataSection.UniversalProfiling,
-      title: i18n.translate('xpack.profiling.addData.section.universalProfiling', {
-        defaultMessage: 'Universal Profiling',
-      }),
-    },
-    {
-      key: AddDataSection.OpenTelemetry,
-      title: i18n.translate('xpack.profiling.addData.section.openTelemetry', {
-        defaultMessage: 'OpenTelemetry Profiles',
-      }),
-    },
-  ];
+  const renderSectionContent = () => {
+    if (section === AddDataSection.OpenTelemetry) {
+      return (
+        <EuiEmptyPrompt
+          iconType="logoObservability"
+          title={
+            <h2>
+              {i18n.translate('xpack.profiling.addData.openTelemetry.title', {
+                defaultMessage: 'OpenTelemetry Profiles',
+              })}
+            </h2>
+          }
+          body={i18n.translate('xpack.profiling.addData.openTelemetry.description', {
+            defaultMessage:
+              'The easiest way to start ingesting profiles is by installing the OpenTelemetry Profiling integration. It walks you through deploying the profiler with Elastic Agent and sending the profiles to this deployment.',
+          })}
+          actions={
+            <EuiButton
+              data-test-subj="profilingAddDataViewOtelIntegrationButton"
+              fill
+              iconType="plusInCircle"
+              // No version in the package key: Fleet resolves the installed version or the latest one
+              href={core.http.basePath.prepend('/app/integrations/detail/profiling_otel/overview')}
+            >
+              {i18n.translate('xpack.profiling.addData.openTelemetry.integrationButton', {
+                defaultMessage: 'Add OpenTelemetry Profiling integration',
+              })}
+            </EuiButton>
+          }
+        />
+      );
+    }
 
-  const sectionTabs = (
-    <EuiTabs>
-      {sections.map((item) => (
-        <EuiTab
-          key={item.key}
-          data-test-subj={`profilingAddDataSection-${item.key}`}
-          isSelected={item.key === section}
-          onClick={() => {
-            profilingRouter.push(routePath, { path: {}, query: { ...query, section: item.key } });
-          }}
-        >
-          {item.title}
-        </EuiTab>
-      ))}
-    </EuiTabs>
-  );
+    if (!hasUniversalProfilingSetup) {
+      return <UniversalProfilingSetup />;
+    }
 
-  if (section === AddDataSection.OpenTelemetry) {
+    if (isLoading) {
+      return null;
+    }
+
     return (
-      <ProfilingAppPageTemplate restrictWidth hideSearchBar pageTitle={pageTitle}>
-        <>
-          {sectionTabs}
-          <EuiSpacer />
-          <EuiEmptyPrompt
-            iconType="logoObservability"
-            title={
-              <h2>
-                {i18n.translate('xpack.profiling.addData.openTelemetry.title', {
-                  defaultMessage: 'OpenTelemetry Profiles',
+      <>
+        <EuiCallOut
+          announceOnMount
+          color="warning"
+          iconType="question"
+          title={
+            <FormattedMessage
+              id="xpack.profiling.tabs.debWarning"
+              defaultMessage="Due to a {linuxLink} bug which impacts stability, the Universal Profiling agent will not run on unpatched kernel versions {versionFrom} to {versionTo}. Refer to {debianLink} and {fedoraLink} to learn more. If you are running an affected kernel, the Universal Profiling agent dynamically checks for the patch. Refer to {advancedLink} for instructions on overriding this check."
+              values={{
+                versionFrom: (
+                  <strong>
+                    {i18n.translate('xpack.profiling.tabs.strong.5.19Label', {
+                      defaultMessage: '5.19',
+                    })}
+                  </strong>
+                ),
+                versionTo: (
+                  <strong>
+                    {i18n.translate('xpack.profiling.tabs.strong.6.4Label', {
+                      defaultMessage: '6.4',
+                    })}
+                  </strong>
+                ),
+                linuxLink: (
+                  <EuiLink
+                    data-test-subj="profilingAddDataViewLinuxKernelBugLink"
+                    target="_blank"
+                    href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=d319f344561de23e810515d109c7278919bff7b0"
+                  >
+                    {i18n.translate('xpack.profiling.tabs.debWarning.linuxLink', {
+                      defaultMessage: 'Linux kernel bug',
+                    })}
+                  </EuiLink>
+                ),
+                debianLink: (
+                  <EuiLink
+                    data-test-subj="profilingAddDataViewDebianLink"
+                    target="_blank"
+                    href="https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1033398"
+                  >
+                    {i18n.translate('xpack.profiling.tabs.debWarning.debianLink', {
+                      defaultMessage: 'Debian',
+                    })}
+                  </EuiLink>
+                ),
+                fedoraLink: (
+                  <EuiLink
+                    data-test-subj="profilingAddDataViewFedoraCentOsLink"
+                    target="_blank"
+                    href="https://bugzilla.redhat.com/show_bug.cgi?id=2211455"
+                  >
+                    {i18n.translate('xpack.profiling.tabs.debWarning.fedoraLink', {
+                      defaultMessage: 'Fedora/CentOS',
+                    })}
+                  </EuiLink>
+                ),
+                advancedLink: (
+                  <EuiLink
+                    data-test-subj="profilingAddDataViewAdvancedConfigurationLink"
+                    target="_blank"
+                    href={`${docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${docLinks.DOC_LINK_VERSION}/profiling-advanced-configuration.html`}
+                  >
+                    {i18n.translate('xpack.profiling.tabs.debWarning.advancedLink', {
+                      defaultMessage: 'Advanced configuration',
+                    })}
+                  </EuiLink>
+                ),
+              }}
+            />
+          }
+        />
+        <EuiSpacer />
+        <EuiText>
+          {i18n.translate('xpack.profiling.noDataPage.addDataTitle', {
+            defaultMessage: 'Select an option below to deploy the Universal Profiling Agent.',
+          })}
+        </EuiText>
+        <EuiSpacer />
+        <EuiSplitPanel.Outer>
+          <EuiPanel hasBorder={false} hasShadow={false} grow={false} paddingSize="none">
+            <EuiSplitPanel.Inner color="subdued" paddingSize="none">
+              <EuiTabs style={{ padding: '0 24px' }}>
+                {tabs.map((tab) => {
+                  return (
+                    <EuiTab
+                      key={tab.key}
+                      onClick={() => {
+                        profilingRouter.push(routePath, {
+                          path: {},
+                          query: { ...query, selectedTab: tab.key },
+                        });
+                      }}
+                      isSelected={tab.key === selectedTab}
+                    >
+                      {tab.title}
+                    </EuiTab>
+                  );
                 })}
-              </h2>
-            }
-            body={i18n.translate('xpack.profiling.addData.openTelemetry.description', {
-              defaultMessage:
-                'The easiest way to start ingesting profiles is by installing the OpenTelemetry Profiling integration. It walks you through deploying the profiler with Elastic Agent and sending the profiles to this deployment.',
-            })}
-            actions={
-              <EuiButton
-                data-test-subj="profilingAddDataViewOtelIntegrationButton"
-                fill
-                iconType="plusInCircle"
-                // No version in the package key: Fleet resolves the installed version or the latest one
-                href={core.http.basePath.prepend(
-                  '/app/integrations/detail/profiling_otel/overview'
-                )}
-              >
-                {i18n.translate('xpack.profiling.addData.openTelemetry.integrationButton', {
-                  defaultMessage: 'Add OpenTelemetry Profiling integration',
-                })}
-              </EuiButton>
-            }
-          />
-        </>
-      </ProfilingAppPageTemplate>
-    );
-  }
-
-  if (!hasUniversalProfilingSetup) {
-    return (
-      <ProfilingAppPageTemplate restrictWidth hideSearchBar pageTitle={pageTitle}>
-        <>
-          {sectionTabs}
-          <EuiSpacer />
-          <UniversalProfilingSetup />
-        </>
-      </ProfilingAppPageTemplate>
-    );
-  }
-
-  return (
-    <ProfilingAppPageTemplate restrictWidth hideSearchBar pageTitle={pageTitle}>
-      {isLoading ? (
-        <></>
-      ) : (
-        <>
-          {sectionTabs}
-          <EuiSpacer />
-          <EuiCallOut
-            announceOnMount
-            color="warning"
-            iconType="question"
-            title={
-              <FormattedMessage
-                id="xpack.profiling.tabs.debWarning"
-                defaultMessage="Due to a {linuxLink} bug which impacts stability, the Universal Profiling agent will not run on unpatched kernel versions {versionFrom} to {versionTo}. Refer to {debianLink} and {fedoraLink} to learn more. If you are running an affected kernel, the Universal Profiling agent dynamically checks for the patch. Refer to {advancedLink} for instructions on overriding this check."
-                values={{
-                  versionFrom: (
-                    <strong>
-                      {i18n.translate('xpack.profiling.tabs.strong.5.19Label', {
-                        defaultMessage: '5.19',
-                      })}
-                    </strong>
-                  ),
-                  versionTo: (
-                    <strong>
-                      {i18n.translate('xpack.profiling.tabs.strong.6.4Label', {
-                        defaultMessage: '6.4',
-                      })}
-                    </strong>
-                  ),
-                  linuxLink: (
-                    <EuiLink
-                      data-test-subj="profilingAddDataViewLinuxKernelBugLink"
-                      target="_blank"
-                      href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=d319f344561de23e810515d109c7278919bff7b0"
-                    >
-                      {i18n.translate('xpack.profiling.tabs.debWarning.linuxLink', {
-                        defaultMessage: 'Linux kernel bug',
-                      })}
-                    </EuiLink>
-                  ),
-                  debianLink: (
-                    <EuiLink
-                      data-test-subj="profilingAddDataViewDebianLink"
-                      target="_blank"
-                      href="https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1033398"
-                    >
-                      {i18n.translate('xpack.profiling.tabs.debWarning.debianLink', {
-                        defaultMessage: 'Debian',
-                      })}
-                    </EuiLink>
-                  ),
-                  fedoraLink: (
-                    <EuiLink
-                      data-test-subj="profilingAddDataViewFedoraCentOsLink"
-                      target="_blank"
-                      href="https://bugzilla.redhat.com/show_bug.cgi?id=2211455"
-                    >
-                      {i18n.translate('xpack.profiling.tabs.debWarning.fedoraLink', {
-                        defaultMessage: 'Fedora/CentOS',
-                      })}
-                    </EuiLink>
-                  ),
-                  advancedLink: (
-                    <EuiLink
-                      data-test-subj="profilingAddDataViewAdvancedConfigurationLink"
-                      target="_blank"
-                      href={`${docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${docLinks.DOC_LINK_VERSION}/profiling-advanced-configuration.html`}
-                    >
-                      {i18n.translate('xpack.profiling.tabs.debWarning.advancedLink', {
-                        defaultMessage: 'Advanced configuration',
-                      })}
-                    </EuiLink>
-                  ),
-                }}
-              />
-            }
-          />
-          <EuiSpacer />
-          <EuiText>
-            {i18n.translate('xpack.profiling.noDataPage.addDataTitle', {
-              defaultMessage: 'Select an option below to deploy the Universal Profiling Agent.',
-            })}
-          </EuiText>
-          <EuiSpacer />
-          <EuiSplitPanel.Outer>
-            <EuiPanel hasBorder={false} hasShadow={false} grow={false} paddingSize="none">
-              <EuiSplitPanel.Inner color="subdued" paddingSize="none">
+              </EuiTabs>
+            </EuiSplitPanel.Inner>
+            <EuiSplitPanel.Inner style={{ padding: '0 24px' }}>
+              <EuiSpacer size="s" />
+              {subTabs.length > 0 && (
                 <EuiTabs style={{ padding: '0 24px' }}>
-                  {tabs.map((tab) => {
+                  {subTabs.map((tab) => {
                     return (
                       <EuiTab
                         key={tab.key}
                         onClick={() => {
-                          profilingRouter.push(routePath, {
-                            path: {},
-                            query: { ...query, selectedTab: tab.key },
-                          });
+                          setSelectedSubTabKey(tab.key);
                         }}
-                        isSelected={tab.key === selectedTab}
+                        isSelected={tab.key === selectedSubTabKey}
                       >
                         {tab.title}
                       </EuiTab>
                     );
                   })}
                 </EuiTabs>
-              </EuiSplitPanel.Inner>
-              <EuiSplitPanel.Inner style={{ padding: '0 24px' }}>
-                <EuiSpacer size="s" />
-                {subTabs.length > 0 && (
-                  <EuiTabs style={{ padding: '0 24px' }}>
-                    {subTabs.map((tab) => {
-                      return (
-                        <EuiTab
-                          key={tab.key}
-                          onClick={() => {
-                            setSelectedSubTabKey(tab.key);
-                          }}
-                          isSelected={tab.key === selectedSubTabKey}
-                        >
-                          {tab.title}
-                        </EuiTab>
-                      );
-                    })}
-                  </EuiTabs>
-                )}
-                <EuiSpacer size="xxl" />
-                {displayedSteps.length > 0 && (
-                  <EuiSteps
-                    steps={displayedSteps.map((step) => {
-                      return {
-                        title: step.title,
-                        children: step.content,
-                        status: 'incomplete',
-                      };
-                    })}
-                  />
-                )}
-              </EuiSplitPanel.Inner>
-            </EuiPanel>
-          </EuiSplitPanel.Outer>
-        </>
-      )}
+              )}
+              <EuiSpacer size="xxl" />
+              {displayedSteps.length > 0 && (
+                <EuiSteps
+                  steps={displayedSteps.map((step) => {
+                    return {
+                      title: step.title,
+                      children: step.content,
+                      status: 'incomplete',
+                    };
+                  })}
+                />
+              )}
+            </EuiSplitPanel.Inner>
+          </EuiPanel>
+        </EuiSplitPanel.Outer>
+      </>
+    );
+  };
+
+  return (
+    <ProfilingAppPageTemplate restrictWidth hideSearchBar pageTitle={pageTitle}>
+      <>
+        <EuiTabs>
+          {sections.map((item) => (
+            <EuiTab
+              key={item.key}
+              data-test-subj={`profilingAddDataSection-${item.key}`}
+              isSelected={item.key === section}
+              onClick={() => {
+                profilingRouter.push(routePath, {
+                  path: {},
+                  query: { ...query, section: item.key },
+                });
+              }}
+            >
+              {item.title}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+        <EuiSpacer />
+        {renderSectionContent()}
+      </>
     </ProfilingAppPageTemplate>
   );
 }

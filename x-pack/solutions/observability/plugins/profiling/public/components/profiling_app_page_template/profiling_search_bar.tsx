@@ -53,7 +53,6 @@ export function ProfilingSearchBar({
   const [dataView, setDataView] = useState<DataView>();
 
   useEffect(() => {
-    // field suggestions come from the events index of the selected schema
     dataViews
       .create({
         title: getEventsIndex(schema),

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { decodeStackTraceResponse, type ProfilingSchema } from '@kbn/profiling-utils';
+import type { ProfilingSchema } from '@kbn/profiling-utils';
+import { decodeStackTraceResponse } from '@kbn/profiling-utils';
 import type { ProfilingESClient } from '../utils/create_profiling_es_client';
 import type { ProjectTimeQuery } from './query';
 
