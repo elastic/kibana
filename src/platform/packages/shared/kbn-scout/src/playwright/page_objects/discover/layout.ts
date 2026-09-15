@@ -101,7 +101,11 @@ export abstract class LayoutMixin extends SaveMixin {
     return this.getDataViewSwitchName(await this.getVisibleDataViewSwitch());
   }
 
-  private async fillAndSubmitDataViewEditor({ name, adHoc = false }: DataViewOptions) {
+  private async fillAndSubmitDataViewEditor({
+    name,
+    adHoc = false,
+    waitUntilLoaded = true,
+  }: DataViewOptions) {
     // Minimal inline interaction with the data view editor flyout. The full
     // `DataViewEditorPage` object lives in the `data_view_editor` plugin, but
     // `kbn-scout` is a base package and must not depend on a plugin, so the few
@@ -154,7 +158,11 @@ export abstract class LayoutMixin extends SaveMixin {
       await expect(this.getSelectedDataView()).toHaveAccessibleName(title, { timeout: 20_000 });
     }).toPass({ timeout: 45_000, intervals: [0] });
 
-    await this.waitUntilTabIsLoaded();
+    // New empty tabs stay uninitialized after a data-view change; the caller knows
+    // that and should pass `waitUntilLoaded: false` instead of probing the prompt.
+    if (waitUntilLoaded) {
+      await this.waitUntilTabIsLoaded();
+    }
   }
 
   /**
@@ -822,8 +830,8 @@ export abstract class LayoutMixin extends SaveMixin {
     return this.getHitCountLocator().innerText();
   }
 
-  getRefreshDataButton(): Locator {
-    return this.page.testSubj.locator('refreshDataButton');
+  getQueryInEsqlButton(): Locator {
+    return this.page.testSubj.locator('queryInEsqlButton');
   }
 
   getQuerySubmitButton(): Locator {
