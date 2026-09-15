@@ -755,6 +755,92 @@ export const RUN_OUTCOME_LABELS: Record<string, string> = {
 };
 
 /* -------------------------------------------------------------------------- */
+/* Detection config (confidence / false-positive thresholds)                  */
+/* -------------------------------------------------------------------------- */
+
+export const DETECTION_CONFIG_SECTION_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.detectionConfig.sectionTitle',
+  { defaultMessage: 'Auto-close' }
+);
+
+export const DETECTION_CONFIG_SECTION_TITLE_HELP = i18n.translate(
+  'xpack.alertzero.watches.settings.detectionConfig.sectionTitleHelp',
+  {
+    defaultMessage:
+      'When the analysis classifies an alert as a false positive at or above the confidence score, it is closed — automatically or as a proposal, depending on the autonomy level.',
+  }
+);
+
+export const CONFIDENCE_THRESHOLD_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.detectionConfig.confidenceThreshold.label',
+  { defaultMessage: 'Minimum confidence score' }
+);
+
+export const CONFIDENCE_THRESHOLD_ARIA_LABEL = CONFIDENCE_THRESHOLD_LABEL;
+
+export const CONFIDENCE_THRESHOLD_ERROR = i18n.translate(
+  'xpack.alertzero.watches.settings.detectionConfig.confidenceThreshold.error',
+  { defaultMessage: 'Must be between 0 and 1.' }
+);
+
+export const FP_COUNT_THRESHOLD_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.detectionConfig.fpCountThreshold.label',
+  { defaultMessage: 'False positive count threshold' }
+);
+
+export const FP_COUNT_THRESHOLD_HELP_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.detectionConfig.fpCountThreshold.helpText',
+  {
+    defaultMessage: 'Minimum alerts closed as false positives to trigger analysis on a rule.',
+  }
+);
+
+export const FP_COUNT_THRESHOLD_ARIA_LABEL = FP_COUNT_THRESHOLD_LABEL;
+
+export const FP_COUNT_THRESHOLD_ERROR = i18n.translate(
+  'xpack.alertzero.watches.settings.detectionConfig.fpCountThreshold.error',
+  { defaultMessage: 'Must be a whole number of at least 1.' }
+);
+
+export const funnelAlertsPerDay = (count: number) =>
+  i18n.translate('xpack.alertzero.watches.settings.detectionConfig.funnel.alertsPerDay', {
+    defaultMessage: '~{count}',
+    values: { count },
+  });
+
+export const FUNNEL_ALERTS_PER_DAY_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.detectionConfig.funnel.alertsPerDayLabel',
+  { defaultMessage: 'alerts / day' }
+);
+
+export const funnelFpVerdictsPerDay = (count: number) =>
+  i18n.translate('xpack.alertzero.watches.settings.detectionConfig.funnel.fpVerdictsPerDay', {
+    defaultMessage: '~{count}',
+    values: { count },
+  });
+
+export const FUNNEL_FP_VERDICTS_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.detectionConfig.funnel.fpVerdictsLabel',
+  { defaultMessage: 'false-positive verdicts' }
+);
+
+export const funnelQualifyingLabel = (score: string) =>
+  i18n.translate('xpack.alertzero.watches.settings.detectionConfig.funnel.qualifyingLabel', {
+    defaultMessage: 'at or above {score}',
+    values: { score },
+  });
+
+export const FUNNEL_OUTCOME_PROPOSED_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.detectionConfig.funnel.outcomeProposed',
+  { defaultMessage: 'proposed for approval' }
+);
+
+export const FUNNEL_OUTCOME_AUTO_CLOSED_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.detectionConfig.funnel.outcomeAutoClosed',
+  { defaultMessage: 'closed automatically' }
+);
+
+/* -------------------------------------------------------------------------- */
 /* Per-watch intro                                                            */
 /* -------------------------------------------------------------------------- */
 

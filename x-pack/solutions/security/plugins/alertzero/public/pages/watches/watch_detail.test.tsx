@@ -75,6 +75,11 @@ const floorWorkers: Worker[] = [
     id: SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
     name: 'Alert Triage',
     watchIds: [SYSTEM_SECURITY_WATCH_FLOOR_ID],
+    settings: {
+      workerId: SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+      autonomy: 'manual',
+      detectionConfig: { confidenceThreshold: 0.85, fpCountThreshold: 10 },
+    },
   }),
   createWorker({
     id: SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
@@ -186,6 +191,24 @@ describe('WatchDetailPage', () => {
     expect(within(attackDiscovery).getByTestId('alertZeroScheduleIntervalUnit')).toHaveValue('h');
     expect(
       within(alertTriage).queryByTestId('alertZeroScheduleIntervalField')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows the ConsequenceFunnel and detectionConfig fields only for Alert Triage', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
+
+    const alertTriage = screen.getByTestId(
+      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
+    );
+    const attackDiscovery = screen.getByTestId(
+      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
+    );
+
+    expect(within(alertTriage).getByTestId('alertZeroConsequenceFunnel')).toBeInTheDocument();
+    expect(within(alertTriage).getByTestId('alertZeroConfidenceThresholdValue')).toHaveValue(0.85);
+    expect(within(alertTriage).getByTestId('alertZeroFpCountThresholdValue')).toHaveValue(10);
+    expect(
+      within(attackDiscovery).queryByTestId('alertZeroDetectionConfigFields')
     ).not.toBeInTheDocument();
   });
 

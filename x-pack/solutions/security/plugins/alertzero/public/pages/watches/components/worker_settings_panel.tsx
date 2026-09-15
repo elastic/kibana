@@ -22,6 +22,7 @@ import {
 import type { Worker } from '@kbn/alertzero-common';
 import { useUpdateWorker } from '../../../hooks/use_workers_api';
 import { AutonomyLevelControl } from './autonomy_level_control';
+import { DetectionConfigFields } from './detection_config_fields';
 import { ScheduleIntervalField } from './schedule_interval_field';
 import { WorkerSkillsTable } from './worker_skills_table';
 import * as settingsI18n from '../settings_translations';
@@ -106,6 +107,22 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
             isDisabled={settingsLocked}
             onChange={(scheduleInterval) =>
               updateWorker({ workerId: worker.id, patch: { scheduleInterval } })
+            }
+          />
+        </>
+      ) : null}
+      {/* Only Workers whose autonomy cards reference detectionConfig carry it in their settings —
+          its presence is what tells this panel to render the confidence/false-positive controls. */}
+      {worker.settings.detectionConfig != null ? (
+        <>
+          <EuiSpacer size="m" />
+          <DetectionConfigFields
+            workerId={worker.id}
+            current={worker.settings.detectionConfig}
+            autonomy={worker.settings.autonomy}
+            isDisabled={settingsLocked}
+            onChange={(detectionConfig) =>
+              updateWorker({ workerId: worker.id, patch: { detectionConfig } })
             }
           />
         </>

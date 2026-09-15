@@ -177,4 +177,80 @@ describe('useUpdateWorker', () => {
       settingsRevision: 4,
     });
   });
+
+  const detectionWorker = createWorker({
+    settingsRevision: 6,
+    settings: {
+      workerId: TRIAGE,
+      autonomy: 'manual',
+      detectionConfig: { confidenceThreshold: 0.85, fpCountThreshold: 10 },
+    },
+  });
+
+  it('treats a detectionConfig-only patch as a settings write and sends the revision', async () => {
+    const patch = jest.fn().mockResolvedValue({
+      worker: createWorker({
+        settingsRevision: 7,
+        settings: {
+          workerId: TRIAGE,
+          autonomy: 'manual',
+          detectionConfig: { confidenceThreshold: 0.7, fpCountThreshold: 10 },
+        },
+      }),
+    });
+    const { result } = renderUpdateWorker(detectionWorker, patch);
+
+    await act(async () => {
+      result.current.mutate({
+        workerId: TRIAGE,
+        patch: { detectionConfig: { confidenceThreshold: 0.7 } },
+      });
+    });
+
+    await waitFor(() => expect(patch).toHaveBeenCalledTimes(1));
+    expect(JSON.parse(patch.mock.calls[0][1].body)).toEqual({
+      detectionConfig: { confidenceThreshold: 0.7 },
+      settingsRevision: 6,
+    });
+  });
+
+  it('merges a detectionConfig patch field-by-field into the optimistic cache entry', async () => {
+    let resolvePatch: ((worker: Worker) => void) | undefined;
+    const patch = jest.fn(
+      () =>
+        new Promise((resolve) => {
+          resolvePatch = (worker) => resolve({ worker });
+        })
+    );
+    const { result, queryClient } = renderUpdateWorker(detectionWorker, patch);
+
+    act(() => {
+      result.current.mutate({
+        workerId: TRIAGE,
+        patch: { detectionConfig: { confidenceThreshold: 0.7 } },
+      });
+    });
+
+    await waitFor(() => expect(patch).toHaveBeenCalledTimes(1));
+
+    const cached = queryClient
+      .getQueryData<{ workers: Worker[] }>(queryKeys.workers.list())
+      ?.workers.find((worker) => worker.id === TRIAGE);
+    expect(cached?.settings.detectionConfig).toEqual({
+      confidenceThreshold: 0.7,
+      fpCountThreshold: 10,
+    });
+
+    resolvePatch!(
+      createWorker({
+        settingsRevision: 7,
+        settings: {
+          workerId: TRIAGE,
+          autonomy: 'manual',
+          detectionConfig: { confidenceThreshold: 0.7, fpCountThreshold: 10 },
+        },
+      })
+    );
+    await waitFor(() => expect(patch).toHaveBeenCalledTimes(1));
+  });
 });
