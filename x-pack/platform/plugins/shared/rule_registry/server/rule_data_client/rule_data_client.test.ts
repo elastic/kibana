@@ -499,6 +499,105 @@ describe('RuleDataClient', () => {
           expect(ruleDataClient.isWriteEnabled()).toBe(true);
         });
 
+        test('logs benign version conflict errors at debug instead of error', async () => {
+          scopedClusterClient.bulk.mockResponseOnce({
+            took: 0,
+            errors: true,
+            items: [
+              {
+                create: {
+                  _index: '.internal.alerts-streams.alerts-default-000004',
+                  _id: '1',
+                  _version: 1,
+                  result: 'created',
+                  _shards: { total: 2, successful: 2, failed: 0 },
+                  status: 201,
+                  _seq_no: 2,
+                  _primary_term: 1,
+                },
+              },
+              {
+                create: {
+                  _index: '.internal.alerts-streams.alerts-default-000004',
+                  _id: '2',
+                  status: 409,
+                  error: {
+                    type: 'version_conflict_engine_exception',
+                    reason: '[2]: version conflict, document already exists (current version [1])',
+                    index_uuid: 'repu04xTTiWq0ZJEU6Es0Q',
+                    shard: '0',
+                    index: '.internal.alerts-streams.alerts-default-000004',
+                  },
+                },
+              },
+            ],
+          });
+          const ruleDataClient = new RuleDataClient(
+            getRuleDataClientOptions({ isUsingDataStreams })
+          );
+          expect(ruleDataClient.isWriteEnabled()).toBe(true);
+          const writer = await ruleDataClient.getWriter();
+
+          await delay();
+
+          await writer.bulk({});
+
+          expect(logger.error).not.toHaveBeenCalled();
+          expect(logger.debug).toHaveBeenCalledWith(expect.any(Function));
+          expect(ruleDataClient.isWriteEnabled()).toBe(true);
+        });
+
+        test('logs at error when a non-version-conflict failure is present', async () => {
+          scopedClusterClient.bulk.mockResponseOnce({
+            took: 0,
+            errors: true,
+            items: [
+              {
+                create: {
+                  _index: '.internal.alerts-streams.alerts-default-000004',
+                  _id: '1',
+                  status: 409,
+                  error: {
+                    type: 'version_conflict_engine_exception',
+                    reason: '[1]: version conflict, document already exists (current version [1])',
+                    index_uuid: 'repu04xTTiWq0ZJEU6Es0Q',
+                    shard: '0',
+                    index: '.internal.alerts-streams.alerts-default-000004',
+                  },
+                },
+              },
+              {
+                create: {
+                  _index: '.internal.alerts-streams.alerts-default-000004',
+                  _id: '2',
+                  status: 404,
+                  error: {
+                    type: 'mapper_parsing_exception',
+                    reason: 'failed to parse field',
+                  },
+                },
+              },
+            ],
+          });
+          const ruleDataClient = new RuleDataClient(
+            getRuleDataClientOptions({ isUsingDataStreams })
+          );
+          expect(ruleDataClient.isWriteEnabled()).toBe(true);
+          const writer = await ruleDataClient.getWriter();
+
+          await delay();
+
+          const bulkWriteResponse = await writer.bulk({});
+
+          expect(logger.debug).not.toHaveBeenCalled();
+          expect(logger.error).toHaveBeenNthCalledWith(
+            1,
+            // @ts-expect-error
+            new errors.ResponseError(bulkWriteResponse)
+          );
+          expect(ruleDataClient.isWriteEnabled()).toBe(true);
+        });
+
         test('waits until cluster client is ready before calling bulk', async () => {
           scopedClusterClient.bulk.mockResolvedValueOnce(
             elasticsearchClientMock.createSuccessTransportRequestPromise(

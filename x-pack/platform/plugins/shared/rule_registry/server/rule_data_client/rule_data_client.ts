@@ -26,6 +26,24 @@ import type { IRuleDataClient, IRuleDataReader, IRuleDataWriter } from './types'
 import type { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import type { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 
+const VERSION_CONFLICT_ERROR_TYPE = 'version_conflict_engine_exception';
+
+/**
+ * Returns true when every failing item in a bulk response failed with a benign
+ * version conflict, so the caller can downgrade the log level from ERROR to DEBUG.
+ */
+const bulkResponseHasOnlyVersionConflictErrors = (response: estypes.BulkResponse): boolean => {
+  const failedItems = (response.items ?? []).flatMap((item) =>
+    Object.values(item).filter((operation) => operation?.error != null)
+  );
+
+  if (failedItems.length === 0) {
+    return false;
+  }
+
+  return failedItems.every((operation) => operation.error?.type === VERSION_CONFLICT_ERROR_TYPE);
+};
+
 export interface RuleDataClientConstructorOptions {
   indexInfo: IndexInfo;
   resourceInstaller: IResourceInstaller;
@@ -237,15 +255,28 @@ export class RuleDataClient implements IRuleDataClient {
               return response;
             }
 
-            // TODO: #160572 - add support for version conflict errors, in case alert was updated
-            // some other way between the time it was fetched and the time it was updated.
             // Redact part of reason message that echoes back value
             const sanitizedResponse = sanitizeBulkErrorResponse(response) as TransportResult<
               estypes.BulkResponse,
               unknown
             >;
-            const error = new errors.ResponseError(sanitizedResponse);
-            this.options.logger.error(error);
+            // #160572 - Writing alerts-as-data documents uses the `create` op-type with a
+            // deterministic `_id`, so re-writing an already-existing alert (e.g. overlapping or
+            // retried rule executions) fails with a benign 409 `version_conflict_engine_exception`.
+            // The document already exists, so no data is lost. Only log at ERROR when the bulk
+            // response contains at least one failure that is NOT a benign version conflict,
+            // otherwise log at DEBUG to avoid noisy error logs for a self-correcting condition.
+            if (bulkResponseHasOnlyVersionConflictErrors(sanitizedResponse.body)) {
+              this.options.logger.debug(
+                () =>
+                  `Bulk write to ${alias} completed with only benign version conflicts (alert documents already exist): ${JSON.stringify(
+                    sanitizedResponse.body
+                  )}`
+              );
+            } else {
+              const error = new errors.ResponseError(sanitizedResponse);
+              this.options.logger.error(error);
+            }
             return sanitizedResponse;
           } else {
             this.options.logger.debug(`Writing is disabled, bulk() will not write any data.`);
