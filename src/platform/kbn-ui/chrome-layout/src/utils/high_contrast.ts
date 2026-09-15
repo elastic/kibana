@@ -18,19 +18,19 @@ export const getHighContrastFrame = (
   euiThemeContext: UseEuiTheme
 ): HighContrastFrame | undefined => {
   const { euiTheme, highContrastMode } = euiThemeContext;
+  const width = euiTheme.border.width.thin;
 
-  if (highContrastMode) {
+  if (width == null) {
+    return undefined;
+  }
+
+  if (highContrastMode || (euiThemeContext.colorMode === 'DARK' && euiTheme.border.thin)) {
     return {
-      width: euiTheme.border.width.thin,
+      width: String(width),
       color: euiTheme.border.color,
     };
   }
-  if (euiThemeContext.colorMode === 'DARK' && euiTheme.border.thin) {
-    return {
-      width: euiTheme.border.width.thin,
-      color: euiTheme.border.color,
-    };
-  }
+
   return undefined;
 };
 
