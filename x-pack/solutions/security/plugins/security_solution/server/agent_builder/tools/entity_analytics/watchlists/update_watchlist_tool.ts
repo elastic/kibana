@@ -68,6 +68,13 @@ Use when the user asks to modify a watchlist's settings (e.g. "rename X", "set t
 Do NOT use this tool to add or remove entities — that is a separate action.`,
     schema,
     tags: ['security', 'entity-analytics', 'watchlists'],
+    annotations: {
+      title: 'Update Watchlist',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: ({ request }) =>

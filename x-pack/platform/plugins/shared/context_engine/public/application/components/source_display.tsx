@@ -40,7 +40,7 @@ const SOURCE_DISPLAY: Record<SourceType, SourceDisplayFactory> = {
           size="m"
           color="subdued"
           name={typeLabel}
-          iconType="editorCodeBlock"
+          iconType="code"
           iconColor="primary"
           iconSize="m"
         />

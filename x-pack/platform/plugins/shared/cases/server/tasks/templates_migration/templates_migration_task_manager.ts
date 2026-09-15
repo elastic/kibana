@@ -33,7 +33,11 @@ import {
 } from './types';
 import type { MigrationTaskState } from './types';
 import { findAllConfigurations, migrateOneConfigure } from './migrate_configuration';
-import { hasPendingCaseBackfill, runCaseBackfillPhase } from './run_case_backfill';
+import {
+  configureNeedsCaseBackfill,
+  hasPendingCaseBackfill,
+  runCaseBackfillPhase,
+} from './run_case_backfill';
 
 /**
  * Registers and schedules the one-shot task that migrates legacy (v1) templates and custom fields
@@ -162,10 +166,11 @@ export class TemplatesMigrationTaskManager {
     // reflects whether real case-backfill work was outstanding when the run began. Derived from the
     // restart-durable `legacyCasesMigrated` flags rather than a per-run write count, so it stays
     // correct even when the final run of a multi-run backfill re-scans already-written cases and
-    // writes nothing (e.g. after a restart wiped the in-progress cursor). Drives the one-shot
-    // analytics re-index nudge on completion — see `onCaseBackfillComplete`. A no-op restart of a
+    // writes nothing (e.g. after a restart wiped the in-progress cursor). Combined below with a
+    // post-Phase-1 recheck into `hadRealBackfillWork`, which drives the one-shot analytics
+    // re-index nudge on completion — see `onCaseBackfillComplete`. A no-op restart of a
     // fully-migrated cluster has every space flagged, so this is `false` and no re-index is triggered.
-    const hadPendingCaseBackfill = hasPendingCaseBackfill(configures);
+    const pendingCaseBackfillAtStart = hasPendingCaseBackfill(configures);
 
     // Aggregate counts so the whole run emits a single summary INFO line, not one per space.
     const totals = {
@@ -181,12 +186,12 @@ export class TemplatesMigrationTaskManager {
     // ── Phase 1: field definitions + templates (fast, bounded per space) ─────────────────────────
     await pMap(
       configures,
-      async (so) => {
+      async (so, index) => {
         const fieldsAndTemplatesDone =
           so.attributes.legacyTemplatesMigrated && so.attributes.legacyCustomFieldsMigrated;
 
         if (fieldsAndTemplatesDone) {
-          if (so.attributes.legacyCasesMigrated) {
+          if (!configureNeedsCaseBackfill(so)) {
             totals.skipped++;
             this.migrationUsageCounter?.incrementCounter({
               counterName: 'configureMigrationSkipped',
@@ -203,6 +208,20 @@ export class TemplatesMigrationTaskManager {
           totals.fieldDefsReused += counts.fieldDefsReused;
           totals.templatesCreated += counts.templatesCreated;
           totals.templatesReused += counts.templatesReused;
+          // Replace (never mutate) this run's in-memory snapshot so Phase 2 (below), which reads
+          // from this same `configures` array, sees a freshly-migrated space as eligible
+          // immediately instead of waiting a full extra run for the next findAllConfigurations
+          // read. Replacing the array slot — rather than assigning `so.attributes.x = ...` — also
+          // avoids a spurious require-atomic-updates flag, since `so` itself is never reassigned
+          // after the `await` above.
+          configures[index] = {
+            ...so,
+            attributes: {
+              ...so.attributes,
+              legacyCustomFieldsMigrated: counts.legacyCustomFieldsMigrated,
+              legacyTemplatesMigrated: counts.legacyTemplatesMigrated,
+            },
+          };
           this.migrationUsageCounter?.incrementCounter({
             counterName: 'configureMigrationSuccess',
             incrementBy: 1,
@@ -224,6 +243,16 @@ export class TemplatesMigrationTaskManager {
       { concurrency: MAX_CONCURRENT_MIGRATIONS }
     );
 
+    // Re-check AFTER Phase 1: a fresh configuration (no migration flags) cannot count as pending
+    // at the start of the run — `configureNeedsCaseBackfill` requires the Phase-1 flags to be set.
+    // When Phase 1 and the whole backfill complete in this same run (small deployments), the
+    // start-of-run snapshot alone would report "no pending work" and the terminal analytics nudge
+    // would never fire, permanently stranding the backfilled values from Cases Analytics v2 (raw
+    // repository writes do not advance the domain updated_at cursor). The OR keeps both sources of
+    // truth: work that was already pending across runs, and work that became pending in this run.
+    const pendingCaseBackfillAfterPhase1 = hasPendingCaseBackfill(configures);
+    const hadRealBackfillWork = pendingCaseBackfillAtStart || pendingCaseBackfillAfterPhase1;
+
     // ── Phase 2: existing-case backfill (resumable, budgeted across runs) ────────────────────────
     const backfill = await runCaseBackfillPhase(
       repo,
@@ -244,26 +273,45 @@ export class TemplatesMigrationTaskManager {
         `${backfill.complete ? '' : ' (more cases remain — rescheduling)'}`
     );
 
-    // Backfill fully done — delete this one-shot task.
-    if (backfill.complete) {
-      await this.notifyCaseBackfillComplete(hadPendingCaseBackfill, executionId);
+    // A space whose Phase-1 migrateOneConfigure keeps throwing never gets its
+    // legacyCustomFieldsMigrated/legacyTemplatesMigrated flags set, so configureNeedsCaseBackfill
+    // (and therefore backfill.complete) silently excludes it from "pending" rather than blocking
+    // on it — `backfill.complete` alone is not "every space fully migrated," just "every space
+    // Phase 1 considers eligible for backfill is backfilled." Gate deletion on both, otherwise the
+    // one-shot task would delete itself while that space's legacy data is never migrated, leaving
+    // it recoverable only via a Kibana restart re-scheduling a fresh task.
+    const phase1HasErrors = totals.errored > 0;
+
+    // Backfill fully done and no space is stuck on an unresolved Phase-1 error — delete this
+    // one-shot task.
+    if (backfill.complete && !phase1HasErrors) {
+      await this.notifyCaseBackfillComplete(hadRealBackfillWork, executionId);
       return { state: {}, shouldDeleteTask: true };
     }
 
-    // Count consecutive runs that couldn't complete a space because its updates kept failing. A run
-    // that only stopped for budget/cancellation is normal progress and resets the count. After the
-    // cap, give up rather than rescheduling a poison space forever.
-    const failedRuns = backfill.hadFailures ? (previousState.failedRuns ?? 0) + 1 : 0;
+    // Count consecutive runs that couldn't fully complete because either a case update kept
+    // failing (Phase 2) or a space's field-definitions/templates migration kept throwing
+    // (Phase 1). A run that only stopped for budget/cancellation — with no Phase-1 errors — is
+    // normal progress and resets the count. After the cap, give up rather than rescheduling a
+    // poison space forever.
+    const failedRuns =
+      backfill.hadFailures || phase1HasErrors ? (previousState.failedRuns ?? 0) + 1 : 0;
     if (failedRuns >= MAX_CASE_BACKFILL_FAILED_RUNS) {
+      const failingPhases = [
+        ...(phase1HasErrors ? ['field-definitions/templates phase'] : []),
+        ...(backfill.hadFailures ? ['case extended_fields backfill'] : []),
+      ].join(', ');
       log.error(
-        `[${executionId}] Giving up the cases extended_fields backfill after ${failedRuns} consecutive runs ` +
-          `with update failures — some cases were not backfilled. Resolve the underlying error (see earlier ` +
-          `"updates failed" logs) and restart Kibana to re-run the migration.`
+        `[${executionId}] Giving up the cases templates v2 migration after ${failedRuns} consecutive runs ` +
+          `with failures (${failingPhases}) — some spaces were not fully migrated. Resolve the ` +
+          `underlying error (see earlier "Migration failed" / "updates failed" logs) and restart ` +
+          `Kibana to re-run the migration.`
       );
-      // Some cases may still have been backfilled successfully across prior runs; nudge analytics to
-      // re-index so those aren't stranded. A later restart re-runs the migration and completes it,
-      // firing this again (idempotent) once the remaining cases succeed.
-      await this.notifyCaseBackfillComplete(hadPendingCaseBackfill, executionId);
+      // Some cases/spaces may still have been migrated/backfilled successfully across prior runs;
+      // nudge analytics to re-index so those aren't stranded. A later restart re-runs the
+      // migration and completes it, firing this again (idempotent) once the remaining work
+      // succeeds.
+      await this.notifyCaseBackfillComplete(hadRealBackfillWork, executionId);
       return { state: {}, shouldDeleteTask: true };
     }
 
@@ -272,17 +320,20 @@ export class TemplatesMigrationTaskManager {
       ...(backfill.nextCursor ? { caseBackfill: backfill.nextCursor } : {}),
       ...(failedRuns > 0 ? { failedRuns } : {}),
     };
-    const delayMs = backfill.hadFailures
-      ? CASE_BACKFILL_FAILURE_RESCHEDULE_DELAY_MS
-      : CASE_BACKFILL_RESCHEDULE_DELAY_MS;
+    const delayMs =
+      backfill.hadFailures || phase1HasErrors
+        ? CASE_BACKFILL_FAILURE_RESCHEDULE_DELAY_MS
+        : CASE_BACKFILL_RESCHEDULE_DELAY_MS;
     return { state: nextState, runAt: new Date(Date.now() + delayMs) };
   }
 
   /**
    * Fires the `onCaseBackfillComplete` hook exactly at the migration's terminal points, and only
-   * when there was outstanding case-backfill work when the final run began. Called from the two
-   * `shouldDeleteTask` branches, so it runs once per migration lifetime (the task deletes itself
-   * after; a subsequent restart of a fully-migrated cluster sees no pending work and does not fire).
+   * when real case-backfill work existed during the final run — either already pending when the
+   * run began, or newly eligible after this run's Phase 1 (a first-run same-run completion).
+   * Called from the two `shouldDeleteTask` branches, so it runs once per migration lifetime (the
+   * task deletes itself after; a subsequent restart of a fully-migrated cluster sees no pending
+   * work and does not fire).
    *
    * Best-effort by contract: the hook is awaited so its own logging orders sensibly, but any error
    * is caught and swallowed. Letting it throw would prevent the caller from returning
@@ -290,10 +341,10 @@ export class TemplatesMigrationTaskManager {
    * the hook — a pointless retry loop. The migration's own success does not depend on the hook.
    */
   private async notifyCaseBackfillComplete(
-    hadPendingCaseBackfill: boolean,
+    hadRealBackfillWork: boolean,
     executionId: string
   ): Promise<void> {
-    if (!hadPendingCaseBackfill || this.onCaseBackfillComplete == null) {
+    if (!hadRealBackfillWork || this.onCaseBackfillComplete == null) {
       return;
     }
     try {

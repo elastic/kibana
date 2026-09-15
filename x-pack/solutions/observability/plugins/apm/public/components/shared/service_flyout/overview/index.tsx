@@ -9,6 +9,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
+  EuiSkeletonRectangle,
   EuiSkeletonText,
   EuiSkeletonTitle,
   EuiSpacer,
@@ -18,15 +19,18 @@ import {
 import { css } from '@emotion/react';
 import { ServiceFlyoutTransactionsSection } from '@kbn/apm-ui-shared';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import React, { useMemo, useState } from 'react';
+import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import type { LensESQLConfig } from './types';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { useServiceFlyoutContext } from '../service_flyout_context';
-import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { LatencyAggregationTypeSelect } from '../../charts/latency_chart/latency_aggregation_type_select';
 import { useServiceHasSystemMetrics } from '../hooks/use_service_has_system_metrics';
-import { getChartDefinitions } from './chart_configs';
+import { useProjectRouting } from '../hooks/use_project_routing';
+import { ServiceFlyoutApmCharts } from './apm_charts';
+import { getEsqlKeyMetricCharts, getInfrastructureMetricCharts } from './chart_configs';
 import { ServiceFlyoutLensChart } from './lens_chart';
 import { ServiceFlyoutQueryControls } from './query_controls';
 
@@ -39,6 +43,10 @@ const INFRASTRUCTURE_METRICS_SECTION_TITLE = i18n.translate(
   { defaultMessage: 'Infrastructure metrics' }
 );
 
+const CHARTS_LOAD_ERROR = i18n.translate('xpack.apm.serviceFlyout.chartsUnavailable', {
+  defaultMessage: 'Unable to load charts',
+});
+
 const INFRASTRUCTURE_METRICS_SECTION_DESCRIPTION = i18n.translate(
   'xpack.apm.serviceFlyout.infrastructureMetricsSectionTooltip',
   {
@@ -47,6 +55,30 @@ const INFRASTRUCTURE_METRICS_SECTION_DESCRIPTION = i18n.translate(
   }
 );
 
+function LensChartsSkeleton({
+  count,
+  'data-test-subj': testSubj,
+}: {
+  count: number;
+  'data-test-subj': string;
+}) {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      data-test-subj={testSubj}
+      css={css`
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: ${euiTheme.size.m};
+      `}
+    >
+      {Array.from({ length: count }, (_, i) => (
+        <EuiSkeletonRectangle key={i} width="100%" height={200} borderRadius="m" />
+      ))}
+    </div>
+  );
+}
+
 interface FlyoutLensChartDefinition {
   id: string;
   title: string;
@@ -54,25 +86,15 @@ interface FlyoutLensChartDefinition {
   config?: LensESQLConfig;
 }
 
-function ServiceFlyoutChartsSection({
+function ServiceFlyoutSectionTitle({
   id,
   title,
   description,
-  charts,
-  rangeFrom,
-  rangeTo,
-  refreshToken,
 }: {
   id: string;
   title: string;
   description?: string;
-  charts: FlyoutLensChartDefinition[];
-  rangeFrom: string;
-  rangeTo: string;
-  refreshToken: number;
 }) {
-  const { euiTheme } = useEuiTheme();
-
   return (
     <>
       <EuiFlexGroup
@@ -86,71 +108,173 @@ function ServiceFlyoutChartsSection({
             <h3>{title}</h3>
           </EuiTitle>
         </EuiFlexItem>
-        {description ? (
+        {description && (
           <EuiFlexItem grow={false}>
             <EuiIconTip content={description} size="s" color="subdued" aria-label={description} />
           </EuiFlexItem>
-        ) : null}
+        )}
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <div
-        css={css`
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: ${euiTheme.size.m};
-        `}
-      >
-        {charts.map((chart) => (
-          <ServiceFlyoutLensChart
-            key={chart.id}
-            id={chart.id}
-            title={chart.title}
-            titleAction={chart.titleAction}
-            config={chart.config}
-            rangeFrom={rangeFrom}
-            rangeTo={rangeTo}
-            refreshToken={refreshToken}
-          />
-        ))}
-      </div>
+    </>
+  );
+}
+
+function ServiceFlyoutChartsSection({
+  id,
+  title,
+  description,
+  charts,
+  isLoading,
+  hasError,
+  rangeFrom,
+  rangeTo,
+  refreshToken,
+}: {
+  id: string;
+  title: string;
+  description?: string;
+  charts: FlyoutLensChartDefinition[];
+  isLoading: boolean;
+  hasError: boolean;
+  rangeFrom: string;
+  rangeTo: string;
+  refreshToken: number;
+}) {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <>
+      <ServiceFlyoutSectionTitle id={id} title={title} description={description} />
+      {isLoading ? (
+        <LensChartsSkeleton
+          count={charts.length}
+          data-test-subj={`serviceFlyoutSection-${id}-skeleton`}
+        />
+      ) : hasError ? (
+        <KbnWarningCallout
+          size="s"
+          data-test-subj={`serviceFlyoutSection-${id}-error`}
+          title={CHARTS_LOAD_ERROR}
+        />
+      ) : (
+        <div
+          css={css`
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: ${euiTheme.size.m};
+          `}
+        >
+          {charts.map((chart) => (
+            <ServiceFlyoutLensChart
+              key={chart.id}
+              id={chart.id}
+              title={chart.title}
+              titleAction={chart.titleAction}
+              config={chart.config}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              refreshToken={refreshToken}
+            />
+          ))}
+        </div>
+      )}
     </>
   );
 }
 
 export function ServiceFlyoutOverview() {
-  const [latencyAggregationType, setLatencyAggregationType] = useState(LatencyAggregationType.avg);
   const {
     deps: { core, share },
     service,
-    filters: { environment, rangeFrom, rangeTo, transactionType, refreshToken },
+    capabilities,
+    indices,
+    preferDocumentBasedCharts,
+    filters: {
+      environment,
+      rangeFrom,
+      rangeTo,
+      transactionType,
+      refreshToken,
+      latencyAggregationType: initialLatencyAggregationType,
+    },
   } = useServiceFlyoutContext();
+  const [latencyAggregationType, setLatencyAggregationType] = useState(
+    initialLatencyAggregationType ?? LatencyAggregationType.avg
+  );
+
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const { dataView } = useAdHocApmDataView();
-  const indexes = dataView?.getIndexPattern();
   const { hasSystemMetrics, isLoading: isSystemMetricsLoading } = useServiceHasSystemMetrics({
     serviceName: service.name,
     environment,
     rangeFrom,
     rangeTo,
   });
+  // CPS: pass project routing to ES|QL charts and the transactions table HTTP calls
+  // so they query the same projects as APM APIs (`x-project-routing`).
+  const projectRouting = useProjectRouting();
 
-  const { keyMetrics, infrastructureMetrics } = useMemo(
+  // ES|QL charts over raw documents for: unprocessed OTel services (invisible to
+  // the APM chart APIs) and document-based hosts like Discover (whose surrounding
+  // RED charts read the raw documents). Every other case renders the same APM
+  // chart components as the alert details page.
+  const useEsqlKeyMetrics = Boolean(preferDocumentBasedCharts) || capabilities.schema === 'otel';
+
+  const esqlKeyMetrics = useMemo(
     () =>
-      getChartDefinitions({
-        indexes,
+      useEsqlKeyMetrics
+        ? getEsqlKeyMetricCharts({
+            indices: indices ?? undefined,
+            schema: capabilities.schema,
+            serviceName: service.name,
+            environment,
+            transactionType: transactionType ?? '',
+            latencyAggregationType,
+            latencyTitleAction: (
+              <LatencyAggregationTypeSelect
+                latencyAggregationType={latencyAggregationType}
+                onChange={setLatencyAggregationType}
+                ebt={{ element: SERVICE_FLYOUT_EBT_ELEMENTS.CHART_CONTROLS }}
+              />
+            ),
+            projectRouting,
+          })
+        : [],
+    [
+      useEsqlKeyMetrics,
+      capabilities.schema,
+      environment,
+      indices,
+      latencyAggregationType,
+      service.name,
+      transactionType,
+      projectRouting,
+    ]
+  );
+
+  const infrastructureMetrics = useMemo(
+    () =>
+      getInfrastructureMetricCharts({
+        indices: indices ?? undefined,
         serviceName: service.name,
         environment,
-        transactionType: transactionType ?? '',
-        latencyAggregationType,
-        latencyTitleAction: (
-          <LatencyAggregationTypeSelect
-            latencyAggregationType={latencyAggregationType}
-            onChange={setLatencyAggregationType}
-          />
-        ),
+        projectRouting,
       }),
-    [environment, indexes, latencyAggregationType, service.name, transactionType]
+    [environment, indices, service.name, projectRouting]
   );
+
+  if (capabilities.loading) {
+    return (
+      <div data-test-subj="serviceFlyoutOverviewSkeleton">
+        <EuiSkeletonTitle size="xs" />
+        <EuiSpacer size="s" />
+        <EuiSkeletonText lines={3} />
+        <EuiSpacer size="m" />
+        <EuiSkeletonTitle size="xs" />
+        <EuiSpacer size="s" />
+        <EuiSkeletonText lines={3} />
+      </div>
+    );
+  }
 
   return (
     <div data-test-subj="serviceFlyoutOverview">
@@ -158,48 +282,68 @@ export function ServiceFlyoutOverview() {
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="column" responsive={false} gutterSize="m">
         <EuiFlexItem>
-          <ServiceFlyoutChartsSection
-            id="keyMetrics"
-            title={KEY_METRICS_SECTION_TITLE}
-            charts={keyMetrics}
-            rangeFrom={rangeFrom}
-            rangeTo={rangeTo}
-            refreshToken={refreshToken}
-          />
-        </EuiFlexItem>
-        {isSystemMetricsLoading ? (
-          <EuiFlexItem data-test-subj="serviceFlyoutSection-infrastructureMetricsSkeleton">
-            <EuiSkeletonTitle size="xs" />
-            <EuiSpacer size="s" />
-            <EuiSkeletonText lines={2} />
-          </EuiFlexItem>
-        ) : hasSystemMetrics ? (
-          <EuiFlexItem>
+          {useEsqlKeyMetrics ? (
             <ServiceFlyoutChartsSection
-              id="infrastructureMetrics"
-              title={INFRASTRUCTURE_METRICS_SECTION_TITLE}
-              description={INFRASTRUCTURE_METRICS_SECTION_DESCRIPTION}
-              charts={infrastructureMetrics}
+              id="keyMetrics"
+              title={KEY_METRICS_SECTION_TITLE}
+              charts={esqlKeyMetrics}
+              isLoading={indices === undefined}
+              hasError={indices === null}
               rangeFrom={rangeFrom}
               rangeTo={rangeTo}
               refreshToken={refreshToken}
             />
-          </EuiFlexItem>
-        ) : null}
-        <EuiFlexItem>
-          <ServiceFlyoutTransactionsSection
-            http={core.http}
-            notifications={core.notifications}
-            locators={share.url.locators}
-            serviceName={service.name}
-            environment={environment}
-            start={start}
-            end={end}
-            transactionType={transactionType ?? ''}
-            latencyAggregationType={latencyAggregationType}
-            refreshToken={refreshToken}
-          />
+          ) : (
+            <>
+              <ServiceFlyoutSectionTitle id="keyMetrics" title={KEY_METRICS_SECTION_TITLE} />
+              <ServiceFlyoutApmCharts
+                key={refreshToken}
+                latencyAggregationType={latencyAggregationType}
+                setLatencyAggregationType={setLatencyAggregationType}
+              />
+            </>
+          )}
         </EuiFlexItem>
+        {capabilities.overview?.infraMetrics &&
+          (isSystemMetricsLoading ? (
+            <EuiFlexItem data-test-subj="serviceFlyoutSection-infrastructureMetricsSkeleton">
+              <EuiSkeletonTitle size="xs" />
+              <EuiSpacer size="s" />
+              <EuiSkeletonText lines={2} />
+            </EuiFlexItem>
+          ) : hasSystemMetrics ? (
+            <EuiFlexItem>
+              <ServiceFlyoutChartsSection
+                id="infrastructureMetrics"
+                title={INFRASTRUCTURE_METRICS_SECTION_TITLE}
+                description={INFRASTRUCTURE_METRICS_SECTION_DESCRIPTION}
+                charts={infrastructureMetrics}
+                isLoading={indices === undefined}
+                hasError={indices === null}
+                rangeFrom={rangeFrom}
+                rangeTo={rangeTo}
+                refreshToken={refreshToken}
+              />
+            </EuiFlexItem>
+          ) : null)}
+        {capabilities.overview?.transactions && (
+          <EuiFlexItem data-test-subj="serviceFlyoutSection-transactions">
+            <ServiceFlyoutTransactionsSection
+              docLinks={core.docLinks}
+              http={core.http}
+              notifications={core.notifications}
+              locators={share.url.locators}
+              serviceName={service.name}
+              environment={environment}
+              start={start}
+              end={end}
+              transactionType={transactionType ?? ''}
+              latencyAggregationType={latencyAggregationType}
+              refreshToken={refreshToken}
+              projectRouting={projectRouting}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </div>
   );

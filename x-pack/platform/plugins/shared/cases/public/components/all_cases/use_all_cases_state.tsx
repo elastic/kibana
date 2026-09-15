@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { Context } from 'react';
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { History } from 'history';
-import { UNSAFE_NavigationContext } from 'react-router-dom-v5-compat';
+import { useHistory } from 'react-router-dom';
 import deepEqual from 'react-fast-compare';
 import { isEmpty } from 'lodash';
 
@@ -17,6 +16,7 @@ import {
   DEFAULT_CASES_TABLE_STATE,
   DEFAULT_FILTER_OPTIONS,
   DEFAULT_QUERY_PARAMS,
+  DEFAULT_TABLE_ACTIVE_PAGE,
 } from '../../containers/constants';
 import { LOCAL_STORAGE_KEYS } from '../../../common/constants';
 import type { AllCasesTableState, AllCasesURLState } from './types';
@@ -108,7 +108,10 @@ export function useAllCasesState(isModalView: boolean = false): UseAllCasesState
     setFilterOptions: (newFilterOptions: Partial<FilterOptions>) => {
       setState({
         filterOptions: { ...allCasesTableState.filterOptions, ...newFilterOptions },
-        queryParams: allCasesTableState.queryParams,
+        // Filtering changes the size of the result set, so a stale page index can
+        // land past the end of it — ES returns `total > 0` with zero hits and the
+        // list renders empty while the stats still show a count.  Reset to page 1.
+        queryParams: { ...allCasesTableState.queryParams, page: DEFAULT_TABLE_ACTIVE_PAGE },
       });
     },
   };
@@ -117,10 +120,9 @@ export function useAllCasesState(isModalView: boolean = false): UseAllCasesState
 const useAllCasesUrlState = (
   isModalView: boolean
 ): [AllCasesURLState, (updated: AllCasesTableState, mode?: 'push' | 'replace') => void] => {
-  const navigationContext = useContext(
-    UNSAFE_NavigationContext as unknown as Context<{ navigator?: History } | undefined>
-  );
-  const history = navigationContext?.navigator;
+  // react-router@5.3 returns undefined outside a <Router>; keep that optional behavior
+  // for modal / non-routed hosts instead of assuming a navigation context exists.
+  const history = useHistory() as History | undefined;
 
   const {
     data: { customFields: customFieldsConfiguration },

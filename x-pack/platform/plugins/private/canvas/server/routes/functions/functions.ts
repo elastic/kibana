@@ -81,7 +81,14 @@ export function initializeBatchFunctionsRoute(deps: RouteInitializerDeps) {
           args: request.body.args,
           context: request.body.context,
         };
-        const result = await runFunction(handlers, fnCall);
+
+        let result;
+        try {
+          result = await runFunction(handlers, fnCall);
+        } catch (err) {
+          return response.badRequest({ body: err instanceof Error ? err.message : String(err) });
+        }
+
         if (typeof result === 'undefined') {
           throw new Error(`Function ${fnCall.functionName} did not return anything.`);
         }

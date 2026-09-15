@@ -14,7 +14,7 @@ export const securityDefaultProductFeaturesConfig: SecurityProductFeaturesConfig
     privileges: {
       all: {
         ui: ['entity-analytics'],
-        api: [`${APP_ID}-entity-analytics`],
+        api: [`${APP_ID}-entity-analytics`, `${APP_ID}-entity-analytics-manage`],
       },
       read: {
         ui: ['entity-analytics'],

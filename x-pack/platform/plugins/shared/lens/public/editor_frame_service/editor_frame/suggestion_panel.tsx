@@ -199,22 +199,31 @@ const SuggestionPreview = ({
   const { euiTheme } = euiThemeContext;
   const xsFontSize = useEuiFontSize('xs');
   return (
-    <EuiToolTip
-      content={preview.title}
-      anchorProps={
+    <div
+      data-test-subj={`lnsSuggestion-${camelCase(preview.title)}`}
+      css={
         wrapSuggestions
-          ? {
-              css: css`
-                display: flex;
-                flex-direction: column;
-                flex-basis: calc(50% - 9px);
-              `,
-            }
+          ? css`
+              flex-basis: calc(50% - 9px);
+            `
           : undefined
       }
     >
-      {/* eslint-disable-next-line @elastic/eui/tooltip-focusable-anchor */}
-      <div data-test-subj={`lnsSuggestion-${camelCase(preview.title)}`}>
+      <EuiToolTip
+        content={preview.title}
+        // anchor element is button with aria label, tooltip announcement would be redundant
+        disableScreenReaderOutput
+        anchorProps={
+          wrapSuggestions
+            ? {
+                css: css`
+                  display: flex;
+                  flex-direction: column;
+                `,
+              }
+            : undefined
+        }
+      >
         <EuiPanel
           hasBorder={true}
           hasShadow={false}
@@ -296,8 +305,8 @@ const SuggestionPreview = ({
             </span>
           )}
         </EuiPanel>
-      </div>
-    </EuiToolTip>
+      </EuiToolTip>
+    </div>
   );
 };
 

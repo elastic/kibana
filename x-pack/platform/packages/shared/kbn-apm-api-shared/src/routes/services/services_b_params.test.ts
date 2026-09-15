@@ -15,6 +15,8 @@ import { serviceThroughputRoute } from './service_throughput';
 import { serviceTransactionTypesRoute } from './service_transaction_types';
 import { servicesDetailedStatisticsRoute } from './services_detailed_statistics';
 import { servicesListRoute } from './services_list';
+import { serviceHasSystemMetricsRoute } from './service_has_system_metrics';
+import { serviceIngestionTypeRoute } from './service_ingestion_type';
 
 describe('serviceMetadataDetailsRoute params', () => {
   it('accepts a valid path and query', () => {
@@ -341,5 +343,61 @@ describe('servicesListRoute params', () => {
     if (result.success) {
       expect(result.data.query.useDurationSummary).toBe(false);
     }
+  });
+});
+
+describe('serviceHasSystemMetricsRoute params', () => {
+  it('accepts a valid path and range query', () => {
+    expectParseSuccess(
+      serviceHasSystemMetricsRoute.params!.safeParse({
+        path: { serviceName: 'opbeans-java' },
+        query: {
+          start: '2021-01-01T00:00:00.000Z',
+          end: '2021-01-02T00:00:00.000Z',
+          environment: 'production',
+        },
+      })
+    );
+  });
+
+  it('rejects a serviceName exceeding MAX_SERVICE_NAME_LENGTH', () => {
+    expectParseError(
+      serviceHasSystemMetricsRoute.params!.safeParse({
+        path: { serviceName: 'a'.repeat(1025) },
+        query: {
+          start: '2021-01-01T00:00:00.000Z',
+          end: '2021-01-02T00:00:00.000Z',
+          environment: 'production',
+        },
+      })
+    );
+  });
+});
+
+describe('serviceIngestionTypeRoute params', () => {
+  it('accepts a valid path and range query', () => {
+    expectParseSuccess(
+      serviceIngestionTypeRoute.params!.safeParse({
+        path: { serviceName: 'opbeans-java' },
+        query: {
+          start: '2021-01-01T00:00:00.000Z',
+          end: '2021-01-02T00:00:00.000Z',
+          environment: 'production',
+        },
+      })
+    );
+  });
+
+  it('rejects a serviceName exceeding MAX_SERVICE_NAME_LENGTH', () => {
+    expectParseError(
+      serviceIngestionTypeRoute.params!.safeParse({
+        path: { serviceName: 'a'.repeat(1025) },
+        query: {
+          start: '2021-01-01T00:00:00.000Z',
+          end: '2021-01-02T00:00:00.000Z',
+          environment: 'production',
+        },
+      })
+    );
   });
 });

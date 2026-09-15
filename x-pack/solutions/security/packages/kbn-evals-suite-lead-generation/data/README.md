@@ -43,7 +43,7 @@ holistically rather than doing exact field comparison.
 Run this once to publish the dataset so CI can fetch it:
 
 ```bash
-# Authenticate first (sources EVALUATIONS_KBN_URL + EVALUATIONS_KBN_API_KEY):
+# Authenticate first (sources EVAL_KBN_URL + EVAL_KBN_API_KEY):
 source x-pack/platform/packages/shared/kbn-evals/scripts/ci/local_ci_env.sh
 
 # Upload (defaults to the JSONL file above):

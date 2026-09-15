@@ -19,7 +19,7 @@ import {
   DynamicSettingsCodec,
   DynamicSettingsSaveCodec,
   LocationMonitorsType,
-} from '../../../../../common/runtime_types';
+} from '../../../../../common/runtime_types/zod/dynamic_settings';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import type { LocationMonitor } from '.';
 
@@ -46,6 +46,7 @@ export const setDynamicSettings = async ({
     defaultTLSRuleEnabled: settings.defaultTLSRuleEnabled,
     defaultStatusRuleEnabled: settings.defaultStatusRuleEnabled,
     privateLocationsSyncInterval: settings.privateLocationsSyncInterval,
+    rebalancePrivateLocationShardsEnabled: settings.rebalancePrivateLocationShardsEnabled,
   };
   return await apiService.put(
     SYNTHETICS_API_URLS.DYNAMIC_SETTINGS,

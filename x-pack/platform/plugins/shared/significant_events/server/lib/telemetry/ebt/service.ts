@@ -19,7 +19,6 @@ import {
   knowledgeIndicatorFeaturesIdentifiedEventType,
   onboardingScheduledEventType,
   agentToolEventWriteEventType,
-  agentToolDiscoveryWriteEventType,
   agentToolEventSearchEventType,
 } from './events';
 import { EbtTelemetryClient } from './client';
@@ -35,7 +34,6 @@ export class EbtTelemetryService {
     this.analytics.registerEventType(knowledgeIndicatorFeaturesIdentifiedEventType);
     this.analytics.registerEventType(agentBuilderKnowledgeIndicatorCreatedEventType);
     this.analytics.registerEventType(agentToolKiIdentificationStartedEventType);
-    this.analytics.registerEventType(agentToolDiscoveryWriteEventType);
     this.analytics.registerEventType(agentToolEventCreateEventType);
     this.analytics.registerEventType(agentToolEventStatusUpdateEventType);
     this.analytics.registerEventType(agentToolEventWriteEventType);

@@ -188,6 +188,13 @@ export const REMOVED_FILE = i18n.translate('xpack.cases.caseView.files.removedFi
   defaultMessage: 'removed file',
 });
 
+export const FILE_ACTIONS_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.cases.caseView.files.fileActionsPopoverAriaLabel',
+  {
+    defaultMessage: 'File actions',
+  }
+);
+
 export const DUPLICATE_FILE_WARNING = (fileName: string) =>
   i18n.translate('xpack.cases.caseView.files.duplicateFileWarning', {
     defaultMessage:

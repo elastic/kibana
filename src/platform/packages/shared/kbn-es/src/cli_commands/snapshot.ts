@@ -209,12 +209,22 @@ export const snapshot: Command = {
           process.on('SIGTERM', shutdown);
         });
       } else {
-        await cluster.run(installPath, {
-          reportTime,
-          startTime: runStartTime,
-          ...options,
-          esStdoutLogLevel: options.esLogLevel || 'info',
-          readyTimeout: parseTimeoutToMs(options.readyTimeout),
+        // Keep the process alive until the user sends SIGINT/SIGTERM (Ctrl+C).
+        await new Promise<void>((resolveShutdown) => {
+          const shutdown = () => {
+            cluster.stop().finally(resolveShutdown);
+          };
+          process.on('SIGINT', shutdown);
+          process.on('SIGTERM', shutdown);
+          cluster
+            .run(installPath, {
+              reportTime,
+              startTime: runStartTime,
+              ...options,
+              esStdoutLogLevel: options.esLogLevel || 'info',
+              readyTimeout: parseTimeoutToMs(options.readyTimeout),
+            })
+            .then(resolveShutdown);
         });
       }
     }

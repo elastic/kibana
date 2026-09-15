@@ -17,6 +17,7 @@ import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ruleIdParamsSchema } from './route_schemas';
+import { runRuleOasExamples } from './run_rule_oas_example';
 
 @injectable()
 export class RunRuleRoute extends BaseAlertingRoute {
@@ -28,7 +29,9 @@ export class RunRuleRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'Run a rule now',
+    oasOperationObject: runRuleOasExamples,
   } as const;
   static schemas = {
     request: {

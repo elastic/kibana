@@ -11,6 +11,7 @@ import { MB, FILE_FORMATS, NO_TIME_FORMAT } from '@kbn/file-upload-common';
 
 export const DEFAULT_LINES_TO_SAMPLE = 1000;
 const UPLOAD_SIZE_MB = 5;
+const NDJSON_DETECT_SAMPLE_LINES = 10;
 
 const overrideDefaults = {
   timestampFormat: undefined,
@@ -26,6 +27,50 @@ const overrideDefaults = {
   linesToSample: undefined,
 };
 
+function isJson(text: string): boolean {
+  try {
+    JSON.parse(text);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Assumes content is NDJSON when the first few non-empty lines each parse as JSON.
+ * When `excludeLastLine` is true (truncated files), the final line is skipped so a cut-off
+ * document cannot fail the detection check.
+ */
+export function looksLikeNdjson(fileContents: string, excludeLastLine = false): boolean {
+  let lines = fileContents.split(/\r?\n/).filter((line) => line.trim() !== '');
+  if (excludeLastLine && lines.length > 1) {
+    lines = lines.slice(0, -1);
+  }
+  if (lines.length === 0) {
+    return false;
+  }
+  const sample = lines.slice(0, NDJSON_DETECT_SAMPLE_LINES);
+  return sample.every(isJson);
+}
+
+/**
+ * When a byte-size truncate cuts through the final NDJSON document, that last line is invalid
+ * JSON. Drop everything after the last newline so analysis only sees complete documents.
+ */
+export function removeCorruptedTrailingNdjsonDoc(fileContents: string): string {
+  const lastNewlineIdx = fileContents.lastIndexOf('\n');
+  if (lastNewlineIdx === -1) {
+    return isJson(fileContents) ? fileContents : '';
+  }
+
+  const trailing = fileContents.slice(lastNewlineIdx + 1);
+  if (trailing.trim() === '' || isJson(trailing.replace(/\r$/, ''))) {
+    return fileContents;
+  }
+
+  return fileContents.slice(0, lastNewlineIdx);
+}
+
 export function readFile(file: File): Promise<{ fileContents: string; data: ArrayBuffer }> {
   return new Promise((resolve, reject) => {
     if (file && file.size) {
@@ -40,7 +85,14 @@ export function readFile(file: File): Promise<{ fileContents: string; data: Arra
             return reject();
           }
           const size = UPLOAD_SIZE_MB * MB;
-          const fileContents = decoder.decode(data.slice(0, size));
+          const wasTruncated = data.byteLength > size;
+          let fileContents = decoder.decode(data.slice(0, size));
+
+          // A size-based slice can cut through the middle of the last NDJSON document.
+          // If the sample looks like NDJSON, drop a trailing line that no longer parses.
+          if (wasTruncated && looksLikeNdjson(fileContents, true)) {
+            fileContents = removeCorruptedTrailingNdjsonDoc(fileContents);
+          }
 
           if (fileContents === '') {
             reject();

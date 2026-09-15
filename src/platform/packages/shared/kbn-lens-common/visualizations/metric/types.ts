@@ -34,6 +34,8 @@ export type SecondaryTrend =
       baselineValue: number | 'primary';
     };
 
+export type SecondaryNameVisibility = 'hidden' | NonNullable<SecondaryMetricProps['labelPosition']>;
+
 export interface MetricVisualizationState {
   layerId: string;
   layerType: LensLayerType;
@@ -50,6 +52,12 @@ export interface MetricVisualizationState {
    * @deprecated
    */
   secondaryPrefix?: string;
+  /**
+   * Custom text from the removed secondary Metric Label control. An empty string is
+   * the legacy None choice. A non-empty value is a runtime render fallback until
+   * the text lives on the secondary column (`customLabel`).
+   * @deprecated Use the secondary column name and `secondaryNameVisibility`.
+   */
   secondaryLabel?: string;
   secondaryTrend?: SecondaryTrend;
   progressDirection?: LayoutDirection;
@@ -71,7 +79,9 @@ export interface MetricVisualizationState {
    */
   titleWeight?: Extract<MetricStyle['titleWeight'], string>;
   primaryPosition?: PrimaryMetricPosition;
+  /** @deprecated */
   secondaryLabelPosition?: SecondaryMetricProps['labelPosition'];
+  secondaryNameVisibility?: SecondaryNameVisibility;
   color?: string;
   icon?: string;
   palette?: PaletteOutput<CustomPaletteParams>;
@@ -101,8 +111,8 @@ export type MetricStateOptinalsWithDefault = Pick<
   | 'valueFontMode'
   | 'density'
   | 'primaryPosition'
-  | 'secondaryLabelPosition'
   | 'applyColorTo'
+  | 'secondaryNameVisibility'
 >;
 
 export type MetricStateDefaults = Required<MetricStateOptinalsWithDefault>;

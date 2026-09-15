@@ -13,7 +13,8 @@ import {
   Provider as ReduxProvider,
   createDispatchHook,
   createSelectorHook,
-} from 'react-redux-v7';
+  createStoreHook,
+} from 'react-redux';
 import type { PropsWithChildren } from 'react';
 import React, { useMemo, createContext, useContext } from 'react';
 import defaultComparator from 'fast-deep-equal';
@@ -28,11 +29,11 @@ import { selectTab } from './selectors';
 import { type TabActionInjector, createTabActionInjector } from './utils';
 import type { ChartPortalNode } from '../../components/chart';
 
-const internalStateContext = createContext<ReactReduxContextValue>(
-  // Recommended approach for versions of Redux prior to v9:
-  // https://github.com/reduxjs/react-redux/issues/1565#issuecomment-867143221
-  null as unknown as ReactReduxContextValue
+const internalStateContext = createContext<ReactReduxContextValue<DiscoverInternalState> | null>(
+  null
 );
+
+const useInternalStateStore = createStoreHook(internalStateContext).withTypes<InternalStateStore>();
 
 export const InternalStateProvider = ({
   store,
@@ -43,22 +44,21 @@ export const InternalStateProvider = ({
   </ReduxProvider>
 );
 
-export const useInternalStateDispatch = createDispatchHook(
-  internalStateContext
-) as () => InternalStateDispatch;
+export const useInternalStateDispatch =
+  createDispatchHook(internalStateContext).withTypes<InternalStateDispatch>();
 
-export const useInternalStateGetState = (): (() => DiscoverInternalState) => {
-  const { store } = useContext(internalStateContext);
-  return store.getState as () => DiscoverInternalState;
+export const useInternalStateGetState = (): InternalStateStore['getState'] => {
+  const store = useInternalStateStore();
+  return store.getState;
 };
 
-export const useInternalStateSubscribe = (): ((listener: () => void) => () => void) => {
-  const { store } = useContext(internalStateContext);
+export const useInternalStateSubscribe = (): InternalStateStore['subscribe'] => {
+  const store = useInternalStateStore();
   return store.subscribe;
 };
 
-export const useInternalStateSelector: TypedUseSelectorHook<DiscoverInternalState> =
-  createSelectorHook(internalStateContext);
+export const useInternalStateSelector =
+  createSelectorHook(internalStateContext).withTypes<DiscoverInternalState>();
 
 interface CurrentTabContextValue {
   currentTabId: string;
@@ -86,7 +86,7 @@ export const CurrentTabProvider = ({
 };
 
 export const useCurrentTabContext = () => {
-  const context = React.useContext(currentTabContext);
+  const context = useContext(currentTabContext);
 
   if (!context) {
     throw new Error('useCurrentTabContext must be used within a CurrentTabProvider');

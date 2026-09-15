@@ -75,6 +75,78 @@ describe('createTaskRunnerLogger', () => {
     expect(logger.fatal).toHaveBeenCalledWith('test fatal message', { tags: ['tag-1', 'tag-2'] });
   });
 
+  test('should inject baseline labels into log messages', () => {
+    const logger: ReturnType<typeof loggingSystemMock.createLogger> =
+      loggingSystemMock.createLogger();
+    const taskRunnerLogger = createTaskRunnerLogger({
+      logger,
+      tags: ['tag-1', 'tag-2'],
+      labels: { ruleId: 'rule-1', ruleType: 'my-rule' },
+    });
+
+    taskRunnerLogger.trace('test trace message');
+    taskRunnerLogger.debug('test debug message');
+    taskRunnerLogger.info('test info message');
+    taskRunnerLogger.warn('test warn message');
+    taskRunnerLogger.error('test error message');
+    taskRunnerLogger.fatal('test fatal message');
+
+    const expectedLabels = { ruleId: 'rule-1', ruleType: 'my-rule' };
+    expect(logger.trace).toHaveBeenCalledWith('test trace message', {
+      tags: ['tag-1', 'tag-2'],
+      labels: expectedLabels,
+    });
+    expect(logger.debug).toHaveBeenCalledWith('test debug message', {
+      tags: ['tag-1', 'tag-2'],
+      labels: expectedLabels,
+    });
+    expect(logger.info).toHaveBeenCalledWith('test info message', {
+      tags: ['tag-1', 'tag-2'],
+      labels: expectedLabels,
+    });
+    expect(logger.warn).toHaveBeenCalledWith('test warn message', {
+      tags: ['tag-1', 'tag-2'],
+      labels: expectedLabels,
+    });
+    expect(logger.error).toHaveBeenCalledWith('test error message', {
+      tags: ['tag-1', 'tag-2'],
+      labels: expectedLabels,
+    });
+    expect(logger.fatal).toHaveBeenCalledWith('test fatal message', {
+      tags: ['tag-1', 'tag-2'],
+      labels: expectedLabels,
+    });
+  });
+
+  test('should merge baseline labels with per-call labels', () => {
+    const logger: ReturnType<typeof loggingSystemMock.createLogger> =
+      loggingSystemMock.createLogger();
+    const taskRunnerLogger = createTaskRunnerLogger({
+      logger,
+      tags: ['rule-id', 'rule-type'],
+      labels: { ruleId: 'rule-1', alertId: 'alert-1', spaceId: 'default' },
+    });
+
+    taskRunnerLogger.debug('first logger call', {
+      labels: { taskInstanceId: 'task-1' },
+    });
+    taskRunnerLogger.debug('second logger call', { labels: { alertId: 'another-alert' } });
+
+    expect(logger.debug).toHaveBeenNthCalledWith(1, 'first logger call', {
+      tags: ['rule-id', 'rule-type'],
+      labels: {
+        ruleId: 'rule-1',
+        alertId: 'alert-1',
+        spaceId: 'default',
+        taskInstanceId: 'task-1',
+      },
+    });
+    expect(logger.debug).toHaveBeenNthCalledWith(2, 'second logger call', {
+      tags: ['rule-id', 'rule-type'],
+      labels: { ruleId: 'rule-1', alertId: 'another-alert', spaceId: 'default' },
+    });
+  });
+
   test('should pass through other functions', () => {
     const logger: ReturnType<typeof loggingSystemMock.createLogger> =
       loggingSystemMock.createLogger();

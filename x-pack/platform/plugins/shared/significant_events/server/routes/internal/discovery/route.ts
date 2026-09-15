@@ -6,8 +6,8 @@
  */
 import type { SignificantEventsWorkflowStatusResult } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { FeatureNotEnabledError } from '../../../lib/errors/feature_not_enabled_error';
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../utils/assert_not_paused';
@@ -24,11 +24,11 @@ const discoveryExecuteRoute = createServerRoute({
     access: 'internal',
     summary: 'Manually trigger the Significant Events pipeline',
     description:
-      'Executes the Significant Events orchestrator workflow for the current space. Runs detection, discovery, and triage in sequence.',
+      'Executes the Significant Events orchestrator workflow for the current space. Runs detection and discovery in sequence.',
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   handler: async ({
@@ -87,7 +87,7 @@ const discoveryStatusRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
   handler: async ({

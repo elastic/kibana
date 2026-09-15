@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
-import { Fragment } from 'react';
-import React from 'react';
+import type { ReactNode } from 'react';
+import React, { Fragment } from 'react';
 
 import {
   EuiAccordion,
@@ -22,23 +21,64 @@ import {
 } from '@elastic/eui';
 
 import { AssetTitleMap } from '../../../constants';
-import type { DisplayedAssetTypes, GetBulkAssetsResponse } from '../../../../../../../../common';
+import type { DisplayedAssetTypes } from '../../../../../../../../common';
 import { useStartServices } from '../../../../../hooks';
 import { KibanaAssetType } from '../../../../../types';
 
 export type DisplayedAssetType = DisplayedAssetTypes[number] | 'view';
 
-export const AssetsAccordion: FunctionComponent<{
-  type: DisplayedAssetType;
-  savedObjects: GetBulkAssetsResponse['items'];
-}> = ({ savedObjects, type }) => {
-  const { http } = useStartServices();
+export interface AccordionAsset {
+  id: string;
+  appLink?: string;
+  attributes?: {
+    title?: string;
+    description?: string;
+  };
+}
 
+export interface AssetsAccordionProps<TAsset extends AccordionAsset = AccordionAsset> {
+  type: DisplayedAssetType;
+  savedObjects: TAsset[];
+  itemCount?: number;
+  initialIsOpen?: boolean;
+  header?: ReactNode;
+  titleExtra?: (asset: TAsset) => ReactNode;
+  getTitleHref?: (asset: TAsset) => string | undefined;
+}
+
+const resolveAssetTitleHref = (
+  titleHref: string,
+  basePath: { get?: () => string; prepend: (path: string) => string }
+): string => {
+  const currentBasePath = basePath.get?.() ?? '';
+  if (
+    currentBasePath &&
+    (titleHref === currentBasePath || titleHref.startsWith(`${currentBasePath}/`))
+  ) {
+    return titleHref;
+  }
+  if (titleHref.startsWith('/app/')) {
+    return basePath.prepend(titleHref);
+  }
+  return titleHref;
+};
+
+export const AssetsAccordion = <TAsset extends AccordionAsset = AccordionAsset>({
+  savedObjects,
+  type,
+  itemCount,
+  initialIsOpen,
+  header,
+  titleExtra,
+  getTitleHref,
+}: AssetsAccordionProps<TAsset>) => {
+  const { http } = useStartServices();
   const isDashboard = type === KibanaAssetType.dashboard;
+  const count = itemCount ?? savedObjects.length;
 
   return (
     <EuiAccordion
-      initialIsOpen={isDashboard}
+      initialIsOpen={initialIsOpen ?? isDashboard}
       data-test-subj={`fleetAssetsAccordion.button.${type}`}
       buttonContent={
         <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s" responsive={false}>
@@ -49,7 +89,7 @@ export const AssetsAccordion: FunctionComponent<{
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiNotificationBadge color="subdued" size="m">
-              <h3>{savedObjects.length}</h3>
+              <h3>{count}</h3>
             </EuiNotificationBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -58,19 +98,22 @@ export const AssetsAccordion: FunctionComponent<{
     >
       <>
         <EuiSpacer size="m" />
+        {header}
         <EuiSplitPanel.Outer
           hasBorder
           hasShadow={false}
           data-test-subj={`fleetAssetsAccordion.content.${type}`}
         >
-          {savedObjects.map(({ id, attributes, appLink }, idx) => {
+          {savedObjects.map((asset, idx) => {
+            const { id, attributes, appLink } = asset;
             const { title: soTitle, description } = attributes || {};
-            // Ignore custom asset views or if not a Kibana asset
             if (type === 'view') {
               return;
             }
 
             const title = soTitle ?? id;
+            const titleHref = getTitleHref ? getTitleHref(asset) : appLink;
+            const extra = titleExtra?.(asset);
             return (
               <Fragment key={id}>
                 <EuiSplitPanel.Inner
@@ -78,15 +121,27 @@ export const AssetsAccordion: FunctionComponent<{
                   key={idx}
                   data-test-subj={`fleetAssetsAccordion.content.${type}.${title}`}
                 >
-                  <EuiText size="m">
-                    <p>
-                      {appLink ? (
-                        <EuiLink href={http.basePath.prepend(appLink)}>{title}</EuiLink>
-                      ) : (
-                        title
-                      )}
-                    </p>
-                  </EuiText>
+                  <EuiFlexGroup
+                    gutterSize="s"
+                    alignItems="center"
+                    responsive={false}
+                    justifyContent="flexStart"
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="m">
+                        <p>
+                          {titleHref ? (
+                            <EuiLink href={resolveAssetTitleHref(titleHref, http.basePath)}>
+                              {title}
+                            </EuiLink>
+                          ) : (
+                            title
+                          )}
+                        </p>
+                      </EuiText>
+                    </EuiFlexItem>
+                    {extra && <EuiFlexItem grow={false}>{extra}</EuiFlexItem>}
+                  </EuiFlexGroup>
                   {description && (
                     <>
                       <EuiSpacer size="s" />

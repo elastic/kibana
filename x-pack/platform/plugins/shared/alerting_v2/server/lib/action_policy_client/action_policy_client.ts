@@ -12,7 +12,6 @@ import type {
   BulkResponse,
   CreateActionPolicyDataInput,
   MatchedActionPolicy,
-  MatcherContext,
 } from '@kbn/alerting-v2-schemas';
 import {
   createActionPolicyDataSchema,
@@ -22,16 +21,23 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
-import { evaluateKql } from '@kbn/eval-kql';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import {
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   type ActionPolicySavedObjectAttributes,
+  type PartiallyUpdateableActionPolicyAttributes,
 } from '../../saved_objects';
-import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
+import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../errors/error_codes';
+import {
+  getActionPolicyAlreadyExistsMessage,
+  getActionPolicyNotFoundMessage,
+  getActionPolicyVersionConflictMessage,
+  getInvalidActionPolicyDataMessage,
+} from '../errors/action_policy_error_messages';
 import { EncryptedSavedObjectsClientToken } from '../dispatcher/steps/dispatch_step_tokens';
+import { PolicyMatcher } from '../dispatcher/state';
 import { ActionPolicySavedObjectServiceScopedToken } from '../services/action_policy_saved_object_service/tokens';
 import type { ActionPolicySavedObjectServiceContract } from '../services/action_policy_saved_object_service/types';
 import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
@@ -41,8 +47,6 @@ import {
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
 import { buildSoSearch } from '../build_so_search';
-import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
-import { RulesSavedObjectServiceScopedToken } from '../services/rules_saved_object_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
 import { ActionPolicyNamespaceToken } from './tokens';
@@ -61,6 +65,7 @@ import type {
 import {
   buildCreateActionPolicyAttributes,
   buildUpdateActionPolicyAttributes,
+  toApiKeyAttributes,
   transformActionPolicySoAttributesToApiResponse,
   validateDateString,
 } from './utils';
@@ -83,6 +88,12 @@ const MAX_API_KEY_UPDATES_IN_PARALLEL = 10;
 /** A single per-resource error entry in a bulk response. */
 type ActionPolicyBulkError = BulkResponse['errors'][number];
 
+/** Decrypted API key material owned by an action policy. */
+interface ActionPolicyAuth {
+  apiKey: string;
+  createdByUser: boolean;
+}
+
 /**
  * Maps a saved-object (or Boom) status code to the stable, machine-readable
  * bulk-error `code` returned in the response body. Keeps the bulk endpoints
@@ -91,12 +102,12 @@ type ActionPolicyBulkError = BulkResponse['errors'][number];
  */
 const actionPolicyBulkErrorCodeForStatus = (statusCode: number): string => {
   if (statusCode === 404) {
-    return ALERTING_V2_ERROR_CODES.ACTION_POLICY_NOT_FOUND;
+    return ALERTING_ERROR_CODES.ACTION_POLICY_NOT_FOUND;
   }
   if (statusCode === 409) {
-    return ALERTING_V2_ERROR_CODES.ACTION_POLICY_VERSION_CONFLICT;
+    return ALERTING_ERROR_CODES.ACTION_POLICY_VERSION_CONFLICT;
   }
-  return ALERTING_V2_ERROR_CODES.INTERNAL_SERVER_ERROR;
+  return ALERTING_ERROR_CODES.INTERNAL_SERVER_ERROR;
 };
 
 const toActionPolicyBulkError = (
@@ -119,20 +130,21 @@ const bulkErrorFromThrown = (id: string, e: unknown): ActionPolicyBulkError => {
 
 @injectable()
 export class ActionPolicyClient {
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(ActionPolicySavedObjectServiceScopedToken)
     private readonly actionPolicySavedObjectService: ActionPolicySavedObjectServiceContract,
-    @inject(RulesSavedObjectServiceScopedToken)
-    private readonly rulesSavedObjectService: RulesSavedObjectServiceContract,
     @inject(UserService) private readonly userService: UserServiceContract,
     @inject(ApiKeyService) private readonly apiKeyService: ApiKeyServiceContract,
     @inject(EncryptedSavedObjectsClientToken)
     private readonly esoClient: EncryptedSavedObjectsClient,
     @inject(ActionPolicyNamespaceToken)
     private readonly namespace: string | undefined,
-    @inject(LoggerServiceToken)
-    private readonly logger: LoggerServiceContract
-  ) {}
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('actionPolicyClient');
+  }
 
   /**
    * Validates a request body with a Zod schema and produces a uniform
@@ -147,9 +159,9 @@ export class ActionPolicyClient {
     const parsed = schema.safeParse(data);
     if (!parsed.success) {
       throw Boom.badRequest(
-        `Error validating ${context} action policy data - ${stringifyZodError(parsed.error)}`,
+        getInvalidActionPolicyDataMessage(context, stringifyZodError(parsed.error)),
         {
-          code: ALERTING_V2_ERROR_CODES.INVALID_ACTION_POLICY_DATA,
+          code: ALERTING_ERROR_CODES.INVALID_ACTION_POLICY_DATA,
           details: { context, errors: treeifyError(parsed.error) },
         }
       );
@@ -170,8 +182,8 @@ export class ActionPolicyClient {
       return { attrs: doc.attributes, version: doc.version };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw Boom.notFound(`Action policy with id "${id}" not found`, {
-          code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
+        throw Boom.notFound(getActionPolicyNotFoundMessage(id), {
+          code: ALERTING_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
           details: { action_policy_id: id },
         });
       }
@@ -199,13 +211,10 @@ export class ActionPolicyClient {
       return await this.actionPolicySavedObjectService.update({ id, attrs, version });
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
-        throw Boom.conflict(
-          `Action policy with id "${id}" has already been updated by another user`,
-          {
-            code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_VERSION_CONFLICT,
-            details: { action_policy_id: id },
-          }
-        );
+        throw Boom.conflict(getActionPolicyVersionConflictMessage(id), {
+          code: ALERTING_ERROR_CODES.ACTION_POLICY_VERSION_CONFLICT,
+          details: { action_policy_id: id },
+        });
       }
       throw e;
     }
@@ -240,11 +249,11 @@ export class ActionPolicyClient {
         attributes,
       });
     } catch (e) {
-      this.markApiKeysForInvalidation(attributes.auth?.apiKey, false);
+      this.markApiKeysForInvalidation(attributes.apiKey, false, params.options?.id);
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         const conflictId = params.options?.id ?? 'unknown';
-        throw Boom.conflict(`Action policy with id "${conflictId}" already exists`, {
-          code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_ALREADY_EXISTS,
+        throw Boom.conflict(getActionPolicyAlreadyExistsMessage(conflictId), {
+          code: ALERTING_ERROR_CODES.ACTION_POLICY_ALREADY_EXISTS,
           details: { action_policy_id: conflictId },
         });
       }
@@ -324,11 +333,11 @@ export class ActionPolicyClient {
         version: params.options.version,
       });
     } catch (e) {
-      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false);
+      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false, params.options.id);
       throw e;
     }
 
-    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser);
+    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser, params.options.id);
 
     return transformActionPolicySoAttributesToApiResponse({
       id: params.options.id,
@@ -374,63 +383,23 @@ export class ActionPolicyClient {
   public async matchActionPoliciesForRule(
     params: MatchActionPoliciesForRuleParams
   ): Promise<MatchActionPoliciesForRuleResponse> {
-    const { ruleId, ruleName, ruleTags } = params;
-
-    let resolvedName = ruleName ?? '';
-    let resolvedTags = ruleTags ?? [];
-
-    // If ruleId is provided but not name or tags, fetch the rule from the DB to get the current name and tags
-    if (ruleId && (ruleName === undefined || ruleTags === undefined)) {
-      try {
-        const rule = await this.rulesSavedObjectService.get(ruleId);
-        resolvedName = ruleName ?? rule.attributes.metadata.name;
-        resolvedTags = ruleTags ?? rule.attributes.metadata.tags ?? [];
-      } catch (e) {
-        if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-          return { items: [], total: 0 };
-        }
-        throw e;
-      }
-    }
-
-    const context: MatcherContext = {
-      last_event_timestamp: '',
-      group_hash: '',
-      episode_id: '',
-      episode_status: 'active',
-      rule: {
-        id: ruleId ?? '',
-        name: resolvedName,
-        tags: resolvedTags,
-      },
-    };
+    const { ruleTags = [] } = params;
+    const ruleTagSet = new Set(ruleTags);
 
     const items: MatchedActionPolicy[] = [];
 
-    const allPolicies = await this.findActionPolicies({ perPage: 100 });
+    const allPolicies = await this.findActionPolicies({ perPage: 100, sortField: 'name' });
     for (const actionPolicy of allPolicies.items) {
-      if (!actionPolicy.matcher || actionPolicy.matcher.trim() === '') {
-        items.push({ actionPolicy, category: 'global' });
+      const { matcher } = actionPolicy;
+
+      if (PolicyMatcher.of(matcher).isCatchAll()) {
+        items.push({ actionPolicy, category: 'catch-all' });
         continue;
       }
 
-      let isMatch = false;
-      try {
-        isMatch = evaluateKql(actionPolicy.matcher, context);
-      } catch (err) {
-        this.logger.warn({
-          message: () =>
-            `Failed to evaluate KQL matcher for action policy "${
-              actionPolicy.id
-            }" during pre-matching: ${
-              err instanceof Error ? err.message : String(err)
-            }. Treating as no-match.`,
-        });
-        continue;
-      }
-
-      if (isMatch) {
-        items.push({ actionPolicy, category: 'global-filtered' });
+      const matcherTags = matcher?.tags ?? [];
+      if (matcherTags.some((tag) => ruleTagSet.has(tag))) {
+        items.push({ actionPolicy, category: 'tags' });
       }
     }
 
@@ -468,17 +437,17 @@ export class ActionPolicyClient {
       await this.writeActionPolicyAttrs({
         id,
         attrs: {
-          auth: apiKeyAttrs,
+          ...toApiKeyAttributes(apiKeyAttrs),
           updatedBy: userProfileUid,
           updatedAt: now,
         },
       });
     } catch (e) {
-      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false);
+      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false, id);
       throw e;
     }
 
-    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser);
+    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser, id);
   }
 
   public async bulkEnableActionPolicies({
@@ -507,6 +476,15 @@ export class ActionPolicyClient {
     return this.executeBulkUpdate(ids, { snoozedUntil: null });
   }
 
+  /**
+   * Deletes action policies by id, queueing their API keys for invalidation
+   * *before* the saved objects that reference those keys are removed. See
+   * {@link ActionPolicyClient.queueApiKeysForInvalidation} for why the phases
+   * run in this order.
+   *
+   * A policy whose key cannot be queued is not deleted at all; it is
+   * reported as `API_KEY_INVALIDATION_FAILED` so the caller can retry.
+   */
   public async bulkDeleteActionPolicies({
     ids,
   }: BulkActionPoliciesByIdsParams): Promise<BulkResponse> {
@@ -515,19 +493,36 @@ export class ActionPolicyClient {
     }
 
     const authMap = await this.getBulkDecryptedAuth(ids);
-    const deleteResults = await this.actionPolicySavedObjectService.bulkDelete({ ids });
 
-    const errors: ActionPolicyBulkError[] = [];
+    const { invalidatedIds, errors: invalidationErrors } = await this.queueApiKeysForInvalidation(
+      ids.map((id) => ({ id, auth: authMap.get(id) ?? null }))
+    );
+
+    const errors: ActionPolicyBulkError[] = [...invalidationErrors];
+    const blockedIds = new Set(invalidationErrors.map(({ id }) => id));
+
+    const idsToDelete = ids.filter((id) => !blockedIds.has(id));
+    const deleteResults =
+      idsToDelete.length > 0
+        ? await this.actionPolicySavedObjectService.bulkDelete({ ids: idsToDelete })
+        : [];
+
     let affectedCount = 0;
+    const divergedIds: string[] = [];
 
     for (const result of deleteResults) {
       if ('error' in result) {
         errors.push(toActionPolicyBulkError(result.id, result.error));
+        if (invalidatedIds.has(result.id)) {
+          divergedIds.push(result.id);
+        }
         continue;
       }
       affectedCount += 1;
-      const auth = authMap.get(result.id);
-      this.markApiKeysForInvalidation(auth?.apiKey, auth?.createdByUser);
+    }
+
+    if (divergedIds.length > 0) {
+      this.logDivergedApiKeyInvalidation(divergedIds);
     }
 
     return { affected_count: affectedCount, errors };
@@ -567,7 +562,7 @@ export class ActionPolicyClient {
    */
   private async executeBulkUpdate(
     ids: string[],
-    stateUpdate: Partial<ActionPolicySavedObjectAttributes>
+    stateUpdate: PartiallyUpdateableActionPolicyAttributes
   ): Promise<BulkResponse> {
     if (ids.length === 0) {
       return { affected_count: 0, errors: [] };
@@ -637,35 +632,142 @@ export class ActionPolicyClient {
     return sortFieldMap[sortField];
   }
 
-  public async getAllTags(params?: { search?: string }): Promise<string[]> {
-    return this.actionPolicySavedObjectService.getDistinctTags({
+  public async getTags(params?: { search?: string }): Promise<string[]> {
+    return this.actionPolicySavedObjectService.findTags({
       search: params?.search,
     });
   }
 
+  /**
+   * Deletes a single action policy, queueing its API key for invalidation
+   * before the saved object that references the key is removed. In case of
+   * failure, the delete is abandoned rather than orphaning a live credential.
+   */
   public async deleteActionPolicy({ id }: { id: string }): Promise<void> {
     if (!(await this.actionPolicyExists({ id }))) {
-      throw Boom.notFound(`Action policy with id "${id}" not found`, {
-        code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
+      throw Boom.notFound(getActionPolicyNotFoundMessage(id), {
+        code: ALERTING_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
         details: { action_policy_id: id },
       });
     }
+
     const auth = await this.getDecryptedAuth(id);
-    await this.actionPolicySavedObjectService.delete({ id });
-    this.markApiKeysForInvalidation(auth?.apiKey, auth?.createdByUser);
+    const { invalidatedIds, errors } = await this.queueApiKeysForInvalidation([{ id, auth }]);
+
+    const [invalidationError] = errors;
+    if (invalidationError) {
+      throw Boom.internal(invalidationError.error.message, {
+        code: invalidationError.error.code,
+        details: { action_policy_id: id },
+      });
+    }
+
+    try {
+      await this.actionPolicySavedObjectService.delete({ id });
+    } catch (e) {
+      if (invalidatedIds.has(id)) {
+        this.logDivergedApiKeyInvalidation([id]);
+      }
+      throw e;
+    }
   }
 
-  private markApiKeysForInvalidation(apiKey?: string, createdByUser?: boolean): void {
+  /**
+   * Queues the Kibana-owned API keys of the targeted policies for invalidation
+   * and reports which policies must therefore not be deleted. Shared by both
+   * delete paths so they order the phases and word their failures identically.
+   *
+   * `invalidatedIds` carries the policies whose key is now queued, so a caller
+   * whose delete then fails can report the divergence.
+   */
+  private async queueApiKeysForInvalidation(
+    targets: Array<{ id: string; auth: ActionPolicyAuth | null }>
+  ): Promise<{ invalidatedIds: Set<string>; errors: ActionPolicyBulkError[] }> {
+    const queueable = targets.flatMap(({ id, auth }) =>
+      auth && !auth.createdByUser ? [{ id, apiKey: auth.apiKey }] : []
+    );
+
+    if (queueable.length === 0) {
+      return { invalidatedIds: new Set(), errors: [] };
+    }
+
+    const results = await this.apiKeyService.markApiKeysForInvalidation(
+      queueable.map(({ apiKey }) => apiKey)
+    );
+
+    const invalidatedIds = new Set<string>();
+    const errors: ActionPolicyBulkError[] = [];
+
+    queueable.forEach(({ id }, index) => {
+      const result = results[index];
+      if (result?.success) {
+        invalidatedIds.add(id);
+        return;
+      }
+
+      errors.push({
+        id,
+        error: {
+          code: ALERTING_ERROR_CODES.API_KEY_INVALIDATION_FAILED,
+          message: `Action policy with id "${id}" was not deleted because its API key could not be queued for invalidation${
+            result ? `: ${result.message}` : ''
+          }`,
+        },
+      });
+    });
+
+    if (errors.length > 0) {
+      this.logger.error({
+        error: new Error(
+          `Skipped deleting action policy(ies) [${errors
+            .map(({ id }) => id)
+            .join(
+              ', '
+            )}]; their API keys could not be queued for invalidation, and deleting them would leave the keys valid with nothing referencing them`
+        ),
+        code: ALERTING_LOG_CODES.ACTION_POLICY_DELETE_BLOCKED_BY_API_KEY_INVALIDATION,
+      });
+    }
+
+    return { invalidatedIds, errors };
+  }
+
+  /**
+   * Records action policies whose API keys were queued for invalidation but
+   * whose deletion then failed — they survive with keys that are about to stop
+   * working, so they need a key rotation to keep dispatching.
+   */
+  private logDivergedApiKeyInvalidation(ids: string[]): void {
+    this.logger.error({
+      error: new Error(
+        `Queued API key(s) for action policy(ies) [${ids.join(
+          ', '
+        )}] for invalidation but failed to delete them; the policies remain with keys that are about to be invalidated and must be rotated to keep dispatching`
+      ),
+      code: ALERTING_LOG_CODES.ACTION_POLICY_API_KEY_INVALIDATION_DIVERGED,
+    });
+  }
+
+  private markApiKeysForInvalidation(
+    apiKey?: string,
+    createdByUser?: boolean,
+    policyId?: string
+  ): void {
     if (!apiKey || createdByUser) {
       return;
     }
 
-    this.apiKeyService.markApiKeysForInvalidation([apiKey]).catch(() => {});
+    this.apiKeyService.markApiKeysForInvalidation([apiKey]).catch((error) => {
+      this.logger.warn({
+        message: 'Failed to mark superseded API key for invalidation',
+        code: ALERTING_LOG_CODES.POLICY_API_KEY_INVALIDATION_FAILED,
+        labels: policyId != null ? { policy_id: policyId } : undefined,
+        error,
+      });
+    });
   }
 
-  private async getDecryptedAuth(
-    id: string
-  ): Promise<{ apiKey: string; createdByUser: boolean } | null> {
+  private async getDecryptedAuth(id: string): Promise<ActionPolicyAuth | null> {
     try {
       const doc =
         await this.esoClient.getDecryptedAsInternalUser<ActionPolicySavedObjectAttributes>(
@@ -673,23 +775,27 @@ export class ActionPolicyClient {
           id,
           this.namespace ? { namespace: this.namespace } : undefined
         );
-      const auth = doc.attributes?.auth;
-      if (!auth?.apiKey) return null;
+      const { apiKey, apiKeyCreatedByUser } = doc.attributes ?? {};
+      if (!apiKey) return null;
 
       return {
-        apiKey: auth.apiKey,
-        createdByUser: auth.createdByUser,
+        apiKey,
+        createdByUser: apiKeyCreatedByUser ?? false,
       };
-    } catch {
+    } catch (error) {
+      this.logger.warn({
+        message: 'Failed to decrypt action policy auth; skipping API key invalidation',
+        code: ALERTING_LOG_CODES.POLICY_API_KEY_LOOKUP_FAILED,
+        labels: { policy_id: id },
+        error,
+      });
       return null;
     }
   }
 
-  private async getBulkDecryptedAuth(
-    ids: string[]
-  ): Promise<Map<string, { apiKey: string; createdByUser: boolean }>> {
+  private async getBulkDecryptedAuth(ids: string[]): Promise<Map<string, ActionPolicyAuth>> {
     const targetIds = new Set(ids);
-    const authMap = new Map<string, { apiKey: string; createdByUser: boolean }>();
+    const authMap = new Map<string, ActionPolicyAuth>();
 
     try {
       const finder =
@@ -703,10 +809,10 @@ export class ActionPolicyClient {
 
       for await (const response of finder.find()) {
         for (const so of response.saved_objects) {
-          if (targetIds.has(so.id) && so.attributes.auth?.apiKey) {
+          if (targetIds.has(so.id) && so.attributes.apiKey) {
             authMap.set(so.id, {
-              apiKey: so.attributes.auth.apiKey,
-              createdByUser: so.attributes.auth.createdByUser,
+              apiKey: so.attributes.apiKey,
+              createdByUser: so.attributes.apiKeyCreatedByUser ?? false,
             });
           }
         }
@@ -715,8 +821,12 @@ export class ActionPolicyClient {
           break;
         }
       }
-    } catch {
-      // best-effort — same as getDecryptedAuth returning null on failure
+    } catch (error) {
+      this.logger.warn({
+        message: 'Failed to decrypt action policy auth; skipping API key invalidation',
+        code: ALERTING_LOG_CODES.POLICY_API_KEY_LOOKUP_FAILED,
+        error,
+      });
     }
 
     return authMap;
@@ -724,7 +834,7 @@ export class ActionPolicyClient {
 
   private async updatePolicyState(
     id: string,
-    stateUpdate: { enabled?: boolean; snoozedUntil?: string | null }
+    stateUpdate: PartiallyUpdateableActionPolicyAttributes
   ): Promise<ActionPolicyResponse> {
     if (stateUpdate.snoozedUntil) {
       validateDateString(stateUpdate.snoozedUntil);
@@ -744,8 +854,8 @@ export class ActionPolicyClient {
       });
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw Boom.notFound(`Action policy with id "${id}" not found`, {
-          code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
+        throw Boom.notFound(getActionPolicyNotFoundMessage(id), {
+          code: ALERTING_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
           details: { action_policy_id: id },
         });
       }
@@ -810,11 +920,11 @@ export class ActionPolicyClient {
         version: existingVersion,
       });
     } catch (e) {
-      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false);
+      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false, id);
       throw e;
     }
 
-    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser);
+    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser, id);
 
     return {
       policy: transformActionPolicySoAttributesToApiResponse({

@@ -12,14 +12,25 @@ import type {
   BulkByIdsParams,
   BulkByQueryParams,
   BulkByQueryResult,
+  BulkCreateRulesParams,
+  BulkCreateRulesResponse,
   BulkGetRulesResponse,
   BulkResponse,
   CreateRuleData,
   FindRulesRequest,
   FindRulesResponse,
+  ListRuleChangeHistoryRequest,
+  ListRuleChangeHistoryResponse,
+  RuleChangeHistoryDetail,
   RuleResponse,
 } from '@kbn/alerting-v2-schemas';
-import { COMMON_HEADERS, POLL_INTERVAL_MS, POLL_TIMEOUT_MS, RULE_API_PATH } from '../constants';
+import {
+  COMMON_HEADERS,
+  INTERNAL_RULE_API_PATH,
+  POLL_INTERVAL_MS,
+  POLL_TIMEOUT_MS,
+  RULE_API_PATH,
+} from '../constants';
 
 export interface WaitForEnabledStateParams {
   id: string;
@@ -39,12 +50,19 @@ export interface RulesApiService {
   enable: (id: string) => Promise<RuleResponse>;
   disable: (id: string) => Promise<RuleResponse>;
   bulkDelete: (params: BulkByIdsParams) => Promise<BulkResponse>;
+  bulkCreate: (params: BulkCreateRulesParams) => Promise<BulkCreateRulesResponse>;
   bulkDisable: (params: BulkByIdsParams) => Promise<BulkResponse>;
   bulkEnable: (params: BulkByIdsParams) => Promise<BulkResponse>;
+  bulkUpdateApiKey: (params: BulkByIdsParams) => Promise<BulkResponse>;
   deleteByQuery: (params: BulkByQueryParams) => Promise<BulkByQueryResult>;
   enableByQuery: (params: BulkByQueryParams) => Promise<BulkByQueryResult>;
   disableByQuery: (params: BulkByQueryParams) => Promise<BulkByQueryResult>;
   bulkGet: (id: string[]) => Promise<BulkGetRulesResponse>;
+  listChangeHistory: (
+    id: string,
+    query?: Partial<ListRuleChangeHistoryRequest>
+  ) => Promise<ListRuleChangeHistoryResponse>;
+  getChangeHistoryEvent: (id: string, eventId: string) => Promise<RuleChangeHistoryDetail>;
   waitForEnabledState: (params: WaitForEnabledStateParams) => Promise<void>;
   cleanUp: () => Promise<void>;
 }
@@ -159,6 +177,16 @@ export const getRulesApiService = ({
         return response.data;
       }),
     bulkDelete,
+    bulkCreate: (params: BulkCreateRulesParams) =>
+      measurePerformanceAsync(log, 'rules.bulkCreate', async () => {
+        const response = await kbnClient.request<BulkCreateRulesResponse>({
+          method: 'POST',
+          path: `${RULE_API_PATH}/_bulk_create`,
+          headers: COMMON_HEADERS,
+          body: params,
+        });
+        return response.data;
+      }),
     bulkDisable: (params: BulkByIdsParams) =>
       measurePerformanceAsync(log, 'rules.bulkDisable', async () => {
         const response = await kbnClient.request<BulkResponse>({
@@ -174,6 +202,16 @@ export const getRulesApiService = ({
         const response = await kbnClient.request<BulkResponse>({
           method: 'POST',
           path: `${RULE_API_PATH}/_bulk_enable`,
+          headers: COMMON_HEADERS,
+          body: params,
+        });
+        return response.data;
+      }),
+    bulkUpdateApiKey: (params: BulkByIdsParams) =>
+      measurePerformanceAsync(log, 'rules.bulkUpdateApiKey', async () => {
+        const response = await kbnClient.request<BulkResponse>({
+          method: 'POST',
+          path: `${RULE_API_PATH}/_bulk_update_api_key`,
           headers: COMMON_HEADERS,
           body: params,
         });
@@ -216,6 +254,25 @@ export const getRulesApiService = ({
           path: `${RULE_API_PATH}/_bulk_get`,
           headers: COMMON_HEADERS,
           body: { ids },
+        });
+        return response.data;
+      }),
+    listChangeHistory: (id, query = {}) =>
+      measurePerformanceAsync(log, 'rules.listChangeHistory', async () => {
+        const response = await kbnClient.request<ListRuleChangeHistoryResponse>({
+          method: 'GET',
+          path: `${INTERNAL_RULE_API_PATH}/${encodeURIComponent(id)}/history`,
+          query: stripUndefined(query),
+        });
+        return response.data;
+      }),
+    getChangeHistoryEvent: (id, eventId) =>
+      measurePerformanceAsync(log, 'rules.getChangeHistoryEvent', async () => {
+        const response = await kbnClient.request<RuleChangeHistoryDetail>({
+          method: 'GET',
+          path: `${INTERNAL_RULE_API_PATH}/${encodeURIComponent(id)}/history/${encodeURIComponent(
+            eventId
+          )}`,
         });
         return response.data;
       }),

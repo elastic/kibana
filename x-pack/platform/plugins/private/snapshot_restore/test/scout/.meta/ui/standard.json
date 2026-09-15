@@ -1,5 +1,8 @@
 {
-  "sha1": "f8ec4376d98434e7ffe20c28ba3dfcec9a542be1",
+  "sha1": "7d7ff637a9b302696f85dc951b912b7d72096b30",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "7e6ddec5039370c-37b029d2fd41663",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/snapshot_restore/test/scout/ui/tests/a11y.spec.ts",
-        "line": 44,
-        "column": 7
+        "line": 40,
+        "column": 5
       }
     },
     {
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/snapshot_restore/test/scout/ui/tests/a11y.spec.ts",
-        "line": 89,
-        "column": 7
+        "line": 77,
+        "column": 13
       }
     },
     {
@@ -39,8 +42,75 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/snapshot_restore/test/scout/ui/tests/a11y.spec.ts",
-        "line": 121,
-        "column": 7
+        "line": 97,
+        "column": 24
+      }
+    },
+    {
+      "id": "778c6fef3ed82ad-c8d19bd8dd35b68",
+      "title": "Snapshot & Restore — home page (no repositories registered) app loads with correct title and register repository button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/snapshot_restore/test/scout/ui/tests/home_page_empty_state.spec.ts",
+        "line": 19,
+        "column": 45
+      }
+    },
+    {
+      "id": "0f7ba5482156548-0706781c035a7fc",
+      "title": "Snapshot & Restore — home page cleanup repository via repository details flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/snapshot_restore/test/scout/ui/tests/home_page.spec.ts",
+        "line": 22,
+        "column": 24
+      }
+    },
+    {
+      "id": "706f3486051fae9-60ca6aee8363877",
+      "title": "Snapshot & Restore — logsdb SLM snapshot and restore create SLM policy, run it, verify logsdb snapshot, and restore with rename",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/snapshot_restore/test/scout/ui/tests/logsdb_snapshot_restore.spec.ts",
+        "line": 45,
+        "column": 22
+      }
+    },
+    {
+      "id": "b6031dcb514c5d6-f5881093a5a1254",
+      "title": "Snapshot & Restore — restore form wizard restore wizard: renders index settings editor and restore button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/snapshot_restore/test/scout/ui/tests/restore_form.spec.ts",
+        "line": 28,
+        "column": 21
+      }
+    },
+    {
+      "id": "eca7d3ca6774923-5afaeee5fe062be",
+      "title": "Snapshot & Restore — source-only logsdb snapshot (partial) and restore rejection source-only snapshot of logsdb index results in Partial state and cannot be restored",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/snapshot_restore/test/scout/ui/tests/source_only_logsdb.spec.ts",
+        "line": 42,
+        "column": 23
       }
     }
   ]

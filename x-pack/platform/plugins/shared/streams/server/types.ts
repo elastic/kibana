@@ -6,7 +6,6 @@
  */
 
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
-import type { AlertingServerStart as AlertingV2ServerStart } from '@kbn/alerting-v2-plugin/server';
 import type {
   PluginStartContract as ActionsPluginStart,
   RelayClientContract,
@@ -67,7 +66,7 @@ export interface StreamsServer {
   cloud?: CloudSetup;
   /**
    * The running Kibana's version, e.g. `9.2.0`. Populated by the
-   * significant_events plugin, which needs it to identify the connecting
+   * significantEvents plugin, which needs it to identify the connecting
    * deployment to the Relay service.
    */
   kibanaVersion: string;
@@ -103,7 +102,6 @@ export interface StreamsPluginStartDependencies {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   licensing: LicensingPluginStart;
   alerting: AlertingServerStart;
-  alertingVTwo?: AlertingV2ServerStart;
   inference: InferenceServerStart;
   ruleRegistry: RuleRegistryPluginStart;
   fieldsMetadata: FieldsMetadataServerStart;

@@ -15,7 +15,11 @@ export { getElasticsearchConnectors } from './spec/elasticsearch';
 export { getKibanaConnectors } from './spec/kibana';
 export { resolveKibanaStepTypeAlias } from './spec/kibana/aliases';
 export * from './spec/schema';
-export { builtInStepDefinitions, getBuiltInStepDefinition } from './spec/builtin_step_definitions';
+export {
+  builtInStepDefinitions,
+  getBuiltInStepDefinition,
+  hitlAuditOutputFields,
+} from './spec/builtin_step_definitions';
 export type { BuiltInStepDefinition } from './spec/builtin_step_definitions';
 export {
   builtInTriggerDefinitions,
@@ -28,6 +32,7 @@ export {
   ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID,
   mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema,
 } from './spec/builtin_workflow_input_definitions';
+export type { JsonSchema } from './spec/schema/common/json_model_shape_schema';
 export type {
   BaseTriggerDefinition,
   TriggerDocumentation,
@@ -86,13 +91,48 @@ export {
   SCHEDULED_INTERVAL_PATTERN,
   ManualTriggerSchema,
   TriggerSchema,
+  getCustomTriggerZodSchema,
   getTriggerSchema,
+  toCustomTriggerSchemaConfigs,
   TriggerTypes,
   WORKFLOW_EVENTS_VALUES_SET,
   WorkflowEventsSchema,
+  type CustomTrigger,
+  type CustomTriggerOn,
+  type CustomTriggerSchemaConfig,
+  type CustomTriggerSchemaInput,
   type TriggerType,
   type WorkflowEventsValue,
 } from './spec/schema/triggers';
 
 // Export specific types that are commonly used
 export type { BuiltInStepType } from './spec/schema';
+
+// The action-workflow contract. Exported from the root entry (rather than only
+// from `./managed`) so a consumer can validate `consts.actionMetadata` without
+// pulling every managed workflow definition into its bundle.
+export {
+  ACTION_WORKFLOW_INPUT,
+  ACTION_WORKFLOW_TAG,
+  actionApprovalPolicySchema,
+  actionCategorySchema,
+  actionImpactSchema,
+  actionMetadataSchema,
+} from './managed/action_workflow';
+export type {
+  ActionApprovalPolicy,
+  ActionCategory,
+  ActionImpact,
+  ActionMetadata,
+} from './managed/action_workflow';
+
+export {
+  isWorkflowValidationRuleId,
+  WORKFLOW_VALIDATION_RULE_IDS,
+  WORKFLOW_VALIDATION_RULES,
+} from './validation/rules';
+export type {
+  WorkflowValidationRuleId,
+  WorkflowValidationRuleOwner,
+  WorkflowValidationRules,
+} from './validation/rules';

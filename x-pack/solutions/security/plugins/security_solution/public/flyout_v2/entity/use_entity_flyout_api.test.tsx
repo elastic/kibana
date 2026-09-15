@@ -8,6 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { EntityType } from '../../../common/entity_analytics/types';
+import { RiskScoreLeftPanelSubTab } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { useEntityFlyoutApi } from './use_entity_flyout_api';
 import { useKibana } from '../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
@@ -395,6 +396,24 @@ describe('useEntityFlyoutApi', () => {
     });
     // A tool is a session:'start' root; closing it clears the param (no parent to revert to).
     expect(mockBuildOnClose).toHaveBeenCalledWith(null);
+  });
+
+  it('openEntityRiskInputs persists the resolution subTab on the URL descriptor', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    result.current.openEntityRiskInputs({
+      entityType: EntityType.user,
+      entityName: 'alice',
+      entityId: 'user:alice',
+      subTab: RiskScoreLeftPanelSubTab.RESOLUTION,
+    });
+
+    expect(mockWriteOnOpen).toHaveBeenCalledWith({
+      kind: FLYOUT_DESCRIPTOR_KIND.entityRiskInputs,
+      entityType: 'user',
+      entityName: 'alice',
+      entityId: 'user:alice',
+      subTab: 'resolution',
+    });
   });
 
   it('openEntityAnomalyInsights writes an entityAnomalyInsights descriptor and clears the param on close', () => {

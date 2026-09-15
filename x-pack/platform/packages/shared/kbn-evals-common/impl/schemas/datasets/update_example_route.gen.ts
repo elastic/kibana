@@ -27,8 +27,8 @@ export type UpdateExamplePayload = z.infer<typeof UpdateExamplePayload>;
 
 export const UpdateEvaluationDatasetExampleRequestParams = lazySchema(() =>
   z.object({
-    datasetId: z.string(),
-    exampleId: z.string(),
+    datasetId: z.string().max(1024),
+    exampleId: z.string().max(1024),
   })
 );
 export type UpdateEvaluationDatasetExampleRequestParams = z.infer<

@@ -57,7 +57,7 @@ export function TraceWaterfallFlyoutFooter({ traceId, rangeFrom, rangeTo }: Prop
             button={
               <EuiButton
                 fill
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 iconSide="right"
                 size="s"
                 data-test-subj="apmTraceWaterfallFlyoutActionsButton"

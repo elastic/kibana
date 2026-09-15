@@ -34,7 +34,7 @@ export const AgentBuilderConnectors = () => {
                 <EuiButton
                   key="create"
                   fill
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   onClick={openCreateFlyout}
                   {...getEbtProps({
                     element: AGENT_BUILDER_UI_EBT.element.pageContent,

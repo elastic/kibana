@@ -83,6 +83,23 @@ export interface TestWorkflowParams {
   inputs: Record<string, unknown>;
 }
 
+export interface SearchExecutionsParams {
+  kql?: string;
+  statuses?: ExecutionStatus[];
+  executionTypes?: ExecutionType[];
+  executedBy?: string[];
+  concurrencyGroupKey?: string;
+  startedAfter?: string;
+  startedBefore?: string;
+  finishedAfter?: string;
+  finishedBefore?: string;
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
+  page?: number;
+  size?: number;
+  trackTotalHits?: boolean;
+}
+
 export interface GetWorkflowExecutionsParams {
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
@@ -100,6 +117,11 @@ export interface GetWorkflowExecutionsParams {
   startedAfter?: string;
   /** Datemath upper bound for filtering executions by startedAt. */
   startedBefore?: string;
+  /**
+   * Opaque cursor from a prior response's `searchAfter` (JSON-encoded sort values).
+   * Prefer over `page` for deep infinite scroll.
+   */
+  searchAfter?: string;
 }
 
 export interface GetWorkflowStepExecutionsParams {
@@ -148,6 +170,8 @@ export interface WorkflowExecutionLogsResponse {
 
 export interface ResumeExecutionParams {
   input: Record<string, unknown>;
+  /** HITL step execution to claim. When omitted, the server looks up the waiting step. */
+  stepExecutionId?: string;
 }
 
 export interface WorkflowsConfig {

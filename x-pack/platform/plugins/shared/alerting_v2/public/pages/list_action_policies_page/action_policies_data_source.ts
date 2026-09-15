@@ -63,9 +63,9 @@ const toContentListItem = (policy: ActionPolicyResponse): ActionPolicyContentLis
   id: policy.id,
   title: policy.name,
   tags: policy.tags ?? undefined,
-  createdBy: policy.createdBy ?? undefined,
-  updatedBy: policy.updatedBy ?? undefined,
-  updatedAt: policy.updatedAt ? new Date(policy.updatedAt) : undefined,
+  createdBy: policy.created_by ?? undefined,
+  updatedBy: policy.updated_by ?? undefined,
+  updatedAt: policy.updated_at ? new Date(policy.updated_at) : undefined,
   policy,
 });
 

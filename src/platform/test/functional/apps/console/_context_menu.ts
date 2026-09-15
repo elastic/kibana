@@ -271,13 +271,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should auto indent when auto indent button is clicked', async () => {
       await PageObjects.console.clearEditorText();
-      await PageObjects.console.enterText('GET _search\n{"query": {"match_all": {}}}');
+      await PageObjects.console.enterText(
+        'GET _search\n{"query": {\n# match every document\n"match_all": {}}}'
+      );
       await PageObjects.console.clickContextMenu();
       await PageObjects.console.clickAutoIndentButton();
       // Retry until the request is auto indented
       await retry.try(async () => {
         const request = await PageObjects.console.getEditorText();
-        expect(request).to.be.eql('GET _search\n{\n  "query": {\n    "match_all": {}\n  }\n}');
+        expect(request).to.be.eql(
+          [
+            'GET _search',
+            '{',
+            '  "query": {',
+            '    # match every document',
+            '    "match_all": {}',
+            '  }',
+            '}',
+          ].join('\n')
+        );
       });
     });
 

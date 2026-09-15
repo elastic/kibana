@@ -1,0 +1,254 @@
+{
+  "sha1": "6a25e7272049ff33ef98c2a7bb8a322a03207125",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "ec25470aadd3b1a-744ce32675c025c",
+      "title": "Setup environment for streams tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/schema/ui/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "92c5c158762b868-56341b35415c7bd",
+      "title": "Stream data mapping - schema editor - Classic Streams read-only user cannot add/edit fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/schema/ui/tests/classic_streams_schema.spec.ts",
+        "line": 30,
+        "column": 25
+      }
+    },
+    {
+      "id": "92c5c158762b868-6c0fa76d26f4840",
+      "title": "Stream data mapping - schema editor - Classic Streams copy_to advanced parameter works",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/schema/ui/tests/classic_streams_schema.spec.ts",
+        "line": 37,
+        "column": 7
+      }
+    },
+    {
+      "id": "92c5c158762b868-dd5db3aa2061b62",
+      "title": "Stream data mapping - schema editor - Classic Streams allows mapping a field as geo_point",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/schema/ui/tests/classic_streams_schema.spec.ts",
+        "line": 107,
+        "column": 23
+      }
+    },
+    {
+      "id": "e6bf69f07792445-44ed3bb5d07afc9",
+      "title": "Stream data mapping - schema editor should display a list of stream mappings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/schema/ui/tests/data_mapping.spec.ts",
+        "line": 35,
+        "column": 25
+      }
+    },
+    {
+      "id": "e6bf69f07792445-01d6d0b9fd4e284",
+      "title": "Stream data mapping - schema editor should allow searching by field name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/schema/ui/tests/data_mapping.spec.ts",
+        "line": 53,
+        "column": 68
+      }
+    },
+    {
+      "id": "e6bf69f07792445-35a0efa77620063",
+      "title": "Stream data mapping - schema editor should allow filtering by field type and status",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/schema/ui/tests/data_mapping.spec.ts",
+        "line": 81,
+        "column": 20
+      }
+    },
+    {
+      "id": "e6bf69f07792445-2375016ad4b94bd",
+      "title": "Stream data mapping - schema editor should allow mapping a field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/schema/ui/tests/data_mapping.spec.ts",
+        "line": 123,
+        "column": 24
+      }
+    },
+    {
+      "id": "e6bf69f07792445-2974d45367725fa",
+      "title": "Stream data mapping - schema editor should allow unmapping a field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/schema/ui/tests/data_mapping.spec.ts",
+        "line": 147,
+        "column": 25
+      }
+    },
+    {
+      "id": "e6bf69f07792445-fc62d688b507d95",
+      "title": "Stream data mapping - schema editor should allow manually adding a new field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/schema/ui/tests/data_mapping.spec.ts",
+        "line": 200,
+        "column": 7
+      }
+    },
+    {
+      "id": "e6bf69f07792445-e190254dffb4011",
+      "title": "Stream data mapping - schema editor should allow adding a description when mapping a field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/schema/ui/tests/data_mapping.spec.ts",
+        "line": 242,
+        "column": 7
+      }
+    },
+    {
+      "id": "28d6f8bdefe8f17-cda4d2c8654359b",
+      "title": "Stream data mapping - schema editor - Wired Streams inherited fields display with parent links",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/schema/ui/tests/wired_streams_schema.spec.ts",
+        "line": 43,
+        "column": 26
+      }
+    },
+    {
+      "id": "28d6f8bdefe8f17-7e8867ed1b7384f",
+      "title": "Stream data mapping - schema editor - Wired Streams ECS/Otel type pre-selection for known fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/schema/ui/tests/wired_streams_schema.spec.ts",
+        "line": 77,
+        "column": 25
+      }
+    },
+    {
+      "id": "28d6f8bdefe8f17-d2dd8bcdf8af73c",
+      "title": "Stream data mapping - schema editor - Wired Streams shows alias relationship in table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/schema/ui/tests/wired_streams_schema.spec.ts",
+        "line": 116,
+        "column": 24
+      }
+    },
+    {
+      "id": "28d6f8bdefe8f17-8e2255657ecd48c",
+      "title": "Stream data mapping - schema editor - Wired Streams validates field names for wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/schema/ui/tests/wired_streams_schema.spec.ts",
+        "line": 159,
+        "column": 13
+      }
+    },
+    {
+      "id": "b5141e99509351e-7132d4e40af07dc",
+      "title": "Teardown environment for streams tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/schema/ui/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
+      }
+    }
+  ]
+}
