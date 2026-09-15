@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiEmptyPrompt,
@@ -24,17 +24,18 @@ import {
   type ConversationsActionsGroupProps,
   type BaseActionsProps,
   type CardActionType,
-  ConversationDetailsFlyout,
+  InvestigationDetailsFlyout,
+  InvestigationActionModals,
   BlastRadius,
-  AssignActionModal,
-  BaseActionModal,
-  MODAL_TRANSLATIONS,
-  ApprovalModal,
 } from '@kbn/agentic-investigations-common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useInvestigations } from '../../hooks/use_investigations_api';
+import { useOpenInChat } from '../../hooks/use_open_in_chat';
+import { useConversationsUrlParams } from './conversations_url_params';
 import { QUEUE_PAGE_INFO } from './translations';
 import { PendingProposalsPanel } from '../../components/pending_proposals';
 import { usePendingProposals } from '../../hooks/use_proposals_api';
@@ -55,12 +56,18 @@ export const ConversationsPage: React.FC = () => {
     string | undefined
   >(undefined);
 
-  const [selectedIdForDetails, setSelectedIdForDetails] = useState<string | undefined>(undefined);
+  const {
+    selectedConversationId,
+    show,
+    selectConversation,
+    showTab,
+    clearSelectedConversation,
+    dismissMissingConversation,
+  } = useConversationsUrlParams();
   const [modalState, setModalState] = useState<{
     type: CardActionType | null;
     recordId: Investigation['recordId'] | null;
-    assignee?: string | null;
-  }>({ type: null, recordId: null, assignee: null });
+  }>({ type: null, recordId: null });
 
   // TODO: update data fetching to use the new conversations API (useConversations) and remove the useInvestigations hook
   const conversations = useMemo(() => data?.investigations ?? [], [data?.investigations]);
@@ -76,19 +83,12 @@ export const ConversationsPage: React.FC = () => {
   } = usePendingProposals();
   const proposalCount = pendingProposalsData?.total ?? 0;
 
-  const onClickAction: BaseActionsProps['onClickAction'] = useCallback(
-    (action, recordId, assignee = null) => {
-      setModalState({ type: action, recordId, assignee });
-    },
-    [setModalState]
-  );
+  const onClickAction: BaseActionsProps['onClickAction'] = useCallback((action, recordId) => {
+    setModalState({ type: action, recordId });
+  }, []);
 
-  const onClickCard = useCallback(
-    (id: Investigation['recordId']) => {
-      setSelectedIdForDetails(id);
-    },
-    [setSelectedIdForDetails]
-  );
+  const closeModal = useCallback(() => setModalState({ type: null, recordId: null }), []);
+  const closeApproval = useCallback(() => setSelectedIdForRecommendedAction(undefined), []);
 
   const onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'] =
     useCallback(
@@ -98,18 +98,53 @@ export const ConversationsPage: React.FC = () => {
       [setSelectedIdForRecommendedAction]
     );
 
+  const openInChat = useOpenInChat();
+  const {
+    services: { notifications },
+  } = useKibana<CoreStart>();
+
+  // Both params are required: an id on its own leaves the flyout closed rather than guessing a tab.
+  const isFlyoutRequested = Boolean(selectedConversationId && show);
+
+  const selectedDetailsConversation = useMemo(
+    () =>
+      isFlyoutRequested ? conversations.find((c) => c.id === selectedConversationId) : undefined,
+    [conversations, isFlyoutRequested, selectedConversationId]
+  );
+
+  // A link to a conversation that no longer exists closes the flyout rather than leaving an empty
+  // one open. Gated on `isLoading` so a background refetch cannot close a flyout that is in use.
+  // Dismissed rather than closed, so Back cannot return to the bad id and warn all over again.
+  useEffect(() => {
+    if (!selectedConversationId || !show || isLoading || error || selectedDetailsConversation) {
+      return;
+    }
+    notifications?.toasts.addDanger(QUEUE_PAGE_INFO.conversationNotFound(selectedConversationId));
+    dismissMissingConversation();
+  }, [
+    dismissMissingConversation,
+    error,
+    isLoading,
+    notifications,
+    selectedConversationId,
+    selectedDetailsConversation,
+    show,
+  ]);
+
+  const actionInvestigation = useMemo(
+    () =>
+      modalState.recordId
+        ? conversations.find((c) => c.recordId === modalState.recordId)
+        : undefined,
+    [conversations, modalState.recordId]
+  );
+
   const selectedRecommendedActionConversation = useMemo(
     () =>
       selectedIdForRecommendedAction
         ? conversations.find((c) => c.id === selectedIdForRecommendedAction)
         : undefined,
     [conversations, selectedIdForRecommendedAction]
-  );
-
-  const selectedDetailsConversation: Investigation | undefined = useMemo(
-    () =>
-      selectedIdForDetails ? conversations.find((c) => c.id === selectedIdForDetails) : undefined,
-    [conversations, selectedIdForDetails]
   );
 
   const sortedConversations = useMemo(
@@ -160,55 +195,25 @@ export const ConversationsPage: React.FC = () => {
         `,
       }}
     >
-      {selectedIdForRecommendedAction && selectedRecommendedActionConversation && (
-        <ApprovalModal
-          selectedRecommendedActionConversation={selectedRecommendedActionConversation}
-          onConfirm={() =>
-            // TODO: use action API call hook
-            setSelectedIdForRecommendedAction(undefined)
-          }
-          onClose={() => setSelectedIdForRecommendedAction(undefined)}
-        />
-      )}
-
-      {selectedIdForDetails && selectedDetailsConversation && (
-        <ConversationDetailsFlyout
+      {selectedConversationId && show && (
+        <InvestigationDetailsFlyout
           investigation={selectedDetailsConversation}
-          onClose={() => setSelectedIdForDetails(undefined)}
-          onClickAction={onClickAction}
-          onClickRecommendedAction={onClickRecommendedAction}
+          isLoading={isLoading}
+          selectedTab={show}
+          onSelectTab={showTab}
+          onClose={clearSelectedConversation}
+          onOpenChat={() => openInChat(selectedConversationId)}
         />
       )}
 
-      {modalState.type === 'assign' && modalState.recordId && (
-        <AssignActionModal
-          recordId={modalState.recordId}
-          initialAssignee={modalState.assignee}
-          onClose={() => setModalState({ type: null, recordId: null })}
-          onAssign={() => {
-            // TODO: use assign action API call hook
-            setModalState({ type: null, recordId: null });
-          }}
-        />
-      )}
-
-      {modalState.type === 'dismiss' && modalState.recordId && (
-        <BaseActionModal
-          type="dismiss"
-          title={MODAL_TRANSLATIONS.dismiss.title}
-          recordId={modalState.recordId}
-          onClose={() => setModalState({ type: null, recordId: null })}
-          rationalePlaceholder={MODAL_TRANSLATIONS.dismiss.rationalePlaceholder}
-          primaryAction={{
-            color: 'danger',
-            label: MODAL_TRANSLATIONS.dismiss.actionButtonLabel,
-            onClick: () => {
-              // TODO: use dismiss action API call hook
-              setModalState({ type: null, recordId: null });
-            },
-          }}
-        />
-      )}
+      <InvestigationActionModals
+        action={modalState.type}
+        recordId={modalState.recordId}
+        initialAssignee={actionInvestigation?.assignee}
+        approvalInvestigation={selectedRecommendedActionConversation}
+        onCloseAction={closeModal}
+        onCloseApproval={closeApproval}
+      />
 
       <EuiFlexGroup gutterSize="l" direction="column" wrap>
         <EuiFlexItem grow={false}>
@@ -274,7 +279,9 @@ export const ConversationsPage: React.FC = () => {
                   isFiltered={filteredQueueItems.length !== sortedConversations.length}
                   onClickRecommendedAction={onClickRecommendedAction}
                   onClickAction={onClickAction}
-                  onClickCard={onClickCard}
+                  onClickCard={selectConversation}
+                  onOpenChat={openInChat}
+                  selectedId={selectedConversationId}
                 />
               </EuiFlexItem>
             ))

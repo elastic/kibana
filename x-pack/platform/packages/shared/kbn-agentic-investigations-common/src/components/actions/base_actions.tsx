@@ -21,7 +21,6 @@ import type { ConversationsActionsGroupProps } from '../conversation_card';
 import { ActionButton } from './action_button';
 import { ACTIONS_TRANSLATIONS } from './translations';
 import { getActionButtonIconProps } from '../helpers';
-import { useOpenInChat } from '../../hooks/use_open_in_chat';
 
 interface ActionConfig {
   key: string;
@@ -72,6 +71,8 @@ export interface BaseActionsProps {
   isFlyout?: boolean;
   onClickAction: (action: CardActionType, recordId: Investigation['recordId']) => void;
   onClickRecommendedAction?: ConversationsActionsGroupProps['onClickRecommendedAction'];
+  /** Opens this investigation's chat. Supplied by the caller, which owns the route. */
+  onOpenChat: () => void;
   'data-test-subj'?: string;
 }
 
@@ -81,12 +82,12 @@ export const BaseActions = memo<BaseActionsProps>(
     isFlyout = false,
     onClickAction,
     onClickRecommendedAction,
+    onOpenChat,
     'data-test-subj': dataTestSubj,
   }) => {
     const [isOpen, setIsOpen] = useState(false);
     const handleClose = useCallback(() => setIsOpen(false), []);
     const handleToggle = useCallback(() => setIsOpen((prev) => !prev), []);
-    const onOpenChat = useOpenInChat(investigation.id);
 
     const button = isFlyout ? (
       <EuiButton
