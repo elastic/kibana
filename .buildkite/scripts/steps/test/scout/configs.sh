@@ -3,6 +3,7 @@
 set -euo pipefail
 
 source .buildkite/scripts/steps/functional/common.sh
+source .buildkite/scripts/steps/test/skipped_on_main.sh
 
 BUILDKITE_PARALLEL_JOB=${BUILDKITE_PARALLEL_JOB:-}
 SCOUT_CONFIG_GROUP_KEY=${SCOUT_CONFIG_GROUP_KEY:-}
@@ -210,11 +211,19 @@ while read -r config_path; do
 
     start=$(date +%s)
 
+    # marks failure reports written by this config+mode so they can be evaluated in isolation
+    failuresMarker=$(mktemp)
+
     # prevent non-zero exit code from breaking the loop
     set +e;
     node scripts/scout run-tests --location local $mode --config "$config_path" --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
     EXIT_CODE=$?
     set -e;
+
+    if [[ $EXIT_CODE -ne 0 && $EXIT_CODE -ne 2 ]] && forgive_skipped_on_main_scout "$config_path ($mode)" "$failuresMarker"; then
+      EXIT_CODE=0
+    fi
+    rm -f "$failuresMarker"
 
     timeSec=$(($(date +%s)-start))
     if [[ $timeSec -gt 60 ]]; then
