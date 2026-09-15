@@ -607,7 +607,7 @@ export const registerAiIndexRoutes = ({
         const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
         try {
           const body: ListAiIndexResponse = {
-            ai_indices: await getAiIndexDataReadService({ esClient, request }).listVisible(),
+            ai_indices: await getAiIndexDataReadService({ esClient, request }).list(),
           };
           return response.ok({ body });
         } catch (error) {
