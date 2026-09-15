@@ -16,8 +16,6 @@
 #   PREEMPTION_METADATA_HOST    override metadata host (tests); default metadata.google.internal
 #   PREEMPTION_STATE_DIR        default target/preemption
 #   PREEMPTION_STOP_AGENT       1/true: SIGQUIT the agent after recording, so the job fails fast
-#   PREEMPTION_SIMULATE_AFTER   seconds: skip the metadata poll and act as if preempted after N s
-#                               (testing the stop path without a real preemption)
 
 set -uo pipefail
 
@@ -48,49 +46,39 @@ if [[ "$(metadata_get 'scheduling/preemptible')" != "TRUE" ]]; then
   exit 0
 fi
 
-if [[ "${PREEMPTION_SIMULATE_AFTER:-}" =~ ^[0-9]+$ ]]; then
-  log "SIMULATION: pretending preemption in ${PREEMPTION_SIMULATE_AFTER}s (meta-data key: $META_KEY)"
-  sleep "$PREEMPTION_SIMULATE_AFTER" &
-  sim_pid=$!
-  trap 'kill "$sim_pid" 2>/dev/null; exit 0' TERM INT
-  wait "$sim_pid"
-  trap - TERM INT
-  kind="SIMULATED preemption"
-else
-  log "watching $METADATA_URL/preempted (meta-data key: $META_KEY)"
-  # wait_for_change blocks until the value changes or timeout_sec elapses; on
-  # timeout it returns the current value, so just loop. last_etag makes the
-  # server return immediately if the value changed between two requests, so a
-  # flip in the gap between polls is never missed. curl runs in the background
-  # so a TERM from the step's EXIT trap is handled immediately instead of after
-  # the long-poll completes.
-  poll_pid=""
-  trap 'kill "$poll_pid" 2>/dev/null; exit 0' TERM INT
-  poll_out="$STATE_DIR/.poll"
-  poll_headers="$STATE_DIR/.poll_headers"
-  # "0" never matches a real etag, so the first request returns immediately.
-  etag="0"
-  while true; do
-    curl -sf --connect-timeout 2 --max-time 310 -H 'Metadata-Flavor: Google' -D "$poll_headers" \
-      "$METADATA_URL/preempted?wait_for_change=true&timeout_sec=300&last_etag=${etag}" > "$poll_out" &
-    poll_pid=$!
-    wait "$poll_pid"
-    [[ "$(cat "$poll_out" 2>/dev/null)" == "TRUE" ]] && break
-    etag=$(sed -n 's/^[Ee][Tt][Aa][Gg]: *\([^[:space:]]*\).*/\1/p' "$poll_headers" 2>/dev/null || true)
-    etag="${etag:-0}"
-    sleep 1 &
-    poll_pid=$!
-    wait "$poll_pid"
-  done
-  trap - TERM INT
-  rm -f "$poll_out" "$poll_headers"
-  kind="Spot preemption"
-fi
+log "watching $METADATA_URL/preempted (meta-data key: $META_KEY)"
+
+# wait_for_change blocks until the value changes or timeout_sec elapses; on
+# timeout it returns the current value, so just loop. last_etag makes the
+# server return immediately if the value changed between two requests, so a
+# flip in the gap between polls is never missed. curl runs in the background
+# so a TERM from the step's EXIT trap is handled immediately instead of after
+# the long-poll completes.
+poll_pid=""
+trap 'kill "$poll_pid" 2>/dev/null; exit 0' TERM INT
+poll_out="$STATE_DIR/.poll"
+poll_headers="$STATE_DIR/.poll_headers"
+# "0" never matches a real etag, so the first request returns immediately.
+etag="0"
+while true; do
+  curl -sf --connect-timeout 2 --max-time 310 -H 'Metadata-Flavor: Google' -D "$poll_headers" \
+    "$METADATA_URL/preempted?wait_for_change=true&timeout_sec=300&last_etag=${etag}" > "$poll_out" &
+  poll_pid=$!
+  wait "$poll_pid"
+  [[ "$(cat "$poll_out" 2>/dev/null)" == "TRUE" ]] && break
+  etag=$(sed -n 's/^[Ee][Tt][Aa][Gg]: *\([^[:space:]]*\).*/\1/p' "$poll_headers" 2>/dev/null || true)
+  etag="${etag:-0}"
+  sleep 1 &
+  poll_pid=$!
+  wait "$poll_pid"
+done
+trap - TERM INT
+rm -f "$poll_out" "$poll_headers"
 
 detected_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 current_config=$(cat "$CURRENT_CONFIG_FILE" 2>/dev/null || echo '')
 
-log "PREEMPTION DETECTED ($kind) at $detected_at while running: ${current_config:-<none>}"
+log "PREEMPTION DETECTED at $detected_at while running: ${current_config:-<none>}"
 echo "^^^ +++"
 
 # Best-effort within the ~30s shutdown window; meta-data first, it is the only
@@ -101,7 +89,7 @@ printf '{"detected_at":"%s","job_id":"%s","retry_count":"%s","config":"%s"}\n' \
   "$detected_at" "${BUILDKITE_JOB_ID:-}" "${BUILDKITE_RETRY_COUNT:-0}" "$current_config" > "$MARKER_FILE" || true
 
 buildkite-agent annotate --style warning --context "preemption-${BUILDKITE_JOB_ID:-local}" \
-  "${kind} detected at ${detected_at} in job \`${BUILDKITE_LABEL:-$META_KEY}\` (attempt $((${BUILDKITE_RETRY_COUNT:-0} + 1))) while running \`${current_config:-<none>}\`" || true
+  "Spot preemption detected at ${detected_at} in job \`${BUILDKITE_LABEL:-$META_KEY}\` (attempt $((${BUILDKITE_RETRY_COUNT:-0} + 1))) while running \`${current_config:-<none>}\`" || true
 
 # Optional: stop the agent now instead of letting Buildkite discover it as lost.
 # A lost agent costs ~3 min heartbeat timeout + up to 60s reaper tick before the
