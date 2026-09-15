@@ -351,7 +351,6 @@ export const ScheduledReportFlyoutContent = ({
                     minDate: now,
                     readOnly,
                     dateFormat,
-                    'data-test-subj': 'startDatePicker',
                   },
                 }}
               />
