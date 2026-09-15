@@ -70,7 +70,9 @@ const STATUS_BADGE_COLORS: Record<ProposalStatus, string> = {
 export const createProposalAttachmentDefinition =
   (): AttachmentUIDefinition<ProposalAttachment> => ({
     getLabel: (attachment) =>
-      attachment.data.action?.name ?? attachment.data.actionWorkflowId ?? PROPOSAL_WITHOUT_ACTION_LABEL,
+      attachment.data.action?.name ??
+      attachment.data.actionWorkflowId ??
+      PROPOSAL_WITHOUT_ACTION_LABEL,
 
     getIcon: () => 'lock',
 
