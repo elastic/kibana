@@ -105,7 +105,6 @@ describe('createSuggestAutomationProvider', () => {
 
     expect(openChat).toHaveBeenCalledWith(
       expect.objectContaining({
-        newConversation: true,
         autoSendInitialMessage: true,
         initialMessage: 'Suggest an automation for this AI index.',
         sessionTag: 'context-engine-ai-index-my-ai-index',
@@ -124,6 +123,27 @@ describe('createSuggestAutomationProvider', () => {
         ],
       })
     );
+  });
+
+  it('does not force a new conversation, so re-opening for the same AI index reuses the session', () => {
+    const { provider, openChat } = createProvider();
+
+    provider.suggestAutomation({ aiIndex, onSaved: jest.fn() });
+
+    // `newConversation` must be left unset: `agentBuilder.openChat` restores the
+    // conversation persisted under `sessionTag` when this flag is absent/false.
+    expect(openChat.mock.calls[0][0]).not.toHaveProperty('newConversation');
+  });
+
+  it('uses a distinct sessionTag per AI index, so different AI indexes never share a conversation', () => {
+    const { provider, openChat } = createProvider();
+    const otherAiIndex: GetAiIndexResponse = { ...aiIndex, id: 'other-ai-index' };
+
+    provider.suggestAutomation({ aiIndex, onSaved: jest.fn() });
+    provider.suggestAutomation({ aiIndex: otherAiIndex, onSaved: jest.fn() });
+
+    expect(openChat.mock.calls[0][0].sessionTag).toBe('context-engine-ai-index-my-ai-index');
+    expect(openChat.mock.calls[1][0].sessionTag).toBe('context-engine-ai-index-other-ai-index');
   });
 
   it('refreshes the page when save automation succeeds for the current AI index', () => {

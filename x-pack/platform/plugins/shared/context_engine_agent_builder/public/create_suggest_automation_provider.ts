@@ -59,8 +59,9 @@ export const createSuggestAutomationProvider = ({
       return;
     }
 
+    // No `newConversation`: reuses the conversation persisted for this sessionTag, if any,
+    // so re-clicking for the same AI index in the same browser continues that conversation.
     agentBuilder.openChat({
-      newConversation: true,
       autoSendInitialMessage: true,
       initialMessage: SUGGEST_AUTOMATION_INITIAL_MESSAGE,
       sessionTag: `context-engine-ai-index-${aiIndex.id}`,
