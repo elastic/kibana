@@ -17,9 +17,9 @@ export interface AlertSelection {
 
 /**
  * Query-based selection used to expand a trigger event on the server instead of
- * enumerating ids on the client. The server pages the query (PIT + search_after),
- * capped by a maxDocs limit, to build the trigger event. This keeps the request
- * payload tiny even when the selection spans thousands of documents.
+ * enumerating ids on the client. The server pages the query using a point in time and
+ * `search_after`, capped by a maxDocs limit, to build the trigger event. This keeps the
+ * request payload tiny even when the selection spans thousands of documents.
  */
 export interface EventQuerySelection {
   /** Elasticsearch DSL query describing the selected documents/alerts. */

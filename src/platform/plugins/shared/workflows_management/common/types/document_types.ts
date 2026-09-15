@@ -21,7 +21,7 @@ export interface DocumentEventEntry {
  * Input contract for the `document` trigger. A caller may supply exactly one of:
  * - `documents`: pre-expanded documents (legacy / standalone forms), passed through as-is.
  * - `documentIds`: explicit id selection, expanded server-side via mget.
- * - `querySelection`: a query, expanded server-side via PIT + search_after.
+ * - `querySelection`: a query, expanded server-side using a point in time and `search_after`.
  */
 export interface DocumentTriggerInput {
   event: {
