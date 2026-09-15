@@ -13,6 +13,7 @@ import {
   DEFAULT_TASK_START_DELAY_MINUTES,
 } from '../common/constants/incremental_id';
 
+// NOTE FOR TESTING PURPOSES
 export const ConfigSchema = schema.object({
   /**
    * Gates server-side population of assignee identity fields (`username`,
