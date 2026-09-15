@@ -117,7 +117,7 @@ interface ArtifactListPageWithSimpleTableProps {
    * Important: this just a UI flag - ManifestManager must also support enabling/disabling
    * the given artifact type.
    */
-  allowEnableDisableArtifacts?: boolean;
+  showEnabledColumn?: boolean;
 }
 
 export type ArtifactListPageProps = ArtifactListPageBaseProps &
@@ -146,7 +146,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     CardDecorator,
     additionalActions,
     showAsSimpleTable = false,
-    allowEnableDisableArtifacts = false,
+    showEnabledColumn = false,
   }) => {
     const areEndpointExceptionsMovedUnderManagementFFEnabled = useIsExperimentalFeatureEnabled(
       'endpointExceptionsMovedUnderManagement'
@@ -571,7 +571,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
                 error={(error?.body as ServerApiError)?.message || error?.message}
                 allowCardEditAction={allowCardEditAction}
                 allowCardDeleteAction={allowCardDeleteAction}
-                allowEnableDisableArtifacts={allowEnableDisableArtifacts}
+                showEnabledColumn={showEnabledColumn}
                 apiClient={apiClient}
                 onEnabledChangeSuccess={handleEnabledChangeSuccess}
                 sortField={sortField}
