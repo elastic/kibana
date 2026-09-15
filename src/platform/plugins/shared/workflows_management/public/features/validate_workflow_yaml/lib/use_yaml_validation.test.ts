@@ -496,6 +496,34 @@ steps:
     expect(individualOwnerCalls).toHaveLength(0);
   });
 
+  it('uses the YAML source paired with the computed validation snapshot', async () => {
+    const computedYaml = `
+version: "1"
+name: "Test Workflow"
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: step1
+    type: console
+    with:
+      message: "plain text"
+`;
+    const editorYaml = computedYaml.replace('plain text', '{{ unknown }}');
+    const mockEditor = createMockEditor(editorYaml);
+    const { result } = renderHookWithProviders(mockEditor as any, computedYaml);
+
+    jest.advanceTimersByTime(500);
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.validationResults).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ owner: 'variable-validation' })])
+    );
+  });
+
   it('surfaces unexpected validation failures outside diagnostic results', async () => {
     const yamlContent = `
 version: "1"
@@ -503,7 +531,7 @@ name: "Test Workflow"
 steps: []
 `;
     const mockEditor = createMockEditor(yamlContent);
-    jest.spyOn(mockEditor.getModel(), 'getValue').mockImplementation(() => {
+    mockEditor.createDecorationsCollection.mockImplementation(() => {
       throw new Error('Validation pipeline failed');
     });
 
