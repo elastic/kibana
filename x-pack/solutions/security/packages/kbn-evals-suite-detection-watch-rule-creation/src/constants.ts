@@ -40,9 +40,3 @@ export const RULE_CREATION_TOOL_ID = 'security.create_detection_rule';
  * are read from the running stack at setup (see workflow_fixture.ts) for the Trajectory evaluators.
  */
 export const RULE_CREATION_SKILL_ID = 'detection-rule-edit';
-
-/** Public Agent Builder API version (`Elastic-Api-Version` header). */
-export const AGENT_BUILDER_API_VERSION = '2023-10-31';
-
-// Provisional: sized from the skill's prescribed path, not from sampled traces.
-export const TRAJECTORY_MAX_TOOL_CALLS = 8;

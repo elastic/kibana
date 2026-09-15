@@ -15,13 +15,14 @@ import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
-  AGENT_BUILDER_API_VERSION,
   RULE_CREATION_SKILL_ID,
   RULE_CREATION_WORKFLOW_ID,
   WORKFLOWS_API_VERSION,
   DRAFT_STEP_ID,
   REVIEW_STEP_ID,
 } from './constants';
+
+const AGENT_BUILDER_API_VERSION = '2023-10-31';
 
 /**
  * The tool ids the detection-rule-edit skill registers on the stack under test. Read live rather

@@ -9,7 +9,7 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import type { RuleCreationResult } from '../rule_creation_client';
-import { DRAFT_STEP_ID, RULE_CREATION_TOOL_ID, TRAJECTORY_MAX_TOOL_CALLS } from '../constants';
+import { DRAFT_STEP_ID, RULE_CREATION_TOOL_ID } from '../constants';
 import {
   createTrajectoryEvaluators,
   createTrajectoryFetcher,
@@ -175,14 +175,13 @@ describe('createTrajectoryEvaluators', () => {
 });
 
 describe('scoreCallCount', () => {
-  it('is 1 at or below the bound', () => {
+  it('is 1 at or below the bound of 8', () => {
     expect(scoreCallCount(settled([CREATE])).score).toBe(1);
-    expect(scoreCallCount(settled(Array(TRAJECTORY_MAX_TOOL_CALLS).fill(CREATE))).score).toBe(1);
+    expect(scoreCallCount(settled(Array(8).fill(CREATE))).score).toBe(1);
   });
 
   it('is 0 past the bound', () => {
-    const over = Array(TRAJECTORY_MAX_TOOL_CALLS + 1).fill(CREATE);
-    expect(scoreCallCount(settled(over)).score).toBe(0);
+    expect(scoreCallCount(settled(Array(9).fill(CREATE))).score).toBe(0);
   });
 });
 

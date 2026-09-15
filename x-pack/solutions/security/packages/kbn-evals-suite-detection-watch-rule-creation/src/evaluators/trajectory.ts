@@ -9,14 +9,12 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator } from '@kbn/evals';
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
-import { TRAJECTORY_MAX_TOOL_CALLS } from '../constants';
 import type { RuleCreationResult } from '../rule_creation_client';
 import { extractConversationId, toolSpanJoinClauses } from './tool_routing';
 
-// What AgentBuilderSpanProcessor writes for non-builtin tools when includeRealNames is off.
-const ANONYMIZED_TOOL_NAME = 'custom';
+// Provisional: sized from the skill's prescribed path, not from sampled traces.
+const MAX_TOOL_CALLS = 8;
 
-const TOOL_KIND = 'attributes.elastic.inference.span.kind == "TOOL"';
 const TOOL_NAME_COLUMN = 'attributes.gen_ai.tool.name';
 
 interface EsqlResponse {
@@ -39,7 +37,7 @@ const fetchToolNames = async (
   where: string
 ): Promise<string[] | undefined> => {
   const response = (await traceEsClient.esql.query({
-    query: `FROM traces-*\n| WHERE ${where} AND ${TOOL_KIND}\n| SORT @timestamp ASC\n| KEEP ${TOOL_NAME_COLUMN}`,
+    query: `FROM traces-*\n| WHERE ${where} AND attributes.elastic.inference.span.kind == "TOOL"\n| SORT @timestamp ASC\n| KEEP ${TOOL_NAME_COLUMN}`,
   })) as unknown as EsqlResponse;
   const nameIdx = response.columns.findIndex((c) => c.name === TOOL_NAME_COLUMN);
   if (nameIdx === -1) return undefined;
@@ -165,9 +163,9 @@ const trajectoryEvaluator = (
 export const scoreCallCount: ScoreFn = ({ toolNames }) => {
   const total = toolNames.length;
   return {
-    score: total <= TRAJECTORY_MAX_TOOL_CALLS ? 1 : 0,
-    explanation: `${total} tool call(s), bound ${TRAJECTORY_MAX_TOOL_CALLS}`,
-    metadata: { total, max: TRAJECTORY_MAX_TOOL_CALLS },
+    score: total <= MAX_TOOL_CALLS ? 1 : 0,
+    explanation: `${total} tool call(s), bound ${MAX_TOOL_CALLS}`,
+    metadata: { total, max: MAX_TOOL_CALLS },
   };
 };
 
@@ -182,7 +180,8 @@ export const scoreKnownTools =
     for (const name of toolNames) {
       if (knownToolIds.has(name)) registry.push(name);
       else if (isInternalTool(name)) internal.push(name);
-      else if (name === ANONYMIZED_TOOL_NAME) anonymized.push(name);
+      // AgentBuilderSpanProcessor writes "custom" for non-builtin tools when includeRealNames is off.
+      else if (name === 'custom') anonymized.push(name);
       else unknown.push(name);
     }
     const score = 1 - unknown.length / toolNames.length;
