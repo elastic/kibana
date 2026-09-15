@@ -29,13 +29,14 @@ spaceTest.describe('Lens share and CSV export', { tag: '@local-stateful-classic'
     'enables share/export for a valid config and preserves filters in the shared URL',
     async ({ page, pageObjects, context, kbnUrl }) => {
       spaceTest.setTimeout(120_000);
-      const { lens, queryBar, filterBar, toasts } = pageObjects;
+      const { appMenu, lens, queryBar, filterBar, toasts } = pageObjects;
 
       await spaceTest.step('share disabled on empty visualization', async () => {
         await lens.waitForLensApp();
-        await lens.workspace.openAppMenuOverflow();
+        await appMenu.openOverflow();
         await expect(lens.workspace.shareButton).toBeDisabled();
-        await lens.workspace.closeAppMenuOverflow();
+        await page.keyboard.press('Escape');
+        await expect(appMenu.popover).toBeHidden();
       });
 
       await spaceTest.step('share stays disabled for incomplete XY', async () => {
@@ -47,9 +48,10 @@ spaceTest.describe('Lens share and CSV export', { tag: '@local-stateful-classic'
           operation: 'date_histogram',
           field: '@timestamp',
         });
-        await lens.workspace.openAppMenuOverflow();
+        await appMenu.openOverflow();
         await expect(lens.workspace.shareButton).toBeDisabled();
-        await lens.workspace.closeAppMenuOverflow();
+        await page.keyboard.press('Escape');
+        await expect(appMenu.popover).toBeHidden();
       });
 
       await spaceTest.step('share and export enable for a valid config', async () => {
@@ -60,10 +62,11 @@ spaceTest.describe('Lens share and CSV export', { tag: '@local-stateful-classic'
         });
         // Share/export enable after Lens has produced a request/visualization.
         await lens.waitForVisualization('xyVisChart');
-        await lens.workspace.openAppMenuOverflow();
+        await appMenu.openOverflow();
         await expect(lens.workspace.shareButton).toBeEnabled();
         await expect(lens.workspace.exportButton).toBeEnabled();
-        await lens.workspace.closeAppMenuOverflow();
+        await page.keyboard.press('Escape');
+        await expect(appMenu.popover).toBeHidden();
 
         // Modern share modal exposes Copy link directly (no `link` tab / tabbedModal-link-content).
         await lens.workspace.openShareModal();

@@ -7,14 +7,9 @@
 
 import type { DebugState } from '@elastic/charts';
 import { encode as encodeRison } from '@kbn/rison';
-import type { Locator, ScoutPage } from '@kbn/scout';
+import { AppMenu, type Locator, type ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { LOGSTASH_IN_RANGE_DATES } from '../../../../fixtures/constants';
-import {
-  clickLensAppMenuItem,
-  closeLensAppMenuOverflow,
-  openLensAppMenuOverflow,
-} from '../../app_menu';
 import { WAIT_FOR_FUNCTION_TIMEOUT_MS } from './lens_editor_helpers';
 
 /** `LensApp` helpers needed by workspace navigation / formula reading. */
@@ -68,6 +63,7 @@ export class LensWorkspace {
   private readonly dimensionFilterQueryInput;
   private readonly shareModal;
   private readonly copyShareUrlButton;
+  private readonly appMenu;
 
   constructor(private readonly page: ScoutPage, private readonly deps: LensWorkspaceDeps) {
     this.chartTitle = this.page.testSubj.locator('lns_ChartTitle');
@@ -103,6 +99,7 @@ export class LensWorkspace {
     );
     this.shareModal = this.page.testSubj.locator('shareContextModal');
     this.copyShareUrlButton = this.page.testSubj.locator('copyShareUrlButton');
+    this.appMenu = new AppMenu(page);
   }
 
   async openFullEditor() {
@@ -404,20 +401,6 @@ export class LensWorkspace {
 
   /** No-op — auto-apply is an inline AppMenu switch, not a settings popover. */
   async closeSettingsMenu() {}
-  /** Opens the classic AppMenu overflow (Share, Export, Inspect, Open in Discover). */
-  async openAppMenuOverflow(): Promise<void> {
-    await openLensAppMenuOverflow(this.page);
-  }
-
-  /** Closes the AppMenu overflow so the next step starts with a closed menu. */
-  async closeAppMenuOverflow(): Promise<void> {
-    await closeLensAppMenuOverflow(this.page);
-  }
-
-  /** Opens the overflow menu and clicks an overflow AppMenu item. */
-  async clickAppMenuItem(testId: string): Promise<void> {
-    await clickLensAppMenuItem(this.page, testId);
-  }
 
   /**
    * Opens the Share modal. Waits until the share button is enabled (can lag after save).
@@ -426,7 +409,7 @@ export class LensWorkspace {
    */
   async openShareModal() {
     await this.page.components.toast().closeAll();
-    await this.openAppMenuOverflow();
+    await this.appMenu.openOverflow();
     await expect(this.shareButton).toBeEnabled({ timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS });
     await this.shareButton.click();
     await this.shareModal.waitFor({ state: 'visible' });

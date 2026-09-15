@@ -8,7 +8,6 @@
 import { expect } from '@kbn/scout/ui';
 import {
   completeLensCsvExport,
-  clickLensAppMenuItem,
   createAdHocDataViewFromLens,
   createRuntimeFieldFromEditor,
   enableElasticChartDebug,
@@ -362,7 +361,7 @@ spaceTest.describe('Lens ad hoc data view', { tag: '@local-stateful-classic' }, 
   spaceTest(
     'should navigate to Discover correctly from Lens with an ad hoc data view',
     async ({ page, pageObjects, context }) => {
-      const { visualize, lens } = pageObjects;
+      const { appMenu, visualize, lens } = pageObjects;
 
       await visualize.goto();
       await visualize.openNewVisualizationWizard();
@@ -384,7 +383,7 @@ spaceTest.describe('Lens ad hoc data view', { tag: '@local-stateful-classic' }, 
       await lens.waitForVisualization('mtrVis');
 
       const discoverPagePromise = context.waitForEvent('page');
-      await clickLensAppMenuItem(page, 'lnsApp_openInDiscover');
+      await appMenu.clickOverflowItem('lnsApp_openInDiscover');
       const discoverPage = await discoverPagePromise;
 
       try {
