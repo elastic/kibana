@@ -279,7 +279,7 @@ describe('ExecutionHistoryPage', () => {
       await switchToPoliciesTab();
 
       expect(
-        screen.getByText(/No policy execution activity in the last 24 hours/i)
+        screen.getByText(/No action policy execution activity in the last 24 hours/i)
       ).toBeInTheDocument();
     });
 
@@ -501,7 +501,7 @@ describe('ExecutionHistoryPage', () => {
 
       expect(screen.getByTestId('executionHistoryFilteredEmptyPrompt')).toBeInTheDocument();
       expect(
-        screen.queryByText(/No policy execution activity in the last 24 hours/i)
+        screen.queryByText(/No action policy execution activity in the last 24 hours/i)
       ).not.toBeInTheDocument();
     });
 

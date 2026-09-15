@@ -223,7 +223,7 @@ export const PoliciesExecutionHistoryTable = ({
 
   return (
     <EuiBasicTable<PolicyExecutionHistoryItem>
-      data-test-subj="policyExecutionHistoryTable"
+      data-test-subj="actionPolicyExecutionHistoryTable"
       tableCaption={tableCaption}
       items={items}
       columns={columns}

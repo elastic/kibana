@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import type { KibanaRole } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   buildAlertEvent,
   buildCreateActionPolicyData,
   buildCreateRuleData,
   buildWorkflowYaml,
+  READ_ROLE,
   test,
   testData,
 } from '../fixtures';
@@ -18,11 +20,27 @@ import {
 const { POLL_TIMEOUT_MS } = testData;
 
 /*
+ * Viewer plus `workflowsManagement: read`. Opening action-policy details
+ * fetches the workflow destination; READ_ROLE alone surfaces a
+ * "Failed to load workflow" toast.
+ */
+const SMOKE_VIEWER_ROLE: KibanaRole = {
+  elasticsearch: READ_ROLE.elasticsearch,
+  kibana: READ_ROLE.kibana.map((entry) => ({
+    ...entry,
+    feature: {
+      ...entry.feature,
+      workflowsManagement: ['read'],
+    },
+  })),
+};
+
+/*
  * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
  * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
  * until ECH support lands.
  *
- * Setup mirrors `list_execution_history_rule_lookup.spec.ts`: a catch-all
+ * Setup mirrors `list_execution_history_rule_lookup.spec.ts`: a rule-scoped
  * action policy plus a disabled rule, then a seeded alert event that the
  * dispatcher turns into a fire action and an execution-history event.
  */
@@ -51,6 +69,7 @@ test.describe('Execution history — smoke', { tag: '@local-stateful-classic' },
         name: policyName,
         description: 'Scout execution history UI smoke policy',
         destinations: [{ type: 'workflow', id: workflowId }],
+        matcher: { expression: `rule.id: "${ruleId}"` },
       })
     );
 
@@ -86,10 +105,12 @@ test.describe('Execution history — smoke', { tag: '@local-stateful-classic' },
   });
 
   test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsAlertingV2Viewer();
+    await browserAuth.loginWithCustomRole(SMOKE_VIEWER_ROLE);
   });
 
   test.afterAll(async ({ apiServices }) => {
+    await apiServices.alertingV2.alertActionsEvents.cleanUp();
+    await apiServices.alertingV2.ruleEvents.cleanUp();
     if (policyId) {
       await apiServices.alertingV2.actionPolicies.delete(policyId);
     }
@@ -134,6 +155,7 @@ test.describe('Execution history — smoke', { tag: '@local-stateful-classic' },
       await expect(
         executionHistory.policyDetailsFlyout.getByRole('heading', { name: policyName })
       ).toBeVisible();
+      await expect(page.getByText('Failed to load workflow')).toHaveCount(0);
     });
   });
 });
