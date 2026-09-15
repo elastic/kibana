@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import { scheduleTask } from './test_utils';
 
 // Spelled out rather than imported from the plugin because both values are persisted -- the id as
 // the task saved object id, the type in every event log document it produces -- so a change to
@@ -31,20 +30,6 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('snapshot telemetry', () => {
-    let sampleTaskId: string | undefined;
-
-    after(async () => {
-      await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
-      if (sampleTaskId) {
-        await es.deleteByQuery({
-          index: '.kibana-event-log*',
-          ignore_unavailable: true,
-          query: { bool: { filter: [{ term: { 'kibana.task.id': sampleTaskId } }] } },
-          conflicts: 'proceed',
-        });
-      }
-    });
-
     function runTaskSoon(id: string) {
       return supertest
         .post('/api/sample_tasks/run_soon')
@@ -99,17 +84,15 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('aggregates task execution volume and schedule delay from the event log', async () => {
-      // Produce a task-run-start event under a known task type for the aggregation to find.
-      const sampleTask = await scheduleTask(supertest, { taskType: 'sampleTask', params: {} });
-      sampleTaskId = sampleTask.id;
-      await runTaskSoon(sampleTask.id);
+      // The telemetry task emits a task-run-start event of its own on every run
+      await runTaskSoon(TELEMETRY_TASK_ID);
 
       await retry.try(async () => {
-        expect(await countTaskRunStartEvents('sampleTask')).to.be.greaterThan(0);
+        expect(await countTaskRunStartEvents(TELEMETRY_TASK_TYPE)).to.be.greaterThan(0);
       });
 
-      // The task runs once at startup, which may well have happened before the event above was
-      // indexed, so keep asking for a fresh collection until one reflects that event.
+      // A collection only sees events the event log had already indexed when it ran, so keep asking
+      // for a fresh one until it reflects the run above.
       await retry.try(async () => {
         await runTaskSoon(TELEMETRY_TASK_ID);
 
@@ -120,9 +103,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(state.error_messages).to.be(undefined);
 
         const byType = state.task_runs_by_type_24hr ?? [];
-        const sampleTaskBucket = byType.find(({ name }) => name === 'sampleTask');
-        expect(sampleTaskBucket).to.be.ok();
-        expect(sampleTaskBucket!.value).to.be.greaterThan(0);
+        const telemetryTaskBucket = byType.find(({ name }) => name === TELEMETRY_TASK_TYPE);
+        expect(telemetryTaskBucket).to.be.ok();
+        expect(telemetryTaskBucket!.value).to.be.greaterThan(0);
 
         // The breakdown is capped to the highest volume task types, so it only reconciles against
         // the total once the remainder reported in task_runs_other_24hr is added back.
