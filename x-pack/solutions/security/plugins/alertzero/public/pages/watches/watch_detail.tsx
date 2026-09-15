@@ -33,7 +33,6 @@ import * as i18n from './translations';
 import * as settingsI18n from './settings_translations';
 
 const RAIL_NARROW_BREAKPOINT_PX = 1020;
-
 export const WatchDetailPage: React.FC = () => {
   const history = useHistory();
   const { watchId } = useParams<{ watchId: string }>();

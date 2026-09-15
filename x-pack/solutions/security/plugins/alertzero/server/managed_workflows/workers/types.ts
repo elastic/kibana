@@ -10,7 +10,6 @@ import type { DetectionConfig } from '@kbn/alertzero-common';
 import type { ManagedWorkflowTemplateValues } from '@kbn/workflows/managed';
 
 export type WorkerSettingsPatch = WorkerSettingsWrite;
-
 export interface WorkerSettingsRegistration {
   createDefaultValues(): ManagedWorkflowTemplateValues;
   migrate(values: Record<string, unknown>): {

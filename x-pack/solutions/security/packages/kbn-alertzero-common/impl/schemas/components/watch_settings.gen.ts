@@ -293,6 +293,38 @@ export const WatchSettings = lazySchema(() =>
 export type WatchSettings = z.infer<typeof WatchSettings>;
 
 /**
+ * Trigger kinds a Worker may allow. Distinct from WorkflowTriggerType (`schedule` vs `scheduled`) — this matches the workflow YAML trigger `type`.
+ */
+export const WorkerTriggerType = lazySchema(() => z.enum(['manual', 'scheduled']));
+export type WorkerTriggerType = z.infer<typeof WorkerTriggerType>;
+export type WorkerTriggerTypeEnum = typeof WorkerTriggerType.enum;
+export const WorkerTriggerTypeEnum = WorkerTriggerType.enum;
+
+/**
+ * Nested unique settings (POC #290871). The owning Worker module validates which keys it accepts.
+ */
+export const WorkerSettingsExtras = lazySchema(() =>
+  z
+    .object({
+      /**
+       * Attack Discovery only. Max candidates considered per run.
+       */
+      candidateLimit: z
+        .number()
+        .int()
+        .min(1)
+        .max(1000)
+        .optional()
+        .describe('Attack Discovery only. Max candidates considered per run.'),
+    })
+    .passthrough()
+    .refine((value) => Object.keys(value).length <= 32, {
+      message: 'Worker settings extras cannot exceed 32 keys',
+    })
+);
+export type WorkerSettingsExtras = z.infer<typeof WorkerSettingsExtras>;
+
+/**
  * Per-Worker numeric tuning for detection-oriented Workers, e.g. Alert Triage's auto-close threshold. Optional and per-Worker opt-in — only meaningful for Workers whose autonomy cards reference these fields.
  */
 export const DetectionConfig = lazySchema(() =>

@@ -50,8 +50,7 @@ paths:
                   $ref: '../components/watch_settings.schema.yaml#/components/schemas/WorkerSettingsWrite'
                   description: >-
                     Nested settings patch. Shared and custom fields share this object and the same
-                    revision/persistence path. Field names match the WorkerSettings read shape.
-      responses:
+                    revision/persistence path. Field names match the WorkerSettings read shape.      responses:
         '200':
           description: Successful response
           content:

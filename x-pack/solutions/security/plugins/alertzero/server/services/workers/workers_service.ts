@@ -44,12 +44,24 @@ const getDefinitionFromTemplate = (registration: WorkerRegistration): WorkflowYa
   return null;
 };
 
+const templateValueEqual = (left: unknown, right: unknown): boolean => {
+  if (left === right) {
+    return true;
+  }
+  if (typeof left !== 'object' || typeof right !== 'object' || left === null || right === null) {
+    return false;
+  }
+  const leftRecord = left as Record<string, unknown>;
+  const rightRecord = right as Record<string, unknown>;
+  return Object.keys(rightRecord).every(
+    (key) => Object.hasOwn(leftRecord, key) && templateValueEqual(leftRecord[key], rightRecord[key])
+  );
+};
+
 const templateValuesEqual = (
   left: Record<string, unknown> | null,
   right: Record<string, unknown>
-): boolean =>
-  left != null &&
-  Object.keys(right).every((key) => Object.hasOwn(left, key) && left[key] === right[key]);
+): boolean => left != null && templateValueEqual(left, right);
 
 export type WorkerUpdateResult =
   | { outcome: 'updated'; response: UpdateWorkerResponse }
@@ -144,8 +156,7 @@ export class WorkersService {
       return { outcome: 'not-found' };
     }
 
-    const touchesSettings = touchesWorkerSettings(patch);
-    const managedWorkflows = await this.requireManagedWorkflows();
+    const touchesSettings = touchesWorkerSettings(patch);    const managedWorkflows = await this.requireManagedWorkflows();
     const management = this.requireManagement();
     let status = await managedWorkflows.getWorkflowStatus(registration.id, {
       spaceId,

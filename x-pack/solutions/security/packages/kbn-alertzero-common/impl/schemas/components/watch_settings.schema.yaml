@@ -366,6 +366,25 @@ components:
           type: string
         autonomy:
           $ref: '#/components/schemas/WatchAutonomyLevel'
+        allowedAutonomyLevels:
+          type: array
+          items:
+            $ref: '#/components/schemas/WatchAutonomyLevel'
+          minItems: 1
+          maxItems: 3
+          description: >-
+            Subset of the shared autonomy scale this Worker offers. Same meaning as
+            WatchAutonomyLevel everywhere; availability is per-Worker. Omitted means all three.
+        allowedTriggers:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkerTriggerType'
+          minItems: 1
+          maxItems: 2
+          description: >-
+            Which trigger kinds this Worker allows. Manual and scheduled are independent —
+            a Worker may offer one or both. The interval control is shown only when scheduled
+            is present (via scheduleInterval).
         scheduleInterval:
           $ref: '#/components/schemas/WorkerScheduleInterval'
           description: >-
@@ -394,7 +413,6 @@ components:
           $ref: '#/components/schemas/AnalysisWindowDays'
         detectionConfig:
           $ref: '#/components/schemas/DetectionConfig'
-
     Worker:
       type: object
       description: A live registered Worker with Watch membership and durable settings.

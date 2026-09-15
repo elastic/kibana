@@ -17,7 +17,6 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 import { WorkerSettingsWrite, Worker } from '../components/watch_settings.gen';
-
 export const UpdateWorkerRequestParams = lazySchema(() =>
   z.object({
     /**
@@ -60,8 +59,7 @@ export const UpdateWorkerRequestBody = lazySchema(() =>
         'Nested settings patch. Shared and custom fields share this object and the same revision/persistence path. Field names match the WorkerSettings read shape.'
       ),
     })
-    .strict()
-);
+    .strict());
 export type UpdateWorkerRequestBody = z.infer<typeof UpdateWorkerRequestBody>;
 export type UpdateWorkerRequestBodyInput = z.input<typeof UpdateWorkerRequestBody>;
 
