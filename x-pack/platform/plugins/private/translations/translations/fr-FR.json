@@ -11592,7 +11592,6 @@
     "xpack.agentBuilder.conversationInput.messageEditor.newConversationLabel": "Nouvelle conversation, saisie de message",
     "xpack.agentBuilder.conversationInput.textArea.disabledPlaceholder": "L'agent \"{agentId}\" a été supprimé. Veuillez démarrer une nouvelle conversation.",
     "xpack.agentBuilder.conversationInput.textArea.enabledPlaceholder": "Poser une question",
-    "xpack.agentBuilder.conversationList.optimisticNewConversationTitle": "Nouvelle conversation",
     "xpack.agentBuilder.conversationRounds": "Messages de conversation",
     "xpack.agentBuilder.conversationRounds.agentResponse": "L'agent a dit : {message}",
     "xpack.agentBuilder.conversationRounds.generatingAnnouncement": "L'agent génère une réponse.",

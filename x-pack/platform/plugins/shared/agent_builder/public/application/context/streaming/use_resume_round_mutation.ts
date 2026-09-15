@@ -10,15 +10,18 @@ import { useCallback, useMemo, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
-import type { Conversation, ConversationRoundStep } from '@kbn/agent-builder-common';
+import type { ConversationRoundStep } from '@kbn/agent-builder-common';
+import { isExecutionStartedEvent, isExecutionTerminatedEvent } from '@kbn/agent-builder-common';
+import { tap } from 'rxjs';
 import type { PromptResponse } from '@kbn/agent-builder-common/agents';
 import { useKibana } from '../../hooks/use_kibana';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { mutationKeys } from '../../mutation_keys';
-import { queryKeys } from '../../query_keys';
 import { subscribeToChatEvents } from './use_subscribe_to_chat_events';
 import { BrowserToolExecutor } from '../../services/browser_tool_executor';
 import { createConversationActions } from '../conversation/use_conversation_actions';
+import type { ConversationStreamService } from '../../../services/events';
+import { releaseLocalContent } from './release_local_content';
 
 export interface ResumeRoundVars {
   prompts: Record<string, PromptResponse>;
@@ -29,6 +32,7 @@ export interface ResumeRoundVars {
 }
 
 export interface ResumeRoundMutationBindings {
+  conversationStreamService: ConversationStreamService;
   setError: (conversationId: string, error: unknown, errorSteps: ConversationRoundStep[]) => void;
   clearActiveStream: (conversationId: string) => void;
 }
@@ -40,6 +44,7 @@ type UseResumeRoundMutationProps = ResumeRoundMutationBindings;
  * `ConfirmationPrompt`. Same single-scope `mutationFn` shape as the send mutation.
  */
 export const useResumeRoundMutation = ({
+  conversationStreamService,
   setError,
   clearActiveStream,
 }: UseResumeRoundMutationProps) => {
@@ -81,11 +86,13 @@ export const useResumeRoundMutation = ({
       // Drop pending prompts from the round — the user has answered, the round is back in progress.
       streamActions.clearPendingPrompts();
 
-      let succeeded = false;
+      let timelineExecutionId: string | undefined;
+      let stepsAtFailure: ConversationRoundStep[] = [];
+
       try {
         const browserApiToolsMetadata = vars.browserApiTools?.map(toToolMetadata);
 
-        const events$ = chatService.resume({
+        const rawEvents$ = chatService.resume({
           signal: controller.signal,
           executionId,
           prompts: vars.prompts,
@@ -96,6 +103,21 @@ export const useResumeRoundMutation = ({
           projectRouting: services.plugins.cps?.cpsManager?.getProjectRouting(),
         });
 
+        const events$ = rawEvents$.pipe(
+          tap({
+            next: (event) => {
+              if (isExecutionStartedEvent(event) || isExecutionTerminatedEvent(event)) {
+                timelineExecutionId ??= event.execution_id;
+              }
+            },
+            // Runs before the upstream `finalize` that clears the draft on stream end.
+            error: () => {
+              stepsAtFailure =
+                conversationStreamService.getSnapshot(vars.conversationId)?.steps ?? [];
+            },
+          })
+        );
+
         await subscribeToChatEvents({
           events$,
           conversationActions: streamActions,
@@ -103,21 +125,23 @@ export const useResumeRoundMutation = ({
           browserToolExecutor,
           isAborted: () => controller.signal.aborted,
         });
-        succeeded = true;
+
+        if (!controller.signal.aborted) {
+          clearActiveStream(vars.conversationId);
+          await releaseLocalContent({
+            refetch: streamActions.refetchConversation,
+            executionId: timelineExecutionId,
+            clearExecution: (persistedExecutionId) =>
+              conversationStreamService.clearPersistedExecution(
+                vars.conversationId,
+                persistedExecutionId
+              ),
+          });
+        }
       } catch (err) {
-        // Snapshot the failing round's accumulated steps from the cache so the
-        // error panel shows the steps that actually ran during this round.
-        const cached = queryClient.getQueryData<Conversation>(
-          queryKeys.conversations.byId(vars.conversationId)
-        );
-        const inProgressSteps = cached?.rounds?.at(-1)?.steps ?? [];
-        setError(vars.conversationId, err, inProgressSteps);
+        setError(vars.conversationId, err, stepsAtFailure);
         throw err;
       } finally {
-        // Only invalidate on success — see use_send_message_mutation.ts for rationale.
-        if (succeeded) {
-          streamActions.invalidateConversation();
-        }
         clearActiveStream(vars.conversationId);
         if (controllersRef.current.get(vars.conversationId)?.controller === controller) {
           controllersRef.current.delete(vars.conversationId);
