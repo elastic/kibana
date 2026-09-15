@@ -29,7 +29,7 @@ export const listAiIndicesHandler = async ({
   context: Pick<ToolHandlerContext, 'esClient' | 'request' | 'agentConfiguration'>;
 }): Promise<ListAiIndicesResult> => {
   const readService = await getAiIndexDataReadServiceForUser({ deps, esClient, request });
-  const aiIndices = await readService.listVisible();
+  const aiIndices = await readService.list();
   const assignedIds = agentConfiguration ? new Set(agentConfiguration.ai_indices ?? []) : undefined;
 
   return {

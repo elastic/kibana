@@ -31,11 +31,11 @@ describe('listAiIndicesHandler', () => {
 
   it('maps visible indices and omits assigned_to_agent without an agent', async () => {
     const { deps, readService } = createAiIndexToolDepsMock();
-    readService.listVisible.mockResolvedValue([aiIndex('elastic', true), aiIndex('runbooks')]);
+    readService.list.mockResolvedValue([aiIndex('elastic', true), aiIndex('runbooks')]);
 
     const result = await listAiIndicesHandler({ deps, context: baseContext });
 
-    expect(readService.listVisible).toHaveBeenCalledWith();
+    expect(readService.list).toHaveBeenCalledWith();
     expect(result).toEqual({
       ai_indices: [
         {
@@ -57,7 +57,7 @@ describe('listAiIndicesHandler', () => {
 
   it('flags which indices the running agent is configured with', async () => {
     const { deps, readService } = createAiIndexToolDepsMock();
-    readService.listVisible.mockResolvedValue([aiIndex('elastic'), aiIndex('runbooks')]);
+    readService.list.mockResolvedValue([aiIndex('elastic'), aiIndex('runbooks')]);
 
     const result = await listAiIndicesHandler({
       deps,
@@ -75,7 +75,7 @@ describe('listAiIndicesHandler', () => {
 
   it('treats an agent with no ai_indices as assigning none', async () => {
     const { deps, readService } = createAiIndexToolDepsMock();
-    readService.listVisible.mockResolvedValue([aiIndex('elastic')]);
+    readService.list.mockResolvedValue([aiIndex('elastic')]);
 
     const result = await listAiIndicesHandler({
       deps,
@@ -91,6 +91,6 @@ describe('listAiIndicesHandler', () => {
     await expect(listAiIndicesHandler({ deps, context: baseContext })).rejects.toThrow(
       CONTEXT_ENGINE_READ_DENIED_MESSAGE
     );
-    expect(readService.listVisible).not.toHaveBeenCalled();
+    expect(readService.list).not.toHaveBeenCalled();
   });
 });

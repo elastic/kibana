@@ -32,7 +32,7 @@ describe('list_ai_indices tool', () => {
 
   it('returns the visible indices as an `other` result', async () => {
     const { deps, readService } = createAiIndexToolDepsMock();
-    readService.listVisible.mockResolvedValue([
+    readService.list.mockResolvedValue([
       {
         id: 'runbooks',
         managed: false,
