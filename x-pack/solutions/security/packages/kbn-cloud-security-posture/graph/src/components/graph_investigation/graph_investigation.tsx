@@ -24,7 +24,7 @@ import type { ProjectRouting } from '@kbn/cloud-security-posture-common/schema/g
 import { css } from '@emotion/react';
 import { Panel } from '@xyflow/react';
 import { getEsQueryConfig } from '@kbn/data-service';
-import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiTextColor } from '@elastic/eui';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { Graph, isEntityNode } from '../../..';
@@ -700,6 +700,15 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         ? NEGATED_FILTER_SEARCH_WARNING_MESSAGE
         : undefined;
 
+    const defaultFilterItems = dataView && defaultFilters.length > 0 && (
+      <FilterItems
+        filters={defaultFilters}
+        indexPatterns={[dataView]}
+        readOnly={true}
+        showTooltip={false}
+      />
+    );
+
     return (
       <>
         <EuiFlexGroup
@@ -737,11 +746,16 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
                     filters={searchFilters}
                     prependFilterBar={
                       defaultFilters.length > 0 ? (
-                        <FilterItems
-                          filters={defaultFilters}
-                          indexPatterns={[dataView]}
-                          readOnly={true}
-                        />
+                        <>
+                          {defaultFilterItems}
+                          {searchFilters.length > 0 && (
+                            <EuiFlexItem grow={false}>
+                              <EuiTextColor color="subdued" data-test-subj="graphDefaultFilterOr">
+                                {BooleanRelation.OR}
+                              </EuiTextColor>
+                            </EuiFlexItem>
+                          )}
+                        </>
                       ) : undefined
                     }
                     submitButtonStyle={'iconOnly'}
@@ -765,11 +779,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
                         padding-top: 4px;
                       `}
                     >
-                      <FilterItems
-                        filters={defaultFilters}
-                        indexPatterns={[dataView]}
-                        readOnly={true}
-                      />
+                      {defaultFilterItems}
                     </EuiFlexGroup>
                   )}
                 </div>

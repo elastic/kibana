@@ -215,6 +215,33 @@ describe('GraphInvestigation Component', () => {
     expect(mockDangerToast).toHaveBeenCalledTimes(1);
   });
 
+  describe('default filter display', () => {
+    it.each([
+      { originEventIds: [{ id: 'origin-event', isAlert: false }], entityIds: [] },
+      { originEventIds: [], entityIds: [{ id: 'admin@example.com', isOrigin: true }] },
+    ])('separates the origin from added filters with OR: %j', async (origins) => {
+      const { container } = renderStory({
+        initialState: {
+          dataView: mockDataView,
+          timeRange: { from: 'now-30d', to: 'now' },
+          ...origins,
+        },
+      });
+
+      expect(screen.queryByTestId('graphDefaultFilterOr')).not.toBeInTheDocument();
+
+      await showActionsByNode(container, 'admin@example.com');
+
+      const filterBar = screen.getByTestId('filter-items-group');
+      expect(within(filterBar).getByTestId('graphDefaultFilterOr')).toHaveTextContent('OR');
+      expect(within(filterBar).getAllByRole('button', { name: 'Filter actions' })).toHaveLength(1);
+
+      await hideActionsByNode(container, 'admin@example.com');
+
+      expect(screen.queryByTestId('graphDefaultFilterOr')).not.toBeInTheDocument();
+    });
+  });
+
   it('calls refresh on submit button click', () => {
     const mockRefresh = action(USE_FETCH_GRAPH_DATA_REFRESH_ACTION);
     const { getByTestId } = renderStory();
