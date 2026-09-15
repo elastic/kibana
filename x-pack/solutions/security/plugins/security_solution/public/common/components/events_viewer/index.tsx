@@ -456,6 +456,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     showCheckboxes,
     filterStatus: undefined,
     filterQuery,
+    indexNames: indexNames ?? selectedPatterns,
     bulkActions,
     selectedCount,
   });

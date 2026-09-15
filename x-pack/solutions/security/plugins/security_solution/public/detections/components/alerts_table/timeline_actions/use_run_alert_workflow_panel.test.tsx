@@ -12,6 +12,7 @@ import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import type { RunWorkflowPanelProps } from '@kbn/workflows-ui';
 import {
+  AlertWorkflowsPanel,
   useRunAlertWorkflowPanel,
   RUN_WORKFLOW_PANEL_ID,
   type UseRunAlertWorkflowPanelProps,
@@ -277,6 +278,8 @@ describe('useRunAlertWorkflowPanel', () => {
       });
       expect(panelProps.visibility).toEqual({ selectors: ['rule_action'] });
       expect(panelProps.onClose).toBe(defaultProps.closePopover);
+      // Single-alert (explicit) selection is never capped, so no notice.
+      expect(panelProps.notice).toBeUndefined();
 
       const { filterWorkflow, sortWorkflow } = panelProps;
       if (!filterWorkflow || !sortWorkflow) {
@@ -294,6 +297,47 @@ describe('useRunAlertWorkflowPanel', () => {
         managedAlertWorkflow,
         unmanagedManualWorkflow,
       ]);
+    });
+  });
+
+  describe('AlertWorkflowsPanel select-all cap notice', () => {
+    it('passes a select-all cap notice when a query selection is provided', () => {
+      const querySelection = {
+        query: { bool: { must: [{ match_all: {} }] } },
+        index: 'alerts-index',
+      };
+
+      render(<AlertWorkflowsPanel querySelection={querySelection} onClose={jest.fn()} />, {
+        wrapper: TestProviders,
+      });
+
+      const panelProps = mockRunWorkflowPanelProps[mockRunWorkflowPanelProps.length - 1];
+      if (!panelProps) {
+        throw new Error('Expected RunWorkflowPanel to render');
+      }
+      expect(panelProps.inputs).toEqual({
+        event: {
+          triggerType: 'alert',
+          querySelection,
+        },
+      });
+      expect(panelProps.notice).toBeDefined();
+    });
+
+    it('does not pass a notice for an explicit alertIds selection', () => {
+      render(
+        <AlertWorkflowsPanel
+          alertIds={[{ _id: 'alert-1', _index: 'alerts-index' }]}
+          onClose={jest.fn()}
+        />,
+        { wrapper: TestProviders }
+      );
+
+      const panelProps = mockRunWorkflowPanelProps[mockRunWorkflowPanelProps.length - 1];
+      if (!panelProps) {
+        throw new Error('Expected RunWorkflowPanel to render');
+      }
+      expect(panelProps.notice).toBeUndefined();
     });
   });
 });
