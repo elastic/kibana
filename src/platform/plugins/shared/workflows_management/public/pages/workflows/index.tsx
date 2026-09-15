@@ -130,7 +130,8 @@ export function WorkflowsPage() {
   const [showImportFlyout, setShowImportFlyout] = useState(false);
 
   const navigateToCreateWorkflow = useCallback(() => {
-    application.navigateToApp(PLUGIN_ID, { path: '/create' });
+    // New workflows land on the visual builder (creation panel lives there).
+    application.navigateToApp(PLUGIN_ID, { path: '/create?view=graph' });
   }, [application]);
 
   const { data: workflows } = useWorkflows(search);

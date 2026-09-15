@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import classnames from 'classnames';
 import throttle from 'lodash/throttle';
@@ -829,13 +829,6 @@ export const WorkflowYAMLEditor = ({
     [extraActions, isReadOnlyYaml]
   );
 
-  const actionsMenuPanelProps = useMemo(() => {
-    return {
-      Button: <EuiButton iconType="plusCircle" css={styles.hiddenButtonCss} />,
-      css: { css: styles.actionsMenuPopoverPanel },
-    };
-  }, [styles.actionsMenuPopoverPanel, styles.hiddenButtonCss]);
-
   const editorWrapperCss = useMemo(
     () => css([styles.container, stepExecutionStyles]),
     [styles.container, stepExecutionStyles]
@@ -851,14 +844,9 @@ export const WorkflowYAMLEditor = ({
     >
       <GlobalWorkflowEditorStyles />
       <ActionsMenuPopover
-        anchorPosition="upCenter"
-        offset={32}
-        button={actionsMenuPanelProps.Button}
-        container={containerRef.current instanceof HTMLElement ? containerRef.current : undefined}
         closePopover={closeActionsPopover}
         onActionSelected={onActionSelected}
         isOpen={actionsPopoverOpen}
-        panelProps={actionsMenuPanelProps.css}
         commands={editorCommands}
         jumpToStepEntries={jumpToStepEntries}
         onCommandSelected={handleCommandSelected}
