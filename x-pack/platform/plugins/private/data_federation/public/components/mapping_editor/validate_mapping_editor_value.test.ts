@@ -81,4 +81,17 @@ describe('validateMappingEditorValue', () => {
     expect(result.isValid).toBe(true);
     expect(result.hasAnyDeclaredMappings).toBe(true);
   });
+
+  it('allows format for date_nanos types', () => {
+    const value: MappingEditorValue = {
+      dynamic: true,
+      fields: [
+        { id: '1', name: '@timestamp', path: 'event_time', type: 'date_nanos', format: 'yyyy' },
+      ],
+    };
+
+    const result = validateMappingEditorValue(value);
+    expect(result.isValid).toBe(true);
+    expect(result.hasAnyDeclaredMappings).toBe(true);
+  });
 });

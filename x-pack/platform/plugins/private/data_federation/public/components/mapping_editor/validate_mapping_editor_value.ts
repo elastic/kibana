@@ -58,7 +58,8 @@ export const validateMappingEditorValue = (
     }
 
     const format = f.format.trim();
-    if (format && f.type !== 'date') {
+    const isDateLike = f.type === 'date' || f.type === 'date_nanos';
+    if (format && !isDateLike) {
       errors.format = i18n.translate(
         'xpack.dataFederation.mappingEditor.validation.formatDateOnly',
         {

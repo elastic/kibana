@@ -34,6 +34,7 @@ export type DatasetMappingFieldType =
   | 'double'
   | 'boolean'
   | 'date'
+  | 'date_nanos'
   | 'unsigned_long'
   | 'ip';
 
@@ -44,7 +45,7 @@ export interface DatasetMappingProperty {
    */
   path?: string;
   /**
-   * Optional date parsing pattern for a column with type `date`.
+   * Optional date parsing pattern for a column with type `date` or `date_nanos`.
    */
   format?: string;
 }

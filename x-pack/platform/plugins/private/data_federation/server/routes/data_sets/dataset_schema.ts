@@ -31,6 +31,7 @@ export const datasetSchema = schema.object({
             schema.literal('double'),
             schema.literal('boolean'),
             schema.literal('date'),
+            schema.literal('date_nanos'),
             schema.literal('unsigned_long'),
             schema.literal('ip'),
           ]),

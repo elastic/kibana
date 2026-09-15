@@ -42,11 +42,14 @@ export interface FieldMappingFormProps {
   onSubmit: () => void;
 }
 
-const DEFAULT_DATE_TYPE_VALUE: DatasetMappingFieldType = 'date';
+const isDateLikeType = (type: DatasetMappingFieldType): boolean => {
+  return type === 'date' || type === 'date_nanos';
+};
 
 const DEFAULT_TYPE_OPTIONS: Array<{ value: '' | DatasetMappingFieldType; text: string }> = [
   { value: 'boolean', text: 'Boolean' },
   { value: 'date', text: 'Date' },
+  { value: 'date_nanos', text: 'Date nanos' },
   { value: 'double', text: 'Double' },
   { value: 'integer', text: 'Integer' },
   { value: 'ip', text: 'IP' },
@@ -115,7 +118,7 @@ export function FieldMappingForm({
   mode,
   onSubmit,
 }: FieldMappingFormProps) {
-  const isDateType = value.type === DEFAULT_DATE_TYPE_VALUE;
+  const isDateType = Boolean(value.type) && isDateLikeType(value.type as DatasetMappingFieldType);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
@@ -138,9 +141,10 @@ export function FieldMappingForm({
                 value={value.type}
                 onChange={(e) => {
                   const nextType = e.target.value as DatasetMappingFieldType;
+                  const nextTypeIsDate = isDateLikeType(nextType);
                   onChange({
                     type: nextType,
-                    ...(nextType === DEFAULT_DATE_TYPE_VALUE ? {} : { format: '' }),
+                    ...(nextTypeIsDate ? {} : { format: '' }),
                   });
                 }}
                 data-test-subj="dataFederationMappingEditorFieldType"

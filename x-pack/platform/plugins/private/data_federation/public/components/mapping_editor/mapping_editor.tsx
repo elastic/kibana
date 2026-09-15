@@ -82,7 +82,7 @@ export const buildDatasetMappings = (value: MappingEditorValue): DatasetMappings
     if (path) prop.path = path;
 
     const format = f.format.trim();
-    if (type === 'date' && format) prop.format = format;
+    if ((type === 'date' || type === 'date_nanos') && format) prop.format = format;
 
     acc[name] = prop;
     return acc;

@@ -18,6 +18,7 @@ export const emptyMappingEditorValue: MappingEditorValue = {
 const TYPE_LABEL_BY_VALUE: Record<DatasetMappingFieldType, string> = {
   boolean: 'Boolean',
   date: 'Date',
+  date_nanos: 'Date nanos',
   double: 'Double',
   integer: 'Integer',
   ip: 'IP',
@@ -34,6 +35,7 @@ export const getTypeInfoByValue = (
   return {
     boolean: { label: TYPE_LABEL_BY_VALUE.boolean, docs: esLinks.mappingBoolean },
     date: { label: TYPE_LABEL_BY_VALUE.date, docs: esLinks.mappingDate },
+    date_nanos: { label: TYPE_LABEL_BY_VALUE.date_nanos, docs: esLinks.mappingDate },
     double: { label: TYPE_LABEL_BY_VALUE.double, docs: esLinks.mappingNumber },
     integer: { label: TYPE_LABEL_BY_VALUE.integer, docs: esLinks.mappingNumber },
     ip: { label: TYPE_LABEL_BY_VALUE.ip, docs: esLinks.mappingIp },
