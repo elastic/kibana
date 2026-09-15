@@ -146,10 +146,10 @@ describe('When using the ArtifactListPage component', () => {
         expect(queryByTestId('testPage-simpleTable-columnEnabled')).not.toBeInTheDocument();
       });
 
-      it('should show the Enabled column when allowEnableDisableArtifacts is true', async () => {
+      it('should show the Enabled column when showEnabledColumn is true', async () => {
         const { getAllByTestId } = await renderWithListData({
           showAsSimpleTable: true,
-          allowEnableDisableArtifacts: true,
+          showEnabledColumn: true,
         });
 
         expect(getAllByTestId('testPage-simpleTable-columnEnabled').length).toBeGreaterThan(0);
@@ -158,7 +158,7 @@ describe('When using the ArtifactListPage component', () => {
       it('should update the full artifact with the disabled tag when the switch is turned off', async () => {
         const { getAllByTestId } = await renderWithListData({
           showAsSimpleTable: true,
-          allowEnableDisableArtifacts: true,
+          showEnabledColumn: true,
         });
 
         await userEvent.click(getAllByTestId('testPage-simpleTable-columnEnabled')[0]);

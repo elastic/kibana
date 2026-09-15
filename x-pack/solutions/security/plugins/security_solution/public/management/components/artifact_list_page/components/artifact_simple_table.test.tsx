@@ -143,8 +143,8 @@ describe('ArtifactSimpleTable', () => {
     expect(renderResult.queryByTestId('testTable-columnEnabled')).not.toBeInTheDocument();
   });
 
-  it('renders the enabled column after last updated when allowEnableDisableArtifacts is true', () => {
-    render({ allowEnableDisableArtifacts: true });
+  it('renders the enabled column after last updated when showEnabledColumn is true', () => {
+    render({ showEnabledColumn: true });
 
     const columns = renderResult.getAllByRole('columnheader');
     expect(columns.map((column) => column.textContent)).toEqual([
@@ -160,7 +160,7 @@ describe('ArtifactSimpleTable', () => {
 
   it('renders the enabled switch on when the artifact has no disabled tag', () => {
     render({
-      allowEnableDisableArtifacts: true,
+      showEnabledColumn: true,
       items: [generator.generate({ ...item, tags: [GLOBAL_ARTIFACT_TAG] })],
     });
 
@@ -169,7 +169,7 @@ describe('ArtifactSimpleTable', () => {
 
   it('renders the enabled switch off when the artifact has the disabled tag', () => {
     render({
-      allowEnableDisableArtifacts: true,
+      showEnabledColumn: true,
       items: [generator.generate({ ...item, tags: [GLOBAL_ARTIFACT_TAG, DISABLED_ARTIFACT_TAG] })],
     });
 
@@ -178,7 +178,7 @@ describe('ArtifactSimpleTable', () => {
 
   it('disables the enabled switch when edit is not allowed', () => {
     render({
-      allowEnableDisableArtifacts: true,
+      showEnabledColumn: true,
       allowCardEditAction: false,
     });
 
