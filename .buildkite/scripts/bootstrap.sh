@@ -33,36 +33,42 @@ if [[ "${BOOTSTRAP_ALWAYS_FORCE_INSTALL:-}" ]]; then
   BOOTSTRAP_PARAMS+=(--force-install)
 fi
 
-# Use the packages that are baked into the agent image, if they exist, as a cache
-# But only for agents not mounting the workspace on a local ssd or in memory
-# It actually ends up being slower to move all of the tiny files between the disks vs extracting archives from the yarn cache
-if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
-  if [[ -d ~/.cache/kibana/pnpm/node_modules ]]; then
-    echo "Using ~/.cache/kibana/pnpm/node_modules as a starting point"
-    mv ~/.cache/kibana/pnpm/node_modules ./
-  fi
-  if [[ -d ~/.cache/kibana/pnpm/.pnpm-store ]]; then
-    echo "Using ~/.cache/kibana/pnpm/.pnpm-store as a starting point"
-    mv ~/.cache/kibana/pnpm/.pnpm-store ./.pnpm-store
-  fi
-  # Check if there's a cache artifact uploaded from a previous step
-  if [[ -z "${KBN_BOOTSTRAP_NO_PREBUILT:-}" ]]; then
-    if download_tmp_artifact moon-cache.tar.zst "$HOME" "$BUILDKITE_BUILD_ID" false; then
-      echo "Found moon-cache.tar.zst artifact, extracting to ./.moon/cache"
-      mkdir -p ./.moon/cache
-      echo "Extracting moon-cache.tar.zst to ./.moon/cache"
-      tar -xf ~/moon-cache.tar.zst -I zstd -C ./
+if [[ "${DISABLE_ALL_BOOTSTRAP_CACHE:-}" ]]; then
+  echo "DISABLE_ALL_BOOTSTRAP_CACHE is set, skipping all pre-baked caches and using a fresh package manager cache"
+  export npm_config_store_dir
+  npm_config_store_dir="$(mktemp -d)"
+else
+  # Use the packages that are baked into the agent image, if they exist, as a cache
+  # But only for agents not mounting the workspace on a local ssd or in memory
+  # It actually ends up being slower to move all of the tiny files between the disks vs extracting archives from the yarn cache
+  if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
+    if [[ -d ~/.cache/kibana/pnpm/node_modules ]]; then
+      echo "Using ~/.cache/kibana/pnpm/node_modules as a starting point"
+      mv ~/.cache/kibana/pnpm/node_modules ./
     fi
-    .buildkite/scripts/common/activate_service_account.sh --unset-impersonation
-  fi
-elif [[ "$(pwd)" == "/dev/shm"* ]]; then
-  yarn config set cache-folder /dev/shm/yarn-cache > /dev/null
-  if [[ -f ~/.kibana/node_modules.tar.zst ]]; then
-    echo "Extracting ~/.kibana/node_modules.tar.zst"
-    tar -xf ~/.kibana/node_modules.tar.zst -I "zstd -T0" -C ./
-  fi
-  if [[ -d ~/.kibana/.yarn-local-mirror ]]; then
-    ln -s ~/.kibana/.yarn-local-mirror ./.yarn-local-mirror
+    if [[ -d ~/.cache/kibana/pnpm/.pnpm-store ]]; then
+      echo "Using ~/.cache/kibana/pnpm/.pnpm-store as a starting point"
+      mv ~/.cache/kibana/pnpm/.pnpm-store ./.pnpm-store
+    fi
+    # Check if there's a cache artifact uploaded from a previous step
+    if [[ -z "${KBN_BOOTSTRAP_NO_PREBUILT:-}" ]]; then
+      if download_tmp_artifact moon-cache.tar.zst "$HOME" "$BUILDKITE_BUILD_ID" false; then
+        echo "Found moon-cache.tar.zst artifact, extracting to ./.moon/cache"
+        mkdir -p ./.moon/cache
+        echo "Extracting moon-cache.tar.zst to ./.moon/cache"
+        tar -xf ~/moon-cache.tar.zst -I zstd -C ./
+      fi
+      .buildkite/scripts/common/activate_service_account.sh --unset-impersonation
+    fi
+  elif [[ "$(pwd)" == "/dev/shm"* ]]; then
+    yarn config set cache-folder /dev/shm/yarn-cache > /dev/null
+    if [[ -f ~/.kibana/node_modules.tar.zst ]]; then
+      echo "Extracting ~/.kibana/node_modules.tar.zst"
+      tar -xf ~/.kibana/node_modules.tar.zst -I "zstd -T0" -C ./
+    fi
+    if [[ -d ~/.kibana/.yarn-local-mirror ]]; then
+      ln -s ~/.kibana/.yarn-local-mirror ./.yarn-local-mirror
+    fi
   fi
 fi
 
