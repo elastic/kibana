@@ -6,20 +6,38 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  AGENTIC_INVESTIGATIONS_API_VERSION,
-  PROPOSALS_INTERNAL_URL,
-} from '@kbn/agentic-investigations-plugin/common';
+import { AGENTIC_INVESTIGATIONS_API_VERSION, PROPOSALS_INTERNAL_URL } from '../../../common';
 import type {
   ApproveProposalRequest,
   DismissProposalRequest,
   ListProposalsResponse,
   Proposal,
   ProposalWithMetadata,
-} from '@kbn/agentic-investigations-plugin/common';
+} from '../../../common';
 import { queryKeys } from '../query_keys';
-import { retryOnTransientError } from './use_watches_api';
+
+/**
+ * Retries on transient failures (network errors and 5xx responses), stops
+ * after 3 attempts. 4xx errors are not transient — they indicate a caller
+ * or server-configuration problem that a retry cannot fix. 501 is excluded
+ * explicitly because it signals that the feature is not available on this
+ * deployment (not a network blip).
+ */
+export const retryOnTransientError = (failureCount: number, error: unknown): boolean => {
+  if (failureCount >= 3) {
+    return false;
+  }
+  if (isHttpFetchError(error)) {
+    const status = error.response?.status;
+    if (status === 501) {
+      return false;
+    }
+    return !status || status >= 500;
+  }
+  return true;
+};
 
 /**
  * Pending proposals, already grouped and ranked by the API (category, then

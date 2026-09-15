@@ -21,6 +21,7 @@ import { registerRoutes } from './proposals/routes/register_routes';
 import { ProposalsService } from './proposals/services/proposals_service';
 import { createProposalUserResolver } from './proposals/services/resolve_proposal_user';
 import type { ResolveProposalUser } from './proposals/services/resolve_proposal_user';
+import { registerProposalAttachment } from './proposals/attachments';
 import { registerStepDefinitions } from './proposals/step_types';
 import { createProposalsStorageClient } from './proposals/storage/proposals_storage';
 import type {
@@ -53,12 +54,21 @@ export class AgenticInvestigationsPlugin
 
   setup(
     coreSetup: CoreSetup<AgenticInvestigationsStartDependencies>,
-    { features, workflowsExtensions, workflowsManagement }: AgenticInvestigationsSetupDependencies
+    {
+      features,
+      workflowsExtensions,
+      workflowsManagement,
+      agentBuilder,
+    }: AgenticInvestigationsSetupDependencies
   ): AgenticInvestigationsPluginSetup {
     // The workflows management API is only exposed on the setup contract.
     this.workflowsManagementApi = workflowsManagement.management;
 
     registerFeatures({ features });
+
+    if (agentBuilder) {
+      registerProposalAttachment(agentBuilder);
+    }
 
     // Declares ownership of this plugin's managed workflows. Without it the
     // startup orphan sweep treats every workflow we installed as owned by an
