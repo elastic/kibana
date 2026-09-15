@@ -191,12 +191,13 @@ export default function ({ getService }: FtrProviderContext) {
               interval: number;
               tzid: string;
             };
-          }
+          },
+      includeRunningTasks: boolean = false
     ) {
       return supertest
         .post('/api/sample_tasks/bulk_update_schedules')
         .set('kbn-xsrf', 'xxx')
-        .send({ taskIds, schedule })
+        .send({ taskIds, schedule, includeRunningTasks })
         .expect(200)
         .then((response: { body: BulkUpdateTaskResult }) => response.body);
     }
@@ -1922,6 +1923,40 @@ export default function ({ getService }: FtrProviderContext) {
 
         // scheduledRunAt shouldn't be changed
         expect(task.runAt).to.eql(scheduledRunAt);
+      });
+    });
+
+    it('should bulk update schedules for task in running status when includeRunningTasks is true', async () => {
+      // this task should be in running status for 60s until it will be time outed
+      const longRunningTask = await scheduleTask(supertest, {
+        taskType: 'sampleRecurringTaskWhichHangs',
+        schedule: { interval: '1h' },
+        params: {},
+      });
+
+      await runTaskSoon({ id: longRunningTask.id });
+
+      // ensure task is running
+      await retry.try(async () => {
+        const task = await currentTask(longRunningTask.id);
+
+        expect(task.status).to.be('running');
+      });
+
+      await retry.try(async () => {
+        const updates = await bulkUpdateSchedules([longRunningTask.id], { interval: '3h' }, true);
+
+        // running task is now updated because includeRunningTasks is true
+        expect(updates.tasks.length).to.be(1);
+        expect(updates.errors.length).to.be(0);
+      });
+
+      // the running task's schedule is updated in place, and it stays running (only its next
+      // schedule/runAt changed)
+      await retry.try(async () => {
+        const task = await currentTask(longRunningTask.id);
+
+        expect(task.schedule).to.eql({ interval: '3h' });
       });
     });
 

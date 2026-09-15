@@ -78,6 +78,11 @@ export interface BulkUpdateTaskResult {
    */
   errors: ErrorOutput[];
 }
+
+export interface BulkUpdateSchedulesOptions extends ApiKeyOptions {
+  /** When true, also update tasks that are currently running or claiming, not just idle ones. */
+  includeRunningTasks?: boolean;
+}
 export interface RunSoonResult {
   id: ConcreteTaskInstance['id'];
   forced: boolean;
@@ -255,26 +260,30 @@ export class TaskScheduling {
 
   /**
    * Bulk updates schedules for tasks by ids.
-   * Only tasks with `idle` status will be updated. Running tasks are skipped even when
-   * `regenerateApiKey` is provided, because their `schedule` and `runAt` are recalculated after
-   * the task run finishes.
+   * By default only tasks with `idle` status are updated. Pass `includeRunningTasks: true` to also
+   * update running/claiming tasks.
    * @param {string[]} taskIds  - list of task ids
    * @param {IntervalSchedule | RruleSchedule} schedule  - new schedule
+   * @param {BulkUpdateSchedulesOptions} options  - API key options and `includeRunningTasks` flag
    * @returns {Promise<BulkUpdateTaskResult>}
    */
   public async bulkUpdateSchedules(
     taskIds: string[],
     schedule: IntervalSchedule | RruleSchedule,
-    options?: ApiKeyOptions
+    options?: BulkUpdateSchedulesOptions
   ): Promise<BulkUpdateTaskResult> {
-    const shouldRegenerateApiKey = options?.regenerateApiKey === true;
+    const { includeRunningTasks = false, ...apiKeyOptions } = options ?? {};
+    const shouldRegenerateApiKey = apiKeyOptions.regenerateApiKey === true;
+    const updatableStatuses = includeRunningTasks
+      ? new Set([TaskStatus.Idle, TaskStatus.Running, TaskStatus.Claiming])
+      : new Set([TaskStatus.Idle]);
 
     return retryableBulkUpdate({
       taskIds,
       store: this.store,
       getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
       filter: (task) =>
-        task.status === TaskStatus.Idle &&
+        updatableStatuses.has(task.status) &&
         (shouldRegenerateApiKey || !isEqual(task.schedule, schedule)),
       map: (task) => {
         if (isEqual(task.schedule, schedule)) {
@@ -294,7 +303,7 @@ export class TaskScheduling {
        * where both are defined by passing mergeAttributes: false here.
        */
       mergeAttributes: false,
-      options,
+      options: apiKeyOptions,
     });
   }
 

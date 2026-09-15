@@ -548,6 +548,7 @@ export function initRoutes(
               }),
             }),
           ]),
+          includeRunningTasks: schema.maybe(schema.boolean({ defaultValue: false })),
         }),
       },
     },
@@ -556,10 +557,12 @@ export function initRoutes(
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
     ) {
-      const { taskIds, schedule } = req.body;
+      const { taskIds, schedule, includeRunningTasks } = req.body;
       try {
         const taskManager = await taskManagerStart;
-        return res.ok({ body: await taskManager.bulkUpdateSchedules(taskIds, schedule) });
+        return res.ok({
+          body: await taskManager.bulkUpdateSchedules(taskIds, schedule, { includeRunningTasks }),
+        });
       } catch (err) {
         return res.ok({ body: { taskIds, error: `${err}` } });
       }
