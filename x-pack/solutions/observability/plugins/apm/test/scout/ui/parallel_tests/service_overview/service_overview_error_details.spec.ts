@@ -18,6 +18,76 @@ test.describe(
       await browserAuth.loginAsViewer();
     });
 
+    test('opbeans-java overview errors table is populated', async ({
+      page,
+      pageObjects: { serviceDetailsPage },
+    }) => {
+      await serviceDetailsPage.overviewTab.goToTab({
+        serviceName: testData.SERVICE_OPBEANS_JAVA,
+        rangeFrom: testData.START_DATE,
+        rangeTo: testData.END_DATE,
+      });
+
+      await test.step('errors table shows the mock error', async () => {
+        await serviceDetailsPage.overviewTab.serviceOverviewErrorsTable.waitFor({
+          state: 'visible',
+          timeout: EXTENDED_TIMEOUT,
+        });
+        await expect(page.getByText(testData.ERROR_MESSAGE)).toBeVisible({
+          timeout: EXTENDED_TIMEOUT,
+        });
+      });
+    });
+
+    test('opbeans-java overview "View errors" link navigates to the errors page', async ({
+      page,
+      pageObjects: { serviceDetailsPage },
+    }) => {
+      await serviceDetailsPage.overviewTab.goToTab({
+        serviceName: testData.SERVICE_OPBEANS_JAVA,
+        rangeFrom: testData.START_DATE,
+        rangeTo: testData.END_DATE,
+      });
+
+      await test.step('click View errors link', async () => {
+        const viewErrorsLink = serviceDetailsPage.overviewTab.getViewErrorsLink();
+        await viewErrorsLink.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+        await viewErrorsLink.click();
+      });
+
+      await test.step('navigated to errors page', async () => {
+        await expect(page).toHaveURL(new RegExp(`/${testData.SERVICE_OPBEANS_JAVA}/errors`), {
+          timeout: EXTENDED_TIMEOUT,
+        });
+      });
+    });
+
+    test('opbeans-java overview clicking an error navigates to the error detail page', async ({
+      page,
+      pageObjects: { serviceDetailsPage },
+    }) => {
+      await serviceDetailsPage.overviewTab.goToTab({
+        serviceName: testData.SERVICE_OPBEANS_JAVA,
+        rangeFrom: testData.START_DATE,
+        rangeTo: testData.END_DATE,
+      });
+
+      await test.step('click on the mock error link', async () => {
+        const errorLink = page.getByRole('link', { name: testData.ERROR_MESSAGE });
+        await errorLink.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+        await errorLink.click();
+      });
+
+      await test.step('navigated to the error detail page', async () => {
+        await expect(page).toHaveURL(new RegExp(`/${testData.SERVICE_OPBEANS_JAVA}/errors/`), {
+          timeout: EXTENDED_TIMEOUT,
+        });
+        await expect(page.getByTestId('errorDistribution')).toBeVisible({
+          timeout: EXTENDED_TIMEOUT,
+        });
+      });
+    });
+
     test('OTEL service navigates to errors page from overview', async ({
       page,
       pageObjects: { serviceDetailsPage },

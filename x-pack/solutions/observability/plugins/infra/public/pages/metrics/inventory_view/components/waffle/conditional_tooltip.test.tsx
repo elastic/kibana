@@ -17,6 +17,7 @@ jest.mock('../../../../../containers/metrics_source', () => ({
 
 jest.mock('../../../../../containers/plugin_config_context');
 jest.mock('../../hooks/use_snaphot');
+import { escapeQuotes } from '@kbn/es-query';
 import type { UseSnapshotRequest } from '../../hooks/use_snaphot';
 import { useSnapshot } from '../../hooks/use_snaphot';
 jest.mock('../../hooks/use_waffle_options');
@@ -155,7 +156,7 @@ describe('ConditionalToolTip', () => {
     ];
 
     expect(mockedUseSnapshot).toHaveBeenCalledWith({
-      kuery: '"host.name": host-01',
+      kuery: '"host.name": "host-01"',
       metrics: expectedMetrics,
       groupBy: [],
       nodeType: 'host',
@@ -167,5 +168,40 @@ describe('ConditionalToolTip', () => {
     } as UseSnapshotRequest);
 
     expect(tooltip).toMatchSnapshot();
+  });
+
+  it('quotes ARN identifiers containing colons in the kuery', () => {
+    const ARN_NODE: InfraWaffleMapNode = {
+      pathId: 'arn:aws:rds:us-west-2:123456789012:db:my-db',
+      id: 'arn:aws:rds:us-west-2:123456789012:db:my-db',
+      name: 'my-db',
+      path: [{ value: 'arn:aws:rds:us-west-2:123456789012:db:my-db', label: 'my-db' }],
+      metrics: [{ name: 'cpu' }],
+    };
+
+    mockedUseSnapshot.mockReturnValue({
+      nodes: [
+        {
+          name: 'my-db',
+          path: [{ label: 'my-db', value: 'arn:aws:rds:us-west-2:123456789012:db:my-db' }],
+          metrics: [{ name: 'cpu', value: 0.1, avg: 0.4, max: 0.7 }],
+        },
+      ],
+      error: null,
+      loading: false,
+      interval: '60s',
+      reload: jest.fn(() => Promise.resolve({} as SnapshotNodeResponse)),
+    });
+    mockedUseWaffleOptionsContext.mockReturnValue(
+      mockedUseWaffleOptionsContextReturnValue as unknown as ReturnType<
+        typeof useWaffleOptionsContext
+      >
+    );
+
+    render(<ConditionalToolTip currentTime={currentTime} node={ARN_NODE} nodeType="awsRDS" />);
+
+    const arn = 'arn:aws:rds:us-west-2:123456789012:db:my-db';
+    const useSnapshotCall = mockedUseSnapshot.mock.calls[0][0] as UseSnapshotRequest;
+    expect(useSnapshotCall.kuery).toBe(`"aws.rds.db_instance.arn": "${escapeQuotes(arn)}"`);
   });
 });

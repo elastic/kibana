@@ -31,7 +31,9 @@ describe('alertAnalysisSkill', () => {
       expect(alertAnalysisSkill.id).toBe('alert-analysis');
       expect(alertAnalysisSkill.name).toBe('alert-analysis');
       expect(alertAnalysisSkill.basePath).toBe('skills/security/alerts');
-      expect(alertAnalysisSkill.description).toContain('Alert triage');
+      expect(alertAnalysisSkill.description).toContain(
+        'Count, list, prioritize, and investigate Security detection alerts'
+      );
     });
 
     it('returns expected registry tool IDs', () => {

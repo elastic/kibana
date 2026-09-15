@@ -204,7 +204,7 @@ describe('useOutputOptions', () => {
     const { result } = testRenderer.renderHook(() => useOutputOptions({} as AgentPolicy));
     expect(result.current.isLoading).toBeTruthy();
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() => expect(result.current.isLoading).toBeFalsy());
     expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -274,7 +274,7 @@ describe('useOutputOptions', () => {
     const { result } = testRenderer.renderHook(() => useOutputOptions({} as AgentPolicy));
     expect(result.current.isLoading).toBeTruthy();
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() => expect(result.current.isLoading).toBeFalsy());
     expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -344,7 +344,7 @@ describe('useOutputOptions', () => {
     const { result } = testRenderer.renderHook(() => useOutputOptions({} as AgentPolicy));
     expect(result.current.isLoading).toBeTruthy();
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() => expect(result.current.isLoading).toBeFalsy());
     expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -404,7 +404,7 @@ describe('useOutputOptions', () => {
     );
     expect(result.current.isLoading).toBeTruthy();
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() => expect(result.current.isLoading).toBeFalsy());
     expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -498,7 +498,7 @@ describe('useOutputOptions', () => {
     const { result } = testRenderer.renderHook(() => useOutputOptions({} as AgentPolicy));
     expect(result.current.isLoading).toBeTruthy();
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() => expect(result.current.isLoading).toBeFalsy());
     expect(result.current.dataOutputOptions.length).toEqual(2);
     expect(result.current.dataOutputOptions[1].value).toEqual('remote1');
     expect(result.current.monitoringOutputOptions.length).toEqual(2);
@@ -514,7 +514,7 @@ describe('useOutputOptions', () => {
     const { result } = testRenderer.renderHook(() => useOutputOptions({} as AgentPolicy));
     expect(result.current.isLoading).toBeTruthy();
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() => expect(result.current.isLoading).toBeFalsy());
     expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -557,7 +557,7 @@ describe('useOutputOptions', () => {
       } as AgentPolicy)
     );
     expect(result.current.isLoading).toBeTruthy();
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() => expect(result.current.isLoading).toBeFalsy());
     expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -663,7 +663,7 @@ describe('useFleetServerHostsOptions', () => {
     const { result } = testRenderer.renderHook(() => useFleetServerHostsOptions({} as AgentPolicy));
     expect(result.current.isLoading).toBeTruthy();
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() => expect(result.current.isLoading).toBeFalsy());
     expect(result.current.fleetServerHostsOptions).toMatchInlineSnapshot(`
       Array [
         Object {

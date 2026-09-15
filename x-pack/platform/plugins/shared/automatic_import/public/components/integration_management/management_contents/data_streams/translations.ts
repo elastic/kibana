@@ -154,11 +154,14 @@ export const SAMPLES_NORMALIZED_WARNING_TITLE = i18n.translate(
   }
 );
 
-export const SAMPLES_NORMALIZED_WARNING_LINES_OMITTED = (omittedCount: number, maxLines: number) =>
+export const SAMPLES_NORMALIZED_WARNING_LINES_OMITTED = (
+  omittedCount: number,
+  sampleCount: number
+) =>
   i18n.translate('xpack.automaticImport.dataStreams.samplesNormalizedWarningLinesOmitted', {
     defaultMessage:
-      'Only the first {maxLines} non-empty lines are sent. {omittedCount, plural, one {# additional line was not sent.} other {# additional lines were not sent.}}',
-    values: { omittedCount, maxLines },
+      'Only {sampleCount} samples are sent. {omittedCount, plural, one {# additional sample was not sent.} other {# additional samples were not sent.}}',
+    values: { omittedCount, sampleCount },
   });
 
 export const LOG_FILE_ERROR = {

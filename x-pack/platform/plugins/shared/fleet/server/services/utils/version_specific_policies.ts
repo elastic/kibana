@@ -11,8 +11,10 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import { escapeQuotes } from '@kbn/es-query';
 
 import { appContextService } from '../app_context';
+import { collectCompiledSecretRefIds } from '../secrets';
 import * as AgentService from '../agents';
 import type { FleetServerPolicy, FullAgentPolicy, FullAgentPolicyInput } from '../../types';
+import type { SecretReference } from '../../../common/types';
 import { agentPolicyService } from '../agent_policy';
 import type { PackageInfo, PackagePolicyAssetsMap } from '../../../common/types';
 import { AGENT_POLICY_INDEX, AGENT_POLICY_VERSION_SEPARATOR } from '../../../common/constants';
@@ -108,6 +110,27 @@ export async function getVersionSpecificPolicies(
         // POLICY_CHANGE actions every checkin. See https://github.com/elastic/kibana/issues/276294
         id: versionedPolicyId,
         inputs: getInputsForVersion(updatedFullPolicy?.inputs ?? fullPolicy.inputs, version),
+        // Remove refs for inputs that getInputsForVersion strips from this variant. Only scan the
+        // stripped inputs: output/fleet-server-host/download-source secrets live outside `inputs`
+        // (in data.outputs, data.fleet, etc.) and have no $co.elastic.secret{X} placeholder there,
+        // so scanning all refs against versionedInputs would incorrectly drop them.
+        secret_references: (() => {
+          const sourceInputs = updatedFullPolicy?.inputs ?? fullPolicy.inputs;
+          const versionedInputs = getInputsForVersion(sourceInputs, version);
+          const strippedInputs = sourceInputs.filter((inp) => !versionedInputs.includes(inp));
+          const strippedIds = collectCompiledSecretRefIds(strippedInputs);
+          // A secret placeholder can appear in both a stripped input and a retained input (e.g. one
+          // var compiles into two inputs with different agentVersion gates). Only remove an id when
+          // it appears in stripped inputs AND is absent from the retained inputs.
+          const versionedIds = collectCompiledSecretRefIds(versionedInputs);
+          const refs: SecretReference[] =
+            updatedFullPolicy?.secret_references ??
+            (fleetServerPolicy.data?.secret_references as SecretReference[] | undefined) ??
+            [];
+          return strippedIds
+            ? refs.filter(({ id: refId }) => !strippedIds.has(refId) || !!versionedIds?.has(refId))
+            : refs;
+        })(),
       },
     };
     fleetServerPolicies.push(versionSpecificPolicy);

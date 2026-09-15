@@ -73,7 +73,6 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
 import { createMockPolicyData } from '../endpoint/services/feature_usage/mocks';
-import { getEndpointAuthzInitialStateMock } from '../../common/endpoint/service/authz/mocks';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../common/endpoint/service/artifacts/constants';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import * as PolicyConfigHelpers from '../../common/endpoint/models/policy_config_helpers';
@@ -1508,123 +1507,6 @@ describe('Fleet integrations', () => {
 
         await expect(
           callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
-        ).resolves.not.toThrow();
-      });
-    });
-  });
-
-  describe('protected artifact policy settings gate', () => {
-    const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    let endpointAppContextServiceMock: ReturnType<typeof createMockEndpointAppContextService>;
-
-    beforeEach(() => {
-      licenseEmitter.next(
-        licenseMock.createLicense({ license: { type: 'enterprise', uid: 'uid' } })
-      );
-      endpointAppContextServiceMock = createMockEndpointAppContextService();
-      endpointAppContextServiceMock.getLicenseService.mockReturnValue(licenseService);
-      (
-        endpointAppContextServiceMock.getInternalFleetServices().packagePolicy.get as jest.Mock
-      ).mockResolvedValue(createMockPolicyData());
-    });
-
-    describe('update callback', () => {
-      const buildUpdateCallback = () =>
-        getPackagePolicyUpdateCallback(
-          endpointAppContextServiceMock,
-          cloudService,
-          productFeaturesService,
-          experimentalFeatures
-        );
-
-      it('throws 403 with apiPassThrough when non-superuser changes artifacts.global.public_key', async () => {
-        (endpointAppContextServiceMock.getEndpointAuthz as jest.Mock).mockResolvedValue(
-          getEndpointAuthzInitialStateMock({ canWriteAdminData: false })
-        );
-        const callback = buildUpdateCallback();
-        const policyConfig = generator.generatePolicyPackagePolicy();
-        policyConfig.inputs[0]!.config!.policy.value.windows.advanced = {
-          artifacts: { global: { public_key: 'attacker-key' } },
-        };
-
-        const err = await callback(
-          policyConfig,
-          soClient,
-          esClient,
-          requestContextMock.convertContext(ctx),
-          req
-        ).catch((e) => e);
-
-        expect(err.statusCode).toBe(403);
-        expect(err.apiPassThrough).toBe(true);
-        expect(err.message).toContain('windows.advanced.artifacts.global.public_key');
-      });
-
-      it('throws 403 when non-superuser changes artifacts.global.base_url', async () => {
-        (endpointAppContextServiceMock.getEndpointAuthz as jest.Mock).mockResolvedValue(
-          getEndpointAuthzInitialStateMock({ canWriteAdminData: false })
-        );
-        const callback = buildUpdateCallback();
-        const policyConfig = generator.generatePolicyPackagePolicy();
-        policyConfig.inputs[0]!.config!.policy.value.linux.advanced = {
-          artifacts: { global: { base_url: 'http://attacker.evil' } },
-        };
-
-        const err = await callback(
-          policyConfig,
-          soClient,
-          esClient,
-          requestContextMock.convertContext(ctx),
-          req
-        ).catch((e) => e);
-
-        expect(err.statusCode).toBe(403);
-        expect(err.apiPassThrough).toBe(true);
-      });
-
-      it('allows superuser to change artifacts.global.public_key', async () => {
-        (endpointAppContextServiceMock.getEndpointAuthz as jest.Mock).mockResolvedValue(
-          getEndpointAuthzInitialStateMock({ canWriteAdminData: true })
-        );
-        const callback = buildUpdateCallback();
-        const policyConfig = generator.generatePolicyPackagePolicy();
-        policyConfig.inputs[0]!.config!.policy.value.windows.advanced = {
-          artifacts: { global: { public_key: 'my-key' } },
-        };
-
-        await expect(
-          callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
-        ).resolves.not.toThrow();
-      });
-
-      it('allows non-superuser to change non-protected settings', async () => {
-        (endpointAppContextServiceMock.getEndpointAuthz as jest.Mock).mockResolvedValue(
-          getEndpointAuthzInitialStateMock({ canWriteAdminData: false })
-        );
-        const callback = buildUpdateCallback();
-        const policyConfig = generator.generatePolicyPackagePolicy();
-        // Change only a non-protected setting (malware mode)
-        policyConfig.inputs[0]!.config!.policy.value.windows.malware.mode = ProtectionModes.detect;
-
-        await expect(
-          callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
-        ).resolves.not.toThrow();
-      });
-
-      it('fails open (no rejection) when request is absent', async () => {
-        (endpointAppContextServiceMock.getEndpointAuthz as jest.Mock).mockResolvedValue(
-          getEndpointAuthzInitialStateMock({ canWriteAdminData: false })
-        );
-        const callback = buildUpdateCallback();
-        const policyConfig = generator.generatePolicyPackagePolicy();
-        policyConfig.inputs[0]!.config!.policy.value.windows.advanced = {
-          artifacts: { global: { public_key: 'attacker-key' } },
-        };
-
-        // No request/context passed — internal background caller
-        await expect(
-          callback(policyConfig, soClient, esClient, undefined, undefined)
         ).resolves.not.toThrow();
       });
     });

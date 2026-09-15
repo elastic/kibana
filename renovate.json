@@ -186,12 +186,8 @@
     },
     {
       "groupName": "Enzyme dependencies",
-      "matchDepNames": [
-        "@wojtekmaj/enzyme-adapter-react-17",
-        "enzyme",
-        "enzyme-to-json",
-        "@types/enzyme"
-      ],
+      "matchDepNames": ["@wojtekmaj/enzyme-adapter-react-17", "enzyme", "enzyme-to-json",
+        "@types/enzyme"],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
       "matchUpdateTypes": ["patch"],
@@ -1393,8 +1389,8 @@
       "enabled": true
     },
     {
-      "groupName": "package.json/yarn.lock utils",
-      "matchDepNames": ["@yarnpkg/lockfile", "sort-package-json", "yarn-deduplicate"],
+      "groupName": "package.json/pnpm-lock.yaml utils",
+      "matchDepNames": ["sort-package-json"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "backport:all-open", "release_note:skip"],
@@ -1851,7 +1847,7 @@
     {
       "groupName": "p-limit",
       "matchDepNames": ["p-limit"],
-      "reviewers": ["team:fleet", "team:actionable-obs-team", "team:security-solution"],
+      "reviewers": ["team:fleet", "team:nightshift-sre-agent-team", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "labels": ["backport:all-open", "release_note:skip"],
       "allowedVersions": "<4.0.0",
@@ -1861,7 +1857,7 @@
     {
       "groupName": "p-map - ESM Required",
       "matchDepNames": ["p-map"],
-      "reviewers": ["team:fleet", "team:actionable-obs-team", "team:security-solution"],
+      "reviewers": ["team:fleet", "team:nightshift-sre-agent-team", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "labels": ["backport:all-open", "release_note:skip", "effort:low", "blocked"],
       "minimumReleaseAge": "14 days",
@@ -1870,7 +1866,7 @@
     {
       "groupName": "p-retry - ESM Required",
       "matchDepNames": ["p-retry"],
-      "reviewers": ["team:fleet", "team:actionable-obs-team", "team:security-solution"],
+      "reviewers": ["team:fleet", "team:nightshift-sre-agent-team", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "labels": ["backport:all-open", "release_note:skip", "blocked", "effort:low"],
       "minimumReleaseAge": "14 days",
@@ -1879,7 +1875,7 @@
     {
       "groupName": "redux-actions",
       "matchDepNames": ["redux-actions", "@types/redux-actions"],
-      "reviewers": ["team:kibana-management", "team:actionable-obs-team"],
+      "reviewers": ["team:kibana-management", "team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
       "labels": ["backport:all-open", "release_note:skip"],
       "minimumReleaseAge": "14 days",
@@ -2092,7 +2088,7 @@
     {
       "groupName": "react-hook-form",
       "matchDepNames": ["react-hook-form"],
-      "reviewers": ["team:actionable-obs-team"],
+      "reviewers": ["team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
       "labels": [
         "release_note:skip",
@@ -2106,7 +2102,7 @@
     {
       "groupName": "react-window-infinite-loader",
       "matchDepNames": ["react-window-infinite-loader", "@types/react-window-infinite-loader"],
-      "reviewers": ["team:actionable-obs-team"],
+      "reviewers": ["team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
       "labels": [
         "release_note:skip",
@@ -2134,7 +2130,7 @@
     {
       "groupName": "form-data",
       "matchDepNames": ["form-data"],
-      "reviewers": ["team:actionable-obs-team"],
+      "reviewers": ["team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
       "labels": [
         "release_note:skip",
@@ -2148,7 +2144,7 @@
     {
       "groupName": "@faker-js/faker",
       "matchDepNames": ["@faker-js/faker"],
-      "reviewers": ["team:actionable-obs-team"],
+      "reviewers": ["team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
       "labels": [
         "release_note:skip",
@@ -2171,7 +2167,7 @@
     {
       "groupName": "redux-saga",
       "matchDepNames": ["redux-saga"],
-      "reviewers": ["team:actionable-obs-team"],
+      "reviewers": ["team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
       "labels": [
         "release_note:skip",
@@ -2346,7 +2342,13 @@
     },
     {
       "groupName": "esql-js",
-      "matchDepNames": ["@elastic/esql"],
+      "matchDepNames": [
+        "@elastic/esql",
+        "@elastic/esql-grammar",
+        "@elastic/esql-promql-grammar",
+        "@elastic/esql-types",
+        "@elastic/pretty-printer"
+      ],
       "reviewers": ["team:kibana-esql"],
       "matchBaseBranches": ["main"],
       "labels": [
