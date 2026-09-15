@@ -226,7 +226,7 @@ describe('useGroupTakeActionsItems', () => {
       );
 
       await act(async () => {
-        getByTestId('close-alert-status').click();
+        getByTestId('closed-alert-status').click();
       });
 
       expect(updateAlertStatus).toHaveBeenCalledWith(
