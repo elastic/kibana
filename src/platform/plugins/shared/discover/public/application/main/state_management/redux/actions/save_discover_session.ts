@@ -47,7 +47,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
       newDescription,
       newTags,
     }: SaveDiscoverSessionThunkParams,
-    { dispatch, getState, extra: { services, runtimeStateManager } }
+    { dispatch, getState, extra: { services, runtimeStateManager, customizationContext } }
   ) => {
     const state = getState();
     const currentTabs = selectAllTabs(state);
@@ -209,7 +209,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
     const discoverSession = await services.savedSearch.saveDiscoverSession(saveParams, saveOptions);
 
     if (discoverSession) {
-      if (discoverSession.id) {
+      if (customizationContext.displayMode === 'standalone' && discoverSession.id) {
         rememberDiscoverSession(services.core.http, services.chrome, discoverSession);
       }
       await dispatch(
