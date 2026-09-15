@@ -16,16 +16,11 @@ import type {
   EsqlRowBatchSource,
 } from './types';
 
-/**
- * The subset of an Arrow `RecordBatch` the decoder reads. Narrowing it here keeps
- * {@link decodeArrowBatch} unit-testable without building real Arrow buffers.
- */
 interface ArrowRecordBatch {
   readonly schema: { fields: ReadonlyArray<{ name: string; typeId: number }> };
   toArray(): Array<{ toJSON(): EsqlRow }>;
 }
 
-/** Decodes one Arrow record batch into plain rows, normalizing timestamps to epoch millis. */
 export const decodeArrowBatch = (batch: ArrowRecordBatch): EsqlRow[] => {
   const dateColumns = new Set(
     batch.schema.fields
@@ -50,10 +45,6 @@ const closeReader = async (reader: AsyncRecordBatchStreamReader): Promise<void> 
   await reader.cancel();
 };
 
-/**
- * Streams self-contained Arrow record batches, so memory stays bounded by the
- * batch size rather than the result set.
- */
 export const arrowFormat = {
   name: 'arrow' as const,
   async open(

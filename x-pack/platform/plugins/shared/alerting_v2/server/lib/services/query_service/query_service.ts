@@ -145,11 +145,6 @@ export class QueryService implements QueryServiceContract {
     }
   }
 
-  /**
-   * Drives the format's batches and enforces the guarantees every format shares:
-   * abort between batches, empty batches never reach callers, and decode
-   * failures surface as a descriptive parse error.
-   */
   private async *iterateBatches<T>(
     source: EsqlRowBatchSource,
     context: ExecutionContext
@@ -184,11 +179,6 @@ export class QueryService implements QueryServiceContract {
     }
   }
 
-  /**
-   * A mid-flight abort surfaces as a transport `RequestAbortedError`, so we also
-   * treat the error as a cancellation when our execution signal has fired. The
-   * `maxResponseSize` guard aborts internally without it, staying a real error.
-   */
   private isCancellation(error: unknown, context: ExecutionContext): boolean {
     return isRuleExecutionCancellationError(error) || context.signal.aborted;
   }

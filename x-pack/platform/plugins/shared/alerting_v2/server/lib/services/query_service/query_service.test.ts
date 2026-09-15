@@ -809,10 +809,6 @@ describe('QueryService', () => {
           abortSignal: abortController.signal,
         })) {
           batches.push(batch);
-          // An explicit `RuleExecutionCancellationError` reason exercises the
-          // short-circuit in `throwIfAborted`, which rethrows an already
-          // recognized cancellation unchanged. The companion test below covers
-          // the bare `abort()` Task Manager actually issues.
           abortController.abort(new RuleExecutionCancellationError());
         }
       }).rejects.toThrow(RuleExecutionCancellationError);
@@ -834,10 +830,6 @@ describe('QueryService', () => {
 
       const batches: Array<Record<string, unknown>[]> = [];
 
-      // A bare `abort()` sets `signal.reason` to a DOMException, which carries
-      // neither the class nor `code: 'rule_execution_aborted'`. `throwIfAborted`
-      // normalizes it into a `RuleExecutionCancellationError`, so `iterateBatches`
-      // rethrows it instead of wrapping it as a parse error.
       await expect(async () => {
         for await (const batch of queryService.executeQueryStream({
           query: mockQuery,
@@ -869,7 +861,7 @@ describe('QueryService', () => {
         for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
           // consume
         }
-      }).rejects.toThrow(/Failed to parse ES\|QL response/);
+      }).rejects.toThrow(/Failed to parse ES\|QL response\. Error: mid-stream failure/);
 
       expect(reader.cancel).toHaveBeenCalledTimes(1);
     });

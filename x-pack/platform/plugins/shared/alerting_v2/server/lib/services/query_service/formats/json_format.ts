@@ -16,18 +16,8 @@ import type {
   EsqlRowBatchSource,
 } from './types';
 
-/**
- * Row cap for the JSON format. The whole result set is held in memory, so this
- * is deliberately far below the product-level `rules.run.alerts.max` ceiling.
- */
 export const NON_STREAMING_MAX_ROWS = 1000;
 
-/**
- * Rows per batch yielded by the JSON format. The raw response is still
- * materialised in full (that is the format's limit), but slicing bounds every
- * downstream copy — row objects, alert events, bulk bodies — to one slice at a
- * time instead of the whole result set.
- */
 export const JSON_STREAM_BATCH_SIZE = 100;
 
 async function* yieldRowSlices(response: EsqlQueryResponse): AsyncIterable<EsqlRow[]> {
@@ -39,11 +29,6 @@ async function* yieldRowSlices(response: EsqlQueryResponse): AsyncIterable<EsqlR
   }
 }
 
-/**
- * Single-shot ES|QL JSON query. Not a stream: the whole result set arrives in
- * one response, which is then yielded in `JSON_STREAM_BATCH_SIZE` slices to
- * preserve the batched contract shared with the streaming formats.
- */
 export const jsonFormat = {
   name: 'json' as const,
   maxRows: NON_STREAMING_MAX_ROWS,
