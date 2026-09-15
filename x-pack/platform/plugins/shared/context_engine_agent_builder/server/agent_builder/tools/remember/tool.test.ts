@@ -153,7 +153,6 @@ describe('remember tool', () => {
           session_id: 'conversation-1',
           session_kind: 'conversation',
           namespace: 'agent_memory',
-          revision: 1,
         },
       }),
       op_type: 'create',
@@ -163,7 +162,7 @@ describe('remember tool', () => {
       results: [
         {
           type: ToolResultType.other,
-          data: { id: 'logical-memory-id', revision: 1 },
+          data: { id: 'logical-memory-id' },
         },
       ],
     });
@@ -237,7 +236,7 @@ describe('remember tool', () => {
               content: 'Summary',
               spaces: ['space-1'],
               updated_at: '2026-09-01T00:00:00.000Z',
-              attributes: { revision: 1 },
+              attributes: {},
             },
           },
         ],
@@ -277,7 +276,7 @@ describe('remember tool', () => {
               content: 'Old content',
               spaces: ['space-1'],
               updated_at: '2026-09-01T00:00:00.000Z',
-              attributes: { revision: 2 },
+              attributes: {},
               governance: { lifecycle: { status: 'deleted' } },
             },
           },
@@ -321,7 +320,6 @@ describe('remember tool', () => {
                 session_id: 'conversation-1',
                 session_kind: 'conversation',
                 namespace: 'agent_memory',
-                revision: 2,
               },
             },
           },
@@ -353,7 +351,11 @@ describe('remember tool', () => {
           id: 'memory-1',
           tags: ['existing'],
           expires_at: '2027-01-01T00:00:00.000Z',
-          attributes: expect.objectContaining({ revision: 3 }),
+          attributes: expect.objectContaining({
+            session_id: 'conversation-1',
+            session_kind: 'conversation',
+            namespace: 'agent_memory',
+          }),
         }),
       })
     );
@@ -363,7 +365,7 @@ describe('remember tool', () => {
       results: [
         {
           type: ToolResultType.other,
-          data: { id: 'memory-1', revision: 3 },
+          data: { id: 'memory-1' },
         },
       ],
     });
@@ -386,7 +388,7 @@ describe('remember tool', () => {
               content: 'Old content',
               spaces: ['space-1'],
               updated_at: '2026-09-01T00:00:00.000Z',
-              attributes: { revision: 2 },
+              attributes: {},
             },
           },
         ],
@@ -410,7 +412,11 @@ describe('remember tool', () => {
         document: expect.objectContaining({
           '@timestamp': '2026-09-01T00:00:00.000Z',
           id: 'memory-1',
-          attributes: expect.objectContaining({ revision: 3 }),
+          attributes: expect.objectContaining({
+            session_id: 'conversation-1',
+            session_kind: 'conversation',
+            namespace: 'agent_memory',
+          }),
         }),
       })
     );

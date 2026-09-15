@@ -86,7 +86,7 @@ describe('forget tool', () => {
               content: 'Cast duration_ms before numeric comparisons.',
               spaces: ['space-1'],
               updated_at: '2026-09-01T00:00:00.000Z',
-              attributes: { revision: 2 },
+              attributes: { session_id: 'conversation-1' },
             },
           },
         ],
@@ -124,7 +124,7 @@ describe('forget tool', () => {
         '@timestamp': '2026-09-01T00:00:00.000Z',
         id: 'memory-1',
         updated_at: expect.any(String),
-        attributes: { revision: 3 },
+        attributes: { session_id: 'conversation-1' },
         governance: {
           lifecycle: {
             status: 'deleted',
@@ -164,7 +164,7 @@ describe('forget tool', () => {
               content: 'Summary',
               spaces: ['space-1'],
               updated_at: '2026-09-01T00:00:00.000Z',
-              attributes: { revision: 2 },
+              attributes: { session_id: 'conversation-1' },
             },
           },
         ],
@@ -187,7 +187,7 @@ describe('forget tool', () => {
         '@timestamp': expect.any(String),
         id: 'memory-1',
         updated_at: expect.any(String),
-        attributes: { revision: 3 },
+        attributes: { session_id: 'conversation-1' },
         governance: {
           lifecycle: {
             status: 'deleted',
@@ -219,7 +219,7 @@ describe('forget tool', () => {
               content: 'Cast duration_ms before numeric comparisons.',
               spaces: ['space-1'],
               updated_at: '2026-09-01T00:00:00.000Z',
-              attributes: { revision: 3 },
+              attributes: { session_id: 'conversation-1' },
               governance: { lifecycle: { status: 'deleted' } },
             },
           },
