@@ -50,6 +50,35 @@ Never write knowledge indicator documents directly under any circumstances. KIs 
 automations. A KI you write by hand is an artifact with no workflow behind it: the next scheduled
 run will not reproduce it, and the defect you were working around stays unfixed.
 
+## Two rules for every message
+
+**Define a term where it first appears, then use the plain phrase.** The reader has not loaded this
+skill. "Prevalence" is "how many retrievals hit this out of how many were made"; a "unit" is "what
+one KI is about"; an "access pattern" is "a query the agent fills in and runs". One clause the first
+time, then the short word. Never a glossary, never a term the reader has to look up.
+
+**Never resend a failed tool call unchanged.** When a query errors, read the error, change the
+thing it names (a field, a cast, a quote), and run the changed call. The same call a second time
+produces the same error and spends the budget on nothing.
+
+## Scope comes first
+
+Before evidence, fix three things and write them down in the first message:
+
+1. **The AI index** — from the attachment or the prompt. Its destination, its sources and its
+   automations are listed there; do not re-run discovery for them.
+2. **What is in scope as evidence** — decided by what the user chose, not by probing. Sources
+   only, nothing built yet: the raw indices the AI index covers are the whole evidence; do not
+   query for signals or traces. The user brought traces in, or the index already has automations
+   and the question is how they are doing: signals are the evidence, and traces are read where
+   the user asked for them or a signal points at a conversation worth reading.
+3. **The window** — the period the signals and traces are read over. The run or the prompt names
+   it; when neither does, use the last 30 days and say so.
+
+When nothing is named — no attachment, no index in the prompt — `platform.core.list_indices` and one
+question about which data the agent should be able to answer from. Do not invent a scope, and do
+not skip to sources or to a strategy: both depend on what is in scope.
+
 ## The model
 
 An AI index has a pipeline: **sources** feed **automations** (Kibana Workflows), which generate
@@ -85,39 +114,11 @@ a query is a snippet the retriever cannot route to. Both halves earn their place
 
 ## KI document shape
 
-The AI index schema has these base fields:
-
-| Field | Type | Purpose |
-|---|---|---|
-| `type` | keyword | The **KI kind** — the discriminator agents filter on: `index_metadata`, `document`, `event`, `fact`, `entity`, `detection`, `feature`. Each strategy uses a stable value. |
-| `title` | text + semantic | Short display name; the primary semantic surface. |
-| `description` | text + semantic | Routing heuristic — what the source does *not* contain, key fields, joins. When sibling KIs share a similar title, this **must** carry the differentiator (sub-category, product, time window). Title alone will not separate near-duplicates for the retriever. |
-| `content` | text + semantic | Free text for semantic retrieval: purpose, questions answered, access patterns. |
-| `tags` | keyword[] | Filter facets. |
-| `attributes` | flattened | Structured, keyword-queryable metadata, plus every quality and lifecycle field. |
-| `@timestamp` | date | When the KI was last profiled. Set by `context-engine.createKi` at write time — never supplied in the step input. |
-
-**Everything else lives inside `attributes`.** It is `flattened`, so arbitrary nested keys are
-keyword-queryable with no declared mapping and can never cause a mapping conflict on a long-lived
-index. The fields that matter when diagnosing an index:
-
-| Field | Purpose |
-|---|---|
-| `attributes.confidence` | **Correctness** — how sure we are the facts are right, on the calibration bands below. |
-| `attributes.coverage` | **Completeness** — how fully the access patterns cover the source's question classes. Optional; most meaningful on `index_metadata` KIs. |
-| `attributes.evidence` | Observed values justifying the KI; each string quotes a real distribution. |
-| `attributes.expires_at` | ISO date, ~30 days out. **Omitted entirely for durable immutable-fact KIs**, which never age out. |
-| `attributes.excluded` | Soft exclude: the KI exists but agents skip it. |
-| `attributes.esql` | **The canonical location for any ES\|QL the KI carries** — a detection's materialized query, an index profile's runnable examples. This is the field the verifiers read. |
-
-**Structured values belong in both `content` and `attributes`** — as prose in `content` so they are
-semantically searchable, and repeated in `attributes` so they are exact-match and filter queryable.
-A value in only one of the two is invisible to half the retrieval paths, and that asymmetry is a
-common and easily missed cause of empty retrievals.
-
-Because `attributes` is `flattened`, numbers and dates inside it index as keywords. In ES|QL, cast
-before comparing: `TO_DOUBLE(FIELD_EXTRACT(attributes, "coverage"))`,
-`TO_DATETIME(FIELD_EXTRACT(attributes, "expires_at"))`.
+The document shape — base fields, the fixed `type` vocabulary, the quality, lifecycle and
+provenance fields inside `attributes`, and the rule that structured values live in both `content`
+and `attributes` — is in the `ki_shapes` reference attached to this skill. Read it before judging
+what an index holds, and before writing any `type` value: the vocabulary there is the schema, and
+a value outside it is a schema change, not a KI.
 
 ## Access patterns
 
@@ -184,32 +185,36 @@ documents that triggered it, and the full-text `field : "value"` match operator.
 
 ## Strategy catalog
 
-| Strategy | Granularity | `type` | When to use |
-|---|---|---|---|
-| **Index/Table Metadata** | One KI per index | `index_metadata` | Always start here. Tells the agent which index to query, when, and how to reach it. |
-| **Bottom-Up** | One KI per document | `document` | Dense, bounded corpora: knowledge bases, case records, articles, product docs. |
-| **Selective / Outlier** | One KI per significant document | `event` | Log and event streams where most records are noise but outliers matter. |
-| **Atomic Facts** | Many KIs per document | `fact` | Information-dense documents (contracts, papers) where one KI per document loses precision. |
-| **Cumulative / Wiki-style** | One KI per entity, enriched over runs | `entity` | Entities recurring across many documents: customers, products, hosts. |
-| **Detection / Feature** | One KI per named condition / per entity | `detection`, `feature` | Observability data needing runnable detection conditions and structured inventory. |
+Choosing the strategy is this skill's job, and a strategy is three answers, stated in this order:
 
-Quick guide: logs and metrics → Index Metadata plus Selective/Outlier plus Detection/Feature;
-article corpus → Bottom-Up; dense documents → Atomic Facts; recurring entities → Cumulative;
-several indices → Metadata for all, then one deeper strategy for the most important; unsure →
-Index/Table Metadata, which is cheap, fast and always useful.
+1. **The unit** — what one KI is about: an index, a document, a claim, a recurring entity, a named
+   condition.
+2. **What one KI carries** for that unit — the orientation and the access patterns, plus the
+   grounded figures that separate it from its siblings.
+3. **How units are found and refreshed** — the discovery query, the corpus filter, and whether a
+   unit is re-profiled every run, only when its source changed, or never.
+
+The `strategy_catalog` reference attached to this skill has the six named strategies (Index/Table
+Metadata, Bottom-Up, Selective / Outlier, Atomic Facts, Cumulative / Wiki-style, Detection /
+Feature) as worked examples of those three answers, with their `type` values, the quick guide and
+the default: unsure means Index/Table Metadata, which is cheap, fast and always useful. When the
+findings fit an example, name it. When they do not — a case corpus with a root-cause structure, a
+unit grounded from three indices — write the three answers from the findings rather than picking
+the nearest name and inheriting a shape that does not fit. State the strategy in the proposal as
+the three answers even when it has a name, because the person reading it has not read the catalog.
 
 Strategy is also a diagnosis. An index generating one thin KI per document when its questions are
 categorical is not under-covered — it is at the wrong granularity, and generating *more* of the
-same will not fix it.
+same will not fix it. Say which of the three answers is wrong.
 
-Choosing the strategy is this skill's job. What each one becomes as a workflow — the steps, the
-grounding, the sink — is in `ai-index-automations`.
+What each strategy becomes as a workflow — the steps, the grounding, the sink — is in
+`ai-index-automations`.
 
 ## The corpus filter
 
-Every automation runs over a filtered slice of its source, not the whole thing: a time window
-(last 90 days), a status condition (resolved cases only), or a numeric cap (at most 1,000 KIs).
-Agreeing that filter is part of choosing a source, and `ai-index-sources` covers it.
+Every automation runs over a filtered slice of its source, not the whole thing. The filter is the
+third strategy answer written into the ES|QL source, and `strategy_catalog` defines it;
+`ai-index-sources` authors and runs it.
 
 It earns a mention here because of what it does to a diagnosis. When agents keep reaching for data
 no indicator covers, the most common cause is not that the automation is generating badly — it is
@@ -264,6 +269,38 @@ from: it has already been scoped to this index and window, and it is what your o
 reconciled against. Query the indices yourself for the denominator, and otherwise only when no
 signals came with the run.
 
+## When traces are in scope
+
+Signals classify one tool call each. Traces hold the whole conversation: the prompt, every query
+in order, the final answer, and what it cost. When the scope step put traces in, load
+`agent-builder-traces` (the platform skill; it has the index, the span fields and the ES|QL to
+read captured messages) and pull four things for the AI index in scope, each with a count over the
+window:
+
+1. **Rounds where the agent queried the raw indices this AI index covers.** Read the prompt and the
+   queries. Repeated question shapes across conversations are candidates for a systemic family;
+   one-offs are not.
+2. **ES|QL errors against those indices.** Wrong fields, wrong types, failed casts, unquoted names.
+   The error text is the provenance. These become `constraint` or `disambiguation` KIs when the same
+   error recurs across conversations.
+3. **Conversations touching those indices with high token or latency cost**, relative to the same
+   agent's other conversations in the window — not against a fixed number. Reading cost argues for a
+   systemic family that pre-digests the unit.
+4. **Rounds that ended in a soft failure**: the final assistant message says, in some form, that it
+   could not find the answer or found only part of it. Signals cannot see this; a round can run
+   clean queries with rows returned and still give up. Match the captured response against a short
+   phrase list ("could not find", "no data on", "does not contain", "unable to determine", "only
+   found part"), then read ten matches before counting, because the match is noisy. Report the
+   confirmed count and the sample. Joined to signals on `trace_ids`, this sorts three ways: with
+   `coverage_gap`, an index or profile gap and a systemic candidate; with `empty_retrieval`, a
+   vocabulary miss and a `disambiguation` candidate; with clean signals, the answer is not in the
+   source at all, so report it and propose nothing.
+
+Do not count how many queries a round ran as evidence of anything. Several queries is what
+answering a question looks like; telling a genuine multi-step answer from an agent that was stuck
+needs the prompt and the outcome, which is what items 1 and 4 read. `data.looped` on a signal is a
+hint about which rounds to read first, not a finding.
+
 ## Reading what the index does today
 
 Before proposing a change to something, read it.
@@ -289,28 +326,48 @@ Before proposing a change to something, read it.
 
 A finding is worth proposing when all of the following hold.
 
-1. **It recurs.** Do not propose a change from a single signal. A pattern across several signals —
-   ideally several distinct conversations, not one conversation where the agent retried five times
-   — is evidence. `data.conversation_id` and `trace_ids` are how you tell those apart, and
-   `data.looped` warns you when you are looking at the latter.
+1. **It carries a count, a denominator and a window.** This is the prevalence rule, and it is a
+   requirement, not a preference: a finding without "N of M retrievals against this index over
+   this window" is not proposable, however plausible it looks. `context-engine-signals` has the
+   query for the denominator and the reason it matters. Report both numbers and the window in the
+   finding itself. In the setup case, where there are no retrievals yet, the count is over the data
+   — how many documents, how many distinct values — and the finding says it rests on the shape of
+   the data rather than on observed retrieval.
 
-2. **You can name the signals behind it.** A finding you cannot trace back to specific signals is a
+2. **It recurs.** Do not propose a change from a single signal. A pattern across several signals —
+   ideally several distinct conversations, not one conversation where the agent retried five times
+   — is evidence. `data.conversation_id` and `trace_ids` are how you tell those apart.
+
+3. **You can name the signals behind it.** A finding you cannot trace back to specific signals is a
    guess. Cite the concrete values: the `target_index`, representative `data.query` strings, the
    `data.error` text, how many signals and how many distinct conversations.
 
-   Count the denominator too, and report both numbers. `context-engine-signals` has the query and
-   the reason it matters.
-
-3. **You can name the change, and it names a workflow or a source.** "Improve coverage of billing
-   data" is not a proposal. "`billing-ki-generation` filters its source query to
+4. **You can name the change, and it names a workflow, a source, or a targeted KI.** "Improve
+   coverage of billing data" is not a proposal. "`billing-ki-generation` filters its source query to
    `status == "open"`, so nothing is ever generated about settled invoices — widen it, because six
    retrievals asked about invoice status and returned nothing" is. For a workflow, name the step.
-   For a source, name what data or configuration changes. A proposal a reviewer cannot act on
-   without doing the analysis again has not saved anyone anything.
+   For a source, name what data or configuration changes. For a targeted KI, name its `type` and
+   what it will say. A proposal a reviewer cannot act on without doing the analysis again has not
+   saved anyone anything.
 
-4. **The change is plausibly the fix.** Argue from the evidence to the change. If the argument only
+5. **The change is plausibly the fix.** Argue from the evidence to the change. If the argument only
    works when you assume something you have not checked, go check it or lower your confidence and
    say what you assumed.
+
+### Targeted KIs as an outcome
+
+Most proposals name a systemic family: an automation that generates one KI per unit over a corpus.
+Some findings do not fit one and still recur — a field that must be backquoted, a join that only
+works in one direction, two indices agents confuse, the four queries that answer a recurring
+question. Those become **targeted KIs**: single indicators of `type` `constraint`, `workaround`,
+`disambiguation` or `task_recipe`, defined in `ki_shapes`, written by an automation that carries
+their content in its `consts` so they survive re-runs of everything else.
+
+A targeted KI is still produced by an automation, never written by hand, and it still needs the
+prevalence rule met. Its provenance is the ids that already exist: the `trace_ids` of the signals
+behind the finding, the `data.conversation_id`, the source index and document id, or the
+`data.error` text for a constraint. Put them in `attributes` as `ki_shapes` lays out.
+`ai-index-automations` has the writer template that produces one.
 
 ### Shapes you will see, and what they usually mean
 
@@ -403,10 +460,14 @@ how a proposal is recorded, reviewed, or applied is a property of the run that i
 **No indices or connectors.** Say so and offer to help set up a connector, rather than proposing
 against data you cannot see.
 
-**No signals, and nothing built yet.** This is the setup case. There is no evidence to reason from,
-so the analysis is of the data itself: what it contains, what questions it could answer, and which
-strategy fits. Load `ai-index-sources` to pick and bound the data, start at Index/Table Metadata,
-and say that the proposal rests on the shape of the data rather than on observed retrieval.
+**Sources only, and nothing built yet.** This is the setup case. Do not go looking for signals: an
+index nobody has built cannot have been queried, and a probe that comes back empty only costs a
+turn. The analysis is of the data itself: what it contains (`platform.core.get_index_mapping` and a
+sample through `platform.core.execute_esql`), what questions it could answer, and which strategy
+fits, stated as the three answers. Start at Index/Table Metadata, and say that the proposal rests
+on the shape of the data rather than on observed retrieval. Load `ai-index-sources` after the
+strategy, to write the source query and the filter the strategy calls for — not before, because
+the filter depends on the unit.
 
 **No signals, on an index that exists.** Not evidence of health: an index nobody queries and an
 index that works perfectly look the same from here. Say which you can and cannot rule out rather

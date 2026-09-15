@@ -51,6 +51,10 @@ Whatever the strategy, a generated workflow has to:
   connector at run time. Naming one pins a saved automation to a connector that can be renamed,
   removed, or run out of billing quota long after the conversation that wrote it — and the failure
   lands on a scheduled run with nobody watching.
+- **Retry every `ai.prompt`**: `on-failure.retry` with three attempts, exponential delay and
+  jitter. Rate limits, transient connector errors and a structured output that failed to parse
+  once are the ordinary failures of a model call, and without the retry each one costs the unit
+  it was profiling. The templates carry it; keep it on any `ai.prompt` you add.
 - **Write through the `context-engine` steps**, never a raw `elasticsearch.index`, and gate every
   write on `context-engine.verifyKi` so an indicator whose ES|QL fails to parse is reported rather
   than persisted.
@@ -60,10 +64,17 @@ Whatever the strategy, a generated workflow has to:
 - **Put every ES|QL the indicator carries into `attributes.esql`**, and mirror structured values
   into both `content` and `attributes`.
 
-Three complete automations are attached to this skill as templates — `index-metadata-template`,
-`entity-profile-template` and `document-template`. Each has been run end to end: grounding steps,
-prompt with its output schema, verified sink. Read whichever is nearest as the reference for what a
-finished automation looks like, whether you are drafting one or judging one.
+Four complete automations are attached to this skill as templates — `index-metadata-template`,
+`unit-profile-template`, `document-template` and `targeted-ki-writer`. Each runs as it stands once
+its `consts` are filled: grounding steps, prompt with its output schema (the writer has none),
+verified sink. Read whichever is nearest as the reference for what a finished automation looks
+like, whether you are drafting one or judging one.
+
+Two more references are attached and shared with `analyze-and-improve`: `ki_shapes`, the KI
+document shape with the fixed `type` vocabulary and the provenance fields, and `strategy_catalog`,
+the three strategy choices and their worked examples. The brief you receive is written in that
+vocabulary, and the `consts` of the templates are the same three choices, so read them when a
+brief names something the template does not spell out.
 
 ## The `context-engine` step contracts
 
@@ -111,7 +122,9 @@ An unknown id fails the step. Gate every write on this: an indicator carrying ES
 is worse than a missing one, because retrieval surfaces it as though it worked.
 
 `attributes` values are strings, numbers, booleans or arrays of strings — never nested objects. A
-single value caps at 10,000 characters, which is what bounds the ES|QL an indicator can carry.
+single value caps at 10,000 characters, which is what bounds the ES|QL an indicator can carry. What
+the fields mean, which `type` values exist, and which provenance keys go in `attributes` is
+`ki_shapes`; this section is only the step's input contract.
 
 ## Two shapes that produce the wrong thing without failing
 
@@ -173,6 +186,28 @@ indicator per document, where the alternative is losing every indicator after th
     continue: true
 ```
 
+**A `while` pages through a corpus the row cap would truncate.** Its `condition` is KQL, checked
+after each pass (the first pass always runs), and `max-iterations` caps the passes. State crosses
+passes through `data.set`: every key a `data.set` writes is readable as `variables.<key>` for the
+rest of the execution, as well as at `steps.<name>.output.<key>`, and `variables` is the form that
+survives from one pass to the next. The unit template keeps a keyword cursor this way: the page
+query reads `variables.cursor`, and a `data.set` at the end of the pass advances it and sets the
+count the condition reads.
+
+```yaml
+- name: page_units
+  type: while
+  condition: 'variables.batch_count > 0'
+  max-iterations:
+    limit: 200
+    on-limit: continue
+  steps: [] # ...
+```
+
+**`loop.continue` skips the rest of an iteration**, inside a `foreach` or `while` body. It is how
+the unit template skips a unit whose source has not changed: an `if` on the freshness check, with
+`loop.continue` as its only step. `loop.break` ends the loop outright.
+
 ```yaml
 on-failure:
   retry:
@@ -188,8 +223,9 @@ on-failure:
 
 **Liquid references and the filters the templates rely on.** `{{ steps.<name>.output.<field> }}`
 reads a step's output — only `output` is reachable, never a step's inputs. `{{ consts.<name> }}`,
-`{{ inputs.<name> }}`, `{{ foreach.item }}` and `{{ event }}` reach the rest. `{%- for x in ... -%}`
-loops build the `content` block.
+`{{ inputs.<name> }}`, `{{ variables.<name> }}`, `{{ foreach.item }}` and `{{ event }}` reach the
+rest. `{%- for x in ... -%}` loops build the `content` block, and `{%- assign x = ... -%}` with
+`{%- if ... -%}` computes a value a `data.set` stores for a condition to read.
 
 | Filter | Use |
 |---|---|
@@ -198,9 +234,15 @@ loops build the `content` block.
 | `join: ', '` | Flatten a list into a string |
 | `size` | Length, for a `data.set` a condition can read |
 | `default: 'value'` | Fall back when a field is missing |
+| `last`, `first` | The last row of a result and the first column of it; how a cursor advances from a page |
 | `replace: '"', '\"'` | Escape a value being interpolated into an ES\|QL string literal |
 | `slugify` | Normalise a value used in a `ki_id` |
 | `times`, `round` | Format a number for a description |
+
+**Field names with spaces or capitals are backquoted inside the const**, not in the query: a const
+`unit_key: "`Product Key`"` is pasted into every `WHERE`, `STATS ... BY` and `KEEP` as written, so
+the query is right everywhere the const is used. An "Unknown column" error on a name copied from
+the mapping is almost always a missing backtick.
 
 Escaping matters more than it looks: an entity value interpolated raw into
 `WHERE field == "{{ ... }}"` breaks the query the moment a value contains a quote, and the failure
@@ -209,18 +251,23 @@ lands on whichever entity happens to carry one. The entity template runs every v
 
 ## Templates and shapes for each strategy
 
-`analyze-and-improve` chooses the strategy. These are what each one becomes as a workflow.
+`analyze-and-improve` chooses the strategy and states it as three answers — the unit (what one KI
+is about), what one KI carries, and how units are found and refreshed — with the named strategies
+in `strategy_catalog` as worked examples. These are what each one becomes as a workflow.
 
-The three that come up most ship as templates. **Start from the nearest template and edit it** —
-never write one of these from nothing. A template is a complete workflow that runs as it stands
-once its `consts` block is filled in, and it already carries the parts a fresh draft gets wrong:
-the grounding, the prompt's output schema, the single `data.set` that builds the indicator so
-verification and the write see the same document, the `verifyKi` gate, the `ki_id` scheme that
-makes a re-run replace rather than duplicate, and the `attributes.esql` wiring the verifiers read.
+The three systemic strategies that come up most ship as templates, and a fourth template writes
+targeted KIs. **Start from the nearest template and edit it** — never write one of these from
+nothing. A template is a complete workflow that runs as it stands once its `consts` block is
+filled in, and it already carries the parts a fresh draft gets wrong: the grounding, the prompt's
+output schema, the single `data.set` that builds the indicator so verification and the write see
+the same document, the `verifyKi` gate, the `ki_id` scheme that makes a re-run replace rather than
+duplicate, the retry on the model call, and the `attributes.esql` wiring the verifiers read.
 
 Each template opens with a comment saying what to change and what to leave, and declares what
 varies in `consts` at the top — the AI index id, the source index, the fields the strategy turns
-on. Editing that block is most of the adaptation; the strategy's own grounding is the rest.
+on. The `consts` are the three strategy answers written down, so a brief that states them fills
+the block almost line for line. Editing that block is most of the adaptation; the strategy's own
+grounding is the rest.
 
 **Index/Table Metadata** (`type: index_metadata`) — template **`index-metadata-template`**. Fetch
 the mapping, sample documents, aggregate the distributions the profile will make claims about, then
@@ -236,12 +283,27 @@ and a sink keyed on the index and source document id. When the pass yields many
 near-identically-titled entries, emit one indicator per logical cluster and enumerate the members
 inside its `content` instead of one per record.
 
-**Cumulative / Wiki-style** (`type: entity`) — template **`entity-profile-template`**. A `foreach`
-over entity ids discovered from the corpus. Per entity: aggregations over every document
-referencing it, an `ai.prompt` synthesising a profile, and a sink keyed on the entity id. The
-per-entity metrics are the part to extend, because sibling entity indicators are near-identical to
-a retriever unless their descriptions carry numbers that separate them. To accumulate across runs
-rather than replace, read the stored indicator and merge through `context-engine.updateKi`.
+**Cumulative / Wiki-style** (`type: entity`) — template **`unit-profile-template`**. A `while`
+pages through the units in `batch_size` batches on a keyword cursor, so a corpus above the row cap
+is walked rather than truncated; inside it a `foreach` handles one page. Per unit: read the stored
+indicator's `source_updated_at` and `loop.continue` past the unit when its `freshness_field` has
+not moved, then aggregations over every document referencing it, its record from a second
+`catalog_index`, an `ai.prompt` synthesising a profile, and a sink keyed on the unit. The
+`consts` are the three strategy answers: `unit_index` and `unit_key` are the unit, the metrics and
+`catalog_index` are what one KI carries, `discovery_filter`, `batch_size` and `freshness_field`
+are how units are found and refreshed. The per-unit metrics are the part to extend, because
+sibling indicators are near-identical to a retriever unless their descriptions carry numbers that
+separate them; add a grounding query per further index the profile should draw on. To accumulate
+across runs rather than replace, read the stored indicator and merge through
+`context-engine.updateKi`.
+
+**Targeted KIs** (`type: constraint`, `workaround`, `disambiguation`, `task_recipe`) — template
+**`targeted-ki-writer`**. No model call: the KIs are written verbatim from a `kis` list in `consts`,
+each through `verifyKi` and `createKi` with a stable `ki_id`. The content comes from the counted
+finding in the brief, and so does the provenance — `trace_ids`, `conversation_id`, `error_text`,
+`source_index` — from ids that already exist. Any ES|QL the KI recommends goes in
+`attributes.esql` as well as `content`, so the verifiers run it. This is the shape for a rule
+agents keep breaking or a recipe they keep rediscovering, when no systemic family would carry it.
 
 **Selective / Outlier** (`type: event`) — start from `document-template`. Filter the ES|QL to
 notable records, have the `ai.prompt` return a significance verdict alongside the indicator, and
@@ -285,9 +347,16 @@ dozen turns that produced them.
 no history, no tool results, not even the index id. Anything you leave out it will invent, and it
 will invent it confidently. Put in the prompt:
 
-- the AI index id, and whether its destination is an index or a data stream
+- the AI index id, its destination index name, and whether that destination is an index or a
+  data stream
 - the sources and the exact corpus filter the automation should apply
-- the strategy from `analyze-and-improve`, and what the indicators are meant to capture
+- the strategy from `analyze-and-improve` **as its three answers** — the unit, what one KI
+  carries, how units are found and refreshed — and what the indicators are meant to capture.
+  Those three are what fill the `consts`, so a brief that names a strategy without them leaves
+  the subagent to guess the block
+- **the counted findings** behind the proposal, with their counts, denominators and windows, and
+  for a targeted KI the provenance ids (`trace_ids`, `conversation_id`, the error text) it should
+  carry. The subagent cannot see the signals; what is not in the brief is not in the KI
 - **the template it starts from, by name**, and the values its `consts` block should take. This is
   the single highest-value line in the brief: a subagent that has been handed a template edits it,
   and one that has not writes a workflow from nothing and spends its budget rediscovering what the
@@ -392,10 +461,10 @@ than that and it returns bare ids and labels with no parameters at all — so a 
 you nothing and buys a chain of follow-up calls. Pass `stepType` with an exact id.
 
 The types these automations use are a closed set: `elasticsearch.esql.query`,
-`elasticsearch.search`, `elasticsearch.request`, `ai.prompt`, `foreach`, `if`, `data.set` and
-`console`, alongside the `context-engine` steps written out above, which no lookup can return at
-all. Every one of them appears in the templates already wired up correctly, so a lookup is worth a
-call only for a step type you are adding that no template uses.
+`elasticsearch.search`, `elasticsearch.request`, `ai.prompt`, `foreach`, `while`, `if`,
+`loop.continue`, `data.set` and `console`, alongside the `context-engine` steps written out above,
+which no lookup can return at all. Every one of them appears in the templates already wired up
+correctly, so a lookup is worth a call only for a step type you are adding that no template uses.
 
 `platform.workflows.get_examples` is one call for the example library rather than one per step, and
 `platform.workflows.get_trigger_definitions` gives the event context a trigger provides.
@@ -414,8 +483,10 @@ That tag is the only handle you will have on what the pilot wrote: on a data-str
 them by.
 
 Bound the run to a handful of documents while you are iterating. The templates put that bound in
-`consts` — `max_entities`, `max_documents`, `corpus_filter` — so it is one edit to narrow and one
-to widen again, rather than a change threaded through the queries.
+`consts` — `max_documents`, `corpus_filter`, `discovery_filter`, and `batch_size` together with the
+`max-iterations` limit on the unit template's `while` — so it is one edit to narrow and one to
+widen again, rather than a change threaded through the queries. The writer needs no bound: its
+`kis` list is the whole corpus.
 
 **Run it without saving.** `platform.core.execute_workflow` accepts a `yaml` argument and runs the
 definition ephemerally — nothing is persisted, nothing needs enabling. It waits for completion and
@@ -447,7 +518,9 @@ Judge those against what the brief asked for. When one step is what is wrong,
 `platform.workflows.workflow_execute_step` runs that step alone out of the inline YAML, so you can
 iterate on it without paying for the whole workflow and without writing more indicators to clean up.
 Where a step's ES|QL is the problem, `platform.core.generate_esql` will rewrite it given the failing
-query, the reason and the mapping. Fix and run again, within your attempt budget.
+query, the reason and the mapping. Fix and run again, within your attempt budget. Never rerun a
+failed call unchanged: read the error, change the thing it names, then run. The same YAML a second
+time fails the same way and costs an attempt.
 
 **Clean up before you return.** The pilot wrote into the user's real index, so the tagged indicators
 are yours to remove and cleanup is not optional — a skipped one leaves junk that nobody else will
@@ -494,7 +567,9 @@ on it.
 
 ## Corpora larger than 10,000 documents
 
-ES|QL caps at 10,000 rows per query. An automation over a larger corpus needs offset-based
-pagination, or a parent workflow dispatching per-item children with `workflow.executeAsync`. Note
+ES|QL caps at 10,000 rows per query. An automation over a larger corpus needs cursor pagination —
+the `unit-profile-template` pages with a `while` over a keyword cursor, and the same `while` and
+`advance_cursor` pair transplants into the document template around its `discover_documents` and
+`foreach` — or a parent workflow dispatching per-item children with `workflow.executeAsync`. Note
 the cap rather than drafting a workflow that silently truncates — this fails quietly, and the index
 looks under-covered for reasons no one will connect back to here.
