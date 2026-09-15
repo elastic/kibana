@@ -34,6 +34,7 @@
 - [Microsoft Teams](/reference/connectors-kibana/microsoft-teams-action-type.md): Search messages and browse teams, channels, and chats in Microsoft Teams.
 - [Monday.com](/reference/connectors-kibana/monday-com-action-type.md): Search boards, read and create items, post updates, and manage workspaces in Monday.com.
 - [MongoDB](/reference/connectors-kibana/mongodb-action-type.md): Query MongoDB collections using find, aggregate, count, and listCollections, and write with insertOne, updateOne, and deleteOne in workflows.
+- [MySQL](/reference/connectors-kibana/mysql-action-type.md): Query tables, search rows, explore schema, and execute SQL in a MySQL database.
 - [New Relic](/reference/connectors-kibana/new-relic-action-type.md): Acknowledge and resolve AI issues, manage muting rules, and run NRQL queries.
 - [Notion](/reference/connectors-kibana/notion-action-type.md): Explore content and databases in Notion.
 - [OneDrive](/reference/connectors-kibana/one-drive-action-type.md): Search files and folders, browse drives, read file content, and list files shared with you in Microsoft OneDrive.

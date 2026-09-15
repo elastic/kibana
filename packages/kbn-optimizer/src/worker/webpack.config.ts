@@ -97,6 +97,8 @@ export function getWebpackConfig(
           // Server-only URI parsing helper for the mongodb driver; loaded via
           // dynamic import alongside 'mongodb' above, same rationale.
           'mongodb-connection-string-url': 'commonjs mongodb-connection-string-url',
+          mysql2: 'commonjs mysql2',
+          'mysql2/promise': 'commonjs mysql2/promise',
           ...UiSharedDepsSrc.externals,
         };
         if (request && request in sharedExternals) {

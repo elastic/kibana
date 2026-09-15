@@ -20,7 +20,13 @@ import { getExternals, isKeaReactReduxImport } from './externals';
  * reason (see packages/kbn-optimizer/src/worker/webpack.config.ts), independently of
  * UiSharedDepsSrc.externals, which only carries browser-safe shared singleton libs.
  */
-const RSPACK_ONLY_EXTERNALS = ['node:crypto', 'mongodb', 'mongodb-connection-string-url'];
+const RSPACK_ONLY_EXTERNALS = [
+  'node:crypto',
+  'mongodb',
+  'mongodb-connection-string-url',
+  'mysql2',
+  'mysql2/promise',
+];
 
 describe('externals configuration', () => {
   const rspackExternals = getExternals();

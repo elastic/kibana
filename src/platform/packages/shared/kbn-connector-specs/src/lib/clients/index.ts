@@ -8,8 +8,10 @@
  */
 
 import type { MongoClient } from 'mongodb';
+import type { Pool as Mysql2Pool } from 'mysql2/promise';
 import type { ClientTypeSpec } from './client_type_spec';
 import { mongodbClientType } from './mongodb_client_type';
+import { mysqlClientType } from './mysql';
 
 export type {
   ClientTypeSpec,
@@ -23,6 +25,7 @@ export type {
 
 export interface ClientRegistry {
   mongodb: MongoClient;
+  mysql: Mysql2Pool;
 }
 
 export type ClientTypeId = keyof ClientRegistry;
@@ -33,4 +36,5 @@ export type ClientTypeSpecs = Readonly<{
 
 export const clientTypes: ClientTypeSpecs = {
   mongodb: mongodbClientType,
+  mysql: mysqlClientType,
 };
