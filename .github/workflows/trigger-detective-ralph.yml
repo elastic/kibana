@@ -1,0 +1,60 @@
+name: 'Trigger Detective Ralph'
+
+on:
+  issues:
+    types: [labeled]
+
+# Label events do not expose author_association for the actor (github.event.sender).
+# Permissions are verified via the GitHub collaborators API in the acknowledge job,
+# which gates the trigger job through `needs`.
+
+permissions:
+  contents: none
+
+concurrency:
+  group: ralph-detect-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  acknowledge:
+    name: 'Acknowledge ralph-investigate'
+    if: >-
+      github.event.issue.pull_request == null &&
+      github.event.label.name == 'ralph-investigate'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Verify actor is an org member or collaborator
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          STATUS=$(gh api "repos/$REPO/collaborators/$ACTOR" -i 2>/dev/null | head -1 | awk '{print $2}')
+          if [[ "$STATUS" != "204" ]]; then
+            echo "Actor '$ACTOR' is not a repository collaborator; skipping Detective Ralph."
+            exit 1
+          fi
+      - name: Post acknowledgment comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh issue comment "$ISSUE_NUMBER" --repo "$REPO" \
+            --body "Detective Ralph has been triggered and is starting up. A follow-up comment with a progress link will appear shortly."
+
+  trigger:
+    permissions:
+      contents: read
+      id-token: write
+    name: 'Run Detective Ralph'
+    needs: [acknowledge]
+    if: >-
+      github.event.issue.pull_request == null &&
+      github.event.label.name == 'ralph-investigate'
+    uses: elastic/kibana-error-sentry/.github/workflows/detective-ralph.yml@main
+    with:
+      issue_number: '${{ github.event.issue.number }}'
+    secrets: inherit
