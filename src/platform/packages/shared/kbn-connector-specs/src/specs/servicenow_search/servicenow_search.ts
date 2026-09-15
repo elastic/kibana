@@ -363,6 +363,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     createRecord: {
       isTool: true,
+      scope: 'write',
       description:
         'Insert a new record into any ServiceNow table. Returns the created record including its sys_id and number. ' +
         'For ITSM incidents use createIncident; for security incidents use createSecurityIncident; ' +
@@ -382,6 +383,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     updateRecord: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Update an existing record in any ServiceNow table by its sys_id. ' +
         'Provide only the fields that need to change — all other fields are left untouched. ' +
@@ -408,6 +410,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     createIncident: {
       isTool: true,
+      scope: 'write',
       description:
         'Create a new ITSM incident in ServiceNow. ' +
         'Requires short_description; all other fields are optional. ' +
@@ -429,6 +432,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     updateIncident: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Update an existing ITSM incident by its sys_id. ' +
         'Provide only the fields to change — all other fields are left untouched. ' +
@@ -450,6 +454,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     addComment: {
       isTool: true,
+      scope: 'write',
       description:
         'Add a customer-visible comment to a ServiceNow record. ' +
         'The comment appears in the record journal and is visible to the caller. ' +
@@ -477,6 +482,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     addWorkNote: {
       isTool: true,
+      scope: 'write',
       description:
         'Add an internal work note to a ServiceNow record. ' +
         'Work notes are only visible to agents and never shown to the end user or caller. ' +
@@ -500,6 +506,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     closeIncident: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Resolve or close a ServiceNow incident by setting its state to Resolved (6) or Closed (7). ' +
         'A close code and close notes are required. ' +
@@ -522,6 +529,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     createSecurityIncident: {
       isTool: true,
+      scope: 'write',
       description:
         'Create a new Security Operations (SecOps/SIR) incident in the sn_si_incident table. ' +
         'Use this for cyber security incidents and threat investigations rather than ITSM incidents. ' +
@@ -548,6 +556,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     createEvent: {
       isTool: true,
+      scope: 'write',
       description:
         'Send an ITOM event to ServiceNow Event Management. ' +
         'Creates or updates an alert in the Event Management console. ' +
@@ -579,6 +588,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     uploadAttachment: {
       isTool: true,
+      scope: 'write',
       description:
         'Upload a file attachment to a ServiceNow record. ' +
         'The file must be provided as base64-encoded content. ' +
@@ -608,6 +618,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     deleteRecord: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Permanently delete a record from a ServiceNow table by its sys_id. ' +
         'This operation cannot be undone. ' +
@@ -628,6 +639,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     getChoices: {
       isTool: true,
+      scope: 'read',
       description:
         'Look up valid choice values for a ServiceNow field. ' +
         'Call this before writing to discover valid values for state, close_code, category, impact, urgency, ' +
@@ -654,6 +666,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     queryUsers: {
       isTool: true,
+      scope: 'read',
       description:
         'Search ServiceNow users by name, email, or username. ' +
         'Use this to look up the sys_id for caller_id or assigned_to fields ' +
@@ -682,6 +695,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     whoAmI: {
       isTool: true,
+      scope: 'read',
       description:
         'Return the identity of the currently authenticated ServiceNow user. ' +
         'Returns sys_id, user_name, name, email, title, department, and active status. ' +
