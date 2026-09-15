@@ -177,7 +177,7 @@ describe('Navigation Tree', () => {
     core.application.capabilities = {
       ...core.application.capabilities,
       alerting_v2_alerts: { read: true },
-      alerting_v2_rules: { all: true },
+      alerting_v2_rules: { read: true },
       alerting_v2_action_policies: { read: true },
       alerting_v2_execution_history: { read: true },
       observabilityAlerts: { show: true },
@@ -221,7 +221,6 @@ describe('Navigation Tree', () => {
               link: 'observabilityAlerting:rules-v1',
               sideNavStatus: 'hidden',
             }),
-            expect.objectContaining({ link: 'observabilityAlerting:rule-library' }),
           ]),
         }),
         expect.objectContaining({

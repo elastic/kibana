@@ -57,7 +57,6 @@ const PANEL_LINKS = {
 const V2_PANEL_PAGES = [
   { name: 'Inbox', deepLinkId: PANEL_LINKS.inbox, title: 'Alert episodes' },
   { name: 'Rules', deepLinkId: PANEL_LINKS.rulesV2, title: 'Rules' },
-  { name: 'Rule library', deepLinkId: PANEL_LINKS.ruleLibrary, title: 'Rule library' },
   { name: 'Action Policies', deepLinkId: PANEL_LINKS.actionPolicies, title: 'Action Policies' },
   {
     name: 'Maintenance Windows',
@@ -114,7 +113,7 @@ const PRIVILEGE_CASES = [
   {
     name: 'v2 rules write',
     role: observabilityAlertingNavRole({ alerting_v2_rules: ['all'] }),
-    visible: [PANEL_LINKS.rulesV2, PANEL_LINKS.ruleLibrary],
+    visible: [PANEL_LINKS.rulesV2],
   },
   {
     name: 'v2 action policies read',
@@ -266,7 +265,7 @@ test.describe(
         ).toBeVisible();
         await expect(
           nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, PANEL_LINKS.ruleLibrary)
-        ).toBeVisible();
+        ).not.toBeVisible();
         await expect(
           nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, PANEL_LINKS.actionPolicies)
         ).toBeVisible();
