@@ -125,6 +125,24 @@ describe('updateSignificantEventStatus', () => {
     expect(callArg.documents[0].assessment_note).toBe('Automatically closed by cleanup.');
   });
 
+  it('preserves an existing assessment note when the caller omits one', async () => {
+    const existing = createSignificantEvent({
+      event_uuid: 'event-1',
+      status: 'open',
+      assessment_note: 'Operator dismissed as noise.',
+    });
+    const { client, dataStreamClient } = createEventClient([existing]);
+
+    await updateSignificantEventStatus({
+      eventClient: client,
+      eventUuid: 'event-1',
+      status: 'closed',
+    });
+
+    const [[callArg]] = dataStreamClient.create.mock.calls;
+    expect(callArg.documents[0].assessment_note).toBe('Operator dismissed as noise.');
+  });
+
   it('ignores when the event is not found', async () => {
     const { client, dataStreamClient } = createEventClient([]);
 

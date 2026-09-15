@@ -8,6 +8,7 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_DISMISS_MEMORY_WRITE_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
@@ -15,13 +16,17 @@ import {
 } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
+import {
+  GLOBAL_CORE_WORKFLOW_IDS,
+  MEMORY_WORKFLOW_IDS,
+} from '../../maintenance/managed_workflow_targets';
 import { createManagedWorkflowsInstaller } from './managed_workflows_installer';
 
-// Significant events is gated solely by the availability flag now, so the installer always writes
-// the full set: 9 base workflows + 4 memory workflows (both via `installWorkflows`).
-const BASE_WORKFLOW_COUNT = 9;
-const MEMORY_WORKFLOW_COUNT = 4;
-const TOTAL_WORKFLOW_COUNT = BASE_WORKFLOW_COUNT + MEMORY_WORKFLOW_COUNT;
+// Full set via `installWorkflows`: GLOBAL_CORE + continuous onboarding, KI sync, investigation
+// completed, plus the memory set.
+const EXTRA_WORKFLOW_COUNT = 3;
+const TOTAL_WORKFLOW_COUNT =
+  GLOBAL_CORE_WORKFLOW_IDS.length + EXTRA_WORKFLOW_COUNT + MEMORY_WORKFLOW_IDS.length;
 
 const createClientMock = () => {
   const client = {
@@ -83,6 +88,7 @@ describe('createManagedWorkflowsInstaller', () => {
     await installer.install();
 
     expect(installedIds(client)).toContain(SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID);
+    expect(installedIds(client)).toContain(SIGNIFICANT_EVENTS_DISMISS_MEMORY_WRITE_WORKFLOW_ID);
     expect(client.install).toHaveBeenCalledTimes(TOTAL_WORKFLOW_COUNT);
     expect(client.ready).toHaveBeenCalledTimes(1);
   });

@@ -13,6 +13,7 @@ import { useKibana } from './use_kibana';
 interface UpdateSignificantEventArgs {
   eventUuid: string;
   status: SignificantEventStatus;
+  assessmentNote?: string;
 }
 
 interface UpdateSignificantEventResult {
@@ -52,11 +53,17 @@ export const useUpdateSignificantEvent = ({
   const queryClient = useQueryClient();
 
   const mutation = useMutation<UpdateSignificantEventResult, Error, UpdateSignificantEventArgs>({
-    mutationFn: ({ eventUuid, status }: UpdateSignificantEventArgs) =>
+    mutationFn: ({ eventUuid, status, assessmentNote }: UpdateSignificantEventArgs) =>
       significantEventsRepositoryClient.fetch(
         'POST /internal/significant_events/events/{id}/update',
         {
-          params: { path: { id: eventUuid }, body: { status } },
+          params: {
+            path: { id: eventUuid },
+            body: {
+              status,
+              ...(assessmentNote !== undefined ? { assessment_note: assessmentNote } : {}),
+            },
+          },
           signal: null,
         }
       ),

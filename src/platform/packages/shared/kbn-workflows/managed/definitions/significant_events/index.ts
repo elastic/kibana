@@ -12,6 +12,10 @@ import INVESTIGATION_COMPLETED_YAML from './investigation_completed.yaml';
 import DETECTION_YAML from './significant_events/detection.yaml';
 import DISCOVERY_YAML from './significant_events/discovery.yaml';
 import ORCHESTRATOR_YAML from './significant_events/orchestrator.yaml';
+export {
+  SIGNIFICANT_EVENTS_DISMISS_MEMORY_WRITE_WORKFLOW,
+  SIGNIFICANT_EVENTS_DISMISS_MEMORY_WRITE_WORKFLOW_ID,
+} from './significant_events/dismiss_memory_write';
 import type { ManagedWorkflowDefinition } from '../../types';
 export {
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW,
