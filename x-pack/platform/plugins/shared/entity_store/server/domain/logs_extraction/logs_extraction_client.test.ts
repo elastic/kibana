@@ -100,6 +100,7 @@ function createMockEngineDescriptor(
       lastExecutionTimestamp: string | null;
       sliceEndTimestamp: string | null;
     } | null;
+    nonPriorityStatus: string | null;
   }>
 ) {
   const logExtractionState = {
@@ -113,6 +114,9 @@ function createMockEngineDescriptor(
     status: ENGINE_STATUS.STARTED,
     logExtractionState,
     nonPriorityLogExtractionState: overrides?.nonPriorityLogExtractionState ?? null,
+    // Each process is gated on its own status, so a started engine sets both.
+    nonPriorityStatus: overrides?.nonPriorityStatus ?? ENGINE_STATUS.STARTED,
+    nonPriorityError: null,
     versionState: { version: 2, state: 'running' as const, isMigratedFromV1: false },
   };
 }
@@ -2126,6 +2130,80 @@ describe('LogsExtractionClient extraction mode cursor routing', () => {
 
     const updateCalls = mockEngineDescriptorClient.update.mock.calls.map(([, update]) => update);
     expect(updateCalls.every((u) => !('nonPriorityLogExtractionState' in u))).toBe(true);
+  });
+
+  /**
+   * Each process is gated on its own status field. Sharing one would mean stopping either process
+   * stopped both, since extraction refuses to run when its status is not 'started'.
+   */
+  it.each([
+    ['single', 'status'],
+    ['priority', 'status'],
+    ['nonPriority', 'nonPriorityStatus'],
+  ] as const)('%s mode is gated on %s alone', async (mode, ownStatusField) => {
+    const { client, mockEngineDescriptorClient } = createContextWithMode(mode);
+    // Stop the *other* process; this one must still run.
+    const otherStopped =
+      ownStatusField === 'status'
+        ? { nonPriorityStatus: ENGINE_STATUS.STOPPED }
+        : { status: ENGINE_STATUS.STOPPED };
+    mockEngineDescriptorClient.findOrThrow.mockResolvedValue({
+      ...createMockEngineDescriptor('user'),
+      ...otherStopped,
+    } as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>);
+    mockIngestEntities.mockResolvedValue(undefined);
+    mockExtractSuccessSequence({ columns: extractionColumns, values: [] });
+
+    const result = await client.extractLogs('user');
+
+    expect(result.success).toBe(true);
+  });
+
+  it('nonPriority mode does not run when only its own status is stopped', async () => {
+    const { client, mockEngineDescriptorClient } = createContextWithMode('nonPriority');
+    mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+      createMockEngineDescriptor('user', {
+        nonPriorityStatus: ENGINE_STATUS.STOPPED,
+      }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
+    );
+
+    const result = await client.extractLogs('user');
+
+    expect(result.success).toBe(false);
+    expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
+  });
+
+  it('nonPriority failures write nonPriorityError and leave the priority error untouched', async () => {
+    const { client, mockEngineDescriptorClient } = createContextWithMode('nonPriority');
+    mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+      createMockEngineDescriptor('user') as Awaited<
+        ReturnType<EngineDescriptorClient['findOrThrow']>
+      >
+    );
+    mockExecuteEsqlQuery.mockRejectedValue(new Error('non-priority boom'));
+
+    await client.extractLogs('user');
+
+    const updateCalls = mockEngineDescriptorClient.update.mock.calls.map(([, update]) => update);
+    expect(updateCalls.some((u) => 'nonPriorityError' in u)).toBe(true);
+    expect(updateCalls.every((u) => !('error' in u))).toBe(true);
+  });
+
+  it('nonPriority success clears nonPriorityError without clearing the priority error', async () => {
+    const { client, mockEngineDescriptorClient } = createContextWithMode('nonPriority');
+    mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+      createMockEngineDescriptor('user') as Awaited<
+        ReturnType<EngineDescriptorClient['findOrThrow']>
+      >
+    );
+    mockIngestEntities.mockResolvedValue(undefined);
+    mockExtractSuccessSequence({ columns: extractionColumns, values: [] });
+
+    await client.extractLogs('user');
+
+    const updateCalls = mockEngineDescriptorClient.update.mock.calls.map(([, update]) => update);
+    expect(updateCalls.some((u) => 'nonPriorityError' in u)).toBe(true);
+    expect(updateCalls.every((u) => !('error' in u))).toBe(true);
   });
 
   it('priority mode writes logExtractionState and resumes from the existing checkpoint', async () => {
