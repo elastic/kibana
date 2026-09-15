@@ -58,6 +58,7 @@ import {
   scheduleInvestigationReconciliationTask,
 } from './tasks/investigation_reconciliation_task';
 import type {
+  InvestigationQuotaCallback,
   NightshiftInvestigationsServerSetup,
   NightshiftInvestigationsServerStart,
   NightshiftInvestigationsSetupDeps,
@@ -86,6 +87,7 @@ export class NightshiftInvestigationsPlugin
   private sandboxConnectionManager?: SandboxConnectionManager;
   private actionsStart?: ActionsPluginStart;
   private cortexEnabled = false;
+  private investigationQuotaCallback?: InvestigationQuotaCallback;
 
   constructor(private readonly ctx: PluginInitializerContext<NightshiftInvestigationsConfig>) {
     this.logger = ctx.logger.get();
@@ -289,6 +291,15 @@ export class NightshiftInvestigationsPlugin
         'workflowsManagement is not available — nightshift investigations routes will not be registered'
       );
     }
+
+    return {
+      registerInvestigationQuota: (callback) => {
+        if (this.investigationQuotaCallback) {
+          throw new Error('Investigation quota callback is already registered');
+        }
+        this.investigationQuotaCallback = callback;
+      },
+    };
   }
 
   start(
@@ -357,6 +368,7 @@ export class NightshiftInvestigationsPlugin
       logger: this.logger,
       spaceIdOverride: spaceId,
       agentBuilder: this.agentBuilder,
+      investigationQuotaCallback: this.investigationQuotaCallback,
       investigationRepository: this.createInvestigationRepository(request, resolvedSpaceId),
       isAvailable: () =>
         isInvestigationAvailable({

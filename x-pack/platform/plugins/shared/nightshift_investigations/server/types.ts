@@ -25,7 +25,15 @@ import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/
 import type { NightshiftInvestigationsClient } from './client/investigations_client';
 import type { TriggerEmitter } from './workflows/triggers/emit';
 
-export type NightshiftInvestigationsServerSetup = void;
+export interface InvestigationQuotaResult {
+  allowed: boolean;
+}
+
+export type InvestigationQuotaCallback = () => Promise<InvestigationQuotaResult>;
+
+export interface NightshiftInvestigationsServerSetup {
+  registerInvestigationQuota: (callback: InvestigationQuotaCallback) => void;
+}
 
 export interface NightshiftInvestigationsServerStart {
   getInvestigationsClient: (request: KibanaRequest) => NightshiftInvestigationsClient;
