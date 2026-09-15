@@ -200,10 +200,17 @@ export {
 } from './common/validation/context/get_foreach_state_schema';
 export { getNearestStepPath } from './common/validation/context/get_nearest_step_path';
 export { getOutputSchemaForStepType } from './common/validation/context/get_output_schema_for_step_type';
-export { getStepsCollectionSchema } from './common/validation/context/get_steps_collection_schema';
+export {
+  getStepsCollectionSchema,
+  type StepsCollectionSchema,
+} from './common/validation/context/get_steps_collection_schema';
 export { getValueAtYamlPath } from './common/validation/context/get_value_at_yaml_path';
 export { getVariablesSchema } from './common/validation/context/get_variables_schema';
 export { getWorkflowContextSchema } from './common/validation/context/get_workflow_context_schema';
+export {
+  createStepContextResolver,
+  type StepContextResolver,
+} from './common/validation/context/step_context_resolver';
 
 // Variable validation rules (the `variable-validation` rule group)
 export { collectAllVariables } from './common/validation/variables/collect_all_variables';

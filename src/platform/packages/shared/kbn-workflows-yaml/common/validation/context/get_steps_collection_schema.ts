@@ -16,6 +16,28 @@ import { getForeachStateSchema } from './get_foreach_state_schema';
 import { getOutputSchemaForStepType } from './get_output_schema_for_step_type';
 
 /**
+ * `steps.<id>` entries depend only on the node, so share one per node across all
+ * step contexts instead of allocating a fresh one per context (quadratic in step count).
+ * Foreach entries close over the resolving step's context and are not shareable.
+ */
+const stepEntrySchemaCache = new WeakMap<GraphNodeUnion, z.ZodTypeAny>();
+
+function getStepEntrySchema(node: GraphNodeUnion): z.ZodTypeAny {
+  const cached = stepEntrySchemaCache.get(node);
+  if (cached) {
+    return cached;
+  }
+  const schema = z.lazy(() =>
+    z.object({
+      output: getOutputSchemaForStepType(node).optional(),
+      error: z.any().optional(),
+    })
+  );
+  stepEntrySchemaCache.set(node, schema);
+  return schema;
+}
+
+/**
  * Folds an array of graph nodes into a steps schema, skipping already-seen
  * and trigger nodes. Mutates `seenStepIds` to track which step IDs have been
  * processed across multiple calls.
@@ -43,12 +65,7 @@ function addNodesToStepsSchema(
     seenStepIds.add(node.stepId);
 
     if (!isEnterForeach(node)) {
-      batch[node.stepId] = z.lazy(() =>
-        z.object({
-          output: getOutputSchemaForStepType(node).optional(),
-          error: z.any().optional(),
-        })
-      );
+      batch[node.stepId] = getStepEntrySchema(node);
     } else {
       flushBatch();
       schema = schema.extend({
@@ -64,12 +81,18 @@ function addNodesToStepsSchema(
   return schema;
 }
 
+export interface StepsCollectionSchema {
+  schema: z.ZodObject;
+  /** Entry count, so callers can test emptiness without forcing zod to materialise `.shape`. */
+  size: number;
+}
+
 export function getStepsCollectionSchema(
   stepContextSchema: typeof DynamicStepContextSchema,
   workflowExecutionGraph: WorkflowGraph,
   stepName: string,
   precomputedPredecessors?: GraphNodeUnion[]
-) {
+): StepsCollectionSchema {
   const stepId = getStepId(stepName);
   const stepNode = workflowExecutionGraph.getStepNode(stepId);
 
@@ -113,5 +136,5 @@ export function getStepsCollectionSchema(
     stepsSchema = addNodesToStepsSchema(innerNodes, stepsSchema, seenStepIds, stepContextSchema);
   }
 
-  return stepsSchema;
+  return { schema: stepsSchema, size: seenStepIds.size };
 }
