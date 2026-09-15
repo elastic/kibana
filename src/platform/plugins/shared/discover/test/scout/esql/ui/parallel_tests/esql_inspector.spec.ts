@@ -39,7 +39,9 @@ const expectRequestNames = async (
     .toStrictEqual(names);
 };
 
-spaceTest.describe('Discover ES|QL inspector', { tag: tags.deploymentAgnostic }, () => {
+// Tagged per test rather than on the describe: Playwright accumulates a test's tags with
+// its parents', so a describe-level tag set cannot be narrowed by an individual test.
+spaceTest.describe('Discover ES|QL inspector', () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
   });
@@ -54,30 +56,38 @@ spaceTest.describe('Discover ES|QL inspector', { tag: tags.deploymentAgnostic },
     await discoverScoutSpace.teardownDiscoverDefaults();
   });
 
-  spaceTest('lists the Table and Visualization requests', async ({ pageObjects }) => {
-    const { discover, inspector, unifiedTabs } = pageObjects;
+  spaceTest(
+    'lists the Table and Visualization requests',
+    { tag: tags.deploymentAgnostic },
+    async ({ pageObjects }) => {
+      const { discover, inspector, unifiedTabs } = pageObjects;
 
-    // the observability root profile overrides it to `FROM <allLogsIndexPattern>`
-    // so the requests below would not be logstash's.
-    await discover.writeAndSubmitEsqlQuery('from logstash-* | limit 10');
+      // the observability root profile overrides it to `FROM <allLogsIndexPattern>`
+      // so the requests below would not be logstash's.
+      await discover.writeAndSubmitEsqlQuery('from logstash-* | limit 10');
 
-    await expectRequestNames({ inspector, unifiedTabs }, ['Table', 'Visualization']);
+      await expectRequestNames({ inspector, unifiedTabs }, ['Table', 'Visualization']);
 
-    await inspector.requests.requestTab.click();
-    const request = await discover.codeEditor.getCodeEditorValueByTestSubj(
-      'inspectorRequestCodeViewerContainer'
-    );
-    expect(request).toContain('POST /_query/async?drop_null_columns=true');
-  });
+      await inspector.requests.requestTab.click();
+      const request = await discover.codeEditor.getCodeEditorValueByTestSubj(
+        'inspectorRequestCodeViewerContainer'
+      );
+      expect(request).toContain('POST /_query/async?drop_null_columns=true');
+    }
+  );
 
+  // Stateful classic only, matching where the FTR original ran: its `with slow queries`
+  // suite existed solely in the stateful file, whose config was registered in
+  // `ftr_platform_stateful_configs.yml`. The serverless mirror never carried it.
   spaceTest(
     'registers one entry per request when the search is slow',
+    { tag: tags.stateful.classic },
     async ({ page, pageObjects }) => {
       const { discover, inspector, unifiedTabs } = pageObjects;
 
-      // Delay the search at the network layer rather than stalling it in ES: the
-      // `error_query` hook the FTR test used returns warnings, which leave the
-      // histogram empty and suppress the visualization request altogether.
+      // Delay the search at the network layer rather than stalling it in ES with the
+      // `error_query` hook the FTR original used: that hook is snapshot-only, and its
+      // stall costs ~3x the configured delay.
       await page.route(isEsqlSearchStart, async (route) => {
         await delay(SEARCH_DELAY_MS);
         await route.continue();
