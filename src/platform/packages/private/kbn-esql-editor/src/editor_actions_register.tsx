@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import type { EsqlEditorActions } from './editor_actions_context';
 import { useEsqlEditorActionsRegistration } from './editor_actions_context';
 
@@ -24,47 +24,38 @@ const noop = () => {};
  * without the full `ESQLEditor`) can drive whichever actions the host wires —
  * e.g. `currentQuery` + `submitEsqlQuery` to enable recommended queries. Handlers
  * left unset default to no-ops, so their menu buttons stay visible but inert.
- */
-export const EsqlEditorActionsRegister = ({
-  toggleVisor = noop,
-  toggleHistory = noop,
-  toggleStarredQuery = noop,
-  toggleLanguageComponent = noop,
-  submitEsqlQuery = noop,
-  isHistoryOpen = false,
-  isCurrentQueryStarred = false,
-  canToggleStarredQuery = false,
-  currentQuery = '',
-  editorIsInline = false,
-}: EsqlEditorActionsRegisterProps): null => {
-  const actions = useMemo<EsqlEditorActions>(
+*/
+export const EsqlEditorActionsRegister = (props: EsqlEditorActionsRegisterProps): null => {
+  const propsRef = useRef(props);
+  propsRef.current = props;
+
+  const stableActions = useMemo<EsqlEditorActions>(
     () => ({
-      toggleVisor,
-      toggleHistory,
-      toggleStarredQuery,
-      toggleLanguageComponent,
-      submitEsqlQuery,
-      isHistoryOpen,
-      isCurrentQueryStarred,
-      canToggleStarredQuery,
-      currentQuery,
-      editorIsInline,
+      toggleVisor: () => (propsRef.current.toggleVisor ?? noop)(),
+      toggleHistory: () => (propsRef.current.toggleHistory ?? noop)(),
+      toggleStarredQuery: () => (propsRef.current.toggleStarredQuery ?? noop)(),
+      toggleLanguageComponent: () => (propsRef.current.toggleLanguageComponent ?? noop)(),
+      submitEsqlQuery: (query: string) => (propsRef.current.submitEsqlQuery ?? noop)(query),
+      get isHistoryOpen() {
+        return propsRef.current.isHistoryOpen ?? false;
+      },
+      get isCurrentQueryStarred() {
+        return propsRef.current.isCurrentQueryStarred ?? false;
+      },
+      get canToggleStarredQuery() {
+        return propsRef.current.canToggleStarredQuery ?? false;
+      },
+      get currentQuery() {
+        return propsRef.current.currentQuery ?? '';
+      },
+      get editorIsInline() {
+        return propsRef.current.editorIsInline ?? false;
+      },
     }),
-    [
-      toggleVisor,
-      toggleHistory,
-      toggleStarredQuery,
-      toggleLanguageComponent,
-      submitEsqlQuery,
-      isHistoryOpen,
-      isCurrentQueryStarred,
-      canToggleStarredQuery,
-      currentQuery,
-      editorIsInline,
-    ]
+    []
   );
 
-  useEsqlEditorActionsRegistration(actions);
+  useEsqlEditorActionsRegistration(stableActions);
 
   return null;
 };

@@ -9,6 +9,7 @@
 import React from 'react';
 import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
+import type { EsqlEditorActions } from './editor_actions_context';
 import { EsqlEditorActionsProvider, useEsqlEditorActions } from './editor_actions_context';
 import { EsqlEditorActionsRegister } from './editor_actions_register';
 
@@ -94,6 +95,36 @@ describe('EsqlEditorActionsRegister', () => {
       </EsqlEditorActionsProvider>
     );
     expect(screen.getByTestId('no-actions')).toBeInTheDocument();
+  });
+
+  it('registers a stable object that reflects prop changes without re-registering', () => {
+    const seen: EsqlEditorActions[] = [];
+    const CaptureActions = () => {
+      const actions = useEsqlEditorActions();
+      if (actions) {
+        seen.push(actions);
+      }
+      return <div data-test-subj="currentQuery">{actions?.currentQuery}</div>;
+    };
+
+    const { rerender } = render(
+      <EsqlEditorActionsProvider>
+        <EsqlEditorActionsRegister currentQuery="FROM a" />
+        <CaptureActions />
+      </EsqlEditorActionsProvider>
+    );
+    expect(screen.getByTestId('currentQuery')).toHaveTextContent('FROM a');
+
+    rerender(
+      <EsqlEditorActionsProvider>
+        <EsqlEditorActionsRegister currentQuery="FROM b" />
+        <CaptureActions />
+      </EsqlEditorActionsProvider>
+    );
+    // The live value is read through the getter on the next render...
+    expect(screen.getByTestId('currentQuery')).toHaveTextContent('FROM b');
+    // ...but the registered object identity never changes (no re-registration churn).
+    expect(new Set(seen).size).toBe(1);
   });
 
   it('is inert (no throw) when rendered without a provider', () => {
