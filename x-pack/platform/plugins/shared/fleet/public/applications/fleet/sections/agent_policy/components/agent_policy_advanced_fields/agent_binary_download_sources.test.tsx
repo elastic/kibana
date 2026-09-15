@@ -106,7 +106,7 @@ describe('AgentBinaryDownloadSources', () => {
     it('should commit immediately when adding a row so unsaved changes are detected', () => {
       const { result, updateAgentPolicy } = render({ download_source_ids: ['ds-1'] });
 
-      fireEvent.click(result.getByTestId('agentPolicyForm.downloadSource.addServer'));
+      fireEvent.click(result.getByTestId('agentPolicyForm.downloadSource.add'));
 
       expect(updateAgentPolicy).toHaveBeenCalledWith({
         download_source_id: 'ds-1',
@@ -117,7 +117,7 @@ describe('AgentBinaryDownloadSources', () => {
     it('should show a new row when adding from the initial Default-only state', () => {
       const result = renderStateful({});
 
-      fireEvent.click(result.getByTestId('agentPolicyForm.downloadSource.addServer'));
+      fireEvent.click(result.getByTestId('agentPolicyForm.downloadSource.add'));
 
       expect(selectAt(result, 0)).toHaveTextContent('Default (Elastic Artifacts)');
       expect(result.queryByTestId('agentPolicyForm.downloadSource.select.1')).not.toBeNull();
@@ -126,11 +126,11 @@ describe('AgentBinaryDownloadSources', () => {
     it('should keep adding rows up to the limit', () => {
       const result = renderStateful({});
 
-      fireEvent.click(result.getByTestId('agentPolicyForm.downloadSource.addServer'));
-      fireEvent.click(result.getByTestId('agentPolicyForm.downloadSource.addServer'));
+      fireEvent.click(result.getByTestId('agentPolicyForm.downloadSource.add'));
+      fireEvent.click(result.getByTestId('agentPolicyForm.downloadSource.add'));
 
       expect(result.queryByTestId('agentPolicyForm.downloadSource.select.2')).not.toBeNull();
-      expect(result.getByTestId('agentPolicyForm.downloadSource.addServer')).toBeDisabled();
+      expect(result.getByTestId('agentPolicyForm.downloadSource.add')).toBeDisabled();
     });
 
     it('should drop a removed row from the rendered list', () => {
@@ -167,8 +167,8 @@ describe('AgentBinaryDownloadSources', () => {
     it('should disable adding and show the limit message at three sources', () => {
       const { result } = render({ download_source_ids: ['ds-1', 'ds-2', 'ds-3'] });
 
-      expect(result.getByTestId('agentPolicyForm.downloadSource.addServer')).toBeDisabled();
-      expect(result.container).toHaveTextContent('You have reached the limit of selected servers.');
+      expect(result.getByTestId('agentPolicyForm.downloadSource.add')).toBeDisabled();
+      expect(result.container).toHaveTextContent('You can select up to 3 download sources.');
     });
 
     it('should disable adding when every source is already in the list', () => {
@@ -183,13 +183,13 @@ describe('AgentBinaryDownloadSources', () => {
         />
       );
 
-      expect(result.getByTestId('agentPolicyForm.downloadSource.addServer')).toBeDisabled();
+      expect(result.getByTestId('agentPolicyForm.downloadSource.add')).toBeDisabled();
     });
 
     it('should allow adding below the limit', () => {
       const { result } = render({ download_source_ids: ['ds-1', 'ds-2'] });
 
-      expect(result.getByTestId('agentPolicyForm.downloadSource.addServer')).not.toBeDisabled();
+      expect(result.getByTestId('agentPolicyForm.downloadSource.add')).not.toBeDisabled();
       expect(result.container).not.toHaveTextContent(
         'You have reached the limit of selected servers.'
       );
@@ -262,6 +262,6 @@ describe('AgentBinaryDownloadSources', () => {
 
     expect(selectAt(result, 0)).toBeDisabled();
     expect(result.getByTestId('agentPolicyForm.downloadSource.remove.1')).toBeDisabled();
-    expect(result.getByTestId('agentPolicyForm.downloadSource.addServer')).toBeDisabled();
+    expect(result.getByTestId('agentPolicyForm.downloadSource.add')).toBeDisabled();
   });
 });
