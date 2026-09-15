@@ -81,9 +81,8 @@ export function getSchemaAtPath(
         if (Object.hasOwn(shape, segment)) {
           current = shape[segment];
         } else {
-          // Typed `additionalProperties: { ... }` compiles to a catchall. Skip `never`
-          // (closed object) and `unknown`/`any` (open map) so only described value
-          // shapes are walked.
+          // Skip `never` (closed object) and `unknown`/`any` (open map) so only
+          // a described catchall value shape is walked.
           const catchall = current.def.catchall as z.ZodType | undefined;
           if (
             catchall &&
