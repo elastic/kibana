@@ -115,12 +115,52 @@ describe('useWorkflowLayout', () => {
       );
     });
 
+    it('routes if then/else edges from the matching sourceHandle ports', () => {
+      const workflow = minimal({
+        steps: [
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'x',
+            steps: [{ name: 'yes', type: 'http' }],
+            else: [{ name: 'no', type: 'http' }],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      });
+      const { result } = renderHook(() => useWorkflowLayout({ workflow }));
+      const thenEdge = result.current.edges.find(
+        (e) => (e.data as Record<string, unknown>)?.branchType === 'then'
+      );
+      const elseEdge = result.current.edges.find(
+        (e) => (e.data as Record<string, unknown>)?.branchType === 'else'
+      );
+      expect(thenEdge?.sourceHandle).toBe('then');
+      expect(elseEdge?.sourceHandle).toBe('else');
+    });
+
+    it('routes on-failure edges from the error port and the main path from step', () => {
+      const workflow = minimal({
+        steps: [
+          {
+            name: 'fetch',
+            type: 'http',
+            'on-failure': { fallback: [{ name: 'notify', type: 'console' }] },
+          },
+          { name: 'after', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      });
+      const { result } = renderHook(() => useWorkflowLayout({ workflow }));
+      const failureEdge = result.current.edges.find(
+        (e) => (e.data as Record<string, unknown>)?.isFailure === true
+      );
+      const mainEdge = result.current.edges.find((e) => e.source === 'fetch' && e.target === 'after');
+      expect(failureEdge?.sourceHandle).toBe('error');
+      expect(mainEdge?.sourceHandle).toBe('step');
+    });
+
     it('tags trigger edges isMerge when two triggers join the first step', () => {
       const workflow = minimal({
-        triggers: [
-          { type: 'alert', enabled: true },
-          { type: 'manual', enabled: true },
-        ],
+        triggers: [{ type: 'alert' }, { type: 'manual' }],
         steps: [{ name: 'first', type: 'http' }] as unknown as WorkflowYaml['steps'],
       });
       const { result } = renderHook(() => useWorkflowLayout({ workflow }));

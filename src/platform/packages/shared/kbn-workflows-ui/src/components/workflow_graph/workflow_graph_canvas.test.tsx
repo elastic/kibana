@@ -28,24 +28,33 @@ const mockNodes = [
 const EXPECTED_CENTER_X = 100;
 
 jest.mock('./use_workflow_layout', () => ({
-  useWorkflowLayout: () => ({ nodes: mockNodes, edges: [] }),
+  useWorkflowLayout: () => ({
+    nodes: mockNodes,
+    edges: [],
+    transformed: { nodeRefs: {}, edges: [], nodes: [] },
+  }),
 }));
 
 // Replace React Flow with light stand-ins: `ReactFlow` captures the `onInit`
-// callback and renders its children; the store hooks return our controllable
-// measured dimensions. jsdom never lays the canvas out, so injecting the
-// dimensions through `useStore`/`useNodesInitialized` is the only way to
-// exercise the "measured vs. not-yet-measured" branch.
+// callback and interaction props, and renders its children; the store hooks
+// return our controllable measured dimensions. jsdom never lays the canvas
+// out, so injecting the dimensions through `useStore`/`useNodesInitialized`
+// is the only way to exercise the "measured vs. not-yet-measured" branch.
+let mockCapturedReactFlowProps: Record<string, unknown> | undefined;
+
 jest.mock('@xyflow/react', () => ({
   ...jest.requireActual('@xyflow/react'),
   ReactFlow: ({
     onInit,
     children,
+    ...rest
   }: {
     onInit?: (i: unknown) => void;
     children?: React.ReactNode;
+    [key: string]: unknown;
   }) => {
     mockCapturedOnInit = onInit;
+    mockCapturedReactFlowProps = rest;
     return <div data-test-subj="reactflow-mock">{children}</div>;
   },
   Background: () => null,
@@ -56,12 +65,42 @@ jest.mock('@xyflow/react', () => ({
   useStore: (selector: (s: { width: number; height: number }) => unknown) =>
     selector({ width: mockStoreWidth, height: mockStoreHeight }),
   useNodesInitialized: () => mockNodesInitialized,
+  ViewportPortal: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
 }));
 
 const makeInstance = () => ({ setCenter: jest.fn(), fitView: jest.fn(), fitBounds: jest.fn() });
 
+/** Flush the double-rAF used when centering after empty → structure. */
+const flushHomeViewportRaf = async () => {
+  await act(async () => {
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => resolve());
+      });
+    });
+  });
+};
+
+/** Workflow with at least one trigger — navigation chrome is visible. */
+const structuredWorkflow = {
+  version: '1' as const,
+  name: 'structured',
+  enabled: true,
+  triggers: [{ type: 'manual' as const }],
+  steps: [],
+};
+
+/** Empty creation state — no trigger and no steps. */
+const emptyWorkflow = {
+  version: '1' as const,
+  name: 'empty',
+  enabled: true,
+  triggers: [],
+  steps: [],
+};
+
 const baseProps = {
-  workflow: undefined,
+  workflow: structuredWorkflow,
   isYamlValid: true,
   onStepSelect: jest.fn(),
 } as const;
@@ -78,6 +117,7 @@ describe('WorkflowGraphCanvas initial centering', () => {
     mockStoreHeight = 0;
     mockNodesInitialized = false;
     mockCapturedOnInit = undefined;
+    mockCapturedReactFlowProps = undefined;
   });
 
   it('does not center the viewport until the canvas has been measured', () => {
@@ -163,17 +203,64 @@ describe('WorkflowGraphCanvas initial centering', () => {
     expect(instance.setCenter).not.toHaveBeenCalled();
     expect(onReady).toHaveBeenCalledTimes(1);
   });
+
+  it('centers when the first node appears on an empty canvas', async () => {
+    const saved = mockNodes.splice(0, mockNodes.length);
+    const instance = makeInstance();
+    measureCanvas();
+    const { rerender } = render(
+      <WorkflowGraphCanvasWithoutProvider {...baseProps} workflow={emptyWorkflow} />
+    );
+    act(() => mockCapturedOnInit!(instance));
+    rerender(<WorkflowGraphCanvasWithoutProvider {...baseProps} workflow={emptyWorkflow} />);
+    expect(instance.setCenter).not.toHaveBeenCalled();
+
+    mockNodes.push(...saved);
+    rerender(<WorkflowGraphCanvasWithoutProvider {...baseProps} />);
+    await flushHomeViewportRaf();
+
+    expect(instance.setCenter).toHaveBeenCalledTimes(1);
+    expect(instance.setCenter).toHaveBeenCalledWith(
+      EXPECTED_CENTER_X,
+      expect.any(Number),
+      expect.objectContaining({ zoom: 1, duration: 200 })
+    );
+  });
+
+  it('centers after nodes initialize when the canvas started empty', async () => {
+    const saved = mockNodes.splice(0, mockNodes.length);
+    const instance = makeInstance();
+    mockStoreWidth = 1200;
+    mockStoreHeight = 900;
+    mockNodesInitialized = false;
+
+    const { rerender } = render(
+      <WorkflowGraphCanvasWithoutProvider {...baseProps} workflow={emptyWorkflow} />
+    );
+    act(() => mockCapturedOnInit!(instance));
+
+    mockNodes.push(...saved);
+    rerender(<WorkflowGraphCanvasWithoutProvider {...baseProps} />);
+    expect(instance.setCenter).not.toHaveBeenCalled();
+
+    mockNodesInitialized = true;
+    rerender(<WorkflowGraphCanvasWithoutProvider {...baseProps} />);
+    await flushHomeViewportRaf();
+
+    expect(instance.setCenter).toHaveBeenCalledTimes(1);
+    expect(instance.setCenter).toHaveBeenCalledWith(
+      EXPECTED_CENTER_X,
+      expect.any(Number),
+      expect.objectContaining({ duration: 200 })
+    );
+  });
 });
 
-// mockNodes: minX=0 minY=0 maxX=200 maxY=214 → centerX=100, centerY=107.
-// jsdom never performs layout so wrapperRef.current.clientWidth/clientHeight are
-// always 0, making both wrapperWidth/wrapperHeight terms contribute 0.
-// TOP_PADDING=80, INITIAL_ZOOM=1.
+// mockNodes: trigger at (0,0) 200×64 → home frame centerX=100, centerY=32, minY=0.
+// measureCanvas() sets store width=1200 height=900. TOP_PADDING=80, INITIAL_ZOOM=1.
 //
-// TB formula (vertical, unchanged): setCenter(centerX, minY + 0/2 - 80, …)
-//                                 = setCenter(100, -80, …)
-// LR formula (horizontal, the fix): setCenter(minX + 0/2 - 80, centerY, …)
-//                                  = setCenter(-80, 107, …)
+// TB: setCenter(centerX, minY + height/2 - TOP_PADDING) = setCenter(100, 370)
+// LR: setCenter(minX + width/2 - TOP_PADDING, centerY) = setCenter(520, 32)
 // ─── Unified viewport contract ────────────────────────────────────────────────
 // The first time the graph is shown (initial centering) and clicking "Reset zoom"
 // must land on exactly the same (x, y) position. Only the animation duration
@@ -207,6 +294,8 @@ describe('WorkflowGraphCanvas initial centering and Reset zoom are equivalent', 
 
     expect(resetX).toBe(initialX);
     expect(resetY).toBe(initialY);
+    expect(initialX).toBe(100);
+    expect(initialY).toBe(370);
   });
 
   it('LR layout: first open and Reset zoom call setCenter with the same (x, y)', () => {
@@ -230,6 +319,8 @@ describe('WorkflowGraphCanvas initial centering and Reset zoom are equivalent', 
 
     expect(resetX).toBe(initialX);
     expect(resetY).toBe(initialY);
+    expect(initialX).toBe(520);
+    expect(initialY).toBe(32);
   });
 });
 
@@ -263,9 +354,43 @@ describe('WorkflowGraphCanvas Reset zoom button', () => {
     fireEvent.click(screen.getByTestId('workflowCanvas-reset-zoom'));
 
     expect(instance.setCenter).toHaveBeenCalledTimes(1);
-    // x: minX + wrapperWidth/2 − TOP_PADDING = 0 + 0 − 80 = −80 (trigger anchored left)
-    // y: centerY = (minY + maxY) / 2 = (0 + 214) / 2 = 107 (graph centred vertically)
-    expect(instance.setCenter).toHaveBeenCalledWith(-80, 107, { zoom: 1, duration: 200 });
+    // Unmeasured canvas (width/height 0): x = minX − TOP_PADDING; y = trigger centerY.
+    expect(instance.setCenter).toHaveBeenCalledWith(-80, 32, { zoom: 1, duration: 200 });
+  });
+});
+
+describe('WorkflowGraphCanvas home framing uses the trigger rank', () => {
+  beforeEach(() => {
+    mockStoreWidth = 0;
+    mockStoreHeight = 0;
+    mockNodesInitialized = false;
+    mockCapturedOnInit = undefined;
+  });
+
+  it('centers on triggers even when a wide downstream branch shifts the full AABB', () => {
+    // Trigger centred; a wide step far to the right would pull full-graph centerX away.
+    mockNodes.length = 0;
+    mockNodes.push(
+      { id: 'trigger', type: 'trigger', position: { x: 100, y: 0 }, width: 200, height: 64, data: {} },
+      { id: 'step1', type: 'step', position: { x: 800, y: 150 }, width: 400, height: 64, data: {} }
+    );
+    const instance = makeInstance();
+    measureCanvas();
+    const { rerender } = render(
+      <WorkflowGraphCanvasWithoutProvider {...baseProps} showZoomControls />
+    );
+    act(() => mockCapturedOnInit!(instance));
+    rerender(<WorkflowGraphCanvasWithoutProvider {...baseProps} showZoomControls />);
+
+    // Trigger centerX = 100 + 200/2 = 200 (not full AABB center ~650).
+    expect(instance.setCenter).toHaveBeenCalledWith(200, 370, { zoom: 1, duration: 0 });
+
+    // Restore default mock nodes for later suites.
+    mockNodes.length = 0;
+    mockNodes.push(
+      { id: 'trigger', type: 'trigger', position: { x: 0, y: 0 }, width: 200, height: 64, data: {} },
+      { id: 'step1', type: 'step', position: { x: 0, y: 150 }, width: 200, height: 64, data: {} }
+    );
   });
 });
 
@@ -298,6 +423,7 @@ describe('WorkflowGraphCanvas minimap collapse', () => {
     mockStoreHeight = 0;
     mockNodesInitialized = false;
     mockCapturedOnInit = undefined;
+    mockCapturedReactFlowProps = undefined;
   });
 
   it('collapses the minimap and restores it from the expand control', () => {
@@ -316,5 +442,108 @@ describe('WorkflowGraphCanvas minimap collapse', () => {
     render(<WorkflowGraphCanvasWithoutProvider {...baseProps} showMinimap={false} />);
     expect(screen.queryByTestId('workflowCanvas-collapse-minimap')).not.toBeInTheDocument();
     expect(screen.queryByTestId('workflowCanvas-expand-minimap')).not.toBeInTheDocument();
+  });
+});
+
+describe('WorkflowGraphCanvas creation-state chrome', () => {
+  const edit = {
+    onInsert: jest.fn(),
+    onEditStep: jest.fn(),
+    onDeleteNode: jest.fn(),
+  };
+
+  beforeEach(() => {
+    mockStoreWidth = 0;
+    mockStoreHeight = 0;
+    mockNodesInitialized = false;
+    mockCapturedOnInit = undefined;
+    mockCapturedReactFlowProps = undefined;
+  });
+
+  it('hides zoom and minimap and disables pan/zoom when the workflow has no structure', () => {
+    render(
+      <WorkflowGraphCanvasWithoutProvider
+        {...baseProps}
+        workflow={emptyWorkflow}
+        showZoomControls
+        edit={edit}
+      />
+    );
+
+    expect(screen.queryByTestId('workflowCanvas-navChrome-zoom')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('workflowCanvas-navChrome-minimap')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('workflowCanvas-zoom-in')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('workflowCanvas-collapse-minimap')).not.toBeInTheDocument();
+    expect(mockCapturedReactFlowProps?.panOnDrag).toBe(false);
+    expect(mockCapturedReactFlowProps?.panOnScroll).toBe(false);
+    expect(mockCapturedReactFlowProps?.zoomOnPinch).toBe(false);
+    expect(screen.getByTestId('workflowGraphEmptyAddTrigger')).toBeInTheDocument();
+  });
+
+  it('shows navigation chrome and enables pan/zoom once structure exists', () => {
+    render(<WorkflowGraphCanvasWithoutProvider {...baseProps} showZoomControls />);
+
+    expect(screen.getByTestId('workflowCanvas-navChrome-zoom')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowCanvas-navChrome-minimap')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowCanvas-zoom-in')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowCanvas-collapse-minimap')).toBeInTheDocument();
+    expect(mockCapturedReactFlowProps?.panOnDrag).toBe(true);
+    expect(mockCapturedReactFlowProps?.panOnScroll).toBe(true);
+    expect(mockCapturedReactFlowProps?.zoomOnPinch).toBe(true);
+  });
+
+  it('shows chrome for trigger-only workflows', () => {
+    render(
+      <WorkflowGraphCanvasWithoutProvider
+        {...baseProps}
+        workflow={{ ...structuredWorkflow, steps: [] }}
+        showZoomControls
+      />
+    );
+    expect(screen.getByTestId('workflowCanvas-navChrome-zoom')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowCanvas-navChrome-minimap')).toBeInTheDocument();
+  });
+
+  it('renders a custom emptyState when the workflow has no structure', () => {
+    const edit = {
+      onInsert: jest.fn(),
+      onEditStep: jest.fn(),
+      onDeleteNode: jest.fn(),
+    };
+    render(
+      <WorkflowGraphCanvasWithoutProvider
+        {...baseProps}
+        workflow={emptyWorkflow}
+        edit={edit}
+        emptyState={<div data-test-subj="customEmptyState">Create me</div>}
+      />
+    );
+    expect(screen.getByTestId('customEmptyState')).toBeInTheDocument();
+    expect(screen.queryByTestId('workflowGraphEmptyAddTrigger')).not.toBeInTheDocument();
+  });
+
+  it('hides the empty state while a pending insert draft is on the canvas', () => {
+    const edit = {
+      onInsert: jest.fn(),
+      onEditStep: jest.fn(),
+      onDeleteNode: jest.fn(),
+    };
+    measureCanvas();
+    render(
+      <WorkflowGraphCanvasWithoutProvider
+        {...baseProps}
+        workflow={emptyWorkflow}
+        edit={edit}
+        emptyState={<div data-test-subj="customEmptyState">Create me</div>}
+        pendingInsert={{
+          phase: 'configuring',
+          context: { mode: 'step', index: 0 },
+          stepType: 'console',
+          label: 'console_step',
+        }}
+      />
+    );
+    expect(screen.queryByTestId('customEmptyState')).not.toBeInTheDocument();
+    expect(screen.getByTestId('workflowGraphPendingNode')).toBeInTheDocument();
   });
 });

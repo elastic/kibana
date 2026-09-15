@@ -50,6 +50,7 @@ describe('resolveNodeChipStyle', () => {
         border: 'accent-border',
         iconColor: 'accent-text',
         isBrand: false,
+        useAiGradient: false,
       });
     });
 
@@ -76,8 +77,9 @@ describe('resolveNodeChipStyle', () => {
       expect(resolveNodeChipStyle(theme, 'http', false, idle).background).toBe('code-bg');
     });
 
-    it('uses primary tokens for AI steps', () => {
+    it('uses the AI gradient tile for AI steps', () => {
       const chip = resolveNodeChipStyle(theme, 'inference', false, idle);
+      expect(chip.useAiGradient).toBe(true);
       expect(chip.background).toBe('code-bg');
       expect(chip.isBrand).toBe(false);
     });

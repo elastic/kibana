@@ -8,7 +8,6 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { i18n } from '@kbn/i18n';
 import { getBuiltInStepDefinition, isDynamicConnector, StepCategory } from '@kbn/workflows';
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
@@ -16,8 +15,59 @@ import { ParallelIcon } from '@kbn/workflows-ui';
 import { buildBuiltInTriggerOptions, buildRegisteredTriggerOptions } from './build_trigger_options';
 import { getAllConnectors, isDeprecatedStepType } from '../../../../common/schema';
 import { triggerSchemas } from '../../../trigger_schemas';
-import type { ActionConnectorGroup, ActionGroup, ActionOptionData } from '../types';
+import { resolveCatalogDisplayName } from '../../../shared/utils/catalog_display_name';
+import type { ActionConnectorGroup, ActionGroup, ActionOptionData, IconVariant } from '../types';
 import { isActionGroup } from '../types';
+
+/** Case-insensitive A–Z compare for subcategory menus. */
+export function compareActionLabels(a: string, b: string): number {
+  return a.localeCompare(b, undefined, { sensitivity: 'base', numeric: true });
+}
+
+/**
+ * Human-readable label for an External connector family group.
+ * Prefers "FamilyName" from descriptions shaped like "FamilyName - SubAction".
+ */
+function getExternalConnectorGroupLabel(
+  baseType: string,
+  connector: { description?: string | null }
+): string {
+  const description = connector.description?.trim();
+  if (description) {
+    const separatorIndex = description.indexOf(' - ');
+    if (separatorIndex > 0) {
+      return description.slice(0, separatorIndex).trim();
+    }
+  }
+  return baseType
+    .split(/[_-]/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+function stripHtml(text: string | null | undefined): string | undefined {
+  if (!text) return undefined;
+  const noTags = text.replace(/<[^>]*>/g, ' ');
+  const decoded = noTags
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
+  const noMarkdown = decoded
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/\*([^*]+)\*/g, '$1');
+  return noMarkdown.replace(/\s+/g, ' ').trim() || undefined;
+}
+
+function firstSentence(text: string | undefined): string | undefined {
+  if (!text) return undefined;
+  const dot = text.indexOf('. ');
+  return dot !== -1 && dot < 180 ? text.slice(0, dot + 1) : text.slice(0, 180);
+}
 
 function getBuiltInNestedFlowControlStepOptions(
   euiTheme: UseEuiTheme['euiTheme']
@@ -30,7 +80,7 @@ function getBuiltInNestedFlowControlStepOptions(
       label: def.label,
       description: def.description,
       iconType: 'nested' as const,
-      iconColor: euiTheme.colors.vis.euiColorVis0,
+      iconColor: euiTheme.colors.textAccentSecondary,
       stability: def.stability,
     }));
 }
@@ -59,19 +109,20 @@ export function getActionOptions(
   );
   const triggersGroup: ActionOptionData = {
     iconType: 'bolt',
-    iconColor: euiTheme.colors.vis.euiColorVis6,
+    iconColor: euiTheme.colors.textAccent,
     id: 'triggers',
     label: i18n.translate('workflows.actionsMenu.triggers', {
       defaultMessage: 'Triggers',
     }),
     description: i18n.translate('workflows.actionsMenu.triggersDescription', {
-      defaultMessage: 'Choose which event starts a workflow',
+      defaultMessage: 'Choose which event starts a workflow.',
     }),
     options: [...builtInTriggerOptions, ...registeredTriggerOptions],
   };
 
   const kibanaCasesGroup: ActionGroup = {
     iconType: 'briefcase',
+    iconColor: euiTheme.colors.textParagraph,
     id: 'kibana.cases',
     label: i18n.translate('workflows.actionsMenu.kibanaCases', {
       defaultMessage: 'Cases',
@@ -120,10 +171,10 @@ export function getActionOptions(
   };
   const externalGroup: ActionOptionData = {
     iconType: 'plugs',
-    iconColor: euiTheme.colors.vis.euiColorVis0,
+    iconColor: euiTheme.colors.textParagraph,
     id: 'external',
     label: i18n.translate('workflows.actionsMenu.external', {
-      defaultMessage: 'External Systems & Apps',
+      defaultMessage: 'External systems & apps',
     }),
     description: i18n.translate('workflows.actionsMenu.externalDescription', {
       defaultMessage: 'Automate actions in external systems and apps.',
@@ -131,7 +182,8 @@ export function getActionOptions(
     options: [],
   };
   const aiGroup: ActionOptionData = {
-    iconType: AssistantIcon,
+    iconType: 'sparkles',
+    iconColor: euiTheme.colors.textPrimary,
     id: 'ai',
     label: i18n.translate('workflows.actionsMenu.ai', {
       defaultMessage: 'AI',
@@ -142,8 +194,8 @@ export function getActionOptions(
     options: [],
   };
   const dataTransformationGroup: ActionOptionData = {
-    iconType: 'pencil',
-    iconColor: euiTheme.colors.vis.euiColorVis0,
+    iconType: 'database',
+    iconColor: euiTheme.colors.textWarning,
     id: 'data',
     label: i18n.translate('workflows.actionsMenu.dataTransformation', {
       defaultMessage: 'Data transformation',
@@ -161,15 +213,16 @@ export function getActionOptions(
           defaultMessage: 'Define or compute variables to use in your workflow',
         }),
         iconType: 'database',
+        iconColor: euiTheme.colors.textWarning,
       },
     ],
   };
   const flowControlGroup: ActionOptionData = {
     iconType: 'branch',
-    iconColor: euiTheme.colors.vis.euiColorVis0,
+    iconColor: euiTheme.colors.textAccentSecondary,
     id: 'flowControl',
     label: i18n.translate('workflows.actionsMenu.aggregations', {
-      defaultMessage: 'Flow Control',
+      defaultMessage: 'Flow control',
     }),
     description: i18n.translate('workflows.actionsMenu.flowControlDescription', {
       defaultMessage: 'Control your workflow with logic, delays, looping, and more',
@@ -184,7 +237,7 @@ export function getActionOptions(
           defaultMessage: 'Define condition with KQL to execute the action',
         }),
         iconType: 'branch',
-        iconColor: euiTheme.colors.vis.euiColorVis0,
+        iconColor: euiTheme.colors.textAccentSecondary,
       },
       {
         id: 'switch',
@@ -195,7 +248,7 @@ export function getActionOptions(
           defaultMessage: 'Multi-way branching based on expression value matching',
         }),
         iconType: 'productStreamsWired',
-        iconColor: euiTheme.colors.vis.euiColorVis0,
+        iconColor: euiTheme.colors.textAccentSecondary,
       },
       {
         id: 'foreach',
@@ -206,7 +259,7 @@ export function getActionOptions(
           defaultMessage: 'Iterate the action over a specified list',
         }),
         iconType: 'refresh',
-        iconColor: euiTheme.colors.vis.euiColorVis0,
+        iconColor: euiTheme.colors.textAccentSecondary,
       },
       {
         id: 'while',
@@ -217,7 +270,7 @@ export function getActionOptions(
           defaultMessage: 'Repeat steps while a condition is true',
         }),
         iconType: 'refresh',
-        iconColor: euiTheme.colors.vis.euiColorVis0,
+        iconColor: euiTheme.colors.textAccentSecondary,
       },
       {
         id: 'parallel',
@@ -228,7 +281,7 @@ export function getActionOptions(
           defaultMessage: 'Run branches concurrently and collect their results',
         }),
         iconType: ParallelIcon,
-        iconColor: euiTheme.colors.vis.euiColorVis0,
+        iconColor: euiTheme.colors.textAccentSecondary,
         stability: getBuiltInStepDefinition('parallel')?.stability,
       },
       {
@@ -240,7 +293,7 @@ export function getActionOptions(
           defaultMessage: 'Pause for a specified amount of time before continuing',
         }),
         iconType: 'clock',
-        iconColor: euiTheme.colors.vis.euiColorVis0,
+        iconColor: euiTheme.colors.textAccentSecondary,
       },
       {
         id: 'waitForInput',
@@ -251,7 +304,7 @@ export function getActionOptions(
           defaultMessage: 'Pause execution until external input is provided (human-in-the-loop)',
         }),
         iconType: 'user',
-        iconColor: euiTheme.colors.vis.euiColorVis0,
+        iconColor: euiTheme.colors.textAccentSecondary,
         stability: getBuiltInStepDefinition('waitForInput')?.stability,
       },
       ...getBuiltInNestedFlowControlStepOptions(euiTheme),
@@ -298,16 +351,24 @@ export function getActionOptions(
       } else if (connector.type.startsWith('elasticsearch.')) {
         elasticSearchGroup.options.push({
           id: connector.type,
-          label: connector.description || connector.type,
-          description: connector.type,
+          label: resolveCatalogDisplayName({
+            type: connector.type,
+            summary: connector.summary,
+            description: stripHtml(connector.description),
+          }),
+          description: firstSentence(stripHtml(connector.description)) || connector.type,
           iconType: 'logoElasticsearch',
           stability: connector.stability,
         });
       } else if (connector.type.startsWith('kibana.')) {
         kibanaGroup.options.push({
           id: connector.type,
-          label: connector.summary || connector.description || connector.type,
-          description: connector.type,
+          label: resolveCatalogDisplayName({
+            type: connector.type,
+            summary: connector.summary,
+            description: stripHtml(connector.description),
+          }),
+          description: firstSentence(stripHtml(connector.description)) || connector.type,
           iconType: 'logoKibana',
           stability: connector.stability,
         });
@@ -329,6 +390,9 @@ export function getActionOptions(
             };
             connectorGroup = newConnectorGroup;
             externalGroup.options.push(newConnectorGroup);
+          } else if (connectorGroup.label === baseType) {
+            // Upgrade raw id labels once we have a friendlier family name
+            connectorGroup.label = getExternalConnectorGroupLabel(baseType, connector);
           }
           // We know connectorGroup is an ActionGroup because we either found it in options
           // (which are ActionOptionData[]) or we just created it with the options property
@@ -343,7 +407,11 @@ export function getActionOptions(
         if (isActionGroup(groupOption)) {
           groupOption.options.push({
             id: connector.type,
-            label: connector.summary || connector.displayName,
+            label: resolveCatalogDisplayName({
+              type: connector.type,
+              summary: connector.summary,
+              displayName: connector.displayName,
+            }),
             description: connector.type,
             connectorType: connector.actionTypeId,
             instancesLabel: getInstancesLabel(connector.instances?.length),
@@ -356,30 +424,129 @@ export function getActionOptions(
 
   mergeNestedStepGroups(stepGroups);
 
+  triggersGroup.iconVariant = 'trigger';
+  // ES / Kibana / Cases share External systems & apps tile colors (subdued + plain)
+  elasticSearchGroup.iconVariant = 'neutral';
+  kibanaGroup.iconVariant = 'neutral';
+  kibanaCasesGroup.iconVariant = 'neutral';
+  aiGroup.iconVariant = 'platform';
+  dataTransformationGroup.iconVariant = 'dataTransformation';
+  externalGroup.iconVariant = 'external';
+  flowControlGroup.iconVariant = 'flowControl';
+
+  // AI category always uses the sparkles glyph on the platform tile
+  for (const opt of isActionGroup(aiGroup) ? aiGroup.options : []) {
+    if ('iconType' in opt) {
+      opt.iconType = 'sparkles';
+    }
+  }
+
+  // Color-grouped: accent (triggers) → neutral tiles → platform blues → flow control
   const topLevelOptions: ActionOptionData[] = [
     triggersGroup,
     elasticSearchGroup,
     kibanaGroup,
+    externalGroup,
     aiGroup,
     dataTransformationGroup,
-    externalGroup,
     flowControlGroup,
   ];
+  // Subcategory lists (and nested groups within them) are A–Z by label.
+  // Root categories keep the intentional color-grouped order above.
+  // Triggers keep built-ins first (manual/alert/scheduled), then registered groups.
+  for (const group of topLevelOptions) {
+    if (!('options' in group)) {
+      // no-op for type narrowing
+    } else if (group.id === 'triggers') {
+      for (const opt of group.options) {
+        if ('options' in opt) {
+          sortOptionsByLabel(opt.options);
+        }
+      }
+    } else {
+      sortOptionsByLabel(group.options);
+    }
+  }
   assignActionPathIds(topLevelOptions);
+  assignIconVariants(topLevelOptions, undefined, euiTheme);
   return topLevelOptions;
 }
 
+/** Sort a group's children alphabetically; recurses into nested groups. */
+function sortOptionsByLabel(options: ActionOptionData[]): void {
+  options.sort((a, b) => compareActionLabels(a.label, b.label));
+  for (const opt of options) {
+    if ('options' in opt) {
+      sortOptionsByLabel(opt.options);
+    }
+  }
+}
+
 /**
- * Sets `pathIds` on every nested group so navigation works when a group is chosen from search
- * (full ancestor chain, not only the clicked row's id).
+ * Glyph color for menu icon tiles (Figma semantic text tokens).
+ * Soft pastel tile fills pair with matching Text/* colors — not inverse/white.
+ */
+export function getIconGlyphColor(
+  variant: IconVariant | undefined,
+  euiTheme: UseEuiTheme['euiTheme']
+): string | undefined {
+  switch (variant) {
+    case 'trigger':
+      return euiTheme.colors.textAccent;
+    case 'platform':
+      return euiTheme.colors.textPrimary;
+    case 'dataTransformation':
+      return euiTheme.colors.textWarning;
+    case 'flowControl':
+      return euiTheme.colors.textAccentSecondary;
+    case 'external':
+    case 'neutral':
+      return euiTheme.colors.textParagraph;
+    default:
+      return undefined;
+  }
+}
+
+/** @deprecated Use {@link getIconGlyphColor}; filled tiles no longer use inverse glyphs. */
+export function usesInverseIconColor(_variant: IconVariant | undefined): boolean {
+  return false;
+}
+
+function assignIconVariants(
+  options: ActionOptionData[],
+  parentVariant: IconVariant | undefined,
+  euiTheme: UseEuiTheme['euiTheme']
+): void {
+  for (const opt of options) {
+    if (parentVariant && !opt.iconVariant) {
+      opt.iconVariant = parentVariant;
+    }
+    const childVariant = opt.iconVariant ?? parentVariant;
+    const glyphColor = getIconGlyphColor(childVariant, euiTheme);
+    if (glyphColor) {
+      opt.iconColor = glyphColor;
+    }
+    if ('options' in opt && childVariant) {
+      assignIconVariants(
+        (opt as ActionGroup | ActionConnectorGroup).options,
+        childVariant,
+        euiTheme
+      );
+    }
+  }
+}
+
+/**
+ * Sets `pathIds` on every item (groups and leaves) so search can group by root category
+ * and navigation works when selecting from search results.
  */
 function assignActionPathIds(
   options: ActionOptionData[],
   parentPath: readonly string[] = []
 ): void {
   for (const opt of options) {
+    opt.pathIds = [...parentPath, opt.id];
     if ('options' in opt) {
-      opt.pathIds = [...parentPath, opt.id];
       assignActionPathIds(opt.options, opt.pathIds);
     }
   }

@@ -15,12 +15,22 @@ export interface EditorCommand {
   label: string;
   iconType: IconType;
   description?: string;
+  shortcut?: string[];
 }
+
+export type IconVariant =
+  | 'trigger'
+  | 'platform'
+  | 'external'
+  | 'flowControl'
+  | 'neutral'
+  | 'dataTransformation';
 
 export interface JumpToStepEntry {
   id: string;
   label: string;
   lineStart: number;
+  yaml?: string;
 }
 
 export type MenuItemData =
@@ -56,6 +66,7 @@ interface ActionBase {
   description?: string;
   instancesLabel?: string;
   iconColor?: string;
+  iconVariant?: IconVariant;
   stability?: StabilityLevel;
   /**
    * Ids from the root menu down through this row (for groups: path to open this group).
@@ -105,3 +116,18 @@ export function isActionConnectorOption(option: ActionOptionData): option is Act
 export function isActionOption(option: ActionOptionData): option is ActionOption {
   return !('options' in option);
 }
+
+/**
+ * Canvas / panel insertion context. `trigger` opens on trigger leaves only;
+ * `step` hides the Triggers group; `error` hides Triggers and Flow control.
+ */
+export type ActionsMenuInsertionContext =
+  | { readonly mode: 'trigger' }
+  | { readonly mode: 'step' }
+  | { readonly mode: 'error' };
+
+/**
+ * `full` — centered dual-pane Actions menu.
+ * `compact` — anchored single-column presentation of the same catalog (in-panel).
+ */
+export type ActionsMenuPresentation = 'full' | 'compact';

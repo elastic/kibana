@@ -15,15 +15,15 @@ import {
   computeEdgePath,
 } from './compute_edge_path';
 
-const TRUNK = 24;
+const TRUNK = 40;
 
 // Constants mirrored from compute_edge_path.ts so tests are self-documenting.
 const CORNER_RADIUS = 16;
-const FORK_BUS_TRUNK = 24;
+const FORK_BUS_TRUNK = 80;
 const FORK_BUS_LABEL_OFFSET = CORNER_RADIUS + 18;
-const MERGE_BUS_TRUNK = 24;
+const MERGE_BUS_TRUNK = 40;
 const TB_LABEL_Y_OFFSET = 30;
-const TRUNK_LENGTH_TO_TARGET = 24;
+const TRUNK_LENGTH_TO_TARGET = 40;
 
 describe('buildRoundedOrthogonalPath', () => {
   it('uses a 16px quadratic corner when both segments are long enough', () => {
@@ -307,7 +307,7 @@ describe('computeEdgePath', () => {
           { x: 400, y: 400 },
         ],
       });
-      // trunkTargetY = targetY - TRUNK_LENGTH_TO_TARGET = 400 - 24 = 376
+      // trunkTargetY = targetY - TRUNK_LENGTH_TO_TARGET = 400 - 40 = 360
       const trunkTargetY = 400 - TRUNK_LENGTH_TO_TARGET;
       expect(r.path).toContain(String(trunkTargetY));
       expect(r.labelX).toBe(400); // targetX
@@ -331,7 +331,7 @@ describe('computeEdgePath', () => {
           { x: 400, y: 400 },
         ],
       });
-      // trunkTargetX = targetX - TRUNK_LENGTH_TO_TARGET = 400 - 24 = 376
+      // trunkTargetX = targetX - TRUNK_LENGTH_TO_TARGET = 400 - 40 = 360
       const trunkTargetX = 400 - TRUNK_LENGTH_TO_TARGET;
       expect(r.path).toContain(String(trunkTargetX));
       expect(r.labelX).toBe((100 + 400) / 2); // (sourceX + targetX) / 2
@@ -357,7 +357,7 @@ describe('computeEdgePath', () => {
     });
 
     it('does NOT use fork bus for a plain sequential edge (no branchType)', () => {
-      // Fork bus busY would be sourceY + FORK_BUS_TRUNK = 100 + 24 = 124.
+      // Fork bus busY would be sourceY + FORK_BUS_TRUNK = 100 + 80 = 180.
       // Smooth-step midY = (100 + 300) / 2 = 200 — clearly different.
       const r = computeEdgePath({
         sourceX: 200,
@@ -392,6 +392,36 @@ describe('computeEdgePath', () => {
         const dy = Math.abs(endY - ctrlY);
         expect(Math.max(dx, dy)).toBe(CORNER_RADIUS);
       }
+    });
+
+    it('failure edges always use orthogonal drop→elbow→run (even with a short gap)', () => {
+      const r = computeEdgePath({
+        sourceX: 276,
+        sourceY: 64,
+        targetX: 350,
+        targetY: 100,
+        sourcePosition: Position.Bottom,
+        targetPosition: Position.Top,
+        isFailure: true,
+      });
+      expect(r.path).not.toMatch(/C /);
+      expect(r.path).toMatch(/^M /);
+      expect(r.path).toContain('Q ');
+    });
+
+    it('LR failure: drop then horizontal into the left edge', () => {
+      const r = computeEdgePath({
+        sourceX: 276,
+        sourceY: 64,
+        targetX: 430,
+        targetY: 140,
+        sourcePosition: Position.Bottom,
+        targetPosition: Position.Left,
+        isFailure: true,
+      });
+      expect(r.path).not.toMatch(/C /);
+      expect(r.path).toContain('L 430 140');
+      expect(r.labelY).toBe(140);
     });
   });
 });

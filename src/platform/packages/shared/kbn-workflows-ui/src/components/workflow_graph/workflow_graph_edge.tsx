@@ -2,18 +2,23 @@
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
  * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * Public License v 1".
  */
 
-import { EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiToolTip, euiCanAnimate, useEuiShadow, useEuiTheme } from '@elastic/eui';
+import { keyframes } from '@emotion/react';
 import type { EdgeProps } from '@xyflow/react';
 import { EdgeLabelRenderer } from '@xyflow/react';
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EdgeBranchType } from '@kbn/workflows';
 import { computeEdgePath } from './compute_edge_path';
+import { INSERT_LAYOUT_MS } from './use_insert_layout_animation';
+
+const drawInStroke = keyframes({
+  from: { strokeDashoffset: 1 },
+  to: { strokeDashoffset: 0 },
+});
 
 interface WorkflowEdgeData extends Record<string, unknown> {
   readonly label?: string;
@@ -32,6 +37,10 @@ interface WorkflowEdgeData extends Record<string, unknown> {
    * arrowhead so the in-edge and out-edge form one continuous line mid-lane.
    */
   readonly hideEndMarker?: boolean;
+  /** Error route into an `on-failure.fallback` step: solid danger connector. */
+  readonly isFailure?: boolean;
+  /** Draw the stroke in when a step was just inserted (insert layout animation). */
+  readonly drawIn?: boolean;
 }
 
 const LABEL_TRUNCATE = 24;
@@ -42,6 +51,9 @@ function displayEdgeLabel(label: string): string {
   }
   if (label === 'false') {
     return i18n.translate('workflowsUi.graph.falseBranchLabel', { defaultMessage: 'false' });
+  }
+  if (label === 'on failure') {
+    return i18n.translate('workflowsUi.graph.onFailureLabel', { defaultMessage: 'on failure' });
   }
   return label;
 }
@@ -60,6 +72,7 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
   } = props;
   const edgeData = data as WorkflowEdgeData | undefined;
   const { euiTheme } = useEuiTheme();
+  const pillShadow = useEuiShadow('xs', { border: 'none' });
 
   const {
     path: edgePath,
@@ -75,18 +88,25 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
     points: edgeData?.points,
     branchType: edgeData?.branchType,
     isMerge: edgeData?.isMerge,
+    isFailure: edgeData?.isFailure,
   });
 
   const traversed = edgeData?.traversed ?? false;
-  // Traversed edges use the `success` token to match the node's success state.
-  // Non-traversed edges and branch labels use `borderBaseProminent` so they
-  // stay readable on the dotted canvas. Node panels keep `borderBasePlain`.
-  const stroke = traversed ? euiTheme.colors.success : euiTheme.colors.borderBaseProminent;
+  const isFailure = edgeData?.isFailure ?? false;
+  const drawIn = edgeData?.drawIn ?? false;
+  const stroke = isFailure
+    ? euiTheme.colors.danger
+    : traversed
+    ? euiTheme.colors.success
+    : euiTheme.colors.borderBaseProminent;
   const strokeWidth = 1;
 
   const fullLabel = displayEdgeLabel(edgeData?.label ?? '');
   const truncated =
     fullLabel.length > LABEL_TRUNCATE ? `${fullLabel.slice(0, LABEL_TRUNCATE - 1)}…` : fullLabel;
+  // true/false pills live under the if-node ports — suppress the mid-edge copies.
+  const rawLabel = edgeData?.label ?? '';
+  const showLabel = Boolean(fullLabel) && rawLabel !== 'true' && rawLabel !== 'false';
 
   return (
     <>
@@ -100,37 +120,63 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
           orient="auto"
           markerUnits="strokeWidth"
         >
-          {/* Triangle pointing right; orient="auto" rotates it to the path
-              tangent at the endpoint automatically. refX=6 places the tip
-              (rightmost point) exactly at the path endpoint. */}
           <path d="M0,0 L0,6 L6,3 z" fill={stroke} />
         </marker>
       </defs>
       <path
         id={id}
-        style={{ ...style, stroke, strokeWidth, fill: 'none' }}
+        pathLength={drawIn ? 1 : undefined}
+        style={{
+          ...style,
+          stroke,
+          strokeWidth,
+          fill: 'none',
+        }}
+        css={
+          drawIn
+            ? {
+                strokeDasharray: 1,
+                strokeDashoffset: 1,
+                [euiCanAnimate]: {
+                  animation: `${drawInStroke} ${INSERT_LAYOUT_MS}ms ease-out forwards`,
+                },
+              }
+            : undefined
+        }
         className="react-flow__edge-path"
         d={edgePath}
         markerEnd={edgeData?.hideEndMarker ? undefined : `url(#arrow-${id})`}
       />
-      {fullLabel && (
+      {showLabel && (
         <EdgeLabelRenderer>
           <div
             style={{
               position: 'absolute',
               transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
               pointerEvents: 'all',
-              padding: '0 12px',
-              borderRadius: euiTheme.size.l,
-              fontFamily: euiTheme.font.familyCode,
-              fontSize: 11,
-              fontWeight: 400,
-              lineHeight: '20px',
-              background: euiTheme.colors.backgroundBasePlain,
-              border: `1px solid ${euiTheme.colors.borderBaseProminent}`,
-              color: euiTheme.colors.textParagraph,
-              whiteSpace: 'nowrap',
             }}
+            css={[
+              {
+                padding: '0 12px',
+                borderRadius: euiTheme.size.l,
+                fontFamily: euiTheme.font.familyCode,
+                fontSize: 11,
+                fontWeight: 400,
+                lineHeight: '20px',
+                background: isFailure
+                  ? euiTheme.colors.backgroundBaseDanger
+                  : euiTheme.colors.backgroundBasePlain,
+                border: `1px solid ${
+                  isFailure
+                    ? euiTheme.colors.borderBaseDanger
+                    : euiTheme.colors.borderBaseProminent
+                }`,
+                color: isFailure ? euiTheme.colors.textDanger : euiTheme.colors.textParagraph,
+                whiteSpace: 'nowrap',
+              },
+              pillShadow,
+            ]}
+            data-test-subj={isFailure ? 'workflowGraphEdgeFailureLabel' : undefined}
           >
             <EuiToolTip content={fullLabel} position="top">
               {/* eslint-disable-next-line @elastic/eui/tooltip-focusable-anchor */}
@@ -161,7 +207,9 @@ function edgePropsAreEqual(prev: EdgeProps, next: EdgeProps): boolean {
     pd?.points === nd?.points &&
     pd?.branchType === nd?.branchType &&
     pd?.isMerge === nd?.isMerge &&
-    pd?.hideEndMarker === nd?.hideEndMarker
+    pd?.hideEndMarker === nd?.hideEndMarker &&
+    pd?.isFailure === nd?.isFailure &&
+    pd?.drawIn === nd?.drawIn
   );
 }
 

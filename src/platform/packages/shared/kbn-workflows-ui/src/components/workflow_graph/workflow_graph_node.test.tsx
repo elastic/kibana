@@ -161,6 +161,14 @@ describe('WorkflowGraphNode', () => {
     expect(onStepSelect).toHaveBeenCalledWith('node-1');
   });
 
+  it('calls onStepSelect with the node id when the card is clicked', () => {
+    const onStepSelect = jest.fn();
+    renderNode({}, false, { onStepSelect });
+
+    fireEvent.click(screen.getByRole('button', { name: /Test Step/ }));
+    expect(onStepSelect).toHaveBeenCalledWith('node-1');
+  });
+
   it('calls onStepSelect with the node id when Space is pressed', () => {
     const onStepSelect = jest.fn();
     renderNode({}, false, { onStepSelect });
@@ -294,5 +302,74 @@ describe('resolveNodeColors', () => {
     it('is false when idle', () => {
       expect(resolveNodeColors(theme, 'http', false, idle).hasStatusIcon).toBe(false);
     });
+  });
+});
+
+describe('WorkflowGraphNode — edit mode', () => {
+  const makeEdit = () => ({
+    onInsert: jest.fn(),
+    onEditStep: jest.fn(),
+    onDeleteNode: jest.fn(),
+  });
+
+  it('renders no action cluster in read-only mode', () => {
+    renderNode();
+    expect(screen.queryByTestId('workflowGraphNodeActionCluster')).not.toBeInTheDocument();
+  });
+
+  it('renders the node action cluster in edit mode', () => {
+    renderNode({}, false, { edit: makeEdit() });
+    expect(screen.getByTestId('workflowGraphNodeActionCluster')).toBeInTheDocument();
+  });
+
+  it('closes the step actions menu when clicking away', () => {
+    renderNode({}, false, { edit: makeEdit() });
+    const menuButton = screen.getByTestId('workflowGraphNodeMenuButton');
+    fireEvent.click(menuButton);
+    expect(menuButton).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByTestId('workflowGraphNodeMenuPanel')).toBeInTheDocument();
+    fireEvent.pointerDown(document.body);
+    expect(menuButton).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('draws a solid border for fallback nodes (no dashed styling)', () => {
+    renderNode({ fallbackOf: 'fetch' }, false, { edit: makeEdit() });
+    const card = screen.getByRole('button', { name: /Test Step/ });
+    expect(getComputedStyle(card).borderStyle).toBe('solid');
+  });
+
+  it('keeps a thin border and draws an outer primary ring when selected', () => {
+    renderNode({}, true, { edit: makeEdit() });
+    const card = screen.getByRole('button', { name: /Test Step/ });
+    // Selection uses an outer ::after ring, so the card border stays thin.
+    expect(getComputedStyle(card).borderStyle).toBe('solid');
+    expect(getComputedStyle(card).borderWidth).not.toBe('2px');
+  });
+
+  it('deletes on Delete / Backspace and selects on Enter', () => {
+    const edit = makeEdit();
+    const onStepSelect = jest.fn();
+    renderNode({}, false, { edit, onStepSelect });
+    const card = screen.getByRole('button', { name: /Test Step/ });
+    fireEvent.keyDown(card, { key: 'Delete' });
+    expect(edit.onDeleteNode).toHaveBeenCalledWith('node-1');
+    fireEvent.keyDown(card, { key: 'Enter' });
+    expect(onStepSelect).toHaveBeenCalledWith('node-1');
+  });
+
+  it('shows the incomplete warning at the top-right for flagged nodes and never tints the border', () => {
+    const { unmount } = renderNode({}, false, {
+      edit: makeEdit(),
+      incompleteNodeIds: new Set(['node-1']),
+    });
+    const warning = screen.getByTestId('workflowGraphNodeIncomplete');
+    expect(warning).toHaveAttribute('aria-label', 'Incomplete — required fields are missing');
+    expect(getComputedStyle(warning).position).toBe('absolute');
+    expect(getComputedStyle(screen.getByRole('button', { name: /Test Step/ })).borderStyle).toBe(
+      'solid'
+    );
+    unmount();
+    renderNode({}, false, { edit: makeEdit(), incompleteNodeIds: new Set(['other']) });
+    expect(screen.queryByTestId('workflowGraphNodeIncomplete')).not.toBeInTheDocument();
   });
 });

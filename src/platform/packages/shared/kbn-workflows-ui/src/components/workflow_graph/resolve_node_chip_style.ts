@@ -17,6 +17,8 @@ export interface NodeChipStyle {
   readonly border: string;
   readonly iconColor: string | undefined;
   readonly isBrand: boolean;
+  /** Primary → Assistance gradient tile (Actions menu / AiButton base recipe). */
+  readonly useAiGradient?: boolean;
 }
 
 interface ExecutionState {
@@ -58,6 +60,11 @@ function categoryTokens(
         iconColor: colors.textWarning,
       };
     case 'code':
+      return {
+        background: colors.backgroundBasePrimary,
+        border: colors.borderBasePrimary,
+        iconColor: colors.textPrimary,
+      };
     case 'ai':
       return {
         background: colors.backgroundBasePrimary,
@@ -138,7 +145,11 @@ export function resolveNodeChipStyle(
   const preserveLogoColor = isBrand || kind === 'external';
 
   if (!isSuccess && !isFailed) {
-    return { ...idle, isBrand };
+    return {
+      ...idle,
+      isBrand,
+      useAiGradient: kind === 'ai',
+    };
   }
 
   if (isSuccess) {

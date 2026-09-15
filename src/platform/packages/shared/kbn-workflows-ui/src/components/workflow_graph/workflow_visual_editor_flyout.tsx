@@ -24,7 +24,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { StepInfo } from '@kbn/workflows-yaml';
 import { deslugifyStepName } from './deslugify_step_name';
+import { AiIcon } from '@kbn/shared-ux-ai-components';
+import { aiIconTileCss } from './ai_icon_tile';
 import { resolveNodeChipStyle } from './resolve_node_chip_style';
+import { getStepIconType } from '../step_icons/get_step_icon_type';
 import type { RenderStepIcon } from './workflow_graph_actions_context';
 import {
   useWorkflowsMonacoTheme,
@@ -109,6 +112,7 @@ export function WorkflowVisualEditorFlyout({
     isSuccess: false,
     isFailed: false,
   });
+  const iconType = getStepIconType(iconStepType);
 
   const yamlSlice = useMemo(() => {
     if (target.kind === 'trigger') return target.yamlSnippet;
@@ -177,20 +181,29 @@ export function WorkflowVisualEditorFlyout({
         >
           <EuiFlexItem grow={false}>
             <div
-              css={{
-                width: 28,
-                height: 28,
-                border: `1px solid ${chip.border}`,
-                borderRadius: euiTheme.border.radius.small,
-                background: chip.background,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                color: chip.iconColor,
-              }}
+              css={[
+                {
+                  width: 28,
+                  height: 28,
+                  borderRadius: euiTheme.border.radius.small,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  color: chip.iconColor,
+                  ...(chip.useAiGradient
+                    ? {}
+                    : {
+                        border: `1px solid ${chip.border}`,
+                        background: chip.background,
+                      }),
+                },
+                chip.useAiGradient ? aiIconTileCss({ euiTheme }) : {},
+              ]}
             >
-              {renderStepIcon ? (
+              {chip.useAiGradient && iconType === 'sparkles' ? (
+                <AiIcon iconType="sparkles" size="m" aria-hidden />
+              ) : renderStepIcon ? (
                 renderStepIcon({ stepType: iconStepType, isTrigger, size: 'm' })
               ) : (
                 <TypeIcon type={iconStepType} kind={isTrigger ? 'trigger' : 'step'} size="m" />

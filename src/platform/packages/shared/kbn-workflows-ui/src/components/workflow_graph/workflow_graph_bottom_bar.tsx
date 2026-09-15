@@ -58,8 +58,7 @@ export interface WorkflowDetailBottomBarProps {
   editorView: WorkflowDetailBottomBarView;
   onEditorViewChange: (next: WorkflowDetailBottomBarView) => void;
   /**
-   * Leftmost slot shown only in YAML view (e.g. "add step" + documentation).
-   * Mirrors ZoomControls in graph view.
+   * Leftmost slot shown in both YAML and graph views (Actions menu + documentation).
    */
   yamlActionsSlot?: ReactNode;
   toolsSlot?: ReactNode;
@@ -398,8 +397,8 @@ export function WorkflowDetailBottomBar({
           onMouseLeave={handleExpandedMouseLeave}
         >
           <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" wrap={false}>
-            {/* Left section — yaml actions slot, only shown in yaml view. */}
-            {yamlActionsSlot && editorView === 'yaml' ? (
+            {/* Left section — Actions menu + documentation in both editor views. */}
+            {yamlActionsSlot ? (
               <>
                 <EuiFlexItem grow={false}>{yamlActionsSlot}</EuiFlexItem>
                 <EuiFlexItem grow={false}>

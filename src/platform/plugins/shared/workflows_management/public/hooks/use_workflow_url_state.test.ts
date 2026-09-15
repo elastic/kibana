@@ -25,7 +25,7 @@ describe('useWorkflowUrlState', () => {
     });
 
     expect(result.current.activeTab).toBe('workflow');
-    expect(result.current.editorView).toBe('yaml');
+    expect(result.current.editorView).toBe('graph');
     expect(result.current.graphDirection).toBe('TB');
     expect(result.current.selectedExecutionId).toBeUndefined();
     expect(result.current.selectedStepExecutionId).toBeUndefined();
@@ -33,12 +33,12 @@ describe('useWorkflowUrlState', () => {
     expect(result.current.shouldAutoResume).toBe(false);
   });
 
-  it('should parse view=graph and direction=LR from URL', () => {
+  it('should parse view=yaml and direction=LR from URL', () => {
     const { result } = renderHook(() => useWorkflowUrlState(), {
-      wrapper: createWrapper(['/?view=graph&direction=LR']),
+      wrapper: createWrapper(['/?view=yaml&direction=LR']),
     });
 
-    expect(result.current.editorView).toBe('graph');
+    expect(result.current.editorView).toBe('yaml');
     expect(result.current.graphDirection).toBe('LR');
   });
 
@@ -48,16 +48,28 @@ describe('useWorkflowUrlState', () => {
     });
 
     act(() => {
+      result.current.setEditorView('yaml');
+    });
+
+    expect(result.current.editorView).toBe('yaml');
+    expect(result.current.selectedStepId).toBeUndefined();
+  });
+
+  it('should omit view from URL when setEditorView is graph', () => {
+    const { result } = renderHook(() => useWorkflowUrlState(), {
+      wrapper: createWrapper(['/?view=yaml']),
+    });
+
+    act(() => {
       result.current.setEditorView('graph');
     });
 
     expect(result.current.editorView).toBe('graph');
-    expect(result.current.selectedStepId).toBeUndefined();
   });
 
   it('should update URL when setGraphDirection is called', () => {
     const { result } = renderHook(() => useWorkflowUrlState(), {
-      wrapper: createWrapper(['/?view=graph']),
+      wrapper: createWrapper(['/?view=yaml']),
     });
 
     act(() => {
