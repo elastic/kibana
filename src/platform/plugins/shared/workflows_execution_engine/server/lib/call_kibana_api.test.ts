@@ -278,6 +278,18 @@ describe('callKibanaApi', () => {
         { method: 'GET', path: '//victim/api' }
       )
     ).rejects.toThrow('Invalid Kibana API path');
+    await expect(
+      callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+        { method: 'GET', path: '/\n/evil.example/x' }
+      )
+    ).rejects.toThrow('Invalid Kibana API path');
+    await expect(
+      callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+        { method: 'GET', path: '/api/%0a/evil.example' }
+      )
+    ).rejects.toThrow('Invalid Kibana API path');
   });
 
   it('prefixes the path with /s/{spaceId} for a non-default space', async () => {

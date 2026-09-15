@@ -212,7 +212,12 @@ const stringifyErrorBodyForMessage = (body: unknown): string => {
 };
 
 const validateSpaceRelativePath = (path: string): void => {
-  if (!path.startsWith('/') || path.startsWith('//') || path.includes('\\')) {
+  if (
+    !path.startsWith('/') ||
+    path.startsWith('//') ||
+    path.includes('\\') ||
+    /[\u0000-\u001F\u007F]/.test(path)
+  ) {
     throw new Error(`Invalid Kibana API path "${path}".`);
   }
   for (const segment of path.split('/')) {
@@ -226,7 +231,8 @@ const validateSpaceRelativePath = (path: string): void => {
       decodedSegment === '.' ||
       decodedSegment === '..' ||
       decodedSegment.includes('\\') ||
-      decodedSegment.includes('/')
+      decodedSegment.includes('/') ||
+      /[\u0000-\u001F\u007F]/.test(decodedSegment)
     ) {
       throw new Error(`Invalid Kibana API path "${path}".`);
     }

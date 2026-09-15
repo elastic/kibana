@@ -333,11 +333,12 @@ const discardResponseBody = (response: Response): void => {
   void response.body?.cancel();
 };
 
+// Fetch: 301/302 rewrite POST to GET; 303 rewrites every method except GET/HEAD.
 const redirectUsesGet = (method: string, status: number): boolean => {
   if (status === 303) {
-    return true;
+    return method !== 'GET' && method !== 'HEAD';
   }
-  return (status === 301 || status === 302) && method !== 'GET' && method !== 'HEAD';
+  return (status === 301 || status === 302) && method === 'POST';
 };
 
 const headersWithoutBodyMetadata = (headers: Headers): Headers => {

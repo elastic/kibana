@@ -392,7 +392,7 @@ export type DataSetStep = z.infer<typeof DataSetStepSchema>;
 export const IGNORED_KIBANA_FETCHER_SETTING_MESSAGE =
   'The "fetcher" setting is deprecated and currently ignored by the system. Please remove this setting. Configure self HTTP routing, TLS, and redirects with `server.selfHttp`. Use `max-step-size` for response limits.';
 
-export const FetcherConfigSchema = z
+const FetcherConfigObjectSchema = z
   .object({
     skip_ssl_verification: z
       .boolean()
@@ -411,12 +411,15 @@ export const FetcherConfigSchema = z
       .optional()
       .describe('Maximum response body size in bytes. Aborts the request mid-stream if exceeded.'),
   })
-  .meta({
-    $id: 'fetcher',
-    deprecated: true,
-    description: IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
-  })
-  .optional();
+  .meta({ $id: 'fetcher', description: 'Fetcher configuration for HTTP request customization' });
+
+export const FetcherConfigSchema = FetcherConfigObjectSchema.optional();
+
+export const KibanaFetcherConfigSchema = FetcherConfigObjectSchema.meta({
+  $id: 'kibanaFetcher',
+  deprecated: true,
+  description: IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
+}).optional();
 
 // Single source of truth for the kibana.request HTTP method enum (mirrors the `http` step's
 // valid values). Reused by the connector schema (editor + validation) and the runtime guard so
@@ -484,7 +487,7 @@ export const KibanaStepInputSchema = z.union([
       body: z.any().optional(),
       headers: z.record(z.string(), z.string()).optional(),
     }),
-    fetcher: FetcherConfigSchema,
+    fetcher: KibanaFetcherConfigSchema,
     ...KibanaStepMetaSchema,
   }),
   // Sugar syntax for common Kibana operations
@@ -506,7 +509,7 @@ export const KibanaStepInputSchema = z.union([
       page: z.number().optional(),
       perPage: z.number().optional(),
       status: z.string().optional(),
-      fetcher: FetcherConfigSchema,
+      fetcher: KibanaFetcherConfigSchema,
       ...KibanaStepMetaSchema,
     })
     .and(z.record(z.string(), z.any())), // Allow additional properties for flexibility

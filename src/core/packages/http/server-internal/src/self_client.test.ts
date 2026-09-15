@@ -385,6 +385,31 @@ describe('InternalHttpSelfScopedClient', () => {
     expect(secondRequest.headers.get('content-type')).toBeNull();
   });
 
+  it('preserves PUT on a 302 follow-up', async () => {
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce(new Response(null, { status: 302, headers: { location: '/api/next' } }))
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ ok: true }), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        })
+      );
+    const { self } = createClient({
+      getHttpConfig: jest.fn().mockReturnValue({
+        ssl: { enabled: false, requestCert: false },
+        selfHttp: { maxRedirects: 1, ssl: { verificationMode: 'full' } },
+      } as HttpConfig),
+    });
+
+    await self.asScoped(createFakeRequest()).fetch('/api/status', {
+      method: 'PUT',
+      body: { hello: 'world' },
+    });
+
+    const secondRequest = (global.fetch as jest.Mock).mock.calls[1][0] as Request;
+    expect(secondRequest.method).toBe('PUT');
+  });
+
   it('uses and reloads verified custom TLS trust for local and public HTTPS targets', async () => {
     let localCertificate = 'local server certificate';
     const localConfig = jest.fn(
