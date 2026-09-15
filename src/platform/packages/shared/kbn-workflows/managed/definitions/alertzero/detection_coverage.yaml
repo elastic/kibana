@@ -153,25 +153,18 @@ steps:
 
   # By-reference security.rule attachment: the framework resolves the rule once
   # from its rule_id and snapshots it, recording the rule as it was when this
-  # check ran. The fixed attachment id makes the refresh PUT below deterministic.
-  # No workflow step exists for attachments yet, hence the raw API.
+  # check ran. The fixed attachment id makes the refresh below deterministic.
   - name: attach_rule
-    type: kibana.request
+    type: ai.attachment.add
     if: >-
       ${{ steps.create_investigation.output.conversation_id != null
         and steps.resolve_rule.output.id != null }}
     with:
-      method: POST
-      path: "/s/{{ workflow.spaceId }}/api/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }}/attachments"
-      headers:
-        kbn-xsrf: string
-        elastic-api-version: "2023-10-31"
-        Content-Type: application/json
-      body:
-        id: "coverage-rule"
-        type: security.rule
-        origin: "{{ steps.coverage_check.output.structured_output.rule_id }}"
-        description: "Rule matched to the detection gap: {{ steps.resolve_rule.output.name }}"
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      id: "coverage-rule"
+      type: security.rule
+      origin: "{{ steps.coverage_check.output.structured_output.rule_id }}"
+      description: "Rule matched to the detection gap: {{ steps.resolve_rule.output.name }}"
     on-failure:
       continue: true
 
@@ -404,50 +397,39 @@ steps:
       continue: true
 
   # security.rule attachments resolve once and never refresh, so after the enable
-  # the snapshot would silently show the disabled rule. This PUT writes the enabled
+  # the snapshot would silently show the disabled rule. This writes the enabled
   # rule as version 2; version 1 keeps the before state in the attachment history.
   - name: refresh_rule_attachment
-    type: kibana.request
+    type: ai.attachment.update
     if: >-
       ${{ steps.resolve_rule.output.id != null
         and steps.attach_rule.error == null
         and steps.refetch_rule.error == null
         and steps.refetch_rule.output.id != null }}
     with:
-      method: PUT
-      path: "/s/{{ workflow.spaceId }}/api/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }}/attachments/coverage-rule"
-      headers:
-        kbn-xsrf: string
-        elastic-api-version: "2023-10-31"
-        Content-Type: application/json
-      body:
-        data:
-          text: "{{ steps.refetch_rule.output | json }}"
-          attachmentLabel: "{{ steps.refetch_rule.output.name }}"
-        description: "Rule after enabling: {{ steps.refetch_rule.output.name }}"
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      attachment_id: "coverage-rule"
+      data:
+        text: "{{ steps.refetch_rule.output | json }}"
+        attachmentLabel: "{{ steps.refetch_rule.output.name }}"
+      description: "Rule after enabling: {{ steps.refetch_rule.output.name }}"
     on-failure:
       continue: true
 
   # A prebuilt rule has no saved object until the install action runs, so the
   # by-reference attachment is only possible now.
   - name: attach_installed_rule
-    type: kibana.request
+    type: ai.attachment.add
     if: >-
       ${{ steps.route_verdict.output.install == true
         and steps.refetch_rule.error == null
         and steps.refetch_rule.output.id != null }}
     with:
-      method: POST
-      path: "/s/{{ workflow.spaceId }}/api/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }}/attachments"
-      headers:
-        kbn-xsrf: string
-        elastic-api-version: "2023-10-31"
-        Content-Type: application/json
-      body:
-        id: "coverage-rule"
-        type: security.rule
-        origin: "{{ steps.coverage_check.output.structured_output.rule_id }}"
-        description: "Prebuilt rule installed for the detection gap: {{ steps.refetch_rule.output.name }}"
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      id: "coverage-rule"
+      type: security.rule
+      origin: "{{ steps.coverage_check.output.structured_output.rule_id }}"
+      description: "Prebuilt rule installed for the detection gap: {{ steps.refetch_rule.output.name }}"
     on-failure:
       continue: true
 

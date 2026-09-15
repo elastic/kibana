@@ -153,10 +153,12 @@ describe('Detection Coverage worker', () => {
 
     it('attaches the matched rule by reference under a fixed attachment id', () => {
       const attach = stepByName('attach_rule');
-      const body = attach?.with?.body as Record<string, string>;
-      expect(body.type).toBe('security.rule');
-      expect(body.id).toBe('coverage-rule');
-      expect(body.origin).toBe('{{ steps.coverage_check.output.structured_output.rule_id }}');
+      expect(attach?.type).toBe('ai.attachment.add');
+      expect(attach?.with?.type).toBe('security.rule');
+      expect(attach?.with?.id).toBe('coverage-rule');
+      expect(attach?.with?.origin).toBe(
+        '{{ steps.coverage_check.output.structured_output.rule_id }}'
+      );
       expect(attach?.if).toContain('steps.resolve_rule.output.id != null');
     });
 
@@ -173,15 +175,15 @@ describe('Detection Coverage worker', () => {
         'rule_id={{ steps.coverage_check.output.structured_output.rule_id | url_encode }}'
       );
 
-      expect(refresh?.with?.method).toBe('PUT');
-      expect(String(refresh?.with?.path)).toContain('/attachments/coverage-rule');
+      expect(refresh?.type).toBe('ai.attachment.update');
+      expect(refresh?.with?.attachment_id).toBe('coverage-rule');
       expect(JSON.stringify(refresh?.with)).toContain('steps.refetch_rule.output | json');
       expect(refresh?.if).toContain('steps.refetch_rule.output.id != null');
 
       // A prebuilt rule has no saved object until installed, so it is attached afterwards.
-      expect(attachInstalled?.with?.method).toBe('POST');
+      expect(attachInstalled?.type).toBe('ai.attachment.add');
       expect(attachInstalled?.if).toContain('steps.route_verdict.output.install == true');
-      expect((attachInstalled?.with?.body as Record<string, string>).id).toBe('coverage-rule');
+      expect(attachInstalled?.with?.id).toBe('coverage-rule');
     });
 
     it('closes the investigation on a decision and leaves it open on a timeout', () => {
