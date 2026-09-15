@@ -8,10 +8,6 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
-import {
-  setAlertingV2EnabledSetting,
-  unsetAlertingV2EnabledSetting,
-} from '../fixtures/alerting_v2_setting';
 import { deleteInboxEpisode, seedInboxEpisode } from '../fixtures/inbox_episode';
 import {
   MANAGEMENT_ALERTING_V2_EPISODES_URL_RE,
@@ -29,7 +25,6 @@ test.describe(
     let episodeId: string;
 
     test.beforeAll(async ({ esClient, kbnClient }) => {
-      await setAlertingV2EnabledSetting(kbnClient, true);
       ({ ruleId, episodeId } = await seedInboxEpisode(esClient, kbnClient));
     });
 
@@ -39,7 +34,6 @@ test.describe(
 
     test.afterAll(async ({ esClient, kbnClient }) => {
       await deleteInboxEpisode(esClient, kbnClient, { ruleId });
-      await unsetAlertingV2EnabledSetting(kbnClient);
     });
 
     test('View details from the inbox flyout stays on observability alerting', async ({

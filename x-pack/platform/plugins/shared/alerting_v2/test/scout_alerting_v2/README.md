@@ -2,8 +2,6 @@
 
 Scout tests for the alerting_v2 plugin, grouped into **namespaces** so CI can schedule them as independent Playwright configs. They share the `alerting_v2` server config set (`xpack.alerting_v2.enabled=true` and relaxed schedule guardrails).
 
-`test/scout/` is a **different** Scout root on purpose: it uses the default server config so `alerting:v2:enabled` stays unpinned for the Agent Builder skill-gating suite.
-
 ## Namespaces
 
 | Namespace | API | UI | Notes |
@@ -11,7 +9,7 @@ Scout tests for the alerting_v2 plugin, grouped into **namespaces** so CI can sc
 | `rules` | Rule HTTP CRUD, rule-template read APIs, error-envelope contract, matcher-value suggestions | Rules list, builder, Discover flyout | Mostly local-only (`@local-stateful-classic`); the rule-template specs are `tags.deploymentAgnostic` |
 | `action_policies` | Action-policy HTTP CRUD | Policy create/edit and privileges | Local-only |
 | `alerts` | Alert actions, execution history, rule-event field suggestions | Alert episodes, Discover compose, execution-history smoke | Local-only |
-| `engine` | End-to-end, telemetry, implicit index privileges, SML types access, **rule history** | — | `tags.stateful.classic` (local **and** cloud). API-only. |
+| `engine` | End-to-end, telemetry, implicit index privileges, SML types access, Agent Builder skill registration, **rule history** | — | `tags.stateful.classic` (local **and** cloud). API-only. |
 | `engine_director` | Director | — | Split out of `engine` to cut CI wall-time. `tags.stateful.classic`. API-only. |
 | `engine_dispatcher` | Dispatcher | — | Split out of `engine` to cut CI wall-time. `tags.stateful.classic`. API-only. |
 | `engine_executor` | Rule executor | — | Split out of `engine` to cut CI wall-time (heaviest suite). `tags.stateful.classic`. API-only. |

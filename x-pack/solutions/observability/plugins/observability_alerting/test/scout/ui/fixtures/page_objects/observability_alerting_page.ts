@@ -48,12 +48,9 @@ export const MANAGEMENT_ALERTING_V2_URL_RE = /\/app\/management\/alertingV2\//;
 
 /**
  * Drives the Observability Alerting mounts (`/app/observability/alerting`).
- * Does not wait for page chrome so the same `goto` works for the flag-off
- * (app-not-found) case.
  */
 export class ObservabilityAlertingPage {
   public readonly pageTitle: Locator;
-  public readonly appNotFoundPageContent: Locator;
   public readonly v1RulesTab: Locator;
   public readonly v2RulesTab: Locator;
   public readonly inboxPage: Locator;
@@ -67,7 +64,6 @@ export class ObservabilityAlertingPage {
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.pageTitle = this.page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title);
-    this.appNotFoundPageContent = this.page.testSubj.locator('appNotFoundPageContent');
     this.v1RulesTab = this.page.testSubj.locator('v1RulesTab');
     this.v2RulesTab = this.page.testSubj.locator('v2RulesTab');
     this.inboxPage = this.page.testSubj.locator('alertingV2EpisodesListPage');
