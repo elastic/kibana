@@ -20,7 +20,7 @@ dependsOn:
   - '@kbn/config'
   - '@kbn/config-schema'
   - '@kbn/logging'
-  - '@kbn/optimizer'
+  - '@kbn/rspack-optimizer'
   - '@kbn/server-http-tools'
   - '@kbn/repo-info'
   - '@kbn/ci-stats-reporter'

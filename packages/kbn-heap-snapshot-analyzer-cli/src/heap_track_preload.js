@@ -15,7 +15,7 @@
 // `kill -SIGUSR2 <pid>`.
 
 // Only enable inside the actual Kibana server child (forked by the dev CLI with
-// isDevCliChild=true). Skip the dev CLI launcher and @kbn/optimizer workers,
+// isDevCliChild=true). Skip the dev CLI launcher and @kbn/rspack-optimizer workers,
 // which inherit NODE_OPTIONS but should not be slowed down by allocation
 // tracking. Override by setting HEAP_TRACK_FORCE=1.
 if (process.env.HEAP_TRACK_FORCE === '1' || process.env.isDevCliChild === 'true') {

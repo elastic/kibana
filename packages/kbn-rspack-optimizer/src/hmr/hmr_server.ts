@@ -78,7 +78,7 @@ export class HmrServer {
       }
       this.log?.warning(
         `HMR port ${requestedPort} is already in use ` +
-          `(likely a leftover @kbn/optimizer worker — check \`lsof -i :${requestedPort}\`). ` +
+          `(likely a leftover @kbn/rspack-optimizer worker — check \`lsof -i :${requestedPort}\`). ` +
           `Falling back to an ephemeral port.`
       );
       return this.tryListen(0);

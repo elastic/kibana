@@ -91,7 +91,7 @@ describe('ship_ci_stats_cli', () => {
         id: 'discover',
         value: 999,
         limit: 1,
-        limitConfigPath: 'packages/kbn-optimizer/limits.yml',
+        limitConfigPath: 'packages/kbn-rspack-optimizer/limits.yml',
       },
     ];
 
@@ -111,7 +111,7 @@ describe('ship_ci_stats_cli', () => {
         id: 'p',
         value: 50,
         limit: 100,
-        limitConfigPath: 'packages/kbn-optimizer/limits.yml',
+        limitConfigPath: 'packages/kbn-rspack-optimizer/limits.yml',
       },
     ];
 
@@ -125,14 +125,14 @@ describe('ship_ci_stats_cli', () => {
         id: 'pluginA',
         value: 200,
         limit: 100,
-        limitConfigPath: 'packages/kbn-optimizer/limits.yml',
+        limitConfigPath: 'packages/kbn-rspack-optimizer/limits.yml',
       },
       {
         group: 'page load bundle size',
         id: 'pluginB',
         value: 200,
         limit: 100,
-        limitConfigPath: 'packages/kbn-optimizer/limits.yml',
+        limitConfigPath: 'packages/kbn-rspack-optimizer/limits.yml',
       },
     ];
 

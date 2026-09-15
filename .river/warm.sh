@@ -21,7 +21,7 @@ cleanup() {
   # exits, particularly the optimizer and Elasticsearch JVM.
   pkill -f 'org.elasticsearch.bootstrap' 2>/dev/null || true
   pkill -f 'scripts/kibana' 2>/dev/null || true
-  pkill -f 'kbn-optimizer' 2>/dev/null || true
+  pkill -f 'kbn-rspack-optimizer' 2>/dev/null || true
   sleep 3
   pkill -9 -f 'org.elasticsearch.bootstrap' 2>/dev/null || true
   pkill -9 -f 'scripts/kibana' 2>/dev/null || true

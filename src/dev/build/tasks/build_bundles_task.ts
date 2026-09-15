@@ -15,7 +15,7 @@ import { availableParallelism } from 'os';
 
 import { globby } from 'globby';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { runBuild, reportOptimizerTimings, type BuildOptions } from '@kbn/optimizer';
+import { runBuild, reportOptimizerTimings, type BuildOptions } from '@kbn/rspack-optimizer';
 import { asyncForEachWithLimit } from '@kbn/std';
 
 import type { Task } from '../lib';

@@ -5409,9 +5409,9 @@ importers:
       '@kbn/openapi-generator':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-openapi-generator
-      '@kbn/optimizer':
+      '@kbn/rspack-optimizer':
         specifier: workspace:*
-        version: link:packages/kbn-optimizer
+        version: link:packages/kbn-rspack-optimizer
       '@kbn/optimizer-webpack-helpers':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-optimizer-webpack-helpers
@@ -6731,7 +6731,7 @@ importers:
 
   packages/kbn-moon: {}
 
-  packages/kbn-optimizer: {}
+  packages/kbn-rspack-optimizer: {}
 
   packages/kbn-peggy-loader: {}
 

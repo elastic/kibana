@@ -11,7 +11,7 @@ import { PassThrough } from 'stream';
 
 import * as Rx from 'rxjs';
 import { toArray } from 'rxjs';
-import type { OptimizerPhase } from '@kbn/optimizer';
+import type { OptimizerPhase } from '@kbn/rspack-optimizer';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 import { createReplaceSerializer } from '@kbn/jest-serializers';
 
@@ -20,7 +20,7 @@ import { Optimizer } from './optimizer';
 
 const importState = { shouldFail: false };
 
-jest.mock('@kbn/optimizer', () => {
+jest.mock('@kbn/rspack-optimizer', () => {
   if (importState.shouldFail) {
     throw new Error('missing native binding');
   }
@@ -67,7 +67,7 @@ expect.addSnapshotSerializer(createReplaceSerializer(/\x1b\[[0-9;]*m/g, ''));
 beforeEach(() => {
   // resolve the mock from the current module registry, which the import failure test resets
   RspackOptimizerMock = jest.requireMock<{ RspackOptimizer: jest.Mock }>(
-    '@kbn/optimizer'
+    '@kbn/rspack-optimizer'
   ).RspackOptimizer;
   RspackOptimizerMock.mockImplementation(function (this: RspackMockInstance, opts: unknown) {
     this.opts = opts;
@@ -125,8 +125,8 @@ it('constructs RspackOptimizer with expected options and a CLI-formatted log', a
 
   expect(await linesPromise).toMatchInlineSnapshot(`
     Array [
-      " np bld    log   [timestamp] [success][@kbn/optimizer] 1 bundle compiled successfully",
-      " np bld    log   [timestamp] [error][@kbn/optimizer] compile errors",
+      " np bld    log   [timestamp] [success][@kbn/rspack-optimizer] 1 bundle compiled successfully",
+      " np bld    log   [timestamp] [error][@kbn/rspack-optimizer] compile errors",
     ]
   `);
 });
@@ -239,7 +239,7 @@ it('completes immediately and is immediately ready when disabled', async () => {
   expect(RspackOptimizerMock).not.toHaveBeenCalled();
 });
 
-it('logs and errors run$ when @kbn/optimizer fails to load', async () => {
+it('logs and errors run$ when @kbn/rspack-optimizer fails to load', async () => {
   const writeLogTo = new PassThrough();
   const linesPromise = Rx.firstValueFrom(observeLines(writeLogTo).pipe(toArray()));
   const error = jest.fn();
@@ -261,7 +261,7 @@ it('logs and errors run$ when @kbn/optimizer fails to load', async () => {
   expect(RspackOptimizerMock).not.toHaveBeenCalled();
   expect(await linesPromise).toMatchInlineSnapshot(`
     Array [
-      " np bld    log   [timestamp] [error][@kbn/optimizer] Failed to load @kbn/optimizer: missing native binding",
+      " np bld    log   [timestamp] [error][@kbn/rspack-optimizer] Failed to load @kbn/rspack-optimizer: missing native binding",
     ]
   `);
 });

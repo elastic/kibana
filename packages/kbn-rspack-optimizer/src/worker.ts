@@ -11,7 +11,7 @@
  * RSPack Worker Process
  *
  * This script runs RSPack in a separate child process, similar to how
- * @kbn/optimizer runs webpack in worker threads. This allows the main
+ * @kbn/rspack-optimizer runs webpack in worker threads. This allows the main
  * process to cleanly terminate the build by killing this worker.
  *
  * Communication with parent process via IPC:

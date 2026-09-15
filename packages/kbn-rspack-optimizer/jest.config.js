@@ -8,7 +8,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_integration_node',
+  preset: '@kbn/test/jest_node',
   rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-optimizer'],
+  roots: ['<rootDir>/packages/kbn-rspack-optimizer'],
 };

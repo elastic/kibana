@@ -306,7 +306,7 @@ export function runRspackCli(options: CliOptions = {}): void {
                                       bundles that exceed their limit; refuses when a bundle
                                       exceeds its limit by more than 15%.
             --validate-limits         Validate limits.yml against discovered plugins (no build)
-            --limits <path>           Override limits.yml path (default: packages/kbn-optimizer/limits.yml)
+            --limits <path>           Override limits.yml path (default: packages/kbn-rspack-optimizer/limits.yml)
 
           Profile Mode (one-time build with bundle analysis):
             --profile                 Full profiling with stats.json + RsDoctor report

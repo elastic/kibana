@@ -119,7 +119,7 @@ export interface PluginMetricsInfo {
  * 7. MODULE COUNT
  *
  *    Module counts come from `compilation.chunkGraph.getChunkModules(chunk).length`
- *    directly. The group name `@kbn/optimizer bundle module count` is the
+ *    directly. The group name `@kbn/rspack-optimizer bundle module count` is the
  *    CI stats key used for trend comparison against the on-merge baseline;
  *    module count has no limit, so it never causes validation failures.
  *
@@ -156,7 +156,7 @@ export interface PluginMetricsInfo {
 
 const IGNORED_EXTNAME = ['.map', '.br', '.gz'];
 
-const LIMITS_PATH_FOR_METRICS = 'packages/kbn-optimizer/limits.yml';
+const LIMITS_PATH_FOR_METRICS = 'packages/kbn-rspack-optimizer/limits.yml';
 
 /**
  * Measure the total JS file size for a set of files from compilation assets.
@@ -201,7 +201,7 @@ export function buildMetrics(
 
   for (const entry of entries) {
     metrics.push({
-      group: '@kbn/optimizer bundle module count',
+      group: '@kbn/rspack-optimizer bundle module count',
       id: entry.id,
       value: entry.moduleCount,
     });

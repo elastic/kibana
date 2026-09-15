@@ -1,6 +1,6 @@
 ---
 name: optimize-bundle-size
-description: Reduce plugin `page load bundle size` and avoid unnecessary increases in `packages/kbn-optimizer/limits.yml`. Use when proactively optimizing bundles, investigating CI page-load overages, or reviewing PRs that change bundle limits.
+description: Reduce plugin `page load bundle size` and avoid unnecessary increases in `packages/kbn-rspack-optimizer/limits.yml`. Use when proactively optimizing bundles, investigating CI page-load overages, or reviewing PRs that change bundle limits.
 disable-model-invocation: true
 ---
 
@@ -21,8 +21,8 @@ jq '.[] | select(.id == "<pluginId>" and .group == "page load bundle size")' tar
 3. If this is a regression investigation, compare plugin limits on branch vs upstream.
 
 ```bash
-git show upstream/main:packages/kbn-optimizer/limits.yml | rg '^\\s{2}<pluginId>:'
-rg '^\\s{2}<pluginId>:' packages/kbn-optimizer/limits.yml
+git show upstream/main:packages/kbn-rspack-optimizer/limits.yml | rg '^\\s{2}<pluginId>:'
+rg '^\\s{2}<pluginId>:' packages/kbn-rspack-optimizer/limits.yml
 ```
 
 ## 2) Identify entry-chunk drivers

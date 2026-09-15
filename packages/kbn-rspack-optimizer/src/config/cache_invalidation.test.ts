@@ -32,14 +32,14 @@ describe('RSPack cache invalidation configuration', () => {
 
   describe('required source files exist', () => {
     const REQUIRED_SOURCE_FILES = [
-      'packages/kbn-optimizer/src/config/externals.ts',
-      'packages/kbn-optimizer/src/config/shared_config.ts',
-      'packages/kbn-optimizer/src/config/create_single_compile_config.ts',
-      'packages/kbn-optimizer/src/config/create_external_plugin_config.ts',
-      'packages/kbn-optimizer/src/loaders/theme_loader.ts',
-      'packages/kbn-optimizer/src/loaders/require_interop_loader.ts',
-      'packages/kbn-optimizer/src/loaders/hmr_boundary_loader.ts',
-      'packages/kbn-optimizer/src/plugins/chunk_preload_manifest_plugin.ts',
+      'packages/kbn-rspack-optimizer/src/config/externals.ts',
+      'packages/kbn-rspack-optimizer/src/config/shared_config.ts',
+      'packages/kbn-rspack-optimizer/src/config/create_single_compile_config.ts',
+      'packages/kbn-rspack-optimizer/src/config/create_external_plugin_config.ts',
+      'packages/kbn-rspack-optimizer/src/loaders/theme_loader.ts',
+      'packages/kbn-rspack-optimizer/src/loaders/require_interop_loader.ts',
+      'packages/kbn-rspack-optimizer/src/loaders/hmr_boundary_loader.ts',
+      'packages/kbn-rspack-optimizer/src/plugins/chunk_preload_manifest_plugin.ts',
       'packages/kbn-swc-config/src/browser.js',
       'packages/kbn-transpiler-config/src/shared_config.ts',
     ];
@@ -58,7 +58,7 @@ describe('RSPack cache invalidation configuration', () => {
     beforeAll(() => {
       const configPath = Path.resolve(
         REPO_ROOT,
-        'packages/kbn-optimizer/src/config/create_single_compile_config.ts'
+        'packages/kbn-rspack-optimizer/src/config/create_single_compile_config.ts'
       );
       configSource = Fs.readFileSync(configPath, 'utf-8');
     });
@@ -96,7 +96,7 @@ describe('RSPack cache invalidation configuration', () => {
     beforeAll(() => {
       const configPath = Path.resolve(
         REPO_ROOT,
-        'packages/kbn-optimizer/src/config/create_external_plugin_config.ts'
+        'packages/kbn-rspack-optimizer/src/config/create_external_plugin_config.ts'
       );
       configSource = Fs.readFileSync(configPath, 'utf-8');
     });

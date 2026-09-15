@@ -23,7 +23,7 @@ if [[ ! "${DISABLE_CI_STATS_SHIPPING:-}" ]]; then
       echo "--- Attempting to auto-update bundle size limits from build metrics"
       if node scripts/build_kibana_platform_plugins --update-limits-from-metrics target/optimizer_bundle_metrics.json; then
         # check_for_changed_files commits ALL tracked changes, so only auto-commit when limits.yml is the only modified file
-        unexpected_changes="$(git status --porcelain -- . ':!packages/kbn-optimizer/limits.yml' ':!config/node.options' ':!config/kibana.yml')"
+        unexpected_changes="$(git status --porcelain -- . ':!packages/kbn-rspack-optimizer/limits.yml' ':!config/node.options' ':!config/kibana.yml')"
         if [[ -z "$unexpected_changes" ]]; then
           check_for_changed_files "node scripts/build_kibana_platform_plugins --update-limits" true "Update bundle limits"
         else

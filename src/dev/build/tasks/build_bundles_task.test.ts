@@ -12,13 +12,13 @@ import Os from 'os';
 import Path from 'path';
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { runBuild } from '@kbn/optimizer';
+import { runBuild } from '@kbn/rspack-optimizer';
 
 import { BuildBundles } from './build_bundles_task';
 import { Build, write } from '../lib';
 import { getMockConfig } from '../lib/__mocks__/get_config';
 
-jest.mock('@kbn/optimizer', () => ({
+jest.mock('@kbn/rspack-optimizer', () => ({
   runBuild: jest.fn(),
   reportOptimizerTimings: jest.fn().mockResolvedValue(undefined),
 }));

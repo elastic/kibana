@@ -17,7 +17,7 @@ import {
   ToolingLogTextWriter,
   parseLogLevel,
 } from '@kbn/tooling-log';
-import type { OptimizerPhase, RspackOptimizer } from '@kbn/optimizer';
+import type { OptimizerPhase, RspackOptimizer } from '@kbn/rspack-optimizer';
 import type { KibanaGroup } from '@kbn/projects-solutions-groups';
 
 export interface Options {
@@ -59,10 +59,10 @@ export class Optimizer {
     return new Rx.Observable<void>((subscriber) => {
       let optimizer: RspackOptimizer | undefined;
 
-      // `@kbn/optimizer` loads the native `@rspack/core` runtime as soon as it is imported, but this
+      // `@kbn/rspack-optimizer` loads the native `@rspack/core` runtime as soon as it is imported, but this
       // process only orchestrates the forked optimizer worker. Defer that cost until run$ is
       // subscribed so it is never paid when the optimizer is disabled.
-      import('@kbn/optimizer')
+      import('@kbn/rspack-optimizer')
         .then(async (kbnOptimizer) => {
           if (subscriber.closed) {
             return;
@@ -98,7 +98,7 @@ export class Optimizer {
           }
         })
         .catch((error) => {
-          log.error(`Failed to load @kbn/optimizer: ${error.message}`);
+          log.error(`Failed to load @kbn/rspack-optimizer: ${error.message}`);
           subscriber.error(error);
         });
 
@@ -117,7 +117,7 @@ export class Optimizer {
    */
   private createLog(options: Options): ToolingLog {
     const dim = Chalk.dim('np bld');
-    const name = Chalk.magentaBright('@kbn/optimizer');
+    const name = Chalk.magentaBright('@kbn/rspack-optimizer');
     const time = () => moment().format('HH:mm:ss.SSS');
     const level = (msgType: string) => {
       switch (msgType) {

@@ -1,4 +1,4 @@
-# @kbn/optimizer
+# @kbn/rspack-optimizer
 
 The Kibana optimizer: an Rspack-based bundler for Kibana platform plugins. Builds core and all plugins in a single unified compilation using Rspack's Rust-based engine.
 
@@ -87,7 +87,7 @@ Debugging:
 Bundle Limits:
   --update-limits           Build in dist mode and update limits.yml (always full build)
   --validate-limits         Validate limits.yml against discovered plugins (no build)
-  --limits <path>           Override limits.yml path (default: packages/kbn-optimizer/limits.yml)
+  --limits <path>           Override limits.yml path (default: packages/kbn-rspack-optimizer/limits.yml)
 
 limits.yml contains entries for both plugins and named shared chunks (shared-core,
 shared-plugins, shared-packages, vendors, vendors-heavy, shared-misc, etc.).
@@ -195,7 +195,7 @@ Third-party plugins are built using `kbn-plugin-helpers`, which uses a separate 
 node /path/to/kibana/scripts/plugin_helpers build
 
 # Or programmatically
-import { createExternalPluginConfig } from '@kbn/optimizer';
+import { createExternalPluginConfig } from '@kbn/rspack-optimizer';
 ```
 
 External plugins do **not** use the unified `build_kibana_platform_plugins.js` script — they have their own standalone compilation config that links against Kibana's shared dependencies (DLL bundles).
@@ -203,7 +203,7 @@ External plugins do **not** use the unified `build_kibana_platform_plugins.js` s
 ## Programmatic API
 
 ```typescript
-import { runBuild } from '@kbn/optimizer';
+import { runBuild } from '@kbn/rspack-optimizer';
 
 const result = await runBuild({
   repoRoot: '/path/to/kibana',

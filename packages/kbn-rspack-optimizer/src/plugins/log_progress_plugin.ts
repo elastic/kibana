@@ -60,7 +60,7 @@ export function createLogProgressPlugin(log?: ToolingLog): RspackPluginInstance 
       log.info(message);
     } else {
       // eslint-disable-next-line no-console
-      console.log(`[@kbn/optimizer] ${message}`);
+      console.log(`[@kbn/rspack-optimizer] ${message}`);
     }
   };
 
@@ -77,7 +77,7 @@ export function createLogProgressPlugin(log?: ToolingLog): RspackPluginInstance 
       log.error(message);
     } else {
       // eslint-disable-next-line no-console
-      console.error(`[@kbn/optimizer] ${message}`);
+      console.error(`[@kbn/rspack-optimizer] ${message}`);
     }
   };
 

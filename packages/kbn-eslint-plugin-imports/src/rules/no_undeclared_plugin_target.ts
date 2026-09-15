@@ -56,8 +56,8 @@ import { getImportResolver } from '../get_import_resolver';
  *   targets (`common/trigger_ids` matches `common/trigger_ids` exactly but
  *   NOT `common/other`). Bare plugin imports (empty target) never match.
  *
- * @see packages/kbn-optimizer/src/config/create_external_plugin_config.ts (build-time equivalent)
- * @see packages/kbn-optimizer/src/plugins/cross_plugin_target_validation_plugin.ts (dist-build validation)
+ * @see packages/kbn-rspack-optimizer/src/config/create_external_plugin_config.ts (build-time equivalent)
+ * @see packages/kbn-rspack-optimizer/src/plugins/cross_plugin_target_validation_plugin.ts (dist-build validation)
  */
 export const NoUndeclaredPluginTargetRule: Rule.RuleModule = {
   meta: {

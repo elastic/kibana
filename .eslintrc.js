@@ -2840,7 +2840,7 @@ module.exports = {
       // them, so the optimizer must go through its rspack_runtime shim, which
       // loads them natively via createRequire (see rspack_runtime.ts).
       files: [
-        'packages/kbn-optimizer/**/*.{ts,tsx}',
+        'packages/kbn-rspack-optimizer/**/*.{ts,tsx}',
         'packages/kbn-plugin-helpers/src/tasks/optimize.ts',
       ],
       rules: {

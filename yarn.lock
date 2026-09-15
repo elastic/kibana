@@ -8118,7 +8118,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/optimizer@link:packages/kbn-optimizer":
+"@kbn/rspack-optimizer@link:packages/kbn-rspack-optimizer":
   version "0.0.0"
   uid ""
 

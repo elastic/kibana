@@ -178,13 +178,13 @@ describe('hmr_boundary_loader', () => {
       expect(result).toContain('enqueueUpdate');
     });
 
-    it('includes the @kbn/optimizer boundary comment', () => {
+    it('includes the @kbn/rspack-optimizer boundary comment', () => {
       const source = `
         export const MyComponent = () => { return null; };
         $RefreshReg$(MyComponent, "MyComponent");
       `;
       const result = runLoader(source);
-      expect(result).toContain('@kbn/optimizer HMR boundary');
+      expect(result).toContain('@kbn/rspack-optimizer HMR boundary');
     });
   });
 

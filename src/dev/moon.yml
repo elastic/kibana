@@ -31,7 +31,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/dev-utils'
   - '@kbn/utils'
-  - '@kbn/optimizer'
+  - '@kbn/rspack-optimizer'
   - '@kbn/peggy'
   - '@kbn/swc-config'
   - '@kbn/import-resolver'

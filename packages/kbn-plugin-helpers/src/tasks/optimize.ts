@@ -10,7 +10,7 @@
 import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { rspack, createExternalPluginConfig } from '@kbn/optimizer';
+import { rspack, createExternalPluginConfig } from '@kbn/rspack-optimizer';
 
 import type { TaskContext } from '../task_context';
 
@@ -38,7 +38,7 @@ export async function optimize({
     return;
   }
 
-  log.info(`running @kbn/optimizer${!!watch ? ' in watch mode (use CTRL+C to quit)' : ''}`);
+  log.info(`running @kbn/rspack-optimizer${!!watch ? ' in watch mode (use CTRL+C to quit)' : ''}`);
 
   await log.indent(2, async () => {
     const outputDir = Path.resolve(dev ? sourceDir : buildDir, 'target/public');
@@ -97,7 +97,7 @@ export async function optimize({
         // Handle process exit
         process.once('SIGINT', () => {
           watching.close(() => {
-            log.info('stopping @kbn/optimizer');
+            log.info('stopping @kbn/rspack-optimizer');
             resolve();
           });
         });

@@ -62,7 +62,7 @@ export interface BuildOptions {
   hmr?: boolean;
   /** Dev server base path (e.g. "/abc") for HMR auto-reload on server restart */
   basePath?: string;
-  /** Override the limits.yml path (default: packages/kbn-optimizer/limits.yml) */
+  /** Override the limits.yml path (default: packages/kbn-rspack-optimizer/limits.yml) */
   limitsPath?: string;
 }
 

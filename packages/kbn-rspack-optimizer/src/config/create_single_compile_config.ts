@@ -60,16 +60,16 @@ export { findTargetEntry };
  * paths (like the DLL manifest) are used as-is by Path.resolve.
  */
 const CACHE_CONFIG_FILES = [
-  'packages/kbn-optimizer/src/config/create_single_compile_config.ts',
-  'packages/kbn-optimizer/src/config/shared_config.ts',
-  'packages/kbn-optimizer/src/config/externals.ts',
-  'packages/kbn-optimizer/src/loaders/theme_loader.ts',
-  'packages/kbn-optimizer/src/loaders/require_interop_loader.ts',
-  'packages/kbn-optimizer/src/loaders/hmr_boundary_loader.ts',
-  'packages/kbn-optimizer/src/plugins/xpack_banner_plugin.ts',
-  'packages/kbn-optimizer/src/plugins/bundle_metrics_plugin.ts',
-  'packages/kbn-optimizer/src/plugins/chunk_preload_manifest_plugin.ts',
-  'packages/kbn-optimizer/limits.yml',
+  'packages/kbn-rspack-optimizer/src/config/create_single_compile_config.ts',
+  'packages/kbn-rspack-optimizer/src/config/shared_config.ts',
+  'packages/kbn-rspack-optimizer/src/config/externals.ts',
+  'packages/kbn-rspack-optimizer/src/loaders/theme_loader.ts',
+  'packages/kbn-rspack-optimizer/src/loaders/require_interop_loader.ts',
+  'packages/kbn-rspack-optimizer/src/loaders/hmr_boundary_loader.ts',
+  'packages/kbn-rspack-optimizer/src/plugins/xpack_banner_plugin.ts',
+  'packages/kbn-rspack-optimizer/src/plugins/bundle_metrics_plugin.ts',
+  'packages/kbn-rspack-optimizer/src/plugins/chunk_preload_manifest_plugin.ts',
+  'packages/kbn-rspack-optimizer/limits.yml',
   'packages/kbn-swc-config/src/browser.js',
   'packages/kbn-transpiler-config/src/shared_config.ts',
   'package.json',
@@ -103,7 +103,7 @@ export interface SingleCompileConfigOptions {
   hmr?: boolean;
   /** Port the HMR SSE server is listening on (required when hmr=true) */
   hmrPort?: number;
-  /** Override the limits.yml path (default: packages/kbn-optimizer/limits.yml) */
+  /** Override the limits.yml path (default: packages/kbn-rspack-optimizer/limits.yml) */
   limitsPath?: string;
 }
 
@@ -351,7 +351,7 @@ export async function createSingleCompileConfig(
     }),
 
     plugins: [
-      // Node.js browser polyfills (same as kbn-optimizer)
+      // Node.js browser polyfills (same as kbn-rspack-optimizer)
       new NodeLibsBrowserPlugin() as any,
 
       // Redirect kea's react-redux import to react-redux-v7 so it shares the

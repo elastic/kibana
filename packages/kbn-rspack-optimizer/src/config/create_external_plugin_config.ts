@@ -38,11 +38,11 @@ import type { ThemeTag } from '../types';
  * against repoRoot; absolute paths (like the DLL manifest) are used as-is.
  */
 const CACHE_CONFIG_FILES = [
-  'packages/kbn-optimizer/src/config/create_external_plugin_config.ts',
-  'packages/kbn-optimizer/src/config/shared_config.ts',
-  'packages/kbn-optimizer/src/config/externals.ts',
-  'packages/kbn-optimizer/src/loaders/theme_loader.ts',
-  'packages/kbn-optimizer/src/loaders/require_interop_loader.ts',
+  'packages/kbn-rspack-optimizer/src/config/create_external_plugin_config.ts',
+  'packages/kbn-rspack-optimizer/src/config/shared_config.ts',
+  'packages/kbn-rspack-optimizer/src/config/externals.ts',
+  'packages/kbn-rspack-optimizer/src/loaders/theme_loader.ts',
+  'packages/kbn-rspack-optimizer/src/loaders/require_interop_loader.ts',
   'packages/kbn-swc-config/src/browser.js',
   'packages/kbn-transpiler-config/src/shared_config.ts',
   'package.json',
@@ -155,7 +155,7 @@ export async function createExternalPluginConfig(
   const sharedDepsExternals = getExternals();
 
   // eslint-disable-next-line no-console
-  console.log(`[@kbn/optimizer] Building external plugin: ${pluginId}`);
+  console.log(`[@kbn/rspack-optimizer] Building external plugin: ${pluginId}`);
 
   return {
     name: `plugin-${pluginId}`,

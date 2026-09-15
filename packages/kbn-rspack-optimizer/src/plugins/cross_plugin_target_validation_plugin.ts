@@ -33,7 +33,7 @@ interface CrossPluginViolation {
  * `__kbnBundles__`). This plugin surfaces those undeclared targets as
  * errors during dist builds so developers can fix them before shipping.
  *
- * @see packages/kbn-optimizer/src/config/create_external_plugin_config.ts (external)
+ * @see packages/kbn-rspack-optimizer/src/config/create_external_plugin_config.ts (external)
  */
 export class CrossPluginTargetValidationPlugin {
   private pluginTargets: Map<string, { pluginId: string; targets: string[] }>;

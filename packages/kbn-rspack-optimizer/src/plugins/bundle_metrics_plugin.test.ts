@@ -120,7 +120,7 @@ describe('buildMetrics', () => {
     const coreMetrics = metrics.filter((m) => m.id === 'core');
     expect(coreMetrics).toHaveLength(5);
     expect(coreMetrics.map((m) => m.group)).toEqual([
-      '@kbn/optimizer bundle module count',
+      '@kbn/rspack-optimizer bundle module count',
       'page load bundle size',
       'async chunks size',
       'async chunk count',
@@ -148,7 +148,7 @@ describe('buildMetrics', () => {
     );
 
     const coreModuleCount = metrics.find(
-      (m) => m.group === '@kbn/optimizer bundle module count' && m.id === 'core'
+      (m) => m.group === '@kbn/rspack-optimizer bundle module count' && m.id === 'core'
     );
     expect(coreModuleCount).toBeDefined();
     expect(coreModuleCount!.value).toBe(583);
@@ -180,7 +180,7 @@ describe('buildMetrics', () => {
       (m) => m.group === 'page load bundle size' && m.id === 'discover'
     );
     expect(pageLoadMetric!.limit).toBe(160000);
-    expect(pageLoadMetric!.limitConfigPath).toBe('packages/kbn-optimizer/limits.yml');
+    expect(pageLoadMetric!.limitConfigPath).toBe('packages/kbn-rspack-optimizer/limits.yml');
 
     const otherMetrics = metrics.filter(
       (m) => m.group !== 'page load bundle size' && m.id === 'discover'
@@ -214,7 +214,7 @@ describe('buildMetrics', () => {
       (m) => m.group === 'page load bundle size' && m.id === 'core'
     );
     expect(pageLoadMetric!.limit).toBeUndefined();
-    expect(pageLoadMetric!.limitConfigPath).toBe('packages/kbn-optimizer/limits.yml');
+    expect(pageLoadMetric!.limitConfigPath).toBe('packages/kbn-rspack-optimizer/limits.yml');
   });
 
   it('emits shared chunk aggregate metrics', () => {
@@ -278,7 +278,7 @@ describe('buildMetrics', () => {
     });
   });
 
-  it('uses module count group name "@kbn/optimizer bundle module count"', () => {
+  it('uses module count group name "@kbn/rspack-optimizer bundle module count"', () => {
     const metrics = buildMetrics(
       [
         {
@@ -298,7 +298,7 @@ describe('buildMetrics', () => {
     );
 
     const moduleCountMetric = metrics.find((m) => m.id === 'core' && m.group.includes('module'));
-    expect(moduleCountMetric!.group).toBe('@kbn/optimizer bundle module count');
+    expect(moduleCountMetric!.group).toBe('@kbn/rspack-optimizer bundle module count');
   });
 
   it('aggregate metrics are ordered after all per-plugin metrics', () => {
@@ -430,7 +430,7 @@ describe('buildMetrics', () => {
     expect(sharedCoreMetric).toBeDefined();
     expect(sharedCoreMetric!.value).toBe(1800000);
     expect(sharedCoreMetric!.limit).toBe(2000000);
-    expect(sharedCoreMetric!.limitConfigPath).toBe('packages/kbn-optimizer/limits.yml');
+    expect(sharedCoreMetric!.limitConfigPath).toBe('packages/kbn-rspack-optimizer/limits.yml');
 
     const vendorsMetric = metrics.find(
       (m) => m.group === 'page load bundle size' && m.id === 'vendors'

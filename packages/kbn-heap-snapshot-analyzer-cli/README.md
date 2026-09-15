@@ -80,7 +80,7 @@ What the environment variables do:
   inspector session and starts allocation tracking.
 - `HEAP_TRACK_FORCE=1` is required for built Kibana. The preload normally
   gates on `isDevCliChild=true` so it does not slow down the launcher and
-  `@kbn/optimizer` workers.
+  `@kbn/rspack-optimizer` workers.
 - `HEAP_TRACK_OUTPUT` sets the snapshot destination.
 
 You should see:

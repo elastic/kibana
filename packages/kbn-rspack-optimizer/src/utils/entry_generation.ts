@@ -245,9 +245,9 @@ window.__kbnPluginsLoaded = (async () => {
     // Non-fatal: plugins will load with English defaults
   }
 ${batchBlocks}
-  console.log('[@kbn/optimizer] All plugins loaded');
+  console.log('[@kbn/rspack-optimizer] All plugins loaded');
 })().catch(err => {
-  console.error('[@kbn/optimizer] Failed to load plugins:', err);
+  console.error('[@kbn/rspack-optimizer] Failed to load plugins:', err);
   throw err;
 });
 `;

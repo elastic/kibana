@@ -58,7 +58,7 @@ export class MyPlugin implements Plugin<MyPluginSetup> {
 
 ## Understanding plugin bundle size
 
-Kibana Platform plugins are pre-built with `@kbn/optimizer`
+Kibana Platform plugins are pre-built with `@kbn/rspack-optimizer`
 and distributed as package artifacts. This means that it is no
 longer necessary for us to include the `optimizer` in the
 distributable version of Kibana Every plugin artifact contains all
@@ -67,7 +67,7 @@ stateful dependencies shared across plugin bundles via
 `@kbn/ui-shared-deps-npm` and `@kbn/ui-shared-deps-src`. This means
 that plugin artifacts _tend to be larger_ than they were in the
 legacy platform. To understand the current size of your plugin
-artifact, run `@kbn/optimizer` with:
+artifact, run `@kbn/rspack-optimizer` with:
 
 ```bash
 node scripts/build_kibana_platform_plugins.js --dist --profile-stats-only --profile-focus=my_plugin
@@ -92,7 +92,7 @@ contributes to; the per-plugin `page load bundle size` is reported in
 eagerly loaded portion as small as possible and to move other parts of your
 plugin behind `import()` boundaries so they become separate async chunks. If
 you want to investigate what your plugin bundle consists of, run
-`@kbn/optimizer` with `--profile-stats-only` (or `--profile`, which also opens
+`@kbn/rspack-optimizer` with `--profile-stats-only` (or `--profile`, which also opens
 an RsDoctor report) to generate a webpack-compatible
 [stats file](https://webpack.js.org/api/stats/) at
 `target/public/bundles/stats.json`. Use `--profile-focus` to include

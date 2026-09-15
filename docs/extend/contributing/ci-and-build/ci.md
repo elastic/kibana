@@ -198,8 +198,8 @@ $$$ci-metric-async-chunks-size$$$ `async chunks size`
 $$$ci-metric-misc-asset-size$$$ `miscellaneous assets size`
 :   Tracks the sum size (in bytes, by plugin/bundle ID) of assets that are not async or entry chunks, typically images.
 
-$$$ci-metric-bundle-module-count$$$ `@kbn/optimizer bundle module count`
-:   The number of separate modules per bundle/plugin. This metric indicates `@kbn/optimizer` build time for a bundle, highlighting potentially large module imports.
+$$$ci-metric-bundle-module-count$$$ `@kbn/rspack-optimizer bundle module count`
+:   The number of separate modules per bundle/plugin. This metric indicates `@kbn/rspack-optimizer` build time for a bundle, highlighting potentially large module imports.
 
 
 #### Distributable size [ci-metric-types-distributable-size]
@@ -228,7 +228,7 @@ You can report new metrics via the `CiStatsReporter` class provided by the `@kbn
 
 ### Resolving `page load bundle size` overages [ci-metric-resolving-overages]
 
-`page load bundle size` is limited per plugin. If a PR exceeds this limit — defined in [`limits.yml`](https://github.com/elastic/kibana/blob/master/packages/kbn-optimizer/limits.yml) — the author must resolve the overage before merging.
+`page load bundle size` is limited per plugin. If a PR exceeds this limit — defined in [`limits.yml`](https://github.com/elastic/kibana/blob/master/packages/kbn-rspack-optimizer/limits.yml) — the author must resolve the overage before merging.
 
 Limits are usually high enough that PRs shouldn't trigger overages, but when they do:
 
@@ -262,7 +262,7 @@ Limits are usually high enough that PRs shouldn't trigger overages, but when the
 
 6. If all else fails, reach out to Operations for help.
 
-After identifying the files that were added, stick them behind an async import. If the size increase is unavoidable, raise the limit in [`limits.yml`](https://github.com/elastic/kibana/blob/master/packages/kbn-optimizer/limits.yml) directly, or run:
+After identifying the files that were added, stick them behind an async import. If the size increase is unavoidable, raise the limit in [`limits.yml`](https://github.com/elastic/kibana/blob/master/packages/kbn-rspack-optimizer/limits.yml) directly, or run:
 
 ```shell
 node scripts/build_kibana_platform_plugins --update-limits

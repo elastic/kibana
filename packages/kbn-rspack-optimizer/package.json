@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/optimizer",
+  "name": "@kbn/rspack-optimizer",
   "version": "1.0.0",
   "private": true,
   "author": "Tiago Costa <tiago.costa@elastic.co>",
