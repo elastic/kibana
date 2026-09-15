@@ -201,10 +201,22 @@ const parseDuplicateMeta = (value: string[] | undefined): YaraMetaKeyOfInterest[
   return value.filter(isYaraMetaKeyOfInterest);
 };
 
+const parseSourceOffset = (value: unknown): number =>
+  typeof value === 'number' && Number.isInteger(value) ? value : -1;
+
+const parseImports = (value: unknown): string[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value.filter((item): item is string => typeof item === 'string' && item.length > 0);
+};
+
 const parseCompiledRule = (item: {
   identifier?: string;
   meta?: { os?: string; arch?: string; scan_type?: string };
   duplicateMeta?: string[];
+  sourceStart?: number;
+  sourceEnd?: number;
 }): YaraCompiledRule => {
   const meta: YaraCompiledRuleMeta = {};
   const os = parseOptionalString(item.meta?.os);
@@ -225,6 +237,8 @@ const parseCompiledRule = (item: {
     identifier: item.identifier ?? '',
     meta,
     duplicateMeta: parseDuplicateMeta(item.duplicateMeta),
+    sourceStart: parseSourceOffset(item.sourceStart),
+    sourceEnd: parseSourceOffset(item.sourceEnd),
   };
 };
 
@@ -236,7 +250,10 @@ const parseResult = (json: string): YaraValidateResult => {
       identifier?: string;
       meta?: { os?: string; arch?: string; scan_type?: string };
       duplicateMeta?: string[];
+      sourceStart?: number;
+      sourceEnd?: number;
     }>;
+    imports?: string[];
     errorCount?: number;
     warningCount?: number;
   };
@@ -258,6 +275,7 @@ const parseResult = (json: string): YaraValidateResult => {
     warnings,
     errorCount: typeof parsed.errorCount === 'number' ? parsed.errorCount : errors.length,
     warningCount: typeof parsed.warningCount === 'number' ? parsed.warningCount : warnings.length,
+    imports: parseImports(parsed.imports),
     rules: (parsed.rules ?? []).map(parseCompiledRule),
   };
 };

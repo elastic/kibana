@@ -15,6 +15,7 @@ import {
   getAllItemsFromEndpointExceptionList,
   getFilteredEndpointExceptionListRaw,
   convertExceptionsToEndpointFormat,
+  convertYaraRulesToEndpointFormat,
 } from './lists';
 import type { TranslatedEntry, TranslatedExceptionListItem } from '../../schemas/artifacts';
 import { ArtifactConstants } from './common';
@@ -22,6 +23,8 @@ import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import {
   FILTER_PROCESS_DESCENDANTS_TAG,
   TRUSTED_PROCESS_DESCENDANTS_TAG,
+  CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+  DISABLED_ARTIFACT_TAG,
 } from '../../../../common/endpoint/service/artifacts/constants';
 import type { ExperimentalFeatures } from '../../../../common';
 import { allowedExperimentalValues } from '../../../../common';
@@ -406,6 +409,177 @@ describe('artifacts lists', () => {
       });
       const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated.entries.length).toEqual(0);
+    });
+
+    test('it should convert Custom YARA Signatures to yara_rule_data entries', async () => {
+      const yaraRuleText = 'rule Example { condition: true }';
+      const exceptionMock = getFoundExceptionListItemSchemaMock();
+      exceptionMock.data[0].list_id = ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id;
+      exceptionMock.data[0].entries = [
+        {
+          field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+          operator: 'included',
+          type: 'match',
+          value: yaraRuleText,
+        },
+      ];
+      mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
+
+      const resp = await getFilteredEndpointExceptionListRaw({
+        elClient: mockExceptionClient,
+        filter: TEST_FILTER,
+        listId: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+      });
+      const translated = await convertYaraRulesToEndpointFormat(resp, 'v1');
+
+      expect(translated).toEqual({
+        entries: [{ yara_rule_data: yaraRuleText }],
+      });
+    });
+
+    test('it should convert multiple Custom YARA Signatures', async () => {
+      const firstRule = 'rule First { condition: true }';
+      const secondRule = 'rule Second { condition: true }';
+      const exceptionMock = getFoundExceptionListItemSchemaMock(2);
+      exceptionMock.data[0] = getExceptionListItemSchemaMock({
+        list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+        entries: [
+          {
+            field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+            operator: 'included',
+            type: 'match',
+            value: firstRule,
+          },
+        ],
+      });
+      exceptionMock.data[1] = getExceptionListItemSchemaMock({
+        list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+        entries: [
+          {
+            field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+            operator: 'included',
+            type: 'match',
+            value: secondRule,
+          },
+        ],
+      });
+      mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
+
+      const resp = await getFilteredEndpointExceptionListRaw({
+        elClient: mockExceptionClient,
+        filter: TEST_FILTER,
+        listId: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+      });
+      const translated = await convertYaraRulesToEndpointFormat(resp, 'v1');
+
+      expect(translated).toEqual({
+        entries: [{ yara_rule_data: firstRule }, { yara_rule_data: secondRule }],
+      });
+    });
+
+    test('it should flatten a Custom YARA Signature with multiple rules into one entry per rule', async () => {
+      const yaraRuleText = `import "pe"
+
+rule First { condition: true }
+rule Second { condition: true }`;
+      const exceptionMock = getFoundExceptionListItemSchemaMock();
+      exceptionMock.data[0].list_id = ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id;
+      exceptionMock.data[0].entries = [
+        {
+          field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+          operator: 'included',
+          type: 'match',
+          value: yaraRuleText,
+        },
+      ];
+      mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
+
+      const resp = await getFilteredEndpointExceptionListRaw({
+        elClient: mockExceptionClient,
+        filter: TEST_FILTER,
+        listId: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+      });
+      const translated = await convertYaraRulesToEndpointFormat(resp, 'v1');
+
+      expect(translated).toEqual({
+        entries: [
+          { yara_rule_data: 'import "pe"\n\nrule First { condition: true }' },
+          { yara_rule_data: 'import "pe"\n\nrule Second { condition: true }' },
+        ],
+      });
+    });
+
+    test('it should skip Custom YARA Signatures tagged as disabled', async () => {
+      const enabledRule = 'rule Enabled { condition: true }';
+      const disabledRule = 'rule Disabled { condition: true }';
+      const exceptionMock = getFoundExceptionListItemSchemaMock(2);
+      exceptionMock.data[0] = getExceptionListItemSchemaMock({
+        list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+        tags: [DISABLED_ARTIFACT_TAG],
+        entries: [
+          {
+            field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+            operator: 'included',
+            type: 'match',
+            value: disabledRule,
+          },
+        ],
+      });
+      exceptionMock.data[1] = getExceptionListItemSchemaMock({
+        list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+        entries: [
+          {
+            field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+            operator: 'included',
+            type: 'match',
+            value: enabledRule,
+          },
+        ],
+      });
+      mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
+
+      const resp = await getFilteredEndpointExceptionListRaw({
+        elClient: mockExceptionClient,
+        filter: TEST_FILTER,
+        listId: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+      });
+      const translated = await convertYaraRulesToEndpointFormat(resp, 'v1');
+
+      expect(translated).toEqual({
+        entries: [{ yara_rule_data: enabledRule }],
+      });
+    });
+
+    test('it should skip Custom YARA Signatures without a match entry value', async () => {
+      const exceptionMock = getFoundExceptionListItemSchemaMock();
+      exceptionMock.data[0].list_id = ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id;
+      exceptionMock.data[0].entries = [
+        {
+          field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+          operator: 'included',
+          type: 'exists',
+        },
+      ];
+      mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
+
+      const resp = await getFilteredEndpointExceptionListRaw({
+        elClient: mockExceptionClient,
+        filter: TEST_FILTER,
+        listId: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+      });
+      const translated = await convertYaraRulesToEndpointFormat(resp, 'v1');
+
+      expect(translated).toEqual({ entries: [] });
+    });
+
+    test('it should convert an empty Custom YARA Signature list', async () => {
+      await expect(convertYaraRulesToEndpointFormat([], 'v1')).resolves.toEqual({ entries: [] });
+    });
+
+    test('it should throw for an unsupported Custom YARA Signature schema version', async () => {
+      await expect(convertYaraRulesToEndpointFormat([], 'v2')).rejects.toThrow(
+        'unsupported schemaVersion'
+      );
     });
 
     test('it should return a stable hash regardless of order of entries', async () => {
@@ -1147,6 +1321,47 @@ describe('artifacts lists', () => {
         listId: ENDPOINT_ARTIFACT_LISTS.trustedDevices.id,
         namespaceType: 'agnostic',
         filter: 'exception-list-agnostic.attributes.os_types:"windows"',
+        perPage: 1000,
+        page: 1,
+        sortField: 'created_at',
+        sortOrder: 'desc',
+      });
+    });
+
+    test('for Custom YARA Signatures', async () => {
+      const yaraRuleText = 'rule Example { condition: true }';
+      mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce({
+        ...getFoundExceptionListItemSchemaMock(),
+        data: [
+          getExceptionListItemSchemaMock({
+            list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+            entries: [
+              {
+                field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+                operator: 'included',
+                type: 'match',
+                value: yaraRuleText,
+              },
+            ],
+          }),
+        ],
+      });
+
+      const resp = await getAllItemsFromEndpointExceptionList({
+        elClient: mockExceptionClient,
+        os: 'linux',
+        listId: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+      });
+      const translated = await convertYaraRulesToEndpointFormat(resp, 'v1');
+
+      expect(translated).toEqual({
+        entries: [{ yara_rule_data: yaraRuleText }],
+      });
+
+      expect(mockExceptionClient.findExceptionListItem).toHaveBeenCalledWith({
+        listId: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+        namespaceType: 'agnostic',
+        filter: 'exception-list-agnostic.attributes.os_types:"linux"',
         perPage: 1000,
         page: 1,
         sortField: 'created_at',

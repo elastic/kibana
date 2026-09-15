@@ -12,6 +12,16 @@ import {
   setYaraLogger,
   validateYaraRule,
 } from './validate_yara_rule';
+import type { YaraCompiledRule } from './types';
+
+const compiledRule = (fields: Pick<YaraCompiledRule, 'identifier' | 'meta' | 'duplicateMeta'>) => ({
+  ...fields,
+  sourceStart: expect.any(Number),
+  sourceEnd: expect.any(Number),
+});
+
+const sliceRule = (source: string, rule: YaraCompiledRule): string =>
+  Buffer.from(source, 'utf8').subarray(rule.sourceStart, rule.sourceEnd).toString('utf8');
 
 /**
  * Smoke test against the real libyara WASM artifact.
@@ -67,19 +77,24 @@ describe('validateYaraRule (libyara WASM)', () => {
   });
 
   it('accepts a minimal valid rule', async () => {
-    const result = await validateYaraRule(`
+    const source = `
 rule Minimal {
   strings:
     $a = "hello"
   condition:
     $a
 }
-`);
+`;
+    const result = await validateYaraRule(source);
 
     expect(result.errors).toEqual([]);
     expect(result.errorCount).toBe(0);
     expect(result.warningCount).toBe(result.warnings.length);
-    expect(result.rules).toEqual([{ identifier: 'Minimal', meta: {}, duplicateMeta: [] }]);
+    expect(result.imports).toEqual([]);
+    expect(result.rules).toEqual([
+      compiledRule({ identifier: 'Minimal', meta: {}, duplicateMeta: [] }),
+    ]);
+    expect(sliceRule(source, result.rules[0])).toContain('rule Minimal');
   });
 
   it('returns syntax errors with line numbers', async () => {
@@ -125,7 +140,8 @@ rule X {
 
     expect(result.errors).toEqual([]);
     expect(result.warnings.length).toBeGreaterThan(0);
-    expect(result.rules).toEqual([{ identifier: 'T', meta: {}, duplicateMeta: [] }]);
+    expect(result.imports).toEqual([]);
+    expect(result.rules).toEqual([compiledRule({ identifier: 'T', meta: {}, duplicateMeta: [] })]);
   });
 
   it('reports pe field errors without poisoning later validations', async () => {
@@ -214,6 +230,7 @@ rule Broken {
       `);
 
       expect(result.errors).toEqual([]);
+      expect(result.imports).toEqual([]);
       expect(result.rules).toEqual([]);
     });
 
@@ -233,8 +250,9 @@ rule Sample {
 `);
 
       expect(result.errors).toEqual([]);
+      expect(result.imports).toEqual([]);
       expect(result.rules).toEqual([
-        {
+        compiledRule({
           identifier: 'Sample',
           meta: {
             os: 'Windows',
@@ -242,7 +260,7 @@ rule Sample {
             scan_type: 'Memory',
           },
           duplicateMeta: [],
-        },
+        }),
       ]);
     });
 
@@ -259,9 +277,10 @@ rule Second {
 `);
 
       expect(result.errors).toEqual([]);
+      expect(result.imports).toEqual([]);
       expect(result.rules).toEqual([
-        { identifier: 'First', meta: {}, duplicateMeta: [] },
-        { identifier: 'Second', meta: { os: 'Linux' }, duplicateMeta: [] },
+        compiledRule({ identifier: 'First', meta: {}, duplicateMeta: [] }),
+        compiledRule({ identifier: 'Second', meta: { os: 'Linux' }, duplicateMeta: [] }),
       ]);
     });
 
@@ -278,15 +297,16 @@ rule Typed {
 `);
 
       expect(result.errors).toEqual([]);
+      expect(result.imports).toEqual([]);
       expect(result.rules).toEqual([
-        {
+        compiledRule({
           identifier: 'Typed',
           meta: {
             os: '1',
             arch: 'true',
           },
           duplicateMeta: ['scan_type'],
-        },
+        }),
       ]);
     });
 
@@ -296,12 +316,18 @@ rule Typed {
         const result = await validateYaraRule(source);
 
         expect(result.errors).toEqual([]);
+        expect(result.imports).toEqual([]);
         expect(result.rules).toEqual(
-          Array.from({ length: 256 }, (_, i) => ({
-            identifier: `r${i}`,
-            meta: {},
-            duplicateMeta: [],
-          }))
+          Array.from({ length: 256 }, (_, i) =>
+            compiledRule({
+              identifier: `r${i}`,
+              meta: {},
+              duplicateMeta: [],
+            })
+          )
+        );
+        expect(result.rules.map((rule) => sliceRule(source, rule).trim())).toEqual(
+          Array.from({ length: 256 }, (_, i) => `rule r${i}{condition:true}`)
         );
       });
 
@@ -317,6 +343,89 @@ rule Typed {
         ]);
         expect(result.rules).toEqual([]);
       });
+    });
+  });
+
+  describe('source layout', () => {
+    it('records file-level imports and rule source spans', async () => {
+      const source = `import "pe"
+import "math"
+
+rule Foo {
+  condition: true
+}
+
+rule Bar {
+  condition: true
+}
+`;
+      const result = await validateYaraRule(source);
+
+      expect(result.errors).toEqual([]);
+      expect(result.imports).toEqual(['pe', 'math']);
+      expect(result.rules.map((rule) => rule.identifier)).toEqual(['Foo', 'Bar']);
+      expect(result.rules.map((rule) => sliceRule(source, rule).trim())).toEqual([
+        'rule Foo {\n  condition: true\n}',
+        'rule Bar {\n  condition: true\n}',
+      ]);
+    });
+
+    it('does not treat braces inside hex strings or regexes as rule boundaries', async () => {
+      const source = `rule HexAndRegex {
+  strings:
+    $hex = { 01 02 }
+    $re = /rule Inner \\{ condition: true \\}/
+  condition:
+    $hex or $re
+}
+
+rule After {
+  condition: true
+}
+`;
+      const result = await validateYaraRule(source);
+
+      expect(result.errors).toEqual([]);
+      expect(result.rules.map((rule) => rule.identifier)).toEqual(['HexAndRegex', 'After']);
+      expect(sliceRule(source, result.rules[0])).toContain('$hex = { 01 02 }');
+      expect(sliceRule(source, result.rules[0])).toContain(
+        '$re = /rule Inner \\{ condition: true \\}/'
+      );
+      expect(sliceRule(source, result.rules[0])).not.toContain('rule After');
+      expect(sliceRule(source, result.rules[1]).trim()).toBe('rule After {\n  condition: true\n}');
+    });
+
+    it('includes private/global modifiers in the rule span', async () => {
+      const source = `private global rule Hidden : tag1 {
+  condition: true
+}
+`;
+      const result = await validateYaraRule(source);
+
+      expect(result.errors).toEqual([]);
+      expect(result.rules).toEqual([
+        compiledRule({ identifier: 'Hidden', meta: {}, duplicateMeta: [] }),
+      ]);
+      expect(sliceRule(source, result.rules[0]).trim()).toBe(
+        'private global rule Hidden : tag1 {\n  condition: true\n}'
+      );
+    });
+
+    it('ignores the word rule inside comments', async () => {
+      const source = `// rule Fake { condition: true }
+/*
+rule AlsoFake { condition: true }
+*/
+rule Real {
+  condition: true
+}
+`;
+      const result = await validateYaraRule(source);
+
+      expect(result.errors).toEqual([]);
+      expect(result.imports).toEqual([]);
+      expect(result.rules.map((rule) => rule.identifier)).toEqual(['Real']);
+      expect(sliceRule(source, result.rules[0]).trim()).toBe('rule Real {\n  condition: true\n}');
     });
   });
 
@@ -342,6 +451,8 @@ rule Typed {
           `);
 
       expect(result.errors).toEqual([]);
+      expect(result.imports).toEqual([module]);
+      expect(result.rules).toHaveLength(1);
     });
   });
 

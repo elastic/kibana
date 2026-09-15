@@ -176,6 +176,7 @@ fi
 echo "Linking validate_yara WASM module (engine ${YARA_VERSION}) ..."
 emcc \
   "${SCRIPT_DIR}/validate_yara.c" \
+  "${SCRIPT_DIR}/source_spans.c" \
   "${LIBYARA_A}" \
   -I"${INCLUDE_DIR}" \
   -O2 -DNDEBUG \
