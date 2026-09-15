@@ -127,7 +127,7 @@ export const ChartGridEmbeddableWrapper: FC<ChangePointDetectionProps> = ({
   if (isLoading) {
     return <EuiLoadingSpinner size="m" />;
   }
-  console.log({ viewType, parentApi });
+
   return (
     <div
       css={{
