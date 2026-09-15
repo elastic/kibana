@@ -45,7 +45,12 @@ const Wrapper: React.FC<{
   onBuilderStateChange: (s: ThresholdFormValues) => void;
   initBuilderState?: (s: ThresholdFormValues) => void;
   children: React.ReactNode;
-}> = ({ builderState, onBuilderStateChange, initBuilderState = onBuilderStateChange, children }) => {
+}> = ({
+  builderState,
+  onBuilderStateChange,
+  initBuilderState = onBuilderStateChange,
+  children,
+}) => {
   const form = useForm<FormValues>({ defaultValues: BASE_COMPOSE_VALUES });
 
   return (
