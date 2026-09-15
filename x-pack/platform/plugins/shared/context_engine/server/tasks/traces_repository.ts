@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { EsqlESQLParams } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
@@ -64,6 +65,30 @@ export const spaceFromTracesIndex = (index: string | undefined | null): string |
   return space || undefined;
 };
 
+/**
+ * ES|QL reports a missing column as a 400 `verification_exception` whose reason
+ * contains `Unknown column [<name>]` — the column-level counterpart to
+ * `isEsqlUnknownIndexError` from `@kbn/storage-adapter`.
+ *
+ * Relevant here specifically: the trace queries below read
+ * `attributes.gen_ai.tool.call.arguments` / `.result`, which only appear in the
+ * traces mapping once `agentBuilder:tracing:includeToolDetails` (off by default)
+ * has been enabled on the cluster. On a cluster where it was never on, the
+ * mapping lacks those columns and query verification fails — without this guard
+ * the signal generator task burns its maxAttempts and dies instead of treating
+ * the batch as empty.
+ */
+export const isEsqlUnknownColumnError = (error: unknown): boolean => {
+  if (!(error instanceof errors.ResponseError)) return false;
+  const body = error.body as { error?: { type?: string; reason?: string } } | undefined;
+  return (
+    error.statusCode === 400 &&
+    body?.error?.type === 'verification_exception' &&
+    typeof body?.error?.reason === 'string' &&
+    body.error.reason.includes('Unknown column')
+  );
+};
+
 const esqlRowsToObjects = <TRow>(response: ESQLSearchResponse): TRow[] => {
   const columns = response.columns ?? [];
   return (response.values ?? []).map((row) => {
@@ -90,7 +115,7 @@ const runEsqlQuery = async (
       { signal }
     )) as unknown as ESQLSearchResponse;
   } catch (error) {
-    if (isEsqlUnknownIndexError(error)) {
+    if (isEsqlUnknownIndexError(error) || isEsqlUnknownColumnError(error)) {
       return undefined;
     }
     throw error;
