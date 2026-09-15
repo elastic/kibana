@@ -20,9 +20,16 @@ import {
 } from '@kbn/alertzero-common';
 import { useUpdateWorker } from './use_workers_api';
 
+interface WorkerSettingsDraft {
+  /** The saved settings and revision the user started editing from. */
+  baseline: WorkerSettings;
+  revision: number | null;
+  draft: WorkerSettings;
+}
+
 interface WorkerDraftOverlay {
   enabled?: boolean;
-  settings?: WorkerSettings;
+  settings?: WorkerSettingsDraft;
   error?: string;
 }
 
@@ -32,7 +39,7 @@ const isWorkerDirty = (worker: Worker, overlay: WorkerDraftOverlay | undefined):
   }
   const enabledDirty = overlay.enabled !== undefined && overlay.enabled !== worker.enabled;
   const settingsDirty =
-    overlay.settings !== undefined && !isEqual(overlay.settings, worker.settings);
+    overlay.settings !== undefined && !isEqual(overlay.settings.draft, overlay.settings.baseline);
   return enabledDirty || settingsDirty;
 };
 
@@ -40,6 +47,10 @@ const isWorkerDirty = (worker: Worker, overlay: WorkerDraftOverlay | undefined):
  * One draft per Watch page covering Enabled, the shared settings and each Worker's `extras`.
  * Nothing is written until Save; Save validates every dirty Worker against its complete schema,
  * then writes Worker by Worker so a failure keeps only that Worker's draft and error.
+ *
+ * Settings edits are compared, diffed and revision-checked against the saved state the user
+ * started from, not against whatever a later refetch returned. Otherwise someone else's change
+ * would read as part of this draft and be written back with a fresh revision.
  */
 export const useWatchSettingsDraft = (workers: Worker[]) => {
   const { mutateAsync } = useUpdateWorker();
@@ -51,7 +62,7 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
       const overlay = overlays[worker.id];
       return {
         enabled: overlay?.enabled ?? worker.enabled,
-        settings: overlay?.settings ?? worker.settings,
+        settings: overlay?.settings?.draft ?? worker.settings,
         error: overlay?.error,
         dirty: isWorkerDirty(worker, overlay),
       };
@@ -74,14 +85,23 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
   }, []);
 
   const updateSettings = useCallback((worker: Worker, patch: WorkerSettingsWrite) => {
-    setOverlays((current) => ({
-      ...current,
-      [worker.id]: {
-        ...current[worker.id],
-        settings: applyWorkerSettingsWrite(current[worker.id]?.settings ?? worker.settings, patch),
-        error: undefined,
-      },
-    }));
+    setOverlays((current) => {
+      const existing = current[worker.id]?.settings;
+      const baseline = existing?.baseline ?? worker.settings;
+      const revision = existing ? existing.revision : worker.settingsRevision;
+      return {
+        ...current,
+        [worker.id]: {
+          ...current[worker.id],
+          settings: {
+            baseline,
+            revision,
+            draft: applyWorkerSettingsWrite(existing?.draft ?? baseline, patch),
+          },
+          error: undefined,
+        },
+      };
+    });
   }, []);
 
   const discard = useCallback(() => {
@@ -106,10 +126,15 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
     try {
       for (const worker of outstanding) {
         const draft = resolve(worker);
-        const settings = diffWorkerSettings(worker.settings, draft.settings);
+        const settingsDraft = overlays[worker.id]?.settings;
+        const settings = settingsDraft
+          ? diffWorkerSettings(settingsDraft.baseline, settingsDraft.draft)
+          : undefined;
         const patch: UpdateWorkerRequestBody = {
           ...(draft.enabled !== worker.enabled ? { enabled: draft.enabled } : {}),
-          ...(settings === undefined ? {} : { settings }),
+          ...(settings === undefined || settingsDraft === undefined
+            ? {}
+            : { settings, settingsRevision: settingsDraft.revision }),
         };
 
         try {

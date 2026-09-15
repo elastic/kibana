@@ -84,6 +84,83 @@ describe('useWatchSettingsDraft', () => {
     });
   });
 
+  it('diffs and revision-checks against the settings the edit started from, not a later refetch', async () => {
+    mutateAsync.mockResolvedValue({ worker: ruleTuning });
+    const { result, rerender } = renderHook(
+      ({ workers }: { workers: Worker[] }) => useWatchSettingsDraft(workers),
+      { initialProps: { workers: [ruleTuning] } }
+    );
+
+    act(() => {
+      result.current.updateSettings(ruleTuning, { extras: { analysisWindowDays: 7 } });
+    });
+
+    // Someone else saved a new interval while this draft was open.
+    const refreshed: Worker = {
+      ...ruleTuning,
+      settingsRevision: 2,
+      settings: { ...ruleTuning.settings, scheduleInterval: '6h' },
+    };
+    rerender({ workers: [refreshed] });
+
+    expect(result.current.resolve(refreshed).dirty).toBe(true);
+    await act(async () => {
+      await result.current.save();
+    });
+
+    expect(mutateAsync).toHaveBeenCalledTimes(1);
+    expect(mutateAsync).toHaveBeenCalledWith({
+      workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+      patch: { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: 1 },
+    });
+  });
+
+  it('keeps the draft and its baseline when the server refuses a stale save', async () => {
+    mutateAsync.mockRejectedValueOnce(new Error('conflict'));
+    const { result } = renderHook(() => useWatchSettingsDraft([ruleTuning]));
+
+    act(() => {
+      result.current.updateSettings(ruleTuning, { extras: { analysisWindowDays: 7 } });
+    });
+    await act(async () => {
+      await result.current.save();
+    });
+
+    expect(result.current.resolve(ruleTuning)).toMatchObject({
+      dirty: true,
+      error: 'conflict',
+      settings: { extras: { analysisWindowDays: 7 } },
+    });
+
+    // A retry still carries the original revision; nothing is silently re-based.
+    mutateAsync.mockRejectedValueOnce(new Error('conflict'));
+    await act(async () => {
+      await result.current.save();
+    });
+    expect(mutateAsync).toHaveBeenLastCalledWith({
+      workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+      patch: { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: 1 },
+    });
+  });
+
+  it('sends a null revision for a Worker that has not been installed yet', async () => {
+    const uninstalled: Worker = { ...ruleCreation, settingsRevision: null };
+    mutateAsync.mockResolvedValue({ worker: uninstalled });
+    const { result } = renderHook(() => useWatchSettingsDraft([uninstalled]));
+
+    act(() => {
+      result.current.updateSettings(uninstalled, { autonomy: 'assisted' });
+    });
+    await act(async () => {
+      await result.current.save();
+    });
+
+    expect(mutateAsync).toHaveBeenCalledWith({
+      workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+      patch: { settings: { autonomy: 'assisted' }, settingsRevision: null },
+    });
+  });
+
   it('treats extras set back to the saved value as clean', () => {
     const { result } = renderHook(() => useWatchSettingsDraft([ruleTuning]));
 
@@ -127,7 +204,7 @@ describe('useWatchSettingsDraft', () => {
     expect(mutateAsync).toHaveBeenCalledTimes(2);
     expect(mutateAsync).toHaveBeenNthCalledWith(1, {
       workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-      patch: { settings: { extras: { analysisWindowDays: 7 } } },
+      patch: { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: 1 },
     });
     expect(mutateAsync).toHaveBeenNthCalledWith(2, {
       workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,

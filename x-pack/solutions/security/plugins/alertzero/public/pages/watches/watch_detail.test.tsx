@@ -308,9 +308,10 @@ describe('WatchDetailPage', () => {
     fireEvent.click(screen.getByTestId('alertZeroWatchSettingsSave'));
 
     await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
+    // Uninstalled Worker: the draft's revision is null and is sent as such.
     expect(mutateAsync).toHaveBeenCalledWith({
       workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-      patch: { settings: { extras: { analysisWindowDays: 7 } } },
+      patch: { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: null },
     });
   });
 });

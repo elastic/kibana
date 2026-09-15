@@ -16,7 +16,6 @@ import {
   ALERTZERO_WORKERS_URL,
   applyWorkerSettingsWrite,
   buildWorkerUrl,
-  touchesWorkerSettings,
 } from '@kbn/alertzero-common';
 import type {
   ListWorkersResponse,
@@ -97,8 +96,9 @@ const replaceWorkerInList = (
 };
 
 /**
- * Patches one Worker. Bound per mutation so callers pass only the fields that changed.
- * Optimistic so switches and sliders respond immediately.
+ * Patches one Worker. Callers pass only the fields that changed; a `settings` patch must carry
+ * the `settingsRevision` its draft was built from, so a stale draft is refused rather than
+ * silently re-based onto whatever revision is in the cache.
  */
 export const useUpdateWorker = () => {
   const { services } = useKibana();
@@ -115,17 +115,11 @@ export const useUpdateWorker = () => {
       patch: UpdateWorkerRequestBody;
     }): Promise<UpdateWorkerResponse> => {
       const execute = async (): Promise<UpdateWorkerResponse> => {
-        const current = queryClient
-          .getQueryData<ListWorkersResponse>(queryKey)
-          ?.workers.find((worker) => worker.id === workerId);
-        const body = touchesWorkerSettings(patch)
-          ? { ...patch, settingsRevision: current?.settingsRevision ?? null }
-          : patch;
         const response = await services.http!.patch<UpdateWorkerResponse>(
           buildWorkerUrl(workerId),
           {
             version: API_VERSIONS.internal.v1,
-            body: JSON.stringify(body),
+            body: JSON.stringify(patch),
           }
         );
         // Reconcile inside the queued operation so the next request sees the new revision.
