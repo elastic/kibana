@@ -7,21 +7,21 @@
 
 import type { AttachmentResolveContext } from '@kbn/agent-builder-server/attachments';
 import { createResolveContextMock } from '../../test_utils';
-import { validateAttachment } from './validate_attachment';
+import { validateAttachments } from './validate_attachment';
 import type { AttachmentTypeRegistry } from './attachment_type_registry';
 
-const createRegistry = (definition: {
+const createRegistry = (definition?: {
   validate: (
     input: unknown
   ) => Promise<{ valid: true; data: unknown } | { valid: false; error: string }>;
   resolve?: (origin: string, context: AttachmentResolveContext) => Promise<unknown>;
 }): AttachmentTypeRegistry =>
   ({
-    has: () => true,
+    has: () => definition !== undefined,
     get: () => definition,
   } as unknown as AttachmentTypeRegistry);
 
-describe('validateAttachment', () => {
+describe('validateAttachments', () => {
   const resolveContext = createResolveContextMock();
   const validateContext = { request: resolveContext.request };
 
@@ -31,20 +31,14 @@ describe('validateAttachment', () => {
         validate: async (input) => ({ valid: true, data: input }),
       });
 
-      const result = await validateAttachment({
-        attachment: { type: 'text', data: { body: 'only-data' } },
-        registry,
-        resolveContext,
-        validateContext,
-      });
-
-      expect(result).toEqual({
-        valid: true,
-        attachment: expect.objectContaining({
-          type: 'text',
-          data: { body: 'only-data' },
-        }),
-      });
+      await expect(
+        validateAttachments({
+          attachments: [{ type: 'text', data: { body: 'only-data' } }],
+          registry,
+          resolveContext,
+          validateContext,
+        })
+      ).resolves.toEqual([expect.objectContaining({ type: 'text', data: { body: 'only-data' } })]);
     });
 
     it('only origin: resolves when resolve() and context are available', async () => {
@@ -54,21 +48,16 @@ describe('validateAttachment', () => {
         resolve: async () => resolved,
       });
 
-      const result = await validateAttachment({
-        attachment: { type: 'text', origin: 'dashboard-id' },
-        registry,
-        resolveContext,
-        validateContext,
-      });
-
-      expect(result).toEqual({
-        valid: true,
-        attachment: expect.objectContaining({
-          type: 'text',
-          data: resolved,
-          origin: 'dashboard-id',
-        }),
-      });
+      await expect(
+        validateAttachments({
+          attachments: [{ type: 'text', origin: 'dashboard-id' }],
+          registry,
+          resolveContext,
+          validateContext,
+        })
+      ).resolves.toEqual([
+        expect.objectContaining({ type: 'text', data: resolved, origin: 'dashboard-id' }),
+      ]);
     });
 
     it('data and origin: uses inline data and does not call resolve', async () => {
@@ -78,22 +67,18 @@ describe('validateAttachment', () => {
         resolve,
       });
 
-      const result = await validateAttachment({
-        attachment: { type: 'text', data: { body: 'inline' }, origin: 'so-1' },
-        registry,
-        resolveContext,
-        validateContext,
-      });
+      await expect(
+        validateAttachments({
+          attachments: [{ type: 'text', data: { body: 'inline' }, origin: 'so-1' }],
+          registry,
+          resolveContext,
+          validateContext,
+        })
+      ).resolves.toEqual([
+        expect.objectContaining({ type: 'text', data: { body: 'inline' }, origin: 'so-1' }),
+      ]);
 
       expect(resolve).not.toHaveBeenCalled();
-      expect(result).toEqual({
-        valid: true,
-        attachment: expect.objectContaining({
-          type: 'text',
-          data: { body: 'inline' },
-          origin: 'so-1',
-        }),
-      });
     });
 
     it('neither data nor origin: fails before type validation', async () => {
@@ -101,18 +86,87 @@ describe('validateAttachment', () => {
         validate: async (input) => ({ valid: true, data: input }),
       });
 
-      const result = await validateAttachment({
-        attachment: { type: 'text' },
+      await expect(
+        validateAttachments({
+          attachments: [{ type: 'text' }],
+          registry,
+          resolveContext,
+          validateContext,
+        })
+      ).rejects.toThrow(
+        'Attachment validation failed: Either data or origin must be provided for an attachment'
+      );
+    });
+  });
+
+  it('validates and normalizes every input', async () => {
+    const registry = createRegistry({
+      validate: async () => ({ valid: true, data: { text: 'validated' } }),
+    });
+
+    await expect(
+      validateAttachments({
+        attachments: [
+          {
+            type: 'test-attachment',
+            data: { text: 'user message' },
+            description: 'User message attachment',
+            hidden: true,
+            origin: 'saved-object:1',
+            group_id: 'group-1',
+          },
+        ],
         registry,
         resolveContext,
         validateContext,
-      });
+      })
+    ).resolves.toEqual([
+      {
+        id: expect.any(String),
+        type: 'test-attachment',
+        data: { text: 'validated' },
+        description: 'User message attachment',
+        hidden: true,
+        origin: 'saved-object:1',
+        group_id: 'group-1',
+      },
+    ]);
+  });
 
-      expect(result).toEqual({
-        valid: false,
-        error:
-          'Error during attachment validation: Either data or origin must be provided for an attachment',
-      });
+  it('returns undefined when there are no inputs', async () => {
+    await expect(
+      validateAttachments({
+        attachments: undefined,
+        registry: createRegistry(),
+        resolveContext,
+        validateContext,
+      })
+    ).resolves.toBeUndefined();
+  });
+
+  it('rejects unknown attachment types', async () => {
+    await expect(
+      validateAttachments({
+        attachments: [{ type: 'bad', data: {} }],
+        registry: createRegistry(),
+        resolveContext,
+        validateContext,
+      })
+    ).rejects.toThrow('Attachment validation failed: Unknown attachment type: bad');
+  });
+
+  it('rejects the request on the first invalid input', async () => {
+    const registry = createRegistry({
+      validate: async () => ({ valid: false, error: 'not valid' }),
     });
+
+    await expect(
+      validateAttachments({
+        attachments: [{ type: 'test-attachment', data: {} }],
+        registry,
+        resolveContext,
+        validateContext,
+      })
+    ).rejects.toThrow('Attachment validation failed: not valid');
   });
 });

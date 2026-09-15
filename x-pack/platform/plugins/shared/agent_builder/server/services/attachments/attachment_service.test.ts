@@ -73,38 +73,39 @@ describe('AttachmentService', () => {
 
       await expect(
         serviceStart.validate(
-          {
-            type: 'test-attachment',
-            data: { text: 'context' },
-            description: 'Context attachment',
-            hidden: true,
-            origin: 'saved-object:1',
-            group_id: 'group-1',
-          },
+          [
+            {
+              type: 'test-attachment',
+              data: { text: 'user message' },
+              description: 'User message attachment',
+              hidden: true,
+              origin: 'saved-object:1',
+              group_id: 'group-1',
+            },
+          ],
           request
         )
-      ).resolves.toEqual({
-        valid: true,
-        attachment: {
+      ).resolves.toEqual([
+        {
           id: expect.any(String),
           type: 'test-attachment',
           data: { text: 'validated' },
-          description: 'Context attachment',
+          description: 'User message attachment',
           hidden: true,
           origin: 'saved-object:1',
-          groupId: 'group-1',
+          group_id: 'group-1',
         },
-      });
+      ]);
     });
 
-    it('reports unknown attachment types as invalid', async () => {
+    it('rejects unknown attachment types', async () => {
       const serviceStart = service.start({
         savedObjects: savedObjectsServiceMock.createStartContract(),
       });
 
       await expect(
-        serviceStart.validate({ type: 'bad', data: {} }, httpServerMock.createKibanaRequest())
-      ).resolves.toEqual({ valid: false, error: 'Unknown attachment type: bad' });
+        serviceStart.validate([{ type: 'bad', data: {} }], httpServerMock.createKibanaRequest())
+      ).rejects.toThrow('Attachment validation failed: Unknown attachment type: bad');
     });
   });
 });

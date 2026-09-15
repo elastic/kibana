@@ -23,7 +23,6 @@ import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
 import { getConverseHelpers, filterEventsNativeApiEvents } from './converse_helpers';
 import { findConversationEvent } from '../services/execution/utils/chat_response';
-import { validateAttachmentInputs } from '../services/attachments/validate_attachment_inputs';
 import { chatPayloadSchema, userMessagePayloadSchema, conversePayloadSchema } from './chat';
 
 /**
@@ -103,11 +102,7 @@ export function registerChatApiRoutes({
             const { attachments: attachmentsService, conversations: conversationsService } =
               getInternalServices();
 
-            const attachments = await validateAttachmentInputs({
-              attachmentsService,
-              attachments: attachmentInputs,
-              request,
-            });
+            const attachments = await attachmentsService.validate(attachmentInputs, request);
 
             const body = await conversationsService.appendUserMessage({
               request,

@@ -8,7 +8,7 @@
 import { registerChatRoutes } from './chat';
 import { firstValueFrom, of, Subject, throwError, toArray } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { ChatEventType, TimelineEventType } from '@kbn/agent-builder-common';
+import { ChatEventType, TimelineEventType, createBadRequestError } from '@kbn/agent-builder-common';
 import { chatApiPath } from '../../common/constants';
 import { registerChatApiRoutes } from './chat_api';
 
@@ -359,8 +359,9 @@ describe('user message acknowledgements', () => {
       response
     );
     expect(result.status).toBe(200);
-    expect(services.attachments.validate).not.toHaveBeenCalled();
-    expect(appendUserMessage).toHaveBeenCalledTimes(1);
+    expect(appendUserMessage).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'context', attachments: undefined })
+    );
     expect(result.payload).toEqual(conversation);
     expect(executeAgent).not.toHaveBeenCalled();
     expect(validateCallbackUrl).not.toHaveBeenCalled();
@@ -422,7 +423,9 @@ describe('user message acknowledgements', () => {
         getTypeDefinition: jest.fn(),
         validate: jest
           .fn()
-          .mockResolvedValue({ valid: false, error: 'Unknown attachment type: bad' }),
+          .mockRejectedValue(
+            createBadRequestError('Attachment validation failed: Unknown attachment type: bad')
+          ),
       },
     };
 
