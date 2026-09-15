@@ -12,7 +12,7 @@ import type { AiIndexDataReadServiceApi, AiIndexToolDeps } from './ai_index_read
 export const createAiIndexDataReadServiceMock = (): jest.Mocked<AiIndexDataReadServiceApi> => ({
   query: jest.fn(),
   describe: jest.fn(),
-  listVisible: jest.fn(),
+  list: jest.fn(),
 });
 
 export const createAiIndexToolDepsMock = ({
