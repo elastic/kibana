@@ -16,7 +16,7 @@ const DEFAULT_SORT: ConversationSearchSort = { field: 'updated_at', order: 'desc
 const SORT_FIELD_PATHS: Record<ConversationSearchSortField, string> = {
   updated_at: 'updated_at',
   created_at: 'created_at',
-  title: 'title.keyword',
+  title: 'title.caseless',
 };
 
 const TIEBREAKER_FIELD: ConversationSearchSortField = 'created_at';
