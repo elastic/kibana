@@ -60,6 +60,7 @@ export const addSectionOperation = defineOperation({
         operationIndex,
         operationType: operation.operation,
         failures: context.failures,
+        resolveAttachmentPanel: context.resolveAttachmentPanel,
       });
 
       const materialized = operation.panels.map((item, i) => ({

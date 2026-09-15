@@ -75,6 +75,16 @@ const EditPackPageComponent = () => {
   }, [deletePackMutation, handleCloseDeleteConfirmationModal]);
 
   const pageTitle = useMemo(() => {
+    if (error) {
+      return isReadOnly
+        ? i18n.translate('xpack.osquery.viewPack.loadError.pageTitle', {
+            defaultMessage: 'View pack',
+          })
+        : i18n.translate('xpack.osquery.editPack.loadError.pageTitle', {
+            defaultMessage: 'Edit pack',
+          });
+    }
+
     if (!data?.name) {
       return undefined;
     }
@@ -88,7 +98,7 @@ const EditPackPageComponent = () => {
           defaultMessage: 'Edit {queryName}',
           values: { queryName: data.name },
         });
-  }, [data?.name, isReadOnly]);
+  }, [data?.name, error, isReadOnly]);
 
   useOsquerySubpageTitle(pageTitle);
 

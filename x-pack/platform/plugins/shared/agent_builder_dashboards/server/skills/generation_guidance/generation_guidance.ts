@@ -51,7 +51,8 @@ For an existing dashboard:
 Each visualization request is authored in a separate context. New-panel authors do not see the dashboard attachment or other panels: pass the exact known \`index\` and describe the measure, fields, and filters in \`query\`. Omit \`index\` only when the source is unknown and discovery is needed. Existing-panel edits receive the original configuration and queries automatically through \`panelId\`.
 
 - Use \`source: "request"\` to create or edit a Lens or Vega panel from a natural-language / ES|QL query — this is the only correct way to make a **new** visualization. Never hand-build a visualization \`config\` for a new visualization.
-- Use \`source: "config"\` only for content you have already resolved (an existing visualization's config, markdown, or custom content). The generation tool never reads an attachment or saved-object store, so the config must be supplied directly.
+- Use \`source: "attachment"\` with an \`attachment_id\` to place any visualization that already exists in this conversation — anything \`${platformCoreTools.createVisualization}\` returned. Pass only the id and a \`grid\`; the attachment's own renderer decides the panel type. Prefer this over \`source: "config"\` whenever you have an id: it costs far fewer tokens than repeating the payload, and for custom content it is the only way to place the panel that was actually generated — a custom content \`config\` takes a prompt and generates a **new** template, producing a different panel.
+- Use \`source: "config"\` for markdown, and for a visualization you hold by value with no attachment id.
 
 ## Panel Type Selection
 

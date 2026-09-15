@@ -14,7 +14,6 @@ import {
 } from '../../hooks/use_save_region_policy';
 import { useDeleteRegionPolicy } from '../../hooks/use_delete_region_policy';
 import { useEisModels } from '../../hooks/use_eis_models';
-import { useRegionPreferencesRedesignEnabled } from '../../hooks/use_region_preferences_redesign_enabled';
 import { getAvailableRegions, getAvailableGeos, regionKey } from '../../utils/eis_utils';
 import { parseRegionPolicyConflict } from '../../utils/parse_region_policy_conflict';
 import type { PolicyMode, RegionPolicyConflictArtifact } from '../../types';
@@ -23,7 +22,12 @@ import { useSetSelection } from '../../hooks/use_set_selection';
 import { useRegionTabState } from './use_region_tab_state';
 
 export const useManageRegionsState = (onClose: () => void) => {
-  const { data: policy, isLoading: isPolicyLoading, isError: isPolicyError } = useRegionPolicy();
+  const {
+    data: policy,
+    isLoading: isPolicyLoading,
+    isError: isPolicyError,
+    isFetchedAfterMount,
+  } = useRegionPolicy();
   const {
     data: eisEndpoints,
     isLoading: isEndpointsLoading,
@@ -31,7 +35,6 @@ export const useManageRegionsState = (onClose: () => void) => {
   } = useEisModels();
   const { mutate: savePolicy, isLoading: isSaving } = useSaveRegionPolicy();
   const { mutate: deletePolicy, isLoading: isDeleting } = useDeleteRegionPolicy(onClose);
-  const isRedesignEnabled = useRegionPreferencesRedesignEnabled();
 
   const availableRegions = useMemo(() => getAvailableRegions(eisEndpoints ?? []), [eisEndpoints]);
   const availableGeos = useMemo(() => getAvailableGeos(eisEndpoints ?? []), [eisEndpoints]);
@@ -53,22 +56,22 @@ export const useManageRegionsState = (onClose: () => void) => {
     RegionPolicyConflictArtifact[] | undefined
   >(undefined);
 
-  // Seed state once both queries finish loading.
+  const isPolicyFetchPending = isFetchedAfterMount === false;
+  const isPolicyPending = isPolicyLoading || isPolicyFetchPending;
+  const areQueriesReady = !isPolicyPending && !isEndpointsLoading;
+
   useEffect(() => {
-    const shouldSeed = !isPolicyLoading && !isEndpointsLoading && !syncedFromInitial;
-    if (shouldSeed) {
+    if (areQueriesReady && !syncedFromInitial) {
       const seedState = computeSeedState(policy, availableRegions, availableGeos);
       setActiveTab(seedState.activeTab);
       setIsNewPolicy(seedState.isNewPolicy);
-      // Toggle is ON when a custom policy is already saved; OFF for first-time setup.
       setUseCustomPolicy(!seedState.isNewPolicy);
       seedRegions(seedState.regionKeys);
       seedGeos(seedState.geos);
       setSyncedFromInitial(true);
     }
   }, [
-    isPolicyLoading,
-    isEndpointsLoading,
+    areQueriesReady,
     syncedFromInitial,
     policy,
     availableRegions,
@@ -77,8 +80,7 @@ export const useManageRegionsState = (onClose: () => void) => {
     seedGeos,
   ]);
 
-  // --- Common derived values ---
-  const isLoading = isPolicyLoading || isEndpointsLoading;
+  const isLoading = isPolicyPending || isEndpointsLoading;
   const isError = isPolicyError || isEndpointsError;
   const activeSelectionIsDirty =
     activeTab === 'regions' ? regionTab.regionSelection.isDirty : geoSelection.isDirty;
@@ -128,7 +130,6 @@ export const useManageRegionsState = (onClose: () => void) => {
           onClose();
         },
         onError: (err: IHttpFetchError<ResponseErrorBody>) => {
-          if (!isRedesignEnabled) return;
           const artifacts = parseRegionPolicyConflict(err.body?.attributes);
           if (artifacts) {
             setConflictArtifacts(artifacts);
@@ -161,7 +162,6 @@ export const useManageRegionsState = (onClose: () => void) => {
       availableRegions,
       savePolicy,
       onClose,
-      isRedesignEnabled,
     ]
   );
 
@@ -173,32 +173,36 @@ export const useManageRegionsState = (onClose: () => void) => {
     setIsCallOutDismissed(true);
   }, []);
 
+  const { reset: resetGeoSelection } = geoSelection;
+  const { reset: resetRegionSelection } = regionTab.regionSelection;
+  const handleLocationTypeChange = useCallback(
+    (next: PolicyMode) => {
+      if (next === activeTab) return;
+      setActiveTab(next);
+      resetGeoSelection();
+      resetRegionSelection();
+    },
+    [activeTab, setActiveTab, resetGeoSelection, resetRegionSelection]
+  );
+
   const regionTabReturn = useMemo(
     () => ({
       zoneGroups: regionTab.zoneGroups,
       checkedKeys: regionTab.regionSelection.selected,
-      expandedZones: regionTab.expandedZones,
       totalRegions: regionTab.regionSelection.total,
       totalSelected: regionTab.regionSelection.totalSelected,
       allSelected: regionTab.regionSelection.allSelected,
-      isAllExpanded: regionTab.isAllExpanded,
       onSelectAll: regionTab.regionSelection.selectAll,
       onToggleRegion: regionTab.regionSelection.toggle,
-      onToggleExpand: regionTab.handleToggleExpand,
-      onExpandAll: regionTab.handleExpandAll,
     }),
     [
       regionTab.zoneGroups,
       regionTab.regionSelection.selected,
-      regionTab.expandedZones,
       regionTab.regionSelection.total,
       regionTab.regionSelection.totalSelected,
       regionTab.regionSelection.allSelected,
-      regionTab.isAllExpanded,
       regionTab.regionSelection.selectAll,
       regionTab.regionSelection.toggle,
-      regionTab.handleToggleExpand,
-      regionTab.handleExpandAll,
     ]
   );
 
@@ -240,10 +244,10 @@ export const useManageRegionsState = (onClose: () => void) => {
       showConfirmation,
       showDeleteConfirmation,
       conflictArtifacts,
-      isRedesignEnabled,
       setActiveTab,
       setUseCustomPolicy,
       handleDismissCallOut,
+      handleLocationTypeChange,
       handleRequestSave,
       handleConfirmSave,
       handleCancelConfirmation,
