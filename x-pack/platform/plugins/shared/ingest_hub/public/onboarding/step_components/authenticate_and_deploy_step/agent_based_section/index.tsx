@@ -27,7 +27,7 @@ import type {
 import type { AgentCredentialVars } from '../package_inputs';
 
 import { useOnboardingFlow } from '../../../onboarding_flow_context';
-import { DeploymentSectionAccordion } from '../section_accordion';
+import { DeploymentModeAccordion } from '../section_accordion';
 import { buildAgentPolicyName } from '../agent_based_deploy/agent_policy_name';
 
 import { CredentialMethodSelector } from './credential_method_selector';
@@ -254,7 +254,7 @@ export function AgentBasedSection({
 
   return (
     <>
-      <DeploymentSectionAccordion
+      <DeploymentModeAccordion
         icon="agentApp"
         title={i18n.translate('xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.title', {
           defaultMessage: 'Where to add this integration?',
@@ -430,7 +430,7 @@ export function AgentBasedSection({
             </>
           )}
         </EuiPanel>
-      </DeploymentSectionAccordion>
+      </DeploymentModeAccordion>
 
       {/* Agent enrollment flyout — outside the accordion so it survives accordion collapsing on
           isDone. The flyout is a portal/overlay regardless of DOM position, but it must be mounted

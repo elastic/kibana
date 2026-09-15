@@ -461,6 +461,29 @@ describe('AuthenticateAndDeployStep', () => {
         expect(onContinue).not.toHaveBeenCalled();
       });
 
+      it('skips deploy and calls onContinue immediately when isAgentDone (Back+Next re-deploy guard)', async () => {
+        // Regression: after a successful deploy the user can go Back then Next again.
+        // Without the guard, deployToExistingAgentPolicies would fire again and create duplicate
+        // package policies on the same agent policy.
+        const handleDeploy = jest.fn().mockResolvedValue({ failed: false });
+        mockUseAgentBasedDeploy.mockReturnValue({
+          targets: agentTargets,
+          isDeploying: false,
+          failedInstances: [],
+          isAlreadyDeployed: true, // already deployed → isAgentDone = true
+          handleDeploy,
+          namespace: 'default',
+          setNamespace: jest.fn(),
+        });
+        const onContinue = jest.fn();
+        renderStep(onContinue);
+
+        fireEvent.click(screen.getByTestId('authenticateAndDeployStep-nextButton'));
+        await waitFor(() => expect(onContinue).toHaveBeenCalledTimes(1));
+        // handleDeploy must NOT be called — the guard short-circuits before it.
+        expect(handleDeploy).not.toHaveBeenCalled();
+      });
+
       it('does NOT call handleDeploy with create-policy args when agentPolicyId is already set', async () => {
         // Regression: when the flyout already created the agent policy on a previous attempt,
         // handleDeploy must route to the existing-policy path, not create a second policy.

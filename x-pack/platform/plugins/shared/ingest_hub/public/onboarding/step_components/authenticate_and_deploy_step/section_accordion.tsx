@@ -29,7 +29,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export interface DeploymentSectionAccordionProps {
+export interface DeploymentModeAccordionProps {
   /** EUI icon type for the section header */
   icon: string;
   /** Localised title string */
@@ -49,7 +49,7 @@ export interface DeploymentSectionAccordionProps {
   children: React.ReactNode;
 }
 
-export function DeploymentSectionAccordion({
+export function DeploymentModeAccordion({
   icon,
   title,
   serviceCount,
@@ -59,7 +59,7 @@ export function DeploymentSectionAccordion({
   dataTestSubj,
   headerButtonTestSubj,
   children,
-}: DeploymentSectionAccordionProps) {
+}: DeploymentModeAccordionProps) {
   const { euiTheme } = useEuiTheme();
   const contentId = useGeneratedHtmlId({ prefix: 'sectionAccordionContent' });
   // Start open always. Auto-collapse only when isDone transitions false → true in this session

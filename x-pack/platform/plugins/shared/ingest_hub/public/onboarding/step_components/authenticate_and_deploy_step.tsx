@@ -259,6 +259,12 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
     // Agent-based: deploy on Next, then navigate only if succeeded.
     if (showAgentSection) {
+      // Short-circuit if already deployed (e.g. user went Back then Next again) to avoid
+      // creating duplicate package policies on the same agent policy.
+      if (isAgentDone) {
+        onContinue();
+        return;
+      }
       const result = await handleAgentDeployForNext();
       if (result.failed) {
         // Deploy failed — stay on step 3, error callout is already shown by the section.
@@ -273,6 +279,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     miServiceIds.length,
     hasAnyEcf,
     showAgentSection,
+    isAgentDone,
     handleAgentDeployForNext,
     ecfSectionProps,
     selectedServiceIds,
