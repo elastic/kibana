@@ -10,9 +10,11 @@
 import { randomUUID } from 'node:crypto';
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import type { WorkflowExecutionDto } from '@kbn/workflows';
 
 apiTest.describe('Workflow access control', { tag: tags.stateful.classic }, () => {
   const spaceId = `workflow-acl-${randomUUID()}`;
+  const ownerUsername = `workflow-owner-${randomUUID()}`;
   let workflowId: string;
   let readerProfileId: string;
   let ownerHeaders: Record<string, string>;
@@ -33,18 +35,34 @@ steps:
       message: access test
 `;
 
-  apiTest.beforeAll(async ({ apiClient, samlAuth, kbnClient }) => {
+  apiTest.beforeAll(async ({ apiClient, samlAuth, kbnClient, esClient }) => {
     await kbnClient.request({
       method: 'POST',
       path: '/api/spaces/space',
       body: { id: spaceId, name: spaceId },
     });
-    const owner = await samlAuth.asInteractiveUser('admin');
+    await kbnClient.request({
+      method: 'PUT',
+      path: `/api/security/role/${ownerUsername}`,
+      body: {
+        elasticsearch: { cluster: [] },
+        kibana: [{ base: [], feature: { workflowsManagement: ['all'] }, spaces: [spaceId] }],
+      },
+    });
+    const ownerPassword = randomUUID();
+    await esClient.security.putUser({
+      username: ownerUsername,
+      password: ownerPassword,
+      roles: [ownerUsername],
+    });
     const reader = await samlAuth.asInteractiveUser({
       elasticsearch: { cluster: [] },
       kibana: [{ base: [], feature: { workflowsManagement: ['all'] }, spaces: [spaceId] }],
     });
-    ownerHeaders = { ...headers, ...owner.cookieHeader };
+    ownerHeaders = {
+      ...headers,
+      Authorization: `Basic ${Buffer.from(`${ownerUsername}:${ownerPassword}`).toString('base64')}`,
+    };
     readerHeaders = { ...headers, ...reader.cookieHeader };
     const profile = await apiClient.get('internal/security/user_profile', {
       headers: readerHeaders,
@@ -59,13 +77,15 @@ steps:
     workflowId = created.body.id;
   });
 
-  apiTest.afterAll(async ({ apiClient, kbnClient }) => {
+  apiTest.afterAll(async ({ apiClient, kbnClient, esClient }) => {
     if (workflowId) {
       await apiClient.delete(`s/${spaceId}/api/workflows/workflow/${workflowId}`, {
         headers: ownerHeaders,
       });
     }
     await kbnClient.request({ method: 'DELETE', path: `/api/spaces/space/${spaceId}` });
+    await esClient.security.deleteUser({ username: ownerUsername });
+    await esClient.security.deleteRole({ name: ownerUsername });
   });
 
   apiTest(
@@ -259,6 +279,49 @@ steps:
         expect(saved).toHaveStatusCode(200);
         expect(saved.body.enabled).toBe(false);
         expect(saved.body.yaml).toBe(disabledYaml);
+      }
+    }
+  );
+
+  apiTest(
+    'runs a private workflow on its schedule using the stored API key',
+    async ({ apiClient }) => {
+      apiTest.setTimeout(120_000);
+      const workflowPath = `s/${spaceId}/api/workflows/workflow/${workflowId}`;
+      const scheduledYaml = yaml
+        .replace('enabled: true', 'enabled: false')
+        .replace('type: manual', 'type: scheduled\n    with:\n      every: 1m');
+      expect(
+        await apiClient.put(workflowPath, { headers: ownerHeaders, body: { yaml: scheduledYaml } })
+      ).toHaveStatusCode(200);
+      expect(
+        await apiClient.put(`s/${spaceId}/internal/workflows/${workflowId}/access_control`, {
+          headers: ownerHeaders,
+          body: { access_mode: 'private', entries: [] },
+        })
+      ).toHaveStatusCode(200);
+      try {
+        expect(
+          await apiClient.put(workflowPath, { headers: ownerHeaders, body: { enabled: true } })
+        ).toHaveStatusCode(200);
+        await expect
+          .poll(
+            async () => {
+              const executions = await apiClient.get(`${workflowPath}/executions`, {
+                headers: ownerHeaders,
+              });
+              expect(executions).toHaveStatusCode(200);
+              return executions.body.results.find(
+                (execution: WorkflowExecutionDto) => execution.triggeredBy === 'scheduled'
+              )?.status;
+            },
+            { timeout: 90_000 }
+          )
+          .toBe('completed');
+      } finally {
+        expect(
+          await apiClient.put(workflowPath, { headers: ownerHeaders, body: { yaml } })
+        ).toHaveStatusCode(200);
       }
     }
   );

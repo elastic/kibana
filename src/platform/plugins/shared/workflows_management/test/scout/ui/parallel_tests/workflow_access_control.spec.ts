@@ -16,7 +16,7 @@ import { getDummyWorkflowYaml } from '../fixtures/workflows';
 
 test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
   let workflowId: string | undefined;
-  let isAdminOwner = false;
+  let ownerHeaders: Record<string, string>;
 
   test.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.uiSettings.set({ [WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID]: true });
@@ -24,18 +24,21 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
 
   test.beforeEach(async () => {
     workflowId = undefined;
-    isAdminOwner = false;
   });
 
-  test.afterEach(async ({ browserAuth, page, scoutSpace }) => {
+  test.afterEach(async ({ apiClient, scoutSpace }) => {
     if (workflowId) {
-      if (isAdminOwner) await browserAuth.loginAsAdmin();
-      const origin = new URL(page.url()).origin;
-      const response = await page.request.delete(
-        `${origin}/s/${scoutSpace.id}/api/workflows/workflow/${workflowId}`,
-        { headers: { 'kbn-xsrf': 'scout', 'elastic-api-version': '2023-10-31' } }
+      const response = await apiClient.delete(
+        `s/${scoutSpace.id}/api/workflows/workflow/${workflowId}`,
+        {
+          headers: {
+            ...ownerHeaders,
+            'kbn-xsrf': 'scout',
+            'elastic-api-version': '2023-10-31',
+          },
+        }
       );
-      expect(response.status()).toBe(200);
+      expect(response.statusCode).toBe(200);
     }
   });
 
@@ -50,9 +53,12 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
     esClient,
     scoutSpace,
     browserAuth,
+    samlAuth,
   }, testInfo) => {
     test.setTimeout(120_000);
-    await browserAuth.loginAsViewer();
+    // Activate the recipient profile so it is available in the access picker.
+    await samlAuth.asInteractiveUser('viewer');
+    ownerHeaders = (await samlAuth.asInteractiveUser('editor')).cookieHeader;
     await browserAuth.loginAsPrivilegedUser();
     const editor = pageObjects.workflowEditor;
     await editor.gotoNewWorkflow();
@@ -137,12 +143,13 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
       pageObjects,
       page,
       scoutSpace,
+      samlAuth,
     }) => {
       test.setTimeout(120_000);
       const editor = pageObjects.workflowEditor;
-      await browserAuth.loginAsPrivilegedUser();
+      await samlAuth.asInteractiveUser('editor');
+      ownerHeaders = (await samlAuth.asInteractiveUser('admin')).cookieHeader;
       await browserAuth.loginAsAdmin();
-      isAdminOwner = true;
       await editor.gotoNewWorkflow();
       await editor.setYamlEditorValue(
         getDummyWorkflowYaml('Executor access').replace('enabled: true', `enabled: ${enabled}`)

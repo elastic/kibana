@@ -176,6 +176,25 @@ describe('runWorkflow', () => {
         }
       );
 
+      it('denies a private workflow when the execution identity has no profile', async () => {
+        mockGetCurrentWorkflow.mockResolvedValueOnce({
+          owner_id: 'owner',
+          access_control: { access_mode: 'private', entries: [] },
+        });
+        dependencies.coreStart.userProfile.getCurrentProfileId.mockResolvedValue(null);
+
+        await runWorkflowWithDefaults();
+
+        expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+          expect.objectContaining({
+            status: ExecutionStatus.FAILED,
+            error: expect.objectContaining({ type: 'WorkflowAccessDeniedError' }),
+          })
+        );
+        expect(workflowRuntime.start).not.toHaveBeenCalled();
+        expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
+      });
+
       it('resumes the waiting parent after child execution access is removed', async () => {
         mockGetCurrentWorkflow.mockResolvedValueOnce({
           owner_id: 'owner',
