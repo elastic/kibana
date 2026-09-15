@@ -100,7 +100,7 @@ apiTest.describe(
     };
 
     apiTest.beforeAll(async ({ samlAuth }) => {
-      ({ cookieHeader } = await samlAuth.asStreamsAdmin());
+      ({ cookieHeader } = await samlAuth.asNightshiftEngineAdmin());
     });
 
     apiTest.beforeEach(async ({ apiClient }) => {
