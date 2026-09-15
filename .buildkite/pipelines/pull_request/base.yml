@@ -1,5 +1,9 @@
 env:
   KBN_ES_SNAPSHOT_USE_CACHED: 'true'
+  # POC: in-VM spot preemption detection for FTR jobs (see preemption_watcher.sh);
+  # STOP_AGENT fails the job fast on preemption instead of waiting for lost-agent detection
+  FTR_PREEMPTION_WATCH: 'true'
+  FTR_PREEMPTION_STOP_AGENT: 'true'
 
 steps:
   - command: .buildkite/scripts/steps/build_kibana.sh

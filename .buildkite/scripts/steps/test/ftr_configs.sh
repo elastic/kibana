@@ -59,6 +59,25 @@ fi
 failedConfigs=""
 results=()
 
+# POC: in-VM spot preemption detection (see preemption_watcher.sh). With
+# FTR_PREEMPTION_STOP_AGENT the watcher also stops the agent on preemption so the
+# job fails fast (signal_reason=agent_stop) instead of waiting for lost-agent detection.
+PREEMPTION_WATCHER_PID=""
+if [[ "${FTR_PREEMPTION_WATCH:-}" =~ ^(1|true)$ ]]; then
+  PREEMPTED_KEY="${BUILDKITE_STEP_ID}${FTR_CONFIG_GROUP_KEY}_preempted"
+  if [[ "${BUILDKITE_RETRY_COUNT:-0}" != "0" ]]; then
+    previousPreemption=$(buildkite-agent meta-data get "$PREEMPTED_KEY" --default '' --log-level error || true)
+    if [[ "$previousPreemption" ]]; then
+      echo "--- Previous attempt was preempted: $previousPreemption"
+      echo "stop-agent result: $(buildkite-agent meta-data get "${PREEMPTED_KEY}_stop" --default '<none>' --log-level error || true)"
+    fi
+  fi
+  mkdir -p target/preemption
+  PREEMPTION_STOP_AGENT="${FTR_PREEMPTION_STOP_AGENT:-}" .buildkite/scripts/common/preemption_watcher.sh &
+  PREEMPTION_WATCHER_PID=$!
+  trap 'kill "$PREEMPTION_WATCHER_PID" 2>/dev/null || true' EXIT
+fi
+
 while read -r config; do
   if [[ ! "$config" ]]; then
     continue;
@@ -80,6 +99,9 @@ while read -r config; do
   fi
 
   start=$(date +%s)
+  if [[ "$PREEMPTION_WATCHER_PID" ]]; then
+    echo "$config" > target/preemption/current_config
+  fi
 
   if [[ "${USE_CHROME_BETA:-}" =~ ^(1|true)$ ]]; then
     echo "USE_CHROME_BETA was set - using google-chrome-beta"
