@@ -17,11 +17,19 @@ import {
 } from './health_diagnostic_service.types';
 
 // Versions this parser recognises; anything else → unknown_version.
-const VALID_VERSIONS = [1, 2, 3] as const;
+const VALID_VERSIONS = [1, 2, 3, 4] as const;
 type ValidVersion = (typeof VALID_VERSIONS)[number];
 
 const filterlistSchema = z.record(z.string(), z.nativeEnum(Action));
 const queryTypeSchema = z.nativeEnum(QueryType);
+// Accepts YYYY-MM-DD strings, ISO datetime strings (truncated to date), and YAML Date objects.
+const expiresAtSchema = z
+  .preprocess((val) => {
+    if (val instanceof Date) return val.toISOString().slice(0, 10);
+    if (typeof val === 'string') return val.slice(0, 10);
+    return val;
+  }, z.string().date())
+  .optional();
 
 // ---------------------------------------------------------------------------
 // Shared index-query logic (used by v2 and v3 index schemas)
@@ -60,6 +68,7 @@ interface IndexQueryRaw {
   size?: number;
   tiers?: string[];
   encryptionKeyId?: string;
+  encryptDocument?: true;
 }
 
 const validateIndexQuery = (data: IndexQueryRaw, ctx: z.RefinementCtx): void => {
@@ -133,6 +142,7 @@ const transformIndexQuery = (data: IndexQueryRaw): IndexQuery => {
     query: data.query,
   };
   if (data.encryptionKeyId !== undefined) q.encryptionKeyId = data.encryptionKeyId;
+  if (data.encryptDocument !== undefined) q.encryptDocument = data.encryptDocument;
   if (data.size !== undefined) q.size = data.size;
   if (data.tiers !== undefined) q.tiers = data.tiers;
   if (integrations !== undefined) q.integrations = integrations;
@@ -163,6 +173,34 @@ const v3IndexSchema = z
   .strict()
   .superRefine(validateIndexQuery)
   .transform(transformIndexQuery);
+
+const validateEncryptDocument = (
+  data: {
+    encryptDocument?: true;
+    encryptionKeyId?: string;
+    filterlist?: Record<string, Action>;
+  },
+  ctx: z.RefinementCtx
+): void => {
+  if (data.encryptDocument !== true) return;
+  if (!data.encryptionKeyId) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'encryptionKeyId is required when encryptDocument is true',
+    });
+  }
+  const encryptFields = Object.entries(data.filterlist ?? {})
+    .filter(([, action]) => action === Action.ENCRYPT)
+    .map(([field]) => field);
+  if (encryptFields.length > 0) {
+    ctx.addIssue({
+      code: 'custom',
+      message: `encrypt action is forbidden when encryptDocument is true: ${encryptFields.join(
+        ', '
+      )}`,
+    });
+  }
+};
 
 // V3 API integrations: accepts a comma-separated string OR a YAML string[] sequence,
 // unlike v2 integrations which only accepts a string.
@@ -230,6 +268,78 @@ const v3ApiSchema = z
     return q;
   });
 
+// V4 index: same as v3 but filterlist is optional (defaults to {}) and adds encryptDocument/expiresAt.
+const v4IndexSchema = z
+  .object({
+    version: z.literal(4),
+    ...indexQueryFields,
+    filterlist: filterlistSchema.optional().default({}),
+    encryptDocument: z.literal(true).optional(),
+    expiresAt: expiresAtSchema,
+  })
+  .strict()
+  .superRefine(validateIndexQuery)
+  .superRefine(validateEncryptDocument)
+  .transform((data): IndexQuery => {
+    const q = transformIndexQuery(data);
+    if (data.expiresAt !== undefined) q.expiresAt = data.expiresAt;
+    return q;
+  });
+
+// V4 API: same as v3 but filterlist is optional (defaults to {}) and adds encryptDocument.
+const v4ApiSchema = z
+  .object({
+    id: z.string().min(1),
+    name: z.string().min(1),
+    version: z.literal(4),
+    type: z.literal('API'),
+    api: z.string().min(1),
+    responsePath: z.string().optional(),
+    scheduleCron: z.string().min(1),
+    enabled: z.boolean(),
+    filterlist: filterlistSchema.optional().default({}),
+    pathParams: z.record(z.string(), z.string()).optional(),
+    queryParams: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
+    responsePathKey: z.string().optional(),
+    integrations: v3IntegrationsSchema,
+    encryptionKeyId: z.string().min(1).optional(),
+    encryptDocument: z.literal(true).optional(),
+    expiresAt: expiresAtSchema,
+  })
+  .strict()
+  .superRefine((data, ctx) => {
+    const placeholders = [...data.api.matchAll(/\{([^}]+)\}/g)].map(([, key]) => key);
+    for (const key of placeholders) {
+      if (!data.pathParams || !(key in data.pathParams)) {
+        ctx.addIssue({
+          code: 'custom',
+          message: `Missing path parameter '${key}' for API template: ${data.api}`,
+        });
+      }
+    }
+  })
+  .superRefine(validateEncryptDocument)
+  .transform((data): ApiQuery => {
+    const q: ApiQuery = {
+      kind: 'api',
+      id: data.id,
+      name: data.name,
+      scheduleCron: data.scheduleCron,
+      filterlist: data.filterlist,
+      enabled: data.enabled,
+      api: data.api,
+    };
+    if (data.responsePath !== undefined) q.responsePath = data.responsePath;
+    if (data.pathParams !== undefined) q.pathParams = data.pathParams;
+    if (data.queryParams !== undefined) q.queryParams = data.queryParams;
+    if (data.responsePathKey !== undefined) q.responsePathKey = data.responsePathKey;
+    if (data.integrations !== undefined) q.integrations = data.integrations;
+    if (data.encryptionKeyId !== undefined) q.encryptionKeyId = data.encryptionKeyId;
+    if (data.encryptDocument !== undefined) q.encryptDocument = data.encryptDocument;
+    if (data.expiresAt !== undefined) q.expiresAt = data.expiresAt;
+    return q;
+  });
+
 // ---------------------------------------------------------------------------
 // Top-level schema
 // ---------------------------------------------------------------------------
@@ -242,7 +352,7 @@ const QueryDescriptor: z.ZodType<HealthDiagnosticQuery> = z
     const obj = raw as Record<string, unknown>;
     // Descriptors without a version field are legacy v1.
     return 'version' in obj ? obj : { ...obj, version: 1 };
-  }, z.union([v1Schema, v2Schema, v3ApiSchema, v3IndexSchema]))
+  }, z.union([v1Schema, v2Schema, v3ApiSchema, v3IndexSchema, v4ApiSchema, v4IndexSchema]))
   .catch((ctx) => {
     const raw = ctx.input as Record<string, unknown> | null;
     const version = raw?.version;

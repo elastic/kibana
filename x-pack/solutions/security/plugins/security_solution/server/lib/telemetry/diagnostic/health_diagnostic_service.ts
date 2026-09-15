@@ -432,7 +432,15 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
           // invalid_descriptor: let it pass so a skipped stat is reported in telemetry.
           return true;
         }
-        const { name, scheduleCron, enabled } = query;
+        const { name, scheduleCron, enabled, expiresAt } = query;
+        if (expiresAt !== undefined && now.toISOString().slice(0, 10) > expiresAt) {
+          this.logger.debug('Skipping expired health diagnostic query', {
+            queryId: (query as { id?: string }).id,
+            name,
+            expiresAt,
+          } as LogMeta);
+          return false;
+        }
         const lastExecutedAt = new Date(lastExecutionByQuery[name] ?? 0);
         return enabled && isDueForExecution(lastExecutedAt, now, scheduleCron);
       } catch (error) {

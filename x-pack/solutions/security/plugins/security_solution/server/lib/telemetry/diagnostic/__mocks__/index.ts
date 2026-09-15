@@ -181,6 +181,8 @@ export const createMockArtifactData = (
     scheduleCron: string;
     filterlist: string;
     enabled: boolean;
+    expiresAt: string;
+    version: number;
   }> = {}
 ) => {
   const defaults = {
@@ -192,9 +194,14 @@ export const createMockArtifactData = (
     scheduleCron: '5m',
     filterlist: 'user.name: keep',
     enabled: true,
+    expiresAt: undefined as string | undefined,
+    version: undefined as number | undefined,
   };
 
   const config = { ...defaults, ...overrides };
+
+  const versionLine = config.version !== undefined ? `\nversion: ${config.version}` : '';
+  const expiresAtLine = config.expiresAt !== undefined ? `\nexpiresAt: '${config.expiresAt}'` : '';
 
   return `---
 id: ${config.id}
@@ -205,7 +212,7 @@ query: '${config.query}'
 scheduleCron: ${config.scheduleCron}
 filterlist:
   ${config.filterlist}
-enabled: ${config.enabled}`;
+enabled: ${config.enabled}${versionLine}${expiresAtLine}`;
 };
 
 // Helper functions for common test patterns
