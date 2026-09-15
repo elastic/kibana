@@ -211,6 +211,9 @@ describe('useEnableOnboarding', () => {
 
     expect(post).toHaveBeenCalledWith(ALERTZERO_ONBOARDING_ENABLE_URL, {
       version: API_VERSIONS.internal.v1,
+      // http client requires a pre-stringified body; raw objects are coerced
+      // to "[object Object]" and rejected by the route's strict zod validation
+      body: JSON.stringify({}),
     });
     expect(services.uiSettings.set).toHaveBeenCalledWith(ALERTZERO_ENABLED_SETTING, true);
   });

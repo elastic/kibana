@@ -103,6 +103,9 @@ export const useEnableOnboarding = () => {
     mutationFn: (): Promise<unknown> =>
       services.http!.post(ALERTZERO_ONBOARDING_ENABLE_URL, {
         version: API_VERSIONS.internal.v1,
+        // The http client does not serialize objects (XHR would coerce them to
+        // "[object Object]"); the route's strict zod body requires valid JSON.
+        body: JSON.stringify({}),
       }),
     onSuccess: () => {
       services.uiSettings?.set(ALERTZERO_ENABLED_SETTING, true);
