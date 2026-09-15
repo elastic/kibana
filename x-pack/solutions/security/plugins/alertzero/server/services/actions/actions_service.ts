@@ -6,6 +6,7 @@
  */
 
 import { ACTION_WORKFLOW_TAG, actionMetadataSchema } from '@kbn/workflows/managed';
+import { ManualTriggerSchema } from '@kbn/workflows';
 import type { JsonSchema, WorkflowListDto } from '@kbn/workflows';
 import type { Logger } from '@kbn/logging';
 import type { ActionCatalogEntry, ListActionsResponse } from '@kbn/alertzero-common';
@@ -116,17 +117,26 @@ export class ActionsService {
 
   /**
    * Reads the JSON Schema the workflow declares on its manual trigger
-   * (`triggers[type=manual].inputs`). Definitions come back already validated
-   * and normalized by the workflow schema, so this only checks that the
-   * trigger's inputs are schema-shaped (`properties` at the root) — a legacy
-   * array-format input or anything unexpected simply yields `undefined` and
-   * the entry is returned without `inputSchema`.
+   * (`triggers[type=manual].inputs`) and returns it verbatim. The trigger is
+   * parsed with the workflow's own {@link ManualTriggerSchema}: definitions are
+   * validated and normalized by the workflow schema on the way in, and this
+   * guards the defensive path where an unnormalized or stale definition still
+   * carries legacy array-format inputs or a malformed schema — anything that
+   * does not parse yields `undefined` and the entry is returned without
+   * `inputSchema`, so a malformed schema is never published.
    */
   private readInputSchema(definition: ActionWorkflowDefinition | null): JsonSchema | undefined {
-    const inputs = definition?.triggers?.find((trigger) => trigger.type === 'manual')?.inputs;
-    if (typeof inputs !== 'object' || inputs === null || Array.isArray(inputs)) {
+    const manualTrigger = definition?.triggers?.find((t) => t.type === 'manual');
+    if (!manualTrigger) {
       return undefined;
     }
-    return 'properties' in inputs ? (inputs as JsonSchema) : undefined;
+    // Parse as a gate only: a successful parse means `inputs` is a well-formed
+    // JSON Schema (or the legacy array format), but the parsed copy strips
+    // unknown keys — the entry publishes the original value, verbatim.
+    if (!ManualTriggerSchema.safeParse(manualTrigger).success) {
+      return undefined;
+    }
+    const { inputs } = manualTrigger;
+    return Array.isArray(inputs) ? undefined : (inputs as JsonSchema);
   }
 }

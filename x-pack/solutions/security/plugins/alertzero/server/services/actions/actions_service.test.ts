@@ -198,6 +198,10 @@ describe('ActionsService', () => {
       },
       required: ['actionInput'],
       additionalProperties: false,
+      // x- prefixed annotations are legal JSON Schema but unknown to the
+      // workflow's zod schema, which would strip them from its parsed copy —
+      // the catalog must publish the original object, verbatim.
+      'x-es-validation': { message: 'Action input' },
     };
     const { client } = makeManagement([
       page([
@@ -224,11 +228,20 @@ describe('ActionsService', () => {
         workflowItem('alert-trigger', { name: 'Alert trigger' }, ['action'], {
           triggers: [{ type: 'alert', inputs: { properties: {} } }],
         }),
+        // Schema-shaped but malformed values the manual-trigger schema rejects.
+        workflowItem('properties-array', { name: 'Properties array' }, ['action'], {
+          triggers: [{ type: 'manual', inputs: { properties: [] } }],
+        }),
+        workflowItem('properties-null', { name: 'Properties null' }, ['action'], {
+          triggers: [{ type: 'manual', inputs: { properties: null } }],
+        }),
       ]),
     ]);
     const service = new ActionsService(() => client, logger);
     const result = await service.list('default');
     expect(result.actions).toEqual([
+      expect.not.objectContaining({ inputSchema: expect.anything() }),
+      expect.not.objectContaining({ inputSchema: expect.anything() }),
       expect.not.objectContaining({ inputSchema: expect.anything() }),
       expect.not.objectContaining({ inputSchema: expect.anything() }),
       expect.not.objectContaining({ inputSchema: expect.anything() }),
