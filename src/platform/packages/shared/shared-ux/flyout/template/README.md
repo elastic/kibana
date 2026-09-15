@@ -29,14 +29,14 @@ import { FlyoutTemplate } from '@kbn/flyout-template';
 
 The root forwards a fixed subset of `EuiFlyoutProps` — `id`, `hasChildBackground`, `onClose`, `size`, `minWidth`, `maxWidth`, `type`, `paddingSize`, `ownFocus`, `resizable`, `onResize`, `outsideClickCloses`, `focusTrapProps`, `closeButtonProps`, `session`, `historyKey`, `onActive`, `flyoutMenuProps` — plus `aria-label`, `aria-labelledby`, and `data-test-subj`. Anything not in that list is not accepted. `size` defaults to `m` and `session` defaults to `start`; `flyoutMenuDisplayMode` is fixed to `auto` and is not configurable.
 
-Tab props also live on the root: `tabs` (array of `FlyoutTabProps`), `selectedTabId` (controlled), `defaultSelectedTabId` (uncontrolled initial), and `onTabChange` (called on every tab click either way). See [Tabs](#tabs) below.
+Tab selection props also live on the root: `selectedTabId` (controlled), `defaultSelectedTabId` (uncontrolled initial), and `onTabChange` (called on every tab click either way). See [`src/header/tab/README.md`](src/header/tab/README.md).
 
 ## Zones
 
 **`FlyoutTemplate.Header`** renders three stacked regions: an always-visible title row, a collapsible region holding the description, and an always-visible trailing region with the full-bleed bottom divider. See [`src/header/README.md`](src/header/README.md) for header blocks (MetaBlock, Badge, InfoBlock) and collapse behavior.
 
 - `title` — required `ReactNode`. Rendered as an `<h3>` carrying a generated id.
-- `titleIcon` — EUI icon type rendered after the title. Without `titleTooltip` it is decorative (`aria-hidden`).
+- `titleIcon` — EUI icon type rendered after the title, in both the expanded and the compact layout. Without `titleTooltip` it is decorative (`aria-hidden`).
 - `titleTooltip` — when set, the title icon becomes a focusable `EuiIconTip` using `titleIcon` as its type, defaulting to `info`.
 - `description` — arbitrary `ReactNode` rendered below the title in subdued text. Not wrapped in a `<p>`, so block content is valid.
 - `collapsed` — renders the compact layout permanently, regardless of scroll position.
@@ -115,3 +115,32 @@ Zone subjects derive from the root `data-test-subj` prop with a zone suffix, and
 | Footer | `${root}Footer` | `FlyoutTemplate.Footer` `data-test-subj` |
 
 Footer action buttons are not derived; their `data-test-subj` passes through to the button as given.
+
+## Opening a flyout imperatively
+
+`core.overlays.openFlyoutTemplate` takes the template's root props and a component that renders `FlyoutTemplate` with its zones. Because the component renders the template itself, the zones are literal children of it and every rule documented above still applies.
+
+```tsx
+const AlertDetails = ({ onClose }) => {
+  const alert = useAlert();
+
+  return (
+    <FlyoutTemplate onClose={onClose}>
+      <FlyoutTemplate.Header title="Alert details" />
+      <FlyoutTemplate.Body>
+        <FlyoutTemplate.Body.Section title="Summary">
+          <AlertSummary alert={alert} />
+        </FlyoutTemplate.Body.Section>
+      </FlyoutTemplate.Body>
+    </FlyoutTemplate>
+  );
+};
+
+core.overlays.openFlyoutTemplate({ size: 'm', session: 'start' }, AlertDetails);
+```
+
+The component is a standard React boundary and can use hooks and re-render. `onClose` is the only root prop it sets—ensuring the flyout can always be dismissed—and it is passed to the content component. All other root props come from the options argument; props passed directly to `FlyoutTemplate` are ignored and will warn in development.
+
+Wrapping `onClose` is fine. If you don't call it, the flyout will still close since EUI's flyout manager forces teardown regardless. Use `useFlyoutClose` to close a flyout from a deeply nested component.
+
+**A part written inside another component does not render.** Parts are identified by parsing direct JSX children. If a part is wrapped inside another component, the parser won't find it and it will silently fail to render. Always keep parts directly inside their respective zones, and put your custom components inside the parts instead.

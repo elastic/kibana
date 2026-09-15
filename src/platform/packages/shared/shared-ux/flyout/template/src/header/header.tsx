@@ -11,6 +11,8 @@ import type { EuiFlyoutProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBadgeGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyoutHeader,
   EuiPopover,
   EuiSpacer,
@@ -87,6 +89,10 @@ const collapsibleRegionStyles = ({ euiTheme }: UseEuiTheme) => {
     collapsedRow: css`
       /* Reserve space so the title does not run under EUI's absolutely-positioned close button. */
       padding-inline-end: ${euiTheme.size.xxl};
+    `,
+    collapsedTitleItem: css`
+      /* Prevent the title from pushing the icon out of the flex container. */
+      min-inline-size: 0;
     `,
     collapsedTitle: css`
       white-space: nowrap;
@@ -234,6 +240,7 @@ export const HeaderZone = ({
   } = useFlyoutHeaderCollapse();
   const isCollapsed = collapsed || isScrollCollapsed;
   const horizontalPadding = resolveHorizontalPadding(euiTheme, paddingSize);
+  const titleIconNode = renderTitleIcon(titleIcon, titleTooltip);
 
   // Every block kind carries its `instanceId` forward as its React key, so reordering or
   // removing one does not make React reuse the wrong element.
@@ -286,23 +293,31 @@ export const HeaderZone = ({
             {/* Always visible: title row. Switches between expanded and compact on collapse. */}
             <div ref={!isCollapsed ? expandedTitleRef : undefined}>
               {isCollapsed ? (
-                <div css={collapseStyles.collapsedRow}>
-                  <EuiTitle size="xs">
-                    <h3
-                      id={flyoutTitleId}
-                      css={collapseStyles.collapsedTitle}
-                      title={typeof title === 'string' ? title : undefined}
-                    >
-                      {title}
-                    </h3>
-                  </EuiTitle>
-                </div>
+                <EuiFlexGroup
+                  gutterSize="xs"
+                  alignItems="center"
+                  responsive={false}
+                  css={collapseStyles.collapsedRow}
+                >
+                  <EuiFlexItem grow={false} css={collapseStyles.collapsedTitleItem}>
+                    <EuiTitle size="xs">
+                      <h3
+                        id={flyoutTitleId}
+                        css={collapseStyles.collapsedTitle}
+                        title={typeof title === 'string' ? title : undefined}
+                      >
+                        {title}
+                      </h3>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  {titleIconNode && <EuiFlexItem grow={false}>{titleIconNode}</EuiFlexItem>}
+                </EuiFlexGroup>
               ) : (
                 renderTitleWithIcon(
                   <EuiTitle size="m">
                     <h3 id={flyoutTitleId}>{title}</h3>
                   </EuiTitle>,
-                  renderTitleIcon(titleIcon, titleTooltip)
+                  titleIconNode
                 )
               )}
             </div>
@@ -314,6 +329,9 @@ export const HeaderZone = ({
                 isCollapsed ? collapseStyles.wrapperCollapsed : collapseStyles.wrapperExpanded,
               ]}
               aria-hidden={isCollapsed || undefined}
+              // Use inert instead of visibility to remove the region from the tab order immediately.
+              // React 18 doesn't type this native attribute, so we spread it.
+              {...(isCollapsed && { inert: '' })}
               data-test-subj="flyoutHeaderCollapsibleRegion"
             >
               <div css={collapseStyles.inner} ref={!collapsed ? collapsibleRef : undefined}>

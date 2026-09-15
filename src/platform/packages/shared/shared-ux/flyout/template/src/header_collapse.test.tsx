@@ -103,6 +103,29 @@ describe('FlyoutTemplate header collapse on scroll', () => {
       </FlyoutTemplate>
     );
 
+  /** Same shape, but the collapsible region owns a focusable element. */
+  const renderFlyoutWithFocusableHeader = () =>
+    render(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title="Long title" description="A timestamp">
+          <FlyoutTemplate.Header.MetaBlock title="Owner">
+            <a href="#test">owner@elastic.co</a>
+          </FlyoutTemplate.Header.MetaBlock>
+        </FlyoutTemplate.Header>
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+  const collapseByScroll = (overflowEl: HTMLElement) => {
+    primeCollapseBudget();
+    setScrollState(overflowEl, { scrollTop: 20, scrollHeight: 1000, clientHeight: 400 });
+    act(() => {
+      fireEvent.scroll(overflowEl);
+    });
+  };
+
   it('hides the collapsible region when scrolled past the threshold', () => {
     renderCollapsibleFlyout();
     const overflowEl = screen.getByTestId('euiFlyoutBodyOverflow');
@@ -117,6 +140,47 @@ describe('FlyoutTemplate header collapse on scroll', () => {
     });
 
     expect(region).toHaveAttribute('aria-hidden', 'true');
+    expect(region).toHaveAttribute('inert');
+  });
+
+  it('takes the collapsible region out of the tab order as soon as it is hidden', () => {
+    renderCollapsibleFlyout();
+    const overflowEl = screen.getByTestId('euiFlyoutBodyOverflow');
+    const region = screen.getByTestId('flyoutHeaderCollapsibleRegion');
+
+    expect(region).not.toHaveAttribute('inert');
+
+    collapseByScroll(overflowEl);
+
+    // `aria-hidden` alone would disagree with focusability for the length of the animation.
+    expect(region).toHaveAttribute('inert');
+  });
+
+  it('moves focus to the body scroll container when the header collapses under it', () => {
+    renderFlyoutWithFocusableHeader();
+    const overflowEl = screen.getByTestId('euiFlyoutBodyOverflow');
+    const link = screen.getByRole('link', { name: 'owner@elastic.co' });
+
+    link.focus();
+    expect(link).toHaveFocus();
+
+    collapseByScroll(overflowEl);
+
+    // Left alone, focus would escape to <body>.
+    expect(overflowEl).toHaveFocus();
+  });
+
+  it('leaves focus alone when it sits outside the collapsible region', () => {
+    renderFlyoutWithFocusableHeader();
+    const overflowEl = screen.getByTestId('euiFlyoutBodyOverflow');
+    const closeButton = screen.getByLabelText('Close this dialog');
+
+    closeButton.focus();
+    expect(closeButton).toHaveFocus();
+
+    collapseByScroll(overflowEl);
+
+    expect(closeButton).toHaveFocus();
   });
 
   it('keeps the title heading visible with its id in collapsed state', () => {
@@ -132,6 +196,32 @@ describe('FlyoutTemplate header collapse on scroll', () => {
     const heading = screen.getByRole('heading', { name: 'Long title' });
     expect(heading).toBeInTheDocument();
     expect(heading.id).toMatch(/^flyoutTemplateTitle/);
+  });
+
+  it('keeps the title tooltip anchor focusable after collapsing on scroll', () => {
+    const { container } = render(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header
+          title="Long title"
+          description="A timestamp"
+          titleTooltip="Extra context"
+        />
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+    const overflowEl = screen.getByTestId('euiFlyoutBodyOverflow');
+
+    collapseByScroll(overflowEl);
+    expect(screen.getByTestId('flyoutHeaderCollapsibleRegion')).toHaveAttribute(
+      'aria-hidden',
+      'true'
+    );
+
+    const anchor = container.querySelector('.euiToolTipAnchor');
+    expect(anchor).not.toBeNull();
+    expect(anchor?.querySelector('[data-euiicon-type="info"]')).toHaveAttribute('tabindex', '0');
   });
 
   it('stays expanded when the body does not overflow enough to cover the collapse budget', () => {
@@ -306,15 +396,20 @@ describe('FlyoutTemplate header collapse on scroll', () => {
     expect(region).not.toHaveAttribute('aria-hidden');
   });
 
-  /** Renders the flyout and returns the header element plus a mock for the scroller's scrollBy. */
-  const setUpWheelForwarding = () => {
+  /**
+   * Renders the flyout and returns the header element plus a mock for the scroller's scrollBy.
+   * We set scroll state explicitly because jsdom reports scrollHeight as 0.
+   */
+  const setUpWheelForwarding = (
+    scrollState = { scrollTop: 100, scrollHeight: 1000, clientHeight: 400 }
+  ) => {
     renderCollapsibleFlyout();
     const overflowEl = screen.getByTestId('euiFlyoutBodyOverflow');
     const headerEl = document.querySelector('.euiFlyoutHeader') as HTMLElement;
     const scrollBy = jest.fn();
     Object.defineProperty(overflowEl, 'scrollBy', { value: scrollBy, configurable: true });
     // Page mode derives its pixel delta from the viewport height.
-    Object.defineProperty(overflowEl, 'clientHeight', { value: 400, configurable: true });
+    setScrollState(overflowEl, scrollState);
     return { headerEl, scrollBy };
   };
 
@@ -377,6 +472,55 @@ describe('FlyoutTemplate header collapse on scroll', () => {
     expect(scrollBy).not.toHaveBeenCalled();
     expect(notCancelled).toBe(true);
   });
+
+  it('releases the wheel event at the end of the scroll range so the scroll can chain outward', () => {
+    const { headerEl, scrollBy } = setUpWheelForwarding({
+      scrollTop: 600,
+      scrollHeight: 1000,
+      clientHeight: 400,
+    });
+
+    let notCancelled = true;
+    act(() => {
+      notCancelled = fireEvent.wheel(headerEl, { deltaY: 50 });
+    });
+
+    // This verifies we don't accidentally cancel scroll chaining to the outer scroller.
+    expect(notCancelled).toBe(true);
+    expect(scrollBy).not.toHaveBeenCalled();
+  });
+
+  it('releases the wheel event at the top of the scroll range when scrolling up', () => {
+    const { headerEl, scrollBy } = setUpWheelForwarding({
+      scrollTop: 0,
+      scrollHeight: 1000,
+      clientHeight: 400,
+    });
+
+    let notCancelled = true;
+    act(() => {
+      notCancelled = fireEvent.wheel(headerEl, { deltaY: -50 });
+    });
+
+    expect(notCancelled).toBe(true);
+    expect(scrollBy).not.toHaveBeenCalled();
+  });
+
+  it('still forwards the wheel event when scrolling away from an edge', () => {
+    const { headerEl, scrollBy } = setUpWheelForwarding({
+      scrollTop: 600,
+      scrollHeight: 1000,
+      clientHeight: 400,
+    });
+
+    let notCancelled = true;
+    act(() => {
+      notCancelled = fireEvent.wheel(headerEl, { deltaY: -50 });
+    });
+
+    expect(notCancelled).toBe(false);
+    expect(scrollBy).toHaveBeenCalledWith({ top: -50 });
+  });
 });
 
 describe('FlyoutTemplate Header collapsed prop', () => {
@@ -403,16 +547,49 @@ describe('FlyoutTemplate Header collapsed prop', () => {
 
   it('hides the collapsible region immediately without needing a scroll', () => {
     renderCollapsedHeader();
-    expect(screen.getByTestId('flyoutHeaderCollapsibleRegion')).toHaveAttribute(
-      'aria-hidden',
-      'true'
-    );
+    const region = screen.getByTestId('flyoutHeaderCollapsibleRegion');
+    expect(region).toHaveAttribute('aria-hidden', 'true');
+    expect(region).toHaveAttribute('inert');
   });
 
   it('puts the title string on the heading title attribute for native tooltip', () => {
     renderCollapsedHeader();
     const heading = screen.getByRole('heading', { name: 'Compact title' });
     expect(heading).toHaveAttribute('title', 'Compact title');
+  });
+
+  it('keeps a decorative title icon beside the compact title', () => {
+    const { container } = render(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title="Compact title" titleIcon="warning" collapsed />
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(container.querySelector('[data-euiicon-type="warning"]')).toHaveAttribute(
+      'aria-hidden',
+      'true'
+    );
+  });
+
+  it('keeps the title tooltip reachable beside the compact title', () => {
+    const { container } = render(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title="Compact title" titleTooltip="Extra context" collapsed />
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    const anchor = container.querySelector('.euiToolTipAnchor');
+    expect(anchor).not.toBeNull();
+    expect(anchor?.querySelector('[data-euiicon-type="info"]')).toHaveAttribute('tabindex', '0');
+
+    // Ensure the anchor is in the visible title row.
+    expect(screen.getByTestId('flyoutHeaderCollapsibleRegion').contains(anchor)).toBe(false);
   });
 
   /** Records which elements a `scroll` listener gets attached to during `render`. */

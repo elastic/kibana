@@ -34,6 +34,21 @@ const WHEEL_LINE_HEIGHT = 20;
  */
 const WHEEL_PAGE_FRACTION = 0.9;
 
+/** Margin of error for scroll calculations. */
+const SCROLL_EDGE_EPSILON = 1;
+
+/**
+ * Checks if the element is scrolled all the way in the given direction.
+ * We need this because calling preventDefault() stops the outer container from scrolling,
+ * which would make the footer unreachable on small screens.
+ */
+const isAtScrollEdge = (scroller: HTMLElement, delta: number): boolean => {
+  if (delta === 0) return true;
+  if (delta < 0) return scroller.scrollTop <= SCROLL_EDGE_EPSILON;
+  const maxScrollTop = scroller.scrollHeight - scroller.clientHeight;
+  return scroller.scrollTop >= maxScrollTop - SCROLL_EDGE_EPSILON;
+};
+
 /**
  * Normalizes a wheel delta to pixels, which is the only unit `scrollBy` accepts.
  *
@@ -97,6 +112,9 @@ export const useHeaderCollapse = ({
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const scrollerRef = useRef<HTMLElement | null>(null);
+  // Mirrors state so evaluate can read the current value without a functional updater.
+  const isCollapsedRef = useRef(false);
+  const collapsibleNodeRef = useRef<HTMLElement | null>(null);
   const collapsibleHeightRef = useRef(0);
   const expandedTitleHeightRef = useRef(0);
   const expandedSpacerHeightRef = useRef(0);
@@ -115,18 +133,30 @@ export const useHeaderCollapse = ({
     const collapsibleHeight = collapsibleHeightRef.current;
     const collapseBudget =
       collapsibleHeight + expandedTitleHeightRef.current + expandedSpacerHeightRef.current;
-    setIsCollapsed((prev) => {
-      // Nothing measured yet, so there is no budget to judge the collapse against. A header with
-      // an empty collapsible region still has one, because the title row and spacer shrink too.
-      if (collapseBudget <= 0) return false;
-      // The overflow guard gates entry only. Collapsing shrinks the header, which grows the body
-      // and shrinks its scroll range, so re-testing the guard while collapsed judges the state
-      // against geometry the collapse itself produced: it reports "cannot collapse", expands,
-      // which restores the scroll range and re-collapses, and the header oscillates. Leaving
-      // collapse is therefore driven by scroll position alone.
-      if (prev) return scrollTop > EXPAND_AT;
-      return scrollHeight - clientHeight > collapseBudget + EXPAND_AT && scrollTop >= COLLAPSE_AT;
-    });
+    const wasCollapsed = isCollapsedRef.current;
+
+    let next: boolean;
+    // Wait until we have measurements before deciding to collapse.
+    if (collapseBudget <= 0) {
+      next = false;
+    } else if (wasCollapsed) {
+      // Only check the overflow limit when deciding to collapse.
+      // Checking it while already collapsed causes an infinite loop of expanding and collapsing.
+      next = scrollTop > EXPAND_AT;
+    } else {
+      next = scrollHeight - clientHeight > collapseBudget + EXPAND_AT && scrollTop >= COLLAPSE_AT;
+    }
+
+    if (next === wasCollapsed) return;
+
+    // If focus is inside the region we're about to hide,
+    // move it to the scroll container to keep it inside the flyout.
+    if (next && collapsibleNodeRef.current?.contains(document.activeElement)) {
+      scroller.focus();
+    }
+
+    isCollapsedRef.current = next;
+    setIsCollapsed(next);
   }, []);
 
   // A separate flag rather than testing `rafRef`, whose assignment lands after a synchronous callback.
@@ -190,6 +220,7 @@ export const useHeaderCollapse = ({
 
   const collapsibleRef = useCallback(
     (node: HTMLElement | null) => {
+      collapsibleNodeRef.current = node;
       observeNaturalHeight(node, collapsibleHeightRef, collapsibleCleanupRef);
     },
     [observeNaturalHeight]
@@ -222,10 +253,13 @@ export const useHeaderCollapse = ({
       // Let modified wheel events (Ctrl/Cmd+scroll = browser zoom, Alt+scroll = h-scroll, etc.)
       // pass through unmodified so the browser can handle them normally.
       if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
+      const delta = wheelDeltaToPixels(event, scroller.clientHeight);
+      // Allow the outer container to scroll if this container is at its limit.
+      if (isAtScrollEdge(scroller, delta)) return;
       // The header is not scrollable, so the browser would otherwise scroll the page behind it.
       // Requires the non-passive listener below; React's onWheel is passive and cannot do this.
       event.preventDefault();
-      scroller.scrollBy({ top: wheelDeltaToPixels(event, scroller.clientHeight) });
+      scroller.scrollBy({ top: delta });
     };
 
     header.addEventListener('wheel', onWheel, { passive: false });

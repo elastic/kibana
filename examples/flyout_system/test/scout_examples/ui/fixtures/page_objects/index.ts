@@ -7,16 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FlyoutOwnFocusSwitch } from './flyout_ownfocus_switch';
-export { FlyoutTypeSwitch } from './flyout_type_switch';
-
-export {
-  createChildFlyoutDescriptionItems,
-  createMainFlyoutDescriptionItems,
-} from './flyout_description_items';
-
-export { headerBlocks } from './flyout_header_blocks';
-
-export { returnFocusToTrigger } from './return_focus';
-
-export const FLYOUT_MIN_WIDTH = 300;
+export { FlyoutSystemApp } from './flyout_system_app';
+export type { ChildLabel, FlyoutForm } from './flyout_system_app';

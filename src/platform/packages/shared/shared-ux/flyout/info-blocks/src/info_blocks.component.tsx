@@ -96,8 +96,9 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
       container-name: ${CONTAINER_NAME};
     `,
 
-    panel: css`
+    grid: css`
       display: grid;
+      margin: 0;
 
       & > * {
         position: relative;
@@ -134,10 +135,6 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
       3: responsiveGrid(3),
       4: responsiveGrid(FLYOUT_MAX_GRID_COLUMNS),
     },
-
-    cell: css`
-      padding: ${euiTheme.size.m};
-    `,
   };
 };
 
@@ -156,14 +153,14 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({
         paddingSize="none"
         hasShadow={false}
         hasBorder
-        css={[memoized.panel, memoized.grids[columns]]}
         data-test-subj={rest['data-test-subj'] ?? 'infoBlocks'}
       >
-        {items.map((item, index) => (
-          <div key={item.id ?? index} css={memoized.cell}>
-            <InfoBlock {...item} />
-          </div>
-        ))}
+        {/* Apply the grid layout to the dl element. */}
+        <dl css={[memoized.grid, memoized.grids[columns]]}>
+          {items.map((item, index) => (
+            <InfoBlock key={item.id ?? index} {...item} />
+          ))}
+        </dl>
       </EuiPanel>
     </div>
   );
