@@ -33,7 +33,11 @@ export const servers: ScoutServerConfig = {
     ...defaultConfig.kbnTestServer,
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
+      // AlertZero requires agenticInvestigations (requiredPlugins in kibana.jsonc);
+      // it defaults to disabled, which transitively disables alertzero even when
+      // alertzero itself is enabled.
       '--xpack.alertzero.enabled=true',
+      '--xpack.agenticInvestigations.enabled=true',
       '--uiSettings.overrides.workflows:ui:enabled=true',
       '--uiSettings.overrides.workflows:aiAgent:enabled=true',
     ],
