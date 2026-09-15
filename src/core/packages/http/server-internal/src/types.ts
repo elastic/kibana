@@ -91,6 +91,12 @@ export interface InternalHttpServiceStart extends Omit<HttpServiceStart, 'static
   setRedactedSessionIdGetter: (
     getter: (request: KibanaRequest) => Promise<string | undefined>
   ) => void;
+  setSelfClientAuthHeaderAugmenter: (
+    augmenter: (
+      request: KibanaRequest,
+      currentHeaders: Headers
+    ) => Record<string, string> | undefined
+  ) => void;
 }
 
 /** @internal */

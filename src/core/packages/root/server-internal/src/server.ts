@@ -60,6 +60,11 @@ import type { DiscoveredPlugins } from '@kbn/core-plugins-server-internal';
 import { PluginsService } from '@kbn/core-plugins-server-internal';
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
 import { SecurityService } from '@kbn/core-security-server-internal';
+import {
+  HTTPAuthorizationHeader,
+  isUiamCredential,
+  isExternalUiamCredential,
+} from '@kbn/core-security-server';
 import { UserProfileService } from '@kbn/core-user-profile-server-internal';
 import { PricingService } from '@kbn/core-pricing-server-internal';
 import { CoreInjectionService } from '@kbn/core-di-server-internal';
@@ -606,6 +611,19 @@ export class Server {
     httpStart.setRedactedSessionIdGetter((request) =>
       securityStart.authc.getRedactedSessionId(request)
     );
+    const uiam = securityStart.authc.apiKeys.uiam;
+    if (uiam) {
+      httpStart.setSelfClientAuthHeaderAugmenter((request) => {
+        const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+        if (!authorizationHeader || !isUiamCredential(authorizationHeader)) {
+          return undefined;
+        }
+        if (isExternalUiamCredential(request)) {
+          return undefined;
+        }
+        return uiam.getInternalCallerAttestationHeaders(authorizationHeader);
+      });
+    }
     const coreUsageDataStart = this.coreUsageData.start({
       elasticsearch: elasticsearchStart,
       savedObjects: savedObjectsStart,

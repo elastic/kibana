@@ -33,6 +33,12 @@ import { SELF_CALL_HEADER } from './self_client_observer';
 const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
 const DEFAULT_TIMEOUT_MS = 60_000;
 const KIBANA_VERSION_HEADER = 'kbn-version';
+
+/** @internal */
+export type SelfClientAuthHeaderAugmenter = (
+  request: KibanaRequest,
+  currentHeaders: Headers
+) => Record<string, string> | undefined;
 export const SELF_CALL_RECURSION_ERROR =
   'Refusing Kibana self HTTP call because a self call cannot issue another self call.';
 export const SELF_CALL_MTLS_ERROR =
@@ -58,6 +64,7 @@ interface HttpSelfClientParams {
   readonly kibanaVersion: string;
   readonly log: Logger;
   readonly target: 'auto' | 'local';
+  readonly getAuthHeaderAugmenter?: () => SelfClientAuthHeaderAugmenter | undefined;
 }
 
 interface SelfFetchInit extends RequestInit {
@@ -255,6 +262,16 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
       headers.set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana');
     }
 
+    const augmenter = this.params.getAuthHeaderAugmenter?.();
+    if (augmenter) {
+      const augmented = augmenter(this.request, headers);
+      if (augmented) {
+        for (const [name, value] of Object.entries(augmented)) {
+          headers.set(name, value);
+        }
+      }
+    }
+
     return headers;
   }
 
@@ -357,7 +374,8 @@ const isProtectedHeader = (name: string) => {
     lowerName === 'host' ||
     lowerName.startsWith('kbn-') ||
     lowerName === SELF_CALL_HEADER ||
-    lowerName.startsWith('x-elastic-internal-')
+    lowerName.startsWith('x-elastic-internal-') ||
+    lowerName === 'x-kbn-uiam-internal-caller-attestation'
   );
 };
 

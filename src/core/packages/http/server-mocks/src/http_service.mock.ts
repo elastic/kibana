@@ -282,6 +282,7 @@ const createInternalStartContractMock = () => {
     staticAssets: createInternalStaticAssetsMock(basePath),
     isListening: jest.fn(),
     setRedactedSessionIdGetter: jest.fn(),
+    setSelfClientAuthHeaderAugmenter: jest.fn(),
   };
 
   mock.isListening.mockReturnValue(true);
