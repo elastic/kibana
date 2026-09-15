@@ -84,22 +84,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/recently_accessed.spec.ts",
-        "line": 89,
-        "column": 3
-      }
-    },
-    {
-      "id": "6fe77ca3288ac4f-843fa5bab50f38c",
-      "title": "recently accessed hover list shows viewed Discover sessions in the Discover hover list and navigates on click",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/recently_accessed.spec.ts",
-        "line": 143,
-        "column": 3
+        "line": 50,
+        "column": 28
       }
     }
   ]
