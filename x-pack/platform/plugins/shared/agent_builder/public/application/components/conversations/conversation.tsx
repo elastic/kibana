@@ -22,14 +22,13 @@ import {
   useHasActiveConversation,
 } from '../../hooks/use_conversation';
 import { ConversationInput } from './conversation_input/conversation_input';
-import { ConversationRounds } from './conversation_rounds/conversation_rounds';
+import { TimelineConnector } from './timeline/timeline_connector';
 import { NewConversationPrompt } from './new_conversation_prompt';
 import { useConversationId } from '../../context/conversation/use_conversation_id';
 import { useStreamingContext } from '../../context/streaming/streaming_context';
 import { useIsAnyConversationStreaming } from '../../hooks/use_is_any_conversation_streaming';
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
 import { useOnRoundFromOtherParticipant } from '../../hooks/use_on_round_from_other_participant';
-import { useAnchoredRoundIndex } from '../../hooks/use_anchored_round';
 import { useConversationStatus } from '../../hooks/use_conversation';
 import { useSendPredefinedInitialMessage } from '../../hooks/use_initial_message';
 import {
@@ -95,9 +94,7 @@ export const Conversation: React.FC<{}> = () => {
 
   // Observed, not read during render: a stale height makes the current round taller than the
   // viewport, scrolling its input out of view.
-  const { height: scrollContainerHeight } = useResizeObserver(scrollContainer, 'height');
-
-  const anchoredRoundIndex = useAnchoredRoundIndex();
+  useResizeObserver(scrollContainer, 'height');
 
   const stagedAttachmentIds = useMemo(() => {
     const ids = stagedAttachments.map((attachment) => attachment.id).filter(isString);
@@ -196,10 +193,7 @@ export const Conversation: React.FC<{}> = () => {
             css={scrollableStyles}
           >
             <EuiFlexItem css={[conversationElementWidthStyles, conversationElementPaddingStyles]}>
-              <ConversationRounds
-                scrollContainerHeight={scrollContainerHeight}
-                anchoredRoundIndex={anchoredRoundIndex}
-              />
+              <TimelineConnector />
             </EuiFlexItem>
           </EuiFlexGroup>
           {showScrollButton && <ScrollButton onClick={smoothScrollToBottom} />}

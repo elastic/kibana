@@ -9,11 +9,15 @@ import {
   ChatEventType,
   ConversationRoundStepType,
   ToolResultType,
+  TimelineEventType,
+  EventActorType,
+  TimelineTriggerType,
   isCompactionStep,
   isToolCallStep,
   findTodosStep,
   type ChatEvent,
   type TodoItem,
+  type ExecutionTerminatedEvent,
 } from '@kbn/agent-builder-common';
 import type { ToolResult } from '@kbn/agent-builder-common/tools';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents';
@@ -117,6 +121,42 @@ const unknownEvent = (): ChatEvent =>
     data: {},
   } as any as ChatEvent);
 
+const executionStartedEvent = (
+  execution_id = 'exec-1',
+  created_at = '2026-01-01T00:00:00.000Z'
+): ChatEvent =>
+  ({
+    type: TimelineEventType.executionStarted,
+    id: `${execution_id}::execution_started`,
+    created_at,
+    actor: { type: EventActorType.agent, id: 'agent' },
+    execution_id,
+    data: { trigger_type: TimelineTriggerType.userMessage },
+  } as ChatEvent);
+
+const executionTerminatedEvent = (
+  execution_id = 'exec-1',
+  created_at = '2026-01-01T00:01:00.000Z'
+): ExecutionTerminatedEvent => ({
+  type: TimelineEventType.executionTerminated,
+  id: `${execution_id}::execution_terminated`,
+  created_at,
+  actor: { type: EventActorType.agent, id: 'agent' },
+  execution_id,
+  data: {
+    model_usage: {
+      connector_id: '',
+      llm_calls: 1,
+      input_tokens: 10,
+      output_tokens: 5,
+      model: 'test',
+    },
+    time_to_first_token: 100,
+    time_to_last_token: 200,
+    outcome: { type: 'responded', response: { message: 'done' } },
+  },
+});
+
 // -------------------------------------------------------
 
 describe('activeExecutionReducer', () => {
@@ -127,30 +167,32 @@ describe('activeExecutionReducer', () => {
     expect(state?.message).toBe('hello');
   });
 
-  it('reasoning transient=true sets transientReasoning, adds NO step', () => {
-    const state = activeExecutionReducer(null, reasoningEvent('thinking...', true));
-    expect(state?.transientReasoning).toBe('thinking...');
-    expect(state?.steps).toHaveLength(0);
+  it('ignores transient reasoning without creating a draft', () => {
+    expect(activeExecutionReducer(null, reasoningEvent('thinking...', true))).toBeNull();
   });
 
-  it('reasoning non-transient appends a reasoning step, resets message and clears transientReasoning', () => {
+  it.each(['running', 'awaiting_prompt', 'completed'] as const)(
+    'ignores transient reasoning without changing a %s execution',
+    (status) => {
+      const state = { status, steps: [], message: 'Existing response' };
+      expect(activeExecutionReducer(state, reasoningEvent('thinking...', true))).toBe(state);
+    }
+  );
+
+  it('non-transient reasoning appends a reasoning step and resets message', () => {
     const s1 = activeExecutionReducer(null, messageChunkEvent('prior'));
-    const s2 = activeExecutionReducer(s1, reasoningEvent('thinking...', true));
-    const s3 = activeExecutionReducer(s2, reasoningEvent('real reasoning'));
+    const s2 = activeExecutionReducer(s1, reasoningEvent('real reasoning'));
 
-    expect(s3?.steps).toHaveLength(1);
-    expect(s3?.steps[0].type).toBe(ConversationRoundStepType.reasoning);
-    expect(s3?.message).toBe('');
-    expect(s3?.transientReasoning).toBeUndefined();
+    expect(s2?.steps).toHaveLength(1);
+    expect(s2?.steps[0].type).toBe(ConversationRoundStepType.reasoning);
+    expect(s2?.message).toBe('');
   });
 
-  it('message_chunk appends text_chunk to message and clears transientReasoning; two chunks concatenate', () => {
-    const s1 = activeExecutionReducer(null, reasoningEvent('tr', true));
-    const s2 = activeExecutionReducer(s1, messageChunkEvent('Hello '));
-    const s3 = activeExecutionReducer(s2, messageChunkEvent('world'));
+  it('message_chunk appends text_chunk to message; two chunks concatenate', () => {
+    const s1 = activeExecutionReducer(null, messageChunkEvent('Hello '));
+    const s2 = activeExecutionReducer(s1, messageChunkEvent('world'));
 
-    expect(s2?.transientReasoning).toBeUndefined();
-    expect(s3?.message).toBe('Hello world');
+    expect(s2?.message).toBe('Hello world');
   });
 
   it('message_complete replaces message with message_content', () => {
@@ -259,6 +301,60 @@ describe('activeExecutionReducer', () => {
     const s1 = activeExecutionReducer(null, unknownEvent());
 
     expect(s1).toBeNull();
+  });
+
+  it('execution_started sets executionId and startedAt on the draft', () => {
+    const state = activeExecutionReducer(
+      null,
+      executionStartedEvent('exec-42', '2026-06-01T10:00:00.000Z')
+    );
+    expect(state?.executionId).toBe('exec-42');
+    expect(state?.startedAt).toBe('2026-06-01T10:00:00.000Z');
+    expect(state?.status).toBe('running');
+  });
+
+  it('execution_terminated seals the draft: status completed, terminalEvent stored', () => {
+    const s1 = activeExecutionReducer(null, executionStartedEvent('exec-seal'));
+    const terminal = executionTerminatedEvent('exec-seal');
+    const s3 = activeExecutionReducer(s1, terminal);
+
+    expect(s3?.status).toBe('completed');
+    expect(s3?.terminalEvent).toBe(terminal);
+    expect(s3?.executionId).toBe('exec-seal');
+  });
+
+  it('execution_terminated falls back to event execution_id/created_at when not set by execution_started', () => {
+    const terminal = executionTerminatedEvent('exec-fallback', '2026-06-01T11:00:00.000Z');
+    const state = activeExecutionReducer(null, terminal);
+
+    expect(state?.status).toBe('completed');
+    expect(state?.executionId).toBe('exec-fallback');
+    expect(state?.startedAt).toBe('2026-06-01T11:00:00.000Z');
+  });
+
+  it('an event arriving after seal starts a fresh draft, discarding the sealed state', () => {
+    const terminal = executionTerminatedEvent('exec-old');
+    const sealed = activeExecutionReducer(null, terminal);
+    expect(sealed?.status).toBe('completed');
+
+    const fresh = activeExecutionReducer(sealed, messageChunkEvent('new run'));
+    expect(fresh?.status).toBe('running');
+    expect(fresh?.message).toBe('new run');
+    expect(fresh?.executionId).toBeUndefined();
+    expect(fresh?.terminalEvent).toBeUndefined();
+  });
+
+  it('execution_started after seal resets and annotates the new draft', () => {
+    const terminal = executionTerminatedEvent('exec-old');
+    const sealed = activeExecutionReducer(null, terminal);
+
+    const fresh = activeExecutionReducer(
+      sealed,
+      executionStartedEvent('exec-new', '2026-06-01T12:00:00.000Z')
+    );
+    expect(fresh?.status).toBe('running');
+    expect(fresh?.executionId).toBe('exec-new');
+    expect(fresh?.terminalEvent).toBeUndefined();
   });
 
   it('happy-path sequence: reasoning → tool_call → tool_result → message_chunk → message_complete accumulates correctly', () => {
