@@ -581,6 +581,55 @@ describe('classifyWorkflowTriggerMatch', () => {
           connectorEventOptions
         )
       ).toBe('matched');
+      // Exact connector-id wins, so the wildcard KQL is not evaluated.
+      expect(
+        classifyWorkflowTriggerMatch(
+          workflow,
+          'inboundWebhook.received',
+          { connectorId: 'webhook-2', body: { action: 'wildcard' } },
+          mockLogger,
+          connectorEventOptions
+        )
+      ).toBe('kql_false');
+    });
+
+    it('uses the first wildcard block in YAML order when there is no exact match', () => {
+      const workflow = createMockWorkflow({
+        definition: {
+          triggers: [
+            {
+              type: 'inboundWebhook.received',
+              'connector-id': ALL_CONNECTOR_IDS,
+              on: { condition: 'event.body.action: first' },
+            },
+            {
+              type: 'inboundWebhook.received',
+              'connector-id': ALL_CONNECTOR_IDS,
+              on: { condition: 'event.body.action: second' },
+            },
+          ],
+          steps: [],
+        },
+      });
+
+      expect(
+        classifyWorkflowTriggerMatch(
+          workflow,
+          'inboundWebhook.received',
+          { connectorId: 'webhook-2', body: { action: 'first' } },
+          mockLogger,
+          connectorEventOptions
+        )
+      ).toBe('matched');
+      expect(
+        classifyWorkflowTriggerMatch(
+          workflow,
+          'inboundWebhook.received',
+          { connectorId: 'webhook-2', body: { action: 'second' } },
+          mockLogger,
+          connectorEventOptions
+        )
+      ).toBe('kql_false');
     });
   });
 });
