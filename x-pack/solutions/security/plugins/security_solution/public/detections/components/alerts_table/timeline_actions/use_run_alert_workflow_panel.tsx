@@ -7,14 +7,16 @@
 
 import React, { useMemo } from 'react';
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiCallOut, useEuiTheme } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import {
   RunWorkflowPanel,
   useWorkflowsCapabilities,
   useWorkflowsUIEnabledSetting,
 } from '@kbn/workflows-ui';
-import type { WorkflowListItemDto } from '@kbn/workflows';
+import { MAX_RUN_WORKFLOW_DOCS, type WorkflowListItemDto } from '@kbn/workflows';
 import type { WorkflowSelectorVisibility } from '@kbn/workflows-ui';
 import type { AlertTableContextMenuItem } from '../types';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
@@ -35,26 +37,75 @@ const sortAlertWorkflow = (a: WorkflowListItemDto, b: WorkflowListItemDto) =>
   Number((a.definition?.triggers ?? []).some((t) => t.type === 'alert'));
 
 export interface AlertWorkflowsPanelProps {
-  /** Array of alert ids and their respective indices */
-  alertIds: {
+  /**
+   * Explicit alert selection. Used for a single row or a same-page multi-selection.
+   * Mutually exclusive with `querySelection`.
+   */
+  alertIds?: Array<{
     _id: string;
     _index: string;
-  }[];
+  }>;
+  /**
+   * Query-based selection expanded server-side. Used for "select all" so the whole
+   * selection is processed without enumerating ids on the client.
+   */
+  querySelection?: {
+    query: QueryDslQueryContainer;
+    index: string | string[];
+  };
+  /** Optional rule type ids, carried for context/telemetry alongside a query selection. */
+  ruleTypeIds?: string[];
   onClose: () => void;
   /** Optional callback invoked when workflow execution is triggered. */
   onExecute?: () => void;
 }
 
 /** A panel that lets users select and execute a workflow against one or more alerts. **/
-export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkflowsPanelProps) => {
+export const AlertWorkflowsPanel = ({
+  alertIds,
+  querySelection,
+  ruleTypeIds,
+  onClose,
+  onExecute,
+}: AlertWorkflowsPanelProps) => {
+  const { euiTheme } = useEuiTheme();
   const inputs = useMemo(
-    () => ({
-      event: {
-        triggerType: 'alert' as const,
-        alertIds,
-      },
-    }),
-    [alertIds]
+    () =>
+      querySelection
+        ? {
+            event: {
+              triggerType: 'alert' as const,
+              querySelection,
+              ...(ruleTypeIds ? { ruleTypeIds } : {}),
+            },
+          }
+        : {
+            event: {
+              triggerType: 'alert' as const,
+              alertIds: alertIds ?? [],
+            },
+          },
+    [alertIds, querySelection, ruleTypeIds]
+  );
+
+  // On "select all" (query selection) the server caps expansion, so state explicitly that only
+  // the most recent N matching alerts will run instead of silently truncating.
+  const notice = useMemo(
+    () =>
+      querySelection ? (
+        <EuiCallOut
+          announceOnMount
+          data-test-subj="run-alert-workflow-select-all-cap"
+          size="s"
+          color="warning"
+          iconType="warning"
+          title={i18n.RUN_WORKFLOW_SELECT_ALL_CAP_TITLE}
+          css={{ marginBottom: euiTheme.size.s }}
+        >
+          {i18n.RUN_WORKFLOW_SELECT_ALL_CAP_ALERTS(MAX_RUN_WORKFLOW_DOCS)}
+        </EuiCallOut>
+      ) : undefined,
+    [querySelection, euiTheme]
   );
 
   return (
@@ -63,6 +114,7 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkf
       visibility={ALERT_WORKFLOW_VISIBILITY}
       sortWorkflow={sortAlertWorkflow}
       filterWorkflow={isAlertWorkflow}
+      notice={notice}
       onClose={onClose}
       onExecute={onExecute}
     />

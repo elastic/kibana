@@ -10,9 +10,12 @@ import type {
   ContentPanelConfig,
   RenderContentPanelProps,
 } from '@kbn/response-ops-alerts-table/types';
+import type { Filter } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
 import React, { useCallback, useMemo } from 'react';
 import * as i18n from '../../components/alerts_table/translations';
+import { buildTimeRangeFilter } from '../../components/alerts_table/helpers';
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 import {
   RUN_WORKFLOWS_PANEL_WIDTH,
@@ -20,12 +23,31 @@ import {
   RUN_WORKFLOW_BULK_PANEL_ID,
 } from '../../components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 
+export interface UseBulkRunAlertWorkflowPanelArgs {
+  /** Start of the active time range, used to build the "select all" query. */
+  from: string;
+  /** End of the active time range, used to build the "select all" query. */
+  to: string;
+  /** Alerts table filters, used to build the "select all" query. */
+  filters: Filter[];
+  /** Alerts index to expand the "select all" query against on the server. */
+  index?: string | null;
+  /** Rule type ids, carried for context alongside a "select all" query selection. */
+  ruleTypeIds?: string[];
+}
+
 export interface UseBulkRunAlertWorkflowPanelResult {
   runWorkflowItems: BulkActionsConfig[];
   runWorkflowPanels: ContentPanelConfig[];
 }
 
-export const useBulkRunAlertWorkflowPanel = (): UseBulkRunAlertWorkflowPanelResult => {
+export const useBulkRunAlertWorkflowPanel = ({
+  from,
+  to,
+  filters,
+  index,
+  ruleTypeIds,
+}: UseBulkRunAlertWorkflowPanelArgs): UseBulkRunAlertWorkflowPanelResult => {
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const workflowUIEnabled = useWorkflowsUIEnabledSetting();
   const { hasIndexWrite } = useAlertsPrivileges();
@@ -34,13 +56,30 @@ export const useBulkRunAlertWorkflowPanel = (): UseBulkRunAlertWorkflowPanelResu
     [hasIndexWrite, workflowUIEnabled, canExecuteWorkflow]
   );
 
-  const renderContent = useCallback((props: RenderContentPanelProps) => {
-    const alertIds = props.alertItems.map((item) => ({
-      _id: item._id,
-      _index: item._index ?? '',
-    }));
-    return <AlertWorkflowsPanel alertIds={alertIds} onClose={props.closePopoverMenu} />;
-  }, []);
+  const renderContent = useCallback(
+    (props: RenderContentPanelProps) => {
+      // On "select all", send a query so the whole selection is expanded server-side,
+      // rather than only the alerts loaded on the current page.
+      if (props.isAllSelected && index) {
+        const timeFilter = buildTimeRangeFilter(from, to);
+        const query = buildEsQuery(undefined, [], [...timeFilter, ...filters], undefined);
+        return (
+          <AlertWorkflowsPanel
+            querySelection={{ query, index }}
+            ruleTypeIds={ruleTypeIds}
+            onClose={props.closePopoverMenu}
+          />
+        );
+      }
+
+      const alertIds = props.alertItems.map((item) => ({
+        _id: item._id,
+        _index: item._index ?? '',
+      }));
+      return <AlertWorkflowsPanel alertIds={alertIds} onClose={props.closePopoverMenu} />;
+    },
+    [from, to, filters, index, ruleTypeIds]
+  );
 
   const runWorkflowItems = useMemo(
     () =>

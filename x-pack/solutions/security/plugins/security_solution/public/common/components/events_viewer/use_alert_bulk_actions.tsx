@@ -22,6 +22,7 @@ interface OwnProps {
   showCheckboxes: boolean;
   filterStatus?: AlertWorkflowStatus;
   filterQuery?: string;
+  indexNames?: string[];
   bulkActions?: BulkActionsProp;
   selectedCount?: number;
 }
@@ -34,6 +35,7 @@ export const useAlertBulkActions = ({
   showCheckboxes,
   filterStatus,
   filterQuery,
+  indexNames,
   bulkActions,
   selectedCount,
 }: OwnProps) => {
@@ -100,6 +102,7 @@ export const useAlertBulkActions = ({
               totalItems={totalItems}
               filterStatus={filterStatus}
               query={filterQuery}
+              index={indexNames}
               onActionSuccess={onAlertStatusActionSuccess}
               onActionFailure={onAlertStatusActionFailure}
               customBulkActions={additionalBulkActions}
@@ -114,6 +117,7 @@ export const useAlertBulkActions = ({
       data,
       filterQuery,
       filterStatus,
+      indexNames,
       onAlertStatusActionFailure,
       onAlertStatusActionSuccess,
       showAlertStatusActions,

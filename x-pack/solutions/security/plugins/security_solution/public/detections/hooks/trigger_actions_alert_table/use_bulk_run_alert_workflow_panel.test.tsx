@@ -48,11 +48,16 @@ jest.mock('../../components/alerts_table/timeline_actions/use_run_alert_workflow
   );
   const MockAlertWorkflowsPanel = ({
     alertIds,
+    querySelection,
   }: {
-    alertIds: Array<{ _id: string; _index: string }>;
+    alertIds?: Array<{ _id: string; _index: string }>;
+    querySelection?: { query: unknown; index: string | string[] };
   }) => (
     <div data-test-subj="bulk-alert-workflows-panel">
-      {alertIds.map((a) => (
+      {querySelection ? (
+        <span data-test-subj="query-selection">{JSON.stringify(querySelection.index)}</span>
+      ) : null}
+      {(alertIds ?? []).map((a) => (
         <span key={a._id} data-test-subj={`alert-id-${a._id}`}>
           {`${a._id}:${a._index}`}
         </span>
@@ -64,6 +69,14 @@ jest.mock('../../components/alerts_table/timeline_actions/use_run_alert_workflow
     AlertWorkflowsPanel: MockAlertWorkflowsPanel,
   };
 });
+
+const defaultArgs = {
+  from: 'now-24h',
+  to: 'now',
+  filters: [],
+  index: '.alerts-security.alerts-default',
+  ruleTypeIds: ['siem.queryRule'],
+};
 
 describe('useBulkRunAlertWorkflowPanel', () => {
   beforeEach(() => {
@@ -78,7 +91,7 @@ describe('useBulkRunAlertWorkflowPanel', () => {
 
   describe('hook return values', () => {
     it('returns run workflow items and panels when user has write, workflow UI enabled, and execute capability', () => {
-      const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(), {
+      const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(defaultArgs), {
         wrapper: TestProviders,
       });
 
@@ -103,7 +116,7 @@ describe('useBulkRunAlertWorkflowPanel', () => {
     it('returns empty arrays when workflow UI is disabled', () => {
       useWorkflowsUIEnabledSettingMock.mockReturnValue(false);
 
-      const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(), {
+      const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(defaultArgs), {
         wrapper: TestProviders,
       });
 
@@ -116,7 +129,7 @@ describe('useBulkRunAlertWorkflowPanel', () => {
         createCapabilities({ canExecuteWorkflow: false })
       );
 
-      const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(), {
+      const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(defaultArgs), {
         wrapper: TestProviders,
       });
 
@@ -127,7 +140,7 @@ describe('useBulkRunAlertWorkflowPanel', () => {
     it('returns empty arrays when user does not have index write', () => {
       (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: false });
 
-      const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(), {
+      const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(defaultArgs), {
         wrapper: TestProviders,
       });
 
@@ -138,7 +151,7 @@ describe('useBulkRunAlertWorkflowPanel', () => {
 
   describe('panel renderContent', () => {
     it('renders AlertWorkflowsPanel with alertIds derived from alertItems and passes closePopoverMenu as onClose', () => {
-      const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(), {
+      const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(defaultArgs), {
         wrapper: TestProviders,
       });
 
@@ -162,7 +175,7 @@ describe('useBulkRunAlertWorkflowPanel', () => {
     });
 
     it('uses empty string for _index when alertItem._index is undefined', () => {
-      const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(), {
+      const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(defaultArgs), {
         wrapper: TestProviders,
       });
 
@@ -177,6 +190,50 @@ describe('useBulkRunAlertWorkflowPanel', () => {
       render(<TestProviders>{renderContent(props)}</TestProviders>);
 
       expect(screen.getByTestId('alert-id-no-index')).toHaveTextContent('no-index:');
+    });
+
+    it('renders AlertWorkflowsPanel with a query selection on select all', () => {
+      const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(defaultArgs), {
+        wrapper: TestProviders,
+      });
+
+      const renderContent = result.current.runWorkflowPanels[0].renderContent;
+      const props: RenderContentPanelProps = {
+        alertItems: [{ _id: 'alert-1', _index: 'index-1', data: [], ecs: { _id: 'alert-1' } }],
+        isAllSelected: true,
+        setIsBulkActionsLoading: jest.fn(),
+        closePopoverMenu: jest.fn(),
+      };
+
+      render(<TestProviders>{renderContent(props)}</TestProviders>);
+
+      // Query-based selection is used instead of enumerating the loaded ids.
+      expect(screen.getByTestId('query-selection')).toHaveTextContent(
+        '.alerts-security.alerts-default'
+      );
+      expect(screen.queryByTestId('alert-id-alert-1')).not.toBeInTheDocument();
+    });
+
+    it('falls back to alertIds on select all when no index is available', () => {
+      const { result } = renderHook(
+        () => useBulkRunAlertWorkflowPanel({ ...defaultArgs, index: null }),
+        {
+          wrapper: TestProviders,
+        }
+      );
+
+      const renderContent = result.current.runWorkflowPanels[0].renderContent;
+      const props: RenderContentPanelProps = {
+        alertItems: [{ _id: 'alert-1', _index: 'index-1', data: [], ecs: { _id: 'alert-1' } }],
+        isAllSelected: true,
+        setIsBulkActionsLoading: jest.fn(),
+        closePopoverMenu: jest.fn(),
+      };
+
+      render(<TestProviders>{renderContent(props)}</TestProviders>);
+
+      expect(screen.queryByTestId('query-selection')).not.toBeInTheDocument();
+      expect(screen.getByTestId('alert-id-alert-1')).toHaveTextContent('alert-1:index-1');
     });
   });
 });

@@ -19,7 +19,9 @@ import type {
   BulkActionsPanelConfig,
   ItemsPanelConfig,
 } from '@kbn/response-ops-alerts-table/types';
+import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import { useBulkRunAlertWorkflowPanel } from './use_bulk_run_alert_workflow_panel';
+import { useSignalIndex } from '../../containers/detection_engine/alerts/use_signal_index';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useBulkAlertAssigneesItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_assignees_items';
 import { useBulkAlertTagsItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_tags_items';
@@ -133,7 +135,15 @@ export const useBulkActionsByTableType = (
 
   const { alertTagsItems, alertTagsPanels } = useBulkAlertTagsItems(bulkAlertTagParams);
 
-  const { runWorkflowItems, runWorkflowPanels } = useBulkRunAlertWorkflowPanel();
+  const { signalIndexName } = useSignalIndex();
+
+  const { runWorkflowItems, runWorkflowPanels } = useBulkRunAlertWorkflowPanel({
+    from,
+    to,
+    filters,
+    index: signalIndexName,
+    ruleTypeIds: SECURITY_SOLUTION_RULE_TYPE_IDS,
+  });
 
   const items = useMemo(() => {
     return [
