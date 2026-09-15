@@ -39,7 +39,7 @@ const ruleTuning = createWorker({
     workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
     autonomy: 'manual',
     scheduleInterval: '2h',
-    analysisWindowDays: 14,
+    extras: { analysisWindowDays: 14 },
   },
 });
 
@@ -61,13 +61,13 @@ describe('useWatchSettingsDraft', () => {
 
     act(() => {
       result.current.updateEnabled(ruleTuning, true);
-      result.current.updateSettings(ruleTuning, { analysisWindowDays: 7 });
+      result.current.updateSettings(ruleTuning, { extras: { analysisWindowDays: 7 } });
     });
 
     expect(result.current.isDirty).toBe(true);
     expect(result.current.resolve(ruleTuning)).toMatchObject({
       enabled: true,
-      settings: { analysisWindowDays: 7 },
+      settings: { extras: { analysisWindowDays: 7 } },
       dirty: true,
     });
     expect(mutateAsync).not.toHaveBeenCalled();
@@ -79,9 +79,33 @@ describe('useWatchSettingsDraft', () => {
     expect(result.current.isDirty).toBe(false);
     expect(result.current.resolve(ruleTuning)).toMatchObject({
       enabled: false,
-      settings: { analysisWindowDays: 14 },
+      settings: { extras: { analysisWindowDays: 14 } },
       dirty: false,
     });
+  });
+
+  it('treats extras set back to the saved value as clean', () => {
+    const { result } = renderHook(() => useWatchSettingsDraft([ruleTuning]));
+
+    act(() => {
+      result.current.updateSettings(ruleTuning, { extras: { analysisWindowDays: 7 } });
+      result.current.updateSettings(ruleTuning, { extras: { analysisWindowDays: 14 } });
+    });
+
+    expect(result.current.isDirty).toBe(false);
+  });
+
+  it('refuses to save while any dirty draft fails its complete schema', async () => {
+    const { result } = renderHook(() => useWatchSettingsDraft([ruleTuning, ruleCreation]));
+
+    act(() => {
+      result.current.updateSettings(ruleTuning, { extras: { analysisWindowDays: 31 } });
+      result.current.updateEnabled(ruleCreation, true);
+    });
+
+    await expect(result.current.save()).rejects.toThrow('invalid');
+    expect(mutateAsync).not.toHaveBeenCalled();
+    expect(result.current.isDirty).toBe(true);
   });
 
   it('validates all dirty drafts before writing and retries only failures', async () => {
@@ -92,7 +116,7 @@ describe('useWatchSettingsDraft', () => {
     const { result } = renderHook(() => useWatchSettingsDraft([ruleTuning, ruleCreation]));
 
     act(() => {
-      result.current.updateSettings(ruleTuning, { analysisWindowDays: 7 });
+      result.current.updateSettings(ruleTuning, { extras: { analysisWindowDays: 7 } });
       result.current.updateEnabled(ruleCreation, true);
     });
 
@@ -103,7 +127,7 @@ describe('useWatchSettingsDraft', () => {
     expect(mutateAsync).toHaveBeenCalledTimes(2);
     expect(mutateAsync).toHaveBeenNthCalledWith(1, {
       workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-      patch: { settings: { analysisWindowDays: 7 } },
+      patch: { settings: { extras: { analysisWindowDays: 7 } } },
     });
     expect(mutateAsync).toHaveBeenNthCalledWith(2, {
       workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,

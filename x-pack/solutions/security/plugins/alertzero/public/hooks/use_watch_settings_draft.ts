@@ -6,14 +6,18 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
+import { isEqual } from 'lodash';
 import type {
   UpdateWorkerRequestBody,
   Worker,
   WorkerSettings,
   WorkerSettingsWrite,
-  WatchAutonomyLevel,
 } from '@kbn/alertzero-common';
-import { parseCompleteWorkerSettings } from '@kbn/alertzero-common';
+import {
+  applyWorkerSettingsWrite,
+  diffWorkerSettings,
+  getCompleteWorkerSettingsSchema,
+} from '@kbn/alertzero-common';
 import { useUpdateWorker } from './use_workers_api';
 
 interface WorkerDraftOverlay {
@@ -22,37 +26,21 @@ interface WorkerDraftOverlay {
   error?: string;
 }
 
-const settingsEqual = (left: WorkerSettings, right: WorkerSettings): boolean =>
-  left.autonomy === right.autonomy &&
-  left.scheduleInterval === right.scheduleInterval &&
-  left.analysisWindowDays === right.analysisWindowDays;
-
-const diffSettings = (
-  saved: WorkerSettings,
-  draft: WorkerSettings
-): WorkerSettingsWrite | undefined => {
-  const patch: WorkerSettingsWrite = {
-    ...(draft.autonomy !== saved.autonomy ? { autonomy: draft.autonomy } : {}),
-    ...(draft.scheduleInterval !== saved.scheduleInterval && draft.scheduleInterval != null
-      ? { scheduleInterval: draft.scheduleInterval }
-      : {}),
-    ...(draft.analysisWindowDays !== saved.analysisWindowDays && draft.analysisWindowDays != null
-      ? { analysisWindowDays: draft.analysisWindowDays }
-      : {}),
-  };
-  return Object.keys(patch).length > 0 ? patch : undefined;
-};
-
 const isWorkerDirty = (worker: Worker, overlay: WorkerDraftOverlay | undefined): boolean => {
   if (!overlay) {
     return false;
   }
   const enabledDirty = overlay.enabled !== undefined && overlay.enabled !== worker.enabled;
   const settingsDirty =
-    overlay.settings !== undefined && !settingsEqual(overlay.settings, worker.settings);
+    overlay.settings !== undefined && !isEqual(overlay.settings, worker.settings);
   return enabledDirty || settingsDirty;
 };
 
+/**
+ * One draft per Watch page covering Enabled, the shared settings and each Worker's `extras`.
+ * Nothing is written until Save; Save validates every dirty Worker against its complete schema,
+ * then writes Worker by Worker so a failure keeps only that Worker's draft and error.
+ */
 export const useWatchSettingsDraft = (workers: Worker[]) => {
   const { mutateAsync } = useUpdateWorker();
   const [overlays, setOverlays] = useState<Record<string, WorkerDraftOverlay>>({});
@@ -86,28 +74,14 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
   }, []);
 
   const updateSettings = useCallback((worker: Worker, patch: WorkerSettingsWrite) => {
-    setOverlays((current) => {
-      const previous = current[worker.id]?.settings ?? worker.settings;
-      return {
-        ...current,
-        [worker.id]: {
-          ...current[worker.id],
-          settings: {
-            ...previous,
-            ...(patch.autonomy === undefined
-              ? {}
-              : { autonomy: patch.autonomy as WatchAutonomyLevel }),
-            ...(patch.scheduleInterval === undefined
-              ? {}
-              : { scheduleInterval: patch.scheduleInterval }),
-            ...(patch.analysisWindowDays === undefined
-              ? {}
-              : { analysisWindowDays: patch.analysisWindowDays }),
-          },
-          error: undefined,
-        },
-      };
-    });
+    setOverlays((current) => ({
+      ...current,
+      [worker.id]: {
+        ...current[worker.id],
+        settings: applyWorkerSettingsWrite(current[worker.id]?.settings ?? worker.settings, patch),
+        error: undefined,
+      },
+    }));
   }, []);
 
   const discard = useCallback(() => {
@@ -120,14 +94,10 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
       return;
     }
 
-    const invalid = outstanding.some((worker) => {
-      try {
-        parseCompleteWorkerSettings(resolve(worker).settings);
-        return false;
-      } catch {
-        return true;
-      }
-    });
+    const invalid = outstanding.some(
+      (worker) =>
+        !getCompleteWorkerSettingsSchema(worker.id).safeParse(resolve(worker).settings).success
+    );
     if (invalid) {
       throw new Error('invalid');
     }
@@ -136,7 +106,7 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
     try {
       for (const worker of outstanding) {
         const draft = resolve(worker);
-        const settings = diffSettings(worker.settings, draft.settings);
+        const settings = diffWorkerSettings(worker.settings, draft.settings);
         const patch: UpdateWorkerRequestBody = {
           ...(draft.enabled !== worker.enabled ? { enabled: draft.enabled } : {}),
           ...(settings === undefined ? {} : { settings }),

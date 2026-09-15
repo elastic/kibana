@@ -14,9 +14,6 @@
  */
 
 export {
-  ANALYSIS_WINDOW_DAYS_DEFAULT,
-  ANALYSIS_WINDOW_DAYS_MAX,
-  ANALYSIS_WINDOW_DAYS_MIN,
   API_VERSIONS,
   CONVERSATION_CATEGORY_COLORS,
   INTERNAL_API_ACCESS,
@@ -61,12 +58,10 @@ export {
   WATCH_OFFICER_TAG,
   WATCH_TAG,
   WATCH_TIER_TAGS,
-  WORKER_CUSTOM_SETTING_FIELDS,
   buildInvestigationUrl,
   buildSkillUrl,
   buildWatchUrl,
   buildWorkerUrl,
-  getWorkerCustomSettingFields,
 } from './constants';
 
 export { CONVERSATION_QUEUE_CATEGORIES, CONVERSATION_QUEUE_LABELS } from './translations';
@@ -112,13 +107,12 @@ export {
   WatchWorker,
   WatchWorkerAttachment,
   AnalysisWindowDays,
-  RuleTuningWorkerSettings,
-  ScheduledWorkerSettings,
-  SharedOnlyWorkerSettings,
+  RuleTuningWorkerExtras,
   Worker,
   WorkerRunState,
   WorkerScheduleInterval,
   WorkerSettings,
+  WorkerSettingsExtras,
   WorkerSettingsWrite,
   WorkflowTriggerType,
   type TimelineEvent,
@@ -151,16 +145,24 @@ export {
   getMockProposalsByInvestigationId,
 } from './impl/samples';
 export {
+  ANALYSIS_WINDOW_DAYS_DEFAULT,
+  ANALYSIS_WINDOW_DAYS_MAX,
+  ANALYSIS_WINDOW_DAYS_MIN,
+  RULE_TUNING_DEFAULT_EXTRAS,
+  WORKER_SETTINGS_DECLARATIONS,
+  applyWorkerSettingsWrite,
+  createDefaultWorkerSettings,
+  diffWorkerSettings,
+  formatWorkerSettingsIssues,
+  getAllowedAutonomyLevels,
   getCompleteWorkerSettingsSchema,
-  parseCompleteWorkerSettings,
-  rejectUnsupportedWorkerSettingsWrite,
+  getWorkerSettingsDeclaration,
   touchesWorkerSettings,
-  workerOwnsSchedule,
-} from './impl/worker_settings_contract';
+} from './impl/worker_settings';
+export type { WorkerSettingsDeclaration } from './impl/worker_settings';
 export type {
   SystemSecurityWatchCatalogEntry,
   SystemSecurityWorkerCatalogEntry,
-  WorkerCustomSettingField,
   WorkerScheduleUnit,
 } from './constants';
 export type { WatchSkillSeed, WatchWorkerSeed } from './impl/samples';

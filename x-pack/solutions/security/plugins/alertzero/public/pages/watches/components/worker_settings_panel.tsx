@@ -6,21 +6,18 @@
  */
 
 import React from 'react';
+import { EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
 import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiSwitch,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
-import type { Worker, WorkerSettings, WorkerSettingsWrite } from '@kbn/alertzero-common';
+  getAllowedAutonomyLevels,
+  type Worker,
+  type WorkerSettings,
+  type WorkerSettingsWrite,
+} from '@kbn/alertzero-common';
 import { AutonomySlider } from './autonomy_slider';
 import { ScheduleIntervalField } from './schedule_interval_field';
 import { SettingsSection } from './settings_section';
 import { WorkerSkillsTable } from './worker_skills_table';
-import { getWatchCustomSettingsComponent } from '../custom_settings/registry';
+import { getWorkerCustomSettingsComponent } from '../custom_settings/registry';
 import * as settingsI18n from '../settings_translations';
 import { workerName } from '../workers/translations';
 
@@ -28,26 +25,27 @@ interface WorkerSettingsPanelProps {
   worker: Worker;
   enabled: boolean;
   settings: WorkerSettings;
-  dirty: boolean;
   error?: string;
   settingsLocked: boolean;
   onEnabledChange: (enabled: boolean) => void;
   onSettingsChange: (patch: WorkerSettingsWrite) => void;
 }
 
+/**
+ * One Worker's settings. Every control, shared or Watch-owned, writes into the page draft; the
+ * shared page decides what to render from the Worker's settings and declaration alone, so a new
+ * Worker-specific field needs no change here.
+ */
 export const WorkerSettingsPanel: React.FC<WorkerSettingsPanelProps> = ({
   worker,
   enabled,
   settings,
-  dirty,
   error,
   settingsLocked,
   onEnabledChange,
   onSettingsChange,
 }) => {
-  const CustomSettings = worker.watchIds
-    .map((watchId) => getWatchCustomSettingsComponent(watchId))
-    .find((component) => component != null);
+  const CustomSettings = getWorkerCustomSettingsComponent(worker.id);
 
   return (
     <SettingsSection
@@ -59,28 +57,13 @@ export const WorkerSettingsPanel: React.FC<WorkerSettingsPanelProps> = ({
       }
       data-test-subj={`alertZeroWatchWorkerSection-${worker.id}`}
     >
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiSwitch
-            label={settingsI18n.ENABLED_SWITCH_LABEL}
-            checked={enabled}
-            disabled={settingsLocked}
-            onChange={(event) => onEnabledChange(event.target.checked)}
-            data-test-subj={`alertZeroWorkerEnabledSwitch-${worker.id}`}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip content={dirty ? settingsI18n.RUN_WORKER_DIRTY : undefined}>
-            <EuiButtonEmpty
-              size="s"
-              disabled={dirty || settingsLocked}
-              data-test-subj={`alertZeroWorkerRun-${worker.id}`}
-            >
-              {settingsI18n.RUN_WORKER}
-            </EuiButtonEmpty>
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiSwitch
+        label={settingsI18n.ENABLED_SWITCH_LABEL}
+        checked={enabled}
+        disabled={settingsLocked}
+        onChange={(event) => onEnabledChange(event.target.checked)}
+        data-test-subj={`alertZeroWorkerEnabledSwitch-${worker.id}`}
+      />
       {error ? (
         <>
           <EuiSpacer size="s" />
@@ -92,9 +75,11 @@ export const WorkerSettingsPanel: React.FC<WorkerSettingsPanelProps> = ({
       <EuiSpacer size="m" />
       <AutonomySlider
         current={settings.autonomy}
+        levels={getAllowedAutonomyLevels(worker.id)}
         isDisabled={settingsLocked}
         onChange={(autonomy) => onSettingsChange({ autonomy })}
       />
+      {/* Only schedule-driven Workers project an interval; its presence is the signal. */}
       {settings.scheduleInterval != null ? (
         <>
           <EuiSpacer size="m" />
@@ -110,7 +95,7 @@ export const WorkerSettingsPanel: React.FC<WorkerSettingsPanelProps> = ({
           worker={worker}
           settings={settings}
           isDisabled={settingsLocked}
-          onSettingsChange={onSettingsChange}
+          onExtrasChange={(extras) => onSettingsChange({ extras })}
         />
       ) : null}
       <EuiSpacer size="m" />

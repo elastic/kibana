@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route } from '@kbn/shared-ux-router';
 import {
   SYSTEM_SECURITY_WATCH_DARK_ID,
@@ -90,7 +90,7 @@ const detectionWorkers: Worker[] = [
       workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
       autonomy: 'manual',
       scheduleInterval: '2h',
-      analysisWindowDays: 14,
+      extras: { analysisWindowDays: 14 },
     },
   }),
   createWorker({
@@ -296,8 +296,21 @@ describe('WatchDetailPage', () => {
     expect(mutate).not.toHaveBeenCalled();
     expect(mutateAsync).not.toHaveBeenCalled();
     expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeEnabled();
-    expect(
-      screen.getByTestId(`alertZeroWorkerRun-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`)
-    ).toBeDisabled();
+    expect(screen.queryByTestId(/alertZeroWorkerRun-/)).not.toBeInTheDocument();
+  });
+
+  it('sends the whole extras object under settings when the analysis window is saved', async () => {
+    const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+    const field = screen.getByTestId('alertZeroAnalysisWindowDays');
+
+    fireEvent.change(field, { target: { value: '7' } });
+    fireEvent.blur(field);
+    fireEvent.click(screen.getByTestId('alertZeroWatchSettingsSave'));
+
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
+    expect(mutateAsync).toHaveBeenCalledWith({
+      workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+      patch: { settings: { extras: { analysisWindowDays: 7 } } },
+    });
   });
 });

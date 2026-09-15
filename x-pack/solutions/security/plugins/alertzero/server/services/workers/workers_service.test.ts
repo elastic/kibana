@@ -440,49 +440,132 @@ describe('WorkersService', () => {
     expect(Array.isArray(triage?.skills)).toBe(true);
   });
 
-  it('persists a custom-only analysis window and forwards it into rendered YAML', async () => {
-    const harness = createPersistentHarness();
-    const service = harness.createService();
-    const enabled = await service.update(RULE_TUNING, { enabled: true }, SPACE, request);
-    if (enabled.outcome !== 'updated') throw new Error('Expected enable to succeed');
+  describe('Worker-specific settings under extras', () => {
+    const enableRuleTuning = async () => {
+      const harness = createPersistentHarness();
+      const service = harness.createService();
+      const enabled = await service.update(RULE_TUNING, { enabled: true }, SPACE, request);
+      if (enabled.outcome !== 'updated') throw new Error('Expected enable to succeed');
+      return { harness, service, revision: enabled.response.worker.settingsRevision };
+    };
 
-    const result = await service.update(
-      RULE_TUNING,
-      {
-        settings: { analysisWindowDays: 7 },
-        settingsRevision: enabled.response.worker.settingsRevision,
-      },
-      SPACE,
-      request
-    );
+    it('persists an extras-only save and forwards the window into the rendered YAML', async () => {
+      const { harness, service, revision } = await enableRuleTuning();
 
-    expect(result.outcome).toBe('updated');
-    if (result.outcome !== 'updated') throw new Error('Expected analysis window save to succeed');
-    expect(result.response.worker.settings).toEqual({
-      workerId: RULE_TUNING,
-      autonomy: 'manual',
-      scheduleInterval: '2h',
-      analysisWindowDays: 7,
-    });
-    expect(harness.documents.get(`${RULE_TUNING}-${SPACE}`)?.yaml).toContain(
-      'analysis_window_days: 7'
-    );
-    expect(harness.documents.get(`${RULE_TUNING}-${SPACE}`)?.yaml).not.toContain(
-      '__WORKER_ANALYSIS_WINDOW_DAYS__'
-    );
-  });
-
-  it('rejects an unknown settings field and a wrong-Worker analysis window', async () => {
-    const harness = createPersistentHarness();
-    const service = harness.createService();
-
-    await expect(
-      service.update(
-        TRIAGE,
-        { settings: { analysisWindowDays: 7 }, settingsRevision: null },
+      const result = await service.update(
+        RULE_TUNING,
+        { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: revision },
         SPACE,
         request
-      )
-    ).resolves.toEqual({ outcome: 'rejected', what: 'an analysis window' });
+      );
+
+      expect(result.outcome).toBe('updated');
+      if (result.outcome !== 'updated') throw new Error('Expected extras save to succeed');
+      expect(result.response.worker.settings).toEqual({
+        workerId: RULE_TUNING,
+        autonomy: 'manual',
+        scheduleInterval: '2h',
+        extras: { analysisWindowDays: 7 },
+      });
+      const yaml = harness.documents.get(`${RULE_TUNING}-${SPACE}`)?.yaml;
+      expect(yaml).toContain('analysis_window_days: 7');
+      expect(yaml).not.toContain('__WORKER_ANALYSIS_WINDOW_DAYS__');
+    });
+
+    it('keeps the saved extras when a shared-field patch omits them', async () => {
+      const { service, revision } = await enableRuleTuning();
+      const withWindow = await service.update(
+        RULE_TUNING,
+        { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: revision },
+        SPACE,
+        request
+      );
+      if (withWindow.outcome !== 'updated') throw new Error('Expected extras save to succeed');
+
+      const result = await service.update(
+        RULE_TUNING,
+        {
+          settings: { autonomy: 'assisted' },
+          settingsRevision: withWindow.response.worker.settingsRevision,
+        },
+        SPACE,
+        request
+      );
+
+      expect(result.outcome).toBe('updated');
+      if (result.outcome !== 'updated') throw new Error('Expected autonomy save to succeed');
+      expect(result.response.worker.settings).toEqual(
+        expect.objectContaining({ autonomy: 'assisted', extras: { analysisWindowDays: 7 } })
+      );
+    });
+
+    it('refuses a stale extras-only save and leaves the stored settings alone', async () => {
+      const { service, revision } = await enableRuleTuning();
+      const first = await service.update(
+        RULE_TUNING,
+        { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: revision },
+        SPACE,
+        request
+      );
+      if (first.outcome !== 'updated') throw new Error('Expected first save to succeed');
+
+      // Same pre-save revision again: someone else's write landed in between.
+      await expect(
+        service.update(
+          RULE_TUNING,
+          { settings: { extras: { analysisWindowDays: 21 } }, settingsRevision: revision },
+          SPACE,
+          request
+        )
+      ).resolves.toEqual({ outcome: 'conflict' });
+      expect((await service.get(RULE_TUNING, request, SPACE))?.settings.extras).toEqual({
+        analysisWindowDays: 7,
+      });
+    });
+
+    it('rejects an extras replacement missing a required field, naming it', async () => {
+      const { service, revision } = await enableRuleTuning();
+
+      const result = await service.update(
+        RULE_TUNING,
+        { settings: { extras: {} }, settingsRevision: revision },
+        SPACE,
+        request
+      );
+
+      expect(result.outcome).toBe('invalid');
+      if (result.outcome !== 'invalid') throw new Error('Expected an invalid outcome');
+      expect(result.message).toContain('extras.analysisWindowDays');
+    });
+
+    it("rejects another Worker's extras field, naming it", async () => {
+      const result = await createPersistentHarness()
+        .createService()
+        .update(
+          TRIAGE,
+          { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: null },
+          SPACE,
+          request
+        );
+
+      expect(result.outcome).toBe('invalid');
+      if (result.outcome !== 'invalid') throw new Error('Expected an invalid outcome');
+      expect(result.message).toMatch(/extras/);
+    });
+
+    it('rejects a schedule interval on a Worker that owns no schedule, naming it', async () => {
+      const result = await createPersistentHarness()
+        .createService()
+        .update(
+          TRIAGE,
+          { settings: { scheduleInterval: '15m' }, settingsRevision: null },
+          SPACE,
+          request
+        );
+
+      expect(result.outcome).toBe('invalid');
+      if (result.outcome !== 'invalid') throw new Error('Expected an invalid outcome');
+      expect(result.message).toContain('scheduleInterval');
+    });
   });
 });

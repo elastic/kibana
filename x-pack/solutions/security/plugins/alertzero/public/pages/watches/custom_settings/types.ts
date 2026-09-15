@@ -6,15 +6,18 @@
  */
 
 import type { FC } from 'react';
-import type { Worker, WorkerSettings, WorkerSettingsWrite } from '@kbn/alertzero-common';
+import type { Worker, WorkerSettings, WorkerSettingsExtras } from '@kbn/alertzero-common';
 
-export interface WatchCustomSettingsProps {
+/**
+ * Contract for a Watch-owned Worker settings component. It renders real controls for the Worker's
+ * `extras`, feeds edits into the shared page draft through `onExtrasChange` with the complete
+ * replacement object, and never calls an API itself.
+ */
+export interface WorkerCustomSettingsProps {
   worker: Worker;
   settings: WorkerSettings;
   isDisabled?: boolean;
-  onSettingsChange: (patch: WorkerSettingsWrite) => void;
+  onExtrasChange: (extras: WorkerSettingsExtras) => void;
 }
 
-export type WatchCustomSettingsComponent = FC<WatchCustomSettingsProps> & {
-  coveredFields: Readonly<Record<string, readonly string[]>>;
-};
+export type WorkerCustomSettingsComponent = FC<WorkerCustomSettingsProps>;

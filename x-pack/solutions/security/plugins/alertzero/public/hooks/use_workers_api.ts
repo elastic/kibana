@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import {
   API_VERSIONS,
   ALERTZERO_WORKERS_URL,
+  applyWorkerSettingsWrite,
   buildWorkerUrl,
   touchesWorkerSettings,
 } from '@kbn/alertzero-common';
@@ -71,16 +72,7 @@ export const notifyWorkerUpdateError = (toasts: IToasts, error: unknown): void =
 const applyWorkerPatch = (worker: Worker, patch: UpdateWorkerRequestBody): Worker => {
   const enabled = patch.enabled ?? worker.enabled;
   const settings = patch.settings
-    ? {
-        ...worker.settings,
-        ...(patch.settings.autonomy === undefined ? {} : { autonomy: patch.settings.autonomy }),
-        ...(patch.settings.scheduleInterval === undefined
-          ? {}
-          : { scheduleInterval: patch.settings.scheduleInterval }),
-        ...(patch.settings.analysisWindowDays === undefined
-          ? {}
-          : { analysisWindowDays: patch.settings.analysisWindowDays }),
-      }
+    ? applyWorkerSettingsWrite(worker.settings, patch.settings)
     : worker.settings;
   return {
     ...worker,

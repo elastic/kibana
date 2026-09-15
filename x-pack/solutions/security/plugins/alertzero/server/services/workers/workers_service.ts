@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { UpdateWorkerResponse } from '@kbn/alertzero-common';
 import {
@@ -49,12 +50,13 @@ const templateValuesEqual = (
   right: Record<string, unknown>
 ): boolean =>
   left != null &&
-  Object.keys(right).every((key) => Object.hasOwn(left, key) && left[key] === right[key]);
+  Object.keys(right).every((key) => Object.hasOwn(left, key) && isEqual(left[key], right[key]));
 
 export type WorkerUpdateResult =
   | { outcome: 'updated'; response: UpdateWorkerResponse }
   | { outcome: 'not-found' }
   | { outcome: 'rejected'; what: string }
+  | { outcome: 'invalid'; message: string }
   | { outcome: 'conflict' }
   | { outcome: 'unavailable' }
   | { outcome: 'failed' };
@@ -168,8 +170,8 @@ export class WorkersService {
         ? registration.settings.migrate(state.templateValues).values
         : registration.settings.createDefaultValues();
       const applied = registration.settings.applyPatch(currentValues, patch.settings ?? {});
-      if ('rejected' in applied) {
-        return { outcome: 'rejected', what: applied.rejected };
+      if ('invalid' in applied) {
+        return { outcome: 'invalid', message: applied.invalid };
       }
 
       await installRegisteredWorker(managedWorkflows, registration, {

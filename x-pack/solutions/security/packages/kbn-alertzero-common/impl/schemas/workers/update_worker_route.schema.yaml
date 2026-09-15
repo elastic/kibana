@@ -49,8 +49,11 @@ paths:
                 settings:
                   $ref: '../components/watch_settings.schema.yaml#/components/schemas/WorkerSettingsWrite'
                   description: >-
-                    Nested settings patch. Shared and custom fields share this object and the same
-                    revision/persistence path. Field names match the WorkerSettings read shape.
+                    Settings patch with the same names and nesting as the WorkerSettings read shape.
+                    Shared fields and `extras` share this object and the same revision/persistence
+                    path. The resulting complete settings are validated against the Worker's own
+                    declaration; an unknown key, another Worker's field, or an autonomy level the
+                    Worker does not allow is rejected with a 400 naming the field.
       responses:
         '200':
           description: Successful response

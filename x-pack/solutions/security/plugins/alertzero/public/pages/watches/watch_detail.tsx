@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -47,17 +47,25 @@ export const WatchDetailPage: React.FC = () => {
   );
   const { discard, isDirty, isSaving, resolve, save, updateEnabled, updateSettings } =
     useWatchSettingsDraft(members);
+  const [saveBlockedByInvalidDraft, setSaveBlockedByInvalidDraft] = useState(false);
 
   const onSave = useCallback(async () => {
     try {
       await save();
+      setSaveBlockedByInvalidDraft(false);
     } catch (saveError) {
       if (saveError instanceof Error && saveError.message === 'invalid') {
+        setSaveBlockedByInvalidDraft(true);
         return;
       }
       throw saveError;
     }
   }, [save]);
+
+  const onDiscard = useCallback(() => {
+    discard();
+    setSaveBlockedByInvalidDraft(false);
+  }, [discard]);
 
   const hasCurrentWatch = watch?.id === watchId;
   const isNotFound =
@@ -109,9 +117,16 @@ export const WatchDetailPage: React.FC = () => {
       <EuiFlexGroup direction="column" gutterSize="xl" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+            {saveBlockedByInvalidDraft ? (
+              <EuiFlexItem grow={false}>
+                <EuiText size="s" color="danger" data-test-subj="alertZeroWatchSettingsInvalid">
+                  <p>{settingsI18n.WATCH_SETTINGS_INVALID}</p>
+                </EuiText>
+              </EuiFlexItem>
+            ) : null}
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                onClick={discard}
+                onClick={onDiscard}
                 disabled={!isDirty || isSaving}
                 data-test-subj="alertZeroWatchSettingsDiscard"
               >
@@ -168,7 +183,6 @@ export const WatchDetailPage: React.FC = () => {
                         worker={worker}
                         enabled={draft.enabled}
                         settings={draft.settings}
-                        dirty={draft.dirty}
                         error={draft.error}
                         settingsLocked={worker.state === 'unavailable'}
                         onEnabledChange={(enabled) => updateEnabled(worker, enabled)}

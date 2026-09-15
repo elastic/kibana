@@ -16,10 +16,14 @@ export interface WorkerSettingsRegistration {
     values: ManagedWorkflowTemplateValues;
     migrated: boolean;
   };
+  /**
+   * Composes the patched settings and validates them against the Worker's complete schema.
+   * `invalid` carries the issues, each naming its field.
+   */
   applyPatch(
     values: ManagedWorkflowTemplateValues,
     patch: WorkerSettingsPatch
-  ): { values: ManagedWorkflowTemplateValues } | { rejected: string };
+  ): { values: ManagedWorkflowTemplateValues } | { invalid: string };
   /** Return the raw projection; the registry test guards against API schema stripping. */
   toSettings(values: ManagedWorkflowTemplateValues): WorkerSettings;
 }

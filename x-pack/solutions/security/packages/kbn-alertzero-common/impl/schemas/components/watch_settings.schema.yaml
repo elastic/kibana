@@ -23,14 +23,6 @@ components:
         minutes, hours or days (e.g. "24h"). Rendered verbatim into the Worker's `scheduled`
         trigger. Seconds are not supported.
 
-    AnalysisWindowDays:
-      type: integer
-      minimum: 1
-      maximum: 30
-      description: >-
-        How many days of alerts feed Rule Tuning analysis. Matches the tuning sweep's
-        analysis_window_days input. Omitted for every Worker except Rule Tuning.
-
     WorkerRunState:
       type: string
       enum: [ok, paused, degraded, unavailable]
@@ -261,67 +253,21 @@ components:
         autonomy:
           $ref: '#/components/schemas/WatchAutonomyLevel'
 
-    SharedOnlyWorkerSettings:
+    WorkerSettingsExtras:
       type: object
-      additionalProperties: false
+      additionalProperties: true
       description: >-
-        Complete settings for a Worker that only carries the shared autonomy dial. Watch-owned
-        custom fields are absent by construction.
-      required:
-        - workerId
-        - autonomy
-      properties:
-        workerId:
-          type: string
-        autonomy:
-          $ref: '#/components/schemas/WatchAutonomyLevel'
-
-    ScheduledWorkerSettings:
-      type: object
-      additionalProperties: false
-      description: Complete settings for a schedule-driven Worker with no Watch-owned custom fields.
-      required:
-        - workerId
-        - autonomy
-        - scheduleInterval
-      properties:
-        workerId:
-          type: string
-        autonomy:
-          $ref: '#/components/schemas/WatchAutonomyLevel'
-        scheduleInterval:
-          $ref: '#/components/schemas/WorkerScheduleInterval'
-
-    RuleTuningWorkerSettings:
-      type: object
-      additionalProperties: false
-      description: >-
-        Complete Detection Watch / Rule Tuning settings. Owned by Detection Watch; CWL reviews
-        the field list and UI, the Watch team owns the values.
-      required:
-        - workerId
-        - autonomy
-        - scheduleInterval
-        - analysisWindowDays
-      properties:
-        workerId:
-          type: string
-          enum: [system-security-detection-rule-tuning]
-        autonomy:
-          $ref: '#/components/schemas/WatchAutonomyLevel'
-        scheduleInterval:
-          $ref: '#/components/schemas/WorkerScheduleInterval'
-        analysisWindowDays:
-          $ref: '#/components/schemas/AnalysisWindowDays'
+        Worker-specific settings owned by the Worker's Watch team. The wire schema is open so the
+        shared read/update path stays generic; each Worker declares a closed schema for its own
+        extras (see the Watch-owned `*_watch_settings.schema.yaml` files) and the server validates
+        against that declaration, rejecting unknown or missing fields by name.
 
     WorkerSettings:
       type: object
       additionalProperties: false
       description: >-
-        Durable per-Worker settings stored as managed template values. Shared fields plus any
-        Watch-owned custom fields that Worker declares. Unknown keys are rejected. Completeness
-        for a given Worker is the matching SharedOnlyWorkerSettings, ScheduledWorkerSettings, or
-        RuleTuningWorkerSettings schema.
+        Durable per-Worker settings stored as managed template values. Shared fields sit at the top
+        level; Worker-specific fields live under `extras`. Unknown top-level keys are rejected.
       required:
         - workerId
         - autonomy
@@ -335,22 +281,26 @@ components:
           description: >-
             Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to
             render the interval control.
-        analysisWindowDays:
-          $ref: '#/components/schemas/AnalysisWindowDays'
+        extras:
+          $ref: '#/components/schemas/WorkerSettingsExtras'
+          description: Omitted for Workers that declare no Worker-specific settings.
 
     WorkerSettingsWrite:
       type: object
       additionalProperties: false
       description: >-
-        Partial settings patch. Field names match WorkerSettings. Omitted fields keep their stored
-        values; unknown keys and wrong-Worker fields are rejected.
+        Settings patch; the editable subset of WorkerSettings with the same names and nesting.
+        Shared fields are per-field: omitted keeps the stored value, supplied replaces it. `extras`
+        is whole-object: omitted keeps the stored extras, supplied must be the complete valid object
+        for this Worker and replaces the stored one. There is no deep merge and `null` has no
+        special meaning.
       properties:
         autonomy:
           $ref: '#/components/schemas/WatchAutonomyLevel'
         scheduleInterval:
           $ref: '#/components/schemas/WorkerScheduleInterval'
-        analysisWindowDays:
-          $ref: '#/components/schemas/AnalysisWindowDays'
+        extras:
+          $ref: '#/components/schemas/WorkerSettingsExtras'
 
     Worker:
       type: object

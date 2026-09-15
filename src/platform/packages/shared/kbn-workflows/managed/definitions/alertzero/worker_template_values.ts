@@ -40,11 +40,13 @@ export const renderScheduledWorkerYaml = (
   );
 
 /**
- * Rule Tuning stores the analysis window beside the shared scheduled values so a
- * settings save re-renders YAML and the per-space Worker can pass it to the sweep.
+ * Worker-specific settings are stored under `extras`, mirroring the Worker settings API, so a
+ * settings save re-renders YAML and the per-space Worker can pass them to the sweep.
  */
 export interface RuleTuningWorkerTemplateValues extends ScheduledWorkerTemplateValues {
-  analysisWindowDays: number;
+  extras: {
+    analysisWindowDays: number;
+  };
 }
 
 export const renderRuleTuningWorkerYaml = (
@@ -53,5 +55,5 @@ export const renderRuleTuningWorkerYaml = (
 ): string =>
   renderScheduledWorkerYaml(yaml, values).replaceAll(
     '__WORKER_ANALYSIS_WINDOW_DAYS__',
-    String(values.analysisWindowDays)
+    String(values.extras.analysisWindowDays)
   );

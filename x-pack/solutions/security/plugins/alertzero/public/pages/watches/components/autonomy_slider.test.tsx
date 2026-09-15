@@ -7,17 +7,39 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { WATCH_AUTONOMY_LEVELS, type WatchAutonomyLevel } from '@kbn/alertzero-common';
 import { AutonomySlider } from './autonomy_slider';
 
 const renderSlider = (
   onChange: jest.Mock = jest.fn(),
-  current: 'manual' | 'assisted' | 'supervised' = 'manual'
+  current: WatchAutonomyLevel = 'manual',
+  levels: readonly WatchAutonomyLevel[] = WATCH_AUTONOMY_LEVELS
 ) => {
-  render(<AutonomySlider current={current} onChange={onChange} />);
+  render(<AutonomySlider current={current} levels={levels} onChange={onChange} />);
   return { onChange, slider: screen.getByTestId('alertZeroAutonomySlider') };
 };
 
 describe('AutonomySlider', () => {
+  it('offers only the levels the Worker allows', () => {
+    const { onChange, slider } = renderSlider(jest.fn(), 'manual', ['manual', 'assisted']);
+
+    expect(slider).toHaveAttribute('max', '1');
+    expect(screen.queryByRole('button', { name: 'Supervised' })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Assisted' }));
+
+    expect(onChange).toHaveBeenCalledWith('assisted');
+  });
+
+  it('renders a single allowed level as a fixed value instead of a slider', () => {
+    const onChange = jest.fn();
+    render(<AutonomySlider current="manual" levels={['manual']} onChange={onChange} />);
+
+    expect(screen.queryByTestId('alertZeroAutonomySlider')).not.toBeInTheDocument();
+    expect(screen.getByTestId('alertZeroAutonomyFixed')).toHaveTextContent('Manual');
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
   it('persists once when a drag crosses an intermediate tick', () => {
     const { onChange, slider } = renderSlider();
 
