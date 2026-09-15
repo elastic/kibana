@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { ANALYSIS_WINDOW_DAYS_MAX, ANALYSIS_WINDOW_DAYS_MIN } from '@kbn/alertzero-common';
 import * as i18n from './detection_translations';
@@ -17,8 +17,9 @@ interface AnalysisWindowDaysFieldProps {
 }
 
 /**
- * Detection Watch / Rule Tuning analysis window. Commits to the page draft on blur so typing
- * "14" does not write "1" then "14".
+ * Detection Watch / Rule Tuning analysis window. The typed text is buffered locally and committed
+ * to the page draft on blur, so partial input never reaches the draft; an out-of-range entry
+ * reverts to `current`. The buffer follows `current`, which resets the field on Discard or refresh.
  */
 export const AnalysisWindowDaysField: React.FC<AnalysisWindowDaysFieldProps> = ({
   current,
@@ -26,12 +27,8 @@ export const AnalysisWindowDaysField: React.FC<AnalysisWindowDaysFieldProps> = (
   onChange,
 }) => {
   const [draft, setDraft] = useState(String(current));
-  const lastCommittedRef = useRef(current);
-  const onChangeRef = useRef(onChange);
-  onChangeRef.current = onChange;
 
   useEffect(() => {
-    lastCommittedRef.current = current;
     setDraft(String(current));
   }, [current]);
 
@@ -42,15 +39,13 @@ export const AnalysisWindowDaysField: React.FC<AnalysisWindowDaysFieldProps> = (
       parsed < ANALYSIS_WINDOW_DAYS_MIN ||
       parsed > ANALYSIS_WINDOW_DAYS_MAX
     ) {
-      setDraft(String(lastCommittedRef.current));
+      setDraft(String(current));
       return;
     }
-    if (parsed === lastCommittedRef.current) {
-      return;
+    if (parsed !== current) {
+      onChange(parsed);
     }
-    lastCommittedRef.current = parsed;
-    onChangeRef.current(parsed);
-  }, [draft]);
+  }, [current, draft, onChange]);
 
   return (
     <EuiFormRow
