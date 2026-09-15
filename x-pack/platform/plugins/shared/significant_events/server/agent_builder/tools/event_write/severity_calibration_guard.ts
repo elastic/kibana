@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import type {
+  Severity,
+  SignificantEvent,
+  SignificantEventStatus,
+} from '@kbn/significant-events-schema';
 import { addsNewDetectionRules, extractRuleUuids } from './episode_context';
 
 export type EventsWriteSource = 'discovery';
@@ -32,8 +36,8 @@ export const getCalibratedSeverity = ({
 }: {
   source?: EventsWriteSource;
   latestEvent?: SignificantEvent;
-  proposedSeverity: SignificantEvent['severity'];
-  proposedStatus: SignificantEvent['status'];
+  proposedSeverity: Severity;
+  proposedStatus: SignificantEventStatus;
   proposedSignals?: SignificantEvent['signals'];
 }): SignificantEvent['severity'] => {
   if (
