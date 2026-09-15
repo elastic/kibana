@@ -209,6 +209,7 @@ export function ValueControlForm({
           setEsqlQueryErrors([]);
           setIsValid(true);
         } else {
+          setEsqlQueryErrors([]);
           setIsValid(false);
         }
 

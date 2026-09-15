@@ -133,7 +133,7 @@ export const ESQLValuesPreview: React.FC<{
     );
   }
 
-  if (values.length === 0) {
+  if (values.length === 0 || columns.length === 0) {
     return (
       <KbnWarningCallout
         announceOnMount
