@@ -11,6 +11,7 @@ import type { AlertZeroSpaceIdResolver } from '../types';
 import type { WatchesService } from '../services/watches/watches_service';
 import type { WorkersService } from '../services/workers/workers_service';
 import type { ConversationProposalsService } from '../services/conversation_proposals/conversation_proposals_service';
+import type { ActionsService } from '../services/actions/actions_service';
 import { registerListWatchesRoute } from './watches/list_watches';
 import { registerGetWatchRoute } from './watches/get_watch';
 import { registerListWorkersRoute } from './workers/list_workers';
@@ -19,6 +20,7 @@ import { registerListInvestigationsRoute } from './investigations/list_investiga
 import { registerGetInvestigationRoute } from './investigations/get_investigation';
 import { registerListInvestigationProposalsRoute } from './investigations/list_proposals';
 import { registerGetProposalsRoute } from './proposals/get_proposals';
+import { registerListActionsRoute } from './actions/list_actions';
 
 export interface RouteDependencies {
   router: IRouter;
@@ -28,6 +30,7 @@ export interface RouteDependencies {
   getWatchesService: () => WatchesService;
   getWorkersService: () => WorkersService;
   getConversationProposalsService: () => ConversationProposalsService;
+  getActionsService: () => ActionsService;
 }
 
 export const registerRoutes = (deps: RouteDependencies): void => {
@@ -39,4 +42,5 @@ export const registerRoutes = (deps: RouteDependencies): void => {
   registerGetInvestigationRoute(deps);
   registerListInvestigationProposalsRoute(deps);
   registerGetProposalsRoute(deps);
+  registerListActionsRoute(deps);
 };
