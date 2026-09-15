@@ -8,8 +8,6 @@
 import { ELASTIC_INTERNAL_ORIGIN_HEADER, PUBLIC_API_HEADERS } from '@kbn/scout-security';
 import type { KibanaRole } from '@kbn/scout-security';
 
-export const DETECTION_ENGINE_RULES_URL = '/api/detection_engine/rules';
-
 export const PUBLIC_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   'Content-Type': 'application/json;charset=UTF-8',

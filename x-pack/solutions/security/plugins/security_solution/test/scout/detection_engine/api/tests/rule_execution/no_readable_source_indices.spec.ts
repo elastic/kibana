@@ -6,13 +6,11 @@
  */
 
 import { randomUUID } from 'crypto';
+import type { ApiClientFixture } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../../common/constants';
 import { apiTest, tags } from '../../fixtures';
-import {
-  DETECTION_ENGINE_RULES_URL,
-  PUBLIC_HEADERS,
-  getViewIndexMetadataOnlyRole,
-} from '../../fixtures/constants';
+import { PUBLIC_HEADERS, getViewIndexMetadataOnlyRole } from '../../fixtures/constants';
 
 /**
  * A rule whose owner holds `view_index_metadata` but not `read` on the source indices matches
@@ -62,7 +60,7 @@ apiTest.describe(
     });
 
     const createRule = async (
-      apiClient: { post: Function },
+      apiClient: ApiClientFixture,
       rule: Record<string, unknown>
     ): Promise<string> => {
       const response = await apiClient.post(DETECTION_ENGINE_RULES_URL, {
@@ -80,7 +78,7 @@ apiTest.describe(
     };
 
     const waitForFirstExecution = async (
-      apiClient: { get: Function },
+      apiClient: ApiClientFixture,
       ruleId: string
     ): Promise<RuleResponse['execution_summary']> => {
       let lastExecution: RuleResponse['execution_summary'];
