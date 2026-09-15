@@ -14,18 +14,22 @@ export interface ProcessBatchResult {
 
 export interface ProcessInHalvingBatchesArgs<TItem> {
   items: readonly TItem[];
-  /** Processes one batch of items, typically by sending an Elasticsearch request for them. */
-  processBatch: (batch: TItem[]) => Promise<ProcessBatchResult>;
-  /** Invoked every time the batch size gets reduced after an oversized Elasticsearch response. */
+  /** Number of items in the first batch, all items at once by default. */
+  initialBatchSize?: number;
+  /**
+   * Processes one batch of items, typically by sending an Elasticsearch request for them.
+   * `startIndex` is the position of the first batch item within `items`.
+   */
+  processBatch: (batch: TItem[], startIndex: number) => Promise<ProcessBatchResult>;
+  /**
+   * Returns the batch size to retry the failed batch with, or undefined when a smaller batch cannot work
+   * around the error. Halves the batch on oversized Elasticsearch responses by default.
+   */
+  getReducedBatchSize?: (error: unknown, batchSize: number) => number | undefined;
+  /** Invoked every time the batch size gets reduced. */
   onBatchSizeReduced: (args: { from: number; to: number; error: Error }) => void;
 }
 
-/**
- * Processes items in batches starting with all items at once. When processing a batch fails because the
- * Elasticsearch response exceeded `elasticsearch.maxResponseSize`, the batch size gets halved and the
- * same items are retried with the reduced batch size. Any other error is rethrown. The reduced batch size
- * is kept for the remaining items.
- */
 export const getBatchSizeReducedWarning = ({
   from,
   to,
@@ -37,19 +41,42 @@ export const getBatchSizeReducedWarning = ({
 }): string =>
   `The new terms search response exceeded the "elasticsearch.maxResponseSize" limit, reducing the number of terms processed per request from ${from} to ${to} and retrying. Error: ${error.message}`;
 
+/**
+ * Returns the halved batch size when the response exceeded `elasticsearch.maxResponseSize` and the batch
+ * still holds more than one item, otherwise undefined.
+ */
+export const halveBatchOnOversizedResponse = (
+  error: unknown,
+  batchSize: number
+): number | undefined => {
+  if (isMaximumResponseSizeExceededError(error) && batchSize > 1) {
+    return Math.floor(batchSize / 2);
+  }
+
+  return undefined;
+};
+
+/**
+ * Processes items in batches. When processing a batch fails with an error that `getReducedBatchSize` can work
+ * around, the failed batch is retried with the reduced batch size starting from its first item, so items of
+ * already processed batches are never processed again. Any other error is rethrown. The reduced batch size
+ * is kept for the remaining items.
+ */
 export const processInHalvingBatches = async <TItem>({
   items,
+  initialBatchSize = items.length,
   processBatch,
+  getReducedBatchSize = halveBatchOnOversizedResponse,
   onBatchSizeReduced,
 }: ProcessInHalvingBatchesArgs<TItem>): Promise<void> => {
-  let batchSize = items.length;
+  let batchSize = initialBatchSize;
   let processedCount = 0;
 
   while (processedCount < items.length) {
     const batch = items.slice(processedCount, processedCount + batchSize);
 
     try {
-      const { stop } = await processBatch(batch);
+      const { stop } = await processBatch(batch, processedCount);
 
       if (stop) {
         return;
@@ -57,11 +84,11 @@ export const processInHalvingBatches = async <TItem>({
 
       processedCount += batch.length;
     } catch (error) {
-      if (!isMaximumResponseSizeExceededError(error) || batch.length <= 1) {
+      const reducedBatchSize = getReducedBatchSize(error, batch.length);
+
+      if (reducedBatchSize == null || !(error instanceof Error)) {
         throw error;
       }
-
-      const reducedBatchSize = Math.floor(batch.length / 2);
 
       onBatchSizeReduced({ from: batch.length, to: reducedBatchSize, error });
       batchSize = reducedBatchSize;

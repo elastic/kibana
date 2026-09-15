@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import pRetry from 'p-retry';
 import type { Moment } from 'moment';
 import type { Logger } from '@kbn/logging';
 import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
@@ -39,7 +38,12 @@ import type {
 } from '../types';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import * as i18n from '../translations';
-import { getBatchSizeReducedWarning } from './process_in_halving_batches';
+import {
+  getBatchSizeReducedWarning,
+  halveBatchOnOversizedResponse,
+  processInHalvingBatches,
+} from './process_in_halving_batches';
+import type { ProcessBatchResult } from './process_in_halving_batches';
 
 /**
  * composite aggregation page batch size set to 500 as it shows th best performance(refer https://github.com/elastic/kibana/pull/157413) and
@@ -47,13 +51,15 @@ import { getBatchSizeReducedWarning } from './process_in_halving_batches';
  */
 const BATCH_SIZE = 500;
 
-interface MultiTermsCompositeArgsBase {
+interface Bucket {
+  doc_count: number;
+  key: Record<string, string | number | null>;
+}
+
+interface MultiTermsCompositeArgs {
   sharedParams: SecuritySharedParams<NewTermsRuleParams>;
   filterArgs: GetFilterArgs;
-  buckets: Array<{
-    doc_count: number;
-    key: Record<string, string | number | null>;
-  }>;
+  buckets: Bucket[];
   params: NewTermsRuleParams;
   aggregatableTimestampField: string;
   parsedHistoryWindowSize: Moment;
@@ -66,27 +72,31 @@ interface MultiTermsCompositeArgsBase {
   isLoggedRequestsEnabled: boolean;
 }
 
-interface MultiTermsCompositeArgs extends MultiTermsCompositeArgsBase {
-  batchSize: number;
-}
-
 interface LoggedRequestsProps {
   loggedRequests?: RulePreviewLoggedRequest[];
 }
 
+type TruncatedBulkCreateResult = Omit<
+  GenericBulkCreateResponse<NewTermsAlertLatest>,
+  'suppressedItemsCount'
+>;
+
 type MultiTermsCompositeResult =
-  | (Omit<GenericBulkCreateResponse<NewTermsAlertLatest>, 'suppressedItemsCount'> &
-      LoggedRequestsProps)
+  | (TruncatedBulkCreateResult & LoggedRequestsProps)
   | LoggedRequestsProps
   | undefined;
 
 /**
  * This helper does phase2/phase3(look README) got multiple new terms
  * It takes full page of results from phase 1 (10,000)
- * Splits it in chunks (starts from 500) and applies it as a filter in new composite aggregation request
+ * Splits it in chunks (starts from BATCH_SIZE) and applies it as a filter in new composite aggregation request
  * It pages through though all 10,000 results from phase1 until maxSize alerts found
+ *
+ * When a chunk fails because of too many clauses or because the response exceeded `elasticsearch.maxResponseSize`,
+ * the chunk size gets halved and processing resumes from the failed chunk (see getReducedBatchSize for the limits),
+ * so alerts of already processed chunks are never created or suppressed twice.
  */
-const multiTermsCompositeNonRetryable = async ({
+export const multiTermsComposite = async ({
   sharedParams,
   filterArgs,
   buckets,
@@ -98,7 +108,6 @@ const multiTermsCompositeNonRetryable = async ({
   logger,
   afterKey,
   createAlertsHook,
-  batchSize,
   isAlertSuppressionActive,
   isLoggedRequestsEnabled,
 }: MultiTermsCompositeArgs): Promise<MultiTermsCompositeResult> => {
@@ -113,15 +122,13 @@ const multiTermsCompositeNonRetryable = async ({
 
   const loggedRequests: RulePreviewLoggedRequest[] = [];
 
-  let internalAfterKey = afterKey ?? undefined;
-
-  let i = 0;
   let pageNumber = 0;
+  let truncatedBulkCreateResult: TruncatedBulkCreateResult | undefined;
 
-  while (i < buckets.length) {
+  const processBatch = async (batch: Bucket[], startIndex: number): Promise<ProcessBatchResult> => {
     pageNumber++;
-    const batch = buckets.slice(i, i + batchSize);
-    i += batchSize;
+    // the composite aggregation continues right after the last bucket of the previous batch
+    const internalAfterKey = startIndex === 0 ? afterKey : buckets[startIndex - 1].key;
     const batchFilters = batch.map((b) => {
       const must = Object.keys(b.key).map((key) => ({ match: { [key]: b.key[key] } }));
 
@@ -145,7 +152,7 @@ const multiTermsCompositeNonRetryable = async ({
         timestampField: aggregatableTimestampField,
         fields: params.newTermsFields,
         after: internalAfterKey,
-        pageSize: batchSize,
+        pageSize: batch.length,
       }),
       runtimeMappings,
       searchAfterSortIds: undefined,
@@ -198,7 +205,7 @@ const multiTermsCompositeNonRetryable = async ({
         unexpectedErrorMessage: 'Aggregations were missing on new terms search result',
       });
 
-      return { loggedRequests };
+      return { stop: true };
     }
 
     // PHASE 3: For each term that is not in the history window, fetch the oldest document in
@@ -212,7 +219,7 @@ const multiTermsCompositeNonRetryable = async ({
           timestampField: aggregatableTimestampField,
           fields: params.newTermsFields,
           after: internalAfterKey,
-          pageSize: batchSize,
+          pageSize: batch.length,
         }),
         runtimeMappings,
         searchAfterSortIds: undefined,
@@ -262,7 +269,7 @@ const multiTermsCompositeNonRetryable = async ({
           unexpectedErrorMessage: 'Aggregations were missing on document fetch search result',
         });
 
-        return { loggedRequests };
+        return { stop: true };
       }
 
       const bulkCreateResult = await createAlertsHook(docFetchResultWithAggs);
@@ -271,69 +278,54 @@ const multiTermsCompositeNonRetryable = async ({
         result.warningMessages.push(
           isAlertSuppressionActive ? getSuppressionMaxSignalsWarning() : getMaxSignalsWarning()
         );
-        return isLoggedRequestsEnabled ? { ...bulkCreateResult, loggedRequests } : bulkCreateResult;
+        truncatedBulkCreateResult = bulkCreateResult;
+
+        return { stop: true };
       }
     }
 
-    internalAfterKey = batch[batch.length - 1]?.key;
+    return { stop: false };
+  };
+
+  const onBatchSizeReduced = ({ from, to, error }: { from: number; to: number; error: Error }) => {
+    if (isMaximumResponseSizeExceededError(error)) {
+      const warningMessage = getBatchSizeReducedWarning({ from, to, error });
+
+      ruleExecutionLogger.warn(warningMessage);
+      result.warningMessages.push(warningMessage);
+
+      return;
+    }
+
+    ruleExecutionLogger.debug(
+      `New terms query failed due to too many clauses\nError: ${error.message}. Retrying with ${to} terms per composite aggregation request.`
+    );
+  };
+
+  try {
+    await processInHalvingBatches({
+      items: buckets,
+      initialBatchSize: BATCH_SIZE,
+      processBatch,
+      getReducedBatchSize,
+      onBatchSizeReduced,
+    });
+  } catch (e) {
+    // errors unrelated to the batch size are reported instead of failing the whole execution
+    // if user's configured rule somehow has filter itself greater than max_clause_count, we won't get to this place anyway,
+    // as rule would fail on phase 1
+    result.errors.push(e.message);
+
+    return { loggedRequests };
+  }
+
+  if (truncatedBulkCreateResult) {
+    return isLoggedRequestsEnabled
+      ? { ...truncatedBulkCreateResult, loggedRequests }
+      : truncatedBulkCreateResult;
   }
 
   return { loggedRequests };
-};
-
-/**
- * Runs phase 2 and phase 3 for multiple new terms fields starting with a batch size of BATCH_SIZE.
- * When a request fails because of too many clauses or because the response exceeded `elasticsearch.maxResponseSize`,
- * the batch size gets halved and the whole pass is retried (see getReducedBatchSize for the limits).
- */
-export const multiTermsComposite = async (
-  args: MultiTermsCompositeArgsBase
-): Promise<MultiTermsCompositeResult> => {
-  let retryBatchSize = BATCH_SIZE;
-  const { ruleExecutionLogger } = args.sharedParams;
-
-  return pRetry(
-    async (retryCount) => {
-      try {
-        const res = await multiTermsCompositeNonRetryable({ ...args, batchSize: retryBatchSize });
-        return res;
-      } catch (e) {
-        const reducedBatchSize = getReducedBatchSize(e, retryBatchSize);
-
-        // do not retry if error is not related to the batch size
-        // if user's configured rule somehow has filter itself greater than max_clause_count, we won't get to this place anyway,
-        // as rule would fail on phase 1
-        if (reducedBatchSize == null) {
-          args.result.errors.push(e.message);
-          return;
-        }
-
-        if (isMaximumResponseSizeExceededError(e)) {
-          const warningMessage = getBatchSizeReducedWarning({
-            from: retryBatchSize,
-            to: reducedBatchSize,
-            error: e,
-          });
-
-          ruleExecutionLogger.warn(warningMessage);
-          args.result.warningMessages.push(warningMessage);
-        } else {
-          ruleExecutionLogger.debug(
-            `New terms query failed due to too many clauses\nError: ${e.message}. Retrying #${retryCount} with ${reducedBatchSize} for composite aggregation.`
-          );
-        }
-
-        retryBatchSize = reducedBatchSize;
-        throw e;
-      }
-    },
-    {
-      retries: MAX_RETRIES,
-      // the errors are deterministic for a given batch size, waiting between attempts does not help
-      factor: 1,
-      minTimeout: 0,
-    }
-  );
 };
 
 /**
@@ -343,25 +335,14 @@ export const multiTermsComposite = async (
  * Oversized responses are retried down to a batch of a single term as every bucket carries a full source document.
  */
 export const getReducedBatchSize = (error: unknown, batchSize: number): number | undefined => {
-  const halvedBatchSize = Math.floor(batchSize / 2);
-
   if (isTooManyClausesError(error) && batchSize > MIN_TOO_MANY_CLAUSES_BATCH_SIZE) {
-    return halvedBatchSize;
+    return Math.floor(batchSize / 2);
   }
 
-  if (isMaximumResponseSizeExceededError(error) && batchSize > 1) {
-    return halvedBatchSize;
-  }
-
-  return undefined;
+  return halveBatchOnOversizedResponse(error, batchSize);
 };
 
 const MIN_TOO_MANY_CLAUSES_BATCH_SIZE = 125;
-
-/**
- * Enough attempts to halve BATCH_SIZE down to a single term
- */
-const MAX_RETRIES = Math.ceil(Math.log2(BATCH_SIZE));
 
 const TOO_MANY_CLAUSES_ERROR_MESSAGES = [
   'query_shard_exception: failed to create query',

@@ -25,8 +25,25 @@ describe('processInHalvingBatches', () => {
     });
 
     expect(processBatch).toHaveBeenCalledTimes(1);
-    expect(processBatch).toHaveBeenCalledWith(['a', 'b', 'c', 'd']);
+    expect(processBatch).toHaveBeenCalledWith(['a', 'b', 'c', 'd'], 0);
     expect(onBatchSizeReduced).not.toHaveBeenCalled();
+  });
+
+  it('starts with the given initial batch size and passes the start index of every batch', async () => {
+    const processBatch = jest.fn().mockResolvedValue({ stop: false });
+
+    await processInHalvingBatches({
+      items: ['a', 'b', 'c', 'd', 'e'],
+      initialBatchSize: 2,
+      processBatch,
+      onBatchSizeReduced: jest.fn(),
+    });
+
+    expect(processBatch.mock.calls).toEqual([
+      [['a', 'b'], 0],
+      [['c', 'd'], 2],
+      [['e'], 4],
+    ]);
   });
 
   it('does nothing when there are no items', async () => {
@@ -53,13 +70,74 @@ describe('processInHalvingBatches', () => {
     });
 
     expect(processBatch.mock.calls).toEqual([
-      [['a', 'b', 'c', 'd', 'e']],
-      [['a', 'b']],
-      [['c', 'd']],
-      [['e']],
+      [['a', 'b', 'c', 'd', 'e'], 0],
+      [['a', 'b'], 0],
+      [['c', 'd'], 2],
+      [['e'], 4],
     ]);
     expect(onBatchSizeReduced).toHaveBeenCalledTimes(1);
     expect(onBatchSizeReduced).toHaveBeenCalledWith({ from: 5, to: 2, error });
+  });
+
+  it('resumes from the failed batch without processing the previous batches again', async () => {
+    const processBatch = jest
+      .fn()
+      .mockResolvedValueOnce({ stop: false })
+      .mockRejectedValueOnce(maxResponseSizeError())
+      .mockResolvedValue({ stop: false });
+
+    await processInHalvingBatches({
+      items: ['a', 'b', 'c', 'd', 'e', 'f'],
+      initialBatchSize: 3,
+      processBatch,
+      onBatchSizeReduced: jest.fn(),
+    });
+
+    expect(processBatch.mock.calls).toEqual([
+      [['a', 'b', 'c'], 0],
+      [['d', 'e', 'f'], 3],
+      [['d'], 3],
+      [['e'], 4],
+      [['f'], 5],
+    ]);
+  });
+
+  it('retries with the batch size returned by a custom getReducedBatchSize', async () => {
+    const error = new Error('too many clauses');
+    const processBatch = jest.fn().mockRejectedValueOnce(error).mockResolvedValue({ stop: false });
+    const getReducedBatchSize = jest.fn().mockReturnValue(3);
+    const onBatchSizeReduced = jest.fn();
+
+    await processInHalvingBatches({
+      items: ['a', 'b', 'c', 'd'],
+      processBatch,
+      getReducedBatchSize,
+      onBatchSizeReduced,
+    });
+
+    expect(getReducedBatchSize).toHaveBeenCalledWith(error, 4);
+    expect(processBatch.mock.calls.map(([batch]) => batch)).toEqual([
+      ['a', 'b', 'c', 'd'],
+      ['a', 'b', 'c'],
+      ['d'],
+    ]);
+    expect(onBatchSizeReduced).toHaveBeenCalledWith({ from: 4, to: 3, error });
+  });
+
+  it('rethrows the error when a custom getReducedBatchSize gives up', async () => {
+    const error = new Error('too many clauses');
+    const processBatch = jest.fn().mockRejectedValue(error);
+
+    await expect(
+      processInHalvingBatches({
+        items: ['a', 'b', 'c', 'd'],
+        processBatch,
+        getReducedBatchSize: () => undefined,
+        onBatchSizeReduced: jest.fn(),
+      })
+    ).rejects.toBe(error);
+
+    expect(processBatch).toHaveBeenCalledTimes(1);
   });
 
   it('keeps halving until the batch fits', async () => {
@@ -110,7 +188,10 @@ describe('processInHalvingBatches', () => {
       })
     ).rejects.toBe(error);
 
-    expect(processBatch.mock.calls).toEqual([[['a', 'b']], [['a']]]);
+    expect(processBatch.mock.calls).toEqual([
+      [['a', 'b'], 0],
+      [['a'], 0],
+    ]);
     expect(onBatchSizeReduced).toHaveBeenCalledTimes(1);
   });
 
