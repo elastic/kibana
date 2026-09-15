@@ -31,7 +31,6 @@ maybe_update_esql_definitions () {
 
   echo "@elastic/esql-definitions: $current → $latest. Bumping @elastic/esql in package.json."
   sed -i "s/\"@elastic\/esql\": \"[^\"]*\"/\"@elastic\/esql\": \"$latest\"/" package.json
-  pnpm install --no-frozen-lockfile
   VERSION_BUMPED=true
 }
 
@@ -44,7 +43,7 @@ main () {
 
   report_main_step "Bootstrapping Kibana"
 
-  .buildkite/scripts/bootstrap.sh
+  pnpm kbn bootstrap --force-install --no-frozen-lockfile
 
   cd "$KIBANA_DIR/$SCRIPTS_PACKAGE_DIR"
 
