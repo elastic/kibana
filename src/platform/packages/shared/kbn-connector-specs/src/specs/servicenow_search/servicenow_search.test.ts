@@ -988,14 +988,31 @@ describe('ServicenowSearch', () => {
       expect(result).toEqual(mockResponse.data);
     });
 
-    it('should propagate API errors', async () => {
+    it('should throw with SIR plugin hint on API errors', async () => {
       mockClient.post.mockRejectedValue(new Error('Table not found'));
 
       await expect(
         ServicenowSearch.actions.createSecurityIncident.handler(mockContext, {
           short_description: 'Test security incident',
         })
-      ).rejects.toThrow('Table not found');
+      ).rejects.toThrow(/SIR.*plugin is installed/);
+    });
+
+    it('should include ServiceNow error detail when present', async () => {
+      const snErr = Object.assign(new Error('Bad Request'), {
+        response: {
+          data: {
+            error: { message: 'Table sn_si_incident not found.', detail: 'Unknown table' },
+          },
+        },
+      });
+      mockClient.post.mockRejectedValue(snErr);
+
+      await expect(
+        ServicenowSearch.actions.createSecurityIncident.handler(mockContext, {
+          short_description: 'Test security incident',
+        })
+      ).rejects.toThrow('Table sn_si_incident not found.: Unknown table');
     });
   });
 
@@ -1013,7 +1030,7 @@ describe('ServicenowSearch', () => {
       });
 
       expect(mockClient.post).toHaveBeenCalledWith(
-        'https://test-instance.service-now.com/api/now/em/event',
+        'https://test-instance.service-now.com/api/global/em/jsonv2',
         {
           records: [
             {
@@ -1048,7 +1065,7 @@ describe('ServicenowSearch', () => {
       });
     });
 
-    it('should propagate API errors', async () => {
+    it('should throw with ITOM plugin hint on API errors', async () => {
       mockClient.post.mockRejectedValue(new Error('Event Management not enabled'));
 
       await expect(
@@ -1056,7 +1073,25 @@ describe('ServicenowSearch', () => {
           source: 'Elastic',
           type: 'test_event',
         })
-      ).rejects.toThrow('Event Management not enabled');
+      ).rejects.toThrow(/Event Management.*ITOM.*plugin is installed/);
+    });
+
+    it('should include ServiceNow error detail when present', async () => {
+      const snErr = Object.assign(new Error('Bad Request'), {
+        response: {
+          data: {
+            error: { message: 'Requested URI does not represent any resource.', detail: '' },
+          },
+        },
+      });
+      mockClient.post.mockRejectedValue(snErr);
+
+      await expect(
+        ServicenowSearch.actions.createEvent.handler(mockContext, {
+          source: 'Elastic',
+          type: 'test_event',
+        })
+      ).rejects.toThrow('Requested URI does not represent any resource.');
     });
   });
 

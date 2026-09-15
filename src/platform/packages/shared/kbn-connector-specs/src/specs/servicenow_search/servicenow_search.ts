@@ -70,6 +70,16 @@ import type {
   GetChoicesInput,
   QueryUsersInput,
 } from './types';
+
+const extractSnError = (err: unknown): string | undefined => {
+  const axiosErr = err as {
+    response?: { data?: { error?: { message?: string; detail?: string } } };
+  };
+  const { message, detail } = axiosErr.response?.data?.error ?? {};
+  if (!message) return undefined;
+  return detail ? `${message}: ${detail}` : message;
+};
+
 export const ServicenowSearch: ConnectorSpec = {
   metadata: {
     id: '.servicenow_search',
@@ -521,11 +531,18 @@ export const ServicenowSearch: ConnectorSpec = {
         const { instanceUrl } = ctx.config as { instanceUrl: string };
         const url = `${instanceUrl}/api/now/table/sn_si_incident`;
 
-        const response = await ctx.client.post(url, input, {
-          params: { sysparm_display_value: 'true' },
-        });
-
-        return response.data;
+        try {
+          const response = await ctx.client.post(url, input, {
+            params: { sysparm_display_value: 'true' },
+          });
+          return response.data;
+        } catch (err) {
+          const snError = extractSnError(err);
+          throw new Error(
+            `Unable to create security incident.${snError ? ` ${snError}.` : ''} ` +
+              'Ensure the ServiceNow Security Incident Response (SIR) plugin is installed on this instance.'
+          );
+        }
       },
     },
 
@@ -539,7 +556,7 @@ export const ServicenowSearch: ConnectorSpec = {
       input: CreateEventInputSchema,
       handler: async (ctx, input: CreateEventInput) => {
         const { instanceUrl } = ctx.config as { instanceUrl: string };
-        const url = `${instanceUrl}/api/now/em/event`;
+        const url = `${instanceUrl}/api/global/em/jsonv2`;
 
         const { additional_info, ...eventFields } = input;
         const eventBody: Record<string, unknown> = { ...eventFields };
@@ -547,9 +564,16 @@ export const ServicenowSearch: ConnectorSpec = {
           eventBody.additional_info = JSON.stringify(additional_info);
         }
 
-        const response = await ctx.client.post(url, { records: [eventBody] });
-
-        return response.data;
+        try {
+          const response = await ctx.client.post(url, { records: [eventBody] });
+          return response.data;
+        } catch (err) {
+          const snError = extractSnError(err);
+          throw new Error(
+            `Unable to create event.${snError ? ` ${snError}.` : ''} ` +
+              'Ensure the ServiceNow Event Management (ITOM) plugin is installed and the connector user has the evt_mgmt_integration role.'
+          );
+        }
       },
     },
 
