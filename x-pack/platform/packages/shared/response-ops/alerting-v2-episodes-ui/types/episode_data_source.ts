@@ -64,6 +64,14 @@ export interface EpisodeSourceHistogram {
   isCapHit: boolean;
 }
 
+export interface SeverityExtension {
+  value: string;
+  label: string;
+  color: string;
+  sortRank: number;
+  filterDotColor?: string;
+}
+
 export interface EpisodeDataSource {
   id: string;
   queryKeyPrefix: readonly unknown[];
@@ -72,4 +80,5 @@ export interface EpisodeDataSource {
   fetchHistogram?: (params: FetchSourceHistogramParams) => Promise<EpisodeSourceHistogram>;
   fetchTagOptions?: (params: FetchSourceTagOptionsParams) => Promise<string[]>;
   resolveRules?: (params: ResolveSourceRulesParams) => Promise<RuleResponse[]>;
+  severityExtensions?: SeverityExtension[];
 }
