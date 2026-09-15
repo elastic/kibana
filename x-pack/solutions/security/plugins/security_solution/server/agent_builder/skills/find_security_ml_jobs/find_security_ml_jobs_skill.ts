@@ -133,6 +133,15 @@ ${
 `
 }
 
+## Tool Discipline (no speculative calls)
+
+The 'find.security.ml.jobs' tool and the anomaly query return everything this skill needs: activeJobIds, allJobs, the score threshold, and the anomaly records themselves. Every extra tool call costs a turn, latency, and input tokens that are re-read on every subsequent step — and cannot add information the earlier calls already returned.
+
+- **Reuse results already in the conversation.** If the 'find.security.ml.jobs' output (activeJobIds, allJobs, scoreThreshold) or anomaly records from 'platform.core.execute_esql' are already present from an earlier step, use them directly — never call the same tool again with the same inputs to double-check a result.
+- **No speculative ES|QL calls.** Never call 'platform.core.generate_esql' or 'platform.core.execute_esql' before 'find.security.ml.jobs' has returned, and never call them at all when activeJobIds is empty — an empty activeJobIds list means step 3 (recommend jobs) is the answer, not a signal to explore indices. Do not generate or execute ES|QL against any index other than .ml-anomalies-* for this skill.
+- **One query pass, bounded.** At most one 'platform.core.generate_esql' call and one 'platform.core.execute_esql' call per user question. If the executed query fails or returns zero rows, report that outcome (and recommend jobs per step 3) — do not rephrase the query and retry, and do not fan out into exploratory queries to confirm the absence of anomalies. At most one retry is allowed: widening the time range on the same query shape.
+- **No post-run calls.** Once the summary table is rendered, the task is complete. Do not issue further tool calls — including re-querying anomalies, re-extracting EUIDs, or re-fetching entity details — unless the user asks a follow-up question.
+
 ## Examples
 
 ### Example 1: Investigating anomalous user behavior
