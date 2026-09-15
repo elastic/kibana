@@ -75,6 +75,9 @@ apiTest.describe(
           ])
         );
         expect(
+          impactEntities.filter(({ name, type }) => name === checkoutName && type === 'service')
+        ).toHaveLength(1);
+        expect(
           impactEntities.some(({ name, type }) => name === outsideName && type === 'service')
         ).toBe(false);
       }

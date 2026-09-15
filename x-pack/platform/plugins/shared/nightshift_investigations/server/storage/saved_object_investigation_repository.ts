@@ -47,7 +47,7 @@ const buildSearchFields = (query: SeverityCountsQuery): string[] | undefined =>
 
 export type InvestigationSavedObjectsClient = Pick<
   SavedObjectsClientContract,
-  'create' | 'get' | 'update' | 'find'
+  'create' | 'get' | 'update' | 'find' | 'createPointInTimeFinder'
 >;
 
 export interface SavedObjectInvestigationRepositoryDeps {
@@ -189,21 +189,29 @@ export class SavedObjectInvestigationRepository implements InvestigationReposito
   }
 
   async findImpactEntities(query: InvestigationDateFilters): Promise<ImpactEntity[]> {
-    const result = await this.savedObjectsClient.find<Pick<InvestigationAttributes, 'impact'>>({
+    const finder = this.savedObjectsClient.createPointInTimeFinder<
+      Pick<InvestigationAttributes, 'impact'>
+    >({
       type: NIGHTSHIFT_INVESTIGATION_SO_TYPE,
       filter: buildBaseInvestigationFilter(query),
-      sortField: 'created_at',
-      sortOrder: 'desc',
-      // The 1,000 latest investigations are sufficient for the expected entity-filter volume.
       perPage: 1000,
       fields: ['impact'],
     });
     const entities = new Map<string, ImpactEntity>();
 
-    for (const { attributes } of result.saved_objects) {
-      for (const { name, type } of attributes.impact?.entities ?? []) {
-        entities.set(JSON.stringify([name, type]), type === undefined ? { name } : { name, type });
+    try {
+      for await (const { saved_objects: savedObjects } of finder.find()) {
+        for (const { attributes } of savedObjects) {
+          for (const { name, type } of attributes.impact?.entities ?? []) {
+            entities.set(
+              JSON.stringify([name, type]),
+              type === undefined ? { name } : { name, type }
+            );
+          }
+        }
       }
+    } finally {
+      await finder.close();
     }
 
     return [...entities.values()].sort(

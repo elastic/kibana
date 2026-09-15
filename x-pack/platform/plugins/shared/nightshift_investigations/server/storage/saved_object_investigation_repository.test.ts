@@ -39,6 +39,7 @@ const createRepository = () => {
     get: jest.fn(),
     update: jest.fn(),
     find: jest.fn(),
+    createPointInTimeFinder: jest.fn(),
   };
   return {
     repository: new SavedObjectInvestigationRepository({ savedObjectsClient }),
@@ -394,42 +395,51 @@ describe('SavedObjectInvestigationRepository', () => {
   });
 
   describe('findImpactEntities()', () => {
-    it('loads the first 1,000 matching investigations and returns distinct entity pairs', async () => {
+    it('loads every matching investigation and returns distinct entity pairs', async () => {
       const { repository, savedObjectsClient } = createRepository();
-      savedObjectsClient.find.mockResolvedValue({
-        saved_objects: [
-          {
-            ...savedObject,
-            id: 'inv-1',
-            attributes: {
-              impact: {
-                entities: [
-                  { name: 'zebra', type: 'host' },
-                  { name: 'api', type: 'database' },
-                  { name: 'api', type: 'database' },
-                  { name: 'api' },
-                ],
+      const finder = {
+        async *find() {
+          yield {
+            saved_objects: [
+              {
+                ...savedObject,
+                id: 'inv-1',
+                attributes: {
+                  impact: {
+                    entities: [
+                      { name: 'zebra', type: 'host' },
+                      { name: 'api', type: 'database' },
+                      { name: 'api', type: 'database' },
+                      { name: 'api' },
+                    ],
+                  },
+                },
               },
-            },
-          },
-          {
-            ...savedObject,
-            id: 'inv-2',
-            attributes: {
-              impact: {
-                entities: [
-                  { name: 'api', type: 'service' },
-                  { name: 'api' },
-                  { name: 'database', type: 'database' },
-                ],
+            ],
+          };
+          yield {
+            saved_objects: [
+              {
+                ...savedObject,
+                id: 'inv-2',
+                attributes: {
+                  impact: {
+                    entities: [
+                      { name: 'api', type: 'service' },
+                      { name: 'api' },
+                      { name: 'database', type: 'database' },
+                    ],
+                  },
+                },
               },
-            },
-          },
-        ],
-        total: 1_001,
-        page: 1,
-        per_page: 1_000,
-      });
+            ],
+          };
+        },
+        close: jest.fn().mockResolvedValue(undefined),
+      };
+      savedObjectsClient.createPointInTimeFinder.mockReturnValue(
+        finder as ReturnType<InvestigationSavedObjectsClient['createPointInTimeFinder']>
+      );
 
       await expect(
         repository.findImpactEntities({
@@ -448,7 +458,7 @@ describe('SavedObjectInvestigationRepository', () => {
         { name: 'zebra', type: 'host' },
       ]);
 
-      expect(savedObjectsClient.find).toHaveBeenCalledWith({
+      expect(savedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
         type: TYPE,
         filter:
           `${TYPE}.attributes.created_at >= "2024-01-01T00:00:00Z"` +
@@ -457,32 +467,33 @@ describe('SavedObjectInvestigationRepository', () => {
           ` AND ${TYPE}.attributes.started_at <= "2024-01-30T00:00:00Z"` +
           ` AND ${TYPE}.attributes.completed_at >= "2024-01-03T00:00:00Z"` +
           ` AND ${TYPE}.attributes.completed_at <= "2024-01-29T00:00:00Z"`,
-        sortField: 'created_at',
-        sortOrder: 'desc',
         perPage: 1_000,
         fields: ['impact'],
       });
+      expect(finder.close).toHaveBeenCalledTimes(1);
     });
 
     it('omits the filter when no date bounds are given', async () => {
       const { repository, savedObjectsClient } = createRepository();
-      savedObjectsClient.find.mockResolvedValue({
-        saved_objects: [],
-        total: 0,
-        page: 1,
-        per_page: 1_000,
-      });
+      const finder = {
+        async *find() {
+          yield { saved_objects: [] };
+        },
+        close: jest.fn().mockResolvedValue(undefined),
+      };
+      savedObjectsClient.createPointInTimeFinder.mockReturnValue(
+        finder as ReturnType<InvestigationSavedObjectsClient['createPointInTimeFinder']>
+      );
 
       await repository.findImpactEntities({});
 
-      expect(savedObjectsClient.find).toHaveBeenCalledWith({
+      expect(savedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
         type: TYPE,
         filter: undefined,
-        sortField: 'created_at',
-        sortOrder: 'desc',
         perPage: 1_000,
         fields: ['impact'],
       });
+      expect(finder.close).toHaveBeenCalledTimes(1);
     });
   });
 });
