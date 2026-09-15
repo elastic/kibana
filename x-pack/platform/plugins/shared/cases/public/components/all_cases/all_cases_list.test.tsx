@@ -1093,10 +1093,12 @@ describe('AllCasesListGeneric', () => {
       expect(await screen.findByTestId('column-selection-popover-button')).toBeInTheDocument();
     });
 
-    it('renders the columns popover in the filter bar when isSelectorView=true', async () => {
+    it('does not render the columns button when isSelectorView=true', async () => {
       renderWithTestingProviders(<AllCasesList isSelectorView={true} />);
 
-      expect(await screen.findByTestId('column-selection-popover-button')).toBeInTheDocument();
+      await screen.findByTestId('cases-table');
+
+      expect(screen.queryByTestId('column-selection-popover-button')).not.toBeInTheDocument();
     });
   });
 
