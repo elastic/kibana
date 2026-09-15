@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiPopover, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiSpacer, EuiText, EuiToolTip } from '@elastic/eui';
 import type { GroupingMode } from '@kbn/alerting-v2-schemas';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -26,9 +26,9 @@ const panelStyle = css`
 `;
 
 /**
- * Info icon shown next to the Frequency label. On hover, click, or keyboard focus it opens a
- * panel listing every frequency option available for the current notify-per mode, each with its
- * explanation, replacing the per-field helper text.
+ * Info icon shown next to the Frequency label. Hovering shows a short tooltip; clicking or
+ * activating it with the keyboard opens a panel listing every frequency option available for the
+ * current notify-per mode, each with its explanation.
  */
 export const FrequencyHelpTip = ({ groupingMode }: FrequencyHelpTipProps) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -44,17 +44,15 @@ export const FrequencyHelpTip = ({ groupingMode }: FrequencyHelpTipProps) => {
   );
 
   const button = (
-    <EuiButtonIcon
-      iconType="info"
-      color="text"
-      aria-label={ariaLabel}
-      data-test-subj="frequencyHelpTip"
-      onMouseEnter={() => setIsOpen(true)}
-      onMouseLeave={() => setIsOpen(false)}
-      onFocus={() => setIsOpen(true)}
-      onBlur={() => setIsOpen(false)}
-      onClick={() => setIsOpen((open) => !open)}
-    />
+    <EuiToolTip content={ariaLabel} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="info"
+        color="text"
+        aria-label={ariaLabel}
+        data-test-subj="frequencyHelpTip"
+        onClick={() => setIsOpen((open) => !open)}
+      />
+    </EuiToolTip>
   );
 
   return (
@@ -65,6 +63,7 @@ export const FrequencyHelpTip = ({ groupingMode }: FrequencyHelpTipProps) => {
       anchorPosition="upCenter"
       panelPaddingSize="m"
       ownFocus={false}
+      aria-label={ariaLabel}
     >
       <div css={panelStyle} data-test-subj="frequencyHelpTipContent">
         {options.map((option, index) => (

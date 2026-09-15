@@ -20,10 +20,10 @@ const renderTip = (groupingMode: GroupingMode) =>
   );
 
 describe('FrequencyHelpTip', () => {
-  it('lists every per_episode frequency option with its explanation on hover', async () => {
+  it('lists every per_episode frequency option with its explanation when opened', async () => {
     renderTip('per_episode');
 
-    await userEvent.hover(screen.getByTestId('frequencyHelpTip'));
+    await userEvent.click(screen.getByTestId('frequencyHelpTip'));
 
     expect(await screen.findByText('On status change')).toBeInTheDocument();
     expect(screen.getByText('On status change + repeat at interval')).toBeInTheDocument();
@@ -35,10 +35,10 @@ describe('FrequencyHelpTip', () => {
     ).toBeInTheDocument();
   });
 
-  it('lists the aggregate frequency options for group/digest modes on hover', async () => {
+  it('lists the aggregate frequency options for group/digest modes when opened', async () => {
     renderTip('all');
 
-    await userEvent.hover(screen.getByTestId('frequencyHelpTip'));
+    await userEvent.click(screen.getByTestId('frequencyHelpTip'));
 
     expect(await screen.findByText('At most once every...')).toBeInTheDocument();
     expect(screen.getByText('Every evaluation')).toBeInTheDocument();
@@ -46,11 +46,12 @@ describe('FrequencyHelpTip', () => {
     expect(screen.queryByText('On status change + repeat at interval')).not.toBeInTheDocument();
   });
 
-  it('opens the panel on click for keyboard/pointer accessibility', async () => {
+  it('shows a hover tooltip on the icon for sighted users', async () => {
     renderTip('per_episode');
 
-    await userEvent.click(screen.getByTestId('frequencyHelpTip'));
+    await userEvent.hover(screen.getByTestId('frequencyHelpTip'));
 
-    expect(await screen.findByText('On status change')).toBeInTheDocument();
+
+    expect(await screen.findByText('Frequency options explained')).toBeInTheDocument();
   });
 });
