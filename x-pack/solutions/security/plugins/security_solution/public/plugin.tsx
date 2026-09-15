@@ -153,7 +153,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     }
 
     if (workflowsExtensions) {
-      registerWorkflowSteps(workflowsExtensions, this.experimentalFeatures);
+      registerWorkflowSteps(workflowsExtensions);
       registerSecurityWorkflowTriggers(workflowsExtensions);
       if (this.experimentalFeatures.threatIntelSupplyEnabled) {
         registerThreatIntelWorkflowSteps(workflowsExtensions);

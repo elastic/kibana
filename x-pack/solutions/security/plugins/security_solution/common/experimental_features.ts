@@ -370,14 +370,6 @@ export const allowedExperimentalValues = Object.freeze({
    *   xpack.securitySolution.enableExperimental: ['threatIntelSupplyEnabled']
    */
   threatIntelSupplyEnabled: false,
-
-  /**
-   * Endpoint response-action workflow steps: security.endpointIsolateHost,
-   * security.endpointKillProcess, security.endpointSuspendProcess. Default
-   * off. Enable with:
-   *   xpack.securitySolution.enableExperimental: ['endpointResponseActionsWorkflowStepsEnabled']
-   */
-  endpointResponseActionsWorkflowStepsEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

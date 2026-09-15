@@ -6,14 +6,12 @@
  */
 
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
 
 /**
  * Registers all security workflow steps with the workflowsExtensions plugin.
  */
 export const registerWorkflowSteps = (
-  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup,
-  experimentalFeatures: ExperimentalFeatures
+  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
 ): void => {
   workflowsExtensions.registerStepDefinition(() =>
     import('./render_alert_narrative_step').then((m) => m.renderAlertNarrativeStepDefinition)
@@ -92,20 +90,4 @@ export const registerWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(() =>
     import('./patch_rule_step/patch_rule_step').then((m) => m.patchRuleStepDefinition)
   );
-
-  if (experimentalFeatures.endpointResponseActionsWorkflowStepsEnabled) {
-    workflowsExtensions.registerStepDefinition(() =>
-      import('./isolate_host_step/isolate_host_step').then((m) => m.isolateHostStepDefinition)
-    );
-
-    workflowsExtensions.registerStepDefinition(() =>
-      import('./kill_process_step/kill_process_step').then((m) => m.killProcessStepDefinition)
-    );
-
-    workflowsExtensions.registerStepDefinition(() =>
-      import('./suspend_process_step/suspend_process_step').then(
-        (m) => m.suspendProcessStepDefinition
-      )
-    );
-  }
 };
