@@ -7,12 +7,7 @@
 
 import { assign, fromPromise, sendTo, setup } from 'xstate';
 import type { CoreStart } from '@kbn/core/public';
-import type {
-  SourceRuntimeMetadata,
-  SourceStatus,
-  SourcesUnitDefinition,
-  SourceType,
-} from '../types';
+import type { SourceRuntimeMetadata, SourceStatus, SourceType } from '../types';
 import {
   createSourcesMachineImplementations,
   sourcesStateMachine,
@@ -20,11 +15,12 @@ import {
 } from './sources_state_machine';
 import type { SourceApiKeyGenerationDeps } from '../source_api_keys';
 import type { SourceEnvironmentLoader } from '../source_environment';
+import { getConfiguredSources } from '../source_models';
 import {
-  createEmptyUnitDefinition,
-  mockUnitDefinitionRepository,
-  type UnitDefinitionRepository,
-} from '../unit_definition_repository';
+  createEmptyUnit,
+  type Unit,
+  type UnitRepository,
+} from '../../../../services/unit_repository';
 
 export interface SourcesTableSortingColumn {
   id: string;
@@ -37,18 +33,18 @@ export interface SourcesTablePagination {
 }
 
 export interface SourcesTableStateInput {
-  unitDefinition?: SourcesUnitDefinition;
+  unitDefinition?: Unit;
   metadataBySourceId?: Record<string, SourceRuntimeMetadata>;
   apiKeyGenerationDeps: SourceApiKeyGenerationDeps;
   toasts: CoreStart['notifications']['toasts'];
   loadSourceEnvironment?: SourceEnvironmentLoader;
-  loadUnitDefinition?: UnitDefinitionRepository['load'];
-  persistUnitDefinition?: UnitDefinitionRepository['persist'];
+  loadUnitDefinition: UnitRepository['load'];
+  persistUnitDefinition: UnitRepository['persist'];
 }
 
 export interface SourcesTableStateContext {
-  unitDefinition: SourcesUnitDefinition;
-  pendingUnitDefinition?: SourcesUnitDefinition;
+  unitDefinition: Unit;
+  pendingUnitDefinition?: Unit;
   pendingSourceId?: string;
   pendingIntent?: 'create' | 'delete';
   sourcesRef: SourcesActorRef;
@@ -59,24 +55,24 @@ export interface SourcesTableStateContext {
   sortingColumns: SourcesTableSortingColumn[];
   pagination: SourcesTablePagination;
   visibleColumnIds: string[];
-  loadUnitDefinition: () => Promise<SourcesUnitDefinition>;
-  persistUnitDefinition: (unitDefinition: SourcesUnitDefinition) => Promise<SourcesUnitDefinition>;
+  loadUnitDefinition: () => Promise<Unit>;
+  persistUnitDefinition: (unitDefinition: Unit) => Promise<Unit>;
   error?: Error;
 }
 
 export type SourcesTableStateEvent =
   | {
       type: 'unit.changed';
-      unitDefinition: SourcesUnitDefinition;
+      unitDefinition: Unit;
       sourceId: string;
       intent: 'create' | 'delete';
     }
   | { type: 'unit.reload' }
-  | { type: 'xstate.done.actor.loadUnitDefinition'; output: SourcesUnitDefinition }
+  | { type: 'xstate.done.actor.loadUnitDefinition'; output: Unit }
   | { type: 'xstate.error.actor.loadUnitDefinition'; error: unknown }
   | {
       type: 'xstate.done.actor.persistUnitDefinition';
-      output: { unitDefinition: SourcesUnitDefinition; sourceId: string };
+      output: { unitDefinition: Unit; sourceId: string };
     }
   | { type: 'xstate.error.actor.persistUnitDefinition'; error: unknown }
   | { type: 'search.change'; query: string }
@@ -97,16 +93,14 @@ export const sourcesTableStateMachine = setup({
     events: {} as SourcesTableStateEvent,
   },
   actors: {
-    loadUnitDefinition: fromPromise(
-      async ({ input }: { input: () => Promise<SourcesUnitDefinition> }) => input()
-    ),
+    loadUnitDefinition: fromPromise(async ({ input }: { input: () => Promise<Unit> }) => input()),
     persistUnitDefinition: fromPromise(
       async ({
         input,
       }: {
         input: {
-          persist: UnitDefinitionRepository['persist'];
-          unitDefinition: SourcesUnitDefinition;
+          persist: UnitRepository['persist'];
+          unitDefinition: Unit;
           sourceId: string;
         };
       }) => ({
@@ -135,7 +129,7 @@ export const sourcesTableStateMachine = setup({
         if (event.type !== 'xstate.done.actor.loadUnitDefinition') {
           return context.selectedSourceIds;
         }
-        const loadedSourceIds = new Set(event.output.sources.map(({ id }) => id));
+        const loadedSourceIds = new Set(getConfiguredSources(event.output).map(({ id }) => id));
         return context.selectedSourceIds.filter((sourceId) => loadedSourceIds.has(sourceId));
       },
       error: undefined,
@@ -243,7 +237,7 @@ export const sourcesTableStateMachine = setup({
 }).createMachine({
   id: 'streamsSourcesTable',
   context: ({ input, self, spawn }) => {
-    const unitDefinition = input.unitDefinition ?? createEmptyUnitDefinition();
+    const unitDefinition = input.unitDefinition ?? createEmptyUnit();
     return {
       unitDefinition,
       pendingUnitDefinition: undefined,
@@ -256,8 +250,8 @@ export const sourcesTableStateMachine = setup({
       sortingColumns: [{ id: 'name', direction: 'asc' }],
       pagination: { pageIndex: 0, pageSize: 10 },
       visibleColumnIds: ['name', 'type', 'status', 'throughput', 'lastEvent', 'destinations'],
-      loadUnitDefinition: input.loadUnitDefinition ?? mockUnitDefinitionRepository.load,
-      persistUnitDefinition: input.persistUnitDefinition ?? mockUnitDefinitionRepository.persist,
+      loadUnitDefinition: input.loadUnitDefinition,
+      persistUnitDefinition: input.persistUnitDefinition,
       error: undefined,
       sourcesRef: spawn(
         sourcesStateMachine.provide(
