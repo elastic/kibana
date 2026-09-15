@@ -749,26 +749,23 @@ describe('AlertEpisodesListPage fetch errors', () => {
     ).not.toBeInTheDocument();
   });
 
-  it.each([403, 503])(
-    'does not toast when classic alerts return %s',
-    async (status) => {
-      jest
-        .mocked(fetchClassicAlertsAsEpisodes)
-        .mockRejectedValue(httpError(status, `classic ${status}`));
+  it.each([403, 503])('does not toast when classic alerts return %s', async (status) => {
+    jest
+      .mocked(fetchClassicAlertsAsEpisodes)
+      .mockRejectedValue(httpError(status, `classic ${status}`));
 
-      renderPage();
+    renderPage();
 
-      await waitFor(() => {
-        const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
-        expect(lastCall?.rows?.length).toBeGreaterThan(0);
-      });
+    await waitFor(() => {
+      const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+      expect(lastCall?.rows?.length).toBeGreaterThan(0);
+    });
 
-      expect(mockServices.notifications.toasts.addError).not.toHaveBeenCalled();
-      expect(screen.queryByText('Unable to load some alerts')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('alertingV2EpisodesListFetchError')).not.toBeInTheDocument();
-      expect(screen.queryByText(`classic ${status}`)).not.toBeInTheDocument();
-    }
-  );
+    expect(mockServices.notifications.toasts.addError).not.toHaveBeenCalled();
+    expect(screen.queryByText('Unable to load some alerts')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('alertingV2EpisodesListFetchError')).not.toBeInTheDocument();
+    expect(screen.queryByText(`classic ${status}`)).not.toBeInTheDocument();
+  });
 
   it('toasts and still shows classic rows when v2 returns 500', async () => {
     jest.mocked(fetchAlertingEpisodes).mockRejectedValue(httpError(500, 'v2 episodes failed'));

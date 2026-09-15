@@ -31,7 +31,9 @@ describe('useToastSourceErrors', () => {
     );
 
     expect(addError).toHaveBeenCalledTimes(1);
-    expect(addError).toHaveBeenCalledWith(error, { title: EPISODES_LIST_V2_FETCH_ERROR_TOAST_TITLE });
+    expect(addError).toHaveBeenCalledWith(error, {
+      title: EPISODES_LIST_V2_FETCH_ERROR_TOAST_TITLE,
+    });
   });
 
   it('toasts a classic list 500 with a v1 list title', () => {
@@ -42,7 +44,9 @@ describe('useToastSourceErrors', () => {
       useToastSourceErrors([{ sourceId: 'classic-alerts', error }], { addError }, 'list')
     );
 
-    expect(addError).toHaveBeenCalledWith(error, { title: EPISODES_LIST_V1_FETCH_ERROR_TOAST_TITLE });
+    expect(addError).toHaveBeenCalledWith(error, {
+      title: EPISODES_LIST_V1_FETCH_ERROR_TOAST_TITLE,
+    });
   });
 
   it('toasts KPI errors with source-specific titles', () => {
