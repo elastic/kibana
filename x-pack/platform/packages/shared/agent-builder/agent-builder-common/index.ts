@@ -328,13 +328,6 @@ export {
   createRelevantSkillsStep,
   isRelevantSkillsStep,
   type ConversationListOptions,
-  userMessageEventDataSchema,
-  promptResponseEventDataSchema,
-  executionStartedEventDataSchema,
-  executionStepEventDataSchema,
-  executionTerminatedEventDataSchema,
-  executionFailedEventDataSchema,
-  executionAbortedEventDataSchema,
   CONVERSATION_SCHEMA_VERSION,
   MIN_EVENTS_NATIVE_SCHEMA_VERSION,
   isEventsNativeVersion,
@@ -369,6 +362,8 @@ export {
   CONVERSATION_EVENT_ID_DELIMITER,
   RESERVED_CONVERSATION_EVENT_TYPES,
   type ReservedConversationEventType,
+  BUILT_IN_CONVERSATION_EVENT_TYPES,
+  isBuiltInConversationEventType,
   type ValidConversationEventType,
 } from './chat';
 export {

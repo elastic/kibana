@@ -7,7 +7,10 @@
 
 import { z } from '@kbn/zod/v4';
 import type { ConversationEventTypeDefinition } from '@kbn/agent-builder-server/conversation_events';
-import type { ValidConversationEventType } from '@kbn/agent-builder-common';
+import {
+  type ValidConversationEventType,
+  BUILT_IN_CONVERSATION_EVENT_TYPES,
+} from '@kbn/agent-builder-common';
 import { createConversationEventTypeRegistry } from './conversation_event_type_registry';
 
 const alertDefinition: ConversationEventTypeDefinition = {
@@ -82,6 +85,16 @@ describe('createConversationEventTypeRegistry', () => {
     );
   });
 
+  it.each(BUILT_IN_CONVERSATION_EVENT_TYPES)(
+    'throws when registering built-in type "%s"',
+    (type) => {
+      const registry = createConversationEventTypeRegistry();
+      expect(() => registry.register({ type, payloadSchema: z.object({}) })).toThrow(
+        'is a built-in timeline event type'
+      );
+    }
+  );
+
   describe('ValidConversationEventType compile-time guard', () => {
     it('accepts a safe literal type', () => {
       // ValidConversationEventType<'security.alert_triaged'> must resolve to the literal itself
@@ -100,6 +113,12 @@ describe('createConversationEventTypeRegistry', () => {
       // @ts-expect-error — ValidConversationEventType<'execution'> resolves to never
       const _bad: ValidConversationEventType<'execution'> = 'execution';
       expect(_bad).toBe('execution');
+    });
+
+    it('rejects a built-in event type at compile time', () => {
+      // @ts-expect-error — ValidConversationEventType<'user_message'> resolves to never
+      const _bad: ValidConversationEventType<'user_message'> = 'user_message';
+      expect(_bad).toBe('user_message');
     });
   });
 });

@@ -172,15 +172,6 @@ export {
   createUserQuestionAnsweredEvent,
 } from './events';
 export type { RoundState } from './round_state';
-export {
-  userMessageEventDataSchema,
-  promptResponseEventDataSchema,
-  executionStartedEventDataSchema,
-  executionStepEventDataSchema,
-  executionTerminatedEventDataSchema,
-  executionFailedEventDataSchema,
-  executionAbortedEventDataSchema,
-} from './event_schemas';
 export type { ConversationListOptions } from './conversation_list';
 export {
   CONVERSATION_SCHEMA_VERSION,
@@ -217,5 +208,7 @@ export {
   CONVERSATION_EVENT_ID_DELIMITER,
   RESERVED_CONVERSATION_EVENT_TYPES,
   type ReservedConversationEventType,
+  BUILT_IN_CONVERSATION_EVENT_TYPES,
+  isBuiltInConversationEventType,
   type ValidConversationEventType,
 } from './timeline_events';

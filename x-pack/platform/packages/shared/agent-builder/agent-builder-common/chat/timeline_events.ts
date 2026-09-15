@@ -276,21 +276,43 @@ export const CONVERSATION_EVENT_ID_DELIMITER = '::' as const;
 /**
  * Type names that are not covered by a `TimelineEventType` member but would still
  * produce ids colliding with round-derived ones.
- * Built-in names (`user_message`, `execution_started`, etc.) are covered by the
- * duplicate-registration guard and need no separate entry here.
  */
 export const RESERVED_CONVERSATION_EVENT_TYPES = ['execution', 'step'] as const;
 export type ReservedConversationEventType = (typeof RESERVED_CONVERSATION_EVENT_TYPES)[number];
 
 /**
- * Compile-time guard that rejects a type string if it contains the id delimiter or is reserved.
+ * The built-in timeline event type names. Derived from `TimelineEventType` rather than written
+ * out, so it cannot drift from the enum: adding a member to `TimelineEventType` adds it here.
+ * A custom event type may not reuse one of these names — the round-derived events projection
+ * owns them.
+ */
+export const BUILT_IN_CONVERSATION_EVENT_TYPES: readonly TimelineEventType[] =
+  Object.values(TimelineEventType);
+
+/** True when `type` is one of the built-in timeline event type names. */
+export const isBuiltInConversationEventType = (type: string): type is TimelineEventType =>
+  (BUILT_IN_CONVERSATION_EVENT_TYPES as readonly string[]).includes(type);
+
+/**
+ * Union of the string values of all built-in timeline event types.
+ * Uses template-literal distribution so that `'user_message' extends BuiltInConversationEventTypeValue`
+ * evaluates to `true` — plain string literals do not extend string enum types in TypeScript's
+ * type system even when the runtime values match.
+ */
+type BuiltInConversationEventTypeValue = `${TimelineEventType}`;
+
+/**
+ * Compile-time guard that rejects a type string if it contains the id delimiter, is reserved, or
+ * is a built-in timeline event type.
  *
  * Only effective when `T` is inferred as a literal — a `string`-typed variable slips through.
- * Always pair with the runtime check in the registry.
+ * Always pair with the runtime checks in the registry.
  */
 export type ValidConversationEventType<T extends string> =
   T extends `${string}${typeof CONVERSATION_EVENT_ID_DELIMITER}${string}`
     ? never
     : T extends ReservedConversationEventType
+    ? never
+    : T extends BuiltInConversationEventTypeValue
     ? never
     : T;

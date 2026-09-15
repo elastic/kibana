@@ -10,7 +10,6 @@ import {
   type ConversationEventTypeRegistry,
 } from './conversation_event_type_registry';
 import type { ConversationEventsServiceSetup, ConversationEventsServiceStart } from './types';
-import { getBuiltinConversationEventTypes } from './event_types';
 
 export interface ConversationEventsService {
   setup: () => ConversationEventsServiceSetup;
@@ -29,11 +28,6 @@ class ConversationEventsServiceImpl implements ConversationEventsService {
   }
 
   setup(): ConversationEventsServiceSetup {
-    // Register all built-in event types before returning the setup contract.
-    for (const def of getBuiltinConversationEventTypes()) {
-      this.registry.register(def);
-    }
-
     return {
       register: (definition) => this.registry.register(definition),
     };

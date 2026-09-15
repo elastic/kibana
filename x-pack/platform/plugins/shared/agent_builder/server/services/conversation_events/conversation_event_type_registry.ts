@@ -8,6 +8,7 @@
 import {
   CONVERSATION_EVENT_ID_DELIMITER,
   RESERVED_CONVERSATION_EVENT_TYPES,
+  isBuiltInConversationEventType,
 } from '@kbn/agent-builder-common';
 import type { ConversationEventTypeDefinition } from '@kbn/agent-builder-server/conversation_events';
 
@@ -37,6 +38,11 @@ class ConversationEventTypeRegistryImpl implements ConversationEventTypeRegistry
     }
     if ((RESERVED_CONVERSATION_EVENT_TYPES as readonly string[]).includes(type)) {
       throw new Error(`Conversation event type "${type}" is reserved and cannot be registered`);
+    }
+    if (isBuiltInConversationEventType(type)) {
+      throw new Error(
+        `Conversation event type "${type}" is a built-in timeline event type and cannot be registered`
+      );
     }
     this.definitions.set(type, definition);
   }
