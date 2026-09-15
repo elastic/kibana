@@ -126,18 +126,51 @@ FIXTURES = Path(__file__).resolve().parent / "__tests__" / "fixtures"
 
 
 class RenderBugBodyTest(unittest.TestCase):
-    def test_uses_official_headings_and_finding_fields(self):
+    def test_uses_skill_headings_and_finding_fields(self):
         finding = json.loads((FIXTURES / "finding.json").read_text())
         config = json.loads((FIXTURES / "session-config.json").read_text())
         body = render_bug_body(finding, config)
-        self.assertIn("**Kibana version:**", body)
+        self.assertIn("**Version:**", body)
         self.assertIn("9.3.0", body)
+        self.assertIn("**Current behaviour (with screenshots and recordings):**", body)
+        self.assertIn("**Logs and/or server output (if relevant):**", body)
+        self.assertIn("**Any additional information:**", body)
         self.assertIn("Open Entity Analytics", body)
         self.assertIn("Table shows 0 entities", body)
         self.assertIn("Table lists entities in range", body)
         self.assertIn("TypeError: cannot read map of undefined", body)
         self.assertIn("t2_analyst", body)
-        self.assertNotIn("**Describe the bug:**\n\n**Steps", body)
+        self.assertIn("/tmp/session/screenshots/ea-flow1.png", body)
+        self.assertIn("**Browser and Browser OS versions:**", body)
+        self.assertIn("Chrome / macos", body)
+        self.assertNotIn("**Kibana version:**", body)
+        self.assertNotIn("**Kibana/Elasticsearch Stack version:**", body)
+        self.assertNotIn("**Functional Area", body)
+        self.assertNotIn("**Screenshots (if relevant):**", body)
+        self.assertNotIn("**Any additional context", body)
+        self.assertNotIn("**Server OS version:**", body)
+        self.assertNotIn("**Elastic Endpoint version:**", body)
+        self.assertNotIn("**Describe the bug:**\n\n**Version", body)
+
+    def test_optional_environment_headings_only_when_needed(self):
+        finding = {
+            "current_behavior": "broken",
+            "expected_behavior": "works",
+            "steps_followed": ["click"],
+        }
+        config = {
+            "environment": {
+                "kind": "local",
+                "server_os": "Ubuntu 22.04",
+                "endpoint_version": "8.16.0",
+            }
+        }
+        body = render_bug_body(finding, config)
+        self.assertIn("**Server OS version:**", body)
+        self.assertIn("Ubuntu 22.04", body)
+        self.assertIn("**Elastic Endpoint version:**", body)
+        self.assertIn("8.16.0", body)
+        self.assertNotIn("**Browser and Browser OS versions:**", body)
 
 
 class UploadEvidenceTest(unittest.TestCase):

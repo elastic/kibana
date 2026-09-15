@@ -231,8 +231,23 @@ _UNKNOWN = "_unknown_"
 _DEV_INSTALL = "from source (dev)"
 _LOCAL_KINDS = frozenset({"local", "scout"})
 _SCREENSHOT_PREFIX = "Screenshot:"
+_RECORDING_PREFIX = "Recording:"
 _CONSOLE_PREFIX = "Console:"
 _NETWORK_PREFIX = "Network:"
+_HEADING_DESCRIBE = "**Describe the bug:**"
+_HEADING_VERSION = "**Version:**"
+_HEADING_SERVER_OS = "**Server OS version:**"
+_HEADING_BROWSER = "**Browser and Browser OS versions:**"
+_HEADING_ENDPOINT = "**Elastic Endpoint version:**"
+_HEADING_INSTALL = (
+    "**Original install method (e.g. download page, yum, from source, etc.):**"
+)
+_HEADING_STEPS = "**Steps to reproduce:**"
+_HEADING_CURRENT = "**Current behaviour (with screenshots and recordings):**"
+_HEADING_EXPECTED = "**Expected behavior:**"
+_HEADING_CONSOLE = "**Errors in browser console (if relevant):**"
+_HEADING_LOGS = "**Logs and/or server output (if relevant):**"
+_HEADING_ADDITIONAL = "**Any additional information:**"
 
 
 def _as_mapping(value: object) -> dict:
@@ -247,6 +262,11 @@ def _first_text(*values: object) -> str:
         if text:
             return text
     return _UNKNOWN
+
+
+def _optional_text(*values: object) -> str | None:
+    text = _first_text(*values)
+    return None if text == _UNKNOWN else text
 
 
 def _environment(config: dict) -> dict:
@@ -292,8 +312,48 @@ def _values_with_prefix(lines: list[str], prefix: str) -> list[str]:
 
 
 def _remaining_evidence(lines: list[str]) -> list[str]:
-    classified = (_SCREENSHOT_PREFIX, _CONSOLE_PREFIX, _NETWORK_PREFIX)
+    classified = (
+        _SCREENSHOT_PREFIX,
+        _RECORDING_PREFIX,
+        _CONSOLE_PREFIX,
+        _NETWORK_PREFIX,
+    )
     return [line for line in lines if not line.startswith(classified)]
+
+
+def _stack_version(config: dict, environment: dict) -> str:
+    return _first_text(
+        config.get("kibana_version"),
+        environment.get("kibana_version"),
+        config.get("elasticsearch_version"),
+        environment.get("elasticsearch_version"),
+    )
+
+
+def _browser_and_os(environment: dict) -> str | None:
+    browser = _optional_text(
+        environment.get("browser_version"), environment.get("browser")
+    )
+    browser_os = _optional_text(
+        environment.get("browser_os_version"), environment.get("browser_os")
+    )
+    if browser and browser_os:
+        return f"{browser} / {browser_os}"
+    return browser or browser_os
+
+
+def _current_behaviour(finding: dict, evidence: list[str]) -> str:
+    parts: list[str] = []
+    current = finding.get("current_behavior")
+    if current is not None and str(current).strip():
+        parts.append(str(current).strip())
+    media = [
+        *_values_with_prefix(evidence, _SCREENSHOT_PREFIX),
+        *_values_with_prefix(evidence, _RECORDING_PREFIX),
+    ]
+    if media:
+        parts.append("\n".join(media))
+    return "\n\n".join(parts) if parts else _UNKNOWN
 
 
 def _joined_or_unknown(values: list[str]) -> str:
@@ -309,49 +369,44 @@ def render_bug_body(finding: dict, config: dict) -> str:
         f"Level: {_first_text(finding.get('level'))}",
         *_remaining_evidence(evidence),
     ]
-    sections = (
-        ("**Kibana version:**", _first_text(
-            config.get("kibana_version"), environment.get("kibana_version")
-        )),
-        ("**Elasticsearch version:**", _first_text(
-            config.get("elasticsearch_version"),
-            environment.get("elasticsearch_version"),
-        )),
-        ("**Server OS version:**", _first_text(
-            environment.get("server_os_version"),
-            environment.get("server_os"),
-            environment.get("os_version"),
-            environment.get("os"),
-        )),
-        ("**Browser version:**", _first_text(
-            environment.get("browser_version"),
-            environment.get("browser"),
-        )),
-        ("**Browser OS version:**", _first_text(
-            environment.get("browser_os_version"),
-            environment.get("browser_os"),
-        )),
+    optional = (
         (
-            "**Original install method (e.g. download page, yum, from source, etc.):**",
-            _install_method(environment),
+            _HEADING_SERVER_OS,
+            _optional_text(
+                environment.get("server_os_version"),
+                environment.get("server_os"),
+                environment.get("os_version"),
+                environment.get("os"),
+            ),
         ),
-        ("**Describe the bug:**", _describe_the_bug(finding)),
-        ("**Steps to reproduce:**", _numbered_steps(finding)),
-        ("**Expected behavior:**", _first_text(finding.get("expected_behavior"))),
+        (_HEADING_BROWSER, _browser_and_os(environment)),
         (
-            "**Screenshots (if relevant):**",
-            _joined_or_unknown(_values_with_prefix(evidence, _SCREENSHOT_PREFIX)),
+            _HEADING_ENDPOINT,
+            _optional_text(
+                environment.get("endpoint_version"),
+                environment.get("elastic_endpoint_version"),
+                config.get("endpoint_version"),
+            ),
         ),
+    )
+    sections: list[tuple[str, str]] = [
+        (_HEADING_DESCRIBE, _describe_the_bug(finding)),
+        (_HEADING_VERSION, _stack_version(config, environment)),
+        *[(heading, value) for heading, value in optional if value is not None],
+        (_HEADING_INSTALL, _install_method(environment)),
+        (_HEADING_STEPS, _numbered_steps(finding)),
+        (_HEADING_CURRENT, _current_behaviour(finding, evidence)),
+        (_HEADING_EXPECTED, _first_text(finding.get("expected_behavior"))),
         (
-            "**Errors in browser console (if relevant):**",
+            _HEADING_CONSOLE,
             _joined_or_unknown(_values_with_prefix(evidence, _CONSOLE_PREFIX)),
         ),
         (
-            "**Provide logs and/or server output (if relevant):**",
+            _HEADING_LOGS,
             _joined_or_unknown(_values_with_prefix(evidence, _NETWORK_PREFIX)),
         ),
-        ("**Any additional context:**", "\n".join(additional)),
-    )
+        (_HEADING_ADDITIONAL, "\n".join(additional)),
+    ]
     return "\n\n".join(f"{heading}\n{body}" for heading, body in sections) + "\n"
 
 

@@ -12,7 +12,7 @@ disable-model-invocation: true
 
 File **only the findings a human names**. Never file the whole report. Do not offer to file anything on your own initiative.
 
-Repo: `elastic/kibana`. Template: `.github/ISSUE_TEMPLATE/Bug_report.md`. Follow `.agents/skills/kbn-github` (explicit confirm, then `gh`).
+Repo: `elastic/kibana`. Template: this skill's `templates/bug-report.md` (Security Solution baseline; not `.github/ISSUE_TEMPLATE/Bug_report.md`). Follow `.agents/skills/kbn-github` (explicit confirm, then `gh`). Omit **Server OS version**, **Browser and Browser OS versions**, and **Elastic Endpoint version** unless the pack has a value.
 
 `disable-model-invocation: true` — this skill does not load during exploratory testing. Entry points: the human names findings, or they say to follow this skill.
 

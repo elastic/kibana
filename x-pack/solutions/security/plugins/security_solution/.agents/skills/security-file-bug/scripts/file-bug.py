@@ -213,7 +213,9 @@ def _build_parser() -> argparse.ArgumentParser:
     infer.add_argument("--knowledge", required=True, help="security-domain-knowledge.md path")
     infer.set_defaults(handler=_cmd_infer_team)
 
-    render = subparsers.add_parser("render-body", help="Render the Kibana bug template")
+    render = subparsers.add_parser(
+        "render-body", help="Render the security-file-bug template"
+    )
     render.add_argument("--finding", required=True, help="Finding JSON path, or - for stdin")
     render.add_argument("--config", default=None, help="Session config JSON path")
     render.set_defaults(handler=_cmd_render_body)
