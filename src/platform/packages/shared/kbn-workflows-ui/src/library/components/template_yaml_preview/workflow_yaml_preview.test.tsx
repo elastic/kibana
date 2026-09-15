@@ -18,15 +18,6 @@ jest.mock('../../../hooks/use_workflows_monaco_theme', () => ({
   WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
 }));
 
-jest.mock('@kbn/monaco', () => ({
-  monaco: {
-    editor: {
-      TrackedRangeStickiness: { NeverGrowsWhenTypingAtEdges: 0 },
-      ShowLightbulbIconMode: { Off: 0 },
-    },
-  },
-}));
-
 const mockGetTypeIconDataUrl = jest.fn(
   async (_params: { type: string; kind: string }) => 'data:image/svg+xml;base64,AAA'
 );
@@ -41,6 +32,8 @@ const mockCreateDecorationsCollection = jest.fn((_decorations: unknown[]) => ({
 // Mock CodeEditor: renders the value and invokes editorDidMount with a fake
 // editor whose model is derived from the value, so decoration logic runs.
 jest.mock('@kbn/code-editor', () => {
+  const actual = jest.requireActual('@kbn/code-editor');
+
   const createFakeModel = (text: string) => {
     const lines = text.split('\n');
     return {
@@ -74,7 +67,7 @@ jest.mock('@kbn/code-editor', () => {
         </div>
       );
     },
-    monaco: { editor: {} },
+    monaco: actual.monaco,
   };
 });
 
