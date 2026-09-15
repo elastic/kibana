@@ -175,9 +175,10 @@ Scout configs share servers. Anything your suite creates or changes can affect t
 
 Clean up in the right place:
 
-- **Per-test data**: clean up in `afterEach`/`afterAll`.
-- **Suite-wide state** (feature flags, global settings, shared archives): reset it in a [global teardown hook](./global-setup-hook.md#global-teardown-hook), which runs once after all workers have finished running the config's tests.
-- **Standard saved objects**: after your domain-specific cleanup, `cleanStandardList()` in `afterAll` is an accepted catch-all for the standard saved-object types (dashboards, visualizations, data views, and so on). Use `kbnClient.savedObjects.cleanStandardList()` in [sequential suites](./parallelism.md#scout-parallelism-differences), which run in the default space, and `scoutSpace.savedObjects.cleanStandardList()` in parallel suites, which run in a dedicated space per worker. Neither is the leak this section is about: the concern is resources that outlive their saved object, fixed names, and unreverted settings.
+- **Data your suite creates**: remove it in `afterEach`/`afterAll`.
+- **Config-wide state** (data ingested by the [global setup hook](./global-setup-hook.md), feature flags, global settings): reset it only in the [global teardown hook](./global-setup-hook.md#global-teardown-hook), which runs once after all workers have finished. A suite must never delete it; the other suites in the config depend on it.
+- **Saved objects are space-scoped, so `cleanStandardList()` is safe.** It deletes only the standard saved-object types in the space it's called in: `kbnClient.savedObjects.cleanStandardList()` cleans the default space ([sequential suites](./parallelism.md#scout-parallelism-differences)), `scoutSpace.savedObjects.cleanStandardList()` cleans the worker's space (parallel suites). Use it in `afterAll` as a catch-all after your domain-specific cleanup. Shareable types such as data views are force-deleted from every space they're shared into, so don't share fixtures across spaces.
+- **Everything else is shared across spaces, so delete it precisely.** Elasticsearch indices and documents, ingest pipelines, index and component templates, API keys, and cluster or global settings are visible to every suite and every parallel worker on the servers. Delete them by the unique names or ids your suite created, never by type, tag, or a fixed field value. This applies to shared helpers too: a helper written for a sequential suite may later be called from a parallel one.
 
 :::::{dropdown} Examples
 ❌ **Don't:** use a fixed literal resource name. Every spec, parallel worker, and leftover from an earlier suite shares it — one teardown deletes everyone's data:
