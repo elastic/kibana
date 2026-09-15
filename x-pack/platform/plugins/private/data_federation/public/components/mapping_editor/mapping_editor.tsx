@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { FC, SetStateAction } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
@@ -62,18 +62,6 @@ export interface MappingEditorProps {
   showJsonPreview?: boolean;
 }
 
-const NoFieldsMatch = () => {
-  return (
-    <EuiText size="s" color="subdued">
-      <p>
-        {i18n.translate('xpack.dataFederation.mappingEditor.noSearchResults', {
-          defaultMessage: 'No fields match your search.',
-        })}
-      </p>
-    </EuiText>
-  );
-};
-
 export const buildDatasetMappings = (value: MappingEditorValue): DatasetMappings | undefined => {
   const properties = value.fields.reduce<DatasetMappings['properties']>((acc, f) => {
     const name = f.name.trim();
@@ -114,7 +102,6 @@ export const MappingEditor: FC<MappingEditorProps> = ({
   const nextId = useRef(0);
   const validation = useMemo(() => validateMappingEditorValue(value), [value]);
   const [editingFieldId, setEditingFieldId] = useState<string | null>(null);
-  const [fieldSearch, setFieldSearch] = useState('');
   const [draftField, setDraftField] = useState<MappingEditorField>(() => ({
     id: 'draft',
     name: '',
@@ -180,17 +167,6 @@ export const MappingEditor: FC<MappingEditorProps> = ({
     if (!mappings) return '';
     return JSON.stringify({ mappings }, null, 2);
   }, [mappings]);
-
-  const filteredFields = useMemo(() => {
-    const q = fieldSearch.trim().toLowerCase();
-    if (!q) return value.fields;
-
-    return value.fields.filter((f) => {
-      const name = f.name.trim().toLowerCase();
-      const renameTo = f.path.trim().toLowerCase();
-      return name.includes(q) || renameTo.includes(q);
-    });
-  }, [fieldSearch, value.fields]);
 
   const draftFieldErrors = useMemo(() => {
     if (!draftValidationAttempted) return {};
@@ -310,8 +286,6 @@ export const MappingEditor: FC<MappingEditorProps> = ({
       <MappingEditorHeader
         isAddFieldVisible={editingFieldId === null && value.fields.length > 0}
         onAddField={addField}
-        fieldSearch={fieldSearch}
-        onFieldSearchChange={setFieldSearch}
       />
       <EuiSpacer size="s" />
       {value.fields.length === 0 ? (
@@ -334,11 +308,9 @@ export const MappingEditor: FC<MappingEditorProps> = ({
             onSubmit={addDraftField}
           />
         </EuiPanel>
-      ) : filteredFields.length === 0 ? (
-        <NoFieldsMatch />
       ) : (
         <EuiFlexGroup direction="column" gutterSize="s">
-          {filteredFields.map((f) => {
+          {value.fields.map((f) => {
             const typeInfo = (
               typeInfoByValue as Record<string, { label: string; docs: string } | undefined>
             )[f.type];
@@ -375,7 +347,6 @@ export const MappingEditor: FC<MappingEditorProps> = ({
                     ) : (
                       <FieldMappingDisplayMode
                         field={f}
-                        fieldSearch={fieldSearch}
                         typeLabel={typeInfo?.label}
                         onEdit={() => setEditingFieldId(f.id)}
                         onRemove={() => removeField(f.id)}

@@ -9,7 +9,6 @@ import React from 'react';
 import {
   EuiCode,
   EuiButton,
-  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -22,15 +21,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 export interface MappingEditorHeaderProps {
   isAddFieldVisible: boolean;
   onAddField: () => void;
-  fieldSearch: string;
-  onFieldSearchChange: (next: string) => void;
 }
 
 export const MappingEditorHeader = ({
   isAddFieldVisible,
   onAddField,
-  fieldSearch,
-  onFieldSearchChange,
 }: MappingEditorHeaderProps) => {
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
@@ -72,22 +67,6 @@ export const MappingEditorHeader = ({
                   defaultMessage: 'Add field',
                 })}
               </EuiButton>
-            </div>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <div style={{ width: 320 }}>
-              <EuiFieldSearch
-                placeholder={i18n.translate('xpack.dataFederation.mappingEditor.searchFields', {
-                  defaultMessage: 'Search fields',
-                })}
-                aria-label={i18n.translate('xpack.dataFederation.mappingEditor.searchFields', {
-                  defaultMessage: 'Search fields',
-                })}
-                value={fieldSearch}
-                onChange={(event) => onFieldSearchChange(event.target.value)}
-                fullWidth
-                data-test-subj="dataFederationMappingEditorSearchFields"
-              />
             </div>
           </EuiFlexItem>
         </EuiFlexGroup>

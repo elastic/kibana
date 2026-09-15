@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { fireEvent, render } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { MappingEditorHeader } from './mapping_editor_header';
 
@@ -18,9 +19,11 @@ describe('MappingEditorHeader', () => {
 
   const renderComponent = (props: React.ComponentProps<typeof MappingEditorHeader>) => {
     return render(
-      <EuiProvider>
-        <MappingEditorHeader {...props} />
-      </EuiProvider>
+      <I18nProvider>
+        <EuiProvider>
+          <MappingEditorHeader {...props} />
+        </EuiProvider>
+      </I18nProvider>
     );
   };
 
@@ -28,14 +31,10 @@ describe('MappingEditorHeader', () => {
     const { getByText } = renderComponent({
       isAddFieldVisible: true,
       onAddField: jest.fn(),
-      fieldSearch: '',
-      onFieldSearchChange: jest.fn(),
     });
 
     expect(getByText('Mapped fields')).toBeInTheDocument();
-    expect(
-      getByText('Mapping your timestamp field and renaming it to @timestamp is recommended.')
-    ).toBeInTheDocument();
+    expect(getByText('@timestamp')).toBeInTheDocument();
   });
 
   it('calls onAddField when clicking "Add field"', () => {
@@ -44,8 +43,6 @@ describe('MappingEditorHeader', () => {
     const { getByTestId } = renderComponent({
       isAddFieldVisible: true,
       onAddField,
-      fieldSearch: '',
-      onFieldSearchChange: jest.fn(),
     });
 
     fireEvent.click(getByTestId('dataFederationMappingEditorAddField'));
@@ -56,8 +53,6 @@ describe('MappingEditorHeader', () => {
     const { getByTestId } = renderComponent({
       isAddFieldVisible: false,
       onAddField: jest.fn(),
-      fieldSearch: '',
-      onFieldSearchChange: jest.fn(),
     });
 
     const addButton = getByTestId('dataFederationMappingEditorAddField');
@@ -67,20 +62,5 @@ describe('MappingEditorHeader', () => {
     expect(wrapper).toHaveStyle('visibility: hidden');
   });
 
-  it('wires the field search input to onFieldSearchChange', () => {
-    const onFieldSearchChange = jest.fn();
-
-    const { getByTestId } = renderComponent({
-      isAddFieldVisible: true,
-      onAddField: jest.fn(),
-      fieldSearch: 'sta',
-      onFieldSearchChange,
-    });
-
-    const input = getByTestId('dataFederationMappingEditorSearchFields') as HTMLInputElement;
-    expect(input.value).toBe('sta');
-
-    fireEvent.change(input, { target: { value: 'status' } });
-    expect(onFieldSearchChange).toHaveBeenCalledWith('status');
-  });
+  // Search field intentionally removed
 });

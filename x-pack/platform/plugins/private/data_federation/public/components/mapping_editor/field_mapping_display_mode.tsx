@@ -11,11 +11,9 @@ import { i18n } from '@kbn/i18n';
 
 import type { MappingEditorField } from './mapping_editor';
 import { MappingActions } from './mapping_actions';
-import { renderBoldMatches } from './render_bold_matches';
 
 export interface FieldMappingDisplayModeProps {
   field: MappingEditorField;
-  fieldSearch: string;
   typeLabel?: string;
   onEdit: () => void;
   onRemove: () => void;
@@ -23,7 +21,6 @@ export interface FieldMappingDisplayModeProps {
 
 export const FieldMappingDisplayMode = ({
   field,
-  fieldSearch,
   typeLabel,
   onEdit,
   onRemove,
@@ -31,7 +28,7 @@ export const FieldMappingDisplayMode = ({
   return (
     <>
       <EuiFlexItem>
-        <EuiText size="s">{renderBoldMatches(field.name, fieldSearch)}</EuiText>
+        <EuiText size="s">{field.name}</EuiText>
         <EuiText size="xs" color="subdued">
           {i18n.translate('xpack.dataFederation.mappingEditor.sourceLabel', {
             defaultMessage: 'Source: {source}',
