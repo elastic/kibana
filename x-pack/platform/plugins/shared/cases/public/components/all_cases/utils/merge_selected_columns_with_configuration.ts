@@ -7,7 +7,7 @@
 
 import { difference } from 'lodash';
 import type { CasesColumnSelection } from '../types';
-import type { CasesColumnsConfiguration } from '../use_cases_columns_configuration';
+import type { CasesColumnsConfiguration } from '../hooks/use_cases_columns_configuration';
 
 // Extended-field columns are keyed `<name>_as_<type>` under templates v2, whereas the same
 // migrated field is keyed by its bare legacy key when the flag is off. Stripping the suffix
